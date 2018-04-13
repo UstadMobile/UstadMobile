@@ -22,6 +22,7 @@ import com.ustadmobile.core.view.CatalogEntryView;
 import com.ustadmobile.core.view.CatalogView;
 import com.ustadmobile.lib.db.entities.OpdsEntry;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
+import com.ustadmobile.lib.db.entities.OpdsEntryWithStatusCache;
 import com.ustadmobile.lib.db.entities.OpdsLink;
 
 
@@ -52,7 +53,7 @@ public class CatalogPresenter extends BaseCatalogPresenter implements Acquisitio
 
     private String loadedFeedId;
 
-    private UmProvider<OpdsEntryWithRelations> entryProvider;
+    private UmProvider<OpdsEntryWithStatusCache> entryProvider;
 
     /**
      * Constant that can be used in the buildconfig to set the bottom button to be a download all
@@ -217,7 +218,7 @@ public class CatalogPresenter extends BaseCatalogPresenter implements Acquisitio
             loadedFeedId = opdsFeed.getUuid();
             title = opdsFeed.getTitle();
             entryProvider = DbManager.getInstance(getContext()).getOpdsEntryWithRelationsDao()
-                    .getEntriesByParent(loadedFeedId);
+                    .getEntriesWithStatusCacheByParent(loadedFeedId);
             mView.setEntryProvider(entryProvider);
         }
     }

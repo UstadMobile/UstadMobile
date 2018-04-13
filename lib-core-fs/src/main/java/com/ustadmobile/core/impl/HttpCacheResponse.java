@@ -4,6 +4,7 @@ import com.ustadmobile.core.impl.http.UmHttpRequest;
 import com.ustadmobile.core.impl.http.UmHttpResponse;
 import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.core.util.UMIOUtils;
+import com.ustadmobile.lib.db.entities.HttpCachedEntry;
 
 import java.io.ByteArrayInputStream;
 import java.io.FileOutputStream;
@@ -32,7 +33,7 @@ import java.io.PipedOutputStream;
 
 public class HttpCacheResponse extends AbstractCacheResponse implements Runnable{
 
-    private HttpCacheEntry entry;
+    private HttpCachedEntry entry;
 
     private PipedInputStream bufferPipeIn;
 
@@ -55,7 +56,7 @@ public class HttpCacheResponse extends AbstractCacheResponse implements Runnable
         void onResponseComplete(HttpCacheResponse response);
     }
 
-    public HttpCacheResponse(HttpCacheEntry entry, UmHttpRequest request) {
+    public HttpCacheResponse(HttpCachedEntry entry, UmHttpRequest request) {
         this.entry = entry;
         this.request = request;
         setCacheResponse(MISS);
@@ -159,7 +160,7 @@ public class HttpCacheResponse extends AbstractCacheResponse implements Runnable
             case UmHttpRequest.HEADER_CONTENT_TYPE:
                 return entry.getContentType();
             case UmHttpRequest.HEADER_ETAG:
-                return entry.geteTag();
+                return entry.getEtag();
             case UmHttpRequest.HEADER_EXPIRES:
                 return UMCalendarUtil.makeHTTPDate(entry.getExpiresTime());
 
@@ -219,7 +220,7 @@ public class HttpCacheResponse extends AbstractCacheResponse implements Runnable
         this.responseCompleteListener = responseCompleteListener;
     }
 
-    public HttpCacheEntry getEntry() {
+    public HttpCachedEntry getEntry() {
         return entry;
     }
 
@@ -229,11 +230,11 @@ public class HttpCacheResponse extends AbstractCacheResponse implements Runnable
 
     @Override
     public boolean isFresh(int timeToLive) {
-        return entry.isFresh(timeToLive);
+        return HttpCache.isFresh(entry, timeToLive);
     }
 
     @Override
     public boolean isFresh() {
-        return entry.isFresh();
+        return HttpCache.isFresh(entry);
     }
 }

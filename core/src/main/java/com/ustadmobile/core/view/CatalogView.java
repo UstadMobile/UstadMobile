@@ -34,6 +34,7 @@ import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.model.CourseProgress;
 import com.ustadmobile.core.opds.OpdsFilterOptions;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
+import com.ustadmobile.lib.db.entities.OpdsEntryWithStatusCache;
 
 import java.util.Set;
 
@@ -161,6 +162,6 @@ public interface CatalogView extends UstadView{
 
     void setFilterOptions(OpdsFilterOptions filterOptions);
 
-    void setEntryProvider(UmProvider<OpdsEntryWithRelations> entryProvider);
+    void setEntryProvider(UmProvider<OpdsEntryWithStatusCache> entryProvider);
 
 }

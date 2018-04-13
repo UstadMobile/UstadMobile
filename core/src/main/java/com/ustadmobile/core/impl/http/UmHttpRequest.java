@@ -56,6 +56,7 @@ public class UmHttpRequest {
     public UmHttpRequest(Object context, String url) {
         this.context = context;
         this.url = url;
+        this.method = method;
     }
 
 
@@ -99,6 +100,15 @@ public class UmHttpRequest {
         return this;
     }
 
+    public String getMethod() {
+        return method != null ? method : METHOD_GET;
+    }
+
+    /**
+     * check if this entry requires revalidation
+     *
+     * @return true if the request must be revalidated (has must-revalidate in the cache-control header), false otherwise
+     */
     public boolean mustRevalidate() {
         if(headers != null && headers.containsKey(HEADER_CACHE_CONTROL)) {
             return ((String)headers.get(HEADER_CACHE_CONTROL)).indexOf(CACHE_CONTROL_MUST_REVALIDATE) != -1;

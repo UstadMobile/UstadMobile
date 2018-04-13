@@ -10,6 +10,7 @@ import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.lib.db.entities.OpdsEntry;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
+import com.ustadmobile.lib.db.entities.OpdsEntryWithStatusCache;
 import com.ustadmobile.lib.db.entities.OpdsLink;
 import com.ustadmobile.test.core.ResourcesHttpdTestServer;
 import com.ustadmobile.test.core.TestCaseCallbackHelper;
@@ -130,10 +131,10 @@ public class TestOpdsRepository extends TestCase {
                 .getInstance(PlatformTestUtil.getTargetContext()).getOpdsAtomFeedRepository();
 
         ArrayList<OpdsEntryWithRelations> entriesInDir = new ArrayList<>();
-        UmLiveData<List<OpdsEntryWithRelations>> entriesInDirLiveData = repository
+        UmLiveData<List<OpdsEntryWithStatusCache>> entriesInDirLiveData = repository
                 .findEntriesByContainerFileDirectoryAsList(Arrays.asList(tmpDir.getAbsolutePath()),
                         null);
-        UmObserver<List<OpdsEntryWithRelations>> observer = (entriesInDirList) -> {
+        UmObserver<List<OpdsEntryWithStatusCache>> observer = (entriesInDirList) -> {
             if(entriesInDirList != null && !entriesInDirList.isEmpty()) {
                 synchronized (TestOpdsRepository.this) {
                     entriesInDir.clear();

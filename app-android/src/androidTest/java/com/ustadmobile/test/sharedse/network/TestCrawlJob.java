@@ -21,6 +21,7 @@ import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.lib.db.entities.CrawlJobItem;
 import com.ustadmobile.lib.db.entities.CrawlJob;
 import com.ustadmobile.lib.db.entities.DownloadJob;
+import com.ustadmobile.lib.db.entities.DownloadJobItem;
 import com.ustadmobile.lib.db.entities.DownloadJobWithRelations;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
 import com.ustadmobile.port.android.netwokmanager.NetworkServiceAndroid;
@@ -37,6 +38,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 import fi.iki.elonen.router.RouterNanoHTTPD;
 
@@ -46,7 +48,7 @@ import fi.iki.elonen.router.RouterNanoHTTPD;
 @SmallTest
 public class TestCrawlJob {
 
-    public static final int CRAWL_JOB_TIMEOUT = 10000;
+    public static final int CRAWL_JOB_TIMEOUT = 1000000;
 
     private static RouterNanoHTTPD resourcesHttpd;
 
@@ -151,6 +153,13 @@ public class TestCrawlJob {
 
         Assert.assertEquals("Crawl job has three items", 3,
                 crawlJobLiveData.getValue().getNumItems());
+
+        List<DownloadJobItem> downloadJobItems = dbManager.getDownloadJobItemDao()
+                .findAllByDownloadJob(job.getId());
+        for(DownloadJobItem item : downloadJobItems) {
+            Assert.assertTrue("Job Item :" + item.getEntryId() + " has size found > 0",
+                    item.getDownloadLength() > 0);
+        }
 
         Assert.assertEquals("All three crawl job items are completed", 3,
                 crawlJobLiveData.getValue().getNumItemsCompleted());

@@ -13,6 +13,7 @@ import com.ustadmobile.lib.db.entities.OpdsEntryAncestor;
 import com.ustadmobile.lib.db.entities.OpdsEntryStatusCache;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelationsAndContainerMimeType;
+import com.ustadmobile.lib.db.entities.OpdsEntryWithStatusCache;
 
 import java.util.List;
 
@@ -33,6 +34,17 @@ public abstract class OpdsEntryWithRelationsDaoAndroid extends OpdsEntryWithRela
 
     @Query("SELECT OpdsEntry.* from OpdsEntry INNER JOIN OpdsEntryParentToChildJoin on OpdsEntry.uuid = OpdsEntryParentToChildJoin.childEntry WHERE OpdsEntryParentToChildJoin.parentEntry = :parentId ORDER BY childIndex")
     public abstract DataSource.Factory<Integer, OpdsEntryWithRelations> findEntriesByParentR(String parentId);
+
+    @Query("SELECT OpdsEntry.*, OpdsEntryStatusCache.* FROM OpdsEntry " +
+            " INNER JOIN OpdsEntryParentToChildJoin on OpdsEntry.uuid = OpdsEntryParentToChildJoin.childEntry " +
+            " LEFT JOIN OpdsEntryStatusCache ON OpdsEntry.entryId = OpdsEntryStatusCache.statusEntryId " +
+            "WHERE OpdsEntryParentToChildJoin.parentEntry = :parentId ORDER BY childIndex")
+    public abstract DataSource.Factory<Integer, OpdsEntryWithStatusCache> findEntriesWithStatusCacheByParent_Room(String parentId);
+
+    @Override
+    public UmProvider<OpdsEntryWithStatusCache> getEntriesWithStatusCacheByParent(String parentId) {
+        return () -> findEntriesWithStatusCacheByParent_Room(parentId);
+    }
 
     @Override
     @Query("Select * from OpdsEntry WHERE url = :url")
@@ -68,10 +80,10 @@ public abstract class OpdsEntryWithRelationsDaoAndroid extends OpdsEntryWithRela
     public abstract String getUuidForEntryUrl(String url);
 
     @Query(findEntriesByContainerFileDirectorySql)
-    public abstract LiveData<List<OpdsEntryWithRelations>> findEntriesByContainerFileDirectoryR(List<String> dirList);
+    public abstract LiveData<List<OpdsEntryWithStatusCache>> findEntriesByContainerFileDirectoryR(List<String> dirList);
 
     @Override
-    public UmLiveData<List<OpdsEntryWithRelations>> findEntriesByContainerFileDirectoryAsList(
+    public UmLiveData<List<OpdsEntryWithStatusCache>> findEntriesByContainerFileDirectoryAsList(
             List<String> dirList, OpdsEntry.OpdsItemLoadCallback callback) {
         return new UmLiveDataAndroid<>(findEntriesByContainerFileDirectoryR(dirList));
     }
@@ -79,10 +91,10 @@ public abstract class OpdsEntryWithRelationsDaoAndroid extends OpdsEntryWithRela
 
 
     @Query(findEntriesByContainerFileDirectorySql)
-    public abstract DataSource.Factory<Integer, OpdsEntryWithRelations> findEntriesByContainerFileDirectoryAsProviderR(List<String> dirList);
+    public abstract DataSource.Factory<Integer, OpdsEntryWithStatusCache> findEntriesByContainerFileDirectoryAsProviderR(List<String> dirList);
 
     @Override
-    public UmProvider<OpdsEntryWithRelations> findEntriesByContainerFileDirectoryAsProvider(
+    public UmProvider<OpdsEntryWithStatusCache> findEntriesByContainerFileDirectoryAsProvider(
             List<String> dirList, OpdsEntry.OpdsItemLoadCallback callback) {
         return () -> findEntriesByContainerFileDirectoryAsProviderR(dirList);
     }

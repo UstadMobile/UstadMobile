@@ -1,6 +1,10 @@
 package com.ustadmobile.port.sharedse.networkmanager;
 
 import com.ustadmobile.core.db.DbManager;
+import com.ustadmobile.core.impl.UMLog;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.impl.http.UmHttpRequest;
+import com.ustadmobile.core.impl.http.UmHttpResponse;
 import com.ustadmobile.core.networkmanager.NetworkTask;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.lib.db.entities.CrawlJobItem;
@@ -10,6 +14,7 @@ import com.ustadmobile.lib.db.entities.OpdsEntry;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
 import com.ustadmobile.lib.db.entities.OpdsLink;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
@@ -86,6 +91,24 @@ public class CrawlTask extends NetworkTask {
                                     crawlJob.getContainersDownloadJobId());
                             if(opdsLink.getLength() > 0){
                                 jobItem.setDownloadLength(opdsLink.getLength());
+                            }else {
+                                try {
+                                    String acquisitionUrl = UMFileUtil.resolveLink(item.getUri(),
+                                            opdsLink.getHref());
+                                    UmHttpRequest request = new UmHttpRequest(dbManager.getContext(),
+                                            acquisitionUrl);
+                                    request.setMethod(UmHttpRequest.METHOD_HEAD);
+                                    UmHttpResponse response = UstadMobileSystemImpl.getInstance()
+                                            .makeRequestSync(request);
+                                    if(response.isSuccessful() && response.getHeader("content-length") != null)
+                                        jobItem.setDownloadLength(Long.parseLong(response.getHeader(
+                                                "content-length")));
+
+                                }catch(IOException|NumberFormatException e) {
+                                    UstadMobileSystemImpl.l(UMLog.ERROR, 0,
+                                            "Exception attempting to find download size", e);
+                                }
+
                             }
 
                             downloadJobItems.add(jobItem);

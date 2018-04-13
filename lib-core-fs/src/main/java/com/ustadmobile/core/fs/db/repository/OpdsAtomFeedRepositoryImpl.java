@@ -11,6 +11,7 @@ import com.ustadmobile.lib.db.entities.OpdsEntryAncestor;
 import com.ustadmobile.lib.db.entities.OpdsEntryStatusCache;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelationsAndContainerMimeType;
+import com.ustadmobile.lib.db.entities.OpdsEntryWithStatusCache;
 
 import java.io.File;
 import java.util.List;
@@ -77,9 +78,9 @@ public class OpdsAtomFeedRepositoryImpl implements OpdsAtomFeedRepository {
         return entry;
     }
 
-    public UmLiveData<List<OpdsEntryWithRelations>> findEntriesByContainerFileDirectoryAsList(
+    public UmLiveData<List<OpdsEntryWithStatusCache>> findEntriesByContainerFileDirectoryAsList(
             List<String> dirList, OpdsEntry.OpdsItemLoadCallback callback) {
-        UmLiveData<List<OpdsEntryWithRelations>> dbResult = dbManager.getOpdsEntryWithRelationsDao()
+        UmLiveData<List<OpdsEntryWithStatusCache>> dbResult = dbManager.getOpdsEntryWithRelationsDao()
                 .findEntriesByContainerFileDirectoryAsList(dirList, callback);
 
         executorService.execute(new OpdsDirScanner(dbManager, dirList, callback));
@@ -87,9 +88,9 @@ public class OpdsAtomFeedRepositoryImpl implements OpdsAtomFeedRepository {
         return dbResult;
     }
 
-    public UmProvider<OpdsEntryWithRelations> findEntriesByContainerFileDirectoryAsProvider(
+    public UmProvider<OpdsEntryWithStatusCache> findEntriesByContainerFileDirectoryAsProvider(
             List<String> dirList, OpdsEntry.OpdsItemLoadCallback callback) {
-        UmProvider<OpdsEntryWithRelations> dbResult = dbManager.getOpdsEntryWithRelationsDao()
+        UmProvider<OpdsEntryWithStatusCache> dbResult = dbManager.getOpdsEntryWithRelationsDao()
                 .findEntriesByContainerFileDirectoryAsProvider(dirList, callback);
 
         executorService.execute(new OpdsDirScanner(dbManager, dirList, callback));

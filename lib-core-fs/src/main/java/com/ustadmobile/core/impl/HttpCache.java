@@ -1,8 +1,7 @@
 package com.ustadmobile.core.impl;
 
 import com.ustadmobile.core.controller.CatalogPresenter;
-import com.ustadmobile.core.fs.db.HttpCacheDbEntry;
-import com.ustadmobile.core.fs.db.HttpCacheDbManager;
+import com.ustadmobile.core.db.DbManager;
 import com.ustadmobile.core.impl.http.UmHttpCall;
 import com.ustadmobile.core.impl.http.UmHttpRequest;
 import com.ustadmobile.core.impl.http.UmHttpResponse;
@@ -11,18 +10,18 @@ import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.util.UMUUID;
+import com.ustadmobile.lib.db.entities.HttpCachedEntry;
 
-import org.json.JSONObject;
-
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.zip.ZipFile;
 
 /**
  * Created by mike on 12/26/17.
@@ -46,9 +45,13 @@ public class HttpCache implements HttpCacheResponse.ResponseCompleteListener{
 
     private final ExecutorService executorService = Executors.newFixedThreadPool(4);
 
-    private int defaultTimeToLive = 60* 60 * 1000;
+    public static final int DEFAULT_TIME_TO_LIVE = (60 * 60 * 1000);
+
+    private int defaultTimeToLive = DEFAULT_TIME_TO_LIVE;
 
     public static final String PROTOCOL_FILE = "file://";
+
+    public static final String CACHE_CONTROL_KEY_MAX_AGE = "max-age";
 
     /**
      * Wrapper HttpCall object that can be used to cancel the request if required. It implements
@@ -66,7 +69,7 @@ public class HttpCache implements HttpCacheResponse.ResponseCompleteListener{
         //Handler that deals with the http request, if an outgoing request is actually sent
         private UmHttpResponseHandler httpResponseHandler;
 
-        protected HttpCacheEntry entry;
+        protected HttpCachedEntry entry;
 
         private boolean async = true;
 
@@ -102,10 +105,10 @@ public class HttpCache implements HttpCacheResponse.ResponseCompleteListener{
                 return cacheResponse;
             }
 
-            HttpCacheEntry entry = getEntry(request.getContext(), request.getUrl());
+            HttpCachedEntry entry = getEntry(request.getContext(), request.getUrl(), request.getMethod());
             if(entry != null) {
                 int timeToLive = request.mustRevalidate() ? 0 : defaultTimeToLive;
-                if(entry.isFresh(timeToLive) || request.isOnlyIfCached()) {
+                if(isFresh(entry, timeToLive) || request.isOnlyIfCached()) {
                     cacheResponse = new HttpCacheResponse(entry, request);
                     cacheResponse.setCacheResponse(HttpCacheResponse.HIT_DIRECT);
                     UstadMobileSystemImpl.l(UMLog.INFO, 384, "Cache:HIT_DIRECT: "
@@ -133,8 +136,8 @@ public class HttpCache implements HttpCacheResponse.ResponseCompleteListener{
             //make an http request for this cache entry
             httpRequest = new UmHttpRequest(request.getContext(), request.getUrl());
             if(entry != null) {
-                if(entry.geteTag() != null) {
-                    httpRequest.addHeader("if-none-match", entry.geteTag());
+                if(entry.getEtag() != null) {
+                    httpRequest.addHeader("if-none-match", entry.getEtag());
                 }
                 if(entry.getLastModified() > 0) {
                     httpRequest.addHeader("if-modified-since",
@@ -227,22 +230,21 @@ public class HttpCache implements HttpCacheResponse.ResponseCompleteListener{
 
         @Override
         public void run() {
-            final HttpCacheDbManager dbManager = HttpCacheDbManager.getInstance();
-            HttpCacheDbEntry entry;
+            List<String> fileUrisToDelete = DbManager.getInstance(context).getHttpCachedEntryDao()
+                    .findFileUrisByUrl(Arrays.asList(urlsToDelete));
+            List<String> deletedFileUris = new ArrayList<>();
             File entryFile;
-
-            for(int i = 0; i < urlsToDelete.length; i++) {
-                entry = dbManager.getEntryByUrl(context, urlsToDelete[i]);
-                if(entry == null)
-                    continue;
-
-                entryFile= new File(entry.getFileUri());
-                if(entryFile.exists()) {
-                    entryFile.delete();
+            for(String fileUri : fileUrisToDelete) {
+                entryFile = new File(fileUri);
+                if(!entryFile.exists() || (entryFile.exists() && entryFile.delete())){
+                    deletedFileUris.add(fileUri);
+                }else {
+                    UstadMobileSystemImpl.l(UMLog.ERROR, 0, "Failed to delete cache file: " +
+                            fileUri);
                 }
-
-                dbManager.delete(context, entry);
             }
+
+            DbManager.getInstance(context).getHttpCachedEntryDao().deleteByFileUris(deletedFileUris);
 
             if(callback != null)
                 callback.onSuccess(null);
@@ -297,23 +299,17 @@ public class HttpCache implements HttpCacheResponse.ResponseCompleteListener{
         return cacheCall.execute();
     }
 
-
-    private HttpCacheEntry getEntry(Object context, String url) {
-        HttpCacheDbEntry dbEntry  = HttpCacheDbManager.getInstance().getEntryByUrl(context, url);
-        if(dbEntry != null) {
-            return new HttpCacheEntry(dbEntry);
-        }else {
-            return null;
-        }
+    private HttpCachedEntry getEntry(Object context, String url, String method) {
+        return DbManager.getInstance(context).getHttpCachedEntryDao()
+                .findByUrlAndMethod(url, getMethodFlag(method));
     }
 
     public HttpCacheResponse cacheResponse(UmHttpRequest request, UmHttpResponse networkResponse,
                                            boolean forkSaveToDisk) {
         final String requestUrl = request.getUrl();
-        HttpCacheEntry entry = getEntry(request.getContext(), requestUrl);
+        HttpCachedEntry entry = getEntry(request.getContext(), requestUrl, request.getMethod());
         if(entry == null) {
-            entry = new HttpCacheEntry(HttpCacheDbManager.getInstance().makeNewEntry(
-                    request.getContext()));
+            entry = new HttpCachedEntry();
             entry.setUrl(requestUrl);
             entry.setFileUri(generateCacheEntryFileName(request, networkResponse, sharedDir));
         }
@@ -321,7 +317,8 @@ public class HttpCache implements HttpCacheResponse.ResponseCompleteListener{
         final HttpCacheResponse cacheResponse = new HttpCacheResponse(entry, request);
         cacheResponse.setNetworkResponse(networkResponse);
         cacheResponse.getEntry().setLastChecked(System.currentTimeMillis());
-        cacheResponse.getEntry().updateFromResponse(networkResponse);
+        updateCachedEntryFromNetworkResponse(cacheResponse.getEntry(), networkResponse);
+
 
         if(networkResponse.getStatus() == 304) {
             updateCacheIndex(cacheResponse);
@@ -341,6 +338,105 @@ public class HttpCache implements HttpCacheResponse.ResponseCompleteListener{
         return cacheResponse;
     }
 
+    /**
+     * Update the given HttpCachedEntry from the response received over the network. This can't be
+     * part of the entry  itself, because the entry is in the database module. This will only update
+     * the object itself and will NOT persist it to the database
+     *
+     * @param cachedEntry The cached entry to update
+     * @param networkResponse The network response just received from the network
+     */
+    public static void updateCachedEntryFromNetworkResponse(HttpCachedEntry cachedEntry, UmHttpResponse networkResponse) {
+        String headerVal;
+        if(networkResponse.getStatus() != 304) {
+            //new entry was downloaded - update the length etc.
+            headerVal = networkResponse.getHeader(UmHttpRequest.HEADER_CONTENT_LENGTH);
+            if(headerVal != null) {
+                try {
+                    cachedEntry.setContentLength(Integer.parseInt(headerVal));
+                }catch(IllegalArgumentException e) {
+                    UstadMobileSystemImpl.l(UMLog.ERROR, 74, headerVal, e);
+                }
+            }
+
+            cachedEntry.setStatusCode(networkResponse.getStatus());
+        }
+
+        cachedEntry.setCacheControl(networkResponse.getHeader(UmHttpRequest.HEADER_CACHE_CONTROL));
+        cachedEntry.setContentType(networkResponse.getHeader(UmHttpRequest.HEADER_CONTENT_TYPE));
+        cachedEntry.setExpiresTime(convertDateHeaderToLong(UmHttpRequest.HEADER_EXPIRES, networkResponse));
+        cachedEntry.setContentType(networkResponse.getHeader(UmHttpRequest.HEADER_CONTENT_TYPE));
+        cachedEntry.setEtag(networkResponse.getHeader(UmHttpRequest.HEADER_ETAG));
+        cachedEntry.setCacheControl(networkResponse.getHeader(UmHttpRequest.HEADER_CACHE_CONTROL));
+    }
+
+    /**
+     * Determine if the entry is considered fresh.
+     *
+     * @see #calculateEntryExpirationTime(HttpCachedEntry)
+     *
+     * @param timeToLive the time since when this entry was last checked for which the entry will be
+     *                   considered fresh if the cache-control headers and expires headers do not
+     *                   provide this information.
+     *
+     * @return true if the entry is considered fresh, false otherwise
+     */
+    public static boolean isFresh(HttpCachedEntry cachedEntry, int timeToLive) {
+        long expiryTime = calculateEntryExpirationTime(cachedEntry);
+        long timeNow = System.currentTimeMillis();
+
+        if(expiryTime != -1) {
+            return expiryTime > timeNow;
+        }else {
+            return cachedEntry.getLastChecked() + timeToLive > timeNow;
+        }
+    }
+
+    public static boolean isFresh(HttpCachedEntry cachedEntry) {
+        return isFresh(cachedEntry, DEFAULT_TIME_TO_LIVE);
+    }
+
+    /**
+     * Calculates when an entry will expire based on it's HTTP headers: specifically
+     * the expires header and cache-control header
+     *
+     * As per :  http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html section
+     * 14.9.3 the max-age if present will take precedence over the expires header
+     *
+     * @return -1 if the expiration time calculated from the headers provided if possible, -1 otherwise
+     */
+    public static final long calculateEntryExpirationTime(HttpCachedEntry cachedEntry) {
+        String cacheControl = cachedEntry.getCacheControl();
+        if(cacheControl != null) {
+            Hashtable ccParams = UMFileUtil.parseParams(cacheControl, ',');
+            if(ccParams.containsKey(CACHE_CONTROL_KEY_MAX_AGE)) {
+                long maxage = Integer.parseInt((String)ccParams.get(CACHE_CONTROL_KEY_MAX_AGE));
+                return cachedEntry.getLastChecked() + (maxage * 1000);
+            }
+        }
+
+        if(cachedEntry.getExpiresTime() >= 0) {
+            return cachedEntry.getExpiresTime();
+        }
+
+        return -1;
+    }
+
+
+    private static long convertDateHeaderToLong(String headerName, UmHttpResponse response) {
+        String headerVal = response.getHeader(headerName);
+        if(headerVal != null) {
+            try {
+                return UMCalendarUtil.parseHTTPDate(headerVal);
+            }catch(NumberFormatException e) {
+                return -1L;
+            }
+        }else {
+            return -1L;
+        }
+    }
+
+
     public void deleteEntries(Object context, String[] urls, UmCallback callback){
         executorService.execute(new DeleteEntriesTask(context, urls, callback));
     }
@@ -355,8 +451,11 @@ public class HttpCache implements HttpCacheResponse.ResponseCompleteListener{
         }
 
         response.getEntry().setLastAccessed(System.currentTimeMillis());
-        HttpCacheDbManager.getInstance().persist(response.getRequest().getContext(),
-                response.getEntry().getDbEntry());
+        DbManager.getInstance(response.getRequest().getContext()).getHttpCachedEntryDao()
+                .insert(response.getEntry());
+
+//        HttpCacheDbManager.getInstance().persist(response.getRequest().getContext(),
+//                response.getEntry().getDbEntry());
     }
 
     @Override
@@ -395,7 +494,25 @@ public class HttpCache implements HttpCacheResponse.ResponseCompleteListener{
                 return entryFile.getAbsolutePath();
         }
 
-        return UMUUID.randomUUID().toString() + "." + filenameParts[1];
+        return new File(dir, UMUUID.randomUUID().toString() + "." + filenameParts[1]).getAbsolutePath();
+    }
+
+    /**
+     * Get the METHOD_ integer flag for the given HTTP Method as a string
+     *
+     * @param methodName The HTTP method as a string e.g. "GET", "HEAD", "POST"
+     *
+     * @return
+     */
+    public static int getMethodFlag(String methodName) {
+        if(methodName.equalsIgnoreCase(UmHttpRequest.METHOD_GET))
+            return HttpCachedEntry.METHOD_GET;
+        else if(methodName.equalsIgnoreCase(UmHttpRequest.METHOD_HEAD))
+            return HttpCachedEntry.METHOD_HEAD;
+        else if(methodName.equalsIgnoreCase(UmHttpRequest.METHOD_POST))
+            return HttpCachedEntry.METHOD_POST;
+
+        return -1;
     }
 
 }

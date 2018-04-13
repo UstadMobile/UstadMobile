@@ -12,6 +12,7 @@ import com.ustadmobile.core.db.dao.DownloadJobDao;
 import com.ustadmobile.core.db.dao.DownloadJobItemDao;
 import com.ustadmobile.core.db.dao.DownloadJobItemHistoryDao;
 import com.ustadmobile.core.db.dao.EntryStatusResponseDao;
+import com.ustadmobile.core.db.dao.HttpCachedEntryDao;
 import com.ustadmobile.core.db.dao.NetworkNodeDao;
 import com.ustadmobile.core.db.dao.OpdsAtomFeedRepository;
 import com.ustadmobile.core.db.dao.OpdsEntryDao;
@@ -149,5 +150,10 @@ public class DbManagerAndroid extends DbManager {
     @Override
     public OpdsEntryStatusCacheAncestorDao getOpdsEntryStatusCacheAncestorDao() {
         return appDatabase.getOpdsEntryStatusCacheAncestorDao();
+    }
+
+    @Override
+    public HttpCachedEntryDao getHttpCachedEntryDao() {
+        return appDatabase.getHttpCachedEnrtyDao();
     }
 }

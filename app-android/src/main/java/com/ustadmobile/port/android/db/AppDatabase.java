@@ -13,6 +13,7 @@ import com.ustadmobile.port.android.db.dao.DownloadJobDaoAndroid;
 import com.ustadmobile.port.android.db.dao.DownloadJobItemDaoAndroid;
 import com.ustadmobile.port.android.db.dao.DownloadJobItemHistoryDaoAndroid;
 import com.ustadmobile.port.android.db.dao.EntryStatusResponseDaoAndroid;
+import com.ustadmobile.port.android.db.dao.HttpCachedEntryDaoAndroid;
 import com.ustadmobile.port.android.db.dao.NetworkNodeDaoAndroid;
 import com.ustadmobile.port.android.db.dao.OpdsEntryDaoAndroid;
 import com.ustadmobile.port.android.db.dao.OpdsEntryParentToChildJoinDaoAndroid;
@@ -30,7 +31,8 @@ import com.ustadmobile.port.android.db.dao.OpdsLinkDaoAndroid;
         ContainerFile.class, ContainerFileEntry.class, DownloadJob.class,
         DownloadJobItem.class, NetworkNode.class, EntryStatusResponse.class,
         DownloadJobItemHistory.class, CrawlJob.class, CrawlJobItem.class,
-        OpdsEntryStatusCache.class, OpdsEntryStatusCacheAncestor.class
+        OpdsEntryStatusCache.class, OpdsEntryStatusCacheAncestor.class,
+        HttpCachedEntry.class
 })
 public abstract class AppDatabase extends RoomDatabase {
 
@@ -63,5 +65,7 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract OpdsEntryStatusCacheDaoAndroid getOpdsEntryStatusCacheDao();
 
     public abstract OpdsEntryStatusCacheAncestorDaoAndroid getOpdsEntryStatusCacheAncestorDao();
+
+    public abstract HttpCachedEntryDaoAndroid getHttpCachedEnrtyDao();
 
 }

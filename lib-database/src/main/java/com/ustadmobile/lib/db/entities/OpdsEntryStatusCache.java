@@ -292,4 +292,53 @@ public class OpdsEntryStatusCache {
     public void setEntryHasContainer(boolean entryHasContainer) {
         this.entryHasContainer = entryHasContainer;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof OpdsEntryStatusCache)) return false;
+
+        OpdsEntryStatusCache that = (OpdsEntryStatusCache) o;
+
+        if (pendingDownloadBytesSoFarIncDescendants != that.pendingDownloadBytesSoFarIncDescendants)
+            return false;
+        if (entryPendingDownloadBytesSoFar != that.entryPendingDownloadBytesSoFar) return false;
+        if (containersDownloadedSizeIncDescendants != that.containersDownloadedSizeIncDescendants)
+            return false;
+        if (entryContainerDownloadedSize != that.entryContainerDownloadedSize) return false;
+        if (sizeIncDescendants != that.sizeIncDescendants) return false;
+        if (entrySize != that.entrySize) return false;
+        if (entriesWithContainerIncDescendants != that.entriesWithContainerIncDescendants)
+            return false;
+        if (entryHasContainer != that.entryHasContainer) return false;
+        if (containersDownloadedIncDescendants != that.containersDownloadedIncDescendants)
+            return false;
+        if (entryContainerDownloaded != that.entryContainerDownloaded) return false;
+        if (containersDownloadPendingIncAncestors != that.containersDownloadPendingIncAncestors)
+            return false;
+        if (entryContainerDownloadPending != that.entryContainerDownloadPending) return false;
+        if (entryAcquisitionLinkLength != that.entryAcquisitionLinkLength) return false;
+        if (!statusCacheUid.equals(that.statusCacheUid)) return false;
+        return statusEntryId.equals(that.statusEntryId);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = statusCacheUid.hashCode();
+        result = 31 * result + statusEntryId.hashCode();
+        result = 31 * result + (int) (pendingDownloadBytesSoFarIncDescendants ^ (pendingDownloadBytesSoFarIncDescendants >>> 32));
+        result = 31 * result + (int) (entryPendingDownloadBytesSoFar ^ (entryPendingDownloadBytesSoFar >>> 32));
+        result = 31 * result + (int) (containersDownloadedSizeIncDescendants ^ (containersDownloadedSizeIncDescendants >>> 32));
+        result = 31 * result + (int) (entryContainerDownloadedSize ^ (entryContainerDownloadedSize >>> 32));
+        result = 31 * result + (int) (sizeIncDescendants ^ (sizeIncDescendants >>> 32));
+        result = 31 * result + (int) (entrySize ^ (entrySize >>> 32));
+        result = 31 * result + entriesWithContainerIncDescendants;
+        result = 31 * result + (entryHasContainer ? 1 : 0);
+        result = 31 * result + containersDownloadedIncDescendants;
+        result = 31 * result + (entryContainerDownloaded ? 1 : 0);
+        result = 31 * result + containersDownloadPendingIncAncestors;
+        result = 31 * result + (entryContainerDownloadPending ? 1 : 0);
+        result = 31 * result + (int) (entryAcquisitionLinkLength ^ (entryAcquisitionLinkLength >>> 32));
+        return result;
+    }
 }

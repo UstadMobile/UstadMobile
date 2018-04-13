@@ -494,4 +494,46 @@ public class OpdsEntry {
         return link;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof OpdsEntry)) return false;
+
+        OpdsEntry opdsEntry = (OpdsEntry) o;
+
+        if (entryType != opdsEntry.entryType) return false;
+        if (uuid != null ? !uuid.equals(opdsEntry.uuid) : opdsEntry.uuid != null) return false;
+        if (entryId != null ? !entryId.equals(opdsEntry.entryId) : opdsEntry.entryId != null)
+            return false;
+        if (title != null ? !title.equals(opdsEntry.title) : opdsEntry.title != null) return false;
+        if (updated != null ? !updated.equals(opdsEntry.updated) : opdsEntry.updated != null)
+            return false;
+        if (summary != null ? !summary.equals(opdsEntry.summary) : opdsEntry.summary != null)
+            return false;
+        if (content != null ? !content.equals(opdsEntry.content) : opdsEntry.content != null)
+            return false;
+        if (contentType != null ? !contentType.equals(opdsEntry.contentType) : opdsEntry.contentType != null)
+            return false;
+        if (publisher != null ? !publisher.equals(opdsEntry.publisher) : opdsEntry.publisher != null)
+            return false;
+        if (language != null ? !language.equals(opdsEntry.language) : opdsEntry.language != null)
+            return false;
+        return url != null ? url.equals(opdsEntry.url) : opdsEntry.url == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = uuid != null ? uuid.hashCode() : 0;
+        result = 31 * result + (entryId != null ? entryId.hashCode() : 0);
+        result = 31 * result + (title != null ? title.hashCode() : 0);
+        result = 31 * result + (updated != null ? updated.hashCode() : 0);
+        result = 31 * result + (summary != null ? summary.hashCode() : 0);
+        result = 31 * result + (content != null ? content.hashCode() : 0);
+        result = 31 * result + (contentType != null ? contentType.hashCode() : 0);
+        result = 31 * result + (publisher != null ? publisher.hashCode() : 0);
+        result = 31 * result + (language != null ? language.hashCode() : 0);
+        result = 31 * result + (url != null ? url.hashCode() : 0);
+        result = 31 * result + entryType;
+        return result;
+    }
 }

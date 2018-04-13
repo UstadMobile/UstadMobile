@@ -4,6 +4,7 @@ import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.lib.db.entities.OpdsEntry;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
+import com.ustadmobile.lib.db.entities.OpdsEntryWithStatusCache;
 
 import java.util.List;
 
@@ -18,10 +19,10 @@ public interface OpdsAtomFeedRepository {
 
     OpdsEntryWithRelations getEntryByUrlStatic(String url);
 
-    UmLiveData<List<OpdsEntryWithRelations>> findEntriesByContainerFileDirectoryAsList(
+    UmLiveData<List<OpdsEntryWithStatusCache>> findEntriesByContainerFileDirectoryAsList(
             List<String> dirList, OpdsEntry.OpdsItemLoadCallback callback);
 
-    UmProvider<OpdsEntryWithRelations> findEntriesByContainerFileDirectoryAsProvider(
+    UmProvider<OpdsEntryWithStatusCache> findEntriesByContainerFileDirectoryAsProvider(
             List<String> dirList, OpdsEntry.OpdsItemLoadCallback callback);
 
     List<OpdsEntryWithRelations> findEntriesByContainerFileNormalizedPath(String containerFilePath);

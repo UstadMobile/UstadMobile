@@ -36,11 +36,8 @@ package com.ustadmobile.core.fs;
     /* $endif$ */
 
 import com.ustadmobile.core.controller.CatalogPresenter;
-import com.ustadmobile.core.fs.db.HttpCacheDbEntry;
-import com.ustadmobile.core.fs.db.HttpCacheDbManager;
 import com.ustadmobile.core.impl.AbstractCacheResponse;
 import com.ustadmobile.core.impl.HttpCache;
-import com.ustadmobile.core.impl.HttpCacheEntry;
 import com.ustadmobile.core.impl.HttpCacheResponse;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.impl.http.UmHttpCall;
@@ -49,6 +46,7 @@ import com.ustadmobile.core.impl.http.UmHttpResponse;
 import com.ustadmobile.core.impl.http.UmHttpResponseCallback;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
+import com.ustadmobile.lib.db.entities.HttpCachedEntry;
 import com.ustadmobile.test.core.ResourcesHttpdTestServer;
 import com.ustadmobile.test.core.UMTestUtil;
 import com.ustadmobile.test.core.impl.PlatformTestUtil;
@@ -78,7 +76,7 @@ import fi.iki.elonen.router.RouterNanoHTTPD;
  *
  * @author mike
  */
-public class TestHttpCache {
+public abstract class TestHttpCache {
     
 
     private static RouterNanoHTTPD resourcesHttpd;
@@ -394,38 +392,38 @@ public class TestHttpCache {
 
     @Test
     public void testFreshness() {
-        final Object context = PlatformTestUtil.getTargetContext();
-
         //Make up an entry that expires in 10 minutes, where it was last checked 9 minutes ago
-        HttpCacheDbEntry dbEntry = HttpCacheDbManager.getInstance().makeNewEntry(context);
-        dbEntry.setCacheControl("max-age=600");
-        dbEntry.setLastChecked(System.currentTimeMillis() - (9 * 60 * 1000));
-        HttpCacheEntry entry = new HttpCacheEntry(dbEntry);
+        HttpCachedEntry entry = new HttpCachedEntry();
+        entry.setCacheControl("max-age=600");
+        entry.setLastChecked(System.currentTimeMillis() - (9 * 60 * 1000));
         Assert.assertTrue("Cache-control header maxage=10min, last checked 9mins ago, isFresh",
-                entry.isFresh(0));
+                HttpCache.isFresh(entry, 0));
 
-        dbEntry.setLastChecked(System.currentTimeMillis() - (11 * 60 * 1000));
+        entry.setLastChecked(System.currentTimeMillis() - (11 * 60 * 1000));
         Assert.assertTrue("Cache-control header maxage=10min, last checked 1mins ago, is stale",
-                !entry.isFresh(0));
+                !HttpCache.isFresh(entry,0));
 
         //Test interpreting freshness using expires header
-        dbEntry.setCacheControl(null);
-        dbEntry.setExpiresTime(System.currentTimeMillis() + 1000);
+        entry.setCacheControl(null);
+        entry.setExpiresTime(System.currentTimeMillis() + 1000);
         Assert.assertTrue("Entry is considered fresh if without cache-control header, with expires header in future",
-                entry.isFresh());
-        dbEntry.setExpiresTime(System.currentTimeMillis() - 1000);
+                HttpCache.isFresh(entry));
+        entry.setExpiresTime(System.currentTimeMillis() - 1000);
         Assert.assertTrue("Entry is considered stale if without cache-control header, with expires header in past",
-                !entry.isFresh());
+                !HttpCache.isFresh(entry));
 
         //test using time to live default
-        dbEntry.setExpiresTime(-1);
-        dbEntry.setLastChecked(System.currentTimeMillis());
+        entry.setExpiresTime(-1);
+        entry.setLastChecked(System.currentTimeMillis());
         Assert.assertTrue("Entry without headers is considered fresh by default with a time to live",
-                entry.isFresh(10000));
+                HttpCache.isFresh(entry, 10000));
         Assert.assertTrue("Entry without headers is considered stale if no time to live given",
-                !entry.isFresh(0));
+                !HttpCache.isFresh(entry, 0));
 
 
     }
+
+
+
 
 }

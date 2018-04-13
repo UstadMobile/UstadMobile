@@ -8,6 +8,7 @@ import com.ustadmobile.lib.db.entities.OpdsEntryAncestor;
 import com.ustadmobile.lib.db.entities.OpdsEntryStatusCache;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelationsAndContainerMimeType;
+import com.ustadmobile.lib.db.entities.OpdsEntryWithStatusCache;
 
 import java.util.List;
 
@@ -33,6 +34,12 @@ public abstract class OpdsEntryWithRelationsDao {
 
     @UmQuery("SELECT * from OpdsEntry INNER JOIN OpdsEntryToParentOpdsEntry on OpdsEntry.uuid = OpdsEntry.uuid WHERE OpdsEntryToParentOpdsEntry.parentEntry = :parentId")
     public abstract UmProvider<OpdsEntryWithRelations> getEntriesByParent(String parentId);
+
+    @UmQuery("SELECT OpdsEntry.* FROM OpdsEntry INNER JOIN OpdsEntryParentToChildJoin on OpdsEntry.uuid = OpdsEntryParentToChildJoin.childEntry WHERE OpdsEntryParentToChildJoin.parentEntry = :parentId ORDER BY childIndex")
+    public abstract UmProvider<OpdsEntryWithStatusCache> getEntriesWithStatusCacheByParent(String parentId);
+
+
+
 
     @UmQuery("SELECT * from OpdsEntry INNER JOIN OpdsEntryToParentOpdsEntry on OpdsEntry.uuid = OpdsEntry.uuid WHERE OpdsEntryToParentOpdsEntry.parentEntry = :parentId")
     public abstract UmLiveData<List<OpdsEntryWithRelations>> getEntriesByParentAsList(String parentId);
@@ -63,14 +70,15 @@ public abstract class OpdsEntryWithRelationsDao {
     protected static final String findEntriesByContainerFileDirectorySql ="SELECT * FROM OpdsEntry " +
             "LEFT JOIN ContainerFileEntry on OpdsEntry.uuid = ContainerFileEntry.opdsEntryUuid " +
             "LEFT JOIN ContainerFile on ContainerFileEntry.containerFileId = ContainerFile.id " +
+            "LEFT JOIN OpdsEntryStatusCache on OpdsEntry.entryId = OpdsEntryStatusCache.statusEntryId " +
             "WHERE ContainerFile.dirPath IN (:dirList)";
 
     @UmQuery(findEntriesByContainerFileDirectorySql)
-    public abstract UmLiveData<List<OpdsEntryWithRelations>> findEntriesByContainerFileDirectoryAsList(
+    public abstract UmLiveData<List<OpdsEntryWithStatusCache>> findEntriesByContainerFileDirectoryAsList(
             List<String> dirList, OpdsEntry.OpdsItemLoadCallback callback);
 
     @UmQuery(findEntriesByContainerFileDirectorySql)
-    public abstract UmProvider<OpdsEntryWithRelations> findEntriesByContainerFileDirectoryAsProvider(
+    public abstract UmProvider<OpdsEntryWithStatusCache> findEntriesByContainerFileDirectoryAsProvider(
             List<String> dirList, OpdsEntry.OpdsItemLoadCallback callback);
 
     protected static final String findEntriesByContainerFileSql = "SELECT * FROM OpdsEntry " +

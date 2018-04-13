@@ -2,9 +2,6 @@ package com.ustadmobile.port.javase.impl;
 
 import com.j256.ormlite.jdbc.JdbcConnectionSource;
 import com.j256.ormlite.support.ConnectionSource;
-import com.j256.ormlite.table.TableUtils;
-import com.ustadmobile.core.fs.db.HttpCacheDbEntry;
-import com.ustadmobile.port.jcommon.fs.db.HttpCacheDbEntryEntity;
 
 import java.sql.SQLException;
 
@@ -22,7 +19,6 @@ public class UmContextSe {
         if(cacheDbConnectionSource == null) {
             try {
                 cacheDbConnectionSource = new JdbcConnectionSource(cacheDbJdbcUrl);
-                TableUtils.createTableIfNotExists(cacheDbConnectionSource, HttpCacheDbEntryEntity.class);
             }catch(SQLException e) {
                 e.printStackTrace();
             }

@@ -33,6 +33,7 @@
 package com.ustadmobile.port.android.view;
 
 
+import android.app.ActionBar;
 import android.arch.lifecycle.LiveData;
 import android.arch.paging.DataSource;
 import android.arch.paging.LivePagedListBuilder;
@@ -44,6 +45,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.recyclerview.extensions.DiffCallback;
+import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -62,7 +64,9 @@ import com.ustadmobile.core.model.CourseProgress;
 import com.ustadmobile.core.opds.OpdsFilterOptions;
 import com.ustadmobile.core.view.CatalogView;
 import com.ustadmobile.lib.db.entities.OpdsEntry;
+import com.ustadmobile.lib.db.entities.OpdsEntryWithChildEntries;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
+import com.ustadmobile.lib.db.entities.OpdsEntryWithStatusCache;
 import com.ustadmobile.lib.db.entities.OpdsLink;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
@@ -202,9 +206,12 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
         rootContainer.findViewById(R.id.fragment_catalog_footer_button).setOnClickListener(this);
 
         mRecyclerView = rootContainer.findViewById(R.id.fragment_catalog_recyclerview);
+
         mRecyclerLayoutManager = new LinearLayoutManager(getContext());
         mRecyclerView.setLayoutManager(mRecyclerLayoutManager);
-
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(mRecyclerView.getContext(),
+                LinearLayoutManager.VERTICAL);
+        mRecyclerView.addItemDecoration(dividerItemDecoration);
 
         mCatalogPresenter = new CatalogPresenter(getContext(), this);
 
@@ -219,10 +226,10 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
     }
 
     @Override
-    public void setEntryProvider(UmProvider<OpdsEntryWithRelations> entryProvider) {
+    public void setEntryProvider(UmProvider<OpdsEntryWithStatusCache> entryProvider) {
         OpdsEntryRecyclerAdapter adapter = new OpdsEntryRecyclerAdapter();
         DataSource.Factory factory = (DataSource.Factory)entryProvider.getProvider();
-        LiveData<PagedList<OpdsEntryWithRelations>> data =  new LivePagedListBuilder<>(factory, 20).build();
+        LiveData<PagedList<OpdsEntryWithStatusCache>> data =  new LivePagedListBuilder<>(factory, 20).build();
 
         data.observe(this, adapter::setList);
         mRecyclerView.setAdapter(adapter);
@@ -564,7 +571,7 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
         return mAddOptionAvailable;
     }
 
-    public class OpdsEntryRecyclerAdapter extends PagedListAdapter<OpdsEntryWithRelations, OpdsEntryRecyclerAdapter.OpdsEntryViewHolder> {
+    public class OpdsEntryRecyclerAdapter extends PagedListAdapter<OpdsEntryWithStatusCache, OpdsEntryRecyclerAdapter.OpdsEntryViewHolder> {
 
         public class OpdsEntryViewHolder extends RecyclerView.ViewHolder {
             public OPDSEntryCard mEntryCard;
@@ -581,8 +588,13 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
 
         @Override
         public OpdsEntryViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            OPDSEntryCard cardView  = (OPDSEntryCard) LayoutInflater.from(parent.getContext()).inflate(
-                    R.layout.fragment_opds_item, null);
+//            OPDSEntryCard cardView  = (OPDSEntryCard) LayoutInflater.from(parent.getContext()).inflate(
+//                    R.layout.fragment_opds_item, null);
+            OPDSEntryCard cardView = new OPDSEntryCard(getContext());
+            ViewGroup.LayoutParams params = new ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            cardView.setLayoutParams(params);
+
             cardView.setOnClickListener(CatalogOPDSFragment.this);
             cardView.setOnLongClickListener(CatalogOPDSFragment.this);
             cardView.setOnClickDownloadListener(CatalogOPDSFragment.this::handleClickDownload);
@@ -591,7 +603,7 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
 
         @Override
         public void onBindViewHolder(OpdsEntryViewHolder holder, int position) {
-            final OpdsEntryWithRelations entry = getItem(position);
+            final OpdsEntryWithStatusCache entry = getItem(position);
             holder.mEntryCard.setOpdsEntry(entry);
             OpdsLink imgLink = null;
             String imageUri = null;
@@ -617,15 +629,17 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
         }
     }
 
-    public static final DiffCallback<OpdsEntryWithRelations> DIFF_CALLBACK = new DiffCallback<OpdsEntryWithRelations>() {
+    public static final DiffCallback<OpdsEntryWithStatusCache> DIFF_CALLBACK = new DiffCallback<OpdsEntryWithStatusCache>() {
         @Override
-        public boolean areItemsTheSame(@NonNull OpdsEntryWithRelations oldItem, @NonNull OpdsEntryWithRelations newItem) {
+        public boolean areItemsTheSame(@NonNull OpdsEntryWithStatusCache oldItem, @NonNull OpdsEntryWithStatusCache newItem) {
             return oldItem.getUuid().equals(newItem.getUuid());
         }
 
         @Override
-        public boolean areContentsTheSame(@NonNull OpdsEntryWithRelations oldItem, @NonNull OpdsEntryWithRelations newItem) {
-            return oldItem.getTitle() != null && oldItem.getTitle().equals(newItem.getTitle());
+        public boolean areContentsTheSame(@NonNull OpdsEntryWithStatusCache oldItem, @NonNull OpdsEntryWithStatusCache newItem) {
+            return oldItem.equals(newItem);
+
+//            return oldItem.getTitle() != null && oldItem.getTitle().equals(newItem.getTitle());
         }
     };
 
