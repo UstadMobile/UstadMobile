@@ -419,11 +419,24 @@ public abstract class TestHttpCache {
                 HttpCache.isFresh(entry, 10000));
         Assert.assertTrue("Entry without headers is considered stale if no time to live given",
                 !HttpCache.isFresh(entry, 0));
-
-
     }
 
+    @Test
+    public void testHeadRequest() throws IOException {
+        String httpURL = UMFileUtil.joinPaths(new String[] {ResourcesHttpdTestServer.getHttpRoot(),
+                "phonepic-smaller.png"});
+        UmHttpRequest headRequest = new UmHttpRequest(PlatformTestUtil.getTargetContext(), httpURL);
+        headRequest.setMethod(UmHttpRequest.METHOD_HEAD);
+        UmHttpResponse headResponse = httpCache.getSync(headRequest);
+        Assert.assertTrue("Content-Length on head request is > 0",
+                Long.parseLong(headResponse.getHeader("content-length")) > 0);
+        IOException exception = null;
+        try {
+            byte[] responseByte = headResponse.getResponseBody();
+        }catch(IOException e) {
+            exception = e;
+        }
 
-
-
+        Assert.assertNotNull("Requesting body on head request throws exception", exception);
+    }
 }

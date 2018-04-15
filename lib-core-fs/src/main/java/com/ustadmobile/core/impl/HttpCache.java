@@ -36,6 +36,8 @@ import java.util.concurrent.Executors;
  * Placed in com.ustadmobile.core.impl so that the systemimpl makeRequestSync method can be
  * protected and accessed by this class, but it won't be accessible to other classes that
  * shouldn't use it (e.g. presenters).
+ *
+ * TODO: Answer HTTP head request with information from a cached GET request
  */
 public class HttpCache implements HttpCacheResponse.ResponseCompleteListener{
 
@@ -308,10 +310,15 @@ public class HttpCache implements HttpCacheResponse.ResponseCompleteListener{
                                            boolean forkSaveToDisk) {
         final String requestUrl = request.getUrl();
         HttpCachedEntry entry = getEntry(request.getContext(), requestUrl, request.getMethod());
+        boolean responseHasBody = !UmHttpRequest.METHOD_HEAD.equals(request.getMethod())
+                && networkResponse.getStatus() != 204;
+
         if(entry == null) {
             entry = new HttpCachedEntry();
             entry.setUrl(requestUrl);
-            entry.setFileUri(generateCacheEntryFileName(request, networkResponse, sharedDir));
+            if(responseHasBody) {
+                entry.setFileUri(generateCacheEntryFileName(request, networkResponse, sharedDir));
+            }
         }
 
         final HttpCacheResponse cacheResponse = new HttpCacheResponse(entry, request);
@@ -324,7 +331,7 @@ public class HttpCache implements HttpCacheResponse.ResponseCompleteListener{
             updateCacheIndex(cacheResponse);
             cacheResponse.setNetworkResponseNotModified(true);
             UstadMobileSystemImpl.l(UMLog.INFO, 387, "Cache:HIT_VALIDATED:"+ request.getUrl());
-        }else {
+        }else if(responseHasBody){
             cacheResponse.setOnResponseCompleteListener(this);
             UstadMobileSystemImpl.l(UMLog.INFO, 385, "Cache:MISS - storing:"+ request.getUrl());
             if(forkSaveToDisk) {
@@ -453,9 +460,6 @@ public class HttpCache implements HttpCacheResponse.ResponseCompleteListener{
         response.getEntry().setLastAccessed(System.currentTimeMillis());
         DbManager.getInstance(response.getRequest().getContext()).getHttpCachedEntryDao()
                 .insert(response.getEntry());
-
-//        HttpCacheDbManager.getInstance().persist(response.getRequest().getContext(),
-//                response.getEntry().getDbEntry());
     }
 
     @Override

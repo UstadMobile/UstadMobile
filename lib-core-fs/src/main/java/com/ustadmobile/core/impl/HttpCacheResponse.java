@@ -63,6 +63,7 @@ public class HttpCacheResponse extends AbstractCacheResponse implements Runnable
     }
 
 
+
     protected void setNetworkResponse(UmHttpResponse response) {
         this.networkResponse = response;
     }
@@ -95,7 +96,8 @@ public class HttpCacheResponse extends AbstractCacheResponse implements Runnable
         try {
             bufferedPipeOut= new PipedOutputStream(bufferPipeIn);
         }catch(IOException e) {
-
+            UstadMobileSystemImpl.l(UMLog.ERROR, 0,
+                    "HttpCacheResponse: Exception with pipe init");
         }
     }
 
@@ -178,6 +180,9 @@ public class HttpCacheResponse extends AbstractCacheResponse implements Runnable
 
     @Override
     public byte[] getResponseBody() throws IOException {
+        if(!hasResponseBody())
+            throw new IOException("getResponseBody called on response that has no body");
+
         markBodyReturned();
         if(networkResponse == null) {
             return UMIOUtils.readStreamToByteArray(UstadMobileSystemImpl.getInstance().openFileInputStream(
@@ -191,6 +196,9 @@ public class HttpCacheResponse extends AbstractCacheResponse implements Runnable
 
     @Override
     public InputStream getResponseAsStream() throws IOException {
+        if(!hasResponseBody())
+            throw new IOException("getResponseAsStream called on response that has no body");
+
         markBodyReturned();
         if(networkResponse == null) {
             return UstadMobileSystemImpl.getInstance().openFileInputStream(entry.getFileUri());
@@ -210,7 +218,6 @@ public class HttpCacheResponse extends AbstractCacheResponse implements Runnable
     public int getStatus() {
         return entry.getStatusCode();
     }
-
 
     public String getFileUri() {
         return entry.getFileUri();
@@ -236,5 +243,14 @@ public class HttpCacheResponse extends AbstractCacheResponse implements Runnable
     @Override
     public boolean isFresh() {
         return HttpCache.isFresh(entry);
+    }
+
+    /**
+     * Single point to determine if this response has a request body.
+     *
+     * @return true if there is an http body attached with this request, false otherwise.
+     */
+    protected boolean hasResponseBody() {
+        return !UmHttpRequest.METHOD_HEAD.equals(request.getMethod()) && entry.getStatusCode() != 204;
     }
 }
