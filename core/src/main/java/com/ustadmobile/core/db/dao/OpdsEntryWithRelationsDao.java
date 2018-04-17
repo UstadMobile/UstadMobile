@@ -32,6 +32,16 @@ public abstract class OpdsEntryWithRelationsDao {
 
     public abstract OpdsEntryWithRelations getEntryByUrlStatic(String url);
 
+    /**
+     * Find OpdsEntryWithRelations by it's primary key (uuid)
+     *
+     * @param uuid The UUID to find
+     *
+     * @return The OpdsEntryWithRelations object representing this in the database, or null if it doesn't exist
+     */
+    public abstract OpdsEntryWithRelations findByUuid(String uuid);
+
+
     @UmQuery("SELECT * from OpdsEntry INNER JOIN OpdsEntryToParentOpdsEntry on OpdsEntry.uuid = OpdsEntry.uuid WHERE OpdsEntryToParentOpdsEntry.parentEntry = :parentId")
     public abstract UmProvider<OpdsEntryWithRelations> getEntriesByParent(String parentId);
 

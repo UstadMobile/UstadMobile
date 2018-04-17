@@ -34,6 +34,13 @@ public class CrawlJobItem {
         this.depth = depth;
     }
 
+    public CrawlJobItem(int crawlJobId, OpdsEntryWithRelations entry, int status, int depth){
+        this.crawlJobId = crawlJobId;
+        this.opdsEntryUuid = entry.getUuid();
+        this.status =status;
+        this.depth = depth;
+    }
+
 
     public Integer getId() {
         return id;

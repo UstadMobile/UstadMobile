@@ -11,11 +11,14 @@ import com.ustadmobile.lib.db.entities.OpdsEntry;
 import com.ustadmobile.lib.db.entities.OpdsEntryParentToChildJoin;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
 import com.ustadmobile.lib.db.entities.OpdsLink;
+import com.ustadmobile.lib.util.UmUuidUtil;
 
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Handles adding a feed to the user's feed list. Those feeds are stored as OPDS text in the
@@ -120,12 +123,19 @@ public class AddFeedDialogPresenter extends UstadBaseController implements OpdsE
     @Override
     public void onDone(OpdsEntry entry) {
         if(entry.getEntryId() != null && entry.getTitle() != null) {
+            OpdsEntry addedEntry = new OpdsEntry(UmUuidUtil.encodeUuidWithAscii85(UUID.randomUUID()),
+                entry.getEntryId(), entry.getTitle());
+            OpdsLink addedEntryLink = new OpdsLink(addedEntry.getUuid(),
+                    OpdsEntry.TYPE_OPDS_NAVIGATION_FEED, entry.getUrl(), "subsection");
             OpdsEntryParentToChildJoin join = new OpdsEntryParentToChildJoin(uuidToAddTo,
-                    entry.getUuid(), 0);
-            OpdsEntryParentToChildJoinDao dao = DbManager.getInstance(getContext())
-                    .getOpdsEntryParentToChildJoinDao();
-            join.setChildIndex(dao.getNumEntriesByParent(uuidToAddTo)+1);
-            dao.insertAsync(join, new UmCallback<Integer>() {
+                    addedEntry.getUuid(), 0);
+            DbManager dbManager = DbManager.getInstance(getContext());
+            dbManager.getOpdsEntryDao().insert(addedEntry);
+            dbManager.getOpdsLinkDao().insert(Arrays.asList(addedEntryLink));
+
+            join.setChildIndex(dbManager.getOpdsEntryParentToChildJoinDao()
+                    .getNumEntriesByParent(uuidToAddTo)+1);
+            dbManager.getOpdsEntryParentToChildJoinDao().insertAsync(join, new UmCallback<Integer>() {
                 @Override
                 public void onSuccess(Integer result) {
                     addFeedDialogView.runOnUiThread(() -> addFeedDialogView.dismiss());

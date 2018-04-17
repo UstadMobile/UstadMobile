@@ -1,11 +1,15 @@
 package com.ustadmobile.port.sharedse.controller;
 
+import com.ustadmobile.core.controller.CatalogPresenter;
 import com.ustadmobile.core.controller.UstadBaseController;
 import com.ustadmobile.core.db.DbManager;
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.dao.CrawlJobWithTotals;
+import com.ustadmobile.core.impl.UMStorageDir;
+import com.ustadmobile.core.impl.UmResultCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMFileUtil;
+import com.ustadmobile.lib.db.entities.CrawlJob;
 import com.ustadmobile.lib.db.entities.DownloadJob;
 import com.ustadmobile.lib.db.entities.DownloadJobWithRelations;
 import com.ustadmobile.lib.db.entities.DownloadJobWithTotals;
@@ -16,6 +20,7 @@ import com.ustadmobile.lib.db.entities.CrawlJobItem;
 import com.ustadmobile.port.sharedse.networkmanager.CrawlTask;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Hashtable;
 
 /**
@@ -34,6 +39,10 @@ public class StartDownloadPresenter extends UstadBaseController<StartDownloadVie
 
     private UmLiveData<DownloadJobWithTotals> downloadJobLiveData;
 
+    private int crawlJobId;
+
+    private int downloadJobId;
+
     public StartDownloadPresenter(Object context, StartDownloadView view, Hashtable args) {
         super(context, args, view);
     }
@@ -41,34 +50,27 @@ public class StartDownloadPresenter extends UstadBaseController<StartDownloadVie
     public void onCreate(Hashtable savedState) {
         CrawlJobWithTotals crawlJob = new CrawlJobWithTotals();
         DownloadJobWithRelations downloadJob = new DownloadJobWithRelations(System.currentTimeMillis());
+        UMStorageDir[] storageDirs = UstadMobileSystemImpl.getInstance().getStorageDirs(
+                CatalogPresenter.SHARED_RESOURCE, getContext());
+        downloadJob.setDestinationDir(storageDirs[0].getDirURI());
         
         dbManager = DbManager.getInstance(getContext());
-        new Thread(() -> {
-            downloadJob.setId((int)dbManager.getDownloadJobDao().insert(downloadJob));
-            crawlJob.setContainersDownloadJobId(downloadJob.getId());
-            crawlJob.setCrawlJobId((int)dbManager.getCrawlJobDao().insert(crawlJob));
 
-            String[] rootUris = (String[])getArguments().get(ARG_ROOT_URIS);
-            ArrayList<CrawlJobItem> initialJobItems = new ArrayList<>(rootUris.length);
-            for(String uri : rootUris) {
-                initialJobItems.add(new CrawlJobItem(crawlJob.getCrawlJobId(), uri, NetworkTask.STATUS_QUEUED,
-                        0));
-            }
+        String[] rootUris = (String[])getArguments().get(ARG_ROOT_URIS);
+        UstadMobileSystemImpl.getInstance().getNetworkManager().prepareDownloadAsync(null,
+                Arrays.asList(rootUris), downloadJob, crawlJob, (insertedCrawlJob) -> {
+                    crawlJobId =insertedCrawlJob.getCrawlJobId();
+                    downloadJobId = insertedCrawlJob.getContainersDownloadJobId();
+                    crawlJobLiveData = dbManager.getCrawlJobDao().findWithTotalsByIdLive(insertedCrawlJob.getCrawlJobId());
+                    downloadJobLiveData = dbManager.getDownloadJobDao().findByIdWithTotals(
+                            insertedCrawlJob.getContainersDownloadJobId());
 
+                    crawlJobLiveData.observe(StartDownloadPresenter.this,
+                            StartDownloadPresenter.this::handleCrawlJobChanged);
+                    downloadJobLiveData.observe(StartDownloadPresenter.this,
+                            StartDownloadPresenter.this::handleDownloadJobChanged);
+                });
 
-
-            dbManager.getDownloadJobCrawlItemDao().insertAll(initialJobItems);
-            task = new CrawlTask(crawlJob, dbManager,
-                    (NetworkManager)UstadMobileSystemImpl.getInstance().getNetworkManager());
-            task.start();
-
-            crawlJobLiveData =dbManager.getCrawlJobDao().findWithTotalsByIdLive(crawlJob.getCrawlJobId());
-            crawlJobLiveData.observe(StartDownloadPresenter.this,
-                    StartDownloadPresenter.this::handleCrawlJobChanged);
-            downloadJobLiveData = dbManager.getDownloadJobDao().findByIdWithTotals(downloadJob.getId());
-            downloadJobLiveData.observe(StartDownloadPresenter.this,
-                    StartDownloadPresenter.this::handleDownloadJobChanged);
-        }).start();
     }
 
     public void handleCrawlJobChanged(CrawlJobWithTotals crawlJob){
@@ -93,7 +95,13 @@ public class StartDownloadPresenter extends UstadBaseController<StartDownloadVie
     }
 
     public void handleClickDownload() {
-        //
+        dbManager.getCrawlJobDao().updateQueueDownloadOnDoneIfNotFinished(crawlJobId, (queueOnComplete) -> {
+            if(queueOnComplete == 0){
+                //the preparation is already done - so we need to queue this ourselves.
+                UstadMobileSystemImpl.getInstance().getNetworkManager().queueDownloadJob(downloadJobId);
+            }
+        });
+
     }
 
 

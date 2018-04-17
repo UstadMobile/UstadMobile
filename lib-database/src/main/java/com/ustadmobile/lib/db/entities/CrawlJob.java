@@ -16,6 +16,10 @@ public class CrawlJob {
 
     private int containersDownloadJobId = -1;
 
+    private boolean recursive = true;
+
+    private boolean queueDownloadJobOnDone = false;
+
     public Integer getCrawlJobId() {
         return crawlJobId;
     }
@@ -50,5 +54,41 @@ public class CrawlJob {
      */
     public void setContainersDownloadJobId(int containersDownloadJobId) {
         this.containersDownloadJobId = containersDownloadJobId;
+    }
+
+    /**
+     * Getter for the recursive property
+     *
+     * @return true if this Crawl should be recursive and iterate over child entries and OPDS subsection links
+     */
+    public boolean isRecursive() {
+        return recursive;
+    }
+
+    /**
+     * Setter for the recursive property
+     *
+     * @param recursive true if this Crawl should be recursive and iterate over child entries and OPDS subsection links
+     */
+    public void setRecursive(boolean recursive) {
+        this.recursive = recursive;
+    }
+
+    /**
+     * Setter for the queue download job on done property
+     *
+     * @return true if this download should be automatically queued when the CrawlTask is done
+     */
+    public boolean isQueueDownloadJobOnDone() {
+        return queueDownloadJobOnDone;
+    }
+
+    /**
+     * Getter for the queue download job on done property
+     *
+     * @param queueDownloadJobOnDone true if this download should be automatically queued when the CrawlTask is done
+     */
+    public void setQueueDownloadJobOnDone(boolean queueDownloadJobOnDone) {
+        this.queueDownloadJobOnDone = queueDownloadJobOnDone;
     }
 }

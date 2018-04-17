@@ -63,4 +63,29 @@ public class ContainerFileEntry {
     public void setOpdsEntryUuid(String opdsEntryUuid) {
         this.opdsEntryUuid = opdsEntryUuid;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ContainerFileEntry)) return false;
+
+        ContainerFileEntry that = (ContainerFileEntry) o;
+
+        if (containerFileEntryId != that.containerFileEntryId) return false;
+        if (containerFileId != that.containerFileId) return false;
+        if (containerEntryUpdated != that.containerEntryUpdated) return false;
+        if (containerEntryId != null ? !containerEntryId.equals(that.containerEntryId) : that.containerEntryId != null)
+            return false;
+        return opdsEntryUuid != null ? opdsEntryUuid.equals(that.opdsEntryUuid) : that.opdsEntryUuid == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = containerFileEntryId;
+        result = 31 * result + containerFileId;
+        result = 31 * result + (containerEntryId != null ? containerEntryId.hashCode() : 0);
+        result = 31 * result + (int) (containerEntryUpdated ^ (containerEntryUpdated >>> 32));
+        result = 31 * result + (opdsEntryUuid != null ? opdsEntryUuid.hashCode() : 0);
+        return result;
+    }
 }

@@ -30,7 +30,7 @@ public class DownloadJob {
 
     private boolean lanDownloadEnabled;
 
-    private boolean mobileDataEnabled;
+    private boolean mobileDataEnabled = true;
 
     public DownloadJob(){
 

@@ -48,6 +48,7 @@ import android.support.v7.recyclerview.extensions.DiffCallback;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SimpleItemAnimator;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -206,6 +207,8 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
         rootContainer.findViewById(R.id.fragment_catalog_footer_button).setOnClickListener(this);
 
         mRecyclerView = rootContainer.findViewById(R.id.fragment_catalog_recyclerview);
+        ((SimpleItemAnimator) mRecyclerView.getItemAnimator()).setSupportsChangeAnimations(false);
+
 
         mRecyclerLayoutManager = new LinearLayoutManager(getContext());
         mRecyclerView.setLayoutManager(mRecyclerLayoutManager);
@@ -638,8 +641,6 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
         @Override
         public boolean areContentsTheSame(@NonNull OpdsEntryWithStatusCache oldItem, @NonNull OpdsEntryWithStatusCache newItem) {
             return oldItem.equals(newItem);
-
-//            return oldItem.getTitle() != null && oldItem.getTitle().equals(newItem.getTitle());
         }
     };
 

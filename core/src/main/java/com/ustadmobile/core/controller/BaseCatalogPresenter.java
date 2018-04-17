@@ -2,6 +2,7 @@ package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.buildconfig.CoreBuildConfig;
 import com.ustadmobile.core.generated.locale.MessageID;
+import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UMStorageDir;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileConstants;
@@ -12,6 +13,7 @@ import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.opds.UstadJSOPDSItem;
 import com.ustadmobile.core.opds.entities.UmOpdsLink;
+import com.ustadmobile.lib.db.entities.CrawlJob;
 import com.ustadmobile.lib.db.entities.DownloadJob;
 import com.ustadmobile.lib.db.entities.DownloadJobItem;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
@@ -108,23 +110,23 @@ public abstract class BaseCatalogPresenter extends UstadBaseController implement
         handleClickDownload(acquisitionFeed, selectedEntries, acquisitionLanguageChoices, false);
     }
 
+    /**
+     * To be called when the user selects to download a list of entries.
+     *
+     * @param entriesToDownload List of OpdsEntryWithRelations objects to download
+     */
     public void handleClickDownload(List<OpdsEntryWithRelations> entriesToDownload){
         final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         UMStorageDir[] storageDirs = impl.getStorageDirs(CatalogPresenter.SHARED_RESOURCE, getContext());
-        impl.getNetworkManager().buildDownloadJobAsync(entriesToDownload,
-                storageDirs[0].getDirURI(), false, true, true,
-                new UmCallback<DownloadJob>() {
-                    @Override
-                    public void onSuccess(DownloadJob result) {
-                        impl.getNetworkManager().queueDownloadJob(result.getId());
-                    }
+        DownloadJob downloadJob = new DownloadJob();
+        downloadJob.setDestinationDir(storageDirs[0].getDirURI());
+        CrawlJob crawlJob = new CrawlJob();
+        crawlJob.setQueueDownloadJobOnDone(true);
 
-                    @Override
-                    public void onFailure(Throwable exception) {
-
-                    }
+        impl.getNetworkManager().prepareDownloadAsync(entriesToDownload, null, downloadJob, crawlJob,
+                (preparedCrawlJob) -> {
+                    UstadMobileSystemImpl.l(UMLog.INFO, 0, "Download prepared");
                 });
-
     }
 
 

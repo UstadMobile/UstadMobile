@@ -1,6 +1,7 @@
 package com.ustadmobile.test.port.android.view;
 
 import android.os.SystemClock;
+import android.support.test.espresso.IdlingPolicies;
 import android.support.test.espresso.matcher.BoundedMatcher;
 import android.support.test.espresso.matcher.ViewMatchers;
 import android.support.test.filters.LargeTest;
@@ -18,11 +19,13 @@ import com.ustadmobile.test.core.ResourcesHttpdTestServer;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 import static android.support.test.espresso.Espresso.*;
 import static android.support.test.espresso.action.ViewActions.click;
@@ -57,8 +60,14 @@ public class DownloadCrawlEspressoTest {
         ResourcesHttpdTestServer.startServer();
     }
 
-//    DISABLED until implementation is completed
-//    @Test
+    @Before
+    public void resetTimeout() {
+        IdlingPolicies.setMasterPolicyTimeout(10, TimeUnit.SECONDS);
+        IdlingPolicies.setIdlingResourceTimeout(10, TimeUnit.SECONDS);
+    }
+
+
+    @Test
     public void addLibraryAndDownloadAll() {
         onView(withText(R.string.my_libraries)).perform(click());
         SystemClock.sleep(1000);
@@ -83,16 +92,20 @@ public class DownloadCrawlEspressoTest {
                 withId(R.id.fragment_catalog_recyclerview)
         )).check(matches(hasDescendant(withText("Crawl Test"))));
 
+        SystemClock.sleep(5000);
+
         onView(allOf(
                 isDescendantOfA(withTagValue(equalTo("entries:///my_library"))),
                 hasSibling(withText("Crawl Test")),
-                withId(R.id.opds_item_download_icon)
+                withId(R.id.item_opds_entry_card_download_icon)
         )).perform(click());
 
         SystemClock.sleep(1000);
 
-        onView(withId(R.id.fragment_start_download_size_text)).check(matches(withText("4 items")));
-        onView(withText(R.string.download)).perform(click());
+        onView(withId(R.id.fragment_start_download_size_text)).check(
+                matches(withText(containsString("4 items"))));
+
+        onView(withId(android.R.id.button1)).perform(click());
 
 
         SystemClock.sleep(10000);
@@ -101,8 +114,9 @@ public class DownloadCrawlEspressoTest {
         onView(allOf(
                 isDescendantOfA(withTagValue(equalTo("entries:///my_library"))),
                 hasSibling(withText("Crawl Test")),
-                withId(R.id.opds_item_download_icon)
+                withId(R.id.item_opds_entry_card_download_icon)
         )).check(matches(withContentDescription("Downloaded")));
+
     }
 
 }

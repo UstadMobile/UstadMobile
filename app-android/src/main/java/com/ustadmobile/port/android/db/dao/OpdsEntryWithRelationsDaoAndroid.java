@@ -32,6 +32,10 @@ public abstract class OpdsEntryWithRelationsDaoAndroid extends OpdsEntryWithRela
     @Query("SELECT * From OpdsEntry Where url = :url")
     public abstract LiveData<OpdsEntryWithRelations> getEntryByUrlR(String url);
 
+    @Override
+    @Query("SELECT * FROM OpdsEntry WHERE uuid = :uuid")
+    public abstract OpdsEntryWithRelations findByUuid(String uuid);
+
     @Query("SELECT OpdsEntry.* from OpdsEntry INNER JOIN OpdsEntryParentToChildJoin on OpdsEntry.uuid = OpdsEntryParentToChildJoin.childEntry WHERE OpdsEntryParentToChildJoin.parentEntry = :parentId ORDER BY childIndex")
     public abstract DataSource.Factory<Integer, OpdsEntryWithRelations> findEntriesByParentR(String parentId);
 

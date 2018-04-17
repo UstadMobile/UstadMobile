@@ -16,11 +16,10 @@ import com.ustadmobile.port.sharedse.controller.StartDownloadPresenter;
 import com.ustadmobile.port.sharedse.view.StartDownloadView;
 
 /**
- * Created by mike on 3/5/18.
+ * Android implementation of the StartDownloadView
  */
-
 public class StartDownloadDialogFragment extends UstadDialogFragment implements StartDownloadView,
-        DialogInterface.OnClickListener{
+        DialogInterface.OnClickListener {
 
     private AlertDialog mDialog;
 
@@ -60,7 +59,15 @@ public class StartDownloadDialogFragment extends UstadDialogFragment implements 
 
     @Override
     public void onClick(DialogInterface dialogInterface, int which) {
+        switch(which){
+            case DialogInterface.BUTTON_POSITIVE:
+                mPresenter.handleClickDownload();
+                break;
 
+            case DialogInterface.BUTTON_NEGATIVE:
+                mPresenter.handleClickCancel();
+                break;
+        }
     }
 
     @Override

@@ -61,9 +61,13 @@ public class OPDSEntryCard extends ConstraintLayout {
 
     private OpdsEntryWithStatusCache opdsEntry;
 
-    private ImageButton statusImageView;
+    private DownloadStatusButton statusButton;
 
     private static final HashMap<Integer, Integer> STATUS_TO_COLOR_MAP = new HashMap<>();
+
+    private String currentThumbnailUrl;
+
+    private static final int IN_PROGRESS_THRESHOLD = 90;
 
     static {
         STATUS_TO_COLOR_MAP.put(MessageID.in_progress, R.color.entry_learner_progress_in_progress);
@@ -106,7 +110,7 @@ public class OPDSEntryCard extends ConstraintLayout {
 
     private void init() {
         inflate(getContext(), R.layout.item_opds_entry_card, this);
-        statusImageView = findViewById(R.id.item_opds_entry_card_download_icon);
+        statusButton = findViewById(R.id.item_opds_entry_card_download_icon);
     }
 
 
@@ -117,17 +121,31 @@ public class OPDSEntryCard extends ConstraintLayout {
 
         OpdsEntryStatusCache statusCache = opdsEntry.getStatusCache();
         if(statusCache != null) {
-            long sizeIncDescendants = statusCache.getContainersDownloadedSizeIncDescendants();
-            if(sizeIncDescendants > 0 && sizeIncDescendants == statusCache.getSizeIncDescendants()) {
-                statusImageView.setImageResource(R.drawable.ic_offline_pin_black_24dp);
+            long containersDownloadedSizeIncDescendants = statusCache.getContainersDownloadedSizeIncDescendants();
+
+            if(containersDownloadedSizeIncDescendants > 0 && containersDownloadedSizeIncDescendants == statusCache.getSizeIncDescendants()) {
+                statusButton.setImageResource(R.drawable.ic_offline_pin_black_24dp);
+                statusButton.setContentDescription(getContext().getResources().getString(R.string.downloaded));
             }else {
-                statusImageView.setImageResource(R.drawable.ic_file_download_black_24dp);
+                statusButton.setImageResource(R.drawable.ic_file_download_black_24dp);
+                statusButton.setContentDescription(getContext().getResources().getString(R.string.download));
             }
+
+            int percentRequestedOrCompleted = (statusCache.getEntriesWithContainerIncDescendants()) > 0 ?
+                    ((statusCache.getContainersDownloadedIncDescendants()
+                    + statusCache.getContainersDownloadPendingIncAncestors()) * 100)
+                    / (statusCache.getEntriesWithContainerIncDescendants()) : 0;
+            boolean downloadInProgress= statusCache.getContainersDownloadPendingIncAncestors() > 0
+                    && statusCache.getSizeIncDescendants() > 0
+                    && percentRequestedOrCompleted > IN_PROGRESS_THRESHOLD;
+            if(downloadInProgress){
+                long totalDownloaded = containersDownloadedSizeIncDescendants +
+                        statusCache.getPendingDownloadBytesSoFarIncDescendants();
+                statusButton.setProgress((int)((totalDownloaded * 100)/statusCache.getSizeIncDescendants()));
+            }
+
+            statusButton.setProgressVisibility(downloadInProgress ? View.VISIBLE : View.GONE);
         }
-
-
-
-//        mDownloadProgressView = findViewById(R.id.opds_item_download_progress_view);
     }
 
     public OpdsEntryWithRelations getOpdsEntry() {
@@ -141,8 +159,8 @@ public class OPDSEntryCard extends ConstraintLayout {
      */
 
     public void setLocalAvailableFile(boolean isAvailable){
-        ((TextView)findViewById(R.id.opds_item_detail_text)).setText(
-                isAvailable? R.string.file_available_locally : R.string.file_unavailable_locally);
+//        ((TextView)findViewById(R.id.opds_item_detail_text)).setText(
+//                isAvailable? R.string.file_available_locally : R.string.file_unavailable_locally);
 
     }
 
@@ -179,7 +197,7 @@ public class OPDSEntryCard extends ConstraintLayout {
     public void setFileAvailabilityTextVisibility(boolean visible){
         Log.d("File Availability",String.valueOf(visible));
         int visibility=visible ? View.VISIBLE : View.INVISIBLE;
-        findViewById(R.id.opds_item_detail_text).setVisibility(visibility);
+//        findViewById(R.id.opds_item_detail_text).setVisibility(visibility);
 
     }
 
@@ -216,6 +234,10 @@ public class OPDSEntryCard extends ConstraintLayout {
             return;
         }
 
+        if(currentThumbnailUrl != null && currentThumbnailUrl.equals(url))
+            return;//it hasn't changed
+
+        currentThumbnailUrl = url;
         if(UmAndroidImageUtil.isSvg(mimeType)) {
             UmAndroidImageUtil.loadSvgIntoImageView(url, thumbImageView);
         }else {

@@ -160,6 +160,8 @@ public class OpdsEntry {
 
     public static final String TYPE_OPDS_ACQUISITION_FEED = "application/atom+xml;profile=opds-catalog;kind=acquisition";
 
+    public static final String TYPE_OPDS_NAVIGATION_FEED = "application/atom+xml;profile=opds-catalog;kind=navigation";
+
     public static final String ENTRY_PROTOCOL = "entry:///";
 
     public static final String NS_ATOM = "http://www.w3.org/2005/Atom";
