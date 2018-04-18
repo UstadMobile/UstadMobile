@@ -53,4 +53,10 @@ public abstract class DownloadJobItemDaoAndroid extends DownloadJobItemDao {
     @Override
     public abstract int[] findAllIdsByDownloadJob(int downloadJobId);
 
+    @Query("SELECT * FROM DownloadJobItem " +
+            "WHERE downloadJobId = :downloadJobId AND status BETWEEN :statusFrom AND :statusTo " +
+            "LIMIT 1")
+    public abstract DownloadJobItem findByDownloadJobAndStatusRange(int downloadJobId, int statusFrom,
+                                                                    int statusTo);
+
 }

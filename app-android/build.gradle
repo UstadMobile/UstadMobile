@@ -214,8 +214,7 @@ android {
 
         manifestPlaceholders = [applicationClass: "android.app.Application"]
 
-        testInstrumentationRunnerArgument "notAnnotation", "com.ustadmobile.test.core.annotation.PeerServerRequiredTest"
-//        testInstrumentationRunnerArgument "annotation", "android.support.test.filters.MediumTest"
+        testInstrumentationRunnerArgument "notAnnotation", "com.ustadmobile.test.core.annotation.PeerServerRequiredTest,com.ustadmobile.test.core.annotation.ImplementationRequiredTest"
     }
 
     flavorDimensions "config"

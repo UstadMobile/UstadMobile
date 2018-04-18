@@ -18,6 +18,18 @@ This is a normal gradle build and should open fine with Android studio. It inclu
 
 ### To test
 
+#### Standalone tests
+
+To run the main tests (that don't depend on a second device for testing peer-to-peer functionality,
+it's a normal gradle task run. As the test app (but not the main app) with dependencies (e.g. Mockito)
+exceeds the 64K method limit, a variant has been made with multidex enabled, which is used only
+for testing and development purposes. The main app itself is well under the 64K method limit and uses
+the vanilla and localconfig build variants.
+
+ >$ ./gradlew connectedVanillamultidexDebugAndroidTest
+
+#### Peer to peer networked tests
+
 Network tests require bluetooth and wifi hardware with a running test slave server to 
 communicate with. If bluetooth or wifi are disabled tests requiring that functionality 
 will not run on Android.

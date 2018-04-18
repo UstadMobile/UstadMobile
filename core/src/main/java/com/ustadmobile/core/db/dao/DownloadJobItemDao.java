@@ -51,6 +51,10 @@ public abstract class DownloadJobItemDao {
     @UmQuery("SELECT id FROM DownloadJobItem WHERE downloadJobId = :downloadJobId")
     public abstract int[] findAllIdsByDownloadJob(int downloadJobId);
 
+    @UmQuery("SELECT * FROM DownloadJobItem WHERE downloadJobId = :downloadJobId AND status BETWEEN :statusFrom AND :statusTo LIMIT 1")
+    public abstract DownloadJobItem findByDownloadJobAndStatusRange(int downloadJobId, int statusFrom,
+                                                                       int statusTo);
+
 
 
 }

@@ -49,6 +49,7 @@ import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.lib.db.entities.HttpCachedEntry;
 import com.ustadmobile.test.core.ResourcesHttpdTestServer;
 import com.ustadmobile.test.core.UMTestUtil;
+import com.ustadmobile.test.core.annotation.ImplementationRequiredTest;
 import com.ustadmobile.test.core.impl.PlatformTestUtil;
 
 
@@ -76,8 +77,8 @@ import fi.iki.elonen.router.RouterNanoHTTPD;
  *
  * @author mike
  */
-public abstract class TestHttpCache {
-    
+@ImplementationRequiredTest
+public class TestHttpCache {
 
     private static RouterNanoHTTPD resourcesHttpd;
 

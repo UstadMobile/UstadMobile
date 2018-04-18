@@ -33,6 +33,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -58,10 +59,8 @@ public class TestDownloadTaskStandalone extends TestWithNetworkService {
      */
     @Test
     public void testRecursiveDownload(){
-        ArrayList<OpdsEntryWithRelations> entryList = new ArrayList<>();
         String storageDir = UstadMobileSystemImpl.getInstance().getStorageDirs(
                 CatalogPresenter.SHARED_RESOURCE, PlatformTestUtil.getTargetContext())[0].getDirURI();
-        NetworkManager networkManager = (NetworkManager)UstadMobileSystemImpl.getInstance().getNetworkManager();
         DbManager dbManager = DbManager.getInstance(PlatformTestUtil.getTargetContext());
 
         List<String> childEntries = dbManager.getOpdsEntryWithRelationsDao()
@@ -71,62 +70,20 @@ public class TestDownloadTaskStandalone extends TestWithNetworkService {
                     entryId);
         }
 
-        DownloadJob job = UstadMobileSystemImpl.getInstance().getNetworkManager().buildDownloadJob(
-                entryList, storageDir, false, true, true);
-        job.setMobileDataEnabled(true);
-        dbManager.getDownloadJobDao().update(job);
-
 
         String opdsRootIndexUrl = UMFileUtil.joinPaths(
                 ResourcesHttpdTestServer.getHttpRoot(), "com/ustadmobile/test/sharedse/crawlme/index.opds");
         CrawlJob crawlJob = new CrawlJob();
-        crawlJob.setContainersDownloadJobId(job.getId());
-        crawlJob.setCrawlJobId((int)dbManager.getCrawlJobDao().insert(crawlJob));
-        CrawlJobItem rootCrawlItem = new CrawlJobItem(crawlJob.getCrawlJobId(), opdsRootIndexUrl,
-                NetworkTask.STATUS_QUEUED, 0);
-        dbManager.getDownloadJobCrawlItemDao().insert(rootCrawlItem);
-
-
-        CrawlTask crawlTask = new CrawlTask(crawlJob, dbManager, networkManager);
-        UmLiveData<CrawlJobWithTotals> crawlJobLiveData = dbManager.getCrawlJobDao().findWithTotalsByIdLive(
-                crawlJob.getCrawlJobId());
+        crawlJob.setQueueDownloadJobOnDone(true);
+        DownloadJob downloadJob = new DownloadJob(System.currentTimeMillis());
+        downloadJob.setDestinationDir(storageDir);
         final Object lock = new Object();
-        UmObserver<CrawlJobWithTotals> crawlJobUmObserver = (crawlJobValue) -> {
-            if(crawlJobValue.getStatus() == NetworkTask.STATUS_COMPLETE){
-                synchronized (lock){
-                    try {lock.notifyAll(); }
-                    catch(Exception e){}
-                }
-            }
-        };
-        crawlTask.start();
-        crawlJobLiveData.observeForever(crawlJobUmObserver);
-        if(crawlJobLiveData.getValue() == null || crawlJobLiveData.getValue().getStatus() != NetworkTask.STATUS_COMPLETE) {
-            synchronized (lock){
-                try { lock.wait(10000);}
-                catch(InterruptedException e) {}
-            }
-        }
 
-        crawlJobLiveData.removeObserver(crawlJobUmObserver);
-
-        //now download the entries in the job
-        DownloadJobWithRelations jobWithRelations = dbManager.getDownloadJobDao().findById(job.getId());
-        DownloadTask downloadTask = new DownloadTask(jobWithRelations, networkManager);
-
-        UmLiveData<OpdsEntryStatusCache> dlStatus = dbManager.getOpdsEntryStatusCacheDao().
-                findByEntryIdLive(CRAWL_ROOT_ENTRY_ID);
-
-
-        final boolean[] receivedProgressUpdate = new boolean[1];
-        UmObserver<OpdsEntryStatusCache> statusUmObserver = (downloadStatus) -> {
-            if(downloadStatus.getContainersDownloadPendingIncAncestors() < downloadStatus.getSizeIncDescendants()) {
-                receivedProgressUpdate[0] = true;
-            }
-        };
+        crawlJob = UstadMobileSystemImpl.getInstance().getNetworkManager().prepareDownload(null,
+                Arrays.asList(opdsRootIndexUrl), downloadJob, crawlJob);
 
         UmLiveData<DownloadJobWithRelations> downloadJobLiveData = dbManager.getDownloadJobDao()
-                .getByIdLive(job.getId());
+                .getByIdLive(crawlJob.getContainersDownloadJobId());
         UmObserver<DownloadJobWithRelations> downloadJobObserver = (downloadJobLiveDataUpdate) -> {
             if (downloadJobLiveDataUpdate.getStatus() == NetworkTask.STATUS_COMPLETE) {
                 synchronized (lock) {
@@ -137,22 +94,24 @@ public class TestDownloadTaskStandalone extends TestWithNetworkService {
         };
         downloadJobLiveData.observeForever(downloadJobObserver);
 
-        dlStatus.observeForever(statusUmObserver);
-        downloadTask.start();
-
-        synchronized (lock){
-            try {lock.wait(120000);}
-            catch(InterruptedException e) {}
+        if(downloadJobLiveData.getValue() == null
+                || downloadJobLiveData.getValue().getStatus() != NetworkTask.STATUS_COMPLETE) {
+            synchronized (lock) {
+                try { lock.wait(120000); }
+                catch (InterruptedException e) { }
+            }
         }
 
-        DownloadJob completedJob =dbManager.getDownloadJobDao().findById(job.getId());
+        DownloadJob completedJob =dbManager.getDownloadJobDao().findById(crawlJob.getContainersDownloadJobId());
 
+        OpdsEntryStatusCache rootStatusCache = dbManager.getOpdsEntryStatusCacheDao()
+                .findByEntryId(CRAWL_ROOT_ENTRY_ID);
         Assert.assertEquals("Download job status reported as completed", NetworkTask.STATUS_COMPLETE,
                 completedJob.getStatus());
         Assert.assertEquals("Status shows all child entries downloaded",
-                dlStatus.getValue().getSizeIncDescendants(), dlStatus.getValue().getContainersDownloadedSizeIncDescendants());
+                rootStatusCache.getSizeIncDescendants(), rootStatusCache.getContainersDownloadedSizeIncDescendants());
         Assert.assertEquals("4 containers downloaded in total",4,
-                dlStatus.getValue().getContainersDownloadedIncDescendants());
+                rootStatusCache.getContainersDownloadedIncDescendants());
 
         //now delete them all. We need to rerun the find query, if these entries were unknown before they
         // would not have been discovered
@@ -163,7 +122,7 @@ public class TestDownloadTaskStandalone extends TestWithNetworkService {
         }
 
         //now make sure that the entries have been marked as deleted
-        OpdsEntryStatusCache rootStatusCache = dbManager.getOpdsEntryStatusCacheDao()
+        rootStatusCache = dbManager.getOpdsEntryStatusCacheDao()
                 .findByEntryId(CRAWL_ROOT_ENTRY_ID);
         Assert.assertEquals("After entries are deleted, 0 entries are marked as being downloaded",
                 0, rootStatusCache.getContainersDownloadedIncDescendants());
