@@ -5,11 +5,9 @@ import android.arch.persistence.room.Dao;
 import android.arch.persistence.room.Insert;
 import android.arch.persistence.room.Query;
 import android.arch.persistence.room.Transaction;
-import android.arch.persistence.room.Update;
 
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.dao.OpdsEntryStatusCacheDao;
-import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.db.entities.ContainerFile;
 import com.ustadmobile.lib.db.entities.OpdsEntryStatusCache;
 
@@ -51,8 +49,9 @@ public abstract class OpdsEntryStatusCacheDaoAndroid extends OpdsEntryStatusCach
 
     @Override
     @Query("SELECT OpdsEntryStatusCache.* FROM OpdsEntryStatusCache " +
-            "            LEFT JOIN DownloadJobItem ON DownloadJobItem.entryId = OpdsEntryStatusCache.statusEntryId " +
-            "            WHERE DownloadJobItem.id = :downloadJobItemId")
+            "            LEFT JOIN DownloadSetItem ON DownloadSetItem.entryId = OpdsEntryStatusCache.statusEntryId " +
+            "            LEFT JOIN DownloadJobItem ON DownloadSetItem.id = DownloadJobItem.downloadSetItemId " +
+            "            WHERE DownloadJobItem.downloadJobItemId = :downloadJobItemId")
     public abstract OpdsEntryStatusCache findByDownloadJobItemId(int downloadJobItemId);
 
     @Override
@@ -100,13 +99,14 @@ public abstract class OpdsEntryStatusCacheDaoAndroid extends OpdsEntryStatusCach
     @Override
     @Query("Update OpdsEntryStatusCache " +
             "SET " +
-            "sizeIncDescendants = sizeIncDescendants+ (" +
+            "sizeIncDescendants = sizeIncDescendants + (" +
             "SELECT " +
                 "(DownloadJobItem.downloadLength - OpdsEntryStatusCache.entrySize) AS deltaTotalSize " +
                 "FROM " +
-                "DownloadJobItem LEFT JOIN OpdsEntryStatusCache ON DownloadJobItem.entryId = OpdsEntryStatusCache.statusEntryId " +
+                "DownloadJobItem LEFT JOIN DownloadSetItem ON DownloadJobItem.downloadSetItemId = DownloadSetItem.id " +
+                "LEFT JOIN OpdsEntryStatusCache ON DownloadSetItem.entryId = OpdsEntryStatusCache.statusEntryId " +
                 "WHERE " +
-                "DownloadJobItem.id = :downloadJobId " +
+                "DownloadJobItem.downloadJobItemId = :downloadJobId " +
             ")," +
             "containersDownloadPendingIncAncestors = containersDownloadPendingIncAncestors + :deltaContainersDownloadPending " +
             "WHERE statusCacheUid IN " +
@@ -116,7 +116,7 @@ public abstract class OpdsEntryStatusCacheDaoAndroid extends OpdsEntryStatusCach
     @Override
     @Query("Update OpdsEntryStatusCache " +
             "SET " +
-            "entrySize = (SELECT downloadLength FROM DownloadJobItem WHERE id = :downloadJobId), " +
+            "entrySize = (SELECT downloadLength FROM DownloadJobItem WHERE downloadJobItemId= :downloadJobId), " +
             "entryContainerDownloadPending = 1 " +
             " WHERE statusCacheUid = :statusCacheUid")
     protected abstract void updateOnDownloadJobItemQueuedEntry(int statusCacheUid, int downloadJobId);
@@ -130,14 +130,14 @@ public abstract class OpdsEntryStatusCacheDaoAndroid extends OpdsEntryStatusCach
     @Query("Update OpdsEntryStatusCache " +
             "SET " +
             "pendingDownloadBytesSoFarIncDescendants= pendingDownloadBytesSoFarIncDescendants + (" +
-            "(SELECT downloadedSoFar FROM DownloadJobItem WHERE id = :downloadJobItemId) - " +
+            "(SELECT downloadedSoFar FROM DownloadJobItem WHERE downloadJobItemId = :downloadJobItemId) - " +
             "(SELECT entryPendingDownloadBytesSoFar FROM OpdsEntryStatusCache WHERE statusCacheUid = :entryStatusCacheId))" +
             "WHERE statusCacheUid IN " +
             "(SELECT ancestorOpdsEntryStatusCacheId FROM OpdsEntryStatusCacheAncestor WHERE opdsEntryStatusCacheId = :entryStatusCacheId)")
     public abstract void updateActiveBytesDownloadedSoFarIncAncestors(int entryStatusCacheId, int downloadJobItemId);
 
     @Query("UPDATE OpdsEntryStatusCache " +
-            "SET entryPendingDownloadBytesSoFar = (SELECT downloadedSoFar FROM DownloadJobItem WHERE id = :downloadJobItemId) " +
+            "SET entryPendingDownloadBytesSoFar = (SELECT downloadedSoFar FROM DownloadJobItem WHERE downloadJobItemId = :downloadJobItemId) " +
             "WHERE statusCacheUid = :entryStatusCacheId")
     public abstract void updateActiveBytesDownloadedSoFarEntry(int entryStatusCacheId, int downloadJobItemId);
 
@@ -181,7 +181,7 @@ public abstract class OpdsEntryStatusCacheDaoAndroid extends OpdsEntryStatusCach
                                                              boolean containerDownloaded,
                                                              long entrySize);
 
-    @Query("SELECT * From OpdsEntryStatusCache " +
+    @Query("SELECT OpdsEntryStatusCache.* FROM OpdsEntryStatusCache " +
             "LEFT JOIN ContainerFileEntry ON OpdsEntryStatusCache.statusEntryId = ContainerFileEntry.containerEntryId " +
             "WHERE " +
             "OpdsEntryStatusCache.statusEntryId IN (:entryIdsToCheck) " +

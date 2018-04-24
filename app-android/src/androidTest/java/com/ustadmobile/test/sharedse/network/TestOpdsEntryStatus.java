@@ -9,6 +9,8 @@ import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.lib.db.entities.ContainerFile;
 import com.ustadmobile.lib.db.entities.DownloadJob;
 import com.ustadmobile.lib.db.entities.DownloadJobItem;
+import com.ustadmobile.lib.db.entities.DownloadSet;
+import com.ustadmobile.lib.db.entities.DownloadSetItem;
 import com.ustadmobile.lib.db.entities.OpdsEntry;
 import com.ustadmobile.lib.db.entities.OpdsEntryStatusCache;
 import com.ustadmobile.lib.db.entities.OpdsEntryParentToChildJoin;
@@ -58,12 +60,16 @@ public class TestOpdsEntryStatus {
         List<OpdsEntry> entryList = new ArrayList<>();
         List<OpdsEntryWithRelations> entryWithRelationsList = new ArrayList<>();
         List<OpdsLink> linkList = new ArrayList<>();
+        List<DownloadSetItem> setItemList = new ArrayList<>();
         List<DownloadJobItem> jobItemList = new ArrayList<>();
         List<OpdsEntryParentToChildJoin> parentToChildJoins = new ArrayList<>();
 
-        DownloadJob downloadJob = new DownloadJob(System.currentTimeMillis());
+        DownloadSet downloadSet = new DownloadSet();
+        downloadSet.setId((int)dbManager.getDownloadSetDao().insert(downloadSet));
+        DownloadJob downloadJob = new DownloadJob(downloadSet, System.currentTimeMillis());
         downloadJob.setStatus(0);
-        downloadJob.setId((int)dbManager.getDownloadJobDao().insert(downloadJob));
+        downloadJob.setDownloadJobId((int)dbManager.getDownloadJobDao().insert(downloadJob));
+
 
 
         OpdsEntryWithRelations subsectionParent = new OpdsEntryWithRelations(UmUuidUtil.encodeUuidWithAscii85(UUID.randomUUID()),
@@ -79,15 +85,19 @@ public class TestOpdsEntryStatus {
             newEntryLink.setLength(ENTRY_SIZE_LINK_LENGTH);
             OpdsEntryParentToChildJoin join = new OpdsEntryParentToChildJoin(subsectionParent.getUuid(),
                     newEntry.getUuid(), i);
-            DownloadJobItem downloadJobItem = new DownloadJobItem(newEntry, downloadJob);
-            downloadJobItem.setDownloadLength(ENTRY_SIZE_DOWNLOAD_LENGTH);
+            DownloadSetItem downloadSetItem = new DownloadSetItem(newEntry, downloadSet);
+            downloadSetItem.setId((int)dbManager.getDownloadSetItemDao().insert(downloadSetItem));
 
+            DownloadJobItem downloadJobItem = new DownloadJobItem(downloadSetItem.getId(),
+                    downloadJob.getDownloadJobId());
+            downloadJobItem.setDownloadLength(ENTRY_SIZE_DOWNLOAD_LENGTH);
 
             entryList.add(newEntry);
             entryWithRelationsList.add(newEntry);
             newEntry.setLinks(Arrays.asList(newEntryLink));
             linkList.add(newEntryLink);
             parentToChildJoins.add(join);
+            setItemList.add(downloadSetItem);
             jobItemList.add(downloadJobItem);
         }
 
@@ -106,11 +116,12 @@ public class TestOpdsEntryStatus {
 
         //now mark a download as in progress
         dbManager.getDownloadJobItemDao().insertList(jobItemList);
-        dbManager.getDownloadJobDao().updateJobStatus(downloadJob.getId(), NetworkTask.STATUS_RUNNING);
+        dbManager.getDownloadJobDao().updateJobStatus(downloadJob.getDownloadJobId(),
+                NetworkTask.STATUS_RUNNING);
 
 
-        for(DownloadJobItem jobItem : dbManager.getDownloadJobItemDao().findAllByDownloadJob(downloadJob.getId())) {
-            dbManager.getOpdsEntryStatusCacheDao().handleDownloadJobQueued(jobItem.getId());
+        for(DownloadJobItem jobItem : dbManager.getDownloadJobItemDao().findAllByDownloadJobId(downloadJob.getDownloadJobId())) {
+            dbManager.getOpdsEntryStatusCacheDao().handleDownloadJobQueued(jobItem.getDownloadJobItemId());
         }
 
         status = dbManager.getOpdsEntryStatusCacheDao().findByEntryId(subsectionParent.getEntryId());
@@ -122,16 +133,16 @@ public class TestOpdsEntryStatus {
         jobItemList.get(0).setStatus(NetworkTask.STATUS_RUNNING);
         jobItemList.get(0).setDownloadedSoFar(500);
         int jobItemId = dbManager.getDownloadJobItemDao().findDownloadJobItemByEntryIdAndStatusRange(
-                jobItemList.get(0).getEntryId(), 0, NetworkTask.STATUS_COMPLETE).get(0)
-                .getDownloadJobId();
-        jobItemList.get(0).setId(jobItemId);
+                setItemList.get(0).getEntryId(), 0, NetworkTask.STATUS_COMPLETE).get(0)
+                .getDownloadJobItemId();
+        jobItemList.get(0).setDownloadJobItemId(jobItemId);
         int statusCacheUid = dbManager.getOpdsEntryStatusCacheDao().findUidByEntryId(
-                jobItemList.get(0).getEntryId());
+                setItemList.get(0).getEntryId());
         dbManager.getDownloadJobItemDao().updateDownloadJobItemStatus(jobItemList.get(0));
 
 
         dbManager.getOpdsEntryStatusCacheDao().handleDownloadJobProgress(statusCacheUid,
-                jobItemList.get(0).getDownloadJobId());
+                jobItemList.get(0).getDownloadJobItemId());
 
         status = dbManager.getOpdsEntryStatusCacheDao().findByEntryId(subsectionParent.getEntryId());
         Assert.assertEquals("When download progress is logged on a child entry, that is reflected on the parent",
@@ -156,11 +167,11 @@ public class TestOpdsEntryStatus {
 
         //For the second entry - set it as in progress downloading, and then test what happens if the download is aborted
         int jobItemId2 = dbManager.getDownloadJobItemDao().findDownloadJobItemByEntryIdAndStatusRange(
-                jobItemList.get(1).getEntryId(), 0, NetworkTask.STATUS_COMPLETE).get(0)
-                .getDownloadJobId();
+                setItemList.get(1).getEntryId(), 0, NetworkTask.STATUS_COMPLETE).get(0)
+                .getDownloadJobItemId();
         int statusCacheUid2 = dbManager.getOpdsEntryStatusCacheDao().findUidByEntryId(
-                jobItemList.get(1).getEntryId());
-        jobItemList.get(1).setId(jobItemId2);
+                setItemList.get(1).getEntryId());
+        jobItemList.get(1).setDownloadJobItemId(jobItemId2);
 
         jobItemList.get(1).setStatus(NetworkTask.STATUS_RUNNING);
         jobItemList.get(1).setDownloadedSoFar(500);
@@ -172,7 +183,7 @@ public class TestOpdsEntryStatus {
                 500, status.getPendingDownloadBytesSoFarIncDescendants());
 
         OpdsEntryStatusCache abortedEntryStatusCache = dbManager.getOpdsEntryStatusCacheDao()
-                .findByEntryId(jobItemList.get(1).getEntryId());
+                .findByEntryId(setItemList.get(1).getEntryId());
         //mark the download as aborted
         dbManager.getOpdsEntryStatusCacheDao().handleContainerDownloadAborted(abortedEntryStatusCache);
         status = dbManager.getOpdsEntryStatusCacheDao().findByEntryId(subsectionParent.getEntryId());
@@ -189,6 +200,7 @@ public class TestOpdsEntryStatus {
         OpdsAtomFeedRepository repo = dbManager.getOpdsAtomFeedRepository();
         final Object loadLock = new Object();
         final Object observerLock = new Object();
+        final boolean[] entryLoaded = new boolean[1];
 
         UmLiveData<OpdsEntryWithRelations> parentLiveData = repo.getEntryByUrl(
                 UMFileUtil.joinPaths(ResourcesHttpdTestServer.getHttpRoot(),
@@ -197,6 +209,7 @@ public class TestOpdsEntryStatus {
                     @Override
                     public void onDone(OpdsEntry item) {
                         synchronized (loadLock){
+                            entryLoaded[0] = true;
                             loadLock.notifyAll();
                         }
                     }
@@ -235,10 +248,13 @@ public class TestOpdsEntryStatus {
 
         Assert.assertNotNull("Parent loaded", parentLiveData.getValue());
 
-        synchronized (loadLock) {
-            try { loadLock.wait(100000); }
-            catch(InterruptedException e) {}
+        if(!entryLoaded[0]) {
+            synchronized (loadLock) {
+                try { loadLock.wait(100000); }
+                catch(InterruptedException e) {}
+            }
         }
+
         OpdsEntryStatusCache statusCache = dbManager.getOpdsEntryStatusCacheDao()
                 .findByEntryId(parentLiveData.getValue().getEntryId());
         Assert.assertNotNull("Parent has status cache value", statusCache);

@@ -4,7 +4,7 @@ import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UmResultCallback;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.lib.db.entities.CrawlJob;
-import com.ustadmobile.lib.db.entities.DownloadJob;
+import com.ustadmobile.lib.db.entities.DownloadSet;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
 
 import java.util.List;
@@ -37,11 +37,11 @@ public interface NetworkManagerCore {
 
     long requestAcquisition(UstadJSOPDSFeed feed, boolean localNetworkEnabled, boolean wifiDirectEnabled);
 
-    DownloadJob buildDownloadJob(List<OpdsEntryWithRelations> rootEntries, String destinationDir,
+    DownloadSet buildDownloadJob(List<OpdsEntryWithRelations> rootEntries, String destinationDir,
                                  boolean recursive);
 
     @Deprecated
-    DownloadJob buildDownloadJob(List<OpdsEntryWithRelations> rootEntries,
+    DownloadSet buildDownloadJob(List<OpdsEntryWithRelations> rootEntries,
                                  String destintionDir,
                                  boolean recursive, boolean wifiDirectEnabled,
                                  boolean localWifiEnabled);
@@ -49,7 +49,7 @@ public interface NetworkManagerCore {
     @Deprecated
     void buildDownloadJobAsync(List<OpdsEntryWithRelations> rootEntries, String destintionDir,
                                boolean recursive, boolean wifiDirectEnabled,
-                               boolean localWifiEnabled, UmCallback<DownloadJob> callback);
+                               boolean localWifiEnabled, UmCallback<DownloadSet> callback);
 
 
     /**
@@ -57,11 +57,6 @@ public interface NetworkManagerCore {
      * catalogs recursively and making HTTP HEAD requests where needed to determine the download size
      * of each entry.
      *
-     * @param rootEntries A list of root OPDS entries that should be crawled to discover containers
-     *                    to download. These can be entries with containers to acquire themselves or
-     *                    subsections. Can be null if entries are supplied by uri instead.
-     * @param rootUris A list of uris that should be crawled to discover contains to download. These
-     *                 must be OPDS Atom XML files, NOT container URLs themselves,
      * @param downloadJob The Download Job that is to be prepared. This should have the destination
      *                    dir set. It should NOT have been inserted into the database yet.
      * @param crawlJob The Crawl Job that will prepare this download. This should be used to set any
@@ -69,9 +64,12 @@ public interface NetworkManagerCore {
      *                 not etc).
      * @return The CrawlJob object as per the crawlJob argument, that is then executing to build the
      *          download job.
+     *
+     *          TODO: Remove this signature - from now on each downloadset has only one root entry
      */
-    CrawlJob prepareDownload(List<OpdsEntryWithRelations> rootEntries, List<String> rootUris,
-                             DownloadJob downloadJob, CrawlJob crawlJob);
+    CrawlJob prepareDownload(DownloadSet downloadJob, CrawlJob crawlJob);
+
+
 
     /**
      * Prepare for a DownloadJob to run. The preparation is mutli-threaded and includes crawling
@@ -80,11 +78,6 @@ public interface NetworkManagerCore {
      *
      * This is the asynchronous equivalent of prepareDownload
      *
-     * @param rootEntries A list of root OPDS entries that should be crawled to discover containers
-     *                    to download. These can be entries with containers to acquire themselves or
-     *                    subsections. Can be null if entries are supplied by uri instead.
-     * @param rootUris A list of uris that should be crawled to discover contains to download. These
-     *                 must be OPDS Atom XML files, NOT container URLs themselves,
      * @param downloadJob The Download Job that is to be prepared. This should have the destination
      *                    dir set. It should NOT have been inserted into the database yet.
      * @param crawlJob The Crawl Job that will prepare this download. This should be used to set any
@@ -95,8 +88,7 @@ public interface NetworkManagerCore {
      * @return The CrawlJob object as per the crawlJob argument, that is then executing to build the
      *          download job.
      */
-    void prepareDownloadAsync(List<OpdsEntryWithRelations> rootEntries, List<String> rootUris,
-                              DownloadJob downloadJob, CrawlJob crawlJob, UmResultCallback<CrawlJob> resultCallback);
+    void prepareDownloadAsync(DownloadSet downloadJob, CrawlJob crawlJob, UmResultCallback<CrawlJob> resultCallback);
 
     void queueDownloadJob(int downloadJobId);
 

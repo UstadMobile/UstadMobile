@@ -1,6 +1,7 @@
 package com.ustadmobile.port.sharedse.networkmanager;
 
 import com.ustadmobile.core.db.DbManager;
+import com.ustadmobile.core.db.dao.DownloadSetItemDao;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.impl.http.UmHttpRequest;
@@ -10,6 +11,7 @@ import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.lib.db.entities.CrawlJobItem;
 import com.ustadmobile.lib.db.entities.CrawlJob;
 import com.ustadmobile.lib.db.entities.DownloadJobItem;
+import com.ustadmobile.lib.db.entities.DownloadSetItem;
 import com.ustadmobile.lib.db.entities.OpdsEntry;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
 import com.ustadmobile.lib.db.entities.OpdsLink;
@@ -38,6 +40,8 @@ public class CrawlTask extends NetworkTask {
 
     private AtomicInteger crawlWorkerAtomicInteger = new AtomicInteger();
 
+    private int containerDownloadSetId;
+
 
     public CrawlTask(CrawlJob crawlJob, DbManager dbManager, NetworkManager networkManager) {
         super(networkManager);
@@ -50,6 +54,8 @@ public class CrawlTask extends NetworkTask {
     public void start() {
         UstadMobileSystemImpl.l(UMLog.INFO, 0, mkLogPrefix() + " starting");
         dbManager.getCrawlJobDao().setStatusById(crawlJob.getCrawlJobId(), STATUS_RUNNING);
+        containerDownloadSetId = dbManager.getDownloadJobDao().findDownloadSetId(
+                crawlJob.getContainersDownloadJobId());
         for(int i = 0; i < CRAWL_NUM_THREADS; i++) {
             DownloadCrawlWorker worker = new DownloadCrawlWorker();
             crawlWorkers.add(worker);
@@ -78,10 +84,11 @@ public class CrawlTask extends NetworkTask {
         public void run() {
             UstadMobileSystemImpl.l(UMLog.INFO, 0, mkWorkerLogPrefix() + " run started");
             final DbManager dbManager = DbManager.getInstance(networkManager.getContext());
+            final DownloadSetItemDao downloadSetItemDao = dbManager.getDownloadSetItemDao();
             CrawlJobItem item;
             while((item = dbManager.getDownloadJobCrawlItemDao().findNextItemAndUpdateStatus(crawlJob.getCrawlJobId(), STATUS_RUNNING))
                     != null) {
-                OpdsEntryWithRelations itemEntry;
+                OpdsEntryWithRelations itemEntry = null;
 
                 List<OpdsEntryWithRelations> allItems = new ArrayList<>();
                 List<DownloadJobItem> downloadJobItems = new ArrayList<>();
@@ -99,7 +106,7 @@ public class CrawlTask extends NetworkTask {
                                 " add child " + childEntries.size() + " item(s) from opds uuid: " +
                                 itemEntry.getUuid());
                     }
-                }else if(item.getUri().startsWith("http://") || item.getUri().startsWith("https://")) {
+                }else if(item.getUri() != null && item.getUri().startsWith("http://") || item.getUri().startsWith("https://")) {
                     UstadMobileSystemImpl.l(UMLog.INFO, 0, mkWorkerLogPrefix() + " load " +
                             item.getUri());
                     itemEntry = dbManager.getOpdsAtomFeedRepository().getEntryByUrlStatic(
@@ -121,14 +128,22 @@ public class CrawlTask extends NetworkTask {
                 for(OpdsEntryWithRelations entry : allItems) {
                     OpdsLink opdsLink = entry.getAcquisitionLink(null, false);
                     if(crawlJob.getContainersDownloadJobId() != -1 && opdsLink != null) {
+                        //see if there is an existing DownloadSetItem for this entry
+                        DownloadSetItem downloadSetItem = dbManager.getDownloadSetItemDao()
+                                .findByEntryId(entry.getEntryId(), containerDownloadSetId);
+                        if(downloadSetItem == null){
+                            downloadSetItem = new DownloadSetItem(entry, containerDownloadSetId);
+                            downloadSetItem.setId((int)downloadSetItemDao.insert(downloadSetItem));
+                        }
+
                         //add this as an item that needs to be downloaded - downloadjobitem
-                        DownloadJobItem jobItem = new DownloadJobItem(entry,
+                        DownloadJobItem jobItem = new DownloadJobItem(downloadSetItem.getId(),
                                 crawlJob.getContainersDownloadJobId());
                         if(opdsLink.getLength() > 0){
                             jobItem.setDownloadLength(opdsLink.getLength());
                         }else {
                             try {
-                                String acquisitionUrl = UMFileUtil.resolveLink(item.getUri(),
+                                String acquisitionUrl = UMFileUtil.resolveLink(itemEntry.getUrl(),
                                         opdsLink.getHref());
                                 UmHttpRequest request = new UmHttpRequest(dbManager.getContext(),
                                         acquisitionUrl);
@@ -153,7 +168,8 @@ public class CrawlTask extends NetworkTask {
                             null, null, false, false, false, 0);
 
                     for(OpdsLink subLink : subsectionLinks) {
-                        String linkPath = UMFileUtil.resolveLink(item.getUri(), subLink.getHref());
+                        String baseUrl = entry.getUrl() != null ? entry.getUrl() : itemEntry.getUrl();
+                        String linkPath = UMFileUtil.resolveLink(baseUrl, subLink.getHref());
                         CrawlJobItem crawlItem = new CrawlJobItem(
                                 item.getDownloadJobId(), linkPath, NetworkTask.STATUS_QUEUED,
                                 item.getDepth() + 1);

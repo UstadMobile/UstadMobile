@@ -6,20 +6,13 @@ import com.ustadmobile.core.db.DbManager;
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.dao.CrawlJobWithTotals;
 import com.ustadmobile.core.impl.UMStorageDir;
-import com.ustadmobile.core.impl.UmResultCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMFileUtil;
-import com.ustadmobile.lib.db.entities.CrawlJob;
-import com.ustadmobile.lib.db.entities.DownloadJob;
-import com.ustadmobile.lib.db.entities.DownloadJobWithRelations;
 import com.ustadmobile.lib.db.entities.DownloadJobWithTotals;
-import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
+import com.ustadmobile.lib.db.entities.DownloadSet;
 import com.ustadmobile.port.sharedse.view.StartDownloadView;
-import com.ustadmobile.core.networkmanager.NetworkTask;
-import com.ustadmobile.lib.db.entities.CrawlJobItem;
 import com.ustadmobile.port.sharedse.networkmanager.CrawlTask;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Hashtable;
 
@@ -49,16 +42,18 @@ public class StartDownloadPresenter extends UstadBaseController<StartDownloadVie
 
     public void onCreate(Hashtable savedState) {
         CrawlJobWithTotals crawlJob = new CrawlJobWithTotals();
-        DownloadJobWithRelations downloadJob = new DownloadJobWithRelations(System.currentTimeMillis());
+        DownloadSet downloadSet = new DownloadSet();
         UMStorageDir[] storageDirs = UstadMobileSystemImpl.getInstance().getStorageDirs(
                 CatalogPresenter.SHARED_RESOURCE, getContext());
-        downloadJob.setDestinationDir(storageDirs[0].getDirURI());
+        downloadSet.setDestinationDir(storageDirs[0].getDirURI());
         
         dbManager = DbManager.getInstance(getContext());
 
         String[] rootUris = (String[])getArguments().get(ARG_ROOT_URIS);
-        UstadMobileSystemImpl.getInstance().getNetworkManager().prepareDownloadAsync(null,
-                Arrays.asList(rootUris), downloadJob, crawlJob, (insertedCrawlJob) -> {
+        crawlJob.setRootEntryUri(rootUris[0]);
+
+        UstadMobileSystemImpl.getInstance().getNetworkManager().prepareDownloadAsync(downloadSet,
+                crawlJob, (insertedCrawlJob) -> {
                     crawlJobId =insertedCrawlJob.getCrawlJobId();
                     downloadJobId = insertedCrawlJob.getContainersDownloadJobId();
                     crawlJobLiveData = dbManager.getCrawlJobDao().findWithTotalsByIdLive(insertedCrawlJob.getCrawlJobId());

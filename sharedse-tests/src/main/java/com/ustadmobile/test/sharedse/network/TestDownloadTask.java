@@ -1,6 +1,5 @@
 package com.ustadmobile.test.sharedse.network;
 
-import com.ustadmobile.core.controller.CatalogEntryInfo;
 import com.ustadmobile.core.controller.CatalogPresenter;
 import com.ustadmobile.core.db.DbManager;
 import com.ustadmobile.core.db.UmLiveData;
@@ -8,26 +7,19 @@ import com.ustadmobile.core.db.UmObserver;
 import com.ustadmobile.core.db.dao.DownloadJobItemHistoryDao;
 import com.ustadmobile.core.fs.db.ContainerFileHelper;
 import com.ustadmobile.core.impl.UMLog;
-import com.ustadmobile.core.impl.UMStorageDir;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMFileUtil;
-import com.ustadmobile.lib.db.entities.ContainerFileEntry;
 import com.ustadmobile.lib.db.entities.ContainerFileEntryWithContainerFile;
-import com.ustadmobile.lib.db.entities.ContainerFileWithRelations;
+import com.ustadmobile.lib.db.entities.CrawlJob;
 import com.ustadmobile.lib.db.entities.DownloadJob;
 import com.ustadmobile.lib.db.entities.DownloadJobItem;
+import com.ustadmobile.lib.db.entities.DownloadSet;
 import com.ustadmobile.lib.db.entities.DownloadJobItemHistory;
-import com.ustadmobile.lib.db.entities.DownloadJobWithRelations;
 import com.ustadmobile.lib.db.entities.EntryStatusResponseWithNode;
-import com.ustadmobile.lib.db.entities.OpdsEntry;
-import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
-import com.ustadmobile.lib.db.entities.OpdsLink;
-import com.ustadmobile.lib.util.UmUuidUtil;
 import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
 import com.ustadmobile.port.sharedse.networkmanager.DownloadTask;
 import com.ustadmobile.port.sharedse.networkmanager.LocalMirrorFinder;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
-import com.ustadmobile.core.networkmanager.NetworkManagerListener;
 import com.ustadmobile.lib.db.entities.NetworkNode;
 import com.ustadmobile.core.networkmanager.NetworkTask;
 import com.ustadmobile.test.core.annotation.PeerServerRequiredTest;
@@ -43,19 +35,14 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
-import java.util.UUID;
 
 import fi.iki.elonen.router.RouterNanoHTTPD;
 
@@ -70,6 +57,8 @@ import static org.mockito.AdditionalMatchers.gt;
  */
 @PeerServerRequiredTest
 public class TestDownloadTask {
+
+    private static final int CRAWLJOB_TIMEOUT = 20000;
 
     private static final int DEFAULT_ACQUIRE_TIMEOUT = 120000;//default acquire timeout: 2mins
 
@@ -98,8 +87,9 @@ public class TestDownloadTask {
 
     @BeforeClass
     public static void stopAllOtherDownloads() {
-        DbManager.getInstance(PlatformTestUtil.getTargetContext()).getDownloadJobDao()
-                .updateJobStatusByRange(0, 20, NetworkTask.STATUS_STOPPED);
+//        TODO: Update this test
+//        DbManager.getInstance(PlatformTestUtil.getTargetContext()).getDownloadSetDao()
+//                .updateJobStatusByRange(0, 20, NetworkTask.STATUS_STOPPED);
     }
 
     @AfterClass
@@ -129,11 +119,14 @@ public class TestDownloadTask {
         ContainerFileHelper.getInstance().deleteAllContainerFilesByEntryId(PlatformTestUtil.getTargetContext(),
                 ENTRY_ID_NOT_PRESENT);
 
-        DownloadJob job = makeDownloadJob(manager, wifiDirectEnabled, localNetworkEnabled);
-        UmLiveData<DownloadJobWithRelations> jobLiveData = dbManager.getDownloadJobDao().getByIdLive(
-                job.getId());
+        CrawlJob crawlJob = makeDownloadJob(manager, wifiDirectEnabled, localNetworkEnabled);
 
-        UmObserver<DownloadJobWithRelations> observer = (downloadJob) -> {
+        waitForCrawlJob(crawlJob, PlatformTestUtil.getTargetContext());
+
+        UmLiveData<DownloadJob> jobLiveData = dbManager.getDownloadJobDao().getByIdLive(
+                crawlJob.getContainersDownloadJobId());
+
+        UmObserver<DownloadJob> observer = (downloadJob) -> {
             synchronized (acquireLock) {
                 if(downloadJob != null && downloadJob.getStatus() > 20) {
                     acquireLock.notifyAll();
@@ -143,7 +136,7 @@ public class TestDownloadTask {
 
         jobLiveData.observeForever(observer);
 
-        manager.queueDownloadJob(job.getId());
+        manager.queueDownloadJob(crawlJob.getContainersDownloadJobId());
         synchronized (acquireLock){
             acquireLock.wait(acquireTimeout);
         }
@@ -153,11 +146,16 @@ public class TestDownloadTask {
 
         jobLiveData.removeObserver(observer);
 
-        DownloadJobItem presentJobItem = jobLiveData.getValue().getJobItemByEntryId(ENTRY_ID_PRESENT);
-        List<DownloadJobItemHistory> presentJobHistoryList = dbManager.getDownloadJobItemHistoryDao()
-                .findHistoryItemsByDownloadJobItem(presentJobItem.getId());
+//        DownloadSetItem presentJobItem = jobLiveData.getValue().getJobItemByEntryId(ENTRY_ID_PRESENT);
+        DownloadJobItem presentJobItem = dbManager.getDownloadJobItemDao()
+                .findLastFinishedJobItem(ENTRY_ID_PRESENT);
 
-        UstadMobileSystemImpl.l(UMLog.DEBUG, 646, "Test job id = " + job.getId());
+
+        List<DownloadJobItemHistory> presentJobHistoryList = dbManager.getDownloadJobItemHistoryDao()
+                .findHistoryItemsByDownloadJobItem(presentJobItem.getDownloadJobItemId());
+
+        UstadMobileSystemImpl.l(UMLog.DEBUG, 646, "Test job id = " +
+                crawlJob.getContainersDownloadJobId());
         DownloadJobItemHistory lastHistoryItem = presentJobHistoryList.get(presentJobHistoryList.size()-1);
         Assert.assertEquals("Last history entry was downloaded from expected network", expectedLocalDownloadMode,
                 lastHistoryItem.getMode());
@@ -188,42 +186,48 @@ public class TestDownloadTask {
         testAcquisition(remoteNode, mirrorFinder, localNetworkEnabled, wifiDirectEnabled, expectedLocalDownloadMode, DEFAULT_ACQUIRE_TIMEOUT);
     }
 
-    private static DownloadJob makeDownloadJob(NetworkManager manager, boolean wifiDirectDownloadEnabled,
+    private static CrawlJob makeDownloadJob(NetworkManager manager, boolean wifiDirectDownloadEnabled,
                                                boolean lanDownloadEnabled) throws XmlPullParserException, IOException{
         //Create a Download Job manually - just insert the OpdsEntries and Links, then make the job.
         String catalogUrl = UMFileUtil.joinPaths(httpRoot,
                 "com/ustadmobile/test/sharedse/test-acquisition-task-feed.opds");
 
-        OpdsEntryWithRelations entry1 = new OpdsEntryWithRelations();
-        entry1.setUuid(UmUuidUtil.encodeUuidWithAscii85(UUID.randomUUID()));
-        entry1.setEntryId(ENTRY_ID_PRESENT);
-        entry1.setTitle("The Little Chicks");
-        entry1.setUrl(catalogUrl);
-        OpdsLink acquireLink1 = new OpdsLink(entry1.getUuid(), "application/epub+zip",
-                "thelittlechicks.epub?speedLimit=128000", OpdsEntry.LINK_REL_ACQUIRE);
-        entry1.setLinks(Arrays.asList(acquireLink1));
-
-
-        OpdsEntryWithRelations entry2 = new OpdsEntryWithRelations();
-        entry2.setUuid(UmUuidUtil.encodeUuidWithAscii85(UUID.randomUUID()));
-        entry2.setEntryId(ENTRY_ID_NOT_PRESENT);
-        entry2.setTitle("I come from a cloud");
-        entry2.setUrl(catalogUrl);
-        OpdsLink acquireLink2 = new OpdsLink(entry2.getUuid(), "application/epub+zip",
-                "icomefromacloud.epub?speedLimit=128000", OpdsEntry.LINK_REL_ACQUIRE);
-        entry2.setLinks(Arrays.asList(acquireLink2));
-
-
-        DbManager dbManager = DbManager.getInstance(PlatformTestUtil.getTargetContext());
-        dbManager.getOpdsLinkDao().insert(Arrays.asList(acquireLink1, acquireLink2));
-        dbManager.getOpdsEntryDao().insertList(Arrays.asList((OpdsEntry)entry1, entry2));
-
-
         String storageDir = UstadMobileSystemImpl.getInstance().getStorageDirs(
                 CatalogPresenter.SHARED_RESOURCE, PlatformTestUtil.getTargetContext())[0].getDirURI();
-        DownloadJob job = manager.buildDownloadJob(Arrays.asList(entry1, entry2), storageDir, false,
-                wifiDirectDownloadEnabled, lanDownloadEnabled);
-        return job;
+
+        CrawlJob crawlJob = new CrawlJob();
+        crawlJob.setRootEntryUri(catalogUrl);
+        DownloadSet downloadSet = new DownloadSet();
+        downloadSet.setLanDownloadEnabled(lanDownloadEnabled);
+        downloadSet.setWifiDirectDownloadEnabled(wifiDirectDownloadEnabled);
+        downloadSet.setDestinationDir(storageDir);
+        crawlJob = UstadMobileSystemImpl.getInstance().getNetworkManager().prepareDownload(downloadSet,
+                crawlJob);
+
+        return crawlJob;
+    }
+
+
+    private static void waitForCrawlJob(CrawlJob crawlJob, Object context){
+        final Object lockObject = new Object();
+        UmLiveData<CrawlJob> crawlJobLiveData = DbManager.getInstance(context).getCrawlJobDao()
+                .findByIdLive(crawlJob.getCrawlJobId());
+
+        UmObserver<CrawlJob> crawlJobObserver = (crawlJobLive) -> {
+            if(crawlJobLive != null && crawlJobLive.getStatus() >= NetworkTask.STATUS_COMPLETE_MIN) {
+                synchronized (lockObject){
+                    lockObject.notifyAll();
+                }
+            }
+        };
+
+        crawlJobLiveData.observeForever(crawlJobObserver);
+        synchronized (lockObject) {
+            try { lockObject.wait(CRAWLJOB_TIMEOUT);}
+            catch(InterruptedException e) {}
+        }
+
+        crawlJobLiveData.removeObserver(crawlJobObserver);
     }
 
 

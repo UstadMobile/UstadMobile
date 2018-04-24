@@ -9,31 +9,28 @@ import android.arch.persistence.room.Update;
 
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.dao.DownloadJobDao;
-import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.db.entities.DownloadJob;
-import com.ustadmobile.lib.db.entities.DownloadJobWithRelations;
+import com.ustadmobile.lib.db.entities.DownloadJobWithDownloadSet;
 import com.ustadmobile.lib.db.entities.DownloadJobWithTotals;
 
-/**
- * Created by mike on 2/2/18.
- */
 @Dao
 public abstract class DownloadJobDaoAndroid extends DownloadJobDao {
 
-    @Override
     @Insert
-    public abstract long insert(DownloadJob job);
+    public abstract long insert(DownloadJob jobRun);
 
     @Override
-    @Query("Update DownloadJob SET status = :status, timeRequested = :timeRequested WHERE id = :id")
-    public abstract long queueDownload(int id, int status, long timeRequested);
+    @Query("Update DownloadJob SET status = :status, timeRequested = :timeRequested WHERE downloadJobId = :id")
+    public abstract void queueDownload(int id, int status, long timeRequested);
 
     @Override
-    @Query("SELECT * FROM DownloadJob WHERE status > 0 AND status <= 10 ORDER BY timeRequested LIMIT 1")
-    protected abstract DownloadJobWithRelations findNextDownloadJob();
+    @Query("SELECT * FROM DownloadJob " +
+            "LEFT JOIN DownloadSet on DownloadJob.downloadSetId = DownloadSet.id " +
+            "WHERE status > 0 AND status <= 10 ORDER BY timeRequested LIMIT 1")
+    protected abstract DownloadJobWithDownloadSet findNextDownloadJob();
 
     @Override
-    @Query("UPDATE DownloadJob SET status = :status WHERE id = :jobId")
+    @Query("UPDATE DownloadJob  SET status = :status WHERE downloadJobId = :jobId")
     public abstract long updateJobStatus(int jobId, int status);
 
     @Override
@@ -41,37 +38,43 @@ public abstract class DownloadJobDaoAndroid extends DownloadJobDao {
     public abstract void updateJobStatusByRange(int rangeFrom, int rangeTo, int setTo);
 
     @Transaction
-    public DownloadJobWithRelations findNextDownloadJobAndSetStartingStatus(){
+    public DownloadJobWithDownloadSet findNextDownloadJobAndSetStartingStatus(){
         return super.findNextDownloadJobAndSetStartingStatus();
     }
 
     @Override
-    public UmLiveData<DownloadJobWithRelations> getByIdLive(int id) {
+    public UmLiveData<DownloadJob> getByIdLive(int id) {
         return new UmLiveDataAndroid<>(getByIdLiveR(id));
     }
 
+    @Query("SELECT * From DownloadJob WHERE downloadJobId = :id")
+    public abstract LiveData<DownloadJob> getByIdLiveR(int id);
+
+
     @Override
     @Update
-    public abstract void update(DownloadJob job);
-
-    @Query("SELECT * From DownloadJob WHERE id = :id")
-    public abstract LiveData<DownloadJobWithRelations> getByIdLiveR(int id);
-
-    @Query("SELECT * FROM DownloadJob WHERE id = :id")
-    public abstract DownloadJobWithRelations findById(int id);
+    public abstract void update(DownloadJob jobRun);
 
     @Override
-    @Query("SELECT * FROM DownloadJob ORDER BY timeCreated DESC LIMIT 1")
-    public abstract DownloadJobWithRelations findLastCreated();
+    @Query("SELECT * From DownloadJob WHERE downloadJobId = :id")
+    public abstract DownloadJob findById(int id);
 
-    @Query("SELECT DownloadJob.*, " +
-            " (SELECT COUNT(*) FROM DownloadJobItem WHERE DownloadJobItem.downloadJobId = DownloadJob.id) AS numJobItems, " +
-            " (SELECT SUM(DownloadJobItem.downloadLength) FROM DownloadJobItem WHERE DownloadJobItem.downloadJobId = DownloadJob.id) AS totalDownloadSize " +
-            " FROM DownloadJob Where DownloadJob.id= :id")
-    public abstract LiveData<DownloadJobWithTotals> findByIdWithTotals_Room(int id);
+    @Override
+    @Query("SELECT downloadSetId FROM DownloadJob WHERE downloadJobId = :downloadJobId")
+    public abstract int findDownloadSetId(int downloadJobId);
 
     @Override
     public UmLiveData<DownloadJobWithTotals> findByIdWithTotals(int id) {
         return new UmLiveDataAndroid<>(findByIdWithTotals_Room(id));
     }
+
+    @Query("SELECT DownloadJob.*, " +
+            " (SELECT COUNT(*) FROM DownloadJobItem WHERE DownloadJobItem.downloadJobId = DownloadJob.downloadJobId) AS numJobItems, " +
+            " (SELECT SUM(DownloadJobItem.downloadLength) FROM DownloadJobItem WHERE DownloadJobItem.downloadJobId = DownloadJob.downloadJobId) AS totalDownloadSize " +
+            " FROM DownloadJob Where DownloadJob.downloadJobId = :id")
+    public abstract LiveData<DownloadJobWithTotals> findByIdWithTotals_Room(int id);
+
+    @Override
+    @Query("SELECT * FROM DownloadJob ORDER BY timeCreated DESC LIMIT 1")
+    public abstract DownloadJob findLastCreatedDownloadJob();
 }

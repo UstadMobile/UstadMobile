@@ -10,6 +10,8 @@ import com.ustadmobile.core.db.dao.CrawJoblItemDao;
 import com.ustadmobile.core.db.dao.CrawlJobDao;
 import com.ustadmobile.core.db.dao.DownloadJobDao;
 import com.ustadmobile.core.db.dao.DownloadJobItemDao;
+import com.ustadmobile.core.db.dao.DownloadSetDao;
+import com.ustadmobile.core.db.dao.DownloadSetItemDao;
 import com.ustadmobile.core.db.dao.DownloadJobItemHistoryDao;
 import com.ustadmobile.core.db.dao.EntryStatusResponseDao;
 import com.ustadmobile.core.db.dao.HttpCachedEntryDao;
@@ -121,8 +123,8 @@ public class DbManagerAndroid extends DbManager {
     }
 
     @Override
-    public DownloadJobDao getDownloadJobDao() {
-        return appDatabase.getDownloadJobDao();
+    public DownloadSetDao getDownloadSetDao() {
+        return appDatabase.getDownloadSetDao();
     }
 
     @Override
@@ -131,8 +133,8 @@ public class DbManagerAndroid extends DbManager {
     }
 
     @Override
-    public DownloadJobItemDao getDownloadJobItemDao() {
-        return appDatabase.getDownloadJobItemDao();
+    public DownloadSetItemDao getDownloadSetItemDao() {
+        return appDatabase.getDownloadSetItemDao();
     }
 
     @Override
@@ -162,5 +164,15 @@ public class DbManagerAndroid extends DbManager {
     @Override
     public HttpCachedEntryDao getHttpCachedEntryDao() {
         return appDatabase.getHttpCachedEnrtyDao();
+    }
+
+    @Override
+    public DownloadJobDao getDownloadJobDao() {
+        return appDatabase.getDownloadJobDao();
+    }
+
+    @Override
+    public DownloadJobItemDao getDownloadJobItemDao() {
+        return appDatabase.getDownloadJobItemDao();
     }
 }

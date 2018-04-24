@@ -5,7 +5,6 @@ import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.db.entities.ContainerFile;
-import com.ustadmobile.lib.db.entities.DownloadJobItem;
 import com.ustadmobile.lib.db.entities.OpdsEntryAncestor;
 import com.ustadmobile.lib.db.entities.OpdsEntryStatusCache;
 import com.ustadmobile.lib.db.entities.OpdsEntryStatusCacheAncestor;
@@ -88,8 +87,9 @@ public abstract class OpdsEntryStatusCacheDao {
      * @return OpdsEntryStatusCache associated with the given download job item, or null if it doesn't exist
      */
     @UmQuery("SELECT OpdsEntryStatusCache.* FROM OpdsEntryStatusCache " +
-            "            LEFT JOIN DownloadJobItem ON DownloadJobItem.entryId = OpdsEntryStatusCache.statusEntryId " +
-            "            WHERE DownloadJobItem.id = :downloadJobItemId")
+            "            LEFT JOIN DownloadSetItem ON DownloadSetItem.entryId = OpdsEntryStatusCache.statusEntryId " +
+            "            LEFT JOIN DownloadJobItem ON DownloadSetItem.id = DownloadJobItem.downloadSetItemId " +
+            "            WHERE DownloadJobItem.downloadJobItemId = :downloadJobItemId")
     public abstract OpdsEntryStatusCache findByDownloadJobItemId(int downloadJobItemId);
 
 
@@ -174,9 +174,7 @@ public abstract class OpdsEntryStatusCacheDao {
             loadedEntry = loadedEntries.get(i);
             currentStatusCache = entryStatusCacheMap.get(loadedEntry.getEntryId());
 
-//            oldEntry = oldEntries != null ? oldEntries.get(i) : null;
             OpdsLink loadedLink = loadedEntry.getAcquisitionLink(null, true);
-//            OpdsLink oldEntryLink = (oldEntry != null) ? oldEntry.getAcquisitionLink(null, false) : null;
 
             int deltaTotalSize = 0;
             int deltaNumEntriesWithContainer = 0;
@@ -285,9 +283,10 @@ public abstract class OpdsEntryStatusCacheDao {
             "SELECT " +
             "(DownloadJobItem.downloadLength - OpdsEntryStatusCache.entrySize) AS deltaTotalSize " +
             "FROM " +
-            "DownloadJobItem LEFT JOIN OpdsEntryStatusCache ON DownloadJobItem.entryId = OpdsEntryStatusCache.statusEntryId " +
+            "DownloadJobItem LEFT JOIN DownloadSetItem ON DownloadJobItem.downloadSetItemId = DownloadSetItem.id " +
+            "LEFT JOIN OpdsEntryStatusCache ON DownloadSetItem.entryId = OpdsEntryStatusCache.statusEntryId " +
             "WHERE " +
-            "DownloadJobItem.id = :downloadJobId " +
+            "DownloadSetItem.id = :downloadJobId " +
             ")," +
             "containersDownloadPendingIncAncestors = containersDownloadPendingIncAncestors + :deltaContainersDownloadPending " +
             "WHERE statusCacheUid IN " +
@@ -321,14 +320,14 @@ public abstract class OpdsEntryStatusCacheDao {
     @UmQuery("Update OpdsEntryStatusCache " +
             "SET " +
             "pendingDownloadBytesSoFarIncDescendants= pendingDownloadBytesSoFarIncDescendants + (" +
-            "(SELECT downloadedSoFar FROM DownloadJobItem WHERE id = :downloadJobItemId) - " +
+            "(SELECT downloadedSoFar FROM DownloadJobItem WHERE downloadJobItemId = :downloadJobItemId) - " +
             "(SELECT entryPendingDownloadBytesSoFar FROM OpdsEntryStatusCache WHERE statusCacheUid = :entryStatusCacheId))" +
             "WHERE statusCacheUid IN " +
             "(SELECT ancestorOpdsEntryStatusCacheId FROM OpdsEntryStatusCacheAncestor WHERE opdsEntryStatusCacheId = :entryStatusCacheId)")
     protected abstract void updateActiveBytesDownloadedSoFarIncAncestors(int entryStatusCacheId, int downloadJobItemId);
 
     @UmQuery("UPDATE OpdsEntryStatusCache " +
-            "SET entryPendingDownloadBytesSoFar = (SELECT downloadedSoFar FROM DownloadJobItem WHERE id = :downloadJobItemId) " +
+            "SET entryPendingDownloadBytesSoFar = (SELECT downloadedSoFar FROM DownloadJobItem WHERE downloadJobItemId = :downloadJobItemId) " +
             "WHERE statusCacheUid = :entryStatusCacheId")
     protected abstract void updateActiveBytesDownloadedSoFarEntry(int entryStatusCacheId, int downloadJobItemId);
 
@@ -526,7 +525,5 @@ public abstract class OpdsEntryStatusCacheDao {
                 entryStatusCache.getEntryContainerDownloadedSize(), entryStatusCache.isEntryContainerDownloaded(),
                 deltaSize);
     }
-
-
 
 }

@@ -4,13 +4,18 @@ import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 
 /**
- * Created by mike on 3/6/18.
+ * Represents a CrawlJob - where the app needs to walk through all the child entries of a given
+ * OPDSEntry. This can be used for indexing and to prepare for a download.
  */
 @UmEntity
 public class CrawlJob {
 
     @UmPrimaryKey(autoIncrement = true)
     private Integer crawlJobId;
+
+    private String rootEntryUri;
+
+    private String rootEntryUuid;
 
     private int status;
 
@@ -20,18 +25,38 @@ public class CrawlJob {
 
     private boolean queueDownloadJobOnDone = false;
 
+    /**
+     * Getter for the crawlJobId property
+     *
+     * @return The crawlJobId (primary key)
+     */
     public Integer getCrawlJobId() {
         return crawlJobId;
     }
 
+    /**
+     * Setter for the crawlJobId property
+     *
+     * @param crawlJobId The crawlJobId (primary key)
+     */
     public void setCrawlJobId(Integer crawlJobId) {
         this.crawlJobId = crawlJobId;
     }
 
+    /**
+     * Get the status of the CrawlJob
+     *
+     * @return The status of the CrawlJob, as an integer flag as per NetworkTask.STATUS flags
+     */
     public int getStatus() {
         return status;
     }
 
+    /**
+     * Set the status of the CrawlJob
+     *
+     * @param status The status of the CrawlJob, as an integer flag as per NetworkTask.STATUS flags
+     */
     public void setStatus(int status) {
         this.status = status;
     }
@@ -90,5 +115,45 @@ public class CrawlJob {
      */
     public void setQueueDownloadJobOnDone(boolean queueDownloadJobOnDone) {
         this.queueDownloadJobOnDone = queueDownloadJobOnDone;
+    }
+
+    /**
+     * Get the root entry URI from which the crawl should begin. Can be null if the root entry UUID
+     * is specified.
+     *
+     * @return The root entry URI from which the crawl should begin
+     */
+    public String getRootEntryUri() {
+        return rootEntryUri;
+    }
+
+    /**
+     * Set the root entry URI from which the crawl should begin. Can be null if the root entry UUID
+     * is specified.
+     *
+     * @param rootEntryUri The root entry URI from which the crawl should begin
+     */
+    public void setRootEntryUri(String rootEntryUri) {
+        this.rootEntryUri = rootEntryUri;
+    }
+
+    /**
+     * Get the root entry OPDS uuid from which the crawl should begin. If null, the rootEntryUri
+     * must not be null, that uri will be loaded, and the URI will be set accordingly.
+     *
+     * @return The root entry OPDS uuid
+     */
+    public String getRootEntryUuid() {
+        return rootEntryUuid;
+    }
+
+    /**
+     * Set the root entry OPDS uuid from which the crawl should begin. If null, the rootEntryUri
+     * must not be null, that uri will be loaded, and the URI will be set accordingly.
+     *
+     * @param rootEntryUuid The root entry OPDS uuid
+     */
+    public void setRootEntryUuid(String rootEntryUuid) {
+        this.rootEntryUuid = rootEntryUuid;
     }
 }

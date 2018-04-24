@@ -11,7 +11,7 @@ import android.support.test.rule.ServiceTestRule;
 import com.ustadmobile.core.db.DbManager;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMFileUtil;
-import com.ustadmobile.lib.db.entities.DownloadJobWithRelations;
+import com.ustadmobile.lib.db.entities.DownloadJob;
 import com.ustadmobile.port.android.netwokmanager.NetworkServiceAndroid;
 import com.ustadmobile.port.sharedse.controller.StartDownloadPresenter;
 import com.ustadmobile.port.sharedse.view.StartDownloadView;
@@ -24,10 +24,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 
 import java.io.IOException;
 import java.util.Hashtable;
@@ -126,9 +123,11 @@ public class TestStartDownloadPresenter {
 
 
         //test when we click download a download job is started
+        //TODO: Update this
         presenter.handleClickDownload();
-        DownloadJobWithRelations createdJob = DbManager.getInstance(PlatformTestUtil.getTargetContext())
-                .getDownloadJobDao().findLastCreated();
+
+        DownloadJob createdJob = DbManager.getInstance(PlatformTestUtil.getTargetContext())
+                .getDownloadJobDao().findLastCreatedDownloadJob();
         Assert.assertTrue("Download job was created after start of this test",
                 createdJob.getTimeCreated() > startTime);
 

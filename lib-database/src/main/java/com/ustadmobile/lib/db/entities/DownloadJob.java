@@ -4,19 +4,18 @@ import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 
 /**
- * Created by mike on 1/26/18.
+ * A DownloadJob represents a specific run of downloading a DownloadSet. The DownloadSet contains
+ * the list of entries that are to be downloaded. One DownloadSet can have multiple DownloadJobs, e.g.
+ * one DownloadJob that initially downloads it, and then further DownloadJobs when it is updated, when
+ * new entries become available, etc.
  */
-
 @UmEntity
 public class DownloadJob {
 
     @UmPrimaryKey(autoIncrement = true)
-    private int id;
+    private int downloadJobId;
 
-    /**
-     * Status as per flags on NetworkTask
-     */
-    private int status;
+    private int downloadSetId;
 
     private long timeCreated;
 
@@ -24,129 +23,137 @@ public class DownloadJob {
 
     private long timeCompleted;
 
-    private String destinationDir;
+    /**
+     * Status as per flags on NetworkTask
+     */
+    private int status;
 
-    private boolean wifiDirectDownloadEnabled;
 
-    private boolean lanDownloadEnabled;
-
-    private boolean mobileDataEnabled = true;
-
+    /**
+     * Empty constructor
+     */
     public DownloadJob(){
 
     }
 
-    public DownloadJob(long timeCreated) {
-        this.timeCreated = timeCreated;
+    /**
+     * Constructor
+     *
+     * @param downloadSet The DownloadSet that this DownloadJob is related to
+     * @param timeRequested The time to mark as the timeRequested (in ms)
+     */
+    public DownloadJob(DownloadSet downloadSet, long timeRequested){
+        this.downloadSetId = downloadSet.getId();
+        this.timeRequested = timeRequested;
+        this.timeCreated = System.currentTimeMillis();
     }
 
 
-    public int getId() {
-        return id;
+    /**
+     * Getter for downloadJobId property
+     *
+     * @return The DownloadJobId (primary key)
+     */
+    public int getDownloadJobId() {
+        return downloadJobId;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    /**
+     * Setter for downloadJobId property
+     *
+     * @param downloadJobId The DownloadJobId (primary key)
+     */
+    public void setDownloadJobId(int downloadJobId) {
+        this.downloadJobId = downloadJobId;
     }
 
-    public int getStatus() {
-        return status;
+    /**
+     * Getter for the downloadSetId proeprty
+     *
+     * @return The id (primary key) of the related DownloadSet
+     */
+    public int getDownloadSetId() {
+        return downloadSetId;
     }
 
-    public void setStatus(int status) {
-        this.status = status;
+    /**
+     * Setter for the downloadSetId property
+     *
+     * @param downloadSetId The id (primary key) of the related DownloadSet
+     */
+    public void setDownloadSetId(int downloadSetId) {
+        this.downloadSetId = downloadSetId;
     }
 
+    /**
+     * Getter for the timeCreated property
+     *
+     * @return The time this downloadJob was created (in ms)
+     */
     public long getTimeCreated() {
         return timeCreated;
     }
 
+    /**
+     * Setter for the timeCreated property
+     *
+     * @param timeCreated The time this downloadJob was created (in ms)
+     */
     public void setTimeCreated(long timeCreated) {
         this.timeCreated = timeCreated;
     }
 
+    /**
+     * Getter for the timeRequested property
+     *
+     * @return The time this download was requested (e.g. queued)
+     */
     public long getTimeRequested() {
         return timeRequested;
     }
 
+    /**
+     * Setter for the timeRequested property
+     *
+     * @param timeRequested The time this download was requested (e.g. queued)
+     */
     public void setTimeRequested(long timeRequested) {
         this.timeRequested = timeRequested;
     }
 
+    /**
+     * Getter for the timeCompleted property
+     *
+     * @return The time this DownloadJob was completed (in ms)
+     */
     public long getTimeCompleted() {
         return timeCompleted;
     }
 
+    /**
+     * Setter for the timeCompleted property
+     *
+     * @param timeCompleted The time this DownloadJob was completed (in ms)
+     */
     public void setTimeCompleted(long timeCompleted) {
         this.timeCompleted = timeCompleted;
     }
 
-    public String getDestinationDir() {
-        return destinationDir;
-    }
-
-    public void setDestinationDir(String destinationDir) {
-        this.destinationDir = destinationDir;
+    /**
+     * Getter for the status property
+     *
+     * @return The status of this DownloadJob as per the NetworkTask status flags
+     */
+    public int getStatus() {
+        return status;
     }
 
     /**
-     * If enabled the task will attempt to acquire the requested entries from another node using
-     * wifi direct. The node will be contacted using bluetooth and then a wifi group connection
-     * will be created.
+     * Setter for the status property
      *
-     * @return boolean: True if enabled, false otherwise
+     * @param status The status of this DownloadJob as per the NetworkTask status flags
      */
-    public boolean isWifiDirectDownloadEnabled() {
-        return wifiDirectDownloadEnabled;
-    }
-
-    public void setWifiDirectDownloadEnabled(boolean wifiDirectDownloadEnabled) {
-        this.wifiDirectDownloadEnabled = wifiDirectDownloadEnabled;
-    }
-
-    /**
-     * If enabled the task will attempt to acquire the requested entries from another node on the same
-     * wifi network directly (nodes discovered using Network Service Discovery - NSD).
-     *
-     * @return boolean: True if enabled, false otherwise
-     */
-    public boolean isLanDownloadEnabled() {
-        return lanDownloadEnabled;
-    }
-
-    public void setLanDownloadEnabled(boolean lanDownloadEnabled) {
-        this.lanDownloadEnabled = lanDownloadEnabled;
-    }
-
-    public boolean isMobileDataEnabled() {
-        return mobileDataEnabled;
-    }
-
-    public void setMobileDataEnabled(boolean mobileDataEnabled) {
-        this.mobileDataEnabled = mobileDataEnabled;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof DownloadJob)) return false;
-
-        DownloadJob that = (DownloadJob) o;
-
-        if (id != that.id) return false;
-        if (status != that.status) return false;
-        if (timeRequested != that.timeRequested) return false;
-        if (timeCompleted != that.timeCompleted) return false;
-        return destinationDir.equals(that.destinationDir);
-    }
-
-    @Override
-    public int hashCode() {
-        int result = id;
-        result = 31 * result + status;
-        result = 31 * result + (int) (timeRequested ^ (timeRequested >>> 32));
-        result = 31 * result + (int) (timeCompleted ^ (timeCompleted >>> 32));
-        result = 31 * result + destinationDir.hashCode();
-        return result;
+    public void setStatus(int status) {
+        this.status = status;
     }
 }

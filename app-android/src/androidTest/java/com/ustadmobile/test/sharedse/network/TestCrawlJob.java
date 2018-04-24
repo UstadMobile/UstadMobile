@@ -18,14 +18,10 @@ import com.ustadmobile.core.db.dao.CrawlJobWithTotals;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.networkmanager.NetworkTask;
 import com.ustadmobile.core.util.UMFileUtil;
-import com.ustadmobile.lib.db.entities.CrawlJobItem;
 import com.ustadmobile.lib.db.entities.CrawlJob;
-import com.ustadmobile.lib.db.entities.DownloadJob;
 import com.ustadmobile.lib.db.entities.DownloadJobItem;
-import com.ustadmobile.lib.db.entities.DownloadJobWithRelations;
-import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
+import com.ustadmobile.lib.db.entities.DownloadSet;
 import com.ustadmobile.port.android.netwokmanager.NetworkServiceAndroid;
-import com.ustadmobile.port.sharedse.networkmanager.CrawlTask;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
 import com.ustadmobile.test.core.impl.ClassResourcesResponder;
 import com.ustadmobile.test.core.impl.PlatformTestUtil;
@@ -37,7 +33,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 import fi.iki.elonen.router.RouterNanoHTTPD;
@@ -105,27 +100,21 @@ public class TestCrawlJob {
 
     @Test
     public void testCrawl() {
-        ArrayList<OpdsEntryWithRelations> entryList = new ArrayList<>();
+        String opdsRootIndexUrl = UMFileUtil.joinPaths(
+                "http://localhost:" + resourcesHttpd.getListeningPort(),
+                "res/com/ustadmobile/test/sharedse/crawlme/index.opds");
+
         String storageDir = UstadMobileSystemImpl.getInstance().getStorageDirs(
                 CatalogPresenter.SHARED_RESOURCE, PlatformTestUtil.getTargetContext())[0].getDirURI();
         NetworkManager networkManager = (NetworkManager)UstadMobileSystemImpl.getInstance().getNetworkManager();
         DbManager dbManager = DbManager.getInstance(PlatformTestUtil.getTargetContext());
 
-        DownloadJob job = UstadMobileSystemImpl.getInstance().getNetworkManager().buildDownloadJob(
-                entryList, storageDir, false, true, true);
-
-        DownloadJobWithRelations jobWithRelations = dbManager.getDownloadJobDao().findById(job.getId());
-        String opdsRootIndexUrl = UMFileUtil.joinPaths(
-                "http://localhost:" + resourcesHttpd.getListeningPort(),
-                "res/com/ustadmobile/test/sharedse/crawlme/index.opds");
+        DownloadSet set = new DownloadSet();
+        set.setDestinationDir(storageDir);
         CrawlJob crawlJob = new CrawlJob();
-        crawlJob.setContainersDownloadJobId(job.getId());
-        crawlJob.setCrawlJobId((int)dbManager.getCrawlJobDao().insert(crawlJob));
+        crawlJob.setRootEntryUri(opdsRootIndexUrl);
+        crawlJob = UstadMobileSystemImpl.getInstance().getNetworkManager().prepareDownload(set, crawlJob);
 
-        CrawlJobItem rootCrawlItem = new CrawlJobItem(crawlJob.getCrawlJobId(), opdsRootIndexUrl,
-                NetworkTask.STATUS_QUEUED, 0);
-        dbManager.getDownloadJobCrawlItemDao().insert(rootCrawlItem);
-        CrawlTask crawlTask = new CrawlTask(crawlJob, dbManager, networkManager);
         UmLiveData<CrawlJobWithTotals> crawlJobLiveData = dbManager.getCrawlJobDao().findWithTotalsByIdLive(
                 crawlJob.getCrawlJobId());
         Object crawlLock = new Object();
@@ -138,7 +127,6 @@ public class TestCrawlJob {
             }
         };
         crawlJobLiveData.observeForever(crawlJobUmObserver);
-        crawlTask.start();
 
         if(crawlJobLiveData.getValue() == null
                 || crawlJobLiveData.getValue().getStatus() != NetworkTask.STATUS_COMPLETE){
@@ -154,17 +142,15 @@ public class TestCrawlJob {
         Assert.assertEquals("Crawl job has three items", 3,
                 crawlJobLiveData.getValue().getNumItems());
 
-        List<DownloadJobItem> downloadJobItems = dbManager.getDownloadJobItemDao()
-                .findAllByDownloadJob(job.getId());
+        List<DownloadJobItem> downloadJobItems = dbManager.getDownloadJobItemDao().
+                findAllByDownloadJobId(crawlJob.getContainersDownloadJobId());
         for(DownloadJobItem item : downloadJobItems) {
-            Assert.assertTrue("Job Item :" + item.getEntryId() + " has size found > 0",
+            Assert.assertTrue("Job Item #" + item.getDownloadJobItemId() + " has size found > 0",
                     item.getDownloadLength() > 0);
         }
 
         Assert.assertEquals("All three crawl job items are completed", 3,
                 crawlJobLiveData.getValue().getNumItemsCompleted());
-
-
     }
 
 

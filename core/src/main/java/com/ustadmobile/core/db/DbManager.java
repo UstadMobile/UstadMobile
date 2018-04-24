@@ -3,7 +3,6 @@ package com.ustadmobile.core.db;
 import com.ustadmobile.core.db.dao.*;
 import com.ustadmobile.core.db.dao.OpdsLinkDao;
 import com.ustadmobile.core.db.impl.DbManagerFactory;
-import com.ustadmobile.lib.db.entities.HttpCachedEntry;
 
 
 /**
@@ -46,6 +45,10 @@ public abstract class DbManager {
     public abstract NetworkNodeDao getNetworkNodeDao();
 
     public abstract EntryStatusResponseDao getEntryStatusResponseDao();
+
+    public abstract DownloadSetDao getDownloadSetDao();
+
+    public abstract DownloadSetItemDao getDownloadSetItemDao();
 
     public abstract DownloadJobDao getDownloadJobDao();
 

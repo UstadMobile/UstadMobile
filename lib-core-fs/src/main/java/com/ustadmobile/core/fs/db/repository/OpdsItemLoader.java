@@ -105,8 +105,6 @@ public class OpdsItemLoader implements Runnable, OpdsEntry.OpdsItemLoadCallback 
             insertItemToLoad();
 
 
-//        OpdsEntryWithRelations previousEntry = dbManager.getOpdsEntryWithRelationsDao()
-//                .findFirstByEntryIdStatic(entry.getEntryId());
         String previousEntryUuid = dbManager.getOpdsEntryWithRelationsDao()
                 .findUuidByEntryIdAndParentUrl(entry.getEntryId(), url);
 

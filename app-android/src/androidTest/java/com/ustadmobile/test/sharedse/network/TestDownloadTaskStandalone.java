@@ -8,20 +8,14 @@ import com.ustadmobile.core.controller.CatalogPresenter;
 import com.ustadmobile.core.db.DbManager;
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.UmObserver;
-import com.ustadmobile.core.db.dao.CrawlJobWithTotals;
 import com.ustadmobile.core.fs.db.ContainerFileHelper;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.networkmanager.NetworkTask;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.lib.db.entities.CrawlJob;
-import com.ustadmobile.lib.db.entities.CrawlJobItem;
 import com.ustadmobile.lib.db.entities.DownloadJob;
-import com.ustadmobile.lib.db.entities.DownloadJobWithRelations;
+import com.ustadmobile.lib.db.entities.DownloadSet;
 import com.ustadmobile.lib.db.entities.OpdsEntryStatusCache;
-import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
-import com.ustadmobile.port.sharedse.networkmanager.CrawlTask;
-import com.ustadmobile.port.sharedse.networkmanager.DownloadTask;
-import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
 import com.ustadmobile.test.core.ResourcesHttpdTestServer;
 import com.ustadmobile.test.core.annotation.UmMediumTest;
 import com.ustadmobile.test.core.impl.PlatformTestUtil;
@@ -32,8 +26,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -74,17 +66,18 @@ public class TestDownloadTaskStandalone extends TestWithNetworkService {
         String opdsRootIndexUrl = UMFileUtil.joinPaths(
                 ResourcesHttpdTestServer.getHttpRoot(), "com/ustadmobile/test/sharedse/crawlme/index.opds");
         CrawlJob crawlJob = new CrawlJob();
+        crawlJob.setRootEntryUri(opdsRootIndexUrl);
         crawlJob.setQueueDownloadJobOnDone(true);
-        DownloadJob downloadJob = new DownloadJob(System.currentTimeMillis());
+        DownloadSet downloadJob = new DownloadSet();
         downloadJob.setDestinationDir(storageDir);
         final Object lock = new Object();
 
-        crawlJob = UstadMobileSystemImpl.getInstance().getNetworkManager().prepareDownload(null,
-                Arrays.asList(opdsRootIndexUrl), downloadJob, crawlJob);
+        crawlJob = UstadMobileSystemImpl.getInstance().getNetworkManager().prepareDownload(downloadJob,
+                crawlJob);
 
-        UmLiveData<DownloadJobWithRelations> downloadJobLiveData = dbManager.getDownloadJobDao()
+        UmLiveData<DownloadJob> downloadJobLiveData = dbManager.getDownloadJobDao()
                 .getByIdLive(crawlJob.getContainersDownloadJobId());
-        UmObserver<DownloadJobWithRelations> downloadJobObserver = (downloadJobLiveDataUpdate) -> {
+        UmObserver<DownloadJob> downloadJobObserver = (downloadJobLiveDataUpdate) -> {
             if (downloadJobLiveDataUpdate.getStatus() == NetworkTask.STATUS_COMPLETE) {
                 synchronized (lock) {
                     try { lock.notifyAll();}

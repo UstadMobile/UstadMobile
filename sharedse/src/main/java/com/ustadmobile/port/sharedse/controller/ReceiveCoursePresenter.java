@@ -6,12 +6,10 @@ import com.ustadmobile.core.db.DbManager;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.core.networkmanager.NetworkManagerCore;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.view.AppView;
-import com.ustadmobile.lib.db.entities.DownloadJob;
+import com.ustadmobile.lib.db.entities.DownloadSet;
 import com.ustadmobile.lib.db.entities.NetworkNode;
-import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.lib.db.entities.OpdsEntry;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithChildEntries;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
@@ -25,10 +23,7 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-
-import static com.ustadmobile.port.sharedse.networkmanager.NetworkManager.SHARED_FEED_PORT;
 
 /**
  * Created by mike on 8/22/17.
@@ -174,7 +169,7 @@ public class ReceiveCoursePresenter extends UstadBaseController implements WifiP
             DbManager.getInstance(getContext()).getOpdsEntryDao().insertList(
                     OpdsEntryWithRelations.toOpdsEntryList(sharedFeed.getChildEntries()));
 
-            DownloadJob job = networkManager.buildDownloadJob(sharedFeed.getChildEntries(), destinationDir,
+            DownloadSet job = networkManager.buildDownloadJob(sharedFeed.getChildEntries(), destinationDir,
                     false);
             networkManager.queueDownloadJob(job.getId());
         }).start();

@@ -7,9 +7,12 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.networkmanager.AcquisitionTaskHistoryEntry;
 import com.ustadmobile.core.networkmanager.NetworkManagerListener;
 import com.ustadmobile.core.networkmanager.NetworkManagerTaskListener;
+import com.ustadmobile.lib.db.entities.DownloadJob;
 import com.ustadmobile.lib.db.entities.DownloadJobItem;
+import com.ustadmobile.lib.db.entities.DownloadJobItemWithDownloadSetItem;
+import com.ustadmobile.lib.db.entities.DownloadJobWithDownloadSet;
+import com.ustadmobile.lib.db.entities.DownloadSetItem;
 import com.ustadmobile.lib.db.entities.DownloadJobItemHistory;
-import com.ustadmobile.lib.db.entities.DownloadJobWithRelations;
 import com.ustadmobile.lib.db.entities.EntryStatusResponseWithNode;
 import com.ustadmobile.lib.db.entities.NetworkNode;
 import com.ustadmobile.core.networkmanager.NetworkTask;
@@ -58,17 +61,15 @@ import static com.ustadmobile.port.sharedse.networkmanager.NetworkManager.NOTIFI
 public class DownloadTask extends NetworkTask implements BluetoothConnectionHandler,NetworkManagerListener{
 
 
-    private DownloadJobWithRelations downloadJob;
+    private DownloadJobWithDownloadSet downloadJob;
 
-    private DownloadJobItem currentDownloadJobItem;
+    private DownloadJobItemWithDownloadSetItem currentDownloadJobItem;
 
     private int currentEntryStatusCacheId;
 
     protected NetworkManagerTaskListener listener;
 
     private static final int DOWNLOAD_TASK_UPDATE_TIME=500;
-
-    private int currentEntryIdIndex;
 
     private String currentGroupIPAddress;
 
@@ -189,7 +190,7 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
                 mDbManager.getDownloadJobItemDao().updateDownloadJobItemStatus(currentDownloadJobItem);
 
                 mDbManager.getOpdsEntryStatusCacheDao().handleDownloadJobProgress(
-                        currentEntryStatusCacheId, currentDownloadJobItem.getId());
+                        currentEntryStatusCacheId, currentDownloadJobItem.getDownloadJobItemId());
             }
         }
     }
@@ -212,7 +213,7 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
      * @param downloadJob downloadJob
      * @param networkManager NetworkManager reference which handle all network operations.
      */
-    public DownloadTask(DownloadJobWithRelations downloadJob, NetworkManager networkManager){
+    public DownloadTask(DownloadJobWithDownloadSet downloadJob, NetworkManager networkManager){
         super(networkManager);
         mDbManager = DbManager.getInstance(networkManager.getContext());
         this.downloadJob = downloadJob;
@@ -236,7 +237,7 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
             }
         }
 
-        mDbManager.getDownloadJobDao().updateJobStatus(downloadJob.getId(), STATUS_RUNNING);
+        mDbManager.getDownloadJobDao().updateJobStatus(downloadJob.getDownloadJobId(), STATUS_RUNNING);
         setStatus(STATUS_RUNNING);
         networkManager.networkTaskStatusChanged(this);
 
@@ -300,34 +301,35 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
                 return;
 
             currentDownloadJobItem = mDbManager.getDownloadJobItemDao().findByDownloadJobAndStatusRange(
-                    downloadJob.getId(), 0, NetworkTask.STATUS_RUNNING_MIN-1);
+                    downloadJob.getDownloadJobId(), 0, NetworkTask.STATUS_RUNNING_MIN-1);
             if (currentDownloadJobItem != null) {
                 currentEntryStatusCacheId = mDbManager.getOpdsEntryStatusCacheDao().findUidByEntryId(
-                        currentDownloadJobItem.getEntryId());
+                        currentDownloadJobItem.getDownloadSetItem().getEntryId());
                 attemptCount++;
                 currentGroupSSID = null;
 
 
                 UstadMobileSystemImpl.l(UMLog.INFO, 303, getLogPrefix() +
-                        ": startNextDownload: DownloadJobItem: #" + currentDownloadJobItem.getId() +
-                        " entry id: " + currentDownloadJobItem.getEntryId());
+                        ": startNextDownload: DownloadJobItem: #" + currentDownloadJobItem.getDownloadJobItemId() +
+                        " entry id: " + currentDownloadJobItem.getDownloadSetItem().getEntryId());
                 setWaitingForWifiConnection(false);
 
                 //TODO: Move hardcoded strings to locale constants
-                message = downloadJob.getDownloadJobItems().size() > 1 ? "Downloading " + (currentEntryIdIndex + 1) + " of "
-                        + downloadJob.getDownloadJobItems().size() + " files" : "Downloading file";
+//                message = downloadJob.getDownloadJobItems().size() > 1 ? "Downloading " + " of "
+//                        + downloadJob.getDownloadJobItems().size() + " files" : "Downloading file";
+                message = "Downloading...";
 
                 currentEntryTitle = DbManager.getInstance(networkManager.getContext()).getOpdsEntryDao()
-                        .findTitleByUuid(currentDownloadJobItem.getOpdsEntryUuid());
+                        .findTitleByUuid(currentDownloadJobItem.getDownloadSetItem().getOpdsEntryUuid());
                 networkManager.addNotification(NOTIFICATION_TYPE_ACQUISITION,
                         currentEntryTitle, message);
                 long currentDownloadId = new AtomicInteger().incrementAndGet();
-                String entryId = currentDownloadJobItem.getEntryId();
+                String entryId = currentDownloadJobItem.getDownloadSetItem().getEntryId();
 
 
                 DbManager dbManager = DbManager.getInstance(networkManager.getContext());
                 List<EntryStatusResponseWithNode> statusResponses = dbManager.getEntryStatusResponseDao()
-                        .findByEntryIdAndAvailability(currentDownloadJobItem.getEntryId(), true);
+                        .findByEntryIdAndAvailability(entryId, true);
 
                 entryStatusResponse = selectEntryStatusResponse(statusResponses,
                         dbManager.getDownloadJobItemHistoryDao());
@@ -339,7 +341,7 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
                         || networkManager.getActionRequiredAfterGroupConnection() == NetworkManager.AFTER_GROUP_CONNECTION_RESTORE;
 
                 OpdsEntryWithRelations entryWithRelations = dbManager.getOpdsEntryWithRelationsDao()
-                        .getEntryByUuidStatic(currentDownloadJobItem.getOpdsEntryUuid());
+                        .getEntryByUuidStatic(currentDownloadJobItem.getDownloadSetItem().getOpdsEntryUuid());
                 OpdsLink acquisitionLink = entryWithRelations.getAcquisitionLink(null, true);
                 currentExpectedMimeType = acquisitionLink.getMimeType();
                 String feedEntryAcquisitionUrl = acquisitionLink.getHref();
@@ -368,7 +370,7 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
                         UstadMobileSystemImpl.l(UMLog.ERROR, 667, getLogPrefix() + " p2p download, group owner IP is null!");
                         handleAttemptFailed();
                     }
-                } else if (downloadJob.isLanDownloadEnabled() && entryStatusResponse != null
+                } else if (downloadJob.getDownloadSet().isLanDownloadEnabled() && entryStatusResponse != null
                         && networkManager.getCurrentWifiSsid() != null
                         && responseNode.getTimeSinceNetworkServiceLastUpdated() < NetworkManager.ALLOWABLE_DISCOVERY_RANGE_LIMIT) {
                     targetNetwork = TARGET_NETWORK_NORMAL;
@@ -376,12 +378,12 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
                             + entryStatusResponse.getNetworkNode().getPort() + "/catalog/container-dl/" +
                             CatalogUriResponder.doubleUrlEncode(entryId);
                     currentDownloadMode = DOWNLOAD_FROM_PEER_ON_SAME_NETWORK;
-                } else if (downloadJob.isWifiDirectDownloadEnabled() && entryStatusResponse != null
+                } else if (downloadJob.getDownloadSet().isWifiDirectDownloadEnabled() && entryStatusResponse != null
                         && networkManager.isWiFiEnabled()
                         && responseNode.getTimeSinceWifiDirectLastUpdated() < NetworkManager.ALLOWABLE_DISCOVERY_RANGE_LIMIT) {
                     targetNetwork = TARGET_NETWORK_WIFIDIRECT_GROUP;
                     currentDownloadMode = DOWNLOAD_FROM_PEER_ON_DIFFERENT_NETWORK;
-                } else if (wifiAvailable || downloadJob.isMobileDataEnabled()) {
+                } else if (wifiAvailable || downloadJob.getDownloadSet().isMobileDataEnabled()) {
                     //download from cloud
                     targetNetwork = wifiAvailable ? TARGET_NETWORK_NORMAL : TARGET_NETWORK_MOBILE_DATA;
                     currentDownloadUrl = feedEntryAcquisitionUrl;
@@ -396,12 +398,13 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
 
                 currentJobItemHistory = new DownloadJobItemHistory(
                         entryStatusResponse != null ? entryStatusResponse.getNetworkNode() : null,
-                        currentDownloadJobItem, currentDownloadMode, System.currentTimeMillis());
+                        currentDownloadJobItem.getDownloadSetItem(), currentDownloadMode,
+                        System.currentTimeMillis());
 
                 UstadMobileSystemImpl.l(UMLog.INFO, 336, getLogPrefix() +
-                                ": DownloadJobItem: #" + currentDownloadJobItem.getId() +
-                                "  id " + currentDownloadJobItem.getEntryId() + " Mode = " +
-                                currentDownloadMode + " target network = " + targetNetwork);
+                                ": DownloadJobItem: #" + currentDownloadJobItem.getDownloadJobItemId() +
+                                "  id " + currentDownloadJobItem.getDownloadSetItem().getEntryId() +
+                                " Mode = " + currentDownloadMode + " target network = " + targetNetwork);
 
                 if (targetNetwork.equals(TARGET_NETWORK_WIFIDIRECT)) {
                     UstadMobileSystemImpl.l(UMLog.INFO, 316, getLogPrefix() + " : use WiFi direct");
@@ -462,7 +465,7 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
             String filename = UMFileUtil.appendExtensionToFilenameIfNeeded(UMFileUtil.getFilename(fileUrl),
                     currentExpectedMimeType);
 
-            File fileDestination = new File(downloadJob.getDestinationDir(), filename);
+            File fileDestination = new File(downloadJob.getDownloadSet().getDestinationDir(), filename);
 
             boolean downloadCompleted = false;
 
@@ -485,7 +488,7 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
                 downloadCompleted = httpDownload.download();
             } catch (IOException e) {
                 UstadMobileSystemImpl.l(UMLog.ERROR, 661, getLogPrefix() + " : jobitem #" +
-                        currentDownloadJobItem.getId() + " : IOException", e);
+                        currentDownloadJobItem.getDownloadSetItem() + " : IOException", e);
             }
 
             currentJobItemHistory.setEndTime(System.currentTimeMillis());
@@ -511,7 +514,7 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
 
                 startNextDownload();
             }else {
-                UstadMobileSystemImpl.l(UMLog.ERROR, 660, getLogPrefix() + " : item " + currentEntryIdIndex +
+                UstadMobileSystemImpl.l(UMLog.ERROR, 660, getLogPrefix() + " : item " +
                     " : Download did not complete");
                 handleAttemptFailed();
             }
@@ -573,7 +576,8 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
                 passphrase = groupInfo[1];
                 currentDownloadUrl = "http://" + currentGroupIPAddress + ":" +
                         entryStatusResponse.getNetworkNode().getPort() + "/catalog/container-dl/" +
-                        CatalogUriResponder.doubleUrlEncode(currentDownloadJobItem.getEntryId());
+                        CatalogUriResponder.doubleUrlEncode(currentDownloadJobItem.getDownloadSetItem()
+                                .getEntryId());
 
                 UstadMobileSystemImpl.l(UMLog.INFO, 318, getLogPrefix() + ": bluetooth says connect to '" +
                     currentGroupSSID + "' download Url = " + currentDownloadUrl);
@@ -728,16 +732,17 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
         this.mirrorFinder = mirrorFinder;
     }
 
-    /**
-     * Check if the given entry id is part of this acquisition task or not
-     *
-     * @param entryId
-     *
-     * @return true if the given entry id is included in this acquisition task, false otherwise
-     */
-    public boolean taskIncludesEntry(String entryId) {
-        return downloadJob.getJobItemByEntryId(entryId) != null;
-    }
+//
+//    /**
+//     * Check if the given entry id is part of this acquisition task or not
+//     *
+//     * @param entryId
+//     *
+//     * @return true if the given entry id is included in this acquisition task, false otherwise
+//     */
+//    public boolean taskIncludesEntry(String entryId) {
+//        return downloadJob.getJobItemByEntryId(entryId) != null;
+//    }
 
     /**
      * Selects the optimal entry check response to download if any
@@ -814,7 +819,8 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
 
 
     protected String getLogPrefix() {
-        return "DownloadTask #" + getTaskId() + " Item # " + currentEntryIdIndex + " Attempt # "
+        int itemId = currentDownloadJobItem != null ? currentDownloadJobItem.getDownloadJobItemId() : -1;
+        return "DownloadTask #" + getTaskId() + " Item id# " + itemId + " Attempt # "
                 + attemptCount;
     }
 

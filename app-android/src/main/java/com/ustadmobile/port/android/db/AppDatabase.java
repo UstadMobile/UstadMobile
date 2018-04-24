@@ -11,6 +11,8 @@ import com.ustadmobile.port.android.db.dao.CrawJoblItemDaoAndroid;
 import com.ustadmobile.port.android.db.dao.CrawlJobDaoAndroid;
 import com.ustadmobile.port.android.db.dao.DownloadJobDaoAndroid;
 import com.ustadmobile.port.android.db.dao.DownloadJobItemDaoAndroid;
+import com.ustadmobile.port.android.db.dao.DownloadSetDaoAndroid;
+import com.ustadmobile.port.android.db.dao.DownloadSetItemDaoAndroid;
 import com.ustadmobile.port.android.db.dao.DownloadJobItemHistoryDaoAndroid;
 import com.ustadmobile.port.android.db.dao.EntryStatusResponseDaoAndroid;
 import com.ustadmobile.port.android.db.dao.HttpCachedEntryDaoAndroid;
@@ -28,11 +30,11 @@ import com.ustadmobile.port.android.db.dao.OpdsLinkDaoAndroid;
  */
 @Database(version = 1, entities =  {
         OpdsEntry.class, OpdsLink.class, OpdsEntryParentToChildJoin.class,
-        ContainerFile.class, ContainerFileEntry.class, DownloadJob.class,
-        DownloadJobItem.class, NetworkNode.class, EntryStatusResponse.class,
+        ContainerFile.class, ContainerFileEntry.class, DownloadSet.class,
+        DownloadSetItem.class, NetworkNode.class, EntryStatusResponse.class,
         DownloadJobItemHistory.class, CrawlJob.class, CrawlJobItem.class,
         OpdsEntryStatusCache.class, OpdsEntryStatusCacheAncestor.class,
-        HttpCachedEntry.class
+        HttpCachedEntry.class, DownloadJob.class, DownloadJobItem.class
 })
 public abstract class AppDatabase extends RoomDatabase {
 
@@ -52,9 +54,9 @@ public abstract class AppDatabase extends RoomDatabase {
 
     public abstract EntryStatusResponseDaoAndroid getEntryStatusResponseDao();
 
-    public abstract DownloadJobDaoAndroid getDownloadJobDao();
+    public abstract DownloadSetDaoAndroid getDownloadSetDao();
 
-    public abstract DownloadJobItemDaoAndroid getDownloadJobItemDao();
+    public abstract DownloadSetItemDaoAndroid getDownloadSetItemDao();
 
     public abstract DownloadJobItemHistoryDaoAndroid getDownloadJobItemHistoryDao();
 
@@ -67,5 +69,9 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract OpdsEntryStatusCacheAncestorDaoAndroid getOpdsEntryStatusCacheAncestorDao();
 
     public abstract HttpCachedEntryDaoAndroid getHttpCachedEnrtyDao();
+
+    public abstract DownloadJobDaoAndroid getDownloadJobDao();
+
+    public abstract DownloadJobItemDaoAndroid getDownloadJobItemDao();
 
 }

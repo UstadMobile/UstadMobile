@@ -14,7 +14,8 @@ import com.ustadmobile.core.networkmanager.AcquisitionTaskStatus;
 import com.ustadmobile.core.networkmanager.AvailabilityMonitorRequest;
 import com.ustadmobile.core.networkmanager.NetworkManagerCore;
 import com.ustadmobile.core.networkmanager.NetworkManagerListener;
-import com.ustadmobile.lib.db.entities.DownloadJobItem;
+import com.ustadmobile.lib.db.entities.DownloadJobItemWithDownloadSetItem;
+import com.ustadmobile.lib.db.entities.DownloadSetItem;
 import com.ustadmobile.lib.db.entities.NetworkNode;
 import com.ustadmobile.core.networkmanager.NetworkTask;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
@@ -99,9 +100,9 @@ public class CatalogEntryPresenter extends BaseCatalogPresenter implements Acqui
 
     private UmLiveData<OpdsEntryWithRelations> entryLiveData;
 
-    private UmObserver<DownloadJobItem> entryDownloadJobItemObserver;
+    private UmObserver<DownloadJobItemWithDownloadSetItem> entryDownloadJobItemObserver;
 
-    private UmLiveData<DownloadJobItem> entryDownloadJobLiveData;
+    private UmLiveData<DownloadJobItemWithDownloadSetItem> entryDownloadJobLiveData;
 
     private String baseHref;
 
@@ -304,7 +305,7 @@ public class CatalogEntryPresenter extends BaseCatalogPresenter implements Acqui
         currentEntryId = entry.getEntryId();
     }
 
-    public void handleDownloadJobItemUpdated(DownloadJobItem jobItem) {
+    public void handleDownloadJobItemUpdated(DownloadJobItemWithDownloadSetItem jobItem) {
         if(jobItem != null) {
             catalogEntryView.setProgressVisible(true);
             float completed = (float) jobItem.getDownloadedSoFar() / (float) jobItem.getDownloadLength();

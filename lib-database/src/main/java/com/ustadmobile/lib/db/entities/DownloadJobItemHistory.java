@@ -4,7 +4,9 @@ import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 
 /**
- * Created by mike on 2/2/18.
+ * DownloadJobItemHistory represents one attempt to download a given DownloadJobItem. It is used
+ * to track the performance of different peers, and inform the selection of peers when attempting to
+ * download items in the future.
  */
 @UmEntity
 public class DownloadJobItemHistory {
@@ -41,7 +43,7 @@ public class DownloadJobItemHistory {
         this.endTime = endTime;
     }
 
-    public DownloadJobItemHistory(NetworkNode node, DownloadJobItem item, int mode, long startTime) {
+    public DownloadJobItemHistory(NetworkNode node, DownloadSetItem item, int mode, long startTime) {
         if(node != null)
             networkNode = node.getNodeId();
 

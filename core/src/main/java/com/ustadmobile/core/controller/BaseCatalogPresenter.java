@@ -4,7 +4,6 @@ import com.ustadmobile.core.buildconfig.CoreBuildConfig;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UMStorageDir;
-import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.networkmanager.AcquisitionTaskStatus;
@@ -14,8 +13,9 @@ import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.opds.UstadJSOPDSItem;
 import com.ustadmobile.core.opds.entities.UmOpdsLink;
 import com.ustadmobile.lib.db.entities.CrawlJob;
-import com.ustadmobile.lib.db.entities.DownloadJob;
 import com.ustadmobile.lib.db.entities.DownloadJobItem;
+import com.ustadmobile.lib.db.entities.DownloadSet;
+import com.ustadmobile.lib.db.entities.DownloadSetItem;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
 import com.ustadmobile.lib.util.UMUtil;
 import com.ustadmobile.core.view.AppViewChoiceListener;
@@ -118,12 +118,15 @@ public abstract class BaseCatalogPresenter extends UstadBaseController implement
     public void handleClickDownload(List<OpdsEntryWithRelations> entriesToDownload){
         final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         UMStorageDir[] storageDirs = impl.getStorageDirs(CatalogPresenter.SHARED_RESOURCE, getContext());
-        DownloadJob downloadJob = new DownloadJob();
+        DownloadSet downloadJob = new DownloadSet();
         downloadJob.setDestinationDir(storageDirs[0].getDirURI());
         CrawlJob crawlJob = new CrawlJob();
         crawlJob.setQueueDownloadJobOnDone(true);
 
-        impl.getNetworkManager().prepareDownloadAsync(entriesToDownload, null, downloadJob, crawlJob,
+        //TODO: rework this to handle multiple selections, which would start multiple download jobs
+        crawlJob.setRootEntryUuid(entriesToDownload.get(0).getUuid());
+
+        impl.getNetworkManager().prepareDownloadAsync(downloadJob, crawlJob,
                 (preparedCrawlJob) -> {
                     UstadMobileSystemImpl.l(UMLog.INFO, 0, "Download prepared");
                 });

@@ -3,7 +3,9 @@ package com.ustadmobile.port.sharedse.networkmanager;
 import com.ustadmobile.core.db.DbManager;
 import com.ustadmobile.core.db.dao.CrawlJobDao;
 import com.ustadmobile.core.db.dao.DownloadJobDao;
+import com.ustadmobile.core.db.dao.DownloadSetDao;
 import com.ustadmobile.core.db.dao.NetworkNodeDao;
+import com.ustadmobile.core.db.dao.OpdsAtomFeedRepository;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UmResultCallback;
@@ -18,8 +20,9 @@ import com.ustadmobile.lib.db.entities.ContainerFileEntry;
 import com.ustadmobile.lib.db.entities.CrawlJob;
 import com.ustadmobile.lib.db.entities.CrawlJobItem;
 import com.ustadmobile.lib.db.entities.DownloadJob;
-import com.ustadmobile.lib.db.entities.DownloadJobItem;
-import com.ustadmobile.lib.db.entities.DownloadJobWithRelations;
+import com.ustadmobile.lib.db.entities.DownloadJobWithDownloadSet;
+import com.ustadmobile.lib.db.entities.DownloadSet;
+import com.ustadmobile.lib.db.entities.DownloadSetItem;
 import com.ustadmobile.lib.db.entities.EntryStatusResponse;
 import com.ustadmobile.lib.db.entities.NetworkNode;
 import com.ustadmobile.core.networkmanager.NetworkTask;
@@ -458,37 +461,53 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
     /**
      * {@inheritDoc}
      */
-    public CrawlJob prepareDownload(List<OpdsEntryWithRelations> rootEntries, List<String> rootUris,
-                                    DownloadJob downloadJob, CrawlJob crawlJob) {
+
+    public CrawlJob prepareDownload(DownloadSet downloadSet, CrawlJob crawlJob) {
         DbManager dbManager = DbManager.getInstance(getContext());
+        DownloadSetDao setDao = dbManager.getDownloadSetDao();
         DownloadJobDao jobDao = dbManager.getDownloadJobDao();
+
+        if(crawlJob.getRootEntryUuid() == null && crawlJob.getRootEntryUri() == null)
+            throw new IllegalArgumentException("CrawlJob has no root uuid or uri!");
+
+        //see if this downloadset already exists
+        if(crawlJob.getRootEntryUuid() == null){
+            //we need to load the root item using the OpdsRepository
+            OpdsEntryWithRelations rootEntry = dbManager.getOpdsAtomFeedRepository()
+                .getEntryByUrlStatic(crawlJob.getRootEntryUri());
+            crawlJob.setRootEntryUuid(rootEntry.getUuid());
+        }
+
+
+        DownloadSet existingSet = dbManager.getDownloadSetDao().findByRootEntry(
+                crawlJob.getRootEntryUuid());
+        if(existingSet != null) {
+            //TODO: Move downloaded items between folders if needed
+            existingSet.setDestinationDir(downloadSet.getDestinationDir());
+            downloadSet = existingSet;
+        }else{
+            downloadSet.setRootOpdsUuid(crawlJob.getRootEntryUuid());
+        }
+
+        downloadSet.setId((int)setDao.insertOrReplace(downloadSet));
+
+        //Now create a new download job
+        DownloadJob downloadJob = new DownloadJob(downloadSet, System.currentTimeMillis());
         downloadJob.setStatus(UstadMobileSystemImpl.DLSTATUS_NOT_STARTED);
-        downloadJob.setId((int)jobDao.insert(downloadJob));
+
+        downloadJob.setDownloadJobId((int)jobDao.insert(downloadJob));
 
         CrawlJobDao crawlJobDao = dbManager.getCrawlJobDao();
-        crawlJob.setContainersDownloadJobId(downloadJob.getId());
+        crawlJob.setContainersDownloadJobId(downloadJob.getDownloadJobId());
         crawlJob.setCrawlJobId((int)crawlJobDao.insert(crawlJob));
 
-        ArrayList<CrawlJobItem> initialItems = new ArrayList<>();
 
-        CrawlJobItem crawlJobItem;
-        if(rootEntries != null) {
-            for (OpdsEntryWithRelations entry : rootEntries) {
-                crawlJobItem = new CrawlJobItem(crawlJob.getCrawlJobId(), entry,
-                        NetworkTask.STATUS_QUEUED, 0);
-                initialItems.add(crawlJobItem);
-            }
-        }
+        //Insert the root crawl item
+        OpdsEntryWithRelations entry = new OpdsEntryWithRelations();
+        entry.setUuid(crawlJob.getRootEntryUuid());
+        DbManager.getInstance(getContext()).getDownloadJobCrawlItemDao().insert(
+                new CrawlJobItem(crawlJob.getCrawlJobId(), entry, NetworkTask.STATUS_QUEUED, 0));
 
-        if(rootUris != null) {
-            for(String rootUri : rootUris) {
-                crawlJobItem = new CrawlJobItem(crawlJob.getCrawlJobId(), rootUri,
-                        NetworkTask.STATUS_QUEUED, 0);
-                initialItems.add(crawlJobItem);
-            }
-        }
-
-        DbManager.getInstance(getContext()).getDownloadJobCrawlItemDao().insertAll(initialItems);
         CrawlTask task = new CrawlTask(crawlJob, dbManager,
                 (NetworkManager)UstadMobileSystemImpl.getInstance().getNetworkManager());
         task.start();
@@ -499,47 +518,44 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
     /**
      * {@inheritDoc}
      */
-    public void prepareDownloadAsync(List<OpdsEntryWithRelations> rootEntries, List<String> rootUris,
-                                     DownloadJob downloadJob, CrawlJob crawlJob,
+    public void prepareDownloadAsync(DownloadSet downloadJob, CrawlJob crawlJob,
                                      UmResultCallback<CrawlJob> resultCallback) {
-        dbExecutorService.execute(() -> resultCallback.onDone(prepareDownload(rootEntries, rootUris,
-                downloadJob, crawlJob)));
+        dbExecutorService.execute(() -> resultCallback.onDone(prepareDownload(downloadJob, crawlJob)));
     }
 
 
     @Deprecated
-    public DownloadJob buildDownloadJob(List<OpdsEntryWithRelations> rootEntries, String destintionDir,
+    public DownloadSet buildDownloadJob(List<OpdsEntryWithRelations> rootEntries, String destintionDir,
                                         boolean recursive, boolean wifiDirectEnabled,
                                         boolean localWifiEnabled) {
-        DownloadJobDao jobDao = DbManager.getInstance(getContext()).getDownloadJobDao();
+        DownloadSetDao jobDao = DbManager.getInstance(getContext()).getDownloadSetDao();
 
-        DownloadJob job = new DownloadJob();
+        DownloadSet job = new DownloadSet();
         job.setDestinationDir(destintionDir);
-        job.setStatus(UstadMobileSystemImpl.DLSTATUS_NOT_STARTED);
+//        job.setStatus(UstadMobileSystemImpl.DLSTATUS_NOT_STARTED);
         job.setLanDownloadEnabled(localWifiEnabled);
         job.setWifiDirectDownloadEnabled(wifiDirectEnabled);
         job.setId((int)jobDao.insert(job));
 
 
 
-        ArrayList<DownloadJobItem> jobItems = new ArrayList<>();
-        //TODO: ensure the download job is sized (make a head request if needed)
+        ArrayList<DownloadSetItem> jobItems = new ArrayList<>();
         for(OpdsEntryWithRelations entry : rootEntries) {
-            jobItems.add(new DownloadJobItem(entry, job));
+            jobItems.add(new DownloadSetItem(entry, job));
         }
-        DbManager.getInstance(getContext()).getDownloadJobItemDao().insertList(jobItems);
+        DbManager.getInstance(getContext()).getDownloadSetItemDao().insertList(jobItems);
 
         return job;
     }
 
     public void buildDownloadJobAsync(List<OpdsEntryWithRelations> rootEntries, String destintionDir,
                                       boolean recursive, boolean wifiDirectEnabled,
-                                      boolean localWifiEnabled, UmCallback<DownloadJob> callback) {
+                                      boolean localWifiEnabled, UmCallback<DownloadSet> callback) {
         dbExecutorService.execute(() -> callback.onSuccess(buildDownloadJob(rootEntries, destintionDir,
                 recursive, wifiDirectEnabled, localWifiEnabled)));
     }
 
-    public DownloadJob buildDownloadJob(List<OpdsEntryWithRelations> rootEntries, String destinationDir,
+    public DownloadSet buildDownloadJob(List<OpdsEntryWithRelations> rootEntries, String destinationDir,
                                         boolean recursive){
         return buildDownloadJob(rootEntries,  destinationDir, recursive, true, true);
     }
@@ -566,14 +582,14 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
      */
     public void checkDownloadJobQueue(){
         if(activeDownloadTasks.isEmpty()){
-            DownloadJobWithRelations job = DbManager.getInstance(getContext())
+            DownloadJobWithDownloadSet job = DbManager.getInstance(getContext())
                     .getDownloadJobDao().findNextDownloadJobAndSetStartingStatus();
             if(job == null) {
                 UstadMobileSystemImpl.l(UMLog.DEBUG, 0, "checkDownloadJobQueue: no pending download jobs");
                 return;//nothing to do
             }
             UstadMobileSystemImpl.l(UMLog.DEBUG, 0, "checkDownloadJobQueue: starting download job #" +
-                    job.getId());
+                    job.getDownloadJobId());
             DownloadTask task = new DownloadTask(job, this);
             task.start();
         }else {
@@ -1038,47 +1054,6 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
         DbManager.getInstance(getContext()).getEntryStatusResponseDao().insert(entryStatusResponses);
         fireFileStatusCheckInformationAvailable(entryIds);
     }
-
-//    /**
-//     * Method which invoked when entry status responses is are received
-//     * @param node NetworkNode on which entry status check task was executed on.
-//     * @param entryIds List of all entries
-//     * @param status List of all entries status
-//     */
-//    public void handleEntriesStatusUpdate(NetworkNode node, List<String> entryIds, List<Boolean> status) {
-//        ArrayList<EntryStatusResponse> entryStatusResponses = new ArrayList<>();
-//        long responseTime = System.currentTimeMillis();
-//        for(int i = 0; i < entryIds.size(); i++) {
-//            entryStatusResponses.add(new EntryStatusResponse(entryIds.get(i), node.getId(),
-//                    responseTime, 0, status.get(i)));
-//        }
-//
-//        DbManager.getInstance(getContext()).getEntryStatusResponseDao().insert(entryStatusResponses);
-//        fireFileStatusCheckInformationAvailable(entryIds);
-//
-////        List<EntryCheckResponse> responseList;
-////        EntryCheckResponse checkResponse;
-////        long timeNow = Calendar.getInstance().getTimeInMillis();
-////        for (int position=0;position<fileIds.size();position++){
-////            checkResponse = getEntryResponse(fileIds.get(position), node);
-////
-////            responseList=getEntryResponses().get(fileIds.get(position));
-////            if(responseList==null){
-////                responseList=new ArrayList<>();
-////                entryResponses.put(fileIds.get(position),responseList);
-////            }
-////
-////            if(checkResponse == null) {
-////                checkResponse = new EntryCheckResponse(node);
-////                responseList.add(checkResponse);
-////            }
-////
-////            checkResponse.setFileAvailable(status.get(position));
-////            checkResponse.setLastChecked(timeNow);
-////        }
-////
-////        fireFileStatusCheckInformationAvailable(fileIds);
-//    }
 
     /**
      * Method which get particular entry status response on a specific node from list of responses.
@@ -1575,25 +1550,6 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
         acquisitionListeners.remove(listener);
     }
 
-    /**
-     * Find the acquisition task for the given entry id
-     *
-     * @param entryId Entry ID to find
-     *
-     * @return The task carrying out acquisition of this entry, or null if it's not being acquired by any known task
-     */
-    public DownloadTask getAcquisitionTaskByEntryId(String entryId) {
-        synchronized (tasksQueues[QUEUE_ENTRY_ACQUISITION]) {
-            DownloadTask acquisitionTask;
-            for(int i = 0; i < tasksQueues[QUEUE_ENTRY_ACQUISITION].size(); i++) {
-                acquisitionTask = (DownloadTask)tasksQueues[QUEUE_ENTRY_ACQUISITION].get(i);
-                if(acquisitionTask.taskIncludesEntry(entryId))
-                    return acquisitionTask;
-            }
-        }
-
-        return null;
-    }
 
     /**
      * Get a network task by id and queue type
