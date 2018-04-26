@@ -159,6 +159,41 @@ public abstract class OpdsEntryWithRelationsDao {
         return getAncestors_RecursiveQuery(entryIds);
     }
 
+    protected static final String GET_ANCESTOR_ENTRIES_RECURSIVE_SQL_TO_INSERT =
+        "WITH RECURSIVE OpdsEntry_recursive(entryId, descendantId, entryStatusCacheUid, descendantStatusCacheUid, entryStatusCacheAncestorUid) AS ( " +
+            "SELECT " +
+            "OpdsEntry.entryId as entryId, OpdsEntry.entryId as descendantId, " +
+            "OpdsEntryStatusCache.statusCacheUid AS entryStatusCacheUid, OpdsEntryStatusCache.statusCacheUid AS descendantStatusCacheUid, " +
+            "EXISTS( " +
+                "SELECT pkId FROM OpdsEntryStatusCacheAncestor " +
+                "WHERE " +
+                "OpdsEntryStatusCacheAncestor.ancestorOpdsEntryStatusCacheId = (SELECT statusCacheUid From OpdsEntryStatusCache WHERE statusEntryId = OpdsEntry.entryId) " +
+                "AND " +
+                "OpdsEntryStatusCacheAncestor.opdsEntryStatusCacheId = (SELECT statusCacheUid FROM OpdsEntryStatusCache WHERE statusEntryId = OpdsEntry.entryId) " +
+            ")" +
+            "FROM OpdsEntry  " +
+            "LEFT JOIN OpdsEntryStatusCache ON OpdsEntryStatusCache.statusEntryId = OpdsEntry.entryId " +
+            "WHERE OpdsEntry.entryId IN (:entryIds) " +
+        "UNION  " +
+        "SELECT  " +
+            "OpdsParentEntry.entryId AS entryId, " +
+            "OpdsEntry_recursive.descendantId AS descendantId, " +
+            "OpdsEntryStatusCacheEntry.statusCacheUid AS entryStatusCacheUid, " +
+            "OpdsEntryStatusCacheDescendant.statusCacheUid AS descendantStatusCacheUid, " +
+            "OpdsEntryStatusCacheAncestor.pkId " +
+        "FROM  " +
+        "OpdsEntryParentToChildJoin  " +
+        "JOIN OpdsEntry OpdsChildEntry ON OpdsEntryParentToChildJoin.childEntry = OpdsChildEntry.uuid  " +
+        "JOIN OpdsEntry OpdsParentEntry ON OpdsEntryParentToChildJoin.parentEntry = OpdsParentEntry.uuid " +
+        "JOIN OpdsEntryStatusCache OpdsEntryStatusCacheEntry ON OpdsEntryStatusCacheEntry.statusEntryId = OpdsParentEntry.entryId " +
+        "JOIN OpdsEntryStatusCache OpdsEntryStatusCacheDescendant ON OpdsEntryStatusCacheDescendant.statusEntryId = OpdsEntry_recursive.descendantId " +
+        "LEFT JOIN OpdsEntryStatusCacheAncestor ON OpdsEntryStatusCacheAncestor.ancestorOpdsEntryStatusCacheId = OpdsEntryStatusCacheEntry.statusCacheUid AND OpdsEntryStatusCacheAncestor.opdsEntryStatusCacheId = OpdsEntryStatusCacheDescendant.statusCacheUid, " +
+        "OpdsEntry_recursive  " +
+        "WHERE  " +
+            "OpdsChildEntry.entryId = OpdsEntry_recursive.entryId " +
+        ") " +
+        "SELECT * FROM OpdsEntry_recursive WHERE entryStatusCacheAncestorUid = 0 OR entryStatusCAcheAncestorUid IS NULL";
+
     protected static final String GET_ANCESTOR_ENTRIES_RECURSIVE_SQL = "WITH RECURSIVE OpdsEntry_recursive(entryId, descendantId) AS (\n" +
             "\tSELECT OpdsEntry.entryId as entryId, OpdsEntry.entryId as descendantId FROM OpdsEntry WHERE OpdsEntry.entryId IN (:entryIds)\n" +
             "\tUNION\n" +
