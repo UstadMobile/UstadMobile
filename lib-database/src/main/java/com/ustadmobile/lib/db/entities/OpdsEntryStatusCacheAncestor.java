@@ -13,7 +13,7 @@ import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 public class OpdsEntryStatusCacheAncestor {
 
     @UmPrimaryKey(autoIncrement = true)
-    private Integer pkId;
+    private int pkId;
 
     @UmIndexField
     private int opdsEntryStatusCacheId;
@@ -36,11 +36,11 @@ public class OpdsEntryStatusCacheAncestor {
      *
      * @return primary key id
      */
-    public Integer getPkId() {
+    public int getPkId() {
         return pkId;
     }
 
-    public void setPkId(Integer pkId) {
+    public void setPkId(int pkId) {
         this.pkId = pkId;
     }
 

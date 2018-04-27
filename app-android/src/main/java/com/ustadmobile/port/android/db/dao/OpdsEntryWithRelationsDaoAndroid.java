@@ -155,4 +155,12 @@ public abstract class OpdsEntryWithRelationsDaoAndroid extends OpdsEntryWithRela
     @Override
     @Query(GET_ANCESTOR_ENTRIES_RECURSIVE_SQL)
     public abstract List<OpdsEntryAncestor> getAncestors_RecursiveQuery(List<String> entryIds);
+
+    @Override
+    @Query(GET_DESCENDANT_ENTRIES_RECURSIVE_SQL)
+    public abstract List<OpdsEntryAncestor> getDescendant_RecursiveQuery(List<String> entryIds);
+
+
+
+
 }

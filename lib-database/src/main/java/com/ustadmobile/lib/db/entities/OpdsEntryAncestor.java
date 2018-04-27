@@ -25,4 +25,5 @@ public class OpdsEntryAncestor {
     public void setDescendantId(String descendantId) {
         this.descendantId = descendantId;
     }
+
 }

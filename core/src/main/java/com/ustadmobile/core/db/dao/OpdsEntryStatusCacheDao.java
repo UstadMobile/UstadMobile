@@ -98,6 +98,9 @@ public abstract class OpdsEntryStatusCacheDao {
      * the given loadedEntry, and all ancestors. This routine will determine the ancestors for the
      * each loaded entry.
      *
+     * TODO: We must first find any known descendants. Then set it's sizeIncDescendants accordingly
+     * (count direct children). Then we find ancestors and increment the size according to what we found.
+     *
      * @param dbManager DbManager object
      * @param loadedEntries The entries that have just been loaded. These MUST have been already
      *                      committed to the OpdsEntry database.
@@ -108,15 +111,15 @@ public abstract class OpdsEntryStatusCacheDao {
         //determine which entries do not have a corresponding EntryStatusCache yet
         HashMap<String, OpdsEntryWithRelations> entryIdToEntryMap = new HashMap<>();
         List<OpdsEntryStatusCache> newStatusCaches = new ArrayList<>();
-        List<String> newStatusCachesEntryIds = new ArrayList<>();
+        List<String> loadedEntryIds = new ArrayList<>();
         for(int i = 0; i < loadedEntries.size(); i++) {
             loadedEntry = loadedEntries.get(i);
             entryIdToEntryMap.put(loadedEntry.getEntryId(), loadedEntry);
-            newStatusCachesEntryIds.add(loadedEntry.getEntryId());
+            loadedEntryIds.add(loadedEntry.getEntryId());
         }
 
-        List<String> entryIdsToAdd = findEntryIdsNotPresent(newStatusCachesEntryIds);
-        List<OpdsEntryStatusCache> oldEntryStatusCaches = findByEntryIdList(newStatusCachesEntryIds);
+        List<String> entryIdsToAdd = findEntryIdsNotPresent(loadedEntryIds);
+        List<OpdsEntryStatusCache> oldEntryStatusCaches = findByEntryIdList(loadedEntryIds);
         HashMap<String, OpdsEntryStatusCache>  entryStatusCacheMap = new HashMap<>();
 
         for(OpdsEntryStatusCache oldEntryStatusCache : oldEntryStatusCaches){
@@ -139,7 +142,7 @@ public abstract class OpdsEntryStatusCacheDao {
             insertList(newStatusCaches);
 
             List<OpdsEntryAncestor> ancestorsList = dbManager.getOpdsEntryWithRelationsDao()
-                    .getAncestors(newStatusCachesEntryIds);
+                    .getAncestors(entryIdsToAdd);
             HashMap<String, Integer> entryIdToUidMap = new HashMap<>();
             List<OpdsEntryStatusCacheAncestor> cacheAncestors = new ArrayList<>();
 
@@ -167,6 +170,12 @@ public abstract class OpdsEntryStatusCacheDao {
 
             dbManager.getOpdsEntryStatusCacheAncestorDao().insertAll(cacheAncestors);
         }
+
+//        List<OpdsEntryStatusCacheAncestor> ancestorsToAdd = dbManager.getOpdsEntryStatusCacheAncestorDao()
+//                .findAncestorsToAdd(loadedEntryIds);
+//        dbManager.getOpdsEntryStatusCacheAncestorDao().insertAll(ancestorsToAdd);
+
+
 
 
         OpdsEntryStatusCache currentStatusCache;
@@ -525,5 +534,8 @@ public abstract class OpdsEntryStatusCacheDao {
                 entryStatusCache.getEntryContainerDownloadedSize(), entryStatusCache.isEntryContainerDownloaded(),
                 deltaSize);
     }
+
+
+
 
 }
