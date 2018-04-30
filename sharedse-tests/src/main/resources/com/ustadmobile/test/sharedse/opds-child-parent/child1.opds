@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no' ?>
+<entry xmlns="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/terms/" xmlns:opds="http://opds-spec.org/2010/catalog">
+  <title>Child 1</title>
+  <id>http://umcloud1.ustadmobile.com/opds/opds-child-parent/child1</id>
+  <content type="text">Child 1.</content>
+  <dc:language>en</dc:language>
+  <link rel="http://opds-spec.org/acquisition" type="application/epub+zip" href="asb18187.epub" length="1156775" />
+  <link rel="http://opds-spec.org/image/thumbnail" type="image/jpeg" href="asb18187-tmb.jpg" />
+</entry>
+
+
+

@@ -9,8 +9,7 @@ import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.db.dao.OpdsEntryWithRelationsDao;
 import com.ustadmobile.lib.db.entities.OpdsEntry;
-import com.ustadmobile.lib.db.entities.OpdsEntryAncestor;
-import com.ustadmobile.lib.db.entities.OpdsEntryStatusCache;
+import com.ustadmobile.lib.db.entities.OpdsEntryRelative;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelationsAndContainerMimeType;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithStatusCache;
@@ -154,11 +153,11 @@ public abstract class OpdsEntryWithRelationsDaoAndroid extends OpdsEntryWithRela
 
     @Override
     @Query(GET_ANCESTOR_ENTRIES_RECURSIVE_SQL)
-    public abstract List<OpdsEntryAncestor> getAncestors_RecursiveQuery(List<String> entryIds);
+    public abstract List<OpdsEntryRelative> getAncestors_RecursiveQuery(List<String> entryIds);
 
     @Override
     @Query(GET_DESCENDANT_ENTRIES_RECURSIVE_SQL)
-    public abstract List<OpdsEntryAncestor> getDescendant_RecursiveQuery(List<String> entryIds);
+    public abstract List<OpdsEntryRelative> getDescendant_RecursiveQuery(List<String> entryIds);
 
 
 

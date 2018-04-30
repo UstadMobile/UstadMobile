@@ -4,8 +4,7 @@ import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.db.entities.OpdsEntry;
-import com.ustadmobile.lib.db.entities.OpdsEntryAncestor;
-import com.ustadmobile.lib.db.entities.OpdsEntryStatusCache;
+import com.ustadmobile.lib.db.entities.OpdsEntryRelative;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelationsAndContainerMimeType;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithStatusCache;
@@ -155,41 +154,47 @@ public abstract class OpdsEntryWithRelationsDao {
     @UmQuery(GET_CHILD_ENTRIES_RECURSIVE_SQL)
     public abstract List<String> findAllChildEntryIdsRecursive(String entryId);
 
-    public List<OpdsEntryAncestor> getAncestors(List<String> entryIds) {
+    public List<OpdsEntryRelative> getAncestors(List<String> entryIds) {
         return getAncestors_RecursiveQuery(entryIds);
     }
 
-    protected static final String GET_ANCESTOR_ENTRIES_RECURSIVE_SQL = "WITH RECURSIVE OpdsEntry_recursive(entryId, descendantId) AS (\n" +
-            "\tSELECT OpdsEntry.entryId as entryId, OpdsEntry.entryId as descendantId FROM OpdsEntry WHERE OpdsEntry.entryId IN (:entryIds)\n" +
-            "\tUNION\n" +
-            "\tSELECT OpdsParentEntry.entryId AS entryId, OpdsEntry_recursive.descendantId AS descendantId FROM \n" +
-            "\tOpdsEntryParentToChildJoin \n" +
-            "\t\tJOIN OpdsEntry OpdsChildEntry ON OpdsEntryParentToChildJoin.childEntry = OpdsChildEntry.uuid\n" +
-            "\t\tJOIN OpdsEntry OpdsParentEntry ON OpdsEntryParentToChildJoin.parentEntry = OpdsParentEntry.uuid,\n" +
-            "\tOpdsEntry_recursive\n" +
-            "\tWHERE\n" +
-            "\t\tOpdsChildEntry.entryId = OpdsEntry_recursive.entryId\n" +
-            ")\n" +
+    protected static final String GET_ANCESTOR_ENTRIES_RECURSIVE_SQL =
+            "WITH RECURSIVE OpdsEntry_recursive(entryId, relativeEntryId, distance) AS ( " +
+            "SELECT OpdsEntry.entryId as entryId, OpdsEntry.entryId as relativeEntryId, 0 FROM OpdsEntry WHERE OpdsEntry.entryId IN (:entryIds) " +
+            "UNION " +
+            "SELECT OpdsParentEntry.entryId AS entryId, OpdsEntry_recursive.relativeEntryId AS relativeEntryId, OpdsEntry_recursive.distance + 1 AS distance FROM " +
+            "OpdsEntryParentToChildJoin " +
+            "JOIN OpdsEntry OpdsChildEntry ON OpdsEntryParentToChildJoin.childEntry = OpdsChildEntry.uuid " +
+            "JOIN OpdsEntry OpdsParentEntry ON OpdsEntryParentToChildJoin.parentEntry = OpdsParentEntry.uuid, " +
+            "OpdsEntry_recursive " +
+            "WHERE " +
+            "OpdsChildEntry.entryId = OpdsEntry_recursive.entryId " +
+            ")" +
             "SELECT * FROM OpdsEntry_recursive ";
-    @UmQuery(GET_ANCESTOR_ENTRIES_RECURSIVE_SQL)
-    public abstract List<OpdsEntryAncestor> getAncestors_RecursiveQuery(List<String> entryIds);
 
-    protected static final String GET_DESCENDANT_ENTRIES_RECURSIVE_SQL = "WITH RECURSIVE OpdsEntry_recursive(entryId, descendantId) AS (" +
-            "SELECT OpdsEntry.entryId as entryId, OpdsEntry.entryId as descendantId FROM OpdsEntry WHERE OpdsEntry.entryId IN (:entryIds) " +
-            "UNION  " +
-            "SELECT OpdsChildEntry.entryId AS entryId, OpdsEntry_recursive.descendantId AS descendantId \n" +
-            "FROM  \n" +
-            "OpdsEntryParentToChildJoin  \n" +
-            "JOIN OpdsEntry OpdsChildEntry ON OpdsEntryParentToChildJoin.childEntry = OpdsChildEntry.uuid \n" +
-            "JOIN OpdsEntry OpdsParentEntry ON OpdsEntryParentToChildJoin.parentEntry = OpdsParentEntry.uuid, \n" +
-            "OpdsEntry_recursive \n" +
-            "WHERE \n" +
-            "OpdsParentEntry.entryId = OpdsEntry_recursive.entryId \n" +
+    @UmQuery(GET_ANCESTOR_ENTRIES_RECURSIVE_SQL)
+    public abstract List<OpdsEntryRelative> getAncestors_RecursiveQuery(List<String> entryIds);
+
+    protected static final String GET_DESCENDANT_ENTRIES_RECURSIVE_SQL =
+            "WITH RECURSIVE OpdsEntry_recursive(entryId, relativeEntryId, distance) AS ( " +
+            "SELECT OpdsEntry.entryId as entryId, OpdsEntry.entryId as relativeEntryId, 0 FROM OpdsEntry WHERE OpdsEntry.entryId IN (:entryIds) "  +
+            "UNION " +
+            "SELECT " +
+            "OpdsEntry_recursive.entryId AS entryId, " +
+            "OpdsChildEntry.entryId as relativeEntryId, " +
+            "OpdsEntry_recursive.distance + 1 AS distance " +
+            "FROM " +
+            "OpdsEntryParentToChildJoin " +
+            "JOIN OpdsEntry OpdsChildEntry ON OpdsEntryParentToChildJoin.childEntry = OpdsChildEntry.uuid " +
+            "JOIN OpdsEntry OpdsParentEntry ON OpdsEntryParentToChildJoin.parentEntry = OpdsParentEntry.uuid, " +
+            "OpdsEntry_recursive " +
+            "WHERE " +
+            "OpdsParentEntry.entryId = OpdsEntry_recursive.relativeEntryId " +
             ") " +
-            "SELECT * FROM OpdsEntry_recursive ";
+            "SELECT * FROM OpdsEntry_recursive WHERE distance > 0";
 
     @UmQuery(GET_DESCENDANT_ENTRIES_RECURSIVE_SQL)
-    public abstract List<OpdsEntryAncestor> getDescendant_RecursiveQuery(List<String> entryIds);
+    public abstract List<OpdsEntryRelative> getDescendant_RecursiveQuery(List<String> entryIds);
 
 
 

@@ -5,7 +5,7 @@ import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.db.entities.ContainerFile;
-import com.ustadmobile.lib.db.entities.OpdsEntryAncestor;
+import com.ustadmobile.lib.db.entities.OpdsEntryRelative;
 import com.ustadmobile.lib.db.entities.OpdsEntryStatusCache;
 import com.ustadmobile.lib.db.entities.OpdsEntryStatusCacheAncestor;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
@@ -37,6 +37,13 @@ public abstract class OpdsEntryStatusCacheDao {
      * @param statuses
      */
     public abstract void insertList(List<OpdsEntryStatusCache> statuses);
+
+    /**
+     *
+     * @param status
+     */
+    public abstract void update(OpdsEntryStatusCache status);
+
 
     /**
      * Find the numeric primary key for the given entryId
@@ -141,30 +148,98 @@ public abstract class OpdsEntryStatusCacheDao {
             //insert new status cache objects
             insertList(newStatusCaches);
 
-            List<OpdsEntryAncestor> ancestorsList = dbManager.getOpdsEntryWithRelationsDao()
-                    .getAncestors(entryIdsToAdd);
-            HashMap<String, Integer> entryIdToUidMap = new HashMap<>();
             List<OpdsEntryStatusCacheAncestor> cacheAncestors = new ArrayList<>();
 
             Integer opdsEntryStatusCacheId;
-            Integer ancestorOpdsEntryStatusCacheId;
-            for(OpdsEntryAncestor ancestor : ancestorsList) {
-                opdsEntryStatusCacheId = entryIdToUidMap.get(ancestor.getDescendantId());
+            Integer relativeOpdsEntryStatusCacheId;
+            HashMap<String, Integer> entryIdToUidMap = new HashMap<>();
+
+
+            List<OpdsEntryRelative> descendantsList = dbManager.getOpdsEntryWithRelationsDao()
+                    .getDescendant_RecursiveQuery(entryIdsToAdd);
+            HashMap<String, OpdsEntryStatusCache> childrenEntryStatusCacheMap = null;
+            
+            if(!descendantsList.isEmpty()) {
+                childrenEntryStatusCacheMap = new HashMap<>();
+                List<String> childrenEntryIdList = new ArrayList<>();
+                for(OpdsEntryRelative descendant : descendantsList){
+                    if(descendant.getDistance() == 1)
+                        childrenEntryIdList.add(descendant.getRelativeEntryId());
+                }
+
+                List<OpdsEntryStatusCache> childrenEntryStatusCacheList = findByEntryIdList(childrenEntryIdList);
+                for(OpdsEntryStatusCache childEntryStatusCache : childrenEntryStatusCacheList) {
+                    childrenEntryStatusCacheMap.put(childEntryStatusCache.getStatusEntryId(),
+                            childEntryStatusCache);
+                }
+            }
+            
+            for(OpdsEntryRelative descendant : descendantsList) {
+//                TODO: This entry has not yet been inserted...
+                opdsEntryStatusCacheId = entryIdToUidMap.get(descendant.getEntryId());
                 if(opdsEntryStatusCacheId == null) {
-                    opdsEntryStatusCacheId = findUidByEntryId(ancestor.getDescendantId());
-                    entryIdToUidMap.put(ancestor.getDescendantId(), opdsEntryStatusCacheId);
+                    opdsEntryStatusCacheId = findUidByEntryId(descendant.getEntryId());
+                    entryIdToUidMap.put(descendant.getEntryId(), opdsEntryStatusCacheId);
                 }
 
-                ancestorOpdsEntryStatusCacheId = entryIdToUidMap.get(ancestor.getEntryId());
-                if(ancestorOpdsEntryStatusCacheId == null) {
-                    ancestorOpdsEntryStatusCacheId = findUidByEntryId(ancestor.getEntryId());
-                    entryIdToUidMap.put(ancestor.getEntryId(), ancestorOpdsEntryStatusCacheId);
+                relativeOpdsEntryStatusCacheId = entryIdToUidMap.get(descendant.getRelativeEntryId());
+                if(relativeOpdsEntryStatusCacheId == null){
+                    relativeOpdsEntryStatusCacheId = findUidByEntryId(descendant.getRelativeEntryId());
+                    entryIdToUidMap.put(descendant.getRelativeEntryId(), relativeOpdsEntryStatusCacheId);
                 }
 
-                if(opdsEntryStatusCacheId != null && ancestorOpdsEntryStatusCacheId != null) {
+                if(descendant.getDistance() == 1) {
+//                    OpdsEntryStatusCache entryStatusCache = entryStatusCacheMap.get(descendant.getEntryId());
+                    OpdsEntryStatusCache entryStatusCache = findByEntryId(descendant.getEntryId());
+                    OpdsEntryStatusCache childEntryStatusCache = childrenEntryStatusCacheMap.get(descendant.getRelativeEntryId());
+
+                    entryStatusCache.setSizeIncDescendants(
+                            entryStatusCache.getSizeIncDescendants() +
+                            childEntryStatusCache.getSizeIncDescendants());
+                    entryStatusCache.setEntriesWithContainerIncDescendants(
+                            entryStatusCache.getEntriesWithContainerIncDescendants() +
+                            childEntryStatusCache.getEntriesWithContainerIncDescendants());
+                    entryStatusCache.setContainersDownloadedIncDescendants(
+                            entryStatusCache.getContainersDownloadedIncDescendants()+
+                            childEntryStatusCache.getContainersDownloadedIncDescendants());
+                    entryStatusCache.setContainersDownloadPendingIncAncestors(
+                            entryStatusCache.getContainersDownloadPendingIncAncestors() +
+                            childEntryStatusCache.getContainersDownloadPendingIncAncestors());
+                    entryStatusCache.setPendingDownloadBytesSoFarIncDescendants(
+                            entryStatusCache.getPendingDownloadBytesSoFarIncDescendants() +
+                            childEntryStatusCache.getPendingDownloadBytesSoFarIncDescendants());
+                    entryStatusCache.setContainersDownloadedSizeIncDescendants(
+                            entryStatusCache.getContainersDownloadedSizeIncDescendants() +
+                            childEntryStatusCache.getContainersDownloadedSizeIncDescendants());
+                    dbManager.getOpdsEntryStatusCacheDao().update(entryStatusCache);
+                }
+
+                cacheAncestors.add(new OpdsEntryStatusCacheAncestor(relativeOpdsEntryStatusCacheId,
+                        opdsEntryStatusCacheId));
+            }
+
+
+
+            List<OpdsEntryRelative> ancestorsList = dbManager.getOpdsEntryWithRelationsDao()
+                    .getAncestors(entryIdsToAdd);
+
+            for(OpdsEntryRelative ancestor : ancestorsList) {
+                opdsEntryStatusCacheId = entryIdToUidMap.get(ancestor.getRelativeEntryId());
+                if(opdsEntryStatusCacheId == null) {
+                    opdsEntryStatusCacheId = findUidByEntryId(ancestor.getRelativeEntryId());
+                    entryIdToUidMap.put(ancestor.getRelativeEntryId(), opdsEntryStatusCacheId);
+                }
+
+                relativeOpdsEntryStatusCacheId = entryIdToUidMap.get(ancestor.getEntryId());
+                if(relativeOpdsEntryStatusCacheId == null) {
+                    relativeOpdsEntryStatusCacheId = findUidByEntryId(ancestor.getEntryId());
+                    entryIdToUidMap.put(ancestor.getEntryId(), relativeOpdsEntryStatusCacheId);
+                }
+
+                if(opdsEntryStatusCacheId != null && relativeOpdsEntryStatusCacheId != null) {
                     //Some entries (e.g. the master library list) might not have statuscacheid objects, so avoid handling them
                     cacheAncestors.add(new OpdsEntryStatusCacheAncestor(opdsEntryStatusCacheId,
-                            ancestorOpdsEntryStatusCacheId));
+                            relativeOpdsEntryStatusCacheId));
                 }
             }
 

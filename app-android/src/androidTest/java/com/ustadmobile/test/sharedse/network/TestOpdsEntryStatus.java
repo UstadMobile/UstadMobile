@@ -14,6 +14,7 @@ import com.ustadmobile.lib.db.entities.DownloadSetItem;
 import com.ustadmobile.lib.db.entities.OpdsEntry;
 import com.ustadmobile.lib.db.entities.OpdsEntryStatusCache;
 import com.ustadmobile.lib.db.entities.OpdsEntryParentToChildJoin;
+import com.ustadmobile.lib.db.entities.OpdsEntryStatusCacheAncestor;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
 import com.ustadmobile.lib.db.entities.OpdsLink;
 import com.ustadmobile.lib.util.UmUuidUtil;
@@ -262,6 +263,45 @@ public class TestOpdsEntryStatus {
                 statusCache.getEntriesWithContainerIncDescendants());
         Assert.assertEquals("Total recursive size of containers is 14700", 14700,
                 statusCache.getSizeIncDescendants());
+    }
+
+    @Test
+    public void testEntryStatus_childDiscoveredBeforeParent(){
+        String childEntryId = UUID.randomUUID().toString() + "-child";
+        String parentEntryId = UUID.randomUUID().toString() + "-parent";
+
+        OpdsEntryWithRelations childEntry = new OpdsEntryWithRelations(
+                UmUuidUtil.encodeUuidWithAscii85(UUID.randomUUID()),
+                childEntryId, "Child 1");
+        OpdsLink childAcquisitionLink = new OpdsLink(childEntry.getUuid(), "application/epub+zip",
+                "file.epub", OpdsEntry.LINK_REL_ACQUIRE);
+        childAcquisitionLink.setLength(ENTRY_SIZE_LINK_LENGTH);
+        childEntry.setLinks(Arrays.asList(childAcquisitionLink));
+        DbManager dbManager = DbManager.getInstance(PlatformTestUtil.getTargetContext());
+        dbManager.getOpdsEntryDao().insert(childEntry);
+        dbManager.getOpdsLinkDao().insert(Arrays.asList(childAcquisitionLink));
+        dbManager.getOpdsEntryStatusCacheDao().handleOpdsEntriesLoaded(dbManager, Arrays.asList(childEntry));
+
+        OpdsEntryStatusCache entryStatusCache = dbManager.getOpdsEntryStatusCacheDao()
+                .findByEntryId(childEntryId);
+        Assert.assertNotNull("entry status cache created for child entry", entryStatusCache);
+        Assert.assertEquals("Entry status cache for entry size is as per link", ENTRY_SIZE_LINK_LENGTH,
+                entryStatusCache.getEntrySize());
+
+
+        //nwo create the parent, discover it, and make sure that it includes the size of the child
+        OpdsEntryWithRelations parentEntry = new OpdsEntryWithRelations(UmUuidUtil.encodeUuidWithAscii85(
+                UUID.randomUUID()), parentEntryId, "Parent 1");
+        dbManager.getOpdsEntryDao().insert(parentEntry);
+        OpdsEntryParentToChildJoin parentChildJoin = new OpdsEntryParentToChildJoin(parentEntry.getUuid(),
+                childEntry.getUuid(), 0);
+        dbManager.getOpdsEntryParentToChildJoinDao().insert(parentChildJoin);
+
+        dbManager.getOpdsEntryStatusCacheDao().handleOpdsEntriesLoaded(dbManager, Arrays.asList(parentEntry));
+
+        OpdsEntryStatusCache parentStatusCache = dbManager.getOpdsEntryStatusCacheDao().findByEntryId(parentEntryId);
+        Assert.assertEquals("Entry size of parent inc descendants includes child entry", ENTRY_SIZE_LINK_LENGTH,
+                parentStatusCache.getSizeIncDescendants());
     }
 
 

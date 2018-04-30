@@ -5,6 +5,7 @@ import android.arch.persistence.room.Dao;
 import android.arch.persistence.room.Insert;
 import android.arch.persistence.room.Query;
 import android.arch.persistence.room.Transaction;
+import android.arch.persistence.room.Update;
 
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.dao.OpdsEntryStatusCacheDao;
@@ -26,6 +27,10 @@ public abstract class OpdsEntryStatusCacheDaoAndroid extends OpdsEntryStatusCach
     @Override
     @Insert
     public abstract void insertList(List<OpdsEntryStatusCache> statuses);
+
+    @Override
+    @Update
+    public abstract void update(OpdsEntryStatusCache status);
 
     @Override
     @Query("SELECT statusCacheUid FROM OpdsEntryStatusCache WHERE statusEntryId = :entryId")
