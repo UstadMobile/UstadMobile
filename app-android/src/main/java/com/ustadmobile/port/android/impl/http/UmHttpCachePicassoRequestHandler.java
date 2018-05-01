@@ -35,7 +35,7 @@ public class UmHttpCachePicassoRequestHandler extends RequestHandler{
 
     @Override
     public boolean canHandleRequest(Request data) {
-        return data.uri.getScheme().startsWith(SCHEME_PREFIX);
+        return data.uri.getScheme() != null && data.uri.getScheme().startsWith(SCHEME_PREFIX);
     }
 
     @Override

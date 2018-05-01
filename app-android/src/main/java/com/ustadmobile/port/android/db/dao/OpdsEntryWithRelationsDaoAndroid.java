@@ -159,7 +159,11 @@ public abstract class OpdsEntryWithRelationsDaoAndroid extends OpdsEntryWithRela
     @Query(GET_DESCENDANT_ENTRIES_RECURSIVE_SQL)
     public abstract List<OpdsEntryRelative> getDescendant_RecursiveQuery(List<String> entryIds);
 
+    public UmProvider<OpdsEntryWithStatusCache> getEntriesWithDownloadSet() {
+        return () -> getEntriesWithDownloadSet_Room();
+    }
 
-
+    @Query(GET_ENTRIES_WITH_DOWNLOADSET_SQL)
+    public abstract DataSource.Factory<Integer, OpdsEntryWithStatusCache> getEntriesWithDownloadSet_Room();
 
 }

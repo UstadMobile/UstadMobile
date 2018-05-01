@@ -123,7 +123,8 @@ public class OPDSEntryCard extends ConstraintLayout {
         if(statusCache != null) {
             long containersDownloadedSizeIncDescendants = statusCache.getContainersDownloadedSizeIncDescendants();
 
-            if(containersDownloadedSizeIncDescendants > 0 && containersDownloadedSizeIncDescendants == statusCache.getSizeIncDescendants()) {
+            if(containersDownloadedSizeIncDescendants > 0
+                    && containersDownloadedSizeIncDescendants == statusCache.getSizeIncDescendants()) {
                 statusButton.setImageResource(R.drawable.ic_offline_pin_black_24dp);
                 statusButton.setContentDescription(getContext().getResources().getString(R.string.downloaded));
             }else {

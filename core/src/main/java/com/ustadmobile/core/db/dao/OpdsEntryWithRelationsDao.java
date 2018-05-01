@@ -196,6 +196,15 @@ public abstract class OpdsEntryWithRelationsDao {
     @UmQuery(GET_DESCENDANT_ENTRIES_RECURSIVE_SQL)
     public abstract List<OpdsEntryRelative> getDescendant_RecursiveQuery(List<String> entryIds);
 
+    protected static final String GET_ENTRIES_WITH_DOWNLOADSET_SQL =
+            "SELECT OpdsEntry.*, OpdsEntryStatusCache.* FROM OpdsEntry " +
+            "JOIN OpdsEntryStatusCache ON OpdsEntry.entryId = OpdsEntryStatusCache.statusEntryId " +
+            "JOIN DownloadSet ON OpdsEntry.uuid = DownloadSet.rootOpdsUuid";
+
+    @UmQuery(GET_ENTRIES_WITH_DOWNLOADSET_SQL)
+    public abstract UmProvider<OpdsEntryWithStatusCache> getEntriesWithDownloadSet();
+
+
 
 
 }

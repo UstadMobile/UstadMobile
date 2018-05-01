@@ -200,6 +200,11 @@ public class CatalogPresenter extends BaseCatalogPresenter implements Acquisitio
                     .findEntriesByContainerFileDirectoryAsProvider(dirsToList, null);
             mView.setEntryProvider(entryProvider);
             title = UstadMobileSystemImpl.getInstance().getString(MessageID.downloaded, getContext());
+        }else if(opdsUri.equals("entries:///downloadSetEntries")) {
+            entryProvider = DbManager.getInstance(getContext()).getOpdsEntryWithRelationsDao()
+                    .getEntriesWithDownloadSet();
+            mView.setEntryProvider(entryProvider);
+            title = UstadMobileSystemImpl.getInstance().getString(MessageID.downloaded, getContext());
         }
 
 
@@ -223,9 +228,11 @@ public class CatalogPresenter extends BaseCatalogPresenter implements Acquisitio
         }
     }
 
-    public String resolveLink(String href) {
+    public String resolveLink(String href, OpdsEntry entry) {
         //TODO: refactor this to using a base href variable instead
-        if(feedLiveData != null && feedLiveData.getValue() != null)
+        if(entry != null && entry.getUrl() != null){
+            return UMFileUtil.resolveLink(entry.getUrl(), href);
+        }else if(feedLiveData != null && feedLiveData.getValue() != null)
             return UMFileUtil.resolveLink(feedLiveData.getValue().getUrl(), href);
         else
             return href;
@@ -289,6 +296,13 @@ public class CatalogPresenter extends BaseCatalogPresenter implements Acquisitio
             return;
         }
 
+        if(entry.getEntryType() == OpdsEntry.ENTRY_TYPE_OPDS_FEED) {
+            //this entry is itself a feed - we could have also looked for child entries
+            args.put(ARG_URL, entry.getUrl());
+            UstadMobileSystemImpl.getInstance().go(CatalogView.VIEW_NAME, args, getContext());
+            return;
+        }
+
         Hashtable args = new Hashtable();
 
         List<OpdsLink> opdsLinks = entry.getLinks();
@@ -316,6 +330,8 @@ public class CatalogPresenter extends BaseCatalogPresenter implements Acquisitio
                 return;
             }
         }
+
+
 
         //no relevant link found - but perhaps this is a file entry
     }
@@ -415,7 +431,7 @@ public class CatalogPresenter extends BaseCatalogPresenter implements Acquisitio
             List<OpdsLink> subsectionLinks = entries.get(i).getLinks(OpdsEntry.LINK_REL_SUBSECTION,
                     null, null, false, false, false, 1);
             if(subsectionLinks != null && !subsectionLinks.isEmpty()){
-                entryUris.add(resolveLink(subsectionLinks.get(0).getHref()));
+                entryUris.add(resolveLink(subsectionLinks.get(0).getHref(), null));
             }
         }
 

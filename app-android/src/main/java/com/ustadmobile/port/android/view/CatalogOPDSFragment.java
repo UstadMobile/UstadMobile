@@ -615,7 +615,7 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
                 imgLink = entry.getThumbnailLink(true);
                 if(imgLink != null) {
                     imageUri = imgLink.getHref();
-                    imageUri = mCatalogPresenter.resolveLink(imageUri);
+                    imageUri = mCatalogPresenter.resolveLink(imageUri, entry);
 
                     holder.mEntryCard.setThumbnailUrl(imageUri, imgLink.getMimeType());
                 }
