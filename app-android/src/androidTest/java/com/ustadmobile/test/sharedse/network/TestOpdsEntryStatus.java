@@ -129,6 +129,14 @@ public class TestOpdsEntryStatus {
         Assert.assertEquals("After queueing download job items, total size should be readjusted",
                 ENTRY_SIZE_DOWNLOAD_LENGTH * NUM_ENTRIES_IN_SUBSECTION, status.getSizeIncDescendants());
 
+        //mark that the first download is now active
+        int statusCacheUid = dbManager.getOpdsEntryStatusCacheDao().findUidByEntryId(
+                setItemList.get(0).getEntryId());
+
+        dbManager.getOpdsEntryStatusCacheDao().handleDownloadJobStarted(statusCacheUid);
+        status = dbManager.getOpdsEntryStatusCacheDao().findByEntryId(subsectionParent.getEntryId());
+        Assert.assertEquals("After marking download job as started, number of active inc ancestors downloads = 1",
+                1, status.getActiveDownloadsIncAncestors());
 
         //now mark progress on a download
         jobItemList.get(0).setStatus(NetworkTask.STATUS_RUNNING);
@@ -137,8 +145,7 @@ public class TestOpdsEntryStatus {
                 setItemList.get(0).getEntryId(), 0, NetworkTask.STATUS_COMPLETE).get(0)
                 .getDownloadJobItemId();
         jobItemList.get(0).setDownloadJobItemId(jobItemId);
-        int statusCacheUid = dbManager.getOpdsEntryStatusCacheDao().findUidByEntryId(
-                setItemList.get(0).getEntryId());
+
         dbManager.getDownloadJobItemDao().updateDownloadJobItemStatus(jobItemList.get(0));
 
 
@@ -160,6 +167,8 @@ public class TestOpdsEntryStatus {
                 ENTRY_SIZE_CONTAINER_LENGTH, status.getContainersDownloadedSizeIncDescendants());
         Assert.assertEquals("After download finishes, bytes in progress is 0, ", 0,
                 status.getPendingDownloadBytesSoFarIncDescendants());
+        Assert.assertEquals("After download finishes, number of active downloads is 0", 0,
+                status.getActiveDownloadsIncAncestors());
         Assert.assertEquals("After download item finishes, bytes downloaded equals 1 container length",
                 ENTRY_SIZE_CONTAINER_LENGTH, status.getContainersDownloadedSizeIncDescendants());
 

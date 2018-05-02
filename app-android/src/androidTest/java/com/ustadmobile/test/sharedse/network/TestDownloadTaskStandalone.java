@@ -9,6 +9,7 @@ import com.ustadmobile.core.db.DbManager;
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.UmObserver;
 import com.ustadmobile.core.fs.db.ContainerFileHelper;
+import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.networkmanager.NetworkTask;
 import com.ustadmobile.core.util.UMFileUtil;
@@ -26,6 +27,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -109,9 +111,32 @@ public class TestDownloadTaskStandalone extends TestWithNetworkService {
         //now delete them all. We need to rerun the find query, if these entries were unknown before they
         // would not have been discovered
         childEntries = dbManager.getOpdsEntryWithRelationsDao().findAllChildEntryIdsRecursive(CRAWL_ROOT_ENTRY_ID);
-        for(String entryId : childEntries) {
-            ContainerFileHelper.getInstance().deleteAllContainerFilesByEntryId(PlatformTestUtil.getTargetContext(),
-                    entryId);
+
+//        dbManager.getOpdsEntryWithRelationsDao().deleteAllDescendants(dbManager.getContext(),
+//                CRAWL_ROOT_ENTRY_ID, dbManager.getOpdsEntryStatusCacheDao());
+        final boolean[] complete = new boolean[1];
+        UstadMobileSystemImpl.getInstance().deleteEntries(PlatformTestUtil.getTargetContext(),
+                Arrays.asList(CRAWL_ROOT_ENTRY_ID), true,
+                new UmCallback<Void>() {
+                    @Override
+                    public void onSuccess(Void result) {
+                        synchronized (complete) {
+                            complete[0] = true;
+                            complete.notifyAll();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Throwable exception) {
+                        complete.notifyAll();
+                    }
+                });
+
+        synchronized (complete) {
+            if(!complete[0]){
+                try { complete.wait(10000); }
+                catch(InterruptedException e) {}
+            }
         }
 
         //now make sure that the entries have been marked as deleted

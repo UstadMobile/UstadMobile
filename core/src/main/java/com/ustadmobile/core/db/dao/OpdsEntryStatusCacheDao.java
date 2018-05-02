@@ -99,6 +99,13 @@ public abstract class OpdsEntryStatusCacheDao {
             "            WHERE DownloadJobItem.downloadJobItemId = :downloadJobItemId")
     public abstract OpdsEntryStatusCache findByDownloadJobItemId(int downloadJobItemId);
 
+    @UmQuery("SELECT OpdsEntryStatusCache.statusEntryId " +
+    "FROM " +
+    "OpdsEntryStatusCache " +
+    "JOIN OpdsEntryStatusCacheAncestor ON OpdsEntryStatusCacheAncestor.opdsEntryStatusCacheId = OpdsEntryStatusCache.statusCacheUid " +
+    "WHERE OpdsEntryStatusCacheAncestor.ancestorOpdsEntryStatusCacheId = " +
+	"(SELECT statusCacheUid FROM OpdsEntryStatusCache WHERE statusEntryId = :rootEntryId)")
+    public abstract List<String> findAllKnownDescendantEntryIds(String rootEntryId);
 
     /**
      * When from OpdsRepository for loading HTTP feeds over OPDS or using the main sync arch. Update
@@ -175,7 +182,6 @@ public abstract class OpdsEntryStatusCacheDao {
             }
             
             for(OpdsEntryRelative descendant : descendantsList) {
-//                TODO: This entry has not yet been inserted...
                 opdsEntryStatusCacheId = entryIdToUidMap.get(descendant.getEntryId());
                 if(opdsEntryStatusCacheId == null) {
                     opdsEntryStatusCacheId = findUidByEntryId(descendant.getEntryId());
@@ -211,6 +217,10 @@ public abstract class OpdsEntryStatusCacheDao {
                     entryStatusCache.setContainersDownloadedSizeIncDescendants(
                             entryStatusCache.getContainersDownloadedSizeIncDescendants() +
                             childEntryStatusCache.getContainersDownloadedSizeIncDescendants());
+                    entryStatusCache.setActiveDownloadsIncAncestors(
+                            entryStatusCache.getActiveDownloadsIncAncestors() +
+                                    childEntryStatusCache.getActiveDownloadsIncAncestors());
+
                     dbManager.getOpdsEntryStatusCacheDao().update(entryStatusCache);
                 }
 
@@ -385,6 +395,19 @@ public abstract class OpdsEntryStatusCacheDao {
     protected abstract void updateOnDownloadJobItemQueuedEntry(int downloadJobId, int statusCacheUid);
 
 
+    public void handleDownloadJobStarted(int statusCacheUid) {
+        OpdsEntryStatusCache statusCache = findByStatusCacheUid(statusCacheUid);
+        if(!statusCache.isEntryActiveDownload()) {
+            updateOnDownloadJobStartedIncAncestors(statusCacheUid, 1);
+            updateOnDownloadJobStartedEntry(statusCacheUid, true);
+        }
+    }
+
+    protected abstract void updateOnDownloadJobStartedIncAncestors(int statusCacheUid, int deltaActiveDownloads);
+
+    protected abstract void updateOnDownloadJobStartedEntry(int statusCacheUid, boolean activeDownload);
+
+
     /**
      * This method needs to be called by the DownloadTask as a download progresses. It will update the
      * bytesSoFar for the given entry and all it's ancestors.
@@ -439,6 +462,8 @@ public abstract class OpdsEntryStatusCacheDao {
     /**
      * This method needs to be called when a container has been downloaded, or discovered on disk.
      *
+     * TODO: check that this download job item is in fact complete (e.g. we are not discovering something which is being updated)
+     *
      * @param entryStatusCache The OpdsEntryStatusCache representing the given id.
      * @param containerFile The ContainerFile that contains the given entry.
      */
@@ -448,13 +473,15 @@ public abstract class OpdsEntryStatusCacheDao {
         long deltaContainersDownloadedSize = containerFile.getFileSize() - entryStatusCache.getEntryContainerDownloadedSize();
         int deltaContainersDownloaded = entryStatusCache.isEntryContainerDownloaded() ? 0 : 1;
         long deltaSize = containerFile.getFileSize() - entryStatusCache.getEntrySize();
+        int deltaActiveDownloads = entryStatusCache.isEntryActiveDownload() ? -1 : 0;
 
         updateOnContainerStatusChangedIncAncestors(entryStatusCache.getStatusEntryId(),
                 deltaPendingDownloadBytesSoFar, deltaContainersDownloadPending,
-                deltaContainersDownloadedSize, deltaContainersDownloaded, deltaSize);
+                deltaActiveDownloads, deltaContainersDownloadedSize, deltaContainersDownloaded,
+                deltaSize);
 
         updateOnContainerStatusChangedEntry(entryStatusCache.getStatusCacheUid(), 0,
-                false, containerFile.getFileSize(), true,
+                false, false, containerFile.getFileSize(), true,
                 containerFile.getFileSize());
     }
 
@@ -492,6 +519,8 @@ public abstract class OpdsEntryStatusCacheDao {
      *                                  just completed.
      * @param deltaContainersDownloadPending The change in the number of containers for which a download
      *                                       is pending. Generally -1.
+     * @param deltaActiveDownloads The change in the number of containers for which a download is currently
+     *                             active.
      * @param deltaContainersDownloadedSize The change in the size of entries that have been downloaded,
      *                                      generally the file size of the container just downloaded.
      * @param deltaContainersDownloaded The change in the number of containers downloaded, generally +1.
@@ -509,6 +538,7 @@ public abstract class OpdsEntryStatusCacheDao {
             "(SELECT ancestorOpdsEntryStatusCacheId FROM OpdsEntryStatusCacheAncestor WHERE opdsEntryStatusCacheId = (SELECT statusCacheUid FROM OpdsEntryStatusCache WHERE statusEntryId = :entryId))")
     protected abstract void updateOnContainerStatusChangedIncAncestors(String entryId, long deltaDownloadedBytesSoFar,
                                                                        int deltaContainersDownloadPending,
+                                                                       int deltaActiveDownloads,
                                                                        long deltaContainersDownloadedSize,
                                                                        long deltaContainersDownloaded,
                                                                        long deltaTotalSize);
@@ -519,6 +549,7 @@ public abstract class OpdsEntryStatusCacheDao {
      * @param statusCacheUid The UID of the OpdsEntryStatusCache object.
      * @param pendingDownloadBytesSoFar Currently pending download bytes so far.
      * @param containerDownloadPending True if the container's download is pending,
+     * @param activeDownload True if the download is currently active, false otherwise
      * @param containerDownloadedSize The currently downloaded container size (0 if not downloaded,
      *                                or the file size of the container if it is downloaded).
      * @param containerDownloaded True if the container for this entry has been downloaded, false otherwise.
@@ -534,6 +565,7 @@ public abstract class OpdsEntryStatusCacheDao {
     protected abstract void updateOnContainerStatusChangedEntry(int statusCacheUid,
                                                                 long pendingDownloadBytesSoFar,
                                                                 boolean containerDownloadPending,
+                                                                boolean activeDownload,
                                                                 long containerDownloadedSize,
                                                                 boolean containerDownloaded,
                                                                 long entrySize);
@@ -569,12 +601,13 @@ public abstract class OpdsEntryStatusCacheDao {
                 entryStatusCache.getEntryContainerDownloadedSize();
 
         updateOnContainerStatusChangedIncAncestors(entryStatusCache.getStatusEntryId(),
-                0, 0,
+                0, 0, 0,
                 deltaContainersDownloadedSize, deltaContainersDownloaded, deltaSize);
 
         updateOnContainerStatusChangedEntry(entryStatusCache.getStatusCacheUid(),
                 entryStatusCache.getEntryPendingDownloadBytesSoFar(),
-                entryStatusCache.isEntryContainerDownloadPending(), 0, false,
+                entryStatusCache.isEntryContainerDownloadPending(),
+                false,0, false,
                 entryStatusCache.getEntryAcquisitionLinkLength());
     }
 
@@ -600,15 +633,18 @@ public abstract class OpdsEntryStatusCacheDao {
         long newEntrySize = entryStatusCache.isEntryContainerDownloaded() ? entryStatusCache.getEntrySize()
                 : entryStatusCache.getEntryAcquisitionLinkLength();
         long deltaSize = entryStatusCache.getEntryAcquisitionLinkLength() - newEntrySize;
+        int deltaActiveDownloads = entryStatusCache.isEntryActiveDownload() ? -1 : 0;
 
         updateOnContainerStatusChangedIncAncestors(entryStatusCache.getStatusEntryId(),
-                deltaDownloadedBytesSoFar, deltaContainerDownloadPending, 0, 0,
+                deltaDownloadedBytesSoFar, deltaContainerDownloadPending, deltaActiveDownloads,
+                0, 0,
                 deltaSize);
 
         updateOnContainerStatusChangedEntry(entryStatusCache.getStatusCacheUid(), 0, false,
-                entryStatusCache.getEntryContainerDownloadedSize(), entryStatusCache.isEntryContainerDownloaded(),
+                false, entryStatusCache.getEntryContainerDownloadedSize(), entryStatusCache.isEntryContainerDownloaded(),
                 deltaSize);
     }
+
 
 
 

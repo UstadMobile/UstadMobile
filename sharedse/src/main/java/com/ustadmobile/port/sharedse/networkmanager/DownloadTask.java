@@ -305,6 +305,7 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
             if (currentDownloadJobItem != null) {
                 currentEntryStatusCacheId = mDbManager.getOpdsEntryStatusCacheDao().findUidByEntryId(
                         currentDownloadJobItem.getDownloadSetItem().getEntryId());
+                mDbManager.getOpdsEntryStatusCacheDao().handleDownloadJobStarted(currentEntryStatusCacheId);
                 attemptCount++;
                 currentGroupSSID = null;
 

@@ -57,6 +57,11 @@ public class OpdsEntryStatusCache {
 
     private long entryAcquisitionLinkLength;
 
+    private int activeDownloadsIncAncestors;
+
+    private boolean entryActiveDownload;
+
+
     public OpdsEntryStatusCache() {
 
     }
@@ -293,6 +298,42 @@ public class OpdsEntryStatusCache {
         this.entryHasContainer = entryHasContainer;
     }
 
+
+    /**
+     * Get the total number of downloads currently ongoing including this entry and all its ancestors
+     *
+     * @return The total number of downloads currently ongoing including this entry and all its ancestors
+     */
+    public int getActiveDownloadsIncAncestors() {
+        return activeDownloadsIncAncestors;
+    }
+
+    /**
+     * Set the total number of downloads currently ongoing including this entry and all its ancestors
+     * @param activeDownloadsIncAncestors
+     */
+    public void setActiveDownloadsIncAncestors(int activeDownloadsIncAncestors) {
+        this.activeDownloadsIncAncestors = activeDownloadsIncAncestors;
+    }
+
+    /**
+     * True if the download for this entry (e.g. DownloadJobItem) is currently running, false otherwise
+     *
+     * @return True if the download for this entry (e.g. DownloadJobItem) is currently running, false otherwise
+     */
+    public boolean isEntryActiveDownload() {
+        return entryActiveDownload;
+    }
+
+    /**
+     * True if the download for this entry (e.g. DownloadJobItem) is currently running, false otherwise
+     *
+     * @param entryActiveDownload True if the download for this entry (e.g. DownloadJobItem) is currently running, false otherwise
+     */
+    public void setEntryActiveDownload(boolean entryActiveDownload) {
+        this.entryActiveDownload = entryActiveDownload;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -319,6 +360,8 @@ public class OpdsEntryStatusCache {
         if (entryContainerDownloadPending != that.entryContainerDownloadPending) return false;
         if (entryAcquisitionLinkLength != that.entryAcquisitionLinkLength) return false;
         if (!statusCacheUid.equals(that.statusCacheUid)) return false;
+        if (entryActiveDownload != that.entryActiveDownload) return false;
+        if (activeDownloadsIncAncestors != that.activeDownloadsIncAncestors) return false;
         return statusEntryId.equals(that.statusEntryId);
     }
 
@@ -339,6 +382,8 @@ public class OpdsEntryStatusCache {
         result = 31 * result + containersDownloadPendingIncAncestors;
         result = 31 * result + (entryContainerDownloadPending ? 1 : 0);
         result = 31 * result + (int) (entryAcquisitionLinkLength ^ (entryAcquisitionLinkLength >>> 32));
+        result = 31 * result + (entryActiveDownload ? 1 : 0);
+        result = 31 * result + activeDownloadsIncAncestors;
         return result;
     }
 }

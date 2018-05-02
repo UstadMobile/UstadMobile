@@ -11,6 +11,9 @@ public class OpdsEntryWithStatusCache extends OpdsEntryWithRelations {
     @UmEmbedded
     OpdsEntryStatusCache statusCache;
 
+    @UmEmbedded
+    DownloadJobItem pendingDownloadJobItem;
+
     /**
      * Setter for status cache property.
      *
@@ -22,6 +25,14 @@ public class OpdsEntryWithStatusCache extends OpdsEntryWithRelations {
 
     public void setStatusCache(OpdsEntryStatusCache statusCache) {
         this.statusCache = statusCache;
+    }
+
+    public DownloadJobItem getPendingDownloadJobItem() {
+        return pendingDownloadJobItem;
+    }
+
+    public void setPendingDownloadJobItem(DownloadJobItem pendingDownloadJobItem) {
+        this.pendingDownloadJobItem = pendingDownloadJobItem;
     }
 
     @Override

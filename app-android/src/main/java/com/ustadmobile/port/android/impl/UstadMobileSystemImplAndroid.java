@@ -60,10 +60,13 @@ import com.ustadmobile.core.buildconfig.CoreBuildConfig;
 import com.ustadmobile.core.catalog.contenttype.*;
 import com.ustadmobile.core.controller.CatalogPresenter;
 import com.ustadmobile.core.controller.UserSettingsController;
+import com.ustadmobile.core.db.DbManager;
+import com.ustadmobile.core.db.dao.OpdsEntryStatusCacheDao;
 import com.ustadmobile.core.fs.contenttype.EpubTypePluginFs;
 import com.ustadmobile.core.fs.contenttype.H5PContentTypeFs;
 import com.ustadmobile.core.fs.contenttype.ScormTypePluginFs;
 import com.ustadmobile.core.fs.contenttype.XapiPackageTypePluginFs;
+import com.ustadmobile.core.fs.db.ContainerFileHelper;
 import com.ustadmobile.core.impl.ContainerMountRequest;
 import com.ustadmobile.core.impl.TinCanQueueListener;
 import com.ustadmobile.core.impl.UMDownloadCompleteReceiver;
@@ -123,9 +126,11 @@ import java.net.URLConnection;
 import java.sql.SQLException;
 import java.text.Format;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Timer;
@@ -1010,4 +1015,27 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         Format format = new SimpleDateFormat("yyyy MM dd HH:mm:ss");
         return format.format(date);
     }
+
+    @Override
+    public void deleteEntries(Object context, final List<String> entryIds, boolean recursive, UmCallback<Void> callback) {
+        bgExecutorService.execute(() -> {
+            OpdsEntryStatusCacheDao entryStatusCacheDao = DbManager.getInstance(context).getOpdsEntryStatusCacheDao();
+            List<String> entryIdsToDelete = entryIds;
+            if(recursive) {
+                entryIdsToDelete = new ArrayList<>();
+                for(String entryId : entryIds) {
+                    entryIdsToDelete.add(entryId);
+                    entryIdsToDelete.addAll(entryStatusCacheDao.findAllKnownDescendantEntryIds(entryId));
+                }
+            }
+
+            for(String descendantEntryId: entryIdsToDelete) {
+                ContainerFileHelper.getInstance().deleteAllContainerFilesByEntryId(context, descendantEntryId);
+            }
+
+            callback.onSuccess(null);
+        });
+
+    }
+
 }

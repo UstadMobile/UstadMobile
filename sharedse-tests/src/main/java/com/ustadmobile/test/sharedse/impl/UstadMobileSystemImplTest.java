@@ -24,6 +24,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
@@ -271,5 +272,10 @@ public class UstadMobileSystemImplTest extends UstadMobileSystemImplSE {
     @Override
     public InputStream getAssetSync(Object context, String path) throws IOException {
         return null;
+    }
+
+    @Override
+    public void deleteEntries(Object context, List<String> entryId, boolean recursive, UmCallback<Void> callback) {
+        //not implemented here
     }
 }

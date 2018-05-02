@@ -9,6 +9,7 @@ import android.arch.persistence.room.Update;
 
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.dao.OpdsEntryStatusCacheDao;
+import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.db.entities.ContainerFile;
 import com.ustadmobile.lib.db.entities.OpdsEntryStatusCache;
 
@@ -126,6 +127,18 @@ public abstract class OpdsEntryStatusCacheDaoAndroid extends OpdsEntryStatusCach
             " WHERE statusCacheUid = :statusCacheUid")
     protected abstract void updateOnDownloadJobItemQueuedEntry(int statusCacheUid, int downloadJobId);
 
+
+    @Override
+    @Query("UPDATE OpdsEntryStatusCache " +
+            "SET activeDownloadsIncAncestors = activeDownloadsIncAncestors + :deltaActiveDownloads " +
+            "WHERE statusCacheUid IN (SELECT ancestorOpdsEntryStatusCacheId FROM OpdsEntryStatusCacheAncestor WHERE opdsEntryStatusCacheId = :statusCacheUid)")
+    protected abstract void updateOnDownloadJobStartedIncAncestors(int statusCacheUid, int deltaActiveDownloads);
+
+    @Override
+    @Query("UPDATE OpdsEntryStatusCache SET entryActiveDownload = :activeDownload " +
+            "WHERE statusCacheUid = :statusCacheUid")
+    protected abstract void updateOnDownloadJobStartedEntry(int statusCacheUid, boolean activeDownload);
+
     @Transaction
     public void handleDownloadJobProgress(int entryStatusCacheUid, int downloadJobItemId){
         super.handleDownloadJobProgress(entryStatusCacheUid, downloadJobItemId);
@@ -160,12 +173,14 @@ public abstract class OpdsEntryStatusCacheDaoAndroid extends OpdsEntryStatusCach
             "containersDownloadPendingIncAncestors = containersDownloadPendingIncAncestors + :deltacontainersDownloadPending,\n" +
             "containersDownloadedSizeIncDescendants = containersDownloadedSizeIncDescendants + :deltaContainersDownloadedSize,\n" +
             "containersDownloadedIncDescendants = containersDownloadedIncDescendants + :deltaContainersDownloaded,\n" +
-            "sizeIncDescendants = sizeIncDescendants + :deltaSize\n" +
-            "WHERE statusCacheUid IN\n" +
+            "sizeIncDescendants = sizeIncDescendants + :deltaSize, " +
+            "activeDownloadsIncAncestors = activeDownloadsIncAncestors + :deltaActiveDownloads " +
+            "WHERE statusCacheUid IN " +
             "(SELECT ancestorOpdsEntryStatusCacheId FROM OpdsEntryStatusCacheAncestor WHERE opdsEntryStatusCacheId = (SELECT statusCacheUid FROM OpdsEntryStatusCache WHERE statusEntryId = :entryId))")
     @Override
     public abstract void updateOnContainerStatusChangedIncAncestors(String entryId, long deltaPendingDownloadBytesSoFar,
                                                                     int deltacontainersDownloadPending,
+                                                                    int deltaActiveDownloads,
                                                                     long deltaContainersDownloadedSize,
                                                                     long deltaContainersDownloaded, long deltaSize);
 
@@ -174,6 +189,7 @@ public abstract class OpdsEntryStatusCacheDaoAndroid extends OpdsEntryStatusCach
             "SET " +
             "entryPendingDownloadBytesSoFar = :pendingDownloadBytesSoFar, " +
             "entryContainerDownloadPending = :containerDownloadPending,  " +
+            "entryActiveDownload = :activeDownload, " +
             "entryContainerDownloadedSize = :containerDownloadedSize, " +
             "entryContainerDownloaded = :containerDownloaded," +
             "entrySize = :entrySize " +
@@ -182,6 +198,7 @@ public abstract class OpdsEntryStatusCacheDaoAndroid extends OpdsEntryStatusCach
     public abstract void updateOnContainerStatusChangedEntry(int statusCacheUid,
                                                              long pendingDownloadBytesSoFar,
                                                              boolean containerDownloadPending,
+                                                             boolean activeDownload,
                                                              long containerDownloadedSize,
                                                              boolean containerDownloaded,
                                                              long entrySize);
@@ -196,5 +213,12 @@ public abstract class OpdsEntryStatusCacheDaoAndroid extends OpdsEntryStatusCach
             "OpdsEntryStatusCache.entryContainerDownloaded = 1")
     protected abstract List<OpdsEntryStatusCache> findDeletedEntriesToUpdate(List<String> entryIdsToCheck);
 
-
+    @Override
+    @Query("SELECT OpdsEntryStatusCache.statusEntryId " +
+            "FROM " +
+            "OpdsEntryStatusCache " +
+            "JOIN OpdsEntryStatusCacheAncestor ON OpdsEntryStatusCacheAncestor.opdsEntryStatusCacheId = OpdsEntryStatusCache.statusCacheUid " +
+            "WHERE OpdsEntryStatusCacheAncestor.ancestorOpdsEntryStatusCacheId = " +
+            "(SELECT statusCacheUid FROM OpdsEntryStatusCache WHERE statusEntryId = :rootEntryId)")
+    public abstract List<String> findAllKnownDescendantEntryIds(String rootEntryId);
 }

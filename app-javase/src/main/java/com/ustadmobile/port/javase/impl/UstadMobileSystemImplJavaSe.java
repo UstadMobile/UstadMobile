@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Hashtable;
+import java.util.List;
 
 /**
  * Created by mike on 10/17/17.
@@ -239,5 +240,10 @@ public class UstadMobileSystemImplJavaSe extends UstadMobileSystemImplSE {
     @Override
     public InputStream getAssetSync(Object context, String path) throws IOException {
         return null;
+    }
+
+    @Override
+    public void deleteEntries(Object context, List<String> entryId, boolean recursive, UmCallback<Void> callback) {
+        //not implemented
     }
 }

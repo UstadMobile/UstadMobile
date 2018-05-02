@@ -200,7 +200,6 @@ public abstract class OpdsEntryWithRelationsDao {
             "SELECT OpdsEntry.*, OpdsEntryStatusCache.* FROM OpdsEntry " +
             "JOIN OpdsEntryStatusCache ON OpdsEntry.entryId = OpdsEntryStatusCache.statusEntryId " +
             "JOIN DownloadSet ON OpdsEntry.uuid = DownloadSet.rootOpdsUuid";
-
     @UmQuery(GET_ENTRIES_WITH_DOWNLOADSET_SQL)
     public abstract UmProvider<OpdsEntryWithStatusCache> getEntriesWithDownloadSet();
 

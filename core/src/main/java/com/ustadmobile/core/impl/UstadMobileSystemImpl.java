@@ -61,6 +61,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Hashtable;
 import java.util.LinkedHashMap;
+import java.util.List;
 
 /* $if umplatform == 2  $
     import org.json.me.*;
@@ -1258,6 +1259,19 @@ public abstract class UstadMobileSystemImpl {
     public void setDecryptionSecretProvider(DecryptionSecretProvider decryptionSecretProvider) {
         this.decryptionSecretProvider = decryptionSecretProvider;
     }
+
+
+    /**
+     * Delete a given set of entries from the system.
+     *
+     * @param context Context object
+     * @param entryId List of entry Ids that should be deleted
+     * @param recursive true if all children of the given entryIds should be deleted, false otherwise
+     * @param callback callback to be called when the operation is completed
+     */
+    public abstract void deleteEntries(Object context, List<String> entryId, boolean recursive,
+                                       UmCallback<Void> callback);
+
 }
 
 
