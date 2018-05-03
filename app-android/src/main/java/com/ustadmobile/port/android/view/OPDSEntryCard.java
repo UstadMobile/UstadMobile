@@ -120,32 +120,42 @@ public class OPDSEntryCard extends ConstraintLayout {
         ((TextView)findViewById(R.id.item_opds_entry_card_title_text)).setText(opdsEntry.getTitle());
 
         OpdsEntryStatusCache statusCache = opdsEntry.getStatusCache();
-        if(statusCache != null) {
-            long containersDownloadedSizeIncDescendants = statusCache.getContainersDownloadedSizeIncDescendants();
+        if(statusCache == null)
+            return;
 
-            if(containersDownloadedSizeIncDescendants > 0
-                    && containersDownloadedSizeIncDescendants == statusCache.getSizeIncDescendants()) {
+        switch(opdsEntry.getDownloadDisplayState()) {
+            case OpdsEntryWithStatusCache.DOWNLOAD_DISPLAY_STATUS_DOWNLOADED:
                 statusButton.setImageResource(R.drawable.ic_offline_pin_black_24dp);
                 statusButton.setContentDescription(getContext().getResources().getString(R.string.downloaded));
-            }else {
+                statusButton.setProgressVisibility(View.GONE);
+                break;
+
+            case OpdsEntryWithStatusCache.DOWNLOAD_DISPLAY_STATUS_PAUSED:
+                statusButton.setImageResource(R.drawable.ic_pause_black_24dp);
+                statusButton.setContentDescription(getContext().getResources().getString(R.string.paused));
+                statusButton.setProgressVisibility(View.VISIBLE);
+                statusButton.setProgress(opdsEntry.getDownloadCompletePercentage());
+                break;
+
+            case OpdsEntryWithStatusCache.DOWNLOAD_DISPLAY_STATUS_IN_PROGRESS:
                 statusButton.setImageResource(R.drawable.ic_file_download_black_24dp);
                 statusButton.setContentDescription(getContext().getResources().getString(R.string.download));
-            }
+                statusButton.setProgressVisibility(View.VISIBLE);
+                statusButton.setProgress(opdsEntry.getDownloadCompletePercentage());
+                break;
 
-            int percentRequestedOrCompleted = (statusCache.getEntriesWithContainerIncDescendants()) > 0 ?
-                    ((statusCache.getContainersDownloadedIncDescendants()
-                    + statusCache.getContainersDownloadPendingIncAncestors()) * 100)
-                    / (statusCache.getEntriesWithContainerIncDescendants()) : 0;
-            boolean downloadInProgress= statusCache.getContainersDownloadPendingIncAncestors() > 0
-                    && statusCache.getSizeIncDescendants() > 0
-                    && percentRequestedOrCompleted > IN_PROGRESS_THRESHOLD;
-            if(downloadInProgress){
-                long totalDownloaded = containersDownloadedSizeIncDescendants +
-                        statusCache.getPendingDownloadBytesSoFarIncDescendants();
-                statusButton.setProgress((int)((totalDownloaded * 100)/statusCache.getSizeIncDescendants()));
-            }
+            case OpdsEntryWithStatusCache.DOWNLOAD_DISPLAY_STATUS_NOT_DOWNLOADED:
+                statusButton.setImageResource(R.drawable.ic_file_download_black_24dp);
+                statusButton.setContentDescription(getContext().getResources().getString(R.string.download));
+                statusButton.setProgressVisibility(View.GONE);
+                break;
 
-            statusButton.setProgressVisibility(downloadInProgress ? View.VISIBLE : View.GONE);
+            case OpdsEntryWithStatusCache.DOWNLOAD_DISPLAY_STATUS_QUEUED:
+                statusButton.setImageResource(R.drawable.ic_queue_download_black_24px);
+                statusButton.setContentDescription(getContext().getResources().getString(R.string.queued));
+                statusButton.setProgressVisibility(View.VISIBLE);
+                statusButton.setProgress(opdsEntry.getDownloadCompletePercentage());
+                break;
         }
     }
 

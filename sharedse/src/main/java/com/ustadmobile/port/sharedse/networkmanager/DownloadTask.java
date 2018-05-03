@@ -241,7 +241,7 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
         setStatus(STATUS_RUNNING);
         networkManager.networkTaskStatusChanged(this);
 
-
+        findNextDownloadJobItem();
         startNextDownload();
     }
 
@@ -300,12 +300,7 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
             if (isStopped())
                 return;
 
-            currentDownloadJobItem = mDbManager.getDownloadJobItemDao().findByDownloadJobAndStatusRange(
-                    downloadJob.getDownloadJobId(), 0, NetworkTask.STATUS_RUNNING_MIN-1);
             if (currentDownloadJobItem != null) {
-                currentEntryStatusCacheId = mDbManager.getOpdsEntryStatusCacheDao().findUidByEntryId(
-                        currentDownloadJobItem.getDownloadSetItem().getEntryId());
-                mDbManager.getOpdsEntryStatusCacheDao().handleDownloadJobStarted(currentEntryStatusCacheId);
                 attemptCount++;
                 currentGroupSSID = null;
 
@@ -445,6 +440,22 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
     }
 
     /**
+     * Find the next downloadjobitem. This is called before marking the previous download as finished
+     * to avoid the UI showing entries as 'queued' in the time between one job finishing and the next
+     * starting.
+     */
+    private void findNextDownloadJobItem() {
+        currentDownloadJobItem =  mDbManager.getDownloadJobItemDao().findByDownloadJobAndStatusRange(
+                downloadJob.getDownloadJobId(), 0, NetworkTask.STATUS_RUNNING_MIN-1);
+        if(currentDownloadJobItem != null) {
+            currentEntryStatusCacheId = mDbManager.getOpdsEntryStatusCacheDao().findUidByEntryId(
+                    currentDownloadJobItem.getDownloadSetItem().getEntryId());
+            mDbManager.getOpdsEntryStatusCacheDao().handleDownloadJobStarted(currentEntryStatusCacheId);
+        }
+
+    }
+
+    /**
      * Method which start file acquisition from the specified source.
      * @param fileUrl : File source URL
      * @param mode: Mode in which the file will be acquired as DOWNLOAD_FROM_CLOUD,
@@ -506,6 +517,8 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
             if(downloadCompleted){
                 UstadMobileSystemImpl.l(UMLog.INFO, 3010, getLogPrefix() +  " : item " +
                         " : Download completed successfully, saved to " + fileDestination.getAbsolutePath());
+                findNextDownloadJobItem();
+
                 mDbManager.getOpdsAtomFeedRepository().
                         findEntriesByContainerFileNormalizedPath(fileDestination.getAbsolutePath());
                 UstadMobileSystemImpl.l(UMLog.INFO, 3010, getLogPrefix() +  " : item " +
@@ -540,11 +553,13 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
                     + " handleAttemptFailed - waiting " + WAITING_TIME_BEFORE_RETRY + "ms then retrying.");
             try { Thread.sleep(WAITING_TIME_BEFORE_RETRY); }
             catch(InterruptedException e) {}
+            findNextDownloadJobItem();
             startNextDownload();
         }else {
             //retry count exceeded - move on to next file
             UstadMobileSystemImpl.l(UMLog.DEBUG, 650, getLogPrefix()
                     + " handleAttemptFailed - attempt retry count exceeded - moving to next item");
+            findNextDownloadJobItem();
             startNextDownload();
         }
 

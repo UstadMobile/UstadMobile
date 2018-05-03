@@ -8,6 +8,20 @@ import com.ustadmobile.lib.database.annotation.UmEmbedded;
  */
 public class OpdsEntryWithStatusCache extends OpdsEntryWithRelations {
 
+    public static final int DOWNLOAD_DISPLAY_STATUS_NOT_DOWNLOADED = 0;
+
+    public static final int DOWNLOAD_DISPLAY_STATUS_QUEUED = 1;
+
+    public static final int DOWNLOAD_DISPLAY_STATUS_IN_PROGRESS = 2;
+
+    public static final int DOWNLOAD_DISPLAY_STATUS_PAUSED = 3;
+
+    public static final int DOWNLOAD_DISPLAY_STATUS_DOWNLOADED = 4;
+
+    public static final int DOWNLOAD_DISPLAY_STATUS_ERROR = 5;
+
+    private static final int IN_PROGRESS_THRESHOLD = 90;
+
     @UmEmbedded
     OpdsEntryStatusCache statusCache;
 
@@ -34,6 +48,52 @@ public class OpdsEntryWithStatusCache extends OpdsEntryWithRelations {
     public void setPendingDownloadJobItem(DownloadJobItem pendingDownloadJobItem) {
         this.pendingDownloadJobItem = pendingDownloadJobItem;
     }
+
+
+    /**
+     * Determine the download status that should be displayed for this entry
+     *
+     * @return Download display status flag as per DOWNLOAD_DISPLAY_STATE flags
+     */
+    public int getDownloadDisplayState() {
+        long containersDownloadedSizeIncDescendants = statusCache.getContainersDownloadedSizeIncDescendants();
+
+        if(containersDownloadedSizeIncDescendants > 0
+                && containersDownloadedSizeIncDescendants == statusCache.getSizeIncDescendants()) {
+            return DOWNLOAD_DISPLAY_STATUS_DOWNLOADED;
+        }else if (statusCache.getActiveDownloadsIncAncestors() > 0){
+            return DOWNLOAD_DISPLAY_STATUS_IN_PROGRESS;
+        }else if (pendingDownloadJobItem != null && pendingDownloadJobItem.getStatus() == 42) {//set this to pause status
+            return DOWNLOAD_DISPLAY_STATUS_PAUSED;
+        }
+
+        int percentRequestedOrCompleted = (statusCache.getEntriesWithContainerIncDescendants()) > 0 ?
+                ((statusCache.getContainersDownloadedIncDescendants()
+                        + statusCache.getContainersDownloadPendingIncAncestors()) * 100)
+                        / (statusCache.getEntriesWithContainerIncDescendants()) : 0;
+        if(statusCache.getContainersDownloadPendingIncAncestors() > 0
+                && statusCache.getSizeIncDescendants() > 0
+                && percentRequestedOrCompleted > IN_PROGRESS_THRESHOLD) {
+            return DOWNLOAD_DISPLAY_STATUS_QUEUED;
+        }
+
+        return DOWNLOAD_DISPLAY_STATUS_NOT_DOWNLOADED;
+    }
+
+    /**
+     * Get the download percentage completed (inc ancestors)
+     *
+     * @return The download percentage completed (inc ancestors), between 0 and 100
+     */
+    public int getDownloadCompletePercentage(){
+        if(statusCache == null)
+            return 0;
+
+        long totalDownloaded = statusCache.getContainersDownloadedSizeIncDescendants() +
+                statusCache.getPendingDownloadBytesSoFarIncDescendants();
+        return (int)((totalDownloaded * 100)/statusCache.getSizeIncDescendants());
+    }
+
 
     @Override
     public boolean equals(Object o) {
