@@ -439,7 +439,7 @@ public class CatalogPresenter extends BaseCatalogPresenter implements Acquisitio
         entryUrisArray = entryUris.toArray(entryUrisArray);
         Hashtable args = new Hashtable();
         args.put("r_uris", entryUrisArray);
-        UstadMobileSystemImpl.getInstance().go("StartDownload", args, getContext());
+        UstadMobileSystemImpl.getInstance().go("DownloadDialog", args, getContext());
     }
 
 

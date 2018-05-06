@@ -545,9 +545,6 @@ public class CatalogEntryPresenter extends BaseCatalogPresenter implements Acqui
         switch(buttonId) {
             case CatalogEntryView.BUTTON_DOWNLOAD:
                 handleClickDownload(Arrays.asList(entryLiveData.getValue()));
-//                Vector selectedEntries = new Vector();
-//                selectedEntries.addElement(entry);
-//                handleClickDownload(entryFeed, selectedEntries);
                 break;
 
             case CatalogEntryView.BUTTON_MODIFY:

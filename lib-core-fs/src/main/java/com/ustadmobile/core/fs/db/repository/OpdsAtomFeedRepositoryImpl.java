@@ -40,14 +40,28 @@ public class OpdsAtomFeedRepositoryImpl implements OpdsAtomFeedRepository {
         //get the result from the database
         UmLiveData<OpdsEntryWithRelations> dbResult = dbManager.getOpdsEntryWithRelationsDao()
                 .getEntryByUrl(url, uuid, callback);
+
+        executeItemLoader(url, uuid, callback);
+        return dbResult;
+    }
+
+    @Override
+    public UmLiveData<OpdsEntryWithStatusCache> getEntryWithStatusCacheByUrl(String url, String uuid,
+                                                                             OpdsEntry.OpdsItemLoadCallback callback) {
+        UmLiveData<OpdsEntryWithStatusCache> dbResult = dbManager.getOpdsEntryWithRelationsDao()
+                .getEntryWithStatusCacheByUrl(url);
+
+        executeItemLoader(url, uuid, callback);
+        return dbResult;
+    }
+
+    private void executeItemLoader(String url, String uuid, OpdsEntry.OpdsItemLoadCallback callback) {
         OpdsEntryWithRelations entryWithRelations = new OpdsEntryWithRelations();
         entryWithRelations.setUuid(uuid);
 
         executorService.execute(new OpdsItemLoader(dbManager.getContext(), dbManager,
                 entryWithRelations, url, callback));
 
-        //execute something to check if required
-        return dbResult;
     }
 
     public UmLiveData<OpdsEntryWithRelations> getEntryByUrl(String url) {

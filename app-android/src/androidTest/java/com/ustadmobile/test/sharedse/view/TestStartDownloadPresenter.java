@@ -13,8 +13,8 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.lib.db.entities.DownloadJob;
 import com.ustadmobile.port.android.netwokmanager.NetworkServiceAndroid;
-import com.ustadmobile.port.sharedse.controller.StartDownloadPresenter;
-import com.ustadmobile.port.sharedse.view.StartDownloadView;
+import com.ustadmobile.port.sharedse.controller.DownloadDialogPresenter;
+import com.ustadmobile.port.sharedse.view.DownloadDialogView;
 import com.ustadmobile.test.core.ResourcesHttpdTestServer;
 import com.ustadmobile.test.core.impl.PlatformTestUtil;
 
@@ -81,7 +81,7 @@ public class TestStartDownloadPresenter {
 
     @Test
     public void testCreation() {
-        StartDownloadView mockView = Mockito.mock(StartDownloadView.class);
+        DownloadDialogView mockView = Mockito.mock(DownloadDialogView.class);
         Hashtable testArgs = new Hashtable();
 
 
@@ -91,9 +91,9 @@ public class TestStartDownloadPresenter {
         final long startTime = System.currentTimeMillis();
         String opdsRootIndexUrl = UMFileUtil.joinPaths(ResourcesHttpdTestServer.getHttpRoot(),
                 "com/ustadmobile/test/sharedse/crawlme/index.opds");
-        testArgs.put(StartDownloadPresenter.ARG_ROOT_URIS, new String[]{opdsRootIndexUrl});
+        testArgs.put(DownloadDialogPresenter.ARG_ROOT_URIS, new String[]{opdsRootIndexUrl});
 
-        StartDownloadPresenter presenter = new StartDownloadPresenter(PlatformTestUtil.getTargetContext(),
+        DownloadDialogPresenter presenter = new DownloadDialogPresenter(PlatformTestUtil.getTargetContext(),
                 mockView, testArgs);
 
         doAnswer((invocationOnMock) -> {
@@ -124,7 +124,7 @@ public class TestStartDownloadPresenter {
 
         //test when we click download a download job is started
         //TODO: Update this
-        presenter.handleClickDownload();
+        presenter.handleClickConfirm();
 
         DownloadJob createdJob = DbManager.getInstance(PlatformTestUtil.getTargetContext())
                 .getDownloadJobDao().findLastCreatedDownloadJob();

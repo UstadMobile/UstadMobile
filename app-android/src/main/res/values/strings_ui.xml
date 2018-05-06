@@ -13,10 +13,13 @@
     <string name="download">Download</string>
     <string name="downloaded" value="81">Downloaded</string>
     <string name="paused">Paused</string>
+    <string name="pause_download">Pause download</string>
     <string name='download_q'>Download?</string>
     <string name='download_all_q'>Download all %s entries?</string>
     <string name='ok'>OK</string>
     <string name='cancel'>Cancel</string>
+    <string name="cancel_download">Cancel download</string>
+    <string name="resume_download">Resume download</string>
     <string name='delete_q'>Delete?</string>
     <string name='delete_x_entries_from_device'>Delete %s entries from device?</string>
     <string name='delete'>Delete</string>

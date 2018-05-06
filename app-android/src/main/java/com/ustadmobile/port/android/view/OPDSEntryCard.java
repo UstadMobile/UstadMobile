@@ -170,7 +170,7 @@ public class OPDSEntryCard extends ConstraintLayout {
      */
 
     public void setLocalAvailableFile(boolean isAvailable){
-//        ((TextView)findViewById(R.id.opds_item_detail_text)).setText(
+//        ((TextView)findViewById(R.id.opds_item_detail_text)).setMainText(
 //                isAvailable? R.string.file_available_locally : R.string.file_unavailable_locally);
 
     }
@@ -221,14 +221,14 @@ public class OPDSEntryCard extends ConstraintLayout {
 //                findViewById(R.id.opds_item_status_layout).setVisibility(View.VISIBLE);
 //                statusIconView.setImageDrawable(ContextCompat.getDrawable(getContext(),
 //                        R.drawable.ic_done_black_16dp));
-//                statusText.setText(R.string.downloaded);
+//                statusText.setMainText(R.string.downloaded);
 //                break;
 //            case CatalogPresenter.STATUS_AVAILABLE_LOCALLY:
 //                findViewById(R.id.opds_item_download_progress_view).setVisibility(View.GONE);
 //                findViewById(R.id.opds_item_status_layout).setVisibility(View.VISIBLE);
 //                statusIconView.setImageDrawable(ContextCompat.getDrawable(getContext(),
 //                        R.drawable.ic_nearby_black_24px));
-//                statusText.setText(R.string.file_available_locally);
+//                statusText.setMainText(R.string.file_available_locally);
 //                break;
 //            case CatalogPresenter.STATUS_ACQUISITION_IN_PROGRESS:
 //            case CatalogPresenter.STATUS_NOT_ACQUIRED:

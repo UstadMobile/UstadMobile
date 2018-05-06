@@ -110,7 +110,7 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
 
     private static final int MENUCMDID_ADD = 1200;
 
-    private static final int MENUCMDID_DELETE = 1201;
+    public static final int MENUCMDID_DELETE = 1201;
 
     private static final int MENUCMD_SHARE = 1202;
 

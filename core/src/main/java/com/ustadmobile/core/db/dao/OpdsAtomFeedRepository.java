@@ -33,6 +33,22 @@ public interface OpdsAtomFeedRepository {
                                                             OpdsEntry.OpdsItemLoadCallback callback);
 
     /**
+     * Retrieve an entry from the given URL as LiveData, with the associated OpdsEntryStatusCache.
+     *
+     * If the URL contains a feed, then the child entries should be found using the
+     * OpdsEntryWithRelationsDao getEntriesByParent method.
+     *
+     * @param url the http/https url of the xml
+     * @param uuid If not null, then use this as the uuid for the loaded entry (otherwise generate a new UUID)
+     * @param callback If not null, the OpdsItemLoadCallback will be used for progress monitoring
+     *
+     * @return A LiveData object representing the root element of the OPDS XML from the given URL
+     */
+    UmLiveData<OpdsEntryWithStatusCache> getEntryWithStatusCacheByUrl(String url, String uuid,
+                                                            OpdsEntry.OpdsItemLoadCallback callback);
+
+
+    /**
      * Retrieve an entry from the given URL as LiveData. If the URL contains a feed, then the child
      * entries should be found using the OpdsEntryWithRelationsDao getEntriesByParent method.
      *

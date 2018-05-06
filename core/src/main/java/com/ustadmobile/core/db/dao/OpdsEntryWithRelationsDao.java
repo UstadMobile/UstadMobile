@@ -29,6 +29,16 @@ public abstract class OpdsEntryWithRelationsDao {
         return getEntryByUrl(url, null, null);
     }
 
+    /**
+     * Find the entry for the given URL, with it's associated OpdsEntryStatusCache object.
+     *
+     * @param url URL to lookup
+     *
+     * @return UmLiveData object representing the OpdsEntry from the given URL
+     */
+    public abstract UmLiveData<OpdsEntryWithStatusCache> getEntryWithStatusCacheByUrl(String url);
+
+
     public abstract OpdsEntryWithRelations getEntryByUrlStatic(String url);
 
     /**
@@ -39,6 +49,8 @@ public abstract class OpdsEntryWithRelationsDao {
      * @return The OpdsEntryWithRelations object representing this in the database, or null if it doesn't exist
      */
     public abstract OpdsEntryWithRelations findByUuid(String uuid);
+
+    public abstract UmLiveData<OpdsEntryWithStatusCache> findWithStatusCacheByUuidLive(String uuid);
 
 
     @UmQuery("SELECT * from OpdsEntry INNER JOIN OpdsEntryToParentOpdsEntry on OpdsEntry.uuid = OpdsEntry.uuid WHERE OpdsEntryToParentOpdsEntry.parentEntry = :parentId")

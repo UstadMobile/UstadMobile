@@ -2,23 +2,15 @@ package com.ustadmobile.test.port.android.view;
 
 import android.os.SystemClock;
 import android.support.test.espresso.IdlingPolicies;
-import android.support.test.espresso.matcher.BoundedMatcher;
-import android.support.test.espresso.matcher.ViewMatchers;
 import android.support.test.filters.LargeTest;
 import android.support.test.rule.ActivityTestRule;
-import android.support.v7.widget.RecyclerView;
-import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.util.UMFileUtil;
-import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
 import com.ustadmobile.port.android.view.BasePointActivity;
 import com.ustadmobile.port.android.view.CatalogOPDSFragment;
 import com.ustadmobile.test.core.ResourcesHttpdTestServer;
 
-import org.hamcrest.Description;
-import org.hamcrest.Matcher;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
@@ -29,6 +21,7 @@ import java.util.concurrent.TimeUnit;
 
 import static android.support.test.espresso.Espresso.*;
 import static android.support.test.espresso.action.ViewActions.click;
+import static android.support.test.espresso.action.ViewActions.longClick;
 import static android.support.test.espresso.action.ViewActions.typeText;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
 import static android.support.test.espresso.matcher.RootMatchers.isPlatformPopup;
@@ -36,6 +29,7 @@ import static android.support.test.espresso.matcher.ViewMatchers.hasDescendant;
 import static android.support.test.espresso.matcher.ViewMatchers.hasSibling;
 import static android.support.test.espresso.matcher.ViewMatchers.isDescendantOfA;
 import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
+import static android.support.test.espresso.matcher.ViewMatchers.withChild;
 import static android.support.test.espresso.matcher.ViewMatchers.withContentDescription;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static android.support.test.espresso.matcher.ViewMatchers.withTagValue;
@@ -102,7 +96,7 @@ public class DownloadCrawlEspressoTest {
 
         SystemClock.sleep(1000);
 
-        onView(withId(R.id.fragment_start_download_size_text)).check(
+        onView(withId(R.id.fragment_download_dialog_main_text)).check(
                 matches(withText(containsString("4 items"))));
 
         onView(withId(android.R.id.button1)).perform(click());
@@ -116,6 +110,34 @@ public class DownloadCrawlEspressoTest {
                 hasSibling(withText("Crawl Test")),
                 withId(R.id.item_opds_entry_card_download_icon)
         )).check(matches(withContentDescription("Downloaded")));
+
+        //now delete it
+        onView(allOf(
+                isDescendantOfA(withTagValue(equalTo("entries:///my_library"))),
+                hasSibling(withText("Crawl Test")),
+                withId(R.id.item_opds_entry_card_download_icon)
+        )).perform(click());
+
+        SystemClock.sleep(1000);
+
+        onView(withId(R.id.fragment_download_dialog_main_text)).check(
+                matches(withText(containsString("Delete"))));
+        onView(withId(android.R.id.button1)).perform(click());
+
+        //Now check the downloads have been deleted
+        SystemClock.sleep(3000);
+        onView(allOf(
+                isDescendantOfA(withTagValue(equalTo("entries:///my_library"))),
+                hasSibling(withText("Crawl Test")),
+                withId(R.id.item_opds_entry_card_download_icon)
+        )).check(matches(withContentDescription("Download")));
+
+
+        onView(allOf(
+                isDescendantOfA(withTagValue(equalTo("entries:///my_library"))),
+                withChild(withText("Crawl Test")))).perform(longClick());
+        onView(withId(CatalogOPDSFragment.MENUCMDID_DELETE)).perform(click());
+        onView(withId(android.R.id.button1)).perform(click());
 
     }
 

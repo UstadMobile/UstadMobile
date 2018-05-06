@@ -33,8 +33,38 @@ public abstract class OpdsEntryWithRelationsDaoAndroid extends OpdsEntryWithRela
     public abstract LiveData<OpdsEntryWithRelations> getEntryByUrlR(String url);
 
     @Override
+    public UmLiveData<OpdsEntryWithStatusCache> getEntryWithStatusCacheByUrl(String url) {
+        return new UmLiveDataAndroid<>(getEntryWithStatusCacheByUrl_Room(url));
+    }
+
+    @Query("SELECT OpdsEntry.*, OpdsEntryStatusCache.*  " +
+            "FROM " +
+            "OpdsEntry " +
+            "LEFT JOIN OpdsEntryStatusCache ON OpdsEntry.entryId = OpdsEntryStatusCache.statusEntryId " +
+            "LEFT JOIN DownloadSetItem ON OpdsEntry.entryId = DownloadSetItem.entryId " +
+            "LEFT JOIN DownloadJobItem ON DownloadSetItem.id = DownloadJobItem.downloadSetItemId " +
+            "AND DownloadJobItem.status BETWEEN " + NetworkTask.STATUS_WAITING_MIN  + " AND " + NetworkTask.STATUS_COMPLETE_MIN + " " +
+            "WHERE OpdsEntry.url = :url")
+    public abstract LiveData<OpdsEntryWithStatusCache> getEntryWithStatusCacheByUrl_Room(String url);
+
+    @Override
     @Query("SELECT * FROM OpdsEntry WHERE uuid = :uuid")
     public abstract OpdsEntryWithRelations findByUuid(String uuid);
+
+    @Override
+    public UmLiveData<OpdsEntryWithStatusCache> findWithStatusCacheByUuidLive(String uuid) {
+        return new UmLiveDataAndroid<>(findWithStatusCacheByUuidLive_Room(uuid));
+    }
+
+    @Query("SELECT OpdsEntry.*, OpdsEntryStatusCache.*  " +
+            "FROM " +
+            "OpdsEntry " +
+            "LEFT JOIN OpdsEntryStatusCache ON OpdsEntry.entryId = OpdsEntryStatusCache.statusEntryId " +
+            "LEFT JOIN DownloadSetItem ON OpdsEntry.entryId = DownloadSetItem.entryId " +
+            "LEFT JOIN DownloadJobItem ON DownloadSetItem.id = DownloadJobItem.downloadSetItemId " +
+            "AND DownloadJobItem.status BETWEEN " + NetworkTask.STATUS_WAITING_MIN  + " AND " + NetworkTask.STATUS_COMPLETE_MIN + " " +
+            "WHERE OpdsEntry.uuid = :uuid")
+    public abstract LiveData<OpdsEntryWithStatusCache> findWithStatusCacheByUuidLive_Room(String uuid);
 
     @Query("SELECT OpdsEntry.* from OpdsEntry INNER JOIN OpdsEntryParentToChildJoin on OpdsEntry.uuid = OpdsEntryParentToChildJoin.childEntry WHERE OpdsEntryParentToChildJoin.parentEntry = :parentId ORDER BY childIndex")
     public abstract DataSource.Factory<Integer, OpdsEntryWithRelations> findEntriesByParentR(String parentId);

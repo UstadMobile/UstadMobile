@@ -110,10 +110,6 @@ public class TestDownloadTaskStandalone extends TestWithNetworkService {
 
         //now delete them all. We need to rerun the find query, if these entries were unknown before they
         // would not have been discovered
-        childEntries = dbManager.getOpdsEntryWithRelationsDao().findAllChildEntryIdsRecursive(CRAWL_ROOT_ENTRY_ID);
-
-//        dbManager.getOpdsEntryWithRelationsDao().deleteAllDescendants(dbManager.getContext(),
-//                CRAWL_ROOT_ENTRY_ID, dbManager.getOpdsEntryStatusCacheDao());
         final boolean[] complete = new boolean[1];
         UstadMobileSystemImpl.getInstance().deleteEntries(PlatformTestUtil.getTargetContext(),
                 Arrays.asList(CRAWL_ROOT_ENTRY_ID), true,

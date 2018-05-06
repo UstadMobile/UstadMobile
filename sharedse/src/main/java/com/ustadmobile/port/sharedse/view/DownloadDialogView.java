@@ -2,13 +2,18 @@ package com.ustadmobile.port.sharedse.view;
 
 import com.ustadmobile.core.view.UstadView;
 
+import java.util.List;
+
 /**
  * Created by mike on 3/5/18.
  */
 
-public interface StartDownloadView extends UstadView {
+public interface DownloadDialogView extends UstadView {
 
-    String VIEW_NAME = "StartDownload";
+    String VIEW_NAME = "DownloadDialog";
+
+    void setAvailableOptions(int options, boolean showChoices);
+
 
     void setProgressVisible(boolean visible);
 
@@ -16,6 +21,6 @@ public interface StartDownloadView extends UstadView {
 
     void setProgressStatusText(String statusText);
 
-    void setDownloadText(String downloadSize);
+    void setMainText(String downloadSize);
 
 }
