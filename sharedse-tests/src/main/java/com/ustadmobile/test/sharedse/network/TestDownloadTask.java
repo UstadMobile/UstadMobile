@@ -434,8 +434,9 @@ public class TestDownloadTask {
         when(mockHistoryDao1.findHistoryItemsByNetworkNodeSince(anyInt(), anyLong()))
                 .thenReturn(new ArrayList<DownloadJobItemHistory>());
 
-        DownloadTask task = new DownloadTask(null,
-                (NetworkManager)UstadMobileSystemImpl.getInstance().getNetworkManager());
+        NetworkManager networkManager =(NetworkManager)UstadMobileSystemImpl.getInstance()
+                .getNetworkManager();
+        DownloadTask task = new DownloadTask(null, networkManager, networkManager);
         Assert.assertEquals("When WiFi direct and local network responses are available, local network response will be chosen",
                 sameNetworkResponse, task.selectEntryStatusResponse(responseList, mockHistoryDao1));
 

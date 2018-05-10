@@ -11,6 +11,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.lib.db.entities.DownloadJobWithTotals;
 import com.ustadmobile.lib.db.entities.DownloadSet;
+import com.ustadmobile.lib.db.entities.OpdsEntryStatusCache;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithStatusCache;
 import com.ustadmobile.port.sharedse.view.DownloadDialogView;
 import com.ustadmobile.port.sharedse.networkmanager.CrawlTask;
@@ -99,17 +100,25 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
 
         rootEntryUuid[0] = entry.getUuid();
         rootEntryId = entry.getEntryId();
+        OpdsEntryStatusCache status = entry.getStatusCache();
 
-        if(entry.getDownloadDisplayState() == OpdsEntryWithStatusCache.DOWNLOAD_DISPLAY_STATUS_DOWNLOADED) {
+        if(status == null)
+            return;//has not really loaded yet
+
+        boolean canPause = entry.getDownloadDisplayState() == OpdsEntryWithStatusCache.DOWNLOAD_DISPLAY_STATUS_PAUSED;
+        boolean canCancel = canPause || entry.getDownloadDisplayState() == OpdsEntryWithStatusCache.DOWNLOAD_DISPLAY_STATUS_IN_PROGRESS;
+
+
+        if(!canCancel && entry.getStatusCache().getContainersDownloadedIncDescendants() > 0) {
             optionsAvailable = optionsAvailable | OPTION_DELETE;
         }
 
-        if(entry.getDownloadDisplayState() == OpdsEntryWithStatusCache.DOWNLOAD_DISPLAY_STATUS_NOT_DOWNLOADED){
+        if(status.getContainersDownloadedIncDescendants() == 0 ||
+                (status.getContainersDownloadedIncDescendants() + status.getContainersDownloadPendingIncAncestors()) < status.getEntriesWithContainerIncDescendants()){
             optionsAvailable = optionsAvailable | OPTION_START_DOWNLOAD;
         }
 
-        if(entry.getDownloadDisplayState() == OpdsEntryWithStatusCache.DOWNLOAD_DISPLAY_STATUS_IN_PROGRESS
-                || entry.getDownloadDisplayState() == OpdsEntryWithStatusCache.DOWNLOAD_DISPLAY_STATUS_PAUSED) {
+        if(canCancel) {
             optionsAvailable = optionsAvailable | OPTION_CANCEL_DOWNLOAD;
         }
 
@@ -117,7 +126,7 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
             optionsAvailable = optionsAvailable | OPTION_RESUME_DOWNLOAD;
         }
 
-        if(entry.getDownloadDisplayState() == OpdsEntryWithStatusCache.DOWNLOAD_DISPLAY_STATUS_IN_PROGRESS) {
+        if(canPause) {
             optionsAvailable = optionsAvailable | OPTION_PAUSE_DOWNLOAD;
         }
 

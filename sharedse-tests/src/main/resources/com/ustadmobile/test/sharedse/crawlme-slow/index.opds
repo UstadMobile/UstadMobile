@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<feed xmlns="http://www.w3.org/2005/Atom" 
+  xmlns:dc="http://purl.org/dc/terms/" 
+  xmlns:opds="http://opds-spec.org/2010/catalog">
+    <id>http://umcloud1.ustadmobile.com/opds/test-crawl-slow</id>
+    
+    <link rel="start"
+                href="/opds/"
+                type="application/atom+xml;profile=opds-catalog;kind=navigation"/>
+    <link rel="self"
+		href="/acquire.opds"
+		type="application/atom+xml;profile=opds-catalog;kind=acquisition"/>
+    <title>Crawl Test - Slow</title>
+    <updated>2015-02-09T21:00:57Z</updated>
+    <author>
+	<name>Mike Test4</name> 
+	<uri>/user/6</uri>
+    </author>
+
+    <entry>
+        <title>Subject 1</title>
+        <link rel="subsection"
+            href="subject1/index.opds"
+            type="application/atom+xml;profile=opds-catalog;kind=acquisition"/>
+            
+        <id>http://umcloud1.ustadmobile.com/opds/test-crawl-slow/subject1</id>
+        <updated>2015-02-09T18:58:12Z</updated>
+        <author>
+            <name>Varuna Singh</name>
+            <uri>/user/2</uri>
+        </author>
+        <content type="text">Subject 1</content>
+    </entry>
+
+    <entry>
+        <title>Subject 2</title>
+        <link rel="subsection"
+            href="subject2/index.opds"
+            type="application/atom+xml;profile=opds-catalog;kind=acquisition"/>
+            
+        <id>http://umcloud1.ustadmobile.com/opds/test-crawl-slow/subject2</id>
+        <updated>2015-02-09T18:58:12Z</updated>
+        <author>
+            <name>Varuna Singh</name>
+            <uri>/user/2</uri>
+        </author>
+        <content type="text">Subject 2</content>
+    </entry>
+
+</feed>

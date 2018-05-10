@@ -5,6 +5,7 @@ import com.ustadmobile.core.db.dao.DownloadJobItemHistoryDao;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.networkmanager.AcquisitionTaskHistoryEntry;
+import com.ustadmobile.core.networkmanager.DownloadTaskListener;
 import com.ustadmobile.core.networkmanager.NetworkManagerListener;
 import com.ustadmobile.core.networkmanager.NetworkManagerTaskListener;
 import com.ustadmobile.lib.db.entities.DownloadJob;
@@ -60,7 +61,6 @@ import static com.ustadmobile.port.sharedse.networkmanager.NetworkManager.NOTIFI
  */
 public class DownloadTask extends NetworkTask implements BluetoothConnectionHandler,NetworkManagerListener{
 
-
     private DownloadJobWithDownloadSet downloadJob;
 
     private DownloadJobItemWithDownloadSetItem currentDownloadJobItem;
@@ -68,6 +68,8 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
     private int currentEntryStatusCacheId;
 
     protected NetworkManagerTaskListener listener;
+
+    private DownloadTaskListener downloadTaskListener;
 
     private static final int DOWNLOAD_TASK_UPDATE_TIME=500;
 
@@ -213,8 +215,8 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
      * @param downloadJob downloadJob
      * @param networkManager NetworkManager reference which handle all network operations.
      */
-    public DownloadTask(DownloadJobWithDownloadSet downloadJob, NetworkManager networkManager){
-        super(networkManager);
+    public DownloadTask(DownloadJobWithDownloadSet downloadJob, NetworkManager networkManager, DownloadTaskListener downloadTaskListener){
+        super(networkManager, downloadJob.getDownloadJobId());
         mDbManager = DbManager.getInstance(networkManager.getContext());
         this.downloadJob = downloadJob;
 
@@ -222,6 +224,7 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
 
         networkManager.addNetworkManagerListener(this);
         this.mirrorFinder = networkManager;
+        this.downloadTaskListener = downloadTaskListener;
     }
 
     /**
@@ -281,7 +284,8 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
 
         mDbManager.getDownloadJobDao().update(downloadJob);
 
-        networkManager.networkTaskStatusChanged(this);
+//        networkManager.networkTaskStatusChanged(this);
+        downloadTaskListener.handleDownloadTaskStatusChanged(this);
     }
 
     /**
@@ -297,8 +301,10 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
      */
     private void startNextDownload(){
         new Thread(() -> {
-            if (isStopped())
+            if (isStopped()) {
+                UstadMobileSystemImpl.l(UMLog.INFO,0, getLogPrefix() + "startNextDownload: stopped. Aborting");
                 return;
+            }
 
             if (currentDownloadJobItem != null) {
                 attemptCount++;
@@ -507,17 +513,19 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
             currentJobItemHistory.setSuccessful(downloadCompleted);
             mDbManager.getDownloadJobItemHistoryDao().insert(currentJobItemHistory);
 
-            currentDownloadJobItem.setStatus(downloadCompleted ? STATUS_COMPLETE : STATUS_RUNNING);
+            boolean stopped = isStopped();
+            currentDownloadJobItem.setStatus(downloadCompleted ? STATUS_COMPLETE :
+                    stopped ?  getStatus() : STATUS_RUNNING);
             currentDownloadJobItem.setDownloadedSoFar(httpDownload.getDownloadedSoFar());
             mDbManager.getDownloadJobItemDao().updateDownloadJobItemStatus(currentDownloadJobItem);
-
 
 
 
             if(downloadCompleted){
                 UstadMobileSystemImpl.l(UMLog.INFO, 3010, getLogPrefix() +  " : item " +
                         " : Download completed successfully, saved to " + fileDestination.getAbsolutePath());
-                findNextDownloadJobItem();
+                if(!stopped)
+                    findNextDownloadJobItem();
 
                 mDbManager.getOpdsAtomFeedRepository().
                         findEntriesByContainerFileNormalizedPath(fileDestination.getAbsolutePath());
@@ -526,11 +534,15 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
                 attemptCount = 0;
                 entryAcquisitionThread =null;
 
-                startNextDownload();
+                if(!stopped)
+                    startNextDownload();
+            }else if(!isStopped()){
+                UstadMobileSystemImpl.l(UMLog.ERROR, 660, getLogPrefix() + " : item " +
+                    " : Download did not complete, download is not stopped");
+                handleAttemptFailed();
             }else {
                 UstadMobileSystemImpl.l(UMLog.ERROR, 660, getLogPrefix() + " : item " +
-                    " : Download did not complete");
-                handleAttemptFailed();
+                        " : download not complete, but download is finished");
             }
 
 
@@ -640,9 +652,15 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
     public void stop(int statusAfterStopped) {
         UstadMobileSystemImpl.l(UMLog.INFO, 321, getLogPrefix() + " task stop called.");
         setStopped(true);
-//        super.stop(statusAfterStopped);
         if(httpDownload != null)
             httpDownload.stop();
+
+        if(currentDownloadJobItem != null && currentDownloadJobItem.getStatus() < NetworkTask.STATUS_COMPLETE_MIN) {
+            currentDownloadJobItem.setStatus(statusAfterStopped);
+            mDbManager.getDownloadJobItemDao().updateStatus(currentDownloadJobItem.getDownloadJobItemId(),
+                    statusAfterStopped);
+        }
+
 
         cleanup(statusAfterStopped);
     }
@@ -836,8 +854,8 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
 
     protected String getLogPrefix() {
         int itemId = currentDownloadJobItem != null ? currentDownloadJobItem.getDownloadJobItemId() : -1;
-        return "DownloadTask #" + getTaskId() + " Item id# " + itemId + " Attempt # "
-                + attemptCount;
+        return "DownloadTask (" + System.identityHashCode(this) + ") #"  + getTaskId() +
+                " Item id# " + itemId + " Attempt # " + attemptCount;
     }
 
 

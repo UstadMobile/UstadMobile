@@ -750,10 +750,13 @@ public class NetworkManagerAndroid extends NetworkManager implements EmbeddedHTT
 
     @Override
     public void removeNotification(int notificationType) {
-        mBuilder.setProgress(0, 0, false);
-        mBuilder.setOngoing(false);
-        mNotifyManager.notify(notificationType, mBuilder.build());
-        mNotifyManager.cancel(notificationType);
+        if(mBuilder != null){
+            mBuilder.setProgress(0, 0, false);
+            mBuilder.setOngoing(false);
+
+            mNotifyManager.notify(notificationType, mBuilder.build());
+            mNotifyManager.cancel(notificationType);
+        }
     }
 
 

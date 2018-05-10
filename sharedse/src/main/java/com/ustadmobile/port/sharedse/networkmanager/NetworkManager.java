@@ -12,6 +12,7 @@ import com.ustadmobile.core.impl.UmResultCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.networkmanager.AcquisitionListener;
 import com.ustadmobile.core.networkmanager.AvailabilityMonitorRequest;
+import com.ustadmobile.core.networkmanager.DownloadTaskListener;
 import com.ustadmobile.core.networkmanager.EntryCheckResponse;
 import com.ustadmobile.core.networkmanager.NetworkManagerCore;
 import com.ustadmobile.core.networkmanager.NetworkManagerListener;
@@ -89,7 +90,7 @@ import static com.ustadmobile.core.buildconfig.CoreBuildConfig.WIFI_P2P_INSTANCE
  */
 
 public abstract class NetworkManager implements NetworkManagerCore, NetworkManagerTaskListener,
-        LocalMirrorFinder, EntryStatusTask.NetworkNodeListProvider, EmbeddedHTTPD.ResponseListener {
+        LocalMirrorFinder, DownloadTaskListener, EntryStatusTask.NetworkNodeListProvider, EmbeddedHTTPD.ResponseListener {
 
     protected ExecutorService dbExecutorService;
 
@@ -170,7 +171,8 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
         new Vector<>(), new Vector<>()
     };
 
-    private Set<DownloadTask> activeDownloadTasks;
+    //Map of ID (integer) -> downloadTask
+    private HashMap<Integer, DownloadTask> activeDownloadTasks;
 
 
     private Vector<NetworkManagerListener> networkManagerListeners = new Vector<>();
@@ -311,7 +313,7 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
 
 
     public NetworkManager() {
-        activeDownloadTasks = new HashSet<>();
+        activeDownloadTasks = new HashMap<>();
     }
 
     /**
@@ -566,15 +568,33 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
         UstadMobileSystemImpl.l(UMLog.INFO, 0, "Queuing download job #" + downloadJobId);
         dbExecutorService.execute(() -> {
             DbManager dbManager = DbManager.getInstance(getContext());
+            dbManager.getDownloadJobItemDao().updateUnpauseItemsByDownloadJob(downloadJobId);
             dbManager.getDownloadJobDao().queueDownload(downloadJobId, NetworkTask.STATUS_QUEUED,
                     System.currentTimeMillis());
             int[] downloadJobItemIds = dbManager.getDownloadJobItemDao().findAllIdsByDownloadJob(
                     downloadJobId);
+            //TODO: filter the above to handle only those items that are not completed
             for(int downloadJobItemId : downloadJobItemIds) {
                 dbManager.getOpdsEntryStatusCacheDao().handleDownloadJobQueued(downloadJobItemId);
             }
             checkDownloadJobQueue();
         });
+    }
+
+    @Override
+    public boolean pauseDownloadJob(int downloadJobId) {
+        DownloadTask downloadTask = activeDownloadTasks.get(downloadJobId);
+        if(downloadTask == null)
+            return false;
+
+        downloadTask.stop(NetworkTask.STATUS_PAUSED);
+
+        return true;
+    }
+
+    @Override
+    public void pauseDownloadJobAsync(int downloadJobId, UmResultCallback<Boolean> callback) {
+        dbExecutorService.execute(() -> callback.onDone(pauseDownloadJob(downloadJobId)));
     }
 
     /**
@@ -588,9 +608,11 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
                 UstadMobileSystemImpl.l(UMLog.DEBUG, 0, "checkDownloadJobQueue: no pending download jobs");
                 return;//nothing to do
             }
+
             UstadMobileSystemImpl.l(UMLog.DEBUG, 0, "checkDownloadJobQueue: starting download job #" +
                     job.getDownloadJobId());
-            DownloadTask task = new DownloadTask(job, this);
+            DownloadTask task = new DownloadTask(job, this, this);
+            activeDownloadTasks.put(job.getDownloadJobId(), task);
             task.start();
         }else {
             UstadMobileSystemImpl.l(UMLog.DEBUG, 0,
@@ -599,8 +621,13 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
     }
 
 
-    public void handleDownloadTaskStatusChanged() {
-
+    @Override
+    public void handleDownloadTaskStatusChanged(NetworkTask task) {
+        if(task.getStatus() >= NetworkTask.STATUS_COMPLETE_MIN || task.getStatus() < NetworkTask.STATUS_WAITING_MIN){
+            //this task has finished
+            activeDownloadTasks.remove(task.getTaskId());
+            checkDownloadJobQueue();
+        }
     }
 
 
@@ -1250,48 +1277,56 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
 
     @Override
     public void networkTaskStatusChanged(NetworkTask task) {
-        int taskType = task.getTaskType();
-        int taskId = task.getTaskId();
-        if(currentTaskIndex[taskType] != -1
-                && taskId == tasksQueues[taskType].get(currentTaskIndex[taskType]).getTaskId()){
-            int status = task.getStatus();
-            switch(status) {
-                case NetworkTask.STATUS_COMPLETE:
-                case NetworkTask.STATUS_FAILED:
-                case NetworkTask.STATUS_STOPPED:
-                    //task is finished
-                    tasksQueues[taskType].remove(currentTaskIndex[taskType]);
-                    currentTaskIndex[taskType] = -1;
-                    checkTaskQueue(taskType);
+        if(task instanceof DownloadTask) {
 
-                    /*
-                     * If this task is associated with an availability monitor request, update the
-                     * tracking information. We won't need to go and stop this task when the monitor
-                     * is stopped if the task has actually already finished.
-                     */
-                    synchronized (availabilityMonitorRequests) {
-                        if(availabilityMonitorTaskIdToRequestMap.containsKey(taskId)) {
-                            AvailabilityMonitorRequest request =
-                                    availabilityMonitorTaskIdToRequestMap.get(taskId);
-                            availabilityMonitorTaskIdToRequestMap.remove(taskId);
-                            List<Long> availabilityTaskIds = availabilityMonitorRequestToTaskIdMap.get(request);
-                            if(availabilityTaskIds != null && availabilityTaskIds.contains(taskId)) {
-                                availabilityTaskIds.remove(availabilityTaskIds.indexOf(taskId));
+        }else{
+
+
+            int taskType = task.getTaskType();
+            int taskId = task.getTaskId();
+            if(currentTaskIndex[taskType] != -1
+                    && taskId == tasksQueues[taskType].get(currentTaskIndex[taskType]).getTaskId()){
+                int status = task.getStatus();
+                switch(status) {
+                    case NetworkTask.STATUS_COMPLETE:
+                    case NetworkTask.STATUS_FAILED:
+                    case NetworkTask.STATUS_STOPPED:
+                        //task is finished
+                        tasksQueues[taskType].remove(currentTaskIndex[taskType]);
+                        currentTaskIndex[taskType] = -1;
+                        checkTaskQueue(taskType);
+
+                        /*
+                         * If this task is associated with an availability monitor request, update the
+                         * tracking information. We won't need to go and stop this task when the monitor
+                         * is stopped if the task has actually already finished.
+                         */
+                        synchronized (availabilityMonitorRequests) {
+                            if(availabilityMonitorTaskIdToRequestMap.containsKey(taskId)) {
+                                AvailabilityMonitorRequest request =
+                                        availabilityMonitorTaskIdToRequestMap.get(taskId);
+                                availabilityMonitorTaskIdToRequestMap.remove(taskId);
+                                List<Long> availabilityTaskIds = availabilityMonitorRequestToTaskIdMap.get(request);
+                                if(availabilityTaskIds != null && availabilityTaskIds.contains(taskId)) {
+                                    availabilityTaskIds.remove(availabilityTaskIds.indexOf(taskId));
+                                }
                             }
                         }
-                    }
 
 
-                    break;
-                case NetworkTask.STATUS_RETRY_LATER:
-                    //put task to back of queue
-                    NetworkTask retryTask = tasksQueues[taskType].remove(currentTaskIndex[taskType]);
-                    tasksQueues[taskType].addElement(retryTask);
-                    currentTaskIndex[taskType] = -1;
-                    checkTaskQueue(taskType);
-                    break;
+                        break;
+                    case NetworkTask.STATUS_RETRY_LATER:
+                        //put task to back of queue
+                        NetworkTask retryTask = tasksQueues[taskType].remove(currentTaskIndex[taskType]);
+                        tasksQueues[taskType].addElement(retryTask);
+                        currentTaskIndex[taskType] = -1;
+                        checkTaskQueue(taskType);
+                        break;
+                }
             }
+
         }
+
 
         fireNetworkTaskStatusChanged(task);
     }
@@ -1559,6 +1594,7 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
      *
      * @return
      */
+    @Deprecated
     @Override
     public NetworkTask getTaskById(long taskId, int queueType) {
         if(taskId == -1)
@@ -1573,6 +1609,10 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
         }
 
         return null;
+    }
+
+    public DownloadTask getActiveDownloadTask(int taskId){
+        return activeDownloadTasks.get(taskId);
     }
 
 

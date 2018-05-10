@@ -1,6 +1,7 @@
 package com.ustadmobile.core.db.dao;
 
 import com.ustadmobile.core.db.UmLiveData;
+import com.ustadmobile.core.networkmanager.NetworkTask;
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.db.entities.DownloadJobItem;
@@ -69,6 +70,9 @@ public abstract class DownloadJobItemDao {
                 item.getDownloadLength(), item.getCurrentSpeed());
     }
 
+    @UmQuery("UPDATE DownloadJobItem SET status = :status WHERE downloadJobItemId = :downloadJobItemId")
+    public abstract void updateStatus(int downloadJobItemId, int status);
+
 
     /**
      * Get a UmLiveData object for the DownloadJobItem for a specific entryId within a specific status range
@@ -132,5 +136,17 @@ public abstract class DownloadJobItemDao {
      */
     @UmQuery("SELECT downloadJobItemId FROM DownloadJobItem WHERE downloadJobId = :downloadJobId")
     public abstract int[] findAllIdsByDownloadJob(int downloadJobId);
+
+    /**
+     * Unpause any DownloadJobItems that have been marked as paused. This is used when a job is
+     * queud, in case it was previously paused.
+     *
+     * @param downloadJobId id of the downloadjob that is being started
+     */
+    @UmQuery("UPDATE DOwnloadJobItem SET status = " + NetworkTask.STATUS_QUEUED +
+            " WHERE status < " + NetworkTask.STATUS_WAITING_MIN + " AND " +
+            " downloadJobId = :downloadJobId")
+    public abstract void updateUnpauseItemsByDownloadJob(int downloadJobId);
+
 
 }

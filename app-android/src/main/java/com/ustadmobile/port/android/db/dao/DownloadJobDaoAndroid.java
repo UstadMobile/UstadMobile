@@ -9,6 +9,7 @@ import android.arch.persistence.room.Update;
 
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.dao.DownloadJobDao;
+import com.ustadmobile.core.networkmanager.NetworkTask;
 import com.ustadmobile.lib.db.entities.DownloadJob;
 import com.ustadmobile.lib.db.entities.DownloadJobWithDownloadSet;
 import com.ustadmobile.lib.db.entities.DownloadJobWithTotals;
@@ -26,7 +27,8 @@ public abstract class DownloadJobDaoAndroid extends DownloadJobDao {
     @Override
     @Query("SELECT * FROM DownloadJob " +
             "LEFT JOIN DownloadSet on DownloadJob.downloadSetId = DownloadSet.id " +
-            "WHERE status > 0 AND status <= 10 ORDER BY timeRequested LIMIT 1")
+            "WHERE status >= " + NetworkTask.STATUS_WAITING_MIN + " AND status <= " +
+            NetworkTask.STATUS_WAITING_MAX + " ORDER BY timeRequested LIMIT 1")
     protected abstract DownloadJobWithDownloadSet findNextDownloadJob();
 
     @Override

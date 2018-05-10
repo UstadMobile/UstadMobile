@@ -16,9 +16,13 @@ public abstract class NetworkTask {
 
     private static final AtomicInteger taskIdAtomicInteger = new AtomicInteger();
 
-    public NetworkTask(NetworkManagerCore networkManager) {
+    public NetworkTask(NetworkManagerCore networkManager, int taskId) {
         this.networkManagerCore = networkManager;
-        this.taskId = taskIdAtomicInteger.getAndIncrement();
+        this.taskId = taskId;
+    }
+
+    public NetworkTask(NetworkManagerCore networkManager) {
+        this(networkManager, taskIdAtomicInteger.getAndIncrement());
     }
 
     public NetworkManagerTaskListener managerTaskListener;
@@ -29,7 +33,7 @@ public abstract class NetworkTask {
     public boolean useBluetooth;
     public boolean useHttp;
 
-    private boolean stopped;
+    private boolean stopped = false;
 
     public static final int STATUS_NOT_QUEUED = 0;
 
@@ -38,15 +42,18 @@ public abstract class NetworkTask {
     /*
      * Statuses are grouped in ranges:
      * 0:       not queued
-     * 1-10     waiting (inc. wait for retry)
+     * 1:       paused (by the user)
+     * 2-10     waiting (inc. wait for retry)
      * 11-20    active/running
      * 21-30    finished
      */
 
+    public static final int STATUS_PAUSED = 1;
+
     /**
      * The minimum value of waiting type statuses e.g. queued, waiting for connection, etc.
      */
-    public static final int STATUS_WAITING_MIN = 1;
+    public static final int STATUS_WAITING_MIN = 2;
 
     /**
      * The maximum value of waiting type statuses - e.g.

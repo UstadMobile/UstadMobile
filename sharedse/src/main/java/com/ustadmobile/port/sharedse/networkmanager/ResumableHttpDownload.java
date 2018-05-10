@@ -1,5 +1,7 @@
 package com.ustadmobile.port.sharedse.networkmanager;
 
+import com.ustadmobile.core.impl.UMLog;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMIOUtils;
 
 import java.io.BufferedOutputStream;
@@ -28,6 +30,12 @@ public class ResumableHttpDownload {
     private String httpSrc;
 
     private String destinationFile;
+
+    private InputStream httpIn;
+
+    private OutputStream fileOut;
+
+    private HttpURLConnection con;
 
     /**
      * Extension of the file which carry file information
@@ -106,12 +114,10 @@ public class ResumableHttpDownload {
 
         IOException ioe = null;
         Properties dlInfoProperties = new Properties();
-        HttpURLConnection con = null;
         URL url;
-        OutputStream fileOut = null;
         OutputStream propertiesOut = null;
         InputStream propertiesIn = null;
-        InputStream httpIn = null;
+
 
         boolean completed = false;
         try {
@@ -237,7 +243,9 @@ public class ResumableHttpDownload {
 
             long currentTime;
             while(!isStopped() && (bytesRead = httpIn.read(buf)) != -1) {
-                fileOut.write(buf, 0, bytesRead);
+                if(!isStopped())
+                    fileOut.write(buf, 0, bytesRead);
+
                 currentTime = System.currentTimeMillis();
                 synchronized (this) {
                     downloadedSoFar += bytesRead;
@@ -263,6 +271,7 @@ public class ResumableHttpDownload {
             UMIOUtils.closeInputStream(propertiesIn);
             UMIOUtils.closeOutputStream(propertiesOut);
             UMIOUtils.closeInputStream(httpIn);
+            httpIn = null;
             UMIOUtils.closeOutputStream(fileOut);
 
 
@@ -376,6 +385,14 @@ public class ResumableHttpDownload {
 
     public synchronized void stop() {
         stopped = true;
+        UMIOUtils.closeInputStream(httpIn);
+        httpIn = null;
+        UMIOUtils.closeOutputStream(fileOut);
+        fileOut = null;
+        if(con != null){
+            con.disconnect();
+        }
+
     }
 
     protected synchronized boolean isStopped() {
