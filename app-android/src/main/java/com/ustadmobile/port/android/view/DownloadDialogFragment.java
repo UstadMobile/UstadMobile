@@ -68,7 +68,7 @@ public class DownloadDialogFragment extends UstadDialogFragment implements Downl
         builder.setView(rootView);
         builder.setTitle(R.string.download);
 
-        builder.setPositiveButton(R.string.download, this);
+        builder.setPositiveButton(R.string.confirm, this);
         builder.setNegativeButton(R.string.cancel, this);
 
         progressBar = rootView.findViewById(R.id.fragment_download_dialog_progress_bar);
