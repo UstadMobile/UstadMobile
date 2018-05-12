@@ -7,9 +7,9 @@ dependencies {
     compile project(":lib-database-annotation")
     compile "org.jboss.forge.roaster:roaster-api:2.19.4.Final"
     compile "org.jboss.forge.roaster:roaster-jdt:2.19.4.Final"
-    compile "commons-io:commons-io:2.5"
+    compile "commons-io:commons-io:$version_commons_io"
 
-    testCompile 'junit:junit:4.12'
+    testCompile "junit:junit:$version_junit"
 }
 
 task runRoomProcessor(type: JavaExec) {

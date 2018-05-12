@@ -35,7 +35,36 @@ version = "0.2.4.83"
 ext {
     ustadVersion = project.version
     ustadVersionCode = 149
-    nanoLrsVersion = "0.2.47.25"
+    nanoLrsVersion = "0.2.49.25"
+
+    version_junit = "4.12"
+    version_nanohttpd = "2.3.1"
+    version_zip4j = "1.3.2"
+    version_kxml = "2.3.0"
+    version_ormlite = "5.0"
+    version_json = "20160212"
+    version_qrcodelibfork = "1.0.3"
+    version_okhttp = "3.9.0"
+    version_commons_io = "2.5"
+    version_ascii85 = "1.1"
+    version_gson = "2.8.2"
+
+    version_android_buildtools = "27.0.3"
+    version_android_compile_sdk = 27
+    version_android_target_sdk = 27
+
+    version_android_support_lib = "27.1.1"
+    version_android_lifecycle = "1.1.0"
+    version_android_room = "1.1.0"
+    version_android_multidex = "1.0.3"
+    version_android_paging = "1.0.0"
+    version_android_constraint_layout = "1.1.0"
+    version_android_flexbox = "0.3.2"
+    version_android_espresso = "3.0.1"
+    version_android_acra = "5.1.1"
+    version_android_junit_runner = "1.0.2"
+    version_android_mockito = "2.13.0"
+
 }
 
 ext.buildConfigProperties = new Properties()

@@ -20,8 +20,8 @@ if (keyStorePropertiesExists) {
 
 
 android {
-    compileSdkVersion 27
-    buildToolsVersion "27.0.3"
+    compileSdkVersion rootProject.ext.version_android_compile_sdk
+    buildToolsVersion rootProject.ext.version_android_buildtools
 
     lintOptions {
         abortOnError false
@@ -39,7 +39,7 @@ android {
     defaultConfig {
         applicationId "com.toughra.ustadmobile.launcher"
         minSdkVersion 16
-        targetSdkVersion 27
+        targetSdkVersion rootProject.ext.version_android_target_sdk
         versionCode 1
         versionName "1.0"
         manifestPlaceholders = [applicationClass : "android.app.Application"]
@@ -116,12 +116,16 @@ android {
 }
 
 configurations.all {
-    resolutionStrategy {
-        force 'com.android.support:appcompat-v7:27.0.2'
-        force 'com.android.support:cardview-v7:27.0.2'
-        force 'com.android.support:design:27.0.2'
-        force 'com.android.support:support-v4:27.0.2'
-    }
+//    resolutionStrategy {
+//        force "com.android.support:appcompat-v7:$support_lib_version"
+//        force "com.android.support:cardview-v7:$support_lib_version"
+//        force "com.android.support:design:$support_lib_version"
+//        force "com.android.support:support-v4:$support_lib_version"
+//        force "com.android.support:recyclerview-v7:$support_lib_version"
+//        force "android.arch.lifecycle:livedata-core:$room_version"
+//        force "android.arch.lifecycle:runtime:$room_version"
+//        force "android.arch.core:runtime:$lifecycle_version"
+//    }
 
     exclude group: "net.sf.kxml", module: "kxml2"
     exclude group: "org.json", module: "json"
@@ -136,15 +140,13 @@ dependencies {
 
     api project(":app-android")
 
-    vanillamultidexApi "com.android.support:multidex:1.0.2"
+    vanillamultidexApi "com.android.support:multidex:$version_android_multidex"
 
 
     api fileTree(dir: 'libs', include: ['*.jar'])
-    androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {
-        exclude group: 'com.android.support', module: 'support-annotations'
-    })
+    androidTestImplementation "com.android.support.test.espresso:espresso-core:$version_android_espresso"
+    androidTestImplementation "com.android.support.test.espresso:espresso-contrib:$version_android_espresso"
 
-//    api 'com.android.support:multidex:1.0.2'
-    testImplementation 'junit:junit:4.12'
+    testImplementation "junit:junit:$version_junit"
 }
 

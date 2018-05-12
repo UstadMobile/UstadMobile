@@ -200,8 +200,8 @@ android {
         abortOnError false
     }
 
-    compileSdkVersion 27
-    buildToolsVersion "27.0.3"
+    compileSdkVersion rootProject.ext.version_android_compile_sdk
+    buildToolsVersion rootProject.ext.version_android_buildtools
 
     defaultConfig {
         minSdkVersion 16
@@ -388,6 +388,13 @@ task generateCoreStringToAndroidResMap {
 }
 assemble.dependsOn(generateCoreStringToAndroidResMap)
 
+configurations.all {
+    resolutionStrategy {
+        force "android.arch.lifecycle:livedata-core:$version_android_lifecycle"
+        force "android.arch.lifecycle:runtime:$version_android_lifecycle"
+        force "android.arch.core:runtime:$version_android_lifecycle"
+    }
+}
 
 dependencies {
     api project(':core')
@@ -397,7 +404,7 @@ dependencies {
     implementation project(":lib-database-annotation")
     implementation project(":lib-util")
 
-    vanillamultidexApi "com.android.support:multidex:1.0.2"
+    vanillamultidexApi "com.android.support:multidex:$version_android_multidex"
 
     androidTestImplementation project(":core-tests")
 
@@ -405,16 +412,19 @@ dependencies {
     api "com.ustadmobile.nanolrs:nanolrs-core:$nanoLrsVersion"
     api "com.ustadmobile.nanolrs:nanolrs-android:$nanoLrsVersion"
 
+
+
     //ViewModel and LiveData
-    implementation "android.arch.lifecycle:extensions:1.0.0"
-    annotationProcessor "android.arch.lifecycle:compiler:1.0.0"
+    implementation "android.arch.lifecycle:extensions:$version_android_lifecycle"
+    annotationProcessor "android.arch.lifecycle:compiler:$version_android_lifecycle"
 
     // Room
-    implementation "android.arch.persistence.room:runtime:1.0.0"
-    annotationProcessor "android.arch.persistence.room:compiler:1.0.0"
+    implementation "android.arch.persistence.room:runtime:$version_android_room"
+    annotationProcessor "android.arch.persistence.room:compiler:$version_android_room"
 
     // Paging
-    implementation "android.arch.paging:runtime:1.0.0-alpha4-1"
+    implementation "android.arch.paging:runtime:$version_android_paging"
+
 
 
 
@@ -425,16 +435,17 @@ dependencies {
     api 'com.ustadmobile.qrcodelibomrfork:qrcode-core:1.0.3'
 
 
-    implementation group: 'com.android.support', name: "appcompat-v7", version: "[26+, 27+]"
-    implementation group: 'com.android.support', name: "cardview-v7", version: "[26+, 27+]"
-    implementation group: 'com.android.support', name: "design", version: "[26+, 27+]"
-    implementation group: 'com.android.support', name: "support-v4", version: "[26+, 27+]"
-
-
-    androidTestImplementation group: 'com.android.support', name: "appcompat-v7", version: "27.0.2"
-    androidTestImplementation group: 'com.android.support', name: "cardview-v7", version: "27.0.2"
-    androidTestImplementation group: 'com.android.support', name: "design", version: "27.0.2"
-    androidTestImplementation group: 'com.android.support', name: "support-v4", version: "27.0.2"
+    /*
+     * If this needs to be made compatible as a library for something using older appcompat libs -
+     * use this format:
+     *  implementation group: 'com.android.support', name: "appcompat-v7", version: "[26+, 27+]"
+     */
+    implementation "com.android.support:support-core-utils:$version_android_support_lib"
+    implementation "com.android.support:appcompat-v7:$version_android_support_lib"
+    implementation "com.android.support:cardview-v7:$version_android_support_lib"
+    implementation "com.android.support:design:$version_android_support_lib"
+    implementation "com.android.support:support-v4:$version_android_support_lib"
+    implementation "com.android.support:recyclerview-v7:$version_android_support_lib"
 
     //Image loading library
     implementation 'com.squareup.picasso:picasso:2.5.2'
@@ -442,7 +453,7 @@ dependencies {
     //Floating action button with support for popup choices
     implementation 'com.github.clans:fab:1.6.4'
 
-    implementation 'com.android.support.constraint:constraint-layout:1.1.0-beta4'
+    implementation "com.android.support.constraint:constraint-layout:$version_android_constraint_layout"
 
     //Wifi direct library
     implementation 'com.ustadmobile.wifibuddy:wifibuddy:1.1.45-SNAPSHOT'
@@ -453,34 +464,37 @@ dependencies {
     //used for learner progress view
     implementation 'com.txusballesteros:FitChart:1.0'
 
-    implementation "com.google.android:flexbox:0.3.0"
+    implementation "com.google.android:flexbox:$version_android_flexbox"
 
     //Used for dns local network discovery on Android versions lower than 5.0
     implementation 'org.jmdns:jmdns:3.5.2'
 
     //ASCII 85 used to encode
-    implementation 'com.github.fzakaria:ascii85:1.1'
+    implementation "com.github.fzakaria:ascii85:$version_ascii85"
     implementation 'com.pixplicity.sharp:library:1.1.0'
 
     //Support for encrypted zips
-    implementation "net.lingala.zip4j:zip4j:1.3.2"
+    implementation "net.lingala.zip4j:zip4j:$version_zip4j"
 
     //Crash reporting
-    def acraVersion = '5.1.1'
-    implementation "ch.acra:acra-http:$acraVersion"
-    implementation "ch.acra:acra-dialog:$acraVersion"
+    implementation "ch.acra:acra-http:$version_android_acra"
+    implementation "ch.acra:acra-dialog:$version_android_acra"
 
-    androidTestImplementation 'junit:junit:4.12'
-    androidTestImplementation group: "com.android.support", name: "support-annotations", version: "27.0.2"
+    androidTestImplementation "junit:junit:$version_junit"
+    androidTestImplementation group: "com.android.support", name: "support-annotations", version: "$version_android_support_lib"
 
     //As per: https://developer.android.com/topic/libraries/testing-support-library/packages.html#gradle-dependencies
-    androidTestImplementation 'com.android.support.test:runner:1.0.1'
-    androidTestImplementation 'com.android.support.test:rules:1.0.1'
-    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
-    androidTestImplementation 'com.android.support.test.espresso:espresso-contrib:3.0.1'
+    androidTestImplementation "com.android.support.test:runner:$version_android_junit_runner"
+    androidTestImplementation "com.android.support.test:rules:$version_android_junit_runner"
+    androidTestImplementation "com.android.support.test.espresso:espresso-core:$version_android_espresso"
+    androidTestImplementation "com.android.support.test.espresso:espresso-contrib:$version_android_espresso"
 
 
-    androidTestImplementation "org.mockito:mockito-android:2.13.0"
+    androidTestImplementation "org.mockito:mockito-android:$version_android_mockito"
+
+    //http server
+    implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
+    implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
 }
 
 task sourceJar(type: Jar) {

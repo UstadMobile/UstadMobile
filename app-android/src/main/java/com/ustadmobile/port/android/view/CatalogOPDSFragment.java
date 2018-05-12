@@ -44,7 +44,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.recyclerview.extensions.DiffCallback;
+import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -234,7 +234,7 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
         DataSource.Factory factory = (DataSource.Factory)entryProvider.getProvider();
         LiveData<PagedList<OpdsEntryWithStatusCache>> data =  new LivePagedListBuilder<>(factory, 20).build();
 
-        data.observe(this, adapter::setList);
+        data.observe(this, adapter::submitList);
         mRecyclerView.setAdapter(adapter);
     }
 
@@ -632,7 +632,7 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
         }
     }
 
-    public static final DiffCallback<OpdsEntryWithStatusCache> DIFF_CALLBACK = new DiffCallback<OpdsEntryWithStatusCache>() {
+    public static final DiffUtil.ItemCallback<OpdsEntryWithStatusCache> DIFF_CALLBACK = new DiffUtil.ItemCallback<OpdsEntryWithStatusCache>() {
         @Override
         public boolean areItemsTheSame(@NonNull OpdsEntryWithStatusCache oldItem, @NonNull OpdsEntryWithStatusCache newItem) {
             return oldItem.getUuid().equals(newItem.getUuid());

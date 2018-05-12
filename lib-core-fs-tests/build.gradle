@@ -18,11 +18,11 @@ dependencies {
     compile project(":core-tests")
     compile project(":lib-core-fs")
     implementation project(":lib-database")
-    implementation 'org.nanohttpd:nanohttpd:2.3.1'
-    implementation 'org.nanohttpd:nanohttpd-nanolets:2.3.1';
+    implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
+    implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
 
 
-    compile 'junit:junit:4.12'
+    compile "junit:junit:$version_junit"
 }
 
 jar {

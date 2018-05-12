@@ -31,13 +31,13 @@ task sourceJar(type: Jar) {
 
 dependencies {
     //compile fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'org.nanohttpd:nanohttpd:2.3.1'
-    implementation 'org.nanohttpd:nanohttpd-nanolets:2.3.1';
-    implementation 'com.ustadmobile.qrcodelibomrfork:qrcode-core:1.0.3'
-    implementation 'com.squareup.okhttp3:okhttp:3.9.0'
-    implementation "net.sf.kxml:kxml2:2.3.0";
-    implementation "com.google.code.gson:gson:2.8.2"
-    implementation "net.lingala.zip4j:zip4j:1.3.2"
+    implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
+    implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
+    implementation "com.ustadmobile.qrcodelibomrfork:qrcode-core:$version_qrcodelibfork"
+    implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
+    implementation "net.sf.kxml:kxml2:$version_kxml";
+    implementation "com.google.code.gson:gson:$version_gson"
+    implementation "net.lingala.zip4j:zip4j:$version_zip4j"
 
     project.ext.nanoLrsVersion = rootProject.ext.nanoLrsVersion
     implementation "com.ustadmobile.nanolrs:nanolrs-core:$nanoLrsVersion"

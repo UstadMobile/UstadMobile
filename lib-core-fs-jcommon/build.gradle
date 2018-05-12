@@ -3,7 +3,7 @@ apply plugin: "maven-publish"
 
 
 dependencies {
-    compile "com.j256.ormlite:ormlite-core:5.0"
+    compile "com.j256.ormlite:ormlite-core:$version_ormlite"
     compile project (":core")
     compile project (":lib-core-fs")
 

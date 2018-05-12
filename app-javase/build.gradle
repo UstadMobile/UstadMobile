@@ -12,11 +12,11 @@ dependencies {
     compile project(':lib-core-fs-jcommon')
     implementation project(":lib-util")
 
-    compile "com.j256.ormlite:ormlite-core:5.0"
-    compile "com.j256.ormlite:ormlite-jdbc:5.0"
+    compile "com.j256.ormlite:ormlite-core:$version_ormlite"
+    compile "com.j256.ormlite:ormlite-jdbc:$version_ormlite"
 
-    compile "org.json:json:20160212"
-    compile "net.sf.kxml:kxml2:2.3.0"
+    compile "org.json:json:$version_json"
+    compile "net.sf.kxml:kxml2:$version_kxml"
 }
 
 task fatJar(type: Jar) {

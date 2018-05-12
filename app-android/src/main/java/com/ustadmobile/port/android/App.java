@@ -1,26 +1,17 @@
 package com.ustadmobile.port.android;
 
-import android.app.Application;
 import android.content.Context;
 
-import com.evernote.android.job.Job;
-import com.evernote.android.job.JobManager;
-import com.evernote.android.job.JobRequest;
+//import com.evernote.android.job.Job;
+//import com.evernote.android.job.JobManager;
+//import com.evernote.android.job.JobRequest;
 import com.toughra.ustadmobile.BuildConfig;
-import com.ustadmobile.port.android.job.UMSyncJob;
-import com.ustadmobile.port.android.job.UMSyncJobCreator;
 
 import org.acra.ACRA;
-import org.acra.ErrorReporter;
-import org.acra.annotation.AcraCore;
-import org.acra.annotation.AcraHttpSender;
 import org.acra.config.CoreConfigurationBuilder;
 import org.acra.config.HttpSenderConfigurationBuilder;
 import org.acra.data.StringFormat;
 import org.acra.sender.HttpSender;
-
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Created by varuna on 8/23/2017.
@@ -33,7 +24,7 @@ public class App extends UmBaseApplication {
 
     private int syncJobId;
 
-    private JobManager mJobManager;
+//    private JobManager mJobManager;
 
     @Override
     public void onCreate() {

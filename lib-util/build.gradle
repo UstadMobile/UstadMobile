@@ -2,9 +2,9 @@ apply plugin: 'java-library'
 apply plugin: "maven-publish"
 
 dependencies {
-    implementation "net.sf.kxml:kxml2:2.3.0";
+    implementation "net.sf.kxml:kxml2:$version_kxml";
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'com.github.fzakaria:ascii85:1.1'
+    implementation "com.github.fzakaria:ascii85:$version_ascii85"
 }
 
 sourceCompatibility = "1.8"

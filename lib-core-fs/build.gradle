@@ -11,10 +11,10 @@ dependencies {
     testCompile project(":app-javase")
     implementation project(":lib-database")
 
-    implementation "net.lingala.zip4j:zip4j:1.3.2"
+    implementation "net.lingala.zip4j:zip4j:$version_zip4j"
     ext.testDbDependency = rootProject.ext.buildConfigProperties['test.jdbc.dbDriverDependency']
     testCompile "$testDbDependency"
-    testCompile 'com.squareup.okhttp3:okhttp:3.9.0'
+    testCompile "com.squareup.okhttp3:okhttp:$version_okhttp"
 }
 
 
