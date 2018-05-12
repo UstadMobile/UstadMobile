@@ -5,6 +5,7 @@ import com.ustadmobile.core.controller.UstadBaseController;
 import com.ustadmobile.core.db.DbManager;
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.dao.CrawlJobWithTotals;
+import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UMStorageDir;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
@@ -105,29 +106,26 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
         if(status == null)
             return;//has not really loaded yet
 
-        boolean canPause = entry.getDownloadDisplayState() == OpdsEntryWithStatusCache.DOWNLOAD_DISPLAY_STATUS_PAUSED;
-        boolean canCancel = canPause || entry.getDownloadDisplayState() == OpdsEntryWithStatusCache.DOWNLOAD_DISPLAY_STATUS_IN_PROGRESS;
+        boolean inProgress = entry.getDownloadDisplayState() == OpdsEntryWithStatusCache.DOWNLOAD_DISPLAY_STATUS_IN_PROGRESS;
+        boolean paused = entry.getDownloadDisplayState() == OpdsEntryWithStatusCache.DOWNLOAD_DISPLAY_STATUS_PAUSED;
 
-
-        if(!canCancel && entry.getStatusCache().getContainersDownloadedIncDescendants() > 0) {
+        if(!inProgress && entry.getStatusCache().getContainersDownloadedIncDescendants() > 0) {
             optionsAvailable = optionsAvailable | OPTION_DELETE;
         }
 
-        if(status.getContainersDownloadedIncDescendants() == 0 ||
-                (status.getContainersDownloadedIncDescendants() + status.getContainersDownloadPendingIncAncestors()) < status.getEntriesWithContainerIncDescendants()){
+        if(!(inProgress || paused) && (status.getContainersDownloadedIncDescendants() == 0 ||
+                (status.getContainersDownloadedIncDescendants() + status.getContainersDownloadPendingIncAncestors()) < status.getEntriesWithContainerIncDescendants())){
             optionsAvailable = optionsAvailable | OPTION_START_DOWNLOAD;
         }
 
-        if(canCancel) {
+        if(inProgress) {
             optionsAvailable = optionsAvailable | OPTION_CANCEL_DOWNLOAD;
-        }
-
-        if(entry.getDownloadDisplayState() == OpdsEntryWithStatusCache.DOWNLOAD_DISPLAY_STATUS_PAUSED) {
-            optionsAvailable = optionsAvailable | OPTION_RESUME_DOWNLOAD;
-        }
-
-        if(canPause) {
             optionsAvailable = optionsAvailable | OPTION_PAUSE_DOWNLOAD;
+        }
+
+        if(paused) {
+            optionsAvailable = optionsAvailable | OPTION_RESUME_DOWNLOAD;
+            optionsAvailable = optionsAvailable | OPTION_CANCEL_DOWNLOAD;
         }
 
         int numOptions = Integer.bitCount(optionsAvailable);
@@ -141,6 +139,7 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
 
         switch(option) {
             case OPTION_START_DOWNLOAD:
+                view.setProgressVisible(true);
                 if(crawlJob == null)
                     startCrawlJob();
 
@@ -148,6 +147,11 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
 
             case OPTION_DELETE:
                 view.setMainText("Delete, are you sure?");
+                view.setProgressVisible(false);
+                break;
+
+            case OPTION_PAUSE_DOWNLOAD:
+                view.setMainText("Pause this download");
                 view.setProgressVisible(false);
                 break;
 
@@ -225,6 +229,25 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
 
                             }
                         });
+            case OPTION_PAUSE_DOWNLOAD:
+                dbManager.getDownloadJobDao().findLastDownloadJobId(rootEntryId, (runningDownloadJobId) -> {
+                    if(runningDownloadJobId > 0){
+                        UstadMobileSystemImpl.getInstance().getNetworkManager().pauseDownloadJobAsync(
+                                runningDownloadJobId, (pausedOK) -> {
+                                    UstadMobileSystemImpl.l(UMLog.INFO, 0, "Paused download: "
+                                            + runningDownloadJobId);
+                                });
+                    }
+                });
+                break;
+
+            case OPTION_RESUME_DOWNLOAD:
+                dbManager.getDownloadJobDao().findLastDownloadJobId(rootEntryId, (runningDownloadJobId) -> {
+                    if(runningDownloadJobId > 0){
+                        UstadMobileSystemImpl.getInstance().getNetworkManager().queueDownloadJob(runningDownloadJobId);
+                    }
+                });
+                break;
 
         }
 

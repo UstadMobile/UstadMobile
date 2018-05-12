@@ -17,6 +17,9 @@ public abstract class CrawJoblItemDao {
     @UmQuery("UPDATE DownloadJobCrawlItem SET status = :status WHERE id = :id")
     public abstract void updateStatus(int id, int status);
 
+    @UmQuery("UPDATE CrawlJobItem SET opdsEntryUuid = :opdsEntryUuid WHERE id = :id")
+    public abstract void updateOpdsEntryUuid(int id, String opdsEntryUuid);
+
     @UmInsert
     public abstract void insert(CrawlJobItem item);
 

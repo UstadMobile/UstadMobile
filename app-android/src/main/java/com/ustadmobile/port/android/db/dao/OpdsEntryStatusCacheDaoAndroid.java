@@ -114,16 +114,18 @@ public abstract class OpdsEntryStatusCacheDaoAndroid extends OpdsEntryStatusCach
                 "WHERE " +
                 "DownloadJobItem.downloadJobItemId = :downloadJobId " +
             ")," +
-            "containersDownloadPendingIncAncestors = containersDownloadPendingIncAncestors + :deltaContainersDownloadPending " +
+            "containersDownloadPendingIncAncestors = containersDownloadPendingIncAncestors + :deltaContainersDownloadPending, " +
+            "pausedDownloadsIncAncestors = pausedDownloadsIncAncestors + :deltaPausedDownloads " +
             "WHERE statusCacheUid IN " +
             "  (SELECT ancestorOpdsEntryStatusCacheId FROM OpdsEntryStatusCacheAncestor WHERE opdsEntryStatusCacheId = :statusCacheUid)")
-    protected abstract void updateOnDownloadJobItemQueuedIncAncestors(int statusCacheUid, int downloadJobId, int deltaContainersDownloadPending);
+    protected abstract void updateOnDownloadJobItemQueuedIncAncestors(int statusCacheUid, int downloadJobId, int deltaContainersDownloadPending, int deltaPausedDownloads);
 
     @Override
     @Query("Update OpdsEntryStatusCache " +
             "SET " +
             "entrySize = (SELECT downloadLength FROM DownloadJobItem WHERE downloadJobItemId= :downloadJobId), " +
-            "entryContainerDownloadPending = 1 " +
+            "entryContainerDownloadPending = 1," +
+            "entryPausedDownload = 0 " +
             " WHERE statusCacheUid = :statusCacheUid")
     protected abstract void updateOnDownloadJobItemQueuedEntry(int statusCacheUid, int downloadJobId);
 
@@ -174,13 +176,15 @@ public abstract class OpdsEntryStatusCacheDaoAndroid extends OpdsEntryStatusCach
             "containersDownloadedSizeIncDescendants = containersDownloadedSizeIncDescendants + :deltaContainersDownloadedSize,\n" +
             "containersDownloadedIncDescendants = containersDownloadedIncDescendants + :deltaContainersDownloaded,\n" +
             "sizeIncDescendants = sizeIncDescendants + :deltaSize, " +
-            "activeDownloadsIncAncestors = activeDownloadsIncAncestors + :deltaActiveDownloads " +
+            "activeDownloadsIncAncestors = activeDownloadsIncAncestors + :deltaActiveDownloads, " +
+            "pausedDownloadsIncAncestors = pausedDownloadsIncAncestors + :deltaPausedDownloads " +
             "WHERE statusCacheUid IN " +
             "(SELECT ancestorOpdsEntryStatusCacheId FROM OpdsEntryStatusCacheAncestor WHERE opdsEntryStatusCacheId = (SELECT statusCacheUid FROM OpdsEntryStatusCache WHERE statusEntryId = :entryId))")
     @Override
     public abstract void updateOnContainerStatusChangedIncAncestors(String entryId, long deltaPendingDownloadBytesSoFar,
                                                                     int deltacontainersDownloadPending,
                                                                     int deltaActiveDownloads,
+                                                                    int deltaPausedDownloads,
                                                                     long deltaContainersDownloadedSize,
                                                                     long deltaContainersDownloaded, long deltaSize);
 
@@ -190,6 +194,7 @@ public abstract class OpdsEntryStatusCacheDaoAndroid extends OpdsEntryStatusCach
             "entryPendingDownloadBytesSoFar = :pendingDownloadBytesSoFar, " +
             "entryContainerDownloadPending = :containerDownloadPending,  " +
             "entryActiveDownload = :activeDownload, " +
+            "entryPausedDownload = :pausedDownload, " +
             "entryContainerDownloadedSize = :containerDownloadedSize, " +
             "entryContainerDownloaded = :containerDownloaded," +
             "entrySize = :entrySize " +
@@ -199,6 +204,7 @@ public abstract class OpdsEntryStatusCacheDaoAndroid extends OpdsEntryStatusCach
                                                              long pendingDownloadBytesSoFar,
                                                              boolean containerDownloadPending,
                                                              boolean activeDownload,
+                                                             boolean pausedDownload,
                                                              long containerDownloadedSize,
                                                              boolean containerDownloaded,
                                                              long entrySize);

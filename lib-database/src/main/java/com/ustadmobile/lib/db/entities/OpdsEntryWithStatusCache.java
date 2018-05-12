@@ -61,10 +61,10 @@ public class OpdsEntryWithStatusCache extends OpdsEntryWithRelations {
         if(containersDownloadedSizeIncDescendants > 0
                 && containersDownloadedSizeIncDescendants == statusCache.getSizeIncDescendants()) {
             return DOWNLOAD_DISPLAY_STATUS_DOWNLOADED;
+        }else if (statusCache.getPausedDownloadsIncAncestors() > 0) {
+            return DOWNLOAD_DISPLAY_STATUS_PAUSED;
         }else if (statusCache.getActiveDownloadsIncAncestors() > 0){
             return DOWNLOAD_DISPLAY_STATUS_IN_PROGRESS;
-        }else if (pendingDownloadJobItem != null && pendingDownloadJobItem.getStatus() == 42) {//set this to pause status
-            return DOWNLOAD_DISPLAY_STATUS_PAUSED;
         }
 
         int percentRequestedOrCompleted = (statusCache.getEntriesWithContainerIncDescendants()) > 0 ?

@@ -2,6 +2,7 @@ package com.ustadmobile.core.db.dao;
 
 import com.ustadmobile.core.db.DbManager;
 import com.ustadmobile.core.db.UmLiveData;
+import com.ustadmobile.core.impl.UmResultCallback;
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.db.entities.ContainerFile;
@@ -354,9 +355,10 @@ public abstract class OpdsEntryStatusCacheDao {
      */
     public void handleDownloadJobQueued(int downloadJobItemId) {
         OpdsEntryStatusCache statusCache = findByDownloadJobItemId(downloadJobItemId);
-        if(!(statusCache.isEntryContainerDownloaded() || statusCache.isEntryContainerDownloadPending())) {
+        if(statusCache.isEntryPausedDownload() || !(statusCache.isEntryContainerDownloaded() || statusCache.isEntryContainerDownloadPending())) {
             updateOnDownloadJobItemQueuedIncAncestors(statusCache.getStatusCacheUid(), downloadJobItemId,
-                    1);
+                    statusCache.isEntryContainerDownloadPending() ? 0 : 1,
+                    statusCache.isEntryPausedDownload() ? -1 : 0);
             updateOnDownloadJobItemQueuedEntry(statusCache.getStatusCacheUid(), downloadJobItemId);
         }
     }
@@ -385,7 +387,8 @@ public abstract class OpdsEntryStatusCacheDao {
             "containersDownloadPendingIncAncestors = containersDownloadPendingIncAncestors + :deltaContainersDownloadPending " +
             "WHERE statusCacheUid IN " +
             "  (SELECT ancestorOpdsEntryStatusCacheId FROM OpdsEntryStatusCacheAncestor WHERE opdsEntryStatusCacheId = :statusCacheUid)")
-    protected abstract void updateOnDownloadJobItemQueuedIncAncestors(int statusCacheUid, int downloadJobId, int deltaContainersDownloadPending);
+    protected abstract void updateOnDownloadJobItemQueuedIncAncestors(int statusCacheUid, int downloadJobId,
+                                                                      int deltaContainersDownloadPending, int deltaPausedDownloads);
 
     @UmQuery("Update OpdsEntryStatusCache " +
             "SET " +
@@ -474,14 +477,16 @@ public abstract class OpdsEntryStatusCacheDao {
         int deltaContainersDownloaded = entryStatusCache.isEntryContainerDownloaded() ? 0 : 1;
         long deltaSize = containerFile.getFileSize() - entryStatusCache.getEntrySize();
         int deltaActiveDownloads = entryStatusCache.isEntryActiveDownload() ? -1 : 0;
+        int deltaPausedDownloads = entryStatusCache.isEntryPausedDownload() ? -1 : 0;
 
         updateOnContainerStatusChangedIncAncestors(entryStatusCache.getStatusEntryId(),
                 deltaPendingDownloadBytesSoFar, deltaContainersDownloadPending,
-                deltaActiveDownloads, deltaContainersDownloadedSize, deltaContainersDownloaded,
-                deltaSize);
+                deltaActiveDownloads, deltaPausedDownloads, deltaContainersDownloadedSize,
+                deltaContainersDownloaded, deltaSize);
 
         updateOnContainerStatusChangedEntry(entryStatusCache.getStatusCacheUid(), 0,
-                false, false, containerFile.getFileSize(), true,
+                false, false, false,
+                containerFile.getFileSize(), true,
                 containerFile.getFileSize());
     }
 
@@ -539,6 +544,7 @@ public abstract class OpdsEntryStatusCacheDao {
     protected abstract void updateOnContainerStatusChangedIncAncestors(String entryId, long deltaDownloadedBytesSoFar,
                                                                        int deltaContainersDownloadPending,
                                                                        int deltaActiveDownloads,
+                                                                       int deltaPausedDownloads,
                                                                        long deltaContainersDownloadedSize,
                                                                        long deltaContainersDownloaded,
                                                                        long deltaTotalSize);
@@ -566,6 +572,7 @@ public abstract class OpdsEntryStatusCacheDao {
                                                                 long pendingDownloadBytesSoFar,
                                                                 boolean containerDownloadPending,
                                                                 boolean activeDownload,
+                                                                boolean pausedDownload,
                                                                 long containerDownloadedSize,
                                                                 boolean containerDownloaded,
                                                                 long entrySize);
@@ -601,13 +608,13 @@ public abstract class OpdsEntryStatusCacheDao {
                 entryStatusCache.getEntryContainerDownloadedSize();
 
         updateOnContainerStatusChangedIncAncestors(entryStatusCache.getStatusEntryId(),
-                0, 0, 0,
+                0, 0, 0,0,
                 deltaContainersDownloadedSize, deltaContainersDownloaded, deltaSize);
 
         updateOnContainerStatusChangedEntry(entryStatusCache.getStatusCacheUid(),
                 entryStatusCache.getEntryPendingDownloadBytesSoFar(),
                 entryStatusCache.isEntryContainerDownloadPending(),
-                false,0, false,
+                false,false,0, false,
                 entryStatusCache.getEntryAcquisitionLinkLength());
     }
 
@@ -634,19 +641,34 @@ public abstract class OpdsEntryStatusCacheDao {
                 : entryStatusCache.getEntryAcquisitionLinkLength();
         long deltaSize = entryStatusCache.getEntryAcquisitionLinkLength() - newEntrySize;
         int deltaActiveDownloads = entryStatusCache.isEntryActiveDownload() ? -1 : 0;
+        int deltaPausedDownloads = entryStatusCache.isEntryPausedDownload() ? -1 : 0;
 
         updateOnContainerStatusChangedIncAncestors(entryStatusCache.getStatusEntryId(),
                 deltaDownloadedBytesSoFar, deltaContainerDownloadPending, deltaActiveDownloads,
-                0, 0,
+                deltaPausedDownloads, 0, 0,
                 deltaSize);
 
         updateOnContainerStatusChangedEntry(entryStatusCache.getStatusCacheUid(), 0, false,
-                false, entryStatusCache.getEntryContainerDownloadedSize(), entryStatusCache.isEntryContainerDownloaded(),
-                deltaSize);
+                false, false, entryStatusCache.getEntryContainerDownloadedSize(),
+                entryStatusCache.isEntryContainerDownloaded(), deltaSize);
     }
 
+    public void handleContainerDownloadPaused(OpdsEntryStatusCache entryStatusCache) {
+        int deltaPausedDownloads = entryStatusCache.isEntryPausedDownload() ? 0 : 1;
+        int deltaActiveDownloads = entryStatusCache.isEntryActiveDownload() ? -1 : 0;
+        updateOnContainerStatusChangedIncAncestors(entryStatusCache.getStatusEntryId(),
+                0, 0, deltaActiveDownloads,
+                deltaPausedDownloads, 0, 0, 0);
 
+        updateOnContainerStatusChangedEntry(entryStatusCache.getStatusCacheUid(),
+                entryStatusCache.getEntryPendingDownloadBytesSoFar(), entryStatusCache.isEntryContainerDownloadPending(),
+                false, true, entryStatusCache.getEntryContainerDownloadedSize(),
+                entryStatusCache.isEntryContainerDownloaded(), entryStatusCache.getEntrySize());
+    }
 
+    public void handleContainerDownloadPaused(String entryId) {
+        handleContainerDownloadPaused(findByEntryId(entryId));
+    }
 
 
 }

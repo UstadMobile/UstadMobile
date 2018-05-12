@@ -9,13 +9,22 @@ import android.arch.persistence.room.Update;
 
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.dao.DownloadJobDao;
+import com.ustadmobile.core.impl.UmResultCallback;
 import com.ustadmobile.core.networkmanager.NetworkTask;
 import com.ustadmobile.lib.db.entities.DownloadJob;
 import com.ustadmobile.lib.db.entities.DownloadJobWithDownloadSet;
 import com.ustadmobile.lib.db.entities.DownloadJobWithTotals;
 
+import java.util.concurrent.ExecutorService;
+
 @Dao
 public abstract class DownloadJobDaoAndroid extends DownloadJobDao {
+
+    private ExecutorService executorService;
+
+    public void setExecutorService(ExecutorService executorService) {
+        this.executorService = executorService;
+    }
 
     @Insert
     public abstract long insert(DownloadJob jobRun);
@@ -79,4 +88,30 @@ public abstract class DownloadJobDaoAndroid extends DownloadJobDao {
     @Override
     @Query("SELECT * FROM DownloadJob ORDER BY timeCreated DESC LIMIT 1")
     public abstract DownloadJob findLastCreatedDownloadJob();
+
+    public void findLastDownloadJobIdByDownloadJobItem(String entryId, UmResultCallback<Integer> callback) {
+        executorService.execute(() -> callback.onDone(findLastDownloadJobIdByDownloadJobItem_Room(entryId)));
+    }
+
+    @Query("SELECT DownloadJob.downloadJobId " +
+            "FROM DownloadSetItem " +
+            "LEFT JOIN DownloadJobItem ON DownloadSetItem.id = DownloadJobItem.downloadJobItemId " +
+            "LEFT JOIN DownloadJob ON DownloadJobItem.downloadJobId = DownloadJob.downloadJobId " +
+            "WHERE DownloadSetItem.entryId = :entryId " +
+            "ORDER BY DownloadJob.timeRequested DESC LIMIT 1")
+    public abstract Integer findLastDownloadJobIdByDownloadJobItem_Room(String entryId);
+
+    @Override
+    public void findLastDownloadJobIdByCrawlJobItem(String entryId, UmResultCallback<Integer> callback) {
+        executorService.execute(() -> callback.onDone(findLastDownloadJobIdByCrawlJobItem_Room(entryId)));
+    }
+
+    @Query("SELECT DownloadJob.downloadJobId  " +
+            "FROM CrawlJobItem " +
+            "LEFT JOIN OpdsEntry ON CrawlJobItem.opdsEntryUuid = OpdsEntry.uuid " +
+            "LEFT JOIN CrawlJob ON CrawlJobItem.crawlJobId = CrawlJob.crawlJobId " +
+            "LEFT JOIN DownloadJob on CrawlJob.containersDownloadJobId = DownloadJob.downloadJobId " +
+            "WHERE OpdsEntry.entryId = :entryId " +
+            "ORDER BY DownloadJob.timeRequested DESC LIMIT 1")
+    public abstract Integer findLastDownloadJobIdByCrawlJobItem_Room(String entryId);
 }

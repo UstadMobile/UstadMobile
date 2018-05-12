@@ -148,8 +148,7 @@ public class TestDownloadTaskStandalone extends TestWithNetworkService {
     }
 
 
-//    TODO: Enable this when the UI is ready
-//    @Test
+    @Test
     public void testPauseResumeDownload() {
         String storageDir = UstadMobileSystemImpl.getInstance().getStorageDirs(
                 CatalogPresenter.SHARED_RESOURCE, PlatformTestUtil.getTargetContext())[0].getDirURI();

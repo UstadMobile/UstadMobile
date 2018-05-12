@@ -8,11 +8,8 @@ import com.ustadmobile.core.networkmanager.AcquisitionTaskHistoryEntry;
 import com.ustadmobile.core.networkmanager.DownloadTaskListener;
 import com.ustadmobile.core.networkmanager.NetworkManagerListener;
 import com.ustadmobile.core.networkmanager.NetworkManagerTaskListener;
-import com.ustadmobile.lib.db.entities.DownloadJob;
-import com.ustadmobile.lib.db.entities.DownloadJobItem;
 import com.ustadmobile.lib.db.entities.DownloadJobItemWithDownloadSetItem;
 import com.ustadmobile.lib.db.entities.DownloadJobWithDownloadSet;
-import com.ustadmobile.lib.db.entities.DownloadSetItem;
 import com.ustadmobile.lib.db.entities.DownloadJobItemHistory;
 import com.ustadmobile.lib.db.entities.EntryStatusResponseWithNode;
 import com.ustadmobile.lib.db.entities.NetworkNode;
@@ -451,7 +448,7 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
      * starting.
      */
     private void findNextDownloadJobItem() {
-        currentDownloadJobItem =  mDbManager.getDownloadJobItemDao().findByDownloadJobAndStatusRange(
+        currentDownloadJobItem =  mDbManager.getDownloadJobItemDao().findNextByDownloadJobAndStatusRange(
                 downloadJob.getDownloadJobId(), 0, NetworkTask.STATUS_RUNNING_MIN-1);
         if(currentDownloadJobItem != null) {
             currentEntryStatusCacheId = mDbManager.getOpdsEntryStatusCacheDao().findUidByEntryId(
@@ -652,8 +649,10 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
     public void stop(int statusAfterStopped) {
         UstadMobileSystemImpl.l(UMLog.INFO, 321, getLogPrefix() + " task stop called.");
         setStopped(true);
-        if(httpDownload != null)
+        if(httpDownload != null) {
             httpDownload.stop();
+        }
+
 
         if(currentDownloadJobItem != null && currentDownloadJobItem.getStatus() < NetworkTask.STATUS_COMPLETE_MIN) {
             currentDownloadJobItem.setStatus(statusAfterStopped);

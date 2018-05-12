@@ -26,6 +26,7 @@ import com.ustadmobile.core.db.dao.OpdsLinkDao;
 import com.ustadmobile.core.fs.db.repository.OpdsAtomFeedRepositoryImpl;
 import com.ustadmobile.port.android.db.dao.ContainerFileDaoAndroid;
 import com.ustadmobile.port.android.db.dao.CrawlJobDaoAndroid;
+import com.ustadmobile.port.android.db.dao.DownloadJobDaoAndroid;
 import com.ustadmobile.port.android.db.dao.OpdsEntryParentToChildJoinDaoAndroid;
 
 import java.util.concurrent.ExecutorService;
@@ -50,6 +51,8 @@ public class DbManagerAndroid extends DbManager {
     private OpdsEntryParentToChildJoinDaoAndroid opdsEntryParentToChildJoinDao;
 
     private CrawlJobDaoAndroid crawlJobDao;
+
+    private DownloadJobDaoAndroid downloadJobDao;
 
     public DbManagerAndroid(Object context) {
         this.context = ((Context)context).getApplicationContext();
@@ -168,7 +171,11 @@ public class DbManagerAndroid extends DbManager {
 
     @Override
     public DownloadJobDao getDownloadJobDao() {
-        return appDatabase.getDownloadJobDao();
+        if(downloadJobDao == null) {
+            downloadJobDao = appDatabase.getDownloadJobDao();
+            downloadJobDao.setExecutorService(executorService);
+        }
+        return downloadJobDao;
     }
 
     @Override

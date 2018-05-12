@@ -29,6 +29,10 @@ public abstract class CrawJoblItemDaoAndroid extends CrawJoblItemDao {
     public abstract void updateStatus(int id, int status);
 
     @Override
+    @Query("UPDATE CrawlJobItem SET opdsEntryUuid = :opdsEntryUuid WHERE id = :id")
+    public abstract void updateOpdsEntryUuid(int id, String opdsEntryUuid);
+
+    @Override
     @Insert
     public abstract void insert(CrawlJobItem item);
 

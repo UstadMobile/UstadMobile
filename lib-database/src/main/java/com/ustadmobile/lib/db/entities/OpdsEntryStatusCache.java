@@ -61,6 +61,9 @@ public class OpdsEntryStatusCache {
 
     private boolean entryActiveDownload;
 
+    private int pausedDownloadsIncAncestors;
+
+    private boolean entryPausedDownload;
 
     public OpdsEntryStatusCache() {
 
@@ -335,6 +338,40 @@ public class OpdsEntryStatusCache {
     }
 
 
+    /**
+     * Get the total number of paused downloads, including any descendants
+     *
+     * @return The total number of paused downloads, including any descendants
+     */
+    public int getPausedDownloadsIncAncestors() {
+        return pausedDownloadsIncAncestors;
+    }
+
+    /**
+     * Set the total number of paused downloads, including any descendants
+     * @param pausedDownloadsIncAncestors the total number of paused downloads, including any descendants
+     */
+    public void setPausedDownloadsIncAncestors(int pausedDownloadsIncAncestors) {
+        this.pausedDownloadsIncAncestors = pausedDownloadsIncAncestors;
+    }
+
+    /**
+     * Get if the download for this entry is currently paused.
+     *
+     * @return True if the download for this entry is currently paused, false otherwise
+     */
+    public boolean isEntryPausedDownload() {
+        return entryPausedDownload;
+    }
+
+    /**
+     * Set if the download for this entry is currently paused.
+     *
+     * @param entryPausedDownload True if the download for this entry is currently paused, false otherwise
+     */
+    public void setEntryPausedDownload(boolean entryPausedDownload) {
+        this.entryPausedDownload = entryPausedDownload;
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -364,7 +401,9 @@ public class OpdsEntryStatusCache {
         if (!statusCacheUid.equals(that.statusCacheUid)) return false;
         if (entryActiveDownload != that.entryActiveDownload) return false;
         if (activeDownloadsIncAncestors != that.activeDownloadsIncAncestors) return false;
-        return statusEntryId.equals(that.statusEntryId);
+        if(!statusEntryId.equals(that.statusEntryId)) return false;
+        if(entryPausedDownload != that.entryPausedDownload) return false;
+        return pausedDownloadsIncAncestors == that.pausedDownloadsIncAncestors;
     }
 
     @Override

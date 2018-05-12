@@ -1,6 +1,7 @@
 package com.ustadmobile.core.db.dao;
 
 import com.ustadmobile.core.db.UmLiveData;
+import com.ustadmobile.core.impl.UmResultCallback;
 import com.ustadmobile.core.networkmanager.NetworkTask;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.db.entities.DownloadJob;
@@ -135,5 +136,24 @@ public abstract class DownloadJobDao {
      */
     @UmQuery("SELECT * FROM DownloadJob ORDER BY timeCreated DESC")
     public abstract DownloadJob findLastCreatedDownloadJob();
+
+
+    /**
+     * Find the last download job that was requested for the given ID
+     * @param entryId
+     */
+    public void findLastDownloadJobId(String entryId, UmResultCallback<Integer> callback) {
+        findLastDownloadJobIdByDownloadJobItem(entryId, (jobItemJobId) -> {
+            if(jobItemJobId != null && jobItemJobId > 0) {
+                callback.onDone(jobItemJobId);
+            }else{
+                findLastDownloadJobIdByCrawlJobItem(entryId, callback);
+            }
+        });
+    }
+
+    public abstract void findLastDownloadJobIdByDownloadJobItem(String entryId, UmResultCallback<Integer> callback);
+
+    public abstract void findLastDownloadJobIdByCrawlJobItem(String entryId, UmResultCallback<Integer> callback);
 
 }

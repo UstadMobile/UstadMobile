@@ -5,7 +5,6 @@ import com.ustadmobile.core.db.dao.CrawlJobDao;
 import com.ustadmobile.core.db.dao.DownloadJobDao;
 import com.ustadmobile.core.db.dao.DownloadSetDao;
 import com.ustadmobile.core.db.dao.NetworkNodeDao;
-import com.ustadmobile.core.db.dao.OpdsAtomFeedRepository;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UmResultCallback;
@@ -21,6 +20,7 @@ import com.ustadmobile.lib.db.entities.ContainerFileEntry;
 import com.ustadmobile.lib.db.entities.CrawlJob;
 import com.ustadmobile.lib.db.entities.CrawlJobItem;
 import com.ustadmobile.lib.db.entities.DownloadJob;
+import com.ustadmobile.lib.db.entities.DownloadJobItemWithDownloadSetItem;
 import com.ustadmobile.lib.db.entities.DownloadJobWithDownloadSet;
 import com.ustadmobile.lib.db.entities.DownloadSet;
 import com.ustadmobile.lib.db.entities.DownloadSetItem;
@@ -588,6 +588,14 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
             return false;
 
         downloadTask.stop(NetworkTask.STATUS_PAUSED);
+        DbManager dbManager = DbManager.getInstance(getContext());
+        List<DownloadJobItemWithDownloadSetItem> pausedItems = dbManager.getDownloadJobItemDao()
+                .findByDownloadJobAndStatusRange(downloadJobId, NetworkTask.STATUS_WAITING_MIN,
+                        NetworkTask.STATUS_COMPLETE_MIN);
+        for(DownloadJobItemWithDownloadSetItem pausedItem : pausedItems) {
+            dbManager.getOpdsEntryStatusCacheDao().handleContainerDownloadPaused(
+                    pausedItem.getDownloadSetItem().getEntryId());
+        }
 
         return true;
     }

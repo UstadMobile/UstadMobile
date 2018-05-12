@@ -111,6 +111,8 @@ public class CrawlTask extends NetworkTask {
                             item.getUri());
                     itemEntry = dbManager.getOpdsAtomFeedRepository().getEntryByUrlStatic(
                             item.getUri());
+                    dbManager.getDownloadJobCrawlItemDao().updateOpdsEntryUuid(item.getId(), itemEntry.getUuid());
+
                     if (itemEntry.getEntryType() == OpdsEntry.ENTRY_TYPE_OPDS_ENTRY_STANDALONE) {
                         UstadMobileSystemImpl.l(UMLog.INFO, 0, mkWorkerLogPrefix() +
                                 " add " + item.getUri() + " (single entry) uuid " + itemEntry.getUuid());

@@ -61,6 +61,7 @@
             android:layout_below="@+id/fragment_download_dialog_status_text"
             style="?android:attr/progressBarStyleHorizontal"
             android:indeterminate="true"
+            android:visibility="gone"
             android:id="@+id/fragment_download_dialog_progress_bar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />

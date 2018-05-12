@@ -8,6 +8,7 @@ import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ProgressBar;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
@@ -22,7 +23,7 @@ import java.util.Map;
  * Android implementation of the StartDownloadView
  */
 public class DownloadDialogFragment extends UstadDialogFragment implements DownloadDialogView,
-        DialogInterface.OnClickListener {
+        DialogInterface.OnClickListener, RadioGroup.OnCheckedChangeListener {
 
     private AlertDialog mDialog;
 
@@ -36,7 +37,11 @@ public class DownloadDialogFragment extends UstadDialogFragment implements Downl
 
     private TextView downloadSizeTextView;
 
+    private RadioGroup radioGroup;
+
     private static final Map<Integer, Integer> optionToRadioButtonIdMap = new HashMap<>();
+
+    private static final Map<Integer, Integer> radioButtonIdToOptionIdMap = new HashMap<>();
 
     static {
         optionToRadioButtonIdMap.put(DownloadDialogPresenter.OPTION_START_DOWNLOAD,
@@ -49,6 +54,9 @@ public class DownloadDialogFragment extends UstadDialogFragment implements Downl
                 R.id.fragment_download_dialog_option_resume);
         optionToRadioButtonIdMap.put(DownloadDialogPresenter.OPTION_DELETE,
                 R.id.fragment_download_dialog_option_delete);
+        for(Map.Entry<Integer, Integer> entry : optionToRadioButtonIdMap.entrySet()) {
+            radioButtonIdToOptionIdMap.put(entry.getValue(), entry.getKey());
+        }
     }
 
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -67,12 +75,19 @@ public class DownloadDialogFragment extends UstadDialogFragment implements Downl
         progressBar.setIndeterminate(true);
         statusTextView = rootView.findViewById(R.id.fragment_download_dialog_status_text);
         downloadSizeTextView = rootView.findViewById(R.id.fragment_download_dialog_main_text);
+        radioGroup = rootView.findViewById(R.id.fragment_download_dialog_options_group);
+        radioGroup.setOnCheckedChangeListener(this);
         mDialog = builder.create();
         mPresenter = new DownloadDialogPresenter(getContext(), this,
                 UMAndroidUtil.bundleToHashtable(getArguments()));
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
 
         return mDialog;
+    }
+
+    @Override
+    public void onCheckedChanged(RadioGroup radioGroup, int checkedId) {
+        mPresenter.handleSelectOption(radioButtonIdToOptionIdMap.get(checkedId));
     }
 
     @Override

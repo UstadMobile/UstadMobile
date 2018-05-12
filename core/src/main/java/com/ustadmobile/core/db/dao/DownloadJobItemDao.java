@@ -122,9 +122,10 @@ public abstract class DownloadJobItemDao {
      * @return The first matching DownloadJobItem, with it's DownloadSetItem as an embedded object.
      */
     @UmQuery("SELECT * FROM DownloadJobItemRun WHERE downloadJobId = :downloadJobId AND status BETWEEN :statusFrom AND :statusTo LIMIT 1")
-    public abstract DownloadJobItemWithDownloadSetItem findByDownloadJobAndStatusRange(int downloadJobId, int statusFrom,
-                                                                                       int statusTo);
+    public abstract DownloadJobItemWithDownloadSetItem findNextByDownloadJobAndStatusRange(int downloadJobId, int statusFrom,
+                                                                                           int statusTo);
 
+    public abstract List<DownloadJobItemWithDownloadSetItem> findByDownloadJobAndStatusRange(int downloadJobId, int statusFrom, int statusTo);
 
     /**
      * Get an int array for all the downloadJobItemIds for all the DownloadJobItem objects that are in
@@ -143,7 +144,7 @@ public abstract class DownloadJobItemDao {
      *
      * @param downloadJobId id of the downloadjob that is being started
      */
-    @UmQuery("UPDATE DOwnloadJobItem SET status = " + NetworkTask.STATUS_QUEUED +
+    @UmQuery("UPDATE DownloadJobItem SET status = " + NetworkTask.STATUS_QUEUED +
             " WHERE status < " + NetworkTask.STATUS_WAITING_MIN + " AND " +
             " downloadJobId = :downloadJobId")
     public abstract void updateUnpauseItemsByDownloadJob(int downloadJobId);
