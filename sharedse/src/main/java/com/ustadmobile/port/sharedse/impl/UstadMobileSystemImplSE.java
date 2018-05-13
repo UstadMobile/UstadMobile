@@ -24,23 +24,6 @@ import com.ustadmobile.core.model.CourseProgress;
 import com.ustadmobile.core.util.Base64Coder;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
-import com.ustadmobile.core.util.UMTinCanUtil;
-import com.ustadmobile.nanolrs.core.endpoints.XapiAgentEndpoint;
-import com.ustadmobile.nanolrs.core.manager.ChangeSeqManager;
-import com.ustadmobile.nanolrs.core.manager.NodeManager;
-import com.ustadmobile.nanolrs.core.manager.NodeSyncStatusManager;
-import com.ustadmobile.nanolrs.core.manager.UserCustomFieldsManager;
-import com.ustadmobile.nanolrs.core.manager.UserManager;
-import com.ustadmobile.nanolrs.core.manager.XapiStatementManager;
-import com.ustadmobile.nanolrs.core.model.Node;
-import com.ustadmobile.nanolrs.core.model.NodeSyncStatus;
-import com.ustadmobile.nanolrs.core.model.User;
-import com.ustadmobile.nanolrs.core.model.UserCustomFields;
-import com.ustadmobile.nanolrs.core.model.XapiAgent;
-import com.ustadmobile.nanolrs.core.model.XapiStatement;
-import com.ustadmobile.nanolrs.core.persistence.PersistenceManager;
-import com.ustadmobile.nanolrs.core.sync.UMSyncEndpoint;
-import com.ustadmobile.nanolrs.core.sync.UMSyncResult;
 import com.ustadmobile.port.sharedse.impl.http.UmHttpCallSe;
 import com.ustadmobile.port.sharedse.impl.http.UmHttpResponseSe;
 import com.ustadmobile.port.sharedse.impl.zip.ZipFileHandleSharedSE;
@@ -77,14 +60,11 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
-import java.util.UUID;
 import java.util.Vector;
 
 import com.ustadmobile.core.listener.ActiveSyncListener;
 import com.ustadmobile.core.listener.ActiveUserListener;
 
-import net.lingala.zip4j.exception.ZipException;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -99,8 +79,6 @@ import okhttp3.Response;
 public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl implements UstadMobileSystemImplFs {
 
     private XmlPullParserFactory xmlPullParserFactory;
-
-    protected XapiAgent xapiAgent;
 
     Vector activeUserListener = new Vector();
     Vector activeSyncListener = new Vector();
@@ -148,20 +126,6 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
     @Override
     public boolean isHttpsSupported() {
         return true;
-    }
-
-    @Override
-    public boolean queueTinCanStatement(final JSONObject stmt, final Object context) {
-        //Placeholder for iOS usage
-        return false;
-    }
-
-    public void addTinCanQueueStatusListener(final TinCanQueueListener listener) {
-        //TODO: remove this - it's not really used - do nothing
-    }
-
-    public void removeTinCanQueueListener(TinCanQueueListener listener) {
-        //TODO: remove this - it's not really used - do nothing
     }
 
     /**
@@ -385,16 +349,12 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
      */
     public abstract NetworkManager getNetworkManager();
 
-    protected XapiAgent getCurrentAgent() {
-        //This is set with setActiveUser
-        return xapiAgent;
-    }
-
     @Override
     public void setActiveUser(String username, Object context) {
         super.setActiveUser(username, context);
-        xapiAgent = username != null ? XapiAgentEndpoint.createOrUpdate(context, null, username,
-                UMTinCanUtil.getXapiServer(context)) : null;
+//        TODO: handle
+//        xapiAgent = username != null ? XapiAgentEndpoint.createOrUpdate(context, null, username,
+//                UMTinCanUtil.getXapiServer(context)) : null;
 
         fireActiveUserChangedEvent(username, context);
     }
@@ -404,239 +364,40 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
         if(getActiveUser(context) == null)
             return null;
 
-        XapiStatementManager stmtManager = PersistenceManager.getInstance().getManager(XapiStatementManager.class);
+        return null;
 
-        String[] entryIdsPrefixed = new String[entryIds.length];
-        for(int i = 0; i < entryIdsPrefixed.length; i++) {
-            entryIdsPrefixed[i] = "epub:" + entryIds[i];
-        }
-
-        List<? extends XapiStatement> progressStmts = stmtManager.findByProgress(context,
-                entryIdsPrefixed, getCurrentAgent(), null, new String[]{
-                    UMTinCanUtil.VERB_ANSWERED, UMTinCanUtil.VERB_PASSED, UMTinCanUtil.VERB_FAILED
-                }, 1);
-
-        if(progressStmts.size() == 0) {
-            return new CourseProgress(CourseProgress.STATUS_NOT_STARTED, 0, 0);
-        }else {
-            XapiStatement stmt = progressStmts.get(0);
-            String stmtVerb = stmt.getVerb().getVerbId();
-            CourseProgress courseProgress = new CourseProgress();
-            if(stmtVerb.equals(UMTinCanUtil.VERB_ANSWERED))
-                courseProgress.setStatus(MessageID.in_progress);
-            else if(stmtVerb.equals(UMTinCanUtil.VERB_PASSED))
-                courseProgress.setStatus(MessageID.passed);
-            else if(stmtVerb.equals(UMTinCanUtil.VERB_FAILED))
-                courseProgress.setStatus(MessageID.failed_message);
-
-            courseProgress.setProgress(stmt.getResultProgress());
-            courseProgress.setScore(Math.round(stmt.getResultScoreScaled()));
-
-            return courseProgress;
-        }
+//        XapiStatementManager stmtManager = PersistenceManager.getInstance().getManager(XapiStatementManager.class);
+//
+//        String[] entryIdsPrefixed = new String[entryIds.length];
+//        for(int i = 0; i < entryIdsPrefixed.length; i++) {
+//            entryIdsPrefixed[i] = "epub:" + entryIds[i];
+//        }
+//
+//        List<? extends XapiStatement> progressStmts = stmtManager.findByProgress(context,
+//                entryIdsPrefixed, getCurrentAgent(), null, new String[]{
+//                    UMTinCanUtil.VERB_ANSWERED, UMTinCanUtil.VERB_PASSED, UMTinCanUtil.VERB_FAILED
+//                }, 1);
+//
+//        if(progressStmts.size() == 0) {
+//            return new CourseProgress(CourseProgress.STATUS_NOT_STARTED, 0, 0);
+//        }else {
+//            XapiStatement stmt = progressStmts.get(0);
+//            String stmtVerb = stmt.getVerb().getVerbId();
+//            CourseProgress courseProgress = new CourseProgress();
+//            if(stmtVerb.equals(UMTinCanUtil.VERB_ANSWERED))
+//                courseProgress.setStatus(MessageID.in_progress);
+//            else if(stmtVerb.equals(UMTinCanUtil.VERB_PASSED))
+//                courseProgress.setStatus(MessageID.passed);
+//            else if(stmtVerb.equals(UMTinCanUtil.VERB_FAILED))
+//                courseProgress.setStatus(MessageID.failed_message);
+//
+//            courseProgress.setProgress(stmt.getResultProgress());
+//            courseProgress.setScore(Math.round(stmt.getResultScoreScaled()));
+//
+//            return courseProgress;
+//        }
     }
 
-    @Override
-    public int registerUser(String username, String password, Hashtable fields, Object context) {
-        UserManager userManager =
-                PersistenceManager.getInstance().getManager(UserManager.class);
-        UserCustomFieldsManager userCustomFieldsManager =
-                PersistenceManager.getInstance().getManager(UserCustomFieldsManager.class);
-
-        String loggedInUsername = null;
-        loggedInUsername = UstadMobileSystemImpl.getInstance().getActiveUser(context);
-        //ignore loggedInUsername cause if we're clicking register, we want this user
-        //to log in..
-
-        User loggedInUser = null;
-        String cred = password;
-        //List<User> users = userManager.findByUsername(context, username);
-        //if(users!= null && !users.isEmpty()){
-        //    loggedInUser = users.get(0);
-        loggedInUser = userManager.findByUsername(context, username);
-        if(loggedInUser == null){
-            //create the user
-            try {
-                loggedInUser = (User)userManager.makeNew();
-                loggedInUser.setUsername(username);
-                loggedInUser.setUuid(UUID.randomUUID().toString());
-
-                //TODO: Test this new way
-                if(password != null && !password.isEmpty()){
-                    try {
-                        //hash it.
-                        password = userManager.hashPassword(password);
-                    } catch (NoSuchAlgorithmException e) {
-                        System.out.println("Cannot hash password.: " + e);
-                        e.printStackTrace();
-                    } catch (UnsupportedEncodingException e) {
-                        e.printStackTrace();
-                    }
-                }
-
-                loggedInUser.setPassword(password);
-
-                loggedInUser.setNotes("User Created via Registration Page");
-                loggedInUser.setDateCreated(System.currentTimeMillis());
-                loggedInUser.setMasterSequence(-1); //This is needed to check is new user or not.
-                //However, normal persist will over ride this to local sequence.
-                ChangeSeqManager changeSeqManager =
-                        PersistenceManager.getInstance().getManager(ChangeSeqManager.class);
-                String tableName = UMSyncEndpoint.getTableNameFromClass(User.class);
-                long setThis = changeSeqManager.getNextChangeAddSeqByTableName(tableName, 1, context);
-                loggedInUser.setMasterSequence(-1);
-                loggedInUser.setLocalSequence(setThis);
-                userManager.persist(context, loggedInUser, false);
-                userCustomFieldsManager.createUserCustom(fields,loggedInUser, context);
-            } catch (SQLException e) {
-                e.printStackTrace();
-                return 1;
-            }
-        }
-
-        //handleUserLoginAuthComplete(loggedInUser.getUsername(), loggedInUser.getPassword(), context);
-        //Specifying the clear text password not the hashed persited one.
-        handleUserLoginAuthComplete(loggedInUser.getUsername(), cred, context);
-        return 0;
-    }
-
-    /**
-     * Update users custom fields or make new ones..
-     * @param map
-     * @param user
-     * @param dbContext
-     * @throws SQLException
-     */
-    public void updateUserCustom(Map<Integer, String> map, User user, Object dbContext)
-            throws SQLException {
-        UserCustomFieldsManager customFieldsManager =
-                PersistenceManager.getInstance().getManager(UserCustomFieldsManager.class);
-
-        Set<Map.Entry<Integer, String>> es = map.entrySet();
-        Iterator<Map.Entry<Integer, String>> it = es.iterator();
-
-        List<UserCustomFields> userFields = customFieldsManager.findByUser(user, dbContext);
-
-        while(it.hasNext()){
-            Map.Entry<Integer, String> e = it.next();
-            int key = e.getKey();
-            String value = e.getValue(); //new value
-            boolean fieldExists = false;
-            UserCustomFields uce = null;
-            for(UserCustomFields customField : userFields){
-                if(customField.getFieldName() == key){
-                    uce = customField;
-                    fieldExists = true;
-                    uce.setFieldValue(value);
-                    break;
-                }
-            }
-            if(fieldExists == false){
-                uce = (UserCustomFields)customFieldsManager.makeNew();
-                uce.setUuid(UUID.randomUUID().toString());
-                if(user!=null) {
-                    uce.setUser(user);
-                }
-                uce.setFieldName(key);
-                uce.setFieldValue(value);
-            }
-
-            customFieldsManager.persist(dbContext, uce);
-        }
-    }
-
-    @Override
-    public int updateUser(String username, String password, Hashtable fields, Object context) {
-        UserManager userManager =
-                PersistenceManager.getInstance().getManager(UserManager.class);
-        UserCustomFieldsManager userCustomFieldsManager =
-                PersistenceManager.getInstance().getManager(UserCustomFieldsManager.class);
-
-        User loggedInUser = null;
-        loggedInUser = userManager.findByUsername(context, username);
-        if(loggedInUser != null){
-            //update the user
-            try {
-                loggedInUser.setNotes("User Updated via Account Settings Page");
-                userManager.persist(context, loggedInUser, true);
-                //userCustomFieldsManager.createUserCustom(fields,loggedInUser, context);
-                updateUserCustom(fields,loggedInUser, context);
-
-            } catch (SQLException e) {
-                e.printStackTrace();
-                return 1;
-            }
-        }
-
-        handleUserLoginAuthComplete(loggedInUser.getUsername(), loggedInUser.getPassword(), context);
-        return 0;
-    }
-
-    /**
-     * Utility merge of what happens after a user is logged in through username/password
-     * and what happens after they are newly registered etc.
-     */
-    private void handleUserLoginAuthComplete(final String username, final String password, Object dbContext) {
-        //Updates user to pref. and userobject to Service.
-        setActiveUser(username, dbContext);
-
-        //Updates password cred to pref.
-        setActiveUserAuth(password, dbContext);
-
-        //Updating password to Service as well.
-        fireActiveUserCredChangedEvent(password, dbContext);
-
-        String authHashed = hashAuth(dbContext, password);
-        setAppPref("um-authcache-" + username, authHashed, dbContext);
-
-    }
-
-    @Override
-    public boolean handleLoginLocally(String username, String password, Object dbContext) {
-        UserManager userManager = PersistenceManager.getInstance().getManager(UserManager.class);
-        //boolean result = userManager.authenticate(dbContext, username, password);
-        //Authenticating and hashing it.
-        boolean result = userManager.authenticate(dbContext, username, password, true);
-        if(result){
-            handleUserLoginAuthComplete(username, password, dbContext);
-        }
-        return result;
-
-    }
-
-    @Override
-    public boolean createUserLocally(String username, String password, String uuid, Object dbContext) {
-        UserManager userManager = PersistenceManager.getInstance().getManager(UserManager.class);
-        try {
-            User user = (User) userManager.makeNew();
-            if(uuid != null && !uuid.isEmpty()){
-                user.setUuid(uuid);
-            }else{
-                user.setUuid(UUID.randomUUID().toString());
-            }
-            user.setUsername(username);
-
-            //TODO: Test this.
-            if(password != null && !password.isEmpty()){
-                try {
-                    //hash it.
-                    password = userManager.hashPassword(password);
-                } catch (NoSuchAlgorithmException e) {
-                    System.out.println("Cannot hash password.: " + e);
-                    e.printStackTrace();
-                } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            user.setPassword(password);
-            userManager.persist(dbContext, user);
-            return true;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
 
     public void addActiveUserListener(ActiveUserListener listener) {
         activeUserListener.addElement(listener);
@@ -739,94 +500,7 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
         return httpCache;
     }
 
-    /**
-     * Get list of syncs
-     * @param context
-     * @return
-     */
-    @Override
-    public LinkedHashMap<String, String> getSyncHistory(Object nodeObj, Object context) {
-        NodeSyncStatusManager nodeSyncStatusManager =
-                PersistenceManager.getInstance().getManager(NodeSyncStatusManager.class);
-        LinkedHashMap syncHistoryMap = new LinkedHashMap<>();
-        Node node = (Node) nodeObj;
-        try {
-            List<NodeSyncStatus> allStatuses = nodeSyncStatusManager.getStatusesByNode(context, node);
-            Iterator<NodeSyncStatus> allStatusesIterator = allStatuses.iterator();
-            while(allStatusesIterator.hasNext()){
-                NodeSyncStatus thisNodeStatus = allStatusesIterator.next();
-                String thisNodeStatusResult = "SUCCESS";
-                if(!thisNodeStatus.getSyncResult().equals("200")){
-                    thisNodeStatusResult = "FAIL";
-                }
-                syncHistoryMap.put(thisNodeStatus.getSyncDate(), thisNodeStatusResult);
-            }
-            return syncHistoryMap;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
 
-    @Override
-    public LinkedHashMap<String, String> getMainNodeSyncHistory(Object context) {
-        NodeManager nodeManager = PersistenceManager.getInstance().getManager(NodeManager.class);
-        Node mainNode = null;
-        try {
-            mainNode = nodeManager.getMainNode(DEFAULT_MAIN_SERVER_HOST_NAME, context);
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return null;
-        }
-        return getSyncHistory(mainNode, context);
-    }
-
-    @Override
-    public long getMainNodeLastSyncDate(Object context) {
-        NodeSyncStatusManager nodeSyncStatusManager =
-                PersistenceManager.getInstance().getManager(NodeSyncStatusManager.class);
-        NodeManager nodeManager = PersistenceManager.getInstance().getManager(NodeManager.class);
-        Node mainNode = null;
-        NodeSyncStatus latestMainNodeSync = null;
-        try {
-            mainNode = nodeManager.getMainNode(
-                    DEFAULT_MAIN_SERVER_HOST_NAME, context);
-
-            latestMainNodeSync =
-                    nodeSyncStatusManager.getLatestSuccessfulStatusByNode(context, mainNode);
-            long lastSyncDate = latestMainNodeSync.getSyncDate();
-            return lastSyncDate;
-        }catch(SQLException se){
-            se.printStackTrace();
-            return 0;
-        }
-    }
-
-    @Override
-    public void triggerSync(final Object context) throws Exception {
-
-        UserManager userManager = PersistenceManager.getInstance().getManager(UserManager.class);
-        NodeManager nodeManager = PersistenceManager.getInstance().getManager(NodeManager.class);
-
-        String loggedInUsername = getActiveUser(context);
-        User loggedInUser = userManager.findByUsername(context, loggedInUsername);
-        String loggedInUserCred = getActiveUserAuth(context);
-        Node endNode = null;
-
-        try {
-            endNode = nodeManager.getMainNode(DEFAULT_MAIN_SERVER_HOST_NAME, context);
-            UMSyncResult result = UMSyncEndpoint.startSync(loggedInUser, loggedInUserCred,
-                    endNode, context);
-            if(result.getStatus() > -1){
-                //UstadMobileSystemImpl.getInstance().fireSetSyncHappeningEvent(false, context);
-                fireSetSyncHappeningEvent(false, context);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            //Update view that something went wrong TODO
-        }
-
-    }
 
     @Override
     public String convertTimeToReadableTime(long time) {

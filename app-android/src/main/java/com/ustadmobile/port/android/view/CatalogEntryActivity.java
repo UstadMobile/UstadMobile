@@ -31,7 +31,6 @@ import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.CatalogEntryPresenter;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.model.CourseProgress;
-import com.ustadmobile.core.opds.UstadJSOPDSItem;
 import com.ustadmobile.core.view.CatalogEntryView;
 import com.ustadmobile.core.view.DialogResultListener;
 import com.ustadmobile.core.view.DismissableDialog;
@@ -129,13 +128,7 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
 
         @Override
         public void onBindViewHolder(SeeAlsoViewHolder holder, int position) {
-            String[] links = CatalogEntryActivity.this.seeAlsoItems.get(position);
-            holder.titleView.setText(links[UstadJSOPDSItem.ATTR_TITLE]);
-            if(seeAlsoIcons.elementAt(position) != null)
-                ImageLoader.getInstance().loadImage(seeAlsoIcons.elementAt(position),
-                        holder.imageLoadTarget, mPresenter);
-            holder.currentIndex = position;
-            seeAlsoViewToIndexMap.put(holder.itemView, position);
+//            TODO: Re-implement for #dbarch2
         }
 
         @Override
@@ -143,23 +136,6 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
             return CatalogEntryActivity.this.seeAlsoItems.size();
         }
     }
-
-    private ImageLoader.ImageLoadTarget thumbnailLoadTarget = new ImageLoader.ImageLoadTarget() {
-        @Override
-        public void setImageFromBytes(byte[] buf) {
-            thumbnailBitmap = BitmapFactory.decodeByteArray(buf, 0, buf.length);
-            final int imageViewId = currentDisplayMode != DISPLAY_MODE_BANNER ?
-                    R.id.activity_catalog_entry_icon_img_normal
-                    : R.id.activity_catalog_entry_icon_img;
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    ((ImageView)findViewById(imageViewId)).setImageBitmap(thumbnailBitmap);
-                }
-            });
-        }
-    };
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

@@ -1,13 +1,5 @@
 package com.ustadmobile.core.catalog.contenttype;
 
-import com.ustadmobile.core.controller.CatalogPresenter;
-import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.core.impl.ZipEntryHandle;
-import com.ustadmobile.core.impl.ZipFileHandle;
-import com.ustadmobile.core.opds.UstadJSOPDSEntry;
-import com.ustadmobile.core.opds.UstadJSOPDSFeed;
-import com.ustadmobile.core.scorm.ScormManifest;
-import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.view.ScormPackageView;
 
 import org.xmlpull.v1.XmlPullParserException;

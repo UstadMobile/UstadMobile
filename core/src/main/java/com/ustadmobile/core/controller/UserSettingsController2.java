@@ -34,7 +34,8 @@ public class UserSettingsController2 extends  UstadBaseController implements App
         if(impl.getActiveUser(context) != null)
             view.setUserDisplayName(impl.getActiveUser(context));
 
-        long lastSyncDate = impl.getMainNodeLastSyncDate(context);
+//        TODO: handle this with #dbarch2
+        long lastSyncDate = 0;
         if(lastSyncDate > 0){
             String lastSyncDateString = impl.convertTimeToReadableTime(lastSyncDate);
             view.setLastSyncText("Last Sync: " + lastSyncDateString);

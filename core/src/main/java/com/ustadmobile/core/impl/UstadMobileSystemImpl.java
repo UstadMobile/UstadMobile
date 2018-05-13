@@ -426,30 +426,6 @@ public abstract class UstadMobileSystemImpl {
     public abstract boolean isHttpsSupported();
 
     /**
-     * Queue the given TinCan statement represented in the JSON object
-     * for transmission to the tin can server
-     *
-     * @param stmt statement to Queue
-     * @return true if successfully queued, false otherwise
-     */
-    public abstract boolean queueTinCanStatement(JSONObject stmt, Object context);
-
-
-    /**
-     * Add a managerTaskListener to be notified when the tincan queue is updated (items added/sent)
-     * @param listener Listener to add
-     */
-    public abstract void addTinCanQueueStatusListener(TinCanQueueListener listener);
-
-    /**
-     * Remove a managerTaskListener from the list to be notified when tincan queue is updated
-     *
-     * @param listener
-     */
-    public abstract void removeTinCanQueueListener(TinCanQueueListener listener);
-
-
-    /**
      * Gets the cache directory for the platform for either user specific
      * cache contents / shared cache contents
      *
@@ -1057,43 +1033,6 @@ public abstract class UstadMobileSystemImpl {
     public abstract CourseProgress getCourseProgress(String[] entryIds, Object context);
 
     /**
-     * Register users locally
-     * @param username
-     * @param password
-     * @param fields
-     * @param context
-     * @return
-     */
-    public abstract int registerUser(String username, String password, Hashtable fields, Object context);
-
-    /**
-     * Update users locally
-     * @param username
-     * @param password
-     * @param fields
-     * @param context
-     * @return
-     */
-    public abstract int updateUser(String username, String password, Hashtable fields, Object context);
-
-    /**
-     * Authenticate locally
-     * @param username
-     * @param password
-     * @return
-     */
-    public abstract boolean handleLoginLocally(String username, String password, Object context);
-
-    /**
-     * Create local user
-     * @param username
-     * @param password
-     * @param uuid
-     * @return
-     */
-    public abstract boolean createUserLocally(String username, String password, String uuid, Object context);
-
-    /**
      * Provides a list of the content types which are supported on this platform.
      *
      * @return Array of Class objects representing the ContentTypePlugin
@@ -1197,18 +1136,6 @@ public abstract class UstadMobileSystemImpl {
     public int getAppConfigInt(String key, int defaultVal, Object context) {
         return Integer.parseInt(getAppConfigString(key, ""+defaultVal, context));
     }
-
-    public abstract String getUserDetail(String username, int field, Object dbContext);
-
-    public abstract UmOpdsDbManager getOpdsDbManager();
-
-    public abstract LinkedHashMap<String, String> getSyncHistory(Object node, Object context);
-
-    public abstract LinkedHashMap<String, String> getMainNodeSyncHistory(Object context);
-
-    public abstract long getMainNodeLastSyncDate(Object context);
-
-    public abstract void triggerSync(Object context) throws Exception;
 
     public abstract String convertTimeToReadableTime(long time);
 

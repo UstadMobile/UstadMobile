@@ -27,7 +27,6 @@ import com.ustadmobile.lib.db.entities.DownloadSetItem;
 import com.ustadmobile.lib.db.entities.EntryStatusResponse;
 import com.ustadmobile.lib.db.entities.NetworkNode;
 import com.ustadmobile.core.networkmanager.NetworkTask;
-import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.lib.db.entities.OpdsEntry;
@@ -37,7 +36,6 @@ import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelationsAndContainerMimeType;
 import com.ustadmobile.lib.db.entities.OpdsLink;
 import com.ustadmobile.lib.util.UmUuidUtil;
-import com.ustadmobile.nanolrs.http.NanoLrsHttpd;
 import com.ustadmobile.port.sharedse.impl.http.CatalogUriResponder;
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD;
 import com.ustadmobile.port.sharedse.impl.http.MountedZipHandler;
@@ -352,7 +350,6 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
              * stack overflow.
              */
             httpd = new EmbeddedHTTPD(0, mContext);
-            NanoLrsHttpd.mountXapiEndpointsOnServer(httpd, mContext, "/xapi/");
             httpd.start();
             System.out.println("Started main http server on port: " + httpd.getListeningPort());
         }catch(IOException e) {
@@ -638,38 +635,6 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
         }
     }
 
-
-
-
-    /**
-     * Method which invoked when making file acquisition request.
-     * @param feed OPDS file feed
-     * @param localNetworkEnabled Whether to involve local network as means of acquiring,
-     *                            TRUE if yes, FALSE otherwise.
-     * @param mirrorFinder Normally the NetworkManager itself but can be any other object implementing
-     *                     the interface (e.g. for testing purposes)
-     * @param wifiDirectEnabled Whether to involve Wi-Fi direct group as means of acquiring,
-     *                          TRUE if yes , otherwise FALSE.
-     * @return
-     */
-    public long requestAcquisition(UstadJSOPDSFeed feed, LocalMirrorFinder mirrorFinder,
-                                              boolean localNetworkEnabled, boolean wifiDirectEnabled){
-
-
-
-//        DownloadTask task=new DownloadTask(feed,this);
-//        task.setMirrorFinder(mirrorFinder);
-//        task.setTaskType(QUEUE_ENTRY_ACQUISITION);
-//        task.setLocalNetworkDownloadEnabled(localNetworkEnabled);
-//        task.setWifiDirectDownloadEnabled(wifiDirectEnabled);
-//        queueTask(task);
-//        return task.getTaskId();
-        return 0;
-    }
-
-    public long requestAcquisition(UstadJSOPDSFeed feed, boolean localNetworkEnabled, boolean wifiDirectEnabled){
-        return requestAcquisition(feed, this, localNetworkEnabled, wifiDirectEnabled);
-    }
 
     public void startMonitoringAvailability(AvailabilityMonitorRequest request, boolean checkKnownNodes){
         synchronized (availabilityMonitorRequests) {

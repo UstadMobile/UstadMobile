@@ -95,18 +95,10 @@ import com.ustadmobile.core.view.UserSettingsView;
 import com.ustadmobile.core.view.UserSettingsView2;
 import com.ustadmobile.core.view.WelcomeView;
 import com.ustadmobile.core.view.XapiPackageView;
-import com.ustadmobile.nanolrs.core.endpoints.XapiAgentEndpoint;
-import com.ustadmobile.nanolrs.core.endpoints.XapiStatementsForwardingEndpoint;
-import com.ustadmobile.nanolrs.core.endpoints.XapiStatementsForwardingListener;
-import com.ustadmobile.nanolrs.core.manager.UserCustomFieldsManager;
-import com.ustadmobile.nanolrs.core.manager.UserManager;
-import com.ustadmobile.nanolrs.core.model.User;
-import com.ustadmobile.nanolrs.core.persistence.PersistenceManager;
 import com.ustadmobile.port.android.generated.MessageIDMap;
 import com.ustadmobile.port.android.impl.http.UmHttpCachePicassoRequestHandler;
 import com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroid;
 import com.ustadmobile.port.android.netwokmanager.NetworkServiceAndroid;
-import com.ustadmobile.port.android.opds.db.UmOpdsDbManagerAndroid;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 import com.ustadmobile.port.android.view.*;
 import com.ustadmobile.port.sharedse.view.*;
@@ -182,11 +174,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         //Account settings:
         //viewNameToAndroidImplMap.put(AccountSettingsView.VIEW_NAME, AccountSettingsActivity.class);
         viewNameToAndroidImplMap.put(BasePointView.VIEW_NAME, BasePointActivity.class);
-        viewNameToAndroidImplMap.put(ClassManagementView.VIEW_NAME, ClassManagementActivity.class);
-        viewNameToAndroidImplMap.put(EnrollStudentView.VIEW_NAME, EnrollStudentActivity.class);
-        viewNameToAndroidImplMap.put(ClassManagementView2.VIEW_NAME, ClassManagementActivity2.class);
         viewNameToAndroidImplMap.put(AboutView.VIEW_NAME, AboutActivity.class);
-        viewNameToAndroidImplMap.put(AttendanceView.VIEW_NAME, AttendanceActivity.class);
         viewNameToAndroidImplMap.put(CatalogEntryView.VIEW_NAME, CatalogEntryActivity.class);
         viewNameToAndroidImplMap.put(UserSettingsView2.VIEW_NAME, UserSettingsActivity2.class);
         viewNameToAndroidImplMap.put(WelcomeView.VIEW_NAME, WelcomeDialogFragment.class);
@@ -222,13 +210,6 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
     private HashMap<UMDownloadCompleteReceiver, BroadcastReceiver> downloadCompleteReceivers;
 
     private Timer sendStatementsTimer;
-
-    /**
-     * Map of TinCanQueueListeners to the XapiQueueStatusListeners used by NanoLRS
-     */
-    private HashMap<TinCanQueueListener, XapiStatementsForwardingListener> queueStatusListeners;
-
-    private UmOpdsDbManagerAndroid opdsDbManager;
 
     private static final ContentTypePlugin[] SUPPORTED_CONTENT_TYPES = new ContentTypePlugin[] {
             new EpubTypePluginFs(), new ScormTypePluginFs(), new XapiPackageTypePluginFs(),
@@ -387,10 +368,8 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         logger = new UMLogAndroid();
         appViews = new WeakHashMap<>();
         downloadCompleteReceivers = new HashMap<>();
-        queueStatusListeners = new HashMap<>();
         networkManagerAndroid = new NetworkManagerAndroid();
         networkManagerAndroid.setServiceConnectionMap(networkServiceConnections);
-        opdsDbManager = new UmOpdsDbManagerAndroid();
     }
 
     /**
@@ -468,8 +447,9 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         currentUsername = appPrefs.getString(KEY_CURRENTUSER, null);
         currentAuth = appPrefs.getString(KEY_CURRENTAUTH, null);
         if(currentUsername != null) {
-            xapiAgent = XapiAgentEndpoint.createOrUpdate(context, null, currentUsername,
-                    UMTinCanUtil.getXapiServer(context));
+//            TODO: Handle users ROOM ORM style
+//            xapiAgent = XapiAgentEndpoint.createOrUpdate(context, null, currentUsername,
+//                    UMTinCanUtil.getXapiServer(context));
         }
         this.userPreferences = null;
         return true;
@@ -480,39 +460,6 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         return null;
     }
 
-
-
-    @Override
-    public boolean queueTinCanStatement(final JSONObject stmtObj, final Object context) {
-
-        //String xapiServer = "http://umcloud1.ustadmobile.com/umlrs/";
-        String xapiServer = getAppPref(
-                UstadMobileSystemImpl.PREFKEY_XAPISERVER,
-                CoreBuildConfig.DEFAULT_XAPI_SERVER, context);
-
-        XapiStatementsForwardingEndpoint.putAndQueueStatement(context, stmtObj,
-                xapiServer, getActiveUser(context), getActiveUserAuth(context));
-
-        l(UMLog.INFO, 304, null);
-
-        return true;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    @Override
-    public void addTinCanQueueStatusListener(final TinCanQueueListener listener) {
-
-    }
-
-    /**
-     * @inheritDoc
-     */
-    @Override
-    public void removeTinCanQueueListener(TinCanQueueListener listener) {
-        queueStatusListeners.remove(listener);
-    }
 
     /**
      * To be called by activities as the first matter of business in the onCreate method
@@ -956,35 +903,6 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         }
 
         return null;
-    }
-
-    @Override
-    public String getUserDetail(String username, int field, Object dbContext){
-
-        try {
-            UserCustomFieldsManager customFieldsManager =
-                    PersistenceManager.getInstance().getManager(UserCustomFieldsManager.class);
-            UserManager userManager =
-                    PersistenceManager.getInstance().getManager(UserManager.class);
-            User user = userManager.findByUsername(dbContext, username);
-            String value = customFieldsManager.getUserField(user, field, dbContext);
-            if (value == null) {
-                return "";
-            }
-            return value;
-        }catch(SQLException s){
-            s.printStackTrace();
-            System.out.println("Unable to get user detail: " + field +
-                " for user: " + username);
-            return "";
-        }
-
-
-    }
-
-    @Override
-    public UmOpdsDbManager getOpdsDbManager() {
-        return opdsDbManager;
     }
 
     @Override

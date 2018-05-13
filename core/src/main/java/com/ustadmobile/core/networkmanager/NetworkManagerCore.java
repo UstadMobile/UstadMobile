@@ -2,7 +2,6 @@ package com.ustadmobile.core.networkmanager;
 
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UmResultCallback;
-import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.lib.db.entities.CrawlJob;
 import com.ustadmobile.lib.db.entities.DownloadSet;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
@@ -34,8 +33,6 @@ public interface NetworkManagerCore {
 
 
     void setSuperNodeEnabled(Object context,boolean enabled);
-
-    long requestAcquisition(UstadJSOPDSFeed feed, boolean localNetworkEnabled, boolean wifiDirectEnabled);
 
     DownloadSet buildDownloadJob(List<OpdsEntryWithRelations> rootEntries, String destinationDir,
                                  boolean recursive);

@@ -24,7 +24,9 @@ public class SettingsDataSyncListController extends UstadBaseController{
 
     public LinkedHashMap<String, String> getMainNodeSyncHistory(Object context){
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        return impl.getMainNodeSyncHistory(context);
+//        return impl.getMainNodeSyncHistory(context);
+//        TODO: Handle this with new #dbarch2
+        return null;
     }
 
     public void setUIStrings() {

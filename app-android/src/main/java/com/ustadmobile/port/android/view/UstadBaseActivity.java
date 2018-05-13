@@ -25,7 +25,6 @@ import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.lib.util.UMUtil;
-import com.ustadmobile.nanolrs.android.service.XapiStatementForwardingService;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 import com.ustadmobile.port.android.netwokmanager.NetworkServiceAndroid;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
@@ -54,10 +53,6 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
 
     private String[] appMenuLabels;
 
-    private XapiStatementForwardingService mNanoLrsService;
-
-    private NetworkServiceAndroid networkServiceAndroid;
-
     private String displayName;
 
     private List<WeakReference<Fragment>> fragmentList;
@@ -71,10 +66,6 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         //bind to the LRS forwarding service
-        Intent lrsForwardIntent = new Intent(this, XapiStatementForwardingService.class);
-        bindService(lrsForwardIntent, mLrsServiceConnection, Context.BIND_AUTO_CREATE);
-
-
         UstadMobileSystemImplAndroid.getInstanceAndroid().handleActivityCreate(this, savedInstanceState);
         fragmentList = new ArrayList<>();
         IntentFilter intentFilter = new IntentFilter();
@@ -115,24 +106,6 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
             }
         }
     };
-
-
-
-    private ServiceConnection mLrsServiceConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-            XapiStatementForwardingService.XapiStatementForwardingBinder binder =
-                    (XapiStatementForwardingService.XapiStatementForwardingBinder)iBinder;
-            mNanoLrsService = binder.getService();
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName componentName) {
-            mNanoLrsService = null;
-        }
-    };
-
-
 
     /**
      * UstadMobileSystemImpl will bind certain services to each activity (e.g. HTTP, P2P services)
@@ -259,7 +232,6 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
 
     public void onDestroy() {
         super.onDestroy();
-        unbindService(mLrsServiceConnection);
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mLocaleChangeBroadcastReceiver);
         UstadMobileSystemImplAndroid.getInstanceAndroid().handleActivityDestroy(this);
     }

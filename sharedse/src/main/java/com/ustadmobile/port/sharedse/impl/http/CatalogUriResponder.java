@@ -2,9 +2,6 @@ package com.ustadmobile.port.sharedse.impl.http;
 
 import com.google.gson.Gson;
 import com.ustadmobile.core.db.DbManager;
-import com.ustadmobile.core.opds.OpdsEndpoint;
-import com.ustadmobile.core.opds.UstadJSOPDSFeed;
-import com.ustadmobile.core.opds.UstadJSOPDSItem;
 import com.ustadmobile.lib.db.entities.ContainerFileEntry;
 import com.ustadmobile.lib.db.entities.ContainerFileEntryWithContainerFile;
 import com.ustadmobile.port.sharedse.networkmanager.EntryStatusTask;
@@ -69,18 +66,7 @@ public class CatalogUriResponder extends FileResponder implements RouterNanoHTTP
         String normalizedUri = RouterNanoHTTPD.normalizeUri(session.getUri());
 
         try {
-            Object context = getContext(uriResource);
-            if(normalizedUri.endsWith("acquire.opds")) {
-                UstadJSOPDSFeed deviceFeed = (UstadJSOPDSFeed)OpdsEndpoint.getInstance().loadItem(
-                        OpdsEndpoint.OPDS_PROTO_DEVICE, null, context, null);
-                ByteArrayOutputStream bout = new ByteArrayOutputStream();
-                deviceFeed.serialize(bout);
-                bout.flush();
-                ByteArrayInputStream bin = new ByteArrayInputStream(bout.toByteArray());
-                NanoHTTPD.Response r = NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK,
-                    UstadJSOPDSItem.TYPE_ACQUISITIONFEED, bin, bout.size());
-                return r;
-            }else if(session.getUri().contains(CONTAINER_DL_PATH_COMPONENT)) {
+            if(session.getUri().contains(CONTAINER_DL_PATH_COMPONENT)) {
                 return handleContainerFileRequest(uriResource, NanoHTTPD.Method.GET, session, normalizedUri);
             }
         }catch(IOException e) {

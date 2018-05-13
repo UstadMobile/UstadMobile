@@ -5,7 +5,6 @@ import com.ustadmobile.core.catalog.contenttype.EPUBTypePlugin;
 import com.ustadmobile.core.impl.ContainerMountRequest;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UmCallback;
-import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.opds.db.UmOpdsDbManager;
 import com.ustadmobile.core.tincan.TinCanResultListener;
 import com.ustadmobile.core.view.AppView;
@@ -249,19 +248,10 @@ public class UstadMobileSystemImplTest extends UstadMobileSystemImplSE {
         return null;
     }
 
-    @Override
-    public String getUserDetail(String username, int field, Object dbContext) {
-        return null;
-    }
 
     @Override
     public void mountContainer(ContainerMountRequest request, int id, UmCallback callback) {
         //do nothing at the moment
-    }
-
-    @Override
-    public UmOpdsDbManager getOpdsDbManager() {
-        return null;
     }
 
     @Override

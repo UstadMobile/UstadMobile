@@ -1,8 +1,5 @@
 package com.ustadmobile.core.catalog.contenttype;
 
-import com.ustadmobile.core.opds.UstadJSOPDSEntry;
-import com.ustadmobile.core.opds.UstadJSOPDSFeed;
-import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,17 +17,17 @@ import java.util.List;
  */
 public abstract class ContentTypePlugin {
 
-    /**
-     *
-     */
-    public interface EntryResult {
-
-        UstadJSOPDSFeed getFeed();
-
-        InputStream getThumbnail() throws IOException;
-
-        String getThumbnailMimeType();
-    }
+//    /**
+//     *
+//     */
+//    public interface EntryResult {
+//
+//        UstadJSOPDSFeed getFeed();
+//
+//        InputStream getThumbnail() throws IOException;
+//
+//        String getThumbnailMimeType();
+//    }
 
     /**
      * Return a String that will match the VIEW_NAME for the view that should be opened for this

@@ -69,7 +69,6 @@ import com.ustadmobile.core.impl.http.UmHttpRequest;
 import com.ustadmobile.core.impl.http.UmHttpResponse;
 import com.ustadmobile.core.impl.http.UmHttpResponseCallback;
 import com.ustadmobile.core.ocf.UstadOCF;
-import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opf.UstadJSOPF;
 import com.ustadmobile.core.opf.UstadJSOPFItem;
 import com.ustadmobile.core.tincan.TinCanXML;
@@ -106,8 +105,6 @@ public class ContainerController extends UstadBaseController {
     
     private ContainerView containerView;
 
-    private UstadJSOPDSEntry entry;
-    
     private UstadOCF ocf;
     
     private UstadJSOPF activeOPF;

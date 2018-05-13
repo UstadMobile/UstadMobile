@@ -3,8 +3,7 @@ package com.ustadmobile.port.sharedse.impl.http;
 import com.ustadmobile.core.db.DbManager;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.core.opds.UstadJSOPDSFeed;
-import com.ustadmobile.core.opds.UstadJSOPDSItem;
+import com.ustadmobile.lib.db.entities.OpdsEntry;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
 
 import org.xmlpull.v1.XmlSerializer;
@@ -61,7 +60,7 @@ public class OPDSFeedUriResponder implements RouterNanoHTTPD.UriResponder {
             ByteArrayInputStream bin = new ByteArrayInputStream(byteArr);
             ResponseMonitoredInputStream rin = new ResponseMonitoredInputStream(bin);
             response = NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK,
-                    UstadJSOPDSItem.TYPE_ACQUISITIONFEED, rin, byteArr.length);
+                    OpdsEntry.TYPE_OPDS_ACQUISITION_FEED, rin, byteArr.length);
             rin.setResponse(response);
 
             if(responseListener != null) {

@@ -408,15 +408,9 @@ dependencies {
 
     androidTestImplementation project(":core-tests")
 
-    project.ext.nanoLrsVersion = rootProject.ext.nanoLrsVersion
-    api "com.ustadmobile.nanolrs:nanolrs-core:$nanoLrsVersion"
-    api "com.ustadmobile.nanolrs:nanolrs-android:$nanoLrsVersion"
-
-
-
     //ViewModel and LiveData
     implementation "android.arch.lifecycle:extensions:$version_android_lifecycle"
-    annotationProcessor "android.arch.lifecycle:compiler:$version_android_lifecycle"
+    annotationProcessor "android.arch.lifecycle:common-java8:$version_android_lifecycle"
 
     // Room
     implementation "android.arch.persistence.room:runtime:$version_android_room"
@@ -424,8 +418,6 @@ dependencies {
 
     // Paging
     implementation "android.arch.paging:runtime:$version_android_paging"
-
-
 
 
     androidTestImplementation project(":core-tests")

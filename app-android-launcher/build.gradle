@@ -116,6 +116,7 @@ android {
 }
 
 configurations.all {
+//    Use this if needed to fix support library versions
 //    resolutionStrategy {
 //        force "com.android.support:appcompat-v7:$support_lib_version"
 //        force "com.android.support:cardview-v7:$support_lib_version"

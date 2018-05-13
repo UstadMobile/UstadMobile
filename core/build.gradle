@@ -53,7 +53,7 @@ dependencies {
     implementation project(":lib-util")
 
     project.ext.nanoLrsVersion = rootProject.ext.nanoLrsVersion
-    api "com.ustadmobile.nanolrs:nanolrs-core:$nanoLrsVersion"
+//    api "com.ustadmobile.nanolrs:nanolrs-core:$nanoLrsVersion"
 
     testImplementation project(":core-tests")
     testImplementation project(":sharedse")

@@ -3,9 +3,6 @@ package com.ustadmobile.test.core.catalog.contenttype;
 import com.ustadmobile.core.catalog.contenttype.ContentTypePlugin;
 import com.ustadmobile.core.catalog.contenttype.XapiPackageTypePlugin;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.core.opds.UstadJSOPDSEntry;
-import com.ustadmobile.core.opds.UstadJSOPDSFeed;
-import com.ustadmobile.core.opds.UstadJSOPDSItem;
 import com.ustadmobile.core.opds.entities.UmOpdsLink;
 import com.ustadmobile.test.core.UMTestUtil;
 

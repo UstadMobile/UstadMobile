@@ -38,10 +38,11 @@ dependencies {
     implementation "net.sf.kxml:kxml2:$version_kxml";
     implementation "com.google.code.gson:gson:$version_gson"
     implementation "net.lingala.zip4j:zip4j:$version_zip4j"
+    implementation "org.json:json:$version_json"
 
-    project.ext.nanoLrsVersion = rootProject.ext.nanoLrsVersion
-    implementation "com.ustadmobile.nanolrs:nanolrs-core:$nanoLrsVersion"
-    implementation "com.ustadmobile.nanolrs:nanolrs-http:$nanoLrsVersion"
+//    project.ext.nanoLrsVersion = rootProject.ext.nanoLrsVersion
+//    implementation "com.ustadmobile.nanolrs:nanolrs-core:$nanoLrsVersion"
+//    implementation "com.ustadmobile.nanolrs:nanolrs-http:$nanoLrsVersion"
     implementation project(":core")
     implementation project(":lib-database")
     implementation project(':lib-core-fs')

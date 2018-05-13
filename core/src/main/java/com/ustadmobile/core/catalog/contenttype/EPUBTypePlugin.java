@@ -1,20 +1,6 @@
 package com.ustadmobile.core.catalog.contenttype;
 
-import com.ustadmobile.core.controller.CatalogPresenter;
-import com.ustadmobile.core.impl.UMLog;
-import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.core.impl.ZipFileHandle;
-import com.ustadmobile.core.ocf.UstadOCF;
-import com.ustadmobile.core.opds.UstadJSOPDSEntry;
-import com.ustadmobile.core.opds.UstadJSOPDSFeed;
-import com.ustadmobile.core.opds.UstadJSOPDSItem;
-import com.ustadmobile.core.opds.entities.UmOpdsLink;
-import com.ustadmobile.core.opf.UstadJSOPF;
-import com.ustadmobile.core.opf.UstadJSOPFItem;
-import com.ustadmobile.core.util.UMFileUtil;
-import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.view.ContainerView;
-import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,9 +14,9 @@ import java.util.List;
 
 public class EPUBTypePlugin extends ContentTypePlugin {
 
-    private static final String[] MIME_TYPES = new String[]{"application/epub+zip"};
+    public static final String[] MIME_TYPES = new String[]{"application/epub+zip"};
 
-    private static final String[] EXTENSIONS = new String[]{"epub"};
+    public static final String[] EXTENSIONS = new String[]{"epub"};
 
     public static final String OCF_CONTAINER_PATH = "META-INF/container.xml";
 

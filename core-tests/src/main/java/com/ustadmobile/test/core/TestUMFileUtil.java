@@ -1,8 +1,6 @@
 package com.ustadmobile.test.core;
-
-import com.ustadmobile.core.opds.UstadJSOPDSFeed;
+import com.ustadmobile.core.catalog.contenttype.EPUBTypePlugin;
 import com.ustadmobile.core.util.UMFileUtil;
-import com.ustadmobile.core.util.URLTextUtil;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -20,10 +18,10 @@ public class TestUMFileUtil {
     public void testAppendExtensionToFilenameIfNeeded() {
         Assert.assertEquals("Will append file extension when needed", "foo.bar.epub",
                 UMFileUtil.appendExtensionToFilenameIfNeeded("foo.bar",
-                UstadJSOPDSFeed.TYPE_EPUBCONTAINER));
+                        EPUBTypePlugin.MIME_TYPES[0]));
         Assert.assertEquals("Will leave filename when extension is already there", "foo.epub",
                 UMFileUtil.appendExtensionToFilenameIfNeeded("foo.epub",
-                UstadJSOPDSFeed.TYPE_EPUBCONTAINER));
+                        EPUBTypePlugin.MIME_TYPES[0]));
         Assert.assertEquals("Will leave filename when extension is unknown", "foo.bar",
                 UMFileUtil.appendExtensionToFilenameIfNeeded("foo.bar",
                 "application/x-foo-bar"));

@@ -7,11 +7,12 @@ dependencies {
     compile project(":sharedse")
     implementation project(":lib-core-fs")
     implementation project(":lib-database")
-    compile 'junit:junit:4.12'
-    implementation "net.sf.kxml:kxml2:2.3.0"
-    implementation 'org.nanohttpd:nanohttpd:2.3.1'
-    implementation 'org.nanohttpd:nanohttpd-nanolets:2.3.1'
+    implementation "junit:junit:$version_junit"
+    implementation "net.sf.kxml:kxml2:$version_kxml"
+    implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
+    implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
     implementation 'org.mockito:mockito-core:2.13.0'
+    implementation "org.json:json:$version_json"
 }
 
 

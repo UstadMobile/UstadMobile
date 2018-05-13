@@ -54,13 +54,13 @@ ext {
     version_android_target_sdk = 27
 
     version_android_support_lib = "27.1.1"
-    version_android_lifecycle = "1.1.0"
+    version_android_lifecycle = "1.1.1"
     version_android_room = "1.1.0"
     version_android_multidex = "1.0.3"
     version_android_paging = "1.0.0"
     version_android_constraint_layout = "1.1.0"
     version_android_flexbox = "0.3.2"
-    version_android_espresso = "3.0.1"
+    version_android_espresso = "3.0.2"
     version_android_acra = "5.1.1"
     version_android_junit_runner = "1.0.2"
     version_android_mockito = "2.13.0"

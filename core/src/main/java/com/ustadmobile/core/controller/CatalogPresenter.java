@@ -9,12 +9,6 @@ import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UMStorageDir;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.core.networkmanager.AcquisitionListener;
-import com.ustadmobile.core.networkmanager.AcquisitionTaskStatus;
-import com.ustadmobile.core.opds.UstadJSOPDSEntry;
-import com.ustadmobile.core.opds.UstadJSOPDSFeed;
-import com.ustadmobile.core.opds.UstadJSOPDSItem;
-import com.ustadmobile.core.opds.entities.UmOpdsLink;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.view.AddFeedDialogView;
 import com.ustadmobile.core.view.AppView;
@@ -42,12 +36,9 @@ import java.util.Vector;
  * Created by mike on 9/30/17.
  */
 
-public class CatalogPresenter extends BaseCatalogPresenter implements AcquisitionListener  {
+public class CatalogPresenter extends BaseCatalogPresenter  {
 
     private CatalogView mView;
-
-    @Deprecated
-    private UstadJSOPDSFeed feed;
 
     private UmLiveData<OpdsEntryWithRelations> feedLiveData;
 
@@ -206,16 +197,10 @@ public class CatalogPresenter extends BaseCatalogPresenter implements Acquisitio
             mView.setEntryProvider(entryProvider);
             title = UstadMobileSystemImpl.getInstance().getString(MessageID.downloaded, getContext());
         }
-
-
-        feed = new UstadJSOPDSFeed();
-
-        UstadMobileSystemImpl.getInstance().getNetworkManager().addAcquisitionTaskListener(this);
     }
 
     public void onDestroy() {
         super.onDestroy();
-        UstadMobileSystemImpl.getInstance().getNetworkManager().removeAcquisitionTaskListener(this);
     }
 
     private void handleParentFeedLoaded(OpdsEntryWithRelations opdsFeed) {
@@ -349,37 +334,6 @@ public class CatalogPresenter extends BaseCatalogPresenter implements Acquisitio
         UstadMobileSystemImpl.getInstance().go(CatalogEntryView.VIEW_NAME, args, getContext());
     }
 
-
-    /**
-     * Triggered when the user selects an entry from the catalog. This could
-     * be another OPDS catalog Feed to display or it could be a container
-     * entry.
-     *
-     * @param entryId
-     */
-    public void handleClickEntry(final String entryId) {
-        UstadJSOPDSEntry entry = feed.getEntryById(entryId);
-
-        final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-
-
-
-        if(!entry.getParentFeed().isAcquisitionFeed()) {
-            //we are loading another opds catalog
-            Vector entryLinks = entry.getLinks(null, UstadJSOPDSItem.TYPE_ATOMFEED,
-                    true, true);
-
-            if(entryLinks.size() > 0) {
-                UmOpdsLink firstLink = (UmOpdsLink) entryLinks.elementAt(0);
-                handleCatalogSelected(UMFileUtil.resolveLink(entry.getParentFeed().getHref(),
-                        firstLink.getHref()));
-            }
-        }else {
-            //Go to the entry view
-            handleOpenEntryView(entry, entry.getParentFeed().getTitle());
-        }
-    }
-
     public void handleClickAdd() {
         Hashtable args = new Hashtable();
         args.put(AddFeedDialogPresenter.ARG_UUID, feedLiveData.getValue().getUuid());
@@ -401,28 +355,20 @@ public class CatalogPresenter extends BaseCatalogPresenter implements Acquisitio
     }
 
     public void handleClickAlternativeLanguage(int langIndex) {
-        String[] altLangLinks = (String[])alternativeTranslationLinks.elementAt(langIndex);
-        String alternativeUrl = UMFileUtil.resolveLink(feed.getHref(),
-                altLangLinks[UstadJSOPDSItem.ATTR_HREF]);
-        handleCatalogSelected(alternativeUrl);
+//        TODO: re-implement for #dbarch2
+//        String[] altLangLinks = (String[])alternativeTranslationLinks.elementAt(langIndex);
+//        String alternativeUrl = UMFileUtil.resolveLink(feed.getHref(),
+//                altLangLinks[UstadJSOPDSItem.ATTR_HREF]);
+//        handleCatalogSelected(alternativeUrl);
     }
 
     public void handleClickFooterButton() {
         if(FOOTER_BUTTON_DOWNLOADALL.equals(footerButtonUrl)) {
-            handleClickDownloadAll();
+//            TODO: Re-implement for #dbarch2
+//            handleClickDownloadAll();
         }else {
             handleCatalogSelected(footerButtonUrl);
         }
-    }
-
-
-    /**
-     * Triggered by the view when the user has selected the download all button
-     * for this feed
-     *
-     */
-    public void handleClickDownloadAll() {
-        handleClickDownload(feed, feed.getAllEntries());
     }
 
     public void handleClickDownload(List<OpdsEntryWithRelations> entries) {
@@ -475,51 +421,28 @@ public class CatalogPresenter extends BaseCatalogPresenter implements Acquisitio
      */
     public void handleClickShare() {
         //share all those in catalog that have been acquired
-        Vector acquiredEntryIds = new Vector();
-        CatalogEntryInfo entryInfo;
-        for(int i = 0; i < feed.size(); i++) {
-            entryInfo = getEntryInfo(feed.getEntry(i).getItemId(), CatalogPresenter.ALL_RESOURCES,
-                    getContext());
-            if(entryInfo != null && entryInfo.acquisitionStatus == CatalogPresenter.STATUS_ACQUIRED) {
-                acquiredEntryIds.addElement(feed.getEntry(i).getItemId());
-            }
-        }
-
-        if(acquiredEntryIds.size() == 0) {
-            //nothing downloaded...
-            return;
-        }
-
-        String[] idsToShare = new String[acquiredEntryIds.size()];
-        acquiredEntryIds.copyInto(idsToShare);
-        Hashtable shareArgs = new Hashtable();
-        shareArgs.put("entries", idsToShare);
-        shareArgs.put("title", feed.getTitle());
-        UstadMobileSystemImpl.getInstance().go("SendCourse", shareArgs, getContext());
-    }
-
-
-    @Override
-    public void acquisitionProgressUpdate(String entryId, AcquisitionTaskStatus status) {
-        UstadJSOPDSEntry entry=  feed.getEntryById(entryId);
-        if(entry != null) {
-            float progress = (float)((double)status.getDownloadedSoFar() / (double)status.getTotalSize());
-            mView.updateDownloadEntryProgress(entryId, progress, formatDownloadStatusText(status));
-        }
-    }
-
-    @Override
-    public void acquisitionStatusChanged(String entryId, AcquisitionTaskStatus status) {
-        switch(status.getStatus()){
-            case UstadMobileSystemImpl.DLSTATUS_RUNNING:
-                mView.setEntryStatus(entryId, CatalogPresenter.STATUS_ACQUISITION_IN_PROGRESS);
-                mView.setDownloadEntryProgressVisible(entryId, true);
-                break;
-            case UstadMobileSystemImpl.DLSTATUS_SUCCESSFUL:
-                mView.setDownloadEntryProgressVisible(entryId, false);
-                mView.setEntryStatus(entryId, CatalogPresenter.STATUS_ACQUIRED);
-                break;
-        }
+//        TODO: Re-implement for #dbarch2
+//        Vector acquiredEntryIds = new Vector();
+//        CatalogEntryInfo entryInfo;
+//        for(int i = 0; i < feed.size(); i++) {
+//            entryInfo = getEntryInfo(feed.getEntry(i).getItemId(), CatalogPresenter.ALL_RESOURCES,
+//                    getContext());
+//            if(entryInfo != null && entryInfo.acquisitionStatus == CatalogPresenter.STATUS_ACQUIRED) {
+//                acquiredEntryIds.addElement(feed.getEntry(i).getItemId());
+//            }
+//        }
+//
+//        if(acquiredEntryIds.size() == 0) {
+//            //nothing downloaded...
+//            return;
+//        }
+//
+//        String[] idsToShare = new String[acquiredEntryIds.size()];
+//        acquiredEntryIds.copyInto(idsToShare);
+//        Hashtable shareArgs = new Hashtable();
+//        shareArgs.put("entries", idsToShare);
+//        shareArgs.put("title", feed.getTitle());
+//        UstadMobileSystemImpl.getInstance().go("SendCourse", shareArgs, getContext());
     }
 
     public void handleRefresh() {

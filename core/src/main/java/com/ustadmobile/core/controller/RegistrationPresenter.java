@@ -166,13 +166,16 @@ public class RegistrationPresenter extends UstadBaseController {
      * @return          value
      */
     public static String getUserDetail(String username, int field, Object dbContext){
-        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        String value = impl.getUserDetail(username, field, dbContext);
-        if(value == null){
-            return "";
-        }
+        return "";
 
-        return value;
+//        TODO: Handle user with new db arch
+//        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+//        String value = impl.getUserDetail(username, field, dbContext);
+//        if(value == null){
+//            return "";
+//        }
+//
+//        return value;
 
     }
     public void setUIStrings() {
@@ -184,11 +187,11 @@ public class RegistrationPresenter extends UstadBaseController {
      */
     public void handleClickRegister(String username, String password, Hashtable fields, boolean editMode) {
         Object context = getContext();
-        if(editMode){
-            UstadMobileSystemImpl.getInstance().updateUser(username, password, fields, context);
-        }else {
-            UstadMobileSystemImpl.getInstance().registerUser(username, password, fields, context);
-        }
+//        if(editMode){
+//            UstadMobileSystemImpl.getInstance().updateUser(username, password, fields, context);
+//        }else {
+//            UstadMobileSystemImpl.getInstance().registerUser(username, password, fields, context);
+//        }
         if(resultListener != null){
             resultListener.onDialogResult(RESULT_REGISTRATION_SUCCESS, view, null);
         }

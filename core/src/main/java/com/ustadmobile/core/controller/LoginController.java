@@ -271,16 +271,18 @@ public class LoginController extends UstadBaseController{
      * @return
      */
     public boolean handleLoginLocally(String username, String password, Object dbContext){
-        boolean result = UstadMobileSystemImpl.getInstance().handleLoginLocally(username, password, dbContext);
-        if(result) {
-            if (resultListener != null) {
-                resultListener.onDialogResult(RESULT_LOGIN_SUCCESSFUL, (DismissableDialog) view, null);
-            } else {
-                UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-                impl.go(impl.getAppConfigString(AppConfig.KEY_FIRST_DEST, null, context), context);
-            }
-        }
-        return result;
+//        boolean result = UstadMobileSystemImpl.getInstance().handleLoginLocally(username, password, dbContext);
+//        if(result) {
+//            if (resultListener != null) {
+//                resultListener.onDialogResult(RESULT_LOGIN_SUCCESSFUL, (DismissableDialog) view, null);
+//            } else {
+//                UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+//                impl.go(impl.getAppConfigString(AppConfig.KEY_FIRST_DEST, null, context), context);
+//            }
+//        }
+//        return result;
+
+        return false;
     }
     /**
      * Handles what happens when in the app the login button is clicked.
@@ -306,10 +308,6 @@ public class LoginController extends UstadBaseController{
 
                 impl.setActiveUser(username, getContext());
                 impl.setActiveUserAuth(password, getContext());
-
-                //Added by Varuna:
-                //create a user locally:
-                impl.createUserLocally(username, password, null, getContext());
 
                 if(resultListener != null) {
                     resultListener.onDialogResult(RESULT_LOGIN_SUCCESSFUL, (DismissableDialog)view, null);
