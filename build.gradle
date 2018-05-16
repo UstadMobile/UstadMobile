@@ -31,11 +31,11 @@ task clean(type: Delete) {
     delete rootProject.buildDir
 }
 
-version = "0.2.4.83"
+//Major.minor.database version
+version = "0.2.5.65"
 ext {
     ustadVersion = project.version
     ustadVersionCode = 149
-    nanoLrsVersion = "0.2.49.25"
 
     version_junit = "4.12"
     version_nanohttpd = "2.3.1"

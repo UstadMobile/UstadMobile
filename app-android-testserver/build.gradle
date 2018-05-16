@@ -107,4 +107,11 @@ dependencies {
 
     implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
     implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
+
+    /*
+     * Included here to avoid build a complaint about different runtime / compile version
+     */
+    implementation "android.arch.lifecycle:extensions:$version_android_lifecycle"
+    annotationProcessor "android.arch.lifecycle:common-java8:$version_android_lifecycle"
+
 }
