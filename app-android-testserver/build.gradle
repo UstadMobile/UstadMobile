@@ -77,6 +77,19 @@ android {
                 merge "META-INF/INDEX.LIST"
             }
         }
+
+        devMinApi21 {
+            dimension "config"
+            minSdkVersion 21
+            applicationId "com.toughra.ustadmobile.testserver"
+            testApplicationId "com.toughra.ustadmobile.appandroid.testserver.test"
+            versionCode rootProject.ext.ustadVersionCode
+            manifestPlaceholders = ["appName": "Ustad Mobile Test Server"]
+            multiDexEnabled true
+            packagingOptions { //Required: otherwise we get complaints on assembling
+                merge "META-INF/INDEX.LIST"
+            }
+        }
     }
 
 }

@@ -98,6 +98,18 @@ android {
                 merge "META-INF/INDEX.LIST"
             }
         }
+
+        devMinApi21 {
+            dimension "config"
+            minSdkVersion 21
+            applicationId "com.toughra.ustadmobile"
+            testApplicationId "com.toughra.ustadmobile.appandroid.test"
+            versionCode rootProject.ext.ustadVersionCode
+            multiDexEnabled true
+            packagingOptions { //Required: otherwise we get complaints on assembling
+                merge "META-INF/INDEX.LIST"
+            }
+        }
     }
 
     buildTypes {

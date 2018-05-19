@@ -257,6 +257,15 @@ android {
 
         }
 
+        devMinApi21 {
+            dimension "config"
+            minSdkVersion 21
+            multiDexEnabled true
+            packagingOptions { //Required: otherwise we get complaints on assembling
+                merge "META-INF/INDEX.LIST"
+            }
+        }
+
         vanillamultidex {
             dimension "config"
             multiDexEnabled true
@@ -313,7 +322,7 @@ task generateCoreStringToAndroidResMap {
     inputs.files("core/locale/*/*.xml")
 
     doLast {
-        int MAIN = 0, LOCALCONFIG = 1, VANILLAMULTIDEX = 2
+        int MAIN = 0, LOCALCONFIG = 1, VANILLAMULTIDEX = 2, DEVMINAPI21 = 3
         String[] dirNames = new String[2]
         dirNames[MAIN] = "vanilla"
         dirNames[LOCALCONFIG] = "localconfig"
@@ -371,10 +380,11 @@ task generateCoreStringToAndroidResMap {
             oldMessageIdFile.delete()
         }
 
-        String[] outDirNames = new String[3]
+        String[] outDirNames = new String[4]
         outDirNames[MAIN] = "vanilla"
         outDirNames[LOCALCONFIG] = "localconfig"
         outDirNames[VANILLAMULTIDEX] = "vanillamultidex"
+        outDirNames[DEVMINAPI21] = "devMinApi21"
 
 
 
@@ -385,7 +395,7 @@ task generateCoreStringToAndroidResMap {
             }
 
             File outFile = new File(outDir, "MessageIDMap.java")
-            int idMapIndex = i == VANILLAMULTIDEX ? MAIN : i;
+            int idMapIndex = i < LOCALCONFIG ? i : MAIN;
             outFile.setText(genSrcHeader + genSrcBody[idMapIndex] + genSrcFooter, "UTF-8")
         }
 
