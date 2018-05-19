@@ -112,14 +112,41 @@ public class DownloadCrawlEspressoTest {
                 withId(R.id.item_opds_entry_card_download_icon)
         )).check(matches(withContentDescription("Download")));
 
+        removeFromMyLibrary(libraryTitle);
+    }
 
+    private void removeFromMyLibrary(String libraryTitle) {
         onView(allOf(
                 isDescendantOfA(withTagValue(equalTo("entries:///my_library"))),
                 withChild(withText(libraryTitle)))).perform(longClick());
         onView(withId(CatalogOPDSFragment.MENUCMDID_DELETE)).perform(click());
         onView(withId(android.R.id.button1)).perform(click());
-
     }
+
+    private void startDownload(String libraryTitle) {
+        onView(allOf(
+                isDescendantOfA(withTagValue(equalTo("entries:///my_library"))),
+                hasSibling(withText(libraryTitle)),
+                withId(R.id.item_opds_entry_card_download_icon)
+        )).perform(click());
+
+        onView(withId(android.R.id.button1)).perform(click());
+
+        SystemClock.sleep(1000);
+    }
+
+    public void clickDownloadIconAndSelectOption(String libraryTitle, int optionId) {
+        onView(allOf(
+                isDescendantOfA(withTagValue(equalTo("entries:///my_library"))),
+                hasSibling(withText(libraryTitle)),
+                withId(R.id.item_opds_entry_card_download_icon)
+        )).perform(click());
+
+
+        onView(withId(optionId)).perform(click());
+        onView(withId(android.R.id.button1)).perform(click());
+    }
+
 
     private void waitForLastDownloadJobToFinish(final int timeout) {
         DownloadJobDao jobDao = DbManager.getInstance(PlatformTestUtil.getTargetContext())
@@ -146,7 +173,7 @@ public class DownloadCrawlEspressoTest {
     }
 
     @Test
-    public void testDownloadAllAndDelete() {
+    public void givenEmptyList_whenAllDownloaded_shouldShowDownloaded() {
         addFeedToMyLibraries(UMFileUtil.joinPaths(ResourcesHttpdTestServer.getHttpRoot(),
             "com/ustadmobile/test/sharedse/crawlme/index.opds"), "Crawl Test");
 
@@ -180,19 +207,13 @@ public class DownloadCrawlEspressoTest {
     }
 
     @Test
-    public void testPauseAndResume() {
+    public void givenEmptyList_whenDownloadPausedThenResumed_shouldShowPausedThenDownloaded() {
         addFeedToMyLibraries(UMFileUtil.joinPaths(ResourcesHttpdTestServer.getHttpRoot(),
                 "com/ustadmobile/test/sharedse/crawlme-slow/index.opds"), "Crawl Test - Slow");
 
         SystemClock.sleep(1000);
 
-        onView(allOf(
-                isDescendantOfA(withTagValue(equalTo("entries:///my_library"))),
-                hasSibling(withText("Crawl Test - Slow")),
-                withId(R.id.item_opds_entry_card_download_icon)
-        )).perform(click());
-
-        onView(withId(android.R.id.button1)).perform(click());
+        startDownload("Crawl Test - Slow");
 
         SystemClock.sleep(1000);
 
@@ -235,4 +256,25 @@ public class DownloadCrawlEspressoTest {
         deleteAndRemoveFromMyLibraries("Crawl Test - Slow");
     }
 
+
+    @Test
+    public void givenEmptyList_whenDownloadedThenCancelled_shouldShowNotDownloaded() {
+        addFeedToMyLibraries(UMFileUtil.joinPaths(ResourcesHttpdTestServer.getHttpRoot(),
+                "com/ustadmobile/test/sharedse/crawlme-slow/index.opds"), "Crawl Test - Slow");
+
+        startDownload("Crawl Test - Slow");
+        SystemClock.sleep(1000);
+        clickDownloadIconAndSelectOption("Crawl Test - Slow",
+                R.id.fragment_download_dialog_option_cancel);
+
+        SystemClock.sleep(1000);
+        //Check that the content description shows the option to download - e.g all entries are deleted.
+        onView(allOf(
+                isDescendantOfA(withTagValue(equalTo("entries:///my_library"))),
+                hasSibling(withText("Crawl Test - Slow")),
+                withId(R.id.item_opds_entry_card_download_icon)
+        )).check(matches(withContentDescription("Download")));
+
+        removeFromMyLibrary("Crawl Test - Slow");
+    }
 }

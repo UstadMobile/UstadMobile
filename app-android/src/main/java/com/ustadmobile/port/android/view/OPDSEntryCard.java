@@ -139,7 +139,7 @@ public class OPDSEntryCard extends ConstraintLayout {
 
             case OpdsEntryWithStatusCache.DOWNLOAD_DISPLAY_STATUS_IN_PROGRESS:
                 statusButton.setImageResource(R.drawable.ic_file_download_black_24dp);
-                statusButton.setContentDescription(getContext().getResources().getString(R.string.download));
+                statusButton.setContentDescription(getContext().getResources().getString(R.string.downloading));
                 statusButton.setProgressVisibility(View.VISIBLE);
                 statusButton.setProgress(opdsEntry.getDownloadCompletePercentage());
                 break;

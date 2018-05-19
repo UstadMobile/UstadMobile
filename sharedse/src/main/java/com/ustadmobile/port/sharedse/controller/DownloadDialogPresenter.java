@@ -155,6 +155,11 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
                 view.setProgressVisible(false);
                 break;
 
+            case OPTION_CANCEL_DOWNLOAD:
+                view.setMainText("Cancel this download");
+                view.setProgressVisible(false);
+                break;
+
         }
     }
 
@@ -245,6 +250,14 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
                 dbManager.getDownloadJobDao().findLastDownloadJobId(rootEntryId, (runningDownloadJobId) -> {
                     if(runningDownloadJobId > 0){
                         UstadMobileSystemImpl.getInstance().getNetworkManager().queueDownloadJob(runningDownloadJobId);
+                    }
+                });
+                break;
+
+            case OPTION_CANCEL_DOWNLOAD:
+                dbManager.getDownloadJobDao().findLastDownloadJobId(rootEntryId, (runningDownloadJobId) -> {
+                    if(runningDownloadJobId > 0){
+                        UstadMobileSystemImpl.getInstance().getNetworkManager().cancelDownloadJob(runningDownloadJobId);
                     }
                 });
                 break;
