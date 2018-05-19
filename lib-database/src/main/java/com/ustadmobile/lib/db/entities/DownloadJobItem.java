@@ -33,6 +33,8 @@ public class DownloadJobItem {
     @UmIndexField
     private int status;
 
+    private String destinationFile;
+
     /**
      * Constructor
      *
@@ -208,5 +210,23 @@ public class DownloadJobItem {
      */
     public void setTimeFinished(long timeFinished) {
         this.timeFinished = timeFinished;
+    }
+
+    /**
+     * Get the destination file to which this download job will be written
+     *
+     * @return the destination file to which this download job will be written
+     */
+    public String getDestinationFile() {
+        return destinationFile;
+    }
+
+    /**
+     * Set the destination file to which this download job will be written
+     *
+     * @param destinationFile the destination file to which this download job will be written
+     */
+    public void setDestinationFile(String destinationFile) {
+        this.destinationFile = destinationFile;
     }
 }

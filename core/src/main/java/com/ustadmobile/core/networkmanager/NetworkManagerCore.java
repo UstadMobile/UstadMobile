@@ -93,6 +93,10 @@ public interface NetworkManagerCore {
 
     boolean pauseDownloadJob(int downloadJobId);
 
+    boolean cancelDownloadJob(int downloadJobId);
+
+    void cancelDownloadJobAsync(int downloadJobId, UmResultCallback<Boolean> callback);
+
     void addAcquisitionTaskListener(AcquisitionListener listener);
 
     void removeAcquisitionTaskListener(AcquisitionListener listener);

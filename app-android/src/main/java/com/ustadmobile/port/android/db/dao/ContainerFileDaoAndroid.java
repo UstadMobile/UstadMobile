@@ -73,4 +73,7 @@ public abstract class ContainerFileDaoAndroid extends ContainerFileDao implement
     public void findContainerFileLengthAsync(int containerFileId, UmCallback<Long> callback){
         executor.execute(() -> callback.onSuccess(findContainerFileLength(containerFileId)));
     }
+
+    @Query("Select * FROM ContainerFile")
+    public abstract List<ContainerFile> findAll();
 }

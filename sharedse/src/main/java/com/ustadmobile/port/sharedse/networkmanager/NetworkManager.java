@@ -5,6 +5,7 @@ import com.ustadmobile.core.db.dao.CrawlJobDao;
 import com.ustadmobile.core.db.dao.DownloadJobDao;
 import com.ustadmobile.core.db.dao.DownloadSetDao;
 import com.ustadmobile.core.db.dao.NetworkNodeDao;
+import com.ustadmobile.core.fs.db.ContainerFileHelper;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UmResultCallback;
@@ -44,6 +45,7 @@ import com.ustadmobile.port.sharedse.impl.http.OPDSFeedUriResponder;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -578,18 +580,29 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
         });
     }
 
+    private DownloadTask stopDownloadAndSetStatus(int downloadJobId, int statusAfterStop) {
+        DownloadTask downloadTask = activeDownloadTasks.get(downloadJobId);
+        if(downloadTask == null)
+            return null;
+
+        downloadTask.stop(statusAfterStop);
+
+        return downloadTask;
+    }
+
     @Override
     public boolean pauseDownloadJob(int downloadJobId) {
-        DownloadTask downloadTask = activeDownloadTasks.get(downloadJobId);
+        DownloadTask downloadTask = stopDownloadAndSetStatus(downloadJobId, NetworkTask.STATUS_PAUSED);
         if(downloadTask == null)
             return false;
 
-        downloadTask.stop(NetworkTask.STATUS_PAUSED);
         DbManager dbManager = DbManager.getInstance(getContext());
         List<DownloadJobItemWithDownloadSetItem> pausedItems = dbManager.getDownloadJobItemDao()
                 .findByDownloadJobAndStatusRange(downloadJobId, NetworkTask.STATUS_WAITING_MIN,
                         NetworkTask.STATUS_COMPLETE_MIN);
         for(DownloadJobItemWithDownloadSetItem pausedItem : pausedItems) {
+            dbManager.getDownloadJobItemDao().updateStatus(pausedItem.getDownloadJobItemId(),
+                    NetworkTask.STATUS_PAUSED);
             dbManager.getOpdsEntryStatusCacheDao().handleContainerDownloadPaused(
                     pausedItem.getDownloadSetItem().getEntryId());
         }
@@ -600,6 +613,46 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
     @Override
     public void pauseDownloadJobAsync(int downloadJobId, UmResultCallback<Boolean> callback) {
         dbExecutorService.execute(() -> callback.onDone(pauseDownloadJob(downloadJobId)));
+    }
+
+    @Override
+    public boolean cancelDownloadJob(int downloadJobId) {
+        DbManager dbManager = DbManager.getInstance(getContext());
+        DownloadTask downloadTask = stopDownloadAndSetStatus(downloadJobId,
+                NetworkTask.STATUS_CANCELED);
+
+        //go through all downloads that have been completed, and delete them
+        List<DownloadJobItemWithDownloadSetItem> downloadedItems =  dbManager
+                .getDownloadJobItemDao().findAllWithDownloadSet(downloadJobId);
+
+        for(DownloadJobItemWithDownloadSetItem item : downloadedItems) {
+            if(item.getStatus() < NetworkTask.STATUS_COMPLETE_MIN) {
+                dbManager.getOpdsEntryStatusCacheDao().handleContainerDownloadAborted(item
+                        .getDownloadSetItem().getEntryId());
+
+                //check for any file leftovers
+                if(item.getDestinationFile() != null) {
+                    File file = new File(item.getDestinationFile());
+                    if(file.exists())
+                        file.delete();
+
+                    file = new File(item.getDestinationFile() + ResumableHttpDownload.DLPART_EXTENSION);
+                    if(file.exists())
+                        file.delete();
+                }
+            }else {
+                ContainerFileHelper.getInstance().deleteAllContainerFilesByEntryId(getContext(),
+                        item.getDownloadSetItem().getEntryId());
+            }
+
+        }
+
+        return downloadTask != null;
+    }
+
+    @Override
+    public void cancelDownloadJobAsync(int downloadJobId, UmResultCallback<Boolean> callback) {
+        dbExecutorService.execute(() -> callback.onDone(cancelDownloadJob(downloadJobId)));
     }
 
     /**

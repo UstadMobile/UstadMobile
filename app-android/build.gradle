@@ -181,6 +181,12 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
 
+    testOptions {
+        unitTests {
+            includeAndroidResources = true
+        }
+    }
+
     dexOptions {
         javaMaxHeapSize "2g"
     }
@@ -487,6 +493,8 @@ dependencies {
     //http server
     implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
     implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
+
+    testImplementation "junit:junit:$version_junit"
 }
 
 task sourceJar(type: Jar) {

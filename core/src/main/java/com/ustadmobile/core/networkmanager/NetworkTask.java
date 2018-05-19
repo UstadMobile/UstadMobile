@@ -33,7 +33,7 @@ public abstract class NetworkTask {
     public boolean useBluetooth;
     public boolean useHttp;
 
-    private boolean stopped = false;
+    private volatile boolean stopped = false;
 
     public static final int STATUS_NOT_QUEUED = 0;
 
@@ -96,6 +96,8 @@ public abstract class NetworkTask {
     public static final int STATUS_FAILED = 25;
 
     public static final int STATUS_STOPPED = 26;
+
+    public static final int STATUS_CANCELED = 27;
 
 
     @Deprecated

@@ -427,10 +427,13 @@ public class ResumableHttpDownload {
      * Stop this download. Everything downloaded so far will be written to disk, and the file will
      * be closed. This method is thread safe, and no reading or writing of the output file will
      * take place after this method returns.
+     *
+     * @return the number of bytes downloaded
      */
-    public synchronized void stop() {
+    public synchronized long stop() {
         stopped = true;
         UstadMobileSystemImpl.l(UMLog.DEBUG, 0, mkLogPrefix() + " stop() called");
+
         //close the file output stream
         if(fileOut != null) {
             try {
@@ -450,6 +453,7 @@ public class ResumableHttpDownload {
             }
         }
 
+        return downloadedSoFar;
     }
 
     protected synchronized boolean isStopped() {

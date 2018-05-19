@@ -20,7 +20,7 @@
     <entry>
         <title>Subject 2 - Part 1</title>
         <link rel="http://opds-spec.org/acquisition"
-	        href="2a.epub?speedLimit=128000"
+	        href="2a_slow.epub?speedLimit=128000"
             type="application/epub+zip"/>
             
         <id>http://umcloud1.ustadmobile.com/opds/test-crawl-slow/subject2/2a</id>
@@ -35,7 +35,7 @@
     <entry>
         <title>Subject 2 - Part 2</title>
         <link rel="http://opds-spec.org/acquisition"
-	        href="2b.epub?speedLimit=128000"
+	        href="2b_slow.epub?speedLimit=128000"
             type="application/epub+zip"/>
             
         <id>http://umcloud1.ustadmobile.com/opds/test-crawl-slow/subject2/2b</id>

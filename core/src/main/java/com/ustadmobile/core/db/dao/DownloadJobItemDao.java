@@ -102,6 +102,15 @@ public abstract class DownloadJobItemDao {
                                                                                      int statusTo);
 
     /**
+     * Get a list of the download job items that are part of the given download job id.
+     *
+     * @param downloadJobId
+     *
+     * @return
+     */
+    public abstract List<DownloadJobItemWithDownloadSetItem> findAllWithDownloadSet(int downloadJobId);
+
+    /**
      * Find the DownloadJobItem for the given entryId that was most recently completed
      *
      * @param entryId EntryID to search by
@@ -148,6 +157,18 @@ public abstract class DownloadJobItemDao {
             " WHERE status < " + NetworkTask.STATUS_WAITING_MIN + " AND " +
             " downloadJobId = :downloadJobId")
     public abstract void updateUnpauseItemsByDownloadJob(int downloadJobId);
+
+    /**
+     * Update the DownloadJobItem when the destination file it is going to be saved to is known. This
+     * is used when a download is canceled and the download is not completed (e.g. the file should
+     * be deleted, but there is no ContainerFile entity yet).
+     *
+     * @param downloadJobItemId DownloadJobItem id
+     * @param destinationFile The path to the destination file this item is being saved into
+     */
+    @UmQuery("UPDATE DownloadJobItem SET destinationFile = :destinationFile " +
+            "WHERE downloadJobItemId = :downloadJobItemId")
+    public abstract void updateDestinationFile(int downloadJobItemId, String destinationFile);
 
 
 }

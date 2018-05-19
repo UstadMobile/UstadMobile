@@ -639,7 +639,7 @@ public abstract class OpdsEntryStatusCacheDao {
         int deltaContainerDownloadPending = entryStatusCache.isEntryContainerDownloadPending() ? -1 : 0;
         long newEntrySize = entryStatusCache.isEntryContainerDownloaded() ? entryStatusCache.getEntrySize()
                 : entryStatusCache.getEntryAcquisitionLinkLength();
-        long deltaSize = entryStatusCache.getEntryAcquisitionLinkLength() - newEntrySize;
+        long deltaSize = newEntrySize - entryStatusCache.getEntrySize();
         int deltaActiveDownloads = entryStatusCache.isEntryActiveDownload() ? -1 : 0;
         int deltaPausedDownloads = entryStatusCache.isEntryPausedDownload() ? -1 : 0;
 
@@ -650,8 +650,22 @@ public abstract class OpdsEntryStatusCacheDao {
 
         updateOnContainerStatusChangedEntry(entryStatusCache.getStatusCacheUid(), 0, false,
                 false, false, entryStatusCache.getEntryContainerDownloadedSize(),
-                entryStatusCache.isEntryContainerDownloaded(), deltaSize);
+                entryStatusCache.isEntryContainerDownloaded(), newEntrySize);
     }
+
+    /**
+     * This method should be called whne an entry that was being downloaded (and for which there was
+     * a corresponding call to handleDownloadJobQueued ) is no longer being downloaded - e.g. it has
+     * failed permanently or been cancelled by the user
+     *
+     * Synonamous to handleContainerDownloadAborted(findByEntryId(entryId))
+     *
+     * @param entryId Entry ID of the download that has been aborted
+     */
+    public void handleContainerDownloadAborted(String entryId) {
+        handleContainerDownloadAborted(findByEntryId(entryId));
+    }
+
 
     public void handleContainerDownloadPaused(OpdsEntryStatusCache entryStatusCache) {
         int deltaPausedDownloads = entryStatusCache.isEntryPausedDownload() ? 0 : 1;

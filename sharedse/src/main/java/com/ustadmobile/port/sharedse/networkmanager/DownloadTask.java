@@ -172,7 +172,7 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
      */
     private class UpdateTimerTask extends TimerTask{
         public void run() {
-            if(httpDownload != null && httpDownload.getTotalSize()>0L){
+            if(httpDownload != null && httpDownload.getTotalSize()>0L && !isStopped()){
                 int progress=(int)((httpDownload.getDownloadedSoFar()*100)/ httpDownload.getTotalSize());
                 long currentTime = Calendar.getInstance().getTimeInMillis();
                 int progressLimit=100;
@@ -477,10 +477,12 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
 
             UstadMobileSystemImpl.l(UMLog.INFO, 317, getLogPrefix() + ":downloadCurrentFile: from "
                     + fileUrl + " mode: " + mode);
-            String filename = UMFileUtil.appendExtensionToFilenameIfNeeded(UMFileUtil.getFilename(fileUrl),
-                    currentExpectedMimeType);
+            String filename = UMFileUtil.appendExtensionToFilenameIfNeeded(UMFileUtil.getFilename(
+                    fileUrl), currentExpectedMimeType);
 
             File fileDestination = new File(downloadJob.getDownloadSet().getDestinationDir(), filename);
+            mDbManager.getDownloadJobItemDao().updateDestinationFile(
+                    currentDownloadJobItem.getDownloadJobItemId(), fileDestination.getAbsolutePath());
 
             boolean downloadCompleted = false;
 
@@ -506,23 +508,24 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
                         currentDownloadJobItem.getDownloadSetItem() + " : IOException", e);
             }
 
+            if(isStopped()) {
+                UstadMobileSystemImpl.l(UMLog.ERROR, 660, getLogPrefix() + " : item " +
+                        " : downloadtask has been stopped - returning");
+                return;
+            }
+
             currentJobItemHistory.setEndTime(System.currentTimeMillis());
             currentJobItemHistory.setSuccessful(downloadCompleted);
             mDbManager.getDownloadJobItemHistoryDao().insert(currentJobItemHistory);
 
-            boolean stopped = isStopped();
-            currentDownloadJobItem.setStatus(downloadCompleted ? STATUS_COMPLETE :
-                    stopped ?  getStatus() : STATUS_RUNNING);
+            currentDownloadJobItem.setStatus(downloadCompleted ? STATUS_COMPLETE : STATUS_RUNNING);
             currentDownloadJobItem.setDownloadedSoFar(httpDownload.getDownloadedSoFar());
             mDbManager.getDownloadJobItemDao().updateDownloadJobItemStatus(currentDownloadJobItem);
 
-
-
-            if(downloadCompleted){
+            if(downloadCompleted) {
                 UstadMobileSystemImpl.l(UMLog.INFO, 3010, getLogPrefix() +  " : item " +
                         " : Download completed successfully, saved to " + fileDestination.getAbsolutePath());
-                if(!stopped)
-                    findNextDownloadJobItem();
+                findNextDownloadJobItem();
 
                 mDbManager.getOpdsAtomFeedRepository().
                         findEntriesByContainerFileNormalizedPath(fileDestination.getAbsolutePath());
@@ -531,18 +534,12 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
                 attemptCount = 0;
                 entryAcquisitionThread =null;
 
-                if(!stopped)
-                    startNextDownload();
-            }else if(!isStopped()){
+                startNextDownload();
+            }else{
                 UstadMobileSystemImpl.l(UMLog.ERROR, 660, getLogPrefix() + " : item " +
-                    " : Download did not complete, download is not stopped");
+                    " : Download did not complete, download is not stopped, handle failed attempt");
                 handleAttemptFailed();
-            }else {
-                UstadMobileSystemImpl.l(UMLog.ERROR, 660, getLogPrefix() + " : item " +
-                        " : download not complete, but download is finished");
             }
-
-
         });
         UstadMobileSystemImpl.l(UMLog.DEBUG, 649, "Start entry acquisition thread");
         entryAcquisitionThread.start();
@@ -645,21 +642,26 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
         handleAttemptFailed();
     }
 
+    /**
+     * Stop the DownloadTask. This will immediately flush everything that has been downloaded so far
+     * to the output file, and close the output file. If a download is ongoing, it will be
+     *
+     * @param statusAfterStopped The status to set the DownloadJob to after the task has been stopped.
+     *                           Only the DownloadJob stautus will be changed, not the DownloadJobItem
+     *                           for any items that are part of the download job.
+     */
     @Override
-    public void stop(int statusAfterStopped) {
+    public synchronized void stop(int statusAfterStopped) {
         UstadMobileSystemImpl.l(UMLog.INFO, 321, getLogPrefix() + " task stop called.");
         setStopped(true);
         if(httpDownload != null) {
-            httpDownload.stop();
+            long bytesSoFar = httpDownload.stop();
+            currentDownloadJobItem.setDownloadedSoFar(bytesSoFar);
+
+            currentJobItemHistory.setEndTime(System.currentTimeMillis());
+            currentJobItemHistory.setSuccessful(true);
+            mDbManager.getDownloadJobItemHistoryDao().insert(currentJobItemHistory);
         }
-
-
-        if(currentDownloadJobItem != null && currentDownloadJobItem.getStatus() < NetworkTask.STATUS_COMPLETE_MIN) {
-            currentDownloadJobItem.setStatus(statusAfterStopped);
-            mDbManager.getDownloadJobItemDao().updateStatus(currentDownloadJobItem.getDownloadJobItemId(),
-                    statusAfterStopped);
-        }
-
 
         cleanup(statusAfterStopped);
     }
@@ -764,18 +766,6 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
     public void setMirrorFinder(LocalMirrorFinder mirrorFinder) {
         this.mirrorFinder = mirrorFinder;
     }
-
-//
-//    /**
-//     * Check if the given entry id is part of this acquisition task or not
-//     *
-//     * @param entryId
-//     *
-//     * @return true if the given entry id is included in this acquisition task, false otherwise
-//     */
-//    public boolean taskIncludesEntry(String entryId) {
-//        return downloadJob.getJobItemByEntryId(entryId) != null;
-//    }
 
     /**
      * Selects the optimal entry check response to download if any

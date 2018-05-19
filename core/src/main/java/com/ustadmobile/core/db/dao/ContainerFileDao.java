@@ -52,4 +52,7 @@ public abstract class ContainerFileDao {
 
     @UmQuery("SELECT fileSize FROM ContainerFile WHERE id = :containerFileId")
     public abstract void findContainerFileLengthAsync(int containerFileId, UmCallback<Long> callback);
+
+    @UmQuery("Select * FROM ContainerFile")
+    public abstract List<ContainerFile> findAll();
 }

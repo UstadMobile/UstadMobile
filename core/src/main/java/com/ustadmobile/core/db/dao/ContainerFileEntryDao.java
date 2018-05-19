@@ -57,6 +57,7 @@ public abstract class ContainerFileEntryDao {
     @UmQuery("DELETE from ContainerFileEntry Where containerFileId = :containerFileId")
     protected abstract void deleteByContainerFileId(int containerFileId);
 
-
+    @UmQuery("SELECT * FROM ContainerFileEntry")
+    public abstract List<ContainerFileEntry> findAll();
 
 }
