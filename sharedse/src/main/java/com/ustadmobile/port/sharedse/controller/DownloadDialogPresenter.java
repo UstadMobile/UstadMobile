@@ -216,7 +216,7 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
                 break;
 
             case OPTION_DELETE:
-                UstadMobileSystemImpl.getInstance().deleteEntries(getContext(),
+                UstadMobileSystemImpl.getInstance().deleteEntriesAsync(getContext(),
                         Arrays.asList(rootEntryId), true,
                         new UmCallback<Void>() {
                             @Override

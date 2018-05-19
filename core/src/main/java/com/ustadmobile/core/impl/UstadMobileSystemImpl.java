@@ -1196,8 +1196,10 @@ public abstract class UstadMobileSystemImpl {
      * @param recursive true if all children of the given entryIds should be deleted, false otherwise
      * @param callback callback to be called when the operation is completed
      */
-    public abstract void deleteEntries(Object context, List<String> entryId, boolean recursive,
-                                       UmCallback<Void> callback);
+    public abstract void deleteEntriesAsync(Object context, List<String> entryId, boolean recursive,
+                                            UmCallback<Void> callback);
+
+    public abstract void deleteEntries(Object context, List<String> entryId, boolean recursive);
 
 }
 

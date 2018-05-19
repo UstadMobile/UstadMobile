@@ -265,7 +265,12 @@ public class UstadMobileSystemImplTest extends UstadMobileSystemImplSE {
     }
 
     @Override
-    public void deleteEntries(Object context, List<String> entryId, boolean recursive, UmCallback<Void> callback) {
+    public void deleteEntriesAsync(Object context, List<String> entryId, boolean recursive, UmCallback<Void> callback) {
         //not implemented here
+    }
+
+    @Override
+    public void deleteEntries(Object context, List<String> entryId, boolean recursive) {
+
     }
 }

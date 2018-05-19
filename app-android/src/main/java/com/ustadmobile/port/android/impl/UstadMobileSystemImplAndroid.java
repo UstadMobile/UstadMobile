@@ -935,22 +935,28 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
     }
 
     @Override
-    public void deleteEntries(Object context, final List<String> entryIds, boolean recursive, UmCallback<Void> callback) {
+    public void deleteEntries(Object context, List<String> entryIds, boolean recursive) {
+        OpdsEntryStatusCacheDao entryStatusCacheDao = DbManager.getInstance(context).getOpdsEntryStatusCacheDao();
+        List<String> entryIdsToDelete = entryIds;
+        if(recursive) {
+            entryIdsToDelete = new ArrayList<>();
+            for(String entryId : entryIds) {
+                entryIdsToDelete.add(entryId);
+                entryIdsToDelete.addAll(entryStatusCacheDao.findAllKnownDescendantEntryIds(entryId));
+            }
+        }
+
+        for(String descendantEntryId: entryIdsToDelete) {
+            ContainerFileHelper.getInstance().deleteAllContainerFilesByEntryId(context, descendantEntryId);
+        }
+
+
+    }
+
+    @Override
+    public void deleteEntriesAsync(Object context, final List<String> entryIds, boolean recursive, UmCallback<Void> callback) {
         bgExecutorService.execute(() -> {
-            OpdsEntryStatusCacheDao entryStatusCacheDao = DbManager.getInstance(context).getOpdsEntryStatusCacheDao();
-            List<String> entryIdsToDelete = entryIds;
-            if(recursive) {
-                entryIdsToDelete = new ArrayList<>();
-                for(String entryId : entryIds) {
-                    entryIdsToDelete.add(entryId);
-                    entryIdsToDelete.addAll(entryStatusCacheDao.findAllKnownDescendantEntryIds(entryId));
-                }
-            }
-
-            for(String descendantEntryId: entryIdsToDelete) {
-                ContainerFileHelper.getInstance().deleteAllContainerFilesByEntryId(context, descendantEntryId);
-            }
-
+            deleteEntries(context, entryIds, recursive);
             callback.onSuccess(null);
         });
 

@@ -230,7 +230,12 @@ public class UstadMobileSystemImplJavaSe extends UstadMobileSystemImplSE {
     }
 
     @Override
-    public void deleteEntries(Object context, List<String> entryId, boolean recursive, UmCallback<Void> callback) {
+    public void deleteEntriesAsync(Object context, List<String> entryId, boolean recursive, UmCallback<Void> callback) {
         //not implemented
+    }
+
+    @Override
+    public void deleteEntries(Object context, List<String> entryId, boolean recursive) {
+
     }
 }
