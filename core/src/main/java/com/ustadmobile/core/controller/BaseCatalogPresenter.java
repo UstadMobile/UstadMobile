@@ -13,7 +13,6 @@ import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
 import com.ustadmobile.lib.util.UMUtil;
 import com.ustadmobile.core.view.CatalogEntryView;
 
-import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Vector;

@@ -27,11 +27,16 @@ public class SendCoursePresenter extends UstadBaseController implements WifiP2pL
 
     private String sendTitle;
 
+    @Deprecated
     private String[] sharedEntries;
+
+    private String sharedUuid;
 
     public static final String ARG_SEND_TITLE = "title";
 
     public static final String ARG_ENTRY_IDS = "entries";
+
+    public static final String ARG_SHARED_UUID = "uuid";
 
     private String chosenMacAddr = null;
 
@@ -41,7 +46,8 @@ public class SendCoursePresenter extends UstadBaseController implements WifiP2pL
         super(context);
         this.view = view;
         sendTitle = args.containsKey(ARG_SEND_TITLE) ? args.get(ARG_SEND_TITLE).toString() : "Shared courses";
-        sharedEntries = (String[])args.get(ARG_ENTRY_IDS);
+//        sharedEntries = (String[])args.get(ARG_ENTRY_IDS);
+        sharedUuid = (String)args.get(ARG_SHARED_UUID);
     }
 
     public void onCreate(Hashtable savedState) {
@@ -54,7 +60,8 @@ public class SendCoursePresenter extends UstadBaseController implements WifiP2pL
         peersChanged(networkManager.getKnownWifiDirectPeers());
         networkManager.addWifiDirectPeersListener(this);
         networkManager.addWifiDirectGroupListener(this);
-        networkManager.setSharedFeed(sharedEntries, sendTitle);
+        networkManager.setSharedFeed(sharedUuid);
+
     }
 
     public void onStop() {

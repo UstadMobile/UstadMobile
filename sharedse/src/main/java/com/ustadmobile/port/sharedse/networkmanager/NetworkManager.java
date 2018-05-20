@@ -40,7 +40,7 @@ import com.ustadmobile.lib.util.UmUuidUtil;
 import com.ustadmobile.port.sharedse.impl.http.CatalogUriResponder;
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD;
 import com.ustadmobile.port.sharedse.impl.http.MountedZipHandler;
-import com.ustadmobile.port.sharedse.impl.http.OPDSFeedUriResponder;
+import com.ustadmobile.port.sharedse.impl.http.SharedEntryResponder;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -1777,8 +1777,8 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
                     sharedFeedHttpd.removeRoute("(.*)");
                 }
 
-                sharedFeedHttpd.addRoute("(.*)", OPDSFeedUriResponder.class, sharedFeedUuid, this, getContext());
-
+                sharedFeedHttpd.addRoute("(.*)", SharedEntryResponder.class, sharedFeedUuid,
+                    getContext(), getHttpListeningPort());
                 updateClientServices();
             }else if(sharedFeedUuid == null) {
                 UstadMobileSystemImpl.l(UMLog.INFO, 301, "setSharedFeed: shared feed is now null");
@@ -1834,6 +1834,7 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
      *
      * @param uuids
      */
+    @Deprecated
     public void setSharedFeed(String[] uuids, String title) {
         //TODO: replace this hardcoded value with something generic that gets replaced by client
 
@@ -1955,13 +1956,13 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
      * @param feedUuid
      * @param destinationMacAddr
      */
-    @Deprecated
     public void shareFeed(String feedUuid, String destinationMacAddr) {
         setSharedFeed(feedUuid);
         if(!isWifiDirectConnectionEstablished(destinationMacAddr))
             connectToWifiDirectNode(destinationMacAddr);
     }
 
+    @Deprecated
     public void shareEntries(String[] uuids, String title, String destinationMacAddr) {
         setSharedFeed(uuids, title);
         if(!isWifiDirectConnectionEstablished(destinationMacAddr))

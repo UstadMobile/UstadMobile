@@ -488,6 +488,9 @@ dependencies {
     implementation "ch.acra:acra-http:$version_android_acra"
     implementation "ch.acra:acra-dialog:$version_android_acra"
 
+    //Gson for JSON serializing and deserializing
+    implementation "com.google.code.gson:gson:$version_gson"
+
     androidTestImplementation "junit:junit:$version_junit"
     androidTestImplementation group: "com.android.support", name: "support-annotations", version: "$version_android_support_lib"
 
