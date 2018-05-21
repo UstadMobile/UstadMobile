@@ -8,6 +8,7 @@ import android.arch.persistence.room.Query;
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.db.dao.OpdsEntryWithRelationsDao;
+import com.ustadmobile.core.impl.UmResultCallback;
 import com.ustadmobile.core.networkmanager.NetworkTask;
 import com.ustadmobile.lib.db.entities.OpdsEntry;
 import com.ustadmobile.lib.db.entities.OpdsEntryRelative;
@@ -16,12 +17,23 @@ import com.ustadmobile.lib.db.entities.OpdsEntryWithRelationsAndContainerMimeTyp
 import com.ustadmobile.lib.db.entities.OpdsEntryWithStatusCache;
 
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 
 /**
  * Created by mike on 1/15/18.
  */
 @Dao
 public abstract class OpdsEntryWithRelationsDaoAndroid extends OpdsEntryWithRelationsDao {
+
+    private ExecutorService executorService;
+
+    public ExecutorService getExecutorService() {
+        return executorService;
+    }
+
+    public void setExecutorService(ExecutorService executorService) {
+        this.executorService = executorService;
+    }
 
     @Override
     public UmLiveData<OpdsEntryWithRelations> getEntryByUrl(String url, String entryId,
@@ -69,12 +81,9 @@ public abstract class OpdsEntryWithRelationsDaoAndroid extends OpdsEntryWithRela
     @Query("SELECT OpdsEntry.* from OpdsEntry INNER JOIN OpdsEntryParentToChildJoin on OpdsEntry.uuid = OpdsEntryParentToChildJoin.childEntry WHERE OpdsEntryParentToChildJoin.parentEntry = :parentId ORDER BY childIndex")
     public abstract DataSource.Factory<Integer, OpdsEntryWithRelations> findEntriesByParentR(String parentId);
 
-    @Query("SELECT OpdsEntry.*, OpdsEntryStatusCache.*, DownloadJobItem.* FROM OpdsEntry " +
+    @Query("SELECT OpdsEntry.*, OpdsEntryStatusCache.* FROM OpdsEntry " +
             " INNER JOIN OpdsEntryParentToChildJoin on OpdsEntry.uuid = OpdsEntryParentToChildJoin.childEntry " +
             " LEFT JOIN OpdsEntryStatusCache ON OpdsEntry.entryId = OpdsEntryStatusCache.statusEntryId " +
-            " LEFT JOIN DownloadSetItem ON OpdsEntry.entryId = DownloadSetItem.entryId" +
-            " LEFT JOIN DownloadJobItem ON DownloadSetItem.id = DownloadJobItem.downloadSetItemId " +
-                "AND DownloadJobItem.status BETWEEN " + NetworkTask.STATUS_WAITING_MIN  + " AND " + NetworkTask.STATUS_COMPLETE_MIN +
             " WHERE OpdsEntryParentToChildJoin.parentEntry = :parentId ORDER BY childIndex")
     public abstract DataSource.Factory<Integer, OpdsEntryWithStatusCache> findEntriesWithStatusCacheByParent_Room(String parentId);
 
@@ -141,6 +150,11 @@ public abstract class OpdsEntryWithRelationsDaoAndroid extends OpdsEntryWithRela
             " LEFT JOIN OpdsEntry ON OpdsEntryParentToChildJoin.parentEntry = OpdsEntry.uuid " +
             " WHERE OpdsEntryParentToChildJoin.childEntry = :childUuid")
     public abstract String findParentUrlByChildUuid(String childUuid);
+
+    @Override
+    public void findParentUrlByChildUuid(String childUuid, UmResultCallback<String> callback) {
+        executorService.execute(() -> callback.onDone(findParentUrlByChildUuid(childUuid)));
+    }
 
     @Override
     @Query("Select * From OpdsEntry WHERE uuid = :uuid")

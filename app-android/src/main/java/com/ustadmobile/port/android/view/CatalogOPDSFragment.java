@@ -567,7 +567,7 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
     }
 
     public void handleClickDownload(OpdsEntryWithRelations entry){
-        mCatalogPresenter.handleClickDownload(Arrays.asList(entry));
+        mCatalogPresenter.handleClickDownload(entry);
     }
 
     public boolean isAddOptionAvailable() {
@@ -591,8 +591,6 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
 
         @Override
         public OpdsEntryViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-//            OPDSEntryCard cardView  = (OPDSEntryCard) LayoutInflater.from(parent.getContext()).inflate(
-//                    R.layout.fragment_opds_item, null);
             OPDSEntryCard cardView = new OPDSEntryCard(getContext());
             ViewGroup.LayoutParams params = new ViewGroup.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -608,16 +606,13 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
         public void onBindViewHolder(OpdsEntryViewHolder holder, int position) {
             final OpdsEntryWithStatusCache entry = getItem(position);
             holder.mEntryCard.setOpdsEntry(entry);
-            OpdsLink imgLink = null;
-            String imageUri = null;
 
             if(entry != null) {
-                imgLink = entry.getThumbnailLink(true);
+                OpdsLink imgLink = entry.getThumbnailLink(true);
                 if(imgLink != null) {
-                    imageUri = imgLink.getHref();
-                    imageUri = mCatalogPresenter.resolveLink(imageUri, entry);
-
-                    holder.mEntryCard.setThumbnailUrl(imageUri, imgLink.getMimeType());
+                    mCatalogPresenter.resolveLink(imgLink.getHref(), entry, (imageHref) -> {
+                        runOnUiThread(() -> holder.mEntryCard.setThumbnailUrl(imageHref, imgLink.getMimeType()));
+                    });
                 }
 
                 holder.mEntryCard.setSelected(selectedUuids.contains(entry.getUuid()));

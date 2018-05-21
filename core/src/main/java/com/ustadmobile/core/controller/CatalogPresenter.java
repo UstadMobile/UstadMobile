@@ -8,6 +8,7 @@ import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UMStorageDir;
 import com.ustadmobile.core.impl.UmCallback;
+import com.ustadmobile.core.impl.UmResultCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.view.AddFeedDialogView;
@@ -223,6 +224,25 @@ public class CatalogPresenter extends BaseCatalogPresenter  {
             return href;
     }
 
+    public void resolveLink(String href, OpdsEntry entry, UmResultCallback<String> callback) {
+        if(UMFileUtil.isUriAbsolute(href)){
+            callback.onDone(href);
+        }else if(entry != null && entry.getUrl() != null){
+            callback.onDone(UMFileUtil.resolveLink(entry.getUrl(), href));
+        }else if(feedLiveData != null && feedLiveData.getValue() != null) {
+            callback.onDone(UMFileUtil.resolveLink(feedLiveData.getValue().getUrl(), href));
+        }else {
+            DbManager.getInstance(getContext()).getOpdsEntryWithRelationsDao()
+                    .findParentUrlByChildUuid(entry.getUuid(), (parentHref) -> {
+                        if(parentHref != null)
+                            callback.onDone(UMFileUtil.resolveLink(parentHref, href));
+                        else
+                            callback.onDone(null);//no parent and could not resolve
+                    });
+        }
+    }
+
+
     public int getResourceMode() {
         return resourceMode;
     }
@@ -385,6 +405,13 @@ public class CatalogPresenter extends BaseCatalogPresenter  {
         entryUrisArray = entryUris.toArray(entryUrisArray);
         Hashtable args = new Hashtable();
         args.put("r_uris", entryUrisArray);
+        UstadMobileSystemImpl.getInstance().go("DownloadDialog", args, getContext());
+    }
+
+    public void handleClickDownload(OpdsEntryWithRelations entry) {
+        String[] uuidArr = {entry.getUuid()};
+        Hashtable args = new Hashtable();
+        args.put("r_uuids", uuidArr);
         UstadMobileSystemImpl.getInstance().go("DownloadDialog", args, getContext());
     }
 

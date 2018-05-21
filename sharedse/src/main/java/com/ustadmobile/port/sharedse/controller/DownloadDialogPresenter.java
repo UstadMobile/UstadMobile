@@ -165,8 +165,14 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
 
     private void startCrawlJob(){
         crawlJob = new CrawlJobWithTotals();
-        String[] rootUris = (String[])getArguments().get(ARG_ROOT_URIS);
-        crawlJob.setRootEntryUri(rootUris[0]);
+
+        if(rootEntryUuid == null) {
+            String[] rootUris = (String[])getArguments().get(ARG_ROOT_URIS);
+            crawlJob.setRootEntryUri(rootUris[0]);
+        }else {
+            crawlJob.setRootEntryUuid(rootEntryUuid[0]);
+        }
+
         DownloadSet downloadSet = new DownloadSet();
         UMStorageDir[] storageDirs = UstadMobileSystemImpl.getInstance().getStorageDirs(
                 CatalogPresenter.SHARED_RESOURCE, getContext());

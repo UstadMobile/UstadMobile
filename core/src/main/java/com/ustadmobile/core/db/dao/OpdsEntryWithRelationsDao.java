@@ -2,6 +2,7 @@ package com.ustadmobile.core.db.dao;
 
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.UmProvider;
+import com.ustadmobile.core.impl.UmResultCallback;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.db.entities.OpdsEntry;
 import com.ustadmobile.lib.db.entities.OpdsEntryRelative;
@@ -128,6 +129,9 @@ public abstract class OpdsEntryWithRelationsDao {
             " LEFT JOIN OpdsEntry ON OpdsEntryParentToChildJoin.parentEntry = OpdsEntry.uuid " +
             " WHERE OpdsEntryParentToChildJoin.childEntry = :childUuid")
     public abstract String findParentUrlByChildUuid(String childUuid);
+
+    public abstract void findParentUrlByChildUuid(String childUuid, UmResultCallback<String> callback);
+
 
     /**
      * Method to delete a given list of entries and any links that are associated with them

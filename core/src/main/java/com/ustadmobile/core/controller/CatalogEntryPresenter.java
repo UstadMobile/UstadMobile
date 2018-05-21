@@ -129,9 +129,24 @@ public class CatalogEntryPresenter extends BaseCatalogPresenter implements Netwo
         OpdsLink thumbnailLink = entry.getThumbnailLink(true);
 
 
-        if(thumbnailLink != null)
+        if(entry.getUrl() != null){
+            baseHref = entry.getUrl();
+        }
+
+        if(thumbnailLink != null && baseHref != null) {
             catalogEntryView.setThumbnail(UMFileUtil.resolveLink(baseHref, thumbnailLink.getHref()),
                     thumbnailLink.getMimeType());
+        }else if(thumbnailLink != null){
+            DbManager.getInstance(getContext()).getOpdsEntryWithRelationsDao()
+                    .findParentUrlByChildUuid(entry.getUuid(), (parentUrl) -> {
+                        if(parentUrl != null){
+                            CatalogEntryPresenter.this.baseHref = parentUrl;
+                            catalogEntryView.runOnUiThread(() -> catalogEntryView.setThumbnail(
+                                    UMFileUtil.resolveLink(baseHref, thumbnailLink.getHref()),
+                                        thumbnailLink.getMimeType()));
+                        }
+                    });
+        }
 
         int containerFileId = -1;
         if(entry.getContainerFileEntries() != null && entry.getContainerFileEntries().size() > 0) {

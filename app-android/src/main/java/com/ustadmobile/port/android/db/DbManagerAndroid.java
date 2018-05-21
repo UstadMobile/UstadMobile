@@ -28,6 +28,7 @@ import com.ustadmobile.port.android.db.dao.ContainerFileDaoAndroid;
 import com.ustadmobile.port.android.db.dao.CrawlJobDaoAndroid;
 import com.ustadmobile.port.android.db.dao.DownloadJobDaoAndroid;
 import com.ustadmobile.port.android.db.dao.OpdsEntryParentToChildJoinDaoAndroid;
+import com.ustadmobile.port.android.db.dao.OpdsEntryWithRelationsDaoAndroid;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -53,6 +54,8 @@ public class DbManagerAndroid extends DbManager {
     private CrawlJobDaoAndroid crawlJobDao;
 
     private DownloadJobDaoAndroid downloadJobDao;
+
+    private OpdsEntryWithRelationsDaoAndroid opdsEntryWithRelationsDao;
 
     public DbManagerAndroid(Object context) {
         this.context = ((Context)context).getApplicationContext();
@@ -82,7 +85,12 @@ public class DbManagerAndroid extends DbManager {
 
     @Override
     public OpdsEntryWithRelationsDao getOpdsEntryWithRelationsDao() {
-        return appDatabase.getOpdsEntryWithRelationsDao();
+        if(opdsEntryWithRelationsDao == null) {
+            opdsEntryWithRelationsDao = appDatabase.getOpdsEntryWithRelationsDao();
+            opdsEntryWithRelationsDao.setExecutorService(executorService);
+        }
+
+        return opdsEntryWithRelationsDao;
     }
 
     @Override
