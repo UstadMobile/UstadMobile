@@ -22,7 +22,11 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 /**
- * Created by mike on 2/15/18.
+ * ContentTypePluginFs implementation for H5P files.
+ *
+ * If the H5P file's h5p.json contains "entryId" - this will be used as the entry id attribute. This
+ * is non-standard and not part of the H5P spec. It's thus difficult to match up what is described in
+ * a feed and the actual file. If entryId is not in the h5p.json file, we use the file path.
  */
 
 public class H5PContentTypeFs extends H5PContentType implements ContentTypePluginFs {
@@ -94,7 +98,13 @@ public class H5PContentTypeFs extends H5PContentType implements ContentTypePlugi
 //            }
 
             //This is not an ideal solution
-            entry.setEntryId(fileUri);
+
+            String entryId = h5pJsonObj.optString("entryId", null);
+            if(entryId != null) {
+                entry.setEntryId(entryId);
+            }else {
+                entry.setEntryId(fileUri);
+            }
         }catch(IOException e) {
             e.printStackTrace();
         }finally{

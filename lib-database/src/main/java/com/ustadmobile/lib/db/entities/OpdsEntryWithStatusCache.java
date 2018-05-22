@@ -89,6 +89,9 @@ public class OpdsEntryWithStatusCache extends OpdsEntryWithRelations {
         if(statusCache == null)
             return 0;
 
+        if(statusCache.getSizeIncDescendants() == 0)
+            return 0;
+
         long totalDownloaded = statusCache.getContainersDownloadedSizeIncDescendants() +
                 statusCache.getPendingDownloadBytesSoFarIncDescendants();
         return (int)((totalDownloaded * 100)/statusCache.getSizeIncDescendants());

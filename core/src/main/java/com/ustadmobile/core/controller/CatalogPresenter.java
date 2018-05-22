@@ -328,7 +328,7 @@ public class CatalogPresenter extends BaseCatalogPresenter  {
                 return;
             }
 
-            if(linkType.contains("kind=navigation")) {
+            if(linkType.contains("kind=navigation") || linkType.contains("kind=acquisition")) {
                 args.put(ARG_URL, UMFileUtil.resolveLink(feedLiveData.getValue().getUrl(),
                         link.getHref()));
                 UstadMobileSystemImpl.getInstance().go(CatalogView.VIEW_NAME, args, getContext());

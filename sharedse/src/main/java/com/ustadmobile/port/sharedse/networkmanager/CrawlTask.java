@@ -145,7 +145,15 @@ public class CrawlTask extends NetworkTask {
                             jobItem.setDownloadLength(opdsLink.getLength());
                         }else {
                             try {
-                                String acquisitionUrl = UMFileUtil.resolveLink(itemEntry.getUrl(),
+                                String baseHref;
+                                if(itemEntry.getUrl() != null) {
+                                    baseHref= itemEntry.getUrl();
+                                }else {
+                                    baseHref = dbManager.getOpdsEntryWithRelationsDao()
+                                            .findParentUrlByChildUuid(itemEntry.getUuid());
+                                }
+
+                                String acquisitionUrl = UMFileUtil.resolveLink(baseHref,
                                         opdsLink.getHref());
                                 UmHttpRequest request = new UmHttpRequest(dbManager.getContext(),
                                         acquisitionUrl);
