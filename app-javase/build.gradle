@@ -9,7 +9,6 @@ dependencies {
     compile project(":core")
     compile project(":sharedse")
     compile project(":lib-core-fs")
-    compile project(':lib-core-fs-jcommon')
     implementation project(":lib-util")
 
     compile "com.j256.ormlite:ormlite-core:$version_ormlite"

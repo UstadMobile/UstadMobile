@@ -11,12 +11,10 @@
             <option value="$PROJECT_DIR$/app-android" />
             <option value="$PROJECT_DIR$/app-android-launcher" />
             <option value="$PROJECT_DIR$/app-android-testserver" />
-            <option value="$PROJECT_DIR$/app-j2me" />
             <option value="$PROJECT_DIR$/app-javase" />
             <option value="$PROJECT_DIR$/core" />
             <option value="$PROJECT_DIR$/core-tests" />
             <option value="$PROJECT_DIR$/lib-core-fs" />
-            <option value="$PROJECT_DIR$/lib-core-fs-jcommon" />
             <option value="$PROJECT_DIR$/lib-core-fs-tests" />
             <option value="$PROJECT_DIR$/lib-database" />
             <option value="$PROJECT_DIR$/lib-database-annotation" />

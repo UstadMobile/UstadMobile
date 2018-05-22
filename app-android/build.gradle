@@ -416,7 +416,6 @@ dependencies {
     api project(':core')
     api project(':sharedse')
     api project(":lib-core-fs")
-    api project(':lib-core-fs-jcommon')
     implementation project(":lib-database-annotation")
     implementation project(":lib-util")
 
