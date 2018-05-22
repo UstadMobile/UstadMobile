@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<feed xmlns="http://www.w3.org/2005/Atom"
+    xmlns:dc="http://purl.org/dc/terms/"
+    xmlns:opds="http://opds-spec.org/2010/catalog">
+    <id>http://umcloud1.ustadmobile.com/opds/courseid/6CM</id>
+
+    <link rel="start"
+        href="/opds/"
+        type="application/atom+xml;profile=opds-catalog;kind=navigation"/>
+
+    <link rel="self"
+        href="test-acquisition-task-feed.opds"
+        type="application/atom+xml;profile=opds-catalog;kind=acquisition"/>
+
+    <title>Acquisition feed test task</title>
+    <updated>2015-02-09T21:00:57Z</updated>
+    <author>
+        <name>Mike Test4</name>
+        <uri>/user/6</uri>
+    </author>
+
+    <entry>
+        <title>The little chicks</title>
+        <link rel="http://opds-spec.org/acquisition"
+            href="thelittlechicks.epub?speedLimit=128000"
+            type="application/epub+zip"/>
+
+        <id>202b10fe-b028-4b84-9b84-852aa766607d</id>
+        <updated>2015-02-09T18:58:12Z</updated>
+        <author>
+            <name>Varuna Singh</name>
+            <uri>/user/2</uri>
+        </author>
+        <content type="text">Test file present on the local network remote test slave device</content>
+    </entry>
+
+    <entry>
+        <title>I come from a cloud</title>
+
+        <id>b649852e-2bf9-45ab-839e-ec5bb00ca19d</id>
+        <updated>2015-02-09T18:58:12Z</updated>
+        <author>
+            <name>Varuna Singh</name>
+            <uri>/user/2</uri>
+        </author>
+        <content type="text">Test file present only in cloud</content>
+
+        <link rel="http://opds-spec.org/acquisition"
+            hreflang="ps"
+            href="icomefromacloud.epub?speedLimit=128000"
+            type="application/epub+zip"/>
+
+    </entry>
+</feed>

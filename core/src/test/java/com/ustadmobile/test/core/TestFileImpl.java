@@ -35,12 +35,16 @@ import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.TestUtils;
 import com.ustadmobile.core.util.UMFileUtil;
+import com.ustadmobile.test.core.impl.PlatformTestUtil;
+
+import junit.framework.TestCase;
+
 import java.io.IOException;
 import java.io.OutputStream;
+
 /* $if umplatform == 2  $
     import j2meunit.framework.TestCase;
  $else$ */
-    import junit.framework.TestCase;
 /* $endif$ */
 
 /* $if umplatform == 1 $
@@ -59,7 +63,7 @@ import java.io.OutputStream;
 /* $if umplatform == 1  $
 public class TestFileImpl extends ActivityInstrumentationTestCase2<UstadMobileActivity>{
  $else$ */
-public class TestFileImpl extends TestCase {
+public abstract class TestFileImpl extends TestCase {
 /* $endif */
     
     public TestFileImpl() {
@@ -78,17 +82,19 @@ public class TestFileImpl extends TestCase {
         
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         
-        String sharedContentDir = impl.getSharedContentDir();
+        String sharedContentDir = impl.getSharedContentDir(PlatformTestUtil.getTargetContext());
         
         assertTrue("Shared content dir exists", impl.dirExists(sharedContentDir));
         
         impl.setActiveUser(utils.getTestProperty(TestUtils.PROP_TESTUSER), context);
         
         assertTrue("User directory exists when active user is set",
-                impl.dirExists(impl.getUserContentDirectory(impl.getActiveUser(context))));
+                impl.dirExists(impl.getUserContentDirectory(PlatformTestUtil.getTargetContext(),
+                        impl.getActiveUser(context))));
         
         String testMkDirPath = UMFileUtil.joinPaths(
-                new String[]{impl.getSharedContentDir(), "tmpFileDirTest"});
+                new String[]{impl.getSharedContentDir(PlatformTestUtil.getTargetContext()),
+                        "tmpFileDirTest"});
         impl.makeDirectory(testMkDirPath);
         assertTrue("Newly created dir exists: " + testMkDirPath,
             impl.dirExists(testMkDirPath));

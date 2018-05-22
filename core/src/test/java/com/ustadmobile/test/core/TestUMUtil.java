@@ -30,11 +30,13 @@
  */
 package com.ustadmobile.test.core;
 
-import com.ustadmobile.core.util.UMUtil;
+import com.ustadmobile.lib.util.UMUtil;
+
+import junit.framework.TestCase;
+
 /* $if umplatform == 2  $
     import j2meunit.framework.TestCase;
  $else$ */
-    import junit.framework.TestCase;
 /* $endif$ */
 
 
@@ -61,7 +63,7 @@ public class TestUMUtil extends TestCase{
         assertEquals("sorted item1", five, arr[1]);
         assertEquals("Sorted item2", seven, arr[2]);
     }
-    
+
     public void runTest(){
         testUMUtilSort();
     }

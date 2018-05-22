@@ -31,7 +31,7 @@
 
 package com.ustadmobile.core.view;
 
-import com.ustadmobile.core.opds.UstadJSOPDSFeed;
+import java.util.Hashtable;
 
 /**
  * The base point view provides two tabs: the downloaded entries of that user
@@ -42,13 +42,6 @@ import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 public interface BasePointView extends UstadView{
     
     public static final String VIEW_NAME = "BasePoint";
-
-    /**
-     * Refresh the given column 
-     * 
-     * @param column INDEX_DOWNLOADEDENTRIES or INDEX_BROWSEFEEDS
-     */
-    public void refreshCatalog(int column);
 
     /**
      * If true the view should add a third tab for class
@@ -65,5 +58,16 @@ public interface BasePointView extends UstadView{
      * @param menuItems
      */
     void setMenuItems(BasePointMenuItem[] menuItems);
+
+    /**
+     * Show a dialog used to share the application itself offline
+     */
+    void showShareAppDialog();
+
+    void setShareAppDialogProgressVisible(boolean visible);
+
+    void dismissShareAppDialog();
+
+    void addTab(Hashtable tabArguments);
     
 }

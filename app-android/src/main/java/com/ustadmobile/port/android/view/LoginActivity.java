@@ -32,29 +32,25 @@
 package com.ustadmobile.port.android.view;
 
 import android.os.Build;
+import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
-import android.widget.RadioGroup;
-import android.widget.Spinner;
 
 import com.toughra.ustadmobile.R;
-import com.ustadmobile.core.MessageIDConstants;
 import com.ustadmobile.core.controller.LoginController;
-import com.ustadmobile.core.impl.UstadMobileConstants;
+import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.LoginView;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 
-import java.util.Hashtable;
 import java.util.WeakHashMap;
 
 public class LoginActivity extends UstadBaseActivity implements LoginView, View.OnClickListener, CheckBox.OnCheckedChangeListener {
@@ -79,7 +75,7 @@ public class LoginActivity extends UstadBaseActivity implements LoginView, View.
         mLoginController = LoginController.makeControllerForView(this);
         setBaseController(mLoginController);
 
-        setTitle(UstadMobileSystemImpl.getInstance().getString(MessageIDConstants.login));
+        setTitle(R.string.login);
 
         Toolbar toolbar = (Toolbar)findViewById(R.id.login_toolbar);
         setSupportActionBar(toolbar);
@@ -152,24 +148,24 @@ public class LoginActivity extends UstadBaseActivity implements LoginView, View.
             String password = ((EditText)findViewById(R.id.login_password)).getText().toString();
             mLoginController.handleClickLogin(username, password, xAPIServer);
         }else if(id == R.id.login_registerbutton) {
-            Hashtable userVals = new Hashtable();
-            int selectedCountryNum = ((Spinner)findViewById(R.id.login_registercountry)).getSelectedItemPosition();
-
-            userVals.put(LoginController.REGISTER_COUNTRY,
-                    new Integer(UstadMobileConstants.COUNTRYDIALINGCODES[selectedCountryNum]));
-            userVals.put(LoginController.REGISTER_PHONENUM,
-                    ((EditText) findViewById(R.id.login_registerphonenum)).getText().toString());
-            userVals.put(LoginController.REGISTER_NAME,
-                    ((EditText)findViewById(R.id.login_registername)).getText().toString());
-            int genderSelectedId = ((RadioGroup)findViewById(R.id.login_registergenderradiogroup)).getCheckedRadioButtonId();
-            userVals.put(LoginController.REGISTER_GENDER,
-                    genderSelectedId == R.id.login_register_radio_female ? "f" : "m");
-            userVals.put(LoginController.REGISTER_USERNAME, getEditTextVal(R.id.login_registerusername));
-            userVals.put(LoginController.REGISTER_PASSWORD, getEditTextVal(R.id.login_registerpassword));
-            userVals.put(LoginController.REGISTER_EMAIL, getEditTextVal(R.id.login_registeremail));
-            userVals.put(LoginController.REGISTER_REGCODE, getEditTextVal(R.id.login_registerregcode));
-            userVals.put(UstadMobileSystemImpl.PREFKEY_XAPISERVER, xAPIServer);
-            mLoginController.handleClickRegister(userVals);
+//            Hashtable userVals = new Hashtable();
+//            int selectedCountryNum = ((Spinner)findViewById(R.id.login_registercountry)).getSelectedItemPosition();
+//
+//            userVals.put(LoginController.REGISTER_COUNTRY,
+//                    new Integer(UstadMobileConstants.COUNTRYDIALINGCODES[selectedCountryNum]));
+//            userVals.put(LoginController.REGISTER_PHONENUM,
+//                    ((EditText) findViewById(R.id.login_registerphonenum)).getText().toString());
+//            userVals.put(LoginController.REGISTER_NAME,
+//                    ((EditText)findViewById(R.id.login_registername)).getText().toString());
+//            int genderSelectedId = ((RadioGroup)findViewById(R.id.login_registergenderradiogroup)).getCheckedRadioButtonId();
+//            userVals.put(LoginController.REGISTER_GENDER,
+//                    genderSelectedId == R.id.login_register_radio_female ? "f" : "m");
+//            userVals.put(LoginController.REGISTER_USERNAME, getEditTextVal(R.id.login_registerusername));
+//            userVals.put(LoginController.REGISTER_PASSWORD, getEditTextVal(R.id.login_registerpassword));
+//            userVals.put(LoginController.REGISTER_EMAIL, getEditTextVal(R.id.login_registeremail));
+//            userVals.put(LoginController.REGISTER_REGCODE, getEditTextVal(R.id.login_registerregcode));
+//            userVals.put(UstadMobileSystemImpl.PREFKEY_XAPISERVER, xAPIServer);
+//            mLoginController.handleClickRegister(userVals);
         }
     }
 
@@ -182,7 +178,7 @@ public class LoginActivity extends UstadBaseActivity implements LoginView, View.
 
         private WeakHashMap<Integer, LoginFragment> fragmentMap;
 
-        private int[] tabTitles = new int[] {MessageIDConstants.login, MessageIDConstants.register};
+        private int[] tabTitles = new int[] {MessageID.login, MessageID.register};
 
         public LoginPagerAdapter(FragmentManager fm) {
             super(fm);
@@ -209,7 +205,8 @@ public class LoginActivity extends UstadBaseActivity implements LoginView, View.
         @Override
         public CharSequence getPageTitle(int position) {
             // Generate title based on item position
-            return UstadMobileSystemImpl.getInstance().getString(tabTitles[position]);
+            return UstadMobileSystemImpl.getInstance().getString(
+                    tabTitles[position], LoginActivity.this);
         }
     }
 

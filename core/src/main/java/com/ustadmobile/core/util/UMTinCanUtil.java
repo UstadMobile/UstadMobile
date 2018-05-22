@@ -30,19 +30,22 @@
  */
 package com.ustadmobile.core.util;
 
+import com.ustadmobile.core.buildconfig.CoreBuildConfig;
 import com.ustadmobile.core.controller.LoginController;
 import com.ustadmobile.core.impl.UMLog;
-import com.ustadmobile.core.impl.UstadMobileDefaults;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.tincan.TinCanStatement;
-import java.util.Calendar;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.Hashtable;
 import java.util.Vector;
 
 /* $if umplatform == 2  $
     import org.json.me.*;
  $else$ */
-    import org.json.*;
 /* $endif$ */
 
 
@@ -52,7 +55,16 @@ import java.util.Vector;
  * @author mike
  */
 public class UMTinCanUtil {
-    
+
+    public static final String ADL_PREFIX_VERB = "http://adlnet.gov/expapi/verbs/";
+
+    public static final String VERB_PASSED = ADL_PREFIX_VERB + "passed";
+
+    public static final String VERB_FAILED = ADL_PREFIX_VERB + "failed";
+
+    public static final String VERB_ANSWERED = ADL_PREFIX_VERB + "answered";
+
+
     /**
      * Generate a JSON Object representing a TinCan statement for 'experience' a 
      * given page.
@@ -217,10 +229,16 @@ public class UMTinCanUtil {
     public static JSONObject makeActorFromActiveUser(Object context) {
         return UMTinCanUtil.makeActorFromUserAccount(
                 UstadMobileSystemImpl.getInstance().getActiveUser(context), 
-                UstadMobileSystemImpl.getInstance().getAppPref(
-                    UstadMobileSystemImpl.PREFKEY_XAPISERVER,
-                    UstadMobileDefaults.DEFAULT_XAPI_SERVER, context));
+                getXapiServer(context));
     }
+
+    public static String getXapiServer(Object context) {
+        return UstadMobileSystemImpl.getInstance().getAppPref(
+                UstadMobileSystemImpl.PREFKEY_XAPISERVER,
+                CoreBuildConfig.DEFAULT_XAPI_SERVER, context);
+    }
+
+
     
     /**
      * Make a JSON object representing the verb in the form of:
@@ -382,31 +400,7 @@ public class UMTinCanUtil {
         return resultStmts;
     }
     
-    /**
-     * Parse the ISO 8601 combined date and time format string 
-     * 
-     * e.g. 
-     * 2016-04-18T17:08:07.563789+00:00
-     * 
-     */
-    public static Calendar parse8601Timestamp(String timestamp) {
-        Calendar cal = Calendar.getInstance();
-        cal.set(Calendar.YEAR, Integer.parseInt(timestamp.substring(0, 4)));
-        cal.set(Calendar.MONTH, Integer.parseInt(timestamp.substring(5, 7)));
-        cal.set(Calendar.DAY_OF_MONTH, Integer.parseInt(timestamp.substring(8, 10)));
-        
-        if(timestamp.length() < 12) {
-            return cal;
-        }
-        
-        //There is a time section
-        cal.set(Calendar.HOUR_OF_DAY, Integer.parseInt(timestamp.substring(11, 13)));
-        cal.set(Calendar.MINUTE, Integer.parseInt(timestamp.substring(14, 16)));
-        cal.set(Calendar.SECOND, Integer.parseInt(timestamp.substring(17, 19)));
-        
-        return cal;
-    }
-    
+
     
     
 }

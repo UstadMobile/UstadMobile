@@ -5,9 +5,8 @@ import android.support.v4.app.Fragment;
 import android.view.Menu;
 import android.view.MenuItem;
 
-
-import com.ustadmobile.core.controller.UserSettingsController;
 import com.toughra.ustadmobile.R;
+import com.ustadmobile.core.controller.UserSettingsController;
 import com.ustadmobile.core.model.UserSettingItem;
 import com.ustadmobile.core.view.UserSettingsView;
 
@@ -31,7 +30,7 @@ public class UserSettingsActivity extends UstadBaseActivity implements UserSetti
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_settings);
-        setUMToolbar();
+        setUMToolbar(R.id.um_toolbar);
 
 
         settingsController = UserSettingsController.makeControllerForView(this);
@@ -97,6 +96,7 @@ public class UserSettingsActivity extends UstadBaseActivity implements UserSetti
             case CMD_LOGOUT_ID:
                 settingsController.handleClickLogout();
                 return true;
+
         }
 
         return super.onOptionsItemSelected(item);

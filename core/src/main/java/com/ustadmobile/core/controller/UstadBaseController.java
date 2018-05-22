@@ -30,15 +30,14 @@
  */
 package com.ustadmobile.core.controller;
 
-import com.ustadmobile.core.MessageIDConstants;
-import com.ustadmobile.core.impl.TinCanQueueEvent;
-import com.ustadmobile.core.impl.TinCanQueueListener;
-import com.ustadmobile.core.impl.UstadMobileConstants;
+import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.AboutView;
+import com.ustadmobile.core.view.UserSettingsView2;
 import com.ustadmobile.core.view.UstadView;
-import com.ustadmobile.core.view.UserSettingsView;
+
 import java.util.Hashtable;
+import java.util.Vector;
 
 /**
  * Base Controller that provides key functionality for any view :
@@ -47,13 +46,15 @@ import java.util.Hashtable;
  * 
  * @author mike
  */
-public abstract class UstadBaseController implements UstadController {
+public abstract class UstadBaseController<V extends UstadView> implements UstadController<V> {
 
-    private UstadView view;
+    protected V view;
     
     protected Object context;
     
     protected boolean isDestroyed = false;
+
+    protected Vector controllerLifecycleListeners;
     
     public static final int CMD_ABOUT = 1001;
     
@@ -62,23 +63,14 @@ public abstract class UstadBaseController implements UstadController {
     public static final int CMD_LOGOUT = 1003;
     
     public static final int CMD_HOME = 1004;
-    
+
     public static final int[] STANDARD_APPEMNU_CMDS = new int[]{CMD_HOME, 
         CMD_ABOUT, CMD_SETTINGS, CMD_LOGOUT};
     
-    public static final int[] STANDARD_APPMENU_STRIDS = new int[]{MessageIDConstants.home,
-        MessageIDConstants.about, MessageIDConstants.settings, MessageIDConstants.logout};
+    public static final int[] STANDARD_APPMENU_STRIDS = new int[]{MessageID.home,
+        MessageID.about, MessageID.settings,MessageID.logout};
 
-
-    /**
-     * Create a new controller with the given context
-     * 
-     * @param context System dependent context object
-     * @param statusEventListeningEnabled Whether or not to register for status event updates and pass to the view
-     */
-    public UstadBaseController(Object context, boolean statusEventListeningEnabled) {
-        this.context = context;
-    }
+    private Hashtable arguments;
 
     /**
      * Create a new controller with the given context
@@ -86,15 +78,22 @@ public abstract class UstadBaseController implements UstadController {
      * @param context System dependent context objec
      */
     public UstadBaseController(Object context) {
-        this(context, true);
+        this.context = context;
     }
+
+    public UstadBaseController(Object context, Hashtable arguments, V view) {
+        this.context = context;
+        this.arguments = arguments;
+        this.view = view;
+    }
+
     
     /**
      * Set the view that this controller is associated with
      * 
      * @param view 
      */
-    public void setView(UstadView view) {
+    public void setView(V view) {
         this.view = view;
     }
 
@@ -102,10 +101,10 @@ public abstract class UstadBaseController implements UstadController {
      * Get the view this controller is associated with
      * @return View this controller is associated with
      */
-    public UstadView getView() {
+    public V getView() {
         return this.view;
     }
-    
+
     /**
      * Get the system dependent context for this controller
      * 
@@ -114,12 +113,43 @@ public abstract class UstadBaseController implements UstadController {
     public Object getContext() {
         return this.context;
     }
-    
+
+
+    public void onCreate(Hashtable savedState) {
+
+    }
+
+    public void onStart() {
+
+    }
+
+
+    public void onStop() {
+
+    }
+
+    /**
+     * Called when the view is destroyed and removed from memory. onDestroy in Android, when the form
+     * is navigated away from in J2ME
+     */
+    public void onDestroy() {
+        if(controllerLifecycleListeners == null)
+            return;
+
+        for(int i = 0; i < controllerLifecycleListeners.size(); i++) {
+            ((ControllerLifecycleListener)controllerLifecycleListeners.elementAt(i)).onDestroyed(this);
+        }
+    }
+
+
+
     /**
      * Must call all view methods that set UI strings - e.g.  when the
      * locale is changed
      */
     public abstract void setUIStrings();
+
+
 
 
     /**
@@ -165,7 +195,16 @@ public abstract class UstadBaseController implements UstadController {
     protected synchronized void setDestroyed(boolean isDestroyed) {
         this.isDestroyed = isDestroyed;
     }
-    
+
+    public Hashtable getArguments() {
+        return arguments;
+    }
+
+    protected void setArguments(Hashtable arguments) {
+        this.arguments = arguments;
+    }
+
+
     /**
      * Handle when users have clicked a standard option from the menu
      * 
@@ -182,8 +221,7 @@ public abstract class UstadBaseController implements UstadController {
                 UstadMobileSystemImpl.getInstance().go(AboutView.VIEW_NAME, new Hashtable(), context);
                 return true;
             case CMD_SETTINGS:
-                UstadMobileSystemImpl.getInstance().go(UserSettingsView.VIEW_NAME,
-                    new Hashtable(), context);
+                UstadMobileSystemImpl.getInstance().go(UserSettingsView2.VIEW_NAME,null, context);
                 return true;
             case CMD_LOGOUT:
                 LoginController.handleLogout(context);
@@ -208,7 +246,7 @@ public abstract class UstadBaseController implements UstadController {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         for(int i = offset; i < STANDARD_APPEMNU_CMDS.length + offset; i++) {
             cmds[i] = STANDARD_APPEMNU_CMDS[i - offset];
-            labels[i] = impl.getString(STANDARD_APPMENU_STRIDS[i - offset]);
+            labels[i] = impl.getString(STANDARD_APPMENU_STRIDS[i - offset], getContext());
         }
     }
     
@@ -218,5 +256,22 @@ public abstract class UstadBaseController implements UstadController {
         fillStandardMenuOptions(new int[labels.length], labels, 0);
         view.setAppMenuCommands(labels, STANDARD_APPEMNU_CMDS);
     }
+
+    public void addLifecycleListener(ControllerLifecycleListener listener) {
+        if(controllerLifecycleListeners == null)
+            controllerLifecycleListeners = new Vector();
+
+        controllerLifecycleListeners.addElement(listener);
+    }
+
+    public void removeLifecycleListener(ControllerLifecycleListener listener) {
+        controllerLifecycleListeners.removeElement(listener);
+    }
+
+
+
+
+
+
 
 }

@@ -38,12 +38,14 @@ package com.ustadmobile.test.core;
 /* $if umplatform == 2  $
     import j2meunit.framework.TestCase;
  $else$ */
-import junit.framework.TestCase;
-/* $endif$ */
 
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.TestUtils;
-import com.ustadmobile.core.util.UMUtil;
+import com.ustadmobile.lib.util.UMUtil;
+
+import junit.framework.TestCase;
+
+/* $endif$ */
 
 /**
  *
@@ -52,7 +54,7 @@ import com.ustadmobile.core.util.UMUtil;
 /* $if umplatform == 1  $
 public class TestPreferences extends ActivityInstrumentationTestCase2<UstadMobileActivity> {
  $else$ */
-public class TestPreferences extends TestCase {
+public abstract class TestPreferences extends TestCase {
 /* $endif */
    
     

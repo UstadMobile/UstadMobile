@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_settings_data_usage"
+    android:layout_width="match_parent"
+    android:background="@color/icons"
+    android:layout_height="match_parent"
+    android:keepScreenOn="true"
+    android:orientation="vertical"
+    tools:context="com.ustadmobile.port.android.view.SettingsDataUsageActivity">
+    <android.support.design.widget.AppBarLayout
+        android:elevation="@dimen/dimen_4dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <include
+            layout="@layout/layout_toolbar"/>
+    </android.support.design.widget.AppBarLayout>
+
+    <ScrollView
+        android:layout_weight="1"
+        android:layout_below="@+id/toolbar"
+        android:scrollbars="none"
+        android:layout_width="match_parent"
+        android:layout_height="0dp">
+
+        <LinearLayout
+            android:layout_margin="@dimen/activity_horizontal_margin"
+
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:text="@string/connection"
+                android:textSize="@dimen/text_body_small"
+                android:id="@+id/connectionLabel"
+                android:textColor="@color/text_secondary"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+
+            <TextView
+                android:text="@string/data_label"
+                android:layout_marginTop="16dp"
+                android:textColor="@color/text_secondary"
+                android:id="@+id/data_label"
+                android:textSize="@dimen/text_body"
+                android:gravity="center_vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+            <LinearLayout
+                android:id="@+id/wifiWrapper"
+                android:layout_marginTop="8dp"
+                android:layout_width="match_parent"
+                android:layout_height="30dp">
+
+                <TextView
+                    android:text="@string/cell_data_label"
+                    android:textColor="@color/text_primary"
+                    android:id="@+id/mobile_data_label"
+                    android:textSize="@dimen/text_body"
+                    android:gravity="center_vertical"
+                    android:layout_marginRight="10dp"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent" />
+                <RadioButton
+                    android:id="@+id/wifiData"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/mobileWrapper"
+                android:layout_marginBottom="10dp"
+                android:layout_marginTop="8dp"
+                android:layout_width="match_parent"
+                android:layout_height="30dp">
+
+                <TextView
+                    android:text="@string/wifi_data_label"
+                    android:textColor="@color/text_primary"
+                    android:id="@+id/wifi_data_label"
+                    android:textSize="@dimen/text_body"
+                    android:gravity="center_vertical"
+                    android:layout_marginRight="10dp"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent" />
+                <RadioButton
+                    android:id="@+id/mobileData"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+
+            </LinearLayout>
+
+            <TextView
+                android:text="@string/p2p_connection_label"
+                android:layout_marginTop="16dp"
+                android:textSize="@dimen/text_body_small"
+                android:id="@+id/p2pConnectionLabel"
+                android:textColor="@color/text_secondary"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <LinearLayout
+                android:id="@+id/nodeWrapper"
+                android:layout_marginBottom="10dp"
+                android:layout_width="match_parent"
+                android:layout_height="40dp">
+
+                <TextView
+                    android:text="@string/enable_supernode"
+                    android:textColor="@color/text_primary"
+                    android:id="@+id/set_super_node_label"
+                    android:textSize="@dimen/text_body"
+                    android:gravity="center_vertical"
+                    android:layout_marginRight="10dp"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent" />
+                <Switch
+                    android:id="@+id/superNodeEnabled"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+
+            <TextView
+                android:visibility="gone"
+                android:text="@string/usage_statistics"
+                android:layout_marginTop="@dimen/activity_horizontal_margin"
+                android:textSize="@dimen/text_body_small"
+                android:id="@+id/dataLabel"
+                android:textColor="@color/text_secondary"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <LinearLayout
+                android:visibility="gone"
+                android:orientation="vertical"
+                android:layout_marginTop="16dp"
+                android:layout_width="match_parent"
+                android:layout_height="60dp">
+                <TextView
+                    android:text="@string/reset_counter_label"
+                    android:textColor="@color/text_secondary"
+                    android:id="@+id/reset_counter_label"
+                    android:textSize="@dimen/text_body"
+                    android:gravity="center_vertical"
+                    android:layout_marginRight="10dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+
+                <TextView
+                    android:layout_marginTop="8dp"
+                    android:id="@+id/reset_counter_data"
+                    android:textSize="@dimen/text_body"
+                    android:textColor="@color/text_primary"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+
+
+
+            <LinearLayout
+                android:visibility="gone"
+                android:layout_marginTop="16dp"
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="60dp">
+                <TextView
+                    android:text="@string/data_usage_label"
+                    android:textColor="@color/text_secondary"
+                    android:id="@+id/data_usage_label"
+                    android:textSize="@dimen/text_body"
+                    android:gravity="center_vertical"
+                    android:layout_marginRight="10dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+
+                <TextView
+                    android:layout_marginTop="8dp"
+                    android:id="@+id/data_usage_data"
+                    android:textSize="@dimen/text_body"
+                    android:textColor="@color/text_primary"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </ScrollView>
+
+
+</LinearLayout>

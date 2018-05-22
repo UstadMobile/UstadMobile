@@ -74,4 +74,13 @@ public interface UstadView {
      */
     void setUIStrings();
 
+    /**
+     * Most UI platforms require that all UI changes are done in a particular thread. This method
+     * simply wraps those implementations.
+     *
+     * @param r Runnable to run on system's UI thread
+     */
+    void runOnUiThread(Runnable r);
+
+
 }

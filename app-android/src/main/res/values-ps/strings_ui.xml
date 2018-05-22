@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name='app_name'>د بریالیتوب مهارتونه</string>s
+    <string name='login'> ننوتون</string>
+    <string name='error'> تېروتنه</string>
+    <string name='err_registering_new_user'>تیروتنه د نوی کارونکی په ثبت</string>
+    <string name='registering'>شاملونه</string>
+    <string name='wrong_user_pass_combo'> غلطه کارونکی نوم/شفر: بیا کوښښ وکړی</string>
+    <string name='login_network_error'>چک وکری په کرښه یی د جال تیروتنه! مهربانی</string>
+    <string name='authenticating'> تصدیق كول</string>
+    <string name='course_catalog_load_error'>بخښنه! تیروتنه په بارولو کښی </string>
+    <string name='download'> رالېښل</string>
+    <string name='download_q'> رالېښل</string>
+    <string name='download_all_q'>د تول ننوتونو رالیښل</string>
+    <string name='ok'>صحیح</string>
+    <string name='cancel'>لغو کول</string>
+    <string name='delete_q'> ړنګول</string>
+    <string name='delete_x_entries_from_device'>ړنګول تول ننوتونو د وزلی نه</string>
+    <string name='delete'>ړنګول</string>
+    <string name='error_loading_catalog'>بخښنه! تیروتنه د اساسی لست په بارولو کښی</string>
+    <string name='loading'>بارونه</string>
+    <string name='error_opening_file'>تیروتنه د دوتنه په پرانيستل کښی </string>
+    <string name='download_in_progress'>رالیښل په پرمخیون ده...</string>
+    <string name='save_to'> خوندي/ثبت کړی په...</string>
+    <string name='all_users'>ټول کارونکی</string>
+    <string name='only_me'>یوازی زه</string>
+    <string name='mycourses'>زما کورسونه</string>
+    <string name='onthisdevice'>په دی وزله کښی</string>
+    <string name='logout'>وتل</string>
+    <string name='about'>په اړه</string>
+    <string name='download_for'>رالیښل د...لپاره</string>
+    <string name='refresh'>تاندول</string>
+    <string name='download_all'>رالیښل تول</string>
+    <string name='nothing_selected'>هیڅ تاکلی شوی نده</string>
+    <string name='next'>بل</string>
+    <string name='back'>شا</string>
+    <string name='username'>کارن نوم</string>
+    <string name='password'>تیرنویی/شفر</string>
+    <string name='phone_memory'>د تیلیفون یاد</string>
+    <string name='memory_card'>د یاد کارت</string>
+    <string name='device'>وزله</string>
+    <string name='register'>نومکښنه</string>
+    <string name='phone_number'>د تیلیفون شمیره</string>
+    <string name='name'>نوم</string>
+    <string name='male'>نارینه</string>
+    <string name='female'>شځینه</string>
+    <string name='could_not_open_file'>بخښنه! دوتنه خلاص نه شو </string>
+    <string name='settings'>امستن/تنظیمات</string>
+    <string name='lang_sys'>د سیستم/غونډال ژبه</string>
+    <string name='lang_en'>انګلیسی</string>
+    <string name='lang_ar'>عربی</string>
+    <string name='my_resources'>رالیښل شوی</string>
+    <string name='browse_feeds'>د منځپانګه کتنی</string>
+    <string name='choose_format'>بڼه انتخاب وکړی:</string>
+    <string name='language'>ژبه</string>
+    <string name='advanced'>پرمخ تللی</string>
+    <string name='server'>پالنګر</string>
+    <string name='optional'>اختياري</string>
+    <string name='email'>ایمیل</string>
+    <string name='regcode'>کد</string>
+    <string name='home'>کور پاڼه</string>
+    <string name='my_libraries'>زما کتابتون</string>
+    <string name='add_library'>د کتابتون زیاتول</string>
+    <string name='select_library'>د کتابتون ټاکل</string>
+    <string name='add'>زیاتول</string>
+    <string name='library_title'>د کتابتوب نوم، لکه کتابتون A</string>
+
+    <string name='enter_phone_num'>په مهربانۍ سره د ټېلفون شمېره ننباسئ</string>
+    <string name='enter_name'>په مهربانۍ سره نوم ننباسئ</string>
+    <string name='attendance'>حاضري</string>
+    <string name='processing'> بهیرونګ</string>
+    <string name='classes'>ټولګي</string>
+    <string name='exams'>آزموینې</string>
+    <string name='reports'>راپورونه</string>
+    <string name='students'>حساب</string>
+    <string name='data_usage'>د معلوماتو کارونه</string>
+    <string name='forgot_password'>له سیسټم څخه وتل</string>
+    <string name='connections'>اتصال</string>
+    <string name='notifications'>اعلان</string>
+
+
+    <string name='wifi_data_label'>د ټېلفوني معلوماتو د استفادې پرمهال</string>
+    <string name='cell_data_label'>یواځې د وای فای د استفادې پر مهال</string>
+    <string name='data_label'>ځوابونه، امتیازونه او د لګښت معلومات ولېږئ</string>
+    <string name='p2p_connection_label'>د P2P اتصالات</string>
+
+    <string name='file_available_locally'>په ځايي توګه د لاسرسي وړ</string>
+    <string name='file_unavailable_locally'>په ځايي توګه د نه لاسرسي وړ</string>
+    <string name='connection'>عمومي اتصال</string>
+
+    <string name='account'>حساب</string>
+
+    <string name="modify">بدلول</string>
+    <string name="open">پرانیستل</string>
+
+    <string name='welcome'>ښه راغلاست</string>
+    <string name='welcome_dialog_subheader'>د دندې د ترلاسه کولو هڅه\n د بریالیتوب مهارتونه دلته ترلاسه کړئ</string>
+    <string name='welcome_dialog_box1'>
+    <![CDATA[
+    <b><font color="#2196f3">
+        د فانټ رنګ:
+    </b></font>
+         د دې اپلګېشن ماډیولونه وړیا دي. منځپانګې ته یې د لاسرسي لپاره اپلکېشن ډ‌انلود کړئ. تاسو کولای شئ له انټرنټ پرته ورڅخه په هر وخت او هر ځای کې کار واخلئ.
+    ]]>
+    </string>
+    <string name='welcome_dialog_box2'><![CDATA[
+     <b><font color="#2196f3">
+        زده‌کړه وکړئ:
+     </b></font>
+        تعاملي ویډیوګانې به تاسو ته د سوانح لنډیز لیکلو، د مرکې مهارتونو، د اړیکو مهارتونو او ډېرو نورو مسائلو په هکله زده کړه درکړي.
+    ]]>
+    </string>
+    <string name='welcome_dialog_box3'><![CDATA[
+    <b><font color="#2196f3">
+    حضوري ټولکي:
+    </b></font>
+         که د دولتي پوهنتون محصل یاست او یا په دې وروستیو کې فارغه شوي یاست، کولای شئ  په بریالۍ توګه د دې اپلکېشن د مادیول له ترسره کولو وروسته د USWDP مرکزونو په وړیا ټولګیو کې حضوري برخه واخلئ.
+    ]]>
+    </string>
+    <string name='dont_show_this_next_time'>بل ځل دا مه ښکاره کوه</string>
+
+    <string name='data_usage_label'>د ګرځنده تېلفون د ډاټا ټولیز مصرف</string>
+    <string name='app_interface_language'>د اپلکېشن ژبه</string>
+    <string name='enable_supernode'>سوپرنوډ فعاله کړئ</string>
+    <string name='share_application'>اپلکېشن شریک کړئ</string>
+    <string name='share_via'>له دې لارې یې شریک کړئ</string>
+    <string name='share'>شریک کول</string>
+    <string name='receive'>ترلاسه کول</string>
+    <string name='sent'>ولېږل شو</string>
+    <string name='sending'>د لېږل پر حال کې</string>
+    <string name='send'>لېږل</string>
+    <string name='size'>اندازه</string>
+    <string name='see_also'>همدارنګه ـ وګورئ</string>
+    <string name='download_in_another_language'>په بله ژبه کې یې دانلوډ کړئ</string>
+    <string name='passed'>بریالي شوی</string>
+    <string name='in_progress'>په جریان کې</string>
+    <string name='select_language'>ژبه غوره کړئ</string>
+    <string name='device_language'>د وزلې وکاروئ</string>
+    <string name='downloading'>د دانلوډ پر حال کې</string>
+    <string name='waiting'>د انتظار په حال کې</string>
+    <string name='queued'>په کتار کې</string>
+    <string name='failed'>نابریالی</string>
+    <string name='ok_got_it'>سمه ده، پوه شوم!</string>
+
+    <string name="university_name" value="10001">د پوهنتون نوم</string>
+
+    <string name="field_university" value="980">د پوهنتون نوم</string>
+    <string name="field_fullname" value="981">بشپړ نوم </string>
+    <string name="field_email" value="982">ایمیل آدرس</string>
+    <!-- Gender translation pashto: confirmation pending -->
+    <string name="field_gender" value="983">جنسیت</string>
+    <string name="field_phonenumber" value="984">د ټیلیفون شمیره</string>
+    <string name="field_faculty" value="985">د پوهنځي نوم</string>
+    <string name="field_father_name" value="986">د پلار نوم</string>
+    <string name="field_address" value="987">آدرس</string>
+    <string name="field_tazkira_id" value="988">د تذکرې شمیره</string>
+    <string name="field_relationship" value="989">اړیکه</string>
+    <string name="field_department" value="990">څانګه</string>
+    <string name="field_academic_year" value="991">اکادمیک کال</string>
+    <string name="field_gpa" value="992"> نمرو سلنه</string>
+    <string name="field_would_work" value="993">آی اد وظیفې اجراء کولو سره لیوالتیا لرئ؟ که ځواب مو هو وي نو تشریح یې کړئ:</string>
+    <string name="field_would_work_elaborate" value="994">Why do you want or dont want to work?</string>
+    <string name="field_have_work_experience" value="995">آیا کاري تجربه لرئ؟ که ځواب مو هو وي نو تشریح یې کړئ:</string>
+    <string name="field_type_job" value="996">کوم ډول دنده غواړئ؟ یو یا د یو څخه زیات ځوابونه انتخاب کړئ</string>
+    <string name="field_english_proficiency" value="997">څومره انګلیسي ژبه باندې تسلط لرئ؟ تش ځایونه انتخاب کړئ.</string>
+    <string name="field_computer_application" value="998">د کمپيوټر کومو پروګرامونو سره اشنا یاست؟</string>
+    <string name="field_post_graduate" value="999"> فراغت څخه وروسته مو پلان څه دی؟ </string>
+    <string name="field_comments" value="1000"> که کوم نظر یا پوښتنه لرئ نو مهرباني وکړئ ولیکئ:</string>
+    <string name="field_work_experience_elaborate" value="1001">Elaborate on work experience:</string>
+
+    <!-- Registration options-->
+    <string name="options_uni_kabul_uni" value="1002">Kabul University</string>
+    <string name="options_uni_kabul_polytechnic_uni" value="1003">Kabul Polytechnic University</string>
+    <string name="options_uni_kabul_education_uni" value="1004">Kabul Education University</string>
+    <string name="options_uni_other" value="1005">Other</string>
+    <string name="options_uni_i_dont_know" value="1006">I don\'t know</string>
+    <string name="options_uni_none" value="1020">None</string>
+    <string name="options_uni_kabul_medical_science" value="1021">Kabul University of Medical Science</string>
+    <string name="options_uni_shaheed_rabani" value="1022">Shaheed Rabbani Education University</string>
+    <string name="options_uni_jawzjan" value="1023">Jawzjan University</string>
+    <string name="options_uni_herat" value="1024">Herat University</string>
+    <string name="options_uni_balkh" value="1025">Balkh University</string>
+    <string name="options_uni_nagahar" value="1026">Nangahar University</string>
+    <string name="options_uni_khost" value="1027">Sheikh Zayed University (Khost)</string>
+    <string name="options_uni_kandahar" value="1028">Kandahar University</string>
+    <string name="options_uni_kunduz" value="1029">Kunduz University</string>
+
+
+
+    <string name="options_gender_female" value="1007">Female</string>
+    <string name="options_gender_male" value="1008">Male</string>
+
+    <string name="options_relationship_single" value="1009">Single</string>
+    <string name="options_relationship_married" value="1010">Married</string>
+
+    <string name="options_english_fluent" value="1011">فصیح</string>
+    <string name="options_english_good" value="1012">ښه</string>
+    <string name="options_english_fair" value="1013">مناسب</string>
+    <string name="options_english_poor" value="1014">ضعیف</string>
+
+    <string name="options_yes" value="1015">Yes</string>
+    <string name="options_no" value="1016">No</string>
+
+    <string name="options_job_short" value="1017">لنډمهاله</string>
+    <string name="options_job_long" value="1018">اوږود مهاله</string>
+    <string name="options_job_part" value="1019">نیمه ورځ</string>
+    <string name="options_job_full" value="1020">پوره ورځ</string>
+
+    <!-- Registration dialog feedback -->
+    <string name="field_password_min">Minimum 5 characters</string>
+
+    <!-- Update student details action button -->
+    <string name="update">Update</string>
+
+
+    <string name='login_successful'>بریالی ننوتل</string>
+    <string name='registration_successful'>بریالۍ نوم لیکنه</string>
+    <string name='share_offline_dialog_message'>کولای شئ دا اپلکېشن په آنلاین توګه شریک کړئ. هغه آله چې تاسو یې غواړئ د هغې په واسطه یې شریک کړئ:\n  تنظیمات پرانیسئ &lt; د بلوتوث تنظیمات\n ډاډ ترلاسه کړئ چې آله د لیدو وړ ده.\n </string>
+    <string name='send_in_zip_file'>د زېپ په فایل کې ولېږئ</string>
+    <string name='device_name'>د وزلې نوم</string>
+    <string name='accept'>منل</string>
+    <string name='decline'>رد کول</string>
+
+    <string name='downloaded'>دانلوډ شو</string>
+    <string name='new_password'>نوی تېرنويى</string>
+    <string name='phone'>ټېلفون</string>
+    <string name='tablet'>تبلټ</string>
+    <string name='waiting_for_sender'>د استونکي په انتظار</string>
+    <string name='preparing'>چمتو کول</string>
+    <string name='send_course_instructions'>په بلې آله کې، اپلکېشن پرانیسئ، د مینو پورته ښي اړخه څخه د ترلاسه کول وټاکئ.\n  د لاندې لیسټ څخه بله آله انتخاب کړئ:</string>
+    <string name='cancel_invite'>د بلني لغوه </string>
+    <string name='inviting'>د بلنې په حال کې</string>
+    <string name='connecting'>د اړیکې په حال کې</string>
+    <string name='connected_but_host_not_sharing'>اړیکه/اتصال رامنځ ته شو، خو هغه بله وسله چې له دې اپلکېشن څخه استفاده کوي هېڅ شی نه شریکوي.</string>
+    <string name='field_required_prompt'>دا برخه لازمه ده </string>
+    <string name="also_available_in">همدارنګه د لاسترسي وړ دی</string>
+
+
+
+
+</resources>

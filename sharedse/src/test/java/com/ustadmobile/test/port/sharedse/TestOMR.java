@@ -28,19 +28,18 @@
     GNU General Public License for more details.
 
  */
-package com.ustadmobile.test.core;
+package com.ustadmobile.test.port.sharedse;
 
-import com.ustadmobile.core.util.TestUtils;
 import com.ustadmobile.core.impl.HTTPResult;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.port.sharedse.omr.OMRRecognizer;
+import com.ustadmobile.core.util.TestUtils;
 
 import java.io.IOException;
 
 /* $if umplatform == 2  $
     import com.ustadmobile.test.port.j2me.TestCase;
  $else$ */
-    import junit.framework.TestCase;
+    //import junit.framework.TestCase;
 /* $endif$ */
 
 
@@ -56,7 +55,7 @@ import java.io.IOException;
 /* $if umplatform == 1  $
 public class TestOMR extends ActivityInstrumentationTestCase2<UstadMobileActivity>{
  $else$ */
-public class TestOMR extends TestCase {
+public class TestOMR  {
 /* $endif */
 
     private byte[] imgBytes;
@@ -68,10 +67,10 @@ public class TestOMR extends TestCase {
     }
 
     protected void setUp() throws Exception {
-        String imgURL = TestUtils.getInstance().getHTTPRoot() + "omr-img1.jpg";
-        HTTPResult imgResult = UstadMobileSystemImpl.getInstance().makeRequest(
-            imgURL, null, null);
-        imgBytes = imgResult.getResponse();
+//        String imgURL = TestUtils.getInstance().getHTTPRoot() + "omr-img1.jpg";
+//        HTTPResult imgResult = UstadMobileSystemImpl.getInstance().makeRequest(
+//            imgURL, null, null);
+//        imgBytes = imgResult.getResponse();
     }
     
     public void testOMR() throws IOException{

@@ -30,7 +30,7 @@
  */
 package com.ustadmobile.core.controller;
 
-import com.ustadmobile.core.MessageIDConstants;
+import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.model.UserSettingItem;
@@ -49,6 +49,8 @@ public class UserSettingsController extends UstadBaseController implements Ustad
     public static final String PREFKEY_LANG = "lang";
     
     public static final int SETTING_LANG = 0;
+
+    public static final int SETTING_SUPERNODE = 1;
     
     private UserSettingsView settingsView;
     
@@ -60,11 +62,11 @@ public class UserSettingsController extends UstadBaseController implements Ustad
         super(context);
     }
     
-    public static String getLocaleNameByCode(String langCode) {
+    public static String getLocaleNameByCode(String langCode, Object context) {
         String retVal = null;
         if(langCode.equals("")) {
             //this is the system default language
-            return UstadMobileSystemImpl.getInstance().getString(MessageIDConstants.lang_sys);
+            return UstadMobileSystemImpl.getInstance().getString(MessageID.lang_sys, context);
         }
         
         for(int i = 0; i < UstadMobileConstants.SUPPORTED_LOCALES.length; i++) {
@@ -88,7 +90,7 @@ public class UserSettingsController extends UstadBaseController implements Ustad
     
     public void setUIStrings() {
         final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        settingsView.setSettingsTitle(impl.getString(MessageIDConstants.settings));
+        settingsView.setSettingsTitle(impl.getString(MessageID.settings, getContext()));
         setViewSettingsList();
         
         int numLangs = UstadMobileConstants.SUPPORTED_LOCALES.length + 1;
@@ -97,7 +99,7 @@ public class UserSettingsController extends UstadBaseController implements Ustad
         
         //default system locale
         languageCodes[0] = "";
-        languageNames[0] = impl.getString(MessageIDConstants.lang_sys);
+        languageNames[0] = impl.getString(MessageID.lang_sys, getContext());
         
         for(int i = 1; i < numLangs; i++) {
             languageCodes[i] = UstadMobileConstants.SUPPORTED_LOCALES[i-1][UstadMobileConstants.LOCALE_CODE];
@@ -117,12 +119,21 @@ public class UserSettingsController extends UstadBaseController implements Ustad
         
         String userLangSetting = impl.getUserPref(PREFKEY_LANG, "", 
                 settingsView.getContext());
-        String selectedLang = getLocaleNameByCode(userLangSetting);
-        items[SETTING_LANG] = new UserSettingItem(impl.getString(MessageIDConstants.language),
-            selectedLang);
+        String selectedLang = getLocaleNameByCode(userLangSetting, getContext());
+        items[SETTING_LANG] = new UserSettingItem(
+                impl.getString(MessageID.language, getContext()), selectedLang);
         
         settingsView.setSettingsList(items);
     }
+
+    public void handleClickAccount() {
+
+    }
+
+    public void handleClickDataUsage() {
+
+    }
+
     
     public void handleClickSetting(int index) {
         switch(index) {
@@ -137,7 +148,6 @@ public class UserSettingsController extends UstadBaseController implements Ustad
         String chosenLocaleCode = languageCodes[index];
         UstadMobileSystemImpl.getInstance().setUserPref(PREFKEY_LANG, 
             chosenLocaleCode, context);
-        UstadMobileSystemImpl.getInstance().loadLocale(getContext());
         setUIStrings();
         settingsView.showSettingsList();
     }

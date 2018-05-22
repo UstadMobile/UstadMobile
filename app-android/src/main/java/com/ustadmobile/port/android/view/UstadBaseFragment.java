@@ -1,5 +1,6 @@
 package com.ustadmobile.port.android.view;
 
+import android.content.Context;
 import android.support.v4.app.Fragment;
 
 import com.ustadmobile.core.controller.UstadBaseController;
@@ -8,6 +9,8 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.Vector;
 
 /**
  * Created by mike on 10/15/15.
@@ -17,6 +20,8 @@ public class UstadBaseFragment  extends Fragment{
     private String mUILocale;
 
     private UstadBaseController baseController;
+
+    private Vector<Runnable> runOnAttach = new Vector<>();
 
     protected void setBaseController(UstadBaseController baseController) {
         this.baseController = baseController;
@@ -44,7 +49,7 @@ public class UstadBaseFragment  extends Fragment{
     @Override
     public void onResume() {
         super.onResume();
-        String sysLocale = UstadMobileSystemImpl.getInstance().getLocale();
+        String sysLocale = UstadMobileSystemImpl.getInstance().getLocale(getContext());
         if(mUILocale != null && !mUILocale.equals(sysLocale)) {
             //the locale has changed - we need to update the ui
             baseController.setUIStrings();
@@ -108,6 +113,23 @@ public class UstadBaseFragment  extends Fragment{
 
     }
 
+    public void runOnUiThread(Runnable r) {
+        if(getActivity() != null) {
+            getActivity().runOnUiThread(r);
+        }else {
+            runOnAttach.add(r);
+        }
+    }
 
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
 
+        Iterator<Runnable> runnables = runOnAttach.iterator();
+        while(runnables.hasNext()) {
+            Runnable current = runnables.next();
+            current.run();
+            runnables.remove();
+        }
+    }
 }

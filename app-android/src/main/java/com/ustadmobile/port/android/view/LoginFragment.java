@@ -3,27 +3,27 @@ package com.ustadmobile.port.android.view;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
-import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CheckBox;
-import android.widget.TextView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.Spinner;
+import android.widget.CheckBox;
+import android.widget.EditText;
 import android.widget.RadioButton;
+import android.widget.Spinner;
+import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
-import com.ustadmobile.core.MessageIDConstants;
 import com.ustadmobile.core.controller.LoginController;
+import com.ustadmobile.core.generated.locale.MessageID;
+import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileDefaults;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.core.view.LoginView;
-import android.widget.EditText;
 
 /**
  * Created by mike on 8/24/15.
@@ -107,67 +107,66 @@ public class LoginFragment extends Fragment {
         switch(this.positionID) {
             case LoginView.SECTION_LOGIN:
                 Button loginButton = (Button)mRootViewGroup.findViewById(R.id.login_button);
-                loginButton.setText(impl.getString(MessageIDConstants.login));
+                loginButton.setText(impl.getString(MessageID.login, getContext()));
                 ((TextView)mRootViewGroup.findViewById(R.id.login_username)).setHint(
-                        impl.getString(MessageIDConstants.username));
+                        impl.getString(MessageID.username, getContext()));
                 ((TextView)mRootViewGroup.findViewById(R.id.login_password)).setHint(
-                        impl.getString(MessageIDConstants.password));
+                        impl.getString(MessageID.password, getContext()));
 
                 CheckBox advancedCheckbox =(CheckBox) mRootViewGroup.findViewById(R.id.login_advanced_checkbox);
-                advancedCheckbox.setText(impl.getString(MessageIDConstants.advanced));
+                advancedCheckbox.setText(impl.getString(MessageID.advanced, getContext()));
                 ((TextView)mRootViewGroup.findViewById(R.id.login_server_label)).setText(
-                        impl.getString(MessageIDConstants.server));
+                        impl.getString(MessageID.server, getContext()));
                 break;
             case LoginView.SECTION_REGISTER:
                 Button registerButton = (Button)mRootViewGroup.findViewById(R.id.login_registerbutton);
-                registerButton.setText(impl.getString(MessageIDConstants.register));
-                setTextViewHint(mRootViewGroup, R.id.login_registername,
-                        impl.getString(MessageIDConstants.name));
-                ((TextView)mRootViewGroup.findViewById(R.id.login_registerphonenum)).setHint(
-                        impl.getString(MessageIDConstants.phone_number));
-                ((RadioButton)mRootViewGroup.findViewById(R.id.login_register_radio_male)).setText(
-                        impl.getString(MessageIDConstants.male));
-                ((RadioButton)mRootViewGroup.findViewById(R.id.login_register_radio_female)).setText(
-                        impl.getString(MessageIDConstants.female));
+                registerButton.setText(impl.getString(MessageID.register, getContext()));
 
-                String optSffx = " (" + impl.getString(MessageIDConstants.optional) + ")";
+                setTextViewHint(mRootViewGroup, R.id.login_registername,
+                        impl.getString(MessageID.name, getContext()));
+                ((TextView)mRootViewGroup.findViewById(R.id.login_registerphonenum)).setHint(
+                        impl.getString(MessageID.phone_number, getContext()));
+                ((RadioButton)mRootViewGroup.findViewById(R.id.login_register_radio_male)).setText(
+                        impl.getString(MessageID.male, getContext()));
+                ((RadioButton)mRootViewGroup.findViewById(R.id.login_register_radio_female)).setText(
+                        impl.getString(MessageID.female, getContext()));
+
+                String optSffx = " (" + impl.getString(MessageID.optional, getContext()) + ")";
                 setTextViewHint(mRootViewGroup, R.id.login_registerusername,
-                        impl.getString(MessageIDConstants.username) + optSffx);
+                        impl.getString(MessageID.username, getContext()) + optSffx);
                 setTextViewHint(mRootViewGroup, R.id.login_registerpassword,
-                        impl.getString(MessageIDConstants.password) + optSffx);
+                        impl.getString(MessageID.password, getContext()) + optSffx);
                 setTextViewHint(mRootViewGroup, R.id.login_registeremail,
-                        impl.getString(MessageIDConstants.email) + optSffx);
+                        impl.getString(MessageID.email, getContext()) + optSffx);
                 setTextViewHint(mRootViewGroup, R.id.login_registerregcode,
-                        impl.getString(MessageIDConstants.regcode) + optSffx);
+                        impl.getString(MessageID.regcode, getContext()) + optSffx);
 
 
                 break;
         }
-
     }
 
 
     public void lookupCountry(final Spinner countrySpinner, final Activity activity) {
         final Context ctx = getActivity();
-        Thread countryLookupThread = new Thread() {
-            public void run() {
-                try {
-                    String countryCode =
-                            LoginController.getCountryCode(UstadMobileDefaults.DEFAULT_GEOIP_SERVER);
-                    final int countryIndex = LoginController.getCountryIndexByCode(countryCode);
-                    activity.runOnUiThread(new Runnable() {
-                        public void run() {
-                            countrySpinner.setSelection(countryIndex);
-                        }
-                    });
-                }catch(Exception e) {
-                    e.printStackTrace();
-                    UstadMobileSystemImpl.getInstance().getAppView(ctx).showNotification(
-                        "Sorry - Could not detect country", AppView.LENGTH_LONG);
-                }
+        LoginController.getCountryCode(ctx, UstadMobileDefaults.DEFAULT_GEOIP_SERVER, new UmCallback() {
+            @Override
+            public void onSuccess(Object result) {
+                String countryCode = (String)result;
+                final int countryIndex = LoginController.getCountryIndexByCode(countryCode);
+                activity.runOnUiThread(new Runnable() {
+                    public void run() {
+                        countrySpinner.setSelection(countryIndex);
+                    }
+                });
             }
-        };
-        countryLookupThread.start();
+
+            @Override
+            public void onFailure(Throwable exception) {
+                UstadMobileSystemImpl.getInstance().getAppView(ctx).showNotification(
+                        "Sorry - Could not detect country", AppView.LENGTH_LONG);
+            }
+        });
     }
 
 }

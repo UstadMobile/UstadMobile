@@ -34,11 +34,14 @@ package com.ustadmobile.test.core;
 /* $if umplatform == 2  $
     import com.ustadmobile.test.port.j2me.TestCase;
  $else$ */
-    import junit.framework.TestCase;
-/* $endif$ */
 
 import com.ustadmobile.core.util.UMFileUtil;
+
+import junit.framework.TestCase;
+
 import java.util.Hashtable;
+
+/* $endif$ */
 
 
 /**
@@ -121,13 +124,13 @@ public class TestUMFileUtilFilename extends TestCase{
             "nastyname.so", UMFileUtil.filterFilename("/nastyname.*so"));
         
         int fileSize = 500;
-        assertEquals("Format filename in bytes", "500 bytes", 
+        assertEquals("Format filename in bytes", "500.0 bytes",
             UMFileUtil.formatFileSize(500));
         fileSize *= 1024;
-        assertEquals("Format filename in kB", "500 kB", 
+        assertEquals("Format filename in kB", "500.0 kB",
             UMFileUtil.formatFileSize(fileSize));
         fileSize *= 1024;
-        assertEquals("Format filename in kB", "500 MB", 
+        assertEquals("Format filename in kB", "500.0 MB",
             UMFileUtil.formatFileSize(fileSize));
     }
 

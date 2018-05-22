@@ -30,11 +30,13 @@
  */
 package com.ustadmobile.core.tincan;
 
-import java.lang.ref.WeakReference;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 /* $if umplatform == 2  $
     import org.json.me.*;
  $else$ */
-    import org.json.*;
 /* $endif$ */
 
 /**
@@ -45,7 +47,7 @@ import java.lang.ref.WeakReference;
  */
 public class TinCanStatement extends JSONObject{
     
-    private WeakReference registrationUUID;
+    private String registrationUUID;
     
     public TinCanStatement(String stmt) throws JSONException {
         super(stmt);
@@ -78,18 +80,15 @@ public class TinCanStatement extends JSONObject{
      * @return Registration UUID as a string; or null if there is none
      */
     public String getRegistrationUUID() {
-        if(registrationUUID != null && registrationUUID.get() != null) {
-            return (String)registrationUUID.get();
-        }
+        if(registrationUUID != null)
+            return registrationUUID;
         
         try {
             if(has("context")) {
                 JSONObject ctx = getJSONObject("context");
-                String reg;
                 if(ctx.has("registration")) {
-                    reg = ctx.getString("registration");
-                    registrationUUID = new WeakReference(reg);
-                    return reg;
+                    registrationUUID = ctx.getString("registration");
+                    return registrationUUID;
                 }
             }
         }catch(JSONException e) {

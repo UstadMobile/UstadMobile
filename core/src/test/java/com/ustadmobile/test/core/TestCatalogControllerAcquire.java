@@ -31,24 +31,18 @@
 package com.ustadmobile.test.core;
 
 
-import com.ustadmobile.core.controller.CatalogController;
-import com.ustadmobile.core.controller.CatalogEntryInfo;
-import com.ustadmobile.core.impl.UMStorageDir;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.core.opds.UstadJSOPDSFeed;
-import com.ustadmobile.core.util.UMFileUtil;
 
+import junit.framework.TestCase;
 
 /* $if umplatform == 1 $
         import android.test.ActivityInstrumentationTestCase2;
         import com.toughra.ustadmobile.UstadMobileActivity;
    $endif$ */
-
 /* $if umplatform == 2  $
     import j2meunit.framework.TestCase;
     import com.ustadmobile.core.impl.UMLog;
  $else$ */
-    import junit.framework.TestCase;
 /* $endif$ */
 
 /**
@@ -59,7 +53,7 @@ import com.ustadmobile.core.util.UMFileUtil;
 /* $if umplatform == 1  $
 public class TestCatalogControllerAcquire extends ActivityInstrumentationTestCase2<UstadMobileActivity>{
  $else$ */
-public class TestCatalogControllerAcquire extends TestCase{
+public abstract class TestCatalogControllerAcquire extends TestCase{
 /* $endif */
     
     /**

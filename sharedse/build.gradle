@@ -1,21 +1,74 @@
-apply plugin: 'java'
+apply plugin: 'java-library'
+apply plugin: 'jacoco'
+apply plugin: "maven-publish"
 
-sourceCompatibility = "1.7"
-targetCompatibility = "1.7"
+sourceCompatibility = "1.8"
+targetCompatibility = "1.8"
 
 repositories {
     mavenCentral()
     maven {
         url "http://devserver2.ustadmobile.com/repo-mvn"
     }
+
+}
+
+/*
+ * Added to overcome limitation on Android studio as per:
+ *  http://tools.android.com/knownissues#TOC-JUnit-tests-missing-resources-in-classpath-when-run-from-Studio
+ */
+task copyTestResources(type: Copy) {
+    from "${projectDir}/src/test/resources"
+    from "${projectDir}/../core-tests/src/main/resources"
+    from "${projectDir}/../sharedse-tests/src/main/resources"
+    into "${buildDir}/classes/test"
+}
+processTestResources.dependsOn copyTestResources
+
+task sourceJar(type: Jar) {
+    from sourceSets.main.allJava
 }
 
 dependencies {
     //compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile "org.json:json:20160212";
-    compile "net.sf.kxml:kxml2:2.3.0";
-    compile 'org.nanohttpd:nanohttpd:2.3.1'
-    compile 'org.nanohttpd:nanohttpd-nanolets:2.3.1';
-    compile 'com.ustadmobile.qrcodelibomrfork:qrcode-core:1.0-SNAPSHOT'
-    compile project(":core")
+    implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
+    implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
+    implementation "com.ustadmobile.qrcodelibomrfork:qrcode-core:$version_qrcodelibfork"
+    implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
+    implementation "net.sf.kxml:kxml2:$version_kxml";
+    implementation "com.google.code.gson:gson:$version_gson"
+    implementation "net.lingala.zip4j:zip4j:$version_zip4j"
+    implementation "org.json:json:$version_json"
+
+//    project.ext.nanoLrsVersion = rootProject.ext.nanoLrsVersion
+//    implementation "com.ustadmobile.nanolrs:nanolrs-core:$nanoLrsVersion"
+//    implementation "com.ustadmobile.nanolrs:nanolrs-http:$nanoLrsVersion"
+    implementation project(":core")
+    implementation project(":lib-database")
+    implementation project(':lib-core-fs')
+    implementation project(":lib-util")
+    testImplementation project(":sharedse-tests")
+    testImplementation project(":core-tests")
+}
+
+publishing {
+    publications {
+        nanolrscore(MavenPublication) {
+            groupId 'com.ustadmobile.app'
+            artifactId 'sharedse'
+            version rootProject.version
+
+            from components.java
+
+            artifact sourceJar {
+                classifier = 'sources'
+            }
+        }
+    }
+
+    repositories {
+        maven {
+            url rootProject.ext.buildConfigProperties['repo.dir']
+        }
+    }
 }

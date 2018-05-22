@@ -18,7 +18,7 @@ public interface ListableEntity {
 
     String getId();
 
-    String getStatusText();
+    String getStatusText(Object context);
 
     /**
      * Provide a status icon as per the STATUSICON_ codes

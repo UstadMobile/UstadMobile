@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:background="@android:color/white"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.ustadmobile.port.android.view.RegistrationDialogFragment">
+
+    <TextView
+        android:textStyle="bold"
+        android:textColor="@android:color/white"
+        android:background="@color/primary"
+        android:id="@+id/fragment_register_dialog_title"
+        android:gravity="center"
+        android:textSize="@dimen/text_title"
+        android:layout_width="match_parent"
+
+        android:layout_height="@dimen/dimen_50dp" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/fragment_register_dialog_title"
+        android:layout_above="@+id/fragment_register_dialog_register_button"
+        >
+        <LinearLayout
+            android:id="@+id/fragment_register_dialog_field_layout"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+
+            <android.support.design.widget.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <AutoCompleteTextView
+                    android:id="@+id/fragment_register_dialog_username_text"
+
+                    android:inputType="textNoSuggestions"
+                    android:imeOptions="actionNext"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minLines="1"
+
+                    android:maxLines="1"/>
+
+            </android.support.design.widget.TextInputLayout>
+
+            <android.support.design.widget.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <AutoCompleteTextView
+                    android:id="@+id/fragment_register_dialog_password_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:imeOptions="actionNext"
+
+                    android:inputType="textPassword"
+                    android:minLines="1"
+                    android:maxLines="1"/>
+
+            </android.support.design.widget.TextInputLayout>
+
+
+
+        </LinearLayout>
+    </ScrollView>
+
+    <Button
+        android:textAllCaps="true"
+        android:clickable="true"
+        android:id="@+id/fragment_register_dialog_register_button"
+        android:layout_alignParentBottom="true"
+        android:background="@color/primary"
+        android:textColor="@android:color/white"
+        android:text="@string/register"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+
+
+</RelativeLayout>

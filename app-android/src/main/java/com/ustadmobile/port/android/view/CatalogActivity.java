@@ -1,33 +1,12 @@
 package com.ustadmobile.port.android.view;
 
-import android.app.ProgressDialog;
-import android.content.Intent;
-import android.net.Uri;
-import android.support.v4.app.NavUtils;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
-import android.view.Menu;
 import android.view.MenuItem;
-import android.support.v4.app.Fragment;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
 
 import com.toughra.ustadmobile.R;
-import com.ustadmobile.core.controller.BasePointController;
+import com.ustadmobile.core.impl.AppConfig;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.core.view.BasePointView;
-import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
-import com.ustadmobile.port.android.util.UMAndroidUtil;
 
-import java.util.Hashtable;
-import java.util.Map;
-import java.util.WeakHashMap;
 
 public class CatalogActivity extends UstadBaseActivity  {
 
@@ -63,8 +42,8 @@ public class CatalogActivity extends UstadBaseActivity  {
         // as you specify a parent activity in AndroidManifest.xml.
         switch (item.getItemId()) {
             case android.R.id.home:
-                UstadMobileSystemImpl.getInstance().go(BasePointView.VIEW_NAME,
-                        BasePointController.makeDefaultBasePointArgs(this), this);
+                UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+                impl.go(impl.getAppConfigString(AppConfig.KEY_FIRST_DEST, null, this), this);
                 return true;
         }
 

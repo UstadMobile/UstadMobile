@@ -32,12 +32,13 @@ package com.ustadmobile.core.opf;
 
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.core.opds.UstadJSOPDSItem;
+
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+
 import java.io.IOException;
 import java.util.Hashtable;
 import java.util.Vector;
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
 
 /**
  *
@@ -52,6 +53,8 @@ public class UstadJSOPF {
     public static String DEFAULT_MIMETYPE = "application/octet-stream";
     
     public UstadJSOPFItem[] spine;
+
+    private Vector coverImages;
     
     /**
      * The item from the OPF that contains "nav" in it's properties.  As per the 
@@ -62,6 +65,17 @@ public class UstadJSOPF {
     public String title;
     
     public String id;
+
+    public String description;
+
+    private Vector links;
+
+    private Vector creators;
+
+    //As per the OPF spec a dc:language tag is required
+    private Vector languages = new Vector();
+
+
     
     /**
      * Flag value to indicate we should parse the metadata (e.g. title, identifier, description)
@@ -110,23 +124,83 @@ public class UstadJSOPF {
         int dotPos = filename.lastIndexOf('.');
         return dotPos != -1 ? filename.substring(dotPos + 1) : null;
     }
+
+    public static class LinkElement {
+
+        static final String ATTR_REL = "rel";
+
+        static final String ATTR_HREF = "href";
+
+        static final String ATTR_MEDIA_TYPE = "media-type";
+
+        static final String ATTR_ID = "id";
+
+        static final String ATTR_REFINES = "refines";
+
+        private String rel;
+
+        private String mediaType;
+
+        private String href;
+
+        private String id;
+
+        private String refines;
+
+        public String getRel() {
+            return rel;
+        }
+
+        public void setRel(String rel) {
+            this.rel = rel;
+        }
+
+        public String getMediaType() {
+            return mediaType;
+        }
+
+        public void setMediaType(String mediaType) {
+            this.mediaType = mediaType;
+        }
+
+        public String getHref() {
+            return href;
+        }
+
+        public void setHref(String href) {
+            this.href = href;
+        }
+
+        public String getId() {
+            return id;
+        }
+
+        public void setId(String id) {
+            this.id = id;
+        }
+
+        public String getRefines() {
+            return refines;
+        }
+
+        public void setRefines(String refines) {
+            this.refines = refines;
+        }
+    }
     
     public UstadJSOPF() {
         mimeExceptions = new Hashtable();
     }
     
     
-    public static UstadJSOPF loadFromOPF(XmlPullParser xpp) throws XmlPullParserException, IOException {
-        return loadFromOPF(xpp, PARSE_METADATA | PARSE_MANIFEST);
+    public void loadFromOPF(XmlPullParser xpp) throws XmlPullParserException, IOException {
+        loadFromOPF(xpp, PARSE_METADATA | PARSE_MANIFEST);
     }
     
     /*
      * xpp: Parser of the OPF
      */
-    public static UstadJSOPF loadFromOPF(XmlPullParser xpp, int parseFlags) throws XmlPullParserException, IOException {
-        UstadJSOPF result = new UstadJSOPF();
-        
-        
+    public void loadFromOPF(XmlPullParser xpp, int parseFlags) throws XmlPullParserException, IOException {
         boolean parseMetadata = (parseFlags & PARSE_METADATA) == PARSE_METADATA;
         boolean parseManifest = (parseFlags & PARSE_MANIFEST) == PARSE_MANIFEST;
         
@@ -142,7 +216,7 @@ public class UstadJSOPF {
         boolean isLinear = true;
         String isLinearStrVal = null;
         Hashtable allItems = new Hashtable();
-        Vector spineItems = new Vector();        
+        Vector spineItems = new Vector();
 
         
         /*
@@ -164,13 +238,17 @@ public class UstadJSOPF {
             idref=null;
             isLinear = true;
             isLinearStrVal = null;
+            String tagName;
+            UstadJSOPFCreator creator;
+            String tagVal;
             
                         
             
             //If we are parsing the manifest
             if(parseManifest) {
                 if(evtType == XmlPullParser.START_TAG){
-                    if(xpp.getName() != null && xpp.getName().equals("item")){
+                    tagName = xpp.getName();
+                    if(tagName != null && tagName.equals("item")){
 
                         filename=xpp.getAttributeValue(null, "href");
                         itemMime=xpp.getAttributeValue(null, "media-type");
@@ -185,17 +263,24 @@ public class UstadJSOPF {
 
                         if(extension == null || defMimeType == null ||
                                 !itemMime.equals(defMimeType)){
-                            result.mimeExceptions.put(filename, itemMime);
+                            mimeExceptions.put(filename, itemMime);
                         }
                         UstadJSOPFItem item2 = new UstadJSOPFItem();
                         item2.href = filename;
                         item2.mimeType = itemMime;
                         item2.properties = properties;
                         item2.id = id;
-                        
+
+                        /*
+                         * As per the EPUB spec only one item should have this property
+                         */
                         if(properties != null && properties.indexOf("nav") != -1) {
-                            result.navItem = item2;
+                            navItem = item2;
                         }
+                        if(properties != null && properties.indexOf("cover-image") != -1) {
+                            addCoverImage(item2);
+                        }
+
 
                         allItems.put(id, item2);
 
@@ -219,8 +304,8 @@ public class UstadJSOPF {
                     }
                 }else if(evtType == XmlPullParser.END_TAG){
                     if(xpp.getName().equals("spine")){
-                        result.spine = new UstadJSOPFItem[spineItems.size()];
-                        spineItems.copyInto(result.spine);
+                        spine = new UstadJSOPFItem[spineItems.size()];
+                        spineItems.copyInto(spine);
                     }
                 }
             }
@@ -236,11 +321,39 @@ public class UstadJSOPF {
                     
                     if(inMetadata) {
                         if(xpp.getName().equals("dc:title")) {
-                            result.title = xpp.nextText();
+                            title = xpp.nextText();
                         }else if(xpp.getName().equals("dc:identifier")) {
                             String idAttr = xpp.getAttributeValue(null, "id");
                             if(idAttr != null && idAttr.equals(uniqueIdentifier)) {
-                                result.id = xpp.nextText();
+                                this.id = xpp.nextText();
+                            }
+                        }else if(xpp.getName().equals("dc:description")) {
+                            description = xpp.nextText();
+                        }else if(xpp.getName().equals("link")) {
+                            LinkElement linkEl = new LinkElement();
+                            linkEl.href = xpp.getAttributeValue(null, LinkElement.ATTR_HREF);
+                            linkEl.id = xpp.getAttributeValue(null, LinkElement.ATTR_ID);
+                            linkEl.mediaType = xpp.getAttributeValue(null, LinkElement.ATTR_MEDIA_TYPE);
+                            linkEl.rel = xpp.getAttributeValue(null, LinkElement.ATTR_REL);
+                            linkEl.refines = xpp.getAttributeValue(null, LinkElement.ATTR_REFINES);
+                            if(links == null)
+                                links = new Vector();
+
+                            links.addElement(linkEl);
+                        }else if(xpp.getName().equals("dc:creator")) {
+                            creator = new UstadJSOPFCreator();
+                            creator.setId(xpp.getAttributeValue(null, LinkElement.ATTR_ID));
+                            if(xpp.next() == XmlPullParser.TEXT)
+                                creator.setCreator(xpp.getText());
+
+                            if(creators == null)
+                                creators = new Vector();
+
+                            creators.addElement(creator);
+                        }else if(xpp.getName().equals("dc:language")) {
+                            if(xpp.next() == XmlPullParser.TEXT) {
+                                tagVal = xpp.getText();
+                                languages.addElement(tagVal);
                             }
                         }
                     }
@@ -255,8 +368,6 @@ public class UstadJSOPF {
             evtType = xpp.next();
             
         }while(evtType != XmlPullParser.END_DOCUMENT);
-        
-        return result;
     }
     
     public String getMimeType(String filename) {
@@ -319,4 +430,71 @@ public class UstadJSOPF {
         
         return -1;
     }
+
+    /**
+     * Add a cover image item.
+     *
+     * @param coverImage UstadJSOPFItem representing the cover image (including href and mime type)
+     */
+    public void addCoverImage(UstadJSOPFItem coverImage) {
+        if(coverImages == null)
+            coverImages = new Vector();
+
+        coverImages.addElement(coverImage);
+    }
+
+    /**
+     * Get the cover image for this publication.
+     *
+     * @param mimeType Preferred mime type (unimplemented)
+     *
+     * @return UstadJSOPFItem representing the cover image
+     */
+    public UstadJSOPFItem getCoverImage(String mimeType) {
+        //TODO: implement mime type preference here
+
+        if(coverImages == null || coverImages.size() == 0)
+            return null;
+
+        return (UstadJSOPFItem)coverImages.elementAt(0);
+    }
+
+    public Vector getLinks() {
+        return links;
+    }
+
+
+    /**
+     * Return the opf item that represents the navigation document. This is the OPF item that
+     * contains properties="nav". As per the spec, only one item is allowed to have this property.
+     *
+     * @return
+     */
+    public UstadJSOPFItem getNavItem() {
+        return navItem;
+    }
+
+    public Vector getCreators() {
+        return creators;
+    }
+
+    public UstadJSOPFCreator getCreator(int index) {
+        return (UstadJSOPFCreator)creators.elementAt(index);
+    }
+
+    public int getNumCreators() {
+        return creators != null ? creators.size() : 0;
+    }
+
+    /**
+     * Return a Vector of String objects containing the languages as per dc:language tags that were
+     * found on this OPF, in the order they appeared in the declaration.
+     *
+     * @return Vector of language codes as Strings.
+     */
+    public Vector getLanguages() {
+        return languages;
+    }
+
+
 }

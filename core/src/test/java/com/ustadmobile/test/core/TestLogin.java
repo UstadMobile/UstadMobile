@@ -33,19 +33,22 @@ package com.ustadmobile.test.core;
 /* $if umplatform == 2  $
     import j2meunit.framework.TestCase;
  $else$ */
-    import junit.framework.TestCase;
-/* $endif$ */
 
-import com.ustadmobile.test.core.buildconfig.TestConstants;
 import com.ustadmobile.core.controller.LoginController;
 import com.ustadmobile.core.util.TestUtils;
+import com.ustadmobile.test.core.buildconfig.TestConstants;
+
+import junit.framework.TestCase;
+
 import java.io.IOException;
+
+/* $endif$ */
 
 /** 
 *
  * @author mike
  */
-public class TestLogin extends TestCase{
+public abstract class TestLogin extends TestCase{
     
     public TestLogin() {
     }
@@ -56,17 +59,18 @@ public class TestLogin extends TestCase{
     public void tearDown() {
     }
 
-    public void testLogin() throws IOException{
-        TestUtils utils = new TestUtils();
-        int loginOKResult = LoginController.authenticate(
-                utils.getTestProperty(TestUtils.PROP_TESTUSER), 
-                utils.getTestProperty(TestUtils.PROP_TESTAUTH),
-                TestConstants.LOGIN_URL);
-        assertEquals("Login OK returns 200", 200, loginOKResult);
-    }
+//    public void testLogin() throws IOException{
+//        TestUtils utils = new TestUtils();
+//        Object testLock = new Object();
+//        int loginOKResult = LoginController.authenticate(
+//                utils.getTestProperty(TestUtils.PROP_TESTUSER),
+//                utils.getTestProperty(TestUtils.PROP_TESTAUTH),
+//                TestConstants.LOGIN_URL);
+//        assertEquals("Login OK returns 200", 200, loginOKResult);
+//    }
     
     public void runTest() throws IOException{
-        testLogin();
+//        testLogin();
     }
     
 }

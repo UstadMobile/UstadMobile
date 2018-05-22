@@ -30,15 +30,25 @@
  */
 package com.ustadmobile.core.view;
 
-import com.ustadmobile.core.controller.CatalogController;
-import com.ustadmobile.core.opds.UstadJSOPDSEntry;
-import com.ustadmobile.core.opds.UstadJSOPDSItem;
+import com.ustadmobile.core.db.UmProvider;
+import com.ustadmobile.core.model.CourseProgress;
+import com.ustadmobile.core.opds.OpdsFilterOptions;
+import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
+import com.ustadmobile.lib.db.entities.OpdsEntryWithStatusCache;
+
+import java.util.Set;
 
 /**
  *
  * @author varuna
  */
 public interface CatalogView extends UstadView{
+
+    interface CardView {
+
+        void setStatus();
+
+    }
     
     public int CMD_DOWNLOADALL = 0;
     
@@ -47,32 +57,8 @@ public interface CatalogView extends UstadView{
     public int CMD_DOWNLOADENTRY = 2;
 
     public static final String VIEW_NAME = "Catalog";
-    
-    /**
-     * Set the controller linked to this view: the feed is referenced
-     * via controller.
-     * @param controller 
-     */
-    public void setController(CatalogController controller);
-    
-    /**
-     * Get the controller linked to this view: the feed is reference via the
-     * controller
-     * 
-     * @return Controller connected with this view
-     */
-    public CatalogController getController();
-    
-    /**
-     * Show a confirm/cancel dialog to the user (e.g. delete item? download item?)
-     * 
-     * @param title
-     * @param text 
-     * @param commandId The type of event (the view should then know what to trigger next)
-     */
-    public void showConfirmDialog(String title, String message, String positiveChoice, String negativeChoice, final int commandId);
-    
-    
+
+
     /**
      * Set the status of a given entry (e.g. acquired, not acquired, in progress) 
      * 
@@ -81,14 +67,6 @@ public interface CatalogView extends UstadView{
      */
     public void setEntryStatus(String entryId, int status);
     
-    /**
-     * Set the thumbnail for the given entry.  Loading the thumbnails is threaded
-     * and this method should handle putting calls onto the UI thread as required
-     * 
-     * @param entryId the entry id for the entry to s
-     * @param iconFileURI A file with an icon image
-     */
-    public void setEntrythumbnail(String entryId, String iconFileURI);
 
     /**
      * Set the background for the given catalog entry.  This is not found in standard OPDS
@@ -125,45 +103,27 @@ public interface CatalogView extends UstadView{
      * Update the progress bar showing the progress on a given download entry
      * 
      * @param entryId The entry id to be updated
-     * @param loaded the amount loaded 
-     * @param total total amount to load (or -1 if not yet known)
+     * @param progress The progress as a float between 0 and 1
+     * @param statusText The status text to display to the user
      */
-    public void updateDownloadEntryProgress(String entryId, int loaded, int total);
-    
+    void updateDownloadEntryProgress(String entryId, float progress, String statusText);
+
     /**
-     * Get the entries that have been selected by the user (e.g. by long press)
-     * 
-     * @return Array of entries selected by the user
+     * Show the user's progress on this course (displayed to the right of the entry as a donut
+     * chart (e.g. fitness goal style).
+     *
+     * @param entryId
+     * @param progress
      */
-    public UstadJSOPDSEntry[] getSelectedEntries();
-    
+    void setEntryProgress(String entryId, CourseProgress progress);
+
+
     /**
      * Set the entries that are to be marked as selected
      * 
-     * @param entries Array of entries to be marked as selected
+     * @param entries Array of Strings with the uuid of the entries that should be shown as selected
      */
-    public void setSelectedEntries(UstadJSOPDSEntry[] entries);
-
-    /**
-     * Show the dialog for adding a new feed
-     */
-    public void showAddFeedDialog();
-
-    public void setAddFeedDialogURL(String url);
-
-    public String getAddFeedDialogURL();
-
-    public String getAddFeedDialogTitle();
-
-    public void setAddFeedDialogTitle(String title);
-
-    /**
-     * Sets whether or not the URL and Title text fields are visible - they should be shown only
-     * when the user has selected Custom OPDS from the presets drop down
-     *
-     * @param visible
-     */
-    public void setAddFeedDialogTextFieldsVisible(boolean visible);
+    void setSelectedEntries(Set<String> entries);
 
     public void refresh();
 
@@ -173,18 +133,35 @@ public interface CatalogView extends UstadView{
      *
      * @param buttonVisible true to make it visible; false otherwise
      */
-    public void setBrowseButtonVisible(boolean buttonVisible);
+    public void setFooterButtonVisible(boolean buttonVisible);
 
     /**
      * Sets the label for the browse button
      *
      * @param browseButtonLabel Text label for the browse button
      */
-    public void setBrowseButtonLabel(String browseButtonLabel);
+    public void setFooterButtonLabel(String browseButtonLabel);
 
     public void setDeleteOptionAvailable(boolean deleteOptionAvailable);
 
     public void setAddOptionAvailable(boolean addOptionAvailable);
 
+    /**
+     * Set alternative (translated) versions of this catalog, as per the rel='alternate' hreflang='other-lang'
+     * links. The view should then call CatalogController.handleClickAlternativeTranslationLink
+     * with the index of the language selected
+     *
+     * @param translationLinks String array of other languages.
+     * @param disabledItem The index of an item which should be disabled. This would normally be the
+     *                     language the catalog is already in (if known). Providing a value < 0
+     *                     means none of the items are to be disabled.
+     */
+    void setAlternativeTranslationLinks(String[] translationLinks, int disabledItem);
+
+    void setRefreshing(boolean isRefreshing);
+
+    void setFilterOptions(OpdsFilterOptions filterOptions);
+
+    void setEntryProvider(UmProvider<OpdsEntryWithStatusCache> entryProvider);
 
 }

@@ -46,32 +46,26 @@ public class CatalogEntryInfo {
 
     public String mimeType;
     
-    public String downloadID = "";
-    
-    public static final int ACQUISITION_STATUS_ACQUIRED = 0;
-    
-    public static final int ACQUISITION_STATUS_NOTACQUIRED = 1;
-    
-    public static final int ACQUISITION_STATUS_INPROGRESS = 2;
-    
+    public long downloadID = -1;
+
     public int downloadTotalSize = -1;
 
     public String toString() {
-        //StringBuilder sb = new StringBuilder();
-        //Changed to support J2ME:
         StringBuffer sb = new StringBuffer();
         sb.append(acquisitionStatus).append(':');
-        for(int i = 0; i < srcURLs.length; i++) {
-            sb.append(URLTextUtil.urlEncodeUTF8(srcURLs[i]));
-            if(i < srcURLs.length-1) {
-                sb.append(',');
+        if(srcURLs != null) {
+            for(int i = 0; i < srcURLs.length; i++) {
+                sb.append(URLTextUtil.urlEncodeUTF8(srcURLs[i]));
+                if(i < srcURLs.length-1) {
+                    sb.append(',');
+                }
             }
         }
         sb.append(':');
         sb.append(URLTextUtil.urlEncodeUTF8(fileURI)).append(':');
         sb.append(mimeType);
-        if(acquisitionStatus == ACQUISITION_STATUS_INPROGRESS) {
-            sb.append(':').append(URLTextUtil.urlEncodeUTF8(downloadID)).append(':').append(
+        if(acquisitionStatus == CatalogPresenter.STATUS_ACQUISITION_IN_PROGRESS) {
+            sb.append(':').append(String.valueOf(downloadID)).append(':').append(
                     downloadTotalSize);
         }
         return sb.toString();
@@ -88,8 +82,8 @@ public class CatalogEntryInfo {
         entryInfo.srcURLs = urls;
         entryInfo.fileURI = URLTextUtil.urlDecodeUTF8(strComps[2]);
         entryInfo.mimeType = strComps[3];
-        entryInfo.downloadID = strComps.length >= 5 ? URLTextUtil.urlDecodeUTF8(strComps[4])
-                : "";
+        entryInfo.downloadID = strComps.length >= 5 && strComps[4].length() > 0
+                ? Integer.parseInt(strComps[4]) : -1L;
         entryInfo.downloadTotalSize = strComps.length >= 6 ? Integer.parseInt(strComps[5])
                 : -1;
         return entryInfo;

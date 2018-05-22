@@ -30,17 +30,17 @@
  */
 package com.ustadmobile.test.core;
 
-import com.ustadmobile.test.core.buildconfig.TestConstants;
-import com.ustadmobile.core.util.TestUtils;
 import com.ustadmobile.core.util.UMTinCanUtil;
+import com.ustadmobile.test.core.buildconfig.TestConstants;
 
+import junit.framework.TestCase;
+
+import org.json.JSONObject;
 
 /* $if umplatform == 2  $
     import com.ustadmobile.test.port.j2me.TestCase;
     import org.json.me.*;
  $else$ */
-    import junit.framework.TestCase;
-    import org.json.*;
 /* $endif$ */
 
 
@@ -52,13 +52,12 @@ public class TestUMTinCanUtils extends TestCase{
     
     
     public void testUMTinCanUtils() throws Exception{
-        TestUtils utils = new TestUtils();
-        JSONObject testActor = UMTinCanUtil.makeActorFromUserAccount(
-            utils.getTestProperty(TestUtils.PROP_TESTUSER), TestConstants.XAPI_SERVER);
+        JSONObject testActor = UMTinCanUtil.makeActorFromUserAccount(TestConstants.LOGIN_USER,
+            TestConstants.XAPI_SERVER);
         JSONObject testAcct =testActor.getJSONObject("account");
         String testAcctStr = testAcct.toString();
-        assertEquals("Correctly set name on account", testAcct.getString("name"), 
-                utils.getTestProperty(TestUtils.PROP_TESTUSER));
+        assertEquals("Correctly set name on account", TestConstants.LOGIN_USER,
+                testAcct.getString("name"));
         assertEquals("Correctly set homepage", testAcct.getString("homePage"),
             TestConstants.XAPI_SERVER);
         

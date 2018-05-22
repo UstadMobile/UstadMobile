@@ -7,32 +7,28 @@ import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
-import com.ustadmobile.core.MessageIDConstants;
 import com.ustadmobile.core.controller.LoginController;
+import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.core.view.DialogResultListener;
 import com.ustadmobile.core.view.DismissableDialog;
 import com.ustadmobile.core.view.LoginView;
 
 /**
  * An Android Dialog Fragment that implements the LoginView.
  */
-public class LoginDialogFragment extends android.support.v4.app.DialogFragment implements LoginView, View.OnClickListener, DismissableDialog {
+public class LoginDialogFragment extends UstadDialogFragment implements LoginView, View.OnClickListener, DismissableDialog {
 
     private LoginController mLoginController;
 
     private View mView;
 
     private String mXapiServer;
-
-    private DialogResultListener mResultListener;
-
 
     public LoginDialogFragment() {
         //Required empty public constructor
@@ -42,27 +38,20 @@ public class LoginDialogFragment extends android.support.v4.app.DialogFragment i
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
+        getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
         mView= inflater.inflate(R.layout.fragment_login_dialog, container, false);
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
 
-        ((TextView)mView.findViewById(R.id.fragment_login_title_text)).setText(
-                impl.getString(MessageIDConstants.login));
-        ((EditText)mView.findViewById(R.id.fragment_login_dialog_username_text)).setHint(
-                impl.getString(MessageIDConstants.username));
-        ((EditText)mView.findViewById(R.id.fragment_login_dialog_password)).setHint(
-                impl.getString(MessageIDConstants.password));
-
         Button forgotPassword= (Button) mView.findViewById(R.id.fragment_login_forgot_password_button);
-        forgotPassword.setText(Html.fromHtml("<u>" + impl.getString(MessageIDConstants.forgot_password) +
-                "</u>"));
+        forgotPassword.setText(Html.fromHtml("<u>"
+                + impl.getString(MessageID.forgot_password, getContext()) + "</u>"));
         forgotPassword.setTransformationMethod(null);
 
         Button loginButton = (Button)mView.findViewById(R.id.fragment_login_dialog_login_button);
         loginButton.setOnClickListener(this);
-        loginButton.setText(impl.getString(MessageIDConstants.login));
 
         Button registerButton = (Button)mView.findViewById(R.id.fragment_login_dialog_register_button);
-        registerButton.setText(impl.getString(MessageIDConstants.register));
+        registerButton.setOnClickListener(this);
 
         mLoginController = LoginController.makeControllerForView(this);
         mLoginController.setUIStrings();
@@ -86,33 +75,33 @@ public class LoginDialogFragment extends android.support.v4.app.DialogFragment i
     @Override
     public void onClick(View view) {
         int viewId = view.getId();
-        switch(viewId) {
-            case R.id.fragment_login_dialog_login_button:
-            case R.id.fragment_login_dialog_register_button:
-                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
-                    view.setElevation(8);
-                }
-                break;
+        if((viewId == R.id.fragment_login_dialog_login_button
+                || viewId == R.id.fragment_login_dialog_register_button)
+                && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
+            view.setElevation(8);
         }
 
+        if(viewId == R.id.fragment_login_dialog_login_button) {
+            String username = ((EditText)mView.findViewById(R.id.fragment_login_dialog_username_text)).getText().toString();
+            String password = ((EditText)mView.findViewById(R.id.fragment_login_dialog_password)).getText().toString();
 
-        switch(viewId){
-            case R.id.fragment_login_dialog_login_button:
-                String username = ((EditText)mView.findViewById(R.id.fragment_login_dialog_username_text)).getText().toString();
-                String password = ((EditText)mView.findViewById(R.id.fragment_login_dialog_password)).getText().toString();
+            //Login against local database
+            boolean locallyPresent =
+                    mLoginController.handleLoginLocally(username, password, getContext());
+            if(!locallyPresent) {
+                //Login against main server:
                 mLoginController.handleClickLogin(username, password, mXapiServer);
-                break;
+            }
+        }else if(viewId == R.id.fragment_login_dialog_register_button) {
+            mLoginController.handleClickRegister();
         }
     }
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if(context instanceof DialogResultListener) {
-            mResultListener = (DialogResultListener)context;
-            if(mLoginController != null)
-                mLoginController.setResultListener(mResultListener);
-        }
+        if(mLoginController != null && mResultListener != null)
+            mLoginController.setResultListener(mResultListener);
     }
 
     @Override
@@ -159,4 +148,6 @@ public class LoginDialogFragment extends android.support.v4.app.DialogFragment i
     public void setUIStrings() {
 
     }
+
+
 }

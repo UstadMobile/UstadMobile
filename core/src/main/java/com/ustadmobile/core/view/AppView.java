@@ -50,6 +50,10 @@ public interface AppView {
      * http://developer.android.com/reference/android/widget/Toast.html#LENGTH_LONG
      */
     public static final int LENGTH_LONG = 1;
+
+    int CHOICE_POSITIVE = 1;
+
+    int CHOICE_NEGATIVE = 0;
     
     /**
      * Show progress going on (e.g. show spinner) with title
@@ -97,7 +101,7 @@ public interface AppView {
     
     /**
      * Show a list of choices to the user.  When the user has made a selection -
-     * notify the listener provided of the choice number and command id.
+     * notify the managerTaskListener provided of the choice number and command id.
      * 
      * The choice dialog will not just go away when the user makes a choice - 
      * the dismissChoiceDialog method must be called.  
@@ -107,7 +111,7 @@ public interface AppView {
      * 
      * @param title The title for the choice being presented to the user
      * @param choices An array of choices for the user to choose from (e.g. Phone Memory, SD Card, etc)
-     * @param commandId The command ID that will be supplied to the listener
+     * @param commandId The command ID that will be supplied to the managerTaskListener
      * @param listener the Listener to be registered when a choice is selected
      */
     public void showChoiceDialog(String title, String[] choices, int commandId, AppViewChoiceListener listener);
@@ -116,5 +120,39 @@ public interface AppView {
      * Hide the choice dialog if showing
      */
     public void dismissChoiceDialog();
+
+    /**
+     * Show a confirmation dialog. Use AppViewChoiceListener to listen for the result. The
+     * selection will be CHOICE_POSITIVE or CHOICE_NEGATIVE depending on the user selection
+     *
+     * @param title Title of the dialog window
+     * @param text Text for the dialog window
+     * @param positiveButtonText Text for the positive / confirmation button e.g. delete, add etc.
+     * @param negativeButtonText Text for the negative button e.g. cancel
+     * @param cmdId Command ID that will be passed to the listener
+     * @param listener Listener to receive event when the user makes a choice
+     */
+    void showConfirmDialog(final String title, final String text, String positiveButtonText,
+                                       String negativeButtonText, final int cmdId,
+                                       final AppViewChoiceListener listener);
+
+    /**
+     * Show a confirmation dialog. Use AppViewChoiceListener to listen for the result. The
+     * selection will be CHOICE_POSITIVE or CHOICE_NEGATIVE depending on the user selection
+     *
+     * @param title Title of the dialog window
+     * @param text Text for the dialog window
+     * @param positiveButtonText Text for the positive / confirmation button e.g. delete, add etc.
+     * @param negativeButtonText Text for the negative button e.g. cancel
+     * @param cmdId Command ID that will be passed to the listener
+     * @param listener Listener to receive event when the user makes a choice
+     */
+    void showConfirmDialog(int title, int text, int positiveButtonText, int negativeButtonText,
+                           int cmdId, AppViewChoiceListener listener);
+
+    /**
+     * Dismiss any active confirmation dialog
+     */
+    void dismissConfirmDialog();
 
 }

@@ -30,6 +30,8 @@
  */
 package com.ustadmobile.core.impl;
 
+import java.util.Hashtable;
+
 /**
  *
  * @author mike
@@ -62,7 +64,10 @@ public class UstadMobileConstants {
      * array with the locale code and it's name
      */
     public static final String[][] SUPPORTED_LOCALES = new String[][] {
-        {"en", "English"}, {"ar", "العَرَبِية‎"}, {"fa", "دری"}, {"ps", "پښتو"}};
+        {"en", "English"},
+        {"ar", "\u0627\u0644\u0639\u064e\u0631\u064e\u0628\u0650\u064a\u0629\u200e"},
+        {"fa", "\u062f\u0631\u06cc"},
+        {"ps", "\u067e\u069a\u062a\u0648"}};
     
     /**
      * Index of the locale code in the string array - e.g.
@@ -750,4 +755,15 @@ public class UstadMobileConstants {
         "Zambia",
         "Zimbabwe"
     };
+
+    public static final Hashtable LANGUAGE_NAMES = new Hashtable();
+
+    static {
+        LANGUAGE_NAMES.put("en", "English");
+        LANGUAGE_NAMES.put("en-US", "English (US)");
+        LANGUAGE_NAMES.put("ps", "\u067e\u069a\u062a\u0648");
+        LANGUAGE_NAMES.put("fa-AF", "\u062f\u0631\u06cc");
+        LANGUAGE_NAMES.put("fa", "\u062f\u0631\u06cc");
+    }
+
 }

@@ -31,6 +31,8 @@
 package com.ustadmobile.core.view;
 
 import com.ustadmobile.core.controller.ContainerController;
+import com.ustadmobile.core.epubnav.EPUBNavDocument;
+import com.ustadmobile.core.epubnav.EPUBNavItem;
 
 /**
  *
@@ -40,26 +42,18 @@ public interface ContainerView extends UstadView {
 
     public static final String VIEW_NAME = "Container";
 
-    public void setController(ContainerController controller);
+    void setController(ContainerController controller);
         
-    public void setContainerTitle(String containerTitle);
+    void setContainerTitle(String containerTitle);
+
+    void setSpineUrls(String basePath, String[] spineUrls, String query);
 
     void setPageTitle(String pageTitle);
 
-    /**
-     * The content is an EPUB - show the EPUB
-     */
-    public void showEPUB();
-    
-    /**
-     * Orders the view to look again at the URLs of each page.  This is used for
-     * instance when the registration is changed... thus changing the URL of each
-     * page.
-     * 
-     * @return true if successfully executed, false otherwise
-     */
-    public boolean refreshURLs();
+    void setTableOfContents(EPUBNavItem tocNavItem);
 
+    void setCoverImage(String imageUrl);
 
+    void setAuthorName(String authorName);
     
 }

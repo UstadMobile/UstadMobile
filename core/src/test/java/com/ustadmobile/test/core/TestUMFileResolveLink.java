@@ -33,9 +33,12 @@ package com.ustadmobile.test.core;
 /* $if umplatform == 2  $
     import j2meunit.framework.TestCase;
  $else$ */
-    import junit.framework.TestCase;
-/* $endif$ */
+
 import com.ustadmobile.core.util.UMFileUtil;
+
+import junit.framework.TestCase;
+
+/* $endif$ */
 
 /**
  *
@@ -74,6 +77,10 @@ public class TestUMFileResolveLink extends TestCase{
             "http://server1.com/file.jpg",
             UMFileUtil.resolveLink("http://server1.com/some/other.html", 
                 "../file.jpg"));
+
+        assertEquals("Can handle base link with no folder", "images/thumb.png",
+                UMFileUtil.resolveLink("content.opf", "images/thumb.png"));
+
     }
 
     public void runTest(){

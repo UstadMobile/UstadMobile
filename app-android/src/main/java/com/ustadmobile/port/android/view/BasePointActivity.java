@@ -1,38 +1,47 @@
 package com.ustadmobile.port.android.view;
 
 
+import android.content.DialogInterface;
+import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.NavigationView;
+import android.support.design.widget.TabLayout;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.view.ViewPager;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
+import android.widget.CheckBox;
+
 import com.toughra.ustadmobile.R;
-import com.ustadmobile.core.MessageIDConstants;
-import com.ustadmobile.core.buildconfig.CoreBuildConfig;
+import com.ustadmobile.core.controller.BaseCatalogPresenter;
 import com.ustadmobile.core.controller.BasePointController;
+import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.BasePointMenuItem;
 import com.ustadmobile.core.view.BasePointView;
 import com.ustadmobile.core.view.DialogResultListener;
 import com.ustadmobile.core.view.DismissableDialog;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
-import com.ustadmobile.port.android.view.slidingtab.SlidingTabLayout;
 
-import android.os.Build;
-import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.design.widget.NavigationView;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentStatePagerAdapter;
-import android.support.v4.view.ViewPager;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.WindowManager;
-
+import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.WeakHashMap;
 
-public class BasePointActivity extends UstadBaseActivity implements BasePointView, NavigationView.OnNavigationItemSelectedListener, DialogResultListener {
+
+public class BasePointActivity extends UstadBaseActivity implements BasePointView,
+        NavigationView.OnNavigationItemSelectedListener, DialogResultListener,
+        View.OnClickListener, TabLayout.OnTabSelectedListener,
+        CatalogOPDSFragment.CatalogOPDSFragmentListener{
 
     protected BasePointController mBasePointController;
 
@@ -56,43 +65,93 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
 
     private BasePointMenuItem[] mNavigationDrawerItems;
 
+    private AlertDialog shareAppDialog;
+
+    private ArrayList<Hashtable> tabArgumentsList;
+
+    private TabLayout mTabLayout;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if(Build.VERSION.SDK_INT>= Build.VERSION_CODES.LOLLIPOP){
-            getWindow().setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION, WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
-            getWindow().setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS, WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-        }
         setContentView(R.layout.activity_base_point);
-        Hashtable args = UMAndroidUtil.bundleToHashtable(getIntent().getExtras());
+        Hashtable savedInstanceHt = UMAndroidUtil.bundleToHashtable(savedInstanceState);
+        String recreateWelcomeVal = UstadMobileSystemImpl.getInstance().getAppPref(
+                "recreate-" + BasePointController.ARG_WELCOME_SCREEN_DISPLAYED, this);
 
-        //make OPDS fragments and set them here
-        mBasePointController = BasePointController.makeControllerForView(this, args);
-        setBaseController(mBasePointController);
-        setUMToolbar();
+        /*
+         * When recreate is manually called (e.g. in-app locale change) onSaveInstanceState is not
+         * called by Android. Thus we look for a manually saved state.
+         */
+        if(recreateWelcomeVal != null) {
+            UstadMobileSystemImpl.getInstance().setAppPref(
+                    "recreate-" + BasePointController.ARG_WELCOME_SCREEN_DISPLAYED, null, this);
+        }
+
+        if(savedInstanceHt == null && recreateWelcomeVal != null) {
+            savedInstanceHt.put(BasePointController.ARG_WELCOME_SCREEN_DISPLAYED, recreateWelcomeVal);
+        }
+
+        setUMToolbar(R.id.um_toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        tabArgumentsList = new ArrayList<>();
         mPagerAdapter = new BasePointPagerAdapter(getSupportFragmentManager());
+
+
         ViewPager viewPager = (ViewPager)findViewById(R.id.basepoint_pager);
         viewPager.setAdapter(mPagerAdapter);
-        SlidingTabLayout tabs = (SlidingTabLayout)findViewById(R.id.activity_basepoint_sliding_tab_layout);
-        tabs.setDistributeEvenly(false);
-        tabs.setViewPager(viewPager);
-        tabs.setCustomTabColorizer(new SlidingTabLayout.TabColorizer() {
-            @Override
-            public int getIndicatorColor(int position) {
-                return getResources().getColor(R.color.primary_text);
-            }
-        });
+
+        mTabLayout= (TabLayout)findViewById(R.id.activity_basepoint_tablayout);
+        mTabLayout.setupWithViewPager(viewPager);
+        mTabLayout.setSelectedTabIndicatorColor(ContextCompat.getColor(this, R.color.primary_text));
+        mTabLayout.setTabTextColors(ContextCompat.getColor(this, R.color.primary_light),
+                ContextCompat.getColor(this, R.color.primary_text));
+        mTabLayout.addOnTabSelectedListener(this);
 
         mDrawerLayout = (DrawerLayout)findViewById(R.id.activity_basepoint_drawlayout);
         mDrawerNavigationView = (NavigationView)findViewById(R.id.activity_basepoint_navigationview);
         mDrawerNavigationView.setNavigationItemSelectedListener(this);
-        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.string.drawer_open,
-                R.string.drawer_close);
+        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.string.open,
+                R.string.closed);
         mDrawerLayout.addDrawerListener(mDrawerToggle);
-        setMenuItems(this.mNavigationDrawerItems);
+
+        findViewById(R.id.activity_basepoint_fab).setOnClickListener(this);
+
+        mBasePointController = new BasePointController(this, this);
+        mBasePointController.onCreate(UMAndroidUtil.bundleToHashtable(getIntent().getExtras()),
+                UMAndroidUtil.bundleToHashtable(savedInstanceState));
+
+    }
+
+    public void setWelcomeScreenDisplayed(boolean displayed) {
+        mBasePointController.setWelcomeScreenDisplayed(displayed);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mBasePointController.onResume();
+    }
+
+    @Override
+    public void recreate() {
+        /*
+         * When recreate is manually called (e.g. in-app locale change) onSaveInstanceState is not
+         * called by Android
+         */
+        String welcomeScreenDisplayed = String.valueOf(mBasePointController.isWelcomeScreenDisplayed());
+        UstadMobileSystemImpl.getInstance().setAppPref("recreate-"
+                    + BasePointController.ARG_WELCOME_SCREEN_DISPLAYED, welcomeScreenDisplayed, this);
+        super.recreate();
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString(BasePointController.ARG_WELCOME_SCREEN_DISPLAYED,
+                String.valueOf(mBasePointController.isWelcomeScreenDisplayed()));
     }
 
     @Override
@@ -115,7 +174,8 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
                 String iconName;
 
                 for(int i = 0; i < menuItems.length; i++) {
-                    item = drawerMenu.add(0, BASEPOINT_MENU_CMD_ID_OFFSET+ i, 0, impl.getString(menuItems[i].getTitleStringId()));
+                    item = drawerMenu.add(0, BASEPOINT_MENU_CMD_ID_OFFSET+ i, 0,
+                        impl.getString(menuItems[i].getTitleStringId(), BasePointActivity.this));
                     iconName = menuItems[i].getIconName();
                     if(iconName != null){
                         int resId = getResources().getIdentifier(iconName, "drawable", getPackageName());
@@ -135,6 +195,7 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
         mDrawerToggle.syncState();
     }
 
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -143,14 +204,24 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
                     mDrawerLayout.openDrawer(mDrawerNavigationView);
                 }
                 return true;
+            case BasePointController.CMD_SHARE_APP:
+                mBasePointController.handleClickShareApp();
+                return true;
+
+            case BasePointController.CMD_RECEIVE_ENTRY:
+                mBasePointController.handleClickReceive();
+                return true;
+
         }
 
         return super.onOptionsItemSelected(item);
     }
 
     @Override
-    public void refreshCatalog(int column) {
-        ((CatalogOPDSFragment) mPagerAdapter.getItem(column)).loadCatalog();
+    public boolean onCreateOptionsMenu(Menu menu) {
+        menu.add(Menu.NONE, BasePointController.CMD_SHARE_APP, 0, R.string.share_application);
+        menu.add(Menu.NONE, BasePointController.CMD_RECEIVE_ENTRY, 1, R.string.receive);
+        return super.onCreateOptionsMenu(menu);
     }
 
     @Override
@@ -184,9 +255,61 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
         return false;
     }
 
-    public class BasePointPagerAdapter extends FragmentStatePagerAdapter {
+    @Override
+    public void onTabSelected(TabLayout.Tab tab) {
+        Fragment selectedFragment = mPagerAdapter.getItem(tab.getPosition());
 
-        private int[] tabTitles = new int[]{MessageIDConstants.my_resources, MessageIDConstants.classes};
+        if(selectedFragment instanceof CatalogOPDSFragment) {
+            //set the filter options
+            filterOptionsUpdated((CatalogOPDSFragment)selectedFragment);
+            updateAddFabVisibility((CatalogOPDSFragment)selectedFragment);
+        }
+    }
+
+    @Override
+    public void filterOptionsUpdated(CatalogOPDSFragment catalogFragment) {
+        Fragment selectedFragment = mPagerAdapter.getItem(mTabLayout.getSelectedTabPosition());
+        Fragment fromFragment = catalogFragment;
+        boolean sameFrag = selectedFragment.equals(fromFragment);
+        if(catalogFragment.equals(mPagerAdapter.getItem(mTabLayout.getSelectedTabPosition()))) {
+            //this is an update to the currently selected tab - show it.
+            ((OpdsFilterBar)findViewById(R.id.activity_basepoint_filterbar)).setFilterOptions(
+                    catalogFragment.getFilterOptions());
+        }
+    }
+
+    @Override
+    public void updateAddFabVisibility(CatalogOPDSFragment catalogFragment) {
+        Fragment currentFragment = mPagerAdapter.getItem(mTabLayout.getSelectedTabPosition());
+        if(catalogFragment.equals(currentFragment)) {
+            FloatingActionButton fab = (FloatingActionButton)findViewById(R.id.activity_basepoint_fab);
+            boolean showFab = catalogFragment.isAddOptionAvailable();
+            if(fab.isShown() && !showFab) {
+                fab.hide();
+            }else if(!fab.isShown() && showFab) {
+                fab.show();
+            }
+        }
+    }
+
+    @Override
+    public void onTabUnselected(TabLayout.Tab tab) {
+
+    }
+
+    @Override
+    public void onTabReselected(TabLayout.Tab tab) {
+
+    }
+
+    @Override
+    public void onDestroy() {
+        mBasePointController.onDestroy();
+        super.onDestroy();
+    }
+
+
+    public class BasePointPagerAdapter extends FragmentStatePagerAdapter {
 
         private WeakHashMap<Integer, Fragment> fragmentMap;
 
@@ -200,19 +323,9 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
         public Fragment getItem(int position) {
             Fragment fragment = fragmentMap.get(position);
             if(fragment == null) {
-                Bundle bundle = null;
-                switch(position) {
-                    case BasePointController.INDEX_DOWNLOADEDENTRIES:
-                        Hashtable posArgs =
-                                BasePointActivity.this.mBasePointController.getCatalogOPDSArguments(position);
-                        bundle = UMAndroidUtil.hashtableToBundle(posArgs);
-                        fragment = CatalogOPDSFragment.newInstance(bundle);
-                        break;
-                    case BasePointController.INDEX_CLASSES:
-                        bundle = new Bundle();
-                        fragment = ClassListFragment.newInstance(bundle);
-                        break;
-                }
+                fragment = CatalogOPDSFragment.newInstance(UMAndroidUtil.hashtableToBundle(
+                        tabArgumentsList.get(position)));
+
                 fragmentMap.put(position, fragment);
             }
 
@@ -221,14 +334,80 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
 
         @Override
         public int getCount() {
-            return BasePointActivity.this.classListVisible ? 2 : 1;
+            return tabArgumentsList.size();
         }
 
         @Override
         public CharSequence getPageTitle(int position) {
-            return UstadMobileSystemImpl.getInstance().getString(tabTitles[position]);
+            Object titleObj = tabArgumentsList.get(position).get(BaseCatalogPresenter.ARG_TITLE);
+            if(titleObj != null) {
+                try {
+                    int messageCode = Integer.parseInt((String)titleObj);
+                    return UstadMobileSystemImpl.getInstance().getString(messageCode,
+                            BasePointActivity.this);
+                }catch(NumberFormatException e) {
+                    UstadMobileSystemImpl.l(UMLog.ERROR, 681, titleObj.toString(), e);
+                }
+            }
+
+            return "Tab " + position;
         }
 
 
+    }
+
+    @Override
+    public void showShareAppDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.share_application);
+        builder.setView(R.layout.fragment_share_app_dialog);
+        builder.setPositiveButton(R.string.share, null);
+        builder.setNegativeButton(R.string.cancel, null);
+        shareAppDialog = builder.create();
+        shareAppDialog.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface dialogInterface) {
+                Button okButton = shareAppDialog.getButton(AlertDialog.BUTTON_POSITIVE);
+                okButton.setOnClickListener(BasePointActivity.this);
+            }
+        });
+        shareAppDialog.show();
+    }
+
+    @Override
+    public void onClick(View view) {
+        if(view.getId() == R.id.activity_basepoint_fab) {
+            Fragment currentFrag = mPagerAdapter.getItem(mTabLayout.getSelectedTabPosition());
+            if(currentFrag instanceof CatalogOPDSFragment) {
+                ((CatalogOPDSFragment)currentFrag).onClick(view);
+            }
+        }else {
+            CheckBox zipCheckbox = shareAppDialog.findViewById(R.id.fragment_share_app_zip_checkbox);
+            mBasePointController.handleClickConfirmShareApp(zipCheckbox.isChecked());
+        }
+    }
+
+    public void setShareAppDialogProgressVisible(boolean visible) {
+        shareAppDialog.findViewById(R.id.fragment_share_app_progres_label).setVisibility(
+            visible ? View.VISIBLE: View.GONE);
+        shareAppDialog.findViewById(R.id.fragment_share_app_zip_progress_bar).setVisibility(
+                visible ? View.VISIBLE: View.GONE);
+        shareAppDialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(!visible);
+        shareAppDialog.getButton(AlertDialog.BUTTON_NEGATIVE).setEnabled(!visible);
+    }
+
+    @Override
+    public void dismissShareAppDialog() {
+        shareAppDialog.dismiss();
+        shareAppDialog = null;
+    }
+
+    @Override
+    public void addTab(Hashtable tabArguments) {
+        tabArgumentsList.add(tabArguments);
+        if(tabArgumentsList.size() > 1){
+            mTabLayout.setVisibility(View.VISIBLE);
+        }
+        mPagerAdapter.notifyDataSetChanged();
     }
 }

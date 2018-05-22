@@ -1,0 +1,55 @@
+apply plugin: 'java-library'
+apply plugin: "maven-publish"
+
+task runOrmLiteGeneration(type: JavaExec) {
+    classpath sourceSets.main.runtimeClasspath
+}
+
+dependencies {
+    compile project(":core")
+    compile project(":sharedse")
+    compile project(":lib-core-fs")
+    compile project(':lib-core-fs-jcommon')
+    implementation project(":lib-util")
+
+    compile "com.j256.ormlite:ormlite-core:$version_ormlite"
+    compile "com.j256.ormlite:ormlite-jdbc:$version_ormlite"
+
+    compile "org.json:json:$version_json"
+    compile "net.sf.kxml:kxml2:$version_kxml"
+}
+
+task fatJar(type: Jar) {
+    baseName = project.name + '-all'
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}
+
+task sourceJar(type: Jar) {
+    from sourceSets.main.allJava
+}
+
+sourceCompatibility = "1.8"
+targetCompatibility = "1.8"
+
+publishing {
+    publications {
+        nanolrscore(MavenPublication) {
+            groupId 'com.ustadmobile.app'
+            artifactId 'app-javase'
+            version rootProject.version
+
+            from components.java
+
+            artifact sourceJar {
+                classifier = 'sources'
+            }
+        }
+    }
+
+    repositories {
+        maven {
+            url rootProject.ext.buildConfigProperties['repo.dir']
+        }
+    }
+}

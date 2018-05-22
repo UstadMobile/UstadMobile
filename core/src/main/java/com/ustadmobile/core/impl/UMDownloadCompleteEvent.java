@@ -12,11 +12,19 @@ package com.ustadmobile.core.impl;
 public class UMDownloadCompleteEvent {
     private String downloadID;
     
-    private int[] status;
+    private int status;
+
+    private int downloadedFromPeer = 2;
     
-    public UMDownloadCompleteEvent(String downloadID, int[] status) {
+    public UMDownloadCompleteEvent(String downloadID, int status) {
         this.downloadID = downloadID;
         this.status = status;
+    }
+
+    public UMDownloadCompleteEvent(String downloadID, int status, int downloadedFromPeer) {
+        this.downloadID = downloadID;
+        this.status = status;
+        this.downloadedFromPeer = downloadedFromPeer;
     }
     
     /**
@@ -31,8 +39,12 @@ public class UMDownloadCompleteEvent {
     /**
      * The status of the download upon completion
      */
-    public int[] getStatus() {
+    public int getStatus() {
         return status;
+    }
+
+    public int getDownloadedFromPeer(){
+        return downloadedFromPeer;
     }
     
 }

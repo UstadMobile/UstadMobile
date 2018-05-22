@@ -1,0 +1,165 @@
+apply plugin: 'com.android.application'
+apply plugin: "jacoco"
+
+ext.buildConfigProperties = new Properties()
+ext.buildConfigProperties.load(new FileInputStream(project.file("../app-android/buildconfig.default.properties")))
+if (project.file("../app-android/buildconfig.local.properties").exists()) {
+    ext.buildConfigProperties.load(new FileInputStream(project.file("../app-android/buildconfig.local.properties")))
+}
+
+//See:
+// https://developer.android.com/studio/projects/android-library.html
+
+//As Per https://developer.android.com/studio/publish/app-signing.html#release-mode
+def keyStorePropertiesExists = rootProject.file("keystore.properties").exists()
+def keystoreProperties = new Properties()
+
+if (keyStorePropertiesExists) {
+    keystoreProperties.load(new FileInputStream(rootProject.file("keystore.properties")))
+}
+
+
+android {
+    compileSdkVersion rootProject.ext.version_android_compile_sdk
+    buildToolsVersion rootProject.ext.version_android_buildtools
+
+    lintOptions {
+        abortOnError false
+    }
+
+    packagingOptions {
+        exclude 'META-INF/INDEX.LIST'
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    defaultConfig {
+        applicationId "com.toughra.ustadmobile.launcher"
+        minSdkVersion 16
+        targetSdkVersion rootProject.ext.version_android_target_sdk
+        versionCode 1
+        versionName "1.0"
+        manifestPlaceholders = [applicationClass : "android.app.Application"]
+
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+    }
+
+    signingConfigs {
+        release {
+            keyAlias keyStorePropertiesExists ? keystoreProperties['keyAlias'] : "default"
+            keyPassword keyStorePropertiesExists ? keystoreProperties['keyPassword'] : "default"
+            storeFile keyStorePropertiesExists ? file(keystoreProperties['storeFile']) : new File("keystore.ks")
+            storePassword keyStorePropertiesExists ? keystoreProperties['storePassword'] : "default"
+        }
+    }
+
+    dexOptions {
+        jumboMode = true
+    }
+
+    flavorDimensions "config"
+
+    productFlavors {
+        /*
+         * The localconfig flavor is created based on the buildconfig.local.properties settings
+         */
+        localconfig {
+            dimension "config"
+            applicationId project.ext.buildConfigProperties['android.applicationId']
+            testApplicationId = project.ext.buildConfigProperties['android.applicationId'] + ".test"
+            versionCode rootProject.ext.ustadVersionCode + Integer.parseInt(rootProject.ext.buildConfigProperties['localVersionCode'])
+        }
+
+        /*
+         * The vanilla config flavor is here for convenience : it's the same as having no
+         * buildconfig.local.properties and relying on what's in buildconfig.default.properties
+         *
+         * It's just here to make life easier so you can switch flavors in Android studio without
+         * having to remove the local config files themselves
+         */
+        vanilla {
+            dimension "config"
+            applicationId "com.toughra.ustadmobile"
+            testApplicationId "com.toughra.ustadmobile.appandroid.test"
+            versionCode rootProject.ext.ustadVersionCode
+        }
+
+        vanillamultidex {
+            dimension "config"
+            applicationId "com.toughra.ustadmobile"
+            testApplicationId "com.toughra.ustadmobile.appandroid.test"
+            versionCode rootProject.ext.ustadVersionCode
+            multiDexEnabled true
+            packagingOptions { //Required: otherwise we get complaints on assembling
+                merge "META-INF/INDEX.LIST"
+            }
+        }
+
+        devMinApi21 {
+            dimension "config"
+            minSdkVersion 21
+            applicationId "com.toughra.ustadmobile"
+            testApplicationId "com.toughra.ustadmobile.appandroid.test"
+            versionCode rootProject.ext.ustadVersionCode
+            multiDexEnabled true
+            packagingOptions { //Required: otherwise we get complaints on assembling
+                merge "META-INF/INDEX.LIST"
+            }
+        }
+    }
+
+    buildTypes {
+        debug {
+            testCoverageEnabled = true
+        }
+
+        release {
+            testCoverageEnabled = false
+            debuggable false
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
+        }
+    }
+}
+
+configurations.all {
+//    Use this if needed to fix support library versions
+//    resolutionStrategy {
+//        force "com.android.support:appcompat-v7:$support_lib_version"
+//        force "com.android.support:cardview-v7:$support_lib_version"
+//        force "com.android.support:design:$support_lib_version"
+//        force "com.android.support:support-v4:$support_lib_version"
+//        force "com.android.support:recyclerview-v7:$support_lib_version"
+//        force "android.arch.lifecycle:livedata-core:$room_version"
+//        force "android.arch.lifecycle:runtime:$room_version"
+//        force "android.arch.core:runtime:$lifecycle_version"
+//    }
+
+    exclude group: "net.sf.kxml", module: "kxml2"
+    exclude group: "org.json", module: "json"
+    exclude module: "lib-database"
+
+}
+
+
+dependencies {
+    api project(':core')
+    api project(':sharedse')
+
+    api project(":app-android")
+
+    vanillamultidexApi "com.android.support:multidex:$version_android_multidex"
+
+
+    api fileTree(dir: 'libs', include: ['*.jar'])
+    androidTestImplementation "com.android.support.test.espresso:espresso-core:$version_android_espresso"
+    androidTestImplementation "com.android.support.test.espresso:espresso-contrib:$version_android_espresso"
+
+    testImplementation "junit:junit:$version_junit"
+}
+

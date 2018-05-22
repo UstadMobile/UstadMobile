@@ -1,0 +1,13 @@
+body {
+    column-width: 600px;
+    -webkit-column-width: 600px;
+    column-fill: auto;
+    -webkit-column-fill: auto;
+    height: 100%;
+    width: auto;
+}
+
+img, video, audio {
+    max-width: 100% !important;
+    max-height: 100% !important;
+}

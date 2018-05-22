@@ -1,38 +1,38 @@
 package com.ustadmobile.port.android.view;
-
-import android.app.ActivityManager;
-import android.app.ActivityManager.RunningServiceInfo;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.toughra.ustadmobile.R;
-import com.ustadmobile.core.controller.BasePointController;
+import com.ustadmobile.core.buildconfig.CoreBuildConfig;
 import com.ustadmobile.core.controller.UstadBaseController;
+import com.ustadmobile.core.impl.AppConfig;
+import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.core.view.BasePointView;
-import com.ustadmobile.core.view.UstadView;
-import com.ustadmobile.nanolrs.android.persistence.PersistenceManagerAndroid;
-import com.ustadmobile.nanolrs.android.service.XapiStatementForwardingService;
+import com.ustadmobile.lib.util.UMUtil;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
-import com.ustadmobile.port.android.impl.UstadMobileSystemImplFactoryAndroid;
-import com.ustadmobile.port.android.impl.http.HTTPService;
+import com.ustadmobile.port.android.netwokmanager.NetworkServiceAndroid;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Base activity to handle interacting with UstadMobileSystemImpl
@@ -40,8 +40,6 @@ import java.util.List;
  * Created by mike on 10/15/15.
  */
 public abstract class UstadBaseActivity extends AppCompatActivity implements ServiceConnection {
-
-    private String mUILocale;
 
     private int mUIDirection = UstadMobileConstants.DIR_LTR;
 
@@ -55,34 +53,57 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
 
     private String[] appMenuLabels;
 
-    private XapiStatementForwardingService mNanoLrsService;
-
     private String displayName;
 
     private List<WeakReference<Fragment>> fragmentList;
 
+    private boolean localeChanged = false;
+
+    private String localeOnCreate = null;
+
+    private boolean isStarted = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        UstadMobileSystemImpl.setSystemImplFactoryClass(UstadMobileSystemImplFactoryAndroid.class);
         //bind to the LRS forwarding service
-        Intent lrsForwardIntent = new Intent(this, XapiStatementForwardingService.class);
-        bindService(lrsForwardIntent, mLrsServiceConnection, Context.BIND_AUTO_CREATE);
-
         UstadMobileSystemImplAndroid.getInstanceAndroid().handleActivityCreate(this, savedInstanceState);
         fragmentList = new ArrayList<>();
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(UstadMobileSystemImplAndroid.ACTION_LOCALE_CHANGE);
+        LocalBroadcastManager.getInstance(this).registerReceiver(mLocaleChangeBroadcastReceiver,
+                intentFilter);
         super.onCreate(savedInstanceState);
+        localeOnCreate = UstadMobileSystemImpl.getInstance().getDisplayedLocale(this);
+
     }
 
-    private ServiceConnection mLrsServiceConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-            XapiStatementForwardingService.XapiStatementForwardingBinder binder = (XapiStatementForwardingService.XapiStatementForwardingBinder)iBinder;
-            mNanoLrsService = binder.getService();
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if(localeChanged) {
+            if(UstadMobileSystemImpl.getInstance().hasDisplayedLocaleChanged(localeOnCreate, this)) {
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        recreate();
+                    }
+                }, 200);
+            }
         }
+    }
 
+    /**
+     * Handles internal locale changes. When the user changes the locale using the system settings
+     * Android will take care of destroying and recreating the activity.
+     */
+    private BroadcastReceiver mLocaleChangeBroadcastReceiver = new BroadcastReceiver() {
         @Override
-        public void onServiceDisconnected(ComponentName componentName) {
-            mNanoLrsService = null;
+        public void onReceive(Context context, Intent intent) {
+            switch(intent.getAction()) {
+                case UstadMobileSystemImplAndroid.ACTION_LOCALE_CHANGE:
+                    localeChanged = true;
+                    break;
+            }
         }
     };
 
@@ -102,6 +123,10 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
     public void onServiceDisconnected(ComponentName name) {
 
     }
+
+
+
+
 
     public int getDirection() {
         return mUIDirection;
@@ -144,19 +169,17 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
         supportInvalidateOptionsMenu();
     }
 
+    //TODO: Fully disable this properly
     public boolean onCreateOptionsMenu(Menu menu) {
-        if(displayName != null) {
-            MenuItem displayNameItem = menu.add(Menu.NONE, Menu.NONE, 0, displayName);
-        }
-
-        if(appMenuCommands != null && appMenuLabels != null) {
-            for(int i = 0; i < appMenuLabels.length; i++) {
-                menu.add(Menu.NONE, appMenuCommands[i], i + 10, appMenuLabels[i]);
-            }
-            return true;
-        }else {
-            return super.onCreateOptionsMenu(menu);
-        }
+//        if(appMenuCommands != null && appMenuLabels != null) {
+//            for(int i = 0; i < appMenuLabels.length; i++) {
+//                menu.add(Menu.NONE, appMenuCommands[i], i + 10, appMenuLabels[i]);
+//            }
+//            return true;
+//        }else {
+//            return super.onCreateOptionsMenu(menu);
+//        }
+        return super.onCreateOptionsMenu(menu);
     }
 
     public boolean handleClickAppMenuItem(MenuItem item, UstadBaseController controller) {
@@ -172,9 +195,6 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
         return umToolbar;
     }
 
-    protected void setUMToolbar() {
-        setUMToolbar(R.id.um_toolbar);
-    }
 
     protected void setBaseController(UstadBaseController baseController) {
         this.baseController = baseController;
@@ -189,33 +209,30 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
 
     @Override
     public void onStart() {
+        isStarted = true;
         super.onStart();
         UstadMobileSystemImplAndroid.getInstanceAndroid().handleActivityStart(this);
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        if(handleUIStringsOnResume) {
-            String sysLocale = UstadMobileSystemImpl.getInstance().getLocale();
-            if(mUILocale != null && !mUILocale.equals(sysLocale)) {
-                //the locale has changed - we need to update the ui
-                baseController.setUIStrings();
-            }
-
-            mUILocale = new String(sysLocale);
-        }
+    public void onStop() {
+        isStarted = false;
+        super.onStop();
+        UstadMobileSystemImpl.getInstance().handleSave();
+        UstadMobileSystemImplAndroid.getInstanceAndroid().handleActivityStop(this);
     }
 
-    public void onStop() {
-        super.onStop();
-        UstadMobileSystemImplAndroid.getInstanceAndroid().handleActivityStop(this);
+    /**
+     * Can be used to check if the activity has been started.
+     *
+     * @return true if the activity is started. false if it has not been started yet, or it was started, but has since stopped
+     */
+    public boolean isStarted() {
+        return isStarted;
     }
 
     public void onDestroy() {
         super.onDestroy();
-        unbindService(mLrsServiceConnection);
-        PersistenceManagerAndroid.getInstanceAndroid().releaseHelperForContext(this);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mLocaleChangeBroadcastReceiver);
         UstadMobileSystemImplAndroid.getInstanceAndroid().handleActivityDestroy(this);
     }
 
@@ -227,12 +244,10 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
     public boolean onOptionsItemSelected(MenuItem item) {
         switch(item.getItemId()) {
             case android.R.id.home:
-                UstadMobileSystemImpl.getInstance().go(BasePointView.VIEW_NAME,
-                        BasePointController.makeDefaultBasePointArgs(this), this);
+                UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+                impl.go(impl.getAppConfigString(AppConfig.KEY_FIRST_DEST, null, this), this);
                 return true;
-            case R.id.action_finish:
-                finish();
-                return true;
+
 
         }
 
@@ -278,5 +293,21 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
         super.onBackPressed();
     }
 
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        final Resources res = newBase.getResources();
+        final Configuration config = res.getConfiguration();
+        String languageSetting = UstadMobileSystemImpl.getInstance().getLocale(newBase);
+        UstadMobileSystemImpl.l(UMLog.DEBUG, 652, "Base Activity: set language to  '"
+                + languageSetting + "'");
 
+        if(Build.VERSION.SDK_INT >= 17) {
+            Locale locale = languageSetting.equals(UstadMobileSystemImpl.LOCALE_USE_SYSTEM)
+                    ? Locale.getDefault() : new Locale(languageSetting);
+            config.setLocale(locale);
+            super.attachBaseContext(newBase.createConfigurationContext(config));
+        }else {
+            super.attachBaseContext(newBase);
+        }
+    }
 }

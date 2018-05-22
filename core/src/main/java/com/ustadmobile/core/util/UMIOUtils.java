@@ -31,16 +31,18 @@
 
 package com.ustadmobile.core.util;
 
-import com.ustadmobile.core.impl.HTTPResult;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.impl.ZipFileHandle;
+
+import org.xmlpull.v1.XmlPullParserException;
+
+import java.io.ByteArrayOutputStream;
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Hashtable;
-import org.xmlpull.v1.XmlPullParserException;
 
 /**
  *
@@ -51,6 +53,8 @@ public class UMIOUtils {
     public static final int HTTP_SIZE_NOT_GIVEN = -1;
     
     public static final int HTTP_SIZE_IO_EXCEPTION = -2;
+
+    public static final int DEFAULT_BUFFER_SIZE = 8 * 1024;
     
     /**
      * Close the given input stream if not null
@@ -63,6 +67,16 @@ public class UMIOUtils {
                 in.close();
             }
         }catch(IOException e) {
+        }
+    }
+
+    public static final void closeQuietly(Closeable closeable) {
+        if(closeable != null){
+            try {
+                closeable.close();
+            }catch(IOException e) {
+
+            }
         }
     }
     
@@ -122,6 +136,50 @@ public class UMIOUtils {
         }
         out.flush();
     }
+
+    public static final void readFully(InputStream in, OutputStream out) throws IOException{
+        readFully(in, out, DEFAULT_BUFFER_SIZE);
+    }
+
+    public static final String readStreamToString(InputStream in, int bufsize) throws IOException{
+        ByteArrayOutputStream bout = new ByteArrayOutputStream();
+        readFully(in, bout, bufsize);
+        in.close();
+
+        return new String(bout.toByteArray(), "UTF-8");
+    }
+
+    public static final String readStreamToString(InputStream in) throws IOException{
+        return readStreamToString(in, DEFAULT_BUFFER_SIZE);
+    }
+
+    public static final byte[] readStreamToByteArray(InputStream in, int bufsize) throws IOException{
+        ByteArrayOutputStream bout = new ByteArrayOutputStream();
+        readFully(in, bout, bufsize);
+        return bout.toByteArray();
+    }
+
+    public static final byte[] readStreamToByteArray(InputStream in) throws IOException {
+        return readStreamToByteArray(in, DEFAULT_BUFFER_SIZE);
+    }
+
+
+
+    /**
+     * Read from the given input stream and return a string
+     *
+     * @param in Input Stream to read from
+     * @param encoding Encoding to use
+     * @return String from the given input stream in the given encoding
+     * @throws IOException
+     */
+    public static final String readToString(InputStream in, String encoding) throws IOException{
+        ByteArrayOutputStream bout = new ByteArrayOutputStream();
+        readFully(in, bout, 1024);
+        in.close();
+        return new String(bout.toByteArray(), encoding);
+    }
+
     
     public static final void throwIfNotNullIO(IOException e) throws IOException{
         if(e != null) {

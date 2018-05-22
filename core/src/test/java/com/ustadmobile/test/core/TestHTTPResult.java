@@ -34,13 +34,14 @@ package com.ustadmobile.test.core;
 /* $if umplatform == 2  $
     import com.ustadmobile.test.port.j2me.TestCase;
  $else$ */
-    import junit.framework.TestCase;
-/* $endif$ */
 
 import com.ustadmobile.core.impl.HTTPResult;
-import java.util.Hashtable;
 
-public class TestHTTPResult extends TestCase{
+import junit.framework.TestCase;
+
+/* $endif$ */
+
+public abstract class TestHTTPResult extends TestCase{
     
     
     public void testHTTPResult() {

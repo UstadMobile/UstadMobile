@@ -2,13 +2,11 @@
     xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:id="@+id/fragment_catalog_root"
     tools:context="com.ustadmobile.port.android.view.CatalogOPDSFragment">
 
-
-
-
     <FrameLayout
-        android:layout_above="@+id/fragment_catalog_browsebutton"
+        android:layout_above="@+id/fragment_catalog_footer_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
@@ -16,7 +14,6 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:id="@+id/fragment_catalog_swiperefreshview">
-
 
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/fragment_catalog_recyclerview"
@@ -26,22 +23,13 @@
 
         </android.support.v4.widget.SwipeRefreshLayout>
 
-        <android.support.design.widget.FloatingActionButton
-            android:visibility="gone"
-            android:id="@+id/fragment_catalog_addbutton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="end|bottom"
-            android:layout_margin="@dimen/fab_margin"
-            android:src="@drawable/ic_add_white_24dp" />
     </FrameLayout>
 
     <Button
-        android:background="@color/accent"
+        android:background="@color/primary"
         android:textColor="@color/primary_text"
-        android:drawableLeft="@drawable/ic_local_library_white_24dp"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:id="@+id/fragment_catalog_browsebutton"
+        android:textAllCaps="true"
+        android:id="@+id/fragment_catalog_footer_button"
         android:layout_alignParentBottom="true"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />

@@ -3,9 +3,10 @@
 buildscript {
     repositories {
         jcenter()
+        google()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.3.3'
+        classpath 'com.android.tools.build:gradle:3.1.2'
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }
@@ -19,6 +20,10 @@ plugins {
 allprojects {
     repositories {
         jcenter()
+        google()
+        maven {
+            url "http://devserver2.ustadmobile.com/repo-mvn"
+        }
     }
 }
 
@@ -26,10 +31,40 @@ task clean(type: Delete) {
     delete rootProject.buildDir
 }
 
-version = "0.2.4.21"
+//Major.minor.database version
+version = "0.2.5.65"
 ext {
     ustadVersion = project.version
-    ustadVersionCode = 90
+    ustadVersionCode = 149
+
+    version_junit = "4.12"
+    version_nanohttpd = "2.3.1"
+    version_zip4j = "1.3.2"
+    version_kxml = "2.3.0"
+    version_ormlite = "5.0"
+    version_json = "20160212"
+    version_qrcodelibfork = "1.0.3"
+    version_okhttp = "3.9.0"
+    version_commons_io = "2.5"
+    version_ascii85 = "1.1"
+    version_gson = "2.8.2"
+
+    version_android_buildtools = "27.0.3"
+    version_android_compile_sdk = 27
+    version_android_target_sdk = 27
+
+    version_android_support_lib = "27.1.1"
+    version_android_lifecycle = "1.1.1"
+    version_android_room = "1.1.0"
+    version_android_multidex = "1.0.3"
+    version_android_paging = "1.0.0"
+    version_android_constraint_layout = "1.1.0"
+    version_android_flexbox = "0.3.2"
+    version_android_espresso = "3.0.2"
+    version_android_acra = "5.1.1"
+    version_android_junit_runner = "1.0.2"
+    version_android_mockito = "2.13.0"
+
 }
 
 ext.buildConfigProperties = new Properties()
@@ -52,6 +87,7 @@ task copyLocalConfigToRepoDir(type: Copy) {
 
         include "app-android/src/localconfig/**"
         include "app-j2me/res-local/**"
+        include "core/src/localconfig/**"
     }
 
     into project.hasProperty("configDst") ? configDst : "../UstadMobile-config-" + project.ext.buildConfigProperties["localConfigId"]

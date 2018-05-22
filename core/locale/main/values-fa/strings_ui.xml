@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name='app_name'>مهارت‌های کامیابی</string>
+    <string name='dir'>rtl</string>
+    <string name='login'>وارد شدن</string>
+    <string name='error'>خطا</string>
+    <string name='err_registering_new_user'> خطا در ثبت نام کاربر جدید</string>
+    <string name='registering'>در حال ثبت نام </string>
+    <string name='wrong_user_pass_combo'> نام کاربری اشتباه است / رمز عبور: دوباره امتحان کنید</string>
+    <string name='login_network_error'> خطای شبکه: لطفا شماچک کنید آنلاین هستید</string>
+    <string name='authenticating'> تأیید اعتبار</string>
+    <string name='course_catalog_load_error'> با عرض پوزش! خطا در بارگذاری</string>
+    <string name="download"> دانلود</string>
+    <string name='download_q'> دانلود</string>
+    <string name='download_all_q'> دانلود تمام ورودی ها</string>
+    <string name='ok'>درست</string>
+    <string name='cancel'> لغو</string>
+    <string name='delete_q'>حذف</string>
+    <string name='delete_x_entries_from_device'> حذف نوشته از دستگاه </string>
+    <string name='delete'>حذف </string>
+    <string name='error_loading_catalog'>با عرض پوزش! خطا در بارگذاری کاتولوگ:</string>
+    <string name='loading'>بارگیری </string>
+    <string name='error_opening_file'> خطا در باز کردن پرونده  </string>
+    <string name='download_in_progress'> دانلود در حال انجام...</string>
+    <string name='save_to'> ذخیره در...</string>
+    <string name='all_users'> تمام کاربران</string>
+    <string name='only_me'> فقط من</string>
+    <string name='mycourses'> دوره های آموزشی من</string>
+    <string name='onthisdevice'> در این دستگاه</string>
+    <string name='logout'> خارج شدن</string>
+    <string name='about'>درباره </string>
+    <string name='download_for'>دانلود برای...</string>
+    <string name='refresh'>تازه کردن</string>
+    <string name='download_all'>دانلود همه </string>
+    <string name='nothing_selected'>هیچ چیز انتخاب نشده</string>
+    <string name='next'>بعد</string>
+    <string name='back'> بازگشت</string>
+    <string name='username'>کاربر</string>
+    <string name='password'>رمز ورودی</string>
+    <string name='phone_memory'>حافظه تلفن </string>
+    <string name='memory_card'>کارت حافظه</string>
+    <string name='device'>دستگاه</string>
+    <string name='register'>ثبت نام</string>
+    <string name='phone_number'>نمبر تلفن</string>
+    <string name='name'>نام </string>
+    <string name='male'>مذکر</string>
+    <string name='female'>مونث</string>
+    <string name='could_not_open_file'> با عرض تأسف! نمیتواند فایل را بازکرد</string>
+    <string name='settings'>تنظیمات</string>
+    <string name='lang_sys'>سیستم </string>
+    <string name='lang_en'>انگلیسی</string>
+    <string name='lang_ar'>عربی</string>
+    <string name='my_resources'>دانلود شده</string>
+    <string name='browse_feeds'>دستگاه های محتوا/خدمت</string>
+    <string name='choose_format'> فرمت را انتخاب کنید:</string>
+    <string name='language'>زبان</string>
+    <string name='advanced'>پیشرفته</string>
+    <string name='server'>سرور</string>
+    <string name='optional'>اختیاری</string>
+    <string name='email'>ایمیل</string>
+    <string name='regcode'>ثبت نام کد</string>
+    <string name='home'>صفحه اول</string>
+    <string name='my_libraries'>کتابخانه‌های من</string>
+    <string name='add_library'>افزودن کتابخانه</string>
+    <string name='select_library'>انتخاب کتابخانه</string>
+    <string name='add'>افزودن</string>
+    <string name='library_title'>نام کتابخانه مثلاً کتابخانۀ A</string>
+
+    <string name='enter_phone_num'>لطفاً شمارۀ تیلفون را داخل کنید</string>
+    <string name='enter_name'>لطفاً نام را داخل کنید</string>
+    <string name='attendance'>حاظری</string>
+    <string name='processing'>پردازش</string>
+    <string name='classes'>صنف‌ها</string>
+    <string name='exams'>آزمون‌ها</string>
+    <string name='reports'>گزارش‌ها</string>
+    <string name='students'>حساب</string>
+    <string name='notifications'>اعلان</string>
+    <string name='forgot_password'>خروج از سیستم</string>
+    <string name='connections'>اتصال</string>
+
+
+    <string name='wifi_data_label'>هنگام استفاده داده موبائل</string>
+    <string name='cell_data_label'>هنگام استفاده تنها وای فای</string>
+    <string name='data_label'>پاسخ‌ها، امتیازها و اطلاعات مصرف را بفرستید</string>
+    <string name='p2p_connection_label'>اتصالات P2P</string>
+
+    <string name='file_available_locally'>قابل دسترس بصورت محلی</string>
+    <string name='file_unavailable_locally'>غیر قابل دسترس بصورت محلی</string>
+    <string name='connection'>اتصال عمومی</string>
+    <string name='account'>حساب</string>
+    <string name='data_usage'>استفاده از داده</string>
+
+    <string name="modify">اصلاح</string>
+    <string name="open">باز کردن</string>
+
+    <string name="welcome">خوش آمدی</string>
+    <string name='welcome_dialog_subheader'>تلاش برای به‌دست آوردن وظیفه؟\n مهارت‌های موفقیت را این‌جا به دست آورید!</string>
+    <string name='welcome_dialog_box1'><![CDATA[
+    <b><font color="#2196f3">
+     رنگ فونت:
+     </font></b>
+     مادیول‌های این اپلکیشن رایگان میباشد. برای دستری به محتوای، اپلکیشن را دانلود نماید. شما می‌توانید بدون انترنت در هرجا و هر وقت از آن استفاده کنید. ]]></string>
+    <string name='welcome_dialog_box2'><![CDATA[
+    <b><font color="#2196f3">
+        بیاموزید:
+    </b></font>
+         ویدیوهای تعاملی شما را در نوشتن خلص سوانح، مهارت‌های مصاحبه، مهارت‌های ارتباطات و خیلی مسائل دیگر آموزش خواهد داد.
+    ]]>
+    </string>
+    <string name='welcome_dialog_box3'><![CDATA[
+    <b><font color="#2196f3">
+        صنوف حضوری:
+    </b></font>
+         اگر محصل پوهنتون دولتی هستیید و یا اخیراً فارغ شده‌اید، می‌توانید بعد از سپری کردن موفقانه مادیول این اپلکیشن در صنوف مجانی مراکز USWDP  حضوری شرکت کنید.
+    ]]>
+    </string>
+
+
+    <string name="university_name" value="10001">نام پوهنتون</string>
+
+    <string name="field_university" value="980">نام پوهنتون</string>
+    <string name="field_fullname" value="981">نام مکمل </string>
+    <string name="field_email" value="982">ایمیل آدرس</string>
+    <string name="field_gender" value="983">جنسیت</string>
+    <string name="field_phonenumber" value="984">شمارۀ تلفون</string>
+    <string name="field_faculty" value="985">نام پوهنحی</string>
+    <string name="field_academic_year" value="991">سال فراغت</string>
+
+    <string name="field_father_name" value="986">ولد</string>
+    <string name="field_address" value="987">آدرس</string>
+    <string name="field_tazkira_id" value="988">شمارۀ تذکره</string>
+    <string name="field_relationship" value="989">ارتباط</string>
+    <string name="field_department" value="990">دیپارتمنت</string>
+    <string name="field_gpa" value="992">فیصدی نمرات</string>
+    <string name="field_would_work" value="993">آیاعلاقه به وظیفه دارید؟ اگر بلی واضح سازید:</string>
+    <string name="field_would_work_elaborate" value="994">Why do you want or dont want to work?</string>
+    <string name="field_have_work_experience" value="995">تجربۀ کاری دارید؟ اگر بلی واضح سازید:</string>
+    <string name="field_type_job" value="996">چه نوع وظیفه یی را دوست دارید؟ یکی و یا بیشتر از گزینه ها را انتخاب کنید. </string>
+    <string name="field_english_proficiency" value="997">زبان انگلیسی را در چه حدی میدانید؟ یکی از گزینه ها را انتخاب کنید.</string>
+    <string name="field_computer_application" value="998">توانایی استفاده از کدام برنامه های کمپیوتر را دارید؟</string>
+    <string name="field_post_graduate" value="999">پلان تان برای بعد از فراغت تان چیست؟ </string>
+    <string name="field_comments" value="1000">اگر کدام نظر و یا سوال دارید</string>
+    <string name="field_work_experience_elaborate" value="1001">Elaborate on work experience:</string>
+
+    <!-- Registration options-->
+    <string name="options_uni_kabul_uni" value="1002">Kabul University</string>
+    <string name="options_uni_kabul_polytechnic_uni" value="1003">Kabul Polytechnic University</string>
+    <string name="options_uni_kabul_education_uni" value="1004">Kabul Education University</string>
+    <string name="options_uni_other" value="1005">Other</string>
+    <string name="options_uni_i_dont_know" value="1006">I don\'t know</string>
+    <string name="options_uni_none" value="1020">None</string>
+    <string name="options_uni_kabul_medical_science" value="1021">Kabul University of Medical Science</string>
+    <string name="options_uni_shaheed_rabani" value="1022">Shaheed Rabbani Education University</string>
+    <string name="options_uni_jawzjan" value="1023">Jawzjan University</string>
+    <string name="options_uni_herat" value="1024">Herat University</string>
+    <string name="options_uni_balkh" value="1025">Balkh University</string>
+    <string name="options_uni_nagahar" value="1026">Nangahar University</string>
+    <string name="options_uni_khost" value="1027">Sheikh Zayed University (Khost)</string>
+    <string name="options_uni_kandahar" value="1028">Kandahar University</string>
+    <string name="options_uni_kunduz" value="1029">Kunduz University</string>
+
+
+
+    <string name="options_gender_female" value="1007">Female</string>
+    <string name="options_gender_male" value="1008">Male</string>
+
+    <string name="options_relationship_single" value="1009">Single</string>
+    <string name="options_relationship_married" value="1010">Married</string>
+
+    <string name="options_english_fluent" value="1011">Fluent</string>
+    <string name="options_english_good" value="1012">Good</string>
+    <string name="options_english_fair" value="1013">Fair</string>
+    <string name="options_english_poor" value="1014">Poor</string>
+
+    <string name="options_yes" value="1015">Yes</string>
+    <string name="options_no" value="1016">No</string>
+
+    <string name="options_job_short" value="1017">Short-term</string>
+    <string name="options_job_long" value="1018">Long-term</string>
+    <string name="options_job_part" value="1019">Part-time</string>
+    <string name="options_job_full" value="1020">Full-time</string>
+
+    <!-- Registration dialog feedback -->
+    <string name="field_password_min">Minimum 5 characters</string>
+
+    <!-- Update student details action button -->
+    <string name="update">Update</string>
+
+    <string name='data_usage_label'>مجموع مصرف داده تلفن همراه</string>
+    <string name='app_interface_language'>زبان اپلکیشن</string>
+    <string name='enable_supernode'>سوپرنود را فعال سازید</string>
+    <string name='share_application'>اپلکیشن را شریک کنید</string>
+    <string name='share_via'>بدین وسیله شریک کنید</string>
+    <string name='share'>شریک کردن</string>
+    <string name='receive'>دریافت کردن</string>
+    <string name='sent'>فرستاده شد</string>
+    <string name='sending'>در حال فرستادن</string>
+    <string name='send'>فرستادن</string>
+    <string name='size'>اندازه</string>
+    <string name='see_also'>همچنان - ببینید</string>
+    <string name='download_in_another_language'>به زبان دیگری دانلود کنید</string>
+    <string name='passed'>کامیاب شدید</string>
+    <string name='in_progress'>در جریان</string>
+    <string name='select_language'>زبان را انتخاب کنید</string>
+    <string name='device_language'>از زبان دستگاه استفاده کنید</string>
+    <string name='downloading'>در حال دانلود</string>
+    <string name='waiting'>در حال انتظار</string>
+    <string name='queued'>در صف</string>
+    <string name='failed'> ناموفق</string>
+    <string name='ok_got_it'>سمه ده، پوه شوم</string>
+    <string name="dont_show_this_next_time">این را بار بعدی نشان ندهید</string>
+
+    <string name='login_successful'>دخول موفق</string>
+    <string name='registration_successful'>ثبت‌نام موفق</string>
+    <string name='share_offline_dialog_message'>می‌تواند این اپلکیشن را به‌صورت آنلاین شریک سازید. در دستگاه که شما می‌خواهید توسط آن شریک سازید:\n  تنظیمات را بازکنید &lt; تنظیمات بلوتوث\n مطمئن شوید که دستگاه قابل‌رؤیت است.\n </string>
+    <string name='send_in_zip_file'>در فایل زیپ بفرستید</string>
+    <string name='device_name'>نام دستگاه</string>
+    <string name='accept'>پذیرفتن</string>
+    <string name='decline'>رد کردن</string>
+    <string name='downloaded'>دانلود شد</string>
+    <string name='new_password'>رمز عبور جدید</string>
+    <string name='phone'>تیلفون</string>
+    <string name='tablet'>تبلت</string>
+    <string name='waiting_for_sender'>منتظر فرستنده</string>
+    <string name='preparing'>آماده سازی</string>
+    <string name='send_course_instructions'>در دستگاه دیگر، اپلکیشن را بازه کنید، از بالای سمت راست مینو دریافت یا انتخاب کنید.\n دستگاه دیگر را از فهرست زیر انتخاب کنید: </string>
+    <string name='cancel_invite'>لغو دعوت</string>
+    <string name='inviting'>در حال دعوت </string>
+    <string name='connecting'>در حال تماس</string>
+    <string name='connected_but_host_not_sharing'>رابطه/اتصال ایجاد شد، اما دستگاه دیگر که از این اپلکیشن استفاده می‌کند هیچ‌چیزی را شریک نمیکند.  </string>
+    <string name='field_required_prompt'>این بخش الزمی است </string>
+    <string name="also_available_in">همدارنګه د لاسترسي وړ دی</string>
+
+
+
+</resources>

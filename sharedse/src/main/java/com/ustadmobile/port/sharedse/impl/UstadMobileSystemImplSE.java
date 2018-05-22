@@ -5,52 +5,92 @@
  */
 package com.ustadmobile.port.sharedse.impl;
 
-import com.ustadmobile.core.MessageIDConstants;
-import com.ustadmobile.core.controller.CatalogController;
-import com.ustadmobile.core.impl.HTTPResult;
+import com.ustadmobile.core.controller.CatalogPresenter;
+import com.ustadmobile.core.generated.locale.MessageID;
+import com.ustadmobile.core.impl.HttpCache;
 import com.ustadmobile.core.impl.TinCanQueueListener;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UMStorageDir;
+import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.impl.UstadMobileSystemImplFs;
+import com.ustadmobile.core.impl.ZipFileHandle;
+import com.ustadmobile.core.impl.http.UmHttpCall;
+import com.ustadmobile.core.impl.http.UmHttpRequest;
+import com.ustadmobile.core.impl.http.UmHttpResponse;
+import com.ustadmobile.core.impl.http.UmHttpResponseCallback;
+import com.ustadmobile.core.model.CourseProgress;
 import com.ustadmobile.core.util.Base64Coder;
 import com.ustadmobile.core.util.UMFileUtil;
+import com.ustadmobile.core.util.UMIOUtils;
+import com.ustadmobile.port.sharedse.impl.http.UmHttpCallSe;
+import com.ustadmobile.port.sharedse.impl.http.UmHttpResponseSe;
+import com.ustadmobile.port.sharedse.impl.zip.ZipFileHandleSharedSE;
+import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
 
-import com.ustadmobile.core.impl.ZipFileHandle;
-import com.ustadmobile.port.sharedse.impl.zip.*;
 import org.json.JSONObject;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 import org.xmlpull.v1.XmlSerializer;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.HttpURLConnection;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.net.URLEncoder;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.sql.SQLException;
+import java.text.Format;
+import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Vector;
+
+import com.ustadmobile.core.listener.ActiveSyncListener;
+import com.ustadmobile.core.listener.ActiveUserListener;
+
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 /**
  *
  * @author mike
  */
-public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl {
+public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl implements UstadMobileSystemImplFs {
 
     private XmlPullParserFactory xmlPullParserFactory;
+
+    Vector activeUserListener = new Vector();
+    Vector activeSyncListener = new Vector();
+    //ActiveSyncListener activeSyncListener;
+
+    private HttpCache httpCache;
+
+    private final OkHttpClient client = new OkHttpClient();
+
+    public static String DEFAULT_MAIN_SERVER_HOST_NAME = "umcloud1svlt";
+
+    private Properties appConfig;
 
     /**
      * Convenience method to return a casted instance of UstadMobileSystemImplSharedSE
@@ -61,93 +101,12 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl {
         return (UstadMobileSystemImplSE)UstadMobileSystemImpl.getInstance();
     }
 
-    /**
-     * @inheritDoc
-     */
     @Override
-    public HTTPResult makeRequest(String httpURL, Hashtable headers, Hashtable postParams, String method, byte[] postBody) throws IOException {
-        URL url = new URL(httpURL);
-        HttpURLConnection conn = (HttpURLConnection)openConnection(url);
+    public void init(Object context) {
+        super.init(context);
 
-        if(headers != null) {
-            Enumeration e = headers.keys();
-            while(e.hasMoreElements()) {
-                String headerField = e.nextElement().toString();
-                String headerValue = headers.get(headerField).toString();
-                conn.setRequestProperty(headerField, headerValue);
-            }
-        }
-        //conn.setRequestProperty("Connection", "close");
-
-        conn.setRequestMethod(method);
-
-        if("POST".equals(method)) {
-            if(postBody == null && postParams != null && postParams.size() > 0) {
-                //we need to write the post params to the request
-                StringBuilder sb = new StringBuilder();
-                Enumeration e = postParams.keys();
-                boolean firstParam = true;
-                while(e.hasMoreElements()) {
-                    String key = e.nextElement().toString();
-                    String value = postParams.get(key).toString();
-                    if(firstParam) {
-                        firstParam = false;
-                    }else {
-                        sb.append('&');
-                    }
-                    sb.append(URLEncoder.encode(key, "UTF-8")).append('=');
-                    sb.append(URLEncoder.encode(value, "UTF-8"));
-                }
-
-                postBody = sb.toString().getBytes();
-            }else if(postBody == null) {
-                throw new IllegalArgumentException("Cant make a post request with no body and no parameters");
-            }
-
-            conn.setDoOutput(true);
-            OutputStream out = conn.getOutputStream();
-            out.write(postBody);
-            out.flush();
-            out.close();
-        }
-
-        conn.connect();
-
-        int contentLen = conn.getContentLength();
-        int statusCode = conn.getResponseCode();
-        InputStream in = statusCode < 400 ? conn.getInputStream() : conn.getErrorStream();
-        byte[] buf = new byte[1024];
-        int bytesRead = 0;
-        int bytesReadTotal = 0;
-
-        //do not read more bytes than is available in the stream
-        int bytesToRead = Math.min(buf.length, contentLen != -1 ? contentLen : buf.length);
-        ByteArrayOutputStream bout = new ByteArrayOutputStream();
-        if(!method.equalsIgnoreCase("HEAD")) {
-            while((contentLen != -1 ? (bytesRead < contentLen) : true)  && (bytesRead = in.read(buf, 0, contentLen == -1 ? buf.length : Math.min(buf.length, contentLen - bytesRead))) != -1) {
-                bout.write(buf, 0, bytesRead);
-            }
-        }
-
-        in.close();
-
-        Hashtable responseHeaders = new Hashtable();
-        Iterator<String> headerIterator = conn.getHeaderFields().keySet().iterator();
-        while(headerIterator.hasNext()) {
-            String header = headerIterator.next();
-            if(header == null) {
-                continue;//a null header is the response line not header; leave that alone...
-            }
-
-            String headerVal = conn.getHeaderField(header);
-            responseHeaders.put(header.toLowerCase(), headerVal);
-        }
-
-        byte[] resultBytes = bout.toByteArray();
-        HTTPResult result = new HTTPResult(resultBytes, statusCode,
-                responseHeaders);
-
-        return result;
+        if(httpCache == null)
+            httpCache = new HttpCache(getCacheDir(CatalogPresenter.SHARED_RESOURCE, context));
     }
 
     /**
@@ -169,31 +128,18 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl {
         return true;
     }
 
-    @Override
-    public boolean queueTinCanStatement(final JSONObject stmt, final Object context) {
-        //Placeholder for iOS usage
-        return false;
-    }
-
-    public void addTinCanQueueStatusListener(final TinCanQueueListener listener) {
-        //TODO: remove this - it's not really used - do nothing
-    }
-
-    public void removeTinCanQueueListener(TinCanQueueListener listener) {
-        //TODO: remove this - it's not really used - do nothing
-    }
-
     /**
      * Returns the system base directory to work from
      *
      * @return
      */
-    protected abstract String getSystemBaseDir();
+    protected abstract String getSystemBaseDir(Object context);
+
 
     @Override
     public String getCacheDir(int mode, Object context) {
-        String systemBaseDir = getSystemBaseDir();
-        if(mode == CatalogController.SHARED_RESOURCE) {
+        String systemBaseDir = getSystemBaseDir(context);
+        if(mode == CatalogPresenter.SHARED_RESOURCE) {
             return UMFileUtil.joinPaths(new String[]{systemBaseDir, UstadMobileConstants.CACHEDIR});
         }else {
             return UMFileUtil.joinPaths(new String[]{systemBaseDir, "user-" + getActiveUser(context),
@@ -204,24 +150,30 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl {
     @Override
     public UMStorageDir[] getStorageDirs(int mode, Object context) {
         List<UMStorageDir> dirList = new ArrayList<>();
-        String systemBaseDir = getSystemBaseDir();
+        String systemBaseDir = getSystemBaseDir(context);
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        final String contentDirName = getContentDirName(context);
 
-        if((mode & CatalogController.SHARED_RESOURCE) == CatalogController.SHARED_RESOURCE) {
-            dirList.add(new UMStorageDir(systemBaseDir, getString(MessageIDConstants.device), false, true, false));
+        if((mode & CatalogPresenter.SHARED_RESOURCE) == CatalogPresenter.SHARED_RESOURCE) {
+            dirList.add(new UMStorageDir(systemBaseDir, getString(MessageID.device, context),
+                    false, true, false));
 
             //Find external directories
             String[] externalDirs = findRemovableStorage();
             for(String extDir : externalDirs) {
                 dirList.add(new UMStorageDir(UMFileUtil.joinPaths(new String[]{extDir,
-                        UstadMobileSystemImpl.CONTENT_DIR_NAME}), getString(MessageIDConstants.memory_card),
+                        contentDirName}),
+                        getString(MessageID.memory_card, context),
                         true, true, false, false));
             }
         }
 
-        if((mode & CatalogController.USER_RESOURCE) == CatalogController.USER_RESOURCE) {
+        if(impl.getActiveUser(context) != null
+                && ((mode & CatalogPresenter.USER_RESOURCE) == CatalogPresenter.USER_RESOURCE)) {
             String userBase = UMFileUtil.joinPaths(new String[]{systemBaseDir, "user-"
                     + getActiveUser(context)});
-            dirList.add(new UMStorageDir(userBase, getString(MessageIDConstants.device), false, true, true));
+            dirList.add(new UMStorageDir(userBase, getString(MessageID.device, context),
+                    false, true, true));
         }
 
 
@@ -388,6 +340,196 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl {
         }
 
         return null;
+    }
+
+    /**
+     * Return the network manager for this platform
+     *
+     * @return
+     */
+    public abstract NetworkManager getNetworkManager();
+
+    @Override
+    public void setActiveUser(String username, Object context) {
+        super.setActiveUser(username, context);
+//        TODO: handle
+//        xapiAgent = username != null ? XapiAgentEndpoint.createOrUpdate(context, null, username,
+//                UMTinCanUtil.getXapiServer(context)) : null;
+
+        fireActiveUserChangedEvent(username, context);
+    }
+
+    @Override
+    public CourseProgress getCourseProgress(String[] entryIds, Object context) {
+        if(getActiveUser(context) == null)
+            return null;
+
+        return null;
+
+//        XapiStatementManager stmtManager = PersistenceManager.getInstance().getManager(XapiStatementManager.class);
+//
+//        String[] entryIdsPrefixed = new String[entryIds.length];
+//        for(int i = 0; i < entryIdsPrefixed.length; i++) {
+//            entryIdsPrefixed[i] = "epub:" + entryIds[i];
+//        }
+//
+//        List<? extends XapiStatement> progressStmts = stmtManager.findByProgress(context,
+//                entryIdsPrefixed, getCurrentAgent(), null, new String[]{
+//                    UMTinCanUtil.VERB_ANSWERED, UMTinCanUtil.VERB_PASSED, UMTinCanUtil.VERB_FAILED
+//                }, 1);
+//
+//        if(progressStmts.size() == 0) {
+//            return new CourseProgress(CourseProgress.STATUS_NOT_STARTED, 0, 0);
+//        }else {
+//            XapiStatement stmt = progressStmts.get(0);
+//            String stmtVerb = stmt.getVerb().getVerbId();
+//            CourseProgress courseProgress = new CourseProgress();
+//            if(stmtVerb.equals(UMTinCanUtil.VERB_ANSWERED))
+//                courseProgress.setStatus(MessageID.in_progress);
+//            else if(stmtVerb.equals(UMTinCanUtil.VERB_PASSED))
+//                courseProgress.setStatus(MessageID.passed);
+//            else if(stmtVerb.equals(UMTinCanUtil.VERB_FAILED))
+//                courseProgress.setStatus(MessageID.failed_message);
+//
+//            courseProgress.setProgress(stmt.getResultProgress());
+//            courseProgress.setScore(Math.round(stmt.getResultScoreScaled()));
+//
+//            return courseProgress;
+//        }
+    }
+
+
+    public void addActiveUserListener(ActiveUserListener listener) {
+        activeUserListener.addElement(listener);
+    }
+
+    public void removeActiveUserListener(ActiveUserListener listener) {
+        activeUserListener.removeElement(listener);
+    }
+
+    protected void fireActiveUserChangedEvent(String username, Object context) {
+        for(int i = 0; i < activeUserListener.size(); i++) {
+            ((ActiveUserListener)activeUserListener
+                    .elementAt(i)).userChanged(username, context);
+        }
+    }
+
+    protected void fireActiveUserCredChangedEvent(String cred, Object context) {
+        for(int i = 0; i < activeUserListener.size(); i++) {
+            ((ActiveUserListener)activeUserListener
+                    .elementAt(i)).credChanged(cred, context);
+        }
+    }
+
+    //ActiveSyncListener:
+    //TODO: Check if gotta remove this.
+
+    public void addActiveSyncListener(ActiveSyncListener listener){
+        activeSyncListener.addElement(listener);
+    }
+
+    public void removeActiveSyncListener(ActiveSyncListener listener){
+        activeSyncListener.removeElement(listener);
+    }
+
+    public void fireSetSyncHappeningEvent(boolean happening, Object context){
+        for(int i = 0; i < activeSyncListener.size(); i++) {
+            ( (ActiveSyncListener)
+                    activeSyncListener.elementAt(i)
+            ).setSyncHappening(happening, context);
+        }
+
+    }
+
+    @Override
+    public String formatInteger(int integer) {
+        return NumberFormat.getIntegerInstance().format(integer);
+    }
+
+    @Override
+    public UmHttpCall makeRequestAsync(UmHttpRequest request, final UmHttpResponseCallback callback) {
+        Request.Builder httpRequest = new Request.Builder().url(request.getUrl());
+        if(request.getHeaders() != null) {
+            Enumeration allHeaders = request.getHeaders().keys();
+            String header;
+            while(allHeaders.hasMoreElements()) {
+                header = (String)allHeaders.nextElement();
+                httpRequest.addHeader(header, (String)request.getHeaders().get(header));
+            }
+        }
+
+        Call call = client.newCall(httpRequest.build());
+        final UmHttpCall umCall = new UmHttpCallSe(call);
+        call.enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                callback.onFailure(umCall, e);
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                callback.onComplete(umCall, new UmHttpResponseSe(response));
+            }
+        });
+
+        return umCall;
+    }
+
+    @Override
+    public UmHttpCall sendRequestAsync(UmHttpRequest request, UmHttpResponseCallback responseListener) {
+        return makeRequestAsync(request, responseListener);
+    }
+
+    @Override
+    protected UmHttpResponse sendRequestSync(UmHttpRequest request) throws IOException{
+        Request.Builder httpRequest = new Request.Builder().url(request.getUrl());
+        Call call = client.newCall(httpRequest.build());
+        return new UmHttpResponseSe(call.execute());
+    }
+
+    @Override
+    public UmHttpResponse makeRequestSync(UmHttpRequest request) throws IOException {
+        return getHttpCache(request.getContext()).getSync(request);
+    }
+
+    @Override
+    public HttpCache getHttpCache(Object context) {
+        if(httpCache == null)
+            httpCache = new HttpCache(getCacheDir(CatalogPresenter.SHARED_RESOURCE, context));
+
+        return httpCache;
+    }
+
+
+
+    @Override
+    public String convertTimeToReadableTime(long time) {
+        Date date = new Date(time);
+        Format format = new SimpleDateFormat("yyyy MM dd HH:mm:ss");
+        return format.format(date);
+    }
+
+    public abstract InputStream getAssetSync(Object context, String path) throws IOException;
+
+    @Override
+    public String getAppConfigString(String key, String defaultVal, Object context) {
+        if(appConfig == null) {
+            String appPrefResource = getManifestPreference("com.ustadmobile.core.appconfig",
+                    "/com/ustadmobile/core/appconfig.properties", context);
+            appConfig = new Properties();
+            InputStream prefIn = null;
+
+            try {
+                prefIn = getAssetSync(context, appPrefResource);
+                appConfig.load(prefIn);
+            }catch(IOException e) {
+                UstadMobileSystemImpl.l(UMLog.ERROR, 685, appPrefResource, e);
+            }finally {
+                UMIOUtils.closeInputStream(prefIn);
+            }
+        }
+
+        return appConfig.getProperty(key, defaultVal);
     }
 
 

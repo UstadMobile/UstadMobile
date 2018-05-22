@@ -30,11 +30,11 @@
  */
 package com.ustadmobile.core.impl;
 
-import com.ustadmobile.core.util.Base64Coder;
-import com.ustadmobile.core.util.UMFileUtil;
-import java.io.IOException;
-import java.util.Enumeration;
-import java.util.Hashtable;
+    import com.ustadmobile.core.util.Base64Coder;
+    import com.ustadmobile.core.util.UMFileUtil;
+
+    import java.util.Enumeration;
+    import java.util.Hashtable;
 
 /**
  *

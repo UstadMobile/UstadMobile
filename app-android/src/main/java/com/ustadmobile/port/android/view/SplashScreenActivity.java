@@ -34,23 +34,21 @@ package com.ustadmobile.port.android.view;
 import android.Manifest;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
-import android.view.View;
 
 import com.toughra.ustadmobile.R;
-
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 
 
-public class SplashScreenActivity extends UstadBaseActivity implements DialogInterface.OnClickListener, ActivityCompat.OnRequestPermissionsResultCallback{
-
-    UstadMobileSystemImplAndroid impl;
+public class SplashScreenActivity extends AppCompatActivity implements DialogInterface.OnClickListener, ActivityCompat.OnRequestPermissionsResultCallback{
 
     public static final int EXTERNAL_STORAGE_REQUESTED = 1;
 
@@ -59,12 +57,12 @@ public class SplashScreenActivity extends UstadBaseActivity implements DialogInt
         Manifest.permission.READ_EXTERNAL_STORAGE
     };
 
+    boolean rationalesShown = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash_screen);
-        impl = UstadMobileSystemImplAndroid.getInstanceAndroid();
-        checkPermissions();
     }
 
     public void checkPermissions() {
@@ -74,21 +72,29 @@ public class SplashScreenActivity extends UstadBaseActivity implements DialogInt
         }
 
         if(!hasRequiredPermissions){
-            if(ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+            if(ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    && !rationalesShown) {
                 //show an alert
                 AlertDialog.Builder builder = new AlertDialog.Builder(this);
                 builder.setTitle("File permissions required").setMessage("This app requires file permissions on the SD card to download and save content");
                 builder.setPositiveButton("OK", this);
                 AlertDialog dialog = builder.create();
                 dialog.show();
+                rationalesShown = true;
                 return;
             }else {
+                rationalesShown = false;
                 ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, EXTERNAL_STORAGE_REQUESTED);
                 return;
             }
         }
 
-        impl.startUI(this);
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                UstadMobileSystemImpl.getInstance().startUI(SplashScreenActivity.this);
+            }
+        }, 0);
     }
 
     @Override
@@ -98,15 +104,41 @@ public class SplashScreenActivity extends UstadBaseActivity implements DialogInt
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        checkPermissions();
+        boolean allGranted = permissions.length == 2;
+        for(int i = 0; i < grantResults.length; i++) {
+            allGranted &= grantResults[i] == PackageManager.PERMISSION_GRANTED;
+        }
+
+        if(allGranted) {
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    UstadMobileSystemImpl.getInstance().startUI(SplashScreenActivity.this);
+                }
+            }, 0);
+        }else {
+            //avoid possibly getting into an infinite loop if we had no user interaction and permission was denied
+            new AsyncTask<Void, Void, Void>() {
+                @Override
+                protected Void doInBackground(Void... voids) {
+                    try { Thread.sleep(500); }
+                    catch(InterruptedException e) {}
+                    return null;
+                }
+
+                @Override
+                protected void onPostExecute(Void o) {
+                    SplashScreenActivity.this.checkPermissions();
+                }
+            }.execute();
+        }
+
     }
 
     @Override
     public void onStart() {
         super.onStart();
-        UstadMobileSystemImpl.getInstance();
-
-
+        checkPermissions();
     }
 
     @Override
@@ -123,5 +155,7 @@ public class SplashScreenActivity extends UstadBaseActivity implements DialogInt
 
         return super.onOptionsItemSelected(item);
     }
+
+
 
 }

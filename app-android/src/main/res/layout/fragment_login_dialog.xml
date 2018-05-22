@@ -10,6 +10,7 @@
         android:layout_height="wrap_content">
 
         <TextView
+            android:text="@string/login"
             android:textColor="@android:color/white"
             android:background="@color/primary"
             android:id="@+id/fragment_login_title_text"
@@ -32,13 +33,15 @@
                 android:layout_height="wrap_content"
                 android:textSize="@dimen/text_hint"
                 android:background="@drawable/logindialog_edit_text_drawable"
-                android:inputType="text"
+                android:inputType="textNoSuggestions"
                 android:drawableLeft="@drawable/ic_person_white_24dp"
                 android:drawablePadding="@dimen/dimen_20dp"
                 android:paddingLeft="@dimen/dimen_12dp"
                 android:paddingRight="@dimen/dimen_12dp"
                 android:paddingTop="@dimen/dimen_12dp"
                 android:paddingBottom="@dimen/dimen_12dp"
+                android:hint="@string/username"
+                android:imeOptions="actionNext"
                 />
 
             <EditText
@@ -56,9 +59,12 @@
                 android:paddingRight="@dimen/dimen_12dp"
                 android:paddingTop="@dimen/dimen_12dp"
                 android:paddingBottom="@dimen/dimen_12dp"
+                android:hint="@string/password"
+                android:imeOptions="actionDone"
                 />
 
             <Button
+                android:visibility="invisible"
                 android:clickable="true"
                 android:id="@+id/fragment_login_forgot_password_button"
                 android:background="@drawable/text_only_button_background"
@@ -72,7 +78,7 @@
             <Button
                 android:clickable="true"
                 android:id="@+id/fragment_login_dialog_login_button"
-                android:padding="@dimen/dimen_16dp"
+                android:paddingLeft="@dimen/dimen_16dp"
                 android:gravity="center"
                 android:text="@string/login"
                 android:textColor="@android:color/white"
@@ -81,10 +87,12 @@
                 android:drawableLeft="@drawable/ic_exit_to_app_white_18dp"
                 android:layout_marginTop="@dimen/dimen_10dp"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+                android:textAllCaps="true"/>
 
             <Button
                 android:layout_marginBottom="@dimen/dimen_16dp"
+                android:text="@string/register"
                 android:clickable="true"
                 android:id="@+id/fragment_login_dialog_register_button"
                 android:gravity="center"
@@ -95,7 +103,8 @@
                 android:drawableLeft="@drawable/ic_launch_white_18dp"
                 android:layout_marginTop="@dimen/dimen_10dp"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+                android:textAllCaps="true"/>
 
         </LinearLayout>
     </RelativeLayout>

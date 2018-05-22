@@ -8,13 +8,14 @@ package com.ustadmobile.port.sharedse.omr;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 
+import java.util.concurrent.locks.ReentrantLock;
+
 import jp.sourceforge.qrcode.geom.Line;
 import jp.sourceforge.qrcode.geom.Point;
 import jp.sourceforge.qrcode.pattern.FinderPattern;
 import jp.sourceforge.qrcode.util.DebugCanvas;
 
 /* $if umplatform != 2  $ */
-import java.util.concurrent.locks.ReentrantLock;
 /* $endif */
 
 /**

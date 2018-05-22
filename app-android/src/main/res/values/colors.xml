@@ -4,19 +4,39 @@
     Helped by using:
     http://www.materialpalette.com/blue-grey/light-blue
     -->
-    <color name="primary">#607D8B</color>
-    <color name="primary_dark">#455A64</color>
-    <color name="primary_light">#CFD8DC</color>
-    <color name="accent">#4CAF50</color>
+    <color name="primary">#009688</color>
+    <color name="primary_dark">#00796B</color>
+    <color name="primary_light">#B2DFDB</color>
+    <color name="accent">#FF9800</color>
     <color name="primary_text">#FFFFFF</color>
     <color name="secondary_text">#727272</color>
+
+    <color name="text_primary">#212121</color>
+    <color name="text_secondary">#757575</color>
     <color name="icons">#FFFFFF</color>
-    <color name="divider">#B6B6B6</color>
+    <color name="divider">#BDBDBD</color>
+
+    <color name="background_light">#E8EAED</color>
 
     <item name="umblue" type="color">#FF3F31B5</item>
     <item name="opds_card_pressed" type="color">#FF888888</item>
     <item name="opds_card_normal" type="color">#FFFFFFFF</item>
     <item name="basepoint_navigation_drawer_tint" type="color">#FF757575</item>
+
+    <!-- Catalog Entry View colors-->
+    <item name="catalog_entry_remove_modify_button_background" type="color">@color/primary_dark</item>
+    <item name="catalog_entry_remove_modify_button_text" type="color">@color/primary_text</item>
+
+    <item name="catalog_entry_download_button_background" type="color">@color/primary</item>
+    <item name="catalog_entry_download_button_text" type="color">@color/primary_text</item>
+
+    <item name="catalog_entry_open_button_background" type="color">@color/primary</item>
+    <item name="catalog_entry_open_button_text" type="color">@color/primary_text</item>
+
+    <item name="catalog_entry_display_mode_normal_background" type="color">#FFFFFF</item>
+    <item name="catalog_entry_display_mode_banner_background" type="color">@color/background_light</item>
+
+
 
     <!--
     Text only button background color: Used when we want something that looks like hyperlink
@@ -25,5 +45,11 @@
     <item name="text_only_button_background_color" type="color">@android:color/white</item>
 
     <color name="highlight_area">#009688</color>
+
+    <color name="entry_learner_progress_in_progress">#565656</color>
+
+    <color name="entry_learner_progresss_failed">#ffa904</color>
+
+    <color name="entry_learner_progress_passed">#6bb865</color>
 
 </resources>
