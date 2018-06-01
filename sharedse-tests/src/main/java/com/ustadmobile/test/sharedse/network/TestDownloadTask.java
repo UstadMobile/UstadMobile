@@ -202,7 +202,7 @@ public class TestDownloadTask {
         downloadSet.setWifiDirectDownloadEnabled(wifiDirectDownloadEnabled);
         downloadSet.setDestinationDir(storageDir);
         crawlJob = UstadMobileSystemImpl.getInstance().getNetworkManager().prepareDownload(downloadSet,
-                crawlJob);
+                crawlJob, true);
 
         return crawlJob;
     }

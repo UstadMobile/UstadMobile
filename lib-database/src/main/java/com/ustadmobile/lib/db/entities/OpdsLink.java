@@ -9,7 +9,8 @@ import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 /**
  * Created by mike on 1/13/18.
  */
-@UmEntity(indices = {@UmIndex(name = "idx_uuid_linkIndex", unique = true, value = {"entryUuid", "linkIndex"})})
+//TODO: re-enable this index (indices = {@UmIndex(name = "idx_uuid_linkIndex", unique = true, value = {"entryUuid", "linkIndex"})})
+@UmEntity
 public class OpdsLink {
 
     @UmPrimaryKey(autoIncrement = true)

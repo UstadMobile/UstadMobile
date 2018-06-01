@@ -9,7 +9,9 @@ import android.arch.persistence.room.Update;
 
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.dao.DownloadJobDao;
+import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UmResultCallback;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.networkmanager.NetworkTask;
 import com.ustadmobile.lib.db.entities.DownloadJob;
 import com.ustadmobile.lib.db.entities.DownloadJobWithDownloadSet;
@@ -36,21 +38,30 @@ public abstract class DownloadJobDaoAndroid extends DownloadJobDao {
     @Override
     @Query("SELECT * FROM DownloadJob " +
             "LEFT JOIN DownloadSet on DownloadJob.downloadSetId = DownloadSet.id " +
-            "WHERE status >= " + NetworkTask.STATUS_WAITING_MIN + " AND status <= " +
-            NetworkTask.STATUS_WAITING_MAX + " ORDER BY timeRequested LIMIT 1")
-    protected abstract DownloadJobWithDownloadSet findNextDownloadJob();
+            "WHERE (status BETWEEN " + NetworkTask.STATUS_WAITING_MIN + " AND  " +
+                NetworkTask.STATUS_WAITING_MAX + ") " +
+            " AND (allowMeteredDataUsage = 1 OR allowMeteredDataUsage = :connectionMetered) " +
+            " ORDER BY timeRequested LIMIT 1")
+    protected abstract DownloadJobWithDownloadSet findNextDownloadJob(boolean connectionMetered);
 
     @Override
+    public long updateJobStatus(int jobId, int status) {
+        UstadMobileSystemImpl.l(UMLog.VERBOSE, 0, "DownloadJobDao: updateJobStatus #"
+            + jobId + " status " + status);
+        return updateJobStatus_Room(jobId, status);
+    }
+
     @Query("UPDATE DownloadJob  SET status = :status WHERE downloadJobId = :jobId")
-    public abstract long updateJobStatus(int jobId, int status);
+    public abstract long updateJobStatus_Room(int jobId, int status);
+
 
     @Override
     @Query("UPDATE DownloadJob SET status = :setTo WHERE status BETWEEN :rangeFrom AND :rangeTo")
     public abstract void updateJobStatusByRange(int rangeFrom, int rangeTo, int setTo);
 
     @Transaction
-    public DownloadJobWithDownloadSet findNextDownloadJobAndSetStartingStatus(){
-        return super.findNextDownloadJobAndSetStartingStatus();
+    public DownloadJobWithDownloadSet findNextDownloadJobAndSetStartingStatus(boolean connectionMetered){
+        return super.findNextDownloadJobAndSetStartingStatus(connectionMetered);
     }
 
     @Override
@@ -63,8 +74,17 @@ public abstract class DownloadJobDaoAndroid extends DownloadJobDao {
 
 
     @Override
+    public void update(DownloadJob jobRun) {
+        UstadMobileSystemImpl.l(UMLog.VERBOSE, 0, "DownloadJobDao: update job#"
+            + jobRun.getDownloadJobId() + " status " + jobRun.getStatus());
+        update_Room(jobRun);
+    }
+
+
+
     @Update
-    public abstract void update(DownloadJob jobRun);
+    public abstract void update_Room(DownloadJob jobRun);
+
 
     @Override
     @Query("SELECT * From DownloadJob WHERE downloadJobId = :id")
@@ -114,4 +134,24 @@ public abstract class DownloadJobDaoAndroid extends DownloadJobDao {
             "WHERE OpdsEntry.entryId = :entryId " +
             "ORDER BY DownloadJob.timeRequested DESC LIMIT 1")
     public abstract Integer findLastDownloadJobIdByCrawlJobItem_Room(String entryId);
+
+    @Override
+    public UmLiveData<Boolean> findAllowMeteredDataUsageLive(int downloadJobId) {
+        return new UmLiveDataAndroid<>(findAllowMeteredDataUsageLive_Room(downloadJobId));
+    }
+
+    @Query("SELECT allowMeteredDataUsage FROM DownloadJob WHERE downloadJobId = :downloadJobId")
+    public abstract LiveData<Boolean> findAllowMeteredDataUsageLive_Room(int downloadJobId);
+
+    @Override
+    public void updateAllowMeteredDataUsage(int downloadJobId, boolean allowMeteredDataUsage, UmResultCallback<Void> callback) {
+        executorService.execute(() -> {
+            updateAllowMeteredDataUsage_Room(downloadJobId, allowMeteredDataUsage);
+            if(callback != null)
+                callback.onDone(null);
+        });
+    }
+
+    @Query("UPDATE DownloadJob SET allowMeteredDataUsage = :allowMeteredDataUsage WHERE downloadJobId = :downloadJobId ")
+    public abstract void updateAllowMeteredDataUsage_Room(int downloadJobId, boolean allowMeteredDataUsage);
 }

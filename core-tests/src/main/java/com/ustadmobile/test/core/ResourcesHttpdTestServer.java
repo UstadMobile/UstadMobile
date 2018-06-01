@@ -16,13 +16,17 @@ public class ResourcesHttpdTestServer {
 
     private static String httpRoot;
 
-    public static void startServer() throws IOException {
+    public static void startServer(int port) throws IOException {
         if(resourcesHttpd == null) {
-            resourcesHttpd = new RouterNanoHTTPD(0);
+            resourcesHttpd = new RouterNanoHTTPD(port);
             resourcesHttpd.addRoute("/res/(.*)", ClassResourcesResponder.class, "/res/");
             resourcesHttpd.start();
             httpRoot = "http://localhost:" + resourcesHttpd.getListeningPort() + "/res/";
         }
+    }
+
+    public static void startServer() throws IOException {
+        startServer(0);
     }
 
     public static void stopServer() throws IOException{
@@ -34,6 +38,10 @@ public class ResourcesHttpdTestServer {
 
     public static String getHttpRoot() {
         return httpRoot;
+    }
+
+    public static int getListeningPort(){
+        return resourcesHttpd.getListeningPort();
     }
 
 }

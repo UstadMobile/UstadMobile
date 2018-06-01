@@ -31,6 +31,25 @@ public interface NetworkManagerCore {
      */
     public static final int QUEUE_ENTRY_ACQUISITION=1;
 
+    /**
+     * The network is completely disconnected.
+     */
+    int CONNECTIVITY_STATE_DISCONNECTED = 0;
+
+    /**
+     * A connection is established for local connections only (e.g. for a WiFi direct download).
+     */
+    int CONNECTIVITY_STATE_LOCAL_ONLY = 1;
+
+    /**
+     * A metered (e.g. mobile data) connection is available.
+     */
+    int CONNECTIVITY_STATE_METERED = 2;
+
+    /**
+     * An unmetered Internet connection is available (e.g. 'normal' wifi).
+     */
+    int CONNECTIVITY_STATE_UNMETERED = 3;
 
     void setSuperNodeEnabled(Object context,boolean enabled);
 
@@ -54,17 +73,20 @@ public interface NetworkManagerCore {
      * catalogs recursively and making HTTP HEAD requests where needed to determine the download size
      * of each entry.
      *
-     * @param downloadJob The Download Job that is to be prepared. This should have the destination
+     * @param downloadSet The Download Job that is to be prepared. This should have the destination
      *                    dir set. It should NOT have been inserted into the database yet.
      * @param crawlJob The Crawl Job that will prepare this download. This should be used to set any
      *                 preferences about how the download is going to be prepared (e.g. recursive or
      *                 not etc).
+     * @param allowDownloadOverMeteredNetwork if true, allow the download to run over a metered network.
+     *
      * @return The CrawlJob object as per the crawlJob argument, that is then executing to build the
      *          download job.
      *
      *          TODO: Remove this signature - from now on each downloadset has only one root entry
      */
-    CrawlJob prepareDownload(DownloadSet downloadJob, CrawlJob crawlJob);
+    CrawlJob prepareDownload(DownloadSet downloadSet, CrawlJob crawlJob,
+                             boolean allowDownloadOverMeteredNetwork);
 
 
 
@@ -75,17 +97,20 @@ public interface NetworkManagerCore {
      *
      * This is the asynchronous equivalent of prepareDownload
      *
-     * @param downloadJob The Download Job that is to be prepared. This should have the destination
+     * @param downloadSet The Download Job that is to be prepared. This should have the destination
      *                    dir set. It should NOT have been inserted into the database yet.
      * @param crawlJob The Crawl Job that will prepare this download. This should be used to set any
      *                 preferences about how the download is going to be prepared (e.g. recursive or
      *                 not etc).
+     * @param allowDownloadOverMeteredNetwork if true, allow the download to run over a metered network.
      * @param resultCallback A callback to be called once the CrawlJob has started.
      *
      * @return The CrawlJob object as per the crawlJob argument, that is then executing to build the
      *          download job.
      */
-    void prepareDownloadAsync(DownloadSet downloadJob, CrawlJob crawlJob, UmResultCallback<CrawlJob> resultCallback);
+    void prepareDownloadAsync(DownloadSet downloadSet, CrawlJob crawlJob,
+                              boolean allowDownloadOverMeteredNetwork,
+                              UmResultCallback<CrawlJob> resultCallback);
 
     void queueDownloadJob(int downloadJobId);
 

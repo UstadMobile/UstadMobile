@@ -20,6 +20,8 @@ dependencies {
     implementation project(":lib-database")
     implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
     implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
+    implementation "commons-cli:commons-cli:$version_apache_commons_cli"
+    implementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
 
 
     compile "junit:junit:$version_junit"

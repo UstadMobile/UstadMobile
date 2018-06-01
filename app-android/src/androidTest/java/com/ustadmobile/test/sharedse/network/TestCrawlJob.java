@@ -113,7 +113,7 @@ public class TestCrawlJob {
         set.setDestinationDir(storageDir);
         CrawlJob crawlJob = new CrawlJob();
         crawlJob.setRootEntryUri(opdsRootIndexUrl);
-        crawlJob = UstadMobileSystemImpl.getInstance().getNetworkManager().prepareDownload(set, crawlJob);
+        crawlJob = UstadMobileSystemImpl.getInstance().getNetworkManager().prepareDownload(set, crawlJob, true);
 
         UmLiveData<CrawlJobWithTotals> crawlJobLiveData = dbManager.getCrawlJobDao().findWithTotalsByIdLive(
                 crawlJob.getCrawlJobId());

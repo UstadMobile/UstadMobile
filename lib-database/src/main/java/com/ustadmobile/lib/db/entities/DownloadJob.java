@@ -23,6 +23,8 @@ public class DownloadJob {
 
     private long timeCompleted;
 
+    private boolean allowMeteredDataUsage;
+
     /**
      * Status as per flags on NetworkTask
      */
@@ -155,5 +157,23 @@ public class DownloadJob {
      */
     public void setStatus(int status) {
         this.status = status;
+    }
+
+    /**
+     * Get if the usage of metered data is enabled for this download job.
+     *
+     * @return true if the usage of metered data is enabled for this download job.
+     */
+    public boolean isAllowMeteredDataUsage() {
+        return allowMeteredDataUsage;
+    }
+
+    /**
+     * Set if the usage of metered data is enabled for this download job.
+     *
+     * @param allowMeteredDataUsage if the usage of metered data is enabled for this download job.
+     */
+    public void setAllowMeteredDataUsage(boolean allowMeteredDataUsage) {
+        this.allowMeteredDataUsage = allowMeteredDataUsage;
     }
 }

@@ -384,13 +384,15 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         super.init(context);
 
         if(!initRan) {
-            try {
-                if(!dirExists(getSystemBaseDir(context))){
-                    makeDirectoryRecursive(getSystemBaseDir(context));
+            File systemBaseDir = new File(getSystemBaseDir(context));
+            if(!systemBaseDir.exists()) {
+                if(systemBaseDir.mkdirs()){
+                    l(UMLog.INFO, 0, "Created base system dir: " +
+                            systemBaseDir.getAbsolutePath());
+                }else {
+                    l(UMLog.CRITICAL, 0, "Failed to created system base dir" +
+                        systemBaseDir.getAbsolutePath());
                 }
-                initRan = true;
-            }catch (IOException e) {
-                l(UMLog.CRITICAL, 0, "Failed to make base system dir");
             }
 
             Context appContext = ((Context)context).getApplicationContext();
@@ -398,6 +400,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
             Picasso.Builder picassoBuilder = new Picasso.Builder(appContext);
             picassoBuilder.addRequestHandler(new UmHttpCachePicassoRequestHandler(appContext));
             Picasso.setSingletonInstance(picassoBuilder.build());
+            initRan = true;
         }
 
         if(context instanceof Activity) {

@@ -46,7 +46,8 @@ public class OpdsEntry {
     /**
      * The entryId as defined by the id element in an OPDS feed
      */
-    @UmIndexField
+//    TODO: re-enable this index - it's throwing an exception
+//    @UmIndexField
     private String entryId;
 
 
@@ -57,7 +58,8 @@ public class OpdsEntry {
 
     protected String title;
 
-    @UmIndexField
+//    TODO: re-enable this index
+//    @UmIndexField
     protected String updated;
 
     protected String summary;

@@ -55,6 +55,8 @@ public class HttpCache implements HttpCacheResponse.ResponseCompleteListener{
 
     public static final String CACHE_CONTROL_KEY_MAX_AGE = "max-age";
 
+    public static final String CACHE_CONTROL_NO_CACHE = "no-cache";
+
     /**
      * Wrapper HttpCall object that can be used to cancel the request if required. It implements
      * runnable and can be invoked using the executor service.
@@ -206,6 +208,20 @@ public class HttpCache implements HttpCacheResponse.ResponseCompleteListener{
         }
 
         public AbstractCacheResponse execute() {
+            String responseCacheControlHeader = response.getHeader(UmHttpRequest.HEADER_CACHE_CONTROL);
+
+            if(responseCacheControlHeader != null) {
+                Hashtable responseCacheControl = UMFileUtil.parseParams(responseCacheControlHeader, ',');
+
+                if(responseCacheControl.containsKey(CACHE_CONTROL_NO_CACHE)) {
+                    AbstractCacheResponse noCacheResponse = new NoCacheResponse(response);
+                    if(cacheCall.async) {
+                        cacheCall.responseCallback.onComplete(cacheCall, noCacheResponse);
+                    }
+                    return noCacheResponse;
+                }
+            }
+
             HttpCacheResponse cacheResponse = cacheResponse(cacheCall.request, response, !cacheCall.async);
 
             if(cacheCall.async) {

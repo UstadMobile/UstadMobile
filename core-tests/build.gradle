@@ -44,6 +44,7 @@ if(rootProject.file("buildconfig.local.properties").exists()) {
  * Generate build constants for testing purposes (e.g. remote servers etc.
  */
 task generateCoreTestConstantsBuildConfig (type: de.fuerstenau.gradle.buildconfig.GenerateBuildConfigTask) {
+    inputs.files(fileTree(dir: rootProject.file(".")).matching { include 'buildconfig.*.properties' })
     outputDir = new File("${projectDir}/src/main/java")
     packageName ="com.ustadmobile.test.core.buildconfig"
     clsName = "TestConstants"
@@ -51,8 +52,8 @@ task generateCoreTestConstantsBuildConfig (type: de.fuerstenau.gradle.buildconfi
     buildConfigField "String", "LOGIN_PASS", project.ext.buildConfigProperties["test.remote_auth"]
     buildConfigField "String", "XAPI_SERVER", project.ext.buildConfigProperties["test.remote_xapi_server"]
     buildConfigField "String", "LOGIN_URL", project.ext.buildConfigProperties["test.remote_login_url"]
-    buildConfigField "String", "TEST_SERVER", project.ext.buildConfigProperties["test.remote_http_test_server"]
-    buildConfigField "String", "TEST_CONTROL_PORT", project.ext.buildConfigProperties["test.remote_http_control_port"]
+    buildConfigField "String", "UM_HTTP_TESTSERVER_HOSTNAME", project.ext.buildConfigProperties["test.um_http_testserver"]
+    buildConfigField "int", "UM_HTTP_TESTSERVER_CONTROL_PORT", project.ext.buildConfigProperties["test.um_http_testserver_controlport"]
     buildConfigField "String", "CATALOG_OPDS_ROOT", project.ext.buildConfigProperties["test.catalog_opds_root"]
     buildConfigField "int", "DEFAULT_NETWORK_INTERVAL", project.ext.buildConfigProperties["test.remote_network_interval"]
     buildConfigField "int", "DEFAULT_NETWORK_TIMEOUT", project.ext.buildConfigProperties["test.remote_network_timeout"]

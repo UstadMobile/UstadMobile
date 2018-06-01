@@ -74,4 +74,13 @@
             android:textAppearance="?android:attr/textAppearanceMedium"/>
 
     </RelativeLayout>
+
+    <android.support.v7.widget.SwitchCompat
+        android:id="@+id/fragment_download_dialog_download_wifi_only"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:checked="true"
+        android:text="@string/only_download_on_wifi"
+        />
+
 </LinearLayout>

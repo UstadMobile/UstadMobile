@@ -1,0 +1,29 @@
+apply plugin: 'java-library'
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
+    implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
+    implementation "org.json:json:$version_json"
+    implementation "commons-cli:commons-cli:$version_apache_commons_cli"
+
+    testImplementation "junit:junit:$version_junit"
+}
+
+ext.buildConfigProperties = new Properties()
+ext.buildConfigProperties.load(new FileInputStream(rootProject.file("buildconfig.default.properties")))
+if(rootProject.file("buildconfig.local.properties").exists()) {
+    ext.buildConfigProperties.load(new FileInputStream(rootProject.file("buildconfig.local.properties")))
+}
+
+
+sourceCompatibility = "1.8"
+targetCompatibility = "1.8"
+
+
+task runHttpTestServer(type: JavaExec) {
+    classpath sourceSets.main.runtimeClasspath
+    standardInput = System.in
+    main = "com.ustadmobile.test.http.UmTestServerManager"
+    args "--controlport", 8400, "--startport", 8500, "--endport", 8600, "--httpdir", rootProject.file("sharedse-tests/src/main/resources").getAbsolutePath(), "--bindaddr", project.ext.buildConfigProperties["test.um_http_testserver"]
+}

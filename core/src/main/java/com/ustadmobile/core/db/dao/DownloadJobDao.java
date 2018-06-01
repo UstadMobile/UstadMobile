@@ -1,7 +1,9 @@
 package com.ustadmobile.core.db.dao;
 
 import com.ustadmobile.core.db.UmLiveData;
+import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UmResultCallback;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.networkmanager.NetworkTask;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.db.entities.DownloadJob;
@@ -38,7 +40,7 @@ public abstract class DownloadJobDao {
      * @return The next DownloadJob to run
      */
     @UmQuery("SELECT * FROM DownloadJobRun WHERE status > 0 AND status <= 10 ORDER BY timeRequested LIMIT 1")
-    protected abstract DownloadJobWithDownloadSet findNextDownloadJob();
+    protected abstract DownloadJobWithDownloadSet findNextDownloadJob(boolean connectionMetered);
 
     /**
      * Update the status of the given DownloadJob
@@ -96,8 +98,8 @@ public abstract class DownloadJobDao {
      *
      * @return The DownloadJob that has been marked as started, if any was pending
      */
-    public DownloadJobWithDownloadSet findNextDownloadJobAndSetStartingStatus(){
-        DownloadJobWithDownloadSet nextJob = findNextDownloadJob();
+    public DownloadJobWithDownloadSet findNextDownloadJobAndSetStartingStatus(boolean connectionMetered){
+        DownloadJobWithDownloadSet nextJob = findNextDownloadJob(connectionMetered);
         if(nextJob != null){
             updateJobStatus(nextJob.getDownloadJobId(), NetworkTask.STATUS_STARTING);
         }
@@ -156,4 +158,8 @@ public abstract class DownloadJobDao {
 
     public abstract void findLastDownloadJobIdByCrawlJobItem(String entryId, UmResultCallback<Integer> callback);
 
+    public abstract UmLiveData<Boolean> findAllowMeteredDataUsageLive(int downloadJobId);
+
+    public abstract void updateAllowMeteredDataUsage(int downloadJobId, boolean allowMeteredDataUsage,
+                                                     UmResultCallback<Void> callback);
 }

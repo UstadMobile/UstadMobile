@@ -62,7 +62,6 @@ public abstract class DbManager {
 
     public abstract HttpCachedEntryDao getHttpCachedEntryDao();
 
-
     public abstract Object getContext();
 
 }

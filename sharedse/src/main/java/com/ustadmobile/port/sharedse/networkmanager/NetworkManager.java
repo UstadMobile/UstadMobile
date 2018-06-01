@@ -56,6 +56,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -172,8 +173,10 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
     };
 
     //Map of ID (integer) -> downloadTask
-    private HashMap<Integer, DownloadTask> activeDownloadTasks;
+//    @Deprecated
+//    private HashMap<Integer, DownloadTask> activeDownloadTasks;
 
+    private Hashtable<Class, Map<Integer, ? extends NetworkTask>> activeNetworkTasks = new Hashtable<>();
 
     private Vector<NetworkManagerListener> networkManagerListeners = new Vector<>();
 
@@ -279,6 +282,10 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
 
     protected URLConnectionOpener wifiUrlConnectionOpener;
 
+    private List<ConnectivityListener> connectivityListeners = new Vector<>();
+
+    private int connectivityState;
+
     /**
      * The time that the shared feed will be available
      */
@@ -313,7 +320,7 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
 
 
     public NetworkManager() {
-        activeDownloadTasks = new HashMap<>();
+//        activeDownloadTasks = new HashMap<>();
     }
 
     /**
@@ -344,6 +351,8 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
         this.mContext = mContext;
 
         dbExecutorService = Executors.newCachedThreadPool();
+
+        activeNetworkTasks.put(DownloadTask.class, new HashMap<Integer, DownloadTask>());
 
         try {
             /*
@@ -462,8 +471,8 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
     /**
      * {@inheritDoc}
      */
-
-    public CrawlJob prepareDownload(DownloadSet downloadSet, CrawlJob crawlJob) {
+    public CrawlJob prepareDownload(DownloadSet downloadSet, CrawlJob crawlJob,
+                                    boolean allowDownloadOverMeteredNetwork) {
         DbManager dbManager = DbManager.getInstance(getContext());
         DownloadSetDao setDao = dbManager.getDownloadSetDao();
         DownloadJobDao jobDao = dbManager.getDownloadJobDao();
@@ -494,7 +503,9 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
 
         //Now create a new download job
         DownloadJob downloadJob = new DownloadJob(downloadSet, System.currentTimeMillis());
+        downloadJob.setAllowMeteredDataUsage(allowDownloadOverMeteredNetwork);
         downloadJob.setStatus(UstadMobileSystemImpl.DLSTATUS_NOT_STARTED);
+
 
         downloadJob.setDownloadJobId((int)jobDao.insert(downloadJob));
 
@@ -519,9 +530,11 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
     /**
      * {@inheritDoc}
      */
-    public void prepareDownloadAsync(DownloadSet downloadJob, CrawlJob crawlJob,
+    public void prepareDownloadAsync(DownloadSet downloadSet, CrawlJob crawlJob,
+                                     boolean allowDownloadOverMeteredNetwork,
                                      UmResultCallback<CrawlJob> resultCallback) {
-        dbExecutorService.execute(() -> resultCallback.onDone(prepareDownload(downloadJob, crawlJob)));
+        dbExecutorService.execute(() -> resultCallback.onDone(prepareDownload(downloadSet, crawlJob,
+                allowDownloadOverMeteredNetwork)));
     }
 
 
@@ -581,14 +594,25 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
     }
 
     private DownloadTask stopDownloadAndSetStatus(int downloadJobId, int statusAfterStop) {
-        DownloadTask downloadTask = activeDownloadTasks.get(downloadJobId);
+        NetworkTask downloadTask = activeNetworkTasks.get(DownloadTask.class).get(downloadJobId);
         if(downloadTask == null)
             return null;
 
         downloadTask.stop(statusAfterStop);
 
-        return downloadTask;
+        return (DownloadTask)downloadTask;
     }
+
+    public <T extends NetworkTask> T getActiveTask(int taskId, Class<T> taskType) {
+        Map<Integer, ? extends NetworkTask> taskTypeMap = activeNetworkTasks.get(taskType);
+        NetworkTask task = taskTypeMap.get(taskId);
+        if(task != null) {
+            return (T)task;
+        }else {
+            return null;
+        }
+    }
+
 
     @Override
     public boolean pauseDownloadJob(int downloadJobId) {
@@ -659,9 +683,15 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
      *
      */
     public void checkDownloadJobQueue(){
-        if(activeDownloadTasks.isEmpty()){
+        @SuppressWarnings("unchecked")
+        Map<Integer, DownloadTask> taskMap = (Map<Integer, DownloadTask>)activeNetworkTasks.get(
+                DownloadTask.class);
+
+        int connectivityState = getConnectivityState();
+        if(taskMap.isEmpty() && connectivityState != CONNECTIVITY_STATE_DISCONNECTED){
             DownloadJobWithDownloadSet job = DbManager.getInstance(getContext())
-                    .getDownloadJobDao().findNextDownloadJobAndSetStartingStatus();
+                    .getDownloadJobDao()
+                    .findNextDownloadJobAndSetStartingStatus(connectivityState == CONNECTIVITY_STATE_METERED);
             if(job == null) {
                 UstadMobileSystemImpl.l(UMLog.DEBUG, 0, "checkDownloadJobQueue: no pending download jobs");
                 return;//nothing to do
@@ -670,7 +700,7 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
             UstadMobileSystemImpl.l(UMLog.DEBUG, 0, "checkDownloadJobQueue: starting download job #" +
                     job.getDownloadJobId());
             DownloadTask task = new DownloadTask(job, this, this);
-            activeDownloadTasks.put(job.getDownloadJobId(), task);
+            taskMap.put(job.getDownloadJobId(), task);
             task.start();
         }else {
             UstadMobileSystemImpl.l(UMLog.DEBUG, 0,
@@ -678,12 +708,20 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
         }
     }
 
+    public void checkDownloadJobQueueAsync(UmResultCallback<Void> callback){
+        dbExecutorService.execute(() -> {
+            checkDownloadJobQueue();
+            if(callback != null)
+                callback.onDone(null);
+        });
+    }
+
 
     @Override
     public void handleDownloadTaskStatusChanged(NetworkTask task) {
-        if(task.getStatus() >= NetworkTask.STATUS_COMPLETE_MIN || task.getStatus() < NetworkTask.STATUS_WAITING_MIN){
-            //this task has finished
-            activeDownloadTasks.remove(task.getTaskId());
+        if(task.getStatus() >= NetworkTask.STATUS_COMPLETE_MIN || task.getStatus() < NetworkTask.STATUS_RUNNING_MIN){
+            //this task has finished or has to wait (e.g. for a connection to be available)
+            activeNetworkTasks.get(DownloadTask.class).remove(task.getTaskId());
             checkDownloadJobQueue();
         }
     }
@@ -1163,6 +1201,7 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
      * @param downloadSource File source, which might be from cloud,
      *                       peer on the same network or peer on different network
      */
+    @Deprecated
     public void handleFileAcquisitionInformationAvailable(String entryId,long downloadId,int downloadSource){
         fireFileAcquisitionInformationAvailable(entryId,downloadId,downloadSource);
     }
@@ -1637,8 +1676,38 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
         return null;
     }
 
-    public DownloadTask getActiveDownloadTask(int taskId){
-        return activeDownloadTasks.get(taskId);
+//    public DownloadTask getActiveDownloadTask(int taskId){
+//        return
+//    }
+
+    public void addConnectivityListener(ConnectivityListener listener) {
+        connectivityListeners.add(listener);
+    }
+
+    public void removeConnectivityListener(ConnectivityListener listener) {
+        connectivityListeners.remove(listener);
+    }
+
+    protected void fireOnConnectivityChanged(int state) {
+        for(ConnectivityListener listener : connectivityListeners) {
+            listener.onConnectivityChanged(state);
+        }
+    }
+
+    protected void handleConnectivityChanged(int state) {
+        setConnectivityState(state);
+        fireOnConnectivityChanged(state);
+
+        if(state == CONNECTIVITY_STATE_METERED || state == CONNECTIVITY_STATE_UNMETERED)
+            checkDownloadJobQueueAsync(null);
+    }
+
+    protected synchronized void setConnectivityState(int connectivityState) {
+        this.connectivityState = connectivityState;
+    }
+
+    public synchronized int getConnectivityState() {
+        return connectivityState;
     }
 
 

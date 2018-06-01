@@ -64,6 +64,10 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
 
     private int selectedOption = 0;
 
+    private boolean wifiOnly = true;
+
+    private int optionsAvailable;
+
     public DownloadDialogPresenter(Object context, DownloadDialogView view, Hashtable args) {
         super(context, args, view);
     }
@@ -128,6 +132,7 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
             optionsAvailable = optionsAvailable | OPTION_CANCEL_DOWNLOAD;
         }
 
+        this.optionsAvailable = optionsAvailable;
         int numOptions = Integer.bitCount(optionsAvailable);
         view.setAvailableOptions(optionsAvailable, numOptions > 1);
         if(numOptions == 1)
@@ -179,7 +184,7 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
         downloadSet.setDestinationDir(storageDirs[0].getDirURI());
 
         UstadMobileSystemImpl.getInstance().getNetworkManager().prepareDownloadAsync(downloadSet,
-                crawlJob, (insertedCrawlJob) -> {
+                crawlJob, !wifiOnly, (insertedCrawlJob) -> {
                     crawlJobId =insertedCrawlJob.getCrawlJobId();
                     downloadJobId = insertedCrawlJob.getContainersDownloadJobId();
                     crawlJobLiveData = dbManager.getCrawlJobDao().findWithTotalsByIdLive(insertedCrawlJob.getCrawlJobId());
@@ -270,6 +275,19 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
 
         }
 
+    }
+
+    public void handleSetWifiOnly(boolean wifiOnly) {
+        this.wifiOnly = wifiOnly;
+        if(crawlJob != null) {
+            dbManager.getDownloadJobDao().updateAllowMeteredDataUsage(
+                    crawlJob.getContainersDownloadJobId(), !wifiOnly, null);
+        }else if((optionsAvailable
+                & (OPTION_PAUSE_DOWNLOAD | OPTION_RESUME_DOWNLOAD | OPTION_CANCEL_DOWNLOAD)) > 0) {
+            dbManager.getDownloadJobDao().findLastDownloadJobId(rootEntryId, (jobId) -> {
+                dbManager.getDownloadJobDao().updateAllowMeteredDataUsage(jobId, !wifiOnly, null);
+            });
+        }
     }
 
 

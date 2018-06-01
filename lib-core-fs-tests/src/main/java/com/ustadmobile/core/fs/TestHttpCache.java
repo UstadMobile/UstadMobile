@@ -71,6 +71,8 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import fi.iki.elonen.router.RouterNanoHTTPD;
+import okhttp3.mockwebserver.MockResponse;
+import okhttp3.mockwebserver.MockWebServer;
 
 
 /**
@@ -440,4 +442,29 @@ public class TestHttpCache {
 
         Assert.assertNotNull("Requesting body on head request throws exception", exception);
     }
+
+    @Test
+    public void givenNoCacheResponseHeader_whenRequested_shouldNotBeCached() throws IOException{
+        MockWebServer server = new MockWebServer();
+        server.start();
+        MockResponse noCacheResponse = new MockResponse().setBody("hello world")
+                .addHeader("Content-Type", "text/plain")
+                .addHeader("Cache-Control", "no-cache");
+        server.enqueue(noCacheResponse);
+        server.enqueue(noCacheResponse);
+
+        UmHttpRequest request = new UmHttpRequest(PlatformTestUtil.getTargetContext(),
+                server.url("/").toString());
+
+        AbstractCacheResponse response1 = (AbstractCacheResponse)httpCache.getSync(request);
+        AbstractCacheResponse response2 = (AbstractCacheResponse)httpCache.getSync(request);
+
+        Assert.assertEquals("When no-cache header is provided by response 1, entry is not cached",
+                AbstractCacheResponse.MISS, response1.getCacheResponse());
+        Assert.assertEquals("When no-cache header is provided by response 2, entry is not cached",
+                AbstractCacheResponse.MISS, response2.getCacheResponse());
+
+        server.close();
+    }
+
 }

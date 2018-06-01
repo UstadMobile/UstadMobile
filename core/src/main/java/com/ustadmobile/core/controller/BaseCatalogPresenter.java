@@ -71,7 +71,7 @@ public abstract class BaseCatalogPresenter extends UstadBaseController {
         //TODO: rework this to handle multiple selections, which would start multiple download jobs
         crawlJob.setRootEntryUuid(entriesToDownload.get(0).getUuid());
 
-        impl.getNetworkManager().prepareDownloadAsync(downloadJob, crawlJob,
+        impl.getNetworkManager().prepareDownloadAsync(downloadJob, crawlJob, true,
                 (preparedCrawlJob) -> {
                     UstadMobileSystemImpl.l(UMLog.INFO, 0, "Download prepared");
                 });

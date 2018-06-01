@@ -2,7 +2,9 @@ package com.ustadmobile.core.db.dao;
 
 import com.ustadmobile.core.db.DbManager;
 import com.ustadmobile.core.db.UmLiveData;
+import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UmResultCallback;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.db.entities.ContainerFile;
@@ -667,9 +669,12 @@ public abstract class OpdsEntryStatusCacheDao {
     }
 
 
-    public void handleContainerDownloadPaused(OpdsEntryStatusCache entryStatusCache) {
-        int deltaPausedDownloads = entryStatusCache.isEntryPausedDownload() ? 0 : 1;
+    public void handleContainerDownloadPaused(OpdsEntryStatusCache entryStatusCache, boolean pausedByUser) {
+        int deltaPausedDownloads = pausedByUser ?
+                (entryStatusCache.isEntryPausedDownload() ? 0 : 1) : 0;
         int deltaActiveDownloads = entryStatusCache.isEntryActiveDownload() ? -1 : 0;
+        UstadMobileSystemImpl.l(UMLog.VERBOSE, 0, "OpdsEntryStatusCacheDao: handleContainerDownloadPaused " +
+            "id " + entryStatusCache.getStatusEntryId() + " pausedByUser = " + pausedByUser);
         updateOnContainerStatusChangedIncAncestors(entryStatusCache.getStatusEntryId(),
                 0, 0, deltaActiveDownloads,
                 deltaPausedDownloads, 0, 0, 0);
@@ -681,7 +686,11 @@ public abstract class OpdsEntryStatusCacheDao {
     }
 
     public void handleContainerDownloadPaused(String entryId) {
-        handleContainerDownloadPaused(findByEntryId(entryId));
+        handleContainerDownloadPaused(findByEntryId(entryId), true);
+    }
+
+    public void handleContainerDownloadWaitingForNetwork(String entryId) {
+        handleContainerDownloadPaused(findByEntryId(entryId), false);
     }
 
 

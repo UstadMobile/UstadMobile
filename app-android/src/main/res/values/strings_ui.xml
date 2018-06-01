@@ -21,6 +21,7 @@
     <string name='cancel'>Cancel</string>
     <string name="cancel_download">Cancel download</string>
     <string name="resume_download">Resume download</string>
+    <string name="only_download_on_wifi">Only download on Wi-FI</string>
     <string name='delete_q'>Delete?</string>
     <string name='delete_x_entries_from_device'>Delete %s entries from device?</string>
     <string name='delete'>Delete</string>

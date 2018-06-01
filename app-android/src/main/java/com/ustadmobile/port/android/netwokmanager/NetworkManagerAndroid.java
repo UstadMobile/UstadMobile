@@ -36,6 +36,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.net.ConnectivityManagerCompat;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -43,6 +44,7 @@ import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.buildconfig.CoreBuildConfig;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.networkmanager.NetworkManagerCore;
 import com.ustadmobile.core.networkmanager.NetworkTask;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
@@ -317,9 +319,11 @@ public class NetworkManagerAndroid extends NetworkManager implements EmbeddedHTT
         intentFilter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
         intentFilter.addAction(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION);
         intentFilter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
-
-
         networkService.registerReceiver(mWifiBroadcastReceiver, intentFilter);
+
+        IntentFilter connectivityIntentFilter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
+        networkService.registerReceiver(mConnectivityBroadcastReceiver, connectivityIntentFilter);
+
 
         httpAndroidAssetsPath = "/assets-" + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()) + '/';
         httpd.addRoute(httpAndroidAssetsPath +"(.)+",  AndroidAssetsHandler.class, context);
@@ -521,6 +525,25 @@ public class NetworkManagerAndroid extends NetworkManager implements EmbeddedHTT
                             break;
                     }
                     break;
+            }
+        }
+    };
+
+    private BroadcastReceiver mConnectivityBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            NetworkInfo networkInfo = ConnectivityManagerCompat.getNetworkInfoFromBroadcast(
+                    connectivityManager, intent);
+
+            UstadMobileSystemImpl.l(UMLog.DEBUG, 0, "ConnectivityAction: network: " +
+                networkInfoToString(networkInfo));
+
+            if(networkInfo == null || !networkInfo.isConnected()){
+                handleConnectivityChanged(CONNECTIVITY_STATE_DISCONNECTED);
+            }else {
+                handleConnectivityChanged(
+                        ConnectivityManagerCompat.isActiveNetworkMetered(connectivityManager) ?
+                        CONNECTIVITY_STATE_METERED : CONNECTIVITY_STATE_UNMETERED);
             }
         }
     };
@@ -817,6 +840,7 @@ public class NetworkManagerAndroid extends NetworkManager implements EmbeddedHTT
         }
 
         networkService.unregisterReceiver(mWifiBroadcastReceiver);
+        networkService.unregisterReceiver(mConnectivityBroadcastReceiver);
         networkService.getApplication().unregisterActivityLifecycleCallbacks(this);
 
         super.onDestroy();
@@ -1440,5 +1464,31 @@ public class NetworkManagerAndroid extends NetworkManager implements EmbeddedHTT
     @Override
     public void onActivityDestroyed(Activity activity) {
 
+    }
+
+    public static String networkInfoToString(NetworkInfo networkInfo) {
+        if(networkInfo == null)
+            return null;
+
+        String str = "";
+        switch(networkInfo.getType()){
+            case ConnectivityManager.TYPE_WIFI:
+                str += "WiFi ";
+                break;
+
+            case ConnectivityManager.TYPE_ETHERNET:
+                str += "Ethernet ";
+                break;
+
+            case ConnectivityManager.TYPE_MOBILE:
+                str += "Mobile ";
+                break;
+
+        }
+
+        str += " connected: " + networkInfo.isConnected() + " connectedOrConnecting: "
+                + networkInfo.isConnectedOrConnecting();
+
+        return str;
     }
 }

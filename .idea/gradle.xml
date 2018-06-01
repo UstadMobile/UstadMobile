@@ -19,6 +19,7 @@
             <option value="$PROJECT_DIR$/lib-database" />
             <option value="$PROJECT_DIR$/lib-database-annotation" />
             <option value="$PROJECT_DIR$/lib-database-processor" />
+            <option value="$PROJECT_DIR$/lib-http-testserver" />
             <option value="$PROJECT_DIR$/lib-util" />
             <option value="$PROJECT_DIR$/sharedse" />
             <option value="$PROJECT_DIR$/sharedse-tests" />

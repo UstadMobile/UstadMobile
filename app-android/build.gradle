@@ -499,6 +499,7 @@ dependencies {
     androidTestImplementation "com.android.support.test.espresso:espresso-core:$version_android_espresso"
     androidTestImplementation "com.android.support.test.espresso:espresso-contrib:$version_android_espresso"
 
+    androidTestImplementation "com.android.support.test.uiautomator:uiautomator-v18:$version_android_uiautomator"
 
     androidTestImplementation "org.mockito:mockito-android:$version_android_mockito"
 

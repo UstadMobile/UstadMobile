@@ -5,8 +5,10 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.SwitchCompat;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.CompoundButton;
 import android.widget.ProgressBar;
 import android.widget.RadioGroup;
 import android.widget.TextView;
@@ -38,6 +40,8 @@ public class DownloadDialogFragment extends UstadDialogFragment implements Downl
     private TextView downloadSizeTextView;
 
     private RadioGroup radioGroup;
+
+    private SwitchCompat wifiOnlySwitch;
 
     private static final Map<Integer, Integer> optionToRadioButtonIdMap = new HashMap<>();
 
@@ -76,6 +80,8 @@ public class DownloadDialogFragment extends UstadDialogFragment implements Downl
         statusTextView = rootView.findViewById(R.id.fragment_download_dialog_status_text);
         downloadSizeTextView = rootView.findViewById(R.id.fragment_download_dialog_main_text);
         radioGroup = rootView.findViewById(R.id.fragment_download_dialog_options_group);
+        wifiOnlySwitch = rootView.findViewById(R.id.fragment_download_dialog_download_wifi_only);
+        wifiOnlySwitch.setOnCheckedChangeListener(this::onWifiOnlyCheckChanged);
         radioGroup.setOnCheckedChangeListener(this);
         mDialog = builder.create();
         mPresenter = new DownloadDialogPresenter(getContext(), this,
@@ -88,6 +94,10 @@ public class DownloadDialogFragment extends UstadDialogFragment implements Downl
     @Override
     public void onCheckedChanged(RadioGroup radioGroup, int checkedId) {
         mPresenter.handleSelectOption(radioButtonIdToOptionIdMap.get(checkedId));
+    }
+
+    public void onWifiOnlyCheckChanged(CompoundButton view, boolean isChecked) {
+        mPresenter.handleSetWifiOnly(isChecked);
     }
 
     @Override
