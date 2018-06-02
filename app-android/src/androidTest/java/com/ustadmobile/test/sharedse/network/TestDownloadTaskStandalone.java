@@ -1,8 +1,5 @@
 package com.ustadmobile.test.sharedse.network;
 
-/**
- * Created by mike on 3/11/18.
- */
 
 import com.ustadmobile.core.controller.CatalogPresenter;
 import com.ustadmobile.core.db.DbManager;
@@ -10,12 +7,13 @@ import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.UmObserver;
 import com.ustadmobile.core.fs.db.ContainerFileHelper;
 import com.ustadmobile.core.impl.UMLog;
-import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.networkmanager.DownloadTaskListener;
 import com.ustadmobile.core.networkmanager.NetworkTask;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.lib.db.entities.CrawlJob;
 import com.ustadmobile.lib.db.entities.DownloadJob;
+import com.ustadmobile.lib.db.entities.DownloadJobWithDownloadSet;
 import com.ustadmobile.lib.db.entities.DownloadSet;
 import com.ustadmobile.lib.db.entities.OpdsEntryStatusCache;
 import com.ustadmobile.port.sharedse.networkmanager.DownloadTask;
@@ -28,12 +26,21 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+
+import static com.ustadmobile.core.networkmanager.NetworkTask.STATUS_COMPLETE;
+import static com.ustadmobile.core.networkmanager.NetworkTask.STATUS_WAITING_FOR_CONNECTION;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.timeout;
 
 /**
  * Tests for the download task that run without requiring a network peer to download entries from
@@ -43,16 +50,22 @@ import java.util.concurrent.TimeUnit;
 @UmMediumTest
 public class TestDownloadTaskStandalone extends TestWithNetworkService {
 
+    @SuppressWarnings("WeakerAccess")
     public static final String CRAWL_ROOT_ENTRY_ID = "http://umcloud1.ustadmobile.com/opds/test-crawl";
 
+    @SuppressWarnings("WeakerAccess")
     public static final String CRAWL_ROOT_ENTRY_ID_SLOW = "http://umcloud1.ustadmobile.com/opds/test-crawl-slow";
 
+    @SuppressWarnings("WeakerAccess")
     public static final String OPDS_PATH_SPEED_LIMITED = "com/ustadmobile/test/sharedse/crawlme-slow/index.opds";
 
     /**
      *
      */
     public static final int JOB_CHANGE_WAIT_TIME = 1000;
+
+    @SuppressWarnings("WeakerAccess")
+    public static final int CRAWL_JOB_TIMEOUT = 5000;
 
     @BeforeClass
     public static void startHttpResourcesServer() throws IOException{
@@ -65,8 +78,9 @@ public class TestDownloadTaskStandalone extends TestWithNetworkService {
     }
 
 
-    public static CrawlJob startDownloadJob(String opdsPath, String rootEntryId, boolean autoStart,
-                                     boolean allowMeteredNetworks) {
+    @SuppressWarnings("EmptyCatchBlock")
+    public static CrawlJob runCrawlJob(String opdsPath, String rootEntryId,
+                                       boolean allowMeteredNetworks, long crawlTimeout) {
         String storageDir = UstadMobileSystemImpl.getInstance().getStorageDirs(
                 CatalogPresenter.SHARED_RESOURCE, PlatformTestUtil.getTargetContext())[0].getDirURI();
         DbManager dbManager = DbManager.getInstance(PlatformTestUtil.getTargetContext());
@@ -80,20 +94,39 @@ public class TestDownloadTaskStandalone extends TestWithNetworkService {
 
         CrawlJob crawlJob = new CrawlJob();
         crawlJob.setRootEntryUri(opdsPath);
-        crawlJob.setQueueDownloadJobOnDone(autoStart);
+        crawlJob.setQueueDownloadJobOnDone(false);
         DownloadSet downloadSet = new DownloadSet();
         downloadSet.setDestinationDir(storageDir);
 
         crawlJob = UstadMobileSystemImpl.getInstance().getNetworkManager().prepareDownload(downloadSet,
                 crawlJob, allowMeteredNetworks);
+        UmLiveData<CrawlJob> crawlJobLiveData = dbManager.getCrawlJobDao().findByIdLive(
+                crawlJob.getCrawlJobId());
+        CountDownLatch latch = new CountDownLatch(1);
+        UmObserver<CrawlJob> observer = (crawlJobValue) -> {
+            if(crawlJobValue != null && crawlJobValue.getStatus() == STATUS_COMPLETE)
+                latch.countDown();
+        };
+        crawlJobLiveData.observeForever(observer);
+        try {latch.await(crawlTimeout, TimeUnit.MILLISECONDS); }
+        catch(InterruptedException e) {}
+
+        crawlJobLiveData.removeObserver(observer);
 
         return crawlJob;
     }
 
-    public CrawlJob startDownloadJob(String opdsPath, String rootEntryId, boolean autoStart) {
-        return startDownloadJob(opdsPath, rootEntryId, autoStart, false);
+    @SuppressWarnings("WeakerAccess")
+    public static DownloadTask startDownload(int downloadJobId, DownloadTaskListener listener) {
+        DownloadJobWithDownloadSet job = DbManager.getInstance(PlatformTestUtil.getTargetContext())
+                .getDownloadJobDao().findByIdWithDownloadSet(downloadJobId);
+        DownloadTask task = new DownloadTask(job,
+                (NetworkManager)UstadMobileSystemImpl.getInstance().getNetworkManager(), listener);
+        task.start();
+        return task;
     }
 
+    @SuppressWarnings("EmptyCatchBlock")
     public static void waitForDownloadStatus(int downloadJobId, int status, int timeout) {
         CountDownLatch downloadJobLatch = new CountDownLatch(1);
         UmLiveData<DownloadJob> downloadJobLiveData = DbManager.getInstance(PlatformTestUtil
@@ -107,15 +140,21 @@ public class TestDownloadTaskStandalone extends TestWithNetworkService {
         };
         downloadJobLiveData.observeForever(downloadJobObserver);
 
+
         try { downloadJobLatch.await(timeout, TimeUnit.MILLISECONDS); }
         catch(InterruptedException e) {}
+
+        downloadJobLiveData.removeObserver(downloadJobObserver);
     }
 
     @Test
+    @SuppressWarnings("EmptyCatchBlock")
     public void givenDownloadStarted_whenCancelled_thenShouldBeDeleted() {
-        CrawlJob crawlJob = startDownloadJob(UMFileUtil.joinPaths(
+        CrawlJob crawlJob = runCrawlJob(UMFileUtil.joinPaths(
                 ResourcesHttpdTestServer.getHttpRoot(), "com/ustadmobile/test/sharedse/crawlme-slow/index.opds"),
-                CRAWL_ROOT_ENTRY_ID_SLOW, true, true);
+                CRAWL_ROOT_ENTRY_ID_SLOW, true, CRAWL_JOB_TIMEOUT);
+        startDownload(crawlJob.getContainersDownloadJobId(),
+                (NetworkManager)UstadMobileSystemImpl.getInstance().getNetworkManager());
 
         DbManager dbManager = DbManager.getInstance(PlatformTestUtil.getTargetContext());
 
@@ -158,48 +197,44 @@ public class TestDownloadTaskStandalone extends TestWithNetworkService {
         DbManager dbManager = DbManager.getInstance(PlatformTestUtil.getTargetContext());
         String opdsRootIndexUrl = UMFileUtil.joinPaths(
                 ResourcesHttpdTestServer.getHttpRoot(), "com/ustadmobile/test/sharedse/crawlme/index.opds");
-        CrawlJob crawlJob = startDownloadJob(opdsRootIndexUrl, CRAWL_ROOT_ENTRY_ID, true,
-                true);
+        CrawlJob crawlJob = runCrawlJob(opdsRootIndexUrl, CRAWL_ROOT_ENTRY_ID, true,
+                CRAWL_JOB_TIMEOUT);
+        DownloadTaskListener mockDownloadlistener = Mockito.mock(DownloadTaskListener.class);
 
-        CountDownLatch completeLatch = new CountDownLatch(1);
-        UmLiveData<DownloadJob> downloadJobLiveData = dbManager.getDownloadJobDao()
-                .getByIdLive(crawlJob.getContainersDownloadJobId());
-        UmObserver<DownloadJob> downloadJobObserver = (downloadJobLiveDataUpdate) -> {
-            if (downloadJobLiveDataUpdate.getStatus() == NetworkTask.STATUS_COMPLETE) {
-                completeLatch.countDown();
-            }
-        };
-        downloadJobLiveData.observeForever(downloadJobObserver);
+        startDownload(crawlJob.getContainersDownloadJobId(), mockDownloadlistener);
 
-        try { completeLatch.await(120, TimeUnit.SECONDS); }
-        catch(InterruptedException e) {}
-
+        waitForDownloadStatus(crawlJob.getContainersDownloadJobId(), STATUS_COMPLETE,
+                120000);
         DownloadJob completedJob =dbManager.getDownloadJobDao().findById(crawlJob.getContainersDownloadJobId());
 
         OpdsEntryStatusCache rootStatusCache = dbManager.getOpdsEntryStatusCacheDao()
                 .findByEntryId(CRAWL_ROOT_ENTRY_ID);
-        Assert.assertEquals("Download job status reported as completed", NetworkTask.STATUS_COMPLETE,
+        Assert.assertEquals("Download job status reported as completed", STATUS_COMPLETE,
                 completedJob.getStatus());
         Assert.assertEquals("Status shows all child entries downloaded",
                 rootStatusCache.getSizeIncDescendants(), rootStatusCache.getContainersDownloadedSizeIncDescendants());
         Assert.assertEquals("4 containers downloaded in total",4,
                 rootStatusCache.getContainersDownloadedIncDescendants());
+        Mockito.verify(mockDownloadlistener, timeout(1000))
+                .handleDownloadTaskStatusChanged(any(), eq(STATUS_COMPLETE));
 
         //now delete them all. We need to rerun the find query, if these entries were unknown before they
         // would not have been discovered
-        final boolean[] complete = new boolean[1];
+
         UstadMobileSystemImpl.getInstance().deleteEntries(PlatformTestUtil.getTargetContext(),
                 Arrays.asList(CRAWL_ROOT_ENTRY_ID), true);
     }
 
 
     @Test
+    @SuppressWarnings("EmptyCatchBlock")
     public void givenDownloadStarted_whenPausedAndResumed_shouldComplete() {
         String opdsRootIndexUrl = UMFileUtil.joinPaths(
                 ResourcesHttpdTestServer.getHttpRoot(), "com/ustadmobile/test/sharedse/crawlme-slow/index.opds");
         DbManager dbManager = DbManager.getInstance(PlatformTestUtil.getTargetContext());
 
-        CrawlJob crawlJob = startDownloadJob(opdsRootIndexUrl, CRAWL_ROOT_ENTRY_ID, true, true);
+        CrawlJob crawlJob = runCrawlJob(opdsRootIndexUrl, CRAWL_ROOT_ENTRY_ID, true,
+                CRAWL_JOB_TIMEOUT);
         int downloadJobId = crawlJob.getContainersDownloadJobId();
 
 
@@ -210,7 +245,7 @@ public class TestDownloadTaskStandalone extends TestWithNetworkService {
 
         CountDownLatch latch = new CountDownLatch(1);
         UstadMobileSystemImpl.getInstance().getNetworkManager().pauseDownloadJobAsync(downloadJobId,
-                (pausedOK) -> { latch.countDown(); });
+                (pausedOK) -> latch.countDown());
 
         try { latch.await(12, TimeUnit.SECONDS); }
         catch(InterruptedException e) {}
@@ -228,7 +263,7 @@ public class TestDownloadTaskStandalone extends TestWithNetworkService {
         UmLiveData<DownloadJob> downloadJobLiveData = dbManager.getDownloadJobDao()
                 .getByIdLive(crawlJob.getContainersDownloadJobId());
         UmObserver<DownloadJob> downloadJobObserver = (downloadJobLiveDataUpdate) -> {
-            if (downloadJobLiveDataUpdate.getStatus() == NetworkTask.STATUS_COMPLETE) {
+            if (downloadJobLiveDataUpdate.getStatus() == STATUS_COMPLETE) {
                 downloadJobLatch.countDown();
             }
         };
@@ -243,7 +278,7 @@ public class TestDownloadTaskStandalone extends TestWithNetworkService {
         pausedJob = dbManager.getDownloadJobDao().findById(downloadJobId);
         OpdsEntryStatusCache rootStatusCache = dbManager.getOpdsEntryStatusCacheDao()
                 .findByEntryId(CRAWL_ROOT_ENTRY_ID_SLOW);
-        Assert.assertEquals("Download job status reported as completed", NetworkTask.STATUS_COMPLETE,
+        Assert.assertEquals("Download job status reported as completed", STATUS_COMPLETE,
                 pausedJob.getStatus());
         Assert.assertEquals("Status shows all child entries downloaded",
                 rootStatusCache.getSizeIncDescendants(), rootStatusCache.getContainersDownloadedSizeIncDescendants());
@@ -259,8 +294,11 @@ public class TestDownloadTaskStandalone extends TestWithNetworkService {
     public void givenDownloadStarted_whenConnectivityDisconnected_shouldStopAndQueue() {
         String opdsRootIndexUrl = UMFileUtil.joinPaths(
                 ResourcesHttpdTestServer.getHttpRoot(), OPDS_PATH_SPEED_LIMITED );
-        CrawlJob crawlJob = startDownloadJob(opdsRootIndexUrl, CRAWL_ROOT_ENTRY_ID_SLOW, true,
-                true);
+        CrawlJob crawlJob = runCrawlJob(opdsRootIndexUrl, CRAWL_ROOT_ENTRY_ID_SLOW, true,
+                CRAWL_JOB_TIMEOUT);
+        DownloadTaskListener taskListener = Mockito.mock(DownloadTaskListener.class);
+        DownloadTask task = startDownload(crawlJob.getContainersDownloadJobId(), taskListener);
+
         NetworkManager networkManager = (NetworkManager)UstadMobileSystemImpl.getInstance()
                 .getNetworkManager();
         waitForDownloadStatus(crawlJob.getContainersDownloadJobId(), NetworkTask.STATUS_RUNNING,
@@ -269,15 +307,17 @@ public class TestDownloadTaskStandalone extends TestWithNetworkService {
         catch(InterruptedException e) {}
 
         //fire the connectivity disconnected event
-        DownloadTask createdTask = networkManager.getActiveTask(
-                crawlJob.getContainersDownloadJobId(), DownloadTask.class);
-        createdTask.onConnectivityChanged(NetworkManager.CONNECTIVITY_STATE_DISCONNECTED);
-        try { Thread.sleep(10000); }
-        catch(InterruptedException e) {}
+        long connectivityChangeTime = System.currentTimeMillis();
+        task.onConnectivityChanged(NetworkManager.CONNECTIVITY_STATE_DISCONNECTED);
+        Mockito.verify(taskListener, timeout(5000)).handleDownloadTaskStatusChanged(any(),
+                eq(STATUS_WAITING_FOR_CONNECTION));
+        long timeToStop = System.currentTimeMillis() - connectivityChangeTime;
+        UstadMobileSystemImpl.l(UMLog.INFO, 0, "Task stopped " + timeToStop +
+                "ms after connectivity change");
 
         DownloadJob downloadJob = DbManager.getInstance(PlatformTestUtil.getTargetContext())
                 .getDownloadJobDao().findById(crawlJob.getContainersDownloadJobId());
-        Assert.assertTrue("Task is stopped", createdTask.isStopped());
+        Assert.assertTrue("Task is stopped", task.isStopped());
         Assert.assertEquals("Job status is waiting for connection",
                 NetworkTask.STATUS_WAITING_FOR_CONNECTION, downloadJob.getStatus());
 
@@ -287,10 +327,11 @@ public class TestDownloadTaskStandalone extends TestWithNetworkService {
 
 //    TODO: make start download work independently of the crawljob
 //    @Test
+    @SuppressWarnings("EmptyCatchBlock")
     public void givenDownloadStartedUnmeteredOnly_whenConnectivityChangesToMetered_shouldStopAndQueue() {
         String opdsRootIndexUrl = UMFileUtil.joinPaths(ResourcesHttpdTestServer.getHttpRoot(),
                 OPDS_PATH_SPEED_LIMITED);
-        CrawlJob crawlJob = startDownloadJob(opdsRootIndexUrl, CRAWL_ROOT_ENTRY_ID_SLOW, true, false);
+        CrawlJob crawlJob = runCrawlJob(opdsRootIndexUrl, CRAWL_ROOT_ENTRY_ID_SLOW, true, CRAWL_JOB_TIMEOUT);
         NetworkManager networkManager = (NetworkManager)UstadMobileSystemImpl.getInstance()
                 .getNetworkManager();
 
@@ -314,23 +355,25 @@ public class TestDownloadTaskStandalone extends TestWithNetworkService {
     public void givenDownloadStartedAnyNetwork_whenConnectivityChangesToMetered_shouldComplete() {
         String opdsRootIndexUrl = UMFileUtil.joinPaths(ResourcesHttpdTestServer.getHttpRoot(),
                 OPDS_PATH_SPEED_LIMITED);
-        CrawlJob crawlJob = startDownloadJob(opdsRootIndexUrl, CRAWL_ROOT_ENTRY_ID_SLOW, true, true);
-        NetworkManager networkManager = (NetworkManager)UstadMobileSystemImpl.getInstance()
-                .getNetworkManager();
+        CrawlJob crawlJob = runCrawlJob(opdsRootIndexUrl, CRAWL_ROOT_ENTRY_ID_SLOW, true, CRAWL_JOB_TIMEOUT);
+        DownloadTaskListener taskListener = Mockito.mock(DownloadTaskListener.class);
+        UstadMobileSystemImpl.l(UMLog.INFO, 0,
+                "givenDownloadStartedAnyNetwork_whenConnectivityChangesToMetered_shouldComplete"
+                        + " created download job #" + crawlJob.getContainersDownloadJobId());
+        DownloadTask task = startDownload(crawlJob.getContainersDownloadJobId(), taskListener);
 
         try { Thread.sleep(JOB_CHANGE_WAIT_TIME); }
         catch(InterruptedException e) {}
-        DownloadTask createdTask = networkManager.getActiveTask(
-                crawlJob.getContainersDownloadJobId(), DownloadTask.class);
-        createdTask.onConnectivityChanged(NetworkManager.CONNECTIVITY_STATE_METERED);
 
-        waitForDownloadStatus(crawlJob.getContainersDownloadJobId(), NetworkTask.STATUS_COMPLETE,
+        task.onConnectivityChanged(NetworkManager.CONNECTIVITY_STATE_METERED);
+
+        waitForDownloadStatus(crawlJob.getContainersDownloadJobId(), STATUS_COMPLETE,
                 120*1000);
 
         DownloadJob dlJob = DbManager.getInstance(PlatformTestUtil.getTargetContext())
                 .getDownloadJobDao().findById(crawlJob.getCrawlJobId());
         Assert.assertEquals("Download job status = completed",
-                NetworkTask.STATUS_COMPLETE, dlJob.getStatus());
+                STATUS_COMPLETE, dlJob.getStatus());
         OpdsEntryStatusCache statusCache = DbManager.getInstance(PlatformTestUtil.getTargetContext())
                 .getOpdsEntryStatusCacheDao().findByEntryId(CRAWL_ROOT_ENTRY_ID_SLOW);
         Assert.assertTrue("Containers have been downloaded",
@@ -342,10 +385,11 @@ public class TestDownloadTaskStandalone extends TestWithNetworkService {
     }
 
 //    @Test
+    @SuppressWarnings("EmptyCatchBlock")
     public void givenDownloadStarted_whenServerFails_shouldStopAndQueue() throws IOException{
         String opdsRootIndexUrl = UMFileUtil.joinPaths(ResourcesHttpdTestServer.getHttpRoot(),
                 OPDS_PATH_SPEED_LIMITED);
-        CrawlJob crawlJob = startDownloadJob(opdsRootIndexUrl, CRAWL_ROOT_ENTRY_ID_SLOW, true, true);
+        CrawlJob crawlJob = runCrawlJob(opdsRootIndexUrl, CRAWL_ROOT_ENTRY_ID_SLOW, true, CRAWL_JOB_TIMEOUT);
 
         try { Thread.sleep(JOB_CHANGE_WAIT_TIME); }
         catch(InterruptedException e) {}

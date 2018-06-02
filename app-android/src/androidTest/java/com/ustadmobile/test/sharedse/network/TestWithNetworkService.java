@@ -1,5 +1,6 @@
 package com.ustadmobile.test.sharedse.network;
 
+import android.Manifest;
 import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
@@ -7,6 +8,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.support.test.InstrumentationRegistry;
+import android.support.test.rule.GrantPermissionRule;
 import android.support.test.rule.ServiceTestRule;
 
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
@@ -26,11 +28,17 @@ import java.util.concurrent.TimeoutException;
 public abstract class TestWithNetworkService {
 
     @Rule
+    public GrantPermissionRule mPermissionRule = GrantPermissionRule.grant(
+            Manifest.permission.WRITE_EXTERNAL_STORAGE);
+
+
+    @Rule
     public final ServiceTestRule mServiceRule = new ServiceTestRule();
 
-    protected NetworkServiceAndroid sService;
 
-    protected ServiceConnection sServiceConnection = new ServiceConnection() {
+    private NetworkServiceAndroid sService;
+
+    private ServiceConnection sServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
             sService = ((NetworkServiceAndroid.LocalServiceBinder)iBinder)

@@ -78,9 +78,18 @@ public abstract class DownloadJobDao {
      *
      * @param id downloadJobId to search for.
      *
-     * @return The DownloadJob with the given id, or null if no such download exists
+     * @return The DownloadJob with the given id, or null if no such DownloadJob exists
      */
     public abstract DownloadJob findById(int id);
+
+    /**
+     * Find a DownloadJobWithDownloadSet by the downloadJobId (primary key)
+     *
+     * @param id downloadJobId to search for.
+     * @return The DownloadJobWithDownloadSet for the given id, or null if no such DownloadJob exists
+     */
+    public abstract DownloadJobWithDownloadSet findByIdWithDownloadSet(int id);
+
 
 
     /**

@@ -10,6 +10,7 @@ public interface DownloadTaskListener {
      * failed, etc)
      *
      * @param task The task being worked on. This is always a DownloadTask
+     * @param status The status flag that the status has changed to as per NetworkTask.STATUS_ flags
      */
-    void handleDownloadTaskStatusChanged(NetworkTask task);
+    void handleDownloadTaskStatusChanged(NetworkTask task, int status);
 }

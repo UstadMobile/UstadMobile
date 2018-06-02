@@ -617,6 +617,7 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
     @Override
     public boolean pauseDownloadJob(int downloadJobId) {
         DownloadTask downloadTask = stopDownloadAndSetStatus(downloadJobId, NetworkTask.STATUS_PAUSED);
+        //TODO: this should likely go, it should be possible to pause a download that is not currently running
         if(downloadTask == null)
             return false;
 
@@ -718,7 +719,7 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
 
 
     @Override
-    public void handleDownloadTaskStatusChanged(NetworkTask task) {
+    public void handleDownloadTaskStatusChanged(NetworkTask task, int status) {
         if(task.getStatus() >= NetworkTask.STATUS_COMPLETE_MIN || task.getStatus() < NetworkTask.STATUS_RUNNING_MIN){
             //this task has finished or has to wait (e.g. for a connection to be available)
             activeNetworkTasks.get(DownloadTask.class).remove(task.getTaskId());

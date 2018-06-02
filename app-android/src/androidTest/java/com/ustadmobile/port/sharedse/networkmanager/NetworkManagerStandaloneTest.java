@@ -20,6 +20,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.util.Arrays;
 
+import static com.ustadmobile.test.sharedse.network.TestDownloadTaskStandalone.CRAWL_JOB_TIMEOUT;
 import static com.ustadmobile.test.sharedse.network.TestDownloadTaskStandalone.CRAWL_ROOT_ENTRY_ID_SLOW;
 
 public class NetworkManagerStandaloneTest extends TestWithNetworkService {
@@ -36,11 +37,12 @@ public class NetworkManagerStandaloneTest extends TestWithNetworkService {
 
 
     @Test
+    @SuppressWarnings("EmptyCatchBlock")
     public void givenWaitingDownload_whenConnectivityRestored_thenShouldStartAndComplete() {
-        CrawlJob crawlJob = TestDownloadTaskStandalone.startDownloadJob(
+        CrawlJob crawlJob = TestDownloadTaskStandalone.runCrawlJob(
                 UMFileUtil.resolveLink(ResourcesHttpdTestServer.getHttpRoot(),
                         TestDownloadTaskStandalone.OPDS_PATH_SPEED_LIMITED),
-                        CRAWL_ROOT_ENTRY_ID_SLOW, true, true);
+                        CRAWL_ROOT_ENTRY_ID_SLOW, true, CRAWL_JOB_TIMEOUT);
         try { Thread.sleep(500);}
         catch(InterruptedException e) {}
         NetworkManager networkManager = (NetworkManager)UstadMobileSystemImpl.getInstance()
@@ -70,14 +72,15 @@ public class NetworkManagerStandaloneTest extends TestWithNetworkService {
     }
 
     @Test
+    @SuppressWarnings("EmptyCatchBlock")
     public void givenWaitingDownloadRequiringUnmetered_whenUnmeteredConnectivityAvailable_thenShouldStartAndComplete() {
         NetworkManager networkManager = (NetworkManager)UstadMobileSystemImpl.getInstance()
                 .getNetworkManager();
         networkManager.handleConnectivityChanged(NetworkManagerCore.CONNECTIVITY_STATE_UNMETERED);
-        CrawlJob crawlJob = TestDownloadTaskStandalone.startDownloadJob(
+        CrawlJob crawlJob = TestDownloadTaskStandalone.runCrawlJob(
                 UMFileUtil.resolveLink(ResourcesHttpdTestServer.getHttpRoot(),
                         TestDownloadTaskStandalone.OPDS_PATH_SPEED_LIMITED),
-                CRAWL_ROOT_ENTRY_ID_SLOW, true, false);
+                CRAWL_ROOT_ENTRY_ID_SLOW, true, CRAWL_JOB_TIMEOUT);
         try { Thread.sleep(500);}
         catch(InterruptedException e) {}
 

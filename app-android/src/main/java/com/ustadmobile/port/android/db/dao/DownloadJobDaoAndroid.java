@@ -91,6 +91,12 @@ public abstract class DownloadJobDaoAndroid extends DownloadJobDao {
     public abstract DownloadJob findById(int id);
 
     @Override
+    @Query("SELECT * FROM DownloadJob " +
+            "LEFT JOIN DownloadSet on DownloadJob.downloadSetId = DownloadSet.id " +
+            "WHERE downloadJobId = :id")
+    public abstract DownloadJobWithDownloadSet findByIdWithDownloadSet(int id);
+
+    @Override
     @Query("SELECT downloadSetId FROM DownloadJob WHERE downloadJobId = :downloadJobId")
     public abstract int findDownloadSetId(int downloadJobId);
 
