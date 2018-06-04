@@ -625,6 +625,8 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
         List<DownloadJobItemWithDownloadSetItem> pausedItems = dbManager.getDownloadJobItemDao()
                 .findByDownloadJobAndStatusRange(downloadJobId, NetworkTask.STATUS_WAITING_MIN,
                         NetworkTask.STATUS_COMPLETE_MIN);
+        UstadMobileSystemImpl.l(UMLog.DEBUG, 0, "Setting status to paused on " +
+                pausedItems.size() + " items");
         for(DownloadJobItemWithDownloadSetItem pausedItem : pausedItems) {
             dbManager.getDownloadJobItemDao().updateStatus(pausedItem.getDownloadJobItemId(),
                     NetworkTask.STATUS_PAUSED);

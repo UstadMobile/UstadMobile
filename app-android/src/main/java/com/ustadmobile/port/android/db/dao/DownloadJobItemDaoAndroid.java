@@ -8,7 +8,6 @@ import android.arch.persistence.room.Query;
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.dao.DownloadJobItemDao;
 import com.ustadmobile.core.networkmanager.NetworkTask;
-import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.db.entities.DownloadJobItem;
 import com.ustadmobile.lib.db.entities.DownloadJobItemWithDownloadSetItem;
 
@@ -30,7 +29,11 @@ public abstract class DownloadJobItemDaoAndroid extends DownloadJobItemDao {
             "status = :status, downloadedSoFar = :downloadedSoFar, " +
             "downloadLength = :downloadLength, currentSpeed = :currentSpeed " +
             " WHERE downloadJobItemId = :downloadJobItemId")
-    public abstract void updateDownloadJobItemStatus(int downloadJobItemId, int status, long downloadedSoFar, long downloadLength, long currentSpeed);
+    public abstract void updateDownloadJobItemStatus(int downloadJobItemId, int status,
+                                                     long downloadedSoFar, long downloadLength,
+                                                     long currentSpeed);
+
+
 
     @Override
     @Query("SELECT * FROM DownloadJobItem WHERE downloadJobId = :downloadJobId")
@@ -42,8 +45,10 @@ public abstract class DownloadJobItemDaoAndroid extends DownloadJobItemDao {
             " WHERE DownloadJobItem.downloadJobId = :downloadJobId ")
     public abstract List<DownloadJobItemWithDownloadSetItem> findAllWithDownloadSet(int downloadJobId);
 
+    @Override
     @Query("UPDATE DownloadJobItem SET status = :status WHERE downloadJobItemId = :downloadJobItemId")
     public abstract void updateStatus(int downloadJobItemId, int status);
+
 
     @Override
     public UmLiveData<DownloadJobItemWithDownloadSetItem> findDownloadJobItemByEntryIdAndStatusRangeLive(String entryId, int statusFrom, int statusTo) {

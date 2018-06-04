@@ -1,14 +1,14 @@
 package com.ustadmobile.core.db.dao;
 
 import com.ustadmobile.core.db.UmLiveData;
-import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UmResultCallback;
-import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.networkmanager.NetworkTask;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.db.entities.DownloadJob;
 import com.ustadmobile.lib.db.entities.DownloadJobWithDownloadSet;
 import com.ustadmobile.lib.db.entities.DownloadJobWithTotals;
+
+import java.util.List;
 
 /**
  * DAO for the DownloadJob class
@@ -48,10 +48,9 @@ public abstract class DownloadJobDao {
      * @param id The DownloadJobId of the download job to update the status for
      * @param status The status to set on the given DownloadJob
      *
-     * @return The number of entries updated (should normally be 1)
      */
     @UmQuery("UPDATE DownloadJobRun SET status = :status WHERE id = :jobId")
-    public abstract long updateJobStatus(int id, int status);
+    public abstract void updateJobStatus(int id, int status);
 
     /**
      * Mark the status in bulk of DownloadJob, useful for testing purposes to cancel other downloads
@@ -150,8 +149,10 @@ public abstract class DownloadJobDao {
 
 
     /**
-     * Find the last download job that was requested for the given ID
-     * @param entryId
+     * Find the last download job that was requested with a given entryId as one of the entries
+     *
+     * @param entryId entryId to search for - can be the root entryId, or any child entry
+     * @param callback callback to call when done
      */
     public void findLastDownloadJobId(String entryId, UmResultCallback<Integer> callback) {
         findLastDownloadJobIdByDownloadJobItem(entryId, (jobItemJobId) -> {
@@ -171,4 +172,12 @@ public abstract class DownloadJobDao {
 
     public abstract void updateAllowMeteredDataUsage(int downloadJobId, boolean allowMeteredDataUsage,
                                                      UmResultCallback<Void> callback);
+
+    /**
+     * Get a list of all DownloadJob items. Used for debugging purposes.
+     *
+     * @return A list of all DownloadJob entity objects
+     */
+    public abstract List<DownloadJob> findAll();
+
 }

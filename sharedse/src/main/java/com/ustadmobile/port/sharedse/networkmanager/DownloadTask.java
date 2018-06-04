@@ -188,28 +188,18 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
             try {
                 statusLock.lock();
 
-                if(httpDownload != null && httpDownload.getTotalSize()>0L && !isStopped()){
-                    int progress=(int)((httpDownload.getDownloadedSoFar()*100)/ httpDownload.getTotalSize());
-                    long currentTime = Calendar.getInstance().getTimeInMillis();
-                    int progressLimit=100;
-                    if(((currentTime - lastProgressUpdateTime) < DOWNLOAD_TASK_UPDATE_TIME) ||
-                            (progress < 0 && progress > progressLimit)) {
-                        return;
-                    }
+                if(httpDownload != null && httpDownload.getTotalSize() > 0 && !isStopped()
+                        && currentDownloadJobItem != null){
 
-                    lastProgressUpdateTime = currentTime;
+                    currentDownloadJobItem.setDownloadedSoFar(httpDownload.getDownloadedSoFar());
+                    currentDownloadJobItem.setCurrentSpeed(httpDownload.getCurrentDownloadSpeed());
+                    currentDownloadJobItem.setStatus(STATUS_RUNNING);
+                    currentDownloadJobItem.setDownloadLength(httpDownload.getTotalSize());
+                    mDbManager.getDownloadJobItemDao().updateDownloadJobItemStatus(currentDownloadJobItem);
 
+                    mDbManager.getOpdsEntryStatusCacheDao().handleDownloadJobProgress(
+                            currentEntryStatusCacheId, currentDownloadJobItem.getDownloadJobItemId());
 
-                    if(!isStopped() && currentDownloadJobItem != null) {
-                        currentDownloadJobItem.setDownloadedSoFar(httpDownload.getDownloadedSoFar());
-                        currentDownloadJobItem.setCurrentSpeed(httpDownload.getCurrentDownloadSpeed());
-                        currentDownloadJobItem.setStatus(STATUS_RUNNING);
-                        currentDownloadJobItem.setDownloadLength(httpDownload.getTotalSize());
-                        mDbManager.getDownloadJobItemDao().updateDownloadJobItemStatus(currentDownloadJobItem);
-
-                        mDbManager.getOpdsEntryStatusCacheDao().handleDownloadJobProgress(
-                                currentEntryStatusCacheId, currentDownloadJobItem.getDownloadJobItemId());
-                    }
                 }
             }finally {
                 statusLock.unlock();
@@ -249,6 +239,7 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
 
         this.mirrorFinder = networkManager;
         this.downloadTaskListener = downloadTaskListener;
+        this.updateTimer = new Timer();
     }
 
     protected void executeIfNotStopped(Runnable runnable) {
@@ -280,7 +271,6 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
                     .getDownloadJobDao().findAllowMeteredDataUsageLive(downloadJob.getDownloadJobId());
             allowMeteredDataUsageLiveData.observeForever(allowMeteredDataUsageObserver);
 
-            updateTimer = new Timer();
             updateTimerTask = new UpdateTimerTask();
             updateTimer.scheduleAtFixedRate(updateTimerTask, DOWNLOAD_TASK_UPDATE_TIME,
                     DOWNLOAD_TASK_UPDATE_TIME);
@@ -308,12 +298,7 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
             networkManager.removeNetworkManagerListener(this);
             networkManager.removeConnectivityListener(this);
 
-            if(updateTimer!=null){
-                updateTimer.cancel();
-                updateTimerTask.cancel();
-                updateTimerTask =null;
-                updateTimer=null;
-            }
+            updateTimer.cancel();
 
             setWaitingForWifiConnection(false);
 
@@ -571,6 +556,13 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
 
         try {
             statusLock.lock();
+
+            //if the task was stopped during download, everything has been handled by the stop() method
+            if(isStopped()) {
+                UstadMobileSystemImpl.l(UMLog.ERROR, 0, getLogPrefix() +
+                        " stopped during download - aborting downloadCurrentFile");
+                return;
+            }
 
             currentJobItemHistory.setEndTime(System.currentTimeMillis());
             currentJobItemHistory.setSuccessful(downloadCompleted);

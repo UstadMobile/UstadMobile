@@ -9,14 +9,13 @@ import android.arch.persistence.room.Update;
 
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.dao.DownloadJobDao;
-import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UmResultCallback;
-import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.networkmanager.NetworkTask;
 import com.ustadmobile.lib.db.entities.DownloadJob;
 import com.ustadmobile.lib.db.entities.DownloadJobWithDownloadSet;
 import com.ustadmobile.lib.db.entities.DownloadJobWithTotals;
 
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 
 @Dao
@@ -45,14 +44,8 @@ public abstract class DownloadJobDaoAndroid extends DownloadJobDao {
     protected abstract DownloadJobWithDownloadSet findNextDownloadJob(boolean connectionMetered);
 
     @Override
-    public long updateJobStatus(int jobId, int status) {
-        UstadMobileSystemImpl.l(UMLog.VERBOSE, 0, "DownloadJobDao: updateJobStatus #"
-            + jobId + " status " + status);
-        return updateJobStatus_Room(jobId, status);
-    }
-
     @Query("UPDATE DownloadJob  SET status = :status WHERE downloadJobId = :jobId")
-    public abstract long updateJobStatus_Room(int jobId, int status);
+    public abstract void updateJobStatus(int jobId, int status);
 
 
     @Override
@@ -74,16 +67,8 @@ public abstract class DownloadJobDaoAndroid extends DownloadJobDao {
 
 
     @Override
-    public void update(DownloadJob jobRun) {
-        UstadMobileSystemImpl.l(UMLog.VERBOSE, 0, "DownloadJobDao: update job#"
-            + jobRun.getDownloadJobId() + " status " + jobRun.getStatus());
-        update_Room(jobRun);
-    }
-
-
-
     @Update
-    public abstract void update_Room(DownloadJob jobRun);
+    public abstract void update(DownloadJob jobRun);
 
 
     @Override
@@ -160,4 +145,8 @@ public abstract class DownloadJobDaoAndroid extends DownloadJobDao {
 
     @Query("UPDATE DownloadJob SET allowMeteredDataUsage = :allowMeteredDataUsage WHERE downloadJobId = :downloadJobId ")
     public abstract void updateAllowMeteredDataUsage_Room(int downloadJobId, boolean allowMeteredDataUsage);
+
+    @Override
+    @Query("SELECT * From DownloadJob")
+    public abstract List<DownloadJob> findAll();
 }
