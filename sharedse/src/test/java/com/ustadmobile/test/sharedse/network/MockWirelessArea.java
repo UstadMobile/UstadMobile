@@ -32,20 +32,20 @@ public class MockWirelessArea {
     private TimerTask peerDiscoveryTimerTask = new TimerTask() {
         @Override
         public void run() {
-            ArrayList<MockNetworkManager> peers;
-            synchronized (devices) {
-                for(int i = 0; i < devices.size(); i++) {
-                    peers = new ArrayList<>(devices);
-                    peers.remove(devices.get(i));
-
-                    ArrayList<NetworkNode> nodePeers = new ArrayList<>(peers.size());
-                    for(MockNetworkManager manager : peers) {
-                        nodePeers.add(manager.getThisWifiDirectDevice());
-                    }
-
-                    devices.get(i).handleWifiDirectPeersChanged(nodePeers);
-                }
-            }
+//            ArrayList<MockNetworkManager> peers;
+//            synchronized (devices) {
+//                for(int i = 0; i < devices.size(); i++) {
+//                    peers = new ArrayList<>(devices);
+//                    peers.remove(devices.get(i));
+//
+//                    ArrayList<NetworkNode> nodePeers = new ArrayList<>(peers.size());
+//                    for(MockNetworkManager manager : peers) {
+//                        nodePeers.add(manager.getThisWifiDirectDevice());
+//                    }
+//
+//                    devices.get(i).handleWifiDirectPeersChanged(nodePeers);
+//                }
+//            }
         }
     };
 

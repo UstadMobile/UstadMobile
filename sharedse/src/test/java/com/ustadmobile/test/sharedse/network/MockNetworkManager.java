@@ -201,11 +201,6 @@ public class MockNetworkManager extends NetworkManager {
     }
 
     @Override
-    public void handleEntriesStatusUpdate(NetworkNode node, List<String> fileIds, List<Boolean> status) {
-        super.handleEntriesStatusUpdate(node, fileIds, status);
-    }
-
-    @Override
     public void setSuperNodeEnabled(Object context, boolean enabled) {
         this.supernodeEnabled = enabled;
         updateClientServices();
@@ -613,12 +608,6 @@ public class MockNetworkManager extends NetworkManager {
         wifiDirectNodeConnectionTimer.schedule(connectTask, 1000);
     }
 
-    @Override
-    public NetworkNode getThisWifiDirectDevice() {
-        NetworkNode node = new NetworkNode(getWifiDirectMacAddr(), null);
-        node.setDeviceWifiDirectName(mockDeviceName);
-        return node;
-    }
 
     @Override
     public String getWifiDirectGroupOwnerIp() {
@@ -646,5 +635,10 @@ public class MockNetworkManager extends NetworkManager {
             }
             wifiDirectNodeConnectionPendingTasks.clear();
         }
+    }
+
+    @Override
+    public com.ustadmobile.lib.db.entities.NetworkNode getThisWifiDirectDevice() {
+        return null;
     }
 }

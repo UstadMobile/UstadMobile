@@ -13,7 +13,6 @@ import org.junit.runners.Suite;
 
 @Suite.SuiteClasses({
         TestCatalogUriResponder.class,
-        TestResumableHttpDownload.class,
         TestMountedZipHandler.class
 })
 

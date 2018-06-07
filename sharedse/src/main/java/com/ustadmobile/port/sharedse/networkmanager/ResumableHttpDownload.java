@@ -102,6 +102,8 @@ public class ResumableHttpDownload {
 
     private final String logPrefix;
 
+    private int responseCode;
+
     public ResumableHttpDownload(String httpSrc, String destinationFile){
         this.httpSrc = httpSrc;
         this.destinationFile = destinationFile;
@@ -234,7 +236,7 @@ public class ResumableHttpDownload {
             propertiesOut.close();
             propertiesOut = null;
 
-            int responseCode = con.getResponseCode();
+            responseCode = con.getResponseCode();
             boolean appendToPartFileOutput = responseCode == HttpURLConnection.HTTP_PARTIAL;
             synchronized (this) {
                 if(isStopped()) {
@@ -472,4 +474,12 @@ public class ResumableHttpDownload {
         return logPrefix;
     }
 
+    /**
+     * Get the http response code (if the response has started)
+     *
+     * @return HTTP response code (if the ressponse has started)
+     */
+    public int getResponseCode() {
+        return responseCode;
+    }
 }

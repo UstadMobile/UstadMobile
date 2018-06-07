@@ -186,6 +186,21 @@ public class UMIOUtils {
             throw e;
         }
     }
+
+    /**
+     * Throw the given exception if it's not null
+     *
+     * @param throwable Throwable exception
+     * @param clazz Exception class
+     * @param <T> Exception class type
+     *
+     * @throws T Throwable exception
+     */
+    public static <T extends Throwable> void throwIfNotNull(T throwable, Class<T> clazz) throws T {
+        if(throwable != null)
+            throw throwable;
+    }
+
     
     public static final void throwIfNotNullXPE(XmlPullParserException xe) throws XmlPullParserException {
         if(xe != null) {
