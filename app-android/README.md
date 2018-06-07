@@ -2,6 +2,12 @@
 
 This is a normal gradle build and should open fine with Android studio. It includes the core and sharedse modules.
 
+### Android Studio Setup
+
+Gradle 4.6 (required to use annotationProcessor without plugins) does not allow __configure on
+demand__. Open File - Settings - Build, Execution, Deployment, Compiler and uncheck configure on
+demand if checked.
+
 ### To build
 
 (run from root project directory):

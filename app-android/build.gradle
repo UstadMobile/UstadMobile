@@ -12,7 +12,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'digital.wup:android-maven-publish:3.1.1'
+        classpath 'digital.wup:android-maven-publish:3.3.0'
     }
 }
 
