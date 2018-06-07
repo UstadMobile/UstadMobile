@@ -13,6 +13,7 @@ import com.ustadmobile.core.networkmanager.NetworkTask;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.lib.db.entities.CrawlJob;
 import com.ustadmobile.lib.db.entities.DownloadJob;
+import com.ustadmobile.lib.db.entities.DownloadJobItem;
 import com.ustadmobile.lib.db.entities.DownloadJobWithDownloadSet;
 import com.ustadmobile.lib.db.entities.DownloadSet;
 import com.ustadmobile.lib.db.entities.OpdsEntryStatusCache;
@@ -58,6 +59,14 @@ public class TestDownloadTaskStandalone extends TestWithNetworkService {
 
     @SuppressWarnings("WeakerAccess")
     public static final String OPDS_PATH_SPEED_LIMITED = "com/ustadmobile/test/sharedse/crawlme-slow/index.opds";
+
+    @SuppressWarnings("WeakerAccess")
+    public static final String OPDS_PATH_404 =
+            "com/ustadmobile/test/sharedse/testfeeds/entry-not-found/index.opds";
+
+    @SuppressWarnings("WeakerAccess")
+    public static final String CRAWL_ROOT_ENTRY_ID_404 =
+            "http://umcloud1.ustadmobile.com/opds/test-crawl/entry-not-found/doesnotexist";
 
     /**
      *
@@ -384,26 +393,36 @@ public class TestDownloadTaskStandalone extends TestWithNetworkService {
                 Arrays.asList(CRAWL_ROOT_ENTRY_ID_SLOW), true);
     }
 
-//    @Test
+    @Test
     @SuppressWarnings("EmptyCatchBlock")
-    public void givenDownloadStarted_whenServerFails_shouldStopAndQueue() throws IOException{
+    public void givenDownloadStarted_whenFileIs404NotFound_shouldGiveUpAndSetFailStatus()
+            throws IOException{
         String opdsRootIndexUrl = UMFileUtil.joinPaths(ResourcesHttpdTestServer.getHttpRoot(),
-                OPDS_PATH_SPEED_LIMITED);
-        CrawlJob crawlJob = runCrawlJob(opdsRootIndexUrl, CRAWL_ROOT_ENTRY_ID_SLOW, true, CRAWL_JOB_TIMEOUT);
+                OPDS_PATH_404);
+        CrawlJob crawlJob = runCrawlJob(opdsRootIndexUrl, CRAWL_ROOT_ENTRY_ID_404,
+                true, CRAWL_JOB_TIMEOUT);
+        startDownload(crawlJob.getContainersDownloadJobId(),
+                (NetworkManager)UstadMobileSystemImpl.getInstance().getNetworkManager());
 
         try { Thread.sleep(JOB_CHANGE_WAIT_TIME); }
         catch(InterruptedException e) {}
         ResourcesHttpdTestServer.stopServer();
 
-        waitForDownloadStatus(crawlJob.getContainersDownloadJobId(), NetworkTask.STATUS_WAIT_FOR_RETRY,
+        waitForDownloadStatus(crawlJob.getContainersDownloadJobId(), NetworkTask.STATUS_COMPLETE,
                 150000);
         DownloadJob dlJob = DbManager.getInstance(PlatformTestUtil.getTargetContext())
                 .getDownloadJobDao().findById(crawlJob.getContainersDownloadJobId());
-        Assert.assertEquals("Status after server fail should be STATUS_WAIT_FOR_RETRY",
-                NetworkTask.STATUS_WAIT_FOR_RETRY, dlJob.getStatus());
+        List<DownloadJobItem> downloadJobItemList = DbManager.getInstance(PlatformTestUtil.getTargetContext())
+                .getDownloadJobItemDao().findAllByDownloadJobId(dlJob.getDownloadJobId());
 
-        UstadMobileSystemImpl.getInstance().getNetworkManager().cancelDownloadJob(
-                dlJob.getDownloadJobId());
+        Assert.assertEquals("Download Job List has 1 item", 1,
+                downloadJobItemList.size());
+        Assert.assertEquals("Download Job Item status is failed", NetworkTask.STATUS_FAILED,
+                downloadJobItemList.get(0).getStatus());
+        Assert.assertEquals("When 404 hard failure response code sent, there was no retry",
+                1, downloadJobItemList.get(0).getNumAttempts());
+        Assert.assertEquals("DownloadJob status with failed item is complete",
+                NetworkTask.STATUS_COMPLETE, dlJob.getStatus());
     }
 
 }

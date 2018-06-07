@@ -101,4 +101,10 @@ public abstract class DownloadJobItemDaoAndroid extends DownloadJobItemDao {
     @Query("UPDATE DownloadJobItem SET destinationFile = :destinationFile " +
             "WHERE downloadJobItemId = :downloadJobItemId")
     public abstract void updateDestinationFile(int downloadJobItemId, String destinationFile);
+
+
+    @Override
+    @Query("UPDATE DownloadJobItem SET numAttempts = :numAttempts " +
+            "WHERE downloadJobItemId = :downloadJobItemId")
+    public abstract void updateNumAttempts(int downloadJobItemId, int numAttempts);
 }

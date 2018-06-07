@@ -170,5 +170,14 @@ public abstract class DownloadJobItemDao {
             "WHERE downloadJobItemId = :downloadJobItemId")
     public abstract void updateDestinationFile(int downloadJobItemId, String destinationFile);
 
+    /**
+     * Update the number of attempts for a given DownloadJobItem.
+     *
+     * @param downloadJobItemId primary key of the DownloadJob to update
+     * @param numAttempts value for numAttempts field
+     */
+    @UmQuery("UPDATE DownloadJobItem SET numAttempts = numAttempts " +
+            "WHERE downloadJobItemId = :downloadJobItemId")
+    public abstract void updateNumAttempts(int downloadJobItemId, int numAttempts);
 
 }

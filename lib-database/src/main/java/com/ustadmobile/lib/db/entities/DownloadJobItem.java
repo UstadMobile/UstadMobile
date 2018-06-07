@@ -35,6 +35,8 @@ public class DownloadJobItem {
 
     private String destinationFile;
 
+    private int numAttempts;
+
     /**
      * Constructor
      *
@@ -228,5 +230,25 @@ public class DownloadJobItem {
      */
     public void setDestinationFile(String destinationFile) {
         this.destinationFile = destinationFile;
+    }
+
+    /**
+     * Get the number of attempts that have been completed to download this item. This is exclusive
+     * of the current attempt running, if any.
+     *
+     * @return The number of attempts that have been completed to download this item
+     */
+    public int getNumAttempts() {
+        return numAttempts;
+    }
+
+    /**
+     Get the number of attempts that have been completed to download this item. This is exclusive
+     * of the current attempt running, if any.
+     *
+     * @param numAttempts
+     */
+    public void setNumAttempts(int numAttempts) {
+        this.numAttempts = numAttempts;
     }
 }
