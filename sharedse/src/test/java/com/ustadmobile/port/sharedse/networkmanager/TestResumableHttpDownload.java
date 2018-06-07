@@ -120,7 +120,7 @@ public class TestResumableHttpDownload {
 
     @Test
     @SuppressWarnings({"EmptyCatchBlock", "ConstantConditions"})
-    public void givenInterruptdConnection_whenDownloaded_md5ShouldMatch() throws IOException, NoSuchAlgorithmException{
+    public void givenInterruptedConnection_whenDownloaded_md5ShouldMatch() throws IOException, NoSuchAlgorithmException{
         boolean result = false;
         int retryLimit = 15;
         File tmpDownloadFile = File.createTempFile("testresumabledownload-retry", ".epub");
@@ -148,4 +148,42 @@ public class TestResumableHttpDownload {
         Assert.assertTrue("Deleted tmp download file for retry", tmpDownloadFile.delete());
     }
 
+    @Test
+    public void givenRemoteFileNotExisting_whenDownloaded_shouldThrowException() throws IOException{
+        String httpDownloadUrl = UMFileUtil.joinPaths(httpRoot, TEST_RESOURCE_PATH + "-wrongurl");
+        File tmpDownloadFile = File.createTempFile("testresuambledownload-wrongurl", ".epub");
+        ResumableHttpDownload resumableDownload = new ResumableHttpDownload(httpDownloadUrl,
+                tmpDownloadFile.getAbsolutePath());
+        IOException ioe = null;
+
+        try {
+            resumableDownload.download();
+        }catch(IOException e) {
+            ioe = e;
+        }
+
+        Assert.assertNotNull("When download url does not exist, IOException is thrown",
+                ioe);
+        Assert.assertEquals("When download url does not exist, response code is 404",
+                404, resumableDownload.getResponseCode());
+    }
+
+    @Test
+    public void givenRemoteServerOffline_whenDownloaded_shouldThrowException() throws IOException{
+        String httpDownloadUrl = UMFileUtil.joinPaths("http://localhost:42", TEST_RESOURCE_PATH);
+        File tmpDownloadFile = File.createTempFile("testresumabledownload-offlineserver", ".epub");
+        ResumableHttpDownload resumableHttpDownload = new ResumableHttpDownload(httpDownloadUrl,
+                tmpDownloadFile.getAbsolutePath());
+        IOException ioe = null;
+
+        try {
+            resumableHttpDownload.download();
+        }catch(IOException e) {
+            ioe = e;
+        }
+
+        Assert.assertNotNull("When server is offline, IOException is thrown", ioe);
+        Assert.assertEquals("When server is offline, response code is 0", 0,
+                resumableHttpDownload.getResponseCode());
+    }
 }
