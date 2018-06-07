@@ -18,6 +18,7 @@
             <option value="$PROJECT_DIR$/lib-core-fs-tests" />
             <option value="$PROJECT_DIR$/lib-database" />
             <option value="$PROJECT_DIR$/lib-database-annotation" />
+            <option value="$PROJECT_DIR$/lib-database-annotation-processor" />
             <option value="$PROJECT_DIR$/lib-database-processor" />
             <option value="$PROJECT_DIR$/lib-http-testserver" />
             <option value="$PROJECT_DIR$/lib-util" />

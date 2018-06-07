@@ -3,6 +3,7 @@ package com.ustadmobile.core.db.dao;
 import com.ustadmobile.core.db.DbManager;
 import com.ustadmobile.core.impl.BaseUmCallback;
 import com.ustadmobile.core.impl.UmCallback;
+import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmDelete;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.db.entities.ContainerFile;
@@ -13,7 +14,7 @@ import java.util.List;
 /**
  * Created by mike on 1/27/18.
  */
-
+@UmDao
 public abstract class ContainerFileDao {
 
     public abstract ContainerFileWithRelations findContainerFileByPath(String path);

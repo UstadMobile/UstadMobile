@@ -52,6 +52,8 @@ dependencies {
     implementation project(":lib-database-annotation")
     implementation project(":lib-util")
 
+    annotationProcessor project(":lib-database-annotation-processor")
+
 
     testImplementation project(":core-tests")
     testImplementation project(":sharedse")
