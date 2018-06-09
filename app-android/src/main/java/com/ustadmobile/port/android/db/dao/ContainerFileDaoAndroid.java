@@ -8,6 +8,7 @@ import android.arch.persistence.room.Query;
 import com.ustadmobile.core.db.dao.ContainerFileDao;
 import com.ustadmobile.core.impl.BaseUmCallback;
 import com.ustadmobile.core.impl.UmCallback;
+import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.db.entities.ContainerFile;
 import com.ustadmobile.lib.db.entities.ContainerFileWithRelations;
 
@@ -17,7 +18,7 @@ import java.util.concurrent.ExecutorService;
 /**
  * Created by mike on 1/27/18.
  */
-
+@UmDao
 @Dao
 public abstract class ContainerFileDaoAndroid extends ContainerFileDao implements UmDaoAndroid {
 

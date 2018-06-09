@@ -418,6 +418,7 @@ dependencies {
     api project(":lib-core-fs")
     implementation project(":lib-database-annotation")
     implementation project(":lib-util")
+    annotationProcessor project(":lib-database-annotation-processor")
 
     vanillamultidexApi "com.android.support:multidex:$version_android_multidex"
 

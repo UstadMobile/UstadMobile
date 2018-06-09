@@ -5,6 +5,7 @@ import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeSpec;
 import com.ustadmobile.lib.database.annotation.UmDao;
+import com.ustadmobile.lib.database.annotation.UmEntity;
 
 import java.io.IOException;
 import java.util.HashSet;
@@ -55,6 +56,17 @@ public class UmDaoProcessor extends AbstractProcessor{
 
     @Override
     public boolean process(Set<? extends TypeElement> set, RoundEnvironment roundEnvironment) {
+        //look for things with umentity class
+        Set<? extends Element> entityElements = roundEnvironment.getElementsAnnotatedWith(UmEntity.class);
+        messager.printMessage(Diagnostic.Kind.NOTE, "Found " + entityElements.size() + " entities");
+        MethodSpec numMethodSpec = MethodSpec.methodBuilder("getNumEntities")
+                .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
+                .returns(ClassName.get("java.lang", "Integer"))
+                .addStatement("return " + entityElements.size())
+                .build();
+
+
+
         for(Element element : roundEnvironment.getElementsAnnotatedWith(UmDao.class)) {
             TypeElement typeElement = (TypeElement)element;
             if(!typeElement.getKind().equals(ElementKind.CLASS)) {
@@ -69,6 +81,7 @@ public class UmDaoProcessor extends AbstractProcessor{
         TypeSpec.Builder navigationClass = TypeSpec
                 .classBuilder("Navigator")
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL);
+        navigationClass.addMethod(numMethodSpec);
 
         for(TypeElement element : umDaoSet) {
             String methodName = "make_" + element.getSimpleName();

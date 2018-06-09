@@ -52,7 +52,7 @@ dependencies {
     implementation project(":lib-database-annotation")
     implementation project(":lib-util")
 
-    annotationProcessor project(":lib-database-annotation-processor")
+    annotationProcessor project(":lib-database-annotation-processor-core")
 
 
     testImplementation project(":core-tests")
