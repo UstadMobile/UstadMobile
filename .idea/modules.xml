@@ -14,6 +14,7 @@
       <module fileurl="file://$PROJECT_DIR$/lib-database/lib-database.iml" filepath="$PROJECT_DIR$/lib-database/lib-database.iml" />
       <module fileurl="file://$PROJECT_DIR$/lib-database-annotation/lib-database-annotation.iml" filepath="$PROJECT_DIR$/lib-database-annotation/lib-database-annotation.iml" />
       <module fileurl="file://$PROJECT_DIR$/lib-database-annotation-processor/lib-database-annotation-processor.iml" filepath="$PROJECT_DIR$/lib-database-annotation-processor/lib-database-annotation-processor.iml" />
+      <module fileurl="file://$PROJECT_DIR$/lib-database-annotation-processor/lib-database-annotation-processor.iml" filepath="$PROJECT_DIR$/lib-database-annotation-processor/lib-database-annotation-processor.iml" />
       <module fileurl="file://$PROJECT_DIR$/lib-database-annotation-processor-core/lib-database-annotation-processor-core.iml" filepath="$PROJECT_DIR$/lib-database-annotation-processor-core/lib-database-annotation-processor-core.iml" />
       <module fileurl="file://$PROJECT_DIR$/lib-database-processor/lib-database-processor.iml" filepath="$PROJECT_DIR$/lib-database-processor/lib-database-processor.iml" />
       <module fileurl="file://$PROJECT_DIR$/lib-http-testserver/lib-http-testserver.iml" filepath="$PROJECT_DIR$/lib-http-testserver/lib-http-testserver.iml" />

@@ -1,6 +1,7 @@
 package com.ustadmobile.core.db.dao;
 
 import com.ustadmobile.core.db.UmLiveData;
+import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmOnConflictStrategy;
 import com.ustadmobile.lib.database.annotation.UmQuery;
@@ -11,9 +12,10 @@ import java.util.List;
 /**
  * Created by mike on 1/15/18.
  */
-
+@UmDao
 public abstract class OpdsEntryDao {
 
+    @UmInsert
     public abstract long insert(OpdsEntry entry);
 
     @UmInsert(onConflict = UmOnConflictStrategy.REPLACE)
