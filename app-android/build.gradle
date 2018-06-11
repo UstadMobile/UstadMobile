@@ -419,6 +419,9 @@ dependencies {
     implementation project(":lib-database-annotation")
     implementation project(":lib-util")
 
+    annotationProcessor project(":lib-database-annotation-processor-room")
+    annotationProcessor project(":core")
+
     vanillamultidexApi "com.android.support:multidex:$version_android_multidex"
 
     androidTestImplementation project(":core-tests")
