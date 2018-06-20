@@ -233,11 +233,20 @@ public class CatalogPresenter extends BaseCatalogPresenter  {
             callback.onDone(UMFileUtil.resolveLink(feedLiveData.getValue().getUrl(), href));
         }else {
             DbManager.getInstance(getContext()).getOpdsEntryWithRelationsDao()
-                    .findParentUrlByChildUuid(entry.getUuid(), (parentHref) -> {
-                        if(parentHref != null)
-                            callback.onDone(UMFileUtil.resolveLink(parentHref, href));
-                        else
-                            callback.onDone(null);//no parent and could not resolve
+                    .findParentUrlByChildUuid(entry.getUuid(), new UmCallback<String>() {
+                        @Override
+                        public void onSuccess(String parentHref) {
+                            if(parentHref != null)
+                                callback.onDone(UMFileUtil.resolveLink(parentHref, href));
+                            else
+                                callback.onDone(null);//no parent and could not resolve
+
+                        }
+
+                        @Override
+                        public void onFailure(Throwable exception) {
+
+                        }
                     });
         }
     }

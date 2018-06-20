@@ -2,7 +2,10 @@ package com.ustadmobile.core.db.dao;
 
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.UmProvider;
+import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UmResultCallback;
+import com.ustadmobile.core.networkmanager.NetworkTask;
+import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.db.entities.OpdsEntry;
 import com.ustadmobile.lib.db.entities.OpdsEntryRelative;
@@ -15,20 +18,23 @@ import java.util.List;
 /**
  * Created by mike on 1/15/18.
  */
-
+@UmDao
 public abstract class OpdsEntryWithRelationsDao {
 
-    @UmQuery("SELECT * from OpdsEntry WHERE url = :url")
-    public abstract UmLiveData<OpdsEntryWithRelations> getEntryByUrl(String url, String entryUuid,
-                                                             OpdsEntry.OpdsItemLoadCallback callback);
 
+    //TODO: refactor this to remove unused parameters
+    public UmLiveData<OpdsEntryWithRelations> getEntryByUrl(String url, String entryUuid,
+                                                             OpdsEntry.OpdsItemLoadCallback callback) {
+        return getEntryByUrl(url);
+    }
+
+    //TODO: refactor this to remove unused parameters
     public UmLiveData<OpdsEntryWithRelations> getEntryByUrl(String url, String entryUuid) {
-        return getEntryByUrl(url, entryUuid, null);
+        return getEntryByUrl(url);
     }
 
-    public UmLiveData<OpdsEntryWithRelations> getEntryByUrl(String url) {
-        return getEntryByUrl(url, null, null);
-    }
+    @UmQuery("SELECT * From OpdsEntry Where url = :url")
+    public abstract UmLiveData<OpdsEntryWithRelations> getEntryByUrl(String url);
 
     /**
      * Find the entry for the given URL, with it's associated OpdsEntryStatusCache object.
@@ -37,9 +43,18 @@ public abstract class OpdsEntryWithRelationsDao {
      *
      * @return UmLiveData object representing the OpdsEntry from the given URL
      */
+    @UmQuery("SELECT OpdsEntry.*, OpdsEntryStatusCache.*  " +
+            "FROM " +
+            "OpdsEntry " +
+            "LEFT JOIN OpdsEntryStatusCache ON OpdsEntry.entryId = OpdsEntryStatusCache.statusEntryId " +
+            "LEFT JOIN DownloadSetItem ON OpdsEntry.entryId = DownloadSetItem.entryId " +
+            "LEFT JOIN DownloadJobItem ON DownloadSetItem.id = DownloadJobItem.downloadSetItemId " +
+            "AND DownloadJobItem.status BETWEEN " + NetworkTask.STATUS_WAITING_MIN  + " AND " + NetworkTask.STATUS_COMPLETE_MIN + " " +
+            "WHERE OpdsEntry.url = :url")
     public abstract UmLiveData<OpdsEntryWithStatusCache> getEntryWithStatusCacheByUrl(String url);
 
 
+    @UmQuery("Select * from OpdsEntry WHERE url = :url")
     public abstract OpdsEntryWithRelations getEntryByUrlStatic(String url);
 
     /**
@@ -49,30 +64,42 @@ public abstract class OpdsEntryWithRelationsDao {
      *
      * @return The OpdsEntryWithRelations object representing this in the database, or null if it doesn't exist
      */
+    @UmQuery("SELECT * FROM OpdsEntry WHERE uuid = :uuid")
     public abstract OpdsEntryWithRelations findByUuid(String uuid);
 
+    @UmQuery("SELECT OpdsEntry.*, OpdsEntryStatusCache.*  " +
+            "FROM " +
+            "OpdsEntry " +
+            "LEFT JOIN OpdsEntryStatusCache ON OpdsEntry.entryId = OpdsEntryStatusCache.statusEntryId " +
+            "LEFT JOIN DownloadSetItem ON OpdsEntry.entryId = DownloadSetItem.entryId " +
+            "LEFT JOIN DownloadJobItem ON DownloadSetItem.id = DownloadJobItem.downloadSetItemId " +
+            "AND DownloadJobItem.status BETWEEN " + NetworkTask.STATUS_WAITING_MIN  + " AND " + NetworkTask.STATUS_COMPLETE_MIN + " " +
+            "WHERE OpdsEntry.uuid = :uuid")
     public abstract UmLiveData<OpdsEntryWithStatusCache> findWithStatusCacheByUuidLive(String uuid);
 
 
-    @UmQuery("SELECT * from OpdsEntry INNER JOIN OpdsEntryToParentOpdsEntry on OpdsEntry.uuid = OpdsEntry.uuid WHERE OpdsEntryToParentOpdsEntry.parentEntry = :parentId")
+    @UmQuery("SELECT OpdsEntry.* from OpdsEntry INNER JOIN OpdsEntryParentToChildJoin on OpdsEntry.uuid = OpdsEntryParentToChildJoin.childEntry WHERE OpdsEntryParentToChildJoin.parentEntry = :parentId ORDER BY childIndex")
     public abstract UmProvider<OpdsEntryWithRelations> getEntriesByParent(String parentId);
 
-    @UmQuery("SELECT OpdsEntry.* FROM OpdsEntry INNER JOIN OpdsEntryParentToChildJoin on OpdsEntry.uuid = OpdsEntryParentToChildJoin.childEntry WHERE OpdsEntryParentToChildJoin.parentEntry = :parentId ORDER BY childIndex")
+    @UmQuery("SELECT OpdsEntry.*, OpdsEntryStatusCache.* FROM OpdsEntry " +
+            " INNER JOIN OpdsEntryParentToChildJoin on OpdsEntry.uuid = OpdsEntryParentToChildJoin.childEntry " +
+            " LEFT JOIN OpdsEntryStatusCache ON OpdsEntry.entryId = OpdsEntryStatusCache.statusEntryId " +
+            " WHERE OpdsEntryParentToChildJoin.parentEntry = :parentId ORDER BY childIndex")
     public abstract UmProvider<OpdsEntryWithStatusCache> getEntriesWithStatusCacheByParent(String parentId);
 
 
 
 
-    @UmQuery("SELECT * from OpdsEntry INNER JOIN OpdsEntryToParentOpdsEntry on OpdsEntry.uuid = OpdsEntry.uuid WHERE OpdsEntryToParentOpdsEntry.parentEntry = :parentId")
+    @UmQuery("SELECT OpdsEntry.* from OpdsEntry INNER JOIN OpdsEntryParentToChildJoin on OpdsEntry.uuid = OpdsEntryParentToChildJoin.childEntry WHERE OpdsEntryParentToChildJoin.parentEntry = :parentId ORDER BY childIndex")
     public abstract UmLiveData<List<OpdsEntryWithRelations>> getEntriesByParentAsList(String parentId);
 
-    @UmQuery("SELECT * from OpdsEntry INNER JOIN OpdsEntryToParentOpdsEntry on OpdsEntry.uuid = OpdsEntry.uuid WHERE OpdsEntryToParentOpdsEntry.parentEntry = :parentId")
+    @UmQuery("SELECT OpdsEntry.* from OpdsEntry INNER JOIN OpdsEntryParentToChildJoin on OpdsEntry.uuid = OpdsEntryParentToChildJoin.childEntry WHERE OpdsEntryParentToChildJoin.parentEntry = :parentId ORDER BY childIndex")
     public abstract List<OpdsEntryWithRelations> getEntriesByParentAsListStatic(String parentId);
 
     @UmQuery("SELECT * from OpdsEntry where uuid = :uuid")
     public abstract UmLiveData<OpdsEntryWithRelations> getEntryByUuid(String uuid);
 
-    @UmQuery("SELECT * from OpdsEntry where uuid = :uuid")
+    @UmQuery("Select * From OpdsEntry WHERE uuid = :uuid")
     public abstract OpdsEntryWithRelations getEntryByUuidStatic(String uuid);
 
 
@@ -82,7 +109,7 @@ public abstract class OpdsEntryWithRelationsDao {
     @UmQuery("SELECT * FROM OpdsEntry WHERE entryId = :entryId LIMIT 1")
     public abstract OpdsEntryWithRelations findFirstByEntryIdStatic(String entryId);
 
-    @UmQuery("SELECT uuid FROM OpdsEntry " +
+    @UmQuery("SELECT OpdsEntry.uuid FROM OpdsEntry " +
             "LEFT JOIN OpdsEntryParentToChildJoin ON OpdsEntryParentToChildJoin.childEntry = OpdsEntry.uuid " +
             "LEFT JOIN OpdsEntry OpdsEntryParent ON OpdsEntryParentToChildJoin.parentEntry = OpdsEntryParent.uuid " +
             "WHERE OpdsEntry.entryId = :entryId AND OpdsEntryParent.url = :parentUrl ")
@@ -97,11 +124,24 @@ public abstract class OpdsEntryWithRelationsDao {
 
     @UmQuery(findEntriesByContainerFileDirectorySql)
     public abstract UmLiveData<List<OpdsEntryWithStatusCache>> findEntriesByContainerFileDirectoryAsList(
-            List<String> dirList, OpdsEntry.OpdsItemLoadCallback callback);
+            List<String> dirList);
+
+    //TODO: remove unused parameter
+    public UmLiveData<List<OpdsEntryWithStatusCache>> findEntriesByContainerFileDirectoryAsList(
+            List<String> dirList, OpdsEntry.OpdsItemLoadCallback callback) {
+        return findEntriesByContainerFileDirectoryAsList(dirList);
+    }
 
     @UmQuery(findEntriesByContainerFileDirectorySql)
     public abstract UmProvider<OpdsEntryWithStatusCache> findEntriesByContainerFileDirectoryAsProvider(
-            List<String> dirList, OpdsEntry.OpdsItemLoadCallback callback);
+            List<String> dirList);
+
+    //TODO: this method should not be called as the callback is never really used
+    @Deprecated
+    public UmProvider<OpdsEntryWithStatusCache> findEntriesByContainerFileDirectoryAsProvider(
+            List<String> dirList, OpdsEntry.OpdsItemLoadCallback callback) {
+        return findEntriesByContainerFileDirectoryAsProvider(dirList);
+    }
 
     protected static final String findEntriesByContainerFileSql = "SELECT * FROM OpdsEntry " +
             "LEFT JOIN ContainerFileEntry on OpdsEntry.uuid = ContainerFileEntry.opdsEntryUuid " +
@@ -130,7 +170,10 @@ public abstract class OpdsEntryWithRelationsDao {
             " WHERE OpdsEntryParentToChildJoin.childEntry = :childUuid")
     public abstract String findParentUrlByChildUuid(String childUuid);
 
-    public abstract void findParentUrlByChildUuid(String childUuid, UmResultCallback<String> callback);
+    @UmQuery("SELECT OpdsEntry.url FROM OpdsEntryParentToChildJoin " +
+            " LEFT JOIN OpdsEntry ON OpdsEntryParentToChildJoin.parentEntry = OpdsEntry.uuid " +
+            " WHERE OpdsEntryParentToChildJoin.childEntry = :childUuid")
+    public abstract void findParentUrlByChildUuid(String childUuid, UmCallback<String> callback);
 
 
     /**
@@ -148,7 +191,10 @@ public abstract class OpdsEntryWithRelationsDao {
     @UmQuery("DELETE FROM OpdsLink WHERE entryUuid in (:entryUuids)")
     public abstract int deleteLinksByOpdsEntryUuids(List<String> entryUuids);
 
-    @UmQuery("SELECT * FROM OpdsEntryWithRelations WHERE uuid in (:uuids)")
+    @UmQuery("SELECT OpdsEntry.*, ContainerFile.mimeType as containerMimeType FROM OpdsEntry " +
+            "LEFT JOIN ContainerFileEntry on OpdsEntry.entryId = ContainerFileEntry.containerEntryId " +
+            "LEFT JOIN ContainerFile on ContainerFileEntry.containerFileId = ContainerFile.id " +
+            "WHERE OpdsEntry.uuid in (:uuids)")
     public abstract List<OpdsEntryWithRelationsAndContainerMimeType> findByUuidsWithContainerMimeType(List<String> uuids);
 
     @UmQuery("SELECT uuid From OpdsEntry WHERE entryId = :entryId")

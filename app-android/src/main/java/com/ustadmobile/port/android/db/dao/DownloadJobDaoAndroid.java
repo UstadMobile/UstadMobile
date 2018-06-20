@@ -9,6 +9,7 @@ import android.arch.persistence.room.Update;
 
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.dao.DownloadJobDao;
+import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UmResultCallback;
 import com.ustadmobile.core.networkmanager.NetworkTask;
 import com.ustadmobile.lib.db.entities.DownloadJob;
@@ -100,8 +101,8 @@ public abstract class DownloadJobDaoAndroid extends DownloadJobDao {
     @Query("SELECT * FROM DownloadJob ORDER BY timeCreated DESC LIMIT 1")
     public abstract DownloadJob findLastCreatedDownloadJob();
 
-    public void findLastDownloadJobIdByDownloadJobItem(String entryId, UmResultCallback<Integer> callback) {
-        executorService.execute(() -> callback.onDone(findLastDownloadJobIdByDownloadJobItem_Room(entryId)));
+    public void findLastDownloadJobIdByDownloadJobItem(String entryId, UmCallback<Integer> callback) {
+        executorService.execute(() -> callback.onSuccess(findLastDownloadJobIdByDownloadJobItem_Room(entryId)));
     }
 
     @Query("SELECT DownloadJob.downloadJobId " +
@@ -113,8 +114,8 @@ public abstract class DownloadJobDaoAndroid extends DownloadJobDao {
     public abstract Integer findLastDownloadJobIdByDownloadJobItem_Room(String entryId);
 
     @Override
-    public void findLastDownloadJobIdByCrawlJobItem(String entryId, UmResultCallback<Integer> callback) {
-        executorService.execute(() -> callback.onDone(findLastDownloadJobIdByCrawlJobItem_Room(entryId)));
+    public void findLastDownloadJobIdByCrawlJobItem(String entryId, UmCallback<Integer> callback) {
+        executorService.execute(() -> callback.onSuccess(findLastDownloadJobIdByCrawlJobItem_Room(entryId)));
     }
 
     @Query("SELECT DownloadJob.downloadJobId  " +
@@ -135,11 +136,11 @@ public abstract class DownloadJobDaoAndroid extends DownloadJobDao {
     public abstract LiveData<Boolean> findAllowMeteredDataUsageLive_Room(int downloadJobId);
 
     @Override
-    public void updateAllowMeteredDataUsage(int downloadJobId, boolean allowMeteredDataUsage, UmResultCallback<Void> callback) {
+    public void updateAllowMeteredDataUsage(int downloadJobId, boolean allowMeteredDataUsage, UmCallback<Void> callback) {
         executorService.execute(() -> {
             updateAllowMeteredDataUsage_Room(downloadJobId, allowMeteredDataUsage);
             if(callback != null)
-                callback.onDone(null);
+                callback.onSuccess(null);
         });
     }
 

@@ -1,5 +1,6 @@
 package com.ustadmobile.core.db.dao;
 
+import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.db.entities.DownloadSetItem;
@@ -9,6 +10,7 @@ import java.util.List;
 /**
  * DAO for the DownloadSetItem entity
  */
+@UmDao
 public abstract class DownloadSetItemDao {
 
     /**
@@ -35,7 +37,7 @@ public abstract class DownloadSetItemDao {
      * @param downloadSetId Primary Key of the DownloadSet to search in
      * @return DownloadSetItem matching the given arguments, otherwise null
      */
-    @UmQuery("SELECT * FROM DownloadSetItem WHERE entryId = :entryId")
+    @UmQuery("SELECT * FROM DownloadSetItem WHERE entryId = :entryId AND downloadSetId = :downloadSetId")
     public abstract DownloadSetItem findByEntryId(String entryId, int downloadSetId);
 
 

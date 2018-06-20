@@ -147,6 +147,7 @@ afterEvaluate {
         variant.javaCompiler.dependsOn(generateCoreStringToAndroidResMap)
         variant.javaCompiler.dependsOn(checkBuildConfig)
         variant.javaCompiler.dependsOn(generateRoomEntities)
+        variant.javaCompiler.dependsOn(":lib-database-annotation-processor-room:runRoomProcessor")
     }
 }
 
@@ -173,7 +174,7 @@ android {
     sourceSets {
         main.assets.srcDirs += "../core/src/main/assets/"
         localconfig.assets.srcDirs += "../core/src/localconfig/assets/"
-        main.java.srcDirs += "build/generated/source/umentities"
+        main.java.srcDirs += ["build/generated/source/umentities", "build/generated/source/umdbprocessor"]
     }
 
     compileOptions {
@@ -418,9 +419,6 @@ dependencies {
     api project(":lib-core-fs")
     implementation project(":lib-database-annotation")
     implementation project(":lib-util")
-
-    annotationProcessor project(":lib-database-annotation-processor-room")
-    annotationProcessor project(":core")
 
     vanillamultidexApi "com.android.support:multidex:$version_android_multidex"
 

@@ -8,6 +8,7 @@ import android.arch.persistence.room.Query;
 
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.dao.OpdsEntryDao;
+import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.lib.db.entities.OpdsEntry;
 
 import java.util.List;
@@ -36,4 +37,9 @@ public abstract class OpdsEntryDaoAndroid extends OpdsEntryDao{
     @Override
     @Query("Select title From OpdsEntry Where uuid = :uuid")
     public abstract String findTitleByUuid(String uuid);
+
+    @Override
+    public void findTitleByUuidAsync(String uuid, UmCallback<String> callback) {
+
+    }
 }

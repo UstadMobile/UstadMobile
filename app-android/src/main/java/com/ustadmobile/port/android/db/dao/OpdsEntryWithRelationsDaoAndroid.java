@@ -8,6 +8,7 @@ import android.arch.persistence.room.Query;
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.db.dao.OpdsEntryWithRelationsDao;
+import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UmResultCallback;
 import com.ustadmobile.core.networkmanager.NetworkTask;
 import com.ustadmobile.lib.db.entities.OpdsEntry;
@@ -36,8 +37,7 @@ public abstract class OpdsEntryWithRelationsDaoAndroid extends OpdsEntryWithRela
     }
 
     @Override
-    public UmLiveData<OpdsEntryWithRelations> getEntryByUrl(String url, String entryId,
-                                                            OpdsEntry.OpdsItemLoadCallback callback) {
+    public UmLiveData<OpdsEntryWithRelations> getEntryByUrl(String url) {
         return new UmLiveDataAndroid<>(getEntryByUrlR(url));
     }
 
@@ -130,7 +130,7 @@ public abstract class OpdsEntryWithRelationsDaoAndroid extends OpdsEntryWithRela
 
     @Override
     public UmLiveData<List<OpdsEntryWithStatusCache>> findEntriesByContainerFileDirectoryAsList(
-            List<String> dirList, OpdsEntry.OpdsItemLoadCallback callback) {
+            List<String> dirList) {
         return new UmLiveDataAndroid<>(findEntriesByContainerFileDirectoryR(dirList));
     }
 
@@ -141,7 +141,7 @@ public abstract class OpdsEntryWithRelationsDaoAndroid extends OpdsEntryWithRela
 
     @Override
     public UmProvider<OpdsEntryWithStatusCache> findEntriesByContainerFileDirectoryAsProvider(
-            List<String> dirList, OpdsEntry.OpdsItemLoadCallback callback) {
+            List<String> dirList) {
         return () -> findEntriesByContainerFileDirectoryAsProviderR(dirList);
     }
 
@@ -152,8 +152,8 @@ public abstract class OpdsEntryWithRelationsDaoAndroid extends OpdsEntryWithRela
     public abstract String findParentUrlByChildUuid(String childUuid);
 
     @Override
-    public void findParentUrlByChildUuid(String childUuid, UmResultCallback<String> callback) {
-        executorService.execute(() -> callback.onDone(findParentUrlByChildUuid(childUuid)));
+    public void findParentUrlByChildUuid(String childUuid, UmCallback<String> callback) {
+        executorService.execute(() -> callback.onSuccess(findParentUrlByChildUuid(childUuid)));
     }
 
     @Override
@@ -213,5 +213,6 @@ public abstract class OpdsEntryWithRelationsDaoAndroid extends OpdsEntryWithRela
 
     @Query(GET_ENTRIES_WITH_DOWNLOADSET_SQL)
     public abstract DataSource.Factory<Integer, OpdsEntryWithStatusCache> getEntriesWithDownloadSet_Room();
+
 
 }

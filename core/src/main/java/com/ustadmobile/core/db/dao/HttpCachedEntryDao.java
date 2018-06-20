@@ -1,5 +1,9 @@
 package com.ustadmobile.core.db.dao;
 
+import com.ustadmobile.lib.database.annotation.UmDao;
+import com.ustadmobile.lib.database.annotation.UmInsert;
+import com.ustadmobile.lib.database.annotation.UmQuery;
+import com.ustadmobile.lib.database.annotation.UmUpdate;
 import com.ustadmobile.lib.db.entities.HttpCachedEntry;
 
 import java.util.List;
@@ -7,6 +11,7 @@ import java.util.List;
 /**
  * DAO for managing HttpCachedEntry database entries, used for running the http cache database
  */
+@UmDao
 public abstract class HttpCachedEntryDao {
 
     /**
@@ -21,6 +26,7 @@ public abstract class HttpCachedEntryDao {
      *
      * @return The HttpCachedEntry representing the given entry, null if it's not in the database
      */
+    @UmQuery("SELECT * FROM HttpCachedEntry WHERE url = :url AND method = :method")
     public abstract HttpCachedEntry findByUrlAndMethod(String url, int method);
 
     /**
@@ -28,6 +34,7 @@ public abstract class HttpCachedEntryDao {
      *
      * @param entry Entry to update
      */
+    @UmUpdate
     public abstract void update(HttpCachedEntry entry);
 
     /**
@@ -35,6 +42,7 @@ public abstract class HttpCachedEntryDao {
      *
      * @param entry Entry to insert or replace
      */
+    @UmInsert
     public abstract void insert(HttpCachedEntry entry);
 
     /**
@@ -44,6 +52,7 @@ public abstract class HttpCachedEntryDao {
      *
      * @return A list of Strings of all known file paths for the given urls
      */
+    @UmQuery("SELECT fileUri FROM HttpCachedEntry WHERE url in (:urls)")
     public abstract List<String> findFileUrisByUrl(List<String> urls);
 
     /**
@@ -51,6 +60,7 @@ public abstract class HttpCachedEntryDao {
      *
      * @param deletedFileUris
      */
+    @UmQuery("DELETE FROM HttpCachedEntry WHERE fileUri in (:deletedFileUris)")
     public abstract void deleteByFileUris(List<String> deletedFileUris);
 
 

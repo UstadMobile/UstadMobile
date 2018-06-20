@@ -35,8 +35,8 @@ public abstract class OpdsEntryParentToChildJoinDaoAndroid extends OpdsEntryPare
     public abstract void insertAll(List<OpdsEntryParentToChildJoin> entryList);
 
     @Override
-    public void insertAsync(OpdsEntryParentToChildJoin entry, UmCallback<Integer> callback) {
-        executorService.execute(() -> callback.onSuccess((int)insert(entry)));
+    public void insertAsync(OpdsEntryParentToChildJoin entry, UmCallback<Long> callback) {
+        executorService.execute(() -> callback.onSuccess(insert(entry)));
     }
 
     @Override
@@ -59,8 +59,10 @@ public abstract class OpdsEntryParentToChildJoinDaoAndroid extends OpdsEntryPare
     public abstract int deleteByParentIdAndChildId(String parentId, List<String> childId);
 
     public void deleteByParentIdAndChildIdAsync(String parentId, List<String> childId, UmCallback<Integer> callback) {
-        executorService.execute(() -> callback.onSuccess(deleteByParentIdAndChildId(parentId, childId)));
+        executorService.execute(() -> callback.onSuccess(deleteByParentIdAndChildId_RoomTmp(parentId, childId)));
     }
 
+    @Query("DELETE FROM OpdsEntryParentToChildJoin WHERE parentEntry = :parentId AND childEntry IN (:childId)")
+    public abstract int deleteByParentIdAndChildId_RoomTmp(String parentId, List<String> childId);
 
 }

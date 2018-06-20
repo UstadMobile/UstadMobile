@@ -1,5 +1,6 @@
 package com.ustadmobile.core.db.dao;
 
+import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.db.entities.ContainerFileEntry;
@@ -10,7 +11,7 @@ import java.util.List;
 /**
  * Created by mike on 1/27/18.
  */
-
+@UmDao
 public abstract class ContainerFileEntryDao {
 
     @UmInsert
@@ -22,12 +23,13 @@ public abstract class ContainerFileEntryDao {
     @UmQuery("DELETE FROM ContainerFileEntry WHERE containerFileId = :containerFileId")
     public abstract void deleteContainerFileEntriesByContainerFile(int containerFileId);
 
+    //TODO: Add transaction annotation support
     public void deleteOpdsAndContainerFileEntriesByContainerFile(int containerFileId) {
         deleteOpdsEntriesByContainerFile(containerFileId);
         deleteContainerFileEntriesByContainerFile(containerFileId);
     }
 
-    @UmQuery("SELECT containerEntryId, containerEntryUpdated FROM ContainerFileEntry WHERE containerEntryId IN (:entryIds)")
+    @UmQuery("SELECT * FROM ContainerFileEntry WHERE containerEntryId IN (:entryIds)")
     public abstract List<ContainerFileEntry> findContainerFileEntriesByEntryIds(String[] entryIds);
 
     /**
@@ -37,7 +39,9 @@ public abstract class ContainerFileEntryDao {
      * @param entryId
      * @return
      */
-    @UmQuery("")
+    @UmQuery("SELECT * FROM ContainerFileEntry " +
+            "LEFT JOIN ContainerFile ON ContainerFileEntry.containerFileId = ContainerFile.id " +
+            "WHERE ContainerFileEntry.containerEntryId = :entryId")
     public abstract ContainerFileEntryWithContainerFile findContainerFileEntryWithContainerFileByEntryId(String entryId);
 
     /**
@@ -46,6 +50,9 @@ public abstract class ContainerFileEntryDao {
      * @param entryId
      * @return
      */
+    @UmQuery("SELECT * FROM ContainerFileEntry " +
+            "LEFT JOIN ContainerFile ON ContainerFileEntry.containerFileId = ContainerFile.id " +
+            "WHERE ContainerFileEntry.containerEntryId = :entryId")
     public abstract List<ContainerFileEntryWithContainerFile> findContainerFileEntriesWithContainerFileByEntryId(String entryId);
 
     @UmQuery("SELECT opdsEntryUuid FROM ContainerFileEntry WHERE containerFileId = :containerFileId")

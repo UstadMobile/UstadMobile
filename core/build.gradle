@@ -30,6 +30,7 @@ jar {
     exclude("com/ustadmobile/core/impl/*Factory.class")
     exclude("com/ustadmobile/core/db/impl/*Factory.class")
     exclude("com/ustadmobile/core/db/entities/*.class")
+    exclude("com/ustadmobile/core/db/*_Factory.class")
 }
 
 task sourceJar(type: Jar) {

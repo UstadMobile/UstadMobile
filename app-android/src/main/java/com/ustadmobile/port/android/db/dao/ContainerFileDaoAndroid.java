@@ -51,7 +51,7 @@ public abstract class ContainerFileDaoAndroid extends ContainerFileDao implement
 
 
     @Override
-    public void getContainerFileByIdAsync(int containerFileId, BaseUmCallback<ContainerFile> callback){
+    public void getContainerFileByIdAsync(int containerFileId, UmCallback<ContainerFile> callback){
         executor.execute(() -> callback.onSuccess(getContainerFileEntryByIdR(containerFileId)));
     }
 

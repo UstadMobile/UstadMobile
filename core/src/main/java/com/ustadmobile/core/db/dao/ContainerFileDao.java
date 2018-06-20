@@ -5,6 +5,7 @@ import com.ustadmobile.core.impl.BaseUmCallback;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmDelete;
+import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.db.entities.ContainerFile;
 import com.ustadmobile.lib.db.entities.ContainerFileWithRelations;
@@ -17,14 +18,19 @@ import java.util.List;
 @UmDao
 public abstract class ContainerFileDao {
 
+    @UmQuery("Select * From ContainerFile WHERE normalizedPath = :path ")
     public abstract ContainerFileWithRelations findContainerFileByPath(String path);
 
+    @UmInsert
     public abstract long insert(ContainerFile containerFile);
 
+    @UmQuery("UPDATE ContainerFile SET lastUpdated = :lastUpdated WHERE id = :id")
     public abstract void updateLastUpdatedById(int id, long lastUpdated);
 
-    public abstract void getContainerFileByIdAsync(int containerFileId, BaseUmCallback<ContainerFile> callback);
+    @UmQuery("SELECT * From ContainerFile WHERE id = :containerFileId")
+    public abstract void getContainerFileByIdAsync(int containerFileId, UmCallback<ContainerFile> callback);
 
+    @UmQuery("SELECT * FROM ContainerFile WHERE id = :id")
     public abstract ContainerFileWithRelations getContainerFileById(int id);
 
     /**
@@ -49,6 +55,7 @@ public abstract class ContainerFileDao {
     @UmDelete
     public abstract void delete(ContainerFile containerFile);
 
+    @UmQuery("SELECT * From ContainerFile WHERE dirPath = :dirPath")
     public abstract List<ContainerFile> findFilesByDirectory(String dirPath);
 
     @UmQuery("SELECT fileSize FROM ContainerFile WHERE id = :containerFileId")

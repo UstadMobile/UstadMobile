@@ -1,8 +1,10 @@
 package com.ustadmobile.core.db.dao;
 
+import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmOnConflictStrategy;
 import com.ustadmobile.lib.database.annotation.UmQuery;
+import com.ustadmobile.lib.database.annotation.UmUpdate;
 import com.ustadmobile.lib.db.entities.NetworkNode;
 
 import java.util.List;
@@ -10,10 +12,10 @@ import java.util.List;
 /**
  * Created by mike on 1/30/18.
  */
-
+@UmDao
 public abstract class NetworkNodeDao {
 
-    @UmQuery("Select * From NetworkNode Where ipAddress = :ipAddress")
+    @UmQuery("SELECT * From NetworkNode WHERE ipAddress = :ipAddress")
     public abstract NetworkNode findNodeByIpAddress(String ipAddress);
 
     @UmQuery("Select * From NetworkNode Where ((ipAddress = :ipAddress AND ipAddress IS NOT NULL) OR (wifiDirectMacAddress = :wifiDirectMacAddress AND wifiDirectMacAddress IS NOT NULL))")
@@ -27,6 +29,7 @@ public abstract class NetworkNodeDao {
     @UmInsert(onConflict = UmOnConflictStrategy.REPLACE)
     public abstract long insert(NetworkNode node);
 
+    @UmUpdate
     public abstract void update(NetworkNode node);
 
     @UmQuery("Select * From NetworkNode")

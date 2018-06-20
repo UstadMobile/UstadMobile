@@ -138,12 +138,20 @@ public class CatalogEntryPresenter extends BaseCatalogPresenter implements Netwo
                     thumbnailLink.getMimeType());
         }else if(thumbnailLink != null){
             DbManager.getInstance(getContext()).getOpdsEntryWithRelationsDao()
-                    .findParentUrlByChildUuid(entry.getUuid(), (parentUrl) -> {
-                        if(parentUrl != null){
-                            CatalogEntryPresenter.this.baseHref = parentUrl;
-                            catalogEntryView.runOnUiThread(() -> catalogEntryView.setThumbnail(
-                                    UMFileUtil.resolveLink(baseHref, thumbnailLink.getHref()),
+                    .findParentUrlByChildUuid(entry.getUuid(), new UmCallback<String>() {
+                        @Override
+                        public void onSuccess(String parentUrl) {
+                            if(parentUrl != null){
+                                CatalogEntryPresenter.this.baseHref = parentUrl;
+                                catalogEntryView.runOnUiThread(() -> catalogEntryView.setThumbnail(
+                                        UMFileUtil.resolveLink(baseHref, thumbnailLink.getHref()),
                                         thumbnailLink.getMimeType()));
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Throwable exception) {
+
                         }
                     });
         }

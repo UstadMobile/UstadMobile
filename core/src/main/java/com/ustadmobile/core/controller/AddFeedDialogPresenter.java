@@ -135,9 +135,9 @@ public class AddFeedDialogPresenter extends UstadBaseController implements OpdsE
 
             join.setChildIndex(dbManager.getOpdsEntryParentToChildJoinDao()
                     .getNumEntriesByParent(uuidToAddTo)+1);
-            dbManager.getOpdsEntryParentToChildJoinDao().insertAsync(join, new UmCallback<Integer>() {
+            dbManager.getOpdsEntryParentToChildJoinDao().insertAsync(join, new UmCallback<Long>() {
                 @Override
-                public void onSuccess(Integer result) {
+                public void onSuccess(Long result) {
                     addFeedDialogView.runOnUiThread(() -> addFeedDialogView.dismiss());
                 }
 

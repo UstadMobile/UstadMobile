@@ -89,26 +89,29 @@ public class DbProcessorCore extends AbstractProcessor{
                         + ioe.getMessage());
             }
 
-            //now go through all the methods and find the ones that return DAOs
-            for(Element subElement : daoClassElement.getEnclosedElements()) {
-                if(subElement.getKind() != ElementKind.METHOD)
-                    continue;
-
-                ExecutableElement methodElement = (ExecutableElement)subElement;
-
-                messager.printMessage(Diagnostic.Kind.NOTE, "Found DAO method " +
-                        methodElement.getSimpleName().toString());
-
-                for(Element daoElement : daoSet) {
-                    if(daoElement.asType().equals(methodElement.getReturnType())) {
-                        //generate the intermediate DAO
-                        generateIntermediateDao((TypeElement)daoElement);
-                        break;
-                    }
-                }
-            }
+//            //now go through all the methods and find the ones that return DAOs
+//            for(Element subElement : daoClassElement.getEnclosedElements()) {
+//                if(subElement.getKind() != ElementKind.METHOD)
+//                    continue;
+//
+//                ExecutableElement methodElement = (ExecutableElement)subElement;
+//
+//                messager.printMessage(Diagnostic.Kind.NOTE, "Found DAO method " +
+//                        methodElement.getSimpleName().toString());
+//
+//                for(Element daoElement : daoSet) {
+//                    if(daoElement.asType().equals(methodElement.getReturnType())) {
+//                        //generate the intermediate DAO
+//                        generateIntermediateDao((TypeElement)daoElement);
+//                        break;
+//                    }
+//                }
+//            }
         }
 
+        for(Element daoElement : daoSet) {
+            generateIntermediateDao((TypeElement)daoElement);
+        }
 
         return true;
     }
@@ -127,6 +130,9 @@ public class DbProcessorCore extends AbstractProcessor{
                 continue;
 
             ExecutableElement executableElement = (ExecutableElement)subElement;
+            if(!executableElement.getModifiers().contains(Modifier.ABSTRACT))
+                continue;
+
             MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(executableElement.getSimpleName().toString())
                     .addAnnotation(Override.class)
                     .returns(TypeName.get(executableElement.getReturnType()))

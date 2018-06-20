@@ -1,6 +1,7 @@
 package com.ustadmobile.core.db.dao;
 
 import com.ustadmobile.core.db.UmLiveData;
+import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmOnConflictStrategy;
@@ -15,7 +16,7 @@ import java.util.List;
 @UmDao
 public abstract class OpdsEntryDao {
 
-    @UmInsert
+    @UmInsert(onConflict =  UmOnConflictStrategy.REPLACE)
     public abstract long insert(OpdsEntry entry);
 
     @UmInsert(onConflict = UmOnConflictStrategy.REPLACE)
@@ -27,6 +28,9 @@ public abstract class OpdsEntryDao {
 
     @UmQuery("Select title From OpdsEntry Where uuid = :uuid")
     public abstract String findTitleByUuid(String uuid);
+
+    @UmQuery("Select title From OpdsEntry Where uuid = :uuid")
+    public abstract void findTitleByUuidAsync(String uuid, UmCallback<String> callback);
 
 
 }

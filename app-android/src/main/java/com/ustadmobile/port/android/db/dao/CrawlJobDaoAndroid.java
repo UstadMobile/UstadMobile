@@ -8,6 +8,7 @@ import android.arch.persistence.room.Query;
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.dao.CrawlJobDao;
 import com.ustadmobile.core.db.dao.CrawlJobWithTotals;
+import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UmResultCallback;
 import com.ustadmobile.core.networkmanager.NetworkTask;
 import com.ustadmobile.lib.database.annotation.UmQuery;
@@ -66,8 +67,8 @@ public abstract class CrawlJobDaoAndroid extends CrawlJobDao {
     public abstract int updateQueueDownloadOnDoneIfNotFinished(int crawlJobId);
 
     @Override
-    public void updateQueueDownloadOnDoneIfNotFinished(int crawlJobId, UmResultCallback<Integer> callback) {
-        executorService.execute(() -> callback.onDone(updateQueueDownloadOnDoneIfNotFinished(crawlJobId)));
+    public void updateQueueDownloadOnDoneIfNotFinished(int crawlJobId, UmCallback<Integer> callback) {
+        executorService.execute(() -> callback.onSuccess(updateQueueDownloadOnDoneIfNotFinished(crawlJobId)));
     }
 
     @Override

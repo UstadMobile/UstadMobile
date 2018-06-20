@@ -1,9 +1,13 @@
 package com.ustadmobile.core.db.dao;
 
 import com.ustadmobile.core.db.UmLiveData;
+import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UmResultCallback;
 import com.ustadmobile.core.networkmanager.NetworkTask;
+import com.ustadmobile.lib.database.annotation.UmDao;
+import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
+import com.ustadmobile.lib.database.annotation.UmUpdate;
 import com.ustadmobile.lib.db.entities.DownloadJob;
 import com.ustadmobile.lib.db.entities.DownloadJobWithDownloadSet;
 import com.ustadmobile.lib.db.entities.DownloadJobWithTotals;
@@ -13,6 +17,7 @@ import java.util.List;
 /**
  * DAO for the DownloadJob class
  */
+@UmDao
 public abstract class DownloadJobDao {
 
     /**
@@ -22,6 +27,7 @@ public abstract class DownloadJobDao {
      *
      * @return The Primary Key value assigned to the inserted object
      */
+    @UmInsert
     public abstract long insert(DownloadJob job);
 
     /**
@@ -31,7 +37,7 @@ public abstract class DownloadJobDao {
      * @param status The status to mark on the DownloadJob
      * @param timeRequested The time the download job is to be marked as queued (in ms)
      */
-    @UmQuery("Update DownloadJobRun SET status = :status, timeRequested = :timeRequested WHERE id = :id")
+    @UmQuery("Update DownloadJob SET status = :status, timeRequested = :timeRequested WHERE downloadJobId = :id")
     public abstract void queueDownload(int id, int status, long timeRequested);
 
     /**
@@ -39,18 +45,23 @@ public abstract class DownloadJobDao {
      *
      * @return The next DownloadJob to run
      */
-    @UmQuery("SELECT * FROM DownloadJobRun WHERE status > 0 AND status <= 10 ORDER BY timeRequested LIMIT 1")
+    @UmQuery("SELECT * FROM DownloadJob " +
+            "LEFT JOIN DownloadSet on DownloadJob.downloadSetId = DownloadSet.id " +
+            "WHERE (status BETWEEN " + NetworkTask.STATUS_WAITING_MIN + " AND  " +
+            NetworkTask.STATUS_WAITING_MAX + ") " +
+            " AND (allowMeteredDataUsage = 1 OR allowMeteredDataUsage = :connectionMetered) " +
+            " ORDER BY timeRequested LIMIT 1")
     protected abstract DownloadJobWithDownloadSet findNextDownloadJob(boolean connectionMetered);
 
     /**
      * Update the status of the given DownloadJob
      *
-     * @param id The DownloadJobId of the download job to update the status for
+     * @param jobId The DownloadJobId of the download job to update the status for
      * @param status The status to set on the given DownloadJob
      *
      */
-    @UmQuery("UPDATE DownloadJobRun SET status = :status WHERE id = :jobId")
-    public abstract void updateJobStatus(int id, int status);
+    @UmQuery("UPDATE DownloadJob  SET status = :status WHERE downloadJobId = :jobId")
+    public abstract void updateJobStatus(int jobId, int status);
 
     /**
      * Mark the status in bulk of DownloadJob, useful for testing purposes to cancel other downloads
@@ -59,7 +70,7 @@ public abstract class DownloadJobDao {
      * @param rangeTo The maximum existing status of a job
      * @param setTo The status to set on a job
      */
-    @UmQuery("UPDATE DownloadJobRun SET status = :setTo WHERE status BETWEEN :rangeFrom AND :rangeTo")
+    @UmQuery("UPDATE DownloadJob SET status = :setTo WHERE status BETWEEN :rangeFrom AND :rangeTo")
     @Deprecated
     public abstract void updateJobStatusByRange(int rangeFrom, int rangeTo, int setTo);
 
@@ -69,6 +80,7 @@ public abstract class DownloadJobDao {
      *
      * @param job The DownloadJob to update
      */
+    @UmUpdate
     public abstract void update(DownloadJob job);
 
 
@@ -79,6 +91,7 @@ public abstract class DownloadJobDao {
      *
      * @return The DownloadJob with the given id, or null if no such DownloadJob exists
      */
+    @UmQuery("SELECT * From DownloadJob WHERE downloadJobId = :id")
     public abstract DownloadJob findById(int id);
 
     /**
@@ -87,6 +100,9 @@ public abstract class DownloadJobDao {
      * @param id downloadJobId to search for.
      * @return The DownloadJobWithDownloadSet for the given id, or null if no such DownloadJob exists
      */
+    @UmQuery("SELECT * FROM DownloadJob " +
+            "LEFT JOIN DownloadSet on DownloadJob.downloadSetId = DownloadSet.id " +
+            "WHERE downloadJobId = :id")
     public abstract DownloadJobWithDownloadSet findByIdWithDownloadSet(int id);
 
 
@@ -98,6 +114,7 @@ public abstract class DownloadJobDao {
      *
      * @return The primary key of the related DownloadSet
      */
+    @UmQuery("SELECT downloadSetId FROM DownloadJob WHERE downloadJobId = :downloadJobId")
     public abstract int findDownloadSetId(int downloadJobId);
 
     /**
@@ -122,7 +139,7 @@ public abstract class DownloadJobDao {
      *
      * @return LiveData for the given DownloadJob
      */
-    @UmQuery("SELECT * From DownloadJob where id = :id")
+    @UmQuery("SELECT * From DownloadJob WHERE downloadJobId = :id")
     public abstract UmLiveData<DownloadJob> getByIdLive(int id);
 
     /**
@@ -133,10 +150,10 @@ public abstract class DownloadJobDao {
      *
      * @return LiveData with DownloadJobWithTotals for the given DownloadJob
      */
-    @UmQuery("SELECT DownloadSet.*, " +
-            " (SELECT COUNT(*) FROM DownloadSetItem WHERE DownloadSetItem.downloadSetId = DownloadSet.id) AS numJobItems, " +
-            " (SELECT SUM(DownloadSetItem.downloadLength) FROM DownloadSetItem WHERE DownloadSetItem.downloadSetId = DownloadSet.id) AS totalDownloadSize " +
-            " FROM DownloadSet Where DownloadSet.id= :id")
+    @UmQuery("SELECT DownloadJob.*, " +
+            " (SELECT COUNT(*) FROM DownloadJobItem WHERE DownloadJobItem.downloadJobId = DownloadJob.downloadJobId) AS numJobItems, " +
+            " (SELECT SUM(DownloadJobItem.downloadLength) FROM DownloadJobItem WHERE DownloadJobItem.downloadJobId = DownloadJob.downloadJobId) AS totalDownloadSize " +
+            " FROM DownloadJob Where DownloadJob.downloadJobId = :id")
     public abstract UmLiveData<DownloadJobWithTotals> findByIdWithTotals(int id);
 
     /**
@@ -144,7 +161,7 @@ public abstract class DownloadJobDao {
      *
      * @return the most recently created DownloadJob
      */
-    @UmQuery("SELECT * FROM DownloadJob ORDER BY timeCreated DESC")
+    @UmQuery("SELECT * FROM DownloadJob ORDER BY timeCreated DESC LIMIT 1")
     public abstract DownloadJob findLastCreatedDownloadJob();
 
 
@@ -154,30 +171,54 @@ public abstract class DownloadJobDao {
      * @param entryId entryId to search for - can be the root entryId, or any child entry
      * @param callback callback to call when done
      */
-    public void findLastDownloadJobId(String entryId, UmResultCallback<Integer> callback) {
-        findLastDownloadJobIdByDownloadJobItem(entryId, (jobItemJobId) -> {
-            if(jobItemJobId != null && jobItemJobId > 0) {
-                callback.onDone(jobItemJobId);
-            }else{
-                findLastDownloadJobIdByCrawlJobItem(entryId, callback);
+    public void findLastDownloadJobId(String entryId, UmCallback<Integer> callback) {
+        findLastDownloadJobIdByDownloadJobItem(entryId, new UmCallback<Integer>() {
+            @Override
+            public void onSuccess(Integer jobItemJobId) {
+                if(jobItemJobId != null && jobItemJobId > 0) {
+                    callback.onSuccess(jobItemJobId);
+                }else{
+                    findLastDownloadJobIdByCrawlJobItem(entryId, callback);
+                }
+            }
+
+            @Override
+            public void onFailure(Throwable exception) {
+                callback.onFailure(exception);
             }
         });
     }
 
-    public abstract void findLastDownloadJobIdByDownloadJobItem(String entryId, UmResultCallback<Integer> callback);
+    @UmQuery("SELECT DownloadJob.downloadJobId " +
+            "FROM DownloadSetItem " +
+            "LEFT JOIN DownloadJobItem ON DownloadSetItem.id = DownloadJobItem.downloadJobItemId " +
+            "LEFT JOIN DownloadJob ON DownloadJobItem.downloadJobId = DownloadJob.downloadJobId " +
+            "WHERE DownloadSetItem.entryId = :entryId " +
+            "ORDER BY DownloadJob.timeRequested DESC LIMIT 1")
+    public abstract void findLastDownloadJobIdByDownloadJobItem(String entryId, UmCallback<Integer> callback);
 
-    public abstract void findLastDownloadJobIdByCrawlJobItem(String entryId, UmResultCallback<Integer> callback);
+    @UmQuery("SELECT DownloadJob.downloadJobId  " +
+            "FROM CrawlJobItem " +
+            "LEFT JOIN OpdsEntry ON CrawlJobItem.opdsEntryUuid = OpdsEntry.uuid " +
+            "LEFT JOIN CrawlJob ON CrawlJobItem.crawlJobId = CrawlJob.crawlJobId " +
+            "LEFT JOIN DownloadJob on CrawlJob.containersDownloadJobId = DownloadJob.downloadJobId " +
+            "WHERE OpdsEntry.entryId = :entryId " +
+            "ORDER BY DownloadJob.timeRequested DESC LIMIT 1")
+    public abstract void findLastDownloadJobIdByCrawlJobItem(String entryId, UmCallback<Integer> callback);
 
+    @UmQuery("SELECT allowMeteredDataUsage FROM DownloadJob WHERE downloadJobId = :downloadJobId")
     public abstract UmLiveData<Boolean> findAllowMeteredDataUsageLive(int downloadJobId);
 
+    @UmQuery("UPDATE DownloadJob SET allowMeteredDataUsage = :allowMeteredDataUsage WHERE downloadJobId = :downloadJobId ")
     public abstract void updateAllowMeteredDataUsage(int downloadJobId, boolean allowMeteredDataUsage,
-                                                     UmResultCallback<Void> callback);
+                                                     UmCallback<Void> callback);
 
     /**
      * Get a list of all DownloadJob items. Used for debugging purposes.
      *
      * @return A list of all DownloadJob entity objects
      */
+    @UmQuery("SELECT * From DownloadJob")
     public abstract List<DownloadJob> findAll();
 
 }
