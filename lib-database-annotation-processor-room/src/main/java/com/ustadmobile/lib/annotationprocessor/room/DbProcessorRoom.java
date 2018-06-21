@@ -205,11 +205,12 @@ public class DbProcessorRoom {
         TypeName insertRetType;
         int asyncParamIndex = parameterTypeList.indexOf(UmCallback.class);
         if(isAsyncMethod) {
-            ParameterizedType asyncParamType = (ParameterizedType)daoMethod
+            ParameterizedType asyncParamaterizedType = (ParameterizedType)daoMethod
                     .getGenericParameterTypes()[asyncParamIndex];
-            insertRetType = ClassName.get(asyncParamType.getActualTypeArguments()[0]);
+            Type actualType = asyncParamaterizedType.getActualTypeArguments()[0];
+            insertRetType = convertToPrimitiveIfApplicable(actualType);
         }else {
-            insertRetType = ClassName.get(daoMethod.getGenericReturnType());
+            insertRetType = TypeName.get(daoMethod.getGenericReturnType());
         }
 
 
@@ -248,6 +249,18 @@ public class DbProcessorRoom {
         }
 
         return methodBuilder;
+    }
+
+    private TypeName convertToPrimitiveIfApplicable(Type type) {
+        if(type.equals(Void.class)) {
+            return TypeName.VOID;
+        }else if(type.equals(Integer.class)) {
+            return TypeName.INT;
+        }else if(type.equals(Long.class)) {
+            return TypeName.LONG;
+        }else {
+            return TypeName.get(type);
+        }
     }
 
 
@@ -319,22 +332,32 @@ public class DbProcessorRoom {
             Parameter callbackParam = intermediateMethod.getParameters()[callbackParamNum];
             ParameterizedType roomMethodRetType = (ParameterizedType)callbackParam.getParameterizedType();
 
+            TypeName returnTypeName = convertToPrimitiveIfApplicable(
+                    roomMethodRetType.getActualTypeArguments()[0]);
             MethodSpec.Builder roomMethodBuilder = MethodSpec.methodBuilder(roomMethodName)
                     .addModifiers(Modifier.PROTECTED, Modifier.ABSTRACT)
                     .addAnnotation(querySpec.build())
-                    .returns(roomMethodRetType.getActualTypeArguments()[0]);
+                    .returns(returnTypeName);
 
             addNamedParametersToMethodBuilder(roomMethodBuilder, intermediateMethod,
                     UmCallback.class);
 
             daoClassBuilder.addMethod(roomMethodBuilder.build());
-            retMethod.addCode(CodeBlock.builder()
-                    .add("dbExecutor.execute(() -> $L.onSuccess($L",
-                            callbackParam.getAnnotation(UmNamedParameter.class).value(),
-                            roomMethodName)
-                    .add(makeNamedParameterMethodCall(intermediateMethod.getParameters(),
-                            UmCallback.class))
-                    .add("));\n").build());
+
+            String callbackParamName = callbackParam.getAnnotation(UmNamedParameter.class).value();
+            if(!returnTypeName.equals(TypeName.VOID)) {
+                retMethod.addCode("dbExecutor.execute(() -> $L.onSuccess($L$L));",
+                        callbackParamName,
+                        roomMethodName,
+                        makeNamedParameterMethodCall(intermediateMethod.getParameters(),
+                                UmCallback.class));
+            }else {
+                retMethod.addCode("dbExecutor.execute(() -> { $L$L; $L.onSuccess(null); });",
+                        roomMethodName,
+                        makeNamedParameterMethodCall(intermediateMethod.getParameters(),
+                                UmCallback.class),
+                        callbackParamName);
+            }
         }else {
             //this is just a simple override
             retMethod.addAnnotation(querySpec.build())
