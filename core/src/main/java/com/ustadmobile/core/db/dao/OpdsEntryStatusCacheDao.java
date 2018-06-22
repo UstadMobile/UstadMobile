@@ -1,6 +1,6 @@
 package com.ustadmobile.core.db.dao;
 
-import com.ustadmobile.core.db.DbManager;
+import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UmResultCallback;
@@ -127,7 +127,7 @@ public abstract class OpdsEntryStatusCacheDao {
      * @param loadedEntries The entries that have just been loaded. These MUST have been already
      *                      committed to the OpdsEntry database.
      */
-    public void handleOpdsEntriesLoaded(DbManager dbManager, List<OpdsEntryWithRelations> loadedEntries) {
+    public void handleOpdsEntriesLoaded(UmAppDatabase dbManager, List<OpdsEntryWithRelations> loadedEntries) {
         OpdsEntryWithRelations loadedEntry;
 
         //determine which entries do not have a corresponding EntryStatusCache yet
@@ -467,7 +467,7 @@ public abstract class OpdsEntryStatusCacheDao {
      * @param entry Entry found within container (e.g. as returned by the scanner)
      * @param containerFile The ContainerFile that represents the file in which this entry was found
      */
-    public void handleContainerFoundOnDisk(DbManager dbManager, OpdsEntryWithRelations entry,
+    public void handleContainerFoundOnDisk(UmAppDatabase dbManager, OpdsEntryWithRelations entry,
                                            ContainerFile containerFile) {
         OpdsEntryStatusCache statusCache = findByEntryId(entry.getEntryId());
         if(statusCache == null) {

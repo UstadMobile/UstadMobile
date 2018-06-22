@@ -1,7 +1,7 @@
 package com.ustadmobile.core.fs.contenttype;
 
 import com.ustadmobile.core.catalog.contenttype.ScormTypePlugin;
-import com.ustadmobile.core.db.DbManager;
+import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.scorm.ScormManifest;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
@@ -43,7 +43,7 @@ public class ScormTypePluginFs extends ScormTypePlugin implements ContentTypePlu
             if(zipEntry == null)
                 return null;
 
-            entry = DbManager.getInstance(context)
+            entry = UmAppDatabase.getInstance(context)
                     .getOpdsEntryWithRelationsDao().getEntryByUrlStatic(url);
 
             if(entry == null){

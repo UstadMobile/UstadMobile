@@ -1,11 +1,11 @@
 package com.ustadmobile.core.fs.db;
 
-import com.ustadmobile.core.db.DbManager;
+import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.UmObserver;
 import com.ustadmobile.core.db.dao.OpdsAtomFeedRepository;
-import com.ustadmobile.core.db.dao.OpdsEntryWithRelationsDao;
 import com.ustadmobile.core.fs.db.repository.OpdsAtomFeedRepositoryImpl;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.lib.db.entities.OpdsEntry;
@@ -50,8 +50,8 @@ public class TestOpdsRepository extends TestCase {
 
     @Test
     public void testOpdsRepositoryLoadFromFeed() {
-        OpdsAtomFeedRepository repository = DbManager.getInstance(PlatformTestUtil.getTargetContext())
-                .getOpdsAtomFeedRepository();
+        OpdsAtomFeedRepository repository = UstadMobileSystemImpl.getInstance()
+                .getOpdsAtomFeedRepository(PlatformTestUtil.getTargetContext());
 
         String opdsUrl = UMFileUtil.joinPaths(new String[] {
                 ResourcesHttpdTestServer.getHttpRoot(), "com/ustadmobile/test/core/acquire-multi.opds"});
@@ -92,7 +92,7 @@ public class TestOpdsRepository extends TestCase {
                     "http://umcloud1.ustadmobile.com/opds/courseid/6CM",
                     parent.getEntryId());
 
-            UmLiveData<List<OpdsEntryWithRelations>> childEntryListLiveData = DbManager
+            UmLiveData<List<OpdsEntryWithRelations>> childEntryListLiveData = UmAppDatabase
                     .getInstance(PlatformTestUtil.getTargetContext()).getOpdsEntryWithRelationsDao()
                     .getEntriesByParentAsList(parent.getUuid());
             UmObserver<List<OpdsEntryWithRelations>> observer = new UmObserver<List<OpdsEntryWithRelations>>() {
@@ -127,8 +127,8 @@ public class TestOpdsRepository extends TestCase {
         fout.flush();
         fout.close();
 
-        OpdsAtomFeedRepositoryImpl repository = (OpdsAtomFeedRepositoryImpl)DbManager
-                .getInstance(PlatformTestUtil.getTargetContext()).getOpdsAtomFeedRepository();
+        OpdsAtomFeedRepositoryImpl repository = (OpdsAtomFeedRepositoryImpl) UstadMobileSystemImpl
+                .getInstance().getOpdsAtomFeedRepository(PlatformTestUtil.getTargetContext());
 
         ArrayList<OpdsEntryWithRelations> entriesInDir = new ArrayList<>();
         UmLiveData<List<OpdsEntryWithStatusCache>> entriesInDirLiveData = repository

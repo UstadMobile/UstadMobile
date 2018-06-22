@@ -1,7 +1,7 @@
 package com.ustadmobile.core.impl;
 
 import com.ustadmobile.core.controller.CatalogPresenter;
-import com.ustadmobile.core.db.DbManager;
+import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.impl.http.UmHttpCall;
 import com.ustadmobile.core.impl.http.UmHttpRequest;
 import com.ustadmobile.core.impl.http.UmHttpResponse;
@@ -248,7 +248,7 @@ public class HttpCache implements HttpCacheResponse.ResponseCompleteListener{
 
         @Override
         public void run() {
-            List<String> fileUrisToDelete = DbManager.getInstance(context).getHttpCachedEntryDao()
+            List<String> fileUrisToDelete = UmAppDatabase.getInstance(context).getHttpCachedEntryDao()
                     .findFileUrisByUrl(Arrays.asList(urlsToDelete));
             List<String> deletedFileUris = new ArrayList<>();
             File entryFile;
@@ -262,7 +262,7 @@ public class HttpCache implements HttpCacheResponse.ResponseCompleteListener{
                 }
             }
 
-            DbManager.getInstance(context).getHttpCachedEntryDao().deleteByFileUris(deletedFileUris);
+            UmAppDatabase.getInstance(context).getHttpCachedEntryDao().deleteByFileUris(deletedFileUris);
 
             if(callback != null)
                 callback.onSuccess(null);
@@ -318,7 +318,7 @@ public class HttpCache implements HttpCacheResponse.ResponseCompleteListener{
     }
 
     private HttpCachedEntry getEntry(Object context, String url, String method) {
-        return DbManager.getInstance(context).getHttpCachedEntryDao()
+        return UmAppDatabase.getInstance(context).getHttpCachedEntryDao()
                 .findByUrlAndMethod(url, getMethodFlag(method));
     }
 
@@ -474,7 +474,7 @@ public class HttpCache implements HttpCacheResponse.ResponseCompleteListener{
         }
 
         response.getEntry().setLastAccessed(System.currentTimeMillis());
-        DbManager.getInstance(response.getRequest().getContext()).getHttpCachedEntryDao()
+        UmAppDatabase.getInstance(response.getRequest().getContext()).getHttpCachedEntryDao()
                 .insert(response.getEntry());
     }
 

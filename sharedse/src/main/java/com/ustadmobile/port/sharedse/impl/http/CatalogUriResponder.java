@@ -1,7 +1,7 @@
 package com.ustadmobile.port.sharedse.impl.http;
 
 import com.google.gson.Gson;
-import com.ustadmobile.core.db.DbManager;
+import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.lib.db.entities.ContainerFileEntry;
 import com.ustadmobile.lib.db.entities.ContainerFileEntryWithContainerFile;
 import com.ustadmobile.port.sharedse.networkmanager.EntryStatusTask;
@@ -121,7 +121,8 @@ public class CatalogUriResponder extends FileResponder implements RouterNanoHTTP
         EmbeddedHTTPD httpd = uriResource.initParameter(INIT_PARAM_INDEX_EMBEDDEDHTTPD,
                 EmbeddedHTTPD.class);
 
-        ContainerFileEntryWithContainerFile containerFileEntry = DbManager.getInstance(getContext(uriResource))
+        ContainerFileEntryWithContainerFile containerFileEntry = UmAppDatabase
+                .getInstance(getContext(uriResource))
                 .getContainerFileEntryDao().findContainerFileEntryWithContainerFileByEntryId(entryId);
 
         if(containerFileEntry == null) {
@@ -194,7 +195,7 @@ public class CatalogUriResponder extends FileResponder implements RouterNanoHTTP
             entryIdList[i] = requestEntryIds.getString(i);
         }
 
-        List<ContainerFileEntry> containerFileEntries = DbManager
+        List<ContainerFileEntry> containerFileEntries = UmAppDatabase
                 .getInstance(context).getContainerFileEntryDao()
                 .findContainerFileEntriesByEntryIds(entryIdList);
         Gson gson = new Gson();

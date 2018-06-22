@@ -1,9 +1,7 @@
 package com.ustadmobile.test.port.android.view;
 
 import android.Manifest;
-import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
 import android.net.wifi.WifiManager;
 import android.os.SystemClock;
 import android.support.test.InstrumentationRegistry;
@@ -13,16 +11,10 @@ import android.support.test.filters.RequiresDevice;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.rule.GrantPermissionRule;
 import android.support.test.runner.AndroidJUnit4;
-import android.support.test.runner.AndroidJUnitRunner;
-import android.support.test.uiautomator.By;
-import android.support.test.uiautomator.UiDevice;
-import android.support.test.uiautomator.UiObject;
-import android.support.test.uiautomator.UiObjectNotFoundException;
-import android.support.test.uiautomator.UiSelector;
-import android.support.test.uiautomator.Until;
+
 
 import com.toughra.ustadmobile.R;
-import com.ustadmobile.core.db.DbManager;
+import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.UmObserver;
 import com.ustadmobile.core.db.dao.DownloadJobDao;
@@ -196,7 +188,7 @@ public class DownloadCrawlEspressoTest {
 
 
     private void waitForLastDownloadJobToFinish(final int timeout) {
-        DownloadJobDao jobDao = DbManager.getInstance(PlatformTestUtil.getTargetContext())
+        DownloadJobDao jobDao = UmAppDatabase.getInstance(PlatformTestUtil.getTargetContext())
                 .getDownloadJobDao();
         DownloadJob lastJob = jobDao.findLastCreatedDownloadJob();
         CountDownLatch latch = new CountDownLatch(1);

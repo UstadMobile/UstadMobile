@@ -1,7 +1,7 @@
 package com.ustadmobile.core.fs.db.repository;
 
 import com.ustadmobile.core.catalog.contenttype.ContentTypePlugin;
-import com.ustadmobile.core.db.DbManager;
+import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.fs.contenttype.ContentTypePluginFs;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMFileUtil;
@@ -9,7 +9,6 @@ import com.ustadmobile.lib.db.entities.ContainerFile;
 import com.ustadmobile.lib.db.entities.ContainerFileEntry;
 import com.ustadmobile.lib.db.entities.ContainerFileWithRelations;
 import com.ustadmobile.lib.db.entities.OpdsEntry;
-import com.ustadmobile.lib.db.entities.OpdsEntryStatusCache;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
 
 import java.io.File;
@@ -24,24 +23,24 @@ import java.util.Map;
 
 public class OpdsDirScanner implements Runnable{
 
-    private DbManager dbManager;
+    private UmAppDatabase dbManager;
 
     private List<String> dirNames;
 
     private OpdsEntry.OpdsItemLoadCallback callback;
 
-    public OpdsDirScanner(DbManager dbManager, List<String> dirNames,
+    public OpdsDirScanner(UmAppDatabase dbManager, List<String> dirNames,
                           OpdsEntry.OpdsItemLoadCallback callback) {
         this.dbManager = dbManager;
         this.dirNames = dirNames;
         this.callback = callback;
     }
 
-    public OpdsDirScanner(DbManager dbManager, List<String> dirNames) {
+    public OpdsDirScanner(UmAppDatabase dbManager, List<String> dirNames) {
         this(dbManager, dirNames, null);
     }
 
-    public OpdsDirScanner(DbManager dbManager) {
+    public OpdsDirScanner(UmAppDatabase dbManager) {
         this.dbManager = dbManager;
     }
 
@@ -52,7 +51,7 @@ public class OpdsDirScanner implements Runnable{
             File dirFile = new File(dirName);
 
             //make sure entries that are in the database in this directory are actually still there
-            List<ContainerFile> containerFilesInDir = DbManager.getInstance(dbManager.getContext())
+            List<ContainerFile> containerFilesInDir = UmAppDatabase.getInstance(dbManager.getContext())
                     .getContainerFileDao().findFilesByDirectory(dirFile.getAbsolutePath());
 
             File file = null;

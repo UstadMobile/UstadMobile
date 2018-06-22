@@ -1,7 +1,7 @@
 package com.ustadmobile.core.fs.contenttype;
 
 import com.ustadmobile.core.catalog.contenttype.H5PContentType;
-import com.ustadmobile.core.db.DbManager;
+import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
@@ -47,7 +47,7 @@ public class H5PContentTypeFs extends H5PContentType implements ContentTypePlugi
             JSONObject h5pJsonObj = new JSONObject(UMIOUtils.readStreamToString(entryIn));
 
             String fileUri = file.toURI().toString();
-            entry = DbManager.getInstance(context)
+            entry = UmAppDatabase.getInstance(context)
                     .getOpdsEntryWithRelationsDao().getEntryByUrlStatic(fileUri);
             if(entry == null) {
                 entry = new OpdsEntryWithRelations();

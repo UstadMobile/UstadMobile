@@ -1,7 +1,7 @@
 package com.ustadmobile.core.fs.contenttype;
 
 import com.ustadmobile.core.catalog.contenttype.XapiPackageTypePlugin;
-import com.ustadmobile.core.db.DbManager;
+import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.impl.ZipEntryHandle;
@@ -73,7 +73,7 @@ public class XapiPackageTypePluginFs extends XapiPackageTypePlugin implements Co
                         }
 
                         String url = UMFileUtil.PROTOCOL_FILE + file.getAbsolutePath();
-                        tincanEntry = DbManager.getInstance(context)
+                        tincanEntry = UmAppDatabase.getInstance(context)
                                 .getOpdsEntryWithRelationsDao().getEntryByUrlStatic(url);
                         if(tincanEntry == null) {
                             tincanEntry = new OpdsEntryWithRelations();

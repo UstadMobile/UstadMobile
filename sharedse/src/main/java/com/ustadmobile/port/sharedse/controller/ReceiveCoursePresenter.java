@@ -2,7 +2,7 @@ package com.ustadmobile.port.sharedse.controller;
 
 import com.ustadmobile.core.controller.CatalogPresenter;
 import com.ustadmobile.core.controller.UstadBaseController;
-import com.ustadmobile.core.db.DbManager;
+import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
@@ -164,9 +164,9 @@ public class ReceiveCoursePresenter extends UstadBaseController implements WifiP
         }
 
         new Thread(() -> {
-            DbManager.getInstance(getContext()).getOpdsLinkDao().insert(linkList);
+            UmAppDatabase.getInstance(getContext()).getOpdsLinkDao().insert(linkList);
 
-            DbManager.getInstance(getContext()).getOpdsEntryDao().insertList(
+            UmAppDatabase.getInstance(getContext()).getOpdsEntryDao().insertList(
                     OpdsEntryWithRelations.toOpdsEntryList(sharedFeed.getChildEntries()));
 
             DownloadSet job = networkManager.buildDownloadJob(sharedFeed.getChildEntries(), destinationDir,

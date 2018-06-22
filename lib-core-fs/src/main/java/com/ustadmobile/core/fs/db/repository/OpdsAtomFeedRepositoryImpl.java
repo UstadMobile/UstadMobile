@@ -1,6 +1,6 @@
 package com.ustadmobile.core.fs.db.repository;
 
-import com.ustadmobile.core.db.DbManager;
+import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.db.dao.OpdsAtomFeedRepository;
@@ -19,11 +19,11 @@ import java.util.concurrent.ExecutorService;
 
 public class OpdsAtomFeedRepositoryImpl implements OpdsAtomFeedRepository {
 
-    private DbManager dbManager;
+    private UmAppDatabase dbManager;
 
     private ExecutorService executorService;
 
-    public OpdsAtomFeedRepositoryImpl(DbManager dbManager, ExecutorService executorService){
+    public OpdsAtomFeedRepositoryImpl(UmAppDatabase dbManager, ExecutorService executorService){
         this.dbManager = dbManager;
         this.executorService = executorService;
     }

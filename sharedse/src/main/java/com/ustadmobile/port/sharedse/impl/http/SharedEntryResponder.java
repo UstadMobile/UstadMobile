@@ -1,7 +1,7 @@
 package com.ustadmobile.port.sharedse.impl.http;
 
 import com.google.gson.Gson;
-import com.ustadmobile.core.db.DbManager;
+import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.lib.db.entities.OpdsEntry;
 
 import java.util.Map;
@@ -25,7 +25,7 @@ public class SharedEntryResponder implements RouterNanoHTTPD.UriResponder{
         Object context = uriResource.initParameter(ARG_INDEX_CONTEXT, Object.class);
         Integer portNum = uriResource.initParameter(ARG_INDEX_PORTNUM, Integer.class);
 
-        OpdsEntry entry = DbManager.getInstance(context).getOpdsEntryWithRelationsDao()
+        OpdsEntry entry = UmAppDatabase.getInstance(context).getOpdsEntryWithRelationsDao()
                 .getEntryByUuidStatic(opdsUuid);
 
         SharedEntryInfo sharedEntryInfo = new SharedEntryInfo(opdsUuid, entry.getUrl(),

@@ -1,6 +1,6 @@
 package com.ustadmobile.test.sharedse.http;
 
-import com.ustadmobile.core.db.DbManager;
+import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
@@ -85,7 +85,7 @@ public class RemoteTestServerHttpd extends NanoHTTPD {
             }else if(CMD_SEND_COURSE.equals(command)){
                 String destMacAddr = decodedParams.get("dst").get(0);
                 List<String> entryIdsToSend = decodedParams.get("entryId");
-                List<String> uuids = DbManager.getInstance(networkManager.getContext())
+                List<String> uuids = UmAppDatabase.getInstance(networkManager.getContext())
                         .getOpdsEntryWithRelationsDao().getUuidsForEntryId(entryIdsToSend.get(0));
                 String[] entryIdsToSendArr = new String[1];
                 entryIdsToSend.toArray(entryIdsToSendArr);

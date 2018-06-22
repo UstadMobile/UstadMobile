@@ -6,6 +6,10 @@
 package com.ustadmobile.port.sharedse.impl;
 
 import com.ustadmobile.core.controller.CatalogPresenter;
+import com.ustadmobile.core.db.UmAppDatabase;
+import com.ustadmobile.core.db.dao.OpdsAtomFeedRepository;
+import com.ustadmobile.core.db.impl.DbManagerFactory;
+import com.ustadmobile.core.fs.db.repository.OpdsAtomFeedRepositoryImpl;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.HttpCache;
 import com.ustadmobile.core.impl.TinCanQueueListener;
@@ -61,6 +65,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Vector;
+import java.util.concurrent.Executors;
 
 import com.ustadmobile.core.listener.ActiveSyncListener;
 import com.ustadmobile.core.listener.ActiveUserListener;
@@ -91,6 +96,8 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
     public static String DEFAULT_MAIN_SERVER_HOST_NAME = "umcloud1svlt";
 
     private Properties appConfig;
+
+    private OpdsAtomFeedRepository atomFeedRepository;
 
     /**
      * Convenience method to return a casted instance of UstadMobileSystemImplSharedSE
@@ -532,5 +539,13 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
         return appConfig.getProperty(key, defaultVal);
     }
 
+    @Override
+    public OpdsAtomFeedRepository getOpdsAtomFeedRepository(Object context) {
+        if(atomFeedRepository == null) {
+            atomFeedRepository = new OpdsAtomFeedRepositoryImpl(UmAppDatabase.getInstance(context),
+                    Executors.newCachedThreadPool());
+        }
 
+        return atomFeedRepository;
+    }
 }

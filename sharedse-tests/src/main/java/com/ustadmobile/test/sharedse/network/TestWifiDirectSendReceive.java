@@ -1,7 +1,6 @@
 package com.ustadmobile.test.sharedse.network;
 
 import com.ustadmobile.core.controller.CatalogPresenter;
-import com.ustadmobile.core.db.DbManager;
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.UmObserver;
 import com.ustadmobile.core.fs.db.ContainerFileHelper;

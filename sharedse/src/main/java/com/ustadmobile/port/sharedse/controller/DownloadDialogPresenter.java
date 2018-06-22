@@ -2,7 +2,7 @@ package com.ustadmobile.port.sharedse.controller;
 
 import com.ustadmobile.core.controller.CatalogPresenter;
 import com.ustadmobile.core.controller.UstadBaseController;
-import com.ustadmobile.core.db.DbManager;
+import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.dao.CrawlJobWithTotals;
 import com.ustadmobile.core.impl.UMLog;
@@ -30,7 +30,7 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
 
     public static final String ARG_ROOT_UUID = "r_uuids";
 
-    private DbManager dbManager;
+    private UmAppDatabase dbManager;
 
     private UmLiveData<OpdsEntryWithStatusCache> rootEntryLiveData;
 
@@ -73,7 +73,7 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
     }
 
     public void onCreate(Hashtable savedState) {
-        dbManager = DbManager.getInstance(getContext());
+        dbManager = UmAppDatabase.getInstance(getContext());
 
 
         if(getArguments().containsKey(ARG_ROOT_UUID)){
@@ -84,8 +84,9 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
             //we need to load the entry from the given URI
             rootEntryUuid = new String[1];
             String rootEntryUri = ((String[])getArguments().get(ARG_ROOT_URIS))[0];
-            rootEntryLiveData = dbManager.getOpdsAtomFeedRepository().getEntryWithStatusCacheByUrl(
-                    rootEntryUri, null, null);
+            rootEntryLiveData = UstadMobileSystemImpl.getInstance()
+                    .getOpdsAtomFeedRepository(getContext()).getEntryWithStatusCacheByUrl(
+                        rootEntryUri, null, null);
         }
 
         rootEntryLiveData.observe(this, this::onEntryChanged);

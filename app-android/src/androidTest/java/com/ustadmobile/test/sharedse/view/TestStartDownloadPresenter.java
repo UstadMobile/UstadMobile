@@ -8,7 +8,7 @@ import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.support.test.rule.ServiceTestRule;
 
-import com.ustadmobile.core.db.DbManager;
+import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.lib.db.entities.DownloadJob;
@@ -126,7 +126,7 @@ public class TestStartDownloadPresenter {
         //TODO: Update this
         presenter.handleClickConfirm();
 
-        DownloadJob createdJob = DbManager.getInstance(PlatformTestUtil.getTargetContext())
+        DownloadJob createdJob = UmAppDatabase.getInstance(PlatformTestUtil.getTargetContext())
                 .getDownloadJobDao().findLastCreatedDownloadJob();
         Assert.assertTrue("Download job was created after start of this test",
                 createdJob.getTimeCreated() > startTime);

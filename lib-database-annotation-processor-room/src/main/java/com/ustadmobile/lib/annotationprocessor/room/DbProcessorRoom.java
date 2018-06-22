@@ -12,8 +12,10 @@ import com.squareup.javapoet.TypeSpec;
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.impl.UmCallback;
+import com.ustadmobile.core.impl.UmCallbackUtil;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmDatabase;
+import com.ustadmobile.lib.database.annotation.UmDbContext;
 import com.ustadmobile.lib.database.annotation.UmDelete;
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmNamedParameter;
@@ -108,6 +110,15 @@ public class DbProcessorRoom {
 
         //now go through all methods that return DAO objects and create matching methods
         for(Method daoMethod : clazz.getMethods()) {
+            if(daoMethod.isAnnotationPresent(UmDbContext.class)) {
+                MethodSpec.Builder contextMethodBuilder = MethodSpec.methodBuilder(daoMethod.getName())
+                        .returns(ClassName.get(Object.class))
+                        .addCode("return this.context;\n")
+                        .addAnnotation(Override.class);
+                addModifiersFromMethod(contextMethodBuilder, daoMethod);
+                dbManagerImplSpec.addMethod(contextMethodBuilder.build());
+            }
+
             if(!daoMethod.getReturnType().isAnnotationPresent(UmDao.class))
                 continue;
 
@@ -235,12 +246,14 @@ public class DbProcessorRoom {
             CodeBlock.Builder asyncInsert = CodeBlock.builder();
             asyncInsert.add("dbExecutor.execute(() -> ");
             if(daoMethod.getReturnType().equals(Void.class)){
-                asyncInsert.add("{$L$L; $L.onSuccess(null);}",
+                asyncInsert.add("{$L$L; $T.onSuccessIfNotNull($L, null);}",
                         insertMethodName,
                         makeNamedParameterMethodCall(intermediateDaoMethod.getParameters(), UmCallback.class),
+                        ClassName.get(UmCallbackUtil.class),
                         callbackParamName);
             }else {
-                asyncInsert.add("$L.onSuccess($L$L)",
+                asyncInsert.add("$T.onSuccessIfNotNull($L, $L$L)",
+                        ClassName.get(UmCallbackUtil.class),
                         callbackParamName, insertMethodName,
                         makeNamedParameterMethodCall(intermediateDaoMethod.getParameters(), UmCallback.class));
             }
@@ -346,16 +359,18 @@ public class DbProcessorRoom {
 
             String callbackParamName = callbackParam.getAnnotation(UmNamedParameter.class).value();
             if(!returnTypeName.equals(TypeName.VOID)) {
-                retMethod.addCode("dbExecutor.execute(() -> $L.onSuccess($L$L));",
+                retMethod.addCode("dbExecutor.execute(() -> $T.onSuccessIfNotNull($L, $L$L));",
+                        ClassName.get(UmCallbackUtil.class),
                         callbackParamName,
                         roomMethodName,
                         makeNamedParameterMethodCall(intermediateMethod.getParameters(),
                                 UmCallback.class));
             }else {
-                retMethod.addCode("dbExecutor.execute(() -> { $L$L; $L.onSuccess(null); });",
+                retMethod.addCode("dbExecutor.execute(() -> { $L$L; $T.onSuccessIfNotNull($L, null); });",
                         roomMethodName,
                         makeNamedParameterMethodCall(intermediateMethod.getParameters(),
                                 UmCallback.class),
+                        ClassName.get(UmCallbackUtil.class),
                         callbackParamName);
             }
         }else {

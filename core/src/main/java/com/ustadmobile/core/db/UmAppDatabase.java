@@ -19,6 +19,7 @@ import com.ustadmobile.core.db.dao.OpdsEntryStatusCacheDao;
 import com.ustadmobile.core.db.dao.OpdsEntryWithRelationsDao;
 import com.ustadmobile.core.db.dao.OpdsLinkDao;
 import com.ustadmobile.lib.database.annotation.UmDatabase;
+import com.ustadmobile.lib.database.annotation.UmDbContext;
 import com.ustadmobile.lib.db.entities.ContainerFile;
 import com.ustadmobile.lib.db.entities.ContainerFileEntry;
 import com.ustadmobile.lib.db.entities.CrawlJob;
@@ -92,6 +93,9 @@ public abstract class UmAppDatabase{
     public abstract CrawJoblItemDao getDownloadJobCrawlItemDao();
 
     public abstract HttpCachedEntryDao getHttpCachedEntryDao();
+
+    @UmDbContext
+    public abstract Object getContext();
 
 
 }

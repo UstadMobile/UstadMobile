@@ -3,6 +3,7 @@ package com.ustadmobile.core.db.dao;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmInsert;
+import com.ustadmobile.lib.database.annotation.UmOnConflictStrategy;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.db.entities.OpdsEntryParentToChildJoin;
 
@@ -14,10 +15,10 @@ import java.util.List;
 @UmDao
 public abstract class OpdsEntryParentToChildJoinDao {
 
-    @UmInsert
+    @UmInsert(onConflict = UmOnConflictStrategy.REPLACE)
     public abstract long insert(OpdsEntryParentToChildJoin entry);
 
-    @UmInsert
+    @UmInsert(onConflict = UmOnConflictStrategy.REPLACE)
     public abstract void insertAll(List<OpdsEntryParentToChildJoin> entryList);
 
     @UmInsert

@@ -9,6 +9,7 @@ import com.ustadmobile.core.db.impl.DbManagerFactory;
  * Created by mike on 1/13/18.
  */
 
+@Deprecated
 public abstract class DbManager {
 
     private static DbManager instance;

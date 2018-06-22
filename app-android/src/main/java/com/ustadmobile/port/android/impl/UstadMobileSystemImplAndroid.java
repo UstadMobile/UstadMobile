@@ -61,6 +61,7 @@ import com.ustadmobile.core.catalog.contenttype.*;
 import com.ustadmobile.core.controller.CatalogPresenter;
 import com.ustadmobile.core.controller.UserSettingsController;
 import com.ustadmobile.core.db.DbManager;
+import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.OpdsEntryStatusCacheDao;
 import com.ustadmobile.core.fs.contenttype.EpubTypePluginFs;
 import com.ustadmobile.core.fs.contenttype.H5PContentTypeFs;
@@ -939,7 +940,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
 
     @Override
     public void deleteEntries(Object context, List<String> entryIds, boolean recursive) {
-        OpdsEntryStatusCacheDao entryStatusCacheDao = DbManager.getInstance(context).getOpdsEntryStatusCacheDao();
+        OpdsEntryStatusCacheDao entryStatusCacheDao = UmAppDatabase.getInstance(context).getOpdsEntryStatusCacheDao();
         List<String> entryIdsToDelete = entryIds;
         if(recursive) {
             entryIdsToDelete = new ArrayList<>();

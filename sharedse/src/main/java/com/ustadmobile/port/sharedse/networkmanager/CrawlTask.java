@@ -1,6 +1,6 @@
 package com.ustadmobile.port.sharedse.networkmanager;
 
-import com.ustadmobile.core.db.DbManager;
+import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.DownloadSetItemDao;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
@@ -30,7 +30,7 @@ public class CrawlTask extends NetworkTask {
 
     private Vector<DownloadCrawlWorker> crawlWorkers = new Vector();
 
-    private DbManager dbManager;
+    private UmAppDatabase dbManager;
 
     private NetworkManager networkManager;
 
@@ -43,7 +43,7 @@ public class CrawlTask extends NetworkTask {
     private int containerDownloadSetId;
 
 
-    public CrawlTask(CrawlJob crawlJob, DbManager dbManager, NetworkManager networkManager) {
+    public CrawlTask(CrawlJob crawlJob, UmAppDatabase dbManager, NetworkManager networkManager) {
         super(networkManager);
         this.dbManager = dbManager;
         this.networkManager = networkManager;
@@ -83,7 +83,7 @@ public class CrawlTask extends NetworkTask {
 
         public void run() {
             UstadMobileSystemImpl.l(UMLog.INFO, 0, mkWorkerLogPrefix() + " run started");
-            final DbManager dbManager = DbManager.getInstance(networkManager.getContext());
+            final UmAppDatabase dbManager = UmAppDatabase.getInstance(networkManager.getContext());
             final DownloadSetItemDao downloadSetItemDao = dbManager.getDownloadSetItemDao();
             CrawlJobItem item;
             while((item = dbManager.getDownloadJobCrawlItemDao().findNextItemAndUpdateStatus(crawlJob.getCrawlJobId(), STATUS_RUNNING))
@@ -109,8 +109,9 @@ public class CrawlTask extends NetworkTask {
                 }else if(item.getUri() != null && item.getUri().startsWith("http://") || item.getUri().startsWith("https://")) {
                     UstadMobileSystemImpl.l(UMLog.INFO, 0, mkWorkerLogPrefix() + " load " +
                             item.getUri());
-                    itemEntry = dbManager.getOpdsAtomFeedRepository().getEntryByUrlStatic(
-                            item.getUri());
+                    itemEntry = UstadMobileSystemImpl.getInstance()
+                            .getOpdsAtomFeedRepository(networkManager.getContext())
+                            .getEntryByUrlStatic(item.getUri());
                     dbManager.getDownloadJobCrawlItemDao().updateOpdsEntryUuid(item.getId(), itemEntry.getUuid());
 
                     if (itemEntry.getEntryType() == OpdsEntry.ENTRY_TYPE_OPDS_ENTRY_STANDALONE) {

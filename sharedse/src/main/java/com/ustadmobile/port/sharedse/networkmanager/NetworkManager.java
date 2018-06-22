@@ -1,6 +1,6 @@
 package com.ustadmobile.port.sharedse.networkmanager;
 
-import com.ustadmobile.core.db.DbManager;
+import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.CrawlJobDao;
 import com.ustadmobile.core.db.dao.DownloadJobDao;
 import com.ustadmobile.core.db.dao.DownloadSetDao;
@@ -445,7 +445,7 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
 
     @Override
     public List<NetworkNode> getNetworkNodes() {
-        return DbManager.getInstance(getContext()).getNetworkNodeDao().findAllActiveNodes();
+        return UmAppDatabase.getInstance(getContext()).getNetworkNodeDao().findAllActiveNodes();
     }
 
     public long requestFileStatus(String[] entryIds, boolean useBluetooth, boolean useHttp) {
@@ -473,7 +473,7 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
      */
     public CrawlJob prepareDownload(DownloadSet downloadSet, CrawlJob crawlJob,
                                     boolean allowDownloadOverMeteredNetwork) {
-        DbManager dbManager = DbManager.getInstance(getContext());
+        UmAppDatabase dbManager = UmAppDatabase.getInstance(getContext());
         DownloadSetDao setDao = dbManager.getDownloadSetDao();
         DownloadJobDao jobDao = dbManager.getDownloadJobDao();
 
@@ -483,8 +483,9 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
         //see if this downloadset already exists
         if(crawlJob.getRootEntryUuid() == null){
             //we need to load the root item using the OpdsRepository
-            OpdsEntryWithRelations rootEntry = dbManager.getOpdsAtomFeedRepository()
-                .getEntryByUrlStatic(crawlJob.getRootEntryUri());
+            OpdsEntryWithRelations rootEntry = UstadMobileSystemImpl.getInstance()
+                    .getOpdsAtomFeedRepository(getContext())
+                    .getEntryByUrlStatic(crawlJob.getRootEntryUri());
             crawlJob.setRootEntryUuid(rootEntry.getUuid());
         }
 
@@ -517,7 +518,7 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
         //Insert the root crawl item
         OpdsEntryWithRelations entry = new OpdsEntryWithRelations();
         entry.setUuid(crawlJob.getRootEntryUuid());
-        DbManager.getInstance(getContext()).getDownloadJobCrawlItemDao().insert(
+        UmAppDatabase.getInstance(getContext()).getDownloadJobCrawlItemDao().insert(
                 new CrawlJobItem(crawlJob.getCrawlJobId(), entry, NetworkTask.STATUS_QUEUED, 0));
 
         CrawlTask task = new CrawlTask(crawlJob, dbManager,
@@ -542,7 +543,7 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
     public DownloadSet buildDownloadJob(List<OpdsEntryWithRelations> rootEntries, String destintionDir,
                                         boolean recursive, boolean wifiDirectEnabled,
                                         boolean localWifiEnabled) {
-        DownloadSetDao jobDao = DbManager.getInstance(getContext()).getDownloadSetDao();
+        DownloadSetDao jobDao = UmAppDatabase.getInstance(getContext()).getDownloadSetDao();
 
         DownloadSet job = new DownloadSet();
         job.setDestinationDir(destintionDir);
@@ -557,7 +558,7 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
         for(OpdsEntryWithRelations entry : rootEntries) {
             jobItems.add(new DownloadSetItem(entry, job));
         }
-        DbManager.getInstance(getContext()).getDownloadSetItemDao().insertList(jobItems);
+        UmAppDatabase.getInstance(getContext()).getDownloadSetItemDao().insertList(jobItems);
 
         return job;
     }
@@ -579,7 +580,7 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
         //just set the status of the job and let it be found using a query
         UstadMobileSystemImpl.l(UMLog.INFO, 0, "Queuing download job #" + downloadJobId);
         dbExecutorService.execute(() -> {
-            DbManager dbManager = DbManager.getInstance(getContext());
+            UmAppDatabase dbManager = UmAppDatabase.getInstance(getContext());
             dbManager.getDownloadJobItemDao().updateUnpauseItemsByDownloadJob(downloadJobId);
             dbManager.getDownloadJobDao().queueDownload(downloadJobId, NetworkTask.STATUS_QUEUED,
                     System.currentTimeMillis());
@@ -621,7 +622,7 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
         if(downloadTask == null)
             return false;
 
-        DbManager dbManager = DbManager.getInstance(getContext());
+        UmAppDatabase dbManager = UmAppDatabase.getInstance(getContext());
         List<DownloadJobItemWithDownloadSetItem> pausedItems = dbManager.getDownloadJobItemDao()
                 .findByDownloadJobAndStatusRange(downloadJobId, NetworkTask.STATUS_WAITING_MIN,
                         NetworkTask.STATUS_COMPLETE_MIN);
@@ -644,7 +645,7 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
 
     @Override
     public boolean cancelDownloadJob(int downloadJobId) {
-        DbManager dbManager = DbManager.getInstance(getContext());
+        UmAppDatabase dbManager = UmAppDatabase.getInstance(getContext());
         DownloadTask downloadTask = stopDownloadAndSetStatus(downloadJobId,
                 NetworkTask.STATUS_CANCELED);
 
@@ -692,7 +693,7 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
 
         int connectivityState = getConnectivityState();
         if(taskMap.isEmpty() && connectivityState != CONNECTIVITY_STATE_DISCONNECTED){
-            DownloadJobWithDownloadSet job = DbManager.getInstance(getContext())
+            DownloadJobWithDownloadSet job = UmAppDatabase.getInstance(getContext())
                     .getDownloadJobDao()
                     .findNextDownloadJobAndSetStartingStatus(connectivityState == CONNECTIVITY_STATE_METERED);
             if(job == null) {
@@ -849,7 +850,7 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
                 boolean newNode = false;
                 NetworkNode node = null;
                 synchronized (knownNodesLock) {
-                    NetworkNodeDao networkNodeDao = DbManager.getInstance(getContext()).getNetworkNodeDao();
+                    NetworkNodeDao networkNodeDao = UmAppDatabase.getInstance(getContext()).getNetworkNodeDao();
                     node = networkNodeDao.findNodeByIpOrWifiDirectMacAddress(ipAddr, senderMacAddr);
 
                     if(node == null) {
@@ -965,7 +966,7 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
                     return;
 
 
-                DbManager dbManager = DbManager.getInstance(getContext());
+                UmAppDatabase dbManager = UmAppDatabase.getInstance(getContext());
                 node = dbManager.getNetworkNodeDao().findNodeByIpAddress(ipAddress);
 
 //            node = getNodeByIpAddress(ipAddress);
@@ -1145,7 +1146,7 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
                     responseTime,0, false));
         }
 
-        DbManager.getInstance(getContext()).getEntryStatusResponseDao().insert(entryStatusResponses);
+        UmAppDatabase.getInstance(getContext()).getEntryStatusResponseDao().insert(entryStatusResponses);
         fireFileStatusCheckInformationAvailable(entryIds);
     }
 
@@ -1927,7 +1928,7 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
         sharedLinks.add(p2pSelfLink);
 
         dbExecutorService.execute(() -> {
-            List<OpdsEntryWithRelationsAndContainerMimeType> entriesToShareSrc = DbManager.getInstance(getContext())
+            List<OpdsEntryWithRelationsAndContainerMimeType> entriesToShareSrc = UmAppDatabase.getInstance(getContext())
                     .getOpdsEntryWithRelationsDao().findByUuidsWithContainerMimeType(Arrays.asList(uuids));
 
 
@@ -1957,7 +1958,7 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
             }
 
             //persist to the database
-            DbManager dbManager = DbManager.getInstance(getContext());
+            UmAppDatabase dbManager = UmAppDatabase.getInstance(getContext());
             dbManager.getOpdsEntryDao().insert(sharedFeed);
             dbManager.getOpdsEntryDao().insertList(sharedEntries);
             dbManager.getOpdsLinkDao().insert(sharedLinks);

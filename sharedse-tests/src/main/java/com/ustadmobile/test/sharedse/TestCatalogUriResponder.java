@@ -1,7 +1,7 @@
 package com.ustadmobile.test.sharedse;
 
 import com.ustadmobile.core.controller.CatalogPresenter;
-import com.ustadmobile.core.db.DbManager;
+import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.fs.db.ContainerFileHelper;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMIOUtils;
@@ -70,8 +70,10 @@ public class TestCatalogUriResponder {
             UMIOUtils.throwIfNotNullIO(ioe);
         }
 
-        DbManager.getInstance(PlatformTestUtil.getTargetContext()).getOpdsAtomFeedRepository().
-                findEntriesByContainerFileNormalizedPath(entryTmpFile.getAbsolutePath());
+
+        UstadMobileSystemImpl.getInstance()
+                .getOpdsAtomFeedRepository(PlatformTestUtil.getTargetContext())
+                .findEntriesByContainerFileNormalizedPath(entryTmpFile.getAbsolutePath());
 
 //        CatalogEntryInfo entryInfo = new CatalogEntryInfo();
 //        entryInfo.fileURI = entryTmpFile.getAbsolutePath();

@@ -72,8 +72,8 @@ public class DbManagerAndroid extends DbManager {
 
     @Override
     public OpdsAtomFeedRepository getOpdsAtomFeedRepository() {
-        if(opdsAtomFeedRepository == null)
-            opdsAtomFeedRepository = new OpdsAtomFeedRepositoryImpl(this, executorService);
+//        if(opdsAtomFeedRepository == null)
+//            opdsAtomFeedRepository = new OpdsAtomFeedRepositoryImpl(this, executorService);
 
         return opdsAtomFeedRepository;
     }
