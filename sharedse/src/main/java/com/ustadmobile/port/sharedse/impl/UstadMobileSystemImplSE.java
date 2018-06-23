@@ -8,7 +8,6 @@ package com.ustadmobile.port.sharedse.impl;
 import com.ustadmobile.core.controller.CatalogPresenter;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.OpdsAtomFeedRepository;
-import com.ustadmobile.core.db.impl.DbManagerFactory;
 import com.ustadmobile.core.fs.db.repository.OpdsAtomFeedRepositoryImpl;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.HttpCache;
