@@ -2,6 +2,7 @@ package com.ustadmobile.lib.annotationprocessor.core;
 
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
@@ -10,9 +11,12 @@ import com.squareup.javapoet.TypeSpec;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmDatabase;
 import com.ustadmobile.lib.database.annotation.UmNamedParameter;
+import com.ustadmobile.lib.database.annotation.UmTransaction;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.annotation.processing.AbstractProcessor;
@@ -28,6 +32,8 @@ import javax.lang.model.element.Modifier;
 import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.NoType;
+import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
 
 /**
@@ -88,25 +94,6 @@ public class DbProcessorCore extends AbstractProcessor{
                 messager.printMessage(Diagnostic.Kind.ERROR, "Exception writing factory class "
                         + ioe.getMessage());
             }
-
-//            //now go through all the methods and find the ones that return DAOs
-//            for(Element subElement : daoClassElement.getEnclosedElements()) {
-//                if(subElement.getKind() != ElementKind.METHOD)
-//                    continue;
-//
-//                ExecutableElement methodElement = (ExecutableElement)subElement;
-//
-//                messager.printMessage(Diagnostic.Kind.NOTE, "Found DAO method " +
-//                        methodElement.getSimpleName().toString());
-//
-//                for(Element daoElement : daoSet) {
-//                    if(daoElement.asType().equals(methodElement.getReturnType())) {
-//                        //generate the intermediate DAO
-//                        generateIntermediateDao((TypeElement)daoElement);
-//                        break;
-//                    }
-//                }
-//            }
         }
 
         for(Element daoElement : daoSet) {
@@ -130,7 +117,8 @@ public class DbProcessorCore extends AbstractProcessor{
                 continue;
 
             ExecutableElement executableElement = (ExecutableElement)subElement;
-            if(!executableElement.getModifiers().contains(Modifier.ABSTRACT))
+            if(!(executableElement.getModifiers().contains(Modifier.ABSTRACT)
+                || executableElement.getAnnotation(UmTransaction.class) != null))
                 continue;
 
             MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(executableElement.getSimpleName().toString())
@@ -146,6 +134,20 @@ public class DbProcessorCore extends AbstractProcessor{
                         "\"" + variableElement.getSimpleName().toString() + "\"");
                 spec.addAnnotation(annotationBuilder.build());
                 methodBuilder.addParameter(spec.build());
+            }
+
+            if(!executableElement.getModifiers().contains(Modifier.ABSTRACT)) {
+                //we need to make a super call
+                CodeBlock.Builder superCall = CodeBlock.builder();
+                List<String> paramNames = new ArrayList<>();
+                for(VariableElement variableElement : executableElement.getParameters()) {
+                    paramNames.add(variableElement.getSimpleName().toString());
+                }
+
+                methodBuilder.addCode(executableElement.getReturnType() instanceof NoType ?
+                                "super.$L($L);\n" : "return super.$L($L);\n",
+                        executableElement.getSimpleName().toString(),
+                        String.join(", ", paramNames));
             }
 
             intermediateDaoBuilder.addMethod(methodBuilder.build());

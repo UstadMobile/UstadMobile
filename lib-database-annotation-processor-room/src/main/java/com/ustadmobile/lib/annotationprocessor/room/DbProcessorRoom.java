@@ -20,6 +20,7 @@ import com.ustadmobile.lib.database.annotation.UmDelete;
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmNamedParameter;
 import com.ustadmobile.lib.database.annotation.UmQuery;
+import com.ustadmobile.lib.database.annotation.UmTransaction;
 import com.ustadmobile.lib.database.annotation.UmUpdate;
 
 import org.apache.commons.cli.CommandLine;
@@ -193,6 +194,9 @@ public class DbProcessorRoom {
                         roomDaoClassSpec);
             }else if(daoMethod.isAnnotationPresent(UmQuery.class)) {
                 methodBuilder = generateQueryMethod(daoMethod, intermediateDaoMethod, roomDaoClassSpec);
+            }else if(daoMethod.isAnnotationPresent(UmTransaction.class)) {
+                methodBuilder = generateTransactionWrapperMethod(daoMethod, intermediateDaoMethod,
+                        roomDaoClassSpec);
             }
 
             if(methodBuilder != null){
@@ -202,6 +206,22 @@ public class DbProcessorRoom {
 
         JavaFile.builder(daoClass.getPackage().getName(), roomDaoClassSpec.build()).build()
                 .writeTo(destinationDir);
+    }
+
+
+    private MethodSpec.Builder generateTransactionWrapperMethod(Method daoMethod,
+                                                                Method intermediateDaoMethod,
+                                                                TypeSpec.Builder roomDaoClassSpec) {
+        MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(daoMethod.getName())
+                .addAnnotation(ClassName.get(ROOM_PKG_NAME, "Transaction"))
+                .returns(TypeName.get(daoMethod.getGenericReturnType()));
+        addModifiersFromMethod(methodBuilder, daoMethod);
+        addNamedParametersToMethodBuilder(methodBuilder, intermediateDaoMethod);
+        methodBuilder.addCode(daoMethod.getGenericReturnType().equals(Void.TYPE) ?
+                        "super.$L$L;\n" : "return super.$L$L;\n",
+                daoMethod.getName(),
+                makeNamedParameterMethodCall(intermediateDaoMethod.getParameters()));
+        return methodBuilder;
     }
 
     private MethodSpec.Builder generateAnnotatedMethod(Method daoMethod, Method intermediateDaoMethod,

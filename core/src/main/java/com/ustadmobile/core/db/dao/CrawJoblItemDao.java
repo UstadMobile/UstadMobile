@@ -3,6 +3,7 @@ package com.ustadmobile.core.db.dao;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
+import com.ustadmobile.lib.database.annotation.UmTransaction;
 import com.ustadmobile.lib.db.entities.CrawlJobItem;
 
 import java.util.List;
@@ -28,6 +29,7 @@ public abstract class CrawJoblItemDao {
     @UmInsert
     public abstract void insertAll(List<CrawlJobItem> item);
 
+    @UmTransaction
     public CrawlJobItem findNextItemAndUpdateStatus(int downloadJobId, int status){
         CrawlJobItem item = findNextItemForJob(downloadJobId);
         if(item != null) {

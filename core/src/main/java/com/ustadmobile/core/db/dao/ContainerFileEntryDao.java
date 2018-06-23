@@ -3,6 +3,7 @@ package com.ustadmobile.core.db.dao;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
+import com.ustadmobile.lib.database.annotation.UmTransaction;
 import com.ustadmobile.lib.db.entities.ContainerFileEntry;
 import com.ustadmobile.lib.db.entities.ContainerFileEntryWithContainerFile;
 
@@ -23,7 +24,7 @@ public abstract class ContainerFileEntryDao {
     @UmQuery("DELETE FROM ContainerFileEntry WHERE containerFileId = :containerFileId")
     public abstract void deleteContainerFileEntriesByContainerFile(int containerFileId);
 
-    //TODO: Add transaction annotation support
+    @UmTransaction
     public void deleteOpdsAndContainerFileEntriesByContainerFile(int containerFileId) {
         deleteOpdsEntriesByContainerFile(containerFileId);
         deleteContainerFileEntriesByContainerFile(containerFileId);

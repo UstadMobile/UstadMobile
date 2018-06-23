@@ -8,6 +8,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
+import com.ustadmobile.lib.database.annotation.UmTransaction;
 import com.ustadmobile.lib.database.annotation.UmUpdate;
 import com.ustadmobile.lib.db.entities.ContainerFile;
 import com.ustadmobile.lib.db.entities.OpdsEntryRelative;
@@ -360,6 +361,7 @@ public abstract class OpdsEntryStatusCacheDao {
      *
      * @param downloadJobItemId The id of the DownloadJobItem for the download that has been started
      */
+    @UmTransaction
     public void handleDownloadJobQueued(int downloadJobItemId) {
         OpdsEntryStatusCache statusCache = findByDownloadJobItemId(downloadJobItemId);
         if(statusCache.isEntryPausedDownload() || !(statusCache.isEntryContainerDownloaded() || statusCache.isEntryContainerDownloadPending())) {
@@ -437,6 +439,7 @@ public abstract class OpdsEntryStatusCacheDao {
      *
      *                          //TODO: add transaction annotation
      */
+    @UmTransaction
     public void handleDownloadJobProgress(int entryStatusCacheUid, int downloadJobItemId){
         updateActiveBytesDownloadedSoFarIncAncestors(entryStatusCacheUid, downloadJobItemId);
         updateActiveBytesDownloadedSoFarEntry(entryStatusCacheUid, downloadJobItemId);
@@ -486,6 +489,7 @@ public abstract class OpdsEntryStatusCacheDao {
      * @param entryStatusCache The OpdsEntryStatusCache representing the given id.
      * @param containerFile The ContainerFile that contains the given entry.
      */
+    @UmTransaction
     public void handleContainerDownloadedOrDiscovered(OpdsEntryStatusCache entryStatusCache, ContainerFile containerFile){
         long deltaPendingDownloadBytesSoFar = entryStatusCache.getEntryPendingDownloadBytesSoFar() * -1;
         int deltaContainersDownloadPending = entryStatusCache.isEntryContainerDownloadPending() ? -1 : 0;
