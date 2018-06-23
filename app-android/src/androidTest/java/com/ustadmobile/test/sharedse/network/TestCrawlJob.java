@@ -11,7 +11,7 @@ import android.support.test.filters.SmallTest;
 import android.support.test.rule.ServiceTestRule;
 
 import com.ustadmobile.core.controller.CatalogPresenter;
-import com.ustadmobile.core.db.DbManager;
+import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.UmObserver;
 import com.ustadmobile.core.db.dao.CrawlJobWithTotals;
@@ -107,7 +107,7 @@ public class TestCrawlJob {
         String storageDir = UstadMobileSystemImpl.getInstance().getStorageDirs(
                 CatalogPresenter.SHARED_RESOURCE, PlatformTestUtil.getTargetContext())[0].getDirURI();
         NetworkManager networkManager = (NetworkManager)UstadMobileSystemImpl.getInstance().getNetworkManager();
-        DbManager dbManager = DbManager.getInstance(PlatformTestUtil.getTargetContext());
+        UmAppDatabase dbManager = UmAppDatabase.getInstance(PlatformTestUtil.getTargetContext());
 
         DownloadSet set = new DownloadSet();
         set.setDestinationDir(storageDir);

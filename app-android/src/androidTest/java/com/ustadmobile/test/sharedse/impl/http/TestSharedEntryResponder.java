@@ -1,7 +1,7 @@
 package com.ustadmobile.test.sharedse.impl.http;
 
 import com.google.gson.Gson;
-import com.ustadmobile.core.db.DbManager;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.lib.db.entities.OpdsEntry;
@@ -42,8 +42,9 @@ public class TestSharedEntryResponder  {
 
     @Test
     public void givenExistingUuid_whenGetCalled_thenShouldReturnEntryInfoJson() throws IOException{
-        OpdsEntry entry = DbManager.getInstance(PlatformTestUtil.getTargetContext())
-                .getOpdsAtomFeedRepository().getEntryByUrlStatic(UMFileUtil.joinPaths(
+        OpdsEntry entry = UstadMobileSystemImpl.getInstance()
+                .getOpdsAtomFeedRepository(PlatformTestUtil.getTargetContext())
+                .getEntryByUrlStatic(UMFileUtil.joinPaths(
                         ResourcesHttpdTestServer.getHttpRoot(),
                         "com/ustadmobile/test/sharedse/crawlme-slow/index.opds"));
         int portNum = new Random().nextInt();

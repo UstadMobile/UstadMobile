@@ -2,7 +2,7 @@ package com.ustadmobile.port.sharedse.controller;
 
 import com.ustadmobile.core.controller.CatalogPresenter;
 import com.ustadmobile.core.controller.UstadBaseController;
-import com.ustadmobile.core.db.DbManager;
+import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.dao.CrawlJobWithTotals;
 import com.ustadmobile.core.impl.UMLog;
@@ -30,7 +30,7 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
 
     public static final String ARG_ROOT_UUID = "r_uuids";
 
-    private DbManager dbManager;
+    private UmAppDatabase dbManager;
 
     private UmLiveData<OpdsEntryWithStatusCache> rootEntryLiveData;
 
@@ -73,7 +73,7 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
     }
 
     public void onCreate(Hashtable savedState) {
-        dbManager = DbManager.getInstance(getContext());
+        dbManager = UmAppDatabase.getInstance(getContext());
 
 
         if(getArguments().containsKey(ARG_ROOT_UUID)){
@@ -84,8 +84,9 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
             //we need to load the entry from the given URI
             rootEntryUuid = new String[1];
             String rootEntryUri = ((String[])getArguments().get(ARG_ROOT_URIS))[0];
-            rootEntryLiveData = dbManager.getOpdsAtomFeedRepository().getEntryWithStatusCacheByUrl(
-                    rootEntryUri, null, null);
+            rootEntryLiveData = UstadMobileSystemImpl.getInstance()
+                    .getOpdsAtomFeedRepository(getContext()).getEntryWithStatusCacheByUrl(
+                        rootEntryUri, null, null);
         }
 
         rootEntryLiveData.observe(this, this::onEntryChanged);
@@ -223,10 +224,20 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
     public void handleClickConfirm() {
         switch(selectedOption) {
             case OPTION_START_DOWNLOAD:
-                dbManager.getCrawlJobDao().updateQueueDownloadOnDoneIfNotFinished(crawlJobId, (queueOnComplete) -> {
-                    if(queueOnComplete == 0){
-                        //the preparation is already done - so we need to queue this ourselves.
-                        UstadMobileSystemImpl.getInstance().getNetworkManager().queueDownloadJob(downloadJobId);
+                dbManager.getCrawlJobDao().updateQueueDownloadOnDoneIfNotFinished(crawlJobId, new UmCallback<Integer>() {
+                    @Override
+                    public void onSuccess(Integer queueOnComplete) {
+                        if(queueOnComplete == 0){
+                            //the preparation is already done - so we need to queue this ourselves.
+                            UstadMobileSystemImpl.getInstance().getNetworkManager()
+                                    .queueDownloadJob(downloadJobId);
+                        }
+
+                    }
+
+                    @Override
+                    public void onFailure(Throwable exception) {
+
                     }
                 });
                 break;
@@ -246,29 +257,54 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
                             }
                         });
             case OPTION_PAUSE_DOWNLOAD:
-                dbManager.getDownloadJobDao().findLastDownloadJobId(rootEntryId, (runningDownloadJobId) -> {
-                    if(runningDownloadJobId > 0){
-                        UstadMobileSystemImpl.getInstance().getNetworkManager().pauseDownloadJobAsync(
-                                runningDownloadJobId, (pausedOK) -> {
-                                    UstadMobileSystemImpl.l(UMLog.INFO, 0, "Paused download: "
-                                            + runningDownloadJobId);
-                                });
+                dbManager.getDownloadJobDao().findLastDownloadJobId(rootEntryId, new UmCallback<Integer>() {
+                    @Override
+                    public void onSuccess(Integer runningDownloadJobId) {
+                        if(runningDownloadJobId > 0){
+                            UstadMobileSystemImpl.getInstance().getNetworkManager().pauseDownloadJobAsync(
+                                    runningDownloadJobId, (pausedOK) -> {
+                                        UstadMobileSystemImpl.l(UMLog.INFO, 0, "Paused download: "
+                                                + runningDownloadJobId);
+                                    });
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Throwable exception) {
+
                     }
                 });
                 break;
 
             case OPTION_RESUME_DOWNLOAD:
-                dbManager.getDownloadJobDao().findLastDownloadJobId(rootEntryId, (runningDownloadJobId) -> {
-                    if(runningDownloadJobId > 0){
-                        UstadMobileSystemImpl.getInstance().getNetworkManager().queueDownloadJob(runningDownloadJobId);
+                dbManager.getDownloadJobDao().findLastDownloadJobId(rootEntryId, new UmCallback<Integer>() {
+                    @Override
+                    public void onSuccess(Integer runningDownloadJobId) {
+                        if(runningDownloadJobId > 0){
+                            UstadMobileSystemImpl.getInstance().getNetworkManager().queueDownloadJob(runningDownloadJobId);
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Throwable exception) {
+
                     }
                 });
                 break;
 
             case OPTION_CANCEL_DOWNLOAD:
-                dbManager.getDownloadJobDao().findLastDownloadJobId(rootEntryId, (runningDownloadJobId) -> {
-                    if(runningDownloadJobId > 0){
-                        UstadMobileSystemImpl.getInstance().getNetworkManager().cancelDownloadJob(runningDownloadJobId);
+                dbManager.getDownloadJobDao().findLastDownloadJobId(rootEntryId, new UmCallback<Integer>() {
+                    @Override
+                    public void onSuccess(Integer runningDownloadJobId) {
+                        if(runningDownloadJobId > 0){
+                            UstadMobileSystemImpl.getInstance().getNetworkManager().cancelDownloadJob(
+                                    runningDownloadJobId);
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Throwable exception) {
+
                     }
                 });
                 break;
@@ -284,8 +320,16 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
                     crawlJob.getContainersDownloadJobId(), !wifiOnly, null);
         }else if((optionsAvailable
                 & (OPTION_PAUSE_DOWNLOAD | OPTION_RESUME_DOWNLOAD | OPTION_CANCEL_DOWNLOAD)) > 0) {
-            dbManager.getDownloadJobDao().findLastDownloadJobId(rootEntryId, (jobId) -> {
-                dbManager.getDownloadJobDao().updateAllowMeteredDataUsage(jobId, !wifiOnly, null);
+            dbManager.getDownloadJobDao().findLastDownloadJobId(rootEntryId, new UmCallback<Integer>() {
+                @Override
+                public void onSuccess(Integer jobId) {
+                    dbManager.getDownloadJobDao().updateAllowMeteredDataUsage(jobId, !wifiOnly, null);
+                }
+
+                @Override
+                public void onFailure(Throwable exception) {
+
+                }
             });
         }
     }

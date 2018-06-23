@@ -1,7 +1,7 @@
 package com.ustadmobile.core.fs.contenttype;
 
 import com.ustadmobile.core.catalog.contenttype.EPUBTypePlugin;
-import com.ustadmobile.core.db.DbManager;
+import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.ocf.UstadOCF;
 import com.ustadmobile.core.ocf.UstadOCFRootFile;
@@ -56,7 +56,7 @@ public class EpubTypePluginFs extends EPUBTypePlugin implements ContentTypePlugi
             for(UstadOCFRootFile root : ocf.rootFiles) {
                 String url = UMFileUtil.PROTOCOL_FILE + file.getAbsolutePath() + "!" + root.fullPath;
 
-                OpdsEntryWithRelations entry = DbManager.getInstance(context)
+                OpdsEntryWithRelations entry = UmAppDatabase.getInstance(context)
                         .getOpdsEntryWithRelationsDao().getEntryByUrlStatic(url);
 
                 if(entry == null) {

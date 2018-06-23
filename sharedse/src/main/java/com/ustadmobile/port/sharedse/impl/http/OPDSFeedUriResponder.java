@@ -1,6 +1,6 @@
 package com.ustadmobile.port.sharedse.impl.http;
 
-import com.ustadmobile.core.db.DbManager;
+import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.lib.db.entities.OpdsEntry;
@@ -47,7 +47,7 @@ public class OPDSFeedUriResponder implements RouterNanoHTTPD.UriResponder {
         ByteArrayOutputStream bout = new ByteArrayOutputStream();
         NanoHTTPD.Response response = null;
         try {
-            DbManager dbManager = DbManager.getInstance(context);
+            UmAppDatabase dbManager = UmAppDatabase.getInstance(context);
             OpdsEntryWithRelations feedParent = dbManager.getOpdsEntryWithRelationsDao()
                     .getEntryByUuidStatic(feedUuid);
             List<OpdsEntryWithRelations> childEntries = dbManager.getOpdsEntryWithRelationsDao()

@@ -35,6 +35,7 @@ import com.ustadmobile.core.buildconfig.CoreBuildConfig;
 import com.ustadmobile.core.catalog.contenttype.ContentTypePlugin;
 import com.ustadmobile.core.controller.CatalogPresenter;
 import com.ustadmobile.core.db.UmObserver;
+import com.ustadmobile.core.db.dao.OpdsAtomFeedRepository;
 import com.ustadmobile.core.impl.http.UmHttpCall;
 import com.ustadmobile.core.impl.http.UmHttpRequest;
 import com.ustadmobile.core.impl.http.UmHttpResponse;
@@ -1200,6 +1201,8 @@ public abstract class UstadMobileSystemImpl {
                                             UmCallback<Void> callback);
 
     public abstract void deleteEntries(Object context, List<String> entryId, boolean recursive);
+
+    public abstract OpdsAtomFeedRepository getOpdsAtomFeedRepository(Object context);
 
 }
 

@@ -2,8 +2,10 @@ package com.ustadmobile.core.db.dao;
 
 
 import com.ustadmobile.core.db.UmLiveData;
+import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UmResultCallback;
 import com.ustadmobile.core.networkmanager.NetworkTask;
+import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.db.entities.CrawlJob;
@@ -12,25 +14,25 @@ import com.ustadmobile.lib.db.entities.CrawlJob;
  * DAO for the CrawlJob class
  *
  */
-
+@UmDao
 public abstract class CrawlJobDao {
 
     @UmInsert
     public abstract long insert(CrawlJob job);
 
-    @UmQuery("SELECT * FROM CrawlJob where crawlJobId = :crawlJobId")
+    @UmQuery("SELECT * From CrawlJob WHERE crawlJobId = :crawlJobId")
     public abstract CrawlJob findById(int crawlJobId);
 
-    @UmQuery("UPDATE CrawlJob set status = :status WHERE crawlJobId = :crawlJobId")
+    @UmQuery("UPDATE CrawlJob SET status = :status WHERE crawlJobId = :crawlJobId")
     public abstract void setStatusById(int crawlJobId, int status);
 
-    @UmQuery("SELECT * From CrawlJob where crawlJobId = :crawlJobId")
+    @UmQuery("SELECT * FROM CrawlJob WHERE crawlJobId = :crawlJobId")
     public abstract UmLiveData<CrawlJob> findByIdLive(int crawlJobId);
 
     @UmQuery("SELECT CrawlJob.*, " +
-            " (SELECT COUNT(*) FROM CrawlJobItem WHERE CrawlJobItem.crawlJobId = CrawlJob.id) AS numItems, " +
-            " (SELECT COUNT(*) FROM CrawlJobItem WHERE CrawlJobItem.crawlJobId = CrawlJob.id AND CrawlJobItem.status = " + NetworkTask.STATUS_COMPLETE +
-            " FROM CrawlJob Where CrawlJob.id = :crawlJobId")
+            " (SELECT COUNT(*) FROM CrawlJobItem WHERE CrawlJobItem.crawlJobId = CrawlJob.crawlJobId) AS numItems, " +
+            " (SELECT COUNT(*) FROM CrawlJobItem WHERE CrawlJobItem.crawlJobId = CrawlJob.crawlJobId AND CrawlJobItem.status = " + NetworkTask.STATUS_COMPLETE + ") AS numItemsCompleted " +
+            " FROM CrawlJob Where CrawlJob.crawlJobId = :crawlJobId")
     public abstract UmLiveData<CrawlJobWithTotals> findWithTotalsByIdLive(int crawlJobId);
 
 
@@ -43,9 +45,8 @@ public abstract class CrawlJobDao {
      */
     @UmQuery("UPDATE CrawlJob SET queueDownloadJobOnDone = 1 " +
             "WHERE crawlJobId = :crawlJobId " +
-            "AND queueDownloadJobOnDone = 0 " +
             "AND status < " + NetworkTask.STATUS_COMPLETE_MIN)
-    public abstract void updateQueueDownloadOnDoneIfNotFinished(int crawlJobId, UmResultCallback<Integer> callback);
+    public abstract void updateQueueDownloadOnDoneIfNotFinished(int crawlJobId, UmCallback<Integer> callback);
 
     /**
      * Check if the given Crawl Job should automatically queue the associated DownloadJob

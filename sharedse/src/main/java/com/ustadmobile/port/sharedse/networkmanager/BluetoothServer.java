@@ -3,7 +3,7 @@ package com.ustadmobile.port.sharedse.networkmanager;
 import com.google.gson.Gson;
 import com.ustadmobile.core.controller.CatalogEntryInfo;
 import com.ustadmobile.core.controller.CatalogPresenter;
-import com.ustadmobile.core.db.DbManager;
+import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.lib.db.entities.ContainerFileEntry;
 
@@ -122,7 +122,7 @@ public abstract class BluetoothServer implements WiFiDirectGroupListener{
         if(clientInput.startsWith(CMD_ENTRY_STATUS_QUERY)) {
             System.out.print("BluetoothSReceived command "+clientInput);
             String[] entryIds = clientInput.substring(CMD_ENTRY_STATUS_QUERY.length()+1).split(";");
-            List<ContainerFileEntry> containerFileEntries = DbManager
+            List<ContainerFileEntry> containerFileEntries = UmAppDatabase
                     .getInstance(networkManager.getContext()).getContainerFileEntryDao()
                     .findContainerFileEntriesByEntryIds(entryIds);
             Gson gson = new Gson();

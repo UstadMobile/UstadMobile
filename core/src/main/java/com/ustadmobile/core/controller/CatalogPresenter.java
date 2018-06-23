@@ -1,6 +1,6 @@
 package com.ustadmobile.core.controller;
 
-import com.ustadmobile.core.db.DbManager;
+import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.UmObserver;
 import com.ustadmobile.core.db.UmProvider;
@@ -153,14 +153,14 @@ public class CatalogPresenter extends BaseCatalogPresenter  {
 
 
         if(opdsUri.startsWith("https://") || opdsUri.startsWith("http://")) {
-            feedLiveData = DbManager.getInstance(getContext()).getOpdsAtomFeedRepository()
+            feedLiveData = UstadMobileSystemImpl.getInstance().getOpdsAtomFeedRepository(getContext())
                     .getEntryByUrl(opdsUri);
             feedLiveData.observe(this, this::handleParentFeedLoaded);
         }else if(opdsUri.equals("entries:///my_library")) {
             final String libraryUuid = "my_library";
-            UmLiveData<Boolean> libraryPresent = DbManager.getInstance(getContext())
+            UmLiveData<Boolean> libraryPresent = UmAppDatabase.getInstance(getContext())
                     .getOpdsEntryDao().isEntryPresent(libraryUuid);
-            feedLiveData = DbManager.getInstance(getContext()).getOpdsEntryWithRelationsDao()
+            feedLiveData = UmAppDatabase.getInstance(getContext()).getOpdsEntryWithRelationsDao()
                     .getEntryByUuid(libraryUuid);
             feedLiveData.observe(CatalogPresenter.this,
                     CatalogPresenter.this::handleParentFeedLoaded);
@@ -170,7 +170,7 @@ public class CatalogPresenter extends BaseCatalogPresenter  {
                     if(!present){
                         String presetUrl = UstadMobileSystemImpl.getInstance().getAppConfigString(
                                 APPCONFIG_DEFAULT_MY_LIBRARY, null, getContext());
-                        DbManager.getInstance(getContext()).getOpdsAtomFeedRepository()
+                        UstadMobileSystemImpl.getInstance().getOpdsAtomFeedRepository(getContext())
                                 .getEntryByUrl(presetUrl, libraryUuid);
                         libraryPresent.removeObserver(this);
                     }
@@ -188,12 +188,12 @@ public class CatalogPresenter extends BaseCatalogPresenter  {
                 dirsToList.add(storageDirs[i].getDirURI());
             }
 
-            entryProvider = DbManager.getInstance(getContext()).getOpdsAtomFeedRepository()
+            entryProvider = UstadMobileSystemImpl.getInstance().getOpdsAtomFeedRepository(getContext())
                     .findEntriesByContainerFileDirectoryAsProvider(dirsToList, null);
             mView.setEntryProvider(entryProvider);
             title = UstadMobileSystemImpl.getInstance().getString(MessageID.downloaded, getContext());
         }else if(opdsUri.equals("entries:///downloadSetEntries")) {
-            entryProvider = DbManager.getInstance(getContext()).getOpdsEntryWithRelationsDao()
+            entryProvider = UmAppDatabase.getInstance(getContext()).getOpdsEntryWithRelationsDao()
                     .getEntriesWithDownloadSet();
             mView.setEntryProvider(entryProvider);
             title = UstadMobileSystemImpl.getInstance().getString(MessageID.downloaded, getContext());
@@ -208,7 +208,7 @@ public class CatalogPresenter extends BaseCatalogPresenter  {
         if(opdsFeed != null && (loadedFeedId == null || !loadedFeedId.equals(opdsFeed.getUuid()))) {
             loadedFeedId = opdsFeed.getUuid();
             title = opdsFeed.getTitle();
-            entryProvider = DbManager.getInstance(getContext()).getOpdsEntryWithRelationsDao()
+            entryProvider = UmAppDatabase.getInstance(getContext()).getOpdsEntryWithRelationsDao()
                     .getEntriesWithStatusCacheByParent(loadedFeedId);
             mView.setEntryProvider(entryProvider);
         }
@@ -232,12 +232,21 @@ public class CatalogPresenter extends BaseCatalogPresenter  {
         }else if(feedLiveData != null && feedLiveData.getValue() != null) {
             callback.onDone(UMFileUtil.resolveLink(feedLiveData.getValue().getUrl(), href));
         }else {
-            DbManager.getInstance(getContext()).getOpdsEntryWithRelationsDao()
-                    .findParentUrlByChildUuid(entry.getUuid(), (parentHref) -> {
-                        if(parentHref != null)
-                            callback.onDone(UMFileUtil.resolveLink(parentHref, href));
-                        else
-                            callback.onDone(null);//no parent and could not resolve
+            UmAppDatabase.getInstance(getContext()).getOpdsEntryWithRelationsDao()
+                    .findParentUrlByChildUuid(entry.getUuid(), new UmCallback<String>() {
+                        @Override
+                        public void onSuccess(String parentHref) {
+                            if(parentHref != null)
+                                callback.onDone(UMFileUtil.resolveLink(parentHref, href));
+                            else
+                                callback.onDone(null);//no parent and could not resolve
+
+                        }
+
+                        @Override
+                        public void onFailure(Throwable exception) {
+
+                        }
                     });
         }
     }
@@ -422,7 +431,7 @@ public class CatalogPresenter extends BaseCatalogPresenter  {
                 MessageID.delete, MessageID.delete_q, MessageID.ok, MessageID.cancel, 0,
                     (commandId, choice) -> {
                         if(choice == AppView.CHOICE_POSITIVE) {
-                            DbManager.getInstance(getContext()).getOpdsEntryParentToChildJoinDao()
+                            UmAppDatabase.getInstance(getContext()).getOpdsEntryParentToChildJoinDao()
                                     .deleteByParentIdAndChildIdAsync(feedLiveData.getValue().getUuid(),
                                             new ArrayList<>(selectedEntries), new UmCallback<Integer>() {
                                                 @Override
@@ -481,7 +490,7 @@ public class CatalogPresenter extends BaseCatalogPresenter  {
                 dirsToList.add(storageDirs[i].getDirURI());
             }
 
-            DbManager.getInstance(getContext()).getOpdsAtomFeedRepository()
+            UstadMobileSystemImpl.getInstance().getOpdsAtomFeedRepository(getContext())
                     .findEntriesByContainerFileDirectoryAsProvider(dirsToList, new OpdsEntry.OpdsItemLoadCallback() {
                         @Override
                         public void onDone(OpdsEntry item) {

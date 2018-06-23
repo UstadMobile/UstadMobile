@@ -1,6 +1,6 @@
 package com.ustadmobile.test.sharedse.network;
 
-import com.ustadmobile.core.db.DbManager;
+import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.EntryStatusResponseDao;
 import com.ustadmobile.core.networkmanager.AvailabilityMonitorRequest;
 import com.ustadmobile.core.networkmanager.NetworkManagerCore;
@@ -96,7 +96,7 @@ public class TestEntryStatusTask{
 //    }
 
     public static void testEntryStatusBluetooth(Hashtable expectedAvailability, String remoteBluetoothAddr) throws IOException, InterruptedException {
-        NetworkNode networkNode= DbManager.getInstance(PlatformTestUtil.getTargetContext())
+        NetworkNode networkNode= UmAppDatabase.getInstance(PlatformTestUtil.getTargetContext())
                 .getNetworkNodeDao().findNodeByBluetoothAddress(remoteBluetoothAddr);
         if(networkNode == null)
             throw new IllegalArgumentException("testEntryStatuBluetooth Hashtable, String requires the bluetooth address to have been discovered");
@@ -221,7 +221,7 @@ public class TestEntryStatusTask{
         final long taskId[] = new long[]{-1};
         final boolean taskCompleted[] = new boolean[]{false};
 
-        final EntryStatusResponseDao responseDao = DbManager.getInstance(PlatformTestUtil.getTargetContext())
+        final EntryStatusResponseDao responseDao = UmAppDatabase.getInstance(PlatformTestUtil.getTargetContext())
                 .getEntryStatusResponseDao();
 
         NetworkManagerListener responseListener = new NetworkManagerListener() {

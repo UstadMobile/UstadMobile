@@ -1,6 +1,6 @@
 package com.ustadmobile.port.sharedse.networkmanager;
 
-import com.ustadmobile.core.db.DbManager;
+import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.networkmanager.NetworkManagerCore;
 import com.ustadmobile.core.networkmanager.NetworkTask;
@@ -52,7 +52,7 @@ public class NetworkManagerStandaloneTest extends TestWithNetworkService {
         try { Thread.sleep(500);}
         catch(InterruptedException e) {}
         //Make sure the task has stopped
-        DownloadJob dlJob = DbManager.getInstance(PlatformTestUtil.getTargetContext())
+        DownloadJob dlJob = UmAppDatabase.getInstance(PlatformTestUtil.getTargetContext())
                 .getDownloadJobDao().findById(crawlJob.getContainersDownloadJobId());
         Assert.assertEquals("After connectivity is disconnected, task is stopped",
                 NetworkTask.STATUS_WAITING_FOR_CONNECTION, dlJob.getStatus());
@@ -62,7 +62,7 @@ public class NetworkManagerStandaloneTest extends TestWithNetworkService {
         TestDownloadTaskStandalone.waitForDownloadStatus(crawlJob.getContainersDownloadJobId(),
                 NetworkTask.STATUS_COMPLETE, 120*1000);
 
-        dlJob = DbManager.getInstance(PlatformTestUtil.getTargetContext())
+        dlJob = UmAppDatabase.getInstance(PlatformTestUtil.getTargetContext())
                 .getDownloadJobDao().findById(crawlJob.getContainersDownloadJobId());
         Assert.assertEquals("After connectivity is restored, download job is completed",
                 NetworkTask.STATUS_COMPLETE, dlJob.getStatus());
@@ -88,7 +88,7 @@ public class NetworkManagerStandaloneTest extends TestWithNetworkService {
         try { Thread.sleep(500);}
         catch(InterruptedException e) {}
 
-        DownloadJob dlJob = DbManager.getInstance(PlatformTestUtil.getTargetContext())
+        DownloadJob dlJob = UmAppDatabase.getInstance(PlatformTestUtil.getTargetContext())
                 .getDownloadJobDao().findById(crawlJob.getContainersDownloadJobId());
         Assert.assertEquals("Setup: download job has stopped itself", NetworkTask.STATUS_WAITING_FOR_CONNECTION,
                 dlJob.getStatus());
@@ -100,7 +100,7 @@ public class NetworkManagerStandaloneTest extends TestWithNetworkService {
         TestDownloadTaskStandalone.waitForDownloadStatus(crawlJob.getContainersDownloadJobId(),
                 NetworkTask.STATUS_COMPLETE, 120000);
 
-        dlJob = DbManager.getInstance(PlatformTestUtil.getTargetContext())
+        dlJob = UmAppDatabase.getInstance(PlatformTestUtil.getTargetContext())
                 .getDownloadJobDao().findById(crawlJob.getContainersDownloadJobId());
         Assert.assertEquals("After restoring unmetered connectivity, download job is completed",
                 NetworkTask.STATUS_COMPLETE, dlJob.getStatus());

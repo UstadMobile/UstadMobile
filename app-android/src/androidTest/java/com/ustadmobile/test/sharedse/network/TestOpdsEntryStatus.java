@@ -1,9 +1,10 @@
 package com.ustadmobile.test.sharedse.network;
 
-import com.ustadmobile.core.db.DbManager;
+import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.UmObserver;
 import com.ustadmobile.core.db.dao.OpdsAtomFeedRepository;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.networkmanager.NetworkTask;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.lib.db.entities.ContainerFile;
@@ -56,7 +57,7 @@ public class TestOpdsEntryStatus {
 
     @Test
     public void testEntryStatusCacheLifecycle() {
-        DbManager dbManager = DbManager.getInstance(PlatformTestUtil.getTargetContext());
+        UmAppDatabase dbManager = UmAppDatabase.getInstance(PlatformTestUtil.getTargetContext());
 
         List<OpdsEntry> entryList = new ArrayList<>();
         List<OpdsEntryWithRelations> entryWithRelationsList = new ArrayList<>();
@@ -206,8 +207,9 @@ public class TestOpdsEntryStatus {
 
     @Test
     public void testStatusFromAtomFeedRepositoryLoad() {
-        DbManager dbManager = DbManager.getInstance(PlatformTestUtil.getTargetContext());
-        OpdsAtomFeedRepository repo = dbManager.getOpdsAtomFeedRepository();
+        UmAppDatabase dbManager = UmAppDatabase.getInstance(PlatformTestUtil.getTargetContext());
+        OpdsAtomFeedRepository repo = UstadMobileSystemImpl.getInstance()
+                .getOpdsAtomFeedRepository(PlatformTestUtil.getTargetContext());
         final Object loadLock = new Object();
         final Object observerLock = new Object();
         final boolean[] entryLoaded = new boolean[1];
@@ -286,7 +288,7 @@ public class TestOpdsEntryStatus {
                 "file.epub", OpdsEntry.LINK_REL_ACQUIRE);
         childAcquisitionLink.setLength(ENTRY_SIZE_LINK_LENGTH);
         childEntry.setLinks(Arrays.asList(childAcquisitionLink));
-        DbManager dbManager = DbManager.getInstance(PlatformTestUtil.getTargetContext());
+        UmAppDatabase dbManager = UmAppDatabase.getInstance(PlatformTestUtil.getTargetContext());
         dbManager.getOpdsEntryDao().insert(childEntry);
         dbManager.getOpdsLinkDao().insert(Arrays.asList(childAcquisitionLink));
         dbManager.getOpdsEntryStatusCacheDao().handleOpdsEntriesLoaded(dbManager, Arrays.asList(childEntry));

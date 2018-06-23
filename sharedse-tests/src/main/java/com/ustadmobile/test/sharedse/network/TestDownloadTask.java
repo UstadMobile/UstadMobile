@@ -1,7 +1,7 @@
 package com.ustadmobile.test.sharedse.network;
 
 import com.ustadmobile.core.controller.CatalogPresenter;
-import com.ustadmobile.core.db.DbManager;
+import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.UmObserver;
 import com.ustadmobile.core.db.dao.DownloadJobItemHistoryDao;
@@ -110,7 +110,7 @@ public class TestDownloadTask {
         final Object acquireLock = new Object();
 
         //make sure we don't have any of the entries in question already
-        DbManager dbManager = DbManager.getInstance(PlatformTestUtil.getTargetContext());
+        UmAppDatabase dbManager = UmAppDatabase.getInstance(PlatformTestUtil.getTargetContext());
 
         long startTime = System.currentTimeMillis();
 
@@ -210,7 +210,7 @@ public class TestDownloadTask {
 
     private static void waitForCrawlJob(CrawlJob crawlJob, Object context){
         final Object lockObject = new Object();
-        UmLiveData<CrawlJob> crawlJobLiveData = DbManager.getInstance(context).getCrawlJobDao()
+        UmLiveData<CrawlJob> crawlJobLiveData = UmAppDatabase.getInstance(context).getCrawlJobDao()
                 .findByIdLive(crawlJob.getCrawlJobId());
 
         UmObserver<CrawlJob> crawlJobObserver = (crawlJobLive) -> {
@@ -250,7 +250,7 @@ public class TestDownloadTask {
         //TODO: Test entry status over http here
 
 
-        NetworkNode remoteNode = DbManager.getInstance(PlatformTestUtil.getTargetContext())
+        NetworkNode remoteNode = UmAppDatabase.getInstance(PlatformTestUtil.getTargetContext())
                 .getNetworkNodeDao().findNodeByIpAddress(TestConstants.TEST_REMOTE_SLAVE_SERVER);
         testAcquisition(remoteNode, manager, true, false, NetworkManager.DOWNLOAD_FROM_PEER_ON_SAME_NETWORK);
         Assert.assertTrue(TestUtilsSE.setRemoteTestSlaveSupernodeEnabled(false));
@@ -266,7 +266,7 @@ public class TestDownloadTask {
         TestEntryStatusTask.testEntryStatusBluetooth(TestEntryStatusTask.EXPECTED_AVAILABILITY,
                 TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE);
 
-        NetworkNode remoteNode = DbManager.getInstance(PlatformTestUtil.getTargetContext())
+        NetworkNode remoteNode = UmAppDatabase.getInstance(PlatformTestUtil.getTargetContext())
                 .getNetworkNodeDao().findNodeByBluetoothAddress(TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE);
         testAcquisition(remoteNode, manager, false, true,
                 NetworkManager.DOWNLOAD_FROM_PEER_ON_DIFFERENT_NETWORK);

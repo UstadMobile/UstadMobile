@@ -13,7 +13,6 @@ import android.support.v4.content.ContextCompat;
 import android.widget.Toast;
 
 import com.ustadmobile.core.controller.CatalogPresenter;
-import com.ustadmobile.core.db.DbManager;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.port.android.netwokmanager.NetworkServiceAndroid;
 import com.ustadmobile.port.android.view.UstadBaseActivity;
@@ -60,7 +59,8 @@ public class RemoteTestSlaveServerActivity extends UstadBaseActivity implements 
         String contentDir = UstadMobileSystemImpl.getInstance().getStorageDirs(CatalogPresenter.SHARED_RESOURCE,
                 this)[0].getDirURI();
 
-        DbManager.getInstance(this).getOpdsAtomFeedRepository()
+        UstadMobileSystemImpl.getInstance()
+                .getOpdsAtomFeedRepository(this.getApplicationContext())
                 .findEntriesByContainerFileDirectoryAsList(Arrays.asList(contentDir), null);
     }
 

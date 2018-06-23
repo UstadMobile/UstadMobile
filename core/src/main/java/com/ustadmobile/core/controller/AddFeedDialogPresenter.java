@@ -1,6 +1,6 @@
 package com.ustadmobile.core.controller;
 
-import com.ustadmobile.core.db.DbManager;
+import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmObserver;
 import com.ustadmobile.core.db.dao.OpdsEntryParentToChildJoinDao;
 import com.ustadmobile.core.db.UmLiveData;
@@ -56,15 +56,16 @@ public class AddFeedDialogPresenter extends UstadBaseController implements OpdsE
         final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         uuidToAddTo = (String)args.get(ARG_UUID);
         presetFeedsList = new ArrayList<>();
-        entry = DbManager.getInstance(getContext()).getOpdsAtomFeedRepository().getEntryByUrl(
-                "asset:///com/ustadmobile/core/libraries.opds", "preset_libraries_opds");
+        entry = UstadMobileSystemImpl.getInstance().getOpdsAtomFeedRepository(getContext())
+                .getEntryByUrl("asset:///com/ustadmobile/core/libraries.opds",
+                        "preset_libraries_opds");
         entry.observe(this, this::handlePresetParentFeedUpdated);
     }
 
     private void handlePresetParentFeedUpdated(OpdsEntryWithRelations presetParent) {
         if(loadedUuid == null && presetParent != null) {
             loadedUuid = presetParent.getUuid();
-            presetListLiveData = DbManager.getInstance(getContext()).getOpdsEntryWithRelationsDao()
+            presetListLiveData = UmAppDatabase.getInstance(getContext()).getOpdsEntryWithRelationsDao()
                     .getEntriesByParentAsList(loadedUuid);
             presetListObserver = this::handlePresetFeedListUpdated;
             presetListLiveData.observe(this, presetListObserver);
@@ -96,7 +97,7 @@ public class AddFeedDialogPresenter extends UstadBaseController implements OpdsE
             OpdsEntry addedEntry = presetFeedsList.get(dropDownlSelectedIndex-2);
             OpdsEntryParentToChildJoin join = new OpdsEntryParentToChildJoin(uuidToAddTo,
                 addedEntry.getUuid(), 0);
-            final DbManager dbManager = DbManager.getInstance(getContext());
+            final UmAppDatabase dbManager = UmAppDatabase.getInstance(getContext());
 
             OpdsEntryParentToChildJoinDao dao = dbManager.getOpdsEntryParentToChildJoinDao();
 
@@ -115,7 +116,7 @@ public class AddFeedDialogPresenter extends UstadBaseController implements OpdsE
             addFeedDialogView.setUiEnabled(false);
             addFeedDialogView.setProgressVisible(true);
             String feedUrl = addFeedDialogView.getOpdsUrl();
-            DbManager.getInstance(getContext()).getOpdsAtomFeedRepository()
+            UstadMobileSystemImpl.getInstance().getOpdsAtomFeedRepository(getContext())
                     .getEntryByUrl(feedUrl, null, this);
         }
     }
@@ -129,15 +130,15 @@ public class AddFeedDialogPresenter extends UstadBaseController implements OpdsE
                     OpdsEntry.TYPE_OPDS_NAVIGATION_FEED, entry.getUrl(), "subsection");
             OpdsEntryParentToChildJoin join = new OpdsEntryParentToChildJoin(uuidToAddTo,
                     addedEntry.getUuid(), 0);
-            DbManager dbManager = DbManager.getInstance(getContext());
+            UmAppDatabase dbManager = UmAppDatabase.getInstance(getContext());
             dbManager.getOpdsEntryDao().insert(addedEntry);
             dbManager.getOpdsLinkDao().insert(Arrays.asList(addedEntryLink));
 
             join.setChildIndex(dbManager.getOpdsEntryParentToChildJoinDao()
                     .getNumEntriesByParent(uuidToAddTo)+1);
-            dbManager.getOpdsEntryParentToChildJoinDao().insertAsync(join, new UmCallback<Integer>() {
+            dbManager.getOpdsEntryParentToChildJoinDao().insertAsync(join, new UmCallback<Long>() {
                 @Override
-                public void onSuccess(Integer result) {
+                public void onSuccess(Long result) {
                     addFeedDialogView.runOnUiThread(() -> addFeedDialogView.dismiss());
                 }
 

@@ -1,6 +1,6 @@
 package com.ustadmobile.core.fs.db.repository;
 
-import com.ustadmobile.core.db.DbManager;
+import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.impl.UstadMobileSystemImplFs;
 import com.ustadmobile.lib.db.entities.OpdsEntry;
 import com.ustadmobile.lib.db.entities.OpdsEntryParentToChildJoin;
@@ -25,7 +25,7 @@ import java.util.UUID;
  */
 public class OpdsItemLoader implements Runnable, OpdsEntry.OpdsItemLoadCallback {
 
-    private DbManager dbManager;
+    private UmAppDatabase dbManager;
 
     private OpdsEntryWithRelations itemToLoad;
 
@@ -43,7 +43,7 @@ public class OpdsItemLoader implements Runnable, OpdsEntry.OpdsItemLoadCallback 
     private boolean itemToLoadInserted = false;
 
 
-    public OpdsItemLoader(Object context, DbManager dbManager, OpdsEntryWithRelations itemToLoad, String url,
+    public OpdsItemLoader(Object context, UmAppDatabase dbManager, OpdsEntryWithRelations itemToLoad, String url,
                           OpdsEntry.OpdsItemLoadCallback callback) {
         this.dbManager = dbManager;
         this.itemToLoad = itemToLoad;

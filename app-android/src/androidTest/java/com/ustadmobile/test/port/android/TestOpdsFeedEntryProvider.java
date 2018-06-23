@@ -5,11 +5,11 @@ import android.arch.paging.DataSource;
 import android.arch.paging.LivePagedListBuilder;
 import android.arch.paging.PagedList;
 
-import com.ustadmobile.core.db.DbManager;
+import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.db.dao.OpdsAtomFeedRepository;
-import com.ustadmobile.core.fs.db.repository.OpdsAtomFeedRepositoryImpl;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
 import com.ustadmobile.test.core.ResourcesHttpdTestServer;
@@ -41,8 +41,8 @@ public class TestOpdsFeedEntryProvider extends TestCase{
 
     @Test
     public void testOpdsFeedEntryProvider() {
-        OpdsAtomFeedRepository repository = DbManager.getInstance(PlatformTestUtil.getTargetContext())
-                .getOpdsAtomFeedRepository();
+        OpdsAtomFeedRepository repository = UstadMobileSystemImpl.getInstance()
+                .getOpdsAtomFeedRepository(PlatformTestUtil.getTargetContext());
         String opdsUrl = UMFileUtil.joinPaths(new String[] {
                 ResourcesHttpdTestServer.getHttpRoot(), "com/ustadmobile/test/core/acquire-multi.opds"});
 
@@ -59,7 +59,7 @@ public class TestOpdsFeedEntryProvider extends TestCase{
             });
         }).add(20000, () -> {
             OpdsEntryWithRelations returnedFeed = (OpdsEntryWithRelations)helper.getResult();
-            UmProvider<OpdsEntryWithRelations> entryProvider = DbManager.getInstance(PlatformTestUtil.getTargetContext())
+            UmProvider<OpdsEntryWithRelations> entryProvider = UmAppDatabase.getInstance(PlatformTestUtil.getTargetContext())
                     .getOpdsEntryWithRelationsDao().getEntriesByParent(returnedFeed.getUuid());
             DataSource.Factory<Integer, OpdsEntryWithRelations> factory =
                     (DataSource.Factory<Integer, OpdsEntryWithRelations>)entryProvider.getProvider();

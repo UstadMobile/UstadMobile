@@ -2,15 +2,17 @@ package com.ustadmobile.core.db.dao;
 
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.networkmanager.NetworkTask;
+import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmOnConflictStrategy;
 import com.ustadmobile.lib.database.annotation.UmQuery;
+import com.ustadmobile.lib.database.annotation.UmUpdate;
 import com.ustadmobile.lib.db.entities.DownloadSet;
 
 /**
  * DAO for the DownloadSet entity.
  */
-
+@UmDao
 public abstract class DownloadSetDao {
 
     /**
@@ -36,6 +38,7 @@ public abstract class DownloadSetDao {
      *
      * @param set
      */
+    @UmUpdate
     public abstract void update(DownloadSet set);
 
     /**
@@ -44,7 +47,7 @@ public abstract class DownloadSetDao {
      * @param id the id (primary key) of the given DownloadSet
      * @return DownloadSetWithRelations representing the given DownloadSet if found, otherwise null
      */
-    @UmQuery("SELECT * FROM DownloadJob WHERE id = :id")
+    @UmQuery("SELECT * FROM DownloadSet WHERE id = :id")
     public abstract DownloadSet findById(int id);
 
     /**
@@ -53,7 +56,7 @@ public abstract class DownloadSetDao {
      * @param rootEntryUuid root OPDS UUID to search by
      * @return The DownloadSet matching the given root OPDS UUID, otherwise null
      */
-    @UmQuery("SELECT * FROM DownloadSet WHERE rootEntryUuid = :rootEntryUuid")
+    @UmQuery("SELECT * FROM DownloadSet WHERE rootOpdsUuid = :rootEntryUuid")
     public abstract DownloadSet findByRootEntry(String rootEntryUuid);
 
     /**
@@ -61,7 +64,7 @@ public abstract class DownloadSetDao {
      * @param id Primary key (id) of the given downloadset
      * @return UmLiveData object for the given DownloadSet
      */
-    @UmQuery("SELECT * From DownloadJob where id = :id")
+    @UmQuery("SELECT * From DownloadSet WHERE id = :id")
     public abstract UmLiveData<DownloadSet> getByIdLive(int id);
 
 }

@@ -147,6 +147,7 @@ afterEvaluate {
         variant.javaCompiler.dependsOn(generateCoreStringToAndroidResMap)
         variant.javaCompiler.dependsOn(checkBuildConfig)
         variant.javaCompiler.dependsOn(generateRoomEntities)
+        variant.javaCompiler.dependsOn(":lib-database-annotation-processor-room:runRoomProcessor")
     }
 }
 
@@ -173,7 +174,7 @@ android {
     sourceSets {
         main.assets.srcDirs += "../core/src/main/assets/"
         localconfig.assets.srcDirs += "../core/src/localconfig/assets/"
-        main.java.srcDirs += "build/generated/source/umentities"
+        main.java.srcDirs += ["build/generated/source/umentities", "build/generated/source/umdbprocessor"]
     }
 
     compileOptions {

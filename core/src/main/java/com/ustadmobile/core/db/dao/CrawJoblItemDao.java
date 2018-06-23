@@ -1,7 +1,9 @@
 package com.ustadmobile.core.db.dao;
 
+import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
+import com.ustadmobile.lib.database.annotation.UmTransaction;
 import com.ustadmobile.lib.db.entities.CrawlJobItem;
 
 import java.util.List;
@@ -9,12 +11,13 @@ import java.util.List;
 /**
  * Created by mike on 3/3/18.
  */
+@UmDao
 public abstract class CrawJoblItemDao {
 
-    @UmQuery("SELECT * FROM DownloadJobCrawlItem WHERE downloadJobId = :downloadJobId AND status < 10")
-    public abstract CrawlJobItem findNextItemForJob(int downloadJobId);
+    @UmQuery("SELECT * FROM CrawlJobItem WHERE crawlJobId = :crawlJobId AND status < 10")
+    public abstract CrawlJobItem findNextItemForJob(int crawlJobId);
 
-    @UmQuery("UPDATE DownloadJobCrawlItem SET status = :status WHERE id = :id")
+    @UmQuery("UPDATE CrawlJobItem SET status = :status WHERE id = :id")
     public abstract void updateStatus(int id, int status);
 
     @UmQuery("UPDATE CrawlJobItem SET opdsEntryUuid = :opdsEntryUuid WHERE id = :id")
@@ -23,8 +26,10 @@ public abstract class CrawJoblItemDao {
     @UmInsert
     public abstract void insert(CrawlJobItem item);
 
+    @UmInsert
     public abstract void insertAll(List<CrawlJobItem> item);
 
+    @UmTransaction
     public CrawlJobItem findNextItemAndUpdateStatus(int downloadJobId, int status){
         CrawlJobItem item = findNextItemForJob(downloadJobId);
         if(item != null) {
@@ -35,5 +40,6 @@ public abstract class CrawJoblItemDao {
         return item;
     }
 
+    @UmQuery("SELECT * FROM CrawlJobItem WHERE crawlJobId = :crawlJobId")
     public abstract List<CrawlJobItem> findByCrawlJob(int crawlJobId);
 }

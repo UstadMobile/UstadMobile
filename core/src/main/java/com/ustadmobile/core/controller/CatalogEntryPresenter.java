@@ -1,7 +1,7 @@
 package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.catalog.ContentTypeManager;
-import com.ustadmobile.core.db.DbManager;
+import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.UmObserver;
 import com.ustadmobile.core.generated.locale.MessageID;
@@ -106,7 +106,7 @@ public class CatalogEntryPresenter extends BaseCatalogPresenter implements Netwo
         String entryUri = (String)args.get(ARG_URL);
         if(entryUri.startsWith(ENTRY_PROTOCOL)) {
             String entryUuid = entryUri.substring(ENTRY_PROTOCOL.length());
-            entryLiveData = DbManager.getInstance(getContext()).getOpdsEntryWithRelationsDao()
+            entryLiveData = UmAppDatabase.getInstance(getContext()).getOpdsEntryWithRelationsDao()
                     .getEntryByUuid(entryUuid);
             entryLiveData.observe(this, this::handleEntryUpdated);
         }
@@ -137,13 +137,21 @@ public class CatalogEntryPresenter extends BaseCatalogPresenter implements Netwo
             catalogEntryView.setThumbnail(UMFileUtil.resolveLink(baseHref, thumbnailLink.getHref()),
                     thumbnailLink.getMimeType());
         }else if(thumbnailLink != null){
-            DbManager.getInstance(getContext()).getOpdsEntryWithRelationsDao()
-                    .findParentUrlByChildUuid(entry.getUuid(), (parentUrl) -> {
-                        if(parentUrl != null){
-                            CatalogEntryPresenter.this.baseHref = parentUrl;
-                            catalogEntryView.runOnUiThread(() -> catalogEntryView.setThumbnail(
-                                    UMFileUtil.resolveLink(baseHref, thumbnailLink.getHref()),
+            UmAppDatabase.getInstance(getContext()).getOpdsEntryWithRelationsDao()
+                    .findParentUrlByChildUuid(entry.getUuid(), new UmCallback<String>() {
+                        @Override
+                        public void onSuccess(String parentUrl) {
+                            if(parentUrl != null){
+                                CatalogEntryPresenter.this.baseHref = parentUrl;
+                                catalogEntryView.runOnUiThread(() -> catalogEntryView.setThumbnail(
+                                        UMFileUtil.resolveLink(baseHref, thumbnailLink.getHref()),
                                         thumbnailLink.getMimeType()));
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Throwable exception) {
+
                         }
                     });
         }
@@ -164,7 +172,7 @@ public class CatalogEntryPresenter extends BaseCatalogPresenter implements Netwo
         String sizePrefix =  impl.getString(MessageID.size, getContext()) +  ": ";
 
         if(containerSize <= 0 && containerFileId != -1){
-            DbManager.getInstance(getContext()).getContainerFileDao().findContainerFileLengthAsync(
+            UmAppDatabase.getInstance(getContext()).getContainerFileDao().findContainerFileLengthAsync(
                     containerFileId, new UmCallback<Long>() {
                         @Override
                         public void onSuccess(Long result) {
@@ -185,7 +193,7 @@ public class CatalogEntryPresenter extends BaseCatalogPresenter implements Netwo
         }
 
         entryDownloadJobItemObserver = this::handleDownloadJobItemUpdated;
-        entryDownloadJobLiveData = DbManager.getInstance(getContext()).getDownloadJobItemDao()
+        entryDownloadJobLiveData = UmAppDatabase.getInstance(getContext()).getDownloadJobItemDao()
                 .findDownloadJobItemByEntryIdAndStatusRangeLive(entry.getEntryId(),
                         NetworkTask.STATUS_WAITING_MIN, NetworkTask.STATUS_RUNNING_MAX);
         entryDownloadJobLiveData.observe(this, entryDownloadJobItemObserver);
@@ -293,7 +301,7 @@ public class CatalogEntryPresenter extends BaseCatalogPresenter implements Netwo
 
         if(containerFileEntries != null && containerFileEntries.size() > 0) {
             int containerFileId = containerFileEntries.get(0).getContainerFileId();
-            DbManager.getInstance(getContext()).getContainerFileDao()
+            UmAppDatabase.getInstance(getContext()).getContainerFileDao()
                     .getContainerFileByIdAsync(containerFileId, new BaseUmCallback<ContainerFile>() {
                         @Override
                         public void onSuccess(ContainerFile result) {

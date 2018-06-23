@@ -1,0 +1,25 @@
+apply plugin: 'java-library'
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation project(":lib-database-annotation")
+    implementation "com.squareup:javapoet:$version_javapoet"
+    implementation "org.reflections:reflections:$version_reflections"
+    implementation "commons-cli:commons-cli:$version_apache_commons_cli"
+    implementation project(":core")
+    implementation project(":lib-database")
+    testImplementation "junit:junit:$version_junit"
+}
+
+task runRoomProcessor(type: JavaExec) {
+//    inputs.files("")
+    classpath sourceSets.main.runtimeClasspath
+    main = "com.ustadmobile.lib.annotationprocessor.room.DbProcessorRoom"
+    args "--dest", "../app-android/build/generated/source/umdbprocessor"
+    outputs.upToDateWhen { false }
+}
+
+
+
+sourceCompatibility = "1.8"
+targetCompatibility = "1.8"

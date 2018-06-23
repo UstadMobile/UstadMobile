@@ -1,6 +1,6 @@
 package com.ustadmobile.port.sharedse.networkmanager;
 
-import com.ustadmobile.core.db.DbManager;
+import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.UmObserver;
 import com.ustadmobile.core.db.dao.DownloadJobItemHistoryDao;
@@ -148,7 +148,8 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
 
     protected NetworkManager networkManager;
 
-    private DbManager mDbManager;
+
+    protected UmAppDatabase mDbManager;
 
 
     private static final int SAME_NET_SCORE = 600;
@@ -223,7 +224,7 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
      */
     public DownloadTask(DownloadJobWithDownloadSet downloadJob, NetworkManager networkManager, DownloadTaskListener downloadTaskListener){
         super(networkManager, downloadJob.getDownloadJobId());
-        mDbManager = DbManager.getInstance(networkManager.getContext());
+        mDbManager = UmAppDatabase.getInstance(networkManager.getContext());
         this.downloadJob = downloadJob;
         allowMeteredDataUsage = downloadJob.isAllowMeteredDataUsage();
 
@@ -260,7 +261,7 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
         executor = Executors.newSingleThreadScheduledExecutor();
         executor.execute(() -> {
             allowMeteredDataUsageObserver = this::handleAllowMeteredDataUsageUpdate;
-            allowMeteredDataUsageLiveData = DbManager.getInstance(networkManager.getContext())
+            allowMeteredDataUsageLiveData = UmAppDatabase.getInstance(networkManager.getContext())
                     .getDownloadJobDao().findAllowMeteredDataUsageLive(downloadJob.getDownloadJobId());
             allowMeteredDataUsageLiveData.observeForever(allowMeteredDataUsageObserver);
 
@@ -350,7 +351,7 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
 
                 message = "Downloading...";
 
-                currentEntryTitle = DbManager.getInstance(networkManager.getContext()).getOpdsEntryDao()
+                currentEntryTitle = UmAppDatabase.getInstance(networkManager.getContext()).getOpdsEntryDao()
                         .findTitleByUuid(currentDownloadJobItem.getDownloadSetItem().getOpdsEntryUuid());
                 networkManager.addNotification(NOTIFICATION_TYPE_ACQUISITION,
                         currentEntryTitle, message);
@@ -358,7 +359,7 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
                 String entryId = currentDownloadJobItem.getDownloadSetItem().getEntryId();
 
 
-                DbManager dbManager = DbManager.getInstance(networkManager.getContext());
+                UmAppDatabase dbManager = UmAppDatabase.getInstance(networkManager.getContext());
                 List<EntryStatusResponseWithNode> statusResponses = dbManager.getEntryStatusResponseDao()
                         .findByEntryIdAndAvailability(entryId, true);
 
@@ -573,8 +574,8 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
                         " : Download completed successfully, saved to " + fileDestination.getAbsolutePath());
                 findNextDownloadJobItem();
 
-                mDbManager.getOpdsAtomFeedRepository().
-                        findEntriesByContainerFileNormalizedPath(fileDestination.getAbsolutePath());
+                UstadMobileSystemImpl.getInstance().getOpdsAtomFeedRepository(networkManager.getContext())
+                        .findEntriesByContainerFileNormalizedPath(fileDestination.getAbsolutePath());
                 UstadMobileSystemImpl.l(UMLog.INFO, 3010, getLogPrefix() +  " : item " +
                         " : indexed in database");
 

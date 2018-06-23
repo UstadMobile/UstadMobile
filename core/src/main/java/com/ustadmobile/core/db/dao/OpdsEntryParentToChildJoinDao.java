@@ -1,7 +1,9 @@
 package com.ustadmobile.core.db.dao;
 
 import com.ustadmobile.core.impl.UmCallback;
+import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmInsert;
+import com.ustadmobile.lib.database.annotation.UmOnConflictStrategy;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.db.entities.OpdsEntryParentToChildJoin;
 
@@ -10,17 +12,19 @@ import java.util.List;
 /**
  * Created by mike on 1/23/18.
  */
-
+@UmDao
 public abstract class OpdsEntryParentToChildJoinDao {
 
-    @UmInsert
+    @UmInsert(onConflict = UmOnConflictStrategy.REPLACE)
     public abstract long insert(OpdsEntryParentToChildJoin entry);
 
-    @UmInsert
+    @UmInsert(onConflict = UmOnConflictStrategy.REPLACE)
     public abstract void insertAll(List<OpdsEntryParentToChildJoin> entryList);
 
-    public abstract void insertAsync(OpdsEntryParentToChildJoin entry, UmCallback<Integer> callback);
+    @UmInsert
+    public abstract void insertAsync(OpdsEntryParentToChildJoin entry, UmCallback<Long> callback);
 
+    @UmInsert
     public abstract void insertAsLastEntryForParentAsync(OpdsEntryParentToChildJoin entry, UmCallback<Long> callback);
 
     public long insertAsLastEntryForParent(OpdsEntryParentToChildJoin entry) {
@@ -28,8 +32,10 @@ public abstract class OpdsEntryParentToChildJoinDao {
         return insert(entry);
     }
 
+    @UmQuery("Select * From OpdsEntryParentToChildJoin WHERE parentEntry = :parentId and childEntry = :childId")
     public abstract List<OpdsEntryParentToChildJoin> findByParentAndEntry(String parentId, String childId);
 
+    @UmQuery("Select * From OpdsEntryParentToChildJoin")
     public abstract List<OpdsEntryParentToChildJoin> findAll();
 
     @UmQuery("SELECT MAX(childIndex) FROM OpdsEntryParentToChildJoin WHERE parentEntry = :parentId")
