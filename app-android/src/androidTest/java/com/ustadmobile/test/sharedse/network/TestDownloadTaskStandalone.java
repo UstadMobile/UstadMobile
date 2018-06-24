@@ -412,7 +412,7 @@ public class TestDownloadTaskStandalone extends TestWithNetworkService {
                 150000);
         DownloadJob dlJob = UmAppDatabase.getInstance(PlatformTestUtil.getTargetContext())
                 .getDownloadJobDao().findById(crawlJob.getContainersDownloadJobId());
-        List<DownloadJobItem> downloadJobItemList = DbManager.getInstance(PlatformTestUtil.getTargetContext())
+        List<DownloadJobItem> downloadJobItemList = UmAppDatabase.getInstance(PlatformTestUtil.getTargetContext())
                 .getDownloadJobItemDao().findAllByDownloadJobId(dlJob.getDownloadJobId());
 
         Assert.assertEquals("Download Job List has 1 item", 1,

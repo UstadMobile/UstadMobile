@@ -521,8 +521,7 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
         UmAppDatabase.getInstance(getContext()).getDownloadJobCrawlItemDao().insert(
                 new CrawlJobItem(crawlJob.getCrawlJobId(), entry, NetworkTask.STATUS_QUEUED, 0));
 
-        CrawlTask task = new CrawlTask(crawlJob, dbManager,
-                (NetworkManager)UstadMobileSystemImpl.getInstance().getNetworkManager());
+        CrawlTask task = new CrawlTask(crawlJob, dbManager, this);
         task.start();
 
         return crawlJob;

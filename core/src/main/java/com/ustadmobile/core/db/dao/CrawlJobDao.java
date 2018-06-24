@@ -24,16 +24,21 @@ public abstract class CrawlJobDao {
     public abstract CrawlJob findById(int crawlJobId);
 
     @UmQuery("UPDATE CrawlJob SET status = :status WHERE crawlJobId = :crawlJobId")
-    public abstract void setStatusById(int crawlJobId, int status);
+    public abstract int setStatusById(int crawlJobId, int status);
 
     @UmQuery("SELECT * FROM CrawlJob WHERE crawlJobId = :crawlJobId")
     public abstract UmLiveData<CrawlJob> findByIdLive(int crawlJobId);
 
-    @UmQuery("SELECT CrawlJob.*, " +
+    private static final String SQL_CRAWL_JOB_WITH_TOTALS = "SELECT CrawlJob.*, " +
             " (SELECT COUNT(*) FROM CrawlJobItem WHERE CrawlJobItem.crawlJobId = CrawlJob.crawlJobId) AS numItems, " +
             " (SELECT COUNT(*) FROM CrawlJobItem WHERE CrawlJobItem.crawlJobId = CrawlJob.crawlJobId AND CrawlJobItem.status = " + NetworkTask.STATUS_COMPLETE + ") AS numItemsCompleted " +
-            " FROM CrawlJob Where CrawlJob.crawlJobId = :crawlJobId")
+            " FROM CrawlJob Where CrawlJob.crawlJobId = :crawlJobId";
+
+    @UmQuery(SQL_CRAWL_JOB_WITH_TOTALS)
     public abstract UmLiveData<CrawlJobWithTotals> findWithTotalsByIdLive(int crawlJobId);
+
+    @UmQuery(SQL_CRAWL_JOB_WITH_TOTALS)
+    public abstract CrawlJobWithTotals findWithTotalsById(int crawlJobId);
 
 
     /**

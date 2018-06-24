@@ -15,6 +15,7 @@ import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.UmObserver;
 import com.ustadmobile.core.db.dao.CrawlJobWithTotals;
+import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.networkmanager.NetworkTask;
 import com.ustadmobile.core.util.UMFileUtil;
@@ -34,16 +35,22 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import fi.iki.elonen.router.RouterNanoHTTPD;
 
 /**
  * Created by mike on 3/6/18.
+ *
+ * Note: Sometimes the observer on Android is not calling the onChanged method of the observer as
+ * it should when the status is updated.
+ *
  */
 @SmallTest
 public class TestCrawlJob {
 
-    public static final int CRAWL_JOB_TIMEOUT = 1000000;
+    public static final int CRAWL_JOB_TIMEOUT = 1500;//* 100 for testing purposes only
 
     private static RouterNanoHTTPD resourcesHttpd;
 
@@ -114,33 +121,33 @@ public class TestCrawlJob {
         CrawlJob crawlJob = new CrawlJob();
         crawlJob.setRootEntryUri(opdsRootIndexUrl);
         crawlJob = UstadMobileSystemImpl.getInstance().getNetworkManager().prepareDownload(set, crawlJob, true);
-
+        UstadMobileSystemImpl.l(UMLog.DEBUG, 0, "Created crawl job id# " +
+                crawlJob.getCrawlJobId());
         UmLiveData<CrawlJobWithTotals> crawlJobLiveData = dbManager.getCrawlJobDao().findWithTotalsByIdLive(
                 crawlJob.getCrawlJobId());
-        Object crawlLock = new Object();
+        CountDownLatch latch = new CountDownLatch(1);
+
+
         UmObserver<CrawlJobWithTotals> crawlJobUmObserver = (crawlJobValue) -> {
+            UstadMobileSystemImpl.l(UMLog.DEBUG, 0,
+                    "crawlJobObserver: status " + crawlJobValue.getStatus());
             if(crawlJobValue.getStatus() == NetworkTask.STATUS_COMPLETE){
-                synchronized (crawlLock){
-                    try {crawlLock.notifyAll(); }
-                    catch(Exception e){}
-                }
+                latch.countDown();
             }
         };
         crawlJobLiveData.observeForever(crawlJobUmObserver);
 
-        if(crawlJobLiveData.getValue() == null
-                || crawlJobLiveData.getValue().getStatus() != NetworkTask.STATUS_COMPLETE){
-            synchronized (crawlLock) {
-                try {crawlLock.wait(CRAWL_JOB_TIMEOUT);}
-                catch(InterruptedException e) {}
-            }
-        }
+        try { latch.await(CRAWL_JOB_TIMEOUT, TimeUnit.MILLISECONDS); }
+        catch(InterruptedException e) {}
+
+        CrawlJobWithTotals crawlJobValue = dbManager.getCrawlJobDao().findWithTotalsById(
+                crawlJob.getCrawlJobId());
 
         Assert.assertEquals("Crawl job status complete", NetworkTask.STATUS_COMPLETE,
-                crawlJobLiveData.getValue().getStatus());
+                crawlJobValue.getStatus());
 
         Assert.assertEquals("Crawl job has three items", 3,
-                crawlJobLiveData.getValue().getNumItems());
+                crawlJobValue.getNumItems());
 
         List<DownloadJobItem> downloadJobItems = dbManager.getDownloadJobItemDao().
                 findAllByDownloadJobId(crawlJob.getContainersDownloadJobId());
@@ -150,7 +157,9 @@ public class TestCrawlJob {
         }
 
         Assert.assertEquals("All three crawl job items are completed", 3,
-                crawlJobLiveData.getValue().getNumItemsCompleted());
+                crawlJobValue.getNumItemsCompleted());
+
+        crawlJobLiveData.removeObserver(crawlJobUmObserver);
     }
 
 

@@ -18,6 +18,8 @@ import com.ustadmobile.core.db.dao.OpdsEntryStatusCacheAncestorDao;
 import com.ustadmobile.core.db.dao.OpdsEntryStatusCacheDao;
 import com.ustadmobile.core.db.dao.OpdsEntryWithRelationsDao;
 import com.ustadmobile.core.db.dao.OpdsLinkDao;
+import com.ustadmobile.core.impl.UMLog;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.lib.database.annotation.UmDatabase;
 import com.ustadmobile.lib.database.annotation.UmDbContext;
 import com.ustadmobile.lib.db.entities.ContainerFile;
@@ -48,9 +50,9 @@ import com.ustadmobile.lib.db.entities.OpdsLink;
 })
 public abstract class UmAppDatabase{
 
-    private static UmAppDatabase instance;
+    private static volatile UmAppDatabase instance;
 
-    public static UmAppDatabase getInstance(Object context) {
+    public static synchronized UmAppDatabase getInstance(Object context) {
         if(instance == null){
             instance = com.ustadmobile.core.db.UmAppDatabase_Factory.makeUmAppDatabase(context);
         }

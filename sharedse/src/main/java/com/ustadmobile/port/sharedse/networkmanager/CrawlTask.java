@@ -106,7 +106,7 @@ public class CrawlTask extends NetworkTask {
                                 " add child " + childEntries.size() + " item(s) from opds uuid: " +
                                 itemEntry.getUuid());
                     }
-                }else if(item.getUri() != null && item.getUri().startsWith("http://") || item.getUri().startsWith("https://")) {
+                }else if(item.getUri() != null && (item.getUri().startsWith("http://") || item.getUri().startsWith("https://"))) {
                     UstadMobileSystemImpl.l(UMLog.INFO, 0, mkWorkerLogPrefix() + " load " +
                             item.getUri());
                     itemEntry = UstadMobileSystemImpl.getInstance()
@@ -209,8 +209,11 @@ public class CrawlTask extends NetworkTask {
                     //The task itself is done
                     UstadMobileSystemImpl.l(UMLog.INFO, 0, mkWorkerLogPrefix()
                             + " no more work and no more active workers: task is done");
-                    dbManager.getCrawlJobDao().setStatusById(crawlJob.getCrawlJobId(),
+                    int updateCount = dbManager.getCrawlJobDao().setStatusById(crawlJob.getCrawlJobId(),
                             NetworkTask.STATUS_COMPLETE);
+                    UstadMobileSystemImpl.l(UMLog.DEBUG, 0, mkWorkerLogPrefix() +
+                        " set " + crawlJob.getCrawlJobId() + " to status STATUS_COMPLETE (Update " +
+                        updateCount + ")");
                     if(dbManager.getCrawlJobDao().findQueueOnDownloadJobDoneById(crawlJob.getCrawlJobId())){
                         UstadMobileSystemImpl.l(UMLog.INFO, 0, mkWorkerLogPrefix()
                                 + " queueing generated download job #" +
