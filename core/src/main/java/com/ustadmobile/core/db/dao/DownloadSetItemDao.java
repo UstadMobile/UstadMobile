@@ -13,6 +13,10 @@ import java.util.List;
 @UmDao
 public abstract class DownloadSetItemDao {
 
+
+    @UmQuery("SELECT * From DownloadSetItem WHERE id = :id")
+    public abstract DownloadSetItem findById(int id);
+
     /**
      * Insert a list of DownloadSetItem entities
      * @param jobItems List of DownloadSetItem entities to insert

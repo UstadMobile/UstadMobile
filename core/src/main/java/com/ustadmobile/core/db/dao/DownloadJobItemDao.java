@@ -164,6 +164,9 @@ public abstract class DownloadJobItemDao {
     @UmQuery("SELECT downloadJobItemId FROM DownloadJobItem WHERE downloadJobId = :downloadJobId")
     public abstract int[] findAllIdsByDownloadJob(int downloadJobId);
 
+    @UmQuery("SELECT * FROM DownloadJobItem WHERE downloadJobItemId = :downloadJobItemId")
+    public abstract DownloadJobItem findById(int downloadJobItemId);
+
     /**
      * Unpause any DownloadJobItems that have been marked as paused. This is used when a job is
      * queud, in case it was previously paused.

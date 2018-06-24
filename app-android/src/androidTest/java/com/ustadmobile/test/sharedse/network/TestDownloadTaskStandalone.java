@@ -172,7 +172,7 @@ public class TestDownloadTaskStandalone extends TestWithNetworkService {
                 .getOpdsEntryStatusCacheDao().findByEntryIdLive(CRAWL_ROOT_ENTRY_ID_SLOW);
         CountDownLatch latch = new CountDownLatch(1);
         UmObserver<OpdsEntryStatusCache> observer = (statusCache) -> {
-            if(statusCache.getContainersDownloadedIncDescendants() > 0) {
+            if(statusCache != null && statusCache.getContainersDownloadedIncDescendants() > 0) {
                 latch.countDown();
             }
         };

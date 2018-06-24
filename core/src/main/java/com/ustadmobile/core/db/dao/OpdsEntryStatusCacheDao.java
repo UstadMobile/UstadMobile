@@ -365,9 +365,12 @@ public abstract class OpdsEntryStatusCacheDao {
     public void handleDownloadJobQueued(int downloadJobItemId) {
         OpdsEntryStatusCache statusCache = findByDownloadJobItemId(downloadJobItemId);
         if(statusCache.isEntryPausedDownload() || !(statusCache.isEntryContainerDownloaded() || statusCache.isEntryContainerDownloadPending())) {
-            updateOnDownloadJobItemQueuedIncAncestors(statusCache.getStatusCacheUid(), downloadJobItemId,
-                    statusCache.isEntryContainerDownloadPending() ? 0 : 1,
-                    statusCache.isEntryPausedDownload() ? -1 : 0);
+            int statusCacheUid = statusCache.getStatusCacheUid();
+            int deltaContainerDownloadPending = statusCache.isEntryContainerDownloadPending() ? 0 : 1;
+            int deltaPaused = statusCache.isEntryPausedDownload() ? -1 : 0;
+            updateOnDownloadJobItemQueuedIncAncestors(statusCacheUid, downloadJobItemId,
+                    deltaContainerDownloadPending,
+                    deltaPaused);
             updateOnDownloadJobItemQueuedEntry(statusCache.getStatusCacheUid(), downloadJobItemId);
         }
     }
@@ -392,8 +395,8 @@ public abstract class OpdsEntryStatusCacheDao {
             "LEFT JOIN OpdsEntryStatusCache ON DownloadSetItem.entryId = OpdsEntryStatusCache.statusEntryId " +
             "WHERE " +
             "DownloadJobItem.downloadJobItemId = :downloadJobId " +
-            ")," +
-            "containersDownloadPendingIncAncestors = containersDownloadPendingIncAncestors + :deltaContainersDownloadPending, " +
+            "), " +
+            "containersDownloadPendingIncAncestors = containersDownloadPendingIncAncestors + :deltaContainersDownloadPending , " +
             "pausedDownloadsIncAncestors = pausedDownloadsIncAncestors + :deltaPausedDownloads " +
             "WHERE statusCacheUid IN " +
             "  (SELECT ancestorOpdsEntryStatusCacheId FROM OpdsEntryStatusCacheAncestor WHERE opdsEntryStatusCacheId = :statusCacheUid)")
@@ -402,12 +405,11 @@ public abstract class OpdsEntryStatusCacheDao {
 
     @UmQuery("Update OpdsEntryStatusCache " +
             "SET " +
-            "entrySize = (SELECT downloadLength FROM DownloadJobItem WHERE downloadJobItemId= :downloadJobId), " +
+                "entrySize = (SELECT downloadLength FROM DownloadJobItem WHERE downloadJobItemId= :downloadJobId), " +
             "entryContainerDownloadPending = 1," +
             "entryPausedDownload = 0 " +
             " WHERE statusCacheUid = :statusCacheUid")
-    protected abstract void updateOnDownloadJobItemQueuedEntry(int downloadJobId, int statusCacheUid);
-
+    protected abstract void updateOnDownloadJobItemQueuedEntry(int statusCacheUid, int downloadJobId);
 
     public void handleDownloadJobStarted(int statusCacheUid) {
         OpdsEntryStatusCache statusCache = findByStatusCacheUid(statusCacheUid);

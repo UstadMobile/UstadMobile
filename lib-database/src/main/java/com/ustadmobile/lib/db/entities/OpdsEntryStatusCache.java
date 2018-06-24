@@ -25,8 +25,8 @@ import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 @UmEntity
 public class OpdsEntryStatusCache {
 
-    @UmPrimaryKey
-    private Integer statusCacheUid;
+    @UmPrimaryKey(autoIncrement = true)
+    private int statusCacheUid;
 
     @UmIndexField
     private String statusEntryId;
@@ -83,7 +83,7 @@ public class OpdsEntryStatusCache {
      *
      * @return The primary key
      */
-    public Integer getStatusCacheUid() {
+    public int getStatusCacheUid() {
         return statusCacheUid;
     }
 
@@ -92,7 +92,7 @@ public class OpdsEntryStatusCache {
      *
      * @param statusCacheUid
      */
-    public void setStatusCacheUid(Integer statusCacheUid) {
+    public void setStatusCacheUid(int statusCacheUid) {
         this.statusCacheUid = statusCacheUid;
     }
 
@@ -398,7 +398,7 @@ public class OpdsEntryStatusCache {
             return false;
         if (entryContainerDownloadPending != that.entryContainerDownloadPending) return false;
         if (entryAcquisitionLinkLength != that.entryAcquisitionLinkLength) return false;
-        if (!statusCacheUid.equals(that.statusCacheUid)) return false;
+        if (statusCacheUid != that.statusCacheUid) return false;
         if (entryActiveDownload != that.entryActiveDownload) return false;
         if (activeDownloadsIncAncestors != that.activeDownloadsIncAncestors) return false;
         if(!statusEntryId.equals(that.statusEntryId)) return false;
@@ -408,7 +408,7 @@ public class OpdsEntryStatusCache {
 
     @Override
     public int hashCode() {
-        int result = statusCacheUid.hashCode();
+        int result = statusCacheUid;
         result = 31 * result + statusEntryId.hashCode();
         result = 31 * result + (int) (pendingDownloadBytesSoFarIncDescendants ^ (pendingDownloadBytesSoFarIncDescendants >>> 32));
         result = 31 * result + (int) (entryPendingDownloadBytesSoFar ^ (entryPendingDownloadBytesSoFar >>> 32));
