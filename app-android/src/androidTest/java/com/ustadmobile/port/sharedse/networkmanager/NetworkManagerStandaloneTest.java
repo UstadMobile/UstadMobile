@@ -42,7 +42,8 @@ public class NetworkManagerStandaloneTest extends TestWithNetworkService {
         CrawlJob crawlJob = TestDownloadTaskStandalone.runCrawlJob(
                 UMFileUtil.resolveLink(ResourcesHttpdTestServer.getHttpRoot(),
                         TestDownloadTaskStandalone.OPDS_PATH_SPEED_LIMITED),
-                        CRAWL_ROOT_ENTRY_ID_SLOW, true, CRAWL_JOB_TIMEOUT);
+                        CRAWL_ROOT_ENTRY_ID_SLOW, true, CRAWL_JOB_TIMEOUT,
+                true);
         try { Thread.sleep(500);}
         catch(InterruptedException e) {}
         NetworkManager networkManager = (NetworkManager)UstadMobileSystemImpl.getInstance()

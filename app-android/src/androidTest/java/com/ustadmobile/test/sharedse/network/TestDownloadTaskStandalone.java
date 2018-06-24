@@ -68,9 +68,7 @@ public class TestDownloadTaskStandalone extends TestWithNetworkService {
     public static final String CRAWL_ROOT_ENTRY_ID_404 =
             "http://umcloud1.ustadmobile.com/opds/test-crawl/entry-not-found/doesnotexist";
 
-    /**
-     *
-     */
+    @SuppressWarnings("WeakerAccess")
     public static final int JOB_CHANGE_WAIT_TIME = 1000;
 
     @SuppressWarnings("WeakerAccess")
@@ -89,7 +87,8 @@ public class TestDownloadTaskStandalone extends TestWithNetworkService {
 
     @SuppressWarnings("EmptyCatchBlock")
     public static CrawlJob runCrawlJob(String opdsPath, String rootEntryId,
-                                       boolean allowMeteredNetworks, long crawlTimeout) {
+                                       boolean allowMeteredNetworks, long crawlTimeout,
+                                       boolean queueDownloadJobOnDone) {
         String storageDir = UstadMobileSystemImpl.getInstance().getStorageDirs(
                 CatalogPresenter.SHARED_RESOURCE, PlatformTestUtil.getTargetContext())[0].getDirURI();
         UmAppDatabase dbManager = UmAppDatabase.getInstance(PlatformTestUtil.getTargetContext());
@@ -103,7 +102,7 @@ public class TestDownloadTaskStandalone extends TestWithNetworkService {
 
         CrawlJob crawlJob = new CrawlJob();
         crawlJob.setRootEntryUri(opdsPath);
-        crawlJob.setQueueDownloadJobOnDone(false);
+        crawlJob.setQueueDownloadJobOnDone(queueDownloadJobOnDone);
         DownloadSet downloadSet = new DownloadSet();
         downloadSet.setDestinationDir(storageDir);
 
@@ -123,6 +122,11 @@ public class TestDownloadTaskStandalone extends TestWithNetworkService {
         crawlJobLiveData.removeObserver(observer);
 
         return crawlJob;
+    }
+
+    public static CrawlJob runCrawlJob(String opdsPath, String rootEntryId,
+                                       boolean allowMeteredNetworks, long crawlTimeout){
+        return runCrawlJob(opdsPath, rootEntryId, allowMeteredNetworks, crawlTimeout, false);
     }
 
     @SuppressWarnings("WeakerAccess")
@@ -159,13 +163,14 @@ public class TestDownloadTaskStandalone extends TestWithNetworkService {
     @Test
     @SuppressWarnings("EmptyCatchBlock")
     public void givenDownloadStarted_whenCancelled_thenShouldBeDeleted() {
-        CrawlJob crawlJob = runCrawlJob(UMFileUtil.joinPaths(
-                ResourcesHttpdTestServer.getHttpRoot(), "com/ustadmobile/test/sharedse/crawlme-slow/index.opds"),
+        String opdsUrl = UMFileUtil.joinPaths(
+                ResourcesHttpdTestServer.getHttpRoot(), "com/ustadmobile/test/sharedse/crawlme-slow/index.opds");
+        CrawlJob crawlJob = runCrawlJob(opdsUrl,
                 CRAWL_ROOT_ENTRY_ID_SLOW, true, CRAWL_JOB_TIMEOUT);
+        UstadMobileSystemImpl.l(UMLog.INFO, 0,
+                "whenCancelled_thenShouldBeDeleted: created download job # " + crawlJob.getContainersDownloadJobId());
         startDownload(crawlJob.getContainersDownloadJobId(),
                 (NetworkManager)UstadMobileSystemImpl.getInstance().getNetworkManager());
-
-        UmAppDatabase dbManager = UmAppDatabase.getInstance(PlatformTestUtil.getTargetContext());
 
         UmLiveData<OpdsEntryStatusCache> statusCacheLive = UmAppDatabase
                 .getInstance(PlatformTestUtil.getTargetContext())
@@ -395,18 +400,19 @@ public class TestDownloadTaskStandalone extends TestWithNetworkService {
 
     @Test
     @SuppressWarnings("EmptyCatchBlock")
-    public void givenDownloadStarted_whenFileIs404NotFound_shouldGiveUpAndSetFailStatus()
-            throws IOException{
+    public void givenDownloadStarted_whenFileIs404NotFound_shouldGiveUpAndSetFailStatus() {
         String opdsRootIndexUrl = UMFileUtil.joinPaths(ResourcesHttpdTestServer.getHttpRoot(),
                 OPDS_PATH_404);
         CrawlJob crawlJob = runCrawlJob(opdsRootIndexUrl, CRAWL_ROOT_ENTRY_ID_404,
                 true, CRAWL_JOB_TIMEOUT);
+        UstadMobileSystemImpl.l(UMLog.INFO, 0,
+                "whenFileIs404NotFound_shouldGiveUpAndSetFailStatus: created download job # " +
+                        crawlJob.getContainersDownloadJobId());
         startDownload(crawlJob.getContainersDownloadJobId(),
                 (NetworkManager)UstadMobileSystemImpl.getInstance().getNetworkManager());
 
         try { Thread.sleep(JOB_CHANGE_WAIT_TIME); }
         catch(InterruptedException e) {}
-        ResourcesHttpdTestServer.stopServer();
 
         waitForDownloadStatus(crawlJob.getContainersDownloadJobId(), NetworkTask.STATUS_COMPLETE,
                 150000);
