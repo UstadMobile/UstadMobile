@@ -168,7 +168,7 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
 
     private final ReentrantLock statusLock = new ReentrantLock();
 
-    private boolean stopped;
+    private volatile boolean stopped;
 
     /**
      * Monitor file acquisition task progress and report it to the rest of the app (UI).
@@ -715,6 +715,7 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
     public void stop(int statusAfterStopped) {
         try {
             statusLock.lock();
+
             UstadMobileSystemImpl.l(UMLog.INFO, 321, getLogPrefix() + " task stop called" +
                     " setting status to: " + statusAfterStopped);
             if(isStopped()) {
@@ -814,37 +815,39 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
 
     @Override
     public void onConnectivityChanged(int newState) {
-        executeIfNotStopped(() -> {
-            try {
-                statusLock.lock();
+        UstadMobileSystemImpl.l(UMLog.DEBUG, 0, getLogPrefix() +
+            "onConnectivityChanged: new state : " + newState);
+        UstadMobileSystemImpl.l(UMLog.DEBUG, 0, getLogPrefix() +
+            " status locked? : " + statusLock.isLocked());
+        try {
+            statusLock.lock();
 
-                if(isWaitingForWifiConnection()) {
-                    UstadMobileSystemImpl.l(UMLog.ERROR, 0, getLogPrefix() +
-                            " onConnectivityChanged: actually waiting for WiFi - do nothing");
-                    return;
-                }
-
-                if(newState == CONNECTIVITY_STATE_DISCONNECTED
-                        || (newState == CONNECTIVITY_STATE_METERED && !allowMeteredDataUsage)) {
-                    UstadMobileSystemImpl.l(UMLog.ERROR, 0, getLogPrefix() +
-                            " onConnectivityChanged: disconnected or metered data only on a unmetered only job");
-                    stop(NetworkTask.STATUS_WAITING_FOR_CONNECTION);
-                    List<DownloadJobItemWithDownloadSetItem> pausedItems = mDbManager.getDownloadJobItemDao()
-                            .findByDownloadJobAndStatusRange(downloadJob.getDownloadJobId(),
-                                    NetworkTask.STATUS_WAITING_MIN, NetworkTask.STATUS_COMPLETE_MIN-1);
-                    UstadMobileSystemImpl.l(UMLog.ERROR, 0,
-                            " setting waiting for connection status on " + pausedItems.size() +  " job items");
-                    for(DownloadJobItemWithDownloadSetItem pausedItem : pausedItems) {
-                        mDbManager.getDownloadJobItemDao().updateStatus(pausedItem.getDownloadJobItemId(),
-                                NetworkTask.STATUS_WAITING_FOR_CONNECTION);
-                        mDbManager.getOpdsEntryStatusCacheDao().handleContainerDownloadWaitingForNetwork(
-                                pausedItem.getDownloadSetItem().getEntryId());
-                    }
-                }
-            }finally {
-                statusLock.unlock();
+            if(isWaitingForWifiConnection()) {
+                UstadMobileSystemImpl.l(UMLog.ERROR, 0, getLogPrefix() +
+                        " onConnectivityChanged: actually waiting for WiFi - do nothing");
+                return;
             }
-        });
+
+            if(newState == CONNECTIVITY_STATE_DISCONNECTED
+                    || (newState == CONNECTIVITY_STATE_METERED && !allowMeteredDataUsage)) {
+                UstadMobileSystemImpl.l(UMLog.ERROR, 0, getLogPrefix() +
+                        " onConnectivityChanged: disconnected or metered data only on a unmetered only job");
+                stop(NetworkTask.STATUS_WAITING_FOR_CONNECTION);
+                List<DownloadJobItemWithDownloadSetItem> pausedItems = mDbManager.getDownloadJobItemDao()
+                        .findByDownloadJobAndStatusRange(downloadJob.getDownloadJobId(),
+                                NetworkTask.STATUS_WAITING_MIN, NetworkTask.STATUS_COMPLETE_MIN-1);
+                UstadMobileSystemImpl.l(UMLog.ERROR, 0,
+                        " setting waiting for connection status on " + pausedItems.size() +  " job items");
+                for(DownloadJobItemWithDownloadSetItem pausedItem : pausedItems) {
+                    mDbManager.getDownloadJobItemDao().updateStatus(pausedItem.getDownloadJobItemId(),
+                            NetworkTask.STATUS_WAITING_FOR_CONNECTION);
+                    mDbManager.getOpdsEntryStatusCacheDao().handleContainerDownloadWaitingForNetwork(
+                            pausedItem.getDownloadSetItem().getEntryId());
+                }
+            }
+        }finally {
+            statusLock.unlock();
+        }
 
     }
 

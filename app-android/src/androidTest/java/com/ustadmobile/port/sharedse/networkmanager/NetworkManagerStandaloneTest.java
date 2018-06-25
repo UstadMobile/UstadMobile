@@ -1,6 +1,7 @@
 package com.ustadmobile.port.sharedse.networkmanager;
 
 import com.ustadmobile.core.db.UmAppDatabase;
+import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.networkmanager.NetworkManagerCore;
 import com.ustadmobile.core.networkmanager.NetworkTask;
@@ -48,10 +49,12 @@ public class NetworkManagerStandaloneTest extends TestWithNetworkService {
         catch(InterruptedException e) {}
         NetworkManager networkManager = (NetworkManager)UstadMobileSystemImpl.getInstance()
                 .getNetworkManager();
+        UstadMobileSystemImpl.l(UMLog.ERROR, 0, "Test: setting connection disconnect");
         networkManager.handleConnectivityChanged(NetworkManagerCore.CONNECTIVITY_STATE_DISCONNECTED);
 
-        try { Thread.sleep(500);}
-        catch(InterruptedException e) {}
+        TestDownloadTaskStandalone.waitForDownloadStatus(crawlJob.getContainersDownloadJobId(),
+            NetworkTask.STATUS_WAITING_FOR_CONNECTION, 10*1000);
+
         //Make sure the task has stopped
         DownloadJob dlJob = UmAppDatabase.getInstance(PlatformTestUtil.getTargetContext())
                 .getDownloadJobDao().findById(crawlJob.getContainersDownloadJobId());
@@ -81,7 +84,8 @@ public class NetworkManagerStandaloneTest extends TestWithNetworkService {
         CrawlJob crawlJob = TestDownloadTaskStandalone.runCrawlJob(
                 UMFileUtil.resolveLink(ResourcesHttpdTestServer.getHttpRoot(),
                         TestDownloadTaskStandalone.OPDS_PATH_SPEED_LIMITED),
-                CRAWL_ROOT_ENTRY_ID_SLOW, true, CRAWL_JOB_TIMEOUT);
+                CRAWL_ROOT_ENTRY_ID_SLOW, false, CRAWL_JOB_TIMEOUT,
+                true);
         try { Thread.sleep(500);}
         catch(InterruptedException e) {}
 
