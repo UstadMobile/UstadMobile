@@ -595,8 +595,11 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
 
     private DownloadTask stopDownloadAndSetStatus(int downloadJobId, int statusAfterStop) {
         NetworkTask downloadTask = activeNetworkTasks.get(DownloadTask.class).get(downloadJobId);
-        if(downloadTask == null)
+        if(downloadTask == null) {
+            UstadMobileSystemImpl.l(UMLog.WARN, 0, "stopDownloadAndSetStatus: " +
+                    " download job #" + downloadJobId + " is not active");
             return null;
+        }
 
         downloadTask.stop(statusAfterStop);
 
@@ -647,6 +650,8 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
         UmAppDatabase dbManager = UmAppDatabase.getInstance(getContext());
         DownloadTask downloadTask = stopDownloadAndSetStatus(downloadJobId,
                 NetworkTask.STATUS_CANCELED);
+        UstadMobileSystemImpl.l(UMLog.INFO, 0, "cancelDownloadJob #" + downloadJobId +
+            " task running: " + (downloadTask != null));
 
         //go through all downloads that have been completed, and delete them
         List<DownloadJobItemWithDownloadSetItem> downloadedItems =  dbManager
@@ -654,6 +659,9 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
 
         for(DownloadJobItemWithDownloadSetItem item : downloadedItems) {
             if(item.getStatus() < NetworkTask.STATUS_COMPLETE_MIN) {
+                UstadMobileSystemImpl.l(UMLog.INFO, 0, "cancelDownloadJob #"
+                        + downloadJobId + " : item #" + item.getDownloadJobItemId() +
+                        " : " + item.getDownloadSetItem().getEntryId() + " : handleContainerDownloadAborted");
                 dbManager.getOpdsEntryStatusCacheDao().handleContainerDownloadAborted(item
                         .getDownloadSetItem().getEntryId());
 
@@ -668,12 +676,17 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
                         file.delete();
                 }
             }else {
+                UstadMobileSystemImpl.l(UMLog.INFO, 0, "cancelDownloadJob #"
+                        + " : item #" + item.getDownloadJobItemId() +
+                        " : " + item.getDownloadSetItem().getEntryId() + ": deleteContainer");
                 ContainerFileHelper.getInstance().deleteAllContainerFilesByEntryId(getContext(),
                         item.getDownloadSetItem().getEntryId());
             }
 
         }
 
+        UstadMobileSystemImpl.l(UMLog.INFO, 0, "cancelDownloadJob #" + downloadJobId +
+                " cancel complete");
         return downloadTask != null;
     }
 
@@ -702,12 +715,14 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
 
             UstadMobileSystemImpl.l(UMLog.DEBUG, 0, "checkDownloadJobQueue: starting download job #" +
                     job.getDownloadJobId());
-            DownloadTask task = new DownloadTask(job, this, this);
+            DownloadTask task = new DownloadTask(job, this, this,
+                    dbExecutorService);
             taskMap.put(job.getDownloadJobId(), task);
             task.start();
         }else {
             UstadMobileSystemImpl.l(UMLog.DEBUG, 0,
-                    "checkDownloadJobQueue: not looking for new downloads, there are currently active download tasks");
+            "checkDownloadJobQueue: not looking for new downloads: " +
+                    (!taskMap.isEmpty() ? " There are currently active tasks" : "Network is disconnected"));
         }
     }
 

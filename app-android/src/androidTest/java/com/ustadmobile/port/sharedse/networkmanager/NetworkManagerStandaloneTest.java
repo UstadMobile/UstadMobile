@@ -23,6 +23,7 @@ import java.util.Arrays;
 
 import static com.ustadmobile.test.sharedse.network.TestDownloadTaskStandalone.CRAWL_JOB_TIMEOUT;
 import static com.ustadmobile.test.sharedse.network.TestDownloadTaskStandalone.CRAWL_ROOT_ENTRY_ID_SLOW;
+import static com.ustadmobile.test.sharedse.network.TestDownloadTaskStandalone.waitForDownloadStatus;
 
 public class NetworkManagerStandaloneTest extends TestWithNetworkService {
 
@@ -45,6 +46,8 @@ public class NetworkManagerStandaloneTest extends TestWithNetworkService {
                         TestDownloadTaskStandalone.OPDS_PATH_SPEED_LIMITED),
                         CRAWL_ROOT_ENTRY_ID_SLOW, true, CRAWL_JOB_TIMEOUT,
                 true);
+        waitForDownloadStatus(crawlJob.getContainersDownloadJobId(), NetworkTask.STATUS_RUNNING,
+            5*1000);
         try { Thread.sleep(500);}
         catch(InterruptedException e) {}
         NetworkManager networkManager = (NetworkManager)UstadMobileSystemImpl.getInstance()
@@ -86,17 +89,21 @@ public class NetworkManagerStandaloneTest extends TestWithNetworkService {
                         TestDownloadTaskStandalone.OPDS_PATH_SPEED_LIMITED),
                 CRAWL_ROOT_ENTRY_ID_SLOW, false, CRAWL_JOB_TIMEOUT,
                 true);
+        waitForDownloadStatus(crawlJob.getContainersDownloadJobId(), NetworkTask.STATUS_RUNNING,
+                5*1000);
+
         try { Thread.sleep(500);}
         catch(InterruptedException e) {}
 
         networkManager.handleConnectivityChanged(NetworkManagerCore.CONNECTIVITY_STATE_METERED);
-        try { Thread.sleep(500);}
-        catch(InterruptedException e) {}
+
+        TestDownloadTaskStandalone.waitForDownloadStatus(crawlJob.getContainersDownloadJobId(),
+                NetworkTask.STATUS_WAITING_FOR_CONNECTION, 10*1000);
 
         DownloadJob dlJob = UmAppDatabase.getInstance(PlatformTestUtil.getTargetContext())
                 .getDownloadJobDao().findById(crawlJob.getContainersDownloadJobId());
-        Assert.assertEquals("Setup: download job has stopped itself", NetworkTask.STATUS_WAITING_FOR_CONNECTION,
-                dlJob.getStatus());
+        Assert.assertEquals("Setup: download job has stopped itself",
+                NetworkTask.STATUS_WAITING_FOR_CONNECTION, dlJob.getStatus());
 
         //bring back unmetered connectivity
         networkManager.handleConnectivityChanged(NetworkManagerCore.CONNECTIVITY_STATE_UNMETERED);

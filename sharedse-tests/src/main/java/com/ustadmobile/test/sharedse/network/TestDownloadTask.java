@@ -43,6 +43,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
+import java.util.concurrent.Executors;
 
 import fi.iki.elonen.router.RouterNanoHTTPD;
 
@@ -436,7 +437,8 @@ public class TestDownloadTask {
 
         NetworkManager networkManager =(NetworkManager)UstadMobileSystemImpl.getInstance()
                 .getNetworkManager();
-        DownloadTask task = new DownloadTask(null, networkManager, networkManager);
+        DownloadTask task = new DownloadTask(null, networkManager, networkManager,
+                Executors.newCachedThreadPool());
         Assert.assertEquals("When WiFi direct and local network responses are available, local network response will be chosen",
                 sameNetworkResponse, task.selectEntryStatusResponse(responseList, mockHistoryDao1));
 

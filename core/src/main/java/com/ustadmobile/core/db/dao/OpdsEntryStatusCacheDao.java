@@ -128,6 +128,7 @@ public abstract class OpdsEntryStatusCacheDao {
      * @param loadedEntries The entries that have just been loaded. These MUST have been already
      *                      committed to the OpdsEntry database.
      */
+    @UmTransaction
     public void handleOpdsEntriesLoaded(UmAppDatabase dbManager, List<OpdsEntryWithRelations> loadedEntries) {
         OpdsEntryWithRelations loadedEntry;
 
@@ -472,6 +473,7 @@ public abstract class OpdsEntryStatusCacheDao {
      * @param entry Entry found within container (e.g. as returned by the scanner)
      * @param containerFile The ContainerFile that represents the file in which this entry was found
      */
+    @UmTransaction
     public void handleContainerFoundOnDisk(UmAppDatabase dbManager, OpdsEntryWithRelations entry,
                                            ContainerFile containerFile) {
         OpdsEntryStatusCache statusCache = findByEntryId(entry.getEntryId());
@@ -633,21 +635,28 @@ public abstract class OpdsEntryStatusCacheDao {
      *
      * @param entryStatusCache
      */
+    @UmTransaction
     public void handleContainerDeleted(OpdsEntryStatusCache entryStatusCache) {
         long deltaContainersDownloadedSize = entryStatusCache.getEntryContainerDownloadedSize() * -1;
         int deltaContainersDownloaded = entryStatusCache.isEntryContainerDownloaded() ? -1 : 0;
         long deltaSize = entryStatusCache.getEntryAcquisitionLinkLength() -
                 entryStatusCache.getEntryContainerDownloadedSize();
-
-        updateOnContainerStatusChangedIncAncestors(entryStatusCache.getStatusEntryId(),
-                0, 0, 0,0,
-                deltaContainersDownloadedSize, deltaContainersDownloaded, deltaSize);
+        int deltaActiveDownload = entryStatusCache.isEntryActiveDownload() ? -1 : 0;
+        int deltaPausedDownloads = entryStatusCache.isEntryPausedDownload() ? -1 : 0;
 
         updateOnContainerStatusChangedEntry(entryStatusCache.getStatusCacheUid(),
                 entryStatusCache.getEntryPendingDownloadBytesSoFar(),
                 entryStatusCache.isEntryContainerDownloadPending(),
-                false,false,0, false,
+                entryStatusCache.isEntryActiveDownload(),entryStatusCache.isEntryPausedDownload(),
+                0, false,
                 entryStatusCache.getEntryAcquisitionLinkLength());
+
+        updateOnContainerStatusChangedIncAncestors(entryStatusCache.getStatusEntryId(),
+                0, 0, 0,
+                0, deltaContainersDownloadedSize, deltaContainersDownloaded,
+                deltaSize);
+
+
     }
 
     /**
@@ -666,6 +675,7 @@ public abstract class OpdsEntryStatusCacheDao {
      *
      * @param entryStatusCache The OpdsEntryStatusCache representing the download that is being aborted
      */
+    @UmTransaction
     public void handleContainerDownloadAborted(OpdsEntryStatusCache entryStatusCache){
         long deltaDownloadedBytesSoFar = entryStatusCache.getEntryPendingDownloadBytesSoFar() * -1;
         int deltaContainerDownloadPending = entryStatusCache.isEntryContainerDownloadPending() ? -1 : 0;
@@ -699,6 +709,7 @@ public abstract class OpdsEntryStatusCacheDao {
     }
 
 
+    @UmTransaction
     public void handleContainerDownloadPaused(OpdsEntryStatusCache entryStatusCache, boolean pausedByUser) {
         int deltaPausedDownloads = pausedByUser ?
                 (entryStatusCache.isEntryPausedDownload() ? 0 : 1) : 0;
