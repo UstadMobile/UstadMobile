@@ -1,0 +1,18 @@
+apply plugin: 'java-library'
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation "org.jsoup:jsoup:$version_jsoup"
+    implementation "com.google.code.gson:gson:$version_gson"
+    implementation project(":core")
+    implementation "commons-io:commons-io:$version_commons_io"
+
+    testImplementation "junit:junit:$version_junit"
+    testImplementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
+}
+
+
+compileTestJava.options.encoding = 'UTF-8'
+
+sourceCompatibility = "1.8"
+targetCompatibility = "1.8"

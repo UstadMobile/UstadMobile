@@ -9,6 +9,7 @@
       <module fileurl="file://$PROJECT_DIR$/app-javase/app-javase.iml" filepath="$PROJECT_DIR$/app-javase/app-javase.iml" />
       <module fileurl="file://$PROJECT_DIR$/core/core.iml" filepath="$PROJECT_DIR$/core/core.iml" />
       <module fileurl="file://$PROJECT_DIR$/core-tests/core-tests.iml" filepath="$PROJECT_DIR$/core-tests/core-tests.iml" />
+      <module fileurl="file://$PROJECT_DIR$/lib-content-scrapers/lib-content-scrapers.iml" filepath="$PROJECT_DIR$/lib-content-scrapers/lib-content-scrapers.iml" />
       <module fileurl="file://$PROJECT_DIR$/lib-core-fs/lib-core-fs.iml" filepath="$PROJECT_DIR$/lib-core-fs/lib-core-fs.iml" />
       <module fileurl="file://$PROJECT_DIR$/lib-core-fs-tests/lib-core-fs-tests.iml" filepath="$PROJECT_DIR$/lib-core-fs-tests/lib-core-fs-tests.iml" />
       <module fileurl="file://$PROJECT_DIR$/lib-database/lib-database.iml" filepath="$PROJECT_DIR$/lib-database/lib-database.iml" />
