@@ -4,28 +4,26 @@ import com.google.gson.GsonBuilder;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
-import java.awt.Component;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
-import java.util.zip.ZipOutputStream;
 
 import okhttp3.mockwebserver.Dispatcher;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
 import okio.Okio;
-import static com.ustadmobile.lib.contentscrapers.ScraperConstants.*;
+
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.CONTENT_JSON;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.ComponentType;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.QUESTIONS_JSON;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.QUESTION_SET_HOLDER_TYPES;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.VIDEO_MP4;
 
 public class TestEdraakContentScraper {
 
@@ -49,6 +47,8 @@ public class TestEdraakContentScraper {
 
     private final String VIDEO_LOCATION_FILE = "/com/ustadmobile/lib/contentscrapers/video.mp4";
 
+    private final String RESOURCE_PATH = "/com/ustadmobile/lib/contentscrapers/";
+
     final String COMPONENT_API_PREFIX = "/api/component/";
 
     final Dispatcher dispatcher = new Dispatcher() {
@@ -68,6 +68,12 @@ public class TestEdraakContentScraper {
                 } else if (request.getPath().equals("/media/video.mp4")) {
                     InputStream videoIn = getClass().getResourceAsStream(VIDEO_LOCATION_FILE);
                     return new MockResponse().setResponseCode(200).setBody(Okio.buffer(Okio.source(videoIn)).buffer());
+                } else if(request.getPath().contains("picture")){
+                    int length = "/media/".length();
+                    String fileName = request.getPath().substring(length,
+                            request.getPath().indexOf(".png", length));
+                    InputStream pictureIn = getClass().getResourceAsStream(RESOURCE_PATH + fileName + ".png");
+                    return new MockResponse().setResponseCode(200).setBody(Okio.buffer(Okio.source(pictureIn)).buffer());
                 }
 
             } catch (IOException e) {

@@ -26,17 +26,25 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
-import sun.misc.JavaUtilZipFileAccess;
-
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.*;
 
 
 public class EdraakContentScraper implements ContentScraper{
 
+    public static void main(String[] args) {
+        // TODO
+    }
+
     public void convert(String contentId, int programId, String baseUrl, File destinationDir) throws IOException {
         convert(baseUrl + "component/" +  contentId + "/?states_program_id=" + programId, destinationDir);
     }
-
+    /**
+     *
+     *  Given a url and a directory, download all its content and save it in a directory
+     * @param urlString
+     * @param destinationDir destination directory
+     * @throws IOException
+     */
     @Override
     public void convert(String urlString, File destinationDir) throws IOException {
 
@@ -87,7 +95,7 @@ public class EdraakContentScraper implements ContentScraper{
                 } else if(ScraperConstants.QUESTION_SET_HOLDER_TYPES.contains(children.component_type)) {
 
                     List<ContentResponse> questionsList = children.question_set.children;
-                    findAllExerciseImages(questionsList, destinationDir);
+                    findAllExerciseImages(questionsList, destinationDir, url);
 
                 }
 
@@ -97,7 +105,7 @@ public class EdraakContentScraper implements ContentScraper{
 
             // list of questions sets
             List<ContentResponse> questionsList = response.target_component.question_set.children;
-            findAllExerciseImages(questionsList, destinationDir);
+            findAllExerciseImages(questionsList, destinationDir, url);
         }
 
 
@@ -130,7 +138,15 @@ public class EdraakContentScraper implements ContentScraper{
     }
 
 
-    private void findAllExerciseImages(List<ContentResponse> questionsList, File destinationDir) throws IOException {
+    /**
+     *  Given an array of questions, find the questions that have image tags in their html and save the image within the directory
+     *  Finally write the list into a file
+     *
+     * @param questionsList
+     * @param destinationDir
+     * @throws IOException
+     */
+    private void findAllExerciseImages(List<ContentResponse> questionsList, File destinationDir, URL url) throws IOException {
 
             if (questionsList.isEmpty())
                 throw new IllegalArgumentException("No Questions were found in the question set");
@@ -139,18 +155,18 @@ public class EdraakContentScraper implements ContentScraper{
                 File exerciseDirectory = new File(destinationDir, exercise.id);
                 exerciseDirectory.mkdirs();
 
-                exercise.full_description = ContentScraperUtil.checkIfJsonObjectHasAttribute(exercise.full_description, IMG_TAG, exerciseDirectory, HtmlName.FULL_DESC.getName() + ScraperConstants.PNG_EXT);
-                exercise.explanation = ContentScraperUtil.checkIfJsonObjectHasAttribute(exercise.explanation, IMG_TAG, exerciseDirectory, HtmlName.EXPLAIN.getName() + ScraperConstants.PNG_EXT);
-                exercise.description = ContentScraperUtil.checkIfJsonObjectHasAttribute(exercise.description, IMG_TAG, exerciseDirectory, HtmlName.DESC + PNG_EXT);
+                exercise.full_description = ContentScraperUtil.checkIfJsonObjectHasAttribute(exercise.full_description, IMG_TAG, exerciseDirectory, HtmlName.FULL_DESC.getName() + ScraperConstants.PNG_EXT, url);
+                exercise.explanation = ContentScraperUtil.checkIfJsonObjectHasAttribute(exercise.explanation, IMG_TAG, exerciseDirectory, HtmlName.EXPLAIN.getName() + ScraperConstants.PNG_EXT, url);
+                exercise.description = ContentScraperUtil.checkIfJsonObjectHasAttribute(exercise.description, IMG_TAG, exerciseDirectory, HtmlName.DESC + PNG_EXT, url);
 
                 if (ComponentType.MULTICHOICE.getType().equalsIgnoreCase(exercise.component_type)) {
                     for (ContentResponse.Choice choice : exercise.choices) {
-                        choice.description = ContentScraperUtil.checkIfJsonObjectHasAttribute(choice.description, IMG_TAG, exerciseDirectory, choice.item_id + ScraperConstants.PNG_EXT);
+                        choice.description = ContentScraperUtil.checkIfJsonObjectHasAttribute(choice.description, IMG_TAG, exerciseDirectory, choice.item_id + ScraperConstants.PNG_EXT, url);
                     }
                 }
 
                 for (ContentResponse.Hint hint : exercise.hints) {
-                    hint.description = ContentScraperUtil.checkIfJsonObjectHasAttribute(hint.description, IMG_TAG, exerciseDirectory, hint.item_id + ScraperConstants.PNG_EXT);
+                    hint.description = ContentScraperUtil.checkIfJsonObjectHasAttribute(hint.description, IMG_TAG, exerciseDirectory, hint.item_id + ScraperConstants.PNG_EXT, url);
                 }
 
             }
@@ -162,6 +178,14 @@ public class EdraakContentScraper implements ContentScraper{
             }
     }
 
+
+    /**
+     *
+     * Given the list of questions, save it as json file
+     * @param destinationDir
+     * @param questionsList
+     * @throws IOException
+     */
     private void saveQuestionsAsJson(File destinationDir, List<ContentResponse> questionsList) throws IOException{
         FileWriter fileWriter = null;
         try {
@@ -169,7 +193,6 @@ public class EdraakContentScraper implements ContentScraper{
             Gson gson = new GsonBuilder().create();
             String savedQuestionsJson = gson.toJson(questionsList, ArrayList.class);
             File savedQuestionsFile = new File(destinationDir, QUESTIONS_JSON);
-
 
             fileWriter = new FileWriter(savedQuestionsFile);
             fileWriter.write(savedQuestionsJson);
@@ -180,6 +203,12 @@ public class EdraakContentScraper implements ContentScraper{
     }
 
 
+    /**
+     *
+     * Given a list of videos, find the one with the smallest size
+     * @param encoded_videos
+     * @return chosen video url
+     */
     private String selectVideo(List<ContentResponse.Encoded_videos> encoded_videos) {
 
         String videoUrl = "";
@@ -197,8 +226,9 @@ public class EdraakContentScraper implements ContentScraper{
         return ScraperConstants.ComponentType.IMPORTED.getType().equalsIgnoreCase(component_type);
     }
 
+
     private ContentResponse parseJson(URL url) throws IOException {
-        //check closing these readers
+
         Reader reader = null;
         try{
             reader = new InputStreamReader(url.openStream()); //Read the json output

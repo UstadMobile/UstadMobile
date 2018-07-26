@@ -17,14 +17,34 @@ import java.net.URL;
 
 public class ContentScraperUtil {
 
-    public static String checkIfJsonObjectHasAttribute(String json, String attribute, File destinationDir, String fileName) throws IOException{
-        if (json != null && json.contains(attribute))
-            return ContentScraperUtil.downloadAllResources(json, destinationDir, fileName);
-        return json;
+
+    /**
+     *  Checks if the html string has an attribute value within, if found download its content
+     * @param htmlString html String
+     * @param attribute Attribute to look for
+     * @param destinationDir directory it will be saved if attribute found
+     * @param fileName - name of the file once saved
+     * @param url - base url
+     * @return
+     * @throws IOException
+     */
+    public static String checkIfJsonObjectHasAttribute(String htmlString, String attribute, File destinationDir, String fileName, URL url) throws IOException{
+        if (htmlString != null && htmlString.contains(attribute))
+            return ContentScraperUtil.downloadAllResources(htmlString, destinationDir, fileName, url);
+        return htmlString;
     }
 
 
-    public static String downloadAllResources(String html, File destinationDir, String fileName) throws IOException {
+    /**
+     * Given an html String search for all images that have sources to download from
+     * @param html
+     * @param destinationDir
+     * @param fileName
+     * @param baseUrl
+     * @return
+     * @throws IOException
+     */
+    public static String downloadAllResources(String html, File destinationDir, String fileName, URL baseUrl) throws IOException {
 
         Document doc = Jsoup.parse(html);
 
@@ -36,7 +56,7 @@ public class ContentScraperUtil {
             if(url.contains("data:image") && url.contains("base64")){
                 continue;
             }
-            URL imageUrl = new URL(url);
+            URL imageUrl = new URL(baseUrl, url);
 
             downloadContent(imageUrl, destinationDir, imageCountInTag + fileName);
 
@@ -49,6 +69,15 @@ public class ContentScraperUtil {
         return htmlBody;
     }
 
+
+    /**
+     *
+     * Given a url, download its content and save in the destination directory
+     * @param url
+     * @param destinationDir
+     * @param fileName
+     * @throws IOException
+     */
     public static void downloadContent(URL url, File destinationDir, String fileName) throws IOException {
 
         InputStream inputStream = null;
