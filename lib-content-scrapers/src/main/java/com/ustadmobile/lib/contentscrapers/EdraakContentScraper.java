@@ -31,13 +31,18 @@ import sun.misc.JavaUtilZipFileAccess;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.*;
 
 
-public class EdraakContentScraper {
+public class EdraakContentScraper implements ContentScraper{
 
     public void convert(String contentId, int programId, String baseUrl, File destinationDir) throws IOException {
+        convert(baseUrl + "component/" +  contentId + "/?states_program_id=" + programId, destinationDir);
+    }
+
+    @Override
+    public void convert(String urlString, File destinationDir) throws IOException {
 
         URL url;
         try {
-            url = new URL(baseUrl + "component/" +  contentId + "/?states_program_id=" + programId);
+            url = new URL(urlString);
         } catch (MalformedURLException e) {
             throw new IllegalArgumentException("Malformed url", e);
         }
@@ -55,20 +60,23 @@ public class EdraakContentScraper {
         if(response.target_component == null || response.target_component.children == null)
             throw new IllegalArgumentException("Null target component, or target component children are null");
 
-        for(ContentResponse children: response.target_component.children){
+        if(ComponentType.ONLINE.getType().equalsIgnoreCase(response.target_component.component_type)){
 
-            if(ScraperConstants.ComponentType.VIDEO.getType().equalsIgnoreCase(children.component_type)){
+            // Contains children which have video and question set list
+            for(ContentResponse children: response.target_component.children){
 
-                if (children.video_info == null || children.video_info.encoded_videos == null || children.video_info.encoded_videos.isEmpty())
-                    throw new IllegalArgumentException("Component Type was Video but no video found");
+                if(ScraperConstants.ComponentType.VIDEO.getType().equalsIgnoreCase(children.component_type)){
 
-                String videoHref = selectVideo(children.video_info.encoded_videos);
-                URL videoUrl;
-                try {
-                    videoUrl = new URL(url, videoHref);
-                } catch (MalformedURLException e) {
-                    throw new IllegalArgumentException("Malformed url", e);
-                }
+                    if (children.video_info == null || children.video_info.encoded_videos == null || children.video_info.encoded_videos.isEmpty())
+                        throw new IllegalArgumentException("Component Type was Video but no video found");
+
+                    String videoHref = selectVideo(children.video_info.encoded_videos);
+                    URL videoUrl;
+                    try {
+                        videoUrl = new URL(url, videoHref);
+                    } catch (MalformedURLException e) {
+                        throw new IllegalArgumentException("Malformed url", e);
+                    }
 
                     try {
                         ContentScraperUtil.downloadContent(videoUrl, destinationDir, VIDEO_MP4);
@@ -76,40 +84,22 @@ public class EdraakContentScraper {
                         throw new IllegalArgumentException("Malformed url", e);
                     }
 
-                } else if(ScraperConstants.QUESTION_SET_HOLDER_TYPES.contains(children.component_type)){
+                } else if(ScraperConstants.QUESTION_SET_HOLDER_TYPES.contains(children.component_type)) {
 
-                        List<ContentResponse> questionsList = children.question_set.children;
+                    List<ContentResponse> questionsList = children.question_set.children;
+                    findAllExerciseImages(questionsList, destinationDir);
 
-                    if(questionsList.isEmpty())
-                        throw new IllegalArgumentException("No Questions were found in the question set");
+                }
 
-                    for(ContentResponse exercise : questionsList) {
-                        File exerciseDirectory = new File(destinationDir, exercise.id);
-                        exerciseDirectory.mkdirs();
-
-                        exercise.full_description = ContentScraperUtil.checkIfJsonObjectHasAttribute(exercise.full_description, IMG_TAG, exerciseDirectory, HtmlName.FULL_DESC.getName() + ScraperConstants.PNG_EXT);
-                        exercise.explanation = ContentScraperUtil.checkIfJsonObjectHasAttribute(exercise.explanation, IMG_TAG, exerciseDirectory, HtmlName.EXPLAIN.getName() + ScraperConstants.PNG_EXT);
-                        exercise.description = ContentScraperUtil.checkIfJsonObjectHasAttribute(exercise.description, IMG_TAG, exerciseDirectory, HtmlName.DESC + PNG_EXT);
-
-                        if(ComponentType.MULTICHOICE.getType().equalsIgnoreCase(exercise.component_type)){
-                            for(ContentResponse.Choice choice: exercise.choices){
-                                choice.description = ContentScraperUtil.checkIfJsonObjectHasAttribute(choice.description, IMG_TAG, exerciseDirectory, choice.item_id + ScraperConstants.PNG_EXT);
-                            }
-                        }
-
-                        for(ContentResponse.Hint hint : exercise.hints){
-                            hint.description = ContentScraperUtil.checkIfJsonObjectHasAttribute(hint.description, IMG_TAG, exerciseDirectory, hint.item_id + ScraperConstants.PNG_EXT);
-                        }
-
-                    }
-
-                    try {
-                        saveQuestionsAsJson(destinationDir, questionsList);
-                    } catch (IOException e) {
-                        throw new IllegalArgumentException("Invalid Questions Json");
-                    }
             }
+
+        }else if(ComponentType.TEST.getType().equalsIgnoreCase(response.target_component.component_type)){
+
+            // list of questions sets
+            List<ContentResponse> questionsList = response.target_component.question_set.children;
+            findAllExerciseImages(questionsList, destinationDir);
         }
+
 
         // store the json in a file after modifying image links
         Gson gson = new GsonBuilder().disableHtmlEscaping().create();
@@ -137,6 +127,39 @@ public class EdraakContentScraper {
                     });
         }
 
+    }
+
+
+    private void findAllExerciseImages(List<ContentResponse> questionsList, File destinationDir) throws IOException {
+
+            if (questionsList.isEmpty())
+                throw new IllegalArgumentException("No Questions were found in the question set");
+
+            for (ContentResponse exercise : questionsList) {
+                File exerciseDirectory = new File(destinationDir, exercise.id);
+                exerciseDirectory.mkdirs();
+
+                exercise.full_description = ContentScraperUtil.checkIfJsonObjectHasAttribute(exercise.full_description, IMG_TAG, exerciseDirectory, HtmlName.FULL_DESC.getName() + ScraperConstants.PNG_EXT);
+                exercise.explanation = ContentScraperUtil.checkIfJsonObjectHasAttribute(exercise.explanation, IMG_TAG, exerciseDirectory, HtmlName.EXPLAIN.getName() + ScraperConstants.PNG_EXT);
+                exercise.description = ContentScraperUtil.checkIfJsonObjectHasAttribute(exercise.description, IMG_TAG, exerciseDirectory, HtmlName.DESC + PNG_EXT);
+
+                if (ComponentType.MULTICHOICE.getType().equalsIgnoreCase(exercise.component_type)) {
+                    for (ContentResponse.Choice choice : exercise.choices) {
+                        choice.description = ContentScraperUtil.checkIfJsonObjectHasAttribute(choice.description, IMG_TAG, exerciseDirectory, choice.item_id + ScraperConstants.PNG_EXT);
+                    }
+                }
+
+                for (ContentResponse.Hint hint : exercise.hints) {
+                    hint.description = ContentScraperUtil.checkIfJsonObjectHasAttribute(hint.description, IMG_TAG, exerciseDirectory, hint.item_id + ScraperConstants.PNG_EXT);
+                }
+
+            }
+
+            try {
+                saveQuestionsAsJson(destinationDir, questionsList);
+            } catch (IOException e) {
+                throw new IllegalArgumentException("Invalid Questions Json");
+            }
     }
 
     private void saveQuestionsAsJson(File destinationDir, List<ContentResponse> questionsList) throws IOException{
@@ -185,6 +208,7 @@ public class EdraakContentScraper {
             UMIOUtils.closeQuietly(reader);
         }
     }
+
 
 
 }

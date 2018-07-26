@@ -93,8 +93,10 @@ public class TestEdraakContentScraper {
         ContentResponse gsonContent = new GsonBuilder().disableHtmlEscaping().create().fromJson(jsonStr,ContentResponse.class);
         Assert.assertNotNull("Created Gson POJO Object", gsonContent);
 
+        if(ComponentType.ONLINE.getType().equalsIgnoreCase(gsonContent.target_component.component_type)){
+            Assert.assertTrue("Downloaded video exists", new File(tmpDir, VIDEO_MP4).exists());
+        }
 
-        Assert.assertTrue("Downloaded video exists", new File(tmpDir, VIDEO_MP4).exists());
         Assert.assertTrue("Downloaded Questions json exist", new File(tmpDir, QUESTIONS_JSON).exists());
         Assert.assertTrue("Downloaded zip exists", new File(tmpDir.getParent(), gsonContent.id + ".zip").exists());
 
@@ -102,22 +104,40 @@ public class TestEdraakContentScraper {
         List<ContentResponse> tests = gsonContent.target_component.children;
 
         int videoCount = 0, questionSet = 0;
-        for(ContentResponse content: tests){
-            if(ComponentType.VIDEO.getType().equalsIgnoreCase(content.component_type)){
+        if(ComponentType.TEST.getType().equalsIgnoreCase(gsonContent.target_component.component_type)){
 
-                videoCount++;
-                Assert.assertTrue("Video info content is not empty", !content.video_info.url.isEmpty());
-
-            }else if(QUESTION_SET_HOLDER_TYPES.contains(content.component_type)){
-
+            ContentResponse questionList = gsonContent.target_component.question_set;
+            if(questionList != null){
                 questionSet++;
-                //load JSON classes - assert that the quiz exists, and has > 0 questinos
-                Assert.assertNotNull("Has Questions Set",content.question_set);
-                Assert.assertTrue("Has more than 1 question", content.question_set.children.size() > 0);
-
             }
+
+        }else if(ComponentType.ONLINE.getType().equalsIgnoreCase(gsonContent.target_component.component_type)){
+
+            for(ContentResponse content: tests){
+                if(ComponentType.VIDEO.getType().equalsIgnoreCase(content.component_type)){
+
+                    videoCount++;
+                    Assert.assertTrue("Video info content is not empty", !content.video_info.url.isEmpty());
+
+                }else if(QUESTION_SET_HOLDER_TYPES.contains(content.component_type)){
+
+                    questionSet++;
+                    //load JSON classes - assert that the quiz exists, and has > 0 questinos
+                    Assert.assertNotNull("Has Questions Set",content.question_set);
+                    Assert.assertTrue("Has more than 1 question", content.question_set.children.size() > 0);
+
+                }
+            }
+
         }
-        Assert.assertEquals("Found 1 video", 1, videoCount);
+
+
+
+        if(ComponentType.ONLINE.getType().equalsIgnoreCase(gsonContent.target_component.component_type)){
+            Assert.assertEquals("Found 1 video", 1, videoCount);
+        }
+
+
         Assert.assertEquals("Found 1 question set", 1, questionSet);
 
     }
