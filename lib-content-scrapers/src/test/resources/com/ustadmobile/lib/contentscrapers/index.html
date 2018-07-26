@@ -1,0 +1,149 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>Login  Ustad Mobile Cloud Django</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<script src="jquery-3.3.1.min.js"></script>
+
+</head>
+
+<body onload="readJson();">
+		<script type="text/javascript">
+
+			var jsonQuestions = null;
+			var questionsCounter = 0;
+
+			function readJson() {
+                var request = new XMLHttpRequest();
+                request.open("GET", "questions.json", false);
+                request.send(null);
+                jsonQuestions = JSON.parse(request.responseText);
+
+                displayQuestion(questionsCounter);
+            }
+
+            function displayQuestion(counter){
+
+                document.getElementById("question").innerHTML=jsonQuestions[counter].full_description;
+                var container = document.getElementById("choices");
+                var next = document.getElementById("nextquestion");
+                next.style.display = "none";
+                container.innerHTML = "";
+
+				if(jsonQuestions[questionsCounter].component_type === "NumericResponseQuestion"){
+
+                    var text = document.createElement("input");
+                    text.setAttribute("id","edittext");
+                    text.setAttribute("type", "text");
+                    text.setAttribute("style","float:right");
+
+                    container.appendChild(text);
+                    linebreak = document.createElement("br");
+                    container.appendChild(linebreak);
+
+
+			}else if (jsonQuestions[questionsCounter].component_type === "MultipleChoiceQuestion"){
+                    for(var i = 0; i < jsonQuestions[counter].choices.length ; i++){
+
+                        var input = document.createElement("input");
+                        input.setAttribute("type","radio");
+                        input.setAttribute("name","choice");
+                        input.setAttribute("id","choice" + i);
+
+                        var label = document.createElement("label");
+                        label.setAttribute("for","choice" + i);
+                        label.setAttribute("display","inline-block");
+                        label.innerHTML = jsonQuestions[counter].choices[i].description;
+
+                        container.appendChild(input);
+                        container.appendChild(label);
+
+                    }
+
+				}
+
+
+            }
+
+            function formatAnswer(answer){
+                return answer.replace(/^0+/, '').replace(/\.0+$/,'');
+            }
+
+            function submitAnswer(){
+
+                var container = document.getElementById("choices");
+                if(jsonQuestions[questionsCounter].component_type === "NumericResponseQuestion"){
+
+					var edittext = formatAnswer(document.getElementById("edittext").value);
+					if(edittext == formatAnswer(jsonQuestions[questionsCounter].correct_answer_precise)){
+
+                        var next = document.getElementById("nextquestion");
+                        next.style.display = "block";
+
+                        var div = document.createElement("div");
+                        div.innerHTML = jsonQuestions[questionsCounter].explanation;
+                        container.appendChild(div);
+
+					}
+
+
+
+                }else if (jsonQuestions[questionsCounter].component_type === "MultipleChoiceQuestion"){
+
+                    var radios = document.getElementsByName("choice");
+
+
+                    for(var i = 0; i < jsonQuestions[questionsCounter].choices.length ; i++){
+
+                        if(radios[i].checked){
+                            if(jsonQuestions[questionsCounter].choices[i].is_correct){
+                                // TODO Correct Answer, Create Continue Button
+                                var next = document.getElementById("nextquestion");
+                                next.style.display = "block";
+
+                                var div = document.createElement("div");
+                                var text = document.createElement("H3");
+                                text.setAttribute("style", "float:right");
+                                var value = document.createTextNode("Explaination");
+                                text.appendChild(value);
+                                div.innerHTML = jsonQuestions[questionsCounter].explanation;
+                                container.appendChild(text);
+                                linebreak = document.createElement("br");
+                                container.appendChild(linebreak);
+                                container.appendChild(div);
+
+                            }else{
+                                // TODO Incorrect Answer
+
+                            }
+
+                            break;
+                        }
+                    }
+
+                }
+
+			}
+
+	  </script>
+	<div id="header">
+		<p></p>
+	</div>
+	<div id="page" role="main" class="ui-content" style="align-content:center;">
+
+				<video width="100%" height="auto" controls>
+					<source id="video" src="video.mp4" type="video/mp4">
+				</video>
+
+				<div id="exercise">
+					<h4 id="question"></h4>
+					<div id="choices" ></div>
+					<button  data-role="button" id="wronganswer" style="float:right">Need a hint?</button>
+					<button data-role="button" onclick=submitAnswer();>Submit Answer</button><br/>
+					<button  data-role="button" id="nextquestion" style=display:none onclick="displayQuestion(++questionsCounter)">Next Question</button>
+
+				</div>
+	</div>
+</body>
+</html>

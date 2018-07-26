@@ -6,10 +6,13 @@ import com.google.gson.JsonSyntaxException;
 import com.ustadmobile.core.util.UMIOUtils;
 
 import org.apache.commons.io.IOUtils;
+import org.omg.CORBA.portable.OutputStream;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
+import java.io.FilterWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -29,7 +32,7 @@ import java.util.zip.ZipOutputStream;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.*;
 
 
-public class EdraakContentScraper implements ContentScraper{
+public class EdraakK12ContentScraper implements ContentScraper{
 
     public static void main(String[] args) {
         // TODO
@@ -117,6 +120,14 @@ public class EdraakContentScraper implements ContentScraper{
         fileWriter.write(jsonString);
         UMIOUtils.closeQuietly(fileWriter);
 
+        File htmlFile = new File(destinationDir, "index.html");
+        File jsFile = new File(destinationDir, "jquery-3.3.1.min.js");
+
+        writeToFile(ScraperConstants.JS_HTML_TAG, htmlFile);
+        writeToFile(ScraperConstants.JS_TAG, jsFile);
+
+
+
 
         // zip it all
         File zippedFile = new File(destinationDir.getParent(), response.id +".zip");
@@ -135,6 +146,24 @@ public class EdraakContentScraper implements ContentScraper{
                     });
         }
 
+    }
+
+    private void writeToFile(String input, File file) {
+        InputStream htmlIns = getClass().getResourceAsStream(input);
+        FileOutputStream outputStream = null;
+        try {
+            outputStream = new FileOutputStream(file);
+            int bytesRead;
+            byte[] buffer = new byte[4096];
+            while ((bytesRead = htmlIns.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, bytesRead);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            UMIOUtils.closeQuietly(htmlIns);
+            UMIOUtils.closeQuietly(outputStream);
+        }
     }
 
 

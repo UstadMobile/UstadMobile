@@ -86,7 +86,7 @@ public class TestEdraakContentScraper {
 
     @Test
     public void givenServerOnline_whenEdXContentScraped_thenShouldConvertAndDownload() throws IOException{
-        EdraakContentScraper scraper = new EdraakContentScraper();
+        EdraakK12ContentScraper scraper = new EdraakK12ContentScraper();
         File tmpDir = Files.createTempDirectory("testedxcontentscraper").toFile();
         MockWebServer mockWebServer = new MockWebServer();
         mockWebServer.setDispatcher(dispatcher);
@@ -150,7 +150,7 @@ public class TestEdraakContentScraper {
 
     @Test(expected = IllegalArgumentException.class)
     public void givenNotImportedContent_whenEdXContentScraped_thenShouldThrowIllegalArgumentException() throws IOException {
-        EdraakContentScraper scraper = new EdraakContentScraper();
+        EdraakK12ContentScraper scraper = new EdraakK12ContentScraper();
 
         MockWebServer mockWebServer = new MockWebServer();
         mockWebServer.setDispatcher(dispatcher);
@@ -161,7 +161,7 @@ public class TestEdraakContentScraper {
     @Test(expected = IllegalArgumentException.class)
     public void givenNullTargetComponent_whenEdXContentScraped_thenShouldThrowIllegalArgumentException() throws IOException {
 
-        EdraakContentScraper scraper = new EdraakContentScraper();
+        EdraakK12ContentScraper scraper = new EdraakK12ContentScraper();
         MockWebServer mockWebServer = new MockWebServer();
         mockWebServer.setDispatcher(dispatcher);
 
@@ -171,7 +171,7 @@ public class TestEdraakContentScraper {
 
     @Test(expected = IllegalArgumentException.class)
     public void givenNullTargetComponentChildren_whenEdXContentScraped_thenShouldThrowIllegalArgumentException() throws IOException{
-        EdraakContentScraper scraper = new EdraakContentScraper();
+        EdraakK12ContentScraper scraper = new EdraakK12ContentScraper();
         MockWebServer mockWebServer = new MockWebServer();
         mockWebServer.setDispatcher(dispatcher);
         scraper.convert(MAIN_DETAIL_WITHOUT_CHILDREN_FILE, 41, mockWebServer.url("/api/").toString(),
@@ -180,7 +180,7 @@ public class TestEdraakContentScraper {
 
     @Test(expected = IllegalArgumentException.class)
     public void givenEncodedVideoListIsEmpty_whenEdXContentScraped_thenShouldThrowIllegalArgumentException() throws IOException {
-        EdraakContentScraper scraper = new EdraakContentScraper();
+        EdraakK12ContentScraper scraper = new EdraakK12ContentScraper();
         MockWebServer mockWebServer = new MockWebServer();
         mockWebServer.setDispatcher(dispatcher);
         scraper.convert(MAIN_DETAIL_NO_VIDEO_FOUND, 41, mockWebServer.url("/api/").toString(),
@@ -191,7 +191,7 @@ public class TestEdraakContentScraper {
     @Test(expected = IllegalArgumentException.class)
     public void givenEmptyQuestionSet_whenEdXContentScraped_thenShouldThrowIOException() throws IOException {
 
-        EdraakContentScraper scraper = new EdraakContentScraper();
+        EdraakK12ContentScraper scraper = new EdraakK12ContentScraper();
         MockWebServer mockWebServer = new MockWebServer();
         mockWebServer.setDispatcher(dispatcher);
         scraper.convert(MAIN_DETAIL_NO_QUESTIONS_FOUND, 41, mockWebServer.url("/api/").toString(),
@@ -202,7 +202,7 @@ public class TestEdraakContentScraper {
 
     @Test(expected = IllegalArgumentException.class)
     public void givenMalformedContent_whenEdXContentScaped_thenShouldThrowIllegalArgumentException() throws IOException{
-            EdraakContentScraper scraper = new EdraakContentScraper();
+            EdraakK12ContentScraper scraper = new EdraakK12ContentScraper();
 
             File tmpDir = Files.createTempDirectory("testedxcontentscraper").toFile();
 

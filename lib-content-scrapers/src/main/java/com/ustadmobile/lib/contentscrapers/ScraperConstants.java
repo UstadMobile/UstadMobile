@@ -11,6 +11,8 @@ public class ScraperConstants {
     public static final String UTF_ENCODING = "UTF-8";
     public static final String IMG_EXT = "eximage.png";
     public static final String IMG_TAG = "img";
+    public static final String JS_HTML_TAG = "/com/ustadmobile/lib/contentscrapers/index.html";
+    public static final String JS_TAG = "/com/ustadmobile/lib/contentscrapers/jquery-3.3.1.min.js";
 
     public static final List<String> QUESTION_SET_HOLDER_TYPES = Arrays.asList(
            ComponentType.EXCERCISE.getType(), ComponentType.ONLINE.getType(),
