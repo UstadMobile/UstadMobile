@@ -5,19 +5,13 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.ustadmobile.core.util.UMIOUtils;
 
-import org.apache.commons.io.IOUtils;
-import org.omg.CORBA.portable.OutputStream;
-
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
-import java.io.FilterWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
@@ -26,7 +20,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.*;
@@ -122,9 +115,13 @@ public class EdraakK12ContentScraper implements ContentScraper{
 
         File htmlFile = new File(destinationDir, "index.html");
         File jsFile = new File(destinationDir, "jquery-3.3.1.min.js");
+        File materialJS = new File(destinationDir, ScraperConstants.MATERIAL_JS);
+        File materialCSS = new File(destinationDir, ScraperConstants.MATERIAL_CSS);
 
-        writeToFile(ScraperConstants.JS_HTML_TAG, htmlFile);
-        writeToFile(ScraperConstants.JS_TAG, jsFile);
+        writeFileToDirectory(ScraperConstants.JS_HTML_TAG, htmlFile);
+        writeFileToDirectory(ScraperConstants.JS_TAG, jsFile);
+        writeFileToDirectory(ScraperConstants.MATERIAL_CSS_LINK, materialCSS);
+        writeFileToDirectory(ScraperConstants.MATERIAL_JS_LINK, materialJS);
 
 
 
@@ -148,7 +145,7 @@ public class EdraakK12ContentScraper implements ContentScraper{
 
     }
 
-    private void writeToFile(String input, File file) {
+    private void writeFileToDirectory(String input, File file) {
         InputStream htmlIns = getClass().getResourceAsStream(input);
         FileOutputStream outputStream = null;
         try {

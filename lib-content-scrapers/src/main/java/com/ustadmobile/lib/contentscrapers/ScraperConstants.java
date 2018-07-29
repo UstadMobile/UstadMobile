@@ -1,5 +1,6 @@
 package com.ustadmobile.lib.contentscrapers;
 
+import java.awt.image.DirectColorModel;
 import java.util.Arrays;
 import java.util.List;
 
@@ -11,8 +12,13 @@ public class ScraperConstants {
     public static final String UTF_ENCODING = "UTF-8";
     public static final String IMG_EXT = "eximage.png";
     public static final String IMG_TAG = "img";
+    public static final String DIRECTORY = "/com/ustadmobile/lib/contentscrapers/";
     public static final String JS_HTML_TAG = "/com/ustadmobile/lib/contentscrapers/index.html";
     public static final String JS_TAG = "/com/ustadmobile/lib/contentscrapers/jquery-3.3.1.min.js";
+    public static final String MATERIAL_JS_LINK = "/com/ustadmobile/lib/contentscrapers/materialize.min.js";
+    public static final String MATERIAL_CSS_LINK = "/com/ustadmobile/lib/contentscrapers/materialize.min.css";
+    public static final String MATERIAL_JS = "materialize.min.js";
+    public static final String MATERIAL_CSS = "materialize.min.css";
 
     public static final List<String> QUESTION_SET_HOLDER_TYPES = Arrays.asList(
            ComponentType.EXCERCISE.getType(), ComponentType.ONLINE.getType(),
