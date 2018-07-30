@@ -1,5 +1,15 @@
 apply plugin: 'java-library'
 
+task convertEdraakK12(type: JavaExec) {
+    classpath sourceSets.main.runtimeClasspath
+    main "com.ustadmobile.lib.contentscrapers.EdraakK12ContentScraper"
+    if(project.hasProperty("convertUrl") && project.hasProperty("convertDest")) {
+        args  project.getProperties().get("convertUrl"), project.getProperties().get("convertDest")
+    }
+
+    outputs.upToDateWhen { false }
+}
+
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jsoup:jsoup:$version_jsoup"

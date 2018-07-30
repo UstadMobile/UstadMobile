@@ -17,6 +17,8 @@ public class ScraperConstants {
     public static final String JS_TAG = "/com/ustadmobile/lib/contentscrapers/jquery-3.3.1.min.js";
     public static final String MATERIAL_JS_LINK = "/com/ustadmobile/lib/contentscrapers/materialize.min.js";
     public static final String MATERIAL_CSS_LINK = "/com/ustadmobile/lib/contentscrapers/materialize.min.css";
+    public static final String REGULAR_ARABIC_FONT_LINK = "/com/ustadmobile/lib/contentscrapers/DroidNaskh-Regular.woff2";
+    public static final String BOLD_ARABIC_FONT_LINK = "/com/ustadmobile/lib/contentscrapers/DroidNaskh-Bold.woff2";
     public static final String MATERIAL_JS = "materialize.min.js";
     public static final String MATERIAL_CSS = "materialize.min.css";
 
@@ -26,6 +28,10 @@ public class ScraperConstants {
 
 
     public static final String PNG_EXT = ".png";
+    public static final String ARABIC_FONT_REGULAR = "DroidNaskh-Regular.woff2";
+    public static final String ARABIC_FONT_BOLD = "DroidNaskh-Bold.woiff2";
+    public static final String INDEX_HTML = "index.html";
+    public static final String JQUERY_JS = "jquery-3.3.1.min.js";
 
     public enum ComponentType{
         MAIN("MainContentTrack"),

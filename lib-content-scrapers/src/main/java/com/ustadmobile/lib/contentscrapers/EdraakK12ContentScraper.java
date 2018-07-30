@@ -5,6 +5,8 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.ustadmobile.core.util.UMIOUtils;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
@@ -14,6 +16,8 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -28,7 +32,20 @@ import static com.ustadmobile.lib.contentscrapers.ScraperConstants.*;
 public class EdraakK12ContentScraper implements ContentScraper{
 
     public static void main(String[] args) {
-        // TODO
+        if(args.length != 2) {
+            System.err.println("Usage: <edraak k12 json url> <file destination>");
+            System.exit(1);
+        }
+
+        System.out.println(args[0]);
+        System.out.println(args[1]);
+        try {
+            new EdraakK12ContentScraper().convert(args[0], new File(args[1]));
+        }catch(IOException e) {
+            System.err.println("Exception running convert");
+            e.printStackTrace();
+        }
+
     }
 
     public void convert(String contentId, int programId, String baseUrl, File destinationDir) throws IOException {
@@ -50,6 +67,8 @@ public class EdraakK12ContentScraper implements ContentScraper{
         } catch (MalformedURLException e) {
             throw new IllegalArgumentException("Malformed url", e);
         }
+
+        destinationDir.mkdirs();
 
         ContentResponse response;
         try {
@@ -113,22 +132,17 @@ public class EdraakK12ContentScraper implements ContentScraper{
         fileWriter.write(jsonString);
         UMIOUtils.closeQuietly(fileWriter);
 
-        File htmlFile = new File(destinationDir, "index.html");
-        File jsFile = new File(destinationDir, "jquery-3.3.1.min.js");
-        File materialJS = new File(destinationDir, ScraperConstants.MATERIAL_JS);
-        File materialCSS = new File(destinationDir, ScraperConstants.MATERIAL_CSS);
-
-        writeFileToDirectory(ScraperConstants.JS_HTML_TAG, htmlFile);
-        writeFileToDirectory(ScraperConstants.JS_TAG, jsFile);
-        writeFileToDirectory(ScraperConstants.MATERIAL_CSS_LINK, materialCSS);
-        writeFileToDirectory(ScraperConstants.MATERIAL_JS_LINK, materialJS);
-
-
+        writeFileToDirectory(ScraperConstants.JS_HTML_TAG, new File(destinationDir, INDEX_HTML));
+        writeFileToDirectory(ScraperConstants.JS_TAG, new File(destinationDir, JQUERY_JS));
+        writeFileToDirectory(ScraperConstants.MATERIAL_CSS_LINK, new File(destinationDir, ScraperConstants.MATERIAL_CSS));
+        writeFileToDirectory(ScraperConstants.MATERIAL_JS_LINK, new File(destinationDir, ScraperConstants.MATERIAL_JS_LINK));
+        writeFileToDirectory(ScraperConstants.REGULAR_ARABIC_FONT_LINK, new File(destinationDir, ScraperConstants.ARABIC_FONT_REGULAR));
+        writeFileToDirectory(ScraperConstants.BOLD_ARABIC_FONT_LINK, new File(destinationDir, ScraperConstants.ARABIC_FONT_BOLD));
 
 
         // zip it all
         File zippedFile = new File(destinationDir.getParent(), response.id +".zip");
-        try (ZipOutputStream out = new ZipOutputStream(Files.newOutputStream(zippedFile.toPath()))){
+        try (ZipOutputStream out = new ZipOutputStream(Files.newOutputStream(zippedFile.toPath()), StandardCharsets.UTF_8)){
             Path sourceDirPath = Paths.get(destinationDir.toURI());
             Files.walk(sourceDirPath).filter(path -> !Files.isDirectory(path))
                     .forEach(path -> {
@@ -256,8 +270,19 @@ public class EdraakK12ContentScraper implements ContentScraper{
     private ContentResponse parseJson(URL url) throws IOException {
 
         Reader reader = null;
+        InputStream inputStream;
+        URLConnection connection;
         try{
-            reader = new InputStreamReader(url.openStream()); //Read the json output
+            connection = url.openConnection();
+            connection.setRequestProperty("Accept","application/json, text/javascript, */*; q=0.01");
+            inputStream = connection.getInputStream();
+            ByteArrayOutputStream bout = new ByteArrayOutputStream();
+            UMIOUtils.readFully(inputStream, bout);
+
+            String strVal = bout.toString("UTF-8");
+            System.out.println("Read: " + strVal);
+
+            reader = new InputStreamReader(new ByteArrayInputStream(bout.toByteArray()));
             Gson gson = new GsonBuilder().create();
             return gson.fromJson(reader, ContentResponse.class);
         } finally {
