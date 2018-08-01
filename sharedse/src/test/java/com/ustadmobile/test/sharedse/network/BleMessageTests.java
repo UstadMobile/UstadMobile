@@ -64,7 +64,7 @@ public class BleMessageTests {
         BleMessage receivedMessage = new BleMessage(sentMessage.getPackets());
 
         assertTrue("Uncompressed payload should have same length",
-                payload.length == receivedMessage.getPayload().length);
+                payload.length == receivedMessage.getLength());
     }
 
 }
