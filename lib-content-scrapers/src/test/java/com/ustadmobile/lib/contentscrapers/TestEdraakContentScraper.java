@@ -10,13 +10,18 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.util.Calendar;
 import java.util.List;
 
 import okhttp3.mockwebserver.Dispatcher;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
+import okio.Buffer;
+import okio.BufferedSink;
+import okio.BufferedSource;
 import okio.Okio;
+import okio.Source;
 
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.CONTENT_JSON;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.ComponentType;
@@ -67,13 +72,20 @@ public class TestEdraakContentScraper {
 
                 } else if (request.getPath().equals("/media/video.mp4")) {
                     InputStream videoIn = getClass().getResourceAsStream(VIDEO_LOCATION_FILE);
-                    return new MockResponse().setResponseCode(200).setBody(Okio.buffer(Okio.source(videoIn)).buffer());
+                    BufferedSource source = Okio.buffer(Okio.source(videoIn));
+                    Buffer buffer = new Buffer();
+                    source.readAll(buffer);
+
+                    return new MockResponse().setResponseCode(200).setBody(buffer);
                 } else if(request.getPath().contains("picture")){
                     int length = "/media/".length();
                     String fileName = request.getPath().substring(length,
                             request.getPath().indexOf(".png", length));
                     InputStream pictureIn = getClass().getResourceAsStream(RESOURCE_PATH + fileName + ".png");
-                    return new MockResponse().setResponseCode(200).setBody(Okio.buffer(Okio.source(pictureIn)).buffer());
+                    BufferedSource source = Okio.buffer(Okio.source(pictureIn));
+                    Buffer buffer = new Buffer();
+                    source.readAll(buffer);
+                    return new MockResponse().setResponseCode(200).setBody(buffer);
                 }
 
             } catch (IOException e) {
@@ -94,17 +106,17 @@ public class TestEdraakContentScraper {
                 tmpDir);
 
         File jsonFile = new File(tmpDir, CONTENT_JSON);
-        Assert.assertTrue("Downloaded content info json exists", jsonFile.exists());
+        Assert.assertTrue("Downloaded content info json exists", jsonFile.length() > 0);
         String jsonStr = new String(Files.readAllBytes(jsonFile.toPath()), "UTF-8");
         ContentResponse gsonContent = new GsonBuilder().disableHtmlEscaping().create().fromJson(jsonStr,ContentResponse.class);
         Assert.assertNotNull("Created Gson POJO Object", gsonContent);
 
         if(ComponentType.ONLINE.getType().equalsIgnoreCase(gsonContent.target_component.component_type)){
-            Assert.assertTrue("Downloaded video exists", new File(tmpDir, VIDEO_MP4).exists());
+            Assert.assertTrue("Downloaded video exists", new File(tmpDir, VIDEO_MP4).length() > 0);
         }
 
-        Assert.assertTrue("Downloaded Questions json exist", new File(tmpDir, QUESTIONS_JSON).exists());
-        Assert.assertTrue("Downloaded zip exists", new File(tmpDir.getParent(), gsonContent.id + ".zip").exists());
+        Assert.assertTrue("Downloaded Questions json exist", new File(tmpDir, QUESTIONS_JSON).length() > 0);
+        Assert.assertTrue("Downloaded zip exists", new File(tmpDir.getParent(), gsonContent.id + ".zip").length() > 0);
 
         //add assertions that the content info and video info are present in the JSON
         List<ContentResponse> tests = gsonContent.target_component.children;
@@ -201,7 +213,7 @@ public class TestEdraakContentScraper {
 
 
     @Test(expected = IllegalArgumentException.class)
-    public void givenMalformedContent_whenEdXContentScaped_thenShouldThrowIllegalArgumentException() throws IOException{
+    public void givenMalformedContent_whenEdXContentScraped_thenShouldThrowIllegalArgumentException() throws IOException{
             EdraakK12ContentScraper scraper = new EdraakK12ContentScraper();
 
             File tmpDir = Files.createTempDirectory("testedxcontentscraper").toFile();
@@ -221,6 +233,43 @@ public class TestEdraakContentScraper {
             }
     }
 
+    @Test
+    public void givenContentNotModified_whenEdXContentScrapedAgain_thenShouldNotDownloadComponents() throws IOException {
+        //run the initial convert
+        EdraakK12ContentScraper scraper = new EdraakK12ContentScraper();
+        File tmpDir = Files.createTempDirectory("testmodifiededraak").toFile();
+        MockWebServer mockWebServer = new MockWebServer();
+        mockWebServer.setDispatcher(dispatcher);
 
+        scraper.convert(DETAIL_JSON_CONTENT_FILE, 41, mockWebServer.url("/api/").toString(),
+                tmpDir);
+        long contentTime = new File(tmpDir, CONTENT_JSON).lastModified();
+        //now run convert again...
+        scraper.convert(DETAIL_JSON_CONTENT_FILE, 41, mockWebServer.url("/api/").toString(),
+                tmpDir);
+
+        long secondTime = new File(tmpDir, CONTENT_JSON).lastModified();
+        //Assert that last modified dates are lower than firstDownloadCompleteTime
+        Assert.assertTrue(contentTime < secondTime);
+
+        //Ideally, if possible, using mockwebserver, assert that no additional http calls to images/video took place
+    }
+
+    public void givenVideoModified_whenEdXContentScrapedAgain_thenShouldVideoOnlyAgain() throws IOException  {
+        //run the initial convert
+
+        long firstDownloadCompleteTime = System.currentTimeMillis();
+
+        //now run convert again...
+    }
+
+    public void givenQuestionSetModified_whenEdXContentScrapedAgain_thenShouldDownloadImagesOnlyAgain() throws IOException {
+
+        //run the initial convert
+
+        long firstDownloadCompleteTime = System.currentTimeMillis();
+
+        //now run convert again...
+    }
 
 }

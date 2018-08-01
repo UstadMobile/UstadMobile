@@ -1,5 +1,7 @@
 package com.ustadmobile.lib.contentscrapers;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.ustadmobile.core.util.UMIOUtils;
 
 import org.jsoup.Jsoup;
@@ -7,12 +9,17 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 
 
@@ -33,6 +40,17 @@ public class ContentScraperUtil {
         if (htmlString != null && htmlString.contains(attribute))
             return ContentScraperUtil.downloadAllResources(htmlString, destinationDir, fileName, url);
         return htmlString;
+    }
+
+
+    /**
+     *
+     * Is the given componentType "Imported Component"
+     * @param component_type
+     * @return
+     */
+    public static Boolean isImportedComponent(String component_type) {
+        return ScraperConstants.ComponentType.IMPORTED.getType().equalsIgnoreCase(component_type);
     }
 
 
@@ -105,6 +123,37 @@ public class ContentScraperUtil {
             UMIOUtils.closeQuietly(outputStream);
         }
 
+    }
+
+
+    /**
+     *
+     * Given a url, parse the JSON from the http url response and return the object
+     * @param url
+     * @return
+     * @throws IOException
+     */
+    public static ContentResponse parseJson(URL url) throws IOException {
+
+        Reader reader = null;
+        InputStream inputStream;
+        URLConnection connection;
+        try{
+            connection = url.openConnection();
+            connection.setRequestProperty("Accept","application/json, text/javascript, */*; q=0.01");
+            inputStream = connection.getInputStream();
+            ByteArrayOutputStream bout = new ByteArrayOutputStream();
+            UMIOUtils.readFully(inputStream, bout);
+
+            String strVal = bout.toString("UTF-8");
+            System.out.println("Read: " + strVal);
+
+            reader = new InputStreamReader(new ByteArrayInputStream(bout.toByteArray()));
+            Gson gson = new GsonBuilder().create();
+            return gson.fromJson(reader, ContentResponse.class);
+        } finally {
+            UMIOUtils.closeQuietly(reader);
+        }
     }
 
 

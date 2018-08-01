@@ -5,22 +5,20 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.ustadmobile.core.util.UMIOUtils;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.ZipEntry;
@@ -72,12 +70,16 @@ public class EdraakK12ContentScraper implements ContentScraper{
 
         ContentResponse response;
         try {
-            response = parseJson(url);
+            response = ContentScraperUtil.parseJson(url);
         } catch (IOException | JsonSyntaxException e) {
             throw new IllegalArgumentException("JSON INVALID", e.getCause());
         }
 
-        if(!isImportedComponent(response.component_type))
+      //  DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS");
+      //  LocalDateTime dateTime = LocalDateTime.parse(response.updated, formatter);
+
+
+        if(!ContentScraperUtil.isImportedComponent(response.component_type))
             throw new IllegalArgumentException("Not an imported content type!");
 
         if(response.target_component == null || response.target_component.children == null)
@@ -93,13 +95,14 @@ public class EdraakK12ContentScraper implements ContentScraper{
                     if (children.video_info == null || children.video_info.encoded_videos == null || children.video_info.encoded_videos.isEmpty())
                         throw new IllegalArgumentException("Component Type was Video but no video found");
 
-                    String videoHref = selectVideo(children.video_info.encoded_videos);
+                    ContentResponse.Encoded_videos videoHref = selectVideo(children.video_info.encoded_videos);
                     URL videoUrl;
                     try {
-                        videoUrl = new URL(url, videoHref);
+                        videoUrl = new URL(url, videoHref.url);
                     } catch (MalformedURLException e) {
                         throw new IllegalArgumentException("Malformed url", e);
                     }
+
 
                     try {
                         ContentScraperUtil.downloadContent(videoUrl, destinationDir, VIDEO_MP4);
@@ -127,6 +130,7 @@ public class EdraakK12ContentScraper implements ContentScraper{
         // store the json in a file after modifying image links
         Gson gson = new GsonBuilder().disableHtmlEscaping().create();
         File file = new File(destinationDir, ScraperConstants.CONTENT_JSON);
+
         FileWriter fileWriter = new FileWriter(file);
         String jsonString =  gson.toJson(response);
         fileWriter.write(jsonString);
@@ -135,7 +139,7 @@ public class EdraakK12ContentScraper implements ContentScraper{
         writeFileToDirectory(ScraperConstants.JS_HTML_TAG, new File(destinationDir, INDEX_HTML));
         writeFileToDirectory(ScraperConstants.JS_TAG, new File(destinationDir, JQUERY_JS));
         writeFileToDirectory(ScraperConstants.MATERIAL_CSS_LINK, new File(destinationDir, ScraperConstants.MATERIAL_CSS));
-        writeFileToDirectory(ScraperConstants.MATERIAL_JS_LINK, new File(destinationDir, ScraperConstants.MATERIAL_JS_LINK));
+        writeFileToDirectory(ScraperConstants.MATERIAL_JS_LINK, new File(destinationDir, ScraperConstants.MATERIAL_JS));
         writeFileToDirectory(ScraperConstants.REGULAR_ARABIC_FONT_LINK, new File(destinationDir, ScraperConstants.ARABIC_FONT_REGULAR));
         writeFileToDirectory(ScraperConstants.BOLD_ARABIC_FONT_LINK, new File(destinationDir, ScraperConstants.ARABIC_FONT_BOLD));
 
@@ -249,47 +253,18 @@ public class EdraakK12ContentScraper implements ContentScraper{
      * @param encoded_videos
      * @return chosen video url
      */
-    private String selectVideo(List<ContentResponse.Encoded_videos> encoded_videos) {
+    private ContentResponse.Encoded_videos selectVideo(List<ContentResponse.Encoded_videos> encoded_videos) {
 
-        String videoUrl = "";
+        ContentResponse.Encoded_videos selectedVideo = null;
         int videoSize= Integer.MAX_VALUE;
 
         for(ContentResponse.Encoded_videos videos: encoded_videos){
             if(videos.file_size > 0 && videos.file_size < videoSize){
-                videoUrl = videos.url;
+                selectedVideo = videos;
             }
         }
-        return videoUrl;
+        return selectedVideo;
     }
-
-    private Boolean isImportedComponent(String component_type) {
-        return ScraperConstants.ComponentType.IMPORTED.getType().equalsIgnoreCase(component_type);
-    }
-
-
-    private ContentResponse parseJson(URL url) throws IOException {
-
-        Reader reader = null;
-        InputStream inputStream;
-        URLConnection connection;
-        try{
-            connection = url.openConnection();
-            connection.setRequestProperty("Accept","application/json, text/javascript, */*; q=0.01");
-            inputStream = connection.getInputStream();
-            ByteArrayOutputStream bout = new ByteArrayOutputStream();
-            UMIOUtils.readFully(inputStream, bout);
-
-            String strVal = bout.toString("UTF-8");
-            System.out.println("Read: " + strVal);
-
-            reader = new InputStreamReader(new ByteArrayInputStream(bout.toByteArray()));
-            Gson gson = new GsonBuilder().create();
-            return gson.fromJson(reader, ContentResponse.class);
-        } finally {
-            UMIOUtils.closeQuietly(reader);
-        }
-    }
-
 
 
 }
