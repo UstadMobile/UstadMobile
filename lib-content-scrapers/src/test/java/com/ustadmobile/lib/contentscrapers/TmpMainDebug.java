@@ -11,4 +11,9 @@ public class TmpMainDebug {
 
     }
 
+    @Test
+    public void testIndexMain(){
+        IndexEdraakK12Content.main(new String[]{"https://programs.edraak.org/api/component/5a6087f46380a6049b33fc19/?states_program_id=41","C:\\Users\\suhai\\index\\"});
+    }
+
 }

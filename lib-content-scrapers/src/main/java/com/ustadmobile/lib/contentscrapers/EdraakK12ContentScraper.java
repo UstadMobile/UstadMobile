@@ -127,9 +127,10 @@ public class EdraakK12ContentScraper implements ContentScraper{
 
 
 
-        // store the json in a file after modifying image links
+        // nothing changed, keep same files
         if(anyContentUpdated){
 
+            // store the json in a file after modifying image links
             Gson gson = new GsonBuilder().disableHtmlEscaping().create();
             File file = new File(destinationDir, ScraperConstants.CONTENT_JSON);
             FileWriter fileWriter = new FileWriter(file);
