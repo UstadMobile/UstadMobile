@@ -6,7 +6,6 @@ import com.google.gson.JsonSyntaxException;
 import com.ustadmobile.core.util.UMIOUtils;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -17,8 +16,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.ZipEntry;
@@ -75,16 +72,13 @@ public class EdraakK12ContentScraper implements ContentScraper{
             throw new IllegalArgumentException("JSON INVALID", e.getCause());
         }
 
-      //  DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS");
-      //  LocalDateTime dateTime = LocalDateTime.parse(response.updated, formatter);
-
-
         if(!ContentScraperUtil.isImportedComponent(response.component_type))
             throw new IllegalArgumentException("Not an imported content type!");
 
         if(response.target_component == null || response.target_component.children == null)
             throw new IllegalArgumentException("Null target component, or target component children are null");
 
+        boolean anyContentUpdated = false;
         if(ComponentType.ONLINE.getType().equalsIgnoreCase(response.target_component.component_type)){
 
             // Contains children which have video and question set list
@@ -104,16 +98,20 @@ public class EdraakK12ContentScraper implements ContentScraper{
                     }
 
 
-                    try {
-                        ContentScraperUtil.downloadContent(videoUrl, destinationDir, VIDEO_MP4);
-                    } catch (IOException e) {
-                        throw new IllegalArgumentException("Malformed url", e);
+                    File videoFile = new File(destinationDir, VIDEO_MP4);
+                    if(ContentScraperUtil.isContentUpdated(ContentScraperUtil.parseEdraakK12Date(videoHref.modified), videoFile)){
+                        try {
+                            ContentScraperUtil.downloadContent(videoUrl, videoFile);
+                            anyContentUpdated = true;
+                        } catch (IOException e) {
+                            throw new IllegalArgumentException("Malformed url", e);
+                        }
                     }
 
                 } else if(ScraperConstants.QUESTION_SET_HOLDER_TYPES.contains(children.component_type)) {
 
                     List<ContentResponse> questionsList = children.question_set.children;
-                    findAllExerciseImages(questionsList, destinationDir, url);
+                    anyContentUpdated = findAllExerciseImages(questionsList, destinationDir, url) || anyContentUpdated;
 
                 }
 
@@ -123,47 +121,56 @@ public class EdraakK12ContentScraper implements ContentScraper{
 
             // list of questions sets
             List<ContentResponse> questionsList = response.target_component.question_set.children;
-            findAllExerciseImages(questionsList, destinationDir, url);
+            anyContentUpdated = findAllExerciseImages(questionsList, destinationDir, url);
         }
 
 
+
+
         // store the json in a file after modifying image links
-        Gson gson = new GsonBuilder().disableHtmlEscaping().create();
-        File file = new File(destinationDir, ScraperConstants.CONTENT_JSON);
+        if(anyContentUpdated){
 
-        FileWriter fileWriter = new FileWriter(file);
-        String jsonString =  gson.toJson(response);
-        fileWriter.write(jsonString);
-        UMIOUtils.closeQuietly(fileWriter);
+            Gson gson = new GsonBuilder().disableHtmlEscaping().create();
+            File file = new File(destinationDir, ScraperConstants.CONTENT_JSON);
+            FileWriter fileWriter = new FileWriter(file);
+            String jsonString =  gson.toJson(response);
+            fileWriter.write(jsonString);
+            UMIOUtils.closeQuietly(fileWriter);
 
-        writeFileToDirectory(ScraperConstants.JS_HTML_TAG, new File(destinationDir, INDEX_HTML));
-        writeFileToDirectory(ScraperConstants.JS_TAG, new File(destinationDir, JQUERY_JS));
-        writeFileToDirectory(ScraperConstants.MATERIAL_CSS_LINK, new File(destinationDir, ScraperConstants.MATERIAL_CSS));
-        writeFileToDirectory(ScraperConstants.MATERIAL_JS_LINK, new File(destinationDir, ScraperConstants.MATERIAL_JS));
-        writeFileToDirectory(ScraperConstants.REGULAR_ARABIC_FONT_LINK, new File(destinationDir, ScraperConstants.ARABIC_FONT_REGULAR));
-        writeFileToDirectory(ScraperConstants.BOLD_ARABIC_FONT_LINK, new File(destinationDir, ScraperConstants.ARABIC_FONT_BOLD));
+            writeFileToDirectory(ScraperConstants.JS_HTML_TAG, new File(destinationDir, INDEX_HTML));
+            writeFileToDirectory(ScraperConstants.JS_TAG, new File(destinationDir, JQUERY_JS));
+            writeFileToDirectory(ScraperConstants.MATERIAL_CSS_LINK, new File(destinationDir, ScraperConstants.MATERIAL_CSS));
+            writeFileToDirectory(ScraperConstants.MATERIAL_JS_LINK, new File(destinationDir, ScraperConstants.MATERIAL_JS));
+            writeFileToDirectory(ScraperConstants.REGULAR_ARABIC_FONT_LINK, new File(destinationDir, ScraperConstants.ARABIC_FONT_REGULAR));
+            writeFileToDirectory(ScraperConstants.BOLD_ARABIC_FONT_LINK, new File(destinationDir, ScraperConstants.ARABIC_FONT_BOLD));
 
 
-        // zip it all
-        File zippedFile = new File(destinationDir.getParent(), response.id +".zip");
-        try (ZipOutputStream out = new ZipOutputStream(Files.newOutputStream(zippedFile.toPath()), StandardCharsets.UTF_8)){
-            Path sourceDirPath = Paths.get(destinationDir.toURI());
-            Files.walk(sourceDirPath).filter(path -> !Files.isDirectory(path))
-                    .forEach(path -> {
-                        ZipEntry zipEntry = new ZipEntry(sourceDirPath.relativize(path).toString());
-                        try {
-                            out.putNextEntry(zipEntry);
-                            out.write(Files.readAllBytes(path));
-                            out.closeEntry();
-                        } catch (Exception e) {
-                            System.err.println(e.getCause());
-                        }
-                    });
+            File zippedFile = new File(destinationDir.getParent(), response.id +".zip");
+            try (ZipOutputStream out = new ZipOutputStream(Files.newOutputStream(zippedFile.toPath()), StandardCharsets.UTF_8)){
+                Path sourceDirPath = Paths.get(destinationDir.toURI());
+                Files.walk(sourceDirPath).filter(path -> !Files.isDirectory(path))
+                        .forEach(path -> {
+                            ZipEntry zipEntry = new ZipEntry(sourceDirPath.relativize(path).toString());
+                            try {
+                                out.putNextEntry(zipEntry);
+                                out.write(Files.readAllBytes(path));
+                                out.closeEntry();
+                            } catch (Exception e) {
+                                System.err.println(e.getCause());
+                            }
+                        });
+            }
         }
 
     }
 
-    private void writeFileToDirectory(String input, File file) {
+    /**
+     *
+     * Given an asset location, write into a file
+     * @param input
+     * @param file
+     */
+    public void writeFileToDirectory(String input, File file) {
         InputStream htmlIns = getClass().getResourceAsStream(input);
         FileOutputStream outputStream = null;
         try {
@@ -190,36 +197,46 @@ public class EdraakK12ContentScraper implements ContentScraper{
      * @param destinationDir
      * @throws IOException
      */
-    private void findAllExerciseImages(List<ContentResponse> questionsList, File destinationDir, URL url) throws IOException {
+    private boolean findAllExerciseImages(List<ContentResponse> questionsList, File destinationDir, URL url) throws IOException {
 
             if (questionsList.isEmpty())
                 throw new IllegalArgumentException("No Questions were found in the question set");
 
+            int exerciseUpdatedCount = 0;
             for (ContentResponse exercise : questionsList) {
+
                 File exerciseDirectory = new File(destinationDir, exercise.id);
-                exerciseDirectory.mkdirs();
+                if(ContentScraperUtil.isContentUpdated(ContentScraperUtil.parseEdraakK12Date(exercise.updated), exerciseDirectory)){
 
-                exercise.full_description = ContentScraperUtil.checkIfJsonObjectHasAttribute(exercise.full_description, IMG_TAG, exerciseDirectory, HtmlName.FULL_DESC.getName() + ScraperConstants.PNG_EXT, url);
-                exercise.explanation = ContentScraperUtil.checkIfJsonObjectHasAttribute(exercise.explanation, IMG_TAG, exerciseDirectory, HtmlName.EXPLAIN.getName() + ScraperConstants.PNG_EXT, url);
-                exercise.description = ContentScraperUtil.checkIfJsonObjectHasAttribute(exercise.description, IMG_TAG, exerciseDirectory, HtmlName.DESC + PNG_EXT, url);
+                    exerciseDirectory.mkdirs();
+                    exerciseUpdatedCount++;
 
-                if (ComponentType.MULTICHOICE.getType().equalsIgnoreCase(exercise.component_type)) {
-                    for (ContentResponse.Choice choice : exercise.choices) {
-                        choice.description = ContentScraperUtil.checkIfJsonObjectHasAttribute(choice.description, IMG_TAG, exerciseDirectory, choice.item_id + ScraperConstants.PNG_EXT, url);
+                    exercise.full_description = ContentScraperUtil.checkIfJsonObjectHasAttribute(exercise.full_description, IMG_TAG, exerciseDirectory, HtmlName.FULL_DESC.getName() + ScraperConstants.PNG_EXT, url);
+                    exercise.explanation = ContentScraperUtil.checkIfJsonObjectHasAttribute(exercise.explanation, IMG_TAG, exerciseDirectory, HtmlName.EXPLAIN.getName() + ScraperConstants.PNG_EXT, url);
+                    exercise.description = ContentScraperUtil.checkIfJsonObjectHasAttribute(exercise.description, IMG_TAG, exerciseDirectory, HtmlName.DESC + PNG_EXT, url);
+
+                    if (ComponentType.MULTICHOICE.getType().equalsIgnoreCase(exercise.component_type)) {
+                        for (ContentResponse.Choice choice : exercise.choices) {
+                            choice.description = ContentScraperUtil.checkIfJsonObjectHasAttribute(choice.description, IMG_TAG, exerciseDirectory, choice.item_id + ScraperConstants.PNG_EXT, url);
+                        }
                     }
-                }
 
-                for (ContentResponse.Hint hint : exercise.hints) {
-                    hint.description = ContentScraperUtil.checkIfJsonObjectHasAttribute(hint.description, IMG_TAG, exerciseDirectory, hint.item_id + ScraperConstants.PNG_EXT, url);
+                    for (ContentResponse.Hint hint : exercise.hints) {
+                        hint.description = ContentScraperUtil.checkIfJsonObjectHasAttribute(hint.description, IMG_TAG, exerciseDirectory, hint.item_id + ScraperConstants.PNG_EXT, url);
+                    }
                 }
 
             }
 
             try {
-                saveQuestionsAsJson(destinationDir, questionsList);
+                if(exerciseUpdatedCount > 0){
+                    saveQuestionsAsJson(destinationDir, questionsList);
+                }
             } catch (IOException e) {
                 throw new IllegalArgumentException("Invalid Questions Json");
             }
+
+            return exerciseUpdatedCount > 0;
     }
 
 

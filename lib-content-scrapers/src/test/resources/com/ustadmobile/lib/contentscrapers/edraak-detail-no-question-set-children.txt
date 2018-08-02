@@ -183,7 +183,7 @@
             {
               "created": "2018-01-12T09:14:45.460715Z",
               "modified": "2018-01-12T09:14:45.460715Z",
-              "url": "https://videos.edraak.org/videos-outputs/repository%2Fmath-prob-stats-oers-v1%2Fdesktop_mp4%2F637af223-efa4-405f-b902-227c455eea7d.mp4",
+              "url": "/media/video.mp4",
               "file_size": 56692459,
               "bitrate": 2400,
               "profile": "desktop_mp4"
@@ -191,7 +191,7 @@
             {
               "created": "2018-01-12T09:14:45.515711Z",
               "modified": "2018-01-12T09:14:45.515711Z",
-              "url": "https://videos.edraak.org/videos-outputs/repository%2Fmath-prob-stats-oers-v1%2Fdesktop_webm%2F637af223-efa4-405f-b902-227c455eea7d.webm",
+              "url": "/media/video.mp4",
               "file_size": 21570756,
               "bitrate": 2400,
               "profile": "desktop_webm"
@@ -199,7 +199,7 @@
             {
               "created": "2018-01-12T09:14:45.545093Z",
               "modified": "2018-01-12T09:14:45.545093Z",
-              "url": "https://videos.edraak.org/videos-outputs/repository%2Fmath-prob-stats-oers-v1%2Fmobile_low%2F637af223-efa4-405f-b902-227c455eea7d.mp4",
+              "url": "/media/video.mp4",
               "file_size": 18989228,
               "bitrate": 720,
               "profile": "mobile_low"

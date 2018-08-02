@@ -20,7 +20,9 @@ import java.io.Reader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
-import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 
 
 public class ContentScraperUtil {
@@ -76,8 +78,8 @@ public class ContentScraperUtil {
                 continue;
             }
             URL imageUrl = new URL(baseUrl, url);
-
-            downloadContent(imageUrl, destinationDir, imageCountInTag + fileName);
+            File imageFile = new File(destinationDir, imageCountInTag + fileName);
+            downloadContent(imageUrl, imageFile);
 
             image.attr("src",  destinationDir.getName() + "/" + imageCountInTag + fileName);
 
@@ -91,13 +93,13 @@ public class ContentScraperUtil {
 
     /**
      *
-     * Given a url, download its content and save in the destination directory
+     * Given a url and file, download its content and write into the file
      * @param url
-     * @param destinationDir
-     * @param fileName
+     * @param file
+     * @param
      * @throws IOException
      */
-    public static void downloadContent(URL url, File destinationDir, String fileName) throws IOException {
+    public static void downloadContent(URL url,File file) throws IOException {
 
         InputStream inputStream = null;
         FileOutputStream outputStream = null;
@@ -108,10 +110,8 @@ public class ContentScraperUtil {
             if(responseCode != HttpURLConnection.HTTP_OK)
                 throw new IOException("HTTP Response code not 200: got " + responseCode);
 
-            File savedFile = new File(destinationDir, fileName);
-
             inputStream = httpConn.getInputStream();
-            outputStream = new FileOutputStream(savedFile);
+            outputStream = new FileOutputStream(file);
             int bytesRead;
             byte[] buffer = new byte[4096];
             while ((bytesRead = inputStream.read(buffer)) != -1) {
@@ -123,6 +123,35 @@ public class ContentScraperUtil {
             UMIOUtils.closeQuietly(outputStream);
         }
 
+    }
+
+
+
+
+    /**
+     *
+     * Given the last modified time and the file return if modified time is recent
+     * @param modifiedTime
+     * @param file
+     * @return
+     */
+    public static boolean isContentUpdated(long modifiedTime, File file) {
+
+        if(file.exists()){
+            return modifiedTime >= file.lastModified();
+        }
+        return true;
+    }
+
+
+    /**
+     *
+     * Given an EdraakK12Date, return it as a long
+     * @param date
+     * @return
+     */
+    public static long parseEdraakK12Date(String date){
+        return LocalDateTime.parse(date, ScraperConstants.formatter).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
     }
 
 

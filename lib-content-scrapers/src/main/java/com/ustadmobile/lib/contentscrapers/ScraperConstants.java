@@ -1,6 +1,7 @@
 package com.ustadmobile.lib.contentscrapers;
 
 import java.awt.image.DirectColorModel;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
 
@@ -32,6 +33,13 @@ public class ScraperConstants {
     public static final String ARABIC_FONT_BOLD = "DroidNaskh-Bold.woiff2";
     public static final String INDEX_HTML = "index.html";
     public static final String JQUERY_JS = "jquery-3.3.1.min.js";
+
+    public static DateTimeFormatter formatter = DateTimeFormatter.ofPattern(""
+            + "[yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z']"
+            + "[yyyy-MM-dd'T'HH:mm:ss.SSSSSS]"
+            + "[yyyy-MM-dd'T'HH:mm:ss]"
+    );
+
 
     public enum ComponentType{
         MAIN("MainContentTrack"),

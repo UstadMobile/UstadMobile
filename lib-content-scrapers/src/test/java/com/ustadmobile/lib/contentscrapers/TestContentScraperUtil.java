@@ -1,6 +1,5 @@
 package com.ustadmobile.lib.contentscrapers;
 
-import org.apache.commons.io.IOUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -11,16 +10,14 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 
-import okhttp3.Response;
 import okhttp3.mockwebserver.Dispatcher;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
 import okio.Okio;
-
-import static com.ustadmobile.lib.contentscrapers.ScraperConstants.CONTENT_JSON;
-import static com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING;
 
 public class TestContentScraperUtil {
 
@@ -53,7 +50,6 @@ public class TestContentScraperUtil {
         MockWebServer mockWebServer = new MockWebServer();
         mockWebServer.setDispatcher(dispatcher);
 
-
         File tmpDir = Files.createTempDirectory("exercisecontentscraper").toFile();
         String convertedHtml = ContentScraperUtil.downloadAllResources(htmlWithImage, tmpDir, ScraperConstants.HtmlName.DESC.getName() + ScraperConstants.PNG_EXT, mockWebServer.url("/api").url());
 
@@ -68,6 +64,27 @@ public class TestContentScraperUtil {
         Assert.assertTrue("Img Src is pointing to relative path", image.attr("src").equalsIgnoreCase(  tmpDir.getName() + "/" + 0 + ScraperConstants.HtmlName.DESC.getName() + ScraperConstants.PNG_EXT) );
     }
 
+
+    @Test
+    public void givenEdraak12Date_whenParsingDate_thenDateConvertedToLong() {
+
+        String commonEdraakDate = "2018-01-07T08:19:46.410000";
+        String videoEdraakDate = "2018-01-17T18:38:17.612502Z";
+        String exerciseEdraakDate = "2018-01-17T21:22:37";
+
+        ContentScraperUtil.parseEdraakK12Date(commonEdraakDate);
+        ContentScraperUtil.parseEdraakK12Date(videoEdraakDate);
+        ContentScraperUtil.parseEdraakK12Date(exerciseEdraakDate);
+
+    }
+
+    @Test(expected = DateTimeParseException.class)
+    public void givenEdraak12Date_whenParsingDate_thenThrowDateTimeParseException() {
+
+        String unCommonEdraakDate = "2018-01-07T08:19:46.4100";
+
+        ContentScraperUtil.parseEdraakK12Date(unCommonEdraakDate);
+    }
 
 
 }
