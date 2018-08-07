@@ -13,6 +13,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -120,6 +121,21 @@ public class ContentScraperUtil {
         } finally {
             UMIOUtils.closeQuietly(inputStream);
             UMIOUtils.closeQuietly(outputStream);
+        }
+
+    }
+
+
+    public static final void writeStringToFile(String text, File file) {
+
+        FileWriter writer = null;
+        try {
+            writer = new FileWriter(file);
+            writer.write(text);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            UMIOUtils.closeQuietly(writer);
         }
 
     }

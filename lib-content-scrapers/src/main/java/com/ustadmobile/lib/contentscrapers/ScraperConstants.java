@@ -9,6 +9,9 @@ public class ScraperConstants {
 
     public static final String CONTENT_JSON = "content.json";
     public static final String QUESTIONS_JSON = "questions.json";
+    public static final String ETAG_TXT = "etag.txt";
+    public static final String LAST_MODIFIED_TXT = "last-modified.txt";
+    public static final String ABOUT_HTML = "about.txt";
     public static final String VIDEO_MP4 = "video.mp4";
     public static final String UTF_ENCODING = "UTF-8";
     public static final String IMG_EXT = "eximage.png";
