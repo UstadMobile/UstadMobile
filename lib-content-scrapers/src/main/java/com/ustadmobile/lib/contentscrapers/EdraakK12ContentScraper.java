@@ -44,6 +44,7 @@ public class EdraakK12ContentScraper implements ContentScraper{
     }
 
     public void convert(String contentId, int programId, String baseUrl, File destinationDir) throws IOException {
+        System.out.println("convert url = " +baseUrl + "component/" +  contentId + "/?states_program_id=" + programId);
         convert(baseUrl + "component/" +  contentId + "/?states_program_id=" + programId, destinationDir);
     }
     /**
@@ -60,7 +61,8 @@ public class EdraakK12ContentScraper implements ContentScraper{
         try {
             url = new URL(urlString);
         } catch (MalformedURLException e) {
-            throw new IllegalArgumentException("Malformed url", e);
+            System.out.println("Scrap Malformed url" + urlString);
+            throw new IllegalArgumentException("Malformed url" + urlString, e);
         }
 
         destinationDir.mkdirs();
@@ -94,7 +96,7 @@ public class EdraakK12ContentScraper implements ContentScraper{
                     try {
                         videoUrl = new URL(url, videoHref.url);
                     } catch (MalformedURLException e) {
-                        throw new IllegalArgumentException("Malformed url", e);
+                        throw new IllegalArgumentException("video Malformed url", e);
                     }
 
 
@@ -104,14 +106,18 @@ public class EdraakK12ContentScraper implements ContentScraper{
                             ContentScraperUtil.downloadContent(videoUrl, videoFile);
                             anyContentUpdated = true;
                         } catch (IOException e) {
-                            throw new IllegalArgumentException("Malformed url", e);
+                            throw new IllegalArgumentException("Download Video Malformed url", e);
                         }
                     }
 
                 } else if(ScraperConstants.QUESTION_SET_HOLDER_TYPES.contains(children.component_type)) {
 
                     List<ContentResponse> questionsList = children.question_set.children;
-                    anyContentUpdated = findAllExerciseImages(questionsList, destinationDir, url) || anyContentUpdated;
+                    try {
+                        anyContentUpdated = findAllExerciseImages(questionsList, destinationDir, url) || anyContentUpdated;
+                    }catch (IOException e){
+                        throw new IllegalArgumentException("Exercise Malformed", e.getCause());
+                    }
 
                 }
 
@@ -121,10 +127,12 @@ public class EdraakK12ContentScraper implements ContentScraper{
 
             // list of questions sets
             List<ContentResponse> questionsList = response.target_component.question_set.children;
-            anyContentUpdated = findAllExerciseImages(questionsList, destinationDir, url);
+            try {
+                anyContentUpdated = findAllExerciseImages(questionsList, destinationDir, url);
+            }   catch (IOException e){
+                throw new IllegalArgumentException("Exercise Malformed", e.getCause());
+            }
         }
-
-
 
 
         // nothing changed, keep same files

@@ -35,9 +35,7 @@ public class ContentResponse {
     @Expose
     @SerializedName("eligibility_criteria")
     public List<String> eligibility_criteria;
-    @Expose
-    @SerializedName("audience")
-    public List<String> audience;
+    
     @Expose
     @SerializedName("license")
     public String license;
@@ -277,6 +275,5 @@ public class ContentResponse {
         @SerializedName("item_id")
         public String item_id;
     }
-
 
 }

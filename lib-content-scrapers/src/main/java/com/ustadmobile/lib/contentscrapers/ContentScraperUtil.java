@@ -74,7 +74,7 @@ public class ContentScraperUtil {
         for(Element image: images){
 
             String url = image.attr("src");
-            if(url.contains("data:image") && url.contains("base64")){
+            if((url.contains("data:image") && url.contains("base64")) || url.contains("file://")){
                 continue;
             }
             URL imageUrl = new URL(baseUrl, url);
@@ -86,8 +86,7 @@ public class ContentScraperUtil {
             imageCountInTag++;
         }
 
-        String htmlBody = doc.body().html();
-        return htmlBody;
+        return doc.body().html();
     }
 
 
@@ -173,9 +172,6 @@ public class ContentScraperUtil {
             inputStream = connection.getInputStream();
             ByteArrayOutputStream bout = new ByteArrayOutputStream();
             UMIOUtils.readFully(inputStream, bout);
-
-            String strVal = bout.toString("UTF-8");
-            System.out.println("Read: " + strVal);
 
             reader = new InputStreamReader(new ByteArrayInputStream(bout.toByteArray()));
             Gson gson = new GsonBuilder().create();

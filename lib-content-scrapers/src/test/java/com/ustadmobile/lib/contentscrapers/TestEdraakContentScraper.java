@@ -104,7 +104,8 @@ public class TestEdraakContentScraper {
         MockWebServer mockWebServer = new MockWebServer();
         mockWebServer.setDispatcher(dispatcher);
         scraper.convert(DETAIL_JSON_CONTENT_FILE, 41, mockWebServer.url("/api/").toString(),
-                tmpDir);
+               tmpDir);
+
 
         File jsonFile = new File(tmpDir, CONTENT_JSON);
         Assert.assertTrue("Downloaded content info json exists", jsonFile.length() > 0);
@@ -298,6 +299,23 @@ public class TestEdraakContentScraper {
         //Assert that last modified dates are lower than firstDownloadCompleteTime
         Assert.assertTrue(lastModified == firstDownloadTime);
 
+    }
+
+
+    @Test
+    public void testCommand() throws IOException{
+        EdraakK12ContentScraper scraper = new EdraakK12ContentScraper();
+        if(System.getProperty("url") != null && System.getProperty("dir") != null){
+            scraper.convert(System.getProperty("url"),new File(System.getProperty("dir")));
+        }
+    }
+
+    @Test
+    public void testIndexCommand() throws IOException{
+        IndexEdraakK12Content content = new IndexEdraakK12Content();
+        if(System.getProperty("findUrl") != null && System.getProperty("findDir") != null) {
+            content.findContent(System.getProperty("findUrl"), new File(System.getProperty("findDir")));
+        }
     }
 
 }

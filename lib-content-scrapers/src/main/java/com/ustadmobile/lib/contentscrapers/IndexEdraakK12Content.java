@@ -49,7 +49,8 @@ public class IndexEdraakK12Content {
         try {
             url = new URL(urlString);
         } catch (MalformedURLException e) {
-            throw new IllegalArgumentException("Malformed url", e);
+            System.out.println("Index Malformed url" + urlString);
+            throw new IllegalArgumentException("Malformed url" + urlString, e);
         }
 
         destinationDir.mkdirs();
@@ -73,13 +74,18 @@ public class IndexEdraakK12Content {
 
     }
 
-    public void findImportedComponent(ContentResponse parent, OpdsEntryWithRelations parentEntry) throws IOException {
+    public void findImportedComponent(ContentResponse parent, OpdsEntryWithRelations parentEntry)  {
 
         if(ContentScraperUtil.isImportedComponent(parent.component_type)){
 
             // found the last child
             EdraakK12ContentScraper scraper = new EdraakK12ContentScraper();
-            scraper.convert(parent.id, parent.program == 0 ? response.program : parent.program, url.getProtocol() + "://" + url.getHost() + (url.getPort() > 0 ? (":" + url.getPort()) : "") + "/api/", new File(destinationDirectory, parent.id));
+            try{
+                scraper.convert(parent.id, parent.program == 0 ? response.program : parent.program, url.getProtocol() + "://" + url.getHost() + (url.getPort() > 0 ? (":" + url.getPort()) : "") + "/api/", new File(destinationDirectory, parent.id));
+            }catch (Exception e){
+                System.out.println(e.getCause());
+                return;
+            }
 
             OpdsLink newEntryLink = new OpdsLink(parentEntry.getUuid(), "application/zip",
                     destinationDirectory.getParent() + "/" + parent.id + ".zip", OpdsEntry.LINK_REL_ACQUIRE);

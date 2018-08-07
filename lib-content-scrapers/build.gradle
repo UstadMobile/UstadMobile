@@ -1,3 +1,14 @@
+buildscript {
+    repositories {
+        maven {
+            url 'https://plugins.gradle.org/m2/'
+        }
+    }
+    dependencies {
+        classpath 'gradle.plugin.de.fuerstenau:BuildConfigPlugin:1.1.7'
+    }
+}
+
 apply plugin: 'java-library'
 
 task convertEdraakK12(type: JavaExec) {
@@ -20,6 +31,42 @@ dependencies {
     testImplementation "junit:junit:$version_junit"
     testImplementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
     compile project(path: ':lib-database')
+}
+
+task generateTestBuildConfig(type: de.fuerstenau.gradle.buildconfig.GenerateBuildConfigTask) {
+    outputDir = new File ("${projectDir}/src/test/java")
+    packageName = "com.ustadmobile.lib.contentscrapers.generated"
+    appName = "TestContentScraper"
+    clsName = "TestBuildConfig"
+    version = rootProject.version
+
+    String testEdraakContentUrl = project.hasProperty("testEdraakK12ContentUrl") ? project.getProperties().get("testEdraakK12ContentUrl") : ""
+    buildConfigField "String", "TEST_CONTENT_URL", testEdraakContentUrl
+}
+
+task scrapEdraakK12(type: Test) {
+
+    outputs.upToDateWhen { false }
+
+    testLogging {
+        showStandardStreams = true
+    }
+
+    include('**/TestEdraakContentScraper.class')
+}
+
+compileTestJava.dependsOn(generateTestBuildConfig)
+
+tasks.withType(Test) {
+    systemProperty "file.encoding", "UTF-8"
+    if(System.getProperty('url') && System.getProperty('dir')){
+        systemProperty 'url', System.getProperty('url')
+        systemProperty 'dir', System.getProperty('dir')
+    }
+    if(System.getProperty('findUrl') && System.getProperty('findDir')){
+        systemProperty 'findUrl', System.getProperty('findUrl')
+        systemProperty 'findDir', System.getProperty('findDir')
+    }
 }
 
 
