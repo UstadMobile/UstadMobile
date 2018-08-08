@@ -37,6 +37,7 @@ public class PhetContentScraper implements ContentScraper{
         String about = simulationDoc.getElementById("about").html();
         ContentScraperUtil.writeStringToFile(about, new File(destinationDir, ScraperConstants.ABOUT_HTML));
 
+        boolean contentUpdated = false;
         for(Element englishLink: simulationDoc.select("div.simulation-main-image-panel a.phet-button[href]")){
 
             String hrefLink = englishLink.attr("href");
@@ -46,6 +47,7 @@ public class PhetContentScraper implements ContentScraper{
 
             if(hrefLink.contains("download")){
                 downloadContent(simulationUrl, hrefLink, englishLocation);
+                contentUpdated = true;
                 break;
             }
         }
@@ -72,14 +74,19 @@ public class PhetContentScraper implements ContentScraper{
                 String hrefLink = links.attr("href");
 
                 if(hrefLink.contains("download")){
-
                     downloadContent(simulationUrl, hrefLink, languageLocation);
+                    contentUpdated = true;
                     break;
                 }
 
             }
 
         }
+
+        if(contentUpdated){
+            ContentScraperUtil.zipDirectory(destinationDir, url.substring(url.lastIndexOf("/"), url.length()));
+        }
+
     }
 
     private void downloadContent(URL simulationUrl, String hrefLink, File languageLocation) throws IOException {

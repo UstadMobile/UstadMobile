@@ -153,22 +153,7 @@ public class EdraakK12ContentScraper implements ContentScraper{
             writeFileToDirectory(ScraperConstants.REGULAR_ARABIC_FONT_LINK, new File(destinationDir, ScraperConstants.ARABIC_FONT_REGULAR));
             writeFileToDirectory(ScraperConstants.BOLD_ARABIC_FONT_LINK, new File(destinationDir, ScraperConstants.ARABIC_FONT_BOLD));
 
-
-            File zippedFile = new File(destinationDir.getParent(), response.id +".zip");
-            try (ZipOutputStream out = new ZipOutputStream(Files.newOutputStream(zippedFile.toPath()), StandardCharsets.UTF_8)){
-                Path sourceDirPath = Paths.get(destinationDir.toURI());
-                Files.walk(sourceDirPath).filter(path -> !Files.isDirectory(path))
-                        .forEach(path -> {
-                            ZipEntry zipEntry = new ZipEntry(sourceDirPath.relativize(path).toString());
-                            try {
-                                out.putNextEntry(zipEntry);
-                                out.write(Files.readAllBytes(path));
-                                out.closeEntry();
-                            } catch (Exception e) {
-                                System.err.println(e.getCause());
-                            }
-                        });
-            }
+            ContentScraperUtil.zipDirectory(destinationDir.getParentFile(), response.id);
         }
 
     }

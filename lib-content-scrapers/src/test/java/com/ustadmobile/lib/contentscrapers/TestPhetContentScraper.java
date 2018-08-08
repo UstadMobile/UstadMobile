@@ -105,7 +105,7 @@ public class TestPhetContentScraper {
         mockWebServer.setDispatcher(dispatcher);
 
         PhetContentScraper scraper = new PhetContentScraper();
-        scraper.convert(mockWebServer.url("/api/simulation/").toString(), tmpDir);
+        scraper.convert(mockWebServer.url("/api/simulation/equality-explorer-two-variables").toString(), tmpDir);
 
         File aboutFile = new File(tmpDir, ScraperConstants.ABOUT_HTML);
         Assert.assertTrue("About File Exists",aboutFile.length() > 0);
@@ -136,7 +136,10 @@ public class TestPhetContentScraper {
         File spanishModified = new File(spanishDir, ScraperConstants.LAST_MODIFIED_TXT);
         Assert.assertTrue("Spanish Last Modified exists", spanishModified.length() > 0);
 
-        scraper.convert(mockWebServer.url("/api/simulation/").toString(), tmpDir);
+        File zipFile = new File(tmpDir.getParentFile(), "equality-explorer-two-variables.zip");
+        Assert.assertTrue("Zip File Exists", zipFile.length() > 0);
+
+        scraper.convert(mockWebServer.url("/api/simulation/equality-explorer-two-variables").toString(), tmpDir);
 
         long secondSimDownload = englishSimulation.lastModified();
 

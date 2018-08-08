@@ -21,9 +21,15 @@ import java.io.Reader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 
 public class ContentScraperUtil {
@@ -195,6 +201,28 @@ public class ContentScraperUtil {
         } finally {
             UMIOUtils.closeQuietly(reader);
         }
+    }
+
+
+    public static void zipDirectory(File directory, String filename) throws IOException {
+
+        File zippedFile = new File(directory.getParent(), filename +".zip");
+        try (ZipOutputStream out = new ZipOutputStream(Files.newOutputStream(zippedFile.toPath()), StandardCharsets.UTF_8)){
+            Path sourceDirPath = Paths.get(directory.toURI());
+            Files.walk(sourceDirPath).filter(path -> !Files.isDirectory(path))
+                    .forEach(path -> {
+                        ZipEntry zipEntry = new ZipEntry(sourceDirPath.relativize(path).toString());
+                        try {
+                            out.putNextEntry(zipEntry);
+                            out.write(Files.readAllBytes(path));
+                            out.closeEntry();
+                        } catch (Exception e) {
+                            System.err.println(e.getCause());
+                        }
+                    });
+        }
+
+
     }
 
 
