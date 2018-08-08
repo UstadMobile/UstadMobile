@@ -50,7 +50,9 @@ public class IndexPhetContentScraper {
 
 
     public void browseCategory(Document document) throws IOException {
+
         Elements simulationList = document.select("td.simulation-list-item span.sim-badge-html");
+
         OpdsEntryWithRelations parentPhet = new OpdsEntryWithRelations(
                 UmUuidUtil.encodeUuidWithAscii85(UUID.randomUUID()), UUID.randomUUID().toString(), "Phet Interactive Simulations");
 
@@ -79,11 +81,11 @@ public class IndexPhetContentScraper {
                     OpdsEntryParentToChildJoin phetToCategoryJoin = new OpdsEntryParentToChildJoin(parentPhet.getUuid(),
                             category.getUuid(), count++);
 
-                    OpdsEntryParentToChildJoin join = new OpdsEntryParentToChildJoin(category.getUuid(),
+                    OpdsEntryParentToChildJoin categoryToSimulationJoin = new OpdsEntryParentToChildJoin(category.getUuid(),
                         simulationChild.getUuid(), count++);
 
                     parentToChildJoins.add(phetToCategoryJoin);
-                    parentToChildJoins.add(join);
+                    parentToChildJoins.add(categoryToSimulationJoin);
                 }
 
                 OpdsLink newEntryLink = new OpdsLink(simulationChild.getUuid(), "application/zip",

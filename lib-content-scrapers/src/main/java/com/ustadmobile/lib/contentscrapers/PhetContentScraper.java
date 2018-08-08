@@ -92,6 +92,7 @@ public class PhetContentScraper implements ContentScraper{
 
         ArrayList<OpdsEntryWithRelations> categoryRelations = new ArrayList<>();
         for(Element category: selected){
+
             if(Arrays.stream(CATEGORY).parallel().noneMatch(category.text()::contains)){
 
                 String categoryName = category.text(); // category name

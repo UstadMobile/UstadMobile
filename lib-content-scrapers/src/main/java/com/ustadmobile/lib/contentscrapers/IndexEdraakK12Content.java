@@ -65,10 +65,19 @@ public class IndexEdraakK12Content {
         entryWithRelationsList = new ArrayList<>();
         parentToChildJoins = new ArrayList<>();
 
+        OpdsEntryWithRelations edraakEntry = new OpdsEntryWithRelations(UmUuidUtil.encodeUuidWithAscii85(UUID.randomUUID()),
+                UUID.randomUUID().toString(), "Edraak K12");
+
         OpdsEntryWithRelations parentEntry = new OpdsEntryWithRelations(UmUuidUtil.encodeUuidWithAscii85(UUID.randomUUID()),
                 response.id, response.title);
 
+        OpdsEntryParentToChildJoin join = new OpdsEntryParentToChildJoin(edraakEntry.getUuid(),
+                parentEntry.getUuid(), 0);
+
+
+        entryWithRelationsList.add(edraakEntry);
         entryWithRelationsList.add(parentEntry);
+        parentToChildJoins.add(join);
 
         findImportedComponent(response, parentEntry);
 
