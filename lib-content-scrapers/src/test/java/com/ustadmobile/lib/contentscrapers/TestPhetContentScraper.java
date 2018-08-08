@@ -25,6 +25,8 @@ public class TestPhetContentScraper {
     private String JAR_FILE_LOCATION = "/com/ustadmobile/lib/contentscrapers/phet-jar-detail.html";
     private String FLASH_FILE_LOCATION = "/com/ustadmobile/lib/contentscrapers/phet-flash-detail.html";
 
+    private final String PHET_MAIN_CONTENT = "/com/ustadmobile/lib/contentscrapers/phet-main-content.txt";
+
     private String SIM_EN = "simulation_en.html";
     private String SIM_ES = "simulation_es.html";
 
@@ -40,6 +42,15 @@ public class TestPhetContentScraper {
 
                 if (request.getPath().startsWith("/api/simulation")) {
                     InputStream videoIn = getClass().getResourceAsStream(HTML_FILE_LOCATION);
+                    BufferedSource source = Okio.buffer(Okio.source(videoIn));
+                    Buffer buffer = new Buffer();
+                    source.readAll(buffer);
+
+                    return new MockResponse().setBody(buffer);
+
+                } else if (request.getPath().contains(PHET_MAIN_CONTENT)){
+
+                    InputStream videoIn = getClass().getResourceAsStream(PHET_MAIN_CONTENT);
                     BufferedSource source = Okio.buffer(Okio.source(videoIn));
                     Buffer buffer = new Buffer();
                     source.readAll(buffer);
@@ -170,5 +181,35 @@ public class TestPhetContentScraper {
         scraper.convert(mockWebServer.url("/legacy/flash").toString(), tmpDir);
 
     }
+
+    @Test
+    public void givenServerOnline_whenUrlFound_findAllSimulations() throws IOException {
+
+        IndexPhetContentScraper index = new IndexPhetContentScraper();
+        MockWebServer mockWebServer = new MockWebServer();
+        mockWebServer.setDispatcher(dispatcher);
+
+        File tmpDir = Files.createTempDirectory("testphetindexscraper").toFile();
+
+        index.findContent(mockWebServer.url(PHET_MAIN_CONTENT).toString(), tmpDir);
+
+    }
+
+    @Test
+    public void testCommand() throws IOException{
+        PhetContentScraper scraper = new PhetContentScraper();
+        if(System.getProperty("phetUrl") != null && System.getProperty("phetDir") != null){
+            scraper.convert(System.getProperty("phetUrl"),new File(System.getProperty("phetDir")));
+        }
+    }
+
+    @Test
+    public void testIndexCommand() throws IOException{
+        IndexPhetContentScraper content = new IndexPhetContentScraper();
+        if(System.getProperty("findPhetUrl") != null && System.getProperty("findPhetDir") != null) {
+            content.findContent(System.getProperty("findPhetUrl"), new File(System.getProperty("findPhetDir")));
+        }
+    }
+
 
 }

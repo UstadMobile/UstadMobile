@@ -53,6 +53,7 @@ task scrapEdraakK12(type: Test) {
     }
 
     include('**/TestEdraakContentScraper.class')
+    include('**/TestPhetContentScraper.class')
 }
 
 compileTestJava.dependsOn(generateTestBuildConfig)
@@ -67,6 +68,17 @@ tasks.withType(Test) {
         systemProperty 'findUrl', System.getProperty('findUrl')
         systemProperty 'findDir', System.getProperty('findDir')
     }
+
+    if(System.getProperty('phetUrl') && System.getProperty('dir')){
+        systemProperty 'phetUrl', System.getProperty('phetUrl')
+        systemProperty 'phetDir', System.getProperty('phetDir')
+    }
+
+    if(System.getProperty('findPhetUrl') && System.getProperty('findPhetDir')){
+        systemProperty 'findPhetUrl', System.getProperty('findPhetUrl')
+        systemProperty 'findPhetDir', System.getProperty('findPhetDir')
+    }
+
 }
 
 

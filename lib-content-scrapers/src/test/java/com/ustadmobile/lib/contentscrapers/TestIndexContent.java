@@ -1,17 +1,13 @@
 package com.ustadmobile.lib.contentscrapers;
 
-import com.google.gson.GsonBuilder;
-import com.ustadmobile.lib.db.entities.OpdsEntry;
-import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
 
 import org.apache.commons.io.IOUtils;
-import org.junit.Assert;
+
 import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.List;
 
 import okhttp3.mockwebserver.Dispatcher;
 import okhttp3.mockwebserver.MockResponse;
@@ -23,6 +19,7 @@ import static com.ustadmobile.lib.contentscrapers.ScraperConstants.*;
 public class TestIndexContent {
 
     private final String MAIN_CONTENT_CONTENT_FILE = "/com/ustadmobile/lib/contentscrapers/edraak-main-content.txt";
+
 
     private final String DETAIL_JSON_CONTENT_FILE = "/com/ustadmobile/lib/contentscrapers/edraak-detail.txt";
 
@@ -41,7 +38,7 @@ public class TestIndexContent {
                             request.getPath().indexOf(".txt", prefixLength));
                     return new MockResponse().setBody(IOUtils.toString(getClass().getResourceAsStream(fileName + ".txt"), UTF_ENCODING));
 
-                }else {
+                } else {
                      return new MockResponse().setBody(IOUtils.toString(getClass().getResourceAsStream(DETAIL_JSON_CONTENT_FILE), UTF_ENCODING));
                  }
 
@@ -67,16 +64,6 @@ public class TestIndexContent {
 
     }
 
-    @Test
-    public void givenServerOnline_whenUrlFound_findAllSimulations() throws IOException {
-
-        IndexPhetContentScraper index = new IndexPhetContentScraper();
-
-        File tmpDir = Files.createTempDirectory("testphetindexscraper").toFile();
-
-        index.findContent("https://phet.colorado.edu/en/simulations/category/html", tmpDir);
-
-    }
 
 
 }
