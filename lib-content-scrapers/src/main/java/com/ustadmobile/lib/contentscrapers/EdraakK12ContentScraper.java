@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.ustadmobile.core.util.UMIOUtils;
+import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -12,14 +13,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.*;
 
@@ -55,7 +50,7 @@ public class EdraakK12ContentScraper implements ContentScraper{
      * @throws IOException
      */
     @Override
-    public void convert(String urlString, File destinationDir) throws IOException {
+    public ArrayList<OpdsEntryWithRelations> convert(String urlString, File destinationDir) throws IOException {
 
         URL url;
         try {
@@ -156,6 +151,7 @@ public class EdraakK12ContentScraper implements ContentScraper{
             ContentScraperUtil.zipDirectory(destinationDir.getParentFile(), response.id);
         }
 
+        return null;
     }
 
     /**

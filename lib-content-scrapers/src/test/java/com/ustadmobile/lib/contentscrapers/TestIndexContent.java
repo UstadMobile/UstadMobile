@@ -67,5 +67,16 @@ public class TestIndexContent {
 
     }
 
+    @Test
+    public void givenServerOnline_whenUrlFound_findAllSimulations() throws IOException {
+
+        IndexPhetContentScraper index = new IndexPhetContentScraper();
+
+        File tmpDir = Files.createTempDirectory("testphetindexscraper").toFile();
+
+        index.findContent("https://phet.colorado.edu/en/simulations/category/html", tmpDir);
+
+    }
+
 
 }

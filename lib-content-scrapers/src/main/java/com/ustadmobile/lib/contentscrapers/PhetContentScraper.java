@@ -1,29 +1,30 @@
 package com.ustadmobile.lib.contentscrapers;
 
-import com.ustadmobile.core.util.UMIOUtils;
+import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
+import com.ustadmobile.lib.util.UmUuidUtil;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.List;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.UUID;
 
 public class PhetContentScraper implements ContentScraper{
 
+    public static final String[] CATEGORY = {
+            "iPad/Tablet", "New Sims", "Simulations", "HTML5"};
+
 
     @Override
-    public void convert(String url, File destinationDir) throws IOException {
+    public ArrayList<OpdsEntryWithRelations> convert(String url, File destinationDir) throws IOException {
 
         URL simulationUrl = new URL(url);
         destinationDir.mkdirs();
@@ -87,6 +88,24 @@ public class PhetContentScraper implements ContentScraper{
             ContentScraperUtil.zipDirectory(destinationDir, url.substring(url.lastIndexOf("/"), url.length()));
         }
 
+        Elements selected = simulationDoc.select("ul.nav-ul div.link-holder span.selected");
+
+        ArrayList<OpdsEntryWithRelations> categoryRelations = new ArrayList<>();
+        for(Element category: selected){
+            if(Arrays.stream(CATEGORY).parallel().noneMatch(category.text()::contains)){
+
+                String categoryName = category.text(); // category name
+                String path = category.parent().attr("href"); // url path to category
+
+                OpdsEntryWithRelations newEntry = new OpdsEntryWithRelations(
+                        UmUuidUtil.encodeUuidWithAscii85(UUID.randomUUID()), path, categoryName);
+
+                categoryRelations.add(newEntry);
+                System.out.println(categoryName);
+            }
+        }
+
+        return categoryRelations;
     }
 
     private void downloadContent(URL simulationUrl, String hrefLink, File languageLocation) throws IOException {
