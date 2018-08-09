@@ -33,6 +33,14 @@ public class BleMessage {
 
     private int length;
 
+    private ByteArrayOutputStream outputStream;
+
+
+    /**
+     * Constructor which will be used when receiving packets
+     */
+    public BleMessage(){ }
+
 
     /**
      * Constructor which will be used when sending the message
@@ -49,25 +57,24 @@ public class BleMessage {
 
     /**
      * Constructor which will be used when receiving the message
-     * @param payloadPackets Received packets
+     * @param payload Received packets
      */
-    public BleMessage(byte[][] payloadPackets){
-        if(payloadPackets != null){
-            byte [] packets = depacketizePayload(payloadPackets);
-            byte [] receivedPayload = ByteBuffer.wrap(Arrays.copyOfRange(packets, 5,
-                    packets.length)).array();
-            requestType = ByteBuffer.wrap(Arrays.copyOfRange(packets, 0, 1)).get();
-            length = ByteBuffer.wrap(Arrays.copyOfRange(packets, 1, 5)).getInt();
+    public BleMessage(byte[][] payload){
+        byte [] packets = depacketizePayload(payload);
+        byte [] receivedPayload = ByteBuffer.wrap(Arrays.copyOfRange(packets, 5,
+                packets.length)).array();
+        requestType = ByteBuffer.wrap(Arrays.copyOfRange(packets, 0, 1)).get();
+        length = ByteBuffer.wrap(Arrays.copyOfRange(packets, 1, 5)).getInt();
 
-            boolean isCompressed = receivedPayload.length > 0 &&
-                    (receivedPayload[0] == (byte) (GZIPInputStream.GZIP_MAGIC))
-                    && (receivedPayload[1] == (byte) (GZIPInputStream.GZIP_MAGIC >> 8));
-            this.payload = receivedPayload;
-            if(isCompressed){
-                payload = decompressPayload(receivedPayload);
-            }
+        boolean isCompressed = receivedPayload.length > 0 &&
+                (receivedPayload[0] == (byte) (GZIPInputStream.GZIP_MAGIC))
+                && (receivedPayload[1] == (byte) (GZIPInputStream.GZIP_MAGIC >> 8));
+        this.payload = receivedPayload;
+        if(isCompressed){
+            this.payload = decompressPayload(receivedPayload);
         }
     }
+
 
     /**
      * Get constructed payload packets to be transferred
@@ -154,6 +161,8 @@ public class BleMessage {
             } catch (IOException e) {
                 e.printStackTrace();
                 return new byte[][]{};
+            }finally {
+                UMIOUtils.closeQuietly(outputStream);
             }
             byte [] totalPayLoad = outputStream.toByteArray();
             byte[][] packets = new byte[packetSize][mtu];
@@ -184,6 +193,8 @@ public class BleMessage {
                     outputStream.write(payLoad);
                 } catch (IOException e) {
                     e.printStackTrace();
+                }finally {
+                    UMIOUtils.closeQuietly(outputStream);
                 }
             }
             return outputStream.toByteArray();
@@ -204,6 +215,48 @@ public class BleMessage {
      */
     public int getLength(){
         return length;
+    }
+
+    /**
+     * Called when packet is received from the other peer for assembling
+     * @param packets packet received from the other peer
+     * @return True if the packets are all received else False.
+     */
+    public boolean onPackageReceived(byte [] packets){
+        if(outputStream == null){
+            outputStream = new ByteArrayOutputStream();
+            requestType = ByteBuffer.wrap(Arrays.copyOfRange(packets, 0, 1)).get();
+            length = ByteBuffer.wrap(Arrays.copyOfRange(packets, 1, 5)).getInt();
+        }
+
+        try{
+            outputStream.write(packets);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        byte [] receivedPayload = ByteBuffer.wrap(Arrays.copyOfRange(outputStream.toByteArray(), 5,
+                outputStream.toByteArray().length)).array();
+
+        if(receivedPayload.length == length){
+            boolean isCompressed = receivedPayload.length > 0 &&
+                    (receivedPayload[0] == (byte) (GZIPInputStream.GZIP_MAGIC))
+                    && (receivedPayload[1] == (byte) (GZIPInputStream.GZIP_MAGIC >> 8));
+            this.payload = receivedPayload;
+            if(isCompressed){
+                this.payload = decompressPayload(receivedPayload);
+            }
+            try {
+                outputStream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }finally {
+                UMIOUtils.closeQuietly(outputStream);
+                outputStream = null;
+            }
+            return true;
+        }
+        return false;
     }
 
 }
