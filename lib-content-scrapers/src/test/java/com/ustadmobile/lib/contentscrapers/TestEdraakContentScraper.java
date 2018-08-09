@@ -247,7 +247,7 @@ public class TestEdraakContentScraper {
 
     @Test
     public void givenContentNotModified_whenEdXContentScrapedAgain_thenShouldNotDownloadComponents() throws IOException {
-        //run the initial convert
+        //run the initial scrapContent
         File tmpDir = Files.createTempDirectory("testmodifiededraak").toFile();
         MockWebServer mockWebServer = new MockWebServer();
         mockWebServer.setDispatcher(dispatcher);
@@ -257,7 +257,7 @@ public class TestEdraakContentScraper {
         scraper.scrapContent();
 
         long firstDownloadTime = new File(tmpDir, CONTENT_JSON).lastModified();
-        //now run convert again...
+        //now run scrapContent again...
         scraper.scrapContent();
 
         long lastModified = new File(tmpDir, CONTENT_JSON).lastModified();
@@ -280,7 +280,7 @@ public class TestEdraakContentScraper {
         scraper.scrapContent();
 
         long firstDownloadTime = new File(tmpDir, VIDEO_MP4).lastModified();
-        //now run convert again...
+        //now run scrapContent again...
         scraper.scrapContent();
 
         long lastModified = new File(tmpDir, VIDEO_MP4).lastModified();
@@ -301,7 +301,7 @@ public class TestEdraakContentScraper {
 
         scraper.scrapContent();
         long firstDownloadTime = new File(tmpDir, QUESTIONS_JSON).lastModified();
-        //now run convert again...
+        //now run scrapContent again...
 
         scraper.scrapContent();
 

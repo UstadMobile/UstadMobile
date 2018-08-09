@@ -37,7 +37,7 @@ public class IndexEdraakK12Content {
         try {
             new IndexEdraakK12Content().findContent(args[0], new File(args[1]));
         }catch(IOException e) {
-            System.err.println("Exception running convert");
+            System.err.println("Exception running scrapContent");
             e.printStackTrace();
         }
 
@@ -67,7 +67,7 @@ public class IndexEdraakK12Content {
         OpdsEntryWithRelations edraakEntry = new OpdsEntryWithRelations(UmUuidUtil.encodeUuidWithAscii85(UUID.randomUUID()),
                "https://www.edraak.org/k12/", "Edraak K12");
 
-        
+
         OpdsEntryWithRelations parentEntry = new OpdsEntryWithRelations(UmUuidUtil.encodeUuidWithAscii85(UUID.randomUUID()),
                urlString.substring(0, urlString.indexOf("component/")) + response.id, response.title);
 

@@ -54,7 +54,7 @@ public class IndexPhetContentScraper {
         Elements simulationList = document.select("td.simulation-list-item span.sim-badge-html");
 
         OpdsEntryWithRelations parentPhet = new OpdsEntryWithRelations(
-                UmUuidUtil.encodeUuidWithAscii85(UUID.randomUUID()), UUID.randomUUID().toString(), "Phet Interactive Simulations");
+                UmUuidUtil.encodeUuidWithAscii85(UUID.randomUUID()), "https://phet.colorado.edu/", "Phet Interactive Simulations");
 
         entryWithRelationsList.add(parentPhet);
 
@@ -62,16 +62,21 @@ public class IndexPhetContentScraper {
 
             String path = simulation.parent().attr("href");
             String simulationUrl = new URL(url, path).toString();
-            String title = simulationUrl.substring(simulationUrl.lastIndexOf("/"), simulationUrl.length());
+            String title = simulationUrl.substring(simulationUrl.lastIndexOf("/") + 1, simulationUrl.length());
 
             OpdsEntryWithRelations simulationChild = new OpdsEntryWithRelations(
                     UmUuidUtil.encodeUuidWithAscii85(UUID.randomUUID()), path, title);
 
             ArrayList<OpdsEntryWithRelations> categoryList;
+            ArrayList<OpdsEntryWithRelations> translationList;
 
-            PhetContentScraper scraper = new PhetContentScraper();
+            PhetContentScraper scraper = new PhetContentScraper(simulationUrl, new File(destinationDirectory, title));
             try {
-                categoryList = scraper.convert(simulationUrl, new File(destinationDirectory, title));
+                scraper.scrapContent();
+
+                categoryList = scraper.getCategoryRelations();
+                translationList = scraper.getTranslations(destinationDirectory);
+
                 entryWithRelationsList.add(simulationChild);
                 int count = 0;
                 for(OpdsEntryWithRelations category: categoryList){
@@ -86,10 +91,25 @@ public class IndexPhetContentScraper {
 
                     parentToChildJoins.add(phetToCategoryJoin);
                     parentToChildJoins.add(categoryToSimulationJoin);
+
+                    for(OpdsEntryWithRelations translation: translationList){
+
+                        OpdsEntryParentToChildJoin categoryToSimulationTranslationJoin = new OpdsEntryParentToChildJoin(category.getUuid(),
+                                translation.getUuid(), count++);
+
+                        parentToChildJoins.add(categoryToSimulationTranslationJoin);
+
+
+
+                    }
                 }
 
+
+
+
+
                 OpdsLink newEntryLink = new OpdsLink(simulationChild.getUuid(), "application/zip",
-                        destinationDirectory.getPath() + title + ".zip", OpdsEntry.LINK_REL_ACQUIRE);
+                        destinationDirectory.getPath() + "\\" + title + ".zip", OpdsEntry.LINK_REL_ACQUIRE);
                 newEntryLink.setLength(ENTRY_SIZE_LINK_LENGTH);
                 simulationChild.setLinks(Collections.singletonList(newEntryLink));
 

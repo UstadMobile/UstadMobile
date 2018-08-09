@@ -17,33 +17,41 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.UUID;
 
-public class PhetContentScraper implements ContentScraper{
+public class PhetContentScraper{
 
     public static final String[] CATEGORY = {
             "iPad/Tablet", "New Sims", "Simulations", "HTML5"};
+    private final String url;
+    private final File destinationDirectory;
+    private Document simulationDoc;
 
+    public PhetContentScraper(String url, File destinationDir){
+        this.url = url;
+        this.destinationDirectory = destinationDir;
 
-    @Override
-    public ArrayList<OpdsEntryWithRelations> convert(String url, File destinationDir) throws IOException {
+    }
+
+    //TODO: refactor url and destinationDir to be constructor arguments, then the scrapContent method does not take any parameters.
+    public void scrapContent() throws IOException {
 
         URL simulationUrl = new URL(url);
-        destinationDir.mkdirs();
+        destinationDirectory.mkdirs();
 
-        Document simulationDoc = Jsoup.connect(url).get();
+        simulationDoc = Jsoup.connect(url).get();
 
         if(!simulationDoc.select("div.simulation-main-image-panel a span").hasClass("html-badge")){
             throw new IllegalArgumentException("File Type not supported");
         }
 
         String about = simulationDoc.getElementById("about").html();
-        ContentScraperUtil.writeStringToFile(about, new File(destinationDir, ScraperConstants.ABOUT_HTML));
+        ContentScraperUtil.writeStringToFile(about, new File(destinationDirectory, ScraperConstants.ABOUT_HTML));
 
         boolean contentUpdated = false;
         for(Element englishLink: simulationDoc.select("div.simulation-main-image-panel a.phet-button[href]")){
 
             String hrefLink = englishLink.attr("href");
 
-            File englishLocation = new File(destinationDir, "en");
+            File englishLocation = new File(destinationDirectory, "en");
             englishLocation.mkdirs();
 
             if(hrefLink.contains("download")){
@@ -64,7 +72,7 @@ public class PhetContentScraper implements ContentScraper{
 
                     String langCode = hrefLink.substring(hrefLink.lastIndexOf("/") + 1, hrefLink.length());
                     System.out.println(langCode);
-                    languageLocation = new File(destinationDir, langCode);
+                    languageLocation = new File(destinationDirectory, langCode);
                     languageLocation.mkdirs();
                     break;
                 }
@@ -85,8 +93,13 @@ public class PhetContentScraper implements ContentScraper{
         }
 
         if(contentUpdated){
-            ContentScraperUtil.zipDirectory(destinationDir, url.substring(url.lastIndexOf("/"), url.length()));
+            ContentScraperUtil.zipDirectory(destinationDirectory, url.substring(url.lastIndexOf("/"), url.length()));
         }
+
+
+    }
+
+    public ArrayList<OpdsEntryWithRelations> getCategoryRelations(){
 
         Elements selected = simulationDoc.select("ul.nav-ul div.link-holder span.selected");
 
@@ -107,6 +120,7 @@ public class PhetContentScraper implements ContentScraper{
         }
 
         return categoryRelations;
+
     }
 
     private void downloadContent(URL simulationUrl, String hrefLink, File languageLocation) throws IOException {
@@ -136,5 +150,35 @@ public class PhetContentScraper implements ContentScraper{
         ContentScraperUtil.writeStringToFile(eTag, eTagFile);
         ContentScraperUtil.writeStringToFile(lastModified, modifiedFile);
 
+    }
+
+    public ArrayList<OpdsEntryWithRelations> getTranslations(File destinationDirectory) throws IOException {
+
+        ArrayList<OpdsEntryWithRelations> translationsEntry = new ArrayList<>();
+
+        for(File translationDir: destinationDirectory.listFiles()){
+
+            if(translationDir.isDirectory()){
+                String langCode = translationDir.getName();
+                if(langCode.equalsIgnoreCase("en")){
+                    continue;
+                }
+                for(File file: translationDir.listFiles()){
+
+                    if(file.getName().endsWith(".html")){
+
+                        String title = Jsoup.parse(file, ScraperConstants.UTF_ENCODING).title();
+                        OpdsEntryWithRelations newEntry = new OpdsEntryWithRelations(
+                                UmUuidUtil.encodeUuidWithAscii85(UUID.randomUUID()), destinationDirectory.getName() + "\\" + langCode, title);
+                        newEntry.setLanguage(langCode);
+                        translationsEntry.add(newEntry);
+                        break;
+                    }
+
+                }
+            }
+        }
+
+        return translationsEntry;
     }
 }

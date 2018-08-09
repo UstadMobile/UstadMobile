@@ -34,7 +34,7 @@ public class EdraakK12ContentScraper{
         try {
             new EdraakK12ContentScraper(args[0], new File(args[1])).scrapContent();
         }catch(IOException e) {
-            System.err.println("Exception running convert");
+            System.err.println("Exception running scrapContent");
             e.printStackTrace();
         }
 
@@ -46,7 +46,7 @@ public class EdraakK12ContentScraper{
     }
 
     public static String generateUrl(String baseUrl, String contentId, int programId) {
-        System.out.println("convert url = " +baseUrl + "component/" +  contentId + "/?states_program_id=" + programId);
+        System.out.println("scrapContent url = " +baseUrl + "component/" +  contentId + "/?states_program_id=" + programId);
 
         return baseUrl + "component/" +  contentId + "/?states_program_id=" + programId;
     }
