@@ -22,13 +22,13 @@ import okio.Okio;
 public class TestPhetContentScraper {
 
 
-    private String EN_LOCATION_FILE = "/com/ustadmobile/lib/contentscrapers/phetsimluation/simulation_en.html";
-    private String ES_LOCATION_FILE = "/com/ustadmobile/lib/contentscrapers/phetsimluation/simulation_es.html";
-    private String HTML_FILE_LOCATION = "/com/ustadmobile/lib/contentscrapers/phetsimluation/phet-html-detail.txt";
-    private String JAR_FILE_LOCATION = "/com/ustadmobile/lib/contentscrapers/phetsimluation/phet-jar-detail.html";
-    private String FLASH_FILE_LOCATION = "/com/ustadmobile/lib/contentscrapers/phetsimluation/phet-flash-detail.html";
+    private String EN_LOCATION_FILE = "/com/ustadmobile/lib/contentscrapers/phetsimulation/simulation_en.html";
+    private String ES_LOCATION_FILE = "/com/ustadmobile/lib/contentscrapers/phetsimulation/simulation_es.html";
+    private String HTML_FILE_LOCATION = "/com/ustadmobile/lib/contentscrapers/phetsimulation/phet-html-detail.html";
+    private String JAR_FILE_LOCATION = "/com/ustadmobile/lib/contentscrapers/phetsimulation/phet-jar-detail.html";
+    private String FLASH_FILE_LOCATION = "/com/ustadmobile/lib/contentscrapers/phetsimuluation/phet-flash-detail.html";
 
-    private final String PHET_MAIN_CONTENT = "/com/ustadmobile/lib/contentscrapers/phetsimluation/phet-main-content.txt";
+    private final String PHET_MAIN_CONTENT = "/com/ustadmobile/lib/contentscrapers/phetsimulation/phet-main-content.html";
 
     private String SIM_EN = "simulation_en.html";
     private String SIM_ES = "simulation_es.html";
