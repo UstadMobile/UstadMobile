@@ -18,10 +18,10 @@ import static com.ustadmobile.lib.contentscrapers.ScraperConstants.*;
 
 public class TestIndexContent {
 
-    private final String MAIN_CONTENT_CONTENT_FILE = "/com/ustadmobile/lib/contentscrapers/edraak-main-content.txt";
+    private final String MAIN_CONTENT_CONTENT_FILE = "/com/ustadmobile/lib/contentscrapers/edraakK12/edraak-main-content.txt";
 
 
-    private final String DETAIL_JSON_CONTENT_FILE = "/com/ustadmobile/lib/contentscrapers/edraak-detail.txt";
+    private final String DETAIL_JSON_CONTENT_FILE = "/com/ustadmobile/lib/contentscrapers/edraakK12/edraak-detail.txt";
 
     final String COMPONENT_API_PREFIX = "/api/component/";
 

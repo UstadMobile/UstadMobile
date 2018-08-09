@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.ustadmobile.core.util.UMIOUtils;
-import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -19,7 +18,10 @@ import java.util.List;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.*;
 
 
-public class EdraakK12ContentScraper implements ContentScraper{
+public class EdraakK12ContentScraper{
+
+    private final String url;
+    private final File destinationDirectory;
 
     public static void main(String[] args) {
         if(args.length != 2) {
@@ -30,7 +32,7 @@ public class EdraakK12ContentScraper implements ContentScraper{
         System.out.println(args[0]);
         System.out.println(args[1]);
         try {
-            new EdraakK12ContentScraper().convert(args[0], new File(args[1]));
+            new EdraakK12ContentScraper(args[0], new File(args[1])).scrapContent();
         }catch(IOException e) {
             System.err.println("Exception running convert");
             e.printStackTrace();
@@ -38,33 +40,36 @@ public class EdraakK12ContentScraper implements ContentScraper{
 
     }
 
-    public void convert(String contentId, int programId, String baseUrl, File destinationDir) throws IOException {
+    public EdraakK12ContentScraper(String url, File destinationDir){
+        this.url = url;
+        this.destinationDirectory = destinationDir;
+    }
+
+    public static String generateUrl(String baseUrl, String contentId, int programId) {
         System.out.println("convert url = " +baseUrl + "component/" +  contentId + "/?states_program_id=" + programId);
-        convert(baseUrl + "component/" +  contentId + "/?states_program_id=" + programId, destinationDir);
+
+        return baseUrl + "component/" +  contentId + "/?states_program_id=" + programId;
     }
     /**
      *
      *  Given a url and a directory, download all its content and save it in a directory
-     * @param urlString
-     * @param destinationDir destination directory
      * @throws IOException
      */
-    @Override
-    public ArrayList<OpdsEntryWithRelations> convert(String urlString, File destinationDir) throws IOException {
+    public void scrapContent() throws IOException {
 
-        URL url;
+        URL scrapUrl;
         try {
-            url = new URL(urlString);
+            scrapUrl = new URL(url);
         } catch (MalformedURLException e) {
-            System.out.println("Scrap Malformed url" + urlString);
-            throw new IllegalArgumentException("Malformed url" + urlString, e);
+            System.out.println("Scrap Malformed url" + url);
+            throw new IllegalArgumentException("Malformed url" + url, e);
         }
 
-        destinationDir.mkdirs();
+        destinationDirectory.mkdirs();
 
         ContentResponse response;
         try {
-            response = ContentScraperUtil.parseJson(url);
+            response = ContentScraperUtil.parseJson(scrapUrl);
         } catch (IOException | JsonSyntaxException e) {
             throw new IllegalArgumentException("JSON INVALID", e.getCause());
         }
@@ -89,13 +94,13 @@ public class EdraakK12ContentScraper implements ContentScraper{
                     ContentResponse.Encoded_videos videoHref = selectVideo(children.video_info.encoded_videos);
                     URL videoUrl;
                     try {
-                        videoUrl = new URL(url, videoHref.url);
+                        videoUrl = new URL(scrapUrl, videoHref.url);
                     } catch (MalformedURLException e) {
                         throw new IllegalArgumentException("video Malformed url", e);
                     }
 
 
-                    File videoFile = new File(destinationDir, VIDEO_MP4);
+                    File videoFile = new File(destinationDirectory, VIDEO_MP4);
                     if(ContentScraperUtil.isContentUpdated(ContentScraperUtil.parseEdraakK12Date(videoHref.modified), videoFile)){
                         try {
                             ContentScraperUtil.downloadContent(videoUrl, videoFile);
@@ -109,7 +114,7 @@ public class EdraakK12ContentScraper implements ContentScraper{
 
                     List<ContentResponse> questionsList = children.question_set.children;
                     try {
-                        anyContentUpdated = findAllExerciseImages(questionsList, destinationDir, url) || anyContentUpdated;
+                        anyContentUpdated = findAllExerciseImages(questionsList, destinationDirectory, scrapUrl) || anyContentUpdated;
                     }catch (IOException e){
                         throw new IllegalArgumentException("Exercise Malformed", e.getCause());
                     }
@@ -123,7 +128,7 @@ public class EdraakK12ContentScraper implements ContentScraper{
             // list of questions sets
             List<ContentResponse> questionsList = response.target_component.question_set.children;
             try {
-                anyContentUpdated = findAllExerciseImages(questionsList, destinationDir, url);
+                anyContentUpdated = findAllExerciseImages(questionsList, destinationDirectory, scrapUrl);
             }   catch (IOException e){
                 throw new IllegalArgumentException("Exercise Malformed", e.getCause());
             }
@@ -135,23 +140,21 @@ public class EdraakK12ContentScraper implements ContentScraper{
 
             // store the json in a file after modifying image links
             Gson gson = new GsonBuilder().disableHtmlEscaping().create();
-            File file = new File(destinationDir, ScraperConstants.CONTENT_JSON);
+            File file = new File(destinationDirectory, ScraperConstants.CONTENT_JSON);
             FileWriter fileWriter = new FileWriter(file);
             String jsonString =  gson.toJson(response);
             fileWriter.write(jsonString);
             UMIOUtils.closeQuietly(fileWriter);
 
-            writeFileToDirectory(ScraperConstants.JS_HTML_TAG, new File(destinationDir, INDEX_HTML));
-            writeFileToDirectory(ScraperConstants.JS_TAG, new File(destinationDir, JQUERY_JS));
-            writeFileToDirectory(ScraperConstants.MATERIAL_CSS_LINK, new File(destinationDir, ScraperConstants.MATERIAL_CSS));
-            writeFileToDirectory(ScraperConstants.MATERIAL_JS_LINK, new File(destinationDir, ScraperConstants.MATERIAL_JS));
-            writeFileToDirectory(ScraperConstants.REGULAR_ARABIC_FONT_LINK, new File(destinationDir, ScraperConstants.ARABIC_FONT_REGULAR));
-            writeFileToDirectory(ScraperConstants.BOLD_ARABIC_FONT_LINK, new File(destinationDir, ScraperConstants.ARABIC_FONT_BOLD));
+            writeFileToDirectory(ScraperConstants.JS_HTML_TAG, new File(destinationDirectory, INDEX_HTML));
+            writeFileToDirectory(ScraperConstants.JS_TAG, new File(destinationDirectory, JQUERY_JS));
+            writeFileToDirectory(ScraperConstants.MATERIAL_JS_LINK, new File(destinationDirectory, ScraperConstants.MATERIAL_JS));
+            writeFileToDirectory(ScraperConstants.REGULAR_ARABIC_FONT_LINK, new File(destinationDirectory, ScraperConstants.ARABIC_FONT_REGULAR));
+            writeFileToDirectory(ScraperConstants.BOLD_ARABIC_FONT_LINK, new File(destinationDirectory, ScraperConstants.ARABIC_FONT_BOLD));
 
-            ContentScraperUtil.zipDirectory(destinationDir.getParentFile(), response.id);
+            ContentScraperUtil.zipDirectory(destinationDirectory, response.id);
         }
 
-        return null;
     }
 
     /**

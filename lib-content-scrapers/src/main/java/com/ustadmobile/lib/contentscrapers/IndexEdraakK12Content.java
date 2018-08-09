@@ -13,12 +13,11 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
 public class IndexEdraakK12Content {
-
-    static final int ENTRY_SIZE_LINK_LENGTH = 1000;
 
     private List<OpdsEntryWithRelations> entryWithRelationsList;
     private List<OpdsEntryParentToChildJoin> parentToChildJoins;
@@ -66,10 +65,11 @@ public class IndexEdraakK12Content {
         parentToChildJoins = new ArrayList<>();
 
         OpdsEntryWithRelations edraakEntry = new OpdsEntryWithRelations(UmUuidUtil.encodeUuidWithAscii85(UUID.randomUUID()),
-                UUID.randomUUID().toString(), "Edraak K12");
+               "https://www.edraak.org/k12/", "Edraak K12");
 
+        
         OpdsEntryWithRelations parentEntry = new OpdsEntryWithRelations(UmUuidUtil.encodeUuidWithAscii85(UUID.randomUUID()),
-                response.id, response.title);
+               urlString.substring(0, urlString.indexOf("component/")) + response.id, response.title);
 
         OpdsEntryParentToChildJoin join = new OpdsEntryParentToChildJoin(edraakEntry.getUuid(),
                 parentEntry.getUuid(), 0);
@@ -88,25 +88,29 @@ public class IndexEdraakK12Content {
         if(ContentScraperUtil.isImportedComponent(parent.component_type)){
 
             // found the last child
-            EdraakK12ContentScraper scraper = new EdraakK12ContentScraper();
+            EdraakK12ContentScraper scraper = new EdraakK12ContentScraper(
+                    EdraakK12ContentScraper.generateUrl(url.getProtocol() + "://" + url.getHost() + (url.getPort() > 0 ? (":" + url.getPort()) : "") + "/api/", parent.id, parent.program == 0 ? response.program : parent.program),
+                    destinationDirectory);
             try{
-                scraper.convert(parent.id, parent.program == 0 ? response.program : parent.program, url.getProtocol() + "://" + url.getHost() + (url.getPort() > 0 ? (":" + url.getPort()) : "") + "/api/", new File(destinationDirectory, parent.id));
+                scraper.scrapContent();
             }catch (Exception e){
-                System.out.println(e.getCause());
+                System.err.println(e.getCause());
                 return;
             }
 
             OpdsLink newEntryLink = new OpdsLink(parentEntry.getUuid(), "application/zip",
                     destinationDirectory.getParent() + "/" + parent.id + ".zip", OpdsEntry.LINK_REL_ACQUIRE);
-            newEntryLink.setLength(ENTRY_SIZE_LINK_LENGTH);
-            parentEntry.setLinks(Arrays.asList(newEntryLink));
+            newEntryLink.setLength(new File(destinationDirectory.getParentFile(), response.id + ".zip").length());
+            parentEntry.setLinks(Collections.singletonList(newEntryLink));
 
         }else{
 
             for(ContentResponse children: parent.children){
 
                 OpdsEntryWithRelations newEntry = new OpdsEntryWithRelations(
-                        UmUuidUtil.encodeUuidWithAscii85(UUID.randomUUID()), children.id, children.title);
+                        UmUuidUtil.encodeUuidWithAscii85(UUID.randomUUID()),
+                        url.toString().substring(0, url.toString().indexOf("component/")) + children.id,
+                        children.title);
 
                 OpdsEntryParentToChildJoin join = new OpdsEntryParentToChildJoin(parentEntry.getUuid(),
                         newEntry.getUuid(), children.child_index);

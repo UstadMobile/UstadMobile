@@ -27,11 +27,11 @@ public class TestEdraakContentScraperWithParameters {
 
     private static MockWebServer mockWebServer;
 
-    private static final String DETAIL_JSON_CONTENT_FILE = "/com/ustadmobile/lib/contentscrapers/edraak-detail.txt";
+    private static final String DETAIL_JSON_CONTENT_FILE = "/com/ustadmobile/lib/contentscrapers/edraakK12/edraak-detail.txt";
 
-    private static final String VIDEO_LOCATION_FILE = "/com/ustadmobile/lib/contentscrapers/video.mp4";
+    private static final String VIDEO_LOCATION_FILE = "/com/ustadmobile/lib/contentscrapers/edraakK12/video.mp4";
 
-    private static final String RESOURCE_PATH = "/com/ustadmobile/lib/contentscrapers/";
+    private static final String RESOURCE_PATH = "/com/ustadmobile/lib/contentscrapers/edraakK12/";
 
     @Parameterized.Parameters
     public static ArrayList<Object> urlParameters() throws IOException {
@@ -91,8 +91,8 @@ public class TestEdraakContentScraperWithParameters {
 
     @Test
     public void test() throws IOException {
-        EdraakK12ContentScraper scraper = new EdraakK12ContentScraper();
-        scraper.convert(url, new File("C:\\Users\\suhai\\indexparameter\\"));
+        EdraakK12ContentScraper scraper = new EdraakK12ContentScraper(url, new File("C:\\Users\\suhai\\indexparameter\\"));
+        scraper.scrapContent();
     }
 
 }

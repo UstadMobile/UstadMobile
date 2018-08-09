@@ -21,7 +21,7 @@ import okio.Okio;
 
 public class TestContentScraperUtil {
 
-    private final String RESOURCE_PATH = "/com/ustadmobile/lib/contentscrapers/";
+    private final String RESOURCE_PATH = "/com/ustadmobile/lib/contentscrapers/edraakK12/";
     final Dispatcher dispatcher = new Dispatcher() {
 
         @Override
