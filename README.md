@@ -55,19 +55,3 @@ The build configuration system uses .properties files in each module:
 Most core options (e.g. app name, base content catalog, etc) are in the core module (e.g. in [core/buildconfig.default.properties](core/buildconfig.default.properties)). Options specific to a given platform (e.g. the android application id) 
   are in the module for that platform (e.g. app-android/buildconfig.local.properties).
 
-  
-To commit the build config to it's own git repository (push):
- ```
- ./gradlew -PconfigRepoUri=user@server.com:/path/to/repo pushLocalConfig
-```
-  
-To apply a new build config from a git repository (clone):
-```
-./gradlew -PconfigRepoUri=user@server.com:/path/to/repo cloneLocalConfig
-```
-  
- To pull changes from git for a build config that's currently applied (pull):
- ```
- ./gradlew pullLocalConfig
- ```
-
