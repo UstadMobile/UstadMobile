@@ -24,6 +24,7 @@ public class PhetContentScraper{
     private final String url;
     private final File destinationDirectory;
     private Document simulationDoc;
+    private String aboutText;
 
     public PhetContentScraper(String url, File destinationDir){
         this.url = url;
@@ -31,7 +32,6 @@ public class PhetContentScraper{
 
     }
 
-    //TODO: refactor url and destinationDir to be constructor arguments, then the scrapContent method does not take any parameters.
     public void scrapContent() throws IOException {
 
         URL simulationUrl = new URL(url);
@@ -43,8 +43,8 @@ public class PhetContentScraper{
             throw new IllegalArgumentException("File Type not supported");
         }
 
-        String about = simulationDoc.getElementById("about").html();
-        ContentScraperUtil.writeStringToFile(about, new File(destinationDirectory, ScraperConstants.ABOUT_HTML));
+        aboutText = simulationDoc.getElementById("about").html();
+
 
         boolean contentUpdated = false;
         for(Element englishLink: simulationDoc.select("div.simulation-main-image-panel a.phet-button[href]")){
@@ -93,10 +93,12 @@ public class PhetContentScraper{
         }
 
         if(contentUpdated){
-            ContentScraperUtil.zipDirectory(destinationDirectory, url.substring(url.lastIndexOf("/"), url.length()));
+            for(File langDirectory: destinationDirectory.listFiles()){
+                if(langDirectory.isDirectory()){
+                    ContentScraperUtil.zipDirectory(langDirectory, langDirectory.getName(), langDirectory.getParentFile());
+                }
+            }
         }
-
-
     }
 
     public ArrayList<OpdsEntryWithRelations> getCategoryRelations(){
@@ -126,6 +128,11 @@ public class PhetContentScraper{
     private void downloadContent(URL simulationUrl, String hrefLink, File languageLocation) throws IOException {
 
         URL link = new URL(simulationUrl, hrefLink);
+
+        String title = Jsoup.connect(link.toString()).get().title().replaceAll("[\\\\/:*?\"<>|]", " ");
+        File simulationLocation = new File(languageLocation, title);
+        simulationLocation.mkdirs();
+
         System.out.println(link);
         URLConnection conn = link.openConnection();
 
@@ -134,8 +141,8 @@ public class PhetContentScraper{
         System.out.println(eTag);
         System.out.println(lastModified);
 
-        File eTagFile = new File(languageLocation, ScraperConstants.ETAG_TXT);
-        File modifiedFile = new File(languageLocation, ScraperConstants.LAST_MODIFIED_TXT);
+        File eTagFile = new File(simulationLocation, ScraperConstants.ETAG_TXT);
+        File modifiedFile = new File(simulationLocation, ScraperConstants.LAST_MODIFIED_TXT);
 
         if(eTagFile.length() > 0){
 
@@ -145,10 +152,11 @@ public class PhetContentScraper{
             }
 
         }
-
-        ContentScraperUtil.downloadContent(link, new File(languageLocation, hrefLink.substring(hrefLink.lastIndexOf("/") + 1, hrefLink.lastIndexOf("?"))));
         ContentScraperUtil.writeStringToFile(eTag, eTagFile);
         ContentScraperUtil.writeStringToFile(lastModified, modifiedFile);
+        ContentScraperUtil.writeStringToFile(aboutText, new File(simulationLocation, ScraperConstants.ABOUT_HTML));
+        ContentScraperUtil.downloadContent(link, new File(simulationLocation, hrefLink.substring(hrefLink.lastIndexOf("/") + 1, hrefLink.lastIndexOf("?"))));
+
 
     }
 

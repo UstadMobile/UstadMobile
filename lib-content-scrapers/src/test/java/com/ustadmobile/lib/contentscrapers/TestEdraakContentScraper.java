@@ -264,7 +264,6 @@ public class TestEdraakContentScraper {
         //Assert that last modified dates are lower than firstDownloadCompleteTime
         Assert.assertTrue(lastModified == firstDownloadTime);
 
-        //Ideally, if possible, using mockwebserver, assert that no additional http calls to images/video took place
     }
 
     @Test

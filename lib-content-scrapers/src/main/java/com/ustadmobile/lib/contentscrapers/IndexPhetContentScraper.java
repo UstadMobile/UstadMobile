@@ -70,7 +70,7 @@ public class IndexPhetContentScraper {
             ArrayList<OpdsEntryWithRelations> categoryList;
             ArrayList<OpdsEntryWithRelations> translationList;
 
-            PhetContentScraper scraper = new PhetContentScraper(simulationUrl, new File(destinationDirectory, title));
+            PhetContentScraper scraper = new PhetContentScraper(simulationUrl, destinationDirectory);
             try {
                 scraper.scrapContent();
 

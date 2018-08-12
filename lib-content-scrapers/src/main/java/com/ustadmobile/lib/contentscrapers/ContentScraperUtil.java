@@ -27,7 +27,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -204,11 +203,20 @@ public class ContentScraperUtil {
     }
 
 
-    public static void zipDirectory(File directory, String filename) throws IOException {
+    /**
+     *
+     * Given a directory, save it using the filename, download its content and save in the given directory 
+     * @param directoryToZip
+     * @param filename
+     * @param locationToSave
+     * @throws IOException
+     */
 
-        File zippedFile = new File(directory.getParent(), filename +".zip");
+    public static void zipDirectory(File directoryToZip, String filename, File locationToSave) throws IOException {
+
+        File zippedFile = new File(locationToSave, filename +".zip");
         try (ZipOutputStream out = new ZipOutputStream(Files.newOutputStream(zippedFile.toPath()), StandardCharsets.UTF_8)){
-            Path sourceDirPath = Paths.get(directory.toURI());
+            Path sourceDirPath = Paths.get(directoryToZip.toURI());
             Files.walk(sourceDirPath).filter(path -> !Files.isDirectory(path))
                     .forEach(path -> {
                         ZipEntry zipEntry = new ZipEntry(sourceDirPath.relativize(path).toString());

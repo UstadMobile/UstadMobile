@@ -2,12 +2,16 @@ package com.ustadmobile.lib.contentscrapers;
 
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.nio.file.Files;
 import java.util.ArrayList;
 
@@ -118,37 +122,77 @@ public class TestPhetContentScraper {
         MockWebServer mockWebServer = new MockWebServer();
         mockWebServer.setDispatcher(dispatcher);
 
-        PhetContentScraper scraper = new PhetContentScraper(mockWebServer.url("/api/simulation/equality-explorer-two-variables").toString(), tmpDir);
+        String mockServerUrl = mockWebServer.url("/api/simulation/equality-explorer-two-variables").toString();
+        PhetContentScraper scraper = new PhetContentScraper(mockServerUrl, tmpDir);
         scraper.scrapContent();
 
-        File aboutFile = new File(tmpDir, ScraperConstants.ABOUT_HTML);
-        Assert.assertTrue("About File Exists",aboutFile.length() > 0);
+        Document simulationDoc = Jsoup.connect(mockServerUrl).get();
 
-        File englishDir = new File(tmpDir, "en");
-        Assert.assertTrue("English Folder exists", englishDir.isDirectory());
+       long firstSimDownload = 0;
+       File englishSimulation = null;
 
-        File englishSimulation = new File(englishDir, SIM_EN);
-        Assert.assertTrue("English Simulation exists", englishSimulation.length() > 0);
+       for(Element englishLink: simulationDoc.select("div.simulation-main-image-panel a.phet-button[href]")){
 
-        long firstSimDownload = englishSimulation.lastModified();
+           String hrefLink = englishLink.attr("href");
 
-        File engETag = new File(englishDir, ScraperConstants.ETAG_TXT);
-        Assert.assertTrue("English ETag exists", engETag.length() > 0);
+           File englishLocation = new File(tmpDir, "en");
+           Assert.assertTrue("English Folder exists", englishLocation.isDirectory());
 
-        File engModified = new File(englishDir, ScraperConstants.LAST_MODIFIED_TXT);
-        Assert.assertTrue("English Last Modified exists", engModified.length() > 0);
+           if(hrefLink.contains("download")){
+               URL link = new URL(new URL(mockServerUrl), hrefLink);
+               String title = Jsoup.connect(link.toString()).get().title().replaceAll("[\\\\/:*?\"<>|]", " ");
+               File titleDirectory = new File(englishLocation, title);
 
-        File spanishDir = new File(tmpDir, "es");
-        Assert.assertTrue("Spanish Folder exists",spanishDir.isDirectory());
+               Assert.assertTrue("English Simulation Folder exists", titleDirectory.isDirectory());
 
-        File spanishSimulation = new File(spanishDir, SIM_ES);
-        Assert.assertTrue("Spanish Simulation exists", spanishSimulation.length() > 0);
+               File aboutFile = new File(titleDirectory, ScraperConstants.ABOUT_HTML);
+               Assert.assertTrue("About File English Exists",aboutFile.length() > 0);
 
-        File spanishETag = new File(englishDir, ScraperConstants.ETAG_TXT);
-        Assert.assertTrue("Spanish ETag exists", spanishETag.length() > 0);
+               englishSimulation = new File(titleDirectory, SIM_EN);
+               Assert.assertTrue("English Simulation exists", englishSimulation.length() > 0);
 
-        File spanishModified = new File(spanishDir, ScraperConstants.LAST_MODIFIED_TXT);
-        Assert.assertTrue("Spanish Last Modified exists", spanishModified.length() > 0);
+               firstSimDownload = englishSimulation.lastModified();
+
+               File engETag = new File(titleDirectory, ScraperConstants.ETAG_TXT);
+               Assert.assertTrue("English ETag exists", engETag.length() > 0);
+
+               File engModified = new File(titleDirectory, ScraperConstants.LAST_MODIFIED_TXT);
+               Assert.assertTrue("English Last Modified exists", engModified.length() > 0);
+               break;
+           }
+       }
+
+       for(Element translations: simulationDoc.select("table.phet-table tr td.img-container a[href]")){
+
+
+               String hrefLink = translations.attr("href");
+
+               if(hrefLink.contains("download")){
+
+                   URL link = new URL(new URL(mockServerUrl), hrefLink);
+                   String title = Jsoup.connect(link.toString()).get().title().replaceAll("[\\\\/:*?\"<>|]", " ");
+
+                   File spanishDir = new File(tmpDir, "es");
+                   Assert.assertTrue("Spanish Folder exists",spanishDir.isDirectory());
+
+                   File titleDirectory = new File(spanishDir, title);
+
+                   File aboutSpanishFile = new File(titleDirectory, ScraperConstants.ABOUT_HTML);
+                   Assert.assertTrue("About File English Exists",aboutSpanishFile.length() > 0);
+
+                   File spanishSimulation = new File(titleDirectory, SIM_ES);
+                   Assert.assertTrue("Spanish Simulation exists", spanishSimulation.length() > 0);
+
+                   File spanishETag = new File(titleDirectory, ScraperConstants.ETAG_TXT);
+                   Assert.assertTrue("Spanish ETag exists", spanishETag.length() > 0);
+
+                   File spanishModified = new File(titleDirectory, ScraperConstants.LAST_MODIFIED_TXT);
+                   Assert.assertTrue("Spanish Last Modified exists", spanishModified.length() > 0);
+
+                   break;
+               }
+
+       }
 
         File zipFile = new File(tmpDir.getParentFile(), "equality-explorer-two-variables.zip");
         Assert.assertTrue("Zip File Exists", zipFile.length() > 0);

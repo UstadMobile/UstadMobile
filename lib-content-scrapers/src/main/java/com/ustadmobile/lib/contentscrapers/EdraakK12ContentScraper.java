@@ -152,7 +152,7 @@ public class EdraakK12ContentScraper{
             writeFileToDirectory(ScraperConstants.REGULAR_ARABIC_FONT_LINK, new File(destinationDirectory, ScraperConstants.ARABIC_FONT_REGULAR));
             writeFileToDirectory(ScraperConstants.BOLD_ARABIC_FONT_LINK, new File(destinationDirectory, ScraperConstants.ARABIC_FONT_BOLD));
 
-            ContentScraperUtil.zipDirectory(destinationDirectory, response.id);
+            ContentScraperUtil.zipDirectory(destinationDirectory, response.id, destinationDirectory.getParentFile());
         }
 
     }
