@@ -27,6 +27,8 @@ merged into sharedse.
 * [__lib-database__](lib-database/): Contains entity classes that are used across platforms.
 * [__lib-database-annotation__](lib-database-annotation/): Contains annotation used for entities
  and Data Access Objects (DAO)s.
+* [__lib-database-annotation-processor-core__](lib-database-annotation-processor-core/): Database annotation processor
+  used to generate DAOs and database classes for different platforms.
 * [__lib-util__](lib-util/): Contains small utility functions
 
 
