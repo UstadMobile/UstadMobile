@@ -205,7 +205,7 @@ public class ContentScraperUtil {
 
     /**
      *
-     * Given a directory, save it using the filename, download its content and save in the given directory 
+     * Given a directory, save it using the filename, download its content and save in the given directory
      * @param directoryToZip
      * @param filename
      * @param locationToSave

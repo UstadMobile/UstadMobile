@@ -138,6 +138,9 @@ public class TestPhetContentScraper {
            File englishLocation = new File(tmpDir, "en");
            Assert.assertTrue("English Folder exists", englishLocation.isDirectory());
 
+           File englishZip = new File(tmpDir, "en.zip");
+           Assert.assertTrue("English Zip exists", englishZip.length() > 0);
+
            if(hrefLink.contains("download")){
                URL link = new URL(new URL(mockServerUrl), hrefLink);
                String title = Jsoup.connect(link.toString()).get().title().replaceAll("[\\\\/:*?\"<>|]", " ");
@@ -164,7 +167,6 @@ public class TestPhetContentScraper {
 
        for(Element translations: simulationDoc.select("table.phet-table tr td.img-container a[href]")){
 
-
                String hrefLink = translations.attr("href");
 
                if(hrefLink.contains("download")){
@@ -174,6 +176,9 @@ public class TestPhetContentScraper {
 
                    File spanishDir = new File(tmpDir, "es");
                    Assert.assertTrue("Spanish Folder exists",spanishDir.isDirectory());
+
+                   File spanishZip = new File(tmpDir, "es.zip");
+                   Assert.assertTrue("Spanish Zip exists", spanishZip.length() > 0);
 
                    File titleDirectory = new File(spanishDir, title);
 
@@ -193,9 +198,6 @@ public class TestPhetContentScraper {
                }
 
        }
-
-        File zipFile = new File(tmpDir.getParentFile(), "equality-explorer-two-variables.zip");
-        Assert.assertTrue("Zip File Exists", zipFile.length() > 0);
 
         scraper.scrapContent();
 
