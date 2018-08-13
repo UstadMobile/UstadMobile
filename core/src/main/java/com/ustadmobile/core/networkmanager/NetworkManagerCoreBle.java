@@ -22,8 +22,4 @@ public abstract class NetworkManagerCoreBle {
     public abstract void startMonitoringAvailability(Object monitor, List<Long> entryUidsToMonitor);
 
     public abstract void stopMonitoringAvailability(Object monitor);
-
-
-    protected abstract BleEntryStatusTask makeEntryStatusTask(List<Long> entryUidsToCheck,
-                                                              NetworkNode peerToCheck);
 }

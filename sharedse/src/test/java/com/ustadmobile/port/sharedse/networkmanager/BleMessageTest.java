@@ -4,7 +4,7 @@ import org.junit.Test;
 
 import java.util.Arrays;
 
-import static com.ustadmobile.port.sharedse.networkmanager.NetworkManager.ENTRY_STATUS_REQUEST;
+import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.ENTRY_STATUS_REQUEST;
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
 

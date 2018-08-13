@@ -22,6 +22,27 @@ import java.util.List;
 public class NetworkManagerBle extends NetworkManagerCoreBle {
 
     /**
+     * Flag to indicate entry status request
+     */
+    public static final byte ENTRY_STATUS_REQUEST = (byte) 111;
+
+    /**
+     * Flag to indicate entry status response
+     */
+    public static final byte ENTRY_STATUS_RESPONSE = (byte) 112;
+
+    /**
+     * Flag to indicate WiFi direct group creation request
+     */
+    public static final byte WIFI_GROUP_CREATION_REQUEST = (byte) 113;
+
+    /**
+     * Flag to indicate WiFi direct group creation response
+     */
+    public static final byte WIFI_GROUP_CREATION_RESPONSE = (byte) 114;
+
+
+    /**
      * Check if WiFi is enabled / disabled on the device
      * @return boolean: TRUE, if enabled otherwise FALSE.
      */
@@ -78,7 +99,6 @@ public class NetworkManagerBle extends NetworkManagerCoreBle {
      *
      * @see BleEntryStatusTask
      */
-    @Override
     protected BleEntryStatusTask makeEntryStatusTask(List<Long> entryUidsToCheck, NetworkNode peerToCheck) {
         return null;
     }

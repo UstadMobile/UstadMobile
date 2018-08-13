@@ -3,10 +3,10 @@ package com.ustadmobile.port.sharedse.networkmanager;
 import org.junit.Before;
 import org.junit.Test;
 
-import static com.ustadmobile.port.sharedse.networkmanager.NetworkManager.ENTRY_STATUS_REQUEST;
-import static com.ustadmobile.port.sharedse.networkmanager.NetworkManager.ENTRY_STATUS_RESPONSE;
-import static com.ustadmobile.port.sharedse.networkmanager.NetworkManager.WIFI_GROUP_CREATION_REQUEST;
-import static com.ustadmobile.port.sharedse.networkmanager.NetworkManager.WIFI_GROUP_CREATION_RESPONSE;
+import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.ENTRY_STATUS_REQUEST;
+import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.ENTRY_STATUS_RESPONSE;
+import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.WIFI_GROUP_CREATION_REQUEST;
+import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.WIFI_GROUP_CREATION_RESPONSE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.mock;

@@ -163,25 +163,7 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
      */
     public static final int WIFI_DIRECT_GROUP_STATUS_ACTIVE = 2;
 
-    /**
-     * Flag to indicate entry status request
-     */
-    public static final byte ENTRY_STATUS_REQUEST = (byte) 111;
 
-    /**
-     * Flag to indicate entry status response
-     */
-    public static final byte ENTRY_STATUS_RESPONSE = (byte) 112;
-
-    /**
-     * Flag to indicate WiFi direct group creation request
-     */
-    public static final byte WIFI_GROUP_CREATION_REQUEST = (byte) 113;
-
-    /**
-     * Flag to indicate WiFi direct group creation response
-     */
-    public static final byte WIFI_GROUP_CREATION_RESPONSE = (byte) 114;
 
 
     private Object mContext;
