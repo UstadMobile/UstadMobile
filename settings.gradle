@@ -1,3 +1,1 @@
-include ':app-android', ':core', ':sharedse', ':core-tests', ':sharedse-tests', ':app-javase', ':app-android-launcher', ':lib-core-fs', ':lib-core-fs-tests', ':lib-database', ':lib-util', ':lib-database-processor', ':lib-database-annotation', ':app-android-testserver', ':lib-http-testserver', ':lib-database-annotation-processor', ':lib-database-annotation-processor-core', ':lib-database-annotation-processor-room', ':lib-content-scrapers'
-include ':lib-database-annotation-processor'
-
+include ':app-android', ':core', ':sharedse', ':core-tests', ':sharedse-tests', ':app-javase', ':app-android-launcher', ':lib-core-fs', ':lib-core-fs-tests', ':lib-database', ':lib-util', ':lib-database-processor', ':lib-database-annotation', ':app-android-testserver', ':lib-http-testserver', ':lib-database-annotation-processor-core', ':lib-content-scrapers'

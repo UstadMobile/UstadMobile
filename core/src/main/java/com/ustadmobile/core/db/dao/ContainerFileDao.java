@@ -51,8 +51,14 @@ public abstract class ContainerFileDao {
         delete(containerFile);
     }
 
+    public void delete(ContainerFile containerFile) {
+        System.out.println("ContainerFileDao.delete: " + containerFile.getId());
+        Thread.dumpStack();
+        deleteQuery(containerFile);
+    }
+
     @UmDelete
-    public abstract void delete(ContainerFile containerFile);
+    public abstract void deleteQuery(ContainerFile containerFile);
 
     @UmQuery("SELECT * From ContainerFile WHERE dirPath = :dirPath")
     public abstract List<ContainerFile> findFilesByDirectory(String dirPath);

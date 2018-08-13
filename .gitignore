@@ -13,6 +13,8 @@
 .idea/libraries
 .idea/markdown-navigator
 .idea/markdown-navigator.xml
+.idea/caches/build_file_checksums.ser
+
 
 # Java class files
 *.class

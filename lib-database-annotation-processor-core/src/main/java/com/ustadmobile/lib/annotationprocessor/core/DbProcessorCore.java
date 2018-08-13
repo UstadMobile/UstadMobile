@@ -24,6 +24,8 @@ import javax.annotation.processing.Filer;
 import javax.annotation.processing.Messager;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
+import javax.annotation.processing.SupportedAnnotationTypes;
+import javax.annotation.processing.SupportedOptions;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
@@ -36,21 +38,29 @@ import javax.lang.model.type.NoType;
 import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
 
+import static com.ustadmobile.lib.annotationprocessor.core.DbProcessorCore.OPT_ROOM_OUTPUT;
+
 /**
- * DbProcessorCore will generate a factory class for each database, and an _Intermediate class for
- * each Dao referenced with annotations to preserve the names of DAO method parameters
- *  ( see https://bugs.openjdk.java.net/browse/JDK-8191074 )
+ * DbProcessorCore will generate a factory class for each database, and then run annotation
+ * processors for each implementation to be generated.
  */
+
+@SupportedOptions({OPT_ROOM_OUTPUT})
 public class DbProcessorCore extends AbstractProcessor{
+
+    public static final String OPT_ROOM_OUTPUT = "umdb_room_out";
 
     private Messager messager;
 
     private Filer filer;
 
+    private DbProcessorRoom dbProcessorRoom;
+
     @Override
     public Set<String> getSupportedAnnotationTypes() {
         Set<String> set = new HashSet<>();
         set.add(UmDatabase.class.getCanonicalName());
+        set.add(UmDao.class.getCanonicalName());
         return set;
     }
 
@@ -64,18 +74,24 @@ public class DbProcessorCore extends AbstractProcessor{
         super.init(processingEnvironment);
         filer = processingEnvironment.getFiler();
         messager = processingEnvironment.getMessager();
+
+        dbProcessorRoom = new DbProcessorRoom();
+        dbProcessorRoom.init(processingEnvironment);
     }
 
     @Override
-    public boolean process(Set<? extends TypeElement> set, RoundEnvironment roundEnvironment) {
+    public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnvironment) {
+        String roomOut = processingEnv.getOptions().get(OPT_ROOM_OUTPUT);
+        messager.printMessage(Diagnostic.Kind.NOTE, "Room out dir: " + roomOut);
+
         Set<? extends Element> daoSet = roundEnvironment.getElementsAnnotatedWith(UmDao.class);
 
-
+        //Generate core factory method
         for(Element daoClassElement : roundEnvironment.getElementsAnnotatedWith(UmDatabase.class)) {
             TypeSpec.Builder factoryClassBuilder =
                     TypeSpec.classBuilder(daoClassElement.getSimpleName().toString() + "_Factory")
                     .addModifiers(Modifier.PUBLIC);
-            PackageElement packageElement = findPackageElement(daoClassElement);
+            PackageElement packageElement = processingEnv.getElementUtils().getPackageOf(daoClassElement);
 
             MethodSpec makeMethodSpec = MethodSpec.methodBuilder(
                     "make" + daoClassElement.getSimpleName())
@@ -96,79 +112,9 @@ public class DbProcessorCore extends AbstractProcessor{
             }
         }
 
-        for(Element daoElement : daoSet) {
-            generateIntermediateDao((TypeElement)daoElement);
-        }
+        boolean result = dbProcessorRoom.process(annotations, roundEnvironment);
 
-        return true;
+        return result;
     }
 
-
-
-
-    private void generateIntermediateDao(TypeElement element){
-        TypeSpec.Builder intermediateDaoBuilder = TypeSpec.classBuilder(
-                element.getSimpleName() + "_CoreIntermediate")
-                .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
-                .superclass(ClassName.get(element));
-
-        for(Element subElement : element.getEnclosedElements()) {
-            if(subElement.getKind() != ElementKind.METHOD)
-                continue;
-
-            ExecutableElement executableElement = (ExecutableElement)subElement;
-            if(!(executableElement.getModifiers().contains(Modifier.ABSTRACT)
-                || executableElement.getAnnotation(UmTransaction.class) != null))
-                continue;
-
-            MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(executableElement.getSimpleName().toString())
-                    .addAnnotation(Override.class)
-                    .returns(TypeName.get(executableElement.getReturnType()))
-                    .addModifiers(executableElement.getModifiers());
-
-            for(VariableElement variableElement : executableElement.getParameters()) {
-                ParameterSpec.Builder spec = ParameterSpec.builder(TypeName.get(variableElement.asType()),
-                    variableElement.getSimpleName().toString());
-                AnnotationSpec.Builder annotationBuilder =AnnotationSpec.builder(UmNamedParameter.class);
-                annotationBuilder.addMember("value",
-                        "\"" + variableElement.getSimpleName().toString() + "\"");
-                spec.addAnnotation(annotationBuilder.build());
-                methodBuilder.addParameter(spec.build());
-            }
-
-            if(!executableElement.getModifiers().contains(Modifier.ABSTRACT)) {
-                //we need to make a super call
-                CodeBlock.Builder superCall = CodeBlock.builder();
-                List<String> paramNames = new ArrayList<>();
-                for(VariableElement variableElement : executableElement.getParameters()) {
-                    paramNames.add(variableElement.getSimpleName().toString());
-                }
-
-                methodBuilder.addCode(executableElement.getReturnType() instanceof NoType ?
-                                "super.$L($L);\n" : "return super.$L($L);\n",
-                        executableElement.getSimpleName().toString(),
-                        String.join(", ", paramNames));
-            }
-
-            intermediateDaoBuilder.addMethod(methodBuilder.build());
-        }
-
-        try {
-
-            JavaFile.builder(findPackageElement(element).getQualifiedName().toString(),
-                    intermediateDaoBuilder.build()).build().writeTo(filer);
-        }catch(IOException e) {
-            messager.printMessage(Diagnostic.Kind.ERROR, "Exception writing intermdiate DAO"
-                + e.getMessage());
-        }
-    }
-
-    private PackageElement findPackageElement(Element element) {
-        Element enclosing = element;
-        while(enclosing.getKind() != ElementKind.PACKAGE) {
-            enclosing = element.getEnclosingElement();
-        }
-
-        return (PackageElement)enclosing;
-    }
 }

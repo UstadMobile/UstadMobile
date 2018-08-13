@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -166,6 +167,8 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
 
     private ScheduledExecutorService executor;
 
+    private ExecutorService dbExecutor;
+
     private final ReentrantLock statusLock = new ReentrantLock();
 
     private volatile boolean stopped;
@@ -222,7 +225,8 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
      * @param downloadJob downloadJob
      * @param networkManager NetworkManager reference which handle all network operations.
      */
-    public DownloadTask(DownloadJobWithDownloadSet downloadJob, NetworkManager networkManager, DownloadTaskListener downloadTaskListener){
+    public DownloadTask(DownloadJobWithDownloadSet downloadJob, NetworkManager networkManager,
+                        DownloadTaskListener downloadTaskListener, ExecutorService dbExecutor){
         super(networkManager, downloadJob.getDownloadJobId());
         mDbManager = UmAppDatabase.getInstance(networkManager.getContext());
         this.downloadJob = downloadJob;
@@ -234,6 +238,7 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
 
         this.downloadTaskListener = downloadTaskListener;
         this.updateTimer = new Timer();
+        this.dbExecutor = dbExecutor;
     }
 
     protected void executeIfNotStopped(Runnable runnable) {
@@ -778,6 +783,7 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
 
     @Override
     public void wifiConnectionChanged(String ssid, boolean connected, boolean connectedOrConnecting) {
+        //TODO: this should call download on the executor.
         UstadMobileSystemImpl.l(UMLog.INFO, 320, getLogPrefix()+ ": wifiConnectionChanged : " +
                 " ssid: " + ssid + " connected: " + connected + " connectedOrConnecting: " +
                 connectedOrConnecting);
@@ -819,36 +825,37 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
             "onConnectivityChanged: new state : " + newState);
         UstadMobileSystemImpl.l(UMLog.DEBUG, 0, getLogPrefix() +
             " status locked? : " + statusLock.isLocked());
-        try {
-            statusLock.lock();
+        dbExecutor.execute(() -> {
+            try {
+                statusLock.lock();
 
-            if(isWaitingForWifiConnection()) {
-                UstadMobileSystemImpl.l(UMLog.ERROR, 0, getLogPrefix() +
-                        " onConnectivityChanged: actually waiting for WiFi - do nothing");
-                return;
-            }
-
-            if(newState == CONNECTIVITY_STATE_DISCONNECTED
-                    || (newState == CONNECTIVITY_STATE_METERED && !allowMeteredDataUsage)) {
-                UstadMobileSystemImpl.l(UMLog.ERROR, 0, getLogPrefix() +
-                        " onConnectivityChanged: disconnected or metered data only on a unmetered only job");
-                stop(NetworkTask.STATUS_WAITING_FOR_CONNECTION);
-                List<DownloadJobItemWithDownloadSetItem> pausedItems = mDbManager.getDownloadJobItemDao()
-                        .findByDownloadJobAndStatusRange(downloadJob.getDownloadJobId(),
-                                NetworkTask.STATUS_WAITING_MIN, NetworkTask.STATUS_COMPLETE_MIN-1);
-                UstadMobileSystemImpl.l(UMLog.ERROR, 0,
-                        " setting waiting for connection status on " + pausedItems.size() +  " job items");
-                for(DownloadJobItemWithDownloadSetItem pausedItem : pausedItems) {
-                    mDbManager.getDownloadJobItemDao().updateStatus(pausedItem.getDownloadJobItemId(),
-                            NetworkTask.STATUS_WAITING_FOR_CONNECTION);
-                    mDbManager.getOpdsEntryStatusCacheDao().handleContainerDownloadWaitingForNetwork(
-                            pausedItem.getDownloadSetItem().getEntryId());
+                if(isWaitingForWifiConnection()) {
+                    UstadMobileSystemImpl.l(UMLog.ERROR, 0, getLogPrefix() +
+                            " onConnectivityChanged: actually waiting for WiFi - do nothing");
+                    return;
                 }
-            }
-        }finally {
-            statusLock.unlock();
-        }
 
+                if(newState == CONNECTIVITY_STATE_DISCONNECTED
+                        || (newState == CONNECTIVITY_STATE_METERED && !allowMeteredDataUsage)) {
+                    UstadMobileSystemImpl.l(UMLog.ERROR, 0, getLogPrefix() +
+                            " onConnectivityChanged: disconnected or metered data only on a unmetered only job");
+                    stop(NetworkTask.STATUS_WAITING_FOR_CONNECTION);
+                    List<DownloadJobItemWithDownloadSetItem> pausedItems = mDbManager.getDownloadJobItemDao()
+                            .findByDownloadJobAndStatusRange(downloadJob.getDownloadJobId(),
+                                    NetworkTask.STATUS_WAITING_MIN, NetworkTask.STATUS_COMPLETE_MIN-1);
+                    UstadMobileSystemImpl.l(UMLog.ERROR, 0,
+                            " setting waiting for connection status on " + pausedItems.size() +  " job items");
+                    for(DownloadJobItemWithDownloadSetItem pausedItem : pausedItems) {
+                        mDbManager.getDownloadJobItemDao().updateStatus(pausedItem.getDownloadJobItemId(),
+                                NetworkTask.STATUS_WAITING_FOR_CONNECTION);
+                        mDbManager.getOpdsEntryStatusCacheDao().handleContainerDownloadWaitingForNetwork(
+                                pausedItem.getDownloadSetItem().getEntryId());
+                    }
+                }
+            }finally {
+                statusLock.unlock();
+            }
+        });
     }
 
     private boolean isWaitingForWifiConnection() {

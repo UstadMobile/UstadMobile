@@ -27,6 +27,8 @@ merged into sharedse.
 * [__lib-database__](lib-database/): Contains entity classes that are used across platforms.
 * [__lib-database-annotation__](lib-database-annotation/): Contains annotation used for entities
  and Data Access Objects (DAO)s.
+* [__lib-database-annotation-processor-core__](lib-database-annotation-processor-core/): Database annotation processor
+  used to generate DAOs and database classes for different platforms.
 * [__lib-util__](lib-util/): Contains small utility functions
 
 
@@ -52,20 +54,4 @@ The build configuration system uses .properties files in each module:
 
 Most core options (e.g. app name, base content catalog, etc) are in the core module (e.g. in [core/buildconfig.default.properties](core/buildconfig.default.properties)). Options specific to a given platform (e.g. the android application id) 
   are in the module for that platform (e.g. app-android/buildconfig.local.properties).
-
-  
-To commit the build config to it's own git repository (push):
- ```
- ./gradlew -PconfigRepoUri=user@server.com:/path/to/repo pushLocalConfig
-```
-  
-To apply a new build config from a git repository (clone):
-```
-./gradlew -PconfigRepoUri=user@server.com:/path/to/repo cloneLocalConfig
-```
-  
- To pull changes from git for a build config that's currently applied (pull):
- ```
- ./gradlew pullLocalConfig
- ```
 
