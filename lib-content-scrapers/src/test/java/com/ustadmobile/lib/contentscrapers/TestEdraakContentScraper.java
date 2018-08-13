@@ -99,7 +99,7 @@ public class TestEdraakContentScraper {
     };
 
 
-    public void assertAllFiles(File tmpDir) throws IOException {
+    public void assertAllFiles(File tmpDir, EdraakK12ContentScraper scraper) throws IOException {
 
         File jsonFile = new File(tmpDir, CONTENT_JSON);
         Assert.assertTrue("Downloaded content info json exists", ContentScraperUtil.isFileCreated(jsonFile));
@@ -107,50 +107,19 @@ public class TestEdraakContentScraper {
         ContentResponse gsonContent = new GsonBuilder().disableHtmlEscaping().create().fromJson(jsonStr,ContentResponse.class);
         Assert.assertNotNull("Created Gson POJO Object", gsonContent);
 
-        if(ComponentType.ONLINE.getType().equalsIgnoreCase(gsonContent.target_component.component_type)){
-            Assert.assertTrue("Downloaded video exists", ContentScraperUtil.isFileCreated(new File(tmpDir, VIDEO_MP4)));
-        }
-
         Assert.assertTrue("Downloaded Questions json exist", ContentScraperUtil.isFileCreated(new File(tmpDir, QUESTIONS_JSON)));
         Assert.assertTrue("Downloaded zip exists", ContentScraperUtil.isFileCreated(new File(tmpDir.getParent(), gsonContent.id + ".zip")));
 
-        //add assertions that the content info and video info are present in the JSON
-        List<ContentResponse> tests = gsonContent.target_component.children;
+        List<ContentResponse> questionSetList = scraper.getQuestionSet(gsonContent);
+        Assert.assertNotNull("Has Questions Set", questionSetList);
+        Assert.assertTrue("Has more than 1 question", questionSetList.size() > 0);
 
-        int videoCount = 0, questionSet = 0;
-        if(ComponentType.TEST.getType().equalsIgnoreCase(gsonContent.target_component.component_type)){
-
-            ContentResponse questionList = gsonContent.target_component.question_set;
-            if(questionList != null){
-                questionSet++;
-            }
-
-        }else if(ComponentType.ONLINE.getType().equalsIgnoreCase(gsonContent.target_component.component_type)){
-
-            for(ContentResponse content: tests){
-                if(ComponentType.VIDEO.getType().equalsIgnoreCase(content.component_type)){
-
-                    videoCount++;
-                    Assert.assertTrue("Video info content is not empty", !content.video_info.url.isEmpty());
-
-                }else if(QUESTION_SET_HOLDER_TYPES.contains(content.component_type)){
-
-                    questionSet++;
-                    //load JSON classes - assert that the quiz exists, and has > 0 questinos
-                    Assert.assertNotNull("Has Questions Set",content.question_set);
-                    Assert.assertTrue("Has more than 1 question", content.question_set.children.size() > 0);
-
-                }
-            }
-
+        File video = new File(tmpDir, VIDEO_MP4);
+        if (ComponentType.ONLINE.getType().equalsIgnoreCase(gsonContent.target_component.component_type)) {
+            Assert.assertEquals("Has Video", true, ContentScraperUtil.isFileCreated(video));
+        } else {
+            Assert.assertEquals("Should not have video", false, ContentScraperUtil.isFileCreated(video));
         }
-
-        if(ComponentType.ONLINE.getType().equalsIgnoreCase(gsonContent.target_component.component_type)){
-            Assert.assertEquals("Found 1 video", 1, videoCount);
-        }
-
-
-        Assert.assertEquals("Found 1 question set", 1, questionSet);
 
         Assert.assertTrue("tincan file exists", ContentScraperUtil.isFileCreated(new File(tmpDir, "tincan.xml")));
         Assert.assertTrue("index html file exists", ContentScraperUtil.isFileCreated(new File(tmpDir, INDEX_HTML)));
@@ -172,7 +141,7 @@ public class TestEdraakContentScraper {
         String url = EdraakK12ContentScraper.generateUrl(mockWebServer.url("/api/").toString(), DETAIL_JSON_CONTENT_FILE, 41);
         EdraakK12ContentScraper scraper = new EdraakK12ContentScraper(url, tmpDir);
         scraper.scrapContent();
-        assertAllFiles(tmpDir);
+        assertAllFiles(tmpDir, scraper);
 
     }
 
@@ -337,7 +306,7 @@ public class TestEdraakContentScraper {
             EdraakK12ContentScraper scraper = new EdraakK12ContentScraper(
                     System.getProperty("url"),destination );
             scraper.scrapContent();
-            assertAllFiles(destination);
+            assertAllFiles(destination, scraper);
         }
     }
 

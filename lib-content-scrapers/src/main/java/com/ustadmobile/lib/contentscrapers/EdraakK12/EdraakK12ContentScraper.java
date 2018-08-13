@@ -85,7 +85,15 @@ public class EdraakK12ContentScraper{
         if(response.target_component == null || response.target_component.children == null)
             throw new IllegalArgumentException("Null target component, or target component children are null");
 
-        boolean anyContentUpdated = false;
+        boolean anyContentUpdated;
+
+        List<ContentResponse> questionsList = getQuestionSet(response);
+        try {
+            anyContentUpdated = findAllExerciseImages(questionsList, destinationDirectory, scrapUrl);
+        }   catch (IOException e){
+            throw new IllegalArgumentException("Exercise Malformed", e.getCause());
+        }
+
         if(ComponentType.ONLINE.getType().equalsIgnoreCase(response.target_component.component_type)){
 
             // Contains children which have video and question set list
@@ -115,27 +123,8 @@ public class EdraakK12ContentScraper{
                         }
                     }
 
-                } else if(ScraperConstants.QUESTION_SET_HOLDER_TYPES.contains(children.component_type)) {
-
-                    List<ContentResponse> questionsList = children.question_set.children;
-                    try {
-                        anyContentUpdated = findAllExerciseImages(questionsList, destinationDirectory, scrapUrl) || anyContentUpdated;
-                    }catch (IOException e){
-                        throw new IllegalArgumentException("Exercise Malformed", e.getCause());
-                    }
-
                 }
 
-            }
-
-        }else if(ComponentType.TEST.getType().equalsIgnoreCase(response.target_component.component_type)){
-
-            // list of questions sets
-            List<ContentResponse> questionsList = response.target_component.question_set.children;
-            try {
-                anyContentUpdated = findAllExerciseImages(questionsList, destinationDirectory, scrapUrl);
-            }   catch (IOException e){
-                throw new IllegalArgumentException("Exercise Malformed", e.getCause());
             }
         }
 
@@ -209,23 +198,28 @@ public class EdraakK12ContentScraper{
         return true;
     }
 
-    private List<ContentResponse> getQuestionSet(ContentResponse response){
 
-        List<ContentResponse> questionsList = null;
+    /**
+     * Find and return question set for imported content
+     * @param response
+     * @return
+     */
+    public List<ContentResponse> getQuestionSet(ContentResponse response){
+
         if(ComponentType.ONLINE.getType().equalsIgnoreCase(response.target_component.component_type)){
 
             for(ContentResponse children: response.target_component.children){
                 if(ScraperConstants.QUESTION_SET_HOLDER_TYPES.contains(children.component_type)) {
-                    questionsList = children.question_set.children;
-                    break;
+
+                    return children.question_set.children;
                 }
             }
         }else if(ComponentType.TEST.getType().equalsIgnoreCase(response.target_component.component_type)){
 
-             questionsList = response.target_component.question_set.children;
+             return response.target_component.question_set.children;
 
         }
-        return questionsList;
+        return null;
     }
 
 
@@ -239,7 +233,7 @@ public class EdraakK12ContentScraper{
      */
     private boolean findAllExerciseImages(List<ContentResponse> questionsList, File destinationDir, URL url) throws IOException {
 
-            if (questionsList.isEmpty())
+            if (questionsList == null || questionsList.isEmpty())
                 throw new IllegalArgumentException("No Questions were found in the question set");
 
             int exerciseUpdatedCount = 0;
