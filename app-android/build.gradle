@@ -503,6 +503,9 @@ dependencies {
     androidTestImplementation "com.android.support.test.uiautomator:uiautomator-v18:$version_android_uiautomator"
 
     androidTestImplementation "org.mockito:mockito-android:$version_android_mockito"
+    testImplementation "org.mockito:mockito-core:$version_android_mockito"
+
+    testImplementation "org.robolectric:robolectric:$version_android_roboelectric"
 
     //http server
     implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
