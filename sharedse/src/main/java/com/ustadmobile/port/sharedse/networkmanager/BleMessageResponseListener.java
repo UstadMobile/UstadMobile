@@ -1,6 +1,4 @@
-package com.ustadmobile.port.android.netwokmanager;
-
-import com.ustadmobile.port.sharedse.networkmanager.BleMessage;
+package com.ustadmobile.port.sharedse.networkmanager;
 
 /**
  * <h1>BleMessageResponseListener</h1>
