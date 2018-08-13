@@ -3,7 +3,7 @@ package com.ustadmobile.test.sharedse.network;
 import com.ustadmobile.core.buildconfig.CoreBuildConfig;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.core.networkmanager.NetworkNode;
+import com.ustadmobile.port.sharedse.networkmanager.BleEntryStatusTask;
 import com.ustadmobile.port.sharedse.networkmanager.BluetoothConnectionHandler;
 import com.ustadmobile.port.sharedse.networkmanager.BluetoothServer;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
@@ -125,8 +125,8 @@ public class MockNetworkManager extends NetworkManager {
             synchronized (wifiLockObj) {
                 if (MockNetworkManager.this.connectedWifiNetwork != null) {
                     MockNetworkManager.this.connectedWifiNetwork.sendWirelessServiceBroadcast(
-                        mockDeviceName, MockNetworkManager.this.getDeviceIPAddress(),
-                        MockNetworkManager.this.getHttpListeningPort());
+                            mockDeviceName, MockNetworkManager.this.getDeviceIPAddress(),
+                            MockNetworkManager.this.getHttpListeningPort());
                 }
             }
         }
@@ -639,6 +639,11 @@ public class MockNetworkManager extends NetworkManager {
 
     @Override
     public com.ustadmobile.lib.db.entities.NetworkNode getThisWifiDirectDevice() {
+        return null;
+    }
+
+    @Override
+    protected BleEntryStatusTask makeEntryStatusTask(List<Long> entryUidsToCheck, com.ustadmobile.lib.db.entities.NetworkNode peerToCheck) {
         return null;
     }
 }

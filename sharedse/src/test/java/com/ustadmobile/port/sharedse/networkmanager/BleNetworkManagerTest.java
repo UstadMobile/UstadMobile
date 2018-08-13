@@ -3,6 +3,7 @@ package com.ustadmobile.port.sharedse.networkmanager;
 
 import com.ustadmobile.lib.db.entities.NetworkNode;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Collections;
@@ -20,18 +21,22 @@ import static org.mockito.Mockito.when;
 /**
  * <h1>BleNetworkManagerTest</h1>
  *
- * Test class which tests {@link NetworkManager} to make sure it behaves as expected
+ * Test class which tests {@link NetworkManagerBle} to make sure it behaves as expected
  * on entry status monitoring logic
  *
  * @author kileha3
  */
 public class BleNetworkManagerTest {
 
+    private NetworkManagerBle testManager;
+    @Before
+    public void setUpSpy() {
+        testManager = spy(NetworkManagerBle.class);
+    }
+
     @Test
     public void givenEntryStatusNotKnown_whenStartMonitoringAvailabilityCalled_thenShouldCreateEntryStatusTask() {
-        NetworkManager testManager = spy(NetworkManager.class);
-
-        BleEntryStatusTask task1 = mock(BleEntryStatusTask.class);
+       BleEntryStatusTask task1 = mock(BleEntryStatusTask.class);
 
         when(testManager.makeEntryStatusTask(any(), any())).thenReturn(task1);
 
@@ -47,7 +52,6 @@ public class BleNetworkManagerTest {
 
     @Test
     public void givenMonitoringAvailabilityStarted_whenNewNodeDiscovered_thenShouldCreateEntryStatusTask() {
-        NetworkManager testManager = spy(NetworkManager.class);
         BleEntryStatusTask task1 = mock(BleEntryStatusTask.class);
         List<Long> entryUUID = Collections.singletonList(64L);
         NetworkNode node = new NetworkNode();
@@ -66,7 +70,6 @@ public class BleNetworkManagerTest {
 
     @Test
     public void givenMonitoringAvailabilityStopped_whenNewNodeDiscovered_thenShouldNotCreateEntryStatusTask() {
-        NetworkManager testManager = spy(NetworkManager.class);
         Object availabilityClient = new Object();
         NetworkNode node = new NetworkNode();
 
