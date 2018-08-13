@@ -45,6 +45,15 @@ repositories {
     }
 }
 
+compileJava {
+    /*
+     *  Annotation processor arguments:
+     *   umdb_room_out - Destination directory for the generated room version of database and DAO classes
+     */
+    options.compilerArgs += ["-Aumdb_room_out=" + rootProject.file("app-android/build/generated/source/umdbprocessor").getAbsolutePath()]
+}
+
+
 dependencies {
     implementation "org.json:json:$version_json"
     implementation "net.sf.kxml:kxml2:$version_kxml"

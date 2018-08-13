@@ -147,7 +147,6 @@ afterEvaluate {
         variant.javaCompiler.dependsOn(generateCoreStringToAndroidResMap)
         variant.javaCompiler.dependsOn(checkBuildConfig)
         variant.javaCompiler.dependsOn(generateRoomEntities)
-        variant.javaCompiler.dependsOn(":lib-database-annotation-processor-room:runRoomProcessor")
     }
 }
 
@@ -155,18 +154,30 @@ task generateRoomEntities {
 
 }
 
+/*
+ * Anything under the localconfig variant is not stored in Git. The class UmBaseApplication.java
+ * exists in each variant, and controls whether the Application class does or does not extend
+ * MultidexApplication. When the source is first checked out, to ensure that all variants build
+ * successfully, we must copy UmBaseApplication.java into the localconfig source directory.
+ */
+task copyLocalconfigUmBaseApplication(type: Copy) {
+    inputs.file("src/vanilla/java/com/ustadmobile/port/android/UmBaseApplication.java")
+
+    from("src/vanilla/java/com/ustadmobile/port/android/UmBaseApplication.java")
+    into("src/localconfig/java/com/ustadmobile/port/android/")
+}
+
 generateRoomEntities.dependsOn(":lib-database-processor:runRoomProcessor")
 
-//TODO: Fix this for building as library
 tasks.whenTaskAdded { task ->
     if (task.name == "assembleRemotetestslaveDebug") {
         startTestSlaveServer.dependsOn task
-    }
-
-    if (task.name == "installLocalconfigDebugAndroidTest") {
+    }else if (task.name == "installLocalconfigDebugAndroidTest") {
         testEmulatorLocalconfigDebug.dependsOn task
     } else if (task.name == "installLocalconfigDebug") {
         testEmulatorLocalconfigDebug.dependsOn task
+    }else if(task.name == "assembleLocalconfigDebug" || task.name == "assembleLocalconfigRelease") {
+        task.dependsOn(copyLocalconfigUmBaseApplication)
     }
 }
 
