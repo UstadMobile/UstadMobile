@@ -25,6 +25,8 @@ import okio.Buffer;
 import okio.BufferedSource;
 import okio.Okio;
 
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.CONTENT_JSON;
+
 public class TestPhetContentScraper {
 
 
@@ -97,6 +99,53 @@ public class TestPhetContentScraper {
     }
 
 
+    public void AssertAllFiles(File tmpDir, PhetContentScraper scraper) throws IOException {
+
+        File englishLocation = new File(tmpDir, "en");
+        Assert.assertTrue("English Folder exists", englishLocation.isDirectory());
+
+        File englishZip = new File(tmpDir, "en.zip");
+        Assert.assertTrue("English Zip exists", englishZip.length() > 0);
+
+        File titleDirectory = new File(englishLocation, scraper.getTitle());
+
+        Assert.assertTrue("English Simulation Folder exists", titleDirectory.isDirectory());
+
+        File aboutFile = new File(titleDirectory, ScraperConstants.ABOUT_HTML);
+        Assert.assertTrue("About File English Exists",aboutFile.length() > 0);
+
+        File englishSimulation = new File(titleDirectory, SIM_EN);
+        Assert.assertTrue("English Simulation exists", englishSimulation.length() > 0);
+
+        File engETag = new File(titleDirectory, ScraperConstants.ETAG_TXT);
+        Assert.assertTrue("English ETag exists", engETag.length() > 0);
+
+        File engModified = new File(titleDirectory, ScraperConstants.LAST_MODIFIED_TXT);
+        Assert.assertTrue("English Last Modified exists", engModified.length() > 0);
+
+        File spanishDir = new File(tmpDir, "es");
+        Assert.assertTrue("Spanish Folder exists",spanishDir.isDirectory());
+
+        File spanishZip = new File(tmpDir, "es.zip");
+        Assert.assertTrue("Spanish Zip exists", spanishZip.length() > 0);
+
+        File spanishTitleDirectory = new File(spanishDir, scraper.getTitle());
+
+        File aboutSpanishFile = new File(spanishTitleDirectory, ScraperConstants.ABOUT_HTML);
+        Assert.assertTrue("About File English Exists",aboutSpanishFile.length() > 0);
+
+        File spanishSimulation = new File(spanishTitleDirectory, SIM_ES);
+        Assert.assertTrue("Spanish Simulation exists", spanishSimulation.length() > 0);
+
+        File spanishETag = new File(titleDirectory, ScraperConstants.ETAG_TXT);
+        Assert.assertTrue("Spanish ETag exists", spanishETag.length() > 0);
+
+        File spanishModified = new File(spanishTitleDirectory, ScraperConstants.LAST_MODIFIED_TXT);
+        Assert.assertTrue("Spanish Last Modified exists", spanishModified.length() > 0);
+
+    }
+
+
    @Test
     public void givenServerOnline_whenPhetContentScraped_thenShouldConvertAndDownload() throws IOException {
         File tmpDir = Files.createTempDirectory("testphetcontentscraper").toFile();
@@ -108,56 +157,30 @@ public class TestPhetContentScraper {
         PhetContentScraper scraper = new PhetContentScraper(mockServerUrl, tmpDir);
         scraper.scrapContent();
 
+        AssertAllFiles(tmpDir, scraper);
+    }
+
+    @Test
+    public void givenServerOnline_whenPhetContentScrapedAgain_thenShouldNotDownloadFilesAgain() throws IOException {
+        File tmpDir = Files.createTempDirectory("testphetcontentscraper").toFile();
+
+        MockWebServer mockWebServer = new MockWebServer();
+        mockWebServer.setDispatcher(dispatcher);
+
+        String mockServerUrl = mockWebServer.url("/api/simulation/equality-explorer-two-variables").toString();
+        PhetContentScraper scraper = new PhetContentScraper(mockServerUrl, tmpDir);
+        scraper.scrapContent();
         File englishLocation = new File(tmpDir, "en");
-        Assert.assertTrue("English Folder exists", englishLocation.isDirectory());
-
-        File englishZip = new File(tmpDir, "en.zip");
-        Assert.assertTrue("English Zip exists", englishZip.length() > 0);
-
-
         File titleDirectory = new File(englishLocation, scraper.getTitle());
+        File englishSimulation = new File(titleDirectory, SIM_EN);
 
-        Assert.assertTrue("English Simulation Folder exists", titleDirectory.isDirectory());
-
-        File aboutFile = new File(titleDirectory, ScraperConstants.ABOUT_HTML);
-        Assert.assertTrue("About File English Exists",aboutFile.length() > 0);
-
-       File englishSimulation = new File(titleDirectory, SIM_EN);
-       Assert.assertTrue("English Simulation exists", englishSimulation.length() > 0);
-
-       long firstSimDownload = englishSimulation.lastModified();
-
-       File engETag = new File(titleDirectory, ScraperConstants.ETAG_TXT);
-       Assert.assertTrue("English ETag exists", engETag.length() > 0);
-
-       File engModified = new File(titleDirectory, ScraperConstants.LAST_MODIFIED_TXT);
-       Assert.assertTrue("English Last Modified exists", engModified.length() > 0);
-
-       File spanishDir = new File(tmpDir, "es");
-       Assert.assertTrue("Spanish Folder exists",spanishDir.isDirectory());
-
-       File spanishZip = new File(tmpDir, "es.zip");
-       Assert.assertTrue("Spanish Zip exists", spanishZip.length() > 0);
-
-       File spanishTitleDirectory = new File(spanishDir, scraper.getTitle());
-
-       File aboutSpanishFile = new File(spanishTitleDirectory, ScraperConstants.ABOUT_HTML);
-       Assert.assertTrue("About File English Exists",aboutSpanishFile.length() > 0);
-
-       File spanishSimulation = new File(spanishTitleDirectory, SIM_ES);
-       Assert.assertTrue("Spanish Simulation exists", spanishSimulation.length() > 0);
-
-       File spanishETag = new File(titleDirectory, ScraperConstants.ETAG_TXT);
-       Assert.assertTrue("Spanish ETag exists", spanishETag.length() > 0);
-
-       File spanishModified = new File(spanishTitleDirectory, ScraperConstants.LAST_MODIFIED_TXT);
-       Assert.assertTrue("Spanish Last Modified exists", spanishModified.length() > 0);
+        long firstSimDownload = englishSimulation.lastModified();
 
         scraper.scrapContent();
 
-        long secondSimDownload = englishSimulation.lastModified();
+        long lastModified = englishSimulation.lastModified();
 
-        Assert.assertTrue("didnt download 2nd time", firstSimDownload == secondSimDownload);
+        Assert.assertTrue("didnt download 2nd time", firstSimDownload == lastModified);
 
     }
 
@@ -224,8 +247,10 @@ public class TestPhetContentScraper {
     public void testCommand() throws IOException{
 
         if(System.getProperty("phetUrl") != null && System.getProperty("phetDir") != null){
-            PhetContentScraper scraper = new PhetContentScraper(System.getProperty("phetUrl"),new File(System.getProperty("phetDir")));
+            File tmp = new File(System.getProperty("phetDir"));
+            PhetContentScraper scraper = new PhetContentScraper(System.getProperty("phetUrl"),tmp);
             scraper.scrapContent();
+            AssertAllFiles(tmp, scraper);
         }
     }
 

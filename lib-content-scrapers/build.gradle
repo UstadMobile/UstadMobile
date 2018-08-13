@@ -36,16 +36,6 @@ dependencies {
     compile project(path: ':lib-database')
 }
 
-task generateTestBuildConfig(type: de.fuerstenau.gradle.buildconfig.GenerateBuildConfigTask) {
-    outputDir = new File ("${projectDir}/src/test/java")
-    packageName = "com.ustadmobile.lib.contentscrapers.generated"
-    appName = "TestContentScraper"
-    clsName = "TestBuildConfig"
-    version = rootProject.version
-
-    String testEdraakContentUrl = project.hasProperty("testEdraakK12ContentUrl") ? project.getProperties().get("testEdraakK12ContentUrl") : ""
-    buildConfigField "String", "TEST_CONTENT_URL", testEdraakContentUrl
-}
 
 task scrapEdraakK12(type: Test) {
 
@@ -58,8 +48,6 @@ task scrapEdraakK12(type: Test) {
     include('**/TestEdraakContentScraper.class')
     include('**/TestPhetContentScraper.class')
 }
-
-compileTestJava.dependsOn(generateTestBuildConfig)
 
 tasks.withType(Test) {
     systemProperty "file.encoding", "UTF-8"
