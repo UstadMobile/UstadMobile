@@ -3,11 +3,13 @@ package com.ustadmobile.lib.contentscrapers;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.ustadmobile.core.util.UMIOUtils;
+import com.ustadmobile.lib.contentscrapers.EdraakK12.ContentResponse;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.w3c.dom.Attr;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -29,6 +31,15 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 
 public class ContentScraperUtil {
@@ -130,8 +141,12 @@ public class ContentScraperUtil {
 
     }
 
-
-    public static final void writeStringToFile(String text, File file) {
+    /**
+     * Given text, write into a file
+     * @param text
+     * @param file
+     */
+    public static void writeStringToFile(String text, File file) {
 
         FileWriter writer = null;
         try {
@@ -161,6 +176,11 @@ public class ContentScraperUtil {
             return modifiedTime >= file.lastModified();
         }
         return true;
+    }
+
+
+    public static boolean isFileCreated(File file){
+        return file.exists() && file.length() > 0;
     }
 
 
@@ -230,6 +250,74 @@ public class ContentScraperUtil {
                     });
         }
 
+
+    }
+
+
+    /**
+     *
+     * Generate tincan xml file
+     * @param destinationDirectory directory it will be saved
+     * @param activityName name of course/simulation
+     * @param langCode langugage of the course/simulation
+     * @param fileName name of file tincan will launch
+     * @param typeText type of tincan file - get from https://registry.tincanapi.com/
+     * @param entityId id of activity should match entry id of opds link
+     * @param description description of course/simulation
+     * @param descLang lang of description
+     *
+     * @return
+     * @throws ParserConfigurationException
+     * @throws TransformerException
+     */
+    public static void generateTinCanXMLFile(File destinationDirectory, String activityName, String langCode, String fileName, String typeText, String entityId, String description, String descLang) throws ParserConfigurationException, TransformerException {
+
+        DocumentBuilderFactory dbFactory =
+                DocumentBuilderFactory.newInstance();
+        DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+        org.w3c.dom.Document doc = dBuilder.newDocument();
+
+        org.w3c.dom.Element rootElement = doc.createElement("tincan");
+        Attr xlms = doc.createAttribute("xmlns");
+        xlms.setValue("http://projecttincan.com/tincan.xsd");
+        rootElement.setAttributeNode(xlms);
+        doc.appendChild(rootElement);
+
+        org.w3c.dom.Element activities = doc.createElement("activities");
+        rootElement.appendChild(activities);
+
+        org.w3c.dom.Element activityNode = doc.createElement("activity");
+        Attr id = doc.createAttribute("id");
+        Attr type = doc.createAttribute("type");
+        id.setValue(entityId);
+        type.setValue(typeText);
+        activityNode.setAttributeNode(id);
+        activityNode.setAttributeNode(type);
+        activities.appendChild(activityNode);
+
+        org.w3c.dom.Element nameElement = doc.createElement("name");
+        nameElement.appendChild(doc.createTextNode(activityName));
+        activityNode.appendChild(nameElement);
+
+        org.w3c.dom.Element descElement = doc.createElement("description");
+        Attr lang = doc.createAttribute("lang");
+        lang.setValue(descLang);
+        descElement.setAttributeNode(lang);
+        descElement.appendChild(doc.createTextNode(description));
+        activityNode.appendChild(descElement);
+
+        org.w3c.dom.Element launchElement = doc.createElement("launch");
+        Attr langLaunch = doc.createAttribute("lang");
+        langLaunch.setValue(langCode);
+        launchElement.setAttributeNode(langLaunch);
+        launchElement.appendChild(doc.createTextNode(fileName));
+        activityNode.appendChild(launchElement);
+
+        TransformerFactory transformerFactory = TransformerFactory.newInstance();
+        Transformer transformer = transformerFactory.newTransformer();
+        DOMSource source = new DOMSource(doc);
+        StreamResult result = new StreamResult(new File(destinationDirectory, "tincan.xml"));
+        transformer.transform(source, result);
 
     }
 

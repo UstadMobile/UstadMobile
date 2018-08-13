@@ -1,5 +1,7 @@
-package com.ustadmobile.lib.contentscrapers;
+package com.ustadmobile.lib.contentscrapers.PhetSimulation;
 
+import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
+import com.ustadmobile.lib.contentscrapers.ScraperConstants;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
 import com.ustadmobile.lib.util.UmUuidUtil;
 
@@ -17,19 +19,28 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.UUID;
 
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerException;
+
 public class PhetContentScraper{
 
     public static final String[] CATEGORY = {
             "iPad/Tablet", "New Sims", "Simulations", "HTML5"};
     private final String url;
     private final File destinationDirectory;
+    private final String title;
     private Document simulationDoc;
     private String aboutText;
+    private ArrayList<String> langugageList;
+
+    private final String simulationType = "http://adlnet.gov/expapi/activities/simulation";
+    private String aboutDescription;
 
     public PhetContentScraper(String url, File destinationDir){
         this.url = url;
         this.destinationDirectory = destinationDir;
-
+        langugageList = new ArrayList<>();
+        this.title = url.substring(url.lastIndexOf("/") + 1, url.length());
     }
 
     public void scrapContent() throws IOException {
@@ -44,7 +55,7 @@ public class PhetContentScraper{
         }
 
         aboutText = simulationDoc.getElementById("about").html();
-
+        aboutDescription = Jsoup.parse(aboutText).select("p.simulation-panel-indent").text();
 
         boolean contentUpdated = false;
         for(Element englishLink: simulationDoc.select("div.simulation-main-image-panel a.phet-button[href]")){
@@ -72,6 +83,7 @@ public class PhetContentScraper{
 
                     String langCode = hrefLink.substring(hrefLink.lastIndexOf("/") + 1, hrefLink.length());
                     System.out.println(langCode);
+                    langugageList.add(langCode);
                     languageLocation = new File(destinationDirectory, langCode);
                     languageLocation.mkdirs();
                     break;
@@ -129,7 +141,6 @@ public class PhetContentScraper{
 
         URL link = new URL(simulationUrl, hrefLink);
 
-        String title = Jsoup.connect(link.toString()).get().title().replaceAll("[\\\\/:*?\"<>|]", " ");
         File simulationLocation = new File(languageLocation, title);
         simulationLocation.mkdirs();
 
@@ -152,11 +163,25 @@ public class PhetContentScraper{
             }
 
         }
+
+        String fileName = hrefLink.substring(hrefLink.lastIndexOf("/") + 1, hrefLink.lastIndexOf("?"));
+        File simulationFile = new File(simulationLocation, fileName);
+
+
+
         ContentScraperUtil.writeStringToFile(eTag, eTagFile);
         ContentScraperUtil.writeStringToFile(lastModified, modifiedFile);
         ContentScraperUtil.writeStringToFile(aboutText, new File(simulationLocation, ScraperConstants.ABOUT_HTML));
-        ContentScraperUtil.downloadContent(link, new File(simulationLocation, hrefLink.substring(hrefLink.lastIndexOf("/") + 1, hrefLink.lastIndexOf("?"))));
-
+        ContentScraperUtil.downloadContent(link, simulationFile);
+        String simulationTitle  = Jsoup.parse(simulationFile, ScraperConstants.UTF_ENCODING).title();
+        try {
+            ContentScraperUtil.generateTinCanXMLFile(simulationLocation, simulationTitle,
+                    languageLocation.getName(), fileName, simulationType,
+                    this.title + "\\" + languageLocation.getName(),
+                    aboutDescription, "en");
+        } catch (ParserConfigurationException | TransformerException e) {
+            e.printStackTrace();
+        }
 
     }
 
@@ -168,25 +193,34 @@ public class PhetContentScraper{
 
             if(translationDir.isDirectory()){
                 String langCode = translationDir.getName();
-                if(langCode.equalsIgnoreCase("en")){
+                if(!langugageList.contains(langCode)){
                     continue;
                 }
-                for(File file: translationDir.listFiles()){
+                for(File contentDirectory: translationDir.listFiles()){
 
-                    if(file.getName().endsWith(".html")){
+                    if(title.equalsIgnoreCase(contentDirectory.getName())){
 
-                        String title = Jsoup.parse(file, ScraperConstants.UTF_ENCODING).title();
-                        OpdsEntryWithRelations newEntry = new OpdsEntryWithRelations(
-                                UmUuidUtil.encodeUuidWithAscii85(UUID.randomUUID()), destinationDirectory.getName() + "\\" + langCode, title);
-                        newEntry.setLanguage(langCode);
-                        translationsEntry.add(newEntry);
-                        break;
+                        for(File file: contentDirectory.listFiles()){
+
+                            if(file.getName().endsWith(".html")){
+                                // TODO recheck entry id for translations
+                                String langTitle = Jsoup.parse(file, ScraperConstants.UTF_ENCODING).title();
+                                OpdsEntryWithRelations newEntry = new OpdsEntryWithRelations(
+                                        UmUuidUtil.encodeUuidWithAscii85(UUID.randomUUID()), this.title + "\\" + langCode, langTitle);
+                                newEntry.setLanguage(langCode);
+                                translationsEntry.add(newEntry);
+                                break;
+                            }
+                        }
                     }
-
                 }
             }
         }
 
         return translationsEntry;
+    }
+
+    public String getTitle() {
+        return title;
     }
 }

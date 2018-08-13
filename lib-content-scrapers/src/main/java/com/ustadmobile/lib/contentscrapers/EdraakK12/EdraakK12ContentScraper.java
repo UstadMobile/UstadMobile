@@ -1,9 +1,11 @@
-package com.ustadmobile.lib.contentscrapers;
+package com.ustadmobile.lib.contentscrapers.EdraakK12;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.ustadmobile.core.util.UMIOUtils;
+import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
+import com.ustadmobile.lib.contentscrapers.ScraperConstants;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -14,6 +16,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerException;
 
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.*;
 
@@ -134,24 +139,40 @@ public class EdraakK12ContentScraper{
             }
         }
 
-
-        // nothing changed, keep same files
-        if(anyContentUpdated){
-
+        File contentJsonFile = new File(destinationDirectory, ScraperConstants.CONTENT_JSON);
+        if(anyContentUpdated || !ContentScraperUtil.isFileCreated(contentJsonFile)){
             // store the json in a file after modifying image links
             Gson gson = new GsonBuilder().disableHtmlEscaping().create();
-            File file = new File(destinationDirectory, ScraperConstants.CONTENT_JSON);
-            FileWriter fileWriter = new FileWriter(file);
             String jsonString =  gson.toJson(response);
-            fileWriter.write(jsonString);
-            UMIOUtils.closeQuietly(fileWriter);
+            ContentScraperUtil.writeStringToFile(jsonString, contentJsonFile);
+            anyContentUpdated = true;
+        }
 
-            writeFileToDirectory(ScraperConstants.JS_HTML_TAG, new File(destinationDirectory, INDEX_HTML));
-            writeFileToDirectory(ScraperConstants.JS_TAG, new File(destinationDirectory, JQUERY_JS));
-            writeFileToDirectory(ScraperConstants.MATERIAL_JS_LINK, new File(destinationDirectory, ScraperConstants.MATERIAL_JS));
-            writeFileToDirectory(ScraperConstants.REGULAR_ARABIC_FONT_LINK, new File(destinationDirectory, ScraperConstants.ARABIC_FONT_REGULAR));
-            writeFileToDirectory(ScraperConstants.BOLD_ARABIC_FONT_LINK, new File(destinationDirectory, ScraperConstants.ARABIC_FONT_BOLD));
+        File tinCanFile = new File(destinationDirectory, "tincan.xml");
+        if(!ContentScraperUtil.isFileCreated(tinCanFile)){
+            try {
+                ContentScraperUtil.generateTinCanXMLFile(destinationDirectory, response.title, "ar",
+                        ScraperConstants.INDEX_HTML, "http://adlnet.gov/expapi/activities/module",
+                        url.substring(0, url.indexOf("component/")) + response.id,
+                        "","en");
+            } catch (ParserConfigurationException | TransformerException e) {
+                e.printStackTrace();
+            }
+            anyContentUpdated = true;
+        }
 
+        // add these files into the directory
+        anyContentUpdated = writeFileToDirectory(ScraperConstants.JS_HTML_TAG, new File(destinationDirectory, INDEX_HTML)) || anyContentUpdated;
+        anyContentUpdated = writeFileToDirectory(ScraperConstants.JS_TAG, new File(destinationDirectory, JQUERY_JS)) || anyContentUpdated;
+        anyContentUpdated = writeFileToDirectory(ScraperConstants.MATERIAL_CSS_LINK, new File(destinationDirectory, MATERIAL_CSS)) || anyContentUpdated;
+        anyContentUpdated = writeFileToDirectory(ScraperConstants.MATERIAL_JS_LINK, new File(destinationDirectory, ScraperConstants.MATERIAL_JS)) || anyContentUpdated;
+        anyContentUpdated = writeFileToDirectory(ScraperConstants.REGULAR_ARABIC_FONT_LINK, new File(destinationDirectory, ScraperConstants.ARABIC_FONT_REGULAR)) || anyContentUpdated;
+        anyContentUpdated = writeFileToDirectory(ScraperConstants.BOLD_ARABIC_FONT_LINK, new File(destinationDirectory, ScraperConstants.ARABIC_FONT_BOLD)) || anyContentUpdated;
+
+
+
+        // nothing changed, keep same files
+        if(anyContentUpdated) {
             ContentScraperUtil.zipDirectory(destinationDirectory, response.id, destinationDirectory.getParentFile());
         }
 
@@ -159,11 +180,16 @@ public class EdraakK12ContentScraper{
 
     /**
      *
-     * Given an asset location, write into a file
+     * Given an asset location, write into a file and return true if it was created. return false if it was created before
      * @param input
      * @param file
      */
-    public void writeFileToDirectory(String input, File file) {
+    public boolean writeFileToDirectory(String input, File file) {
+
+        if(ContentScraperUtil.isFileCreated(file)){
+            return false;
+        }
+
         InputStream htmlIns = getClass().getResourceAsStream(input);
         FileOutputStream outputStream = null;
         try {
@@ -179,6 +205,27 @@ public class EdraakK12ContentScraper{
             UMIOUtils.closeQuietly(htmlIns);
             UMIOUtils.closeQuietly(outputStream);
         }
+
+        return true;
+    }
+
+    private List<ContentResponse> getQuestionSet(ContentResponse response){
+
+        List<ContentResponse> questionsList = null;
+        if(ComponentType.ONLINE.getType().equalsIgnoreCase(response.target_component.component_type)){
+
+            for(ContentResponse children: response.target_component.children){
+                if(ScraperConstants.QUESTION_SET_HOLDER_TYPES.contains(children.component_type)) {
+                    questionsList = children.question_set.children;
+                    break;
+                }
+            }
+        }else if(ComponentType.TEST.getType().equalsIgnoreCase(response.target_component.component_type)){
+
+             questionsList = response.target_component.question_set.children;
+
+        }
+        return questionsList;
     }
 
 

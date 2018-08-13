@@ -1,6 +1,9 @@
 package com.ustadmobile.lib.contentscrapers;
 
 import com.google.gson.GsonBuilder;
+import com.ustadmobile.lib.contentscrapers.EdraakK12.ContentResponse;
+import com.ustadmobile.lib.contentscrapers.EdraakK12.EdraakK12ContentScraper;
+import com.ustadmobile.lib.contentscrapers.EdraakK12.IndexEdraakK12Content;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
@@ -20,8 +23,14 @@ import okio.Buffer;
 import okio.BufferedSource;
 import okio.Okio;
 
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.ARABIC_FONT_BOLD;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.ARABIC_FONT_REGULAR;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.CONTENT_JSON;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.ComponentType;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.INDEX_HTML;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.JQUERY_JS;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.MATERIAL_CSS;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.MATERIAL_JS;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.QUESTIONS_JSON;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.QUESTION_SET_HOLDER_TYPES;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING;
@@ -29,9 +38,6 @@ import static com.ustadmobile.lib.contentscrapers.ScraperConstants.VIDEO_MP4;
 
 public class TestEdraakContentScraper {
 
-    private final String DETAIL_COMPONENT_ID = "5a608cc76380a6049b33feb6";
-
-    final String MAIN_CONTENT_ID = "5a6087f46380a6049b33fc19";
 
     private final String MALFORMED_COMPONENT_ID = "eada";
 
@@ -93,29 +99,20 @@ public class TestEdraakContentScraper {
     };
 
 
-    @Test
-    public void givenServerOnline_whenEdXContentScraped_thenShouldConvertAndDownload() throws IOException{
-
-        File tmpDir = Files.createTempDirectory("testedxcontentscraper").toFile();
-        MockWebServer mockWebServer = new MockWebServer();
-        mockWebServer.setDispatcher(dispatcher);
-        String url = EdraakK12ContentScraper.generateUrl(mockWebServer.url("/api/").toString(), DETAIL_JSON_CONTENT_FILE, 41);
-        EdraakK12ContentScraper scraper = new EdraakK12ContentScraper(url, tmpDir);
-        scraper.scrapContent();
-
+    public void assertAllFiles(File tmpDir) throws IOException {
 
         File jsonFile = new File(tmpDir, CONTENT_JSON);
-        Assert.assertTrue("Downloaded content info json exists", jsonFile.length() > 0);
+        Assert.assertTrue("Downloaded content info json exists", ContentScraperUtil.isFileCreated(jsonFile));
         String jsonStr = new String(Files.readAllBytes(jsonFile.toPath()), "UTF-8");
         ContentResponse gsonContent = new GsonBuilder().disableHtmlEscaping().create().fromJson(jsonStr,ContentResponse.class);
         Assert.assertNotNull("Created Gson POJO Object", gsonContent);
 
         if(ComponentType.ONLINE.getType().equalsIgnoreCase(gsonContent.target_component.component_type)){
-            Assert.assertTrue("Downloaded video exists", new File(tmpDir, VIDEO_MP4).length() > 0);
+            Assert.assertTrue("Downloaded video exists", ContentScraperUtil.isFileCreated(new File(tmpDir, VIDEO_MP4)));
         }
 
-        Assert.assertTrue("Downloaded Questions json exist", new File(tmpDir, QUESTIONS_JSON).length() > 0);
-        Assert.assertTrue("Downloaded zip exists", new File(tmpDir.getParent(), gsonContent.id + ".zip").length() > 0);
+        Assert.assertTrue("Downloaded Questions json exist", ContentScraperUtil.isFileCreated(new File(tmpDir, QUESTIONS_JSON)));
+        Assert.assertTrue("Downloaded zip exists", ContentScraperUtil.isFileCreated(new File(tmpDir.getParent(), gsonContent.id + ".zip")));
 
         //add assertions that the content info and video info are present in the JSON
         List<ContentResponse> tests = gsonContent.target_component.children;
@@ -154,6 +151,28 @@ public class TestEdraakContentScraper {
 
 
         Assert.assertEquals("Found 1 question set", 1, questionSet);
+
+        Assert.assertTrue("tincan file exists", ContentScraperUtil.isFileCreated(new File(tmpDir, "tincan.xml")));
+        Assert.assertTrue("index html file exists", ContentScraperUtil.isFileCreated(new File(tmpDir, INDEX_HTML)));
+        Assert.assertTrue("jquery file exists", ContentScraperUtil.isFileCreated(new File(tmpDir, JQUERY_JS)));
+        Assert.assertTrue("material js file exists", ContentScraperUtil.isFileCreated(new File(tmpDir, MATERIAL_JS)));
+        Assert.assertTrue("material css file exists", ContentScraperUtil.isFileCreated(new File(tmpDir, MATERIAL_CSS)));
+        Assert.assertTrue("arabic font regular file exists", ContentScraperUtil.isFileCreated(new File(tmpDir, ARABIC_FONT_REGULAR)));
+        Assert.assertTrue("arabic font bold file exists", ContentScraperUtil.isFileCreated(new File(tmpDir, ARABIC_FONT_BOLD)));
+
+    }
+
+
+    @Test
+    public void givenServerOnline_whenEdXContentScraped_thenShouldConvertAndDownload() throws IOException{
+
+        File tmpDir = Files.createTempDirectory("testedxcontentscraper").toFile();
+        MockWebServer mockWebServer = new MockWebServer();
+        mockWebServer.setDispatcher(dispatcher);
+        String url = EdraakK12ContentScraper.generateUrl(mockWebServer.url("/api/").toString(), DETAIL_JSON_CONTENT_FILE, 41);
+        EdraakK12ContentScraper scraper = new EdraakK12ContentScraper(url, tmpDir);
+        scraper.scrapContent();
+        assertAllFiles(tmpDir);
 
     }
 
@@ -314,10 +333,11 @@ public class TestEdraakContentScraper {
     @Test
     public void testCommand() throws IOException{
         if(System.getProperty("url") != null && System.getProperty("dir") != null){
+            File destination = new File(System.getProperty("dir"));
             EdraakK12ContentScraper scraper = new EdraakK12ContentScraper(
-                    System.getProperty("url"),
-                    new File(System.getProperty("dir")));
+                    System.getProperty("url"),destination );
             scraper.scrapContent();
+            assertAllFiles(destination);
         }
     }
 

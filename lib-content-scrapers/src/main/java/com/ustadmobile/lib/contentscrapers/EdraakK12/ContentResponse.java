@@ -1,9 +1,8 @@
-package com.ustadmobile.lib.contentscrapers;
+package com.ustadmobile.lib.contentscrapers.EdraakK12;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-import java.security.Key;
 import java.util.List;
 
 public class ContentResponse {

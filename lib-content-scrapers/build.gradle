@@ -13,9 +13,12 @@ apply plugin: 'java-library'
 
 task convertEdraakK12(type: JavaExec) {
     classpath sourceSets.main.runtimeClasspath
-    main "com.ustadmobile.lib.contentscrapers.EdraakK12ContentScraper"
+    main "com.ustadmobile.lib.contentscrapers.EdraakK12.EdraakK12ContentScraper"
     if(project.hasProperty("convertUrl") && project.hasProperty("convertDest")) {
         args  project.getProperties().get("convertUrl"), project.getProperties().get("convertDest")
+    }
+    if(project.hasProperty("findUrl") && project.hasProperty("findDest")) {
+        args  project.getProperties().get("findUrl"), project.getProperties().get("findDest")
     }
 
     outputs.upToDateWhen { false }

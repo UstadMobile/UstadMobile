@@ -1,19 +1,25 @@
 package com.ustadmobile.lib.contentscrapers;
 
+import com.ustadmobile.lib.contentscrapers.EdraakK12.EdraakK12ContentScraper;
+import com.ustadmobile.lib.contentscrapers.EdraakK12.IndexEdraakK12Content;
+
 import org.junit.Test;
 
 public class TmpMainDebug {
 
     @Test
-    public void testMain() {
-        EdraakK12ContentScraper.main(new String[]{"https://programs.edraak.org/api/component/5a60a6663d99e104fb62c881/?states_program_id=41", "C:\\Users\\suhai\\cmdout\\"});
-        EdraakK12ContentScraper.main(new String[]{"https://programs.edraak.org/api/component/5a60a5e1d1e59d0495fb8473/?states_program_id=41", "C:\\Users\\suhai\\cmdout2\\" });
-
+    public void testMain()  {
+        if(System.getProperty("convertUrl") != null && System.getProperty("convertDest") != null){
+            EdraakK12ContentScraper.main(new String[]{System.getProperty("convertUrl"), System.getProperty("convertDest")});
+        }
     }
 
     @Test
-    public void testIndexMain(){
-        IndexEdraakK12Content.main(new String[]{"https://programs.edraak.org/api/component/5a6087f46380a6049b33fc19/?states_program_id=41","C:\\Users\\suhai\\index\\"});
+    public void testIndexMain() {
+
+        if (System.getProperty("findUrl") != null && System.getProperty("findDest") != null) {
+            IndexEdraakK12Content.main(new String[]{System.getProperty("findUrl"), System.getProperty("findDest")});
+        }
     }
 
 }

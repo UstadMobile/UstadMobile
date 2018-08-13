@@ -1,6 +1,8 @@
 package com.ustadmobile.lib.contentscrapers;
 
 
+import com.ustadmobile.lib.contentscrapers.EdraakK12.IndexEdraakK12Content;
+
 import org.apache.commons.io.IOUtils;
 
 import org.junit.Test;
