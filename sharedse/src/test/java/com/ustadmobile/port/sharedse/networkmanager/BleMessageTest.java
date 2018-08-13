@@ -11,7 +11,8 @@ import static org.junit.Assert.assertEquals;
 /**
  * <h1>BleMessageTest</h1>
  *
- * Bluetooth Low Energy Test Class tests {@link BleMessage} to make sure it behaves as expected.
+ * Test class which tests {@link BleMessage} to make sure it behaves as expected
+ * when creating, processing and receiving packets.
  *
  * @author kileha3
  */
