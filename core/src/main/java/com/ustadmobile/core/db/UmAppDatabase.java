@@ -1,5 +1,6 @@
 package com.ustadmobile.core.db;
 
+import com.ustadmobile.core.db.dao.ClazzDao;
 import com.ustadmobile.core.db.dao.ContainerFileDao;
 import com.ustadmobile.core.db.dao.ContainerFileEntryDao;
 import com.ustadmobile.core.db.dao.CrawJoblItemDao;
@@ -18,10 +19,12 @@ import com.ustadmobile.core.db.dao.OpdsEntryStatusCacheAncestorDao;
 import com.ustadmobile.core.db.dao.OpdsEntryStatusCacheDao;
 import com.ustadmobile.core.db.dao.OpdsEntryWithRelationsDao;
 import com.ustadmobile.core.db.dao.OpdsLinkDao;
+import com.ustadmobile.core.db.dao.PersonDao;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.lib.database.annotation.UmDatabase;
 import com.ustadmobile.lib.database.annotation.UmDbContext;
+import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.ContainerFile;
 import com.ustadmobile.lib.db.entities.ContainerFileEntry;
 import com.ustadmobile.lib.db.entities.CrawlJob;
@@ -39,6 +42,7 @@ import com.ustadmobile.lib.db.entities.OpdsEntryParentToChildJoin;
 import com.ustadmobile.lib.db.entities.OpdsEntryStatusCache;
 import com.ustadmobile.lib.db.entities.OpdsEntryStatusCacheAncestor;
 import com.ustadmobile.lib.db.entities.OpdsLink;
+import com.ustadmobile.lib.db.entities.Person;
 
 @UmDatabase(version = 1, entities = {
         OpdsEntry.class, OpdsLink.class, OpdsEntryParentToChildJoin.class,
@@ -46,7 +50,8 @@ import com.ustadmobile.lib.db.entities.OpdsLink;
         DownloadSetItem.class, NetworkNode.class, EntryStatusResponse.class,
         DownloadJobItemHistory.class, CrawlJob.class, CrawlJobItem.class,
         OpdsEntryStatusCache.class, OpdsEntryStatusCacheAncestor.class,
-        HttpCachedEntry.class, DownloadJob.class, DownloadJobItem.class
+        HttpCachedEntry.class, DownloadJob.class, DownloadJobItem.class,
+        Person.class, Clazz.class
 })
 public abstract class UmAppDatabase{
 
@@ -99,6 +104,10 @@ public abstract class UmAppDatabase{
     public abstract CrawJoblItemDao getDownloadJobCrawlItemDao();
 
     public abstract HttpCachedEntryDao getHttpCachedEntryDao();
+
+    public abstract PersonDao getPersonDao();
+
+    public abstract ClazzDao getClazzDao();
 
     @UmDbContext
     public abstract Object getContext();

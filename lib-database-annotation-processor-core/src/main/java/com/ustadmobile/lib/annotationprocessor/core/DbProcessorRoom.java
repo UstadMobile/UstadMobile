@@ -153,7 +153,6 @@ public class DbProcessorRoom extends AbstractDbProcessor{
             }
         }
 
-
         //now go through all methods that return DAO objects and create matching methods
         for(Element subElement : dbType.getEnclosedElements()) {
             if(subElement.getKind() != ElementKind.METHOD)
