@@ -1,12 +1,16 @@
 package com.ustadmobile.port.android.view;
 
-import android.content.Context;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
+import android.support.v4.widget.TextViewCompat;
+import android.support.v7.widget.Toolbar;
+import android.widget.TextView;
 
 
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
@@ -28,6 +32,9 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
 
     private ViewPager mPager;
     private BasePointViewPagerAdapter mPagerAdapter;
+
+    private CollapsingToolbarLayout mCollapsingToolbar;
+    private Toolbar toolbar;
 
     @Override
     public void setBottomNavigationItems(String[] menuItems) {
@@ -52,6 +59,16 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
         //set up view pager
         setupViewPager();
 
+        //Collapsable toolbar
+        //mCollapsingToolbar = (CollapsingToolbarLayout)findViewById(R.id.activity_base_point_2_toolbar_layout);
+        //mCollapsingToolbar.setTitle("UstadMobile");
+
+        //Toolbar
+        toolbar = findViewById(R.id.base_point_2_toolbar);
+        toolbar.setTitle("Ustad Mobile");
+        setSupportActionBar(toolbar);
+
+
         //Get the bottom navigation component.
         AHBottomNavigation bottomNavigation = findViewById(R.id.bottom_navigation);
 
@@ -59,6 +76,7 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
         bottomNavigation.setDefaultBackgroundColor(fetchColor(R.color.default_background_color_2));
         bottomNavigation.setAccentColor(fetchColor(R.color.bottom_nav_yourAccentColor));
         bottomNavigation.setInactiveColor(fetchColor(R.color.bottom_nav_yourInactiveColor));
+        bottomNavigation.setBehaviorTranslationEnabled(false);
 
         //Create the items to be added
         AHBottomNavigationItem feed_item =

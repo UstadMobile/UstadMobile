@@ -20,7 +20,7 @@ import com.ustadmobile.core.view.BasePointPeopleView;
  * BasePointPeopleFragment Android fragment extends UstadBaseFragment
  */
 public class BasePointPeopleFragment extends UstadBaseFragment implements BasePointPeopleView,
-        View.OnClickListener, View.OnLongClickListener, SwipeRefreshLayout.OnRefreshListener {
+        View.OnClickListener, View.OnLongClickListener{
 
     View rootContainer;
     //RecyclerView
@@ -29,6 +29,9 @@ public class BasePointPeopleFragment extends UstadBaseFragment implements BasePo
     private RecyclerView.Adapter mAdapter;
     private ViewPager mPager;
     private SectionsPagerAdapter mSectionsPagerAdapter;
+
+    //Swipe-refresh
+    //private SwipeRefreshLayout mSwipeRefreshLayout;
 
     /**
      * Generates a new Fragment for a page fragment
@@ -69,25 +72,13 @@ public class BasePointPeopleFragment extends UstadBaseFragment implements BasePo
         rootContainer = inflater.inflate(R.layout.fragment_base_point_people,container, false);
         setHasOptionsMenu(true);
 
-        /*
-        // Set mRecyclerView..
-        mRecyclerView = rootContainer.findViewById(R.id.fragment_base_point_people_recyclerview);
-
-        // Use Layout: set layout manager. Change defaults
-        mRecyclerLayoutManager = new LinearLayoutManager(getContext());
-        mRecyclerView.setLayoutManager(mRecyclerLayoutManager);
-        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(mRecyclerView.getContext(),
-                LinearLayoutManager.VERTICAL);
-        mRecyclerView.addItemDecoration(dividerItemDecoration);
-        */
-
-
-
         // TODO: Specify the mAdapter
         mPager = (ViewPager) rootContainer.findViewById(R.id.fragment_base_point_people_container);
         mSectionsPagerAdapter = new SectionsPagerAdapter(getChildFragmentManager());
         mPager.setAdapter(mSectionsPagerAdapter);
-        //mRecyclerView.setAdapter(mAdapter);
+
+        //Swipe-Refresh
+        //mSwipeRefreshLayout = rootContainer.findViewById(R.id.fragment_catalog_swiperefreshview);
 
         //return container
         return rootContainer;
@@ -101,12 +92,8 @@ public class BasePointPeopleFragment extends UstadBaseFragment implements BasePo
     }
 
     /**
-     * View and SwipeRefreshLayout Listeners
+     * View Listeners
      */
-    @Override
-    public void onRefresh() {
-
-    }
 
     @Override
     public void onClick(View v) {

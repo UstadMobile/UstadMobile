@@ -24,6 +24,8 @@ public class FeedListFragment extends UstadBaseFragment implements FeedListView,
     private RecyclerView.LayoutManager mRecyclerLayoutManager;
     private RecyclerView.Adapter mAdapter;
 
+    //Swipe-refresh
+    private SwipeRefreshLayout mSwipeRefreshLayout;
 
     /**
      * Generates a new Fragment for a page fragment
@@ -88,6 +90,10 @@ public class FeedListFragment extends UstadBaseFragment implements FeedListView,
         mAdapter = new MyRecyclerViewAdapter(getContext(), animalNames);
         mRecyclerView.setAdapter(mAdapter);
 
+        //Swipe-refresh
+        mSwipeRefreshLayout = rootContainer.findViewById(R.id.fragment_feed_swiperefreshview);
+        mSwipeRefreshLayout.setOnRefreshListener(this);
+
         //return container
         return rootContainer;
     }
@@ -108,6 +114,9 @@ public class FeedListFragment extends UstadBaseFragment implements FeedListView,
     public void onRefresh() {
         //TODO: Check this
         mRecyclerView.refreshDrawableState();
+        //Update refreshing animation, etc
+        mSwipeRefreshLayout.setRefreshing(false);
+
     }
 
     @Override

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.ustadmobile.port.android.view.BasePointActivity2"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent">
+
+
+    <item
+        android:id="@+id/action_user"
+        android:title="User"
+        android:orderInCategory="200"
+        android:icon="@drawable/ic_person_black_24dp"
+        android:showAsAction="ifRoom"
+        />
+</menu>
