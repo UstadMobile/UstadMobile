@@ -60,6 +60,10 @@ public abstract class UmAppDatabase{
         return instance;
     }
 
+    public static synchronized UmAppDatabase getInstance(Object context, String dbName) {
+        return UmAppDatabase_Factory.makeUmAppDatabase(context, dbName);
+    }
+
     public abstract OpdsEntryDao getOpdsEntryDao();
 
     public abstract OpdsEntryWithRelationsDao getOpdsEntryWithRelationsDao();

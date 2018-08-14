@@ -19,8 +19,10 @@ import com.ustadmobile.lib.database.annotation.UmUpdate;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -53,49 +55,7 @@ import static com.ustadmobile.lib.annotationprocessor.core.DbProcessorCore.OPT_R
  *
  */
 @SupportedOptions({OPT_ROOM_OUTPUT})
-public class DbProcessorRoom{
-
-    private ProcessingEnvironment processingEnv;
-
-    private Messager messager;
-
-    private Filer filer;
-
-    public synchronized void init(ProcessingEnvironment processingEnvironment) {
-        this.processingEnv = processingEnvironment;
-        filer = processingEnvironment.getFiler();
-        messager = processingEnvironment.getMessager();
-    }
-
-    public boolean process(Set<? extends TypeElement> set, RoundEnvironment roundEnvironment) {
-        String destinationPath = processingEnv.getOptions().get(OPT_ROOM_OUTPUT);
-        if(destinationPath == null)
-            return true;
-
-        File destinationDir = new File(destinationPath);
-
-        for(Element dbClassElement : roundEnvironment.getElementsAnnotatedWith(UmDatabase.class)) {
-            try {
-                processDbClass((TypeElement)dbClassElement, destinationDir);
-            }catch(IOException ioe) {
-                messager.printMessage(Diagnostic.Kind.ERROR, "IOException processing DB "
-                    + ioe.getMessage());
-            }
-        }
-
-        for(Element daoClassElement : roundEnvironment.getElementsAnnotatedWith(UmDao.class)) {
-            try {
-                processDbDao((TypeElement)daoClassElement, destinationDir);
-            }catch(IOException e) {
-                messager.printMessage(Diagnostic.Kind.ERROR, "IOException proceossing DAO "
-                    + e.getMessage());
-            }
-        }
-
-
-        messager.printMessage(Diagnostic.Kind.NOTE, "running room processor");
-        return true;
-    }
+public class DbProcessorRoom extends AbstractDbProcessor{
 
     public static final String SUFFIX_ROOM_DAO = "_RoomDao";
 
@@ -104,6 +64,10 @@ public class DbProcessorRoom{
     private static final String ROOM_PKG_NAME =  "android.arch.persistence.room";
 
     private static final String UMDB_CORE_PKG_NAME = "com.ustadmobile.core.db";
+
+    public DbProcessorRoom() {
+        setOutputDirOpt(OPT_ROOM_OUTPUT);
+    }
 
     /**
      * Process a class with the @UmDatabase annotation. This will generate
@@ -119,6 +83,7 @@ public class DbProcessorRoom{
      *                       place generated sources in.
      * @throws IOException If there are IO exceptions writing newly generated classes
      */
+    @Override
     public void processDbClass(TypeElement dbType,  File destinationDir) throws IOException {
         String roomDbClassName = dbType.getSimpleName() + "_RoomDb";
         String roomDbManagerClassName = dbType.getSimpleName() + SUFFIX_ROOM_DBMANAGER;
@@ -140,25 +105,20 @@ public class DbProcessorRoom{
                         Modifier.PRIVATE)
                 .addJavadoc("Generated code - DO NOT EDIT!");
 
-        TypeSpec.Builder factoryClassSpec = TypeSpec.classBuilder(dbType.getSimpleName() + "_Factory")
-                .addModifiers(Modifier.PUBLIC)
-                .addField(ClassName.get(dbType), "instance", Modifier.PRIVATE, Modifier.STATIC)
-                .addMethod(MethodSpec.methodBuilder("make" + dbType.getSimpleName())
-                        .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                        .addParameter(ClassName.get(Object.class), "context")
-                        .returns(ClassName.get(dbType))
-                        .addCode(CodeBlock.builder().add("if(instance == null) \n")
-                                .add("\tinstance = new $L(context);\n", roomDbManagerClassName)
-                                .add("return instance;\n").build()).build())
-                .addJavadoc("Generated code - DO NOT EDIT!");
+        TypeSpec.Builder factoryClassSpec = DbProcessorUtils.makeFactoryClass(dbType,
+                roomDbManagerClassName);
+
+
 
         dbManagerImplSpec.addMethod(MethodSpec.constructorBuilder()
                     .addParameter(ClassName.get(Object.class), "context")
+                    .addParameter(ClassName.get(String.class), "dbName")
                     .addModifiers(Modifier.PUBLIC)
                     .addCode("this.context = (Context)context;\n")
                     .addCode("this.dbExecutor = $T.newCachedThreadPool();\n", Executors.class)
                     .addCode("_roomDb = $T.databaseBuilder(this.context, " + roomDbClassName +
-                            ".class, " + "\"appdbname\").build();\n", ClassName.get("android.arch.persistence.room", "Room"))
+                            ".class, dbName).build();\n",
+                            ClassName.get("android.arch.persistence.room", "Room"))
                 .build());
 
 
@@ -275,7 +235,7 @@ public class DbProcessorRoom{
      *
      * @throws IOException When there is an IO issue writing the generated output
      */
-    private void processDbDao(TypeElement daoClass, File destinationDir) throws IOException {
+    public void processDbDao(TypeElement daoClass, File destinationDir) throws IOException {
         String daoClassName = daoClass.getSimpleName() + SUFFIX_ROOM_DAO;
         TypeSpec.Builder roomDaoClassSpec = TypeSpec.classBuilder(daoClassName)
                 .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
