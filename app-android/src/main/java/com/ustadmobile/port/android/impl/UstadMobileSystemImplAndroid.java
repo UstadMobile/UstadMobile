@@ -84,6 +84,7 @@ import com.ustadmobile.core.view.CatalogView;
 import com.ustadmobile.core.view.ContainerView;
 import com.ustadmobile.core.view.H5PContentView;
 import com.ustadmobile.core.view.LoginView;
+import com.ustadmobile.core.view.BasePointView2;
 import com.ustadmobile.core.view.RegistrationView;
 import com.ustadmobile.core.view.ScormPackageView;
 import com.ustadmobile.core.view.SettingsDataSyncListView;
@@ -111,7 +112,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
-import java.sql.SQLException;
 import java.text.Format;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -169,6 +169,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         viewNameToAndroidImplMap.put(SettingsDataSyncListView.VIEW_NAME, SettingsDataSyncListActivity.class);
         //Account settings:
         //viewNameToAndroidImplMap.put(AccountSettingsView.VIEW_NAME, AccountSettingsActivity.class);
+        viewNameToAndroidImplMap.put(BasePointView2.VIEW_NAME, BasePointActivity2.class);
         viewNameToAndroidImplMap.put(BasePointView.VIEW_NAME, BasePointActivity.class);
         viewNameToAndroidImplMap.put(AboutView.VIEW_NAME, AboutActivity.class);
         viewNameToAndroidImplMap.put(CatalogEntryView.VIEW_NAME, CatalogEntryActivity.class);

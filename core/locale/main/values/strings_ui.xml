@@ -245,5 +245,30 @@
 
     <string name="catalog_language">Catalog Language</string>
     <string name="also_available_in">Also available in</string>
+    <string name="feed">Feed</string>
+    <string name="people">People</string>
+    <string name="statistcs">Statistics</string>
+    <string name="lessons">Lessons</string>
+    <string name="my_classes">My Classes</string>
+    <string name="record_attendance">Record attendance</string>
+    <string name="record_attendance_for">Record attendance for</string>
+    <string name="students_literal">Students</string>
+    <string name="last_recorded">last recorded</string>
+    <string name="yesterday">Yesterday</string>
+    <string name="today">Today</string>
+    <string name="sort_by">sort_by</string>
+    <string name="log">Log</string>
+    <string name="schedule">Schedule</string>
+    <string name="add_student">Add Student</string>
+    <string name="this_week">This week</string>
+    <string name="view_as">View as</string>
+    <string name="most_recent">most recent</string>
+    <string name="first">first</string>
+    <string name="last">last</string>
+    <string name="last_week">Last week</string>
+    <string name="overdue">overdue</string>
+    <string name="mark_all">Mark all</string>
+    <string name="present">Present</string>
+    <string name="absent">Absent</string>
 
 </resources>

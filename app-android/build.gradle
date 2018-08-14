@@ -519,6 +519,9 @@ dependencies {
     implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
     implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
 
+    //Bottom Navigation
+    implementation 'com.aurelhubert:ahbottomnavigation:2.1.0'
+
     testImplementation "junit:junit:$version_junit"
 }
 

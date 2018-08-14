@@ -135,7 +135,7 @@ public interface CatalogView extends UstadView{
      */
     public void setFooterButtonVisible(boolean buttonVisible);
 
-    /**
+    /**Vi
      * Sets the label for the browse button
      *
      * @param browseButtonLabel Text label for the browse button
