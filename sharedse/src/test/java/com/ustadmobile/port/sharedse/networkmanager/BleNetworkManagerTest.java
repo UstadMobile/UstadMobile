@@ -6,17 +6,25 @@ import com.ustadmobile.lib.db.entities.NetworkNode;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.awt.SystemTray;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import javax.naming.Context;
+
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.withSettings;
 
 /**
  * <h1>BleNetworkManagerTest</h1>
@@ -29,57 +37,58 @@ import static org.mockito.Mockito.when;
 public class BleNetworkManagerTest {
 
     private NetworkManagerBle testManager;
+
+    private List<Long> entries;
+
+    private NetworkNode networkNode;
+
+    private BleEntryStatusTask mockedStatusTask;
+
+    private Context mockedContext;
+
+    private Object availabilityClient = new Object();
+
     @Before
-    public void setUpSpy() {
+    public void setUp() {
         testManager = spy(NetworkManagerBle.class);
+        mockedContext = mock(Context.class);
+        entries = Arrays.asList(1056289670L,4590875612L,9076137860L,2912543894L);
+        networkNode = mock(NetworkNode.class);
+        mockedStatusTask = mock(BleEntryStatusTask.class);
+        when(testManager.makeEntryStatusTask(any(),any(),any())).thenReturn(mockedStatusTask);
     }
 
     @Test
     public void givenEntryStatusNotKnown_whenStartMonitoringAvailabilityCalled_thenShouldCreateEntryStatusTask() {
-       BleEntryStatusTask task1 = mock(BleEntryStatusTask.class);
-
-        when(testManager.makeEntryStatusTask(any(), any())).thenReturn(task1);
-
         Object availabilityClient = new Object();
-        testManager.startMonitoringAvailability(availabilityClient, Collections.singletonList(64L));
+        testManager.startMonitoringAvailability(mockedContext,availabilityClient, entries);
 
-        verify(testManager).makeEntryStatusTask(any(), any());
+        verify(testManager).makeEntryStatusTask(mockedContext,entries,null);
 
         //will have been called async - we need to wait for it to run
-        verify(task1, timeout(5000)).run();
+        verify(mockedStatusTask, timeout(5000)).run();
 
     }
 
     @Test
     public void givenMonitoringAvailabilityStarted_whenNewNodeDiscovered_thenShouldCreateEntryStatusTask() {
-        BleEntryStatusTask task1 = mock(BleEntryStatusTask.class);
-        List<Long> entryUUID = Collections.singletonList(64L);
-        NetworkNode node = new NetworkNode();
-        when(testManager.makeEntryStatusTask(entryUUID, eq(node))).thenReturn(task1);
-        Object availabilityClient = new Object();
+        testManager.startMonitoringAvailability(mockedContext,availabilityClient, entries);
+        testManager.handleNodeDiscovered(networkNode);
 
-
-        testManager.startMonitoringAvailability(availabilityClient, entryUUID);
-        testManager.handleNodeDiscovered(node);
-
-        verify(testManager).makeEntryStatusTask(any(), node);
+        verify(testManager).makeEntryStatusTask(mockedContext,entries, null);
 
         //will have been called async - we need to wait for it to run
-        verify(task1, timeout(5000)).run();
+        verify(mockedStatusTask, timeout(5000)).run();
     }
 
     @Test
     public void givenMonitoringAvailabilityStopped_whenNewNodeDiscovered_thenShouldNotCreateEntryStatusTask() {
-        Object availabilityClient = new Object();
-        NetworkNode node = new NetworkNode();
-
-
-        testManager.startMonitoringAvailability(availabilityClient, Collections.singletonList(64L));
+        testManager.startMonitoringAvailability(mockedContext,availabilityClient, entries);
         testManager.stopMonitoringAvailability(availabilityClient);
-        testManager.handleNodeDiscovered(node);
+        testManager.handleNodeDiscovered(networkNode);
 
         //Verify that makeEntryStatusTask was not called even once
-        verify(testManager,never()).makeEntryStatusTask(any(), node);
+        verify(testManager,never()).makeEntryStatusTask(mockedContext,entries, networkNode);
     }
 
     @Test
