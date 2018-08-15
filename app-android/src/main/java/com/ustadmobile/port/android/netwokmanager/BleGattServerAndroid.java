@@ -5,20 +5,29 @@ import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattServer;
 import android.bluetooth.BluetoothGattServerCallback;
-import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.support.annotation.VisibleForTesting;
-import android.util.Log;
 
+import com.ustadmobile.port.sharedse.networkmanager.BleGattServer;
 import com.ustadmobile.port.sharedse.networkmanager.BleMessage;
 
-import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.USTADMOBILE_BLE_SERVICE_UUID;
+import java.util.List;
 
-public class BleGattServerAndroid extends BleGattServer {
+import static com.ustadmobile.port.sharedse.networkmanager.BleMessageUtil.bleMessageBytesToLong;
+import static com.ustadmobile.port.sharedse.networkmanager.BleMessageUtil.bleMessageLongToBytes;
+import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.ENTRY_STATUS_REQUEST;
+import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.ENTRY_STATUS_RESPONSE;
+import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.USTADMOBILE_BLE_SERVICE_UUID;
+import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.WIFI_GROUP_CREATION_REQUEST;
+import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.WIFI_GROUP_CREATION_RESPONSE;
+
+public class BleGattServerAndroid extends BleGattServer{
 
     private BluetoothGattServer gattServer;
 
     private BleMessage receivedMessage;
+
+    private NetworkManagerAndroidBle networkManager;
 
     private BluetoothGattServerCallback mCallback = new BluetoothGattServerCallback() {
         @Override
@@ -59,11 +68,11 @@ public class BleGattServerAndroid extends BleGattServer {
         }
     };
 
-    public BleGattServerAndroid(Context context, BluetoothManager bluetoothManager) {
+    public BleGattServerAndroid(Context context, NetworkManagerAndroidBle networkManager ) {
         this.receivedMessage = new BleMessage();
-        this.gattServer = bluetoothManager.openGattServer(context,mCallback);
+        this.gattServer = networkManager.getBluetoothManager().openGattServer(context,mCallback);
+        this.networkManager = networkManager;
     }
-
 
     @VisibleForTesting
     protected BluetoothGattServerCallback getGattServerCallback() {

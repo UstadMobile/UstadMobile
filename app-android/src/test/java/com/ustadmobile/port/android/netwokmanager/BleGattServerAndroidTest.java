@@ -56,9 +56,10 @@ public class BleGattServerAndroidTest {
         mockedBluetoothDevice = mock(BluetoothDevice.class);
 
         BluetoothManager mockBluetoothManager = mock(BluetoothManager.class);
+        NetworkManagerAndroidBle networkManager = mock(NetworkManagerAndroidBle.class);
+        when(networkManager.getBluetoothManager()).thenReturn(mockBluetoothManager);
         when(mockBluetoothManager.openGattServer(any(), any())).thenReturn(mockedGattServer);
-        serverCallback = new BleGattServerAndroid(mock(Context.class),mockBluetoothManager)
-                .getGattServerCallback();
+        serverCallback = new BleGattServerAndroid(mock(Context.class),networkManager).getGattServerCallback();
 
         List<Long> entryList = Arrays.asList(1056289670L,4590875612L,9076137860L,2912543894L);
         bleMessage = new BleMessage(ENTRY_STATUS_REQUEST, BleMessageUtil.bleMessageLongToBytes(entryList),
