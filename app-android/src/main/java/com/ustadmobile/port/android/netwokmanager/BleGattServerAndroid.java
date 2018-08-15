@@ -11,15 +11,7 @@ import android.support.annotation.VisibleForTesting;
 import com.ustadmobile.port.sharedse.networkmanager.BleGattServer;
 import com.ustadmobile.port.sharedse.networkmanager.BleMessage;
 
-import java.util.List;
-
-import static com.ustadmobile.port.sharedse.networkmanager.BleMessageUtil.bleMessageBytesToLong;
-import static com.ustadmobile.port.sharedse.networkmanager.BleMessageUtil.bleMessageLongToBytes;
-import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.ENTRY_STATUS_REQUEST;
-import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.ENTRY_STATUS_RESPONSE;
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.USTADMOBILE_BLE_SERVICE_UUID;
-import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.WIFI_GROUP_CREATION_REQUEST;
-import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.WIFI_GROUP_CREATION_RESPONSE;
 
 public class BleGattServerAndroid extends BleGattServer{
 
@@ -79,4 +71,7 @@ public class BleGattServerAndroid extends BleGattServer{
         return mCallback;
     }
 
+    public BluetoothGattServer getGattServer() {
+        return gattServer;
+    }
 }
