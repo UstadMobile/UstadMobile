@@ -3,6 +3,7 @@ package com.ustadmobile.port.sharedse.networkmanager;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.List;
 
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.ENTRY_STATUS_REQUEST;
 import static junit.framework.TestCase.assertTrue;
@@ -19,15 +20,14 @@ import static org.junit.Assert.assertEquals;
 
 public class BleMessageTest {
 
-    private String messageWithSufficientDuplicates = "dce655f2-34f0-469c-b890-a910039b0afc,c9d07319-2ab0-4a53-82cb-02370f5b8699,f912c86a-7f3b-406b-aef9-816e47bc00c0," +
-            "dce655f2-34f0-469c-b890-a910039b0afc,c9d07319-2ab0-4a53-82cb-02370f5b8699,f912c86a-7f3b-406b-aef9-816e47bc00c0";
+    private List<Long> entriesListWithSufficientDuplicates = Arrays.asList(8888888888L,8888888888L,8888888888L,8888888888L,8888888888L);
 
-    private String messageWithInsufficientDuplicates = "dce655f2-34f0-469c-b890-a910039b0afc,c9d07319-2ab0-4a53-82cb-02370f5b8699";
+    private List<Long> entriesListWithInsufficientDuplicates = Arrays.asList(1056289670L,4590875612L,9076137860L,2912543894L);
 
 
     @Test
     public void givenPayload_whenPacketizedAndDepacketized_shouldBeEqual() {
-        byte[] payload = messageWithSufficientDuplicates.getBytes();
+        byte[] payload = BleMessageUtil.bleMessageLongToBytes(entriesListWithSufficientDuplicates);
 
         BleMessage sentMessage = new BleMessage((byte)0, payload, 20);
         BleMessage receivedMessage = new BleMessage(sentMessage.getPackets());
@@ -48,17 +48,18 @@ public class BleMessageTest {
 
     @Test
     public void givenMessageWithSufficientDuplicates_whenPacketized_thenShouldBeCompressed() {
-        byte[] payload = messageWithSufficientDuplicates.getBytes();
+        byte[] payload = BleMessageUtil.bleMessageLongToBytes(entriesListWithSufficientDuplicates);
 
         BleMessage sentMessage = new BleMessage((byte)0, payload, 20);
         BleMessage receivedMessage = new BleMessage(sentMessage.getPackets());
+
         assertTrue("Compressed payload is less compared to the original one",
                 payload.length > receivedMessage.getLength());
     }
 
     @Test
     public void givenMessageWithInsufficientDuplicates_whenPacketized_thenShouldNotBeCompressed() {
-        byte[] payload = messageWithInsufficientDuplicates.getBytes();
+        byte[] payload = BleMessageUtil.bleMessageLongToBytes(entriesListWithInsufficientDuplicates);
 
         BleMessage sentMessage = new BleMessage((byte)0, payload, 20);
         BleMessage receivedMessage = new BleMessage(sentMessage.getPackets());
@@ -69,7 +70,7 @@ public class BleMessageTest {
 
     @Test
     public void givenPacketizedPayload_whenReceived_thenShouldBeReceivedAsSent(){
-        byte[] payload = messageWithInsufficientDuplicates.getBytes();
+        byte[] payload = BleMessageUtil.bleMessageLongToBytes(entriesListWithInsufficientDuplicates);
         BleMessage messageToSend = new BleMessage(ENTRY_STATUS_REQUEST, payload, 20);
         BleMessage sentMessage = new BleMessage();
 
