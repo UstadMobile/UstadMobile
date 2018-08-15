@@ -26,7 +26,7 @@ public class BleMessageUtilTest {
     }
 
     @Test
-    public void givenListOfEntriesInLong_whenConvertedToBytesAndReConvertedBackToList_thenShouldBeEqual(){
+    public void givenListOfEntriesInLong_whenConvertedToBytesAndConvertedBackToList_thenShouldTheSame(){
         List<Long> entryList = Arrays.asList(1056289670L,4590875612L,9076137860L,2912543894L,8965341254L);
 
         byte[] entriesInBytes = BleMessageUtil.bleMessageLongToBytes(entryList);
