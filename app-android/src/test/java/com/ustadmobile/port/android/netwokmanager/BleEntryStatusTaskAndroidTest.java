@@ -1,19 +1,32 @@
 package com.ustadmobile.port.android.netwokmanager;
 
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothManager;
+import android.content.Context;
+
 import com.ustadmobile.lib.db.entities.NetworkNode;
 import com.ustadmobile.port.sharedse.networkmanager.BleMessage;
+import com.ustadmobile.port.sharedse.networkmanager.BleMessageUtil;
 
+import org.junit.Before;
 import org.junit.Test;
+import org.mockito.stubbing.Answer;
 
 import java.nio.ByteBuffer;
+import java.sql.Array;
 import java.util.Arrays;
 import java.util.List;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * <h1>BleEntryStatusTaskAndroidTest</h1>
@@ -25,26 +38,42 @@ import static org.mockito.Mockito.verify;
  */
 public class BleEntryStatusTaskAndroidTest {
 
-    private List<Long> entries = Arrays.asList(64L,64L);
+    private List<Long> entries;
+
+
+    private BleEntryStatusTaskAndroid statusTask;
+
+    @Before
+    public void setUp(){
+        entries = Arrays.asList(1056289670L,4590875612L,9076137860L,2912543894L);
+        BluetoothManager mockedBluetoothManager = mock(BluetoothManager.class);
+        BluetoothAdapter mockedBluetoothAdapter = mock(BluetoothAdapter.class);
+        BluetoothDevice mockedDevice = mock(BluetoothDevice.class);
+
+        NetworkNode networkNode = new NetworkNode();
+        networkNode.setBluetoothMacAddress("");
+        statusTask = new BleEntryStatusTaskAndroid(mock(Context.class), entries, networkNode);
+        statusTask.setBluetoothManager(mockedBluetoothManager);
+
+        when(mockedBluetoothManager.getAdapter())
+                .thenReturn(mockedBluetoothAdapter);
+
+        when(mockedBluetoothAdapter.getRemoteDevice("")).thenReturn(mockedDevice);
+
+    }
 
     @Test
     public void givenEntryStatusIsCreated_whenStarted_thenShouldCreateBleClientCallback(){
-        NetworkNode networkNode = new NetworkNode();
-        BleEntryStatusTaskAndroid statusTask = new BleEntryStatusTaskAndroid(entries,networkNode);
 
         statusTask.run();
 
-        assertNotNull("BleClientCallback should not be null ", statusTask.getGattClientCallback());
+        assertNotNull("BleClientCallback should not be null ",
+                statusTask.getGattClientCallback());
     }
 
     @Test
     public void givenEntryStatusIsCreated_whenStartedAndBleClientCallbackIsCreated_thenItShouldHaveRightMessage(){
-        NetworkNode networkNode = new NetworkNode();
-        ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
-        buffer.putLong(entries.get(0));
-        buffer.putLong(entries.get(1));
-
-        BleEntryStatusTaskAndroid statusTask = new BleEntryStatusTaskAndroid(entries,networkNode);
+        byte [] payload = BleMessageUtil.bleMessageLongToBytes(entries);
 
         statusTask.run();
 
@@ -52,18 +81,11 @@ public class BleEntryStatusTaskAndroidTest {
 
         BleMessage message = statusTask.getMessage();
 
-        assertEquals("Should have the same message", message.getPayload(),buffer.array());
-
+        assertTrue("Should have the same message", Arrays.equals(message.getPayload(),payload));
     }
 
     @Test
-    public void givenEntryStatusIsStarted_whenFinishes_thenShouldReportBackTaskResults(){
+    public void givenBleMessageWithRequest_whenResponseReceived_thenShouldUpdateEntryStatusResponseInDatabase() {
 
-        BleEntryStatusTaskAndroid statusTask = mock(BleEntryStatusTaskAndroid.class);
-
-        statusTask.run();
-
-        //Verify that onResponseReceived was called
-        verify(statusTask).onResponseReceived(any());
     }
 }

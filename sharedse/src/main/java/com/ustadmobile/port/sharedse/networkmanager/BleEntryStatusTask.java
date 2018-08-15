@@ -14,9 +14,7 @@ public abstract class BleEntryStatusTask implements Runnable,BleMessageResponseL
 
     public BleMessage message;
 
-    public BleEntryStatusTask(List<Long> entryUidsToCheck, NetworkNode peerToCheck) {
-
-    }
+    public BleEntryStatusTask(Object context,List<Long> entryUidsToCheck, NetworkNode peerToCheck) { }
 
     @Override
     public void onResponseReceived(BleMessage response) {

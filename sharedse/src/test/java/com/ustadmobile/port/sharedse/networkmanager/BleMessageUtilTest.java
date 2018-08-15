@@ -12,6 +12,7 @@ import static org.junit.Assert.assertTrue;
  *
  * test class which test {{@link BleMessageUtil}} to make sure it behaves as expected when
  * converting List of entries to bytes and vice-versa
+ *
  * @author kileha3
  */
 public class BleMessageUtilTest {
