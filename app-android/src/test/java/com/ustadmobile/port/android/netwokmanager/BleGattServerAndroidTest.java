@@ -8,13 +8,23 @@ import android.bluetooth.BluetoothGattServerCallback;
 import android.bluetooth.BluetoothManager;
 import android.content.Context;
 
+import com.ustadmobile.port.sharedse.networkmanager.BleMessage;
+import com.ustadmobile.port.sharedse.networkmanager.BleMessageUtil;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 
+import java.util.Arrays;
+import java.util.List;
+
+import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.ENTRY_STATUS_REQUEST;
+import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.USTADMOBILE_BLE_SERVICE_UUID;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * <h1>BleGattServerAndroidTest</h1>
@@ -29,50 +39,60 @@ import static org.mockito.Mockito.verify;
 @RunWith(RobolectricTestRunner.class)
 public class BleGattServerAndroidTest {
 
-    private BluetoothManager bluetoothManager;
+    private BluetoothGattCharacteristic mockedCharacteristics;
 
-    private BluetoothGattCharacteristic characteristic;
+    private BluetoothGattServer mockedGattServer;
 
-    private BluetoothGattServer gattServer;
+    private BluetoothDevice mockedBluetoothDevice;
 
-    private BluetoothDevice bluetoothDevice;
+    private BluetoothGattServerCallback serverCallback;
 
-    private Context context;
+
+    private BleMessage bleMessage;
 
     @Before
-    public void setUpMocks(){
-        bluetoothManager = mock(BluetoothManager.class);
-        characteristic = mock(BluetoothGattCharacteristic.class);
-        bluetoothDevice = mock(BluetoothDevice.class);
-        gattServer = mock(BluetoothGattServer.class);
-        context = mock(Context.class);
+    public void setUp(){
+        mockedGattServer = mock(BluetoothGattServer.class);
+        mockedBluetoothDevice = mock(BluetoothDevice.class);
+
+        BluetoothManager mockBluetoothManager = mock(BluetoothManager.class);
+        when(mockBluetoothManager.openGattServer(any(), any())).thenReturn(mockedGattServer);
+        serverCallback = new BleGattServerAndroid(mock(Context.class),mockBluetoothManager)
+                .getGattServerCallback();
+
+        List<Long> entryList = Arrays.asList(1056289670L,4590875612L,9076137860L,2912543894L);
+        bleMessage = new BleMessage(ENTRY_STATUS_REQUEST, BleMessageUtil.bleMessageLongToBytes(entryList),
+                20);
+        mockedCharacteristics = mock(BluetoothGattCharacteristic.class);
+        when(mockedCharacteristics.getUuid()).thenReturn(USTADMOBILE_BLE_SERVICE_UUID);
     }
 
     @Test
-    public void givenOnCharacteristicReadRequest_whenIsCharacteristicsWithSameUUID_thenShouldGrantPermission(){
-        BleGattServerAndroid bleGattServer = new BleGattServerAndroid(context,bluetoothManager);
-        BluetoothGattServerCallback serverCallback = bleGattServer.getGattServerCallback();
+    public void givenOnCharacteristicReadRequestFromKnownSource_whenIsCharacteristicsWithSameUUID_thenShouldGrantPermission(){
+        serverCallback.onCharacteristicReadRequest(mockedBluetoothDevice,0, 0, mockedCharacteristics);
 
+        //Verify that permission to read on the characteristics was granted
+        verify(mockedGattServer).sendResponse(mockedBluetoothDevice,0,BluetoothGatt.GATT_SUCCESS,0,null);
+    }
 
-        serverCallback.onCharacteristicReadRequest(bluetoothDevice,0, 0,characteristic);
+    @Test
+    public void givenOnCharacteristicReadRequestFromUnknownSource_whenIsCharacteristicsWithSameUUID_thenShouldGrantPermission(){
+        mockedCharacteristics.setWriteType(BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE);
+        serverCallback.onCharacteristicReadRequest(mockedBluetoothDevice,0, 0, mockedCharacteristics);
 
-        //Verify that permission to write on the characteristics was granted
-        verify(gattServer).sendResponse(bluetoothDevice,0,BluetoothGatt.GATT_SUCCESS,0,null);
+        //Verify that permission to read on the characteristics was granted
+        verify(mockedGattServer).sendResponse(mockedBluetoothDevice,0,BluetoothGatt.GATT_SUCCESS,0,null);
     }
 
 
     @Test
     public void givenOnCharacteristicWriteRequest_whenIsCharacteristicsWithSameUUID_thenShouldGrantPermission(){
-        Context context = mock(Context.class);
-        BleGattServerAndroid bleGattServer = new BleGattServerAndroid(context,bluetoothManager);
-        BluetoothGattServerCallback serverCallback = bleGattServer.getGattServerCallback();
-
-
-        serverCallback.onCharacteristicWriteRequest(bluetoothDevice,0,
-                characteristic,true,true,0,null);
+        serverCallback.onCharacteristicWriteRequest(mockedBluetoothDevice,0, mockedCharacteristics,
+                true,true,0,bleMessage.getPackets()[0]);
 
         //Verify that permission to write on the characteristics was granted
-        verify(gattServer).sendResponse(bluetoothDevice,0,BluetoothGatt.GATT_SUCCESS,0,null);
+        verify(mockedGattServer).sendResponse(mockedBluetoothDevice,0,BluetoothGatt.GATT_SUCCESS,
+                0,null);
     }
 
     @Test
