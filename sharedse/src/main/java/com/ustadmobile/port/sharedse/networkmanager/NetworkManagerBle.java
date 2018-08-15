@@ -52,17 +52,63 @@ public abstract class NetworkManagerBle extends NetworkManagerCoreBle {
      */
     public static final UUID USTADMOBILE_BLE_SERVICE_UUID = UUID.fromString("7d2ea28a-f7bd-485a-bd9d-92ad6ecfe93e");
 
+
     /**
      * Do the main initialization of the NetworkManager : set the context
      *
      * @param mContext The context to use for the network manager
      */
     public abstract void init(Object mContext);
+
+
     /**
      * Check if WiFi is enabled / disabled on the device
      * @return boolean: TRUE, if enabled otherwise FALSE.
      */
     public abstract boolean isWiFiEnabled();
+
+
+    /**
+     * Check if the device is Bluetooth Low Energy capable
+     * @return True is capable otherwise false
+     */
+    public abstract boolean isBleCapable();
+
+
+    /**
+     * Check if bluetooth is enabled on the device
+     * @return True if enabled otherwise false
+     */
+    public abstract boolean isBluetoothEnabled();
+
+    /**
+     * Check if the device can create BLE service and advertise it to the peer devices
+     * @return true if can advertise its service else false
+     */
+    public abstract boolean canDeviceAdvertise();
+
+    /**
+     * Start advertising BLE service to the peer devices
+     * <b>Use case</b>
+     * When this method called, it will create BLE service and start advertising it.
+     */
+    public abstract void startAdvertising();
+
+    /**
+     * Stop advertising the service which was created and advertised by {@link NetworkManagerBle#startAdvertising()}
+     */
+    public abstract void stopAdvertising();
+
+    /**
+     * Start scanning for the peer devices whose services are being advertised
+     */
+    public abstract void startScanning();
+
+    /**
+     * Stop scanning task which was started by {@link NetworkManagerBle#startScanning()}
+     */
+    public abstract void stopScanning();
+
 
     /**
      * This should be called by the platform implementation when BLE discovers a nearby device
