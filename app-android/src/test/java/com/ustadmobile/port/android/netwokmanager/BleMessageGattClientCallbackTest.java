@@ -3,7 +3,7 @@ package com.ustadmobile.port.android.netwokmanager;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothGattCharacteristic;
-import android.bluetooth.BluetoothManager;
+import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothProfile;
 
 import com.ustadmobile.port.sharedse.networkmanager.BleMessage;
@@ -13,9 +13,16 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 
-import static org.mockito.ArgumentMatchers.any;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+import static com.ustadmobile.port.sharedse.networkmanager.BleMessageUtil.bleMessageLongToBytes;
+import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.ENTRY_STATUS_REQUEST;
+import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.USTADMOBILE_BLE_SERVICE_UUID;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 
 /**
@@ -31,96 +38,81 @@ import static org.mockito.Mockito.verify;
 @RunWith(RobolectricTestRunner.class)
 public class BleMessageGattClientCallbackTest {
 
-    private String destinationAddress ="78:00:9E:DE:CB:21";
+    private BluetoothGatt mockedGattClient;
 
-    private BluetoothGatt bluetoothGatt;
+    private BleMessage messageToSend;
 
-    private BluetoothManager bluetoothManager;
+    private BluetoothGattCharacteristic mockedCharacteristic;
 
-    private BleMessage bleMessage;
-
-    private BluetoothGattCharacteristic characteristic;
+    private BleMessageGattClientCallback gattClientCallback;
 
 
     @Before
-    public void setUpMocks(){
-        bluetoothGatt = mock(BluetoothGatt.class);
-        bluetoothManager = mock(BluetoothManager.class);
-        bleMessage = mock(BleMessage.class);
-        characteristic = mock(BluetoothGattCharacteristic.class);
+    public void setUp(){
+        mockedGattClient = mock(BluetoothGatt.class);
+        List<Long> entryList = Arrays.asList(1056289670L,4590875612L,9076137860L,2912543894L);
+        messageToSend = new BleMessage(ENTRY_STATUS_REQUEST, bleMessageLongToBytes(entryList),20);
+
+        String destinationAddress = "78:00:9E:DE:CB:21";
+        gattClientCallback = new BleMessageGattClientCallback(messageToSend, destinationAddress);
+
+        BluetoothGattService service = new BluetoothGattService(USTADMOBILE_BLE_SERVICE_UUID,
+                BluetoothGattService.SERVICE_TYPE_PRIMARY);
+        mockedCharacteristic = mock(BluetoothGattCharacteristic.class);
+        service.addCharacteristic(mockedCharacteristic);
+
+        when(mockedGattClient.getServices()).thenReturn(Collections.singletonList(service));
+        when(mockedCharacteristic.getUuid()).thenReturn(USTADMOBILE_BLE_SERVICE_UUID);
+
     }
 
 
     @Test
     public void givenOnConnectionStateChanged_whenConnectedWithFailureStatus_thenShouldDisconnect(){
-        BleMessageGattClientCallback clientCallback =
-                new BleMessageGattClientCallback(bluetoothManager,bleMessage,destinationAddress);
-        BluetoothGattCallback gattCallback = clientCallback.getGattClientCallback();
-
-
-        gattCallback.onConnectionStateChange(bluetoothGatt,
+        gattClientCallback.onConnectionStateChange(mockedGattClient,
                 BluetoothGatt.GATT_FAILURE, BluetoothProfile.STATE_CONNECTED);
 
         //Verify that client was disconnected from the gatt server
-        verify(bluetoothGatt).disconnect();
+        verify(mockedGattClient).disconnect();
 
     }
 
     @Test
     public void givenOnConnectionStateChanged_whenDisconnectedWithSuccessStatus_thenShouldDisconnect(){
-        BleMessageGattClientCallback clientCallback =
-                new BleMessageGattClientCallback(bluetoothManager,bleMessage,destinationAddress);
-        BluetoothGattCallback gattCallback = clientCallback.getGattClientCallback();
-
-
-        gattCallback.onConnectionStateChange(bluetoothGatt,
+       gattClientCallback.onConnectionStateChange(mockedGattClient,
                 BluetoothGatt.GATT_SUCCESS, BluetoothProfile.STATE_DISCONNECTED);
 
         //Verify that client was disconnected from the gatt server
-        verify(bluetoothGatt).disconnect();
+        verify(mockedGattClient).disconnect();
     }
 
     @Test
     public void givenOnConnectionStateChanged_whenConnectedWithSuccessStatus_thenShouldDiscoverServices(){
-        BleMessageGattClientCallback clientCallback =
-                new BleMessageGattClientCallback(bluetoothManager,bleMessage,destinationAddress);
-        BluetoothGattCallback gattCallback = clientCallback.getGattClientCallback();
-
-
-        gattCallback.onConnectionStateChange(bluetoothGatt,
+        gattClientCallback.onConnectionStateChange(mockedGattClient,
                 BluetoothGatt.GATT_SUCCESS, BluetoothProfile.STATE_CONNECTED);
 
         //Verify that service discovery was started
-        verify(bluetoothGatt).discoverServices();
+        verify(mockedGattClient).discoverServices();
     }
 
     @Test
     public void givenServiceIsDiscovered_whenMatchingCharacteristicsFound_thenShouldRequestPermissionToWrite(){
-        BleMessageGattClientCallback clientCallback =
-                new BleMessageGattClientCallback(bluetoothManager,bleMessage,destinationAddress);
-        BluetoothGattCallback gattCallback = clientCallback.getGattClientCallback();
+        gattClientCallback.onServicesDiscovered(mockedGattClient, BluetoothGatt.GATT_SUCCESS);
 
-
-        gattCallback.onServicesDiscovered(bluetoothGatt, BluetoothGatt.GATT_SUCCESS);
-
+        //verify that permission was set
+        verify(mockedCharacteristic).setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT);
         //Verify that characteristics permission was requested
-        verify(bluetoothGatt).writeCharacteristic(characteristic);
+        verify(mockedGattClient).setCharacteristicNotification(mockedCharacteristic,true);
     }
 
     @Test
     public void givenOnCharacteristicWrite_whenGrantedPermissionToWrite_thenShouldStartSendingPackets(){
-        BluetoothGattCharacteristic characteristic = mock(BluetoothGattCharacteristic.class);
-        BleMessageGattClientCallback clientCallback =
-                new BleMessageGattClientCallback(bluetoothManager,bleMessage,destinationAddress);
-        BluetoothGattCallback gattCallback = clientCallback.getGattClientCallback();
-
-
-        gattCallback.onCharacteristicWrite(bluetoothGatt,characteristic,BluetoothGatt.GATT_SUCCESS);
+       gattClientCallback.onCharacteristicWrite(mockedGattClient, mockedCharacteristic,BluetoothGatt.GATT_SUCCESS);
 
         //verify that characteristics value was modified
-        verify(characteristic).setValue(new byte[]{});
+        verify(mockedCharacteristic).setValue(messageToSend.getPackets()[0]);
         //Verify that characteristics was modified
-        verify(bluetoothGatt).writeCharacteristic(characteristic);
+        verify(mockedGattClient).writeCharacteristic(mockedCharacteristic);
 
     }
 }
