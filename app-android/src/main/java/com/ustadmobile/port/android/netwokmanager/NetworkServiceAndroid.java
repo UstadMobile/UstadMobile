@@ -5,6 +5,7 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 
@@ -13,6 +14,7 @@ import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
 
 import java.sql.SQLException;
+import java.util.concurrent.TimeUnit;
 
 import edu.rit.se.wifibuddy.WifiDirectHandler;
 import com.ustadmobile.core.listener.ActiveSyncListener;
@@ -36,24 +38,27 @@ import static com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroid.P
 public class NetworkServiceAndroid extends Service {
 
     private WifiDirectHandler wifiDirectHandler;
+
     private final IBinder mBinder = new LocalServiceBinder();
+
     private NetworkManagerAndroid networkManagerAndroid;
 
-    private boolean isSyncHappening = false;
-
-    /**
-     * Default time interval for Wi-Fi Direct service rebroadcasting.
-     */
-    public static final int SERVICE_REBROADCASTING_TIMER=120000;
+    private NetworkManagerAndroidBle managerAndroidBle;
 
     public NetworkServiceAndroid(){}
 
     @Override
     public void onCreate() {
         super.onCreate();
+
+        //TODO: This have to go
         networkManagerAndroid = (NetworkManagerAndroid)
                 UstadMobileSystemImplAndroid.getInstanceAndroid().getNetworkManager();
-        networkManagerAndroid.init(NetworkServiceAndroid.this);
+       networkManagerAndroid.init(NetworkServiceAndroid.this);
+
+        managerAndroidBle = (NetworkManagerAndroidBle)
+                UstadMobileSystemImplAndroid.getInstanceAndroid().getNetworkManagerBle();
+        managerAndroidBle.init(NetworkServiceAndroid.this);
 
         //Bind WifiService
         Intent wifiServiceIntent = new Intent(this, WifiDirectHandler.class);
@@ -63,11 +68,9 @@ public class NetworkServiceAndroid extends Service {
     @Override
     public void onDestroy() {
         networkManagerAndroid.onDestroy();
-
+        managerAndroidBle.onDestroy();
         if(wifiDirectHandler!=null){
             wifiDirectHandler.removeGroup();
-            wifiDirectHandler.stopServiceDiscovery();
-            wifiDirectHandler.removeService();
             UstadMobileSystemImpl.getInstance().setAppPref("devices",
                     "",getApplicationContext());
         }
@@ -82,6 +85,13 @@ public class NetworkServiceAndroid extends Service {
      */
     public NetworkManagerAndroid getNetworkManager() {
         return  networkManagerAndroid;
+    }
+
+    /**
+     * @return NetworkManagerAndroidBle class reference
+     */
+    public NetworkManagerAndroidBle getManagerAndroidBle() {
+        return managerAndroidBle;
     }
 
     @Override
@@ -107,15 +117,32 @@ public class NetworkServiceAndroid extends Service {
     ServiceConnection wifiP2PServiceConnection=new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+
+            //TODO: Have to go
             wifiDirectHandler = ((WifiDirectHandler.WifiTesterBinder) iBinder).getService();
             wifiDirectHandler.setStopDiscoveryAfterGroupFormed(false);
-            wifiDirectHandler.setPeerDiscoveryInterval(SERVICE_REBROADCASTING_TIMER);
-            wifiDirectHandler.setLocalServicePeerDiscoveryKickEnabled(false);
 
             boolean isSuperNodeEnabled = Boolean.parseBoolean(UstadMobileSystemImpl.getInstance().getAppPref(
                     PREF_KEY_SUPERNODE, "false", NetworkServiceAndroid.this.getApplicationContext()));
             networkManagerAndroid.setSuperNodeEnabled(NetworkServiceAndroid.this.getApplicationContext(),
                     isSuperNodeEnabled);
+
+            if(managerAndroidBle.isBluetoothEnabled() && managerAndroidBle.isBleCapable()){
+                if(managerAndroidBle.canDeviceAdvertise()){
+                    managerAndroidBle.startAdvertising();
+
+                    //Wait for 3 seconds before starting service discovery
+                    new Handler().postDelayed(() -> {
+                        managerAndroidBle.startScanning();
+                    }, TimeUnit.SECONDS.toMillis(3));
+                }else{
+                    managerAndroidBle.startScanning();
+                }
+            }else{
+                if(!managerAndroidBle.isBluetoothEnabled()){
+                    managerAndroidBle.openBluetoothSettings();
+                }
+            }
         }
 
         @Override
