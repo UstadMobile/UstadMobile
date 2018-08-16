@@ -5,7 +5,6 @@ import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
-import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
 import android.support.annotation.VisibleForTesting;
 
@@ -17,7 +16,24 @@ import java.util.List;
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.USTADMOBILE_BLE_SERVICE_UUID;
 
 /**
- * <h1>BleMessageGattClientCallback</h1>
+ * This class handle all the GATT client Bluetooth Low Energy callback
+ *
+ * <p>
+ * <b>Note: Operation Flow</b>
+ *
+ * - When a device is connected to a BLE node, it will request for all available services
+ * from the GATT. This will be achieved by calling {@link BluetoothGatt#discoverServices()}.
+ * Once services are found, all characteristics in those services will be listed.
+ *
+ * - When trying to send a message, it will need write permission from the BLE node,
+ * and when requested response might be as discussed in {@link BleGattServerAndroid}.
+ *
+ * - If it will receive {@link BluetoothGatt#GATT_SUCCESS} response, then it will start data
+ * transmission to the BLE node. Upon receiving response the
+ * {@link BleMessageGattClientCallback#onCharacteristicRead} method will be invoked.
+ * </p>
+ *
+ *  @author kileha3
  */
 
 public class BleMessageGattClientCallback extends  BluetoothGattCallback{
@@ -54,10 +70,8 @@ public class BleMessageGattClientCallback extends  BluetoothGattCallback{
             return;
         }
         if (newState == BluetoothProfile.STATE_CONNECTED) {
-            //TODO: add node to the known nodes
             gatt.discoverServices();
         } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
-            //TODO: remove node from known nodes
             gatt.disconnect();
         }
     }
@@ -104,9 +118,11 @@ public class BleMessageGattClientCallback extends  BluetoothGattCallback{
         readCharacteristics(characteristic);
     }
 
-
+    /**
+     * Read value from the service characteristic
+     * @param characteristic Modified service characteristic
+     */
     private void readCharacteristics(BluetoothGattCharacteristic characteristic){
-
         boolean isReceived = receivedMessage.onPackageReceived(characteristic.getValue());
         if(isReceived){
             responseListener.onResponseReceived(receivedMessage);
