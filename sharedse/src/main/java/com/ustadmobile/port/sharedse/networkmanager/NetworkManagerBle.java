@@ -1,23 +1,20 @@
 package com.ustadmobile.port.sharedse.networkmanager;
 
+import com.ustadmobile.core.db.UmAppDatabase;
+import com.ustadmobile.core.db.dao.NetworkNodeDao;
 import com.ustadmobile.core.networkmanager.NetworkManagerCoreBle;
-import com.ustadmobile.core.networkmanager.NetworkManagerTaskListener;
 import com.ustadmobile.lib.db.entities.NetworkNode;
 
+import java.util.Calendar;
 import java.util.List;
 import java.util.UUID;
 
 /**
- * <h1>NetworkManagerBle</h1>
- *
- * This is the class which defines all cross platform Network logical flows.
- * It is responsible to register all network listeners,register all services,
- * start/stop monitoring entry status availability and handling WiFi communications.
+ * This is an abstract class which is used to implement platform specific NetworkManager
  *
  * @author kileha3
  *
- * @see NetworkManagerTaskListener
- * @see com.ustadmobile.core.networkmanager.NetworkManagerCore
+ * @see com.ustadmobile.core.networkmanager.NetworkManagerCoreBle
  */
 
 public abstract class NetworkManagerBle extends NetworkManagerCoreBle {
@@ -53,17 +50,23 @@ public abstract class NetworkManagerBle extends NetworkManagerCoreBle {
     public static final UUID USTADMOBILE_BLE_SERVICE_UUID = UUID.fromString("7d2ea28a-f7bd-485a-bd9d-92ad6ecfe93e");
 
 
+    private final Object knownNodesLock = new Object();
+
+    private Object mContext;
+
     /**
-     * Do the main initialization of the NetworkManager : set the context
+     * Do the main initialization of the NetworkManager : set the mContext
      *
-     * @param mContext The context to use for the network manager
+     * @param context The mContext to use for the network manager
      */
-    public abstract void init(Object mContext);
+    public synchronized void init(Object context){
+        this.mContext = context;
+    }
 
 
     /**
      * Check if WiFi is enabled / disabled on the device
-     * @return boolean: TRUE, if enabled otherwise FALSE.
+     * @return boolean true, if enabled otherwise false.
      */
     public abstract boolean isWiFiEnabled();
 
@@ -117,7 +120,34 @@ public abstract class NetworkManagerBle extends NetworkManagerCoreBle {
      */
     protected void handleNodeDiscovered(NetworkNode node) {
 
+        NetworkNode networkNode;
+        boolean isNewNode = false;
+
+        synchronized (knownNodesLock){
+            NetworkNodeDao networkNodeDao = UmAppDatabase.getInstance(mContext).getNetworkNodeDao();
+            networkNode = networkNodeDao.findNodeByBluetoothAddress(node.getBluetoothMacAddress());
+
+            if(networkNode == null) {
+                networkNode = node;
+                isNewNode = true;
+            }
+
+            networkNode.setWifiDirectLastUpdated(Calendar.getInstance().getTimeInMillis());
+
+            if(isNewNode) {
+                networkNodeDao.insert(networkNode);
+            }else {
+                networkNodeDao.update(networkNode);
+            }
+        }
+
+
     }
+
+    /**
+     * Open bluetooth setting section from setting panel
+     */
+    public abstract void openBluetoothSettings();
 
     /**
      * Enable of disable WiFi on the device
@@ -160,7 +190,7 @@ public abstract class NetworkManagerBle extends NetworkManagerCoreBle {
     /**
      * Create entry status task for a specific peer device,
      * it will request status of the provided entries from the provided peer device
-     * @param context Platform specific context
+     * @param context Platform specific mContext
      * @param entryUidsToCheck List of entries to be checked from the peer device
      * @param peerToCheck Peer device to request from
      * @return Created BleEntryStatusTask
@@ -169,5 +199,12 @@ public abstract class NetworkManagerBle extends NetworkManagerCoreBle {
      */
     protected BleEntryStatusTask makeEntryStatusTask(Object context,List<Long> entryUidsToCheck, NetworkNode peerToCheck){
         return null;
+    }
+
+    /**
+     * Clean up the network manager for shutdown
+     */
+    public void onDestroy(){
+        mContext = null;
     }
 }
