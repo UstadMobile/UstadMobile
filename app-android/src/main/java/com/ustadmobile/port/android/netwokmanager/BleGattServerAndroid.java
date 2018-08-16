@@ -13,6 +13,28 @@ import com.ustadmobile.port.sharedse.networkmanager.BleMessage;
 
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.USTADMOBILE_BLE_SERVICE_UUID;
 
+/**
+ * This class handle all the GATT server device's Bluetooth Low Energy callback
+ *
+ * <p>
+ * <b>Note: Operation Flow</b>
+ *
+ * - When a client wants to send data it requests for a permission to write
+ * on the characteristic. Upon receiving that request
+ * {@link BluetoothGattServerCallback#onCharacteristicWriteRequest} will be invoked
+ * , permission will be granted with {@link BluetoothGatt#GATT_SUCCESS}
+ * and the packets will be received on the same
+ * {@link BluetoothGattServerCallback#onCharacteristicWriteRequest} method.
+ *
+ * - When a client device tries to read modified characteristic value,
+ * {@link BluetoothGattServerCallback#onCharacteristicReadRequest} will be invoked
+ * and the response will be sent back depending on what kind of device tried to read it.
+ * If device has same service UUID then {@link BluetoothGatt#GATT_SUCCESS}
+ * will be granted, otherwise {@link BluetoothGatt#GATT_FAILURE}
+ * </p>
+ *
+ *  @author kileha3
+ */
 public class BleGattServerAndroid extends BleGattServer{
 
     private BluetoothGattServer gattServer;
@@ -25,6 +47,7 @@ public class BleGattServerAndroid extends BleGattServer{
         @Override
         public void onConnectionStateChange(BluetoothDevice device, int status, int newState) {
             super.onConnectionStateChange(device, status, newState);
+
         }
 
         @Override
@@ -42,24 +65,38 @@ public class BleGattServerAndroid extends BleGattServer{
         }
 
         @Override
-        public void onCharacteristicWriteRequest(BluetoothDevice device, int requestId, BluetoothGattCharacteristic characteristic, boolean preparedWrite, boolean responseNeeded, int offset, byte[] value) {
+        public void onCharacteristicWriteRequest(BluetoothDevice device, int requestId, BluetoothGattCharacteristic characteristic,
+                                                 boolean preparedWrite, boolean responseNeeded, int offset, byte[] value) {
             super.onCharacteristicWriteRequest(device, requestId, characteristic, preparedWrite, responseNeeded, offset, value);
 
             if (USTADMOBILE_BLE_SERVICE_UUID.equals(characteristic.getUuid())) {
                 //Grant permission to the client device to write on this characteristics
                 gattServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, 0, null);
                 //start receiving packets from the client device
-                receivedMessage.onPackageReceived(value);
+                boolean isPackedReceived = receivedMessage.onPackageReceived(value);
+                if(isPackedReceived){
+                    //Send back response
+                    BleMessage messageToSend =  handleRequest(receivedMessage);
+                    //Our service doesn't require confirmation, if it does reject sending packets
+                    boolean requireConfirmation = (characteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_INDICATE)
+                            == BluetoothGattCharacteristic.PROPERTY_INDICATE;
+                    if(!requireConfirmation){
+                        for(int packetIteration = 0 ; packetIteration < messageToSend.getPackets().length; packetIteration++){
+                            characteristic.setValue(messageToSend.getPackets()[packetIteration]);
+                            gattServer.notifyCharacteristicChanged(device, characteristic, false);
+                        }
+                    }
+                }
             }
-        }
-
-
-        @Override
-        public void onNotificationSent(BluetoothDevice device, int status) {
-            super.onNotificationSent(device, status);
         }
     };
 
+    /**
+     * Constructor which will be used when creating new instance of BleGattServerAndroid
+     * @param context Application context
+     * @param networkManager Instance of a NetworkManagerAndroidBle for getting
+     *                       BluetoothManager instance.
+     */
     public BleGattServerAndroid(Context context, NetworkManagerAndroidBle networkManager ) {
         this.receivedMessage = new BleMessage();
         this.gattServer = networkManager.getBluetoothManager().openGattServer(context,mCallback);
@@ -71,6 +108,10 @@ public class BleGattServerAndroid extends BleGattServer{
         return mCallback;
     }
 
+    /**
+     * Get instance of a BluetoothGattServer
+     * @return Instance
+     */
     public BluetoothGattServer getGattServer() {
         return gattServer;
     }
