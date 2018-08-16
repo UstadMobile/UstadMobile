@@ -10,22 +10,61 @@ import android.bluetooth.le.AdvertiseSettings;
 import android.bluetooth.le.BluetoothLeAdvertiser;
 import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanCallback;
+import android.bluetooth.le.ScanFilter;
 import android.bluetooth.le.ScanResult;
+import android.bluetooth.le.ScanSettings;
 import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.ParcelUuid;
+import android.support.annotation.RequiresApi;
 
+import com.ustadmobile.core.impl.UMLog;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.lib.db.entities.NetworkNode;
 import com.ustadmobile.port.sharedse.networkmanager.BleEntryStatusTask;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static android.content.Context.BLUETOOTH_SERVICE;
 
+/**
+ * This class provides methods to perform android network related communications.
+ * All Bluetooth Low Energy and WiFi direct communications will be handled here.
+ * Also, this is maintained as a singleton by all activities binding to NetworkServiceAndroid,
+ * which is responsible to call the init method of this class.
+ *
+ * <p>
+ * Use {@link NetworkManagerAndroidBle#startAdvertising()} to start advertising
+ * BLE services to the nearby peers.
+ *
+ * Use {@link NetworkManagerAndroidBle#stopAdvertising()} to stop advertising
+ * BLE services to the nearby peers.
+ *
+ * Use {@link NetworkManagerAndroidBle#startScanning()} to start scanning for the BLE
+ * services advertised from peer devices.
+ *
+ * Use {@link NetworkManagerAndroidBle#stopScanning()} to stop scanning for the BLE
+ * services advertised from peer devices.
+ *
+ * Use {@link NetworkManagerAndroidBle#createWifiDirectGroup()} to create WiFi direct
+ * group for peer content downloading.
+ *
+ * </p>
+ * <b>Note:</b> Most of the scan / advertise methods here require
+ * {@link android.Manifest.permission#BLUETOOTH_ADMIN} permission.
+ *
+ * @see NetworkManagerBle
+ *
+ *  @author kileha3
+ */
 public class NetworkManagerAndroidBle extends NetworkManagerBle{
 
     private WifiManager wifiManager;
@@ -34,41 +73,66 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
 
     private BluetoothAdapter bluetoothAdapter;
 
-    private BluetoothLeAdvertiser mBluetoothLeAdvertiser;
+    private BluetoothLeAdvertiser bleServiceAdvertiser;
 
+    private Map<Context, ServiceConnection> serviceConnectionMap;
 
     private BleGattServerAndroid gattServerAndroid;
 
     private BluetoothLeScanner bleServiceScanner;
 
-    private Context context;
+    private NetworkServiceAndroid networkService;
 
+    private ParcelUuid parcelServiceUuid = new ParcelUuid(USTADMOBILE_BLE_SERVICE_UUID);
 
+    /**
+     * Callback for BLE service scans for devices with
+     * Build.VERSION.SDK_INT <= Build.VERSION_CODES.LOLLIPOP
+     *
+     * @see android.bluetooth.BluetoothAdapter.LeScanCallback
+     */
     private BluetoothAdapter.LeScanCallback leScanCallback = (device, rssi, scanRecord) -> {
-
+        NetworkNode networkNode = new NetworkNode();
+        networkNode.setBluetoothMacAddress(device.getAddress());
+        handleNodeDiscovered(networkNode);
     };
 
-    private ScanCallback bleScannCallback = new ScanCallback() {
+    /**
+     * Callback for BLE service scans for devices with
+     * Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP
+     *
+     * @see ScanCallback
+     */
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    private ScanCallback bleScanCallback = new ScanCallback() {
         @Override
         public void onScanResult(int callbackType, ScanResult result) {
+            UstadMobileSystemImpl.l(UMLog.DEBUG,690,
+                    "Device found "+result.getDevice().getAddress());
             super.onScanResult(callbackType, result);
+            NetworkNode networkNode = new NetworkNode();
+            networkNode.setBluetoothMacAddress(result.getDevice().getAddress());
+            handleNodeDiscovered(networkNode);
         }
 
         @Override
         public void onScanFailed(int errorCode) {
             super.onScanFailed(errorCode);
+            UstadMobileSystemImpl.l(UMLog.DEBUG,690,
+                    "Failed to scan for BLE services with errorCode "+errorCode);
         }
     };
 
-
     @Override
-    public void init(Object mContext) {
-        this.context = ((Context)mContext);
-        wifiManager= (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-        bluetoothManager = (BluetoothManager)context.getSystemService(BLUETOOTH_SERVICE);
+    public void init(Object context) {
+        networkService = ((NetworkServiceAndroid) context);
+        wifiManager= (WifiManager) networkService.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        bluetoothManager = (BluetoothManager)networkService.getSystemService(BLUETOOTH_SERVICE);
         bluetoothAdapter = bluetoothManager.getAdapter();
-        bleServiceScanner = bluetoothAdapter.getBluetoothLeScanner();
-        gattServerAndroid = new BleGattServerAndroid(((Context)mContext),this);
+        if(requirePermission()){
+            bleServiceScanner = bluetoothAdapter.getBluetoothLeScanner();
+        }
+        gattServerAndroid = new BleGattServerAndroid(((Context) context),this);
     }
 
     @Override
@@ -78,7 +142,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
 
     @Override
     public boolean isBleCapable() {
-        return context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE);
+        return networkService.getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE);
     }
 
     @Override
@@ -88,27 +152,26 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
 
     @Override
     public boolean canDeviceAdvertise() {
-        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP
-                && bluetoothAdapter.isMultipleAdvertisementSupported();
+        return requirePermission() && bluetoothAdapter.isMultipleAdvertisementSupported();
     }
 
     @Override
     public void startAdvertising() {
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
-            mBluetoothLeAdvertiser = bluetoothAdapter.getBluetoothLeAdvertiser();
+        if(requirePermission()){
+            bleServiceAdvertiser = bluetoothAdapter.getBluetoothLeAdvertiser();
 
-            BluetoothGattService service = new BluetoothGattService(USTADMOBILE_BLE_SERVICE_UUID,
+            BluetoothGattService service = new BluetoothGattService(parcelServiceUuid.getUuid(),
                     BluetoothGattService.SERVICE_TYPE_PRIMARY);
 
             BluetoothGattCharacteristic writeCharacteristic = new BluetoothGattCharacteristic(
-                    USTADMOBILE_BLE_SERVICE_UUID, BluetoothGattCharacteristic.PROPERTY_WRITE,
+                    parcelServiceUuid.getUuid(), BluetoothGattCharacteristic.PROPERTY_WRITE,
                     BluetoothGattCharacteristic.PERMISSION_WRITE);
 
             service.addCharacteristic(writeCharacteristic);
 
             gattServerAndroid.getGattServer().addService(service);
 
-            if (mBluetoothLeAdvertiser == null) {
+            if (bleServiceAdvertiser == null) {
                 return;
             }
 
@@ -119,18 +182,22 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
                     .setTxPowerLevel(AdvertiseSettings.ADVERTISE_TX_POWER_LOW)
                     .build();
 
-            ParcelUuid parcelUuid = new ParcelUuid(USTADMOBILE_BLE_SERVICE_UUID);
+            ParcelUuid parcelUuid = new ParcelUuid(parcelServiceUuid.getUuid());
             AdvertiseData data = new AdvertiseData.Builder()
                     .addServiceUuid(parcelUuid)
                     .build();
 
-            mBluetoothLeAdvertiser.startAdvertising(settings, data, new AdvertiseCallback() {
+            bleServiceAdvertiser.startAdvertising(settings, data, new AdvertiseCallback() {
                 @Override public void onStartSuccess(AdvertiseSettings settingsInEffect) {
                     super.onStartSuccess(settingsInEffect);
+                    UstadMobileSystemImpl.l(UMLog.DEBUG,689,
+                            "Service advertised successfully");
                 }
 
                 @Override public void onStartFailure(int errorCode) {
                     super.onStartFailure(errorCode);
+                    UstadMobileSystemImpl.l(UMLog.ERROR,689,
+                            "Service could'nt start, with error code "+errorCode);
                 }
             });
         }
@@ -138,21 +205,28 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
 
     @Override
     public void stopAdvertising() {
-        if(mBluetoothLeAdvertiser == null) return;
+        if(bleServiceAdvertiser == null) return;
         if (gattServerAndroid.getGattServer() != null) {
             gattServerAndroid.getGattServer().clearServices();
             gattServerAndroid.getGattServer().close();
+            gattServerAndroid = null;
         }
     }
 
     @Override
     public void startScanning() {
 
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
-            bleServiceScanner.startScan(bleScannCallback);
+        if(requirePermission()){
+            List<ScanFilter> filter = Collections.singletonList(new ScanFilter.Builder()
+                    .setServiceUuid(parcelServiceUuid)
+                    .build());
+             ScanSettings scanSettings=new ScanSettings.Builder()
+                    .setScanMode(ScanSettings.SCAN_MODE_LOW_POWER)
+                    .build();
+            bleServiceScanner.startScan(filter,scanSettings,bleScanCallback);
         }else{
             if(!bluetoothAdapter.isDiscovering()){
-                bluetoothAdapter.startLeScan(new UUID[] { USTADMOBILE_BLE_SERVICE_UUID},leScanCallback);
+                bluetoothAdapter.startLeScan(new UUID[] { parcelServiceUuid.getUuid()},leScanCallback);
             }
         }
 
@@ -161,11 +235,17 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
     @Override
     public void stopScanning() {
         if(bluetoothAdapter == null) return;
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
-            bleServiceScanner.stopScan(bleScannCallback);
+        if(requirePermission()){
+            bleServiceScanner.stopScan(bleScanCallback);
         }else{
             bluetoothAdapter.stopLeScan(leScanCallback);
         }
+    }
+
+    @Override
+    public void openBluetoothSettings() {
+        networkService.startActivity(new Intent(
+                android.provider.Settings.ACTION_BLUETOOTH_SETTINGS));
     }
 
     @Override
@@ -184,6 +264,30 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
         return new BleEntryStatusTaskAndroid((Context)context,entryUidsToCheck,peerToCheck);
     }
 
+
+    /**
+     * This method is responsible for setting up the right services connection
+     * @param serviceConnectionMap Map of all services connection made within the app.
+     */
+    public void setServiceConnectionMap(Map<Context, ServiceConnection> serviceConnectionMap) {
+        this.serviceConnectionMap = serviceConnectionMap;
+    }
+
+    @Override
+    public void onDestroy() {
+        stopAdvertising();
+        stopScanning();
+        super.onDestroy();
+    }
+
+    private boolean requirePermission(){
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP;
+    }
+
+    /**
+     * Get bluetooth manager instance
+     * @return Instance of a BluetoothManager
+     */
     public BluetoothManager getBluetoothManager(){
         return bluetoothManager;
     }
