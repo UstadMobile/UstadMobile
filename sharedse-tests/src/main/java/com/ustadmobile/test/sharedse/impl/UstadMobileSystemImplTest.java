@@ -10,6 +10,7 @@ import com.ustadmobile.core.tincan.TinCanResultListener;
 import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
+import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle;
 import com.ustadmobile.test.core.impl.TestContext;
 
 import org.kxml2.io.KXmlParser;
@@ -75,6 +76,11 @@ public class UstadMobileSystemImplTest extends UstadMobileSystemImplSE {
 
     @Override
     public NetworkManager getNetworkManager() {
+        return null;
+    }
+
+    @Override
+    public NetworkManagerBle getNetworkManagerBle() {
         return null;
     }
 

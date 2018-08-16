@@ -68,6 +68,7 @@ import java.util.concurrent.Executors;
 
 import com.ustadmobile.core.listener.ActiveSyncListener;
 import com.ustadmobile.core.listener.ActiveUserListener;
+import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle;
 
 
 import okhttp3.Call;
@@ -353,7 +354,15 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
      *
      * @return
      */
+
+    @Deprecated
     public abstract NetworkManager getNetworkManager();
+
+    /**
+     * Get NetworkManagerBle instance
+     * @return Instance of NetworkManagerBle
+     */
+    public abstract NetworkManagerBle getNetworkManagerBle();
 
     @Override
     public void setActiveUser(String username, Object context) {
