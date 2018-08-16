@@ -10,6 +10,11 @@ import java.util.Arrays;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
+import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.ENTRY_STATUS_REQUEST;
+import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.ENTRY_STATUS_RESPONSE;
+import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.WIFI_GROUP_CREATION_REQUEST;
+import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.WIFI_GROUP_CREATION_RESPONSE;
+
 /**
  * <h1>BleMessage</h1>
  *
@@ -223,40 +228,50 @@ public class BleMessage {
      * @return True if the packets are all received else False.
      */
     public boolean onPackageReceived(byte [] packets){
-        if(outputStream == null){
+        byte mRequestType = ByteBuffer.wrap(Arrays.copyOfRange(packets, 0, 1)).get();
+        if(outputStream == null && isValidRequestType(mRequestType)){
             outputStream = new ByteArrayOutputStream();
-            requestType = ByteBuffer.wrap(Arrays.copyOfRange(packets, 0, 1)).get();
             length = ByteBuffer.wrap(Arrays.copyOfRange(packets, 1, 5)).getInt();
+            requestType = mRequestType;
         }
 
-        try{
-            outputStream.write(packets);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        byte [] receivedPayload = ByteBuffer.wrap(Arrays.copyOfRange(outputStream.toByteArray(), 5,
-                outputStream.toByteArray().length)).array();
-
-        if(receivedPayload.length == length){
-            boolean isCompressed = receivedPayload.length > 0 &&
-                    (receivedPayload[0] == (byte) (GZIPInputStream.GZIP_MAGIC))
-                    && (receivedPayload[1] == (byte) (GZIPInputStream.GZIP_MAGIC >> 8));
-            this.payload = receivedPayload;
-            if(isCompressed){
-                this.payload = decompressPayload(receivedPayload);
-            }
-            try {
-                outputStream.close();
+        if(outputStream != null){
+            try{
+                outputStream.write(packets);
             } catch (IOException e) {
                 e.printStackTrace();
-            }finally {
-                UMIOUtils.closeQuietly(outputStream);
-                outputStream = null;
             }
-            return true;
+
+            byte [] receivedPayload = ByteBuffer.wrap(Arrays.copyOfRange(outputStream.toByteArray(), 5,
+                    outputStream.toByteArray().length)).array();
+
+            if(receivedPayload.length == length){
+                boolean isCompressed = receivedPayload.length > 0 &&
+                        (receivedPayload[0] == (byte) (GZIPInputStream.GZIP_MAGIC))
+                        && (receivedPayload[1] == (byte) (GZIPInputStream.GZIP_MAGIC >> 8));
+                this.payload = receivedPayload;
+                if(isCompressed){
+                    this.payload = decompressPayload(receivedPayload);
+                }
+                try {
+                    outputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }finally {
+                    UMIOUtils.closeQuietly(outputStream);
+                    outputStream = null;
+                }
+                return true;
+            }
         }
         return false;
+    }
+
+
+    private boolean isValidRequestType(byte requestType){
+        return ENTRY_STATUS_REQUEST == requestType || ENTRY_STATUS_RESPONSE == requestType ||
+                WIFI_GROUP_CREATION_REQUEST == requestType ||
+                WIFI_GROUP_CREATION_RESPONSE == requestType;
     }
 
 }
