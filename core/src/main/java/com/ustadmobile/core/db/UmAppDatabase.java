@@ -57,6 +57,17 @@ public abstract class UmAppDatabase{
 
     private static volatile UmAppDatabase instance;
 
+    /**
+     * For use by other projects using this app as a library. By calling setInstance before
+     * any other usage (e.g. in the Android Application class) a child class of this database (eg.
+     * with additional entities) can be used.
+     *
+     * @param instance
+     */
+    public static synchronized void setInstance(UmAppDatabase instance) {
+        UmAppDatabase.instance = instance;
+    }
+
     public static synchronized UmAppDatabase getInstance(Object context) {
         if(instance == null){
             instance = com.ustadmobile.core.db.UmAppDatabase_Factory.makeUmAppDatabase(context);
