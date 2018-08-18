@@ -102,7 +102,9 @@
             android:name="com.ustadmobile.port.android.view.H5PContentActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
             android:label="" />
-        <activity android:name="com.ustadmobile.port.android.view.LoginActivity2"></activity>
+        <activity android:name="com.ustadmobile.port.android.view.LoginActivity2"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
+            android:label="@string/login"/>
     </application>
 
 </manifest>
