@@ -4,6 +4,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.LoginPresenter2;
@@ -18,6 +19,8 @@ public class LoginActivity2 extends UstadBaseActivity implements LoginView2{
 
     private EditText passwordEditText;
 
+    private TextView errorTextView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -26,6 +29,7 @@ public class LoginActivity2 extends UstadBaseActivity implements LoginView2{
 
         usernameEditText = findViewById(R.id.activity_login2_username_edit_text);
         passwordEditText = findViewById(R.id.activity_login2_password_edit_text);
+        errorTextView = findViewById(R.id.activity_login2_error_text);
 
         mPresenter = new LoginPresenter2(this,
                 UMAndroidUtil.bundleToHashtable(getIntent().getExtras()), this);
@@ -54,17 +58,20 @@ public class LoginActivity2 extends UstadBaseActivity implements LoginView2{
 
     @Override
     public void setUsername(String username) {
-
+        usernameEditText.setText(username);
     }
 
     @Override
     public void setPassword(String password) {
-
+        passwordEditText.setText(password);
     }
 
     @Override
     public void setErrorMessage(String errorMessage) {
-
+        if(errorMessage != null) {
+            errorTextView.setText(errorMessage);
+        }
+        errorTextView.setVisibility(errorMessage != null ? View.VISIBLE : View.GONE);
     }
 
     @Override

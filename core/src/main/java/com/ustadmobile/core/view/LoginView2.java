@@ -2,7 +2,7 @@ package com.ustadmobile.core.view;
 
 public interface LoginView2 extends UstadView {
 
-    String VIEW_NAME = "LoginView2";
+    String VIEW_NAME = "Login2";
 
     void setFacebookLoginVisible(boolean facebookLoginVisible);
 

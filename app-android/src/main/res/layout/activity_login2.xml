@@ -129,22 +129,6 @@
 
             </android.support.design.widget.TextInputLayout>
 
-            <Button
-                android:id="@+id/activity_login2_login_button"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="8dp"
-                android:layout_weight="1"
-                android:text="@string/login"
-                android:backgroundTint="@color/accent"
-                android:textColor="@color/primary_text"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="1.0"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/activity_login2_forgot_password" />
-
             <TextView
                 android:id="@+id/activity_login2_forgot_password"
                 android:layout_width="wrap_content"
@@ -167,6 +151,40 @@
                 android:background="?attr/selectableItemBackground"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/activity_login2_password_text_input_layout" />
+
+            <TextView
+                android:id="@+id/activity_login2_error_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:visibility="gone"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/activity_login2_forgot_password" />
+
+            <android.support.constraint.Barrier
+                android:id="@+id/activity_login2_barrier_bottom"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:barrierDirection="bottom"
+                app:constraint_referenced_ids="activity_login2_error_text, activity_login2_error_text"
+                />
+
+            <Button
+                android:id="@+id/activity_login2_login_button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:layout_weight="1"
+                android:backgroundTint="@color/accent"
+                android:text="@string/login"
+                android:textColor="@color/primary_text"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/activity_login2_barrier_bottom" />
 
         </android.support.constraint.ConstraintLayout>
 

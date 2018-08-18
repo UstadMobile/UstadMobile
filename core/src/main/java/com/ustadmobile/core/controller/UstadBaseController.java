@@ -48,6 +48,11 @@ import java.util.Vector;
  */
 public abstract class UstadBaseController<V extends UstadView> implements UstadController<V> {
 
+    /**
+     * Argument key for presenters which have a next destination (e.g. login, create new account, etc)
+     */
+    public static final String ARG_NEXT = "next";
+
     protected V view;
     
     protected Object context;
@@ -198,6 +203,11 @@ public abstract class UstadBaseController<V extends UstadView> implements UstadC
 
     public Hashtable getArguments() {
         return arguments;
+    }
+
+    protected String getArgumentString(String key) {
+        return arguments != null && arguments.containsKey(key) ?
+                arguments.get(key).toString() : null;
     }
 
     protected void setArguments(Hashtable arguments) {

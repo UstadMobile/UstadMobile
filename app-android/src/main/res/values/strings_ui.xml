@@ -44,6 +44,9 @@
     <string name='back'>Back</string>
     <string name='username'>Username</string>
     <string name='password'>Password</string>
+    <string name="confirm_password">Confirm password</string>
+    <string name="first_name">First name</string>
+    <string name="last_name">Last name</string>
     <string name="new_password">New password</string>
     <string name='phone_memory'>Phone memory</string>
     <string name='memory_card'>Memory card</string>

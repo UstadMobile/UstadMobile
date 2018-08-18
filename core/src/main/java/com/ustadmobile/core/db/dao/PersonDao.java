@@ -49,4 +49,19 @@ public abstract class PersonDao implements BaseDao<Person>{
             }
         });
     }
+
+    public void createNewAccount(Person newAccount, UmCallback<UmAccount> callback) {
+        insertAsync(newAccount, new UmCallback<Long>() {
+            @Override
+            public void onSuccess(Long result) {
+                UmCallbackUtil.onSuccessIfNotNull(callback, new UmAccount(result, newAccount.getUsername(),
+                        "", ""));
+            }
+
+            @Override
+            public void onFailure(Throwable exception) {
+                UmCallbackUtil.onFailIfNotNull(callback, exception);
+            }
+        });
+    }
 }

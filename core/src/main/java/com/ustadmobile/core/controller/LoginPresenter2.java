@@ -6,13 +6,12 @@ import com.ustadmobile.core.impl.AppConfig;
 import com.ustadmobile.core.impl.UmAccount;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.view.CreateAccountView;
 import com.ustadmobile.core.view.LoginView2;
 
 import java.util.Hashtable;
 
 public class LoginPresenter2 extends UstadBaseController<LoginView2>{
-
-    public static final String ARG_NEXT_DEST = "next";
 
     public LoginPresenter2(Object context, Hashtable arguments, LoginView2 view) {
         super(context, arguments, view);
@@ -25,6 +24,7 @@ public class LoginPresenter2 extends UstadBaseController<LoginView2>{
 
     public void handleClickLogin(String username, String password, String serverUrl) {
         view.setInProgress(true);
+        view.setErrorMessage(null);
         UmAppDatabase.getInstance(context).getPersonDao().authenticate(username, password,
                 new UmCallback<UmAccount>() {
             @Override
@@ -35,14 +35,18 @@ public class LoginPresenter2 extends UstadBaseController<LoginView2>{
                         view.setInProgress(false);
                         view.setPassword("");
                         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-                        String nextDest = getArguments().containsKey(ARG_NEXT_DEST) ?
-                                (String)getArguments().get(ARG_NEXT_DEST) :
+                        String nextDest = getArgumentString(ARG_NEXT) != null ?
+                                getArgumentString(ARG_NEXT) :
                                 impl.getAppConfigString(AppConfig.KEY_FIRST_DEST, null,
                                         context);
                         UstadMobileSystemImpl.getInstance().go(nextDest, context);
                     });
                 }else {
-//                    view.setErrorMessage(UstadMobileSystemImpl.getInstance().getString());
+                    view.runOnUiThread(() -> {
+                        view.setPassword("");
+                        view.setErrorMessage(UstadMobileSystemImpl.getInstance().getString(
+                                        MessageID.invalid_username_or_password, context));
+                    });
                 }
             }
 
@@ -55,7 +59,7 @@ public class LoginPresenter2 extends UstadBaseController<LoginView2>{
     }
 
     public void handleClickCreateAccount(){
-
+        UstadMobileSystemImpl.getInstance().go(CreateAccountView.VIEW_NAME, context);
     }
 
 }
