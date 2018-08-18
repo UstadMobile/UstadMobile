@@ -17,6 +17,7 @@
     <color name="divider">#BDBDBD</color>
 
     <color name="background_light">#E8EAED</color>
+    <color name="background_white">#FFFFFF</color>
 
     <item name="umblue" type="color">#FF3F31B5</item>
     <item name="opds_card_pressed" type="color">#FF888888</item>
@@ -51,5 +52,11 @@
     <color name="entry_learner_progresss_failed">#ffa904</color>
 
     <color name="entry_learner_progress_passed">#6bb865</color>
+
+
+    <color name="login_facebook_button_color">#3B5998</color>
+    <color name="login_twitter_button_color">#1DA1F2</color>
+    <color name="text_link_color">#FF3F31B5</color>
+
 
 </resources>

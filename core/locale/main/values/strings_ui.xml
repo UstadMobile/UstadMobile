@@ -147,6 +147,11 @@
 
     <string name="login_successful">Login successful</string>
     <string name="registration_successful">Registration successful</string>
+    <string name="invalid_username_or_password">Invalid username and/or password. Please try again</string>
+    <string name="continue_with_facebook">Continue with Facebook</string>
+    <string name="continue_with_twitter">Continue with Twitter</string>
+    <string name="create_new_account">Create new account</string>
+    <string name="already_have_an_account">Already have an account? Login below:</string>
 
     <string name="send_course_instructions">1. On the other device, open the app, and select receive from the top right menu.
         \n2. Select the other device from the list below:</string>

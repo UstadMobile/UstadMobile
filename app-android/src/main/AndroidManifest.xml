@@ -94,15 +94,15 @@
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
             android:label="@string/settings"
             android:theme="@style/Theme.UstadTheme" />
-
         <activity
             android:name="com.ustadmobile.port.android.view.ScormPackageActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
             android:label="" />
-
-        <activity android:name="com.ustadmobile.port.android.view.H5PContentActivity"
+        <activity
+            android:name="com.ustadmobile.port.android.view.H5PContentActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
-            android:label=""/>
+            android:label="" />
+        <activity android:name="com.ustadmobile.port.android.view.LoginActivity2"></activity>
     </application>
 
 </manifest>

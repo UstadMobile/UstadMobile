@@ -172,11 +172,11 @@ generateRoomEntities.dependsOn(":lib-database-processor:runRoomProcessor")
 tasks.whenTaskAdded { task ->
     if (task.name == "assembleRemotetestslaveDebug") {
         startTestSlaveServer.dependsOn task
-    }else if (task.name == "installLocalconfigDebugAndroidTest") {
+    } else if (task.name == "installLocalconfigDebugAndroidTest") {
         testEmulatorLocalconfigDebug.dependsOn task
     } else if (task.name == "installLocalconfigDebug") {
         testEmulatorLocalconfigDebug.dependsOn task
-    }else if(task.name == "assembleLocalconfigDebug" || task.name == "assembleLocalconfigRelease") {
+    } else if (task.name == "assembleLocalconfigDebug" || task.name == "assembleLocalconfigRelease") {
         task.dependsOn(copyLocalconfigUmBaseApplication)
     }
 }
@@ -231,7 +231,7 @@ android {
         buildConfigField "long", "TIMESTAMP", System.currentTimeMillis() + "L"
         buildConfigField "String", "ACRA_HTTP_URI", "\"" + project.ext.buildConfigProperties["android.acra.httpUri"] + "\""
         buildConfigField "String", "ACRA_BASIC_LOGIN", "\"" + project.ext.buildConfigProperties["android.acra.basicLogin"] + "\""
-        buildConfigField "String", "ACRA_BASIC_PASS", "\"" + project.ext.buildConfigProperties["android.acra.basicPass"]+ "\""
+        buildConfigField "String", "ACRA_BASIC_PASS", "\"" + project.ext.buildConfigProperties["android.acra.basicPass"] + "\""
 
         manifestPlaceholders = [applicationClass: "android.app.Application"]
 
@@ -431,6 +431,7 @@ dependencies {
     implementation project(":lib-database-annotation")
     implementation project(":lib-util")
 
+    implementation 'com.android.support.constraint:constraint-layout:1.1.2'
     vanillamultidexApi "com.android.support:multidex:$version_android_multidex"
 
     androidTestImplementation project(":core-tests")
@@ -452,7 +453,6 @@ dependencies {
     androidTestImplementation project(":lib-core-fs-tests")
 
     api 'com.ustadmobile.qrcodelibomrfork:qrcode-core:1.0.3'
-
 
     /*
      * If this needs to be made compatible as a library for something using older appcompat libs -
@@ -547,4 +547,3 @@ publishing {
         }
     }
 }
-

@@ -27,7 +27,7 @@ task clean(type: Delete) {
 }
 
 //Major.minor.database version
-version = "0.2.7.65"
+version = "0.2.8.65L1"
 ext {
     ustadVersion = project.version
     ustadVersionCode = 150
