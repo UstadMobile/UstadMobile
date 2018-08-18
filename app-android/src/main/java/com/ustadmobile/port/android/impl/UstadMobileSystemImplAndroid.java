@@ -161,7 +161,6 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
     private boolean initRan = false;
 
     static {
-        viewNameToAndroidImplMap.put(LoginView.VIEW_NAME, LoginDialogFragment.class);
         viewNameToAndroidImplMap.put(LoginView2.VIEW_NAME, LoginActivity2.class);
         viewNameToAndroidImplMap.put(ContainerView.VIEW_NAME, ContainerActivity.class);
         viewNameToAndroidImplMap.put(CatalogView.VIEW_NAME, CatalogActivity.class);
