@@ -117,11 +117,13 @@ public class BasePointPeopleFragment extends UstadBaseFragment implements BasePo
             switch (position) {
                 case 0:
                     System.out.println("GO TO NESTED FRAGMENT 1");
-                    return FeedListFragment.newInstance();
+                    return ClassListFragment.newInstance();
+                    //return FeedListFragment.newInstance();
                     //return Nest1Fragment.newInstance(1);
                 default:
                     System.out.println("GO TO NESTED PRAGMENT 2");
-                    return FeedListFragment.newInstance();
+                    return PeopleListFragment.newInstance();
+                    //return FeedListFragment.newInstance();
                     //return Nest2Fragment.newInstance(2);
             }
             //return null;

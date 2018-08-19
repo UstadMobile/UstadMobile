@@ -4,7 +4,7 @@
 <android.support.design.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/base_point_2_coordinator"
+    android:id="@+id/class_log_detail_coordinator"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -17,7 +17,7 @@
         app:elevation="0dp">
 
         <android.support.v7.widget.Toolbar
-            android:id="@+id/base_point_2_toolbar"
+            android:id="@+id/class_log_detail_toolbar"
             android:titleTextColor="#fff"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
@@ -29,8 +29,8 @@
 
     <android.support.v4.view.ViewPager
         xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/container_feedlist"
-        android:layout_below="@+id/base_point_2_toolbar"
+        android:id="@+id/class_log_detail_container_viewpager"
+        android:layout_below="@+id/class_log_detail_toolbar"
         android:layout_alignParentBottom="true"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

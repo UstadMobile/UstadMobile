@@ -170,6 +170,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         //Account settings:
         //viewNameToAndroidImplMap.put(AccountSettingsView.VIEW_NAME, AccountSettingsActivity.class);
         viewNameToAndroidImplMap.put(BasePointView2.VIEW_NAME, BasePointActivity2.class);
+        viewNameToAndroidImplMap.put(ClassDetailActivity.VIEW_NAME, ClassDetailActivity.class);
         viewNameToAndroidImplMap.put(BasePointView.VIEW_NAME, BasePointActivity.class);
         viewNameToAndroidImplMap.put(AboutView.VIEW_NAME, AboutActivity.class);
         viewNameToAndroidImplMap.put(CatalogEntryView.VIEW_NAME, CatalogEntryActivity.class);

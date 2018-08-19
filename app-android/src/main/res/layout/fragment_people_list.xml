@@ -1,22 +1,28 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.ustadmobile.port.android.view.ClassListFragment">
+    tools:context="com.ustadmobile.port.android.view.PeopleListFragment">
 
     <android.support.v4.widget.SwipeRefreshLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/fragment_class_list_swiperefreshview">
+        android:id="@+id/fragment_people_list_swiperefreshview">
+
+        <TextView
+            android:id="@+id/name_text"
+            android:text="@string/people"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="60sp"/>
 
         <android.support.v7.widget.RecyclerView
             android:layout_height="match_parent"
             android:layout_width="match_parent"
-            android:id="@+id/fragment_class_list_recyclerview"
+            android:id="@+id/fragment_people_list_recyclerview"
             android:scrollbars="vertical"
             />
 
+
     </android.support.v4.widget.SwipeRefreshLayout>
-
-
 
 </FrameLayout>

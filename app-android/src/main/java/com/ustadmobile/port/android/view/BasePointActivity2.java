@@ -89,7 +89,7 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
                 new AHBottomNavigationItem(R.string.statistcs,
                         R.drawable.ic_chart_areaspline_black_24dp, R.color.default_back_color);
         AHBottomNavigationItem lessons_item =
-                new AHBottomNavigationItem(R.string.feed,
+                new AHBottomNavigationItem(R.string.lessons,
                         R.drawable.ic_book_multiple_black_24dp, R.color.default_back_color);
 
         //Add the items
@@ -123,6 +123,25 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
                     mPager.setCurrentItem(position);
 
                 }
+
+                //Update title
+                switch(position){
+                    case 0:
+                        updateTitle(getText(R.string.feed).toString());
+                        break;
+                    case 1:
+                        updateTitle(getText(R.string.my_classes).toString());
+                        break;
+                    case 2:
+                        updateTitle(getText(R.string.statistcs).toString());
+                        break;
+                    case 3:
+                        updateTitle(getText(R.string.lessons).toString());
+                        break;
+                    default:
+                        break;
+
+                }
                 return true;
             }
         });
@@ -134,6 +153,10 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
             }
         });
 
+    }
+
+    public void updateTitle(String title){
+        toolbar.setTitle(title);
     }
 
     private void setupViewPager() {
@@ -172,22 +195,31 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
             if(thisFragment != null){
                 return thisFragment;
             }else{
-                if (position == 0){
-                    UstadBaseFragment newFrag =
-                            FeedListFragment.newInstance();
-                    this.positionMap.put(position, newFrag);
-                    return newFrag;
-                }else if (position == 1){
-                    UstadBaseFragment peopleFragment =
-                            BasePointPeopleFragment.newInstance();
-                    this.positionMap.put(position, peopleFragment);
-                    return peopleFragment;
-                }else{
-                    UstadBaseFragment comingSoonFragment =
-                            ComingSoonFragment.newInstance();
-                    this.positionMap.put(position, comingSoonFragment);
-                    return comingSoonFragment;
+                switch(position){
+                    case 0:
+                        UstadBaseFragment newFrag =
+                                FeedListFragment.newInstance();
+                        this.positionMap.put(position, newFrag);
+                        return newFrag;
+                    case 1:
+                        UstadBaseFragment peopleFragment =
+                                BasePointPeopleFragment.newInstance();
+                        this.positionMap.put(position, peopleFragment);
+                        return peopleFragment;
+                    case 2:
+                        UstadBaseFragment comingSoonFragment =
+                                ComingSoonFragment.newInstance();
+                        this.positionMap.put(position, comingSoonFragment);
+                        return comingSoonFragment;
+                    case 3:
+                        UstadBaseFragment csf =
+                                ComingSoonFragment.newInstance();
+                        this.positionMap.put(position, csf);
+                        return csf;
+                    default:
+                        return null;
                 }
+
 
             }
         }

@@ -1,6 +1,5 @@
 package com.ustadmobile.port.android.view;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.DividerItemDecoration;
@@ -10,21 +9,24 @@ import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
 import com.toughra.ustadmobile.R;
-import com.ustadmobile.core.view.FeedListView;
+import com.ustadmobile.core.view.ClassListView;
 
 import java.util.ArrayList;
 
 /**
- * FeedListFragment Android fragment extends UstadBaseFragment
+ * ClassListFragment Android fragment extends UstadBaseFragment
  */
-public class FeedListFragment extends UstadBaseFragment implements FeedListView, View.OnClickListener,
-        View.OnLongClickListener, SwipeRefreshLayout.OnRefreshListener {
+public class ClassListFragment extends UstadBaseFragment implements ClassListView,
+        View.OnClickListener, View.OnLongClickListener, SwipeRefreshLayout.OnRefreshListener {
 
     View rootContainer;
+    //RecyclerView
     private RecyclerView mRecyclerView;
     private RecyclerView.LayoutManager mRecyclerLayoutManager;
     private RecyclerView.Adapter mAdapter;
+
     private Toolbar toolbar;
 
     //Swipe-refresh
@@ -32,13 +34,12 @@ public class FeedListFragment extends UstadBaseFragment implements FeedListView,
 
     /**
      * Generates a new Fragment for a page fragment
+     * TODO: Add any args if needed
      *
-     *
-     * @return A new instance of fragment ContainerPageFragment.
+     * @return A new instance of fragment ClassListFragment.
      */
-    // TODO: Rename and change types and number of parameters
-    public static FeedListFragment newInstance() {
-        FeedListFragment fragment = new FeedListFragment();
+    public static ClassListFragment newInstance() {
+        ClassListFragment fragment = new ClassListFragment();
         Bundle args = new Bundle();
         fragment.setArguments(args);
         return fragment;
@@ -46,6 +47,7 @@ public class FeedListFragment extends UstadBaseFragment implements FeedListView,
 
     /**
      * On Create of the fragment.
+     *
      * @param savedInstanceState
      */
     @Override
@@ -55,6 +57,7 @@ public class FeedListFragment extends UstadBaseFragment implements FeedListView,
 
     /**
      * On Create of the View fragment . Part of Android's Fragment Override
+     *
      * @param inflater
      * @param container
      * @param savedInstanceState
@@ -64,65 +67,49 @@ public class FeedListFragment extends UstadBaseFragment implements FeedListView,
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        // Inflate the layout for this fragment
-        rootContainer = inflater.inflate(R.layout.fragment_feed_list, container, false);
+        // TODO: Inflate the layout for this fragment
+        rootContainer = inflater.inflate(R.layout.fragment_class_list, container, false);
         setHasOptionsMenu(true);
 
-        //Set Recycler view
-        mRecyclerView = rootContainer.findViewById(R.id.fragment_feed_list_recyclerview);
 
-        //Use Linear Layout Manager : Set layout Manager
+        // TODO: Set mRecyclerView..
+        mRecyclerView = rootContainer.findViewById(R.id.fragment_class_list_recyclerview);
+
+        // TODO: Use Layout: set layout manager. Change defaults
         mRecyclerLayoutManager = new LinearLayoutManager(getContext());
         mRecyclerView.setLayoutManager(mRecyclerLayoutManager);
         DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(mRecyclerView.getContext(),
                 LinearLayoutManager.VERTICAL);
         mRecyclerView.addItemDecoration(dividerItemDecoration);
 
+        //Get test data
         // data to populate the RecyclerView with
-        ArrayList<String> animalNames = new ArrayList<>();
-        for(int i=0;i<10;i++){
-            animalNames.add("Horse");
-            animalNames.add("Cow");
-            animalNames.add("Camel");
-            animalNames.add("Sheep");
-            animalNames.add("Goat");
+        ArrayList<String> classNames = new ArrayList<>();
+        for(int i=0;i<16;i++){
+            classNames.add("Class " + i + 1);
         }
+
+        // TODO: Specify the mAdapter
+        mAdapter = new CardRecyclerViewAdapter(getContext(), classNames);
+        mRecyclerView.setAdapter(mAdapter);
+
 
         //Update the parent header toolbar
         toolbar = getActivity().findViewById(R.id.base_point_2_toolbar);
-        toolbar.setTitle(getText(R.string.feed));
-
-        //Specify the adapter
-        mAdapter = new MyRecyclerViewAdapter(getContext(), animalNames);
-        mRecyclerView.setAdapter(mAdapter);
+        toolbar.setTitle(getText(R.string.my_classes));
 
         //Swipe-refresh
-        mSwipeRefreshLayout = rootContainer.findViewById(R.id.fragment_feed_swiperefreshview);
+        mSwipeRefreshLayout = rootContainer.findViewById(R.id.fragment_class_list_swiperefreshview);
         mSwipeRefreshLayout.setOnRefreshListener(this);
 
         //return container
         return rootContainer;
     }
 
-    @Override
-    public void onResume(){
-        super.onResume();
-        updateTitle(getText(R.string.feed).toString());
-
-    }
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        updateTitle(getText(R.string.feed).toString());
-
-    }
-
     // This event is triggered soon after onCreateView().
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         // Setup any handles to view objects here
-        updateTitle(getText(R.string.feed).toString());
 
     }
 
@@ -131,12 +118,8 @@ public class FeedListFragment extends UstadBaseFragment implements FeedListView,
      */
     @Override
     public void onRefresh() {
-        //TODO: Check this
-        mRecyclerView.refreshDrawableState();
         //Update refreshing animation, etc
         mSwipeRefreshLayout.setRefreshing(false);
-        updateTitle(getText(R.string.feed).toString());
-
     }
 
     @Override
@@ -147,12 +130,6 @@ public class FeedListFragment extends UstadBaseFragment implements FeedListView,
     @Override
     public boolean onLongClick(View v) {
         return false;
-    }
-
-    public void updateTitle(String title){
-        //Update the parent header toolbar
-        toolbar = getActivity().findViewById(R.id.base_point_2_toolbar);
-        toolbar.setTitle(title);
     }
 
 }
