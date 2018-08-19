@@ -8,6 +8,8 @@ import android.bluetooth.BluetoothGattServerCallback;
 import android.content.Context;
 import android.support.annotation.VisibleForTesting;
 
+import com.ustadmobile.core.impl.UMLog;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.port.sharedse.networkmanager.BleGattServer;
 import com.ustadmobile.port.sharedse.networkmanager.BleMessage;
 
@@ -75,9 +77,14 @@ public class BleGattServerAndroid extends BleGattServer{
                 gattServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, 0, null);
                 //start receiving packets from the client device
                 boolean isPackedReceived = receivedMessage.onPackageReceived(value);
+                UstadMobileSystemImpl.l(UMLog.DEBUG,691,
+                        "Receiving packets: isDone "+isPackedReceived);
                 if(isPackedReceived){
                     //Send back response
                     BleMessage messageToSend =  handleRequest(receivedMessage);
+                    receivedMessage = new BleMessage();
+                    UstadMobileSystemImpl.l(UMLog.DEBUG,691,
+                            "Prepare response to send back");
                     //Our service doesn't require confirmation, if it does then reject sending packets
                     boolean requireConfirmation = (characteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_INDICATE)
                             == BluetoothGattCharacteristic.PROPERTY_INDICATE;

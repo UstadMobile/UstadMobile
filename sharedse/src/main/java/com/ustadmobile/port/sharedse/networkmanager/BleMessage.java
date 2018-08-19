@@ -55,6 +55,7 @@ public class BleMessage {
         this.requestType = requestType;
         this.payload = payload;
         this.mtu = mtu;
+        this.length = payload.length;
     }
 
 
@@ -91,6 +92,7 @@ public class BleMessage {
         }else {
             return packetizePayload(this.payload);
         }
+
     }
 
     /**
