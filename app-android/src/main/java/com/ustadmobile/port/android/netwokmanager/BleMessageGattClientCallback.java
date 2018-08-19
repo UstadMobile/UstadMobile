@@ -30,7 +30,7 @@ import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.UST
  *
  * - If it will receive {@link BluetoothGatt#GATT_SUCCESS} response, then it will start data
  * transmission to the BLE node. Upon receiving response the
- * {@link BleMessageGattClientCallback#onCharacteristicRead} method will be invoked.
+ * {@link BleMessageGattClientCallback#onCharacteristicChanged} method will be invoked.
  * </p>
  *
  *  @author kileha3
@@ -46,21 +46,29 @@ public class BleMessageGattClientCallback extends  BluetoothGattCallback{
 
     private int packetIteration = 0;
 
-
-
-
+    /**
+     * Constructor to be called when creating new callback
+     * @param messageToSend Payload to be sent to the peer device (List of entry Id's)
+     * @param destinationAddress Bluetooth MAC address for the peer device.
+     */
     public BleMessageGattClientCallback(BleMessage messageToSend, String destinationAddress){
         this.messageToSend = messageToSend;
         receivedMessage = new BleMessage();
         this.destinationAddress = destinationAddress;
     }
 
+    /**
+     * Set listener to report back results on the listening part.
+     * @param responseListener BleMessageResponseListener listener
+     */
     public void setOnResponseReceived(BleMessageResponseListener responseListener){
         this.responseListener = responseListener;
     }
 
-
-
+    /**
+     * Start discovering GATT services when peer device is connected or disconnects from GATT
+     * when connection failed.
+     */
     @Override
     public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
         super.onConnectionStateChange(gatt, status, newState);
@@ -76,6 +84,10 @@ public class BleMessageGattClientCallback extends  BluetoothGattCallback{
         }
     }
 
+    /**
+     * Enable notification to be sen't back when characteristics are modified
+     * from the GATT server's side.
+     */
     @Override
     public void onServicesDiscovered(BluetoothGatt gatt, int status) {
         super.onServicesDiscovered(gatt, status);
@@ -88,6 +100,10 @@ public class BleMessageGattClientCallback extends  BluetoothGattCallback{
         }
     }
 
+    /**
+     * Start transmitting message packets to the peer device once given permission
+     * to write on the characteristic
+     */
     @Override
     public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
         super.onCharacteristicWrite(gatt, characteristic, status);
@@ -103,6 +119,9 @@ public class BleMessageGattClientCallback extends  BluetoothGattCallback{
         }
     }
 
+    /**
+     * Read modified valued from the characteristics when changed from GATT server's end.
+     */
     @Override
     public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
         super.onCharacteristicRead(gatt, characteristic, status);
@@ -111,16 +130,18 @@ public class BleMessageGattClientCallback extends  BluetoothGattCallback{
 
     }
 
+    /**
+     * Receive notification when characteristics value has been changed from GATT server's side.
+     */
     @Override
     public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
         super.onCharacteristicChanged(gatt, characteristic);
-
         readCharacteristics(characteristic);
     }
 
     /**
-     * Read value from the service characteristic
-     * @param characteristic Modified service characteristic
+     * Read values from the service characteristic
+     * @param characteristic Modified service characteristic to read that value from
      */
     private void readCharacteristics(BluetoothGattCharacteristic characteristic){
         boolean isReceived = receivedMessage.onPackageReceived(characteristic.getValue());

@@ -1,34 +1,29 @@
 package com.ustadmobile.port.sharedse.networkmanager;
 
 
+import com.ustadmobile.core.db.UmAppDatabase;
+import com.ustadmobile.core.db.dao.NetworkNodeDao;
 import com.ustadmobile.lib.db.entities.NetworkNode;
 
 import org.junit.Before;
 import org.junit.Test;
 
-import java.awt.SystemTray;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import javax.naming.Context;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.timeout;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.withSettings;
 
 /**
- * <h1>BleNetworkManagerTest</h1>
- *
  * Test class which tests {@link NetworkManagerBle} to make sure it behaves as expected
  * on entry status monitoring logic
  *
@@ -40,7 +35,7 @@ public class BleNetworkManagerTest {
 
     private List<Long> entries;
 
-    private NetworkNode networkNode;
+    private NetworkNode mockedNode;
 
     private BleEntryStatusTask mockedStatusTask;
 
@@ -53,8 +48,12 @@ public class BleNetworkManagerTest {
         testManager = spy(NetworkManagerBle.class);
         mockedContext = mock(Context.class);
         entries = Arrays.asList(1056289670L,4590875612L,9076137860L,2912543894L);
-        networkNode = mock(NetworkNode.class);
+        mockedNode = mock(NetworkNode.class);
         mockedStatusTask = mock(BleEntryStatusTask.class);
+        NetworkNodeDao mockedDao = mock(NetworkNodeDao.class);
+        UmAppDatabase appDatabase = mock(UmAppDatabase.class);
+        when(appDatabase.getNetworkNodeDao()).thenReturn(mockedDao);
+        when(mockedDao.findNodeByBluetoothAddress(any())).thenReturn(mockedNode);
         when(testManager.makeEntryStatusTask(any(),any(),any())).thenReturn(mockedStatusTask);
     }
 
@@ -73,8 +72,8 @@ public class BleNetworkManagerTest {
     @Test
     public void givenMonitoringAvailabilityStarted_whenNewNodeDiscovered_thenShouldCreateEntryStatusTask() {
         testManager.startMonitoringAvailability(mockedContext,availabilityClient, entries);
-        testManager.handleNodeDiscovered(networkNode);
 
+        testManager.handleNodeDiscovered(mockedNode);
         verify(testManager).makeEntryStatusTask(mockedContext,entries, null);
 
         //will have been called async - we need to wait for it to run
@@ -85,10 +84,10 @@ public class BleNetworkManagerTest {
     public void givenMonitoringAvailabilityStopped_whenNewNodeDiscovered_thenShouldNotCreateEntryStatusTask() {
         testManager.startMonitoringAvailability(mockedContext,availabilityClient, entries);
         testManager.stopMonitoringAvailability(availabilityClient);
-        testManager.handleNodeDiscovered(networkNode);
+        testManager.handleNodeDiscovered(mockedNode);
 
         //Verify that makeEntryStatusTask was not called even once
-        verify(testManager,never()).makeEntryStatusTask(mockedContext,entries, networkNode);
+        verify(testManager,never()).makeEntryStatusTask(mockedContext,entries, mockedNode);
     }
 
     @Test

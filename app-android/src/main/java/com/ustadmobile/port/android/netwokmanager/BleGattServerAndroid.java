@@ -44,14 +44,12 @@ public class BleGattServerAndroid extends BleGattServer{
     private NetworkManagerAndroidBle networkManager;
 
     private BluetoothGattServerCallback mCallback = new BluetoothGattServerCallback() {
+        /**
+         * Grant permission a peer device to start reading characteristics values
+         */
         @Override
-        public void onConnectionStateChange(BluetoothDevice device, int status, int newState) {
-            super.onConnectionStateChange(device, status, newState);
-
-        }
-
-        @Override
-        public void onCharacteristicReadRequest(BluetoothDevice device, int requestId, int offset, BluetoothGattCharacteristic characteristic) {
+        public void onCharacteristicReadRequest(BluetoothDevice device, int requestId, int offset,
+                                                BluetoothGattCharacteristic characteristic) {
             super.onCharacteristicReadRequest(device, requestId, offset, characteristic);
 
             boolean needResponse = characteristic.getProperties() == BluetoothGattCharacteristic.PROPERTY_WRITE;
@@ -64,20 +62,23 @@ public class BleGattServerAndroid extends BleGattServer{
             }
         }
 
+        /**
+         * Start receiving message packets sent from peer device
+         */
         @Override
         public void onCharacteristicWriteRequest(BluetoothDevice device, int requestId, BluetoothGattCharacteristic characteristic,
                                                  boolean preparedWrite, boolean responseNeeded, int offset, byte[] value) {
             super.onCharacteristicWriteRequest(device, requestId, characteristic, preparedWrite, responseNeeded, offset, value);
 
             if (USTADMOBILE_BLE_SERVICE_UUID.equals(characteristic.getUuid())) {
-                //Grant permission to the client device to write on this characteristics
+                //Grant permission to the peer device to write on this characteristics
                 gattServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, 0, null);
                 //start receiving packets from the client device
                 boolean isPackedReceived = receivedMessage.onPackageReceived(value);
                 if(isPackedReceived){
                     //Send back response
                     BleMessage messageToSend =  handleRequest(receivedMessage);
-                    //Our service doesn't require confirmation, if it does reject sending packets
+                    //Our service doesn't require confirmation, if it does then reject sending packets
                     boolean requireConfirmation = (characteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_INDICATE)
                             == BluetoothGattCharacteristic.PROPERTY_INDICATE;
                     if(!requireConfirmation){

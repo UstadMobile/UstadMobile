@@ -2,7 +2,6 @@ package com.ustadmobile.port.sharedse.networkmanager;
 
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.NetworkNodeDao;
-import com.ustadmobile.core.networkmanager.NetworkManagerCoreBle;
 import com.ustadmobile.lib.db.entities.NetworkNode;
 
 import java.util.Calendar;
@@ -14,10 +13,9 @@ import java.util.UUID;
  *
  * @author kileha3
  *
- * @see com.ustadmobile.core.networkmanager.NetworkManagerCoreBle
  */
 
-public abstract class NetworkManagerBle extends NetworkManagerCoreBle {
+public abstract class NetworkManagerBle {
 
     /**
      * Flag to indicate entry status request
@@ -150,7 +148,7 @@ public abstract class NetworkManagerBle extends NetworkManagerCoreBle {
     public abstract void openBluetoothSettings();
 
     /**
-     * Enable of disable WiFi on the device
+     * Enable or disable WiFi on the device
      *
      * @param enabled Enable when true otherwise disable
      * @return true if the operation is successful, false otherwise
@@ -175,6 +173,7 @@ public abstract class NetworkManagerBle extends NetworkManagerCoreBle {
      * @param entryUidsToMonitor List of entries to be monitored
      */
     public void startMonitoringAvailability(Object context,Object monitor, List<Long> entryUidsToMonitor) {
+        //TODO: Implement this when Db is ready - check if there are pending task left in the Db
          BleEntryStatusTask entryStatusTask= makeEntryStatusTask(context,entryUidsToMonitor,null);
          entryStatusTask.run();
     }

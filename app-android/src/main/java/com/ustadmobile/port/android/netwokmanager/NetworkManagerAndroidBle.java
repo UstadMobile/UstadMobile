@@ -123,6 +123,9 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
         }
     };
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void init(Object context) {
         networkService = ((NetworkServiceAndroid) context);
@@ -135,26 +138,41 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
         gattServerAndroid = new BleGattServerAndroid(((Context) context),this);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean isWiFiEnabled() {
         return wifiManager.isWifiEnabled();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean isBleCapable() {
         return networkService.getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean isBluetoothEnabled() {
         return bluetoothAdapter != null && bluetoothAdapter.isEnabled();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean canDeviceAdvertise() {
         return requirePermission() && bluetoothAdapter.isMultipleAdvertisementSupported();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void startAdvertising() {
         if(requirePermission()){
@@ -203,6 +221,9 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void stopAdvertising() {
         if(bleServiceAdvertiser == null) return;
@@ -213,6 +234,9 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void startScanning() {
 
@@ -232,6 +256,9 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
 
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void stopScanning() {
         if(bluetoothAdapter == null) return;
@@ -242,44 +269,52 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void openBluetoothSettings() {
         networkService.startActivity(new Intent(
                 android.provider.Settings.ACTION_BLUETOOTH_SETTINGS));
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean setWifiEnabled(boolean enabled) {
         return wifiManager.setWifiEnabled(enabled);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void createWifiDirectGroup() {
 
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected BleEntryStatusTask makeEntryStatusTask(Object context, List<Long> entryUidsToCheck,
                                                      NetworkNode peerToCheck) {
         return new BleEntryStatusTaskAndroid((Context)context,entryUidsToCheck,peerToCheck);
     }
 
-
     /**
-     * This method is responsible for setting up the right services connection
+     * Responsible for setting up the right services connection
      * @param serviceConnectionMap Map of all services connection made within the app.
      */
     public void setServiceConnectionMap(Map<Context, ServiceConnection> serviceConnectionMap) {
         this.serviceConnectionMap = serviceConnectionMap;
     }
 
-    @Override
-    public void onDestroy() {
-        stopAdvertising();
-        stopScanning();
-        super.onDestroy();
-    }
-
+    /**
+     * Check if the device needs runtime-permission
+     * @return True if needed else False
+     */
     private boolean requirePermission(){
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP;
     }
@@ -290,5 +325,15 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
      */
     public BluetoothManager getBluetoothManager(){
         return bluetoothManager;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onDestroy() {
+        stopAdvertising();
+        stopScanning();
+        super.onDestroy();
     }
 }

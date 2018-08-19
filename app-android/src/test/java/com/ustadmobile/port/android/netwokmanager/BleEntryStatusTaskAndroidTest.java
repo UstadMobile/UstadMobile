@@ -86,6 +86,6 @@ public class BleEntryStatusTaskAndroidTest {
 
     @Test
     public void givenBleMessageWithRequest_whenResponseReceived_thenShouldUpdateEntryStatusResponseInDatabase() {
-
+        //TODO: Implement this when DAO for the entry status response is ready
     }
 }

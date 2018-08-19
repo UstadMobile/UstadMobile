@@ -8,9 +8,7 @@ import java.util.List;
 import static org.junit.Assert.assertTrue;
 
 /**
- * <h1>BleMessageUtilTest</h1>
- *
- * test class which test {{@link BleMessageUtil}} to make sure it behaves as expected when
+ * Test class which test {{@link BleMessageUtil}} to make sure it behaves as expected when
  * converting List of entries to bytes and vice-versa
  *
  * @author kileha3

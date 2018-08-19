@@ -10,8 +10,6 @@ import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
 
 /**
- * <h1>BleMessageTest</h1>
- *
  * Test class which tests {@link BleMessage} to make sure it behaves as expected
  * when creating, processing and receiving packets.
  *

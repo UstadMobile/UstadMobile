@@ -19,8 +19,6 @@ import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 
 /**
- * <h1>BleGattServerTest</h1>
- *
  * Test class which tests {@link com.ustadmobile.port.sharedse.networkmanager.BleGattServer}
  * to make sure it behaves as expected when given different message with different request types.
  *

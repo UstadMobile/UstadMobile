@@ -5,22 +5,40 @@ import com.ustadmobile.lib.db.entities.NetworkNode;
 import java.util.List;
 
 /**
- * <h1>BleEntryStatusTask</h1>
+ * This is an abstract class which is used to implement platform specific BleEntryStatus
  *
- * BleEntryStatusTask is executed by an Executor. It will query a given peer to determine if
- * it has a set of entryUids for local download.
+ * @see BleMessageResponseListener
+ * @see Runnable
+ * @author kileha3
  */
 public abstract class BleEntryStatusTask implements Runnable,BleMessageResponseListener {
 
+    /**
+     * Message object which carries list of entry Ids to be checked for availability.
+     */
     public BleMessage message;
 
+    /**
+     * Constructor which will be used when creating new instance of a task
+     * @param context Application context.
+     * @param entryUidsToCheck List of Id's to be checked for availability from a peer device.
+     * @param peerToCheck Peer device for those entries to be checked from.
+     */
     public BleEntryStatusTask(Object context,List<Long> entryUidsToCheck, NetworkNode peerToCheck) { }
 
+    /**
+     * Handle response from the entry status task
+     * @param response Message received as a response from the server device.
+     */
     @Override
     public void onResponseReceived(BleMessage response) {
-
+        //TODO: Handle this when DAO for entry status response is ready - Save result to the DB
     }
 
+    /**
+     * Get BleMessage instance
+     * @return Created BleMessage
+     */
     public BleMessage getMessage() {
         return message;
     }

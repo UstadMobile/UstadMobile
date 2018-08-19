@@ -10,11 +10,19 @@ import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.WIF
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.WIFI_GROUP_CREATION_RESPONSE;
 
 /**
- * <h1>BleGattServer</h1>
+ * This is an abstract class which is used to implement platform specific BleGattServer
  *
+ * @author kileha3
  */
 public abstract class BleGattServer {
 
+    /**
+     * Handle request from peer device
+     * @param requestReceived Message received from the peer device
+     * @return Newly constructed message as a response to the peer device
+     *
+     * @see BleMessage
+     */
     public BleMessage handleRequest(BleMessage requestReceived) {
         byte requestType = requestReceived.getRequestType();
         switch (requestType){
@@ -24,7 +32,7 @@ public abstract class BleGattServer {
                 return new BleMessage(ENTRY_STATUS_RESPONSE,bleMessageLongToBytes(requestedEntries),20);
 
             case WIFI_GROUP_CREATION_REQUEST:
-                return new BleMessage(WIFI_GROUP_CREATION_RESPONSE,"".getBytes(),20);
+                return new BleMessage(WIFI_GROUP_CREATION_RESPONSE,"CreatedWiFiGroup".getBytes(),20);
                 default: return null;
         }
     }

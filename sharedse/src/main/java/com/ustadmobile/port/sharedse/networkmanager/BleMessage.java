@@ -16,12 +16,10 @@ import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.WIF
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.WIFI_GROUP_CREATION_RESPONSE;
 
 /**
- * <h1>BleMessage</h1>
- *
  * Bluetooth Low Energy can use a packet size between 20 and 512 bytes. BleMessage will packetize
  * a payload accordingly, and use Gzip compression if that reduces the size. Messages are delivered
  * as follows:
- *
+ * <p>
  * Byte 0: request code (8 bit integer value between 0 and 255)
  * Byte 1-4: payload length
  * Byte 5-onwards: payload
