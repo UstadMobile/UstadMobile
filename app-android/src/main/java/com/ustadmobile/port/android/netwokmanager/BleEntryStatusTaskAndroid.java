@@ -19,18 +19,18 @@ import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.ENT
  * This class handles all android specific entry status check from a peer device also,
  * it is responsible for creating BLE GATT client callback.
  *
- * <p>
  * <b>Note: Operation Flow</b>
+ * <p>
  * - Once {@link BleEntryStatusTaskAndroid#run()} is called, it creates
  * {@link BleMessageGattClientCallback} and pass the list of entries to be checked
  * and peer device to be checked from. After entry status check
  * {@link BleEntryStatusTask#onResponseReceived} will be called to report back the results.
  *
- *
+ * <p>
  * Use {@link BleEntryStatusTaskAndroid#run()} to start executing the task itself,
  * this method will be called in {@link NetworkManagerBle#startMonitoringAvailability}
  * when pending task to be executed is found.
- * </p>
+ *
  *
  * @see BleMessageGattClientCallback
  * @see BleEntryStatusTask

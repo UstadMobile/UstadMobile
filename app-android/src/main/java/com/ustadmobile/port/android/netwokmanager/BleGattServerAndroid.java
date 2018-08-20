@@ -20,20 +20,19 @@ import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.UST
  *
  * <p>
  * <b>Note: Operation Flow</b>
- *
+ *<p>
  * - When a client wants to send data it requests for a permission to write
  * on the characteristic. Upon receiving that request
  * {@link BluetoothGattServerCallback#onCharacteristicWriteRequest} will be invoked
  * , permission will be granted with {@link BluetoothGatt#GATT_SUCCESS}
  * and the packets will be received on the same
  * {@link BluetoothGattServerCallback#onCharacteristicWriteRequest} method.
- *
+ *<p>
  * - When a client device tries to read modified characteristic value,
  * {@link BluetoothGattServerCallback#onCharacteristicReadRequest} will be invoked
  * and the response will be sent back depending on what kind of device tried to read it.
  * If device has same service UUID then {@link BluetoothGatt#GATT_SUCCESS}
  * will be granted, otherwise {@link BluetoothGatt#GATT_FAILURE}
- * </p>
  *
  *  @author kileha3
  */
@@ -118,7 +117,7 @@ public class BleGattServerAndroid extends BleGattServer{
 
     /**
      * Get instance of a BluetoothGattServer
-     * @return Instance
+     * @return Instance of BluetoothGattServer
      */
     public BluetoothGattServer getGattServer() {
         return gattServer;

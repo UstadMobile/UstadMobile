@@ -20,14 +20,14 @@ import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.UST
  *
  * <p>
  * <b>Note: Operation Flow</b>
- *
+ *<p>
  * - When a device is connected to a BLE node, it will request for all available services
  * from the GATT. This will be achieved by calling {@link BluetoothGatt#discoverServices()}.
  * Once services are found, all characteristics in those services will be listed.
- *
+ *<p>
  * - When trying to send a message, it will need write permission from the BLE node,
  * and when requested response might be as discussed in {@link BleGattServerAndroid}.
- *
+ *<p>
  * - If it will receive {@link BluetoothGatt#GATT_SUCCESS} response, then it will start data
  * transmission to the BLE node. Upon receiving response the
  * {@link BleMessageGattClientCallback#onCharacteristicChanged} method will be invoked.

@@ -44,20 +44,19 @@ import static android.content.Context.BLUETOOTH_SERVICE;
  * <p>
  * Use {@link NetworkManagerAndroidBle#startAdvertising()} to start advertising
  * BLE services to the nearby peers.
- *
+ *<p>
  * Use {@link NetworkManagerAndroidBle#stopAdvertising()} to stop advertising
  * BLE services to the nearby peers.
- *
+ *<p>
  * Use {@link NetworkManagerAndroidBle#startScanning()} to start scanning for the BLE
  * services advertised from peer devices.
- *
+ *<p>
  * Use {@link NetworkManagerAndroidBle#stopScanning()} to stop scanning for the BLE
  * services advertised from peer devices.
- *
+ *<p>
  * Use {@link NetworkManagerAndroidBle#createWifiDirectGroup()} to create WiFi direct
  * group for peer content downloading.
- *
- * </p>
+ *<p>
  * <b>Note:</b> Most of the scan / advertise methods here require
  * {@link android.Manifest.permission#BLUETOOTH_ADMIN} permission.
  *
