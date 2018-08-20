@@ -28,10 +28,11 @@ public abstract class BleEntryStatusTask implements Runnable,BleMessageResponseL
 
     /**
      * Handle response from the entry status task
+     * @param sourceDeviceAddress Server device bluetooth MAC address
      * @param response Message received as a response from the server device.
      */
     @Override
-    public void onResponseReceived(BleMessage response) {
+    public void onResponseReceived(String sourceDeviceAddress,BleMessage response) {
         //TODO: Handle this when DAO for entry status response is ready - Save result to the DB
     }
 

@@ -126,7 +126,7 @@ public class BleMessageGattClientCallback extends  BluetoothGattCallback{
     public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
         super.onCharacteristicRead(gatt, characteristic, status);
 
-        readCharacteristics(characteristic);
+        readCharacteristics(gatt.getDevice().getAddress(),characteristic);
 
     }
 
@@ -136,17 +136,18 @@ public class BleMessageGattClientCallback extends  BluetoothGattCallback{
     @Override
     public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
         super.onCharacteristicChanged(gatt, characteristic);
-        readCharacteristics(characteristic);
+        readCharacteristics(gatt.getDevice().getAddress(),characteristic);
     }
 
     /**
      * Read values from the service characteristic
+     * @param sourceDeviceAddress Peer device bluetooth MAC address from which is reading from.
      * @param characteristic Modified service characteristic to read that value from
      */
-    private void readCharacteristics(BluetoothGattCharacteristic characteristic){
+    private void readCharacteristics(String sourceDeviceAddress,BluetoothGattCharacteristic characteristic){
         boolean isReceived = receivedMessage.onPackageReceived(characteristic.getValue());
         if(isReceived){
-            responseListener.onResponseReceived(receivedMessage);
+            responseListener.onResponseReceived(sourceDeviceAddress,receivedMessage);
         }
     }
 
