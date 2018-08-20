@@ -21,7 +21,8 @@
             android:titleTextColor="#fff"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            app:layout_scrollFlags="scroll|enterAlways" />
+            app:layout_scrollFlags="scroll|enterAlways"
+            />
 
 
     </android.support.design.widget.AppBarLayout>

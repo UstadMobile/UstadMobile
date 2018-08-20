@@ -86,7 +86,7 @@ public class DownloadCrawlEspressoTest {
 
     private static final String CRAWLABLE_FEED_TITLE = "Crawl Test";
 
-    private static final int THROTTLE_BYTES_PER_SECOND = 128000;c
+    private static final int THROTTLE_BYTES_PER_SECOND = 128000;
 
     @BeforeClass
     public static void startResourcesServer() throws IOException {

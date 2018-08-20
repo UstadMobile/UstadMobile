@@ -109,7 +109,6 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
         bottomNavigation.setOnTabSelectedListener(new AHBottomNavigation.OnTabSelectedListener() {
             @Override
             public boolean onTabSelected(int position, boolean wasSelected) {
-                // Do something cool here...
                 System.out.println("Tab Selected: " + position);
                 if(position == 1){
                     if(!wasSelected){
@@ -118,6 +117,7 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
                 }
                 //Go to fragment ? TODO
                 if (!wasSelected) {
+                    mPagerAdapter.notifyDataSetChanged();
                     Fragment selectedFragment = mPagerAdapter.getItem(position);
                     mPagerAdapter.notifyDataSetChanged();
                     mPager.setCurrentItem(position);
