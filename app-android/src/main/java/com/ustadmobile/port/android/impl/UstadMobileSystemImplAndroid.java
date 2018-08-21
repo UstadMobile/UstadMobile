@@ -544,8 +544,11 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
             }
         }else {
             Intent startIntent = new Intent(ctx, androidImplClass);
-            if(args != null)
+            if(args != null) {
                 startIntent.putExtras(argsBundle);
+                if(args.containsKey(ARG_NO_HISTORY))
+                    startIntent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+            }
 
             ctx.startActivity(startIntent);
         }

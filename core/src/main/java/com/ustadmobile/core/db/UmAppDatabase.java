@@ -3,8 +3,10 @@ package com.ustadmobile.core.db;
 import com.ustadmobile.core.db.dao.ClazzDao;
 import com.ustadmobile.core.db.dao.ContainerFileDao;
 import com.ustadmobile.core.db.dao.ContainerFileEntryDao;
+import com.ustadmobile.core.db.dao.ContentEntryDao;
 import com.ustadmobile.core.db.dao.CrawJoblItemDao;
 import com.ustadmobile.core.db.dao.CrawlJobDao;
+import com.ustadmobile.core.db.dao.DiscussionPostDao;
 import com.ustadmobile.core.db.dao.DownloadJobDao;
 import com.ustadmobile.core.db.dao.DownloadJobItemDao;
 import com.ustadmobile.core.db.dao.DownloadJobItemHistoryDao;
@@ -27,8 +29,10 @@ import com.ustadmobile.lib.database.annotation.UmDbContext;
 import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.ContainerFile;
 import com.ustadmobile.lib.db.entities.ContainerFileEntry;
+import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.CrawlJob;
 import com.ustadmobile.lib.db.entities.CrawlJobItem;
+import com.ustadmobile.lib.db.entities.DiscussionPost;
 import com.ustadmobile.lib.db.entities.DownloadJob;
 import com.ustadmobile.lib.db.entities.DownloadJobItem;
 import com.ustadmobile.lib.db.entities.DownloadJobItemHistory;
@@ -51,7 +55,7 @@ import com.ustadmobile.lib.db.entities.Person;
         DownloadJobItemHistory.class, CrawlJob.class, CrawlJobItem.class,
         OpdsEntryStatusCache.class, OpdsEntryStatusCacheAncestor.class,
         HttpCachedEntry.class, DownloadJob.class, DownloadJobItem.class,
-        Person.class, Clazz.class
+        Person.class, Clazz.class, ContentEntry.class, DiscussionPost.class
 })
 public abstract class UmAppDatabase{
 
@@ -119,6 +123,10 @@ public abstract class UmAppDatabase{
     public abstract PersonDao getPersonDao();
 
     public abstract ClazzDao getClazzDao();
+
+    public abstract ContentEntryDao getContentEntryDao();
+
+    public abstract DiscussionPostDao getDiscussionPostDao();
 
     @UmDbContext
     public abstract Object getContext();

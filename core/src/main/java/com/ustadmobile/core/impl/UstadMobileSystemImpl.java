@@ -218,6 +218,8 @@ public abstract class UstadMobileSystemImpl {
 
     private DecryptionSecretProvider decryptionSecretProvider;
 
+    public static final String ARG_NO_HISTORY = "nohistory";
+
 
     static {
         MIME_TYPES.put("image/jpg", "jpg");

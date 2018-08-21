@@ -59,7 +59,13 @@ public class LoginPresenter2 extends UstadBaseController<LoginView2>{
     }
 
     public void handleClickCreateAccount(){
-        UstadMobileSystemImpl.getInstance().go(CreateAccountView.VIEW_NAME, context);
+        Hashtable args = new Hashtable();
+        if(getArgumentString(ARG_NEXT) != null)
+            args.put(ARG_NEXT, getArgumentString(ARG_NEXT));
+        if(getArgumentString(UstadMobileSystemImpl.ARG_NO_HISTORY) != null)
+            args.put(UstadMobileSystemImpl.ARG_NO_HISTORY, getArgumentString(UstadMobileSystemImpl.ARG_NO_HISTORY));
+
+        UstadMobileSystemImpl.getInstance().go(CreateAccountView.VIEW_NAME, args, context);
     }
 
 }

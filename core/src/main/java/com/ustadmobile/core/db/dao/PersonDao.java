@@ -23,6 +23,9 @@ public abstract class PersonDao implements BaseDao<Person>{
     @UmQuery("SELECT * From Person WHERE personUid = :uid")
     public abstract Person findByUid(long uid);
 
+    @UmQuery("SELECT * From Person WHERE personUid = :uid")
+    public abstract void findByUidAsync(long uid, UmCallback<Person> callback);
+
     @UmQuery("SELECT * FROM Person WHERE username = :username")
     public abstract void findByUsername(String username, UmCallback<Person> callback);
 
