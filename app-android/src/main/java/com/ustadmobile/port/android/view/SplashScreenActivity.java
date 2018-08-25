@@ -45,7 +45,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 
 import com.toughra.ustadmobile.R;
+import com.ustadmobile.core.db.UmAppDatabase;
+import com.ustadmobile.core.db.dao.ClazzDao;
+import com.ustadmobile.core.db.dao.ClazzMemberDao;
+import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.lib.db.entities.Clazz;
+import com.ustadmobile.lib.db.entities.ClazzMember;
 
 
 public class SplashScreenActivity extends AppCompatActivity implements DialogInterface.OnClickListener, ActivityCompat.OnRequestPermissionsResultCallback{
@@ -63,6 +69,7 @@ public class SplashScreenActivity extends AppCompatActivity implements DialogInt
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash_screen);
+        addDummyData();
     }
 
     public void checkPermissions() {
@@ -156,6 +163,36 @@ public class SplashScreenActivity extends AppCompatActivity implements DialogInt
         return super.onOptionsItemSelected(item);
     }
 
+
+    public void addDummyData(){
+        ClazzDao clazzDao =
+                UmAppDatabase.getInstance(getApplicationContext()).getClazzDao();
+        ClazzMemberDao clazzMemberDao = UmAppDatabase.getInstance(getApplicationContext())
+                .getClazzMemberDao();
+        Clazz clazz1 = new Clazz();
+        clazz1.setClazzName("Class 1");
+        clazz1.setAttendanceAverage(42);
+        clazzDao.insertAsync(clazz1, new UmCallback<Long>() {
+            @Override
+            public void onSuccess(Long result) {
+                clazz1.setClazzUid(result);
+
+                for(int i = 0; i < 5; i++) {
+                    ClazzMember member = new ClazzMember();
+                    member.setRole(ClazzMember.ROLE_STUDENT);
+                    member.setClazzMemberPersonUid(i);
+                    member.setClazzMemberClazzUid(result);
+                    clazzMemberDao.insertAsync(member, null);
+                }
+
+            }
+
+            @Override
+            public void onFailure(Throwable exception) {
+
+            }
+        });
+    }
 
 
 }

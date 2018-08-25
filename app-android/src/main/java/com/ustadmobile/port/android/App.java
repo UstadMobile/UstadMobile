@@ -1,11 +1,18 @@
 package com.ustadmobile.port.android;
 
 import android.content.Context;
+import android.support.v4.content.ContextCompat;
 
 //import com.evernote.android.job.Job;
 //import com.evernote.android.job.JobManager;
 //import com.evernote.android.job.JobRequest;
 import com.toughra.ustadmobile.BuildConfig;
+import com.ustadmobile.core.db.UmAppDatabase;
+import com.ustadmobile.core.db.dao.ClazzDao;
+import com.ustadmobile.core.db.dao.ClazzMemberDao;
+import com.ustadmobile.core.impl.UmCallback;
+import com.ustadmobile.lib.db.entities.Clazz;
+import com.ustadmobile.lib.db.entities.ClazzMember;
 
 import org.acra.ACRA;
 import org.acra.config.CoreConfigurationBuilder;
@@ -41,6 +48,7 @@ public class App extends UmBaseApplication {
                 .setHttpMethod(HttpSender.Method.POST).setEnabled(true);
 
         ACRA.init(this, builder);
+
     }
 }
 

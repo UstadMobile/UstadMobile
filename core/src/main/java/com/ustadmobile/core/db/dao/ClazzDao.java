@@ -8,6 +8,8 @@ import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.ClazzWithNumStudents;
 
+import java.util.List;
+
 @UmDao
 public abstract class ClazzDao implements BaseDao<Clazz> {
 
@@ -28,5 +30,12 @@ public abstract class ClazzDao implements BaseDao<Clazz> {
             " FROM Clazz WHERE :personUid in " +
             " (SELECT ClazzMember.clazzMemberPersonUid FROM ClazzMember WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid)")
     public abstract UmProvider<ClazzWithNumStudents> findAllClazzesByPersonUid(long personUid);
+
+    @UmQuery("SELECT Clazz.*, " +
+            " (SELECT COUNT(*) FROM ClazzMember WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid) AS numStudents" +
+            " FROM Clazz WHERE :personUid in " +
+            " (SELECT ClazzMember.clazzMemberPersonUid FROM ClazzMember WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid)")
+    public abstract List<ClazzWithNumStudents> findAllClazzesByPersonUidAsList(long personUid);
+
 
 }

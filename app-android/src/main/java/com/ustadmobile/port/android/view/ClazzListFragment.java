@@ -21,7 +21,9 @@ import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.ClazzListPresenter;
+import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmProvider;
+import com.ustadmobile.core.db.dao.ClazzDao;
 import com.ustadmobile.core.view.ClazzListView;
 import com.ustadmobile.lib.db.entities.ClazzWithNumStudents;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
@@ -153,6 +155,10 @@ public class ClazzListFragment extends UstadBaseFragment implements ClazzListVie
         LiveData<PagedList<ClazzWithNumStudents>> data = new LivePagedListBuilder<>(factory, 20)
                 .build();
         data.observe(this, recyclerAdapter::submitList);
+        new Thread(() -> {
+            ClazzDao dao = UmAppDatabase.getInstance(getContext()).getClazzDao();
+            System.out.print(dao);
+        }).start();
         mRecyclerView.setAdapter(recyclerAdapter);
     }
 
