@@ -38,6 +38,7 @@ import javax.lang.model.type.NoType;
 import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
 
+import static com.ustadmobile.lib.annotationprocessor.core.DbProcessorCore.OPT_JDBC_OUTPUT;
 import static com.ustadmobile.lib.annotationprocessor.core.DbProcessorCore.OPT_ROOM_OUTPUT;
 
 /**
@@ -45,16 +46,20 @@ import static com.ustadmobile.lib.annotationprocessor.core.DbProcessorCore.OPT_R
  * processors for each implementation to be generated.
  */
 
-@SupportedOptions({OPT_ROOM_OUTPUT})
+@SupportedOptions({OPT_ROOM_OUTPUT, OPT_JDBC_OUTPUT})
 public class DbProcessorCore extends AbstractProcessor{
 
     public static final String OPT_ROOM_OUTPUT = "umdb_room_out";
+
+    public static final String OPT_JDBC_OUTPUT = "umdb_jdbc_out";
 
     private Messager messager;
 
     private Filer filer;
 
     private DbProcessorRoom dbProcessorRoom;
+
+    private DbProcessorJdbc dbProcessorJdbc;
 
     @Override
     public Set<String> getSupportedAnnotationTypes() {
@@ -77,6 +82,8 @@ public class DbProcessorCore extends AbstractProcessor{
 
         dbProcessorRoom = new DbProcessorRoom();
         dbProcessorRoom.init(processingEnvironment);
+        dbProcessorJdbc = new DbProcessorJdbc();
+        dbProcessorJdbc.init(processingEnvironment);
     }
 
     @Override
@@ -93,15 +100,20 @@ public class DbProcessorCore extends AbstractProcessor{
                     .addModifiers(Modifier.PUBLIC);
             PackageElement packageElement = processingEnv.getElementUtils().getPackageOf(daoClassElement);
 
-            MethodSpec makeMethodSpec = MethodSpec.methodBuilder(
+            MethodSpec.Builder makeMethodSpec = MethodSpec.methodBuilder(
                     "make" + daoClassElement.getSimpleName())
                     .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                     .addParameter(ParameterSpec.builder(
                             ClassName.get("java.lang", "Object"), "context").build())
                     .returns(ClassName.get((TypeElement)daoClassElement))
-                    .addCode("throw new RuntimeException(\"must be replaced with a platform implementation\");\n")
-                    .build();
-            factoryClassBuilder.addMethod(makeMethodSpec);
+                    .addCode("throw new RuntimeException(\"must be replaced with a platform implementation\");\n");
+
+            factoryClassBuilder.addMethod(makeMethodSpec.build());
+
+            //Create a second version of the same method - with a specific uri.
+            makeMethodSpec.addParameter(ClassName.get(String.class), "uri");
+            factoryClassBuilder.addMethod(makeMethodSpec.build());
+
 
             try {
                 JavaFile.builder(packageElement.getQualifiedName().toString(),
@@ -113,6 +125,7 @@ public class DbProcessorCore extends AbstractProcessor{
         }
 
         boolean result = dbProcessorRoom.process(annotations, roundEnvironment);
+        result &= dbProcessorJdbc.process(annotations, roundEnvironment);
 
         return result;
     }
