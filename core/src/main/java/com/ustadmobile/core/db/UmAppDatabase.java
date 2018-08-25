@@ -1,6 +1,7 @@
 package com.ustadmobile.core.db;
 
 import com.ustadmobile.core.db.dao.ClazzDao;
+import com.ustadmobile.core.db.dao.ClazzMemberDao;
 import com.ustadmobile.core.db.dao.ContainerFileDao;
 import com.ustadmobile.core.db.dao.ContainerFileEntryDao;
 import com.ustadmobile.core.db.dao.CrawJoblItemDao;
@@ -120,6 +121,8 @@ public abstract class UmAppDatabase{
     public abstract PersonDao getPersonDao();
 
     public abstract ClazzDao getClazzDao();
+
+    public abstract ClazzMemberDao getClazzMemberDao();
 
     @UmDbContext
     public abstract Object getContext();
