@@ -15,6 +15,16 @@ public class Clazz implements SyncableEntity{
 
     private long localChangeSeqNum;
 
+    private float attendanceAverage;
+
+    public float getAttendanceAverage() {
+        return attendanceAverage;
+    }
+
+    public void setAttendanceAverage(float attendanceAverage) {
+        this.attendanceAverage = attendanceAverage;
+    }
+
     public long getClazzUid() {
         return clazzUid;
     }
