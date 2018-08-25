@@ -1,7 +1,6 @@
 package com.ustadmobile.test.port.android.view;
 
 import android.os.SystemClock;
-import android.support.design.widget.TabLayout;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
 import android.support.v4.view.ViewPager;
@@ -26,9 +25,9 @@ import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.core.AllOf.allOf;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
 
-
-
-
+/**
+ * Android Espresso test that tests BasePoint2Activity
+ */
 @RunWith(AndroidJUnit4.class)
 public class BasePoint2EspressoTest {
 
@@ -46,42 +45,21 @@ public class BasePoint2EspressoTest {
         //Before here..
     }
 
-    public void changeNvigationView(int position){
-        //Get the bottom navigation component.
-        AHBottomNavigation bottomNavigation =
-            mActivityRule.getActivity().findViewById(R.id.bottom_navigation);
+    public void setBottomNavigationCurrentItem(int position) throws Throwable {
 
-        final Runnable changeView = new Runnable()
-        {
-            public void run()
-            {
-                bottomNavigation.setCurrentItem(position);
-            }
-        };
-
-        try {
-            mActivityRule.runOnUiThread(changeView);
-        } catch (Throwable throwable) {
-            throwable.printStackTrace();
-        }
+        //Lambda way
+        mActivityRule.runOnUiThread(() ->
+            ((AHBottomNavigation)mActivityRule.getActivity().findViewById(R.id.bottom_navigation)
+                ).setCurrentItem(position));
     }
 
-    public void changePeopleView(int position){
-        //Get the BasePointPeople TabLayout component
-        ViewPager basepointPeopleFragmentContainer = (ViewPager)
-                mActivityRule.getActivity().findViewById(R.id.fragment_base_point_people_container);
-        final Runnable changeView = new Runnable() {
-            @Override
-            public void run() {
-                basepointPeopleFragmentContainer.setCurrentItem(position);
-            }
-        };
+    public void changePeopleView(int position) throws Throwable {
 
-        try {
-            mActivityRule.runOnUiThread(changeView);
-        } catch (Throwable throwable) {
-            throwable.printStackTrace();
-        }
+        //Lambda way:
+        mActivityRule.runOnUiThread(() ->
+                ((ViewPager)
+                    mActivityRule.getActivity().findViewById(R.id.fragment_base_point_people_container)
+                ).setCurrentItem(position));
     }
 
     @Test
@@ -93,47 +71,39 @@ public class BasePoint2EspressoTest {
     }
 
     @Test
-    public void givenAppLoads_whenBasePoint2Starts_shouldShowFeedFirst(){
-        //TODO: Check this might not work since the test will not run the first time. We don't
-        // know the order of things. Neither we know the state of the UI with other tests
-        // being run before this. The current view is guaranteed not to be Feed.
-
+    public void givenBasePointLoads_whenFeedClicked_shouldGoToFeed() throws Throwable {
+        setBottomNavigationCurrentItem(0);
         onView(allOf(instanceOf(TextView.class), withParent(withId(R.id.base_point_2_toolbar))))
                 .check(matches(withText(R.string.feed)));
+        //TODO Check if fragment opened and loaded.
 
     }
 
     @Test
-    public void givenBasePointLoads_whenFeedClicked_shouldGoToFeed(){
-        changeNvigationView(0);
-        onView(allOf(instanceOf(TextView.class), withParent(withId(R.id.base_point_2_toolbar))))
-                .check(matches(withText(R.string.feed)));
-
-    }
-
-    @Test
-    public void givenBasePointLoads_whenPeopleClicked_shouldGoToPeople(){
-        changeNvigationView(1);
+    public void givenBasePointLoads_whenPeopleClicked_shouldGoToPeople() throws Throwable {
+        setBottomNavigationCurrentItem(1);
         SystemClock.sleep(1000);
         onView(allOf(instanceOf(TextView.class), withParent(withId(R.id.base_point_2_toolbar))))
                 .check(matches(withText(R.string.my_classes)));
-        //Check if PeopleListFragment opened.
+        //TODO Check if PeopleListFragment opened.
     }
 
     @Test
-    public void givenBasePointLoads_whenStatisticsClicked_shouldGoToStatistics(){
-        changeNvigationView(2);
+    public void givenBasePointLoads_whenStatisticsClicked_shouldGoToStatistics() throws Throwable {
+        setBottomNavigationCurrentItem(2);
         SystemClock.sleep(1000);
         onView(allOf(instanceOf(TextView.class), withParent(withId(R.id.base_point_2_toolbar))))
                 .check(matches(withText(R.string.statistcs)));
+        //TODO Check if fragment opened and loaded.
     }
 
     @Test
-    public void givenBasePointLoads_whenLessonsClicked_shouldGoToLessons(){
-        changeNvigationView(3);
+    public void givenBasePointLoads_whenLessonsClicked_shouldGoToLessons() throws Throwable {
+        setBottomNavigationCurrentItem(3);
         SystemClock.sleep(1000);
         onView(allOf(instanceOf(TextView.class), withParent(withId(R.id.base_point_2_toolbar))))
                 .check(matches(withText(R.string.lessons)));
+        //TODO Check if fragment opened and loaded.
 
     }
 

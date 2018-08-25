@@ -46,7 +46,7 @@ public class BasePointPeopleFragmentEspressoTest {
     }
 
     @Test
-    public void givenAppLoads_whenBasePointPeopleFragmentStarts_shouldLoadTabs() {
+    public void givenAppLoads_whenBasePointPeopleFragmentStarts_shouldShowTabs() {
         //TODO: Write tests
 
         //Assert Classes and People Tabs are loaded

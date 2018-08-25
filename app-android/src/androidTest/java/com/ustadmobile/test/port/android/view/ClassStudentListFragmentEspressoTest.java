@@ -47,7 +47,7 @@ public class ClassStudentListFragmentEspressoTest {
     }
 
     @Test
-    public void givenAppLoads_whenClassStudentListFragmentStarts_shouldLoadStudents() {
+    public void givenAppLoads_whenClassStudentListFragmentStarts_shouldShowStudents() {
         //TODO: Write tests
 
         //Assert students load in recycler view.

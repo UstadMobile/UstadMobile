@@ -12,14 +12,6 @@ import org.junit.runner.RunWith;
 import com.ustadmobile.port.android.view.BasePointActivity2;
 import com.ustadmobile.port.android.view.ClassListFragment;
 
-import static android.support.test.espresso.Espresso.onView;
-import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
-import static android.support.test.espresso.matcher.ViewMatchers.withId;
-import static android.support.test.espresso.matcher.ViewMatchers.withParent;
-import static android.support.test.espresso.matcher.ViewMatchers.withText;
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.core.AllOf.allOf;
-import static android.support.test.espresso.assertion.ViewAssertions.matches;
 
 
 /**
@@ -46,12 +38,12 @@ public class ClassListFragmentEspressoTest {
     }
 
     @Test
-    public void givenAppLoads_whenClassListFragmentStarts_shouldLoadClassesCards() {
+    public void givenAppLoads_whenClassListFragmentStarts_shouldShowClassesCards() {
         //TODO: Write tests
 
         //Assert the class card list recycler view populates according to DAO
-        //Assert value in those cards matches with the classes themseves via DAO.
-        //Assert attendance color matches with all cases.
+        //Assert value in those cards matches with the classes themselves via DAO.
+
 
     }
 
@@ -61,6 +53,13 @@ public class ClassListFragmentEspressoTest {
 
         //Assert that a class, the record attendance button opens up the attendance activity for that
         //class with students populated and today's date.
+    }
+
+    @Test
+    public void givenClassListFragmentStarted_whenClassClicked_shouldLaunchClassDetailActivity(){
+        //TODO: this
+
+        //Assert that when class cicked goes to its Class Detail activity page.
     }
 
 }

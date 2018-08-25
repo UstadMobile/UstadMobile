@@ -45,12 +45,6 @@ public class PeopleListFragmentEspressoTest {
         //Before here..
     }
 
-    @Test
-    public void givenAppLoads_whenPeopleListFragmentStarts_shouldListPeopleInClass() {
-        //TODO: Write tests
-
-        //Assert loads ok.
-
-    }
+    //Tests go here
 
 }

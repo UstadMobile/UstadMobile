@@ -47,7 +47,7 @@ public class FeedListFragmentEspressoTest {
     }
 
     @Test
-    public void givenFeedListFragmentStarts_whenFeedListLoads_shouldShowAndMatchFeedEntries() {
+    public void givenAppStarts_whenFeedListLoads_shouldShowAndMatchFeedEntries() {
         //TODO: Write tests
 
         //Assert feed entries match with DAO entries
@@ -62,11 +62,11 @@ public class FeedListFragmentEspressoTest {
     }
 
     @Test
-    public void givenFeedListFragmentStarts_whenFeedListLoads_shouldUpdateFeedIcon() {
+    public void givenFeedListFragmentStarts_whenFeedListLoads_shouldUpdateFeedBadge() {
         //TODO: this
 
         //Assert load feedlist and the number of outstanding items matches with the feed button's
-        // number notification icon in the bottom navigation of BasePoint2Activity
+        // number notification icon (badge) in the bottom navigation of BasePoint2Activity
 
     }
 

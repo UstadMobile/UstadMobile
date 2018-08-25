@@ -1,22 +1,11 @@
 package com.ustadmobile.test.port.android.view;
 
-import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import static android.support.test.espresso.Espresso.onView;
-import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
-import static android.support.test.espresso.matcher.ViewMatchers.withId;
-import static android.support.test.espresso.matcher.ViewMatchers.withParent;
-import static android.support.test.espresso.matcher.ViewMatchers.withText;
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.core.AllOf.allOf;
-import static android.support.test.espresso.assertion.ViewAssertions.matches;
 
 
 /**
@@ -40,7 +29,7 @@ public class ClassAttendanceActivityEspressoTest {
     }
 
     @Test
-    public void givenAppLoads_whenClassAttendanceActivityStarts_shouldTakeAttendance() {
+    public void givenAttendanceActivityStart_whenUserRecordsAttendanceAndClicksDone_shouldSaveToDatabaseAndFinish(){
         //TODO: Write tests
 
         //Assert loads with details
@@ -52,7 +41,7 @@ public class ClassAttendanceActivityEspressoTest {
     }
 
     @Test
-    public void givenAttendanceForClassTakenLoads_whenDetailsChanged_shouldUpdateDetails(){
+    public void givenAttendanceActivityStartedForPreviousRecord_whenResultsUpdated_shouldUpdateDatabase(){
         //TODO: this
 
         //Assert attendane open for already taken.
@@ -62,7 +51,7 @@ public class ClassAttendanceActivityEspressoTest {
     }
 
     @Test
-    public void givenAttendanceForClassLoads_whenDateTabSwiped_showConsecutiveDateAttendance(){
+    public void givenAttendanceActivityStarted_whenDateTabSwiped_shouldShowRecordsFromPreviousDate(){
         //TODO this
 
         //Assert can swipe towards left to show previous day's attendance.
