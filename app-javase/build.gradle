@@ -12,8 +12,8 @@ dependencies {
     implementation project(":lib-util")
 
     testImplementation "junit:junit:$version_junit"
-    testImplementation "com.github.h-thurow:simple-jndi:0.17.2"
-    testImplementation "org.xerial:sqlite-jdbc:3.23.1"
+    testImplementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
+    testImplementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
 
     implementation "org.json:json:$version_json"
     implementation "net.sf.kxml:kxml2:$version_kxml"

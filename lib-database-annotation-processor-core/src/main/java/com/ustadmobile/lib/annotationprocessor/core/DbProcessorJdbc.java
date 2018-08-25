@@ -4,23 +4,38 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
+import com.ustadmobile.lib.database.annotation.UmDatabase;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.Formatter;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.processing.RoundEnvironment;
+import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
+import javax.lang.model.type.TypeMirror;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
+import javax.sql.DataSource;
+import javax.tools.Diagnostic;
 
 import static com.ustadmobile.lib.annotationprocessor.core.DbProcessorCore.OPT_JDBC_OUTPUT;
 
@@ -40,25 +55,31 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
         TypeSpec.Builder jdbcDbTypeSpec = TypeSpec.classBuilder(jdbcDbClassName)
                 .addModifiers(Modifier.PUBLIC)
                 .superclass(ClassName.get(dbType))
-                .addJavadoc("Generated code - DO NOT EDIT!")
+                .addJavadoc("Generated code - DO NOT EDIT!\n")
                 .addField(ClassName.get(Object.class), "_context")
-                .addField(ClassName.get("javax.sql", "DataSource"), "_dataSource")
+                .addField(ClassName.get(DataSource.class), "_dataSource")
+                .addField(ClassName.get(Connection.class), "_connection")
                 .addMethod(MethodSpec.constructorBuilder()
                     .addModifiers(Modifier.PUBLIC)
                     .addParameter(TypeName.get(Object.class), "context")
                     .addParameter(TypeName.get(String.class), "dbName")
                     .addCode(CodeBlock.builder().add("\tthis._context = context;\n")
-                        .add("\ttry {\n")
-                        .add("\t\t$T iContext = new $T();\n", initialContextClassName, initialContextClassName)
-                        .add("\t\tthis._dataSource = (DataSource)iContext.lookup(\"java:/comp/env/jdbc/\"+dbName);\n")
-                        .add("\t}catch($T e){\n", ClassName.get(NamingException.class))
-                        .add("\t\tthrow new RuntimeException(e);\n")
-                        .add("\t}\n")
+                        .beginControlFlow("try ")
+                            .add("$T iContext = new $T();\n", initialContextClassName, initialContextClassName)
+                            .add("this._dataSource = (DataSource)iContext.lookup(\"java:/comp/env/jdbc/\"+dbName);\n")
+                            .add("this._connection = _dataSource.getConnection();\n")
+                            .add("createAllTables(_connection);\n")
+                        .endControlFlow()
+                        .beginControlFlow("catch($T|$T e)",
+                                ClassName.get(NamingException.class), ClassName.get(SQLException.class))
+                            .add("throw new RuntimeException(e);\n")
+                        .endControlFlow()
                         .build())
                 .build());
 
         TypeSpec.Builder factoryClassSpec = DbProcessorUtils.makeFactoryClass(dbType, jdbcDbClassName);
 
+        addCreateTablesMethodToClassSpec(dbType, jdbcDbTypeSpec);
 
         for(Element subElement : dbType.getEnclosedElements()) {
             if (subElement.getKind() != ElementKind.METHOD)
@@ -88,6 +109,117 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
         JavaFile.builder(packageElement.getQualifiedName().toString(), jdbcDbTypeSpec.build())
                 .build().writeTo(destinationDir);
     }
+
+    protected void addCreateTablesMethodToClassSpec(TypeElement dbType, TypeSpec.Builder classBuilder) {
+        List<? extends AnnotationMirror> annotationMirrors = dbType.getAnnotationMirrors();
+        Element umDbElement = processingEnv.getElementUtils()
+                .getPackageElement(UmDatabase.class.getCanonicalName());
+
+        Map<? extends ExecutableElement, ? extends AnnotationValue> annotationEntryMap =
+                dbType.getAnnotationMirrors().get(0).getElementValues();
+        for(Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entry :
+                annotationEntryMap.entrySet()) {
+            String key = entry.getKey().getSimpleName().toString();
+            Object value = entry.getValue().getValue();
+            if (key.equals("entities")) {
+                List<? extends AnnotationValue> typeMirrors =
+                        (List<? extends AnnotationValue>) value;
+                MethodSpec.Builder createMethod = MethodSpec.methodBuilder("createAllTables");
+                createMethod.addParameter(ClassName.get(Connection.class), "con");
+                CodeBlock.Builder createCb = CodeBlock.builder();
+                createCb.add("try {\n");
+                createCb.add("$T _stmt = con.createStatement();\n", ClassName.get(Statement.class));
+                for(AnnotationValue entityValue : typeMirrors) {
+                    TypeElement entityTypeElement = (TypeElement)processingEnv.getTypeUtils()
+                            .asElement((TypeMirror)entityValue.getValue());
+                    String createTableStmt = makeCreateTableStatement(entityTypeElement, '`');
+                    createCb.add("_stmt.executeUpdate($S);\n", createTableStmt);
+                }
+                createCb.add("_stmt.close();\n");
+
+                createCb.add("}catch($T e){\n", SQLException.class)
+                        .add("throw new $T(e);\n", RuntimeException.class)
+                        .add("}\n");
+
+
+                createMethod.addCode(createCb.build());
+                classBuilder.addMethod(createMethod.build());
+            }
+        }
+    }
+
+    protected String makeCreateTableStatement(TypeElement entitySpec, char quoteChar) {
+        StringBuilder sbuf = new StringBuilder();
+        sbuf.append("CREATE TABLE IF NOT EXISTS ").append(quoteChar)
+                .append(entitySpec.getSimpleName()).append(quoteChar)
+                .append(" (");
+
+        List<? extends Element> subElementList = entitySpec.getEnclosedElements();
+
+
+        boolean fieldVariablesStarted = false;
+        for(int i = 0; i < subElementList.size(); i++) {
+            if(subElementList.get(i).getKind() != ElementKind.FIELD)
+                continue;
+
+            if(fieldVariablesStarted)
+                sbuf.append(", ");
+
+            VariableElement fieldVariable = (VariableElement)subElementList.get(i);
+            sbuf.append(quoteChar).append(fieldVariable.getSimpleName().toString())
+                    .append(quoteChar).append(' ').append(makeSqlTypeDeclaration(fieldVariable));
+
+            fieldVariablesStarted = true;
+        }
+
+        sbuf.append(')');
+        return sbuf.toString();
+
+    }
+
+    protected String makeSqlTypeDeclaration(VariableElement field) {
+        TypeMirror fieldType = field.asType();
+
+        switch(fieldType.getKind()) {
+            case BOOLEAN:
+                return "BOOL";
+
+            case INT:
+                return "INTEGER";
+
+            case LONG:
+                return "BIGINT";
+
+            case FLOAT:
+                return "FLOAT";
+
+            case DOUBLE:
+                return "DOUBLE";
+
+            case DECLARED:
+                Element typeEl = processingEnv.getTypeUtils().asElement(fieldType);
+                if(processingEnv.getElementUtils().getTypeElement("java.lang.String")
+                        .equals(typeEl)) {
+                    return "TEXT";
+                }else if(processingEnv.getElementUtils().getTypeElement("java.lang.Integer")
+                    .equals(typeEl)) {
+                    return "INTEGER";
+                }else if(processingEnv.getElementUtils().getTypeElement("java.lang.Long")
+                    .equals(typeEl)) {
+                    return "BIGINT";
+                }
+
+                break;
+        }
+
+        //didn't recognize that.
+        messager.printMessage(Diagnostic.Kind.ERROR,
+                "Could not determine SQL data type for field: " + field.getEnclosingElement() +
+                "." + field.getSimpleName().toString());
+
+        return null;
+    }
+
 
     @Override
     public void processDbDao(TypeElement dbDao, File DestinationDir) throws IOException {
