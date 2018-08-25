@@ -19,6 +19,8 @@ public class ClazzMember implements SyncableEntity {
 
     private long clazzMemberPersonUid;
 
+    private long clazzMemberClazzUid;
+
     private long dateJoined;
 
     private long dateLeft;
@@ -72,6 +74,14 @@ public class ClazzMember implements SyncableEntity {
 
     public void setRole(int role) {
         this.role = role;
+    }
+
+    public long getClazzMemberClazzUid() {
+        return clazzMemberClazzUid;
+    }
+
+    public void setClazzMemberClazzUid(long clazzMemberClazzUid) {
+        this.clazzMemberClazzUid = clazzMemberClazzUid;
     }
 
     @Override
