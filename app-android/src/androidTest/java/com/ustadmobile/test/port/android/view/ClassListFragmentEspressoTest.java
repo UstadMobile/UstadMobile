@@ -10,12 +10,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import com.ustadmobile.port.android.view.BasePointActivity2;
-import com.ustadmobile.port.android.view.ClassListFragment;
-
 
 
 /**
- * ClassListFragment's Espresso UI Test for Android
+ * ClazzListFragment's Espresso UI Test for Android
  */
 @RunWith(AndroidJUnit4.class)
 public class ClassListFragmentEspressoTest {

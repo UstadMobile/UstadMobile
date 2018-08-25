@@ -1,6 +1,5 @@
 package com.ustadmobile.port.android.view;
 
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v4.app.Fragment;
@@ -8,10 +7,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
-import android.support.v4.widget.TextViewCompat;
 import android.support.v7.widget.Toolbar;
-import android.widget.TextView;
-
 
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigationItem;
@@ -36,6 +32,10 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
     private CollapsingToolbarLayout mCollapsingToolbar;
     private Toolbar toolbar;
 
+    /**
+     *
+     * @param menuItems String menuItems
+     */
     @Override
     public void setBottomNavigationItems(String[] menuItems) {
 
@@ -155,6 +155,10 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
 
     }
 
+    /**
+     *
+     * @param title
+     */
     public void updateTitle(String title){
         toolbar.setTitle(title);
     }

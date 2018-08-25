@@ -11,15 +11,15 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.toughra.ustadmobile.R;
-import com.ustadmobile.core.view.ClassListView;
+import com.ustadmobile.core.view.ClazzListView;
 
 import java.util.ArrayList;
 
 /**
- * ClassListFragment Android fragment extends UstadBaseFragment
+ * ClazzListFragment Android fragment extends UstadBaseFragment
  */
-public class ClassListFragment extends UstadBaseFragment implements ClassListView,
-        View.OnClickListener, View.OnLongClickListener, SwipeRefreshLayout.OnRefreshListener {
+public class ClazzListFragment extends UstadBaseFragment implements ClazzListView,
+        View.OnClickListener, View.OnLongClickListener{
 
     View rootContainer;
     //RecyclerView
@@ -36,10 +36,10 @@ public class ClassListFragment extends UstadBaseFragment implements ClassListVie
      * Generates a new Fragment for a page fragment
      * TODO: Add any args if needed
      *
-     * @return A new instance of fragment ClassListFragment.
+     * @return A new instance of fragment ClazzListFragment.
      */
-    public static ClassListFragment newInstance() {
-        ClassListFragment fragment = new ClassListFragment();
+    public static ClazzListFragment newInstance() {
+        ClazzListFragment fragment = new ClazzListFragment();
         Bundle args = new Bundle();
         fragment.setArguments(args);
         return fragment;
@@ -67,15 +67,12 @@ public class ClassListFragment extends UstadBaseFragment implements ClassListVie
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        // TODO: Inflate the layout for this fragment
         rootContainer = inflater.inflate(R.layout.fragment_class_list, container, false);
         setHasOptionsMenu(true);
 
 
-        // TODO: Set mRecyclerView..
         mRecyclerView = rootContainer.findViewById(R.id.fragment_class_list_recyclerview);
 
-        // TODO: Use Layout: set layout manager. Change defaults
         mRecyclerLayoutManager = new LinearLayoutManager(getContext());
         mRecyclerView.setLayoutManager(mRecyclerLayoutManager);
         DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(mRecyclerView.getContext(),
@@ -89,18 +86,12 @@ public class ClassListFragment extends UstadBaseFragment implements ClassListVie
             classNames.add("Class " + i + 1);
         }
 
-        // TODO: Specify the mAdapter
         mAdapter = new CardRecyclerViewAdapter(getContext(), classNames);
         mRecyclerView.setAdapter(mAdapter);
-
 
         //Update the parent header toolbar
         toolbar = getActivity().findViewById(R.id.base_point_2_toolbar);
         toolbar.setTitle(getText(R.string.my_classes));
-
-        //Swipe-refresh
-        mSwipeRefreshLayout = rootContainer.findViewById(R.id.fragment_class_list_swiperefreshview);
-        mSwipeRefreshLayout.setOnRefreshListener(this);
 
         //return container
         return rootContainer;
@@ -111,15 +102,6 @@ public class ClassListFragment extends UstadBaseFragment implements ClassListVie
     public void onViewCreated(View view, Bundle savedInstanceState) {
         // Setup any handles to view objects here
 
-    }
-
-    /**
-     * View and SwipeRefreshLayout Listeners
-     */
-    @Override
-    public void onRefresh() {
-        //Update refreshing animation, etc
-        mSwipeRefreshLayout.setRefreshing(false);
     }
 
     @Override

@@ -5,9 +5,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.widget.DividerItemDecoration;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -116,15 +113,9 @@ public class BasePointPeopleFragment extends UstadBaseFragment implements BasePo
         public Fragment getItem(int position) {
             switch (position) {
                 case 0:
-                    System.out.println("GO TO NESTED FRAGMENT 1");
-                    return ClassListFragment.newInstance();
-                    //return FeedListFragment.newInstance();
-                    //return Nest1Fragment.newInstance(1);
+                    return ClazzListFragment.newInstance();
                 default:
-                    System.out.println("GO TO NESTED PRAGMENT 2");
                     return PeopleListFragment.newInstance();
-                    //return FeedListFragment.newInstance();
-                    //return Nest2Fragment.newInstance(2);
             }
             //return null;
         }
