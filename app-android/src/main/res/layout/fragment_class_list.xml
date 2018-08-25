@@ -3,20 +3,11 @@
     android:layout_height="match_parent"
     tools:context="com.ustadmobile.port.android.view.ClazzListFragment">
 
-    <android.support.v4.widget.SwipeRefreshLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/fragment_class_list_swiperefreshview">
-
         <android.support.v7.widget.RecyclerView
             android:layout_height="match_parent"
             android:layout_width="match_parent"
             android:id="@+id/fragment_class_list_recyclerview"
             android:scrollbars="vertical"
             />
-
-    </android.support.v4.widget.SwipeRefreshLayout>
-
-
 
 </FrameLayout>

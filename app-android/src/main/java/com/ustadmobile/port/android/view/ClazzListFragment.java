@@ -1,7 +1,15 @@
 package com.ustadmobile.port.android.view;
 
+import android.arch.lifecycle.LiveData;
+import android.arch.paging.DataSource;
+import android.arch.paging.LivePagedListBuilder;
+import android.arch.paging.PagedList;
+import android.arch.paging.PagedListAdapter;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -9,9 +17,14 @@ import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
+import com.ustadmobile.core.controller.ClazzListPresenter;
+import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.view.ClazzListView;
+import com.ustadmobile.lib.db.entities.ClazzWithNumStudents;
+import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.util.ArrayList;
 
@@ -21,16 +34,61 @@ import java.util.ArrayList;
 public class ClazzListFragment extends UstadBaseFragment implements ClazzListView,
         View.OnClickListener, View.OnLongClickListener{
 
-    View rootContainer;
+    private View rootContainer;
+
     //RecyclerView
     private RecyclerView mRecyclerView;
     private RecyclerView.LayoutManager mRecyclerLayoutManager;
-    private RecyclerView.Adapter mAdapter;
 
     private Toolbar toolbar;
 
-    //Swipe-refresh
-    private SwipeRefreshLayout mSwipeRefreshLayout;
+    private ClazzListPresenter mPresenter;
+
+
+    protected class ClazzListRecyclerAdapter extends PagedListAdapter<ClazzWithNumStudents, ClazzListRecyclerAdapter.ClazzViewHolder> {
+
+        protected class ClazzViewHolder extends RecyclerView.ViewHolder {
+
+            protected ClazzViewHolder(View itemView) {
+                super(itemView);
+            }
+        }
+
+        protected ClazzListRecyclerAdapter(@NonNull DiffUtil.ItemCallback<ClazzWithNumStudents> diffCallback) {
+            super(diffCallback);
+        }
+
+        @NonNull
+        @Override
+        public ClazzViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            View clazzListItem = LayoutInflater.from(getContext()).inflate(R.layout.item_clazzlist_clazz,
+                    parent, false);
+            return new ClazzViewHolder(clazzListItem);
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull ClazzViewHolder holder, int position) {
+            ClazzWithNumStudents clazz = getItem(position);
+            ((TextView)holder.itemView.findViewById(R.id.item_clazzlist_clazz_title))
+                    .setText(clazz.getClazzName());
+            ((TextView)holder.itemView.findViewById(R.id.item_clazzlist_numstudents_text))
+                    .setText(clazz.getNumStudents() + " " + getResources()
+                            .getText(R.string.students_literal).toString());
+            holder.itemView.setOnClickListener((view) -> mPresenter.handleClickClazz(clazz));
+        }
+    }
+
+    public static final DiffUtil.ItemCallback<ClazzWithNumStudents> DIFF_CALLBACK = new DiffUtil.ItemCallback<ClazzWithNumStudents>() {
+        @Override
+        public boolean areItemsTheSame(ClazzWithNumStudents oldItem, ClazzWithNumStudents newItem) {
+            return oldItem.getClazzUid() == newItem.getClazzUid();
+        }
+
+        @Override
+        public boolean areContentsTheSame(ClazzWithNumStudents oldItem, ClazzWithNumStudents newItem) {
+            return oldItem.equals(newItem);
+        }
+    };
 
     /**
      * Generates a new Fragment for a page fragment
@@ -77,24 +135,25 @@ public class ClazzListFragment extends UstadBaseFragment implements ClazzListVie
         mRecyclerView.setLayoutManager(mRecyclerLayoutManager);
         DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(mRecyclerView.getContext(),
                 LinearLayoutManager.VERTICAL);
-        mRecyclerView.addItemDecoration(dividerItemDecoration);
 
-        //Get test data
-        // data to populate the RecyclerView with
-        ArrayList<String> classNames = new ArrayList<>();
-        for(int i=0;i<16;i++){
-            classNames.add("Class " + i + 1);
-        }
-
-        mAdapter = new CardRecyclerViewAdapter(getContext(), classNames);
-        mRecyclerView.setAdapter(mAdapter);
-
-        //Update the parent header toolbar
-        toolbar = getActivity().findViewById(R.id.base_point_2_toolbar);
-        toolbar.setTitle(getText(R.string.my_classes));
 
         //return container
+
+        mPresenter = new ClazzListPresenter(this,
+                UMAndroidUtil.bundleToHashtable(getArguments()), this);
+        mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
         return rootContainer;
+    }
+
+    @Override
+    public void setClazzListProvider(UmProvider<ClazzWithNumStudents> clazzListProvider) {
+        ClazzListRecyclerAdapter recyclerAdapter = new ClazzListRecyclerAdapter(DIFF_CALLBACK);
+        DataSource.Factory<Integer, ClazzWithNumStudents> factory =
+                (DataSource.Factory<Integer, ClazzWithNumStudents>)clazzListProvider.getProvider();
+        LiveData<PagedList<ClazzWithNumStudents>> data = new LivePagedListBuilder<>(factory, 20)
+                .build();
+        data.observe(this, recyclerAdapter::submitList);
+        mRecyclerView.setAdapter(recyclerAdapter);
     }
 
     // This event is triggered soon after onCreateView().
