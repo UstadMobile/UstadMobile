@@ -7,8 +7,6 @@ import android.arch.paging.PagedList;
 import android.arch.paging.PagedListAdapter;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
@@ -28,8 +26,6 @@ import com.ustadmobile.core.view.ClazzListView;
 import com.ustadmobile.lib.db.entities.ClazzWithNumStudents;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
-import java.util.ArrayList;
-
 /**
  * ClazzListFragment Android fragment extends UstadBaseFragment
  */
@@ -47,7 +43,8 @@ public class ClazzListFragment extends UstadBaseFragment implements ClazzListVie
     private ClazzListPresenter mPresenter;
 
 
-    protected class ClazzListRecyclerAdapter extends PagedListAdapter<ClazzWithNumStudents, ClazzListRecyclerAdapter.ClazzViewHolder> {
+    protected class ClazzListRecyclerAdapter extends
+            PagedListAdapter<ClazzWithNumStudents, ClazzListRecyclerAdapter.ClazzViewHolder> {
 
         protected class ClazzViewHolder extends RecyclerView.ViewHolder {
 
@@ -56,20 +53,22 @@ public class ClazzListFragment extends UstadBaseFragment implements ClazzListVie
             }
         }
 
-        protected ClazzListRecyclerAdapter(@NonNull DiffUtil.ItemCallback<ClazzWithNumStudents> diffCallback) {
+        protected ClazzListRecyclerAdapter(@NonNull DiffUtil.ItemCallback<ClazzWithNumStudents>
+                                                   diffCallback) {
             super(diffCallback);
         }
 
         @NonNull
         @Override
         public ClazzViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            View clazzListItem = LayoutInflater.from(getContext()).inflate(R.layout.item_clazzlist_clazz,
+            View clazzListItem =
+                    LayoutInflater.from(getContext()).inflate(R.layout.item_clazzlist_clazz,
                     parent, false);
             return new ClazzViewHolder(clazzListItem);
         }
 
         @Override
-        public void onBindViewHolder(@NonNull ClazzViewHolder holder, int position) {
+        public void onBindViewHolder  (@NonNull ClazzViewHolder holder, int position) {
             ClazzWithNumStudents clazz = getItem(position);
             ((TextView)holder.itemView.findViewById(R.id.item_clazzlist_clazz_title))
                     .setText(clazz.getClazzName());
@@ -80,14 +79,17 @@ public class ClazzListFragment extends UstadBaseFragment implements ClazzListVie
         }
     }
 
-    public static final DiffUtil.ItemCallback<ClazzWithNumStudents> DIFF_CALLBACK = new DiffUtil.ItemCallback<ClazzWithNumStudents>() {
+    public static final DiffUtil.ItemCallback<ClazzWithNumStudents> DIFF_CALLBACK =
+            new DiffUtil.ItemCallback<ClazzWithNumStudents>() {
         @Override
-        public boolean areItemsTheSame(ClazzWithNumStudents oldItem, ClazzWithNumStudents newItem) {
+        public boolean areItemsTheSame(ClazzWithNumStudents oldItem,
+                                       ClazzWithNumStudents newItem) {
             return oldItem.getClazzUid() == newItem.getClazzUid();
         }
 
         @Override
-        public boolean areContentsTheSame(ClazzWithNumStudents oldItem, ClazzWithNumStudents newItem) {
+        public boolean areContentsTheSame(ClazzWithNumStudents oldItem,
+                                          ClazzWithNumStudents newItem) {
             return oldItem.equals(newItem);
         }
     };
@@ -127,7 +129,8 @@ public class ClazzListFragment extends UstadBaseFragment implements ClazzListVie
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        rootContainer = inflater.inflate(R.layout.fragment_class_list, container, false);
+        rootContainer =
+                inflater.inflate(R.layout.fragment_class_list, container, false);
         setHasOptionsMenu(true);
 
 
@@ -135,7 +138,8 @@ public class ClazzListFragment extends UstadBaseFragment implements ClazzListVie
 
         mRecyclerLayoutManager = new LinearLayoutManager(getContext());
         mRecyclerView.setLayoutManager(mRecyclerLayoutManager);
-        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(mRecyclerView.getContext(),
+        DividerItemDecoration dividerItemDecoration =
+                new DividerItemDecoration(mRecyclerView.getContext(),
                 LinearLayoutManager.VERTICAL);
 
 
@@ -152,8 +156,8 @@ public class ClazzListFragment extends UstadBaseFragment implements ClazzListVie
         ClazzListRecyclerAdapter recyclerAdapter = new ClazzListRecyclerAdapter(DIFF_CALLBACK);
         DataSource.Factory<Integer, ClazzWithNumStudents> factory =
                 (DataSource.Factory<Integer, ClazzWithNumStudents>)clazzListProvider.getProvider();
-        LiveData<PagedList<ClazzWithNumStudents>> data = new LivePagedListBuilder<>(factory, 20)
-                .build();
+        LiveData<PagedList<ClazzWithNumStudents>> data =
+                new LivePagedListBuilder<>(factory, 20).build();
         data.observe(this, recyclerAdapter::submitList);
         new Thread(() -> {
             ClazzDao dao = UmAppDatabase.getInstance(getContext()).getClazzDao();

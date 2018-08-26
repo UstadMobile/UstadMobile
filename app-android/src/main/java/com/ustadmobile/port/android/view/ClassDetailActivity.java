@@ -5,12 +5,12 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.app.FragmentStatePagerAdapter;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.Toolbar;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.view.ClassDetailView;
+import com.ustadmobile.lib.db.entities.Clazz;
+
 import java.util.WeakHashMap;
 
 /**
@@ -27,12 +27,17 @@ public class ClassDetailActivity extends UstadBaseActivity implements
     private Toolbar toolbar;
     private TabLayout mTabLayout;
 
+    String CLAZZIDKEY = "ClazzUid";
+
+    Long clazzUid;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         //Setting layout:
         setContentView(R.layout.activity_class_detail);
 
+        clazzUid = getIntent().getLongExtra("ClazzUid", 0L);
 
         //Toolbar
         toolbar = findViewById(R.id.class_detail_toolbar);
@@ -55,7 +60,7 @@ public class ClassDetailActivity extends UstadBaseActivity implements
     private void setupViewPager() {
         mPager = (ViewPager) findViewById(R.id.class_detail_view_pager_container);
         mPagerAdapter = new ClassDetailViewPagerAdapter(getSupportFragmentManager());
-        mPagerAdapter.addFragments(0, ClassStudentListFragment.newInstance());
+        mPagerAdapter.addFragments(0, ClazzStudentListFragment.newInstance(this.clazzUid));
         mPagerAdapter.addFragments(1, ClassLogListFragment.newInstance());
         mPagerAdapter.addFragments(2, ComingSoonFragment.newInstance());
         //Fragment selectedFragment = mPagerAdapter.getItem(0);
@@ -115,7 +120,7 @@ public class ClassDetailActivity extends UstadBaseActivity implements
             } else {
                 switch (position) {
                     case 0:
-                        return ClassStudentListFragment.newInstance();
+                        return ClazzStudentListFragment.newInstance(clazzUid);
                     case 1:
                         return ClassLogListFragment.newInstance();
                     case 2:

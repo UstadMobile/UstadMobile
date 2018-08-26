@@ -1,28 +1,14 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.ustadmobile.port.android.view.ClassStudentListFragment">
+    tools:context="com.ustadmobile.port.android.view.ClazzStudentListFragment">
 
-    <android.support.v4.widget.SwipeRefreshLayout
-        android:layout_width="match_parent"
+    <android.support.v7.widget.RecyclerView
         android:layout_height="match_parent"
-        android:id="@+id/fragment_class_student_list_swiperefreshview">
-
-        <TextView
-            android:id="@+id/name_text"
-            android:text="@string/students_literal"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="60sp"/>
-
-        <android.support.v7.widget.RecyclerView
-            android:layout_height="match_parent"
-            android:layout_width="match_parent"
-            android:id="@+id/fragment_class_student_list_recyclerview"
-            android:scrollbars="vertical"
-            />
-
-    </android.support.v4.widget.SwipeRefreshLayout>
+        android:layout_width="match_parent"
+        android:id="@+id/fragment_class_student_list_recyclerview"
+        android:scrollbars="vertical"
+        />
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/class_student_list_add_student_fab"

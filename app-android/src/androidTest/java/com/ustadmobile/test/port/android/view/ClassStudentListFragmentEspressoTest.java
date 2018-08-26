@@ -10,20 +10,14 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import com.ustadmobile.port.android.view.ClassDetailActivity;
-import com.ustadmobile.port.android.view.ClassStudentListFragment;
 
-import static android.support.test.espresso.Espresso.onView;
-import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
-import static android.support.test.espresso.matcher.ViewMatchers.withParent;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
-import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.core.AllOf.allOf;
-import static android.support.test.espresso.assertion.ViewAssertions.matches;
 
 
 /**
- * ClassStudentListFragment's Espresso UI Test for Android
+ * ClazzStudentListFragment's Espresso UI Test for Android
  */
 @RunWith(AndroidJUnit4.class)
 public class ClassStudentListFragmentEspressoTest {

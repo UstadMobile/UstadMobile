@@ -8,7 +8,7 @@ import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
  * or a student. Each member has a joining date, and a leaving date.
  */
 @UmEntity
-public class ClazzMember implements SyncableEntity {
+public class ClazzMember  {
 
     public static final int ROLE_STUDENT = 1;
 
@@ -27,9 +27,7 @@ public class ClazzMember implements SyncableEntity {
 
     private int role;
 
-    private long masterChangeSeqNum;
-
-    private long localChangeSeqNum;
+    private float attendancePercentage;
 
     public long getClazzMemberUid() {
         return clazzMemberUid;
@@ -84,23 +82,11 @@ public class ClazzMember implements SyncableEntity {
         this.clazzMemberClazzUid = clazzMemberClazzUid;
     }
 
-    @Override
-    public long getMasterChangeSeqNum() {
-        return masterChangeSeqNum;
+    public float getAttendancePercentage() {
+        return attendancePercentage;
     }
 
-    @Override
-    public void setMasterChangeSeqNum(long masterChangeSeqNum) {
-        this.masterChangeSeqNum = masterChangeSeqNum;
-    }
-
-    @Override
-    public long getLocalChangeSeqNum() {
-        return localChangeSeqNum;
-    }
-
-    @Override
-    public void setLocalChangeSeqNum(long localChangeSeqNum) {
-        this.localChangeSeqNum = localChangeSeqNum;
+    public void setAttendancePercentage(float attendancePercentage) {
+        this.attendancePercentage = attendancePercentage;
     }
 }

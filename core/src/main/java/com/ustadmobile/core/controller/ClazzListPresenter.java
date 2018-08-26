@@ -2,7 +2,10 @@ package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmProvider;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.view.ClassDetailView;
 import com.ustadmobile.core.view.ClazzListView;
+import com.ustadmobile.core.view.ClazzStudentListView;
 import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.ClazzWithNumStudents;
 
@@ -27,6 +30,11 @@ public class ClazzListPresenter extends UstadBaseController<ClazzListView> {
     }
 
     public void handleClickClazz(Clazz clazz) {
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        Hashtable args = new Hashtable();
+        long clazzUid = clazz.getClazzUid();
+        args.put("ClazzUid", clazzUid);
+        impl.go(ClassDetailView.VIEW_NAME, args, view.getContext());
 
     }
 

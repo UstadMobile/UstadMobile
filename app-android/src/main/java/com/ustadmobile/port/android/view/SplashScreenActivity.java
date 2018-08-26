@@ -48,10 +48,12 @@ import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.ClazzDao;
 import com.ustadmobile.core.db.dao.ClazzMemberDao;
+import com.ustadmobile.core.db.dao.PersonDao;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.ClazzMember;
+import com.ustadmobile.lib.db.entities.Person;
 
 
 public class SplashScreenActivity extends AppCompatActivity implements DialogInterface.OnClickListener, ActivityCompat.OnRequestPermissionsResultCallback{
@@ -169,6 +171,27 @@ public class SplashScreenActivity extends AppCompatActivity implements DialogInt
                 UmAppDatabase.getInstance(getApplicationContext()).getClazzDao();
         ClazzMemberDao clazzMemberDao = UmAppDatabase.getInstance(getApplicationContext())
                 .getClazzMemberDao();
+        PersonDao personDao =
+                UmAppDatabase.getInstance(getApplicationContext()).getPersonDao();
+
+        for(int i = 0; i < 5; i++) {
+            Person person = new Person();
+            person.setFirstName("Ahmed");
+            person.setLastName("Khalil" + i);
+            personDao.insertAsync(person, new UmCallback<Long>() {
+                @Override
+                public void onSuccess(Long result) {
+                    person.setPersonUid(result);
+                }
+
+                @Override
+                public void onFailure(Throwable exception) {
+
+                }
+            });
+
+        }
+
         Clazz clazz1 = new Clazz();
         clazz1.setClazzName("Class 1");
         clazz1.setAttendanceAverage(42);
@@ -178,13 +201,14 @@ public class SplashScreenActivity extends AppCompatActivity implements DialogInt
                 clazz1.setClazzUid(result);
 
                 for(int i = 0; i < 5; i++) {
+
                     ClazzMember member = new ClazzMember();
                     member.setRole(ClazzMember.ROLE_STUDENT);
                     member.setClazzMemberPersonUid(i);
                     member.setClazzMemberClazzUid(result);
+                    member.setAttendancePercentage(42L);
                     clazzMemberDao.insertAsync(member, null);
                 }
-
             }
 
             @Override
