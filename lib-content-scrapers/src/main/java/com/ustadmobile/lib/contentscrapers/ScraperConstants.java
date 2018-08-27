@@ -26,6 +26,10 @@ public class ScraperConstants {
     public static final String MATERIAL_JS = "materialize.min.js";
     public static final String MATERIAL_CSS = "materialize.min.css";
 
+    public static final String brainGenieLink = "https://braingenie.ck12.org/";
+    public static final String slideShareLink = "www.slideshare.net";
+
+
     public static final List<String> QUESTION_SET_HOLDER_TYPES = Arrays.asList(
            ComponentType.EXCERCISE.getType(), ComponentType.ONLINE.getType(),
            ComponentType.TEST.getType());
@@ -42,6 +46,24 @@ public class ScraperConstants {
             + "[yyyy-MM-dd'T'HH:mm:ss.SSSSSS]"
             + "[yyyy-MM-dd'T'HH:mm:ss]"
     );
+
+    public enum QUESTION_TYPE{
+
+        MULTI_CHOICE("multiple-choice"),
+        FILL_BLANKS("fill-in-the-blanks"),
+        SHORT_ANSWER("short-answer");
+
+        private String type;
+
+        QUESTION_TYPE(String questionType) {
+            this.type = questionType;
+        }
+
+        public String getType() {
+            return type;
+        }
+
+    }
 
 
     public enum ComponentType{

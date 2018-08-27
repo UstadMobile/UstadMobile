@@ -3,8 +3,8 @@ package com.ustadmobile.lib.contentscrapers;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.ustadmobile.core.util.UMIOUtils;
-import com.ustadmobile.lib.contentscrapers.EdraakK12.ContentResponse;
 
+import org.apache.commons.io.FileUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -15,7 +15,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -29,6 +28,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -41,66 +42,77 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING;
+
 
 public class ContentScraperUtil {
 
-
     /**
-     *  Checks if the html string has an attribute value within, if found download its content
-     * @param htmlString html String
-     * @param attribute Attribute to look for
-     * @param destinationDir directory it will be saved if attribute found
-     * @param fileName - name of the file once saved
-     * @param url - base url
-     * @return
-     * @throws IOException
-     */
-    public static String checkIfJsonObjectHasAttribute(String htmlString, String attribute, File destinationDir, String fileName, URL url) throws IOException{
-        if (htmlString != null && htmlString.contains(attribute))
-            return ContentScraperUtil.downloadAllResources(htmlString, destinationDir, fileName, url);
-        return htmlString;
-    }
-
-
-    /**
-     *
      * Is the given componentType "Imported Component"
-     * @param component_type
+     *
+     * @param component_type enum type
      * @return
      */
-    public static Boolean isImportedComponent(String component_type) {
+    public static boolean isImportedComponent(String component_type) {
         return ScraperConstants.ComponentType.IMPORTED.getType().equalsIgnoreCase(component_type);
     }
 
 
     /**
-     * Given an html String search for all images that have sources to download from
-     * @param html
-     * @param destinationDir
-     * @param fileName
-     * @param baseUrl
-     * @return
-     * @throws IOException
+     * Given an html String, search for all tags that have src attribute to download from
+     *
+     * @param html           html string that might have src attributes
+     * @param destinationDir location the src file will be stored
+     * @param baseUrl        is needed for when the src is a path for the url
+     * @returns the html with modified src pointing to its new location
      */
-    public static String downloadAllResources(String html, File destinationDir, String fileName, URL baseUrl) throws IOException {
+    public static String downloadAllResources(String html, File destinationDir, URL baseUrl) {
+
+        if (html == null || html.isEmpty()) {
+            // no string to parse
+            return html;
+        }
 
         Document doc = Jsoup.parse(html);
 
-        int imageCountInTag = 0;
-        Elements images =  doc.select("img[src]");
-        for(Element image: images){
+        Elements contentList = doc.select("[src]");
+        for (Element content : contentList) {
 
-            String url = image.attr("src");
-            if((url.contains("data:image") && url.contains("base64")) || url.contains("file://")){
+            String url = content.attr("src");
+            if ((url.contains("data:image") && url.contains("base64")) || url.contains("file://")) {
+                continue;
+            } else if (url.contains(ScraperConstants.brainGenieLink)) {
+                String videoHtml;
+                try {
+                    videoHtml = Jsoup.connect(url).followRedirects(true).get().select("video").outerHtml();
+                } catch (IOException e) {
+                    continue;
+                }
+                content.parent().html(ContentScraperUtil.downloadAllResources(videoHtml, destinationDir, baseUrl));
+                continue;
+            } else if (url.contains("youtube")) {
+                // content.parent().html("We cannot download youtube content, please watch using the link below <p></p><a href=" + url + "\"><img src=\"video-thumbnail.jpg\"/></a>");
+                content.parent().html("");
+                continue;
+            } else if (url.contains(ScraperConstants.slideShareLink)) {
+                // content.html("We cannot download slideshare content, please watch using the link below <p></p><img href=" + url + "\" src=\"video-thumbnail.jpg\"/>");
+                content.parent().html("");
+                continue;
+                //    videoSource = Jsoup.connect(link).followRedirects(true).get().select("div.player").outerHtml();
+                //   videoSource = ContentScraperUtil.downloadAllResources(videoSource, destinationDirectory, "slideshare.jpg", scrapUrl);
+            }
+            try {
+                URL contentUrl = new URL(baseUrl, url);
+                String fileName = getFileNameFromUrl(url);
+                File contentFile = new File(destinationDir, fileName);
+
+                downloadContent(contentUrl, contentFile);
+
+                content.attr("src", destinationDir.getName() + "/" + fileName);
+            } catch (IOException e) {
                 continue;
             }
-            URL imageUrl = new URL(baseUrl, url);
-            File imageFile = new File(destinationDir, imageCountInTag + fileName);
-            downloadContent(imageUrl, imageFile);
 
-            image.attr("src",  destinationDir.getName() + "/" + imageCountInTag + fileName);
-
-            imageCountInTag++;
         }
 
         return doc.body().html();
@@ -108,14 +120,42 @@ public class ContentScraperUtil {
 
 
     /**
+     * Given a url link, find the file name
      *
-     * Given a url and file, download its content and write into the file
      * @param url
-     * @param file
+     * @return the extracted file name from url link
+     */
+    public static String getFileNameFromUrl(String url) {
+        return url.substring(url.lastIndexOf("/") + 1, url.length()).replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
+    }
+
+
+    /**
+     * Given the list, save it as json file
+     *
+     * @param destinationDir directory it will be saved
+     * @param list           ArrayList of Objects to be parsed to a string
+     * @throws IOException
+     */
+    public static void saveListAsJson(File destinationDir, List<?> list, String fileName) throws IOException {
+
+        Gson gson = new GsonBuilder().disableHtmlEscaping().create();
+        String savedQuestionsJson = gson.toJson(list, ArrayList.class);
+        File savedQuestionsFile = new File(destinationDir, fileName);
+
+        FileUtils.writeStringToFile(savedQuestionsFile, savedQuestionsJson, UTF_ENCODING);
+    }
+
+
+    /**
+     * Given a url and file, download its content and write into the file
+     *
+     * @param url  url that contains contain to download from
+     * @param file file it will write the content to
      * @param
      * @throws IOException
      */
-    public static void downloadContent(URL url,File file) throws IOException {
+    public static void downloadContent(URL url, File file) throws IOException {
 
         InputStream inputStream = null;
         FileOutputStream outputStream = null;
@@ -123,8 +163,8 @@ public class ContentScraperUtil {
             HttpURLConnection httpConn = (HttpURLConnection) url.openConnection();
             int responseCode = httpConn.getResponseCode();
 
-            if(responseCode != HttpURLConnection.HTTP_OK)
-                throw new IOException("HTTP Response code not 200: got " + responseCode);
+            if (responseCode != HttpURLConnection.HTTP_OK)
+                throw new IOException("HTTP Response code not 200: got " + responseCode + url);
 
             inputStream = httpConn.getInputStream();
             outputStream = new FileOutputStream(file);
@@ -141,82 +181,68 @@ public class ContentScraperUtil {
 
     }
 
-    /**
-     * Given text, write into a file
-     * @param text
-     * @param file
-     */
-    public static void writeStringToFile(String text, File file) {
-
-        FileWriter writer = null;
-        try {
-            writer = new FileWriter(file);
-            writer.write(text);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            UMIOUtils.closeQuietly(writer);
-        }
-
-    }
-
-
-
 
     /**
+     * Given the last modified time from server, check if the file that is saved is up to date with server
      *
-     * Given the last modified time and the file return if modified time is recent
-     * @param modifiedTime
-     * @param file
+     * @param modifiedTime the last time file was modified from server
+     * @param file         the current file in our directory
      * @return
      */
     public static boolean isContentUpdated(long modifiedTime, File file) {
 
-        if(file.exists()){
+        if (file.exists()) {
             return modifiedTime >= file.lastModified();
         }
         return true;
     }
 
 
-    public static boolean isFileCreated(File file){
+    /**
+     * Given a file, check it exists and has content by checking its size
+     *
+     * @param file that contains content
+     * @return
+     */
+    public static boolean fileHasContent(File file) {
         return file.exists() && file.length() > 0;
     }
 
 
     /**
-     *
      * Given an EdraakK12Date, return it as a long
+     *
      * @param date
      * @return
      */
-    public static long parseEdraakK12Date(String date){
+    public static long parseEdraakK12Date(String date) {
         return LocalDateTime.parse(date, ScraperConstants.formatter).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
     }
 
 
     /**
-     *
      * Given a url, parse the JSON from the http url response and return the object
-     * @param url
+     *
+     * @param url   url its downloading the json from
+     * @param clazz the class of the object its returning
      * @return
      * @throws IOException
      */
-    public static ContentResponse parseJson(URL url) throws IOException {
+    public static <T> T parseJson(URL url, Class<? extends T> clazz) throws IOException {
 
         Reader reader = null;
         InputStream inputStream;
         URLConnection connection;
-        try{
+        try {
             connection = url.openConnection();
-            connection.setRequestProperty("Accept","application/json, text/javascript, */*; q=0.01");
+            connection.setRequestProperty("Accept", "application/json, text/javascript, */*; q=0.01");
             inputStream = connection.getInputStream();
             ByteArrayOutputStream bout = new ByteArrayOutputStream();
             UMIOUtils.readFully(inputStream, bout);
 
             reader = new InputStreamReader(new ByteArrayInputStream(bout.toByteArray()));
             Gson gson = new GsonBuilder().create();
-            return gson.fromJson(reader, ContentResponse.class);
+            return gson.fromJson(reader, clazz);
         } finally {
             UMIOUtils.closeQuietly(reader);
         }
@@ -224,18 +250,18 @@ public class ContentScraperUtil {
 
 
     /**
-     *
      * Given a directory, save it using the filename, download its content and save in the given directory
-     * @param directoryToZip
-     * @param filename
-     * @param locationToSave
+     *
+     * @param directoryToZip location of the folder that will be zipped
+     * @param filename       name of the zip
+     * @param locationToSave location where the zipped folder will be placed
      * @throws IOException
      */
 
     public static void zipDirectory(File directoryToZip, String filename, File locationToSave) throws IOException {
 
-        File zippedFile = new File(locationToSave, filename +".zip");
-        try (ZipOutputStream out = new ZipOutputStream(Files.newOutputStream(zippedFile.toPath()), StandardCharsets.UTF_8)){
+        File zippedFile = new File(locationToSave, filename + ".zip");
+        try (ZipOutputStream out = new ZipOutputStream(Files.newOutputStream(zippedFile.toPath()), StandardCharsets.UTF_8)) {
             Path sourceDirPath = Paths.get(directoryToZip.toURI());
             Files.walk(sourceDirPath).filter(path -> !Files.isDirectory(path))
                     .forEach(path -> {
@@ -255,18 +281,16 @@ public class ContentScraperUtil {
 
 
     /**
-     *
      * Generate tincan xml file
-     * @param destinationDirectory directory it will be saved
-     * @param activityName name of course/simulation
-     * @param langCode langugage of the course/simulation
-     * @param fileName name of file tincan will launch
-     * @param typeText type of tincan file - get from https://registry.tincanapi.com/
-     * @param entityId id of activity should match entry id of opds link
-     * @param description description of course/simulation
-     * @param descLang lang of description
      *
-     * @return
+     * @param destinationDirectory directory it will be saved
+     * @param activityName         name of course/simulation
+     * @param langCode             language of the course/simulation
+     * @param fileName             name of file tincan will launch
+     * @param typeText             type of tincan file - get from https://registry.tincanapi.com/
+     * @param entityId             id of activity should match entry id of opds link
+     * @param description          description of course/simulation
+     * @param descLang             lang of description
      * @throws ParserConfigurationException
      * @throws TransformerException
      */

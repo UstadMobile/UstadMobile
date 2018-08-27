@@ -30,6 +30,8 @@ dependencies {
     implementation "com.google.code.gson:gson:$version_gson"
     implementation project(":core")
     implementation "commons-io:commons-io:$version_commons_io"
+    implementation "org.seleniumhq.selenium:selenium-java:$version_selenium"
+    implementation "org.seleniumhq.selenium:selenium-chrome-driver:$version_selenium"
 
     testImplementation "junit:junit:$version_junit"
     testImplementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
