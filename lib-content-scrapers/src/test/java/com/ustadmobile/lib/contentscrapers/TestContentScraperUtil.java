@@ -1,9 +1,5 @@
 package com.ustadmobile.lib.contentscrapers;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.ustadmobile.lib.contentscrapers.CK12.AnswerResponse;
-
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -14,7 +10,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
-import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 
 import okhttp3.mockwebserver.Dispatcher;
