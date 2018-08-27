@@ -10,7 +10,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
-import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 
 import okhttp3.mockwebserver.Dispatcher;
@@ -51,7 +50,7 @@ public class TestContentScraperUtil {
         mockWebServer.setDispatcher(dispatcher);
 
         File tmpDir = Files.createTempDirectory("exercisecontentscraper").toFile();
-        String convertedHtml = ContentScraperUtil.downloadAllResources(htmlWithImage, tmpDir, ScraperConstants.HtmlName.DESC.getName() + ScraperConstants.PNG_EXT, mockWebServer.url("/api").url());
+        String convertedHtml = ContentScraperUtil.downloadAllResources(htmlWithImage, tmpDir, mockWebServer.url("/api").url());
 
         File imageFile = new File(tmpDir, 0 + ScraperConstants.HtmlName.DESC.getName() + ScraperConstants.PNG_EXT);
         //Assert that the image file is downloaded
