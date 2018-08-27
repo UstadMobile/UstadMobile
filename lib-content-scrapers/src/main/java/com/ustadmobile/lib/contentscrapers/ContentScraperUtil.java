@@ -81,7 +81,6 @@ public class ContentScraperUtil {
             String url = content.attr("src");
             if ((url.contains("data:image") && url.contains("base64")) || url.contains("file://")) {
                 continue;
-                continue;
             }
             try {
                 URL contentUrl = new URL(baseUrl, url);
