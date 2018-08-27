@@ -72,12 +72,6 @@ tasks.withType(Test) {
 
 }
 
-task copyTestResources(type: Copy) {
-    from "${projectDir}/src/main/resources"
-    into "${buildDir}/classes/test"
-}
-processTestResources.dependsOn copyTestResources
-
 
 compileTestJava.options.encoding = 'UTF-8'
 

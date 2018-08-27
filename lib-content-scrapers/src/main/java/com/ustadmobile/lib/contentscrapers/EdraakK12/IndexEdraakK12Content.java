@@ -56,7 +56,7 @@ public class IndexEdraakK12Content {
         destinationDirectory = destinationDir;
 
         try {
-            response = ContentScraperUtil.parseJson(url, ContentResponse.class);
+            response = ContentScraperUtil.parseJson(url);
         } catch (IOException | JsonSyntaxException e) {
             throw new IllegalArgumentException("JSON INVALID", e.getCause());
         }
@@ -83,7 +83,7 @@ public class IndexEdraakK12Content {
 
     }
 
-    private void findImportedComponent(ContentResponse parent, OpdsEntryWithRelations parentEntry)  {
+    public void findImportedComponent(ContentResponse parent, OpdsEntryWithRelations parentEntry)  {
 
         if(ContentScraperUtil.isImportedComponent(parent.component_type)){
 

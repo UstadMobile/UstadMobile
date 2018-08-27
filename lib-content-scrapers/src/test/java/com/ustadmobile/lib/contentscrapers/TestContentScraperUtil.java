@@ -1,9 +1,5 @@
 package com.ustadmobile.lib.contentscrapers;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.ustadmobile.lib.contentscrapers.CK12.AnswerResponse;
-
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -55,9 +51,9 @@ public class TestContentScraperUtil {
         mockWebServer.setDispatcher(dispatcher);
 
         File tmpDir = Files.createTempDirectory("exercisecontentscraper").toFile();
-        String convertedHtml = ContentScraperUtil.downloadAllResources(htmlWithImage, tmpDir , mockWebServer.url("/api").url());
+        String convertedHtml = ContentScraperUtil.downloadAllResources(htmlWithImage, tmpDir, ScraperConstants.HtmlName.DESC.getName() + ScraperConstants.PNG_EXT, mockWebServer.url("/api").url());
 
-        File imageFile = new File(tmpDir, "test1picture.png");
+        File imageFile = new File(tmpDir, 0 + ScraperConstants.HtmlName.DESC.getName() + ScraperConstants.PNG_EXT);
         //Assert that the image file is downloaded
         Assert.assertTrue("Image Downloaded Successfully", imageFile.exists());
 
@@ -65,8 +61,7 @@ public class TestContentScraperUtil {
 
         Document doc = Jsoup.parse(convertedHtml);
         Element image =  doc.select("img").first();
-        Assert.assertTrue("Img Src is pointing to relative path", image.attr("src").equalsIgnoreCase(
-                tmpDir.getName() + "/test1picture.png"));
+        Assert.assertTrue("Img Src is pointing to relative path", image.attr("src").equalsIgnoreCase(  tmpDir.getName() + "/" + 0 + ScraperConstants.HtmlName.DESC.getName() + ScraperConstants.PNG_EXT) );
     }
 
 

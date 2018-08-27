@@ -5,7 +5,6 @@ import com.ustadmobile.lib.contentscrapers.ScraperConstants;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
 import com.ustadmobile.lib.util.UmUuidUtil;
 
-import org.apache.commons.io.FileUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -170,10 +169,9 @@ public class PhetContentScraper{
 
 
 
-        FileUtils.writeStringToFile(eTagFile, eTag, ScraperConstants.UTF_ENCODING);
-        FileUtils.writeStringToFile(modifiedFile, lastModified, ScraperConstants.UTF_ENCODING);
-        FileUtils.writeStringToFile(new File(simulationLocation, ScraperConstants.ABOUT_HTML), aboutText, ScraperConstants.UTF_ENCODING);
-
+        ContentScraperUtil.writeStringToFile(eTag, eTagFile);
+        ContentScraperUtil.writeStringToFile(lastModified, modifiedFile);
+        ContentScraperUtil.writeStringToFile(aboutText, new File(simulationLocation, ScraperConstants.ABOUT_HTML));
         ContentScraperUtil.downloadContent(link, simulationFile);
         String simulationTitle  = Jsoup.parse(simulationFile, ScraperConstants.UTF_ENCODING).title();
         try {

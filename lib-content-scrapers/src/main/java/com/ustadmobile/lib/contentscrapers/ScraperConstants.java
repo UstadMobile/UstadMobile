@@ -14,6 +14,9 @@ public class ScraperConstants {
     public static final String ABOUT_HTML = "about.txt";
     public static final String VIDEO_MP4 = "video.mp4";
     public static final String UTF_ENCODING = "UTF-8";
+    public static final String IMG_EXT = "eximage.png";
+    public static final String IMG_TAG = "img";
+    public static final String DIRECTORY = "/com/ustadmobile/lib/contentscrapers/";
     public static final String JS_HTML_TAG = "/com/ustadmobile/lib/contentscrapers/index.html";
     public static final String JS_TAG = "/com/ustadmobile/lib/contentscrapers/jquery-3.3.1.min.js";
     public static final String MATERIAL_JS_LINK = "/com/ustadmobile/lib/contentscrapers/materialize.min.js";
@@ -28,6 +31,7 @@ public class ScraperConstants {
            ComponentType.TEST.getType());
 
 
+    public static final String PNG_EXT = ".png";
     public static final String ARABIC_FONT_REGULAR = "DroidNaskh-Regular.woff2";
     public static final String ARABIC_FONT_BOLD = "DroidNaskh-Bold.woiff2";
     public static final String INDEX_HTML = "index.html";
@@ -62,6 +66,25 @@ public class ScraperConstants {
         public String getType() {
             return type;
         }
+    }
+
+    public enum HtmlName{
+        DESC("description"),
+        FULL_DESC("full_description"),
+        EXPLAIN("explaination"),
+        CHOICE("choice"),
+        HINT("hint");
+
+        private String name;
+
+        HtmlName(String compType) {
+            this.name = compType;
+        }
+
+        public String getName() {
+            return name;
+        }
+
     }
 
 }
