@@ -13,10 +13,12 @@ import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.WIF
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.WIFI_GROUP_CREATION_RESPONSE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * Test class which tests {@link com.ustadmobile.port.sharedse.networkmanager.BleGattServer}
@@ -73,7 +75,7 @@ public class BleGattServerTest {
         BleMessage responseMessage = gattServer.handleRequest(messageToSend);
 
         //will have been called async - we need to wait for group creation to finish
-        verify(mockedNetworkManager).createWifiDirectGroup();
+        verify(mockedNetworkManager).createWifiDirectGroup(any());
 
         assertEquals("Should return the right response",
                 WIFI_GROUP_CREATION_RESPONSE,responseMessage.getRequestType());
