@@ -52,4 +52,28 @@ public class ClazzLogAttendanceRecord {
     public void setAttendanceStatus(int attendanceStatus) {
         this.attendanceStatus = attendanceStatus;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ClazzLogAttendanceRecord that = (ClazzLogAttendanceRecord) o;
+
+        if (clazzLogAttendanceRecordUid != that.clazzLogAttendanceRecordUid) return false;
+        if (clazzLogAttendanceRecordClazzLogUid != that.clazzLogAttendanceRecordClazzLogUid)
+            return false;
+        if (clazzLogAttendanceRecordClazzMemberUid != that.clazzLogAttendanceRecordClazzMemberUid)
+            return false;
+        return attendanceStatus == that.attendanceStatus;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = (int) (clazzLogAttendanceRecordUid ^ (clazzLogAttendanceRecordUid >>> 32));
+        result = 31 * result + (int) (clazzLogAttendanceRecordClazzLogUid ^ (clazzLogAttendanceRecordClazzLogUid >>> 32));
+        result = 31 * result + (int) (clazzLogAttendanceRecordClazzMemberUid ^ (clazzLogAttendanceRecordClazzMemberUid >>> 32));
+        result = 31 * result + attendanceStatus;
+        return result;
+    }
 }

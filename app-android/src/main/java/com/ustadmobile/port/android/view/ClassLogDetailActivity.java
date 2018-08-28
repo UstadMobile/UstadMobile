@@ -36,6 +36,11 @@ import java.util.WeakHashMap;
 
 import ru.dimorinny.floatingtextbutton.FloatingTextButton;
 
+import static com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.STATUS_ATTENDED;
+import static com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.STATUS_ABSENT;
+import static com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.STATUS_PARTIAL;
+
+
 /**
  * The ClassLogDetail activity.
  * <p>
@@ -106,28 +111,34 @@ public class ClassLogDetailActivity extends UstadBaseActivity
             ((ImageView)holder.itemView
                     .findViewById(R.id.item_clazzlog_detail_student_present_icon)).setColorFilter(Color.BLACK);
 
-
             voidAllRecordIcons(holder);
+            final long clazzLogAttendanceRecordUid = attendanceRecord.getClazzLogAttendanceRecordUid();
+            holder.itemView.findViewById(R.id.item_clazzlog_detail_student_present_icon)
+                    .setOnClickListener((view) -> mPresenter.handleMarkStudent(
+                            clazzLogAttendanceRecordUid, STATUS_ATTENDED));
+            holder.itemView.findViewById(R.id.item_clazzlog_detail_student_absent_icon)
+                    .setOnClickListener((view) -> mPresenter.handleMarkStudent(
+                            clazzLogAttendanceRecordUid, STATUS_ABSENT));
+            holder.itemView.findViewById(R.id.item_clazzlog_detail_student_delay_icon)
+                    .setOnClickListener((view) -> mPresenter.handleMarkStudent(
+                            clazzLogAttendanceRecordUid, STATUS_PARTIAL));
+
 
             switch(studentAttendance){
-                case ClazzLogAttendanceRecord.STATUS_ATTENDED:
+                case STATUS_ATTENDED:
                     ((ImageView)holder.itemView
                             .findViewById(R.id.item_clazzlog_detail_student_present_icon))
                             .setColorFilter(Color.BLACK);
                     break;
-                case ClazzLogAttendanceRecord.STATUS_ABSENT:
+                case STATUS_ABSENT:
                     ((ImageView)holder.itemView
                             .findViewById(R.id.item_clazzlog_detail_student_absent_icon))
                             .setColorFilter(Color.BLACK);
                     break;
-                case ClazzLogAttendanceRecord.STATUS_PARTIAL:
+                case STATUS_PARTIAL:
                     ((ImageView)holder.itemView
                             .findViewById(R.id.item_clazzlog_detail_student_delay_icon))
                             .setColorFilter(Color.BLACK);
-                    break;
-                case 0:
-                    break;
-                default:
                     break;
             }
         }
@@ -201,23 +212,11 @@ public class ClassLogDetailActivity extends UstadBaseActivity
             }
         });
 
-        Button allPresentButton = findViewById(R.id.activity_class_log_detail_mark_all_present_text);
-        allPresentButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mPresenter.handleMarkAllPresent();
-            }
-        });
+        findViewById(R.id.activity_class_log_detail_mark_all_present_text)
+            .setOnClickListener((view) -> mPresenter.handleMarkAll(ClazzLogAttendanceRecord.STATUS_ATTENDED));
 
-        Button allAbsentButton = findViewById(R.id.activity_class_log_detail_mark_all_absent_text);
-        allAbsentButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mPresenter.handleMarkAllAbsent();
-            }
-        });
-
-
+        findViewById(R.id.activity_class_log_detail_mark_all_absent_text)
+            .setOnClickListener((view) -> mPresenter.handleMarkAll(ClazzLogAttendanceRecord.STATUS_ABSENT));
     }
 
     @Override

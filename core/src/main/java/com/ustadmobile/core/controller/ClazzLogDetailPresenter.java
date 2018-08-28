@@ -20,6 +20,8 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
 
     private UmProvider<ClazzLogAttendanceRecord> clazzLogAttendanceRecordUmProvider;
 
+    private ClazzLog clazzLog;
+
     /**
      * Constructor. We get the ClazzLog Uid from the arguments
      *
@@ -82,6 +84,7 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
         clazzLogDao.findByClazzIdAndDateAsync(currentClazzUid, currentLogDate, new UmCallback<ClazzLog>() {
             @Override
             public void onSuccess(ClazzLog result) {
+                clazzLog = result;
                 clazzLogAttendanceRecordDao.insertAllAttendanceRecords(currentClazzUid,
                         result.getClazzLogUid(), new UmCallback<long[]>() {
                     @Override
@@ -131,23 +134,19 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
     }
 
     /**
-     * Method logic to what happens when we mark all students as present
+     * Handle when the user taps to mark all present, or mark all absent. This will update the
+     * database to set all ClazzLogAttendanceRecord
+     *
+     * @param attendanceStatus attendance status to set for all ClazzLogAttendanceRecords that are in this ClazzLog
      */
-    public void handleMarkAllPresent(){
-        //TODO: this
-        //get all classattenda
-        System.out.println("All present");
+    public void handleMarkAll(int attendanceStatus){
+        UmAppDatabase.getInstance(context).getClazzLogAttendanceRecordDao()
+                .updateAllByClazzLogUid(clazzLog.getClazzLogUid(), attendanceStatus, null);
     }
 
-    /**
-     * Method logic to what happens when we mark all students as absent
-     */
-    public void handleMarkAllAbsent(){
-        //TODO: this
-        System.out.println("Absent");
+    public void handleMarkStudent(long clazzLogAttendanceRecordUid, int attendanceStatus) {
+        UmAppDatabase.getInstance(context).getClazzLogAttendanceRecordDao()
+                .updateAttendanceStatus(clazzLogAttendanceRecordUid, attendanceStatus, null);
     }
-
-
-
 
 }

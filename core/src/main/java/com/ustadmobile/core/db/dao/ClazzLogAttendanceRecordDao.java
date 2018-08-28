@@ -68,4 +68,13 @@ public abstract class ClazzLogAttendanceRecordDao implements BaseDao<ClazzLogAtt
         });
     }
 
+    @UmQuery("UPDATE ClazzLogAttendanceRecord SET attendanceStatus = :attendanceStatus WHERE clazzLogAttendanceRecordClazzLogUid = :clazzLogUid")
+    public abstract void updateAllByClazzLogUid(long clazzLogUid, int attendanceStatus,
+                                                UmCallback<Integer> callback);
+
+
+    @UmQuery("UPDATE ClazzLogAttendanceRecord SET attendanceStatus = :attendanceStatus WHERE clazzLogAttendanceRecordUid = :clazzLogAttendanceRecordUid")
+    public abstract void updateAttendanceStatus(long clazzLogAttendanceRecordUid, int attendanceStatus,
+                                                UmCallback<Integer> callback);
+
 }
