@@ -1,7 +1,11 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context="com.ustadmobile.port.android.view.ClazzStudentListFragment">
+
+
 
     <android.support.v7.widget.RecyclerView
         android:layout_height="match_parent"
@@ -10,12 +14,17 @@
         android:scrollbars="vertical"
         />
 
-    <android.support.design.widget.FloatingActionButton
+    <ru.dimorinny.floatingtextbutton.FloatingTextButton
         android:id="@+id/class_student_list_add_student_fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="end|bottom"
-        android:layout_margin="@dimen/fab_margin"
-        android:src="@drawable/ic_add_circle_outline_white_24dp" />
+        app:floating_background_color="@color/accent"
+        app:floating_left_icon="@drawable/ic_add_white_trans_24dp"
+        app:floating_title="@string/add_student"
+        android:layout_gravity="bottom|center"
+        app:floating_title_color="@android:color/white"
+        android:layout_margin="16dp"/>
 
 </FrameLayout>
+
+

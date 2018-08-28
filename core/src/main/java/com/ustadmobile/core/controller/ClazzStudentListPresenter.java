@@ -34,7 +34,6 @@ public class ClazzStudentListPresenter extends UstadBaseController<ClazzStudentL
                                      ClazzStudentListView view) {
         super(context, arguments, view);
 
-        //TODO: Get the Class uid from the arguments.
         if(arguments.containsKey("clazzUid")){
             currentClazzId = (long) arguments.get("clazzUid");
         }

@@ -16,7 +16,7 @@ import com.ustadmobile.core.view.ClassLogListView;
  * ClassLogListFragment Android fragment extends UstadBaseFragment
  */
 public class ClassLogListFragment extends UstadBaseFragment implements ClassLogListView,
-        View.OnClickListener, View.OnLongClickListener, SwipeRefreshLayout.OnRefreshListener {
+        View.OnClickListener, View.OnLongClickListener {
 
     View rootContainer;
     //RecyclerView
@@ -24,8 +24,6 @@ public class ClassLogListFragment extends UstadBaseFragment implements ClassLogL
     private RecyclerView.LayoutManager mRecyclerLayoutManager;
     private RecyclerView.Adapter mAdapter;
 
-    //Swipe-refresh
-    private SwipeRefreshLayout mSwipeRefreshLayout;
 
     /**
      * Generates a new Fragment for a page fragment
@@ -82,10 +80,6 @@ public class ClassLogListFragment extends UstadBaseFragment implements ClassLogL
         mRecyclerView.setAdapter(mAdapter);
         */
 
-        //Swipe-refresh
-        mSwipeRefreshLayout = rootContainer.findViewById(R.id.fragment_class_log_list_swiperefreshview);
-        mSwipeRefreshLayout.setOnRefreshListener(this);
-
         //return container
         return rootContainer;
     }
@@ -95,15 +89,6 @@ public class ClassLogListFragment extends UstadBaseFragment implements ClassLogL
     public void onViewCreated(View view, Bundle savedInstanceState) {
         // Setup any handles to view objects here
 
-    }
-
-    /**
-     * View and SwipeRefreshLayout Listeners
-     */
-    @Override
-    public void onRefresh() {
-        //Update refreshing animation, etc
-        mSwipeRefreshLayout.setRefreshing(false);
     }
 
     @Override

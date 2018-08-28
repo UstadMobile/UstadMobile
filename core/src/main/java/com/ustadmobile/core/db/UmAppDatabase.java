@@ -1,6 +1,8 @@
 package com.ustadmobile.core.db;
 
 import com.ustadmobile.core.db.dao.ClazzDao;
+import com.ustadmobile.core.db.dao.ClazzLogAttendanceRecordDao;
+import com.ustadmobile.core.db.dao.ClazzLogDao;
 import com.ustadmobile.core.db.dao.ClazzMemberDao;
 import com.ustadmobile.core.db.dao.ContainerFileDao;
 import com.ustadmobile.core.db.dao.ContainerFileEntryDao;
@@ -26,6 +28,8 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.lib.database.annotation.UmDatabase;
 import com.ustadmobile.lib.database.annotation.UmDbContext;
 import com.ustadmobile.lib.db.entities.Clazz;
+import com.ustadmobile.lib.db.entities.ClazzLog;
+import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord;
 import com.ustadmobile.lib.db.entities.ClazzMember;
 import com.ustadmobile.lib.db.entities.ContainerFile;
 import com.ustadmobile.lib.db.entities.ContainerFileEntry;
@@ -53,7 +57,8 @@ import com.ustadmobile.lib.db.entities.Person;
         DownloadJobItemHistory.class, CrawlJob.class, CrawlJobItem.class,
         OpdsEntryStatusCache.class, OpdsEntryStatusCacheAncestor.class,
         HttpCachedEntry.class, DownloadJob.class, DownloadJobItem.class,
-        Person.class, Clazz.class, ClazzMember.class
+        Person.class, Clazz.class, ClazzMember.class, ClazzLog.class,
+        ClazzLogAttendanceRecord.class
 })
 public abstract class UmAppDatabase{
 
@@ -123,6 +128,10 @@ public abstract class UmAppDatabase{
     public abstract ClazzDao getClazzDao();
 
     public abstract ClazzMemberDao getClazzMemberDao();
+
+    public abstract ClazzLogDao getClazzLogDao();
+
+    public abstract ClazzLogAttendanceRecordDao getClazzLogAttendanceRecordDao();
 
     @UmDbContext
     public abstract Object getContext();

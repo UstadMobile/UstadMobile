@@ -15,9 +15,9 @@ public class ClazzLogAttendanceRecord {
     @UmPrimaryKey(autoIncrement = true)
     private long clazzLogAttendanceRecordUid;
 
-    private long clazzLogClazzLogUid;
+    private long clazzLogAttendanceRecordClazzLogUid;
 
-    private long studentClazzMemberUid;
+    private long clazzLogAttendanceRecordClazzMemberUid;
 
     private int attendanceStatus;
 
@@ -29,20 +29,20 @@ public class ClazzLogAttendanceRecord {
         this.clazzLogAttendanceRecordUid = clazzLogAttendanceRecordUid;
     }
 
-    public long getClazzLogClazzLogUid() {
-        return clazzLogClazzLogUid;
+    public long getClazzLogAttendanceRecordClazzLogUid() {
+        return clazzLogAttendanceRecordClazzLogUid;
     }
 
-    public void setClazzLogClazzLogUid(long clazzLogClazzLogUid) {
-        this.clazzLogClazzLogUid = clazzLogClazzLogUid;
+    public void setClazzLogAttendanceRecordClazzLogUid(long clazzLogAttendanceRecordClazzLogUid) {
+        this.clazzLogAttendanceRecordClazzLogUid = clazzLogAttendanceRecordClazzLogUid;
     }
 
-    public long getStudentClazzMemberUid() {
-        return studentClazzMemberUid;
+    public long getClazzLogAttendanceRecordClazzMemberUid() {
+        return clazzLogAttendanceRecordClazzMemberUid;
     }
 
-    public void setStudentClazzMemberUid(long studentClazzMemberUid) {
-        this.studentClazzMemberUid = studentClazzMemberUid;
+    public void setClazzLogAttendanceRecordClazzMemberUid(long clazzLogAttendanceRecordClazzMemberUid) {
+        this.clazzLogAttendanceRecordClazzMemberUid = clazzLogAttendanceRecordClazzMemberUid;
     }
 
     public int getAttendanceStatus() {

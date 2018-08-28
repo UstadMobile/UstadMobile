@@ -268,7 +268,10 @@
     <string name="last_week">Last week</string>
     <string name="overdue">overdue</string>
     <string name="mark_all">Mark all</string>
+    <string name="mark_all_present">Mark all present</string>
+    <string name="mark_all_absent">Mark all absent</string>
     <string name="present">Present</string>
     <string name="absent">Absent</string>
+    <string name="done">Done</string>
 
 </resources>

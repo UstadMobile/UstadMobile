@@ -19,6 +19,7 @@ allprojects {
         maven {
             url "http://devserver2.ustadmobile.com/repo-mvn"
         }
+        maven { url "https://jitpack.io" }
     }
 }
 
@@ -64,6 +65,8 @@ ext {
     version_android_mockito = "2.13.0"
     version_android_uiautomator = "2.1.3"
 
+    version_android_ahbottomnavigation = "2.1.0"
+    version_android_floating_text_button = "0.0.4"
 }
 
 ext.buildConfigProperties = new Properties()

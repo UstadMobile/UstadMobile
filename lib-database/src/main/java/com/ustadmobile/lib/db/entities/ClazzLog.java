@@ -23,6 +23,24 @@ public class ClazzLog implements SyncableEntity{
 
     private long localChangeSeqNum;
 
+    private boolean done;
+
+    /**
+     * Gets if Log is done.
+     * @return if log entry is done.
+     */
+    public boolean isDone() {
+        return done;
+    }
+
+    /**
+     * Sets log entry done status
+     * @param done the done status
+     */
+    public void setDone(boolean done) {
+        this.done = done;
+    }
+
     public long getClazzLogUid() {
         return clazzLogUid;
     }

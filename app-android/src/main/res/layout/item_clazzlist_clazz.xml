@@ -5,6 +5,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    app:cardCornerRadius="2dp"
+    android:layout_margin="10dp"
+    android:elevation="2dp"
     >
 
     <android.support.constraint.ConstraintLayout
@@ -16,8 +19,9 @@
             android:id="@+id/item_clazzlist_clazz_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
+            android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
+            android:textSize="20sp"
             android:text="TextView"
             android:textAppearance="@android:style/TextAppearance.Material.Headline"
             app:layout_constraintStart_toStartOf="parent"
@@ -25,18 +29,21 @@
 
         <ImageView
             android:id="@+id/item_clazzlist_people_icon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_width="15dp"
+            android:layout_height="15dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="10dp"
+            android:tint="@color/text_secondary"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/item_clazzlist_clazz_title"
-            app:srcCompat="@drawable/ic_people_black_24dp"
-            tools:layout_editor_absoluteX="16dp" />
+            app:srcCompat="@drawable/ic_people_black_24dp" />
 
         <TextView
             android:id="@+id/item_clazzlist_numstudents_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
+            android:textColor="@color/text_secondary"
             android:layout_marginTop="8dp"
             android:text="TextView"
             app:layout_constraintStart_toEndOf="@+id/item_clazzlist_people_icon"
@@ -44,9 +51,9 @@
 
         <ImageView
             android:id="@+id/item_clazzlist_attendance_trafficlight"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
+            android:layout_width="15dp"
+            android:layout_height="15dp"
+            android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/item_clazzlist_people_icon"
@@ -56,9 +63,10 @@
             android:id="@+id/item_clazzlist_attendance_percentage"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textColor="@color/text_secondary"
             android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
-            android:text="TextView"
+            android:layout_marginTop="4dp"
+            android:text="@string/attendance"
             app:layout_constraintStart_toEndOf="@+id/item_clazzlist_attendance_trafficlight"
             app:layout_constraintTop_toBottomOf="@+id/item_clazzlist_numstudents_text" />
 
@@ -66,11 +74,34 @@
             android:id="@+id/item_clazzlist_horizontal_divider"
             android:layout_width="368dp"
             android:layout_height="1dp"
+            android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
             android:background="?android:attr/listDivider"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/item_clazzlist_attendance_trafficlight" />
+            app:layout_constraintTop_toBottomOf="@+id/item_clazzlist_attendance_percentage" />
+
+        <ImageButton
+            android:id="@+id/item_clazzlist_attendance_record_attendance_icon"
+            android:layout_width="25dp"
+            android:layout_height="27dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="16dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/item_clazzlist_horizontal_divider"
+            app:srcCompat="@drawable/ic_content_paste_black_24dp" />
+
+        <Button
+            android:id="@+id/item_clazzlist_attendance_record_attendance_button"
+            style="?android:attr/borderlessButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="@string/record_attendance"
+            android:textColor="@color/accent"
+            app:layout_constraintStart_toEndOf="@+id/item_clazzlist_attendance_record_attendance_icon"
+            app:layout_constraintTop_toBottomOf="@+id/item_clazzlist_horizontal_divider" />
+
     </android.support.constraint.ConstraintLayout>
 
 </android.support.v7.widget.CardView>

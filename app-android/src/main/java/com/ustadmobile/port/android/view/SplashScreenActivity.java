@@ -47,6 +47,7 @@ import android.view.MenuItem;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.ClazzDao;
+import com.ustadmobile.core.db.dao.ClazzLogDao;
 import com.ustadmobile.core.db.dao.ClazzMemberDao;
 import com.ustadmobile.core.db.dao.PersonDao;
 import com.ustadmobile.core.impl.UmCallback;
@@ -54,6 +55,8 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.ClazzMember;
 import com.ustadmobile.lib.db.entities.Person;
+
+import java.util.Calendar;
 
 
 public class SplashScreenActivity extends AppCompatActivity implements DialogInterface.OnClickListener, ActivityCompat.OnRequestPermissionsResultCallback{
@@ -167,6 +170,11 @@ public class SplashScreenActivity extends AppCompatActivity implements DialogInt
 
 
     public void addDummyData(){
+        String createStatus = UstadMobileSystemImpl.getInstance().getAppPref("dummydata",
+                getApplicationContext());
+        if(createStatus != null)
+            return;
+
         ClazzDao clazzDao =
                 UmAppDatabase.getInstance(getApplicationContext()).getClazzDao();
         ClazzMemberDao clazzMemberDao = UmAppDatabase.getInstance(getApplicationContext())
@@ -174,48 +182,68 @@ public class SplashScreenActivity extends AppCompatActivity implements DialogInt
         PersonDao personDao =
                 UmAppDatabase.getInstance(getApplicationContext()).getPersonDao();
 
-        for(int i = 0; i < 5; i++) {
-            Person person = new Person();
-            person.setFirstName("Ahmed");
-            person.setLastName("Khalil" + i);
-            personDao.insertAsync(person, new UmCallback<Long>() {
+        //Get today's date
+
+
+
+        new Thread(() -> {
+
+            Long currentLogDate = -1L;
+            Calendar attendanceDate = Calendar.getInstance();
+            attendanceDate.setTimeInMillis(System.currentTimeMillis());
+            attendanceDate.set(Calendar.HOUR_OF_DAY, 0);
+            attendanceDate.set(Calendar.MINUTE, 0);
+            attendanceDate.set(Calendar.SECOND, 0);
+            attendanceDate.set(Calendar.MILLISECOND, 0);
+            currentLogDate = attendanceDate.getTimeInMillis();
+
+            for(int i = 0; i < 5; i++) {
+                Person person = new Person();
+                person.setFirstName("Ahmed");
+                person.setLastName("Khalil" + i);
+
+                long thisPersonUid = personDao.insert(person);
+                person.setPersonUid(thisPersonUid);
+
+            }
+
+            Clazz clazz1 = new Clazz();
+            clazz1.setClazzName("Class 1");
+            clazz1.setAttendanceAverage(42);
+            long thisClazzUid = clazzDao.insert(clazz1);
+            clazz1.setClazzUid(thisClazzUid);
+
+            for(int i = 0; i < 5; i++) {
+
+                ClazzMember member = new ClazzMember();
+                member.setRole(ClazzMember.ROLE_STUDENT);
+                member.setClazzMemberPersonUid(i);
+                member.setClazzMemberClazzUid(thisClazzUid);
+                member.setAttendancePercentage(42L);
+                clazzMemberDao.insertAsync(member, null);
+            }
+
+            //Create a ClassLog for today for Class 1
+            ClazzLogDao clazzLogDao = UmAppDatabase.getInstance(getApplicationContext()).getClazzLogDao();
+
+            clazzLogDao.createClazzLogForDate(clazz1.getClazzUid(), currentLogDate, new UmCallback<Long>() {
                 @Override
                 public void onSuccess(Long result) {
-                    person.setPersonUid(result);
+                    System.out.println("Success in creating ClazzLog for class1");
                 }
 
                 @Override
                 public void onFailure(Throwable exception) {
-
+                    System.out.println(exception);
                 }
             });
 
-        }
+            UstadMobileSystemImpl.getInstance().setAppPref("dummydata", "created",
+                    getApplicationContext());
+        }).start();
 
-        Clazz clazz1 = new Clazz();
-        clazz1.setClazzName("Class 1");
-        clazz1.setAttendanceAverage(42);
-        clazzDao.insertAsync(clazz1, new UmCallback<Long>() {
-            @Override
-            public void onSuccess(Long result) {
-                clazz1.setClazzUid(result);
 
-                for(int i = 0; i < 5; i++) {
 
-                    ClazzMember member = new ClazzMember();
-                    member.setRole(ClazzMember.ROLE_STUDENT);
-                    member.setClazzMemberPersonUid(i);
-                    member.setClazzMemberClazzUid(result);
-                    member.setAttendancePercentage(42L);
-                    clazzMemberDao.insertAsync(member, null);
-                }
-            }
-
-            @Override
-            public void onFailure(Throwable exception) {
-
-            }
-        });
     }
 
 

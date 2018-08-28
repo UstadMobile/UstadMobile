@@ -15,6 +15,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
@@ -76,6 +77,8 @@ public class ClazzListFragment extends UstadBaseFragment implements ClazzListVie
                     .setText(clazz.getNumStudents() + " " + getResources()
                             .getText(R.string.students_literal).toString());
             holder.itemView.setOnClickListener((view) -> mPresenter.handleClickClazz(clazz));
+            holder.itemView.findViewById(R.id.item_clazzlist_attendance_record_attendance_button)
+                    .setOnClickListener((view)-> mPresenter.handleClickClazzRecordAttendance(clazz));
         }
     }
 
