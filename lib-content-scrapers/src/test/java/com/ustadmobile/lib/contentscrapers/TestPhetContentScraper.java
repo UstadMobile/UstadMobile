@@ -1,19 +1,15 @@
 package com.ustadmobile.lib.contentscrapers;
 
-import com.ustadmobile.lib.contentscrapers.PhetSimulation.IndexPhetContentScraper;
-import com.ustadmobile.lib.contentscrapers.PhetSimulation.PhetContentScraper;
+import com.ustadmobile.lib.contentscrapers.phetsimulation.IndexPhetContentScraper;
+import com.ustadmobile.lib.contentscrapers.phetsimulation.PhetContentScraper;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
 
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 import java.nio.file.Files;
 import java.util.ArrayList;
 
@@ -24,8 +20,6 @@ import okhttp3.mockwebserver.RecordedRequest;
 import okio.Buffer;
 import okio.BufferedSource;
 import okio.Okio;
-
-import static com.ustadmobile.lib.contentscrapers.ScraperConstants.CONTENT_JSON;
 
 public class TestPhetContentScraper {
 
@@ -155,7 +149,7 @@ public class TestPhetContentScraper {
 
         String mockServerUrl = mockWebServer.url("/api/simulation/equality-explorer-two-variables").toString();
         PhetContentScraper scraper = new PhetContentScraper(mockServerUrl, tmpDir);
-        scraper.scrapContent();
+        scraper.scrapeContent();
 
         AssertAllFiles(tmpDir, scraper);
     }
@@ -169,14 +163,14 @@ public class TestPhetContentScraper {
 
         String mockServerUrl = mockWebServer.url("/api/simulation/equality-explorer-two-variables").toString();
         PhetContentScraper scraper = new PhetContentScraper(mockServerUrl, tmpDir);
-        scraper.scrapContent();
+        scraper.scrapeContent();
         File englishLocation = new File(tmpDir, "en");
         File titleDirectory = new File(englishLocation, scraper.getTitle());
         File englishSimulation = new File(titleDirectory, SIM_EN);
 
         long firstSimDownload = englishSimulation.lastModified();
 
-        scraper.scrapContent();
+        scraper.scrapeContent();
 
         long lastModified = englishSimulation.lastModified();
 
@@ -192,7 +186,7 @@ public class TestPhetContentScraper {
         mockWebServer.setDispatcher(dispatcher);
 
         PhetContentScraper scraper = new PhetContentScraper(mockWebServer.url("/legacy/jar").toString(), tmpDir);
-        scraper.scrapContent();
+        scraper.scrapeContent();
 
     }
 
@@ -204,7 +198,7 @@ public class TestPhetContentScraper {
         mockWebServer.setDispatcher(dispatcher);
 
         PhetContentScraper scraper = new PhetContentScraper(mockWebServer.url("/legacy/flash").toString(), tmpDir);
-        scraper.scrapContent();
+        scraper.scrapeContent();
 
     }
 
@@ -232,7 +226,7 @@ public class TestPhetContentScraper {
         mockWebServer.setDispatcher(dispatcher);
 
         PhetContentScraper scraper = new PhetContentScraper(mockWebServer.url("/api/simulation/equality-explorer-two-variables").toString(), tmpDir);
-        scraper.scrapContent();
+        scraper.scrapeContent();
 
 
         ArrayList<OpdsEntryWithRelations> translationList = scraper.getTranslations(tmpDir);
@@ -249,7 +243,7 @@ public class TestPhetContentScraper {
         if(System.getProperty("phetUrl") != null && System.getProperty("phetDir") != null){
             File tmp = new File(System.getProperty("phetDir"));
             PhetContentScraper scraper = new PhetContentScraper(System.getProperty("phetUrl"),tmp);
-            scraper.scrapContent();
+            scraper.scrapeContent();
             AssertAllFiles(tmp, scraper);
         }
     }

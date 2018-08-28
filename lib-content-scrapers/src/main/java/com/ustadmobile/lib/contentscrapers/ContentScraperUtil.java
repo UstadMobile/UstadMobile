@@ -37,6 +37,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
@@ -51,7 +52,7 @@ public class ContentScraperUtil {
      * Is the given componentType "Imported Component"
      *
      * @param component_type enum type
-     * @return
+     * @return true if type matches ImportedComponent
      */
     public static boolean isImportedComponent(String component_type) {
         return ScraperConstants.ComponentType.IMPORTED.getType().equalsIgnoreCase(component_type);
@@ -87,7 +88,7 @@ public class ContentScraperUtil {
                 String fileName = getFileNameFromUrl(url);
                 File contentFile = new File(destinationDir, fileName);
 
-                downloadContent(contentUrl, contentFile);
+                FileUtils.copyURLToFile(contentUrl, contentFile);
 
                 content.attr("src", destinationDir.getName() + "/" + fileName);
             } catch (IOException e) {
@@ -103,7 +104,7 @@ public class ContentScraperUtil {
     /**
      * Given a url link, find the file name
      *
-     * @param url
+     * @param url download link to file
      * @return the extracted file name from url link
      */
     public static String getFileNameFromUrl(String url) {
@@ -127,48 +128,12 @@ public class ContentScraperUtil {
         FileUtils.writeStringToFile(savedQuestionsFile, savedQuestionsJson, UTF_ENCODING);
     }
 
-
-    /**
-     * Given a url and file, download its content and write into the file
-     *
-     * @param url  url that contains contain to download from
-     * @param file file it will write the content to
-     * @param
-     * @throws IOException
-     */
-    public static void downloadContent(URL url, File file) throws IOException {
-
-        InputStream inputStream = null;
-        FileOutputStream outputStream = null;
-        try {
-            HttpURLConnection httpConn = (HttpURLConnection) url.openConnection();
-            int responseCode = httpConn.getResponseCode();
-
-            if (responseCode != HttpURLConnection.HTTP_OK)
-                throw new IOException("HTTP Response code not 200: got " + responseCode + url);
-
-            inputStream = httpConn.getInputStream();
-            outputStream = new FileOutputStream(file);
-            int bytesRead;
-            byte[] buffer = new byte[4096];
-            while ((bytesRead = inputStream.read(buffer)) != -1) {
-                outputStream.write(buffer, 0, bytesRead);
-            }
-
-        } finally {
-            UMIOUtils.closeQuietly(inputStream);
-            UMIOUtils.closeQuietly(outputStream);
-        }
-
-    }
-
-
     /**
      * Given the last modified time from server, check if the file that is saved is up to date with server
      *
      * @param modifiedTime the last time file was modified from server
      * @param file         the current file in our directory
-     * @return
+     * @return true if file does not exist or modified time on server is greater than the time in the directory
      */
     public static boolean isContentUpdated(long modifiedTime, File file) {
 
@@ -183,7 +148,7 @@ public class ContentScraperUtil {
      * Given a file, check it exists and has content by checking its size
      *
      * @param file that contains content
-     * @return
+     * @return true if the size of the file is greater than 0
      */
     public static boolean fileHasContent(File file) {
         return file.exists() && file.length() > 0;
@@ -193,40 +158,11 @@ public class ContentScraperUtil {
     /**
      * Given an EdraakK12Date, return it as a long
      *
-     * @param date
-     * @return
+     * @param date Edraak Date format from server
+     * @return the date given in a long format
      */
     public static long parseEdraakK12Date(String date) {
         return LocalDateTime.parse(date, ScraperConstants.formatter).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-    }
-
-
-    /**
-     * Given a url, parse the JSON from the http url response and return the object
-     *
-     * @param url   url its downloading the json from
-     * @param clazz the class of the object its returning
-     * @return
-     * @throws IOException
-     */
-    public static <T> T parseJson(URL url, Class<? extends T> clazz) throws IOException {
-
-        Reader reader = null;
-        InputStream inputStream;
-        URLConnection connection;
-        try {
-            connection = url.openConnection();
-            connection.setRequestProperty("Accept", "application/json, text/javascript, */*; q=0.01");
-            inputStream = connection.getInputStream();
-            ByteArrayOutputStream bout = new ByteArrayOutputStream();
-            UMIOUtils.readFully(inputStream, bout);
-
-            reader = new InputStreamReader(new ByteArrayInputStream(bout.toByteArray()));
-            Gson gson = new GsonBuilder().create();
-            return gson.fromJson(reader, clazz);
-        } finally {
-            UMIOUtils.closeQuietly(reader);
-        }
     }
 
 
@@ -238,7 +174,6 @@ public class ContentScraperUtil {
      * @param locationToSave location where the zipped folder will be placed
      * @throws IOException
      */
-
     public static void zipDirectory(File directoryToZip, String filename, File locationToSave) throws IOException {
 
         File zippedFile = new File(locationToSave, filename + ".zip");
@@ -272,10 +207,10 @@ public class ContentScraperUtil {
      * @param entityId             id of activity should match entry id of opds link
      * @param description          description of course/simulation
      * @param descLang             lang of description
-     * @throws ParserConfigurationException
-     * @throws TransformerException
+     * @throws ParserConfigurationException fails to create an xml document
+     * @throws TransformerException         fails to save the xml document in the directory
      */
-    public static void generateTinCanXMLFile(File destinationDirectory, String activityName, String langCode, String fileName, String typeText, String entityId, String description, String descLang) throws ParserConfigurationException, TransformerException {
+    public static void generateTinCanXMLFile(File destinationDirectory, String activityName, String langCode, String fileName, String typeText, String entityId, String description, String descLang) throws TransformerException, ParserConfigurationException {
 
         DocumentBuilderFactory dbFactory =
                 DocumentBuilderFactory.newInstance();

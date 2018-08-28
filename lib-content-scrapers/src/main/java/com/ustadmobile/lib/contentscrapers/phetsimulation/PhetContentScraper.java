@@ -1,4 +1,4 @@
-package com.ustadmobile.lib.contentscrapers.PhetSimulation;
+package com.ustadmobile.lib.contentscrapers.phetsimulation;
 
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.ScraperConstants;
@@ -23,7 +23,25 @@ import java.util.UUID;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 
-public class PhetContentScraper{
+
+/**
+ * The page for each simulation on the website follows the same format
+ * <p>
+ * The english simulation can be found by using the css selector
+ * div.simulation-main-image-panel a.phet-button[href]
+ * which provides the button with href link to download the html file.
+ * <p>
+ * The description of the simulation can be found at the div tag with id "about" to get its content.
+ * Within the about html, there is a description used for purpose of tincan which can be found by the selector - p.simulation-panel-indent
+ * <p>
+ * The translations for the simulation can be found in the table table.phet-table tr
+ * In the css selector for that tr row
+ * you will get the language in the column with selector - "td.list-highlight-background a[href]"
+ * you will get the download link column with selector - "td.img-container a[href]"
+ * <p>
+ * The download links url have eTag and last modified in the headers to identify new content
+ */
+public class PhetContentScraper {
 
     public static final String[] CATEGORY = {
             "iPad/Tablet", "New Sims", "Simulations", "HTML5"};
@@ -37,21 +55,21 @@ public class PhetContentScraper{
     private final String simulationType = "http://adlnet.gov/expapi/activities/simulation";
     private String aboutDescription;
 
-    public PhetContentScraper(String url, File destinationDir){
+    public PhetContentScraper(String url, File destinationDir) {
         this.url = url;
         this.destinationDirectory = destinationDir;
         langugageList = new ArrayList<>();
         this.title = url.substring(url.lastIndexOf("/") + 1, url.length());
     }
 
-    public void scrapContent() throws IOException {
+    public void scrapeContent() throws IOException {
 
         URL simulationUrl = new URL(url);
         destinationDirectory.mkdirs();
 
         simulationDoc = Jsoup.connect(url).get();
 
-        if(!simulationDoc.select("div.simulation-main-image-panel a span").hasClass("html-badge")){
+        if (!simulationDoc.select("div.simulation-main-image-panel a span").hasClass("html-badge")) {
             throw new IllegalArgumentException("File Type not supported");
         }
 
@@ -59,14 +77,14 @@ public class PhetContentScraper{
         aboutDescription = Jsoup.parse(aboutText).select("p.simulation-panel-indent").text();
 
         boolean contentUpdated = false;
-        for(Element englishLink: simulationDoc.select("div.simulation-main-image-panel a.phet-button[href]")){
+        for (Element englishLink : simulationDoc.select("div.simulation-main-image-panel a.phet-button[href]")) {
 
             String hrefLink = englishLink.attr("href");
 
             File englishLocation = new File(destinationDirectory, "en");
             englishLocation.mkdirs();
 
-            if(hrefLink.contains("download")){
+            if (hrefLink.contains("download")) {
                 downloadContent(simulationUrl, hrefLink, englishLocation);
                 contentUpdated = true;
                 break;
@@ -74,13 +92,13 @@ public class PhetContentScraper{
         }
 
         File languageLocation = null;
-        for(Element translations: simulationDoc.select("table.phet-table tr")){
+        for (Element translations : simulationDoc.select("table.phet-table tr")) {
 
-            for(Element langs: translations.select("td.list-highlight-background a[href]")){
+            for (Element langs : translations.select("td.list-highlight-background a[href]")) {
 
                 String hrefLink = langs.attr("href");
 
-                if(hrefLink.contains("translated")) {
+                if (hrefLink.contains("translated")) {
 
                     String langCode = hrefLink.substring(hrefLink.lastIndexOf("/") + 1, hrefLink.length());
                     System.out.println(langCode);
@@ -91,11 +109,11 @@ public class PhetContentScraper{
                 }
             }
 
-            for(Element links: translations.select("td.img-container a[href]")){
+            for (Element links : translations.select("td.img-container a[href]")) {
 
                 String hrefLink = links.attr("href");
 
-                if(hrefLink.contains("download")){
+                if (hrefLink.contains("download")) {
                     downloadContent(simulationUrl, hrefLink, languageLocation);
                     contentUpdated = true;
                     break;
@@ -105,23 +123,28 @@ public class PhetContentScraper{
 
         }
 
-        if(contentUpdated){
-            for(File langDirectory: destinationDirectory.listFiles()){
-                if(langDirectory.isDirectory()){
+        if (contentUpdated) {
+            for (File langDirectory : destinationDirectory.listFiles()) {
+                if (langDirectory.isDirectory()) {
                     ContentScraperUtil.zipDirectory(langDirectory, langDirectory.getName(), langDirectory.getParentFile());
                 }
             }
         }
     }
 
-    public ArrayList<OpdsEntryWithRelations> getCategoryRelations(){
+
+    /**
+     *  Find the category for the phet simulation
+     * @return a list of categories a single phet simulation could be in
+     */
+    public ArrayList<OpdsEntryWithRelations> getCategoryRelations() {
 
         Elements selected = simulationDoc.select("ul.nav-ul div.link-holder span.selected");
 
         ArrayList<OpdsEntryWithRelations> categoryRelations = new ArrayList<>();
-        for(Element category: selected){
+        for (Element category : selected) {
 
-            if(Arrays.stream(CATEGORY).parallel().noneMatch(category.text()::contains)){
+            if (Arrays.stream(CATEGORY).parallel().noneMatch(category.text()::contains)) {
 
                 String categoryName = category.text(); // category name
                 String path = category.parent().attr("href"); // url path to category
@@ -156,10 +179,10 @@ public class PhetContentScraper{
         File eTagFile = new File(simulationLocation, ScraperConstants.ETAG_TXT);
         File modifiedFile = new File(simulationLocation, ScraperConstants.LAST_MODIFIED_TXT);
 
-        if(eTagFile.length() > 0){
+        if (eTagFile.length() > 0) {
 
             String text = new String(Files.readAllBytes(eTagFile.toPath()));
-            if(text.equalsIgnoreCase(eTag)){
+            if (text.equalsIgnoreCase(eTag)) {
                 return;
             }
 
@@ -169,13 +192,12 @@ public class PhetContentScraper{
         File simulationFile = new File(simulationLocation, fileName);
 
 
-
         FileUtils.writeStringToFile(eTagFile, eTag, ScraperConstants.UTF_ENCODING);
         FileUtils.writeStringToFile(modifiedFile, lastModified, ScraperConstants.UTF_ENCODING);
         FileUtils.writeStringToFile(new File(simulationLocation, ScraperConstants.ABOUT_HTML), aboutText, ScraperConstants.UTF_ENCODING);
 
-        ContentScraperUtil.downloadContent(link, simulationFile);
-        String simulationTitle  = Jsoup.parse(simulationFile, ScraperConstants.UTF_ENCODING).title();
+        FileUtils.copyURLToFile(link, simulationFile);
+        String simulationTitle = Jsoup.parse(simulationFile, ScraperConstants.UTF_ENCODING).title();
         try {
             ContentScraperUtil.generateTinCanXMLFile(simulationLocation, simulationTitle,
                     languageLocation.getName(), fileName, simulationType,
@@ -187,24 +209,31 @@ public class PhetContentScraper{
 
     }
 
+
+    /**
+     * Given a directory of phet simulation content, find the languages it was translated to
+     * @param destinationDirectory  directory of the all phet simulations
+     * @return a list of languages the phet simulation was translated to
+     * @throws IOException
+     */
     public ArrayList<OpdsEntryWithRelations> getTranslations(File destinationDirectory) throws IOException {
 
         ArrayList<OpdsEntryWithRelations> translationsEntry = new ArrayList<>();
 
-        for(File translationDir: destinationDirectory.listFiles()){
+        for (File translationDir : destinationDirectory.listFiles()) {
 
-            if(translationDir.isDirectory()){
+            if (translationDir.isDirectory()) {
                 String langCode = translationDir.getName();
-                if(!langugageList.contains(langCode)){
+                if (!langugageList.contains(langCode)) {
                     continue;
                 }
-                for(File contentDirectory: translationDir.listFiles()){
+                for (File contentDirectory : translationDir.listFiles()) {
 
-                    if(title.equalsIgnoreCase(contentDirectory.getName())){
+                    if (title.equalsIgnoreCase(contentDirectory.getName())) {
 
-                        for(File file: contentDirectory.listFiles()){
+                        for (File file : contentDirectory.listFiles()) {
 
-                            if(file.getName().endsWith(".html")){
+                            if (file.getName().endsWith(".html")) {
                                 // TODO recheck entry id for translations
                                 String langTitle = Jsoup.parse(file, ScraperConstants.UTF_ENCODING).title();
                                 OpdsEntryWithRelations newEntry = new OpdsEntryWithRelations(
@@ -222,6 +251,10 @@ public class PhetContentScraper{
         return translationsEntry;
     }
 
+    /**
+     *
+     * @return the title of the simulation in english
+     */
     public String getTitle() {
         return title;
     }
