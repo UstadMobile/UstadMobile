@@ -1,14 +1,12 @@
 package com.ustadmobile.port.sharedse.networkmanager;
 
 /**
- * <h1>WiFiDirectGroupListener</h1>
+ * Interface for listening WiFi Direct group creation and removal
  *
- * Interface to listen for WiFi Direct group creation and removal
- *
- * @author mike
+ * @author kileha3
  */
 
-public interface WiFiDirectGroupListener {
+public interface WiFiDirectGroupListenerBle{
 
     /**
      * A new WiFi direct group was created - or creation failed
@@ -17,7 +15,7 @@ public interface WiFiDirectGroupListener {
      * @param err The exception if any occurred attempting to create the group,
      *            otherwise null
      */
-    void groupCreated(WiFiDirectGroup group, Exception err);
+    void groupCreated(WiFiDirectGroupBle group, Exception err);
 
     /**
      * WiFi direct group removal was attempted.

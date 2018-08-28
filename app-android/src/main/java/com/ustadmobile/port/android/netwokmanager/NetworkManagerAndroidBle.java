@@ -13,11 +13,16 @@ import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanFilter;
 import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.net.wifi.WifiManager;
+import android.net.wifi.p2p.WifiP2pDevice;
+import android.net.wifi.p2p.WifiP2pGroup;
+import android.net.wifi.p2p.WifiP2pManager;
 import android.os.Build;
 import android.os.ParcelUuid;
 import android.support.annotation.RequiresApi;
@@ -27,6 +32,8 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.lib.db.entities.NetworkNode;
 import com.ustadmobile.port.sharedse.networkmanager.BleEntryStatusTask;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle;
+import com.ustadmobile.port.sharedse.networkmanager.WiFiDirectGroupBle;
+import com.ustadmobile.port.sharedse.networkmanager.WiFiDirectGroupListenerBle;
 
 import java.util.Collections;
 import java.util.List;
@@ -34,6 +41,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static android.content.Context.BLUETOOTH_SERVICE;
+import static android.os.Looper.getMainLooper;
 
 /**
  * This class provides methods to perform android network related communications.
@@ -54,7 +62,7 @@ import static android.content.Context.BLUETOOTH_SERVICE;
  * Use {@link NetworkManagerAndroidBle#stopScanning()} to stop scanning for the BLE
  * services advertised from peer devices.
  *<p>
- * Use {@link NetworkManagerAndroidBle#createWifiDirectGroup()} to create WiFi direct
+ * Use {@link NetworkManagerAndroidBle#createWifiDirectGroup} to create WiFi direct
  * group for peer content downloading.
  *<p>
  * <b>Note:</b> Most of the scan / advertise methods here require
@@ -83,6 +91,38 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
     private NetworkServiceAndroid networkService;
 
     private ParcelUuid parcelServiceUuid = new ParcelUuid(USTADMOBILE_BLE_SERVICE_UUID);
+
+    private WifiP2pManager.Channel wifiP2pChannel;
+
+    private WifiP2pManager wifiP2pManager;
+
+    private WiFiDirectGroupListenerBle wiFiDirectGroupListener;
+
+    private boolean groupCreationInitiated = false;
+
+    /**
+     * Listeners for the WiFi-Direct group connections / states,
+     * invoked when WiFi Direct state/connection has changed
+     */
+    private BroadcastReceiver p2pBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent != null && intent.getAction() != null){
+                switch (intent.getAction()){
+                    case WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION:
+                        if(groupCreationInitiated){
+                            wifiP2pManager.requestGroupInfo(wifiP2pChannel, group -> {
+                                WiFiDirectGroupBle groupBle =
+                                        new WiFiDirectGroupBle(group.getNetworkName(),group.getPassphrase());
+                                wiFiDirectGroupListener.groupCreated(groupBle,null);
+                            });
+                        }
+                        break;
+                }
+            }
+        }
+    };
+
 
     /**
      * Callback for BLE service scans for devices with
@@ -135,6 +175,14 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
             bleServiceScanner = bluetoothAdapter.getBluetoothLeScanner();
         }
         gattServerAndroid = new BleGattServerAndroid(((Context) context),this);
+        wifiP2pManager = (WifiP2pManager) networkService.getSystemService(Context.WIFI_P2P_SERVICE);
+        wifiP2pChannel = wifiP2pManager.initialize(networkService, getMainLooper(), null);
+
+        //setting up WiFi Direct connection listener
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
+        networkService.registerReceiver(p2pBroadcastReceiver, intentFilter);
+
     }
 
     /**
@@ -250,6 +298,9 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
         }else{
             if(!bluetoothAdapter.isDiscovering()){
                 bluetoothAdapter.startLeScan(new UUID[] { parcelServiceUuid.getUuid()},leScanCallback);
+            }else{
+                UstadMobileSystemImpl.l(UMLog.ERROR,689,
+                        "Scanning already started, no need to start it again");
             }
         }
 
@@ -289,9 +340,24 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
      * {@inheritDoc}
      */
     @Override
-    public void createWifiDirectGroup() {
+    public void createWifiDirectGroup(WiFiDirectGroupListenerBle wiFiDirectGroupListener) {
+        this.wiFiDirectGroupListener = wiFiDirectGroupListener;
+        wifiP2pManager.createGroup(wifiP2pChannel, new WifiP2pManager.ActionListener() {
+            @Override
+            public void onSuccess() {
+                groupCreationInitiated = true;
+                UstadMobileSystemImpl.l(UMLog.ERROR,692,
+                        "Group created successfully");
+            }
 
+            @Override
+            public void onFailure(int reason) {
+                UstadMobileSystemImpl.l(UMLog.ERROR,692,
+                        "Failed to create a group with error code "+reason);
+            }
+        });
     }
+
 
     /**
      * {@inheritDoc}

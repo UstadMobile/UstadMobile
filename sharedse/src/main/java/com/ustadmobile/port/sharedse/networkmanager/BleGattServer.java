@@ -14,8 +14,16 @@ import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.WIF
  *
  * @author kileha3
  */
-public abstract class BleGattServer {
+public abstract class BleGattServer implements WiFiDirectGroupListenerBle{
 
+    /**
+     * Instance of a network manager which used for platform specific operations.
+     */
+    public NetworkManagerBle networkManager;
+
+    private final Object p2pGroupCreationLock = new Object();
+
+    private String message = null;
     /**
      * Handle request from peer device
      * @param requestReceived Message received from the peer device
@@ -28,12 +36,32 @@ public abstract class BleGattServer {
         switch (requestType){
             case ENTRY_STATUS_REQUEST:
                 List<Long> requestedEntries = bleMessageBytesToLong(requestReceived.getPayload());
-
                 return new BleMessage(ENTRY_STATUS_RESPONSE,bleMessageLongToBytes(requestedEntries),20);
 
             case WIFI_GROUP_CREATION_REQUEST:
-                return new BleMessage(WIFI_GROUP_CREATION_RESPONSE,"CreatedWiFiGroup".getBytes(),20);
+                synchronized (p2pGroupCreationLock){
+                    try{
+                        p2pGroupCreationLock.wait();
+                        networkManager.createWifiDirectGroup(this);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+                return new BleMessage(WIFI_GROUP_CREATION_RESPONSE,message.getBytes(),20);
                 default: return null;
         }
+    }
+
+    @Override
+    public void groupCreated(WiFiDirectGroupBle group, Exception err) {
+        synchronized (p2pGroupCreationLock){
+            this.message = group.getPassphrase()+","+group.getPassphrase();
+            p2pGroupCreationLock.notify();
+        }
+    }
+
+    @Override
+    public void groupRemoved(boolean successful, Exception err) {
+
     }
 }

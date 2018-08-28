@@ -42,7 +42,6 @@ public class BleGattServerAndroid extends BleGattServer{
 
     private BleMessage receivedMessage;
 
-    private NetworkManagerAndroidBle networkManager;
 
     private BluetoothGattServerCallback mCallback = new BluetoothGattServerCallback() {
         /**

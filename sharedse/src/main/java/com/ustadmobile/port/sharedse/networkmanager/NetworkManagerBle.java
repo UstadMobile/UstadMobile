@@ -164,8 +164,10 @@ public abstract class NetworkManagerBle {
      * group creation.
      *
      * If a WiFi direct group is already under creation this method has no effect.
+     *
+     * @param wiFiDirectGroupListener Listener for group creation task
      */
-    public abstract void createWifiDirectGroup();
+    public abstract void createWifiDirectGroup(WiFiDirectGroupListenerBle wiFiDirectGroupListener);
 
     /**
      * Start monitoring availability of specific entries from peer devices
