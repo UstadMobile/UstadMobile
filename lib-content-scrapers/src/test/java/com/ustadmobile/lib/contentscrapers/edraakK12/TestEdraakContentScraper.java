@@ -1,6 +1,7 @@
-package com.ustadmobile.lib.contentscrapers;
+package com.ustadmobile.lib.contentscrapers.edraakK12;
 
 import com.google.gson.GsonBuilder;
+import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.edraakK12.ContentResponse;
 import com.ustadmobile.lib.contentscrapers.edraakK12.EdraakK12ContentScraper;
 import com.ustadmobile.lib.contentscrapers.edraakK12.IndexEdraakK12Content;
@@ -300,20 +301,20 @@ public class TestEdraakContentScraper {
 
     @Test
     public void givenParametersFromGradleCommandLineAndServerOnline_whenEdraakContentScraped_thenShouldConvertAndDownload() throws IOException {
-        if (System.getProperty("url") != null && System.getProperty("dir") != null) {
-            File destination = new File(System.getProperty("dir"));
+        if (System.getProperty("edraakUrl") != null && System.getProperty("edraakDir") != null) {
+            File destination = new File(System.getProperty("edraakDir"));
             EdraakK12ContentScraper scraper = new EdraakK12ContentScraper(
-                    System.getProperty("url"), destination);
+                    System.getProperty("edraakUrl"), destination);
             scraper.scrapeContent();
             assertAllFiles(destination, scraper);
         }
     }
 
     @Test
-    public void givenParametersFromGradleCommandLineAndServerOnline_findImportedComponentAndDownload() throws IOException {
+    public void givenParametersFromGradleCommandLineAndServerOnline_findImportedComponentAndDownload() {
         IndexEdraakK12Content content = new IndexEdraakK12Content();
-        if (System.getProperty("findUrl") != null && System.getProperty("findDir") != null) {
-            content.findContent(System.getProperty("findUrl"), new File(System.getProperty("findDir")));
+        if (System.getProperty("findEdraakUrl") != null && System.getProperty("findEdraakDir") != null) {
+            content.findContent(System.getProperty("findEdraakUrl"), new File(System.getProperty("findEdraakDir")));
         }
     }
 

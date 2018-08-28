@@ -2,6 +2,7 @@ package com.ustadmobile.lib.contentscrapers.phetsimulation;
 
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.ScraperConstants;
+import com.ustadmobile.lib.contentscrapers.edraakK12.EdraakK12ContentScraper;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
 import com.ustadmobile.lib.util.UmUuidUtil;
 
@@ -61,6 +62,25 @@ public class PhetContentScraper {
         langugageList = new ArrayList<>();
         this.title = url.substring(url.lastIndexOf("/") + 1, url.length());
     }
+
+    public static void main(String[] args) {
+        if (args.length != 2) {
+            System.err.println("Usage: <phet html url> <file destination>");
+            System.exit(1);
+        }
+
+        System.out.println(args[0]);
+        System.out.println(args[1]);
+        try {
+            new PhetContentScraper(args[0], new File(args[1])).scrapeContent();
+        } catch (IOException e) {
+            System.err.println("Exception running scrapeContent");
+            e.printStackTrace();
+        }
+
+    }
+
+
 
     public void scrapeContent() throws IOException {
 

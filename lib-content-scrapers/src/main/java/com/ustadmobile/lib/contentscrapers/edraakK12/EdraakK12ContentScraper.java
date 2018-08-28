@@ -93,10 +93,12 @@ public class EdraakK12ContentScraper {
             URLConnection urlConnection = scrapUrl.openConnection();
             urlConnection.setRequestProperty("Accept", "application/json, text/javascript, */*; q=0.01");
             response = new GsonBuilder().create().fromJson(IOUtils.toString(urlConnection.getInputStream(), UTF_ENCODING), ContentResponse.class);
-          //  response = ContentScraperUtil.parseJson(scrapUrl, ContentResponse.class);
         } catch (IOException | JsonSyntaxException e) {
             throw new IllegalArgumentException("JSON INVALID", e.getCause());
         }
+
+        File courseDirectory = new File(destinationDirectory, response.id);
+        courseDirectory.mkdirs();
 
         if (!ContentScraperUtil.isImportedComponent(response.component_type))
             throw new IllegalArgumentException("Not an imported content type!");
@@ -108,7 +110,7 @@ public class EdraakK12ContentScraper {
 
         List<ContentResponse> questionsList = getQuestionSet(response);
         try {
-            anyContentUpdated = downloadQuestions(questionsList, destinationDirectory, scrapUrl);
+            anyContentUpdated = downloadQuestions(questionsList, courseDirectory, scrapUrl);
         } catch (IOException e) {
             throw new IllegalArgumentException("Exercise Malformed", e.getCause());
         }
@@ -132,7 +134,7 @@ public class EdraakK12ContentScraper {
                     }
 
 
-                    File videoFile = new File(destinationDirectory, VIDEO_MP4);
+                    File videoFile = new File(courseDirectory, VIDEO_MP4);
                     if (ContentScraperUtil.isContentUpdated(ContentScraperUtil.parseEdraakK12Date(videoHref.modified), videoFile)) {
                         try {
                             FileUtils.copyURLToFile(videoUrl, videoFile);
@@ -147,7 +149,7 @@ public class EdraakK12ContentScraper {
             }
         }
 
-        File contentJsonFile = new File(destinationDirectory, ScraperConstants.CONTENT_JSON);
+        File contentJsonFile = new File(courseDirectory, ScraperConstants.CONTENT_JSON);
         if (anyContentUpdated || !ContentScraperUtil.fileHasContent(contentJsonFile)) {
             // store the json in a file after modifying image links
             Gson gson = new GsonBuilder().disableHtmlEscaping().create();
@@ -156,10 +158,10 @@ public class EdraakK12ContentScraper {
             anyContentUpdated = true;
         }
 
-        File tinCanFile = new File(destinationDirectory, "tincan.xml");
+        File tinCanFile = new File(courseDirectory, "tincan.xml");
         if (!ContentScraperUtil.fileHasContent(tinCanFile)) {
             try {
-                ContentScraperUtil.generateTinCanXMLFile(destinationDirectory, response.title, "ar",
+                ContentScraperUtil.generateTinCanXMLFile(courseDirectory, response.title, "ar",
                         ScraperConstants.INDEX_HTML, "http://adlnet.gov/expapi/activities/module",
                         url.substring(0, url.indexOf("component/")) + response.id,
                         "", "en");
@@ -170,17 +172,17 @@ public class EdraakK12ContentScraper {
         }
 
         // add these files into the directory
-        anyContentUpdated = writeFileToDirectory(ScraperConstants.JS_HTML_TAG, new File(destinationDirectory, INDEX_HTML)) || anyContentUpdated;
-        anyContentUpdated = writeFileToDirectory(ScraperConstants.JS_TAG, new File(destinationDirectory, JQUERY_JS)) || anyContentUpdated;
-        anyContentUpdated = writeFileToDirectory(ScraperConstants.MATERIAL_CSS_LINK, new File(destinationDirectory, MATERIAL_CSS)) || anyContentUpdated;
-        anyContentUpdated = writeFileToDirectory(ScraperConstants.MATERIAL_JS_LINK, new File(destinationDirectory, ScraperConstants.MATERIAL_JS)) || anyContentUpdated;
-        anyContentUpdated = writeFileToDirectory(ScraperConstants.REGULAR_ARABIC_FONT_LINK, new File(destinationDirectory, ScraperConstants.ARABIC_FONT_REGULAR)) || anyContentUpdated;
-        anyContentUpdated = writeFileToDirectory(ScraperConstants.BOLD_ARABIC_FONT_LINK, new File(destinationDirectory, ScraperConstants.ARABIC_FONT_BOLD)) || anyContentUpdated;
+        anyContentUpdated = writeFileToDirectory(ScraperConstants.JS_HTML_TAG, new File(courseDirectory, INDEX_HTML)) || anyContentUpdated;
+        anyContentUpdated = writeFileToDirectory(ScraperConstants.JS_TAG, new File(courseDirectory, JQUERY_JS)) || anyContentUpdated;
+        anyContentUpdated = writeFileToDirectory(ScraperConstants.MATERIAL_CSS_LINK, new File(courseDirectory, MATERIAL_CSS)) || anyContentUpdated;
+        anyContentUpdated = writeFileToDirectory(ScraperConstants.MATERIAL_JS_LINK, new File(courseDirectory, ScraperConstants.MATERIAL_JS)) || anyContentUpdated;
+        anyContentUpdated = writeFileToDirectory(ScraperConstants.REGULAR_ARABIC_FONT_LINK, new File(courseDirectory, ScraperConstants.ARABIC_FONT_REGULAR)) || anyContentUpdated;
+        anyContentUpdated = writeFileToDirectory(ScraperConstants.BOLD_ARABIC_FONT_LINK, new File(courseDirectory, ScraperConstants.ARABIC_FONT_BOLD)) || anyContentUpdated;
 
 
         // nothing changed, keep same files
         if (anyContentUpdated) {
-            ContentScraperUtil.zipDirectory(destinationDirectory, response.id, destinationDirectory.getParentFile());
+            ContentScraperUtil.zipDirectory(courseDirectory, response.id, destinationDirectory);
         }
 
     }

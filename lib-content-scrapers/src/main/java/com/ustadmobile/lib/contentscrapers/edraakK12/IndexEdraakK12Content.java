@@ -61,8 +61,6 @@ public class IndexEdraakK12Content {
         System.out.println(args[0]);
         System.out.println(args[1]);
         new IndexEdraakK12Content().findContent(args[0], new File(args[1]));
-
-
     }
 
 
@@ -130,8 +128,8 @@ public class IndexEdraakK12Content {
             }
 
             OpdsLink newEntryLink = new OpdsLink(parentEntry.getUuid(), "application/zip",
-                    destinationDirectory.getParent() + "/" + parent.id + ".zip", OpdsEntry.LINK_REL_ACQUIRE);
-            newEntryLink.setLength(new File(destinationDirectory.getParentFile(), response.id + ".zip").length());
+                    destinationDirectory.getName() + "/" + parent.id + ".zip", OpdsEntry.LINK_REL_ACQUIRE);
+            newEntryLink.setLength(new File(destinationDirectory, parent.id + ".zip").length());
             parentEntry.setLinks(Collections.singletonList(newEntryLink));
 
         } else {
@@ -157,6 +155,14 @@ public class IndexEdraakK12Content {
     }
 
 
+    /**
+     * Generate the url based on the different parameters
+     *
+     * @param contentId      unique id of the course
+     * @param baseUrl        baseurl for edraak
+     * @param programId      program id for the course
+     * @param destinationDir directory where the course will be saved
+     */
     public void findContent(String contentId, String baseUrl, int programId, File destinationDir) {
         findContent(baseUrl + "component/" + contentId + "/?states_program_id=" + programId, destinationDir);
     }

@@ -1,5 +1,6 @@
 package com.ustadmobile.lib.contentscrapers.phetsimulation;
 
+import com.ustadmobile.lib.contentscrapers.edraakK12.IndexEdraakK12Content;
 import com.ustadmobile.lib.db.entities.OpdsEntry;
 import com.ustadmobile.lib.db.entities.OpdsEntryParentToChildJoin;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
@@ -34,6 +35,22 @@ public class IndexPhetContentScraper {
     private ArrayList<OpdsEntryWithRelations> entryWithRelationsList;
     private ArrayList<OpdsEntryParentToChildJoin> parentToChildJoins;
 
+
+    public static void main(String[] args) {
+        if (args.length != 2) {
+            System.err.println("Usage: <phet html url> <file destination>");
+            System.exit(1);
+        }
+
+        System.out.println(args[0]);
+        System.out.println(args[1]);
+        try {
+            new IndexPhetContentScraper().findContent(args[0], new File(args[1]));
+        } catch (IOException e) {
+            System.err.println("Exception running findContent");
+            e.printStackTrace();
+        }
+    }
 
     /**
      * Given a phet url, find the content and download

@@ -1,5 +1,6 @@
-package com.ustadmobile.lib.contentscrapers;
+package com.ustadmobile.lib.contentscrapers.phetsimulation;
 
+import com.ustadmobile.lib.contentscrapers.ScraperConstants;
 import com.ustadmobile.lib.contentscrapers.phetsimulation.IndexPhetContentScraper;
 import com.ustadmobile.lib.contentscrapers.phetsimulation.PhetContentScraper;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
@@ -48,7 +49,7 @@ public class TestPhetContentScraper {
 
                     return new MockResponse().setBody(readFile(HTML_FILE_LOCATION));
 
-                } else if (request.getPath().contains(PHET_MAIN_CONTENT)){
+                } else if (request.getPath().contains(PHET_MAIN_CONTENT)) {
 
                     return new MockResponse().setBody(readFile(PHET_MAIN_CONTENT));
 
@@ -57,21 +58,21 @@ public class TestPhetContentScraper {
                     MockResponse mock = new MockResponse();
                     mock.setBody(readFile(EN_LOCATION_FILE));
                     mock.addHeader("ETag", "16adca-5717010854ac0");
-                    mock.addHeader("Last-Modified","Fri, 20 Jul 2018 15:36:51 GMT");
+                    mock.addHeader("Last-Modified", "Fri, 20 Jul 2018 15:36:51 GMT");
 
                     return mock;
-                } else if(request.getPath().contains("/media/simulation_es.html?download")){
+                } else if (request.getPath().contains("/media/simulation_es.html?download")) {
 
                     MockResponse mock = new MockResponse();
                     mock.setBody(readFile(ES_LOCATION_FILE));
                     mock.addHeader("ETag", "16adca-5717010854ac0");
-                    mock.addHeader("Last-Modified","Fri, 20 Jul 2018 15:36:51 GMT");
+                    mock.addHeader("Last-Modified", "Fri, 20 Jul 2018 15:36:51 GMT");
 
                     return mock;
-                } else if(request.getPath().contains("flash")){
+                } else if (request.getPath().contains("flash")) {
 
                     return new MockResponse().setBody(readFile(FLASH_FILE_LOCATION));
-                }else if(request.getPath().contains("jar")){
+                } else if (request.getPath().contains("jar")) {
 
                     return new MockResponse().setBody(readFile(JAR_FILE_LOCATION));
                 }
@@ -106,7 +107,7 @@ public class TestPhetContentScraper {
         Assert.assertTrue("English Simulation Folder exists", titleDirectory.isDirectory());
 
         File aboutFile = new File(titleDirectory, ScraperConstants.ABOUT_HTML);
-        Assert.assertTrue("About File English Exists",aboutFile.length() > 0);
+        Assert.assertTrue("About File English Exists", aboutFile.length() > 0);
 
         File englishSimulation = new File(titleDirectory, SIM_EN);
         Assert.assertTrue("English Simulation exists", englishSimulation.length() > 0);
@@ -118,7 +119,7 @@ public class TestPhetContentScraper {
         Assert.assertTrue("English Last Modified exists", engModified.length() > 0);
 
         File spanishDir = new File(tmpDir, "es");
-        Assert.assertTrue("Spanish Folder exists",spanishDir.isDirectory());
+        Assert.assertTrue("Spanish Folder exists", spanishDir.isDirectory());
 
         File spanishZip = new File(tmpDir, "es.zip");
         Assert.assertTrue("Spanish Zip exists", spanishZip.length() > 0);
@@ -126,7 +127,7 @@ public class TestPhetContentScraper {
         File spanishTitleDirectory = new File(spanishDir, scraper.getTitle());
 
         File aboutSpanishFile = new File(spanishTitleDirectory, ScraperConstants.ABOUT_HTML);
-        Assert.assertTrue("About File English Exists",aboutSpanishFile.length() > 0);
+        Assert.assertTrue("About File English Exists", aboutSpanishFile.length() > 0);
 
         File spanishSimulation = new File(spanishTitleDirectory, SIM_ES);
         Assert.assertTrue("Spanish Simulation exists", spanishSimulation.length() > 0);
@@ -140,7 +141,7 @@ public class TestPhetContentScraper {
     }
 
 
-   @Test
+    @Test
     public void givenServerOnline_whenPhetContentScraped_thenShouldConvertAndDownload() throws IOException {
         File tmpDir = Files.createTempDirectory("testphetcontentscraper").toFile();
 
@@ -174,7 +175,7 @@ public class TestPhetContentScraper {
 
         long lastModified = englishSimulation.lastModified();
 
-        Assert.assertTrue("didnt download 2nd time", firstSimDownload == lastModified);
+        Assert.assertEquals("didnt download 2nd time", firstSimDownload, lastModified);
 
     }
 
@@ -231,33 +232,29 @@ public class TestPhetContentScraper {
 
         ArrayList<OpdsEntryWithRelations> translationList = scraper.getTranslations(tmpDir);
 
-        Assert.assertTrue(translationList.get(0).getLanguage().equals("es"));
+        Assert.assertEquals("first translation == es", translationList.get(0).getLanguage(), ("es"));
 
     }
 
 
-
     @Test
-    public void testCommand() throws IOException{
+    public void givenParametersFromGradleCommandLineAndServerOnline_whenPhetContentScraped_thenShouldConvertAndDownload() throws IOException {
 
-        if(System.getProperty("phetUrl") != null && System.getProperty("phetDir") != null){
+        if (System.getProperty("phetUrl") != null && System.getProperty("phetDir") != null) {
             File tmp = new File(System.getProperty("phetDir"));
-            PhetContentScraper scraper = new PhetContentScraper(System.getProperty("phetUrl"),tmp);
+            PhetContentScraper scraper = new PhetContentScraper(System.getProperty("phetUrl"), tmp);
             scraper.scrapeContent();
             AssertAllFiles(tmp, scraper);
         }
     }
 
     @Test
-    public void testIndexCommand() throws IOException{
+    public void givenParametersFromGradleCommandLineAndServerOnline_findSimulationsAndDownload() throws IOException {
         IndexPhetContentScraper content = new IndexPhetContentScraper();
-        if(System.getProperty("findPhetUrl") != null && System.getProperty("findPhetDir") != null) {
+        if (System.getProperty("findPhetUrl") != null && System.getProperty("findPhetDir") != null) {
             content.findContent(System.getProperty("findPhetUrl"), new File(System.getProperty("findPhetDir")));
         }
     }
-
-
-
 
 
 }
