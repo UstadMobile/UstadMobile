@@ -37,5 +37,17 @@ public abstract class ClazzDao implements BaseDao<Clazz> {
             " (SELECT ClazzMember.clazzMemberPersonUid FROM ClazzMember WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid)")
     public abstract List<ClazzWithNumStudents> findAllClazzesByPersonUidAsList(long personUid);
 
+    @UmQuery("Update Clazz SET attendanceAverage " +
+            " = (SELECT COUNT(*) FROM ClazzLogAttendanceRecord  " +
+            " LEFT JOIN ClazzLog ON ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid = ClazzLog.clazzLogUid " +
+            " WHERE ClazzLog.done = 1 " +
+            " AND ClazzLogAttendanceRecord.attendanceStatus = 1) * 1.0 " +
+            " /  " +
+            "MAX(1, (SELECT COUNT(*) FROM ClazzLogAttendanceRecord  " +
+            "LEFT JOIN ClazzLog ON ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid = ClazzLog.clazzLogUid " +
+            "WHERE ClazzLog.done = 1)) * 1.0 " +
+            "Where Clazz.clazzUid = :clazzUid")
+    public abstract void updateAttendancePercentage(long clazzUid);
+
 
 }
