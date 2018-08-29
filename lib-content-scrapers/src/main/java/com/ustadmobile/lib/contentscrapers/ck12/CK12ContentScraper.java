@@ -1,4 +1,4 @@
-package com.ustadmobile.lib.contentscrapers.CK12;
+package com.ustadmobile.lib.contentscrapers.ck12;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -27,8 +27,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.print.Doc;
 
 public class CK12ContentScraper {
 

@@ -1,7 +1,7 @@
 package com.ustadmobile.lib.contentscrapers;
 
-import com.ustadmobile.lib.contentscrapers.CK12.CK12ContentScraper;
-import com.ustadmobile.lib.contentscrapers.CK12.Rhino;
+import com.ustadmobile.lib.contentscrapers.ck12.CK12ContentScraper;
+import com.ustadmobile.lib.contentscrapers.ck12.Rhino;
 
 import org.junit.Assert;
 import org.junit.Test;

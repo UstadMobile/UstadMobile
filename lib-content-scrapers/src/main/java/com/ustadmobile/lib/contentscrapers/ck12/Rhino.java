@@ -1,4 +1,4 @@
-package com.ustadmobile.lib.contentscrapers.CK12;
+package com.ustadmobile.lib.contentscrapers.ck12;
 
 import java.io.File;
 import java.io.FileReader;
