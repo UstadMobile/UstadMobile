@@ -297,7 +297,7 @@ public class TestDownloadTask {
         final NetworkNode wrongAddressNode = new NetworkNode(remoteNode.getWifiDirectMacAddress(),
                 null);
         wrongAddressNode.setBluetoothMacAddress("00:11:22:33:44:55");
-        wrongAddressNode.setWifiDirectLastUpdated(Calendar.getInstance().getTimeInMillis());
+        wrongAddressNode.setNetworkNodeLastUpdated(Calendar.getInstance().getTimeInMillis());
 //        EntryCheckResponse wrongAddressNodeResponse = new EntryCheckResponse(wrongAddressNode);
 //        wrongAddressNodeResponse.setFileAvailable(true);
 //        wrongAddressNodeResponse.setLastChecked(Calendar.getInstance().getTimeInMillis());
@@ -408,7 +408,7 @@ public class TestDownloadTask {
 
         NetworkNode wifiDirectNode = new NetworkNode("00:00:00:00:00:01", null);
         wifiDirectNode.setNodeId(0);
-        wifiDirectNode.setWifiDirectLastUpdated(timeNow);
+        wifiDirectNode.setNetworkNodeLastUpdated(timeNow);
         EntryStatusResponseWithNode wifiDirectResponse = new EntryStatusResponseWithNode();
         wifiDirectResponse.setAvailable(true);
         wifiDirectResponse.setNetworkNode(wifiDirectNode);

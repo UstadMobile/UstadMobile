@@ -335,14 +335,6 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
      * {@inheritDoc}
      */
     @Override
-    public void openWifiSettings() {
-        networkService.startActivity(new Intent(Settings.ACTION_WIFI_SETTINGS));
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public boolean setWifiEnabled(boolean enabled) {
         return wifiManager.setWifiEnabled(enabled);
     }
@@ -371,7 +363,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
         }else{
             UstadMobileSystemImpl.l(UMLog.ERROR,692,
                     "Wifi is not enabled, enabling now");
-            wifiManager.setWifiEnabled(true);
+            setWifiEnabled(true);
         }
     }
 

@@ -911,7 +911,7 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
                     node.setBluetoothMacAddress(btAddr);
                     node.setWifiDirectMacAddress(senderMacAddr);
                     node.setPort(port);
-                    node.setWifiDirectLastUpdated(Calendar.getInstance().getTimeInMillis());
+                    node.setNetworkNodeLastUpdated(Calendar.getInstance().getTimeInMillis());
 
                     if(newNode) {
                         networkNodeDao.insert(node);

@@ -49,6 +49,7 @@ public class BleNetworkManagerTest {
         mockedContext = mock(Context.class);
         entries = Arrays.asList(1056289670L,4590875612L,9076137860L,2912543894L);
         mockedNode = mock(NetworkNode.class);
+        testManager.init(mockedContext);
         mockedStatusTask = mock(BleEntryStatusTask.class);
         NetworkNodeDao mockedDao = mock(NetworkNodeDao.class);
         UmAppDatabase appDatabase = mock(UmAppDatabase.class);
@@ -60,7 +61,7 @@ public class BleNetworkManagerTest {
     @Test
     public void givenEntryStatusNotKnown_whenStartMonitoringAvailabilityCalled_thenShouldCreateEntryStatusTask() {
         Object availabilityClient = new Object();
-        testManager.startMonitoringAvailability(mockedContext,availabilityClient, entries);
+        testManager.startMonitoringAvailability(availabilityClient, entries);
 
         verify(testManager).makeEntryStatusTask(any(),any(),any());
 
@@ -71,10 +72,10 @@ public class BleNetworkManagerTest {
 
     @Test
     public void givenMonitoringAvailabilityStarted_whenNewNodeDiscovered_thenShouldCreateEntryStatusTask() {
-        testManager.startMonitoringAvailability(mockedContext,availabilityClient, entries);
+        testManager.startMonitoringAvailability(availabilityClient, entries);
 
         testManager.handleNodeDiscovered(mockedNode);
-        verify(testManager).makeEntryStatusTask(mockedContext,entries, null);
+        verify(testManager).makeEntryStatusTask(mockedContext,entries, mockedNode);
 
         //will have been called async - we need to wait for it to run
         verify(mockedStatusTask, timeout(5000)).run();
@@ -82,7 +83,7 @@ public class BleNetworkManagerTest {
 
     @Test
     public void givenMonitoringAvailabilityStopped_whenNewNodeDiscovered_thenShouldNotCreateEntryStatusTask() {
-        testManager.startMonitoringAvailability(mockedContext,availabilityClient, entries);
+        testManager.startMonitoringAvailability(availabilityClient, entries);
         testManager.stopMonitoringAvailability(availabilityClient);
         testManager.handleNodeDiscovered(mockedNode);
 
