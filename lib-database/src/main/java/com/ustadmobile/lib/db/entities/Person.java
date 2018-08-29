@@ -1,15 +1,17 @@
 package com.ustadmobile.lib.db.entities;
 
 import com.ustadmobile.lib.database.annotation.UmEntity;
+import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 
 /**
  * Created by mike on 3/8/18.
  */
 
 @UmEntity
-public class Person {
+public class Person implements SyncableEntity {
 
-    private String uuid;
+    @UmPrimaryKey(autoIncrement = true)
+    private long personUid;
 
     private String username;
 
@@ -25,12 +27,17 @@ public class Person {
 
     private String phoneNum;
 
-    public String getUuid() {
-        return uuid;
+    private long masterChangeSeqNum;
+
+    private long localChangeSeqNum;
+
+
+    public long getPersonUid() {
+        return personUid;
     }
 
-    public void setUuid(String uuid) {
-        this.uuid = uuid;
+    public void setPersonUid(long personUid) {
+        this.personUid = personUid;
     }
 
     public String getUsername() {
@@ -87,5 +94,25 @@ public class Person {
 
     public void setPhoneNum(String phoneNum) {
         this.phoneNum = phoneNum;
+    }
+
+    @Override
+    public long getMasterChangeSeqNum() {
+        return masterChangeSeqNum;
+    }
+
+    @Override
+    public void setMasterChangeSeqNum(long masterChangeSeqNum) {
+        this.masterChangeSeqNum = masterChangeSeqNum;
+    }
+
+    @Override
+    public long getLocalChangeSeqNum() {
+        return localChangeSeqNum;
+    }
+
+    @Override
+    public void setLocalChangeSeqNum(long localChangeSeqNum) {
+        this.localChangeSeqNum = localChangeSeqNum;
     }
 }

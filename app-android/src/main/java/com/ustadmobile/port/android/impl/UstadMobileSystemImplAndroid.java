@@ -186,6 +186,17 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         viewNameToAndroidImplMap.put(DownloadDialogView.VIEW_NAME, DownloadDialogFragment.class);
     }
 
+    /**
+     * When using UstadMobile as a library in other apps, this method can be used to map custom
+     * views so that they work with the go method.
+     *
+     * @param viewName A unique name e.g. as per the view interface VIEW_NAME
+     * @param implementingClass The Activity or Fragment class that implements this view on Android
+     */
+    public static void mapView(String viewName, Class implementingClass) {
+        viewNameToAndroidImplMap.put(viewName, implementingClass);
+    }
+
 
     private String currentUsername;
 

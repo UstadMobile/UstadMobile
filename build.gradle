@@ -27,16 +27,15 @@ task clean(type: Delete) {
 }
 
 //Major.minor.database version
-version = "0.2.5.65"
+version = "0.2.7.65"
 ext {
     ustadVersion = project.version
-    ustadVersionCode = 149
+    ustadVersionCode = 150
 
     version_junit = "4.12"
     version_nanohttpd = "2.3.1"
     version_zip4j = "1.3.2"
     version_kxml = "2.3.0"
-    version_ormlite = "5.0"
     version_json = "20160212"
     version_qrcodelibfork = "1.0.3"
     version_okhttp = "3.9.0"
