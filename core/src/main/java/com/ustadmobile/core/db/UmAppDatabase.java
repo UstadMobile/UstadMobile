@@ -29,6 +29,7 @@ import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.ClazzMember;
 import com.ustadmobile.lib.db.entities.ContainerFile;
 import com.ustadmobile.lib.db.entities.ContainerFileEntry;
+import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.CrawlJob;
 import com.ustadmobile.lib.db.entities.CrawlJobItem;
 import com.ustadmobile.lib.db.entities.DownloadJob;
@@ -53,7 +54,7 @@ import com.ustadmobile.lib.db.entities.Person;
         DownloadJobItemHistory.class, CrawlJob.class, CrawlJobItem.class,
         OpdsEntryStatusCache.class, OpdsEntryStatusCacheAncestor.class,
         HttpCachedEntry.class, DownloadJob.class, DownloadJobItem.class,
-        Person.class, Clazz.class, ClazzMember.class
+        Person.class, Clazz.class, ClazzMember.class, ContentEntry.class
 })
 public abstract class UmAppDatabase{
 
