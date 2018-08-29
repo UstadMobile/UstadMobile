@@ -63,7 +63,7 @@ public class FeedListPresenter extends UstadBaseController<FeedListView>{
 
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         String linkViewName = feedLink.split("\\?")[0];
-        Hashtable args = splitQuery(feedLink);
+        Hashtable args = splitQuery(feedLink.split("\\?")[1]);
 
         impl.go(linkViewName, args, view.getContext());
 

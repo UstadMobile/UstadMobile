@@ -30,6 +30,7 @@ import com.ustadmobile.core.controller.ClazzLogDetailPresenter;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.view.ClassLogDetailView;
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord;
+import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecordWithPerson;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.util.WeakHashMap;
@@ -62,7 +63,7 @@ public class ClassLogDetailActivity extends UstadBaseActivity
     public long logDate;
 
     protected class ClazzLogDetailRecyclerAdapter
-            extends PagedListAdapter<ClazzLogAttendanceRecord,
+            extends PagedListAdapter<ClazzLogAttendanceRecordWithPerson,
                 ClazzLogDetailRecyclerAdapter.ClazzLogDetailViewHolder>{
 
         protected class ClazzLogDetailViewHolder extends RecyclerView.ViewHolder{
@@ -72,7 +73,7 @@ public class ClassLogDetailActivity extends UstadBaseActivity
         }
 
         protected ClazzLogDetailRecyclerAdapter(
-                @NonNull DiffUtil.ItemCallback<ClazzLogAttendanceRecord> diffCallback){
+                @NonNull DiffUtil.ItemCallback<ClazzLogAttendanceRecordWithPerson> diffCallback){
             super(diffCallback);
         }
 
@@ -101,9 +102,11 @@ public class ClassLogDetailActivity extends UstadBaseActivity
 
         @Override
         public void onBindViewHolder(@NonNull ClazzLogDetailViewHolder holder, int position){
-            ClazzLogAttendanceRecord attendanceRecord = getItem(position);
-            String studentName =
-                    "Student Name " + attendanceRecord.getClazzLogAttendanceRecordClazzMemberUid();
+            ClazzLogAttendanceRecordWithPerson attendanceRecord = getItem(position);
+
+            String studentName = attendanceRecord.getPerson().getFirstName() + " " +
+                    attendanceRecord.getPerson().getLastName();
+
             int studentAttendance = attendanceRecord.getAttendanceStatus();
 
             ((TextView)holder.itemView
@@ -144,18 +147,18 @@ public class ClassLogDetailActivity extends UstadBaseActivity
         }
     }
 
-    public static final DiffUtil.ItemCallback<ClazzLogAttendanceRecord> DIFF_CALLBACK =
-            new DiffUtil.ItemCallback<ClazzLogAttendanceRecord>() {
+    public static final DiffUtil.ItemCallback<ClazzLogAttendanceRecordWithPerson> DIFF_CALLBACK =
+            new DiffUtil.ItemCallback<ClazzLogAttendanceRecordWithPerson>() {
                 @Override
-                public boolean areItemsTheSame(ClazzLogAttendanceRecord oldItem,
-                                               ClazzLogAttendanceRecord newItem) {
+                public boolean areItemsTheSame(ClazzLogAttendanceRecordWithPerson oldItem,
+                                               ClazzLogAttendanceRecordWithPerson newItem) {
                     return oldItem.getClazzLogAttendanceRecordUid() ==
                             newItem.getClazzLogAttendanceRecordUid();
                 }
 
                 @Override
-                public boolean areContentsTheSame(ClazzLogAttendanceRecord oldItem,
-                                                  ClazzLogAttendanceRecord newItem) {
+                public boolean areContentsTheSame(ClazzLogAttendanceRecordWithPerson oldItem,
+                                                  ClazzLogAttendanceRecordWithPerson newItem) {
                     return oldItem.equals(newItem);
                 }
             };
@@ -221,13 +224,13 @@ public class ClassLogDetailActivity extends UstadBaseActivity
 
     @Override
     public void setClazzLogAttendanceRecordProvider(
-            UmProvider<ClazzLogAttendanceRecord> clazzLogAttendanceRecordProvider) {
+            UmProvider<ClazzLogAttendanceRecordWithPerson> clazzLogAttendanceRecordProvider) {
         ClazzLogDetailRecyclerAdapter recyclerAdapter =
                 new ClazzLogDetailRecyclerAdapter(DIFF_CALLBACK);
-        DataSource.Factory<Integer, ClazzLogAttendanceRecord> factory =
-                (DataSource.Factory<Integer, ClazzLogAttendanceRecord>)
+        DataSource.Factory<Integer, ClazzLogAttendanceRecordWithPerson> factory =
+                (DataSource.Factory<Integer, ClazzLogAttendanceRecordWithPerson>)
                         clazzLogAttendanceRecordProvider.getProvider();
-        LiveData<PagedList<ClazzLogAttendanceRecord>> data =
+        LiveData<PagedList<ClazzLogAttendanceRecordWithPerson>> data =
                 new LivePagedListBuilder<>(factory, 20).build();
         data.observe(this, recyclerAdapter::submitList);
 

@@ -7,6 +7,7 @@ import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord;
+import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecordWithPerson;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +30,14 @@ public abstract class ClazzLogAttendanceRecordDao implements BaseDao<ClazzLogAtt
 
     @UmQuery("SELECT * from ClazzLogAttendanceRecord WHERE clazzLogAttendanceRecordClazzLogUid = :clazzLogUid")
     public abstract UmProvider<ClazzLogAttendanceRecord> findAttendanceLogsByClassLogId(long clazzLogUid);
+
+
+    @UmQuery("SELECT ClazzLogAttendanceRecord.* , Person.* " +
+            " FROM ClazzLogAttendanceRecord " +
+            " LEFT JOIN ClazzMember on ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzMemberUid = ClazzMember.clazzMemberUid " +
+            " LEFT JOIN Person on ClazzMember.clazzMemberPersonUid = Person.personUid " +
+            " WHERE ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid = :clazzLogUid")
+    public abstract UmProvider<ClazzLogAttendanceRecordWithPerson> findAttendanceRecordsWithPersonByClassLogId (long clazzLogUid);
 
     @UmQuery("SELECT ClazzMember.clazzMemberUid FROM ClazzMember WHERE ClazzMember.clazzMemberClazzUid = :clazzId AND ClazzMember.clazzMemberClazzUid NOT IN " +
             "(SELECT clazzLogAttendanceRecordClazzMemberUid FROM ClazzLogAttendanceRecord WHERE clazzLogAttendanceRecordClazzLogUid = :clazzLogUid)")

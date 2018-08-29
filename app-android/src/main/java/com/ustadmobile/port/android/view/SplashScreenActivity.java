@@ -200,6 +200,7 @@ public class SplashScreenActivity extends AppCompatActivity implements DialogInt
 
         new Thread(() -> {
 
+            //Get current Date (minus time)
             Long currentLogDate = -1L;
             Calendar attendanceDate = Calendar.getInstance();
             attendanceDate.setTimeInMillis(System.currentTimeMillis());
@@ -209,28 +210,37 @@ public class SplashScreenActivity extends AppCompatActivity implements DialogInt
             attendanceDate.set(Calendar.MILLISECOND, 0);
             currentLogDate = attendanceDate.getTimeInMillis();
 
-            for(int i = 0; i < 5; i++) {
-                Person person = new Person();
-                person.setFirstName("Ahmed");
-                person.setLastName("Khalil" + i);
-
-                long thisPersonUid = personDao.insert(person);
-                person.setPersonUid(thisPersonUid);
-
-            }
-
+            //Create Class
             Clazz clazz1 = new Clazz();
-            clazz1.setClazzName("Class 1");
+            clazz1.setClazzName("Class A");
             clazz1.setAttendanceAverage(0L);
             long thisClazzUid = clazzDao.insert(clazz1);
             clazz1.setClazzUid(thisClazzUid);
 
-            for(int i = 0; i < 5; i++) {
+            //Names
+            String[] names = {"Shukriyya al-Azzam", "Ummu Kulthoom al-Munir","Azeema el-Saleem",
+                    "Fuaada el-Qadir","Amatullah al-Baluch","Sham'a al-Wali","Haamida al-Sinai",
+                    "Hasnaa el-Khalili","Nawwaara al-Salim","Qamraaa el-Shakoor",
+                    "Riyaal al-Moustafa","Haazim al-Salah","Hamdaan el-Ishmael","Baheej el-Huda",
+                    "Mahdi el-Mahmoud","Badraan el-Zaman","Saeed el-Rafiq","Husaam el-Wakim",
+                    "Mansoor el-Saidi","Nazmi al-Hares"};
 
+            //Persist names to DB <-> ClazzMembers <-> Clazz
+            for (String full_name: names){
+                //Create Person
+                String first_name = full_name.split(" ")[0];
+                String last_name = full_name.split(" ")[1];
+                Person person = new Person();
+                person.setFirstName(first_name);
+                person.setLastName(last_name);
+                long thisPersonUid = personDao.insert(person);
+                person.setPersonUid(thisPersonUid);
+
+                //Create ClazzMember
                 ClazzMember member = new ClazzMember();
                 member.setRole(ClazzMember.ROLE_STUDENT);
-                member.setClazzMemberPersonUid(i);
-                member.setClazzMemberClazzUid(thisClazzUid);
+                member.setClazzMemberClazzUid(clazz1.getClazzUid());
+                member.setClazzMemberPersonUid(thisPersonUid);
                 member.setAttendancePercentage(0L);
                 clazzMemberDao.insertAsync(member, null);
             }

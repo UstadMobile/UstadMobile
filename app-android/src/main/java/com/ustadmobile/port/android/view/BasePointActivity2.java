@@ -110,16 +110,15 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
                 System.out.println("Tab Selected: " + position);
                 if(position == 1){
                     if(!wasSelected){
+                        //mPagerAdapter.notifyDataSetChanged();
                         int x;
                     }
                 }
-                //Go to fragment ? TODO
                 if (!wasSelected) {
                     mPagerAdapter.notifyDataSetChanged();
                     Fragment selectedFragment = mPagerAdapter.getItem(position);
                     mPagerAdapter.notifyDataSetChanged();
                     mPager.setCurrentItem(position);
-
                 }
 
                 //Update title

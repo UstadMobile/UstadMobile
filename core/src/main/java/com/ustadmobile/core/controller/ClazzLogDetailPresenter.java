@@ -10,6 +10,7 @@ import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.view.ClassLogDetailView;
 import com.ustadmobile.lib.db.entities.ClazzLog;
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord;
+import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecordWithPerson;
 
 import java.util.Calendar;
 import java.util.Hashtable;
@@ -21,7 +22,7 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
     private long currentClazzUid = -1L;
     private long currentLogDate = -1L;
 
-    private UmProvider<ClazzLogAttendanceRecord> clazzLogAttendanceRecordUmProvider;
+    private UmProvider<ClazzLogAttendanceRecordWithPerson> clazzLogAttendanceRecordUmProvider;
 
     private ClazzLog currentClazzLog;
 
@@ -38,10 +39,11 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
         super(context, arguments, view);
 
         if(arguments.containsKey("clazzuid")){
-            currentClazzUid = (long) arguments.get("clazzuid");
+            currentClazzUid = Long.parseLong(arguments.get("clazzuid").toString());
         }
         if(arguments.containsKey("logdate")){
-            currentLogDate = (long) arguments.get("logdate");
+            String thisLogDate = arguments.get("logdate").toString();
+            currentLogDate = Long.parseLong(thisLogDate);
         }
     }
 
@@ -139,7 +141,8 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
                         //Get provider
                         clazzLogAttendanceRecordUmProvider = UmAppDatabase.getInstance(context)
                                 .getClazzLogAttendanceRecordDao()
-                                .findAttendanceLogsByClassLogId(result.getClazzLogUid());
+                                .findAttendanceRecordsWithPersonByClassLogId(result.getClazzClazzUid());
+                                //.findAttendanceLogsByClassLogId(result.getClazzLogUid());
                         //Set to view
                         view.runOnUiThread(() ->
                                 view.setClazzLogAttendanceRecordProvider(clazzLogAttendanceRecordUmProvider));

@@ -19,7 +19,7 @@ import java.util.Hashtable;
 
 public class ClazzListPresenter extends UstadBaseController<ClazzListView> {
 
-    private long currentPersonUid = 0L;
+    private long currentPersonUid = -1L;
 
     private UmProvider<ClazzWithNumStudents> clazzListProvider;
 
@@ -30,6 +30,10 @@ public class ClazzListPresenter extends UstadBaseController<ClazzListView> {
     @Override
     public void onCreate(Hashtable savedState) {
         super.onCreate(savedState);
+
+        //TODO: Remove. Replace with Logged-In User
+        currentPersonUid = 1L;
+
         clazzListProvider = UmAppDatabase.getInstance(context).getClazzDao()
                 .findAllClazzesByPersonUid(currentPersonUid);
         view.setClazzListProvider(clazzListProvider);

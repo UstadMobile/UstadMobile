@@ -97,6 +97,7 @@ public class FeedListFragment extends UstadBaseFragment implements FeedListView,
          */
         @Override
         public void onBindViewHolder(@NonNull FeedViewHolder holder, int position) {
+
             FeedEntry feedEntry = getItem(position);
 
             TextView feedText = ((TextView)holder.itemView
@@ -236,10 +237,17 @@ public class FeedListFragment extends UstadBaseFragment implements FeedListView,
         return false;
     }
 
+    /**
+     * Updates the title of the toolbar.
+     * TODO: check why its null sometimes
+     * @param title
+     */
     public void updateTitle(String title){
         //Update the parent header toolbar
         toolbar = getActivity().findViewById(R.id.base_point_2_toolbar);
-        toolbar.setTitle(title);
+        if(toolbar != null) {
+            toolbar.setTitle(title);
+        }
     }
 
 }

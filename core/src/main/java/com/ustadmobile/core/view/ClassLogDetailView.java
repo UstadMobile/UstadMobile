@@ -2,6 +2,7 @@ package com.ustadmobile.core.view;
 
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord;
+import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecordWithPerson;
 
 /**
  * ClassLogDetail Core View extends Core UstadView. Will be implemented
@@ -17,7 +18,7 @@ public interface ClassLogDetailView extends UstadView {
      *
      * @param clazzLogAttendanceRecordProvider The provider data
      */
-    void setClazzLogAttendanceRecordProvider(UmProvider<ClazzLogAttendanceRecord>
+    void setClazzLogAttendanceRecordProvider(UmProvider<ClazzLogAttendanceRecordWithPerson>
                                                      clazzLogAttendanceRecordProvider);
 
 }
