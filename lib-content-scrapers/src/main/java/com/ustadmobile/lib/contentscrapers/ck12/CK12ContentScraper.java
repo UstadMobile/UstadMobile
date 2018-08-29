@@ -2,18 +2,17 @@ package com.ustadmobile.lib.contentscrapers.ck12;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.ustadmobile.lib.contentscrapers.ContentScraper;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.ScraperConstants;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -80,7 +79,7 @@ public class CK12ContentScraper {
         }
 
         try {
-            ContentScraperUtil.downloadContent(new URL(imageThumnail), new File(assetDirectory, "video-thumbnail.jpg"));
+            FileUtils.copyURLToFile(new URL(imageThumnail), new File(assetDirectory, "video-thumbnail.jpg"));
         } catch (MalformedURLException e) {
             imageThumnail = "";
         }
@@ -125,13 +124,15 @@ public class CK12ContentScraper {
 
         String testIdLink = practiceTestIdLink + practiceUrl + practicePost;
 
-        PracticeResponse response = ContentScraperUtil.parseJson(new URL(testIdLink), PracticeResponse.class);
+        PracticeResponse response = new GsonBuilder().disableHtmlEscaping().create().fromJson(
+                IOUtils.toString(new URL(testIdLink), ScraperConstants.UTF_ENCODING), PracticeResponse.class);
 
         String testId = response.response.test.id;
         int goal = response.response.test.goal;
 
         String testLink = startTestLink + testId + POLICIES;
-        TestResponse testResponse = ContentScraperUtil.parseJson(new URL(testLink), TestResponse.class);
+        TestResponse testResponse = new GsonBuilder().disableHtmlEscaping().create().fromJson(
+                IOUtils.toString(new URL(testLink), ScraperConstants.UTF_ENCODING), TestResponse.class);
 
         String testScoreId = testResponse.response.testScore.id;
 
@@ -142,7 +143,8 @@ public class CK12ContentScraper {
 
             String questionLink = questionLinkId + testId + "/" + i + "/" + testScoreId + postfix;
 
-            QuestionResponse questionResponse = ContentScraperUtil.parseJson(new URL(questionLink), QuestionResponse.class);
+            QuestionResponse questionResponse =  new GsonBuilder().disableHtmlEscaping().create().fromJson(
+                    IOUtils.toString(new URL(questionLink), ScraperConstants.UTF_ENCODING), QuestionResponse.class);
 
             String questionId = questionResponse.response.questionID;
 

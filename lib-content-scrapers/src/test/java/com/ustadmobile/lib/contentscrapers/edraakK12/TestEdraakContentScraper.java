@@ -103,13 +103,13 @@ public class TestEdraakContentScraper {
     public void assertAllFiles(File tmpDir, EdraakK12ContentScraper scraper) throws IOException {
 
         File jsonFile = new File(tmpDir, CONTENT_JSON);
-        Assert.assertTrue("Downloaded content info json exists", ContentScraperUtil.isFileCreated(jsonFile));
+        Assert.assertTrue("Downloaded content info json exists", ContentScraperUtil.fileHasContent(jsonFile));
         String jsonStr = new String(Files.readAllBytes(jsonFile.toPath()), "UTF-8");
         ContentResponse gsonContent = new GsonBuilder().disableHtmlEscaping().create().fromJson(jsonStr, ContentResponse.class);
         Assert.assertNotNull("Created Gson POJO Object", gsonContent);
 
-        Assert.assertTrue("Downloaded Questions json exist", ContentScraperUtil.isFileCreated(new File(tmpDir, QUESTIONS_JSON)));
-        Assert.assertTrue("Downloaded zip exists", ContentScraperUtil.isFileCreated(new File(tmpDir.getParent(), gsonContent.id + ".zip")));
+        Assert.assertTrue("Downloaded Questions json exist", ContentScraperUtil.fileHasContent(new File(tmpDir, QUESTIONS_JSON)));
+        Assert.assertTrue("Downloaded zip exists", ContentScraperUtil.fileHasContent(new File(tmpDir.getParent(), gsonContent.id + ".zip")));
 
         List<ContentResponse> questionSetList = scraper.getQuestionSet(gsonContent);
         Assert.assertNotNull("Has Questions Set", questionSetList);
@@ -117,18 +117,18 @@ public class TestEdraakContentScraper {
 
         File video = new File(tmpDir, VIDEO_MP4);
         if (ComponentType.ONLINE.getType().equalsIgnoreCase(gsonContent.target_component.component_type)) {
-            Assert.assertEquals("Has Video", true, ContentScraperUtil.isFileCreated(video));
+            Assert.assertEquals("Has Video", true, ContentScraperUtil.fileHasContent(video));
         } else {
-            Assert.assertEquals("Should not have video", false, ContentScraperUtil.isFileCreated(video));
+            Assert.assertEquals("Should not have video", false, ContentScraperUtil.fileHasContent(video));
         }
 
-        Assert.assertTrue("tincan file exists", ContentScraperUtil.isFileCreated(new File(tmpDir, "tincan.xml")));
-        Assert.assertTrue("index html file exists", ContentScraperUtil.isFileCreated(new File(tmpDir, INDEX_HTML)));
-        Assert.assertTrue("jquery file exists", ContentScraperUtil.isFileCreated(new File(tmpDir, JQUERY_JS)));
-        Assert.assertTrue("material js file exists", ContentScraperUtil.isFileCreated(new File(tmpDir, MATERIAL_JS)));
-        Assert.assertTrue("material css file exists", ContentScraperUtil.isFileCreated(new File(tmpDir, MATERIAL_CSS)));
-        Assert.assertTrue("arabic font regular file exists", ContentScraperUtil.isFileCreated(new File(tmpDir, ARABIC_FONT_REGULAR)));
-        Assert.assertTrue("arabic font bold file exists", ContentScraperUtil.isFileCreated(new File(tmpDir, ARABIC_FONT_BOLD)));
+        Assert.assertTrue("tincan file exists", ContentScraperUtil.fileHasContent(new File(tmpDir, "tincan.xml")));
+        Assert.assertTrue("index html file exists", ContentScraperUtil.fileHasContent(new File(tmpDir, INDEX_HTML)));
+        Assert.assertTrue("jquery file exists", ContentScraperUtil.fileHasContent(new File(tmpDir, JQUERY_JS)));
+        Assert.assertTrue("material js file exists", ContentScraperUtil.fileHasContent(new File(tmpDir, MATERIAL_JS)));
+        Assert.assertTrue("material css file exists", ContentScraperUtil.fileHasContent(new File(tmpDir, MATERIAL_CSS)));
+        Assert.assertTrue("arabic font regular file exists", ContentScraperUtil.fileHasContent(new File(tmpDir, ARABIC_FONT_REGULAR)));
+        Assert.assertTrue("arabic font bold file exists", ContentScraperUtil.fileHasContent(new File(tmpDir, ARABIC_FONT_BOLD)));
 
     }
 
