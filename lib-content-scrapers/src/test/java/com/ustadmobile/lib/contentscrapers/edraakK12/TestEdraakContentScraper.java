@@ -1,9 +1,10 @@
-package com.ustadmobile.lib.contentscrapers;
+package com.ustadmobile.lib.contentscrapers.edraakK12;
 
 import com.google.gson.GsonBuilder;
-import com.ustadmobile.lib.contentscrapers.EdraakK12.ContentResponse;
-import com.ustadmobile.lib.contentscrapers.EdraakK12.EdraakK12ContentScraper;
-import com.ustadmobile.lib.contentscrapers.EdraakK12.IndexEdraakK12Content;
+import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
+import com.ustadmobile.lib.contentscrapers.edraakK12.ContentResponse;
+import com.ustadmobile.lib.contentscrapers.edraakK12.EdraakK12ContentScraper;
+import com.ustadmobile.lib.contentscrapers.edraakK12.IndexEdraakK12Content;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
@@ -80,7 +81,7 @@ public class TestEdraakContentScraper {
                     source.readAll(buffer);
 
                     return new MockResponse().setResponseCode(200).setBody(buffer);
-                } else if(request.getPath().contains("picture")){
+                } else if (request.getPath().contains("picture")) {
                     int length = "/media/".length();
                     String fileName = request.getPath().substring(length,
                             request.getPath().indexOf(".png", length));
@@ -104,7 +105,7 @@ public class TestEdraakContentScraper {
         File jsonFile = new File(tmpDir, CONTENT_JSON);
         Assert.assertTrue("Downloaded content info json exists", ContentScraperUtil.isFileCreated(jsonFile));
         String jsonStr = new String(Files.readAllBytes(jsonFile.toPath()), "UTF-8");
-        ContentResponse gsonContent = new GsonBuilder().disableHtmlEscaping().create().fromJson(jsonStr,ContentResponse.class);
+        ContentResponse gsonContent = new GsonBuilder().disableHtmlEscaping().create().fromJson(jsonStr, ContentResponse.class);
         Assert.assertNotNull("Created Gson POJO Object", gsonContent);
 
         Assert.assertTrue("Downloaded Questions json exist", ContentScraperUtil.isFileCreated(new File(tmpDir, QUESTIONS_JSON)));
@@ -133,31 +134,31 @@ public class TestEdraakContentScraper {
 
 
     @Test
-    public void givenServerOnline_whenEdXContentScraped_thenShouldConvertAndDownload() throws IOException{
+    public void givenServerOnline_whenEdraakContentScraped_thenShouldConvertAndDownload() throws IOException {
 
         File tmpDir = Files.createTempDirectory("testedxcontentscraper").toFile();
         MockWebServer mockWebServer = new MockWebServer();
         mockWebServer.setDispatcher(dispatcher);
         String url = EdraakK12ContentScraper.generateUrl(mockWebServer.url("/api/").toString(), DETAIL_JSON_CONTENT_FILE, 41);
         EdraakK12ContentScraper scraper = new EdraakK12ContentScraper(url, tmpDir);
-        scraper.scrapContent();
+        scraper.scrapeContent();
         assertAllFiles(tmpDir, scraper);
 
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void givenNotImportedContent_whenEdXContentScraped_thenShouldThrowIllegalArgumentException() throws IOException {
+    public void givenNotImportedContent_whenEdraakContentScraped_thenShouldThrowIllegalArgumentException() throws IOException {
 
         File tmpDir = Files.createTempDirectory("testedxcontentscraper").toFile();
         MockWebServer mockWebServer = new MockWebServer();
         mockWebServer.setDispatcher(dispatcher);
         String url = EdraakK12ContentScraper.generateUrl(mockWebServer.url("/api/").toString(), MAIN_CONTENT_CONTENT_FILE, 41);
         EdraakK12ContentScraper scraper = new EdraakK12ContentScraper(url, tmpDir);
-        scraper.scrapContent();
+        scraper.scrapeContent();
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void givenNullTargetComponent_whenEdXContentScraped_thenShouldThrowIllegalArgumentException() throws IOException {
+    public void givenNullTargetComponent_whenEdraakContentScraped_thenShouldThrowIllegalArgumentException() throws IOException {
 
         File tmpDir = Files.createTempDirectory("testedxcontentscraper").toFile();
         MockWebServer mockWebServer = new MockWebServer();
@@ -166,25 +167,25 @@ public class TestEdraakContentScraper {
 
         String url = EdraakK12ContentScraper.generateUrl(mockWebServer.url("/api/").toString(), MAIN_DETAIL_WITHOUT_TARGET_FILE, 41);
         EdraakK12ContentScraper scraper = new EdraakK12ContentScraper(url, tmpDir);
-        scraper.scrapContent();
+        scraper.scrapeContent();
 
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void givenNullTargetComponentChildren_whenEdXContentScraped_thenShouldThrowIllegalArgumentException() throws IOException{
+    public void givenNullTargetComponentChildren_whenEdraakContentScraped_thenShouldThrowIllegalArgumentException() throws IOException {
 
         File tmpDir = Files.createTempDirectory("testedxcontentscraper").toFile();
         MockWebServer mockWebServer = new MockWebServer();
         mockWebServer.setDispatcher(dispatcher);
 
-        String url = EdraakK12ContentScraper.generateUrl(mockWebServer.url("/api/").toString(),MAIN_DETAIL_WITHOUT_CHILDREN_FILE, 41);
+        String url = EdraakK12ContentScraper.generateUrl(mockWebServer.url("/api/").toString(), MAIN_DETAIL_WITHOUT_CHILDREN_FILE, 41);
         EdraakK12ContentScraper scraper = new EdraakK12ContentScraper(url, tmpDir);
-        scraper.scrapContent();
+        scraper.scrapeContent();
 
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void givenEncodedVideoListIsEmpty_whenEdXContentScraped_thenShouldThrowIllegalArgumentException() throws IOException {
+    public void givenEncodedVideoListIsEmpty_whenEdraakContentScraped_thenShouldThrowIllegalArgumentException() throws IOException {
 
         File tmpDir = Files.createTempDirectory("testedxcontentscraper").toFile();
         MockWebServer mockWebServer = new MockWebServer();
@@ -192,12 +193,12 @@ public class TestEdraakContentScraper {
 
         String url = EdraakK12ContentScraper.generateUrl(mockWebServer.url("/api/").toString(), MAIN_DETAIL_NO_VIDEO_FOUND, 41);
         EdraakK12ContentScraper scraper = new EdraakK12ContentScraper(url, tmpDir);
-        scraper.scrapContent();
+        scraper.scrapeContent();
 
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void givenEmptyQuestionSet_whenEdXContentScraped_thenShouldThrowIOException() throws IOException {
+    public void givenEmptyQuestionSet_whenEdraakContentScraped_thenShouldThrowIOException() throws IOException {
 
         File tmpDir = Files.createTempDirectory("testedxcontentscraper").toFile();
         MockWebServer mockWebServer = new MockWebServer();
@@ -205,48 +206,48 @@ public class TestEdraakContentScraper {
 
         String url = EdraakK12ContentScraper.generateUrl(mockWebServer.url("/api/").toString(), MAIN_DETAIL_NO_QUESTIONS_FOUND, 41);
         EdraakK12ContentScraper scraper = new EdraakK12ContentScraper(url, tmpDir);
-        scraper.scrapContent();
+        scraper.scrapeContent();
 
 
     }
 
 
     @Test(expected = IllegalArgumentException.class)
-    public void givenMalformedContent_whenEdXContentScraped_thenShouldThrowIllegalArgumentException() throws IOException{
+    public void givenMalformedContent_whenEdraakContentScraped_thenShouldThrowIllegalArgumentException() throws IOException {
 
 
-            File tmpDir = Files.createTempDirectory("testedxcontentscraper").toFile();
+        File tmpDir = Files.createTempDirectory("testedxcontentscraper").toFile();
 
-            MockWebServer mockWebServer = new MockWebServer();
+        MockWebServer mockWebServer = new MockWebServer();
 
-            try{
-                mockWebServer.enqueue(new MockResponse().setBody("{id"));
+        try {
+            mockWebServer.enqueue(new MockResponse().setBody("{id"));
 
-                mockWebServer.start();
+            mockWebServer.start();
 
-                String url = EdraakK12ContentScraper.generateUrl(mockWebServer.url("/api/").toString(), MALFORMED_COMPONENT_ID, 41);
-                EdraakK12ContentScraper scraper = new EdraakK12ContentScraper(url, tmpDir);
-                scraper.scrapContent();
+            String url = EdraakK12ContentScraper.generateUrl(mockWebServer.url("/api/").toString(), MALFORMED_COMPONENT_ID, 41);
+            EdraakK12ContentScraper scraper = new EdraakK12ContentScraper(url, tmpDir);
+            scraper.scrapeContent();
 
-            } finally {
-                mockWebServer.close();
-            }
+        } finally {
+            mockWebServer.close();
+        }
     }
 
     @Test
-    public void givenContentNotModified_whenEdXContentScrapedAgain_thenShouldNotDownloadComponents() throws IOException {
-        //run the initial scrapContent
+    public void givenContentNotModified_whenEdraakContentScrapedAgain_thenShouldNotDownloadComponents() throws IOException {
+        //run the initial scrapeContent
         File tmpDir = Files.createTempDirectory("testmodifiededraak").toFile();
         MockWebServer mockWebServer = new MockWebServer();
         mockWebServer.setDispatcher(dispatcher);
 
         String url = EdraakK12ContentScraper.generateUrl(mockWebServer.url("/api/").toString(), DETAIL_JSON_CONTENT_FILE, 41);
         EdraakK12ContentScraper scraper = new EdraakK12ContentScraper(url, tmpDir);
-        scraper.scrapContent();
+        scraper.scrapeContent();
 
         long firstDownloadTime = new File(tmpDir, CONTENT_JSON).lastModified();
-        //now run scrapContent again...
-        scraper.scrapContent();
+        //now run scrapeContent again...
+        scraper.scrapeContent();
 
         long lastModified = new File(tmpDir, CONTENT_JSON).lastModified();
         //Assert that last modified dates are lower than firstDownloadCompleteTime
@@ -255,7 +256,7 @@ public class TestEdraakContentScraper {
     }
 
     @Test
-    public void givenVideoModified_whenEdXContentScrapedAgain_thenShouldVideoOnlyAgain() throws IOException  {
+    public void givenVideoModified_whenEdraakContentScrapedAgain_thenShouldVideoOnlyAgain() throws IOException {
 
         File tmpDir = Files.createTempDirectory("testmodifiededraak").toFile();
         MockWebServer mockWebServer = new MockWebServer();
@@ -264,20 +265,20 @@ public class TestEdraakContentScraper {
         String url = EdraakK12ContentScraper.generateUrl(mockWebServer.url("/api/").toString(), DETAIL_JSON_CONTENT_FILE, 41);
         EdraakK12ContentScraper scraper = new EdraakK12ContentScraper(url, tmpDir);
 
-        scraper.scrapContent();
+        scraper.scrapeContent();
 
         long firstDownloadTime = new File(tmpDir, VIDEO_MP4).lastModified();
-        //now run scrapContent again...
-        scraper.scrapContent();
+        //now run scrapeContent again...
+        scraper.scrapeContent();
 
         long lastModified = new File(tmpDir, VIDEO_MP4).lastModified();
         //Assert that last modified dates are lower than firstDownloadCompleteTime
-        Assert.assertTrue(lastModified == firstDownloadTime);
+        Assert.assertEquals("last modified time = firstdownload time", lastModified, firstDownloadTime);
 
     }
 
     @Test
-    public void givenQuestionSetModified_whenEdXContentScrapedAgain_thenShouldDownloadImagesOnlyAgain() throws IOException {
+    public void givenQuestionSetModified_whenEdraakContentScrapedAgain_thenShouldDownloadImagesOnlyAgain() throws IOException {
 
         File tmpDir = Files.createTempDirectory("testmodifiededraak").toFile();
         MockWebServer mockWebServer = new MockWebServer();
@@ -286,35 +287,35 @@ public class TestEdraakContentScraper {
         String url = EdraakK12ContentScraper.generateUrl(mockWebServer.url("/api/").toString(), DETAIL_JSON_CONTENT_FILE, 41);
         EdraakK12ContentScraper scraper = new EdraakK12ContentScraper(url, tmpDir);
 
-        scraper.scrapContent();
+        scraper.scrapeContent();
         long firstDownloadTime = new File(tmpDir, QUESTIONS_JSON).lastModified();
-        //now run scrapContent again...
+        //now run scrapeContent again...
 
-        scraper.scrapContent();
+        scraper.scrapeContent();
 
         long lastModified = new File(tmpDir, QUESTIONS_JSON).lastModified();
         //Assert that last modified dates are lower than firstDownloadCompleteTime
-        Assert.assertTrue(lastModified == firstDownloadTime);
+        Assert.assertEquals("last modified time = firstdownload time", lastModified, firstDownloadTime);
 
     }
 
 
     @Test
-    public void testCommand() throws IOException{
-        if(System.getProperty("url") != null && System.getProperty("dir") != null){
-            File destination = new File(System.getProperty("dir"));
+    public void givenParametersFromGradleCommandLineAndServerOnline_whenEdraakContentScraped_thenShouldConvertAndDownload() throws IOException {
+        if (System.getProperty("edraakUrl") != null && System.getProperty("edraakDir") != null) {
+            File destination = new File(System.getProperty("edraakDir"));
             EdraakK12ContentScraper scraper = new EdraakK12ContentScraper(
-                    System.getProperty("url"),destination );
-            scraper.scrapContent();
+                    System.getProperty("edraakUrl"), destination);
+            scraper.scrapeContent();
             assertAllFiles(destination, scraper);
         }
     }
 
     @Test
-    public void testIndexCommand() throws IOException{
+    public void givenParametersFromGradleCommandLineAndServerOnline_findImportedComponentAndDownload() {
         IndexEdraakK12Content content = new IndexEdraakK12Content();
-        if(System.getProperty("findUrl") != null && System.getProperty("findDir") != null) {
-            content.findContent(System.getProperty("findUrl"), new File(System.getProperty("findDir")));
+        if (System.getProperty("findEdraakUrl") != null && System.getProperty("findEdraakDir") != null) {
+            content.findContent(System.getProperty("findEdraakUrl"), new File(System.getProperty("findEdraakDir")));
         }
     }
 

@@ -1,10 +1,13 @@
-package com.ustadmobile.lib.contentscrapers.EdraakK12;
+package com.ustadmobile.lib.contentscrapers.edraakK12;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
 
+/***
+ * Generated from DTO Generator Plugin
+ */
 public class ContentResponse {
 
     @Expose
