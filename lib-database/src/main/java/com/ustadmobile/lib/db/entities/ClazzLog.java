@@ -25,6 +25,63 @@ public class ClazzLog implements SyncableEntity{
 
     private boolean done;
 
+    private int numPresent;
+
+    private int numAbsent;
+
+    private int numPartial;
+
+    /**
+     * Gets the number of members passed
+     *
+     * @return
+     */
+    public int getNumPresent() {
+        return numPresent;
+    }
+
+    /**
+     * Sets the number of members passed
+     *
+     * @param numPassed
+     */
+    public void setNumPresent(int numPresent) {
+        this.numPresent = numPresent;
+    }
+
+    /**
+     * Gets the number of members absent
+     * @return
+     */
+    public int getNumAbsent() {
+        return numAbsent;
+    }
+
+    /**
+     * Sets the number of members absent
+     * @param numAbsent
+     */
+    public void setNumAbsent(int numAbsent) {
+        this.numAbsent = numAbsent;
+    }
+
+    /**
+     * Gets the number of members partially present
+     *
+     * @return
+     */
+    public int getNumPartial() {
+        return numPartial;
+    }
+
+    /**
+     * Sets the number of members partially present
+     * @param numPartial
+     */
+    public void setNumPartial(int numPartial) {
+        this.numPartial = numPartial;
+    }
+
     /**
      * Gets if Log is done.
      * @return if log entry is done.

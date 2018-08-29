@@ -5,8 +5,10 @@ import android.arch.paging.DataSource;
 import android.arch.paging.LivePagedListBuilder;
 import android.arch.paging.PagedList;
 import android.arch.paging.PagedListAdapter;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
@@ -16,6 +18,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
@@ -71,14 +74,29 @@ public class ClazzListFragment extends UstadBaseFragment implements ClazzListVie
         @Override
         public void onBindViewHolder  (@NonNull ClazzViewHolder holder, int position) {
             ClazzWithNumStudents clazz = getItem(position);
+            long attendancePercentage = (long) (clazz.getAttendanceAverage() * 100);
+            String lastRecordedAttendance = "";
             ((TextView)holder.itemView.findViewById(R.id.item_clazzlist_clazz_title))
                     .setText(clazz.getClazzName());
             ((TextView)holder.itemView.findViewById(R.id.item_clazzlist_numstudents_text))
                     .setText(clazz.getNumStudents() + " " + getResources()
                             .getText(R.string.students_literal).toString());
+            ((TextView)holder.itemView.findViewById(R.id.item_clazzlist_attendance_percentage))
+                    .setText(attendancePercentage + "% " + getText(R.string.attendance)
+                    + " (" + getText(R.string.last_recorded) + " " + lastRecordedAttendance + ")");
             holder.itemView.setOnClickListener((view) -> mPresenter.handleClickClazz(clazz));
             holder.itemView.findViewById(R.id.item_clazzlist_attendance_record_attendance_button)
                     .setOnClickListener((view)-> mPresenter.handleClickClazzRecordAttendance(clazz));
+
+            ImageView trafficLight = ((ImageView) holder.itemView
+                    .findViewById(R.id.item_clazzlist_attendance_trafficlight));
+            if(attendancePercentage > 75L){
+                trafficLight.setColorFilter(ContextCompat.getColor(getContext(), R.color.traffic_green));
+            }else if(attendancePercentage > 50L){
+                trafficLight.setColorFilter(ContextCompat.getColor(getContext(), R.color.traffic_orange));
+            }else{
+                trafficLight.setColorFilter(ContextCompat.getColor(getContext(), R.color.traffic_red));
+            }
         }
     }
 

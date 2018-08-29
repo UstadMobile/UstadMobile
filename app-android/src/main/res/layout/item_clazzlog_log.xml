@@ -8,8 +8,8 @@
 
     <TextView
         android:id="@+id/item_clazzlog_log_date"
-        android:layout_width="85dp"
-        android:layout_height="25dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:text="TextView"
@@ -37,12 +37,36 @@
         app:srcCompat="@drawable/ic_date_range_black_24dp" />
 
     <View
-        android:id="@+id/divider"
+        android:id="@+id/item_clazzlog_log_divider"
+        android:layout_width="368dp"
+        android:layout_height="1dp"
+        android:layout_marginStart="8dp"
+        android:background="?android:attr/listDivider"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:layout_editor_absoluteY="54dp" />
+
+    <View
+        android:id="@+id/divider2"
         android:layout_width="368dp"
         android:layout_height="1dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:background="?android:attr/listDivider"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/item_clazzlog_log_status_text" />
+        app:layout_constraintTop_toBottomOf="@+id/imageView3" />
+
+    <TextView
+        android:id="@+id/item_clazzlog_log_day"
+        android:layout_width="19dp"
+        android:layout_height="13dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="25dp"
+        android:text="Mon"
+        android:textSize="8sp"
+        app:layout_constraintBottom_toBottomOf="@+id/imageView3"
+        app:layout_constraintEnd_toEndOf="@+id/imageView3"
+        app:layout_constraintStart_toStartOf="@+id/imageView3"
+        app:layout_constraintTop_toTopOf="@+id/imageView3" />
 </android.support.constraint.ConstraintLayout>

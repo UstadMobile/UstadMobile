@@ -7,6 +7,7 @@ import android.arch.paging.PagedList;
 import android.arch.paging.PagedListAdapter;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
@@ -14,6 +15,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
@@ -89,8 +91,20 @@ public class ClazzStudentListFragment extends UstadBaseFragment implements Clazz
                         clazzMemberWithPerson.getPerson().getLastName();
             }
 
-            String studentAttendancePercentage = clazzMemberWithPerson.getAttendancePercentage() +
+            long attendancePercentage =
+                    (long) (clazzMemberWithPerson.getAttendancePercentage() * 100);
+
+            String studentAttendancePercentage = attendancePercentage +
                     "% " + getText(R.string.attendance);
+            ImageView trafficLight = ((ImageView) holder.itemView
+                    .findViewById(R.id.item_clazzstudentlist_attendance_trafficlight));
+            if(attendancePercentage > 75L){
+                trafficLight.setColorFilter(ContextCompat.getColor(getContext(), R.color.traffic_green));
+            }else if(attendancePercentage > 50L){
+                trafficLight.setColorFilter(ContextCompat.getColor(getContext(), R.color.traffic_orange));
+            }else{
+                trafficLight.setColorFilter(ContextCompat.getColor(getContext(), R.color.traffic_red));
+            }
 
             ((TextView)holder.itemView
                 .findViewById(R.id.item_clazzstudentlist_student_title))

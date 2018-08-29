@@ -209,7 +209,7 @@ public class SplashScreenActivity extends AppCompatActivity implements DialogInt
 
             Clazz clazz1 = new Clazz();
             clazz1.setClazzName("Class 1");
-            clazz1.setAttendanceAverage(42);
+            clazz1.setAttendanceAverage(0L);
             long thisClazzUid = clazzDao.insert(clazz1);
             clazz1.setClazzUid(thisClazzUid);
 
@@ -219,7 +219,7 @@ public class SplashScreenActivity extends AppCompatActivity implements DialogInt
                 member.setRole(ClazzMember.ROLE_STUDENT);
                 member.setClazzMemberPersonUid(i);
                 member.setClazzMemberClazzUid(thisClazzUid);
-                member.setAttendancePercentage(42L);
+                member.setAttendancePercentage(0L);
                 clazzMemberDao.insertAsync(member, null);
             }
 

@@ -1,5 +1,6 @@
 package com.ustadmobile.core.db.dao;
 
+import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmInsert;
@@ -28,6 +29,15 @@ public abstract class ClazzLogDao implements BaseDao<ClazzLog>{
 
     @UmQuery("SELECT * FROM ClazzLog")
     public abstract List<ClazzLog> findAll();
+
+    @UmQuery("UPDATE ClazzLog SET done = 1 where clazzLogUid = :clazzLogUid ")
+    public abstract void updateDoneForClazzLogAsync(long clazzLogUid, UmCallback<Long> callback);
+
+    @UmQuery("SELECT * FROM ClazzLog where clazzClazzUid = :clazzUid")
+    public abstract UmProvider<ClazzLog> findByClazzUid(long clazzUid);
+
+    @UmQuery("UPDATE ClazzLog SET numPresent = :numPresent,  numAbsent = :numAbsent, numPartial = :numPartial WHERE clazzLogUid = :clazzLogUid")
+    public abstract void updateClazzAttendanceNumbersAsync(long clazzLogUid, int numPresent, int numAbsent, int numPartial, UmCallback<Void> callback);
 
     public void createClazzLogForDate(long currentClazzUid, long currentLogDate, UmCallback<Long> callback){
 

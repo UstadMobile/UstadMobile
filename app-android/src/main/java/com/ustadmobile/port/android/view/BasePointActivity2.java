@@ -59,10 +59,6 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
         //set up view pager
         setupViewPager();
 
-        //Collapsable toolbar
-        //mCollapsingToolbar = (CollapsingToolbarLayout)findViewById(R.id.activity_base_point_2_toolbar_layout);
-        //mCollapsingToolbar.setTitle("UstadMobile");
-
         //Toolbar
         toolbar = findViewById(R.id.base_point_2_toolbar);
         toolbar.setTitle("Ustad Mobile");
@@ -77,6 +73,8 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
         bottomNavigation.setAccentColor(fetchColor(R.color.bottom_nav_yourAccentColor));
         bottomNavigation.setInactiveColor(fetchColor(R.color.bottom_nav_yourInactiveColor));
         bottomNavigation.setBehaviorTranslationEnabled(false);
+        bottomNavigation.setUseElevation(true, 2L);
+
 
         //Create the items to be added
         AHBottomNavigationItem feed_item =

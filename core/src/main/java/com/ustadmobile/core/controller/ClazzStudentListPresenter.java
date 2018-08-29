@@ -55,7 +55,7 @@ public class ClazzStudentListPresenter extends UstadBaseController<ClazzStudentL
      * The Presenter here's onCreate. This populates the provider and sets it to the View.
      *
      * This will be called when the implementation View is ready.
-     * (ie: on Android, this is called in the Fragment's onCreateView()
+     * (ie: on Android, this is called in the Fragment's onCreateView() )
      *
      * @param savedState
      */

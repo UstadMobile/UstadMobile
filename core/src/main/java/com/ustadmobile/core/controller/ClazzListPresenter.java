@@ -60,33 +60,8 @@ public class ClazzListPresenter extends UstadBaseController<ClazzListView> {
         long clazzUid = clazz.getClazzUid();
         args.put("clazzuid", clazzUid);
 
-
-
         args.put("logdate", System.currentTimeMillis());
         impl.go(ClassLogDetailView.VIEW_NAME, args, view.getContext());
-
-
-        /*
-        ClazzLogDao clazzLogDao = UmAppDatabase.getInstance(view.getContext()).getClazzLogDao();
-        ClazzLog newClazzLog = new ClazzLog();
-        newClazzLog.setClazzClazzUid(clazzUid);
-        newClazzLog.setDone(false);
-        newClazzLog.setLogDate(System.currentTimeMillis());
-        clazzLogDao.insertAsync(newClazzLog, new UmCallback<Long>() {
-            @Override
-            public void onSuccess(Long result) {
-                newClazzLog.setClazzLogUid(result);
-                args.put("clazzloguid", result);
-                impl.go(ClassLogDetailView.VIEW_NAME, args, view.getContext());
-            }
-
-            @Override
-            public void onFailure(Throwable exception) {
-
-            }
-        });
-        */
-
 
     }
 

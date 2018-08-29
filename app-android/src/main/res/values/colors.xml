@@ -11,6 +11,10 @@
     <color name="primary_text">#FFFFFF</color>
     <color name="secondary_text">#727272</color>
 
+    <color name="traffic_green">#009900</color>
+    <color name="traffic_orange">#FFCC00</color>
+    <color name="traffic_red">#FF0000</color>
+
     <color name="text_primary">#212121</color>
     <color name="text_secondary">#757575</color>
     <color name="icons">#FFFFFF</color>

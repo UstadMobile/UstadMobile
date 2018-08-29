@@ -61,7 +61,7 @@ public class ClassDetailActivity extends UstadBaseActivity implements
         mPager = (ViewPager) findViewById(R.id.class_detail_view_pager_container);
         mPagerAdapter = new ClassDetailViewPagerAdapter(getSupportFragmentManager());
         mPagerAdapter.addFragments(0, ClazzStudentListFragment.newInstance(this.clazzUid));
-        mPagerAdapter.addFragments(1, ClassLogListFragment.newInstance());
+        mPagerAdapter.addFragments(1, ClassLogListFragment.newInstance(this.clazzUid));
         mPagerAdapter.addFragments(2, ComingSoonFragment.newInstance());
         //Fragment selectedFragment = mPagerAdapter.getItem(0);
         mPager.setAdapter(mPagerAdapter);
@@ -122,7 +122,7 @@ public class ClassDetailActivity extends UstadBaseActivity implements
                     case 0:
                         return ClazzStudentListFragment.newInstance(clazzUid);
                     case 1:
-                        return ClassLogListFragment.newInstance();
+                        return ClassLogListFragment.newInstance(clazzUid);
                     case 2:
                         return ComingSoonFragment.newInstance();
                     default:

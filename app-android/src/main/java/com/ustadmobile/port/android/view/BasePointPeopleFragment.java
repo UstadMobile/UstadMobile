@@ -32,7 +32,6 @@ public class BasePointPeopleFragment extends UstadBaseFragment implements BasePo
 
     /**
      * Generates a new Fragment for a page fragment
-     * TODO: Add any args if needed
      *
      * @return A new instance of fragment BasePointPeopleFragment.
      */
@@ -73,9 +72,6 @@ public class BasePointPeopleFragment extends UstadBaseFragment implements BasePo
         mPager = (ViewPager) rootContainer.findViewById(R.id.fragment_base_point_people_container);
         mSectionsPagerAdapter = new SectionsPagerAdapter(getChildFragmentManager());
         mPager.setAdapter(mSectionsPagerAdapter);
-
-        //Swipe-Refresh
-        //mSwipeRefreshLayout = rootContainer.findViewById(R.id.fragment_catalog_swiperefreshview);
 
         //return container
         return rootContainer;
@@ -122,7 +118,6 @@ public class BasePointPeopleFragment extends UstadBaseFragment implements BasePo
 
         @Override
         public int getCount() {
-            // Show 4 total pages.
             return 2;
         }
 

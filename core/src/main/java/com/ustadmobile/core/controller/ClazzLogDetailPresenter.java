@@ -2,8 +2,10 @@ package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmProvider;
+import com.ustadmobile.core.db.dao.ClazzDao;
 import com.ustadmobile.core.db.dao.ClazzLogAttendanceRecordDao;
 import com.ustadmobile.core.db.dao.ClazzLogDao;
+import com.ustadmobile.core.db.dao.ClazzMemberDao;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.view.ClassLogDetailView;
 import com.ustadmobile.lib.db.entities.ClazzLog;
@@ -12,15 +14,16 @@ import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord;
 import java.util.Calendar;
 import java.util.Hashtable;
 
+import static com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.*;
+
 public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailView> {
 
-    private long currentClazzLogUId = -1L;
     private long currentClazzUid = -1L;
     private long currentLogDate = -1L;
 
     private UmProvider<ClazzLogAttendanceRecord> clazzLogAttendanceRecordUmProvider;
 
-    private ClazzLog clazzLog;
+    private ClazzLog currentClazzLog;
 
     /**
      * Constructor. We get the ClazzLog Uid from the arguments
@@ -34,9 +37,6 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
                                    ClassLogDetailView view) {
         super(context, arguments, view);
 
-        if(arguments.containsKey("clazzloguid")){
-            currentClazzLogUId = (long) arguments.get("clazzloguid");
-        }
         if(arguments.containsKey("clazzuid")){
             currentClazzUid = (long) arguments.get("clazzuid");
         }
@@ -54,6 +54,16 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
 
     }
 
+    public long getTodayMillis(){
+        Calendar attendanceDate = Calendar.getInstance();
+        attendanceDate.setTimeInMillis(System.currentTimeMillis());
+        attendanceDate.set(Calendar.HOUR_OF_DAY, 0);
+        attendanceDate.set(Calendar.MINUTE, 0);
+        attendanceDate.set(Calendar.SECOND, 0);
+        attendanceDate.set(Calendar.MILLISECOND, 0);
+        return attendanceDate.getTimeInMillis();
+    }
+
     /**
      * The Presenter's onCreate. This populated the provider and sets it to the View.
      *
@@ -69,8 +79,6 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
 
         //Check for ClassLog
         ClazzLogDao clazzLogDao = UmAppDatabase.getInstance(getContext()).getClazzLogDao();
-        ClazzLogAttendanceRecordDao clazzLogAttendanceRecordDao =
-                UmAppDatabase.getInstance(getContext()).getClazzLogAttendanceRecordDao();
 
         Calendar attendanceDate = Calendar.getInstance();
         attendanceDate.setTimeInMillis(currentLogDate);
@@ -84,9 +92,48 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
         clazzLogDao.findByClazzIdAndDateAsync(currentClazzUid, currentLogDate, new UmCallback<ClazzLog>() {
             @Override
             public void onSuccess(ClazzLog result) {
-                clazzLog = result;
-                clazzLogAttendanceRecordDao.insertAllAttendanceRecords(currentClazzUid,
-                        result.getClazzLogUid(), new UmCallback<long[]>() {
+
+                if(result == null){
+                    //Create one anyway if not set for today
+                    clazzLogDao.createClazzLogForDate(currentClazzUid, getTodayMillis(), new UmCallback<Long>() {
+                        @Override
+                        public void onSuccess(Long result) {
+
+                            currentClazzLog = clazzLogDao.findByUid(result);
+                            insertAllAndSetProvider(currentClazzLog);
+                        }
+                        @Override
+                        public void onFailure(Throwable exception) {
+
+                        }
+                    });
+                }else{
+                    currentClazzLog = result;
+                    insertAllAndSetProvider(currentClazzLog);
+                }
+
+            }
+
+            @Override
+            public void onFailure(Throwable exception) {
+                System.out.println(exception);
+            }
+        });
+
+
+    }
+
+    /**
+     * Common method to insert all attendance records for a clazz log uid and prepare its provider
+     * to be set to the view.
+     */
+    public void insertAllAndSetProvider(ClazzLog result){
+
+        ClazzLogAttendanceRecordDao clazzLogAttendanceRecordDao =
+                UmAppDatabase.getInstance(getContext()).getClazzLogAttendanceRecordDao();
+
+        clazzLogAttendanceRecordDao.insertAllAttendanceRecords(currentClazzUid,
+                result.getClazzLogUid(), new UmCallback<long[]>() {
                     @Override
                     public void onSuccess(long[] result2) {
                         //Get provider
@@ -103,13 +150,6 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
                         System.out.println(exception);
                     }
                 });
-            }
-
-            @Override
-            public void onFailure(Throwable exception) {
-                System.out.println(exception);
-            }
-        });
 
 
     }
@@ -118,8 +158,40 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
      * Method logic to what happens when we click "Done" on the ClassLogDetail View
      */
     public void handleClickDone(){
-        //TODO: This
-        System.out.println("handle Click Done");
+        //1. Update Done status on ClazzLog for this clazzLogUid
+        ClazzLogDao clazzLogDao = UmAppDatabase.getInstance(getContext()).getClazzLogDao();
+        ClazzDao clazzDao = UmAppDatabase.getInstance(getContext()).getClazzDao();
+        ClazzMemberDao clazzMemberDao = UmAppDatabase.getInstance(getContext()).getClazzMemberDao();
+        ClazzLogAttendanceRecordDao clazzLogAttendanceRecordDao =
+                UmAppDatabase.getInstance(getContext()).getClazzLogAttendanceRecordDao();
+        clazzLogDao.updateDoneForClazzLogAsync(currentClazzLog.getClazzLogUid(),
+                new UmCallback<Long>() {
+            @Override
+            public void onSuccess(Long result) {
+                //2. Update Attendance numbers for this clazzUid
+                clazzDao.updateAttendancePercentage(currentClazzUid);
+                //3. Update Attendance numbers for ClazzMember for this clazzUid.
+                clazzMemberDao.updateAttendancePercentages(currentClazzUid);
+
+                int numPresent = clazzLogAttendanceRecordDao.getAttedanceStatusCount(
+                        currentClazzLog.getClazzLogUid(), STATUS_ATTENDED);
+                int numAbsent = clazzLogAttendanceRecordDao.getAttedanceStatusCount(
+                        currentClazzLog.getClazzLogUid(), STATUS_ABSENT);
+                int numPartial = clazzLogAttendanceRecordDao.getAttedanceStatusCount(
+                        currentClazzLog.getClazzLogUid(), STATUS_PARTIAL);
+
+                clazzLogDao.updateClazzAttendanceNumbersAsync(currentClazzLog.getClazzLogUid(),
+                        numPresent, numAbsent, numPartial, null);
+
+                //4. Close the activity.
+
+            }
+
+            @Override
+            public void onFailure(Throwable exception) {
+
+            }
+        });
 
     }
 
@@ -130,7 +202,6 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
      */
     public void handleChangeSortOrder(int order){
         //TODO: this
-        System.out.println("Sort");
     }
 
     /**
@@ -141,7 +212,7 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
      */
     public void handleMarkAll(int attendanceStatus){
         UmAppDatabase.getInstance(context).getClazzLogAttendanceRecordDao()
-                .updateAllByClazzLogUid(clazzLog.getClazzLogUid(), attendanceStatus, null);
+                .updateAllByClazzLogUid(currentClazzLog.getClazzLogUid(), attendanceStatus, null);
     }
 
     public void handleMarkStudent(long clazzLogAttendanceRecordUid, int attendanceStatus) {
