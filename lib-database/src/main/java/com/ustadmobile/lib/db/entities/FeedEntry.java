@@ -6,7 +6,7 @@ import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 @UmEntity
 public class FeedEntry implements SyncableEntity{
 
-    @UmPrimaryKey
+    @UmPrimaryKey(autoIncrement = true)
     private long feedEntryUid;
 
     private long feedEntryPersonUid;

@@ -49,14 +49,18 @@ import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.ClazzDao;
 import com.ustadmobile.core.db.dao.ClazzLogDao;
 import com.ustadmobile.core.db.dao.ClazzMemberDao;
+import com.ustadmobile.core.db.dao.FeedEntryDao;
 import com.ustadmobile.core.db.dao.PersonDao;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.ClazzMember;
+import com.ustadmobile.lib.db.entities.FeedEntry;
 import com.ustadmobile.lib.db.entities.Person;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 
 
 public class SplashScreenActivity extends AppCompatActivity implements DialogInterface.OnClickListener, ActivityCompat.OnRequestPermissionsResultCallback{
@@ -168,6 +172,17 @@ public class SplashScreenActivity extends AppCompatActivity implements DialogInt
         return super.onOptionsItemSelected(item);
     }
 
+    public long getDateInMilliPlusDays(int days){
+        // get a calendar instance, which defaults to "now"
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DAY_OF_YEAR, days);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        return calendar.getTimeInMillis();
+
+    }
 
     public void addDummyData(){
         String createStatus = UstadMobileSystemImpl.getInstance().getAppPref("dummydata",
@@ -181,9 +196,6 @@ public class SplashScreenActivity extends AppCompatActivity implements DialogInt
                 .getClazzMemberDao();
         PersonDao personDao =
                 UmAppDatabase.getInstance(getApplicationContext()).getPersonDao();
-
-        //Get today's date
-
 
 
         new Thread(() -> {
@@ -237,6 +249,48 @@ public class SplashScreenActivity extends AppCompatActivity implements DialogInt
                     System.out.println(exception);
                 }
             });
+
+            //Create some feeds
+            FeedEntryDao feedEntryDao =
+                    UmAppDatabase.getInstance(getApplicationContext()).getFeedEntryDao();
+
+            long feedClazzUid = 1L;
+            long thisPersonUid = 1L;
+
+
+            long thisDate = getDateInMilliPlusDays(1);
+            FeedEntry thisFeed = new FeedEntry();
+            thisFeed.setDeadline(thisDate);
+            thisFeed.setDescription("This is your regular attendance alert.");
+            thisFeed.setTitle("Record attendance for Class " + 1);
+            thisFeed.setFeedEntryPersonUid(thisPersonUid);
+            thisFeed.setLink("ClassLogDetail?clazzuid=" + feedClazzUid +
+                    "&logdate=" + thisDate);
+            thisFeed.setFeedEntryHash(123);
+
+            feedEntryDao.insertAsync(thisFeed, new UmCallback<Long>() {
+                @Override
+                public void onSuccess(Long result) {
+                    long newDate = getDateInMilliPlusDays(-1);
+                    FeedEntry newFeed = new FeedEntry();
+                    newFeed.setDeadline(newDate);
+                    newFeed.setDescription("This is your regular attendance alert.");
+                    newFeed.setTitle("Record attendance for Class " + 1);
+                    newFeed.setFeedEntryPersonUid(thisPersonUid);
+                    newFeed.setLink("ClassLogDetail?clazzuid=" + feedClazzUid +
+                            "&logdate=" + thisDate);
+                    newFeed.setFeedEntryHash(456);
+                    feedEntryDao.insertAsync(newFeed, null);
+                }
+
+                @Override
+                public void onFailure(Throwable exception) {
+
+                }
+            });
+
+
+
 
             UstadMobileSystemImpl.getInstance().setAppPref("dummydata", "created",
                     getApplicationContext());

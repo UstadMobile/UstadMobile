@@ -27,7 +27,7 @@
             android:layout_marginTop="12dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/item_clazzstudentlist_student_title"
-            app:srcCompat="@drawable/ic_lens_black_24dp" />
+            android:src="@drawable/ic_lens_black_24dp" />
 
         <TextView
             android:id="@+id/item_clazzstudentlist_student_attendance_percentage"

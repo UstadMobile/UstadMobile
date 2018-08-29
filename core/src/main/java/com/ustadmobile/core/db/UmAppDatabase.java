@@ -14,6 +14,7 @@ import com.ustadmobile.core.db.dao.DownloadJobItemHistoryDao;
 import com.ustadmobile.core.db.dao.DownloadSetDao;
 import com.ustadmobile.core.db.dao.DownloadSetItemDao;
 import com.ustadmobile.core.db.dao.EntryStatusResponseDao;
+import com.ustadmobile.core.db.dao.FeedEntryDao;
 import com.ustadmobile.core.db.dao.HttpCachedEntryDao;
 import com.ustadmobile.core.db.dao.NetworkNodeDao;
 import com.ustadmobile.core.db.dao.OpdsEntryDao;
@@ -41,6 +42,7 @@ import com.ustadmobile.lib.db.entities.DownloadJobItemHistory;
 import com.ustadmobile.lib.db.entities.DownloadSet;
 import com.ustadmobile.lib.db.entities.DownloadSetItem;
 import com.ustadmobile.lib.db.entities.EntryStatusResponse;
+import com.ustadmobile.lib.db.entities.FeedEntry;
 import com.ustadmobile.lib.db.entities.HttpCachedEntry;
 import com.ustadmobile.lib.db.entities.NetworkNode;
 import com.ustadmobile.lib.db.entities.OpdsEntry;
@@ -58,7 +60,7 @@ import com.ustadmobile.lib.db.entities.Person;
         OpdsEntryStatusCache.class, OpdsEntryStatusCacheAncestor.class,
         HttpCachedEntry.class, DownloadJob.class, DownloadJobItem.class,
         Person.class, Clazz.class, ClazzMember.class, ClazzLog.class,
-        ClazzLogAttendanceRecord.class
+        ClazzLogAttendanceRecord.class, FeedEntry.class
 })
 public abstract class UmAppDatabase{
 
@@ -132,6 +134,8 @@ public abstract class UmAppDatabase{
     public abstract ClazzLogDao getClazzLogDao();
 
     public abstract ClazzLogAttendanceRecordDao getClazzLogAttendanceRecordDao();
+
+    public abstract FeedEntryDao getFeedEntryDao();
 
     @UmDbContext
     public abstract Object getContext();
