@@ -12,7 +12,7 @@ public class EntryStatusResponse {
     @UmPrimaryKey(autoIncrement = true)
     private int id;
 
-    private String entryId;
+    private long entryId;
 
     private long updated;
 
@@ -22,7 +22,7 @@ public class EntryStatusResponse {
 
     private boolean available;
 
-    public EntryStatusResponse(String entryId, int responderNodeId, long responseTime, long updated,
+    public EntryStatusResponse(long entryId, int responderNodeId, long responseTime, long updated,
                                boolean available) {
         this.entryId = entryId;
         this.responderNodeId = responderNodeId;
@@ -43,11 +43,11 @@ public class EntryStatusResponse {
         this.id = id;
     }
 
-    public String getEntryId() {
+    public long getEntryId() {
         return entryId;
     }
 
-    public void setEntryId(String entryId) {
+    public void setEntryId(long entryId) {
         this.entryId = entryId;
     }
 

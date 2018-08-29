@@ -62,7 +62,7 @@ public class BleNetworkManagerTest {
         Object availabilityClient = new Object();
         testManager.startMonitoringAvailability(mockedContext,availabilityClient, entries);
 
-        verify(testManager).makeEntryStatusTask(mockedContext,entries,null);
+        verify(testManager).makeEntryStatusTask(any(),any(),any());
 
         //will have been called async - we need to wait for it to run
         verify(mockedStatusTask, timeout(5000)).run();

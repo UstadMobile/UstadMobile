@@ -21,6 +21,7 @@ import static com.ustadmobile.port.sharedse.networkmanager.BleMessageUtil.bleMes
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.ENTRY_STATUS_REQUEST;
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.USTADMOBILE_BLE_SERVICE_UUID;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -107,12 +108,18 @@ public class BleMessageGattClientCallbackTest {
 
     @Test
     public void givenOnCharacteristicWrite_whenGrantedPermissionToWrite_thenShouldStartSendingPackets(){
-       gattClientCallback.onCharacteristicWrite(mockedGattClient, mockedCharacteristic,BluetoothGatt.GATT_SUCCESS);
+        for(int i = 0; i < messageToSend.getPackets().length; i++) {
+            gattClientCallback.onCharacteristicWrite(mockedGattClient, mockedCharacteristic,
+                    BluetoothGatt.GATT_SUCCESS);
 
-        //verify that characteristics value was modified
-        verify(mockedCharacteristic).setValue(messageToSend.getPackets()[0]);
-        //Verify that characteristics was modified
-        verify(mockedGattClient).writeCharacteristic(mockedCharacteristic);
+            //verify that characteristics value was modified
+            verify(mockedCharacteristic).setValue(messageToSend.getPackets()[i]);
+            //Verify that characteristics was modified
 
+            //onCharacteristicWrite is called when permission is granted, and each time writing
+            // finishes. Verifying that writeCharacteristic was called thus verifies
+            // that the process will repeat.
+            verify(mockedGattClient, times(i + 1)).writeCharacteristic(mockedCharacteristic);
+        }
     }
 }

@@ -28,4 +28,31 @@ public abstract class EntryStatusResponseDao {
     public abstract List<EntryStatusResponseWithNode> findByEntryIdAndAvailability(String entryId, boolean available);
 
 
+    public class EntryWithoutRecentResponse {
+        private long contentUid;
+
+        private int nodeId;
+
+        public long getContentUid() {
+            return contentUid;
+        }
+
+        public void setContentUid(long contentUid) {
+            this.contentUid = contentUid;
+        }
+
+        public int getNodeId() {
+            return nodeId;
+        }
+
+        public void setNodeId(int nodeId) {
+            this.nodeId = nodeId;
+        }
+    }
+
+    @UmQuery("SELECT Content.contentUid, NetworkNode.nodeId FROM Content, NetworkNode," +
+            " WHERE Content.contentUid IN (:contentUids) " +
+            " AND NetworkNode.nodeId IN (:nodeIds)  " +
+            " AND NOT EXISTS(Select id FROM EntryStatusResponse WHERE entryId = ContentUids.contentUid AND responderNodeId = NodeIds.nodeId) ")
+    public abstract List<EntryWithoutRecentResponse> findEntriesWithoutRecentResponse(List<Long> contentUids, List<Integer> nodeIds);
 }

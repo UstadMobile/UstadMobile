@@ -90,7 +90,7 @@ public class NetworkServiceAndroid extends Service {
     /**
      * @return NetworkManagerAndroidBle class reference
      */
-    public NetworkManagerAndroidBle getManagerAndroidBle() {
+    public NetworkManagerAndroidBle getNetworkManagerBle() {
         return managerAndroidBle;
     }
 
@@ -165,6 +165,7 @@ public class NetworkServiceAndroid extends Service {
     /**
      * @return WifiDirectHandler: Instance of the WifiDirectHandler from Wi-Fi buddy API
      */
+    @Deprecated
     public WifiDirectHandler getWifiDirectHandlerAPI(){
         return wifiDirectHandler;
     }

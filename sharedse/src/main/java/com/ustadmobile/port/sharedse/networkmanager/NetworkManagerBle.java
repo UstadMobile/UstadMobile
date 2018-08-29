@@ -5,8 +5,14 @@ import com.ustadmobile.core.db.dao.NetworkNodeDao;
 import com.ustadmobile.lib.db.entities.NetworkNode;
 
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * This is an abstract class which is used to implement platform specific NetworkManager
@@ -51,6 +57,10 @@ public abstract class NetworkManagerBle {
     private final Object knownNodesLock = new Object();
 
     private Object mContext;
+
+    private ExecutorService entryStatusTaskExecutorService = Executors.newCachedThreadPool();
+
+    private Map<Object, List<Long>> availabilityMonitoringRequests = new HashMap<>();
 
     /**
      * Do the main initialization of the NetworkManager : set the mContext
@@ -148,6 +158,11 @@ public abstract class NetworkManagerBle {
     public abstract void openBluetoothSettings();
 
     /**
+     * Open WiFi setting section from setting panel
+     */
+    public abstract void openWifiSettings();
+
+    /**
      * Enable or disable WiFi on the device
      *
      * @param enabled Enable when true otherwise disable
@@ -155,12 +170,11 @@ public abstract class NetworkManagerBle {
      */
     public abstract boolean setWifiEnabled(boolean enabled);
 
-
     /**
      * Create a new WiFi direct group on this device. A WiFi direct group
      * will create a new SSID and passphrase other devices can use to connect in "legacy" mode.
      *
-     * The process is asynchronous and the WifiDirectGroupListener should be used to listen for
+     * The process is asynchronous and the {@link WiFiDirectGroupListenerBle} should be used to listen for
      * group creation.
      *
      * If a WiFi direct group is already under creation this method has no effect.
@@ -170,14 +184,25 @@ public abstract class NetworkManagerBle {
     public abstract void createWifiDirectGroup(WiFiDirectGroupListenerBle wiFiDirectGroupListener);
 
     /**
+     * Remove a WiFi group from the device.The process is asynchronous and the
+     * {@link WiFiDirectGroupListenerBle} should be used to listen for
+     * group removal.
+     * @param wiFiDirectGroupListener Listener for group removal
+     */
+    public abstract void removeWifiDirectGroup(WiFiDirectGroupListenerBle wiFiDirectGroupListener);
+
+    /**
      * Start monitoring availability of specific entries from peer devices
      * @param monitor Monitor which can be Presenter or
      * @param entryUidsToMonitor List of entries to be monitored
      */
     public void startMonitoringAvailability(Object context,Object monitor, List<Long> entryUidsToMonitor) {
+        availabilityMonitoringRequests.put(monitor, entryUidsToMonitor);
+
+
         //TODO: Implement this when Db is ready - check if there are pending task left in the Db
          BleEntryStatusTask entryStatusTask= makeEntryStatusTask(context,entryUidsToMonitor,null);
-         entryStatusTask.run();
+         entryStatusTaskExecutorService.execute(entryStatusTask);
     }
 
     /**
@@ -185,8 +210,24 @@ public abstract class NetworkManagerBle {
      * @param monitor Monitor object which created a monitor (e.g Presenter)
      */
     public void stopMonitoringAvailability(Object monitor) {
-
+        availabilityMonitoringRequests.remove(monitor);
     }
+
+    protected Set<Long> getAllUidsToBeMonitored() {
+        Set uidsToBeMonitoredSet = new HashSet();
+        for(List<Long> uidList : availabilityMonitoringRequests.values()) {
+            uidsToBeMonitoredSet.addAll(uidList);
+        }
+
+        return uidsToBeMonitoredSet;
+    }
+
+    /**
+     * Connecting a client to a group network for content acquisition
+     * @param ssid Group network SSID
+     * @param passphrase Group network passphrase
+     */
+    public abstract void connectToWiFi(String ssid, String passphrase);
 
     /**
      * Create entry status task for a specific peer device,
@@ -198,9 +239,7 @@ public abstract class NetworkManagerBle {
      *
      * @see BleEntryStatusTask
      */
-    protected BleEntryStatusTask makeEntryStatusTask(Object context,List<Long> entryUidsToCheck, NetworkNode peerToCheck){
-        return null;
-    }
+    public abstract BleEntryStatusTask makeEntryStatusTask(Object context,List<Long> entryUidsToCheck, NetworkNode peerToCheck);
 
     /**
      * Clean up the network manager for shutdown

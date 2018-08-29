@@ -1196,16 +1196,16 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
         ArrayList<EntryStatusResponse> entryStatusResponses = new ArrayList<>();
         long responseTime = System.currentTimeMillis();
 
-        for(ContainerFileEntry availableEntry : availableEntries) {
-            entryStatusResponses.add(new EntryStatusResponse(availableEntry.getContainerEntryId(),
-                    node.getNodeId(), responseTime, 0, true));
-            remainingEntries.remove(availableEntry.getContainerEntryId());
-        }
-
-        for(String unavailableEntryId : remainingEntries) {
-            entryStatusResponses.add(new EntryStatusResponse(unavailableEntryId, node.getNodeId(),
-                    responseTime,0, false));
-        }
+//        for(ContainerFileEntry availableEntry : availableEntries) {
+//            entryStatusResponses.add(new EntryStatusResponse(availableEntry.getContainerEntryId(),
+//                    node.getNodeId(), responseTime, 0, true));
+//            remainingEntries.remove(availableEntry.getContainerEntryId());
+//        }
+//
+//        for(String unavailableEntryId : remainingEntries) {
+//            entryStatusResponses.add(new EntryStatusResponse(unavailableEntryId, node.getNodeId(),
+//                    responseTime,0, false));
+//        }
 
         UmAppDatabase.getInstance(getContext()).getEntryStatusResponseDao().insert(entryStatusResponses);
         fireFileStatusCheckInformationAvailable(entryIds);

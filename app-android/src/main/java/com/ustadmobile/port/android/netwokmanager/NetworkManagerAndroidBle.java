@@ -19,13 +19,16 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
+import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pGroup;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.os.Build;
 import android.os.ParcelUuid;
+import android.provider.Settings;
 import android.support.annotation.RequiresApi;
+import android.support.annotation.VisibleForTesting;
 
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
@@ -332,6 +335,14 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
      * {@inheritDoc}
      */
     @Override
+    public void openWifiSettings() {
+        networkService.startActivity(new Intent(Settings.ACTION_WIFI_SETTINGS));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public boolean setWifiEnabled(boolean enabled) {
         return wifiManager.setWifiEnabled(enabled);
     }
@@ -342,20 +353,67 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
     @Override
     public void createWifiDirectGroup(WiFiDirectGroupListenerBle wiFiDirectGroupListener) {
         this.wiFiDirectGroupListener = wiFiDirectGroupListener;
-        wifiP2pManager.createGroup(wifiP2pChannel, new WifiP2pManager.ActionListener() {
+        if(isWiFiEnabled()){
+            wifiP2pManager.createGroup(wifiP2pChannel, new WifiP2pManager.ActionListener() {
+                @Override
+                public void onSuccess() {
+                    groupCreationInitiated = true;
+                    UstadMobileSystemImpl.l(UMLog.ERROR,692,
+                            "Group created successfully");
+                }
+
+                @Override
+                public void onFailure(int reason) {
+                    UstadMobileSystemImpl.l(UMLog.ERROR,692,
+                            "Failed to create a group with error code "+reason);
+                }
+            });
+        }else{
+            UstadMobileSystemImpl.l(UMLog.ERROR,692,
+                    "Wifi is not enabled, enabling now");
+            wifiManager.setWifiEnabled(true);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void removeWifiDirectGroup(WiFiDirectGroupListenerBle wiFiDirectGroupListener) {
+        wifiP2pManager.removeGroup(wifiP2pChannel, new WifiP2pManager.ActionListener() {
             @Override
             public void onSuccess() {
-                groupCreationInitiated = true;
-                UstadMobileSystemImpl.l(UMLog.ERROR,692,
-                        "Group created successfully");
+                wiFiDirectGroupListener.groupRemoved(true,null);
+                UstadMobileSystemImpl.l(UMLog.ERROR,693,
+                        "Group removed successfully");
             }
 
             @Override
             public void onFailure(int reason) {
-                UstadMobileSystemImpl.l(UMLog.ERROR,692,
-                        "Failed to create a group with error code "+reason);
+                wiFiDirectGroupListener.groupRemoved(false,null);
+                UstadMobileSystemImpl.l(UMLog.ERROR,693,
+                        "Failed to remove a group with error code "+reason);
             }
         });
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void connectToWiFi(String ssid, String passphrase) {
+        WifiConfiguration wifiConfig = new WifiConfiguration();
+        wifiConfig.SSID = "\""+ ssid +"\"";
+        wifiConfig.priority=(getMaxWiFiConfigurationPriority(wifiManager)+1);
+        wifiConfig.preSharedKey = "\""+ passphrase +"\"";
+        wifiConfig.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
+        wifiConfig.priority = getMaxWiFiConfigurationPriority(wifiManager);
+
+        int netId = wifiManager.addNetwork(wifiConfig);
+        boolean isConnected = wifiManager.enableNetwork(netId, true);
+        UstadMobileSystemImpl.l(UMLog.INFO, 648, "Network: Connecting to wifi: "
+                + ssid + " passphrase: '" + passphrase +"', " + "successful?"  + isConnected
+                +  " priority = " + wifiConfig.priority);
     }
 
 
@@ -363,7 +421,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
      * {@inheritDoc}
      */
     @Override
-    protected BleEntryStatusTask makeEntryStatusTask(Object context, List<Long> entryUidsToCheck,
+    public BleEntryStatusTask makeEntryStatusTask(Object context, List<Long> entryUidsToCheck,
                                                      NetworkNode peerToCheck) {
         return new BleEntryStatusTaskAndroid((Context)context,entryUidsToCheck,peerToCheck);
     }
@@ -385,11 +443,35 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
     }
 
     /**
+     * Get maximum priority assigned to a network configuration.
+     * This helps to prioritize which network to connect to.
+     *
+     * @param wifiManager
+     * @return int: Maximum configuration priority number.
+     */
+    private int getMaxWiFiConfigurationPriority(final WifiManager wifiManager) {
+        final List<WifiConfiguration> configurations = wifiManager.getConfiguredNetworks();
+        int maxPriority = 0;
+        for(final WifiConfiguration config : configurations) {
+            if(config.priority > maxPriority)
+                maxPriority = config.priority;
+        }
+
+        return maxPriority;
+    }
+
+    /**
      * Get bluetooth manager instance
      * @return Instance of a BluetoothManager
      */
     public BluetoothManager getBluetoothManager(){
         return bluetoothManager;
+    }
+
+
+    @VisibleForTesting
+    public BleGattServerAndroid getGattServerAndroid() {
+        return gattServerAndroid;
     }
 
     /**
