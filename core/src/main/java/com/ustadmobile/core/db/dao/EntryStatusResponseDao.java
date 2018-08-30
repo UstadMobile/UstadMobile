@@ -2,6 +2,7 @@ package com.ustadmobile.core.db.dao;
 
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmInsert;
+import com.ustadmobile.lib.database.annotation.UmOnConflictStrategy;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.db.entities.EntryStatusResponse;
 import com.ustadmobile.lib.db.entities.EntryStatusResponseWithNode;
@@ -14,7 +15,7 @@ import java.util.List;
 @UmDao
 public abstract class EntryStatusResponseDao {
 
-    @UmInsert
+    @UmInsert(onConflict = UmOnConflictStrategy.IGNORE)
     public abstract void insert(List<EntryStatusResponse> responses);
 
 
@@ -28,17 +29,17 @@ public abstract class EntryStatusResponseDao {
     public abstract List<EntryStatusResponseWithNode> findByEntryIdAndAvailability(String entryId, boolean available);
 
 
-    public class EntryWithoutRecentResponse {
-        private long contentUid;
+    public static class EntryWithoutRecentResponse {
+        private long contentEntryUid;
 
         private int nodeId;
 
-        public long getContentUid() {
-            return contentUid;
+        public long getContentEntryUid() {
+            return contentEntryUid;
         }
 
-        public void setContentUid(long contentUid) {
-            this.contentUid = contentUid;
+        public void setContentEntryUid(long contentEntryUid) {
+            this.contentEntryUid = contentEntryUid;
         }
 
         public int getNodeId() {
@@ -50,9 +51,10 @@ public abstract class EntryStatusResponseDao {
         }
     }
 
-    @UmQuery("SELECT Content.contentUid, NetworkNode.nodeId FROM Content, NetworkNode," +
-            " WHERE Content.contentUid IN (:contentUids) " +
+    @UmQuery("SELECT ContentEntry.contentEntryUid, NetworkNode.nodeId FROM ContentEntry, NetworkNode " +
+            " WHERE ContentEntry.contentEntryUid IN (:contentUids) " +
             " AND NetworkNode.nodeId IN (:nodeIds)  " +
-            " AND NOT EXISTS(Select id FROM EntryStatusResponse WHERE entryId = ContentUids.contentUid AND responderNodeId = NodeIds.nodeId) ")
+            " AND NOT EXISTS(Select id FROM EntryStatusResponse WHERE entryId = ContentEntry.contentEntryUid" +
+            " AND responderNodeId = NetworkNode.nodeId) ORDER BY NetworkNode.nodeId")
     public abstract List<EntryWithoutRecentResponse> findEntriesWithoutRecentResponse(List<Long> contentUids, List<Integer> nodeIds);
 }

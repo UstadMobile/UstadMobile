@@ -39,7 +39,7 @@ public abstract class NetworkNodeDao {
     @UmQuery("Select * From NetworkNode")
     public abstract List<NetworkNode> findAllActiveNodes();
 
-    @ UmQuery ("UPDATE NetworkNode set lastUpdateTimeStamp = : lastUpdateTimeStamp WHERE bluetoothMacAddress = : bluetoothAddress")
+    @ UmQuery ("UPDATE NetworkNode set lastUpdateTimeStamp = :lastUpdateTimeStamp WHERE bluetoothMacAddress = :bluetoothAddress")
     public abstract void updateLastSeen(String bluetoothAddress,long lastUpdateTimeStamp, UmCallback<Integer> numChanged);
 
 }
