@@ -8,6 +8,7 @@ import com.ustadmobile.core.view.ClassLogListView;
 import com.ustadmobile.lib.db.entities.ClazzLog;
 
 import java.util.Hashtable;
+import java.util.List;
 
 /**
  * The Presenter/Controller for ClazzLogListFragment. This is responsible in creating the provider
@@ -54,6 +55,12 @@ public class ClazzLogListPresenter extends UstadBaseController<ClassLogListView>
     @Override
     public void onCreate(Hashtable savedState){
         super.onCreate(savedState);
+
+        new Thread(()-> {
+            List<ClazzLog> all = UmAppDatabase.getInstance(context).getClazzLogDao().findAll();
+            int size = all.size();
+
+        }).start();
 
         clazzLogListProvider = UmAppDatabase.getInstance(context).getClazzLogDao()
                 .findByClazzUid(currentClazzUid);

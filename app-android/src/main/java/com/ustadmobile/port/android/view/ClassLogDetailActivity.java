@@ -212,6 +212,7 @@ public class ClassLogDetailActivity extends UstadBaseActivity
             @Override
             public void onClick(View v) {
                 mPresenter.handleClickDone();
+
             }
         });
 

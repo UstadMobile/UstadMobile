@@ -264,7 +264,7 @@ public class SplashScreenActivity extends AppCompatActivity implements DialogInt
             FeedEntryDao feedEntryDao =
                     UmAppDatabase.getInstance(getApplicationContext()).getFeedEntryDao();
 
-            long feedClazzUid = 1L;
+            long feedClazzUid = clazz1.getClazzUid();
             long thisPersonUid = 1L;
 
 

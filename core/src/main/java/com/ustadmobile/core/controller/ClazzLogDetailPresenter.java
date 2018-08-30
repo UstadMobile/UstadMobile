@@ -187,7 +187,7 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
                         numPresent, numAbsent, numPartial, null);
 
                 //4. Close the activity.
-
+                view.finish();
             }
 
             @Override
