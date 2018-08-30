@@ -154,7 +154,7 @@ public class SplashScreenActivity extends AppCompatActivity implements DialogInt
     @Override
     public void onStart() {
         super.onStart();
-        checkPermissions();
+        //checkPermissions();
     }
 
     @Override
@@ -304,6 +304,7 @@ public class SplashScreenActivity extends AppCompatActivity implements DialogInt
 
             UstadMobileSystemImpl.getInstance().setAppPref("dummydata", "created",
                     getApplicationContext());
+            UstadMobileSystemImpl.getInstance().startUI(SplashScreenActivity.this);
         }).start();
 
 
