@@ -4,6 +4,8 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
 import android.content.Context;
 
+import com.ustadmobile.core.impl.UMLog;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.lib.db.entities.NetworkNode;
 import com.ustadmobile.port.sharedse.networkmanager.BleEntryStatusTask;
 import com.ustadmobile.port.sharedse.networkmanager.BleMessage;
@@ -76,11 +78,15 @@ public class BleEntryStatusTaskAndroid extends BleEntryStatusTask {
      */
     @Override
     public void run() {
-        mCallback = new BleMessageGattClientCallback(message,peerToCheck.getBluetoothMacAddress());
-        mCallback.setOnResponseReceived(this);
-        BluetoothDevice destinationPeer =
-                bluetoothManager.getAdapter().getRemoteDevice(peerToCheck.getBluetoothMacAddress());
-        destinationPeer.connectGatt(context,false,mCallback);
+       try{
+           mCallback = new BleMessageGattClientCallback(message,peerToCheck.getBluetoothMacAddress());
+           mCallback.setOnResponseReceived(this);
+           BluetoothDevice destinationPeer = bluetoothManager.getAdapter()
+                   .getRemoteDevice(peerToCheck.getBluetoothMacAddress());
+           destinationPeer.connectGatt(context,false,mCallback);
+       }catch (IllegalArgumentException e){
+           UstadMobileSystemImpl.l(UMLog.ERROR,695, "Wrong address format provided",e);
+       }
     }
 
 

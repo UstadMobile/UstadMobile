@@ -21,12 +21,9 @@ import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
-import android.net.wifi.p2p.WifiP2pDevice;
-import android.net.wifi.p2p.WifiP2pGroup;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.os.Build;
 import android.os.ParcelUuid;
-import android.provider.Settings;
 import android.support.annotation.RequiresApi;
 import android.support.annotation.VisibleForTesting;
 
@@ -42,6 +39,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.Vector;
 
 import static android.content.Context.BLUETOOTH_SERVICE;
 import static android.os.Looper.getMainLooper;
@@ -91,7 +89,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
 
     private BluetoothLeScanner bleServiceScanner;
 
-    private NetworkServiceAndroid networkService;
+    private Context mContext;
 
     private ParcelUuid parcelServiceUuid = new ParcelUuid(USTADMOBILE_BLE_SERVICE_UUID);
 
@@ -170,21 +168,22 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
      */
     @Override
     public void init(Object context) {
-        networkService = ((NetworkServiceAndroid) context);
-        wifiManager= (WifiManager) networkService.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-        bluetoothManager = (BluetoothManager)networkService.getSystemService(BLUETOOTH_SERVICE);
+        super.init(context);
+        mContext = ((Context) context);
+        wifiManager= (WifiManager) mContext.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        bluetoothManager = (BluetoothManager) mContext.getSystemService(BLUETOOTH_SERVICE);
         bluetoothAdapter = bluetoothManager.getAdapter();
-        if(requirePermission()){
+        if(requirePermission() && isBleCapable()){
             bleServiceScanner = bluetoothAdapter.getBluetoothLeScanner();
         }
         gattServerAndroid = new BleGattServerAndroid(((Context) context),this);
-        wifiP2pManager = (WifiP2pManager) networkService.getSystemService(Context.WIFI_P2P_SERVICE);
-        wifiP2pChannel = wifiP2pManager.initialize(networkService, getMainLooper(), null);
+        wifiP2pManager = (WifiP2pManager) mContext.getSystemService(Context.WIFI_P2P_SERVICE);
+        wifiP2pChannel = wifiP2pManager.initialize(mContext, getMainLooper(), null);
 
         //setting up WiFi Direct connection listener
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
-        networkService.registerReceiver(p2pBroadcastReceiver, intentFilter);
+        mContext.registerReceiver(p2pBroadcastReceiver, intentFilter);
 
     }
 
@@ -201,7 +200,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
      */
     @Override
     public boolean isBleCapable() {
-        return networkService.getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE);
+        return mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE);
     }
 
     /**
@@ -327,7 +326,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
      */
     @Override
     public void openBluetoothSettings() {
-        networkService.startActivity(new Intent(
+        mContext.startActivity(new Intent(
                 android.provider.Settings.ACTION_BLUETOOTH_SETTINGS));
     }
 
@@ -415,7 +414,10 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
     @Override
     public BleEntryStatusTask makeEntryStatusTask(Object context, List<Long> entryUidsToCheck,
                                                      NetworkNode peerToCheck) {
-        return new BleEntryStatusTaskAndroid((Context)context,entryUidsToCheck,peerToCheck);
+        BleEntryStatusTaskAndroid entryStatusTask =
+                new BleEntryStatusTaskAndroid((Context)context,entryUidsToCheck,peerToCheck);
+        entryStatusTask.setBluetoothManager(bluetoothManager);
+        return entryStatusTask;
     }
 
     /**
@@ -466,6 +468,10 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
         return gattServerAndroid;
     }
 
+    @VisibleForTesting
+    public Vector<BleEntryStatusTask> getEntryStatusTasks() {
+        return entryStatusTasks;
+    }
     /**
      * {@inheritDoc}
      */

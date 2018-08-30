@@ -167,6 +167,13 @@ public class NetworkNode {
     }
 
     /**
+     * Method which used to set last node update time by Wi-Fi Direct service.
+     */
+    public void setLastUpdateTimeStamp(long lastUpdateTimeStamp) {
+        this.lastUpdateTimeStamp = lastUpdateTimeStamp;
+    }
+
+    /**
      *
      * @return
      */

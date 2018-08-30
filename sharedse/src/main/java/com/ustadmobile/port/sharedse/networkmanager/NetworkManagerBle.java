@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.Vector;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -61,19 +62,28 @@ public abstract class NetworkManagerBle {
 
     private final Object knownNodesLock = new Object();
 
-    private Object context;
+    private Object mContext;
+
+    private boolean isStopMonitoring = false;
 
     private ExecutorService entryStatusTaskExecutorService = Executors.newCachedThreadPool();
 
     private Map<Object, List<Long>> availabilityMonitoringRequests = new HashMap<>();
 
     /**
-     * Do the main initialization of the NetworkManager : set the context
+     * Holds all created entry status tasks
+     */
+    protected Vector<BleEntryStatusTask> entryStatusTasks = new Vector<>();
+
+    /**
+     * Do the main initialization of the NetworkManager : set the mContext
      *
-     * @param context The context to use for the network manager
+     * @param context The mContext to use for the network manager
      */
     public synchronized void init(Object context){
-        this.context = context;
+        if(this.mContext == null){
+            this.mContext = context;
+        }
     }
 
 
@@ -135,18 +145,30 @@ public abstract class NetworkManagerBle {
 
         synchronized (knownNodesLock){
             long updateTime = Calendar.getInstance().getTimeInMillis();
-            node.setNetworkNodeLastUpdated(Calendar.getInstance().getTimeInMillis());
-            NetworkNodeDao networkNodeDao = UmAppDatabase.getInstance(context).getNetworkNodeDao();
+            NetworkNodeDao networkNodeDao = UmAppDatabase.getInstance(mContext).getNetworkNodeDao();
             networkNodeDao.updateLastSeen(node.getBluetoothMacAddress(),updateTime,
                     new UmCallback<Integer>() {
                         @Override
                         public void onSuccess(Integer result) {
                             if(result == 0){
+                                node.setNetworkNodeLastUpdated(updateTime);
                                 networkNodeDao.insert(node);
                                 List<Long> entryUidsToMonitor = new ArrayList<>(getAllUidsToBeMonitored());
-                                BleEntryStatusTask entryStatusTask =
-                                        makeEntryStatusTask(context,entryUidsToMonitor,node);
-                                entryStatusTaskExecutorService.execute(entryStatusTask);
+                                if(!isStopMonitoring){
+                                    BleEntryStatusTask entryStatusTask =
+                                            makeEntryStatusTask(mContext,entryUidsToMonitor,node);
+                                    entryStatusTasks.add(entryStatusTask);
+                                    entryStatusTaskExecutorService.execute(entryStatusTask);
+                                    UstadMobileSystemImpl.l(UMLog.DEBUG,694,
+                                            "Node added to the db and task created",null);
+                                }else{
+                                    UstadMobileSystemImpl.l(UMLog.DEBUG,694,
+                                            "Task couldn't be created, monitoring stopped",
+                                            null);
+                                }
+                            }else{
+                                UstadMobileSystemImpl.l(UMLog.DEBUG,694,
+                                        "Node exists: was updated successfully",null);
                             }
                         }
 
@@ -195,40 +217,42 @@ public abstract class NetworkManagerBle {
 
     /**
      * Start monitoring availability of specific entries from peer devices
-     * @param monitor Monitor which can be Presenter or
+     * @param monitor Object to monitor e.g Presenter
      * @param entryUidsToMonitor List of entries to be monitored
      */
     public void startMonitoringAvailability(Object monitor, List<Long> entryUidsToMonitor) {
         availabilityMonitoringRequests.put(monitor, entryUidsToMonitor);
 
-        NetworkNodeDao networkNodeDao = UmAppDatabase.getInstance(context).getNetworkNodeDao();
+        NetworkNodeDao networkNodeDao = UmAppDatabase.getInstance(mContext).getNetworkNodeDao();
+        EntryStatusResponseDao responseDao =
+                UmAppDatabase.getInstance(mContext).getEntryStatusResponseDao();
+
         List<Long> uniqueEntryUidsToMonitor = new ArrayList<>(getAllUidsToBeMonitored());
         List<Integer> knownNetworkNodes =
                 getAllKnownNetworkNodeIds(networkNodeDao.findAllActiveNodes());
 
         List<EntryStatusResponseDao.EntryWithoutRecentResponse> entryWithoutRecentResponses =
-                UmAppDatabase.getInstance(context).getEntryStatusResponseDao()
-                        .findEntriesWithoutRecentResponse(uniqueEntryUidsToMonitor,knownNetworkNodes);
+                responseDao.findEntriesWithoutRecentResponse(uniqueEntryUidsToMonitor,knownNetworkNodes);
 
-        //Group entryUUid by node to be checked from
+        //Group entryUUid by node where their status will be checked from
         HashMap<Integer,List<Long>> nodeToCheckEntryList = new HashMap<>();
         for(EntryStatusResponseDao.EntryWithoutRecentResponse entryResponse: entryWithoutRecentResponses){
-            Integer nodeToCheckFrom = entryResponse.getNodeId();
-
-            if(nodeToCheckEntryList.containsKey(nodeToCheckFrom)){
-                nodeToCheckEntryList.get(nodeToCheckFrom).add(entryResponse.getContentUid());
+            int nodeIdToCheckFrom = entryResponse.getNodeId();
+            if(nodeToCheckEntryList.containsKey(nodeIdToCheckFrom)){
+                nodeToCheckEntryList.get(nodeIdToCheckFrom).add(entryResponse.getContentEntryUid());
             }else{
-                List<Long> listEntryUUids = new ArrayList<>();
-                listEntryUUids.add(entryResponse.getContentUid());
-                nodeToCheckEntryList.put(nodeToCheckFrom, listEntryUUids);
+                List<Long> entryUuids = new ArrayList<>();
+                entryUuids.add(entryResponse.getContentEntryUid());
+                nodeToCheckEntryList.put(nodeIdToCheckFrom, entryUuids);
             }
         }
 
-        //Make entryStatusTask as per entry set
+        //Make entryStatusTask as per node list and entryUuids found
         for(int nodeId : nodeToCheckEntryList.keySet()){
             NetworkNode networkNode = networkNodeDao.findNodeById(nodeId);
-            BleEntryStatusTask entryStatusTask = makeEntryStatusTask(context,
+            BleEntryStatusTask entryStatusTask = makeEntryStatusTask(mContext,
                     nodeToCheckEntryList.get(nodeId),networkNode);
+            entryStatusTasks.add(entryStatusTask);
             entryStatusTaskExecutorService.execute(entryStatusTask);
         }
     }
@@ -239,7 +263,9 @@ public abstract class NetworkManagerBle {
      */
     public void stopMonitoringAvailability(Object monitor) {
         availabilityMonitoringRequests.remove(monitor);
+        isStopMonitoring = availabilityMonitoringRequests.size() == 0;
     }
+
 
     /**
      * Get all unique entry UUID's to be monitored
@@ -254,7 +280,7 @@ public abstract class NetworkManagerBle {
     }
 
 
-    private List<Integer> getAllKnownNetworkNodeIds(List<NetworkNode> networkNodes){
+    protected List<Integer> getAllKnownNetworkNodeIds(List<NetworkNode> networkNodes){
         List<Integer> nodeIdList = new ArrayList<>();
         for(NetworkNode networkNode: networkNodes){
             nodeIdList.add(networkNode.getNodeId());
@@ -272,7 +298,7 @@ public abstract class NetworkManagerBle {
     /**
      * Create entry status task for a specific peer device,
      * it will request status of the provided entries from the provided peer device
-     * @param context Platform specific context
+     * @param context Platform specific mContext
      * @param entryUidsToCheck List of entries to be checked from the peer device
      * @param peerToCheck Peer device to request from
      * @return Created BleEntryStatusTask
@@ -281,13 +307,14 @@ public abstract class NetworkManagerBle {
      */
     public abstract BleEntryStatusTask makeEntryStatusTask(Object context,List<Long> entryUidsToCheck, NetworkNode peerToCheck);
 
+
     /**
      * Clean up the network manager for shutdown
      */
     public void onDestroy(){
         entryStatusTaskExecutorService.shutdown();
         if(entryStatusTaskExecutorService.isShutdown()){
-            context = null;
+            mContext = null;
         }
     }
 }
