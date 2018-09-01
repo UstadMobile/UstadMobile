@@ -1,4 +1,4 @@
-package com.utadmobile.lib.database.jdbc.db;
+package com.ustadmobile.lib.annotationprocessor.core.db;
 
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmInsert;

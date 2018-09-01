@@ -1,6 +1,7 @@
-package com.utadmobile.lib.database.jdbc.db;
+package com.ustadmobile.lib.annotationprocessor.core.db;
 
 import com.ustadmobile.lib.database.annotation.UmDatabase;
+
 
 @UmDatabase(version = 1, entities = {ExampleEntity.class})
 public abstract class ExampleDatabase {
@@ -9,7 +10,7 @@ public abstract class ExampleDatabase {
 
     public static synchronized ExampleDatabase getInstance(Object context) {
         if(instance == null){
-            instance = com.utadmobile.lib.database.jdbc.db.ExampleDatabase_Factory.makeExampleDatabase(context);
+            instance = ExampleDatabase_Factory.makeExampleDatabase(context);
         }
 
         return instance;

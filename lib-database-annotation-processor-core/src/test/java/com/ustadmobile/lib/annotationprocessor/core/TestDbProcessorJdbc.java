@@ -1,10 +1,10 @@
-package com.ustadmobile.lib.database.jdbc;
+package com.ustadmobile.lib.annotationprocessor.core;
 
 
-import com.utadmobile.lib.database.jdbc.db.ExampleDatabase;
+import com.ustadmobile.lib.database.jdbc.JdbcDatabaseUtils;
+import com.ustadmobile.lib.annotationprocessor.core.db.ExampleDatabase;
 
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.sqlite.SQLiteDataSource;
@@ -17,7 +17,10 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 
-public class TestDatabaseJdbc {
+/**
+ * Tests the result of the JDBC generation
+ */
+public class TestDbProcessorJdbc {
 
 
     @BeforeClass

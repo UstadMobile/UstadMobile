@@ -8,13 +8,19 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import com.ustadmobile.lib.database.annotation.UmDatabase;
+import com.ustadmobile.lib.database.annotation.UmIndexField;
+import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
+import com.ustadmobile.lib.database.jdbc.JdbcDatabaseUtils;
 
 import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Formatter;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -127,19 +133,24 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                 MethodSpec.Builder createMethod = MethodSpec.methodBuilder("createAllTables");
                 createMethod.addParameter(ClassName.get(Connection.class), "con");
                 CodeBlock.Builder createCb = CodeBlock.builder();
-                createCb.add("try {\n");
-                createCb.add("$T _stmt = con.createStatement();\n", ClassName.get(Statement.class));
+                createCb.beginControlFlow("try")
+                    .add("$T _existingTableNames = $T.getTableNames(_connection);\n",
+                        ParameterizedTypeName.get(ClassName.get(List.class), ClassName.get(String.class)),
+                            ClassName.get(JdbcDatabaseUtils.class))
+                    .add("$T _stmt = con.createStatement();\n", ClassName.get(Statement.class));
                 for(AnnotationValue entityValue : typeMirrors) {
                     TypeElement entityTypeElement = (TypeElement)processingEnv.getTypeUtils()
                             .asElement((TypeMirror)entityValue.getValue());
-                    String createTableStmt = makeCreateTableStatement(entityTypeElement, '`');
-                    createCb.add("_stmt.executeUpdate($S);\n", createTableStmt);
+                    addCreateTableStatements(createCb, "_stmt", entityTypeElement,
+                            '`');
                 }
                 createCb.add("_stmt.close();\n");
 
-                createCb.add("}catch($T e){\n", SQLException.class)
-                        .add("throw new $T(e);\n", RuntimeException.class)
-                        .add("}\n");
+                createCb.endControlFlow() //end try/catch control flow
+                    .beginControlFlow("catch($T e)\n", SQLException.class)
+                    .add("throw new $T(e);\n", RuntimeException.class)
+                    .endControlFlow();
+
 
 
                 createMethod.addCode(createCb.build());
@@ -148,7 +159,17 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
         }
     }
 
-    protected String makeCreateTableStatement(TypeElement entitySpec, char quoteChar) {
+    /**
+     * Generates code that will execute CREATE TABLE and CREATE INDEX as required for the given
+     * entity.
+     *
+     * @param codeBlock CodeBlock.Builder that this code will be added to
+     * @param stmtVariableName Name of the SQL Statement object variable in the CodeBlock
+     * @param entitySpec The TypeElement representing the entity for which the statements are being generated
+     * @param quoteChar The quote char used to contain SQL table names e.g. '`' for MySQL and Sqlite
+     */
+    protected void addCreateTableStatements(CodeBlock.Builder codeBlock, String stmtVariableName,
+                                                 TypeElement entitySpec, char quoteChar) {
         StringBuilder sbuf = new StringBuilder();
         sbuf.append("CREATE TABLE IF NOT EXISTS ").append(quoteChar)
                 .append(entitySpec.getSimpleName()).append(quoteChar)
@@ -158,6 +179,7 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
 
 
         boolean fieldVariablesStarted = false;
+        Map<String, List<String>> indexes = new HashMap<>();
         for(int i = 0; i < subElementList.size(); i++) {
             if(subElementList.get(i).getKind() != ElementKind.FIELD)
                 continue;
@@ -166,15 +188,56 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                 sbuf.append(", ");
 
             VariableElement fieldVariable = (VariableElement)subElementList.get(i);
+            UmPrimaryKey primaryKeyAnnotation = fieldVariable.getAnnotation(UmPrimaryKey.class);
+
+
+
+            if(fieldVariable.getAnnotation(UmIndexField.class) != null) {
+                indexes.put("index_" + entitySpec.getSimpleName() + '_' + fieldVariable.getSimpleName(),
+                        Collections.singletonList(fieldVariable.getSimpleName().toString()));
+            }
+
             sbuf.append(quoteChar).append(fieldVariable.getSimpleName().toString())
                     .append(quoteChar).append(' ').append(makeSqlTypeDeclaration(fieldVariable));
+
+            if(primaryKeyAnnotation!= null) {
+                sbuf.append(" PRIMARY KEY ");
+                if(primaryKeyAnnotation.autoIncrement())
+                    sbuf.append(" AUTOINCREMENT ");
+                sbuf.append(" NOT NULL ");
+            }
 
             fieldVariablesStarted = true;
         }
 
         sbuf.append(')');
-        return sbuf.toString();
 
+
+        codeBlock.beginControlFlow("if(!_existingTableNames.contains($S))",
+                entitySpec.getSimpleName().toString())
+                .add("$L.executeUpdate($S);\n", stmtVariableName, sbuf.toString());
+        for(Map.Entry<String, List<String>> index : indexes.entrySet()) {
+            Map<String, String> formatArgs = new HashMap<>();
+            formatArgs.put("quot", String.valueOf(quoteChar));
+            formatArgs.put("index_name", index.getKey());
+            formatArgs.put("table_name", entitySpec.getSimpleName().toString());
+            formatArgs.put("stmt", stmtVariableName);
+            boolean indexFieldCommaNeeded = false;
+            StringBuffer indexFieldBuffer = new StringBuffer();
+            for(String fieldName : index.getValue()) {
+                if(indexFieldCommaNeeded)
+                    indexFieldBuffer.append(',');
+
+                indexFieldCommaNeeded = true;
+                indexFieldBuffer.append(quoteChar).append(fieldName).append(quoteChar).append(' ');
+            }
+
+            formatArgs.put("index_fields", indexFieldBuffer.toString());
+            codeBlock.addNamed("$stmt:L.executeUpdate(\"CREATE INDEX $quot:L$index_name:L$quot:L ON $quot:L$table_name:L$quot:L ($index_fields:L)\");\n",
+                    formatArgs);
+        }
+
+        codeBlock.endControlFlow();
     }
 
     protected String makeSqlTypeDeclaration(VariableElement field) {

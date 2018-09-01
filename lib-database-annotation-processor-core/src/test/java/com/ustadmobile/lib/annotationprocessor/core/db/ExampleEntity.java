@@ -1,4 +1,4 @@
-package com.utadmobile.lib.database.jdbc.db;
+package com.ustadmobile.lib.annotationprocessor.core.db;
 
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
@@ -7,15 +7,15 @@ import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 public class ExampleEntity {
 
     @UmPrimaryKey(autoIncrement = true)
-    private long uid;
+    private int uid;
 
     private String name;
 
-    public long getUid() {
+    public int getUid() {
         return uid;
     }
 
-    public void setUid(long uid) {
+    public void setUid(int uid) {
         this.uid = uid;
     }
 
