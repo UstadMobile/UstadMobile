@@ -16,9 +16,7 @@ import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 /**
  * Test class which tests {@link com.ustadmobile.port.sharedse.networkmanager.BleGattServer}
@@ -28,8 +26,6 @@ import static org.mockito.Mockito.when;
  */
 
 public class BleGattServerTest {
-
-    private int defaultMtu = 20;
 
     private BleGattServer gattServer;
 
@@ -46,8 +42,7 @@ public class BleGattServerTest {
 
     @Test
     public void givenRequestMessageWithCorrectRequestHeader_whenHandlingIt_thenShouldReturnResponseMessage(){
-        BleMessage messageToSend = new BleMessage(ENTRY_STATUS_REQUEST, bleMessageLongToBytes(entries),
-                defaultMtu);
+        BleMessage messageToSend = new BleMessage(ENTRY_STATUS_REQUEST, bleMessageLongToBytes(entries));
 
         BleMessage responseMessage = gattServer.handleRequest(messageToSend);
 
@@ -58,8 +53,7 @@ public class BleGattServerTest {
 
     @Test
     public void givenRequestMessageWithWrongRequestHeader_whenHandlingIt_thenShouldNoReturnResponseMessage(){
-        BleMessage messageToSend = new BleMessage((byte) 0, bleMessageLongToBytes(entries),
-                defaultMtu);
+        BleMessage messageToSend = new BleMessage((byte) 0, bleMessageLongToBytes(entries));
 
         BleMessage responseMessage = gattServer.handleRequest(messageToSend);
 
@@ -70,7 +64,7 @@ public class BleGattServerTest {
     @Test
     public void givenRequestToCreateGroup_whenHandlingIt_thenShouldCreateAGroupAndPassGroupDetails(){
         BleMessage messageToSend = new BleMessage(WIFI_GROUP_CREATION_REQUEST,
-                bleMessageLongToBytes(entries), defaultMtu);
+                bleMessageLongToBytes(entries));
 
         BleMessage responseMessage = gattServer.handleRequest(messageToSend);
 
@@ -84,8 +78,7 @@ public class BleGattServerTest {
 
     @Test
     public void givenRequestWithAvailableEntries_whenHandlingIt_thenShouldReplyTheyAreAvailable(){
-        BleMessage messageToSend = new BleMessage(ENTRY_STATUS_REQUEST,
-                bleMessageLongToBytes(entries), defaultMtu);
+        BleMessage messageToSend = new BleMessage(ENTRY_STATUS_REQUEST, bleMessageLongToBytes(entries));
 
         BleMessage responseMessage = gattServer.handleRequest(messageToSend);
 
@@ -95,8 +88,7 @@ public class BleGattServerTest {
 
     @Test
     public void givenRequestWithUnAvailableEntries_whenHandlingIt_thenShouldReplyTheyAreNotAvailable(){
-        BleMessage messageToSend = new BleMessage(ENTRY_STATUS_REQUEST,bleMessageLongToBytes(entries),
-                defaultMtu);
+        BleMessage messageToSend = new BleMessage(ENTRY_STATUS_REQUEST,bleMessageLongToBytes(entries));
 
         BleMessage responseMessage = gattServer.handleRequest(messageToSend);
 

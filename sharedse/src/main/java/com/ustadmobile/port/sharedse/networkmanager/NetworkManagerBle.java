@@ -52,7 +52,9 @@ public abstract class NetworkManagerBle {
     /**
      * Commonly used MTU for android devices
      */
-    public static final int DEFAULT_MTU = 20;
+    public static final int DEFAULT_MTU_SIZE = 20;
+
+    public static final int MAXIMUM_MTU_SIZE = 512;
 
     /**
      * Bluetooth Low Energy service UUID for our app

@@ -36,7 +36,7 @@ public abstract class BleGattServer implements WiFiDirectGroupListenerBle{
         switch (requestType){
             case ENTRY_STATUS_REQUEST:
                 List<Long> requestedEntries = bleMessageBytesToLong(requestReceived.getPayload());
-                return new BleMessage(ENTRY_STATUS_RESPONSE,bleMessageLongToBytes(requestedEntries),20);
+                return new BleMessage(ENTRY_STATUS_RESPONSE,bleMessageLongToBytes(requestedEntries));
 
             case WIFI_GROUP_CREATION_REQUEST:
                 synchronized (p2pGroupCreationLock){
@@ -47,7 +47,7 @@ public abstract class BleGattServer implements WiFiDirectGroupListenerBle{
                         e.printStackTrace();
                     }
                 }
-                return new BleMessage(WIFI_GROUP_CREATION_RESPONSE,message.getBytes(),20);
+                return new BleMessage(WIFI_GROUP_CREATION_RESPONSE,message.getBytes());
                 default: return null;
         }
     }

@@ -49,12 +49,10 @@ public class BleMessage {
      * Constructor which will be used when sending the message
      * @param requestType Type of the request that will be contained.
      * @param payload The actual payload to be sent
-     * @param mtu Size of MTU to be used for the transfer.
      */
-    public BleMessage(byte requestType, byte[] payload, int mtu){
+    public BleMessage(byte requestType, byte[] payload){
         this.requestType = requestType;
         this.payload = payload;
-        this.mtu = mtu;
         this.length = payload.length;
     }
 
@@ -65,10 +63,11 @@ public class BleMessage {
      */
     public BleMessage(byte[][] payload){
         byte [] packets = depacketizePayload(payload);
-        byte [] receivedPayload = ByteBuffer.wrap(Arrays.copyOfRange(packets, 5,
+        byte [] receivedPayload = ByteBuffer.wrap(Arrays.copyOfRange(packets, 6,
                 packets.length)).array();
         requestType = ByteBuffer.wrap(Arrays.copyOfRange(packets, 0, 1)).get();
-        length = ByteBuffer.wrap(Arrays.copyOfRange(packets, 1, 5)).getInt();
+        mtu = ByteBuffer.wrap(Arrays.copyOfRange(packets, 1, 2)).get();
+        length = ByteBuffer.wrap(Arrays.copyOfRange(packets, 2, 6)).getInt();
 
         boolean isCompressed = receivedPayload.length > 0 &&
                 (receivedPayload[0] == (byte) (GZIPInputStream.GZIP_MAGIC))
@@ -82,9 +81,11 @@ public class BleMessage {
 
     /**
      * Get constructed payload packets to be transferred
+     * @param mtu Packets maximum transfer unit
      * @return Constructed packets in byte arrays
      */
-    public byte[][] getPackets() {
+    public byte[][] getPackets(int mtu) {
+        this.mtu = mtu;
         byte[] compressedPayload = compressPayload(this.payload);
 
         if(compressedPayload.length < this.payload.length) {
@@ -157,8 +158,9 @@ public class BleMessage {
             throw new IllegalArgumentException();
         }else{
             int packetSize = (int) Math.ceil(payload.length / (double) mtu);
-            ByteBuffer headerBuffer = ByteBuffer.allocate(5);
-            byte[] header = headerBuffer.put(requestType).putInt(payload.length).array();
+            ByteBuffer headerBuffer = ByteBuffer.allocate(6);
+            byte[] header = headerBuffer.put(requestType).put((byte) mtu)
+                    .putInt(payload.length).array();
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             try {
                 outputStream.write(header);
@@ -222,6 +224,10 @@ public class BleMessage {
         return length;
     }
 
+
+    public int getMtu(){
+        return mtu;
+    }
     /**
      * Called when packet is received from the other peer for assembling
      * @param packets packet received from the other peer
@@ -231,7 +237,8 @@ public class BleMessage {
         byte mRequestType = ByteBuffer.wrap(Arrays.copyOfRange(packets, 0, 1)).get();
         if(outputStream == null && isValidRequestType(mRequestType)){
             outputStream = new ByteArrayOutputStream();
-            length = ByteBuffer.wrap(Arrays.copyOfRange(packets, 1, 5)).getInt();
+            mtu = ByteBuffer.wrap(Arrays.copyOfRange(packets, 1, 2)).get();
+            length = ByteBuffer.wrap(Arrays.copyOfRange(packets, 2, 6)).getInt();
             requestType = mRequestType;
         }
 
@@ -242,7 +249,7 @@ public class BleMessage {
                 e.printStackTrace();
             }
 
-            byte [] receivedPayload = ByteBuffer.wrap(Arrays.copyOfRange(outputStream.toByteArray(), 5,
+            byte [] receivedPayload = ByteBuffer.wrap(Arrays.copyOfRange(outputStream.toByteArray(), 6,
                     outputStream.toByteArray().length)).array();
 
             if(receivedPayload.length == length){

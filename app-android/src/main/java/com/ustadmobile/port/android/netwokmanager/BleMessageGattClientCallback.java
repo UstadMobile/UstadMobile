@@ -6,13 +6,18 @@ import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothProfile;
+import android.os.Build;
 import android.support.annotation.VisibleForTesting;
+import android.util.Log;
 
 import com.ustadmobile.port.sharedse.networkmanager.BleMessage;
 import com.ustadmobile.port.sharedse.networkmanager.BleMessageResponseListener;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
+import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.DEFAULT_MTU_SIZE;
+import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.MAXIMUM_MTU_SIZE;
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.USTADMOBILE_BLE_SERVICE_UUID;
 
 /**
@@ -21,8 +26,11 @@ import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.UST
  * <p>
  * <b>Note: Operation Flow</b>
  *<p>
- * - When a device is connected to a BLE node, it will request for all available services
- * from the GATT. This will be achieved by calling {@link BluetoothGatt#discoverServices()}.
+ * - When a device is connected to a BLE node, if it  has android version 5 and above
+ * it will request for the MTU change and upon receiving a call back on
+ * {{@link BleMessageGattClientCallback#onMtuChanged}} it will update MTU and request for
+ * all available services from the GATT otherwise it will request for available services.
+ * This will be achieved by calling {@link BluetoothGatt#discoverServices()}.
  * Once services are found, all characteristics in those services will be listed.
  *<p>
  * - When trying to send a message, it will need write permission from the BLE node,
@@ -46,12 +54,17 @@ public class BleMessageGattClientCallback extends  BluetoothGattCallback{
 
     private int packetIteration = 0;
 
+    private int mtu = DEFAULT_MTU_SIZE;
+
+    private final  Object mtuChangeMonitor = new Object();
+
+
+
     /**
      * Constructor to be called when creating new callback
      * @param messageToSend Payload to be sent to the peer device (List of entry Id's)
-     * @param destinationAddress Bluetooth MAC address for the peer device.
      */
-    public BleMessageGattClientCallback(BleMessage messageToSend, String destinationAddress){
+    public BleMessageGattClientCallback(BleMessage messageToSend){
         this.messageToSend = messageToSend;
         receivedMessage = new BleMessage();
         this.destinationAddress = destinationAddress;
@@ -66,6 +79,19 @@ public class BleMessageGattClientCallback extends  BluetoothGattCallback{
     }
 
     /**
+     * Changing Maximum Transfer Unit
+     */
+    @Override
+    public void onMtuChanged(BluetoothGatt gatt, int mtu, int status) {
+        super.onMtuChanged(gatt, mtu, status);
+        //Successfully changed the MTU, update message and notify to start discovering service
+        this.mtu = mtu;
+        synchronized (mtuChangeMonitor){
+           mtuChangeMonitor.notify();
+        }
+    }
+
+    /**
      * Start discovering GATT services when peer device is connected or disconnects from GATT
      * when connection failed.
      */
@@ -77,8 +103,23 @@ public class BleMessageGattClientCallback extends  BluetoothGattCallback{
             gatt.disconnect();
             return;
         }
-        if (newState == BluetoothProfile.STATE_CONNECTED) {
+
+        if(newState == BluetoothProfile.STATE_CONNECTED) {
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
+                if(gatt.requestMtu(MAXIMUM_MTU_SIZE)){
+                    synchronized (mtuChangeMonitor){
+                        try {
+                            mtuChangeMonitor.wait(TimeUnit.SECONDS.toMillis(2));
+                        } catch (InterruptedException e) {
+                            mtuChangeMonitor.notify();
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }
+
             gatt.discoverServices();
+
         } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
             gatt.disconnect();
         }
@@ -107,10 +148,10 @@ public class BleMessageGattClientCallback extends  BluetoothGattCallback{
     @Override
     public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
         super.onCharacteristicWrite(gatt, characteristic, status);
-
+        byte[][] packets = messageToSend.getPackets(mtu);
         if (status == BluetoothGatt.GATT_SUCCESS) {
-            if(packetIteration < messageToSend.getPackets().length){
-                characteristic.setValue(messageToSend.getPackets()[packetIteration]);
+            if(packetIteration < packets.length){
+                characteristic.setValue(packets[packetIteration]);
                 gatt.writeCharacteristic(characteristic);
                 packetIteration++;
             }else{
@@ -127,7 +168,6 @@ public class BleMessageGattClientCallback extends  BluetoothGattCallback{
         super.onCharacteristicRead(gatt, characteristic, status);
 
         readCharacteristics(gatt.getDevice().getAddress(),characteristic);
-
     }
 
     /**

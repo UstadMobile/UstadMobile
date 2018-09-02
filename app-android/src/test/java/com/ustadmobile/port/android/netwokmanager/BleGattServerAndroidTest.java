@@ -19,6 +19,7 @@ import org.robolectric.RobolectricTestRunner;
 import java.util.Arrays;
 import java.util.List;
 
+import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.DEFAULT_MTU_SIZE;
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.ENTRY_STATUS_REQUEST;
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.USTADMOBILE_BLE_SERVICE_UUID;
 import static org.mockito.ArgumentMatchers.any;
@@ -47,7 +48,6 @@ public class BleGattServerAndroidTest {
 
     private BluetoothGattServerCallback serverCallback;
 
-
     private BleMessage bleMessage;
 
     @Before
@@ -62,8 +62,7 @@ public class BleGattServerAndroidTest {
         serverCallback = new BleGattServerAndroid(mock(Context.class),networkManager).getGattServerCallback();
 
         List<Long> entryList = Arrays.asList(1056289670L,4590875612L,9076137860L,2912543894L);
-        bleMessage = new BleMessage(ENTRY_STATUS_REQUEST, BleMessageUtil.bleMessageLongToBytes(entryList),
-                20);
+        bleMessage = new BleMessage(ENTRY_STATUS_REQUEST, BleMessageUtil.bleMessageLongToBytes(entryList));
         mockedCharacteristics = mock(BluetoothGattCharacteristic.class);
         when(mockedCharacteristics.getUuid()).thenReturn(USTADMOBILE_BLE_SERVICE_UUID);
     }
@@ -89,7 +88,7 @@ public class BleGattServerAndroidTest {
     @Test
     public void givenOnCharacteristicWriteRequest_whenIsCharacteristicsWithSameUUID_thenShouldGrantPermission(){
         serverCallback.onCharacteristicWriteRequest(mockedBluetoothDevice,0, mockedCharacteristics,
-                true,true,0,bleMessage.getPackets()[0]);
+                true,true,0,bleMessage.getPackets(DEFAULT_MTU_SIZE)[0]);
 
         //Verify that permission to write on the characteristics was granted
         verify(mockedGattServer).sendResponse(mockedBluetoothDevice,0,BluetoothGatt.GATT_SUCCESS,

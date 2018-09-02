@@ -18,7 +18,9 @@ import java.util.Collections;
 import java.util.List;
 
 import static com.ustadmobile.port.sharedse.networkmanager.BleMessageUtil.bleMessageLongToBytes;
+import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.DEFAULT_MTU_SIZE;
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.ENTRY_STATUS_REQUEST;
+import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.MAXIMUM_MTU_SIZE;
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.USTADMOBILE_BLE_SERVICE_UUID;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -52,10 +54,9 @@ public class BleMessageGattClientCallbackTest {
     public void setUp(){
         mockedGattClient = mock(BluetoothGatt.class);
         List<Long> entryList = Arrays.asList(1056289670L,4590875612L,9076137860L,2912543894L);
-        messageToSend = new BleMessage(ENTRY_STATUS_REQUEST, bleMessageLongToBytes(entryList),20);
+        messageToSend = new BleMessage(ENTRY_STATUS_REQUEST, bleMessageLongToBytes(entryList));
 
-        String destinationAddress = "78:00:9E:DE:CB:21";
-        gattClientCallback = new BleMessageGattClientCallback(messageToSend, destinationAddress);
+        gattClientCallback = new BleMessageGattClientCallback(messageToSend);
 
         BluetoothGattService service = new BluetoothGattService(USTADMOBILE_BLE_SERVICE_UUID,
                 BluetoothGattService.SERVICE_TYPE_PRIMARY);
@@ -63,6 +64,7 @@ public class BleMessageGattClientCallbackTest {
         service.addCharacteristic(mockedCharacteristic);
 
         when(mockedGattClient.getServices()).thenReturn(Collections.singletonList(service));
+        when(mockedGattClient.requestMtu(MAXIMUM_MTU_SIZE)).thenReturn(true);
         when(mockedCharacteristic.getUuid()).thenReturn(USTADMOBILE_BLE_SERVICE_UUID);
 
     }
@@ -96,6 +98,20 @@ public class BleMessageGattClientCallbackTest {
         verify(mockedGattClient).discoverServices();
     }
 
+
+    @Test
+    public void givenOnMtuChangeRequested_whenReceivedChangeCallback_thenShouldDiscoverServices(){
+        gattClientCallback.onConnectionStateChange(mockedGattClient,
+                BluetoothGatt.GATT_SUCCESS, BluetoothProfile.STATE_CONNECTED);
+
+        //Verify that MTU change was requested
+        verify(mockedGattClient).requestMtu(MAXIMUM_MTU_SIZE);
+        gattClientCallback.onMtuChanged(mockedGattClient,MAXIMUM_MTU_SIZE,BluetoothGatt.GATT_SUCCESS);
+        //Verify that service discovery was started
+        verify(mockedGattClient).discoverServices();
+
+    }
+
     @Test
     public void givenServiceIsDiscovered_whenMatchingCharacteristicsFound_thenShouldRequestPermissionToWrite(){
         gattClientCallback.onServicesDiscovered(mockedGattClient, BluetoothGatt.GATT_SUCCESS);
@@ -108,12 +124,14 @@ public class BleMessageGattClientCallbackTest {
 
     @Test
     public void givenOnCharacteristicWrite_whenGrantedPermissionToWrite_thenShouldStartSendingPackets(){
-        for(int i = 0; i < messageToSend.getPackets().length; i++) {
+        byte[][] packets = messageToSend.getPackets(DEFAULT_MTU_SIZE);
+
+        for(int i = 0; i < packets.length; i++) {
             gattClientCallback.onCharacteristicWrite(mockedGattClient, mockedCharacteristic,
                     BluetoothGatt.GATT_SUCCESS);
 
             //verify that characteristics value was modified
-            verify(mockedCharacteristic).setValue(messageToSend.getPackets()[i]);
+            verify(mockedCharacteristic).setValue(packets[i]);
             //Verify that characteristics was modified
 
             //onCharacteristicWrite is called when permission is granted, and each time writing

@@ -12,15 +12,8 @@ import org.junit.Test;
  */
 public class BleNetworkManagerTest {
 
-
-
-
     @Before
-    public void setUp() {
-
-
-    }
-
+    public void setUp() { }
 
 
     @Test

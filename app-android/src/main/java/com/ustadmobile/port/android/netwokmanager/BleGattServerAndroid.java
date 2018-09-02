@@ -13,6 +13,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.port.sharedse.networkmanager.BleGattServer;
 import com.ustadmobile.port.sharedse.networkmanager.BleMessage;
 
+import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.DEFAULT_MTU_SIZE;
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.USTADMOBILE_BLE_SERVICE_UUID;
 
 /**
@@ -87,8 +88,9 @@ public class BleGattServerAndroid extends BleGattServer{
                     boolean requireConfirmation = (characteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_INDICATE)
                             == BluetoothGattCharacteristic.PROPERTY_INDICATE;
                     if(!requireConfirmation){
-                        for(int packetIteration = 0 ; packetIteration < messageToSend.getPackets().length; packetIteration++){
-                            characteristic.setValue(messageToSend.getPackets()[packetIteration]);
+                        byte[][] packets = messageToSend.getPackets(DEFAULT_MTU_SIZE);
+                        for (byte[] packet : packets) {
+                            characteristic.setValue(packet);
                             gattServer.notifyCharacteristicChanged(device, characteristic, false);
                         }
                     }

@@ -14,7 +14,6 @@ import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle;
 
 import java.util.List;
 
-import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.DEFAULT_MTU;
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.ENTRY_STATUS_REQUEST;
 
 /**
@@ -62,7 +61,7 @@ public class BleEntryStatusTaskAndroid extends BleEntryStatusTask {
         this.context = context;
         this.peerToCheck = peerToCheck;
         byte [] messagePayload = BleMessageUtil.bleMessageLongToBytes(entryUidsToCheck);
-        this.message = new BleMessage(ENTRY_STATUS_REQUEST,messagePayload,DEFAULT_MTU);
+        this.message = new BleMessage(ENTRY_STATUS_REQUEST,messagePayload);
     }
 
     /**
@@ -79,7 +78,7 @@ public class BleEntryStatusTaskAndroid extends BleEntryStatusTask {
     @Override
     public void run() {
        try{
-           mCallback = new BleMessageGattClientCallback(message,peerToCheck.getBluetoothMacAddress());
+           mCallback = new BleMessageGattClientCallback(message);
            mCallback.setOnResponseReceived(this);
            BluetoothDevice destinationPeer = bluetoothManager.getAdapter()
                    .getRemoteDevice(peerToCheck.getBluetoothMacAddress());

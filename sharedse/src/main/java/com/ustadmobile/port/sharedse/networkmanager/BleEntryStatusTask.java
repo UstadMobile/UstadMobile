@@ -4,8 +4,6 @@ import com.ustadmobile.lib.db.entities.NetworkNode;
 
 import java.util.List;
 
-import sun.nio.ch.Net;
-
 /**
  * This is an abstract class which is used to implement platform specific BleEntryStatus
  *
