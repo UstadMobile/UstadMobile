@@ -24,6 +24,7 @@ import com.ustadmobile.core.db.dao.OpdsLinkDao;
 import com.ustadmobile.core.db.dao.PersonDao;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.lib.database.annotation.UmClearAll;
 import com.ustadmobile.lib.database.annotation.UmDatabase;
 import com.ustadmobile.lib.database.annotation.UmDbContext;
 import com.ustadmobile.lib.db.entities.Clazz;
@@ -130,6 +131,9 @@ public abstract class UmAppDatabase{
 
     @UmDbContext
     public abstract Object getContext();
+
+    @UmClearAll
+    public abstract void clearAllTables();
 
 
 }
