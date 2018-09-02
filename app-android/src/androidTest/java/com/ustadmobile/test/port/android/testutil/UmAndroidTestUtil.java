@@ -1,4 +1,4 @@
-package com.ustadmobile.test.port.android;
+package com.ustadmobile.test.port.android.testutil;
 
 import android.os.SystemClock;
 import android.support.test.InstrumentationRegistry;

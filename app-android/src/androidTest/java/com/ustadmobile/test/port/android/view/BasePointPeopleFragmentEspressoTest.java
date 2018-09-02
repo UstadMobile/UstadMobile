@@ -35,10 +35,6 @@ public class BasePointPeopleFragmentEspressoTest {
     public ActivityTestRule<BasePointActivity2> baseActivityRule =
             new ActivityTestRule<>(BasePointActivity2.class);
 
-    @BeforeClass
-    public static void beforeClass() {
-        //Before class stuff here
-    }
 
     @Before
     public void beforeTest() {
