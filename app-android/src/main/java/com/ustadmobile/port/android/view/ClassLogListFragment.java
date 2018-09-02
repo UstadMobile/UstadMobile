@@ -26,6 +26,8 @@ import com.ustadmobile.port.android.util.UMAndroidUtil;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
+import static com.ustadmobile.core.controller.ClazzListPresenter.ARG_CLAZZ_UID;
+
 /**
  * ClassLogListFragment Android fragment extends UstadBaseFragment
  */
@@ -115,7 +117,7 @@ public class ClassLogListFragment extends UstadBaseFragment implements ClassLogL
     public static ClassLogListFragment newInstance(long clazzUid) {
         ClassLogListFragment fragment = new ClassLogListFragment();
         Bundle args = new Bundle();
-        args.putLong("clazzUid", clazzUid);
+        args.putLong(ARG_CLAZZ_UID, clazzUid);
         fragment.setArguments(args);
         return fragment;
     }

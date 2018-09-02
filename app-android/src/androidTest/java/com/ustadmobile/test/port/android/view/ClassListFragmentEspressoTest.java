@@ -1,13 +1,17 @@
 package com.ustadmobile.test.port.android.view;
 
 import android.arch.paging.DataSource;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.support.test.InstrumentationRegistry;
+import android.support.test.espresso.intent.Intents;
 import android.support.test.espresso.intent.rule.IntentsTestRule;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
+import android.view.View;
 
+import org.hamcrest.Matcher;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -16,19 +20,31 @@ import org.junit.runner.RunWith;
 
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
 import com.toughra.ustadmobile.R;
+import com.ustadmobile.core.controller.ClazzListPresenter;
+import com.ustadmobile.core.controller.ClazzLogDetailPresenter;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.ClazzDao;
 import com.ustadmobile.core.db.dao.ClazzMemberDao;
 import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.ClazzMember;
 import com.ustadmobile.port.android.view.BasePointActivity2;
+import com.ustadmobile.port.android.view.ClassDetailActivity;
+import com.ustadmobile.port.android.view.ClassLogDetailActivity;
 
 import static android.support.test.espresso.Espresso.onView;
+import static android.support.test.espresso.action.ViewActions.click;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
+import static android.support.test.espresso.intent.Intents.intended;
+import static android.support.test.espresso.intent.matcher.IntentMatchers.hasAction;
+import static android.support.test.espresso.intent.matcher.IntentMatchers.hasComponent;
+import static android.support.test.espresso.intent.matcher.IntentMatchers.hasExtra;
+import static android.support.test.espresso.matcher.ViewMatchers.hasDescendant;
 import static android.support.test.espresso.matcher.ViewMatchers.hasSibling;
 import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
+import static android.support.test.espresso.matcher.ViewMatchers.withChild;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.core.AllOf.allOf;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
 
@@ -41,7 +57,7 @@ import static android.support.test.espresso.matcher.ViewMatchers.withId;
 public class ClassListFragmentEspressoTest {
 
 
-    private static final String TEST_CLASS_NAME = "ClassA";
+    private static final String TEST_CLASS_NAME = "Class A";
     private static final float TEST_CLASS_PERCENTAGE = 0.42F;
     private static final float TEST_STUDENT_PERCENTAGE = 0.21F;
     private static final long TEST_USER_UID = 1L;
@@ -54,25 +70,25 @@ public class ClassListFragmentEspressoTest {
             new IntentsTestRule<>(BasePointActivity2.class, false, false);
 
 
+    private Clazz testClazz;
 
     @Before
     public void beforeTest() throws Throwable{
         Context context = InstrumentationRegistry.getTargetContext();
-        context.deleteDatabase(UmAppDatabase.class.getName());
-        UmAppDatabase.setInstance(null);
+        UmAppDatabase.getInstance(context).clearAllTables();
 
         ClazzDao clazzDao = UmAppDatabase.getInstance(context).getClazzDao();
         ClazzMemberDao clazzMemberDao = UmAppDatabase.getInstance(context).getClazzMemberDao();
 
-        Clazz clazz1 = new Clazz();
-        clazz1.setClazzName(TEST_CLASS_NAME);
-        clazz1.setAttendanceAverage(TEST_CLASS_PERCENTAGE);
-        clazz1.setClazzUid(clazzDao.insert(clazz1));
+        testClazz = new Clazz();
+        testClazz.setClazzName(TEST_CLASS_NAME);
+        testClazz.setAttendanceAverage(TEST_CLASS_PERCENTAGE);
+        testClazz.setClazzUid(clazzDao.insert(testClazz));
 
         for (int i=0; i<2; i++){
             ClazzMember clazzMember = new ClazzMember();
             clazzMember.setAttendancePercentage(TEST_STUDENT_PERCENTAGE);
-            clazzMember.setClazzMemberClazzUid(clazz1.getClazzUid());
+            clazzMember.setClazzMemberClazzUid(testClazz.getClazzUid());
             clazzMember.setRole(ClazzMember.ROLE_STUDENT);
             clazzMember.setClazzMemberPersonUid(TEST_USER_UID);
 
@@ -104,9 +120,15 @@ public class ClassListFragmentEspressoTest {
 
     @Test
     public void givenClassesListCardLoads_whenItemRecordAttendanceButtonPressed_shouldLoadAttendanceActivity(){
-        Assert.assertTrue(true);
-        //TODO: this
-        //onView(allOf(withId(R.id.item_clazz)))
+
+        onView(allOf(withId(R.id.item_clazzlist_attendance_record_attendance_button),
+                withChild(withText(TEST_CLASS_NAME)))).perform(click());
+
+        intended(allOf(
+                hasComponent(ClassLogDetailActivity.class.getCanonicalName()),
+                hasExtra(equalTo(ClazzListPresenter.ARG_CLAZZ_UID),
+                        equalTo(testClazz.getClazzUid()))
+        ));
 
 
         //Assert that a class, the record attendance button opens up the attendance activity for that
@@ -115,11 +137,17 @@ public class ClassListFragmentEspressoTest {
 
     @Test
     public void givenClassListFragmentStarted_whenClassClicked_shouldLaunchClassDetailActivity(){
-        //TODO:
-        Assert.assertTrue(true);
-        //this
+        onView(allOf(withId(R.id.item_clazzlist_clazz_card),
+                hasDescendant(withText(TEST_CLASS_NAME)))).perform(click());
 
-        //Assert that when class cicked goes to its Class Detail activity page.
+        intended(allOf(
+                hasComponent(new ComponentName(InstrumentationRegistry.getTargetContext(),
+                        ClassDetailActivity.class)),
+                hasExtra(equalTo(ClazzListPresenter.ARG_CLAZZ_UID),
+                        equalTo(testClazz.getClazzUid()))
+        ));
+
+        //Assert that when class clicked goes to its Class Detail activity page.
     }
 
 }

@@ -13,6 +13,8 @@ import com.ustadmobile.lib.db.entities.Clazz;
 
 import java.util.WeakHashMap;
 
+import static com.ustadmobile.core.controller.ClazzListPresenter.ARG_CLAZZ_UID;
+
 /**
  * The ClassDetail activity.
  * <p>
@@ -27,7 +29,6 @@ public class ClassDetailActivity extends UstadBaseActivity implements
     private Toolbar toolbar;
     private TabLayout mTabLayout;
 
-    String CLAZZIDKEY = "ClazzUid";
 
     Long clazzUid;
 
@@ -37,7 +38,7 @@ public class ClassDetailActivity extends UstadBaseActivity implements
         //Setting layout:
         setContentView(R.layout.activity_class_detail);
 
-        clazzUid = getIntent().getLongExtra("ClazzUid", 0L);
+        clazzUid = getIntent().getLongExtra(ARG_CLAZZ_UID, 0L);
 
         //Toolbar
         toolbar = findViewById(R.id.class_detail_toolbar);

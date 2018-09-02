@@ -12,6 +12,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import com.toughra.ustadmobile.R;
+import com.ustadmobile.core.controller.ClazzListPresenter;
 import com.ustadmobile.core.controller.ClazzLogDetailPresenter;
 import com.ustadmobile.port.android.view.ClassDetailActivity;
 
@@ -50,7 +51,7 @@ public class ClazzLogDetailActivityEspressoTest {
     @Before
     public void beforeTest() {
         Intent startIntent = new Intent();
-        startIntent.putExtra(ClazzLogDetailPresenter.ARG_CLAZZ_UID, 2);
+        startIntent.putExtra(ClazzListPresenter.ARG_CLAZZ_UID, 2);
         mActivityRule.launchActivity(startIntent);
         //Before here..
     }

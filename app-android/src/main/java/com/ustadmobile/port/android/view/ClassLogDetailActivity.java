@@ -41,6 +41,8 @@ import java.util.WeakHashMap;
 
 import ru.dimorinny.floatingtextbutton.FloatingTextButton;
 
+import static com.ustadmobile.core.controller.ClazzListPresenter.ARG_CLAZZ_UID;
+import static com.ustadmobile.core.controller.ClazzLogDetailPresenter.ARG_LOGDATE;
 import static com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.STATUS_ATTENDED;
 import static com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.STATUS_ABSENT;
 import static com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.STATUS_PARTIAL;
@@ -62,8 +64,6 @@ public class ClassLogDetailActivity extends UstadBaseActivity
 
     private ClazzLogDetailPresenter mPresenter;
     public static final String ARGS_CLAZZLOG_UID = "clazzloguid";
-    public static final String ARGS_CLAZZ_UID = "clazzuid";
-    public static final String ARGS_LOGDATE = "logdate";
     public static final String TAG_STATUS = "status";
 
     public long clazzLogUid;
@@ -254,12 +254,12 @@ public class ClassLogDetailActivity extends UstadBaseActivity
             clazzLogUid = getIntent().getLongExtra(ARGS_CLAZZLOG_UID, -1L);
         }
 
-        if(getIntent().hasExtra(ARGS_CLAZZ_UID)){
-            clazzUid = getIntent().getLongExtra(ARGS_CLAZZ_UID, -1L);
+        if(getIntent().hasExtra(ARG_CLAZZ_UID)){
+            clazzUid = getIntent().getLongExtra(ARG_CLAZZ_UID, -1L);
         }
 
-        if(getIntent().hasExtra(ARGS_LOGDATE)){
-            logDate = getIntent().getLongExtra(ARGS_LOGDATE, -1L);
+        if(getIntent().hasExtra(ARG_LOGDATE)){
+            logDate = getIntent().getLongExtra(ARG_LOGDATE, -1L);
         }
 
         mRecyclerView = (RecyclerView) findViewById(R.id.class_log_detail_container_recyclerview);

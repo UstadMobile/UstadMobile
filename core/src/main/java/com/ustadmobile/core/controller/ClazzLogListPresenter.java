@@ -10,6 +10,9 @@ import com.ustadmobile.lib.db.entities.ClazzLog;
 import java.util.Hashtable;
 import java.util.List;
 
+import static com.ustadmobile.core.controller.ClazzListPresenter.ARG_CLAZZ_UID;
+import static com.ustadmobile.core.controller.ClazzLogDetailPresenter.ARG_LOGDATE;
+
 /**
  * The Presenter/Controller for ClazzLogListFragment. This is responsible in creating the provider
  * from the Dao and assigning it to the View. Any click handlers are also here.
@@ -29,8 +32,8 @@ public class ClazzLogListPresenter extends UstadBaseController<ClassLogListView>
     public ClazzLogListPresenter(Object context, Hashtable arguments, ClassLogListView view) {
         super(context, arguments, view);
 
-        if(arguments.containsKey("clazzUid")){
-            currentClazzUid = (long) arguments.get("clazzUid");
+        if(arguments.containsKey(ARG_CLAZZ_UID)){
+            currentClazzUid = (long) arguments.get(ARG_CLAZZ_UID);
         }
     }
 
@@ -77,8 +80,8 @@ public class ClazzLogListPresenter extends UstadBaseController<ClassLogListView>
 
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         Hashtable args = new Hashtable();
-        args.put("clazzuid", clazzLog.getClazzClazzUid());
-        args.put("logdate", clazzLog.getLogDate());
+        args.put(ARG_CLAZZ_UID, clazzLog.getClazzClazzUid());
+        args.put(ARG_LOGDATE, clazzLog.getLogDate());
         impl.go(ClassLogDetailView.VIEW_NAME, args, view.getContext());
     }
 

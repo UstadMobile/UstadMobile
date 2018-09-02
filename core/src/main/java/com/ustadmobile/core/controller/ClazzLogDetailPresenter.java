@@ -15,14 +15,13 @@ import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecordWithPerson;
 import java.util.Calendar;
 import java.util.Hashtable;
 
+import static com.ustadmobile.core.controller.ClazzListPresenter.ARG_CLAZZ_UID;
 import static com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.*;
 
 public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailView> {
 
     private long currentClazzUid = -1L;
     private long currentLogDate = -1L;
-
-    public static final String ARG_CLAZZ_UID = "clazzuid";
 
     public static final String ARG_LOGDATE = "logdate";
 

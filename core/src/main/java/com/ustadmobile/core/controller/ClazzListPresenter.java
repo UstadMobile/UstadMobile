@@ -17,9 +17,13 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Hashtable;
 
+import static com.ustadmobile.core.controller.ClazzLogDetailPresenter.ARG_LOGDATE;
+
 public class ClazzListPresenter extends UstadBaseController<ClazzListView> {
 
     private long currentPersonUid = -1L;
+
+    public static final String ARG_CLAZZ_UID = "ClazzUid";
 
     private UmProvider<ClazzWithNumStudents> clazzListProvider;
 
@@ -48,7 +52,7 @@ public class ClazzListPresenter extends UstadBaseController<ClazzListView> {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         Hashtable args = new Hashtable();
         long clazzUid = clazz.getClazzUid();
-        args.put("ClazzUid", clazzUid);
+        args.put(ARG_CLAZZ_UID, clazzUid);
         impl.go(ClassDetailView.VIEW_NAME, args, view.getContext());
 
     }
@@ -62,9 +66,9 @@ public class ClazzListPresenter extends UstadBaseController<ClazzListView> {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         Hashtable args = new Hashtable();
         long clazzUid = clazz.getClazzUid();
-        args.put("clazzuid", clazzUid);
+        args.put(ARG_CLAZZ_UID, clazzUid);
 
-        args.put("logdate", System.currentTimeMillis());
+        args.put(ARG_LOGDATE, System.currentTimeMillis());
         impl.go(ClassLogDetailView.VIEW_NAME, args, view.getContext());
 
     }

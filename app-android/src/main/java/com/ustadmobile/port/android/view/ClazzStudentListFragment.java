@@ -28,6 +28,8 @@ import com.ustadmobile.lib.db.entities.ClazzMemberWithPerson;
 import com.ustadmobile.lib.db.entities.Person;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
+import static com.ustadmobile.core.controller.ClazzListPresenter.ARG_CLAZZ_UID;
+
 /**
  * ClazzStudentListFragment Android fragment extends UstadBaseFragment
  */
@@ -140,7 +142,7 @@ public class ClazzStudentListFragment extends UstadBaseFragment implements Clazz
     public static ClazzStudentListFragment newInstance(long clazzUid) {
         ClazzStudentListFragment fragment = new ClazzStudentListFragment();
         Bundle args = new Bundle();
-        args.putLong("clazzUid", clazzUid);
+        args.putLong(ARG_CLAZZ_UID, clazzUid);
         fragment.setArguments(args);
         return fragment;
     }

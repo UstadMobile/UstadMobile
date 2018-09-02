@@ -9,6 +9,8 @@ import com.ustadmobile.lib.db.entities.ClazzMemberWithPerson;
 
 import java.util.Hashtable;
 
+import static com.ustadmobile.core.controller.ClazzListPresenter.ARG_CLAZZ_UID;
+
 
 /**
  * The Presenter/Controller for ClazzStudentListFragment. This is responsible in creating the
@@ -17,7 +19,7 @@ import java.util.Hashtable;
 public class ClazzStudentListPresenter extends UstadBaseController<ClazzStudentListView> {
 
     private long currentClazzId = -1L;
-    public String CLAZZIDKEY = "ClazzUid";
+
 
 
     /**
@@ -34,8 +36,8 @@ public class ClazzStudentListPresenter extends UstadBaseController<ClazzStudentL
                                      ClazzStudentListView view) {
         super(context, arguments, view);
 
-        if(arguments.containsKey("clazzUid")){
-            currentClazzId = (long) arguments.get("clazzUid");
+        if(arguments.containsKey(ARG_CLAZZ_UID)){
+            currentClazzId = (long) arguments.get(ARG_CLAZZ_UID);
         }
     }
 
