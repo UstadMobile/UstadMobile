@@ -9,6 +9,7 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
+import com.ustadmobile.lib.database.annotation.UmClearAll;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmDatabase;
 import com.ustadmobile.lib.database.annotation.UmDbContext;
@@ -213,6 +214,8 @@ public class DbProcessorRoom{
                     contextMethodBuilder.addModifiers(Modifier.PUBLIC);
 
                 dbManagerImplSpec.addMethod(contextMethodBuilder.build());
+            }else if(daoMethod.getAnnotation(UmClearAll.class) != null) {
+                dbManagerImplSpec.addMethod(generateClearAllMethod(daoMethod).build());
             }
 
             //Lookup using processingEnv.getElementUtils.getTypeElement
@@ -580,6 +583,10 @@ public class DbProcessorRoom{
 
         return retMethod;
 
+    }
+
+    private MethodSpec.Builder generateClearAllMethod(ExecutableElement daoMethod) {
+        return MethodSpec.overriding(daoMethod).addCode("_roomDb.clearAllTables();\n");
     }
 
 
