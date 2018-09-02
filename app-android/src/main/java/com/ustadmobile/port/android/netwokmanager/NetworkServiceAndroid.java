@@ -131,7 +131,8 @@ public class NetworkServiceAndroid extends Service {
                 if(managerAndroidBle.canDeviceAdvertise()){
                     managerAndroidBle.startAdvertising();
 
-                    //Wait for 3 seconds before starting service discovery
+                    /*Wait for 3 seconds before starting service discovery, it wont be happy staring
+                    the service and start scanning at the same time*/
                     new Handler().postDelayed(() -> {
                         managerAndroidBle.startScanning();
                     }, TimeUnit.SECONDS.toMillis(3));

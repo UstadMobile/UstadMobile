@@ -79,8 +79,8 @@ public class BleNetworkManagerTest {
 
         Vector<BleEntryStatusTask> statusTasks = networkManager.getEntryStatusTasks();
         boolean taskCreated = false;
-        for(int i = 0; i < statusTasks.size(); i++){
-            taskCreated = statusTasks.get(i).getNetworkNode()
+        for(BleEntryStatusTask statusTask: statusTasks){
+            taskCreated = statusTask.getNetworkNode()
                     .getBluetoothMacAddress().equals(networkNode.getBluetoothMacAddress());
             if(taskCreated){
                 break;
@@ -108,8 +108,8 @@ public class BleNetworkManagerTest {
 
         Vector<BleEntryStatusTask> statusTasks = networkManager.getEntryStatusTasks();
         boolean taskCreated = false;
-        for(int i = 0; i < statusTasks.size(); i++){
-            taskCreated = statusTasks.get(i).getNetworkNode()
+        for(BleEntryStatusTask statusTask: statusTasks){
+            taskCreated = statusTask.getNetworkNode()
                     .getBluetoothMacAddress().equals(networkNode.getBluetoothMacAddress());
             if(taskCreated){
                 break;
@@ -126,8 +126,8 @@ public class BleNetworkManagerTest {
 
         Vector<BleEntryStatusTask> statusTasks = networkManager.getEntryStatusTasks();
         boolean taskCreated = false;
-        for(int i = 0; i < statusTasks.size(); i++){
-            taskCreated = statusTasks.get(i).getNetworkNode()
+        for(BleEntryStatusTask statusTask: statusTasks){
+            taskCreated = statusTask.getNetworkNode()
                     .getBluetoothMacAddress().equals(networkNode.getBluetoothMacAddress());
             if(taskCreated){
                 break;

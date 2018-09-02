@@ -20,9 +20,10 @@ import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.WIF
  * a payload accordingly, and use Gzip compression if that reduces the size. Messages are delivered
  * as follows:
  * <p>
- * Byte 0: request code (8 bit integer value between 0 and 255)
- * Byte 1-4: payload length
- * Byte 5-onwards: payload
+ * Byte 0: Request code (8 bit integer value between 0 and 255)
+ * Byte 1: Maximum Transfer Unit
+ * Byte 2-6: payload length
+ * Byte 7-onwards: Payload
  *
  * @author kileha3
  */
@@ -225,6 +226,10 @@ public class BleMessage {
     }
 
 
+    /**
+     * Get Maximum Transfer Unit from message packets
+     * @return MTU value
+     */
     public int getMtu(){
         return mtu;
     }
@@ -253,16 +258,16 @@ public class BleMessage {
                     outputStream.toByteArray().length)).array();
 
             if(receivedPayload.length == length){
-                boolean isCompressed = receivedPayload.length > 0 &&
-                        (receivedPayload[0] == (byte) (GZIPInputStream.GZIP_MAGIC))
-                        && (receivedPayload[1] == (byte) (GZIPInputStream.GZIP_MAGIC >> 8));
-                this.payload = receivedPayload;
-                if(isCompressed){
-                    this.payload = decompressPayload(receivedPayload);
-                }
-                try {
+                try{
+                    boolean isCompressed = receivedPayload.length > 0 &&
+                            (receivedPayload[0] == (byte) (GZIPInputStream.GZIP_MAGIC))
+                            && (receivedPayload[1] == (byte) (GZIPInputStream.GZIP_MAGIC >> 8));
+                    this.payload = receivedPayload;
+                    if(isCompressed){
+                        this.payload = decompressPayload(receivedPayload);
+                    }
                     outputStream.close();
-                } catch (IOException e) {
+                }catch (IOException e) {
                     e.printStackTrace();
                 }finally {
                     UMIOUtils.closeQuietly(outputStream);
@@ -275,6 +280,9 @@ public class BleMessage {
     }
 
 
+    /**
+     * Check if received request type is one of the pre defined request types.
+     */
     private boolean isValidRequestType(byte requestType){
         return ENTRY_STATUS_REQUEST == requestType || ENTRY_STATUS_RESPONSE == requestType ||
                 WIFI_GROUP_CREATION_REQUEST == requestType ||

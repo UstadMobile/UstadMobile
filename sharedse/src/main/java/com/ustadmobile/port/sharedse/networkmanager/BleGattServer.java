@@ -1,6 +1,7 @@
 package com.ustadmobile.port.sharedse.networkmanager;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import static com.ustadmobile.port.sharedse.networkmanager.BleMessageUtil.bleMessageBytesToLong;
 import static com.ustadmobile.port.sharedse.networkmanager.BleMessageUtil.bleMessageLongToBytes;
@@ -23,6 +24,8 @@ public abstract class BleGattServer implements WiFiDirectGroupListenerBle{
 
     private final Object p2pGroupCreationLock = new Object();
 
+    private long GROUP_CREATION_TIMEOUT = TimeUnit.SECONDS.toMillis(1);
+
     private String message = null;
     /**
      * Handle request from peer device
@@ -41,10 +44,11 @@ public abstract class BleGattServer implements WiFiDirectGroupListenerBle{
             case WIFI_GROUP_CREATION_REQUEST:
                 synchronized (p2pGroupCreationLock){
                     try{
-                        p2pGroupCreationLock.wait();
                         networkManager.createWifiDirectGroup(this);
+                        p2pGroupCreationLock.wait(GROUP_CREATION_TIMEOUT);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
+                        p2pGroupCreationLock.notify();
                     }
                 }
                 return new BleMessage(WIFI_GROUP_CREATION_RESPONSE,message.getBytes());

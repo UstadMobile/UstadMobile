@@ -48,8 +48,6 @@ public class BleMessageGattClientCallback extends  BluetoothGattCallback{
 
     private BleMessage messageToSend, receivedMessage;
 
-    private String destinationAddress;
-
     private BleMessageResponseListener responseListener;
 
     private int packetIteration = 0;
@@ -67,7 +65,6 @@ public class BleMessageGattClientCallback extends  BluetoothGattCallback{
     public BleMessageGattClientCallback(BleMessage messageToSend){
         this.messageToSend = messageToSend;
         receivedMessage = new BleMessage();
-        this.destinationAddress = destinationAddress;
     }
 
     /**
@@ -105,11 +102,13 @@ public class BleMessageGattClientCallback extends  BluetoothGattCallback{
         }
 
         if(newState == BluetoothProfile.STATE_CONNECTED) {
+            /*Check if the device has android version 5 or above and request for the MTU change,
+            MTU change is not supported on lower android version devices*/
             if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
                 if(gatt.requestMtu(MAXIMUM_MTU_SIZE)){
                     synchronized (mtuChangeMonitor){
                         try {
-                            mtuChangeMonitor.wait(TimeUnit.SECONDS.toMillis(2));
+                            mtuChangeMonitor.wait(TimeUnit.SECONDS.toMillis(1));
                         } catch (InterruptedException e) {
                             mtuChangeMonitor.notify();
                             e.printStackTrace();

@@ -19,9 +19,11 @@ import static org.junit.Assert.assertEquals;
 
 public class BleMessageTest {
 
-    private List<Long> entriesListWithSufficientDuplicates = Arrays.asList(8888888888L,8888888888L,8888888888L,8888888888L,8888888888L);
+    private List<Long> entriesListWithSufficientDuplicates =
+            Arrays.asList(8888888888L,8888888888L,8888888888L,8888888888L,8888888888L);
 
-    private List<Long> entriesListWithInsufficientDuplicates = Arrays.asList(1056289670L,4590875612L,9076137860L,2912543894L);
+    private List<Long> entriesListWithInsufficientDuplicates =
+            Arrays.asList(1056289670L,4590875612L,9076137860L,2912543894L);
 
 
     @Test

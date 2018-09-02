@@ -38,6 +38,7 @@ public class BleGattServerTest {
         gattServer = spy(BleGattServer.class);
         entries = Arrays.asList(1056289670L,4590875612L,9076137860L,2912543894L);
         mockedNetworkManager = mock(NetworkManagerBle.class);
+        mockedNetworkManager.init(mock(Object.class));
     }
 
     @Test

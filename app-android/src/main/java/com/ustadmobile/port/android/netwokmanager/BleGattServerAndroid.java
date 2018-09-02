@@ -45,6 +45,7 @@ public class BleGattServerAndroid extends BleGattServer{
 
 
     private BluetoothGattServerCallback mCallback = new BluetoothGattServerCallback() {
+
         /**
          * Grant permission a peer device to start reading characteristics values
          */
