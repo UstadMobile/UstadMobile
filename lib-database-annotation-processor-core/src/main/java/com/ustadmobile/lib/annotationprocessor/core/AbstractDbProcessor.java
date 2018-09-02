@@ -65,7 +65,7 @@ public abstract class AbstractDbProcessor {
 
     public abstract void processDbClass(TypeElement dbType, File destinationDir) throws IOException;
 
-    public abstract void processDbDao(TypeElement dbDao, File DestinationDir) throws IOException;
+    public abstract void processDbDao(TypeElement dbDao, File destinationDir) throws IOException;
 
     public String getOutputDirOpt() {
         return outputDirOpt;

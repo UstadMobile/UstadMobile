@@ -11,6 +11,7 @@ import com.ustadmobile.lib.database.annotation.UmDatabase;
 import com.ustadmobile.lib.database.annotation.UmIndexField;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 import com.ustadmobile.lib.database.jdbc.JdbcDatabaseUtils;
+import com.ustadmobile.lib.database.jdbc.UmJdbcDatabase;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
 
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.element.AnnotationMirror;
@@ -48,6 +50,8 @@ import static com.ustadmobile.lib.annotationprocessor.core.DbProcessorCore.OPT_J
 public class DbProcessorJdbc extends AbstractDbProcessor {
 
     private static String SUFFIX_JDBC_DBMANAGER = "_Jdbc";
+
+    private static final String SUFFIX_JDBC_DAO = "_JdbcDaoImpl";
 
     public DbProcessorJdbc() {
         setOutputDirOpt(OPT_JDBC_OUTPUT);
@@ -285,7 +289,19 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
 
 
     @Override
-    public void processDbDao(TypeElement dbDao, File DestinationDir) throws IOException {
+    public void processDbDao(TypeElement daoClass, File destinationDir) throws IOException {
+        String daoClassName = daoClass.getSimpleName() + SUFFIX_JDBC_DAO;
+        TypeSpec.Builder jdbcDaoClassSpec = TypeSpec.classBuilder(daoClassName)
+                .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
+                .superclass(ClassName.get(daoClass))
+                .addField(ClassName.get(UmJdbcDatabase.class), "_db", Modifier.PRIVATE)
+                .addMethod(MethodSpec.constructorBuilder()
+                    .addModifiers(Modifier.PUBLIC)
+                    .addParameter(ClassName.get(UmJdbcDatabase.class), "_db")
+                    .addCode("this._db = _db;\n").build());
 
+
+        JavaFile.builder(processingEnv.getElementUtils().getPackageOf(daoClass).toString(),
+                jdbcDaoClassSpec.build()).build().writeTo(destinationDir);
     }
 }
