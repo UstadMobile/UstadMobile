@@ -30,11 +30,6 @@ public class FeedListPresenter extends UstadBaseController<FeedListView>{
 
         //Testing: TODO: Remove
         personUid = 1L;
-        new Thread(() -> {
-            List<FeedEntry> all2 =
-                    UmAppDatabase.getInstance(view.getContext()).getFeedEntryDao().findByPersonUidList(personUid);
-            int size2 = all2.size();
-        }).start();
 
         feedEntryUmProvider = UmAppDatabase.getInstance(view.getContext()).getFeedEntryDao()
                 .findByPersonUid(personUid);

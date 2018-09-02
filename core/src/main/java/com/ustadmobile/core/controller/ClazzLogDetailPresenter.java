@@ -22,6 +22,10 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
     private long currentClazzUid = -1L;
     private long currentLogDate = -1L;
 
+    public static final String ARG_CLAZZ_UID = "clazzuid";
+
+    public static final String ARG_LOGDATE = "logdate";
+
     private UmProvider<ClazzLogAttendanceRecordWithPerson> clazzLogAttendanceRecordUmProvider;
 
     private ClazzLog currentClazzLog;
@@ -38,11 +42,11 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
                                    ClassLogDetailView view) {
         super(context, arguments, view);
 
-        if(arguments.containsKey("clazzuid")){
-            currentClazzUid = Long.parseLong(arguments.get("clazzuid").toString());
+        if(arguments.containsKey(ARG_CLAZZ_UID)){
+            currentClazzUid = Long.parseLong(arguments.get(ARG_CLAZZ_UID).toString());
         }
-        if(arguments.containsKey("logdate")){
-            String thisLogDate = arguments.get("logdate").toString();
+        if(arguments.containsKey(ARG_LOGDATE)){
+            String thisLogDate = arguments.get(ARG_LOGDATE).toString();
             currentLogDate = Long.parseLong(thisLogDate);
         }
     }

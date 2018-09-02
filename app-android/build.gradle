@@ -508,8 +508,10 @@ dependencies {
     //As per: https://developer.android.com/topic/libraries/testing-support-library/packages.html#gradle-dependencies
     androidTestImplementation "com.android.support.test:runner:$version_android_junit_runner"
     androidTestImplementation "com.android.support.test:rules:$version_android_junit_runner"
+    androidTestUtil "com.android.support.test:orchestrator:$version_android_junit_runner"
     androidTestImplementation "com.android.support.test.espresso:espresso-core:$version_android_espresso"
     androidTestImplementation "com.android.support.test.espresso:espresso-contrib:$version_android_espresso"
+    androidTestImplementation "com.android.support.test.espresso:espresso-intents:$version_android_espresso"
 
     androidTestImplementation "com.android.support.test.uiautomator:uiautomator-v18:$version_android_uiautomator"
 

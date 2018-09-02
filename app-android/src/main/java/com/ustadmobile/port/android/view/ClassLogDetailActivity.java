@@ -5,6 +5,7 @@ import android.arch.paging.DataSource;
 import android.arch.paging.LivePagedListBuilder;
 import android.arch.paging.PagedList;
 import android.arch.paging.PagedListAdapter;
+import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -33,6 +34,9 @@ import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord;
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecordWithPerson;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.Map;
 import java.util.WeakHashMap;
 
 import ru.dimorinny.floatingtextbutton.FloatingTextButton;
@@ -57,10 +61,41 @@ public class ClassLogDetailActivity extends UstadBaseActivity
     private RecyclerView.LayoutManager mRecyclerLayoutManager;
 
     private ClazzLogDetailPresenter mPresenter;
+    public static final String ARGS_CLAZZLOG_UID = "clazzloguid";
+    public static final String ARGS_CLAZZ_UID = "clazzuid";
+    public static final String ARGS_LOGDATE = "logdate";
+    public static final String TAG_STATUS = "status";
 
     public long clazzLogUid;
     public long clazzUid;
     public long logDate;
+
+    private static Map<Integer, Integer> STATUS_TO_COLOR_MAP = new HashMap<>();
+
+    private static Map<Integer, Integer> STATUS_TO_STRING_ID_MAP = new HashMap<>();
+
+    private static Map<Integer, Integer> SELECTED_STATUS_TO_STATUS_TAG = new HashMap<>();
+
+    private static Map<Integer, Integer> UNSELECTED_STATUS_TO_STATUS_TAG = new HashMap<>();
+
+    static {
+        STATUS_TO_COLOR_MAP.put(STATUS_ATTENDED, R.color.traffic_green);
+        STATUS_TO_COLOR_MAP.put(STATUS_ABSENT, R.color.traffic_red);
+        STATUS_TO_COLOR_MAP.put(STATUS_PARTIAL, R.color.traffic_orange);
+
+        STATUS_TO_STRING_ID_MAP.put(STATUS_ATTENDED, R.string.attendance);
+        STATUS_TO_STRING_ID_MAP.put(STATUS_ABSENT, R.string.attendance);
+        STATUS_TO_STRING_ID_MAP.put(STATUS_PARTIAL, R.string.attendance);
+
+        SELECTED_STATUS_TO_STATUS_TAG.put(STATUS_ATTENDED, R.string.present_selected);
+        SELECTED_STATUS_TO_STATUS_TAG.put(STATUS_ABSENT, R.string.absent_selected);
+        SELECTED_STATUS_TO_STATUS_TAG.put(STATUS_PARTIAL, R.string.partial_selected);
+
+        UNSELECTED_STATUS_TO_STATUS_TAG.put(STATUS_ATTENDED, R.string.present_unselected);
+        UNSELECTED_STATUS_TO_STATUS_TAG.put(STATUS_ABSENT, R.string.absent_unselected);
+        UNSELECTED_STATUS_TO_STATUS_TAG.put(STATUS_PARTIAL, R.string.partial_unselected);
+
+    }
 
     protected class ClazzLogDetailRecyclerAdapter
             extends PagedListAdapter<ClazzLogAttendanceRecordWithPerson,
@@ -87,6 +122,7 @@ public class ClassLogDetailActivity extends UstadBaseActivity
             return new ClazzLogDetailViewHolder(clazzLogDetailListItem);
         }
 
+        /*
         public void voidAllRecordIcons(@NonNull ClazzLogDetailViewHolder holder){
             ((ImageView)holder.itemView
                     .findViewById(R.id.item_clazzlog_detail_student_present_icon))
@@ -98,7 +134,7 @@ public class ClassLogDetailActivity extends UstadBaseActivity
                     .findViewById(R.id.item_clazzlog_detail_student_delay_icon))
                     .setColorFilter(Color.GRAY);
         }
-
+        */
 
         @Override
         public void onBindViewHolder(@NonNull ClazzLogDetailViewHolder holder, int position){
@@ -107,6 +143,8 @@ public class ClassLogDetailActivity extends UstadBaseActivity
             String studentName = attendanceRecord.getPerson().getFirstName() + " " +
                     attendanceRecord.getPerson().getLastName();
 
+            holder.itemView.setTag(attendanceRecord.getClazzLogAttendanceRecordUid());
+
             int studentAttendance = attendanceRecord.getAttendanceStatus();
 
             ((TextView)holder.itemView
@@ -114,36 +152,66 @@ public class ClassLogDetailActivity extends UstadBaseActivity
             ((ImageView)holder.itemView
                     .findViewById(R.id.item_clazzlog_detail_student_present_icon)).setColorFilter(Color.BLACK);
 
-            voidAllRecordIcons(holder);
             final long clazzLogAttendanceRecordUid = attendanceRecord.getClazzLogAttendanceRecordUid();
-            holder.itemView.findViewById(R.id.item_clazzlog_detail_student_present_icon)
-                    .setOnClickListener((view) -> mPresenter.handleMarkStudent(
-                            clazzLogAttendanceRecordUid, STATUS_ATTENDED));
-            holder.itemView.findViewById(R.id.item_clazzlog_detail_student_absent_icon)
-                    .setOnClickListener((view) -> mPresenter.handleMarkStudent(
-                            clazzLogAttendanceRecordUid, STATUS_ABSENT));
-            holder.itemView.findViewById(R.id.item_clazzlog_detail_student_delay_icon)
-                    .setOnClickListener((view) -> mPresenter.handleMarkStudent(
-                            clazzLogAttendanceRecordUid, STATUS_PARTIAL));
 
+            Map<Integer, ImageView> attendanceButtons = new HashMap<>();
+            attendanceButtons.put(STATUS_ATTENDED, holder.itemView.findViewById(
+                    R.id.item_clazzlog_detail_student_present_icon));
+            attendanceButtons.put(STATUS_ABSENT, holder.itemView.findViewById(
+                    R.id.item_clazzlog_detail_student_absent_icon));
+            attendanceButtons.put(STATUS_PARTIAL, holder.itemView.findViewById(
+                    R.id.item_clazzlog_detail_student_delay_icon));
 
-            switch(studentAttendance){
-                case STATUS_ATTENDED:
-                    ((ImageView)holder.itemView
-                            .findViewById(R.id.item_clazzlog_detail_student_present_icon))
-                            .setColorFilter(Color.BLACK);
-                    break;
-                case STATUS_ABSENT:
-                    ((ImageView)holder.itemView
-                            .findViewById(R.id.item_clazzlog_detail_student_absent_icon))
-                            .setColorFilter(Color.BLACK);
-                    break;
-                case STATUS_PARTIAL:
-                    ((ImageView)holder.itemView
-                            .findViewById(R.id.item_clazzlog_detail_student_delay_icon))
-                            .setColorFilter(Color.BLACK);
-                    break;
+            for(Map.Entry<Integer, ImageView> entry : attendanceButtons.entrySet()) {
+                boolean selectedOption = attendanceRecord.getAttendanceStatus() == entry.getKey();
+                entry.getValue().setOnClickListener((view) -> mPresenter.handleMarkStudent(
+                        clazzLogAttendanceRecordUid, entry.getKey()));
+                entry.getValue().setColorFilter(
+                        selectedOption ?
+                        ContextCompat.getColor(ClassLogDetailActivity.this,
+                                STATUS_TO_COLOR_MAP.get(entry.getKey())) : Color.GRAY);
+
+                String status_tag = getResources().getString(
+                        STATUS_TO_STRING_ID_MAP.get(entry.getKey())) + " " +
+                        (selectedOption ? SELECTED_STATUS_TO_STATUS_TAG.get(entry.getKey()) :
+                                UNSELECTED_STATUS_TO_STATUS_TAG.get(entry.getKey()));
+                entry.getValue().setTag(status_tag);
+                //entry.getValue().setContentDescription();
             }
+
+//            attendanceButtons.get(STATUS_ATTENDED).setContentDescription();
+//
+//            holder.itemView.findViewById(R.id.item_clazzlog_detail_student_present_icon)
+//                    .setOnClickListener((view) -> mPresenter.handleMarkStudent(
+//                            clazzLogAttendanceRecordUid, STATUS_ATTENDED));
+//            holder.itemView.findViewById(R.id.item_clazzlog_detail_student_absent_icon)
+//                    .setOnClickListener((view) -> mPresenter.handleMarkStudent(
+//                            clazzLogAttendanceRecordUid, STATUS_ABSENT));
+//            holder.itemView.findViewById(R.id.item_clazzlog_detail_student_delay_icon)
+//                    .setOnClickListener((view) -> mPresenter.handleMarkStudent(
+//                            clazzLogAttendanceRecordUid, STATUS_PARTIAL));
+//
+//
+//            switch(studentAttendance){
+//                case STATUS_ATTENDED:
+//                    ((ImageView)holder.itemView
+//                            .findViewById(R.id.item_clazzlog_detail_student_present_icon))
+//                            .setColorFilter(ContextCompat.getColor(
+//                                    getApplicationContext(), R.color.traffic_green));
+//                    break;
+//                case STATUS_ABSENT:
+//                    ((ImageView)holder.itemView
+//                            .findViewById(R.id.item_clazzlog_detail_student_absent_icon))
+//                            .setColorFilter(ContextCompat.getColor(
+//                                    getApplicationContext(), R.color.traffic_red));
+//                    break;
+//                case STATUS_PARTIAL:
+//                    ((ImageView)holder.itemView
+//                            .findViewById(R.id.item_clazzlog_detail_student_delay_icon))
+//                            .setColorFilter(ContextCompat.getColor(
+//                                    getApplicationContext(), R.color.traffic_orange));
+//                    break;
+//            }
         }
     }
 
@@ -181,18 +249,17 @@ public class ClassLogDetailActivity extends UstadBaseActivity
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
 
-
-        //arguments
-        if (getIntent().hasExtra("clazzloguid")){
-            clazzLogUid = getIntent().getLongExtra("clazzloguid", -1L);
+        //Get arguments
+        if (getIntent().hasExtra(ARGS_CLAZZLOG_UID)){
+            clazzLogUid = getIntent().getLongExtra(ARGS_CLAZZLOG_UID, -1L);
         }
 
-        if(getIntent().hasExtra("clazzuid")){
-            clazzUid = getIntent().getLongExtra("clazzuid", -1L);
+        if(getIntent().hasExtra(ARGS_CLAZZ_UID)){
+            clazzUid = getIntent().getLongExtra(ARGS_CLAZZ_UID, -1L);
         }
 
-        if(getIntent().hasExtra("logdate")){
-            logDate = getIntent().getLongExtra("logdate", -1L);
+        if(getIntent().hasExtra(ARGS_LOGDATE)){
+            logDate = getIntent().getLongExtra(ARGS_LOGDATE, -1L);
         }
 
         mRecyclerView = (RecyclerView) findViewById(R.id.class_log_detail_container_recyclerview);
@@ -208,19 +275,17 @@ public class ClassLogDetailActivity extends UstadBaseActivity
 
         //FAB
         FloatingTextButton fab = findViewById(R.id.class_log_detail__done_fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mPresenter.handleClickDone();
+        fab.setOnClickListener(v -> mPresenter.handleClickDone());
 
-            }
-        });
-
+        //Mark all present
         findViewById(R.id.activity_class_log_detail_mark_all_present_text)
-            .setOnClickListener((view) -> mPresenter.handleMarkAll(ClazzLogAttendanceRecord.STATUS_ATTENDED));
+            .setOnClickListener((view) ->
+                    mPresenter.handleMarkAll(ClazzLogAttendanceRecord.STATUS_ATTENDED));
 
+        //Mark all absent
         findViewById(R.id.activity_class_log_detail_mark_all_absent_text)
-            .setOnClickListener((view) -> mPresenter.handleMarkAll(ClazzLogAttendanceRecord.STATUS_ABSENT));
+            .setOnClickListener((view) ->
+                    mPresenter.handleMarkAll(ClazzLogAttendanceRecord.STATUS_ABSENT));
     }
 
     @Override

@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
+
+<!--
+This is the one you should be editing.
+-->
 <resources>
     <string name="app_name">Ustad Mobile</string>
     <string name='dir'>ltr</string>
@@ -273,5 +277,11 @@
     <string name="present">Present</string>
     <string name="absent">Absent</string>
     <string name="done">Done</string>
+    <string name="present_selected">Present Selected</string>
+    <string name="absent_selected">Absent Selected</string>
+    <string name="partial_selected">Partial Selected</string>
+    <string name="present_unselected">Present Unselected</string>
+    <string name="absent_unselected">Absent Unselected</string>
+    <string name="partial_unselected">Partial Unselected</string>
 
 </resources>
