@@ -151,7 +151,8 @@ afterEvaluate {
 }
 
 task generateRoomEntities {
-
+    inputs.files(fileTree(dir: rootProject.file("lib-database/src/main/java")).matching { include '**/*.java' })
+    outputs.dir("build/generated/source/umentities")
 }
 
 /*
