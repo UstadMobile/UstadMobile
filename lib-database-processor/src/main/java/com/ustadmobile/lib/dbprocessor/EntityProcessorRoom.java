@@ -37,6 +37,10 @@ public class EntityProcessorRoom {
             if(!srcFile.getName().endsWith(".java"))
                 continue;
 
+            if(outFile.exists() && (outFile.lastModified() > srcFile.lastModified()))
+                continue;
+
+
             JavaType parsedSource = Roaster.parse(srcFile);
 
             if(!(parsedSource instanceof JavaClassSource)) {
