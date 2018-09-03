@@ -15,7 +15,7 @@ import java.util.List;
 @UmDao
 public abstract class EntryStatusResponseDao {
 
-    @UmInsert(onConflict = UmOnConflictStrategy.IGNORE)
+    @UmInsert(onConflict = UmOnConflictStrategy.REPLACE)
     public abstract void insert(List<EntryStatusResponse> responses);
 
 
@@ -28,6 +28,8 @@ public abstract class EntryStatusResponseDao {
             "WHERE entryId = :entryId AND available = :available ")
     public abstract List<EntryStatusResponseWithNode> findByEntryIdAndAvailability(String entryId, boolean available);
 
+    @UmQuery("SELECT * FROM EntryStatusResponse WHERE entryid=:entryId AND responderNodeId=:nodeId")
+    public abstract EntryStatusResponse findByEntryIdAndNetworkNode(long entryId, int nodeId);
 
     public static class EntryWithoutRecentResponse {
         private long contentEntryUid;
