@@ -123,7 +123,8 @@ public abstract class NetworkManagerBle {
     public abstract void startAdvertising();
 
     /**
-     * Stop advertising the service which was created and advertised by {@link NetworkManagerBle#startAdvertising()}
+     * Stop advertising the service which was created and advertised by
+     * {@link NetworkManagerBle#startAdvertising()}
      */
     public abstract void stopAdvertising();
 

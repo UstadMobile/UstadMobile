@@ -1,5 +1,10 @@
 package com.ustadmobile.port.sharedse.networkmanager;
 
+import com.ustadmobile.core.db.UmAppDatabase;
+import com.ustadmobile.core.db.dao.ContentEntryDao;
+import com.ustadmobile.lib.db.entities.ContentEntry;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -27,6 +32,12 @@ public abstract class BleGattServer implements WiFiDirectGroupListenerBle{
     private long GROUP_CREATION_TIMEOUT = TimeUnit.SECONDS.toMillis(1);
 
     private String message = null;
+
+    private Object context;
+
+    public BleGattServer (Object context){
+        this.context = context;
+    }
     /**
      * Handle request from peer device
      * @param requestReceived Message received from the peer device
@@ -38,8 +49,15 @@ public abstract class BleGattServer implements WiFiDirectGroupListenerBle{
         byte requestType = requestReceived.getRequestType();
         switch (requestType){
             case ENTRY_STATUS_REQUEST:
-                List<Long> requestedEntries = bleMessageBytesToLong(requestReceived.getPayload());
-                return new BleMessage(ENTRY_STATUS_RESPONSE,bleMessageLongToBytes(requestedEntries));
+                UmAppDatabase database = UmAppDatabase.getInstance(context);
+                ContentEntryDao contentEntryDao = database.getContentEntryDao();
+                List<Long> entryStatusResponse = new ArrayList<>();
+                for(long entryUuid: bleMessageBytesToLong(requestReceived.getPayload())){
+                    ContentEntry contentEntry = contentEntryDao.findByEntryId(entryUuid);
+                    entryStatusResponse.add(contentEntry == null ? 0L: contentEntry.getLastUpdateTime());
+                }
+                return new BleMessage(ENTRY_STATUS_RESPONSE,
+                        bleMessageLongToBytes(entryStatusResponse));
 
             case WIFI_GROUP_CREATION_REQUEST:
                 synchronized (p2pGroupCreationLock){
