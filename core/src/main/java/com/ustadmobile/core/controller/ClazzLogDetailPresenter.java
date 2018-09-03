@@ -59,7 +59,7 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
 
     }
 
-    public long getTodayMillis(){
+    public static long getTodayMillis(){
         Calendar attendanceDate = Calendar.getInstance();
         attendanceDate.setTimeInMillis(System.currentTimeMillis());
         attendanceDate.set(Calendar.HOUR_OF_DAY, 0);
@@ -100,6 +100,7 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
 
                 if(result == null){
                     //Create one anyway if not set for today
+                    //todo: CHECK . Not for today, but for currentLogDate !?
                     clazzLogDao.createClazzLogForDate(currentClazzUid, getTodayMillis(), new UmCallback<Long>() {
                         @Override
                         public void onSuccess(Long result) {
@@ -144,7 +145,7 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
                         //Get provider
                         clazzLogAttendanceRecordUmProvider = UmAppDatabase.getInstance(context)
                                 .getClazzLogAttendanceRecordDao()
-                                .findAttendanceRecordsWithPersonByClassLogId(result.getClazzClazzUid());
+                                .findAttendanceRecordsWithPersonByClassLogId(result.getClazzLogUid());
                                 //.findAttendanceLogsByClassLogId(result.getClazzLogUid());
                         //Set to view
                         view.runOnUiThread(() ->

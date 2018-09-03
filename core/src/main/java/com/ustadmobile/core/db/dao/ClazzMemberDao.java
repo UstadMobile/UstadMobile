@@ -23,7 +23,7 @@ public abstract class ClazzMemberDao implements BaseDao<ClazzMember> {
 
     @UmQuery("SELECT ClazzMember.*, Person.* FROM ClazzMember" +
             " LEFT JOIN Person ON ClazzMember.clazzMemberPersonUid = Person.personUid" +
-            " WHERE ClazzMember.clazzMemberClazzUid = :uid")
+            " WHERE ClazzMember.clazzMemberClazzUid = :uid AND ClazzMember.role = 1")
     public abstract UmProvider<ClazzMemberWithPerson> findClazzMembersByClazzId(long uid);
 
     @UmQuery("Update ClazzMember SET attendancePercentage " +

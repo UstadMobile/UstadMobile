@@ -179,39 +179,6 @@ public class ClassLogDetailActivity extends UstadBaseActivity
                 //entry.getValue().setContentDescription();
             }
 
-//            attendanceButtons.get(STATUS_ATTENDED).setContentDescription();
-//
-//            holder.itemView.findViewById(R.id.item_clazzlog_detail_student_present_icon)
-//                    .setOnClickListener((view) -> mPresenter.handleMarkStudent(
-//                            clazzLogAttendanceRecordUid, STATUS_ATTENDED));
-//            holder.itemView.findViewById(R.id.item_clazzlog_detail_student_absent_icon)
-//                    .setOnClickListener((view) -> mPresenter.handleMarkStudent(
-//                            clazzLogAttendanceRecordUid, STATUS_ABSENT));
-//            holder.itemView.findViewById(R.id.item_clazzlog_detail_student_delay_icon)
-//                    .setOnClickListener((view) -> mPresenter.handleMarkStudent(
-//                            clazzLogAttendanceRecordUid, STATUS_PARTIAL));
-//
-//
-//            switch(studentAttendance){
-//                case STATUS_ATTENDED:
-//                    ((ImageView)holder.itemView
-//                            .findViewById(R.id.item_clazzlog_detail_student_present_icon))
-//                            .setColorFilter(ContextCompat.getColor(
-//                                    getApplicationContext(), R.color.traffic_green));
-//                    break;
-//                case STATUS_ABSENT:
-//                    ((ImageView)holder.itemView
-//                            .findViewById(R.id.item_clazzlog_detail_student_absent_icon))
-//                            .setColorFilter(ContextCompat.getColor(
-//                                    getApplicationContext(), R.color.traffic_red));
-//                    break;
-//                case STATUS_PARTIAL:
-//                    ((ImageView)holder.itemView
-//                            .findViewById(R.id.item_clazzlog_detail_student_delay_icon))
-//                            .setColorFilter(ContextCompat.getColor(
-//                                    getApplicationContext(), R.color.traffic_orange));
-//                    break;
-//            }
         }
     }
 
@@ -244,7 +211,7 @@ public class ClassLogDetailActivity extends UstadBaseActivity
 
         //Toolbar
         toolbar = findViewById(R.id.class_log_detail_toolbar);
-        toolbar.setTitle("Class");
+        toolbar.setTitle("Class"); //TODO Change this
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 

@@ -12,20 +12,19 @@ import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.ClazzListPresenter;
 import com.ustadmobile.core.db.UmAppDatabase;
-import com.ustadmobile.core.db.dao.ClazzDao;
-import com.ustadmobile.core.db.dao.ClazzMemberDao;
 import com.ustadmobile.lib.db.entities.Clazz;
-import com.ustadmobile.lib.db.entities.ClazzMember;
 import com.ustadmobile.port.android.view.BasePointActivity2;
 import com.ustadmobile.port.android.view.ClassDetailActivity;
 import com.ustadmobile.port.android.view.ClassLogDetailActivity;
 import com.ustadmobile.test.port.android.testutil.ActivityStopCountdownLatch;
+import com.ustadmobile.test.port.android.testutil.UmDbTestUtil;
 
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.Hashtable;
 import java.util.concurrent.TimeUnit;
 
 import static android.support.test.espresso.Espresso.onView;
@@ -45,7 +44,6 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.core.AllOf.allOf;
 
 
-
 /**
  * ClazzListFragment's Espresso UI Test for Android
  */
@@ -56,6 +54,19 @@ public class ClassListFragmentEspressoTest {
     private static final String TEST_CLASS_NAME = "Class A";
     private static final float TEST_CLASS_PERCENTAGE = 0.42F;
     private static final long TEST_USER_UID = 1L;
+    private static final String TEST_CLASS_MEMBER1_NAME = "Test User1";
+    private static final float TEST_CLASS_MEMBER1_PERCENTAGE = 0.21F;
+    private static final float TEST_CLASS_MEMBER2_PERCENTAGE = 0.21F;
+    private static final String TEST_CLASS_MEMBER2_NAME = "Test User2";
+    private static Hashtable peopleMap;
+    private Clazz testClazz;
+
+
+    static {
+        peopleMap = new Hashtable();
+        peopleMap.put(TEST_CLASS_MEMBER1_NAME, TEST_CLASS_MEMBER1_PERCENTAGE);
+        peopleMap.put(TEST_CLASS_MEMBER2_NAME, TEST_CLASS_MEMBER2_PERCENTAGE);
+    }
 
     /**
      * This sets the activity that we want floating around
@@ -65,31 +76,15 @@ public class ClassListFragmentEspressoTest {
             new IntentsTestRule<>(BasePointActivity2.class, false, false);
 
 
-    private Clazz testClazz;
 
     @Before
     public void beforeTest() throws Throwable{
         Context context = InstrumentationRegistry.getTargetContext();
         UmAppDatabase.getInstance(context).clearAllTables();
 
-        ClazzDao clazzDao = UmAppDatabase.getInstance(context).getClazzDao();
-        ClazzMemberDao clazzMemberDao = UmAppDatabase.getInstance(context).getClazzMemberDao();
+        testClazz = UmDbTestUtil.createClazzWithClazzMembers(TEST_CLASS_NAME, TEST_CLASS_PERCENTAGE,
+                peopleMap, TEST_USER_UID, context);
 
-        testClazz = new Clazz();
-        testClazz.setClazzName(TEST_CLASS_NAME);
-        testClazz.setAttendanceAverage(TEST_CLASS_PERCENTAGE);
-        testClazz.setClazzUid(clazzDao.insert(testClazz));
-
-        for (int i=0; i<2; i++){
-            ClazzMember clazzMember = new ClazzMember();
-            clazzMember.setClazzMemberClazzUid(testClazz.getClazzUid());
-            clazzMember.setRole(ClazzMember.ROLE_STUDENT);
-            clazzMember.setClazzMemberPersonUid(TEST_USER_UID);
-
-            clazzMemberDao.insert(clazzMember);
-        }
-
-        //Before here..
         mActivityRule.launchActivity(new Intent());
 
         mActivityRule.runOnUiThread(() ->

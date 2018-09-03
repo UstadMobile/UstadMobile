@@ -36,7 +36,7 @@ public abstract class ClazzLogAttendanceRecordDao implements BaseDao<ClazzLogAtt
             " FROM ClazzLogAttendanceRecord " +
             " LEFT JOIN ClazzMember on ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzMemberUid = ClazzMember.clazzMemberUid " +
             " LEFT JOIN Person on ClazzMember.clazzMemberPersonUid = Person.personUid " +
-            " WHERE ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid = :clazzLogUid")
+            " WHERE ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid = :clazzLogUid AND ClazzMember.role = 1")
     public abstract UmProvider<ClazzLogAttendanceRecordWithPerson> findAttendanceRecordsWithPersonByClassLogId (long clazzLogUid);
 
     @UmQuery("SELECT ClazzMember.clazzMemberUid FROM ClazzMember WHERE ClazzMember.clazzMemberClazzUid = :clazzId AND ClazzMember.clazzMemberClazzUid NOT IN " +
