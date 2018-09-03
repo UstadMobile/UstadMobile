@@ -13,6 +13,8 @@ public class ContentEntry {
 
     private String description;
 
+    private long lastUpdateTime;
+
     public long getContentEntryUid() {
         return contentEntryUid;
     }
@@ -35,5 +37,13 @@ public class ContentEntry {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public long getLastUpdateTime() {
+        return lastUpdateTime;
+    }
+
+    public void setLastUpdateTime(long lastUpdateTime) {
+        this.lastUpdateTime = lastUpdateTime;
     }
 }
