@@ -1,17 +1,9 @@
 package com.ustadmobile.port.sharedse.networkmanager;
 
-import com.ustadmobile.core.util.UMIOUtils;
-
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.zip.GZIPInputStream;
 
 /**
  * <h1>BleMessageUtil</h1>
@@ -40,7 +32,7 @@ public class BleMessageUtil {
      */
     public static List<Long> bleMessageBytesToLong(byte [] entryInBytes){
         List<Long> entries = new ArrayList<>();
-        int BUFFER_SIZE =8;
+        int BUFFER_SIZE = 8;
         int start = 0;
         for(int position = 0; position < entryInBytes.length/BUFFER_SIZE; position++) {
             int end = start + BUFFER_SIZE;
@@ -51,7 +43,5 @@ public class BleMessageUtil {
         return entries;
 
     }
-
-
 
 }
