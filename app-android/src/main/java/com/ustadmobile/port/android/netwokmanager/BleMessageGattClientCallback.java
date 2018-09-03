@@ -8,7 +8,6 @@ import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothProfile;
 import android.os.Build;
 import android.support.annotation.VisibleForTesting;
-import android.util.Log;
 
 import com.ustadmobile.port.sharedse.networkmanager.BleMessage;
 import com.ustadmobile.port.sharedse.networkmanager.BleMessageResponseListener;
@@ -116,7 +115,6 @@ public class BleMessageGattClientCallback extends  BluetoothGattCallback{
                     }
                 }
             }
-
             gatt.discoverServices();
 
         } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {

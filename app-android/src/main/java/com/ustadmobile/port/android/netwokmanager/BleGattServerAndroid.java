@@ -107,6 +107,7 @@ public class BleGattServerAndroid extends BleGattServer{
      *                       BluetoothManager instance.
      */
     public BleGattServerAndroid(Context context, NetworkManagerAndroidBle networkManager ) {
+        super(context);
         this.receivedMessage = new BleMessage();
         this.gattServer = networkManager.getBluetoothManager().openGattServer(context,mCallback);
         this.networkManager = networkManager;
