@@ -1,7 +1,5 @@
 package com.ustadmobile.lib.contentscrapers;
 
-import java.awt.image.DirectColorModel;
-import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
 
@@ -14,12 +12,13 @@ public class ScraperConstants {
     public static final String ABOUT_HTML = "about.txt";
     public static final String VIDEO_MP4 = "video.mp4";
     public static final String UTF_ENCODING = "UTF-8";
-    public static final String JS_HTML_TAG = "/com/ustadmobile/lib/contentscrapers/index.html";
+    public static final String EDRAAK_INDEX_HTML_TAG = "/com/ustadmobile/lib/contentscrapers/edraak/index.html";
+    public static final String CK12_INDEX_HTML_TAG = "/com/ustadmobile/lib/contentscrapers/ck12/index.html";
     public static final String JS_TAG = "/com/ustadmobile/lib/contentscrapers/jquery-3.3.1.min.js";
     public static final String MATERIAL_JS_LINK = "/com/ustadmobile/lib/contentscrapers/materialize.min.js";
     public static final String MATERIAL_CSS_LINK = "/com/ustadmobile/lib/contentscrapers/materialize.min.css";
-    public static final String REGULAR_ARABIC_FONT_LINK = "/com/ustadmobile/lib/contentscrapers/DroidNaskh-Regular.woff2";
-    public static final String BOLD_ARABIC_FONT_LINK = "/com/ustadmobile/lib/contentscrapers/DroidNaskh-Bold.woff2";
+    public static final String REGULAR_ARABIC_FONT_LINK = "/com/ustadmobile/lib/contentscrapers/edraak/DroidNaskh-Regular.woff2";
+    public static final String BOLD_ARABIC_FONT_LINK = "/com/ustadmobile/lib/contentscrapers/edraak/DroidNaskh-Bold.woff2";
     public static final String MATERIAL_JS = "materialize.min.js";
     public static final String MATERIAL_CSS = "materialize.min.css";
 

@@ -27,6 +27,10 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.INDEX_HTML;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.JQUERY_JS;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.MATERIAL_CSS;
+
 public class CK12ContentScraper {
 
     private final String urlString;
@@ -105,6 +109,8 @@ public class CK12ContentScraper {
 
     public void scrapReadContent() throws IOException {
 
+
+
         Document html = setUpChromeDriver(urlString);
         //Document html = getContentFromSite(READ_TYPE, "");
 
@@ -139,6 +145,12 @@ public class CK12ContentScraper {
 
         String testIdLink = generatePracticeLink(practiceUrl);
 
+        File practiceDirectory = new File(destinationDirectory, practiceUrl);
+        practiceDirectory.mkdirs();
+
+        File practiceAssetDirectory = new File(practiceDirectory, "practice-asset");
+        practiceAssetDirectory.mkdirs();
+
         PracticeResponse response = new GsonBuilder().disableHtmlEscaping().create().fromJson(
                 IOUtils.toString(new URL(testIdLink), ScraperConstants.UTF_ENCODING), PracticeResponse.class);
 
@@ -149,7 +161,7 @@ public class CK12ContentScraper {
         String practiceName = response.response.test.title;
         String updated = response.response.test.updated;
 
-        File modifiedFile = new File(destinationDirectory, ScraperConstants.LAST_MODIFIED_TXT);
+        File modifiedFile = new File(practiceDirectory, ScraperConstants.LAST_MODIFIED_TXT);
         if (!ContentScraperUtil.isContentUpdated(ContentScraperUtil.parseServerDate(updated), modifiedFile)) {
             return;
         }
@@ -180,7 +192,7 @@ public class CK12ContentScraper {
 
             String questionId = questionResponse.response.questionID;
 
-            File questionAsset = new File(destinationDirectory, questionId);
+            File questionAsset = new File(practiceDirectory, questionId);
             questionAsset.mkdirs();
 
             questionResponse.response.stem.displayText = ContentScraperUtil.downloadAllResources(
@@ -190,7 +202,7 @@ public class CK12ContentScraper {
 
             List<String> hintsList = questionResponse.response.hints;
             for (int j = 0; j < hintsList.size(); j++) {
-                hintsList.set(j, ContentScraperUtil.downloadAllResources(hintsList.get(j), questionAsset, scrapUrl));
+                hintsList.set(j, ContentScraperUtil.downloadAllResources(hintsList.get(j), practiceAssetDirectory, scrapUrl));
             }
             questionResponse.response.hints = hintsList;
 
@@ -228,7 +240,13 @@ public class CK12ContentScraper {
 
         }
 
-        ContentScraperUtil.saveListAsJson(destinationDirectory, questionList, ScraperConstants.QUESTIONS_JSON);
+        ContentScraperUtil.saveListAsJson(practiceDirectory, questionList, ScraperConstants.QUESTIONS_JSON);
+        FileUtils.copyToFile(getClass().getResourceAsStream(ScraperConstants.JS_TAG), new File(practiceDirectory, JQUERY_JS));
+        FileUtils.copyToFile(getClass().getResourceAsStream(ScraperConstants.MATERIAL_CSS_LINK), new File(practiceDirectory, MATERIAL_CSS));
+        FileUtils.copyToFile(getClass().getResourceAsStream(ScraperConstants.MATERIAL_JS_LINK), new File(practiceDirectory, ScraperConstants.MATERIAL_JS)) ;
+        FileUtils.copyToFile(getClass().getResourceAsStream(ScraperConstants.CK12_INDEX_HTML_TAG), new File(practiceDirectory, INDEX_HTML));
+
+        ContentScraperUtil.zipDirectory(practiceDirectory,practiceUrl,destinationDirectory);
 
     }
 

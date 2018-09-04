@@ -171,17 +171,16 @@ public class EdraakK12ContentScraper {
             anyContentUpdated = true;
         }
 
-        // add these files into the directory
-        anyContentUpdated = writeFileToDirectory(ScraperConstants.JS_HTML_TAG, new File(courseDirectory, INDEX_HTML)) || anyContentUpdated;
-        anyContentUpdated = writeFileToDirectory(ScraperConstants.JS_TAG, new File(courseDirectory, JQUERY_JS)) || anyContentUpdated;
-        anyContentUpdated = writeFileToDirectory(ScraperConstants.MATERIAL_CSS_LINK, new File(courseDirectory, MATERIAL_CSS)) || anyContentUpdated;
-        anyContentUpdated = writeFileToDirectory(ScraperConstants.MATERIAL_JS_LINK, new File(courseDirectory, ScraperConstants.MATERIAL_JS)) || anyContentUpdated;
-        anyContentUpdated = writeFileToDirectory(ScraperConstants.REGULAR_ARABIC_FONT_LINK, new File(courseDirectory, ScraperConstants.ARABIC_FONT_REGULAR)) || anyContentUpdated;
-        anyContentUpdated = writeFileToDirectory(ScraperConstants.BOLD_ARABIC_FONT_LINK, new File(courseDirectory, ScraperConstants.ARABIC_FONT_BOLD)) || anyContentUpdated;
-
-
         // nothing changed, keep same files
         if (anyContentUpdated) {
+            // add these files into the directory
+            FileUtils.copyToFile(getClass().getResourceAsStream(ScraperConstants.EDRAAK_INDEX_HTML_TAG), new File(courseDirectory, INDEX_HTML));
+            FileUtils.copyToFile(getClass().getResourceAsStream(ScraperConstants.JS_TAG), new File(courseDirectory, JQUERY_JS));
+            FileUtils.copyToFile(getClass().getResourceAsStream(ScraperConstants.MATERIAL_CSS_LINK), new File(courseDirectory, MATERIAL_CSS));
+            FileUtils.copyToFile(getClass().getResourceAsStream(ScraperConstants.MATERIAL_JS_LINK), new File(courseDirectory, ScraperConstants.MATERIAL_JS)) ;
+            FileUtils.copyToFile(getClass().getResourceAsStream(ScraperConstants.REGULAR_ARABIC_FONT_LINK), new File(courseDirectory, ScraperConstants.ARABIC_FONT_REGULAR));
+            FileUtils.copyToFile(getClass().getResourceAsStream(ScraperConstants.BOLD_ARABIC_FONT_LINK), new File(courseDirectory, ScraperConstants.ARABIC_FONT_BOLD));
+
             ContentScraperUtil.zipDirectory(courseDirectory, response.id, destinationDirectory);
         }
 

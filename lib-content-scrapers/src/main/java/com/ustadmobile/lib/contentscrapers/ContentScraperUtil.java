@@ -135,7 +135,7 @@ public class ContentScraperUtil {
      * @return the extracted file name from url link
      */
     public static String getFileNameFromUrl(String url) {
-        return url.substring(url.lastIndexOf("/") + 1, url.length()).replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
+        return url.replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
     }
 
 

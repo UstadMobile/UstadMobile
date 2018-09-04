@@ -15,8 +15,8 @@ public class Rhino {
 
         try {
 
-            FileReader cryptoReader = new FileReader(new File(getClass().getResource("/com/ustadmobile/lib/contentscrapers/crypto-js.js").toURI()));
-            FileReader utils = new FileReader(new File(getClass().getResource("/com/ustadmobile/lib/contentscrapers/utils.js").toURI()));
+            FileReader cryptoReader = new FileReader(new File(getClass().getResource("/com/ustadmobile/lib/contentscrapers/ck12/crypto-js.js").toURI()));
+            FileReader utils = new FileReader(new File(getClass().getResource("/com/ustadmobile/lib/contentscrapers/ck12/utils.js").toURI()));
 
             ScriptEngine engine = new ScriptEngineManager().getEngineByExtension("js");
             engine.eval(utils);
