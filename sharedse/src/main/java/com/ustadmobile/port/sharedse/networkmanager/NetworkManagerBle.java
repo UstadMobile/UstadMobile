@@ -12,9 +12,12 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.UUID;
 import java.util.Vector;
 import java.util.concurrent.ExecutorService;
@@ -40,9 +43,9 @@ public abstract class NetworkManagerBle {
     public static final byte ENTRY_STATUS_RESPONSE = (byte) 112;
 
     /**
-     * Flag to indicate WiFi direct group creation request
+     * Flag to indicate WiFi direct group request (for content download)
      */
-    public static final byte WIFI_GROUP_CREATION_REQUEST = (byte) 113;
+    public static final byte WIFI_GROUP_REQUEST = (byte) 113;
 
     /**
      * Flag to indicate WiFi direct group creation response
@@ -154,14 +157,13 @@ public abstract class NetworkManagerBle {
                         @Override
                         public void onSuccess(Integer result) {
                             if(result == 0){
-                                node.setNetworkNodeLastUpdated(updateTime);
-                                networkNodeDao.insert(node);
                                 List<Long> entryUidsToMonitor = new ArrayList<>(getAllUidsToBeMonitored());
                                 if(!isStopMonitoring){
-                                    BleEntryStatusTask entryStatusTask =
-                                            makeEntryStatusTask(mContext,entryUidsToMonitor,node);
+                                    BleEntryStatusTask entryStatusTask = makeEntryStatusTask(mContext,entryUidsToMonitor,node);
                                     entryStatusTasks.add(entryStatusTask);
                                     entryStatusTaskExecutorService.execute(entryStatusTask);
+                                    node.setNetworkNodeLastUpdated(updateTime);
+                                    networkNodeDao.insert(node);
                                     UstadMobileSystemImpl.l(UMLog.DEBUG,694,
                                             "Node added to the db and task created",null);
                                 }else{
@@ -238,16 +240,13 @@ public abstract class NetworkManagerBle {
                 responseDao.findEntriesWithoutRecentResponse(uniqueEntryUidsToMonitor,knownNetworkNodes);
 
         //Group entryUUid by node where their status will be checked from
-        HashMap<Integer,List<Long>> nodeToCheckEntryList = new HashMap<>();
+        LinkedHashMap<Integer,List<Long>> nodeToCheckEntryList = new LinkedHashMap<>();
         for(EntryStatusResponseDao.EntryWithoutRecentResponse entryResponse: entryWithoutRecentResponses){
             int nodeIdToCheckFrom = entryResponse.getNodeId();
-            if(nodeToCheckEntryList.containsKey(nodeIdToCheckFrom)){
-                nodeToCheckEntryList.get(nodeIdToCheckFrom).add(entryResponse.getContentEntryUid());
-            }else{
-                List<Long> entryUuids = new ArrayList<>();
-                entryUuids.add(entryResponse.getContentEntryUid());
-                nodeToCheckEntryList.put(nodeIdToCheckFrom, entryUuids);
-            }
+            if(!nodeToCheckEntryList.containsKey(nodeIdToCheckFrom))
+                nodeToCheckEntryList.put(nodeIdToCheckFrom, new ArrayList<>());
+
+            nodeToCheckEntryList.get(nodeIdToCheckFrom).add(entryResponse.getContentEntryUid());
         }
 
         //Make entryStatusTask as per node list and entryUuids found
@@ -274,8 +273,8 @@ public abstract class NetworkManagerBle {
      * Get all unique entry UUID's to be monitored
      * @return Set of all unique UUID's
      */
-    protected Set<Long> getAllUidsToBeMonitored() {
-        Set uidsToBeMonitoredSet = new HashSet();
+    protected SortedSet<Long> getAllUidsToBeMonitored() {
+        SortedSet uidsToBeMonitoredSet = new TreeSet();
         for(List<Long> uidList : availabilityMonitoringRequests.values()) {
             uidsToBeMonitoredSet.addAll(uidList);
         }

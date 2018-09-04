@@ -22,8 +22,6 @@ import com.ustadmobile.core.db.dao.OpdsEntryStatusCacheDao;
 import com.ustadmobile.core.db.dao.OpdsEntryWithRelationsDao;
 import com.ustadmobile.core.db.dao.OpdsLinkDao;
 import com.ustadmobile.core.db.dao.PersonDao;
-import com.ustadmobile.core.impl.UMLog;
-import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.lib.database.annotation.UmClearAll;
 import com.ustadmobile.lib.database.annotation.UmDatabase;
 import com.ustadmobile.lib.database.annotation.UmDbContext;
