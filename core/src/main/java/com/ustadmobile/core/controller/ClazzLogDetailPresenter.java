@@ -59,6 +59,7 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
 
     }
 
+    //TODO: replace with UMCalendarUtil.getDateInMilliPLusDays(days)
     public static long getTodayMillis(){
         Calendar attendanceDate = Calendar.getInstance();
         attendanceDate.setTimeInMillis(System.currentTimeMillis());
@@ -85,6 +86,7 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
         //Check for ClassLog
         ClazzLogDao clazzLogDao = UmAppDatabase.getInstance(getContext()).getClazzLogDao();
 
+        //TODO: replace with UMCalendarUtil.getDateInMilliPLusDays(days)
         Calendar attendanceDate = Calendar.getInstance();
         attendanceDate.setTimeInMillis(currentLogDate);
         attendanceDate.set(Calendar.HOUR_OF_DAY, 0);

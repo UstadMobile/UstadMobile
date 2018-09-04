@@ -2,15 +2,11 @@ package com.ustadmobile.test.port.android.view;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.ColorFilter;
 import android.os.Bundle;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.espresso.contrib.RecyclerViewActions;
 import android.support.test.espresso.intent.rule.IntentsTestRule;
-import android.support.test.espresso.matcher.BoundedMatcher;
 import android.support.test.runner.AndroidJUnit4;
-import android.support.v4.content.ContextCompat;
-import android.widget.ImageView;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.ClazzListPresenter;
@@ -18,19 +14,18 @@ import com.ustadmobile.core.controller.ClazzLogDetailPresenter;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.port.android.view.ClassLogDetailActivity;
+import com.ustadmobile.test.port.android.testutil.CustomMatcherFilters;
 import com.ustadmobile.test.port.android.testutil.UmDbTestUtil;
 
 import junit.framework.Assert;
 
-import org.hamcrest.Description;
-import org.hamcrest.Matcher;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.Hashtable;
+
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.action.ViewActions.click;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
@@ -38,11 +33,8 @@ import static android.support.test.espresso.matcher.ViewMatchers.hasDescendant;
 import static android.support.test.espresso.matcher.ViewMatchers.hasSibling;
 import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
-import static android.support.test.espresso.matcher.ViewMatchers.withSubstring;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
 import static com.ustadmobile.test.port.android.testutil.RecyclerViewChildAction.clickOnDescendantViewWithId;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.core.AllOf.allOf;
 
 /**
@@ -108,12 +100,12 @@ public class ClazzLogDetailActivityActivityEspressoTest {
                 withId(R.id.item_clazzlog_detail_student_name))).check(matches(isDisplayed()));
 
         onView(withId(R.id.class_log_detail_container_recyclerview)).perform(
-                RecyclerViewActions.actionOnItem(hasDescendant(withText(TEST_CLASS_MEMBER1_NAME)),
-                        clickOnDescendantViewWithId(R.id.item_clazzlog_detail_student_present_icon)));
+            RecyclerViewActions.actionOnItem(hasDescendant(withText(TEST_CLASS_MEMBER1_NAME)),
+                    clickOnDescendantViewWithId(R.id.item_clazzlog_detail_student_present_icon)));
 
         onView( allOf(hasSibling(withText(TEST_CLASS_MEMBER1_NAME)),
                 withId(R.id.item_clazzlog_detail_student_present_icon)))
-                .check(matches(ImageViewShouldHaveColorFilter(R.color.traffic_green))
+                .check(matches(CustomMatcherFilters.withColorFilter(R.color.traffic_green))
                 );
     }
 
@@ -124,12 +116,12 @@ public class ClazzLogDetailActivityActivityEspressoTest {
                 withId(R.id.item_clazzlog_detail_student_name))).check(matches(isDisplayed()));
 
         onView(withId(R.id.class_log_detail_container_recyclerview)).perform(
-                RecyclerViewActions.actionOnItem(hasDescendant(withText(TEST_CLASS_MEMBER2_NAME)),
-                        clickOnDescendantViewWithId(R.id.item_clazzlog_detail_student_absent_icon)));
+            RecyclerViewActions.actionOnItem(hasDescendant(withText(TEST_CLASS_MEMBER2_NAME)),
+                    clickOnDescendantViewWithId(R.id.item_clazzlog_detail_student_absent_icon)));
 
         onView( allOf(hasSibling(withText(TEST_CLASS_MEMBER2_NAME)),
                 withId(R.id.item_clazzlog_detail_student_absent_icon)))
-                .check(matches(ImageViewShouldHaveColorFilter(R.color.traffic_red))
+                .check(matches(CustomMatcherFilters.withColorFilter(R.color.traffic_red))
                 );
     }
 
@@ -140,12 +132,12 @@ public class ClazzLogDetailActivityActivityEspressoTest {
                 withId(R.id.item_clazzlog_detail_student_name))).check(matches(isDisplayed()));
 
         onView(withId(R.id.class_log_detail_container_recyclerview)).perform(
-                RecyclerViewActions.actionOnItem(hasDescendant(withText(TEST_CLASS_MEMBER3_NAME)),
-                        clickOnDescendantViewWithId(R.id.item_clazzlog_detail_student_delay_icon)));
+            RecyclerViewActions.actionOnItem(hasDescendant(withText(TEST_CLASS_MEMBER3_NAME)),
+                    clickOnDescendantViewWithId(R.id.item_clazzlog_detail_student_delay_icon)));
 
         onView( allOf(hasSibling(withText(TEST_CLASS_MEMBER3_NAME)),
                 withId(R.id.item_clazzlog_detail_student_delay_icon)))
-                .check(matches(ImageViewShouldHaveColorFilter(R.color.traffic_orange))
+                .check(matches(CustomMatcherFilters.withColorFilter(R.color.traffic_orange))
                 );
     }
 
@@ -153,31 +145,32 @@ public class ClazzLogDetailActivityActivityEspressoTest {
     public void givenAttendanceActivityStart_whenUserRecordsAttendanceAndClicksDone_shouldSaveToDatabaseAndFinish(){
         //TODO: Write tests
 
-        //Assert loads with details
-        //Assert can fill in details and toggle
         onView(withId(R.id.class_log_detail_container_recyclerview)).perform(
-                RecyclerViewActions.actionOnItem(hasDescendant(withText(TEST_CLASS_MEMBER1_NAME)),
-                        clickOnDescendantViewWithId(R.id.item_clazzlog_detail_student_delay_icon)));
+            RecyclerViewActions.actionOnItem(hasDescendant(withText(TEST_CLASS_MEMBER1_NAME)),
+                    clickOnDescendantViewWithId(R.id.item_clazzlog_detail_student_delay_icon)));
         onView(withId(R.id.class_log_detail_container_recyclerview)).perform(
-                RecyclerViewActions.actionOnItem(hasDescendant(withText(TEST_CLASS_MEMBER2_NAME)),
-                        clickOnDescendantViewWithId(R.id.item_clazzlog_detail_student_present_icon)));
+            RecyclerViewActions.actionOnItem(hasDescendant(withText(TEST_CLASS_MEMBER2_NAME)),
+                    clickOnDescendantViewWithId(R.id.item_clazzlog_detail_student_present_icon)));
         onView(withId(R.id.class_log_detail_container_recyclerview)).perform(
-                RecyclerViewActions.actionOnItem(hasDescendant(withText(TEST_CLASS_MEMBER3_NAME)),
-                        clickOnDescendantViewWithId(R.id.item_clazzlog_detail_student_present_icon)));
+            RecyclerViewActions.actionOnItem(hasDescendant(withText(TEST_CLASS_MEMBER3_NAME)),
+                    clickOnDescendantViewWithId(R.id.item_clazzlog_detail_student_present_icon)));
         onView(withId(R.id.class_log_detail_container_recyclerview)).perform(
-                RecyclerViewActions.actionOnItem(hasDescendant(withText(TEST_CLASS_MEMBER4_NAME)),
-                        clickOnDescendantViewWithId(R.id.item_clazzlog_detail_student_absent_icon)));
+            RecyclerViewActions.actionOnItem(hasDescendant(withText(TEST_CLASS_MEMBER4_NAME)),
+                    clickOnDescendantViewWithId(R.id.item_clazzlog_detail_student_absent_icon)));
         onView(withId(R.id.class_log_detail_container_recyclerview)).perform(
-                RecyclerViewActions.actionOnItem(hasDescendant(withText(TEST_CLASS_MEMBER4_NAME)),
-                        clickOnDescendantViewWithId(R.id.item_clazzlog_detail_student_present_icon)));
+            RecyclerViewActions.actionOnItem(hasDescendant(withText(TEST_CLASS_MEMBER4_NAME)),
+                    clickOnDescendantViewWithId(R.id.item_clazzlog_detail_student_present_icon)));
         onView(withId(R.id.class_log_detail_container_recyclerview)).perform(
-                RecyclerViewActions.actionOnItem(hasDescendant(withText(TEST_CLASS_MEMBER4_NAME)),
-                        clickOnDescendantViewWithId(R.id.item_clazzlog_detail_student_delay_icon)));
+            RecyclerViewActions.actionOnItem(hasDescendant(withText(TEST_CLASS_MEMBER4_NAME)),
+                    clickOnDescendantViewWithId(R.id.item_clazzlog_detail_student_delay_icon)));
         onView(withId(R.id.class_log_detail_container_recyclerview)).perform(
-                RecyclerViewActions.actionOnItem(hasDescendant(withText(TEST_CLASS_MEMBER4_NAME)),
-                        clickOnDescendantViewWithId(R.id.item_clazzlog_detail_student_absent_icon)));
-        //Assert Click Done closes the activity.
+            RecyclerViewActions.actionOnItem(hasDescendant(withText(TEST_CLASS_MEMBER4_NAME)),
+                    clickOnDescendantViewWithId(R.id.item_clazzlog_detail_student_absent_icon)));
+
         onView(withId(R.id.class_log_detail__done_fab)).perform(click());
+
+
+        //Assert Click Done closes the activity.
         Assert.assertTrue(mActivityRule.getActivity().isFinishing());
 
         //Assert attendance updated in the DAO.
@@ -207,41 +200,4 @@ public class ClazzLogDetailActivityActivityEspressoTest {
         //Assert can't swipe future date's attendance.
         //Assert can take attendance for previous date. Check via DAOs.
     }
-
-    public static Matcher<Object> ImageViewShouldHaveColorFilter(int expectedColor) {
-        return ImageViewShouldHaveColorFilter(equalTo(expectedColor), expectedColor);
-    }
-
-    private static Matcher<Object> ImageViewShouldHaveColorFilter(
-            final Matcher<Integer> expectedObject, int expectedColor) {
-
-        final ColorFilter[] colorFilter = new ColorFilter[1];
-
-        return new BoundedMatcher<Object, ImageView>( ImageView.class) {
-
-            @Override
-            public boolean matchesSafely(final ImageView actualObject) {
-
-                colorFilter[0] = actualObject.getColorFilter();
-
-                //Compare with this one
-                ImageView iv = new ImageView(InstrumentationRegistry.getContext());
-                iv.setColorFilter(ContextCompat.getColor(InstrumentationRegistry.getContext(),
-                        expectedColor));
-                ColorFilter ivcf = iv.getColorFilter();
-
-                if(ivcf.equals(colorFilter[0])){
-                    return true;
-                }else{
-                    return false;
-                }
-            }
-
-            @Override
-            public void describeTo(final Description description) {
-                description.appendText("Color Filter did not match " + colorFilter[0]);
-            }
-        };
-    }
-
 }

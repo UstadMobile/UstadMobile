@@ -2,6 +2,7 @@ package com.ustadmobile.core.util;
 
 import com.ustadmobile.lib.util.UMUtil;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
@@ -160,6 +161,36 @@ public class UMCalendarUtil {
         }else {
             return year;
         }
+    }
+
+    public static long getDateInMilliPlusDays(int days){
+        // get a calendar instance, which defaults to "now"
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DAY_OF_YEAR, days);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        return calendar.getTimeInMillis();
+
+    }
+
+    public static String getPrettyDateFromLong(long thisDate){
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(thisDate);
+        SimpleDateFormat format = new SimpleDateFormat("EEEE, dd/MMMM/yyyy");
+        SimpleDateFormat formatShortDay = new SimpleDateFormat("EEE");
+        String prettyDate = format.format(calendar.getTime());
+        return prettyDate;
+    }
+
+    public static String getSimpleDayFromLongDate(long thisDate){
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(thisDate);
+        SimpleDateFormat format = new SimpleDateFormat("EEEE, dd/MMMM/yyyy");
+        SimpleDateFormat formatShortDay = new SimpleDateFormat("EEE");
+        String prettyShortDay = formatShortDay.format(calendar.getTime());
+        return prettyShortDay;
     }
 
 }

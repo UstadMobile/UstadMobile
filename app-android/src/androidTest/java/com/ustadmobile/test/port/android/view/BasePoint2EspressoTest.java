@@ -17,6 +17,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import static android.support.test.espresso.Espresso.onView;
+import static android.support.test.espresso.matcher.ViewMatchers.isCompletelyDisplayed;
 import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static android.support.test.espresso.matcher.ViewMatchers.withParent;
@@ -71,42 +72,18 @@ public class BasePoint2EspressoTest {
         setBottomNavigationCurrentItem(0);
         onView(allOf(instanceOf(TextView.class), withParent(withId(R.id.base_point_2_toolbar))))
                 .check(matches(withText(R.string.feed)));
-        //TODO Check if fragment opened and loaded.
+        onView(withId(R.id.fragment_feed_list_recyclerview)).check(matches(isCompletelyDisplayed()));
 
     }
 
     @Test
     public void givenBasePointLoads_whenPeopleClicked_shouldGoToPeople() throws Throwable {
         setBottomNavigationCurrentItem(1);
-        SystemClock.sleep(1000);
+
         onView(allOf(instanceOf(TextView.class), withParent(withId(R.id.base_point_2_toolbar))))
                 .check(matches(withText(R.string.my_classes)));
-        //TODO Check if PeopleListFragment opened.
+        onView(withId(R.id.fragment_base_point_people_container)).check(matches(isDisplayed()));
     }
 
-    @Test
-    public void givenBasePointLoads_whenStatisticsClicked_shouldGoToStatistics() throws Throwable {
-        setBottomNavigationCurrentItem(2);
-        SystemClock.sleep(1000);
-        onView(allOf(instanceOf(TextView.class), withParent(withId(R.id.base_point_2_toolbar))))
-                .check(matches(withText(R.string.statistcs)));
-        //TODO Check if fragment opened and loaded.
-    }
-
-    @Test
-    public void givenBasePointLoads_whenLessonsClicked_shouldGoToLessons() throws Throwable {
-        setBottomNavigationCurrentItem(3);
-        SystemClock.sleep(1000);
-        onView(allOf(instanceOf(TextView.class), withParent(withId(R.id.base_point_2_toolbar))))
-                .check(matches(withText(R.string.lessons)));
-        //TODO Check if fragment opened and loaded.
-
-    }
-
-    @Test
-    public void givenBasePointLoads_whenUserIconClicked_shouldGoToUserPanel(){
-        //TODO: this
-
-    }
 
 }

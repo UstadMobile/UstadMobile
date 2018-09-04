@@ -1,13 +1,25 @@
 package com.ustadmobile.test.port.android.testutil;
 
+import com.ustadmobile.core.controller.ClazzListPresenter;
+import com.ustadmobile.core.controller.ClazzLogDetailPresenter;
+import com.ustadmobile.core.controller.ClazzLogListPresenter;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.ClazzDao;
+import com.ustadmobile.core.db.dao.ClazzLogAttendanceRecordDao;
+import com.ustadmobile.core.db.dao.ClazzLogDao;
 import com.ustadmobile.core.db.dao.ClazzMemberDao;
+import com.ustadmobile.core.db.dao.FeedEntryDao;
 import com.ustadmobile.core.db.dao.PersonDao;
+import com.ustadmobile.core.impl.UmCallback;
+import com.ustadmobile.core.util.UMCalendarUtil;
+import com.ustadmobile.core.view.ClassLogDetailView;
 import com.ustadmobile.lib.db.entities.Clazz;
+import com.ustadmobile.lib.db.entities.ClazzLog;
 import com.ustadmobile.lib.db.entities.ClazzMember;
+import com.ustadmobile.lib.db.entities.FeedEntry;
 import com.ustadmobile.lib.db.entities.Person;
 
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Set;
 
@@ -15,6 +27,10 @@ import java.util.Set;
  * Database related method util go here. eg: setting the database with fixtures, etc.
  */
 public class UmDbTestUtil {
+
+    public static final String TEST_FEED_DESCRIPTION = "This is a test feed. Created from the tests.";
+    public static final String TEST_FEED_TITLE = "This is your regular test feed notification.";
+
 
     public static void addData(boolean clearDb, Object context){
 
@@ -79,6 +95,60 @@ public class UmDbTestUtil {
         }
 
         return testClazz;
+
+    }
+
+    public static void createClazzLogs(Hashtable clazzLogsToCreate, Clazz thisClazz, Object context){
+        //Create a ClassLog for today
+
+        ClazzLogDao clazzLogDao = UmAppDatabase.getInstance(context).getClazzLogDao();
+        ClazzLogAttendanceRecordDao clazzLogAttendanceRecordDao =
+                UmAppDatabase.getInstance(context).getClazzLogAttendanceRecordDao();
+
+
+        Set<Long> allDates = clazzLogsToCreate.keySet();
+        for(Long thisDate : allDates){
+            Hashtable peopleAttendanceMap = (Hashtable) clazzLogsToCreate.get(thisDate);
+
+            ClazzLog newClazzLog = new ClazzLog();
+            newClazzLog.setLogDate(thisDate);
+            newClazzLog.setDone(false);
+            newClazzLog.setClazzClazzUid(thisClazz.getClazzUid());
+            newClazzLog.setClazzLogUid(clazzLogDao.insert(newClazzLog));
+
+            clazzLogAttendanceRecordDao.insertAllAttendanceRecords(thisClazz.getClazzUid(),
+                    newClazzLog.getClazzLogUid(), null);
+
+        }
+    }
+
+    public static void createFeedEntries(Hashtable feedsToCreate, long feedClazzUid,
+                                               long feedEntryPersonUid, Object context) {
+        FeedEntryDao feedEntryDao = UmAppDatabase.getInstance(context).getFeedEntryDao();
+
+        Set<String> feedMapKeys = feedsToCreate.keySet();
+        for(String feedTitle: feedMapKeys){
+            long feedLogDate = (long)feedsToCreate.get(feedTitle);
+            String feedEntryLink = ClassLogDetailView.VIEW_NAME + "?" +
+                    ClazzListPresenter.ARG_CLAZZ_UID + "=" + feedClazzUid + "&" +
+                    ClazzLogDetailPresenter.ARG_LOGDATE + "=" + feedLogDate;
+            long feedEntryHash = 456;
+
+            FeedEntry thisFeedEntry =  new FeedEntry();
+            thisFeedEntry.setDescription(TEST_FEED_DESCRIPTION);
+            thisFeedEntry.setTitle(feedTitle);
+            thisFeedEntry.setDeadline(feedLogDate);
+            thisFeedEntry.setFeedEntryPersonUid(feedEntryPersonUid);
+            thisFeedEntry.setLink(feedEntryLink);
+            thisFeedEntry.setFeedEntryHash(feedEntryHash);
+            thisFeedEntry.setFeedEntryUid(feedEntryDao.insert(thisFeedEntry));
+
+        }
+
+
+
+
+
 
     }
 }

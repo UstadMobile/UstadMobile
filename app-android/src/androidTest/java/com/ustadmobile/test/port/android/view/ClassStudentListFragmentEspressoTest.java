@@ -2,24 +2,19 @@ package com.ustadmobile.test.port.android.view;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.ColorFilter;
 import android.os.Bundle;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.espresso.intent.rule.IntentsTestRule;
-import android.support.test.espresso.matcher.BoundedMatcher;
 import android.support.test.runner.AndroidJUnit4;
-import android.support.v4.content.ContextCompat;
-import android.widget.ImageView;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.ClazzListPresenter;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.port.android.view.ClassDetailActivity;
+import com.ustadmobile.test.port.android.testutil.CustomMatcherFilters;
 import com.ustadmobile.test.port.android.testutil.UmDbTestUtil;
 
-import org.hamcrest.Description;
-import org.hamcrest.Matcher;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -34,7 +29,6 @@ import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
 import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.core.AllOf.allOf;
 
 
@@ -99,7 +93,8 @@ public class ClassStudentListFragmentEspressoTest {
         String attendancePercentage = (int)(TEST_CLASS_MEMBER1_PERCENTAGE * 100) + "%";
 
         //Assert students load in recycler view.
-        onView(allOf(withId(R.id.item_clazzstudentlist_student_title), withText(TEST_CLASS_MEMBER1_NAME)))
+        onView(allOf(withId(R.id.item_clazzstudentlist_student_title),
+                withText(TEST_CLASS_MEMBER1_NAME)))
                 .check(matches(isDisplayed()));
 
         //Assert attendance numbers with DAOs
@@ -110,17 +105,17 @@ public class ClassStudentListFragmentEspressoTest {
         //Assert attendance numbers and their colors match
         onView( allOf(hasSibling(withText(TEST_CLASS_MEMBER4_NAME)),
                 withId(R.id.item_clazzstudentlist_attendance_trafficlight)))
-            .check(matches(ImageViewShouldHaveColorFilter(R.color.traffic_green))
+            .check(matches(CustomMatcherFilters.withColorFilter(R.color.traffic_green))
             );
 
         onView( allOf(hasSibling(withText(TEST_CLASS_MEMBER3_NAME)),
                 withId(R.id.item_clazzstudentlist_attendance_trafficlight)))
-            .check(matches(ImageViewShouldHaveColorFilter(R.color.traffic_orange))
+            .check(matches(CustomMatcherFilters.withColorFilter(R.color.traffic_orange))
             );
 
         onView( allOf(hasSibling(withText(TEST_CLASS_MEMBER2_NAME)),
                 withId(R.id.item_clazzstudentlist_attendance_trafficlight)))
-                .check(matches(ImageViewShouldHaveColorFilter(R.color.traffic_red))
+                .check(matches(CustomMatcherFilters.withColorFilter(R.color.traffic_red))
                 );
 
         //Assert student size and each match with Daos
@@ -129,40 +124,5 @@ public class ClassStudentListFragmentEspressoTest {
     }
 
 
-    public static Matcher<Object> ImageViewShouldHaveColorFilter(int expectedColor) {
-        return ImageViewShouldHaveColorFilter(equalTo(expectedColor), expectedColor);
-    }
-
-    private static Matcher<Object> ImageViewShouldHaveColorFilter(
-            final Matcher<Integer> expectedObject, int expectedColor) {
-
-        final ColorFilter[] colorFilter = new ColorFilter[1];
-
-        return new BoundedMatcher<Object, ImageView>( ImageView.class) {
-
-            @Override
-            public boolean matchesSafely(final ImageView actualObject) {
-
-                colorFilter[0] = actualObject.getColorFilter();
-
-                //Compare with this one
-                ImageView iv = new ImageView(InstrumentationRegistry.getContext());
-                iv.setColorFilter(ContextCompat.getColor(InstrumentationRegistry.getContext(),
-                        expectedColor));
-                ColorFilter ivcf = iv.getColorFilter();
-
-                if(ivcf.equals(colorFilter[0])){
-                    return true;
-                }else{
-                    return false;
-                }
-            }
-
-            @Override
-            public void describeTo(final Description description) {
-                description.appendText("Color Filter did not match " + colorFilter[0]);
-            }
-        };
-    }
 
 }

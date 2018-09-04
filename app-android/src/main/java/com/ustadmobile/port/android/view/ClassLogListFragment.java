@@ -68,6 +68,7 @@ public class ClassLogListFragment extends UstadBaseFragment implements ClassLogL
         @Override
         public void onBindViewHolder(@NonNull ClazzLogViewHolder holder, int position){
             ClazzLog clazzLog = getItem(position);
+            //TODO: Replace with UMClaendarUtil
             Calendar calendar = Calendar.getInstance();
             calendar.setTimeInMillis(clazzLog.getLogDate());
             SimpleDateFormat format = new SimpleDateFormat("EEEE, dd/MMMM/yyyy");

@@ -172,6 +172,7 @@ public class SplashScreenActivity extends AppCompatActivity implements DialogInt
         return super.onOptionsItemSelected(item);
     }
 
+    //TODO: replace with UMCalendarUtil.getDateInMilliPLusDays(days)
     public long getDateInMilliPlusDays(int days){
         // get a calendar instance, which defaults to "now"
         Calendar calendar = Calendar.getInstance();
