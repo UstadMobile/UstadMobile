@@ -14,6 +14,18 @@ public class QuestionResponse {
         @SerializedName("_id")
         public String id;
 
+        @SerializedName("goal")
+        public int goal;
+
+        @SerializedName("nextPracticeUrl")
+        public String nextPracticeUrl;
+
+        @SerializedName("nextPracticeName")
+        public String nextPracticeName;
+
+        @SerializedName("practiceName")
+        public String practiceName;
+
         @SerializedName("evalData")
         public String data;
 

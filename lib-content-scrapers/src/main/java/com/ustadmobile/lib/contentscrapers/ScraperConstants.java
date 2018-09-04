@@ -14,9 +14,6 @@ public class ScraperConstants {
     public static final String ABOUT_HTML = "about.txt";
     public static final String VIDEO_MP4 = "video.mp4";
     public static final String UTF_ENCODING = "UTF-8";
-    public static final String IMG_EXT = "eximage.png";
-    public static final String IMG_TAG = "img";
-    public static final String DIRECTORY = "/com/ustadmobile/lib/contentscrapers/";
     public static final String JS_HTML_TAG = "/com/ustadmobile/lib/contentscrapers/index.html";
     public static final String JS_TAG = "/com/ustadmobile/lib/contentscrapers/jquery-3.3.1.min.js";
     public static final String MATERIAL_JS_LINK = "/com/ustadmobile/lib/contentscrapers/materialize.min.js";
@@ -40,12 +37,6 @@ public class ScraperConstants {
     public static final String ARABIC_FONT_BOLD = "DroidNaskh-Bold.woiff2";
     public static final String INDEX_HTML = "index.html";
     public static final String JQUERY_JS = "jquery-3.3.1.min.js";
-
-    public static DateTimeFormatter formatter = DateTimeFormatter.ofPattern(""
-            + "[yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z']"
-            + "[yyyy-MM-dd'T'HH:mm:ss.SSSSSS]"
-            + "[yyyy-MM-dd'T'HH:mm:ss]"
-    );
 
     public enum QUESTION_TYPE{
 

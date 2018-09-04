@@ -1,0 +1,2366 @@
+<!doctype html>
+<!--[if IE 7]>         <html itemscope itemtype="http://schema.org/Organization" class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if IE 8]>         <html itemscope itemtype="http://schema.org/Organization" class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if IE 9]>         <html itemscope itemtype="http://schema.org/Organization" class="no-js ie9 lt-ie10" lang="en"> <![endif]-->
+<!--[if gt IE 9]><!-->
+<html xmlns="http://www.w3.org/1999/xhtml" itemscope itemtype="http://schema.org/Organization" class=" js no-touch svg inlinesvg svgclippaths no-ie8compat csstransforms csstransforms3d csstransitions" lang="en" style="height: 100%;">
+ <!--<![endif]-->
+ <head>
+  <title>
+Population Growth Patterns ( Read ) | Biology
+ | CK-12 Foundation</title>
+  <meta property="og:site_name" itemprop="name" name="author" content="CK-12 Foundation">
+  <meta property="fb:app_id" content="159884644067996">
+  <meta itemprop="url" content="https://www.ck12.org">
+  <meta itemprop="telephone" content="(650) 494-1302">
+  <meta charset="utf-8">
+  <!-- DNS Prefetching for domains -->
+  <meta http-equiv="x-dns-prefetch-control" content="on">
+  <link rel="dns-prefetch" href="//st1.ck12.org">
+  <link rel="dns-prefetch" href="//st2.ck12.org">
+  <link rel="dns-prefetch" href="//st3.ck12.org">
+  <link rel="dns-prefetch" href="//img1.ck12.org">
+  <link rel="dns-prefetch" href="//img2.ck12.org">
+  <link rel="dns-prefetch" href="//img3.ck12.org">
+  <link rel="dns-prefetch" href="//api-prod.ck12.org">
+  <meta name="title" content="Population Growth Patterns ( Read ) | Biology">
+  <meta name="description" content="Covers population growth and the factors that affect it.">
+  <meta name="google-play-app" content="app-id=org.ck12.app.practice">
+  <meta name="apple-itunes-app-internal" content="app-id=909343639">
+  <meta name="description" content="">
+  <meta property="ck12:content_div_id" content="modality_content">
+  <meta property="og:title" content="Population Growth Patterns">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://dr282zn36sxxg.cloudfront.net/datastreams/f-d%3Ad5cdf0a7b5afa96dedf6e1b48c3e3fe19f650e4e46a674f3455ef1d3%2BCOVER_PAGE_THUMB_LARGE_TINY%2BCOVER_PAGE_THUMB_LARGE_TINY.1">
+  <meta property="og:url" content="https://www.ck12.org/c/life-science/population-growth-patterns/lesson/Population-Growth-Patterns-MS-LS/">
+  <meta property="og:description" content="Covers population growth and the factors that affect it.">
+  <meta name="viewport" content="width=device-width">
+  <meta name="google-site-verification" content="wHx0f-Udlfd7ZNYNrIXpJVpjjO8nSH5RE0jIX8V-jIM">
+  <meta name="google-translate-customization" content="">
+  <meta name="application-name" content="CK-12 Foundation">
+  <meta name="msapplication-TileColor" content="#003300">
+  <meta name="msapplication-TileImage" content="//img1.ck12.org/media/build-20180828193300/images/ck12-logo-livetile.png">
+  <link rel="apple-touch-icon" href="//img1.ck12.org/media/build-20180828193300/images/ck12-logo-livetile-57x57.png">
+  <link rel="apple-touch-icon" sizes="72x72" href="//img1.ck12.org/media/build-20180828193300/images/ck12-logo-livetile-72x72.png">
+  <link rel="apple-touch-icon" sizes="114x114" href="//img3.ck12.org/media/build-20180828193300/images/ck12-logo-livetile-114x114.png">
+  <link rel="shortcut icon" href="//img2.ck12.org/media/build-20180828193300/images/favicon.ico" type="image/x-icon">
+  <link rel="search" type="application/opensearchdescription+xml" href="/opensearch.xml" title="CK-12 Foundation">
+  <link rel="stylesheet" type="text/css" href="//st1.ck12.org/media/build-20180828193300/css/jquery.qtip.v2.min.css">
+  <link rel="stylesheet" type="text/css" href="//st1.ck12.org/media/build-20180828193300/css/noty_theme_twitter.css">
+  <link rel="stylesheet" type="text/css" href="//st3.ck12.org/media/build-20180828193300/css/jquery.noty.css">
+  <link rel="stylesheet" type="text/css" media="all" href="//st1.ck12.org/media/build-20180828193300/annotatorjs/css/annotator.css">
+  <link rel="stylesheet" type="text/css" media="all" href="//st2.ck12.org/media/build-20180828193300/common/css/master.css">
+  <link rel="stylesheet" type="text/css" media="all" href="//st1.ck12.org/media/build-20180828193300/lib/jquery-ui/css/smoothness/jquery-ui-1.8.17.custom.css">
+  <link type="text/css" rel="stylesheet" href="//st2.ck12.org/media/build-20180828193300/css/modalities.css">
+  <link rel="stylesheet" type="text/css" media="all" href="//st2.ck12.org/media/build-20180828193300/modality/css/concept.css">
+  <link rel="stylesheet" type="text/css" media="all" href="//st3.ck12.org/media/build-20180828193300/common/vendor/jquery-plugins/appdownload/css/jquery.appdownload.css">
+  <link type="text/css" rel="stylesheet" href="//st2.ck12.org/media/build-20180828193300/css/details.css">
+  <link rel="stylesheet" type="text/css" media="all" href="//st2.ck12.org/media/build-20180828193300/common/css/concept_coversheet.css">
+  <link rel="stylesheet" href="//st3.ck12.org/media/build-20180828193300/css/boxstyle.css" type="text/css" media="screen">
+  <link rel="stylesheet" type="text/css" media="all" href="//st3.ck12.org/media/build-20180828193300/duplicateUsernames/css/content.css">
+  <script type="text/javascript" async src="https://www.google-analytics.com/analytics.js"></script>
+  <script type="text/javascript" async src="https://www.google-analytics.com/plugins/ua/linkid.js"></script>
+  <script type="text/javascript" async src="https://www.google-analytics.com/gtm/js?id=GTM-MJHJWG9&amp;t=gtm1&amp;cid=1649379330.1536044987"></script>
+  <script type="text/javascript" async src="//cdn.mxpnl.com/libs/mixpanel-2-latest.min.js"></script>
+  <script async src="//rum-static.pingdom.net/prum.min.js"></script>
+  <script type="text/javascript" async src="https://www.google-analytics.com/analytics.js"></script>
+  <script async src="//www.googletagmanager.com/gtm.js?id=GTM-NFJ3V2"></script>
+  <script type="text/javascript" async src="https://d31qbv1cthcecs.cloudfront.net/atrk.js"></script>
+  <script type="text/javascript">
+var pageType = "Modality Details";
+var pageSubType = "Read";
+</script>
+  <!-- CDN invalidation script -->
+  <script src="/media/buildnumber.js"> </script>
+  <!-- End CDN invalidation script -->
+  <!-- Start Alexa Certify Javascript -->
+  <script type="text/javascript">
+    _atrk_opts = { atrk_acct:"iA1Pi1a8Dy00ym", domain:"ck12.org",dynamic: true};
+    (function() { var as = document.createElement('script'); as.type = 'text/javascript'; as.async = true; as.src = "https://d31qbv1cthcecs.cloudfront.net/atrk.js"; var s = document.getElementsByTagName('script')[0];s.parentNode.insertBefore(as, s); })();
+    </script>
+  <noscript>
+   &lt;img src="https://d5nxst8fruw4z.cloudfront.net/atrk.gif?account=iA1Pi1a8Dy00ym" style="display:none" height="1" width="1" alt="" /&gt;
+  </noscript>
+  <!-- End Alexa Certify Javascript -->
+  <link rel="canonical" href="https://www.ck12.org/life-science/population-growth-patterns/lesson/Population-Growth-Patterns-MS-LS/">
+  <script type="text/javascript" charset="utf-8" async data-requirecontext="_" data-requiremodule="main" src="//st3.ck12.org/media/build-20180828193300/js/main.js"></script>
+  <style type="text/css">.MathJax_Preview {color: #888}
+#MathJax_Message {position: fixed; left: 1px; bottom: 2px; background-color: #E6E6E6; border: 1px solid #959595; margin: 0px; padding: 2px 8px; z-index: 102; color: black; font-size: 80%; width: auto; white-space: nowrap}
+#MathJax_MSIE_Frame {position: absolute; top: 0; left: 0; width: 0px; z-index: 101; border: 0px; margin: 0px; padding: 0px}
+.MathJax_Error {color: #CC0000; font-style: italic}
+</style>
+  <script type="text/javascript" charset="utf-8" async data-requirecontext="_" data-requiremodule="flxweb.settings" src="//st3.ck12.org/media/build-20180828193300/js/flxweb.settings.js"></script>
+  <script id="googleClassroomScript" type="text/javascript" src="https://apis.google.com/js/platform.js" gapi_processed="true"></script>
+  <script type="text/javascript" charset="utf-8" async data-requirecontext="_" data-requiremodule="js/flxweb.lms.banner" src="//st3.ck12.org/media/build-20180828193300/js/../js/flxweb.lms.banner.js"></script>
+  <script type="text/javascript" charset="utf-8" async data-requirecontext="_" data-requiremodule="flxweb.details.modality.read" src="//st3.ck12.org/media/build-20180828193300/js/flxweb.details.modality.read.js"></script>
+  <script type="text/javascript" charset="utf-8" async data-requirecontext="_" data-requiremodule="flxweb.modalities.common" src="//st3.ck12.org/media/build-20180828193300/js/flxweb.modalities.common.js"></script>
+  <script type="text/javascript" charset="utf-8" async data-requirecontext="_" data-requiremodule="common/utils/practice_badge" src="//st3.ck12.org/media/build-20180828193300/js/../common/js/utils/practice_badge.js"></script>
+  <script type="text/javascript" charset="utf-8" async data-requirecontext="_" data-requiremodule="flxweb.details.actions" src="//st3.ck12.org/media/build-20180828193300/js/flxweb.details.actions.js"></script>
+  <script type="text/javascript" charset="utf-8" async data-requirecontext="_" data-requiremodule="jquery.appdownload" src="//st3.ck12.org/media/build-20180828193300/js/../common/vendor/jquery-plugins/appdownload/js/jquery.appdownload.js"></script>
+  <script type="text/javascript" charset="utf-8" async data-requirecontext="_" data-requiremodule="common/utils/concept_coversheet" src="//st3.ck12.org/media/build-20180828193300/js/../common/js/utils/concept_coversheet.js"></script>
+  <script type="text/javascript" charset="utf-8" async data-requirecontext="_" data-requiremodule="modalityAssign/modality.assign.lib" src="//st3.ck12.org/media/build-20180828193300/js/../modalityAssign/js/modality.assign.lib.js"></script>
+  <link rel="stylesheet" href="https://st1.ck12.org/media/build-20180828193300/modalityAssign/css/modality.assign.css">
+  <link rel="stylesheet" href="https://st1.ck12.org/media/build-20180828193300/common/css/fontck12.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script type="text/javascript" charset="utf-8" async data-requirecontext="_" data-requiremodule="groups/controllers/assignment.edit" src="//st3.ck12.org/media/build-20180828193300/js/../groups/js/controllers/assignment.edit.js"></script>
+  <script type="text/javascript" charset="utf-8" async data-requirecontext="_" data-requiremodule="standard/services/ck12.standard" src="//st3.ck12.org/media/build-20180828193300/js/../standard/js/services/ck12.standard.js"></script>
+  <script type="text/javascript" charset="utf-8" async data-requirecontext="_" data-requiremodule="groups/views/assignment.edit.view" src="//st3.ck12.org/media/build-20180828193300/js/../groups/js/views/assignment.edit.view.js"></script>
+  <script type="text/javascript" charset="utf-8" async data-requirecontext="_" data-requiremodule="groups/services/ck12.groups" src="//st3.ck12.org/media/build-20180828193300/js/../groups/js/services/ck12.groups.js"></script>
+  <script type="text/javascript" charset="utf-8" async data-requirecontext="_" data-requiremodule="common/utils/walkthrough" src="//st3.ck12.org/media/build-20180828193300/js/../common/js/utils/walkthrough.js"></script>
+  <script type="text/javascript" charset="utf-8" async data-requirecontext="_" data-requiremodule="hammer" src="//st3.ck12.org/media/build-20180828193300/js/../common/vendor/jquery-plugins/hammer/jquery.hammer.min.js"></script>
+  <script type="text/javascript" charset="utf-8" async data-requirecontext="_" data-requiremodule="common/templates/walkthrough.html" src="//st3.ck12.org/media/build-20180828193300/js/../common/js/templates/walkthrough.html.js"></script>
+  <style type="text/css"></style>
+  <link rel="stylesheet" type="text/css" href="/media/common/css/shareplane.css">
+  <script type="text/javascript" charset="utf-8" async data-requirecontext="_" data-requiremodule="groups/templates/concept.row.collection.html" src="//st3.ck12.org/media/build-20180828193300/js/../groups/js/templates/concept.row.collection.html.js"></script>
+  <link type="text/css" rel="stylesheet" charset="UTF-8" href="https://translate.googleapis.com/translate_static/css/translateelement.css">
+  <script type="text/javascript" charset="UTF-8" src="https://translate.googleapis.com/translate_static/js/element/main.js"></script>
+  <script type="text/javascript" charset="UTF-8" src="https://translate.googleapis.com/element/TE_20180625_00/e/js/element/element_main.js"></script>
+  <script type="text/javascript" charset="utf-8" async data-requirecontext="_" data-requiremodule="ck12annotator/mathjax.loaded" src="//st3.ck12.org/media/build-20180828193300/js/../annotatorjs/js/mathjax.loaded.js"></script>
+ </head>
+ <body class="" style="position: relative; min-height: 100%; top: 0px;">
+  <div id="MathJax_Message" style="display: none;"></div>
+  <script type="text/javascript">
+/* Check for app-context:
+ * -- set the &lt;html&gt; data-app-context = {app-context}
+ */
+var _context = sessionStorage.getItem('app-context');
+if (_context &amp;&amp; _context === 'lti-app' &amp;&amp; window.name !=="lms-context-override"){
+    try {
+	// Set data-app-context for css
+        document.getElementsByTagName('html')[0].setAttribute('data-app-context','lti_app');
+	// Set window lmsContext for js
+	window.lmsContext='lti-app';
+    } catch(e){
+        console.log("Error setting lms app context:"+ String(e));
+    }
+}
+
+function closeLTIHelpBanner(){
+    try {
+        document.getElementById('lti_help_banner').remove();
+    } catch(e){
+	console.log("Could not close banner:"+ String(e));
+    }
+}
+
+/*
+ *  Need to show a loading icon on some pages.
+ *  - browse, library
+ */
+function loadingCheck(){
+try {
+    var pathname = window.location.pathname;
+    if (/library|browse/.test(pathname)){
+	// Create loading icon and append to body
+	var loading_div = document.createElement("div");
+	loading_div.setAttribute('id','lti-loading-icon');
+	loading_div.setAttribute('class','loading-icon js-loading-icon');
+	var img_el = document.createElement("img");
+	img_el.setAttribute('alt','loading');
+	img_el.setAttribute('src','/media/common/images/icon_loading.gif');
+
+	loading_div.appendChild(img_el);
+	document.body.appendChild(loading_div);
+
+	if (document.readyState === 'complete'){
+	    removeLoadingIcon();
+	}
+
+	document.addEventListener('readystatechange', function(evnt){
+	    if (evnt.target.readyState ==='complete'){
+		removeLoadingIcon();
+	    }
+	}, false);
+    }
+
+} catch(e){
+    console.log("Error in loadingCheck: "+ String(e));
+}
+}
+
+// Remove the loading icon after 2 seconds
+function removeLoadingIcon(){
+try {
+    window.setTimeout(function(){
+        $('#lti-loading-icon').remove();
+	console.log("removed loading icon");
+    }, 1500);
+} catch(e){
+    console.log("Error in removeLoadingIcon: "+ String(e));
+}
+}
+</script>
+  <script type="text/javascript">
+// GA global object
+var _gaq = _gaq || [];
+// GTM dataLayer for global data push
+dataLayer = [];
+
+
+var pageType = pageType || "";
+var pageSubType = pageSubType || "";
+var gtm_pageType = pageType;
+var gtm_pageSubType = pageSubType;
+</script>
+  <!-- Google Tag Manager -->
+  <noscript>
+   &lt;iframe src="//www.googletagmanager.com/ns.html?id=GTM-NFJ3V2" height="0" width="0" style="display:none;visibility:hidden"&gt;&lt;/iframe&gt;
+  </noscript>
+  <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&amp;l='+l:'';j.async=true;j.src=
+'//www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-NFJ3V2');</script>
+  <!-- End Google Tag Manager -->
+  <header class="ff4-compt original-nav ">
+   <div id="browserDetect" class="text-center hide" style="background-color:#FFEFAE;">
+    <span id="browserVersion"></span>
+    <a>Dismiss</a>
+   </div>
+   <a id="skip-navigation" href="#anchor-content"><img src="//img2.ck12.org/media/build-20180828193300/common/images/1x1.gif" width="1" height="1" alt="Skip Navigation"></a>
+   <nav class="hide-small top-bar-section top-nav">
+    <section class="top-bar row user-settings">
+     <!--
+            <div class='mid-header-banner'>
+			</div>
+            -->
+     <ul class="right user-info">
+      <!-- If not signed in -->
+      <li class="signin"><a id="top_nav_signin" title="Sign in with your Email, Facebook, Google, Twitter or Microsoft Live account" class="js-sign-in">Sign In</a></li>
+      <li class="join"><a id="top_nav_join" href="https://www.ck12.org/auth/signup/student?requestor=https%3A//www.ck12.org/c/life-science/population-growth-patterns/lesson/Population-Growth-Patterns-MS-LS/%3Freferrer%3Dconcept_details&amp;returnTo=https%3A//www.ck12.org/c/life-science/population-growth-patterns/lesson/Population-Growth-Patterns-MS-LS/%3Freferrer%3Dconcept_details" title="Create an Account with CK-12" rel="nofollow">Join</a></li>
+      <li class="menu-help"><a id="top_nav_help" href="http://help.ck12.org" title="Help" target="new">Help</a></li>
+      <li class="menu-donate"> <a id="top_nav_donate" href="https://www.ck12info.org/about//donate/?source=ck12_top_nav" title="Donate" class="ga-track"> <span>Donate</span> <i class="icon-heart"></i> </a> </li>
+     </ul>
+    </section>
+   </nav>
+   <nav class="top-bar row side-bar-expanded">
+    <ul class="title-area text-center">
+     <li class="name left"> <a id="nav_logo" href="/" title="CK-12 Foundation Home" class="logo-img"> <img src="//img2.ck12.org/media/build-20180828193300/common/images/logo_ck12.svg" alt="CK-12" itemprop="logo"> </a> </li>
+     <li class="pointer hidden hide-one back-icon left show-small"><i class="icon-arrow"></i></li>
+     <li class="left ph-back hide"><i class="icon-arrow"></i></li>
+     <li class="ellipsis page-title show-small"></li>
+     <li id="side-reveal-icon" class="pointer side-reveal menu-icon"><i class="icon-more"></i></li>
+    </ul>
+    <section class="relative top-bar-section" style="height: auto;">
+     <ul id="top-bar-left-section" class="left top-navigation-list" data-magellan-expedition="relative" data-magellan-top-offset="1000000000000">
+      <li class="show-small search-field-parent small">
+       <div id="side_nav_search" class="left search-field-container-small">
+        <input type="text" value="" placeholder="Search for free resources" class="search-small search-input ui-autocomplete-input" data-autocompleteclass="search" autocomplete="off" role="textbox" aria-autocomplete="list" aria-haspopup="true">
+        <span id="loading-search-small" class="custom-loading-search-small right hide js-loading-icon"> <img alt="loading" src="//img3.ck12.org/media/build-20180828193300/common/images/loading.gif"> </span>
+        <div class="left pointer search-button-small js-search-content">
+         <i class="icon-search"></i>
+        </div>
+       </div> </li>
+      <li class="original-nav-container">
+       <ul>
+        <li data-magellan-arrival="header_dashboard"> <a id="nav_features_dashboard" data-href="/features#dashboard" title="Dashboard" class="js-link js-feature-link" href="/features#dashboard"> <span class="menu-item-img icon-dashboard2"></span> <span class="menu-item-title">Dashboard</span> </a> </li>
+        <li data-magellan-arrival="header_groups"> <a id="nav_features_groups" data-href="/features#group" title="Classes" class="js-link js-feature-link" href="/features#group"> <span class="menu-item-img icon-groups"></span> <span class="menu-item-title">Classes</span> <span class="nav-groups-classes hide-for-small">(Groups)</span> </a>
+         <div class="nav-groups-classes-mob show-for-small">
+           Previously called Groups.
+         </div> </li>
+        <li data-magellan-arrival="header_library"> <a id="nav_features_library" data-href="/features#library" title="Library" class="js-link js-feature-link" href="/features#library"> <span class="menu-item-img icon-backpack"></span> <span class="menu-item-title">Library</span> </a> </li>
+        <li class="forum-header-link" data-magellan-arrival="header_forums"> <a id="nav_forums" href="/forums/" title="Cafe"> <span class="menu-item-img icon-comments"></span> <span class="menu-item-title">Cafe</span> </a> </li>
+       </ul> </li>
+      <li class="browse-header-link hide-for-lti-context" data-magellan-arrival="header_browse"> <a id="nav_browse" href="/browse/" title="Browse" class="js-link"> <span class="menu-item-img icon-lightbulb2"></span> <span class="menu-item-title">Browse</span> </a> </li>
+      <li id="search" class="show-for-medium hide-for-lti-context"> <a id="nav_search_icon" title="Search"> <span class="menu-item-img icon-search"></span> <span class="menu-item-title">Search</span> </a> </li>
+      <li class="show-small"> <a id="side_nav_help" href="http://help.ck12.org" title="Help"> <span class="menu-item-img icon-help2"></span> <span class="menu-item-title">Help</span> </a> </li>
+      <li class="show-small"> <a id="side_nav_donate" href="https://www.ck12info.org/about//donate/?source=ck12_sidemenu" title="Donate"> <span class="menu-item-img icon-heart"></span> <span class="menu-item-title">Donate</span> </a> </li>
+      <li id="user-status" class="user link-container show-small">
+       <ul>
+        <li class="join-link-small"> <a id="side_nav_join" href="https://www.ck12.org/auth/signup/student?requestor=https%3A//www.ck12.org/c/life-science/population-growth-patterns/lesson/Population-Growth-Patterns-MS-LS/%3Freferrer%3Dconcept_details&amp;returnTo=https%3A//www.ck12.org/c/life-science/population-growth-patterns/lesson/Population-Growth-Patterns-MS-LS/%3Freferrer%3Dconcept_details" title="Create an Account with CK-12"> <span class="menu-item-img icon-user_join"></span> <span class="menu-item-title">Join</span> </a> </li>
+        <li> <a id="side_nav_signin" title="Sign in with your Email, Facebook, Google, Twitter or Microsoft Live account" class="js-sign-in"> <span class="menu-item-img icon-signin"></span> <span class="menu-item-title">Sign In</span> </a> </li>
+       </ul> </li>
+     </ul>
+     <ul class="right top-bar-right-section hide-small-important search-for-large hide-for-medium">
+      <li class="search-field-parent large">
+       <div id="nav_search" class="right search-field-container-large">
+        <input type="text" value="" placeholder="What do you want to learn today?" class="search-large header-search search-input js-search-large ui-autocomplete-input" data-autocompleteclass="search" autocomplete="off" role="textbox" aria-autocomplete="list" aria-haspopup="true">
+        <span id="loading-search" class="custom-loading-search right hide js-loading-icon"> <img alt="loading" src="//img3.ck12.org/media/build-20180828193300/common/images/loading.gif"> </span>
+        <div class="left pointer search-button-large js-search-content">
+         <i class="icon-search"></i>
+        </div>
+       </div> </li>
+     </ul>
+    </section>
+   </nav>
+   <div id="searchBrowseContainer" class="container_12 relative">
+    <ul id="searchContainer" class="row hide-for-large-up hide-for-small search-field-parent hide-important">
+     <li class="search-wrapper left">
+      <div id="searchComponent" class="large-10 small-12 columns">
+       <div id="nav_search_medium" class="left search-field-container">
+        <input type="text" class="search-field search-input js-search-large ui-autocomplete-input" value="" placeholder="What do you want to learn today?" data-autocompleteclass="search" autocomplete="off" role="textbox" aria-autocomplete="list" aria-haspopup="true">
+        <span id="loading-search-medium" class="custom-loading-search-medium right hide js-loading-icon"> <img alt="loading" src="//img3.ck12.org/media/build-20180828193300/common/images/loading.gif"> </span>
+        <div class="left pointer search-button js-search-content">
+         <i class="icon-search"></i>
+        </div>
+       </div>
+       <div id="searchClose" class="right pointer">
+        <span class="close-icon"></span>
+       </div>
+      </div> </li>
+    </ul>
+   </div>
+  </header>
+  <div class="header-space hide-small-important"></div>
+  <div id="softRegWrapper" class="grey-back"></div>
+  <div id="lti_help_banner" class="row hide modality_details">
+   <div id="lti_banner_msg_container" class="small-12 columns alert_big notice">
+    <i class="icon-notice"></i>
+    <span id="lti_banner_message">Click <span class="lti_assign_message">Create Assignment</span> to assign this modality to your LMS.</span>
+   </div>
+   <a class="close-lti-help-banner js-close-lti-help-banner right" onclick="closeLTIHelpBanner()"> <i class="close-icon"></i> </a>
+  </div>
+  <div id="content-container">
+   <a name="anchor-content"></a>
+   <div id="breadcrumbWrapper" class="row collapse breadcrumb-container hide"></div>
+   <div id="content-area" class="content-wrap row no-padding" itemscope itemtype="http://schema.org/WebPage">
+    <div id="contentwrap" data-concept-url="/c/life-science/population-growth-patterns" class="">
+     <div class="grey-back">
+      <div class="relative desktop_view">
+       <div class="desktop_view row collapse desktop-view_margin modalities-common modalities-header-wrapper modality-details-row">
+        <div class="column large-12">
+         <!-- Modality details which is old revision -->
+         <div class="row collapse revision-notofication-wrapper hide">
+          <div class="notificationwrap clearfix">
+           <div id="js_old_fb_notification" class="notification">
+             You are viewing an older version of this Concept.
+            <a class="notificationlink" href="">Go to the latest version.</a>
+           </div>
+          </div>
+         </div>
+         <div class="row collapse concept-wrapper">
+          <div class="left concept-info-wrapper">
+           <div class="left text-center concept_top_icon hide-small">
+            <span title="Life Science" class="icon-life-science"></span>
+           </div>
+           <div class="left concept_info_label">
+            <h1 id="artifact_title" class="row collapse artifact_title artifact_title_modality_details"> <a style="margin-right:3px;" title="Previous: Population" href="/c/life-science/population">
+              <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26">
+               <circle cx="13" cy="13" r="13" fill="#00aba4" />
+               <path d="M16 6 L8 14" stroke="white" stroke-width="3" />
+               <path d="M16 20 L8 12" stroke="white" stroke-width="3" />
+              </svg> </a> <a style="margin-left:3px;" title="Next: Population Growth Limits" href="/c/life-science/population-growth-limits">
+              <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26">
+               <circle cx="13" cy="13" r="13" fill="#00aba4" />
+               <path d="M10 6 L18 14" stroke="white" stroke-width="3" />
+               <path d="M10 20 L18 12" stroke="white" stroke-width="3" />
+              </svg> </a> <br> <span class="artifact_title_text" itemprop="name">Population Growth Patterns</span> </h1>
+           </div>
+           <h2 class="artifact_description artifact_description_details">Compares expotential and logistic population growth patterns.</h2>
+          </div>
+          <!-- practice badge markup starts -->
+          <div class="practice-badge-wrapper">
+           <div class="practice-badge" data-encodedid="SCI.BIO.442" data-handle="population-growth-patterns" id="practiceBadge">
+            <div class="practice-badge-container large hide-for-small">
+             <div class="img-bg">
+              <img src="//img2.ck12.org/media/build-20180828193300/images/modality_generic_icons/practice_image.png" alt="Atoms Practice" style="height: 91px;">
+             </div>
+             <div class="row collapse">
+              <div class="columns small-5 practice-badge-column">
+               <div class="pie-container" style="height: 78px; visibility: visible;">
+                <div class="inner-circle">
+                 <div class="average-time">
+                  <span class="small-text margin-top">Estimated</span>
+                  <span class="large-text">5</span>
+                  <span class="attach-text"> mins</span>
+                  <span class="small-text">to complete</span>
+                 </div>
+                </div>
+                <div class="hold" style="border-color: rgb(255, 102, 51); clip: rect(0px, 78px, 78px, 39px);">
+                 <div class="pie" style="transform: rotate(0deg); clip: rect(0px, 39px, 78px, 0px);"></div>
+                 <div class="pie" style="transform: rotate(0deg); clip: rect(0px, 39px, 78px, 0px);"></div>
+                </div>
+                <div class="content hide">
+                 <span class="large-text">%</span>
+                </div>
+               </div>
+               <div class="text-center capitalize bottom pie-container-label">
+                Progress
+               </div>
+              </div>
+              <div class="columns small-7 practice-badge-column">
+               <div class="practice-badge-detail">
+                <div class="top-section">
+                 <div class="icon-container hide">
+                  <i class=""></i>
+                 </div>
+                 <div class="description">
+                  <b>Practice </b>
+                  <span class="concept-title">Population Growth Patterns</span>
+                 </div>
+                </div>
+                <div class="memory-boost-section hide">
+                 <div class="row">
+                  <div class="columns small-5">
+                   &nbsp;
+                  </div>
+                  <div class="boost-icon columns small-1"></div>
+                  <div class="columns small-6">
+                   &nbsp;
+                  </div>
+                 </div>
+                 <div class="row">
+                  <div class="columns small-1">
+                   &nbsp;
+                  </div>
+                  <div class="boost-message columns small-9"></div>
+                  <div class="boost-tooltip tooltip-icon icon icon-help_icon columns small-2"></div>
+                 </div>
+                 <div class="boost-tooltip tooltip-info hide">
+                  <div class="boost-tooltip tooltip-title">
+                   MEMORY METER
+                  </div>
+                  <div class="boost-tooltip tooltip-msg">
+                   This indicates how strong in your memory this concept is
+                  </div>
+                 </div>
+                </div>
+                <div class="bottom">
+                 <div class="badge-option-container">
+                  <div class="button tangerine standard redirect-button hide-for-lti-context">
+                   <span class="button-text">Practice</span>
+                   <i class="js-badge-icon icon-arrow_right"></i>
+                  </div>
+                  <div class="more-badge-option js-more-badge-option hide">
+                   <ul class="more-badge-list-option">
+                    <li class="js-preview-btn" data-render="preview">Preview</li>
+                    <li class="js-assign-btn" data-render="assign">Assign Practice</li>
+                   </ul>
+                  </div>
+                 </div>
+                </div>
+               </div>
+              </div>
+             </div>
+            </div>
+            <div class="small practice-badge-container">
+             <div class="table text-center">
+              <div class="table-cell capitalize hide best-score-block pie-container-label text-right">
+               Progress
+              </div>
+              <div class="table-cell hide graph-block">
+               <div class="pie-container" style="height: 20px; visibility: visible;">
+                <div class="inner-circle">
+                 <div class="average-time">
+                  <span class="small-text margin-top">Estimated</span>
+                  <span class="large-text">5</span>
+                  <span class="attach-text"> mins</span>
+                  <span class="small-text">to complete</span>
+                 </div>
+                </div>
+                <div class="hold" style="border-color: rgb(255, 102, 51); clip: rect(0px, 20px, 20px, 10px);">
+                 <div class="pie" style="transform: rotate(0deg); clip: rect(0px, 10px, 20px, 0px);"></div>
+                 <div class="pie" style="transform: rotate(0deg); clip: rect(0px, 10px, 20px, 0px);"></div>
+                </div>
+               </div>
+              </div>
+              <div class="table-cell small-score hide">
+               %
+              </div>
+              <div class="table-cell tangerine redirect-button button">
+               <i class="icon-running"></i>
+               <span class="small-button-text">Practice Now</span>
+              </div>
+             </div>
+            </div>
+           </div>
+          </div>
+          <!-- practice badge markup ends -->
+          <!-- Assign to class button for mobile -->
+         </div>
+        </div>
+        <!-- concept dropdown markup -->
+       </div>
+       <div id="concept_list_container" class="concept_list_container" style="display: none;">
+        <div class="row collapse concept_list_header">
+         <div class="left concept_list_header_wrapper">
+          <a href="/biology/" title="Biology" class="topic_title">Biology</a>
+          <i class="icon-arrow3_right"></i>
+          <span class="topic_title name_wrap" title="Ecology">Ecology</span>
+          <div id="concept_list_count" class="row collapse hide-small concept_list_count"></div>
+         </div>
+         <div class="right pointer concept-close-icon js-concept-close-icon">
+          <i class="close-icon"></i>
+         </div>
+        </div>
+        <div class="relative concept_list_wrapper">
+         <span id="concept_line" class="concept_line">&nbsp;</span>
+         <span id="top_button" class="concept_button top_button js-concept_button">...</span>
+         <div>
+          <ul id="concept_list" class="row collapse relative concept_list" data-encodedid="SCI.BIO.400" style=""></ul>
+         </div>
+         <span id="bottom_button" class="concept_button bottom_button js-concept_button">...</span>
+        </div>
+       </div>
+      </div>
+      <div class="desktop_view">
+       <div id="modality_filters_container" class="row collapse desktop-view_margin modality_filters_container">
+        <div class="modalities_top_container">
+         <div class="hide-for-small row collapse">
+          <div class="column small-12">
+           <a href="/c/life-science/population-growth-patterns#all" class="modality-return"><i class="icon-arrow arrow-return"></i> All Modalities</a>
+          </div>
+         </div>
+         <div class="modalities-common">
+          <ul id="modality_filters_list" class="hide" style="">
+           <li class="modality_group" style=""> <a class="lnk_modality_filter group_all " href="/c/life-science/population-growth-patterns?referrer=concept_details&amp;by=ck12&amp;difficulty=all#all"> <i class="js-modality-icon icon-lightbulb"></i> <span class="group_label"> <span class="js-modality-label">All</span> <br class="show-small"> <span>(7)</span> </span> </a> </li>
+           <li class="modality_group"> <a class="lnk_modality_filter group_text  selected " href="/c/life-science/population-growth-patterns?referrer=concept_details&amp;by=ck12&amp;difficulty=all#text"> <i class="js-modality-icon icon-read"></i> <span class="group_label"> <span class="js-modality-label">Read</span> <br class="show-small"> <span>(1)</span> </span> </a> </li>
+           <li class="modality_group"> <a class="lnk_modality_filter group_interactive " href="/c/life-science/population-growth-patterns?referrer=concept_details&amp;by=ck12&amp;difficulty=all#interactive"> <i class="js-modality-icon icon-interactive_practice"></i> <span class="group_label"> <span class="js-modality-label">PLIX</span> <br class="show-small"> <span>(1)</span> </span> </a> </li>
+           <li class="modality_group"> <a class="lnk_modality_filter group_multimedia " href="/c/life-science/population-growth-patterns?referrer=concept_details&amp;by=ck12&amp;difficulty=all#multimedia"> <i class="js-modality-icon icon-video"></i> <span class="group_label"> <span class="js-modality-label">Video</span> <br class="show-small"> <span>(3)</span> </span> </a> </li>
+           <li class="modality_group"> <a class="lnk_modality_filter group_assessment " href="/c/life-science/population-growth-patterns?referrer=concept_details&amp;by=ck12&amp;difficulty=all#assessment"> <i class="js-modality-icon icon-exercise"></i> <span class="group_label"> <span class="js-modality-label">Assessments</span> <br class="show-small"> <span>(1)</span> </span> </a> </li>
+           <li class="modality_group"> <a class="lnk_modality_filter group_real_world " href="/c/life-science/population-growth-patterns?referrer=concept_details&amp;by=ck12&amp;difficulty=all#real_world"> <i class="js-modality-icon icon-rwa"></i> <span class="group_label"> <span class="js-modality-label">Real World</span> <br class="show-small"> <span>(1)</span> </span> </a> </li>
+           <li class="mdoalityfilterdropmenuwrap hide"> <a class="lnk_modality_filter"> <i class="icon-arrow3_right"></i> <span class="group_label"> <span>More</span> <br class="show-small"> <span>(</span><span id="more-concept-count"></span><span>)</span> </span> </a>
+            <ul id="modality_extra_filter_list" class="drop-menu hide"></ul> </li>
+          </ul>
+          <ul class="modality-actions-mobile show-for-small row">
+           <li class="column small-5 modality-actions-all-mod-link"><a href="/c/life-science/population-growth-patterns#all"><i class="icon-arrow"></i> All Modalities</a></li>
+           <li class="column small-5 hide-for-lti-context"><a class="js-shareGroupLink right" data-sharetype="group" data-artifactid="1106138" title="Share with Classes" style="pointer-events: initial;">Share with Classes</a>
+            <div class="groups_share_dialog hide"></div> </li>
+          </ul>
+         </div>
+        </div>
+       </div>
+      </div>
+      <div class="desktop_view quick-assignment-notification">
+       <div id="quick_assignment_notification" class="row collapse teal-theme-back desktop-view_margin modality_quick_assign_notification">
+        <div class="notification-data alert_big" style="line-height: 2em;">
+         <span id="notification-status-icon-container"><i id="notification-status-icon" class="icon-notice"></i></span>
+         <span id="assignmentNotification"></span>
+         <span id="turn-in-container">
+          <div id="turn-in-button" style="margin: 0px;" class="button tangerine small dxtrack-user-action" data-dx-desc="Turn-in button clicked">
+           Turn In
+          </div><span id="turnInfoIcon" class="turn-info icon-Info hide"></span><span class="turn-info-cont hide"></span></span>
+         <span class="hide cont-next-practice">Continue with next concept<span></span></span>
+        </div>
+        <div id="dismiss_assignment-notification" class="dxtrack" data-dx-eventname="FBS_ACTION" data-dx-action_type="link" data-dx-action_name="dismiss_assignment_notification">
+         <i class="icon-close"></i>
+        </div>
+       </div>
+       <div class="reveal reveal-modal modal-uikit hide" data-v-offset="137" data-close-on-click="false" data-close-on-esc="false" data-animation-in="slide-in-down fast" data-animation-out="slide-out-up fast" id="assignConfirmModal">
+        <div id="closeModal">
+         <a data-close="" class="close-modale">+</a>
+        </div>
+        <div class="row">
+         <div class="columns small-12 content text-center">
+          You are turning in your score of @@score@@% for this assignment. Continue?
+         </div>
+        </div>
+        <div class="text-center">
+         <div class="button standard turquoise" id="turn-in-confirm" data-close="">
+          Continue
+         </div>
+         <div class="button standard turquoise hide" id="Confirmbtn" data-close="">
+          OK
+         </div>
+         <div class="button standard turquoise hide" id="Cancelbtn" data-close="">
+          Cancel
+         </div>
+        </div>
+       </div>
+      </div>
+      <div class="desktop_view">
+       <div id="modalities_container" class="contentarea modalities-common">
+        <section class="clearfix">
+         <div class="clear"></div>
+         <!-- Schema.org properties -->
+         <meta itemprop="description" content="Covers population growth and the factors that affect it.">
+         <meta itemprop="interactivityType" content="mixed">
+         <meta itemprop="provider" content="CK-12 Foundation">
+         <meta itemprop="url" content="https://www.ck12.org/c/life-science/population-growth-patterns/lesson/Population-Growth-Patterns-MS-LS/">
+         <meta itemprop="dateCreated" content="2012-11-30T02:39:04-08:00">
+         <meta itemprop="dateModified" content="2018-08-13T12:53:51-07:00">
+         <meta itemprop="datePublished" content="2018-08-13T12:53:51-07:00">
+         <meta itemprop="version" content="42">
+         <meta itemprop="useRightsURL" content="http://creativecommons.org/licenses/by-nc/3.0/">
+         <meta itemprop="learningResourceType" content="Read">
+         <meta itemprop="typicalAgeRange" content="11-12">
+         <meta itemprop="typicalAgeRange" content="12-13">
+         <meta itemprop="typicalAgeRange" content="13-14">
+         <meta itemprop="intendedEndUserRole" content="student">
+         <div class="row collapse">
+          <div class="hide-for-small modalitysidebar-wrapper large-2 columns ">
+           <div class="modalitysidebar">
+            <div class="dividerwrap start hide">
+             <div class="divider">
+              <div class="top"></div>
+             </div>
+            </div>
+            <ul>
+             <li class="modality-info assign-to-class hide hide-for-lti-context"><a title="Assign to Class" class="assign_to_class">Assign to Class</a><span class="assign-info-img icon-Info"></span>
+              <div>
+               <div id="assign-tooltip" class="hide">
+                <strong>Quick Assignments!</strong>
+                <div class="speech-text">
+                  You can directly assign a modality to your classes and set a due date for each class.
+                </div>
+                <div class="text-center">
+                 <button class="button tangerine standard speech-btn" id="assign-ok-button">OK</button>
+                </div>
+               </div>
+              </div></li>
+             <!-- This change is for READ MODALITY -->
+             <li> <a id="add_to_library" title="Add to Library" style="pointer-events: initial;"> Add to Library </a> </li>
+             <li class="hide-for-lti-context"> <a class="js-shareGroupLink" data-sharetype="group" data-artifactid="1106138" title="Share with Classes" style="pointer-events: initial;">Share with Classes</a>
+              <div class="groups_share_dialog hide"></div> </li>
+             <li class="hide-for-lti-context">
+              <!-- From modality_actions.html --> <a id="add_to_book" data-artifactid="1106138" data-artifacttype="lesson" data-artifactrevisionid="6829127" data-title="Population Growth Patterns" data-perma="c/concept/Population-Growth-Patterns-MS-LS/" href="#" title="Add to FlexBook® textbook" style="pointer-events: initial;">Add to FlexBook® Textbook</a> </li>
+             <li>
+              <div class="js_editable" data-ownerid="3" data-islatest="True" data-context-ownerid="">
+               <a id="personalize_link" class="js_editable action_edit hide hide-for-lti-context" href="/editor/c/concept/Population-Growth-Patterns-MS-LS/r42/" data-href="/editor/c/concept/Population-Growth-Patterns-MS-LS/r42/" title="Edit This Modality" style="pointer-events: initial;"> <span class="library-st">Edit</span> </a>
+               <a id="latest_link" class="action_viewlatest hide" href="https://www.ck12.org/c/life-science/population-growth-patterns/lesson/Population-Growth-Patterns-MS-LS/" title="You are viewing an older version of this Concept. Click here to view the latest."> View Latest </a>
+               <div class="action_customize">
+                <a id="personalize_link" class="js_editable hide-for-lti-context" href="/editor/c/concept/Population-Growth-Patterns-MS-LS/r42/?conceptCollectionHandle=life-science-::-population-growth-patterns&amp;&amp;collectionCreatorID=3" data-href="/editor/c/concept/Population-Growth-Patterns-MS-LS/r42/?conceptCollectionHandle=life-science-::-population-growth-patterns&amp;&amp;collectionCreatorID=3" title="Customize this Modality" style="pointer-events: initial;"> Customize </a>
+                <span class="customize-help-wrapper old-icon-view"> <a id="customizeHelp" class="icon-help2 customize-help old-icon-view" target="_blank" href="https://ck12support.zendesk.com/hc/en-us/articles/200448244"></a> </span>
+               </div>
+              </div> </li>
+             <li> <a class="js_modality_details js_block_show" data-toggle=".js_metadata_toggle" data-container=".js_metadata_container" href="javascript:void(0);" title="Show Details">Details</a> </li>
+             <li> <a class="js_modality_resources js_block_show" data-toggle=".js_resources_toggle" data-container=".js_resources_container" href="javascript:void(0);" title="Show Resources">Resources</a> </li>
+             <li class="hide-for-lti-context"> <a class="dropdowntop hide-for-lti-context">Download <span class="tip"></span></a>
+              <ul class="dropdown">
+               <li> <a class="js_renderlink pdf" href="#" data-rendertype="pdf" data-artifactid="1106138" data-artifactrevisionid="6829127" data-rendertemplatetype="onecolumn">PDF<span class="popupbubble">Most Devices</span></a> </li>
+               <!-- <li>
+		<a class="js_renderlink mobi"
+			 href="#"
+			data-rendertype="mobi" data-artifactid="1106138" data-artifactrevisionid="6829127">mobi<span class="popupbubble">Kindle</span></a>
+	</li>
+	<li>
+		<a class="js_renderlink epub"
+			 href="#"
+			data-rendertype="epub" data-artifactid="1106138" data-artifactrevisionid="6829127">ePub<span class="popupbubble">iPad and Android</span></a>
+	</li> -->
+              </ul> </li>
+             <li class="book_unpublished hide" data-ownerid="3"> <a id="js_publish_artifact_link" href="#" data-artifactrevisionid="6829127" title="Submit a Publish Request"> Publish </a> </li>
+             <li class="book_published hide"> Published </li>
+             <li class="hide-for-lti-context">
+              <div data-magellan-expedition="fixed" class="quick-tips-wrapper">
+               <div class="alternate-h2">
+                Quick Tips
+               </div>
+               <ul class="quick-tips">
+                <li data-magellan-arrival="unselect-quicktips" class="hide"></li>
+                <li data-magellan-arrival="myAnnotations"> <i class="icon-play"></i><a href="#myAnnotations" name="myAnnotations">Notes/Highlights</a></li>
+                <li class="hide"> <i class="icon-play"></i><a title="Summary" id="artifact_summary_dialog">Summary</a></li>
+                <li data-magellan-arrival="vocabulary"> <i class="icon-play"></i><a href="#vocabulary" name="vocabulary">Vocabulary</a></li>
+               </ul>
+              </div> </li>
+            </ul>
+            <div class="dividerwrap end">
+             <div class="divider">
+              <div class="top"></div>
+             </div>
+             <div class="divider">
+              <div class="bottom"></div>
+             </div>
+            </div>
+           </div>
+          </div>
+          <div class="small-12 large-10 columns">
+           <div class="row collapse modalitycontentwrap modality-details-row">
+            <div class="modalitycontentouterwrap">
+             <div class="modalitycontentinnerwrap">
+              <div class="row collapse">
+               <div class="modalitylabel group_text">
+                <div class="title break-word titleonly">
+                  Population Growth Patterns
+                </div>
+               </div>
+              </div>
+              <div class="modalitycontent clearfix">
+               <article>
+                <div class="annotator-wrapper">
+                 <div id="modality_content" class="modality_content modality_type_read" data-loadurl="/flx/get/perma/modality/lesson/Population-Growth-Patterns-MS-LS/SCI.BIO.442?extension=version%3A42&amp;format=html">
+                  <p id="x-ck12-OThlZDYwZGIxYzVmMTMzNTlmYjYxMDYwYTljOThlNDk.-frn"><span class="x-ck12-img-inline">
+                    <!-- @@author="" -->
+                    <!-- @@license="" --> <img data-flx-url="/flx/show/image/201501121421083742599594_c0bc731fb1a1d27f956f0efb96a8a31c-201501121421084032983640.jpg" src="/media/read1picture.png" width="300" alt=""></span></p>
+                  <p id="x-ck12-YTE3NmY0MGNlY2YwYzllOTQxMzJiMjgwZDdjZGYwZjY.-xnw"><strong>What affects <a class="x-ck12-crossref" title="Population" href="/c/biology/population" target="_blank">population</a> growth in the United States?</strong></p>
+                  <p id="x-ck12-NDFlZTdmZWRlMzM4OGNkNDk5MTgwZTJjZjM4MmRhNzg.-zys">One way the <a class="x-ck12-crossref" title="Population" href="/c/biology/population" target="_blank">population</a> of the United States has grown is through the movement of individuals into the United States from other parts of the world. The same effects can be seen in wildlife populations. Individuals move into a population and increase its size. This is just one of the many factors affecting population growth. Of course, individuals may also move away from a population.</p>
+                  <h3 id="x-ck12-UG9wdWxhdGlvbiBHcm93dGg.">Population Growth</h3>
+                  <p id="x-ck12-N2IwZGNiZjEwNjJjNjg5N2RkNTg1ZDM2NDVmMWY1M2U.-f4y">What does population growth mean? You can probably guess that it means the number of individuals in a population is increasing. The <strong><span class="vocab_term">population growth rate</span></strong> tells you how quickly a population is increasing or decreasing. What determines the population growth rate for a particular population?</p>
+                  <h4 id="x-ck12-QmlydGhzLCBEZWF0aHMsIGFuZCBNaWdyYXRpb24.">Births, Deaths, and <span class="vocab_term">Migration</span></h4>
+                  <p id="x-ck12-NWRiZWI2NjhiM2M4MTliODY2ZGZkN2ZlZWE0ZTAzYmE.-wxb">Population growth rate depends on birth rates and death rates, as well as <a class="x-ck12-crossref" title="Migration" href="/c/biology/migration" target="_blank">migration</a>. First, we will consider the effects of birth and death rates. You can predict the growth rate by using this simple equation: <em>growth rate = birth rate – death rate.</em></p>
+                  <p id="x-ck12-MDM3N2RlZjllM2I3NDE4ZjRjMzBiNzcxOWVkN2Q2MjM.-wt6">If the birth rate is larger than the death rate, then the population grows. If the death rate is larger than the birth rate, what will happen to the population? The population size will decrease. If the birth and death rates are equal, then the population size will not change.</p>
+                  <p id="x-ck12-YzJkNDc4MjdlMDlhZWVhM2UwODAyYzg5NThhOTQ5YjA.-szt">Factors that affect population growth are:</p>
+                  <ol id="x-ck12-NjcyNzZmNTVhNThjMGM2ODQ0MWRiMmZiNDU5ODVhZmI.-nrf">
+                   <li>Age of organisms at first <a class="x-ck12-crossref" title="Reproduction" href="/c/biology/reproduction" target="_blank">reproduction</a>.</li>
+                   <li>How often an organism reproduces.</li>
+                   <li>The number of offspring of an organism.</li>
+                   <li>The presence or absence of <a class="x-ck12-crossref" title="Parental Care" href="/c/biology/parental-care" target="_blank">parental care</a>.</li>
+                   <li>How long an organism is able to reproduce.</li>
+                   <li>The death rate of offspring.</li>
+                  </ol>
+                  <p id="x-ck12-MDE0M2U3NTUyNTM2YjlhMDg5MGE5ZjM2MTZmOWI4ODg.-idw">For an ecosystem to be stable, populations in that system must be healthy, and that usually means reproducing as much as their environment allows. Do organisms reproduce yearly or every few years? Do organisms reproduce for much of their life, or just part of their life? Do organisms produce many offspring at once, or just a few, or even just one? Do many newborn organisms die, or do the majority survive? All these factors play a role in the growth of a population.</p>
+                  <p id="x-ck12-MzBjZTI4NThhNmUyMjRjZWEzOGQ1NDJjZTM4MGMwM2I.-3j9">Organisms can use different strategies to increase their <a class="x-ck12-crossref" title="Reproduction" href="/c/biology/reproduction" target="_blank">reproduction</a> rate. <strong><span class="vocab_term">Altricial</span></strong> organisms are helpless at birth, and their parents give them a lot of care. This care is often seen in bird <a class="x-ck12-crossref" title="Species" href="/c/biology/species" target="_blank">species</a>. (<strong>Figure</strong> <a href="#x-ck12-TVNMUy0yMy0wNi1yZXByb2R1Y3RpdmUtc3RyYXRlZ2llcw..">below</a>). Altricial <a class="x-ck12-crossref" title="Birds" href="/c/biology/birds" target="_blank">birds</a> are usually born blind and without feathers. Compared to <span class="vocab_term">precocial</span> organisms, altricial organisms have a longer period of <a class="x-ck12-crossref" title="Development" href="/c/biology/development" target="_blank">development</a> before they reach maturity. <strong>Precocial</strong> organisms, such as the geese shown below, can take care of themselves at birth and do not require help from their parents (<strong>Figure</strong> <a href="#x-ck12-TVNMUy0yMy0wNi1yZXByb2R1Y3RpdmUtc3RyYXRlZ2llcw..">below</a>). In order to reproduce as much as possible, altricial and precocial organisms must use very different strategies.</p>
+                  <div id="x-ck12-NmY4ODk5OWNkYTY3OTRhZWY3YTRlOTA2YzE5ZGEwZGM.-qnj" class="x-ck12-img-postcard x-ck12-nofloat image-with-caption block-image">
+                   <!-- @@author="Hummingbirds: User:Miksmith/Wikipedia; Geese: Courtesy of the U.S. Fish and Wildlife Service" -->
+                   <!-- @@url="Hummingbirds: http://commons.wikimedia.org/wiki/File:Hummingbird_nest_with_two_chicks_in_Santa_Monica,_CA._Photo_taken_June_26,_2006.jpg; Geese: http://commons.wikimedia.org/wiki/File:Branta_canadensis1.jpg" -->
+                   <!-- @@license="Public Domain" -->
+                   <p id="x-ck12-8ay"><img data-flx-url="/flx/show/THUMB_POSTCARD/image/201501121421083742625819_0d41645212061946b252ad5000e5b0ce-201501121421084033443389.jpg" src="/media/read1picture.png" id="x-ck12-TVNMUy0yMy0wNi1yZXByb2R1Y3RpdmUtc3RyYXRlZ2llcw.." title="Two reproductive strategies used are altricial strategies with few helpless young and precocial strategies with many well-developed young" alt="Two reproductive strategies used are altricial strategies with few helpless young and precocial strategies with many well-developed young" longdesc="%28left%29%20A%20hummingbird%20nest%20with%20young%20illustrates%20an%20altricial%20reproductive%20strategy%2C%20with%20a%20few%20small%20eggs%2C%20helpless%20young%2C%20and%20intensive%20parental%20care.%20%28right%29%20The%20Canada%20goose%20shows%20a%20precocial%20reproductive%20strategy.%20It%20lays%20a%20large%20number%20of%20large%20eggs%2C%20producing%20well-developed%20young.%20"></p>
+                   <p id="x-ck12-OWI1YjE3ZjBiMGVmZDU1ZGFiNjM4Njg5YTkwOTg2MGI.-136">(left) A hummingbird nest with young illustrates an altricial reproductive strategy, with a few small eggs, helpless young, and intensive parental care. (right) The Canada goose shows a precocial reproductive strategy. It lays a large number of large eggs, producing well-developed young.<a class="figure-index figure-index-with-caption js_scroll" data-href="#img-attr-1" data-refid="x-ck12-TVNMUy0yMy0wNi1yZXByb2R1Y3RpdmUtc3RyYXRlZ2llcw.." data-author="Hummingbirds: User:Miksmith&amp;#x2F;Wikipedia; Geese: Courtesy of the U.S. Fish and Wildlife Service" data-source="Hummingbirds: &amp;lt;a target=&amp;quot;_blank&amp;quot; rel=&amp;quot;noopener&amp;quot; href=&amp;quot;http:&amp;#x2F;&amp;#x2F;commons.wikimedia.org&amp;#x2F;wiki&amp;#x2F;File:Hummingbird_nest_with_two_chicks_in_Santa_Monica,_CA._Photo_taken_June_26,_2006.jpg&amp;quot;&amp;gt;http:&amp;#x2F;&amp;#x2F;commons.wikimedia.org&amp;#x2F;wiki&amp;#x2F;File:Hummingbird_nest_with_two_chicks_in_Santa_Monica,_CA._Photo_taken_June_26,_2006.jpg&amp;lt;&amp;#x2F;a&amp;gt;; Geese: &amp;lt;a target=&amp;quot;_blank&amp;quot; rel=&amp;quot;noopener&amp;quot; href=&amp;quot;http:&amp;#x2F;&amp;#x2F;commons.wikimedia.org&amp;#x2F;wiki&amp;#x2F;File:Branta_canadensis1.jpg&amp;quot;&amp;gt;http:&amp;#x2F;&amp;#x2F;commons.wikimedia.org&amp;#x2F;wiki&amp;#x2F;File:Branta_canadensis1.jpg&amp;lt;&amp;#x2F;a&amp;gt;" data-license="Public Domain" data-index="1">[Figure1]</a></p>
+                  </div>
+                  <h4 id="x-ck12-TWlncmF0aW9u">Migration</h4>
+                  <p id="x-ck12-ZDZlMDBkYWQ0N2I3ODc3ZjFjODE3MzgxMGFjNDZjYWI.-lpz"><strong>Migration</strong> is the movement of individual organisms into, or out of, a population. <a class="x-ck12-crossref" title="Migration" href="/c/biology/migration" target="_blank">Migration</a> affects population growth rate. There are two types of migration:</p>
+                  <ol id="x-ck12-NTFhMzgxZTkzZmY4YjZkN2ViYTBkOWYzOTk1M2M5NTQ.-xn5">
+                   <li><strong><span class="vocab_term">Immigration</span></strong> is the movement of individuals into a population from other areas. This increases the population size and growth rate.</li>
+                   <li><strong><span class="vocab_term">Emigration</span></strong> is the movement of individuals out of a population. This decreases the population size and growth rate.</li>
+                  </ol>
+                  <p id="x-ck12-NjAyYjQ0OGEyNTk4N2VlM2QxYmE1ZGNmMjdlZDY4YWY.-8on">The earlier growth rate equation can be modified to account for <a class="x-ck12-crossref" title="Migration" href="/c/biology/migration" target="_blank">migration</a>: <em>growth rate = (birth rate + immigration rate) – (death rate + emigration rate).</em></p>
+                  <p id="x-ck12-YWFiNjhjODQ1OGU1YmVlOGNlYjQ4Y2U0ZTFhMDY4Njk.-czo">One type of migration that you are probably familiar with is the migration of <a class="x-ck12-crossref" title="Birds" href="/c/biology/birds" target="_blank">birds</a>. Maybe you have heard that birds fly south for the winter. In the fall, birds fly thousands of miles to the south where it is warmer. In the spring, they return to their homes. (<strong>Figure</strong> <a href="#x-ck12-TVNMUy0yMy0wOC1iYXJuYWNsZS1nZWVzZS1taWdyYXRpb24.">below</a>).</p>
+                  <p id="x-ck12-OWYzZWJiYzM4YzJlYzFmNmU0MTg1NDQyMTk5MjhlOGM.-y5w">Monarch butterflies also migrate from Mexico to the northern U.S. in the summer and back to Mexico in the winter. These types of migrations move entire populations from one <a class="x-ck12-crossref" title="Location" href="/c/earth-science/location" target="_blank">location</a> to another.</p>
+                  <div id="x-ck12-ODhiMzFiNTcwNjhjNTBiMWFiZjBjZDQwOTVkNzQyZTc.-rei" class="x-ck12-img-postcard x-ck12-nofloat image-with-caption block-image">
+                   <!-- @@author="User:Huhu Uet/Wikimedia Commons" -->
+                   <!-- @@url="http://commons.wikimedia.org/wiki/File:G%C3%A4nse_Hetlinger_Schanze_04.jpg" -->
+                   <!-- @@license="CC BY 3.0" -->
+                   <p id="x-ck12-0f1"><img data-flx-url="/flx/show/THUMB_POSTCARD/image/201501121421083742644096_deefd765a47d41afc47aacc90dcb1aa3-201501121421084033982430.jpg" src="/media/read1picture.png" id="x-ck12-TVNMUy0yMy0wOC1iYXJuYWNsZS1nZWVzZS1taWdyYXRpb24." longdesc="A%20flock%20of%20barnacle%20geese%20fly%20in%20formation%20during%20the%20autumn%20migration.%20" alt=""></p>
+                   <p id="x-ck12-NGIyYTExMzFiNTAwZTYwOTZhZWIwM2ZhNzA4YmMzNWE.-q9d">A flock of barnacle geese fly in formation during the autumn migration.<a class="figure-index figure-index-with-caption js_scroll" data-href="#img-attr-2" data-refid="x-ck12-TVNMUy0yMy0wOC1iYXJuYWNsZS1nZWVzZS1taWdyYXRpb24." data-author="User:Huhu Uet&amp;#x2F;Wikimedia Commons" data-source="&amp;lt;a target=&amp;quot;_blank&amp;quot; rel=&amp;quot;noopener&amp;quot; href=&amp;quot;http:&amp;#x2F;&amp;#x2F;commons.wikimedia.org&amp;#x2F;wiki&amp;#x2F;File:G%C3%A4nse_Hetlinger_Schanze_04.jpg&amp;quot;&amp;gt;http:&amp;#x2F;&amp;#x2F;commons.wikimedia.org&amp;#x2F;wiki&amp;#x2F;File:G%C3%A4nse_Hetlinger_Schanze_04.jpg&amp;lt;&amp;#x2F;a&amp;gt;" data-license="CC BY 3.0" data-index="2">[Figure2]</a></p>
+                  </div>
+                  <h4 id="x-ck12-RXhwb25lbnRpYWwgR3Jvd3Ro"><span class="vocab_term">Exponential Growth</span></h4>
+                  <p id="x-ck12-NmUzZmQxNzQ2N2I2MTBlZWIwY2EzZGFlY2E3YzBiMTI.-sbp">Population growth can be described with two models, based on the size of the population and necessary <a class="x-ck12-crossref" title="Resources" href="/c/biology/resources" target="_blank">resources</a>. These two types of growth are known as exponential growth and <span class="vocab_term">logistic growth</span>. If a population is given unlimited amounts of resources, such as food and <a class="x-ck12-crossref" title="Water" href="/c/biology/water" target="_blank">water</a>, land if needed, moisture, oxygen, and other environmental factors, it will grow exponentially. <strong>Exponential growth</strong> occurs as a population grows larger, dramatically increasing the growth rate. This is shown as a "J-shaped" curve below (<strong>Figure</strong> <a href="#x-ck12-TVNMUy0yMy0wOS1wb3B1bGF0aW9uLWdyb3d0aC1ncmFwaHM.">below</a>). You can see that the population grows slowly at first, but as time passes, growth occurs more and more rapidly.</p>
+                  <div id="x-ck12-YTliNjBhZDcxOWQ5ZDU3MTdhMzc3NDgwMjRlNjc0NTc.-uyk" class="x-ck12-img-postcard x-ck12-nofloat image-with-caption block-image">
+                   <!-- @@author="Laura Guerin" -->
+                   <!-- @@url="CK-12 Foundation" -->
+                   <!-- @@license="CC BY-NC 3.0" -->
+                   <p id="x-ck12-yox"><img data-flx-url="/flx/show/THUMB_POSTCARD/image/201501121421083742657593_aea16c197f80007d0f7189413b1e0f09-201501121421084034559518.png" src="/media/read1picture.png" id="x-ck12-TVNMUy0yMy0wOS1wb3B1bGF0aW9uLWdyb3d0aC1ncmFwaHM." longdesc="Growth%20of%20populations%20according%20to%20exponential%20%28or%20J-curve%29%20growth%20model%20%28%3Cem%3Eleft%3C/em%3E%29%20and%20logistic%20%28or%20S-curve%29%20growth%20model%20%28%3Cem%3Eright%3C/em%3E%29.%20Time%20is%20plotted%20on%20the%20x-axis%2C%20and%20population%20size%20is%20plotted%20on%20the%20y-axis." alt=""></p>
+                   <p id="x-ck12-MWVlODAxYzgxOWY3ZTAwMmRjMGVjMzcwZDJlNGRjYjQ.-wym">Growth of populations according to exponential (or J-curve) growth model (<em>left</em>) and logistic (or S-curve) growth model (<em>right</em>). Time is plotted on the x-axis, and population size is plotted on the y-axis.<a class="figure-index figure-index-with-caption js_scroll" data-href="#img-attr-3" data-refid="x-ck12-TVNMUy0yMy0wOS1wb3B1bGF0aW9uLWdyb3d0aC1ncmFwaHM." data-author="Laura Guerin" data-source="CK-12 Foundation" data-license="CC BY-NC 3.0" data-index="3">[Figure3]</a></p>
+                  </div>
+                  <p id="x-ck12-ZjJmMTk1ODUxYjI5NTNkNTFlZWE4MzRjZTc5NzdmNTI.-m8z">In nature, organisms do not usually have ideal environments with unlimited food. In nature, there are limits. Sometimes, there will be plenty of food. Sometimes, a fire will wipe out all of the available nutrients. Sometimes a predator will kill many individuals in a population. How do you think these limits affect the way organisms grow?</p>
+                  <p id="x-ck12-M2Q3NmExNjk1YTI2NGU2YzEyYjYzYTFhNTk3ZTVjZjI.-tlf">Usually, populations first grow exponentially while <a class="x-ck12-crossref" title="Resources" href="/c/biology/resources" target="_blank">resources</a> are abundant. But as populations increase and resources become less available, rates of growth slow down and slowly level off, reaching the <span class="vocab_term">carrying capacity</span>. The <strong>carrying capacity</strong> is the upper limit to the population size that <a class="x-ck12-crossref" title="The Environment" href="/c/chemistry/the-environment" target="_blank">the environment</a> can support. This type of growth is shown as an "S-shaped" curve below (<strong>Figure</strong> <a href="#x-ck12-TVNMUy0yMy0wOS1wb3B1bGF0aW9uLWdyb3d0aC1ncmFwaHM.">above</a>) and is called <strong>logistic growth.</strong> Why do you think occurs?</p>
+                  <h3 id="x-ck12-U3VtbWFyeQ..">Summary</h3>
+                  <ul id="x-ck12-YjJiMTI0YzE0ODY1M2E5OGI0NmY5NDM0YzI0NzQ5NWE.-8wd">
+                   <li>Population growth rate is affected by birth rates, death rates, immigration, and emigration.</li>
+                   <li>If a population is given unlimited amounts of food, moisture, and oxygen, and other environmental factors, it will show exponential growth.</li>
+                  </ul>
+                  <h3 id="x-ck12-RXhwbG9yZSBNb3Jl">Explore More</h3>
+                  <p id="x-ck12-ZTgwZmFkNTVhYTRhNDhkMGEyNDdmNjU5MTQwZGMzMzE.-rap">Use the resource below to answer the questions that follow.</p>
+                  <ul id="x-ck12-MzliYzc3ZmZmYmQxNTkwYmE3MDc3OTlkNjNjNTAxYmU.-ujs">
+                   <li><strong>Population Growth</strong> at <a href="http://www.youtube.com/watch?v=sc4HxPxNrZ0" target="_blank">http://www.youtube.com/watch?v=sc4HxPxNrZ0</a> (2:58)</li>
+                  </ul>
+                  <div id="x-ck12-pma" itemprop="video" itemscope itemtype="http://schema.org/VideoObject">
+                   <div class="">
+                    <iframe id="x-ck12-x-ck12-c2M0SHhQeE5yWjA." src="/flx/show/cover%20video/http%3A//www.youtube.com/embed/sc4HxPxNrZ0" name="1548" frameborder="0" height="380" width="500" class="ck12-embed-iframe"></iframe>
+                   </div>
+                  </div>
+                  <ol id="x-ck12-ZTA1MTU5NmI5Yzg3NzllODVjNGRhMTgxYWI3MjgzZmE.-st8">
+                   <li>How many years did it take the human population to increase from 1 billion to 2 billion? Considering how long it took the human population to reach 1 billion, is this pattern consistent with an exponential growth model?</li>
+                   <li>How fast is the human population currently increasing? What kind of growth does this indicate the human population is experiencing currently? Does this rate represent an increase or decrease from previous growth rates?</li>
+                   <li>Is our <a class="x-ck12-crossref" title="Current" href="/c/physics/current" target="_blank">current</a> population level creating problems with available space? Why or why not?</li>
+                  </ol>
+                  <h3 id="x-ck12-UmV2aWV3">Review</h3>
+                  <ol id="x-ck12-NjI4OWM3ZmY4NGU5ODZlMGUwZmY0MDQzMzVhNzk2ZTY.-ha5">
+                   <li>List three factors that affect population growth?</li>
+                   <li>Compare altricial organisms to precocial organisms.</li>
+                   <li>What is the overall equation for growth rate?</li>
+                   <li>Does a typical population show exponential growth? Why or why not?</li>
+                   <li>Define carrying capacity.</li>
+                  </ol>
+                 </div>
+                </div>
+               </article>
+               <div data-magellan-destination="unselect-quicktips" class="hide"></div>
+               <div class="clearfix">
+                <section data-magellan-destination="myAnnotations" class="myAnnotations-container">
+                 <h3 class="myAnnotations">Notes/Highlights</h3>
+                 <table>
+                  <thead>
+                   <tr>
+                    <th>Color</th>
+                    <th>Highlighted Text</th>
+                    <th>Notes</th>
+                    <th></th>
+                   </tr>
+                  </thead>
+                  <tbody>
+                   <tr class="hide">
+                    <td colspan="4" id="notes-pagination">Show More <i class="icon-arrow3-down"></i></td>
+                   </tr>
+                  </tbody>
+                 </table>
+                </section>
+               </div>
+               <!-- Vocabulary -->
+               <div class="vocab-pos" data-magellan-destination="vocabulary"></div>
+               <div class="clearfix">
+                <section class="vocabulary_content" data-loadurl="/ajax/vocabulary_list/c/concept/Population-Growth-Patterns-MS-LS/r42/" style="display: block; overflow: hidden;">
+                 <div class="vocabulary_wrap spacetoplarge">
+                  <div class="columnwrap spacetop">
+                   <div class="vocabularyheader">
+                    <h3>Vocabulary
+                     <div class="select_language">
+                      <span class="title">Language:</span>
+                      <div class="dropmenuwrap">
+                       <a id="vocab_select_language" class="btn"><span id="selected_language">&nbsp;English&nbsp;</span><span class="tip">▼</span><span class="arrowdown"></span></a>
+                       <div data-menu-link="#vocab_select_language" class="drop-menu hide" id="language_select_menu">
+                        <ul class="create-dropdown">
+                         <li data-language-code="en" data-language-name="English" class="item_language selected last"><a title="Show vocabulary in English">English</a></li>
+                        </ul>
+                       </div>
+                      </div>
+                      <div class="clear"></div>
+                     </div> </h3>
+                   </div>
+                   <div class="clear"></div>
+                   <div id="vocabularygrid" class="vocabularygrid spacetop">
+                    <table>
+                     <thead>
+                      <tr>
+                       <th style="width:23%;">Term</th>
+                       <th>Definition</th>
+                      </tr>
+                     </thead>
+                     <tbody>
+                      <tr>
+                       <td><span class="vterm vtitle"><strong>altricial</strong></span></td>
+                       <td><span class="vdefinition">Born in a helpless state; needs a lot of parental care.</span></td>
+                      </tr>
+                      <tr>
+                       <td><span class="vterm vtitle"><strong>carrying capacity</strong></span></td>
+                       <td><span class="vdefinition">Maximum population size that can be supported in a particular area without degradation of the habitat.</span></td>
+                      </tr>
+                      <tr>
+                       <td><span class="vterm vtitle"><strong>emigration</strong></span></td>
+                       <td><span class="vdefinition">Movement of individuals out of a population to other areas.</span></td>
+                      </tr>
+                      <tr>
+                       <td><span class="vterm vtitle"><strong>exponential growth</strong></span></td>
+                       <td><span class="vdefinition">Pattern of population growth in which a population starts out growing slowly but grows faster and faster as the population size increases.</span></td>
+                      </tr>
+                      <tr>
+                       <td><span class="vterm vtitle"><strong>immigration</strong></span></td>
+                       <td><span class="vdefinition">Movement of individuals into a population from other areas.</span></td>
+                      </tr>
+                      <tr>
+                       <td><span class="vterm vtitle"><strong>logistic growth</strong></span></td>
+                       <td><span class="vdefinition">Pattern of population growth in which growth slows and population size levels off as the population approaches the carrying capacity.</span></td>
+                      </tr>
+                      <tr>
+                       <td><span class="vterm vtitle"><strong>migration</strong></span></td>
+                       <td><span class="vdefinition">Movement of individual organisms into, or out of, a population.</span></td>
+                      </tr>
+                      <tr>
+                       <td><span class="vterm vtitle"><strong>population growth rate</strong></span></td>
+                       <td><span class="vdefinition">How quickly a population is increasing or decreasing.</span></td>
+                      </tr>
+                      <tr>
+                       <td><span class="vterm vtitle"><strong>precocial</strong></span></td>
+                       <td><span class="vdefinition">Born in an independent, advanced state.</span></td>
+                      </tr>
+                     </tbody>
+                    </table>
+                   </div>
+                   <div class="clear"></div>
+                  </div>
+                 </div>
+                </section>
+               </div>
+               <div class="clearfix">
+                <section id="img_attributions_wrapper" class="img_attribution">
+                 <h3>Image Attributions</h3>
+                 <ol id="img_attributions">
+                  <li id="img-attr-1"><a class="js_scroll" data-href="#x-ck12-TVNMUy0yMy0wNi1yZXByb2R1Y3RpdmUtc3RyYXRlZ2llcw..">[Figure 1]</a><br><b>Credit:</b> Hummingbirds: User:Miksmith/Wikipedia; Geese: Courtesy of the U.S. Fish and Wildlife Service<br><b>Source:</b> Hummingbirds: <a target="_blank" rel="noopener" href="http://commons.wikimedia.org/wiki/File:Hummingbird_nest_with_two_chicks_in_Santa_Monica,_CA._Photo_taken_June_26,_2006.jpg">http://commons.wikimedia.org/wiki/File:Hummingbird_nest_with_two_chicks_in_Santa_Monica,_CA._Photo_taken_June_26,_2006.jpg</a>; Geese: <a target="_blank" rel="noopener" href="http://commons.wikimedia.org/wiki/File:Branta_canadensis1.jpg">http://commons.wikimedia.org/wiki/File:Branta_canadensis1.jpg</a><br><b>License:</b> Public Domain</li>
+                  <li id="img-attr-2"><a class="js_scroll" data-href="#x-ck12-TVNMUy0yMy0wOC1iYXJuYWNsZS1nZWVzZS1taWdyYXRpb24.">[Figure 2]</a><br><b>Credit:</b> User:Huhu Uet/Wikimedia Commons<br><b>Source:</b> <a target="_blank" rel="noopener" href="http://commons.wikimedia.org/wiki/File:G%C3%A4nse_Hetlinger_Schanze_04.jpg">http://commons.wikimedia.org/wiki/File:G%C3%A4nse_Hetlinger_Schanze_04.jpg</a><br><b>License:</b> CC BY 3.0</li>
+                  <li id="img-attr-3"><a class="js_scroll" data-href="#x-ck12-TVNMUy0yMy0wOS1wb3B1bGF0aW9uLWdyb3d0aC1ncmFwaHM.">[Figure 3]</a><br><b>Credit:</b> Laura Guerin<br><b>Source:</b> CK-12 Foundation<br><b>License:</b> <a target="_blank" href="http://creativecommons.org/licenses/by-nc/3.0/">CC BY-NC 3.0</a></li>
+                 </ol>
+                </section>
+               </div>
+              </div>
+              <div class="detailswrap" data-details="True">
+               <!-- START METADATA VIEW -->
+               <h3 class="js_block_toggle js_metadata_toggle" data-toggle=".js_metadata_toggle" data-container=".js_metadata_container"> <span class="show">Show</span><span class="noshow hide">Hide</span> Details <span class="tip"></span> </h3>
+               <div class="divider"></div>
+               <div class="js_metadata_container annotation-content-container" id="js_metadata_container_mjax" style="display:none;">
+                <div class="metadataview">
+                 <div class="left">
+                  <!-- Artifact Summary -->
+                  <section>
+                   <h2 class="toptitle spacetopmedium">Description</h2>
+                   <div class="articleinfowrap js_moreinfo">
+                    <div itemprop="description" id="artifact_summary">
+                      Covers population growth and the factors that affect it.
+                    </div>
+                   </div>
+                  </section>
+                  <section class="objectives_container js_metadata_objectives_container">
+                   <h2 class="toptitle">Learning Objectives</h2>
+                   <div class="articleinfowrap js_moreinfo objectives_content">
+                    <ul id="x-ck12-N2VmZWVjMDAwMzk5ZjI0Y2E4OWU0MjA3MmVhZGM5MmI.-3xc">
+                     <li>Describe factors that affect <a class="x-ck12-crossref" title="Population" href="/c/biology/population">population</a> growth.</li>
+                     <li>Distinguish immigration from emigration.</li>
+                     <li>Compare exponential growth to logistic growth.</li>
+                     <li>Explain carrying capacity.</li>
+                    </ul>
+                   </div>
+                  </section>
+                  <section class="objectives_container js_metadata_vocabulary_container hide">
+                   <h2 class="toptitle">Vocabulary</h2>
+                   <div class="articleinfowrap js_moreinfo objectives_content"></div>
+                  </section>
+                  <section>
+                   <!-- Authors List -->
+                   <div class="spacetopmedium break-word">
+                    <div class="alternate-h2 toptitle">
+                     Authors:
+                    </div>
+                    <div>
+                     <a itemprop="author" href="/search/?q=author:Jessica%20Harwood">Jessica Harwood</a>
+                    </div>
+                    <div>
+                     <a itemprop="author" href="/search/?q=author:Douglas%20Wilkin%2C%20Ph.D.">Douglas Wilkin, Ph.D.</a>
+                    </div>
+                   </div>
+                   <!-- Contributors List -->
+                   <div class="spacetopmedium break-word">
+                    <div class="alternate-h2 toptitle">
+                     Contributors:
+                    </div>
+                    <div>
+                     <a itemprop="author" href="/search/?q=author:Doris%20Kraus%2C%20Ph.D.">Doris Kraus, Ph.D.</a>
+                    </div>
+                    <div>
+                     <a itemprop="author" href="/search/?q=author:Niamh%20Gray-Wilson">Niamh Gray-Wilson</a>
+                    </div>
+                    <div>
+                     <a itemprop="author" href="/search/?q=author:Jean%20Brainard%2C%20Ph.D.">Jean Brainard, Ph.D.</a>
+                    </div>
+                    <div>
+                     <a itemprop="author" href="/search/?q=author:Sarah%20Johnson">Sarah Johnson</a>
+                    </div>
+                    <div>
+                     <a itemprop="author" href="/search/?q=author:Jane%20Willan">Jane Willan</a>
+                    </div>
+                    <div>
+                     <a itemprop="author" href="/search/?q=author:Corliss%20Karasov">Corliss Karasov</a>
+                    </div>
+                   </div>
+                   <!-- Editors List -->
+                   <div class="spacetopmedium break-word">
+                    <div class="alternate-h2 toptitle">
+                     Editors:
+                    </div>
+                    <div>
+                     <a itemprop="author" href="/search/?q=author:Douglas%20Wilkin%2C%20Ph.D.">Douglas Wilkin, Ph.D.</a>
+                    </div>
+                   </div>
+                   <!-- Translators List -->
+                   <!-- Reviewer List -->
+                   <!-- Technical Reviewer List -->
+                  </section>
+                  <section>
+                   <!-- Objectives -->
+                  </section>
+                  <section>
+                   <!-- Source List -->
+                  </section>
+                  <!-- Related Materials -->
+                  <section id="related" class="relatedmaterials">
+                  </section>
+                  <section>
+                   <div class="spacetopmedium">
+                    <h2 class="toptitle">Difficulty Level</h2> At Grade
+                   </div>
+                   <!-- Grades -->
+                   <div id="modality_grades_wrapper">
+                    <div class="columnwrap spacetopmedium">
+                     <h2 class="toptitle"> Grades </h2>
+                     <div id="modality_grades">
+                      <a href="/search/?q=grade:6" title="6">6 </a> ,
+                      <a href="/search/?q=grade:7" title="7">7 </a> ,
+                      <a href="/search/?q=grade:8" title="8">8 </a>
+                     </div>
+                    </div>
+                   </div>
+                  </section>
+                 </div>
+                 <div class="right">
+                  <section>
+                   <div class="spacetopmedium">
+                    <h2 class="toptitle infoitemname">Date Created:</h2>
+                    <span class="js_local_date" data-date="2012-11-30T02:39:04-08:00">November 30, 2012</span>
+                   </div>
+                   <div>
+                    <h2 class="toptitle infoitemname">Last Modified:</h2>
+                    <span class="js_local_date" data-date="2018-08-13T12:53:51-07:00">August 13, 2018</span>
+                   </div>
+                  </section>
+                  <section>
+                   <!-- Subjects -->
+                   <div id="modality_subjects_wrapper">
+                    <div class="spacetopmedium">
+                     <section>
+                      <div class="alternate-h2 toptitle">
+                        Subjects:
+                      </div>
+                      <div class="keywordlist">
+                       <a class="keyworditem" href="/search/?q=&amp;subject=science" title="science"><span itemprop="keywords"> science </span></a>
+                       <a class="keyworditem" href="/search/?q=&amp;subject=life-science" title="Life Science"><span itemprop="keywords"> Life Science </span></a>
+                       <div class="clear"></div>
+                      </div>
+                     </section>
+                    </div>
+                    <div class="clear"></div>
+                   </div>
+                  </section>
+                  <section>
+                   <!-- Tags -->
+                   <div id="modality_search_wrapper">
+                    <div class="spacetopmedium">
+                     <section>
+                      <div class="alternate-h2 toptitle">
+                        Search Keywords:
+                      </div>
+                      <div class="keywordlist">
+                       <a class="keyworditem" href="/search/?q=immigration" title="immigration"><span itemprop="keywords">immigration</span></a>
+                       <a class="keyworditem" href="/search/?q=emigration" title="emigration"><span itemprop="keywords">emigration</span></a>
+                       <a class="keyworditem" href="/search/?q=exponential%20growth" title="exponential growth"><span itemprop="keywords">exponential growth</span></a>
+                       <a href="#" class="keyworditem js_lnk_show_meta">(1 more)</a>
+                       <span class="js_more_keywords hide"> <a class="keyworditem" href="/search/?q=population%20growth" title="population growth"><span itemprop="keywords">population growth</span></a> </span>
+                       <div class="clear"></div>
+                      </div>
+                     </section>
+                    </div>
+                    <div class="clear"></div>
+                   </div>
+                  </section>
+                  <section>
+                   <!-- Tags -->
+                   <div id="modality_tags_wrapper">
+                    <div class="spacetopmedium">
+                     <section>
+                      <div class="alternate-h2 toptitle">
+                        Tags:
+                      </div>
+                      <div class="keywordlist">
+                       <a class="keyworditem" href="/search/?q=tag:SCI.BIO.525.1.L.2" title="SCI.BIO.525.1.L.2"><span itemprop="keywords"> SCI.BIO.525.1.L.2 </span></a>
+                       <a class="keyworditem" href="/search/?q=tag:SCI.LSC.525.1.L.1" title="SCI.LSC.525.1.L.1"><span itemprop="keywords"> SCI.LSC.525.1.L.1 </span></a>
+                       <div class="clear"></div>
+                      </div>
+                     </section>
+                    </div>
+                   </div>
+                  </section>
+                  <!-- Other Details -->
+                  <section>
+                   <!-- Standards Correlations (Replaced States - SLING) -->
+                   <div class="spacetopmedium js_standardboards_container hide" data-loadurl="/ajax/artifact/standardboards/1106138/">
+                   </div>
+                   <div class="clear"></div>
+                   <!--<h2>Other Details</h2>-->
+                   <!-- Concept Nodes -->
+                   <div id="modality_concept_node_wrapper">
+                    <section class="spacetopmedium">
+                     <h2 class="toptitle"> Concept Nodes: </h2>
+                     <div class="articleinfowrap">
+                      <a title="SCI.BIO.442 (Population Growth Patterns - Life Science) " href="/search/?q=Population Growth Patterns&amp;type=concept" itemprop="keywords" data-encodedid="SCI.BIO.442">SCI.BIO.442 (Population Growth Patterns - Life Science)</a>
+                     </div>
+                    </section>
+                    <div class="clear"></div>
+                   </div>
+                  </section>
+                 </div>
+                 <div class="clear"></div>
+                </div>
+                <div class="spacetop"></div>
+                <div class="divider"></div>
+               </div>
+               <div class="after_metadata">
+                <div class="clear"></div>
+                <div class="resourcesview hide-for-small">
+                 <h3 class=" js_block_toggle js_resources_toggle" data-toggle=".js_resources_toggle" data-container=".js_resources_container"> <span class="show">Show</span><span class="noshow hide">Hide</span> Resources <span class="tip"></span> </h3>
+                 <div class="divider thin"></div>
+                 <div class="js_resources_container" style="display: none">
+                  <!-- Resources -->
+                  <section class="resource_actions resource_wrapper">
+                  </section>
+                  <section class="resources_container clickload" data-loadurl="/ajax/resource_list/c/concept/Population-Growth-Patterns-MS-LS/r42/?artifact_id=1106138&amp;editable=&amp;owned=False&amp;artifact_revision_id=6829127">
+                  </section>
+                 </div>
+                </div>
+               </div>
+               <!-- /END METADATA VIEW -->
+              </div>
+             </div>
+             <!-- /END modalitycontentinnerwrap -->
+            </div>
+            <!-- /END modalitycontentouterwrap -->
+           </div>
+          </div>
+         </div>
+        </section>
+       </div>
+       <div>
+        <div style="padding: 10px;text-align: right;">
+         <img src="https://static.ck12.org/experiments/report-content-error/content_error.svg" style="width: 22px;">
+         <a href="https://docs.google.com/forms/d/e/1FAIpQLSf0FzLyIImbJsJ2gVKD2wVRCfkXuGTXeZLPXlng4U2KZ0Er9g/viewform?formkey=dHlaUFlvNnZrRzhPcWVWbzJ0ZGVFb1E6MQ&amp;entry.1000002=https%3A%2F%2Fwww.ck12.org%2Fc%2Flife-science%2Fpopulation-growth-patterns%2Flesson%2FPopulation-Growth-Patterns-MS-LS%2F%3Freferrer%3Dconcept_details" target="_blank" noopener="">Report a content error</a>
+        </div>
+       </div>
+      </div>
+      <div class="desktop_view">
+       <div class="small-12 columns">
+        <div class="column large-12 review-list-wrapper">
+         <div id="review_list_container" class="relative js_loadlater" data-native="flxweb.modality.read.initreviewlist" data-lazyload="1">
+          <!-- Bottom Artifact Review Feedback -->
+          <div class="reviewswrap">
+           <a id="feedback"></a>
+           <div class="alternate-h1 reviewstitle spacetopxxlarge">
+            Reviews
+           </div>
+           <div class="reviewsdivider hide-for-small"></div>
+           <div>
+            <div id="reviews" class="listitem clearfix reviewslist">
+             <div id="reviewsSummary">
+              <!-- the artifact reviews summary goes here -->
+             </div>
+             <div id="reviewsList">
+              <!-- all the reviews show up here -->
+             </div>
+            </div>
+           </div>
+          </div>
+          <!-- /Bottom Artifact Review Feedback -->
+          <!-- Artifact Voting -->
+          <!-- Artifact Voting -->
+          <div id="myreview">
+           <div class="formrightcolumn artifactvotingfeedback">
+            <div id="myreview_vote">
+             <a href="javascript:void(0);" id="top_edit_review" class="editfeedback_link  hide ">Edit Review</a>
+             <span class="washelpful_js  show "><span>Was this helpful?</span></span>
+             <a id="review_up" class="artifactfeedbackaction artifactfeedbackaction_js" title="Helpful"> <span class="icon-like voting-icon  yes  artifactfeedbackaction"></span> <span> Yes </span> </a>
+             <a id="review_down" class="artifactfeedbackaction artifactfeedbackaction_js" title="Not helpful"> <span class="icon-unlike voting-icon  no   artifactfeedbackaction"></span> <span> No </span> </a>
+            </div>
+            <div id="review_popup" class="feedbackpopup hide">
+             <div class="divfeedback">
+              <textarea maxlength="1000" id="review_comments" class="feedbacktextarea" placeholder="Give feedback about this resource. Why was it helpful or not? Limit to 1000 max characters." rows="4"></textarea>
+             </div>
+             <div class="error profane" id="profane_message"></div>
+             <div class="divider"></div>
+             <div class="feedbackbtn">
+              <!-- <span class="hint_edittitle">(Comment) <span class="var_comment">    0 / 1000</span></span> -->
+              <span class="inlineblock wait_js block-for-small"></span>
+              <span class="spacer"></span>
+              <span class="inlineblock"><a id="review_submit" class="button turquoise feedbackbtn_js " href="javascript:void(0);">Submit Review</a></span>
+              <span class="spacer"></span>
+              <span class="inlineblock"><a id="review_skip" class="button dusty-grey feedbackbtn_skip" href="javascript:void(0);">Skip Review</a></span>
+              <span class="inlineblock"><a class="feedbackbtn_cancel" href="javascript:void(0);">Cancel</a></span>
+             </div>
+            </div>
+           </div>
+          </div>
+          <!-- /Artifact Voting -->
+         </div>
+        </div>
+       </div>
+      </div>
+      <div class="desktop_view">
+       <div class="small-12 columns">
+        <div class="backtotop clear">
+         Back to the
+         <a href="#" id="back_to_top_page" title="Back to top of the page">top of the page ↑</a>
+        </div>
+        <div class="divider"></div>
+        <div class="gclear"></div>
+       </div>
+      </div>
+     </div>
+    </div>
+   </div>
+   <div id="sharePlaneWrapper" class="row relative share-plane-container">
+    <div class="share-plane-div js-share-plane absolute" style="right: 10px;">
+     <div class="plane_image"></div>
+    </div>
+   </div>
+   <!-- own contents go here -->
+   <div class="row collapse" id="profilebuilder-content"></div>
+   <div class="row collapse" id="ck12-license-container"></div>
+   <div class="row collapse hide" id="notification_popup"></div>
+   <button onclick="loadZendeskScript(); " class="supportButton">Support</button>
+  </div>
+  <div class="footer-space hide-for-lti-context"></div>
+  <footer id="footer" class="ff4-compt hide-for-lti-context" style="">
+   <div class="row collapse footer-wrapper">
+    <div class="row collapse footer-links-row">
+     <div class="large-12 small-12 large-centered columns">
+      <div class="row collapse footer-links-container">
+       <div class="large-4 small-6 columns">
+        <div class="row collapse footer-titles">
+         ABOUT
+        </div>
+        <div class="row collapse footer-link-wrapper">
+         <div class="large-6 small-12 columns medium-12">
+          <ul>
+           <li><a id="footer_mission" href="https://www.ck12info.org/about//mission/">Our Mission</a></li>
+           <li><a id="footer_team" href="https://www.ck12info.org/about//team/">Meet the Team</a></li>
+           <li><a id="footer_partners" href="https://www.ck12info.org/about//partners/">Partners</a></li>
+           <li><a id="footer_pres" href="https://www.ck12info.org/about//press/">Press</a></li>
+           <li><a id="footer_careers" href="https://www.ck12info.org/about//careers/">Careers</a></li>
+           <li><a id="footer_security" href="https://www.ck12info.org/about//security/">Security</a></li>
+          </ul>
+         </div>
+         <div class="large-6 small-12 columns medium-12">
+          <ul>
+           <li><a id="footer_community" href="https://www.ck12info.org/about//ck12-community/">Community</a></li>
+           <li><a id="footer_success" href="https://www.ck12info.org/about//success-stories/">Success Stories</a></li>
+           <li><a id="footer_blog" href="https://www.ck12.org/blog/">Blog</a></li>
+           <li><a id="footer_overview" data-reveal-id="myModal">Overview</a></li>
+           <li><a id="footer_usage_map" href="https://www.ck12.org/map/">CK-12 Usage Map</a></li>
+           <li><a id="footer_testimonials" href="https://www.ck12.org/testimonials">Testimonials</a></li>
+          </ul>
+         </div>
+        </div>
+       </div>
+       <div class="large-8 small-6 columns">
+        <div class="row collapse">
+         <div class="large-5 small-12 columns large-offset-1">
+          <div class="row collapse footer-titles">
+           SUPPORT
+          </div>
+          <div class="row collapse footer-link-wrapper">
+           <ul>
+            <li><a id="footer_jumpstart" href="https://www.ck12.org/certified">Certified Educator Program</a></li>
+            <li><a id="footer_webinars" href="https://www.ck12info.org/about//ck12-webinars/">Webinars</a></li>
+            <li><a id="footer_implementation" href="https://www.ck12info.org/about//overview/">CK-12 Resources</a></li>
+            <li><a id="footer_pilot" href="https://www.ck12info.org/about//pilot-program/">Pilot Program</a></li>
+            <li><a id="footer_help" href="https://ck12support.zendesk.com/hc/en-us">Help</a></li>
+            <li><a id="footer_contact" href="https://www.ck12info.org/about//contact-us/">Contact Us</a></li>
+           </ul>
+          </div>
+         </div>
+         <div class="large-5 small-12 columns large-offset-1 by-ck12-wrapper">
+          <div class="row collapse footer-titles">
+           BY CK-12
+          </div>
+          <div class="row collapse footer-link-wrapper">
+           <ul>
+            <li><a id="footer_ccss" href="/books/standards/ccss/">Common Core Math</a></li>
+            <li><a id="footer_flexbooks" href="https://www.ck12info.org/about//fbbrowse/">K-12 FlexBooks®</a></li>
+            <li><a id="footer_colege_flexbooks" href="/college/">College FlexBooks®</a></li>
+            <li><a id="footer_tools" href="https://www.ck12info.org/about//tools-and-apps/">Tools and Apps</a></li>
+            <li><a id="footer_braingenie" href="https://braingenie.ck12.org/" class="notranslate">BRAINGENIE™</a></li>
+           </ul>
+          </div>
+         </div>
+        </div>
+       </div>
+      </div>
+      <div class="footer-social-links-wrapper">
+       <div class="large-4 small-12 columns small-centered translate-social-wrapper">
+        <div id="google_translate_element" title="Select language">
+         <div class="skiptranslate goog-te-gadget" dir="ltr" style="">
+          <div id=":0.targetLanguage" class="goog-te-gadget-simple" style="white-space: nowrap;">
+           <img src="https://www.google.com/images/cleardot.gif" class="goog-te-gadget-icon" alt="" style="background-image: url(&quot;https://translate.googleapis.com/translate_static/img/te_ctrl3.gif&quot;); background-position: -65px 0px;">
+           <span style="vertical-align: middle;"><a aria-haspopup="true" class="goog-te-menu-value" href="javascript:void(0)"><span>Select Language</span><img src="https://www.google.com/images/cleardot.gif" alt="" width="1" height="1"><span style="border-left: 1px solid rgb(187, 187, 187);">​</span><img src="https://www.google.com/images/cleardot.gif" alt="" width="1" height="1"><span aria-hidden="true" style="color: rgb(118, 118, 118);">▼</span></a></span>
+          </div>
+         </div>
+        </div>
+        <div class="right social_links">
+         <span itemscope itemtype="http://schema.org/Organization"><a itemprop="sameAs" id="footer_googleplus" href="https://plus.google.com/+Ck12Org/" target="_blank" rel="noopener" class="icon-googleplus"></a></span>
+         <span itemscope itemtype="http://schema.org/Organization"><a itemprop="sameAs" id="footer_facebook" href="https://www.facebook.com/CK12Foundation" target="_blank" rel="noopener" class="icon-facebook"></a></span>
+         <span itemscope itemtype="http://schema.org/Organization"><a itemprop="sameAs" id="footer_twitter" href="https://twitter.com/CK12Foundation" target="_blank" rel="noopener" class="icon-twitter"></a></span>
+         <span itemscope itemtype="http://schema.org/Organization"><a itemprop="sameAs" id="footer_linkedin" href="https://www.linkedin.com/company/75810" target="_blank" rel="noopener" class="icon-linkedin"></a></span>
+         <span itemscope itemtype="http://schema.org/Organization"><a itemprop="sameAs" id="footer_pinterest" href="http://www.pinterest.com/ck12foundation/" target="_blank" rel="noopener" class="icon-pinterest-3"></a></span>
+         <span itemscope itemtype="http://schema.org/Organization"><a itemprop="sameAs" id="footer_email" class="footer-share-email-link icon-email"></a></span>
+        </div>
+        <div class="app-store-icons">
+         <a id="apple-store-link" target="_blank" rel="noopener" href="https://itunes.apple.com/us/app/ck-12/id909343639?ls=1&amp;mt=8"> <img class="apple-store-image" alt="Download on the app store" src="//img2.ck12.org/media/build-20180828193300/common/images/apple-app-store.svg"> </a>
+         <a id="google-store-link" target="_blank" rel="noopener" href="https://play.google.com/store/apps/details?id=org.ck12.app.practice"> <img class="google-store-image" alt="Get it on Google Play" src="//img1.ck12.org/media/build-20180828193300/common/images/google-play-badge.png"> </a>
+        </div>
+       </div>
+      </div>
+     </div>
+    </div>
+    <div class="row collapse footer-info-row">
+     <div class="large-5 columns footer-version-info hide-for-small">
+      <span>v2.8.0.20180828135746</span>
+      <span class="year_version_separator">|</span>
+      <span class="copy-right-year">© CK-12 Foundation 2018</span>
+      <div>
+       <span>FlexBook® Platform</span>
+      </div>
+     </div>
+     <div class="large-7 small-12 columns footer-usage">
+      <span><a id="footer_tou" href="https://www.ck12info.org/about//terms-of-use/" title="Terms of Use">Terms of Use</a></span>
+      <span class="footer-separator">|</span>
+      <span><a id="footer_privacy" href="https://www.ck12info.org/about//technology-2/privacy-policy/" title="Privacy">Privacy</a></span>
+      <span class="footer-separator">|</span>
+      <span><a id="footer_guidelines" href="https://www.ck12info.org/about//attribution-guidelines/" title="CK-12 Attribution Requirements">Attribution Guide</a></span>
+      <span class="footer-separator">|</span>
+      <span><a id="footer_license" href="http://creativecommons.org/licenses/by-nc/3.0/" title="CK-12 Foundation is licensed under Creative Commons Attribution-NonCommercial 3.0 Unported (CC BY-NC 3.0)." target="new"><img class="footer_image" src="//img1.ck12.org/media/build-20180828193300/images/icon_licence.png" alt="Attribution-NonCommercial 3.0 Unported"></a></span>
+     </div>
+     <div class="large-5 small-12 columns footer-version-info-small show-for-small">
+      <span>v2.8.0.20180828135746</span>
+      <span class="year_version_separator">|</span>
+      <span class="copy-right-year">© CK-12 Foundation 2018</span>
+      <div>
+       <span>FlexBook® Platform</span>
+      </div>
+     </div>
+    </div>
+   </div>
+  </footer>
+  <!-- Tutorial Video -->
+  <div id="myModal" class="modal-uikit reveal-modal small">
+   <div class="close close-reveal-modal button-close">
+    +
+   </div>
+   <h4>CK-12 Overview</h4>
+   <div class="flex-video"></div>
+  </div>
+  <div class="hide">
+   <!-- All the divs inside this div will be hidden and are used for showing dialogs and messages -->
+   <div id="loading_div">
+     Please wait...
+    <img src="//img1.ck12.org/media/build-20180828193300/images/icon_loading.gif" width="43" height="11">
+   </div>
+   <div id="js_signindialog" data-url="https://www.ck12.org/auth/signin?popup=true&amp;requestor=https%3A//www.ck12.org/c/life-science/population-growth-patterns/lesson/Population-Growth-Patterns-MS-LS/%3Freferrer%3Dconcept_details&amp;returnTo=https%3A//www.ck12.org/account/federated/authorized/popup/" data-auth-no-popup-url="https://www.ck12.org/auth/signin?&amp;requestor=https%3A//www.ck12.org/c/life-science/population-growth-patterns/lesson/Population-Growth-Patterns-MS-LS/%3Freferrer%3Dconcept_details&amp;returnTo=https%3A//www.ck12.org/c/life-science/population-growth-patterns/lesson/Population-Growth-Patterns-MS-LS/%3Freferrer%3Dconcept_details">
+    <div class="action">
+     <a id="signin_close" href="#" alt="Close Sign In " title="Close Sign In"></a>
+    </div>
+   </div>
+   <div id="js_dialog_basic">
+    <!-- used for simple OK/Cancel or Alert type dialogs. -->
+    <div class="dialog_msg"></div>
+    <div class="dialog_loading hide">
+     Please wait...
+     <img src="//img1.ck12.org/media/build-20180828193300/images/icon_loading.gif" width="43" height="11">
+    </div>
+   </div>
+   <script id="tmpl_modality_filter" type="text/template">
+	&lt;a class="lnk_modality_filter group_&lt;%= data.group_classname %&gt; &lt;% if (data.active) { %&gt; selected &lt;% } %&gt;" href="/c/life-science/population-growth-patterns&lt;%= window.location.search %&gt;&lt;% if (window.location.search) { %&gt;&amp;by=ck12&amp;difficulty=all&lt;% } else { %&gt;?by=ck12&amp;difficulty=all&lt;% } %&gt;#&lt;%= data.group_classname %&gt;"&gt;
+		&lt;i class="js-modality-icon"&gt;&lt;/i&gt;
+        &lt;span class="group_label"&gt;
+			&lt;span class="js-modality-label"&gt;&lt;%= data.display_text %&gt;&lt;/span&gt;
+        	&lt;br class="show-small"/&gt;
+        	&lt;span&gt;(&lt;%= data.count || 99 %&gt;)&lt;/span&gt;
+        &lt;/span&gt;
+	&lt;/a&gt;
+</script>
+   <script id="tmpl_modality" type="text/template">
+	&lt;div class="modality_inner"&gt;
+		&lt;div class="modalitywrap"&gt;
+			&lt;div class="modality_info_wrapper"&gt;
+				&lt;div class='resource_meta'&gt;
+					&lt;span class="label"&gt;&lt;span class="imgwrap"&gt;&lt;/span&gt;&lt;%= data.modality_display_label %&gt;&lt;/span&gt;
+				&lt;/div&gt;
+				&lt;% if (data.thumbnail_img) { %&gt;
+					&lt;div class="thumbnail_wrapper"&gt;
+						&lt;a href="&lt;%= data.details_url %&gt;" class="thumbnaillink" title="&lt;%= data.title %&gt;"&gt;&lt;img src="&lt;%= data.thumbnail_img %&gt; " alt="&lt;%= data.title %&gt;" /&gt;&lt;/a&gt;
+					&lt;/div&gt;
+				&lt;% } else { %&gt;
+					&lt;div class="thumbnail_wrapper"&gt;
+						&lt;a href="&lt;%= data.details_url %&gt;" class="thumbnaillink" title="&lt;%= data.title %&gt;"&gt;&lt;img src="//img1.ck12.org/media/build-20180828193300/images/modality_generic_icons/&lt;%= data.modality_group.group_classname %&gt;_ic.png" alt="&lt;%= data.title %&gt;" /&gt;&lt;/a&gt;
+					&lt;/div&gt;
+				&lt;% } %&gt;
+				&lt;div class="data_wrapper"&gt;
+					&lt;div class="modalitybody"&gt;
+						&lt;h2&gt;&lt;a href="&lt;%= data.details_url %&gt;"&gt;&lt;%= data.title %&gt;&lt;/a&gt;&lt;/h2&gt;
+						&lt;!-- Contributed By --&gt;
+						&lt;% if (data.contributed_by){ %&gt;
+						&lt;p class="contributiondesc"&gt;&lt;%= data.contributed_by %&gt;&lt;/p&gt;
+						&lt;% } %&gt;
+						&lt;p class="resource_desc"&gt;&lt;%= data.summary %&gt;&lt;/p&gt;
+						&lt;!-- Difficulty Level --&gt;
+						&lt;% if (data.level &amp;&amp; data.artifactType=='lesson' &amp;&amp; window.modality_data &amp;&amp; window.modality_data.read_modality_count &gt; 1  &amp;&amp; !window.modality_data.difficulty) { %&gt;
+						&lt;p class="difficulty"&gt;Difficulty Level:&amp;nbsp; &lt;span class="level"&gt;&lt;%= data.level %&gt;&lt;/span&gt;&lt;/p&gt;
+						&lt;% } %&gt;
+					&lt;/div&gt;
+				&lt;/div&gt;
+			&lt;/div&gt;
+			&lt;div class="modality_actions_wrap"&gt;
+				&lt;div class='modality_actions'&gt;
+					&lt;div class="modality_action share"&gt;
+						&lt;div class="sharemenuwrap js_sharemenuwrap"&gt;
+							&lt;a href="#" class="js_lnk_share"&gt;&lt;span class="imgwrap"&gt;&lt;/span&gt;&lt;span class="label"&gt; &lt;/span&gt;&lt;/a&gt;
+							&lt;ul class='share_menu hide'&gt;
+								&lt;li&gt;
+									&lt;a class="twitter" target="_blank" title="Share on Twitter "
+									href="http://twitter.com?status=&lt;%= escape(data.share_url) %&gt;"&gt;
+										&lt;span class="imgwrap"&gt;&lt;/span&gt;
+										&lt;span class="label"&gt;Twitter&lt;/span&gt;
+									&lt;/a&gt;
+								&lt;/li&gt;
+								&lt;li&gt;
+									&lt;a class="facebook" target="_blank" title="Share on Facebook"
+									href="http://www.facebook.com/sharer.php?u=&lt;%= escape(data.share_url) %&gt;"&gt;
+										&lt;span class="imgwrap"&gt;&lt;/span&gt;
+										&lt;span class="label"&gt;Facebook&lt;/span&gt;
+									&lt;/a&gt;
+								&lt;/li&gt;
+								&lt;li&gt;
+									&lt;a class="email" target="_blank" title="Share via Email"
+									href="mailto:?subject=&lt;%= escape(data.title) %&gt;&amp;body=&lt;%= escape(data.title) %&gt;: &lt;%= escape(data.details_url) %&gt;"&gt;
+										&lt;span class="imgwrap"&gt;&lt;/span&gt;
+										&lt;span class="label"&gt;Email&lt;/span&gt;
+									&lt;/a&gt;
+								&lt;/li&gt;
+							&lt;/ul&gt;
+						&lt;/div&gt;
+					&lt;/div&gt;
+					&lt;div class="voting"&gt;
+					&lt;% if (data.feedbacks &amp;&amp; data.feedbacks.voting)  { %&gt;
+						&lt;% if (data.feedbacks.voting.like) { %&gt;
+							&lt;span class="imgwrap like" title="Helpful"&gt;&lt;/span&gt;   &lt;%= data.feedbacks.voting.like %&gt;
+					    &lt;% } else { %&gt;
+							&lt;span class="imgwrap nolike"  title="Not yet reviewed"&gt;&lt;/span&gt;
+					    &lt;% } %&gt;
+					&lt;% } %&gt;
+					&lt;/div&gt;
+				&lt;/div&gt;
+				&lt;!--
+				&lt;div class="modality_action bookmark"&gt;
+					&lt;a href="#"&gt;&lt;span class="imgwrap"&gt;&lt;/span&gt;&lt;span class="label"&gt;Bookmark&lt;/span&gt;&lt;/a&gt;
+				&lt;/div&gt;
+				--&gt;
+				&lt;div class="clear"&gt;&lt;/div&gt;
+			&lt;/div&gt;
+		&lt;/div&gt;
+	&lt;/div&gt;
+</script>
+   <!-- Template used for concept dropdown on modalities pages -->
+   <script id="conceptDropdownTemplate" type="text/x-template">
+	&lt;li title="&lt;%= (data.conceptName) %&gt;"&gt;
+		&lt;div class="concept_list_display"&gt;
+    		&lt;span class="concept_list_button"&gt;&lt;span class="concept_list_select"&gt;&lt;/span&gt;&lt;/span&gt;
+    	&lt;/div&gt;
+    	&lt;div class="concept_descriptions"&gt;&lt;a href="&lt;%= data.conceptURL %&gt;/"&gt;&lt;%= _.escape(data.conceptName) %&gt;&lt;/a&gt;&lt;/div&gt;
+	&lt;/li&gt;
+</script>
+   <script type="text/javascript">
+	window.js_modality_data = {"domain": {"pre": null, "ck12ModalityCount": {"asmtpractice": {"at grade": 1}, "rwa": {"at grade": 1}, "plix": {"at grade": 1}, "lecture": {"at grade": 2}, "lesson": {"at grade": 1}, "enrichment": {"basic": 1}}, "previewImageUrl": "http://www.ck12.org/media/images/modality_generic_icons/concept_gicon.png", "id": 156186, "subject": "SCI", "from": "domain", "latestDescendantModalityAdded": null, "descendantDomainCount": 0, "branch": "BIO", "communityModalityCount": {"flashcard": {"at grade": 1}, "lesson": {"none": 2, "at grade": 16, "basic": 2}, "studyguide": {"basic": 1}, "rwa": {"at grade": 1}, "lecture": {"at grade": 1}}, "descendantOf": {"term": "Ecology", "handle": "ecology", "description": "", "previewIconUrl": "https://s3.amazonaws.com/concepts.ck12.org/icons/science/Evolution_SCI.BIO.400.svg", "previewImageUrl": "https://s3.amazonaws.com/concepts.ck12.org/preview/evolution.jpg", "encodedID": "SCI.BIO.400", "branch": "BIO", "parentID": 11, "from": "domain", "subject": "SCI", "type": "domain", "id": 1375, "branchInfo": {"term": "Biology", "handle": "biology", "description": null, "previewIconUrl": null, "previewImageUrl": "https://s3.amazonaws.com/concepts.ck12.org/preview/biology.jpg", "encodedID": "SCI.BIO", "branch": "BIO", "parentID": 9, "from": "domain", "subject": "SCI", "type": "domain", "id": 11, "name": "Biology"}, "name": "Ecology"}, "descendantArtifactCount": 0, "type": "domain", "descendantModalityCount": {}, "sort": 1, "handle": "population-growth-patterns", "description": "Compares expotential and logistic population growth patterns.", "parent": {"sort": 1, "term": "Populations Overview", "previewIconUrl": null, "description": "None", "from": "domain", "parentID": 156152, "name": "Populations Overview", "encodedID": "SCI.BIO.436", "branch": "BIO", "previewImageUrl": "http://www.ck12.org/media/images/modality_generic_icons/concept_gicon.png", "handle": "populations-overview", "type": "domain", "id": 156169, "branchInfo": {"term": "Biology", "handle": "biology", "description": null, "previewIconUrl": null, "previewImageUrl": "https://s3.amazonaws.com/concepts.ck12.org/preview/biology.jpg", "encodedID": "SCI.BIO", "branch": "BIO", "parentID": 9, "from": "domain", "subject": "SCI", "type": "domain", "id": 11, "name": "Biology"}, "subject": "SCI"}, "descendantCommunityModalityCount": {}, "latestModalityAdded": "2018-08-13T09:01:55-07:00", "collection": {"collectionHandle": "life-science", "collectionCreatorID": 3, "conceptCollectionAbsoluteHandle": "population-growth-patterns", "collectionTitle": "Life Science", "encodedID": "SCI.BIO.442", "isCanonical": true, "conceptCollectionTitle": "Population Growth Patterns"}, "post": null, "artifactCount": {"rwa": 1, "lesson": 2, "plix": 1}, "term": "Population Growth Patterns", "previewIconUrl": null, "name": "Population Growth Patterns", "descendantDomainCountWithModalities": 0, "descendantCK12ModalityCount": 0, "encodedID": "SCI.BIO.442", "branchInfo": {"term": "Biology", "handle": "biology", "description": null, "previewIconUrl": null, "previewImageUrl": "https://s3.amazonaws.com/concepts.ck12.org/preview/biology.jpg", "encodedID": "SCI.BIO", "branch": "BIO", "parentID": 9, "from": "domain", "subject": "SCI", "type": "domain", "id": 11, "name": "Biology"}, "modalityCount": {"asmtpractice": {"at grade": 1}, "rwa": {"at grade": 2}, "plix": {"at grade": 1}, "lecture": {"at grade": 3}, "flashcard": {"at grade": 1}, "lesson": {"none": 2, "at grade": 17, "basic": 2}, "studyguide": {"basic": 1}, "enrichment": {"basic": 1}}}, "modality_groups": [{"display_text": "All Modalities", "count": 7, "artifact_types": ["__ALL__"], "sequence": 0, "group_classname": "all", "group_name": "All types", "show_text_label": true, "default_thumb": "modality_generic_icons/concept_gicon.png"}, {"display_text": "Read", "count": 1, "artifact_types": ["lesson", "concept", "section"], "sequence": 1, "group_classname": "text", "group_name": "Read", "show_text_label": false, "default_thumb": "modality_generic_icons/read_gicon.png"}, {"display_text": "Video", "count": 3, "artifact_types": ["lecture", "audio", "enrichment"], "sequence": 4, "group_classname": "multimedia", "group_name": "Video", "show_text_label": false, "default_thumb": "modality_generic_icons/video_gicon.png"}, {"display_text": "Assessments", "count": 1, "artifact_types": ["asmtpractice", "asmtquiz"], "sequence": 9, "group_classname": "assessment", "group_name": "Assessments", "show_text_label": false, "default_thumb": "modality_generic_icons/assest_gicon.png"}, {"display_text": "Real World", "count": 1, "artifact_types": ["rwa", "rwaans"], "sequence": 14, "group_classname": "real_world", "group_name": "Real World", "show_text_label": false, "default_thumb": "modality_generic_icons/rwa_gicon.png"}, {"display_text": "PLIX", "count": 1, "artifact_types": ["plix"], "sequence": 3, "group_classname": "interactive", "group_name": "PLIX", "show_text_label": false, "default_thumb": "modality_generic_icons/interactive_ic.png"}], "downloaduri": null, "artifact": {"domain": {"term": "Population Growth Patterns", "handle": "population-growth-patterns", "description": "Compares expotential and logistic population growth patterns.", "parent": {"term": "Populations Overview", "handle": "populations-overview", "description": "None", "parent": {"term": "Communities and Populations", "handle": "communities-and-populations", "description": "None", "parent": {"term": "Ecology", "handle": "ecology", "description": "", "parent": {"term": "Biology", "handle": "biology", "description": null, "parent": {"term": "Science", "handle": "science", "description": null, "parent": {"term": "root", "handle": "root", "description": null, "previewIconUrl": null, "encodedID": "CKT", "branch": null, "previewImageUrl": "http://www.ck12.org/media/images/modality_generic_icons/concept_gicon.png", "from": "domain", "subject": "CKT", "type": "domain", "id": 1, "name": "root"}, "previewIconUrl": null, "previewImageUrl": "https://s3.amazonaws.com/concepts.ck12.org/preview/introduction-to-animals.jpg", "encodedID": "SCI", "branch": null, "parentID": 1, "from": "domain", "subject": "SCI", "type": "domain", "id": 9, "name": "Science"}, "previewIconUrl": null, "previewImageUrl": "https://s3.amazonaws.com/concepts.ck12.org/preview/biology.jpg", "encodedID": "SCI.BIO", "branch": "BIO", "parentID": 9, "from": "domain", "subject": "SCI", "type": "domain", "id": 11, "branchInfo": {"term": "Biology", "handle": "biology", "description": null, "previewIconUrl": null, "previewImageUrl": "https://s3.amazonaws.com/concepts.ck12.org/preview/biology.jpg", "encodedID": "SCI.BIO", "branch": "BIO", "parentID": 9, "from": "domain", "subject": "SCI", "type": "domain", "id": 11, "name": "Biology"}, "name": "Biology"}, "previewIconUrl": "https://s3.amazonaws.com/concepts.ck12.org/icons/science/Evolution_SCI.BIO.400.svg", "previewImageUrl": "https://s3.amazonaws.com/concepts.ck12.org/preview/evolution.jpg", "encodedID": "SCI.BIO.400", "branch": "BIO", "parentID": 11, "from": "domain", "subject": "SCI", "type": "domain", "id": 1375, "branchInfo": {"term": "Biology", "handle": "biology", "description": null, "previewIconUrl": null, "previewImageUrl": "https://s3.amazonaws.com/concepts.ck12.org/preview/biology.jpg", "encodedID": "SCI.BIO", "branch": "BIO", "parentID": 9, "from": "domain", "subject": "SCI", "type": "domain", "id": 11, "name": "Biology"}, "name": "Ecology"}, "previewIconUrl": null, "previewImageUrl": "http://www.ck12.org/media/images/modality_generic_icons/concept_gicon.png", "encodedID": "SCI.BIO.430", "branch": "BIO", "parentID": 1375, "from": "domain", "subject": "SCI", "type": "domain", "id": 156152, "branchInfo": {"term": "Biology", "handle": "biology", "description": null, "previewIconUrl": null, "previewImageUrl": "https://s3.amazonaws.com/concepts.ck12.org/preview/biology.jpg", "encodedID": "SCI.BIO", "branch": "BIO", "parentID": 9, "from": "domain", "subject": "SCI", "type": "domain", "id": 11, "name": "Biology"}, "name": "Communities and Populations"}, "previewIconUrl": null, "previewImageUrl": "http://www.ck12.org/media/images/modality_generic_icons/concept_gicon.png", "encodedID": "SCI.BIO.436", "branch": "BIO", "parentID": 156152, "from": "domain", "subject": "SCI", "type": "domain", "id": 156169, "branchInfo": {"term": "Biology", "handle": "biology", "description": null, "previewIconUrl": null, "previewImageUrl": "https://s3.amazonaws.com/concepts.ck12.org/preview/biology.jpg", "encodedID": "SCI.BIO", "branch": "BIO", "parentID": 9, "from": "domain", "subject": "SCI", "type": "domain", "id": 11, "name": "Biology"}, "name": "Populations Overview"}, "previewIconUrl": null, "previewImageUrl": "http://www.ck12.org/media/images/modality_generic_icons/concept_gicon.png", "encodedID": "SCI.BIO.442", "branch": "BIO", "parentID": 156169, "from": "domain", "subject": "SCI", "type": "domain", "id": 156186, "branchInfo": {"term": "Biology", "handle": "biology", "description": null, "previewIconUrl": null, "previewImageUrl": "https://s3.amazonaws.com/concepts.ck12.org/preview/biology.jpg", "encodedID": "SCI.BIO", "branch": "BIO", "parentID": 9, "from": "domain", "subject": "SCI", "type": "domain", "id": 11, "name": "Biology"}, "name": "Population Growth Patterns"}, "modality_group": {"display_text": "Read", "artifact_types": ["lesson", "concept", "section"], "sequence": 1, "group_classname": "text", "group_name": "Read", "show_text_label": false, "default_thumb": "modality_generic_icons/read_gicon.png"}, "creator": "CK-12", "labels": [], "exerciseCount": 0, "contributor": null, "handle": "Population-Growth-Patterns-MS-LS", "perma": "c/concept/Population-Growth-Patterns-MS-LS/", "url_pdf": [], "url_epub": null, "id": 1106138, "conceptNode": "SCI.LSC.525.1", "realm": null, "resourceCounts": {"allVideos": 1, "image": 4, "cover page": 1, "allAttachments": 0, "cover video": 1, "contents": 1}, "title": "Population Growth Patterns", "coverImageThumbSmall": "https://dr282zn36sxxg.cloudfront.net/datastreams/f-d%3Ad5cdf0a7b5afa96dedf6e1b48c3e3fe19f650e4e46a674f3455ef1d3%2BCOVER_PAGE_THUMB_SMALL_TINY%2BCOVER_PAGE_THUMB_SMALL_TINY.1", "extendedArtifactsCount": 0, "creatorAuthID": 3, "isDraft": false, "feedbacks": {"rating": {"count": 0, "average": 0, "1": 0, "3": 0, "2": 0, "5": 0, "4": 0}, "voting": {"dislike": 15, "like": 28}}, "gradeGrid": [[2080, "6"], [1935, "7"], [1936, "8"]], "handle-encoded": true, "subjectGrid": [[3568, "science"], [4078, "Life Science"]], "collections": [{"collectionHandle": "life-science", "collectionCreatorID": 3, "conceptCollectionAbsoluteHandle": "population-growth-patterns", "collectionTitle": "Life Science", "encodedID": "SCI.BIO.442", "isCanonical": true, "conceptCollectionTitle": "Population Growth Patterns"}], "internalTagGrid": [], "coverImageResourceID": 9821812, "messageToUsers": null, "isLatest": true, "thumbnail_img": "https://dr282zn36sxxg.cloudfront.net/datastreams/f-d%3Ad5cdf0a7b5afa96dedf6e1b48c3e3fe19f650e4e46a674f3455ef1d3%2BCOVER_PAGE%2BCOVER_PAGE.1", "type": {"modality": true, "extensionType": "L", "description": "The lesson artifact", "name": "lesson", "id": 3}, "searchGrid": [[2880, "immigration"], [2881, "emigration"], [3285, "exponential growth"], [6751, "population growth"]], "revision": "42", "artifactRevisionID": 6829127, "lastRead": null, "isModality": 1, "modality": {"artifact_type": "lesson", "weight_teacher": 10, "student_show": true, "display_label": "Read", "weight_student": 10}, "revisionInLibrary": null, "published": "2018-08-13T12:53:51-07:00", "coverImageThumbLarge": "https://dr282zn36sxxg.cloudfront.net/datastreams/f-d%3Ad5cdf0a7b5afa96dedf6e1b48c3e3fe19f650e4e46a674f3455ef1d3%2BCOVER_PAGE_THUMB_LARGE_TINY%2BCOVER_PAGE_THUMB_LARGE_TINY.1", "modality_display_label": "Read", "hasXhtml": true, "foundationGrid": [[156186, "Population Growth Patterns", "SCI.BIO.442", "Population-Growth-Patterns", "biology"]], "stateGrid": [], "creatorLogin": "ck12editor", "extendedArtifacts": {}, "creatorID": 3, "authors": [{"roleID": 3, "sequence": 4, "role": "author", "name": "Jessica Harwood", "artifactID": 1106138}, {"roleID": 3, "sequence": 6, "role": "author", "name": "Douglas Wilkin, Ph.D.", "artifactID": 1106138}, {"roleID": 9, "sequence": 1, "role": "contributor", "name": "Doris Kraus, Ph.D.", "artifactID": 1106138}, {"roleID": 9, "sequence": 2, "role": "contributor", "name": "Niamh Gray-Wilson", "artifactID": 1106138}, {"roleID": 9, "sequence": 3, "role": "contributor", "name": "Jean Brainard, Ph.D.", "artifactID": 1106138}, {"roleID": 9, "sequence": 5, "role": "contributor", "name": "Sarah Johnson", "artifactID": 1106138}, {"roleID": 9, "sequence": 8, "role": "contributor", "name": "Jane Willan", "artifactID": 1106138}, {"roleID": 9, "sequence": 9, "role": "contributor", "name": "Corliss Karasov", "artifactID": 1106138}, {"roleID": 10, "sequence": 7, "role": "editor", "name": "Douglas Wilkin, Ph.D.", "artifactID": 1106138}], "level": "at grade", "vocabulary_info": null, "artifactID": 1106138, "latestRevision": "42", "contributed_by": "", "language": "English", "license": "CC BY NC", "tagGrid": [[15893, "SCI.BIO.525.1.L.2"], [19168, "SCI.LSC.525.1.L.1"]], "coverImage": "/flx/show/cover%20page/user%3Ack12science/8238ac75e3cf2797c2a40f6e9c455868-201501121421084476234308-201501121421089979593869.jpg", "created": "2012-11-30T02:39:04-08:00", "latestRevisionID": 6829127, "modified": "2018-08-13T12:53:51-07:00", "summary": "Covers population growth and the factors that affect it.", "coverImageSatelliteUrl": "https://dr282zn36sxxg.cloudfront.net/datastreams/f-d%3Ad5cdf0a7b5afa96dedf6e1b48c3e3fe19f650e4e46a674f3455ef1d3%2BCOVER_PAGE%2BCOVER_PAGE.1", "encodedID": "SCI.LSC.525.1.L.1", "standardGrid": {}, "artifactType": "lesson", "url_mobi": null}, "modalities": []};
+	var jsCollectionData = [{"collection_url": "/c/life-science", "collection": {"handle": "life-science", "description": "Life Science is the study of life and living organisms, including their physical and chemical structure, function, development, and evolution.", "isRoot": true, "level": 1, "parentSubjectID": "SCI", "nextDescendantCollection": {"descendantEIDChildrenCount": 0, "handle": "life-science-::-population-growth-limits", "level": 5, "title": "Population Growth Limits", "encodedID": "SCI.BIO.443", "creatorID": 3, "identifier": "11.1.2.3", "type": "Collection", "absoluteHandle": "population-growth-limits"}, "title": "Life Science", "isPublished": true, "canonicalID": "SCI.LSC", "descendantCollection": {"taxonomyComposistionsInfo": [{"updated": "2013-02-04 21:46:19", "nodeType": "subject", "name": "Science", "created": "2012-06-08 22:38:20", "branches": [{"updated": "2015-12-09 10:10:13.287450", "handle": "Biology", "name": "Biology", "created": "2012-06-08 22:38:20", "bisac": "SCI008000", "flxID": 11, "concepts": [{"orderedEncodedID": "SCIBIO44200000000000000000000000000000000000000000", "status": "published", "updated": "2017-08-04 20:24:42.950313", "handle": "Population-Growth-Patterns", "description": "Compares expotential and logistic population growth patterns.", "created": "2017-08-04 20:24:42.950305", "flxID": 156186, "redirectedReferences": ["SCI.BIO.525.1", "SCI.LSC.525.1", "SCI.BIO.525.6"], "encodedID": "SCI.BIO.442", "keywords": "", "nodeType": "concept", "descendantEIDChildrenCount": 0, "name": "Population Growth Patterns"}], "nodeType": "branch", "shortname": "BIO", "descendantEIDChildrenCount": 0, "previewImageUrl": "http://concepts.ck12.org/preview/biology.jpg"}], "previewImageUrl": "http://concepts.ck12.org/preview/introduction-to-animals.jpg", "shortname": "SCI", "descendantEIDChildrenCount": 0}], "descendantEIDChildrenCount": 0, "handle": "life-science-::-population-growth-patterns", "level": 5, "title": "Population Growth Patterns", "encodedID": "SCI.BIO.442", "creatorID": 3, "identifier": "11.1.2.2", "type": "Collection", "absoluteHandle": "population-growth-patterns"}, "isCanonical": true, "creatorID": 3, "previousDescendantCollection": {"descendantEIDChildrenCount": 0, "handle": "life-science-::-population", "level": 5, "title": "Population", "encodedID": "SCI.BIO.437", "creatorID": 3, "identifier": "11.1.2.1", "type": "Collection", "absoluteHandle": "population"}, "descendantEIDChildrenCount": 0, "type": "Collection"}}]
+    if (jsCollectionData.length &gt; 0)
+    {
+    	window.js_collection_data = jsCollectionData[0];
+    	/* Setting canonical url */
+    	var urlElements = window.location.href.split('/')
+    	var l = urlElements.length
+    	var originalConceptCollectionHandle = ('taxonomyComposistionsInfo' in jsCollectionData[0].collection.descendantCollection) ? jsCollectionData[0].collection.descendantCollection.taxonomyComposistionsInfo[0].branches[0].concepts[0].handle.toLowerCase() : jsCollectionData[0].collection.descendantCollection.absoluteHandle;
+		var canonical_url = "https://www.ck12.org/" + jsCollectionData[0].collection.handle + "/" + originalConceptCollectionHandle.toLowerCase() + '/' + urlElements[l - 3] + '/' + urlElements[l - 2] + '/'
+        var link = document.createElement('link');
+        link.rel = 'canonical'
+        link.href = canonical_url;
+        document.head.appendChild(link);
+        console.log("Canonical url: " + document.querySelector("link[rel='canonical']").href)
+	}
+</script>
+   <!--
+    Templates for reviews
+-->
+   <!--
+    Template used for 1 review in the reviews list
+-->
+   <script type="text/x-template" id="reviewTemplate">
+    &lt;div class="feedbacksection" id="&lt;%= memberID %&gt;"&gt;
+            &lt;div class="feedbackauth"&gt;
+                &lt;span class="membername"&gt; &lt;%= memberName %&gt; &lt;/span&gt;
+                &lt;span class="date"&gt;  &lt;%= creationTime %&gt;&lt;/span&gt;
+                &lt;span&gt;
+                &lt;% if (score == -1) { %&gt;
+                    &lt;a class="dislikeicon" title="Not helpful"&gt;&lt;span class="imgwrap"&gt;&lt;/span&gt;&lt;/a&gt;
+                &lt;% } else { %&gt;
+                     &lt;a class="likeicon" title="Helpful"&gt;&lt;span class="imgwrap"&gt;&lt;/span&gt;&lt;/a&gt;
+                &lt;% } %&gt;
+                &lt;/span&gt;
+            &lt;/div&gt;
+            &lt;div class="feedbackcomment break-word"&gt;
+                &lt;%= _.escape(comments) %&gt;
+            &lt;/div&gt;
+
+            &lt;div class="reply_action"&gt;
+                &lt;span class="feedbackbtn"&gt;&lt;span class="inlineblock wait_js block-for-small"&gt;&lt;/span&gt; &lt;a class="listreply collapsereply" data-memberid="&lt;%= memberID %&gt;" data-totalreviews="&lt;%= totalReviews %&gt;" href="javascript:void(0);" &gt; &lt;%= totalReviews %&gt; &lt;% if (totalReviews &gt; 1 || totalReviews === 0){ %&gt; Comments &lt;%}else{ %&gt; Comment &lt;% } %&gt;  &lt;/a&gt; &lt;/span&gt;
+                &lt;a class="addreply" data-memberid="&lt;%= memberID %&gt;" href="javascript:void(0);"  &gt;&amp;nbsp;&amp;nbsp;Reply&amp;nbsp;&amp;nbsp;&lt;/a&gt;&lt;/span&gt;
+                &lt;span class="spaceleft"&gt; Was this helpful? &lt;a class="spaceleft helpfulyes" href="javascript:void(0);" data-helpfulyes="&lt;%= isHelpful %&gt;" &gt; Yes ( &lt;%= isHelpful %&gt; ) &lt;/a&gt; &lt;a class="spaceleft helpfulno" href="javascript:void(0);" data-helpfulno="&lt;%= isNotHelpful %&gt;" &gt; No ( &lt;%= isNotHelpful %&gt; ) &lt;/a&gt;&lt;/span&gt;
+                &lt;span class="formrightcolumn feedbackbtn"&gt;
+	                &lt;span class="inlineblock wait_js block-for-small"&gt;&lt;/span&gt;
+	                &lt;span class="action-item-container"&gt;
+					&lt;% if (isArtifactOwner || isAdminUser || isReviewer) { %&gt;
+                		&lt;a class="hide js_feedbackbtn_remove"&gt;&lt;/a&gt;
+						&lt;span class="action-item icon-remove remove_feedback_confirm js_feedback"&gt;
+                			&lt;span class="tooltip-bottom text-tips"&gt;
+                				Delete
+                			&lt;/span&gt;
+                		&lt;/span&gt;
+                	&lt;% } %&gt;
+                	&lt;/span&gt;
+                	&lt;span class="action-item-container"&gt;
+	                &lt;% if ((!notAbuse &amp;&amp; !hasReportedAbuse) &amp;&amp; (memberID != userID)){ %&gt;
+                		&lt;span class="action-item icon-flag report_abuse js_feedback_abuse"&gt;
+                			&lt;span class="tooltip-bottom text-tips"&gt;
+                				Report Abuse
+                			&lt;/span&gt;
+                		&lt;/span&gt;
+	                &lt;% } %&gt;
+	                &lt;/span&gt;
+            &lt;/div&gt;
+
+            &lt;div class="divider spacetop"&gt;&lt;/div&gt;
+
+            &lt;div class="addreplybox hide"&gt;
+                &lt;div class="formleftcolumn spacetop"&gt;
+                    &lt;span class="feedbacktitle"&gt; Post a Comment&lt;/span&gt;
+                &lt;/div&gt;
+                &lt;div class="clear replytextareawrap"&gt;
+                    &lt;textarea maxlength="1000" class="replytextarea" placeholder="Give reply about this review. Why was it helpful or not? Limit to 1000 max characters." rows="4"&gt;&lt;/textarea&gt;
+                &lt;/div&gt;
+                &lt;div class="error profanereply" &gt;&lt;/div&gt;
+                &lt;div class="feedbackbtn formrightcolumn inlineblock"&gt;
+                    &lt;span class="inlineblock wait_js block-for-small"&gt;&lt;/span&gt;
+                    &lt;span class="inlineblock"&gt;&lt;a data-memberid="&lt;%= memberID %&gt;" class="button turquoise postreply_js " href="javascript:void(0);" &gt;Post&lt;/a&gt;&lt;/span&gt;
+                    &lt;span class="spacer"&gt;&lt;/span&gt;
+                    &lt;span class="inlineblock"&gt;&lt;a class="button dusty-grey supplementary cancelreply_js"   href="javascript:void(0);"&gt;Cancel&lt;/a&gt;&lt;/span&gt;
+                &lt;/div&gt;
+                &lt;div class="clear"&gt;&lt;/div&gt;
+            &lt;/div&gt;
+    &lt;/div&gt;
+
+
+</script>
+   <!--
+    Template used for disply 1 reply for review
+-->
+   <script type="text/x-template" id="replyTemplate">
+   &lt;div class="replycomment" id="&lt;%= id %&gt;"&gt;
+			&lt;div class="spacetop"&gt;&lt;/div&gt;
+            &lt;div class="feedbackauth"&gt;
+                &lt;span class="membername"&gt; &lt;%= reviewersMemberName %&gt; &lt;/span&gt;
+                &lt;span class="date"&gt;  &lt;%= creationTime %&gt;&lt;/span&gt;
+                &lt;span class="reply_action"&gt;
+                    &lt;% if (isReplier) { %&gt;
+	                 &lt;span class="spaceleft editaction"&gt;&lt;a class="editreply_js" href="javascript:void(0);"&gt; Edit &lt;/a&gt;&lt;/span&gt;
+                    &lt;% } %&gt;
+	                 &lt;span class="formrightcolumn feedbackbtn"&gt;
+	                 	 &lt;span class="inlineblock wait_js block-for-small"&gt;&lt;/span&gt;
+	                 	 &lt;span class="action-item-container"&gt;
+		                 &lt;% if (isArtifactOwner || isAdminUser || isReviewer || isReplier) { %&gt;
+	                		&lt;a class="deletereply_js hide"&gt;X&lt;/a&gt;
+	                		&lt;span class="action-item icon-remove remove_feedback_confirm"&gt;
+	                			&lt;span class="tooltip-bottom text-tips"&gt;
+	                				Delete
+	                			&lt;/span&gt;
+	                		&lt;/span&gt;
+	                	 &lt;% } %&gt;
+	                	 &lt;/span&gt;
+	                	 &lt;span class="action-item-container"&gt;
+	                	&lt;% if ((!notAbuse &amp;&amp; !hasReportedAbuse) &amp;&amp; (reviewersMemberID != userID)){ %&gt;
+	                		&lt;span class="action-item icon-flag report_abuse"&gt;
+	                			&lt;span class="tooltip-bottom text-tips"&gt;
+	                				Report Abuse
+	                			&lt;/span&gt;
+	                		&lt;/span&gt;
+	                	&lt;% } %&gt;
+	                	&lt;/span&gt;
+                	&lt;/span&gt;
+                &lt;/span&gt;
+            &lt;/div&gt;
+
+
+            &lt;div class="feedbackcomment break-word" data-reviewid="&lt;%= id %&gt;" data-reviewersmemberid="&lt;%= reviewersMemberID %&gt;" data-memberid="&lt;%= memberID %&gt;" &gt;
+                &lt;%= _.escape(reviewComment) %&gt;
+            &lt;/div&gt;
+
+            &lt;div class="divider spacetop"&gt;&lt;/div&gt;
+    &lt;/div&gt;
+</script>
+   <!--
+    Template used edit box of 1 reply for review
+-->
+   <script type="text/x-template" id="updateReplyTemplate">
+        &lt;div class="editreplybox"&gt;
+                &lt;div class="formleftcolumn spacetop"&gt;
+                    &lt;span class="feedbacktitle"&gt; Edit a Comment&lt;/span&gt;
+                &lt;/div&gt;
+                &lt;div class="clear replytextareawrap"&gt;
+                    &lt;textarea maxlength="1000" class="replytextarea" placeholder="Give reply about this review. Why was it helpful or not? Limit to 1000 max characters." rows="4"&gt; &lt;%= reviewComment %&gt;&lt;/textarea&gt;
+                &lt;/div&gt;
+                &lt;div class="error profanereply" &gt;&lt;/div&gt;
+                &lt;div class="feedbackbtn formrightcolumn inlineblock"&gt;
+                   &lt;span class="inlineblock wait_js block-for-small"&gt;&lt;/span&gt;
+                   &lt;span class="inlineblock"&gt;&lt;a class="btn updatereply_js " href="javascript:void(0);" &gt;Update&lt;/a&gt;&lt;/span&gt;
+                   &lt;span class="spacer"&gt;
+                   &lt;/span&gt; &lt;span class="inlineblock"&gt;&lt;a class="btn supplementary canceleditreply cancelreply_js" href="javascript:void(0);" &gt;Cancel&lt;/a&gt;&lt;/span&gt;
+                &lt;/div&gt;
+                &lt;div class="clear"&gt;&lt;/div&gt;
+        &lt;/div&gt;
+</script>
+   <!--
+    Template used for showing the Load more button
+-->
+   <script type="text/x-template" id="loadmoreBtnTemplate">
+	&lt;div id = 'load-more-container'&gt;
+	&lt;div class="spacetop"&gt;&lt;/div&gt;
+
+        &lt;div id="reviewfeedback_loading_div" class="hide"&gt;
+        Loading reviews...
+        &lt;img class="x-ck12-img-nopopup" src="//img1.ck12.org/media/build-20180828193300/images/icon_loading.gif" width="43" height="11" /&gt;
+        &lt;/div&gt;
+
+    &lt;% if(showLoadmore) { %&gt;
+        &lt;span class="inlineblock formleftcolumn"&gt; &lt;a id="loadMorebtn" class="loadmorereviewfeedback_js" &gt;
+        	Load More (&lt;span id = 'remaing-reviews'&gt;&lt;%= reviewsRemaining %&gt;&lt;/span&gt;)
+        	&lt;span class="icon-arrow3-down"&gt;&lt;/span&gt;
+        	&lt;/a&gt;&lt;/span&gt;
+    &lt;% } %&gt;
+    &lt;/div&gt;
+</script>
+   <!--
+    Template used for showing the summary of the reviews
+-->
+   <script type="text/x-template" id="reviewsSummaryTemplate">
+    &lt;div class="reviewfeedbackhead spacetop"&gt;
+        &lt;div class="formrightcolumn"&gt;
+            &lt;% if (score == -1 || score == 1) { %&gt;
+            &lt;a id="editMyReview" class="btn editreviewfeedback_js " href="javascript:void(0);" &gt; Edit Your Review&lt;/a&gt;
+            &lt;% } %&gt;
+        &lt;/div&gt;
+        &lt;div class="feedbackpercentage" &gt;
+            &lt;% if (total &gt; 0) { %&gt;
+            &lt;div class="formleftcolumn hide-for-small"&gt;
+                &lt;span class="feedbacktitle"&gt;
+                &lt;%= percentage %&gt; % of people thought this content was helpful.
+                &lt;/span&gt;
+            &lt;/div&gt;
+            &lt;span class="feedbacktitle"&gt;
+                &lt;span class="icon-like voting-icon like" title="Helpful"&gt;&lt;/span&gt;
+                &lt;span class="vote like"&gt;&lt;%= like %&gt;&lt;/span&gt;
+                &lt;span class="icon-unlike voting-icon dislike" title="Not helpful"&gt;&lt;/span&gt;
+                &lt;span class="vote dislike"&gt;&lt;%= dislike %&gt;&lt;/span&gt;
+            &lt;/span&gt;
+            &lt;div class="clear spacetop"&gt;&lt;/div&gt;
+            &lt;% if (reviewsRemaining &gt; 0) { %&gt;
+            &lt;div class="inlineblock formleftcolumn show-hide-feedback-reviews reviews-collapsed"&gt;
+                 &lt;a id="show-reviews-btn" class="showreviews_js"&gt;Show reviews (&lt;%= reviewsRemaining %&gt;)
+                 	&lt;span class="icon-arrow3-down"&gt;&lt;/span&gt;
+                 &lt;/a&gt;
+            &lt;/div&gt;
+            &lt;div class="clear"&gt;&lt;/div&gt;
+            &lt;% } %&gt;
+            &lt;% } else { %&gt;
+            Help us create better content by rating and reviewing this modality.
+            &lt;% } %&gt;
+        &lt;/div&gt;
+         &lt;div class="divider spacetop"&gt;&lt;/div&gt;
+         &lt;% if(reviewsRemaining &gt; 0) { %&gt;
+         &lt;div class="formleftcolumn"&gt;
+                &lt;span class="feedback-helpfull-heading feedbacktitle reviews-expanded hide"&gt;
+                Most Helpful Reviews:
+                &lt;/span&gt;
+        &lt;/div&gt;
+		 &lt;div class="inlineblock formrightcolumn show-hide-feedback-reviews spacetop reviews-expanded hide"&gt;
+                 &lt;a id="hide-reviews-btn" class="hidereviews_js"&gt;Close
+                 &lt;/a&gt;
+        &lt;/div&gt;
+        &lt;% } %&gt;
+    &lt;/div&gt;
+</script>
+   <!--
+Template used for showing the current user's review
+for a specified artifact
+-->
+   <script type="text/x-template" id="myReviewTemplate">
+    &lt;div class="formrightcolumn artifactvotingfeedback"&gt;
+        &lt;div id="myreview_vote"&gt;
+
+            &lt;a href="javascript:void(0);" id="top_edit_review" class="editfeedback_link &lt;% if (score == 1 || score == -1) { %&gt; show &lt;% } else{ %&gt; hide &lt;% } %&gt;" &gt;Edit Review&lt;/a&gt;
+
+            &lt;span class="washelpful_js &lt;% if (score == 1 || score == -1) { %&gt; hide &lt;% } else{ %&gt; show &lt;% } %&gt;"&gt;&lt;span&gt;Was this helpful?&lt;/span&gt;&lt;/span&gt;
+
+
+            &lt;a id="review_up" class="artifactfeedbackaction artifactfeedbackaction_js" title="Helpful"  &gt;
+                &lt;span class="icon-like voting-icon &lt;% if (score == 1) { %&gt; like &lt;% } else{ %&gt; yes &lt;% } %&gt; artifactfeedbackaction"&gt;&lt;/span&gt;
+                &lt;span&gt; Yes &lt;/span&gt;
+            &lt;/a&gt;
+            &lt;a id="review_down" class="artifactfeedbackaction artifactfeedbackaction_js" title="Not helpful" &gt;
+                &lt;span class="icon-unlike voting-icon &lt;% if (score == -1) { %&gt; dislike &lt;% } else{ %&gt; no &lt;% } %&gt;  artifactfeedbackaction"&gt;&lt;/span&gt;
+                &lt;span&gt; No &lt;/span&gt;
+            &lt;/a&gt;
+       &lt;/div&gt;
+ 		&lt;div id="review_popup" class="feedbackpopup hide"&gt;
+            &lt;div class="divfeedback"&gt;
+                &lt;textarea maxlength="1000" id="review_comments" class="feedbacktextarea" placeholder="Give feedback about this resource. Why was it helpful or not? Limit to 1000 max characters." rows="4"&gt;&lt;%= comments %&gt;&lt;/textarea&gt;
+            &lt;/div&gt;
+            &lt;div class="error profane" id="profane_message"&gt;&lt;/div&gt;
+        	&lt;div class="divider"&gt;&lt;/div&gt;
+        	&lt;div class="feedbackbtn"&gt;
+            &lt;!-- &lt;span class="hint_edittitle"&gt;(Comment) &lt;span class="var_comment"&gt;    0 / 1000&lt;/span&gt;&lt;/span&gt; --&gt;
+            &lt;span class="inlineblock wait_js block-for-small"&gt;&lt;/span&gt;
+            &lt;span class="spacer"&gt;&lt;/span&gt;
+            &lt;span class="inlineblock"&gt;&lt;a id="review_submit"   class="button turquoise feedbackbtn_js " href="javascript:void(0);" &gt;Submit Review&lt;/a&gt;&lt;/span&gt;
+            &lt;span class="spacer"&gt;&lt;/span&gt;
+            &lt;span class="inlineblock"&gt;&lt;a id="review_skip"  class="button dusty-grey feedbackbtn_skip" href="javascript:void(0);"&gt;Skip Review&lt;/a&gt;&lt;/span&gt;
+             &lt;% if (score == 1 || score == -1) { %&gt;
+            &lt;span class="inlineblock"&gt;&lt;a class="feedbackbtn_remove"   href="javascript:void(0);"&gt;Remove&lt;/a&gt;&lt;/span&gt;
+            &lt;% } else{ %&gt;
+            &lt;span class="inlineblock"&gt;&lt;a class="feedbackbtn_cancel"   href="javascript:void(0);"&gt;Cancel&lt;/a&gt;&lt;/span&gt;
+            &lt;% } %&gt;
+        &lt;/div&gt;
+   	 &lt;/div&gt;
+    &lt;/div&gt;
+</script>
+   <!--
+Template used for showing the inappropriate comment popup
+-->
+   <script type="text/x-template" id="commentInappropriateTemplate">
+	&lt;div class="flag-comment-container" id="flag-comment-container"&gt;
+	    &lt;div class="flag-comment-options"&gt;
+	        &lt;span&gt;Does this post seem offensive or disrespectful?&lt;/span&gt;
+	        &lt;div class="flag-diff"&gt;&lt;/div&gt;
+	        &lt;a class="flag-link" id="inappropriate"&gt;Flag it as inappropriate&lt;/a&gt;
+	        &lt;div class="flag-diff"&gt;&lt;/div&gt;
+	    &lt;/div&gt;
+
+	    &lt;!--&lt;div class="flag-comment-as-inappropriate hidden"&gt;
+	        You flagged this comments as &lt;b&gt;inappropriate&lt;/b&gt;
+	        &lt;br&gt;
+	        &lt;br&gt;
+	        Thanks for bringing this to our attention.
+	    &lt;/div&gt;--&gt;
+	&lt;/div&gt;
+</script>
+   <div id="ck12_template_resource_row">
+    <div class="resource_row js_resource_row">
+     <div class="js_row_info info">
+      <div class="resourceicons">
+       <span class="attachment_icon imgwrap"></span>
+       <span class="noimage js_noimage hide"></span>
+       <span class="js_publishstate_icon" title="Private"></span>
+      </div>
+      <div class="resourcename">
+       <div class="resourcenamelinkwrap">
+        <a class="break-word js_resource_link" target="_blank" href="javscript:return false;"></a>
+       </div>
+      </div>
+      <div class="clear"></div>
+     </div>
+     <div class="js_row_actions actions">
+      <a href="#" class="js_resource_remove remove" data-resource-id="" data-resource-revision-id="" data-artifact-id="" data-artifact-revision-id=""> <span class="icon-close"></span> </a>
+      <a href="#" class="js_resource_edit myresource_edit"><span class="icon-edit"></span></a>
+      <span class="hide js_resource_description"></span>
+      <a href="#" class="js_resource_public_toggle public_toggle hide" data-txtmakepublic="Make Public" data-txtmakeprivate="Make Private" data-ispublic="false"> Make Public </a>
+     </div>
+     <div class="js_row_actions loading">
+      <div class="progressbar"></div>
+     </div>
+     <div class="js_row_actions_failed failed hide">
+      <div class="message_resources warning">
+       <span class="imgwrap"></span>
+       <a href="javascript:void(0);" class="js_failed_link" title="Click to see error message">Upload Failed</a>
+       <a href="javascript:void(0);" class="js_failed_remove remove" title="Remove Resouce"></a>
+      </div>
+     </div>
+     <div class="clear"></div>
+     <div class="divider spacetop"></div>
+    </div>
+   </div>
+   <!--
+	Templates for groups sharing
+-->
+   <!--
+	Template used for sharing via groups
+-->
+   <script type="text/x-template" id="shareGroupsTemplate">
+&lt;% if (data.onLoad) { %&gt;
+	&lt;div class="row collapse grp-heading"&gt;
+		&lt;i class="icon-groups grp-assignment for-group-mobile"&gt;&lt;/i&gt;
+		&lt;strong&gt;Share with Classes &lt;/strong&gt;
+		&lt;span class="close-modal for-group-mobile"&gt;✕&lt;/span&gt;
+		&lt;span class="close-modal" id="close-modal-studyguide-desktops" style="float: right; display: none;"&gt;X&lt;/span&gt;
+	&lt;/div&gt;
+	&lt;% if (!(data.groups instanceof Array) || data.groups.length == 0) { %&gt;
+		&lt;!-- No groups message --&gt;
+		&lt;div class="row collapse no_groups_container"&gt;
+			&lt;div class="no_groups_text"&gt; You don't own any class.  Please create a class to share this resource.&lt;/div&gt;
+			&lt;div class="text-center"&gt;
+				&lt;a class="button tangerine standard createnewgroup" title="Create a Class" target="_blank" href="/my/dashboard-new/groups/#create"&gt;Create a Class&lt;/a&gt;
+			&lt;/div&gt;
+		&lt;/div&gt;
+	&lt;% } else { %&gt;
+        &lt;div id="shareGroupsContainer" class="relative shareGroupsContainer"&gt;
+            &lt;div class="modality-title for-group-mobile"&gt;&lt;/div&gt;
+            &lt;div class="custom-box checkbox all-groups for-group-mobile"&gt;
+                &lt;input type="checkbox" id="all-grps" name="all-grps"&gt;
+                &lt;label id="all-checkbox" for="all-grps" class="checkbox grps-label"&gt;
+                    &lt;span&gt;
+                        &lt;i class="icon-validated"&gt;&lt;/i&gt;
+                    &lt;/span&gt;
+                    &lt;i class="all-lbl-txt"&gt;Classes&lt;/i&gt;
+                &lt;/label&gt;
+            &lt;/div&gt;
+            &lt;div id="none_selected_error" class="none_selected_error hide"&gt;Please select at least one class to share.&lt;/div&gt;
+            &lt;% _.each(data.groups,function(group) { %&gt;
+            &lt;div class="custom-box groups_checkbox"&gt;
+                &lt;input type="checkbox" id="&lt;%= group.id %&gt;" name="group_checkbox" value="&lt;%= group.id %&gt;" class="js_groups_select"&gt;
+                &lt;label class="checkbox" for="&lt;%= group.id %&gt;" title="&lt;%= _.escape(group.name) %&gt;"&gt;&lt;span&gt;&lt;i class="icon-validated"&gt;&lt;/i&gt;&lt;/span&gt;&lt;i&gt;&lt;%= _.escape(_.truncate(group.name, 35)) %&gt;&lt;/i&gt;&lt;/label&gt;
+            &lt;/div&gt;
+            &lt;% }); %&gt;
+        &lt;/div&gt;
+        &lt;span class="load-more-groups for-group-mobile" title="Load more classes"&gt;load more&lt;/span&gt;
+        &lt;div class="row collapse button_container"&gt;
+			&lt;a id="shareGroupFormBtn" class="button tangerine small" title="Share with the selected class(es)"&gt;Share&lt;/a&gt;
+
+			&lt;span class="or-text"&gt;or&lt;/span&gt;
+			&lt;a class="createnew" title="Create a New Class" target="_blank" href="/my/dashboard-new/groups/#create"&gt;Create a New Class&lt;/a&gt;
+		&lt;/div&gt;
+	&lt;% } %&gt;
+&lt;% } else { %&gt;
+	&lt;% _.each(data.groups,function(group) { %&gt;
+		&lt;div class="custom-box groups_checkbox"&gt;
+			&lt;input type="checkbox" id="&lt;%= group.id %&gt;" name="group_checkbox" value="&lt;%= group.id %&gt;" class="js_groups_select"&gt;
+			&lt;label class="checkbox" for="&lt;%= group.id %&gt;" title="&lt;%= _.escape(group.name) %&gt;"&gt;&lt;span&gt;&lt;i class="icon-validated"&gt;&lt;/i&gt;&lt;/span&gt;&lt;i&gt;&lt;%= _.escape(_.truncate(group.name, 35)) %&gt;&lt;/i&gt;&lt;/label&gt;
+		&lt;/div&gt;
+	&lt;% }); %&gt;
+&lt;% } %&gt;
+</script>
+   <!--
+	Template used for loading groups.
+-->
+   <script type="text/x-template" id="shareGroupsLoadingTemplate">
+	&lt;div class="text-center"&gt;
+		&lt;img src="//img1.ck12.org/media/build-20180828193300/images/icon_loading.gif" /&gt;
+	&lt;/div&gt;
+</script>
+   <div id="js_modality_published_dialog" data-dialogtitle="Modality Published">
+   </div>
+   <!-- Standards correlation dialog -->
+   <script type="text/javascript" src="//maps.googleapis.com/maps/api/js?libraries=places&amp;key=AIzaSyDVTA7d25Puy-_W52IfMDdflx93pWYDJB8"></script>
+   <script src="//st2.ck12.org/media/build-20180828193300/dexterjs/dexterjs.min.js"></script>
+   <script src="//st1.ck12.org/media/build-20180828193300/common/js/utils/globals.js"></script>
+   <script data-main="//st3.ck12.org/media/build-20180828193300/js/main" src="//st3.ck12.org/media/build-20180828193300/common/vendor/requirejs/require.js"></script>
+   <script language="javascript" type="text/javascript">
+
+    function getCookie(c_name){
+        var i,x,y,ARRcookies=document.cookie.split(";");
+        for (i=0;i&lt;ARRcookies.length;i++){
+          x=ARRcookies[i].substr(0,ARRcookies[i].indexOf("="));
+          y=ARRcookies[i].substr(ARRcookies[i].indexOf("=")+1);
+          x=x.replace(/^\s+|\s+$/g,"");
+          if (x==c_name) {
+            return unescape(y);
+          }
+        }
+    }
+
+    function getRandomString(length) {
+        var chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ', value = '';
+        for (var i = length; i &gt; 0; --i) {
+            value += chars[Math.round(Math.random() * (chars.length - 1))];
+        }
+        return value;
+    }
+
+    // login user role is c.user.role for guest role is in cookies.
+    var flxweb_role;
+    var flxweb_roles = [];
+    var isEditAllowed = false;
+    var webroot_url = 'https://www.ck12.org/';
+    var editprofile_url = 'https://www.ck12.org/auth/profile?returnTo=https%3A%2F%2Fwww.ck12.org%2Faccount%2Fsettings%2F&amp;appHome=https%3A%2F%2Fwww.ck12.org%2F';
+    var adaptive_practice_launch_date = '';
+
+
+        flxweb_role = getCookie('flxweb_role');
+        flxweb_roles.push(flxweb_role);
+        window.ck12_signed_in = false;
+
+
+    dexterjs.set("config", {
+        clientID: 24839961,
+        trackPageTime: false
+    });
+
+    if (window.lmsContext === 'lti-app'){
+        // Add in appID and provider for ADS
+        // when in lti context
+        try {
+            appInfo = JSON.parse(sessionStorage.getItem('ltiAppInfo'));
+	    var mixins = { appID: appInfo.appID,
+	          lmsProvider: appInfo.provider,
+		  appContext: appInfo.lms_name
+	    }
+            dexterjs.set('config', {mixins:mixins});
+       } catch(e) {
+            console.error("Error adding ADS mixins for lti: "+ String(e));
+       }
+    }
+    _ck12 = dexterjs;
+
+    function startPageTimer() {
+        window.adsPageStartTime = new Date().getTime();
+    }
+
+    function adsLogPageTime() {
+        var endTime = new Date().getTime();
+        var timeOnPage = Math.round((endTime - window.adsPageStartTime)/1000);
+        //pageType, URL, duration (in seconds)
+        var payload = {
+            'URL' : document.location.href,
+            'duration': timeOnPage
+        };
+        if(window.adsPage) {
+            payload['pageType'] = window.adsPage;
+        } else if (window.pageType) {
+            payload['pageType'] = window.pageType;
+        }
+
+        if (window.adsSubject) {
+            payload['subject'] = window.adsSubject;
+        }
+        if (window.adsBranch) {
+            payload['branch'] = window.adsBranch;
+        }
+        if (window.adsContextEid) {
+            payload['context_eid'] = window.adsContextEid;
+        }
+        if (window.artifactID) {
+            payload['artifactID'] = window.artifactID;
+        }
+
+        _ck12.logEvent('FBS_TIMESPENT', payload);
+     }
+
+    function adsOnload() {
+        if (window.ck12_signed_in) {
+            createCookieActiveUser();
+        }
+        startPageTimer();
+    }
+
+    function adsOnBeforeUnload() {
+        adsLogPageTime();
+    }
+
+    function createCookieActiveUser(){
+        var value;
+        var now = new Date();
+        var time = now.getTime();
+        var expireTime = time + 1000*3600;
+        now.setTime(expireTime);
+        var activeCookie = getCookie('flxweb_user_active');
+        if(activeCookie){
+            value = activeCookie;
+        }else{
+            value = getRandomString(25);
+            payload = {
+                'sessionID': value
+            };
+            _ck12.logEvent('FBS_ACTIVE_USER', payload);
+        }
+        document.cookie =
+            'flxweb_user_active=' + value +
+            '; expires=' + now.toUTCString() +
+            '; path=/';
+    }
+
+    function addEvent(obj, evt,fn,useCapture){
+        if(obj.addEventListener){
+            obj.addEventListener(evt,fn,useCapture);
+            return true;
+        }else if(obj.attachEvent){
+            var r=obj.attachEvent('on'+evt,fn);
+            return r;
+        }else this['on'+evt]=fn;
+    }
+
+    addEvent(window, "load", adsOnload);
+    addEvent(window, "beforeunload", adsOnBeforeUnload);
+
+&lt;!--Browser Cookie detection start --&gt;
+var cookieEnabled = (navigator.cookieEnabled) ? true : false;
+if (typeof navigator.cookieEnabled == "undefined" &amp;&amp; !cookieEnabled)
+{
+    var cookieName = "CK12-Cookie-Test";
+    document.cookie= cookieName;
+    cookieEnabled = (document.cookie.indexOf(cookieName) != -1) ? true : false;
+    if (cookieEnabled){
+        document.cookie = cookieName + "=; expires=Thu, 01 Jan 1970 00:00:01 GMT;";
+    }
+}
+if (!cookieEnabled){
+    cookieBar('block');
+}
+
+function cookieBar(displayValue){
+    var cookies_msg_container = document.getElementById("nocookies");
+    if (cookies_msg_container != null){
+        cookies_msg_container.style.display = displayValue;
+    }
+}
+
+</script>
+   <!--Browser Cookie detection end -->
+   <script language="javascript" type="text/javascript">
+	require(['main'],function(){
+        require(['common/utils/user'], function(User) {
+            var isPublished = 'True';
+            User.getUser().done(function (user) {
+                if (isPublished.toLowerCase() != 'true') {
+                    user.isLoggedIn(true);
+                }
+            });
+            require(['flxweb.details.actions']);
+        });
+	});
+</script>
+   <script language="JavaScript" type="text/x-mathjax-config;executed=true">
+	MathJax.Hub.Config({
+		extensions: ["tex2jax.js","TeX/AMSmath.js","TeX/AMSsymbols.js"],
+		tex2jax: {
+			inlineMath: [['@$','@$']],
+			displayMath: [['@$$','@$$']],
+			skipTags: ["script","noscript","style","textarea","code"]
+		},
+		showMathMenu : false,
+		jax: ["input/TeX","output/HTML-CSS"],
+		messageStyle: "none",
+		TeX: {
+			extensions: ["cancel.js", "color.js", "autoload-all.js"]
+		}
+	});
+</script>
+   <script language="JavaScript" type="text/javascript" src="//d3lkjnwva6z405.cloudfront.net/MathJax-2.7.2/MathJax.js"></script>
+   <script type="text/javascript">
+    //mod common
+    require(['main'],function(){
+        require(['js/flxweb.lms.banner'],function(lmsBanner){
+            lmsBanner('concept');
+	});
+    });
+</script>
+   <script language="JavaScript" type="text/javascript">
+	var artifactID = '1106138';
+	var artifactRevisionID = '6829127';
+	var standardBoards = "";
+	require(['main'],function(){
+		require(['flxweb.details.modality.read']);
+        var isPublished = 'True';
+        require(['common/utils/user'], function(User) {
+            User.getUser().done(function (user) {
+                if (user.isLoggedIn(false)) {
+                    if (user.userInfoDetail.id == $('.book_unpublished').data('ownerid')) {
+                        if (isPublished.toLowerCase() != 'true') {
+                            $('.book_unpublished').removeClass('hide');
+                        } else {
+                            $('.book_published').removeClass('hide');
+                        }
+                    }
+                }
+            });
+        });
+	});
+</script>
+   <script language="JavaScript" type="text/javascript">
+			var modality_type = "lesson"
+			require(['main'],function(){
+					require(['flxweb.modalities.common']);
+			});
+	</script>
+   <script language="JavaScript" type="text/javascript">
+		require(['main'],function(){
+			require(['jquery','common/utils/practice_badge'],function($, badge){
+				$(document).ready(function() {
+					$('.modalitysidebar li a.dropdowntop').click(function() {
+						var $dropdown = $(this).next('.dropdown');
+						if ($dropdown.is(':hidden')) {
+							$dropdown.slideDown('slow');
+						}
+						else {
+							$dropdown.hide('slow');
+						}
+					});
+
+					function checkForcedSignIn(){
+						var selectedUrlconfig = $.cookie('assessmentFrameUrlConfig'),
+							$menuElement = null;
+
+						if(selectedUrlconfig &amp;&amp; window.ck12_signed_in){
+							$.removeCookie("assessmentFrameUrlConfig");
+							window.location.href = selectedUrlconfig;
+						}
+				 	}
+
+					checkForcedSignIn();
+					if ('js_collection_data' in window)
+					{
+						var jsCollectionData = window.js_collection_data
+
+						//init practice badge if practice available for concept
+						 badge &amp;&amp; badge.init({
+								"encodedId": window.js_modality_data.domain.encodedID,
+								"handle": window.js_modality_data.domain.handle,
+								"conceptCollectionHandle": jsCollectionData.collection.descendantCollection.handle,
+								"collectionCreatorID": jsCollectionData.collection.creatorID
+						 });
+					}
+					else
+					{
+						 badge &amp;&amp; badge.init({
+								"encodedId": window.js_modality_data.domain.encodedID,
+								"handle": window.js_modality_data.domain.handle,
+						 });
+					}
+				});
+			});
+		});
+
+		/*
+		require(['main'],function(){
+			require(['jquery'],function($){
+				$(document).ready(function(){
+
+				});
+			});
+		});*/
+
+	</script>
+   <script>
+    if(window.lmsContext === 'lti-app'){
+       loadingCheck();
+    }
+</script>
+   <noscript>
+     &lt;div style="position:fixed; top:0;left:0;right:0;margin:auto; z-index:9999;"&gt; &lt;div class="row collapsed" style="text-align:center;background-color:#FFFF99;padding:5px 5px 5px 5px; border:2px solid #999;font-size:16px;text-shadow:none;color:#000000;"&gt; &lt;div&gt;To use this website, please enable javascript in your browser. &lt;a style="text-shadow: none;color:#0000FF;text-decoration:underline;" href="/nojavascript/"&gt;Learn more&lt;/a&gt;&lt;/div&gt; &lt;/div&gt; &lt;/div&gt;
+   </noscript>
+   <!-- START cookie disabled message -->
+   <div id="nocookies" style="text-align:center; top: 0px; width:100%; position:absolute;	z-index:9999; display:none;">
+    <div id="nocookies_inner" style="margin:0 auto; height:16px;	width:800px; background-color: #FFFF99;	padding:4px 10px 10px 10px; border:3px solid #999; font-size: 16px; text-shadow: none; color: #000000;">
+     <div class="cookiemsg" style="float:left;">
+      Oops, looks like cookies are disabled on your browser. Click
+      <a style=" text-shadow: none;color: #0000FF;" href="/nocookies/">here</a> to see how to enable them.
+     </div>
+     <div class="cookies_close" style="float:right;">
+      <a style="text-decoration:none;color: #000000;" href="javascript:void(0);" onclick="cookieBar('none');">X</a>
+     </div>
+    </div>
+   </div>
+   <!-- END cookie disabled message -->
+   <!--
+	###############################
+	#  FLXWEB DEBUG INFORMATION
+	###############################
+	flxweb_node_name = flxweb2
+	processing_time  = 0.261732
+-->
+  </div>
+  <script type="text/javascript" id="">var _prum=[["id","55f09a4cabe53d977c9b8715"],["mark","firstbyte",(new Date).getTime()]];(function(){var b=document.getElementsByTagName("script")[0],a=document.createElement("script");a.async="async";a.src="//rum-static.pingdom.net/prum.min.js";b.parentNode.insertBefore(a,b)})();</script>
+  <script type="text/javascript" id="">var MAX_TIME=18E5;window.addEventListener("beforeunload",function(){var a=(new Date).getTime()-google_tag_manager["GTM-NFJ3V2"].macro(2);a&gt;MAX_TIME&amp;&amp;(a=MAX_TIME);window.dataLayer.push({event:"unloadEvent",timeonpage:a})});</script>
+  <script type="text/javascript" id="">(function(){"slim-show-parent"===window.sessionStorage.ERVariation&amp;&amp;(window._softRegConfig={showParentRole:!0,hideMessageProps:!0})})();</script>
+  <script type="text/javascript" id="">(function(a,b){if(!b.__SV){var c=window;try{var n,k,l=c.location,g=l.hash;var d=function(a,b){return(n=a.match(RegExp(b+"\x3d([^\x26]*)")))?n[1]:null};g&amp;&amp;d(g,"state")&amp;&amp;(k=JSON.parse(decodeURIComponent(d(g,"state"))),"mpeditor"===k.action&amp;&amp;(c.sessionStorage.setItem("_mpcehash",g),history.replaceState(k.desiredHash||"",a.title,l.pathname+l.search)))}catch(p){}var m,h;window.mixpanel=b;b._i=[];b.init=function(a,c,f){function d(a,b){var c=b.split(".");2==c.length&amp;&amp;(a=a[c[0]],b=c[1]);a[b]=function(){a.push([b].concat(Array.prototype.slice.call(arguments,
+0)))}}var e=b;"undefined"!==typeof f?e=b[f]=[]:f="mixpanel";e.people=e.people||[];e.toString=function(a){var b="mixpanel";"mixpanel"!==f&amp;&amp;(b+="."+f);a||(b+=" (stub)");return b};e.people.toString=function(){return e.toString(1)+".people (stub)"};m="disable time_event track track_pageview track_links track_forms register register_once alias unregister identify name_tag set_config reset people.set people.set_once people.unset people.increment people.append people.union people.track_charge people.clear_charges people.delete_user".split(" ");
+for(h=0;h&lt;m.length;h++)d(e,m[h]);b._i.push([a,c,f])};b.__SV=1.2;c=a.createElement("script");c.type="text/javascript";c.async=!0;c.src="undefined"!==typeof MIXPANEL_CUSTOM_LIB_URL?MIXPANEL_CUSTOM_LIB_URL:"file:"===a.location.protocol&amp;&amp;"//cdn.mxpnl.com/libs/mixpanel-2-latest.min.js".match(/^\/\//)?"https://cdn.mxpnl.com/libs/mixpanel-2-latest.min.js":"//cdn.mxpnl.com/libs/mixpanel-2-latest.min.js";d=a.getElementsByTagName("script")[0];d.parentNode.insertBefore(c,d)}})(document,window.mixpanel||[]);
+mixpanel.init("b119ac0518c6006607b1105730218729",{persistence:"localStorage"});function getCookieValue(a){return(a=document.cookie.match("(^|;)\\s*"+a+"\\s*\x3d\\s*([^;]+)"))?a.pop():""}window.setTimeout(function(){var a=getCookieValue("dexterjsVisitorID");a?window.mixpanel&amp;&amp;window.mixpanel.identify&amp;&amp;window.mixpanel.identify(a):console.warn("GTM::Mixpanel: dexterjsVisitorID cookie not found")},10);
+window.setTimeout(function(){window.mixpanel.hasOwnProperty("track")&amp;&amp;window.dexterjs.logEvent("FBS_ERROR",{error_type:"analytics",error_code:"MIXPANEL_NOT_INITIALIZED",error_exception:"not_applicable"})},1E3);</script>
+  <script type="text/javascript" id="">console.log("Setting configuration to disable Soft Registration");window._softRegConfig={rule:{1:{status:"CLOSE"}},shouldTriggerSRFromSEO:!1,shouldCountForAddressBarAccess:!1};</script>
+  <script type="text/javascript" id="">(function(a){(a=document.getElementById("footer_colege_flexbooks"))&amp;&amp;(a.innerHTML="College FlexBooks\x26reg;")})();</script>
+  <script src="https://static.ck12.org/experiments/report-content-error/report-content-error.js"></script>
+  <ul class="ui-autocomplete ui-menu ui-widget ui-widget-content ui-corner-all" role="listbox" aria-activedescendant="ui-active-menuitem" style="z-index: 52; top: 0px; left: 0px; display: none;"></ul>
+  <ul class="ui-autocomplete ui-menu ui-widget ui-widget-content ui-corner-all" role="listbox" aria-activedescendant="ui-active-menuitem" style="z-index: 52; top: 0px; left: 0px; display: none;"></ul>
+  <ul class="ui-autocomplete ui-menu ui-widget ui-widget-content ui-corner-all" role="listbox" aria-activedescendant="ui-active-menuitem" style="z-index: 100; top: 0px; left: 0px; display: none;"></ul>
+  <div class="ui-dialog ui-widget ui-widget-content ui-corner-all js_ck12_dialog_common standards_dialog ui-draggable" tabindex="-1" role="dialog" aria-labelledby="ui-dialog-title-js_view_standards_dialog" style="display: none; z-index: 1000; outline: 0px;">
+   <div class="ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix">
+    <span class="ui-dialog-title" id="ui-dialog-title-js_view_standards_dialog">Standards Correlations</span>
+    <a href="#" class="ui-dialog-titlebar-close ui-corner-all" role="button"><span class="ui-icon ui-icon-closethick">close</span></a>
+   </div>
+   <div id="js_view_standards_dialog" data-dialogtitle="Standards Correlations" data-dialognocache="true" class="ui-dialog-content ui-widget-content">
+    <div id="temp_lesson_xhtml_content"></div>
+   </div>
+  </div>
+  <div class="ui-dialog ui-widget ui-widget-content ui-corner-all js_ck12_dialog_common ui-draggable" tabindex="-1" role="dialog" aria-labelledby="ui-dialog-title-js_edit_resource" style="display: none; z-index: 1000; outline: 0px;">
+   <div class="ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix">
+    <span class="ui-dialog-title" id="ui-dialog-title-js_edit_resource">Edit Resource</span>
+    <a href="#" class="ui-dialog-titlebar-close ui-corner-all" role="button"><span class="ui-icon ui-icon-closethick">close</span></a>
+   </div>
+   <div id="js_edit_resource" data-dialogtitle="Edit Resource" class="ui-dialog-content ui-widget-content">
+    <form id="res_edit_form" action="ajax/resource/upload/" method="POST">
+     <div class="input_row title_row">
+      Title:
+      <br>
+      <input type="text" name="resource_name" id="res_name" maxlength="100" class="txt_resource_title">
+     </div>
+     <div class="error js_res_name_msg hide input_row">
+      <label>Please enter valid title for resource</label>
+     </div>
+     <div class="input_row description_row">
+      Description:
+      <br>
+      <textarea class="txt_resource_desc" name="desc" id="res_desc" rows="5"></textarea>
+     </div>
+     <div class="error js_res_desc_msg hide input_row">
+      <label>Please enter description to make resource public</label>
+     </div>
+     <div class="input_row type_input_row">
+      Type:&nbsp;&nbsp;
+      <select class="resource_type" name="type" id="res_type"> <option value="activity">Activity</option> <option value="attachment">Attachment</option> <option value="assessment">Assessment</option> <option value="audio">Audio</option> <option value="classwork">Classwork</option> <option value="cthink">Critical Thinking</option> <option value="handout">Handout</option> <option value="homework">Homework</option> <option value="image">Image</option> <option value="interactive">Interactive Object</option> <option value="lab">Lab</option> <option value="lessonplan">Lesson Plan </option> <option value="notes">Notes</option> <option value="reading">Presentation</option> <option value="project">Project</option> <option value="reading">Reading</option> <option value="rubric">Rubric</option> <option value="starter">Starter/Do now</option> <option value="studyguide">Study Guide</option> <option value="syllabus">Syllabus</option> <option value="quiz">Test/Quiz</option> <option value="video">Video</option> <option value="web">Web</option> <option value="worksheet">Worksheet</option> </select> &nbsp;&nbsp;&nbsp;&nbsp;
+      <input type="checkbox" name="isPublic" id="res_public">
+      <label class="label_publish" for="res_public">Published</label>
+     </div>
+     <input type="hidden" name="isAttachment" value="true">
+     <input type="hidden" name="isExternal" id="res_external" value="">
+     <input type="hidden" name="src" id="res_uri" value="">
+     <input type="hidden" name="resourceid" id="res_id" value="">
+     <input type="hidden" name="resource_handle" id="res_handle" value="">
+    </form>
+   </div>
+   <div class="ui-dialog-buttonpane ui-widget-content ui-helper-clearfix">
+    <div class="ui-dialog-buttonset">
+     <button type="button" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" role="button" aria-disabled="false"><span class="ui-button-text">Save</span></button>
+     <button type="button" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" role="button" aria-disabled="false"><span class="ui-button-text">Cancel</span></button>
+    </div>
+   </div>
+  </div>
+  <link rel="stylesheet" type="text/css" media="all" href="//dvninqhj78q4x.cloudfront.net/media/common/css/gtranslate.overrides.css">
+  <style>
+  .goog-te-spinner, .goog-te-spinner-path {
+    	animation:none !important; /* disable the animation see bug 48485*/
+  }
+</style>
+  <script type="text/javascript" id="">function googleTranslateElementInit(){new google.translate.TranslateElement({pageLanguage:"en",layout:google.translate.TranslateElement.InlineLayout.SIMPLE,autoDisplay:!1,gaTrack:!0,gaId:"UA-5330854-2"},"google_translate_element");var a=document.getElementById("goog-gt-tt");a.parentNode.removeChild(a)};</script>
+  <script type="text/javascript" id="" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+  <style>
+  .supportButton{
+    background: #99CC66;
+    color: #ffffff;
+    display: block;
+    border: 0px;
+    position: fixed;
+    top:calc(50% - 44px) !important;
+    right:0px;
+    transform: rotate(-90deg);
+    /*transform-origin: right center;
+    margin-right: 15px;*/
+    transform-origin: bottom right;
+    font-size: 14px;
+    font-weight: bold;
+    padding: 10px;
+    z-index: 9999;
+    -webkit-font-smoothing: antialiased;
+}
+
+.remZDLink{
+  	display: none;
+  }
+</style>
+  <script type="text/javascript" id="">var zendeskLoaded=!1,supportButton=document.createElement("button");supportButton.setAttribute("onclick","loadZendeskScript(); ");supportButton.setAttribute("class","supportButton");supportButton.innerHTML="Support";var page_context="",container=document.getElementById("content-container");-1!==window.location.pathname.indexOf("/my/dashboard-new/")&amp;&amp;(container=document.getElementById("dashboard"));
+-1!==window.location.pathname.search("/lmspractice/edmPractice(Science|Math)/")&amp;&amp;(console.log("This is an edmodo page"),page_context="edmodo",container=document.getElementById("practiceapp_container"));if(container&amp;&amp;"edmodo"===page_context){console.log("Inserting support button before contianer");try{container.parentNode.insertBefore(supportButton,container)}catch(c){console.log("Failed to insert support button: "+c)}}else container&amp;&amp;container.appendChild(supportButton);
+function remZDLink(){var c=document.getElementsByClassName("u-isHiddenVisually");c&amp;&amp;(c.innerHTML="")}
+function loadZendeskScript(){zendeskLoaded?(zE.activate({hideOnClose:!0}),remZDLink()):(window.zESettings={webWidget:{position:{horizontal:"right",vertical:"top"},offset:{horizontal:"50px",vertical:"160px"},zIndex:9999999}},window.zEmbed||function(c,g){var f=[],b=document.createElement("iframe");window.zEmbed=function(){f.push(arguments)};window.zE=window.zE||window.zEmbed;b.src="javascript:false";b.title="";b.role="presentation";(b.frameElement||b).style.cssText="display: none";var a=document.getElementsByTagName("script");
+a=a[a.length-1];a.parentNode.insertBefore(b,a);a=b.contentWindow;a=a.document;try{var d=a}catch(h){var e=document.domain;b.src='javascript:var d\x3ddocument.open();d.domain\x3d"'+e+'";void(0);';d=a}d.open()._l=function(){var a=this.createElement("script");e&amp;&amp;(this.domain=e);a.id="js-iframe-async";a.src=c;this.t=+new Date;this.zendeskHost=g;this.zEQueue=f;this.body.appendChild(a)};d.write('\x3cbody onload\x3d"document._l();"\x3e');d.close()}("https://assets.zendesk.com/embeddable_framework/main.js",
+"ck12support.zendesk.com"),zE(function(){zE.hide();zE.activate({hideOnClose:!0});remZDLink()}),zendeskLoaded=!0)};</script>
+  <div class="ui-dialog ui-widget ui-widget-content ui-corner-all js_ck12_dialog_common ui-draggable" tabindex="-1" role="dialog" aria-labelledby="ui-dialog-title-js_publish_artifact_dialog" style="display: none; z-index: 1000; outline: 0px;">
+   <div class="ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix">
+    <span class="ui-dialog-title" id="ui-dialog-title-js_publish_artifact_dialog">Publish Modality</span>
+    <a href="#" class="ui-dialog-titlebar-close ui-corner-all" role="button"><span class="ui-icon ui-icon-closethick">close</span></a>
+   </div>
+   <div id="js_publish_artifact_dialog" data-url="https://www.ck12.org/dialog/publish/artifact/" data-dialogtitle="Publish Modality" class="ui-dialog-content ui-widget-content">
+    <div style="text-align:left">
+     <div class="contribution-type">
+      <div>
+       Select a contribution type :
+      </div>
+      <div class="custom-box">
+       <input name="contribution_type" type="radio" id="contribution_type2" value="derived">
+       <label for="contribution_type2" class="radio"><span></span> CK-12 Content derived <i class="icon-help2" title="This content being published is customized CK-12 content."></i></label>
+      </div>
+      <div class="custom-box">
+       <input name="contribution_type" type="radio" id="contribution_type3" value="modified">
+       <label for="contribution_type3" class="radio"><span></span> Customized from other content <i class="icon-help2" title="This content being published is customized from non-CK-12 content."></i></label>
+      </div>
+      <div class="custom-box">
+       <input name="contribution_type" type="radio" id="contribution_type1" value="original">
+       <label for="contribution_type1" class="radio"><span></span> Original Content <i class="icon-help2" title="This content being published is original content that is not based on other content."></i></label>
+      </div>
+      <div class="contribution-type-error">
+       Please select a contribution type
+      </div>
+     </div>
+     <div>
+      <span>You're about to make</span>
+      <span id="publish_artifact_name"></span>
+      <span>available to the public.</span>
+     </div>
+     <br>
+     <div>
+       Are you sure you'd like to do this?
+     </div>
+     <br>
+     <input type="hidden" id="sw_selected_id">
+     <input type="hidden" id="sw_auth_url" value="auth-switchuser">
+     <input type="hidden" id="sw_returnto" value="https://www.ck12.org/authorized_switch">
+    </div>
+   </div>
+   <div class="ui-dialog-buttonpane ui-widget-content ui-helper-clearfix">
+    <div class="ui-dialog-buttonset">
+     <button type="button" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" role="button" aria-disabled="false"><span class="ui-button-text">Publish</span></button>
+     <button type="button" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" role="button" aria-disabled="false"><span class="ui-button-text">Cancel</span></button>
+    </div>
+   </div>
+  </div>
+  <div class="goog-te-spinner-pos">
+   <div class="goog-te-spinner-animation">
+    <svg xmlns="http://www.w3.org/2000/svg" class="goog-te-spinner" width="96px" height="96px" viewbox="0 0 66 66">
+     <circle class="goog-te-spinner-path" fill="none" stroke-width="6" stroke-linecap="round" cx="33" cy="33" r="30" />
+    </svg>
+   </div>
+  </div>
+  <iframe frameborder="0" class="goog-te-menu-frame skiptranslate" title="Language Translate Widget" style="visibility: visible; box-sizing: content-box; width: 1030px; height: 263px; display: none;"></iframe>
+  <div class="ui-dialog ui-widget ui-widget-content ui-corner-all js_ck12_dialog_common add-to-book-wrapper ui-draggable" tabindex="-1" role="dialog" aria-labelledby="ui-dialog-title-1" style="display: none; z-index: 1000; outline: 0px;">
+   <div class="ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix">
+    <span class="ui-dialog-title" id="ui-dialog-title-1">Add to your FlexBook®</span>
+    <a href="#" class="ui-dialog-titlebar-close ui-corner-all" role="button"><span class="ui-icon ui-icon-closethick">close</span></a>
+   </div>
+   <div data-dialogueparentclass="js_ck12_dialog_common add-to-book-wrapper" class="ui-dialog-content ui-widget-content">
+    <div class="atbwrap">
+     <!--<div class="atbsearchwrap">
+		<input id="atb_search_text" class="forminput" type="text" placeholder="Find a book in your library"/>
+		<a id="atb_search_btn" class="btn inlineblock" href="#">Search</a>
+		<div class="clear"></div>
+	</div>-->
+     <div id="atb_books_wrapper" class="spacetop">
+      <div id="atb_books">
+      </div>
+      <div id="load_flexbook_progress" class="load-flexbook-progress hide">
+       <img src="//img2.ck12.org/media/build-20180828193300/common/images/icon_loading.gif" alt="loading">
+      </div>
+      <!-- Bug 8911 - Removed 'Load More' button
+		<div class="atbloadmorewrap clear">
+			<a href"#" class="btn inlineblock" id="atb_loadmore">Load more</a>
+		</div> -->
+     </div>
+    </div>
+    <!-- book in the results template -->
+    <script type="text/template" id="tmpl_atb_book">
+&lt;div class="js_atb_book inlineblock"&gt;
+	&lt;input class="radio spacetop" type="radio" name="atb_book"/&gt;
+	&lt;div class="imgborder thumbnailwrap"&gt;
+		&lt;img src="&lt;%=  thumbnail  %&gt;"
+		alt="&lt;%=  _.escape(title)  %&gt;"
+		title="&lt;%=  _.escape(title)  %&gt;"/&gt;
+	&lt;/div&gt;
+	&lt;div class="titlewrap" title="&lt;%= title %&gt;"&gt;
+		&lt;%=  _.escape(_(title).truncate(40))  %&gt;
+	&lt;/div&gt;
+&lt;/div&gt;
+</script>
+    <!--New book in the results template -->
+    <script type="text/template" id="tmpl_atb_new_book">
+&lt;div class="js_atb_book inlineblock newbook"&gt;
+	&lt;a onclick = "showNewBook()" id = "createbookButton" class = "create-new-book-row" href = "#"&gt;
+		&lt;span class="create-new-book-wrapper"&gt;
+			&lt;i class="icon-plus icon-create-new-book"&gt;&lt;/i&gt;
+		&lt;/span&gt;
+		&lt;span&gt;Create a New FlexBook&amp;#174; Textbook&lt;/span&gt;
+	&lt;/a&gt;
+	&lt;div style = "display:none;" id = "newBookBox"&gt;
+		&lt;input maxlength="100" class="radio" type="radio" name="atb_book"/&gt;
+		&lt;div class="imgborder thumbnailwrap"&gt;
+			&lt;img src="&lt;%=  thumbnail  %&gt;"/&gt;
+		&lt;/div&gt;
+		&lt;div class="titlewrap"&gt;
+			&lt;input id="newBookTitle" class="forminput sdsa" maxlength="100" type="text" placeholder="Untitled"/&gt;
+		&lt;/div&gt;
+	&lt;/div&gt;
+&lt;/div&gt;
+</script>
+   </div>
+   <div class="ui-dialog-buttonpane ui-widget-content ui-helper-clearfix">
+    <div class="ui-dialog-buttonset">
+     <button type="button" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" role="button" aria-disabled="false"><span class="ui-button-text">Cancel</span></button>
+     <button type="button" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" role="button" aria-disabled="false"><span class="ui-button-text">OK</span></button>
+    </div>
+   </div>
+  </div>
+ </body>
+</html>

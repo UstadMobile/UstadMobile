@@ -16,6 +16,8 @@ public class TestResponse {
             @SerializedName("_id")
             public String id;
 
+            public String updated;
+
         }
 
         public class TestScore{

@@ -65,24 +65,24 @@ public class TestContentScraperUtil {
 
 
     @Test
-    public void givenEdraak12Date_whenParsingDate_thenDateConvertedToLong() {
+    public void givenEdraak12Date_whenParsingDate_thenDateConvertedToLong()  {
 
         String commonEdraakDate = "2018-01-07T08:19:46.410000";
         String videoEdraakDate = "2018-01-17T18:38:17.612502Z";
         String exerciseEdraakDate = "2018-01-17T21:22:37";
 
-        ContentScraperUtil.parseEdraakK12Date(commonEdraakDate);
-        ContentScraperUtil.parseEdraakK12Date(videoEdraakDate);
-        ContentScraperUtil.parseEdraakK12Date(exerciseEdraakDate);
+        ContentScraperUtil.parseServerDate(commonEdraakDate);
+        ContentScraperUtil.parseServerDate(videoEdraakDate);
+        ContentScraperUtil.parseServerDate(exerciseEdraakDate);
 
     }
 
-    @Test(expected = DateTimeParseException.class)
+    @Test(expected = IOException.class)
     public void givenEdraak12Date_whenParsingDate_thenThrowDateTimeParseException() {
 
         String unCommonEdraakDate = "2018-01-07T08:19:46.4100";
 
-        ContentScraperUtil.parseEdraakK12Date(unCommonEdraakDate);
+        ContentScraperUtil.parseServerDate(unCommonEdraakDate);
     }
 
 

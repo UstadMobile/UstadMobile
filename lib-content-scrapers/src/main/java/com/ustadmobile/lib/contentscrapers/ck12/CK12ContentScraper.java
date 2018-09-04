@@ -37,14 +37,15 @@ public class CK12ContentScraper {
 
     String chromeDriverLocation = "C:\\Users\\suhai\\Documents\\chromedriver_win32\\chromedriver.exe";
 
-    String practiceTestIdLink = "https://www.ck12.org/assessment/api/get/info/test/practice/";
+    public final String postfix = "?hints=true&evalData=true";
+    public final String POLICIES = "?policies=[{\"name\":\"shuffle\",\"value\":false},{\"name\":\"shuffle_question_options\",\"value\":false},{\"name\":\"max_questions\",\"value\":15},{\"name\":\"adaptive\",\"value\":false}]";
+    public final String practicePost = "?nextPractice=true&adaptive=true&checkUserLogin=false";
+
+    String practiceIdLink = "https://www.ck12.org/assessment/api/get/info/test/practice/";
     String startTestLink = "https://www.ck12.org/assessment/api/start/test/";
     String questionLinkId = "https://www.ck12.org/assessment/api/render/questionInstance/test/";
     // sample questionLink 5985b3d15aa4136da1e858b8/2/5b7a41ba5aa413662008f44f
 
-    public final String postfix = "?hints=true&evalData=true";
-    public final String POLICIES = "?policies=%5B%7B%22name%22%3A%22immediate_evaluation%22%2C%22value%22%3Atrue%7D%2C%7B%22name%22%3A%22timelimit%22%2C%22value%22%3A0%7D%2C%7B%22name%22%3A%22max_questions%22%2C%22value%22%3A15%7D%2C%7B%22name%22%3A%22adaptive%22%2C%22value%22%3Atrue%7D%5D";
-    public final String practicePost = "?adaptive=true";
 
     private ChromeDriver driver;
     private WebDriverWait waitDriver;
@@ -52,6 +53,8 @@ public class CK12ContentScraper {
     public static final String READ_TYPE = "READ";
     public static final String VIDEO_TYPE = "VIDEO";
     public static final String PRACTICE_TYPE = "PRACTICE";
+
+    public Rhino rhino = new Rhino();
 
 
     public CK12ContentScraper(String url, File destDir) throws MalformedURLException {
@@ -118,11 +121,23 @@ public class CK12ContentScraper {
 
     }
 
+    public String generatePracticeLink(String url){
+        return practiceIdLink + url + practicePost;
+    }
+
+    public String generateTestUrl(String testId){
+        return startTestLink + testId + POLICIES;
+    }
+
+    public String generateQuestionUrl(String testId, String testScoreId, int count){
+        return questionLinkId + testId + "/" + count + "/" + testScoreId + postfix;
+    }
+
     public void scrapPracticeContent() throws IOException {
 
         String practiceUrl = urlString.substring(urlString.lastIndexOf("/") + 1, urlString.indexOf("?"));
 
-        String testIdLink = practiceTestIdLink + practiceUrl + practicePost;
+        String testIdLink = generatePracticeLink(practiceUrl);
 
         PracticeResponse response = new GsonBuilder().disableHtmlEscaping().create().fromJson(
                 IOUtils.toString(new URL(testIdLink), ScraperConstants.UTF_ENCODING), PracticeResponse.class);
@@ -130,7 +145,19 @@ public class CK12ContentScraper {
         String testId = response.response.test.id;
         int goal = response.response.test.goal;
 
-        String testLink = startTestLink + testId + POLICIES;
+        int questionsCount = response.response.test.questionsCount;
+        String practiceName = response.response.test.title;
+        String updated = response.response.test.updated;
+
+        File modifiedFile = new File(destinationDirectory, ScraperConstants.LAST_MODIFIED_TXT);
+        if (!ContentScraperUtil.isContentUpdated(ContentScraperUtil.parseServerDate(updated), modifiedFile)) {
+            return;
+        }
+
+        String nextPracticeName = response.response.test.nextPractice.nameOfNextPractice;
+        String nextPracticeUrl = practiceIdLink + nextPracticeName + practicePost;
+
+        String testLink = generateTestUrl(testId);
         TestResponse testResponse = new GsonBuilder().disableHtmlEscaping().create().fromJson(
                 IOUtils.toString(new URL(testLink), ScraperConstants.UTF_ENCODING), TestResponse.class);
 
@@ -139,12 +166,17 @@ public class CK12ContentScraper {
         Gson gson = new GsonBuilder().create();
 
         ArrayList<QuestionResponse> questionList = new ArrayList<>();
-        for (int i = 1; i <= goal; i++) {
+        for (int i = 1; i <= questionsCount; i++) {
 
-            String questionLink = questionLinkId + testId + "/" + i + "/" + testScoreId + postfix;
+            String questionLink = generateQuestionUrl(testId, testScoreId, i);
 
-            QuestionResponse questionResponse =  new GsonBuilder().disableHtmlEscaping().create().fromJson(
+            QuestionResponse questionResponse = new GsonBuilder().disableHtmlEscaping().create().fromJson(
                     IOUtils.toString(new URL(questionLink), ScraperConstants.UTF_ENCODING), QuestionResponse.class);
+
+            questionResponse.response.goal = goal;
+            questionResponse.response.practiceName = practiceName;
+            questionResponse.response.nextPracticeName = nextPracticeName;
+            questionResponse.response.nextPracticeUrl = nextPracticeUrl;
 
             String questionId = questionResponse.response.questionID;
 
@@ -154,6 +186,7 @@ public class CK12ContentScraper {
             questionResponse.response.stem.displayText = ContentScraperUtil.downloadAllResources(
                     questionResponse.response.stem.displayText, questionAsset, scrapUrl);
 
+            System.out.println(questionResponse.response.stem.displayText);
 
             List<String> hintsList = questionResponse.response.hints;
             for (int j = 0; j < hintsList.size(); j++) {
@@ -161,7 +194,7 @@ public class CK12ContentScraper {
             }
             questionResponse.response.hints = hintsList;
 
-            String answerResponse = new Rhino().getResult(questionResponse.response.data);
+            String answerResponse = extractAnswerFromEncryption(questionResponse.response.data);
 
             System.out.println(answerResponse);
 
@@ -199,14 +232,18 @@ public class CK12ContentScraper {
 
     }
 
+    public String extractAnswerFromEncryption(String data) {
+        return rhino.getResult(data);
+    }
+
     private List<Object> downloadAllResourcesFromAnswer(List<Object> answer, File questionAsset, URL scrapUrl) {
 
-        for(int i = 0; i < answer.size(); i++) {
+        for (int i = 0; i < answer.size(); i++) {
 
             Object object = answer.get(i);
-            if(object instanceof String){
+            if (object instanceof String) {
                 answer.set(i, ContentScraperUtil.downloadAllResources((String) object, questionAsset, scrapUrl));
-            }else if(object instanceof List<?>){
+            } else if (object instanceof List<?>) {
                 answer.set(i, downloadAllResourcesFromAnswer((List<Object>) object, questionAsset, scrapUrl));
             }
         }

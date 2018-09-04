@@ -18,7 +18,24 @@ public class PracticeResponse {
             @SerializedName("goal")
             public int goal;
 
+            @SerializedName("questionsCount")
+            public int questionsCount;
 
+            public String title;
+
+            public NextPractice nextPractice;
+
+            public String updated;
+
+            public class NextPractice {
+
+                @SerializedName("_id")
+                public String id;
+
+                @SerializedName("handle")
+                public String nameOfNextPractice;
+
+            }
         }
 
     }

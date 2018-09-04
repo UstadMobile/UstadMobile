@@ -135,7 +135,7 @@ public class EdraakK12ContentScraper {
 
 
                     File videoFile = new File(courseDirectory, VIDEO_MP4);
-                    if (ContentScraperUtil.isContentUpdated(ContentScraperUtil.parseEdraakK12Date(videoHref.modified), videoFile)) {
+                    if (ContentScraperUtil.isContentUpdated(ContentScraperUtil.parseServerDate(videoHref.modified), videoFile)) {
                         try {
                             FileUtils.copyURLToFile(videoUrl, videoFile);
                             anyContentUpdated = true;
@@ -261,7 +261,7 @@ public class EdraakK12ContentScraper {
         for (ContentResponse exercise : questionsList) {
 
             File exerciseDirectory = new File(destinationDir, exercise.id);
-            if (ContentScraperUtil.isContentUpdated(ContentScraperUtil.parseEdraakK12Date(exercise.updated), exerciseDirectory)) {
+            if (ContentScraperUtil.isContentUpdated(ContentScraperUtil.parseServerDate(exercise.updated), exerciseDirectory)) {
 
                 exerciseDirectory.mkdirs();
                 exerciseUpdatedCount++;

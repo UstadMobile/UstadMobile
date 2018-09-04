@@ -42,6 +42,7 @@ dependencies {
 
     testImplementation "junit:junit:$version_junit"
     testImplementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
+    testImplementation "org.mockito:mockito-core:$version_android_mockito"
     compile project(path: ':lib-database')
 }
 

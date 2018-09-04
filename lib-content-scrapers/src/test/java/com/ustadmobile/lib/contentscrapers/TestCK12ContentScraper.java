@@ -3,19 +3,87 @@ package com.ustadmobile.lib.contentscrapers;
 import com.ustadmobile.lib.contentscrapers.ck12.CK12ContentScraper;
 import com.ustadmobile.lib.contentscrapers.ck12.Rhino;
 
+import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 
+import okhttp3.mockwebserver.Dispatcher;
+import okhttp3.mockwebserver.MockResponse;
+import okhttp3.mockwebserver.MockWebServer;
+import okhttp3.mockwebserver.RecordedRequest;
+import okio.Buffer;
+import okio.BufferedSource;
+import okio.Okio;
+
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
+
 public class TestCK12ContentScraper {
+
+    private static final String COMPONENT_API_PREFIX = "/c/";
+    private final String PRACTICE_JSON = "/com/ustadmobile/lib/contentscrapers/ck12/ck12-practice.txt";
+    private final String TEST_JSON = "/com/ustadmobile/lib/contentscrapers/ck12/ck12-test.txt";
+    private final String QUESTION_JSON = "/com/ustadmobile/lib/contentscrapers/ck12/ck12-question-1.txt";
+    private final String ANSWER_JSON = "/com/ustadmobile/lib/contentscrapers/ck12/answer.txt";
+    private final String VIDEO_LOCATION_FILE = "/com/ustadmobile/lib/contentscrapers/files/video.mp4";
+    private final String RESOURCE_PATH = "/com/ustadmobile/lib/contentscrapers/files/";
+
+    private final String READ_HTML = "/com/ustadmobile/lib/contentscrapers/ck12/ck12-read.txt";
+
 
     String youtubeUrl = "https://www.ck12.org/c/biology/history-of-life/lecture/Origin-and-Evolution-of-Life/?referrer=concept_details";
     String ckVidUrl = "https://www.ck12.org/c/elementary-math-grade-1/add-to-10-with-images/enrichment/Overview-of-Addition-Sums-to-10/?referrer=concept_details";
     String slideShareUrl = "https://www.ck12.org/c/earth-science/observations-and-experiments/lecture/Inference-and-Observation-Activity/?referrer=concept_details";
     String mathJaxUrl = "https://www.ck12.org/c/geometry/midpoints-and-segment-bisectors/lesson/Midpoints-and-Segment-Bisectors-BSC-GEOM/?referrer=concept_details";
+    String practiceUrl = "https://www.ck12.org/c/elementary-math-grade-1/add-to-10-with-images/asmtpractice/Add-to-10-with-Images-Practice?referrer=featured_content&collectionHandle=elementary-math-grade-1&collectionCreatorID=3&conceptCollectionHandle=elementary-math-grade-1-::-add-to-10-with-images?referrer=concept_details";
+
+    final Dispatcher dispatcher = new Dispatcher() {
+        @Override
+        public MockResponse dispatch(RecordedRequest request) throws InterruptedException {
+
+            try {
+
+                if (request.getPath().startsWith(COMPONENT_API_PREFIX)) {
+
+                    int prefixLength = COMPONENT_API_PREFIX.length();
+                    String fileName = request.getPath().substring(prefixLength,
+                            request.getPath().indexOf(".txt", prefixLength));
+                    String body = IOUtils.toString(getClass().getResourceAsStream(fileName + ".txt"), UTF_ENCODING);
+                    return new MockResponse().setBody(body);
+
+                } else if (request.getPath().equals("/media/video.mp4")) {
+                    InputStream videoIn = getClass().getResourceAsStream(VIDEO_LOCATION_FILE);
+                    BufferedSource source = Okio.buffer(Okio.source(videoIn));
+                    Buffer buffer = new Buffer();
+                    source.readAll(buffer);
+
+                    return new MockResponse().setResponseCode(200).setBody(buffer);
+                } else if (request.getPath().contains("picture")) {
+                    int length = "/media/".length();
+                    String fileName = request.getPath().substring(length,
+                            request.getPath().indexOf(".png", length));
+                    InputStream pictureIn = getClass().getResourceAsStream(RESOURCE_PATH + fileName + ".png");
+                    BufferedSource source = Okio.buffer(Okio.source(pictureIn));
+                    Buffer buffer = new Buffer();
+                    source.readAll(buffer);
+                    return new MockResponse().setResponseCode(200).setBody(buffer);
+                }
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return new MockResponse().setResponseCode(404);
+        }
+    };
+
+
 
     @Test
     public void givenServerOnline_whenVideoContentScraped_thenShouldConvertAndDownload() throws IOException {
@@ -53,15 +121,37 @@ public class TestCK12ContentScraper {
     @Test
     public void givenServerOnline_whenReadContentScraped_thenShouldConvertAndDownload() throws IOException {
         File tmpDir = Files.createTempDirectory("testCK12readcontentscraper").toFile();
-        CK12ContentScraper scraper = new CK12ContentScraper("https://www.ck12.org/c/life-science/population-growth-patterns/lesson/Population-Growth-Patterns-MS-LS/?referrer=concept_details", tmpDir);
+
+        MockWebServer mockWebServer = new MockWebServer();
+        mockWebServer.setDispatcher(dispatcher);
+
+        CK12ContentScraper scraper = new CK12ContentScraper(mockWebServer.url("/c/" + READ_HTML).toString(), tmpDir);
         scraper.scrapReadContent();
     }
 
+
+
     @Test
     public void givenServerOnline_whenPracticeContentScraped_thenShouldConvertAndDownload() throws IOException{
+        MockWebServer mockWebServer = new MockWebServer();
+        mockWebServer.setDispatcher(dispatcher);
         File tmpDir = Files.createTempDirectory("testCK12practicecontentscraper").toFile();
-        CK12ContentScraper scraper = new CK12ContentScraper("https://www.ck12.org/c/elementary-math-grade-1/add-to-10-with-images/asmtpractice/Add-to-10-with-Images-Practice?referrer=featured_content&collectionHandle=elementary-math-grade-1&collectionCreatorID=3&conceptCollectionHandle=elementary-math-grade-1-::-add-to-10-with-images?referrer=concept_details", tmpDir);
+
+
+        CK12ContentScraper scraper = spy(new CK12ContentScraper(mockWebServer.url("/c/ck12-practice.txt.txt?").toString(), tmpDir));
+        doReturn(mockWebServer.url("/c/" + PRACTICE_JSON).toString()).when(scraper).generatePracticeLink(Mockito.anyString());
+        doReturn(mockWebServer.url("/c/" + TEST_JSON).toString()).when(scraper).generateTestUrl(Mockito.anyString());
+        doReturn(mockWebServer.url("/c/" + QUESTION_JSON).toString()).when(scraper).generateQuestionUrl(
+                Mockito.anyString(), Mockito.anyString(), Mockito.anyInt());
+        doReturn(IOUtils.toString(getClass().getResourceAsStream(ANSWER_JSON), UTF_ENCODING)).when(scraper).extractAnswerFromEncryption(Mockito.anyString());
+
+
         scraper.scrapPracticeContent();
+
+        File questions = new File(tmpDir, "questions.json");
+        Assert.assertEquals("download questions json exists",true,ContentScraperUtil.fileHasContent(questions));
+
+
     }
 
 

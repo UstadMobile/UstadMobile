@@ -26,8 +26,14 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.ZipEntry;
@@ -47,6 +53,8 @@ import static com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING;
 
 
 public class ContentScraperUtil {
+
+    private static final DateTimeFormatter LOOSE_ISO_DATE_TIME_ZONE_PARSER = DateTimeFormatter.ofPattern("[yyyyMMdd][yyyy-MM-dd][yyyy-DDD]['T'[HHmmss][HHmm][HH:mm:ss][HH:mm][.SSSSSSSSS][.SSSSSS][.SSS][.SS][.S]][OOOO][O][z][XXXXX][XXXX]['['VV']']");
 
     /**
      * Is the given componentType "Imported Component"
@@ -156,7 +164,7 @@ public class ContentScraperUtil {
      */
     public static boolean isContentUpdated(long modifiedTime, File file) {
 
-        if (file.exists()) {
+        if (ContentScraperUtil.fileHasContent(file)) {
             return modifiedTime >= file.lastModified();
         }
         return true;
@@ -175,13 +183,20 @@ public class ContentScraperUtil {
 
 
     /**
-     * Given an EdraakK12Date, return it as a long
+     * Given an Server date, return it as a long
      *
-     * @param date Edraak Date format from server
+     * @param date Date format from server
      * @return the date given in a long format
      */
-    public static long parseEdraakK12Date(String date) {
-        return LocalDateTime.parse(date, ScraperConstants.formatter).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+    public static long parseServerDate(String date)  {
+        TemporalAccessor temporalAccessor = LOOSE_ISO_DATE_TIME_ZONE_PARSER.parseBest(date, ZonedDateTime::from, LocalDateTime::from, LocalDate::from);
+        if (temporalAccessor instanceof ZonedDateTime) {
+            return ((ZonedDateTime) temporalAccessor).toInstant().toEpochMilli();
+        }
+        if (temporalAccessor instanceof LocalDateTime) {
+            return ((LocalDateTime) temporalAccessor).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+        }
+        return ((LocalDate) temporalAccessor).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
     }
 
 
