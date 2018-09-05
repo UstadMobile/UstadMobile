@@ -15,4 +15,7 @@ public abstract class ContentEntryDao {
 
     @UmQuery("SELECT * FROM ContentEntry WHERE contentEntryUid=:entryUuid")
     public abstract ContentEntry findByEntryId(long entryUuid);
+
+    @UmQuery("DELETE FROM ContentEntry")
+    public abstract void deleteAll();
 }
