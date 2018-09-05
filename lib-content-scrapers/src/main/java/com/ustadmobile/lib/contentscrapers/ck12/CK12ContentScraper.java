@@ -7,9 +7,12 @@ import com.ustadmobile.lib.contentscrapers.ScraperConstants;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.http.protocol.RequestUserAgent;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Entities;
+import org.jsoup.parser.Parser;
 import org.jsoup.select.Elements;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
@@ -71,12 +74,18 @@ public class CK12ContentScraper {
 
     public void scrapVideoContent() throws IOException {
 
+        Document fullSite = Jsoup.connect(urlString).get();
 
-        Document fullSite = setUpChromeDriver(urlString);
+        Document videoContent = getVideoContent(fullSite, "iframe[src]","src");
+        if(videoContent == null){
+            videoContent = getVideoContent(fullSite, "div.modality_content[data-loadurl]", "data-loadurl");
+            if(videoContent == null){
+                System.err.println("Unsupported video content" + fullSite);
+                throw new IOException("Did not find video content");
+            }
+        }
 
-        Document videoContent = getContentFromSite(VIDEO_TYPE, "div.flex-video iframe");
-
-        Elements videoElement = videoContent.select("iframe");
+        Elements videoElement = getIframefromHtml(videoContent);
         String link = videoElement.attr("src");
 
         String imageThumnail = fullSite.select("meta[property=og:image]").attr("content");
@@ -95,7 +104,7 @@ public class CK12ContentScraper {
         String videoSource = ContentScraperUtil.downloadAllResources(videoElement.outerHtml(), assetDirectory, scrapUrl);
 
         if (link == null || link.isEmpty()) {
-            throw new IllegalArgumentException("Have not finished support of video type link " + link + " for url " + urlString);
+            throw new IllegalArgumentException("Have not finished support of video type link for url " + urlString);
         }
 
         String videoTitleHtml = getTitleHtml(fullSite);
@@ -105,6 +114,30 @@ public class CK12ContentScraper {
         String indexHtml = videoTitleHtml + videoSource + detailHtml;
 
         FileUtils.writeStringToFile(new File(destinationDirectory, "index.html"), indexHtml, ScraperConstants.UTF_ENCODING);
+    }
+
+    private Elements getIframefromHtml(Document videoContent) {
+
+        Elements elements = videoContent.select("iframe");
+        if(elements.size() > 0){
+            return elements;
+        }else{
+            String videoElementsList = videoContent.select("textarea").text();
+            return Jsoup.parse(videoElementsList).select("iframe");
+        }
+    }
+
+    public Document getVideoContent(Document document, String htmlTag, String search) throws IOException{
+        Elements elements = document.select(htmlTag);
+        for(Element element : elements){
+            if(!element.attr(search).contains("googletag")){
+                String path = element.attr(search);
+                URL videoUrl = new URL(scrapUrl, path);
+                return Jsoup.connect(videoUrl.toString())
+                        .followRedirects(true).get();
+            }
+        }
+        return null;
     }
 
     public void scrapReadContent() throws IOException {
@@ -342,9 +375,9 @@ public class CK12ContentScraper {
         driver = new ChromeDriver(chromeOptions);
 
         driver.get(url);
-
         waitDriver = new WebDriverWait(driver, 30);
         waitForJSandJQueryToLoad();
+
 
         return Jsoup.parse(driver.getPageSource());
     }

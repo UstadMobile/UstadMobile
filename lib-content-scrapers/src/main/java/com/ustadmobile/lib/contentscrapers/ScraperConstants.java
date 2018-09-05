@@ -22,7 +22,7 @@ public class ScraperConstants {
     public static final String MATERIAL_JS = "materialize.min.js";
     public static final String MATERIAL_CSS = "materialize.min.css";
 
-    public static final String brainGenieLink = "https://braingenie.ck12.org/";
+    public static final String brainGenieLink = "braingenie.ck12.org";
     public static final String slideShareLink = "www.slideshare.net";
 
 

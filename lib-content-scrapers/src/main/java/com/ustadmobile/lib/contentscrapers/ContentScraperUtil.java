@@ -93,6 +93,9 @@ public class ContentScraperUtil {
             } else if (url.contains(ScraperConstants.brainGenieLink)) {
                 String videoHtml;
                 try {
+                    if(url.startsWith("//")){
+                        url = "https:" + url;
+                    }
                     videoHtml = Jsoup.connect(url).followRedirects(true).get().select("video").outerHtml();
                 } catch (IOException e) {
                     continue;
@@ -105,7 +108,7 @@ public class ContentScraperUtil {
                 continue;
             } else if (url.contains(ScraperConstants.slideShareLink)) {
                 // content.html("We cannot download slideshare content, please watch using the link below <p></p><img href=" + url + "\" src=\"video-thumbnail.jpg\"/>");
-                content.parent().html("");
+                 content.parent().html("");
                 continue;
                 //    videoSource = Jsoup.connect(link).followRedirects(true).get().select("div.player").outerHtml();
                 //   videoSource = ContentScraperUtil.downloadAllResources(videoSource, destinationDirectory, "slideshare.jpg", scrapUrl);

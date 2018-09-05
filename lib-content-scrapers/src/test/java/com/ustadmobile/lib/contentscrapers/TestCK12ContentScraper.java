@@ -23,6 +23,7 @@ import okio.Okio;
 
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 
 public class TestCK12ContentScraper {
@@ -35,7 +36,10 @@ public class TestCK12ContentScraper {
     private final String VIDEO_LOCATION_FILE = "/com/ustadmobile/lib/contentscrapers/files/video.mp4";
     private final String RESOURCE_PATH = "/com/ustadmobile/lib/contentscrapers/files/";
 
-    private final String VIDEO_YT_HTML = "/com/ustadmobile/lib/contentscrapers/ck12/video-youtube.txt";
+
+    private final String SLIDESHARE_HTML = "/com/ustadmobile/lib/contentscrapers/ck12/ck12-slideshare.txt";
+    private final String VIDEO_YT_HTML = "/com/ustadmobile/lib/contentscrapers/ck12/ck-12-video-yt.txt";
+    private final String CK_VID_HTML = "/com/ustadmobile/lib/contentscrapers/ck12/ck12-video-genie.txt";
     private final String READ_HTML = "/com/ustadmobile/lib/contentscrapers/ck12/ck12-read.txt";
 
 
@@ -88,25 +92,70 @@ public class TestCK12ContentScraper {
     @Test
     public void givenServerOnline_whenVideoContentScraped_thenShouldConvertAndDownload() throws IOException {
 
+        MockWebServer mockWebServer = new MockWebServer();
+        mockWebServer.setDispatcher(dispatcher);
         File tmpDir = Files.createTempDirectory("testCK12contentscraper").toFile();
-        CK12ContentScraper scraper = new CK12ContentScraper(ckVidUrl, tmpDir);
+
+        CK12ContentScraper scraper = new CK12ContentScraper(mockWebServer.url("/c/" + CK_VID_HTML).toString(), tmpDir);
         scraper.scrapVideoContent();
+
+        File file = new File(tmpDir, "index.html");
+        Assert.assertEquals("Html for video content", true, ContentScraperUtil.fileHasContent(file));
+
+        File asset = new File(tmpDir, "asset");
+        Assert.assertEquals("asset folder created", true, asset.isDirectory());
+
+        File thumbnail = new File(asset, "video-thumbnail.jpg");
+        Assert.assertEquals("thumbnail for content", true, ContentScraperUtil.fileHasContent(thumbnail));
+
+        File video = new File(asset, "_media_video.mp4");
+        Assert.assertEquals("video for content", true, ContentScraperUtil.fileHasContent(video));
     }
 
     @Test
     public void givenServerOnline_whenSlideShareVideoContentScraped_thenShouldConvertAndDownload() throws IOException {
 
         File tmpDir = Files.createTempDirectory("testCK12contentscraper").toFile();
-        CK12ContentScraper scraper = new CK12ContentScraper(slideShareUrl, tmpDir);
+        MockWebServer mockWebServer = new MockWebServer();
+        mockWebServer.setDispatcher(dispatcher);
+
+        CK12ContentScraper scraper = new CK12ContentScraper(mockWebServer.url("/c/" + SLIDESHARE_HTML).toString(), tmpDir);
         scraper.scrapVideoContent();
+
+        File file = new File(tmpDir, "index.html");
+        Assert.assertEquals("Html for video content", true, ContentScraperUtil.fileHasContent(file));
+
+        File asset = new File(tmpDir, "asset");
+        Assert.assertEquals("asset folder created", true, asset.isDirectory());
+
+        File thumbnail = new File(asset, "video-thumbnail.jpg");
+        Assert.assertEquals("thumbnail for content", true, ContentScraperUtil.fileHasContent(thumbnail));
+
+        File video = new File(asset, "_media_video.mp4");
+        Assert.assertEquals("video for content", false, ContentScraperUtil.fileHasContent(video));
     }
 
     @Test
     public void givenServerOnline_whenYoutubeVideoContentScraped_thenShouldThrowIllegalException() throws IOException {
 
         File tmpDir = Files.createTempDirectory("testCK12contentscraper").toFile();
-        CK12ContentScraper scraper = new CK12ContentScraper(youtubeUrl, tmpDir);
+        MockWebServer mockWebServer = new MockWebServer();
+        mockWebServer.setDispatcher(dispatcher);
+
+        CK12ContentScraper scraper = new CK12ContentScraper(mockWebServer.url("/c/" + VIDEO_YT_HTML).toString(), tmpDir);
         scraper.scrapVideoContent();
+
+        File file = new File(tmpDir, "index.html");
+        Assert.assertEquals("Html for video content", true, ContentScraperUtil.fileHasContent(file));
+
+        File asset = new File(tmpDir, "asset");
+        Assert.assertEquals("asset folder created", true, asset.isDirectory());
+
+        File thumbnail = new File(asset, "video-thumbnail.jpg");
+        Assert.assertEquals("thumbnail for content", true, ContentScraperUtil.fileHasContent(thumbnail));
+
+        File video = new File(asset, "_media_video.mp4");
+        Assert.assertEquals("video for content", false, ContentScraperUtil.fileHasContent(video));
     }
 
     @Test
