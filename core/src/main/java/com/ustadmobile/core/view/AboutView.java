@@ -6,7 +6,7 @@ package com.ustadmobile.core.view;
 
 public interface AboutView extends UstadView {
 
-    public static final String VIEW_NAME = "About";
+    String VIEW_NAME = "About";
 
     void setVersionInfo(String versionInfo);
 

@@ -31,6 +31,7 @@
 package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.generated.locale.MessageID;
+import com.ustadmobile.core.impl.UmLifecycleOwner;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.AboutView;
 import com.ustadmobile.core.view.UserSettingsView2;
@@ -46,7 +47,8 @@ import java.util.Vector;
  * 
  * @author mike
  */
-public abstract class UstadBaseController<V extends UstadView> implements UstadController<V> {
+public abstract class UstadBaseController<V extends UstadView> implements UstadController<V>,
+        UmLifecycleOwner {
 
     protected V view;
     

@@ -9,6 +9,7 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
+import com.ustadmobile.lib.database.annotation.UmClearAll;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmDatabase;
 import com.ustadmobile.lib.database.annotation.UmDbContext;
@@ -87,6 +88,9 @@ public class DbProcessorRoom extends AbstractDbProcessor{
     public void processDbClass(TypeElement dbType,  File destinationDir) throws IOException {
         String roomDbClassName = dbType.getSimpleName() + "_RoomDb";
         String roomDbManagerClassName = dbType.getSimpleName() + SUFFIX_ROOM_DBMANAGER;
+
+        System.out.println("DbProcessorRoom processing db class: " + dbType.getSimpleName());
+
         TypeSpec.Builder roomDbTypeSpec = TypeSpec.classBuilder(roomDbClassName)
                 .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
                 .superclass(ClassName.get(ROOM_PKG_NAME, "RoomDatabase"))
@@ -172,6 +176,8 @@ public class DbProcessorRoom extends AbstractDbProcessor{
                     contextMethodBuilder.addModifiers(Modifier.PUBLIC);
 
                 dbManagerImplSpec.addMethod(contextMethodBuilder.build());
+            }else if(daoMethod.getAnnotation(UmClearAll.class) != null) {
+                dbManagerImplSpec.addMethod(generateClearAllMethod(daoMethod).build());
             }
 
             //Lookup using processingEnv.getElementUtils.getTypeElement
@@ -464,7 +470,7 @@ public class DbProcessorRoom extends AbstractDbProcessor{
 
             CodeBlock.Builder retMethodCodeBlock = CodeBlock.builder().add(
                     "return new $T<>($L",
-                    ClassName.get("com.ustadmobile.port.android.db.dao",
+                    ClassName.get("com.ustadmobile.port.android.db",
                             "UmLiveDataAndroid"), liveDataMethodName);
 
             addParametersToMethodBuilder(roomLiveDataBuilder, daoMethod);
@@ -539,6 +545,10 @@ public class DbProcessorRoom extends AbstractDbProcessor{
 
         return retMethod;
 
+    }
+
+    private MethodSpec.Builder generateClearAllMethod(ExecutableElement daoMethod) {
+        return MethodSpec.overriding(daoMethod).addCode("_roomDb.clearAllTables();\n");
     }
 
 
