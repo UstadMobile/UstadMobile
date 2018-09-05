@@ -12,7 +12,8 @@ import static com.ustadmobile.port.sharedse.networkmanager.BleMessageUtil.bleMes
 import static com.ustadmobile.port.sharedse.networkmanager.BleMessageUtil.bleMessageLongToBytes;
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.ENTRY_STATUS_REQUEST;
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.ENTRY_STATUS_RESPONSE;
-import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.WIFI_GROUP_CREATION_REQUEST;
+import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.WIFI_GROUP_INFO_SEPARATOR;
+import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.WIFI_GROUP_REQUEST;
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.WIFI_GROUP_CREATION_RESPONSE;
 
 /**
@@ -22,10 +23,7 @@ import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.WIF
  */
 public abstract class BleGattServer implements WiFiDirectGroupListenerBle{
 
-    /**
-     * Instance of a network manager which used for platform specific operations.
-     */
-    public NetworkManagerBle networkManager;
+    private NetworkManagerBle networkManager;
 
     private final Object p2pGroupCreationLock = new Object();
 
@@ -38,6 +36,13 @@ public abstract class BleGattServer implements WiFiDirectGroupListenerBle{
     public BleGattServer (Object context){
         this.context = context;
     }
+
+
+    public void setNetworkManager(NetworkManagerBle networkManager) {
+        this.networkManager = networkManager;
+    }
+
+    public BleGattServer(){}
     /**
      * Handle request from peer device
      * @param requestReceived Message received from the peer device
@@ -59,10 +64,11 @@ public abstract class BleGattServer implements WiFiDirectGroupListenerBle{
                 return new BleMessage(ENTRY_STATUS_RESPONSE,
                         bleMessageLongToBytes(entryStatusResponse));
 
-            case WIFI_GROUP_CREATION_REQUEST:
+            case WIFI_GROUP_REQUEST:
                 synchronized (p2pGroupCreationLock){
                     try{
-                        networkManager.createWifiDirectGroup(this);
+                        networkManager.handleWiFiDirectGroupChangeRequest(this);
+                        networkManager.createWifiDirectGroup();
                         p2pGroupCreationLock.wait(GROUP_CREATION_TIMEOUT);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
@@ -77,7 +83,7 @@ public abstract class BleGattServer implements WiFiDirectGroupListenerBle{
     @Override
     public void groupCreated(WiFiDirectGroupBle group, Exception err) {
         synchronized (p2pGroupCreationLock){
-            this.message = group.getPassphrase()+","+group.getPassphrase();
+            this.message = group.getSsid()+WIFI_GROUP_INFO_SEPARATOR+group.getPassphrase();
             p2pGroupCreationLock.notify();
         }
     }

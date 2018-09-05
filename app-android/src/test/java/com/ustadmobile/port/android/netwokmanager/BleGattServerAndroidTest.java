@@ -28,8 +28,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
- * <h1>BleGattServerAndroidTest</h1>
- *
  * Test class which tests {@link BleGattServerAndroid} to make sure it behaves as expected on all
  * {@link BluetoothGattServerCallback} callbacks
  *

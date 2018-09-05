@@ -58,7 +58,7 @@ public class BleNetworkManagerTest {
                 .makeEntryStatusTask(eq(context),eq(entries),any()))
                 .thenReturn(mockedEntryStatusTask);
 
-        umAppDatabase = UmAppDatabase.getInstance(PlatformTestUtil.getTargetContext());
+        umAppDatabase = UmAppDatabase.getInstance(context);
         umAppDatabase.clearAllTables();
 
 

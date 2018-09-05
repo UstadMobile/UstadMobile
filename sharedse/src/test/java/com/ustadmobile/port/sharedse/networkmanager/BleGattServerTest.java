@@ -9,7 +9,7 @@ import java.util.List;
 import static com.ustadmobile.port.sharedse.networkmanager.BleMessageUtil.bleMessageLongToBytes;
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.ENTRY_STATUS_REQUEST;
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.ENTRY_STATUS_RESPONSE;
-import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.WIFI_GROUP_CREATION_REQUEST;
+import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.WIFI_GROUP_REQUEST;
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.WIFI_GROUP_CREATION_RESPONSE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -35,10 +35,10 @@ public class BleGattServerTest {
 
     @Before
     public void setUpSpy(){
-        gattServer = spy(BleGattServer.class);
         entries = Arrays.asList(1056289670L,4590875612L,9076137860L,2912543894L);
         mockedNetworkManager = mock(NetworkManagerBle.class);
         mockedNetworkManager.init(mock(Object.class));
+        gattServer = spy(BleGattServer.class);
     }
 
     @Test
@@ -53,7 +53,7 @@ public class BleGattServerTest {
 
 
     @Test
-    public void givenRequestMessageWithWrongRequestHeader_whenHandlingIt_thenShouldNoReturnResponseMessage(){
+    public void givenRequestMessageWithWrongRequestHeader_whenHandlingIt_thenShouldNotReturnResponseMessage(){
         BleMessage messageToSend = new BleMessage((byte) 0, bleMessageLongToBytes(entries));
 
         BleMessage responseMessage = gattServer.handleRequest(messageToSend);
@@ -63,8 +63,8 @@ public class BleGattServerTest {
 
 
     @Test
-    public void givenRequestToCreateGroup_whenHandlingIt_thenShouldCreateAGroupAndPassGroupDetails(){
-        BleMessage messageToSend = new BleMessage(WIFI_GROUP_CREATION_REQUEST,
+    public void givenNoWifiDirectGroupExisting_whenWifiDirectGroupRequested_thenShouldCreateAGroupAndPassGroupDetails(){
+        BleMessage messageToSend = new BleMessage(WIFI_GROUP_REQUEST,
                 bleMessageLongToBytes(entries));
 
         BleMessage responseMessage = gattServer.handleRequest(messageToSend);
@@ -74,6 +74,23 @@ public class BleGattServerTest {
 
         assertEquals("Should return the right response",
                 WIFI_GROUP_CREATION_RESPONSE,responseMessage.getRequestType());
+        //todo: check the message can be decoded, and that it provided the correct ssid and passphrase
+
+    }
+
+    @Test
+    public void givenWifiDirectGroupUnderCreation_whenWifiDirectGroupRequested_thenShouldWaitAndProvideGroupDetails() {
+
+    }
+
+    @Test
+    public void givenWiFiDirectGroupExists_whenWifiDirectGroupRequested_thenShouldProvideGroupDetails(){
+
+    }
+
+    @Test
+    public void givenWifiDirectGroupBeingRemoved_whenWifiDirectGroupRequested_thenShouldWaitAndCreateNewGroup() {
+
     }
 
 
@@ -81,9 +98,11 @@ public class BleGattServerTest {
     public void givenRequestWithAvailableEntries_whenHandlingIt_thenShouldReplyTheyAreAvailable(){
         BleMessage messageToSend = new BleMessage(ENTRY_STATUS_REQUEST, bleMessageLongToBytes(entries));
 
+        //TODO: Insert the entries in question into the database and mark them as available
+
         BleMessage responseMessage = gattServer.handleRequest(messageToSend);
 
-        //TODO: Query to the database to get Entry status result
+        //TODO: check the response message, and assert response says that they were available
 
     }
 
@@ -93,7 +112,7 @@ public class BleGattServerTest {
 
         BleMessage responseMessage = gattServer.handleRequest(messageToSend);
 
-        //TODO: Query to the database to get Entry status result
+        //TODO: check the response message, and assert response says that they are not available
     }
 
 }
