@@ -326,6 +326,26 @@ assemble.dependsOn(copyLocalconfigXmlLocaleFilesFromCore)
 
 task generateCoreStringToAndroidResMap {
     inputs.files("core/locale/*/*.xml")
+    onlyIf {
+        /*
+         Only run this task if the input files have been updated since the task was last run.
+         upToDateWhen was not having the expected effect.
+         */
+        long inputLastModified = 0L
+        String[] inDirNames = new String[2]
+        inDirNames[0] = "main"
+        inDirNames[1] = "localconfig"
+
+        for (int i = 0; i < inDirNames.length; i++) {
+            rootProject.fileTree(dir: "core/locale/" + inDirNames[i], include: "**/*.xml").each() { File file ->
+                if (file.lastModified() > inputLastModified)
+                    inputLastModified = file.lastModified()
+            }
+        }
+
+        File outputFile = project.file("src/vanilla/java/com/ustadmobile/port/android/generated/MessageIDMap.java")
+        return outputFile.lastModified() < inputLastModified;
+    }
 
     doLast {
         int MAIN = 0, LOCALCONFIG = 1, VANILLAMULTIDEX = 2, DEVMINAPI21 = 3
