@@ -96,8 +96,6 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
 
     private WifiP2pManager wifiP2pManager;
 
-    private int wifiGroupCreationStatus = 0;
-
     private WiFiDirectGroupBle wiFiDirectGroupBle;
 
     /**
@@ -110,7 +108,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
             if (intent != null && intent.getAction() != null){
                 switch (intent.getAction()){
                     case WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION:
-                        if(wifiGroupCreationStatus == WIFI_DIRECT_GROUP_UNDER_CREATION_STATUS){
+                        if(wifiDirectGroupChangeStatus == WIFI_DIRECT_GROUP_UNDER_CREATION_STATUS){
                             requestGroupInfo();
                         }
                         break;
@@ -339,8 +337,8 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
      */
     @Override
     public void createWifiDirectGroup() {
-        if(wifiGroupCreationStatus == WIFI_DIRECT_GROUP_INACTIVE_STATUS){
-            wifiGroupCreationStatus = WIFI_DIRECT_GROUP_UNDER_CREATION_STATUS;
+        if(wifiDirectGroupChangeStatus == WIFI_DIRECT_GROUP_INACTIVE_STATUS){
+            wifiDirectGroupChangeStatus = WIFI_DIRECT_GROUP_UNDER_CREATION_STATUS;
             if(isWiFiEnabled()){
                 startCreatingAGroup();
             }else{
@@ -352,8 +350,8 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
                 }
             }
         }else{
-            if(wifiGroupCreationStatus == WIFI_DIRECT_GROUP_ACTIVE_STATUS){
-                requestGroupInfo();
+            if(wifiDirectGroupChangeStatus == WIFI_DIRECT_GROUP_ACTIVE_STATUS){
+                fireWiFiDirectGroupChanged(true, getWifiDirectGroup());
             }else {
                 UstadMobileSystemImpl.l(UMLog.ERROR,692,
                         "Wifi is being created, please wait for the callback");
@@ -375,14 +373,14 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
             public void onSuccess() {
                 UstadMobileSystemImpl.l(UMLog.ERROR,692,
                         "Group created successfully");
-                wifiGroupCreationStatus = WIFI_DIRECT_GROUP_ACTIVE_STATUS;
+                wifiDirectGroupChangeStatus = WIFI_DIRECT_GROUP_ACTIVE_STATUS;
             }
 
             @Override
             public void onFailure(int reason) {
                 UstadMobileSystemImpl.l(UMLog.ERROR,692,
                         "Failed to create a group with error code "+reason);
-                wifiGroupCreationStatus = WIFI_DIRECT_GROUP_INACTIVE_STATUS;
+                wifiDirectGroupChangeStatus = WIFI_DIRECT_GROUP_INACTIVE_STATUS;
             }
         });
     }
@@ -411,6 +409,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
                 fireWiFiDirectGroupChanged(false,null);
                 UstadMobileSystemImpl.l(UMLog.ERROR,693,
                         "Group removed successfully");
+                wifiDirectGroupChangeStatus = WIFI_DIRECT_GROUP_INACTIVE_STATUS;
             }
 
             @Override

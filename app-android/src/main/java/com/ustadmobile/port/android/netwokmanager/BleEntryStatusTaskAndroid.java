@@ -58,6 +58,7 @@ public class    BleEntryStatusTaskAndroid extends BleEntryStatusTask {
     public BleEntryStatusTaskAndroid(Context context, List<Long> entryUidsToCheck,
                                      NetworkNode peerToCheck) {
         super(context,entryUidsToCheck,peerToCheck);
+        System.out.println("change");
         this.context = context;
         this.peerToCheck = peerToCheck;
         byte [] messagePayload = BleMessageUtil.bleMessageLongToBytes(entryUidsToCheck);
