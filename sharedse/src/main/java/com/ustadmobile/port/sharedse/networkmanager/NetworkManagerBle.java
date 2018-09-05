@@ -83,6 +83,9 @@ public abstract class NetworkManagerBle {
     public static final int MAXIMUM_MTU_SIZE = 512;
 
 
+    protected int wifiDirectGroupChangeStatus = 0;
+
+
     /**
      * Bluetooth Low Energy service UUID for our app
      */
@@ -250,6 +253,22 @@ public abstract class NetworkManagerBle {
      * group removal.
      */
     public abstract void removeWifiDirectGroup();
+
+    /**
+     * Get Wifi direct group change status
+     * @return Current status
+     */
+    protected int getWifiDirectGroupChangeStatus() {
+        return wifiDirectGroupChangeStatus;
+    }
+
+    /**
+     * Set Wifi direct group change status
+     * @param wifiDirectGroupChangeStatus Status to be changed to
+     */
+    protected void setWifiDirectGroupChangeStatus(int wifiDirectGroupChangeStatus) {
+        this.wifiDirectGroupChangeStatus = wifiDirectGroupChangeStatus;
+    }
 
     /**
      * Add all group change listeners to the list

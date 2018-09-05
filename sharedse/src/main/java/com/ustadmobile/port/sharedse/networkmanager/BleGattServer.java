@@ -27,7 +27,7 @@ public abstract class BleGattServer implements WiFiDirectGroupListenerBle{
 
     private final Object p2pGroupCreationLock = new Object();
 
-    private long GROUP_CREATION_TIMEOUT = TimeUnit.SECONDS.toMillis(1);
+    private long GROUP_CREATION_TIMEOUT = TimeUnit.SECONDS.toMillis(2);
 
     private String message = null;
 

@@ -2,7 +2,6 @@ package com.ustadmobile.port.sharedse.networkmanager;
 
 
 import android.content.Context;
-import android.util.Log;
 
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.lib.db.entities.ContentEntry;
@@ -16,10 +15,13 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import static com.ustadmobile.port.sharedse.networkmanager.BleMessageUtil.bleMessageLongToBytes;
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.ENTRY_STATUS_REQUEST;
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.ENTRY_STATUS_RESPONSE;
+import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.WIFI_DIRECT_GROUP_ACTIVE_STATUS;
+import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.WIFI_DIRECT_GROUP_UNDER_CREATION_STATUS;
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.WIFI_GROUP_CREATION_RESPONSE;
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.WIFI_GROUP_INFO_SEPARATOR;
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.WIFI_GROUP_REQUEST;
@@ -45,6 +47,8 @@ public class BleGattServerTest {
     private BleGattServer gattServer;
     private List<ContentEntry> contentEntryList = new ArrayList<>();
     private WiFiDirectGroupBle wiFiDirectGroupBle;
+    private final Object wifiCreationLock = new Object();
+    private long testCaseTimeOut = TimeUnit.SECONDS.toMillis(1);
 
     @Before
     public void setUpSpy(){
@@ -104,6 +108,7 @@ public class BleGattServerTest {
         String [] groupInfo = new String(responseMessage.getPayload()).split(WIFI_GROUP_INFO_SEPARATOR);
         WiFiDirectGroupBle groupBle = new WiFiDirectGroupBle(groupInfo[0],groupInfo[1]);
 
+        //Verify that wifi direct group creation was initiated
         verify(mockedNetworkManager).createWifiDirectGroup();
 
         assertEquals("Should return the right response",
@@ -117,17 +122,89 @@ public class BleGattServerTest {
 
     @Test
     public void givenWifiDirectGroupUnderCreation_whenWifiDirectGroupRequested_thenShouldWaitAndProvideGroupDetails() {
+        doAnswer(invocation -> {
+            if(mockedNetworkManager.getWifiDirectGroupChangeStatus()
+                    == WIFI_DIRECT_GROUP_UNDER_CREATION_STATUS){
+                synchronized (wifiCreationLock){
+                    wifiCreationLock.wait(testCaseTimeOut);
+                    gattServer.groupCreated(wiFiDirectGroupBle,null);
+                }
+            }
+            return null;
+        }).when(mockedNetworkManager).createWifiDirectGroup();
 
+        mockedNetworkManager.setWifiDirectGroupChangeStatus(WIFI_DIRECT_GROUP_UNDER_CREATION_STATUS);
+
+        BleMessage messageToSend = new BleMessage(WIFI_GROUP_REQUEST, bleMessageLongToBytes(entries));
+        BleMessage responseMessage = gattServer.handleRequest(messageToSend);
+        String [] groupInfo = new String(responseMessage.getPayload()).split(WIFI_GROUP_INFO_SEPARATOR);
+        WiFiDirectGroupBle groupBle = new WiFiDirectGroupBle(groupInfo[0],groupInfo[1]);
+
+        //Verify that wifi direct group creation was initiated
+        verify(mockedNetworkManager).createWifiDirectGroup();
+
+        assertEquals("Should return the right response",
+                WIFI_GROUP_CREATION_RESPONSE,responseMessage.getRequestType());
+
+        assertTrue("Returned the right group information",
+                wiFiDirectGroupBle.getPassphrase().equals(groupBle.getPassphrase()) &&
+                        wiFiDirectGroupBle.getSsid().equals(groupBle.getSsid()));
     }
 
     @Test
     public void givenWiFiDirectGroupExists_whenWifiDirectGroupRequested_thenShouldProvideGroupDetails(){
 
+        doAnswer(invocation -> {
+            if(mockedNetworkManager.getWifiDirectGroupChangeStatus()
+                    == WIFI_DIRECT_GROUP_ACTIVE_STATUS){
+                gattServer.groupCreated(wiFiDirectGroupBle,null);
+            }
+            return null;
+        }).when(mockedNetworkManager).createWifiDirectGroup();
+
+        BleMessage messageToSend = new BleMessage(WIFI_GROUP_REQUEST, bleMessageLongToBytes(entries));
+        mockedNetworkManager.setWifiDirectGroupChangeStatus(WIFI_DIRECT_GROUP_ACTIVE_STATUS);
+
+        BleMessage responseMessage = gattServer.handleRequest(messageToSend);
+        String [] groupInfo = new String(responseMessage.getPayload()).split(WIFI_GROUP_INFO_SEPARATOR);
+        WiFiDirectGroupBle groupBle = new WiFiDirectGroupBle(groupInfo[0],groupInfo[1]);
+
+        //Verify that wifi direct group creation was initiated
+        verify(mockedNetworkManager).createWifiDirectGroup();
+
+        assertEquals("Should return the right response",
+                WIFI_GROUP_CREATION_RESPONSE,responseMessage.getRequestType());
+
+        assertTrue("Returned the right group information",
+                wiFiDirectGroupBle.getPassphrase().equals(groupBle.getPassphrase()) &&
+                        wiFiDirectGroupBle.getSsid().equals(groupBle.getSsid()));
     }
 
     @Test
     public void givenWifiDirectGroupBeingRemoved_whenWifiDirectGroupRequested_thenShouldWaitAndCreateNewGroup() {
+        doAnswer(invocation -> {
+            synchronized (wifiCreationLock){
+                wifiCreationLock.wait(testCaseTimeOut);
+                gattServer.groupCreated(wiFiDirectGroupBle,null);
+            }
+            return null;
+        }).when(mockedNetworkManager).createWifiDirectGroup();
 
+        BleMessage messageToSend = new BleMessage(WIFI_GROUP_REQUEST, bleMessageLongToBytes(entries));
+        mockedNetworkManager.removeWifiDirectGroup();
+        BleMessage responseMessage = gattServer.handleRequest(messageToSend);
+        String [] groupInfo = new String(responseMessage.getPayload()).split(WIFI_GROUP_INFO_SEPARATOR);
+        WiFiDirectGroupBle groupBle = new WiFiDirectGroupBle(groupInfo[0],groupInfo[1]);
+
+        //Verify that wifi direct group creation was initiated
+        verify(mockedNetworkManager).createWifiDirectGroup();
+
+        assertEquals("Should return the right response",
+                WIFI_GROUP_CREATION_RESPONSE,responseMessage.getRequestType());
+
+        assertTrue("Returned the right group information",
+                wiFiDirectGroupBle.getPassphrase().equals(groupBle.getPassphrase()) &&
+                        wiFiDirectGroupBle.getSsid().equals(groupBle.getSsid()));
     }
 
 
