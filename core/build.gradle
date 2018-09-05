@@ -94,8 +94,6 @@ task generateCoreBuildConfig (type: de.fuerstenau.gradle.buildconfig.GenerateBui
     clsName = "CoreBuildConfig"
     version = rootProject.version
 
-    long buildTimeMillis = Calendar.getInstance().getTimeInMillis()
-
     String[] supportedLocales = project.ext.buildConfigProperties.getProperty("appSupportedLocales").split(",")
     String supportedLocalesValue = "new String[]{"
     for(int k = 0; k < supportedLocales.length; k++) {
@@ -108,7 +106,6 @@ task generateCoreBuildConfig (type: de.fuerstenau.gradle.buildconfig.GenerateBui
     buildConfigField "String[]", "SUPPORTED_LOCALES", supportedLocalesValue
 
     buildConfigField "String", "BASE_NAME", project.ext.buildConfigProperties["baseName"]
-    buildConfigField "long", "BUILD_TIME_MILLIS", String.valueOf(buildTimeMillis) + "L"
     buildConfigField "String", "DEFAULT_PREFERRED_ACQUISITION_FORMATS", project.ext.buildConfigProperties["appPreferredAcquisitionFormats"]
     buildConfigField "String", "NETWORK_SERVICE_TYPE", project.ext.buildConfigProperties["appNetworkServiceType"]
     buildConfigField "String", "WIFI_P2P_INSTANCE_NAME", project.ext.buildConfigProperties["appP2pServiceInstanceName"]

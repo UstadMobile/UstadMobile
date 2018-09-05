@@ -369,7 +369,7 @@ public class LoginController extends UstadBaseController{
     public void setUIStrings() {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         view.setVersionLabel(impl.getVersion(context) + " - " +
-                UMCalendarUtil.makeHTTPDate(CoreBuildConfig.BUILD_TIME_MILLIS));
+                UMCalendarUtil.makeHTTPDate(impl.getBuildTimestamp(context)));
         String xAPIURL = impl.getAppPref(
                     UstadMobileSystemImpl.PREFKEY_XAPISERVER,
                     impl.isHttpsSupported() ? CoreBuildConfig.DEFAULT_XAPI_SERVER : CoreBuildConfig.DEFAULT_XAPI_SERVER_NOSSL,

@@ -222,7 +222,6 @@ android {
         versionCode rootProject.ext.ustadVersionCode
         versionName rootProject.version
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-        buildConfigField "long", "TIMESTAMP", System.currentTimeMillis() + "L"
         buildConfigField "String", "ACRA_HTTP_URI", "\"" + project.ext.buildConfigProperties["android.acra.httpUri"] + "\""
         buildConfigField "String", "ACRA_BASIC_LOGIN", "\"" + project.ext.buildConfigProperties["android.acra.basicLogin"] + "\""
         buildConfigField "String", "ACRA_BASIC_PASS", "\"" + project.ext.buildConfigProperties["android.acra.basicPass"]+ "\""

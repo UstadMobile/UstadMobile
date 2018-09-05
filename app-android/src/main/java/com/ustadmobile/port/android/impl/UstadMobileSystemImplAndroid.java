@@ -865,6 +865,19 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
     }
 
     @Override
+    public long getBuildTimestamp(Object ctx) {
+        Context context = (Context)ctx;
+        try {
+            PackageInfo pInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
+            return pInfo.lastUpdateTime;
+        }catch(PackageManager.NameNotFoundException e) {
+            l(UMLog.ERROR, 90, null, e);
+        }
+
+        return 0;
+    }
+
+    @Override
     public boolean isWiFiP2PSupported() {
         //TODO: Use android specific code here to determine if this device supports wifi p2p
         return true;
