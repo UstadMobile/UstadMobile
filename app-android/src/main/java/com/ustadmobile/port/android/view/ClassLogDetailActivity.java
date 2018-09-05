@@ -122,20 +122,6 @@ public class ClassLogDetailActivity extends UstadBaseActivity
             return new ClazzLogDetailViewHolder(clazzLogDetailListItem);
         }
 
-        /*
-        public void voidAllRecordIcons(@NonNull ClazzLogDetailViewHolder holder){
-            ((ImageView)holder.itemView
-                    .findViewById(R.id.item_clazzlog_detail_student_present_icon))
-                    .setColorFilter(Color.GRAY);
-            ((ImageView)holder.itemView
-                    .findViewById(R.id.item_clazzlog_detail_student_absent_icon))
-                    .setColorFilter(Color.GRAY);
-            ((ImageView)holder.itemView
-                    .findViewById(R.id.item_clazzlog_detail_student_delay_icon))
-                    .setColorFilter(Color.GRAY);
-        }
-        */
-
         @Override
         public void onBindViewHolder(@NonNull ClazzLogDetailViewHolder holder, int position){
             ClazzLogAttendanceRecordWithPerson attendanceRecord = getItem(position);
@@ -144,8 +130,6 @@ public class ClassLogDetailActivity extends UstadBaseActivity
                     attendanceRecord.getPerson().getLastName();
 
             holder.itemView.setTag(attendanceRecord.getClazzLogAttendanceRecordUid());
-
-            int studentAttendance = attendanceRecord.getAttendanceStatus();
 
             ((TextView)holder.itemView
                     .findViewById(R.id.item_clazzlog_detail_student_name)).setText(studentName);
@@ -169,7 +153,9 @@ public class ClassLogDetailActivity extends UstadBaseActivity
                 entry.getValue().setColorFilter(
                         selectedOption ?
                         ContextCompat.getColor(ClassLogDetailActivity.this,
-                                STATUS_TO_COLOR_MAP.get(entry.getKey())) : Color.GRAY);
+                                STATUS_TO_COLOR_MAP.get(entry.getKey())) :
+                                ContextCompat.getColor(
+                                        ClassLogDetailActivity.this, R.color.color_gray));
 
                 String status_tag = getResources().getString(
                         STATUS_TO_STRING_ID_MAP.get(entry.getKey())) + " " +

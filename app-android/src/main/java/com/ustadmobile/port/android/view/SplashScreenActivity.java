@@ -81,6 +81,15 @@ public class SplashScreenActivity extends AppCompatActivity implements DialogInt
         addDummyData();
     }
 
+    public void runMe(){
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                UstadMobileSystemImpl.getInstance().startUI(SplashScreenActivity.this);
+            }
+        }, 0);
+    }
+
     public void checkPermissions() {
         boolean hasRequiredPermissions = true;
         for(int i = 0; i < REQUIRED_PERMISSIONS.length; i++) {
@@ -155,6 +164,7 @@ public class SplashScreenActivity extends AppCompatActivity implements DialogInt
     public void onStart() {
         super.onStart();
         //checkPermissions();
+        runMe();
     }
 
     @Override

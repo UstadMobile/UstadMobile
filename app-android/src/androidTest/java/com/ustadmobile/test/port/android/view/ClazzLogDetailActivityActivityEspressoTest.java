@@ -93,79 +93,79 @@ public class ClazzLogDetailActivityActivityEspressoTest {
 
     }
 
+    public static void checkStudentEntryIsDisplayed(String studentName){
+        onView(allOf(hasSibling(withText(studentName)),
+                withId(R.id.item_clazzlog_detail_student_name))).check(matches(isDisplayed()));
+    }
+
+    public void clickOnStudentEntryAttendanceButton(String studentName, int attendanceIcon){
+        onView(withId(R.id.class_log_detail_container_recyclerview)).perform(
+                RecyclerViewActions.actionOnItem(hasDescendant(withText(studentName)),
+                        clickOnDescendantViewWithId(attendanceIcon)));
+    }
+
+    public static void checkIconColorForStudent(String studentName, int attendanceIcon, int expectedColor){
+        onView( allOf(hasSibling(withText(studentName)),
+                withId(attendanceIcon)))
+                .check(matches(CustomMatcherFilters.withColorFilter(expectedColor))
+                );
+    }
+
     @Test
     public void givenActivityStarted_whenUserTapsStudentPresent_shouldTintPresentIcon() {
 
-        onView(allOf(hasSibling(withText(TEST_CLASS_MEMBER1_NAME)),
-                withId(R.id.item_clazzlog_detail_student_name))).check(matches(isDisplayed()));
+        checkStudentEntryIsDisplayed(TEST_CLASS_MEMBER1_NAME);
 
-        onView(withId(R.id.class_log_detail_container_recyclerview)).perform(
-            RecyclerViewActions.actionOnItem(hasDescendant(withText(TEST_CLASS_MEMBER1_NAME)),
-                    clickOnDescendantViewWithId(R.id.item_clazzlog_detail_student_present_icon)));
+        clickOnStudentEntryAttendanceButton(TEST_CLASS_MEMBER1_NAME,
+                R.id.item_clazzlog_detail_student_present_icon);
 
-        onView( allOf(hasSibling(withText(TEST_CLASS_MEMBER1_NAME)),
-                withId(R.id.item_clazzlog_detail_student_present_icon)))
-                .check(matches(CustomMatcherFilters.withColorFilter(R.color.traffic_green))
-                );
+        checkIconColorForStudent(TEST_CLASS_MEMBER1_NAME,
+                R.id.item_clazzlog_detail_student_present_icon, R.color.traffic_green);
+
     }
 
     @Test
     public void givenActivityStarted_whenUserTapsStudentAbsent_shouldTintAbsentIcon() {
 
-        onView(allOf(hasSibling(withText(TEST_CLASS_MEMBER2_NAME)),
-                withId(R.id.item_clazzlog_detail_student_name))).check(matches(isDisplayed()));
+        checkStudentEntryIsDisplayed(TEST_CLASS_MEMBER2_NAME);
 
-        onView(withId(R.id.class_log_detail_container_recyclerview)).perform(
-            RecyclerViewActions.actionOnItem(hasDescendant(withText(TEST_CLASS_MEMBER2_NAME)),
-                    clickOnDescendantViewWithId(R.id.item_clazzlog_detail_student_absent_icon)));
+        clickOnStudentEntryAttendanceButton(TEST_CLASS_MEMBER2_NAME,
+                R.id.item_clazzlog_detail_student_absent_icon);
 
-        onView( allOf(hasSibling(withText(TEST_CLASS_MEMBER2_NAME)),
-                withId(R.id.item_clazzlog_detail_student_absent_icon)))
-                .check(matches(CustomMatcherFilters.withColorFilter(R.color.traffic_red))
-                );
+        checkIconColorForStudent(TEST_CLASS_MEMBER2_NAME,
+                R.id.item_clazzlog_detail_student_absent_icon, R.color.traffic_red);
     }
 
     @Test
     public void givenActivityStarted_whenUserTapsStudentPartial_shouldTintPartialIcon() {
 
-        onView(allOf(hasSibling(withText(TEST_CLASS_MEMBER3_NAME)),
-                withId(R.id.item_clazzlog_detail_student_name))).check(matches(isDisplayed()));
+        checkStudentEntryIsDisplayed(TEST_CLASS_MEMBER3_NAME);
 
-        onView(withId(R.id.class_log_detail_container_recyclerview)).perform(
-            RecyclerViewActions.actionOnItem(hasDescendant(withText(TEST_CLASS_MEMBER3_NAME)),
-                    clickOnDescendantViewWithId(R.id.item_clazzlog_detail_student_delay_icon)));
+        clickOnStudentEntryAttendanceButton(TEST_CLASS_MEMBER3_NAME,
+                R.id.item_clazzlog_detail_student_delay_icon);
 
-        onView( allOf(hasSibling(withText(TEST_CLASS_MEMBER3_NAME)),
-                withId(R.id.item_clazzlog_detail_student_delay_icon)))
-                .check(matches(CustomMatcherFilters.withColorFilter(R.color.traffic_orange))
-                );
+        checkIconColorForStudent(TEST_CLASS_MEMBER3_NAME,
+                R.id.item_clazzlog_detail_student_delay_icon, R.color.traffic_orange);
     }
 
     @Test
     public void givenAttendanceActivityStart_whenUserRecordsAttendanceAndClicksDone_shouldSaveToDatabaseAndFinish(){
-        //TODO: Write tests
+        //TODO: Finish
 
-        onView(withId(R.id.class_log_detail_container_recyclerview)).perform(
-            RecyclerViewActions.actionOnItem(hasDescendant(withText(TEST_CLASS_MEMBER1_NAME)),
-                    clickOnDescendantViewWithId(R.id.item_clazzlog_detail_student_delay_icon)));
-        onView(withId(R.id.class_log_detail_container_recyclerview)).perform(
-            RecyclerViewActions.actionOnItem(hasDescendant(withText(TEST_CLASS_MEMBER2_NAME)),
-                    clickOnDescendantViewWithId(R.id.item_clazzlog_detail_student_present_icon)));
-        onView(withId(R.id.class_log_detail_container_recyclerview)).perform(
-            RecyclerViewActions.actionOnItem(hasDescendant(withText(TEST_CLASS_MEMBER3_NAME)),
-                    clickOnDescendantViewWithId(R.id.item_clazzlog_detail_student_present_icon)));
-        onView(withId(R.id.class_log_detail_container_recyclerview)).perform(
-            RecyclerViewActions.actionOnItem(hasDescendant(withText(TEST_CLASS_MEMBER4_NAME)),
-                    clickOnDescendantViewWithId(R.id.item_clazzlog_detail_student_absent_icon)));
-        onView(withId(R.id.class_log_detail_container_recyclerview)).perform(
-            RecyclerViewActions.actionOnItem(hasDescendant(withText(TEST_CLASS_MEMBER4_NAME)),
-                    clickOnDescendantViewWithId(R.id.item_clazzlog_detail_student_present_icon)));
-        onView(withId(R.id.class_log_detail_container_recyclerview)).perform(
-            RecyclerViewActions.actionOnItem(hasDescendant(withText(TEST_CLASS_MEMBER4_NAME)),
-                    clickOnDescendantViewWithId(R.id.item_clazzlog_detail_student_delay_icon)));
-        onView(withId(R.id.class_log_detail_container_recyclerview)).perform(
-            RecyclerViewActions.actionOnItem(hasDescendant(withText(TEST_CLASS_MEMBER4_NAME)),
-                    clickOnDescendantViewWithId(R.id.item_clazzlog_detail_student_absent_icon)));
+        clickOnStudentEntryAttendanceButton(TEST_CLASS_MEMBER1_NAME,
+                R.id.item_clazzlog_detail_student_delay_icon);
+        clickOnStudentEntryAttendanceButton(TEST_CLASS_MEMBER2_NAME,
+                R.id.item_clazzlog_detail_student_present_icon);
+        clickOnStudentEntryAttendanceButton(TEST_CLASS_MEMBER3_NAME,
+                R.id.item_clazzlog_detail_student_present_icon);
+        clickOnStudentEntryAttendanceButton(TEST_CLASS_MEMBER4_NAME,
+                R.id.item_clazzlog_detail_student_absent_icon);
+        clickOnStudentEntryAttendanceButton(TEST_CLASS_MEMBER4_NAME,
+                R.id.item_clazzlog_detail_student_present_icon);
+        clickOnStudentEntryAttendanceButton(TEST_CLASS_MEMBER4_NAME,
+                R.id.item_clazzlog_detail_student_delay_icon);
+        clickOnStudentEntryAttendanceButton(TEST_CLASS_MEMBER4_NAME,
+                R.id.item_clazzlog_detail_student_absent_icon);
 
         onView(withId(R.id.class_log_detail__done_fab)).perform(click());
 

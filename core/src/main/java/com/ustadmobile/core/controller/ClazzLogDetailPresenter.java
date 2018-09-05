@@ -103,7 +103,8 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
                 if(result == null){
                     //Create one anyway if not set for today
                     //todo: CHECK . Not for today, but for currentLogDate !?
-                    clazzLogDao.createClazzLogForDate(currentClazzUid, getTodayMillis(), new UmCallback<Long>() {
+                    //clazzLogDao.createClazzLogForDate(currentClazzUid, getTodayMillis(), new UmCallback<Long>() {
+                    clazzLogDao.createClazzLogForDate(currentClazzUid, currentLogDate, new UmCallback<Long>() {
                         @Override
                         public void onSuccess(Long result) {
 
