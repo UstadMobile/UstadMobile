@@ -2,9 +2,8 @@ package com.ustadmobile.core.db.dao;
 
 
 import com.ustadmobile.core.db.UmLiveData;
+import com.ustadmobile.core.impl.NetworkTaskStatus;
 import com.ustadmobile.core.impl.UmCallback;
-import com.ustadmobile.core.impl.UmResultCallback;
-import com.ustadmobile.core.networkmanager.NetworkTask;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
@@ -31,7 +30,7 @@ public abstract class CrawlJobDao {
 
     private static final String SQL_CRAWL_JOB_WITH_TOTALS = "SELECT CrawlJob.*, " +
             " (SELECT COUNT(*) FROM CrawlJobItem WHERE CrawlJobItem.crawlJobId = CrawlJob.crawlJobId) AS numItems, " +
-            " (SELECT COUNT(*) FROM CrawlJobItem WHERE CrawlJobItem.crawlJobId = CrawlJob.crawlJobId AND CrawlJobItem.status = " + NetworkTask.STATUS_COMPLETE + ") AS numItemsCompleted " +
+            " (SELECT COUNT(*) FROM CrawlJobItem WHERE CrawlJobItem.crawlJobId = CrawlJob.crawlJobId AND CrawlJobItem.status = " + NetworkTaskStatus.STATUS_COMPLETE + ") AS numItemsCompleted " +
             " FROM CrawlJob Where CrawlJob.crawlJobId = :crawlJobId";
 
     @UmQuery(SQL_CRAWL_JOB_WITH_TOTALS)
@@ -50,7 +49,7 @@ public abstract class CrawlJobDao {
      */
     @UmQuery("UPDATE CrawlJob SET queueDownloadJobOnDone = 1 " +
             "WHERE crawlJobId = :crawlJobId " +
-            "AND status < " + NetworkTask.STATUS_COMPLETE_MIN)
+            "AND status < " + NetworkTaskStatus.STATUS_COMPLETE_MIN)
     public abstract void updateQueueDownloadOnDoneIfNotFinished(int crawlJobId, UmCallback<Integer> callback);
 
     /**

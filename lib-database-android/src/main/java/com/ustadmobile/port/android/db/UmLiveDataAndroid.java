@@ -1,4 +1,4 @@
-package com.ustadmobile.port.android.db.dao;
+package com.ustadmobile.port.android.db;
 
 import android.arch.lifecycle.LifecycleOwner;
 import android.arch.lifecycle.LiveData;
@@ -6,9 +6,9 @@ import android.arch.lifecycle.Observer;
 import android.os.Handler;
 import android.os.Looper;
 
-import com.ustadmobile.core.controller.UstadController;
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.UmObserver;
+import com.ustadmobile.core.impl.UmLifecycleOwner;
 
 import java.util.HashMap;
 
@@ -33,7 +33,7 @@ public class UmLiveDataAndroid<T> implements UmLiveData<T> {
     }
 
     @Override
-    public void observe(UstadController controller, UmObserver<T> observer) {
+    public void observe(UmLifecycleOwner controller, UmObserver<T> observer) {
         Observer<T> observerImpl = observer::onChanged;
         if(controller.getContext() instanceof LifecycleOwner) {
             LifecycleOwner owner = (LifecycleOwner)controller.getContext();

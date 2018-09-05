@@ -23,7 +23,6 @@ apply plugin: 'digital.wup.android-maven-publish'
 configurations.all {
     exclude group: "net.sf.kxml", module: "kxml2"
     exclude group: "org.json", module: "json"
-    exclude module: "lib-database"
 }
 
 ext.buildConfigProperties = new Properties()
@@ -146,14 +145,9 @@ afterEvaluate {
         variant.javaCompiler.dependsOn(copyLocalconfigXmlLocaleFilesFromCore)
         variant.javaCompiler.dependsOn(generateCoreStringToAndroidResMap)
         variant.javaCompiler.dependsOn(checkBuildConfig)
-        variant.javaCompiler.dependsOn(generateRoomEntities)
     }
 }
 
-task generateRoomEntities {
-    inputs.files(fileTree(dir: rootProject.file("lib-database/src/main/java")).matching { include '**/*.java' })
-    outputs.dir("build/generated/source/umentities")
-}
 
 /*
  * Anything under the localconfig variant is not stored in Git. The class UmBaseApplication.java
@@ -168,7 +162,7 @@ task copyLocalconfigUmBaseApplication(type: Copy) {
     into("src/localconfig/java/com/ustadmobile/port/android/")
 }
 
-generateRoomEntities.dependsOn(":lib-database-processor:runRoomProcessor")
+
 
 tasks.whenTaskAdded { task ->
     if (task.name == "assembleRemotetestslaveDebug") {
@@ -186,7 +180,6 @@ android {
     sourceSets {
         main.assets.srcDirs += "../core/src/main/assets/"
         localconfig.assets.srcDirs += "../core/src/localconfig/assets/"
-        main.java.srcDirs += ["build/generated/source/umentities", "build/generated/source/umdbprocessor"]
     }
 
     compileOptions {
@@ -229,7 +222,6 @@ android {
         versionCode rootProject.ext.ustadVersionCode
         versionName rootProject.version
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-        buildConfigField "long", "TIMESTAMP", System.currentTimeMillis() + "L"
         buildConfigField "String", "ACRA_HTTP_URI", "\"" + project.ext.buildConfigProperties["android.acra.httpUri"] + "\""
         buildConfigField "String", "ACRA_BASIC_LOGIN", "\"" + project.ext.buildConfigProperties["android.acra.basicLogin"] + "\""
         buildConfigField "String", "ACRA_BASIC_PASS", "\"" + project.ext.buildConfigProperties["android.acra.basicPass"]+ "\""
@@ -333,6 +325,26 @@ assemble.dependsOn(copyLocalconfigXmlLocaleFilesFromCore)
 
 task generateCoreStringToAndroidResMap {
     inputs.files("core/locale/*/*.xml")
+    onlyIf {
+        /*
+         Only run this task if the input files have been updated since the task was last run.
+         upToDateWhen was not having the expected effect.
+         */
+        long inputLastModified = 0L
+        String[] inDirNames = new String[2]
+        inDirNames[0] = "main"
+        inDirNames[1] = "localconfig"
+
+        for (int i = 0; i < inDirNames.length; i++) {
+            rootProject.fileTree(dir: "core/locale/" + inDirNames[i], include: "**/*.xml").each() { File file ->
+                if (file.lastModified() > inputLastModified)
+                    inputLastModified = file.lastModified()
+            }
+        }
+
+        File outputFile = project.file("src/vanilla/java/com/ustadmobile/port/android/generated/MessageIDMap.java")
+        return outputFile.lastModified() < inputLastModified;
+    }
 
     doLast {
         int MAIN = 0, LOCALCONFIG = 1, VANILLAMULTIDEX = 2, DEVMINAPI21 = 3
@@ -430,6 +442,8 @@ dependencies {
     api project(':sharedse')
     api project(":lib-core-fs")
     implementation project(":lib-database-annotation")
+    implementation project(":lib-database")
+    implementation project(':lib-database-android')
     implementation project(":lib-util")
 
     vanillamultidexApi "com.android.support:multidex:$version_android_multidex"
@@ -440,9 +454,8 @@ dependencies {
     implementation "android.arch.lifecycle:extensions:$version_android_lifecycle"
     annotationProcessor "android.arch.lifecycle:common-java8:$version_android_lifecycle"
 
-    // Room
+    // Room (annotation processing takes place only on lib-database-android to improve build times)
     implementation "android.arch.persistence.room:runtime:$version_android_room"
-    annotationProcessor "android.arch.persistence.room:compiler:$version_android_room"
 
     // Paging
     implementation "android.arch.paging:runtime:$version_android_paging"

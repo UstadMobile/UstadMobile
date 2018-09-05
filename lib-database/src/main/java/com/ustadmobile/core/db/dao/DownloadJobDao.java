@@ -1,9 +1,8 @@
 package com.ustadmobile.core.db.dao;
 
 import com.ustadmobile.core.db.UmLiveData;
+import com.ustadmobile.core.impl.NetworkTaskStatus;
 import com.ustadmobile.core.impl.UmCallback;
-import com.ustadmobile.core.impl.UmResultCallback;
-import com.ustadmobile.core.networkmanager.NetworkTask;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
@@ -48,8 +47,8 @@ public abstract class DownloadJobDao {
      */
     @UmQuery("SELECT * FROM DownloadJob " +
             "LEFT JOIN DownloadSet on DownloadJob.downloadSetId = DownloadSet.id " +
-            "WHERE (status BETWEEN " + NetworkTask.STATUS_WAITING_MIN + " AND  " +
-            NetworkTask.STATUS_WAITING_MAX + ") " +
+            "WHERE (status BETWEEN " + NetworkTaskStatus.STATUS_WAITING_MIN + " AND  " +
+            NetworkTaskStatus.STATUS_WAITING_MAX + ") " +
             " AND (allowMeteredDataUsage = 1 OR allowMeteredDataUsage = :connectionMetered) " +
             " ORDER BY timeRequested LIMIT 1")
     protected abstract DownloadJobWithDownloadSet findNextDownloadJob(boolean connectionMetered);
@@ -128,7 +127,7 @@ public abstract class DownloadJobDao {
     public DownloadJobWithDownloadSet findNextDownloadJobAndSetStartingStatus(boolean connectionMetered){
         DownloadJobWithDownloadSet nextJob = findNextDownloadJob(connectionMetered);
         if(nextJob != null){
-            updateJobStatus(nextJob.getDownloadJobId(), NetworkTask.STATUS_STARTING);
+            updateJobStatus(nextJob.getDownloadJobId(), NetworkTaskStatus.STATUS_STARTING);
         }
 
         return nextJob;

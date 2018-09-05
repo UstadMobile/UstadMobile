@@ -2,9 +2,9 @@ package com.ustadmobile.core.db.dao;
 
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.UmProvider;
+import com.ustadmobile.core.impl.NetworkTaskStatus;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UmResultCallback;
-import com.ustadmobile.core.networkmanager.NetworkTask;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.db.entities.OpdsEntry;
@@ -49,7 +49,7 @@ public abstract class OpdsEntryWithRelationsDao {
             "LEFT JOIN OpdsEntryStatusCache ON OpdsEntry.entryId = OpdsEntryStatusCache.statusEntryId " +
             "LEFT JOIN DownloadSetItem ON OpdsEntry.entryId = DownloadSetItem.entryId " +
             "LEFT JOIN DownloadJobItem ON DownloadSetItem.id = DownloadJobItem.downloadSetItemId " +
-            "AND DownloadJobItem.status BETWEEN " + NetworkTask.STATUS_WAITING_MIN  + " AND " + NetworkTask.STATUS_COMPLETE_MIN + " " +
+            "AND DownloadJobItem.status BETWEEN " + NetworkTaskStatus.STATUS_WAITING_MIN  + " AND " + NetworkTaskStatus.STATUS_COMPLETE_MIN + " " +
             "WHERE OpdsEntry.url = :url")
     public abstract UmLiveData<OpdsEntryWithStatusCache> getEntryWithStatusCacheByUrl(String url);
 
@@ -73,7 +73,7 @@ public abstract class OpdsEntryWithRelationsDao {
             "LEFT JOIN OpdsEntryStatusCache ON OpdsEntry.entryId = OpdsEntryStatusCache.statusEntryId " +
             "LEFT JOIN DownloadSetItem ON OpdsEntry.entryId = DownloadSetItem.entryId " +
             "LEFT JOIN DownloadJobItem ON DownloadSetItem.id = DownloadJobItem.downloadSetItemId " +
-            "AND DownloadJobItem.status BETWEEN " + NetworkTask.STATUS_WAITING_MIN  + " AND " + NetworkTask.STATUS_COMPLETE_MIN + " " +
+            "AND DownloadJobItem.status BETWEEN " + NetworkTaskStatus.STATUS_WAITING_MIN  + " AND " + NetworkTaskStatus.STATUS_COMPLETE_MIN + " " +
             "WHERE OpdsEntry.uuid = :uuid")
     public abstract UmLiveData<OpdsEntryWithStatusCache> findWithStatusCacheByUuidLive(String uuid);
 

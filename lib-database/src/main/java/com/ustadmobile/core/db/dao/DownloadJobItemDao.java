@@ -1,7 +1,7 @@
 package com.ustadmobile.core.db.dao;
 
 import com.ustadmobile.core.db.UmLiveData;
-import com.ustadmobile.core.networkmanager.NetworkTask;
+import com.ustadmobile.core.impl.NetworkTaskStatus;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
@@ -173,8 +173,8 @@ public abstract class DownloadJobItemDao {
      *
      * @param downloadJobId id of the downloadjob that is being started
      */
-    @UmQuery("UPDATE DownloadJobItem SET status = " + NetworkTask.STATUS_QUEUED +
-            " WHERE status < " + NetworkTask.STATUS_WAITING_MIN + " AND " +
+    @UmQuery("UPDATE DownloadJobItem SET status = " + NetworkTaskStatus.STATUS_QUEUED +
+            " WHERE status < " + NetworkTaskStatus.STATUS_WAITING_MIN + " AND " +
             " downloadJobId = :downloadJobId")
     public abstract void updateUnpauseItemsByDownloadJob(int downloadJobId);
 

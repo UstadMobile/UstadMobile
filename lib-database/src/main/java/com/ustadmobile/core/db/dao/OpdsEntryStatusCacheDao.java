@@ -2,9 +2,6 @@ package com.ustadmobile.core.db.dao;
 
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmLiveData;
-import com.ustadmobile.core.impl.UMLog;
-import com.ustadmobile.core.impl.UmResultCallback;
-import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
@@ -714,8 +711,6 @@ public abstract class OpdsEntryStatusCacheDao {
         int deltaPausedDownloads = pausedByUser ?
                 (entryStatusCache.isEntryPausedDownload() ? 0 : 1) : 0;
         int deltaActiveDownloads = entryStatusCache.isEntryActiveDownload() ? -1 : 0;
-        UstadMobileSystemImpl.l(UMLog.VERBOSE, 0, "OpdsEntryStatusCacheDao: handleContainerDownloadPaused " +
-            "id " + entryStatusCache.getStatusEntryId() + " pausedByUser = " + pausedByUser);
         updateOnContainerStatusChangedIncAncestors(entryStatusCache.getStatusEntryId(),
                 0, 0, deltaActiveDownloads,
                 deltaPausedDownloads, 0, 0, 0);
