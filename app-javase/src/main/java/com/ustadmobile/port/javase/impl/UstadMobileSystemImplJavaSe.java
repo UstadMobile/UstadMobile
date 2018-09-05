@@ -235,4 +235,9 @@ public class UstadMobileSystemImplJavaSe extends UstadMobileSystemImplSE {
     public void deleteEntries(Object context, List<String> entryId, boolean recursive) {
 
     }
+
+    @Override
+    public long getBuildTimestamp(Object context) {
+        return 0;//not implemented
+    }
 }
