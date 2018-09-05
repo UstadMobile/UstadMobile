@@ -33,6 +33,21 @@ import java.util.concurrent.Executors;
 public abstract class NetworkManagerBle {
 
     /**
+     * Flag to indicate wifi direct group is inactive and it is not under creation
+     */
+    public static final int WIFI_DIRECT_GROUP_INACTIVE_STATUS = 0;
+
+    /**
+     * Flag to indicate Wifi direct group is being created now
+     */
+    public static final int WIFI_DIRECT_GROUP_UNDER_CREATION_STATUS = 1;
+
+    /**
+     * Flag to indicate Wifi direct group is active
+     */
+    public static final int WIFI_DIRECT_GROUP_ACTIVE_STATUS = 2;
+
+    /**
      * Flag to indicate entry status request
      */
     public static final byte ENTRY_STATUS_REQUEST = (byte) 111;
@@ -53,11 +68,20 @@ public abstract class NetworkManagerBle {
     public static final byte WIFI_GROUP_CREATION_RESPONSE = (byte) 114;
 
     /**
+     * Separator between Wifi direct network SSID and Passphrase
+     */
+    public static final String WIFI_GROUP_INFO_SEPARATOR = ",";
+
+    /**
      * Commonly used MTU for android devices
      */
     public static final int DEFAULT_MTU_SIZE = 20;
 
+    /**
+     * Maximum MTU for the packet transfer
+     */
     public static final int MAXIMUM_MTU_SIZE = 512;
+
 
     /**
      * Bluetooth Low Energy service UUID for our app
@@ -79,6 +103,8 @@ public abstract class NetworkManagerBle {
      * Holds all created entry status tasks
      */
     protected Vector<BleEntryStatusTask> entryStatusTasks = new Vector<>();
+
+    protected Vector<WiFiDirectGroupListenerBle> wiFiDirectGroupListeners = new Vector<>();
 
     /**
      * Do the main initialization of the NetworkManager : set the mContext
@@ -207,18 +233,52 @@ public abstract class NetworkManagerBle {
      * group creation.
      *
      * If a WiFi direct group is already under creation this method has no effect.
-     *
-     * @param wiFiDirectGroupListener Listener for group creation task
      */
-    public abstract void createWifiDirectGroup(WiFiDirectGroupListenerBle wiFiDirectGroupListener);
+    public abstract void createWifiDirectGroup();
+
+
+    /**
+     * Get current active WiFi Direct group (if any)
+     *
+     * @return The active WiFi direct group (if any) - otherwise null
+     */
+    public abstract WiFiDirectGroupBle getWifiDirectGroup();
 
     /**
      * Remove a WiFi group from the device.The process is asynchronous and the
      * {@link WiFiDirectGroupListenerBle} should be used to listen for
      * group removal.
-     * @param wiFiDirectGroupListener Listener for group removal
      */
-    public abstract void removeWifiDirectGroup(WiFiDirectGroupListenerBle wiFiDirectGroupListener);
+    public abstract void removeWifiDirectGroup();
+
+    /**
+     * Add all group change listeners to the list
+     * @param groupListenerBle Listener interface
+     *
+     * @see WiFiDirectGroupListenerBle
+     */
+    public void handleWiFiDirectGroupChangeRequest(WiFiDirectGroupListenerBle groupListenerBle){
+        if(!wiFiDirectGroupListeners.contains(groupListenerBle)){
+            wiFiDirectGroupListeners.add(groupListenerBle);
+        }
+    }
+
+    /**
+     * Notify all listening object that Wifi direct group has been changed
+     * @param isCreated True if change was CREATION otherwise REMOVAL
+     * @param group Group information
+     *
+     * @see WiFiDirectGroupBle
+     */
+    protected void fireWiFiDirectGroupChanged(boolean isCreated, WiFiDirectGroupBle group){
+        for(WiFiDirectGroupListenerBle groupListenerBle : wiFiDirectGroupListeners){
+            if(isCreated){
+                groupListenerBle.groupCreated(group,null);
+            }else{
+                groupListenerBle.groupRemoved(true,null);
+            }
+        }
+    }
 
     /**
      * Start monitoring availability of specific entries from peer devices
@@ -314,6 +374,7 @@ public abstract class NetworkManagerBle {
      * Clean up the network manager for shutdown
      */
     public void onDestroy(){
+        wiFiDirectGroupListeners.clear();
         entryStatusTaskExecutorService.shutdown();
         if(entryStatusTaskExecutorService.isShutdown()){
             mContext = null;
