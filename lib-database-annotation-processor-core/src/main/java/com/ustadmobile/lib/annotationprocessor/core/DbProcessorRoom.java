@@ -123,6 +123,9 @@ public class DbProcessorRoom{
     public void processDbClass(TypeElement dbType,  File destinationDir) throws IOException {
         String roomDbClassName = dbType.getSimpleName() + "_RoomDb";
         String roomDbManagerClassName = dbType.getSimpleName() + SUFFIX_ROOM_DBMANAGER;
+
+        System.out.println("DbProcessorRoom processing db class: " + dbType.getSimpleName());
+
         TypeSpec.Builder roomDbTypeSpec = TypeSpec.classBuilder(roomDbClassName)
                 .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
                 .superclass(ClassName.get(ROOM_PKG_NAME, "RoomDatabase"))
@@ -508,7 +511,7 @@ public class DbProcessorRoom{
 
             CodeBlock.Builder retMethodCodeBlock = CodeBlock.builder().add(
                     "return new $T<>($L",
-                    ClassName.get("com.ustadmobile.port.android.db.dao",
+                    ClassName.get("com.ustadmobile.port.android.db",
                             "UmLiveDataAndroid"), liveDataMethodName);
 
             addParametersToMethodBuilder(roomLiveDataBuilder, daoMethod);

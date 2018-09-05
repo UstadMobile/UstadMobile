@@ -10,6 +10,7 @@ dependencies {
     testCompile project(":sharedse-tests")
     testCompile project(":app-javase")
     implementation project(":lib-database")
+    compileOnly project(':lib-database-entities')
 
     implementation "org.json:json:$version_json"
     implementation "net.lingala.zip4j:zip4j:$version_zip4j"

@@ -45,24 +45,16 @@ repositories {
     }
 }
 
-compileJava {
-    /*
-     *  Annotation processor arguments:
-     *   umdb_room_out - Destination directory for the generated room version of database and DAO classes
-     */
-    options.compilerArgs += ["-Aumdb_room_out=" + rootProject.file("app-android/build/generated/source/umdbprocessor").getAbsolutePath()]
-}
-
 
 dependencies {
     implementation "org.json:json:$version_json"
     implementation "net.sf.kxml:kxml2:$version_kxml"
     implementation "com.ustadmobile.qrcodelibomrfork:qrcode-core:$version_qrcodelibfork"
-    compileOnly project(":lib-database")
+    implementation project(":lib-database")
+    compileOnly project(':lib-database-entities')
     implementation project(":lib-database-annotation")
     implementation project(":lib-util")
 
-    annotationProcessor project(":lib-database-annotation-processor-core")
 
 
     testImplementation project(":core-tests")
@@ -210,7 +202,6 @@ task prepareLocale (type: de.fuerstenau.gradle.buildconfig.GenerateBuildConfigTa
     while(nameIterator.hasNext()) {
         String strName = nameIterator.next()
         Integer value =messageIds.get(strName)
-        System.out.println("buildconfigfield : '" + strName + "' = "+ String.valueOf(value))
 
         buildConfigField "int", strName, String.valueOf(value)
     }

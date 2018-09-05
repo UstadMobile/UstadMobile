@@ -17,7 +17,7 @@ dependencies {
     compile project(":sharedse")
     compile project(":core-tests")
     compile project(":lib-core-fs")
-    implementation project(":lib-database")
+    implementation project(':lib-database-entities')
     implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
     implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
     implementation "commons-cli:commons-cli:$version_apache_commons_cli"

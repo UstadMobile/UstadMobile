@@ -13,23 +13,29 @@ Ustad Mobile is licensed under the AGPLv3 license: please see the LICENSE file f
 The platform consisits of a main cross platform 'core' and an implementation of the UI and platform specific ports in app-platformname .
 
 Code is contained (mostly) in the following modules:
-* [__core__](core/) : Contains core models and business logic.
-* [__core-tests__](core-tests/) : Contains testing code shared between implementations. Some tests of core functionality cannot run without an implementation: So the tests are placed in this separate module and then included as test dependencies for individual implementations.
-* [__sharedse__](sharedse/): Contains implementation for operating systems with a disk
-* [__app-android__](app-android/): Contains Android implementation, forms the basis of the app in 
+* [core](core/) : Contains Presenters, Views Interfaces, and core business logic.
+* [core-tests](core-tests/) : Contains testing code shared between implementations. Some tests of core functionality cannot run without an implementation: So the tests are placed in this separate module and then included as test dependencies for individual implementations.
+* [sharedse](sharedse/): Contains implementation for operating systems with a disk
+* [app-android](app-android/): Contains Android implementation, forms the basis of the app in
   app-android-launcher but can also be used as a library in other apps.
-* [__app-android-launcher/__](app-android-launcher/): Standalone app launcher that uses app-android.
-* [__app-android-testserver__](app-android-testserver/): Provides a test server for p2p functionality integration testing.
-* [__app-gwt__](app-gwt/): implementtion of the core app using GWT (work in progress).
-* [__lib-core-fs__](lib-core-fs/): Contains code used on platforms that have a file system. To be 
+* [app-android-launcher/](app-android-launcher/): Standalone app launcher that uses app-android.
+* [app-android-testserver](app-android-testserver/): Provides a test server for p2p functionality integration testing.
+* [app-gwt](app-gwt/): implementtion of the core app using GWT (work in progress).
+* [lib-core-fs](lib-core-fs/): Contains code used on platforms that have a file system. To be
 merged into sharedse.
-* [__lib-core-fs-tests__](lib-core-fs-tests/): Contains unit tests for implementations that have a file system.
-* [__lib-database__](lib-database/): Contains entity classes that are used across platforms.
-* [__lib-database-annotation__](lib-database-annotation/): Contains annotation used for entities
- and Data Access Objects (DAO)s.
-* [__lib-database-annotation-processor-core__](lib-database-annotation-processor-core/): Database annotation processor
+* [lib-core-fs-tests](lib-core-fs-tests/): Contains unit tests for implementations that have a file system.
+* [lib-database](lib-database/): core Database and Data Access Object (DAO) classes. See this
+module's README for further details on the relationship between different database modules.
+* [lib-database-android](lib-database-android/) Android database
+implementation (a Room Persistence Framework database generated from lib-database).
+* [lib-database-annotation](lib-database-annotation/): annotation classes used for entities
+ and DAOs.
+* [lib-database-annotation-processor-core](lib-database-annotation-processor-core/): database annotation processor
   used to generate DAOs and database classes for different platforms.
-* [__lib-util__](lib-util/): Contains small utility functions
+* [lib-database-entities](lib-database-entities/) contains database POJO entity classes.
+* [lib-database-entity-processor](lib-database-entity-processor/) executable that adds Room Persistence Framework
+annotations to POJOs from lib-entities and outputs them to lib-database-android.
+* [lib-util](lib-util/): Small utility functions
 
 
 To build debug / release versions for any given platform please see the README in the directory for that platform.
