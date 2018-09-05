@@ -394,6 +394,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
     @Override
     public void init(Object context) {
         super.init(context);
+        System.out.println("init4");
 
         if(!initRan) {
             File systemBaseDir = new File(getSystemBaseDir(context));
@@ -878,6 +879,19 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
             l(UMLog.ERROR, 90, null, e);
         }
         return versionInfo;
+    }
+
+    @Override
+    public long getBuildTimestamp(Object ctx) {
+        Context context = (Context)ctx;
+        try {
+            PackageInfo pInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
+            return pInfo.lastUpdateTime;
+        }catch(PackageManager.NameNotFoundException e) {
+            l(UMLog.ERROR, 90, null, e);
+        }
+
+        return 0;
     }
 
     @Override

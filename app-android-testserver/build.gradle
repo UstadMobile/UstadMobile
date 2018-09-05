@@ -97,8 +97,6 @@ android {
 configurations.all {
     exclude group: "net.sf.kxml", module: "kxml2"
     exclude group: "org.json", module: "json"
-    exclude module: "lib-database"
-
 }
 
 

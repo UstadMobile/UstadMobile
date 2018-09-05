@@ -1,7 +1,7 @@
 # Data Access Object (DAO) Annotation Processor
 
-The annotation processor is designed to automate the creation of room persistence style Data Access
-Objects (DAOs).
+The annotation processor is designed to automate the creation of room persistence
+style Data Access Objects (DAOs) and database classes.
 
 ## Debugging the annotation processor using IntelliJ
 
