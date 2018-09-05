@@ -12,7 +12,7 @@ import java.util.zip.GZIPOutputStream;
 
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.ENTRY_STATUS_REQUEST;
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.ENTRY_STATUS_RESPONSE;
-import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.WIFI_GROUP_CREATION_REQUEST;
+import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.WIFI_GROUP_REQUEST;
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.WIFI_GROUP_CREATION_RESPONSE;
 
 /**
@@ -285,7 +285,7 @@ public class BleMessage {
      */
     private boolean isValidRequestType(byte requestType){
         return ENTRY_STATUS_REQUEST == requestType || ENTRY_STATUS_RESPONSE == requestType ||
-                WIFI_GROUP_CREATION_REQUEST == requestType ||
+                WIFI_GROUP_REQUEST == requestType ||
                 WIFI_GROUP_CREATION_RESPONSE == requestType;
     }
 
