@@ -39,7 +39,7 @@ import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.ENT
  *
  *  @author kileha3
  */
-public class BleEntryStatusTaskAndroid extends BleEntryStatusTask {
+public class    BleEntryStatusTaskAndroid extends BleEntryStatusTask {
 
     private BleMessageGattClientCallback mCallback;
 

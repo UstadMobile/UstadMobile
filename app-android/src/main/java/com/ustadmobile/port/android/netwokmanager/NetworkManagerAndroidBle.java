@@ -33,7 +33,6 @@ import com.ustadmobile.lib.db.entities.NetworkNode;
 import com.ustadmobile.port.sharedse.networkmanager.BleEntryStatusTask;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle;
 import com.ustadmobile.port.sharedse.networkmanager.WiFiDirectGroupBle;
-import com.ustadmobile.port.sharedse.networkmanager.WiFiDirectGroupListenerBle;
 
 import java.util.Collections;
 import java.util.List;
@@ -97,9 +96,9 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
 
     private WifiP2pManager wifiP2pManager;
 
-    private WiFiDirectGroupListenerBle wiFiDirectGroupListener;
+    private int wifiGroupCreationStatus = 0;
 
-    private boolean groupCreationInitiated = false;
+    private WiFiDirectGroupBle wiFiDirectGroupBle;
 
     /**
      * Listeners for the WiFi-Direct group connections / states,
@@ -111,12 +110,8 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
             if (intent != null && intent.getAction() != null){
                 switch (intent.getAction()){
                     case WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION:
-                        if(groupCreationInitiated){
-                            wifiP2pManager.requestGroupInfo(wifiP2pChannel, group -> {
-                                WiFiDirectGroupBle groupBle =
-                                        new WiFiDirectGroupBle(group.getNetworkName(),group.getPassphrase());
-                                wiFiDirectGroupListener.groupCreated(groupBle,null);
-                            });
+                        if(wifiGroupCreationStatus == WIFI_DIRECT_GROUP_UNDER_CREATION_STATUS){
+                            requestGroupInfo();
                         }
                         break;
                 }
@@ -299,7 +294,8 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
             bleServiceScanner.startScan(filter,scanSettings,bleScanCallback);
         }else{
             if(!bluetoothAdapter.isDiscovering()){
-                bluetoothAdapter.startLeScan(new UUID[] { parcelServiceUuid.getUuid()},leScanCallback);
+                bluetoothAdapter.startLeScan(new UUID[] { parcelServiceUuid.getUuid()},
+                        leScanCallback);
             }else{
                 UstadMobileSystemImpl.l(UMLog.ERROR,689,
                         "Scanning already started, no need to start it again");
@@ -342,46 +338,84 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
      * {@inheritDoc}
      */
     @Override
-    public void createWifiDirectGroup(WiFiDirectGroupListenerBle wiFiDirectGroupListener) {
-        this.wiFiDirectGroupListener = wiFiDirectGroupListener;
-        if(isWiFiEnabled()){
-            wifiP2pManager.createGroup(wifiP2pChannel, new WifiP2pManager.ActionListener() {
-                @Override
-                public void onSuccess() {
-                    groupCreationInitiated = true;
+    public void createWifiDirectGroup() {
+        if(wifiGroupCreationStatus == WIFI_DIRECT_GROUP_INACTIVE_STATUS){
+            wifiGroupCreationStatus = WIFI_DIRECT_GROUP_UNDER_CREATION_STATUS;
+            if(isWiFiEnabled()){
+                startCreatingAGroup();
+            }else{
+                if(setWifiEnabled(true)){
+                    startCreatingAGroup();
+                }else{
                     UstadMobileSystemImpl.l(UMLog.ERROR,692,
-                            "Group created successfully");
+                            "Wifi is not enabled, enabling failed");
                 }
-
-                @Override
-                public void onFailure(int reason) {
-                    UstadMobileSystemImpl.l(UMLog.ERROR,692,
-                            "Failed to create a group with error code "+reason);
-                }
-            });
+            }
         }else{
-            UstadMobileSystemImpl.l(UMLog.ERROR,692,
-                    "Wifi is not enabled, enabling now");
-            setWifiEnabled(true);
+            if(wifiGroupCreationStatus == WIFI_DIRECT_GROUP_ACTIVE_STATUS){
+                requestGroupInfo();
+            }else {
+                UstadMobileSystemImpl.l(UMLog.ERROR,692,
+                        "Wifi is being created, please wait for the callback");
+            }
         }
+    }
+
+    @Override
+    public WiFiDirectGroupBle getWifiDirectGroup() {
+        return wiFiDirectGroupBle;
+    }
+
+    /**
+     * Create a WiFi direct group
+     */
+    private void startCreatingAGroup(){
+        wifiP2pManager.createGroup(wifiP2pChannel, new WifiP2pManager.ActionListener() {
+            @Override
+            public void onSuccess() {
+                UstadMobileSystemImpl.l(UMLog.ERROR,692,
+                        "Group created successfully");
+                wifiGroupCreationStatus = WIFI_DIRECT_GROUP_ACTIVE_STATUS;
+            }
+
+            @Override
+            public void onFailure(int reason) {
+                UstadMobileSystemImpl.l(UMLog.ERROR,692,
+                        "Failed to create a group with error code "+reason);
+                wifiGroupCreationStatus = WIFI_DIRECT_GROUP_INACTIVE_STATUS;
+            }
+        });
+    }
+
+    /**
+     * Request WiFi direct group information
+     */
+    private void requestGroupInfo(){
+        wifiP2pManager.requestGroupInfo(wifiP2pChannel, group -> {
+            if(group!=null){
+                wiFiDirectGroupBle = new WiFiDirectGroupBle(group.getNetworkName(),
+                        group.getPassphrase());
+                fireWiFiDirectGroupChanged(true, wiFiDirectGroupBle);
+            }
+        });
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void removeWifiDirectGroup(WiFiDirectGroupListenerBle wiFiDirectGroupListener) {
+    public void removeWifiDirectGroup() {
         wifiP2pManager.removeGroup(wifiP2pChannel, new WifiP2pManager.ActionListener() {
             @Override
             public void onSuccess() {
-                wiFiDirectGroupListener.groupRemoved(true,null);
+                fireWiFiDirectGroupChanged(false,null);
                 UstadMobileSystemImpl.l(UMLog.ERROR,693,
                         "Group removed successfully");
             }
 
             @Override
             public void onFailure(int reason) {
-                wiFiDirectGroupListener.groupRemoved(false,null);
+                fireWiFiDirectGroupChanged(false,null);
                 UstadMobileSystemImpl.l(UMLog.ERROR,693,
                         "Failed to remove a group with error code "+reason);
             }

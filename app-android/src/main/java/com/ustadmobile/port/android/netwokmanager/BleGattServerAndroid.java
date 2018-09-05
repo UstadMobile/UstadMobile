@@ -12,6 +12,7 @@ import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.port.sharedse.networkmanager.BleGattServer;
 import com.ustadmobile.port.sharedse.networkmanager.BleMessage;
+import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle;
 
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.DEFAULT_MTU_SIZE;
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.USTADMOBILE_BLE_SERVICE_UUID;
@@ -89,6 +90,8 @@ public class BleGattServerAndroid extends BleGattServer{
                     boolean requireConfirmation = (characteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_INDICATE)
                             == BluetoothGattCharacteristic.PROPERTY_INDICATE;
                     if(!requireConfirmation){
+
+                        //TODO: test MTU handling on the server. does the client changing MTU change this?
                         byte[][] packets = messageToSend.getPackets(DEFAULT_MTU_SIZE);
                         for (byte[] packet : packets) {
                             characteristic.setValue(packet);
@@ -110,7 +113,7 @@ public class BleGattServerAndroid extends BleGattServer{
         super(context);
         this.receivedMessage = new BleMessage();
         this.gattServer = networkManager.getBluetoothManager().openGattServer(context,mCallback);
-        this.networkManager = networkManager;
+        setNetworkManager(networkManager);
     }
 
     @VisibleForTesting

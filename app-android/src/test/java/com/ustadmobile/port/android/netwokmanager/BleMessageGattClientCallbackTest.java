@@ -29,8 +29,6 @@ import static org.mockito.Mockito.when;
 
 
 /**
- * <h1>BleMessageGattClientCallbackTest</h1>
- *
  * Test class which tests {@link BleMessageGattClientCallback} to make sure all
  * {@link BluetoothGattCallback} callbacks it behaves as expected.
  *
@@ -109,8 +107,9 @@ public class BleMessageGattClientCallbackTest {
         gattClientCallback.onMtuChanged(mockedGattClient,MAXIMUM_MTU_SIZE,BluetoothGatt.GATT_SUCCESS);
         //Verify that service discovery was started
         verify(mockedGattClient).discoverServices();
-
     }
+
+    //TODO: Add test case for when onMtuChanged is not called (eg device does not support it)
 
     @Test
     public void givenServiceIsDiscovered_whenMatchingCharacteristicsFound_thenShouldRequestPermissionToWrite(){
