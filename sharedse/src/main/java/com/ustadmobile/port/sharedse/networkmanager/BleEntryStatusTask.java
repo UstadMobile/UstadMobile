@@ -44,12 +44,23 @@ public abstract class BleEntryStatusTask implements Runnable,BleMessageResponseL
         this.entryUidsToCheck = entryUidsToCheck;
     }
 
+    /**
+     * Default constructor for Mockito to spy on this class
+     */
     protected BleEntryStatusTask(){}
 
+    /**
+     * Set content, for test purpose
+     * @param context Mocked context
+     */
     protected void setContext(Object context){
         this.context = context;
     }
 
+    /**
+     * Set list of entry uuids , for test purpose
+     * @param entryUidsToCheck List of uuids
+     */
     protected void setEntryUidsToCheck(List<Long> entryUidsToCheck){
         this.entryUidsToCheck = entryUidsToCheck;
     }
