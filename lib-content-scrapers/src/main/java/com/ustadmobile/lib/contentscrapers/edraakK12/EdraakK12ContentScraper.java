@@ -109,11 +109,12 @@ public class EdraakK12ContentScraper {
         boolean anyContentUpdated;
 
         List<ContentResponse> questionsList = getQuestionSet(response);
-        try {
-            anyContentUpdated = downloadQuestions(questionsList, courseDirectory, scrapUrl);
-        } catch (IOException e) {
-            throw new IllegalArgumentException("Exercise Malformed", e.getCause());
+        if(questionsList == null){
+            System.err.println("the question set was not found in its known position for course id " + response.id);
+            throw new IllegalArgumentException("the question set was not found course id" + response.id);
         }
+
+        anyContentUpdated = downloadQuestions(questionsList, courseDirectory, scrapUrl);
 
         if (ComponentType.ONLINE.getType().equalsIgnoreCase(response.target_component.component_type)) {
 
@@ -177,7 +178,7 @@ public class EdraakK12ContentScraper {
             FileUtils.copyToFile(getClass().getResourceAsStream(ScraperConstants.EDRAAK_INDEX_HTML_TAG), new File(courseDirectory, INDEX_HTML));
             FileUtils.copyToFile(getClass().getResourceAsStream(ScraperConstants.JS_TAG), new File(courseDirectory, JQUERY_JS));
             FileUtils.copyToFile(getClass().getResourceAsStream(ScraperConstants.MATERIAL_CSS_LINK), new File(courseDirectory, MATERIAL_CSS));
-            FileUtils.copyToFile(getClass().getResourceAsStream(ScraperConstants.MATERIAL_JS_LINK), new File(courseDirectory, ScraperConstants.MATERIAL_JS)) ;
+            FileUtils.copyToFile(getClass().getResourceAsStream(ScraperConstants.MATERIAL_JS_LINK), new File(courseDirectory, ScraperConstants.MATERIAL_JS));
             FileUtils.copyToFile(getClass().getResourceAsStream(ScraperConstants.REGULAR_ARABIC_FONT_LINK), new File(courseDirectory, ScraperConstants.ARABIC_FONT_REGULAR));
             FileUtils.copyToFile(getClass().getResourceAsStream(ScraperConstants.BOLD_ARABIC_FONT_LINK), new File(courseDirectory, ScraperConstants.ARABIC_FONT_BOLD));
 
@@ -187,42 +188,10 @@ public class EdraakK12ContentScraper {
     }
 
     /**
-     * Given an asset location, write into a file and return true if it was created. return false if it was created before
-     *
-     * @param input
-     * @param file
-     */
-    public boolean writeFileToDirectory(String input, File file) {
-
-        if (ContentScraperUtil.fileHasContent(file)) {
-            return false;
-        }
-
-        InputStream htmlIns = getClass().getResourceAsStream(input);
-        FileOutputStream outputStream = null;
-        try {
-            outputStream = new FileOutputStream(file);
-            int bytesRead;
-            byte[] buffer = new byte[4096];
-            while ((bytesRead = htmlIns.read(buffer)) != -1) {
-                outputStream.write(buffer, 0, bytesRead);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            UMIOUtils.closeQuietly(htmlIns);
-            UMIOUtils.closeQuietly(outputStream);
-        }
-
-        return true;
-    }
-
-
-    /**
      * Find and return question set for imported content
      *
-     * @param response
-     * @return
+     * @param response depending on type of course (lesson or test), the question set is in different locations
+     * @return the question set if found
      */
     public List<ContentResponse> getQuestionSet(ContentResponse response) {
 
@@ -247,11 +216,11 @@ public class EdraakK12ContentScraper {
      * Given an array of questions, find the questions that have image tags in their html and save the image within the directory
      * Finally write the list into a file
      *
-     * @param questionsList
-     * @param destinationDir
-     * @throws IOException
+     * @param questionsList  list of questions from json response
+     * @param destinationDir directory where folder for each question will be saved (for images)
+     * @return true if any content updated was updated based on server date and compared to last modified date of folder
      */
-    private boolean downloadQuestions(List<ContentResponse> questionsList, File destinationDir, URL url) throws IOException {
+    private boolean downloadQuestions(List<ContentResponse> questionsList, File destinationDir, URL url) {
 
         if (questionsList == null || questionsList.isEmpty())
             throw new IllegalArgumentException("No Questions were found in the question set");
@@ -297,8 +266,8 @@ public class EdraakK12ContentScraper {
     /**
      * Given a list of videos, find the one with the smallest size
      *
-     * @param encoded_videos
-     * @return chosen video url
+     * @param encoded_videos list of videos from json response
+     * @return chosen video url based on lowest size
      */
     private ContentResponse.Encoded_videos selectVideo(List<ContentResponse.Encoded_videos> encoded_videos) {
 

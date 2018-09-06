@@ -7,7 +7,7 @@ import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 
-public class Rhino {
+public class ScriptEngineReader {
 
     private String result = "";
 

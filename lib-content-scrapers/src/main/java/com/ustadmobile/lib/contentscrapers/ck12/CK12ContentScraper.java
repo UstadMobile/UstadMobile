@@ -7,21 +7,10 @@ import com.ustadmobile.lib.contentscrapers.ScraperConstants;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.http.protocol.RequestUserAgent;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.jsoup.nodes.Entities;
-import org.jsoup.parser.Parser;
 import org.jsoup.select.Elements;
-import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
-import org.openqa.selenium.support.ui.ExpectedCondition;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.io.File;
 import java.io.IOException;
@@ -34,6 +23,22 @@ import static com.ustadmobile.lib.contentscrapers.ScraperConstants.INDEX_HTML;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.JQUERY_JS;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.MATERIAL_CSS;
 
+
+/**
+ * The ck12 content is in found in multiple types
+ * Currently supported content includes: read, video, practice
+ * <p>
+ * Most content is made up of 3 sections:- Title, Main Content, Detail Content
+ * each section has a method to get their html section
+ * <p>
+ * Read Content:
+ * Selenium loads and renders the page with chrome driver and waits until all js and jquery is loaded
+ * All 3 sections are available in read content due to selenium load.
+ * <p>
+ * Video Content:
+ * Selenium does not get any extra information here
+ * title and detail
+ */
 public class CK12ContentScraper {
 
     private final String urlString;
@@ -54,14 +59,7 @@ public class CK12ContentScraper {
     // sample questionLink 5985b3d15aa4136da1e858b8/2/5b7a41ba5aa413662008f44f
 
 
-    private ChromeDriver driver;
-    private WebDriverWait waitDriver;
-
-    public static final String READ_TYPE = "READ";
-    public static final String VIDEO_TYPE = "VIDEO";
-    public static final String PRACTICE_TYPE = "PRACTICE";
-
-    public Rhino rhino = new Rhino();
+    public ScriptEngineReader scriptEngineReader = new ScriptEngineReader();
 
 
     public CK12ContentScraper(String url, File destDir) throws MalformedURLException {
@@ -72,16 +70,17 @@ public class CK12ContentScraper {
         assetDirectory.mkdirs();
     }
 
-    public void scrapVideoContent() throws IOException {
+    public void scrapeVideoContent() throws IOException {
 
         Document fullSite = Jsoup.connect(urlString).get();
 
-        Document videoContent = getVideoContent(fullSite, "iframe[src]","src");
-        if(videoContent == null){
-            videoContent = getVideoContent(fullSite, "div.modality_content[data-loadurl]", "data-loadurl");
-            if(videoContent == null){
-                System.err.println("Unsupported video content" + fullSite);
-                throw new IOException("Did not find video content");
+        Document videoContent = getMainContent(fullSite, "div.modality_content[data-loadurl]", "data-loadurl");
+        // sometimes video stored in iframe
+        if (videoContent == null) {
+            videoContent = getMainContent(fullSite, "iframe[src]", "src");
+            if (videoContent == null) {
+                System.err.println("Unsupported video content" + urlString);
+                throw new IOException("Did not find video content" + urlString);
             }
         }
 
@@ -119,60 +118,111 @@ public class CK12ContentScraper {
     private Elements getIframefromHtml(Document videoContent) {
 
         Elements elements = videoContent.select("iframe");
-        if(elements.size() > 0){
+        if (elements.size() > 0) {
             return elements;
-        }else{
+        } else {
             String videoElementsList = videoContent.select("textarea").text();
             return Jsoup.parse(videoElementsList).select("iframe");
         }
     }
 
-    public Document getVideoContent(Document document, String htmlTag, String search) throws IOException{
+    /**
+     * Given a document, search for content that has src or data-url to load more content and return a new document
+     *
+     * @param document website page source
+     * @param htmlTag  tag we are looking for - div.modality_content in most cases
+     * @param search   src or data-url
+     * @return the rendered document found in src/data-url
+     * @throws IOException
+     */
+    private Document getMainContent(Document document, String htmlTag, String search) throws IOException {
         Elements elements = document.select(htmlTag);
-        for(Element element : elements){
-            if(!element.attr(search).contains("googletag")){
+        for (Element element : elements) {
+            if (!element.attr(search).contains("googletag")) {
                 String path = element.attr(search);
-                URL videoUrl = new URL(scrapUrl, path);
-                return Jsoup.connect(videoUrl.toString())
+                URL contentUrl = new URL(scrapUrl, path);
+                return Jsoup.connect(contentUrl.toString())
                         .followRedirects(true).get();
             }
         }
         return null;
     }
 
-    public void scrapReadContent() throws IOException {
+    private String getVocabHtml(Document site) throws IOException {
+
+        Elements elements = site.select("section.vocabulary_content[data-loadurl]");
+        for (Element element : elements) {
+            String path = element.attr("data-loadurl");
+            URL contentUrl = new URL(scrapUrl, path);
+            return Jsoup.connect(contentUrl.toString())
+                    .followRedirects(true).get().html();
+        }
+        return null;
+    }
 
 
+    public void scrapeReadContent() throws IOException {
 
-        Document html = setUpChromeDriver(urlString);
-        //Document html = getContentFromSite(READ_TYPE, "");
+        Document html = Jsoup.connect(urlString).get();
 
         String readTitle = getTitleHtml(html);
 
-        String readHtml = removeAllHref(ContentScraperUtil.downloadAllResources(getContentHtml(html), assetDirectory, scrapUrl));
+        Document content = getMainContent(html, "div.modality_content[data-loadurl]", "data-loadurl");
+
+        if (content == null) {
+            System.err.println("Unsupported read content" + urlString);
+            throw new IllegalArgumentException("Did not find read content" + urlString);
+        }
+        String readHtml = content.html();
+
+        readHtml = removeAllHref(ContentScraperUtil.downloadAllResources(readHtml, assetDirectory, scrapUrl));
+
+        String vocabHtml = removeAllHref(getVocabHtml(html));
 
         String detailHtml = removeAllHref(getDetailSectionHtml(html));
 
-        // append the title
-        readHtml = readTitle + readHtml + detailHtml;
+        readHtml = readTitle + readHtml + vocabHtml + detailHtml;
 
         FileUtils.writeStringToFile(new File(destinationDirectory, "index.html"), readHtml, ScraperConstants.UTF_ENCODING);
-
     }
 
-    public String generatePracticeLink(String url){
+    /**
+     * Given a practice url - generate the url needed to create the json response
+     *
+     * @param url practice url
+     * @return the generated url
+     */
+    public String generatePracticeLink(String url) {
         return practiceIdLink + url + practicePost;
     }
 
-    public String generateTestUrl(String testId){
+    /**
+     * Given the test id from practice link, generate the test url
+     *
+     * @param testId test id from practice links' response
+     * @return the generated url for the test
+     */
+    public String generateTestUrl(String testId) {
         return startTestLink + testId + POLICIES;
     }
 
-    public String generateQuestionUrl(String testId, String testScoreId, int count){
+
+    /**
+     * Generates the url needed to get the question for the practice
+     *
+     * @param testId      test id from practice link
+     * @param testScoreId test score from test link
+     * @param count       question number
+     * @return generated url to get the question
+     */
+    public String generateQuestionUrl(String testId, String testScoreId, int count) {
         return questionLinkId + testId + "/" + count + "/" + testScoreId + postfix;
     }
 
-    public void scrapPracticeContent() throws IOException {
+
+    public void scrapePracticeContent() throws IOException {
+
+        Gson gson = new GsonBuilder().disableHtmlEscaping().create();
 
         String practiceUrl = urlString.substring(urlString.lastIndexOf("/") + 1, urlString.indexOf("?"));
 
@@ -184,7 +234,7 @@ public class CK12ContentScraper {
         File practiceAssetDirectory = new File(practiceDirectory, "practice-asset");
         practiceAssetDirectory.mkdirs();
 
-        PracticeResponse response = new GsonBuilder().disableHtmlEscaping().create().fromJson(
+        PracticeResponse response = gson.fromJson(
                 IOUtils.toString(new URL(testIdLink), ScraperConstants.UTF_ENCODING), PracticeResponse.class);
 
         String testId = response.response.test.id;
@@ -203,19 +253,17 @@ public class CK12ContentScraper {
         String nextPracticeUrl = practiceIdLink + nextPracticeName + practicePost;
 
         String testLink = generateTestUrl(testId);
-        TestResponse testResponse = new GsonBuilder().disableHtmlEscaping().create().fromJson(
+        TestResponse testResponse = gson.fromJson(
                 IOUtils.toString(new URL(testLink), ScraperConstants.UTF_ENCODING), TestResponse.class);
 
         String testScoreId = testResponse.response.testScore.id;
-
-        Gson gson = new GsonBuilder().create();
 
         ArrayList<QuestionResponse> questionList = new ArrayList<>();
         for (int i = 1; i <= questionsCount; i++) {
 
             String questionLink = generateQuestionUrl(testId, testScoreId, i);
 
-            QuestionResponse questionResponse = new GsonBuilder().disableHtmlEscaping().create().fromJson(
+            QuestionResponse questionResponse = gson.fromJson(
                     IOUtils.toString(new URL(questionLink), ScraperConstants.UTF_ENCODING), QuestionResponse.class);
 
             questionResponse.response.goal = goal;
@@ -276,17 +324,32 @@ public class CK12ContentScraper {
         ContentScraperUtil.saveListAsJson(practiceDirectory, questionList, ScraperConstants.QUESTIONS_JSON);
         FileUtils.copyToFile(getClass().getResourceAsStream(ScraperConstants.JS_TAG), new File(practiceDirectory, JQUERY_JS));
         FileUtils.copyToFile(getClass().getResourceAsStream(ScraperConstants.MATERIAL_CSS_LINK), new File(practiceDirectory, MATERIAL_CSS));
-        FileUtils.copyToFile(getClass().getResourceAsStream(ScraperConstants.MATERIAL_JS_LINK), new File(practiceDirectory, ScraperConstants.MATERIAL_JS)) ;
+        FileUtils.copyToFile(getClass().getResourceAsStream(ScraperConstants.MATERIAL_JS_LINK), new File(practiceDirectory, ScraperConstants.MATERIAL_JS));
         FileUtils.copyToFile(getClass().getResourceAsStream(ScraperConstants.CK12_INDEX_HTML_TAG), new File(practiceDirectory, INDEX_HTML));
 
-        ContentScraperUtil.zipDirectory(practiceDirectory,practiceUrl,destinationDirectory);
+        ContentScraperUtil.zipDirectory(practiceDirectory, practiceUrl, destinationDirectory);
 
     }
 
+    /**
+     * Given encrypted data from json response
+     *
+     * @param data return the result as json string
+     * @return
+     */
     public String extractAnswerFromEncryption(String data) {
-        return rhino.getResult(data);
+        return scriptEngineReader.getResult(data);
     }
 
+
+    /**
+     * Given a list of answers, save the resources in its directory if any found
+     *
+     * @param answer        return a list of objects because an answer might have its own list of objects
+     * @param questionAsset folder where images might be saved
+     * @param scrapUrl      base url to get images
+     * @return the list of objects with the modified resources
+     */
     private List<Object> downloadAllResourcesFromAnswer(List<Object> answer, File questionAsset, URL scrapUrl) {
 
         for (int i = 0; i < answer.size(); i++) {
@@ -302,8 +365,8 @@ public class CK12ContentScraper {
         return answer;
     }
 
-    private String getTitleHtml(Document section) {
 
+    private String getTitleHtml(Document section) {
         return section.select("div.title").outerHtml();
     }
 
@@ -311,10 +374,6 @@ public class CK12ContentScraper {
 
         return section.select("div.metadataview").html();
 
-    }
-
-    private String getContentHtml(Document section) {
-        return section.select("div.modalitycontent").html();
     }
 
     private String removeAllHref(String html) {
@@ -330,76 +389,6 @@ public class CK12ContentScraper {
         return doc.body().html();
     }
 
- /*   private String getResourceSectionHtml(Document section) throws IOException {
-
-        String path = section.select("section.resources_container").attr("data-loadurl");
-
-        Document document = Jsoup.connect(new URL(scrapUrl, path).toString()).get();
-
-        Elements resources = document.select("div.resource_row a.break-word");
-
-        StringBuilder htmlString = new StringBuilder();
-        for (Element resourceLink : resources) {
-
-            htmlString.append(resourceLink.outerHtml());
-
-        }
-        return htmlString.toString();
-    } */
-
-    private Document getContentFromSite(String type, String waitForText) {
-
-        WebElement element = waitDriver.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(waitForText)));
-
-        if (type.equalsIgnoreCase(VIDEO_TYPE)) {
-            return Jsoup.parse(driver.switchTo().frame(element).getPageSource());
-        }
-
-        if (type.equalsIgnoreCase(READ_TYPE)) {
-            return Jsoup.parse(driver.getPageSource());
-        }
-
-        return null;
-    }
-
-
-    /**
-     * Given a url, Setup chrome web driver and wait for page to be rendered
-     *
-     * @param url
-     */
-    public Document setUpChromeDriver(String url) {
-        System.setProperty("webdriver.chrome.driver", chromeDriverLocation);
-        ChromeOptions chromeOptions = new ChromeOptions();
-        chromeOptions.setHeadless(true);
-        driver = new ChromeDriver(chromeOptions);
-
-        driver.get(url);
-        waitDriver = new WebDriverWait(driver, 30);
-        waitForJSandJQueryToLoad();
-
-
-        return Jsoup.parse(driver.getPageSource());
-    }
-
-    private boolean waitForJSandJQueryToLoad() {
-
-        // wait for jQuery to load
-        ExpectedCondition<Boolean> jQueryLoad = driver -> {
-            try {
-                return ((Long) ((JavascriptExecutor) driver).executeScript("return jQuery.active") == 0);
-            } catch (Exception e) {
-                // no jQuery present
-                return true;
-            }
-        };
-
-        // wait for Javascript to load
-        ExpectedCondition<Boolean> jsLoad = driver -> ((JavascriptExecutor) driver).executeScript("return document.readyState")
-                .toString().equals("complete");
-
-        return waitDriver.until(jQueryLoad) && waitDriver.until(jsLoad);
-    }
 
 
 }

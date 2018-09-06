@@ -8,7 +8,7 @@
 <head>
 
     <title>
-Chemistry of Compounds ( Read ) | Chemistry
+Midpoints and Segment Bisectors ( Read ) | Geometry
  | CK-12 Foundation</title>
     <meta property="og:site_name" itemprop="name" name="author" content="CK-12 Foundation" />
     <meta property="fb:app_id" content="159884644067996" />
@@ -39,9 +39,9 @@ Chemistry of Compounds ( Read ) | Chemistry
 
 
 
-	<meta name="title" content="Chemistry of Compounds ( Read ) | Chemistry">
+	<meta name="title" content="Midpoints and Segment Bisectors ( Read ) | Geometry">
 
-		<meta name="description" content="Chemical compounds and how elements form different compounds.">
+		<meta name="description" content="Apply the definitions of midpoint, segment bisector, and angle bisector.">
 
 	<meta name="google-play-app" content="app-id=org.ck12.app.practice">
     <meta name="apple-itunes-app-internal" content="app-id=909343639">
@@ -58,11 +58,11 @@ Chemistry of Compounds ( Read ) | Chemistry
 
 
 <meta property="ck12:content_div_id" content="modality_content">
-<meta property="og:title" content="Chemistry of Compounds" />
+<meta property="og:title" content="Midpoints and Segment Bisectors" />
 <meta property="og:type" content="website" />
-<meta property="og:image" content="https://dr282zn36sxxg.cloudfront.net/datastreams/f-d%3Aadbe3fa9de3276faef1a39607a0b690e37edc85d5a826eb9ee12935f%2BIMAGE_THUMB_LARGE_TINY%2BIMAGE_THUMB_LARGE_TINY.1" />
-<meta property="og:url" content="https://www.ck12.org/c/physical-science/chemistry-of-compounds/lesson/Chemistry-of-Compounds-MS-PS/" />
-<meta property="og:description" content="Chemical compounds and how elements form different compounds." />
+<meta property="og:image" content="https://dr282zn36sxxg.cloudfront.net/datastreams/f-d%3A6a98a3ad7d0f7e30f7ac6626d413a3e250ddfed53d0b2d22ea146f08%2BIMAGE_THUMB_LARGE_TINY%2BIMAGE_THUMB_LARGE_TINY.1" />
+<meta property="og:url" content="https://www.ck12.org/c/geometry/midpoints-and-segment-bisectors/lesson/Midpoints-and-Segment-Bisectors-BSC-GEOM/" />
+<meta property="og:description" content="Apply the definitions of midpoint, segment bisector, and angle bisector." />
 
 
 
@@ -250,7 +250,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 			<ul class="right user-info hidden">
 				 <!-- If not signed in -->
 					<li class="signin"><a id="top_nav_signin" title="Sign in with your Email, Facebook, Google, Twitter or Microsoft Live account" class="js-sign-in">Sign In</a></li>
-                    <li class="join"><a id="top_nav_join" href="https://www.ck12.org/auth/signup/student?requestor=https%3A//www.ck12.org/c/physical-science/chemistry-of-compounds/lesson/Chemistry-of-Compounds-MS-PS/%3Freferrer%3Dconcept_details&returnTo=https%3A//www.ck12.org/c/physical-science/chemistry-of-compounds/lesson/Chemistry-of-Compounds-MS-PS/%3Freferrer%3Dconcept_details" title="Create an Account with CK-12"  rel="nofollow">Join</a></li>
+                    <li class="join"><a id="top_nav_join" href="https://www.ck12.org/auth/signup/student?requestor=https%3A//www.ck12.org/c/geometry/midpoints-and-segment-bisectors/lesson/Midpoints-and-Segment-Bisectors-BSC-GEOM/%3Freferrer%3Dconcept_details&returnTo=https%3A//www.ck12.org/c/geometry/midpoints-and-segment-bisectors/lesson/Midpoints-and-Segment-Bisectors-BSC-GEOM/%3Freferrer%3Dconcept_details" title="Create an Account with CK-12"  rel="nofollow">Join</a></li>
 
                 <li class="menu-help"><a id="top_nav_help" href="http://help.ck12.org" title="Help" target="new">Help</a></li>
                 <li class="menu-donate">
@@ -364,7 +364,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 					<ul>
 
 						<li class="join-link-small">
-							<a id="side_nav_join" href="https://www.ck12.org/auth/signup/student?requestor=https%3A//www.ck12.org/c/physical-science/chemistry-of-compounds/lesson/Chemistry-of-Compounds-MS-PS/%3Freferrer%3Dconcept_details&returnTo=https%3A//www.ck12.org/c/physical-science/chemistry-of-compounds/lesson/Chemistry-of-Compounds-MS-PS/%3Freferrer%3Dconcept_details" title="Create an Account with CK-12" >
+							<a id="side_nav_join" href="https://www.ck12.org/auth/signup/student?requestor=https%3A//www.ck12.org/c/geometry/midpoints-and-segment-bisectors/lesson/Midpoints-and-Segment-Bisectors-BSC-GEOM/%3Freferrer%3Dconcept_details&returnTo=https%3A//www.ck12.org/c/geometry/midpoints-and-segment-bisectors/lesson/Midpoints-and-Segment-Bisectors-BSC-GEOM/%3Freferrer%3Dconcept_details" title="Create an Account with CK-12" >
 								<span class="menu-item-img icon-user_join"></span>
 								<span class="menu-item-title">Join</span>
 							</a>
@@ -455,7 +455,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
         	<div id='content-area' class="content-wrap row"  itemscope itemtype="http://schema.org/WebPage" >
 
-<div id="contentwrap" data-concept-url="/c/physical-science/chemistry-of-compounds" class="">
+<div id="contentwrap" data-concept-url="/c/geometry/midpoints-and-segment-bisectors" class="">
 	<div class="grey-back">
 		<div class="relative desktop_view">
 			<div class="desktop_view row collapse desktop-view_margin modalities-common modalities-header-wrapper modality-details-row">
@@ -478,7 +478,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
 							<div class="left text-center concept_top_icon hide-small">
 
-									<span  title="Physical Science" class="icon-physical-science"></span>
+									<span  title="Geometry" class="icon-geometry"></span>
 
 							</div>
 
@@ -486,7 +486,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 								<h1 id="artifact_title" class="row collapse artifact_title artifact_title_modality_details">
 
 
-											<a style="margin-right:3px;" title="Previous: Chemical Bond" href="/c/physical-science/chemical-bond" >
+											<a style="margin-right:3px;" title="Previous: Definition of Line Segment" href="/c/geometry/definition-of-line-segment" >
 												<svg width="26" height="26"  >
 												   <circle cx="13" cy="13" r="13" fill="#00aba4" />
 												   <path d="M16 6 L8 14" stroke="white" stroke-width="3"/>
@@ -495,7 +495,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 											</a>
 
 
-											<a style="margin-left:3px;" title="Next: Chemical Formula" href="/c/physical-science/chemical-formula" >
+											<a style="margin-left:3px;" title="Next: Midpoint Formula" href="/c/geometry/midpoint-formula" >
 												<svg width="26" height="26">
 												   <circle cx="13" cy="13" r="13" fill="#00aba4" />
 												   <path d="M10 6 L18 14" stroke="white" stroke-width="3"/>
@@ -504,13 +504,13 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 											</a>
 
 										</br>
-										<span class="artifact_title_text" itemprop="name">Chemistry of Compounds</span>
+										<span class="artifact_title_text" itemprop="name">Midpoints and Segment Bisectors</span>
 
 
 								</h1>
 							</div>
 
-								<h2 class="artifact_description artifact_description_details">Introduction to substances that form when two or more elements combine chemically.</h2>
+								<h2 class="artifact_description artifact_description_details">Use midpoints and bisectors to find the halfway mark between two coordinates.</h2>
 
 						</div>
 
@@ -614,11 +614,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 					<div class="left concept_list_header_wrapper">
 
 
-								<a href="/chemistry/" title="Chemistry" class="topic_title">Chemistry</a>
+								<a href="/geometry/" title="Geometry" class="topic_title">Geometry</a>
 								<i class="icon-arrow3_right"></i>
 
 
-						<span class="topic_title name_wrap" title="Chemical Nomenclature">Chemical Nomenclature</span>
+						<span class="topic_title name_wrap" title="Basics of Geometry">Basics of Geometry</span>
 						<div id="concept_list_count" class="row collapse hide-small concept_list_count"></div>
 					</div>
 					<div class="right pointer concept-close-icon js-concept-close-icon">
@@ -629,7 +629,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
    					<span id="concept_line" class="concept_line">&nbsp;</span>
 					<span id="top_button" class="concept_button top_button js-concept_button">...</span>
 					<div>
-						<ul id="concept_list" class="row collapse relative concept_list" data-encodedID="SCI.CHE.300"></ul>
+						<ul id="concept_list" class="row collapse relative concept_list" data-encodedID="MAT.GEO.100"></ul>
 					</div>
 					<span id="bottom_button" class="concept_button bottom_button js-concept_button">...</span>
    				</div>
@@ -644,7 +644,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
 <div class="modalities_top_container">
     <div class="hide-for-small row collapse">
-        <div class="column small-12"><a href="/c/physical-science/chemistry-of-compounds#all" class="modality-return"><i class="icon-arrow arrow-return"></i> All Modalities</a></div>
+        <div class="column small-12"><a href="/c/geometry/midpoints-and-segment-bisectors#all" class="modality-return"><i class="icon-arrow arrow-return"></i> All Modalities</a></div>
     </div>
 	<div class="modalities-common">
 		<ul id="modality_filters_list" class="hide">
@@ -661,9 +661,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 			</li>
 		</ul>
 		<ul class="modality-actions-mobile show-for-small row">
-			<li class="column small-5 modality-actions-all-mod-link"><a href="/c/physical-science/chemistry-of-compounds#all"><i class="icon-arrow"></i> All Modalities</a></li>
+			<li class="column small-5 modality-actions-all-mod-link"><a href="/c/geometry/midpoints-and-segment-bisectors#all"><i class="icon-arrow"></i> All Modalities</a></li>
 
-				<li class="column small-5 hide-for-lti-context hide-important"><a class="js-shareGroupLink right" data-sharetype="group" data-artifactID="1083742" title="Share with Classes">Share with Classes</a>
+				<li class="column small-5 hide-for-lti-context hide-important"><a class="js-shareGroupLink right" data-sharetype="group" data-artifactID="7493" title="Share with Classes">Share with Classes</a>
 
 		</ul>
 	</div>
@@ -682,23 +682,25 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 				<div class="clear"></div>
 
 <!-- Schema.org properties -->
-<meta itemprop="description" content="Chemical compounds and how elements form different compounds.">
+<meta itemprop="description" content="Apply the definitions of midpoint, segment bisector, and angle bisector.">
 <meta itemprop="interactivityType" content="mixed">
 <meta itemprop="provider" content="CK-12 Foundation"/>
-<meta itemprop="url" content="https://www.ck12.org/c/physical-science/chemistry-of-compounds/lesson/Chemistry-of-Compounds-MS-PS/"/>
-<meta itemprop="dateCreated" content="2012-11-01T00:58:37-07:00" />
-<meta itemprop="dateModified" content="2018-08-16T15:07:18-07:00" />
-<meta itemprop="datePublished" content="2018-08-16T15:07:18-07:00" />
-<meta itemprop="version" content="53" />
+<meta itemprop="url" content="https://www.ck12.org/c/geometry/midpoints-and-segment-bisectors/lesson/Midpoints-and-Segment-Bisectors-BSC-GEOM/"/>
+<meta itemprop="dateCreated" content="2012-02-24T10:29:52-08:00" />
+<meta itemprop="dateModified" content="2016-08-25T15:13:06-07:00" />
+<meta itemprop="datePublished" content="2016-08-25T08:13:06-07:00" />
+<meta itemprop="version" content="23" />
 <meta itemprop="useRightsURL" content="http://creativecommons.org/licenses/by-nc/3.0/" />
 <meta itemprop="learningResourceType" content="Read" />
 
 
 
 
-	<meta itemprop="typicalAgeRange" content="12-13" />
-
 	<meta itemprop="typicalAgeRange" content="13-14" />
+
+	<meta itemprop="typicalAgeRange" content="14-15" />
+
+	<meta itemprop="typicalAgeRange" content="15-16" />
 
 <meta itemprop="intendedEndUserRole" content="student" />
 
@@ -723,17 +725,17 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
 			<li> <a id="add_to_library" title="Add to Library"> Add to Library </a> </li>
 
-		<li class="hide-for-lti-context hide-important"> <a class="js-shareGroupLink" data-sharetype="group" data-artifactID="1083742" title="Share with Classes">Share with Classes</a> </li>
+		<li class="hide-for-lti-context hide-important"> <a class="js-shareGroupLink" data-sharetype="group" data-artifactID="7493" title="Share with Classes">Share with Classes</a> </li>
 
 
 		<li class="hide-for-lti-context">
       <!-- From modality_actions.html -->
       <a id="add_to_book"
-              data-artifactID="1083742"
+              data-artifactID="7493"
               data-artifactType="lesson"
-              data-artifactRevisionID="6845944"
-              data-title="Chemistry of Compounds"
-              data-perma="c/concept/Chemistry-of-Compounds-MS-PS/"
+              data-artifactRevisionID="4325976"
+              data-title="Midpoints and Segment Bisectors"
+              data-perma="c/concept/Midpoints-and-Segment-Bisectors-BSC-GEOM/"
               href="#" title="Add to FlexBook&#174; textbook">Add to FlexBook&#174; Textbook</a>
  </li>
 
@@ -758,7 +760,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
 
 
-    <a id="lms_personalize_link" class="js_editable action_edit hide show-for-lti-context" href="#" data-href="/editor/c/concept/Chemistry-of-Compounds-MS-PS/r53/" title="Edit This Modality" target="lms-context-override">
+    <a id="lms_personalize_link" class="js_editable action_edit hide show-for-lti-context" href="#" data-href="/editor/c/concept/Midpoints-and-Segment-Bisectors-BSC-GEOM/r23/" title="Edit This Modality" target="lms-context-override">
 
 
 	 		    <span>Edit</span>
@@ -766,7 +768,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
 
 	</a>
-	<a id="personalize_link" class="js_editable action_edit hide hide-for-lti-context" href="#" data-href="/editor/c/concept/Chemistry-of-Compounds-MS-PS/r53/"  title="Edit This Modality">
+	<a id="personalize_link" class="js_editable action_edit hide hide-for-lti-context" href="#" data-href="/editor/c/concept/Midpoints-and-Segment-Bisectors-BSC-GEOM/r23/"  title="Edit This Modality">
 
 
 	 		    <span class="library-st">Edit</span>
@@ -776,7 +778,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 	</a>
 
 
-    <a id="latest_link" class="action_viewlatest hide" href="https://www.ck12.org/c/physical-science/chemistry-of-compounds/lesson/Chemistry-of-Compounds-MS-PS/"
+    <a id="latest_link" class="action_viewlatest hide" href="https://www.ck12.org/c/geometry/midpoints-and-segment-bisectors/lesson/Midpoints-and-Segment-Bisectors-BSC-GEOM/"
         title="You are viewing an older version of this Concept. Click here to view the latest."> View Latest </a>
 
 
@@ -788,8 +790,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
 
 	<div class="action_customize hide">
-		<a id="lms_personalize_link" class="js_signinrequired js_editable show-for-lti-context" href="#" data-href="/editor/c/concept/Chemistry-of-Compounds-MS-PS/r53/?conceptCollectionHandle=physical-science-::-chemistry-of-compounds&&collectionCreatorID=3"  title="Customize this Modality" target="lms-context-override"> Customize</a>
-		<a id="personalize_link" class="js_signinrequired js_editable hide-for-lti-context" href="#" data-href="/editor/c/concept/Chemistry-of-Compounds-MS-PS/r53/?conceptCollectionHandle=physical-science-::-chemistry-of-compounds&&collectionCreatorID=3"  title="Customize this Modality">
+		<a id="lms_personalize_link" class="js_signinrequired js_editable show-for-lti-context" href="#" data-href="/editor/c/concept/Midpoints-and-Segment-Bisectors-BSC-GEOM/r23/?conceptCollectionHandle=geometry-::-midpoints-and-segment-bisectors&&collectionCreatorID=3"  title="Customize this Modality" target="lms-context-override"> Customize</a>
+		<a id="personalize_link" class="js_signinrequired js_editable hide-for-lti-context" href="#" data-href="/editor/c/concept/Midpoints-and-Segment-Bisectors-BSC-GEOM/r23/?conceptCollectionHandle=geometry-::-midpoints-and-segment-bisectors&&collectionCreatorID=3"  title="Customize this Modality">
 
 			Customize
 
@@ -816,25 +818,25 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <ul class="dropdown">
 	<li>
 		<a class="js_renderlink pdf"
-			 href="#"
-			data-rendertype="pdf" data-artifactid="1083742" data-artifactrevisionid="6845944"
+			href="/flx/show/pdf/Midpoints-and-Segment-Bisectors-BSC-GEOM_l_v23_ssl_s1.pdf"
+			data-rendertype="pdf" data-artifactid="7493" data-artifactrevisionid="4325976"
 			data-rendertemplatetype="onecolumn">PDF<span class="popupbubble">Most Devices</span></a>
 	</li>
 	<!-- <li>
 		<a class="js_renderlink mobi"
 			 href="#"
-			data-rendertype="mobi" data-artifactid="1083742" data-artifactrevisionid="6845944">mobi<span class="popupbubble">Kindle</span></a>
+			data-rendertype="mobi" data-artifactid="7493" data-artifactrevisionid="4325976">mobi<span class="popupbubble">Kindle</span></a>
 	</li>
 	<li>
 		<a class="js_renderlink epub"
 			 href="#"
-			data-rendertype="epub" data-artifactid="1083742" data-artifactrevisionid="6845944">ePub<span class="popupbubble">iPad and Android</span></a>
+			data-rendertype="epub" data-artifactid="7493" data-artifactrevisionid="4325976">ePub<span class="popupbubble">iPad and Android</span></a>
 	</li> -->
 </ul>
  </li>
         <li class="book_unpublished hide" data-ownerid="3">
 	<a id="js_publish_artifact_link" href="#"
-		data-artifactRevisionID="6845944"
+		data-artifactRevisionID="4325976"
 		title="Submit a Publish Request">
 		Publish
 	</a>
@@ -873,7 +875,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 				<div class="row collapse">
 					<div class="modalitylabel group_text">
 						<div class="title break-word titleonly">
-							Chemistry of Compounds
+							Midpoints and Segment Bisectors
 
 						</div>
 
@@ -886,7 +888,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
 	<div class="annotator-wrapper">
 		<div id="modality_content" class="modality_content modality_type_read"
-			data-loadurl="/c//com/ustadmobile/lib/contentscrapers/ck12/embed-read.txt">
+			data-loadurl="/c//com/ustadmobile/lib/contentscrapers/ck12/embed-mathjax.txt">
 			Loading...&nbsp;<img title="Loading..." class="js_loadingplaceholder" src="//img1.ck12.org/media/build-20180828193300/images/icon_loading.gif" width="43" height="11" />
 		</div>
 	</div>
@@ -919,7 +921,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <!-- Vocabulary -->
 <div class="vocab-pos" data-magellan-destination="vocabulary"></div>
 <div class="clearfix">
-	<section class="vocabulary_content" data-loadurl="/c//com/ustadmobile/lib/contentscrapers/ck12/embed-read-vocab.txt">
+	<section class="vocabulary_content" data-loadurl="/c//com/ustadmobile/lib/contentscrapers/ck12/embed-mathjax-vocab.txt">
 	</section>
 </div>
 <div class="clearfix">
@@ -952,7 +954,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 	<div class="articleinfowrap js_moreinfo">
 		<div itemprop="description" id="artifact_summary">
 
-			Chemical compounds and how elements form different compounds.
+			Apply the definitions of midpoint, segment bisector, and angle bisector.
 
 		</div>
 	</div>
@@ -980,7 +982,32 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
 		<div class="alternate-h2 toptitle">Authors:</div>
 		<div>
-			<a itemprop="author" href="/search/?q=author:Jean%20Brainard%2C%20Ph.D.">Jean Brainard, Ph.D.</a>
+			<a itemprop="author" href="/search/?q=author:Dan%20Greenberg">Dan Greenberg</a>
+		</div>
+
+
+		<div>
+			<a itemprop="author" href="/search/?q=author:Lori%20Jordan">Lori Jordan</a>
+		</div>
+
+
+		<div>
+			<a itemprop="author" href="/search/?q=author:Andrew%20Gloag">Andrew Gloag</a>
+		</div>
+
+
+		<div>
+			<a itemprop="author" href="/search/?q=author:Victor%20Cifarelli">Victor Cifarelli</a>
+		</div>
+
+
+		<div>
+			<a itemprop="author" href="/search/?q=author:Jim%20Sconyers">Jim Sconyers</a>
+		</div>
+
+
+		<div>
+			<a itemprop="author" href="/search/?q=author:Bill%20Zahner">Bill Zahner</a>
 		</div>
 
 
@@ -1020,7 +1047,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 								<section>
 
 									<div class="spacetopmedium">
-										<h2 class="toptitle">Difficulty Level</h2> At Grade
+										<h2 class="toptitle">Difficulty Level</h2> Basic
 									</div>
 
 
@@ -1031,10 +1058,13 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                                             <h2 class="toptitle"> Grades </h2>
                                             <div id="modality_grades">
 
-                                                <a href="/search/?q=grade:7" title="7">7 </a>
+                                                <a href="/search/?q=grade:8" title="8">8 </a>
                                                 ,
 
-                                                <a href="/search/?q=grade:8" title="8">8 </a>
+                                                <a href="/search/?q=grade:9" title="9">9 </a>
+                                                ,
+
+                                                <a href="/search/?q=grade:10" title="10">10 </a>
 
 
                                             </div>
@@ -1048,11 +1078,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 								<section>
 									<div class="spacetopmedium">
 										<h2 class="toptitle infoitemname">Date Created:</h2>
-										<span class="js_local_date" data-date="2012-11-01T00:58:37-07:00"></span>
+										<span class="js_local_date" data-date="2012-02-24T10:29:52-08:00"></span>
 									</div>
 									<div>
 										<h2 class="toptitle infoitemname">Last Modified:</h2>
-										<span class="js_local_date" data-date="2018-08-16T15:07:18-07:00"></span>
+										<span class="js_local_date" data-date="2016-08-25T15:13:06-07:00"></span>
 									</div>
 								</section>
 								<section>
@@ -1077,7 +1107,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
 
 
-				<a class="keyworditem" href="/search/?q=&subject=science" title="science"><span itemprop="keywords"> science </span></a>
+				<a class="keyworditem" href="/search/?q=&subject=mathematics" title="mathematics"><span itemprop="keywords"> mathematics </span></a>
 
 
 
@@ -1086,7 +1116,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
 
 
-				<a class="keyworditem" href="/search/?q=&subject=physical-science" title="Physical Science"><span itemprop="keywords"> Physical Science </span></a>
+				<a class="keyworditem" href="/search/?q=&subject=geometry" title="Geometry"><span itemprop="keywords"> Geometry </span></a>
 
 
 
@@ -1108,6 +1138,12 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                                     <div id="modality_search_wrapper">
 
 
+                                    </div>
+								</section>
+								<section>
+									<!-- Tags -->
+                                    <div id="modality_tags_wrapper">
+
                                         <div class="spacetopmedium">
 
 <section>
@@ -1120,27 +1156,39 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
 
 
-		<div class="alternate-h2 toptitle"> Search Keywords: </div>
+		<div class="alternate-h2 toptitle"> Tags: </div>
 		<div class="keywordlist">
 
 
 
-				<a class="keyworditem" href="/search/?q=compound" title="compound"><span itemprop="keywords">compound</span></a>
+
+
+
+				<a class="keyworditem" href="/search/?q=tag:MAT.GEO.122.L.1" title="MAT.GEO.122.L.1"><span itemprop="keywords"> MAT.GEO.122.L.1 </span></a>
 
 
 
 
 
-				<a class="keyworditem" href="/search/?q=chemical%20compound" title="chemical compound"><span itemprop="keywords">chemical compound</span></a>
+
+
+
+				<a class="keyworditem" href="/search/?q=tag:midpoint%20formula" title="midpoint formula"><span itemprop="keywords"> midpoint formula </span></a>
 
 
 
 
 
-				<a class="keyworditem" href="/search/?q=ionic%20compound" title="ionic compound"><span itemprop="keywords">ionic compound</span></a>
 
 
-					<a href="#" class="keyworditem js_lnk_show_meta">(1 more)</a>
+
+				<a class="keyworditem" href="/search/?q=tag:perpendicular%20bisector" title="perpendicular bisector"><span itemprop="keywords"> perpendicular bisector </span></a>
+
+
+					<a href="#" class="js_lnk_show_meta">(2 more)</a>
+
+
+
 
 
 
@@ -1148,7 +1196,18 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
 
 				<span class="js_more_keywords hide">
-					<a class="keyworditem" href="/search/?q=covalent%20compound" title="covalent compound"><span itemprop="keywords">covalent compound</span></a>
+					<a class="keyworditem" href="/search/?q=tag:segment%20bisector" title="segment bisector"><span itemprop="keywords"> segment bisector </span></a>
+				</span>
+
+
+
+
+
+
+
+
+				<span class="js_more_keywords hide">
+					<a class="keyworditem" href="/search/?q=tag:segment%20markings" title="segment markings"><span itemprop="keywords"> segment markings </span></a>
 				</span>
 
 
@@ -1160,13 +1219,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 </section>
 
                                         </div>
-                                        <div class="clear"></div>
-
-                                    </div>
-								</section>
-								<section>
-									<!-- Tags -->
-                                    <div id="modality_tags_wrapper">
 
                                     </div>
 								</section>
@@ -1175,7 +1227,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 									<!-- Standards Correlations (Replaced States - SLING) -->
 
 										<div class="spacetopmedium js_standardboards_container hide"
-											data-loadurl="/ajax/artifact/standardboards/1083742/">
+											data-loadurl="/ajax/artifact/standardboards/7493/">
 										</div>
 										<div class="clear"></div>
 
@@ -1189,7 +1241,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                                                 <h2 class="toptitle"> Concept Nodes: </h2>
                                                 <div class="articleinfowrap">
 
-                                                    <a title="SCI.CHE.303 (Chemistry of Compounds - Physical Science) " href="/search/?q=Chemistry of Compounds&type=concept" itemprop="keywords" data-encodedid="SCI.CHE.303">SCI.CHE.303 (Chemistry of Compounds - Physical Science)</a>
+                                                    <a title="MAT.GEO.103.01 (Midpoints and Segment Bisectors - Geometry) " href="/search/?q=Midpoints and Segment Bisectors&type=concept" itemprop="keywords" data-encodedid="MAT.GEO.103.01">MAT.GEO.103.01 (Midpoints and Segment Bisectors - Geometry)</a>
 
                                                 </div>
                                             </section>
@@ -1236,7 +1288,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
 
 
-<section class="resources_container clickload" data-loadurl="/ajax/resource_list/c/concept/Chemistry-of-Compounds-MS-PS/r53/?artifact_id=1083742&editable=&owned=False&artifact_revision_id=6845944">
+<section class="resources_container clickload" data-loadurl="/ajax/resource_list/c/concept/Midpoints-and-Segment-Bisectors-BSC-GEOM/r23/?artifact_id=7493&editable=&owned=False&artifact_revision_id=4325976">
 </section>
 
 
@@ -1447,7 +1499,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 	</div>
 
 
-	<div id="js_signindialog" data-url='https://www.ck12.org/auth/signin?popup=true&requestor=https%3A//www.ck12.org/c/physical-science/chemistry-of-compounds/lesson/Chemistry-of-Compounds-MS-PS/%3Freferrer%3Dconcept_details&returnTo=https%3A//www.ck12.org/account/federated/authorized/popup/' data-auth-no-popup-url='https://www.ck12.org/auth/signin?&requestor=https%3A//www.ck12.org/c/physical-science/chemistry-of-compounds/lesson/Chemistry-of-Compounds-MS-PS/%3Freferrer%3Dconcept_details&returnTo=https%3A//www.ck12.org/c/physical-science/chemistry-of-compounds/lesson/Chemistry-of-Compounds-MS-PS/%3Freferrer%3Dconcept_details'>
+	<div id="js_signindialog" data-url='https://www.ck12.org/auth/signin?popup=true&requestor=https%3A//www.ck12.org/c/geometry/midpoints-and-segment-bisectors/lesson/Midpoints-and-Segment-Bisectors-BSC-GEOM/%3Freferrer%3Dconcept_details&returnTo=https%3A//www.ck12.org/account/federated/authorized/popup/' data-auth-no-popup-url='https://www.ck12.org/auth/signin?&requestor=https%3A//www.ck12.org/c/geometry/midpoints-and-segment-bisectors/lesson/Midpoints-and-Segment-Bisectors-BSC-GEOM/%3Freferrer%3Dconcept_details&returnTo=https%3A//www.ck12.org/c/geometry/midpoints-and-segment-bisectors/lesson/Midpoints-and-Segment-Bisectors-BSC-GEOM/%3Freferrer%3Dconcept_details'>
 		<div class="action"><a id="signin_close" href="#" alt="Close Sign In " title="Close Sign In"></a></div>
 	</div>
 
@@ -1458,7 +1510,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 	</div>
 
 <script id="tmpl_modality_filter" type="text/template">
-	<a class="lnk_modality_filter group_<%= data.group_classname %> <% if (data.active) { %> selected <% } %>" href="/c/physical-science/chemistry-of-compounds<%= window.location.search %><% if (window.location.search) { %>&by=ck12&difficulty=all<% } else { %>?by=ck12&difficulty=all<% } %>#<%= data.group_classname %>">
+	<a class="lnk_modality_filter group_<%= data.group_classname %> <% if (data.active) { %> selected <% } %>" href="/c/geometry/midpoints-and-segment-bisectors<%= window.location.search %><% if (window.location.search) { %>&by=ck12&difficulty=all<% } else { %>?by=ck12&difficulty=all<% } %>#<%= data.group_classname %>">
 		<i class="js-modality-icon"></i>
         <span class="group_label">
 			<span class="js-modality-label"><%= data.display_text %></span>
@@ -1562,8 +1614,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
 
 <script type="text/javascript">
-	window.js_modality_data = {"domain": {"pre": null, "ck12ModalityCount": {"asmtpractice": {"at grade": 1}, "lecture": {"at grade": 2}, "lesson": {"at grade": 1}, "enrichment": {"basic": 3}, "rwa": {"basic": 2}}, "previewImageUrl": "http://www.ck12.org/media/images/modality_generic_icons/concept_gicon.png", "id": 156126, "subject": "SCI", "from": "domain", "latestDescendantModalityAdded": null, "descendantDomainCount": 0, "branch": "CHE", "communityModalityCount": {"flashcard": {"basic": 1}, "lesson": {"at grade": 1}}, "descendantOf": {"term": "Chemical Nomenclature", "handle": "chemical-nomenclature", "description": "Trends between elements that can be measured as defined values.", "previewIconUrl": "https://s3.amazonaws.com/concepts.ck12.org/icons/science/Quantitative-Relationships_SCI.CHE.300.svg", "previewImageUrl": "https://s3.amazonaws.com/concepts.ck12.org/preview/quantitative-relationships.jpg", "encodedID": "SCI.CHE.300", "branch": "CHE", "parentID": 12032, "from": "domain", "subject": "SCI", "type": "domain", "id": 19677, "branchInfo": {"term": "Chemistry", "handle": "chemistry", "description": null, "previewIconUrl": null, "previewImageUrl": "https://s3.amazonaws.com/concepts.ck12.org/preview/equilibrium-and-lechateliers-principle.jpg", "encodedID": "SCI.CHE", "branch": "CHE", "parentID": 9, "from": "domain", "subject": "SCI", "type": "domain", "id": 12032, "name": "Chemistry"}, "name": "Chemical Nomenclature"}, "descendantArtifactCount": 0, "type": "domain", "descendantModalityCount": {}, "sort": 1, "handle": "chemistry-of-compounds", "description": "Introduction to substances that form when two or more elements combine chemically.", "parent": {"sort": 1, "term": "Ionic Compounds", "previewIconUrl": null, "description": "None", "from": "domain", "parentID": 19677, "name": "Ionic Compounds", "encodedID": "SCI.CHE.301", "branch": "CHE", "previewImageUrl": "http://www.ck12.org/media/images/modality_generic_icons/concept_gicon.png", "handle": "ionic-compounds", "type": "domain", "id": 156123, "branchInfo": {"term": "Chemistry", "handle": "chemistry", "description": null, "previewIconUrl": null, "previewImageUrl": "https://s3.amazonaws.com/concepts.ck12.org/preview/equilibrium-and-lechateliers-principle.jpg", "encodedID": "SCI.CHE", "branch": "CHE", "parentID": 9, "from": "domain", "subject": "SCI", "type": "domain", "id": 12032, "name": "Chemistry"}, "subject": "SCI"}, "descendantCommunityModalityCount": {}, "latestModalityAdded": "2017-08-05T11:21:45-07:00", "collection": {"collectionHandle": "physical-science", "collectionCreatorID": 3, "conceptCollectionAbsoluteHandle": "chemistry-of-compounds", "collectionTitle": "Physical Science", "encodedID": "SCI.CHE.303", "isCanonical": true, "conceptCollectionTitle": "Chemistry of Compounds"}, "post": null, "artifactCount": {"lesson": 1}, "term": "Chemistry of Compounds", "previewIconUrl": null, "name": "Chemistry of Compounds", "descendantDomainCountWithModalities": 0, "descendantCK12ModalityCount": 0, "encodedID": "SCI.CHE.303", "branchInfo": {"term": "Chemistry", "handle": "chemistry", "description": null, "previewIconUrl": null, "previewImageUrl": "https://s3.amazonaws.com/concepts.ck12.org/preview/equilibrium-and-lechateliers-principle.jpg", "encodedID": "SCI.CHE", "branch": "CHE", "parentID": 9, "from": "domain", "subject": "SCI", "type": "domain", "id": 12032, "name": "Chemistry"}, "modalityCount": {"asmtpractice": {"at grade": 1}, "rwa": {"basic": 2}, "lecture": {"at grade": 2}, "flashcard": {"basic": 1}, "lesson": {"at grade": 2}, "enrichment": {"basic": 3}}}, "modality_groups": [{"display_text": "All Modalities", "count": 9, "artifact_types": ["__ALL__"], "sequence": 0, "group_classname": "all", "group_name": "All types", "show_text_label": true, "default_thumb": "modality_generic_icons/concept_gicon.png"}, {"display_text": "Read", "count": 1, "artifact_types": ["lesson", "concept", "section"], "sequence": 1, "group_classname": "text", "group_name": "Read", "show_text_label": false, "default_thumb": "modality_generic_icons/read_gicon.png"}, {"display_text": "Video", "count": 5, "artifact_types": ["lecture", "audio", "enrichment"], "sequence": 4, "group_classname": "multimedia", "group_name": "Video", "show_text_label": false, "default_thumb": "modality_generic_icons/video_gicon.png"}, {"display_text": "Assessments", "count": 1, "artifact_types": ["asmtpractice", "asmtquiz"], "sequence": 9, "group_classname": "assessment", "group_name": "Assessments", "show_text_label": false, "default_thumb": "modality_generic_icons/assest_gicon.png"}, {"display_text": "Real World", "count": 2, "artifact_types": ["rwa", "rwaans"], "sequence": 14, "group_classname": "real_world", "group_name": "Real World", "show_text_label": false, "default_thumb": "modality_generic_icons/rwa_gicon.png"}], "downloaduri": null, "artifact": {"domain": {"term": "Chemistry of Compounds", "handle": "chemistry-of-compounds", "description": "Introduction to substances that form when two or more elements combine chemically.", "parent": {"term": "Ionic Compounds", "handle": "ionic-compounds", "description": "None", "parent": {"term": "Chemical Nomenclature", "handle": "chemical-nomenclature", "description": "Trends between elements that can be measured as defined values.", "parent": {"term": "Chemistry", "handle": "chemistry", "description": null, "parent": {"term": "Science", "handle": "science", "description": null, "parent": {"term": "root", "handle": "root", "description": null, "previewIconUrl": null, "encodedID": "CKT", "branch": null, "previewImageUrl": "http://www.ck12.org/media/images/modality_generic_icons/concept_gicon.png", "from": "domain", "subject": "CKT", "type": "domain", "id": 1, "name": "root"}, "previewIconUrl": null, "previewImageUrl": "https://s3.amazonaws.com/concepts.ck12.org/preview/introduction-to-animals.jpg", "encodedID": "SCI", "branch": null, "parentID": 1, "from": "domain", "subject": "SCI", "type": "domain", "id": 9, "name": "Science"}, "previewIconUrl": null, "previewImageUrl": "https://s3.amazonaws.com/concepts.ck12.org/preview/equilibrium-and-lechateliers-principle.jpg", "encodedID": "SCI.CHE", "branch": "CHE", "parentID": 9, "from": "domain", "subject": "SCI", "type": "domain", "id": 12032, "branchInfo": {"term": "Chemistry", "handle": "chemistry", "description": null, "previewIconUrl": null, "previewImageUrl": "https://s3.amazonaws.com/concepts.ck12.org/preview/equilibrium-and-lechateliers-principle.jpg", "encodedID": "SCI.CHE", "branch": "CHE", "parentID": 9, "from": "domain", "subject": "SCI", "type": "domain", "id": 12032, "name": "Chemistry"}, "name": "Chemistry"}, "previewIconUrl": "https://s3.amazonaws.com/concepts.ck12.org/icons/science/Quantitative-Relationships_SCI.CHE.300.svg", "previewImageUrl": "https://s3.amazonaws.com/concepts.ck12.org/preview/quantitative-relationships.jpg", "encodedID": "SCI.CHE.300", "branch": "CHE", "parentID": 12032, "from": "domain", "subject": "SCI", "type": "domain", "id": 19677, "branchInfo": {"term": "Chemistry", "handle": "chemistry", "description": null, "previewIconUrl": null, "previewImageUrl": "https://s3.amazonaws.com/concepts.ck12.org/preview/equilibrium-and-lechateliers-principle.jpg", "encodedID": "SCI.CHE", "branch": "CHE", "parentID": 9, "from": "domain", "subject": "SCI", "type": "domain", "id": 12032, "name": "Chemistry"}, "name": "Chemical Nomenclature"}, "previewIconUrl": null, "previewImageUrl": "http://www.ck12.org/media/images/modality_generic_icons/concept_gicon.png", "encodedID": "SCI.CHE.301", "branch": "CHE", "parentID": 19677, "from": "domain", "subject": "SCI", "type": "domain", "id": 156123, "branchInfo": {"term": "Chemistry", "handle": "chemistry", "description": null, "previewIconUrl": null, "previewImageUrl": "https://s3.amazonaws.com/concepts.ck12.org/preview/equilibrium-and-lechateliers-principle.jpg", "encodedID": "SCI.CHE", "branch": "CHE", "parentID": 9, "from": "domain", "subject": "SCI", "type": "domain", "id": 12032, "name": "Chemistry"}, "name": "Ionic Compounds"}, "previewIconUrl": null, "previewImageUrl": "http://www.ck12.org/media/images/modality_generic_icons/concept_gicon.png", "encodedID": "SCI.CHE.303", "branch": "CHE", "parentID": 156123, "from": "domain", "subject": "SCI", "type": "domain", "id": 156126, "branchInfo": {"term": "Chemistry", "handle": "chemistry", "description": null, "previewIconUrl": null, "previewImageUrl": "https://s3.amazonaws.com/concepts.ck12.org/preview/equilibrium-and-lechateliers-principle.jpg", "encodedID": "SCI.CHE", "branch": "CHE", "parentID": 9, "from": "domain", "subject": "SCI", "type": "domain", "id": 12032, "name": "Chemistry"}, "name": "Chemistry of Compounds"}, "modality_group": {"display_text": "Read", "artifact_types": ["lesson", "concept", "section"], "sequence": 1, "group_classname": "text", "group_name": "Read", "show_text_label": false, "default_thumb": "modality_generic_icons/read_gicon.png"}, "creator": "CK-12", "labels": [], "exerciseCount": 0, "contributor": null, "handle": "Chemistry-of-Compounds-MS-PS", "perma": "c/concept/Chemistry-of-Compounds-MS-PS/", "url_pdf": [], "url_epub": null, "id": 1083742, "conceptNode": "SCI.PSC.112.34", "realm": null, "resourceCounts": {"allVideos": 3, "image": 4, "cover page": 1, "allAttachments": 0, "video": 3, "contents": 1}, "title": "Chemistry of Compounds", "coverImageThumbSmall": "https://dr282zn36sxxg.cloudfront.net/datastreams/f-d%3Aadbe3fa9de3276faef1a39607a0b690e37edc85d5a826eb9ee12935f%2BIMAGE_THUMB_SMALL_TINY%2BIMAGE_THUMB_SMALL_TINY.1", "extendedArtifactsCount": 0, "creatorAuthID": 3, "isDraft": false, "feedbacks": {"rating": {"count": 0, "average": 0, "1": 0, "3": 0, "2": 0, "5": 0, "4": 0}, "voting": {"dislike": 18, "like": 31}}, "gradeGrid": [[1935, "7"], [1936, "8"]], "handle-encoded": true, "subjectGrid": [[3568, "science"], [12114, "Physical Science"]], "collections": [{"collectionHandle": "physical-science", "collectionCreatorID": 3, "conceptCollectionAbsoluteHandle": "chemistry-of-compounds", "collectionTitle": "Physical Science", "encodedID": "SCI.CHE.303", "isCanonical": true, "conceptCollectionTitle": "Chemistry of Compounds"}], "internalTagGrid": [], "coverImageResourceID": 9788135, "messageToUsers": null, "isLatest": true, "thumbnail_img": "https://dr282zn36sxxg.cloudfront.net/datastreams/f-d%3Aadbe3fa9de3276faef1a39607a0b690e37edc85d5a826eb9ee12935f%2BIMAGE_THUMB_POSTCARD_TINY%2BIMAGE_THUMB_POSTCARD_TINY.1", "type": {"modality": true, "extensionType": "L", "description": "The lesson artifact", "name": "lesson", "id": 3}, "searchGrid": [[3366, "compound"], [8493, "chemical compound"], [9870, "ionic compound"], [9874, "covalent compound"]], "revision": "53", "artifactRevisionID": 6845944, "lastRead": null, "isModality": 1, "modality": {"artifact_type": "lesson", "weight_teacher": 10, "student_show": true, "display_label": "Read", "weight_student": 10}, "revisionInLibrary": null, "published": "2018-08-16T15:07:18-07:00", "coverImageThumbLarge": "https://dr282zn36sxxg.cloudfront.net/datastreams/f-d%3Aadbe3fa9de3276faef1a39607a0b690e37edc85d5a826eb9ee12935f%2BIMAGE_THUMB_LARGE_TINY%2BIMAGE_THUMB_LARGE_TINY.1", "modality_display_label": "Read", "hasXhtml": true, "foundationGrid": [[156126, "Chemistry of Compounds", "SCI.CHE.303", "Chemistry-of-Compounds", "chemistry"]], "stateGrid": [[1937, "CA"]], "creatorLogin": "ck12editor", "extendedArtifacts": {}, "creatorID": 3, "authors": [{"roleID": 3, "sequence": 1, "role": "author", "name": "Jean Brainard, Ph.D.", "artifactID": 1083742}], "level": "at grade", "vocabulary_info": null, "artifactID": 1083742, "latestRevision": "53", "contributed_by": "", "language": "English", "license": "CC BY NC", "tagGrid": [], "coverImage": "/flx/show/cover%20page/user%3Ack12science/ddb79d9d5063f431ceeebdf90bd2e37f-201412291419895321548611-201412291419896614368135.jpg", "created": "2012-11-01T00:58:37-07:00", "latestRevisionID": 6845944, "modified": "2018-08-16T15:07:18-07:00", "summary": "Chemical compounds and how elements form different compounds.", "coverImageSatelliteUrl": "https://dr282zn36sxxg.cloudfront.net/datastreams/f-d%3Aadbe3fa9de3276faef1a39607a0b690e37edc85d5a826eb9ee12935f%2BIMAGE%2BIMAGE.1", "encodedID": "SCI.PSC.112.34.L.1", "standardGrid": {}, "artifactType": "lesson", "url_mobi": null}, "modalities": []};
-	var jsCollectionData = [{"collection_url": "/c/physical-science", "collection": {"handle": "physical-science", "description": "Physical science is the study of matter and energy. Physical science can be divided into chemistry and physics. Chemistry is the study of matter and energy at the scale of atoms and molecules. Physics is the study of matter and energy at all scales\u2014from the tiniest particles of matter to the entire universe.", "isRoot": true, "level": 1, "parentSubjectID": "SCI", "nextDescendantCollection": {"descendantEIDChildrenCount": 0, "handle": "physical-science-::-chemical-formula", "level": 4, "title": "Chemical Formula", "encodedID": "SCI.CHE.304", "creatorID": 3, "identifier": "5.1.3", "type": "Collection", "absoluteHandle": "chemical-formula"}, "title": "Physical Science", "isPublished": true, "canonicalID": "SCI.PSC", "descendantCollection": {"taxonomyComposistionsInfo": [{"updated": "2013-02-04 21:46:19", "nodeType": "subject", "name": "Science", "created": "2012-06-08 22:38:20", "branches": [{"updated": "2015-12-09 10:10:31.868126", "handle": "Chemistry", "name": "Chemistry", "created": "2012-06-08 22:38:20", "bisac": "SCI013000", "flxID": 12032, "concepts": [{"orderedEncodedID": "SCICHE30300000000000000000000000000000000000000000", "status": "published", "updated": "2017-08-04 20:21:42.701608", "handle": "Chemistry-of-Compounds", "description": "Introduction to substances that form when two or more elements combine chemically.", "created": "2017-08-04 20:21:42.701600", "flxID": 156126, "redirectedReferences": ["SCI.PSC.112.34", "SCI.CHE.123.4", "SCI.CHE.242"], "encodedID": "SCI.CHE.303", "keywords": "", "nodeType": "concept", "descendantEIDChildrenCount": 0, "name": "Chemistry of Compounds"}], "nodeType": "branch", "shortname": "CHE", "descendantEIDChildrenCount": 0, "previewImageUrl": "http://concepts.ck12.org/preview/chemistry.jpg"}], "previewImageUrl": "http://concepts.ck12.org/preview/introduction-to-animals.jpg", "shortname": "SCI", "descendantEIDChildrenCount": 0}], "descendantEIDChildrenCount": 0, "handle": "physical-science-::-chemistry-of-compounds", "level": 4, "title": "Chemistry of Compounds", "encodedID": "SCI.CHE.303", "creatorID": 3, "identifier": "5.1.2", "type": "Collection", "absoluteHandle": "chemistry-of-compounds"}, "isCanonical": true, "creatorID": 3, "previousDescendantCollection": {"descendantEIDChildrenCount": 0, "handle": "physical-science-::-chemical-bond", "level": 4, "title": "Chemical Bond", "encodedID": "SCI.CHE.402", "creatorID": 3, "identifier": "5.1.1", "type": "Collection", "absoluteHandle": "chemical-bond"}, "descendantEIDChildrenCount": 0, "type": "Collection"}}]
+	window.js_modality_data = {"domain": {"pre": null, "ck12ModalityCount": {"asmtpractice": {"at grade": 1}, "rwa": {"at grade": 3}, "studyguide": {"at grade": 1}, "plix": {"at grade": 3}, "lecture": {"at grade": 2, "basic": 4}, "lesson": {"at grade": 1, "basic": 1}, "cthink": {"at grade": 1}}, "previewImageUrl": "http://www.ck12.org/media/images/modality_generic_icons/concept_gicon.png", "id": 158169, "subject": "MAT", "from": "domain", "latestDescendantModalityAdded": null, "descendantDomainCount": 0, "branch": "GEO", "communityModalityCount": {"lesson": {"at grade": 3, "basic": 2}}, "descendantOf": {"term": "Basics of Geometry", "handle": "basics-of-geometry", "description": "Formal arguments of mathematical statements written in paragraph, two-column, and flow diagram formats.", "previewIconUrl": "https://s3.amazonaws.com/concepts.ck12.org/icons/math/Definitions-and-Introduction-to-Proof_MAT.GEO.100.svg", "previewImageUrl": "https://s3.amazonaws.com/concepts.ck12.org/preview/definitions-and-introduction-to-proof.jpg", "encodedID": "MAT.GEO.100", "branch": "GEO", "parentID": 6, "from": "domain", "subject": "MAT", "type": "domain", "id": 320, "branchInfo": {"term": "Geometry", "handle": "geometry", "description": null, "previewIconUrl": null, "previewImageUrl": "https://s3.amazonaws.com/concepts.ck12.org/preview/geometry.jpg", "encodedID": "MAT.GEO", "branch": "GEO", "parentID": 2, "from": "domain", "subject": "MAT", "type": "domain", "id": 6, "name": "Geometry"}, "name": "Basics of Geometry"}, "descendantArtifactCount": 0, "type": "domain", "descendantModalityCount": {}, "sort": 1, "handle": "midpoints-and-segment-bisectors", "description": "Use midpoints and bisectors to find the halfway mark between two coordinates.", "parent": {"sort": 1, "term": "Line Segments", "previewIconUrl": null, "description": "Identify the Positive length between points.", "from": "domain", "parentID": 320, "name": "Line Segments", "encodedID": "MAT.GEO.103", "branch": "GEO", "previewImageUrl": "http://www.ck12.org/media/images/modality_generic_icons/concept_gicon.png", "handle": "line-segments", "type": "domain", "id": 158166, "branchInfo": {"term": "Geometry", "handle": "geometry", "description": null, "previewIconUrl": null, "previewImageUrl": "https://s3.amazonaws.com/concepts.ck12.org/preview/geometry.jpg", "encodedID": "MAT.GEO", "branch": "GEO", "parentID": 2, "from": "domain", "subject": "MAT", "type": "domain", "id": 6, "name": "Geometry"}, "subject": "MAT"}, "descendantCommunityModalityCount": {}, "latestModalityAdded": "2017-08-05T12:18:18-07:00", "collection": {"collectionHandle": "geometry", "collectionCreatorID": 3, "conceptCollectionAbsoluteHandle": "midpoints-and-segment-bisectors", "collectionTitle": "Geometry", "encodedID": "MAT.GEO.103.01", "isCanonical": true, "conceptCollectionTitle": "Midpoints and Segment Bisectors"}, "post": null, "artifactCount": {"plix": 3}, "term": "Midpoints and Segment Bisectors", "previewIconUrl": null, "name": "Midpoints and Segment Bisectors", "descendantDomainCountWithModalities": 0, "descendantCK12ModalityCount": 0, "encodedID": "MAT.GEO.103.01", "branchInfo": {"term": "Geometry", "handle": "geometry", "description": null, "previewIconUrl": null, "previewImageUrl": "https://s3.amazonaws.com/concepts.ck12.org/preview/geometry.jpg", "encodedID": "MAT.GEO", "branch": "GEO", "parentID": 2, "from": "domain", "subject": "MAT", "type": "domain", "id": 6, "name": "Geometry"}, "modalityCount": {"asmtpractice": {"at grade": 1}, "rwa": {"at grade": 3}, "studyguide": {"at grade": 1}, "plix": {"at grade": 3}, "lecture": {"at grade": 2, "basic": 4}, "lesson": {"at grade": 4, "basic": 3}, "cthink": {"at grade": 1}}}, "modality_groups": [{"display_text": "All Modalities", "count": 17, "artifact_types": ["__ALL__"], "sequence": 0, "group_classname": "all", "group_name": "All types", "show_text_label": true, "default_thumb": "modality_generic_icons/concept_gicon.png"}, {"display_text": "Read", "count": 2, "artifact_types": ["lesson", "concept", "section"], "sequence": 1, "group_classname": "text", "group_name": "Read", "show_text_label": false, "default_thumb": "modality_generic_icons/read_gicon.png"}, {"display_text": "Video", "count": 6, "artifact_types": ["lecture", "audio", "enrichment"], "sequence": 4, "group_classname": "multimedia", "group_name": "Video", "show_text_label": false, "default_thumb": "modality_generic_icons/video_gicon.png"}, {"display_text": "Activities", "count": 1, "artifact_types": ["labans", "prepostreadans", "worksheet", "prereadans", "lab", "preread", "postread", "activityans", "activity", "worksheetans", "whilereadans", "cthink", "postreadans", "prepostread", "whileread"], "sequence": 5, "group_classname": "activities", "group_name": "Activities", "show_text_label": false, "default_thumb": "modality_generic_icons/activities_gicon.png"}, {"display_text": "Study Aids", "count": 1, "artifact_types": ["flashcard", "studyguide"], "sequence": 6, "group_classname": "study_resource", "group_name": "Study Aids", "show_text_label": false, "default_thumb": "modality_generic_icons/styaids_gicon.png"}, {"display_text": "Assessments", "count": 1, "artifact_types": ["asmtpractice", "asmtquiz"], "sequence": 9, "group_classname": "assessment", "group_name": "Assessments", "show_text_label": false, "default_thumb": "modality_generic_icons/assest_gicon.png"}, {"display_text": "Real World", "count": 3, "artifact_types": ["rwa", "rwaans"], "sequence": 14, "group_classname": "real_world", "group_name": "Real World", "show_text_label": false, "default_thumb": "modality_generic_icons/rwa_gicon.png"}, {"display_text": "PLIX", "count": 3, "artifact_types": ["plix"], "sequence": 3, "group_classname": "interactive", "group_name": "PLIX", "show_text_label": false, "default_thumb": "modality_generic_icons/interactive_ic.png"}], "downloaduri": null, "artifact": {"domain": {"term": "Midpoints and Segment Bisectors", "handle": "midpoints-and-segment-bisectors", "description": "Use midpoints and bisectors to find the halfway mark between two coordinates.", "parent": {"term": "Line Segments", "handle": "line-segments", "description": "Identify the Positive length between points.", "parent": {"term": "Basics of Geometry", "handle": "basics-of-geometry", "description": "Formal arguments of mathematical statements written in paragraph, two-column, and flow diagram formats.", "parent": {"term": "Geometry", "handle": "geometry", "description": null, "parent": {"term": "Mathematics", "handle": "mathematics", "description": null, "parent": {"term": "root", "handle": "root", "description": null, "previewIconUrl": null, "encodedID": "CKT", "branch": null, "previewImageUrl": "http://www.ck12.org/media/images/modality_generic_icons/concept_gicon.png", "from": "domain", "subject": "CKT", "type": "domain", "id": 1, "name": "root"}, "previewIconUrl": null, "previewImageUrl": "https://s3.amazonaws.com/concepts.ck12.org/preview/translations-rotations-and-reflections.jpg", "encodedID": "MAT", "branch": null, "parentID": 1, "from": "domain", "subject": "MAT", "type": "domain", "id": 2, "name": "Mathematics"}, "previewIconUrl": null, "previewImageUrl": "https://s3.amazonaws.com/concepts.ck12.org/preview/geometry.jpg", "encodedID": "MAT.GEO", "branch": "GEO", "parentID": 2, "from": "domain", "subject": "MAT", "type": "domain", "id": 6, "branchInfo": {"term": "Geometry", "handle": "geometry", "description": null, "previewIconUrl": null, "previewImageUrl": "https://s3.amazonaws.com/concepts.ck12.org/preview/geometry.jpg", "encodedID": "MAT.GEO", "branch": "GEO", "parentID": 2, "from": "domain", "subject": "MAT", "type": "domain", "id": 6, "name": "Geometry"}, "name": "Geometry"}, "previewIconUrl": "https://s3.amazonaws.com/concepts.ck12.org/icons/math/Definitions-and-Introduction-to-Proof_MAT.GEO.100.svg", "previewImageUrl": "https://s3.amazonaws.com/concepts.ck12.org/preview/definitions-and-introduction-to-proof.jpg", "encodedID": "MAT.GEO.100", "branch": "GEO", "parentID": 6, "from": "domain", "subject": "MAT", "type": "domain", "id": 320, "branchInfo": {"term": "Geometry", "handle": "geometry", "description": null, "previewIconUrl": null, "previewImageUrl": "https://s3.amazonaws.com/concepts.ck12.org/preview/geometry.jpg", "encodedID": "MAT.GEO", "branch": "GEO", "parentID": 2, "from": "domain", "subject": "MAT", "type": "domain", "id": 6, "name": "Geometry"}, "name": "Basics of Geometry"}, "previewIconUrl": null, "previewImageUrl": "http://www.ck12.org/media/images/modality_generic_icons/concept_gicon.png", "encodedID": "MAT.GEO.103", "branch": "GEO", "parentID": 320, "from": "domain", "subject": "MAT", "type": "domain", "id": 158166, "branchInfo": {"term": "Geometry", "handle": "geometry", "description": null, "previewIconUrl": null, "previewImageUrl": "https://s3.amazonaws.com/concepts.ck12.org/preview/geometry.jpg", "encodedID": "MAT.GEO", "branch": "GEO", "parentID": 2, "from": "domain", "subject": "MAT", "type": "domain", "id": 6, "name": "Geometry"}, "name": "Line Segments"}, "previewIconUrl": null, "previewImageUrl": "http://www.ck12.org/media/images/modality_generic_icons/concept_gicon.png", "encodedID": "MAT.GEO.103.01", "branch": "GEO", "parentID": 158166, "from": "domain", "subject": "MAT", "type": "domain", "id": 158169, "branchInfo": {"term": "Geometry", "handle": "geometry", "description": null, "previewIconUrl": null, "previewImageUrl": "https://s3.amazonaws.com/concepts.ck12.org/preview/geometry.jpg", "encodedID": "MAT.GEO", "branch": "GEO", "parentID": 2, "from": "domain", "subject": "MAT", "type": "domain", "id": 6, "name": "Geometry"}, "name": "Midpoints and Segment Bisectors"}, "modality_group": {"display_text": "Read", "artifact_types": ["lesson", "concept", "section"], "sequence": 1, "group_classname": "text", "group_name": "Read", "show_text_label": false, "default_thumb": "modality_generic_icons/read_gicon.png"}, "creator": "CK-12", "labels": [], "exerciseCount": 0, "contributor": null, "handle": "Midpoints-and-Segment-Bisectors-BSC-GEOM", "perma": "c/concept/Midpoints-and-Segment-Bisectors-BSC-GEOM/", "url_pdf": ["/flx/show/pdf/Midpoints-and-Segment-Bisectors-BSC-GEOM_l_v23_ssl_s1.pdf"], "url_epub": null, "id": 7493, "conceptNode": "MAT.GEO.122", "realm": null, "resourceCounts": {"web": 1, "cthink": 1, "allVideos": 4, "image": 11, "cover page": 1, "answer key": 1, "studyguide": 1, "quiz": 1, "allAttachments": 9, "video": 3, "reading": 2, "pdf": 1, "cover video": 1, "contents": 1}, "title": "Midpoints and Segment Bisectors", "coverImageThumbSmall": "https://dr282zn36sxxg.cloudfront.net/datastreams/f-d%3A6a98a3ad7d0f7e30f7ac6626d413a3e250ddfed53d0b2d22ea146f08%2BIMAGE_THUMB_SMALL_TINY%2BIMAGE_THUMB_SMALL_TINY.1", "extendedArtifactsCount": 0, "creatorAuthID": 3, "isDraft": false, "feedbacks": {"rating": {"count": 0, "average": 0, "1": 0, "3": 0, "2": 0, "5": 0, "4": 0}, "voting": {"dislike": 4, "like": 19}}, "gradeGrid": [[1936, "8"], [1995, "9"], [2241, "10"]], "handle-encoded": true, "subjectGrid": [[1938, "mathematics"], [2685, "Geometry"]], "collections": [{"collectionHandle": "geometry", "collectionCreatorID": 3, "conceptCollectionAbsoluteHandle": "midpoints-and-segment-bisectors", "collectionTitle": "Geometry", "encodedID": "MAT.GEO.103.01", "isCanonical": true, "conceptCollectionTitle": "Midpoints and Segment Bisectors"}], "internalTagGrid": [], "coverImageResourceID": 9932721, "messageToUsers": null, "isLatest": true, "thumbnail_img": "https://dr282zn36sxxg.cloudfront.net/datastreams/f-d%3A6a98a3ad7d0f7e30f7ac6626d413a3e250ddfed53d0b2d22ea146f08%2BIMAGE_THUMB_POSTCARD_TINY%2BIMAGE_THUMB_POSTCARD_TINY.1", "type": {"modality": true, "extensionType": "L", "description": "The lesson artifact", "name": "lesson", "id": 3}, "searchGrid": [], "revision": "23", "artifactRevisionID": 4325976, "lastRead": null, "isModality": 1, "modality": {"artifact_type": "lesson", "weight_teacher": 10, "student_show": true, "display_label": "Read", "weight_student": 10}, "revisionInLibrary": null, "published": "2016-08-25T08:13:06-07:00", "coverImageThumbLarge": "https://dr282zn36sxxg.cloudfront.net/datastreams/f-d%3A6a98a3ad7d0f7e30f7ac6626d413a3e250ddfed53d0b2d22ea146f08%2BIMAGE_THUMB_LARGE_TINY%2BIMAGE_THUMB_LARGE_TINY.1", "modality_display_label": "Read", "hasXhtml": true, "foundationGrid": [[158169, "Midpoints and Segment Bisectors", "MAT.GEO.103.01", "Midpoints-and-Segment-Bisectors", "geometry"]], "stateGrid": [], "creatorLogin": "ck12editor", "extendedArtifacts": {}, "creatorID": 3, "authors": [{"roleID": 3, "sequence": 1, "role": "author", "name": "Dan Greenberg", "artifactID": 7493}, {"roleID": 3, "sequence": 2, "role": "author", "name": "Lori Jordan", "artifactID": 7493}, {"roleID": 3, "sequence": 3, "role": "author", "name": "Andrew Gloag", "artifactID": 7493}, {"roleID": 3, "sequence": 4, "role": "author", "name": "Victor Cifarelli", "artifactID": 7493}, {"roleID": 3, "sequence": 5, "role": "author", "name": "Jim Sconyers", "artifactID": 7493}, {"roleID": 3, "sequence": 6, "role": "author", "name": "Bill Zahner", "artifactID": 7493}], "level": "basic", "vocabulary_info": null, "artifactID": 7493, "latestRevision": "23", "contributed_by": "", "language": "English", "license": "CC BY NC", "tagGrid": [[573, "midpoint formula"], [740, "perpendicular bisector"], [6620, "segment markings"], [6621, "segment bisector"], [6622, "MAT.GEO.122.L.1"]], "coverImage": "/flx/show/cover%20page/user%3Ack12math/068ebcd8096b53d6d65454022db1706b-201502261424996254067599-201502261424996376549693.png", "created": "2012-02-24T10:29:52-08:00", "latestRevisionID": 4325976, "modified": "2016-08-25T15:13:06-07:00", "summary": "Apply the definitions of midpoint, segment bisector, and angle bisector.", "coverImageSatelliteUrl": "https://dr282zn36sxxg.cloudfront.net/datastreams/f-d%3A6a98a3ad7d0f7e30f7ac6626d413a3e250ddfed53d0b2d22ea146f08%2BIMAGE%2BIMAGE.1", "encodedID": "MAT.GEO.122.L.1", "standardGrid": {}, "artifactType": "lesson", "url_mobi": null}, "modalities": []};
+	var jsCollectionData = [{"collection_url": "/c/geometry", "collection": {"handle": "geometry", "description": "Geometry is the branch of mathematics that explores the properties, measurements, and relationships between shapes in space. Geometry involves the construction of points, lines, polygons, and three dimensional figures. These can be measured, compared, and transformed, and their properties and relationships can be proven using logical deduction. The resulting theorems are powerful tools you can use to solve many real-world problems.", "isRoot": true, "level": 1, "parentSubjectID": "MAT", "nextDescendantCollection": {"descendantEIDChildrenCount": 0, "handle": "geometry-::-midpoint-formula", "level": 4, "title": "Midpoint Formula", "encodedID": "MAT.GEO.103.03", "creatorID": 3, "identifier": "1.3.3", "type": "Collection", "absoluteHandle": "midpoint-formula"}, "title": "Geometry", "isPublished": true, "canonicalID": "MAT.GEO", "descendantCollection": {"taxonomyComposistionsInfo": [{"updated": "2013-02-04 21:46:19", "nodeType": "subject", "name": "Mathematics", "created": "2012-06-08 22:38:20", "branches": [{"updated": "2015-12-09 10:09:25.435345", "handle": "Geometry", "name": "Geometry", "created": "2012-06-08 22:38:20", "bisac": "MAT012000", "flxID": 6, "concepts": [{"orderedEncodedID": "MATGEO10301000000000000000000000000000000000000000", "status": "published", "updated": "2017-08-04 22:37:38.550910", "handle": "Midpoints-and-Segment-Bisectors", "description": "Use midpoints and bisectors to find the halfway mark between two coordinates.", "created": "2017-08-04 22:37:38.550903", "flxID": 158169, "redirectedReferences": ["MAT.GEO.122"], "encodedID": "MAT.GEO.103.01", "keywords": "", "nodeType": "concept", "descendantEIDChildrenCount": 0, "name": "Midpoints and Segment Bisectors"}], "nodeType": "branch", "shortname": "GEO", "descendantEIDChildrenCount": 0, "previewImageUrl": "http://concepts.ck12.org/preview/geometry.jpg"}], "previewImageUrl": "http://concepts.ck12.org/preview/translations-rotations-and-reflections.jpg", "shortname": "MAT", "descendantEIDChildrenCount": 0}], "descendantEIDChildrenCount": 0, "handle": "geometry-::-midpoints-and-segment-bisectors", "level": 4, "title": "Midpoints and Segment Bisectors", "encodedID": "MAT.GEO.103.01", "creatorID": 3, "identifier": "1.3.2", "type": "Collection", "absoluteHandle": "midpoints-and-segment-bisectors"}, "isCanonical": true, "creatorID": 3, "previousDescendantCollection": {"descendantEIDChildrenCount": 0, "handle": "geometry-::-definition-of-line-segment", "level": 4, "title": "Definition of Line Segment", "encodedID": "MAT.GEO.103", "creatorID": 3, "identifier": "1.3.1", "type": "Collection", "absoluteHandle": "definition-of-line-segment"}, "descendantEIDChildrenCount": 0, "type": "Collection"}}]
     if (jsCollectionData.length > 0)
     {
     	window.js_collection_data = jsCollectionData[0];
@@ -2271,8 +2323,8 @@ function cookieBar(displayValue){
 
 
 <script language="JavaScript" type="text/javascript">
-	var artifactID = '1083742';
-	var artifactRevisionID = '6845944';
+	var artifactID = '7493';
+	var artifactRevisionID = '4325976';
 	var standardBoards = "";
 	require(['main'],function(){
 		require(['flxweb.details.modality.read']);
@@ -2394,8 +2446,8 @@ function cookieBar(displayValue){
 	###############################
 	#  FLXWEB DEBUG INFORMATION
 	###############################
-	flxweb_node_name = flxweb1
-	processing_time  = 0.272888
+	flxweb_node_name = flxweb3
+	processing_time  = 0.265152
 -->
 </body>
 </html>
