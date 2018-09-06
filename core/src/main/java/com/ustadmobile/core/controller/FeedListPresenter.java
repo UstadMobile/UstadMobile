@@ -7,9 +7,10 @@ import com.ustadmobile.core.view.FeedListView;
 import com.ustadmobile.lib.db.entities.FeedEntry;
 
 import java.util.Hashtable;
-import java.util.List;
 
 public class FeedListPresenter extends UstadBaseController<FeedListView>{
+
+    public static long TEST_DEFAULT_PERSON_UID = 1L;
 
     private long personUid = -1L;
 
@@ -29,7 +30,7 @@ public class FeedListPresenter extends UstadBaseController<FeedListView>{
         super.onCreate(savedState);
 
         //Testing: TODO: Remove when User integrated
-        personUid = 1L;
+        personUid = TEST_DEFAULT_PERSON_UID;
 
         feedEntryUmProvider = UmAppDatabase.getInstance(view.getContext()).getFeedEntryDao()
                 .findByPersonUid(personUid);

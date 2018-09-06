@@ -21,13 +21,21 @@ public abstract class FeedEntryDao implements BaseDao<FeedEntry> {
     @UmQuery("SELECT * FROM FeedEntry WHERE feedEntryUid = :uid")
     public abstract FeedEntry findByUid(long uid) ;
 
-    @UmQuery("SELECT * FROM FeedEntry WHERE feedEntryPersonUid = :personUid")
+    @UmQuery("SELECT * FROM FeedEntry WHERE feedEntryPersonUid = :personUid AND feedEntryDone = 0")
     public abstract UmProvider<FeedEntry> findByPersonUid(long personUid);
 
-    @UmQuery("SELECT * FROM FeedEntry WHERE feedEntryPersonUid = :personUid")
+    @UmQuery("SELECT * FROM FeedEntry WHERE feedEntryPersonUid = :personUid AND feedEntryDone = 0")
     public abstract List<FeedEntry> findByPersonUidList(long personUid);
 
     @UmQuery("SELECT * FROM FeedEntry")
     public abstract List<FeedEntry> findAll();
 
+    @UmQuery("SELECT * FROM FeedEntry WHERE link = :link AND feedEntryDone = 0 AND feedEntryPersonUid = :personUid")
+    public abstract FeedEntry findByLink(long personUid, String link);
+
+    @UmQuery("UPDATE FeedEntry SET feedEntryDone = 1 WHERE feedEntryUid = :feedEntryUid")
+    public abstract void updateDoneTrue(long feedEntryUid);
+
+    @UmQuery("UPDATE FeedEntry SET feedEntryDone = 0 WHERE feedEntryUid = :feedEntryUid")
+    public abstract void updateDoneFalse(long feedEntryUid);
 }

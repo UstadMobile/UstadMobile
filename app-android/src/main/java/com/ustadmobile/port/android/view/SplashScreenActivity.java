@@ -56,6 +56,7 @@ import com.ustadmobile.core.db.dao.PersonDao;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMCalendarUtil;
+import com.ustadmobile.core.view.ClassLogDetailView;
 import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.ClazzMember;
 import com.ustadmobile.lib.db.entities.FeedEntry;
@@ -246,21 +247,6 @@ public class SplashScreenActivity extends AppCompatActivity implements DialogInt
                 clazzMemberDao.insertAsync(member, null);
             }
 
-            //Create a ClassLog for today for Class 1
-            ClazzLogDao clazzLogDao = UmAppDatabase.getInstance(getApplicationContext()).getClazzLogDao();
-
-            clazzLogDao.createClazzLogForDate(clazz1.getClazzUid(), currentLogDate, new UmCallback<Long>() {
-                @Override
-                public void onSuccess(Long result) {
-                    System.out.println("Success in creating ClazzLog for class1");
-                }
-
-                @Override
-                public void onFailure(Throwable exception) {
-                    System.out.println(exception);
-                }
-            });
-
             //Create some feeds
             FeedEntryDao feedEntryDao =
                     UmAppDatabase.getInstance(getApplicationContext()).getFeedEntryDao();
@@ -272,11 +258,13 @@ public class SplashScreenActivity extends AppCompatActivity implements DialogInt
             long thisDate = UMCalendarUtil.getDateInMilliPlusDays(0);
             FeedEntry thisFeed = new FeedEntry();
             thisFeed.setDeadline(thisDate);
+            thisFeed.setFeedEntryDone(false);
             thisFeed.setDescription("This is your regular attendance alert.");
             thisFeed.setTitle("Record attendance for Class " + 1);
             thisFeed.setFeedEntryPersonUid(thisPersonUid);
-            thisFeed.setLink("ClassLogDetail?" + ClazzListPresenter.ARG_CLAZZ_UID + "=" + feedClazzUid +
-                    "&" + ClazzLogDetailPresenter.ARG_LOGDATE + "=" + thisDate);
+            thisFeed.setLink(ClassLogDetailView.VIEW_NAME + "?" +
+                    ClazzListPresenter.ARG_CLAZZ_UID + "=" + feedClazzUid + "&" +
+                    ClazzLogDetailPresenter.ARG_LOGDATE + "=" + thisDate);
             thisFeed.setFeedEntryHash(123);
 
             feedEntryDao.insertAsync(thisFeed, new UmCallback<Long>() {
@@ -285,11 +273,13 @@ public class SplashScreenActivity extends AppCompatActivity implements DialogInt
                     long newDate = UMCalendarUtil.getDateInMilliPlusDays(-1);
                     FeedEntry newFeed = new FeedEntry();
                     newFeed.setDeadline(newDate);
+                    newFeed.setFeedEntryDone(false);
                     newFeed.setDescription("This is your regular attendance alert.");
                     newFeed.setTitle("Record attendance for Class " + 1);
                     newFeed.setFeedEntryPersonUid(thisPersonUid);
-                    newFeed.setLink("ClassLogDetail?" + ClazzListPresenter.ARG_CLAZZ_UID + "=" +
-                            feedClazzUid + "&" + ClazzLogDetailPresenter.ARG_LOGDATE + "=" + newDate);
+                    newFeed.setLink(ClassLogDetailView.VIEW_NAME + "?" +
+                            ClazzListPresenter.ARG_CLAZZ_UID + "=" + feedClazzUid + "&" +
+                            ClazzLogDetailPresenter.ARG_LOGDATE + "=" + newDate);
                     newFeed.setFeedEntryHash(456);
                     feedEntryDao.insertAsync(newFeed, null);
                 }

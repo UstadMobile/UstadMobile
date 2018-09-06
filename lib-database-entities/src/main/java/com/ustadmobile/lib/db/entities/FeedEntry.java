@@ -21,6 +21,16 @@ public class FeedEntry implements SyncableEntity{
 
     private long feedEntryHash;
 
+    private boolean feedEntryDone;
+
+    public boolean isFeedEntryDone() {
+        return feedEntryDone;
+    }
+
+    public void setFeedEntryDone(boolean feedEntryDone) {
+        this.feedEntryDone = feedEntryDone;
+    }
+
     public long getFeedEntryUid() {
         return feedEntryUid;
     }

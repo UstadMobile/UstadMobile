@@ -3,6 +3,7 @@ package com.ustadmobile.core.controller;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.core.view.ClassLogDetailView;
 import com.ustadmobile.core.view.ClassLogListView;
 import com.ustadmobile.lib.db.entities.ClazzLog;
@@ -92,7 +93,7 @@ public class ClazzLogListPresenter extends UstadBaseController<ClassLogListView>
         Hashtable args = new Hashtable();
         args.put(ARG_CLAZZ_UID, currentClazzUid);
 
-        args.put(ARG_LOGDATE, System.currentTimeMillis());
+        args.put(ARG_LOGDATE, UMCalendarUtil.getDateInMilliPlusDays(0));
         impl.go(ClassLogDetailView.VIEW_NAME, args, view.getContext());
     }
 
