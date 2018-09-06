@@ -47,8 +47,7 @@ import java.util.Vector;
 public class UstadJSOPF {
     
     private Hashtable mimeExceptions;
-    //defaultMimeTypes.put("","");
-    
+
     static Hashtable defaultMimeTypes;
     public static String DEFAULT_MIMETYPE = "application/octet-stream";
     
@@ -451,7 +450,6 @@ public class UstadJSOPF {
      * @return UstadJSOPFItem representing the cover image
      */
     public UstadJSOPFItem getCoverImage(String mimeType) {
-        //TODO: implement mime type preference here
 
         if(coverImages == null || coverImages.size() == 0)
             return null;

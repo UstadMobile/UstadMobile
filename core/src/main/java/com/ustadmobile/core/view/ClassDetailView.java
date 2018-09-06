@@ -6,8 +6,7 @@ package com.ustadmobile.core.view;
  */
 public interface ClassDetailView extends UstadView {
 
-    public static final String VIEW_NAME = "ClassDetail";
+    String VIEW_NAME = "ClassDetail";
 
-    /** TODO: this **/
 
 }

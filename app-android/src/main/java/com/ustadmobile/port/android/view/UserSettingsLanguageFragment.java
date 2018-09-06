@@ -23,7 +23,6 @@ public class UserSettingsLanguageFragment extends Fragment implements AdapterVie
      *
      * @return A new instance of fragment UserSettingsLanguageFragment.
      */
-    // TODO: Rename and change types and number of parameters
     public static UserSettingsLanguageFragment newInstance() {
         UserSettingsLanguageFragment fragment = new UserSettingsLanguageFragment();
         Bundle args = new Bundle();

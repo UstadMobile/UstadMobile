@@ -25,7 +25,6 @@ public class ClazzStudentListPresenter extends UstadBaseController<ClazzStudentL
     /**
      * Constructor to the ClassStudentsList Presenter.
      * We get the class uid from the arguments passed to it.
-     *(TODO: Check if true)
      *
      * @param context
      * @param arguments
@@ -76,7 +75,6 @@ public class ClazzStudentListPresenter extends UstadBaseController<ClazzStudentL
      * @param clazz The current Clazz that we are working on.
      */
     public void goToAddStudentFragment(Clazz clazz){
-        //TODO: Go To Add new student activity/fragment for that Class
     }
 
     /**
@@ -85,7 +83,6 @@ public class ClazzStudentListPresenter extends UstadBaseController<ClazzStudentL
      * @param order The order flag. 0 to Sort by Name, 1 to Sort by Attendance, 2 to Sort by date
      */
     public void handleChangeSortOrder(int order){
-
         //TODO: Change provider's sort order
     }
 

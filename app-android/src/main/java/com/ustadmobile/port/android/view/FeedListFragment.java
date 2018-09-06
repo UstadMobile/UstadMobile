@@ -9,7 +9,6 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
@@ -23,14 +22,11 @@ import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.FeedListPresenter;
-import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmProvider;
+import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.core.view.FeedListView;
 import com.ustadmobile.lib.db.entities.FeedEntry;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
-
-import java.util.ArrayList;
-import java.util.Calendar;
 
 /**
  * FeedListFragment Android fragment extends UstadBaseFragment
@@ -45,17 +41,6 @@ public class FeedListFragment extends UstadBaseFragment implements FeedListView,
 
     private FeedListPresenter mPresenter;
 
-
-    public long getTodayDateInLong(){
-        Calendar attendanceDate = Calendar.getInstance();
-        attendanceDate.setTimeInMillis(System.currentTimeMillis());
-        attendanceDate.set(Calendar.HOUR_OF_DAY, 0);
-        attendanceDate.set(Calendar.MINUTE, 0);
-        attendanceDate.set(Calendar.SECOND, 0);
-        attendanceDate.set(Calendar.MILLISECOND, 0);
-
-        return attendanceDate.getTimeInMillis();
-    }
     /**
      * The Recycler Adapter for Feed Entries.
      */
@@ -105,8 +90,8 @@ public class FeedListFragment extends UstadBaseFragment implements FeedListView,
             ImageView feedIcon = ((ImageView)holder.itemView
                 .findViewById(R.id.item_feedlist_feed_icon));
             feedText.setText(feedEntry.getTitle());
-            if (getTodayDateInLong() > feedEntry.getDeadline()){
-                //TODO: Apply more complex deadline with scheduling.
+            if (UMCalendarUtil.getDateInMilliPlusDays(0) > feedEntry.getDeadline()){
+                //Apply more complex deadline with scheduling in the future ie Check schedule
                 feedIcon.setColorFilter(ContextCompat.getColor(getContext(), R.color.accent));
                 feedText.setText(feedEntry.getTitle() + " (" + getText(R.string.overdue)+ ")");
             }
@@ -239,7 +224,6 @@ public class FeedListFragment extends UstadBaseFragment implements FeedListView,
 
     /**
      * Updates the title of the toolbar.
-     * TODO: check why its null sometimes
      * @param title
      */
     public void updateTitle(String title){

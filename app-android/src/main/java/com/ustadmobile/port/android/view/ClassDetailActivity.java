@@ -29,7 +29,6 @@ public class ClassDetailActivity extends UstadBaseActivity implements
     private Toolbar toolbar;
     private TabLayout mTabLayout;
 
-
     Long clazzUid;
 
     @Override

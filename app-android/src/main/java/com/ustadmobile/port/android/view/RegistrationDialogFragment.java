@@ -244,7 +244,6 @@ public class RegistrationDialogFragment extends UstadDialogFragment
         autoTextField.setMaxLines(1);
 
 
-        // TODO Auto-generated method stub
 
         Calendar myCalendar = Calendar.getInstance();
         int year = Calendar.getInstance().get(Calendar.YEAR);

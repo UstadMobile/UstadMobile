@@ -17,6 +17,8 @@ import java.util.Map;
 /**
  * The controller/presenter for registration.
  * Created by varuna on 7/28/2017.
+ *
+ * Might not be used/redundant
  */
 public class RegistrationPresenter extends UstadBaseController {
 
@@ -37,7 +39,6 @@ public class RegistrationPresenter extends UstadBaseController {
     public static final int TYPE_SPINNER = 555;
 
     //Hashed user authentication to cache in case they login next time when offline
-    //TODO
     public static final String PREFKEY_AUTHCACHE_PREFIX = "um-authcache-";
 
     private DialogResultListener resultListener;
@@ -51,7 +52,6 @@ public class RegistrationPresenter extends UstadBaseController {
 
     public static List userFields;
 
-    //TODO: Remove. Instead get it from properties
     public void setExtraFields(){
 
         universities = new int[]{
@@ -168,7 +168,6 @@ public class RegistrationPresenter extends UstadBaseController {
     public static String getUserDetail(String username, int field, Object dbContext){
         return "";
 
-//        TODO: Handle user with new db arch
 //        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
 //        String value = impl.getUserDetail(username, field, dbContext);
 //        if(value == null){

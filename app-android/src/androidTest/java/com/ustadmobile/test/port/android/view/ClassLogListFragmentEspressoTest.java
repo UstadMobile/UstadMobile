@@ -243,7 +243,7 @@ public class ClassLogListFragmentEspressoTest {
 
         onView(withId(R.id.fragment_class_log_record_attendance_fab)).perform(click());
 
-        //TODO: implement
+        //TODO: implement when done
         /*
         long todayDate = UMCalendarUtil.getDateInMilliPlusDays(0);
 

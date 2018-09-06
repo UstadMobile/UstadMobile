@@ -28,7 +28,7 @@ public class FeedListPresenter extends UstadBaseController<FeedListView>{
     public void onCreate(Hashtable savedState){
         super.onCreate(savedState);
 
-        //Testing: TODO: Remove
+        //Testing: TODO: Remove when User integrated
         personUid = 1L;
 
         feedEntryUmProvider = UmAppDatabase.getInstance(view.getContext()).getFeedEntryDao()
@@ -37,6 +37,12 @@ public class FeedListPresenter extends UstadBaseController<FeedListView>{
 
     }
 
+    /**
+     * Splits the string query without host name and returns a hashmap of it.
+     *
+     * @param query The string get query without host. eg: clazzuid=22&logdate=123456789
+     * @return  A hashtable all the query
+     */
     public static Hashtable splitQuery(String query) {
         Hashtable query_pairs = new Hashtable();
 
@@ -53,7 +59,6 @@ public class FeedListPresenter extends UstadBaseController<FeedListView>{
      * Takes action on a feed.
      */
     public void handleClickFeedEntry(FeedEntry feedEntry){
-        //TODO: Check this
         String feedLink = feedEntry.getLink();
 
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();

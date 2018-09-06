@@ -7,7 +7,9 @@ import com.ustadmobile.core.db.dao.ClazzLogAttendanceRecordDao;
 import com.ustadmobile.core.db.dao.ClazzLogDao;
 import com.ustadmobile.core.db.dao.ClazzMemberDao;
 import com.ustadmobile.core.impl.UmCallback;
+import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.core.view.ClassLogDetailView;
+import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.ClazzLog;
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord;
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecordWithPerson;
@@ -28,6 +30,8 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
     private UmProvider<ClazzLogAttendanceRecordWithPerson> clazzLogAttendanceRecordUmProvider;
 
     private ClazzLog currentClazzLog;
+
+    public Clazz currentClazz;
 
     /**
      * Constructor. We get the ClazzLog Uid from the arguments
@@ -59,17 +63,6 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
 
     }
 
-    //TODO: replace with UMCalendarUtil.getDateInMilliPLusDays(days)
-    public static long getTodayMillis(){
-        Calendar attendanceDate = Calendar.getInstance();
-        attendanceDate.setTimeInMillis(System.currentTimeMillis());
-        attendanceDate.set(Calendar.HOUR_OF_DAY, 0);
-        attendanceDate.set(Calendar.MINUTE, 0);
-        attendanceDate.set(Calendar.SECOND, 0);
-        attendanceDate.set(Calendar.MILLISECOND, 0);
-        return attendanceDate.getTimeInMillis();
-    }
-
     /**
      * The Presenter's onCreate. This populated the provider and sets it to the View.
      *
@@ -85,24 +78,16 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
 
         //Check for ClassLog
         ClazzLogDao clazzLogDao = UmAppDatabase.getInstance(getContext()).getClazzLogDao();
-
-        //TODO: replace with UMCalendarUtil.getDateInMilliPLusDays(days)
-        Calendar attendanceDate = Calendar.getInstance();
-        attendanceDate.setTimeInMillis(currentLogDate);
-        attendanceDate.set(Calendar.HOUR_OF_DAY, 0);
-        attendanceDate.set(Calendar.MINUTE, 0);
-        attendanceDate.set(Calendar.SECOND, 0);
-        attendanceDate.set(Calendar.MILLISECOND, 0);
-
-        this.currentLogDate = attendanceDate.getTimeInMillis();
+        ClazzDao clazzDao = UmAppDatabase.getInstance(getContext()).getClazzDao();
 
         clazzLogDao.findByClazzIdAndDateAsync(currentClazzUid, currentLogDate, new UmCallback<ClazzLog>() {
             @Override
             public void onSuccess(ClazzLog result) {
 
+                currentClazz = clazzDao.findByUid(currentClazzUid);
+
                 if(result == null){
-                    //Create one anyway if not set for today
-                    //todo: CHECK . Not for today, but for currentLogDate !?
+                    //Create one anyway if not set for today (or any day
                     //clazzLogDao.createClazzLogForDate(currentClazzUid, getTodayMillis(), new UmCallback<Long>() {
                     clazzLogDao.createClazzLogForDate(currentClazzUid, currentLogDate, new UmCallback<Long>() {
                         @Override
@@ -211,7 +196,7 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
      * @param order The order flag. 0 to Sort by Name, 1 to Sort by Attendance, 2 to Sort by date.
      */
     public void handleChangeSortOrder(int order){
-        //TODO: this
+        //TODO: Change provider's sort order
     }
 
     /**

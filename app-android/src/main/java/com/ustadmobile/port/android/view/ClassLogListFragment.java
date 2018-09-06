@@ -19,12 +19,15 @@ import android.widget.TextView;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.ClazzLogListPresenter;
 import com.ustadmobile.core.db.UmProvider;
+import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.core.view.ClassLogListView;
 import com.ustadmobile.lib.db.entities.ClazzLog;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+
+import ru.dimorinny.floatingtextbutton.FloatingTextButton;
 
 import static com.ustadmobile.core.controller.ClazzListPresenter.ARG_CLAZZ_UID;
 
@@ -68,13 +71,10 @@ public class ClassLogListFragment extends UstadBaseFragment implements ClassLogL
         @Override
         public void onBindViewHolder(@NonNull ClazzLogViewHolder holder, int position){
             ClazzLog clazzLog = getItem(position);
-            //TODO: Replace with UMClaendarUtil
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTimeInMillis(clazzLog.getLogDate());
-            SimpleDateFormat format = new SimpleDateFormat("EEEE, dd/MMMM/yyyy");
-            SimpleDateFormat formatShortDay = new SimpleDateFormat("EEE");
-            String prettyDate = format.format(calendar.getTime());
-            String prettyShortDay = formatShortDay.format(calendar.getTime());
+
+            String prettyDate = UMCalendarUtil.getPrettyDateFromLong(clazzLog.getLogDate());
+            String prettyShortDay = UMCalendarUtil.getSimpleDayFromLongDate(clazzLog.getLogDate());
+
             int presentCount = clazzLog.getNumPresent();
             int absentCount = clazzLog.getNumAbsent();
             String clazzLogAttendanceStatus = presentCount + " " +
@@ -111,7 +111,6 @@ public class ClassLogListFragment extends UstadBaseFragment implements ClassLogL
 
     /**
      * Generates a new Fragment for a page fragment
-     * TODO: Add any args if needed
      *
      * @return A new instance of fragment ClassLogListFragment.
      */
@@ -159,6 +158,10 @@ public class ClassLogListFragment extends UstadBaseFragment implements ClassLogL
         mPresenter = new ClazzLogListPresenter(this,
                 UMAndroidUtil.bundleToHashtable(getArguments()), this);
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
+
+        //Record attendance FAB
+        FloatingTextButton fab = rootContainer.findViewById(R.id.fragment_class_log_record_attendance_fab);
+        fab.setOnClickListener(v -> mPresenter.goToNewClazzLogDetailActivity());
 
         //return container
         return rootContainer;

@@ -23,7 +23,6 @@ public class PeopleListFragment extends UstadBaseFragment implements PeopleListV
 
     /**
      * Generates a new Fragment for a page fragment
-     * TODO: Add any args if needed
      *
      * @return A new instance of fragment PeopleListFragment.
      */

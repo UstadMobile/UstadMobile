@@ -20,7 +20,6 @@ public class ComingSoonFragment extends UstadBaseFragment implements View.OnClic
 
     /**
      * Generates a new Fragment for a page fragment
-     * TODO: Add any args if needed
      *
      * @return A new instance of fragment ComingSoonFragment.
      */
@@ -53,7 +52,7 @@ public class ComingSoonFragment extends UstadBaseFragment implements View.OnClic
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        // TODO: Inflate the layout for this fragment
+        //Inflate the layout for this fragment
         rootContainer = inflater.inflate(R.layout.fragment_coming_soon,container, false);
         setHasOptionsMenu(true);
 

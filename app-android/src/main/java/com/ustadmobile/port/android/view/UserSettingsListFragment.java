@@ -30,7 +30,6 @@ public class UserSettingsListFragment extends Fragment implements AdapterView.On
      *
      * @return A new instance of fragment UserSettingsListFragment.
      */
-    // TODO: Rename and change types and number of parameters
     public static UserSettingsListFragment newInstance() {
         UserSettingsListFragment fragment = new UserSettingsListFragment();
         Bundle args = new Bundle();

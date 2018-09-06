@@ -42,6 +42,5 @@ public class PeopleListFragmentEspressoTest {
     }
 
     //Tests go here
-    //TODO: Write tests when ready
 
 }

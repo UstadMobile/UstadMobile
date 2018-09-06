@@ -88,16 +88,13 @@ public class UserSettingsActivity2 extends UstadBaseActivity implements UserSett
         if(view.getId() == R.id.language_section_holder) {
             mController.handleClickLanguage();
         }else if(view==accountSection){
-            //TODO: implement navigation to account settings
             mController.handleClickAccount();
         }else if(view==dataUsageSection){
             mController.handleClickDataSettings();
         }else if(view==logoutSection){
             mController.handleClickLogout();
         }else if(view==actionCaptureImage){
-            //TODO:implement image capture functionality
         }else if(view==actionEditProfile){
-            //TODO: go to edit page
             new WelcomeDialogFragment().show(getSupportFragmentManager(),"");
         }
 

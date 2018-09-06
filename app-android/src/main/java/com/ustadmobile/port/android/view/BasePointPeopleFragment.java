@@ -68,7 +68,7 @@ public class BasePointPeopleFragment extends UstadBaseFragment implements BasePo
         rootContainer = inflater.inflate(R.layout.fragment_base_point_people,container, false);
         setHasOptionsMenu(true);
 
-        // TODO: Specify the mAdapter
+        // Specify the mAdapter
         mPager = (ViewPager) rootContainer.findViewById(R.id.fragment_base_point_people_container);
         mSectionsPagerAdapter = new SectionsPagerAdapter(getChildFragmentManager());
         mPager.setAdapter(mSectionsPagerAdapter);

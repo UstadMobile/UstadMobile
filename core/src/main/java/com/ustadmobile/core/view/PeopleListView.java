@@ -6,8 +6,7 @@ package com.ustadmobile.core.view;
  */
 public interface PeopleListView extends UstadView {
 
-    public static final String VIEW_NAME = "PeopleList";
+    String VIEW_NAME = "PeopleList";
 
-    /** TODO: this **/
 
 }

@@ -71,7 +71,6 @@ public class ClazzLogListPresenter extends UstadBaseController<ClassLogListView>
 
     }
 
-
     /**
      * Method logic to go to the Log Detail activity.
      * @param clazzLog
@@ -86,12 +85,24 @@ public class ClazzLogListPresenter extends UstadBaseController<ClassLogListView>
     }
 
     /**
+     *Method logic that goes to ClazzLogDetail view (take attendance) for the class we're in.
+     */
+    public void goToNewClazzLogDetailActivity(){
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        Hashtable args = new Hashtable();
+        args.put(ARG_CLAZZ_UID, currentClazzUid);
+
+        args.put(ARG_LOGDATE, System.currentTimeMillis());
+        impl.go(ClassLogDetailView.VIEW_NAME, args, view.getContext());
+    }
+
+    /**
      * Method logic for what happens when we change the order of the log list
      *
      * @param order The order flag. 1 - Attendance, 2 - Date
      */
     public void handleChangeSortOrder(int order){
-        //TODO: this
+        //TODO: Change provider's sort order
     }
 
 

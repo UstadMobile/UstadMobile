@@ -28,8 +28,11 @@ import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.ClazzLogDetailPresenter;
+import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmProvider;
+import com.ustadmobile.core.db.dao.ClazzDao;
 import com.ustadmobile.core.view.ClassLogDetailView;
+import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord;
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecordWithPerson;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
@@ -197,7 +200,6 @@ public class ClassLogDetailActivity extends UstadBaseActivity
 
         //Toolbar
         toolbar = findViewById(R.id.class_log_detail_toolbar);
-        toolbar.setTitle("Class"); //TODO Change this
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -215,6 +217,7 @@ public class ClassLogDetailActivity extends UstadBaseActivity
             logDate = getIntent().getLongExtra(ARG_LOGDATE, -1L);
         }
 
+
         mRecyclerView = (RecyclerView) findViewById(R.id.class_log_detail_container_recyclerview);
         mRecyclerLayoutManager = new LinearLayoutManager(getApplicationContext());
         mRecyclerView.setLayoutManager(mRecyclerLayoutManager);
@@ -225,6 +228,14 @@ public class ClassLogDetailActivity extends UstadBaseActivity
         mPresenter = new ClazzLogDetailPresenter(this,
                 UMAndroidUtil.bundleToHashtable(getIntent().getExtras()), this);
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
+
+        //TODO: This never gets thru
+        if(mPresenter.currentClazz != null ){
+            String clazzName = mPresenter.currentClazz.getClazzName();
+            if (clazzName != null && clazzName.length() > 0) {
+                toolbar.setTitle(clazzName);
+            }
+        }
 
         //FAB
         FloatingTextButton fab = findViewById(R.id.class_log_detail__done_fab);
