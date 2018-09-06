@@ -27,6 +27,12 @@ task scrapeContent(type: JavaExec) {
         args  project.getProperties().get("findPhetUrl"), project.getProperties().get("findPhetDir")
     }
 
+    if(project.hasProperty("ck12Url") && project.hasProperty("ck12Dir") && project.hasProperty("ck12type")){
+        main "com.ustadmobile.lib.contentscrapers.ck12.CK12ContentScraper"
+        args  project.getProperties().get("ck12Url"), project.getProperties().get("ck12Dir"), project.getProperties().get("ck12type")
+    }
+
+
 
     outputs.upToDateWhen { false }
 }

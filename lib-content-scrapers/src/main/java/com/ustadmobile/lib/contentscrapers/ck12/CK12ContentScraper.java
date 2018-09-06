@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.ScraperConstants;
+import com.ustadmobile.lib.contentscrapers.edraakK12.EdraakK12ContentScraper;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -30,14 +31,28 @@ import static com.ustadmobile.lib.contentscrapers.ScraperConstants.MATERIAL_CSS;
  * <p>
  * Most content is made up of 3 sections:- Title, Main Content, Detail Content
  * each section has a method to get their html section
+ * Title from div.title
+ * Main Content is from div.modality_content which has an attribute data-loadurl which has a url to load and get the main content from
+ * Detail comes from div.metadataview
  * <p>
  * Read Content:
- * Selenium loads and renders the page with chrome driver and waits until all js and jquery is loaded
- * All 3 sections are available in read content due to selenium load.
+ * All 3 sections are available in read content in its usual format
+ * An html page is generated with these sections to create an index.html page
  * <p>
  * Video Content:
- * Selenium does not get any extra information here
- * title and detail
+ * title and detail are from the 2 methods defined
+ * main content can come from an iframe or the usual modality_content
+ * An html page is generated with these sections to create an index.html page
+ * <p>
+ * Practice Content:
+ * Does not have the 3 usual sections
+ * The content is generated based on the url to the practice course
+ * 1st url to get the practice link
+ * 2nd url to get the test link and its id
+ * 3rd url format to generate each question
+ * A question contains an encrypted answer which can be extracted using script engine class
+ * and crypto js to decrypt it and store the answer back into the question json
+ *
  */
 public class CK12ContentScraper {
 
@@ -45,9 +60,7 @@ public class CK12ContentScraper {
     private final File destinationDirectory;
     private final URL scrapUrl;
     private final File assetDirectory;
-    String ckK12 = "https://www.ck12.org";
 
-    String chromeDriverLocation = "C:\\Users\\suhai\\Documents\\chromedriver_win32\\chromedriver.exe";
 
     public final String postfix = "?hints=true&evalData=true";
     public final String POLICIES = "?policies=[{\"name\":\"shuffle\",\"value\":false},{\"name\":\"shuffle_question_options\",\"value\":false},{\"name\":\"max_questions\",\"value\":15},{\"name\":\"adaptive\",\"value\":false}]";
@@ -69,6 +82,34 @@ public class CK12ContentScraper {
         assetDirectory = new File(destDir, "asset");
         assetDirectory.mkdirs();
     }
+
+    public static void main(String[] args) {
+        if (args.length != 3) {
+            System.err.println("Usage: <ck12 json url> <file destination><type READ or PRACTICE or VIDEO");
+            System.exit(1);
+        }
+
+        System.out.println(args[0]);
+        System.out.println(args[1]);
+        System.out.println(args[2]);
+        try {
+            CK12ContentScraper scraper = new CK12ContentScraper(args[0], new File(args[1]));
+            String type = args[2];
+            if ("READ".equalsIgnoreCase(type)) {
+                scraper.scrapeReadContent();
+            } else if ("PRACTICE".equalsIgnoreCase(type)) {
+                scraper.scrapePracticeContent();
+            } else if ("VIDEO".equalsIgnoreCase(type)) {
+                scraper.scrapeVideoContent();
+            }
+
+        } catch (IOException e) {
+            System.err.println("Exception running scrapeContent");
+            e.printStackTrace();
+        }
+
+    }
+
 
     public void scrapeVideoContent() throws IOException {
 
@@ -388,7 +429,6 @@ public class CK12ContentScraper {
 
         return doc.body().html();
     }
-
 
 
 }
