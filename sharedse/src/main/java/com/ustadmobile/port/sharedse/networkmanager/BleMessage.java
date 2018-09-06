@@ -16,14 +16,35 @@ import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.WIF
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.WIFI_GROUP_CREATION_RESPONSE;
 
 /**
+ * Class which is actual presentation of message that exchanged between peer devices.
+ *
+ * <p>
+ * Use {@link BleMessage#BleMessage(byte, byte[])} to send message
+ * from one peer device to another
+ * <p>
+ * Use {@link BleMessage#BleMessage(byte[][])} to receive message
+ * sent by peer device.
+ * <p>
+ * Use {@link BleMessage#getPackets(int)} to get the packets to be sent
+ * to the peer device.
+ * <p>
  * Bluetooth Low Energy can use a packet size between 20 and 512 bytes. BleMessage will packetize
- * a payload accordingly, and use Gzip compression if that reduces the size. Messages are delivered
- * as follows:
+ * a payload accordingly, and use Gzip compression if that reduces the size.
+ * <p>
+ * <b>Packet Structure</b>
  * <p>
  * Byte 0: Request code (8 bit integer value between 0 and 255)
- * Byte 1: Maximum Transfer Unit
- * Byte 2-6: payload length
+ * Byte 1: Maximum Transfer Unit (MTU)
+ * Byte 2-6: Payload length
  * Byte 7-onwards: Payload
+ *<p>
+ * Use {@link BleMessage#getPayload()} to get the actual payload sent from the peer device
+ * <p>
+ * Use {@link BleMessage#getLength()} to get the payload length
+ * <p>
+ * Use {@link BleMessage#getRequestType()} to get request type
+ * <p>
+ * Use {@link BleMessage#getMtu()} to get the MTU used to send th packets
  *
  * @author kileha3
  */
@@ -185,7 +206,6 @@ public class BleMessage {
         }
     }
 
-
     /**
      * Internal method for reconstructing the payload from packets.
      * @param packets Payload packets to be depacketized
@@ -225,7 +245,6 @@ public class BleMessage {
         return length;
     }
 
-
     /**
      * Get Maximum Transfer Unit from message packets
      * @return MTU value
@@ -233,6 +252,7 @@ public class BleMessage {
     public int getMtu(){
         return mtu;
     }
+
     /**
      * Called when packet is received from the other peer for assembling
      * @param packets packet received from the other peer
@@ -254,7 +274,8 @@ public class BleMessage {
                 e.printStackTrace();
             }
 
-            byte [] receivedPayload = ByteBuffer.wrap(Arrays.copyOfRange(outputStream.toByteArray(), 6,
+            byte [] receivedPayload = ByteBuffer.wrap(
+                    Arrays.copyOfRange(outputStream.toByteArray(), 6,
                     outputStream.toByteArray().length)).array();
 
             if(receivedPayload.length == length){

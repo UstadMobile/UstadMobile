@@ -47,7 +47,8 @@ public class BluetoothServerAndroid extends BluetoothServer implements Runnable{
     @Override
     public void start() {
         if(serverAcceptThread == null) {
-            UstadMobileSystemImpl.l(UMLog.INFO, 381, "BluetoothSereverAndroid: start");
+            UstadMobileSystemImpl.l(UMLog.INFO, 381,
+                    "BluetoothSereverAndroid: start");
             running = true;
             serverAcceptThread = new Thread(this);
             serverAcceptThread.start();
@@ -56,13 +57,13 @@ public class BluetoothServerAndroid extends BluetoothServer implements Runnable{
 
     /**
      * Method which listen for the incoming connection
-     * @exception IOException
      */
     public void run() {
         try {
             mServerSocket=mBluetoothAdapter.listenUsingInsecureRfcommWithServiceRecord(
                     BluetoothServer.SERVICE_NAME, BluetoothServer.SERVICE_UUID);
-            UstadMobileSystemImpl.l(UMLog.INFO, 344, "BluetoothSereverAndroid listening : service name: " +
+            UstadMobileSystemImpl.l(UMLog.INFO, 344,
+                    "BluetoothSereverAndroid listening : service name: " +
                 BluetoothServer.SERVICE_NAME + " on UUID : " + BluetoothServer.SERVICE_UUID);
 
             while(running) {
@@ -75,8 +76,10 @@ public class BluetoothServerAndroid extends BluetoothServer implements Runnable{
                         try{
                             out = clientSocket.getOutputStream();
                             in = clientSocket.getInputStream();
-                            handleNodeConnected(clientSocket.getRemoteDevice().getAddress(), in, out);
-                            Log.d(TAG,"Connected to "+clientSocket.getRemoteDevice().getName());
+                            handleNodeConnected(clientSocket.getRemoteDevice().getAddress(),
+                                    in, out);
+                            Log.d(TAG,"Connected to "
+                                    +clientSocket.getRemoteDevice().getName());
                         } catch (IOException e) {
                             UstadMobileSystemImpl.l(UMLog.ERROR, 668,
                                     "BluetoothServeRAndroid: IOException", e);
@@ -96,13 +99,12 @@ public class BluetoothServerAndroid extends BluetoothServer implements Runnable{
             UstadMobileSystemImpl.l(UMLog.INFO, 380,
                     "BluetoothServerAndroid: finished listening running=false");
         } catch (IOException e) {
-            UstadMobileSystemImpl.l(UMLog.ERROR, 76, "Exception running bluetooth server", e);
+            UstadMobileSystemImpl.l(UMLog.ERROR, 76,
+                    "Exception running bluetooth server", e);
         }
     }
 
-    /**
-     * @exception IOException
-     */
+
     @Override
     public void stop() {
         if(serverAcceptThread != null) {

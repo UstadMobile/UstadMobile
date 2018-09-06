@@ -11,11 +11,9 @@ import com.ustadmobile.lib.db.entities.NetworkNode;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.UUID;
@@ -82,15 +80,15 @@ public abstract class NetworkManagerBle {
      */
     public static final int MAXIMUM_MTU_SIZE = 512;
 
-
+    /**
+     * Wifi direct change current status
+     */
     protected int wifiDirectGroupChangeStatus = 0;
-
 
     /**
      * Bluetooth Low Energy service UUID for our app
      */
     public static final UUID USTADMOBILE_BLE_SERVICE_UUID = UUID.fromString("7d2ea28a-f7bd-485a-bd9d-92ad6ecfe93e");
-
 
     private final Object knownNodesLock = new Object();
 
@@ -107,11 +105,13 @@ public abstract class NetworkManagerBle {
      */
     protected Vector<BleEntryStatusTask> entryStatusTasks = new Vector<>();
 
+    /**
+     * Lis of all objects that will be listening for the Wifi direct group change
+     */
     protected Vector<WiFiDirectGroupListenerBle> wiFiDirectGroupListeners = new Vector<>();
 
     /**
-     * Do the main initialization of the NetworkManager : set the mContext
-     *
+     * Do the main initialization of the NetworkManagerBle
      * @param context The mContext to use for the network manager
      */
     public synchronized void init(Object context){
@@ -119,7 +119,6 @@ public abstract class NetworkManagerBle {
             this.mContext = context;
         }
     }
-
 
     /**
      * Check if WiFi is enabled / disabled on the device
@@ -133,7 +132,6 @@ public abstract class NetworkManagerBle {
      * @return True is capable otherwise false
      */
     public abstract boolean isBleCapable();
-
 
     /**
      * Check if bluetooth is enabled on the device
@@ -170,10 +168,8 @@ public abstract class NetworkManagerBle {
      */
     public abstract void stopScanning();
 
-
     /**
      * This should be called by the platform implementation when BLE discovers a nearby device
-     *
      * @param node The nearby device discovered
      */
     protected void handleNodeDiscovered(NetworkNode node) {
@@ -194,7 +190,8 @@ public abstract class NetworkManagerBle {
                                     node.setNetworkNodeLastUpdated(updateTime);
                                     networkNodeDao.insert(node);
                                     UstadMobileSystemImpl.l(UMLog.DEBUG,694,
-                                            "Node added to the db and task created",null);
+                                            "Node added to the db and task created",
+                                            null);
                                 }else{
                                     UstadMobileSystemImpl.l(UMLog.DEBUG,694,
                                             "Task couldn't be created, monitoring stopped",
@@ -202,7 +199,8 @@ public abstract class NetworkManagerBle {
                                 }
                             }else{
                                 UstadMobileSystemImpl.l(UMLog.DEBUG,694,
-                                        "Node exists: was updated successfully",null);
+                                        "Node exists: was updated successfully",
+                                        null);
                             }
                         }
 
@@ -232,13 +230,12 @@ public abstract class NetworkManagerBle {
      * Create a new WiFi direct group on this device. A WiFi direct group
      * will create a new SSID and passphrase other devices can use to connect in "legacy" mode.
      *
-     * The process is asynchronous and the {@link WiFiDirectGroupListenerBle} should be used to listen for
-     * group creation.
+     * The process is asynchronous and the {@link WiFiDirectGroupListenerBle} should be used to
+     * listen for group creation.
      *
      * If a WiFi direct group is already under creation this method has no effect.
      */
     public abstract void createWifiDirectGroup();
-
 
     /**
      * Get current active WiFi Direct group (if any)
@@ -347,7 +344,6 @@ public abstract class NetworkManagerBle {
         isStopMonitoring = availabilityMonitoringRequests.size() == 0;
     }
 
-
     /**
      * Get all unique entry UUID's to be monitored
      * @return Set of all unique UUID's
@@ -360,7 +356,11 @@ public abstract class NetworkManagerBle {
         return uidsToBeMonitoredSet;
     }
 
-
+    /**
+     * Get all peer network nodes that we know about
+     * @param networkNodes Known NetworkNode
+     * @return List of all known nodes
+     */
     protected List<Integer> getAllKnownNetworkNodeIds(List<NetworkNode> networkNodes){
         List<Integer> nodeIdList = new ArrayList<>();
         for(NetworkNode networkNode: networkNodes){
@@ -387,7 +387,6 @@ public abstract class NetworkManagerBle {
      * @see BleEntryStatusTask
      */
     public abstract BleEntryStatusTask makeEntryStatusTask(Object context,List<Long> entryUidsToCheck, NetworkNode peerToCheck);
-
 
     /**
      * Clean up the network manager for shutdown

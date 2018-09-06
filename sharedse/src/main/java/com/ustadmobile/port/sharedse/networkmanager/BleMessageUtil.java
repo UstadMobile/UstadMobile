@@ -6,8 +6,6 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * <h1>BleMessageUtil</h1>
- *
  * Util class for {{@link BleMessage}}, it converts the entry UUID from Long to Bytes and vice versa.
  */
 public class BleMessageUtil {

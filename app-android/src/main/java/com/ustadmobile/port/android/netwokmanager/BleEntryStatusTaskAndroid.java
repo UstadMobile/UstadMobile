@@ -85,7 +85,8 @@ public class    BleEntryStatusTaskAndroid extends BleEntryStatusTask {
                    .getRemoteDevice(peerToCheck.getBluetoothMacAddress());
            destinationPeer.connectGatt(context,false,mCallback);
        }catch (IllegalArgumentException e){
-           UstadMobileSystemImpl.l(UMLog.ERROR,695, "Wrong address format provided",e);
+           UstadMobileSystemImpl.l(UMLog.ERROR,695,
+                   "Wrong address format provided",e);
        }
     }
 

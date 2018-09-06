@@ -12,7 +12,6 @@ import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.port.sharedse.networkmanager.BleGattServer;
 import com.ustadmobile.port.sharedse.networkmanager.BleMessage;
-import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle;
 
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.DEFAULT_MTU_SIZE;
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.USTADMOBILE_BLE_SERVICE_UUID;
@@ -55,12 +54,16 @@ public class BleGattServerAndroid extends BleGattServer{
                                                 BluetoothGattCharacteristic characteristic) {
             super.onCharacteristicReadRequest(device, requestId, offset, characteristic);
 
-            boolean needResponse = characteristic.getProperties() == BluetoothGattCharacteristic.PROPERTY_WRITE;
+            boolean needResponse = characteristic.getProperties() ==
+                    BluetoothGattCharacteristic.PROPERTY_WRITE;
             if(needResponse){
-                //Reject all direct characteristics read from unknown source (one of our characteristics has NO_RESPONSE set).
-                gattServer.sendResponse(device, requestId, BluetoothGatt.GATT_FAILURE, 0, characteristic.getValue());
+               /* Reject all direct characteristics read from unknown source
+                (one of our characteristics has NO_RESPONSE set).*/
+                gattServer.sendResponse(device, requestId, BluetoothGatt.GATT_FAILURE, 0,
+                        characteristic.getValue());
             }else{
-                gattServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, 0, characteristic.getValue());
+                gattServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, 0,
+                        characteristic.getValue());
 
             }
         }
@@ -69,13 +72,17 @@ public class BleGattServerAndroid extends BleGattServer{
          * Start receiving message packets sent from peer device
          */
         @Override
-        public void onCharacteristicWriteRequest(BluetoothDevice device, int requestId, BluetoothGattCharacteristic characteristic,
-                                                 boolean preparedWrite, boolean responseNeeded, int offset, byte[] value) {
-            super.onCharacteristicWriteRequest(device, requestId, characteristic, preparedWrite, responseNeeded, offset, value);
+        public void onCharacteristicWriteRequest(BluetoothDevice device, int requestId,
+                                                 BluetoothGattCharacteristic characteristic,
+                                                 boolean preparedWrite, boolean responseNeeded,
+                                                 int offset, byte[] value) {
+            super.onCharacteristicWriteRequest(device, requestId, characteristic, preparedWrite,
+                    responseNeeded, offset, value);
 
             if (USTADMOBILE_BLE_SERVICE_UUID.equals(characteristic.getUuid())) {
                 //Grant permission to the peer device to write on this characteristics
-                gattServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, 0, null);
+                gattServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, 0,
+                        null);
                 //start receiving packets from the client device
                 boolean isPackedReceived = receivedMessage.onPackageReceived(value);
                 UstadMobileSystemImpl.l(UMLog.DEBUG,691,
@@ -87,7 +94,8 @@ public class BleGattServerAndroid extends BleGattServer{
                     UstadMobileSystemImpl.l(UMLog.DEBUG,691,
                             "Prepare response to send back");
                     //Our service doesn't require confirmation, if it does then reject sending packets
-                    boolean requireConfirmation = (characteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_INDICATE)
+                    boolean requireConfirmation = (characteristic.getProperties() &
+                            BluetoothGattCharacteristic.PROPERTY_INDICATE)
                             == BluetoothGattCharacteristic.PROPERTY_INDICATE;
                     if(!requireConfirmation){
 

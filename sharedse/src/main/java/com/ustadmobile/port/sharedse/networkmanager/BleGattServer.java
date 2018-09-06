@@ -17,7 +17,16 @@ import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.WIF
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.WIFI_GROUP_CREATION_RESPONSE;
 
 /**
- * This is an abstract class which is used to implement platform specific BleGattServer
+ * This is an abstract class which is used to implement platform specific BleGattServer.
+ * It is responsible for processing the message received from peer devices and return
+ * the response to the respective peer device.
+ *
+ * <p>
+ * <b>Note: Operation Flow</b>
+ * When server device receives a message, it calls {@link BleGattServer#handleRequest}
+ * and handle it according to the request type. If the Request type will be about
+ * checking entry statuses, it will check the status from the database otherwise
+ * it will be for Wifi direct group creation.
  *
  * @author kileha3
  */
@@ -37,12 +46,19 @@ public abstract class BleGattServer implements WiFiDirectGroupListenerBle{
         this.context = context;
     }
 
-
+    /**
+     * Set NetworkManagerBle instance
+     * @param networkManager Instance of NetworkManagerBle
+     */
     public void setNetworkManager(NetworkManagerBle networkManager) {
         this.networkManager = networkManager;
     }
 
+    /**
+     * Default constructor used by Mockito when spying this class
+     */
     public BleGattServer(){}
+
     /**
      * Handle request from peer device
      * @param requestReceived Message received from the peer device
@@ -59,7 +75,8 @@ public abstract class BleGattServer implements WiFiDirectGroupListenerBle{
                 List<Long> entryStatusResponse = new ArrayList<>();
                 for(long entryUuid: bleMessageBytesToLong(requestReceived.getPayload())){
                     ContentEntry contentEntry = contentEntryDao.findByEntryId(entryUuid);
-                    entryStatusResponse.add(contentEntry == null ? 0L: contentEntry.getLastUpdateTime());
+                    entryStatusResponse.add(contentEntry == null ?
+                            0L: contentEntry.getLastUpdateTime());
                 }
                 return new BleMessage(ENTRY_STATUS_RESPONSE,
                         bleMessageLongToBytes(entryStatusResponse));

@@ -62,6 +62,7 @@ public class BleGattServerTest {
         gattServer = spy(BleGattServer.class);
         wiFiDirectGroupBle = new WiFiDirectGroupBle("NetworkSsId","@@@1234");
         gattServer.setNetworkManager(mockedNetworkManager);
+
         long currentTimeStamp = Calendar.getInstance().getTimeInMillis();
         for(int i = 0 ; i < entries.size(); i++){
             long entryId = entries.get(i);
@@ -114,7 +115,7 @@ public class BleGattServerTest {
         assertEquals("Should return the right response",
                 WIFI_GROUP_CREATION_RESPONSE,responseMessage.getRequestType());
 
-        assertTrue("Returned the right group information",
+        assertTrue("Returned the right Wifi direct group information",
                 wiFiDirectGroupBle.getPassphrase().equals(groupBle.getPassphrase()) &&
                         wiFiDirectGroupBle.getSsid().equals(groupBle.getSsid()));
 
@@ -123,8 +124,8 @@ public class BleGattServerTest {
     @Test
     public void givenWifiDirectGroupUnderCreation_whenWifiDirectGroupRequested_thenShouldWaitAndProvideGroupDetails() {
         doAnswer(invocation -> {
-            if(mockedNetworkManager.getWifiDirectGroupChangeStatus()
-                    == WIFI_DIRECT_GROUP_UNDER_CREATION_STATUS){
+            if(mockedNetworkManager.getWifiDirectGroupChangeStatus() ==
+                    WIFI_DIRECT_GROUP_UNDER_CREATION_STATUS){
                 synchronized (wifiCreationLock){
                     wifiCreationLock.wait(testCaseTimeOut);
                     gattServer.groupCreated(wiFiDirectGroupBle,null);
@@ -155,8 +156,7 @@ public class BleGattServerTest {
     public void givenWiFiDirectGroupExists_whenWifiDirectGroupRequested_thenShouldProvideGroupDetails(){
 
         doAnswer(invocation -> {
-            if(mockedNetworkManager.getWifiDirectGroupChangeStatus()
-                    == WIFI_DIRECT_GROUP_ACTIVE_STATUS){
+            if(mockedNetworkManager.getWifiDirectGroupChangeStatus() == WIFI_DIRECT_GROUP_ACTIVE_STATUS){
                 gattServer.groupCreated(wiFiDirectGroupBle,null);
             }
             return null;
@@ -190,8 +190,9 @@ public class BleGattServerTest {
             return null;
         }).when(mockedNetworkManager).createWifiDirectGroup();
 
-        BleMessage messageToSend = new BleMessage(WIFI_GROUP_REQUEST, bleMessageLongToBytes(entries));
         mockedNetworkManager.removeWifiDirectGroup();
+
+        BleMessage messageToSend = new BleMessage(WIFI_GROUP_REQUEST, bleMessageLongToBytes(entries));
         BleMessage responseMessage = gattServer.handleRequest(messageToSend);
         String [] groupInfo = new String(responseMessage.getPayload()).split(WIFI_GROUP_INFO_SEPARATOR);
         WiFiDirectGroupBle groupBle = new WiFiDirectGroupBle(groupInfo[0],groupInfo[1]);
@@ -224,7 +225,8 @@ public class BleGattServerTest {
             }
         }
 
-        assertTrue("All requested are available",entries.size()==availabilityCounter);
+        assertTrue("All requested entry uuids status are available",
+                entries.size()==availabilityCounter);
 
     }
 
@@ -242,7 +244,8 @@ public class BleGattServerTest {
             }
         }
 
-        assertTrue("All requested are available",availabilityCounter == 0);
+        assertTrue("All requested entry uuids status are not available",
+                availabilityCounter == 0);
     }
 
 }

@@ -44,6 +44,16 @@ public abstract class BleEntryStatusTask implements Runnable,BleMessageResponseL
         this.entryUidsToCheck = entryUidsToCheck;
     }
 
+    protected BleEntryStatusTask(){}
+
+    protected void setContext(Object context){
+        this.context = context;
+    }
+
+    protected void setEntryUidsToCheck(List<Long> entryUidsToCheck){
+        this.entryUidsToCheck = entryUidsToCheck;
+    }
+
     /**
      * Handle response from the entry status task
      * @param sourceDeviceAddress Server device bluetooth MAC address

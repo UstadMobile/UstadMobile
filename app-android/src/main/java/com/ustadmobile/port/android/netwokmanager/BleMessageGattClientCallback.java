@@ -131,7 +131,8 @@ public class BleMessageGattClientCallback extends  BluetoothGattCallback{
         super.onServicesDiscovered(gatt, status);
 
         List<BluetoothGattService> serviceList = gatt.getServices();
-        BluetoothGattCharacteristic characteristic = serviceList.get(0).getCharacteristics().get(0);
+        BluetoothGattCharacteristic characteristic = serviceList.get(0)
+                .getCharacteristics().get(0);
         if(characteristic.getUuid().equals(USTADMOBILE_BLE_SERVICE_UUID)){
             characteristic.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT);
             gatt.setCharacteristicNotification(characteristic, true);
@@ -143,7 +144,8 @@ public class BleMessageGattClientCallback extends  BluetoothGattCallback{
      * to write on the characteristic
      */
     @Override
-    public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
+    public void onCharacteristicWrite(BluetoothGatt gatt,
+                                      BluetoothGattCharacteristic characteristic, int status) {
         super.onCharacteristicWrite(gatt, characteristic, status);
         byte[][] packets = messageToSend.getPackets(mtu);
         if (status == BluetoothGatt.GATT_SUCCESS) {
@@ -161,7 +163,8 @@ public class BleMessageGattClientCallback extends  BluetoothGattCallback{
      * Read modified valued from the characteristics when changed from GATT server's end.
      */
     @Override
-    public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
+    public void onCharacteristicRead(BluetoothGatt gatt,
+                                     BluetoothGattCharacteristic characteristic, int status) {
         super.onCharacteristicRead(gatt, characteristic, status);
 
         readCharacteristics(gatt.getDevice().getAddress(),characteristic);
@@ -171,7 +174,8 @@ public class BleMessageGattClientCallback extends  BluetoothGattCallback{
      * Receive notification when characteristics value has been changed from GATT server's side.
      */
     @Override
-    public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
+    public void onCharacteristicChanged(BluetoothGatt gatt,
+                                        BluetoothGattCharacteristic characteristic) {
         super.onCharacteristicChanged(gatt, characteristic);
         readCharacteristics(gatt.getDevice().getAddress(),characteristic);
     }
@@ -181,7 +185,8 @@ public class BleMessageGattClientCallback extends  BluetoothGattCallback{
      * @param sourceDeviceAddress Peer device bluetooth MAC address from which is reading from.
      * @param characteristic Modified service characteristic to read that value from
      */
-    private void readCharacteristics(String sourceDeviceAddress,BluetoothGattCharacteristic characteristic){
+    private void readCharacteristics(String sourceDeviceAddress,
+                                     BluetoothGattCharacteristic characteristic){
         boolean isReceived = receivedMessage.onPackageReceived(characteristic.getValue());
         if(isReceived){
             responseListener.onResponseReceived(sourceDeviceAddress,receivedMessage);
