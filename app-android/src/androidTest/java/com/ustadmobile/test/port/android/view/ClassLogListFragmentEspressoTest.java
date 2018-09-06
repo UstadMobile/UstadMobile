@@ -22,9 +22,8 @@ import com.ustadmobile.core.controller.ClazzLogDetailPresenter;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.lib.db.entities.Clazz;
-import com.ustadmobile.port.android.view.ClassDetailActivity;
-import com.ustadmobile.port.android.view.ClassLogDetailActivity;
-import com.ustadmobile.test.port.android.testutil.CustomMatcherFilters;
+import com.ustadmobile.port.android.view.ClazzDetailActivity;
+import com.ustadmobile.port.android.view.ClazzLogDetailActivity;
 import com.ustadmobile.test.port.android.testutil.UmDbTestUtil;
 
 import java.util.Hashtable;
@@ -49,11 +48,9 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.core.AllOf.allOf;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
 
-import com.ustadmobile.test.port.android.view.ClazzLogDetailActivityActivityEspressoTest.*;
-
 
 /**
- * ClassLogListFragment's Espresso UI Test for Android
+ * ClazzLogListFragment's Espresso UI Test for Android
  */
 @RunWith(AndroidJUnit4.class)
 public class ClassLogListFragmentEspressoTest {
@@ -133,8 +130,8 @@ public class ClassLogListFragmentEspressoTest {
      * This sets the activity that we want floating around
      */
     @Rule
-    public IntentsTestRule<ClassDetailActivity> mActivityRule =
-            new IntentsTestRule<>(ClassDetailActivity.class, false, false);
+    public IntentsTestRule<ClazzDetailActivity> mActivityRule =
+            new IntentsTestRule<>(ClazzDetailActivity.class, false, false);
 
     @Before
     public void beforeTest() {
@@ -209,7 +206,7 @@ public class ClassLogListFragmentEspressoTest {
         Assert that un-taken attendance item is clickable to open ClassAttendanceActivity
         for that item
          */
-        intended(allOf(hasComponent(ClassLogDetailActivity.class.getCanonicalName())
+        intended(allOf(hasComponent(ClazzLogDetailActivity.class.getCanonicalName())
                 , hasExtras(allOf( hasEntry(equalTo(ClazzListPresenter.ARG_CLAZZ_UID),
                         equalTo(testClazz.getClazzUid())),
                         hasEntry(equalTo(ClazzLogDetailPresenter.ARG_LOGDATE),
@@ -248,7 +245,7 @@ public class ClassLogListFragmentEspressoTest {
         long todayDate = UMCalendarUtil.getDateInMilliPlusDays(0);
 
         //Assert Class attendance activity opens up and fills students per class details DAO.
-        intended(allOf(hasComponent(ClassLogDetailActivity.class.getCanonicalName())
+        intended(allOf(hasComponent(ClazzLogDetailActivity.class.getCanonicalName())
                 , hasExtras(allOf( hasEntry(equalTo(ClazzListPresenter.ARG_CLAZZ_UID),
                         equalTo(testClazz.getClazzUid())),
                         hasEntry(equalTo(ClazzLogDetailPresenter.ARG_LOGDATE),

@@ -5,7 +5,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,15 +19,8 @@ public class BasePointPeopleFragment extends UstadBaseFragment implements BasePo
         View.OnClickListener, View.OnLongClickListener{
 
     View rootContainer;
-    //RecyclerView
-    private RecyclerView mRecyclerView;
-    private RecyclerView.LayoutManager mRecyclerLayoutManager;
-    private RecyclerView.Adapter mAdapter;
     private ViewPager mPager;
     private SectionsPagerAdapter mSectionsPagerAdapter;
-
-    //Swipe-refresh
-    //private SwipeRefreshLayout mSwipeRefreshLayout;
 
     /**
      * Generates a new Fragment for a page fragment
@@ -65,7 +57,8 @@ public class BasePointPeopleFragment extends UstadBaseFragment implements BasePo
                              Bundle savedInstanceState) {
 
         // Inflate the layout for this fragment
-        rootContainer = inflater.inflate(R.layout.fragment_base_point_people,container, false);
+        rootContainer = inflater.inflate(R.layout.fragment_base_point_people,container,
+                false);
         setHasOptionsMenu(true);
 
         // Specify the mAdapter
@@ -73,7 +66,6 @@ public class BasePointPeopleFragment extends UstadBaseFragment implements BasePo
         mSectionsPagerAdapter = new SectionsPagerAdapter(getChildFragmentManager());
         mPager.setAdapter(mSectionsPagerAdapter);
 
-        //return container
         return rootContainer;
     }
 
@@ -81,12 +73,7 @@ public class BasePointPeopleFragment extends UstadBaseFragment implements BasePo
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         // Setup any handles to view objects here
-
     }
-
-    /**
-     * View Listeners
-     */
 
     @Override
     public void onClick(View v) {
@@ -99,12 +86,14 @@ public class BasePointPeopleFragment extends UstadBaseFragment implements BasePo
     }
 
 
+    //Tab Section Pager Adapter
     private class SectionsPagerAdapter extends FragmentPagerAdapter {
 
         public SectionsPagerAdapter(FragmentManager fm) {
             super(fm);
         }
 
+        //Returns fragments for the tabs - ClazzList and PeopleList
         @Override
         public Fragment getItem(int position) {
             switch (position) {
@@ -113,14 +102,15 @@ public class BasePointPeopleFragment extends UstadBaseFragment implements BasePo
                 default:
                     return PeopleListFragment.newInstance();
             }
-            //return null;
         }
 
+        //Returns tab size
         @Override
         public int getCount() {
             return 2;
         }
 
+        //Returns tab title
         @Override
         public CharSequence getPageTitle(int position) {
 
@@ -134,7 +124,6 @@ public class BasePointPeopleFragment extends UstadBaseFragment implements BasePo
                             (String) getContext().getResources().getText(R.string.people);
                     return people_title.toUpperCase();
             }
-
 
         }
     }

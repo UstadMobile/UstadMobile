@@ -24,27 +24,25 @@ import com.ustadmobile.core.view.ClassLogListView;
 import com.ustadmobile.lib.db.entities.ClazzLog;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-
 import ru.dimorinny.floatingtextbutton.FloatingTextButton;
 
 import static com.ustadmobile.core.controller.ClazzListPresenter.ARG_CLAZZ_UID;
 
 /**
- * ClassLogListFragment Android fragment extends UstadBaseFragment
+ * ClazzLogListFragment Android fragment extends UstadBaseFragment
  */
-public class ClassLogListFragment extends UstadBaseFragment implements ClassLogListView,
+public class ClazzLogListFragment extends UstadBaseFragment implements ClassLogListView,
         View.OnClickListener, View.OnLongClickListener {
 
     View rootContainer;
-    //RecyclerView
     private RecyclerView mRecyclerView;
     private RecyclerView.LayoutManager mRecyclerLayoutManager;
 
     private ClazzLogListPresenter mPresenter;
 
-
+    /**
+     * The ClazzLogList's recycler adapter.
+     */
     protected class ClazzLogListRecyclerAdapter extends
             PagedListAdapter<ClazzLog, ClazzLogListRecyclerAdapter.ClazzLogViewHolder>{
 
@@ -54,7 +52,8 @@ public class ClassLogListFragment extends UstadBaseFragment implements ClassLogL
             }
         }
 
-        protected ClazzLogListRecyclerAdapter(@NonNull DiffUtil.ItemCallback<ClazzLog> diffCallback){
+        protected ClazzLogListRecyclerAdapter(@NonNull DiffUtil.ItemCallback<ClazzLog>
+                                                      diffCallback){
             super(diffCallback);
         }
 
@@ -68,6 +67,15 @@ public class ClassLogListFragment extends UstadBaseFragment implements ClassLogL
 
         }
 
+        /**
+         * This method sets the elements after it has been obtained for that item'th position.
+         *
+         * For every item part of the recycler adapter, this will be called and every item in it
+         * will be set as per this function.
+         *
+         * @param holder
+         * @param position
+         */
         @Override
         public void onBindViewHolder(@NonNull ClazzLogViewHolder holder, int position){
             ClazzLog clazzLog = getItem(position);
@@ -95,6 +103,7 @@ public class ClassLogListFragment extends UstadBaseFragment implements ClassLogL
         }
     }
 
+    // ClassLogList's DIFF callback
     public static final DiffUtil.ItemCallback<ClazzLog> DIFF_CALLBACK =
             new DiffUtil.ItemCallback<ClazzLog>(){
 
@@ -112,10 +121,10 @@ public class ClassLogListFragment extends UstadBaseFragment implements ClassLogL
     /**
      * Generates a new Fragment for a page fragment
      *
-     * @return A new instance of fragment ClassLogListFragment.
+     * @return A new instance of fragment ClazzLogListFragment.
      */
-    public static ClassLogListFragment newInstance(long clazzUid) {
-        ClassLogListFragment fragment = new ClassLogListFragment();
+    public static ClazzLogListFragment newInstance(long clazzUid) {
+        ClazzLogListFragment fragment = new ClazzLogListFragment();
         Bundle args = new Bundle();
         args.putLong(ARG_CLAZZ_UID, clazzUid);
         fragment.setArguments(args);
@@ -145,7 +154,7 @@ public class ClassLogListFragment extends UstadBaseFragment implements ClassLogL
                              Bundle savedInstanceState) {
 
         rootContainer =
-                inflater.inflate(R.layout.fragment_class_log_list, container, false);
+                inflater.inflate(R.layout.fragment_clazz_log_list, container, false);
         setHasOptionsMenu(true);
 
         mRecyclerView = rootContainer.findViewById(R.id.fragment_class_log_list_recyclerview);

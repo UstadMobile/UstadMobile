@@ -5,15 +5,10 @@ import android.arch.paging.DataSource;
 import android.arch.paging.LivePagedListBuilder;
 import android.arch.paging.PagedList;
 import android.arch.paging.PagedListAdapter;
-import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.view.ViewPager;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
@@ -22,44 +17,36 @@ import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.ClazzLogDetailPresenter;
-import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmProvider;
-import com.ustadmobile.core.db.dao.ClazzDao;
 import com.ustadmobile.core.view.ClassLogDetailView;
-import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord;
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecordWithPerson;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Map;
-import java.util.WeakHashMap;
 
 import ru.dimorinny.floatingtextbutton.FloatingTextButton;
 
 import static com.ustadmobile.core.controller.ClazzListPresenter.ARG_CLAZZ_UID;
 import static com.ustadmobile.core.controller.ClazzLogDetailPresenter.ARG_LOGDATE;
-import static com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.STATUS_ATTENDED;
 import static com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.STATUS_ABSENT;
+import static com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.STATUS_ATTENDED;
 import static com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.STATUS_PARTIAL;
-
 
 /**
  * The ClassLogDetail activity.
- * <p>
+ *
  * This Activity extends UstadBaseActivity and implements ClassLogDetailView
  */
-public class ClassLogDetailActivity extends UstadBaseActivity
+public class ClazzLogDetailActivity extends UstadBaseActivity
         implements ClassLogDetailView, View.OnClickListener, View.OnLongClickListener{
 
-    //Toolbar
     private Toolbar toolbar;
 
     private RecyclerView mRecyclerView;
@@ -73,8 +60,10 @@ public class ClassLogDetailActivity extends UstadBaseActivity
     public long clazzUid;
     public long logDate;
 
+    //static map matching attendance status code value with color tint
     private static Map<Integer, Integer> STATUS_TO_COLOR_MAP = new HashMap<>();
 
+    //static map matching attendance status code value with
     private static Map<Integer, Integer> STATUS_TO_STRING_ID_MAP = new HashMap<>();
 
     private static Map<Integer, Integer> SELECTED_STATUS_TO_STATUS_TAG = new HashMap<>();
@@ -100,6 +89,9 @@ public class ClassLogDetailActivity extends UstadBaseActivity
 
     }
 
+    /**
+     * The Log Detail (Attendance) Recycler Adapter
+     */
     protected class ClazzLogDetailRecyclerAdapter
             extends PagedListAdapter<ClazzLogAttendanceRecordWithPerson,
                 ClazzLogDetailRecyclerAdapter.ClazzLogDetailViewHolder>{
@@ -125,6 +117,15 @@ public class ClassLogDetailActivity extends UstadBaseActivity
             return new ClazzLogDetailViewHolder(clazzLogDetailListItem);
         }
 
+        /**
+         * This method sets the elements after it has been obtained for that item'th position.
+         *
+         * Every item in the recycler view will have set its colors if no attendance status is set.
+         * every attendance button will have it-self mapped to tints on activation.
+         *
+         * @param holder
+         * @param position
+         */
         @Override
         public void onBindViewHolder(@NonNull ClazzLogDetailViewHolder holder, int position){
             ClazzLogAttendanceRecordWithPerson attendanceRecord = getItem(position);
@@ -137,9 +138,11 @@ public class ClassLogDetailActivity extends UstadBaseActivity
             ((TextView)holder.itemView
                     .findViewById(R.id.item_clazzlog_detail_student_name)).setText(studentName);
             ((ImageView)holder.itemView
-                    .findViewById(R.id.item_clazzlog_detail_student_present_icon)).setColorFilter(Color.BLACK);
+                    .findViewById(R.id.item_clazzlog_detail_student_present_icon))
+                    .setColorFilter(Color.BLACK);
 
-            final long clazzLogAttendanceRecordUid = attendanceRecord.getClazzLogAttendanceRecordUid();
+            final long clazzLogAttendanceRecordUid =
+                    attendanceRecord.getClazzLogAttendanceRecordUid();
 
             Map<Integer, ImageView> attendanceButtons = new HashMap<>();
             attendanceButtons.put(STATUS_ATTENDED, holder.itemView.findViewById(
@@ -155,22 +158,23 @@ public class ClassLogDetailActivity extends UstadBaseActivity
                         clazzLogAttendanceRecordUid, entry.getKey()));
                 entry.getValue().setColorFilter(
                         selectedOption ?
-                        ContextCompat.getColor(ClassLogDetailActivity.this,
+                        ContextCompat.getColor(ClazzLogDetailActivity.this,
                                 STATUS_TO_COLOR_MAP.get(entry.getKey())) :
                                 ContextCompat.getColor(
-                                        ClassLogDetailActivity.this, R.color.color_gray));
+                                        ClazzLogDetailActivity.this, R.color.color_gray));
 
                 String status_tag = getResources().getString(
                         STATUS_TO_STRING_ID_MAP.get(entry.getKey())) + " " +
                         (selectedOption ? SELECTED_STATUS_TO_STATUS_TAG.get(entry.getKey()) :
                                 UNSELECTED_STATUS_TO_STATUS_TAG.get(entry.getKey()));
                 entry.getValue().setTag(status_tag);
-                //entry.getValue().setContentDescription();
+                //Set any content description here.
             }
 
         }
     }
 
+    // Diff callback.
     public static final DiffUtil.ItemCallback<ClazzLogAttendanceRecordWithPerson> DIFF_CALLBACK =
             new DiffUtil.ItemCallback<ClazzLogAttendanceRecordWithPerson>() {
                 @Override
@@ -188,7 +192,11 @@ public class ClassLogDetailActivity extends UstadBaseActivity
             };
 
     /**
-     * onCreate of the Activity.
+     * onCreate of the Activity does the following:
+     *
+     * 1. Gets arguments for clazz log uid, clazz uid, logdate
+     * 2. sets the recycler view
+     * 3. adds handlers to all buttons on the view
      *
      * @param savedInstanceState
      */
@@ -196,13 +204,12 @@ public class ClassLogDetailActivity extends UstadBaseActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         //Setting layout:
-        setContentView(R.layout.activity_class_log_detail);
+        setContentView(R.layout.activity_clazz_log_detail);
 
         //Toolbar
         toolbar = findViewById(R.id.class_log_detail_toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
 
         //Get arguments
         if (getIntent().hasExtra(ARGS_CLAZZLOG_UID)){
@@ -229,7 +236,6 @@ public class ClassLogDetailActivity extends UstadBaseActivity
                 UMAndroidUtil.bundleToHashtable(getIntent().getExtras()), this);
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
 
-        //TODO: This never gets thru
         if(mPresenter.currentClazz != null ){
             String clazzName = mPresenter.currentClazz.getClazzName();
             if (clazzName != null && clazzName.length() > 0) {
@@ -265,17 +271,6 @@ public class ClassLogDetailActivity extends UstadBaseActivity
         data.observe(this, recyclerAdapter::submitList);
 
         mRecyclerView.setAdapter(recyclerAdapter);
-    }
-
-
-    /**
-     * Get color
-     *
-     * @param color
-     * @return
-     */
-    public int fetchColor(int color) {
-        return ContextCompat.getColor(this, color);
     }
 
 

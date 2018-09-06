@@ -14,7 +14,7 @@ import com.ustadmobile.core.controller.ClazzLogDetailPresenter;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.lib.db.entities.Clazz;
-import com.ustadmobile.port.android.view.ClassLogDetailActivity;
+import com.ustadmobile.port.android.view.ClazzLogDetailActivity;
 import com.ustadmobile.test.port.android.testutil.CustomMatcherFilters;
 import com.ustadmobile.test.port.android.testutil.UmDbTestUtil;
 
@@ -72,8 +72,8 @@ public class ClazzLogDetailActivityActivityEspressoTest {
      * This sets the activity that we want floating around
      */
     @Rule
-    public IntentsTestRule<ClassLogDetailActivity> mActivityRule =
-            new IntentsTestRule<>(ClassLogDetailActivity.class, false, false);
+    public IntentsTestRule<ClazzLogDetailActivity> mActivityRule =
+            new IntentsTestRule<>(ClazzLogDetailActivity.class, false, false);
 
     @Before
     public void beforeTest() {

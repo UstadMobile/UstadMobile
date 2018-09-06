@@ -9,7 +9,6 @@ import com.ustadmobile.core.view.ClassLogListView;
 import com.ustadmobile.lib.db.entities.ClazzLog;
 
 import java.util.Hashtable;
-import java.util.List;
 
 import static com.ustadmobile.core.controller.ClazzListPresenter.ARG_CLAZZ_UID;
 import static com.ustadmobile.core.controller.ClazzLogDetailPresenter.ARG_LOGDATE;
@@ -59,12 +58,6 @@ public class ClazzLogListPresenter extends UstadBaseController<ClassLogListView>
     @Override
     public void onCreate(Hashtable savedState){
         super.onCreate(savedState);
-
-        new Thread(()-> {
-            List<ClazzLog> all = UmAppDatabase.getInstance(context).getClazzLogDao().findAll();
-            int size = all.size();
-
-        }).start();
 
         clazzLogListProvider = UmAppDatabase.getInstance(context).getClazzLogDao()
                 .findByClazzUid(currentClazzUid);

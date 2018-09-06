@@ -5,7 +5,6 @@ import android.arch.paging.DataSource;
 import android.arch.paging.LivePagedListBuilder;
 import android.arch.paging.PagedList;
 import android.arch.paging.PagedListAdapter;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
@@ -17,7 +16,6 @@ import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -42,11 +40,11 @@ public class ClazzListFragment extends UstadBaseFragment implements ClazzListVie
     private RecyclerView mRecyclerView;
     private RecyclerView.LayoutManager mRecyclerLayoutManager;
 
-    private Toolbar toolbar;
-
     private ClazzListPresenter mPresenter;
 
-
+    /**
+     * The ClazzList Recycler Adapter used here.
+     */
     protected class ClazzListRecyclerAdapter extends
             PagedListAdapter<ClazzWithNumStudents, ClazzListRecyclerAdapter.ClazzViewHolder> {
 
@@ -71,6 +69,12 @@ public class ClazzListFragment extends UstadBaseFragment implements ClazzListVie
             return new ClazzViewHolder(clazzListItem);
         }
 
+        /**
+         * This method sets the elements after it has been obtained for that item'th position.
+         *
+         * @param holder The view holder
+         * @param position The position of the item
+         */
         @Override
         public void onBindViewHolder  (@NonNull ClazzViewHolder holder, int position) {
             ClazzWithNumStudents clazz = getItem(position);
@@ -150,7 +154,7 @@ public class ClazzListFragment extends UstadBaseFragment implements ClazzListVie
                              Bundle savedInstanceState) {
 
         rootContainer =
-                inflater.inflate(R.layout.fragment_class_list, container, false);
+                inflater.inflate(R.layout.fragment_clazz_list, container, false);
         setHasOptionsMenu(true);
 
 

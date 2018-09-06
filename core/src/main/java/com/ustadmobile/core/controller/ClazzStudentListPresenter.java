@@ -20,8 +20,6 @@ public class ClazzStudentListPresenter extends UstadBaseController<ClazzStudentL
 
     private long currentClazzId = -1L;
 
-
-
     /**
      * Constructor to the ClassStudentsList Presenter.
      * We get the class uid from the arguments passed to it.

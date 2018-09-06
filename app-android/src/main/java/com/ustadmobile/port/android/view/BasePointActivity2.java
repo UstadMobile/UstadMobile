@@ -50,6 +50,25 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
         return ContextCompat.getColor(this, color);
     }
 
+    /**
+     * ViewPager set up in its own method for clarity.
+     */
+    private void setupViewPager() {
+        mPager = (ViewPager) findViewById(R.id.container_feedlist);
+        mPagerAdapter = new BasePointViewPagerAdapter(getSupportFragmentManager());
+        Fragment selectedFragment = mPagerAdapter.getItem(0);
+        mPager.setAdapter(mPagerAdapter);
+    }
+
+    /**
+     * The overriden onCreate method does the following:
+     *
+     * 1. Creates, names, styles and sets the Bottom Navigation
+     * 2. Sets the default location (Feed)
+     * 3. Sets the toolbar title upon navigation
+     *
+     * @param savedInstanceState
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -63,7 +82,6 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
         toolbar = findViewById(R.id.base_point_2_toolbar);
         toolbar.setTitle("Ustad Mobile");
         setSupportActionBar(toolbar);
-
 
         //Get the bottom navigation component.
         AHBottomNavigation bottomNavigation = findViewById(R.id.bottom_navigation);
@@ -107,13 +125,7 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
         bottomNavigation.setOnTabSelectedListener(new AHBottomNavigation.OnTabSelectedListener() {
             @Override
             public boolean onTabSelected(int position, boolean wasSelected) {
-                System.out.println("Tab Selected: " + position);
-                if(position == 1){
-                    if(!wasSelected){
-                        //mPagerAdapter.notifyDataSetChanged();
-                        int x;
-                    }
-                }
+
                 if (!wasSelected) {
                     mPagerAdapter.notifyDataSetChanged();
                     Fragment selectedFragment = mPagerAdapter.getItem(position);
@@ -135,40 +147,22 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
                     case 3:
                         updateTitle(getText(R.string.lessons).toString());
                         break;
-                    default:
-                        break;
-
                 }
                 return true;
             }
         });
-
-        bottomNavigation.setOnNavigationPositionListener(new AHBottomNavigation.OnNavigationPositionListener() {
-            @Override public void onPositionChange(int y) {
-                // Manage the new y position
-                System.out.println("Position Changed: " + y);
-            }
-        });
-
     }
 
     /**
-     *
-     * @param title
+     *  Updates the toolbar's title
+     * @param title The string of the title to be set to the toolbar
      */
     public void updateTitle(String title){
         toolbar.setTitle(title);
     }
 
-    private void setupViewPager() {
-        mPager = (ViewPager) findViewById(R.id.container_feedlist);
-        mPagerAdapter = new BasePointViewPagerAdapter(getSupportFragmentManager());
-        Fragment selectedFragment = mPagerAdapter.getItem(0);
-        mPager.setAdapter(mPagerAdapter);
-    }
-
     /**
-     * Class : feed view pager adapter
+     * Feed view pager's Adapter
      */
     private static class BasePointViewPagerAdapter extends FragmentStatePagerAdapter{
 
@@ -220,8 +214,6 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
                     default:
                         return null;
                 }
-
-
             }
         }
 
@@ -230,6 +222,5 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
             return positionMap.size();
         }
     }
-
 
 }

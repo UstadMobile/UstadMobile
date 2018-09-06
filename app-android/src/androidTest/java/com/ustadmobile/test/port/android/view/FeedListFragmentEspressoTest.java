@@ -5,11 +5,9 @@ import android.content.Intent;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.espresso.contrib.RecyclerViewActions;
 import android.support.test.espresso.intent.rule.IntentsTestRule;
-import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,11 +20,8 @@ import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.port.android.view.BasePointActivity2;
-import com.ustadmobile.port.android.view.ClassLogDetailActivity;
-import com.ustadmobile.port.android.view.FeedListFragment;
+import com.ustadmobile.port.android.view.ClazzLogDetailActivity;
 import com.ustadmobile.test.port.android.testutil.UmDbTestUtil;
-
-import junit.framework.Assert;
 
 import java.util.Hashtable;
 
@@ -37,13 +32,9 @@ import static android.support.test.espresso.intent.matcher.IntentMatchers.hasCom
 import static android.support.test.espresso.intent.matcher.IntentMatchers.hasExtra;
 import static android.support.test.espresso.intent.matcher.IntentMatchers.hasExtras;
 import static android.support.test.espresso.matcher.ViewMatchers.hasDescendant;
-import static android.support.test.espresso.matcher.ViewMatchers.hasSibling;
 import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
-import static android.support.test.espresso.matcher.ViewMatchers.withParent;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
-import static com.ustadmobile.test.port.android.testutil.RecyclerViewChildAction.clickOnDescendantViewWithId;
-import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.core.AllOf.allOf;
@@ -135,7 +126,7 @@ public class FeedListFragmentEspressoTest {
         onView(withId(R.id.fragment_feed_list_recyclerview)).perform(
                 RecyclerViewActions.actionOnItem(
                         hasDescendant(withText(containsString(TEST_FEED1_TITLE))), click()));
-        intended(allOf(hasComponent(ClassLogDetailActivity.class.getCanonicalName())
+        intended(allOf(hasComponent(ClazzLogDetailActivity.class.getCanonicalName())
                 , hasExtras(allOf( hasEntry(equalTo(ClazzListPresenter.ARG_CLAZZ_UID),
                     equalTo(Long.toString(testClazz.getClazzUid()))),
                         hasEntry(equalTo(ClazzLogDetailPresenter.ARG_LOGDATE),

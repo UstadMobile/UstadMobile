@@ -2,19 +2,13 @@ package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmProvider;
-import com.ustadmobile.core.db.dao.ClazzLogDao;
-import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.ClassDetailView;
 import com.ustadmobile.core.view.ClassLogDetailView;
 import com.ustadmobile.core.view.ClazzListView;
-import com.ustadmobile.core.view.ClazzStudentListView;
 import com.ustadmobile.lib.db.entities.Clazz;
-import com.ustadmobile.lib.db.entities.ClazzLog;
 import com.ustadmobile.lib.db.entities.ClazzWithNumStudents;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Hashtable;
 
 import static com.ustadmobile.core.controller.ClazzLogDetailPresenter.ARG_LOGDATE;
@@ -31,6 +25,12 @@ public class ClazzListPresenter extends UstadBaseController<ClazzListView> {
         super(context, arguments, view);
     }
 
+    /**
+     * The ClazzListPresenter does the following:
+     * 1. Populates the clazzListProvider and sets it to the view.
+     *
+     * @param savedState The state
+     */
     @Override
     public void onCreate(Hashtable savedState) {
         super.onCreate(savedState);
@@ -54,7 +54,6 @@ public class ClazzListPresenter extends UstadBaseController<ClazzListView> {
         long clazzUid = clazz.getClazzUid();
         args.put(ARG_CLAZZ_UID, clazzUid);
         impl.go(ClassDetailView.VIEW_NAME, args, view.getContext());
-
     }
 
     /**
@@ -67,12 +66,9 @@ public class ClazzListPresenter extends UstadBaseController<ClazzListView> {
         Hashtable args = new Hashtable();
         long clazzUid = clazz.getClazzUid();
         args.put(ARG_CLAZZ_UID, clazzUid);
-
         args.put(ARG_LOGDATE, System.currentTimeMillis());
         impl.go(ClassLogDetailView.VIEW_NAME, args, view.getContext());
-
     }
-
 
     @Override
     public void setUIStrings() {

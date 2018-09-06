@@ -25,6 +25,12 @@ public class FeedListPresenter extends UstadBaseController<FeedListView>{
 
     private UmProvider<FeedEntry> feedEntryUmProvider;
 
+    /**
+     * Overridden onCreate gets the UmProvider types FeedEntry list and sets it as a provider to
+     * the view.
+     *
+     * @param savedState
+     */
     @Override
     public void onCreate(Hashtable savedState){
         super.onCreate(savedState);
@@ -61,14 +67,11 @@ public class FeedListPresenter extends UstadBaseController<FeedListView>{
      */
     public void handleClickFeedEntry(FeedEntry feedEntry){
         String feedLink = feedEntry.getLink();
-
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         String linkViewName = feedLink.split("\\?")[0];
         Hashtable args = splitQuery(feedLink.split("\\?")[1]);
-
         impl.go(linkViewName, args, view.getContext());
 
     }
-
 
 }

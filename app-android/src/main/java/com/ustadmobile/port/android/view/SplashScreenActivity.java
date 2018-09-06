@@ -49,7 +49,6 @@ import com.ustadmobile.core.controller.ClazzListPresenter;
 import com.ustadmobile.core.controller.ClazzLogDetailPresenter;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.ClazzDao;
-import com.ustadmobile.core.db.dao.ClazzLogDao;
 import com.ustadmobile.core.db.dao.ClazzMemberDao;
 import com.ustadmobile.core.db.dao.FeedEntryDao;
 import com.ustadmobile.core.db.dao.PersonDao;
@@ -62,12 +61,10 @@ import com.ustadmobile.lib.db.entities.ClazzMember;
 import com.ustadmobile.lib.db.entities.FeedEntry;
 import com.ustadmobile.lib.db.entities.Person;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
 
-
-public class SplashScreenActivity extends AppCompatActivity implements DialogInterface.OnClickListener, ActivityCompat.OnRequestPermissionsResultCallback{
+public class SplashScreenActivity extends AppCompatActivity
+        implements DialogInterface.OnClickListener,
+        ActivityCompat.OnRequestPermissionsResultCallback{
 
     public static final int EXTERNAL_STORAGE_REQUESTED = 1;
 
@@ -85,7 +82,10 @@ public class SplashScreenActivity extends AppCompatActivity implements DialogInt
         addDummyData();
     }
 
-    public void runMe(){
+    /**
+     * Calls startUi to be run. This is usually called after we have checked permissions.
+     */
+    public void startTheUI(){
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -94,18 +94,25 @@ public class SplashScreenActivity extends AppCompatActivity implements DialogInt
         }, 0);
     }
 
+    /**
+     * Checks for permissions and alerts the user to give permissions.
+     */
     public void checkPermissions() {
         boolean hasRequiredPermissions = true;
         for(int i = 0; i < REQUIRED_PERMISSIONS.length; i++) {
-            hasRequiredPermissions &= ContextCompat.checkSelfPermission(this, REQUIRED_PERMISSIONS[i]) == PackageManager.PERMISSION_GRANTED;
+            hasRequiredPermissions &=
+                    ContextCompat.checkSelfPermission(this,
+                            REQUIRED_PERMISSIONS[i]) == PackageManager.PERMISSION_GRANTED;
         }
 
         if(!hasRequiredPermissions){
-            if(ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                    && !rationalesShown) {
+            if(ActivityCompat.shouldShowRequestPermissionRationale(this,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE) && !rationalesShown) {
                 //show an alert
                 AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                builder.setTitle("File permissions required").setMessage("This app requires file permissions on the SD card to download and save content");
+                builder.setTitle("File permissions required")
+                        .setMessage("This app requires file permissions " +
+                                "on the SD card to download and save content");
                 builder.setPositiveButton("OK", this);
                 AlertDialog dialog = builder.create();
                 dialog.show();
@@ -113,17 +120,11 @@ public class SplashScreenActivity extends AppCompatActivity implements DialogInt
                 return;
             }else {
                 rationalesShown = false;
-                ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, EXTERNAL_STORAGE_REQUESTED);
+                ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS,
+                        EXTERNAL_STORAGE_REQUESTED);
                 return;
             }
         }
-
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                UstadMobileSystemImpl.getInstance().startUI(SplashScreenActivity.this);
-            }
-        }, 0);
     }
 
     @Override
@@ -132,7 +133,8 @@ public class SplashScreenActivity extends AppCompatActivity implements DialogInt
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
         boolean allGranted = permissions.length == 2;
         for(int i = 0; i < grantResults.length; i++) {
             allGranted &= grantResults[i] == PackageManager.PERMISSION_GRANTED;
@@ -146,7 +148,9 @@ public class SplashScreenActivity extends AppCompatActivity implements DialogInt
                 }
             }, 0);
         }else {
-            //avoid possibly getting into an infinite loop if we had no user interaction and permission was denied
+            /* avoid possibly getting into an infinite loop if we had no user interaction
+                and permission was denied
+             */
             new AsyncTask<Void, Void, Void>() {
                 @Override
                 protected Void doInBackground(Void... voids) {
@@ -167,8 +171,9 @@ public class SplashScreenActivity extends AppCompatActivity implements DialogInt
     @Override
     public void onStart() {
         super.onStart();
+        //Disabling for now in the new version of the application
         //checkPermissions();
-        runMe();
+        startTheUI();
     }
 
     @Override
@@ -186,6 +191,11 @@ public class SplashScreenActivity extends AppCompatActivity implements DialogInt
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * Adds dummy data in the start of the application here. It also sets a key so that we don't
+     * add the dummy data every time. This will get replaced with real data that will sync with
+     * the server.
+     */
     public void addDummyData(){
         String createStatus = UstadMobileSystemImpl.getInstance().getAppPref("dummydata",
                 getApplicationContext());
@@ -199,18 +209,8 @@ public class SplashScreenActivity extends AppCompatActivity implements DialogInt
         PersonDao personDao =
                 UmAppDatabase.getInstance(getApplicationContext()).getPersonDao();
 
-
+        //Running all insertions in a separate thread.
         new Thread(() -> {
-
-            //Get current Date (minus time)
-            Long currentLogDate = -1L;
-            Calendar attendanceDate = Calendar.getInstance();
-            attendanceDate.setTimeInMillis(System.currentTimeMillis());
-            attendanceDate.set(Calendar.HOUR_OF_DAY, 0);
-            attendanceDate.set(Calendar.MINUTE, 0);
-            attendanceDate.set(Calendar.SECOND, 0);
-            attendanceDate.set(Calendar.MILLISECOND, 0);
-            currentLogDate = attendanceDate.getTimeInMillis();
 
             //Create Class
             Clazz clazz1 = new Clazz();
@@ -247,7 +247,7 @@ public class SplashScreenActivity extends AppCompatActivity implements DialogInt
                 clazzMemberDao.insertAsync(member, null);
             }
 
-            //Create some feeds
+            //Create some feeds. The feeds upon interaction will in-turn create ClazzLogs.
             FeedEntryDao feedEntryDao =
                     UmAppDatabase.getInstance(getApplicationContext()).getFeedEntryDao();
 
@@ -290,17 +290,12 @@ public class SplashScreenActivity extends AppCompatActivity implements DialogInt
                 }
             });
 
-
-
-
+            //Set that we have created dummy data so that check for this and don't create it again.
             UstadMobileSystemImpl.getInstance().setAppPref("dummydata", "created",
                     getApplicationContext());
             UstadMobileSystemImpl.getInstance().startUI(SplashScreenActivity.this);
         }).start();
 
-
-
     }
-
 
 }

@@ -14,8 +14,8 @@ import com.ustadmobile.core.controller.ClazzListPresenter;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.port.android.view.BasePointActivity2;
-import com.ustadmobile.port.android.view.ClassDetailActivity;
-import com.ustadmobile.port.android.view.ClassLogDetailActivity;
+import com.ustadmobile.port.android.view.ClazzDetailActivity;
+import com.ustadmobile.port.android.view.ClazzLogDetailActivity;
 import com.ustadmobile.test.port.android.testutil.ActivityStopCountdownLatch;
 import com.ustadmobile.test.port.android.testutil.UmDbTestUtil;
 
@@ -116,7 +116,7 @@ public class ClassListFragmentEspressoTest {
         latch.wait(10, TimeUnit.SECONDS);
 
         intended(allOf(
-                hasComponent(ClassLogDetailActivity.class.getCanonicalName()),
+                hasComponent(ClazzLogDetailActivity.class.getCanonicalName()),
                 hasExtra(equalTo(ClazzListPresenter.ARG_CLAZZ_UID),
                         equalTo(testClazz.getClazzUid()))
         ));
@@ -134,7 +134,7 @@ public class ClassListFragmentEspressoTest {
 
         intended(allOf(
                 hasComponent(new ComponentName(InstrumentationRegistry.getTargetContext(),
-                        ClassDetailActivity.class)),
+                        ClazzDetailActivity.class)),
                 hasExtra(equalTo(ClazzListPresenter.ARG_CLAZZ_UID),
                         equalTo(testClazz.getClazzUid()))
         ));

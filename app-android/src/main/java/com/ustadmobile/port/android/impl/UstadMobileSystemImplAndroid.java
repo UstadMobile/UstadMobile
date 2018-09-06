@@ -185,8 +185,8 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         viewNameToAndroidImplMap.put(ScormPackageView.VIEW_NAME, ScormPackageActivity.class);
         viewNameToAndroidImplMap.put(H5PContentView.VIEW_NAME, H5PContentActivity.class);
         viewNameToAndroidImplMap.put(DownloadDialogView.VIEW_NAME, DownloadDialogFragment.class);
-        viewNameToAndroidImplMap.put(ClassDetailView.VIEW_NAME, ClassDetailActivity.class);
-        viewNameToAndroidImplMap.put(ClassLogDetailView.VIEW_NAME, ClassLogDetailActivity.class);
+        viewNameToAndroidImplMap.put(ClassDetailView.VIEW_NAME, ClazzDetailActivity.class);
+        viewNameToAndroidImplMap.put(ClassLogDetailView.VIEW_NAME, ClazzLogDetailActivity.class);
     }
 
     /**

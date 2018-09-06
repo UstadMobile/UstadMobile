@@ -11,7 +11,7 @@ import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.ClazzListPresenter;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.lib.db.entities.Clazz;
-import com.ustadmobile.port.android.view.ClassDetailActivity;
+import com.ustadmobile.port.android.view.ClazzDetailActivity;
 import com.ustadmobile.test.port.android.testutil.CustomMatcherFilters;
 import com.ustadmobile.test.port.android.testutil.UmDbTestUtil;
 
@@ -66,8 +66,8 @@ public class ClassStudentListFragmentEspressoTest {
      * This sets the activity that we want floating around
      */
     @Rule
-    public IntentsTestRule<ClassDetailActivity> mActivityRule =
-            new IntentsTestRule<>(ClassDetailActivity.class, false, false);
+    public IntentsTestRule<ClazzDetailActivity> mActivityRule =
+            new IntentsTestRule<>(ClazzDetailActivity.class, false, false);
 
     @Before
     public void beforeTest() {

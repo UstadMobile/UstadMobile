@@ -2,7 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context="com.ustadmobile.port.android.view.ClassLogListFragment">
+    tools:context="com.ustadmobile.port.android.view.ClazzLogListFragment">
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/fragment_class_log_list_recyclerview"

@@ -35,7 +35,7 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
     public Clazz currentClazz;
 
     /**
-     * Constructor. We get the ClazzLog Uid from the arguments
+     * Constructor. We get the ClazzLog Uid and date from the arguments
      *
      * @param context
      * @param arguments
@@ -69,6 +69,12 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
      *
      * This will be called when the implementation view is ready.
      * (ie: on Android, this is called in the Activity's onCreateView() )
+     *
+     * Steps to get there:
+     * 1. For a particular Clazz UID and date, we find if an existing ClazzLog exists.
+     * 2. If it does not, we create it.
+     * 3. We then call insertAllAndSetProvider where it checks the records associated and set the
+     * provider.
      *
      * @param savedState This is generally the state which Android resumes this app. This is not
      *                   the arguments. It will most likely be null in a normal application run.
@@ -105,7 +111,6 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
                     currentClazzLog = result;
                     insertAllAndSetProvider(currentClazzLog);
                 }
-
             }
 
             @Override
@@ -120,6 +125,8 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
     /**
      * Common method to insert all attendance records for a clazz log uid and prepare its provider
      * to be set to the view.
+     *
+     * @param result The ClazzLog for which to insert and get provider data for.
      */
     public void insertAllAndSetProvider(ClazzLog result){
 
@@ -136,7 +143,8 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
                                 .findAttendanceRecordsWithPersonByClassLogId(result.getClazzLogUid());
                         //Set to view
                         view.runOnUiThread(() ->
-                                view.setClazzLogAttendanceRecordProvider(clazzLogAttendanceRecordUmProvider));
+                                view.setClazzLogAttendanceRecordProvider(
+                                        clazzLogAttendanceRecordUmProvider));
                     }
 
                     @Override
@@ -144,8 +152,6 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
                         System.out.println(exception);
                     }
                 });
-
-
     }
 
     /**
@@ -190,10 +196,8 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
                     feedEntryDao.updateDoneTrue(parentFeed.getFeedEntryUid());
                 }
 
-
                 //5. Close the activity.
                 view.finish();
-
             }
 
             @Override
@@ -217,16 +221,26 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
      * Handle when the user taps to mark all present, or mark all absent. This will update the
      * database to set all ClazzLogAttendanceRecord
      *
-     * @param attendanceStatus attendance status to set for all ClazzLogAttendanceRecords that are in this ClazzLog
+     * @param attendanceStatus attendance status to set for all ClazzLogAttendanceRecords that
+     *                         are in this ClazzLog
      */
     public void handleMarkAll(int attendanceStatus){
         UmAppDatabase.getInstance(context).getClazzLogAttendanceRecordDao()
-                .updateAllByClazzLogUid(currentClazzLog.getClazzLogUid(), attendanceStatus, null);
+                .updateAllByClazzLogUid(currentClazzLog.getClazzLogUid(),
+                        attendanceStatus, null);
     }
 
+    /**
+     * Handle when the user taps a student and marks it. This will update the database and
+     * therefore the recycler view via LiveData.
+     *
+     * @param clazzLogAttendanceRecordUid
+     * @param attendanceStatus
+     */
     public void handleMarkStudent(long clazzLogAttendanceRecordUid, int attendanceStatus) {
         UmAppDatabase.getInstance(context).getClazzLogAttendanceRecordDao()
-                .updateAttendanceStatus(clazzLogAttendanceRecordUid, attendanceStatus, null);
+                .updateAttendanceStatus(clazzLogAttendanceRecordUid,
+                        attendanceStatus, null);
     }
 
 }
