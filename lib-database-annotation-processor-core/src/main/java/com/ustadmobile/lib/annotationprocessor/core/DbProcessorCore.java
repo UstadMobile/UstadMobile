@@ -39,6 +39,7 @@ import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
 
 import static com.ustadmobile.lib.annotationprocessor.core.DbProcessorCore.OPT_JDBC_OUTPUT;
+import static com.ustadmobile.lib.annotationprocessor.core.DbProcessorCore.OPT_NO_DEFAULT_FACTORY;
 import static com.ustadmobile.lib.annotationprocessor.core.DbProcessorCore.OPT_ROOM_OUTPUT;
 
 /**
@@ -46,7 +47,7 @@ import static com.ustadmobile.lib.annotationprocessor.core.DbProcessorCore.OPT_R
  * processors for each implementation to be generated.
  */
 
-@SupportedOptions({OPT_ROOM_OUTPUT, OPT_JDBC_OUTPUT})
+@SupportedOptions({OPT_ROOM_OUTPUT, OPT_JDBC_OUTPUT, OPT_NO_DEFAULT_FACTORY})
 public class DbProcessorCore extends AbstractProcessor{
 
     public static final String OPT_ROOM_OUTPUT = "umdb_room_out";

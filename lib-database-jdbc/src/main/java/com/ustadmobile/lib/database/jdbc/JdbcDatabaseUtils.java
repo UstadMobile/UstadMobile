@@ -1,6 +1,7 @@
 package com.ustadmobile.lib.database.jdbc;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -47,6 +48,20 @@ public class JdbcDatabaseUtils {
         }
 
         return tableNames;
+    }
+
+    /**
+     *
+     * @param stmt
+     */
+    public static void closeStatement(PreparedStatement stmt) {
+        if(stmt != null) {
+            try {
+                stmt.close();
+            }catch(SQLException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
 }

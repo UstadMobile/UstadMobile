@@ -7,6 +7,6 @@ import com.ustadmobile.lib.database.annotation.UmInsert;
 public abstract class ExampleDao {
 
     @UmInsert
-    public abstract long insert(ExampleEntity entity);
+    public abstract void insertE(ExampleEntity entity);
 
 }

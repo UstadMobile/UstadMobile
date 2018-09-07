@@ -1,6 +1,7 @@
 package com.ustadmobile.lib.annotationprocessor.core;
 
 
+import com.ustadmobile.lib.annotationprocessor.core.db.ExampleEntity;
 import com.ustadmobile.lib.database.jdbc.JdbcDatabaseUtils;
 import com.ustadmobile.lib.annotationprocessor.core.db.ExampleDatabase;
 
@@ -27,7 +28,7 @@ public class TestDbProcessorJdbc {
     public static void setupClass() throws NamingException{
         InitialContext ic = new InitialContext();
         SQLiteDataSource dataSource = new SQLiteDataSource();
-        dataSource.setUrl("jdbc:sqlite:memory:");
+        dataSource.setUrl("jdbc:sqlite::memory:");
         ic.bind("java:/comp/env/jdbc/ds", dataSource);
     }
 
@@ -38,7 +39,7 @@ public class TestDbProcessorJdbc {
     }
 
     @Test
-    public void testTableCreated() throws NamingException, SQLException{
+    public void givenDatabaseInstance_whenInitialized_thenTableShouldBeCreated() throws NamingException, SQLException{
         ExampleDatabase db = ExampleDatabase.getInstance(null, "ds");
 
         InitialContext ic = new InitialContext();
@@ -48,6 +49,14 @@ public class TestDbProcessorJdbc {
         List<String> tableNames = JdbcDatabaseUtils.getTableNames(con);
 
         Assert.assertTrue("ExampleEntity table was created", tableNames.contains("ExampleEntity"));
+    }
+
+    @Test
+    public void givenDatabaseInstance_whenDataInserted_thenShouldBeRetrievable() {
+        ExampleDatabase db = ExampleDatabase.getInstance(null, "ds");
+        ExampleEntity entity = new ExampleEntity();
+        entity.setName("Bob Jones");
+        db.getExampleDao().insertE(entity);
     }
 
 
