@@ -9,9 +9,12 @@ import android.bluetooth.BluetoothProfile;
 import android.os.Build;
 import android.support.annotation.VisibleForTesting;
 
+import com.ustadmobile.core.impl.UMLog;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.port.sharedse.networkmanager.BleMessage;
 import com.ustadmobile.port.sharedse.networkmanager.BleMessageResponseListener;
 
+import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -51,7 +54,7 @@ public class BleMessageGattClientCallback extends  BluetoothGattCallback{
 
     private int packetIteration = 0;
 
-    private int mtu = DEFAULT_MTU_SIZE;
+    private int defaultMtuSize = DEFAULT_MTU_SIZE;
 
     private final  Object mtuChangeMonitor = new Object();
 
@@ -81,7 +84,7 @@ public class BleMessageGattClientCallback extends  BluetoothGattCallback{
     public void onMtuChanged(BluetoothGatt gatt, int mtu, int status) {
         super.onMtuChanged(gatt, mtu, status);
         //Successfully changed the MTU, update message and notify to start discovering service
-        this.mtu = mtu;
+        this.defaultMtuSize = mtu;
         synchronized (mtuChangeMonitor){
            mtuChangeMonitor.notify();
         }
@@ -107,7 +110,7 @@ public class BleMessageGattClientCallback extends  BluetoothGattCallback{
                 if(gatt.requestMtu(MAXIMUM_MTU_SIZE)){
                     synchronized (mtuChangeMonitor){
                         try {
-                            mtuChangeMonitor.wait(TimeUnit.SECONDS.toMillis(1));
+                            mtuChangeMonitor.wait(TimeUnit.SECONDS.toMillis(3));
                         } catch (InterruptedException e) {
                             mtuChangeMonitor.notify();
                             e.printStackTrace();
@@ -129,13 +132,17 @@ public class BleMessageGattClientCallback extends  BluetoothGattCallback{
     @Override
     public void onServicesDiscovered(BluetoothGatt gatt, int status) {
         super.onServicesDiscovered(gatt, status);
+        BluetoothGattService service = findMatchingService(gatt.getServices());
+        if(service == null){
+            return;
+        }
+        List<BluetoothGattCharacteristic> characteristics = service.getCharacteristics();
 
-        List<BluetoothGattService> serviceList = gatt.getServices();
-        BluetoothGattCharacteristic characteristic = serviceList.get(0)
-                .getCharacteristics().get(0);
+        BluetoothGattCharacteristic characteristic = characteristics.get(0);
         if(characteristic.getUuid().equals(USTADMOBILE_BLE_SERVICE_UUID)){
             characteristic.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT);
             gatt.setCharacteristicNotification(characteristic, true);
+            onCharacteristicWrite(gatt,characteristic,BluetoothGatt.GATT_SUCCESS);
         }
     }
 
@@ -147,7 +154,7 @@ public class BleMessageGattClientCallback extends  BluetoothGattCallback{
     public void onCharacteristicWrite(BluetoothGatt gatt,
                                       BluetoothGattCharacteristic characteristic, int status) {
         super.onCharacteristicWrite(gatt, characteristic, status);
-        byte[][] packets = messageToSend.getPackets(mtu);
+        byte[][] packets = messageToSend.getPackets(defaultMtuSize);
         if (status == BluetoothGatt.GATT_SUCCESS) {
             if(packetIteration < packets.length){
                 characteristic.setValue(packets[packetIteration]);
@@ -202,4 +209,39 @@ public class BleMessageGattClientCallback extends  BluetoothGattCallback{
     public BleMessage getReceivedMessage() {
         return receivedMessage;
     }
+
+    /**
+     * Find the matching service among services found by peer devices
+     * @param serviceList List of all found services
+     * @return Matching service
+     */
+    private BluetoothGattService findMatchingService(List<BluetoothGattService> serviceList) {
+        for (BluetoothGattService service : serviceList) {
+            String serviceIdString = service.getUuid().toString();
+            if (matchesServiceUuidString(serviceIdString)) {
+                return service;
+            }
+        }
+        return null;
+    }
+
+    private boolean matchesServiceUuidString(String serviceIdString) {
+        return uuidMatches(serviceIdString, USTADMOBILE_BLE_SERVICE_UUID.toString());
+    }
+
+    private boolean uuidMatches(String uuidString, String... matches) {
+        for (String match : matches) {
+            if (uuidString.equalsIgnoreCase(match)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean initiatePacketTransfer(BluetoothGatt gatt,
+                                           BluetoothGattCharacteristic characteristic){
+        characteristic.setValue(ByteBuffer.allocate(1).put((byte) 0).array());
+        return gatt.writeCharacteristic(characteristic);
+    }
+
 }

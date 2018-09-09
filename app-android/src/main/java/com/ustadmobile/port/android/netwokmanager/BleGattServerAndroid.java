@@ -81,30 +81,42 @@ public class BleGattServerAndroid extends BleGattServer{
 
             if (USTADMOBILE_BLE_SERVICE_UUID.equals(characteristic.getUuid())) {
                 //Grant permission to the peer device to write on this characteristics
-                gattServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, 0,
-                        null);
-                //start receiving packets from the client device
-                boolean isPackedReceived = receivedMessage.onPackageReceived(value);
+                boolean granted= gattServer.sendResponse(device, requestId,
+                        BluetoothGatt.GATT_SUCCESS, 0, null);
                 UstadMobileSystemImpl.l(UMLog.DEBUG,691,
-                        "Receiving packets: isDone "+isPackedReceived);
-                if(isPackedReceived){
+                        "Write permission granted for "+device.getAddress()+" "+granted);
+                //start receiving packets from the client device
+                boolean packetsReceived = receivedMessage.onPackageReceived(value);
+                UstadMobileSystemImpl.l(UMLog.DEBUG,691,
+                        "Received all packets from "+device.getAddress()+" "
+                                +packetsReceived);
+                if(packetsReceived){
+                    int currentMtuSize = receivedMessage.getMtu();
                     //Send back response
                     BleMessage messageToSend =  handleRequest(receivedMessage);
-                    receivedMessage = new BleMessage();
+                    receivedMessage.reset();
                     UstadMobileSystemImpl.l(UMLog.DEBUG,691,
-                            "Prepare response to send back");
+                            "Prepare response to send back to "+device.getAddress());
                     //Our service doesn't require confirmation, if it does then reject sending packets
                     boolean requireConfirmation = (characteristic.getProperties() &
                             BluetoothGattCharacteristic.PROPERTY_INDICATE)
                             == BluetoothGattCharacteristic.PROPERTY_INDICATE;
                     if(!requireConfirmation){
-
-                        //TODO: test MTU handling on the server. does the client changing MTU change this?
-                        byte[][] packets = messageToSend.getPackets(DEFAULT_MTU_SIZE);
+                        byte[][] packets = messageToSend.getPackets(currentMtuSize);
                         for (byte[] packet : packets) {
                             characteristic.setValue(packet);
-                            gattServer.notifyCharacteristicChanged(device, characteristic, false);
+                             boolean notified= gattServer.notifyCharacteristicChanged(device,
+                                     characteristic, false);
+                             if(notified){
+                                 UstadMobileSystemImpl.l(UMLog.DEBUG,691,
+                                         "Pee device notified on characteristics change");
+                             }else{
+                                 UstadMobileSystemImpl.l(UMLog.ERROR,691,
+                                         "Failed to notify peer device");
+                             }
                         }
+                        UstadMobileSystemImpl.l(UMLog.DEBUG,691,
+                                "Response sent to "+device.getAddress());
                     }
                 }
             }
