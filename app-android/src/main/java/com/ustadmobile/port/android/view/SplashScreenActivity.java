@@ -233,7 +233,7 @@ public class SplashScreenActivity extends AppCompatActivity
                 String first_name = full_name.split(" ")[0];
                 String last_name = full_name.split(" ")[1];
                 Person person = new Person();
-                person.setFirstName(first_name);
+                person.setFirstNames(first_name);
                 person.setLastName(last_name);
                 long thisPersonUid = personDao.insert(person);
                 person.setPersonUid(thisPersonUid);

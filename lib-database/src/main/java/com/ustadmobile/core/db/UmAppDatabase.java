@@ -23,6 +23,8 @@ import com.ustadmobile.core.db.dao.OpdsEntryStatusCacheAncestorDao;
 import com.ustadmobile.core.db.dao.OpdsEntryStatusCacheDao;
 import com.ustadmobile.core.db.dao.OpdsEntryWithRelationsDao;
 import com.ustadmobile.core.db.dao.OpdsLinkDao;
+import com.ustadmobile.core.db.dao.PersonCustomFieldDao;
+import com.ustadmobile.core.db.dao.PersonCustomFieldValueDao;
 import com.ustadmobile.core.db.dao.PersonDao;
 import com.ustadmobile.lib.database.annotation.UmClearAll;
 import com.ustadmobile.lib.database.annotation.UmDatabase;
@@ -51,6 +53,8 @@ import com.ustadmobile.lib.db.entities.OpdsEntryStatusCache;
 import com.ustadmobile.lib.db.entities.OpdsEntryStatusCacheAncestor;
 import com.ustadmobile.lib.db.entities.OpdsLink;
 import com.ustadmobile.lib.db.entities.Person;
+import com.ustadmobile.lib.db.entities.PersonCustomField;
+import com.ustadmobile.lib.db.entities.PersonCustomFieldValue;
 
 @UmDatabase(version = 1, entities = {
         OpdsEntry.class, OpdsLink.class, OpdsEntryParentToChildJoin.class,
@@ -60,7 +64,8 @@ import com.ustadmobile.lib.db.entities.Person;
         OpdsEntryStatusCache.class, OpdsEntryStatusCacheAncestor.class,
         HttpCachedEntry.class, DownloadJob.class, DownloadJobItem.class,
         Person.class, Clazz.class, ClazzMember.class, ClazzLog.class,
-        ClazzLogAttendanceRecord.class, FeedEntry.class, ContentEntry.class
+        ClazzLogAttendanceRecord.class, FeedEntry.class, ContentEntry.class,
+        PersonCustomField.class, PersonCustomFieldValue.class
 })
 public abstract class UmAppDatabase{
 
@@ -136,6 +141,10 @@ public abstract class UmAppDatabase{
     public abstract ClazzLogAttendanceRecordDao getClazzLogAttendanceRecordDao();
 
     public abstract FeedEntryDao getFeedEntryDao();
+
+    public abstract PersonCustomFieldDao getPersonCustomFieldDao();
+
+    public abstract PersonCustomFieldValueDao getPersonCustomFieldValueDao();
 
     @UmDbContext
     public abstract Object getContext();

@@ -89,7 +89,7 @@ public class ClazzStudentListFragment extends UstadBaseFragment implements Clazz
             if(clazzMemberWithPerson.getPerson() == null){
                 studentName = "Null Student";
             }else{
-                studentName = clazzMemberWithPerson.getPerson().getFirstName() + " " +
+                studentName = clazzMemberWithPerson.getPerson().getFirstNames() + " " +
                         clazzMemberWithPerson.getPerson().getLastName();
             }
 

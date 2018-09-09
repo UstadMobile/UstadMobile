@@ -130,7 +130,7 @@ public class ClazzLogDetailActivity extends UstadBaseActivity
         public void onBindViewHolder(@NonNull ClazzLogDetailViewHolder holder, int position){
             ClazzLogAttendanceRecordWithPerson attendanceRecord = getItem(position);
 
-            String studentName = attendanceRecord.getPerson().getFirstName() + " " +
+            String studentName = attendanceRecord.getPerson().getFirstNames() + " " +
                     attendanceRecord.getPerson().getLastName();
 
             holder.itemView.setTag(attendanceRecord.getClazzLogAttendanceRecordUid());
