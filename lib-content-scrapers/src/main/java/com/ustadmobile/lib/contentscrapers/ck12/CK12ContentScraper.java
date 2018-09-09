@@ -20,9 +20,12 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.CHECK_NAME;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.INDEX_HTML;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.JQUERY_JS;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.MATERIAL_CSS;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.TIMER_NAME;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.TROPHY_NAME;
 
 
 /**
@@ -367,6 +370,9 @@ public class CK12ContentScraper {
         FileUtils.copyToFile(getClass().getResourceAsStream(ScraperConstants.MATERIAL_CSS_LINK), new File(practiceDirectory, MATERIAL_CSS));
         FileUtils.copyToFile(getClass().getResourceAsStream(ScraperConstants.MATERIAL_JS_LINK), new File(practiceDirectory, ScraperConstants.MATERIAL_JS));
         FileUtils.copyToFile(getClass().getResourceAsStream(ScraperConstants.CK12_INDEX_HTML_TAG), new File(practiceDirectory, INDEX_HTML));
+        FileUtils.copyToFile(getClass().getResourceAsStream(ScraperConstants.TIMER_PATH), new File(practiceDirectory, TIMER_NAME));
+        FileUtils.copyToFile(getClass().getResourceAsStream(ScraperConstants.TROPHY_PATH), new File(practiceDirectory, TROPHY_NAME));
+        FileUtils.copyToFile(getClass().getResourceAsStream(ScraperConstants.CHECK_PATH), new File(practiceDirectory, CHECK_NAME));
 
         ContentScraperUtil.zipDirectory(practiceDirectory, practiceUrl, destinationDirectory);
 

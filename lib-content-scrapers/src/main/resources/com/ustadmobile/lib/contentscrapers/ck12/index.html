@@ -17,7 +17,6 @@
             max-width: 100%;
             height: auto;
         }
-
     </style>
 
 </head>
@@ -32,28 +31,31 @@
         <a class="waves-effect waves-light btn modal-trigger hide" id="modal-trigger" href="#modal1">Modal</a>
         <!-- Modal Structure -->
         <div id="modal1" class="modal">
-            <div class="modal-content center-align">
+            <div class="modal-content center-align container">
                 <h4 id="practiceHeader"></h4>
                 <div class="row">
-                    <div class="progress-circle" id="progress">
-                        <span id="progresspercent"></span>
-                        <div class="left-half-clipper">
-                            <div class="first50-bar"></div>
-                            <div class="value-bar"></div>
+                    <div style="background-color: #56544D" class="col s12 m6 l6">
+                        <p style="color: white;">YOUR PRACTICE GOAL</p>
+                        <div class="progress-circle" id="progress">
+                            <span id="progresspercent"></span>
+                            <div class="left-half-clipper">
+                                <div class="first50-bar"></div>
+                                <div class="value-bar"></div>
+                            </div>
                         </div>
                     </div>
-
-                </div>
-                <div class="row">
-
-                    <p id="score"></p>
-                </div>
-                <div class="row">
-                    <img src="trophy.png"/>
-                    <p id="streak">Streak 4</p>
-                </div>
-                <div class="row">
-                    <p id="time"></p>
+                    <div class="col s4 m2 l2"  style="padding-top: 8%">
+                        <img height="52" width="52" src="check.svg"/>
+                        <p id="score"></p>
+                    </div>
+                    <div class="col s4 m2 l2"  style="padding-top: 8%">
+                        <img height="52" width="52" src="trophy.svg"/>
+                        <p id="streak">Streak 4</p>
+                    </div>
+                    <div class="col s4 m2 l2"  style="padding-top: 8%">
+                        <img height="52" width="52" src="timer.svg"/>
+                        <p id="time"></p>
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">
@@ -125,7 +127,7 @@
         nextPracticeUrl = jsonQuestions[questionsCounter].response.nextPracticeUrl;
         practiceName = jsonQuestions[questionsCounter].response.practiceName;
         document.getElementById("practiceName").textContent = practiceName;
-        document.getElementById("practiceHeader").textContent = nextPracticeName;
+        document.getElementById("practiceHeader").textContent = practiceName;
 
         updateScore(score);
 
@@ -134,7 +136,7 @@
         displayQuestion(questionsCounter);
     }
 
-    function restart(){
+    function restart() {
 
         questionsCounter = 0;
         score = 0;
@@ -274,20 +276,20 @@
     function correctAnswer() {
 
         ++currentStreak;
-        if(currentStreak > savedStreak){
+        if (currentStreak > savedStreak) {
             savedStreak = currentStreak;
         }
         updateScore(++score);
 
         if (score === goal) {
 
-            var endTime =  new Date();
+            var endTime = new Date();
             var diff = endTime - startTime;
             // the "href" attribute of the modal trigger must specify the modal ID that wants to be triggered
             var progress = document.getElementById("progress");
 
             var percent = (goal / attempt) * 100;
-            if(percent > 50){
+            if (percent > 50) {
                 progress.classList.add("over50");
             }
             progress.classList.add("p" + percent);
@@ -306,15 +308,15 @@
             var seconds = ((diff % 60000) / 1000).toFixed(0);
 
             var timeText = "";
-            if(hours > 0.0){
+            if (hours > 0.0) {
                 timeText += hours + " hrs ";
             }
 
-            if(minutes > 0.0){
+            if (minutes > 0.0) {
                 timeText += minutes + " mins ";
             }
 
-            if(seconds > 0.0){
+            if (seconds > 0.0) {
                 timeText += seconds + " secs ";
             }
 
@@ -498,7 +500,7 @@
         }
     }
 
-    $(document).ready(function(){
+    $(document).ready(function () {
         $('.modal').modal();
     });
 

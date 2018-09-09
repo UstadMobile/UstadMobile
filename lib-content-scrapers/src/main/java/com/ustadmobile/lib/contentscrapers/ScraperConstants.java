@@ -19,6 +19,15 @@ public class ScraperConstants {
     public static final String MATERIAL_CSS_LINK = "/com/ustadmobile/lib/contentscrapers/materialize.min.css";
     public static final String REGULAR_ARABIC_FONT_LINK = "/com/ustadmobile/lib/contentscrapers/edraak/DroidNaskh-Regular.woff2";
     public static final String BOLD_ARABIC_FONT_LINK = "/com/ustadmobile/lib/contentscrapers/edraak/DroidNaskh-Bold.woff2";
+    public static final String CIRCULAR_CSS_LINK = "/com/ustadmobile/lib/contentscrapers/ck12/css-circular-prog-bar.css";
+    public static final String CIRCULAR_CSS_NAME = "css-circular-prog-bar.css";
+    public static final String TIMER_PATH = "com/ustadmobile/lib/contentscrapers/ck12/timer.svg";
+    public static final String TIMER_NAME = "timer.svg";
+    public static final String TROPHY_PATH = "com/ustadmobile/lib/contentscrapers/ck12/trophy.svg";
+    public static final String TROPHY_NAME = "trophy.svg";
+    public static final String CHECK_PATH = "com/ustadmobile/lib/contentscrapers/ck12/check.svg";
+    public static final String CHECK_NAME = "check.svg";
+
     public static final String MATERIAL_JS = "materialize.min.js";
     public static final String MATERIAL_CSS = "materialize.min.css";
 
