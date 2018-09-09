@@ -88,7 +88,8 @@ public abstract class NetworkManagerBle {
     /**
      * Bluetooth Low Energy service UUID for our app
      */
-    public static final UUID USTADMOBILE_BLE_SERVICE_UUID = UUID.fromString("7d2ea28a-f7bd-485a-bd9d-92ad6ecfe93e");
+    public static final UUID USTADMOBILE_BLE_SERVICE_UUID =
+            UUID.fromString("7d2ea28a-f7bd-485a-bd9d-92ad6ecfe93e");
 
     private final Object knownNodesLock = new Object();
 
@@ -182,11 +183,15 @@ public abstract class NetworkManagerBle {
                         @Override
                         public void onSuccess(Integer result) {
                             if(result == 0){
-                                List<Long> entryUidsToMonitor = new ArrayList<>(getAllUidsToBeMonitored());
+                                List<Long> entryUidsToMonitor =
+                                        new ArrayList<>(getAllUidsToBeMonitored());
                                 if(!isStopMonitoring){
-                                    BleEntryStatusTask entryStatusTask = makeEntryStatusTask(mContext,entryUidsToMonitor,node);
-                                    entryStatusTasks.add(entryStatusTask);
-                                    entryStatusTaskExecutorService.execute(entryStatusTask);
+                                    if(entryUidsToMonitor.size() > 0){
+                                        BleEntryStatusTask entryStatusTask =
+                                                makeEntryStatusTask(mContext,entryUidsToMonitor,node);
+                                        entryStatusTasks.add(entryStatusTask);
+                                        entryStatusTaskExecutorService.execute(entryStatusTask);
+                                    }
                                     node.setNetworkNodeLastUpdated(updateTime);
                                     networkNodeDao.insert(node);
                                     UstadMobileSystemImpl.l(UMLog.DEBUG,694,

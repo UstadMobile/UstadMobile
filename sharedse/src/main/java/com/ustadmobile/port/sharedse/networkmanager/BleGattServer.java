@@ -36,7 +36,7 @@ public abstract class BleGattServer implements WiFiDirectGroupListenerBle{
 
     private final Object p2pGroupCreationLock = new Object();
 
-    private long GROUP_CREATION_TIMEOUT = TimeUnit.SECONDS.toMillis(2);
+    private long GROUP_CREATION_TIMEOUT = TimeUnit.SECONDS.toMillis(5);
 
     private String message = null;
 
@@ -57,7 +57,7 @@ public abstract class BleGattServer implements WiFiDirectGroupListenerBle{
     /**
      * Default constructor used by Mockito when spying this class
      */
-    public BleGattServer(){}
+    protected BleGattServer(){}
 
     /**
      * Handle request from peer device

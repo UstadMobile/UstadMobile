@@ -7,6 +7,7 @@ import android.bluetooth.BluetoothManager;
 import android.bluetooth.le.AdvertiseCallback;
 import android.bluetooth.le.AdvertiseData;
 import android.bluetooth.le.AdvertiseSettings;
+import android.bluetooth.le.AdvertisingSetParameters;
 import android.bluetooth.le.BluetoothLeAdvertiser;
 import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanCallback;
@@ -27,6 +28,7 @@ import android.os.ParcelUuid;
 import android.support.annotation.RequiresApi;
 import android.support.annotation.VisibleForTesting;
 
+import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.lib.db.entities.NetworkNode;
@@ -242,10 +244,8 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
                     .setTxPowerLevel(AdvertiseSettings.ADVERTISE_TX_POWER_LOW)
                     .build();
 
-            ParcelUuid parcelUuid = new ParcelUuid(parcelServiceUuid.getUuid());
             AdvertiseData data = new AdvertiseData.Builder()
-                    .addServiceUuid(parcelUuid)
-                    .build();
+                    .addServiceUuid(parcelServiceUuid).build();
 
             bleServiceAdvertiser.startAdvertising(settings, data, new AdvertiseCallback() {
                 @Override public void onStartSuccess(AdvertiseSettings settingsInEffect) {
@@ -340,12 +340,12 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
         if(wifiDirectGroupChangeStatus == WIFI_DIRECT_GROUP_INACTIVE_STATUS){
             wifiDirectGroupChangeStatus = WIFI_DIRECT_GROUP_UNDER_CREATION_STATUS;
             if(isWiFiEnabled()){
-                startCreatingAGroup();
+                requestGroupInfo();
             }else{
                 if(setWifiEnabled(true)){
                     startCreatingAGroup();
                 }else{
-                    UstadMobileSystemImpl.l(UMLog.ERROR,692,
+                    UstadMobileSystemImpl.l(UMLog.DEBUG,692,
                             "Wifi is not enabled, enabling failed");
                 }
             }
@@ -353,7 +353,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
             if(wifiDirectGroupChangeStatus == WIFI_DIRECT_GROUP_ACTIVE_STATUS){
                 fireWiFiDirectGroupChanged(true, getWifiDirectGroup());
             }else {
-                UstadMobileSystemImpl.l(UMLog.ERROR,692,
+                UstadMobileSystemImpl.l(UMLog.DEBUG,692,
                         "Wifi is being created, please wait for the callback");
             }
         }
@@ -373,7 +373,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
             public void onSuccess() {
                 UstadMobileSystemImpl.l(UMLog.ERROR,692,
                         "Group created successfully");
-                wifiDirectGroupChangeStatus = WIFI_DIRECT_GROUP_ACTIVE_STATUS;
+                wifiDirectGroupChangeStatus = WIFI_DIRECT_GROUP_UNDER_CREATION_STATUS;
             }
 
             @Override
@@ -391,9 +391,12 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
     private void requestGroupInfo(){
         wifiP2pManager.requestGroupInfo(wifiP2pChannel, group -> {
             if(group!=null){
+                wifiDirectGroupChangeStatus = WIFI_DIRECT_GROUP_ACTIVE_STATUS;
                 wiFiDirectGroupBle = new WiFiDirectGroupBle(group.getNetworkName(),
                         group.getPassphrase());
                 fireWiFiDirectGroupChanged(true, wiFiDirectGroupBle);
+            }else{
+                startCreatingAGroup();
             }
         });
     }
@@ -410,6 +413,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
                 UstadMobileSystemImpl.l(UMLog.ERROR,693,
                         "Group removed successfully");
                 wifiDirectGroupChangeStatus = WIFI_DIRECT_GROUP_INACTIVE_STATUS;
+                requestGroupInfo();
             }
 
             @Override
@@ -473,8 +477,8 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
      * Get maximum priority assigned to a network configuration.
      * This helps to prioritize which network to connect to.
      *
-     * @param wifiManager
-     * @return int: Maximum configuration priority number.
+     * @param wifiManager WifiManager instance
+     * @return Maximum configuration priority number.
      */
     private int getMaxWiFiConfigurationPriority(final WifiManager wifiManager) {
         final List<WifiConfiguration> configurations = wifiManager.getConfiguredNetworks();
@@ -495,16 +499,6 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
         return bluetoothManager;
     }
 
-
-    @VisibleForTesting
-    public BleGattServerAndroid getGattServerAndroid() {
-        return gattServerAndroid;
-    }
-
-    @VisibleForTesting
-    public Vector<BleEntryStatusTask> getEntryStatusTasks() {
-        return entryStatusTasks;
-    }
     /**
      * {@inheritDoc}
      */
