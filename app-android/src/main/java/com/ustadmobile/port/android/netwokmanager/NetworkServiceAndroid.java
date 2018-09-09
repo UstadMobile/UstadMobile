@@ -9,11 +9,13 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 
+import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
 
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 import edu.rit.se.wifibuddy.WifiDirectHandler;
@@ -120,22 +122,14 @@ public class NetworkServiceAndroid extends Service {
 
             //TODO: Have to go
             wifiDirectHandler = ((WifiDirectHandler.WifiTesterBinder) iBinder).getService();
-            wifiDirectHandler.setStopDiscoveryAfterGroupFormed(false);
-
-            boolean isSuperNodeEnabled = Boolean.parseBoolean(UstadMobileSystemImpl.getInstance().getAppPref(
-                    PREF_KEY_SUPERNODE, "false", NetworkServiceAndroid.this.getApplicationContext()));
-            networkManagerAndroid.setSuperNodeEnabled(NetworkServiceAndroid.this.getApplicationContext(),
-                    isSuperNodeEnabled);
 
             if(managerAndroidBle.isBluetoothEnabled() && managerAndroidBle.isBleCapable()){
                 if(managerAndroidBle.canDeviceAdvertise()){
                     managerAndroidBle.startAdvertising();
-
                     /*Wait for 3 seconds before starting service discovery, it wont be happy staring
                     the service and start scanning at the same time*/
-                    new Handler().postDelayed(() -> {
-                        managerAndroidBle.startScanning();
-                    }, TimeUnit.SECONDS.toMillis(3));
+                    new Handler().postDelayed(() -> managerAndroidBle.startScanning(),
+                            TimeUnit.SECONDS.toMillis(3));
                 }else{
                     managerAndroidBle.startScanning();
                 }

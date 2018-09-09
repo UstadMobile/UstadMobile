@@ -691,10 +691,7 @@ public class NetworkManagerAndroid extends NetworkManager implements EmbeddedHTT
         return wifiManager.setWifiEnabled(enabled);
     }
 
-    @Override
-    protected BleEntryStatusTask makeEntryStatusTask(List<Long> entryUidsToCheck, NetworkNode peerToCheck) {
-        return null;
-    }
+
 
     /**
      * @exception IOException

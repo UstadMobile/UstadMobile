@@ -17,7 +17,6 @@ public class MockWifiDirectGroup  extends  WiFiDirectGroup{
 
     public MockWifiDirectGroup(MockNetworkManager owner, String ssid, String passphrase) {
         super(ssid, passphrase);
-        super.setGroupOwner(owner.getThisWifiDirectDevice());
         groupClients = new ArrayList<>();
         owner.setWifiDirectGroup(this);
         this.ownerNetworkManager = owner;

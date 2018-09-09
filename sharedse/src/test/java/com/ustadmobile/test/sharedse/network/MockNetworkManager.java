@@ -3,7 +3,6 @@ package com.ustadmobile.test.sharedse.network;
 import com.ustadmobile.core.buildconfig.CoreBuildConfig;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.port.sharedse.networkmanager.BleEntryStatusTask;
 import com.ustadmobile.port.sharedse.networkmanager.BluetoothConnectionHandler;
 import com.ustadmobile.port.sharedse.networkmanager.BluetoothServer;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
@@ -581,6 +580,8 @@ public class MockNetworkManager extends NetworkManager {
         return 20000;
     }
 
+
+
     @Override
     public void connectToWifiDirectNode(final String deviceAddress) {
         TimerTask connectTask = new TimerTask(){
@@ -637,13 +638,5 @@ public class MockNetworkManager extends NetworkManager {
         }
     }
 
-    @Override
-    public com.ustadmobile.lib.db.entities.NetworkNode getThisWifiDirectDevice() {
-        return null;
-    }
 
-    @Override
-    protected BleEntryStatusTask makeEntryStatusTask(List<Long> entryUidsToCheck, com.ustadmobile.lib.db.entities.NetworkNode peerToCheck) {
-        return null;
-    }
 }

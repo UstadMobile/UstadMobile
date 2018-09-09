@@ -411,18 +411,6 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
     public abstract boolean setWifiEnabled(boolean enabled);
 
 
-    public void startMonitoringAvailability(Object monitor, List<Long> entryUidsToMonitor) {
-
-    }
-
-    public void stopMonitoringAvailability(Object monitor) {
-
-    }
-
-    protected abstract BleEntryStatusTask makeEntryStatusTask(List<Long> entryUidsToCheck,
-                                                              NetworkNode peerToCheck);
-
-
 
     /**
      * Method which tells if the file can be downloaded locally or not.
@@ -878,6 +866,10 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
         return -1;
     }
 
+
+    public NetworkNode getThisWifiDirectDevice(){
+        return null;
+    }
 
     /**
      * Method which is invoked when new node has been found from Wi-Fi Direct discovery service.
@@ -2066,12 +2058,7 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
         updateClientServices();
     }
 
-    /**
-     * Return info about this wifi direct device as a NetworkNode object
-     *
-     * @return
-     */
-    public abstract NetworkNode getThisWifiDirectDevice();
+
 
     public abstract String getWifiDirectGroupOwnerIp();
 
