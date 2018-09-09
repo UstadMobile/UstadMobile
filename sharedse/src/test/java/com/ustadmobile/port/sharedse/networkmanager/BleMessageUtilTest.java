@@ -1,6 +1,5 @@
 package com.ustadmobile.port.sharedse.networkmanager;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -17,15 +16,9 @@ import static org.junit.Assert.assertTrue;
  */
 public class BleMessageUtilTest {
 
-    private List<Long> entryList;
+    private List<Long> entryList =
+            Arrays.asList(1056289670L,4590875612L,9076137860L,2912543894L,8965341254L);
 
-    private List<Boolean> entryStatusResponse;
-
-    @Before
-    public void setUp(){
-        this.entryList = Arrays.asList(1056289670L,4590875612L,9076137860L,2912543894L,8965341254L);
-        this.entryStatusResponse = Arrays.asList(true,false,true,true,false);
-    }
 
     @Test
     public void givenListOfEntriesInLong_whenConverted_shouldReturnBytes(){

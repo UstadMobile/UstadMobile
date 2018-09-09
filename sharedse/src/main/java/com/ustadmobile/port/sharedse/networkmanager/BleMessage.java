@@ -12,8 +12,8 @@ import java.util.zip.GZIPOutputStream;
 
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.ENTRY_STATUS_REQUEST;
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.ENTRY_STATUS_RESPONSE;
-import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.WIFI_GROUP_REQUEST;
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.WIFI_GROUP_CREATION_RESPONSE;
+import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.WIFI_GROUP_REQUEST;
 
 /**
  * Class which is actual presentation of message that exchanged between peer devices.
@@ -34,9 +34,9 @@ import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.WIF
  * <b>Packet Structure</b>
  * <p>
  * Byte 0: Request code (8 bit integer value between 0 and 255)
- * Byte 1: Maximum Transfer Unit (MTU)
- * Byte 2-6: Payload length
- * Byte 7-onwards: Payload
+ * Byte 1-3: Maximum Transfer Unit (MTU)
+ * Byte 4-7: Payload length
+ * Byte 8-onwards: Payload
  *<p>
  * Use {@link BleMessage#getPayload()} to get the actual payload sent from the peer device
  * <p>
@@ -57,6 +57,11 @@ public class BleMessage {
     private int mtu;
 
     private int length;
+
+    private static final int requestTypeStartIndex = 0;
+    private static final int mtuStartIndex = 1;
+    private static final int payloadLengthStartIndex = 3;
+    private static final int payLoadStartIndex = 7;
 
     private ByteArrayOutputStream outputStream;
 
@@ -85,11 +90,14 @@ public class BleMessage {
      */
     public BleMessage(byte[][] payload){
         byte [] packets = depacketizePayload(payload);
-        byte [] receivedPayload = ByteBuffer.wrap(Arrays.copyOfRange(packets, 6,
+        byte [] receivedPayload = ByteBuffer.wrap(Arrays.copyOfRange(packets, payLoadStartIndex,
                 packets.length)).array();
-        requestType = ByteBuffer.wrap(Arrays.copyOfRange(packets, 0, 1)).get();
-        mtu = ByteBuffer.wrap(Arrays.copyOfRange(packets, 1, 2)).get();
-        length = ByteBuffer.wrap(Arrays.copyOfRange(packets, 2, 6)).getInt();
+        requestType = ByteBuffer.wrap(Arrays.copyOfRange(packets, requestTypeStartIndex,
+                mtuStartIndex)).get();
+        mtu = ByteBuffer.wrap(Arrays.copyOfRange(packets, mtuStartIndex,
+                payloadLengthStartIndex)).getShort();
+        length = ByteBuffer.wrap(Arrays.copyOfRange(packets, payloadLengthStartIndex,
+                payLoadStartIndex)).getInt();
 
         boolean isCompressed = receivedPayload.length > 0 &&
                 (receivedPayload[0] == (byte) (GZIPInputStream.GZIP_MAGIC))
@@ -180,8 +188,8 @@ public class BleMessage {
             throw new IllegalArgumentException();
         }else{
             int packetSize = (int) Math.ceil(payload.length / (double) mtu);
-            ByteBuffer headerBuffer = ByteBuffer.allocate(6);
-            byte[] header = headerBuffer.put(requestType).put((byte) mtu)
+            ByteBuffer headerBuffer = ByteBuffer.allocate(7);
+            byte[] header = headerBuffer.put(requestType).putShort((short) mtu)
                     .putInt(payload.length).array();
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             try {
@@ -259,11 +267,14 @@ public class BleMessage {
      * @return True if the packets are all received else False.
      */
     public boolean onPackageReceived(byte [] packets){
-        byte mRequestType = ByteBuffer.wrap(Arrays.copyOfRange(packets, 0, 1)).get();
+        byte mRequestType = ByteBuffer.wrap(Arrays.copyOfRange(packets, requestTypeStartIndex,
+                mtuStartIndex)).get();
         if(outputStream == null && isValidRequestType(mRequestType)){
             outputStream = new ByteArrayOutputStream();
-            mtu = ByteBuffer.wrap(Arrays.copyOfRange(packets, 1, 2)).get();
-            length = ByteBuffer.wrap(Arrays.copyOfRange(packets, 2, 6)).getInt();
+            mtu = ByteBuffer.wrap(Arrays.copyOfRange(packets, mtuStartIndex,
+                    payloadLengthStartIndex)).getShort();
+            length = ByteBuffer.wrap(Arrays.copyOfRange(packets, payloadLengthStartIndex,
+                    payLoadStartIndex)).getInt();
             requestType = mRequestType;
         }
 
@@ -273,9 +284,8 @@ public class BleMessage {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-
             byte [] receivedPayload = ByteBuffer.wrap(
-                    Arrays.copyOfRange(outputStream.toByteArray(), 6,
+                    Arrays.copyOfRange(outputStream.toByteArray(), payLoadStartIndex,
                     outputStream.toByteArray().length)).array();
 
             if(receivedPayload.length == length){
@@ -308,6 +318,12 @@ public class BleMessage {
         return ENTRY_STATUS_REQUEST == requestType || ENTRY_STATUS_RESPONSE == requestType ||
                 WIFI_GROUP_REQUEST == requestType ||
                 WIFI_GROUP_CREATION_RESPONSE == requestType;
+    }
+
+    public void reset(){
+        outputStream = null;
+        requestType = 0;
+        length = 0;
     }
 
 }
