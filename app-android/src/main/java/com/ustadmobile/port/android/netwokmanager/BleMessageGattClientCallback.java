@@ -9,12 +9,9 @@ import android.bluetooth.BluetoothProfile;
 import android.os.Build;
 import android.support.annotation.VisibleForTesting;
 
-import com.ustadmobile.core.impl.UMLog;
-import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.port.sharedse.networkmanager.BleMessage;
 import com.ustadmobile.port.sharedse.networkmanager.BleMessageResponseListener;
 
-import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -238,10 +235,5 @@ public class BleMessageGattClientCallback extends  BluetoothGattCallback{
         return false;
     }
 
-    private boolean initiatePacketTransfer(BluetoothGatt gatt,
-                                           BluetoothGattCharacteristic characteristic){
-        characteristic.setValue(ByteBuffer.allocate(1).put((byte) 0).array());
-        return gatt.writeCharacteristic(characteristic);
-    }
 
 }
