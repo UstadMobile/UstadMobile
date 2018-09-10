@@ -26,6 +26,7 @@ import com.ustadmobile.core.db.dao.OpdsLinkDao;
 import com.ustadmobile.core.db.dao.PersonCustomFieldDao;
 import com.ustadmobile.core.db.dao.PersonCustomFieldValueDao;
 import com.ustadmobile.core.db.dao.PersonDao;
+import com.ustadmobile.core.db.dao.PersonDetailPresenterFieldDao;
 import com.ustadmobile.lib.database.annotation.UmClearAll;
 import com.ustadmobile.lib.database.annotation.UmDatabase;
 import com.ustadmobile.lib.database.annotation.UmDbContext;
@@ -55,6 +56,7 @@ import com.ustadmobile.lib.db.entities.OpdsLink;
 import com.ustadmobile.lib.db.entities.Person;
 import com.ustadmobile.lib.db.entities.PersonCustomField;
 import com.ustadmobile.lib.db.entities.PersonCustomFieldValue;
+import com.ustadmobile.lib.db.entities.PersonDetailPresenterField;
 
 @UmDatabase(version = 1, entities = {
         OpdsEntry.class, OpdsLink.class, OpdsEntryParentToChildJoin.class,
@@ -65,7 +67,8 @@ import com.ustadmobile.lib.db.entities.PersonCustomFieldValue;
         HttpCachedEntry.class, DownloadJob.class, DownloadJobItem.class,
         Person.class, Clazz.class, ClazzMember.class, ClazzLog.class,
         ClazzLogAttendanceRecord.class, FeedEntry.class, ContentEntry.class,
-        PersonCustomField.class, PersonCustomFieldValue.class
+        PersonCustomField.class, PersonCustomFieldValue.class,
+        PersonDetailPresenterField.class
 })
 public abstract class UmAppDatabase{
 
@@ -145,6 +148,8 @@ public abstract class UmAppDatabase{
     public abstract PersonCustomFieldDao getPersonCustomFieldDao();
 
     public abstract PersonCustomFieldValueDao getPersonCustomFieldValueDao();
+
+    public abstract PersonDetailPresenterFieldDao getPersonDetailPresenterFieldDao();
 
     @UmDbContext
     public abstract Object getContext();

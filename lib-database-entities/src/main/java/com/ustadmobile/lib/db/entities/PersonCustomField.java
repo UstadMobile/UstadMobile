@@ -9,9 +9,10 @@ public class PersonCustomField {
     @UmPrimaryKey(autoIncrement = true)
     private long personCustomFieldUid;
 
+    //Any extra field names that isn't used in the display of things yet.
     private String fieldName;
 
-    private int labelMessageCode;
+    private int labelMessageId;
 
     private String fieldIcon;
 
@@ -31,12 +32,12 @@ public class PersonCustomField {
         this.fieldName = fieldName;
     }
 
-    public int getLabelMessageCode() {
-        return labelMessageCode;
+    public int getLabelMessageId() {
+        return labelMessageId;
     }
 
-    public void setLabelMessageCode(int labelMessageCode) {
-        this.labelMessageCode = labelMessageCode;
+    public void setLabelMessageId(int labelMessageId) {
+        this.labelMessageId = labelMessageId;
     }
 
     public String getFieldIcon() {

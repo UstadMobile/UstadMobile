@@ -79,7 +79,7 @@ public class UmDbTestUtil {
             //float personAttendancePercentage = Float.parseFloat(peopleMap.get(name).toString());
             float personAttendancePercentage = (float) peopleMap.get(name);
             Person testPerson = new Person();
-            testPerson.setFirstName(name.split(" ")[0]);
+            testPerson.setFirstNames(name.split(" ")[0]);
             testPerson.setLastName(name.split(" ")[1]);
             testPerson.setPersonUid(personDao.insert(testPerson));
 

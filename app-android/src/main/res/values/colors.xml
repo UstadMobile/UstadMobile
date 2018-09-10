@@ -6,7 +6,7 @@
     -->
     <color name="primary">#00BCD4</color>
     <color name="primary_dark">#00BCD4</color>
-    <color name="primary_light">#FFFFFF</color>
+    <color name="primary_light">#CCFFFF</color>
     <color name="accent">#FF6600</color>
     <color name="primary_text">#FFFFFF</color>
     <color name="secondary_text">#727272</color>
