@@ -1,4 +1,4 @@
-package com.ustadmobile.lib.contentscrapers.ck12;
+package com.ustadmobile.lib.contentscrapers.ck12.practice;
 
 import com.google.gson.annotations.SerializedName;
 
@@ -11,15 +11,15 @@ public class AnswerResponse {
 
     public class Instance{
 
-        String solution;
+        public String solution;
 
         boolean multiAnswers;
 
         String questionTypeName;
 
-        List<AnswerObjects> responseObjects;
+        public List<AnswerObjects> responseObjects;
 
-        List<Object> answer;
+        public List<Object> answer;
 
         public class AnswerObjects {
 

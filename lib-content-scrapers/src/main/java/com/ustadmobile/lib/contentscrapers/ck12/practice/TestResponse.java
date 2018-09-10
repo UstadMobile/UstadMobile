@@ -1,4 +1,4 @@
-package com.ustadmobile.lib.contentscrapers.ck12;
+package com.ustadmobile.lib.contentscrapers.ck12.practice;
 
 import com.google.gson.annotations.SerializedName;
 

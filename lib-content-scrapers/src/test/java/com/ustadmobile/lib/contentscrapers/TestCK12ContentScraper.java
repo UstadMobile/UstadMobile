@@ -1,7 +1,7 @@
 package com.ustadmobile.lib.contentscrapers;
 
 import com.ustadmobile.lib.contentscrapers.ck12.CK12ContentScraper;
-import com.ustadmobile.lib.contentscrapers.ck12.ScriptEngineReader;
+import com.ustadmobile.lib.contentscrapers.ck12.practice.ScriptEngineReader;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;

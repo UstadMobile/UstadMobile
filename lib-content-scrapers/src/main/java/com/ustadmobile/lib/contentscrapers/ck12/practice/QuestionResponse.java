@@ -1,6 +1,7 @@
-package com.ustadmobile.lib.contentscrapers.ck12;
+package com.ustadmobile.lib.contentscrapers.ck12.practice;
 
 import com.google.gson.annotations.SerializedName;
+import com.ustadmobile.lib.contentscrapers.ck12.practice.AnswerResponse;
 
 
 import java.util.List;

@@ -4,7 +4,11 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.ScraperConstants;
-import com.ustadmobile.lib.contentscrapers.edraakK12.EdraakK12ContentScraper;
+import com.ustadmobile.lib.contentscrapers.ck12.practice.AnswerResponse;
+import com.ustadmobile.lib.contentscrapers.ck12.practice.PracticeResponse;
+import com.ustadmobile.lib.contentscrapers.ck12.practice.QuestionResponse;
+import com.ustadmobile.lib.contentscrapers.ck12.practice.ScriptEngineReader;
+import com.ustadmobile.lib.contentscrapers.ck12.practice.TestResponse;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
