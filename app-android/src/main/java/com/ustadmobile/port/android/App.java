@@ -31,7 +31,7 @@ public class App extends UmBaseApplication {
     protected void attachBaseContext(Context base) {
         super.attachBaseContext(base);
 
-        CoreConfigurationBuilder builder = new CoreConfigurationBuilder(this);
+        /*CoreConfigurationBuilder builder = new CoreConfigurationBuilder(this);
         builder.setReportFormat(StringFormat.JSON);
 
         builder.getPluginConfigurationBuilder(HttpSenderConfigurationBuilder.class)
@@ -40,7 +40,7 @@ public class App extends UmBaseApplication {
                 .setBasicAuthPassword(BuildConfig.ACRA_BASIC_PASS)
                 .setHttpMethod(HttpSender.Method.POST).setEnabled(true);
 
-        ACRA.init(this, builder);
+        ACRA.init(this, builder);*/
     }
 }
 
