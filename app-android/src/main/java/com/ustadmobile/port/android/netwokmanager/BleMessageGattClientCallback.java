@@ -7,8 +7,11 @@ import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothProfile;
 import android.os.Build;
+import android.support.annotation.RequiresApi;
 import android.support.annotation.VisibleForTesting;
 
+import com.ustadmobile.core.impl.UMLog;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.port.sharedse.networkmanager.BleMessage;
 import com.ustadmobile.port.sharedse.networkmanager.BleMessageResponseListener;
 
@@ -43,6 +46,7 @@ import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.UST
  *  @author kileha3
  */
 
+@RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
 public class BleMessageGattClientCallback extends  BluetoothGattCallback{
 
     private BleMessage messageToSend, receivedMessage;
@@ -61,7 +65,7 @@ public class BleMessageGattClientCallback extends  BluetoothGattCallback{
      * Constructor to be called when creating new callback
      * @param messageToSend Payload to be sent to the peer device (List of entry Id's)
      */
-    public BleMessageGattClientCallback(BleMessage messageToSend){
+    BleMessageGattClientCallback(BleMessage messageToSend){
         this.messageToSend = messageToSend;
         receivedMessage = new BleMessage();
     }
@@ -97,6 +101,8 @@ public class BleMessageGattClientCallback extends  BluetoothGattCallback{
 
         if (status != BluetoothGatt.GATT_SUCCESS) {
             gatt.disconnect();
+            UstadMobileSystemImpl.l(UMLog.DEBUG,698,
+                    "Connection failed with error code "+status);
             return;
         }
 
@@ -107,7 +113,7 @@ public class BleMessageGattClientCallback extends  BluetoothGattCallback{
                 if(gatt.requestMtu(MAXIMUM_MTU_SIZE)){
                     synchronized (mtuChangeMonitor){
                         try {
-                            mtuChangeMonitor.wait(TimeUnit.SECONDS.toMillis(3));
+                            mtuChangeMonitor.wait(TimeUnit.SECONDS.toMillis(2));
                         } catch (InterruptedException e) {
                             mtuChangeMonitor.notify();
                             e.printStackTrace();
@@ -197,15 +203,6 @@ public class BleMessageGattClientCallback extends  BluetoothGattCallback{
         }
     }
 
-    @VisibleForTesting
-    public BleMessageResponseListener getResponseListener(){
-        return responseListener;
-    }
-
-    @VisibleForTesting
-    public BleMessage getReceivedMessage() {
-        return receivedMessage;
-    }
 
     /**
      * Find the matching service among services found by peer devices

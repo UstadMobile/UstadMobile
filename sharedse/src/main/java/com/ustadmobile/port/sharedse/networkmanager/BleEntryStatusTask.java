@@ -3,6 +3,8 @@ package com.ustadmobile.port.sharedse.networkmanager;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.EntryStatusResponseDao;
 import com.ustadmobile.core.db.dao.NetworkNodeDao;
+import com.ustadmobile.core.impl.UMLog;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.lib.db.entities.EntryStatusResponse;
 import com.ustadmobile.lib.db.entities.NetworkNode;
 
@@ -96,7 +98,12 @@ public abstract class BleEntryStatusTask implements Runnable,BleMessageResponseL
             entryStatusResponses.add(statusResponse);
 
         }
-        entryStatusResponseDao.insert(entryStatusResponses);
+        long [] rowCount = entryStatusResponseDao.insert(entryStatusResponses);
+        if(rowCount.length == entryStatusResponses.size()){
+            UstadMobileSystemImpl.l(UMLog.DEBUG,697,
+                    rowCount.length+" responses saved to the db");
+        }
+
     }
 
     /**

@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
+import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.DEFAULT_MTU_SIZE;
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.ENTRY_STATUS_REQUEST;
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.ENTRY_STATUS_RESPONSE;
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.WIFI_GROUP_CREATION_RESPONSE;
@@ -320,10 +321,15 @@ public class BleMessage {
                 WIFI_GROUP_CREATION_RESPONSE == requestType;
     }
 
+    /**
+     * Reset a message
+     */
     public void reset(){
         outputStream = null;
         requestType = 0;
         length = 0;
+        mtu = DEFAULT_MTU_SIZE;
+        payload = new byte[]{};
     }
 
 }

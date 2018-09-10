@@ -1,8 +1,11 @@
 package com.ustadmobile.port.android.netwokmanager;
 
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothManager;
 import android.content.Context;
+import android.os.Build;
+import android.support.annotation.RequiresApi;
 
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
@@ -39,6 +42,7 @@ import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.ENT
  *
  *  @author kileha3
  */
+@RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
 public class    BleEntryStatusTaskAndroid extends BleEntryStatusTask {
 
     private BleMessageGattClientCallback mCallback;
@@ -55,8 +59,8 @@ public class    BleEntryStatusTaskAndroid extends BleEntryStatusTask {
      * @param entryUidsToCheck List of Id's to be checked for availability from a peer device.
      * @param peerToCheck Peer device for those entries to be checked from.
      */
-    public BleEntryStatusTaskAndroid(Context context, List<Long> entryUidsToCheck,
-                                     NetworkNode peerToCheck) {
+    BleEntryStatusTaskAndroid(Context context, List<Long> entryUidsToCheck,
+                              NetworkNode peerToCheck) {
         super(context,entryUidsToCheck,peerToCheck);
         System.out.println("change");
         this.context = context;
@@ -83,7 +87,14 @@ public class    BleEntryStatusTaskAndroid extends BleEntryStatusTask {
            mCallback.setOnResponseReceived(this);
            BluetoothDevice destinationPeer = bluetoothManager.getAdapter()
                    .getRemoteDevice(peerToCheck.getBluetoothMacAddress());
-           destinationPeer.connectGatt(context,false,mCallback);
+            BluetoothGatt gatt= destinationPeer.connectGatt(context,false,mCallback);
+            if(gatt == null){
+                UstadMobileSystemImpl.l(UMLog.ERROR,695,
+                        "Failed to connect to "+destinationPeer.getAddress());
+            }else{
+                UstadMobileSystemImpl.l(UMLog.DEBUG,695,
+                        "Connecting to "+destinationPeer.getAddress());
+            }
        }catch (IllegalArgumentException e){
            UstadMobileSystemImpl.l(UMLog.ERROR,695,
                    "Wrong address format provided",e);

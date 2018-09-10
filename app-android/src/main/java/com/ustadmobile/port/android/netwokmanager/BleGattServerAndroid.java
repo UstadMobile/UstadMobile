@@ -6,6 +6,8 @@ import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattServer;
 import android.bluetooth.BluetoothGattServerCallback;
 import android.content.Context;
+import android.os.Build;
+import android.support.annotation.RequiresApi;
 import android.support.annotation.VisibleForTesting;
 
 import com.ustadmobile.core.impl.UMLog;
@@ -36,6 +38,7 @@ import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.UST
  *
  *  @author kileha3
  */
+@RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
 public class BleGattServerAndroid extends BleGattServer{
 
     private BluetoothGattServer gattServer;
@@ -128,7 +131,7 @@ public class BleGattServerAndroid extends BleGattServer{
      * @param networkManager Instance of a NetworkManagerAndroidBle for getting
      *                       BluetoothManager instance.
      */
-    public BleGattServerAndroid(Context context, NetworkManagerAndroidBle networkManager ) {
+    BleGattServerAndroid(Context context, NetworkManagerAndroidBle networkManager) {
         super(context);
         this.receivedMessage = new BleMessage();
         this.gattServer = networkManager.getBluetoothManager().openGattServer(context,mCallback);

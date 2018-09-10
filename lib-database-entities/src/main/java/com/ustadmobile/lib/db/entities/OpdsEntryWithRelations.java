@@ -1,14 +1,9 @@
 package com.ustadmobile.lib.db.entities;
 
-import com.ustadmobile.lib.database.annotation.UmEmbedded;
 import com.ustadmobile.lib.database.annotation.UmRelation;
-import com.ustadmobile.lib.util.UMUtil;
 
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;

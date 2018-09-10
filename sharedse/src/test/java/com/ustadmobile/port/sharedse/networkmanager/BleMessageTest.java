@@ -85,4 +85,17 @@ public class BleMessageTest {
                 Arrays.equals(payload, sentMessage.getPayload()));
     }
 
+    @Test
+    public void givenCreatedMessage_whenResetCalled_thenShouldResetTheMessage(){
+        byte[] payload = BleMessageUtil.bleMessageLongToBytes(entriesListWithInsufficientDuplicates);
+        BleMessage messageToSend = new BleMessage(ENTRY_STATUS_REQUEST, payload);
+
+        assertTrue("Message was created and is not null",
+                messageToSend.getPayload().length > 0);
+        messageToSend.reset();
+
+        assertTrue("Message was reset",
+                messageToSend.getPayload().length == 0);
+    }
+
 }

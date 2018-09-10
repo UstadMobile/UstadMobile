@@ -9,20 +9,12 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 
-import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
-import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
 
-import java.sql.SQLException;
-import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 import edu.rit.se.wifibuddy.WifiDirectHandler;
-import com.ustadmobile.core.listener.ActiveSyncListener;
-import com.ustadmobile.core.listener.ActiveUserListener;
-
-import static com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroid.PREF_KEY_SUPERNODE;
 
 
 /**
@@ -126,8 +118,8 @@ public class NetworkServiceAndroid extends Service {
             if(managerAndroidBle.isBluetoothEnabled() && managerAndroidBle.isBleCapable()){
                 if(managerAndroidBle.canDeviceAdvertise()){
                     managerAndroidBle.startAdvertising();
-                    /*Wait for 3 seconds before starting service discovery, it wont be happy staring
-                    the service and start scanning at the same time*/
+                    /*Wait for 3 seconds before starting service discovery, it wont be happy when
+                    both start at the same time*/
                     new Handler().postDelayed(() -> managerAndroidBle.startScanning(),
                             TimeUnit.SECONDS.toMillis(3));
                 }else{

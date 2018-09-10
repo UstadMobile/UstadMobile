@@ -104,12 +104,12 @@ public abstract class NetworkManagerBle {
     /**
      * Holds all created entry status tasks
      */
-    protected Vector<BleEntryStatusTask> entryStatusTasks = new Vector<>();
+    private Vector<BleEntryStatusTask> entryStatusTasks = new Vector<>();
 
     /**
      * Lis of all objects that will be listening for the Wifi direct group change
      */
-    protected Vector<WiFiDirectGroupListenerBle> wiFiDirectGroupListeners = new Vector<>();
+    private Vector<WiFiDirectGroupListenerBle> wiFiDirectGroupListeners = new Vector<>();
 
     /**
      * Do the main initialization of the NetworkManagerBle

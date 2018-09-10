@@ -139,4 +139,16 @@ public class BleMessageGattClientCallbackTest {
             verify(mockedGattClient, times(i + 1)).writeCharacteristic(mockedCharacteristic);
         }
     }
+
+    @Test
+    public void givenOnConnectionStateChanged_whenMtuChangeRequested_thenShouldWaitAndDiscoverServices(){
+        gattClientCallback.onConnectionStateChange(mockedGattClient,
+                BluetoothGatt.GATT_SUCCESS, BluetoothProfile.STATE_CONNECTED);
+
+        gattClientCallback.onMtuChanged(mockedGattClient,DEFAULT_MTU_SIZE, BluetoothGatt.GATT_SUCCESS);
+
+        /*Verify that service discovery was started of which it might be dur to
+        the request timeout or successful MTU change*/
+        verify(mockedGattClient).discoverServices();
+    }
 }
