@@ -9,11 +9,13 @@ public class PersonCustomField {
     @UmPrimaryKey(autoIncrement = true)
     private long personCustomFieldUid;
 
-    //Any extra field names that isn't used in the display of things yet.
+    //Any extra field names that isn't used in the views.
     private String fieldName;
 
+    //The label of the field used in the views.
     private int labelMessageId;
 
+    //The field icon used in the view.
     private String fieldIcon;
 
     public long getPersonCustomFieldUid() {

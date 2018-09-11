@@ -14,6 +14,7 @@ import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.core.view.PersonDetailView;
 import com.ustadmobile.lib.db.entities.Clazz;
+import com.ustadmobile.lib.db.entities.Person;
 import com.ustadmobile.port.android.view.ClazzLogDetailActivity;
 import com.ustadmobile.port.android.view.PersonDetailActivity;
 import com.ustadmobile.test.port.android.testutil.UmDbTestUtil;
@@ -73,8 +74,9 @@ public class PersonDetailActivityEspressoTest {
         testClazz = UmDbTestUtil.createClazzWithClazzMembers(TEST_CLASS_NAME, TEST_CLASS_PERCENTAGE,
                 peopleMap, TEST_USER_UID, context);
 
-        //TODO: change? Get from UmDbTestUtil ?
-        personUid = 1L;
+        Person testPerson = UmDbTestUtil.createPersonWithFieldsAndCustomFields(context);
+
+        personUid = testPerson.getPersonUid();
 
         //Start the activity
         Intent launchActivityIntent = new Intent();

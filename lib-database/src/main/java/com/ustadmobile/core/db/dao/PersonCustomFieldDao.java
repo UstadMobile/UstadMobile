@@ -18,4 +18,7 @@ public abstract class PersonCustomFieldDao implements BaseDao<PersonCustomField>
     @Override
     @UmQuery("SELECT * FROM PersonCustomField WHERE personCustomFieldUid = :uid")
     public abstract PersonCustomField findByUid(long uid);
+
+    @UmQuery("SELECT MAX(personCustomFieldUid) FROM PersonCustomField")
+    public abstract int findLatestUid();
 }

@@ -284,4 +284,22 @@ This is the one you should be editing.
     <string name="absent_unselected">Absent Unselected</string>
     <string name="partial_unselected">Partial Unselected</string>
 
+    <string name="call_parent">Call parent</string>
+    <string name="text_parent">Text parent</string>
+    <string name="enroll_in_class">Enroll in class</string>
+    <string name="attendance_report">Attendance report</string>
+    <string name="record_dropout">Record dropout</string>
+    <string name="profile">Profile</string>
+    <string name="father">Father</string>
+    <string name="mother">Mother</string>
+    <string name="birthday">Birthday</string>
+    <string name="years_old">years old</string>
+    <string name="background">Background</string>
+    <string name="test_result">test result</string>
+    <string name="aser_test_result">ASER test result</string>
+    <string name="current_formal_school">Current public/formal school</string>
+    <string name="first_names">First names</string>
+    <string name="last_name">Last name</string>
+
+
 </resources>

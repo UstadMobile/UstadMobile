@@ -50,14 +50,19 @@ using the serial as listed by the adb devices command.
 
 Start the remote test slave server device:
  >$./gradlew startTestSlaveServer
- 
+
 This automatically updates buildconfig.local.properties with the ip address, mac address, and
 bluetooth mac of the device being used as the test slave server.
 
  Run the tests:
  >export ANDROID_SERIAL="TESTDEVICESERIAL" <br/>
- >$./gradlew connectedAndroidTest
- 
+ >
+ >>$./gradlew connectedAndroidTest\
+
+#### Testing on Windows bug error=206
+
+If you see the error  ``` Createprocess error=206; the filename or extension is too long``` while running the Android Espresso tests it means that Gradle in Windows is unable to handle the long classpath. ie: this repo is a bit further down the folder structure. It seems that Gradle doesn't handle long command line on Windows yet. A solution to this error would be to move the UstadMobile repo closer to ```C:\```  eg: ```C:\repo\UstadMobile\```. You may be able to mount the repo on a virtual disk however we have not tested that yet.
+
 ### To use as a library in another app
 
 Add Ustad Mobile's maven repo to your build.gradle file:
