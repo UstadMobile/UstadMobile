@@ -300,6 +300,14 @@ This is the one you should be editing.
     <string name="current_formal_school">Current public/formal school</string>
     <string name="first_names">First names</string>
     <string name="last_name">Last name</string>
+    <string name="basic_details">Basic details</string>
+    <string name="home_address">Home address</string>
+    <string name="add_person_to_class">Add person to class</string>
+    <string name="fathers_name">Father's name</string>
+    <string name="fathers_number">Father's number</string>
+    <string name="mothers_name">Mother's name</string>
+    <string name="mothers_number">Mother's number</string>
+    <string name="new_person">New Person</string>
 
 
 </resources>

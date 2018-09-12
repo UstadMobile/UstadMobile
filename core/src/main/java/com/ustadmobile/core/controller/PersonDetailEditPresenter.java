@@ -7,8 +7,10 @@ import java.util.Hashtable;
 
 public class PersonDetailEditPresenter extends UstadBaseController<PersonDetailEditView> {
 
+    //The person we are editing
     private long personUid;
 
+    //The clazz uid which we are looking/the clazz uid to assign this personUid.
     private long addToClazzUid;
 
     /**

@@ -14,6 +14,7 @@ import com.ustadmobile.core.view.PersonDetailEditView;
 import com.ustadmobile.core.view.PersonDetailView;
 import com.ustadmobile.lib.db.entities.Person;
 import com.ustadmobile.lib.db.entities.PersonCustomFieldValueWithPersonCustomField;
+import com.ustadmobile.lib.db.entities.PersonCustomFieldWithPersonCustomFieldValue;
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField;
 
 import java.util.HashMap;
@@ -106,6 +107,7 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
     private List<PersonDetailPresenterField> presenterFields;
 
     private Map<Long, PersonCustomFieldValueWithPersonCustomField> customFieldValueMap;
+    private Map<Long, PersonCustomFieldWithPersonCustomFieldValue> customFieldWithFieldValueMap;
 
     private long personUid;
 
@@ -147,18 +149,19 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
             public void onSuccess(List<PersonDetailPresenterField> fields) {
                 presenterFields = fields;
 
-                //Get all values
-                personCustomFieldValueDao.findByPersonUidAsync(personUid,
-                                new UmCallback<List<PersonCustomFieldValueWithPersonCustomField>>() {
+                //Get all the (custom?) fields and their values (if applicable)
+                personCustomFieldValueDao.findByPersonUidAsync2(personUid,
+                        new UmCallback<List<PersonCustomFieldWithPersonCustomFieldValue>>() {
                     @Override
-                    public void onSuccess(List<PersonCustomFieldValueWithPersonCustomField> result) {
-                        customFieldValueMap = new HashMap<>();
-                        for( PersonCustomFieldValueWithPersonCustomField fieldValue: result){
-                            customFieldValueMap.put(
-                                    fieldValue.getPersonCustomFieldValuePersonCustomFieldUid(),
-                                    fieldValue);
+                    public void onSuccess(List<PersonCustomFieldWithPersonCustomFieldValue> result) {
+                        //Store the values and fields in this Map
+                        customFieldWithFieldValueMap = new HashMap<>();
+                        for( PersonCustomFieldWithPersonCustomFieldValue fieldWithFieldValue: result){
+                            customFieldWithFieldValueMap.put(
+                                    fieldWithFieldValue.getPersonCustomFieldUid(), fieldWithFieldValue);
                         }
 
+                        //Get the attendance average for this person.
                         clazzMemberDao.getAverageAttendancePercentageByPersonUidAsync(personUid, new UmCallback<Float>() {
                             @Override
                             public void onSuccess(Float result) {
@@ -180,9 +183,6 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
                             }
                         });
 
-                        
-
-
                     }
 
                     @Override
@@ -190,6 +190,7 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
 
                     }
                 });
+
             }
 
             @Override
@@ -243,10 +244,13 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
                         , UMCalendarUtil.getPrettyDateFromLong(person.getDateOfBirth()));
             }else  {//this is actually a custom field
 
-                view.setField(field.getFieldIndex(), new PersonDetailViewField(field.getFieldType(),
-                                customFieldValueMap.get(field.getFieldUid()).getCustomField().getLabelMessageId(),
-                                customFieldValueMap.get(field.getFieldUid()).getCustomField().getFieldIcon()),
-                        customFieldValueMap.get(field.getFieldUid()).getFieldValue());
+                view.setField(field.getFieldIndex(),
+                        new PersonDetailViewField(
+                                field.getFieldType(),
+                                customFieldWithFieldValueMap.get(field.getFieldUid()).getLabelMessageId(),
+                                customFieldWithFieldValueMap.get(field.getFieldUid()).getFieldIcon()),
+                        customFieldWithFieldValueMap.get(field.getFieldUid()).getCustomFieldValue().getFieldValue()
+                        );
             }
         }
     }

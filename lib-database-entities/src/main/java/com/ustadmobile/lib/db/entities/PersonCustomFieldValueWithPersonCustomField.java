@@ -2,6 +2,9 @@ package com.ustadmobile.lib.db.entities;
 
 import com.ustadmobile.lib.database.annotation.UmEmbedded;
 
+/**
+ * TODO: Remove this. This is replaced by PersonCustomFieldWithPersonCustomFieldValue (gasp)
+ */
 public class PersonCustomFieldValueWithPersonCustomField extends PersonCustomFieldValue {
 
     @UmEmbedded

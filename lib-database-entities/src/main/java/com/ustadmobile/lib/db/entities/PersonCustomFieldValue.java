@@ -28,7 +28,8 @@ public class PersonCustomFieldValue {
         return personCustomFieldValuePersonCustomFieldUid;
     }
 
-    public void setPersonCustomFieldValuePersonCustomFieldUid(long personCustomFieldValuePersonCustomFieldUid) {
+    public void setPersonCustomFieldValuePersonCustomFieldUid(
+            long personCustomFieldValuePersonCustomFieldUid) {
         this.personCustomFieldValuePersonCustomFieldUid = personCustomFieldValuePersonCustomFieldUid;
     }
 
