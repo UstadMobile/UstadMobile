@@ -195,11 +195,11 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
 
             } else if (field.getFieldUid() == PersonDetailPresenterField.PERSON_FIELD_UID_ATTENDANCE) {
                 view.setField(field.getFieldIndex(), new PersonDetailViewField(FIELD_TYPE_TEXT,
-                        MessageID.attendance, "ic_lens_black_24dp"), "Attended ...");
+                        0, "ic_lens_black_24dp"), "Attended ...");
 
             } else if (field.getFieldUid() == PersonDetailPresenterField.PERSON_FIELD_UID_CLASSES) {
                 view.setField(field.getFieldIndex(), new PersonDetailViewField(FIELD_TYPE_TEXT,
-                        MessageID.classes, "ic_people_black_24dp"), "Class Name ...");
+                        0, "ic_people_black_24dp"), "Class Name ...");
 
             } else if (field.getFieldUid() == PersonDetailPresenterField.PERSON_FIELD_UID_FATHER_NAME_AND_PHONE_NUMBER) {
                 view.setField(field.getFieldIndex(), new PersonDetailViewField(FIELD_TYPE_TEXT,

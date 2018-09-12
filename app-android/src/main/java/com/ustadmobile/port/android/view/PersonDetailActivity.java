@@ -1,23 +1,16 @@
 package com.ustadmobile.port.android.view;
 
-import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.view.ViewPager;
-import android.support.v7.widget.DividerItemDecoration;
-import android.support.v7.widget.LinearLayoutCompat;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
@@ -28,8 +21,6 @@ import com.ustadmobile.core.view.PersonDetailView;
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
-import java.util.List;
-import java.util.Map;
 import java.util.WeakHashMap;
 
 import static com.ustadmobile.core.controller.PersonDetailPresenter.PersonDetailViewField.FIELD_TYPE_DATE;
@@ -46,23 +37,10 @@ public class PersonDetailActivity extends UstadBaseActivity implements PersonDet
 
     //Toolbar
     private Toolbar toolbar;
-    private RecyclerView mRecyclerView;
-    private RecyclerView.LayoutManager mRecyclerLayoutManager;
     private LinearLayout mLinearLayout;
 
     private PersonDetailPresenter mPresenter;
-
     String personName = "";
-
-    /**
-     * Get color
-     *
-     * @param color
-     * @return
-     */
-    public int fetchColor(int color) {
-        return ContextCompat.getColor(this, color);
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,16 +53,7 @@ public class PersonDetailActivity extends UstadBaseActivity implements PersonDet
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-//        mRecyclerView = findViewById(R.id.activity_person_detail_fields);
-//        mRecyclerView.setLayoutManager(mRecyclerLayoutManager);
-//        DividerItemDecoration dividerItemDecoration =
-//                new DividerItemDecoration(mRecyclerView.getContext(),
-//                        LinearLayoutManager.VERTICAL);
-//        mRecyclerView.addItemDecoration(dividerItemDecoration);
-
-
         mLinearLayout = findViewById(R.id.activity_person_detail_fields_linearlayout);
-
 
         //Call the Presenter
         mPresenter = new PersonDetailPresenter(this,
@@ -105,25 +74,29 @@ public class PersonDetailActivity extends UstadBaseActivity implements PersonDet
 
     @Override
     public void setField(int index, PersonDetailPresenter.PersonDetailViewField field, Object value) {
-        System.out.println("Set Field: " + index);
-        List<Map.Entry<Object, String>> options = field.getFieldOptions();
-        String iconName = field.getIconName();
-
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        String label = impl.getString(field.getMessageLabel(), getContext());
-
-
+        String label = null;
+        if(field.getMessageLabel() != 0) {
+            label = impl.getString(field.getMessageLabel(), getContext());
+        }
 
         switch(field.getFieldType()){
             case PersonDetailPresenterField.FIELD_TYPE_HEADER:
 
                 //Add The Divider
-                //TODO
+                View divider = new View(this);
+                divider.setLayoutParams(new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        2
+                ));
+                divider.setBackgroundColor(Color.parseColor("#B3B3B3"));
+                mLinearLayout.addView(divider);
 
                 //Add the Header
                 TextView header = new TextView(this);
-                header.setText(label);
-                header.setPadding(16,2,2,2);
+                header.setText(label.toUpperCase());
+                header.setTextSize(12);
+                header.setPadding(16,0,0,2);
                 mLinearLayout.addView(header);
                 break;
             case FIELD_TYPE_TEXT:
@@ -150,24 +123,29 @@ public class PersonDetailActivity extends UstadBaseActivity implements PersonDet
                 int iconResId = getResourceId(field.getIconName(), "drawable", getPackageName());
                 ImageView icon = new ImageView(this);
                 icon.setImageResource(iconResId);
-                icon.setPadding(4,4,4,4);
+                icon.setPadding(16,0,4,0);
                 hll.addView(icon);
 
 
+                LinearLayout vll = new LinearLayout(this);
+                vll.setOrientation(LinearLayout.VERTICAL);
+                vll.setPadding(16,0,0,0);
+
                 TextView fieldValue = new TextView(this);
                 fieldValue.setText(value.toString());
-                fieldValue.setPadding(4,4,4,0);
-                hll.addView(fieldValue);
+                fieldValue.setPadding(16,4,4,0);
+                vll.addView(fieldValue);
 
-                TextView fieldLabel = new TextView(this);
-                fieldLabel.setTextSize(10);
-                fieldLabel.setText(label);
-                fieldLabel.setPadding(125,0,4,4);
-                //hll.addView(fieldLabel);
+                if (label != null) {
+                    TextView fieldLabel = new TextView(this);
+                    fieldLabel.setTextSize(10);
+                    fieldLabel.setText(label);
+                    fieldLabel.setPadding(16, 0, 4, 4);
+                    vll.addView(fieldLabel);
+                }
 
+                hll.addView(vll);
                 mLinearLayout.addView(hll);
-                mLinearLayout.addView(fieldLabel);
-
 
                 break;
             case FIELD_TYPE_DROPDOWN:

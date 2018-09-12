@@ -191,11 +191,11 @@
         <View
             android:id="@+id/activity_person_detail_divider2"
             android:layout_width="match_parent"
-            android:layout_height="1dp"
+            android:layout_height="0dp"
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
             android:background="?android:attr/listDivider"
-            android:visibility="visible"
+            android:visibility="invisible"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/activity_person_detail_action_attendance_report_text" />
 
@@ -210,7 +210,7 @@
             android:layout_marginBottom="8dp"
             android:orientation="vertical"
             app:layout_constraintTop_toBottomOf="@+id/activity_person_detail_divider2"
-            tools:layout_editor_absoluteX="0dp">
+            >
 
 
         </LinearLayout>
