@@ -38,6 +38,8 @@ public class QuestionResponse {
 
         public Question stem;
 
+        boolean multiAnswers;
+
         public class Question {
 
             public String displayText;

@@ -225,6 +225,14 @@ public class TestCK12ContentScraper {
         Assert.assertEquals("result matches answer json response", result, "{\"answer\": [\"<img width=\\\"248\\\" height=\\\"64\\\" src=\\\"https://s3.amazonaws.com/ck12bg.ck12.org/curriculum/102916/35.jpg\\\" alt=\\\"\\\" />\"], \"instance\": {\"multiAnswers\": false, \"solution\": \"<p>\\n  There are 4 yellow trees and 3 green trees. There are 7 trees altogether.\\n</p>\\n<p>\\n  4 + 3 = 7\\n</p>\", \"stem\": {\"displayText\": \"<p>\\n  Which picture shows 4 + 3 = 7?\\n</p>\"}, \"responseObjects\": [{\"optionKey\": \"<img width=\\\"254\\\" height=\\\"64\\\" src=\\\"https://s3.amazonaws.com/ck12bg.ck12.org/curriculum/102916/34.jpg\\\" alt=\\\"\\\" />\", \"isCorrect\": \"F\", \"displayText\": \"<img width=\\\"254\\\" height=\\\"64\\\" src=\\\"https://s3.amazonaws.com/ck12bg.ck12.org/curriculum/102916/34.jpg\\\" alt=\\\"\\\" />\", \"orderText\": \"a\", \"displayOrder\": 1}, {\"optionKey\": \"<img width=\\\"247\\\" height=\\\"73\\\" src=\\\"https://s3.amazonaws.com/ck12bg.ck12.org/curriculum/102916/37.jpg\\\" alt=\\\"\\\" />\", \"isCorrect\": \"F\", \"displayText\": \"<img width=\\\"247\\\" height=\\\"73\\\" src=\\\"https://s3.amazonaws.com/ck12bg.ck12.org/curriculum/102916/37.jpg\\\" alt=\\\"\\\" />\", \"orderText\": \"b\", \"displayOrder\": 2}, {\"optionKey\": \"<img width=\\\"248\\\" height=\\\"64\\\" src=\\\"https://s3.amazonaws.com/ck12bg.ck12.org/curriculum/102916/35.jpg\\\" alt=\\\"\\\" />\", \"isCorrect\": \"T\", \"displayText\": \"<img width=\\\"248\\\" height=\\\"64\\\" src=\\\"https://s3.amazonaws.com/ck12bg.ck12.org/curriculum/102916/35.jpg\\\" alt=\\\"\\\" />\", \"orderText\": \"c\", \"displayOrder\": 3}, {\"optionKey\": \"<img width=\\\"258\\\" height=\\\"77\\\" src=\\\"https://s3.amazonaws.com/ck12bg.ck12.org/curriculum/102916/36.jpg\\\" alt=\\\"\\\" />\", \"isCorrect\": \"F\", \"displayText\": \"<img width=\\\"258\\\" height=\\\"77\\\" src=\\\"https://s3.amazonaws.com/ck12bg.ck12.org/curriculum/102916/36.jpg\\\" alt=\\\"\\\" />\", \"orderText\": \"d\", \"displayOrder\": 4}], \"answer\": [\"<img width=\\\"248\\\" height=\\\"64\\\" src=\\\"https://s3.amazonaws.com/ck12bg.ck12.org/curriculum/102916/35.jpg\\\" alt=\\\"\\\" />\"], \"hints\": [\"<iframe width=\\\"95%\\\" height=\\\"95%\\\" frameborder=\\\"0\\\" src=\\\"https://braingenie.ck12.org/skills/102916/video_only\\\" style=\\\"border:none\\\"><p>Your browser does not support iframes.</p> </iframe>\"]}, \"allowVariants\": false, \"questionTypeName\": \"multiple-choice\", \"answered\": false}");
     }
 
+    @Test
+    public void testPlix() throws IOException {
+        File tmpDir = Files.createTempDirectory("testCK12plixcontentscraper").toFile();
+        CK12ContentScraper scraper = new CK12ContentScraper("https://www.ck12.org/c/elementary-math-grade-1/add-to-10-with-images/plix/The-Flying-Birds-56953eed8e0e086aa6e2d3c2?referrer=concept_details", tmpDir);
+        scraper.scrapePlixContent();
+
+    }
+
 
 
 }
