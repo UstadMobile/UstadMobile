@@ -15,6 +15,7 @@ import com.ustadmobile.core.db.dao.PersonCustomFieldValueDao;
 import com.ustadmobile.core.db.dao.PersonDao;
 import com.ustadmobile.core.db.dao.PersonDetailPresenterFieldDao;
 import com.ustadmobile.core.generated.locale.MessageID;
+import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.core.view.ClassLogDetailView;
 import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.ClazzLog;
@@ -335,6 +336,11 @@ public class UmDbTestUtil {
         newPerson.setGender(Person.GENDER_FEMALE);
         newPerson.setUsername("rainarawazi");
         newPerson.setActive(true);
+        newPerson.setDateOfBirth(UMCalendarUtil.getLongDateFromPrettyString("12-Jan-2001"));
+        newPerson.setFatherName("Addulla Rawazi");
+        newPerson.setMotherName("Aysha Rawazi");
+        newPerson.setFatherNumber("+96212345678");
+        newPerson.setMotherNum("+96287654321");
         newPerson.setPersonUid(personDao.insert(newPerson));
 
 

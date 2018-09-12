@@ -2,6 +2,7 @@ package com.ustadmobile.core.util;
 
 import com.ustadmobile.lib.util.UMUtil;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -161,6 +162,22 @@ public class UMCalendarUtil {
         }else {
             return year;
         }
+    }
+
+    /**
+     * Gets date in milli from specified pretty dateString
+     * @param dateString in format dd-MM-yyyy is 23-01-1989
+     * @return the long date representation
+     */
+    public static long getLongDateFromPrettyString(String dateString){
+        SimpleDateFormat formatter = new SimpleDateFormat("dd-MMM-yyyy");
+        Date date = null;
+        try {
+            date = (Date)formatter.parse(dateString);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return date.getTime();
     }
 
     public static long getDateInMilliPlusDays(int days){

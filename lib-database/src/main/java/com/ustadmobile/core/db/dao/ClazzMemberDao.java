@@ -40,4 +40,7 @@ public abstract class ClazzMemberDao implements BaseDao<ClazzMember> {
             "WHERE ClazzMember.clazzMemberClazzUid = :clazzUid ")
     public abstract void updateAttendancePercentages(long clazzUid);
 
+    @UmQuery("SELECT AVG(attendancePercentage) FROM ClazzMember WHERE clazzMemberPersonUid = :personUid")
+    public abstract void getAverageAttendancePercentageByPersonUidAsync(long personUid, UmCallback<Float> callback);
+
 }

@@ -41,6 +41,55 @@ public class Person implements SyncableEntity {
 
     private long localChangeSeqNum;
 
+    private String fatherName;
+
+    private String fatherNumber;
+
+    private String motherName;
+
+    private String motherNum;
+
+    private long dateOfBirth;
+
+    public String getFatherName() {
+        return fatherName;
+    }
+
+    public void setFatherName(String fatherName) {
+        this.fatherName = fatherName;
+    }
+
+    public String getFatherNumber() {
+        return fatherNumber;
+    }
+
+    public void setFatherNumber(String fatherNumber) {
+        this.fatherNumber = fatherNumber;
+    }
+
+    public String getMotherName() {
+        return motherName;
+    }
+
+    public void setMotherName(String motherName) {
+        this.motherName = motherName;
+    }
+
+    public String getMotherNum() {
+        return motherNum;
+    }
+
+    public void setMotherNum(String motherNum) {
+        this.motherNum = motherNum;
+    }
+
+    public long getDateOfBirth() {
+        return dateOfBirth;
+    }
+
+    public void setDateOfBirth(long dateOfBirth) {
+        this.dateOfBirth = dateOfBirth;
+    }
 
     public long getPersonUid() {
         return personUid;

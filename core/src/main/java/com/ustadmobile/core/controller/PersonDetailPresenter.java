@@ -2,12 +2,14 @@ package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmLiveData;
+import com.ustadmobile.core.db.dao.ClazzMemberDao;
 import com.ustadmobile.core.db.dao.PersonCustomFieldValueDao;
 import com.ustadmobile.core.db.dao.PersonDao;
 import com.ustadmobile.core.db.dao.PersonDetailPresenterFieldDao;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.core.view.PersonDetailEditView;
 import com.ustadmobile.core.view.PersonDetailView;
 import com.ustadmobile.lib.db.entities.Person;
@@ -107,6 +109,8 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
 
     private long personUid;
 
+    private String attendanceAverage;
+
     /**
      * Presenter's constructor where we are getting arguments and setting the personUid
      *
@@ -134,6 +138,8 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
                 UmAppDatabase.getInstance(context).getPersonCustomFieldValueDao();
         PersonDetailPresenterFieldDao personDetailPresenterField =
                 UmAppDatabase.getInstance(context).getPersonDetailPresenterFieldDao();
+        ClazzMemberDao clazzMemberDao = 
+                UmAppDatabase.getInstance(context).getClazzMemberDao();
 
         //Get all fields
         personDetailPresenterField.findAllPersonDetailPresenterFields(new UmCallback<List<PersonDetailPresenterField>>() {
@@ -153,10 +159,30 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
                                     fieldValue);
                         }
 
-                        //Get person live data and observe
-                        mPerson = personDao.findByUidLive(personUid);
-                        mPerson.observe(PersonDetailPresenter.this,
-                                PersonDetailPresenter.this::handlePersonDataChanged);
+                        clazzMemberDao.getAverageAttendancePercentageByPersonUidAsync(personUid, new UmCallback<Float>() {
+                            @Override
+                            public void onSuccess(Float result) {
+                                if (result == null){
+                                    attendanceAverage = "N/A";
+                                }else {
+                                    attendanceAverage = result * 100 + "%";
+                                }
+
+                                //Get person live data and observe
+                                mPerson = personDao.findByUidLive(personUid);
+                                mPerson.observe(PersonDetailPresenter.this,
+                                        PersonDetailPresenter.this::handlePersonDataChanged);
+                            }
+
+                            @Override
+                            public void onFailure(Throwable exception) {
+
+                            }
+                        });
+
+                        
+
+
                     }
 
                     @Override
@@ -195,7 +221,7 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
 
             } else if (field.getFieldUid() == PersonDetailPresenterField.PERSON_FIELD_UID_ATTENDANCE) {
                 view.setField(field.getFieldIndex(), new PersonDetailViewField(FIELD_TYPE_TEXT,
-                        0, "ic_lens_black_24dp"), "Attended ...");
+                        0, "ic_lens_black_24dp"), attendanceAverage);
 
             } else if (field.getFieldUid() == PersonDetailPresenterField.PERSON_FIELD_UID_CLASSES) {
                 view.setField(field.getFieldIndex(), new PersonDetailViewField(FIELD_TYPE_TEXT,
@@ -204,17 +230,17 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
             } else if (field.getFieldUid() == PersonDetailPresenterField.PERSON_FIELD_UID_FATHER_NAME_AND_PHONE_NUMBER) {
                 view.setField(field.getFieldIndex(), new PersonDetailViewField(FIELD_TYPE_TEXT,
                                 MessageID.field_father_name, "ic_person_black_24dp")
-                        , "Father Name (Number)");
+                        , person.getFatherName() + " (" + person.getFatherNumber() +")");
 
             } else if(field.getFieldUid() == PersonDetailPresenterField.PERSON_FIELD_UID_MOTHER_NAME_AND_PHONE_NUMBER){
                 view.setField(field.getFieldIndex(), new PersonDetailViewField(FIELD_TYPE_TEXT,
                                 MessageID.mother, "ic_person_black_24dp")
-                        , "Mother Name (Number)");
+                        , person.getMotherName() + " (" + person.getMotherNum() + ")");
             } else if(field.getFieldUid() == PersonDetailPresenterField.PERSON_FIELD_UID_BIRTHDAY){
 
                 view.setField(field.getFieldIndex(), new PersonDetailViewField(FIELD_TYPE_TEXT,
                                 MessageID.birthday, "ic_perm_contact_calendar_black_24dp")
-                        , "Birthday2");
+                        , UMCalendarUtil.getPrettyDateFromLong(person.getDateOfBirth()));
             }else  {//this is actually a custom field
 
                 view.setField(field.getFieldIndex(), new PersonDetailViewField(field.getFieldType(),
