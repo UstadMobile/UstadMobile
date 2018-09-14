@@ -1,6 +1,7 @@
 package com.ustadmobile.lib.database.jdbc;
 
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -32,19 +33,16 @@ public class JdbcDatabaseUtils {
      * @throws SQLException If an SQLException occurs
      */
     public static List<String> getTableNames(Connection connection) throws SQLException{
-        ResultSet tableResult = null;
         List<String> tableNames = new ArrayList<>();
-        try {
-            tableResult = connection.getMetaData().getTables(null, null, "%", null);
 
+        try(
+            ResultSet tableResult = connection.getMetaData().getTables(null, null, "%", null);
+        ) {
             while(tableResult.next()){
                 tableNames.add(tableResult.getString("TABLE_NAME"));
             }
         }catch(SQLException e) {
             throw e;
-        }finally {
-            if(tableResult != null)
-                tableResult.close();
         }
 
         return tableNames;

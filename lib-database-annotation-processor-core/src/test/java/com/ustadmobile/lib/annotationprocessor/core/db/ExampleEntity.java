@@ -11,6 +11,8 @@ public class ExampleEntity {
 
     private String name;
 
+    private int locationPk;
+
     public int getUid() {
         return uid;
     }
@@ -25,5 +27,13 @@ public class ExampleEntity {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public int getLocationPk() {
+        return locationPk;
+    }
+
+    public void setLocationPk(int locationPk) {
+        this.locationPk = locationPk;
     }
 }

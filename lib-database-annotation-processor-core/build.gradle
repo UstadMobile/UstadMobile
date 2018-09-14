@@ -26,10 +26,11 @@ dependencies {
     implementation project(":lib-database-annotation")
     implementation project(":lib-database-jdbc")
     implementation "com.squareup:javapoet:$version_javapoet"
+    implementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
+    implementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
 
     testAnnotationProcessor project(":lib-database-annotation-processor-core")
-    testImplementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
-    testImplementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
+
     testImplementation "junit:junit:$version_junit"
 }
 

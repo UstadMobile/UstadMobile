@@ -3,7 +3,7 @@ package com.ustadmobile.lib.annotationprocessor.core.db;
 import com.ustadmobile.lib.database.annotation.UmDatabase;
 
 
-@UmDatabase(version = 1, entities = {ExampleEntity.class})
+@UmDatabase(version = 1, entities = {ExampleEntity.class, ExampleLocation.class})
 public abstract class ExampleDatabase {
 
     private static volatile ExampleDatabase instance;

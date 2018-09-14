@@ -28,7 +28,7 @@ public class TestDbProcessorJdbc {
     public static void setupClass() throws NamingException{
         InitialContext ic = new InitialContext();
         SQLiteDataSource dataSource = new SQLiteDataSource();
-        dataSource.setUrl("jdbc:sqlite::memory:");
+        dataSource.setUrl("jdbc:sqlite:test.sqlite");
         ic.bind("java:/comp/env/jdbc/ds", dataSource);
     }
 
@@ -45,10 +45,13 @@ public class TestDbProcessorJdbc {
         InitialContext ic = new InitialContext();
         DataSource ds = (DataSource)ic.lookup("java:/comp/env/jdbc/ds");
 
-        Connection con = ds.getConnection();
-        List<String> tableNames = JdbcDatabaseUtils.getTableNames(con);
-
-        Assert.assertTrue("ExampleEntity table was created", tableNames.contains("ExampleEntity"));
+        try (
+                Connection con = ds.getConnection();
+        ){
+            List<String> tableNames = JdbcDatabaseUtils.getTableNames(con);
+            Assert.assertTrue("ExampleEntity table was created",
+                    tableNames.contains("ExampleEntity"));
+        }
     }
 
     @Test
@@ -57,6 +60,9 @@ public class TestDbProcessorJdbc {
         ExampleEntity entity = new ExampleEntity();
         entity.setName("Bob Jones");
         db.getExampleDao().insertE(entity);
+        List<ExampleEntity> allEntities = db.getExampleDao().getAllEntities();
+        ExampleEntity firstEntity = db.getExampleDao().findByUid(0);
+        Assert.assertTrue("All entities list is not empty", !allEntities.isEmpty());
     }
 
 

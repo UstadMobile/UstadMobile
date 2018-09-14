@@ -1,5 +1,7 @@
 package com.ustadmobile.lib.annotationprocessor.core;
 
+import com.squareup.javapoet.TypeName;
+import com.ustadmobile.lib.database.annotation.UmClearAll;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmDatabase;
 import com.ustadmobile.lib.database.annotation.UmDbContext;
@@ -18,6 +20,7 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeKind;
+import javax.lang.model.type.TypeMirror;
 import javax.tools.Diagnostic;
 
 import static com.ustadmobile.lib.annotationprocessor.core.DbProcessorCore.OPT_ROOM_OUTPUT;
@@ -57,8 +60,11 @@ public abstract class AbstractDbProcessor {
                     if(!dbMethod.getModifiers().contains(Modifier.ABSTRACT))
                         continue;
 
-                    if(dbMethod.getAnnotation(UmDbContext.class) != null)
+                    if(dbMethod.getAnnotation(UmDbContext.class) != null
+                            || dbMethod.getAnnotation(UmClearAll.class) != null)
                         continue;
+
+
 
                     if(!dbMethod.getReturnType().getKind().equals(TypeKind.DECLARED)) {
                         messager.printMessage(Diagnostic.Kind.ERROR,
@@ -96,5 +102,23 @@ public abstract class AbstractDbProcessor {
 
     public void setOutputDirOpt(String outputDirOpt) {
         this.outputDirOpt = outputDirOpt;
+    }
+
+    public static String defaultValue(TypeMirror type) {
+        TypeName typeName = TypeName.get(type);
+        if(typeName.isBoxedPrimitive()){
+            typeName = typeName.unbox();
+        }
+
+        if(typeName.equals(TypeName.INT) || typeName.equals(TypeName.LONG)
+                || typeName.equals(TypeName.FLOAT) || typeName.equals(TypeName.DOUBLE)
+                || typeName.equals(TypeName.BYTE) || typeName.equals(TypeName.SHORT)
+                || typeName.equals(TypeName.CHAR) || typeName.equals(TypeName.BYTE)) {
+            return "0";
+        }else if(typeName.equals(TypeName.BOOLEAN)) {
+            return "false";
+        }else {
+            return "null";
+        }
     }
 }

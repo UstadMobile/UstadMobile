@@ -2,39 +2,39 @@ package com.ustadmobile.lib.annotationprocessor.core;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
-import com.ustadmobile.lib.database.annotation.UmDatabase;
 import com.ustadmobile.lib.database.annotation.UmDbContext;
+import com.ustadmobile.lib.database.annotation.UmEmbedded;
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmIndexField;
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
+import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.database.jdbc.JdbcDatabaseUtils;
 import com.ustadmobile.lib.database.jdbc.UmJdbcDatabase;
+
+import org.sqlite.SQLiteDataSource;
 
 import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.Formatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
-import javax.annotation.processing.RoundEnvironment;
-import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
@@ -43,6 +43,7 @@ import javax.lang.model.element.Modifier;
 import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
@@ -60,7 +61,7 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
     private static final String SUFFIX_JDBC_DAO = "_JdbcDaoImpl";
 
     //Map of fully qualified database class name to a connection that has that database
-    private Map<String, Connection> nameToConnectionMap = new HashMap<>();
+    private Map<String, DataSource> nameToDataSourceMap = new HashMap<>();
 
     public DbProcessorJdbc() {
         setOutputDirOpt(OPT_JDBC_OUTPUT);
@@ -78,7 +79,6 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                 .addJavadoc("Generated code - DO NOT EDIT!\n")
                 .addField(ClassName.get(Object.class), "_context", Modifier.PRIVATE)
                 .addField(ClassName.get(DataSource.class), "_dataSource", Modifier.PRIVATE)
-                .addField(ClassName.get(Connection.class), "_connection", Modifier.PRIVATE)
                 .addField(ClassName.get(ExecutorService.class), "_executor", Modifier.PRIVATE)
                 .addMethod(MethodSpec.constructorBuilder()
                     .addModifiers(Modifier.PUBLIC)
@@ -88,11 +88,10 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                         .beginControlFlow("try ")
                             .add("$T iContext = new $T();\n", initialContextClassName, initialContextClassName)
                             .add("this._dataSource = (DataSource)iContext.lookup(\"java:/comp/env/jdbc/\"+dbName);\n")
-                            .add("this._connection = _dataSource.getConnection();\n")
-                            .add("createAllTables(_connection);\n")
+                            .add("createAllTables();\n")
                         .endControlFlow()
-                        .beginControlFlow("catch($T|$T e)",
-                                ClassName.get(NamingException.class), ClassName.get(SQLException.class))
+                        .beginControlFlow("catch($T e)",
+                                ClassName.get(NamingException.class))
                             .add("throw new RuntimeException(e);\n")
                         .endControlFlow()
                         .build())
@@ -103,10 +102,11 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                         .returns(ClassName.get(ExecutorService.class))
                         .addCode("return this._executor;\n").build())
                 .addMethod(MethodSpec.methodBuilder("getConnection")
+                        .addException(ClassName.get(SQLException.class))
                         .addAnnotation(Override.class)
                         .addModifiers(Modifier.PUBLIC)
                         .returns(ClassName.get(Connection.class))
-                        .addCode("return this._connection;\n").build());
+                        .addCode("return this._dataSource.getConnection();\n").build());
 
         TypeSpec.Builder factoryClassSpec = DbProcessorUtils.makeFactoryClass(dbType, jdbcDbClassName);
 
@@ -154,6 +154,25 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                 .indent("    ").build().writeTo(destinationDir);
         JavaFile.builder(packageElement.getQualifiedName().toString(), jdbcDbTypeSpec.build())
                 .indent("    ").build().writeTo(destinationDir);
+
+        //now create an in memory implementation of this database, this will be used when generating the DAOs
+        SQLiteDataSource dataSource = new SQLiteDataSource();
+        dataSource.setUrl("jdbc:sqlite:" + dbType.getQualifiedName().toString() + ".db");
+        try(
+            Connection connection = dataSource.getConnection();
+            Statement stmt = connection.createStatement();
+        ) {
+            nameToDataSourceMap.put(dbType.getQualifiedName().toString(), dataSource);
+            for(TypeElement entityType : findEntityTypes(dbType)){
+                stmt.execute(makeCreateTableStatement(entityType, '`'));
+            }
+            stmt.close();
+        }catch(SQLException e) {
+            messager.printMessage(Diagnostic.Kind.ERROR, "Error attempting to create database for "
+                + dbType.getQualifiedName().toString() + ": " + e.getMessage());
+        }
+
+
     }
 
     /**
@@ -165,13 +184,14 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
      */
     protected void addCreateTablesMethodToClassSpec(TypeElement dbType, TypeSpec.Builder classBuilder) {
         MethodSpec.Builder createMethod = MethodSpec.methodBuilder("createAllTables");
-        createMethod.addParameter(ClassName.get(Connection.class), "con");
         CodeBlock.Builder createCb = CodeBlock.builder();
-        createCb.beginControlFlow("try")
+        createCb.add("try (\n").indent()
+                .add("$T _connection = getConnection();\n", Connection.class)
+                .add("$T _stmt = _connection.createStatement();\n", ClassName.get(Statement.class))
+            .unindent().beginControlFlow(")")
                 .add("$T _existingTableNames = $T.getTableNames(_connection);\n",
                         ParameterizedTypeName.get(ClassName.get(List.class), ClassName.get(String.class)),
-                        ClassName.get(JdbcDatabaseUtils.class))
-                .add("$T _stmt = con.createStatement();\n", ClassName.get(Statement.class));
+                        ClassName.get(JdbcDatabaseUtils.class));
 
         for(TypeElement entityTypeElement : findEntityTypes(dbType)) {
             addCreateTableStatements(createCb, "_stmt", entityTypeElement, '`');
@@ -382,6 +402,8 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
 
             if(daoMethod.getAnnotation(UmInsert.class) != null) {
                 addInsertMethod(daoMethod, jdbcDaoClassSpec, '`');
+            }else if(daoMethod.getAnnotation(UmQuery.class) != null){
+                addQueryMethod(daoMethod, dbType, jdbcDaoClassSpec, '`');
             }
         }
 
@@ -438,7 +460,7 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
         codeBlock.add(")\");\n");
 
         for(int i = 0; i < entityFields.size(); i++) {
-            setPreparedStatementValue(preparedStmtVarName, insertedElement.getSimpleName().toString(),
+            addSetPreparedStatementValueToCodeBlock(preparedStmtVarName, insertedElement.getSimpleName().toString(),
                     i + 1, entityFields.get(i), codeBlock);
         }
 
@@ -454,37 +476,419 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
         daoBuilder.addMethod(methodBuilder.build());
     }
 
-    public void addQueryMethod(ExecutableElement daoMethod, TypeSpec.Builder daoBuilder,
+    public void addQueryMethod(ExecutableElement daoMethod, TypeElement dbType, TypeSpec.Builder daoBuilder,
                                char identifierQuote) {
+        //we need to run the query, find the columns, and then determine the appropriate setter methods to run
+
+        CodeBlock.Builder codeBlock = CodeBlock.builder();
+        MethodSpec.Builder methodBuilder = MethodSpec.overriding(daoMethod);
+        String querySql = daoMethod.getAnnotation(UmQuery.class).value();
+
+
+        List<String> namedParams = getNamedParameters(querySql);
+        String preparedStmtSql = querySql;
+        for(String paramName : namedParams) {
+            preparedStmtSql = preparedStmtSql.replaceAll(":" + paramName, "?");
+        }
+
+        boolean returnsList = false;
+        boolean returnsArray = false;
+
+        TypeMirror returnTypeMirror = daoMethod.getReturnType();
+
+        Element returnTypeElement = processingEnv.getTypeUtils().asElement(
+                daoMethod.getReturnType());
+
+        if(daoMethod.getReturnType().getKind().equals(TypeKind.ARRAY)) {
+            ArrayType arrayType = (ArrayType)daoMethod.getReturnType();
+            returnTypeMirror = arrayType.getComponentType();
+            returnTypeElement = processingEnv.getTypeUtils().asElement(returnTypeMirror);
+            codeBlock.add("$T[] result = null;\n", returnTypeElement);
+            returnsArray = true;
+        }else if(returnTypeElement != null && returnTypeElement.equals(processingEnv
+                .getElementUtils().getTypeElement(List.class.getCanonicalName()))) {
+            DeclaredType returnType = (DeclaredType)daoMethod.getReturnType();
+
+            //TODO: handle when this is a primitive return type
+            returnTypeMirror = returnType.getTypeArguments().get(0);
+            returnTypeElement = processingEnv.getTypeUtils().asElement(returnTypeMirror);
+            returnsList = true;
+            codeBlock.add("$T<$T> result = new $T<>();\n", List.class, returnTypeElement,
+                    ArrayList.class);
+        }else {
+            codeBlock.add("$T result = $L;\n", returnTypeMirror, defaultValue(returnTypeMirror));
+        }
+
+        TypeName returnTypeName = TypeName.get(returnTypeMirror);
+        boolean primitiveOrStringReturn = returnTypeName.isPrimitive()
+                || returnTypeName.isBoxedPrimitive()
+                || returnTypeName.equals(ClassName.get(String.class));
+
+        codeBlock.add("$T resultSet = null;\n", ResultSet.class)
+            .add("try (\n").indent()
+            .add("$T connection = _db.getConnection();\n", Connection.class)
+            .add("$T stmt = connection.prepareStatement($S);\n", PreparedStatement.class, preparedStmtSql)
+            .unindent().beginControlFlow(")");
+
+
+        for(int i = 0; i < namedParams.size(); i++) {
+            VariableElement paramVariableElement = null;
+            for(VariableElement variableElement : daoMethod.getParameters()) {
+                if(variableElement.getSimpleName().toString().equals(namedParams.get(i))) {
+                    paramVariableElement = variableElement;
+                    break;
+                }
+            }
+
+            if(paramVariableElement == null) {
+                messager.printMessage(Diagnostic.Kind.ERROR, formatMethodForErrorMessage(daoMethod)
+                        + " has no parameter named " + namedParams.get(i));
+                return;
+            }
+
+            codeBlock.add("stmt.$L($L, $L);\n",
+                    getPreparedStatementSetterMethodName(paramVariableElement.asType()),  i + 1,
+                    paramVariableElement.getSimpleName().toString());
+        }
+
+        codeBlock.add("resultSet = stmt.executeQuery();\n");
+
+
+        try(
+            Connection dbConnection = nameToDataSourceMap.get(dbType.getQualifiedName().toString())
+                .getConnection();
+            Statement stmt = dbConnection.createStatement();
+            ResultSet results = stmt.executeQuery(querySql);
+        ) {
+            ResultSetMetaData metaData = results.getMetaData();
+            if(primitiveOrStringReturn && metaData.getColumnCount() != 1) {
+                messager.printMessage(Diagnostic.Kind.ERROR,
+                        formatMethodForErrorMessage(daoMethod) +
+                                ": returns a String or primitive. SQL must have 1 column only. " +
+                                "found " + metaData.getColumnCount() + " columns");
+            }
+
+            if(returnsList) {
+                codeBlock.beginControlFlow("while(resultSet.next())");
+            } else if (returnsArray) {
+                codeBlock.add("$T<$T> resultList = new $T<>();\n", ArrayList.class, returnTypeMirror,
+                        ArrayList.class)
+                        .beginControlFlow("while(resultSet.next())");
+            } else {
+                codeBlock.beginControlFlow("if(resultSet.next())");
+            }
+
+            if(!primitiveOrStringReturn){
+                addCreateNewEntityFromResultToCodeBlock((TypeElement)returnTypeElement,  daoMethod,
+                        "entity", "resultSet", metaData, codeBlock);
+            }else{
+                codeBlock.add("$T entity = resultSet.get$L(1);\n", returnTypeMirror,
+                        getPreparedStatementSetterGetterTypeName(returnTypeMirror));
+            }
+
+            if(returnsList) {
+                codeBlock.add("result.add(entity);\n")
+                        .endControlFlow();
+            }else if(returnsArray) {
+                codeBlock.add("resultList.add(entity);\n")
+                        .endControlFlow()
+                        .add("result = resultList.toArray(new $T[resultList.size()]);\n",
+                                returnTypeElement);
+            }else {
+                codeBlock.add("result = entity;\n")
+                            .endControlFlow();
+            }
+
+        } catch(SQLException e) {
+            messager.printMessage(Diagnostic.Kind.ERROR,
+                    "Exception generating query method for: " +
+                            formatMethodForErrorMessage(daoMethod) + ": " + e.getMessage());
+        }
+
+        codeBlock.nextControlFlow("catch($T e)", SQLException.class)
+            .add("e.printStackTrace();\n")
+        .nextControlFlow("finally")
+            .beginControlFlow("if(resultSet != null)")
+                .beginControlFlow("try")
+                    .add("resultSet.close();\n")
+                .nextControlFlow("catch($T ce)", SQLException.class)
+                    .add("ce.printStackTrace();\n")
+                .endControlFlow()
+            .endControlFlow()
+        .endControlFlow();
+
+        codeBlock.add("return result;\n");
+
+        methodBuilder.addCode(codeBlock.build());
+        daoBuilder.addMethod(methodBuilder.build());
 
     }
 
+    /**
+     * Generate a block of code that will initialize a new POJO / Entity from an JDBC ResultSet.
+     * It will generate code along the lines of:
+     *
+     *  EntityType entityVariableName = new EntityType();
+     *  entityVariableName.setUid(resultSetVariableName.getInt(1));
+     *  entityVariableName.setName(resultSetVariableName.getString(2));
+     *  entityVariableName.setEmbeddedObject(new EmbeddedObject());
+     *  entityVariableName.getEmbeddedObject().setEmbeddedValue(resultSetVariableName.getInt(3));
+     *
+     *
+     * @param entityElement The POJO / Entity that is being initialized
+     * @param daoMethodElement The DAO method this is being generated for. Used to generate useful
+     *                         error messages
+     * @param entityVariableName The variable name to use for the entity being initialized
+     * @param resultSetVariableName The variable name of the JDBC ResultSet from which values are
+     *                              to be fetched
+     * @param metaData JDBC Metadata used to find the columns that are returned by running the
+     *                 query, so that they can be mapped to to setters.
+     * @param codeBlock CodeBlock.Builder to add the generate code block to
+     */
+    private void addCreateNewEntityFromResultToCodeBlock(TypeElement entityElement,
+                                                         ExecutableElement daoMethodElement,
+                                                         String entityVariableName,
+                                                         String resultSetVariableName,
+                                                         ResultSetMetaData metaData,
+                                                         CodeBlock.Builder codeBlock) {
+        codeBlock.add("$T $L = new $T();\n", entityElement.asType(), entityVariableName,
+                entityElement.asType());
+        try {
+            List<String> initializedEmbeddedObjects = new ArrayList<>();
+            for(int i = 0; i < metaData.getColumnCount(); i++) {
+                List<ExecutableElement> callChain = findSetterMethod(daoMethodElement,
+                        metaData.getColumnLabel(i + 1), entityElement, new ArrayList<>());
+                if(callChain == null || callChain.isEmpty()) {
+                    messager.printMessage(Diagnostic.Kind.ERROR,
+                            formatMethodForErrorMessage(daoMethodElement) +
+                                    " : Could not find setter for field: '" +
+                                    metaData.getColumnLabel(i + 1) +"' on return class " +
+                                    entityElement.getQualifiedName());
+                    return;
+                }
 
-    private void setPreparedStatementValue(String preparedStatementVariableName,
+                CodeBlock.Builder setFromResultCodeBlock = CodeBlock.builder()
+                        .add(entityVariableName);
+                String callChainStr = "";
+
+                for(int j = 0; j < callChain.size(); j++) {
+                    ExecutableElement method = callChain.get(j);
+                    callChainStr += "." + method.getSimpleName() + "()";
+                    if(method.getSimpleName().toString().startsWith("set")) {
+                        HashMap<String, Object> paramMap = new HashMap<>();
+                        paramMap.put("setterName", method.getSimpleName().toString());
+                        paramMap.put("resultSetGetter",
+                                "get" + getPreparedStatementSetterGetterTypeName(method.getParameters()
+                                        .get(0).asType()));
+                        paramMap.put("resultSetVarName", resultSetVariableName);
+                        paramMap.put("index", i + 1);
+                        setFromResultCodeBlock.addNamed(".$setterName:L($resultSetVarName:L.$resultSetGetter:L($index:L));\n",
+                                paramMap);
+                    }else if(method.getSimpleName().toString().startsWith("get")) {
+                        //this is an embedded field
+
+                        //Check if the embedded field has been initialized with a blank new object.
+                        // If not, we must do so to avoid a NullPointerException
+                        if(!initializedEmbeddedObjects.contains(callChainStr)) {
+                            CodeBlock.Builder initBuilder = CodeBlock.builder()
+                                    .add(entityVariableName);
+                            for(int k = 0; k < j; k++) {
+                                initBuilder.add(".$L()", callChain.get(k).getSimpleName().toString());
+                            }
+
+                            initBuilder.add(".set$L(new $T());\n",
+                                    callChain.get(j).getSimpleName().toString()
+                                            .substring("get".length()),
+                                    callChain.get(j).getReturnType());
+                            codeBlock.add(initBuilder.build());
+                            initializedEmbeddedObjects.add(callChainStr);
+                        }
+
+                        setFromResultCodeBlock.add(".$L()", method.getSimpleName().toString());
+                    }
+                }
+
+                codeBlock.add(setFromResultCodeBlock.build());
+            }
+        }catch(SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * For SQL with named parameters (e.g. "SELECT * FROM Table WHERE uid = :paramName") return a
+     * list of all named parameters.
+     *
+     * @param querySql SQL that may contain named parameters
+     * @return String list of named parameters (e.g. "paramName"). Empty if no named parameters are present.
+     */
+    private List<String> getNamedParameters(String querySql) {
+        List<String> namedParams = new ArrayList<>();
+        boolean insideQuote = false;
+        boolean insideDoubleQuote = false;
+        char lastC = 0;
+        int startNamedParam = -1;
+        for(int i  = 0; i < querySql.length(); i++) {
+            char c = querySql.charAt(i);
+            if(c == '\'' && lastC != '\\')
+                insideQuote = !insideQuote;
+            if(c == '\"' && lastC != '\\')
+                insideDoubleQuote = !insideDoubleQuote;
+
+            if(!insideQuote && !insideDoubleQuote) {
+                if(c == ':'){
+                    startNamedParam = i;
+                }else if(Character.isWhitespace(c) && startNamedParam != -1){
+                    //process the parameter
+                    namedParams.add(querySql.substring(startNamedParam + 1, i ));
+                    startNamedParam = -1;
+                }else if(i == (querySql.length()-1) && startNamedParam != -1) {
+                    namedParams.add(querySql.substring(startNamedParam + 1, i +1));
+                    startNamedParam = -1;
+                }
+            }
+
+
+            lastC = c;
+        }
+
+        return namedParams;
+    }
+
+
+    /**
+     * Find the setter method for a given row name (e.g. "fieldName") on a given Java object (e.g.
+     * POJO or Entity). This method will recursively check parent classes and any field with the
+     * UmEmbedded annotation.
+     *
+     * @see UmEmbedded
+     *
+     * @param daoMethod The daoMethod currently being generated. Used to generate meaningful error
+     *                  messages.
+     * @param rowName The rowName as it was returned by the query
+     * @param entityElement The java object to search to find an appropriate setter method
+     * @param callChain The current call chain to get to this object.
+     * @return A list of methods that represent the chain of methods that need to be called.
+     *  For simple setters that are directly on the object itself, this is simply a list with the
+     *  setter method. If the field resides in an embedded object, this includes the getter methods
+     *  to reach the setter method e.g. getEmbeddedObject, setField.
+     */
+    private List<ExecutableElement> findSetterMethod(ExecutableElement daoMethod, String rowName,
+                                                     TypeElement entityElement,
+                                                     List<ExecutableElement> callChain) {
+        //go through the methods on this TypeElement to find a setter
+        String setterMethodName = "set" + Character.toUpperCase(rowName.charAt(0)) +
+                rowName.substring(1);
+
+        for(Element subElement : entityElement.getEnclosedElements()) {
+            if(subElement.getKind() != ElementKind.METHOD)
+                continue;
+
+            if(subElement.getSimpleName().toString().equals(setterMethodName)) {
+                callChain.add((ExecutableElement)subElement);
+                return callChain;
+            }
+        }
+
+
+        //check @UmEmbedded objects
+        for(Element subElement : entityElement.getEnclosedElements()) {
+            if(subElement.getKind().equals(ElementKind.FIELD)
+                    && subElement.getAnnotation(UmEmbedded.class) != null) {
+                VariableElement varElement = (VariableElement)subElement;
+                String getterName = subElement.getSimpleName().toString();
+                getterName = "get" + Character.toUpperCase(getterName.charAt(0)) +
+                        getterName.substring(1);
+
+                ExecutableElement getterMethod = null;
+                for(Element subElement2 : entityElement.getEnclosedElements()){
+                    if(subElement2.getSimpleName().toString().equals(getterName)
+                            && subElement2.getKind().equals(ElementKind.METHOD)
+                            && ((ExecutableElement)subElement2).getParameters().isEmpty()){
+                        getterMethod = (ExecutableElement)subElement2;
+                        break;
+                    }
+                }
+
+                if(getterMethod == null) {
+                    messager.printMessage(Diagnostic.Kind.ERROR,
+                            formatMethodForErrorMessage(daoMethod) + ": " +
+                            entityElement.getQualifiedName() + "." + subElement.getSimpleName() +
+                            " is annotated with @UmEmbedded but has no getter method");
+                    return null;
+                }
+
+                callChain.add(getterMethod);
+                List<ExecutableElement> retVal = findSetterMethod(daoMethod, rowName,
+                        (TypeElement)processingEnv.getTypeUtils().asElement(varElement.asType()),
+                        callChain);
+
+                if(retVal != null)
+                    return retVal;
+                else
+                    callChain.remove(getterMethod);
+            }
+        }
+
+        //Check parent classes
+        if(entityElement.getSuperclass() != null
+                && !entityElement.getSuperclass().getKind().equals(TypeKind.NONE)) {
+            return findSetterMethod(daoMethod, rowName, (TypeElement) processingEnv.getTypeUtils()
+                    .asElement(entityElement.getSuperclass()), callChain);
+        }else {
+            return null;
+        }
+    }
+
+
+    private void addSetPreparedStatementValueToCodeBlock(String preparedStatementVariableName,
                                            String entityVariableName, int index,
                                            VariableElement field, CodeBlock.Builder codeBlock) {
         codeBlock.add(preparedStatementVariableName);
-        TypeMirror stringType = processingEnv.getElementUtils().getTypeElement("java.lang.String")
-                .asType();
-        TypeMirror variableType = field.asType();
-        if(variableType.getKind().equals(TypeKind.INT)) {
-            codeBlock.add(".setInt(");
-        }else if(variableType.getKind().equals(TypeKind.LONG)) {
-            codeBlock.add(".setLong(");
-        }else if(variableType.getKind().equals(TypeKind.FLOAT)) {
-            codeBlock.add(".setFloat(");
-        }else if(variableType.getKind().equals(TypeKind.DOUBLE)) {
-            codeBlock.add(".setDouble(");
-        }else if(variableType.getKind().equals(TypeKind.DECLARED)
-                && variableType.equals(stringType)) {
-            codeBlock.add(".setString(");
-        }
+        codeBlock.add(".$L(", getPreparedStatementSetterMethodName(field.asType()));
+
         //TODO: add error message here if there is no match
         codeBlock.add("$L, $L.get", index, entityVariableName);
         String fieldName = field.getSimpleName().toString();
 
         codeBlock.add(Character.toUpperCase(fieldName.charAt(0)) + fieldName.substring(1))
                 .add("());\n");
+    }
+
+    private String getPreparedStatementSetterMethodName(TypeMirror variableType) {
+        return "set" + getPreparedStatementSetterGetterTypeName(variableType);
+    }
+
+    /**
+     * Get the suffix to use on get/set methods of PreparedStatement according to the type of variable.
+     * Used when generating code such as preparedStatement.setString / preparedStatement.setInt etc.
+     *
+     * @param variableType Variable type to set/get on a prepared statement
+     * @return suffix to use e.g. "Int" for integers, "String" for Strings, etc.
+     */
+    private String getPreparedStatementSetterGetterTypeName(TypeMirror variableType) {
+        TypeMirror stringType = processingEnv.getElementUtils().getTypeElement("java.lang.String")
+                .asType();
+
+        if(variableType.getKind().equals(TypeKind.INT)) {
+            return "Int";
+        }else if(variableType.getKind().equals(TypeKind.LONG)) {
+            return "Long";
+        }else if(variableType.getKind().equals(TypeKind.FLOAT)) {
+            return "Float";
+        }else if(variableType.getKind().equals(TypeKind.DOUBLE)) {
+            return "Double";
+        }else if(variableType.getKind().equals(TypeKind.DECLARED)
+                && variableType.equals(stringType)) {
+            return "String";
+        }
+
+        return null;
+    }
+
+    private String formatMethodForErrorMessage(ExecutableElement element) {
+        return ((TypeElement)element.getEnclosingElement()).getQualifiedName() + "." +
+            element.getSimpleName();
     }
 
 }
