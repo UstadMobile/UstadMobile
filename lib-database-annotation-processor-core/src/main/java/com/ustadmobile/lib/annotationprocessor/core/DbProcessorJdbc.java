@@ -7,6 +7,8 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
+import com.ustadmobile.core.impl.UmCallback;
+import com.ustadmobile.core.impl.UmCallbackUtil;
 import com.ustadmobile.lib.database.annotation.UmDbContext;
 import com.ustadmobile.lib.database.annotation.UmEmbedded;
 import com.ustadmobile.lib.database.annotation.UmEntity;
@@ -389,6 +391,7 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                 .addModifiers(Modifier.PUBLIC)
                 .superclass(ClassName.get(daoType))
                 .addField(ClassName.get(UmJdbcDatabase.class), "_db", Modifier.PRIVATE)
+                .addJavadoc(" GENERATED CODE - DO NOT EDIT! \n")
                 .addMethod(MethodSpec.constructorBuilder()
                     .addModifiers(Modifier.PUBLIC)
                     .addParameter(ClassName.get(UmJdbcDatabase.class), "_db")
@@ -484,6 +487,22 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
         MethodSpec.Builder methodBuilder = MethodSpec.overriding(daoMethod);
         String querySql = daoMethod.getAnnotation(UmQuery.class).value();
 
+        TypeElement umCallbackTypeElement = processingEnv.getElementUtils().getTypeElement(
+                UmCallback.class.getName());
+        List<Element> variableTypeElements = getMethodParametersAsElements(daoMethod);
+        int asyncParamIndex = variableTypeElements.indexOf(umCallbackTypeElement);
+        boolean asyncMethod = asyncParamIndex != -1;
+
+
+        TypeMirror resultType;
+        if(asyncMethod) {
+            codeBlock.beginControlFlow("_db.getExecutor().execute(() -> ");
+            DeclaredType declaredType = (DeclaredType)daoMethod.getParameters().get(asyncParamIndex)
+                    .asType();
+            resultType = declaredType.getTypeArguments().get(0);
+        }else {
+            resultType = daoMethod.getReturnType();
+        }
 
         List<String> namedParams = getNamedParameters(querySql);
         String preparedStmtSql = querySql;
@@ -494,32 +513,29 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
         boolean returnsList = false;
         boolean returnsArray = false;
 
-        TypeMirror returnTypeMirror = daoMethod.getReturnType();
+        Element resultTypeElement = processingEnv.getTypeUtils().asElement(resultType);
 
-        Element returnTypeElement = processingEnv.getTypeUtils().asElement(
-                daoMethod.getReturnType());
 
-        if(daoMethod.getReturnType().getKind().equals(TypeKind.ARRAY)) {
-            ArrayType arrayType = (ArrayType)daoMethod.getReturnType();
-            returnTypeMirror = arrayType.getComponentType();
-            returnTypeElement = processingEnv.getTypeUtils().asElement(returnTypeMirror);
-            codeBlock.add("$T[] result = null;\n", returnTypeElement);
+        if(resultType.getKind().equals(TypeKind.ARRAY)) {
+            ArrayType arrayType = (ArrayType)resultType;
+            resultType = arrayType.getComponentType();
+            resultTypeElement = processingEnv.getTypeUtils().asElement(resultType);
+            codeBlock.add("$T[] result = null;\n", resultTypeElement);
             returnsArray = true;
-        }else if(returnTypeElement != null && returnTypeElement.equals(processingEnv
+        }else if(resultTypeElement != null && resultTypeElement.equals(processingEnv
                 .getElementUtils().getTypeElement(List.class.getCanonicalName()))) {
-            DeclaredType returnType = (DeclaredType)daoMethod.getReturnType();
+            DeclaredType declaredResultType = (DeclaredType)resultType;
 
-            //TODO: handle when this is a primitive return type
-            returnTypeMirror = returnType.getTypeArguments().get(0);
-            returnTypeElement = processingEnv.getTypeUtils().asElement(returnTypeMirror);
+            resultType = declaredResultType.getTypeArguments().get(0);
+            resultTypeElement = processingEnv.getTypeUtils().asElement(resultType);
             returnsList = true;
-            codeBlock.add("$T<$T> result = new $T<>();\n", List.class, returnTypeElement,
+            codeBlock.add("$T<$T> result = new $T<>();\n", List.class, resultTypeElement,
                     ArrayList.class);
         }else {
-            codeBlock.add("$T result = $L;\n", returnTypeMirror, defaultValue(returnTypeMirror));
+            codeBlock.add("$T result = $L;\n", resultType, defaultValue(resultType));
         }
 
-        TypeName returnTypeName = TypeName.get(returnTypeMirror);
+        TypeName returnTypeName = TypeName.get(resultType);
         boolean primitiveOrStringReturn = returnTypeName.isPrimitive()
                 || returnTypeName.isBoxedPrimitive()
                 || returnTypeName.equals(ClassName.get(String.class));
@@ -571,7 +587,7 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
             if(returnsList) {
                 codeBlock.beginControlFlow("while(resultSet.next())");
             } else if (returnsArray) {
-                codeBlock.add("$T<$T> resultList = new $T<>();\n", ArrayList.class, returnTypeMirror,
+                codeBlock.add("$T<$T> resultList = new $T<>();\n", ArrayList.class, resultType,
                         ArrayList.class)
                         .beginControlFlow("while(resultSet.next())");
             } else {
@@ -579,11 +595,11 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
             }
 
             if(!primitiveOrStringReturn){
-                addCreateNewEntityFromResultToCodeBlock((TypeElement)returnTypeElement,  daoMethod,
+                addCreateNewEntityFromResultToCodeBlock((TypeElement)resultTypeElement,  daoMethod,
                         "entity", "resultSet", metaData, codeBlock);
             }else{
-                codeBlock.add("$T entity = resultSet.get$L(1);\n", returnTypeMirror,
-                        getPreparedStatementSetterGetterTypeName(returnTypeMirror));
+                codeBlock.add("$T entity = resultSet.get$L(1);\n", resultType,
+                        getPreparedStatementSetterGetterTypeName(resultType));
             }
 
             if(returnsList) {
@@ -593,7 +609,7 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                 codeBlock.add("resultList.add(entity);\n")
                         .endControlFlow()
                         .add("result = resultList.toArray(new $T[resultList.size()]);\n",
-                                returnTypeElement);
+                                resultTypeElement);
             }else {
                 codeBlock.add("result = entity;\n")
                             .endControlFlow();
@@ -608,16 +624,18 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
         codeBlock.nextControlFlow("catch($T e)", SQLException.class)
             .add("e.printStackTrace();\n")
         .nextControlFlow("finally")
-            .beginControlFlow("if(resultSet != null)")
-                .beginControlFlow("try")
-                    .add("resultSet.close();\n")
-                .nextControlFlow("catch($T ce)", SQLException.class)
-                    .add("ce.printStackTrace();\n")
-                .endControlFlow()
-            .endControlFlow()
+            .add("$T.closeQuietly(resultSet);\n", JdbcDatabaseUtils.class)
         .endControlFlow();
 
-        codeBlock.add("return result;\n");
+        if(asyncMethod) {
+            codeBlock.add("$T.onSuccessIfNotNull($L, result);\n",
+                    UmCallbackUtil.class,
+                    daoMethod.getParameters().get(asyncParamIndex).getSimpleName().toString());
+            codeBlock.endControlFlow(")");
+        }else {
+            codeBlock.add("return result;\n");
+        }
+
 
         methodBuilder.addCode(codeBlock.build());
         daoBuilder.addMethod(methodBuilder.build());

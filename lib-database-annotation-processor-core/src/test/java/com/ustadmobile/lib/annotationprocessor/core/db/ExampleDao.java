@@ -1,5 +1,6 @@
 package com.ustadmobile.lib.annotationprocessor.core.db;
 
+import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
@@ -27,5 +28,11 @@ public abstract class ExampleDao {
     @UmQuery("SELECT * FROM ExampleEntity " +
             "LEFT JOIN ExampleLocation ON ExampleEntity.locationPk = ExampleLocation.locationUid")
     public abstract List<ExampleEntityWithLocation> getAllEntitiesWithLocation();
+
+    @UmQuery("SELECT * FROM ExampleEntity WHERE uid = :uid ")
+    public abstract void findExampleEntityByUidAsync(int uid, UmCallback<ExampleEntity> callback);
+
+    @UmQuery("SELECT * FROM ExampleEntity")
+    public abstract void findAllExampleEntitiesAsync(UmCallback<List<ExampleEntity>> callback);
 
 }

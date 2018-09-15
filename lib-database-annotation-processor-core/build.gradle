@@ -25,6 +25,7 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation project(":lib-database-annotation")
     implementation project(":lib-database-jdbc")
+    implementation project(":lib-util")
     implementation "com.squareup:javapoet:$version_javapoet"
     implementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
     implementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"

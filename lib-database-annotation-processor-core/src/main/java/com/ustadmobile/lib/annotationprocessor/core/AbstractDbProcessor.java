@@ -8,6 +8,8 @@ import com.ustadmobile.lib.database.annotation.UmDbContext;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 import javax.annotation.processing.Filer;
@@ -19,11 +21,10 @@ import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.tools.Diagnostic;
-
-import static com.ustadmobile.lib.annotationprocessor.core.DbProcessorCore.OPT_ROOM_OUTPUT;
 
 public abstract class AbstractDbProcessor {
 
@@ -121,4 +122,22 @@ public abstract class AbstractDbProcessor {
             return "null";
         }
     }
+
+    /**
+     * Get a list of elements (e.g. TypeElements) for all the parameters for a given method
+     *
+     * @param method Method for which we want a list of TypeElements
+     *
+     * @return List of Elements for each parameter.
+     */
+    protected List<Element> getMethodParametersAsElements(ExecutableElement method) {
+        List<? extends VariableElement> variableElementList = method.getParameters();
+        List<Element> variableTypeElements = new ArrayList<>();
+        for(VariableElement variableElement : variableElementList) {
+            variableTypeElements.add(processingEnv.getTypeUtils().asElement(variableElement.asType()));
+        }
+
+        return variableTypeElements;
+    }
+
 }

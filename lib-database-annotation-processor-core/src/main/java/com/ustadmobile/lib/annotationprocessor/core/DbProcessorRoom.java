@@ -297,10 +297,7 @@ public class DbProcessorRoom extends AbstractDbProcessor{
         MethodSpec.Builder methodBuilder;
 
         List<? extends VariableElement> variableElementList = daoMethod.getParameters();
-        List<Element> variableTypeElements = new ArrayList<>();
-        for(VariableElement variableElement : variableElementList) {
-            variableTypeElements.add(processingEnv.getTypeUtils().asElement(variableElement.asType()));
-        }
+        List<Element> variableTypeElements = getMethodParametersAsElements(daoMethod);
 
         TypeElement umCallbackTypeElement = processingEnv.getElementUtils().getTypeElement(
                 "com.ustadmobile.core.impl.UmCallback");

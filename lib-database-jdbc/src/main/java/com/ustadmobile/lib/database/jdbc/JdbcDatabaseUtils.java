@@ -1,5 +1,6 @@
 package com.ustadmobile.lib.database.jdbc;
 
+import java.io.Closeable;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
@@ -46,6 +47,14 @@ public class JdbcDatabaseUtils {
         }
 
         return tableNames;
+    }
+
+    public static void closeQuietly(AutoCloseable closeable) {
+        try {
+            closeable.close();
+        }catch(Exception e) {
+            e.printStackTrace();
+        }
     }
 
     /**
