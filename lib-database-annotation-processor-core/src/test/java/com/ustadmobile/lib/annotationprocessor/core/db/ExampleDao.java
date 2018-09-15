@@ -35,4 +35,16 @@ public abstract class ExampleDao {
     @UmQuery("SELECT * FROM ExampleEntity")
     public abstract void findAllExampleEntitiesAsync(UmCallback<List<ExampleEntity>> callback);
 
+    @UmQuery("UPDATE ExampleEntity SET name = :name WHERE uid = :uid")
+    public abstract int updateNameByUid(String name, int uid);
+
+    @UmQuery("UPDATE ExampleEntity SET name = :name WHERE uid = :uid")
+    public abstract void updateNameByUidVoid(String name, int uid);
+
+    @UmQuery("UPDATE ExampleEntity SET name = :name WHERE uid = :uid")
+    public abstract void updateNameByUidAsync(String name, int uid, UmCallback<Integer> callback);
+
+    @UmQuery("UPDATE ExampleEntity SET name = :name WHERE uid = :uid")
+    public abstract void updateNameByUidVoidAsync(String name, int uid, UmCallback<Void> callback);
+
 }

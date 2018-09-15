@@ -482,10 +482,15 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
     public void addQueryMethod(ExecutableElement daoMethod, TypeElement dbType, TypeSpec.Builder daoBuilder,
                                char identifierQuote) {
         //we need to run the query, find the columns, and then determine the appropriate setter methods to run
-
         CodeBlock.Builder codeBlock = CodeBlock.builder();
         MethodSpec.Builder methodBuilder = MethodSpec.overriding(daoMethod);
         String querySql = daoMethod.getAnnotation(UmQuery.class).value();
+        String querySqlTrimmedLower = querySql.toLowerCase().trim();
+
+        boolean isUpdateOrDelete = false;
+        if(querySqlTrimmedLower.startsWith("update") || querySqlTrimmedLower.startsWith("delete")) {
+            isUpdateOrDelete = true;
+        }
 
         TypeElement umCallbackTypeElement = processingEnv.getElementUtils().getTypeElement(
                 UmCallback.class.getName());
@@ -531,7 +536,7 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
             returnsList = true;
             codeBlock.add("$T<$T> result = new $T<>();\n", List.class, resultTypeElement,
                     ArrayList.class);
-        }else {
+        }else if(!resultType.getKind().equals(TypeKind.VOID)){
             codeBlock.add("$T result = $L;\n", resultType, defaultValue(resultType));
         }
 
@@ -540,8 +545,11 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                 || returnTypeName.isBoxedPrimitive()
                 || returnTypeName.equals(ClassName.get(String.class));
 
-        codeBlock.add("$T resultSet = null;\n", ResultSet.class)
-            .add("try (\n").indent()
+        if(!isUpdateOrDelete) {
+            codeBlock.add("$T resultSet = null;\n", ResultSet.class);
+        }
+
+        codeBlock.add("try (\n").indent()
             .add("$T connection = _db.getConnection();\n", Connection.class)
             .add("$T stmt = connection.prepareStatement($S);\n", PreparedStatement.class, preparedStmtSql)
             .unindent().beginControlFlow(")");
@@ -567,12 +575,91 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                     paramVariableElement.getSimpleName().toString());
         }
 
+        if(!isUpdateOrDelete) {
+            addMapResultSetToValuesToCodeBlock(dbType, daoMethod, querySql, primitiveOrStringReturn,
+                    returnsList, returnsArray, resultType, resultTypeElement, codeBlock);
+        }else {
+            TypeMirror updateResultTypeMirror = resultType;
+            if(updateResultTypeMirror.getKind().equals(TypeKind.DECLARED)) {
+                TypeElement updateResultTypeElement = (TypeElement)resultTypeElement;
+                if(updateResultTypeElement != null && updateResultTypeElement.equals(
+                        processingEnv.getElementUtils().getTypeElement("java.lang.Void"))) {
+                    updateResultTypeMirror = processingEnv.getTypeUtils().getNoType(TypeKind.VOID);
+                }
+            }
+
+            if(updateResultTypeMirror.getKind().equals(TypeKind.DECLARED)) {
+                try {
+                    updateResultTypeMirror = processingEnv.getTypeUtils().unboxedType(resultType);
+                }catch(Exception e) {
+                    messager.printMessage(Diagnostic.Kind.ERROR,
+                            formatMethodForErrorMessage(daoMethod) + " : " +
+                        "update or delete query method must return void or integer type.");
+                }
+            }
+
+            if(updateResultTypeMirror.getKind().equals(TypeKind.VOID)){
+                codeBlock.add("stmt.executeUpdate();\n");
+            }else {
+                codeBlock.add("result = stmt.executeUpdate();\n");
+            }
+        }
+
+        codeBlock.nextControlFlow("catch($T e)", SQLException.class)
+            .add("e.printStackTrace();\n");
+
+        if(!isUpdateOrDelete) {
+            codeBlock.nextControlFlow("finally")
+                .add("$T.closeQuietly(resultSet);\n", JdbcDatabaseUtils.class);
+        }
+
+        codeBlock.endControlFlow();
+
+        if(asyncMethod) {
+            codeBlock.add("$T.onSuccessIfNotNull($L, result);\n",
+                    UmCallbackUtil.class,
+                    daoMethod.getParameters().get(asyncParamIndex).getSimpleName().toString());
+            codeBlock.endControlFlow(")");
+        }else if(!daoMethod.getReturnType().getKind().equals(TypeKind.VOID)){
+            codeBlock.add("return result;\n");
+        }
+
+
+        methodBuilder.addCode(codeBlock.build());
+        daoBuilder.addMethod(methodBuilder.build());
+
+    }
+
+    /**
+     * Generates a block of code that will convert the JDBC ResultSet from a SELECT query into the
+     * desired result, which could be a single entity / POJO object, a list of objects, or String/
+     * primitive result types.
+     *
+     * @param dbType TypeElement representing the database class
+     * @param daoMethod ExecutableElement representing the DAO Method for which an implementation is
+     *                  being generated
+     * @param querySql The SQL query as per the UmQuery annotation
+     * @param primitiveOrStringReturn true if the method returns a primitive result or string, false
+     *                                otherwise (e.g. returns a POJO/entity)
+     * @param returnsList true if the method returns a java.util.List, false otherwise
+     * @param returnsArray true if the method returns an Array, false otherwise
+     * @param resultType The TypeMirror representing the return type.
+     * @param resultTypeElement Element representation of resultType
+     * @param codeBlock CodeBlock.Builder the generated code will be added to
+     */
+    protected void addMapResultSetToValuesToCodeBlock(TypeElement dbType, ExecutableElement daoMethod,
+                                                      String querySql,
+                                                      boolean primitiveOrStringReturn,
+                                                      boolean returnsList, boolean returnsArray,
+                                                      TypeMirror resultType,
+                                                      Element resultTypeElement,
+                                                      CodeBlock.Builder codeBlock) {
         codeBlock.add("resultSet = stmt.executeQuery();\n");
 
 
         try(
             Connection dbConnection = nameToDataSourceMap.get(dbType.getQualifiedName().toString())
-                .getConnection();
+                    .getConnection();
             Statement stmt = dbConnection.createStatement();
             ResultSet results = stmt.executeQuery(querySql);
         ) {
@@ -612,7 +699,7 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                                 resultTypeElement);
             }else {
                 codeBlock.add("result = entity;\n")
-                            .endControlFlow();
+                        .endControlFlow();
             }
 
         } catch(SQLException e) {
@@ -620,26 +707,6 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                     "Exception generating query method for: " +
                             formatMethodForErrorMessage(daoMethod) + ": " + e.getMessage());
         }
-
-        codeBlock.nextControlFlow("catch($T e)", SQLException.class)
-            .add("e.printStackTrace();\n")
-        .nextControlFlow("finally")
-            .add("$T.closeQuietly(resultSet);\n", JdbcDatabaseUtils.class)
-        .endControlFlow();
-
-        if(asyncMethod) {
-            codeBlock.add("$T.onSuccessIfNotNull($L, result);\n",
-                    UmCallbackUtil.class,
-                    daoMethod.getParameters().get(asyncParamIndex).getSimpleName().toString());
-            codeBlock.endControlFlow(")");
-        }else {
-            codeBlock.add("return result;\n");
-        }
-
-
-        methodBuilder.addCode(codeBlock.build());
-        daoBuilder.addMethod(methodBuilder.build());
-
     }
 
     /**
