@@ -33,9 +33,9 @@ targetCompatibility = "1.8"
 
 publishing {
     publications {
-        nanolrscore(MavenPublication) {
-            groupId 'com.ustadmobile.app'
-            artifactId 'app-javase'
+        maven(MavenPublication) {
+            groupId rootProject.group
+            artifactId project.name
             version rootProject.version
 
             from components.java
