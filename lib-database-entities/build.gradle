@@ -1,0 +1,42 @@
+apply plugin: 'java-library'
+apply plugin: "maven-publish"
+
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation project(":lib-database-annotation")
+
+    api "net.sf.kxml:kxml2:$version_kxml";
+    api project(":lib-util")
+}
+
+task sourceJar(type: Jar) {
+    from sourceSets.main.allJava
+}
+
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId rootProject.group
+            artifactId project.name
+            version rootProject.version
+
+            from components.java
+
+            artifact sourceJar {
+                classifier = 'sources'
+            }
+        }
+    }
+
+    repositories {
+        maven {
+            url rootProject.ext.buildConfigProperties['repo.dir']
+        }
+    }
+}
+
+
+sourceCompatibility = "1.8"
+targetCompatibility = "1.8"

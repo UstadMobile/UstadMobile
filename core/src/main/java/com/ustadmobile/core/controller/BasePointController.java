@@ -91,9 +91,6 @@ public class BasePointController extends UstadBaseController implements DialogRe
             welcomeScreenDisplayed = savedState.get(ARG_WELCOME_SCREEN_DISPLAYED).toString().equals("true");
         }
 
-        basePointView.setMenuItems(impl.getActiveUser(getContext()) != null ?
-                CoreBuildConfig.BASEPOINT_MENU_AUTHENTICATED : CoreBuildConfig.BASEPOINT_MENU_GUEST);
-
         Vector catalogTabs = null;
         if(args != null) {
             catalogTabs = UMFileUtil.splitCombinedViewArguments(args, "catalog", '-');
@@ -187,7 +184,6 @@ public class BasePointController extends UstadBaseController implements DialogRe
         switch(commandId) {
             case LoginController.RESULT_LOGIN_SUCCESSFUL:
                 dialog.dismiss();
-                basePointView.setMenuItems(CoreBuildConfig.BASEPOINT_MENU_AUTHENTICATED);
                 impl.getAppView(getContext()).showNotification(
                         impl.getString(MessageID.login_successful, getContext()),
                         AppView.LENGTH_LONG);
@@ -195,7 +191,6 @@ public class BasePointController extends UstadBaseController implements DialogRe
 
             case RegistrationPresenter.RESULT_REGISTRATION_SUCCESS:
                 dialog.dismiss();
-                basePointView.setMenuItems(CoreBuildConfig.BASEPOINT_MENU_AUTHENTICATED);
                 impl.getAppView(getContext()).showNotification(
                         impl.getString(MessageID.registration_successful, getContext()),
                         AppView.LENGTH_LONG);

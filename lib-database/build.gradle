@@ -2,11 +2,25 @@ apply plugin: 'java-library'
 apply plugin: "maven-publish"
 
 
+compileJava {
+    /*
+     *  Annotation processor arguments:
+     *   umdb_room_out - Destination directory for the generated room version of database and DAO classes
+     */
+    options.compilerArgs += ["-Aumdb_room_out=" + rootProject.file("lib-database-android/build/generated/source/umdbprocessor").getAbsolutePath()]
+}
+
+jar {
+    exclude("com/ustadmobile/core/db/*_Factory.*")
+}
+
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+    compileOnly project(":lib-database-entities")
     implementation project(":lib-database-annotation")
-    api "net.sf.kxml:kxml2:$version_kxml";
-    api project(":lib-util")
+    implementation project(":lib-util")
+
+    annotationProcessor project(":lib-database-annotation-processor-core")
 }
 
 task sourceJar(type: Jar) {
@@ -14,11 +28,14 @@ task sourceJar(type: Jar) {
 }
 
 
+sourceCompatibility = "1.8"
+targetCompatibility = "1.8"
+
 publishing {
     publications {
-        nanolrscore(MavenPublication) {
-            groupId 'com.ustadmobile.app'
-            artifactId 'lib-database'
+        maven(MavenPublication) {
+            groupId rootProject.group
+            artifactId project.name
             version rootProject.version
 
             from components.java
@@ -35,7 +52,3 @@ publishing {
         }
     }
 }
-
-
-sourceCompatibility = "1.8"
-targetCompatibility = "1.8"

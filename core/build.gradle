@@ -45,27 +45,15 @@ repositories {
     }
 }
 
-compileJava {
-    /*
-     *  Annotation processor arguments:
-     *   umdb_room_out - Destination directory for the generated room version of database and DAO classes
-     */
-    options.compilerArgs += [
-            "-Aumdb_room_out=" + rootProject.file("app-android/build/generated/source/umdbprocessor").getAbsolutePath(),
-            "-Aumdb_jdbc_out=" + rootProject.file("app-javase/build/generated/source/umdbprocessor").getAbsolutePath()
-    ]
-}
-
-
 dependencies {
     implementation "org.json:json:$version_json"
     implementation "net.sf.kxml:kxml2:$version_kxml"
     implementation "com.ustadmobile.qrcodelibomrfork:qrcode-core:$version_qrcodelibfork"
-    compileOnly project(":lib-database")
+    implementation project(":lib-database")
+    compileOnly project(':lib-database-entities')
     implementation project(":lib-database-annotation")
     implementation project(":lib-util")
 
-    annotationProcessor project(":lib-database-annotation-processor-core")
 
 
     testImplementation project(":core-tests")
@@ -105,50 +93,6 @@ task generateCoreBuildConfig (type: de.fuerstenau.gradle.buildconfig.GenerateBui
     clsName = "CoreBuildConfig"
     version = rootProject.version
 
-    ArrayList<String> baseMenuTypes = new ArrayList<>()
-    baseMenuTypes.add("guest")
-    baseMenuTypes.add("authenticated")
-
-    long buildTimeMillis = Calendar.getInstance().getTimeInMillis()
-
-    for(int i = 0; i < baseMenuTypes.size(); i++) {
-        String menuTypePrefix = "baseMenu." + baseMenuTypes.get(i)
-        int menuItemIndex = 0
-        String menuItemTitle=null
-        ArrayList<String> titleIdsList = new ArrayList<>()
-        ArrayList<String> destinationsList = new ArrayList<>()
-        ArrayList<String> iconList = new ArrayList<>()
-
-        while((menuItemTitle = project.ext.buildConfigProperties.getProperty(menuTypePrefix + "." + menuItemIndex + ".title")) != null) {
-            String itemPrefix = menuTypePrefix + "." + menuItemIndex
-            String itemDest = project.ext.buildConfigProperties.getProperty(itemPrefix + ".dest")
-            if(itemDest == null || itemDest.equals("null")) {
-                break
-            }
-
-            titleIdsList.add(menuItemTitle)
-            destinationsList.add(itemDest)
-            iconList.add(project.ext.buildConfigProperties.getProperty(itemPrefix + ".icon"))
-            menuItemIndex++
-        }
-
-        String basePointMenuArrayStr = "new com.ustadmobile.core.view.BasePointMenuItem[]{"
-        for(int j = 0; j< titleIdsList.size(); j++) {
-            String titleIdVal = titleIdsList.get(j)
-            if(titleIdsList[i].startsWith("MessageID")) {
-                titleIdVal = "com.ustadmobile.core.generated.locale." + titleIdVal
-            }
-            basePointMenuArrayStr += "new com.ustadmobile.core.view.BasePointMenuItem("+ titleIdVal + ", \"" + destinationsList.get(j) + "\", " + (iconList.get(j) != null ? "\""+iconList.get(j) + "\"": "null") +")"
-            if(j < titleIdsList.size()-1){
-                basePointMenuArrayStr += ", "
-            }
-        }
-        basePointMenuArrayStr += "}"
-
-        buildConfigField "com.ustadmobile.core.view.BasePointMenuItem[]", "BASEPOINT_MENU_" + baseMenuTypes.get(i).toUpperCase(),basePointMenuArrayStr
-    }
-
-
     String[] supportedLocales = project.ext.buildConfigProperties.getProperty("appSupportedLocales").split(",")
     String supportedLocalesValue = "new String[]{"
     for(int k = 0; k < supportedLocales.length; k++) {
@@ -161,15 +105,7 @@ task generateCoreBuildConfig (type: de.fuerstenau.gradle.buildconfig.GenerateBui
     buildConfigField "String[]", "SUPPORTED_LOCALES", supportedLocalesValue
 
     buildConfigField "String", "BASE_NAME", project.ext.buildConfigProperties["baseName"]
-    buildConfigField "long", "BUILD_TIME_MILLIS", String.valueOf(buildTimeMillis) + "L"
-    buildConfigField "boolean", "OPDS_ITEM_ENABLE_BACKGROUNDS", project.ext.buildConfigProperties["appOpdsBackgroundsEnable"]
-    buildConfigField "boolean", "BASEPOINT_BROWSEBUTTON_ENABLED", project.ext.buildConfigProperties["appBasepointBrowseButtonUrl"].equals("") ? "false" : "true"
-    buildConfigField "boolean", "BASEPOINT_FILTER_BY_UI_LANG", project.ext.buildConfigProperties["appBasepointFilterByUiLang"]
-    buildConfigField "boolean", "LOGIN_TITLEBAR_VISIBLE", project.ext.buildConfigProperties["appLoginTitleBarVisible"]
-    buildConfigField "boolean", "LOGIN_BEFORE_DOWNLOAD", project.ext.buildConfigProperties["appLoginBeforeDownload"]
     buildConfigField "String", "DEFAULT_PREFERRED_ACQUISITION_FORMATS", project.ext.buildConfigProperties["appPreferredAcquisitionFormats"]
-    buildConfigField "int", "ACQUISITION_SELECT_WEIGHT_LANGUAGE", project.ext.buildConfigProperties['appAcquisitionLanguagePrefWeight']
-    buildConfigField "int", "ACQUISITION_SELECT_WEIGHT_MIMETYPE", project.ext.buildConfigProperties['appAcquisitionMimeTypeWeight']
     buildConfigField "String", "NETWORK_SERVICE_TYPE", project.ext.buildConfigProperties["appNetworkServiceType"]
     buildConfigField "String", "WIFI_P2P_INSTANCE_NAME", project.ext.buildConfigProperties["appP2pServiceInstanceName"]
     buildConfigField "String", "DEFAULT_XAPI_SERVER", project.ext.buildConfigProperties["appDefaultXapiServer"]
@@ -213,7 +149,6 @@ task prepareLocale (type: de.fuerstenau.gradle.buildconfig.GenerateBuildConfigTa
     while(nameIterator.hasNext()) {
         String strName = nameIterator.next()
         Integer value =messageIds.get(strName)
-        System.out.println("buildconfigfield : '" + strName + "' = "+ String.valueOf(value))
 
         buildConfigField "int", strName, String.valueOf(value)
     }
@@ -459,9 +394,9 @@ processTestResources.dependsOn copyTestResources
 
 publishing {
     publications {
-        nanolrscore(MavenPublication) {
-            groupId 'com.ustadmobile.app'
-            artifactId 'core'
+        maven(MavenPublication) {
+            groupId rootProject.group
+            artifactId project.name
             version rootProject.version
 
             from components.java

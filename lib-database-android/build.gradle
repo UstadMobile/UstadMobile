@@ -1,0 +1,103 @@
+apply plugin: 'com.android.library'
+apply plugin: 'digital.wup.android-maven-publish'
+
+buildscript {
+    repositories {
+        jcenter()
+    }
+
+    dependencies {
+        classpath "digital.wup:android-maven-publish:$version_android_maven_publish"
+    }
+}
+
+android {
+    compileSdkVersion 27
+
+
+    sourceSets {
+        main.java.srcDirs += ["build/generated/source/umentities", "build/generated/source/umdbprocessor"]
+    }
+
+    defaultConfig {
+        minSdkVersion 15
+        targetSdkVersion 27
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+}
+
+task generateRoomEntities {
+    inputs.files(fileTree(dir: rootProject.file("lib-database/src/main/java")).matching { include '**/*.java' })
+    outputs.dir("build/generated/source/umentities")
+}
+
+generateRoomEntities.dependsOn(":lib-database-entity-processor:runRoomProcessor")
+
+afterEvaluate {
+    android.libraryVariants.all { variant ->
+        variant.javaCompiler.dependsOn(generateRoomEntities)
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    implementation project(":lib-database")
+    implementation project(":lib-database-annotation")
+    implementation project(":lib-util")
+
+    //ViewModel and LiveData
+    implementation "android.arch.lifecycle:extensions:$version_android_lifecycle"
+    annotationProcessor "android.arch.lifecycle:common-java8:$version_android_lifecycle"
+
+    //Room persistence
+    implementation "android.arch.persistence.room:runtime:$version_android_room"
+    annotationProcessor "android.arch.persistence.room:compiler:$version_android_room"
+
+    // Paging
+    implementation "android.arch.paging:runtime:$version_android_paging"
+
+    implementation "com.android.support:appcompat-v7:$version_android_support_lib"
+    implementation "com.android.support:support-core-utils:$version_android_support_lib"
+
+    testImplementation "junit:junit:$version_junit"
+    androidTestImplementation "com.android.support.test:runner:$version_android_junit_runner"
+    androidTestImplementation "com.android.support.test.espresso:espresso-core:$version_android_espresso"
+}
+
+publishing {
+    publications {
+        mavenAar(MavenPublication) {
+            from components.android
+
+            groupId rootProject.group
+            artifactId project.name
+            version "${rootProject.version}"
+        }
+    }
+
+    repositories {
+        //Set this in projectdir/extrasettings.gradle
+        maven {
+            url rootProject.ext.buildConfigProperties['repo.dir']
+        }
+    }
+}

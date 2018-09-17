@@ -980,6 +980,15 @@ public abstract class UstadMobileSystemImpl {
     public abstract String getVersion(Object context);
 
     /**
+     * Get the build timestamp
+     *
+     * @param context System context object
+     *
+     * @return Build timestamp in ms since epoch
+     */
+    public abstract long getBuildTimestamp(Object context);
+
+    /**
      * Perform a one way hash of an authentication parameter
      *
      * @param context System context

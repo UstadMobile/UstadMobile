@@ -10,6 +10,7 @@ dependencies {
     testCompile project(":sharedse-tests")
     testCompile project(":app-javase")
     implementation project(":lib-database")
+    compileOnly project(':lib-database-entities')
 
     implementation "org.json:json:$version_json"
     implementation "net.lingala.zip4j:zip4j:$version_zip4j"
@@ -36,9 +37,9 @@ task sourceJar(type: Jar) {
 
 publishing {
     publications {
-        nanolrscore(MavenPublication) {
-            groupId 'com.ustadmobile.app'
-            artifactId 'lib-core-fs'
+        maven(MavenPublication) {
+            groupId rootProject.group
+            artifactId project.name
             version rootProject.version
 
             from components.java
