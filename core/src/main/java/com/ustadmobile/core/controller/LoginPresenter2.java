@@ -3,7 +3,8 @@ package com.ustadmobile.core.controller;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.AppConfig;
-import com.ustadmobile.core.impl.UmAccount;
+import com.ustadmobile.core.impl.UmAccountManager;
+import com.ustadmobile.lib.db.entities.UmAccount;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.CreateAccountView;
@@ -30,7 +31,7 @@ public class LoginPresenter2 extends UstadBaseController<LoginView2>{
             @Override
             public void onSuccess(UmAccount result) {
                 if(result != null) {
-                    UmAccount.setActiveAccount(result, context);
+                    UmAccountManager.setActiveAccount(result, context);
                     view.runOnUiThread(() -> {
                         view.setInProgress(false);
                         view.setPassword("");
