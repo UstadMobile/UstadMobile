@@ -421,8 +421,27 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                 .addModifiers(Modifier.SYNCHRONIZED);
 
         VariableElement insertedElement = daoMethod.getParameters().get(0);
-        TypeElement entityTypeElement = (TypeElement)processingEnv.getTypeUtils()
-                .asElement(insertedElement.asType());
+        boolean isList = false;
+        boolean isArray = false;
+
+        TypeMirror insertParameter = daoMethod.getParameters().get(0).asType();
+
+        TypeElement entityTypeElement = insertParameter.getKind().equals(TypeKind.DECLARED) ?
+                (TypeElement)processingEnv.getTypeUtils().asElement(insertedElement.asType()) : null;
+
+        if(entityTypeElement != null && entityTypeElement.equals(processingEnv.getElementUtils()
+                .getTypeElement(List.class.getName()))) {
+            isList = true;
+            DeclaredType declaredType = (DeclaredType)daoMethod.getParameters().get(0).asType();
+            entityTypeElement = (TypeElement)processingEnv.getTypeUtils().asElement(
+                    declaredType.getTypeArguments().get(0));
+        }else if(insertParameter.getKind().equals(TypeKind.ARRAY)) {
+            isArray = true;
+            entityTypeElement = (TypeElement)processingEnv.getTypeUtils().asElement(
+                    ((ArrayType)insertParameter).getComponentType());
+        }
+
+
         if(entityTypeElement.getAnnotation(UmEntity.class) == null) {
             messager.printMessage(Diagnostic.Kind.ERROR, daoMethod.getEnclosingElement().getSimpleName() +
                     "." + daoMethod.getSimpleName() +
@@ -435,11 +454,12 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
 
         String identifierQuoteStr = String.valueOf(identifierQuote);
         CodeBlock.Builder codeBlock = CodeBlock.builder()
-                .add("$T _stmt = null;\n", PreparedStatement.class)
-                .beginControlFlow("try")
-                .add("_stmt = _db.getConnection().prepareStatement(\"INSERT INTO $L$L$L (",
-                        identifierQuoteStr, entityTypeElement.getSimpleName().toString(),
-                        identifierQuoteStr);
+                .add("try (\n").indent()
+                    .add("$T connection = _db.getConnection();\n", Connection.class)
+                    .add("$T _stmt = connection.prepareStatement(\"INSERT INTO $L$L$L (",
+                            PreparedStatement.class, identifierQuoteStr,
+                            entityTypeElement.getSimpleName().toString(), identifierQuoteStr);
+
         List<VariableElement> entityFields = new ArrayList<>();
         boolean commaRequired = false;
         for(Element fieldElement : entityTypeElement.getEnclosedElements()) {
@@ -462,17 +482,28 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
         }
         codeBlock.add(")\");\n");
 
+        codeBlock.unindent().beginControlFlow(")");
+
+
+        if(isList || isArray) {
+            codeBlock.beginControlFlow("for($T _element : $L)", entityTypeElement,
+                    daoMethod.getParameters().get(0).getSimpleName().toString());
+        }
+
         for(int i = 0; i < entityFields.size(); i++) {
-            addSetPreparedStatementValueToCodeBlock(preparedStmtVarName, insertedElement.getSimpleName().toString(),
+            addSetPreparedStatementValueToCodeBlock(preparedStmtVarName,
+                    (isList|| isArray) ? "_element" : insertedElement.getSimpleName().toString(),
                     i + 1, entityFields.get(i), codeBlock);
         }
 
         codeBlock.add("$L.execute();\n", preparedStmtVarName);
+
+        if(isList || isArray) {
+            codeBlock.endControlFlow();
+        }
+
         codeBlock.endControlFlow().beginControlFlow("catch($T e)", SQLException.class)
-                .add("e.printStackTrace();\n").endControlFlow()
-                .beginControlFlow("finally")
-                .add("$T.closeStatement(_stmt);\n", ClassName.get(JdbcDatabaseUtils.class))
-                .endControlFlow();
+                .add("e.printStackTrace();\n").endControlFlow();
 
 
         methodBuilder.addCode(codeBlock.build());

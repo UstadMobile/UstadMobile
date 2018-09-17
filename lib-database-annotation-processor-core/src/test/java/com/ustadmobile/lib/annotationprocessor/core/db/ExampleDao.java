@@ -13,6 +13,12 @@ public abstract class ExampleDao {
     @UmInsert
     public abstract void insertE(ExampleEntity entity);
 
+    @UmInsert
+    public abstract void insertList(List<ExampleEntity> entities);
+
+    @UmInsert
+    public abstract void insertArray(ExampleEntity[] entities);
+
     @UmQuery("SELECT * FROM ExampleEntity")
     public abstract List<ExampleEntity> getAllEntities();
 
