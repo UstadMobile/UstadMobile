@@ -26,4 +26,10 @@ public abstract class PersonDetailPresenterFieldDao implements BaseDao<PersonDet
     @UmQuery("SELECT * FROM PersonDetailPresenterField ORDER BY fieldIndex")
     public abstract void findAllPersonDetailPresenterFields(UmCallback<List<PersonDetailPresenterField>> callback);
 
+    @UmQuery("SELECT * FROM PersonDetailPresenterField WHERE viewModeVisible = 1 ORDER BY fieldIndex")
+    public abstract void findAllPersonDetailPresenterFieldsViewMode(UmCallback<List<PersonDetailPresenterField>> callback);
+
+    @UmQuery("SELECT * FROM PersonDetailPresenterField WHERE editModeVisible = 1 ORDER BY fieldIndex")
+    public abstract void findAllPersonDetailPresenterFieldsEditMode(UmCallback<List<PersonDetailPresenterField>> callback);
+
 }

@@ -1,14 +1,12 @@
 package com.ustadmobile.core.view;
 
 /**
- * PersonDetail Core View extends Core UstadView. Will be implemented
+ * PersonEdit Core View extends Core UstadView. Will be implemented
  * on various implementations.
  */
-public interface PersonDetailView extends UstadView {
+public interface PersonEditView extends UstadView {
 
-    String VIEW_NAME = "PersonDetail";
-
-    String ARG_PERSON_UID = "personUid";
+    String VIEW_NAME = "PersonEdit";
 
     /**
      * Sets every field to the view (mostly a Linear Layout) based on the index and the
@@ -19,5 +17,11 @@ public interface PersonDetailView extends UstadView {
      * @param value The value of the field to be set to the view.
      */
     void setField(int index, PersonDetailViewField field, Object value);
+
+
+    /**
+     * This will close the activity (and finish it)
+     */
+    void finish();
 
 }

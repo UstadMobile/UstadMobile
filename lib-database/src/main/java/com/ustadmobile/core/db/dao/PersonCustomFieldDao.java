@@ -4,21 +4,24 @@ import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
-import com.ustadmobile.lib.db.entities.PersonCustomField;
+import com.ustadmobile.lib.db.entities.PersonField;
 
 @UmDao
-public abstract class PersonCustomFieldDao implements BaseDao<PersonCustomField> {
+public abstract class PersonCustomFieldDao implements BaseDao<PersonField> {
 
     @UmInsert
-    public abstract long insert(PersonCustomField entity);
+    public abstract long insert(PersonField entity);
 
     @UmInsert
-    public abstract void insertAsync(PersonCustomField entity, UmCallback<Long> result);
+    public abstract void insertAsync(PersonField entity, UmCallback<Long> result);
 
     @Override
-    @UmQuery("SELECT * FROM PersonCustomField WHERE personCustomFieldUid = :uid")
-    public abstract PersonCustomField findByUid(long uid);
+    @UmQuery("SELECT * FROM PersonField WHERE personCustomFieldUid = :uid")
+    public abstract PersonField findByUid(long uid);
 
-    @UmQuery("SELECT MAX(personCustomFieldUid) FROM PersonCustomField")
+    @UmQuery("SELECT * FROM PersonField WHERE personCustomFieldUid = :uid")
+    public abstract void findByUidAsync(long uid, UmCallback<PersonField> result);
+
+    @UmQuery("SELECT MAX(personCustomFieldUid) FROM PersonField")
     public abstract int findLatestUid();
 }

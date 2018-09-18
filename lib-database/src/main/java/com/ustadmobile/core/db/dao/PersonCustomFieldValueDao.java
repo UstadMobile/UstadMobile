@@ -5,7 +5,6 @@ import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.db.entities.PersonCustomFieldValue;
-import com.ustadmobile.lib.db.entities.PersonCustomFieldValueWithPersonCustomField;
 import com.ustadmobile.lib.db.entities.PersonCustomFieldWithPersonCustomFieldValue;
 
 import java.util.List;
@@ -26,16 +25,9 @@ public abstract class PersonCustomFieldValueDao implements BaseDao<PersonCustomF
     public abstract PersonCustomFieldValue findByUid(long uid);
 
 
-    @UmQuery("SELECT * FROM PersonCustomFieldValue " +
-            "LEFT JOIN PersonCustomField ON " +
-            "PersonCustomFieldValue.personCustomFieldValuePersonCustomFieldUid = PersonCustomField.personCustomFieldUid " +
-            "WHERE personCustomFieldValuePersonUid = :personUid")
-    public abstract void findByPersonUidAsync(long personUid,
-                                              UmCallback<List<PersonCustomFieldValueWithPersonCustomField>> callback);
-
-    @UmQuery("SELECT * FROM PersonCustomField " +
+    @UmQuery("SELECT * FROM PersonField " +
             "LEFT JOIN PersonCustomFieldValue ON " +
-            "PersonCustomFieldValue.personCustomFieldValuePersonCustomFieldUid = PersonCustomField.personCustomFieldUid " +
+            "PersonCustomFieldValue.personCustomFieldValuePersonCustomFieldUid = PersonField.personCustomFieldUid " +
             "WHERE personCustomFieldValuePersonUid = :personUid")
     public abstract void findByPersonUidAsync2(long personUid,
                                               UmCallback<List<PersonCustomFieldWithPersonCustomFieldValue>> callback);

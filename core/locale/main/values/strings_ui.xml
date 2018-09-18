@@ -308,6 +308,10 @@ This is the one you should be editing.
     <string name="mothers_name">Mother's name</string>
     <string name="mothers_number">Mother's number</string>
     <string name="new_person">New Person</string>
+    <string name="edit_person">Edit Person</string>
+    <string name="edit">Edit</string>
+    <string name="clazz">Class</string>
+    <string name="student_image">Student image</string>
 
 
 </resources>

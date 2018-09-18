@@ -51,6 +51,17 @@ public class Person implements SyncableEntity {
 
     private long dateOfBirth;
 
+    private String address;
+
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
     public String getFatherName() {
         return fatherName;
     }

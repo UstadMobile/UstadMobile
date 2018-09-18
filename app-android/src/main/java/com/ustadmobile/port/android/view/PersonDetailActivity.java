@@ -2,11 +2,6 @@ package com.ustadmobile.port.android.view;
 
 import android.graphics.Color;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentStatePagerAdapter;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.ImageView;
@@ -18,15 +13,17 @@ import com.ustadmobile.core.controller.PersonDetailPresenter;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.PersonDetailView;
-import com.ustadmobile.lib.db.entities.PersonDetailPresenterField;
+import com.ustadmobile.core.view.PersonDetailViewField;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
-import java.util.WeakHashMap;
+import ru.dimorinny.floatingtextbutton.FloatingTextButton;
 
-import static com.ustadmobile.core.controller.PersonDetailPresenter.PersonDetailViewField.FIELD_TYPE_DATE;
-import static com.ustadmobile.core.controller.PersonDetailPresenter.PersonDetailViewField.FIELD_TYPE_DROPDOWN;
-import static com.ustadmobile.core.controller.PersonDetailPresenter.PersonDetailViewField.FIELD_TYPE_PHONE_NUMBER;
-import static com.ustadmobile.core.controller.PersonDetailPresenter.PersonDetailViewField.FIELD_TYPE_TEXT;
+import static com.ustadmobile.core.view.PersonDetailViewField.FIELD_TYPE_DATE;
+import static com.ustadmobile.core.view.PersonDetailViewField.FIELD_TYPE_DROPDOWN;
+import static com.ustadmobile.core.view.PersonDetailViewField.FIELD_TYPE_FIELD;
+import static com.ustadmobile.core.view.PersonDetailViewField.FIELD_TYPE_HEADER;
+import static com.ustadmobile.core.view.PersonDetailViewField.FIELD_TYPE_PHONE_NUMBER;
+import static com.ustadmobile.core.view.PersonDetailViewField.FIELD_TYPE_TEXT;
 
 /**
  * The PersonDetail activity.
@@ -42,6 +39,9 @@ public class PersonDetailActivity extends UstadBaseActivity implements PersonDet
     private PersonDetailPresenter mPresenter;
     String personName = "";
 
+    public static final String CALL_ICON_NAME = "ic_call_bcd4_24dp";
+    public static final String TEXT_ICON_NAME = "ic_textsms_bcd4_24dp";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,12 +53,17 @@ public class PersonDetailActivity extends UstadBaseActivity implements PersonDet
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        mLinearLayout = findViewById(R.id.activity_person_detail_fields_linearlayout);
+        mLinearLayout = findViewById(R.id.activity_person_detail_fields_linear_layout);
 
         //Call the Presenter
         mPresenter = new PersonDetailPresenter(this,
                 UMAndroidUtil.bundleToHashtable(getIntent().getExtras()), this);
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
+
+        //FAB
+        FloatingTextButton fab = findViewById(R.id.activity_person_detail_fab_edit);
+        fab.setOnClickListener(v -> mPresenter.handleClickEdit());
+
 
     }
 
@@ -72,8 +77,10 @@ public class PersonDetailActivity extends UstadBaseActivity implements PersonDet
         }
     }
 
+
+
     @Override
-    public void setField(int index, PersonDetailPresenter.PersonDetailViewField field, Object value) {
+    public void setField(int index, PersonDetailViewField field, Object value) {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         String label = null;
         if(field.getMessageLabel() != 0) {
@@ -81,7 +88,7 @@ public class PersonDetailActivity extends UstadBaseActivity implements PersonDet
         }
 
         switch(field.getFieldType()){
-            case PersonDetailPresenterField.FIELD_TYPE_HEADER:
+            case FIELD_TYPE_HEADER:
 
                 //Add The Divider
                 View divider = new View(this);
@@ -100,27 +107,28 @@ public class PersonDetailActivity extends UstadBaseActivity implements PersonDet
                 mLinearLayout.addView(header);
                 break;
             case FIELD_TYPE_TEXT:
-            case PersonDetailPresenterField.FIELD_TYPE_FIELD:
+            case FIELD_TYPE_FIELD:
 
-                if(field.getMessageLabel() == MessageID.first_names ||
-                        field.getMessageLabel() == MessageID.last_name){
-
-
-                    if(field.getMessageLabel() == MessageID.first_names){
-                        personName  = value.toString();
-                    }else{
-                        personName = personName + " " + value.toString();
-                    }
+                int messageLabel = field.getMessageLabel();
+                //If this is just the full name, set it and continue
+                if(messageLabel == MessageID.field_fullname){
                     TextView name = findViewById(R.id.activity_person_detail_student_name);
-                    name.setText(personName);
+                    name.setText(value.toString());
                     break;
+
                 }
 
                 LinearLayout hll = new LinearLayout(this);
                 hll.setOrientation(LinearLayout.HORIZONTAL);
                 hll.setPadding(16,16,16,16);
 
-                int iconResId = getResourceId(field.getIconName(), "drawable", getPackageName());
+                String iconName = field.getIconName();
+
+                if(iconName == null || iconName.length() == 0){
+                    iconName = "ic_blank_24dp";
+                }
+
+                int iconResId = getResourceId(iconName, "drawable", getPackageName());
                 ImageView icon = new ImageView(this);
                 icon.setImageResource(iconResId);
                 icon.setPadding(16,0,4,0);
@@ -145,6 +153,44 @@ public class PersonDetailActivity extends UstadBaseActivity implements PersonDet
                 }
 
                 hll.addView(vll);
+
+                //Add call and text buttons to father and mother detail
+                if(field.getActionParam() != null && field.getActionParam().length() > 0){
+                    ImageView textIcon = new ImageView(this);
+                    textIcon.setImageResource(getResourceId(TEXT_ICON_NAME,
+                            "drawable", getPackageName()));
+                    textIcon.setPadding(16,0, 16,0);
+                    textIcon.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            mPresenter.handleClickCall(field.getActionParam());
+                        }
+                    });
+
+                    ImageView callIcon = new ImageView(this);
+                    callIcon.setImageResource(getResourceId(CALL_ICON_NAME,
+                            "drawable", getPackageName()));
+                    callIcon.setPadding(16,0, 16,0);
+                    callIcon.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            mPresenter.handleClickText(field.getActionParam());
+                        }
+                    });
+
+                    LinearLayout.LayoutParams heavyLayout = new LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.MATCH_PARENT,
+                            LinearLayout.LayoutParams.MATCH_PARENT,
+                            1.0f
+                    );
+                    View fillIt = new View(this);
+                    fillIt.setLayoutParams(heavyLayout);
+
+                    hll.addView(fillIt);
+                    hll.addView(textIcon);
+                    hll.addView(callIcon);
+                }
+
                 mLinearLayout.addView(hll);
 
                 break;
@@ -158,52 +204,6 @@ public class PersonDetailActivity extends UstadBaseActivity implements PersonDet
                 break;
         }
 
-
     }
-
-    /**
-     * Class : feed view pager adapter
-     */
-    private class PersonDetailViewPagerAdapter extends FragmentStatePagerAdapter {
-
-        //Map of position and fragment
-        WeakHashMap<Integer, UstadBaseFragment> positionMap;
-
-        //Constructor creates the adapter
-        public PersonDetailViewPagerAdapter(FragmentManager fm) {
-            super(fm);
-            positionMap = new WeakHashMap<>();
-        }
-
-        public void addFragments(int pos, Fragment fragment) {
-            positionMap.put(pos, (UstadBaseFragment) fragment);
-        }
-
-        /**
-         * Generate fragment for that page/position
-         *
-         * @param position
-         * @return
-         */
-        @Override
-        public Fragment getItem(int position) {
-            UstadBaseFragment thisFragment = positionMap.get(new Integer(position));
-            if (thisFragment != null) {
-                return thisFragment;
-            } else {
-                switch (position) {
-                    default:
-                        return null;
-                }
-
-            }
-        }
-
-        @Override
-        public int getCount() {
-            return positionMap.size();
-        }
-    }
-
 
 }

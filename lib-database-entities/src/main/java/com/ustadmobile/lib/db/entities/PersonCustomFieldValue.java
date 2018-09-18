@@ -4,17 +4,28 @@ package com.ustadmobile.lib.db.entities;
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 
+/**
+ * This entity represents the custom field value associated with any custom field for a given
+ * person Uid.
+ *
+ * A custom field is a field in PersonField.
+ */
 @UmEntity
 public class PersonCustomFieldValue {
 
+    //PK
     @UmPrimaryKey(autoIncrement = true)
     private long personCustomFieldValueUid;
 
+    //The Custom field's uid
     private long personCustomFieldValuePersonCustomFieldUid;
 
+    //The person associated uid
     private long personCustomFieldValuePersonUid;
 
+    //The value itself
     private String fieldValue;
+
 
     public long getPersonCustomFieldValueUid() {
         return personCustomFieldValueUid;

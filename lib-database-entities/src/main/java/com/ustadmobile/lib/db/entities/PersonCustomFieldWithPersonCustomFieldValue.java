@@ -6,7 +6,7 @@ import com.ustadmobile.lib.database.annotation.UmEmbedded;
  * Represents Field Value pair for fields (custom)
  *
  */
-public class PersonCustomFieldWithPersonCustomFieldValue extends PersonCustomField {
+public class PersonCustomFieldWithPersonCustomFieldValue extends PersonField {
 
     @UmEmbedded
     private PersonCustomFieldValue customFieldValue;

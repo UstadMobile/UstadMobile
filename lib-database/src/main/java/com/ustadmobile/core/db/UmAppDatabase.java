@@ -54,7 +54,7 @@ import com.ustadmobile.lib.db.entities.OpdsEntryStatusCache;
 import com.ustadmobile.lib.db.entities.OpdsEntryStatusCacheAncestor;
 import com.ustadmobile.lib.db.entities.OpdsLink;
 import com.ustadmobile.lib.db.entities.Person;
-import com.ustadmobile.lib.db.entities.PersonCustomField;
+import com.ustadmobile.lib.db.entities.PersonField;
 import com.ustadmobile.lib.db.entities.PersonCustomFieldValue;
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField;
 
@@ -67,7 +67,7 @@ import com.ustadmobile.lib.db.entities.PersonDetailPresenterField;
         HttpCachedEntry.class, DownloadJob.class, DownloadJobItem.class,
         Person.class, Clazz.class, ClazzMember.class, ClazzLog.class,
         ClazzLogAttendanceRecord.class, FeedEntry.class, ContentEntry.class,
-        PersonCustomField.class, PersonCustomFieldValue.class,
+        PersonField.class, PersonCustomFieldValue.class,
         PersonDetailPresenterField.class
 })
 public abstract class UmAppDatabase{

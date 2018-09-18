@@ -6,14 +6,13 @@ import com.ustadmobile.core.db.dao.ClazzMemberDao;
 import com.ustadmobile.core.db.dao.PersonCustomFieldValueDao;
 import com.ustadmobile.core.db.dao.PersonDao;
 import com.ustadmobile.core.db.dao.PersonDetailPresenterFieldDao;
-import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMCalendarUtil;
-import com.ustadmobile.core.view.PersonDetailEditView;
 import com.ustadmobile.core.view.PersonDetailView;
+import com.ustadmobile.core.view.PersonDetailViewField;
+import com.ustadmobile.core.view.PersonEditView;
 import com.ustadmobile.lib.db.entities.Person;
-import com.ustadmobile.lib.db.entities.PersonCustomFieldValueWithPersonCustomField;
 import com.ustadmobile.lib.db.entities.PersonCustomFieldWithPersonCustomFieldValue;
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField;
 
@@ -22,91 +21,29 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
-import static com.ustadmobile.core.controller.PersonDetailPresenter.PersonDetailViewField.FIELD_TYPE_TEXT;
-import static com.ustadmobile.lib.db.entities.PersonDetailPresenterField.FIELD_TYPE_HEADER;
+import static com.ustadmobile.core.view.PersonDetailViewField.FIELD_TYPE_HEADER;
+import static com.ustadmobile.core.view.PersonDetailViewField.FIELD_TYPE_TEXT;
+import static com.ustadmobile.lib.db.entities.PersonDetailPresenterField.PERSON_FIELD_UID_ADDRESS;
+import static com.ustadmobile.lib.db.entities.PersonDetailPresenterField.PERSON_FIELD_UID_ATTENDANCE;
+import static com.ustadmobile.lib.db.entities.PersonDetailPresenterField.PERSON_FIELD_UID_BIRTHDAY;
+import static com.ustadmobile.lib.db.entities.PersonDetailPresenterField.PERSON_FIELD_UID_CLASSES;
+import static com.ustadmobile.lib.db.entities.PersonDetailPresenterField.PERSON_FIELD_UID_FATHER_NAME;
+import static com.ustadmobile.lib.db.entities.PersonDetailPresenterField.PERSON_FIELD_UID_FATHER_NAME_AND_PHONE_NUMBER;
+import static com.ustadmobile.lib.db.entities.PersonDetailPresenterField.PERSON_FIELD_UID_FATHER_NUMBER;
+import static com.ustadmobile.lib.db.entities.PersonDetailPresenterField.PERSON_FIELD_UID_FIRST_NAMES;
+import static com.ustadmobile.lib.db.entities.PersonDetailPresenterField.PERSON_FIELD_UID_FULL_NAME;
+import static com.ustadmobile.lib.db.entities.PersonDetailPresenterField.PERSON_FIELD_UID_LAST_NAME;
+import static com.ustadmobile.lib.db.entities.PersonDetailPresenterField.PERSON_FIELD_UID_MOTHER_NAME;
+import static com.ustadmobile.lib.db.entities.PersonDetailPresenterField.PERSON_FIELD_UID_MOTHER_NAME_AND_PHONE_NUMBER;
+import static com.ustadmobile.lib.db.entities.PersonDetailPresenterField.PERSON_FIELD_UID_MOTHER_NUMBER;
+
 
 public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>{
-
-    /**
-     * Class representing a person's detail in the View. This is the class that the View will be
-     * made aware of. Part of Person and PersonDetailCustomField
-     * Used in PersonDetail and PersonDetailEdit.
-     *
-     * We assign every field an id, its type, label and options.
-     *
-     */
-    public class PersonDetailViewField {
-
-
-        public PersonDetailViewField(int fieldType, int messageLabel, String iconName) {
-            this.fieldType = fieldType;
-            this.messageLabel = messageLabel;
-            this.iconName = iconName;
-        }
-
-        public PersonDetailViewField(int fieldType, int messageLabel, String iconName,
-                                     List<Map.Entry<Object, String>> options) {
-            this.fieldType = fieldType;
-            this.messageLabel = messageLabel;
-            this.iconName = iconName;
-            this.fieldOptions = options;
-        }
-
-        public static final int FIELD_TYPE_TEXT = 3;
-
-        public static final int FIELD_TYPE_DROPDOWN = 4;
-
-        public static final int FIELD_TYPE_PHONE_NUMBER = 5;
-
-        public static final int FIELD_TYPE_DATE = 6;
-
-
-        private int fieldType;
-
-        private int messageLabel;
-
-        private String iconName;
-
-        private List<Map.Entry<Object, String>> fieldOptions;
-
-        public int getFieldType() {
-            return fieldType;
-        }
-
-        public void setFieldType(int fieldType) {
-            this.fieldType = fieldType;
-        }
-
-        public int getMessageLabel() {
-            return messageLabel;
-        }
-
-        public void setMessageLabel(int messageLabel) {
-            this.messageLabel = messageLabel;
-        }
-
-        public String getIconName() {
-            return iconName;
-        }
-
-        public void setIconName(String iconName) {
-            this.iconName = iconName;
-        }
-
-        public List<Map.Entry<Object, String>> getFieldOptions() {
-            return fieldOptions;
-        }
-
-        public void setFieldOptions(List<Map.Entry<Object, String>> fieldOptions) {
-            this.fieldOptions = fieldOptions;
-        }
-    }
 
     private UmLiveData<Person> mPerson;
 
     private List<PersonDetailPresenterField> presenterFields;
 
-    private Map<Long, PersonCustomFieldValueWithPersonCustomField> customFieldValueMap;
     private Map<Long, PersonCustomFieldWithPersonCustomFieldValue> customFieldWithFieldValueMap;
 
     private long personUid;
@@ -117,8 +54,8 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
      * Presenter's constructor where we are getting arguments and setting the personUid
      *
      * @param context Android context
-     * @param arguments Arguments to the Activity passed here.
-     * @param view  The view that called this Presenter (PersonDetailActivity)
+     * @param arguments Arguments from the Activity passed here.
+     * @param view  The view that called this Presenter (PersonDetailView->PersonDetailActivity)
      */
     public PersonDetailPresenter(Object context, Hashtable arguments, PersonDetailView view) {
         super(context, arguments, view);
@@ -138,18 +75,19 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
         PersonDao personDao = UmAppDatabase.getInstance(context).getPersonDao();
         PersonCustomFieldValueDao personCustomFieldValueDao =
                 UmAppDatabase.getInstance(context).getPersonCustomFieldValueDao();
-        PersonDetailPresenterFieldDao personDetailPresenterField =
+        PersonDetailPresenterFieldDao personDetailPresenterFieldDao =
                 UmAppDatabase.getInstance(context).getPersonDetailPresenterFieldDao();
         ClazzMemberDao clazzMemberDao = 
                 UmAppDatabase.getInstance(context).getClazzMemberDao();
 
-        //Get all fields
-        personDetailPresenterField.findAllPersonDetailPresenterFields(new UmCallback<List<PersonDetailPresenterField>>() {
+        //Get all headers and fields
+        personDetailPresenterFieldDao.findAllPersonDetailPresenterFieldsViewMode(
+                new UmCallback<List<PersonDetailPresenterField>>() {
             @Override
             public void onSuccess(List<PersonDetailPresenterField> fields) {
                 presenterFields = fields;
 
-                //Get all the (custom?) fields and their values (if applicable)
+                //Get all the custom fields and their values (if applicable)
                 personCustomFieldValueDao.findByPersonUidAsync2(personUid,
                         new UmCallback<List<PersonCustomFieldWithPersonCustomFieldValue>>() {
                     @Override
@@ -162,7 +100,8 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
                         }
 
                         //Get the attendance average for this person.
-                        clazzMemberDao.getAverageAttendancePercentageByPersonUidAsync(personUid, new UmCallback<Float>() {
+                        clazzMemberDao.getAverageAttendancePercentageByPersonUidAsync(personUid,
+                                new UmCallback<Float>() {
                             @Override
                             public void onSuccess(Float result) {
                                 if (result == null){
@@ -182,7 +121,6 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
 
                             }
                         });
-
                     }
 
                     @Override
@@ -190,7 +128,6 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
 
                     }
                 });
-
             }
 
             @Override
@@ -200,57 +137,108 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
         });
     }
 
+    public void setItemOnView(){
+
+    }
+
     /**
      * This method tells the View what to show. It will set every field item to the view.
      * @param person The person that needs to be displayed.
      */
     public void handlePersonDataChanged(Person person) {
         for(PersonDetailPresenterField field : presenterFields) {
+
+            String thisValue = "";
+
             if(field.getFieldType() == FIELD_TYPE_HEADER) {
                 view.setField(field.getFieldIndex(), new PersonDetailViewField(FIELD_TYPE_HEADER,
                         field.getHeaderMessageId(), null), field.getHeaderMessageId());
                 continue;
             }
 
-            if (field.getFieldUid() == PersonDetailPresenterField.PERSON_FIELD_UID_FIRST_NAMES) {
+            if (field.getFieldUid() == PERSON_FIELD_UID_FULL_NAME){
+                thisValue = person.getFirstNames() + " " + person.getLastName();
                 view.setField(field.getFieldIndex(), new PersonDetailViewField(FIELD_TYPE_TEXT,
-                        MessageID.first_names, "ic_account"), person.getFirstNames());
+                        field.getLabelMessageId(),field.getFieldIcon()), thisValue);
 
-            } else if (field.getFieldUid() == PersonDetailPresenterField.PERSON_FIELD_UID_LAST_NAME) {
+            }else if (field.getFieldUid() == PERSON_FIELD_UID_FIRST_NAMES) {
+                thisValue =  person.getFirstNames();
                 view.setField(field.getFieldIndex(), new PersonDetailViewField(FIELD_TYPE_TEXT,
-                        MessageID.last_name, "ic_account"), person.getLastName());
+                        field.getLabelMessageId(),field.getFieldIcon()), thisValue);
 
-            } else if (field.getFieldUid() == PersonDetailPresenterField.PERSON_FIELD_UID_ATTENDANCE) {
+            } else if (field.getFieldUid() == PERSON_FIELD_UID_LAST_NAME) {
+                thisValue = person.getLastName();
                 view.setField(field.getFieldIndex(), new PersonDetailViewField(FIELD_TYPE_TEXT,
-                        0, "ic_lens_black_24dp"), attendanceAverage);
+                        field.getLabelMessageId(),field.getFieldIcon()), thisValue);
 
-            } else if (field.getFieldUid() == PersonDetailPresenterField.PERSON_FIELD_UID_CLASSES) {
+            } else if (field.getFieldUid() == PERSON_FIELD_UID_ATTENDANCE) {
+                if(attendanceAverage != null) {
+                    thisValue = attendanceAverage;
+                }
                 view.setField(field.getFieldIndex(), new PersonDetailViewField(FIELD_TYPE_TEXT,
-                        0, "ic_people_black_24dp"), "Class Name ...");
+                        field.getLabelMessageId(),field.getFieldIcon()), thisValue);
 
-            } else if (field.getFieldUid() == PersonDetailPresenterField.PERSON_FIELD_UID_FATHER_NAME_AND_PHONE_NUMBER) {
+            } else if (field.getFieldUid() == PERSON_FIELD_UID_CLASSES) {
+                thisValue = "Class Name ...";
                 view.setField(field.getFieldIndex(), new PersonDetailViewField(FIELD_TYPE_TEXT,
-                                MessageID.field_father_name, "ic_person_black_24dp")
-                        , person.getFatherName() + " (" + person.getFatherNumber() +")");
+                        field.getLabelMessageId(),field.getFieldIcon()), thisValue);
 
-            } else if(field.getFieldUid() == PersonDetailPresenterField.PERSON_FIELD_UID_MOTHER_NAME_AND_PHONE_NUMBER){
-                view.setField(field.getFieldIndex(), new PersonDetailViewField(FIELD_TYPE_TEXT,
-                                MessageID.mother, "ic_person_black_24dp")
-                        , person.getMotherName() + " (" + person.getMotherNum() + ")");
-            } else if(field.getFieldUid() == PersonDetailPresenterField.PERSON_FIELD_UID_BIRTHDAY){
+            } else if (field.getFieldUid() == PERSON_FIELD_UID_FATHER_NAME_AND_PHONE_NUMBER) {
+                thisValue = person.getFatherName() + " (" + person.getFatherNumber() +")";
+                //Also tell the view that we need to add call and text buttons for the number
 
                 view.setField(field.getFieldIndex(), new PersonDetailViewField(FIELD_TYPE_TEXT,
-                                MessageID.birthday, "ic_perm_contact_calendar_black_24dp")
-                        , UMCalendarUtil.getPrettyDateFromLong(person.getDateOfBirth()));
+                        field.getLabelMessageId(), person.getFatherNumber(), field.getFieldIcon()),
+                        thisValue);
+
+            } else if(field.getFieldUid() == PERSON_FIELD_UID_MOTHER_NAME_AND_PHONE_NUMBER){
+                thisValue = person.getMotherName() + " (" + person.getMotherNum() + ")";
+
+                view.setField(field.getFieldIndex(), new PersonDetailViewField(FIELD_TYPE_TEXT,
+                        field.getLabelMessageId(), person.getMotherNum(), field.getFieldIcon()),
+                        thisValue);
+            }
+            else if (field.getFieldUid() == PERSON_FIELD_UID_FATHER_NAME) {
+                thisValue = person.getFatherName();
+                view.setField(field.getFieldIndex(), new PersonDetailViewField(FIELD_TYPE_TEXT,
+                        field.getLabelMessageId(),field.getFieldIcon()), thisValue);
+            }
+            else if (field.getFieldUid() == PERSON_FIELD_UID_MOTHER_NAME) {
+                thisValue = person.getMotherName();
+                view.setField(field.getFieldIndex(), new PersonDetailViewField(FIELD_TYPE_TEXT,
+                        field.getLabelMessageId(),field.getFieldIcon()), thisValue);
+            }
+            else if (field.getFieldUid() == PERSON_FIELD_UID_FATHER_NUMBER) {
+                thisValue = person.getFatherNumber();
+                view.setField(field.getFieldIndex(), new PersonDetailViewField(FIELD_TYPE_TEXT,
+                        field.getLabelMessageId(),field.getFieldIcon()), thisValue);
+            }
+            else if (field.getFieldUid() == PERSON_FIELD_UID_MOTHER_NUMBER) {
+                thisValue = person.getMotherNum();
+                view.setField(field.getFieldIndex(), new PersonDetailViewField(FIELD_TYPE_TEXT,
+                        field.getLabelMessageId(),field.getFieldIcon()), thisValue);
+            }
+
+            else if (field.getFieldUid() == PERSON_FIELD_UID_ADDRESS) {
+                thisValue = person.getAddress();
+                view.setField(field.getFieldIndex(), new PersonDetailViewField(FIELD_TYPE_TEXT,
+                        field.getLabelMessageId(),field.getFieldIcon()), thisValue);
+            }
+            else if(field.getFieldUid() == PERSON_FIELD_UID_BIRTHDAY){
+                thisValue = UMCalendarUtil.getPrettyDateFromLong(person.getDateOfBirth());
+                view.setField(field.getFieldIndex(), new PersonDetailViewField(FIELD_TYPE_TEXT,
+                        field.getLabelMessageId(),field.getFieldIcon()), thisValue);
             }else  {//this is actually a custom field
-
-                view.setField(field.getFieldIndex(),
+                view.setField(
+                        field.getFieldIndex(),
                         new PersonDetailViewField(
                                 field.getFieldType(),
                                 customFieldWithFieldValueMap.get(field.getFieldUid()).getLabelMessageId(),
-                                customFieldWithFieldValueMap.get(field.getFieldUid()).getFieldIcon()),
-                        customFieldWithFieldValueMap.get(field.getFieldUid()).getCustomFieldValue().getFieldValue()
-                        );
+                                customFieldWithFieldValueMap.get(field.getFieldUid()).getFieldIcon()
+                        ),
+                        customFieldWithFieldValueMap.get(field.getFieldUid())
+                                .getCustomFieldValue().getFieldValue()
+                );
             }
         }
     }
@@ -264,11 +252,29 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         Hashtable args = new Hashtable();
         args.put(PersonDetailView.ARG_PERSON_UID, personUid);
-        impl.go(PersonDetailEditView.VIEW_NAME, args, view.getContext());
+        impl.go(PersonEditView.VIEW_NAME, args, view.getContext());
+    }
+
+    /**
+     * Handler to what happens when call button pressed on an entry (usually to call a person)
+     *
+     * @param number The phone number
+     */
+    public void handleClickCall(String number){
+        System.out.println("Call this number: " + number);
+    }
+
+    /**
+     * Handler to what happens when text / sms button pressed on an entry (usually to text a
+     * person / parent)
+     *
+     * @param number The phone number
+     */
+    public void handleClickText(String number){
+        System.out.println("Text this number: " + number);
     }
 
     @Override
     public void setUIStrings() {
-
     }
 }
