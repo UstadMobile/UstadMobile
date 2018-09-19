@@ -24,6 +24,7 @@ import com.ustadmobile.lib.db.entities.Person;
 import com.ustadmobile.lib.db.entities.PersonField;
 import com.ustadmobile.lib.db.entities.PersonCustomFieldValue;
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField;
+import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -32,6 +33,7 @@ import java.util.List;
 import java.util.Set;
 
 import static com.ustadmobile.core.view.PersonDetailViewField.FIELD_TYPE_HEADER;
+import static com.ustadmobile.lib.db.entities.PersonDetailPresenterField.CUSTOM_FIELD_MIN_UID;
 
 /**
  * Database related method util go here. eg: setting the database with fixtures, etc.
@@ -390,9 +392,10 @@ public class UmDbTestUtil {
                 if(field.fieldUid ==0){
                     int lastPersonCustomFieldUidUsed = personCustomFieldDao.findLatestUid();
                     int newCustomPersonCustomFieldUid = lastPersonCustomFieldUidUsed + 1;
-                    if(lastPersonCustomFieldUidUsed < PersonDetailPresenterField.CUSTOM_FIELD_MIN_UID){
+                    if(lastPersonCustomFieldUidUsed < CUSTOM_FIELD_MIN_UID){
                         //first Custom field
-                        newCustomPersonCustomFieldUid = PersonDetailPresenterField.CUSTOM_FIELD_MIN_UID + 1;
+                        newCustomPersonCustomFieldUid =
+                                CUSTOM_FIELD_MIN_UID + 1;
                     }
                     pcf1.setPersonCustomFieldUid(newCustomPersonCustomFieldUid);
                     field.fieldUid = newCustomPersonCustomFieldUid;
@@ -457,12 +460,17 @@ public class UmDbTestUtil {
 
             PersonCustomFieldValue personCustomFieldValue = new PersonCustomFieldValue();
             personCustomFieldValue.setPersonCustomFieldValuePersonUid(person.getPersonUid());
-            personCustomFieldValue.setPersonCustomFieldValuePersonCustomFieldUid(cf.getPersonCustomFieldUid());
+            personCustomFieldValue.setPersonCustomFieldValuePersonCustomFieldUid(
+                    cf.getPersonCustomFieldUid());
             personCustomFieldValue.setFieldValue(cv);
             personCustomFieldValue.setPersonCustomFieldValueUid(
                     personCustomFieldValueDao.insert(personCustomFieldValue));
 
         }
+    }
+
+    public static Person createPersonWithFieldsAndCustomFields(Object context){
+        return createPersonWithFieldsAndCustomFields(null, context);
     }
 
     /**
@@ -471,10 +479,13 @@ public class UmDbTestUtil {
      * @param context   Android context
      * @return  Returns the person created and fields associated for entity.
      */
-    public static Person createPersonWithFieldsAndCustomFields(Object context){
+    public static Person createPersonWithFieldsAndCustomFields(Clazz toClazz, Object context){
 
-        //Create the person and set its non custom fields
         PersonDao personDao = UmAppDatabase.getInstance(context).getPersonDao();
+        ClazzDao clazzDao = UmAppDatabase.getInstance(context).getClazzDao();
+        ClazzMemberDao clazzMemberDao = UmAppDatabase.getInstance(context).getClazzMemberDao();
+
+        //Create the person and set its core fields.
         Person newPerson = new Person();
         newPerson.setFirstNames("Raina Ali");
         newPerson.setLastName("Rawazi");
@@ -497,6 +508,19 @@ public class UmDbTestUtil {
         //Create values based on the created custom fields
         setCustomFieldValue(newPerson, customFieldsCreated, customFieldValues, context);
 
+        if(toClazz == null){
+            return newPerson;
+        }
+
+        //Assign person to given class.
+        //Create ClazzMember
+        ClazzMember clazzMember = new ClazzMember();
+        clazzMember.setClazzMemberClazzUid(toClazz.getClazzUid());
+        clazzMember.setRole(ClazzMember.ROLE_STUDENT);
+
+        clazzMember.setClazzMemberPersonUid(newPerson.getPersonUid());
+        clazzMember.setAttendancePercentage(0.42f);
+        clazzMemberDao.insert(clazzMember);
 
         return newPerson;
 
@@ -605,11 +629,6 @@ public class UmDbTestUtil {
             thisFeedEntry.setFeedEntryUid(feedEntryDao.insert(thisFeedEntry));
 
         }
-
-
-
-
-
-
     }
+
 }

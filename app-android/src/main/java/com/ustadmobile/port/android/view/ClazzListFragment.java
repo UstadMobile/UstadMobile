@@ -183,10 +183,7 @@ public class ClazzListFragment extends UstadBaseFragment implements ClazzListVie
         LiveData<PagedList<ClazzWithNumStudents>> data =
                 new LivePagedListBuilder<>(factory, 20).build();
         data.observe(this, recyclerAdapter::submitList);
-        new Thread(() -> {
-            ClazzDao dao = UmAppDatabase.getInstance(getContext()).getClazzDao();
-            System.out.print(dao);
-        }).start();
+
         mRecyclerView.setAdapter(recyclerAdapter);
     }
 
