@@ -566,6 +566,7 @@ public class UmDbTestUtil {
             Person testPerson = new Person();
             testPerson.setFirstNames(name.split(" ")[0]);
             testPerson.setLastName(name.split(" ")[1]);
+            testPerson.setActive(true);
             testPerson.setPersonUid(personDao.insert(testPerson));
 
             //Create ClazzMember

@@ -5,6 +5,7 @@ import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.db.dao.ClazzDao;
 import com.ustadmobile.core.view.ClazzListEnrollPersonView;
 import com.ustadmobile.lib.db.entities.Clazz;
+import com.ustadmobile.lib.db.entities.ClazzWithEnrollment;
 import com.ustadmobile.lib.db.entities.ClazzWithNumStudents;
 
 import java.util.Hashtable;
@@ -16,6 +17,8 @@ public class ClazzListEnrollPersonPresenter extends UstadBaseController<ClazzLis
     private long currentPersonUid = -1L;
 
     private UmProvider<ClazzWithNumStudents> clazzListProvider;
+
+    private UmProvider<ClazzWithEnrollment> clazzWithEnrollmentUmProvider;
 
     public ClazzListEnrollPersonPresenter(Object context,
                                           Hashtable arguments, ClazzListEnrollPersonView view) {
@@ -32,8 +35,12 @@ public class ClazzListEnrollPersonPresenter extends UstadBaseController<ClazzLis
 
         //Populate clazzes
         ClazzDao clazzDao = UmAppDatabase.getInstance(context).getClazzDao();
-        clazzListProvider = clazzDao.findAllClazzesByPersonUid(currentPersonUid);
-        view.setClazzListProvider(clazzListProvider);
+        //clazzListProvider = clazzDao.findAllClazzesByPersonUid(currentPersonUid);
+        //view.setClazzListProvider(clazzListProvider);
+
+        clazzWithEnrollmentUmProvider =
+                clazzDao.findAllClazzesWithEnrollmentByPersonUid(currentPersonUid);
+        view.setClazzListProvider(clazzWithEnrollmentUmProvider);
 
     }
 

@@ -22,6 +22,7 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
+import static com.ustadmobile.core.controller.ClazzListPresenter.ARG_CLAZZ_UID;
 import static com.ustadmobile.core.view.PersonDetailView.ARG_PERSON_UID;
 import static com.ustadmobile.core.view.PersonDetailViewField.FIELD_TYPE_HEADER;
 import static com.ustadmobile.core.view.PersonDetailViewField.FIELD_TYPE_TEXT;
@@ -54,6 +55,8 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
 
     private long personUid;
 
+    private long assignToThisClazzUid;
+
     private Person mUpdatedPerson;
 
     //OG person before Done/Save/Discard clicked.
@@ -78,7 +81,14 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
     public PersonEditPresenter(Object context, Hashtable arguments, PersonEditView view) {
         super(context, arguments, view);
 
-        personUid = Long.parseLong(arguments.get(ARG_PERSON_UID).toString());
+        if (arguments.containsKey(ARG_PERSON_UID)) {
+            personUid = Long.parseLong(arguments.get(ARG_PERSON_UID).toString());
+        }
+
+        if(arguments.containsKey(ARG_CLAZZ_UID)){
+            assignToThisClazzUid = Long.parseLong(arguments.get(ARG_CLAZZ_UID).toString());
+        }
+
     }
 
     /**
@@ -230,15 +240,29 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
                 thisView.setField(field.getFieldIndex(), new PersonDetailViewField(FIELD_TYPE_TEXT,
                         field.getLabelMessageId(),field.getFieldIcon()), thisValue);
             }else  {//this is actually a custom field
+                int messageLabel = 0;
+                String iconName = null;
+                String fieldValue = null;
+                if(valueMap.get(field.getFieldUid()) != null){
+                    if(valueMap.get(field.getFieldUid()).getLabelMessageId() != 0){
+                        messageLabel = valueMap.get(field.getFieldUid()).getLabelMessageId();
+                    }
+                    if(valueMap.get(field.getFieldUid()).getFieldIcon() != null){
+                        iconName = valueMap.get(field.getFieldUid()).getFieldIcon();
+                    }
+                    if(valueMap.get(field.getFieldUid()).getCustomFieldValue().getFieldValue() != null){
+                        fieldValue = valueMap.get(field.getFieldUid())
+                                .getCustomFieldValue().getFieldValue();
+                    }
+                }
                 thisView.setField(
                         field.getFieldIndex(),
                         new PersonDetailViewField(
                                 field.getFieldType(),
-                                valueMap.get(field.getFieldUid()).getLabelMessageId(),
-                                valueMap.get(field.getFieldUid()).getFieldIcon()
-                        ),
-                        valueMap.get(field.getFieldUid())
-                                .getCustomFieldValue().getFieldValue()
+                                messageLabel,
+                                iconName
+                        ), fieldValue
+
                 );
             }
 
@@ -321,7 +345,17 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
 
         mUpdatedPerson = updateSansPersistPersonField(mUpdatedPerson, fieldCode, value);
         //update the DAO with mUpdatedPerson
-        personDao.insert(mUpdatedPerson);
+        personDao.insertAsync(mUpdatedPerson, new UmCallback<Long>() {
+            @Override
+            public void onSuccess(Long result) {
+                mUpdatedPerson.setPersonUid(result);
+            }
+
+            @Override
+            public void onFailure(Throwable exception) {
+
+            }
+        });
 
     }
 
@@ -340,8 +374,20 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
      *
      */
     public void handleClickDone(){
-        //Close the activity.
-        view.finish();
+        mUpdatedPerson.setActive(true);
+        personDao.insertAsync(mUpdatedPerson, new UmCallback<Long>() {
+            @Override
+            public void onSuccess(Long result) {
+                //Close the activity.
+                view.finish();
+            }
+
+            @Override
+            public void onFailure(Throwable exception) {
+
+            }
+        });
+
     }
 
 }

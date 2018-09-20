@@ -6,6 +6,7 @@ import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.db.entities.Clazz;
+import com.ustadmobile.lib.db.entities.ClazzWithEnrollment;
 import com.ustadmobile.lib.db.entities.ClazzWithNumStudents;
 
 import java.util.List;
@@ -30,6 +31,14 @@ public abstract class ClazzDao implements BaseDao<Clazz> {
             " FROM Clazz WHERE :personUid in " +
             " (SELECT ClazzMember.clazzMemberPersonUid FROM ClazzMember WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid)")
     public abstract UmProvider<ClazzWithNumStudents> findAllClazzesByPersonUid(long personUid);
+
+    @UmQuery("SELECT Clazz.*, (:personUid) AS personUid, " +
+            "(SELECT COUNT(*) FROM ClazzMember WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid AND ClazzMember.role = 1) AS numStudents, " +
+            "(SELECT (EXISTS (SELECT * FROM ClazzMember WHERE clazzMemberPersonUid = :personUid " +
+            " AND clazzMemberClazzUid = Clazz.clazzUid " +
+            "))) AS enrolled " +
+            "FROM Clazz")
+    public abstract UmProvider<ClazzWithEnrollment> findAllClazzesWithEnrollmentByPersonUid(long personUid);
 
     @UmQuery("SELECT Clazz.*, " +
             " (SELECT COUNT(*) FROM ClazzMember WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid AND ClazzMember.role = 1) AS numStudents" +

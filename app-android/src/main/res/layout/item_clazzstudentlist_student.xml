@@ -14,6 +14,7 @@
             android:layout_marginStart="16dp"
             android:layout_marginTop="14dp"
             android:text="TextView"
+            android:textColor="@color/text_primary"
             android:textAppearance="@android:style/TextAppearance.Material.Headline"
             android:textSize="16sp"
             app:layout_constraintStart_toEndOf="@+id/imageView4"
@@ -36,6 +37,7 @@
             android:layout_marginBottom="6dp"
             android:layout_marginStart="4dp"
             android:text="TextView"
+            android:textColor="@color/text_primary"
             android:textSize="12sp"
             app:layout_constraintBottom_toTopOf="@+id/item_clazzstudentlist_horizontal_divider"
             app:layout_constraintStart_toEndOf="@+id/item_clazzstudentlist_attendance_trafficlight"
@@ -59,6 +61,20 @@
             android:layout_marginTop="16dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/ic_person_black_new_24dp" />
+            android:src="@drawable/ic_person_black_new_24dp" />
+
+        <Switch
+            android:id="@+id/item_clazzstudentlist_student_switch"
+            android:visibility="invisible"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginTop="16dp"
+            android:text="@string/enroll_in_class"
+            android:textColor="@color/text_primary"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
 </android.support.constraint.ConstraintLayout>

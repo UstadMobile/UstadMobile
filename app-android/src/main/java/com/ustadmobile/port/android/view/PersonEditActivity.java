@@ -156,8 +156,12 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
 
                 EditText et = new EditText(this);
                 et.setLayoutParams(editTextParams);
-                et.setHint(label);
-                et.setText(thisValue.toString());
+                if(label != null){
+                    et.setHint(label);
+                }
+                if(thisValue != null ) {
+                    et.setText(thisValue.toString());
+                }
 
                 til.addView(et, tilp);
 

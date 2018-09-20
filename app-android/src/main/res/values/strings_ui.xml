@@ -312,6 +312,7 @@ This is the one you should be editing.
     <string name="edit">Edit</string>
     <string name="clazz">Class</string>
     <string name="student_image">Student image</string>
+    <string name="enroll_new_student">Enroll new student</string>
 
 
 </resources>

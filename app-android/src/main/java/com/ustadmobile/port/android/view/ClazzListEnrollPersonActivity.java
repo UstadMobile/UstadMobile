@@ -7,7 +7,6 @@ import android.arch.paging.PagedList;
 import android.arch.paging.PagedListAdapter;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
@@ -16,13 +15,14 @@ import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.ClazzListEnrollPersonPresenter;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.view.ClazzListEnrollPersonView;
+import com.ustadmobile.lib.db.entities.ClazzWithEnrollment;
 import com.ustadmobile.lib.db.entities.ClazzWithNumStudents;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
@@ -79,13 +79,13 @@ public class ClazzListEnrollPersonActivity extends UstadBaseActivity implements 
     }
 
     @Override
-    public void setClazzListProvider(UmProvider<ClazzWithNumStudents> clazzListProvider) {
+    public void setClazzListProvider(UmProvider<ClazzWithEnrollment> clazzListProvider) {
 
         ClazzListEnrollPersonRecyclerAdapter recyclerAdapter =
                 new ClazzListEnrollPersonRecyclerAdapter(DIFF_CALLBACK);
-        DataSource.Factory<Integer, ClazzWithNumStudents> factory =
-                (DataSource.Factory<Integer, ClazzWithNumStudents>)clazzListProvider.getProvider();
-        LiveData<PagedList<ClazzWithNumStudents>> data =
+        DataSource.Factory<Integer, ClazzWithEnrollment> factory =
+                (DataSource.Factory<Integer, ClazzWithEnrollment>)clazzListProvider.getProvider();
+        LiveData<PagedList<ClazzWithEnrollment>> data =
                 new LivePagedListBuilder<>(factory, 20).build();
         data.observe(this, recyclerAdapter::submitList);
 
@@ -97,7 +97,7 @@ public class ClazzListEnrollPersonActivity extends UstadBaseActivity implements 
      * The ClazzList Recycler Adapter used here.
      */
     protected class ClazzListEnrollPersonRecyclerAdapter extends
-            PagedListAdapter<ClazzWithNumStudents,
+            PagedListAdapter<ClazzWithEnrollment,
                     ClazzListEnrollPersonRecyclerAdapter.ClazzViewHolder> {
 
         protected class ClazzViewHolder extends RecyclerView.ViewHolder {
@@ -108,7 +108,7 @@ public class ClazzListEnrollPersonActivity extends UstadBaseActivity implements 
         }
 
         protected ClazzListEnrollPersonRecyclerAdapter(
-                @NonNull DiffUtil.ItemCallback<ClazzWithNumStudents>
+                @NonNull DiffUtil.ItemCallback<ClazzWithEnrollment>
                         diffCallback) {
             super(diffCallback);
         }
@@ -130,29 +130,30 @@ public class ClazzListEnrollPersonActivity extends UstadBaseActivity implements 
          */
         @Override
         public void onBindViewHolder  (@NonNull ClazzViewHolder holder, int position) {
-            ClazzWithNumStudents clazz = getItem(position);
+            ClazzWithEnrollment clazz = getItem(position);
             ((TextView)holder.itemView.findViewById(R.id.item_clazz_list_enroll_person_title))
                     .setText(clazz.getClazzName());
             ((TextView)holder.itemView.findViewById(R.id.item_clazz_list_enroll_person_numstudents_text))
                     .setText(clazz.getNumStudents() + " " + getResources()
                             .getText(R.string.students_literal).toString());
-
+            ((Switch)holder.itemView.findViewById(R.id.item_clazz_list_enroll_person_switch))
+                    .setChecked(clazz.getEnrolled());
             holder.itemView.setOnClickListener((view) -> mPresenter.handleClickClazz(clazz));
 
         }
     }
 
-    public static final DiffUtil.ItemCallback<ClazzWithNumStudents> DIFF_CALLBACK =
-            new DiffUtil.ItemCallback<ClazzWithNumStudents>() {
+    public static final DiffUtil.ItemCallback<ClazzWithEnrollment> DIFF_CALLBACK =
+            new DiffUtil.ItemCallback<ClazzWithEnrollment>() {
                 @Override
-                public boolean areItemsTheSame(ClazzWithNumStudents oldItem,
-                                               ClazzWithNumStudents newItem) {
+                public boolean areItemsTheSame(ClazzWithEnrollment oldItem,
+                                               ClazzWithEnrollment newItem) {
                     return oldItem.getClazzUid() == newItem.getClazzUid();
                 }
 
                 @Override
-                public boolean areContentsTheSame(ClazzWithNumStudents oldItem,
-                                                  ClazzWithNumStudents newItem) {
+                public boolean areContentsTheSame(ClazzWithEnrollment oldItem,
+                                                  ClazzWithEnrollment newItem) {
                     return oldItem.equals(newItem);
                 }
             };

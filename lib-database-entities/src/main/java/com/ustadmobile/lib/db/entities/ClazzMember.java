@@ -29,6 +29,16 @@ public class ClazzMember  {
 
     private float attendancePercentage;
 
+    private boolean clazzMemberActive;
+
+    public boolean isClazzMemberActive() {
+        return clazzMemberActive;
+    }
+
+    public void setClazzMemberActive(boolean clazzMemberActive) {
+        this.clazzMemberActive = clazzMemberActive;
+    }
+
     public long getClazzMemberUid() {
         return clazzMemberUid;
     }
