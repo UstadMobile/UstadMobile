@@ -19,7 +19,6 @@
             android:id="@+id/activity_login2_toolbar"
             android:layout_width="fill_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
             app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
             app:layout_scrollFlags="scroll|enterAlways"/>
 
@@ -178,7 +177,7 @@
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="8dp"
                 android:layout_weight="1"
-                android:backgroundTint="@color/accent"
+                android:backgroundTint="?attr/colorAccent"
                 android:text="@string/login"
                 android:textColor="@color/primary_text"
                 app:layout_constraintEnd_toEndOf="parent"

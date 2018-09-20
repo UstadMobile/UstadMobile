@@ -18,7 +18,6 @@
             android:id="@+id/activity_create_account_toolbar"
             android:layout_width="fill_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
             app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
             app:layout_scrollFlags="scroll|enterAlways"/>
 
@@ -115,7 +114,7 @@
                 android:id="@+id/activity_create_account_create_account_button"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:backgroundTint="@color/accent"
+                android:backgroundTint="?attr/colorAccent"
                 android:textColor="@color/primary_text"
                 android:text="@string/create_new_account" />
 
