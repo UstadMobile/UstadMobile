@@ -1,5 +1,6 @@
 package com.ustadmobile.lib.annotationprocessor.core;
 
+import com.squareup.javapoet.ArrayTypeName;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.JavaFile;
@@ -16,8 +17,16 @@ import com.ustadmobile.lib.database.annotation.UmIndexField;
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 import com.ustadmobile.lib.database.annotation.UmQuery;
+import com.ustadmobile.lib.database.jdbc.DbChangeListener;
 import com.ustadmobile.lib.database.jdbc.JdbcDatabaseUtils;
 import com.ustadmobile.lib.database.jdbc.UmJdbcDatabase;
+
+import net.sf.jsqlparser.JSQLParserException;
+import net.sf.jsqlparser.parser.CCJSqlParserUtil;
+import net.sf.jsqlparser.statement.delete.Delete;
+import net.sf.jsqlparser.statement.select.Select;
+import net.sf.jsqlparser.statement.update.Update;
+import net.sf.jsqlparser.util.TablesNamesFinder;
 
 import org.sqlite.SQLiteDataSource;
 
@@ -31,6 +40,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -82,6 +92,10 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                 .addField(ClassName.get(Object.class), "_context", Modifier.PRIVATE)
                 .addField(ClassName.get(DataSource.class), "_dataSource", Modifier.PRIVATE)
                 .addField(ClassName.get(ExecutorService.class), "_executor", Modifier.PRIVATE)
+                .addField(ParameterizedTypeName.get(ClassName.get(Map.class),
+                        ClassName.get(DbChangeListener.class),
+                        ClassName.get(JdbcDatabaseUtils.DbChangeListenerRequest.class)),
+                        "_dbChangeListeners", Modifier.PRIVATE)
                 .addMethod(MethodSpec.constructorBuilder()
                     .addModifiers(Modifier.PUBLIC)
                     .addParameter(TypeName.get(Object.class), "context")
@@ -108,7 +122,17 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                         .addAnnotation(Override.class)
                         .addModifiers(Modifier.PUBLIC)
                         .returns(ClassName.get(Connection.class))
-                        .addCode("return this._dataSource.getConnection();\n").build());
+                        .addCode("return this._dataSource.getConnection();\n")
+                        .build())
+                .addMethod(MethodSpec.methodBuilder("handleTablesChanged")
+                        .addParameter(ArrayTypeName.of(String.class), "tablesChanged")
+                        .addAnnotation(Override.class)
+                        .addModifiers(Modifier.PUBLIC)
+                        .varargs()
+                        .addCode("$T.handleTablesChanged(_dbChangeListeners, tablesChanged);\n",
+                                JdbcDatabaseUtils.class)
+                        .build());
+
 
         TypeSpec.Builder factoryClassSpec = DbProcessorUtils.makeFactoryClass(dbType, jdbcDbClassName);
 
@@ -574,6 +598,8 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                     .endControlFlow();
         }
 
+        codeBlock.add("_db.handleTablesChanged($S);\n", entityTypeElement.getSimpleName().toString());
+
 
         codeBlock.nextControlFlow("catch($T e)", SQLException.class)
                 .add("e.printStackTrace();\n").endControlFlow();
@@ -651,7 +677,7 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
             returnsList = true;
             codeBlock.add("$T<$T> result = new $T<>();\n", List.class, resultTypeElement,
                     ArrayList.class);
-        }else if(!resultType.getKind().equals(TypeKind.VOID)){
+        }else if(!isVoid(resultType)){
             codeBlock.add("$T result = $L;\n", resultType, defaultValue(resultType));
         }
 
@@ -714,10 +740,45 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
             }
 
             if(updateResultTypeMirror.getKind().equals(TypeKind.VOID)){
-                codeBlock.add("stmt.executeUpdate();\n");
+                codeBlock.add("int result = stmt.executeUpdate();\n");
             }else {
                 codeBlock.add("result = stmt.executeUpdate();\n");
             }
+
+            TablesNamesFinder tablesNamesFinder = new TablesNamesFinder();
+            List<String> tableNames;
+            try {
+                net.sf.jsqlparser.statement.Statement statement = CCJSqlParserUtil.parse(preparedStmtSql);
+                if(querySqlTrimmedLower.startsWith("update")){
+                    tableNames = tablesNamesFinder.getTableList((Update)statement);
+                }else if(querySqlTrimmedLower.startsWith("delete")) {
+                    tableNames = tablesNamesFinder.getTableList((Delete)statement);
+                }else {
+                    messager.printMessage(Diagnostic.Kind.ERROR,
+                            formatMethodForErrorMessage(daoMethod) + ": " +
+                            " query was not select, expecting update or delete statement to " +
+                            " determine table changes, found something else: " + preparedStmtSql);
+                    throw new IllegalArgumentException("Query must be select, update, or delete");
+                }
+
+                codeBlock.beginControlFlow("if(result > 0)")
+                        .add("_db.handleTablesChanged(");
+                boolean commaRequired = false;
+                for(String tableName : tableNames){
+                    if(commaRequired)
+                        codeBlock.add(", ");
+                    codeBlock.add("$S", tableName);
+
+                    commaRequired = true;
+                }
+                codeBlock.add(");\n").endControlFlow();
+            }catch(JSQLParserException je) {
+                messager.printMessage(Diagnostic.Kind.ERROR, formatMethodForErrorMessage(daoMethod) +
+                    " exception parsing update/delete query: " + je.getMessage());
+            }
+
+
+
         }
 
         codeBlock.nextControlFlow("catch($T e)", SQLException.class)
@@ -731,9 +792,10 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
         codeBlock.endControlFlow();
 
         if(asyncMethod) {
-            codeBlock.add("$T.onSuccessIfNotNull($L, result);\n",
+            codeBlock.add("$T.onSuccessIfNotNull($L, $L);\n",
                     UmCallbackUtil.class,
-                    daoMethod.getParameters().get(asyncParamIndex).getSimpleName().toString());
+                    daoMethod.getParameters().get(asyncParamIndex).getSimpleName().toString(),
+                    !isVoid(resultType) ? "result" : "null");
             codeBlock.endControlFlow(")");
         }else if(!daoMethod.getReturnType().getKind().equals(TypeKind.VOID)){
             codeBlock.add("return result;\n");
@@ -785,6 +847,18 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                                 ": returns a String or primitive. SQL must have 1 column only. " +
                                 "found " + metaData.getColumnCount() + " columns");
             }
+
+            try {
+                Select select = (Select) CCJSqlParserUtil.parse(querySql);
+                TablesNamesFinder tablesNamesFinder = new TablesNamesFinder();
+                List<String> tableList = tablesNamesFinder.getTableList(select);
+                codeBlock.add("// Table names = " + Arrays.toString(tableList.toArray()))
+                        .add("\n");
+            }catch(JSQLParserException e) {
+                messager.printMessage(Diagnostic.Kind.ERROR, formatMethodForErrorMessage(daoMethod) +
+                    " exception parsing query to determine tables");
+            }
+
 
             if(returnsList) {
                 codeBlock.beginControlFlow("while(resultSet.next())");

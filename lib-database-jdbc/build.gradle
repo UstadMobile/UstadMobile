@@ -29,6 +29,7 @@ dependencies {
     testImplementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
     testImplementation "junit:junit:$version_junit"
 
+    compile project(path: ':lib-util')
 }
 
 sourceCompatibility = "1.8"
