@@ -59,9 +59,10 @@ public class TestDbProcessorJdbc {
         ExampleDatabase db = ExampleDatabase.getInstance(null, "ds");
         ExampleEntity entity = new ExampleEntity();
         entity.setName("Bob Jones");
-        db.getExampleDao().insertE(entity);
+        int newId = db.getExampleDao().insertGetId(entity);
         List<ExampleEntity> allEntities = db.getExampleDao().getAllEntities();
-        ExampleEntity firstEntity = db.getExampleDao().findByUid(0);
+        ExampleEntity firstEntity = db.getExampleDao().findByUid(newId);
+        Assert.assertNotNull("Retrieved first entity", firstEntity);
         Assert.assertTrue("All entities list is not empty", !allEntities.isEmpty());
     }
 

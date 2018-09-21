@@ -140,4 +140,16 @@ public abstract class AbstractDbProcessor {
         return variableTypeElements;
     }
 
+    protected boolean isVoid(TypeMirror typeMirror) {
+        if(typeMirror.getKind().equals(TypeKind.VOID)) {
+            return true;
+        }else if(typeMirror.getKind().equals(TypeKind.DECLARED)
+            && ((TypeElement)processingEnv.getTypeUtils().asElement(typeMirror)).getQualifiedName()
+                .toString().equals("java.lang.Void")) {
+            return true;
+        }else {
+            return false;
+        }
+    }
+
 }

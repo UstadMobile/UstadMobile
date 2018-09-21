@@ -14,6 +14,15 @@ public abstract class ExampleDao {
     public abstract void insertE(ExampleEntity entity);
 
     @UmInsert
+    public abstract int insertGetId(ExampleEntity entity);
+
+    @UmInsert
+    public abstract void insertAndGetIdAsync(ExampleEntity entity, UmCallback<Integer> callback);
+
+    @UmInsert
+    public abstract void insertAsync(ExampleEntity entity, UmCallback<Void> callback);
+
+    @UmInsert
     public abstract void insertList(List<ExampleEntity> entities);
 
     @UmInsert

@@ -417,12 +417,25 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
 
     public void addInsertMethod(ExecutableElement daoMethod, TypeSpec.Builder daoBuilder,
                                 char identifierQuote) {
-        MethodSpec.Builder methodBuilder = MethodSpec.overriding(daoMethod)
-                .addModifiers(Modifier.SYNCHRONIZED);
+        MethodSpec.Builder methodBuilder = MethodSpec.overriding(daoMethod);
 
         VariableElement insertedElement = daoMethod.getParameters().get(0);
         boolean isList = false;
         boolean isArray = false;
+        TypeMirror resultType;
+
+        TypeElement umCallbackTypeElement = processingEnv.getElementUtils().getTypeElement(
+                UmCallback.class.getName());
+        List<Element> variableTypeElements = getMethodParametersAsElements(daoMethod);
+        int asyncParamIndex = variableTypeElements.indexOf(umCallbackTypeElement);
+        boolean asyncMethod = asyncParamIndex != -1;
+
+        if(asyncMethod) {
+            resultType = ((DeclaredType)daoMethod.getParameters().get(asyncParamIndex)
+                    .asType()).getTypeArguments().get(0);
+        }else {
+            resultType = daoMethod.getReturnType();
+        }
 
         TypeMirror insertParameter = daoMethod.getParameters().get(0).asType();
 
@@ -453,8 +466,18 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
         String preparedStmtVarName = "_stmt";
 
         String identifierQuoteStr = String.valueOf(identifierQuote);
-        CodeBlock.Builder codeBlock = CodeBlock.builder()
-                .add("try (\n").indent()
+        CodeBlock.Builder codeBlock = CodeBlock.builder();
+
+
+        if(asyncMethod) {
+            codeBlock.beginControlFlow("_db.getExecutor().execute(() ->");
+        }
+
+        if(!isVoid(resultType)) {
+            codeBlock.add("$T result = $L;\n", resultType, defaultValue(resultType));
+        }
+
+        codeBlock.add("try (\n").indent()
                     .add("$T connection = _db.getConnection();\n", Connection.class)
                     .add("$T _stmt = connection.prepareStatement(\"INSERT INTO $L$L$L (",
                             PreparedStatement.class, identifierQuoteStr,
@@ -480,7 +503,13 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
             if(i < entityFields.size() - 1)
                 codeBlock.add(", ");
         }
-        codeBlock.add(")\");\n");
+        codeBlock.add(")\"");
+
+        if(!isVoid(resultType)) {
+            codeBlock.add(", $T.RETURN_GENERATED_KEYS", Statement.class);
+        }
+
+        codeBlock.add(");\n");
 
         codeBlock.unindent().beginControlFlow(")");
 
@@ -496,15 +525,70 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                     i + 1, entityFields.get(i), codeBlock);
         }
 
-        codeBlock.add("$L.execute();\n", preparedStmtVarName);
-
         if(isList || isArray) {
-            codeBlock.endControlFlow();
+            codeBlock.add("$L.addBatch();\n", preparedStmtVarName)
+                .endControlFlow()
+                .add("$L.executeBatch();\n", preparedStmtVarName);
+        }else {
+            codeBlock.add("$L.execute();\n", preparedStmtVarName);
         }
 
-        codeBlock.endControlFlow().beginControlFlow("catch($T e)", SQLException.class)
+        /*
+         * Handle getting generated primary keys (if any)
+         */
+        if(!isVoid(resultType)) {
+            codeBlock.add("try (\n").indent()
+                    .add("$T generatedKeys = _stmt.getGeneratedKeys();\n", ResultSet.class)
+                .unindent().beginControlFlow(")");
+
+            if(isList || isArray) {
+                String arrayListVarName = isList ? "result" : "resultList";
+                ParameterizedTypeName listTypeName =ParameterizedTypeName.get(
+                        ClassName.get(ArrayList.class), ClassName.get(String.class));
+                if(isArray)
+                    codeBlock.add("$T ", listTypeName);
+
+                codeBlock.add("$L = new $T();\n", arrayListVarName, listTypeName);
+
+                TypeMirror primaryKeyType = isArray ?
+                        ((DeclaredType)resultType).getTypeArguments().get(0) :
+                        ((ArrayType)resultType).getComponentType();
+                codeBlock.beginControlFlow("while(generatedKeys.next())")
+                        .add("$L.add(generatedKeys.get$L(1));\n", arrayListVarName,
+                                getPreparedStatementSetterGetterTypeName(primaryKeyType))
+                    .endControlFlow();
+
+                if(isArray) {
+                    codeBlock.add("result = arrayList.toArray(new $T[arrayList.size()]);\n",
+                            primaryKeyType);
+                }
+            }else {
+                codeBlock.beginControlFlow("if(generatedKeys.next())")
+                        .add("result = generatedKeys.get$L(1);\n",
+                                getPreparedStatementSetterGetterTypeName(resultType))
+                        .endControlFlow();
+            }
+
+            codeBlock.nextControlFlow("catch($T pkE)", SQLException.class)
+                    .add("pkE.printStackTrace();\n")
+                    .endControlFlow();
+        }
+
+
+        codeBlock.nextControlFlow("catch($T e)", SQLException.class)
                 .add("e.printStackTrace();\n").endControlFlow();
 
+        if(!isVoid(resultType) && !asyncMethod) {
+            codeBlock.add("return result;\n");
+        }
+
+        if(asyncMethod) {
+            codeBlock.add("$T.onSuccessIfNotNull($L, $L);\n", UmCallbackUtil.class,
+                    daoMethod.getParameters().get(asyncParamIndex).getSimpleName().toString(),
+                    isVoid(resultType) ? "null" : "result");
+
+            codeBlock.endControlFlow(")");
+        }
 
         methodBuilder.addCode(codeBlock.build());
         daoBuilder.addMethod(methodBuilder.build());
@@ -960,8 +1044,21 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
     private void addSetPreparedStatementValueToCodeBlock(String preparedStatementVariableName,
                                            String entityVariableName, int index,
                                            VariableElement field, CodeBlock.Builder codeBlock) {
+        boolean isPkAutoIncrementField = field.getAnnotation(UmPrimaryKey.class) != null
+                && field.getAnnotation(UmPrimaryKey.class).autoIncrement();
+
+        if(isPkAutoIncrementField) {
+            String pkGetterMethod = field.getSimpleName().toString();
+            pkGetterMethod = "get" + pkGetterMethod.substring(0, 1).toUpperCase() +
+                    pkGetterMethod.substring(1);
+            codeBlock.beginControlFlow("if($L.$L() == $L)", entityVariableName,
+                    pkGetterMethod, defaultValue(field.asType()))
+                    .add("$L.setObject($L, null);\n", preparedStatementVariableName, index)
+                    .nextControlFlow("else");
+        }
         codeBlock.add(preparedStatementVariableName);
         codeBlock.add(".$L(", getPreparedStatementSetterMethodName(field.asType()));
+
 
         //TODO: add error message here if there is no match
         codeBlock.add("$L, $L.get", index, entityVariableName);
@@ -969,6 +1066,10 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
 
         codeBlock.add(Character.toUpperCase(fieldName.charAt(0)) + fieldName.substring(1))
                 .add("());\n");
+
+        if(isPkAutoIncrementField) {
+            codeBlock.endControlFlow();
+        }
     }
 
     private String getPreparedStatementSetterMethodName(TypeMirror variableType) {
@@ -983,9 +1084,6 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
      * @return suffix to use e.g. "Int" for integers, "String" for Strings, etc.
      */
     private String getPreparedStatementSetterGetterTypeName(TypeMirror variableType) {
-        TypeMirror stringType = processingEnv.getElementUtils().getTypeElement("java.lang.String")
-                .asType();
-
         if(variableType.getKind().equals(TypeKind.INT)) {
             return "Int";
         }else if(variableType.getKind().equals(TypeKind.LONG)) {
@@ -994,9 +1092,21 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
             return "Float";
         }else if(variableType.getKind().equals(TypeKind.DOUBLE)) {
             return "Double";
-        }else if(variableType.getKind().equals(TypeKind.DECLARED)
-                && variableType.equals(stringType)) {
-            return "String";
+        }else if(variableType.getKind().equals(TypeKind.DECLARED)) {
+            String className = ((TypeElement)processingEnv.getTypeUtils().asElement(variableType))
+                    .getQualifiedName().toString();
+            switch(className) {
+                case "java.lang.String":
+                    return "String";
+                case "java.lang.Integer":
+                    return "Int";
+                case "java.lang.Long":
+                    return "Long";
+                case "java.lang.Float":
+                    return "Float";
+                case "java.lang.Double":
+                    return "Double";
+            }
         }
 
         return null;
