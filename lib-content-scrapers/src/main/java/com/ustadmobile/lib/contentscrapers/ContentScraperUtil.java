@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder;
 import com.ustadmobile.core.util.UMIOUtils;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -116,12 +117,11 @@ public class ContentScraperUtil {
             }
             try {
                 URL contentUrl = new URL(baseUrl, url);
-                String fileName = getFileNameFromUrl(url);
-                File contentFile = new File(destinationDir, fileName);
-
+                String fileName = getFileNameFromUrl(contentUrl);
+                File contentFile = getUniqueFile(destinationDir, fileName);
                 FileUtils.copyURLToFile(contentUrl, contentFile);
 
-                content.attr("src", destinationDir.getName() + "/" + fileName);
+                content.attr("src", destinationDir.getName() + "/" + contentFile.getName());
             } catch (IOException e) {
                 continue;
             }
@@ -133,13 +133,33 @@ public class ContentScraperUtil {
 
 
     /**
-     * Given a url link, find the file name
+     * Given a fileName, check if the file exists. If it does, generate a new fileName
+     * @param destinationDirectory folder where the file will be stored
+     * @param fileName name of the file
+     * @return returns the file object which is unique
+     */
+    public static File getUniqueFile(File destinationDirectory, String fileName) {
+        int count = 0;
+        File file = new File(destinationDirectory, fileName);
+        while (file.exists()) {
+            file = new File(destinationDirectory, count++ + fileName);
+        }
+        return file;
+    }
+
+
+    /**
+     * Given a url link, find the file name, if fileName does not exist in path, use the url to create the filename
      *
      * @param url download link to file
      * @return the extracted file name from url link
      */
-    public static String getFileNameFromUrl(String url) {
-        return url.replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
+    public static String getFileNameFromUrl(URL url) {
+        String fileName = FilenameUtils.getName(url.getPath());
+        if(fileName.isEmpty()){
+            return url.getPath().replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
+        }
+        return fileName;
     }
 
 

@@ -86,10 +86,22 @@ import static com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING;
  * and crypto js to decrypt it and store the answer back into the question json
  * <p>
  * Plix:
+ * Use selenium and chrome tools to find the all the files plix opens
+ * Get the id of the plix in the url. Setup Selenium and Chrome
+ * Run selenium and wait for everything to load on the screen by waiting for the element div#questionController
+ * Once that is done, get the logs for the network and store in a list
+ * Filter the responses based on the message RESPONSE RECEIVED
+ * Store the mimeType and url of each response.
+ * Copy and Save the content of each url and use request headers if required.
  * <p>
  * To avoid forced sign-in, find
  * else a = "trialscount.plix." + location.hostname, localStorage.getItem(a) && !y || x.preview ? Oe() : (c = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx".replace(/x/g, function(e)
  * Comment out the condition - from = until : to avoid the call to the Oe method (which forced signin)
+ * <p>
+ * To avoid clickable links in plix content, find the div and use the style display: none to hide it.
+ * </p>
+ * Create a content directory for all the url and their location into a json so it can be played back.
+ * Zip all files with the plixId as the name
  */
 public class CK12ContentScraper {
 
@@ -107,10 +119,6 @@ public class CK12ContentScraper {
     String startTestLink = "https://www.ck12.org/assessment/api/start/test/";
     String questionLinkId = "https://www.ck12.org/assessment/api/render/questionInstance/test/";
     // sample questionLink 5985b3d15aa4136da1e858b8/2/5b7a41ba5aa413662008f44f
-
-    String plixLink = "https://www.ck12.org/assessment/api/get/info/test/plix%20practice/plixID/";
-    String plixQuestions = "https://www.ck12.org/assessment/api/start/tests/";
-    String questionsPost = "?instanceBundle=true&evalData=true&includePLIX=true";
 
     public ScriptEngineReader scriptEngineReader = new ScriptEngineReader();
 
@@ -183,7 +191,7 @@ public class CK12ContentScraper {
         waitForJSandJQueryToLoad();
         try {
             waitDriver.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("div#questionController"))).click();
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
         LogEntries les = driver.manage().logs().get(LogType.PERFORMANCE);
@@ -201,11 +209,8 @@ public class CK12ContentScraper {
                     URL url = new URL(urlString);
                     File urlFile = new File(plixDirectory, url.getAuthority().replaceAll("[^a-zA-Z0-9\\.\\-]", "_"));
                     urlFile.mkdirs();
-                    String fileName = FilenameUtils.getName(url.getPath());
-                    if (fileName.isEmpty()) {
-                        fileName = ContentScraperUtil.getFileNameFromUrl(url.getPath());
-                    }
-                    File file = getUniqueFile(urlFile, fileName);
+                    String fileName = ContentScraperUtil.getFileNameFromUrl(url);
+                    File file = ContentScraperUtil.getUniqueFile(urlFile, fileName);
                     if (log.message.params.response.requestHeaders != null) {
                         URLConnection conn = url.openConnection();
                         for (Map.Entry<String, String> e : log.message.params.response.requestHeaders.entrySet()) {
@@ -219,22 +224,21 @@ public class CK12ContentScraper {
                         FileUtils.copyURLToFile(url, file);
                     }
 
-                    if(file.getName().contains("plix.js")){
-                       String plixJs = FileUtils.readFileToString(file, UTF_ENCODING);
-                       int startIndex = plixJs.indexOf("\"trialscount.plix.\"");
-                       int lastIndex = plixJs.lastIndexOf("():");
-                       plixJs = new StringBuilder(plixJs).insert(lastIndex +3, "*/").insert(startIndex, "/*").toString();
-                       FileUtils.writeStringToFile(file, plixJs, UTF_ENCODING);
+                    if (file.getName().contains("plix.js")) {
+                        String plixJs = FileUtils.readFileToString(file, UTF_ENCODING);
+                        int startIndex = plixJs.indexOf("\"trialscount.plix.\"");
+                        int lastIndex = plixJs.lastIndexOf("():");
+                        plixJs = new StringBuilder(plixJs).insert(lastIndex + 3, "*/").insert(startIndex, "/*").toString();
+                        FileUtils.writeStringToFile(file, plixJs, UTF_ENCODING);
                     }
 
-                    if(file.getName().contains("plix.html")){
+                    if (file.getName().contains("plix.html")) {
                         String plixJs = FileUtils.readFileToString(file, UTF_ENCODING);
                         String searchString = "read-more-container no-display";
                         int startIndex = plixJs.indexOf(searchString);
                         plixJs = new StringBuilder(plixJs).insert(startIndex + searchString.length() + 1, " style=\"display: none;\"").toString();
                         FileUtils.writeStringToFile(file, plixJs, UTF_ENCODING);
                     }
-
 
 
                     PlixIndex plixIndex = new PlixIndex();
@@ -256,24 +260,6 @@ public class CK12ContentScraper {
         FileUtils.writeStringToFile(new File(plixDirectory, "index.json"), gson.toJson(index), UTF_ENCODING);
         ContentScraperUtil.zipDirectory(plixDirectory, plixId, destinationDirectory);
     }
-
-    private File getUniqueFile(File urlFile, String fileName) {
-        int count = 0;
-        File file = new File(urlFile, 0 + fileName);
-        while (file.exists()) {
-            file = new File(urlFile, ++count + fileName);
-        }
-        return file;
-    }
-
-    public String generatePlixLink(String plixId) {
-        return plixLink + plixId;
-    }
-
-    public String generatePlixTestLink(String testId) {
-        return plixQuestions + testId + questionsPost;
-    }
-
 
     public void scrapeVideoContent() throws IOException {
 
