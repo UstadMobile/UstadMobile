@@ -19,16 +19,15 @@ import android.widget.Switch;
 import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
-import com.ustadmobile.core.controller.ClazzListEnrollPersonPresenter;
+import com.ustadmobile.core.controller.PersonDetailEnrollClazzPresenter;
 import com.ustadmobile.core.db.UmProvider;
-import com.ustadmobile.core.view.ClazzListEnrollPersonView;
+import com.ustadmobile.core.view.PersonDetailEnrollClazzView;
 import com.ustadmobile.lib.db.entities.ClazzWithEnrollment;
-import com.ustadmobile.lib.db.entities.ClazzWithNumStudents;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import static com.ustadmobile.core.view.PersonDetailView.ARG_PERSON_UID;
 
-public class ClazzListEnrollPersonActivity extends UstadBaseActivity implements ClazzListEnrollPersonView {
+public class PersonDetailEnrollClazzActivity extends UstadBaseActivity implements PersonDetailEnrollClazzView {
 
     private Toolbar toolbar;
 
@@ -36,7 +35,7 @@ public class ClazzListEnrollPersonActivity extends UstadBaseActivity implements 
     private RecyclerView.LayoutManager mRecyclerLayoutManager;
 
     //TODO: check this
-    private ClazzListEnrollPersonPresenter mPresenter;
+    private PersonDetailEnrollClazzPresenter mPresenter;
 
     private long personUid;
 
@@ -67,7 +66,7 @@ public class ClazzListEnrollPersonActivity extends UstadBaseActivity implements 
                         LinearLayoutManager.VERTICAL);
 
         //Call the presenter
-        mPresenter = new ClazzListEnrollPersonPresenter(this,
+        mPresenter = new PersonDetailEnrollClazzPresenter(this,
                 UMAndroidUtil.bundleToHashtable(getIntent().getExtras()), this);
 
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));

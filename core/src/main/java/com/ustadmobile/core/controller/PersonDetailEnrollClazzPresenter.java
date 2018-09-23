@@ -3,7 +3,7 @@ package com.ustadmobile.core.controller;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.db.dao.ClazzDao;
-import com.ustadmobile.core.view.ClazzListEnrollPersonView;
+import com.ustadmobile.core.view.PersonDetailEnrollClazzView;
 import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.ClazzWithEnrollment;
 import com.ustadmobile.lib.db.entities.ClazzWithNumStudents;
@@ -12,7 +12,7 @@ import java.util.Hashtable;
 
 import static com.ustadmobile.core.view.PersonDetailView.ARG_PERSON_UID;
 
-public class ClazzListEnrollPersonPresenter extends UstadBaseController<ClazzListEnrollPersonView> {
+public class PersonDetailEnrollClazzPresenter extends UstadBaseController<PersonDetailEnrollClazzView> {
 
     private long currentPersonUid = -1L;
 
@@ -20,8 +20,8 @@ public class ClazzListEnrollPersonPresenter extends UstadBaseController<ClazzLis
 
     private UmProvider<ClazzWithEnrollment> clazzWithEnrollmentUmProvider;
 
-    public ClazzListEnrollPersonPresenter(Object context,
-                                          Hashtable arguments, ClazzListEnrollPersonView view) {
+    public PersonDetailEnrollClazzPresenter(Object context,
+                                            Hashtable arguments, PersonDetailEnrollClazzView view) {
         super(context, arguments, view);
 
         if(arguments.containsKey(ARG_PERSON_UID)){

@@ -4,6 +4,8 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.ViewGroup;
@@ -83,7 +85,7 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
     }
 
 
-    public void setEditField(int fieldType, String label, int labelId,
+    public void setEditField(long fieldUid, int fieldType, String label, int labelId,
                              String iconName, boolean editMode,
                              LinearLayout thisLinearLayout, Object thisValue){
 
@@ -163,6 +165,25 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
                     et.setText(thisValue.toString());
                 }
 
+                et.addTextChangedListener(new TextWatcher() {
+                    @Override
+                    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+                    }
+
+                    @Override
+                    public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+                    }
+
+                    @Override
+                    public void afterTextChanged(Editable s) {
+
+                        mPresenter.handleFieldEdited(fieldUid, s.toString());
+
+                    }
+                });
+
                 til.addView(et, tilp);
 
                 hll.addView(til);
@@ -185,7 +206,7 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
     }
 
     @Override
-    public void setField(int index, PersonDetailViewField field, Object value) {
+    public void setField(int index, long fieldUid, PersonDetailViewField field, Object value) {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         String label = null;
         int labelId = 0;
@@ -194,7 +215,7 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
             labelId = MessageIDMap.ID_MAP.get(field.getMessageLabel());
         }
 
-        setEditField(field.getFieldType(), label, labelId,field.getIconName(),
+        setEditField(fieldUid, field.getFieldType(), label, labelId,field.getIconName(),
                 true, mLinearLayout, value);
 
     }

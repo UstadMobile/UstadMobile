@@ -82,33 +82,45 @@ public class ClazzDetailEnrollStudentPresenter extends
     public void handleEnrollChanged(PersonWithEnrollment person, boolean enrolled){
         //TODO
 
-        ClazzMember existingClazzMember =
-                clazzMemberDao.findByPersonUidAndClazzUid(person.getPersonUid(), currentClazzUid);
 
-        if (enrolled){
-            if(existingClazzMember == null){
-                //Create the ClazzMember
-                ClazzMember newClazzMember = new ClazzMember();
-                newClazzMember.setClazzMemberClazzUid(currentClazzUid);
-                newClazzMember.setRole(ClazzMember.ROLE_STUDENT);
-                newClazzMember.setClazzMemberPersonUid(person.getPersonUid());
-                newClazzMember.setDateJoined(System.currentTimeMillis());
-                newClazzMember.setClazzMemberUid(clazzMemberDao.insert(newClazzMember));
-            }else {
-                if (!existingClazzMember.isClazzMemberActive()){
-                    existingClazzMember.setClazzMemberActive(true);
-                    clazzMemberDao.insert(existingClazzMember);
+
+        clazzMemberDao.findByPersonUidAndClazzUidAsync(person.getPersonUid(), currentClazzUid, new UmCallback<ClazzMember>() {
+            @Override
+            public void onSuccess(ClazzMember existingClazzMember) {
+
+                if (enrolled){
+                    if(existingClazzMember == null){
+                        //Create the ClazzMember
+                        ClazzMember newClazzMember = new ClazzMember();
+                        newClazzMember.setClazzMemberClazzUid(currentClazzUid);
+                        newClazzMember.setRole(ClazzMember.ROLE_STUDENT);
+                        newClazzMember.setClazzMemberPersonUid(person.getPersonUid());
+                        newClazzMember.setDateJoined(System.currentTimeMillis());
+                        newClazzMember.setClazzMemberUid(clazzMemberDao.insert(newClazzMember));
+                    }else {
+                        if (!existingClazzMember.isClazzMemberActive()){
+                            existingClazzMember.setClazzMemberActive(true);
+                            clazzMemberDao.update(existingClazzMember);
+                        }
+                        //else let it be
+                    }
+
+                }else{
+                    //if already enrolled, disable ClazzMember.
+                    if(existingClazzMember != null){
+                        existingClazzMember.setClazzMemberActive(false);
+                        clazzMemberDao.update(existingClazzMember);
+                    }
                 }
-                //else let it be
             }
 
-        }else{
-            //if already enrolled, disable ClazzMember.
-            if(existingClazzMember != null){
-                existingClazzMember.setClazzMemberActive(false);
-                clazzMemberDao.insert(existingClazzMember);
+            @Override
+            public void onFailure(Throwable exception) {
+                exception.printStackTrace();
             }
-        }
+        });
+
+
     }
 
     public void handleClickDone(){

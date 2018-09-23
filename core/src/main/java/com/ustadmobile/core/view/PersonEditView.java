@@ -16,7 +16,7 @@ public interface PersonEditView extends UstadView {
      * @param field The PersonDetailViewField field representation that has its id, type label & options
      * @param value The value of the field to be set to the view.
      */
-    void setField(int index, PersonDetailViewField field, Object value);
+    void setField(int index, long fieldUid, PersonDetailViewField field, Object value);
 
 
     /**

@@ -107,7 +107,7 @@
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
             android:theme="@style/Theme.UstadTheme" />
         <activity
-            android:name="com.ustadmobile.port.android.view.ClazzListEnrollPersonActivity"
+            android:name="com.ustadmobile.port.android.view.PersonDetailEnrollClazzActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
             android:theme="@style/Theme.UstadTheme" />
         <activity

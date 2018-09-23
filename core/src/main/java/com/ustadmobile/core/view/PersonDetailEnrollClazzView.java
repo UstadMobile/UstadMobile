@@ -8,9 +8,9 @@ import com.ustadmobile.lib.db.entities.ClazzWithNumStudents;
  * ClazzListEnrollPerson Core View extends Core UstadView. Will be implemented
  * on various implementations.
  */
-public interface ClazzListEnrollPersonView extends UstadView {
+public interface PersonDetailEnrollClazzView extends UstadView {
 
-    String VIEW_NAME = "ClazzListEnrollPerson";
+    String VIEW_NAME = "PersonDetailEnrollClazz";
 
     void setClazzListProvider(UmProvider<ClazzWithEnrollment> clazzEnrollmentListProvider);
     /**

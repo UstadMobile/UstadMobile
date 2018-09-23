@@ -5,6 +5,7 @@ import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
+import com.ustadmobile.lib.database.annotation.UmUpdate;
 import com.ustadmobile.lib.db.entities.Person;
 
 @UmDao
@@ -13,6 +14,12 @@ public abstract class PersonDao implements BaseDao<Person>{
     @Override
     @UmInsert
     public abstract long insert(Person entity);
+
+    @UmUpdate
+    public abstract int update(Person entity);
+
+    @UmUpdate
+    public abstract void updateAsync(Person entity, UmCallback<Integer> result);
 
     @UmInsert
     @Override

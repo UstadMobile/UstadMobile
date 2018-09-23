@@ -5,6 +5,7 @@ import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
+import com.ustadmobile.lib.database.annotation.UmUpdate;
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord;
 import com.ustadmobile.lib.db.entities.ClazzMember;
 import com.ustadmobile.lib.db.entities.ClazzMemberWithPerson;
@@ -20,6 +21,12 @@ public abstract class ClazzMemberDao implements BaseDao<ClazzMember> {
     @UmInsert
     public abstract void insertAsync(ClazzMember entity, UmCallback<Long> result);
 
+    @UmUpdate
+    public abstract void update(ClazzMember entity);
+
+    @UmUpdate
+    public abstract void updateAsync(ClazzMember entity, UmCallback<Integer> result);
+
     @UmQuery("SELECT * FROM ClazzMember WHERE clazzMemberUid = :uid")
     public abstract ClazzMember findByUid(long uid);
 
@@ -30,6 +37,9 @@ public abstract class ClazzMemberDao implements BaseDao<ClazzMember> {
 
     @UmQuery("SELECT * FROM ClazzMember WHERE clazzMemberPersonUid = :personUid AND clazzMemberClazzUid = :clazzUid")
     public abstract ClazzMember findByPersonUidAndClazzUid(long personUid, long clazzUid);
+
+    @UmQuery("SELECT * FROM ClazzMember WHERE clazzMemberPersonUid = :personUid AND clazzMemberClazzUid = :clazzUid")
+    public abstract void findByPersonUidAndClazzUidAsync(long personUid, long clazzUid, UmCallback<ClazzMember> result);
 
     @UmQuery("Update ClazzMember SET attendancePercentage " +
             " = (SELECT COUNT(*) FROM ClazzLogAttendanceRecord " +
