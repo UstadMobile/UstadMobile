@@ -42,6 +42,7 @@ dependencies {
     implementation "org.jsoup:jsoup:$version_jsoup"
     implementation "com.google.code.gson:gson:$version_gson"
     implementation project(":core")
+    implementation project(":lib-database-entities")
     implementation "commons-io:commons-io:$version_commons_io"
     implementation "org.seleniumhq.selenium:selenium-java:$version_selenium"
     implementation "org.seleniumhq.selenium:selenium-chrome-driver:$version_selenium"
@@ -49,7 +50,8 @@ dependencies {
     testImplementation "junit:junit:$version_junit"
     testImplementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
     testImplementation "org.mockito:mockito-core:$version_android_mockito"
-    compile project(path: ':lib-database')
+    implementation project(":lib-database")
+    implementation project(":lib-database-entities")
 }
 
 task copyTestResources(type: Copy) {

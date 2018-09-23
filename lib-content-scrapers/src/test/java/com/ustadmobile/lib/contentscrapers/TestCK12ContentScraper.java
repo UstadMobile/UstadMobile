@@ -42,6 +42,9 @@ public class TestCK12ContentScraper {
     private final String READ_HTML = "/com/ustadmobile/lib/contentscrapers/ck12/ck12-read.txt";
     private final String MATH_JAX_HTML = "/com/ustadmobile/lib/contentscrapers/ck12/ck12-read-mathjax.txt";
 
+    private final String PLIX_HTML = "/com/ustadmobile/lib/contentscrapers/ck12/plix/plix.txt";
+    private final String PLIX_PATH = "/com/ustadmobile/lib/contentscrapers/ck12/plix/";
+
 
     String youtubeUrl = "https://www.ck12.org/c/biology/history-of-life/lecture/Origin-and-Evolution-of-Life/?referrer=concept_details";
     String ckVidUrl = "https://www.ck12.org/c/elementary-math-grade-1/add-to-10-with-images/enrichment/Overview-of-Addition-Sums-to-10/?referrer=concept_details";
@@ -49,6 +52,7 @@ public class TestCK12ContentScraper {
     String mathJaxUrl = "https://www.ck12.org/c/geometry/midpoints-and-segment-bisectors/lesson/Midpoints-and-Segment-Bisectors-BSC-GEOM/?referrer=concept_details";
     String practiceUrl = "https://www.ck12.org/c/elementary-math-grade-1/add-to-10-with-images/asmtpractice/Add-to-10-with-Images-Practice?referrer=featured_content&collectionHandle=elementary-math-grade-1&collectionCreatorID=3&conceptCollectionHandle=elementary-math-grade-1-::-add-to-10-with-images?referrer=concept_details";
     String readUrl = "https://www.ck12.org/c/physical-science/chemistry-of-compounds/lesson/Chemistry-of-Compounds-MS-PS/?referrer=concept_details";
+    String plixUrl = "https://www.ck12.org/c/trigonometry/distance-formula-and-the-pythagorean-theorem/plix/Pythagorean-Theorem-to-Determine-Distance-Tree-Shadows-53d147578e0e0876d4df82f1?referrer=concept_details";
 
 
     final Dispatcher dispatcher = new Dispatcher() {
@@ -77,6 +81,15 @@ public class TestCK12ContentScraper {
                     String fileName = request.getPath().substring(length,
                             request.getPath().indexOf(".png", length));
                     InputStream pictureIn = getClass().getResourceAsStream(RESOURCE_PATH + fileName + ".png");
+                    BufferedSource source = Okio.buffer(Okio.source(pictureIn));
+                    Buffer buffer = new Buffer();
+                    source.readAll(buffer);
+                    return new MockResponse().setResponseCode(200).setBody(buffer);
+                } else if (request.getPath().contains("/plix/")) {
+                    int length = "/plix/".length();
+                    String fileName = request.getPath().substring(length,
+                            request.getPath().length());
+                    InputStream pictureIn = getClass().getResourceAsStream(PLIX_PATH + fileName);
                     BufferedSource source = Okio.buffer(Okio.source(pictureIn));
                     Buffer buffer = new Buffer();
                     source.readAll(buffer);
@@ -226,13 +239,26 @@ public class TestCK12ContentScraper {
     }
 
     @Test
-    public void testPlix() throws IOException {
+    public void givenServerOnline_whenPlixContentScraped_thenShouldConvertAndDownload() throws IOException {
+
+        MockWebServer mockWebServer = new MockWebServer();
+        mockWebServer.setDispatcher(dispatcher);
+
         File tmpDir = Files.createTempDirectory("testCK12plixcontentscraper").toFile();
+        //CK12ContentScraper scraper = new CK12ContentScraper(mockWebServer.url("/c/" + PLIX_HTML + "-53d147578e0e0876d4df82f1?").toString(), tmpDir);
         CK12ContentScraper scraper = new CK12ContentScraper("https://www.ck12.org/c/elementary-math-grade-1/add-to-10-with-images/plix/The-Flying-Birds-56953eed8e0e086aa6e2d3c2?referrer=concept_details", tmpDir);
         scraper.scrapePlixContent();
 
-    }
+        File plixFolder = new File(tmpDir, "53d147578e0e0876d4df82f1");
+        Assert.assertEquals("directory for plix exists", true, plixFolder.isDirectory());
 
+        File indexJson = new File(plixFolder, "index.json");
+        Assert.assertEquals("index json for all urls and thier path exists", true, ContentScraperUtil.fileHasContent(indexJson));
+
+        File zip = new File(tmpDir, "53d147578e0e0876d4df82f1.zip");
+        Assert.assertEquals("zipped file exists", true, ContentScraperUtil.fileHasContent(zip));
+
+    }
 
 
 }

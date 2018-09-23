@@ -15,6 +15,7 @@ import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
 import java.sql.SQLException;
 
 import edu.rit.se.wifibuddy.WifiDirectHandler;
+
 import com.ustadmobile.core.listener.ActiveSyncListener;
 import com.ustadmobile.core.listener.ActiveUserListener;
 
@@ -23,15 +24,13 @@ import static com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroid.P
 
 /**
  * <h1>NetworkServiceAndroid</h1>
- *
+ * <p>
  * NetworkServiceAndroid is effectively a wrapper for NetworkManager. A service is required as this
  * encapsulates network discovery processes and the http server that should continue running
  * regardless of which activity is active.
  *
- * @see android.app.Service
- *
  * @author kileha3
- *
+ * @see android.app.Service
  */
 public class NetworkServiceAndroid extends Service {
 
@@ -44,9 +43,10 @@ public class NetworkServiceAndroid extends Service {
     /**
      * Default time interval for Wi-Fi Direct service rebroadcasting.
      */
-    public static final int SERVICE_REBROADCASTING_TIMER=120000;
+    public static final int SERVICE_REBROADCASTING_TIMER = 120000;
 
-    public NetworkServiceAndroid(){}
+    public NetworkServiceAndroid() {
+    }
 
     @Override
     public void onCreate() {
@@ -64,12 +64,12 @@ public class NetworkServiceAndroid extends Service {
     public void onDestroy() {
         networkManagerAndroid.onDestroy();
 
-        if(wifiDirectHandler!=null){
+        if (wifiDirectHandler != null) {
             wifiDirectHandler.removeGroup();
             wifiDirectHandler.stopServiceDiscovery();
             wifiDirectHandler.removeService();
             UstadMobileSystemImpl.getInstance().setAppPref("devices",
-                    "",getApplicationContext());
+                    "", getApplicationContext());
         }
         unbindService(wifiP2PServiceConnection);
 
@@ -77,11 +77,10 @@ public class NetworkServiceAndroid extends Service {
     }
 
     /**
-     *
      * @return NetworkManagerAndroid : NetworkManagerAndroid class reference
      */
     public NetworkManagerAndroid getNetworkManager() {
-        return  networkManagerAndroid;
+        return networkManagerAndroid;
     }
 
     @Override
@@ -96,15 +95,15 @@ public class NetworkServiceAndroid extends Service {
     }
 
     /**
-     *This is an interface for monitoring the state of an application service.
+     * This is an interface for monitoring the state of an application service.
      * it defines callbacks for service binding, passed to bindService().
      * Either of the two methods will be invoked:
      * <p>
-     *     <b>onServiceConnected</b>: Invoked when service successfully connected
-     *     <b>onServiceDisconnected</b>: Invoked when service connection failed.
+     * <b>onServiceConnected</b>: Invoked when service successfully connected
+     * <b>onServiceDisconnected</b>: Invoked when service connection failed.
      * </p>
      */
-    ServiceConnection wifiP2PServiceConnection=new ServiceConnection() {
+    ServiceConnection wifiP2PServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
             wifiDirectHandler = ((WifiDirectHandler.WifiTesterBinder) iBinder).getService();
@@ -129,7 +128,7 @@ public class NetworkServiceAndroid extends Service {
      * runs in the same process as its clients, we won't be dealing with IPC.
      */
     public class LocalServiceBinder extends Binder {
-        public NetworkServiceAndroid getService(){
+        public NetworkServiceAndroid getService() {
             return NetworkServiceAndroid.this;
         }
 
@@ -138,7 +137,7 @@ public class NetworkServiceAndroid extends Service {
     /**
      * @return WifiDirectHandler: Instance of the WifiDirectHandler from Wi-Fi buddy API
      */
-    public WifiDirectHandler getWifiDirectHandlerAPI(){
+    public WifiDirectHandler getWifiDirectHandlerAPI() {
         return wifiDirectHandler;
     }
 

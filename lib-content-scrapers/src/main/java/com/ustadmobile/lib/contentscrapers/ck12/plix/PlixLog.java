@@ -1,5 +1,7 @@
 package com.ustadmobile.lib.contentscrapers.ck12.plix;
 
+import java.util.Map;
+
 public class PlixLog {
 
     public Message message;
@@ -20,6 +22,9 @@ public class PlixLog {
 
                 public String url;
 
+                public Map<String, String> headers;
+
+                public Map<String, String> requestHeaders;
 
             }
 

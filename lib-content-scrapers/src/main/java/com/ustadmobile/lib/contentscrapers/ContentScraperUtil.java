@@ -36,6 +36,7 @@ import java.time.format.DateTimeParseException;
 import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -218,7 +219,7 @@ public class ContentScraperUtil {
             Path sourceDirPath = Paths.get(directoryToZip.toURI());
             Files.walk(sourceDirPath).filter(path -> !Files.isDirectory(path))
                     .forEach(path -> {
-                        ZipEntry zipEntry = new ZipEntry(sourceDirPath.relativize(path).toString());
+                        ZipEntry zipEntry = new ZipEntry(sourceDirPath.relativize(path).toString().replaceAll(Pattern.quote("\\"), "/"));
                         try {
                             out.putNextEntry(zipEntry);
                             out.write(Files.readAllBytes(path));
