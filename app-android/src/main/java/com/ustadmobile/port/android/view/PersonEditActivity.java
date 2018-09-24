@@ -7,6 +7,9 @@ import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.DisplayMetrics;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
@@ -60,6 +63,7 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+
         //Get the header & fields layout
         mLinearLayout = findViewById(R.id.activity_person_edit_fields_linear_layout);
 
@@ -69,8 +73,9 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
 
         //FAB
-        FloatingTextButton dab = findViewById(R.id.activity_person_edit_fab_done);
-        dab.setOnClickListener(v -> mPresenter.handleClickDone());
+        //FloatingTextButton dab = findViewById(R.id.activity_person_edit_fab_done);
+        //dab.setOnClickListener(v -> mPresenter.handleClickDone());
+
 
     }
 
@@ -202,6 +207,26 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
                 break;
             default:
                 break;
+        }
+    }
+
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_done, menu);
+        return true;
+    }
+
+    //Handling Action Bar button click
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle item selection
+        int i = item.getItemId();
+        if (i == R.id.menu_catalog_entry_presenter_share) {//If this activity started from other activity
+            mPresenter.handleClickDone();
+
+            return super.onOptionsItemSelected(item);
+        } else {
+            return super.onOptionsItemSelected(item);
         }
     }
 

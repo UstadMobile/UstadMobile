@@ -13,7 +13,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:elevation="4dp"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        tools:layout_editor_absoluteX="320dp"
+        tools:layout_editor_absoluteY="0dp">
 
         <android.support.v7.widget.Toolbar
             android:id="@+id/activity_person_edit_toolbar"
@@ -22,12 +24,14 @@
             android:background="@color/primary"
             app:layout_scrollFlags="scroll|enterAlways" />
 
+
     </android.support.design.widget.AppBarLayout>
 
     <ScrollView
         android:id="@+id/activity_person_edit_fields_scrollview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
         app:layout_constraintTop_toBottomOf="@+id/activity_person_edit_appbar">
 
         <android.support.constraint.ConstraintLayout
@@ -50,23 +54,23 @@
 
     </ScrollView> <!--activity_person_edit_fields_scroll-->
 
-    <ru.dimorinny.floatingtextbutton.FloatingTextButton
-        android:id="@+id/activity_person_edit_fab_done"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|center"
-        android:layout_marginBottom="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp"
-        app:floating_background_color="@color/accent"
-        app:floating_left_icon="@drawable/ic_check_white_24dp"
-        app:floating_title="@string/done"
-        app:floating_title_color="@android:color/white"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
+    <!--<ru.dimorinny.floatingtextbutton.FloatingTextButton-->
+        <!--android:id="@+id/activity_person_edit_fab_done"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_gravity="bottom|center"-->
+        <!--android:layout_marginBottom="8dp"-->
+        <!--android:layout_marginEnd="8dp"-->
+        <!--android:layout_marginStart="8dp"-->
+        <!--app:floating_background_color="@color/accent"-->
+        <!--app:floating_left_icon="@drawable/ic_check_white_24dp"-->
+        <!--app:floating_title="@string/done"-->
+        <!--app:floating_title_color="@android:color/white"-->
+        <!--app:layout_constraintBottom_toBottomOf="parent"-->
+        <!--app:layout_constraintEnd_toEndOf="parent"-->
+        <!--app:layout_constraintStart_toStartOf="parent">-->
 
-    </ru.dimorinny.floatingtextbutton.FloatingTextButton>
+    <!--</ru.dimorinny.floatingtextbutton.FloatingTextButton>-->
 
 
 </android.support.constraint.ConstraintLayout>

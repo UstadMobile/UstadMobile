@@ -159,7 +159,7 @@ public class PersonDetailActivity extends UstadBaseActivity implements PersonDet
                     ImageView textIcon = new ImageView(this);
                     textIcon.setImageResource(getResourceId(TEXT_ICON_NAME,
                             "drawable", getPackageName()));
-                    textIcon.setPadding(16,0, 16,0);
+                    textIcon.setPadding(8,16, 32,16);
                     textIcon.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
@@ -170,7 +170,7 @@ public class PersonDetailActivity extends UstadBaseActivity implements PersonDet
                     ImageView callIcon = new ImageView(this);
                     callIcon.setImageResource(getResourceId(CALL_ICON_NAME,
                             "drawable", getPackageName()));
-                    callIcon.setPadding(16,0, 16,0);
+                    callIcon.setPadding(8,16, 32,16);
                     callIcon.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
