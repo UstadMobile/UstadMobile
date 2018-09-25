@@ -123,7 +123,7 @@ public class TestCK12ContentScraper {
         File thumbnail = new File(asset, "video-thumbnail.jpg");
         Assert.assertEquals("thumbnail for content", true, ContentScraperUtil.fileHasContent(thumbnail));
 
-        File video = new File(asset, "_media_video.mp4");
+        File video = new File(asset, "video.mp4");
         Assert.assertEquals("video for content", true, ContentScraperUtil.fileHasContent(video));
     }
 
@@ -245,8 +245,8 @@ public class TestCK12ContentScraper {
         mockWebServer.setDispatcher(dispatcher);
 
         File tmpDir = Files.createTempDirectory("testCK12plixcontentscraper").toFile();
-        //CK12ContentScraper scraper = new CK12ContentScraper(mockWebServer.url("/c/" + PLIX_HTML + "-53d147578e0e0876d4df82f1?").toString(), tmpDir);
-        CK12ContentScraper scraper = new CK12ContentScraper("https://www.ck12.org/c/elementary-math-grade-1/add-to-10-with-images/plix/The-Flying-Birds-56953eed8e0e086aa6e2d3c2?referrer=concept_details", tmpDir);
+        CK12ContentScraper scraper = new CK12ContentScraper(mockWebServer.url("/c/" + PLIX_HTML + "-53d147578e0e0876d4df82f1?").toString(), tmpDir);
+        //CK12ContentScraper scraper = new CK12ContentScraper("https://www.ck12.org/c/elementary-math-grade-1/add-to-10-with-images/plix/The-Flying-Birds-56953eed8e0e086aa6e2d3c2?referrer=concept_details", tmpDir);
         scraper.scrapePlixContent();
 
         File plixFolder = new File(tmpDir, "53d147578e0e0876d4df82f1");
