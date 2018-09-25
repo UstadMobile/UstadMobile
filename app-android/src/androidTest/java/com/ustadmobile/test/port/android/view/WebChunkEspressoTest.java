@@ -7,12 +7,14 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.espresso.intent.rule.IntentsTestRule;
+import android.support.test.espresso.web.webdriver.Locator;
 import android.support.test.rule.GrantPermissionRule;
 import android.support.test.runner.AndroidJUnit4;
 
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.view.WebChunkView;
 import com.ustadmobile.port.android.view.WebChunkActivity;
+import com.ustadmobile.test.port.android.UmAndroidTestUtil;
 
 import junit.framework.Assert;
 
@@ -26,8 +28,14 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.concurrent.TimeUnit;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+
+import static android.support.test.espresso.action.ViewActions.click;
+import static android.support.test.espresso.web.sugar.Web.onWebView;
+import static android.support.test.espresso.web.webdriver.DriverAtoms.findElement;
+import static android.support.test.espresso.web.webdriver.DriverAtoms.webClick;
 
 @RunWith(AndroidJUnit4.class)
 public class WebChunkEspressoTest {
@@ -53,8 +61,10 @@ public class WebChunkEspressoTest {
     }
 
     @Test
-    public void duringTest() throws IOException {
+    public void givenServerOffline_whenPlixZippedIsOpened_WebviewLoads() throws IOException {
         Intent launchActivityIntent = new Intent();
+
+        UmAndroidTestUtil.setAirplaneModeEnabled(true);
         Bundle b = new Bundle();
         //53d147578e0e0876d4df82f1
         String pathToZip = "/com/ustadmobile/app/android/56953eed8e0e086aa6e2d3c2.zip";
@@ -71,8 +81,11 @@ public class WebChunkEspressoTest {
         b.putString(WebChunkView.ARG_CHUNK_PATH, targetFile.getPath());
         launchActivityIntent.putExtras(b);
         mActivityRule.launchActivity(launchActivityIntent);
-        Assert.assertTrue(1 == 1);
 
+        onWebView()
+                .withTimeout(10000, TimeUnit.MILLISECONDS)
+                .withElement(findElement(Locator.CLASS_NAME,"questionController"))
+                .perform(webClick());
     }
 
 

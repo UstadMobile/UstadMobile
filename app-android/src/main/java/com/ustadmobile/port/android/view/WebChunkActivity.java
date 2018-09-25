@@ -37,7 +37,7 @@ public class WebChunkActivity extends UstadBaseActivity implements WebChunkView{
     @Override
     public void mountChunk(String webChunkPath, UmCallback<String> callback) {
         webClient = new WebChunkWebViewClient(webChunkPath);
-        mWebView.setWebViewClient(webClient);
+                mWebView.setWebViewClient(webClient);
         callback.onSuccess(webClient.getUrl());
     }
 

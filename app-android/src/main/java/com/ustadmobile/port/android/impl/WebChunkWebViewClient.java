@@ -12,8 +12,10 @@ import com.ustadmobile.core.util.UMIOUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Array;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,7 +46,6 @@ public class WebChunkWebViewClient extends WebViewClient {
                 indexMap.put(log.url, log);
             }
 
-
         } catch (IOException e) {
             System.err.println("Error opening Zip File from path " + pathToZip);
         }
@@ -66,6 +67,7 @@ public class WebChunkWebViewClient extends WebViewClient {
         IndexLog log = indexMap.get(requestUrl);
         if (log == null) {
             for (Map.Entry<String, IndexLog> e : indexMap.entrySet()) {
+
                 if (e.getKey().contains("plixbrowse") && requestUrl.contains("plixbrowse")) {
                     log = indexMap.get(e.getKey());
                     break;

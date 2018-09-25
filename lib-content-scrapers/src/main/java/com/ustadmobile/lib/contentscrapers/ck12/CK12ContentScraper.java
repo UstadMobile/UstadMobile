@@ -110,6 +110,8 @@ public class CK12ContentScraper {
     private final URL scrapUrl;
     private final File assetDirectory;
 
+    public final String css = "<style> .read-more-container { display: none; } #plixIFrameContainer { float: left !important; margin-top: 15px; } #plixLeftWrapper { float: left !important; width: 49%; min-width: 200px; padding-left: 15px !important; padding-right: 15px !important; margin-right: 15px; } @media (max-width: 1070px) { #plixLeftWrapper { width: 98% !important; } } .plixQestionPlayer, .plixLeftMiddlequestionContainer { margin-bottom: 5px !important; } .leftTopFixedBar { padding-top: 20px !important; } #next-container { margin-top: 0 !important; } .overflow-container { background: transparent !important; width: 0px !important; } .overflow-indicator { left: 50% !important; padding: 12px !important; } .plixWrapper { width: 95% !important; max-width: inherit !important; } body.plix-modal { overflow: auto !important; padding: 0; width: 95% !important; height: inherit !important; } .show-description, .show-challenge { position: static !important; padding-top: 0 !important; } #hintModal { width: 90% !important; margin-left: -45% !important; } @media only screen and (max-device-width: 605px), only screen and (max-device-height: 605px) { #landscapeView { display: block !important; } } </style>";
+
 
     public final String postfix = "?hints=true&evalData=true";
     public final String POLICIES = "?policies=[{\"name\":\"shuffle\",\"value\":false},{\"name\":\"shuffle_question_options\",\"value\":false},{\"name\":\"max_questions\",\"value\":15},{\"name\":\"adaptive\",\"value\":false}]";
@@ -178,6 +180,7 @@ public class CK12ContentScraper {
         System.setProperty("webdriver.chrome.driver", chromeDriverLocation);
 
         DesiredCapabilities d = DesiredCapabilities.chrome();
+        d.setCapability("opera.arguments", "-screenwidth 1024 -screenheight 768");
         // d.merge(capabilities);
         LoggingPreferences logPrefs = new LoggingPreferences();
         logPrefs.enable(LogType.PERFORMANCE, Level.ALL);
@@ -232,12 +235,46 @@ public class CK12ContentScraper {
                         FileUtils.writeStringToFile(file, plixJs, UTF_ENCODING);
                     }
 
+                    if(file.getName().contains("plix.css")){
+                        String plixJs = FileUtils.readFileToString(file, UTF_ENCODING);
+                        int startIndex = plixJs.indexOf("@media only screen and (max-device-width:605px)");
+                        int endIndex = plixJs.indexOf(".plix{");
+                        plixJs = new StringBuilder(plixJs).insert(endIndex, "*/").insert(startIndex, "/*").toString();
+                        FileUtils.writeStringToFile(file, plixJs, UTF_ENCODING);
+                    }
+
                     if (file.getName().contains("plix.html")) {
                         String plixJs = FileUtils.readFileToString(file, UTF_ENCODING);
-                        String searchString = "read-more-container no-display";
-                        int startIndex = plixJs.indexOf(searchString);
-                        plixJs = new StringBuilder(plixJs).insert(startIndex + searchString.length() + 1, " style=\"display: none;\"").toString();
-                        FileUtils.writeStringToFile(file, plixJs, UTF_ENCODING);
+                        Document doc = Jsoup.parse(plixJs);
+
+                        doc.selectFirst("div.read-more-container").remove();
+                        doc.selectFirst("div#portraitView").remove();
+                        doc.selectFirst("div#ToolBarView").remove();
+                        doc.selectFirst("div#deviceCompatibilityAlertPlix").remove();
+                        doc.selectFirst("div#leftBackWrapper").remove();
+
+                        Element head = doc.head();
+                        head.append(css);
+
+                        Element iframe = doc.selectFirst("div.plixIFrameContainer");
+                        iframe.removeClass("plixIFrameContainer");
+
+                        Element leftWrapper = doc.selectFirst("div#plixLeftWrapper");
+                        leftWrapper.removeClass("plixLeftWrapper");
+                        leftWrapper.addClass("small-12");
+                        leftWrapper.addClass("medium-6");
+                        leftWrapper.addClass("large-6");
+                        String leftAttr = leftWrapper.attr("style");
+                        leftWrapper.attr("style", leftAttr + "display: block;");
+
+                        Element rightWrapper = doc.selectFirst("div#plixRightWrapper");
+                        rightWrapper.removeClass("small-6");
+                        rightWrapper.addClass("small-12");
+                        rightWrapper.addClass("medium-6");
+                        rightWrapper.addClass("large-6");
+
+                        FileUtils.writeStringToFile(file, doc.html(), UTF_ENCODING);
+
                     }
 
 
