@@ -2,6 +2,8 @@ package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmLiveData;
+import com.ustadmobile.core.db.UmProvider;
+import com.ustadmobile.core.db.dao.ClazzDao;
 import com.ustadmobile.core.db.dao.ClazzMemberDao;
 import com.ustadmobile.core.db.dao.PersonCustomFieldValueDao;
 import com.ustadmobile.core.db.dao.PersonDao;
@@ -12,6 +14,8 @@ import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.core.view.PersonDetailView;
 import com.ustadmobile.core.view.PersonDetailViewField;
 import com.ustadmobile.core.view.PersonEditView;
+import com.ustadmobile.lib.db.entities.Clazz;
+import com.ustadmobile.lib.db.entities.ClazzWithNumStudents;
 import com.ustadmobile.lib.db.entities.Person;
 import com.ustadmobile.lib.db.entities.PersonCustomFieldWithPersonCustomFieldValue;
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField;
@@ -50,6 +54,8 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
 
     private String attendanceAverage;
 
+    private UmProvider<ClazzWithNumStudents> assignedClazzes;
+
     /**
      * Presenter's constructor where we are getting arguments and setting the personUid
      *
@@ -77,7 +83,7 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
                 UmAppDatabase.getInstance(context).getPersonCustomFieldValueDao();
         PersonDetailPresenterFieldDao personDetailPresenterFieldDao =
                 UmAppDatabase.getInstance(context).getPersonDetailPresenterFieldDao();
-        ClazzMemberDao clazzMemberDao = 
+        ClazzMemberDao clazzMemberDao =
                 UmAppDatabase.getInstance(context).getClazzMemberDao();
 
         //Get all headers and fields
@@ -135,6 +141,25 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
 
             }
         });
+    }
+
+    public void generateAssignedClazzesLiveData(){
+        ClazzDao clazzDao = UmAppDatabase.getInstance(context).getClazzDao();
+
+        assignedClazzes = clazzDao.findAllClazzesByPersonUid(personUid);
+
+        new Thread(){
+            public void run(){
+
+                ClazzDao cd  = UmAppDatabase.getInstance(context).getClazzDao();
+                List a = cd.findAllClazzesByPersonUidAsList(personUid);
+                int x;
+                System.out.println("hey");
+            }
+
+        }.start();
+
+        view.setClazzListProvider(assignedClazzes);
     }
 
     public void setItemOnView(){
@@ -261,7 +286,7 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
      * @param number The phone number
      */
     public void handleClickCall(String number){
-        System.out.println("Call this number: " + number);
+
     }
 
     /**

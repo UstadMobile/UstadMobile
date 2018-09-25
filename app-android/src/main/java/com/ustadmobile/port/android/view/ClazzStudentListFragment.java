@@ -28,6 +28,8 @@ import com.ustadmobile.lib.db.entities.ClazzMemberWithPerson;
 import com.ustadmobile.lib.db.entities.Person;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
+import ru.dimorinny.floatingtextbutton.FloatingTextButton;
+
 import static com.ustadmobile.core.controller.ClazzListPresenter.ARG_CLAZZ_UID;
 
 /**
@@ -189,6 +191,11 @@ public class ClazzStudentListFragment extends UstadBaseFragment implements Clazz
         mPresenter = new ClazzStudentListPresenter(this,
                 UMAndroidUtil.bundleToHashtable(getArguments()), this);
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
+
+
+        //FAB
+        FloatingTextButton fab = rootContainer.findViewById(R.id.class_student_list_add_student_fab);
+        fab.setOnClickListener(v -> mPresenter.goToAddStudentFragment());
 
         return rootContainer;
     }

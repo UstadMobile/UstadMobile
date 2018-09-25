@@ -109,7 +109,7 @@ public class UmDbTestUtil {
                 MessageID.birthday,
                 PersonDetailPresenterField.PERSON_FIELD_UID_BIRTHDAY,
                 5,
-                PersonDetailViewField.FIELD_TYPE_TEXT,
+                PersonDetailViewField.FIELD_TYPE_DATE,
                 0,
                 false,
                 true,
@@ -162,7 +162,7 @@ public class UmDbTestUtil {
                 MessageID.father,
                 PersonDetailPresenterField.PERSON_FIELD_UID_FATHER_NAME_AND_PHONE_NUMBER,
                 11,
-                PersonDetailViewField.FIELD_TYPE_TEXT,
+                PersonDetailViewField.FIELD_TYPE_PHONE_NUMBER,
                 0,
                 false,
                 true,
@@ -186,7 +186,7 @@ public class UmDbTestUtil {
                 MessageID.fathers_number,
                 PersonDetailPresenterField.PERSON_FIELD_UID_FATHER_NUMBER,
                 13,
-                PersonDetailViewField.FIELD_TYPE_TEXT,
+                PersonDetailViewField.FIELD_TYPE_PHONE_NUMBER,
                 0,
                 false,
                 false,
@@ -210,7 +210,7 @@ public class UmDbTestUtil {
                 MessageID.mothers_number,
                 PersonDetailPresenterField.PERSON_FIELD_UID_MOTHER_NUMBER,
                 15,
-                PersonDetailViewField.FIELD_TYPE_TEXT,
+                PersonDetailViewField.FIELD_TYPE_PHONE_NUMBER,
                 0,
                 false,
                 false,
@@ -242,18 +242,18 @@ public class UmDbTestUtil {
                 true,
                 true
         ));
-        allFields.add(new HeadersAndFields(
-                "ic_people_black_24dp",
-                "Classes",
-                MessageID.clazz,
-                PersonDetailPresenterField.PERSON_FIELD_UID_CLASSES,
-                18,
-                PersonDetailViewField.FIELD_TYPE_TEXT,
-                0,
-                false,
-                true,
-                true
-        ));
+//        allFields.add(new HeadersAndFields(
+//                "ic_people_black_24dp",
+//                "Classes",
+//                MessageID.clazz,
+//                PersonDetailPresenterField.PERSON_FIELD_UID_CLASSES,
+//                18,
+//                PersonDetailViewField.FIELD_TYPE_TEXT,
+//                0,
+//                false,
+//                true,
+//                true
+//        ));
 
 
         //Custom fields:

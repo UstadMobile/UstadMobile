@@ -1,32 +1,49 @@
 package com.ustadmobile.port.android.view;
 
+import android.app.DatePickerDialog;
+import android.arch.lifecycle.LiveData;
+import android.arch.paging.DataSource;
+import android.arch.paging.LivePagedListBuilder;
+import android.arch.paging.PagedList;
+import android.arch.paging.PagedListAdapter;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputLayout;
+import android.support.v7.util.DiffUtil;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
+import android.text.InputType;
 import android.text.TextWatcher;
 import android.util.DisplayMetrics;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.PersonEditPresenter;
+import com.ustadmobile.core.db.UmProvider;
+import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.core.view.PersonDetailViewField;
 import com.ustadmobile.core.view.PersonEditView;
+import com.ustadmobile.lib.db.entities.ClazzWithNumStudents;
 import com.ustadmobile.port.android.generated.MessageIDMap;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
-import ru.dimorinny.floatingtextbutton.FloatingTextButton;
+import java.util.Calendar;
 
 import static com.ustadmobile.core.view.PersonDetailViewField.FIELD_TYPE_DATE;
 import static com.ustadmobile.core.view.PersonDetailViewField.FIELD_TYPE_DROPDOWN;
@@ -40,13 +57,17 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
     private Toolbar toolbar;
     private LinearLayout mLinearLayout;
 
+    private RecyclerView mRecyclerView;
+    private RecyclerView.LayoutManager mRecyclerLayoutManager;
+
     private PersonEditPresenter mPresenter;
 
     public static final int DEFAULT_PADDING = 16;
     public static final int DEFAULT_PADDING_HEADER_BOTTOM = 16;
     public static final int DEFAULT_DIVIDER_HEIGHT = 2;
     public static final int DEFAULT_TEXT_PADDING_RIGHT = 4;
-    public static final String BLANK_ICON = "ic_blank_24dp";
+    public static final String BLANK_ICON = "ic_none_24dp";
+    public static final String ADD_PERSON_ICON = "ic_person_add_black_24dp";
     public static final int HEADER_TEXT_SIZE = 12;
     public static final int LABEL_TEXT_SIZE = 10;
     public static final String COLOR_GREY= "#B3B3B3";
@@ -72,10 +93,6 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
                 getIntent().getExtras()), this);
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
 
-        //FAB
-        //FloatingTextButton dab = findViewById(R.id.activity_person_edit_fab_done);
-        //dab.setOnClickListener(v -> mPresenter.handleClickDone());
-
 
     }
 
@@ -97,27 +114,43 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
 
         //Set icon if not present (for margins to align ok)
         if(iconName == null || iconName.length() == 0){
-            iconName = BLANK_ICON;
+            iconName = ADD_PERSON_ICON;
         }
 
         LinearLayout.LayoutParams dividerLayout =
                 new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
                         DEFAULT_DIVIDER_HEIGHT);
 
-        LinearLayout.LayoutParams layoutParams =
-                new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT);
+        LinearLayout.LayoutParams buttonLayout =
+                new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT);
 
         LinearLayout.LayoutParams parentParams =
                 new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                         ViewGroup.LayoutParams.MATCH_PARENT);
 
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        int width = displayMetrics.widthPixels;
+
+        ViewGroup.LayoutParams editTextParams =
+                new LinearLayout.LayoutParams(
+                        width,
+                        ViewGroup.LayoutParams.MATCH_PARENT);
+
+        TextInputLayout.LayoutParams tilp = new TextInputLayout.LayoutParams(width,
+                TextInputLayout.LayoutParams.MATCH_PARENT);
+
         LinearLayout hll = new LinearLayout(this);
         hll.setLayoutParams(parentParams);
         hll.setOrientation(LinearLayout.HORIZONTAL);
 
+        TextInputLayout til = new TextInputLayout(this);
 
-        switch (fieldType){
+        View editView = null;
+
+        switch(fieldType) {
+
             case FIELD_TYPE_HEADER:
                 //Add The Divider
                 View divider = new View(this);
@@ -129,86 +162,149 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
                 TextView header = new TextView(this);
                 header.setText(label.toUpperCase());
                 header.setTextSize(HEADER_TEXT_SIZE);
-                header.setPadding(DEFAULT_PADDING,0,0,DEFAULT_PADDING_HEADER_BOTTOM);
+                header.setPadding(DEFAULT_PADDING, 0, 0, DEFAULT_PADDING_HEADER_BOTTOM);
                 thisLinearLayout.addView(header);
+
+                //Add for classes
+                UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+                if(label.equals(impl.getString(MessageID.classes, getContext()))){
+
+                    //Add Add new Class button
+                    LinearLayout addPersonToClazzHL = new LinearLayout(this);
+                    addPersonToClazzHL.setLayoutParams(parentParams);
+                    addPersonToClazzHL.setOrientation(LinearLayout.HORIZONTAL);
+
+                    //Add the icon
+                    int addIconResId = getResourceId(ADD_PERSON_ICON, "drawable", getPackageName());
+                    ImageView addIcon = new ImageView(this);
+                    addIcon.setImageResource(addIconResId);
+                    addIcon.setPadding(DEFAULT_PADDING,0,DEFAULT_TEXT_PADDING_RIGHT,0);
+                    addPersonToClazzHL.addView(addIcon);
+
+                    //Add the button
+                    Button addPersonButton = new Button(this);
+                    addPersonButton.setIncludeFontPadding(false);
+                    addPersonButton.setMinHeight(0);
+                    //addPersonButton.setLayoutParams(buttonLayout);
+                    addPersonButton.setText(impl.getString(MessageID.add_person_to_class, getContext()));
+                    addPersonButton.setBackground(null);
+                    addPersonButton.setPadding(DEFAULT_PADDING, 0, 0, 0);
+                    addPersonButton.setOnClickListener(v -> mPresenter.handleClickAddNewClazz());
+                    addPersonToClazzHL.addView(addPersonButton);
+
+                    mLinearLayout.addView(addPersonToClazzHL);
+
+                    //Add a recyclerview of classes
+                    mRecyclerView = new RecyclerView(this);
+
+                    mRecyclerLayoutManager = new LinearLayoutManager(getApplicationContext());
+                    mRecyclerView.setLayoutManager(mRecyclerLayoutManager);
+
+                    //Add the layout
+                    mLinearLayout.addView(mRecyclerView);
+
+                    //Generate the live data and set it
+                    mPresenter.generateAssignedClazzesLiveData();
+                }
+
                 break;
 
             case FIELD_TYPE_TEXT:
             case FIELD_TYPE_FIELD:
+            case FIELD_TYPE_PHONE_NUMBER:
+            case FIELD_TYPE_DATE:
 
                 //Add the icon
                 int iconResId = getResourceId(iconName, "drawable", getPackageName());
                 ImageView icon = new ImageView(this);
+                if(iconName.equals(ADD_PERSON_ICON)){
+                    icon.setAlpha(0);
+                }
                 icon.setImageResource(iconResId);
                 icon.setPadding(DEFAULT_PADDING,0,DEFAULT_TEXT_PADDING_RIGHT,0);
                 hll.addView(icon);
 
-                TextInputLayout til = new TextInputLayout(this);
-
-                View cl = findViewById(R.id.activity_person_edit_fields_linear_layout);
-
-                DisplayMetrics displayMetrics = new DisplayMetrics();
-                getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-                int height = displayMetrics.heightPixels;
-                int width = displayMetrics.widthPixels;
-
-
-                TextInputLayout.LayoutParams tilp = new TextInputLayout.LayoutParams(width,
-                        TextInputLayout.LayoutParams.MATCH_PARENT);
-
-                ViewGroup.LayoutParams editTextParams =
-                        new LinearLayout.LayoutParams(
-                                width,
-                                ViewGroup.LayoutParams.MATCH_PARENT);
-
                 EditText et = new EditText(this);
+
+                et.setImeOptions(EditorInfo.IME_ACTION_NEXT);
                 et.setLayoutParams(editTextParams);
-                if(label != null){
+                if (label != null) {
                     et.setHint(label);
                 }
-                if(thisValue != null ) {
+                if (thisValue != null) {
                     et.setText(thisValue.toString());
                 }
+                if (fieldType == FIELD_TYPE_PHONE_NUMBER) {
+                    et.setInputType(InputType.TYPE_CLASS_PHONE);
 
-                et.addTextChangedListener(new TextWatcher() {
-                    @Override
-                    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                }
+                if (fieldType == FIELD_TYPE_DATE) {
+                    //et.setInputType(InputType.TYPE_DATETIME_VARIATION_DATE);
 
-                    }
+                    Calendar myCalendar = Calendar.getInstance();
 
-                    @Override
-                    public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    DatePickerDialog.OnDateSetListener date = (view, year, month, dayOfMonth) -> {
+                        myCalendar.set(Calendar.YEAR, year);
+                        myCalendar.set(Calendar.MONTH, month);
+                        myCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
 
-                    }
+                        et.setText(UMCalendarUtil.getPrettyDateFromLong(myCalendar.getTimeInMillis()));
 
-                    @Override
-                    public void afterTextChanged(Editable s) {
+                    };
 
-                        mPresenter.handleFieldEdited(fieldUid, s.toString());
+                    et.setFocusable(false);
 
-                    }
-                });
+                    et.setOnClickListener(v -> new DatePickerDialog(PersonEditActivity.this, date, myCalendar
+                            .get(Calendar.YEAR), myCalendar.get(Calendar.MONTH),
+                            myCalendar.get(Calendar.DAY_OF_MONTH)).show());
+
+
+                }
+                if (fieldType == FIELD_TYPE_TEXT) {
+                    et.setInputType(InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
+                }
+
+                if(fieldType != FIELD_TYPE_DATE){
+                    et.addTextChangedListener(new TextWatcher() {
+                        @Override
+                        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                        }
+
+                        @Override
+                        public void onTextChanged(CharSequence s, int start, int before, int count) {
+                        }
+
+                        @Override
+                        public void afterTextChanged(Editable s) {
+                            mPresenter.handleFieldEdited(fieldUid, s.toString());
+                        }
+                    });
+                }
 
                 til.addView(et, tilp);
 
-                hll.addView(til);
-
-
-                //Add the value entry to the linear layout
-                thisLinearLayout.addView(hll);
+                editView = til;
+                //End of TEXT
 
                 break;
             case FIELD_TYPE_DROPDOWN:
                 break;
-            case FIELD_TYPE_PHONE_NUMBER:
-                break;
-            case FIELD_TYPE_DATE:
 
-                break;
             default:
                 break;
         }
+
+
+
+        if(editView != null) {
+            hll.addView(editView);
+        }
+
+        mLinearLayout.addView(hll);
+
     }
+
+
 
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
@@ -244,4 +340,83 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
                 true, mLinearLayout, value);
 
     }
+
+    @Override
+    public void setClazzListProvider(UmProvider<ClazzWithNumStudents> clazzListProvider) {
+        ClazzListRecyclerAdapter recyclerAdapter =
+                new ClazzListRecyclerAdapter(DIFF_CALLBACK);
+        DataSource.Factory<Integer, ClazzWithNumStudents> factory =
+                (DataSource.Factory<Integer, ClazzWithNumStudents>)
+                        clazzListProvider.getProvider();
+        LiveData<PagedList<ClazzWithNumStudents>> data =
+                new LivePagedListBuilder<>(factory, 20).build();
+        data.observe(this, recyclerAdapter::submitList);
+
+        mRecyclerView.setAdapter(recyclerAdapter);
+    }
+
+
+    /**
+     * The Recycler Adapter
+     */
+    protected class ClazzListRecyclerAdapter
+            extends PagedListAdapter<ClazzWithNumStudents,
+                                    ClazzListRecyclerAdapter.ClazzLogDetailViewHolder> {
+
+        protected class ClazzLogDetailViewHolder extends RecyclerView.ViewHolder{
+            protected ClazzLogDetailViewHolder(View itemView){
+                super(itemView);
+            }
+        }
+
+        protected ClazzListRecyclerAdapter(
+                @NonNull DiffUtil.ItemCallback<ClazzWithNumStudents> diffCallback){
+            super(diffCallback);
+        }
+
+        @NonNull
+        @Override
+        public ClazzLogDetailViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType){
+
+            View clazzLogDetailListItem =
+                    LayoutInflater.from(getApplicationContext()).inflate(
+                            R.layout.item_clazzlist_clazz_simple, parent, false);
+            return new ClazzLogDetailViewHolder(clazzLogDetailListItem);
+        }
+
+        /**
+         * This method sets the elements after it has been obtained for that item'th position.
+         *
+         * Every item in the recycler view will have set its colors if no attendance status is set.
+         * every attendance button will have it-self mapped to tints on activation.
+         *
+         * @param holder
+         * @param position
+         */
+        @Override
+        public void onBindViewHolder(@NonNull ClazzLogDetailViewHolder holder, int position){
+            ClazzWithNumStudents thisClazz = getItem(position);
+
+            ((TextView)holder.itemView.findViewById(R.id.item_clazzlist_clazz_simple_clazz_name))
+                    .setText(thisClazz.getClazzName());
+
+        }
+    }
+
+    // Diff callback.
+    public static final DiffUtil.ItemCallback<ClazzWithNumStudents> DIFF_CALLBACK =
+            new DiffUtil.ItemCallback<ClazzWithNumStudents>() {
+                @Override
+                public boolean areItemsTheSame(ClazzWithNumStudents oldItem,
+                                               ClazzWithNumStudents newItem) {
+                    return oldItem.getClazzUid() ==
+                            newItem.getClazzUid();
+                }
+
+                @Override
+                public boolean areContentsTheSame(ClazzWithNumStudents oldItem,
+                                                  ClazzWithNumStudents newItem) {
+                    return oldItem.equals(newItem);
+                }
+            };
 }

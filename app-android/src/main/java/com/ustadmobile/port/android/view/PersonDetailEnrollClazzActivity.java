@@ -15,7 +15,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Switch;
+import android.widget.CheckBox;
 import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
@@ -38,7 +38,6 @@ public class PersonDetailEnrollClazzActivity extends UstadBaseActivity implement
     private PersonDetailEnrollClazzPresenter mPresenter;
 
     private long personUid;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -135,8 +134,10 @@ public class PersonDetailEnrollClazzActivity extends UstadBaseActivity implement
             ((TextView)holder.itemView.findViewById(R.id.item_clazz_list_enroll_person_numstudents_text))
                     .setText(clazz.getNumStudents() + " " + getResources()
                             .getText(R.string.students_literal).toString());
-            ((Switch)holder.itemView.findViewById(R.id.item_clazz_list_enroll_person_switch))
+
+            ((CheckBox)holder.itemView.findViewById(R.id.item_clazz_list_enroll_person_checkbox))
                     .setChecked(clazz.getEnrolled());
+
             holder.itemView.setOnClickListener((view) -> mPresenter.handleClickClazz(clazz));
 
         }

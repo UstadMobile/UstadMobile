@@ -17,10 +17,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.CompoundButton;
+import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.Switch;
 import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
@@ -151,7 +150,7 @@ public class ClazzDetailEnrollStudentActivity extends UstadBaseActivity implemen
 
             View clazzLogDetailListItem =
                     LayoutInflater.from(getApplicationContext()).inflate(
-                            R.layout.item_clazzstudentlist_student, parent, false);
+                            R.layout.item_studentlistenroll_student, parent, false);
             return new ClazzLogDetailViewHolder(clazzLogDetailListItem);
         }
 
@@ -176,7 +175,7 @@ public class ClazzDetailEnrollStudentActivity extends UstadBaseActivity implemen
             String studentAttendancePercentage = attendancePercentage +
                     "% " + getText(R.string.attendance);
             ImageView trafficLight = ((ImageView) holder.itemView
-                    .findViewById(R.id.item_clazzstudentlist_attendance_trafficlight));
+                    .findViewById(R.id.item_studentlist_student_simple_attendance_trafficlight));
             if(attendancePercentage > 75L){
                 trafficLight.setColorFilter(ContextCompat.getColor(getApplicationContext(),
                         R.color.traffic_green));
@@ -189,19 +188,19 @@ public class ClazzDetailEnrollStudentActivity extends UstadBaseActivity implemen
             }
 
             ((TextView)holder.itemView
-                    .findViewById(R.id.item_clazzstudentlist_student_title))
+                    .findViewById(R.id.item_studentlist_student_simple_student_title))
                     .setText(studentName);
             ((TextView)holder.itemView
-                    .findViewById(R.id.item_clazzstudentlist_student_attendance_percentage))
+                    .findViewById(R.id.item_studentlist_student_simple_attendance_percentage))
                     .setText(studentAttendancePercentage);
-            ((Switch)holder.itemView.findViewById(R.id.item_clazzstudentlist_student_switch))
-                    .setVisibility(View.VISIBLE);
-            ((Switch)holder.itemView.findViewById(R.id.item_clazzstudentlist_student_switch))
-                    .setChecked(personWithEnrollment.getEnrolled());
 
-            ((Switch)holder.itemView.findViewById(R.id.item_clazzstudentlist_student_switch))
+            holder.itemView.findViewById(R.id.item_studentlist_student_simple_student_checkbox).setVisibility(View.VISIBLE);
+            ((CheckBox)holder.itemView.findViewById(R.id.item_studentlist_student_simple_student_checkbox))
+                    .setChecked(personWithEnrollment.getEnrolled());
+            ((CheckBox)holder.itemView.findViewById(R.id.item_studentlist_student_simple_student_checkbox))
                     .setOnCheckedChangeListener((buttonView, isChecked) ->
                             mPresenter.handleEnrollChanged(personWithEnrollment, isChecked));
+
 
 
         }

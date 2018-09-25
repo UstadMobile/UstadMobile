@@ -2,6 +2,8 @@ package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmLiveData;
+import com.ustadmobile.core.db.UmProvider;
+import com.ustadmobile.core.db.dao.ClazzDao;
 import com.ustadmobile.core.db.dao.ClazzMemberDao;
 import com.ustadmobile.core.db.dao.PersonCustomFieldDao;
 import com.ustadmobile.core.db.dao.PersonCustomFieldValueDao;
@@ -9,9 +11,13 @@ import com.ustadmobile.core.db.dao.PersonDao;
 import com.ustadmobile.core.db.dao.PersonDetailPresenterFieldDao;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UmCallback;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMCalendarUtil;
+import com.ustadmobile.core.view.ClazzDetailEnrollStudentView;
+import com.ustadmobile.core.view.PersonDetailEnrollClazzView;
 import com.ustadmobile.core.view.PersonDetailViewField;
 import com.ustadmobile.core.view.PersonEditView;
+import com.ustadmobile.lib.db.entities.ClazzWithNumStudents;
 import com.ustadmobile.lib.db.entities.Person;
 import com.ustadmobile.lib.db.entities.PersonCustomFieldWithPersonCustomFieldValue;
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField;
@@ -62,6 +68,8 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
     //OG person before Done/Save/Discard clicked.
     private Person mOriginalValuePerson;
 
+    private UmProvider<ClazzWithNumStudents> assignedClazzes;
+
     //The custom fields' values
     private Map<Long, PersonCustomFieldWithPersonCustomFieldValue> customFieldWithFieldValueMap;
 
@@ -69,6 +77,7 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
 
     PersonCustomFieldDao personFieldDao = UmAppDatabase.getInstance(context).getPersonCustomFieldDao();
 
+    ClazzDao clazzDao = UmAppDatabase.getInstance(context).getClazzDao();
 
     /**
      * Presenter's constructor where we are getting arguments and setting the newly/editable
@@ -151,6 +160,25 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
         //personLiveData.observe(this, this::handlePersonValueChanged);
     }
 
+    public void generateAssignedClazzesLiveData(){
+        ClazzDao clazzDao = UmAppDatabase.getInstance(context).getClazzDao();
+
+        assignedClazzes = clazzDao.findAllClazzesByPersonUid(personUid);
+
+        new Thread(){
+            public void run(){
+
+                ClazzDao cd  = UmAppDatabase.getInstance(context).getClazzDao();
+                List a = cd.findAllClazzesByPersonUidAsList(personUid);
+                int x;
+                System.out.println("hey");
+            }
+
+        }.start();
+
+        view.setClazzListProvider(assignedClazzes);
+    }
+
     @Override
     public void setUIStrings() {
 
@@ -174,70 +202,83 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
 
             if (field.getFieldUid() == PERSON_FIELD_UID_FULL_NAME){
                 thisValue = thisPerson.getFirstNames() + " " + thisPerson.getLastName();
-                thisView.setField(field.getFieldIndex(), field.getFieldUid(), new PersonDetailViewField(FIELD_TYPE_TEXT,
+                thisView.setField(field.getFieldIndex(), field.getFieldUid(),
+                        new PersonDetailViewField(field.getFieldType(),
                         field.getLabelMessageId(),field.getFieldIcon()), thisValue);
 
             }else if (field.getFieldUid() == PERSON_FIELD_UID_FIRST_NAMES) {
                 thisValue =  thisPerson.getFirstNames();
-                thisView.setField(field.getFieldIndex(), field.getFieldUid(), new PersonDetailViewField(FIELD_TYPE_TEXT,
+                thisView.setField(field.getFieldIndex(), field.getFieldUid(),
+                        new PersonDetailViewField(field.getFieldType(),
                         field.getLabelMessageId(),field.getFieldIcon()), thisValue);
 
             } else if (field.getFieldUid() == PERSON_FIELD_UID_LAST_NAME) {
                 thisValue = thisPerson.getLastName();
-                thisView.setField(field.getFieldIndex(), field.getFieldUid(), new PersonDetailViewField(FIELD_TYPE_TEXT,
+                thisView.setField(field.getFieldIndex(), field.getFieldUid(),
+                        new PersonDetailViewField(field.getFieldType(),
                         field.getLabelMessageId(),field.getFieldIcon()), thisValue);
 
             } else if (field.getFieldUid() == PERSON_FIELD_UID_ATTENDANCE) {
                 if(attendanceAverage != null) {
                     thisValue = attendanceAverage;
                 }
-                thisView.setField(field.getFieldIndex(), field.getFieldUid(), new PersonDetailViewField(FIELD_TYPE_TEXT,
+                thisView.setField(field.getFieldIndex(), field.getFieldUid(),
+                        new PersonDetailViewField(field.getFieldType(),
                         field.getLabelMessageId(),field.getFieldIcon()), thisValue);
 
             } else if (field.getFieldUid() == PERSON_FIELD_UID_CLASSES) {
                 thisValue = "Class Name ...";
-                thisView.setField(field.getFieldIndex(), field.getFieldUid(), new PersonDetailViewField(FIELD_TYPE_TEXT,
+                thisView.setField(field.getFieldIndex(), field.getFieldUid(),
+                        new PersonDetailViewField(field.getFieldType(),
                         field.getLabelMessageId(),field.getFieldIcon()), thisValue);
 
             } else if (field.getFieldUid() == PERSON_FIELD_UID_FATHER_NAME_AND_PHONE_NUMBER) {
                 thisValue = thisPerson.getFatherName() + " (" + thisPerson.getFatherNumber() +")";
-                thisView.setField(field.getFieldIndex(), field.getFieldUid(), new PersonDetailViewField(FIELD_TYPE_TEXT,
+                thisView.setField(field.getFieldIndex(), field.getFieldUid(),
+                        new PersonDetailViewField(field.getFieldType(),
                         field.getLabelMessageId(),field.getFieldIcon()), thisValue);
 
             } else if(field.getFieldUid() == PERSON_FIELD_UID_MOTHER_NAME_AND_PHONE_NUMBER){
                 thisValue = thisPerson.getMotherName() + " (" + thisPerson.getMotherNum() + ")";
-                thisView.setField(field.getFieldIndex(), field.getFieldUid(), new PersonDetailViewField(FIELD_TYPE_TEXT,
+                thisView.setField(field.getFieldIndex(), field.getFieldUid(),
+                        new PersonDetailViewField(field.getFieldType(),
                         field.getLabelMessageId(),field.getFieldIcon()), thisValue);
             }
             else if (field.getFieldUid() == PERSON_FIELD_UID_FATHER_NAME) {
                 thisValue = thisPerson.getFatherName();
-                thisView.setField(field.getFieldIndex(), field.getFieldUid(), new PersonDetailViewField(FIELD_TYPE_TEXT,
+                thisView.setField(field.getFieldIndex(), field.getFieldUid(),
+                        new PersonDetailViewField(field.getFieldType(),
                         field.getLabelMessageId(),field.getFieldIcon()), thisValue);
             }
             else if (field.getFieldUid() == PERSON_FIELD_UID_MOTHER_NAME) {
                 thisValue = thisPerson.getMotherName();
-                thisView.setField(field.getFieldIndex(), field.getFieldUid(), new PersonDetailViewField(FIELD_TYPE_TEXT,
+                thisView.setField(field.getFieldIndex(), field.getFieldUid(),
+                        new PersonDetailViewField(field.getFieldType(),
                         field.getLabelMessageId(),field.getFieldIcon()), thisValue);
             }
             else if (field.getFieldUid() == PERSON_FIELD_UID_FATHER_NUMBER) {
                 thisValue = thisPerson.getFatherNumber();
-                thisView.setField(field.getFieldIndex(), field.getFieldUid(), new PersonDetailViewField(FIELD_TYPE_TEXT,
+                thisView.setField(field.getFieldIndex(), field.getFieldUid(),
+                        new PersonDetailViewField(field.getFieldType(),
                         field.getLabelMessageId(),field.getFieldIcon()), thisValue);
             }
             else if (field.getFieldUid() == PERSON_FIELD_UID_MOTHER_NUMBER) {
                 thisValue = thisPerson.getMotherNum();
-                thisView.setField(field.getFieldIndex(), field.getFieldUid(), new PersonDetailViewField(FIELD_TYPE_TEXT,
+                thisView.setField(field.getFieldIndex(), field.getFieldUid(),
+                        new PersonDetailViewField(field.getFieldType(),
                         field.getLabelMessageId(),field.getFieldIcon()), thisValue);
             }
 
             else if (field.getFieldUid() == PERSON_FIELD_UID_ADDRESS) {
                 thisValue = thisPerson.getAddress();
-                thisView.setField(field.getFieldIndex(), field.getFieldUid(), new PersonDetailViewField(FIELD_TYPE_TEXT,
+                thisView.setField(field.getFieldIndex(), field.getFieldUid(),
+                        new PersonDetailViewField(field.getFieldType(),
                         field.getLabelMessageId(),field.getFieldIcon()), thisValue);
             }
             else if(field.getFieldUid() == PERSON_FIELD_UID_BIRTHDAY){
                 thisValue = UMCalendarUtil.getPrettyDateFromLong(thisPerson.getDateOfBirth());
-                thisView.setField(field.getFieldIndex(), field.getFieldUid(), new PersonDetailViewField(FIELD_TYPE_TEXT,
+                thisView.setField(field.getFieldIndex(), field.getFieldUid(),
+                        new PersonDetailViewField(field.getFieldType(),
                         field.getLabelMessageId(),field.getFieldIcon()), thisValue);
             }else  {//this is actually a custom field
                 int messageLabel = 0;
@@ -303,7 +344,8 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
             updateThisPerson.setMotherNum((String) value);
 
         } else if (fieldcode == PERSON_FIELD_UID_BIRTHDAY) {
-            updateThisPerson.setDateOfBirth((Long) value);
+            //TODO: Change and work this
+            //updateThisPerson.setDateOfBirth((Long) value);
 
         } else if (fieldcode == PERSON_FIELD_UID_ADDRESS) {
             updateThisPerson.setAddress((String) value);
@@ -374,6 +416,17 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
         //Update dao with mOriginalValuePerson
         personDao.insert(mOriginalValuePerson);
 
+    }
+
+    /**
+     * Click handler when Add new Class clicked on Classes section
+     */
+    public void handleClickAddNewClazz(){
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        Hashtable args = new Hashtable();
+        args.put(ARG_PERSON_UID, personUid);
+
+        impl.go(PersonDetailEnrollClazzView.VIEW_NAME, args, context);
     }
 
     /**

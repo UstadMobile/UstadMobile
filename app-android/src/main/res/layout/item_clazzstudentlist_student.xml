@@ -63,18 +63,4 @@
             app:layout_constraintTop_toTopOf="parent"
             android:src="@drawable/ic_person_black_new_24dp" />
 
-        <Switch
-            android:id="@+id/item_clazzstudentlist_student_switch"
-            android:visibility="invisible"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginTop="16dp"
-            android:text="@string/enroll_in_class"
-            android:textColor="@color/text_primary"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
 </android.support.constraint.ConstraintLayout>

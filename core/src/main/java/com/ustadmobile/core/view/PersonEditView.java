@@ -1,5 +1,8 @@
 package com.ustadmobile.core.view;
 
+import com.ustadmobile.core.db.UmProvider;
+import com.ustadmobile.lib.db.entities.ClazzWithNumStudents;
+
 /**
  * PersonEdit Core View extends Core UstadView. Will be implemented
  * on various implementations.
@@ -18,6 +21,12 @@ public interface PersonEditView extends UstadView {
      */
     void setField(int index, long fieldUid, PersonDetailViewField field, Object value);
 
+
+    /**
+     * Sets the um provider
+     * @param clazzListProvider
+     */
+    void setClazzListProvider(UmProvider<ClazzWithNumStudents> clazzListProvider );
 
     /**
      * This will close the activity (and finish it)

@@ -1,5 +1,8 @@
 package com.ustadmobile.core.view;
 
+import com.ustadmobile.core.db.UmProvider;
+import com.ustadmobile.lib.db.entities.ClazzWithNumStudents;
+
 /**
  * PersonDetail Core View extends Core UstadView. Will be implemented
  * on various implementations.
@@ -19,5 +22,12 @@ public interface PersonDetailView extends UstadView {
      * @param value The value of the field to be set to the view.
      */
     void setField(int index, PersonDetailViewField field, Object value);
+
+
+    /**
+     *
+     * @param clazzListProvider
+     */
+    void setClazzListProvider(UmProvider<ClazzWithNumStudents> clazzListProvider );
 
 }

@@ -2,6 +2,8 @@ package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmProvider;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.view.ClazzDetailEnrollStudentView;
 import com.ustadmobile.core.view.ClazzStudentListView;
 import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.ClazzMember;
@@ -70,10 +72,14 @@ public class ClazzStudentListPresenter extends UstadBaseController<ClazzStudentL
     /**
      * Method logic for what happens when you click the FAB Add Student
      *
-     * @param clazz The current Clazz that we are working on.
      */
-    public void goToAddStudentFragment(Clazz clazz){
+    public void goToAddStudentFragment(){
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        Hashtable args = new Hashtable();
+        args.put(ARG_CLAZZ_UID, currentClazzId);
+        impl.go(ClazzDetailEnrollStudentView.VIEW_NAME, args, view.getContext());
     }
+
 
     /**
      * Method logic for what happens when we change the order of the student list.

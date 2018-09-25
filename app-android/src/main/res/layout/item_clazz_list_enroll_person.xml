@@ -39,14 +39,15 @@
         app:layout_constraintStart_toEndOf="@+id/item_clazz_list_enroll_person_icon"
         app:layout_constraintTop_toBottomOf="@+id/item_clazz_list_enroll_person_title" />
 
-    <Switch
-        android:id="@+id/item_clazz_list_enroll_person_switch"
+    <CheckBox
+        android:id="@+id/item_clazz_list_enroll_person_checkbox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
         android:layout_marginEnd="8dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="8dp"
         android:text="@string/enroll_in_class"
-        android:textColor="@color/text_primary"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 

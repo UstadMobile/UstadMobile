@@ -1,19 +1,36 @@
 package com.ustadmobile.port.android.view;
 
+import android.arch.lifecycle.LiveData;
+import android.arch.paging.DataSource;
+import android.arch.paging.LivePagedListBuilder;
+import android.arch.paging.PagedList;
+import android.arch.paging.PagedListAdapter;
+import android.content.Intent;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.v7.util.DiffUtil;
+import android.support.v7.widget.DividerItemDecoration;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.PersonDetailPresenter;
+import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.PersonDetailView;
 import com.ustadmobile.core.view.PersonDetailViewField;
+import com.ustadmobile.lib.db.entities.Clazz;
+import com.ustadmobile.lib.db.entities.ClazzWithNumStudents;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import ru.dimorinny.floatingtextbutton.FloatingTextButton;
@@ -35,6 +52,9 @@ public class PersonDetailActivity extends UstadBaseActivity implements PersonDet
     //Toolbar
     private Toolbar toolbar;
     private LinearLayout mLinearLayout;
+
+    private RecyclerView mRecyclerView;
+    private RecyclerView.LayoutManager mRecyclerLayoutManager;
 
     private PersonDetailPresenter mPresenter;
     String personName = "";
@@ -105,6 +125,21 @@ public class PersonDetailActivity extends UstadBaseActivity implements PersonDet
                 header.setTextSize(12);
                 header.setPadding(16,0,0,2);
                 mLinearLayout.addView(header);
+
+                if(field.getMessageLabel() == MessageID.classes){
+                    //Add a recyclerview of classes
+                    mRecyclerView = new RecyclerView(this);
+
+                    mRecyclerLayoutManager = new LinearLayoutManager(getApplicationContext());
+                    mRecyclerView.setLayoutManager(mRecyclerLayoutManager);
+
+                    //Add the layout
+                    mLinearLayout.addView(mRecyclerView);
+
+                    //Generate the live data and set it
+                    mPresenter.generateAssignedClazzesLiveData();
+                }
+
                 break;
             case FIELD_TYPE_TEXT:
             case FIELD_TYPE_FIELD:
@@ -115,7 +150,6 @@ public class PersonDetailActivity extends UstadBaseActivity implements PersonDet
                     TextView name = findViewById(R.id.activity_person_detail_student_name);
                     name.setText(value.toString());
                     break;
-
                 }
 
                 LinearLayout hll = new LinearLayout(this);
@@ -160,22 +194,24 @@ public class PersonDetailActivity extends UstadBaseActivity implements PersonDet
                     textIcon.setImageResource(getResourceId(TEXT_ICON_NAME,
                             "drawable", getPackageName()));
                     textIcon.setPadding(8,16, 32,16);
-                    textIcon.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            mPresenter.handleClickCall(field.getActionParam());
-                        }
+                    textIcon.setOnClickListener(v -> {
+                        mPresenter.handleClickCall(field.getActionParam());
+
+                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.fromParts("sms",
+                                field.getActionParam(), null)));
+
                     });
 
                     ImageView callIcon = new ImageView(this);
                     callIcon.setImageResource(getResourceId(CALL_ICON_NAME,
                             "drawable", getPackageName()));
                     callIcon.setPadding(8,16, 32,16);
-                    callIcon.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            mPresenter.handleClickText(field.getActionParam());
-                        }
+                    callIcon.setOnClickListener(v -> {
+                        mPresenter.handleClickText(field.getActionParam());
+
+                        startActivity(new Intent(Intent.ACTION_DIAL,
+                                Uri.parse("tel:" + field.getActionParam())));
+
                     });
 
                     LinearLayout.LayoutParams heavyLayout = new LinearLayout.LayoutParams(
@@ -206,4 +242,82 @@ public class PersonDetailActivity extends UstadBaseActivity implements PersonDet
 
     }
 
+    @Override
+    public void setClazzListProvider(UmProvider<ClazzWithNumStudents> clazzListProvider) {
+
+        ClazzListRecyclerAdapter recyclerAdapter =
+                new ClazzListRecyclerAdapter(DIFF_CALLBACK);
+        DataSource.Factory<Integer, ClazzWithNumStudents> factory =
+                (DataSource.Factory<Integer, ClazzWithNumStudents>)
+                        clazzListProvider.getProvider();
+        LiveData<PagedList<ClazzWithNumStudents>> data =
+                new LivePagedListBuilder<>(factory, 20).build();
+        data.observe(this, recyclerAdapter::submitList);
+
+        mRecyclerView.setAdapter(recyclerAdapter);
+    }
+
+    /**
+     * The Recycler Adapter
+     */
+    protected class ClazzListRecyclerAdapter
+            extends PagedListAdapter<ClazzWithNumStudents,
+                        ClazzListRecyclerAdapter.ClazzLogDetailViewHolder> {
+
+        protected class ClazzLogDetailViewHolder extends RecyclerView.ViewHolder{
+            protected ClazzLogDetailViewHolder(View itemView){
+                super(itemView);
+            }
+        }
+
+        protected ClazzListRecyclerAdapter(
+                @NonNull DiffUtil.ItemCallback<ClazzWithNumStudents> diffCallback){
+            super(diffCallback);
+        }
+
+        @NonNull
+        @Override
+        public ClazzLogDetailViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType){
+
+            View clazzLogDetailListItem =
+                    LayoutInflater.from(getApplicationContext()).inflate(
+                            R.layout.item_clazzlist_clazz_simple, parent, false);
+            return new ClazzLogDetailViewHolder(clazzLogDetailListItem);
+        }
+
+        /**
+         * This method sets the elements after it has been obtained for that item'th position.
+         *
+         * Every item in the recycler view will have set its colors if no attendance status is set.
+         * every attendance button will have it-self mapped to tints on activation.
+         *
+         * @param holder
+         * @param position
+         */
+        @Override
+        public void onBindViewHolder(@NonNull ClazzLogDetailViewHolder holder, int position){
+            ClazzWithNumStudents thisClazz = getItem(position);
+
+            ((TextView)holder.itemView.findViewById(R.id.item_clazzlist_clazz_simple_clazz_name))
+                    .setText(thisClazz.getClazzName());
+
+        }
+    }
+
+    // Diff callback.
+    public static final DiffUtil.ItemCallback<ClazzWithNumStudents> DIFF_CALLBACK =
+            new DiffUtil.ItemCallback<ClazzWithNumStudents>() {
+                @Override
+                public boolean areItemsTheSame(ClazzWithNumStudents oldItem,
+                                               ClazzWithNumStudents newItem) {
+                    return oldItem.getClazzUid() ==
+                            newItem.getClazzUid();
+                }
+
+                @Override
+                public boolean areContentsTheSame(ClazzWithNumStudents oldItem,
+                                                  ClazzWithNumStudents newItem) {
+                    return oldItem.equals(newItem);
+                }
+            };
 }

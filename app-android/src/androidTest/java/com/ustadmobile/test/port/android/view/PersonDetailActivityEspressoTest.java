@@ -74,7 +74,7 @@ public class PersonDetailActivityEspressoTest {
         testClazz = UmDbTestUtil.createClazzWithClazzMembers(TEST_CLASS_NAME, TEST_CLASS_PERCENTAGE,
                 peopleMap, TEST_USER_UID, context);
 
-        Person testPerson = UmDbTestUtil.createPersonWithFieldsAndCustomFields(context);
+        Person testPerson = UmDbTestUtil.createPersonWithFieldsAndCustomFields(testClazz, context);
 
         personUid = testPerson.getPersonUid();
 

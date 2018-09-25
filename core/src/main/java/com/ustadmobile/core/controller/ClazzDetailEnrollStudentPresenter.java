@@ -79,10 +79,8 @@ public class ClazzDetailEnrollStudentPresenter extends
     }
 
     //TODO check arg needs more
+    //TODO: Check for bug
     public void handleEnrollChanged(PersonWithEnrollment person, boolean enrolled){
-        //TODO
-
-
 
         clazzMemberDao.findByPersonUidAndClazzUidAsync(person.getPersonUid(), currentClazzUid, new UmCallback<ClazzMember>() {
             @Override
