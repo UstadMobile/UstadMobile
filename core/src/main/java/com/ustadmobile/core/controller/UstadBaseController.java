@@ -31,6 +31,7 @@
 package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.generated.locale.MessageID;
+import com.ustadmobile.core.impl.UmLifecycleListener;
 import com.ustadmobile.core.impl.UmLifecycleOwner;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.AboutView;
@@ -57,7 +58,9 @@ public abstract class UstadBaseController<V extends UstadView> implements UstadC
     protected boolean isDestroyed = false;
 
     protected Vector controllerLifecycleListeners;
-    
+
+    protected final Vector<UmLifecycleListener> lifecycleListeners = new Vector<>();
+
     public static final int CMD_ABOUT = 1001;
     
     public static final int CMD_SETTINGS = 1002;
@@ -118,16 +121,36 @@ public abstract class UstadBaseController<V extends UstadView> implements UstadC
 
 
     public void onCreate(Hashtable savedState) {
-
+        synchronized (lifecycleListeners) {
+            for(UmLifecycleListener listener : lifecycleListeners) {
+                listener.onLifecycleCreate(this);
+            }
+        }
     }
 
     public void onStart() {
+        synchronized (lifecycleListeners) {
+            for(UmLifecycleListener listener : lifecycleListeners) {
+                listener.onLifecycleStart(this);
+            }
+        }
+    }
 
+    public void onResume() {
+        synchronized (lifecycleListeners) {
+            for(UmLifecycleListener listener : lifecycleListeners) {
+                listener.onLifecycleResume(this);
+            }
+        }
     }
 
 
     public void onStop() {
-
+        synchronized (lifecycleListeners) {
+            for(UmLifecycleListener listener : lifecycleListeners) {
+                listener.onLifecycleStop(this);
+            }
+        }
     }
 
     /**
@@ -135,6 +158,12 @@ public abstract class UstadBaseController<V extends UstadView> implements UstadC
      * is navigated away from in J2ME
      */
     public void onDestroy() {
+        synchronized (lifecycleListeners) {
+            for(UmLifecycleListener listener : lifecycleListeners) {
+                listener.onLifecycleDestroy(this);
+            }
+        }
+
         if(controllerLifecycleListeners == null)
             return;
 
@@ -271,9 +300,13 @@ public abstract class UstadBaseController<V extends UstadView> implements UstadC
     }
 
 
+    @Override
+    public void addLifecycleListener(UmLifecycleListener listener) {
+        lifecycleListeners.add(listener);
+    }
 
-
-
-
-
+    @Override
+    public void removeLifecycleListener(UmLifecycleListener listener) {
+        lifecycleListeners.remove(listener);
+    }
 }

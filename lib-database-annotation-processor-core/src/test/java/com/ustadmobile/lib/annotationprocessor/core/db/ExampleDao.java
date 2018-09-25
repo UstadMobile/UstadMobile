@@ -1,5 +1,6 @@
 package com.ustadmobile.lib.annotationprocessor.core.db;
 
+import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmInsert;
@@ -61,5 +62,10 @@ public abstract class ExampleDao {
 
     @UmQuery("UPDATE ExampleEntity SET name = :name WHERE uid = :uid")
     public abstract void updateNameByUidVoidAsync(String name, int uid, UmCallback<Void> callback);
+
+    @UmQuery("SELECT * FROM ExampleEntity WHERE uid = :uid")
+    public abstract UmLiveData<ExampleEntity> findByUidLive(int uid);
+
+
 
 }

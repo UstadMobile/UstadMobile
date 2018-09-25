@@ -8,6 +8,7 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
+import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UmCallbackUtil;
 import com.ustadmobile.lib.database.annotation.UmDbContext;
@@ -20,6 +21,7 @@ import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.database.jdbc.DbChangeListener;
 import com.ustadmobile.lib.database.jdbc.JdbcDatabaseUtils;
 import com.ustadmobile.lib.database.jdbc.UmJdbcDatabase;
+import com.ustadmobile.lib.database.jdbc.UmLiveDataJdbc;
 
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
@@ -46,6 +48,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.Element;
@@ -82,6 +85,10 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
     public void processDbClass(TypeElement dbType, File destinationDir) throws IOException {
         String jdbcDbClassName = dbType.getSimpleName() + SUFFIX_JDBC_DBMANAGER;
         PackageElement packageElement = processingEnv.getElementUtils().getPackageOf(dbType);
+        ParameterizedTypeName dbChangeListenersMapType = ParameterizedTypeName.get(
+                ClassName.get(Map.class),
+                ClassName.get(DbChangeListener.class),
+                ClassName.get(JdbcDatabaseUtils.DbChangeListenerRequest.class));
 
         ClassName initialContextClassName = ClassName.get(InitialContext.class);
         TypeSpec.Builder jdbcDbTypeSpec = TypeSpec.classBuilder(jdbcDbClassName)
@@ -92,17 +99,16 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                 .addField(ClassName.get(Object.class), "_context", Modifier.PRIVATE)
                 .addField(ClassName.get(DataSource.class), "_dataSource", Modifier.PRIVATE)
                 .addField(ClassName.get(ExecutorService.class), "_executor", Modifier.PRIVATE)
-                .addField(ParameterizedTypeName.get(ClassName.get(Map.class),
-                        ClassName.get(DbChangeListener.class),
-                        ClassName.get(JdbcDatabaseUtils.DbChangeListenerRequest.class)),
-                        "_dbChangeListeners", Modifier.PRIVATE)
+                .addField(dbChangeListenersMapType, "_dbChangeListeners", Modifier.PRIVATE)
                 .addMethod(MethodSpec.constructorBuilder()
                     .addModifiers(Modifier.PUBLIC)
                     .addParameter(TypeName.get(Object.class), "context")
                     .addParameter(TypeName.get(String.class), "dbName")
                     .addCode(CodeBlock.builder().add("\tthis._context = context;\n")
+                        .add("this._dbChangeListeners = new $T<>();\n", HashMap.class)
                         .beginControlFlow("try ")
                             .add("$T iContext = new $T();\n", initialContextClassName, initialContextClassName)
+                            .add("_executor = $T.newCachedThreadPool();\n", Executors.class)
                             .add("this._dataSource = (DataSource)iContext.lookup(\"java:/comp/env/jdbc/\"+dbName);\n")
                             .add("createAllTables();\n")
                         .endControlFlow()
@@ -131,8 +137,28 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                         .varargs()
                         .addCode("$T.handleTablesChanged(_dbChangeListeners, tablesChanged);\n",
                                 JdbcDatabaseUtils.class)
-                        .build());
+                        .build())
 
+                .addMethod(MethodSpec.methodBuilder("addDbChangeListener")
+                        .addParameter(ClassName.get(JdbcDatabaseUtils.DbChangeListenerRequest.class),
+                                "listenerRequest")
+                        .addAnnotation(Override.class)
+                        .addModifiers(Modifier.PUBLIC)
+                        .addCode(CodeBlock.builder()
+                                .add("$T.addDbChangeListener(listenerRequest, _dbChangeListeners);\n",
+                                        JdbcDatabaseUtils.class)
+                                .build())
+                        .build())
+                .addMethod(MethodSpec.methodBuilder("removeDbChangeListener")
+                        .addParameter(ClassName.get(JdbcDatabaseUtils.DbChangeListenerRequest.class),
+                            "listenerRequest")
+                        .addAnnotation(Override.class)
+                        .addModifiers(Modifier.PUBLIC)
+                        .addCode(CodeBlock.builder()
+                            .add("$T.removeDbChangeListener(listenerRequest, _dbChangeListeners);\n",
+                                    JdbcDatabaseUtils.class)
+                            .build())
+                        .build());
 
         TypeSpec.Builder factoryClassSpec = DbProcessorUtils.makeFactoryClass(dbType, jdbcDbClassName);
 
@@ -658,9 +684,49 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
 
         boolean returnsList = false;
         boolean returnsArray = false;
+        boolean returnsLiveData = false;
 
         Element resultTypeElement = processingEnv.getTypeUtils().asElement(resultType);
 
+
+        if(resultTypeElement != null && resultTypeElement.equals(processingEnv
+            .getElementUtils().getTypeElement(UmLiveData.class.getName()))) {
+
+            List<String> tableList;
+            try {
+                Select select = (Select) CCJSqlParserUtil.parse(querySql);
+                TablesNamesFinder tablesNamesFinder = new TablesNamesFinder();
+                tableList = tablesNamesFinder.getTableList(select);
+                codeBlock.add("// Table names = " + Arrays.toString(tableList.toArray()))
+                        .add("\n");
+            }catch(JSQLParserException e) {
+                messager.printMessage(Diagnostic.Kind.ERROR, formatMethodForErrorMessage(daoMethod) +
+                        " exception parsing query to determine tables");
+                return;
+            }
+
+            returnsLiveData = true;
+            DeclaredType declaredResultType = (DeclaredType)resultType;
+            resultType = declaredResultType.getTypeArguments().get(0);
+            resultTypeElement = processingEnv.getTypeUtils().asElement(resultType);
+            codeBlock.beginControlFlow("return new $T<$T>() ", UmLiveDataJdbc.class, resultType)
+                .beginControlFlow("")
+                    .add("super.setDatabase(_db);\n")
+                    .add("super.setTablesToMonitor(");
+            boolean commaRequired = false;
+            for(String tableName : tableList) {
+                if(commaRequired)
+                    codeBlock.add(", ");
+                codeBlock.add("$S", tableName);
+                commaRequired = true;
+            }
+            codeBlock.add(");\n");
+
+            codeBlock.endControlFlow()
+                .beginControlFlow("public $T fetchValue()", resultType);
+
+            //add code here so that we generate the next stuff in the onFetch method of UmLiveDataJdbc
+        }
 
         if(resultType.getKind().equals(TypeKind.ARRAY)) {
             ArrayType arrayType = (ArrayType)resultType;
@@ -801,6 +867,11 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
             codeBlock.add("return result;\n");
         }
 
+        if(returnsLiveData) {
+            //end the method and inner class
+            codeBlock.endControlFlow().endControlFlow().add(";\n");
+        }
+
 
         methodBuilder.addCode(codeBlock.build());
         daoBuilder.addMethod(methodBuilder.build());
@@ -846,17 +917,6 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                         formatMethodForErrorMessage(daoMethod) +
                                 ": returns a String or primitive. SQL must have 1 column only. " +
                                 "found " + metaData.getColumnCount() + " columns");
-            }
-
-            try {
-                Select select = (Select) CCJSqlParserUtil.parse(querySql);
-                TablesNamesFinder tablesNamesFinder = new TablesNamesFinder();
-                List<String> tableList = tablesNamesFinder.getTableList(select);
-                codeBlock.add("// Table names = " + Arrays.toString(tableList.toArray()))
-                        .add("\n");
-            }catch(JSQLParserException e) {
-                messager.printMessage(Diagnostic.Kind.ERROR, formatMethodForErrorMessage(daoMethod) +
-                    " exception parsing query to determine tables");
             }
 
 

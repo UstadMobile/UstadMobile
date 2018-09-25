@@ -1,6 +1,7 @@
 package com.ustadmobile.lib.annotationprocessor.core;
 
 
+import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.lib.annotationprocessor.core.db.ExampleEntity;
 import com.ustadmobile.lib.database.jdbc.JdbcDatabaseUtils;
 import com.ustadmobile.lib.annotationprocessor.core.db.ExampleDatabase;
@@ -13,6 +14,8 @@ import org.sqlite.SQLiteDataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -68,5 +71,29 @@ public class TestDbProcessorJdbc {
 
 
 
+    @Test
+    public void givenLiveDataObserving_whenDataUpdated_thenShouldCallOnChange() {
+        ExampleDatabase db = ExampleDatabase.getInstance(null, "ds");
+        ExampleEntity entityToUpdate = new ExampleEntity();
+        entityToUpdate.setName("Name1");
+        int uid = db.getExampleDao().insertGetId(entityToUpdate);
+
+        CountDownLatch latch = new CountDownLatch(1);
+        ExampleEntity[] entityVal = new ExampleEntity[1];
+        UmLiveData<ExampleEntity> entityUmLiveData = db.getExampleDao().findByUidLive(uid);
+        entityUmLiveData.observeForever((newValue) -> {
+            entityVal[0] = newValue;
+            if(newValue != null && newValue.getName().equals("Name2"))
+                latch.countDown();
+        });
+
+        db.getExampleDao().updateNameByUid("Name2", uid);
+        try {
+            latch.await(5, TimeUnit.SECONDS);
+        }catch(InterruptedException e) {}
+
+        Assert.assertEquals("Updated value provided by live data onChange", "Name2",
+                entityVal[0].getName());
+    }
 
 }

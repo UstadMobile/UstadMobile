@@ -11,9 +11,9 @@ public interface UmJdbcDatabase {
 
     ExecutorService getExecutor();
 
-//    void addDbChangeListener(JdbcDatabaseUtils.DbChangeListenerRequest listenerRequest);
-//
-//    void removeDbChangeListener(JdbcDatabaseUtils.DbChangeListenerRequest listenerRequest);
+    void addDbChangeListener(JdbcDatabaseUtils.DbChangeListenerRequest listenerRequest);
+
+    void removeDbChangeListener(JdbcDatabaseUtils.DbChangeListenerRequest listenerRequest);
 
     /**
      * This method is to be called by DAOs when the table has b
