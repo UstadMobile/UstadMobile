@@ -105,6 +105,37 @@ public class PersonDetailEnrollClazzEspressoTest {
     @Test
     public void givenActivityStarted_whenDataLoaded_shouldShowAllClazzList() {
         Assert.assertTrue(true);
+
+        //Should show all classes according to Dao.
+
+        //Should show number of students in class according to Dao.
+
+        //Should have enrolled ticked next to Class that is enrolled.
+
+        //Should have enrolled unticked next to Class that is not enrolled.
+
+    }
+
+    @Test
+    public void givenActivityStarted_beforeDataLoaded_shouldHavePersonUidSet(){
+
+        //Assert that the activity starts with the person Uid in the arguments.
+
+        //Assert that the data loads according to the person uid from args.
+    }
+
+    @Test
+    public void givenActivityStarted_whenEnrollChanged_shouldPersist(){
+        //Click on enrolled for already enrolled - should update enrollment (ClazzMember)
+
+        //Click on enrolled for not enrolled - should update enrollment (ClazzMember)
+    }
+
+    @Test
+    public void givenActivityStarted_whenDoneClicked_shouldCloseActivity(){
+
+        //Click Done - verify activity closed.
+
     }
 
 }

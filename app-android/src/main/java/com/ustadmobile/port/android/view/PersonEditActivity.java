@@ -121,10 +121,6 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
                 new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
                         DEFAULT_DIVIDER_HEIGHT);
 
-        LinearLayout.LayoutParams buttonLayout =
-                new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT);
-
         LinearLayout.LayoutParams parentParams =
                 new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                         ViewGroup.LayoutParams.MATCH_PARENT);
@@ -293,8 +289,6 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
             default:
                 break;
         }
-
-
 
         if(editView != null) {
             hll.addView(editView);

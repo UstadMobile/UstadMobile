@@ -91,6 +91,68 @@ public class PersonDetailActivityEspressoTest {
     @Test
     public void givenActivityStarted_whenUserDetailsLoaded_shouldShowPersonFieldsAndCustomFields() {
         Assert.assertTrue(true);
+
+        //Core fields are displayed as per Dao - value, icon
+
+        //Custom fields are displayed as per Dao - value, icon
+
+        //User name and image loaded ok
+    }
+
+    @Test
+    public void givenActivityStarted_whenClickFatherMotherCallAndSms_shouldFireCallAndSmsIntentWithNumber(){
+
+        //Click father number's phone icon  - should fire call intent with number as per core field.
+        //Click mother number's phone icon - should fire call intent with number as per core field.
+
+        //Click father's sms icon - should fire sms intent with number as per core field.
+        //Click mother's sms icon - should fire sms intent with number as per core field.
+
+    }
+
+    @Test
+    public void givenActivityStarted_whenEditButtonPressed_shouldOpenPersonEditActivitWithDetailsFilled(){
+
+        //Click the Edit button - verify PersonEditActivity opened.
+
+        //Verify Person Uid sent to PersonEditActivity.
+
+    }
+
+    @Test
+    public void givenActivityStarted_whenEnrollInClassClicked_shouldOpenClassEnrollmentActivity(){
+
+        //Click the "Enroll in class" top buttons - verify Class enrollment activity opened.
+
+        //Verify Person Uid sent to the new class enrollment activity.
+    }
+
+    @Test
+    public void givenActivityStarted_whenAttendanceReportClicked_shouldOpenAttendanceReportActivty(){
+
+        //Click the "Attendance Report" top button - verify goes to new activity.
+
+        //Verify person uid sent to the new activity.
+
+    }
+
+    @Test
+    public void givenActivityStarted_whenRecordDropoutClicked_shouldOpenConfirmationAndRecordsDropout(){
+        //Click the "Record Dropout" button - verify opens confirmation
+
+        //Click confirm - verify person is drop outed - via Dao.
+        //TODO: Make a test to be sure in the clazz student list we exclude that are not drop outed
+
+    }
+
+    @Test
+    public void givenActivityStarted_whenCallAndTextParentClicked_shouldFireDialogAndCallAndTextIntent(){
+
+        //Click Call parent - should open dialog to choose which parent
+        //Click a parent  - verify call intent started.
+
+        //Click Text parent - should open dialog to choose which parent
+        //Click a parent - verify sms intent started.
     }
 
 }

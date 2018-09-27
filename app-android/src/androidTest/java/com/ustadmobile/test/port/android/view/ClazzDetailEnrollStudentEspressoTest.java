@@ -83,7 +83,44 @@ public class ClazzDetailEnrollStudentEspressoTest {
     }
 
     @Test
-    public void givenActivityStarted_whenDataLoaded_shouldShowAllClazzList() {
+    public void givenActivityStarted_whenDataLoaded_shouldShowStudentListWithEnrollmentOptions() {
         Assert.assertTrue(true);
+
+        //All students that are supposed to be there are there
+
+        //Students that are supposed to be enrolled have enrolled checked
+
+        //Students that are not enrolled (ie not part of the class) have Enrolled unchecked
     }
+
+    @Test
+    public void givenActivityStarted_whenDataLoaded_shouldShowStudentNotEnrolledUnchecked(){
+
+        //Students that are not enrolled (ie not part of the class) have Enrolled unchecked.
+    }
+
+    @Test
+    public void givenDataLoaded_whenEnrollStateChanged_shouldReflectInDao(){
+
+        //Uncheck an already checked enrollment - check that its reflected in the Dao
+
+        //Check an unchecked enrollment - check that its reflected in the Dao
+
+    }
+
+    @Test
+    public void givenDataLoad_whenEnrollNewStudentClickedAndFilled_shouldEnrollNewStudentToClass(){
+
+        //Click on button - verify new enrollment activity opened with blank fields.
+
+        //Verify clazzUid sent to new enrollment activity.
+
+    }
+
+    @Test
+    public void givenActivityStarted_whenDoneClicked_shouldCloseActivity(){
+
+        //Verify that the activity has closed (not in display)
+    }
+
 }

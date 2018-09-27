@@ -87,6 +87,56 @@ public class PersonEditActivityEspressoTest {
     @Test
     public void givenActivityStarted_whenUserDetailsLoaded_shouldShowPersonFieldsAndCustomFields() {
         Assert.assertTrue(true);
+
+        //Should show all core fields with values filled in
+        //Assert the type of field with field type
+        //Assert icon
+        //Should fill values in
+
+        //Should show all custom fields with values filled in.
+        //Assert the type of field with field type (custom - always string)
+        //Assert icon
+
+
+    }
+
+    @Test
+    public void givenActivityStarted_whenAddPersonToClassClicked_shouldOpenClassEnrollmentActivity(){
+
+        //Click Add Person To Class button - assert it goes to new activity.
+        //Assert person Uid is sent as argument to new activity.
+
+    }
+
+    @Test
+    public void givenActivityStarted_whenFieldEditedAndDonePressed_shouldPersistPerson(){
+
+        //Fill Values core fields - click done - assert update went up to person.
+        //Fill values in custom field - click done - assert update went to person's custom field.
+
+    }
+
+    @Test
+    public void givenActivityStarted_whenFieldEdited_shouldNotPersist(){
+
+        //Fill core field values - assert update did NOT Persist to Person
+        //Fill custom field values - assert update did NOT Persist to Person.
+
+    }
+
+    @Test
+    public void givenActivityStarted_changeDate_shouldUpdateDate(){
+
+        //Edit Birthday - pick custom date - assert date field updated with pretty text.
+
+        //Click Done - assert new updated date persisted to Person
+
+    }
+
+    @Test
+    public void givenActivityStarted_changeNumberAndClickDone_shouldUpdateNumber(){
+
+        //Edit Phone number for Mother - pick number - click done - assert value persisted to Person
     }
 
 

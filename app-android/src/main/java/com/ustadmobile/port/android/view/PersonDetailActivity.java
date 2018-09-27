@@ -41,6 +41,7 @@ import static com.ustadmobile.core.view.PersonDetailViewField.FIELD_TYPE_FIELD;
 import static com.ustadmobile.core.view.PersonDetailViewField.FIELD_TYPE_HEADER;
 import static com.ustadmobile.core.view.PersonDetailViewField.FIELD_TYPE_PHONE_NUMBER;
 import static com.ustadmobile.core.view.PersonDetailViewField.FIELD_TYPE_TEXT;
+import static com.ustadmobile.port.android.view.PersonEditActivity.ADD_PERSON_ICON;
 
 /**
  * The PersonDetail activity.
@@ -159,12 +160,15 @@ public class PersonDetailActivity extends UstadBaseActivity implements PersonDet
                 String iconName = field.getIconName();
 
                 if(iconName == null || iconName.length() == 0){
-                    iconName = "ic_blank_24dp";
+                    iconName = ADD_PERSON_ICON;
                 }
 
                 int iconResId = getResourceId(iconName, "drawable", getPackageName());
                 ImageView icon = new ImageView(this);
                 icon.setImageResource(iconResId);
+                if(iconName.equals(ADD_PERSON_ICON)){
+                    icon.setAlpha(0);
+                }
                 icon.setPadding(16,0,4,0);
                 hll.addView(icon);
 
