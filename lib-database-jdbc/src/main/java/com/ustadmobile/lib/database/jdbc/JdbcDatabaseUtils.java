@@ -110,6 +110,20 @@ public class JdbcDatabaseUtils {
         }
     }
 
+    /**
+     * Used when calling statement.executeBatch
+     *
+     * @param updateTotals int array of update totals to sum
+     *
+     * @return sum of ints in the array
+     */
+    public static int sumUpdateTotals(int[] updateTotals) {
+        int result = 0;
+        for(int updateTotal: updateTotals) {
+            result += updateTotal;
+        }
 
+        return result;
+    }
 
 }

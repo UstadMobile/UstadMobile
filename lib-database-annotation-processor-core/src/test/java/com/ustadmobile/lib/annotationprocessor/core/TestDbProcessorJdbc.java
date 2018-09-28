@@ -96,4 +96,21 @@ public class TestDbProcessorJdbc {
                 entityVal[0].getName());
     }
 
+    @Test
+    public void givenEntityInserted_whenUpdateMethodRuns_thenShouldReturnUpdateCount() {
+        ExampleDatabase db = ExampleDatabase.getInstance(null, "ds");
+        ExampleEntity entityToUpdate = new ExampleEntity();
+        entityToUpdate.setName("Update Me");
+        int id = db.getExampleDao().insertGetId(entityToUpdate);
+        entityToUpdate.setUid(id);
+
+        entityToUpdate.setName("Updated Me");
+        int updateCount = db.getExampleDao().updateAndGetCount(entityToUpdate);
+        Assert.assertEquals("Update count = 1 when singular existing entity updated", 1,
+                updateCount);
+
+        Assert.assertEquals("Entity object can be retrieved, with update applied", "Updated Me",
+                db.getExampleDao().findByUid(id).getName());
+    }
+
 }

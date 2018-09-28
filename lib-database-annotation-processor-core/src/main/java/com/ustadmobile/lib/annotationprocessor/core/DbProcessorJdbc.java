@@ -18,6 +18,7 @@ import com.ustadmobile.lib.database.annotation.UmIndexField;
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 import com.ustadmobile.lib.database.annotation.UmQuery;
+import com.ustadmobile.lib.database.annotation.UmUpdate;
 import com.ustadmobile.lib.database.jdbc.DbChangeListener;
 import com.ustadmobile.lib.database.jdbc.JdbcDatabaseUtils;
 import com.ustadmobile.lib.database.jdbc.UmJdbcDatabase;
@@ -35,7 +36,6 @@ import org.sqlite.SQLiteDataSource;
 import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -457,6 +457,8 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                 addInsertMethod(daoMethod, jdbcDaoClassSpec, '`');
             }else if(daoMethod.getAnnotation(UmQuery.class) != null){
                 addQueryMethod(daoMethod, dbType, jdbcDaoClassSpec, '`');
+            }else if(daoMethod.getAnnotation(UmUpdate.class) != null) {
+                addUpdateMethod(daoMethod, dbType, jdbcDaoClassSpec, '`');
             }
         }
 
@@ -640,6 +642,159 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                     isVoid(resultType) ? "null" : "result");
 
             codeBlock.endControlFlow(")");
+        }
+
+        methodBuilder.addCode(codeBlock.build());
+        daoBuilder.addMethod(methodBuilder.build());
+    }
+
+    /**
+     * Generate an implementation for methods annotated with UmUpdate
+     *
+     * @param daoMethod daoMethod to generate an implementation for
+     * @param dbType The database class
+     * @param daoBuilder The builder for the dao being generated, to which the new method will be added
+     * @param identifierQuote The quote character to use to quote SQL identifiers
+     */
+    public void addUpdateMethod(ExecutableElement daoMethod, TypeElement dbType,
+                                TypeSpec.Builder daoBuilder, char identifierQuote) {
+        String identifierQuoteStr = String.valueOf(identifierQuote);
+        CodeBlock.Builder codeBlock = CodeBlock.builder();
+        MethodSpec.Builder methodBuilder = MethodSpec.overriding(daoMethod);
+
+        TypeElement umCallbackTypeElement = processingEnv.getElementUtils().getTypeElement(
+                UmCallback.class.getName());
+        List<Element> variableTypeElements = getMethodParametersAsElements(daoMethod);
+        int asyncParamIndex = variableTypeElements.indexOf(umCallbackTypeElement);
+        boolean asyncMethod = asyncParamIndex != -1;
+
+        TypeMirror resultType;
+        if(asyncMethod) {
+            resultType = ((DeclaredType)daoMethod.getParameters().get(asyncParamIndex)
+                    .asType()).getTypeArguments().get(0);
+        }else {
+            resultType = daoMethod.getReturnType();
+        }
+
+        TypeMirror entityType = daoMethod.getParameters().get(0).asType();
+        TypeElement entityTypeElement = entityType.getKind().equals(TypeKind.DECLARED) ?
+                (TypeElement)processingEnv.getTypeUtils().asElement(entityType) : null;
+
+        boolean isListOrArray = false;
+        if(entityTypeElement != null &&
+                entityTypeElement.equals(processingEnv.getElementUtils().getTypeElement(
+                        List.class.getName()))) {
+            entityType = ((DeclaredType)entityType).getTypeArguments().get(0);
+            entityTypeElement = (TypeElement)processingEnv.getTypeUtils().asElement(entityType);
+            isListOrArray = true;
+        }else if(entityType.getKind().equals(TypeKind.ARRAY)) {
+            entityType = ((ArrayType)entityType).getComponentType();
+            entityTypeElement = (TypeElement)processingEnv.getTypeUtils().asElement(entityType);
+            isListOrArray = true;
+        }
+
+
+        if(asyncMethod) {
+            codeBlock.beginControlFlow("_db.getExecutor().execute(() ->");
+        }
+
+        codeBlock.add("$T numUpdates = 0;\n", TypeName.INT);
+
+        codeBlock.add("try (\n").indent()
+                .add("$T _connection = _db.getConnection();\n", Connection.class)
+                .add("$T _stmt = _connection.prepareStatement(\"", PreparedStatement.class)
+                .add("UPDATE $L$L$L SET ", identifierQuoteStr, entityTypeElement.getSimpleName().toString(),
+                        identifierQuoteStr);
+
+        Map<String, Integer> fieldNameToPositionMap = new HashMap<>();
+
+        boolean commaRequired = false;
+        int positionCounter = 1;
+        Element pkElement = null;
+        for(Element subElement : entityTypeElement.getEnclosedElements()) {
+            if(!subElement.getKind().equals(ElementKind.FIELD))
+                continue;
+
+            if(subElement.getAnnotation(UmPrimaryKey.class) != null) {
+                pkElement = subElement;
+                continue;
+            }
+
+
+            if(commaRequired)
+                codeBlock.add(", ");
+
+            codeBlock.add("$L$L$L = ?", identifierQuoteStr, subElement.getSimpleName().toString(),
+                    identifierQuoteStr);
+            commaRequired = true;
+            fieldNameToPositionMap.put(subElement.getSimpleName().toString(),
+                    positionCounter);
+            positionCounter++;
+        }
+
+        if(pkElement == null){
+            String message = " UmUpdate method : on primary key field found on " +
+                    entityTypeElement.getQualifiedName().toString();
+            messager.printMessage(Diagnostic.Kind.ERROR,
+                    formatMethodForErrorMessage(daoMethod) + ": " + message);
+            throw new IllegalArgumentException(message);
+        }
+        fieldNameToPositionMap.put(pkElement.getSimpleName().toString(), positionCounter);
+
+        codeBlock.add(" WHERE $L$L$L = ?\");\n", identifierQuoteStr,
+                pkElement.getSimpleName().toString(), identifierQuoteStr);
+
+        codeBlock.unindent().beginControlFlow(")");
+
+        String entityName = isListOrArray ? "_element" :
+                daoMethod.getParameters().get(0).getSimpleName().toString();
+
+        if(isListOrArray) {
+            codeBlock.beginControlFlow("for($T _element : $L)",
+                    entityTypeElement, daoMethod.getParameters().get(0).getSimpleName().toString());
+        }
+
+        for(Map.Entry<String, Integer> entry : fieldNameToPositionMap.entrySet()) {
+            String propertyName = entry.getKey();
+            List<ExecutableElement> getterCallChain = findGetterOrSetter("get", daoMethod,
+                    propertyName, entityTypeElement, new ArrayList<>(), true);
+            if(getterCallChain != null && getterCallChain.size() != 1) {
+                messager.printMessage(Diagnostic.Kind.ERROR,
+                        formatMethodForErrorMessage(daoMethod) +
+                                " could not find setter for " + propertyName);
+                return;
+            }
+
+            codeBlock.add("_stmt.$L($L, $L.$L());\n",
+                    getPreparedStatementSetterMethodName(getterCallChain.get(0).getReturnType()),
+                    entry.getValue(),
+                    entityName,
+                    getterCallChain.get(0).getSimpleName().toString());
+        }
+
+        if(isListOrArray) {
+            codeBlock.add("_stmt.addBatch();\n")
+                .endControlFlow()
+                .add("numUpdates = $T.sumUpdateTotals(_stmt.executeBatch());\n",
+                        JdbcDatabaseUtils.class);
+        }else {
+            codeBlock.add("numUpdates = _stmt.executeUpdate();\n");
+        }
+
+        codeBlock.nextControlFlow("catch($T e)", SQLException.class)
+                .add("e.printStackTrace();\n")
+                .endControlFlow();
+
+
+
+        if(asyncMethod) {
+            codeBlock.add("$T.onSuccessIfNotNull($L, $L);\n",
+                    UmCallbackUtil.class, daoMethod.getParameters().get(asyncParamIndex)
+                            .getSimpleName().toString(),
+                    isVoid(resultType) ? "null" : "numUpdates");
+            codeBlock.endControlFlow(")");
+        }else if(!isVoid(resultType)) {
+            codeBlock.add("return numUpdates;\n");
         }
 
         methodBuilder.addCode(codeBlock.build());
@@ -991,7 +1146,7 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
             List<String> initializedEmbeddedObjects = new ArrayList<>();
             for(int i = 0; i < metaData.getColumnCount(); i++) {
                 List<ExecutableElement> callChain = findSetterMethod(daoMethodElement,
-                        metaData.getColumnLabel(i + 1), entityElement, new ArrayList<>());
+                        metaData.getColumnLabel(i + 1), entityElement, new ArrayList<>(), true);
                 if(callChain == null || callChain.isEmpty()) {
                     messager.printMessage(Diagnostic.Kind.ERROR,
                             formatMethodForErrorMessage(daoMethodElement) +
@@ -1097,6 +1252,7 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
      *
      * @see UmEmbedded
      *
+     * @param methodType "get" or "set
      * @param daoMethod The daoMethod currently being generated. Used to generate meaningful error
      *                  messages.
      * @param rowName The rowName as it was returned by the query
@@ -1107,18 +1263,21 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
      *  setter method. If the field resides in an embedded object, this includes the getter methods
      *  to reach the setter method e.g. getEmbeddedObject, setField.
      */
-    private List<ExecutableElement> findSetterMethod(ExecutableElement daoMethod, String rowName,
-                                                     TypeElement entityElement,
-                                                     List<ExecutableElement> callChain) {
+    private List<ExecutableElement> findGetterOrSetter(String methodType,
+                                                       ExecutableElement daoMethod,
+                                                       String rowName,
+                                                       TypeElement entityElement,
+                                                       List<ExecutableElement> callChain,
+                                                       boolean checkEmbedded) {
         //go through the methods on this TypeElement to find a setter
-        String setterMethodName = "set" + Character.toUpperCase(rowName.charAt(0)) +
+        String targetMethodName = methodType + Character.toUpperCase(rowName.charAt(0)) +
                 rowName.substring(1);
 
         for(Element subElement : entityElement.getEnclosedElements()) {
             if(subElement.getKind() != ElementKind.METHOD)
                 continue;
 
-            if(subElement.getSimpleName().toString().equals(setterMethodName)) {
+            if(subElement.getSimpleName().toString().equals(targetMethodName)) {
                 callChain.add((ExecutableElement)subElement);
                 return callChain;
             }
@@ -1126,52 +1285,64 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
 
 
         //check @UmEmbedded objects
-        for(Element subElement : entityElement.getEnclosedElements()) {
-            if(subElement.getKind().equals(ElementKind.FIELD)
-                    && subElement.getAnnotation(UmEmbedded.class) != null) {
-                VariableElement varElement = (VariableElement)subElement;
-                String getterName = subElement.getSimpleName().toString();
-                getterName = "get" + Character.toUpperCase(getterName.charAt(0)) +
-                        getterName.substring(1);
+        if(checkEmbedded) {
+            for(Element subElement : entityElement.getEnclosedElements()) {
+                if(subElement.getKind().equals(ElementKind.FIELD)
+                        && subElement.getAnnotation(UmEmbedded.class) != null) {
+                    VariableElement varElement = (VariableElement)subElement;
+                    String getterName = subElement.getSimpleName().toString();
+                    getterName = "get" + Character.toUpperCase(getterName.charAt(0)) +
+                            getterName.substring(1);
 
-                ExecutableElement getterMethod = null;
-                for(Element subElement2 : entityElement.getEnclosedElements()){
-                    if(subElement2.getSimpleName().toString().equals(getterName)
-                            && subElement2.getKind().equals(ElementKind.METHOD)
-                            && ((ExecutableElement)subElement2).getParameters().isEmpty()){
-                        getterMethod = (ExecutableElement)subElement2;
-                        break;
+                    ExecutableElement getterMethod = null;
+                    for(Element subElement2 : entityElement.getEnclosedElements()){
+                        if(subElement2.getSimpleName().toString().equals(getterName)
+                                && subElement2.getKind().equals(ElementKind.METHOD)
+                                && ((ExecutableElement)subElement2).getParameters().isEmpty()){
+                            getterMethod = (ExecutableElement)subElement2;
+                            break;
+                        }
                     }
+
+                    if(getterMethod == null) {
+                        messager.printMessage(Diagnostic.Kind.ERROR,
+                                formatMethodForErrorMessage(daoMethod) + ": " +
+                                    entityElement.getQualifiedName() + "." + subElement.getSimpleName() +
+                                    " is annotated with @UmEmbedded but has no getter method");
+                        return null;
+                    }
+
+                    callChain.add(getterMethod);
+                    List<ExecutableElement> retVal = findGetterOrSetter(methodType,daoMethod, rowName,
+                            (TypeElement)processingEnv.getTypeUtils().asElement(varElement.asType()),
+                            callChain, checkEmbedded);
+
+                    if(retVal != null)
+                        return retVal;
+                    else
+                        callChain.remove(getterMethod);
                 }
-
-                if(getterMethod == null) {
-                    messager.printMessage(Diagnostic.Kind.ERROR,
-                            formatMethodForErrorMessage(daoMethod) + ": " +
-                            entityElement.getQualifiedName() + "." + subElement.getSimpleName() +
-                            " is annotated with @UmEmbedded but has no getter method");
-                    return null;
-                }
-
-                callChain.add(getterMethod);
-                List<ExecutableElement> retVal = findSetterMethod(daoMethod, rowName,
-                        (TypeElement)processingEnv.getTypeUtils().asElement(varElement.asType()),
-                        callChain);
-
-                if(retVal != null)
-                    return retVal;
-                else
-                    callChain.remove(getterMethod);
             }
         }
+
 
         //Check parent classes
         if(entityElement.getSuperclass() != null
                 && !entityElement.getSuperclass().getKind().equals(TypeKind.NONE)) {
-            return findSetterMethod(daoMethod, rowName, (TypeElement) processingEnv.getTypeUtils()
-                    .asElement(entityElement.getSuperclass()), callChain);
+            return findGetterOrSetter(methodType, daoMethod, rowName, (TypeElement) processingEnv.getTypeUtils()
+                    .asElement(entityElement.getSuperclass()), callChain, checkEmbedded);
         }else {
             return null;
         }
+    }
+
+    private List<ExecutableElement> findSetterMethod(ExecutableElement daoMethod,
+                                                     String rowName,
+                                                     TypeElement entityElement,
+                                                     List<ExecutableElement> callChain,
+                                                     boolean checkEmbedded) {
+        return findGetterOrSetter("set", daoMethod, rowName, entityElement, callChain,
+                checkEmbedded);
     }
 
 

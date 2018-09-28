@@ -5,6 +5,7 @@ import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
+import com.ustadmobile.lib.database.annotation.UmUpdate;
 
 import java.util.List;
 
@@ -66,6 +67,16 @@ public abstract class ExampleDao {
     @UmQuery("SELECT * FROM ExampleEntity WHERE uid = :uid")
     public abstract UmLiveData<ExampleEntity> findByUidLive(int uid);
 
+    @UmUpdate
+    public abstract void update(ExampleEntity entity);
 
+    @UmUpdate
+    public abstract void update(List<ExampleEntity> entityList);
+
+    @UmUpdate
+    public abstract void updateAsync(ExampleEntity entity, UmCallback<Void> callback);
+
+    @UmUpdate
+    public abstract int updateAndGetCount(ExampleEntity entity);
 
 }
