@@ -11,6 +11,7 @@ import com.squareup.javapoet.TypeSpec;
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UmCallbackUtil;
+import com.ustadmobile.lib.database.annotation.UmClearAll;
 import com.ustadmobile.lib.database.annotation.UmDbContext;
 import com.ustadmobile.lib.database.annotation.UmDelete;
 import com.ustadmobile.lib.database.annotation.UmEmbedded;
@@ -183,6 +184,8 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
 
             if(dbMethod.getAnnotation(UmDbContext.class) != null) {
                 overrideSpec.addCode("return _context;\n");
+            }else if(dbMethod.getAnnotation(UmClearAll.class) != null) {
+                addClearAllTablesCodeToMethod(dbType, overrideSpec, '`');
             }else {
                 String daoFieldName = "_" + returnTypeElement.getSimpleName();
                 jdbcDbTypeSpec.addField(TypeName.get(dbMethod.getReturnType()), daoFieldName, Modifier.PRIVATE);
@@ -259,6 +262,27 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
 
         createMethod.addCode(createCb.build());
         classBuilder.addMethod(createMethod.build());
+    }
+
+    protected void addClearAllTablesCodeToMethod(TypeElement dbType, MethodSpec.Builder builder,
+                                                 char identifierQuoteChar) {
+        String identifierQuoteStr = String.valueOf(identifierQuoteChar);
+        CodeBlock.Builder codeBlock = CodeBlock.builder();
+        codeBlock.add("try(\n").indent()
+                .add("$T connection = getConnection();\n", Connection.class)
+                .add("$T stmt = connection.createStatement();\n", Statement.class)
+                .unindent().beginControlFlow(") ");
+
+        for(TypeElement entityType : findEntityTypes(dbType)) {
+            codeBlock.add("stmt.executeUpdate(\"DELETE FROM $1L$2L$1L\");\n",
+                    identifierQuoteStr, entityType.getSimpleName().toString());
+        }
+
+        codeBlock.nextControlFlow("catch($T e)", SQLException.class)
+                .add("e.printStackTrace();\n")
+                .endControlFlow();
+
+        builder.addCode(codeBlock.build());
     }
 
     /**
@@ -906,7 +930,7 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                     isVoid(resultType) ? "null" : "numDeleted")
                     .endControlFlow(")");
         }else if(!isVoid(resultType)) {
-            codeBlock.add("return numDeleted;");
+            codeBlock.add("return numDeleted;\n");
         }
 
         methodBuilder.addCode(codeBlock.build());

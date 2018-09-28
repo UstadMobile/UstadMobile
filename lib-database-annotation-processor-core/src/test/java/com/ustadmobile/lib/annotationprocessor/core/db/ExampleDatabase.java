@@ -1,5 +1,6 @@
 package com.ustadmobile.lib.annotationprocessor.core.db;
 
+import com.ustadmobile.lib.database.annotation.UmClearAll;
 import com.ustadmobile.lib.database.annotation.UmDatabase;
 
 
@@ -22,5 +23,8 @@ public abstract class ExampleDatabase {
 
 
     public abstract ExampleDao getExampleDao();
+
+    @UmClearAll
+    public abstract void clearAll();
 
 }
