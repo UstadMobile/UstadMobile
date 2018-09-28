@@ -90,6 +90,8 @@ public abstract class AbstractDbProcessor {
         }
 
         messager.printMessage(Diagnostic.Kind.NOTE, "running room processor");
+        onDone();
+
         return true;
     }
 
@@ -150,6 +152,13 @@ public abstract class AbstractDbProcessor {
         }else {
             return false;
         }
+    }
+
+    /**
+     * Can be overriden to clean up temporary files etc.
+     */
+    protected void onDone() {
+
     }
 
 

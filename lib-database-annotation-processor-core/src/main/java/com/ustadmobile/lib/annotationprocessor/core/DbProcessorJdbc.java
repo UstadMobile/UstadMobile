@@ -77,6 +77,8 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
 
     private static final String SUFFIX_JDBC_DAO = "_JdbcDaoImpl";
 
+    private File dbTmpFile;
+
     //Map of fully qualified database class name to a connection that has that database
     private Map<String, DataSource> nameToDataSourceMap = new HashMap<>();
 
@@ -211,9 +213,15 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
         JavaFile.builder(packageElement.getQualifiedName().toString(), jdbcDbTypeSpec.build())
                 .indent("    ").build().writeTo(destinationDir);
 
-        //now create an in memory implementation of this database, this will be used when generating the DAOs
+        //now create an in temporary file implementation of this database, this will be used when generating the DAOs
         SQLiteDataSource dataSource = new SQLiteDataSource();
-        dataSource.setUrl("jdbc:sqlite:" + dbType.getQualifiedName().toString() + ".db");
+        dbTmpFile = File.createTempFile(dbType.getQualifiedName().toString(), ".db");
+
+        messager.printMessage(Diagnostic.Kind.NOTE,
+                "DbProcessorJdbc: creating temporary database in: " +
+                        dbTmpFile.getAbsolutePath());
+
+        dataSource.setUrl("jdbc:sqlite:" + dbTmpFile.getAbsolutePath());
         try(
             Connection connection = dataSource.getConnection();
             Statement stmt = connection.createStatement();
@@ -1573,4 +1581,14 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
             element.getSimpleName();
     }
 
+    @Override
+    protected void onDone() {
+        super.onDone();
+
+        if(dbTmpFile != null && dbTmpFile.exists()) {
+            messager.printMessage(Diagnostic.Kind.NOTE, "DbProcessorJdbc: " +
+                    " Cleanup db tmp file: " + dbTmpFile.getAbsolutePath() +
+                    " deleted: " + dbTmpFile.delete());
+        }
+    }
 }

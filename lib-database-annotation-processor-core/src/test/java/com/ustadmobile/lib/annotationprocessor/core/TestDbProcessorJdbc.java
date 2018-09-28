@@ -11,6 +11,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.sqlite.SQLiteDataSource;
 
+import java.io.File;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
@@ -31,7 +32,14 @@ public class TestDbProcessorJdbc {
     public static void setupClass() throws NamingException{
         InitialContext ic = new InitialContext();
         SQLiteDataSource dataSource = new SQLiteDataSource();
-        dataSource.setUrl("jdbc:sqlite:test.sqlite");
+
+        String dbFilePath = "build/tmp/TestDbProcessorJdbc.sqlite";
+        File dbFile = new File(dbFilePath);
+
+        if(dbFile.exists())
+            dbFile.delete();
+
+        dataSource.setUrl("jdbc:sqlite:" + dbFilePath);
         ic.bind("java:/comp/env/jdbc/ds", dataSource);
     }
 
