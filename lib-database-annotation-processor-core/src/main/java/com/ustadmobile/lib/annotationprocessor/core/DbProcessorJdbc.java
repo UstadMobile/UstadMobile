@@ -12,6 +12,7 @@ import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UmCallbackUtil;
 import com.ustadmobile.lib.database.annotation.UmDbContext;
+import com.ustadmobile.lib.database.annotation.UmDelete;
 import com.ustadmobile.lib.database.annotation.UmEmbedded;
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmIndexField;
@@ -459,6 +460,8 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                 addQueryMethod(daoMethod, dbType, jdbcDaoClassSpec, '`');
             }else if(daoMethod.getAnnotation(UmUpdate.class) != null) {
                 addUpdateMethod(daoMethod, dbType, jdbcDaoClassSpec, '`');
+            }else if(daoMethod.getAnnotation(UmDelete.class) != null) {
+                addDeleteMethod(daoMethod, jdbcDaoClassSpec, '`');
             }
         }
 
@@ -466,6 +469,7 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
         JavaFile.builder(processingEnv.getElementUtils().getPackageOf(daoType).toString(),
                 jdbcDaoClassSpec.build()).build().writeTo(destinationDir);
     }
+
 
     public void addInsertMethod(ExecutableElement daoMethod, TypeSpec.Builder daoBuilder,
                                 char identifierQuote) {
@@ -781,6 +785,10 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
             codeBlock.add("numUpdates = _stmt.executeUpdate();\n");
         }
 
+        codeBlock.beginControlFlow("if(numUpdates > 0)")
+                .add("_db.handleTablesChanged($S);\n", entityTypeElement.getSimpleName().toString())
+                .endControlFlow();
+
         codeBlock.nextControlFlow("catch($T e)", SQLException.class)
                 .add("e.printStackTrace();\n")
                 .endControlFlow();
@@ -800,6 +808,111 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
         methodBuilder.addCode(codeBlock.build());
         daoBuilder.addMethod(methodBuilder.build());
     }
+
+
+    public void addDeleteMethod(ExecutableElement daoMethod, TypeSpec.Builder daoBuider,
+                                char identifierQuote) {
+        MethodSpec.Builder methodBuilder = MethodSpec.overriding(daoMethod);
+        CodeBlock.Builder codeBlock = CodeBlock.builder();
+
+        boolean isListOrArray = false;
+        String identifierQuoteStr = String.valueOf(identifierQuote);
+
+        TypeElement umCallbackTypeElement = processingEnv.getElementUtils().getTypeElement(
+                UmCallback.class.getName());
+        List<Element> variableTypeElements = getMethodParametersAsElements(daoMethod);
+        int asyncParamIndex = variableTypeElements.indexOf(umCallbackTypeElement);
+        boolean asyncMethod = asyncParamIndex != -1;
+
+        TypeMirror resultType;
+        if(asyncMethod) {
+            codeBlock.beginControlFlow("_db.getExecutor().execute(() -> ");
+            DeclaredType declaredType = (DeclaredType)daoMethod.getParameters().get(asyncParamIndex)
+                    .asType();
+            resultType = declaredType.getTypeArguments().get(0);
+        }else {
+            resultType = daoMethod.getReturnType();
+        }
+
+        TypeMirror entityType = daoMethod.getParameters().get(0).asType();
+        TypeElement entityTypeElement = entityType.getKind().equals(TypeKind.DECLARED) ?
+                (TypeElement)processingEnv.getTypeUtils().asElement(entityType) : null;
+
+        if(entityTypeElement != null &&
+                entityTypeElement.equals(processingEnv.getElementUtils().getTypeElement(
+                        List.class.getName()))) {
+            entityType = ((DeclaredType)entityType).getTypeArguments().get(0);
+            entityTypeElement = (TypeElement)processingEnv.getTypeUtils().asElement(entityType);
+            isListOrArray = true;
+        }else if(entityType.getKind().equals(TypeKind.ARRAY)) {
+            entityType = ((ArrayType)entityType).getComponentType();
+            entityTypeElement = (TypeElement)processingEnv.getTypeUtils().asElement(entityType);
+            isListOrArray = true;
+        }
+
+
+        VariableElement pkElement = findPrimaryKey(entityTypeElement);
+        if(pkElement == null) {
+            messager.printMessage(Diagnostic.Kind.ERROR,
+                    formatMethodForErrorMessage(daoMethod) + " no primary key found on" +
+                    entityTypeElement.getQualifiedName());
+            return;
+        }
+
+        codeBlock.add("int numDeleted = 0;\n")
+                .add("try (\n").indent()
+                    .add("$T connection = _db.getConnection();\n", Connection.class)
+                    .add("$T stmt = connection.prepareStatement(\"", PreparedStatement.class)
+                    .add("DELETE FROM $1L$2L$1L WHERE $1L$3L$1L = ?\");\n", identifierQuoteStr,
+                            entityTypeElement.getSimpleName().toString(),
+                            pkElement.getSimpleName().toString())
+                .unindent().beginControlFlow(")");
+
+        if(isListOrArray) {
+            codeBlock.beginControlFlow("for($T _entity : $L)",
+                    entityTypeElement, daoMethod.getParameters().get(0).getSimpleName().toString());
+        }
+
+        PreparedStatement stmt;
+        String pkGetterMethod = pkElement.getSimpleName().toString();
+        pkGetterMethod = Character.toUpperCase(pkGetterMethod.charAt(0))
+                + pkGetterMethod.substring(1);
+        codeBlock.add("stmt.$L(1, $L.get$L());\n",
+                getPreparedStatementSetterMethodName(pkElement.asType()),
+                isListOrArray ? "_entity" : daoMethod.getParameters().get(0).getSimpleName().toString(),
+                pkGetterMethod);
+
+        if(isListOrArray) {
+            codeBlock.add("stmt.addBatch();\n")
+                    .endControlFlow()
+                    .add("numDeleted = $T.sumUpdateTotals(stmt.executeBatch());\n",
+                            JdbcDatabaseUtils.class);
+        }else {
+            codeBlock.add("numDeleted = stmt.executeUpdate();\n");
+        }
+
+        codeBlock.beginControlFlow("if(numDeleted > 0)")
+                .add("_db.handleTablesChanged($S);\n", entityTypeElement.getSimpleName().toString())
+                .endControlFlow();
+
+        codeBlock.nextControlFlow("catch($T e)", SQLException.class)
+                .add("e.printStackTrace();\n")
+                .endControlFlow();
+
+        if(asyncMethod) {
+            codeBlock.add("$T.onSuccessIfNotNull($L, $L);\n",
+                    UmCallbackUtil.class,
+                    daoMethod.getParameters().get(asyncParamIndex).getSimpleName(),
+                    isVoid(resultType) ? "null" : "numDeleted")
+                    .endControlFlow(")");
+        }else if(!isVoid(resultType)) {
+            codeBlock.add("return numDeleted;");
+        }
+
+        methodBuilder.addCode(codeBlock.build());
+        daoBuider.addMethod(methodBuilder.build());
+    }
+
 
     public void addQueryMethod(ExecutableElement daoMethod, TypeElement dbType, TypeSpec.Builder daoBuilder,
                                char identifierQuote) {
@@ -1258,6 +1371,8 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
      * @param rowName The rowName as it was returned by the query
      * @param entityElement The java object to search to find an appropriate setter method
      * @param callChain The current call chain to get to this object.
+     * @param checkEmbedded If true, look through any objects annotated @UmEmbedded
+     *
      * @return A list of methods that represent the chain of methods that need to be called.
      *  For simple setters that are directly on the object itself, this is simply a list with the
      *  setter method. If the field resides in an embedded object, this includes the getter methods
@@ -1343,6 +1458,18 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                                                      boolean checkEmbedded) {
         return findGetterOrSetter("set", daoMethod, rowName, entityElement, callChain,
                 checkEmbedded);
+    }
+
+    private VariableElement findPrimaryKey(TypeElement entityType) {
+        for(Element subElement : entityType.getEnclosedElements()) {
+            if(!subElement.getKind().equals(ElementKind.FIELD))
+                continue;
+
+            if(subElement.getAnnotation(UmPrimaryKey.class) != null)
+                return (VariableElement)subElement;
+        }
+
+        return null;
     }
 
 

@@ -3,6 +3,7 @@ package com.ustadmobile.lib.annotationprocessor.core.db;
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.lib.database.annotation.UmDao;
+import com.ustadmobile.lib.database.annotation.UmDelete;
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.database.annotation.UmUpdate;
@@ -78,5 +79,17 @@ public abstract class ExampleDao {
 
     @UmUpdate
     public abstract int updateAndGetCount(ExampleEntity entity);
+
+    @UmDelete
+    public abstract void delete(ExampleEntity entity);
+
+    @UmDelete
+    public abstract void deleteAsync(ExampleEntity entity, UmCallback<Void> callback);
+
+    @UmDelete
+    public abstract void deleteList(List<ExampleEntity> entities);
+
+    @UmDelete
+    public abstract int deleteAndGetCount(ExampleEntity entity);
 
 }

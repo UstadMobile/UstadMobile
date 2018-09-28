@@ -113,4 +113,20 @@ public class TestDbProcessorJdbc {
                 db.getExampleDao().findByUid(id).getName());
     }
 
+    @Test
+    public void givenEntityCreated_whenDeleteMethodRuns_thenShouldBeDeleted() {
+        ExampleDatabase db = ExampleDatabase.getInstance(null, "ds");
+        ExampleEntity entityToDelete = new ExampleEntity();
+        entityToDelete.setName("Delete Me");
+        entityToDelete.setUid(db.getExampleDao().insertGetId(entityToDelete));
+
+        int numDeleted = db.getExampleDao().deleteAndGetCount(entityToDelete);
+
+        Assert.assertEquals("Delete count returns 1 when one entity deleted", 1,
+                numDeleted);
+
+        Assert.assertNull("When attempting to get a deleted item, this returns null",
+                db.getExampleDao().findByUid(entityToDelete.getUid()));
+    }
+
 }
