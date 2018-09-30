@@ -11,7 +11,6 @@ import com.ustadmobile.lib.contentscrapers.ck12.practice.PracticeResponse;
 import com.ustadmobile.lib.contentscrapers.ck12.practice.QuestionResponse;
 import com.ustadmobile.lib.contentscrapers.ck12.practice.ScriptEngineReader;
 import com.ustadmobile.lib.contentscrapers.ck12.practice.TestResponse;
-import com.ustadmobile.lib.contentscrapers.phetsimulation.PhetContentScraper;
 
 
 import org.apache.commons.io.FileUtils;
@@ -22,18 +21,13 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.logging.LogEntries;
 import org.openqa.selenium.logging.LogEntry;
 import org.openqa.selenium.logging.LogType;
 import org.openqa.selenium.logging.LoggingPreferences;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
-import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
@@ -45,10 +39,10 @@ import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.logging.Level;
 
-import sun.nio.ch.IOUtil;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerException;
 
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.CHECK_NAME;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.INDEX_HTML;
@@ -209,7 +203,6 @@ public class CK12ContentScraper {
         d.setCapability(CapabilityType.LOGGING_PREFS, logPrefs);
 
         driver = new ChromeDriver(d);
-
 
         driver.get(urlString);
         waitDriver = new WebDriverWait(driver, 10000);
@@ -374,6 +367,13 @@ public class CK12ContentScraper {
 
         FileUtils.writeStringToFile(new File(videoHtmlLocation, "index.html"), indexHtml, ScraperConstants.UTF_ENCODING);
 
+        try {
+            ContentScraperUtil.generateTinCanXMLFile(videoHtmlLocation, videoContentName, "en", "index.html",
+                    ScraperConstants.videoTinCanFile, scrapUrl.getPath(), "", "");
+        } catch (TransformerException | ParserConfigurationException e) {
+            e.printStackTrace();
+        }
+
         ContentScraperUtil.zipDirectory(videoHtmlLocation, videoContentName, destinationDirectory);
     }
 
@@ -453,6 +453,13 @@ public class CK12ContentScraper {
         readHtml = readTitle + readHtml + vocabHtml + detailHtml;
 
         FileUtils.writeStringToFile(new File(readHtmlLocation, "index.html"), readHtml, ScraperConstants.UTF_ENCODING);
+
+        try {
+            ContentScraperUtil.generateTinCanXMLFile(readHtmlLocation, readContentName, "en", "index.html",
+                    ScraperConstants.articleTinCanFile, scrapUrl.getPath(), "", "");
+        } catch (TransformerException | ParserConfigurationException e) {
+            e.printStackTrace();
+        }
 
         ContentScraperUtil.zipDirectory(readHtmlLocation, readContentName, destinationDirectory);
     }
@@ -590,6 +597,13 @@ public class CK12ContentScraper {
 
             questionList.add(questionResponse);
 
+        }
+
+        try {
+            ContentScraperUtil.generateTinCanXMLFile(practiceDirectory, practiceUrl, "en", "index.html",
+                    ScraperConstants.assesmentTinCanFile, scrapUrl.getPath(), "", "");
+        } catch (TransformerException | ParserConfigurationException e) {
+            e.printStackTrace();
         }
 
         ContentScraperUtil.saveListAsJson(practiceDirectory, questionList, ScraperConstants.QUESTIONS_JSON);

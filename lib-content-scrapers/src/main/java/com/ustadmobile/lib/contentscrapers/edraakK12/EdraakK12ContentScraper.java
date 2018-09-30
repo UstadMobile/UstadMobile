@@ -163,7 +163,7 @@ public class EdraakK12ContentScraper {
         if (!ContentScraperUtil.fileHasContent(tinCanFile)) {
             try {
                 ContentScraperUtil.generateTinCanXMLFile(courseDirectory, response.title, "ar",
-                        ScraperConstants.INDEX_HTML, "http://adlnet.gov/expapi/activities/module",
+                        ScraperConstants.INDEX_HTML, ScraperConstants.moduleTinCanFile,
                         url.substring(0, url.indexOf("component/")) + response.id,
                         "", "en");
             } catch (ParserConfigurationException | TransformerException e) {

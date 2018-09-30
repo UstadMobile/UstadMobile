@@ -20,7 +20,7 @@ import okio.Okio;
 
 public class TestContentScraperUtil {
 
-    private final String RESOURCE_PATH = "/com/ustadmobile/lib/contentscrapers/edraakK12/";
+    private final String RESOURCE_PATH = "/com/ustadmobile/lib/contentscrapers/files/";
     final Dispatcher dispatcher = new Dispatcher() {
 
         @Override
@@ -50,9 +50,12 @@ public class TestContentScraperUtil {
         mockWebServer.setDispatcher(dispatcher);
 
         File tmpDir = Files.createTempDirectory("exercisecontentscraper").toFile();
-        String convertedHtml = ContentScraperUtil.downloadAllResources(htmlWithImage, tmpDir, mockWebServer.url("/api").url());
+        File resourceLocation = new File(tmpDir, "resource");
+        resourceLocation.mkdirs();
 
-        File imageFile = new File(tmpDir, 0 + ScraperConstants.HtmlName.DESC.getName() + ScraperConstants.PNG_EXT);
+        String convertedHtml = ContentScraperUtil.downloadAllResources(htmlWithImage, resourceLocation, mockWebServer.url("/api").url());
+
+        File imageFile = new File(resourceLocation, "test1picture.png");
         //Assert that the image file is downloaded
         Assert.assertTrue("Image Downloaded Successfully", imageFile.exists());
 
@@ -60,7 +63,7 @@ public class TestContentScraperUtil {
 
         Document doc = Jsoup.parse(convertedHtml);
         Element image =  doc.select("img").first();
-        Assert.assertTrue("Img Src is pointing to relative path", image.attr("src").equalsIgnoreCase(  tmpDir.getName() + "/" + 0 + ScraperConstants.HtmlName.DESC.getName() + ScraperConstants.PNG_EXT) );
+        Assert.assertTrue("Img Src is pointing to relative path", image.attr("src").equalsIgnoreCase(  resourceLocation.getName() + "/test1picture.png") );
     }
 
 
@@ -77,7 +80,7 @@ public class TestContentScraperUtil {
 
     }
 
-    @Test(expected = IOException.class)
+    @Test(expected = DateTimeParseException.class)
     public void givenEdraak12Date_whenParsingDate_thenThrowDateTimeParseException() {
 
         String unCommonEdraakDate = "2018-01-07T08:19:46.4100";

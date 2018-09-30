@@ -53,7 +53,6 @@ public class PhetContentScraper {
     private String aboutText;
     private ArrayList<String> langugageList;
 
-    private final String simulationType = "http://adlnet.gov/expapi/activities/simulation";
     private String aboutDescription;
 
     public PhetContentScraper(String url, File destinationDir) {
@@ -220,7 +219,7 @@ public class PhetContentScraper {
         String simulationTitle = Jsoup.parse(simulationFile, ScraperConstants.UTF_ENCODING).title();
         try {
             ContentScraperUtil.generateTinCanXMLFile(simulationLocation, simulationTitle,
-                    languageLocation.getName(), fileName, simulationType,
+                    languageLocation.getName(), fileName, ScraperConstants.simulationTinCanFile,
                     this.title + "\\" + languageLocation.getName(),
                     aboutDescription, "en");
         } catch (ParserConfigurationException | TransformerException e) {

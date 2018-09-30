@@ -270,7 +270,7 @@ public class TestCK12ContentScraper {
         //CK12ContentScraper scraper = new CK12ContentScraper("https://www.ck12.org/c/elementary-math-grade-1/add-to-10-with-images/plix/The-Flying-Birds-56953eed8e0e086aa6e2d3c2?referrer=concept_details", tmpDir);
         scraper.scrapePlixContent();
 
-        File plixFolder = new File(tmpDir, "53d147578e0e0876d4df82f1");
+        File plixFolder = new File(tmpDir, "plix-53d147578e0e0876d4df82f1");
         Assert.assertEquals("directory for plix exists", true, plixFolder.isDirectory());
 
         File indexJson = new File(plixFolder, "index.json");
