@@ -9,6 +9,7 @@ buildscript {
 apply plugin: 'java-library'
 
 task scrapeContent(type: JavaExec) {
+
     classpath sourceSets.main.runtimeClasspath
     if(project.hasProperty("edraakUrl") && project.hasProperty("edraakDir")) {
         main "com.ustadmobile.lib.contentscrapers.edraakK12.EdraakK12ContentScraper"
@@ -32,7 +33,10 @@ task scrapeContent(type: JavaExec) {
         args  project.getProperties().get("ck12Url"), project.getProperties().get("ck12Dir"), project.getProperties().get("ck12type")
     }
 
-
+    if(project.hasProperty("findCK12Url") && project.hasProperty("findCK12Dir")){
+        main "com.ustadmobile.lib.contentscrapers.ck12.CK12ContentScraper"
+        args  project.getProperties().get("findCK12Url"), project.getProperties().get("findCK12Dir")
+    }
 
     outputs.upToDateWhen { false }
 }
@@ -59,8 +63,6 @@ task copyTestResources(type: Copy) {
     into "${buildDir}/classes/test"
 }
 processTestResources.dependsOn copyTestResources
-
-
 compileTestJava.options.encoding = 'UTF-8'
 
 sourceCompatibility = "1.8"

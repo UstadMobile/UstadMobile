@@ -34,6 +34,8 @@ public class ScraperConstants {
     public static final String brainGenieLink = "braingenie.ck12.org";
     public static final String slideShareLink = "www.slideshare.net";
 
+    public static final String chromeDriverLocation = "C:\\Users\\suhai\\Documents\\chromedriver_win32\\chromedriver.exe";
+
 
     public static final List<String> QUESTION_SET_HOLDER_TYPES = Arrays.asList(
            ComponentType.EXCERCISE.getType(), ComponentType.ONLINE.getType(),

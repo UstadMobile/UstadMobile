@@ -73,4 +73,41 @@ Example: https://phet.colorado.edu/en/simulation/acid-base-solutions
 
 Downloads the simulation and all its translations
 
->$ gradlew scrapeContent -PphetUrl="https://phet.colorado.edu/en/simulation/acid-base-solutions" -PpetDir="C:\phet\"
+>$ gradlew scrapeContent -PphetUrl="https://phet.colorado.edu/en/simulation/acid-base-solutions" -PphetDir="C:\phet\"
+
+
+#### Find and Scrap All CK12 Content
+
+### Find all CK12 Content
+
+All CK12 Content can be found at https://www.ck12.org/browse/
+
+It will browse each subject to find all its related topics 
+and courses and download from each their own variety of content
+
+Ck12 content comes in different format: PLIX, Practice, Video, Read 
+
+To Download All Content:
+>$ gradlew scrapeContent -PfindCK12Url="https://www.ck12.org/browse/" -PfindCK12Dir="C:\ck12\"
+
+#### Download Specific Content:
+
+PLIX 
+Example: https://www.ck12.org/c/trigonometry/pythagorean-theorem/plix/Find-the-Missing-Side-55c3e84a8e0e082955a19bf6?referrer=concept_details
+
+>$ gradlew scrapeContent -Pck12Url="https://www.ck12.org/c/trigonometry/pythagorean-theorem/plix/Find-the-Missing-Side-55c3e84a8e0e082955a19bf6?referrer=concept_details" -Pck12Dir="C:\ck12\" -Pck12type="plix"
+
+Video Example:
+https://www.ck12.org/c/trigonometry/pythagorean-theorem/lecture/The-Pythagorean-Theorem?referrer=concept_details
+
+>$ gradlew scrapeContent -Pck12Url="https://www.ck12.org/c/trigonometry/pythagorean-theorem/lecture/The-Pythagorean-Theorem?referrer=concept_details" -Pck12Dir="C:\ck12\" -Pck12type="video"
+
+READ Example:
+https://www.ck12.org/c/trigonometry/pythagorean-theorem/lesson/Lengths-of-Triangle-Sides-Using-the-Pythagorean-Theorem-TRIG?referrer=concept_details
+
+>$ gradlew scrapeContent -Pck12Url="https://www.ck12.org/c/trigonometry/pythagorean-theorem/lesson/Lengths-of-Triangle-Sides-Using-the-Pythagorean-Theorem-TRIG?referrer=concept_details" -Pck12Dir="C:\ck12\" -Pck12type="read"
+
+Practice Example: 
+https://www.ck12.org/c/trigonometry/pythagorean-theorem/asmtpractice/Pythagorean-Theorem-Applications-Practice?referrer=featured_content&collectionHandle=trigonometry&collectionCreatorID=3&conceptCollectionHandle=trigonometry-::-pythagorean-theorem?referrer=concept_details
+
+>$ gradlew scrapeContent -Pck12Url="https://www.ck12.org/c/trigonometry/pythagorean-theorem/asmtpractice/Pythagorean-Theorem-Applications-Practice?referrer=featured_content&collectionHandle=trigonometry&collectionCreatorID=3&conceptCollectionHandle=trigonometry-::-pythagorean-theorem?referrer=concept_details" -Pck12Dir="C:\ck12\" -Pck12type="practice"

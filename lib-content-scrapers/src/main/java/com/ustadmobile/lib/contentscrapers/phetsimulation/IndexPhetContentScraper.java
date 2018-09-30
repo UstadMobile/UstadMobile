@@ -1,6 +1,5 @@
 package com.ustadmobile.lib.contentscrapers.phetsimulation;
 
-import com.ustadmobile.lib.contentscrapers.edraakK12.IndexEdraakK12Content;
 import com.ustadmobile.lib.db.entities.OpdsEntry;
 import com.ustadmobile.lib.db.entities.OpdsEntryParentToChildJoin;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;

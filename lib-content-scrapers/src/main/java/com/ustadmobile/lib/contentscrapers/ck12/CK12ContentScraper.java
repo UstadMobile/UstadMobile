@@ -11,6 +11,7 @@ import com.ustadmobile.lib.contentscrapers.ck12.practice.PracticeResponse;
 import com.ustadmobile.lib.contentscrapers.ck12.practice.QuestionResponse;
 import com.ustadmobile.lib.contentscrapers.ck12.practice.ScriptEngineReader;
 import com.ustadmobile.lib.contentscrapers.ck12.practice.TestResponse;
+import com.ustadmobile.lib.contentscrapers.phetsimulation.PhetContentScraper;
 
 
 import org.apache.commons.io.FileUtils;
@@ -22,6 +23,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -59,7 +61,7 @@ import static com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING;
 
 /**
  * The ck12 content is in found in multiple types
- * Currently supported content includes: read, video, practice
+ * Currently supported content includes: read, video, practice, plix
  * <p>
  * Most content is made up of 3 sections:- Title, Main Content, Detail Content
  * each section has a method to get their html section
@@ -100,6 +102,13 @@ import static com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING;
  * <p>
  * To avoid clickable links in plix content, find the div and use the style display: none to hide it.
  * </p>
+ * <p>
+ * To fit the plix in all resolutions:
+ * First remove @media call in plix.css
+ * Add columns to div tags plixLeftWrapper and plixRightWrapper
+ * Remove unnecessary parts of the plix page with Jsoup
+ * Append some custom css
+ * </p>
  * Create a content directory for all the url and their location into a json so it can be played back.
  * Zip all files with the plixId as the name
  */
@@ -108,7 +117,7 @@ public class CK12ContentScraper {
     private final String urlString;
     private final File destinationDirectory;
     private final URL scrapUrl;
-    private final File assetDirectory;
+    private File assetDirectory;
 
     public final String css = "<style> .read-more-container { display: none; } #plixIFrameContainer { float: left !important; margin-top: 15px; } #plixLeftWrapper { float: left !important; width: 49%; min-width: 200px; padding-left: 15px !important; padding-right: 15px !important; margin-right: 15px; } @media (max-width: 1070px) { #plixLeftWrapper { width: 98% !important; } } .plixQestionPlayer, .plixLeftMiddlequestionContainer { margin-bottom: 5px !important; } .leftTopFixedBar { padding-top: 20px !important; } #next-container { margin-top: 0 !important; } .overflow-container { background: transparent !important; width: 0px !important; } .overflow-indicator { left: 50% !important; padding: 12px !important; } .plixWrapper { width: 95% !important; max-width: inherit !important; } body.plix-modal { overflow: auto !important; padding: 0; width: 95% !important; height: inherit !important; } .show-description, .show-challenge { position: static !important; padding-top: 0 !important; } #hintModal { width: 90% !important; margin-left: -45% !important; } @media only screen and (max-device-width: 605px), only screen and (max-device-height: 605px) { #landscapeView { display: block !important; } } </style>";
 
@@ -124,9 +133,7 @@ public class CK12ContentScraper {
 
     public ScriptEngineReader scriptEngineReader = new ScriptEngineReader();
 
-    String chromeDriverLocation = "C:\\Users\\suhai\\Documents\\chromedriver_win32\\chromedriver.exe";
     private ChromeDriver driver;
-
     private WebDriverWait waitDriver;
 
     public static final String RESPONSE_RECEIVED = "Network.responseReceived";
@@ -136,16 +143,13 @@ public class CK12ContentScraper {
         this.urlString = url;
         scrapUrl = new URL(url);
         this.destinationDirectory = destDir;
-        assetDirectory = new File(destDir, "asset");
-        assetDirectory.mkdirs();
     }
 
     public static void main(String[] args) {
         if (args.length != 3) {
-            System.err.println("Usage: <ck12 json url> <file destination><type READ or PRACTICE or VIDEO");
+            System.err.println("Usage: <ck12 json url> <file destination><type READ or PRACTICE or VIDEO or plix");
             System.exit(1);
         }
-
 
         System.out.println(args[0]);
         System.out.println(args[1]);
@@ -153,12 +157,26 @@ public class CK12ContentScraper {
         try {
             CK12ContentScraper scraper = new CK12ContentScraper(args[0], new File(args[1]));
             String type = args[2];
-            if ("READ".equalsIgnoreCase(type)) {
-                scraper.scrapeReadContent();
-            } else if ("PRACTICE".equalsIgnoreCase(type)) {
-                scraper.scrapePracticeContent();
-            } else if ("VIDEO".equalsIgnoreCase(type)) {
-                scraper.scrapeVideoContent();
+            switch (type.toLowerCase()) {
+
+                case "video":
+                    // scraper.scrapeVideoContent();
+                    break;
+                case "plix":
+                    // scraper.scrapePlixContent();
+                    break;
+                case "practice":
+                    // scraper.scrapePracticeContent();
+                    break;
+                case "read":
+                case "activities":
+                case "study aids":
+                case "lesson plans":
+                case "real world":
+                    // scraper.scrapeReadContent();
+                    break;
+                default:
+                    System.out.println("found a group type not supported " + type);
             }
 
         } catch (IOException e) {
@@ -174,10 +192,14 @@ public class CK12ContentScraper {
 
         String plixId = urlString.substring(urlString.lastIndexOf("-") + 1, urlString.indexOf("?"));
 
-        File plixDirectory = new File(destinationDirectory, plixId);
+
+        File plixDirectory = new File(destinationDirectory, "plix-" + plixId);
         plixDirectory.mkdirs();
 
-        System.setProperty("webdriver.chrome.driver", chromeDriverLocation);
+        assetDirectory = new File(plixDirectory, "asset");
+        assetDirectory.mkdirs();
+
+        System.setProperty("webdriver.chrome.driver", ScraperConstants.chromeDriverLocation);
 
         DesiredCapabilities d = DesiredCapabilities.chrome();
         d.setCapability("opera.arguments", "-screenwidth 1024 -screenheight 768");
@@ -191,7 +213,7 @@ public class CK12ContentScraper {
 
         driver.get(urlString);
         waitDriver = new WebDriverWait(driver, 10000);
-        waitForJSandJQueryToLoad();
+        ContentScraperUtil.waitForJSandJQueryToLoad(waitDriver);
         try {
             waitDriver.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("div#questionController"))).click();
         } catch (Exception e) {
@@ -235,7 +257,7 @@ public class CK12ContentScraper {
                         FileUtils.writeStringToFile(file, plixJs, UTF_ENCODING);
                     }
 
-                    if(file.getName().contains("plix.css")){
+                    if (file.getName().contains("plix.css")) {
                         String plixJs = FileUtils.readFileToString(file, UTF_ENCODING);
                         int startIndex = plixJs.indexOf("@media only screen and (max-device-width:605px)");
                         int endIndex = plixJs.indexOf(".plix{");
@@ -302,6 +324,13 @@ public class CK12ContentScraper {
 
         Document fullSite = Jsoup.connect(urlString).get();
 
+        String videoContentName = FilenameUtils.getBaseName(scrapUrl.getPath());
+        File videoHtmlLocation = new File(destinationDirectory, videoContentName);
+        videoHtmlLocation.mkdirs();
+
+        assetDirectory = new File(videoHtmlLocation, "asset");
+        assetDirectory.mkdirs();
+
         Document videoContent = getMainContent(fullSite, "div.modality_content[data-loadurl]", "data-loadurl");
         // sometimes video stored in iframe
         if (videoContent == null) {
@@ -322,11 +351,14 @@ public class CK12ContentScraper {
         }
 
         try {
-            FileUtils.copyURLToFile(new URL(imageThumnail), new File(assetDirectory, "video-thumbnail.jpg"));
+            File thumbnail = new File(assetDirectory, videoContentName + "-" + "video-thumbnail.jpg");
+            if (!ContentScraperUtil.fileHasContent(thumbnail)) {
+                FileUtils.copyURLToFile(new URL(imageThumnail), thumbnail);
+            }
+
         } catch (MalformedURLException e) {
             imageThumnail = "";
         }
-
 
         String videoSource = ContentScraperUtil.downloadAllResources(videoElement.outerHtml(), assetDirectory, scrapUrl);
 
@@ -340,7 +372,9 @@ public class CK12ContentScraper {
 
         String indexHtml = videoTitleHtml + videoSource + detailHtml;
 
-        FileUtils.writeStringToFile(new File(destinationDirectory, "index.html"), indexHtml, ScraperConstants.UTF_ENCODING);
+        FileUtils.writeStringToFile(new File(videoHtmlLocation, "index.html"), indexHtml, ScraperConstants.UTF_ENCODING);
+
+        ContentScraperUtil.zipDirectory(videoHtmlLocation, videoContentName, destinationDirectory);
     }
 
     private Elements getIframefromHtml(Document videoContent) {
@@ -393,6 +427,13 @@ public class CK12ContentScraper {
 
         Document html = Jsoup.connect(urlString).get();
 
+        String readContentName = FilenameUtils.getBaseName(scrapUrl.getPath());
+        File readHtmlLocation = new File(destinationDirectory, readContentName);
+        readHtmlLocation.mkdirs();
+
+        assetDirectory = new File(readHtmlLocation, "asset");
+        assetDirectory.mkdirs();
+
         String readTitle = getTitleHtml(html);
 
         Document content = getMainContent(html, "div.modality_content[data-loadurl]", "data-loadurl");
@@ -411,7 +452,9 @@ public class CK12ContentScraper {
 
         readHtml = readTitle + readHtml + vocabHtml + detailHtml;
 
-        FileUtils.writeStringToFile(new File(destinationDirectory, "index.html"), readHtml, ScraperConstants.UTF_ENCODING);
+        FileUtils.writeStringToFile(new File(readHtmlLocation, "index.html"), readHtml, ScraperConstants.UTF_ENCODING);
+
+        ContentScraperUtil.zipDirectory(readHtmlLocation, readContentName, destinationDirectory);
     }
 
     /**
@@ -459,7 +502,7 @@ public class CK12ContentScraper {
         File practiceDirectory = new File(destinationDirectory, practiceUrl);
         practiceDirectory.mkdirs();
 
-        File practiceAssetDirectory = new File(practiceDirectory, "practice-asset");
+        File practiceAssetDirectory = new File(practiceDirectory, "asset");
         practiceAssetDirectory.mkdirs();
 
         PracticeResponse response = gson.fromJson(
@@ -618,25 +661,6 @@ public class CK12ContentScraper {
         }
 
         return doc.body().html();
-    }
-
-    private boolean waitForJSandJQueryToLoad() {
-
-        // wait for jQuery to load
-        ExpectedCondition<Boolean> jQueryLoad = driver -> {
-            try {
-                return ((Long) ((JavascriptExecutor) driver).executeScript("return jQuery.active") == 0);
-            } catch (Exception e) {
-                // no jQuery present
-                return true;
-            }
-        };
-
-        // wait for Javascript to load
-        ExpectedCondition<Boolean> jsLoad = driver -> ((JavascriptExecutor) driver).executeScript("return document.readyState")
-                .toString().equals("complete");
-
-        return waitDriver.until(jQueryLoad) && waitDriver.until(jsLoad);
     }
 
 

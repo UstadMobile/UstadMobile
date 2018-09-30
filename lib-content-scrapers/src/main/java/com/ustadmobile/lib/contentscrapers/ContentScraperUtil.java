@@ -10,6 +10,9 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.support.ui.ExpectedCondition;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import org.w3c.dom.Attr;
 
 import java.io.ByteArrayInputStream;
@@ -252,6 +255,31 @@ public class ContentScraperUtil {
 
 
     }
+
+    /**
+     * Once Selenium is setup and you load a page, use this method to wait for the page to load completely
+     * @param waitDriver driver used to wait for conditions on webpage
+     * @return true once wait is complete
+     */
+    public static boolean waitForJSandJQueryToLoad(WebDriverWait waitDriver) {
+
+        // wait for jQuery to load
+        ExpectedCondition<Boolean> jQueryLoad = driver -> {
+            try {
+                return ((Long) ((JavascriptExecutor) driver).executeScript("return jQuery.active") == 0);
+            } catch (Exception e) {
+                // no jQuery present
+                return true;
+            }
+        };
+
+        // wait for Javascript to load
+        ExpectedCondition<Boolean> jsLoad = driver -> ((JavascriptExecutor) driver).executeScript("return document.readyState")
+                .toString().equals("complete");
+
+        return waitDriver.until(jQueryLoad) && waitDriver.until(jsLoad);
+    }
+
 
 
     /**

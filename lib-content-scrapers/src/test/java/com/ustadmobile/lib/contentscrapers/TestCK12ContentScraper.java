@@ -1,8 +1,10 @@
 package com.ustadmobile.lib.contentscrapers;
 
 import com.ustadmobile.lib.contentscrapers.ck12.CK12ContentScraper;
+import com.ustadmobile.lib.contentscrapers.ck12.IndexCategoryCK12Content;
 import com.ustadmobile.lib.contentscrapers.ck12.practice.ScriptEngineReader;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Test;
@@ -114,13 +116,17 @@ public class TestCK12ContentScraper {
         CK12ContentScraper scraper = new CK12ContentScraper(mockWebServer.url("/c/" + CK_VID_HTML).toString(), tmpDir);
         scraper.scrapeVideoContent();
 
-        File file = new File(tmpDir, "index.html");
+        String folderName = FilenameUtils.getBaseName(CK_VID_HTML);
+        File folder = new File(tmpDir, folderName);
+        folder.mkdirs();
+
+        File file = new File(folder, "index.html");
         Assert.assertEquals("Html for video content", true, ContentScraperUtil.fileHasContent(file));
 
-        File asset = new File(tmpDir, "asset");
+        File asset = new File(folder, "asset");
         Assert.assertEquals("asset folder created", true, asset.isDirectory());
 
-        File thumbnail = new File(asset, "video-thumbnail.jpg");
+        File thumbnail = new File(asset, folderName + "-video-thumbnail.jpg");
         Assert.assertEquals("thumbnail for content", true, ContentScraperUtil.fileHasContent(thumbnail));
 
         File video = new File(asset, "video.mp4");
@@ -137,13 +143,17 @@ public class TestCK12ContentScraper {
         CK12ContentScraper scraper = new CK12ContentScraper(mockWebServer.url("/c/" + SLIDESHARE_HTML).toString(), tmpDir);
         scraper.scrapeVideoContent();
 
-        File file = new File(tmpDir, "index.html");
+        String folderName = FilenameUtils.getBaseName(SLIDESHARE_HTML);
+        File folder = new File(tmpDir, folderName);
+        folder.mkdirs();
+
+        File file = new File(folder, "index.html");
         Assert.assertEquals("Html for video content", true, ContentScraperUtil.fileHasContent(file));
 
-        File asset = new File(tmpDir, "asset");
+        File asset = new File(folder, "asset");
         Assert.assertEquals("asset folder created", true, asset.isDirectory());
 
-        File thumbnail = new File(asset, "video-thumbnail.jpg");
+        File thumbnail = new File(asset, folderName + "-video-thumbnail.jpg");
         Assert.assertEquals("thumbnail for content", true, ContentScraperUtil.fileHasContent(thumbnail));
 
         File video = new File(asset, "_media_video.mp4");
@@ -160,13 +170,17 @@ public class TestCK12ContentScraper {
         CK12ContentScraper scraper = new CK12ContentScraper(mockWebServer.url("/c/" + VIDEO_YT_HTML).toString(), tmpDir);
         scraper.scrapeVideoContent();
 
-        File file = new File(tmpDir, "index.html");
+        String folderName = FilenameUtils.getBaseName(VIDEO_YT_HTML);
+        File folder = new File(tmpDir, folderName);
+        folder.mkdirs();
+
+        File file = new File(folder, "index.html");
         Assert.assertEquals("Html for video content", true, ContentScraperUtil.fileHasContent(file));
 
-        File asset = new File(tmpDir, "asset");
+        File asset = new File(folder, "asset");
         Assert.assertEquals("asset folder created", true, asset.isDirectory());
 
-        File thumbnail = new File(asset, "video-thumbnail.jpg");
+        File thumbnail = new File(asset, folderName + "-video-thumbnail.jpg");
         Assert.assertEquals("thumbnail for content", true, ContentScraperUtil.fileHasContent(thumbnail));
 
         File video = new File(asset, "_media_video.mp4");
@@ -184,7 +198,11 @@ public class TestCK12ContentScraper {
         CK12ContentScraper scraper = new CK12ContentScraper(mockWebServer.url("/c/" + MATH_JAX_HTML).toString(), tmpDir);
         scraper.scrapeReadContent();
 
-        File index = new File(tmpDir, "index.html");
+        String folderName = FilenameUtils.getBaseName(MATH_JAX_HTML);
+        File folder = new File(tmpDir, folderName);
+        folder.mkdirs();
+
+        File index = new File(folder, "index.html");
         Assert.assertEquals("index html to display content", true, ContentScraperUtil.fileHasContent(index));
     }
 
@@ -199,7 +217,11 @@ public class TestCK12ContentScraper {
         CK12ContentScraper scraper = new CK12ContentScraper(mockWebServer.url("/c/" + READ_HTML).toString(), tmpDir);
         scraper.scrapeReadContent();
 
-        File index = new File(tmpDir, "index.html");
+        String folderName = FilenameUtils.getBaseName(READ_HTML);
+        File folder = new File(tmpDir, folderName);
+        folder.mkdirs();
+
+        File index = new File(folder, "index.html");
         Assert.assertEquals("index html to display content", true, ContentScraperUtil.fileHasContent(index));
 
     }
@@ -230,7 +252,6 @@ public class TestCK12ContentScraper {
 
     }
 
-
     @Test
     public void testRhino() {
         ScriptEngineReader scriptEngineReader = new ScriptEngineReader();
@@ -257,6 +278,16 @@ public class TestCK12ContentScraper {
 
         File zip = new File(tmpDir, "53d147578e0e0876d4df82f1.zip");
         Assert.assertEquals("zipped file exists", true, ContentScraperUtil.fileHasContent(zip));
+
+    }
+
+    @Test
+    public void givenServerOnline_whenURLGiven_scrapeAllCk12Content() throws IOException {
+
+        File tmpDir = Files.createTempDirectory("testIndexCK12Content").toFile();
+
+        IndexCategoryCK12Content content = new IndexCategoryCK12Content("https://www.ck12.org/browse/", tmpDir);
+        content.findContent();
 
     }
 
