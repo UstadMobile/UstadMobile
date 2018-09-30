@@ -186,7 +186,6 @@ public class CK12ContentScraper {
 
         String plixId = urlString.substring(urlString.lastIndexOf("-") + 1, urlString.indexOf("?"));
 
-
         File plixDirectory = new File(destinationDirectory, "plix-" + plixId);
         plixDirectory.mkdirs();
 

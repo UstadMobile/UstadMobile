@@ -2,7 +2,6 @@ package com.ustadmobile.lib.contentscrapers.phetsimulation;
 
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.ScraperConstants;
-import com.ustadmobile.lib.contentscrapers.edraakK12.EdraakK12ContentScraper;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
 import com.ustadmobile.lib.util.UmUuidUtil;
 
@@ -16,7 +15,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.UUID;
@@ -190,29 +188,13 @@ public class PhetContentScraper {
         System.out.println(link);
         URLConnection conn = link.openConnection();
 
-        String eTag = conn.getHeaderField("ETag").replaceAll("\"", "");
-        String lastModified = conn.getHeaderField("Last-Modified");
-        System.out.println(eTag);
-        System.out.println(lastModified);
-
-        File eTagFile = new File(simulationLocation, ScraperConstants.ETAG_TXT);
-        File modifiedFile = new File(simulationLocation, ScraperConstants.LAST_MODIFIED_TXT);
-
-        if (eTagFile.length() > 0) {
-
-            String text = new String(Files.readAllBytes(eTagFile.toPath()));
-            if (text.equalsIgnoreCase(eTag)) {
-                return;
-            }
-
+        if(!ContentScraperUtil.isFileModified(conn, simulationLocation)){
+            return;
         }
 
         String fileName = hrefLink.substring(hrefLink.lastIndexOf("/") + 1, hrefLink.lastIndexOf("?"));
         File simulationFile = new File(simulationLocation, fileName);
 
-
-        FileUtils.writeStringToFile(eTagFile, eTag, ScraperConstants.UTF_ENCODING);
-        FileUtils.writeStringToFile(modifiedFile, lastModified, ScraperConstants.UTF_ENCODING);
         FileUtils.writeStringToFile(new File(simulationLocation, ScraperConstants.ABOUT_HTML), aboutText, ScraperConstants.UTF_ENCODING);
 
         FileUtils.copyURLToFile(link, simulationFile);
