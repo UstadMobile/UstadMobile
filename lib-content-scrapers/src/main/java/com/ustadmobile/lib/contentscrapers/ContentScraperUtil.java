@@ -126,7 +126,7 @@ public class ContentScraperUtil {
                 File contentFile = getUniqueFile(destinationDir, fileName);
                 content.attr("src", destinationDir.getName() + "/" + contentFile.getName());
 
-                if(!ContentScraperUtil.isFileModified(conn, destinationDir){
+                if(!ContentScraperUtil.isFileModified(conn, destinationDir)){
                     continue;
                 }
 
