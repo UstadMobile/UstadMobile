@@ -188,12 +188,12 @@ public class PhetContentScraper {
         System.out.println(link);
         URLConnection conn = link.openConnection();
 
-        if(!ContentScraperUtil.isFileModified(conn, simulationLocation)){
-            return;
-        }
-
         String fileName = hrefLink.substring(hrefLink.lastIndexOf("/") + 1, hrefLink.lastIndexOf("?"));
         File simulationFile = new File(simulationLocation, fileName);
+
+        if(!ContentScraperUtil.isFileModified(conn, simulationLocation, fileName)){
+            return;
+        }
 
         FileUtils.writeStringToFile(new File(simulationLocation, ScraperConstants.ABOUT_HTML), aboutText, ScraperConstants.UTF_ENCODING);
 

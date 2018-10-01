@@ -2,7 +2,6 @@ package com.ustadmobile.lib.contentscrapers;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.ustadmobile.core.util.UMIOUtils;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -15,15 +14,8 @@ import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.w3c.dom.Attr;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
@@ -32,11 +24,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
 import java.util.List;
@@ -48,7 +38,6 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
@@ -123,10 +112,10 @@ public class ContentScraperUtil {
 
                 URLConnection conn = contentUrl.openConnection();
                 String fileName = getFileNameFromUrl(contentUrl);
-                File contentFile = getUniqueFile(destinationDir, fileName);
+                File contentFile = new File(destinationDir, fileName);
                 content.attr("src", destinationDir.getName() + "/" + contentFile.getName());
 
-                if(!ContentScraperUtil.isFileModified(conn, destinationDir)){
+                if(!ContentScraperUtil.isFileModified(conn, destinationDir, fileName)){
                     continue;
                 }
 
@@ -165,7 +154,7 @@ public class ContentScraperUtil {
      * @return the extracted file name from url link
      */
     public static String getFileNameFromUrl(URL url) {
-        String fileName = FilenameUtils.getName(url.getPath());
+        String fileName = FilenameUtils.getPath(url.getPath()).replaceAll("[^a-zA-Z0-9\\.\\-]", "_") + FilenameUtils.getName(url.getPath());
         if(fileName.isEmpty()){
             return url.getPath().replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
         }
@@ -360,11 +349,11 @@ public class ContentScraperUtil {
      *
      * @param conn url from where the file is being downloaded
      * @param destinationDir location of possible eTag and last modified file
+     * @param fileName
      * @return true if file modified
      * @throws IOException
      */
-    public static boolean isFileModified(URLConnection conn, File destinationDir) throws IOException {
-
+    public static boolean isFileModified(URLConnection conn, File destinationDir, String fileName) throws IOException {
 
         String eTag = conn.getHeaderField("ETag");
         String lastModified = conn.getHeaderField("Last-Modified");
@@ -375,8 +364,8 @@ public class ContentScraperUtil {
 
         eTag = eTag.replaceAll("\"", "");
 
-        File eTagFile = new File(destinationDir, ScraperConstants.ETAG_TXT);
-        File modifiedFile = new File(destinationDir, ScraperConstants.LAST_MODIFIED_TXT);
+        File eTagFile = new File(destinationDir, FilenameUtils.getBaseName(fileName) + ScraperConstants.ETAG_TXT);
+        File modifiedFile = new File(destinationDir, FilenameUtils.getBaseName(fileName) + ScraperConstants.LAST_MODIFIED_TXT);
 
         if (eTagFile.length() > 0) {
 

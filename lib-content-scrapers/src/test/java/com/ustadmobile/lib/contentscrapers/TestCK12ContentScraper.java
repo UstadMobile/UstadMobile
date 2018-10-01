@@ -24,6 +24,7 @@ import okio.BufferedSource;
 import okio.Okio;
 
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 
@@ -278,16 +279,6 @@ public class TestCK12ContentScraper {
 
         File zip = new File(tmpDir, "53d147578e0e0876d4df82f1.zip");
         Assert.assertEquals("zipped file exists", true, ContentScraperUtil.fileHasContent(zip));
-
-    }
-
-    @Test
-    public void givenServerOnline_whenURLGiven_scrapeAllCk12Content() throws IOException {
-
-        File tmpDir = Files.createTempDirectory("testIndexCK12Content").toFile();
-
-        IndexCategoryCK12Content content = new IndexCategoryCK12Content("https://www.ck12.org/browse/", tmpDir);
-        content.findContent();
 
     }
 

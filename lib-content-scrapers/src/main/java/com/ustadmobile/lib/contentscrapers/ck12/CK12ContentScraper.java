@@ -227,7 +227,7 @@ public class CK12ContentScraper {
                     File urlFile = new File(plixDirectory, url.getAuthority().replaceAll("[^a-zA-Z0-9\\.\\-]", "_"));
                     urlFile.mkdirs();
                     String fileName = ContentScraperUtil.getFileNameFromUrl(url);
-                    File file = ContentScraperUtil.getUniqueFile(urlFile, fileName);
+                    File file = new File(urlFile, fileName);
                     if (log.message.params.response.requestHeaders != null) {
                         URLConnection conn = url.openConnection();
                         for (Map.Entry<String, String> e : log.message.params.response.requestHeaders.entrySet()) {
