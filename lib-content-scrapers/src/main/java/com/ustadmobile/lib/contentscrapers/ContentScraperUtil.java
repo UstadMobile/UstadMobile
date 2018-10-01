@@ -87,7 +87,7 @@ public class ContentScraperUtil {
             } else if (url.contains(ScraperConstants.brainGenieLink)) {
                 String videoHtml;
                 try {
-                    if(url.startsWith("//")){
+                    if (url.startsWith("//")) {
                         url = "https:" + url;
                     }
                     videoHtml = Jsoup.connect(url).followRedirects(true).get().select("video").outerHtml();
@@ -102,7 +102,7 @@ public class ContentScraperUtil {
                 continue;
             } else if (url.contains(ScraperConstants.slideShareLink)) {
                 // content.html("We cannot download slideshare content, please watch using the link below <p></p><img href=" + url + "\" src=\"video-thumbnail.jpg\"/>");
-                 content.parent().html("");
+                content.parent().html("");
                 continue;
                 //    videoSource = Jsoup.connect(link).followRedirects(true).get().select("div.player").outerHtml();
                 //   videoSource = ContentScraperUtil.downloadAllResources(videoSource, destinationDirectory, "slideshare.jpg", scrapUrl);
@@ -115,7 +115,7 @@ public class ContentScraperUtil {
                 File contentFile = new File(destinationDir, fileName);
                 content.attr("src", destinationDir.getName() + "/" + contentFile.getName());
 
-                if(!ContentScraperUtil.isFileModified(conn, destinationDir, fileName)){
+                if (!ContentScraperUtil.isFileModified(conn, destinationDir, fileName)) {
                     continue;
                 }
 
@@ -133,8 +133,9 @@ public class ContentScraperUtil {
 
     /**
      * Given a fileName, check if the file exists. If it does, generate a new fileName
+     *
      * @param destinationDirectory folder where the file will be stored
-     * @param fileName name of the file
+     * @param fileName             name of the file
      * @return returns the file object which is unique
      */
     public static File getUniqueFile(File destinationDirectory, String fileName) {
@@ -155,7 +156,7 @@ public class ContentScraperUtil {
      */
     public static String getFileNameFromUrl(URL url) {
         String fileName = FilenameUtils.getPath(url.getPath()).replaceAll("[^a-zA-Z0-9\\.\\-]", "_") + FilenameUtils.getName(url.getPath());
-        if(fileName.isEmpty()){
+        if (fileName.isEmpty()) {
             return url.getPath().replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
         }
         return fileName;
@@ -211,7 +212,7 @@ public class ContentScraperUtil {
      * @param date Date format from server
      * @return the date given in a long format
      */
-    public static long parseServerDate(String date)  {
+    public static long parseServerDate(String date) {
         TemporalAccessor temporalAccessor = LOOSE_ISO_DATE_TIME_ZONE_PARSER.parseBest(date, ZonedDateTime::from, LocalDateTime::from, LocalDate::from);
         if (temporalAccessor instanceof ZonedDateTime) {
             return ((ZonedDateTime) temporalAccessor).toInstant().toEpochMilli();
@@ -254,6 +255,7 @@ public class ContentScraperUtil {
 
     /**
      * Once Selenium is setup and you load a page, use this method to wait for the page to load completely
+     *
      * @param waitDriver driver used to wait for conditions on webpage
      * @return true once wait is complete
      */
@@ -275,7 +277,6 @@ public class ContentScraperUtil {
 
         return waitDriver.until(jQueryLoad) && waitDriver.until(jsLoad);
     }
-
 
 
     /**
@@ -347,7 +348,7 @@ public class ContentScraperUtil {
     /**
      * check if the file has been modified by comparing eTag or modified Text from server and file in folder.
      *
-     * @param conn url from where the file is being downloaded
+     * @param conn           url from where the file is being downloaded
      * @param destinationDir location of possible eTag and last modified file
      * @param fileName
      * @return true if file modified
@@ -358,7 +359,7 @@ public class ContentScraperUtil {
         String eTag = conn.getHeaderField("ETag");
         String lastModified = conn.getHeaderField("Last-Modified");
 
-        if(eTag == null || lastModified == null){
+        if (eTag == null || lastModified == null) {
             return true;
         }
 
@@ -367,25 +368,22 @@ public class ContentScraperUtil {
         File eTagFile = new File(destinationDir, FilenameUtils.getBaseName(fileName) + ScraperConstants.ETAG_TXT);
         File modifiedFile = new File(destinationDir, FilenameUtils.getBaseName(fileName) + ScraperConstants.LAST_MODIFIED_TXT);
 
+        String text;
         if (eTagFile.length() > 0) {
 
-            String text = FileUtils.readFileToString(eTagFile, UTF_ENCODING);
+            text = FileUtils.readFileToString(eTagFile, UTF_ENCODING);
 
-            FileUtils.writeStringToFile(eTagFile, eTag, ScraperConstants.UTF_ENCODING);
-            FileUtils.writeStringToFile(modifiedFile, lastModified, ScraperConstants.UTF_ENCODING);
+        } else if (lastModified.length() > 0) {
 
-            return !text.equalsIgnoreCase(eTag);
+            text = FileUtils.readFileToString(modifiedFile, UTF_ENCODING);
 
-        }else if(lastModified.length() > 0){
-
-            String text = FileUtils.readFileToString(modifiedFile, UTF_ENCODING);
-
-            FileUtils.writeStringToFile(eTagFile, eTag, ScraperConstants.UTF_ENCODING);
-            FileUtils.writeStringToFile(modifiedFile, lastModified, ScraperConstants.UTF_ENCODING);
-
-            return !text.equalsIgnoreCase(lastModified);
-
+        } else {
+            return true;
         }
-        return true;
+
+        FileUtils.writeStringToFile(eTagFile, eTag, ScraperConstants.UTF_ENCODING);
+        FileUtils.writeStringToFile(modifiedFile, lastModified, ScraperConstants.UTF_ENCODING);
+
+        return !text.equalsIgnoreCase(lastModified);
     }
 }
