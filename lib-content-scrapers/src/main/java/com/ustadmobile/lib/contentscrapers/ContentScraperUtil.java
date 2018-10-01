@@ -365,8 +365,15 @@ public class ContentScraperUtil {
      */
     public static boolean isFileModified(URLConnection conn, File destinationDir) throws IOException {
 
-        String eTag = conn.getHeaderField("ETag").replaceAll("\"", "");
+
+        String eTag = conn.getHeaderField("ETag");
         String lastModified = conn.getHeaderField("Last-Modified");
+
+        if(eTag == null || lastModified == null){
+            return true;
+        }
+
+        eTag = eTag.replaceAll("\"", "");
 
         File eTagFile = new File(destinationDir, ScraperConstants.ETAG_TXT);
         File modifiedFile = new File(destinationDir, ScraperConstants.LAST_MODIFIED_TXT);
