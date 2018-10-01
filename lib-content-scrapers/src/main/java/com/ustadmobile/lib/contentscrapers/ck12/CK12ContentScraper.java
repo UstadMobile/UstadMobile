@@ -154,20 +154,20 @@ public class CK12ContentScraper {
             switch (type.toLowerCase()) {
 
                 case "video":
-                     scraper.scrapeVideoContent();
+                    scraper.scrapeVideoContent();
                     break;
                 case "plix":
-                     scraper.scrapePlixContent();
+                    scraper.scrapePlixContent();
                     break;
                 case "practice":
-                     scraper.scrapePracticeContent();
+                    scraper.scrapePracticeContent();
                     break;
                 case "read":
                 case "activities":
                 case "study aids":
                 case "lesson plans":
                 case "real world":
-                     scraper.scrapeReadContent();
+                    scraper.scrapeReadContent();
                     break;
                 default:
                     System.out.println("found a group type not supported " + type);
@@ -309,7 +309,7 @@ public class CK12ContentScraper {
         }
 
         FileUtils.writeStringToFile(new File(plixDirectory, "index.json"), gson.toJson(index), UTF_ENCODING);
-        ContentScraperUtil.zipDirectory(plixDirectory, plixId, destinationDirectory);
+        ContentScraperUtil.zipDirectory(plixDirectory, "plix-" + plixId, destinationDirectory);
     }
 
     public void scrapeVideoContent() throws IOException {
