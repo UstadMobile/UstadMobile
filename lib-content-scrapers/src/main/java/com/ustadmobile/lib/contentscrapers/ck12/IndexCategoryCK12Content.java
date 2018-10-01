@@ -35,18 +35,18 @@ import static com.ustadmobile.lib.contentscrapers.ScraperConstants.chromeDriverL
  * The CK 12 Website has a list of available subjects to download content from "https://www.ck12.org/browse/"
  * Each Subject has a list of topics that appear in different layouts.
  * Each Topic leads to a variety of content for example - Video, Text, Interactive(PLIX) or Practice Questions
- *
+ * <p>
  * Each subject is found by using the css selector - a.subject-link
  * A Folder is created for each content
  * There are 3 kinds of layout structure that could be found in each Subject.
- *
+ * <p>
  * For Elementary Subjects:
  * Selenium is needed here to get the final page source
  * Find the grade level by using css selector - li.js-grade a
  * Find the list of topics in each grade by css selector - div.topic-details-container
  * Each topic have different concepts to teach found by css selector - div.concept-track-wrapper
  * Each Concept has a list of subtopics that leads to all the variety content found by using selector - div.concept-list-container a
- *
+ * <p>
  * For Other Subjects
  * Content is found in Concepts or FlexBook Textbooks (not supported)
  * For Concepts:
@@ -55,14 +55,13 @@ import static com.ustadmobile.lib.contentscrapers.ScraperConstants.chromeDriverL
  * Each Topic might have their own list of subtopics identified by using checking the class
  * concept-container contains the content information to go to the variety of content - plix, video, questions
  * however if the class contains the word parent, this means there is more concept containers within the parent
- *
+ * <p>
  * Once the content url is found -
  * Selenium is needed here to wait for the page to load and click on the expand all button(which opens all the content)
  * Each content is found by the class name js-components-newspaper-Cards-Cards__cardsRow
  * Identify the type of content it is by searching the class name for js-components-newspaper-Card-Card__groupType
  * Link to the content can be found using the class js-components-newspaper-Card-Card__title
  * Once all information is found, use the groupType to identify the scraper to use.
- *
  */
 public class IndexCategoryCK12Content {
 
@@ -85,7 +84,7 @@ public class IndexCategoryCK12Content {
     }
 
 
-    public IndexCategoryCK12Content(String urlString, File destinationDirectory){
+    public IndexCategoryCK12Content(String urlString, File destinationDirectory) {
 
         try {
             url = new URL(urlString);
@@ -114,6 +113,7 @@ public class IndexCategoryCK12Content {
 
     /**
      * Given a ck12 url, find the content and download it all
+     *
      * @throws IOException
      */
     public void findContent() throws IOException {
@@ -419,20 +419,20 @@ public class IndexCategoryCK12Content {
             switch (groupType.toLowerCase()) {
 
                 case "video":
-                    //scraper.scrapeVideoContent();
+                    scraper.scrapeVideoContent();
                     break;
                 case "plix":
-                    //scraper.scrapePlixContent();
+                    scraper.scrapePlixContent();
                     break;
                 case "practice":
-                   // scraper.scrapePracticeContent();
+                    scraper.scrapePracticeContent();
                     break;
                 case "read":
                 case "activities":
                 case "study aids":
                 case "lesson plans":
                 case "real world":
-                   // scraper.scrapeReadContent();
+                    scraper.scrapeReadContent();
                     break;
                 default:
                     System.out.println("found a group type not supported " + groupType);
