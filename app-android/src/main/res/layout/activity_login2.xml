@@ -7,8 +7,7 @@
     tools:context="com.ustadmobile.port.android.view.LoginActivity2"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background_white"
-    >
+    android:background="@color/background_white">
 
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
@@ -26,6 +25,8 @@
     </android.support.design.widget.AppBarLayout>
 
     <android.support.v4.widget.NestedScrollView
+
+        android:padding="@dimen/dimen_10dp"
         android:id="@+id/activity_login2_nested_scroll_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -42,9 +43,9 @@
             <Button
                 android:id="@+id/activity_login2_facebook_button"
                 android:layout_width="0dp"
+                android:drawableLeft="@drawable/icon_facebook"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
-                android:layout_marginStart="8dp"
+                android:padding="@dimen/dimen_16dp"
                 android:layout_marginTop="8dp"
                 android:backgroundTint="@color/login_facebook_button_color"
                 android:text="@string/continue_with_facebook"
@@ -55,11 +56,11 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <Button
+                android:padding="@dimen/dimen_16dp"
+                android:drawableLeft="@drawable/icon_twitter"
                 android:id="@+id/activity_login2_twitter_button"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
-                android:layout_marginStart="8dp"
                 android:layout_marginTop="8dp"
                 android:text="@string/continue_with_twitter"
                 android:textColor="@color/primary_text"
@@ -78,11 +79,11 @@
                 />
 
             <TextView
+                android:paddingStart="@dimen/dimen_2dp"
                 android:id="@+id/activity_login2_login_desc"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="@dimen/default_margin_dimension"
                 android:text="@string/already_have_an_account"
                 android:textColor="@color/text_primary"
                 app:layout_constraintStart_toStartOf="parent"
@@ -90,11 +91,9 @@
 
             <android.support.design.widget.TextInputLayout
                 android:id="@+id/activity_login2_username_text_input_layout"
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="@dimen/dimen_16dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
@@ -110,9 +109,8 @@
 
             <android.support.design.widget.TextInputLayout
                 android:id="@+id/activity_login2_password_text_input_layout"
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
                 android:layout_marginTop="8dp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -129,21 +127,22 @@
             </android.support.design.widget.TextInputLayout>
 
             <TextView
+                android:paddingStart="@dimen/dimen_2dp"
                 android:id="@+id/activity_login2_forgot_password"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="@dimen/dimen_16dp"
                 android:text="@string/forgot_password"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/activity_login2_password_text_input_layout" />
 
             <TextView
+                android:paddingEnd="@dimen/dimen_4dp"
+                android:gravity="end"
                 android:id="@+id/activity_login2_create_account"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="@dimen/dimen_16dp"
                 android:text="@string/create_new_account"
                 android:clickable="true"
                 android:textColor="@color/text_link_color"
@@ -156,7 +155,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="@dimen/dimen_16dp"
                 android:visibility="gone"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/activity_login2_forgot_password" />
@@ -173,12 +172,12 @@
                 android:id="@+id/activity_login2_login_button"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="8dp"
+                android:padding="@dimen/dimen_16dp"
+                android:layout_marginTop="@dimen/dimen_16dp"
                 android:layout_weight="1"
                 android:backgroundTint="?attr/colorAccent"
                 android:text="@string/login"
+                android:textSize="18sp"
                 android:textColor="@color/primary_text"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
