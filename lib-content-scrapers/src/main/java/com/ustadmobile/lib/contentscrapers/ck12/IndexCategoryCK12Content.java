@@ -1,10 +1,13 @@
 package com.ustadmobile.lib.contentscrapers.ck12;
 
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
+import com.ustadmobile.lib.db.entities.OpdsEntry;
 import com.ustadmobile.lib.db.entities.OpdsEntryParentToChildJoin;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
+import com.ustadmobile.lib.db.entities.OpdsLink;
 import com.ustadmobile.lib.util.UmUuidUtil;
 
+import org.apache.commons.io.FilenameUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -23,6 +26,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -415,6 +419,7 @@ public class IndexCategoryCK12Content {
 
             URL url = new URL(contentUrl, hrefLink);
 
+
             CK12ContentScraper scraper = new CK12ContentScraper(url.toString(), topicDestination);
             switch (groupType.toLowerCase()) {
 
@@ -426,7 +431,7 @@ public class IndexCategoryCK12Content {
                     break;
                 case "practice":
                     scraper.scrapePracticeContent();
-                    break;
+                break;
                 case "read":
                 case "activities":
                 case "study aids":
@@ -449,6 +454,11 @@ public class IndexCategoryCK12Content {
                     topicEntry.getUuid(), courseCount++);
 
             parentToChildJoins.add(subTopicJoin);
+
+            OpdsLink newEntryLink = new OpdsLink(topicEntry.getUuid(), "application/zip",
+                    destinationDirectory.getName() + "/" + FilenameUtils.getBaseName(url.getPath()) + ".zip", OpdsEntry.LINK_REL_ACQUIRE);
+            newEntryLink.setLength(new File(destinationDirectory, FilenameUtils.getBaseName(url.getPath()) + ".zip").length());
+            topicEntry.setLinks(Collections.singletonList(newEntryLink));
 
 
         }

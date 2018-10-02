@@ -184,9 +184,9 @@ public class CK12ContentScraper {
 
         Gson gson = new GsonBuilder().disableHtmlEscaping().create();
 
-        String plixId = urlString.substring(urlString.lastIndexOf("-") + 1, urlString.indexOf("?"));
+        String plixId = FilenameUtils.getBaseName(scrapUrl.getPath());
 
-        File plixDirectory = new File(destinationDirectory, "plix-" + plixId);
+        File plixDirectory = new File(destinationDirectory, plixId);
         plixDirectory.mkdirs();
 
         assetDirectory = new File(plixDirectory, "asset");
@@ -309,7 +309,7 @@ public class CK12ContentScraper {
         }
 
         FileUtils.writeStringToFile(new File(plixDirectory, "index.json"), gson.toJson(index), UTF_ENCODING);
-        ContentScraperUtil.zipDirectory(plixDirectory, "plix-" + plixId, destinationDirectory);
+        ContentScraperUtil.zipDirectory(plixDirectory, plixId, destinationDirectory);
     }
 
     public void scrapeVideoContent() throws IOException {
@@ -501,7 +501,7 @@ public class CK12ContentScraper {
 
         Gson gson = new GsonBuilder().disableHtmlEscaping().create();
 
-        String practiceUrl = urlString.substring(urlString.lastIndexOf("/") + 1, urlString.indexOf("?"));
+        String practiceUrl = FilenameUtils.getBaseName(scrapUrl.getPath());
 
         String testIdLink = generatePracticeLink(practiceUrl);
 
