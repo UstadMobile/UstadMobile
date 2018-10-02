@@ -27,7 +27,7 @@
     </android.support.design.widget.AppBarLayout>
 
 
-    <android.support.v4.view.ViewPager
+    <com.aurelhubert.ahbottomnavigation.AHBottomNavigationViewPager
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/container_feedlist"
         android:layout_below="@+id/base_point_2_toolbar"
