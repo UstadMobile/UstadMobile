@@ -10,6 +10,14 @@ import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 @UmEntity
 public class Person implements SyncableEntity {
 
+    public static final int GENDER_UNSET = 0;
+
+    public static final int GENDER_FEMALE = 1;
+
+    public static final int GENDER_MALE = 2;
+
+    public static final int GENDER_OTHER = 4;
+
     @UmPrimaryKey(autoIncrement = true)
     private long personUid;
 
@@ -17,15 +25,17 @@ public class Person implements SyncableEntity {
 
     private String passwordHash;
 
-    private String firstName;
-
-    private String middleNames;
+    private String firstNames;
 
     private String lastName;
 
     private String emailAddr;
 
     private String phoneNum;
+
+    private int gender;
+
+    private boolean active;
 
     private long masterChangeSeqNum;
 
@@ -56,20 +66,12 @@ public class Person implements SyncableEntity {
         this.passwordHash = passwordHash;
     }
 
-    public String getFirstName() {
-        return firstName;
+    public String getFirstNames() {
+        return firstNames;
     }
 
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getMiddleNames() {
-        return middleNames;
-    }
-
-    public void setMiddleNames(String middleNames) {
-        this.middleNames = middleNames;
+    public void setFirstNames(String firstNames) {
+        this.firstNames = firstNames;
     }
 
     public String getLastName() {
@@ -114,5 +116,21 @@ public class Person implements SyncableEntity {
     @Override
     public void setLocalChangeSeqNum(long localChangeSeqNum) {
         this.localChangeSeqNum = localChangeSeqNum;
+    }
+
+    public int getGender() {
+        return gender;
+    }
+
+    public void setGender(int gender) {
+        this.gender = gender;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
     }
 }
