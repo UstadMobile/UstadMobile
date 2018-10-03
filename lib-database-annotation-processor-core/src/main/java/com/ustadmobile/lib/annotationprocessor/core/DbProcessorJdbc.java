@@ -9,6 +9,7 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import com.ustadmobile.core.db.UmLiveData;
+import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UmCallbackUtil;
 import com.ustadmobile.lib.database.annotation.UmClearAll;
@@ -991,6 +992,15 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
         boolean returnsLiveData = false;
 
         Element resultTypeElement = processingEnv.getTypeUtils().asElement(resultType);
+
+        //TODO: This is temporary only for purposes of testing compilation
+        if(resultTypeElement != null && resultTypeElement.equals(processingEnv
+            .getElementUtils().getTypeElement(UmProvider.class.getName()))) {
+            codeBlock.add("return null;\n");
+            methodBuilder.addCode(codeBlock.build());
+            daoBuilder.addMethod(methodBuilder.build());
+            return;
+        }
 
 
         if(resultTypeElement != null && resultTypeElement.equals(processingEnv

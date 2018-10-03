@@ -1,6 +1,7 @@
 package com.ustadmobile.lib.annotationprocessor.core.db;
 
 import com.ustadmobile.core.db.UmLiveData;
+import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmDelete;
@@ -91,5 +92,8 @@ public abstract class ExampleDao {
 
     @UmDelete
     public abstract int deleteAndGetCount(ExampleEntity entity);
+
+    @UmQuery("SELECT * FROM ExampleEntity")
+    public abstract UmProvider<ExampleEntity> getAllAsProvider();
 
 }
