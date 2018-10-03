@@ -1,5 +1,6 @@
 package com.ustadmobile.lib.annotationprocessor.core;
 
+import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.TypeName;
 import com.ustadmobile.lib.database.annotation.UmClearAll;
 import com.ustadmobile.lib.database.annotation.UmDao;
@@ -36,6 +37,9 @@ public abstract class AbstractDbProcessor {
 
     private String outputDirOpt;
 
+    public static final String DESTINATION_FILER = "filer";
+
+
     public synchronized void init(ProcessingEnvironment processingEnvironment) {
         this.processingEnv = processingEnvironment;
         filer = processingEnvironment.getFiler();
@@ -43,15 +47,15 @@ public abstract class AbstractDbProcessor {
     }
 
     public boolean process(Set<? extends TypeElement> set, RoundEnvironment roundEnvironment) {
-        String destinationPath = processingEnv.getOptions().get(getOutputDirOpt());
-        if(destinationPath == null)
+        String destination = processingEnv.getOptions().get(getOutputDirOpt());
+        if(destination == null)
             return true;
 
-        File destinationDir = new File(destinationPath);
+        File destinationDir = new File(destination);
 
         for(Element dbClassElement : roundEnvironment.getElementsAnnotatedWith(UmDatabase.class)) {
             try {
-                processDbClass((TypeElement)dbClassElement, destinationDir);
+                processDbClass((TypeElement)dbClassElement, destination);
 
                 for(Element subElement : dbClassElement.getEnclosedElements()) {
                     if (subElement.getKind() != ElementKind.METHOD)
@@ -80,7 +84,7 @@ public abstract class AbstractDbProcessor {
 
 
                     if(returnTypeElement.getAnnotation(UmDao.class) != null) {
-                        processDbDao(returnTypeElement, (TypeElement)dbClassElement, destinationDir);
+                        processDbDao(returnTypeElement, (TypeElement)dbClassElement, destination);
                     }
                 }
             }catch(IOException ioe) {
@@ -95,14 +99,46 @@ public abstract class AbstractDbProcessor {
         return true;
     }
 
-    public abstract void processDbClass(TypeElement dbType, File destinationDir) throws IOException;
+    /**
+     * This method will be called for each class annotated with UmDatabase found. It should be
+     * implemented for each platform and generate an implementation of the Database class.
+     *
+     * @param dbType TypeElement representing the database class
+     * @param destination This can be "filer", indicating that output should go directly to the
+     *                    annotation processor filer, or a file path (e.g. to put output in a
+     *                    different directory)
+     *
+     * @throws IOException If an IOException occurs attmepting to write output
+     */
+    public abstract void processDbClass(TypeElement dbType, String destination) throws IOException;
 
-    public abstract void processDbDao(TypeElement daoType, TypeElement dbType, File destinationDir) throws IOException;
+    /**
+     * This method will be called for each class annotated with UmDao found. It should be implemented
+     * for each platform and generate an implementation of the DAO
+     *
+     * @param daoType TypeElement representing the DAO
+     * @param dbType TypeElement representing the database
+     * @param destination This can be "filer", indicating that output should go directly to the
+     *      *                    annotation processor filer, or a file path (e.g. to put output in a
+     *      *                    different directory)
+     * @throws IOException If an IOException occurs attmepting to write output
+     */
+    public abstract void processDbDao(TypeElement daoType, TypeElement dbType, String destination) throws IOException;
 
+    /**
+     * Get the name of the output option for this processor e.g. umdb_jdbc_out
+     *
+     * @return The name of the output option for this processor e.g. umdb_jdbc_out
+     */
     public String getOutputDirOpt() {
         return outputDirOpt;
     }
 
+    /**
+     * Set the name of the output option for this processor e.g. umdb_jdbc_out
+     *
+     * @param outputDirOpt The name of the output option for this processor e.g. umdb_jdbc_out
+     */
     public void setOutputDirOpt(String outputDirOpt) {
         this.outputDirOpt = outputDirOpt;
     }
@@ -159,6 +195,14 @@ public abstract class AbstractDbProcessor {
      */
     protected void onDone() {
 
+    }
+
+    protected void writeJavaFileToDestination(JavaFile javaFile, String destination) throws IOException {
+        if(destination.equals(DESTINATION_FILER)) {
+            javaFile.writeTo(filer);
+        }else {
+            javaFile.writeTo(new File(destination));
+        }
     }
 
 

@@ -86,7 +86,7 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
         setOutputDirOpt(OPT_JDBC_OUTPUT);
     }
 
-    public void processDbClass(TypeElement dbType, File destinationDir) throws IOException {
+    public void processDbClass(TypeElement dbType, String destination) throws IOException {
         String jdbcDbClassName = dbType.getSimpleName() + SUFFIX_JDBC_DBMANAGER;
         PackageElement packageElement = processingEnv.getElementUtils().getPackageOf(dbType);
         ParameterizedTypeName dbChangeListenersMapType = ParameterizedTypeName.get(
@@ -208,10 +208,13 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
 
 
 
-        JavaFile.builder(packageElement.getQualifiedName().toString(), factoryClassSpec.build())
-                .indent("    ").build().writeTo(destinationDir);
-        JavaFile.builder(packageElement.getQualifiedName().toString(), jdbcDbTypeSpec.build())
-                .indent("    ").build().writeTo(destinationDir);
+        JavaFile factoryClassJavaFile = JavaFile.builder(packageElement.getQualifiedName().toString(), factoryClassSpec.build())
+                .indent("    ").build();
+        writeJavaFileToDestination(factoryClassJavaFile, destination);
+
+        JavaFile databaseJavaFile = JavaFile.builder(packageElement.getQualifiedName().toString(), jdbcDbTypeSpec.build())
+                .indent("    ").build();
+        writeJavaFileToDestination(databaseJavaFile, destination);
 
         //now create an in temporary file implementation of this database, this will be used when generating the DAOs
         SQLiteDataSource dataSource = new SQLiteDataSource();
@@ -468,7 +471,7 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
 
 
     @Override
-    public void processDbDao(TypeElement daoType, TypeElement dbType, File destinationDir) throws IOException {
+    public void processDbDao(TypeElement daoType, TypeElement dbType, String destination) throws IOException {
         String daoClassName = daoType.getSimpleName() + SUFFIX_JDBC_DAO;
         TypeSpec.Builder jdbcDaoClassSpec = TypeSpec.classBuilder(daoClassName)
                 .addModifiers(Modifier.PUBLIC)
@@ -498,8 +501,9 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
         }
 
 
-        JavaFile.builder(processingEnv.getElementUtils().getPackageOf(daoType).toString(),
-                jdbcDaoClassSpec.build()).build().writeTo(destinationDir);
+        JavaFile javaFile = JavaFile.builder(processingEnv.getElementUtils().getPackageOf(daoType).toString(),
+                jdbcDaoClassSpec.build()).build();
+        writeJavaFileToDestination(javaFile, destination);
     }
 
 

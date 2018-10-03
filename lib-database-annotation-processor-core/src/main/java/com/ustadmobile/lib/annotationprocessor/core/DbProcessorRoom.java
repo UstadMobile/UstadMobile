@@ -77,7 +77,7 @@ public class DbProcessorRoom extends AbstractDbProcessor{
      * @throws IOException If there are IO exceptions writing newly generated classes
      */
     @Override
-    public void processDbClass(TypeElement dbType,  File destinationDir) throws IOException {
+    public void processDbClass(TypeElement dbType,  String destination) throws IOException {
         String roomDbClassName = dbType.getSimpleName() + "_RoomDb";
         String roomDbManagerClassName = dbType.getSimpleName() + SUFFIX_ROOM_DBMANAGER;
 
@@ -187,9 +187,12 @@ public class DbProcessorRoom extends AbstractDbProcessor{
         }
 
 
-        JavaFile.builder(packageName, roomDbTypeSpec.build()).build().writeTo(destinationDir);
-        JavaFile.builder(packageName, dbManagerImplSpec.build()).build().writeTo(destinationDir);
-        JavaFile.builder(packageName, factoryClassSpec.build()).build().writeTo(destinationDir);
+        writeJavaFileToDestination(JavaFile.builder(packageName, roomDbTypeSpec.build()).build(),
+            destination);
+        writeJavaFileToDestination(JavaFile.builder(packageName, dbManagerImplSpec.build()).build(),
+            destination);
+        writeJavaFileToDestination(JavaFile.builder(packageName, factoryClassSpec.build()).build(),
+            destination);
     }
 
     private void addDaoMethod(TypeSpec.Builder roomDbTypeSpec, TypeSpec.Builder dbManagerSpec,
@@ -228,11 +231,11 @@ public class DbProcessorRoom extends AbstractDbProcessor{
      * Process the given DAO class and generate a child class with the appropriate room annotations.
      *
      * @param daoClass TypeElement representing the class with @UmDao annotation
-     * @param destinationDir Root package directory for generated source output
+     * @param destination Root package directory for generated source output
      *
      * @throws IOException When there is an IO issue writing the generated output
      */
-    public void processDbDao(TypeElement daoClass, TypeElement dbType, File destinationDir) throws IOException {
+    public void processDbDao(TypeElement daoClass, TypeElement dbType, String destination) throws IOException {
         String daoClassName = daoClass.getSimpleName() + SUFFIX_ROOM_DAO;
         TypeSpec.Builder roomDaoClassSpec = TypeSpec.classBuilder(daoClassName)
                 .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
@@ -275,8 +278,9 @@ public class DbProcessorRoom extends AbstractDbProcessor{
             }
         }
 
-        JavaFile.builder(processingEnv.getElementUtils().getPackageOf(daoClass).toString(),
-                roomDaoClassSpec.build()).build().writeTo(destinationDir);
+        writeJavaFileToDestination(
+                JavaFile.builder(processingEnv.getElementUtils().getPackageOf(daoClass).toString(),
+                roomDaoClassSpec.build()).build(), destination);
     }
 
     /**
