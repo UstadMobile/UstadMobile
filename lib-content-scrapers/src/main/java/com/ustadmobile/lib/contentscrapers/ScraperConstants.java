@@ -28,6 +28,59 @@ public class ScraperConstants {
     public static final String CHECK_PATH = "/com/ustadmobile/lib/contentscrapers/ck12/check.svg";
     public static final String CHECK_NAME = "check.svg";
 
+    // math jax links
+    public static final String MATH_JAX_LINK = "/com/ustadmobile/lib/contentscrapers/ck12/mathjax/MathJax.js";
+    public static final String MATH_JAX_FILE = "MathJax.js";
+
+    public static final String JAX_CONFIG_LINK = "/com/ustadmobile/lib/contentscrapers/ck12/mathjax/TeX-AMS-MML_HTMLorMML.js";
+    public static final String JAX_CONFIG_FILE = "/config/TeX-AMS-MML_HTMLorMML.js";
+
+    public static final String EXTENSION_TEX_LINK = "/com/ustadmobile/lib/contentscrapers/ck12/mathjax/tex2jax.js";
+    public static final String EXTENSION_TEX_FILE = "/extensions/tex2jax.js";
+
+    public static final String MATH_EVENTS_LINK = "/com/ustadmobile/lib/contentscrapers/ck12/mathjax/MathEvents.js";
+    public static final String MATH_EVENTS_FILE = "/extensions/MathEvents.js";
+
+    public static final String TEX_AMS_MATH_LINK = "/com/ustadmobile/lib/contentscrapers/ck12/mathjax/AMSmath.js";
+    public static final String TEX_AMS_MATH_FILE = "/extensions/TeX/AMSmath.js";
+
+    public static final String TEX_AMS_SYMBOL_LINK = "/com/ustadmobile/lib/contentscrapers/ck12/mathjax/AMSsymbols.js";
+    public static final String TEX_AMS_SYMBOL_FILE = "/extensions/TeX/AMSsymbols.js";
+
+    public static final String TEX_AUTOLOAD_LINK = "/com/ustadmobile/lib/contentscrapers/ck12/mathjax/autoload-all.js";
+    public static final String TEX_AUTOLOAD_FILE = "/extensions/TeX/autoload-all.js";
+
+    public static final String TEX_CANCEL_LINK = "/com/ustadmobile/lib/contentscrapers/ck12/mathjax/cancel.js";
+    public static final String TEX_CANCEL_FILE = "/extensions/TeX/cancel.js";
+
+    public static final String TEX_COLOR_LINK = "/com/ustadmobile/lib/contentscrapers/ck12/mathjax/color.js";
+    public static final String TEX_COLOR_FILE = "/extensions/TeX/color.js";
+
+    public static final String JAX_ELEMENT_LINK = "/com/ustadmobile/lib/contentscrapers/ck12/mathjax/element/jax.js";
+    public static final String JAX_ELEMENT_FILE = "/jax/element/mml/jax.js";
+
+    public static final String JAX_INPUT_LINK = "/com/ustadmobile/lib/contentscrapers/ck12/mathjax/input/jax.js";
+    public static final String JAX_INPUT_FILE = "/jax/input/TeX/jax.js";
+
+    public static final String CONFIG_INPUT_LINK = "/com/ustadmobile/lib/contentscrapers/ck12/mathjax/input/config.js";
+    public static final String CONFIG_INPUT_FILE = "/jax/input/TeX/config.js";
+
+    public static final String MTABLE_LINK = "/com/ustadmobile/lib/contentscrapers/ck12/mathjax/output/mtable.js";
+    public static final String MTABLE_FILE = "/jax/output/HTML-CSS/autoload/mtable.js";
+
+    public static final String FONT_DATA_LINK = "/com/ustadmobile/lib/contentscrapers/ck12/mathjax/output/fontdata.js";
+    public static final String FONT_DATA_FILE = "/jax/output/HTML-CSS/fonts/STIX/fontdata.js";
+
+    public static final String FONT_DATA_1_LINK = "/com/ustadmobile/lib/contentscrapers/ck12/mathjax/output/fontdata-1.0.js";
+    public static final String FONT_DATA_1_FILE = "/jax/output/HTML-CSS/fonts/STIX/fontdata-1.0.js";
+
+    public static final String JAX_OUTPUT_LINK = "/com/ustadmobile/lib/contentscrapers/ck12/mathjax/output/jax.js";
+    public static final String JAX_OUTPUT_FILE = "/jax/output/HTML-CSS/jax.js";
+
+    public static final String CONFIG_OUTPUT_LINK = "/com/ustadmobile/lib/contentscrapers/ck12/mathjax/output/config.js";
+    public static final String CONFIG_OUTPUT_FILE = "/jax/output/HTML-CSS/config.js";
+
+
     public static final String MATERIAL_JS = "materialize.min.js";
     public static final String MATERIAL_CSS = "materialize.min.css";
 

@@ -7,6 +7,7 @@ import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
 import com.ustadmobile.lib.db.entities.OpdsLink;
 import com.ustadmobile.lib.util.UmUuidUtil;
 
+import org.apache.commons.exec.ExecuteException;
 import org.apache.commons.io.FilenameUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -421,26 +422,32 @@ public class IndexCategoryCK12Content {
 
 
             CK12ContentScraper scraper = new CK12ContentScraper(url.toString(), topicDestination);
-            switch (groupType.toLowerCase()) {
+            try {
+                switch (groupType.toLowerCase()) {
 
-                case "video":
-                    scraper.scrapeVideoContent();
-                    break;
-                case "plix":
-                    scraper.scrapePlixContent();
-                    break;
-                case "practice":
-                    scraper.scrapePracticeContent();
-                break;
-                case "read":
-                case "activities":
-                case "study aids":
-                case "lesson plans":
-                case "real world":
-                    scraper.scrapeReadContent();
-                    break;
-                default:
-                    System.out.println("found a group type not supported " + groupType);
+                    case "video":
+                        scraper.scrapeVideoContent();
+                        break;
+                    case "plix":
+                        scraper.scrapePlixContent();
+                        break;
+                    case "practice":
+                        scraper.scrapePracticeContent();
+                        break;
+                    case "read":
+                    case "activities":
+                    case "study aids":
+                    case "lesson plans":
+                    case "real world":
+                        scraper.scrapeReadContent();
+                        break;
+                    default:
+                        System.out.println("found a group type not supported " + groupType);
+                }
+            }catch (Exception e){
+                System.err.println("Unable to scrape content from " + groupType + " at url " + url);
+                e.printStackTrace();
+                continue;
             }
 
             System.out.println("Found Content = " + groupType + " at url " + url);

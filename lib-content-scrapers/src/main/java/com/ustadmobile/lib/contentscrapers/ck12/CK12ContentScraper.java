@@ -45,9 +45,43 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.CHECK_NAME;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.CONFIG_INPUT_FILE;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.CONFIG_INPUT_LINK;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.CONFIG_OUTPUT_FILE;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.CONFIG_OUTPUT_LINK;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.EXTENSION_TEX_FILE;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.EXTENSION_TEX_LINK;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.FONT_DATA_1_FILE;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.FONT_DATA_1_LINK;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.FONT_DATA_FILE;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.FONT_DATA_LINK;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.INDEX_HTML;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.JAX_CONFIG_FILE;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.JAX_CONFIG_LINK;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.JAX_ELEMENT_FILE;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.JAX_ELEMENT_LINK;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.JAX_INPUT_FILE;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.JAX_INPUT_LINK;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.JAX_OUTPUT_FILE;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.JAX_OUTPUT_LINK;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.JQUERY_JS;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.MATERIAL_CSS;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.MATH_EVENTS_FILE;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.MATH_EVENTS_LINK;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.MATH_JAX_FILE;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.MATH_JAX_LINK;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.MTABLE_FILE;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.MTABLE_LINK;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.TEX_AMS_MATH_FILE;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.TEX_AMS_MATH_LINK;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.TEX_AMS_SYMBOL_FILE;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.TEX_AMS_SYMBOL_LINK;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.TEX_AUTOLOAD_FILE;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.TEX_AUTOLOAD_LINK;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.TEX_CANCEL_FILE;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.TEX_CANCEL_LINK;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.TEX_COLOR_FILE;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.TEX_COLOR_LINK;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.TIMER_NAME;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.TROPHY_NAME;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING;
@@ -449,6 +483,32 @@ public class CK12ContentScraper {
 
         String detailHtml = removeAllHref(getDetailSectionHtml(html));
 
+        if (readHtml.contains("x-ck12-mathEditor")) {
+            readHtml = appendMathJax() + readHtml;
+            detailHtml = detailHtml + appendMathJaxScript();
+
+            File mathJaxDir = new File(readHtmlLocation, "mathjax");
+            mathJaxDir.mkdirs();
+
+            FileUtils.copyToFile(getClass().getResourceAsStream(MATH_JAX_LINK), new File(mathJaxDir, MATH_JAX_FILE));
+            FileUtils.copyToFile(getClass().getResourceAsStream(JAX_CONFIG_LINK), new File(mathJaxDir, JAX_CONFIG_FILE));
+            FileUtils.copyToFile(getClass().getResourceAsStream(EXTENSION_TEX_LINK), new File(mathJaxDir, EXTENSION_TEX_FILE));
+            FileUtils.copyToFile(getClass().getResourceAsStream(MATH_EVENTS_LINK), new File(mathJaxDir, MATH_EVENTS_FILE));
+            FileUtils.copyToFile(getClass().getResourceAsStream(TEX_AMS_MATH_LINK), new File(mathJaxDir, TEX_AMS_MATH_FILE));
+            FileUtils.copyToFile(getClass().getResourceAsStream(TEX_AMS_SYMBOL_LINK), new File(mathJaxDir, TEX_AMS_SYMBOL_FILE));
+            FileUtils.copyToFile(getClass().getResourceAsStream(TEX_AUTOLOAD_LINK), new File(mathJaxDir, TEX_AUTOLOAD_FILE));
+            FileUtils.copyToFile(getClass().getResourceAsStream(TEX_CANCEL_LINK), new File(mathJaxDir, TEX_CANCEL_FILE));
+            FileUtils.copyToFile(getClass().getResourceAsStream(TEX_COLOR_LINK), new File(mathJaxDir, TEX_COLOR_FILE));
+            FileUtils.copyToFile(getClass().getResourceAsStream(JAX_ELEMENT_LINK), new File(mathJaxDir, JAX_ELEMENT_FILE));
+            FileUtils.copyToFile(getClass().getResourceAsStream(JAX_INPUT_LINK), new File(mathJaxDir, JAX_INPUT_FILE));
+            FileUtils.copyToFile(getClass().getResourceAsStream(CONFIG_INPUT_LINK), new File(mathJaxDir, CONFIG_INPUT_FILE));
+            FileUtils.copyToFile(getClass().getResourceAsStream(MTABLE_LINK), new File(mathJaxDir, MTABLE_FILE));
+            FileUtils.copyToFile(getClass().getResourceAsStream(FONT_DATA_LINK), new File(mathJaxDir, FONT_DATA_FILE));
+            FileUtils.copyToFile(getClass().getResourceAsStream(FONT_DATA_1_LINK), new File(mathJaxDir, FONT_DATA_1_FILE));
+            FileUtils.copyToFile(getClass().getResourceAsStream(JAX_OUTPUT_LINK), new File(mathJaxDir, JAX_OUTPUT_FILE));
+            FileUtils.copyToFile(getClass().getResourceAsStream(CONFIG_OUTPUT_LINK), new File(mathJaxDir, CONFIG_OUTPUT_FILE));
+        }
+
         readHtml = readTitle + readHtml + vocabHtml + detailHtml;
 
         FileUtils.writeStringToFile(new File(readHtmlLocation, "index.html"), readHtml, ScraperConstants.UTF_ENCODING);
@@ -461,6 +521,53 @@ public class CK12ContentScraper {
         }
 
         ContentScraperUtil.zipDirectory(readHtmlLocation, readContentName, destinationDirectory);
+    }
+
+    private String appendMathJaxScript() {
+        return "<script language=\"JavaScript\" src=\"./mathjax/MathJax.js\" type=\"text/javascript\">\n" +
+                "  </script>\n" +
+                "  <script>\n" +
+                "   var els = document.getElementsByClassName(\"x-ck12-mathEditor\");\n" +
+                "    for(var i = 0; i < els.length; i++) {\n" +
+                "        var el = els.item(i);\n" +
+                "        var tex = decodeURIComponent(el.getAttribute(\"data-tex\"))\n" +
+                "        if (tex.indexOf(\"\\\\begin{align\") === -1) {\n" +
+                "            tex = \"\\\\begin{align*}\" + tex + \"\\\\end{align*}\";\n" +
+                "        }\n" +
+                "        tex = (\"@$\" + tex + \"@$\").replace(/</g, \"&lt;\");\n" +
+                "        el.innerHTML = tex;\n" +
+                "        el.removeAttribute(\"data-tex-mathjax\");\n" +
+                "    }\n" +
+                "\n" +
+                "    MathJax.Hub.Typeset(MathJax.Hub);\n" +
+                "  </script>\n" +
+                " </body>\n" +
+                "</html>";
+    }
+
+    private String appendMathJax() {
+
+        return "<html xmlns=\"http://www.w3.org/1999/xhtml\">\n" +
+                " <head>\n" +
+                "  <title>\n" +
+                "  </title><script language=\"JavaScript\" type=\"text/x-mathjax-config\">\n" +
+                "   MathJax.Hub.Config({\n" +
+                "\t\textensions: [\"tex2jax.js\",\"TeX/AMSmath.js\",\"TeX/AMSsymbols.js\"],\n" +
+                "\t\ttex2jax: {\n" +
+                "\t\t\tinlineMath: [['@$','@$']],\n" +
+                "\t\t\tdisplayMath: [['@$$','@$$']],\n" +
+                "\t\t\tskipTags: [\"script\",\"noscript\",\"style\",\"textarea\",\"code\"]\n" +
+                "\t\t},\n" +
+                "\t\tshowMathMenu : false,\n" +
+                "\t\tjax: [\"input/TeX\",\"output/HTML-CSS\"],\n" +
+                "\t\tmessageStyle: \"none\",\n" +
+                "\t\tTeX: {\n" +
+                "\t\t\textensions: [\"cancel.js\", \"color.js\", \"autoload-all.js\"]\n" +
+                "\t\t}\n" +
+                "\t});\n" +
+                "  </script>\n" +
+                " </head>\n" +
+                " <body>\n";
     }
 
     /**
