@@ -149,11 +149,22 @@ public abstract class AbstractDbProcessor {
             typeName = typeName.unbox();
         }
 
-        if(typeName.equals(TypeName.INT) || typeName.equals(TypeName.LONG)
-                || typeName.equals(TypeName.FLOAT) || typeName.equals(TypeName.DOUBLE)
-                || typeName.equals(TypeName.BYTE) || typeName.equals(TypeName.SHORT)
-                || typeName.equals(TypeName.CHAR) || typeName.equals(TypeName.BYTE)) {
+        if(typeName.equals(TypeName.INT)) {
             return "0";
+        }else if(typeName.equals(TypeName.LONG)) {
+            return "0L";
+        }else if(typeName.equals(TypeName.FLOAT)) {
+            return "0f";
+        }else if(typeName.equals(TypeName.DOUBLE)) {
+            return "0d";
+        }else if(typeName.equals(TypeName.BYTE)) {
+            return "0b";
+        }else if(typeName.equals(TypeName.SHORT)) {
+            return "(short)0";
+        }else if(typeName.equals(TypeName.CHAR)) {
+            return "(char)0";
+        }else if(typeName.equals(TypeName.BYTE)) {
+            return "0b";
         }else if(typeName.equals(TypeName.BOOLEAN)) {
             return "false";
         }else {
@@ -205,5 +216,17 @@ public abstract class AbstractDbProcessor {
         }
     }
 
+    protected List<VariableElement> getEntityFieldElements(TypeElement entityTypeElement) {
+        List<VariableElement> entityFieldsList = new ArrayList<>();
+        for(Element subElement : entityTypeElement.getEnclosedElements()) {
+            if(!subElement.getKind().equals(ElementKind.FIELD) ||
+                    subElement.getModifiers().contains(Modifier.STATIC))
+                continue;
+
+            entityFieldsList.add((VariableElement)subElement);
+        }
+
+        return entityFieldsList;
+    }
 
 }

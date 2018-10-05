@@ -34,6 +34,7 @@ import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.update.Update;
 import net.sf.jsqlparser.util.TablesNamesFinder;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.sqlite.SQLiteDataSource;
 
 import java.io.File;
@@ -63,6 +64,7 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.naming.InitialContext;
@@ -226,18 +228,20 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                         dbTmpFile.getAbsolutePath());
 
         dataSource.setUrl("jdbc:sqlite:" + dbTmpFile.getAbsolutePath());
+        String createSql = null;
         try(
             Connection connection = dataSource.getConnection();
             Statement stmt = connection.createStatement();
         ) {
             nameToDataSourceMap.put(dbType.getQualifiedName().toString(), dataSource);
             for(TypeElement entityType : findEntityTypes(dbType)){
-                stmt.execute(makeCreateTableStatement(entityType, '`'));
+                createSql = makeCreateTableStatement(entityType, '`');
+                stmt.execute(createSql);
             }
-            stmt.close();
         }catch(SQLException e) {
             messager.printMessage(Diagnostic.Kind.ERROR, "Error attempting to create database for "
-                + dbType.getQualifiedName().toString() + ": " + e.getMessage());
+                + dbType.getQualifiedName().toString() + ": executing SQL \"" + createSql + "\": " +
+                e.getMessage());
         }
 
 
@@ -342,12 +346,7 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                                                  TypeElement entitySpec, char quoteChar) {
 
         Map<String, List<String>> indexes = new HashMap<>();
-        for(Element subElement : entitySpec.getEnclosedElements()) {
-            if(subElement.getKind() != ElementKind.FIELD)
-                continue;
-
-            VariableElement fieldVariable = (VariableElement)subElement;
-
+        for(VariableElement fieldVariable : getEntityFieldElements(entitySpec)) {
             if(fieldVariable.getAnnotation(UmIndexField.class) != null) {
                 indexes.put("index_" + entitySpec.getSimpleName() + '_' + fieldVariable.getSimpleName(),
                         Collections.singletonList(fieldVariable.getSimpleName().toString()));
@@ -398,18 +397,17 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                 .append("CREATE TABLE IF NOT EXISTS ").append(quoteChar)
                 .append(entitySpec.getSimpleName()).append(quoteChar)
                 .append(" (");
-        for(Element subElement : entitySpec.getEnclosedElements()) {
-            if (subElement.getKind() != ElementKind.FIELD)
-                continue;
 
+        for(VariableElement fieldVariable : getEntityFieldElements(entitySpec)) {
             if (fieldVariablesStarted)
                 sbuf.append(", ");
 
-            VariableElement fieldVariable = (VariableElement)subElement;
             UmPrimaryKey primaryKeyAnnotation = fieldVariable.getAnnotation(UmPrimaryKey.class);
 
             sbuf.append(quoteChar).append(fieldVariable.getSimpleName().toString())
-                    .append(quoteChar).append(' ').append(makeSqlTypeDeclaration(fieldVariable));
+                    .append(quoteChar).append(' ').append(
+                            primaryKeyAnnotation != null && primaryKeyAnnotation.autoIncrement() ?
+                                    "INTEGER" : makeSqlTypeDeclaration(fieldVariable));
 
             if(primaryKeyAnnotation!= null) {
                 sbuf.append(" PRIMARY KEY ");
@@ -567,25 +565,21 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
         }
 
         if(!isVoid(resultType)) {
-            codeBlock.add("$T result = $L;\n", resultType, defaultValue(resultType));
+            codeBlock.add("$T _result = $L;\n", resultType, defaultValue(resultType));
         }
 
         codeBlock.add("try (\n").indent()
-                    .add("$T connection = _db.getConnection();\n", Connection.class)
-                    .add("$T _stmt = connection.prepareStatement(\"INSERT INTO $L$L$L (",
+                    .add("$T _connection = _db.getConnection();\n", Connection.class)
+                    .add("$T _stmt = _connection.prepareStatement(\"INSERT INTO $L$L$L (",
                             PreparedStatement.class, identifierQuoteStr,
                             entityTypeElement.getSimpleName().toString(), identifierQuoteStr);
 
-        List<VariableElement> entityFields = new ArrayList<>();
+        List<VariableElement> entityFields = getEntityFieldElements(entityTypeElement);
         boolean commaRequired = false;
-        for(Element fieldElement : entityTypeElement.getEnclosedElements()) {
-            if(fieldElement.getKind() != ElementKind.FIELD)
-                continue;
-
+        for(VariableElement fieldElement : entityFields) {
             if(commaRequired)
                 codeBlock.add(", ");
 
-            entityFields.add((VariableElement)fieldElement);
             codeBlock.add(identifierQuoteStr).add(fieldElement.getSimpleName().toString())
                     .add(identifierQuoteStr);
             commaRequired = true;
@@ -613,9 +607,9 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
         }
 
         for(int i = 0; i < entityFields.size(); i++) {
-            addSetPreparedStatementValueToCodeBlock(preparedStmtVarName,
+            addSetPreparedStatementValueToCodeBlock(entityTypeElement, preparedStmtVarName,
                     (isList|| isArray) ? "_element" : insertedElement.getSimpleName().toString(),
-                    i + 1, entityFields.get(i), codeBlock);
+                    i + 1, entityFields.get(i), codeBlock, daoMethod);
         }
 
         if(isList || isArray) {
@@ -635,7 +629,7 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                 .unindent().beginControlFlow(")");
 
             if(isList || isArray) {
-                String arrayListVarName = isList ? "result" : "resultList";
+                String arrayListVarName = isList ? "_result" : "_resultList";
                 ParameterizedTypeName listTypeName =ParameterizedTypeName.get(
                         ClassName.get(ArrayList.class), ClassName.get(String.class));
                 if(isArray)
@@ -652,12 +646,12 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                     .endControlFlow();
 
                 if(isArray) {
-                    codeBlock.add("result = arrayList.toArray(new $T[arrayList.size()]);\n",
+                    codeBlock.add("_result = arrayList.toArray(new $T[arrayList.size()]);\n",
                             primaryKeyType);
                 }
             }else {
                 codeBlock.beginControlFlow("if(generatedKeys.next())")
-                        .add("result = generatedKeys.get$L(1);\n",
+                        .add("_result = generatedKeys.get$L(1);\n",
                                 getPreparedStatementSetterGetterTypeName(resultType))
                         .endControlFlow();
             }
@@ -674,13 +668,13 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                 .add("e.printStackTrace();\n").endControlFlow();
 
         if(!isVoid(resultType) && !asyncMethod) {
-            codeBlock.add("return result;\n");
+            codeBlock.add("return _result;\n");
         }
 
         if(asyncMethod) {
             codeBlock.add("$T.onSuccessIfNotNull($L, $L);\n", UmCallbackUtil.class,
                     daoMethod.getParameters().get(asyncParamIndex).getSimpleName().toString(),
-                    isVoid(resultType) ? "null" : "result");
+                    isVoid(resultType) ? "null" : "_result");
 
             codeBlock.endControlFlow(")");
         }
@@ -752,10 +746,7 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
         boolean commaRequired = false;
         int positionCounter = 1;
         Element pkElement = null;
-        for(Element subElement : entityTypeElement.getEnclosedElements()) {
-            if(!subElement.getKind().equals(ElementKind.FIELD))
-                continue;
-
+        for(Element subElement : getEntityFieldElements(entityTypeElement)) {
             if(subElement.getAnnotation(UmPrimaryKey.class) != null) {
                 pkElement = subElement;
                 continue;
@@ -799,7 +790,7 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
             String propertyName = entry.getKey();
             List<ExecutableElement> getterCallChain = findGetterOrSetter("get", daoMethod,
                     propertyName, entityTypeElement, new ArrayList<>(), true);
-            if(getterCallChain != null && getterCallChain.size() != 1) {
+            if(getterCallChain == null || getterCallChain.size() != 1) {
                 messager.printMessage(Diagnostic.Kind.ERROR,
                         formatMethodForErrorMessage(daoMethod) +
                                 " could not find setter for " + propertyName);
@@ -984,7 +975,7 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
         List<String> namedParams = getNamedParameters(querySql);
         String preparedStmtSql = querySql;
         for(String paramName : namedParams) {
-            preparedStmtSql = preparedStmtSql.replaceAll(":" + paramName, "?");
+            preparedStmtSql = preparedStmtSql.replace(":" + paramName, "?");
         }
 
         boolean returnsList = false;
@@ -1008,14 +999,14 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
 
             List<String> tableList;
             try {
-                Select select = (Select) CCJSqlParserUtil.parse(querySql);
+                Select select = (Select) CCJSqlParserUtil.parse(preparedStmtSql);
                 TablesNamesFinder tablesNamesFinder = new TablesNamesFinder();
                 tableList = tablesNamesFinder.getTableList(select);
                 codeBlock.add("// Table names = " + Arrays.toString(tableList.toArray()))
                         .add("\n");
             }catch(JSQLParserException e) {
                 messager.printMessage(Diagnostic.Kind.ERROR, formatMethodForErrorMessage(daoMethod) +
-                        " exception parsing query to determine tables");
+                        " exception parsing query 2 \"" + preparedStmtSql + "\" to determine tables: " + e.getMessage());
                 return;
             }
 
@@ -1046,7 +1037,7 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
             ArrayType arrayType = (ArrayType)resultType;
             resultType = arrayType.getComponentType();
             resultTypeElement = processingEnv.getTypeUtils().asElement(resultType);
-            codeBlock.add("$T[] result = null;\n", resultTypeElement);
+            codeBlock.add("$T[] result = null;\n", resultType);
             returnsArray = true;
         }else if(resultTypeElement != null && resultTypeElement.equals(processingEnv
                 .getElementUtils().getTypeElement(List.class.getCanonicalName()))) {
@@ -1055,7 +1046,10 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
             resultType = declaredResultType.getTypeArguments().get(0);
             resultTypeElement = processingEnv.getTypeUtils().asElement(resultType);
             returnsList = true;
-            codeBlock.add("$T<$T> result = new $T<>();\n", List.class, resultTypeElement,
+
+            codeBlock.add("$T<$T> result = new $T<>();\n", List.class,
+                    resultType.getKind().isPrimitive() ? processingEnv.getTypeUtils().boxedClass(
+                            (PrimitiveType)resultType) : resultType,
                     ArrayList.class);
         }else if(!isVoid(resultType)){
             codeBlock.add("$T result = $L;\n", resultType, defaultValue(resultType));
@@ -1237,7 +1231,9 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
             if(returnsList) {
                 codeBlock.beginControlFlow("while(resultSet.next())");
             } else if (returnsArray) {
-                codeBlock.add("$T<$T> resultList = new $T<>();\n", ArrayList.class, resultType,
+                codeBlock.add("$T<$T> resultList = new $T<>();\n", ArrayList.class,
+                        resultType.getKind().isPrimitive() ? processingEnv.getTypeUtils()
+                            .boxedClass((PrimitiveType)resultType) : resultType,
                         ArrayList.class)
                         .beginControlFlow("while(resultSet.next())");
             } else {
@@ -1257,9 +1253,17 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                         .endControlFlow();
             }else if(returnsArray) {
                 codeBlock.add("resultList.add(entity);\n")
-                        .endControlFlow()
-                        .add("result = resultList.toArray(new $T[resultList.size()]);\n",
-                                resultTypeElement);
+                        .endControlFlow();
+                if(!resultType.getKind().isPrimitive()) {
+                    codeBlock.add("result = resultList.toArray(new $T[resultList.size()]);\n",
+                            resultType);
+                }else {
+                    codeBlock.add(
+                        "result = $T.toPrimitive(resultList.toArray(new $T[resultList.size()]));\n",
+                        ArrayUtils.class,
+                        processingEnv.getTypeUtils().boxedClass((PrimitiveType)resultType));
+                }
+
             }else {
                 codeBlock.add("result = entity;\n")
                         .endControlFlow();
@@ -1307,12 +1311,12 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                 List<ExecutableElement> callChain = findSetterMethod(daoMethodElement,
                         metaData.getColumnLabel(i + 1), entityElement, new ArrayList<>(), true);
                 if(callChain == null || callChain.isEmpty()) {
-                    messager.printMessage(Diagnostic.Kind.ERROR,
+                    messager.printMessage(Diagnostic.Kind.WARNING,
                             formatMethodForErrorMessage(daoMethodElement) +
                                     " : Could not find setter for field: '" +
                                     metaData.getColumnLabel(i + 1) +"' on return class " +
                                     entityElement.getQualifiedName());
-                    return;
+                    continue;
                 }
 
                 CodeBlock.Builder setFromResultCodeBlock = CodeBlock.builder()
@@ -1386,7 +1390,7 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
             if(!insideQuote && !insideDoubleQuote) {
                 if(c == ':'){
                     startNamedParam = i;
-                }else if(Character.isWhitespace(c) && startNamedParam != -1){
+                }else if(!Character.isLetterOrDigit(c) && startNamedParam != -1){
                     //process the parameter
                     namedParams.add(querySql.substring(startNamedParam + 1, i ));
                     startNamedParam = -1;
@@ -1431,14 +1435,16 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                                                        List<ExecutableElement> callChain,
                                                        boolean checkEmbedded) {
         //go through the methods on this TypeElement to find a setter
-        String targetMethodName = methodType + Character.toUpperCase(rowName.charAt(0)) +
-                rowName.substring(1);
+        String methodPostfix = Character.toUpperCase(rowName.charAt(0)) + rowName.substring(1);
+        String targetMethodName = methodType + methodPostfix;
+        String altTargetMethodName = methodType.equals("get") ? "is" + methodPostfix : null;
 
         for(Element subElement : entityElement.getEnclosedElements()) {
             if(subElement.getKind() != ElementKind.METHOD)
                 continue;
 
-            if(subElement.getSimpleName().toString().equals(targetMethodName)) {
+            String methodName = subElement.getSimpleName().toString();
+            if(methodName.equals(targetMethodName) || methodName.equals(altTargetMethodName)) {
                 callChain.add((ExecutableElement)subElement);
                 return callChain;
             }
@@ -1507,10 +1513,7 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
     }
 
     private VariableElement findPrimaryKey(TypeElement entityType) {
-        for(Element subElement : entityType.getEnclosedElements()) {
-            if(!subElement.getKind().equals(ElementKind.FIELD))
-                continue;
-
+        for(Element subElement : getEntityFieldElements(entityType)) {
             if(subElement.getAnnotation(UmPrimaryKey.class) != null)
                 return (VariableElement)subElement;
         }
@@ -1519,9 +1522,12 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
     }
 
 
-    private void addSetPreparedStatementValueToCodeBlock(String preparedStatementVariableName,
-                                           String entityVariableName, int index,
-                                           VariableElement field, CodeBlock.Builder codeBlock) {
+    private void addSetPreparedStatementValueToCodeBlock(TypeElement entityTypeElement,
+                                                 String preparedStatementVariableName,
+                                                 String entityVariableName, int index,
+                                                 VariableElement field,
+                                                 CodeBlock.Builder codeBlock,
+                                                 ExecutableElement daoMethod) {
         boolean isPkAutoIncrementField = field.getAnnotation(UmPrimaryKey.class) != null
                 && field.getAnnotation(UmPrimaryKey.class).autoIncrement();
 
@@ -1539,11 +1545,11 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
 
 
         //TODO: add error message here if there is no match
-        codeBlock.add("$L, $L.get", index, entityVariableName);
-        String fieldName = field.getSimpleName().toString();
+        List<ExecutableElement> getterCallchain = findGetterOrSetter("get", daoMethod,
+                field.getSimpleName().toString(), entityTypeElement, new ArrayList<>(), false);
+        codeBlock.add("$L, $L.", index, entityVariableName);
 
-        codeBlock.add(Character.toUpperCase(fieldName.charAt(0)) + fieldName.substring(1))
-                .add("());\n");
+        codeBlock.add(getterCallchain.get(0).getSimpleName().toString()).add("());\n");
 
         if(isPkAutoIncrementField) {
             codeBlock.endControlFlow();
@@ -1570,6 +1576,8 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
             return "Float";
         }else if(variableType.getKind().equals(TypeKind.DOUBLE)) {
             return "Double";
+        }else if(variableType.getKind().equals(TypeKind.BOOLEAN)) {
+            return "Boolean";
         }else if(variableType.getKind().equals(TypeKind.DECLARED)) {
             String className = ((TypeElement)processingEnv.getTypeUtils().asElement(variableType))
                     .getQualifiedName().toString();
@@ -1584,6 +1592,8 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                     return "Float";
                 case "java.lang.Double":
                     return "Double";
+                case "java.lang.Boolean":
+                    return "Boolean";
             }
         }
 

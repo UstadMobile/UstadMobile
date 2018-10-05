@@ -48,6 +48,9 @@ public class DownloadJobItem {
         this.downloadJobId = downloadJobId;
     }
 
+    public DownloadJobItem() {
+
+    }
 
     /**
      * Get the primary key
