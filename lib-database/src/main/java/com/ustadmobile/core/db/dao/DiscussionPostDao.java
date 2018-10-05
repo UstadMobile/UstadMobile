@@ -36,4 +36,10 @@ public abstract class DiscussionPostDao implements BaseDao<DiscussionPost> {
             " WHERE clazzClazzUid = :clazzUid " +
             " ORDER BY timePosted DESC")
     public abstract List<DiscussionPost> findByClazzUidAsList(long clazzUid);
+
+    @UmQuery("SELECT * FROM DiscussionPost  " +
+            " LEFT JOIN Person ON DiscussionPost.posterPersonUid = Person.personUid " +
+            " WHERE Person.personUid = :personUid" +
+            " ORDER BY timePosted DESC")
+    public abstract UmProvider<DiscussionPostWithPoster> findByPersonUid(long personUid);
 }

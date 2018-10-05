@@ -1,5 +1,6 @@
 package com.ustadmobile.core.db.dao;
 
+import com.ustadmobile.lib.database.annotation.UmUpdate;
 import com.ustadmobile.lib.db.entities.UmAccount;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UmCallbackUtil;
@@ -28,6 +29,9 @@ public abstract class PersonDao implements BaseDao<Person>{
 
     @UmQuery("SELECT * FROM Person WHERE username = :username")
     public abstract void findByUsername(String username, UmCallback<Person> callback);
+
+    @UmUpdate
+    public abstract void updateAccountAsync(Person person, UmCallback<Integer> callback);
 
     /**
      * Determine of the given authentication is valid
