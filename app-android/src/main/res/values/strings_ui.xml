@@ -254,4 +254,11 @@
     <string name="catalog_language">Catalog Language</string>
     <string name="also_available_in">Also available in</string>
 
+    <string name="wamda_default_profile_status">Hi, am learning with Wamda</string>
+    <string name="wamda_password_doesnt_match_message">Password doesn't match, try again</string>
+    <string name="wamda_profile_updated_successfully_message">You have successfully update your profile</string>
+    <string name="wamda_guest_full_name">Guest User</string>
+    <string name="wamda_guest_username">Guest User</string>
+    <string name="wamda_not_logged_in_warning_message">Sorry, you are not logged in please login first</string>
+
 </resources>
