@@ -29,6 +29,7 @@ dependencies {
     testImplementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
     testImplementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
     testImplementation "junit:junit:$version_junit"
+    testImplementation "org.mockito:mockito-core:$version_core_mockito"
 
     compile project(path: ':lib-util')
 }

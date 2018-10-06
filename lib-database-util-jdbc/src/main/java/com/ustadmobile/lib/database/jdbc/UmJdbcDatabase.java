@@ -21,4 +21,12 @@ public interface UmJdbcDatabase {
      */
     void handleTablesChanged(String... changedTables);
 
+    /**
+     * Indicates whether or not the connection natively supports SQL array type. If not, then the
+     * PreparedStatementArrayProxy must be used.
+     *
+     * @return
+     */
+    boolean isArraySupported();
+
 }

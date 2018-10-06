@@ -24,6 +24,7 @@ import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.database.annotation.UmUpdate;
 import com.ustadmobile.lib.database.jdbc.DbChangeListener;
 import com.ustadmobile.lib.database.jdbc.JdbcDatabaseUtils;
+import com.ustadmobile.lib.database.jdbc.PreparedStatementArrayProxy;
 import com.ustadmobile.lib.database.jdbc.UmJdbcDatabase;
 import com.ustadmobile.lib.database.jdbc.UmLiveDataJdbc;
 
@@ -39,6 +40,7 @@ import org.sqlite.SQLiteDataSource;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.Array;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -107,6 +109,7 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                 .addField(ClassName.get(DataSource.class), "_dataSource", Modifier.PRIVATE)
                 .addField(ClassName.get(ExecutorService.class), "_executor", Modifier.PRIVATE)
                 .addField(dbChangeListenersMapType, "_dbChangeListeners", Modifier.PRIVATE)
+                .addField(TypeName.BOOLEAN, "_arraySupported", Modifier.PRIVATE)
                 .addMethod(MethodSpec.constructorBuilder()
                     .addModifiers(Modifier.PUBLIC)
                     .addParameter(TypeName.get(Object.class), "context")
@@ -117,6 +120,8 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                             .add("$T iContext = new $T();\n", initialContextClassName, initialContextClassName)
                             .add("_executor = $T.newCachedThreadPool();\n", Executors.class)
                             .add("this._dataSource = (DataSource)iContext.lookup(\"java:/comp/env/jdbc/\"+dbName);\n")
+                            .add("this._arraySupported = $T.isArraySupported(this._dataSource);\n",
+                                    JdbcDatabaseUtils.class)
                             .add("createAllTables();\n")
                         .endControlFlow()
                         .beginControlFlow("catch($T e)",
@@ -165,6 +170,12 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                             .add("$T.removeDbChangeListener(listenerRequest, _dbChangeListeners);\n",
                                     JdbcDatabaseUtils.class)
                             .build())
+                        .build())
+                .addMethod(MethodSpec.methodBuilder("isArraySupported")
+                        .addAnnotation(Override.class)
+                        .addModifiers(Modifier.PUBLIC)
+                        .returns(TypeName.BOOLEAN)
+                        .addCode("return this._arraySupported;\n")
                         .build());
 
         TypeSpec.Builder factoryClassSpec = DbProcessorUtils.makeFactoryClass(dbType, jdbcDbClassName);
@@ -426,8 +437,18 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
     }
 
     protected String makeSqlTypeDeclaration(VariableElement field) {
-        TypeMirror fieldType = field.asType();
+        String result = makeSqlTypeDeclaration(field.asType());
+        //didn't recognize that.
+        if(result == null) {
+            messager.printMessage(Diagnostic.Kind.ERROR,
+                    "Could not determine SQL data type for field: " + field.getEnclosingElement() +
+                            "." + field.getSimpleName().toString());
+        }
 
+        return result;
+    }
+
+    protected String makeSqlTypeDeclaration(TypeMirror fieldType) {
         switch(fieldType.getKind()) {
             case BOOLEAN:
                 return "BOOL";
@@ -459,11 +480,6 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
 
                 break;
         }
-
-        //didn't recognize that.
-        messager.printMessage(Diagnostic.Kind.ERROR,
-                "Could not determine SQL data type for field: " + field.getEnclosingElement() +
-                "." + field.getSimpleName().toString());
 
         return null;
     }
@@ -1064,6 +1080,12 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
             codeBlock.add("$T resultSet = null;\n", ResultSet.class);
         }
 
+
+        Map<String, String> arrayParameters = findArrayParameters(daoMethod.getParameters());
+        for(String arrayParamName : arrayParameters.keySet()) {
+            codeBlock.add("$T _$L_sqlArr = null;\n", Array.class, arrayParamName);
+        }
+
         codeBlock.add("try (\n").indent()
             .add("$T connection = _db.getConnection();\n", Connection.class)
             .add("$T stmt = connection.prepareStatement($S);\n", PreparedStatement.class, preparedStmtSql)
@@ -1085,9 +1107,39 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                 return;
             }
 
+            String paramVariableName = paramVariableElement.getSimpleName().toString();
+
+            TypeMirror sqlVariableType = paramVariableElement.asType();
+            if(arrayParameters.containsKey(paramVariableElement.getSimpleName().toString())) {
+                boolean isArray = paramVariableElement.asType().getKind().equals(TypeKind.ARRAY);
+                boolean isList = !isArray;//otherwise it would not be in the arrayParameters hashtable
+                TypeMirror arrayElementType;
+                String arrayVariableName;
+
+                if(isList) {
+                    arrayElementType = ((DeclaredType)paramVariableElement.asType())
+                            .getTypeArguments().get(0);
+                    codeBlock.add("$1T[] _$2L_arr = $2L.toArray(new $1T[$2L.size()]);\n",
+                            arrayElementType, paramVariableName);
+                    arrayVariableName = "_" + paramVariableName + "_arr";
+                }else {
+                    arrayElementType = ((ArrayType)paramVariableElement.asType())
+                            .getComponentType();
+                    arrayVariableName = paramVariableName;
+                }
+
+                codeBlock.add("_$1L_sqlArr = _db.isArraySupported() ? " +
+                        " connection.createArrayOf($2S, $3L) : $4T.createArrayOf($2S, $3L);\n",
+                        paramVariableName, makeSqlTypeDeclaration(arrayElementType),
+                        arrayVariableName, PreparedStatementArrayProxy.class);
+                sqlVariableType = processingEnv.getElementUtils().getTypeElement(Array.class.getName())
+                        .asType();
+                paramVariableName = "_" + paramVariableName + "_sqlArr";
+            }
+
             codeBlock.add("stmt.$L($L, $L);\n",
-                    getPreparedStatementSetterMethodName(paramVariableElement.asType()),  i + 1,
-                    paramVariableElement.getSimpleName().toString());
+                    getPreparedStatementSetterMethodName(sqlVariableType),  i + 1,
+                    paramVariableName);
         }
 
         if(!isUpdateOrDelete) {
@@ -1158,9 +1210,17 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
         codeBlock.nextControlFlow("catch($T e)", SQLException.class)
             .add("e.printStackTrace();\n");
 
+        boolean hasFinally = !isUpdateOrDelete || !arrayParameters.isEmpty();
+        if(hasFinally) {
+            codeBlock.nextControlFlow("finally");
+        }
+
         if(!isUpdateOrDelete) {
-            codeBlock.nextControlFlow("finally")
-                .add("$T.closeQuietly(resultSet);\n", JdbcDatabaseUtils.class);
+            codeBlock.add("$T.closeQuietly(resultSet);\n", JdbcDatabaseUtils.class);
+        }
+
+        for(String arrayParamName : arrayParameters.keySet()) {
+            codeBlock.add("$T.freeArrayQuietly(_$L_sqlArr);\n", JdbcDatabaseUtils.class, arrayParamName);
         }
 
         codeBlock.endControlFlow();
@@ -1407,6 +1467,25 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
         return namedParams;
     }
 
+    private Map<String, String> findArrayParameters(List<? extends VariableElement> paramList) {
+        Map<String, String> arrayNameToTypeMap = new HashMap<>();
+        TypeElement listTypeElement = processingEnv.getElementUtils().getTypeElement(List.class.getName());
+
+        for(VariableElement param : paramList) {
+            if(listTypeElement.equals(processingEnv.getTypeUtils().asElement(param.asType()))) {
+                DeclaredType declaredType =(DeclaredType)param.asType();
+                arrayNameToTypeMap.put(param.getSimpleName().toString(),
+                        makeSqlTypeDeclaration(declaredType.getTypeArguments().get(0)));
+            }else if(param.asType().getKind().equals(TypeKind.ARRAY)) {
+                ArrayType arrayType = (ArrayType)param.asType();
+                arrayNameToTypeMap.put(param.getSimpleName().toString(),
+                        makeSqlTypeDeclaration(arrayType.getComponentType()));
+            }
+        }
+
+        return arrayNameToTypeMap;
+    }
+
 
     /**
      * Find the setter method for a given row name (e.g. "fieldName") on a given Java object (e.g.
@@ -1582,6 +1661,8 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
             String className = ((TypeElement)processingEnv.getTypeUtils().asElement(variableType))
                     .getQualifiedName().toString();
             switch(className) {
+                case "java.sql.Array":
+                    return "Array";
                 case "java.lang.String":
                     return "String";
                 case "java.lang.Integer":

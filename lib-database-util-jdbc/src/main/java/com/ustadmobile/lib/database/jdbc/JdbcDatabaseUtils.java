@@ -1,6 +1,7 @@
 package com.ustadmobile.lib.database.jdbc;
 
 import java.io.Closeable;
+import java.sql.Array;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
@@ -9,6 +10,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -124,6 +126,37 @@ public class JdbcDatabaseUtils {
         }
 
         return result;
+    }
+
+
+    //return map of original position to map of startPos -> endPos after handling arrays
+    public static Map<Integer, Map.Entry<Integer, Integer>> mapParameters(String querySql, Map<Integer, Object> arrayParameters) {
+
+        return null;
+    }
+
+    public static boolean isArraySupported(DataSource dataSource) {
+        boolean supported = false;
+        try (
+            Connection connection = dataSource.getConnection();
+        ){
+            Array sqlArray = connection.createArrayOf("VARCHAR", new String[]{"hello"});
+            supported = sqlArray != null;
+        }catch(SQLException e) {
+            System.err.println("SQL Exception checking for array support: " + e.toString());
+        }
+
+        return supported;
+    }
+
+    public static void freeArrayQuietly(Array array) {
+        if(array != null) {
+            try {
+                array.free();
+            }catch(SQLException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
 }
