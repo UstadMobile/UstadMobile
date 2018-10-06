@@ -260,5 +260,10 @@
     <string name="wamda_guest_full_name">Guest User</string>
     <string name="wamda_guest_username">Guest User</string>
     <string name="wamda_not_logged_in_warning_message">Sorry, you are not logged in please login first</string>
-
+    <string name="wamda_empty_state_followers">You have no followers</string>
+    <string name="wamda_empty_state_following">You don\'t follow anybody.</string>
+    <string name="wamda_following_label">FOLLOWING</string>
+    <string name="wamda_follow_label">FOLLOW</string>
+    <string name="wamda_follower_title">Followers</string>
+    <string name="wamda_following_title">Following</string>
 </resources>

@@ -24,7 +24,9 @@ import com.ustadmobile.core.db.dao.OpdsLinkDao;
 import com.ustadmobile.core.db.dao.PersonCustomFieldDao;
 import com.ustadmobile.core.db.dao.PersonCustomFieldValueDao;
 import com.ustadmobile.core.db.dao.PersonDao;
+import com.ustadmobile.core.db.dao.WamdaClazzDao;
 import com.ustadmobile.core.db.dao.WamdaFollowerDao;
+import com.ustadmobile.core.db.dao.WamdaLikeDao;
 import com.ustadmobile.core.db.dao.WamdaPersonDao;
 import com.ustadmobile.lib.database.annotation.UmClearAll;
 import com.ustadmobile.lib.database.annotation.UmDatabase;
@@ -54,7 +56,9 @@ import com.ustadmobile.lib.db.entities.Person;
 import com.ustadmobile.lib.db.entities.PersonCustomField;
 import com.ustadmobile.lib.db.entities.PersonCustomFieldValue;
 import com.ustadmobile.lib.db.entities.WamdaFollower;
+import com.ustadmobile.lib.db.entities.WamdaLike;
 import com.ustadmobile.lib.db.entities.WamdaPerson;
+import com.ustadmobile.lib.db.entities.WamdaShare;
 
 @UmDatabase(version = 1, entities = {
         OpdsEntry.class, OpdsLink.class, OpdsEntryParentToChildJoin.class,
@@ -65,7 +69,8 @@ import com.ustadmobile.lib.db.entities.WamdaPerson;
         HttpCachedEntry.class, DownloadJob.class, DownloadJobItem.class,
         Person.class, Clazz.class, ContentEntry.class, DiscussionPost.class,
         PersonCustomField.class, PersonCustomFieldValue.class,
-        ClazzMember.class, WamdaPerson.class, WamdaFollower.class
+        ClazzMember.class, WamdaPerson.class, WamdaFollower.class,
+        WamdaLike.class, WamdaShare.class
 })
 public abstract class UmAppDatabase{
 
@@ -145,6 +150,10 @@ public abstract class UmAppDatabase{
     public abstract WamdaPersonDao getWamdaPersonDao();
 
     public abstract WamdaFollowerDao getWamdaFollowersDao();
+
+    public abstract WamdaLikeDao getWamdaLikeDao();
+
+    public abstract WamdaClazzDao getWamdaClazzDao();
 
     @UmDbContext
     public abstract Object getContext();

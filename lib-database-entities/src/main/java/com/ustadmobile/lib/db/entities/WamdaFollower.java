@@ -9,9 +9,11 @@ public class WamdaFollower {
     @UmPrimaryKey(autoIncrement = true)
     private long wamdaFollowerUid;
 
-    private long wamdaFollowerFollowerPersonUid;
+    private long wamdaFollowerPersonUid;
 
-    private long wamdaFollowerFollowingPersonUid;
+    private long timeStamp;
+
+    private long wamdaFollowingPersonUid;
 
     public long getWamdaFollowerUid() {
         return wamdaFollowerUid;
@@ -21,19 +23,27 @@ public class WamdaFollower {
         this.wamdaFollowerUid = wamdaFollowerUid;
     }
 
-    public long getWamdaFollowerFollowerPersonUid() {
-        return wamdaFollowerFollowerPersonUid;
+    public long getWamdaFollowerPersonUid() {
+        return wamdaFollowerPersonUid;
     }
 
-    public void setWamdaFollowerFollowerPersonUid(long wamdaFollowerFollowerPersonUid) {
-        this.wamdaFollowerFollowerPersonUid = wamdaFollowerFollowerPersonUid;
+    public void setWamdaFollowerPersonUid(long wamdaFollowerPersonUid) {
+        this.wamdaFollowerPersonUid = wamdaFollowerPersonUid;
     }
 
-    public long getWamdaFollowerFollowingPersonUid() {
-        return wamdaFollowerFollowingPersonUid;
+    public long getWamdaFollowingPersonUid() {
+        return wamdaFollowingPersonUid;
     }
 
-    public void setWamdaFollowerFollowingPersonUid(long wamdaFollowerFollowingPersonUid) {
-        this.wamdaFollowerFollowingPersonUid = wamdaFollowerFollowingPersonUid;
+    public void setWamdaFollowingPersonUid(long wamdaFollowingPersonUid) {
+        this.wamdaFollowingPersonUid = wamdaFollowingPersonUid;
+    }
+
+    public long getTimeStamp() {
+        return timeStamp;
+    }
+
+    public void setTimeStamp(long timeStamp) {
+        this.timeStamp = timeStamp;
     }
 }

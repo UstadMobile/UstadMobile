@@ -22,8 +22,8 @@ public abstract class WamdaPersonDao {
     public abstract void updateAsync(WamdaPerson wamdaPerson,UmCallback<Integer> callback);
 
     @UmQuery("SELECT Person.*, WamdaPerson.*, " +
-            "(SELECT COUNT(*) FROM WamdaFollower WHERE wamdaFollowerFollowingPersonUid = :personUid) AS totalNumFollowers, " +
-            "(SELECT COUNT(*) FROM WamdaFollower WHERE wamdaFollowerFollowerPersonUid = :personUid) AS totalNumFollowing " +
+            "(SELECT COUNT(*) FROM WamdaFollower WHERE wamdaFollowingPersonUid = :personUid) AS totalNumFollowing, " +
+            "(SELECT COUNT(*) FROM WamdaFollower WHERE wamdaFollowerPersonUid = :personUid) AS  totalNumFollowers" +
             " FROM Person " +
             " LEFT JOIN WamdaPerson ON WamdaPerson.wamdaPersonPersonUid = Person.personUid")
     public abstract UmLiveData<WamdaPersonWithTotalFollowers> findWithTotalNumFollowers(long personUid);
