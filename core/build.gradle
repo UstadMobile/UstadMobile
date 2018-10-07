@@ -104,6 +104,7 @@ task generateCoreBuildConfig (type: de.fuerstenau.gradle.buildconfig.GenerateBui
 
     buildConfigField "String[]", "SUPPORTED_LOCALES", supportedLocalesValue
 
+    buildConfigField "String", "FACEBOOK_APPID", project.ext.buildConfigProperties["appFacebookAppId"]
     buildConfigField "String", "BASE_NAME", project.ext.buildConfigProperties["baseName"]
     buildConfigField "String", "DEFAULT_PREFERRED_ACQUISITION_FORMATS", project.ext.buildConfigProperties["appPreferredAcquisitionFormats"]
     buildConfigField "String", "NETWORK_SERVICE_TYPE", project.ext.buildConfigProperties["appNetworkServiceType"]

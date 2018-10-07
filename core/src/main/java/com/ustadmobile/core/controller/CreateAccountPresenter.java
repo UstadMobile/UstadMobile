@@ -1,6 +1,8 @@
 package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.db.UmAppDatabase;
+import com.ustadmobile.core.db.dao.WamdaPersonDao;
+import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.AppConfig;
 import com.ustadmobile.lib.db.entities.UmAccount;
 import com.ustadmobile.core.impl.UmAccountManager;
@@ -8,6 +10,7 @@ import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.CreateAccountView;
 import com.ustadmobile.lib.db.entities.Person;
+import com.ustadmobile.lib.db.entities.WamdaPerson;
 
 import java.util.Hashtable;
 
@@ -38,6 +41,10 @@ public class CreateAccountPresenter extends UstadBaseController<CreateAccountVie
                 String nextDest = getArgumentString(ARG_NEXT) != null ?
                         getArgumentString(ARG_NEXT) :
                         impl.getAppConfigString(AppConfig.KEY_FIRST_DEST, null, context);
+
+                WamdaPersonDao.makeWamdaPersonForNewUser(result.getPersonUid(),
+                        impl.getString(MessageID.wamda_default_profile_status, getContext()),
+                        getContext());
                 impl.go(nextDest, context);
             }
 

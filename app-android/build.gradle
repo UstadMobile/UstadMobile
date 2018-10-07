@@ -19,6 +19,7 @@ buildscript {
 apply plugin: 'com.android.library'
 apply plugin: "jacoco"
 apply plugin: 'digital.wup.android-maven-publish'
+apply plugin: 'com.google.gms.google-services'
 
 configurations.all {
     exclude group: "net.sf.kxml", module: "kxml2"
@@ -147,7 +148,6 @@ afterEvaluate {
         variant.javaCompiler.dependsOn(checkBuildConfig)
     }
 }
-
 
 /*
  * Anything under the localconfig variant is not stored in Git. The class UmBaseApplication.java
@@ -532,6 +532,18 @@ dependencies {
     //http server
     implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
     implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
+
+    //firebase
+    implementation "com.google.firebase:firebase-core:$version_android_firebase_auth"
+    implementation "com.google.firebase:firebase-auth:$version_android_firebase_auth"
+
+    //facebook
+    implementation "com.facebook.android:facebook-login:$version_android_facebook_login"
+
+    //Twitter
+    implementation "com.twitter.sdk.android:twitter-core:$version_android_twitter_login"
+    implementation "com.twitter.sdk.android:twitter:$version_android_twitter_login"
+
 
     testImplementation "junit:junit:$version_junit"
 }

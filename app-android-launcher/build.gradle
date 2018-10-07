@@ -140,6 +140,7 @@ configurations.all {
 //        force "android.arch.core:runtime:$lifecycle_version"
 //    }
 
+
     exclude group: "net.sf.kxml", module: "kxml2"
     exclude group: "org.json", module: "json"
 }
@@ -157,7 +158,6 @@ dependencies {
     api fileTree(dir: 'libs', include: ['*.jar'])
     androidTestImplementation "com.android.support.test.espresso:espresso-core:$version_android_espresso"
     androidTestImplementation "com.android.support.test.espresso:espresso-contrib:$version_android_espresso"
-
     testImplementation "junit:junit:$version_junit"
 }
 

@@ -35,4 +35,28 @@ public class WamdaFollowerWithPerson extends WamdaFollower {
     public void setWamdaPerson(WamdaPerson wamdaPerson) {
         this.wamdaPerson = wamdaPerson;
     }
+
+    public boolean equals(Object object) {
+        if (this == object) return true;
+        if (!(object instanceof WamdaFollowerWithPerson)) return false;
+        if (!super.equals(object)) return false;
+
+        WamdaFollowerWithPerson person = (WamdaFollowerWithPerson) object;
+
+        if (following != person.following) return false;
+        if (followerPerson != null ? !followerPerson.equals(person.followerPerson) : person.followerPerson != null)
+            return false;
+        if (wamdaPerson != null ? !wamdaPerson.equals(person.wamdaPerson) : person.wamdaPerson != null)
+            return false;
+
+        return true;
+    }
+
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + (followerPerson != null ? followerPerson.hashCode() : 0);
+        result = 31 * result + (wamdaPerson != null ? wamdaPerson.hashCode() : 0);
+        result = 31 * result + (following ? 1 : 0);
+        return result;
+    }
 }

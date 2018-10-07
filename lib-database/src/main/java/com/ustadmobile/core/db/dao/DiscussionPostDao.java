@@ -25,11 +25,12 @@ public abstract class DiscussionPostDao implements BaseDao<DiscussionPost> {
     @UmQuery("SELECT * From DiscussionPost WHERE discussionPostUid = :uid")
     public abstract DiscussionPost findByUid(long uid);
 
-    @UmQuery("SELECT * FROM DiscussionPost  " +
+    @UmQuery("SELECT DiscussionPost.*,Person.*,(SELECT COUNT(*) FROM WamdaLike " +
+            " WHERE WamdaLike.wamdaLikeDiscussionUid = DiscussionPost.clazzClazzUid" +
+            " AND WamdaLike.wamdaLikePersonUid = :personUid) AS liked FROM DiscussionPost" +
             " LEFT JOIN Person ON DiscussionPost.posterPersonUid = Person.personUid " +
-            " WHERE clazzClazzUid = :clazzUid" +
-            " ORDER BY timePosted DESC")
-    public abstract UmProvider<DiscussionPostWithPoster> findByClazzUidAsProvider(long clazzUid);
+            "WHERE clazzClazzUid = :clazzUid ORDER BY timePosted DESC")
+    public abstract UmProvider<DiscussionPostWithPoster> findByClazzUidAsProvider(long clazzUid, long personUid);
 
     @UmQuery("SELECT * FROM DiscussionPost " +
             " LEFT JOIN Person ON DiscussionPost.posterPersonUid = Person.personUid " +
@@ -37,9 +38,10 @@ public abstract class DiscussionPostDao implements BaseDao<DiscussionPost> {
             " ORDER BY timePosted DESC")
     public abstract List<DiscussionPost> findByClazzUidAsList(long clazzUid);
 
-    @UmQuery("SELECT * FROM DiscussionPost  " +
-            " LEFT JOIN Person ON DiscussionPost.posterPersonUid = Person.personUid " +
-            " WHERE Person.personUid = :personUid" +
-            " ORDER BY timePosted DESC")
+    @UmQuery("SELECT DiscussionPost.*,Person.*,(SELECT COUNT(*) FROM WamdaLike " +
+            " WHERE WamdaLike.wamdaLikeDiscussionUid = DiscussionPost.clazzClazzUid  " +
+            " AND WamdaLike.wamdaLikePersonUid = :personUid) AS liked FROM DiscussionPost" +
+            " LEFT JOIN Person ON DiscussionPost.posterPersonUid = Person.personUid  " +
+            " WHERE Person.personUid = :personUid ORDER BY timePosted DESC")
     public abstract UmProvider<DiscussionPostWithPoster> findByPersonUid(long personUid);
 }

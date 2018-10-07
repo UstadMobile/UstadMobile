@@ -1,5 +1,6 @@
 package com.ustadmobile.core.db.dao;
 
+import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.lib.database.annotation.UmDao;
@@ -22,9 +23,20 @@ public abstract class WamdaPersonDao {
     public abstract void updateAsync(WamdaPerson wamdaPerson,UmCallback<Integer> callback);
 
     @UmQuery("SELECT Person.*, WamdaPerson.*, " +
-            "(SELECT COUNT(*) FROM WamdaFollower WHERE wamdaFollowingPersonUid = :personUid) AS totalNumFollowing, " +
-            "(SELECT COUNT(*) FROM WamdaFollower WHERE wamdaFollowerPersonUid = :personUid) AS  totalNumFollowers" +
+            "(SELECT COUNT(*) FROM WamdaFollower WHERE wamdaFollowerPersonUid = :personUid) AS totalNumFollowing, " +
+            "(SELECT COUNT(*) FROM WamdaFollower WHERE wamdaFollowingPersonUid = :personUid) AS  totalNumFollowers" +
             " FROM Person " +
-            " LEFT JOIN WamdaPerson ON WamdaPerson.wamdaPersonPersonUid = Person.personUid")
+            " LEFT JOIN WamdaPerson ON WamdaPerson.wamdaPersonPersonUid = Person.personUid" +
+            " WHERE Person.personUid = :personUid ")
     public abstract UmLiveData<WamdaPersonWithTotalFollowers> findWithTotalNumFollowers(long personUid);
+
+    public static void makeWamdaPersonForNewUser(long newPersonUid, String profileStatus,
+                                                 Object context) {
+        WamdaPerson wamdaPerson = new WamdaPerson();
+        wamdaPerson.setWamdaPersonPersonUid(newPersonUid);
+        wamdaPerson.setProfileStatus(profileStatus);
+        UmAppDatabase.getInstance(context).getWamdaPersonDao().insertAsync(wamdaPerson,
+                null);
+    }
+
 }

@@ -133,4 +133,45 @@ public class Person implements SyncableEntity {
     public void setActive(boolean active) {
         this.active = active;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Person)) return false;
+
+        Person person = (Person) o;
+
+        if (personUid != person.personUid) return false;
+        if (gender != person.gender) return false;
+        if (active != person.active) return false;
+        if (masterChangeSeqNum != person.masterChangeSeqNum) return false;
+        if (localChangeSeqNum != person.localChangeSeqNum) return false;
+        if (username != null ? !username.equals(person.username) : person.username != null)
+            return false;
+        if (passwordHash != null ? !passwordHash.equals(person.passwordHash) : person.passwordHash != null)
+            return false;
+        if (firstNames != null ? !firstNames.equals(person.firstNames) : person.firstNames != null)
+            return false;
+        if (lastName != null ? !lastName.equals(person.lastName) : person.lastName != null)
+            return false;
+        if (emailAddr != null ? !emailAddr.equals(person.emailAddr) : person.emailAddr != null)
+            return false;
+        return phoneNum != null ? phoneNum.equals(person.phoneNum) : person.phoneNum == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = (int) (personUid ^ (personUid >>> 32));
+        result = 31 * result + (username != null ? username.hashCode() : 0);
+        result = 31 * result + (passwordHash != null ? passwordHash.hashCode() : 0);
+        result = 31 * result + (firstNames != null ? firstNames.hashCode() : 0);
+        result = 31 * result + (lastName != null ? lastName.hashCode() : 0);
+        result = 31 * result + (emailAddr != null ? emailAddr.hashCode() : 0);
+        result = 31 * result + (phoneNum != null ? phoneNum.hashCode() : 0);
+        result = 31 * result + gender;
+        result = 31 * result + (active ? 1 : 0);
+        result = 31 * result + (int) (masterChangeSeqNum ^ (masterChangeSeqNum >>> 32));
+        result = 31 * result + (int) (localChangeSeqNum ^ (localChangeSeqNum >>> 32));
+        return result;
+    }
 }

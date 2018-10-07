@@ -46,4 +46,25 @@ public class WamdaFollower {
     public void setTimeStamp(long timeStamp) {
         this.timeStamp = timeStamp;
     }
+
+    public boolean equals(Object object) {
+        if (this == object) return true;
+        if (!(object instanceof WamdaFollower)) return false;
+
+        WamdaFollower follower = (WamdaFollower) object;
+
+        if (wamdaFollowerUid != follower.wamdaFollowerUid) return false;
+        if (wamdaFollowerPersonUid != follower.wamdaFollowerPersonUid) return false;
+        if (timeStamp != follower.timeStamp) return false;
+        return wamdaFollowingPersonUid == follower.wamdaFollowingPersonUid;
+    }
+
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + (int) (wamdaFollowerUid ^ (wamdaFollowerUid >>> 32));
+        result = 31 * result + (int) (wamdaFollowerPersonUid ^ (wamdaFollowerPersonUid >>> 32));
+        result = 31 * result + (int) (timeStamp ^ (timeStamp >>> 32));
+        result = 31 * result + (int) (wamdaFollowingPersonUid ^ (wamdaFollowingPersonUid >>> 32));
+        return result;
+    }
 }

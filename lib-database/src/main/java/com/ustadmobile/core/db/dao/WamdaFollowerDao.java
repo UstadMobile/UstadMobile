@@ -22,7 +22,7 @@ public abstract class WamdaFollowerDao {
      */
     @UmQuery("SELECT WamdaFollower.*, Person.*, WamdaPerson.*,  \n" +
             "\t(SELECT COUNT(*) FROM WamdaFollower SubFollower  \n" +
-            "\tWHERE  SubFollower.wamdaFollowerPersonUid = :personUid  \n" +
+            "\tWHERE  SubFollower.wamdaFollowerPersonUid = :currentUserUid  \n" +
             "\tAND  \n" +
             "\tSubFollower.wamdaFollowingPersonUid = WamdaFollower.wamdaFollowerPersonUid)  \n" +
             "\tAS following  \n" +
@@ -30,7 +30,7 @@ public abstract class WamdaFollowerDao {
             "LEFT JOIN Person ON WamdaFollower.wamdaFollowerPersonUid = Person.personUid \n" +
             "LEFT JOIN WamdaPerson ON WamdaPerson.wamdaPersonPersonUid = Person.personUid \n" +
             "WHERE WamdaFollower.wamdaFollowingPersonUid = :personUid ORDER BY WamdaFollower.timeStamp DESC")
-    public abstract UmProvider<WamdaFollowerWithPerson> findFollowersByPersonUid(long personUid);
+    public abstract UmProvider<WamdaFollowerWithPerson> findFollowersByPersonUid(long personUid, long currentUserUid);
 
 
     /**
@@ -38,10 +38,16 @@ public abstract class WamdaFollowerDao {
      * @param personUid
      * @return
      */
-    @UmQuery("SELECT WamdaFollower.*, Person.*, 1 as following FROM WamdaFollower" +
-            " LEFT JOIN Person ON WamdaFollower.wamdaFollowerPersonUid = Person.personUid" +
-            " WHERE WamdaFollower.wamdaFollowingPersonUid = :personUid ORDER BY WamdaFollower.timeStamp DESC")
-    public abstract UmProvider<WamdaFollowerWithPerson> findFollowingByPersonUid(long personUid);
+    @UmQuery("SELECT WamdaFollower.*, Person.*, " +
+            "(SELECT COUNT(*) FROM WamdaFollower SubFollower " +
+            " WHERE SubFollower.wamdaFollowerPersonUid = :currentUserUid " +
+            " AND" +
+            " SubFollower.wamdaFollowingPersonUid = WamdaFollower.wamdaFollowingPersonUid) " +
+            " AS following" +
+            " FROM WamdaFollower" +
+            " LEFT JOIN Person ON WamdaFollower.wamdaFollowingPersonUid = Person.personUid" +
+            " WHERE WamdaFollower.wamdaFollowerPersonUid = :personUid ORDER BY WamdaFollower.timeStamp DESC")
+    public abstract UmProvider<WamdaFollowerWithPerson> findFollowingByPersonUid(long personUid, long currentUserUid);
 
 
     @UmQuery("DELETE FROM WamdaFollower WHERE wamdaFollowerPersonUid = :followerPersonUid " +
