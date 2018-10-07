@@ -98,7 +98,7 @@ public class IndexPrathamContentScraper {
             File file = new File(destinationDir, String.valueOf(data.id));
             file.mkdirs();
             File content = new File(file, data.slug + ePubExt);
-            if(!ContentScraperUtil.isFileModified(connection, file, data.slug)){
+            if(!ContentScraperUtil.isFileModified(connection, file, String.valueOf(data.id))){
                 continue;
             }
             FileUtils.copyInputStreamToFile(connection.getInputStream(), content);
