@@ -4,8 +4,11 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.ScraperConstants;
+import com.ustadmobile.lib.db.entities.OpdsEntry;
 import com.ustadmobile.lib.db.entities.OpdsEntryParentToChildJoin;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
+import com.ustadmobile.lib.db.entities.OpdsLink;
+import com.ustadmobile.lib.util.UmUuidUtil;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -23,6 +26,8 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.UUID;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.swing.text.AbstractDocument;
@@ -71,12 +76,16 @@ public class IndexPrathamContentScraper {
 
         for (Cookie ck : driver.manage().getCookies()) {
 
-            if(ck.getName().equalsIgnoreCase("_session_id")){
+            if (ck.getName().equalsIgnoreCase("_session_id")) {
                 cookie = ck.getName() + "=" + ck.getValue();
                 System.out.println(cookie);
             }
         }
 
+        OpdsEntryWithRelations parentPratham = new OpdsEntryWithRelations(
+                UmUuidUtil.encodeUuidWithAscii85(UUID.randomUUID()), "https://storyweaver.org.in/", "Pratham Books");
+
+        entryWithRelationsList.add(parentPratham);
 
         gson = new GsonBuilder().disableHtmlEscaping().create();
 
@@ -86,6 +95,7 @@ public class IndexPrathamContentScraper {
 
         BooksResponse contentBooksList = gson.fromJson(IOUtils.toString(contentUrl.toURI(), ScraperConstants.UTF_ENCODING), BooksResponse.class);
 
+        int count = 0;
         for (BooksResponse.Data data : contentBooksList.data) {
 
             String epub = prefixEPub + data.slug + ePubExt;
@@ -98,11 +108,24 @@ public class IndexPrathamContentScraper {
             File file = new File(destinationDir, String.valueOf(data.id));
             file.mkdirs();
             File content = new File(file, data.slug + ePubExt);
-            if(!ContentScraperUtil.isFileModified(connection, file, String.valueOf(data.id))){
+            if (!ContentScraperUtil.isFileModified(connection, file, String.valueOf(data.id))) {
                 continue;
             }
             FileUtils.copyInputStreamToFile(connection.getInputStream(), content);
 
+            OpdsEntryWithRelations childEntry = new OpdsEntryWithRelations(UmUuidUtil.encodeUuidWithAscii85(UUID.randomUUID()),
+                    data.slug, data.title);
+
+            OpdsLink newEntryLink = new OpdsLink(childEntry.getUuid(), "application/epub+zip",
+                    file.getName() + "/" + data.slug + ".epub", OpdsEntry.LINK_REL_ACQUIRE);
+            newEntryLink.setLength(new File(file, data.slug + ".epub").length());
+            childEntry.setLinks(Collections.singletonList(newEntryLink));
+
+            OpdsEntryParentToChildJoin join = new OpdsEntryParentToChildJoin(childEntry.getUuid(),
+                    parentPratham.getUuid(), count++);
+
+            entryWithRelationsList.add(childEntry);
+            parentToChildJoins.add(join);
 
         }
 
