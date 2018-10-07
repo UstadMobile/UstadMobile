@@ -355,11 +355,11 @@ public class ContentScraperUtil {
      * @throws IOException
      */
     public static boolean isFileModified(URLConnection conn, File destinationDir, String fileName) throws IOException {
-
+        
         String eTag = conn.getHeaderField("ETag");
         String lastModified = conn.getHeaderField("Last-Modified");
 
-        if (eTag == null || lastModified == null) {
+        if (eTag == null && lastModified == null) {
             return true;
         }
 
@@ -369,21 +369,19 @@ public class ContentScraperUtil {
         File modifiedFile = new File(destinationDir, FilenameUtils.getBaseName(fileName) + ScraperConstants.LAST_MODIFIED_TXT);
 
         String text;
-        if (eTagFile.length() > 0) {
-
+        if(ContentScraperUtil.fileHasContent(eTagFile)){
             text = FileUtils.readFileToString(eTagFile, UTF_ENCODING);
+            return !eTag.equalsIgnoreCase(text);
+        }
 
-        } else if (lastModified.length() > 0) {
-
+        if(ContentScraperUtil.fileHasContent(modifiedFile)){
             text = FileUtils.readFileToString(modifiedFile, UTF_ENCODING);
-
-        } else {
-            return true;
+            return !lastModified.equalsIgnoreCase(text);
         }
 
         FileUtils.writeStringToFile(eTagFile, eTag, ScraperConstants.UTF_ENCODING);
         FileUtils.writeStringToFile(modifiedFile, lastModified, ScraperConstants.UTF_ENCODING);
 
-        return !text.equalsIgnoreCase(lastModified);
+        return true;
     }
 }
