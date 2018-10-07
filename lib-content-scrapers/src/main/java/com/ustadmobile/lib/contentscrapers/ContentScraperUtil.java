@@ -359,7 +359,7 @@ public class ContentScraperUtil {
         String eTag = conn.getHeaderField("ETag");
         String lastModified = conn.getHeaderField("Last-Modified");
 
-        if (eTag == null || lastModified == null) {
+        if (eTag == null && lastModified == null) {
             return true;
         }
 
