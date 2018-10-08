@@ -19,9 +19,6 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.CookieHandler;
-import java.net.CookieManager;
-import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -29,20 +26,27 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.UUID;
 
-import javax.net.ssl.HttpsURLConnection;
-import javax.swing.text.AbstractDocument;
-
-import sun.nio.ch.IOUtil;
-
-import static com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.chromeDriverLocation;
 
+
+/**
+ * Storyweaver has an api for all their epub books.
+ * To download each book, i need to have a cookie session id
+ * I get session by logging in the website and entering the credentials and retrieving the cookie
+ * To get the total number of books,
+ * hit the api with just 1 book request and in the json, the total number of books is stored in metadata.hits
+ * Call the api again with the request for all books
+ * create the url to get the epub, open the url connection and add the cookie session
+ *
+ * If IOException is thrown, might be because the session expired so login again.
+ * otherwise file is downloaded in its folder
+ */
 public class IndexPrathamContentScraper {
 
     String prefixUrl = "https://storyweaver.org.in/api/v1/books-search?page=1&per_page=";
 
     String prefixEPub = "https://storyweaver.org.in/v0/stories/download-story/";
-    String ePubExt = " .epub";
+    String ePubExt = ".epub";
 
     String signIn = "https://storyweaver.org.in/users/sign_in";
 
@@ -64,6 +68,83 @@ public class IndexPrathamContentScraper {
         parentToChildJoins = new ArrayList<>();
 
         System.setProperty("webdriver.chrome.driver", chromeDriverLocation);
+
+        loginPratham();
+
+        OpdsEntryWithRelations parentPratham = new OpdsEntryWithRelations(
+                UmUuidUtil.encodeUuidWithAscii85(UUID.randomUUID()), "https://storyweaver.org.in/", "Pratham Books");
+
+        entryWithRelationsList.add(parentPratham);
+
+        gson = new GsonBuilder().disableHtmlEscaping().create();
+
+        BooksResponse books = gson.fromJson(IOUtils.toString(firstUrl.toURI(), ScraperConstants.UTF_ENCODING), BooksResponse.class);
+
+        URL contentUrl = new URL(prefixUrl + books.metadata.hits);
+
+        BooksResponse contentBooksList = gson.fromJson(IOUtils.toString(contentUrl.toURI(), ScraperConstants.UTF_ENCODING), BooksResponse.class);
+
+        int retry = 0;
+        for (int i = 0; i < contentBooksList.data.size(); i++) {
+
+            try {
+
+                BooksResponse.Data data = contentBooksList.data.get(i);
+
+                String epub = prefixEPub + data.slug + ePubExt;
+
+                URL epubUrl = new URL(epub);
+
+                URLConnection connection = epubUrl.openConnection();
+                connection.setRequestProperty("Cookie", cookie);
+
+                File file = new File(destinationDir, String.valueOf(data.id));
+                file.mkdirs();
+                String fileName = data.slug + ePubExt;
+                File content = new File(file, fileName);
+                if (!ContentScraperUtil.isFileModified(connection, file, String.valueOf(data.id))) {
+                    continue;
+                }
+                try {
+                    FileUtils.copyInputStreamToFile(connection.getInputStream(), content);
+                } catch (IOException io) {
+                    loginPratham();
+                    retry++;
+                    System.err.println("Login and retry the link again attempt" + retry);
+                    if(retry == 2){
+                        retry = 0;
+                        continue;
+                    }
+                    i--;
+                    continue;
+                }
+                retry = 0;
+
+                OpdsEntryWithRelations childEntry = new OpdsEntryWithRelations(UmUuidUtil.encodeUuidWithAscii85(UUID.randomUUID()),
+                        data.slug, data.title);
+
+                OpdsLink newEntryLink = new OpdsLink(childEntry.getUuid(), "application/epub+zip",
+                        file.getName() + "/" + data.slug, OpdsEntry.LINK_REL_ACQUIRE);
+                newEntryLink.setLength(new File(file, fileName).length());
+                childEntry.setLinks(Collections.singletonList(newEntryLink));
+
+                OpdsEntryParentToChildJoin join = new OpdsEntryParentToChildJoin(childEntry.getUuid(),
+                        parentPratham.getUuid(), i);
+
+                entryWithRelationsList.add(childEntry);
+                parentToChildJoins.add(join);
+
+
+            } catch (Exception e) {
+                System.err.println("Error saving book " + contentBooksList.data.get(i).slug);
+                e.printStackTrace();
+            }
+
+        }
+
+    }
+
+    private void loginPratham() {
         ChromeDriver driver = new ChromeDriver();
 
         driver.get(signIn);
@@ -82,53 +163,7 @@ public class IndexPrathamContentScraper {
             }
         }
 
-        OpdsEntryWithRelations parentPratham = new OpdsEntryWithRelations(
-                UmUuidUtil.encodeUuidWithAscii85(UUID.randomUUID()), "https://storyweaver.org.in/", "Pratham Books");
-
-        entryWithRelationsList.add(parentPratham);
-
-        gson = new GsonBuilder().disableHtmlEscaping().create();
-
-        BooksResponse books = gson.fromJson(IOUtils.toString(firstUrl.toURI(), ScraperConstants.UTF_ENCODING), BooksResponse.class);
-
-        URL contentUrl = new URL(prefixUrl + books.metadata.hits);
-
-        BooksResponse contentBooksList = gson.fromJson(IOUtils.toString(contentUrl.toURI(), ScraperConstants.UTF_ENCODING), BooksResponse.class);
-
-        int count = 0;
-        for (BooksResponse.Data data : contentBooksList.data) {
-
-            String epub = prefixEPub + data.slug + ePubExt;
-
-            URL epubUrl = new URL(epub);
-
-            URLConnection connection = epubUrl.openConnection();
-            connection.setRequestProperty("Cookie", cookie);
-
-            File file = new File(destinationDir, String.valueOf(data.id));
-            file.mkdirs();
-            File content = new File(file, data.slug + ePubExt);
-            if (!ContentScraperUtil.isFileModified(connection, file, String.valueOf(data.id))) {
-                continue;
-            }
-            FileUtils.copyInputStreamToFile(connection.getInputStream(), content);
-
-            OpdsEntryWithRelations childEntry = new OpdsEntryWithRelations(UmUuidUtil.encodeUuidWithAscii85(UUID.randomUUID()),
-                    data.slug, data.title);
-
-            OpdsLink newEntryLink = new OpdsLink(childEntry.getUuid(), "application/epub+zip",
-                    file.getName() + "/" + data.slug + ".epub", OpdsEntry.LINK_REL_ACQUIRE);
-            newEntryLink.setLength(new File(file, data.slug + ".epub").length());
-            childEntry.setLinks(Collections.singletonList(newEntryLink));
-
-            OpdsEntryParentToChildJoin join = new OpdsEntryParentToChildJoin(childEntry.getUuid(),
-                    parentPratham.getUuid(), count++);
-
-            entryWithRelationsList.add(childEntry);
-            parentToChildJoins.add(join);
-
-        }
-
+        driver.close();
     }
 
 
