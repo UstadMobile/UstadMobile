@@ -19,7 +19,7 @@ public abstract class WamdaClazzDao {
             "(SELECT COUNT(*) FROM WamdaLike WHERE WamdaLike.wamdaLikeClazzUid = Clazz.clazzUid" +
             " AND WamdaLike.wamdaLikePersonUid =:personUid) AS liked, " +
             "(SELECT  COUNT(*) FROM WamdaShare WHERE WamdaShare.wamdaShareClazzUid = Clazz.clazzUid) AS numShares " +
-            "FROM Clazz")
+            "FROM Clazz ORDER BY Clazz.clazzUid DESC")
     public abstract UmProvider<WamdaClazzWithSocialInfo> findAll(long personUid);
 
     @UmQuery("SELECT Clazz.* , WamdaClazz.*, Person.*, \n" +

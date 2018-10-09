@@ -25,11 +25,13 @@ public abstract class DiscussionPostDao implements BaseDao<DiscussionPost> {
     @UmQuery("SELECT * From DiscussionPost WHERE discussionPostUid = :uid")
     public abstract DiscussionPost findByUid(long uid);
 
-    @UmQuery("SELECT DiscussionPost.*,Person.*,(SELECT COUNT(*) FROM WamdaLike " +
-            " WHERE WamdaLike.wamdaLikeDiscussionUid = DiscussionPost.clazzClazzUid" +
-            " AND WamdaLike.wamdaLikePersonUid = :personUid) AS liked FROM DiscussionPost" +
-            " LEFT JOIN Person ON DiscussionPost.posterPersonUid = Person.personUid " +
-            "WHERE clazzClazzUid = :clazzUid ORDER BY timePosted DESC")
+    @UmQuery("SELECT DiscussionPost.*,Person.*,\n" +
+            " (SELECT COUNT(*) FROM WamdaLike WHERE WamdaLike.wamdaLikeDiscussionUid = DiscussionPost.discussionPostUid " +
+            "AND WamdaLike.wamdaLikePersonUid = :personUid) AS liked\n" +
+            " FROM DiscussionPost \n" +
+            " LEFT JOIN Person ON Person.personUid = DiscussionPost.posterPersonUid\n" +
+            " AND DiscussionPost.clazzClazzUid = :clazzUid\n" +
+            " ORDER BY DiscussionPost.timePosted DESC")
     public abstract UmProvider<DiscussionPostWithPoster> findByClazzUidAsProvider(long clazzUid, long personUid);
 
     @UmQuery("SELECT * FROM DiscussionPost " +
@@ -38,10 +40,12 @@ public abstract class DiscussionPostDao implements BaseDao<DiscussionPost> {
             " ORDER BY timePosted DESC")
     public abstract List<DiscussionPost> findByClazzUidAsList(long clazzUid);
 
-    @UmQuery("SELECT DiscussionPost.*,Person.*,(SELECT COUNT(*) FROM WamdaLike " +
-            " WHERE WamdaLike.wamdaLikeDiscussionUid = DiscussionPost.clazzClazzUid  " +
-            " AND WamdaLike.wamdaLikePersonUid = :personUid) AS liked FROM DiscussionPost" +
-            " LEFT JOIN Person ON DiscussionPost.posterPersonUid = Person.personUid  " +
-            " WHERE Person.personUid = :personUid ORDER BY timePosted DESC")
+    @UmQuery("SELECT DiscussionPost.*,Person.*,\n" +
+            " (SELECT COUNT(*) FROM WamdaLike WHERE WamdaLike.wamdaLikeDiscussionUid = DiscussionPost.discussionPostUid " +
+            "AND WamdaLike.wamdaLikePersonUid = :personUid) AS liked\n" +
+            " FROM DiscussionPost \n" +
+            " LEFT JOIN Person ON Person.personUid = DiscussionPost.posterPersonUid\n" +
+            " AND DiscussionPost.posterPersonUid= :personUid\n" +
+            " ORDER BY DiscussionPost.timePosted DESC")
     public abstract UmProvider<DiscussionPostWithPoster> findByPersonUid(long personUid);
 }

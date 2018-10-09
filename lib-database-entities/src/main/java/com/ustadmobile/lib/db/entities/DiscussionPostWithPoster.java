@@ -24,22 +24,4 @@ public class DiscussionPostWithPoster extends DiscussionPost {
     public void setLiked(boolean liked) {
         this.liked = liked;
     }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof DiscussionPostWithPoster)) return false;
-
-        DiscussionPostWithPoster that = (DiscussionPostWithPoster) o;
-
-        if (liked != that.liked) return false;
-        return poster != null ? poster.equals(that.poster) : that.poster == null;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = poster != null ? poster.hashCode() : 0;
-        result = 31 * result + (liked ? 1 : 0);
-        return result;
-    }
 }
