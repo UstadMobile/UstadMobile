@@ -14,9 +14,10 @@ public abstract class WamdaUpdateDao {
     @UmInsert
     public abstract void insert(WamdaUpdate update, UmCallback<Long> callback);
 
-    @UmQuery("SELECT WamdaUpdate.*, Person.* FROM WamdaUpdate" +
-            " LEFT JOIN Person ON  WamdaUpdate.wamdaUpdatePersonUid = Person.personUid" +
-            " AND Person.personUid IN " +
-            " (SELECT wamdaFollowerPersonUid FROM WamdaFollower WHERE wamdaFollowerPersonUid = :personUid)")
+    @UmQuery("SELECT WamdaUpdate.*, Person.* \n" +
+            " FROM WamdaUpdate \n" +
+            " LEFT JOIN Person on WamdaUpdate.wamdaUpdatePersonUid = Person.personUid\n" +
+            " WHERE WamdaUpdate.wamdaUpdatePersonUid IN (SELECT WamdaFollower.wamdaFollowingPersonUid" +
+            " FROM WamdaFollower WHERE wamdaFollowerPersonUid = :personUid)")
     public abstract UmProvider<WamdaUpdateWithPerson> findByPersonUid(long personUid);
 }

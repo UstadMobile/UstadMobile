@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "141651209223",
+    "firebase_url": "https://ustadapps.firebaseio.com",
+    "project_id": "ustadapps",
+    "storage_bucket": "ustadapps.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:141651209223:android:c5b985d5e2a6f461",
+        "android_client_info": {
+          "package_name": "com.toughra.ustadmobile"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "141651209223-vt2mep97p2vrgi5qrjnskbkvgt990asc.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB31FePujHdqfXf-fzW6wmAiOjJHeJrulY"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

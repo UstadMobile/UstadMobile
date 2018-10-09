@@ -4,6 +4,8 @@ public interface LoginView2 extends UstadView {
 
     String VIEW_NAME = "Login2";
 
+    String ARG_PERSON_UID = "personUid";
+
     void setFacebookLoginVisible(boolean facebookLoginVisible);
 
     void setTwitterLoginVisible(boolean twitterLoginVisible);

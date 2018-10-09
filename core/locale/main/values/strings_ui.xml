@@ -266,4 +266,8 @@
     <string name="wamda_follow_label">FOLLOW</string>
     <string name="wamda_follower_title">Followers</string>
     <string name="wamda_following_title">Following</string>
+    <string name="wamda_likes">Likes</string>
+    <string name="wamda_shares">Shares</string>
+    <string name="wamda_students">Students</string>
+    <string name="wamda_post_empty_message">Comment is empty, write something first</string>
 </resources>

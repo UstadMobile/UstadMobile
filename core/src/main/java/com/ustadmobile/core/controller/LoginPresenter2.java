@@ -14,10 +14,13 @@ import com.ustadmobile.core.view.LoginView2;
 
 import java.util.Hashtable;
 
-public class LoginPresenter2 extends UstadBaseController<LoginView2>{
+import static com.ustadmobile.core.view.LoginView2.ARG_PERSON_UID;
 
+public class LoginPresenter2 extends UstadBaseController<LoginView2>{
+    private Hashtable arguments;
     public LoginPresenter2(Object context, Hashtable arguments, LoginView2 view) {
         super(context, arguments, view);
+        this.arguments = arguments;
     }
 
     @Override
@@ -42,7 +45,8 @@ public class LoginPresenter2 extends UstadBaseController<LoginView2>{
                                 getArgumentString(ARG_NEXT) :
                                 impl.getAppConfigString(AppConfig.KEY_FIRST_DEST, null,
                                         context);
-                        UstadMobileSystemImpl.getInstance().go(nextDest, context);
+                        arguments.put(ARG_PERSON_UID,String.valueOf(result.getPersonUid()));
+                        UstadMobileSystemImpl.getInstance().go(nextDest,arguments, context);
                     });
                 }else {
                     view.runOnUiThread(() -> {

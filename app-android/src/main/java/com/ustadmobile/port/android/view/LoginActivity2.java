@@ -2,6 +2,7 @@ package com.ustadmobile.port.android.view;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -21,7 +22,11 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.TwitterAuthProvider;
 import com.toughra.ustadmobile.R;
 import com.twitter.sdk.android.core.Callback;
+import com.twitter.sdk.android.core.DefaultLogger;
 import com.twitter.sdk.android.core.Result;
+import com.twitter.sdk.android.core.Twitter;
+import com.twitter.sdk.android.core.TwitterAuthConfig;
+import com.twitter.sdk.android.core.TwitterConfig;
 import com.twitter.sdk.android.core.TwitterException;
 import com.twitter.sdk.android.core.TwitterSession;
 import com.twitter.sdk.android.core.identity.TwitterLoginButton;
@@ -57,6 +62,15 @@ public class LoginActivity2 extends UstadBaseActivity implements LoginView2{
         setContentView(R.layout.activity_login2);
         FacebookSdk.setApplicationId(CoreBuildConfig.FACEBOOK_APPID);
         FacebookSdk.sdkInitialize(getApplicationContext());
+        TwitterAuthConfig authConfig =
+                new TwitterAuthConfig(CoreBuildConfig.TWITTER_KEY, CoreBuildConfig.TWITTER_SECRET);
+        TwitterConfig twitterConfig = new TwitterConfig.Builder(this)
+                .logger(new DefaultLogger(Log.DEBUG))
+                .twitterAuthConfig(authConfig)
+                .debug(true)
+                .build();
+        Twitter.initialize(twitterConfig);
+
 
         setSupportActionBar(findViewById(R.id.activity_login2_toolbar));
         usernameEditText = findViewById(R.id.activity_login2_username_edit_text);
@@ -89,7 +103,7 @@ public class LoginActivity2 extends UstadBaseActivity implements LoginView2{
 
         mTwitterButton.setOnClickListener(v -> {
             isFacebookLogin = false;
-            //twitterLoginButton.performClick();
+            twitterLoginButton.performClick();
         });
 
         facebookLoginButton.setReadPermissions("email", "public_profile");

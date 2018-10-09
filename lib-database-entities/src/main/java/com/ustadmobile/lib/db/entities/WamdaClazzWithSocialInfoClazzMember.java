@@ -2,9 +2,7 @@ package com.ustadmobile.lib.db.entities;
 
 import com.ustadmobile.lib.database.annotation.UmEmbedded;
 
-public class WamdaClazzWithSocialInfo extends Clazz {
-
-    private boolean liked;
+public class WamdaClazzWithSocialInfoClazzMember extends Clazz {
 
     private int numLikes;
 
@@ -15,13 +13,8 @@ public class WamdaClazzWithSocialInfo extends Clazz {
     @UmEmbedded
     private WamdaClazz wamdaClazz;
 
-    public boolean isLiked() {
-        return liked;
-    }
-
-    public void setLiked(boolean liked) {
-        this.liked = liked;
-    }
+    @UmEmbedded
+    private Person person;
 
     public int getNumLikes() {
         return numLikes;
@@ -53,5 +46,13 @@ public class WamdaClazzWithSocialInfo extends Clazz {
 
     public void setWamdaClazz(WamdaClazz wamdaClazz) {
         this.wamdaClazz = wamdaClazz;
+    }
+
+    public Person getPerson() {
+        return person;
+    }
+
+    public void setPerson(Person person) {
+        this.person = person;
     }
 }
