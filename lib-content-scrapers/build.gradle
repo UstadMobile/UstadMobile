@@ -48,6 +48,7 @@ dependencies {
     implementation project(":core")
     implementation project(":lib-database-entities")
     implementation "commons-io:commons-io:$version_commons_io"
+    implementation "org.apache.commons:commons-lang3:$version_apache_langs"
     implementation "org.seleniumhq.selenium:selenium-java:$version_selenium"
     implementation "org.seleniumhq.selenium:selenium-chrome-driver:$version_selenium"
 

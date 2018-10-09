@@ -1,0 +1,220 @@
+@charset "UTF-8";
+@namespace "http://www.w3.org/1999/xhtml";
+@namespace epub "http://www.idpf.org/2007/ops";
+
+
+@font-face {
+    font-family: 'NotoSans-Regular';
+    src: url(fonts/NotoSans.otf)  format('opentype');
+    font-weight: normal;
+    font-style: normal;
+
+}
+
+
+@font-face {
+  font-family: 'Noto Sans Ethiopic';
+  src: url(fonts/NotoSansEthiopic-Regular.otf) format('opentype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+body {
+    color: black;
+    /* use sans-serif as fallback to make the difference obvious */
+    font-family: 'NotoSans-Regular', sans-serif, 'Noto Sans Ethiopic';
+    line-height: 1.5em;
+}
+
+p, div, span {
+    font-family: 'NotoSans-Regular', sans-serif, 'Noto Sans Ethiopic';
+}
+
+#container {
+    width:100%;
+    text-align:center;
+    page-break-inside:avoid;
+}
+#container img {
+  display:inline-block;
+    width:80%;
+    margin:0 auto;
+}
+
+#centered  {
+    width:100%;
+    text-align:center;
+    page-break-inside:avoid;
+}
+#centered img {
+  display:inline-block;
+    max-height: 100px;
+    margin:0 auto;
+}
+
+.c000000 {
+    background-color: #9E9E9E;
+    color: #000000;
+}
+
+.c000000_darker {
+    background-color: #616161;
+    color: #FFFFFF;
+}
+
+.cD2D3D5,
+.cF3F3F4 {
+    background-color: #9E9E9E;
+    color: #000000;
+}
+
+.cD2D3D5_darker,
+.cF3F3F4_darker {
+    background-color: #616161;
+    color: #FFFFFF;
+}
+
+.cF3BE17 {
+    background-color: #FFC107;
+    color: #000000;
+}
+
+.cF3BE17_darker {
+    background-color: #FFA00B;
+    color: #000000;
+}
+
+.cD8852A {
+    background-color: #FF9800;
+    color: #000000;
+}
+
+.cD8852A_darker {
+    background-color: #F57C00;
+    color: #000000;
+}
+
+.c90B73E {
+    background-color: #4CAF50;
+    color: #ffffff;
+}
+
+.c90B73E_darker {
+    background-color: #388E3C;
+    color: #FFFFFF;
+}
+
+.c03A9F4 {
+    background-color: #03A9F4;
+    color: #000000;
+}
+
+.c03A9F4_darker {
+    background-color: #0288D1;
+    color: #000000;
+}
+
+.c89C9CC {
+    background-color: #03A9F4;
+    color: #000000;
+}
+
+.c89C9CC_darker {
+    background-color: #0288D1;
+    color: #000000;
+}
+
+.cB6608E {
+    background-color: #9C27B0;
+    color: #ffffff;
+}
+
+.cB6608E_darker {
+    background-color: #7B1FA2;
+    color: #FFFFFF;
+}
+
+.levelFont1 {
+        font-size: 4.5vh !important;
+        line-height: 5vh !important;
+    }
+    .levelFont2 {
+        font-size: 4vh !important;
+        line-height: 4.5vh !important;
+    }
+    .levelFont3 {
+        font-size: 3.5vh !important;
+        line-height: 4vh !important;
+    }
+    .levelFont4 {
+        font-size: 3.0vh !important;
+        line-height: 3.5vh !important;
+    }
+    .levelFont5 {
+        font-size: 3.0vh !important;
+        line-height: 3.5vh !important;
+    }
+    .levelFont6 {
+        font-size: 2.5vh !important;
+        line-height: 3vh !important;
+    }
+
+
+backcover_wrapper {
+    width: 100%;
+    height: 100%;
+    /*position: absolute;*/
+}
+
+.backcover_disclaimer {
+    font-family: 'NotoSans-Regular', sans-serif;
+    width: calc(100% - 12vh);
+    left: 0;
+    padding: 6vh;
+    font-size:9pt;
+    line-height: 11pt;
+    font-weight: 300;
+    text-align: justify;
+}
+
+.backcover_title {
+    font-family: 'NotoSans-Regular', sans-serif;
+    font-weight: 400;
+    width: calc(100% - 16vh);
+    background-color: transparent;
+    text-align: center;
+    margin: 2vh 8vh;
+    font-size:9pt;
+    line-height: 11pt;
+}
+
+.backcover_label {
+    font-family: "Helvetica Neue", "Arial", "Helvetica", "sans-serif";
+    font-weight: 200;
+    font-size:9pt;
+    line-height: 11pt;
+}
+
+.bookcover_author {
+    font-family: 'NotoSans-Regular', 'Noto Sans Ethiopic', sans-serif;
+    font-weight: 300;
+    background-color: transparent;
+    text-align: center;
+    margin: 0px 4vh;
+    font-size:9pt;
+    line-height: 11pt;
+}
+
+.backcover_bold {
+    font-weight: 400;
+}
+
+.backcover_copyright {
+    font-family: 'NotoSans-Regular', sans-serif;
+    font-weight: 300;
+    margin: 1.6vh 0vh;
+    width: 100%;
+    text-align: center;
+    font-size:9pt;
+    line-height: 11pt;
+}

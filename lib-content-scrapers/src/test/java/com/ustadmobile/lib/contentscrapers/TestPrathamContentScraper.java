@@ -1,5 +1,6 @@
 package com.ustadmobile.lib.contentscrapers;
 
+import com.ustadmobile.lib.contentscrapers.africanbooks.AsbScraper;
 import com.ustadmobile.lib.contentscrapers.prathambooks.IndexPrathamContentScraper;
 
 import org.junit.Test;
@@ -17,9 +18,21 @@ public class TestPrathamContentScraper {
 
         File tmpDir = Files.createTempDirectory("testindexPrathamcontentscraper").toFile();
 
+
+
         IndexPrathamContentScraper contentScraper = new IndexPrathamContentScraper();
         contentScraper.findContent(tmpDir);
 
+
+    }
+
+    @Test
+    public void testaf() throws IOException {
+
+        File tmpDir = Files.createTempDirectory("testindexPrathamcontentscraper").toFile();
+
+        AsbScraper scraper = new AsbScraper();
+        scraper.findContent(tmpDir);
 
     }
 }
