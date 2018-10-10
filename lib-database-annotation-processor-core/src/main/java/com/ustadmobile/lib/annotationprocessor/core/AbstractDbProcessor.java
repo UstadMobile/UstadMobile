@@ -27,6 +27,11 @@ import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.tools.Diagnostic;
 
+/**
+ * This base processor is overriden to make platform specific implementations of the database. By
+ * calling the process method, it will find all DAOs and Database classes, and call processDbClass
+ * and processDbDao accordingly.
+ */
 public abstract class AbstractDbProcessor {
 
     protected ProcessingEnvironment processingEnv;

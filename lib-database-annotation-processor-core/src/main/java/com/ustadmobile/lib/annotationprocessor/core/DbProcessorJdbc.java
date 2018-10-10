@@ -76,6 +76,10 @@ import javax.tools.Diagnostic;
 
 import static com.ustadmobile.lib.annotationprocessor.core.DbProcessorCore.OPT_JDBC_OUTPUT;
 
+/**
+ * Generates a JDBC based implementation of database classes annotated with @UmDatabase and their
+ * associated DAOs.
+ */
 public class DbProcessorJdbc extends AbstractDbProcessor {
 
     private static String SUFFIX_JDBC_DBMANAGER = "_Jdbc";

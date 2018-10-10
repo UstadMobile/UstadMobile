@@ -17,20 +17,31 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.RowId;
 import java.sql.SQLException;
-import java.sql.SQLType;
 import java.sql.SQLWarning;
 import java.sql.SQLXML;
-import java.sql.Statement;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
-import java.util.Arrays;
 import java.util.Calendar;
-import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+/**
+ * Some JDBC drivers do not support java.sql.Array . This proxy class is a workaround that will
+ * generate a new PreparedStatement under the hood for each time it is invoked, and substitutes a
+ * single array parameter ? for the number of elements in the array, and then sets them all
+ * individually. This will not deliver the same performance, but it will execute the query.
+ *
+ * This class can be used roughly as follows:
+ *
+ * int[] myUids = new int[]{1,2,3};
+ * Array myArray = PreparedStatementArrayProxy.createArrayOf("JDBCTYPE", myUids);
+ * PreparedStatement preparedStmt = new PreparedStatementArrayProxy("SELECT * FROM TABLE WHERE UID in (?)", connection);
+ * preparedStmt.setArray(1, myArray);
+ * ResultSet result = preparedStmt.executeQuery();
+ *
+ */
 public class PreparedStatementArrayProxy implements PreparedStatement {
 
     private Map<Integer, Object> queryParams = new TreeMap<>();
@@ -130,11 +141,25 @@ public class PreparedStatementArrayProxy implements PreparedStatement {
     }
 
 
+    /**
+     * Create a new PreparedStatementArrayProxy
+     *
+     * @param query The query to execute (as per a normal PreparedStatement using ? for parameters)
+     * @param connection the JDBC connection to run the query on
+     */
     public PreparedStatementArrayProxy(String query, Connection connection) {
         this.query = query;
         this.connection = connection;
     }
 
+    /**
+     * Create a proxy array, using the same method parameters as a JDBC connection uses to create it.
+     *
+     * @param arrayType the JDBC data type e.g. "VARCHAR", "INTEGER", etc
+     * @param objects The objects contained in the array
+     *
+     * @return A java.sql.Array object that can be used as a parameter with this class
+     */
     public static Array createArrayOf(String arrayType, Object[] objects) {
         return new JdbcArrayProxy(arrayType, objects);
     }
@@ -335,7 +360,13 @@ public class PreparedStatementArrayProxy implements PreparedStatement {
 
     @Override
     public boolean execute() throws SQLException {
-        return false;
+        try (
+            PreparedStatement stmt = prepareStatement();
+        ) {
+            return stmt.execute();
+        }catch(SQLException e) {
+            throw e;
+        }
     }
 
     @Override
@@ -630,7 +661,7 @@ public class PreparedStatementArrayProxy implements PreparedStatement {
 
     @Override
     public Connection getConnection() throws SQLException {
-        return null;
+        return connection;
     }
 
     @Override
@@ -723,6 +754,10 @@ public class PreparedStatementArrayProxy implements PreparedStatement {
 
     @Override
     public int executeUpdate() throws SQLException {
-        return 0;
+        try (PreparedStatement stmt = prepareStatement(); ) {
+            return stmt.executeUpdate();
+        }catch(SQLException e) {
+            throw e;
+        }
     }
 }
