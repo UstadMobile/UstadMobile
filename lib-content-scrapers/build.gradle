@@ -38,6 +38,17 @@ task scrapeContent(type: JavaExec) {
         args  project.getProperties().get("findCK12Url"), project.getProperties().get("findCK12Dir")
     }
 
+    if(project.hasProperty("findPratDir")){
+        main "com.ustadmobile.lib.contentscrapers.prathambooks.IndexPrathamContentScraper"
+        args project.getProperties().get("findPratDir")
+    }
+
+    if(project.hasProperty("findAsbDir")){
+        main "com.ustadmobile.lib.contentscrapers.africanbooks.AsbScraper"
+        args project.getProperties().get("findAsbDir")
+    }
+
+
     outputs.upToDateWhen { false }
 }
 

@@ -13,12 +13,10 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -36,24 +34,52 @@ import java.util.List;
 import java.util.UUID;
 import java.util.zip.ZipFile;
 
-import static com.ustadmobile.lib.contentscrapers.ScraperConstants.chromeDriverLocation;
 
+/**
+ * African story books can all be found in https://www.africanstorybook.org/booklist.php inside a script
+ * To get all the books, need to read the source line by line.
+ * To get the book, the line starts with parent.bookItems and the information is between curly braces { } in the format of JSON
+ * Use Gson to parse the object and add to the final list
+ *
+ * Iterate through the list, to get the book, you need to hit 2 urls
+ * /myspace/publish/epub.php?id=bookId needs to be opened using selenium and you need to wait for it load
+ * Once loaded call the url with /read/downloadepub.php?id=bookId and downloading for the epub can start
+ *
+ * Once downloaded, some epubs have some missing information
+ * Open the epub, find description and image property and update them
+ * We also need to increase the font for the epub and this is done by modifying the css and replacing the existing
+ * Move on to next epub until list is complete
+ *
+ */
 public class AsbScraper {
 
     public static final int DOWNLOAD_RETRY_INTERVAL = 10000;
 
     public static final int DOWNLOAD_NEXT_INTERVAL = 5000;
-    private String cookie;
     private ChromeDriver driver;
     private ArrayList<OpdsEntryWithRelations> entryWithRelationsList;
     private ArrayList<OpdsEntryParentToChildJoin> parentToChildJoins;
+
+    public static void main(String[] args) {
+        if (args.length != 1) {
+            System.err.println("Usage: <file destination>");
+            System.exit(1);
+        }
+
+        System.out.println(args[0]);
+        try {
+            new AsbScraper().findContent(new File(args[0]));
+        } catch (IOException e) {
+            System.err.println("Exception running findContent");
+            e.printStackTrace();
+        }
+    }
+
 
 
     public void findContent(File destinationDir) throws IOException {
 
         URL url = new URL("https://www.africanstorybook.org/booklist.php");
-
-        System.setProperty("webdriver.chrome.driver", chromeDriverLocation);
 
         entryWithRelationsList = new ArrayList<>();
         parentToChildJoins = new ArrayList<>();
@@ -63,7 +89,7 @@ public class AsbScraper {
 
         entryWithRelationsList.add(parentAbs);
 
-        setupChrome();
+        driver = ContentScraperUtil.setupChrome(true);
 
         InputStream input = url.openStream();
         List<AfricanBooksResponse> africanBooksList = parseBooklist(input);
@@ -264,31 +290,6 @@ public class AsbScraper {
                 }
             }
         }
-    }
-
-
-
-
-    private void setupChrome() {
-
-        ChromeOptions option = new ChromeOptions();
-        option.setHeadless(true);
-        driver = new ChromeDriver(option);
-    }
-
-
-    public static void main(String[] args) throws IOException {
-        FileInputStream booklistIn = new FileInputStream("/home/mike/tmp/asb/booklist.php");
-        //AsbScraper scraper = new AsbScraper();
-        // scraper.findContent();
-        //        scraper.parseBooklist(booklistIn);
-
-        // scraper.updateAfricanStorybook("http://www.africanstorybook.org/", "/home/mike/tmp/asb", 10);
-
-        //  DirScanner.DirScanOptions options = new DirScanner.DirScanOptions();
-        //  options.setResizeThumbnails(true);
-
-        //  new DirScanner().scanDirectory("/home/mike/tmp/asb", options);
     }
 
 }

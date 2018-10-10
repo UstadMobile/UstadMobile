@@ -111,3 +111,17 @@ Practice Example:
 https://www.ck12.org/c/trigonometry/pythagorean-theorem/asmtpractice/Pythagorean-Theorem-Applications-Practice?referrer=featured_content&collectionHandle=trigonometry&collectionCreatorID=3&conceptCollectionHandle=trigonometry-::-pythagorean-theorem?referrer=concept_details
 
 >$ gradlew scrapeContent -Pck12Url="https://www.ck12.org/c/trigonometry/pythagorean-theorem/asmtpractice/Pythagorean-Theorem-Applications-Practice?referrer=featured_content&collectionHandle=trigonometry&collectionCreatorID=3&conceptCollectionHandle=trigonometry-::-pythagorean-theorem?referrer=concept_details" -Pck12Dir="C:\ck12\" -Pck12type="practice"
+
+
+#### Find all Pratham Books 
+
+All pratham books are found in a single url 
+
+>$ gradlew scrapeContent -PfindPratDir="C:\prathambooks\"
+
+
+#### Find all African Story Books
+
+All african books are found in a single url 
+
+>$ gradlew scrapeContent -PfindAsbDir="C:\africanbooks\"

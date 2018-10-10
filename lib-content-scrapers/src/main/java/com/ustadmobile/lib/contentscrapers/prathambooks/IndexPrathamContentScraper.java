@@ -26,8 +26,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.UUID;
 
-import static com.ustadmobile.lib.contentscrapers.ScraperConstants.chromeDriverLocation;
-
 
 /**
  * Storyweaver has an api for all their epub books.
@@ -50,24 +48,34 @@ public class IndexPrathamContentScraper {
 
     String signIn = "https://storyweaver.org.in/users/sign_in";
 
-    private File destinationDirectory;
-
     private ArrayList<OpdsEntryWithRelations> entryWithRelationsList;
     private ArrayList<OpdsEntryParentToChildJoin> parentToChildJoins;
     private Gson gson;
     private String cookie;
+
+    public static void main(String[] args) {
+        if (args.length != 1) {
+            System.err.println("Usage: <file destination>");
+            System.exit(1);
+        }
+
+        System.out.println(args[0]);
+        try {
+            new IndexPrathamContentScraper().findContent(new File(args[0]));
+        } catch (IOException | URISyntaxException e) {
+            System.err.println("Exception running findContent");
+            e.printStackTrace();
+        }
+    }
 
     public void findContent(File destinationDir) throws IOException, URISyntaxException {
 
         URL firstUrl = new URL(prefixUrl + "1");
 
         destinationDir.mkdirs();
-        destinationDirectory = destinationDir;
 
         entryWithRelationsList = new ArrayList<>();
         parentToChildJoins = new ArrayList<>();
-
-        System.setProperty("webdriver.chrome.driver", chromeDriverLocation);
 
         loginPratham();
 
@@ -145,7 +153,7 @@ public class IndexPrathamContentScraper {
     }
 
     private void loginPratham() {
-        ChromeDriver driver = new ChromeDriver();
+        ChromeDriver driver = ContentScraperUtil.setupChrome(false);
 
         driver.get(signIn);
         WebDriverWait waitDriver = new WebDriverWait(driver, 10000);

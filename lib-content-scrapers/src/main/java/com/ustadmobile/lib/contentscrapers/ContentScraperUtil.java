@@ -10,6 +10,8 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.w3c.dom.Attr;
@@ -44,6 +46,7 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.chromeDriverLocation;
 
 
 public class ContentScraperUtil {
@@ -342,6 +345,21 @@ public class ContentScraperUtil {
         StreamResult result = new StreamResult(new File(destinationDirectory, "tincan.xml"));
         transformer.transform(source, result);
 
+    }
+
+
+    /**
+     * Setup Chrome driver for selenium
+     * @param headless true if chrome browser is required to open
+     * @return
+     */
+    public static ChromeDriver setupChrome(boolean headless) {
+
+        System.setProperty("webdriver.chrome.driver", chromeDriverLocation);
+
+        ChromeOptions option = new ChromeOptions();
+        option.setHeadless(headless);
+        return new ChromeDriver(option);
     }
 
 
