@@ -27,22 +27,6 @@ import javax.sql.DataSource;
  */
 public class TestDbProcessorJdbc {
 
-
-    @BeforeClass
-    public static void setupClass() throws NamingException{
-        InitialContext ic = new InitialContext();
-        SQLiteDataSource dataSource = new SQLiteDataSource();
-
-        String dbFilePath = "build/tmp/TestDbProcessorJdbc.sqlite";
-        File dbFile = new File(dbFilePath);
-
-        if(dbFile.exists())
-            dbFile.delete();
-
-        dataSource.setUrl("jdbc:sqlite:" + dbFilePath);
-        ic.bind("java:/comp/env/jdbc/ds", dataSource);
-    }
-
     @Test
     public void testConnection() {
         ExampleDatabase db = ExampleDatabase.getInstance(null, "ds");

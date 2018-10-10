@@ -45,6 +45,15 @@ sourceSets {
 }
 ```
 
+## JDBC Testing
+
+The generated JDBC implementation uses the standard JNDI/Datasource lookup
+process. For testing purposes, we use simple-jndi. Any modules using the
+JDBC implementation must provide a JNDI datasource. This can be done by
+including simple-jndi. Jndi.properties must be in the resources path of
+the module, and this should contain a datasource (this is done using
+the jndi-config directory for tests).
+
 ## Debugging the annotation processor using IntelliJ
 
 In gradle.properties, uncomment the lines:
