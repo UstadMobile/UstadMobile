@@ -10,7 +10,6 @@ import android.support.test.runner.AndroidJUnit4;
 import com.ustadmobile.core.controller.ClazzListPresenter;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.lib.db.entities.Clazz;
-import com.ustadmobile.port.android.view.ClazzDetailActivity;
 import com.ustadmobile.port.android.view.SELSelectStudentActivity;
 import com.ustadmobile.test.port.android.testutil.UmDbTestUtil;
 

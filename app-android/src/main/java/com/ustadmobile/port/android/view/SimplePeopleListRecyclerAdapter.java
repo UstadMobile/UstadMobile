@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
+import com.ustadmobile.core.controller.CommonHandlerPresenter;
 import com.ustadmobile.core.controller.UstadBaseController;
 import com.ustadmobile.lib.db.entities.Person;
 
@@ -25,7 +26,7 @@ public class SimplePeopleListRecyclerAdapter extends
 
     Context theContext;
     Fragment theFragment;
-    UstadBaseController mPresenter;
+    CommonHandlerPresenter mPresenter;
 
 
     protected class ClazzStudentViewHolder extends RecyclerView.ViewHolder {
@@ -45,6 +46,13 @@ public class SimplePeopleListRecyclerAdapter extends
                                               Context context) {
         super(diffCallback);
         theContext = context;
+    }
+
+    protected SimplePeopleListRecyclerAdapter(@NonNull DiffUtil.ItemCallback<Person> diffCallback,
+                                              Context context, CommonHandlerPresenter presenter) {
+        super(diffCallback);
+        theContext = context;
+        mPresenter = presenter;
     }
 
     /**
@@ -83,14 +91,12 @@ public class SimplePeopleListRecyclerAdapter extends
                     thisPerson.getLastName();
         }
 
-        ((TextView)holder.itemView
-                .findViewById(R.id.item_peoplelist_name))
-                .setText(studentName);
+        TextView studentEntry = (TextView)holder.itemView
+                .findViewById(R.id.item_peoplelist_name);
+        studentEntry.setText(studentName);
 
 
-
-
-        //TODO: Figure how to add click listener for different use cases.
+        studentEntry.setOnClickListener(v -> mPresenter.handleCommonPressed(thisPerson.getPersonUid()));
 
     }
 }

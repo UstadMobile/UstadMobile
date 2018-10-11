@@ -2,6 +2,8 @@ package com.ustadmobile.core.controller;
 
 import java.util.Hashtable;
 
+import com.ustadmobile.core.view.SELEditView;
+import com.ustadmobile.core.view.SELQuestionView;
 import com.ustadmobile.core.view.SELSelectConsentView;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 
@@ -23,9 +25,6 @@ public class SELSelectConsentPresenter
     private long currentClazzUid = -1;
     private long currentPersonUid = -1;
 
-    //Provider 
-    UmProvider<Person> providerList;
-
     public SELSelectConsentPresenter(Object context, Hashtable arguments, SELSelectConsentView view) {
         super(context, arguments, view);
 
@@ -43,31 +42,29 @@ public class SELSelectConsentPresenter
     public void onCreate(Hashtable savedState) {
         super.onCreate(savedState);
 
-        //Populate the provider
-        providerList = UmAppDatabase.getInstance(context).getClazzMemberDao()
-                .findAllPeopleInClassUid(currentClazzUid);
-
-        //Not valid for this screen.
-        //set Provider.
-        //view.setListProvider(providerList);
-
+        //No provider for this activity.
     }
 
     /**
-     *
-     * @param selectedObject the consent checkbox
-     */
-    public void handleClickPrimaryActionButton(long selectedObject) {
+     * Handles click "START SELECTION"
+     * */
+    public void handleClickPrimaryActionButton(boolean consentGiven) {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
 
-        //TODO: Check selectedObject for consent given.
+        //Check selectedObject for consent given.
+        if(consentGiven){
+            //Create arguments
+            Hashtable args = new Hashtable();
+            args.put(ARG_CLAZZ_UID, currentClazzUid);
+            args.put(ARG_PERSON_UID, currentPersonUid);
 
-        //Create arguments
-        Hashtable args = new Hashtable();
-        //eg: args.put(ARG_CLAZZ_UID, selectedObjectUid);
+            //TODO: Decide when to show recognition and when to show the SEL questions themselves.
 
-        //Go to view
-        //eg: impl.go(SELEditView.VIEW_NAME, args, view.getContext());
+            //Go to view
+            impl.go(SELQuestionView.VIEW_NAME, args, view.getContext());
+        }
+        //TODO: Handle and think about what happens if the consent is NOT given.
+
     }
 
     @Override

@@ -15,6 +15,7 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.widget.CheckBox;
 
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 import com.toughra.ustadmobile.R;
@@ -34,46 +35,7 @@ public class SELSelectConsentActivity extends UstadBaseActivity implements SELSe
 
     private Toolbar toolbar;
 
-    //RecyclerView
-    private RecyclerView mRecyclerView;
-    private RecyclerView.LayoutManager mRecyclerLayoutManager;
-    private RecyclerView.Adapter mAdapter; //replaced with object in set view provider method.
     private SELSelectConsentPresenter mPresenter;
-
-    public static final DiffUtil.ItemCallback<Person> DIFF_CALLBACK =
-            new DiffUtil.ItemCallback<Person>() {
-                @Override
-                public boolean areItemsTheSame(Person oldItem,
-                                               Person newItem) {
-                    return oldItem == newItem;
-                }
-
-                @Override
-                public boolean areContentsTheSame(Person oldItem,
-                                                  Person newItem) {
-                    return oldItem.equals(newItem);
-                }
-            };
-
-    @Override
-    public void setListProvider(UmProvider<Person> listProvider) {
-
-        // Specify the mAdapter
-        SimplePeopleListRecyclerAdapter recyclerAdapter =
-                new SimplePeopleListRecyclerAdapter(DIFF_CALLBACK, getApplicationContext());
-
-        // get the provider, set , observe, etc.
-        DataSource.Factory<Integer, Person> factory =
-                (DataSource.Factory<Integer, Person>)
-                        listProvider.getProvider();
-        LiveData<PagedList<Person>> data =
-                new LivePagedListBuilder<>(factory, 20).build();
-        //Observe the data:
-        data.observe(this, recyclerAdapter::submitList);
-
-        //set the adapter
-        mRecyclerView.setAdapter(recyclerAdapter);
-    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -87,20 +49,17 @@ public class SELSelectConsentActivity extends UstadBaseActivity implements SELSe
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        //Recycler View:
-        mRecyclerView = (RecyclerView) findViewById(
-                R.id.activity_selselect_consent_recyclerview);
-        mRecyclerLayoutManager = new LinearLayoutManager(getApplicationContext());
-        mRecyclerView.setLayoutManager(mRecyclerLayoutManager);
-
         //Call the Presenter
         mPresenter = new SELSelectConsentPresenter(this,
                 UMAndroidUtil.bundleToHashtable(getIntent().getExtras()), this);
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
 
+        CheckBox consentCheckBox = findViewById(R.id.activity_selselect_consent_checkbox);
+
         //FAB:
         FloatingTextButton fab = findViewById(R.id.activity_selselect_consent_fab);
-        fab.setOnClickListener(v -> mPresenter.handleClickPrimaryActionButton(-1L));
+        fab.setOnClickListener(v ->
+                mPresenter.handleClickPrimaryActionButton(consentCheckBox.isChecked()));
 
     }
 

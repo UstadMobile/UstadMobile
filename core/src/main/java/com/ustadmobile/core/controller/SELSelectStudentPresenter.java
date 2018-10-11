@@ -3,7 +3,7 @@ package com.ustadmobile.core.controller;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.core.view.SELEditView;
+import com.ustadmobile.core.view.SELSelectConsentView;
 import com.ustadmobile.core.view.SELSelectStudentView;
 import com.ustadmobile.lib.db.entities.Person;
 
@@ -18,7 +18,8 @@ public class SELSelectStudentPresenter extends CommonHandlerPresenter<SELSelectS
     UmProvider<Person> selStudentsProvider;
     private long currentClazzUid = -1;
 
-    public SELSelectStudentPresenter(Object context, Hashtable arguments, SELSelectStudentView view) {
+    public SELSelectStudentPresenter(Object context, Hashtable arguments,
+                                     SELSelectStudentView view) {
         super(context, arguments, view);
 
         if(arguments.containsKey(ARG_CLAZZ_UID)){
@@ -36,16 +37,6 @@ public class SELSelectStudentPresenter extends CommonHandlerPresenter<SELSelectS
         view.setSELAnswerListProvider(selStudentsProvider);
     }
 
-    public void handleClickStudentSEL(long selectedPersonUid){
-        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        Hashtable args = new Hashtable();
-        args.put(ARG_CLAZZ_UID, currentClazzUid);
-        args.put(ARG_PERSON_UID, selectedPersonUid);
-
-        //TODO:
-        //impl.go(SELEditView.VIEW_NAME, args, view.getContext());
-    }
-
     @Override
     public void setUIStrings() {
 
@@ -58,7 +49,7 @@ public class SELSelectStudentPresenter extends CommonHandlerPresenter<SELSelectS
         args.put(ARG_CLAZZ_UID, currentClazzUid);
         args.put(ARG_PERSON_UID, arg);
 
-        impl.go(SELEditView.VIEW_NAME, args, view.getContext());
+        impl.go(SELSelectConsentView.VIEW_NAME, args, view.getContext());
 
     }
 }

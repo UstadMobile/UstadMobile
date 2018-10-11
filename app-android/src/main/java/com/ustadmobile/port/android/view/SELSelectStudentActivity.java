@@ -49,8 +49,8 @@ public class SELSelectStudentActivity extends UstadBaseActivity implements SELSe
     public void setSELAnswerListProvider(UmProvider<Person> selStudentsProvider) {
 
         // Specify the mAdapter
-        SimplePeopleListRecyclerAdapter recyclerAdapter =
-                new SimplePeopleListRecyclerAdapter(DIFF_CALLBACK, getApplicationContext());
+        SimplePeopleListRecyclerAdapter recyclerAdapter = new SimplePeopleListRecyclerAdapter(
+                DIFF_CALLBACK, getApplicationContext(), mPresenter);
 
         // get the provider, set , observe, etc.
         DataSource.Factory<Integer, Person> factory =

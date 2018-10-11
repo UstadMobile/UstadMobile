@@ -2,6 +2,7 @@ package com.ustadmobile.core.controller;
 
 import java.util.Hashtable;
 
+import com.ustadmobile.core.view.SELEditView;
 import com.ustadmobile.core.view.SELQuestionView;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 
@@ -45,10 +46,16 @@ public class SELQuestionPresenter
 
         //Create arguments
         Hashtable args = new Hashtable();
-        //eg: args.put(ARG_CLAZZ_UID, selectedObjectUid);
+        args.put(ARG_CLAZZ_UID, currentClazzUid);
+        args.put(ARG_PERSON_UID, currentPersonUid);
+
+
+        //TODO fix it to go to the right place for the right entry
 
         //Go to view
-        //eg: impl.go(SELEditView.VIEW_NAME, args, view.getContext());
+        impl.go(SELEditView.VIEW_NAME, args, view.getContext());
+
+
     }
 
     @Override

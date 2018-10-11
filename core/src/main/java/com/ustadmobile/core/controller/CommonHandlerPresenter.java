@@ -4,6 +4,10 @@ import com.ustadmobile.core.view.UstadView;
 
 import java.util.Hashtable;
 
+/**
+ * So that we can add click listener for different use cases.
+ * @param <V>
+ */
 public abstract class CommonHandlerPresenter<V extends UstadView>
         extends UstadBaseController<V>  {
 
@@ -15,5 +19,5 @@ public abstract class CommonHandlerPresenter<V extends UstadView>
         super(context, arguments, (V) view);
     }
 
-    abstract void handleCommonPressed(Object arg);
+    public abstract void handleCommonPressed(Object arg);
 }

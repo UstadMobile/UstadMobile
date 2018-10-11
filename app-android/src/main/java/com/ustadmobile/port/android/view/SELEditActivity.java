@@ -12,6 +12,7 @@ import com.ustadmobile.lib.db.entities.Person;
 import com.ustadmobile.core.controller.SELEditPresenter;
 
 import android.os.Bundle;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -59,8 +60,8 @@ public class SELEditActivity extends UstadBaseActivity implements SELEditView {
     public void setListProvider(UmProvider<Person> listProvider) {
 
         // Specify the mAdapter
-        SimplePeopleListRecyclerAdapter recyclerAdapter =
-                new SimplePeopleListRecyclerAdapter(DIFF_CALLBACK, getApplicationContext());
+        PeopleBlobListRecyclerAdapter recyclerAdapter =
+                new PeopleBlobListRecyclerAdapter(DIFF_CALLBACK, getApplicationContext(), mPresenter);
 
         // get the provider, set , observe, etc.
         DataSource.Factory<Integer, Person> factory =
@@ -90,7 +91,8 @@ public class SELEditActivity extends UstadBaseActivity implements SELEditView {
         //Recycler View:
         mRecyclerView = (RecyclerView) findViewById(
                 R.id.activity_sel_edit_recyclerview);
-        mRecyclerLayoutManager = new LinearLayoutManager(getApplicationContext());
+        //mRecyclerLayoutManager = new LinearLayoutManager(getApplicationContext());
+        mRecyclerLayoutManager = new GridLayoutManager(getApplicationContext(), 3);
         mRecyclerView.setLayoutManager(mRecyclerLayoutManager);
 
         //Call the Presenter
@@ -99,9 +101,8 @@ public class SELEditActivity extends UstadBaseActivity implements SELEditView {
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
 
         //FAB and its listener
-        //eg:
         FloatingTextButton fab = findViewById(R.id.activity_sel_edit_fab);
-        fab.setOnClickListener(v -> mPresenter.handleClickPrimaryActionButton(-1L));
+        fab.setOnClickListener(v -> mPresenter.handleClickPrimaryActionButton());
 
 
     }

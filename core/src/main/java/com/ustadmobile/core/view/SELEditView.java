@@ -11,7 +11,6 @@ public interface SELEditView extends UstadView {
 
     String VIEW_NAME = "SELEdit";
 
-
     /**
      * Sets Current provider
      * <p>
