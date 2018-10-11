@@ -45,7 +45,6 @@ repositories {
     }
 }
 
-
 dependencies {
     implementation "org.json:json:$version_json"
     implementation "net.sf.kxml:kxml2:$version_kxml"
@@ -395,9 +394,9 @@ processTestResources.dependsOn copyTestResources
 
 publishing {
     publications {
-        nanolrscore(MavenPublication) {
-            groupId 'com.ustadmobile.app'
-            artifactId 'core'
+        maven(MavenPublication) {
+            groupId rootProject.group
+            artifactId project.name
             version rootProject.version
 
             from components.java

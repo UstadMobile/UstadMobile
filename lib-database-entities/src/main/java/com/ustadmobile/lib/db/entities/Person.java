@@ -1,23 +1,31 @@
 package com.ustadmobile.lib.db.entities;
 
 import com.ustadmobile.lib.database.annotation.UmEntity;
+import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 
 /**
  * Created by mike on 3/8/18.
  */
 
 @UmEntity
-public class Person {
+public class Person implements SyncableEntity {
 
-    private String uuid;
+    public static final int GENDER_UNSET = 0;
+
+    public static final int GENDER_FEMALE = 1;
+
+    public static final int GENDER_MALE = 2;
+
+    public static final int GENDER_OTHER = 4;
+
+    @UmPrimaryKey(autoIncrement = true)
+    private long personUid;
 
     private String username;
 
     private String passwordHash;
 
-    private String firstName;
-
-    private String middleNames;
+    private String firstNames;
 
     private String lastName;
 
@@ -25,12 +33,21 @@ public class Person {
 
     private String phoneNum;
 
-    public String getUuid() {
-        return uuid;
+    private int gender;
+
+    private boolean active;
+
+    private long masterChangeSeqNum;
+
+    private long localChangeSeqNum;
+
+
+    public long getPersonUid() {
+        return personUid;
     }
 
-    public void setUuid(String uuid) {
-        this.uuid = uuid;
+    public void setPersonUid(long personUid) {
+        this.personUid = personUid;
     }
 
     public String getUsername() {
@@ -49,20 +66,12 @@ public class Person {
         this.passwordHash = passwordHash;
     }
 
-    public String getFirstName() {
-        return firstName;
+    public String getFirstNames() {
+        return firstNames;
     }
 
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getMiddleNames() {
-        return middleNames;
-    }
-
-    public void setMiddleNames(String middleNames) {
-        this.middleNames = middleNames;
+    public void setFirstNames(String firstNames) {
+        this.firstNames = firstNames;
     }
 
     public String getLastName() {
@@ -87,5 +96,41 @@ public class Person {
 
     public void setPhoneNum(String phoneNum) {
         this.phoneNum = phoneNum;
+    }
+
+    @Override
+    public long getMasterChangeSeqNum() {
+        return masterChangeSeqNum;
+    }
+
+    @Override
+    public void setMasterChangeSeqNum(long masterChangeSeqNum) {
+        this.masterChangeSeqNum = masterChangeSeqNum;
+    }
+
+    @Override
+    public long getLocalChangeSeqNum() {
+        return localChangeSeqNum;
+    }
+
+    @Override
+    public void setLocalChangeSeqNum(long localChangeSeqNum) {
+        this.localChangeSeqNum = localChangeSeqNum;
+    }
+
+    public int getGender() {
+        return gender;
+    }
+
+    public void setGender(int gender) {
+        this.gender = gender;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
     }
 }

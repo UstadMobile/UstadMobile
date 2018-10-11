@@ -12,7 +12,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'digital.wup:android-maven-publish:3.3.0'
+        classpath "digital.wup:android-maven-publish:$version_android_maven_publish"
     }
 }
 
@@ -548,8 +548,8 @@ publishing {
         // https://github.com/wupdigital/android-maven-publish
         mavenLocalconfigAar(MavenPublication) {
             from components.findByName("androidLocalconfigDebug")
-            groupId 'com.ustadmobile.app'
-            artifactId 'app-android'
+            groupId rootProject.group
+            artifactId project.name
             version rootProject.version
         }
 

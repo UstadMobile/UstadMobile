@@ -39,6 +39,7 @@ import java.util.concurrent.Executors;
  * destroyed the loading of the image will be cancelled.
  *
  */
+@Deprecated
 public class ImageLoader implements ControllerLifecycleListener {
 
     /**

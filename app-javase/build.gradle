@@ -6,16 +6,26 @@ task runOrmLiteGeneration(type: JavaExec) {
 }
 
 dependencies {
-    compile project(":core")
-    compile project(":sharedse")
-    compile project(":lib-core-fs")
+    implementation project(":core")
+    implementation project(":sharedse")
+    implementation project(":lib-core-fs")
     implementation project(":lib-util")
+    implementation project(':lib-database-util-jdbc')
 
-    compile "com.j256.ormlite:ormlite-core:$version_ormlite"
-    compile "com.j256.ormlite:ormlite-jdbc:$version_ormlite"
+    testImplementation "junit:junit:$version_junit"
+    testImplementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
+    testImplementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
 
-    compile "org.json:json:$version_json"
-    compile "net.sf.kxml:kxml2:$version_kxml"
+    implementation "org.json:json:$version_json"
+    implementation "net.sf.kxml:kxml2:$version_kxml"
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs += ["build/generated/source/umdbprocessor"]
+        }
+    }
 }
 
 task fatJar(type: Jar) {
@@ -33,9 +43,9 @@ targetCompatibility = "1.8"
 
 publishing {
     publications {
-        nanolrscore(MavenPublication) {
-            groupId 'com.ustadmobile.app'
-            artifactId 'app-javase'
+        maven(MavenPublication) {
+            groupId rootProject.group
+            artifactId project.name
             version rootProject.version
 
             from components.java

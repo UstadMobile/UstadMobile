@@ -23,7 +23,9 @@
             <option value="$PROJECT_DIR$/lib-database-annotation-processor-core" />
             <option value="$PROJECT_DIR$/lib-database-entities" />
             <option value="$PROJECT_DIR$/lib-database-entity-processor" />
+            <option value="$PROJECT_DIR$/lib-database-jdbc" />
             <option value="$PROJECT_DIR$/lib-database-processor" />
+            <option value="$PROJECT_DIR$/lib-database-util-jdbc" />
             <option value="$PROJECT_DIR$/lib-http-testserver" />
             <option value="$PROJECT_DIR$/lib-util" />
             <option value="$PROJECT_DIR$/sharedse" />
