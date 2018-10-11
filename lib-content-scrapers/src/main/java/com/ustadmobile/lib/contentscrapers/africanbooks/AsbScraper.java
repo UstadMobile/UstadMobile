@@ -133,8 +133,8 @@ public class AsbScraper {
                         newEntryLink.setLength(outFile.length());
                         childEntry.setLinks(Collections.singletonList(newEntryLink));
 
-                        OpdsEntryParentToChildJoin join = new OpdsEntryParentToChildJoin(childEntry.getUuid(),
-                                parentAbs.getUuid(), i);
+                        OpdsEntryParentToChildJoin join = new OpdsEntryParentToChildJoin(parentAbs.getUuid(),
+                                childEntry.getUuid(), i);
 
                         entryWithRelationsList.add(childEntry);
                         parentToChildJoins.add(join);

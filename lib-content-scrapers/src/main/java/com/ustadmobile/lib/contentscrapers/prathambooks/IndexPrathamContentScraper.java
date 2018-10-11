@@ -35,7 +35,7 @@ import java.util.UUID;
  * hit the api with just 1 book request and in the json, the total number of books is stored in metadata.hits
  * Call the api again with the request for all books
  * create the url to get the epub, open the url connection and add the cookie session
- *
+ * <p>
  * If IOException is thrown, might be because the session expired so login again.
  * otherwise file is downloaded in its folder
  */
@@ -119,7 +119,7 @@ public class IndexPrathamContentScraper {
                     loginPratham();
                     retry++;
                     System.err.println("Login and retry the link again attempt" + retry);
-                    if(retry == 2){
+                    if (retry == 2) {
                         retry = 0;
                         continue;
                     }
@@ -136,8 +136,8 @@ public class IndexPrathamContentScraper {
                 newEntryLink.setLength(new File(file, fileName).length());
                 childEntry.setLinks(Collections.singletonList(newEntryLink));
 
-                OpdsEntryParentToChildJoin join = new OpdsEntryParentToChildJoin(childEntry.getUuid(),
-                        parentPratham.getUuid(), i);
+                OpdsEntryParentToChildJoin join = new OpdsEntryParentToChildJoin(parentPratham.getUuid(),
+                        childEntry.getUuid(), i);
 
                 entryWithRelationsList.add(childEntry);
                 parentToChildJoins.add(join);
