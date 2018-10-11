@@ -12,7 +12,23 @@ public class SocialNominationQuestionResponse {
     @UmPrimaryKey(autoIncrement = true)
     private long socialNominationQuestionResponseUid;
 
+    // -> SocialNominationQuestionSetResponse
     private long socialNominationQuestionResponseSocialNominationQuestionSetResponseUid;
 
 
+    public long getSocialNominationQuestionResponseUid() {
+        return socialNominationQuestionResponseUid;
+    }
+
+    public void setSocialNominationQuestionResponseUid(long socialNominationQuestionResponseUid) {
+        this.socialNominationQuestionResponseUid = socialNominationQuestionResponseUid;
+    }
+
+    public long getSocialNominationQuestionResponseSocialNominationQuestionSetResponseUid() {
+        return socialNominationQuestionResponseSocialNominationQuestionSetResponseUid;
+    }
+
+    public void setSocialNominationQuestionResponseSocialNominationQuestionSetResponseUid(long socialNominationQuestionResponseSocialNominationQuestionSetResponseUid) {
+        this.socialNominationQuestionResponseSocialNominationQuestionSetResponseUid = socialNominationQuestionResponseSocialNominationQuestionSetResponseUid;
+    }
 }

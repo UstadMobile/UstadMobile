@@ -66,7 +66,8 @@ public class ClazzDetailEnrollStudentActivity extends UstadBaseActivity implemen
         }
 
         //RecyclerView:
-        mRecyclerView = (RecyclerView) findViewById(R.id. activity_clazz_detail_enroll_student_recycler_view);
+        mRecyclerView = (RecyclerView) findViewById(
+                R.id.activity_clazz_detail_enroll_student_recycler_view);
         mRecyclerLayoutManager = new LinearLayoutManager(getApplicationContext());
         mRecyclerView.setLayoutManager(mRecyclerLayoutManager);
         DividerItemDecoration dividerItemDecoration =

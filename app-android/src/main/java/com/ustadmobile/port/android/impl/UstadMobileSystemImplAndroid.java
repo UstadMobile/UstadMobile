@@ -92,6 +92,12 @@ import com.ustadmobile.core.view.BasePointView2;
 import com.ustadmobile.core.view.PersonDetailView;
 import com.ustadmobile.core.view.PersonEditView;
 import com.ustadmobile.core.view.RegistrationView;
+import com.ustadmobile.core.view.SELEditView;
+import com.ustadmobile.core.view.SELQuestionDetailView;
+import com.ustadmobile.core.view.SELQuestionEditView;
+import com.ustadmobile.core.view.SELQuestionView;
+import com.ustadmobile.core.view.SELSelectConsentView;
+import com.ustadmobile.core.view.SELSelectStudentView;
 import com.ustadmobile.core.view.ScormPackageView;
 import com.ustadmobile.core.view.SettingsDataSyncListView;
 import com.ustadmobile.core.view.SettingsDataUsageView;
@@ -195,6 +201,12 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         viewNameToAndroidImplMap.put(PersonEditView.VIEW_NAME, PersonEditActivity.class);
         viewNameToAndroidImplMap.put(PersonDetailEnrollClazzView.VIEW_NAME, PersonDetailEnrollClazzActivity.class);
         viewNameToAndroidImplMap.put(ClazzDetailEnrollStudentView.VIEW_NAME, ClazzDetailEnrollStudentActivity.class);
+        viewNameToAndroidImplMap.put(SELSelectStudentView.VIEW_NAME, SELSelectStudentActivity.class);
+        viewNameToAndroidImplMap.put(SELSelectConsentView.VIEW_NAME, SELSelectConsentActivity.class);
+        viewNameToAndroidImplMap.put(SELEditView.VIEW_NAME, SELEditActivity.class);
+        viewNameToAndroidImplMap.put(SELQuestionView.VIEW_NAME, SELQuestionActivity.class);
+        viewNameToAndroidImplMap.put(SELQuestionDetailView.VIEW_NAME, SELQuestionDetailActivity.class);
+        viewNameToAndroidImplMap.put(SELQuestionEditView.VIEW_NAME, SELQuestionEditActivity.class);
 
     }
 

@@ -157,7 +157,6 @@ public class ClazzListFragment extends UstadBaseFragment implements ClazzListVie
                 inflater.inflate(R.layout.fragment_clazz_list, container, false);
         setHasOptionsMenu(true);
 
-
         mRecyclerView = rootContainer.findViewById(R.id.fragment_class_list_recyclerview);
 
         mRecyclerLayoutManager = new LinearLayoutManager(getContext());
@@ -166,12 +165,12 @@ public class ClazzListFragment extends UstadBaseFragment implements ClazzListVie
                 new DividerItemDecoration(mRecyclerView.getContext(),
                 LinearLayoutManager.VERTICAL);
 
-
-        //return container
-
+        //set up Presenter
         mPresenter = new ClazzListPresenter(this,
                 UMAndroidUtil.bundleToHashtable(getArguments()), this);
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
+
+        //return container
         return rootContainer;
     }
 

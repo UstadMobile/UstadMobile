@@ -12,7 +12,10 @@ public class SocialNominationQuestionSet  {
     @UmPrimaryKey(autoIncrement = true)
     private long socialNominationQuestionSetUid;
 
+    // The set title.
     private String title;
+
+
 
     public long getSocialNominationQuestionSetUid() {
         return socialNominationQuestionSetUid;

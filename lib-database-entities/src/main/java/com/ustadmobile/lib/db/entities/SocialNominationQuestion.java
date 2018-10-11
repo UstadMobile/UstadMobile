@@ -16,9 +16,35 @@ public class SocialNominationQuestion {
 
     private String questionText;
 
+    // -> SocialNominationQuestionSet - what set is this question a part of
     private long socialNominationQuestionSocialNominationQuestionSetUid;
 
-    private int index;
+    //The order.
+    private int questionIndex;
+
+    //If this question is to be assigned to all classes. (if not - not handled / implemented yet).
+    boolean assignToAllClasses;
+
+    //If this question allows for multiple nominations.
+    boolean multiNominations;
+
+
+
+    public boolean isAssignToAllClasses() {
+        return assignToAllClasses;
+    }
+
+    public void setAssignToAllClasses(boolean assignToAllClasses) {
+        this.assignToAllClasses = assignToAllClasses;
+    }
+
+    public boolean isMultiNominations() {
+        return multiNominations;
+    }
+
+    public void setMultiNominations(boolean multiNominations) {
+        this.multiNominations = multiNominations;
+    }
 
     public long getSocialNominationQuestionUid() {
         return socialNominationQuestionUid;
@@ -44,11 +70,11 @@ public class SocialNominationQuestion {
         this.socialNominationQuestionSocialNominationQuestionSetUid = socialNominationQuestionSocialNominationQuestionSetUid;
     }
 
-    public int getIndex() {
-        return index;
+    public int getQuestionIndex() {
+        return questionIndex;
     }
 
-    public void setIndex(int index) {
-        this.index = index;
+    public void setQuestionIndex(int questionIndex) {
+        this.questionIndex = questionIndex;
     }
 }

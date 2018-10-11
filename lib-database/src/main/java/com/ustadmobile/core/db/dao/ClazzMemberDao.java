@@ -55,6 +55,12 @@ public abstract class ClazzMemberDao implements BaseDao<ClazzMember> {
             "WHERE ClazzMember.clazzMemberClazzUid = :clazzUid ")
     public abstract void updateAttendancePercentages(long clazzUid);
 
+    @UmQuery("SELECT * FROM Person where personUid IN ( " +
+            " SELECT Person.personUid FROM ClazzMember " +
+            " LEFT  JOIN Person On ClazzMember.clazzMemberPersonUid = Person.personUid " +
+            " WHERE ClazzMember.clazzMemberClazzUid = :clazzUid AND ClazzMember.role = 1) AND Person.active = 1 ")
+    public abstract UmProvider<Person> findAllPeopleInClassUid(long clazzUid);
+
 
     @UmQuery("SELECT * FROM Person where personUid NOT IN ( " +
             " SELECT Person.personUid FROM ClazzMember " +

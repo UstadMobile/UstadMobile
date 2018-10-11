@@ -16,4 +16,31 @@ public class SocialNominationQuestionResponseNomination {
 
     //<-> SocialNominationQuestionResponse entity.
     private long socialNominationQuestionResponseNominationSocialNominationQuestionResponseUId;
+
+
+
+
+    public long getSocialNominationQuestionResponseNominationUid() {
+        return socialNominationQuestionResponseNominationUid;
+    }
+
+    public void setSocialNominationQuestionResponseNominationUid(long socialNominationQuestionResponseNominationUid) {
+        this.socialNominationQuestionResponseNominationUid = socialNominationQuestionResponseNominationUid;
+    }
+
+    public long getSocialNominationQuestionResponseNominationClazzMemberUid() {
+        return socialNominationQuestionResponseNominationClazzMemberUid;
+    }
+
+    public void setSocialNominationQuestionResponseNominationClazzMemberUid(long socialNominationQuestionResponseNominationClazzMemberUid) {
+        this.socialNominationQuestionResponseNominationClazzMemberUid = socialNominationQuestionResponseNominationClazzMemberUid;
+    }
+
+    public long getSocialNominationQuestionResponseNominationSocialNominationQuestionResponseUId() {
+        return socialNominationQuestionResponseNominationSocialNominationQuestionResponseUId;
+    }
+
+    public void setSocialNominationQuestionResponseNominationSocialNominationQuestionResponseUId(long socialNominationQuestionResponseNominationSocialNominationQuestionResponseUId) {
+        this.socialNominationQuestionResponseNominationSocialNominationQuestionResponseUId = socialNominationQuestionResponseNominationSocialNominationQuestionResponseUId;
+    }
 }

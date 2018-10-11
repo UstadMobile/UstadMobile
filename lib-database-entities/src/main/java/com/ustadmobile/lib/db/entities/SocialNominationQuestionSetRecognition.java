@@ -4,10 +4,12 @@ import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 
 /**
+ * FOR RECOGNITION
+ *
  * For each run through of a question set for one student, they must attempt to recognize their
  * classmates.
  * There is 1:many relationship between this entity and SocialNominationQuestionSetResponse.
- * There is one SocialNominationQuestinSetRecognition for each
+ * There is one SocialNominationQuestionSetRecognition for each
  * SocialNominationQuestionSetResponse for each student in the class..
  *
  */
@@ -17,11 +19,16 @@ public class SocialNominationQuestionSetRecognition {
     @UmPrimaryKey(autoIncrement = true)
     private long socialNominationQuestionSetRecognitionUid;
 
+    // -> SocialNominationQuestionSetResponse - The question set response (which has recognition percentages)
     private long socialNominationQuestionSetRecognitionSocialNominationQuestionSetResponseUid;
 
+    // The Clazz Member - The Student To BE recognized.
     private long socialNominationQuestionSetRecognitionClazzMemberUid;
 
+    // Boolean if recognized or not by the ClazzMember doing this QuestionSet in QuestionSetResponse.
     private boolean socialNominationQuestionSetRecognitionRecognized;
+
+
 
     public long getSocialNominationQuestionSetRecognitionUid() {
         return socialNominationQuestionSetRecognitionUid;

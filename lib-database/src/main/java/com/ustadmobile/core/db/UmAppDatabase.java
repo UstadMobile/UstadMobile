@@ -27,6 +27,7 @@ import com.ustadmobile.core.db.dao.PersonCustomFieldDao;
 import com.ustadmobile.core.db.dao.PersonCustomFieldValueDao;
 import com.ustadmobile.core.db.dao.PersonDao;
 import com.ustadmobile.core.db.dao.PersonDetailPresenterFieldDao;
+import com.ustadmobile.core.db.dao.SocialNominationQuestionDao;
 import com.ustadmobile.lib.database.annotation.UmClearAll;
 import com.ustadmobile.lib.database.annotation.UmDatabase;
 import com.ustadmobile.lib.database.annotation.UmDbContext;
@@ -57,6 +58,12 @@ import com.ustadmobile.lib.db.entities.Person;
 import com.ustadmobile.lib.db.entities.PersonField;
 import com.ustadmobile.lib.db.entities.PersonCustomFieldValue;
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField;
+import com.ustadmobile.lib.db.entities.SocialNominationQuestion;
+import com.ustadmobile.lib.db.entities.SocialNominationQuestionResponse;
+import com.ustadmobile.lib.db.entities.SocialNominationQuestionResponseNomination;
+import com.ustadmobile.lib.db.entities.SocialNominationQuestionSet;
+import com.ustadmobile.lib.db.entities.SocialNominationQuestionSetRecognition;
+import com.ustadmobile.lib.db.entities.SocialNominationQuestionSetResponse;
 
 @UmDatabase(version = 1, entities = {
         OpdsEntry.class, OpdsLink.class, OpdsEntryParentToChildJoin.class,
@@ -68,7 +75,10 @@ import com.ustadmobile.lib.db.entities.PersonDetailPresenterField;
         Person.class, Clazz.class, ClazzMember.class, ClazzLog.class,
         ClazzLogAttendanceRecord.class, FeedEntry.class, ContentEntry.class,
         PersonField.class, PersonCustomFieldValue.class,
-        PersonDetailPresenterField.class
+        PersonDetailPresenterField.class,
+        SocialNominationQuestion.class, SocialNominationQuestionResponse.class,
+        SocialNominationQuestionResponseNomination.class, SocialNominationQuestionSet.class,
+        SocialNominationQuestionSetRecognition.class, SocialNominationQuestionSetResponse.class
 })
 public abstract class UmAppDatabase{
 
@@ -150,6 +160,8 @@ public abstract class UmAppDatabase{
     public abstract PersonCustomFieldValueDao getPersonCustomFieldValueDao();
 
     public abstract PersonDetailPresenterFieldDao getPersonDetailPresenterFieldDao();
+
+    public abstract SocialNominationQuestionDao getSocialNominationQuestionDao();
 
     @UmDbContext
     public abstract Object getContext();

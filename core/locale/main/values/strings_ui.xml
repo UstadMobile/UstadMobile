@@ -313,6 +313,31 @@ This is the one you should be editing.
     <string name="clazz">Class</string>
     <string name="student_image">Student image</string>
     <string name="enroll_new_student">Enroll new student</string>
+    <string name="sel">sel</string>
+    <string name="record_sel">Record SEL</string>
+    <string name="current_sel">Current SEL answers by students</string>
+    <string name="social_nomination">Social Nomination</string>
+    <string name="please_select_student_sn">Please select the student who will be performing this</string>
+    <string name="explain_sn">1. Explain the terms of consent to the child.</string>
+    <string name="child_given_consent">Child has provided consent to participate</string>
+    <string name="start_selection">start selection</string>
+    <string name="recognition_sn">Recognition:</string>
+    <string name="recognition_sn_desc">Please tap each of your classmates pictures, and select their name from the popup.</string>
+    <string name="recognition_title_desc_sn">Recognition: Please tap each of your classmates pictures, and select their name from the popup.</string>
+    <string name="sel_not_configured">SEL is not configured</string>
+    <string name="configure_sel">Configure SEL</string>
+    <string name="question">question</string>
+    <string name="sel_question_tell_student">1. Tell the student you would like them to </string>
+    <string name="sel_question_press_start">2. Press the "START SELECTION" button at the bottom to hide this instruction and allow the student to make their selection.</string>
+    <string name="questions">Questions</string>
+    <string name="add_question">Add question</string>
+    <string name="sel_questions">SEL Questions</string>
+    <string name="add_sel_question">Add SEL Question</string>
+    <string name="sel_question_description">This is the question that will be shown and explained to the student.</string>
+    <string name="assign_to_all_classes">Assign to all classes</string>
+    <string name="allow_multiple_nominations">Allow multiple nominations</string>
+    <string name="sel_new_question_title">Question</string>
+
 
 
 </resources>

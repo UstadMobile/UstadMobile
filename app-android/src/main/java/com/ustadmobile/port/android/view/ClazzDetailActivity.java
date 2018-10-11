@@ -39,6 +39,7 @@ public class ClazzDetailActivity extends UstadBaseActivity implements
         mPagerAdapter.addFragments(0, ClazzStudentListFragment.newInstance(this.clazzUid));
         mPagerAdapter.addFragments(1, ClazzLogListFragment.newInstance(this.clazzUid));
         mPagerAdapter.addFragments(2, ComingSoonFragment.newInstance());
+        mPagerAdapter.addFragments(3, SELAnswerListFragment.newInstance(this.clazzUid));
         mPager.setAdapter(mPagerAdapter);
     }
 
@@ -124,6 +125,8 @@ public class ClazzDetailActivity extends UstadBaseActivity implements
                         return ClazzLogListFragment.newInstance(clazzUid);
                     case 2:
                         return ComingSoonFragment.newInstance();
+                    case 3:
+                        return SELAnswerListFragment.newInstance(clazzUid);
                     default:
                         return null;
                 }
@@ -149,17 +152,13 @@ public class ClazzDetailActivity extends UstadBaseActivity implements
         public CharSequence getPageTitle(int position){
             switch (position){
                 case 0:
-                    String students_title = (String)
-                            getText(R.string.students_literal);
-                    return students_title.toUpperCase();
+                    return ((String) getText(R.string.students_literal)).toUpperCase();
                 case 1:
-                    String log_title = (String)
-                            getText(R.string.log);
-                    return log_title.toUpperCase();
+                    return ((String) getText(R.string.attendance)).toUpperCase();
                 case 2:
-                    String schedule_title = (String)
-                            getText(R.string.schedule);
-                    return schedule_title.toUpperCase();
+                    return ((String) getText(R.string.schedule)).toUpperCase();
+                case 3:
+                    return ((String) getText(R.string.sel)).toUpperCase();
                 default:
                     return "";
             }

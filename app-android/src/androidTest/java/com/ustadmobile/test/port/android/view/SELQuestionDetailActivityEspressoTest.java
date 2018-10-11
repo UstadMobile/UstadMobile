@@ -9,10 +9,9 @@ import android.support.test.runner.AndroidJUnit4;
 
 import com.ustadmobile.core.controller.ClazzListPresenter;
 import com.ustadmobile.core.db.UmAppDatabase;
-import com.ustadmobile.core.view.PersonDetailView;
 import com.ustadmobile.lib.db.entities.Clazz;
-import com.ustadmobile.lib.db.entities.Person;
-import com.ustadmobile.port.android.view.PersonEditActivity;
+import com.ustadmobile.port.android.view.SELQuestionActivity;
+import com.ustadmobile.port.android.view.SELQuestionDetailActivity;
 import com.ustadmobile.test.port.android.testutil.UmDbTestUtil;
 
 import org.junit.Assert;
@@ -23,8 +22,16 @@ import org.junit.runner.RunWith;
 
 import java.util.Hashtable;
 
+import android.support.test.runner.AndroidJUnit4;
+
+import org.junit.runner.RunWith;
+
+import static com.ustadmobile.core.view.PersonDetailView.ARG_PERSON_UID;
+
 @RunWith(AndroidJUnit4.class)
-public class PersonEditActivityEspressoTest {
+public class SELQuestionDetailActivityEspressoTest {
+
+    //SELQuestionDetailActivity
 
     private static final String TEST_CLASS_NAME = "Class A";
     private static final float TEST_CLASS_PERCENTAGE = 0.42F;
@@ -56,91 +63,31 @@ public class PersonEditActivityEspressoTest {
      * This sets the activity that we want floating around
      */
     @Rule
-    public IntentsTestRule<PersonEditActivity> mActivityRule =
-        new IntentsTestRule<>(PersonEditActivity.class, false, false);
+    public IntentsTestRule<SELQuestionDetailActivity> mActivityRule =
+            new IntentsTestRule<>(SELQuestionDetailActivity.class, false, false);
 
     @Before
     public void beforeTest() {
         Context context = InstrumentationRegistry.getContext();
-
-        //Clear the database
         UmAppDatabase.getInstance(context).clearAllTables();
 
         //Populate the database
         testClazz = UmDbTestUtil.createClazzWithClazzMembers(TEST_CLASS_NAME, TEST_CLASS_PERCENTAGE,
                 peopleMap, TEST_USER_UID, context);
 
-        Person testPerson = UmDbTestUtil.createPersonWithFieldsAndCustomFields(testClazz, context);
-
-        personUid = testPerson.getPersonUid();
-
         //Start the activity
         Intent launchActivityIntent = new Intent();
         Bundle b = new Bundle();
         b.putLong(ClazzListPresenter.ARG_CLAZZ_UID, testClazz.getClazzUid());
-        b.putLong(PersonDetailView.ARG_PERSON_UID, personUid);
+        b.putLong(ARG_PERSON_UID, TEST_USER_UID);
         launchActivityIntent.putExtras(b);
         mActivityRule.launchActivity(launchActivityIntent);
 
     }
 
     @Test
-    public void givenActivityStarted_whenUserDetailsLoaded_shouldShowPersonFieldsAndCustomFields() {
+    public void givenFragmentStarted_whenDataLoaded_shouldShowCorrectData() {
         Assert.assertTrue(true);
-
-        //Should show all core fields with values filled in
-        //Assert the type of field with field type
-        //Assert icon
-        //Should fill values in
-
-        //Should show all custom fields with values filled in.
-        //Assert the type of field with field type (custom - always string)
-        //Assert icon
-
-
     }
-
-    @Test
-    public void givenActivityStarted_whenAddPersonToClassClicked_shouldOpenClassEnrollmentActivity(){
-
-        //Click Add Person To Class button - assert it goes to new activity.
-        //Assert person Uid is sent as argument to new activity.
-
-    }
-
-    @Test
-    public void givenActivityStarted_whenFieldEditedAndDonePressed_shouldPersistPerson(){
-
-        //Fill Values core fields - click done - assert update went up to person.
-        //Fill values in custom field - click done - assert update went to person's custom field.
-
-    }
-
-    @Test
-    public void givenActivityStarted_whenFieldEdited_shouldNotPersist(){
-
-        //Fill core field values - assert update did NOT Persist to Person
-        //Fill custom field values - assert update did NOT Persist to Person.
-
-    }
-
-    @Test
-    public void givenActivityStarted_changeDate_shouldUpdateDate(){
-
-        //Edit Birthday - pick custom date - assert date field updated with pretty text.
-
-        //Click Done - assert new updated date persisted to Person
-
-    }
-
-    @Test
-    public void givenActivityStarted_changeNumberAndClickDone_shouldUpdateNumber(){
-
-        //Edit Phone number for Mother - pick number - click done - assert value persisted to Person
-    }
-
 
 }
-
-
-
