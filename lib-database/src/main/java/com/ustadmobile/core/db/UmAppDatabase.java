@@ -28,6 +28,8 @@ import com.ustadmobile.core.db.dao.PersonCustomFieldValueDao;
 import com.ustadmobile.core.db.dao.PersonDao;
 import com.ustadmobile.core.db.dao.PersonDetailPresenterFieldDao;
 import com.ustadmobile.core.db.dao.SocialNominationQuestionDao;
+import com.ustadmobile.core.db.dao.SocialNominationQuestionResponseDao;
+import com.ustadmobile.core.db.dao.SocialNominationQuestionResponseNominationDao;
 import com.ustadmobile.core.db.dao.SocialNominationQuestionSetDao;
 import com.ustadmobile.core.db.dao.SocialNominationQuestionSetResponseDao;
 import com.ustadmobile.lib.database.annotation.UmClearAll;
@@ -168,6 +170,10 @@ public abstract class UmAppDatabase{
     public abstract SocialNominationQuestionSetResponseDao getSocialNominationQuestionSetResponseDao();
 
     public abstract SocialNominationQuestionSetDao getSocialNominationQuestionSetDao();
+
+    public abstract SocialNominationQuestionResponseNominationDao getSocialNominationQuestionResponseNominationDao();
+
+    public abstract SocialNominationQuestionResponseDao getSocialNominationQuestionResponseDao();
 
     @UmDbContext
     public abstract Object getContext();

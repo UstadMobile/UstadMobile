@@ -2,7 +2,10 @@ package com.ustadmobile.core.controller;
 
 import java.util.Hashtable;
 
+import com.ustadmobile.core.db.dao.ClazzMemberDao;
 import com.ustadmobile.core.db.dao.SocialNominationQuestionDao;
+import com.ustadmobile.core.db.dao.SocialNominationQuestionResponseDao;
+import com.ustadmobile.core.db.dao.SocialNominationQuestionResponseNominationDao;
 import com.ustadmobile.core.db.dao.SocialNominationQuestionSetDao;
 import com.ustadmobile.core.db.dao.SocialNominationQuestionSetResponseDao;
 import com.ustadmobile.core.impl.UmCallback;
@@ -11,17 +14,25 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmProvider;
+import com.ustadmobile.core.view.SELQuestionView;
+import com.ustadmobile.lib.db.entities.ClazzMember;
 import com.ustadmobile.lib.db.entities.Person;
 import com.ustadmobile.lib.db.entities.SocialNominationQuestion;
+import com.ustadmobile.lib.db.entities.SocialNominationQuestionResponse;
+import com.ustadmobile.lib.db.entities.SocialNominationQuestionResponseNomination;
 import com.ustadmobile.lib.db.entities.SocialNominationQuestionSetResponse;
 
 import static com.ustadmobile.core.controller.ClazzListPresenter.ARG_CLAZZ_UID;
 import static com.ustadmobile.core.view.PersonDetailView.ARG_PERSON_UID;
 import static com.ustadmobile.core.view.SELEditView.ARG_CLAZZMEMBER_UID;
 import static com.ustadmobile.core.view.SELEditView.ARG_QUESTION_INDEX_ID;
+import static com.ustadmobile.core.view.SELEditView.ARG_QUESTION_RESPONSE_UID;
 import static com.ustadmobile.core.view.SELEditView.ARG_QUESTION_SET_RESPONSE_UID;
 import static com.ustadmobile.core.view.SELEditView.ARG_QUESTION_SET_UID;
 import static com.ustadmobile.core.view.SELEditView.ARG_QUESTION_UID;
+import static com.ustadmobile.core.view.SELQuestionView.ARG_QUESTION_INDEX;
+import static com.ustadmobile.core.view.SELQuestionView.ARG_QUESTION_TEXT;
+import static com.ustadmobile.core.view.SELQuestionView.ARG_QUESTION_TOTAL;
 
 
 /**
@@ -38,6 +49,7 @@ public class SELEditPresenter
     private long currentClazzMemberUid = -1;
     private int currentQuestionIndexId = 0;
     private long currentQuestionSetResponseUid = -1;
+    private long currentQuestionResponseUid = -1;
 
     //Provider 
     UmProvider<Person> providerList;
@@ -67,6 +79,9 @@ public class SELEditPresenter
         if(arguments.containsKey(ARG_QUESTION_SET_RESPONSE_UID)){
             currentQuestionSetResponseUid = (long) arguments.get(ARG_QUESTION_SET_RESPONSE_UID);
         }
+        if(arguments.containsKey(ARG_QUESTION_RESPONSE_UID)){
+            currentQuestionResponseUid = (long) arguments.get(ARG_QUESTION_RESPONSE_UID);
+        }
 
 
     }
@@ -90,10 +105,8 @@ public class SELEditPresenter
                 UmAppDatabase.getInstance(context).getSocialNominationQuestionDao();
         SocialNominationQuestionSetResponseDao questionSetResponseDao =
                 UmAppDatabase.getInstance(context).getSocialNominationQuestionSetResponseDao();
-        //Create arguments
-        Hashtable args = new Hashtable();
-        args.put(ARG_CLAZZ_UID, currentClazzUid);
-        args.put(ARG_PERSON_UID, currentPersonUid);
+        SocialNominationQuestionResponseDao questionResponseDao =
+                UmAppDatabase.getInstance(context).getSocialNominationQuestionResponseDao();
 
 
         //TODO:Check: Go to Next SEL question part of this set. Or End. (ie: get back to SELAnswerFragment
@@ -110,6 +123,11 @@ public class SELEditPresenter
                 questionSetResponseDao.updateAsync(currentQuestionSetResponse, new UmCallback<Integer>() {
                     @Override
                     public void onSuccess(Integer questionSetResponseUpdatedResult) {
+
+                        //Find total number of questions as well.
+                        int totalSELQuestions = questionDao.findTotalNumberOfQuestions();
+
+
                         questionDao.findNextQuestionByQuestionSetUidAsync(currentQuestionSetUid,
                             currentQuestionIndexId, new UmCallback<SocialNominationQuestion>() {
                                 @Override
@@ -128,14 +146,28 @@ public class SELEditPresenter
                                             public void onSuccess(Long result) {
 
                                                 view.finish();
+
+                                                //Make a question response for the next Question for this Response-Set instance.
+                                                SocialNominationQuestionResponse questionResponse = new SocialNominationQuestionResponse();
+                                                questionResponse.setSocialNominationQuestionResponseSocialNominationQuestionSetResponseUid(currentQuestionSetResponseUid);
+                                                questionResponse.setSocialNominationQuestionResponseUid(questionResponseDao.insert(questionResponse));
+
+                                                //Create arguments
+                                                Hashtable args = new Hashtable();
+                                                args.put(ARG_CLAZZ_UID, currentClazzUid);
+                                                args.put(ARG_PERSON_UID, currentPersonUid);
                                                 args.put(ARG_QUESTION_SET_UID, currentQuestionSetUid);
                                                 args.put(ARG_CLAZZMEMBER_UID, currentClazzMemberUid);
                                                 args.put(ARG_QUESTION_UID, nextQuestion.getSocialNominationQuestionUid());
                                                 args.put(ARG_QUESTION_SET_RESPONSE_UID, currentQuestionSetResponseUid);
                                                 args.put(ARG_QUESTION_INDEX_ID, nextQuestion.getQuestionIndex());
+                                                args.put(ARG_QUESTION_TEXT, nextQuestion.getQuestionText());
+                                                args.put(ARG_QUESTION_INDEX, nextQuestion.getQuestionIndex());
+                                                args.put(ARG_QUESTION_TOTAL, totalSELQuestions);
+                                                args.put(ARG_QUESTION_RESPONSE_UID, questionResponse.getSocialNominationQuestionResponseUid());
 
-                                                //TODO: Change to go to SELQuestion instead.
-                                                impl.go(SELEditView.VIEW_NAME, args, view.getContext());
+                                                //impl.go(SELEditView.VIEW_NAME, args, view.getContext());
+                                                impl.go(SELQuestionView.VIEW_NAME, args, view.getContext());
 
                                             }
 
@@ -173,11 +205,6 @@ public class SELEditPresenter
 
             }
         });
-
-
-
-
-
     }
 
     @Override
@@ -190,6 +217,29 @@ public class SELEditPresenter
         //TODO: Record nomination and highlight selected.
         System.out.println("Handling nomination pressed..");
 
+        ClazzMemberDao clazzMemberDao = UmAppDatabase.getInstance(context).getClazzMemberDao();
+        SocialNominationQuestionResponseNominationDao questionResponseNominationDao =
+                UmAppDatabase.getInstance(context).getSocialNominationQuestionResponseNominationDao();
+
+        clazzMemberDao.findByPersonUidAndClazzUidAsync((Long) arg, currentClazzUid,
+                new UmCallback<ClazzMember>() {
+            @Override
+            public void onSuccess(ClazzMember result) {
+
+                SocialNominationQuestionResponseNomination responseNomination =
+                        new SocialNominationQuestionResponseNomination();
+                responseNomination.setSocialNominationQuestionResponseNominationSocialNominationQuestionResponseUId(currentQuestionResponseUid);
+                responseNomination.setSocialNominationQuestionResponseNominationClazzMemberUid(result.getClazzMemberUid());
+
+                questionResponseNominationDao.insert(responseNomination);
+
+            }
+
+            @Override
+            public void onFailure(Throwable exception) {
+
+            }
+        });
 
     }
 }

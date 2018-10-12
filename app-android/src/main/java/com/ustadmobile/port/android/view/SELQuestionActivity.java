@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.widget.TextView;
 
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 import com.toughra.ustadmobile.R;
@@ -59,9 +60,22 @@ public class SELQuestionActivity extends UstadBaseActivity implements SELQuestio
         //FAB and its listener
         //eg:
         FloatingTextButton fab = findViewById(R.id.activity_sel_question_fab);
-        fab.setOnClickListener(v -> mPresenter.handleClickPrimaryActionButton(-1));
+        fab.setOnClickListener(v -> mPresenter.handleClickPrimaryActionButton());
 
 
+    }
+
+    @Override
+    public void updateQuestion(String questionText) {
+        TextView question = (TextView)findViewById(R.id.activity_sel_question_question);
+        question.setText(questionText);
+
+    }
+
+    @Override
+    public void updateQuestionNumber(String qNumber, String tNumber) {
+        TextView qNum = (TextView) findViewById(R.id.activity_sel_question_number_position);
+        qNum.setText(qNumber.toString() + "/" + tNumber.toString());
     }
 
 

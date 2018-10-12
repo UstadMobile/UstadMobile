@@ -28,6 +28,9 @@ import static com.ustadmobile.core.view.SELEditView.ARG_QUESTION_INDEX_ID;
 import static com.ustadmobile.core.view.SELEditView.ARG_QUESTION_SET_RESPONSE_UID;
 import static com.ustadmobile.core.view.SELEditView.ARG_QUESTION_SET_UID;
 import static com.ustadmobile.core.view.SELEditView.ARG_QUESTION_UID;
+import static com.ustadmobile.core.view.SELQuestionView.ARG_QUESTION_INDEX;
+import static com.ustadmobile.core.view.SELQuestionView.ARG_QUESTION_TEXT;
+import static com.ustadmobile.core.view.SELQuestionView.ARG_QUESTION_TOTAL;
 
 
 /**
@@ -71,7 +74,6 @@ public class SELSelectConsentPresenter
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         SocialNominationQuestionSetResponseDao socialNominationQuestionSetResponseDao =
                 UmAppDatabase.getInstance(context).getSocialNominationQuestionSetResponseDao();
-        ClazzMemberDao clazzMemberDao = UmAppDatabase.getInstance(context).getClazzMemberDao();
         SocialNominationQuestionSetDao questionSetDao = UmAppDatabase.getInstance(context)
                 .getSocialNominationQuestionSetDao();
         SocialNominationQuestionDao questionDao = UmAppDatabase.getInstance(context)
@@ -80,11 +82,6 @@ public class SELSelectConsentPresenter
 
         //Check selectedObject for consent given.
         if(consentGiven){
-            //Create arguments
-            Hashtable args = new Hashtable();
-            args.put(ARG_CLAZZ_UID, currentClazzUid);
-            args.put(ARG_PERSON_UID, currentPersonUid);
-
 
             //TODO: Check: Decide when to show recognition and when to show the SEL questions themselves.
             socialNominationQuestionSetResponseDao.findAllPassedRecognitionByPersonUid(
@@ -97,13 +94,15 @@ public class SELSelectConsentPresenter
                         //Go straight to the Questions
 
                         //Loop through questions.
-                        // 1. Loop through Question set
                         questionSetDao.findAllQuestionsAsync(new UmCallback<List<SocialNominationQuestionSet>>() {
                             @Override
                             public void onSuccess(List<SocialNominationQuestionSet> questionSets) {
 
                                 //TODO: Change this when we add more Question Sets to findNextQuestionSet like we did for findNextQuestion
                                 for(SocialNominationQuestionSet questionSet : questionSets){
+
+                                    //Find total number of questions as well.
+                                    int totalSELQuestions = questionDao.findTotalNumberOfQuestions();
 
                                     questionDao.findNextQuestionByQuestionSetUidAsync(questionSet.getSocialNominationQuestionSetUid(),
                                         0, new UmCallback<SocialNominationQuestion>() {
@@ -113,7 +112,8 @@ public class SELSelectConsentPresenter
 
                                                 SocialNominationQuestionSetResponse newResponse = new SocialNominationQuestionSetResponse();
                                                 newResponse.setSocialNominationQuestionSetResponseStartTime(System.currentTimeMillis());
-                                                newResponse.setSocialNominationQuestionSetResponseSocialNominationQuestionSetUid(questionSet.getSocialNominationQuestionSetUid());
+                                                newResponse.setSocialNominationQuestionSetResponseSocialNominationQuestionSetUid(
+                                                        questionSet.getSocialNominationQuestionSetUid());
                                                 newResponse.setSocialNominationQuestionSetResponseClazzMemberUid(currentClazzMemberUid);
 
                                                 socialNominationQuestionSetResponseDao.insertAsync(newResponse, new UmCallback<Long>() {
@@ -122,15 +122,23 @@ public class SELSelectConsentPresenter
 
                                                         view.finish();
 
+                                                        //Create arguments
+                                                        Hashtable args = new Hashtable();
+                                                        args.put(ARG_CLAZZ_UID, currentClazzUid);
+                                                        args.put(ARG_PERSON_UID, currentPersonUid);
                                                         args.put(ARG_QUESTION_SET_UID, questionSet.getSocialNominationQuestionSetUid());
                                                         args.put(ARG_CLAZZMEMBER_UID, currentClazzMemberUid);
                                                         args.put(ARG_QUESTION_UID, nextQuestion.getSocialNominationQuestionUid());
                                                         args.put(ARG_QUESTION_INDEX_ID, nextQuestion.getQuestionIndex());
                                                         args.put(ARG_QUESTION_SET_RESPONSE_UID, questionSetResponseUid);
-
+                                                        args.put(ARG_QUESTION_TEXT, nextQuestion.getQuestionText());
+                                                        args.put(ARG_QUESTION_INDEX, nextQuestion.getQuestionIndex());
+                                                        args.put(ARG_QUESTION_TOTAL, totalSELQuestions);
 
                                                         //TODO: Change to go to SELQuestion instead.
-                                                        impl.go(SELEditView.VIEW_NAME, args, view.getContext());
+                                                        //impl.go(SELEditView.VIEW_NAME, args, view.getContext());
+
+                                                        impl.go(SELQuestionView.VIEW_NAME, args, view.getContext());
 
                                                     }
 
@@ -140,9 +148,8 @@ public class SELSelectConsentPresenter
                                                     }
                                                 });
 
-
                                             }else{
-                                                //TODO. end the SEL activitieS properly.
+                                                //End the SEL activities properly.
                                                 view.finish();
                                             }
                                         }
@@ -162,11 +169,8 @@ public class SELSelectConsentPresenter
                             }
                         });
 
-
-
-                        //impl.go(SELQuestionView.VIEW_NAME, args, view.getContext());
                     }else{
-                        //Go re-do / do the recognition activity.
+                        //Go re-do/do the recognition activity.
                         SocialNominationQuestionSetResponse newResponse =
                                 new SocialNominationQuestionSetResponse();
                         newResponse.setSocialNominationQuestionSetResponseStartTime(System.currentTimeMillis());

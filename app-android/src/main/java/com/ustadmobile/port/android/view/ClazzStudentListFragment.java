@@ -188,7 +188,7 @@ public class ClazzStudentListFragment extends UstadBaseFragment implements Clazz
 
         //Create the presenter and call its onCreate method. This will populate the provider data
         // and call setProvider to set it
-        mPresenter = new ClazzStudentListPresenter(this,
+        mPresenter = new ClazzStudentListPresenter(getContext(),
                 UMAndroidUtil.bundleToHashtable(getArguments()), this);
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
 

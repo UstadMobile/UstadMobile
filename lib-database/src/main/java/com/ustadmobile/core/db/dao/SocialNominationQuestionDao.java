@@ -48,6 +48,9 @@ public abstract class SocialNominationQuestionDao implements BaseDao<SocialNomin
     @UmQuery("SELECT MIN(questionIndex) FROM SocialNominationQuestion")
     public abstract void getMinIndexAsync(UmCallback<Integer> result);
 
+    @UmQuery("SELECT COUNT(*) FROM SocialNominationQuestion")
+    public abstract int findTotalNumberOfQuestions();
+
 
 
 }

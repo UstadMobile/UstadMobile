@@ -327,7 +327,7 @@ This is the one you should be editing.
     <string name="sel_not_configured">SEL is not configured</string>
     <string name="configure_sel">Configure SEL</string>
     <string name="question">question</string>
-    <string name="sel_question_tell_student">1. Tell the student you would like them to </string>
+    <string name="sel_question_tell_student">1. Tell the student you would like them to choose for this question. </string>
     <string name="sel_question_press_start">2. Press the "START SELECTION" button at the bottom to hide this instruction and allow the student to make their selection.</string>
     <string name="questions">Questions</string>
     <string name="add_question">Add question</string>

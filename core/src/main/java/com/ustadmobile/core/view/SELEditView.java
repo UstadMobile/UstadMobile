@@ -21,6 +21,8 @@ public interface SELEditView extends UstadView {
 
     String ARG_QUESTION_SET_RESPONSE_UID = "questionSetResponseUid";
 
+    String ARG_QUESTION_RESPONSE_UID = "questionResponseUid";
+
 
     /**
      * Sets Current provider
