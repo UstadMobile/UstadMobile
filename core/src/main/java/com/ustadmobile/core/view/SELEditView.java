@@ -11,6 +11,17 @@ public interface SELEditView extends UstadView {
 
     String VIEW_NAME = "SELEdit";
 
+    String ARG_QUESTION_SET_UID = "questionSetUid";
+
+    String ARG_QUESTION_UID = "questionUid";
+
+    String ARG_CLAZZMEMBER_UID = "clazzMemberUid";
+
+    String ARG_QUESTION_INDEX_ID = "questionIndexId";
+
+    String ARG_QUESTION_SET_RESPONSE_UID = "questionSetResponseUid";
+
+
     /**
      * Sets Current provider
      * <p>

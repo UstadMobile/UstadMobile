@@ -16,6 +16,8 @@ import com.ustadmobile.lib.db.entities.SocialNominationQuestion;
 public class SELQuestionEditPresenter
         extends UstadBaseController<SELQuestionEditView> {
 
+    private long DEFAULT_QUESTION_SET_UID = 1;
+
     //Any arguments stored as variables here
     //eg: private long clazzUid = -1;
     SocialNominationQuestionDao socialNominationQuestionDao;
@@ -51,8 +53,11 @@ public class SELQuestionEditPresenter
                 socialNominationQuestion.setQuestionIndex(result);
                 socialNominationQuestion.setAssignToAllClasses(allClasses);
                 socialNominationQuestion.setMultiNominations(multiNominations);
+                socialNominationQuestion.setSocialNominationQuestionSocialNominationQuestionSetUid(
+                        DEFAULT_QUESTION_SET_UID);
 
-                socialNominationQuestionDao.insertAsync(socialNominationQuestion, new UmCallback<Long>() {
+                socialNominationQuestionDao.insertAsync(socialNominationQuestion,
+                        new UmCallback<Long>() {
                     @Override
                     public void onSuccess(Long result) {
                         view.finish();
