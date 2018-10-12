@@ -16,7 +16,8 @@ import static com.ustadmobile.core.controller.ClazzListPresenter.ARG_CLAZZ_UID;
 import static com.ustadmobile.core.view.PersonDetailView.ARG_PERSON_UID;
 import static com.ustadmobile.core.view.SELEditView.ARG_CLAZZMEMBER_UID;
 
-public class SELAnswerListPresenter extends UstadBaseController<SELAnswerListView> {
+//public class SELAnswerListPresenter extends UstadBaseController<SELAnswerListView> {
+public class SELAnswerListPresenter extends CommonHandlerPresenter<SELAnswerListView>{
 
     private long currentClazzUid = -1L;
 
@@ -58,7 +59,6 @@ public class SELAnswerListPresenter extends UstadBaseController<SELAnswerListVie
 
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
 
-
         Hashtable args = new Hashtable();
         args.put(ARG_CLAZZ_UID, currentClazzUid);
 
@@ -74,6 +74,17 @@ public class SELAnswerListPresenter extends UstadBaseController<SELAnswerListVie
      */
     @Override
     public void setUIStrings() {
+
+    }
+
+    @Override
+    public void handleCommonPressed(Object arg) {
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        Hashtable args = new Hashtable();
+        args.put(ARG_CLAZZ_UID, currentClazzUid);
+        args.put(ARG_PERSON_UID, (Long)arg);
+        //Go somewhere ? To SELEdit maybe?
+        //TODO: this
 
     }
 }

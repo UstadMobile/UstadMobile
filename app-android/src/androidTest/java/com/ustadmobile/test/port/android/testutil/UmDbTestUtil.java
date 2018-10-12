@@ -2,6 +2,8 @@ package com.ustadmobile.test.port.android.testutil;
 
 import com.ustadmobile.core.controller.ClazzListPresenter;
 import com.ustadmobile.core.controller.ClazzLogDetailPresenter;
+import com.ustadmobile.core.db.dao.SocialNominationQuestionDao;
+import com.ustadmobile.core.db.dao.SocialNominationQuestionSetDao;
 import com.ustadmobile.core.view.PersonDetailViewField;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.ClazzDao;
@@ -24,6 +26,8 @@ import com.ustadmobile.lib.db.entities.Person;
 import com.ustadmobile.lib.db.entities.PersonField;
 import com.ustadmobile.lib.db.entities.PersonCustomFieldValue;
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField;
+import com.ustadmobile.lib.db.entities.SocialNominationQuestion;
+import com.ustadmobile.lib.db.entities.SocialNominationQuestionSet;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.util.ArrayList;
@@ -525,6 +529,55 @@ public class UmDbTestUtil {
         return newPerson;
 
     }
+
+    public static void createDefaultQuestionSet(Object context){
+        SocialNominationQuestionSetDao socialNominationQuestionSetDao =
+                UmAppDatabase.getInstance(context).getSocialNominationQuestionSetDao();
+        SocialNominationQuestionSet socialNominationQuestionSet = new SocialNominationQuestionSet();
+        socialNominationQuestionSet.setTitle("Default set");
+        socialNominationQuestionSetDao.insert(socialNominationQuestionSet);
+        
+    }
+    
+    public static void createDefaultQuestionSetAndSomeQuestions(Object context){
+        SocialNominationQuestionSetDao questionSetDao =
+                UmAppDatabase.getInstance(context).getSocialNominationQuestionSetDao();
+        SocialNominationQuestionSet questionSet = new SocialNominationQuestionSet();
+        questionSet.setTitle("Default set");
+        questionSet.setSocialNominationQuestionSetUid(questionSetDao.insert(questionSet));
+
+        SocialNominationQuestionDao questionDao = 
+                UmAppDatabase.getInstance(context).getSocialNominationQuestionDao();
+        SocialNominationQuestion question1 = new SocialNominationQuestion();
+        question1.setSocialNominationQuestionSocialNominationQuestionSetUid(
+                questionSet.getSocialNominationQuestionSetUid());
+        question1.setQuestionIndex(1);
+        question1.setQuestionText("Who sits alone in the class?");
+        question1.setMultiNominations(true);
+        question1.setAssignToAllClasses(true);
+        questionDao.insert(question1);
+
+        SocialNominationQuestion question2 = new SocialNominationQuestion();
+        question2.setSocialNominationQuestionSocialNominationQuestionSetUid(
+                questionSet.getSocialNominationQuestionSetUid());
+        question2.setQuestionIndex(2);
+        question2.setQuestionText("Who are your friends?");
+        question2.setMultiNominations(true);
+        question2.setAssignToAllClasses(true);
+        questionDao.insert(question2);
+
+        SocialNominationQuestion question3 = new SocialNominationQuestion();
+        question3.setSocialNominationQuestionSocialNominationQuestionSetUid(
+                questionSet.getSocialNominationQuestionSetUid());
+        question3.setQuestionIndex(3);
+        question3.setQuestionText("Who annoys you?");
+        question3.setMultiNominations(true);
+        question3.setAssignToAllClasses(true);
+        questionDao.insert(question3);
+
+    }
+    
+    
 
     /**
      * Creates a Class/Clazz with given name, assigns members with person Uid, sets percentage.

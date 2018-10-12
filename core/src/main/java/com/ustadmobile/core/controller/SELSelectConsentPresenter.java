@@ -102,6 +102,7 @@ public class SELSelectConsentPresenter
                             @Override
                             public void onSuccess(List<SocialNominationQuestionSet> questionSets) {
 
+                                //TODO: Change this when we add more Question Sets to findNextQuestionSet like we did for findNextQuestion
                                 for(SocialNominationQuestionSet questionSet : questionSets){
 
                                     questionDao.findNextQuestionByQuestionSetUidAsync(questionSet.getSocialNominationQuestionSetUid(),
@@ -118,6 +119,8 @@ public class SELSelectConsentPresenter
                                                 socialNominationQuestionSetResponseDao.insertAsync(newResponse, new UmCallback<Long>() {
                                                     @Override
                                                     public void onSuccess(Long questionSetResponseUid) {
+
+                                                        view.finish();
 
                                                         args.put(ARG_QUESTION_SET_UID, questionSet.getSocialNominationQuestionSetUid());
                                                         args.put(ARG_CLAZZMEMBER_UID, currentClazzMemberUid);
@@ -149,8 +152,6 @@ public class SELSelectConsentPresenter
                                             System.out.println("fail2");
                                         }
                                     });
-
-
                                 }
 
                             }
@@ -163,7 +164,7 @@ public class SELSelectConsentPresenter
 
 
 
-                        impl.go(SELQuestionView.VIEW_NAME, args, view.getContext());
+                        //impl.go(SELQuestionView.VIEW_NAME, args, view.getContext());
                     }else{
                         //Go re-do / do the recognition activity.
                         SocialNominationQuestionSetResponse newResponse =

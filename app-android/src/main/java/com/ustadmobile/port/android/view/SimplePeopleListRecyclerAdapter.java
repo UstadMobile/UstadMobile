@@ -43,6 +43,15 @@ public class SimplePeopleListRecyclerAdapter extends
     }
 
     protected SimplePeopleListRecyclerAdapter(@NonNull DiffUtil.ItemCallback<Person> diffCallback,
+                                              Context context, Fragment fragment,
+                                              CommonHandlerPresenter presenter) {
+        super(diffCallback);
+        theContext = context;
+        theFragment = fragment;
+        mPresenter = presenter;
+    }
+
+    protected SimplePeopleListRecyclerAdapter(@NonNull DiffUtil.ItemCallback<Person> diffCallback,
                                               Context context) {
         super(diffCallback);
         theContext = context;

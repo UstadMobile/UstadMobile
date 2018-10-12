@@ -70,7 +70,7 @@ public class SELAnswerListFragment extends UstadBaseFragment implements SELAnswe
     public void setSELAnswerListProvider(UmProvider<Person> selAnswersProvider) {
         // Specify the mAdapter
         SimplePeopleListRecyclerAdapter recyclerAdapter =
-                new SimplePeopleListRecyclerAdapter(DIFF_CALLBACK, getContext(), this);
+                new SimplePeopleListRecyclerAdapter(DIFF_CALLBACK, getContext(), this, mPresenter);
 
         // get the provider, set , observe, etc.
         DataSource.Factory<Integer, Person> factory =

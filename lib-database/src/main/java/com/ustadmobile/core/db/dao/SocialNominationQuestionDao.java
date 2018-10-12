@@ -41,7 +41,7 @@ public abstract class SocialNominationQuestionDao implements BaseDao<SocialNomin
 
     @UmQuery("SELECT * FROM SocialNominationQuestion WHERE " +
             " socialNominationQuestionSocialNominationQuestionSetUid = :questionSetUid " +
-            " AND questionIndex > :previousIndex ORDER BY questionIndex DESC LIMIT 1    " )
+            " AND questionIndex > :previousIndex ORDER BY questionIndex ASC LIMIT 1    " )
     public abstract void findNextQuestionByQuestionSetUidAsync(long questionSetUid,
                                int previousIndex, UmCallback<SocialNominationQuestion> snQuestion);
 

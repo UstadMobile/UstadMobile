@@ -88,7 +88,7 @@ public class SELEditPresenter
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         SocialNominationQuestionDao  questionDao =
                 UmAppDatabase.getInstance(context).getSocialNominationQuestionDao();
-        SocialNominationQuestionSetResponseDao socialNominationQuestionSetResponseDao =
+        SocialNominationQuestionSetResponseDao questionSetResponseDao =
                 UmAppDatabase.getInstance(context).getSocialNominationQuestionSetResponseDao();
         //Create arguments
         Hashtable args = new Hashtable();
@@ -100,69 +100,82 @@ public class SELEditPresenter
         // ie: go to SELQuestionActivity or SELAnswerFragment.
 
         //Before we go to the next one. We need to end the current one.
-        SocialNominationQuestionSetResponse currentQuestionSetResponse =
-                socialNominationQuestionSetResponseDao.findByUid(currentQuestionSetResponseUid);
-        currentQuestionSetResponse.setSocialNominationQuestionSetResponseFinishTime(System.currentTimeMillis());
-
-        socialNominationQuestionSetResponseDao.updateAsync(currentQuestionSetResponse, new UmCallback<Integer>() {
+        questionSetResponseDao.findByUidAsync(currentQuestionSetResponseUid,
+                new UmCallback<SocialNominationQuestionSetResponse>() {
             @Override
-            public void onSuccess(Integer questionSetResponseUpdatedResult) {
-                questionDao.findNextQuestionByQuestionSetUidAsync(currentQuestionSetUid,
-                        currentQuestionIndexId, new UmCallback<SocialNominationQuestion>() {
-                            @Override
-                            public void onSuccess(SocialNominationQuestion nextQuestion) {
+            public void onSuccess(SocialNominationQuestionSetResponse currentQuestionSetResponse) {
+                currentQuestionSetResponse.setSocialNominationQuestionSetResponseFinishTime(
+                        System.currentTimeMillis());
+
+                questionSetResponseDao.updateAsync(currentQuestionSetResponse, new UmCallback<Integer>() {
+                    @Override
+                    public void onSuccess(Integer questionSetResponseUpdatedResult) {
+                        questionDao.findNextQuestionByQuestionSetUidAsync(currentQuestionSetUid,
+                            currentQuestionIndexId, new UmCallback<SocialNominationQuestion>() {
+                                @Override
+                                public void onSuccess(SocialNominationQuestion nextQuestion) {
 
 
-                                if(nextQuestion != null) {
+                                    if(nextQuestion != null) {
 
-                                    SocialNominationQuestionSetResponse newResponse = new SocialNominationQuestionSetResponse();
-                                    newResponse.setSocialNominationQuestionSetResponseStartTime(System.currentTimeMillis());
-                                    newResponse.setSocialNominationQuestionSetResponseSocialNominationQuestionSetUid(currentQuestionSetUid);
-                                    newResponse.setSocialNominationQuestionSetResponseClazzMemberUid(currentClazzMemberUid);
+                                        SocialNominationQuestionSetResponse newResponse = new SocialNominationQuestionSetResponse();
+                                        newResponse.setSocialNominationQuestionSetResponseStartTime(System.currentTimeMillis());
+                                        newResponse.setSocialNominationQuestionSetResponseSocialNominationQuestionSetUid(currentQuestionSetUid);
+                                        newResponse.setSocialNominationQuestionSetResponseClazzMemberUid(currentClazzMemberUid);
 
-                                    socialNominationQuestionSetResponseDao.insertAsync(newResponse, new UmCallback<Long>() {
-                                        @Override
-                                        public void onSuccess(Long result) {
+                                        questionSetResponseDao.insertAsync(newResponse, new UmCallback<Long>() {
+                                            @Override
+                                            public void onSuccess(Long result) {
 
-                                            args.put(ARG_QUESTION_SET_UID, currentQuestionSetUid);
-                                            args.put(ARG_CLAZZMEMBER_UID, currentClazzMemberUid);
-                                            args.put(ARG_QUESTION_UID, nextQuestion.getSocialNominationQuestionUid());
+                                                view.finish();
+                                                args.put(ARG_QUESTION_SET_UID, currentQuestionSetUid);
+                                                args.put(ARG_CLAZZMEMBER_UID, currentClazzMemberUid);
+                                                args.put(ARG_QUESTION_UID, nextQuestion.getSocialNominationQuestionUid());
+                                                args.put(ARG_QUESTION_SET_RESPONSE_UID, currentQuestionSetResponseUid);
+                                                args.put(ARG_QUESTION_INDEX_ID, nextQuestion.getQuestionIndex());
 
-                                            impl.go(SELEditView.VIEW_NAME, args, view.getContext());
-                                            args.put(ARG_QUESTION_INDEX_ID, nextQuestion.getQuestionIndex());
+                                                //TODO: Change to go to SELQuestion instead.
+                                                impl.go(SELEditView.VIEW_NAME, args, view.getContext());
 
-                                            //TODO: Change to go to SELQuestion instead.
-                                            impl.go(SELEditView.VIEW_NAME, args, view.getContext());
+                                            }
 
-                                        }
-
-                                        @Override
-                                        public void onFailure(Throwable exception) {
-                                            System.out.println("Fail-3");
-                                        }
-                                    });
+                                            @Override
+                                            public void onFailure(Throwable exception) {
+                                                System.out.println("Fail-3");
+                                            }
+                                        });
 
 
-                                }else{
-                                    //TODO. end the SEL activitieS properly.
-                                    System.out.println("All Question gone through OK..");
-                                    view.finish();
-                                    //TODO: Maybe go to SELAnswerFragment
+                                    }else{
+                                        //TODO. end the SEL activitieS properly.
+                                        System.out.println("All Question gone through OK..");
+                                        view.finish();
+                                        //TODO: Maybe go to SELAnswerFragment
+                                    }
                                 }
-                            }
 
-                            @Override
-                            public void onFailure(Throwable exception) {
-                                System.out.println("Fail-2");
-                            }
-                        });
+                                @Override
+                                public void onFailure(Throwable exception) {
+                                    System.out.println("Fail-2");
+                                }
+                            });
+                    }
+
+                    @Override
+                    public void onFailure(Throwable exception) {
+                        System.out.println("Fail-1");
+                    }
+                });
             }
 
             @Override
             public void onFailure(Throwable exception) {
-                System.out.println("Fail-1");
+
             }
         });
+
+
+
 
 
     }

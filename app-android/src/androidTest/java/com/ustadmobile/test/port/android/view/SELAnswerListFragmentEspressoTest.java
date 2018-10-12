@@ -76,6 +76,7 @@ public class SELAnswerListFragmentEspressoTest {
         testClazz = UmDbTestUtil.createClazzWithClazzMembers(TEST_CLASS_NAME, TEST_CLASS_PERCENTAGE,
                 peopleMap, TEST_USER_UID, context);
 
+        UmDbTestUtil.createDefaultQuestionSetAndSomeQuestions(context);
 
         //Start the activity
         Intent launchActivityIntent = new Intent();

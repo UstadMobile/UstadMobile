@@ -34,6 +34,10 @@ public abstract class SocialNominationQuestionSetResponseDao {
             "where socialNominationQuestionSetResposeUid = :uid")
     public abstract SocialNominationQuestionSetResponse findByUid(long uid);
 
+    @UmQuery("SELECT * FROM SocialNominationQuestionSetResponse " +
+            "where socialNominationQuestionSetResposeUid = :uid")
+    public abstract void findByUidAsync(long uid, UmCallback<SocialNominationQuestionSetResponse> result);
+
     @UmQuery("SELECT * FROM SocialNominationQuestionSetResponse WHERE " +
             "socialNominationQuestionSetResponseClazzMemberUid = :uid AND " +
             "socialNominationQuestionSetResponseRecognitionPercentage > 0.8")
