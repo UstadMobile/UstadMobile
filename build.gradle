@@ -6,7 +6,7 @@ buildscript {
         google()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.1.4'
+        classpath 'com.android.tools.build:gradle:3.2.1'
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }
@@ -55,7 +55,7 @@ ext {
     version_core_mockito = "2.13.0"
     version_apache_commons_pool2 = "2.6.0"
 
-    version_android_buildtools = "27.0.3"
+    version_android_buildtools = "28.0.3"
     version_android_compile_sdk = 27
     version_android_target_sdk = 27
 
