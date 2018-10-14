@@ -12,6 +12,7 @@
             <option value="$PROJECT_DIR$/app-android-launcher" />
             <option value="$PROJECT_DIR$/app-android-testserver" />
             <option value="$PROJECT_DIR$/app-javase" />
+            <option value="$PROJECT_DIR$/app-rest-server" />
             <option value="$PROJECT_DIR$/core" />
             <option value="$PROJECT_DIR$/core-tests" />
             <option value="$PROJECT_DIR$/lib-core-fs" />
