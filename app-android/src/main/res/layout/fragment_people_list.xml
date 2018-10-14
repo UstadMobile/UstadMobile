@@ -1,20 +1,39 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="com.ustadmobile.port.android.view.PeopleListFragment">
+<android.support.constraint.ConstraintLayout
 
-        <TextView
-            android:id="@+id/name_text"
-            android:text="@string/people"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="60sp"/>
+    tools:context="com.ustadmobile.port.android.view.PeopleListFragment"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_height="match_parent" android:layout_width="match_parent">
 
         <android.support.v7.widget.RecyclerView
-            android:layout_height="match_parent"
-            android:layout_width="match_parent"
             android:id="@+id/fragment_people_list_recyclerview"
+            android:layout_width="match_parent"
+            android:layout_height="367dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="8dp"
             android:scrollbars="vertical"
-            />
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-</FrameLayout>
+        <ru.dimorinny.floatingtextbutton.FloatingTextButton
+            android:id="@+id/fragment_people_list_fab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|center"
+            android:layout_margin="16dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="8dp"
+            app:floating_background_color="@color/accent"
+            app:floating_left_icon="@drawable/ic_add_white_trans_24dp"
+            app:floating_title="@string/add_person"
+            app:floating_title_color="@android:color/white"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.502"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/fragment_people_list_recyclerview" />
+
+</android.support.constraint.ConstraintLayout>

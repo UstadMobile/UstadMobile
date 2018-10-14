@@ -11,6 +11,7 @@ import com.ustadmobile.core.db.dao.PersonDetailPresenterFieldDao;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMCalendarUtil;
+import com.ustadmobile.core.view.PersonDetailEnrollClazzView;
 import com.ustadmobile.core.view.PersonDetailView;
 import com.ustadmobile.core.view.PersonDetailViewField;
 import com.ustadmobile.core.view.PersonEditView;
@@ -25,6 +26,7 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
+import static com.ustadmobile.core.view.PersonDetailView.ARG_PERSON_UID;
 import static com.ustadmobile.core.view.PersonDetailViewField.FIELD_TYPE_HEADER;
 import static com.ustadmobile.core.view.PersonDetailViewField.FIELD_TYPE_TEXT;
 import static com.ustadmobile.lib.db.entities.PersonDetailPresenterField.PERSON_FIELD_UID_ADDRESS;
@@ -54,6 +56,8 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
 
     private String attendanceAverage;
 
+    private String oneParentNumber = "";
+
     private UmProvider<ClazzWithNumStudents> assignedClazzes;
 
     /**
@@ -66,7 +70,7 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
     public PersonDetailPresenter(Object context, Hashtable arguments, PersonDetailView view) {
         super(context, arguments, view);
 
-        personUid = Long.parseLong(arguments.get(PersonDetailView.ARG_PERSON_UID).toString());
+        personUid = Long.parseLong(arguments.get(ARG_PERSON_UID).toString());
     }
 
     /**
@@ -85,6 +89,22 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
                 UmAppDatabase.getInstance(context).getPersonDetailPresenterFieldDao();
         ClazzMemberDao clazzMemberDao =
                 UmAppDatabase.getInstance(context).getClazzMemberDao();
+
+        personDao.findByUidAsync(personUid, new UmCallback<Person>() {
+            @Override
+            public void onSuccess(Person thisPerson) {
+                if(thisPerson.getFatherNumber() != null && !thisPerson.getFatherNumber().isEmpty()){
+                    oneParentNumber = thisPerson.getFatherNumber();
+                }else if(thisPerson.getMotherNum() != null && !thisPerson.getMotherNum().isEmpty()){
+                    oneParentNumber = thisPerson.getMotherNum();
+                }
+            }
+
+            @Override
+            public void onFailure(Throwable exception) {
+
+            }
+        });
 
         //Get all headers and fields
         personDetailPresenterFieldDao.findAllPersonDetailPresenterFieldsViewMode(
@@ -148,17 +168,6 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
 
         assignedClazzes = clazzDao.findAllClazzesByPersonUid(personUid);
 
-        new Thread(){
-            public void run(){
-
-                ClazzDao cd  = UmAppDatabase.getInstance(context).getClazzDao();
-                List a = cd.findAllClazzesByPersonUidAsList(personUid);
-                int x;
-                System.out.println("hey");
-            }
-
-        }.start();
-
         view.setClazzListProvider(assignedClazzes);
     }
 
@@ -209,6 +218,7 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
                         field.getLabelMessageId(),field.getFieldIcon()), thisValue);
 
             } else if (field.getFieldUid() == PERSON_FIELD_UID_FATHER_NAME_AND_PHONE_NUMBER) {
+
                 thisValue = person.getFatherName() + " (" + person.getFatherNumber() +")";
                 //Also tell the view that we need to add call and text buttons for the number
 
@@ -234,11 +244,21 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
                         field.getLabelMessageId(),field.getFieldIcon()), thisValue);
             }
             else if (field.getFieldUid() == PERSON_FIELD_UID_FATHER_NUMBER) {
+                if(person.getFatherName() != null ){
+                    if(!person.getFatherName().isEmpty()){
+                        oneParentNumber = person.getFatherNumber();
+                    }
+                }
                 thisValue = person.getFatherNumber();
                 view.setField(field.getFieldIndex(), new PersonDetailViewField(FIELD_TYPE_TEXT,
                         field.getLabelMessageId(),field.getFieldIcon()), thisValue);
             }
             else if (field.getFieldUid() == PERSON_FIELD_UID_MOTHER_NUMBER) {
+                if(person.getMotherNum() != null ){
+                    if(!person.getMotherNum().isEmpty()){
+                        oneParentNumber = person.getMotherNum();
+                    }
+                }
                 thisValue = person.getMotherNum();
                 view.setField(field.getFieldIndex(), new PersonDetailViewField(FIELD_TYPE_TEXT,
                         field.getLabelMessageId(),field.getFieldIcon()), thisValue);
@@ -296,16 +316,37 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
 
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         Hashtable args = new Hashtable();
-        args.put(PersonDetailView.ARG_PERSON_UID, personUid);
+        args.put(ARG_PERSON_UID, personUid);
         impl.go(PersonEditView.VIEW_NAME, args, view.getContext());
     }
 
+    public void handleClickCallParent(){
+        if(!oneParentNumber.isEmpty()) {
+            handleClickCall(oneParentNumber);
+        }
+    }
+
+    public void handleClickTextParent(){
+        if(!oneParentNumber.isEmpty()) {
+            handleClickText(oneParentNumber);
+        }
+    }
+
+    public void handleClickEnrollInClass(){
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        Hashtable args = new Hashtable();
+        args.put(ARG_PERSON_UID, personUid);
+
+        impl.go(PersonDetailEnrollClazzView.VIEW_NAME, args, context);
+    }
     /**
      * Handler to what happens when call button pressed on an entry (usually to call a person)
      *
      * @param number The phone number
      */
     public void handleClickCall(String number){
+        System.out.println("Call this number: " + number);
+        view.handleClickCall(number);
 
     }
 
@@ -317,6 +358,7 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
      */
     public void handleClickText(String number){
         System.out.println("Text this number: " + number);
+        view.handleClickText(number);
     }
 
     @Override

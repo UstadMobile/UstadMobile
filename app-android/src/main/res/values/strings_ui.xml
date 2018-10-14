@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <!--
-This is the one you should be editing.
+This is the one you should be editing. The one in /core/locale/main/values/strings.ui.xml
 -->
 <resources>
     <string name="app_name">Ustad Mobile</string>
@@ -338,6 +338,7 @@ This is the one you should be editing.
     <string name="allow_multiple_nominations">Allow multiple nominations</string>
     <string name="sel_new_question_title">Question</string>
     <string name="sel_recognition_student_recognizes">Student recognizes their classmates</string>
+    <string name="add_person">Add Person</string>
 
 
 

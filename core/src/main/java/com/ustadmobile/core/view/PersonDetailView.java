@@ -30,4 +30,8 @@ public interface PersonDetailView extends UstadView {
      */
     void setClazzListProvider(UmProvider<ClazzWithNumStudents> clazzListProvider );
 
+    void handleClickCall(String number);
+
+    void handleClickText(String number);
+
 }

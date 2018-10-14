@@ -809,7 +809,13 @@ public class NetworkManagerAndroid extends NetworkManager implements EmbeddedHTT
      * @return String: Device bluetooth address
      */
     public String getBluetoothMacAddress(){
-        String address = BluetoothAdapter.getDefaultAdapter().getAddress();
+        String address;
+        if(BluetoothAdapter.getDefaultAdapter() == null){
+            address = "";
+        }else{
+            address = BluetoothAdapter.getDefaultAdapter().getAddress();
+        }
+
         if (address.equals(DEFAULT_BLUETOOTH_ADDRESS)) {
             try {
                 ContentResolver mContentResolver = networkService.getApplicationContext().getContentResolver();

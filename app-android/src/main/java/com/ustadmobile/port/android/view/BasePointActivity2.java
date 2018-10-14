@@ -98,20 +98,25 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
         AHBottomNavigationItem feed_item =
                 new AHBottomNavigationItem(R.string.feed,
                         R.drawable.ic_today_black_48dp, R.color.default_back_color);
+        AHBottomNavigationItem classes_item =
+                new AHBottomNavigationItem(R.string.classes,
+                        R.drawable.ic_people_black_48dp, R.color.default_back_color);
+
         AHBottomNavigationItem people_item =
                 new AHBottomNavigationItem(R.string.people,
-                        R.drawable.ic_people_black_48dp, R.color.default_back_color);
-        AHBottomNavigationItem statistics_item =
-                new AHBottomNavigationItem(R.string.statistcs,
-                        R.drawable.ic_chart_areaspline_black_24dp, R.color.default_back_color);
+                        R.drawable.ic_person_black_24dp, R.color.default_back_color);
+//
+//        AHBottomNavigationItem statistics_item =
+//                new AHBottomNavigationItem(R.string.statistcs,
+//                        R.drawable.ic_chart_areaspline_black_24dp, R.color.default_back_color);
 //        AHBottomNavigationItem lessons_item =
 //                new AHBottomNavigationItem(R.string.lessons,
 //                        R.drawable.ic_book_multiple_black_24dp, R.color.default_back_color);
 
         //Add the items
         bottomNavigation.addItem(feed_item);
+        bottomNavigation.addItem(classes_item);
         bottomNavigation.addItem(people_item);
-        bottomNavigation.addItem(statistics_item);
 //        bottomNavigation.addItem(lessons_item);
 
         // Setting the very 1st item as default home screen.
@@ -142,7 +147,7 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
                         updateTitle(getText(R.string.my_classes).toString());
                         break;
                     case 2:
-                        updateTitle(getText(R.string.reports).toString());
+                        updateTitle(getText(R.string.people).toString());
                         break;
 //                    case 3:
 //                        updateTitle(getText(R.string.lessons).toString());
@@ -197,15 +202,25 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
                         this.positionMap.put(position, newFrag);
                         return newFrag;
                     case 1:
-                        UstadBaseFragment peopleFragment =
-                                BasePointPeopleFragment.newInstance();
-                        this.positionMap.put(position, peopleFragment);
-                        return peopleFragment;
+                        UstadBaseFragment classesFragment =
+                                ClazzListFragment.newInstance();
+                        this.positionMap.put(position, classesFragment);
+                        return classesFragment;
+//
+//                        UstadBaseFragment peopleFragment =
+//                                BasePointPeopleFragment.newInstance();
+//                        this.positionMap.put(position, peopleFragment);
+//                        return peopleFragment;
                     case 2:
-                        UstadBaseFragment comingSoonFragment =
-                                ComingSoonFragment.newInstance();
-                        this.positionMap.put(position, comingSoonFragment);
-                        return comingSoonFragment;
+                        UstadBaseFragment peopleListFragment =
+                                PeopleListFragment.newInstance();
+                        this.positionMap.put(position, peopleListFragment);
+                        return peopleListFragment;
+
+//                        UstadBaseFragment comingSoonFragment =
+//                                ComingSoonFragment.newInstance();
+//                        this.positionMap.put(position, comingSoonFragment);
+//                        return comingSoonFragment;
 //                    case 3:
 //                        UstadBaseFragment csf =
 //                                ComingSoonFragment.newInstance();

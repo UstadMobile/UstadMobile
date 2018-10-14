@@ -85,6 +85,26 @@ public class PersonDetailActivity extends UstadBaseActivity implements PersonDet
         FloatingTextButton fab = findViewById(R.id.activity_person_detail_fab_edit);
         fab.setOnClickListener(v -> mPresenter.handleClickEdit());
 
+        TextView callParentTextView = findViewById(R.id.activity_person_detail_action_call_parent_text);
+        TextView textParentTextView = findViewById(R.id.activity_person_detail_action_text_parent_text);
+        ImageView callParentImageView =
+                findViewById(R.id.activity_person_detail_action_call_parent_icon);
+        ImageView textParentImageView =
+                findViewById(R.id.activity_person_detail_action_text_parent_icon);
+        TextView enrollInClassTextView =
+                findViewById(R.id.activity_person_detail_action_enroll_in_class_text);
+        ImageView enrollInClassImageView =
+                findViewById(R.id.activity_person_detail_action_enroll_in_class_icon);
+
+        callParentImageView.setOnClickListener(v -> mPresenter.handleClickCallParent());
+        callParentTextView.setOnClickListener(v -> mPresenter.handleClickCallParent());
+
+        textParentImageView.setOnClickListener(v -> mPresenter.handleClickTextParent());
+        textParentTextView.setOnClickListener(v -> mPresenter.handleClickTextParent());
+
+        enrollInClassImageView.setOnClickListener(v -> mPresenter.handleClickEnrollInClass());
+        enrollInClassTextView.setOnClickListener(v -> mPresenter.handleClickEnrollInClass());
+
 
     }
 
@@ -202,10 +222,7 @@ public class PersonDetailActivity extends UstadBaseActivity implements PersonDet
                             "drawable", getPackageName()));
                     textIcon.setPadding(8,16, 32,16);
                     textIcon.setOnClickListener(v -> {
-                        mPresenter.handleClickCall(field.getActionParam());
-
-                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.fromParts("sms",
-                                field.getActionParam(), null)));
+                        mPresenter.handleClickText(field.getActionParam());
 
                     });
 
@@ -214,10 +231,7 @@ public class PersonDetailActivity extends UstadBaseActivity implements PersonDet
                             "drawable", getPackageName()));
                     callIcon.setPadding(8,16, 32,16);
                     callIcon.setOnClickListener(v -> {
-                        mPresenter.handleClickText(field.getActionParam());
-
-                        startActivity(new Intent(Intent.ACTION_DIAL,
-                                Uri.parse("tel:" + field.getActionParam())));
+                        mPresenter.handleClickCall(field.getActionParam());
 
                     });
 
@@ -262,6 +276,18 @@ public class PersonDetailActivity extends UstadBaseActivity implements PersonDet
         data.observe(this, recyclerAdapter::submitList);
 
         mRecyclerView.setAdapter(recyclerAdapter);
+    }
+
+    @Override
+    public void handleClickCall(String number) {
+        startActivity(new Intent(Intent.ACTION_DIAL,
+                Uri.parse("tel:" + number)));
+    }
+
+    @Override
+    public void handleClickText(String number) {
+        startActivity(new Intent(Intent.ACTION_VIEW, Uri.fromParts("sms",
+                number, null)));
     }
 
     /**

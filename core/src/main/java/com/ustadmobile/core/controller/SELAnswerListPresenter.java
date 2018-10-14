@@ -44,9 +44,10 @@ public class SELAnswerListPresenter extends CommonHandlerPresenter<SELAnswerList
     public void onCreate(Hashtable savedState){
         super.onCreate(savedState);
 
-        //TODO: write the correct one
-        selAnswersProvider = UmAppDatabase.getInstance(context).getClazzMemberDao()
-                .findAllPeopleInClassUid(currentClazzUid);
+        selAnswersProvider = UmAppDatabase.getInstance(context).getSocialNominationQuestionSetResponseDao()
+                .findAllDoneSN();
+
+
 
         view.setSELAnswerListProvider(selAnswersProvider);
     }

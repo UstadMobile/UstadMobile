@@ -6,6 +6,7 @@ import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.database.annotation.UmUpdate;
+import com.ustadmobile.lib.db.entities.Person;
 import com.ustadmobile.lib.db.entities.SocialNominationQuestionSetResponse;
 
 import java.util.List;
@@ -43,4 +44,14 @@ public abstract class SocialNominationQuestionSetResponseDao {
             "socialNominationQuestionSetResponseRecognitionPercentage > 0.8")
     public abstract void findAllPassedRecognitionByPersonUid(long uid,
                                     UmCallback<List<SocialNominationQuestionSetResponse>> result);
+
+    @UmQuery("SELECT Person.*   from " +
+            "ClazzMember INNER JOIN PERSON ON " +
+            "ClazzMember.clazzMemberUid  = Person.personUid INNER join " +
+            "SocialNominationQuestionSetResponse ON  " +
+            "ClazzMember.clazzMemberUid = SocialNominationQuestionSetResponse.socialNominationQuestionSetResponseClazzMemberUid " +
+            "WHERE " +
+            "SocialNominationQuestionSetResponse.socialNominationQuestionSetResponseFinishTime > 0 " +
+            "AND SocialNominationQuestionSetResponse.socialNominationQuestionSetResponseSocialNominationQuestionSetUid > 0")
+    public abstract UmProvider<Person> findAllDoneSN();
 }
