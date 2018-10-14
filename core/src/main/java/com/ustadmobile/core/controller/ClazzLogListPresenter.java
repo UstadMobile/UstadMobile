@@ -86,7 +86,8 @@ public class ClazzLogListPresenter extends UstadBaseController<ClassLogListView>
         Hashtable args = new Hashtable();
         args.put(ARG_CLAZZ_UID, currentClazzUid);
 
-        args.put(ARG_LOGDATE, UMCalendarUtil.getDateInMilliPlusDays(0));
+        //args.put(ARG_LOGDATE, UMCalendarUtil.getDateInMilliPlusDays(0));
+        args.put(ARG_LOGDATE, System.currentTimeMillis());
         impl.go(ClassLogDetailView.VIEW_NAME, args, view.getContext());
     }
 

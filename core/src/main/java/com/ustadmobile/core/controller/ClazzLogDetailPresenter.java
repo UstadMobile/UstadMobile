@@ -7,7 +7,9 @@ import com.ustadmobile.core.db.dao.ClazzLogAttendanceRecordDao;
 import com.ustadmobile.core.db.dao.ClazzLogDao;
 import com.ustadmobile.core.db.dao.ClazzMemberDao;
 import com.ustadmobile.core.db.dao.FeedEntryDao;
+import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UmCallback;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.ClassLogDetailView;
 import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.ClazzLog;
@@ -86,12 +88,16 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
         //Check for ClassLog
         ClazzLogDao clazzLogDao = UmAppDatabase.getInstance(getContext()).getClazzLogDao();
         ClazzDao clazzDao = UmAppDatabase.getInstance(getContext()).getClazzDao();
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
 
         clazzLogDao.findByClazzIdAndDateAsync(currentClazzUid, currentLogDate, new UmCallback<ClazzLog>() {
             @Override
             public void onSuccess(ClazzLog result) {
 
                 currentClazz = clazzDao.findByUid(currentClazzUid);
+
+                view.updateToolbarTitle(currentClazz.getClazzName() + " "
+                        + impl.getString(MessageID.attendance, context));
 
                 if(result == null){
                     //Create one anyway if not set

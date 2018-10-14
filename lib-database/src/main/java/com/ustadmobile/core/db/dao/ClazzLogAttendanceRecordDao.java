@@ -39,8 +39,17 @@ public abstract class ClazzLogAttendanceRecordDao implements BaseDao<ClazzLogAtt
             " WHERE ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid = :clazzLogUid AND ClazzMember.role = 1")
     public abstract UmProvider<ClazzLogAttendanceRecordWithPerson> findAttendanceRecordsWithPersonByClassLogId (long clazzLogUid);
 
-    @UmQuery("SELECT ClazzMember.clazzMemberUid FROM ClazzMember WHERE ClazzMember.clazzMemberClazzUid = :clazzId AND ClazzMember.clazzMemberClazzUid NOT IN " +
-            "(SELECT clazzLogAttendanceRecordClazzMemberUid FROM ClazzLogAttendanceRecord WHERE clazzLogAttendanceRecordClazzLogUid = :clazzLogUid)")
+    @UmQuery("SELECT ClazzMember.clazzMemberUid FROM ClazzMember WHERE " +
+            " ClazzMember.clazzMemberClazzUid = :clazzId " +
+            " AND ClazzMember.clazzMemberActive = 1 " +
+            " AND ClazzMember.clazzMemberClazzUid " +
+            " EXCEPT " +
+//            "NOT IN " +
+//            "(" +
+            "SELECT clazzLogAttendanceRecordClazzMemberUid FROM ClazzLogAttendanceRecord " +
+            " WHERE clazzLogAttendanceRecordClazzLogUid = :clazzLogUid"
+//            + ")"
+    )
     public abstract void findPersonUidsWithNoClazzAttendanceRecord(long clazzId, long clazzLogUid, UmCallback<List<Long>> callback);
 
     /**

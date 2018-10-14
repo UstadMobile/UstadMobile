@@ -182,6 +182,8 @@ public class ClazzLogDetailActivity extends UstadBaseActivity
                                                ClazzLogAttendanceRecordWithPerson newItem) {
                     return oldItem.getClazzLogAttendanceRecordUid() ==
                             newItem.getClazzLogAttendanceRecordUid();
+//                    return oldItem.getPerson().getPersonUid() ==
+//                            newItem.getPerson().getPersonUid();
                 }
 
                 @Override
@@ -228,9 +230,7 @@ public class ClazzLogDetailActivity extends UstadBaseActivity
         mRecyclerView = (RecyclerView) findViewById(R.id.class_log_detail_container_recyclerview);
         mRecyclerLayoutManager = new LinearLayoutManager(getApplicationContext());
         mRecyclerView.setLayoutManager(mRecyclerLayoutManager);
-        DividerItemDecoration dividerItemDecoration =
-                new DividerItemDecoration(mRecyclerView.getContext(),
-                        LinearLayoutManager.VERTICAL);
+
 
         mPresenter = new ClazzLogDetailPresenter(this,
                 UMAndroidUtil.bundleToHashtable(getIntent().getExtras()), this);
@@ -261,16 +261,28 @@ public class ClazzLogDetailActivity extends UstadBaseActivity
     @Override
     public void setClazzLogAttendanceRecordProvider(
             UmProvider<ClazzLogAttendanceRecordWithPerson> clazzLogAttendanceRecordProvider) {
+
         ClazzLogDetailRecyclerAdapter recyclerAdapter =
                 new ClazzLogDetailRecyclerAdapter(DIFF_CALLBACK);
+
         DataSource.Factory<Integer, ClazzLogAttendanceRecordWithPerson> factory =
                 (DataSource.Factory<Integer, ClazzLogAttendanceRecordWithPerson>)
                         clazzLogAttendanceRecordProvider.getProvider();
         LiveData<PagedList<ClazzLogAttendanceRecordWithPerson>> data =
                 new LivePagedListBuilder<>(factory, 20).build();
         data.observe(this, recyclerAdapter::submitList);
-
         mRecyclerView.setAdapter(recyclerAdapter);
+    }
+
+    @Override
+    public void updateToolbarTitle(String title) {
+
+        runOnUiThread(() -> {
+            toolbar.setTitle(title);
+            setSupportActionBar(toolbar);
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        });
+
     }
 
 

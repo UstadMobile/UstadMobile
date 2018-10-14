@@ -21,7 +21,8 @@ public interface ClassLogDetailView extends UstadView {
     void setClazzLogAttendanceRecordProvider(UmProvider<ClazzLogAttendanceRecordWithPerson>
                                                      clazzLogAttendanceRecordProvider);
 
-
     void finish();
+
+    void updateToolbarTitle(String title);
 
 }
