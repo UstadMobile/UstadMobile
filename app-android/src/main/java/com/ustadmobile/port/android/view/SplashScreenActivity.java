@@ -51,15 +51,34 @@ import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.ClazzDao;
 import com.ustadmobile.core.db.dao.ClazzMemberDao;
 import com.ustadmobile.core.db.dao.FeedEntryDao;
+import com.ustadmobile.core.db.dao.PersonCustomFieldDao;
+import com.ustadmobile.core.db.dao.PersonCustomFieldValueDao;
 import com.ustadmobile.core.db.dao.PersonDao;
+import com.ustadmobile.core.db.dao.PersonDetailPresenterFieldDao;
+import com.ustadmobile.core.db.dao.SocialNominationQuestionDao;
+import com.ustadmobile.core.db.dao.SocialNominationQuestionSetDao;
+import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.core.view.ClassLogDetailView;
+import com.ustadmobile.core.view.PersonDetailViewField;
 import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.ClazzMember;
 import com.ustadmobile.lib.db.entities.FeedEntry;
 import com.ustadmobile.lib.db.entities.Person;
+import com.ustadmobile.lib.db.entities.PersonCustomFieldValue;
+import com.ustadmobile.lib.db.entities.PersonDetailPresenterField;
+import com.ustadmobile.lib.db.entities.PersonField;
+import com.ustadmobile.lib.db.entities.SocialNominationQuestion;
+import com.ustadmobile.lib.db.entities.SocialNominationQuestionSet;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+import static com.ustadmobile.core.view.PersonDetailViewField.FIELD_TYPE_HEADER;
+import static com.ustadmobile.lib.db.entities.PersonDetailPresenterField.CUSTOM_FIELD_MIN_UID;
 
 
 public class SplashScreenActivity extends AppCompatActivity
@@ -191,6 +210,8 @@ public class SplashScreenActivity extends AppCompatActivity
         return super.onOptionsItemSelected(item);
     }
 
+
+
     /**
      * Adds dummy data in the start of the application here. It also sets a key so that we don't
      * add the dummy data every time. This will get replaced with real data that will sync with
@@ -209,8 +230,373 @@ public class SplashScreenActivity extends AppCompatActivity
         PersonDao personDao =
                 UmAppDatabase.getInstance(getApplicationContext()).getPersonDao();
 
+
+
         //Running all insertions in a separate thread.
         new Thread(() -> {
+
+            //Sprint 2 stuff:
+
+            /**
+             * Just a POJO for this test class to loop through and create the fields.
+             */
+             class HeadersAndFields {
+
+                public HeadersAndFields(String fieldIcon, String fieldName, int fieldLabel, int fieldUid,
+                                        int fieldIndex, int fieldType, int headerMessageId, boolean readOnly,
+                                        boolean viewMode, boolean editMode){
+
+                    this.fieldIcon = fieldIcon;
+                    this.fieldName = fieldName;
+                    this.fieldLabel = fieldLabel;
+                    this.fieldUid = fieldUid;
+                    this.fieldType = fieldType;
+                    this.fieldIndex = fieldIndex;
+                    this.headerMessageId = headerMessageId;
+                    this.readOnly = readOnly;
+                    this.viewMode = viewMode;
+                    this.editMode = editMode;
+                }
+
+
+                //field uid
+                public int fieldUid;
+                //icon
+                public String fieldIcon;
+                //random name
+                public String fieldName;
+                //label
+                public int fieldLabel;
+                //type (field/header)
+                public int fieldType;
+                //index (order)
+                public int fieldIndex;
+                //header label (if applicable)
+                public int headerMessageId;
+
+                public boolean readOnly;
+
+                public boolean viewMode;
+
+                public boolean editMode;
+
+
+            }
+
+             List<HeadersAndFields> allFields = new ArrayList<>();
+             List<String> customFieldValues = new ArrayList<>();
+             List<PersonField> customFieldsCreated = null;
+
+            allFields.add(new HeadersAndFields(
+                    "",
+                    "",
+                    0,
+                    0,
+                    1,
+                    FIELD_TYPE_HEADER,
+                    MessageID.profile,
+                    false,
+                    true,
+                    true
+            ));
+            allFields.add(new HeadersAndFields(
+                    "",
+                    "Full Name",
+                    MessageID.field_fullname,
+                    PersonDetailPresenterField.PERSON_FIELD_UID_FULL_NAME,
+                    2,
+                    PersonDetailViewField.FIELD_TYPE_TEXT,
+                    0,
+                    false,
+                    true,
+                    false
+            ));
+
+            ///FIRST NAME LAST NAME
+            allFields.add(new HeadersAndFields(
+                    "ic_person_black_24dp",
+                    "First Names",
+                    MessageID.first_names,
+                    PersonDetailPresenterField.PERSON_FIELD_UID_FIRST_NAMES,
+                    3,
+                    PersonDetailViewField.FIELD_TYPE_TEXT,
+                    0,
+                    false,
+                    false,
+                    true
+            ));
+            allFields.add(new HeadersAndFields(
+                    "",
+                    "Last Name",
+                    MessageID.last_name,
+                    PersonDetailPresenterField.PERSON_FIELD_UID_LAST_NAME,
+                    4,
+                    PersonDetailViewField.FIELD_TYPE_TEXT,
+                    0,
+                    false,
+                    false,
+                    true
+            ));
+
+            //BIRTHDAY
+            allFields.add(new HeadersAndFields(
+                    "ic_perm_contact_calendar_black_24dp",
+                    "Date of Birth",
+                    MessageID.birthday,
+                    PersonDetailPresenterField.PERSON_FIELD_UID_BIRTHDAY,
+                    5,
+                    PersonDetailViewField.FIELD_TYPE_DATE,
+                    0,
+                    false,
+                    true,
+                    true
+            ));
+            //ADDRESS
+            allFields.add(new HeadersAndFields(
+                    "",
+                    "Home Address",
+                    MessageID.home_address,
+                    PersonDetailPresenterField.PERSON_FIELD_UID_ADDRESS,
+                    6,
+                    PersonDetailViewField.FIELD_TYPE_TEXT,
+                    0,
+                    false,
+                    true,
+                    true
+            ));
+
+            //ATTENDANCE
+            allFields.add(new HeadersAndFields(
+                    "",
+                    "",
+                    0,
+                    0,
+                    7,
+                    FIELD_TYPE_HEADER,
+                    MessageID.attendance,
+                    false,
+                    true,
+                    false
+            ));
+            allFields.add(new HeadersAndFields(
+                    "ic_lens_black_24dp",
+                    "Total Attendance for student and days",
+                    MessageID.attendance,
+                    PersonDetailPresenterField.PERSON_FIELD_UID_ATTENDANCE,
+                    8,
+                    PersonDetailViewField.FIELD_TYPE_TEXT,
+                    0,
+                    false,
+                    true,
+                    false
+            ));
+
+            //PARENTS
+            allFields.add(new HeadersAndFields(
+                    "ic_person_black_24dp",
+                    "Father with number",
+                    MessageID.father,
+                    PersonDetailPresenterField.PERSON_FIELD_UID_FATHER_NAME_AND_PHONE_NUMBER,
+                    11,
+                    PersonDetailViewField.FIELD_TYPE_PHONE_NUMBER,
+                    0,
+                    false,
+                    true,
+                    false
+            ));
+            allFields.add(new HeadersAndFields(
+                    "ic_person_black_24dp",
+                    "Father name",
+                    MessageID.fathers_name,
+                    PersonDetailPresenterField.PERSON_FIELD_UID_FATHER_NAME,
+                    12,
+                    PersonDetailViewField.FIELD_TYPE_TEXT,
+                    0,
+                    false,
+                    false,
+                    true
+            ));
+            allFields.add(new HeadersAndFields(
+                    "ic_person_black_24dp",
+                    "Father  number",
+                    MessageID.fathers_number,
+                    PersonDetailPresenterField.PERSON_FIELD_UID_FATHER_NUMBER,
+                    13,
+                    PersonDetailViewField.FIELD_TYPE_PHONE_NUMBER,
+                    0,
+                    false,
+                    false,
+                    true
+            ));
+            allFields.add(new HeadersAndFields(
+                    "ic_person_black_24dp",
+                    "Mother name",
+                    MessageID.mothers_name,
+                    PersonDetailPresenterField.PERSON_FIELD_UID_MOTHER_NAME,
+                    14,
+                    PersonDetailViewField.FIELD_TYPE_TEXT,
+                    0,
+                    false,
+                    false,
+                    true
+            ));
+            allFields.add(new HeadersAndFields(
+                    "ic_person_black_24dp",
+                    "Mother number",
+                    MessageID.mothers_number,
+                    PersonDetailPresenterField.PERSON_FIELD_UID_MOTHER_NUMBER,
+                    15,
+                    PersonDetailViewField.FIELD_TYPE_PHONE_NUMBER,
+                    0,
+                    false,
+                    false,
+                    true
+            ));
+            allFields.add(new HeadersAndFields(
+                    "ic_person_black_24dp",
+                    "Mother with number",
+                    MessageID.mother,
+                    PersonDetailPresenterField.PERSON_FIELD_UID_MOTHER_NAME_AND_PHONE_NUMBER,
+                    16,
+                    PersonDetailViewField.FIELD_TYPE_TEXT,
+                    0,
+                    false,
+                    true,
+                    false
+            ));
+
+            //CLASSES
+            allFields.add(new HeadersAndFields(
+                    "",
+                    "",
+                    0,
+                    0,
+                    17,
+                    FIELD_TYPE_HEADER,
+                    MessageID.classes,
+                    false,
+                    true,
+                    true
+            ));
+
+            //Custom fields:
+            allFields.add(new HeadersAndFields(
+                    "",
+                    "",
+                    0,
+                    0,
+                    19,
+                    FIELD_TYPE_HEADER,
+                    MessageID.background,
+                    false,
+                    true,
+                    true
+            ));
+
+            HeadersAndFields cf1 = new HeadersAndFields(
+                    "ic_done_all_black_24dp",
+                    "ASER test result",
+                    MessageID.aser_test_result,
+                    0,
+                    20,
+                    PersonDetailViewField.FIELD_TYPE_TEXT,
+                    0,
+                    false,
+                    true,
+                    true
+            );
+
+            allFields.add(cf1);
+            HeadersAndFields cf2 = new HeadersAndFields(
+                    "ic_account_balance_black_24dp",
+                    "Schooling",
+                    MessageID.current_formal_school,
+                    0,
+                    21,
+                    PersonDetailViewField.FIELD_TYPE_TEXT,
+                    0,
+                    false,
+                    true,
+                    true
+            );
+            allFields.add(cf2);
+
+            //Setting test custom values. //Sprint 2 stuff:
+            customFieldValues.add("42%");
+            customFieldValues.add("Springfield Elementary School");
+
+            //Create Custom Fields:
+            PersonCustomFieldDao personCustomFieldDao =
+                    UmAppDatabase.getInstance(getApplicationContext()).getPersonCustomFieldDao();
+            PersonDetailPresenterFieldDao personDetailPresenterFieldDao =
+                    UmAppDatabase.getInstance(getApplicationContext()).getPersonDetailPresenterFieldDao();
+            PersonCustomFieldValueDao personCustomFieldValueDao =
+                    UmAppDatabase.getInstance(getApplicationContext()).getPersonCustomFieldValueDao();
+
+            customFieldsCreated = new ArrayList<>();
+
+            for (HeadersAndFields field: allFields){
+                boolean isHeader = false;
+                if(field.fieldType == FIELD_TYPE_HEADER){
+                    isHeader = true;
+                }
+
+                //Create the custom fields - basically label & icon .
+                PersonField pcf1 = new PersonField();
+
+                //Create the field only if it is a field (ie not a header)
+                if (!isHeader) {
+                    pcf1.setFieldIcon(field.fieldIcon); //Icon
+                    pcf1.setFieldName(field.fieldName); //Internal name
+                    pcf1.setLabelMessageId(field.fieldLabel);    //Label
+                    //If field not set ie its a Custom Field
+                    if(field.fieldUid ==0){
+                        int lastPersonCustomFieldUidUsed = personCustomFieldDao.findLatestUid();
+                        int newCustomPersonCustomFieldUid = lastPersonCustomFieldUidUsed + 1;
+                        if(lastPersonCustomFieldUidUsed < CUSTOM_FIELD_MIN_UID){
+                            //first Custom field
+                            newCustomPersonCustomFieldUid =
+                                    CUSTOM_FIELD_MIN_UID + 1;
+                        }
+                        pcf1.setPersonCustomFieldUid(newCustomPersonCustomFieldUid);
+                        field.fieldUid = newCustomPersonCustomFieldUid;
+                        customFieldsCreated.add(pcf1);
+                    }else {
+                        pcf1.setPersonCustomFieldUid(field.fieldUid);   //Field's uid
+                    }
+
+                    personCustomFieldDao.insert(pcf1);  //Persist
+                }
+
+                //Create the Mapping between the fields and extra information like :
+                //  type(header / field)
+                //  index (for ordering)
+                //  Header String Id (if header)
+                //
+                PersonDetailPresenterField pdpf1 = new PersonDetailPresenterField();
+                pdpf1.setFieldType(field.fieldType);
+                pdpf1.setFieldIndex(field.fieldIndex);
+
+                pdpf1.setFieldIcon(field.fieldIcon);
+                pdpf1.setLabelMessageId(field.fieldLabel);
+
+                //Set Visibility
+                pdpf1.setReadyOnly(field.readOnly);
+                pdpf1.setViewModeVisible(field.viewMode);
+                pdpf1.setEditModeVisible(field.editMode);
+
+                //If not a header set the field. If is header, set the header label.
+                if(!isHeader) {
+                    pdpf1.setFieldUid(pcf1.getPersonCustomFieldUid());
+                }else {
+                    pdpf1.setHeaderMessageId(field.headerMessageId);
+                }
+
+                //persist:
+                pdpf1.setPersonDetailPresenterFieldUid(personDetailPresenterFieldDao.insert(pdpf1));
+
+            }
+
 
             //Create Class
             Clazz clazz1 = new Clazz();
@@ -218,6 +604,7 @@ public class SplashScreenActivity extends AppCompatActivity
             clazz1.setAttendanceAverage(0L);
             long thisClazzUid = clazzDao.insert(clazz1);
             clazz1.setClazzUid(thisClazzUid);
+
 
             //Names
             String[] names = {"Shukriyya al-Azzam", "Ummu Kulthoom al-Munir","Azeema el-Saleem",
@@ -233,10 +620,34 @@ public class SplashScreenActivity extends AppCompatActivity
                 String first_name = full_name.split(" ")[0];
                 String last_name = full_name.split(" ")[1];
                 Person person = new Person();
+                person.setActive(true);
                 person.setFirstNames(first_name);
                 person.setLastName(last_name);
                 long thisPersonUid = personDao.insert(person);
                 person.setPersonUid(thisPersonUid);
+
+
+                //Add Custom Fields as well:
+
+                //Sprint 2 stuff:
+                //Create values based on the created custom fields
+                Iterator<PersonField> cfi = customFieldsCreated.iterator();
+                Iterator<String> cvi = customFieldValues.iterator();
+
+                while(cfi.hasNext() && cvi.hasNext()){
+                    PersonField cf = cfi.next();
+                    String cv = cvi.next();
+
+                    PersonCustomFieldValue personCustomFieldValue = new PersonCustomFieldValue();
+                    personCustomFieldValue.setPersonCustomFieldValuePersonUid(person.getPersonUid());
+                    personCustomFieldValue.setPersonCustomFieldValuePersonCustomFieldUid(
+                            cf.getPersonCustomFieldUid());
+                    personCustomFieldValue.setFieldValue(cv);
+                    personCustomFieldValue.setPersonCustomFieldValueUid(
+                            personCustomFieldValueDao.insert(personCustomFieldValue));
+
+                }
+
 
                 //Create ClazzMember
                 ClazzMember member = new ClazzMember();
@@ -244,8 +655,48 @@ public class SplashScreenActivity extends AppCompatActivity
                 member.setClazzMemberClazzUid(clazz1.getClazzUid());
                 member.setClazzMemberPersonUid(thisPersonUid);
                 member.setAttendancePercentage(0L);
+                member.setClazzMemberActive(true);
                 clazzMemberDao.insertAsync(member, null);
             }
+
+            //Sprint 2 stuff:
+
+            //Create SEL questions :
+            SocialNominationQuestionSetDao questionSetDao =
+                    UmAppDatabase.getInstance(getApplicationContext()).getSocialNominationQuestionSetDao();
+            SocialNominationQuestionSet questionSet = new SocialNominationQuestionSet();
+            questionSet.setTitle("Default set");
+            questionSet.setSocialNominationQuestionSetUid(questionSetDao.insert(questionSet));
+
+            SocialNominationQuestionDao questionDao =
+                    UmAppDatabase.getInstance(getApplicationContext()).getSocialNominationQuestionDao();
+            SocialNominationQuestion question1 = new SocialNominationQuestion();
+            question1.setSocialNominationQuestionSocialNominationQuestionSetUid(
+                    questionSet.getSocialNominationQuestionSetUid());
+            question1.setQuestionIndex(1);
+            question1.setQuestionText("Who sits alone in the class?");
+            question1.setMultiNominations(true);
+            question1.setAssignToAllClasses(true);
+            questionDao.insert(question1);
+
+            SocialNominationQuestion question2 = new SocialNominationQuestion();
+            question2.setSocialNominationQuestionSocialNominationQuestionSetUid(
+                    questionSet.getSocialNominationQuestionSetUid());
+            question2.setQuestionIndex(2);
+            question2.setQuestionText("Who are your friends?");
+            question2.setMultiNominations(true);
+            question2.setAssignToAllClasses(true);
+            questionDao.insert(question2);
+
+            SocialNominationQuestion question3 = new SocialNominationQuestion();
+            question3.setSocialNominationQuestionSocialNominationQuestionSetUid(
+                    questionSet.getSocialNominationQuestionSetUid());
+            question3.setQuestionIndex(3);
+            question3.setQuestionText("Who annoys you?");
+            question3.setMultiNominations(true);
+            question3.setAssignToAllClasses(true);
+            questionDao.insert(question3);
+
 
             //Create some feeds. The feeds upon interaction will in-turn create ClazzLogs.
             FeedEntryDao feedEntryDao =
@@ -289,6 +740,7 @@ public class SplashScreenActivity extends AppCompatActivity
 
                 }
             });
+
 
             //Set that we have created dummy data so that check for this and don't create it again.
             UstadMobileSystemImpl.getInstance().setAppPref("dummydata", "created",
