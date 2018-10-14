@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
@@ -79,7 +80,7 @@ public class AsbScraper {
 
     public void findContent(File destinationDir) throws IOException {
 
-        URL url = new URL("https://www.africanstorybook.org/booklist.php");
+        URL africanBooksUrl = generateURL();
 
         entryWithRelationsList = new ArrayList<>();
         parentToChildJoins = new ArrayList<>();
@@ -91,8 +92,8 @@ public class AsbScraper {
 
         driver = ContentScraperUtil.setupChrome(true);
 
-        InputStream input = url.openStream();
-        List<AfricanBooksResponse> africanBooksList = parseBooklist(input);
+        InputStream inputStreamOfBooks = africanBooksUrl.openStream();
+        List<AfricanBooksResponse> africanBooksList = parseBooklist(inputStreamOfBooks);
 
         AfricanBooksResponse bookObj;
         WebDriverWait waitDriver = new WebDriverWait(driver, 10000);
@@ -100,11 +101,11 @@ public class AsbScraper {
             //Download the EPUB itself
             bookObj = africanBooksList.get(i);
             String bookId = bookObj.id;
-            File outFile = new File(destinationDir, "asb" + bookId + ".epub");
-            URL epubUrl = new URL(url, "/read/downloadepub.php?id=" + bookId);
-            URL firstUrl = new URL(url, "/myspace/publish/epub.php?id=" + bookId);
+            File ePubFile = new File(destinationDir, "asb" + bookId + ".epub");
+            URL epubUrl = generateEPubUrl(africanBooksUrl, bookId);
+            URL publishUrl = generatePublishUrl(africanBooksUrl, bookId);
 
-            if (outFile.exists() && outFile.lastModified() > Integer.parseInt(bookObj.date)) {
+            if (ePubFile.exists() && ePubFile.lastModified() > Integer.parseInt(bookObj.date)) {
                 System.out.println("ASB " + bookId + " is up to date");
             } else {
                 boolean downloadOk = false;
@@ -113,15 +114,15 @@ public class AsbScraper {
                     zipFile = null;
                     try {
 
-                        System.out.println("Download ASB: " + bookId + " from " + epubUrl.toString() + " to " + outFile.getAbsolutePath());
+                        System.out.println("Download ASB: " + bookId + " from " + epubUrl.toString() + " to " + ePubFile.getAbsolutePath());
 
-                        driver.get(firstUrl.toString());
+                        driver.get(publishUrl.toString());
                         ContentScraperUtil.waitForJSandJQueryToLoad(waitDriver);
 
-                        FileUtils.copyURLToFile(epubUrl, outFile);
+                        FileUtils.copyURLToFile(epubUrl, ePubFile);
 
-                        if (outFile.length() == 0) {
-                            System.out.println(outFile.getName() + " size 0 bytes: failed!");
+                        if (ePubFile.length() == 0) {
+                            System.out.println(ePubFile.getName() + " size 0 bytes: failed!");
                             continue;
                         }
 
@@ -129,8 +130,8 @@ public class AsbScraper {
                                 epubUrl.getPath(), bookObj.title);
 
                         OpdsLink newEntryLink = new OpdsLink(childEntry.getUuid(), "application/epub+zip",
-                                FilenameUtils.getBaseName(outFile.getPath()), OpdsEntry.LINK_REL_ACQUIRE);
-                        newEntryLink.setLength(outFile.length());
+                                FilenameUtils.getBaseName(ePubFile.getPath()), OpdsEntry.LINK_REL_ACQUIRE);
+                        newEntryLink.setLength(ePubFile.length());
                         childEntry.setLinks(Collections.singletonList(newEntryLink));
 
                         OpdsEntryParentToChildJoin join = new OpdsEntryParentToChildJoin(parentAbs.getUuid(),
@@ -140,19 +141,19 @@ public class AsbScraper {
                         parentToChildJoins.add(join);
 
                         //do a basic sanity check on the file downloaded
-                        zipFile = new ZipFile(outFile);
+                        zipFile = new ZipFile(ePubFile);
                         zipFile.size();
 
                         downloadOk = true;
                     } catch (IOException e) {
-                        System.err.println("IO Exception downloading/checking : " + outFile.getName());
+                        System.err.println("IO Exception downloading/checking : " + ePubFile.getName());
                     } finally {
                         if (zipFile != null)
                             zipFile.close();
                     }
 
                     if (!downloadOk) {
-                        outFile.delete();
+                        ePubFile.delete();
                         try {
                             Thread.sleep(DOWNLOAD_RETRY_INTERVAL);
                         } catch (InterruptedException e) {
@@ -167,12 +168,25 @@ public class AsbScraper {
                 }
             }
 
-            if (outFile.exists()) {
-                updateAsbEpub(bookObj, outFile);
+            if (ePubFile.exists()) {
+                updateAsbEpub(bookObj, ePubFile);
             }
         }
         driver.close();
 
+    }
+
+    public URL generatePublishUrl(URL africanBooksUrl, String bookId) throws MalformedURLException {
+        return new URL(africanBooksUrl, "/myspace/publish/epub.php?id=" + bookId);
+    }
+
+    public URL generateEPubUrl(URL africanBooksUrl, String bookId) throws MalformedURLException {
+        return new URL(africanBooksUrl, "/read/downloadepub.php?id=" + bookId);
+    }
+
+
+    public URL generateURL() throws MalformedURLException {
+        return new URL("https://www.africanstorybook.org/booklist.php");
     }
 
 

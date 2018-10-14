@@ -19,6 +19,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -51,7 +52,6 @@ public class IndexPrathamContentScraper {
     private ArrayList<OpdsEntryWithRelations> entryWithRelationsList;
     private ArrayList<OpdsEntryParentToChildJoin> parentToChildJoins;
     private Gson gson;
-    private String cookie;
 
     public static void main(String[] args) {
         if (args.length != 1) {
@@ -70,14 +70,14 @@ public class IndexPrathamContentScraper {
 
     public void findContent(File destinationDir) throws IOException, URISyntaxException {
 
-        URL firstUrl = new URL(prefixUrl + "1");
+        URL firstUrl = generatePrathamUrl("1");
 
         destinationDir.mkdirs();
 
         entryWithRelationsList = new ArrayList<>();
         parentToChildJoins = new ArrayList<>();
 
-        loginPratham();
+        String cookie = loginPratham();
 
         OpdsEntryWithRelations parentPratham = new OpdsEntryWithRelations(
                 UmUuidUtil.encodeUuidWithAscii85(UUID.randomUUID()), "https://storyweaver.org.in/", "Pratham Books");
@@ -88,42 +88,40 @@ public class IndexPrathamContentScraper {
 
         BooksResponse books = gson.fromJson(IOUtils.toString(firstUrl.toURI(), ScraperConstants.UTF_ENCODING), BooksResponse.class);
 
-        URL contentUrl = new URL(prefixUrl + books.metadata.hits);
+        URL contentUrl = generatePrathamUrl(String.valueOf(books.metadata.hits));
 
         BooksResponse contentBooksList = gson.fromJson(IOUtils.toString(contentUrl.toURI(), ScraperConstants.UTF_ENCODING), BooksResponse.class);
 
         int retry = 0;
-        for (int i = 0; i < contentBooksList.data.size(); i++) {
+        for (int contentCount = 0; contentCount < contentBooksList.data.size(); contentCount++) {
 
             try {
 
-                BooksResponse.Data data = contentBooksList.data.get(i);
+                BooksResponse.Data data = contentBooksList.data.get(contentCount);
 
-                String epub = prefixEPub + data.slug + ePubExt;
-
-                URL epubUrl = new URL(epub);
+                URL epubUrl = generatePrathamEPubFileUrl(data.slug);
 
                 URLConnection connection = epubUrl.openConnection();
                 connection.setRequestProperty("Cookie", cookie);
 
-                File file = new File(destinationDir, String.valueOf(data.id));
-                file.mkdirs();
-                String fileName = data.slug + ePubExt;
-                File content = new File(file, fileName);
-                if (!ContentScraperUtil.isFileModified(connection, file, String.valueOf(data.id))) {
+                File resourceFolder = new File(destinationDir, String.valueOf(data.id));
+                resourceFolder.mkdirs();
+                String resourceFileName = data.slug + ePubExt;
+                File content = new File(resourceFolder, resourceFileName);
+                if (!ContentScraperUtil.isFileModified(connection, resourceFolder, String.valueOf(data.id))) {
                     continue;
                 }
                 try {
                     FileUtils.copyInputStreamToFile(connection.getInputStream(), content);
                 } catch (IOException io) {
-                    loginPratham();
+                    cookie = loginPratham();
                     retry++;
                     System.err.println("Login and retry the link again attempt" + retry);
                     if (retry == 2) {
                         retry = 0;
                         continue;
                     }
-                    i--;
+                    contentCount--;
                     continue;
                 }
                 retry = 0;
@@ -132,19 +130,19 @@ public class IndexPrathamContentScraper {
                         data.slug, data.title);
 
                 OpdsLink newEntryLink = new OpdsLink(childEntry.getUuid(), "application/epub+zip",
-                        file.getName() + "/" + data.slug, OpdsEntry.LINK_REL_ACQUIRE);
-                newEntryLink.setLength(new File(file, fileName).length());
+                        resourceFolder.getName() + "/" + data.slug, OpdsEntry.LINK_REL_ACQUIRE);
+                newEntryLink.setLength(new File(resourceFolder, resourceFileName).length());
                 childEntry.setLinks(Collections.singletonList(newEntryLink));
 
                 OpdsEntryParentToChildJoin join = new OpdsEntryParentToChildJoin(parentPratham.getUuid(),
-                        childEntry.getUuid(), i);
+                        childEntry.getUuid(), contentCount);
 
                 entryWithRelationsList.add(childEntry);
                 parentToChildJoins.add(join);
 
 
             } catch (Exception e) {
-                System.err.println("Error saving book " + contentBooksList.data.get(i).slug);
+                System.err.println("Error saving book " + contentBooksList.data.get(contentCount).slug);
                 e.printStackTrace();
             }
 
@@ -152,9 +150,18 @@ public class IndexPrathamContentScraper {
 
     }
 
-    private void loginPratham() {
+    public URL generatePrathamEPubFileUrl(String resourceId) throws MalformedURLException {
+        return new URL(prefixEPub + resourceId + ePubExt);
+    }
+
+    public URL generatePrathamUrl(String number) throws MalformedURLException {
+        return new URL(prefixUrl + number);
+    }
+
+    public String loginPratham() {
         ChromeDriver driver = ContentScraperUtil.setupChrome(false);
 
+        String cookie = "";
         driver.get(signIn);
         WebDriverWait waitDriver = new WebDriverWait(driver, 10000);
         ContentScraperUtil.waitForJSandJQueryToLoad(waitDriver);
@@ -172,6 +179,8 @@ public class IndexPrathamContentScraper {
         }
 
         driver.close();
+
+        return cookie;
     }
 
 

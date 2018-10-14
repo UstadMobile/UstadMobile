@@ -61,7 +61,6 @@ public class IndexDdlContent {
         browseLanguages("fa");
         browseLanguages("en");
 
-
     }
 
     private void browseLanguages(String lang) throws IOException {

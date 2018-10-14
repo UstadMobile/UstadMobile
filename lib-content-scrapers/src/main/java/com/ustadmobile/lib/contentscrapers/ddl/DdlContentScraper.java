@@ -1,7 +1,5 @@
 package com.ustadmobile.lib.contentscrapers.ddl;
 
-import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
-import com.ustadmobile.lib.contentscrapers.ScraperConstants;
 import com.ustadmobile.lib.db.entities.OpdsEntry;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
 import com.ustadmobile.lib.db.entities.OpdsLink;
@@ -9,7 +7,6 @@ import com.ustadmobile.lib.util.UmUuidUtil;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang3.StringEscapeUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -21,7 +18,6 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -29,24 +25,26 @@ import java.util.UUID;
 
 public class DdlContentScraper {
 
-    private final String url;
+    private final String urlString;
     private final File destinationDirectory;
+    private final URL url;
     private Document doc;
     ArrayList<OpdsEntryWithRelations> opdsFiles;
 
-    public DdlContentScraper(String url, File destination) {
-        this.url = url;
+    public DdlContentScraper(String url, File destination) throws MalformedURLException {
+        this.urlString = url;
         this.destinationDirectory = destination;
+        this.url = new URL(url);
         destinationDirectory.mkdirs();
     }
 
     public void scrapeContent() throws IOException, URISyntaxException {
 
 
-        File resourceFolder = new File(destinationDirectory, FilenameUtils.getBaseName(url));
+        File resourceFolder = new File(destinationDirectory, FilenameUtils.getBaseName(urlString));
         resourceFolder.mkdirs();
 
-        doc = Jsoup.connect(url).get();
+        doc = Jsoup.connect(urlString).get();
 
         Elements downloadList = doc.select("span.download-item a[href]");
 
@@ -54,37 +52,37 @@ public class DdlContentScraper {
         for (Element downloadItem : downloadList) {
 
             String href = downloadItem.attr("href");
-            URL url = new URL(href);
-            URI uri = new URI(url.getProtocol(), url.getUserInfo(), url.getHost(), url.getPort(), url.getPath(), url.getQuery(), url.getRef());
+            URL fileUrl = new URL(url, href);
+            URI uri = new URI(fileUrl.getProtocol(), fileUrl.getUserInfo(), fileUrl.getHost(), fileUrl.getPort(), fileUrl.getPath(), fileUrl.getQuery(), fileUrl.getRef());
 
-            File file = new File(resourceFolder, FilenameUtils.getName(href));
-            FileUtils.copyURLToFile(uri.toURL(), file);
-            String mimeType = Files.probeContentType(file.toPath());
+            File resourceFile = new File(resourceFolder, FilenameUtils.getName(href));
+            FileUtils.copyURLToFile(uri.toURL(), resourceFile);
+            String mimeType = Files.probeContentType(resourceFile.toPath());
             OpdsEntryWithRelations newEntry = new OpdsEntryWithRelations(
-                    UmUuidUtil.encodeUuidWithAscii85(UUID.randomUUID()), url.toString(), href);
+                    UmUuidUtil.encodeUuidWithAscii85(UUID.randomUUID()), fileUrl.toString(), href);
             OpdsLink newEntryLink = new OpdsLink(newEntry.getUuid(), mimeType,
                     resourceFolder.getName() + "/" + FilenameUtils.getName(href), OpdsEntry.LINK_REL_ACQUIRE);
-            newEntryLink.setLength(file.length());
+            newEntryLink.setLength(resourceFile.length());
             newEntry.setLinks(Collections.singletonList(newEntryLink));
 
             opdsFiles.add(newEntry);
         }
     }
 
-    protected ArrayList<OpdsEntryWithRelations> getOpdsFiles(){
+    protected ArrayList<OpdsEntryWithRelations> getOpdsFiles() {
         return opdsFiles;
     }
 
-    public ArrayList<OpdsEntryWithRelations> getCategoryRelations(){
+    public ArrayList<OpdsEntryWithRelations> getCategoryRelations() {
 
         ArrayList<OpdsEntryWithRelations> categoryRelations = new ArrayList<>();
         Elements subjectContainer = doc.select("article.resource-view-details h3:contains(Subject Area) ~ p");
 
         Elements subjectList = subjectContainer.select("a");
-        for(Element subject: subjectList){
+        for (Element subject : subjectList) {
 
             String title = subject.attr("title");
-            String href=  subject.attr("href");
+            String href = subject.attr("href");
 
             OpdsEntryWithRelations newEntry = new OpdsEntryWithRelations(
                     UmUuidUtil.encodeUuidWithAscii85(UUID.randomUUID()), href, title);
