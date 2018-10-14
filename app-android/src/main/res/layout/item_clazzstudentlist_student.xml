@@ -4,18 +4,19 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:id="@+id/item_clazzstudentlist_student_cl">
 
 
         <TextView
             android:id="@+id/item_clazzstudentlist_student_title"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
+            android:layout_marginStart="48dp"
             android:layout_marginTop="14dp"
             android:text="TextView"
-            android:textColor="@color/text_primary"
             android:textAppearance="@android:style/TextAppearance.Material.Headline"
+            android:textColor="@color/text_primary"
             android:textSize="16sp"
             app:layout_constraintStart_toEndOf="@+id/imageView4"
             app:layout_constraintTop_toTopOf="parent" />
@@ -32,10 +33,10 @@
 
         <TextView
             android:id="@+id/item_clazzstudentlist_student_attendance_percentage"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginStart="74dp"
             android:layout_marginBottom="6dp"
-            android:layout_marginStart="4dp"
             android:text="TextView"
             android:textColor="@color/text_primary"
             android:textSize="12sp"

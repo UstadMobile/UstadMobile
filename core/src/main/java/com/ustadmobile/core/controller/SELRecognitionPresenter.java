@@ -3,22 +3,20 @@ package com.ustadmobile.core.controller;
 import java.util.Hashtable;
 import java.util.List;
 
-import com.ustadmobile.core.db.dao.ClazzMemberDao;
 import com.ustadmobile.core.db.dao.SocialNominationQuestionDao;
+import com.ustadmobile.core.db.dao.SocialNominationQuestionResponseNominationDao;
 import com.ustadmobile.core.db.dao.SocialNominationQuestionSetDao;
 import com.ustadmobile.core.db.dao.SocialNominationQuestionSetResponseDao;
 import com.ustadmobile.core.impl.UmCallback;
-import com.ustadmobile.core.view.SELEditView;
 import com.ustadmobile.core.view.SELQuestionView;
 import com.ustadmobile.core.view.SELRecognitionView;
-import com.ustadmobile.core.view.SELSelectConsentView;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmProvider;
-import com.ustadmobile.lib.db.entities.ClazzMember;
 import com.ustadmobile.lib.db.entities.Person;
 import com.ustadmobile.lib.db.entities.SocialNominationQuestion;
+import com.ustadmobile.lib.db.entities.SocialNominationQuestionResponseNomination;
 import com.ustadmobile.lib.db.entities.SocialNominationQuestionSet;
 import com.ustadmobile.lib.db.entities.SocialNominationQuestionSetResponse;
 
@@ -36,18 +34,21 @@ import static com.ustadmobile.core.view.SELRecognitionView.ARG_RECOGNITION_UID;
 
 
 /**
- * The SELSelectConsent Presenter.
+ * The SELRecognition Presenter.
  */
-public class SELSelectConsentPresenter
-        extends UstadBaseController<SELSelectConsentView> {
+public class SELRecognitionPresenter
+        extends CommonHandlerPresenter<SELRecognitionView> {
 
     //Any arguments stored as variables here
     private long currentClazzUid = -1;
     private long currentPersonUid = -1;
     private long currentClazzMemberUid = -1;
-    private int MIN_RECOGNITION_SUCCESSES = 0;
+    private long currnetRecognitionQuestionNominationResponse = -1;
 
-    public SELSelectConsentPresenter(Object context, Hashtable arguments, SELSelectConsentView view) {
+    //Provider 
+    UmProvider<Person> providerList;
+
+    public SELRecognitionPresenter(Object context, Hashtable arguments, SELRecognitionView view) {
         super(context, arguments, view);
 
         //Get arguments and set them.
@@ -59,6 +60,9 @@ public class SELSelectConsentPresenter
         }if(arguments.containsKey(ARG_CLAZZMEMBER_UID)){
             currentClazzMemberUid = (long) arguments.get(ARG_CLAZZMEMBER_UID);
         }
+        if(arguments.containsKey(ARG_RECOGNITION_UID)){
+            currnetRecognitionQuestionNominationResponse = (long) arguments.get(ARG_RECOGNITION_UID);
+        }
 
     }
 
@@ -66,64 +70,12 @@ public class SELSelectConsentPresenter
     public void onCreate(Hashtable savedState) {
         super.onCreate(savedState);
 
-        //No provider for this activity.
-    }
+        //Populate the provider
+        providerList = UmAppDatabase.getInstance(context).getClazzMemberDao()
+                .findAllPeopleInClassUid(currentClazzUid);
 
-    /**
-     * Handles click "START SELECTION"
-     * */
-    public void handleClickPrimaryActionButton(boolean consentGiven) {
-        SocialNominationQuestionSetResponseDao socialNominationQuestionSetResponseDao =
-                UmAppDatabase.getInstance(context).getSocialNominationQuestionSetResponseDao();
-        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-
-
-        //Check selectedObject for consent given.
-        if(consentGiven){
-
-            //TODO: Check: Decide when to show recognition and when to show the SEL questions themselves.
-            socialNominationQuestionSetResponseDao.findAllPassedRecognitionByPersonUid(
-                    currentClazzMemberUid,
-                    new UmCallback<List<SocialNominationQuestionSetResponse>>() {
-                @Override
-                public void onSuccess(List<SocialNominationQuestionSetResponse> listPassed) {
-
-                    if(listPassed.size() > MIN_RECOGNITION_SUCCESSES){
-                        //Go straight to the Questions
-                        goToNextQuestion();
-
-                    }else{
-                        //Go re-do/do the recognition activity.
-                        SocialNominationQuestionSetResponse newResponse =
-                                new SocialNominationQuestionSetResponse();
-                        newResponse.setSocialNominationQuestionSetResponseStartTime(System.currentTimeMillis());
-                        newResponse.setSocialNominationQuestionSetResponseClazzMemberUid(currentClazzMemberUid);
-                        newResponse.setSocialNominationQuestionSetResposeUid(
-                                socialNominationQuestionSetResponseDao.insert(newResponse));
-
-                        Hashtable args = new Hashtable();
-                        args.put(ARG_RECOGNITION_UID, newResponse.getSocialNominationQuestionSetResposeUid());
-                        args.put(ARG_CLAZZ_UID, currentClazzUid);
-                        args.put(ARG_PERSON_UID, currentPersonUid);
-                        args.put(ARG_CLAZZMEMBER_UID, currentClazzMemberUid);
-
-                        view.finish();
-
-                        impl.go(SELRecognitionView.VIEW_NAME, args, view.getContext());
-
-                    }
-                }
-
-                @Override
-                public void onFailure(Throwable exception) {
-                    System.out.println("fail4");
-                }
-            });
-        }else {
-            //TODO: Handle and think about what happens if the consent is NOT given.
-            System.out.println("SELSelectConsentPresenter - No Consent - " +
-                    "What to do ? Not doing anything.");
-        }
+        //set Provider.
+        view.setListProvider(providerList);
 
     }
 
@@ -209,6 +161,49 @@ public class SELSelectConsentPresenter
                 System.out.println("fail1");
             }
         });
+
+
+    }
+
+    public void handleClickPrimaryActionButton(boolean recognitionDone) {
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        SocialNominationQuestionSetResponseDao questionResponseNominationDao =
+                UmAppDatabase.getInstance(context).getSocialNominationQuestionSetResponseDao();
+
+        if(recognitionDone){
+
+            questionResponseNominationDao.findByUidAsync(currnetRecognitionQuestionNominationResponse,
+                    new UmCallback<SocialNominationQuestionSetResponse>() {
+                        @Override
+                        public void onSuccess(SocialNominationQuestionSetResponse responseNomination) {
+
+                            responseNomination.setSocialNominationQuestionSetResponseFinishTime(System.currentTimeMillis());
+                            questionResponseNominationDao.updateAsync(responseNomination, new UmCallback<Integer>() {
+                                @Override
+                                public void onSuccess(Integer result) {
+                                    goToNextQuestion();
+                                }
+
+                                @Override
+                                public void onFailure(Throwable exception) {
+                                    System.out.println("SELRecognitionPresenter - handleClickPrimaryActionButton - Failed");
+                                }
+                            });
+                        }
+
+                        @Override
+                        public void onFailure(Throwable exception) {
+
+                        }
+                    });
+
+
+
+        }else{
+            //TODO: Handle if not recognised
+            System.out.println("SELRecognitionPresenter - Student recognized not checked.");
+        }
+
     }
 
     @Override
@@ -216,4 +211,9 @@ public class SELSelectConsentPresenter
 
     }
 
+    @Override
+    public void handleCommonPressed(Object arg) {
+        System.out.println("Toggle student name for SEL to see if the student got it correct.");
+        //Doesn't do more than this. If you want it to do something, you would put it over here.
+    }
 }

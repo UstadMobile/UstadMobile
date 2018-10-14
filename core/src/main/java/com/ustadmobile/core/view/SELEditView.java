@@ -34,6 +34,10 @@ public interface SELEditView extends UstadView {
      */
     void setListProvider(UmProvider<Person> listProvider);
 
+    void updateHeading(String questionText);
+
+    void updateHeading(String iNum, String tNum);
+
     void finish();
 
 

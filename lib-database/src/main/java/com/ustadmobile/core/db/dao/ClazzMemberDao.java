@@ -32,7 +32,7 @@ public abstract class ClazzMemberDao implements BaseDao<ClazzMember> {
 
     @UmQuery("SELECT ClazzMember.*, Person.* FROM ClazzMember" +
             " LEFT JOIN Person ON ClazzMember.clazzMemberPersonUid = Person.personUid" +
-            " WHERE ClazzMember.clazzMemberClazzUid = :uid AND ClazzMember.role = 1")
+            " WHERE ClazzMember.clazzMemberClazzUid = :uid AND ClazzMember.clazzMemberActive = 1 AND ClazzMember.role = 1")
     public abstract UmProvider<ClazzMemberWithPerson> findClazzMembersByClazzId(long uid);
 
     @UmQuery("SELECT * FROM ClazzMember WHERE clazzMemberPersonUid = :personUid AND clazzMemberClazzUid = :clazzUid")
@@ -58,7 +58,8 @@ public abstract class ClazzMemberDao implements BaseDao<ClazzMember> {
     @UmQuery("SELECT * FROM Person where personUid IN ( " +
             " SELECT Person.personUid FROM ClazzMember " +
             " LEFT  JOIN Person On ClazzMember.clazzMemberPersonUid = Person.personUid " +
-            " WHERE ClazzMember.clazzMemberClazzUid = :clazzUid AND ClazzMember.role = 1) AND Person.active = 1 ")
+            " WHERE ClazzMember.clazzMemberClazzUid = :clazzUid AND ClazzMember.clazzMemberActive = 1 " +
+            " AND ClazzMember.role = 1) AND Person.active = 1 ")
     public abstract UmProvider<Person> findAllPeopleInClassUid(long clazzUid);
 
 
@@ -71,8 +72,8 @@ public abstract class ClazzMemberDao implements BaseDao<ClazzMember> {
 
     @UmQuery("SELECT Person.* , (:clazzUid) AS clazzUid, " +
             " (SELECT attendancePercentage FROM ClazzMember WHERE clazzMemberPersonUid = Person.personUid) AS attendancePercentage, " +
-            " (SELECT (EXISTS (SELECT * FROM ClazzMember WHERE ClazzMember.clazzMemberClazzUid = :clazzUid " +
-            " AND ClazzMember.clazzMemberPersonUid = Person.personUid))) AS enrolled FROM Person WHERE Person.active = 1 ")
+            " (SELECT clazzMemberActive FROM ClazzMember WHERE ClazzMember.clazzMemberClazzUid = :clazzUid " +
+            " AND clazzMemberPersonUid = Person.personUid) AS enrolled FROM Person WHERE Person.active = 1 ")
     public abstract UmProvider<PersonWithEnrollment> findAllPeopleWithEnrollmentForClassUid(long clazzUid);
 
 

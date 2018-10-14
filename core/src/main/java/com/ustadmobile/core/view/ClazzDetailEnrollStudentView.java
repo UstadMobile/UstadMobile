@@ -11,6 +11,8 @@ public interface ClazzDetailEnrollStudentView extends UstadView {
 
     String VIEW_NAME = "ClazzDetailEnrollStudent";
 
+    String ARG_NEW_PERSON = "argNewPerson";
+
     void setStudentsProvider(UmProvider<PersonWithEnrollment> studentsProvider);
 
     void finish();

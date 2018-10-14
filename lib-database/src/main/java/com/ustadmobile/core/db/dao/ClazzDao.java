@@ -25,6 +25,9 @@ public abstract class ClazzDao implements BaseDao<Clazz> {
     @UmQuery("SELECT * FROM Clazz WHERE clazzUid = :uid")
     public abstract Clazz findByUid(long uid);
 
+    @UmQuery("SELECT * FROM Clazz WHERE clazzUid = :uid")
+    public abstract void findByUidAsync(long uid, UmCallback<Clazz> result);
+
 
     @UmQuery("SELECT Clazz.*, " +
             " (SELECT COUNT(*) FROM ClazzMember WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid AND ClazzMember.role = 1) AS numStudents" +

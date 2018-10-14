@@ -337,6 +337,7 @@ This is the one you should be editing.
     <string name="assign_to_all_classes">Assign to all classes</string>
     <string name="allow_multiple_nominations">Allow multiple nominations</string>
     <string name="sel_new_question_title">Question</string>
+    <string name="sel_recognition_student_recognizes">Student recognizes their classmates</string>
 
 
 

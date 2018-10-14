@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.ustadmobile.core.controller.ClazzListPresenter.ARG_CLAZZ_UID;
+import static com.ustadmobile.core.view.ClazzDetailEnrollStudentView.ARG_NEW_PERSON;
 import static com.ustadmobile.core.view.PersonDetailView.ARG_PERSON_UID;
 import static com.ustadmobile.core.view.PersonDetailViewField.FIELD_TYPE_HEADER;
 import static com.ustadmobile.core.view.PersonDetailViewField.FIELD_TYPE_TEXT;
@@ -79,6 +80,8 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
 
     ClazzDao clazzDao = UmAppDatabase.getInstance(context).getClazzDao();
 
+    private String newPersonString = "";
+
     /**
      * Presenter's constructor where we are getting arguments and setting the newly/editable
      * personUid
@@ -98,6 +101,10 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
             assignToThisClazzUid = Long.parseLong(arguments.get(ARG_CLAZZ_UID).toString());
         }
 
+        if(arguments.containsKey(ARG_NEW_PERSON)){
+            newPersonString = arguments.get(ARG_NEW_PERSON).toString();
+        }
+
     }
 
     /**
@@ -107,13 +114,17 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
     @Override
     public void onCreate(Hashtable savedState){
         super.onCreate(savedState);
-
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         PersonCustomFieldValueDao personCustomFieldValueDao =
                 UmAppDatabase.getInstance(context).getPersonCustomFieldValueDao();
         PersonDetailPresenterFieldDao personDetailPresenterFieldDao =
                 UmAppDatabase.getInstance(context).getPersonDetailPresenterFieldDao();
         ClazzMemberDao clazzMemberDao =
                 UmAppDatabase.getInstance(context).getClazzMemberDao();
+
+        if(newPersonString.equals("true")){
+            view.updateToolbarTitle(impl.getString(MessageID.new_person, context));
+        }
 
         //Get all the currently set headers and fields:
         //personDetailPresenterFieldDao.findAllPersonDetailPresenterFields(
@@ -164,17 +175,6 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
         ClazzDao clazzDao = UmAppDatabase.getInstance(context).getClazzDao();
 
         assignedClazzes = clazzDao.findAllClazzesByPersonUid(personUid);
-
-        new Thread(){
-            public void run(){
-
-                ClazzDao cd  = UmAppDatabase.getInstance(context).getClazzDao();
-                List a = cd.findAllClazzesByPersonUidAsList(personUid);
-                int x;
-                System.out.println("hey");
-            }
-
-        }.start();
 
         view.setClazzListProvider(assignedClazzes);
     }

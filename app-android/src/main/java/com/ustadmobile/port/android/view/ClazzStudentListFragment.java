@@ -117,6 +117,14 @@ public class ClazzStudentListFragment extends UstadBaseFragment implements Clazz
                 .findViewById(R.id.item_clazzstudentlist_student_attendance_percentage))
                 .setText(studentAttendancePercentage);
 
+            View cl = holder.itemView.findViewById(R.id.item_clazzstudentlist_student_cl);
+            cl.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mPresenter.handleClickStudent(clazzMemberWithPerson.getPerson().getPersonUid());
+                }
+            });
+
         }
     }
 

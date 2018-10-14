@@ -57,6 +57,7 @@ public class ClazzDetailEnrollStudentActivity extends UstadBaseActivity implemen
 
         //Toolbar:
         toolbar = findViewById(R.id.activity_clazz_detail_enroll_student_toolbar);
+        toolbar.setTitle(getText(R.string.add_student));
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -196,8 +197,12 @@ public class ClazzDetailEnrollStudentActivity extends UstadBaseActivity implemen
                     .setText(studentAttendancePercentage);
 
             holder.itemView.findViewById(R.id.item_studentlist_student_simple_student_checkbox).setVisibility(View.VISIBLE);
+            boolean personWithEnrollmentBoolean = false;
+            if (personWithEnrollment.getEnrolled() != null){
+                personWithEnrollmentBoolean = personWithEnrollment.getEnrolled();
+            }
             ((CheckBox)holder.itemView.findViewById(R.id.item_studentlist_student_simple_student_checkbox))
-                    .setChecked(personWithEnrollment.getEnrolled());
+                    .setChecked(personWithEnrollmentBoolean);
             ((CheckBox)holder.itemView.findViewById(R.id.item_studentlist_student_simple_student_checkbox))
                     .setOnCheckedChangeListener((buttonView, isChecked) ->
                             mPresenter.handleEnrollChanged(personWithEnrollment, isChecked));

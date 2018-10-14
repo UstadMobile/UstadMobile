@@ -34,6 +34,7 @@ public class SELQuestionPresenter
     private int currentQuestionIndexId = 0;
     private long currentQuestionSetResponseUid = -1;
     private long currentQuestionResponseUid = -1;
+    private String questionText = "";
 
 
     public SELQuestionPresenter(Object context, Hashtable arguments, SELQuestionView view) {
@@ -75,7 +76,8 @@ public class SELQuestionPresenter
         }
 
         if(arguments.containsKey(ARG_QUESTION_TEXT)){
-            view.updateQuestion(arguments.get(ARG_QUESTION_TEXT).toString());
+            questionText = arguments.get(ARG_QUESTION_TEXT).toString();
+            view.updateQuestion(questionText);
         }
 
         if(arguments.containsKey(ARG_QUESTION_INDEX)){
@@ -110,7 +112,7 @@ public class SELQuestionPresenter
         args.put(ARG_QUESTION_INDEX_ID, currentQuestionIndexId);
         args.put(ARG_QUESTION_SET_RESPONSE_UID, currentQuestionSetResponseUid);
         args.put(ARG_QUESTION_RESPONSE_UID, currentQuestionResponseUid);
-
+        args.put(ARG_QUESTION_TEXT, questionText);
 
         //Go to view
         impl.go(SELEditView.VIEW_NAME, args, view.getContext());

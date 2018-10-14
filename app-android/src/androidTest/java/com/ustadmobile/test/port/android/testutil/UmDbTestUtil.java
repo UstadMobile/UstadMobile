@@ -50,6 +50,10 @@ public class UmDbTestUtil {
 
     public static List<String> customFieldValues = new ArrayList<>();
 
+    public static List<PersonField> customFieldsCreated = null;
+
+    public static boolean createdSELQuestions = false;
+
     static {
 
         //Core fields:
@@ -305,6 +309,7 @@ public class UmDbTestUtil {
         //Setting test custom values.
         customFieldValues.add("42%");
         customFieldValues.add("Springfield Elementary School");
+
     }
 
     /**
@@ -376,7 +381,8 @@ public class UmDbTestUtil {
                 UmAppDatabase.getInstance(context).getPersonDetailPresenterFieldDao();
         PersonCustomFieldValueDao personCustomFieldValueDao =
                 UmAppDatabase.getInstance(context).getPersonCustomFieldValueDao();
-        List<PersonField> customFieldsCreated = new ArrayList<>();
+
+        customFieldsCreated = new ArrayList<>();
 
         for (HeadersAndFields field: fields){
             boolean isHeader = false;
@@ -507,7 +513,9 @@ public class UmDbTestUtil {
 
 
         //Create Custom fields and their headings
-        List<PersonField> customFieldsCreated = createCustomFields(allFields, context);
+        if(customFieldsCreated == null){
+            customFieldsCreated = createCustomFields(allFields, context);
+        }
 
         //Create values based on the created custom fields
         setCustomFieldValue(newPerson, customFieldsCreated, customFieldValues, context);
@@ -622,6 +630,14 @@ public class UmDbTestUtil {
             testPerson.setActive(true);
             testPerson.setPersonUid(personDao.insert(testPerson));
 
+            //Create Custom fields and their headings
+            if(customFieldsCreated == null){
+                customFieldsCreated = createCustomFields(allFields, context);
+            }
+
+            //Create values based on the created custom fields
+            setCustomFieldValue(testPerson, customFieldsCreated, customFieldValues, context);
+
             //Create ClazzMember
             ClazzMember clazzMember = new ClazzMember();
             clazzMember.setClazzMemberClazzUid(testClazz.getClazzUid());
@@ -631,6 +647,11 @@ public class UmDbTestUtil {
             clazzMember.setAttendancePercentage(personAttendancePercentage);
             clazzMemberDao.insert(clazzMember);
 
+        }
+
+        if(!createdSELQuestions){
+            createDefaultQuestionSetAndSomeQuestions(context);
+            createdSELQuestions = true;
         }
 
         return testClazz;

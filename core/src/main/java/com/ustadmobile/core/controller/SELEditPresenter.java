@@ -82,7 +82,17 @@ public class SELEditPresenter
         if(arguments.containsKey(ARG_QUESTION_RESPONSE_UID)){
             currentQuestionResponseUid = (long) arguments.get(ARG_QUESTION_RESPONSE_UID);
         }
+        if(arguments.containsKey(ARG_QUESTION_TEXT)){
+            view.updateHeading(arguments.get(ARG_QUESTION_TEXT).toString());
+        }
 
+        if(arguments.containsKey(ARG_QUESTION_INDEX)){
+            if(arguments.containsKey(ARG_QUESTION_TOTAL)){
+                view.updateHeading(arguments.get(ARG_QUESTION_INDEX).toString(),
+                        arguments.get(ARG_QUESTION_TOTAL).toString());
+            }
+
+        }
 
     }
 

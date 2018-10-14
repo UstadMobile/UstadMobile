@@ -6,6 +6,8 @@ import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.db.entities.PersonField;
 
+import java.util.List;
+
 @UmDao
 public abstract class PersonCustomFieldDao implements BaseDao<PersonField> {
 
@@ -24,4 +26,8 @@ public abstract class PersonCustomFieldDao implements BaseDao<PersonField> {
 
     @UmQuery("SELECT MAX(personCustomFieldUid) FROM PersonField")
     public abstract int findLatestUid();
+
+    @UmQuery("SELECT * FROM PersonField WHERE personCustomFieldUid > :minCustomFieldUid")
+    public abstract void findAllCustomFields(int minCustomFieldUid,
+                                             UmCallback<List<PersonField>> result);
 }

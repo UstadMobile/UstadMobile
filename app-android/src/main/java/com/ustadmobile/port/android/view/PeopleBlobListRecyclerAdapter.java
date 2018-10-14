@@ -10,6 +10,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
@@ -23,6 +24,7 @@ public class PeopleBlobListRecyclerAdapter extends
 
     Context theContext;
     CommonHandlerPresenter mPresenter;
+    boolean hideNames = false;
 
     Hashtable colorMap = new Hashtable();
 
@@ -45,6 +47,15 @@ public class PeopleBlobListRecyclerAdapter extends
         super(diffCallback);
         theContext = context;
         mPresenter = presenter;
+    }
+
+    protected PeopleBlobListRecyclerAdapter(@NonNull DiffUtil.ItemCallback<Person> diffCallback,
+                                            Context context, CommonHandlerPresenter presenter,
+                                            boolean namesHidden) {
+        super(diffCallback);
+        theContext = context;
+        mPresenter = presenter;
+        hideNames = namesHidden;
     }
 
     /**
@@ -83,9 +94,16 @@ public class PeopleBlobListRecyclerAdapter extends
                     thisPerson.getLastName();
         }
 
+        ImageView studentImage = (ImageView) holder.itemView
+                .findViewById(R.id.item_peopleblob_image);
+        //TODO: Add image of student here.
+
         TextView studentEntry = (TextView) holder.itemView
                 .findViewById(R.id.item_peopleblob_name);
-        studentEntry.setText(studentName);
+
+        if (!hideNames) {
+            studentEntry.setText(studentName);
+        }
 
         CardView personCard = holder.itemView.findViewById(R.id.item_peoplblob_card);
 
@@ -93,17 +111,32 @@ public class PeopleBlobListRecyclerAdapter extends
             @Override
             public void onClick(View v) {
 
-                if(colorMap.containsKey(position)){
-                    if (colorMap.get(position) == "selected"){
-                        personCard.setBackgroundColor(Color.parseColor("#FFFFFF"));
+
+                if (colorMap.containsKey(position)) {
+                    if (colorMap.get(position) == "selected") {
+                        if (hideNames){
+                            studentEntry.setText("");
+                        }else {
+                            personCard.setBackgroundColor(Color.parseColor("#FFFFFF"));
+
+                        }
                         colorMap.put(position, "unselected");
-                    }else{
-                        personCard.setBackgroundColor(Color.parseColor("#FF6666"));
+                    } else {
+                        if (hideNames){
+                            studentEntry.setText(studentName);
+                        }else {
+                            personCard.setBackgroundColor(Color.parseColor("#FF6666"));
+
+                        }
                         colorMap.put(position, "selected");
                     }
-                }else{
+                } else {
                     colorMap.put(position, "selected");
-                    personCard.setBackgroundColor(Color.parseColor("#FF6666"));
+                    if (hideNames){
+                        studentEntry.setText(studentName);
+                    }else {
+                        personCard.setBackgroundColor(Color.parseColor("#FF6666"));
+                    }
                 }
 
 

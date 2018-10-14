@@ -138,6 +138,10 @@
             android:name="com.ustadmobile.port.android.view.SELQuestionEditActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
             android:theme="@style/Theme.UstadTheme" />
+        <activity
+            android:name="com.ustadmobile.port.android.view.SELRecognitionActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
+            android:theme="@style/Theme.UstadTheme" />
 
         <activity
             android:name="com.ustadmobile.port.android.view.AboutActivity"

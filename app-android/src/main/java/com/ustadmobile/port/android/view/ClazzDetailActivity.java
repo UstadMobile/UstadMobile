@@ -9,7 +9,9 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.widget.Toolbar;
 
 import com.toughra.ustadmobile.R;
+import com.ustadmobile.core.controller.ClazzDetailPresenter;
 import com.ustadmobile.core.view.ClassDetailView;
+import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.util.WeakHashMap;
 
@@ -27,7 +29,7 @@ public class ClazzDetailActivity extends UstadBaseActivity implements
     private ClassDetailViewPagerAdapter mPagerAdapter;
     private Toolbar toolbar;
     private TabLayout mTabLayout;
-
+    private ClazzDetailPresenter mPresenter;
     Long clazzUid;
 
     /**
@@ -38,8 +40,8 @@ public class ClazzDetailActivity extends UstadBaseActivity implements
         mPagerAdapter = new ClassDetailViewPagerAdapter(getSupportFragmentManager());
         mPagerAdapter.addFragments(0, ClazzStudentListFragment.newInstance(this.clazzUid));
         mPagerAdapter.addFragments(1, ClazzLogListFragment.newInstance(this.clazzUid));
-        mPagerAdapter.addFragments(2, ComingSoonFragment.newInstance());
-        mPagerAdapter.addFragments(3, SELAnswerListFragment.newInstance(this.clazzUid));
+        //mPagerAdapter.addFragments(2, ComingSoonFragment.newInstance());
+        mPagerAdapter.addFragments(2, SELAnswerListFragment.newInstance(this.clazzUid));
         mPager.setAdapter(mPagerAdapter);
     }
 
@@ -60,8 +62,12 @@ public class ClazzDetailActivity extends UstadBaseActivity implements
         //Set title as Class name
         toolbar.setTitle("Class");
         setSupportActionBar(toolbar);
-
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        //Presenter
+        mPresenter = new ClazzDetailPresenter(this,
+                UMAndroidUtil.bundleToHashtable(getIntent().getExtras()), this);
+        mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
 
         //set up view pager
         setupViewPager();
@@ -85,6 +91,14 @@ public class ClazzDetailActivity extends UstadBaseActivity implements
 
     @Override
     public void onTabReselected(TabLayout.Tab tab) {
+
+    }
+
+    @Override
+    public void setToolbarTitle(String toolbarTitle) {
+        toolbar.setTitle(toolbarTitle);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
     }
 
@@ -123,9 +137,9 @@ public class ClazzDetailActivity extends UstadBaseActivity implements
                         return ClazzStudentListFragment.newInstance(clazzUid);
                     case 1:
                         return ClazzLogListFragment.newInstance(clazzUid);
+//                    case 2:
+//                        return ComingSoonFragment.newInstance();
                     case 2:
-                        return ComingSoonFragment.newInstance();
-                    case 3:
                         return SELAnswerListFragment.newInstance(clazzUid);
                     default:
                         return null;
@@ -155,9 +169,9 @@ public class ClazzDetailActivity extends UstadBaseActivity implements
                     return ((String) getText(R.string.students_literal)).toUpperCase();
                 case 1:
                     return ((String) getText(R.string.attendance)).toUpperCase();
+//                case 2:
+//                    return ((String) getText(R.string.schedule)).toUpperCase();
                 case 2:
-                    return ((String) getText(R.string.schedule)).toUpperCase();
-                case 3:
                     return ((String) getText(R.string.sel)).toUpperCase();
                 default:
                     return "";

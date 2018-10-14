@@ -4,21 +4,35 @@ import android.arch.lifecycle.LiveData;
 import android.arch.paging.DataSource;
 import android.arch.paging.LivePagedListBuilder;
 import android.arch.paging.PagedList;
-import android.os.Bundle;
 import android.support.v7.util.DiffUtil;
+
+import com.ustadmobile.core.db.UmProvider;
+import com.ustadmobile.lib.db.entities.Person;
+
+import com.ustadmobile.core.controller.SELRecognitionPresenter;
+
+import android.os.Bundle;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.widget.CheckBox;
 
-import com.toughra.ustadmobile.R;
-import com.ustadmobile.core.controller.SELSelectStudentPresenter;
-import com.ustadmobile.core.db.UmProvider;
-import com.ustadmobile.core.view.SELSelectStudentView;
-import com.ustadmobile.lib.db.entities.Person;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
+import com.toughra.ustadmobile.R;
 
-public class SELSelectStudentActivity extends UstadBaseActivity implements SELSelectStudentView
-{
+
+import com.ustadmobile.core.view.SELRecognitionView;
+
+import ru.dimorinny.floatingtextbutton.FloatingTextButton;
+
+
+/**
+ * The SELRecognition activity.
+ * <p>
+ * This Activity extends UstadBaseActivity and implements SELRecognitionView
+ */
+public class SELRecognitionActivity extends UstadBaseActivity implements SELRecognitionView {
 
     private Toolbar toolbar;
 
@@ -26,9 +40,7 @@ public class SELSelectStudentActivity extends UstadBaseActivity implements SELSe
     private RecyclerView mRecyclerView;
     private RecyclerView.LayoutManager mRecyclerLayoutManager;
     private RecyclerView.Adapter mAdapter; //replaced with object in set view provider method.
-    private SELSelectStudentPresenter mPresenter;
-
-    public long clazzUid;
+    private SELRecognitionPresenter mPresenter;
 
     public static final DiffUtil.ItemCallback<Person> DIFF_CALLBACK =
             new DiffUtil.ItemCallback<Person>() {
@@ -46,16 +58,17 @@ public class SELSelectStudentActivity extends UstadBaseActivity implements SELSe
             };
 
     @Override
-    public void setSELAnswerListProvider(UmProvider<Person> selStudentsProvider) {
+    public void setListProvider(UmProvider<Person> listProvider) {
 
         // Specify the mAdapter
-        SimplePeopleListRecyclerAdapter recyclerAdapter = new SimplePeopleListRecyclerAdapter(
-                DIFF_CALLBACK, getApplicationContext(), mPresenter);
+        PeopleBlobListRecyclerAdapter recyclerAdapter =
+                new PeopleBlobListRecyclerAdapter(DIFF_CALLBACK, getApplicationContext(),
+                        mPresenter, true);
 
         // get the provider, set , observe, etc.
         DataSource.Factory<Integer, Person> factory =
                 (DataSource.Factory<Integer, Person>)
-                        selStudentsProvider.getProvider();
+                        listProvider.getProvider();
         LiveData<PagedList<Person>> data =
                 new LivePagedListBuilder<>(factory, 20).build();
         //Observe the data:
@@ -66,30 +79,38 @@ public class SELSelectStudentActivity extends UstadBaseActivity implements SELSe
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState){
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         //Setting layout:
-        setContentView(R.layout.activity_sel_select_student);
+        setContentView(R.layout.activity_sel_recognition);
 
         //Toolbar:
-        toolbar = findViewById(R.id.activity_sel_select_student_toolbar);
+        toolbar = findViewById(R.id.activity_sel_recognition_toolbar);
         toolbar.setTitle(getText(R.string.social_nomination));
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
 
-
         //Recycler View:
         mRecyclerView = (RecyclerView) findViewById(
-                R.id.activity_sel_select_student_recyclerview);
-        mRecyclerLayoutManager = new LinearLayoutManager(getApplicationContext());
+                R.id.activity_sel_recognition_recyclerview);
+        //mRecyclerLayoutManager = new LinearLayoutManager(getApplicationContext());
+        mRecyclerLayoutManager = new GridLayoutManager(getApplicationContext(), 3);
         mRecyclerView.setLayoutManager(mRecyclerLayoutManager);
 
         //Call the Presenter
-        mPresenter = new SELSelectStudentPresenter(this,
+        mPresenter = new SELRecognitionPresenter(this,
                 UMAndroidUtil.bundleToHashtable(getIntent().getExtras()), this);
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
+
+        CheckBox recognizedCheckBox = findViewById(R.id.activity_sel_recognition_checkbox);
+
+        //FAB and its listener
+        FloatingTextButton fab = findViewById(R.id.activity_sel_recognition_fab);
+        fab.setOnClickListener(v ->
+                mPresenter.handleClickPrimaryActionButton(recognizedCheckBox.isChecked()));
+
 
     }
 

@@ -8,5 +8,6 @@ public interface ClassDetailView extends UstadView {
 
     String VIEW_NAME = "ClassDetail";
 
+    void setToolbarTitle(String toolbarTitle);
 
 }

@@ -46,8 +46,11 @@ public class SELSelectConsentActivity extends UstadBaseActivity implements SELSe
 
         //Toolbar:
         toolbar = findViewById(R.id.activity_selselect_consent_toolbar);
+        toolbar.setTitle(getText(R.string.social_nomination));
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+
 
         //Call the Presenter
         mPresenter = new SELSelectConsentPresenter(this,

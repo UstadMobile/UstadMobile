@@ -16,6 +16,7 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.widget.TextView;
 
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 import com.toughra.ustadmobile.R;
@@ -77,6 +78,17 @@ public class SELEditActivity extends UstadBaseActivity implements SELEditView {
     }
 
     @Override
+    public void updateHeading(String questionText) {
+        TextView title = (TextView) findViewById(R.id.activity_sel_edit_title);
+        title.setText(questionText);
+    }
+
+    @Override
+    public void updateHeading(String iNum, String tNum) {
+        toolbar.setTitle(toolbar.getTitle().toString() + " " + iNum + "/" + tNum);
+    }
+
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
@@ -85,8 +97,10 @@ public class SELEditActivity extends UstadBaseActivity implements SELEditView {
 
         //Toolbar:
         toolbar = findViewById(R.id.activity_sel_edit_toolbar);
+        toolbar.setTitle(getText(R.string.social_nomination));
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
 
         //Recycler View:
         mRecyclerView = (RecyclerView) findViewById(

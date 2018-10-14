@@ -102,6 +102,9 @@ public class PersonDetailActivity extends UstadBaseActivity implements PersonDet
 
     @Override
     public void setField(int index, PersonDetailViewField field, Object value) {
+        if(value == null){
+            value = "";
+        }
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         String label = null;
         if(field.getMessageLabel() != 0) {

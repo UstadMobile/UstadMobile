@@ -5,6 +5,7 @@ import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.ClazzDetailEnrollStudentView;
 import com.ustadmobile.core.view.ClazzStudentListView;
+import com.ustadmobile.core.view.PersonDetailView;
 import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.ClazzMember;
 import com.ustadmobile.lib.db.entities.ClazzMemberWithPerson;
@@ -12,6 +13,7 @@ import com.ustadmobile.lib.db.entities.ClazzMemberWithPerson;
 import java.util.Hashtable;
 
 import static com.ustadmobile.core.controller.ClazzListPresenter.ARG_CLAZZ_UID;
+import static com.ustadmobile.core.view.PersonDetailView.ARG_PERSON_UID;
 
 
 /**
@@ -80,6 +82,13 @@ public class ClazzStudentListPresenter extends UstadBaseController<ClazzStudentL
         impl.go(ClazzDetailEnrollStudentView.VIEW_NAME, args, view.getContext());
     }
 
+    public void handleClickStudent(long personUid){
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        Hashtable args = new Hashtable();
+        args.put(ARG_CLAZZ_UID, currentClazzId);
+        args.put(ARG_PERSON_UID, personUid);
+        impl.go(PersonDetailView.VIEW_NAME, args, view.getContext());
+    }
 
     /**
      * Method logic for what happens when we change the order of the student list.

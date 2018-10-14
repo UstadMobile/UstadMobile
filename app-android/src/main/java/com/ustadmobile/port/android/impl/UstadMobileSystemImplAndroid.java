@@ -96,6 +96,7 @@ import com.ustadmobile.core.view.SELEditView;
 import com.ustadmobile.core.view.SELQuestionDetailView;
 import com.ustadmobile.core.view.SELQuestionEditView;
 import com.ustadmobile.core.view.SELQuestionView;
+import com.ustadmobile.core.view.SELRecognitionView;
 import com.ustadmobile.core.view.SELSelectConsentView;
 import com.ustadmobile.core.view.SELSelectStudentView;
 import com.ustadmobile.core.view.ScormPackageView;
@@ -207,6 +208,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         viewNameToAndroidImplMap.put(SELQuestionView.VIEW_NAME, SELQuestionActivity.class);
         viewNameToAndroidImplMap.put(SELQuestionDetailView.VIEW_NAME, SELQuestionDetailActivity.class);
         viewNameToAndroidImplMap.put(SELQuestionEditView.VIEW_NAME, SELQuestionEditActivity.class);
+        viewNameToAndroidImplMap.put(SELRecognitionView.VIEW_NAME, SELRecognitionActivity.class);
 
     }
 

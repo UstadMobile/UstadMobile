@@ -81,6 +81,7 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
 
         //Toolbar
         toolbar = findViewById(R.id.activity_person_edit_toolbar);
+        toolbar.setTitle(getText(R.string.edit_person));
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -347,6 +348,13 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
         data.observe(this, recyclerAdapter::submitList);
 
         mRecyclerView.setAdapter(recyclerAdapter);
+    }
+
+    @Override
+    public void updateToolbarTitle(String titleName) {
+        toolbar.setTitle(titleName);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
 

@@ -254,15 +254,35 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
                 view.setField(field.getFieldIndex(), new PersonDetailViewField(FIELD_TYPE_TEXT,
                         field.getLabelMessageId(),field.getFieldIcon()), thisValue);
             }else  {//this is actually a custom field
+
+                PersonCustomFieldWithPersonCustomFieldValue cf =
+                        customFieldWithFieldValueMap.get(field.getFieldUid());
+                int cfLabelMessageId = 0;
+                String cfFieldIcon = "";
+                Object cfValue = null;
+
+                if (cf != null){
+                    if(cf.getLabelMessageId() != 0){
+                        cfLabelMessageId = cf.getLabelMessageId();
+                    }
+                    if(cf.getFieldIcon() != null){
+                        cfFieldIcon = cf.getFieldIcon();
+                    }
+                    if(cf.getCustomFieldValue() != null){
+                        if(cf.getCustomFieldValue().getFieldValue() != null){
+                            cfValue = cf.getCustomFieldValue().getFieldValue();
+                        }
+                    }
+                }
+
                 view.setField(
                         field.getFieldIndex(),
                         new PersonDetailViewField(
                                 field.getFieldType(),
-                                customFieldWithFieldValueMap.get(field.getFieldUid()).getLabelMessageId(),
-                                customFieldWithFieldValueMap.get(field.getFieldUid()).getFieldIcon()
+                                cfLabelMessageId,
+                                cfFieldIcon
                         ),
-                        customFieldWithFieldValueMap.get(field.getFieldUid())
-                                .getCustomFieldValue().getFieldValue()
+                        cfValue
                 );
             }
         }

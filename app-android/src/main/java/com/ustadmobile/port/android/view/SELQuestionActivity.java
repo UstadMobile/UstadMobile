@@ -43,8 +43,11 @@ public class SELQuestionActivity extends UstadBaseActivity implements SELQuestio
 
         //Toolbar:
         toolbar = findViewById(R.id.activity_sel_question_toolbar);
+        toolbar.setTitle(getText(R.string.social_nomination));
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+
 
         //Recycler View:
         mRecyclerView = (RecyclerView) findViewById(
@@ -76,6 +79,7 @@ public class SELQuestionActivity extends UstadBaseActivity implements SELQuestio
     public void updateQuestionNumber(String qNumber, String tNumber) {
         TextView qNum = (TextView) findViewById(R.id.activity_sel_question_number_position);
         qNum.setText(qNumber.toString() + "/" + tNumber.toString());
+        toolbar.setTitle(toolbar.getTitle().toString() + qNumber + "/" + tNumber);
     }
 
 

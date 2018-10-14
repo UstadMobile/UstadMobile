@@ -104,15 +104,15 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
         AHBottomNavigationItem statistics_item =
                 new AHBottomNavigationItem(R.string.statistcs,
                         R.drawable.ic_chart_areaspline_black_24dp, R.color.default_back_color);
-        AHBottomNavigationItem lessons_item =
-                new AHBottomNavigationItem(R.string.lessons,
-                        R.drawable.ic_book_multiple_black_24dp, R.color.default_back_color);
+//        AHBottomNavigationItem lessons_item =
+//                new AHBottomNavigationItem(R.string.lessons,
+//                        R.drawable.ic_book_multiple_black_24dp, R.color.default_back_color);
 
         //Add the items
         bottomNavigation.addItem(feed_item);
         bottomNavigation.addItem(people_item);
         bottomNavigation.addItem(statistics_item);
-        bottomNavigation.addItem(lessons_item);
+//        bottomNavigation.addItem(lessons_item);
 
         // Setting the very 1st item as default home screen.
         bottomNavigation.setCurrentItem(0);
@@ -142,11 +142,11 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
                         updateTitle(getText(R.string.my_classes).toString());
                         break;
                     case 2:
-                        updateTitle(getText(R.string.statistcs).toString());
+                        updateTitle(getText(R.string.reports).toString());
                         break;
-                    case 3:
-                        updateTitle(getText(R.string.lessons).toString());
-                        break;
+//                    case 3:
+//                        updateTitle(getText(R.string.lessons).toString());
+//                        break;
                 }
                 return true;
             }
@@ -206,11 +206,11 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
                                 ComingSoonFragment.newInstance();
                         this.positionMap.put(position, comingSoonFragment);
                         return comingSoonFragment;
-                    case 3:
-                        UstadBaseFragment csf =
-                                ComingSoonFragment.newInstance();
-                        this.positionMap.put(position, csf);
-                        return csf;
+//                    case 3:
+//                        UstadBaseFragment csf =
+//                                ComingSoonFragment.newInstance();
+//                        this.positionMap.put(position, csf);
+//                        return csf;
                     default:
                         return null;
                 }

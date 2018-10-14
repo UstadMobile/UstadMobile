@@ -33,4 +33,6 @@ public interface PersonEditView extends UstadView {
      */
     void finish();
 
+    void updateToolbarTitle(String titleName);
+
 }

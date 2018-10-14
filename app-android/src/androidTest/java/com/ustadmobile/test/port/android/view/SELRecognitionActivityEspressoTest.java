@@ -1,22 +1,20 @@
 package com.ustadmobile.test.port.android.view;
 
+
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.espresso.intent.rule.IntentsTestRule;
 import android.support.test.runner.AndroidJUnit4;
-import android.view.View;
 
-import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.ClazzListPresenter;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.lib.db.entities.Clazz;
-import com.ustadmobile.lib.db.entities.Person;
-import com.ustadmobile.port.android.view.ClazzDetailActivity;
+import com.ustadmobile.port.android.view.SELEditActivity;
+import com.ustadmobile.port.android.view.SELRecognitionActivity;
 import com.ustadmobile.test.port.android.testutil.UmDbTestUtil;
 
-import org.hamcrest.Matcher;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -25,15 +23,10 @@ import org.junit.runner.RunWith;
 
 import java.util.Hashtable;
 
-import static android.support.test.espresso.Espresso.onView;
-import static android.support.test.espresso.action.ViewActions.click;
-import static android.support.test.espresso.matcher.ViewMatchers.isDescendantOfA;
-import static android.support.test.espresso.matcher.ViewMatchers.withId;
-import static android.support.test.espresso.matcher.ViewMatchers.withText;
-import static org.hamcrest.core.AllOf.allOf;
+import static com.ustadmobile.core.view.PersonDetailView.ARG_PERSON_UID;
 
 @RunWith(AndroidJUnit4.class)
-public class SELAnswerListFragmentEspressoTest {
+public class SELRecognitionActivityEspressoTest {
 
     private static final String TEST_CLASS_NAME = "Class A";
     private static final float TEST_CLASS_PERCENTAGE = 0.42F;
@@ -65,8 +58,8 @@ public class SELAnswerListFragmentEspressoTest {
      * This sets the activity that we want floating around
      */
     @Rule
-    public IntentsTestRule<ClazzDetailActivity> mActivityRule =
-            new IntentsTestRule<>(ClazzDetailActivity.class, false, false);
+    public IntentsTestRule<SELRecognitionActivity> mActivityRule =
+            new IntentsTestRule<>(SELRecognitionActivity.class, false, false);
 
     @Before
     public void beforeTest() {
@@ -78,20 +71,14 @@ public class SELAnswerListFragmentEspressoTest {
                 peopleMap, TEST_USER_UID, context);
 
 
-        Person testPerson = UmDbTestUtil.createPersonWithFieldsAndCustomFields(testClazz, context);
-
         //Start the activity
         Intent launchActivityIntent = new Intent();
         Bundle b = new Bundle();
         b.putLong(ClazzListPresenter.ARG_CLAZZ_UID, testClazz.getClazzUid());
+        b.putLong(ARG_PERSON_UID, TEST_USER_UID);
         launchActivityIntent.putExtras(b);
         mActivityRule.launchActivity(launchActivityIntent);
 
-        Matcher<View> logMatcher = allOf(
-                withText(InstrumentationRegistry.getContext().getText(
-                        R.string.sel).toString().toUpperCase()),
-                isDescendantOfA(withId(R.id.activity_class_detail_tablayout)));
-        onView(logMatcher).perform(click());
     }
 
     @Test
