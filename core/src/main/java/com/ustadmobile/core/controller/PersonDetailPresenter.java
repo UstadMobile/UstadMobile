@@ -98,6 +98,10 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
                 }else if(thisPerson.getMotherNum() != null && !thisPerson.getMotherNum().isEmpty()){
                     oneParentNumber = thisPerson.getMotherNum();
                 }
+                if(thisPerson.getImagePath() != null){
+                    view.runOnUiThread(() -> view.updateImageOnView(thisPerson.getImagePath()));
+
+                }
             }
 
             @Override

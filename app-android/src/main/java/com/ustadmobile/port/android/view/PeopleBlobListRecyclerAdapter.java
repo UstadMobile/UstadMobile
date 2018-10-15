@@ -2,7 +2,9 @@ package com.ustadmobile.port.android.view;
 
 import android.arch.paging.PagedListAdapter;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.CardView;
@@ -13,10 +15,13 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Transformation;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.CommonHandlerPresenter;
 import com.ustadmobile.lib.db.entities.Person;
 
+import java.io.File;
 import java.util.Hashtable;
 
 public class PeopleBlobListRecyclerAdapter extends
@@ -75,6 +80,42 @@ public class PeopleBlobListRecyclerAdapter extends
         return new PeopleBlobListRecyclerAdapter.PeopleViewHolder(clazzStudentListItem);
     }
 
+    public class CropSquareTransformation implements Transformation {
+        @Override public Bitmap transform(Bitmap source) {
+            int size = Math.min(source.getWidth(), source.getHeight());
+            int x = (source.getWidth() - size) / 2;
+            int y = (source.getHeight() - size) / 2;
+            Bitmap result = Bitmap.createBitmap(source, x, y, size, size);
+            if (result != source) {
+                source.recycle();
+            }
+            return result;
+        }
+
+        @Override public String key() { return "square()"; }
+    }
+
+    public void updateImageOnView(String imagePath, ImageView personImageView){
+        Uri profileImage = Uri.fromFile(new File(imagePath));
+
+//        personImageView.setImageURI(profileImage);
+
+        Picasso.with(theContext)
+                .load(profileImage)
+                .transform(new CropSquareTransformation())
+                .resize(90,90)
+                .centerCrop()
+                .into(personImageView);
+
+        File profilePic = new File(imagePath);
+        Picasso.with(theContext)
+                .load(profilePic)
+                .transform(new CropSquareTransformation())
+                .resize(90,90)
+                .centerCrop()
+                .into(personImageView);
+    }
+
     /**
      * This method sets the elements after it has been obtained for that item'th position.
      * @param holder    The holder
@@ -96,7 +137,11 @@ public class PeopleBlobListRecyclerAdapter extends
 
         ImageView studentImage = (ImageView) holder.itemView
                 .findViewById(R.id.item_peopleblob_image);
+
         //TODO: Add image of student here.
+        if(thisPerson.getImagePath() != null && !thisPerson.getImagePath().isEmpty()){
+            updateImageOnView(thisPerson.getImagePath(), studentImage);
+        }
 
         TextView studentEntry = (TextView) holder.itemView
                 .findViewById(R.id.item_peopleblob_name);

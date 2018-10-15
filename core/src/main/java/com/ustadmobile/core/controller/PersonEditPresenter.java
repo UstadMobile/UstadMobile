@@ -76,10 +76,6 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
 
     PersonDao personDao = UmAppDatabase.getInstance(context).getPersonDao();
 
-    PersonCustomFieldDao personFieldDao = UmAppDatabase.getInstance(context).getPersonCustomFieldDao();
-
-    ClazzDao clazzDao = UmAppDatabase.getInstance(context).getClazzDao();
-
     private String newPersonString = "";
 
     /**
@@ -119,8 +115,7 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
                 UmAppDatabase.getInstance(context).getPersonCustomFieldValueDao();
         PersonDetailPresenterFieldDao personDetailPresenterFieldDao =
                 UmAppDatabase.getInstance(context).getPersonDetailPresenterFieldDao();
-        ClazzMemberDao clazzMemberDao =
-                UmAppDatabase.getInstance(context).getClazzMemberDao();
+
 
         if(newPersonString.equals("true")){
             view.updateToolbarTitle(impl.getString(MessageID.new_person, context));
@@ -171,6 +166,35 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
         //personLiveData.observe(this, this::handlePersonValueChanged);
     }
 
+    public void updatePersonPic(String picPath){
+        personDao.findByUidAsync(personUid, new UmCallback<Person>() {
+            @Override
+            public void onSuccess(Person personWithPic) {
+                personWithPic.setImagePath(picPath);
+                personDao.updateAsync(personWithPic, new UmCallback<Integer>(){
+
+                    @Override
+                    public void onSuccess(Integer result) {
+                        System.out.println("Success updating person with Pic..");
+                        //Update pic on the view
+                        //view.updateImageOnView(picPath);
+
+                    }
+
+                    @Override
+                    public void onFailure(Throwable exception) {
+                        exception.printStackTrace();
+                    }
+                });
+            }
+
+            @Override
+            public void onFailure(Throwable exception) {
+
+            }
+        });
+    }
+
     public void generateAssignedClazzesLiveData(){
         ClazzDao clazzDao = UmAppDatabase.getInstance(context).getClazzDao();
 
@@ -189,6 +213,9 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
                                 Map<Long, PersonCustomFieldWithPersonCustomFieldValue> valueMap ){
 
 
+        if(thisPerson.getImagePath() != null){
+            view.updateImageOnView(thisPerson.getImagePath());
+        }
 
         for(PersonDetailPresenterField field : allFields) {
 

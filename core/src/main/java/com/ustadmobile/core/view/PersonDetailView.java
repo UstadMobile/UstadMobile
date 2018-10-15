@@ -34,4 +34,6 @@ public interface PersonDetailView extends UstadView {
 
     void handleClickText(String number);
 
+    void updateImageOnView(String imagePath);
+
 }

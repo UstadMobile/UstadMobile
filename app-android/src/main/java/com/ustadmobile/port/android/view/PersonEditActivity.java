@@ -1,15 +1,27 @@
 package com.ustadmobile.port.android.view;
 
+import android.Manifest;
 import android.app.DatePickerDialog;
 import android.arch.lifecycle.LiveData;
 import android.arch.paging.DataSource;
 import android.arch.paging.LivePagedListBuilder;
 import android.arch.paging.PagedList;
 import android.arch.paging.PagedListAdapter;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.Matrix;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputLayout;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.content.FileProvider;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -31,6 +43,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.squareup.picasso.Picasso;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.PersonEditPresenter;
 import com.ustadmobile.core.db.UmProvider;
@@ -43,6 +56,8 @@ import com.ustadmobile.lib.db.entities.ClazzWithNumStudents;
 import com.ustadmobile.port.android.generated.MessageIDMap;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.util.Calendar;
 
 import static com.ustadmobile.core.view.PersonDetailViewField.FIELD_TYPE_DATE;
@@ -62,6 +77,8 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
 
     private PersonEditPresenter mPresenter;
 
+    private String imagePathFromCamera;
+
     public static final int DEFAULT_PADDING = 16;
     public static final int DEFAULT_PADDING_HEADER_BOTTOM = 16;
     public static final int DEFAULT_DIVIDER_HEIGHT = 2;
@@ -71,6 +88,11 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
     public static final int HEADER_TEXT_SIZE = 12;
     public static final int LABEL_TEXT_SIZE = 10;
     public static final String COLOR_GREY= "#B3B3B3";
+
+    private static final int CAMERA_PERMISSION_REQUEST = 100;
+    private static final int CAMERA_IMAGE_CAPTURE_REQUEST = 101 ;
+
+    ImageView personEditImage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
@@ -85,7 +107,6 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-
         //Get the header & fields layout
         mLinearLayout = findViewById(R.id.activity_person_edit_fields_linear_layout);
 
@@ -93,6 +114,12 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
         mPresenter = new PersonEditPresenter(this, UMAndroidUtil.bundleToHashtable(
                 getIntent().getExtras()), this);
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
+
+        personEditImage = findViewById(R.id.activity_person_edit_student_image);
+        personEditImage.setOnClickListener(v -> addImageFromCamera());
+
+        Button personEditImageButton = findViewById(R.id.activity_person_edit_student_image_button);
+        personEditImageButton.setOnClickListener(v -> addImageFromCamera());
 
 
     }
@@ -106,7 +133,6 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
             return -1;
         }
     }
-
 
     public void setEditField(long fieldUid, int fieldType, String label, int labelId,
                              String iconName, boolean editMode,
@@ -300,7 +326,6 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
     }
 
 
-
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_done, menu);
@@ -355,6 +380,85 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
         toolbar.setTitle(titleName);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+    }
+
+
+    private void startCameraIntent(){
+        String imageId = String.valueOf(System.currentTimeMillis());
+        Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+        File dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
+        File output = new File(dir,imageId+"_image.png");
+        imagePathFromCamera = output.getAbsolutePath();
+        Uri cameraImage = FileProvider.getUriForFile(this,getPackageName() + ".fileprovider", output);
+        cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT,cameraImage);
+        startActivityForResult(cameraIntent, CAMERA_IMAGE_CAPTURE_REQUEST);
+    }
+
+    //this is how you check permission grant task result.
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[],
+                                           @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case CAMERA_PERMISSION_REQUEST:
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    startCameraIntent();
+                }
+                break;
+        }
+    }
+
+    /*Since most camera capture inverted
+    images then you might want to rotate it first and get it as bitmap*/
+
+    public Bitmap getCompressedImage(int quality){
+        Bitmap bmp = BitmapFactory.decodeFile(imagePathFromCamera);
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        bmp.compress(Bitmap.CompressFormat.JPEG, quality, bos);
+        Matrix matrix = new Matrix();
+        matrix.postRotate(90);
+        return Bitmap.createBitmap(bmp, 0, 0, bmp.getWidth(), bmp.getHeight(), matrix,
+                true);
+    }
+
+    @Override
+    public void updateImageOnView(String imagePath){
+        Uri profileImage = Uri.fromFile(new File(imagePath));
+
+        Picasso.with(getApplicationContext()).load(profileImage).into(personEditImage);
+
+        File profilePic = new File(imagePath);
+        Picasso.with(getApplicationContext()).load(profilePic).into(personEditImage);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(resultCode == RESULT_OK){
+            switch (requestCode){
+                case CAMERA_IMAGE_CAPTURE_REQUEST:
+                    System.out.println("SELEditActivity -> onActivityResult");
+                    Bitmap imageBitmap = getCompressedImage(60);
+                    //userProfile.setImageBitmap(getCompressedImage(60));
+
+                    //TODO: set imagePathFromCamera to Person.
+                    updateImageOnView(imagePathFromCamera);
+                    mPresenter.updatePersonPic(imagePathFromCamera);
+
+                    break;
+            }
+        }
+    }
+
+    @Override
+    public void addImageFromCamera() {
+        if (ContextCompat.checkSelfPermission(getApplicationContext(),
+                Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(PersonEditActivity.this,
+                    new String[]{Manifest.permission.CAMERA, Manifest.permission.READ_EXTERNAL_STORAGE}, CAMERA_PERMISSION_REQUEST);
+            return;
+        }
+        startCameraIntent();
     }
 
 

@@ -303,10 +303,10 @@ This is the one you should be editing. The one in /core/locale/main/values/strin
     <string name="basic_details">Basic details</string>
     <string name="home_address">Home address</string>
     <string name="add_person_to_class">Add person to class</string>
-    <string name="fathers_name">Father's name</string>
-    <string name="fathers_number">Father's number</string>
-    <string name="mothers_name">Mother's name</string>
-    <string name="mothers_number">Mother's number</string>
+    <string name="fathers_name">Fathers name</string>
+    <string name="fathers_number">Fathers number</string>
+    <string name="mothers_name">Mothers name</string>
+    <string name="mothers_number">Mothers number</string>
     <string name="new_person">New Person</string>
     <string name="edit_person">Edit Person</string>
     <string name="edit">Edit</string>
@@ -339,6 +339,7 @@ This is the one you should be editing. The one in /core/locale/main/values/strin
     <string name="sel_new_question_title">Question</string>
     <string name="sel_recognition_student_recognizes">Student recognizes their classmates</string>
     <string name="add_person">Add Person</string>
+    <string name="update_picture">Update picture</string>
 
 
 

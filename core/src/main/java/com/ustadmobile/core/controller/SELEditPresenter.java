@@ -3,12 +3,14 @@ package com.ustadmobile.core.controller;
 import java.util.Hashtable;
 
 import com.ustadmobile.core.db.dao.ClazzMemberDao;
+import com.ustadmobile.core.db.dao.PersonDao;
 import com.ustadmobile.core.db.dao.SocialNominationQuestionDao;
 import com.ustadmobile.core.db.dao.SocialNominationQuestionResponseDao;
 import com.ustadmobile.core.db.dao.SocialNominationQuestionResponseNominationDao;
 import com.ustadmobile.core.db.dao.SocialNominationQuestionSetDao;
 import com.ustadmobile.core.db.dao.SocialNominationQuestionSetResponseDao;
 import com.ustadmobile.core.impl.UmCallback;
+import com.ustadmobile.core.view.PersonDetailView;
 import com.ustadmobile.core.view.SELEditView;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 
@@ -224,7 +226,7 @@ public class SELEditPresenter
 
     @Override
     public void handleCommonPressed(Object arg) {
-        //TODO: Record nomination and highlight selected.
+        //Record nomination and highlight selected.
         System.out.println("Handling nomination pressed..");
 
         ClazzMemberDao clazzMemberDao = UmAppDatabase.getInstance(context).getClazzMemberDao();

@@ -35,4 +35,8 @@ public interface PersonEditView extends UstadView {
 
     void updateToolbarTitle(String titleName);
 
+    void addImageFromCamera();
+
+    void updateImageOnView(String imagePath);
+
 }

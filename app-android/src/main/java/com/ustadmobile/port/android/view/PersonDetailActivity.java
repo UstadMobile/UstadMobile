@@ -22,6 +22,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.squareup.picasso.Picasso;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.PersonDetailPresenter;
 import com.ustadmobile.core.db.UmProvider;
@@ -32,6 +33,8 @@ import com.ustadmobile.core.view.PersonDetailViewField;
 import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.ClazzWithNumStudents;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
+
+import java.io.File;
 
 import ru.dimorinny.floatingtextbutton.FloatingTextButton;
 
@@ -59,6 +62,7 @@ public class PersonDetailActivity extends UstadBaseActivity implements PersonDet
 
     private PersonDetailPresenter mPresenter;
     String personName = "";
+    ImageView personEditImage;
 
     public static final String CALL_ICON_NAME = "ic_call_bcd4_24dp";
     public static final String TEXT_ICON_NAME = "ic_textsms_bcd4_24dp";
@@ -75,6 +79,9 @@ public class PersonDetailActivity extends UstadBaseActivity implements PersonDet
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         mLinearLayout = findViewById(R.id.activity_person_detail_fields_linear_layout);
+
+        //Load the Image
+        personEditImage = findViewById(R.id.activity_person_detail_student_image);
 
         //Call the Presenter
         mPresenter = new PersonDetailPresenter(this,
@@ -105,7 +112,6 @@ public class PersonDetailActivity extends UstadBaseActivity implements PersonDet
         enrollInClassImageView.setOnClickListener(v -> mPresenter.handleClickEnrollInClass());
         enrollInClassTextView.setOnClickListener(v -> mPresenter.handleClickEnrollInClass());
 
-
     }
 
     public int getResourceId(String pVariableName, String pResourcename, String pPackageName)
@@ -118,7 +124,15 @@ public class PersonDetailActivity extends UstadBaseActivity implements PersonDet
         }
     }
 
+    @Override
+    public void updateImageOnView(String imagePath){
+        Uri profileImage = Uri.fromFile(new File(imagePath));
 
+        Picasso.with(getApplicationContext()).load(profileImage).into(personEditImage);
+
+        File profilePic = new File(imagePath);
+        Picasso.with(getApplicationContext()).load(profilePic).into(personEditImage);
+    }
 
     @Override
     public void setField(int index, PersonDetailViewField field, Object value) {
