@@ -21,6 +21,7 @@ import com.ustadmobile.lib.database.annotation.UmIndexField;
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 import com.ustadmobile.lib.database.annotation.UmQuery;
+import com.ustadmobile.lib.database.annotation.UmQueryFindByPrimaryKey;
 import com.ustadmobile.lib.database.annotation.UmUpdate;
 import com.ustadmobile.lib.database.jdbc.DbChangeListener;
 import com.ustadmobile.lib.database.jdbc.JdbcDatabaseUtils;
@@ -40,6 +41,7 @@ import org.sqlite.SQLiteDataSource;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Parameter;
 import java.sql.Array;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -502,16 +504,16 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                     .addParameter(ClassName.get(UmJdbcDatabase.class), "_db")
                     .addCode("this._db = _db;\n").build());
 
-        for(Element subElement : daoType.getEnclosedElements()) {
-            if (subElement.getKind() != ElementKind.METHOD)
-                continue;
-
-            ExecutableElement daoMethod = (ExecutableElement)subElement;
-
+        List<ExecutableElement> methodsToImplement = findDaoMethodsToImplement(daoType);
+        for(ExecutableElement daoMethod : methodsToImplement) {
             if(daoMethod.getAnnotation(UmInsert.class) != null) {
-                addInsertMethod(daoMethod, jdbcDaoClassSpec, '`');
+                addInsertMethod(daoMethod, daoType, jdbcDaoClassSpec, '`');
             }else if(daoMethod.getAnnotation(UmQuery.class) != null){
-                addQueryMethod(daoMethod, dbType, jdbcDaoClassSpec, '`');
+                addQueryMethod(daoMethod, daoType, dbType, jdbcDaoClassSpec, '`',
+                        daoMethod.getAnnotation(UmQuery.class).value());
+            }else if(daoMethod.getAnnotation(UmQueryFindByPrimaryKey.class) != null) {
+                addQueryMethod(daoMethod, daoType, dbType, jdbcDaoClassSpec, '`',
+                        generateFindByPrimaryKeySql(daoType, daoMethod, processingEnv, '`'));
             }else if(daoMethod.getAnnotation(UmUpdate.class) != null) {
                 addUpdateMethod(daoMethod, dbType, jdbcDaoClassSpec, '`');
             }else if(daoMethod.getAnnotation(UmDelete.class) != null) {
@@ -526,10 +528,10 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
     }
 
 
-    public void addInsertMethod(ExecutableElement daoMethod, TypeSpec.Builder daoBuilder,
+    public void addInsertMethod(ExecutableElement daoMethod, TypeElement daoType,
+                                TypeSpec.Builder daoBuilder,
                                 char identifierQuote) {
-        MethodSpec.Builder methodBuilder = MethodSpec.overriding(daoMethod);
-
+        MethodSpec.Builder methodBuilder = overrideAndResolve(daoMethod, daoType, processingEnv);
         VariableElement insertedElement = daoMethod.getParameters().get(0);
         boolean isList = false;
         boolean isArray = false;
@@ -550,21 +552,22 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
 
         TypeMirror insertParameter = daoMethod.getParameters().get(0).asType();
 
-        TypeElement entityTypeElement = insertParameter.getKind().equals(TypeKind.DECLARED) ?
-                (TypeElement)processingEnv.getTypeUtils().asElement(insertedElement.asType()) : null;
-
-        if(entityTypeElement != null && entityTypeElement.equals(processingEnv.getElementUtils()
-                .getTypeElement(List.class.getName()))) {
+        if(processingEnv.getElementUtils().getTypeElement(List.class.getName()).equals(
+                processingEnv.getTypeUtils().asElement(insertParameter))) {
             isList = true;
             DeclaredType declaredType = (DeclaredType)daoMethod.getParameters().get(0).asType();
-            entityTypeElement = (TypeElement)processingEnv.getTypeUtils().asElement(
-                    declaredType.getTypeArguments().get(0));
+            insertParameter = declaredType.getTypeArguments().get(0);
         }else if(insertParameter.getKind().equals(TypeKind.ARRAY)) {
             isArray = true;
-            entityTypeElement = (TypeElement)processingEnv.getTypeUtils().asElement(
-                    ((ArrayType)insertParameter).getComponentType());
+            insertParameter = ((ArrayType)insertParameter).getComponentType();
         }
 
+        if(insertParameter.getKind().equals(TypeKind.TYPEVAR)) {
+            insertParameter = resolveDeclaredType(insertParameter,
+                    daoType, (TypeElement)daoMethod.getEnclosingElement(), processingEnv);
+        }
+
+        TypeElement entityTypeElement = (TypeElement)processingEnv.getTypeUtils().asElement(insertParameter);
 
         if(entityTypeElement.getAnnotation(UmEntity.class) == null) {
             messager.printMessage(Diagnostic.Kind.ERROR, daoMethod.getEnclosingElement().getSimpleName() +
@@ -962,12 +965,15 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
     }
 
 
-    public void addQueryMethod(ExecutableElement daoMethod, TypeElement dbType, TypeSpec.Builder daoBuilder,
-                               char identifierQuote) {
+    public void addQueryMethod(ExecutableElement daoMethod, TypeElement daoType, TypeElement dbType,
+                               TypeSpec.Builder daoBuilder,
+                               char identifierQuote, String querySql) {
         //we need to run the query, find the columns, and then determine the appropriate setter methods to run
+        DaoMethodInfo daoMethodInfo = new DaoMethodInfo(daoMethod, daoType, processingEnv);
         CodeBlock.Builder codeBlock = CodeBlock.builder();
-        MethodSpec.Builder methodBuilder = MethodSpec.overriding(daoMethod);
-        String querySql = daoMethod.getAnnotation(UmQuery.class).value();
+
+        MethodSpec.Builder methodBuilder = AbstractDbProcessor.overrideAndResolve(daoMethod, daoType,
+                processingEnv);
         String querySqlTrimmedLower = querySql.toLowerCase().trim();
 
         boolean isUpdateOrDelete = false;
@@ -982,15 +988,11 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
         boolean asyncMethod = asyncParamIndex != -1;
 
 
-        TypeMirror resultType;
         if(asyncMethod) {
             codeBlock.beginControlFlow("_db.getExecutor().execute(() -> ");
-            DeclaredType declaredType = (DeclaredType)daoMethod.getParameters().get(asyncParamIndex)
-                    .asType();
-            resultType = declaredType.getTypeArguments().get(0);
-        }else {
-            resultType = daoMethod.getReturnType();
         }
+
+        TypeMirror resultType = daoMethodInfo.resolveResultType();
 
         List<String> namedParams = getNamedParameters(querySql);
         String preparedStmtSql = querySql;
@@ -1595,14 +1597,7 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                 checkEmbedded);
     }
 
-    private VariableElement findPrimaryKey(TypeElement entityType) {
-        for(Element subElement : getEntityFieldElements(entityType)) {
-            if(subElement.getAnnotation(UmPrimaryKey.class) != null)
-                return (VariableElement)subElement;
-        }
 
-        return null;
-    }
 
 
     private void addSetPreparedStatementValueToCodeBlock(TypeElement entityTypeElement,
