@@ -36,4 +36,6 @@ public interface PersonDetailView extends UstadView {
 
     void updateImageOnView(String imagePath);
 
+    void clearAllFields();
+
 }

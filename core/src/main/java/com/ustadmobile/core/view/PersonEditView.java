@@ -39,4 +39,6 @@ public interface PersonEditView extends UstadView {
 
     void updateImageOnView(String imagePath);
 
+    void clearAllFields();
+
 }

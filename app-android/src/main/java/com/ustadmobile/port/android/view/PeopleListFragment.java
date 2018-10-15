@@ -32,7 +32,6 @@ public class PeopleListFragment extends UstadBaseFragment implements PeopleListV
     //RecyclerView
     private RecyclerView mRecyclerView;
     private RecyclerView.LayoutManager mRecyclerLayoutManager;
-    private RecyclerView.Adapter mAdapter;
     private PeopleListPresenter mPresenter;
 
     /**

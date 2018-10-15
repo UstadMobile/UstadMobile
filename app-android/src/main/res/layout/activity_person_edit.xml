@@ -49,17 +49,6 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <LinearLayout
-                android:id="@+id/activity_person_edit_fields_linear_layout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="100dp"
-                android:orientation="vertical"
-                app:layout_constraintTop_toBottomOf="@+id/activity_person_edit_student_image"
-                app:layout_constraintStart_toStartOf="parent">
-
-            </LinearLayout>
-
             <Button
                 android:id="@+id/activity_person_edit_student_image_button"
                 android:layout_width="wrap_content"
@@ -69,7 +58,21 @@
                 android:background="@android:color/transparent"
                 android:text="@string/update_picture"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent" /> <!-- activity_person_edit_fields_linear_layout -->
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <LinearLayout
+                android:id="@+id/activity_person_edit_fields_linear_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="100dp"
+                android:orientation="vertical"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/activity_person_edit_student_image"
+                app:layout_constraintStart_toStartOf="parent">
+
+            </LinearLayout>
+
+             <!-- activity_person_edit_fields_linear_layout -->
 
         </android.support.constraint.ConstraintLayout> <!-- activity_peron_edit_constraint -->
 

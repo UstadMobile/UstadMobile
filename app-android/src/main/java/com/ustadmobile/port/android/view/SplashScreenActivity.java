@@ -623,6 +623,18 @@ public class SplashScreenActivity extends AppCompatActivity
                 person.setActive(true);
                 person.setFirstNames(first_name);
                 person.setLastName(last_name);
+
+
+                person.setEmailAddr(first_name + last_name + "@ustadmobile.com");
+                person.setGender(Person.GENDER_FEMALE);
+                person.setDateOfBirth(UMCalendarUtil.getLongDateFromPrettyString("12-Jan-2001"));
+                person.setFatherName("Addulla " + last_name);
+                person.setMotherName("Aysha " + last_name);
+                person.setFatherNumber("+96212345678");
+                person.setMotherNum("+96287654321");
+                person.setAddress("123 Fourth Street, FiftySix Avenue, SevenCity, Eightland");
+
+
                 long thisPersonUid = personDao.insert(person);
                 person.setPersonUid(thisPersonUid);
 

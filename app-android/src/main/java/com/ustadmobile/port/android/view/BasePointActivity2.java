@@ -29,7 +29,6 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
     private ViewPager mPager;
     private BasePointViewPagerAdapter mPagerAdapter;
 
-    private CollapsingToolbarLayout mCollapsingToolbar;
     private Toolbar toolbar;
 
     /**
@@ -39,15 +38,6 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
     @Override
     public void setBottomNavigationItems(String[] menuItems) {
 
-    }
-
-    /**
-     * Get color
-     * @param color
-     * @return
-     */
-    public int fetchColor(int color){
-        return ContextCompat.getColor(this, color);
     }
 
     /**
@@ -101,17 +91,9 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
         AHBottomNavigationItem classes_item =
                 new AHBottomNavigationItem(R.string.classes,
                         R.drawable.ic_people_black_48dp, R.color.default_back_color);
-
         AHBottomNavigationItem people_item =
                 new AHBottomNavigationItem(R.string.people,
                         R.drawable.ic_person_black_24dp, R.color.default_back_color);
-//
-//        AHBottomNavigationItem statistics_item =
-//                new AHBottomNavigationItem(R.string.statistcs,
-//                        R.drawable.ic_chart_areaspline_black_24dp, R.color.default_back_color);
-//        AHBottomNavigationItem lessons_item =
-//                new AHBottomNavigationItem(R.string.lessons,
-//                        R.drawable.ic_book_multiple_black_24dp, R.color.default_back_color);
 
         //Add the items
         bottomNavigation.addItem(feed_item);
@@ -149,9 +131,7 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
                     case 2:
                         updateTitle(getText(R.string.people).toString());
                         break;
-//                    case 3:
-//                        updateTitle(getText(R.string.lessons).toString());
-//                        break;
+
                 }
                 return true;
             }
@@ -206,26 +186,13 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
                                 ClazzListFragment.newInstance();
                         this.positionMap.put(position, classesFragment);
                         return classesFragment;
-//
-//                        UstadBaseFragment peopleFragment =
-//                                BasePointPeopleFragment.newInstance();
-//                        this.positionMap.put(position, peopleFragment);
-//                        return peopleFragment;
+
                     case 2:
                         UstadBaseFragment peopleListFragment =
                                 PeopleListFragment.newInstance();
                         this.positionMap.put(position, peopleListFragment);
                         return peopleListFragment;
 
-//                        UstadBaseFragment comingSoonFragment =
-//                                ComingSoonFragment.newInstance();
-//                        this.positionMap.put(position, comingSoonFragment);
-//                        return comingSoonFragment;
-//                    case 3:
-//                        UstadBaseFragment csf =
-//                                ComingSoonFragment.newInstance();
-//                        this.positionMap.put(position, csf);
-//                        return csf;
                     default:
                         return null;
                 }
@@ -234,8 +201,18 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
 
         @Override
         public int getCount() {
-            return positionMap.size();
+            //return positionMap.size();
+            return 3;
         }
+    }
+
+    /**
+     * Get color
+     * @param color
+     * @return
+     */
+    public int fetchColor(int color){
+        return ContextCompat.getColor(this, color);
     }
 
 }

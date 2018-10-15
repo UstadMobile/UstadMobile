@@ -125,6 +125,11 @@ public class PersonDetailActivity extends UstadBaseActivity implements PersonDet
     }
 
     @Override
+    public void clearAllFields() {
+        mLinearLayout.removeAllViews();
+    }
+
+    @Override
     public void updateImageOnView(String imagePath){
         Uri profileImage = Uri.fromFile(new File(imagePath));
 

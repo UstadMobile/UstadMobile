@@ -4,6 +4,7 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/fragment_catalog_root"
+    android:paddingBottom="@dimen/bottom_navigation_height"
     tools:context="com.ustadmobile.port.android.view.FeedListFragment">
 
 

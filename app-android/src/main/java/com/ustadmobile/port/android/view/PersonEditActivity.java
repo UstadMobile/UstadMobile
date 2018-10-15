@@ -134,6 +134,11 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
         }
     }
 
+    @Override
+    public void clearAllFields() {
+        mLinearLayout.removeAllViews();
+    }
+
     public void setEditField(long fieldUid, int fieldType, String label, int labelId,
                              String iconName, boolean editMode,
                              LinearLayout thisLinearLayout, Object thisValue){
@@ -389,7 +394,8 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
         File dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
         File output = new File(dir,imageId+"_image.png");
         imagePathFromCamera = output.getAbsolutePath();
-        Uri cameraImage = FileProvider.getUriForFile(this,getPackageName() + ".fileprovider", output);
+        Uri cameraImage = FileProvider.getUriForFile(this,
+                getPackageName() + ".fileprovider", output);
         cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT,cameraImage);
         startActivityForResult(cameraIntent, CAMERA_IMAGE_CAPTURE_REQUEST);
     }
@@ -438,7 +444,7 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
             switch (requestCode){
                 case CAMERA_IMAGE_CAPTURE_REQUEST:
                     System.out.println("SELEditActivity -> onActivityResult");
-                    Bitmap imageBitmap = getCompressedImage(60);
+                    //Bitmap imageBitmap = getCompressedImage(60);
                     //userProfile.setImageBitmap(getCompressedImage(60));
 
                     //TODO: set imagePathFromCamera to Person.
@@ -455,7 +461,8 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
         if (ContextCompat.checkSelfPermission(getApplicationContext(),
                 Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(PersonEditActivity.this,
-                    new String[]{Manifest.permission.CAMERA, Manifest.permission.READ_EXTERNAL_STORAGE}, CAMERA_PERMISSION_REQUEST);
+                    new String[]{Manifest.permission.CAMERA,
+                            Manifest.permission.READ_EXTERNAL_STORAGE}, CAMERA_PERMISSION_REQUEST);
             return;
         }
         startCameraIntent();

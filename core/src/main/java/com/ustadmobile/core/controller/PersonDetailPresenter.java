@@ -184,6 +184,9 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
      * @param person The person that needs to be displayed.
      */
     public void handlePersonDataChanged(Person person) {
+
+        view.clearAllFields();
+
         for(PersonDetailPresenterField field : presenterFields) {
 
             String thisValue = "";
