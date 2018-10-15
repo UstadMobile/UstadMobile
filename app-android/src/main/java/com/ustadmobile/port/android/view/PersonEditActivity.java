@@ -462,7 +462,8 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
                 Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(PersonEditActivity.this,
                     new String[]{Manifest.permission.CAMERA,
-                            Manifest.permission.READ_EXTERNAL_STORAGE}, CAMERA_PERMISSION_REQUEST);
+                            Manifest.permission.READ_EXTERNAL_STORAGE,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE}, CAMERA_PERMISSION_REQUEST);
             return;
         }
         startCameraIntent();
