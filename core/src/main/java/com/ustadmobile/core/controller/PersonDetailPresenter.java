@@ -321,6 +321,7 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
      */
     public void handleClickEdit() {
 
+        view.finish();
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         Hashtable args = new Hashtable();
         args.put(ARG_PERSON_UID, personUid);

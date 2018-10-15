@@ -38,4 +38,6 @@ public interface PersonDetailView extends UstadView {
 
     void clearAllFields();
 
+    void finish();
+
 }

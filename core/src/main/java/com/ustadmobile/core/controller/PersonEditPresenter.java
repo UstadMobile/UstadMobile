@@ -19,10 +19,12 @@ import com.ustadmobile.core.view.PersonDetailViewField;
 import com.ustadmobile.core.view.PersonEditView;
 import com.ustadmobile.lib.db.entities.ClazzWithNumStudents;
 import com.ustadmobile.lib.db.entities.Person;
+import com.ustadmobile.lib.db.entities.PersonCustomFieldValue;
 import com.ustadmobile.lib.db.entities.PersonCustomFieldWithPersonCustomFieldValue;
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField;
 import com.ustadmobile.lib.db.entities.PersonField;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
@@ -78,6 +80,11 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
 
     private String newPersonString = "";
 
+    List<PersonCustomFieldValue> customFieldsToUpdate;
+
+    PersonCustomFieldValueDao personCustomFieldValueDao =
+            UmAppDatabase.getInstance(context).getPersonCustomFieldValueDao();
+
     /**
      * Presenter's constructor where we are getting arguments and setting the newly/editable
      * personUid
@@ -100,6 +107,8 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
         if(arguments.containsKey(ARG_NEW_PERSON)){
             newPersonString = arguments.get(ARG_NEW_PERSON).toString();
         }
+
+        customFieldsToUpdate = new ArrayList<>();
 
     }
 
@@ -378,6 +387,25 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
             updateThisPerson.setAddress((String) value);
 
         } else {
+            System.out.println("Custom field edit.");
+            //This is actually a custom field.
+
+            personCustomFieldValueDao.findCustomFieldByFieldAndPersonAsync(fieldcode,
+                    updateThisPerson.getPersonUid(), new UmCallback<PersonCustomFieldValue>() {
+                @Override
+                public void onSuccess(PersonCustomFieldValue result) {
+                    if(result != null) {
+                        result.setFieldValue(value.toString());
+                        customFieldsToUpdate.add(result);
+                    }
+
+                }
+
+                @Override
+                public void onFailure(Throwable exception) {
+
+                }
+            });
         }
 
         //Update Custom Fields:
@@ -467,8 +495,22 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
 
             @Override
             public void onSuccess(Integer result) {
-                //Close the activity.
-                view.finish();
+
+                //Update the custom fields
+                personCustomFieldValueDao.updateListAsync(customFieldsToUpdate,
+                        new UmCallback<Integer>() {
+                    @Override
+                    public void onSuccess(Integer result) {
+                        //Close the activity.
+                        view.finish();
+                    }
+
+                    @Override
+                    public void onFailure(Throwable exception) {
+
+                    }
+                });
+
             }
 
             @Override

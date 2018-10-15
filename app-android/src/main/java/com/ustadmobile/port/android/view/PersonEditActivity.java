@@ -447,7 +447,7 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
                     //Bitmap imageBitmap = getCompressedImage(60);
                     //userProfile.setImageBitmap(getCompressedImage(60));
 
-                    //TODO: set imagePathFromCamera to Person.
+                    //set imagePathFromCamera to Person.
                     updateImageOnView(imagePathFromCamera);
                     mPresenter.updatePersonPic(imagePathFromCamera);
 
