@@ -14,9 +14,7 @@ import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
@@ -32,6 +30,7 @@ import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
@@ -335,7 +334,9 @@ public abstract class AbstractDbProcessor {
                     implementingClass, (TypeElement)method1.getEnclosingElement(), processingEnv);
             TypeMirror method2ResolvedType = resolveDeclaredType(method2.getParameters().get(0).asType(),
                     implementingClass, (TypeElement)method2.getEnclosingElement(), processingEnv);
-            if(!method1ResolvedType.equals(method2ResolvedType))
+
+            //check if these are the same as far as the method signature is concerned - use toString
+            if(!method1ResolvedType.toString().equals(method2ResolvedType.toString()))
                 return false;
         }
 
@@ -407,7 +408,7 @@ public abstract class AbstractDbProcessor {
     /**
      * Resolve a type variable
      *
-     * @param typeVariableMirror The TypeMirror that might contain a type variable e.g. T
+     * @param variableMirror The TypeMirror that might contain a type variable e.g. T
      * @param childTypeEl the class which should implement a method with the type name resolved e.g.
      *                    the DAO class.
      * @param parentTypeEl the typed class which contains a type parameter e.g. an interface being
@@ -417,19 +418,54 @@ public abstract class AbstractDbProcessor {
      * @return The resolved TypeMirror as above if typeVariableMirror is a type variable, otherwise
      * return the typeVariableMirror unchanged.
      */
-    protected static TypeMirror resolveDeclaredType(TypeMirror typeVariableMirror, TypeElement childTypeEl,
+    protected static TypeMirror resolveDeclaredType(TypeMirror variableMirror, TypeElement childTypeEl,
                                              TypeElement parentTypeEl,
                                              ProcessingEnvironment processingEnv) {
-        //TODO: check if it's declaredtype, and if that contains typevar
 
-        if(!typeVariableMirror.getKind().equals(TypeKind.TYPEVAR))
-            return typeVariableMirror;
 
-        TypeVariable typeVariable = (TypeVariable)typeVariableMirror;
-        DeclaredType declaredType = findDeclaredType(childTypeEl, parentTypeEl, processingEnv);
+        if(variableMirror.getKind().equals(TypeKind.DECLARED)){
+            DeclaredType dt = (DeclaredType)variableMirror;
+            TypeMirror[] typeMirrors = new TypeMirror[dt.getTypeArguments().size()];
+            boolean declaredTypeArgumentsResolved = false;
+            for(int i = 0; i < dt.getTypeArguments().size(); i++) {
+                if(dt.getTypeArguments().get(i).getKind().equals(TypeKind.TYPEVAR)) {
+                    declaredTypeArgumentsResolved = true;
+                    typeMirrors[i] = resolveTypeVariable((TypeVariable) dt.getTypeArguments().get(i),
+                            childTypeEl, parentTypeEl, processingEnv);
+                }else {
+                    typeMirrors[i] = dt.getTypeArguments().get(i);
+                }
+            }
+
+            if(declaredTypeArgumentsResolved)
+                variableMirror = processingEnv.getTypeUtils().getDeclaredType(
+                    (TypeElement)processingEnv.getTypeUtils().asElement(variableMirror), typeMirrors);
+        }else if(variableMirror.getKind().equals(TypeKind.ARRAY)
+                && ((ArrayType)variableMirror).getComponentType().getKind().equals(TypeKind.TYPEVAR)) {
+            TypeVariable arrayCompTypeVariable = (TypeVariable)((ArrayType)variableMirror)
+                    .getComponentType();
+            variableMirror = processingEnv.getTypeUtils().getArrayType(
+                    resolveTypeVariable(arrayCompTypeVariable, childTypeEl, parentTypeEl,
+                            processingEnv));
+        }
+
+
+        if(variableMirror.getKind().equals(TypeKind.TYPEVAR)) {
+            variableMirror = resolveTypeVariable((TypeVariable)variableMirror, childTypeEl,
+                    parentTypeEl, processingEnv);
+        }
+
+        return variableMirror;
+    }
+
+    protected static TypeMirror resolveTypeVariable(TypeVariable typeVariable,
+                                                    TypeElement implementingClassParent,
+                                                    TypeElement classWithType,
+                                                    ProcessingEnvironment processingEnv) {
+        DeclaredType declaredType = findDeclaredType(implementingClassParent, classWithType, processingEnv);
 
         if(declaredType != null) {
-            List<? extends TypeParameterElement> parameterElements = parentTypeEl.getTypeParameters();
+            List<? extends TypeParameterElement> parameterElements = classWithType.getTypeParameters();
             for(int i = 0; i < parameterElements.size(); i++) {
                 if(parameterElements.get(i).getSimpleName().equals(typeVariable.asElement().getSimpleName())) {
                     return declaredType.getTypeArguments().get(i);
@@ -437,7 +473,7 @@ public abstract class AbstractDbProcessor {
             }
         }
 
-        return typeVariableMirror;
+        return typeVariable;
     }
 
     /**
@@ -467,12 +503,8 @@ public abstract class AbstractDbProcessor {
 
         for(VariableElement variableElement : method.getParameters()) {
             TypeMirror varTypeMirror = variableElement.asType();
-            if(variableElement.asType().getKind().equals(TypeKind.TYPEVAR)) {
-                TypeMirror resolvedType = resolveDeclaredType((TypeVariable)variableElement.asType(),
-                        childClass, (TypeElement)method.getEnclosingElement(), processingEnv);
-                if(resolvedType != null)
-                    varTypeMirror = resolvedType;
-            }
+            varTypeMirror = resolveDeclaredType(varTypeMirror, childClass,
+                    (TypeElement)method.getEnclosingElement(), processingEnv);
 
             ParameterSpec.Builder paramSpec = ParameterSpec.builder(TypeName.get(varTypeMirror),
                     variableElement.getSimpleName().toString());
