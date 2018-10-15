@@ -2,6 +2,7 @@ package com.ustadmobile.core.db.dao;
 
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.lib.database.annotation.UmInsert;
+import com.ustadmobile.lib.database.annotation.UmQueryFindByPrimaryKey;
 
 /**
  * Represents the minimal functionality that a DAO is expected to provide
@@ -35,6 +36,7 @@ public interface BaseDao<T> {
      * @param uid uid to find
      * @return the object represented by the primary key, or null if there is no such object
      */
+    @UmQueryFindByPrimaryKey
     T findByUid(long uid);
 
 }
