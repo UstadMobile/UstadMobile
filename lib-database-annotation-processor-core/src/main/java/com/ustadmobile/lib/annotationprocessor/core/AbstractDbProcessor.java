@@ -541,6 +541,13 @@ public abstract class AbstractDbProcessor {
         DaoMethodInfo daoMethodInfo = new DaoMethodInfo(daoMethod, daoType, processingEnv);
         TypeElement entityTypeEl = (TypeElement)daoMethodInfo.resolveResultAsElement();
         VariableElement primaryKeyEl = findPrimaryKey(entityTypeEl);
+        if(primaryKeyEl == null) {
+            messager.printMessage(Diagnostic.Kind.ERROR,
+                    "Error generating find by primary key sql method: no primary key found " +
+                    ": DAO class " + daoType.getQualifiedName() + "method: " +
+                            formatMethodForErrorMessage(daoMethod));
+            return "";
+        }
         return "SELECT * FROM " + identifierQuoteChar + entityTypeEl.getSimpleName() +
                 identifierQuoteChar + " WHERE " + identifierQuoteChar +
                 primaryKeyEl.getSimpleName() + identifierQuoteChar + " = :" +
@@ -556,6 +563,10 @@ public abstract class AbstractDbProcessor {
         return null;
     }
 
+    protected String formatMethodForErrorMessage(ExecutableElement element) {
+        return ((TypeElement)element.getEnclosingElement()).getQualifiedName() + "." +
+                element.getSimpleName();
+    }
 
 
 

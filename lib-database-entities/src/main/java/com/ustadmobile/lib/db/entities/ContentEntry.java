@@ -19,7 +19,7 @@ public class ContentEntry {
 
     public static final int LICENSE_TYPE_CC_BY_SA_NC = 3;
 
-    @UmPrimaryKey
+    @UmPrimaryKey(autoIncrement = true)
     private long contentEntryUid;
 
     private String title;
@@ -39,6 +39,8 @@ public class ContentEntry {
     private String licenseName;
 
     private String licenseUrl;
+
+    private String sourceUrl;
 
     public long getContentEntryUid() {
         return contentEntryUid;
@@ -118,5 +120,13 @@ public class ContentEntry {
 
     public void setLicenseUrl(String licenseUrl) {
         this.licenseUrl = licenseUrl;
+    }
+
+    public String getSourceUrl() {
+        return sourceUrl;
+    }
+
+    public void setSourceUrl(String sourceUrl) {
+        this.sourceUrl = sourceUrl;
     }
 }
