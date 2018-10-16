@@ -11,7 +11,7 @@ import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 @UmEntity
 public class ContentEntryContentEntryFileJoin {
 
-    @UmPrimaryKey
+    @UmPrimaryKey(autoIncrement = true)
     private long cecefjUid;
 
     private long cecefjContentEntryUid;

@@ -4,6 +4,8 @@ import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQueryFindByPrimaryKey;
 
+import java.util.List;
+
 /**
  * Represents the minimal functionality that a DAO is expected to provide
  *
@@ -29,6 +31,9 @@ public interface BaseDao<T> {
      */
     @UmInsert
     void insertAsync(T entity, UmCallback<Long> result);
+
+    @UmInsert
+    void insertList(List<T> entityList);
 
     /**
      * Find the given entity by the primary key

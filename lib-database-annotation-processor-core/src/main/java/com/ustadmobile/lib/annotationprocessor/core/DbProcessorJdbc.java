@@ -1680,10 +1680,7 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
         return null;
     }
 
-    private String formatMethodForErrorMessage(ExecutableElement element) {
-        return ((TypeElement)element.getEnclosingElement()).getQualifiedName() + "." +
-            element.getSimpleName();
-    }
+
 
     @Override
     protected void onDone() {

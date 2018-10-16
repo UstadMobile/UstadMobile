@@ -4,7 +4,12 @@ import com.ustadmobile.core.db.dao.ClazzDao;
 import com.ustadmobile.core.db.dao.ClazzMemberDao;
 import com.ustadmobile.core.db.dao.ContainerFileDao;
 import com.ustadmobile.core.db.dao.ContainerFileEntryDao;
+import com.ustadmobile.core.db.dao.ContentEntryContentCategoryJoinDao;
+import com.ustadmobile.core.db.dao.ContentEntryContentEntryFileJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryDao;
+import com.ustadmobile.core.db.dao.ContentEntryFileDao;
+import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
+import com.ustadmobile.core.db.dao.ContentEntryRelatedEntryJoinDao;
 import com.ustadmobile.core.db.dao.CrawJoblItemDao;
 import com.ustadmobile.core.db.dao.CrawlJobDao;
 import com.ustadmobile.core.db.dao.DownloadJobDao;
@@ -32,6 +37,11 @@ import com.ustadmobile.lib.db.entities.ClazzMember;
 import com.ustadmobile.lib.db.entities.ContainerFile;
 import com.ustadmobile.lib.db.entities.ContainerFileEntry;
 import com.ustadmobile.lib.db.entities.ContentEntry;
+import com.ustadmobile.lib.db.entities.ContentEntryContentCategoryJoin;
+import com.ustadmobile.lib.db.entities.ContentEntryContentEntryFileJoin;
+import com.ustadmobile.lib.db.entities.ContentEntryFile;
+import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin;
+import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoin;
 import com.ustadmobile.lib.db.entities.CrawlJob;
 import com.ustadmobile.lib.db.entities.CrawlJobItem;
 import com.ustadmobile.lib.db.entities.DownloadJob;
@@ -58,8 +68,11 @@ import com.ustadmobile.lib.db.entities.PersonCustomFieldValue;
         DownloadJobItemHistory.class, CrawlJob.class, CrawlJobItem.class,
         OpdsEntryStatusCache.class, OpdsEntryStatusCacheAncestor.class,
         HttpCachedEntry.class, DownloadJob.class, DownloadJobItem.class,
-        Person.class, Clazz.class, ClazzMember.class, ContentEntry.class,
-        PersonCustomField.class, PersonCustomFieldValue.class
+        Person.class, Clazz.class, ClazzMember.class,
+        PersonCustomField.class, PersonCustomFieldValue.class,
+        ContentEntry.class, ContentEntryContentCategoryJoin.class,
+        ContentEntryContentEntryFileJoin.class, ContentEntryFile.class,
+        ContentEntryParentChildJoin.class, ContentEntryRelatedEntryJoin.class
 })
 public abstract class UmAppDatabase{
 
@@ -135,6 +148,16 @@ public abstract class UmAppDatabase{
     public abstract PersonCustomFieldValueDao getPersonCustomFieldValueDao();
 
     public abstract ContentEntryDao getContentEntryDao();
+
+    public abstract ContentEntryContentCategoryJoinDao getContentEntryContentCategoryJoinDao();
+
+    public abstract ContentEntryContentEntryFileJoinDao getContentEntryContentEntryFileJoinDao();
+
+    public abstract ContentEntryFileDao getContentEntryFileDao();
+
+    public abstract ContentEntryParentChildJoinDao getContentEntryParentChildJoinDao();
+
+    public abstract ContentEntryRelatedEntryJoinDao getContentEntryRelatedEntryJoinDao();
 
     @UmDbContext
     public abstract Object getContext();
