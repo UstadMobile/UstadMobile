@@ -4,6 +4,8 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.ContentEntryDao;
+import com.ustadmobile.core.db.dao.ContentEntryFileDao;
+import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.ScraperConstants;
 import com.ustadmobile.lib.db.entities.ContentEntry;
@@ -54,12 +56,12 @@ import static com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING;
  */
 public class IndexEdraakK12Content {
 
-    private List<ContentEntry> contentEntryList;
-    private List<OpdsEntryParentToChildJoin> parentToChildJoins;
     private URL url;
     private File destinationDirectory;
     private ContentResponse response;
     private ContentEntryDao contentEntryDao;
+    private ContentEntryParentChildJoinDao contentParentChildJoinDao;
+    private ContentEntryFileDao contenEntryFileDao;
 
 
     public static void main(String[] args) {
@@ -94,6 +96,8 @@ public class IndexEdraakK12Content {
 
         UmAppDatabase db = UmAppDatabase.getInstance(null);
         contentEntryDao = db.getContentEntryDao();
+        contentParentChildJoinDao = db.getContentEntryParentChildJoinDao();
+        contenEntryFileDao = db.getContentEntryFileDao();
 
         try {
             URLConnection connection = url.openConnection();
@@ -103,28 +107,23 @@ public class IndexEdraakK12Content {
             throw new IllegalArgumentException("JSON INVALID", e.getCause());
         }
 
-        contentEntryList = new ArrayList<>();
-        parentToChildJoins = new ArrayList<>();
 
         ContentEntry edraakParentEntry = new ContentEntry();
         edraakParentEntry.setEntryId("https://www.edraak.org/k12/");
         edraakParentEntry.setTitle("Edraak K12");
         long edraakUUid = contentEntryDao.insert(edraakParentEntry);
+        edraakParentEntry.setContentEntryUid(edraakUUid);
 
         ContentEntry parentEntry = new ContentEntry();
         parentEntry.setEntryId(urlString.substring(0, urlString.indexOf("component/")) + response.id);
         parentEntry.setTitle(response.title);
         long parentUuid = contentEntryDao.insert(parentEntry);
+        parentEntry.setContentEntryUid(parentUuid);
 
         ContentEntryParentChildJoin edraakParentJoin = new ContentEntryParentChildJoin();
         edraakParentJoin.setCepcjParentContentEntryUid(edraakUUid);
         edraakParentJoin.setCepcjChildContentEntryUid(parentUuid);
-
-        //OpdsEntryParentToChildJoin join = new OpdsEntryParentToChildJoin(edraakEntry.getUuid(),
-       //         parentEntry.getUuid(), 0);
-
-       // parentToChildJoins.add(join);
-        // TODO missing adding to join doa
+        edraakParentJoin.setCepcjUid(contentParentChildJoinDao.insert(edraakParentJoin));
 
         findImportedComponent(response, parentEntry);
 
@@ -151,8 +150,7 @@ public class IndexEdraakK12Content {
                 contentEntryFile.setFileSize(content.length());
                 contentEntryFile.setLastModified(content.lastModified());
                 contentEntryFile.setMd5sum(md5);
-
-                // TODO missing adding to contentfile doa
+                contentEntryFile.setContentEntryFileUid(contenEntryFileDao.insert(contentEntryFile));
 
             } catch (Exception e) {
                 System.err.println(e.getCause());
@@ -167,14 +165,13 @@ public class IndexEdraakK12Content {
                 childEntry.setEntryId(url.toString().substring(0, url.toString().indexOf("component/")) + children.id);
                 childEntry.setTitle(children.title);
                 long childUuid = contentEntryDao.insert(childEntry);
+                childEntry.setContentEntryUid(childUuid);
 
                 ContentEntryParentChildJoin edraakParentJoin = new ContentEntryParentChildJoin();
                 edraakParentJoin.setCepcjParentContentEntryUid(parentEntry.getContentEntryUid());
                 edraakParentJoin.setCepcjChildContentEntryUid(childUuid);
+                edraakParentJoin.setCepcjUid(contentParentChildJoinDao.insert(edraakParentJoin));
                 edraakParentJoin.setChildIndex(children.child_index);
-
-               // parentToChildJoins.add(join);
-                // TODO missing adding to join doa
 
                 findImportedComponent(children, childEntry);
 
