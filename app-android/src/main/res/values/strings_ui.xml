@@ -340,6 +340,7 @@ This is the one you should be editing. The one in /core/locale/main/values/strin
     <string name="sel_recognition_student_recognizes">Student recognizes their classmates</string>
     <string name="add_person">Add Person</string>
     <string name="update_picture">Update picture</string>
+    <string name="add_class">Add Class</string>
 
 
 

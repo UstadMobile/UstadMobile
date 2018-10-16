@@ -70,13 +70,15 @@ public class PeopleListPresenter
             public void onSuccess(Long result) {
 
                 //Also create null Custom Field values so it shows up in the Edit screen.
-                personFieldDao.findAllCustomFields(CUSTOM_FIELD_MIN_UID, new UmCallback<List<PersonField>>() {
+                personFieldDao.findAllCustomFields(CUSTOM_FIELD_MIN_UID,
+                        new UmCallback<List<PersonField>>() {
                     @Override
                     public void onSuccess(List<PersonField> allCustomFields) {
 
                         for (PersonField everyCustomField:allCustomFields){
                             PersonCustomFieldValue cfv = new PersonCustomFieldValue();
-                            cfv.setPersonCustomFieldValuePersonCustomFieldUid(everyCustomField.getPersonCustomFieldUid());
+                            cfv.setPersonCustomFieldValuePersonCustomFieldUid(
+                                    everyCustomField.getPersonCustomFieldUid());
                             cfv.setPersonCustomFieldValuePersonUid(result);
                             cfv.setPersonCustomFieldValueUid(customFieldValueDao.insert(cfv));
                         }

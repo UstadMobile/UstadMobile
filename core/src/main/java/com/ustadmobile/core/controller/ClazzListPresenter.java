@@ -2,9 +2,12 @@ package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmProvider;
+import com.ustadmobile.core.db.dao.ClazzDao;
+import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.ClassDetailView;
 import com.ustadmobile.core.view.ClassLogDetailView;
+import com.ustadmobile.core.view.ClazzEditView;
 import com.ustadmobile.core.view.ClazzListView;
 import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.ClazzWithNumStudents;
@@ -68,6 +71,33 @@ public class ClazzListPresenter extends UstadBaseController<ClazzListView> {
         args.put(ARG_CLAZZ_UID, clazzUid);
         args.put(ARG_LOGDATE, System.currentTimeMillis());
         impl.go(ClassLogDetailView.VIEW_NAME, args, view.getContext());
+    }
+
+
+    public void handleClickPrimaryActionButton(){
+        //Goes to ClazzEditActivity with currentClazzUid passed as argument
+
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        Clazz  newClazz = new Clazz();
+        ClazzDao clazzDao = UmAppDatabase.getInstance(context).getClazzDao();
+
+
+        clazzDao.insertAsync(newClazz, new UmCallback<Long>() {
+            @Override
+            public void onSuccess(Long result) {
+                Hashtable args = new Hashtable();
+                args.put(ARG_CLAZZ_UID, result);
+                impl.go(ClazzEditView.VIEW_NAME, args, view.getContext());
+            }
+
+            @Override
+            public void onFailure(Throwable exception) {
+
+            }
+        });
+
+
+
     }
 
     @Override

@@ -28,6 +28,8 @@ import com.ustadmobile.core.view.ClazzListView;
 import com.ustadmobile.lib.db.entities.ClazzWithNumStudents;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
+import ru.dimorinny.floatingtextbutton.FloatingTextButton;
+
 /**
  * ClazzListFragment Android fragment extends UstadBaseFragment
  */
@@ -169,6 +171,9 @@ public class ClazzListFragment extends UstadBaseFragment implements ClazzListVie
         mPresenter = new ClazzListPresenter(this,
                 UMAndroidUtil.bundleToHashtable(getArguments()), this);
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
+
+        FloatingTextButton fab = rootContainer.findViewById(R.id.fragment_clazz_list_fab);
+        fab.setOnClickListener(v -> mPresenter.handleClickPrimaryActionButton());
 
         //return container
         return rootContainer;
