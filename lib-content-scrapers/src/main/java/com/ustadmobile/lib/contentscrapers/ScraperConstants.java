@@ -107,6 +107,10 @@ public class ScraperConstants {
     public static final String INDEX_HTML = "index.html";
     public static final String JQUERY_JS = "jquery-3.3.1.min.js";
 
+    public static final String MIMETYPE_ZIP = "application/zip";
+    public static final String ZIP_EXT = ".zip";
+
+
     public enum QUESTION_TYPE{
 
         MULTI_CHOICE("multiple-choice"),

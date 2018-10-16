@@ -4,9 +4,7 @@ import com.ustadmobile.lib.contentscrapers.africanbooks.AsbScraper;
 import com.ustadmobile.lib.contentscrapers.ddl.DdlContentScraper;
 import com.ustadmobile.lib.contentscrapers.ddl.IndexDdlContent;
 import com.ustadmobile.lib.contentscrapers.prathambooks.IndexPrathamContentScraper;
-import java.net.URL;
 
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Test;
