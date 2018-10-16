@@ -44,6 +44,8 @@ public class ContentEntry {
 
     private String sourceUrl;
 
+    private long lastModified;
+
     public long getContentEntryUid() {
         return contentEntryUid;
     }
@@ -184,5 +186,13 @@ public class ContentEntry {
      */
     public void setSourceUrl(String sourceUrl) {
         this.sourceUrl = sourceUrl;
+    }
+
+    public long getLastModified() {
+        return lastModified;
+    }
+
+    public void setLastModified(long lastModified) {
+        this.lastModified = lastModified;
     }
 }
