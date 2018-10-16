@@ -111,6 +111,8 @@ public class IndexEdraakK12Content {
         ContentEntry edraakParentEntry = new ContentEntry();
         edraakParentEntry.setEntryId("https://www.edraak.org/k12/");
         edraakParentEntry.setTitle("Edraak K12");
+        edraakParentEntry.setSourceUrl("https://www.edraak.org/k12/");
+        edraakParentEntry.setPrimaryLanguage(ScraperConstants.ARABIC_LANG_CODE);
         long edraakUUid = contentEntryDao.insert(edraakParentEntry);
         edraakParentEntry.setContentEntryUid(edraakUUid);
 

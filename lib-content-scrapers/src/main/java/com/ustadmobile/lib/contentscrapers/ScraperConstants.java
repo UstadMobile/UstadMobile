@@ -108,7 +108,11 @@ public class ScraperConstants {
     public static final String JQUERY_JS = "jquery-3.3.1.min.js";
 
     public static final String MIMETYPE_ZIP = "application/zip";
+
     public static final String ZIP_EXT = ".zip";
+
+    public static final String ARABIC_LANG_CODE = "ar";
+
 
 
     public enum QUESTION_TYPE{
