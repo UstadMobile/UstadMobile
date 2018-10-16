@@ -39,6 +39,7 @@ import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
 
 import static com.ustadmobile.lib.annotationprocessor.core.DbProcessorCore.OPT_JDBC_OUTPUT;
+import static com.ustadmobile.lib.annotationprocessor.core.DbProcessorCore.OPT_NO_DEFAULT_FACTORY;
 import static com.ustadmobile.lib.annotationprocessor.core.DbProcessorCore.OPT_ROOM_OUTPUT;
 
 /**
@@ -46,12 +47,14 @@ import static com.ustadmobile.lib.annotationprocessor.core.DbProcessorCore.OPT_R
  * processors for each implementation to be generated.
  */
 
-@SupportedOptions({OPT_ROOM_OUTPUT, OPT_JDBC_OUTPUT})
+@SupportedOptions({OPT_ROOM_OUTPUT, OPT_JDBC_OUTPUT, OPT_NO_DEFAULT_FACTORY})
 public class DbProcessorCore extends AbstractProcessor{
 
     public static final String OPT_ROOM_OUTPUT = "umdb_room_out";
 
     public static final String OPT_JDBC_OUTPUT = "umdb_jdbc_out";
+
+    public static final String OPT_NO_DEFAULT_FACTORY = "umdb_no_default_factory";
 
     private Messager messager;
 
@@ -88,16 +91,24 @@ public class DbProcessorCore extends AbstractProcessor{
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnvironment) {
-        String roomOut = processingEnv.getOptions().get(OPT_ROOM_OUTPUT);
-        messager.printMessage(Diagnostic.Kind.NOTE, "Room out dir: " + roomOut);
-
         Set<? extends Element> daoSet = roundEnvironment.getElementsAnnotatedWith(UmDao.class);
+        String defaultFactoryArg = processingEnv.getOptions().get(OPT_NO_DEFAULT_FACTORY);
+        if(defaultFactoryArg == null || !Boolean.parseBoolean(defaultFactoryArg)) {
+            makeDefaultFactoryClass(roundEnvironment);
+        }
 
+        boolean result = dbProcessorRoom.process(annotations, roundEnvironment);
+        result &= dbProcessorJdbc.process(annotations, roundEnvironment);
+
+        return result;
+    }
+
+    private void makeDefaultFactoryClass(RoundEnvironment roundEnvironment) {
         //Generate core factory method
         for(Element daoClassElement : roundEnvironment.getElementsAnnotatedWith(UmDatabase.class)) {
             TypeSpec.Builder factoryClassBuilder =
                     TypeSpec.classBuilder(daoClassElement.getSimpleName().toString() + "_Factory")
-                    .addModifiers(Modifier.PUBLIC);
+                            .addModifiers(Modifier.PUBLIC);
             PackageElement packageElement = processingEnv.getElementUtils().getPackageOf(daoClassElement);
 
             MethodSpec.Builder makeMethodSpec = MethodSpec.methodBuilder(
@@ -123,11 +134,6 @@ public class DbProcessorCore extends AbstractProcessor{
                         + ioe.getMessage());
             }
         }
-
-        boolean result = dbProcessorRoom.process(annotations, roundEnvironment);
-        result &= dbProcessorJdbc.process(annotations, roundEnvironment);
-
-        return result;
     }
 
 }

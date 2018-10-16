@@ -3,7 +3,7 @@ package com.ustadmobile.core.controller;
 /**
  * Created by mike on 8/3/17.
  */
-
+@Deprecated
 public interface ControllerLifecycleListener {
 
     void onStarted(UstadBaseController controller);
