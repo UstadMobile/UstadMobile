@@ -67,6 +67,7 @@ ext {
 
     version_android_ahbottomnavigation = "2.1.0"
     version_android_floating_text_button = "0.0.4"
+    version_compressor = "2.1.0"
 }
 
 ext.buildConfigProperties = new Properties()

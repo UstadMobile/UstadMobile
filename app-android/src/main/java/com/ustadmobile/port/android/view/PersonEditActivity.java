@@ -50,6 +50,7 @@ import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMCalendarUtil;
+import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.view.PersonDetailViewField;
 import com.ustadmobile.core.view.PersonEditView;
 import com.ustadmobile.lib.db.entities.ClazzWithNumStudents;
@@ -58,7 +59,13 @@ import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Calendar;
+
+import id.zelory.compressor.Compressor;
 
 import static com.ustadmobile.core.view.PersonDetailViewField.FIELD_TYPE_DATE;
 import static com.ustadmobile.core.view.PersonDetailViewField.FIELD_TYPE_DROPDOWN;
@@ -203,7 +210,8 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
                     addPersonToClazzHL.setOrientation(LinearLayout.HORIZONTAL);
 
                     //Add the icon
-                    int addIconResId = getResourceId(ADD_PERSON_ICON, "drawable", getPackageName());
+                    int addIconResId = getResourceId(ADD_PERSON_ICON,
+                            "drawable", getPackageName());
                     ImageView addIcon = new ImageView(this);
                     addIcon.setImageResource(addIconResId);
                     addIcon.setPadding(DEFAULT_PADDING,0,DEFAULT_TEXT_PADDING_RIGHT,0);
@@ -214,7 +222,8 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
                     addPersonButton.setIncludeFontPadding(false);
                     addPersonButton.setMinHeight(0);
                     //addPersonButton.setLayoutParams(buttonLayout);
-                    addPersonButton.setText(impl.getString(MessageID.add_person_to_class, getContext()));
+                    addPersonButton.setText(impl.getString(MessageID.add_person_to_class,
+                            getContext()));
                     addPersonButton.setBackground(null);
                     addPersonButton.setPadding(DEFAULT_PADDING, 0, 0, 0);
                     addPersonButton.setOnClickListener(v -> mPresenter.handleClickAddNewClazz());
@@ -282,7 +291,8 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
 
                     et.setFocusable(false);
 
-                    et.setOnClickListener(v -> new DatePickerDialog(PersonEditActivity.this, date, myCalendar
+                    et.setOnClickListener(v -> new DatePickerDialog(
+                            PersonEditActivity.this, date, myCalendar
                             .get(Calendar.YEAR), myCalendar.get(Calendar.MONTH),
                             myCalendar.get(Calendar.DAY_OF_MONTH)).show());
 
@@ -295,11 +305,13 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
                 if(fieldType != FIELD_TYPE_DATE){
                     et.addTextChangedListener(new TextWatcher() {
                         @Override
-                        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                        public void beforeTextChanged(CharSequence s, int start,
+                                                      int count, int after) {
                         }
 
                         @Override
-                        public void onTextChanged(CharSequence s, int start, int before, int count) {
+                        public void onTextChanged(CharSequence s, int start,
+                                                  int before, int count) {
                         }
 
                         @Override
@@ -342,7 +354,8 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle item selection
         int i = item.getItemId();
-        if (i == R.id.menu_catalog_entry_presenter_share) {//If this activity started from other activity
+        //If this activity started from other activity
+        if (i == R.id.menu_catalog_entry_presenter_share) {
             mPresenter.handleClickDone();
 
             return super.onOptionsItemSelected(item);
@@ -387,7 +400,6 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
-
     private void startCameraIntent(){
         String imageId = String.valueOf(System.currentTimeMillis());
         Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
@@ -427,6 +439,23 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
                 true);
     }
 
+    public void compressImage() {
+        File imageFile = new File(imagePathFromCamera);
+        try {
+            Compressor c = new Compressor(this);
+            c.setDestinationDirectoryPath(imageFile.getPath() + "_" + imageFile.getName() );
+
+            File compressedImageFile = c.compressToFile(imageFile);
+            imageFile.delete();
+            imagePathFromCamera = compressedImageFile.getAbsolutePath();
+
+            int x = 0;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        int x;
+    }
+
     @Override
     public void updateImageOnView(String imagePath){
         Uri profileImage = Uri.fromFile(new File(imagePath));
@@ -446,6 +475,9 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
                     System.out.println("SELEditActivity -> onActivityResult");
                     //Bitmap imageBitmap = getCompressedImage(60);
                     //userProfile.setImageBitmap(getCompressedImage(60));
+
+                    //Copress the image:
+                    compressImage();
 
                     //set imagePathFromCamera to Person.
                     updateImageOnView(imagePathFromCamera);
