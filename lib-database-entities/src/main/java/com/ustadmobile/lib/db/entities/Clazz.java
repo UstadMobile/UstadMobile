@@ -11,11 +11,44 @@ public class Clazz implements SyncableEntity{
 
     private String clazzName;
 
+    private String clazzDesc;
+
     private long masterChangeSeqNum;
 
     private long localChangeSeqNum;
 
     private float attendanceAverage;
+
+    //Gives the Holiday calendar Uid
+    private long clazzHolidayUMCalendarUid;
+
+    //Gives the schedule calendar ui
+    private long clazzScheuleUMCalendarUid;
+
+
+    public String getClazzDesc() {
+        return clazzDesc;
+    }
+
+    public void setClazzDesc(String clazzDesc) {
+        this.clazzDesc = clazzDesc;
+    }
+
+    public long getClazzHolidayUMCalendarUid() {
+        return clazzHolidayUMCalendarUid;
+    }
+
+    public void setClazzHolidayUMCalendarUid(long clazzHolidayUMCalendarUid) {
+        this.clazzHolidayUMCalendarUid = clazzHolidayUMCalendarUid;
+    }
+
+    public long getClazzScheuleUMCalendarUid() {
+        return clazzScheuleUMCalendarUid;
+    }
+
+    public void setClazzScheuleUMCalendarUid(long clazzScheuleUMCalendarUid) {
+        this.clazzScheuleUMCalendarUid = clazzScheuleUMCalendarUid;
+    }
 
     public float getAttendanceAverage() {
         return attendanceAverage;

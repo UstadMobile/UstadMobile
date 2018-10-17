@@ -172,7 +172,6 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
             }
         });
 
-        //personLiveData.observe(this, this::handlePersonValueChanged);
     }
 
     public void updatePersonPic(String picPath){
@@ -204,11 +203,12 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
         });
     }
 
+    /**
+     * Generates live data for Clazz list to be assigned to the current Person being edited.
+     */
     public void generateAssignedClazzesLiveData(){
         ClazzDao clazzDao = UmAppDatabase.getInstance(context).getClazzDao();
-
         assignedClazzes = clazzDao.findAllClazzesByPersonUid(personUid);
-
         view.setClazzListProvider(assignedClazzes);
     }
 
@@ -418,6 +418,7 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
 
     /**
      * This method tells the View what to show. It will set every field item to the view.
+     * The Live Data handler calls this method when the data (via Live data) is updated.
      *
      * @param person The person that needs to be displayed.
      */
@@ -468,6 +469,7 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
      * Handle discarding the edits done so far when leaving the activity / clicking discard.
      */
     public void handleClickDiscardChanges(){
+        //TODO:  Make use of this method?
         //Update dao with mOriginalValuePerson
         personDao.insert(mOriginalValuePerson);
 

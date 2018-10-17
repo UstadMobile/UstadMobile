@@ -42,12 +42,7 @@ public class ClazzEditActivity extends UstadBaseActivity implements ClazzEditVie
         toolbar = findViewById(R.id.activity_clazz_edit_toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
-        //Recycler View:
-        mRecyclerView = (RecyclerView) findViewById(
-                R.id.activity_clazz_edit_recyclerview);
-        mRecyclerLayoutManager = new LinearLayoutManager(getApplicationContext());
-        mRecyclerView.setLayoutManager(mRecyclerLayoutManager);
+        
 
         //Call the Presenter
         mPresenter = new ClazzEditPresenter(this,
@@ -55,9 +50,8 @@ public class ClazzEditActivity extends UstadBaseActivity implements ClazzEditVie
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
 
         //FAB and its listener
-        //eg:
-        //FloatingTextButton fab = findViewById(R.id.activity_clazz_edit_fab);
-        //fab.setOnClickListener(v -> mPresenter.handleClickPrimaryActionButton(-1));
+//        FloatingTextButton fab = findViewById(R.id.activity_clazz_edit_fab);
+//        fab.setOnClickListener(v -> mPresenter.handleClickPrimaryActionButton(-1));
 
 
     }

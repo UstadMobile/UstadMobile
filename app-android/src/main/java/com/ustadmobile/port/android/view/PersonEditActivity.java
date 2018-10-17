@@ -50,7 +50,6 @@ import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMCalendarUtil;
-import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.view.PersonDetailViewField;
 import com.ustadmobile.core.view.PersonEditView;
 import com.ustadmobile.lib.db.entities.ClazzWithNumStudents;
@@ -60,9 +59,6 @@ import com.ustadmobile.port.android.util.UMAndroidUtil;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Calendar;
 
 import id.zelory.compressor.Compressor;
@@ -449,11 +445,9 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
             imageFile.delete();
             imagePathFromCamera = compressedImageFile.getAbsolutePath();
 
-            int x = 0;
         } catch (IOException e) {
             e.printStackTrace();
         }
-        int x;
     }
 
     @Override
@@ -472,9 +466,6 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
         if(resultCode == RESULT_OK){
             switch (requestCode){
                 case CAMERA_IMAGE_CAPTURE_REQUEST:
-                    System.out.println("SELEditActivity -> onActivityResult");
-                    //Bitmap imageBitmap = getCompressedImage(60);
-                    //userProfile.setImageBitmap(getCompressedImage(60));
 
                     //Copress the image:
                     compressImage();
