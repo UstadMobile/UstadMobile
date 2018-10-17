@@ -11,6 +11,10 @@ public class DownloadJobItemWithDownloadSetItem extends DownloadJobItem {
         super(downloadSetItemId, downloadJobId);
     }
 
+    public DownloadJobItemWithDownloadSetItem() {
+
+    }
+
     @UmEmbedded
     private DownloadSetItem downloadSetItem;
 

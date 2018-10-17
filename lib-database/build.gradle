@@ -1,11 +1,16 @@
 apply plugin: 'java-library'
+apply plugin: "maven-publish"
+
 
 compileJava {
     /*
      *  Annotation processor arguments:
      *   umdb_room_out - Destination directory for the generated room version of database and DAO classes
      */
-    options.compilerArgs += ["-Aumdb_room_out=" + rootProject.file("lib-database-android/build/generated/source/umdbprocessor").getAbsolutePath()]
+    options.compilerArgs += [
+            "-Aumdb_room_out=" + rootProject.file("lib-database-android/build/generated/source/umdbprocessor").getAbsolutePath(),
+            "-Aumdb_jdbc_out=" + rootProject.file("lib-database-jdbc/build/generated/source/umdbprocessor").getAbsolutePath()
+    ]
 }
 
 jar {
@@ -21,5 +26,32 @@ dependencies {
     annotationProcessor project(":lib-database-annotation-processor-core")
 }
 
+task sourceJar(type: Jar) {
+    from sourceSets.main.allJava
+}
+
+
 sourceCompatibility = "1.8"
 targetCompatibility = "1.8"
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId rootProject.group
+            artifactId project.name
+            version rootProject.version
+
+            from components.java
+
+            artifact sourceJar {
+                classifier = 'sources'
+            }
+        }
+    }
+
+    repositories {
+        maven {
+            url rootProject.ext.buildConfigProperties['repo.dir']
+        }
+    }
+}

@@ -31,6 +31,7 @@
 package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.generated.locale.MessageID;
+import com.ustadmobile.core.impl.UmLifecycleListener;
 import com.ustadmobile.core.impl.UmLifecycleOwner;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.AboutView;
@@ -53,11 +54,11 @@ public abstract class UstadBaseController<V extends UstadView> implements UstadC
     protected V view;
     
     protected Object context;
-    
-    protected boolean isDestroyed = false;
 
     protected Vector controllerLifecycleListeners;
-    
+
+    protected final Vector<UmLifecycleListener> lifecycleListeners = new Vector<>();
+
     public static final int CMD_ABOUT = 1001;
     
     public static final int CMD_SETTINGS = 1002;
@@ -117,24 +118,62 @@ public abstract class UstadBaseController<V extends UstadView> implements UstadC
     }
 
 
+    /**
+     * Handle when the presenter is created. Analogous to Android's onCreate
+     *
+     * @param savedState savedState if any
+     */
     public void onCreate(Hashtable savedState) {
-
-    }
-
-    public void onStart() {
-
-    }
-
-
-    public void onStop() {
-
+        synchronized (lifecycleListeners) {
+            for(UmLifecycleListener listener : lifecycleListeners) {
+                listener.onLifecycleCreate(this);
+            }
+        }
     }
 
     /**
-     * Called when the view is destroyed and removed from memory. onDestroy in Android, when the form
-     * is navigated away from in J2ME
+     * Handle when the presenter is about to become visible. Analogous to Android's onStart
+     */
+    public void onStart() {
+        synchronized (lifecycleListeners) {
+            for(UmLifecycleListener listener : lifecycleListeners) {
+                listener.onLifecycleStart(this);
+            }
+        }
+    }
+
+    /**
+     * Handle when the presenter has become visible. Analogous to Android's onResume
+     */
+    public void onResume() {
+        synchronized (lifecycleListeners) {
+            for(UmLifecycleListener listener : lifecycleListeners) {
+                listener.onLifecycleResume(this);
+            }
+        }
+    }
+
+    /**
+     * Handle when the presenter is no longer visible. Analogous to Android's onStop
+     */
+    public void onStop() {
+        synchronized (lifecycleListeners) {
+            for(UmLifecycleListener listener : lifecycleListeners) {
+                listener.onLifecycleStop(this);
+            }
+        }
+    }
+
+    /**
+     * Called when the view is destroyed and removed from memory. Analogous to Android's onDestroy
      */
     public void onDestroy() {
+        synchronized (lifecycleListeners) {
+            for(UmLifecycleListener listener : lifecycleListeners) {
+                listener.onLifecycleDestroy(this);
+            }
+        }
+
         if(controllerLifecycleListeners == null)
             return;
 
@@ -150,53 +189,15 @@ public abstract class UstadBaseController<V extends UstadView> implements UstadC
      * locale is changed
      */
     public abstract void setUIStrings();
-
-
-
-
-    /**
-     * This should be called by the view when it is paused: e.g. when the user
-     * leaves the view
-     */
-    public void handleViewPause() {
-        
-    }
-    
-    /**
-     * This should be called by the view when the user has come back to
-     * the view
-     */
-    public void handleViewResume() {
-        
-    }
     
     /**
      * This should be called by the view when it is being destroyed: this is
      * irreversible and it is time to stop background activities 
      */
     public void handleViewDestroy() {
-        setDestroyed(true);
+
     }
     
-    /**
-     * Returns true if the view we are working for has been destroyed, false
-     * otherwise
-     * 
-     * @return true if view has been destroyed, false otherwise
-     */
-    protected synchronized boolean isDestroyed() {
-        return isDestroyed;
-    }
-    
-    /**
-     * Set if the view has been destroyed - this is in reality irreversible
-     * and lives in a synchronized method for purposes of thread safety
-     * 
-     * @param isDestroyed 
-     */
-    protected synchronized void setDestroyed(boolean isDestroyed) {
-        this.isDestroyed = isDestroyed;
-    }
 
     public Hashtable getArguments() {
         return arguments;
@@ -271,9 +272,13 @@ public abstract class UstadBaseController<V extends UstadView> implements UstadC
     }
 
 
+    @Override
+    public void addLifecycleListener(UmLifecycleListener listener) {
+        lifecycleListeners.add(listener);
+    }
 
-
-
-
-
+    @Override
+    public void removeLifecycleListener(UmLifecycleListener listener) {
+        lifecycleListeners.remove(listener);
+    }
 }

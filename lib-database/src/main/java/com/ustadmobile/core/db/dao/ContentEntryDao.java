@@ -9,7 +9,7 @@ import com.ustadmobile.lib.db.entities.ContentEntry;
 import java.util.List;
 
 @UmDao
-public abstract class ContentEntryDao {
+public abstract class ContentEntryDao implements BaseDao<ContentEntry> {
     @UmInsert(onConflict = UmOnConflictStrategy.IGNORE)
     public abstract long [] insert(List<ContentEntry> contentEntries);
 

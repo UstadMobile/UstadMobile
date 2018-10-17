@@ -1,4 +1,15 @@
 apply plugin: 'com.android.library'
+apply plugin: 'digital.wup.android-maven-publish'
+
+buildscript {
+    repositories {
+        jcenter()
+    }
+
+    dependencies {
+        classpath "digital.wup:android-maven-publish:$version_android_maven_publish"
+    }
+}
 
 android {
     compileSdkVersion 27
@@ -70,4 +81,23 @@ dependencies {
     testImplementation "junit:junit:$version_junit"
     androidTestImplementation "com.android.support.test:runner:$version_android_junit_runner"
     androidTestImplementation "com.android.support.test.espresso:espresso-core:$version_android_espresso"
+}
+
+publishing {
+    publications {
+        mavenAar(MavenPublication) {
+            from components.android
+
+            groupId rootProject.group
+            artifactId project.name
+            version "${rootProject.version}"
+        }
+    }
+
+    repositories {
+        //Set this in projectdir/extrasettings.gradle
+        maven {
+            url rootProject.ext.buildConfigProperties['repo.dir']
+        }
+    }
 }

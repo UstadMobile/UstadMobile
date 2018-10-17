@@ -4,7 +4,6 @@ import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.impl.NetworkTaskStatus;
 import com.ustadmobile.core.impl.UmCallback;
-import com.ustadmobile.core.impl.UmResultCallback;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.db.entities.OpdsEntry;
