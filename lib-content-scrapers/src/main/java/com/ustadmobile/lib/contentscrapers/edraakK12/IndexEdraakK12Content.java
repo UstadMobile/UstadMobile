@@ -3,12 +3,14 @@ package com.ustadmobile.lib.contentscrapers.edraakK12;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.ustadmobile.core.db.UmAppDatabase;
+import com.ustadmobile.core.db.dao.ContentEntryContentEntryFileJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryDao;
 import com.ustadmobile.core.db.dao.ContentEntryFileDao;
 import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.ScraperConstants;
 import com.ustadmobile.lib.db.entities.ContentEntry;
+import com.ustadmobile.lib.db.entities.ContentEntryContentEntryFileJoin;
 import com.ustadmobile.lib.db.entities.ContentEntryFile;
 import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin;
 
@@ -21,6 +23,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.List;
 
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING;
 
@@ -51,7 +54,8 @@ public class IndexEdraakK12Content {
     private ContentResponse response;
     private ContentEntryDao contentEntryDao;
     private ContentEntryParentChildJoinDao contentParentChildJoinDao;
-    private ContentEntryFileDao contenEntryFileDao;
+    private ContentEntryFileDao contentEntryFileDao;
+    private ContentEntryContentEntryFileJoinDao contentEntryFileJoin;
 
 
     public static void main(String[] args) {
@@ -87,7 +91,8 @@ public class IndexEdraakK12Content {
         UmAppDatabase db = UmAppDatabase.getInstance(null);
         contentEntryDao = db.getContentEntryDao();
         contentParentChildJoinDao = db.getContentEntryParentChildJoinDao();
-        contenEntryFileDao = db.getContentEntryFileDao();
+        contentEntryFileDao = db.getContentEntryFileDao();
+        contentEntryFileJoin = db.getContentEntryContentEntryFileJoinDao();
 
         try {
             URLConnection connection = url.openConnection();
@@ -102,32 +107,16 @@ public class IndexEdraakK12Content {
         if (edraakParentEntry == null) {
             edraakParentEntry = new ContentEntry();
             edraakParentEntry = setContentEntryData(edraakParentEntry, "https://www.edraak.org/k12/",
-                    "Edraak K12","https://www.edraak.org/k12/");
+                    "Edraak K12", "https://www.edraak.org/k12/");
             edraakParentEntry.setContentEntryUid(contentEntryDao.insert(edraakParentEntry));
         } else {
             edraakParentEntry = setContentEntryData(edraakParentEntry, "https://www.edraak.org/k12/",
-                    "Edraak K12","https://www.edraak.org/k12/");
+                    "Edraak K12", "https://www.edraak.org/k12/");
             contentEntryDao.updateContentEntry(edraakParentEntry);
         }
 
-        String sourceUrl = urlString.substring(0, urlString.indexOf("component/")) + response.id;
-        ContentEntry parentEntry = contentEntryDao.findBySourceUrl(sourceUrl);
-        if (parentEntry == null) {
-            parentEntry = new ContentEntry();
-            parentEntry = setContentEntryData(parentEntry, response.id, response.title, sourceUrl);
-            parentEntry.setContentEntryUid(contentEntryDao.insert(parentEntry));
-        } else {
-            parentEntry = setContentEntryData(parentEntry, response.id, response.title, sourceUrl);
-            contentEntryDao.updateContentEntry(parentEntry);
-        }
 
-
-        ContentEntryParentChildJoin edraakParentJoin = new ContentEntryParentChildJoin();
-        edraakParentJoin.setCepcjParentContentEntryUid(edraakParentEntry.getContentEntryUid());
-        edraakParentJoin.setCepcjChildContentEntryUid(parentEntry.getContentEntryUid());
-        edraakParentJoin.setCepcjUid(contentParentChildJoinDao.insert(edraakParentJoin));
-
-        findImportedComponent(response, parentEntry);
+        findImportedComponent(response, edraakParentEntry);
 
     }
 
@@ -135,32 +124,44 @@ public class IndexEdraakK12Content {
         entry.setEntryId(id);
         entry.setTitle(title);
         entry.setSourceUrl(sourceUrl);
+        entry.setPublisher("Edraak");
         entry.setPrimaryLanguage(ScraperConstants.ARABIC_LANG_CODE);
         return entry;
     }
 
-    private void findImportedComponent(ContentResponse parent, ContentEntry parentEntry) {
+    private void findImportedComponent(ContentResponse parentContent, ContentEntry parentEntry) {
 
-        if (ContentScraperUtil.isImportedComponent(parent.component_type)) {
+        if (ContentScraperUtil.isImportedComponent(parentContent.component_type)) {
 
             // found the last child
             EdraakK12ContentScraper scraper = new EdraakK12ContentScraper(
-                    EdraakK12ContentScraper.generateUrl(url.getProtocol() + "://" + url.getHost() + (url.getPort() > 0 ? (":" + url.getPort()) : "") + "/api/", parent.id, parent.program == 0 ? response.program : parent.program),
+                    EdraakK12ContentScraper.generateUrl(url.getProtocol() + "://" + url.getHost() + (url.getPort() > 0 ? (":" + url.getPort()) : "") + "/api/", parentContent.id, parentContent.program == 0 ? response.program : parentContent.program),
                     destinationDirectory);
             try {
                 scraper.scrapeContent();
 
-                File content = new File(destinationDirectory, parent.id + ScraperConstants.ZIP_EXT);
-                FileInputStream fis = new FileInputStream(content);
-                String md5 = DigestUtils.md5Hex(fis);
-                fis.close();
+                if(scraper.hasContentUpdated()){
 
-                ContentEntryFile contentEntryFile = new ContentEntryFile();
-                contentEntryFile.setMimeType(ScraperConstants.MIMETYPE_ZIP);
-                contentEntryFile.setFileSize(content.length());
-                contentEntryFile.setLastModified(content.lastModified());
-                contentEntryFile.setMd5sum(md5);
-                contentEntryFile.setContentEntryFileUid(contenEntryFileDao.insert(contentEntryFile));
+                    File content = new File(destinationDirectory, parentContent.id + ScraperConstants.ZIP_EXT);
+                    FileInputStream fis = new FileInputStream(content);
+                    String md5 = DigestUtils.md5Hex(fis);
+                    fis.close();
+
+                    ContentEntryFile contentEntryFile = new ContentEntryFile();
+                    contentEntryFile.setMimeType(ScraperConstants.MIMETYPE_ZIP);
+                    contentEntryFile.setFileSize(content.length());
+                    contentEntryFile.setLastModified(content.lastModified());
+                    contentEntryFile.setMd5sum(md5);
+                    contentEntryFile.setContentEntryFileUid(contentEntryFileDao.insert(contentEntryFile));
+
+                    ContentEntryContentEntryFileJoin fileJoin = new ContentEntryContentEntryFileJoin();
+                    fileJoin.setCecefjContentEntryFileUid(contentEntryFile.getContentEntryFileUid());
+                    fileJoin.setCecefjContentEntryUid(parentEntry.getContentEntryUid());
+                    fileJoin.setCecefjUid(contentEntryFileJoin.insert(fileJoin));
+
+
+                }
+
 
             } catch (Exception e) {
                 System.err.println(e.getCause());
@@ -169,24 +170,33 @@ public class IndexEdraakK12Content {
 
         } else {
 
-            for (ContentResponse children : parent.children) {
+            for (ContentResponse children : parentContent.children) {
 
                 String sourceUrl = url.toString().substring(0, url.toString().indexOf("component/")) + children.id;
                 ContentEntry childEntry = contentEntryDao.findBySourceUrl(sourceUrl);
-                if(childEntry == null){
+                if (childEntry == null) {
                     childEntry = new ContentEntry();
                     childEntry = setContentEntryData(childEntry, children.id, children.title, sourceUrl);
                     childEntry.setContentEntryUid(contentEntryDao.insert(childEntry));
-                }else{
+                } else {
                     childEntry = setContentEntryData(childEntry, children.id, children.title, sourceUrl);
                     contentEntryDao.updateContentEntry(childEntry);
                 }
 
-                ContentEntryParentChildJoin edraakParentJoin = new ContentEntryParentChildJoin();
-                edraakParentJoin.setCepcjParentContentEntryUid(parentEntry.getContentEntryUid());
-                edraakParentJoin.setCepcjChildContentEntryUid(childEntry.getContentEntryUid());
-                edraakParentJoin.setCepcjUid(contentParentChildJoinDao.insert(edraakParentJoin));
-                edraakParentJoin.setChildIndex(children.child_index);
+                ContentEntryParentChildJoin parentChildJoin = contentParentChildJoinDao.findParentByChildUuids(childEntry.getContentEntryUid());
+                if (parentChildJoin == null) {
+                    parentChildJoin = new ContentEntryParentChildJoin();
+                    parentChildJoin.setCepcjParentContentEntryUid(parentEntry.getContentEntryUid());
+                    parentChildJoin.setCepcjChildContentEntryUid(childEntry.getContentEntryUid());
+                    parentChildJoin.setChildIndex(children.child_index);
+                    parentChildJoin.setCepcjUid(contentParentChildJoinDao.insert(parentChildJoin));
+
+                }else{
+                    parentChildJoin.setCepcjParentContentEntryUid(parentEntry.getContentEntryUid());
+                    parentChildJoin.setCepcjChildContentEntryUid(childEntry.getContentEntryUid());
+                    parentChildJoin.setChildIndex(children.child_index);
+                    contentParentChildJoinDao.updateParentChildJoin(parentChildJoin);
+                }
 
                 findImportedComponent(children, childEntry);
 

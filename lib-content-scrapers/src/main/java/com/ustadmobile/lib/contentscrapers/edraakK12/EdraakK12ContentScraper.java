@@ -41,6 +41,7 @@ public class EdraakK12ContentScraper {
 
     private final String url;
     private final File destinationDirectory;
+    boolean contentUpdated = false;
 
     public static void main(String[] args) {
         if (args.length != 2) {
@@ -184,7 +185,15 @@ public class EdraakK12ContentScraper {
 
             ContentScraperUtil.zipDirectory(courseDirectory, response.id, destinationDirectory);
         }
+        contentUpdated = anyContentUpdated;
+    }
 
+    /**
+     * Check if any new content has been updated after scraping
+     * @return Return true if content has been updated
+     */
+    public boolean hasContentUpdated(){
+        return contentUpdated;
     }
 
     /**
