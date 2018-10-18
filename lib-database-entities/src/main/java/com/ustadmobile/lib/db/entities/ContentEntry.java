@@ -19,6 +19,8 @@ public class ContentEntry {
 
     public static final int LICENSE_TYPE_CC_BY_SA_NC = 3;
 
+    public static final int LICENSE_TYPE_CC_BY_NC_3 = 4;
+
     @UmPrimaryKey(autoIncrement = true)
     private long contentEntryUid;
 

@@ -1,13 +1,22 @@
 package com.ustadmobile.lib.contentscrapers.ck12;
 
+import com.ustadmobile.core.db.UmAppDatabase;
+import com.ustadmobile.core.db.dao.ContentEntryContentCategoryJoinDao;
+import com.ustadmobile.core.db.dao.ContentEntryContentEntryFileJoinDao;
+import com.ustadmobile.core.db.dao.ContentEntryDao;
+import com.ustadmobile.core.db.dao.ContentEntryFileDao;
+import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
-import com.ustadmobile.lib.db.entities.OpdsEntry;
+import com.ustadmobile.lib.contentscrapers.ScraperConstants;
+import com.ustadmobile.lib.db.entities.ContentEntry;
+import com.ustadmobile.lib.db.entities.ContentEntryContentEntryFileJoin;
+import com.ustadmobile.lib.db.entities.ContentEntryFile;
 import com.ustadmobile.lib.db.entities.OpdsEntryParentToChildJoin;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
 import com.ustadmobile.lib.db.entities.OpdsLink;
 import com.ustadmobile.lib.util.UmUuidUtil;
 
-import org.apache.commons.exec.ExecuteException;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -18,22 +27,20 @@ import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import static com.ustadmobile.lib.contentscrapers.ScraperConstants.chromeDriverLocation;
+import static com.ustadmobile.lib.db.entities.ContentEntry.LICENSE_TYPE_CC_BY_NC_3;
 
 
 /**
@@ -70,12 +77,14 @@ import static com.ustadmobile.lib.contentscrapers.ScraperConstants.chromeDriverL
  */
 public class IndexCategoryCK12Content {
 
-    private final OpdsEntryWithRelations parentCK12;
+    private final ContentEntryDao contentEntryDao;
+    private final ContentEntryParentChildJoinDao contentParentChildJoinDao;
+    private final ContentEntryFileDao contentEntryFileDao;
+    private final ContentEntryContentEntryFileJoinDao contentEntryFileJoinDao;
+    private final ContentEntryContentCategoryJoinDao contentEntryCategoryJoinDao;
+    private ContentEntry ck12ParentEntry;
     URL url;
     private File destinationDirectory;
-    private ArrayList<OpdsEntryWithRelations> entryWithRelationsList;
-    private ArrayList<OpdsEntryParentToChildJoin> parentToChildJoins;
-
 
     public static void main(String[] args) throws IOException {
         if (args.length != 2) {
@@ -98,21 +107,39 @@ public class IndexCategoryCK12Content {
             throw new IllegalArgumentException("Malformed url" + urlString, e);
         }
 
-        System.setProperty("webdriver.chrome.driver", chromeDriverLocation);
-
         destinationDirectory.mkdirs();
         this.destinationDirectory = destinationDirectory;
 
-        entryWithRelationsList = new ArrayList<>();
-        parentToChildJoins = new ArrayList<>();
 
-        parentCK12 = new OpdsEntryWithRelations(
-                UmUuidUtil.encodeUuidWithAscii85(UUID.randomUUID()),
-                "https://www.ck12.org/", "CK-12 Foundation");
+        UmAppDatabase db = UmAppDatabase.getInstance(null);
+        contentEntryDao = db.getContentEntryDao();
+        contentParentChildJoinDao = db.getContentEntryParentChildJoinDao();
+        contentEntryFileDao = db.getContentEntryFileDao();
+        contentEntryFileJoinDao = db.getContentEntryContentEntryFileJoinDao();
+        contentEntryCategoryJoinDao = db.getContentEntryContentCategoryJoinDao();
 
-        entryWithRelationsList.add(parentCK12);
+        ck12ParentEntry = contentEntryDao.findBySourceUrl("https://www.ck12.org/");
+        if (ck12ParentEntry == null) {
+            ck12ParentEntry = new ContentEntry();
+            ck12ParentEntry = setContentEntryData(ck12ParentEntry, "https://www.ck12.org/",
+                    "CK-12 Foundation", "https://www.ck12.org/", ScraperConstants.ENGLISH_LANG_CODE);
+            ck12ParentEntry.setContentEntryUid(contentEntryDao.insert(ck12ParentEntry));
+        } else {
+            ck12ParentEntry = setContentEntryData(ck12ParentEntry, "https://www.ck12.org/",
+                    "CK-12 Foundation", "https://www.ck12.org/", ScraperConstants.ENGLISH_LANG_CODE);
+            contentEntryDao.updateContentEntry(ck12ParentEntry);
+        }
 
+    }
 
+    private ContentEntry setContentEntryData(ContentEntry entry, String entryId, String title, String sourceUrl, String langCode) {
+        entry.setEntryId(entryId);
+        entry.setTitle(title);
+        entry.setSourceUrl(sourceUrl);
+        entry.setPublisher("CK12");
+        entry.setLicenseType(LICENSE_TYPE_CC_BY_NC_3);
+        entry.setPrimaryLanguage(langCode);
+        return entry;
     }
 
 
@@ -142,19 +169,24 @@ public class IndexCategoryCK12Content {
 
                 System.out.println("Found Subject = " + title + " at url " + subjectUrl);
 
-                OpdsEntryWithRelations childCk12 = new OpdsEntryWithRelations(
-                        UmUuidUtil.encodeUuidWithAscii85(UUID.randomUUID()), hrefLink, title);
+                ContentEntry subjectEntry = contentEntryDao.findBySourceUrl(hrefLink);
+                if (subjectEntry == null) {
+                    subjectEntry = new ContentEntry();
+                    subjectEntry = setContentEntryData(subjectEntry, hrefLink,
+                            title, hrefLink, ScraperConstants.ENGLISH_LANG_CODE);
+                    subjectEntry.setContentEntryUid(contentEntryDao.insert(subjectEntry));
+                } else {
+                    subjectEntry = setContentEntryData(subjectEntry, hrefLink,
+                            title, hrefLink, ScraperConstants.ENGLISH_LANG_CODE);
+                    contentEntryDao.updateContentEntry(subjectEntry);
+                }
 
-                entryWithRelationsList.add(childCk12);
-
-                OpdsEntryParentToChildJoin ck12ToSubjectsJoin = new OpdsEntryParentToChildJoin(parentCK12.getUuid(),
-                        childCk12.getUuid(), count++);
-                parentToChildJoins.add(ck12ToSubjectsJoin);
+                ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, ck12ParentEntry, subjectEntry, count++);
 
                 File subjectFolder = new File(destinationDirectory, title);
                 subjectFolder.mkdirs();
 
-                browseSubjects(subjectUrl, subjectFolder, childCk12);
+                browseSubjects(subjectUrl, subjectFolder, subjectEntry);
 
             }
 
@@ -162,11 +194,9 @@ public class IndexCategoryCK12Content {
 
     }
 
-    private void browseSubjects(URL url, File destinationDirectory, OpdsEntryWithRelations parent) throws IOException {
+    private void browseSubjects(URL url, File destinationDirectory, ContentEntry parent) throws IOException {
 
-        ChromeOptions chromeOptions = new ChromeOptions();
-        chromeOptions.addArguments("--headless");
-        ChromeDriver driver = new ChromeDriver(chromeOptions);
+        ChromeDriver driver = ContentScraperUtil.setupChrome(true);
         try {
             driver.get(url.toString());
             WebDriverWait waitDriver = new WebDriverWait(driver, 10000);
@@ -195,14 +225,21 @@ public class IndexCategoryCK12Content {
                 File gradeFolder = new File(destinationDirectory, title);
                 gradeFolder.mkdirs();
 
-                OpdsEntryWithRelations childCk12 = new OpdsEntryWithRelations(
-                        UmUuidUtil.encodeUuidWithAscii85(UUID.randomUUID()), hrefLink, title);
-                entryWithRelationsList.add(childCk12);
-                OpdsEntryParentToChildJoin categoryToGradeJoin = new OpdsEntryParentToChildJoin(parent.getUuid(),
-                        childCk12.getUuid(), count++);
-                parentToChildJoins.add(categoryToGradeJoin);
+                ContentEntry gradeEntry = contentEntryDao.findBySourceUrl(hrefLink);
+                if (gradeEntry == null) {
+                    gradeEntry = new ContentEntry();
+                    gradeEntry = setContentEntryData(gradeEntry, hrefLink,
+                            title, hrefLink, ScraperConstants.ENGLISH_LANG_CODE);
+                    gradeEntry.setContentEntryUid(contentEntryDao.insert(gradeEntry));
+                } else {
+                    gradeEntry = setContentEntryData(gradeEntry, hrefLink,
+                            title, hrefLink, ScraperConstants.ENGLISH_LANG_CODE);
+                    contentEntryDao.updateContentEntry(gradeEntry);
+                }
 
-                browseGradeTopics(subCategoryUrl, gradeFolder, childCk12);
+                ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, parent, gradeEntry, count++);
+
+                browseGradeTopics(subCategoryUrl, gradeFolder, gradeEntry);
             }
         }
 
@@ -215,18 +252,25 @@ public class IndexCategoryCK12Content {
 
             System.out.println("Opening Heading = " + level1CategoryTitle + " at url " + fakePath);
 
-            OpdsEntryWithRelations childCk12 = new OpdsEntryWithRelations(
-                    UmUuidUtil.encodeUuidWithAscii85(UUID.randomUUID()), fakePath, level1CategoryTitle);
-            entryWithRelationsList.add(childCk12);
-            OpdsEntryParentToChildJoin categoryToGradeJoin = new OpdsEntryParentToChildJoin(parent.getUuid(),
-                    childCk12.getUuid(), count++);
-            parentToChildJoins.add(categoryToGradeJoin);
+            ContentEntry topicEntry = contentEntryDao.findBySourceUrl(fakePath);
+            if (topicEntry == null) {
+                topicEntry = new ContentEntry();
+                topicEntry = setContentEntryData(topicEntry, fakePath,
+                        level1CategoryTitle, fakePath, ScraperConstants.ENGLISH_LANG_CODE);
+                topicEntry.setContentEntryUid(contentEntryDao.insert(topicEntry));
+            } else {
+                topicEntry = setContentEntryData(topicEntry, fakePath,
+                        level1CategoryTitle, fakePath, ScraperConstants.ENGLISH_LANG_CODE);
+                contentEntryDao.updateContentEntry(topicEntry);
+            }
+
+            ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, parent, topicEntry, count++);
 
             Elements firstListCategory = categoryList.select("div.level1-inner-container");
 
             for (Element firstCategory : firstListCategory) {
 
-                browseListOfTopics(firstCategory, destinationDirectory, fakePath, childCk12);
+                browseListOfTopics(firstCategory, destinationDirectory, fakePath, topicEntry);
 
             }
         }
@@ -237,7 +281,7 @@ public class IndexCategoryCK12Content {
 
     }
 
-    private void browseListOfTopics(Element firstCategory, File destinationDirectory, String fakePath, OpdsEntryWithRelations parent) throws IOException {
+    private void browseListOfTopics(Element firstCategory, File destinationDirectory, String fakePath, ContentEntry parent) throws IOException {
 
         Elements secondListCategory = firstCategory.select(":root > div > div");
 
@@ -253,17 +297,24 @@ public class IndexCategoryCK12Content {
 
                 System.out.println("Found Topic = " + title + " at url " + contentUrl);
 
-                OpdsEntryWithRelations childCk12 = new OpdsEntryWithRelations(
-                        UmUuidUtil.encodeUuidWithAscii85(UUID.randomUUID()), contentUrl.getPath(), title);
-                entryWithRelationsList.add(childCk12);
-                OpdsEntryParentToChildJoin categoryToGradeJoin = new OpdsEntryParentToChildJoin(parent.getUuid(),
-                        childCk12.getUuid(), count++);
-                parentToChildJoins.add(categoryToGradeJoin);
+                ContentEntry lastTopicEntry = contentEntryDao.findBySourceUrl(hrefLink);
+                if (lastTopicEntry == null) {
+                    lastTopicEntry = new ContentEntry();
+                    lastTopicEntry = setContentEntryData(lastTopicEntry, hrefLink,
+                            title, hrefLink, ScraperConstants.ENGLISH_LANG_CODE);
+                    lastTopicEntry.setContentEntryUid(contentEntryDao.insert(lastTopicEntry));
+                } else {
+                    lastTopicEntry = setContentEntryData(lastTopicEntry, hrefLink,
+                            title, hrefLink, ScraperConstants.ENGLISH_LANG_CODE);
+                    contentEntryDao.updateContentEntry(lastTopicEntry);
+                }
+
+                ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, parent, lastTopicEntry, count++);
 
                 File topicDestination = new File(destinationDirectory, title);
                 topicDestination.mkdirs();
 
-                browseContent(contentUrl, topicDestination, childCk12);
+                browseContent(contentUrl, topicDestination, lastTopicEntry);
 
             } else if (secondCategory.attr("class").contains("parent")) {
 
@@ -273,14 +324,21 @@ public class IndexCategoryCK12Content {
 
                 System.out.println("Found Parent Topic = " + title + " at url " + appendPath);
 
-                OpdsEntryWithRelations childCk12 = new OpdsEntryWithRelations(
-                        UmUuidUtil.encodeUuidWithAscii85(UUID.randomUUID()), appendPath, title);
-                entryWithRelationsList.add(childCk12);
-                OpdsEntryParentToChildJoin categoryToGradeJoin = new OpdsEntryParentToChildJoin(parent.getUuid(),
-                        childCk12.getUuid(), count++);
-                parentToChildJoins.add(categoryToGradeJoin);
+                ContentEntry subTopicEntry = contentEntryDao.findBySourceUrl(appendPath);
+                if (subTopicEntry == null) {
+                    subTopicEntry = new ContentEntry();
+                    subTopicEntry = setContentEntryData(subTopicEntry, appendPath,
+                            title, appendPath, ScraperConstants.ENGLISH_LANG_CODE);
+                    subTopicEntry.setContentEntryUid(contentEntryDao.insert(subTopicEntry));
+                } else {
+                    subTopicEntry = setContentEntryData(subTopicEntry, appendPath,
+                            title, appendPath, ScraperConstants.ENGLISH_LANG_CODE);
+                    contentEntryDao.updateContentEntry(subTopicEntry);
+                }
 
-                browseListOfTopics(secondCategory.child(1), destinationDirectory, appendPath, childCk12);
+                ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, parent, subTopicEntry, count++);
+
+                browseListOfTopics(secondCategory.child(1), destinationDirectory, appendPath, subTopicEntry);
 
             }
 
@@ -289,11 +347,9 @@ public class IndexCategoryCK12Content {
     }
 
 
-    private void browseGradeTopics(URL subCategoryUrl, File destination, OpdsEntryWithRelations parent) throws IOException {
+    private void browseGradeTopics(URL subCategoryUrl, File destination, ContentEntry parent) throws IOException {
 
-        ChromeOptions chromeOptions = new ChromeOptions();
-        chromeOptions.addArguments("--headless");
-        ChromeDriver driver = new ChromeDriver(chromeOptions);
+        ChromeDriver driver = ContentScraperUtil.setupChrome(true);
         try {
             driver.get(subCategoryUrl.toString());
             WebDriverWait waitDriver = new WebDriverWait(driver, 10000);
@@ -314,16 +370,20 @@ public class IndexCategoryCK12Content {
 
             System.out.println("Opening Heading = " + headingTitle + " at url " + fakePathTopic);
 
-            OpdsEntryWithRelations childCk12 = new OpdsEntryWithRelations(
-                    UmUuidUtil.encodeUuidWithAscii85(UUID.randomUUID()), fakePathTopic
-                    , headingTitle);
 
-            entryWithRelationsList.add(childCk12);
-            OpdsEntryParentToChildJoin gradeToTopicJoin = new OpdsEntryParentToChildJoin(parent.getUuid(),
-                    childCk12.getUuid(), count++);
+            ContentEntry headingEntry = contentEntryDao.findBySourceUrl(fakePathTopic);
+            if (headingEntry == null) {
+                headingEntry = new ContentEntry();
+                headingEntry = setContentEntryData(headingEntry, fakePathTopic,
+                        headingTitle, fakePathTopic, ScraperConstants.ENGLISH_LANG_CODE);
+                headingEntry.setContentEntryUid(contentEntryDao.insert(headingEntry));
+            } else {
+                headingEntry = setContentEntryData(headingEntry, fakePathTopic,
+                        headingTitle, fakePathTopic, ScraperConstants.ENGLISH_LANG_CODE);
+                contentEntryDao.updateContentEntry(headingEntry);
+            }
 
-            parentToChildJoins.add(gradeToTopicJoin);
-
+            ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, parent, headingEntry, count++);
 
             Elements topicList = header.select("div.concept-track-wrapper");
 
@@ -335,15 +395,20 @@ public class IndexCategoryCK12Content {
 
                 System.out.println("Found Topic = " + title + " at url " + fakeParentTopic);
 
-                OpdsEntryWithRelations parentTopic = new OpdsEntryWithRelations(
-                        UmUuidUtil.encodeUuidWithAscii85(UUID.randomUUID()),
-                        fakeParentTopic, title);
 
-                entryWithRelationsList.add(childCk12);
-                OpdsEntryParentToChildJoin topicJoin = new OpdsEntryParentToChildJoin(childCk12.getUuid(),
-                        parentTopic.getUuid(), topicCount++);
+                ContentEntry topicEntry = contentEntryDao.findBySourceUrl(fakeParentTopic);
+                if (topicEntry == null) {
+                    topicEntry = new ContentEntry();
+                    topicEntry = setContentEntryData(topicEntry, fakeParentTopic,
+                            title, fakeParentTopic, ScraperConstants.ENGLISH_LANG_CODE);
+                    topicEntry.setContentEntryUid(contentEntryDao.insert(topicEntry));
+                } else {
+                    topicEntry = setContentEntryData(topicEntry, fakeParentTopic,
+                            title, fakeParentTopic, ScraperConstants.ENGLISH_LANG_CODE);
+                    contentEntryDao.updateContentEntry(topicEntry);
+                }
 
-                parentToChildJoins.add(topicJoin);
+                ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, headingEntry, topicEntry, topicCount++);
 
                 Elements subTopicsList = topic.select("div.concept-list-container a");
 
@@ -359,17 +424,21 @@ public class IndexCategoryCK12Content {
 
                     System.out.println("Found SubTopic = " + subTitle + " at url " + contentUrl);
 
-                    OpdsEntryWithRelations topicEntry = new OpdsEntryWithRelations(
-                            UmUuidUtil.encodeUuidWithAscii85(UUID.randomUUID()), hrefLink, subTitle);
+                    ContentEntry subTopicEntry = contentEntryDao.findBySourceUrl(hrefLink);
+                    if (subTopicEntry == null) {
+                        subTopicEntry = new ContentEntry();
+                        subTopicEntry = setContentEntryData(subTopicEntry, hrefLink,
+                                subTitle, hrefLink, ScraperConstants.ENGLISH_LANG_CODE);
+                        subTopicEntry.setContentEntryUid(contentEntryDao.insert(subTopicEntry));
+                    } else {
+                        subTopicEntry = setContentEntryData(subTopicEntry, hrefLink,
+                                subTitle, hrefLink, ScraperConstants.ENGLISH_LANG_CODE);
+                        contentEntryDao.updateContentEntry(subTopicEntry);
+                    }
 
-                    entryWithRelationsList.add(topicEntry);
+                    ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, topicEntry, subTopicEntry, subTopicCount++);
 
-                    OpdsEntryParentToChildJoin subTopicJoin = new OpdsEntryParentToChildJoin(parentTopic.getUuid(),
-                            topicEntry.getUuid(), subTopicCount++);
-
-                    parentToChildJoins.add(subTopicJoin);
-
-                    browseContent(contentUrl, topicDestination, topicEntry);
+                    browseContent(contentUrl, topicDestination, subTopicEntry);
 
                 }
 
@@ -379,11 +448,9 @@ public class IndexCategoryCK12Content {
 
     }
 
-    private void browseContent(URL contentUrl, File topicDestination, OpdsEntryWithRelations parent) throws IOException {
+    private void browseContent(URL contentUrl, File topicDestination, ContentEntry parent) throws IOException {
 
-        ChromeOptions chromeOptions = new ChromeOptions();
-        chromeOptions.addArguments("--headless");
-        ChromeDriver driver = new ChromeDriver(chromeOptions);
+        ChromeDriver driver = ContentScraperUtil.setupChrome(true);
         try {
             driver.get(contentUrl.toString());
             WebDriverWait waitDriver = new WebDriverWait(driver, 10000);
@@ -420,7 +487,6 @@ public class IndexCategoryCK12Content {
 
             URL url = new URL(contentUrl, hrefLink);
 
-
             CK12ContentScraper scraper = new CK12ContentScraper(url.toString(), topicDestination);
             try {
                 switch (groupType.toLowerCase()) {
@@ -452,21 +518,42 @@ public class IndexCategoryCK12Content {
 
             System.out.println("Found Content = " + groupType + " at url " + url);
 
-            OpdsEntryWithRelations topicEntry = new OpdsEntryWithRelations(
-                    UmUuidUtil.encodeUuidWithAscii85(UUID.randomUUID()), hrefLink, title);
+            ContentEntry topicEntry = contentEntryDao.findBySourceUrl(hrefLink);
+            if (topicEntry == null) {
+                topicEntry = new ContentEntry();
+                topicEntry = setContentEntryData(topicEntry, hrefLink,
+                        title, hrefLink, ScraperConstants.ENGLISH_LANG_CODE);
+                topicEntry.setDescription(summary);
+                topicEntry.setContentEntryUid(contentEntryDao.insert(topicEntry));
+            } else {
+                topicEntry = setContentEntryData(topicEntry, hrefLink,
+                        title, hrefLink, ScraperConstants.ENGLISH_LANG_CODE);
+                topicEntry.setDescription(summary);
+                contentEntryDao.updateContentEntry(topicEntry);
+            }
 
-            entryWithRelationsList.add(topicEntry);
+            ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, parent, topicEntry, courseCount++);
 
-            OpdsEntryParentToChildJoin subTopicJoin = new OpdsEntryParentToChildJoin(parent.getUuid(),
-                    topicEntry.getUuid(), courseCount++);
+            if(scraper.isContentUpdated()){
 
-            parentToChildJoins.add(subTopicJoin);
+                File content = new File(destinationDirectory, FilenameUtils.getBaseName(url.getPath()) + ScraperConstants.ZIP_EXT);
+                FileInputStream fis = new FileInputStream(content);
+                String md5 = DigestUtils.md5Hex(fis);
+                fis.close();
 
-            OpdsLink newEntryLink = new OpdsLink(topicEntry.getUuid(), "application/zip",
-                    destinationDirectory.getName() + "/" + FilenameUtils.getBaseName(url.getPath()) + ".zip", OpdsEntry.LINK_REL_ACQUIRE);
-            newEntryLink.setLength(new File(destinationDirectory, FilenameUtils.getBaseName(url.getPath()) + ".zip").length());
-            topicEntry.setLinks(Collections.singletonList(newEntryLink));
+                ContentEntryFile contentEntryFile = new ContentEntryFile();
+                contentEntryFile.setMimeType(ScraperConstants.MIMETYPE_ZIP);
+                contentEntryFile.setFileSize(content.length());
+                contentEntryFile.setLastModified(content.lastModified());
+                contentEntryFile.setMd5sum(md5);
+                contentEntryFile.setContentEntryFileUid(contentEntryFileDao.insert(contentEntryFile));
 
+                ContentEntryContentEntryFileJoin fileJoin = new ContentEntryContentEntryFileJoin();
+                fileJoin.setCecefjContentEntryFileUid(contentEntryFile.getContentEntryFileUid());
+                fileJoin.setCecefjContentEntryUid(topicEntry.getContentEntryUid());
+                fileJoin.setCecefjUid(contentEntryFileJoinDao.insert(fileJoin));
+
+            }
 
         }
 

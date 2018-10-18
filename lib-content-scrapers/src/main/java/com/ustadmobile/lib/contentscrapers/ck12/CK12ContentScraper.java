@@ -6,6 +6,7 @@ import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.ScraperConstants;
 import com.ustadmobile.lib.contentscrapers.ck12.plix.PlixIndex;
 import com.ustadmobile.lib.contentscrapers.ck12.plix.PlixLog;
+import com.ustadmobile.lib.contentscrapers.ck12.plix.PlixResponse;
 import com.ustadmobile.lib.contentscrapers.ck12.practice.AnswerResponse;
 import com.ustadmobile.lib.contentscrapers.ck12.practice.PracticeResponse;
 import com.ustadmobile.lib.contentscrapers.ck12.practice.QuestionResponse;
@@ -41,6 +42,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 
+import javax.swing.text.AbstractDocument;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 
@@ -159,12 +161,16 @@ public class CK12ContentScraper {
     String questionLinkId = "https://www.ck12.org/assessment/api/render/questionInstance/test/";
     // sample questionLink 5985b3d15aa4136da1e858b8/2/5b7a41ba5aa413662008f44f
 
+    String plixLink = "https://www.ck12.org/assessment/api/get/info/question/";
+
+
     public ScriptEngineReader scriptEngineReader = new ScriptEngineReader();
 
     private ChromeDriver driver;
     private WebDriverWait waitDriver;
 
     public static final String RESPONSE_RECEIVED = "Network.responseReceived";
+    private boolean isContentUpdated = true;
 
 
     public CK12ContentScraper(String url, File destDir) throws MalformedURLException {
@@ -225,6 +231,19 @@ public class CK12ContentScraper {
 
         assetDirectory = new File(plixDirectory, "asset");
         assetDirectory.mkdirs();
+
+        String plixUrl = generatePlixLink(plixId);
+
+        PlixResponse response = gson.fromJson(
+                IOUtils.toString(new URL(plixUrl), ScraperConstants.UTF_ENCODING), PlixResponse.class);
+
+        File fileLastModified = new File(plixDirectory, "plix-last-modified.txt");
+        isContentUpdated = ContentScraperUtil.isContentUpdated(
+                ContentScraperUtil.parseServerDate(response.response.question.updated), fileLastModified);
+
+        if(!isContentUpdated){
+            return;
+        }
 
         System.setProperty("webdriver.chrome.driver", ScraperConstants.chromeDriverLocation);
 
@@ -357,6 +376,14 @@ public class CK12ContentScraper {
         assetDirectory = new File(videoHtmlLocation, "asset");
         assetDirectory.mkdirs();
 
+        File lastUpdated = new File(videoHtmlLocation, "video-last-modified.txt");
+        isContentUpdated = isPageUpdated(fullSite, lastUpdated);
+
+        if(!isContentUpdated){
+            return;
+        }
+
+
         Document videoContent = getMainContent(fullSite, "div.modality_content[data-loadurl]", "data-loadurl");
         // sometimes video stored in iframe
         if (videoContent == null) {
@@ -410,6 +437,10 @@ public class CK12ContentScraper {
         ContentScraperUtil.zipDirectory(videoHtmlLocation, videoContentName, destinationDirectory);
     }
 
+    public boolean isContentUpdated() {
+        return isContentUpdated;
+    }
+
     private Elements getIframefromHtml(Document videoContent) {
 
         Elements elements = videoContent.select("iframe");
@@ -455,6 +486,12 @@ public class CK12ContentScraper {
         return null;
     }
 
+    private boolean isPageUpdated(Document doc, File file){
+        String date = doc.select("h3:contains(Last Modified) ~ span").attr("data-date");
+        long parsedDate = ContentScraperUtil.parseServerDate(date);
+        return ContentScraperUtil.isContentUpdated(parsedDate, file);
+    }
+
 
     public void scrapeReadContent() throws IOException {
 
@@ -466,6 +503,13 @@ public class CK12ContentScraper {
 
         assetDirectory = new File(readHtmlLocation, "asset");
         assetDirectory.mkdirs();
+
+        File lastUpdated = new File(readHtmlLocation, "read-last-modified.txt");
+        isContentUpdated = isPageUpdated(html, lastUpdated);
+
+        if(!isContentUpdated){
+            return;
+        }
 
         String readTitle = getTitleHtml(html);
 
@@ -570,6 +614,18 @@ public class CK12ContentScraper {
                 " <body>\n";
     }
 
+
+    /**
+     *
+     * Given the id, generate the plix link to find out if it was updated
+     * @param id
+     * @return full url
+     */
+    public String generatePlixLink(String id){
+        return plixLink + id + "?includeBasicPlixDataOnly=true";
+    }
+
+
     /**
      * Given a practice url - generate the url needed to create the json response
      *
@@ -629,7 +685,8 @@ public class CK12ContentScraper {
         String updated = response.response.test.updated;
 
         File modifiedFile = new File(practiceDirectory, ScraperConstants.LAST_MODIFIED_TXT);
-        if (!ContentScraperUtil.isContentUpdated(ContentScraperUtil.parseServerDate(updated), modifiedFile)) {
+        isContentUpdated = ContentScraperUtil.isContentUpdated(ContentScraperUtil.parseServerDate(updated), modifiedFile);
+        if (!isContentUpdated) {
             return;
         }
 
