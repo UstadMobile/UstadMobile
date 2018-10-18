@@ -16,4 +16,6 @@ public @interface UmEntity {
 
     UmIndex[] indices() default {};
 
+    int tableId() default 0;
+
 }

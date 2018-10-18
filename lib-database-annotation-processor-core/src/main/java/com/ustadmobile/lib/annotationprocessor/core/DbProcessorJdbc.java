@@ -19,6 +19,7 @@ import com.ustadmobile.lib.database.annotation.UmEmbedded;
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmIndexField;
 import com.ustadmobile.lib.database.annotation.UmInsert;
+import com.ustadmobile.lib.database.annotation.UmOnConflictStrategy;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.database.annotation.UmQueryFindByPrimaryKey;
@@ -591,10 +592,12 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
             codeBlock.add("$T _result = $L;\n", resultType, defaultValue(resultType));
         }
 
+        String sqlFunction = daoMethod.getAnnotation(UmInsert.class).onConflict()
+                == UmOnConflictStrategy.REPLACE ? "REPLACE" : "INSERT";
         codeBlock.add("try (\n").indent()
                     .add("$T _connection = _db.getConnection();\n", Connection.class)
-                    .add("$T _stmt = _connection.prepareStatement(\"INSERT INTO $L$L$L (",
-                            PreparedStatement.class, identifierQuoteStr,
+                    .add("$T _stmt = _connection.prepareStatement(\"$L INTO $L$L$L (",
+                            PreparedStatement.class, sqlFunction, identifierQuoteStr,
                             entityTypeElement.getSimpleName().toString(), identifierQuoteStr);
 
         List<VariableElement> entityFields = getEntityFieldElements(entityTypeElement);

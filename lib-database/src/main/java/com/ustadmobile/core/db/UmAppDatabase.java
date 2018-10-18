@@ -29,6 +29,7 @@ import com.ustadmobile.core.db.dao.OpdsLinkDao;
 import com.ustadmobile.core.db.dao.PersonCustomFieldDao;
 import com.ustadmobile.core.db.dao.PersonCustomFieldValueDao;
 import com.ustadmobile.core.db.dao.PersonDao;
+import com.ustadmobile.core.db.dao.SyncStatusDao;
 import com.ustadmobile.lib.database.annotation.UmClearAll;
 import com.ustadmobile.lib.database.annotation.UmDatabase;
 import com.ustadmobile.lib.database.annotation.UmDbContext;
@@ -60,6 +61,7 @@ import com.ustadmobile.lib.db.entities.OpdsLink;
 import com.ustadmobile.lib.db.entities.Person;
 import com.ustadmobile.lib.db.entities.PersonCustomField;
 import com.ustadmobile.lib.db.entities.PersonCustomFieldValue;
+import com.ustadmobile.lib.db.entities.SyncStatus;
 
 @UmDatabase(version = 1, entities = {
         OpdsEntry.class, OpdsLink.class, OpdsEntryParentToChildJoin.class,
@@ -72,7 +74,8 @@ import com.ustadmobile.lib.db.entities.PersonCustomFieldValue;
         PersonCustomField.class, PersonCustomFieldValue.class,
         ContentEntry.class, ContentEntryContentCategoryJoin.class,
         ContentEntryContentEntryFileJoin.class, ContentEntryFile.class,
-        ContentEntryParentChildJoin.class, ContentEntryRelatedEntryJoin.class
+        ContentEntryParentChildJoin.class, ContentEntryRelatedEntryJoin.class,
+        SyncStatus.class
 })
 public abstract class UmAppDatabase{
 
@@ -158,6 +161,8 @@ public abstract class UmAppDatabase{
     public abstract ContentEntryParentChildJoinDao getContentEntryParentChildJoinDao();
 
     public abstract ContentEntryRelatedEntryJoinDao getContentEntryRelatedEntryJoinDao();
+
+    public abstract SyncStatusDao getSyncStatusDao();
 
     @UmDbContext
     public abstract Object getContext();
