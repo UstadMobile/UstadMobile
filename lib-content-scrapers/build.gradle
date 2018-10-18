@@ -62,6 +62,7 @@ dependencies {
     implementation "org.apache.commons:commons-lang3:$version_apache_commons_lang"
     implementation "org.seleniumhq.selenium:selenium-java:$version_selenium"
     implementation "org.seleniumhq.selenium:selenium-chrome-driver:$version_selenium"
+    implementation "com.neovisionaries:nv-i18n:$version_nv_lang"
 
     testImplementation "junit:junit:$version_junit"
     testImplementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"

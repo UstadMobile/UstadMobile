@@ -108,6 +108,7 @@ public class ScraperConstants {
     public static final String JQUERY_JS = "jquery-3.3.1.min.js";
 
     public static final String MIMETYPE_ZIP = "application/zip";
+    public static final String MIMETYPE_EPUB = "application/epub+zip";
 
     public static final String ZIP_EXT = ".zip";
     public static final String PNG_EXT = ".png";

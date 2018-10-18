@@ -81,7 +81,6 @@ public class IndexCategoryCK12Content {
     private final ContentEntryParentChildJoinDao contentParentChildJoinDao;
     private final ContentEntryFileDao contentEntryFileDao;
     private final ContentEntryContentEntryFileJoinDao contentEntryFileJoinDao;
-    private final ContentEntryContentCategoryJoinDao contentEntryCategoryJoinDao;
     private ContentEntry ck12ParentEntry;
     URL url;
     private File destinationDirectory;
@@ -116,7 +115,6 @@ public class IndexCategoryCK12Content {
         contentParentChildJoinDao = db.getContentEntryParentChildJoinDao();
         contentEntryFileDao = db.getContentEntryFileDao();
         contentEntryFileJoinDao = db.getContentEntryContentEntryFileJoinDao();
-        contentEntryCategoryJoinDao = db.getContentEntryContentCategoryJoinDao();
 
         ck12ParentEntry = contentEntryDao.findBySourceUrl("https://www.ck12.org/");
         if (ck12ParentEntry == null) {

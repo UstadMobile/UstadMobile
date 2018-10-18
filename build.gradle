@@ -56,6 +56,7 @@ ext {
     version_apache_commons_pool2 = "2.6.0"
     version_jsoup = "1.11.3"
     version_selenium = "3.14.0"
+    version_nv_lang = "1.23"
 
     version_android_buildtools = "28.0.3"
     version_android_compile_sdk = 27

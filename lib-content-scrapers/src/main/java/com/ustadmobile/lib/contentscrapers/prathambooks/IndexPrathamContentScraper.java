@@ -2,15 +2,27 @@ package com.ustadmobile.lib.contentscrapers.prathambooks;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.neovisionaries.i18n.LanguageCode;
+import com.ustadmobile.core.db.UmAppDatabase;
+import com.ustadmobile.core.db.dao.ContentEntryContentCategoryJoinDao;
+import com.ustadmobile.core.db.dao.ContentEntryContentEntryFileJoinDao;
+import com.ustadmobile.core.db.dao.ContentEntryDao;
+import com.ustadmobile.core.db.dao.ContentEntryFileDao;
+import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.ScraperConstants;
+import com.ustadmobile.lib.db.entities.ContentEntry;
+import com.ustadmobile.lib.db.entities.ContentEntryContentEntryFileJoin;
+import com.ustadmobile.lib.db.entities.ContentEntryFile;
 import com.ustadmobile.lib.db.entities.OpdsEntry;
 import com.ustadmobile.lib.db.entities.OpdsEntryParentToChildJoin;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
 import com.ustadmobile.lib.db.entities.OpdsLink;
 import com.ustadmobile.lib.util.UmUuidUtil;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Cookie;
@@ -18,6 +30,7 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
@@ -25,6 +38,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Locale;
 import java.util.UUID;
 
 
@@ -49,9 +63,11 @@ public class IndexPrathamContentScraper {
 
     String signIn = "https://storyweaver.org.in/users/sign_in";
 
-    private ArrayList<OpdsEntryWithRelations> entryWithRelationsList;
-    private ArrayList<OpdsEntryParentToChildJoin> parentToChildJoins;
     private Gson gson;
+    private ContentEntryDao contentEntryDao;
+    private ContentEntryParentChildJoinDao contentParentChildJoinDao;
+    private ContentEntryFileDao contentEntryFileDao;
+    private ContentEntryContentEntryFileJoinDao contentEntryFileJoinDao;
 
     public static void main(String[] args) {
         if (args.length != 1) {
@@ -74,15 +90,25 @@ public class IndexPrathamContentScraper {
 
         destinationDir.mkdirs();
 
-        entryWithRelationsList = new ArrayList<>();
-        parentToChildJoins = new ArrayList<>();
-
         String cookie = loginPratham();
 
-        OpdsEntryWithRelations parentPratham = new OpdsEntryWithRelations(
-                UmUuidUtil.encodeUuidWithAscii85(UUID.randomUUID()), "https://storyweaver.org.in/", "Pratham Books");
+        UmAppDatabase db = UmAppDatabase.getInstance(null);
+        contentEntryDao = db.getContentEntryDao();
+        contentParentChildJoinDao = db.getContentEntryParentChildJoinDao();
+        contentEntryFileDao = db.getContentEntryFileDao();
+        contentEntryFileJoinDao = db.getContentEntryContentEntryFileJoinDao();
 
-        entryWithRelationsList.add(parentPratham);
+        ContentEntry prathamParentEntry = contentEntryDao.findBySourceUrl("https://storyweaver.org.in/");
+        if (prathamParentEntry == null) {
+            prathamParentEntry = new ContentEntry();
+            prathamParentEntry = setContentEntryData(prathamParentEntry, "https://storyweaver.org.in/",
+                    "Pratham Books", "https://storyweaver.org.in/", ScraperConstants.ENGLISH_LANG_CODE);
+            prathamParentEntry.setContentEntryUid(contentEntryDao.insert(prathamParentEntry));
+        } else {
+            prathamParentEntry = setContentEntryData(prathamParentEntry, "https://storyweaver.org.in/",
+                    "Pratham Books", "https://storyweaver.org.in/", ScraperConstants.ENGLISH_LANG_CODE);
+            contentEntryDao.updateContentEntry(prathamParentEntry);
+        }
 
         gson = new GsonBuilder().disableHtmlEscaping().create();
 
@@ -107,6 +133,7 @@ public class IndexPrathamContentScraper {
                 File resourceFolder = new File(destinationDir, String.valueOf(data.id));
                 resourceFolder.mkdirs();
                 String resourceFileName = data.slug + ePubExt;
+
                 File content = new File(resourceFolder, resourceFileName);
                 if (!ContentScraperUtil.isFileModified(connection, resourceFolder, String.valueOf(data.id))) {
                     continue;
@@ -126,20 +153,36 @@ public class IndexPrathamContentScraper {
                 }
                 retry = 0;
 
-                OpdsEntryWithRelations childEntry = new OpdsEntryWithRelations(UmUuidUtil.encodeUuidWithAscii85(UUID.randomUUID()),
-                        data.slug, data.title);
+                ContentEntry contentEntry = contentEntryDao.findBySourceUrl(epubUrl.getPath());
+                if (prathamParentEntry == null) {
+                    prathamParentEntry = new ContentEntry();
+                    prathamParentEntry = setContentEntryData(prathamParentEntry, data.slug,
+                            data.title , epubUrl.getPath(), LanguageCode.findByName(data.language).get(0).name());
+                    prathamParentEntry.setContentEntryUid(contentEntryDao.insert(prathamParentEntry));
+                } else {
+                    prathamParentEntry = setContentEntryData(prathamParentEntry, data.slug,
+                            data.title, epubUrl.getPath(), ScraperConstants.ENGLISH_LANG_CODE);
+                    contentEntryDao.updateContentEntry(prathamParentEntry);
+                }
 
-                OpdsLink newEntryLink = new OpdsLink(childEntry.getUuid(), "application/epub+zip",
-                        resourceFolder.getName() + "/" + data.slug, OpdsEntry.LINK_REL_ACQUIRE);
-                newEntryLink.setLength(new File(resourceFolder, resourceFileName).length());
-                childEntry.setLinks(Collections.singletonList(newEntryLink));
+                ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao,
+                        prathamParentEntry, contentEntry, contentCount);
 
-                OpdsEntryParentToChildJoin join = new OpdsEntryParentToChildJoin(parentPratham.getUuid(),
-                        childEntry.getUuid(), contentCount);
+                FileInputStream fis = new FileInputStream(content);
+                String md5 = DigestUtils.md5Hex(fis);
+                fis.close();
 
-                entryWithRelationsList.add(childEntry);
-                parentToChildJoins.add(join);
+                ContentEntryFile contentEntryFile = new ContentEntryFile();
+                contentEntryFile.setMimeType(ScraperConstants.MIMETYPE_EPUB);
+                contentEntryFile.setFileSize(content.length());
+                contentEntryFile.setLastModified(content.lastModified());
+                contentEntryFile.setMd5sum(md5);
+                contentEntryFile.setContentEntryFileUid(contentEntryFileDao.insert(contentEntryFile));
 
+                ContentEntryContentEntryFileJoin fileJoin = new ContentEntryContentEntryFileJoin();
+                fileJoin.setCecefjContentEntryFileUid(contentEntryFile.getContentEntryFileUid());
+                fileJoin.setCecefjContentEntryUid(prathamParentEntry.getContentEntryUid());
+                fileJoin.setCecefjUid(contentEntryFileJoinDao.insert(fileJoin));
 
             } catch (Exception e) {
                 System.err.println("Error saving book " + contentBooksList.data.get(contentCount).slug);
@@ -148,6 +191,16 @@ public class IndexPrathamContentScraper {
 
         }
 
+    }
+
+    private ContentEntry setContentEntryData(ContentEntry entry, String id, String title, String sourceUrl, String lang) {
+        entry.setEntryId(id);
+        entry.setTitle(title);
+        entry.setSourceUrl(sourceUrl);
+        entry.setPublisher("Pratham");
+        entry.setLicenseType(ContentEntry.LICENSE_TYPE_CC_BY);
+        entry.setPrimaryLanguage(lang);
+        return entry;
     }
 
     public URL generatePrathamEPubFileUrl(String resourceId) throws MalformedURLException {
