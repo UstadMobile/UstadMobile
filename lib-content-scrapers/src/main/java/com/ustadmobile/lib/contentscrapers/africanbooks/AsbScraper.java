@@ -2,13 +2,23 @@ package com.ustadmobile.lib.contentscrapers.africanbooks;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.ustadmobile.core.db.UmAppDatabase;
+import com.ustadmobile.core.db.dao.ContentEntryContentEntryFileJoinDao;
+import com.ustadmobile.core.db.dao.ContentEntryDao;
+import com.ustadmobile.core.db.dao.ContentEntryFileDao;
+import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
+import com.ustadmobile.lib.contentscrapers.ScraperConstants;
+import com.ustadmobile.lib.db.entities.ContentEntry;
+import com.ustadmobile.lib.db.entities.ContentEntryContentEntryFileJoin;
+import com.ustadmobile.lib.db.entities.ContentEntryFile;
 import com.ustadmobile.lib.db.entities.OpdsEntry;
 import com.ustadmobile.lib.db.entities.OpdsEntryParentToChildJoin;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
 import com.ustadmobile.lib.db.entities.OpdsLink;
 import com.ustadmobile.lib.util.UmUuidUtil;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
@@ -17,6 +27,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -41,16 +52,15 @@ import java.util.zip.ZipFile;
  * To get all the books, need to read the source line by line.
  * To get the book, the line starts with parent.bookItems and the information is between curly braces { } in the format of JSON
  * Use Gson to parse the object and add to the final list
- *
+ * <p>
  * Iterate through the list, to get the book, you need to hit 2 urls
  * /myspace/publish/epub.php?id=bookId needs to be opened using selenium and you need to wait for it load
  * Once loaded call the url with /read/downloadepub.php?id=bookId and downloading for the epub can start
- *
+ * <p>
  * Once downloaded, some epubs have some missing information
  * Open the epub, find description and image property and update them
  * We also need to increase the font for the epub and this is done by modifying the css and replacing the existing
  * Move on to next epub until list is complete
- *
  */
 public class AsbScraper {
 
@@ -58,8 +68,10 @@ public class AsbScraper {
 
     public static final int DOWNLOAD_NEXT_INTERVAL = 5000;
     private ChromeDriver driver;
-    private ArrayList<OpdsEntryWithRelations> entryWithRelationsList;
-    private ArrayList<OpdsEntryParentToChildJoin> parentToChildJoins;
+    private ContentEntryDao contentEntryDao;
+    private ContentEntryParentChildJoinDao contentParentChildJoinDao;
+    private ContentEntryFileDao contentEntryFileDao;
+    private ContentEntryContentEntryFileJoinDao contentEntryFileJoinDao;
 
     public static void main(String[] args) {
         if (args.length != 1) {
@@ -77,18 +89,27 @@ public class AsbScraper {
     }
 
 
-
     public void findContent(File destinationDir) throws IOException {
 
         URL africanBooksUrl = generateURL();
 
-        entryWithRelationsList = new ArrayList<>();
-        parentToChildJoins = new ArrayList<>();
+        UmAppDatabase db = UmAppDatabase.getInstance(null);
+        contentEntryDao = db.getContentEntryDao();
+        contentParentChildJoinDao = db.getContentEntryParentChildJoinDao();
+        contentEntryFileDao = db.getContentEntryFileDao();
+        contentEntryFileJoinDao = db.getContentEntryContentEntryFileJoinDao();
 
-        OpdsEntryWithRelations parentAbs = new OpdsEntryWithRelations(
-                UmUuidUtil.encodeUuidWithAscii85(UUID.randomUUID()), "https://www.africanstorybook.org/", "African Story Books");
-
-        entryWithRelationsList.add(parentAbs);
+        ContentEntry asbParentEntry = contentEntryDao.findBySourceUrl("https://www.africanstorybook.org/");
+        if (asbParentEntry == null) {
+            asbParentEntry = new ContentEntry();
+            asbParentEntry = setContentEntryData(asbParentEntry, "https://www.africanstorybook.org/",
+                    "African Story Books", "https://www.africanstorybook.org/", ScraperConstants.ENGLISH_LANG_CODE);
+            asbParentEntry.setContentEntryUid(contentEntryDao.insert(asbParentEntry));
+        } else {
+            asbParentEntry = setContentEntryData(asbParentEntry, "https://www.africanstorybook.org/",
+                    "African Story Books", "https://www.africanstorybook.org/", ScraperConstants.ENGLISH_LANG_CODE);
+            contentEntryDao.updateContentEntry(asbParentEntry);
+        }
 
         driver = ContentScraperUtil.setupChrome(true);
 
@@ -108,72 +129,71 @@ public class AsbScraper {
             if (ePubFile.exists() && ePubFile.lastModified() > Integer.parseInt(bookObj.date)) {
                 System.out.println("ASB " + bookId + " is up to date");
             } else {
-                boolean downloadOk = false;
-                ZipFile zipFile;
-                for (int attempt = 0; !downloadOk && attempt < 5; attempt++) {
-                    zipFile = null;
-                    try {
-
-                        System.out.println("Download ASB: " + bookId + " from " + epubUrl.toString() + " to " + ePubFile.getAbsolutePath());
-
-                        driver.get(publishUrl.toString());
-                        ContentScraperUtil.waitForJSandJQueryToLoad(waitDriver);
-
-                        FileUtils.copyURLToFile(epubUrl, ePubFile);
-
-                        if (ePubFile.length() == 0) {
-                            System.out.println(ePubFile.getName() + " size 0 bytes: failed!");
-                            continue;
-                        }
-
-                        OpdsEntryWithRelations childEntry = new OpdsEntryWithRelations(UmUuidUtil.encodeUuidWithAscii85(UUID.randomUUID()),
-                                epubUrl.getPath(), bookObj.title);
-
-                        OpdsLink newEntryLink = new OpdsLink(childEntry.getUuid(), "application/epub+zip",
-                                FilenameUtils.getBaseName(ePubFile.getPath()), OpdsEntry.LINK_REL_ACQUIRE);
-                        newEntryLink.setLength(ePubFile.length());
-                        childEntry.setLinks(Collections.singletonList(newEntryLink));
-
-                        OpdsEntryParentToChildJoin join = new OpdsEntryParentToChildJoin(parentAbs.getUuid(),
-                                childEntry.getUuid(), i);
-
-                        entryWithRelationsList.add(childEntry);
-                        parentToChildJoins.add(join);
-
-                        //do a basic sanity check on the file downloaded
-                        zipFile = new ZipFile(ePubFile);
-                        zipFile.size();
-
-                        downloadOk = true;
-                    } catch (IOException e) {
-                        System.err.println("IO Exception downloading/checking : " + ePubFile.getName());
-                    } finally {
-                        if (zipFile != null)
-                            zipFile.close();
-                    }
-
-                    if (!downloadOk) {
-                        ePubFile.delete();
-                        try {
-                            Thread.sleep(DOWNLOAD_RETRY_INTERVAL);
-                        } catch (InterruptedException e) {
-                        }
-                    }
-                }
-
-
                 try {
-                    Thread.sleep(DOWNLOAD_NEXT_INTERVAL);
-                } catch (InterruptedException e) {
-                }
-            }
 
-            if (ePubFile.exists()) {
-                updateAsbEpub(bookObj, ePubFile);
+                    System.out.println("Download ASB: " + bookId + " from " + epubUrl.toString() + " to " + ePubFile.getAbsolutePath());
+
+                    driver.get(publishUrl.toString());
+                    ContentScraperUtil.waitForJSandJQueryToLoad(waitDriver);
+
+                    FileUtils.copyURLToFile(epubUrl, ePubFile);
+
+                    if (ePubFile.length() == 0) {
+                        System.out.println(ePubFile.getName() + " size 0 bytes: failed!");
+                        continue;
+                    }
+
+                    ContentEntry childEntry = contentEntryDao.findBySourceUrl(epubUrl.getPath());
+                    if (asbParentEntry == null) {
+                        asbParentEntry = new ContentEntry();
+                        asbParentEntry = setContentEntryData(asbParentEntry, epubUrl.getPath(),
+                                bookObj.title, epubUrl.getPath(), bookObj.lang);
+                        asbParentEntry.setContentEntryUid(contentEntryDao.insert(asbParentEntry));
+                    } else {
+                        asbParentEntry = setContentEntryData(asbParentEntry, epubUrl.getPath(),
+                                bookObj.title, epubUrl.getPath(), bookObj.lang);
+                        contentEntryDao.updateContentEntry(asbParentEntry);
+                    }
+
+                    ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, asbParentEntry, childEntry, i);
+
+                    if (ContentScraperUtil.fileHasContent(ePubFile)) {
+                        updateAsbEpub(bookObj, ePubFile);
+                    }
+
+                    FileInputStream fis = new FileInputStream(ePubFile);
+                    String md5 = DigestUtils.md5Hex(fis);
+                    fis.close();
+
+                    ContentEntryFile contentEntryFile = new ContentEntryFile();
+                    contentEntryFile.setMimeType(ScraperConstants.MIMETYPE_EPUB);
+                    contentEntryFile.setFileSize(ePubFile.length());
+                    contentEntryFile.setLastModified(ePubFile.lastModified());
+                    contentEntryFile.setMd5sum(md5);
+                    contentEntryFile.setContentEntryFileUid(contentEntryFileDao.insert(contentEntryFile));
+
+                    ContentEntryContentEntryFileJoin fileJoin = new ContentEntryContentEntryFileJoin();
+                    fileJoin.setCecefjContentEntryFileUid(contentEntryFile.getContentEntryFileUid());
+                    fileJoin.setCecefjContentEntryUid(childEntry.getContentEntryUid());
+                    fileJoin.setCecefjUid(contentEntryFileJoinDao.insert(fileJoin));
+
+                } catch (IOException e) {
+                    System.err.println("IO Exception downloading/checking : " + ePubFile.getName());
+                }
             }
         }
         driver.close();
 
+    }
+
+    private ContentEntry setContentEntryData(ContentEntry entry, String id, String title, String sourceUrl, String lang) {
+        entry.setEntryId(id);
+        entry.setTitle(title);
+        entry.setSourceUrl(sourceUrl);
+        entry.setPublisher("Pratham");
+        entry.setLicenseType(ContentEntry.LICENSE_TYPE_CC_BY);
+        entry.setPrimaryLanguage(lang);
+        return entry;
     }
 
     public URL generatePublishUrl(URL africanBooksUrl, String bookId) throws MalformedURLException {
@@ -248,7 +268,7 @@ public class AsbScraper {
         BufferedReader opfReader = null;
         try {
 
-           zipFs = FileSystems.newFileSystem(path.toPath(), ClassLoader.getSystemClassLoader());
+            zipFs = FileSystems.newFileSystem(path.toPath(), ClassLoader.getSystemClassLoader());
             System.out.println("Opened filesystem for " + path);
             opfReader = new BufferedReader(
                     new InputStreamReader(Files.newInputStream(zipFs.getPath("content.opf")), "UTF-8"));
@@ -285,6 +305,7 @@ public class AsbScraper {
             //replace the epub.css to increase font size
             Path epubCssResPath = Paths.get(getClass().getResource("/com/ustadmobile/lib/contentscrapers/epub.css").toURI());
             Files.copy(epubCssResPath, zipFs.getPath("epub.css"), StandardCopyOption.REPLACE_EXISTING);
+
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
