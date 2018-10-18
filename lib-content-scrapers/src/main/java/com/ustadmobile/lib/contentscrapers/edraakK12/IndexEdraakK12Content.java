@@ -159,7 +159,6 @@ public class IndexEdraakK12Content {
                     fileJoin.setCecefjContentEntryUid(parentEntry.getContentEntryUid());
                     fileJoin.setCecefjUid(contentEntryFileJoin.insert(fileJoin));
 
-
                 }
 
 
@@ -183,20 +182,7 @@ public class IndexEdraakK12Content {
                     contentEntryDao.updateContentEntry(childEntry);
                 }
 
-                ContentEntryParentChildJoin parentChildJoin = contentParentChildJoinDao.findParentByChildUuids(childEntry.getContentEntryUid());
-                if (parentChildJoin == null) {
-                    parentChildJoin = new ContentEntryParentChildJoin();
-                    parentChildJoin.setCepcjParentContentEntryUid(parentEntry.getContentEntryUid());
-                    parentChildJoin.setCepcjChildContentEntryUid(childEntry.getContentEntryUid());
-                    parentChildJoin.setChildIndex(children.child_index);
-                    parentChildJoin.setCepcjUid(contentParentChildJoinDao.insert(parentChildJoin));
-
-                }else{
-                    parentChildJoin.setCepcjParentContentEntryUid(parentEntry.getContentEntryUid());
-                    parentChildJoin.setCepcjChildContentEntryUid(childEntry.getContentEntryUid());
-                    parentChildJoin.setChildIndex(children.child_index);
-                    contentParentChildJoinDao.updateParentChildJoin(parentChildJoin);
-                }
+                ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, parentEntry, childEntry, children.child_index);
 
                 findImportedComponent(children, childEntry);
 

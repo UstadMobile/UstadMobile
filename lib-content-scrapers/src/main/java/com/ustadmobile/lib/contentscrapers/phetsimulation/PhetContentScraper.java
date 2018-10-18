@@ -1,7 +1,9 @@
 package com.ustadmobile.lib.contentscrapers.phetsimulation;
 
+import com.ustadmobile.core.db.dao.ContentEntryDao;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.ScraperConstants;
+import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
 import com.ustadmobile.lib.util.UmUuidUtil;
 
@@ -17,10 +19,15 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
+import javax.swing.text.AbstractDocument;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
+
+import static com.ustadmobile.lib.db.entities.ContentEntry.LICENSE_TYPE_CC_BY;
 
 
 /**
@@ -50,13 +57,16 @@ public class PhetContentScraper {
     private Document simulationDoc;
     private String aboutText;
     private ArrayList<String> langugageList;
+    private Map<String, Boolean> languageMapUpdate;
 
     private String aboutDescription;
+    private boolean contentUpdated;
 
     public PhetContentScraper(String url, File destinationDir) {
         this.url = url;
         this.destinationDirectory = destinationDir;
         langugageList = new ArrayList<>();
+        languageMapUpdate = new HashMap<>();
         this.title = url.substring(url.lastIndexOf("/") + 1, url.length());
     }
 
@@ -101,8 +111,8 @@ public class PhetContentScraper {
             englishLocation.mkdirs();
 
             if (hrefLink.contains("download")) {
-                downloadContent(simulationUrl, hrefLink, englishLocation);
-                contentUpdated = true;
+                contentUpdated = downloadContent(simulationUrl, hrefLink, englishLocation);
+                languageMapUpdate.put(englishLocation.getName(), contentUpdated);
                 break;
             }
         }
@@ -130,8 +140,9 @@ public class PhetContentScraper {
                 String hrefLink = links.attr("href");
 
                 if (hrefLink.contains("download")) {
-                    downloadContent(simulationUrl, hrefLink, languageLocation);
-                    contentUpdated = true;
+                    boolean isLanguageUpdated = downloadContent(simulationUrl, hrefLink, languageLocation);
+                    languageMapUpdate.put(languageLocation.getName(), isLanguageUpdated);
+                    contentUpdated |= isLanguageUpdated;
                     break;
                 }
 
@@ -146,19 +157,28 @@ public class PhetContentScraper {
                 }
             }
         }
+        this.contentUpdated = contentUpdated;
     }
 
+    public Map<String, Boolean> getLanguageUpdatedMap(){
+        return languageMapUpdate;
+    }
+
+    public boolean isAnyContentUpdated(){
+        return contentUpdated;
+    }
 
     /**
      * Find the category for the phet simulation
      *
      * @return a list of categories a single phet simulation could be in
+     * @param contentEntryDao
      */
-    public ArrayList<OpdsEntryWithRelations> getCategoryRelations() {
+    public ArrayList<ContentEntry> getCategoryRelations(ContentEntryDao contentEntryDao) {
 
         Elements selected = simulationDoc.select("ul.nav-ul div.link-holder span.selected");
 
-        ArrayList<OpdsEntryWithRelations> categoryRelations = new ArrayList<>();
+        ArrayList<ContentEntry> categoryRelations = new ArrayList<>();
         for (Element category : selected) {
 
             if (Arrays.stream(CATEGORY).parallel().noneMatch(category.text()::contains)) {
@@ -166,10 +186,17 @@ public class PhetContentScraper {
                 String categoryName = category.text(); // category name
                 String path = category.parent().attr("href"); // url path to category
 
-                OpdsEntryWithRelations newEntry = new OpdsEntryWithRelations(
-                        UmUuidUtil.encodeUuidWithAscii85(UUID.randomUUID()), path, categoryName);
+                ContentEntry categoryContentEntry = contentEntryDao.findBySourceUrl(path);
+                if (categoryContentEntry == null) {
+                    categoryContentEntry = new ContentEntry();
+                    categoryContentEntry = setContentEntryData(categoryContentEntry, path, categoryName, path, ScraperConstants.ENGLISH_LANG_CODE);
+                    categoryContentEntry.setContentEntryUid(contentEntryDao.insert(categoryContentEntry));
+                } else {
+                    categoryContentEntry = setContentEntryData(categoryContentEntry, path, categoryName, path, ScraperConstants.ENGLISH_LANG_CODE);
+                    contentEntryDao.updateContentEntry(categoryContentEntry);
+                }
 
-                categoryRelations.add(newEntry);
+                categoryRelations.add(categoryContentEntry);
                 System.out.println(categoryName);
             }
         }
@@ -178,7 +205,19 @@ public class PhetContentScraper {
 
     }
 
-    private void downloadContent(URL simulationUrl, String hrefLink, File languageLocation) throws IOException {
+    private ContentEntry setContentEntryData(ContentEntry entry, String id, String title, String sourceUrl, String lang) {
+        entry.setEntryId(id);
+        entry.setTitle(title);
+        entry.setSourceUrl(sourceUrl);
+        entry.setPublisher("Phet");
+        entry.setLicenseType(LICENSE_TYPE_CC_BY);
+        String[] country = lang.split("-");
+        entry.setPrimaryLanguage(country[0]);
+        entry.setPrimaryLanguage(country[1]);
+        return entry;
+    }
+
+    private boolean downloadContent(URL simulationUrl, String hrefLink, File languageLocation) throws IOException {
 
         URL link = new URL(simulationUrl, hrefLink);
 
@@ -192,7 +231,7 @@ public class PhetContentScraper {
         File simulationFile = new File(simulationLocation, fileName);
 
         if(!ContentScraperUtil.isFileModified(conn, simulationLocation, fileName)){
-            return;
+            return false;
         }
 
         FileUtils.writeStringToFile(new File(simulationLocation, ScraperConstants.ABOUT_HTML), aboutText, ScraperConstants.UTF_ENCODING);
@@ -208,6 +247,7 @@ public class PhetContentScraper {
             e.printStackTrace();
         }
 
+        return true;
     }
 
 
@@ -218,9 +258,9 @@ public class PhetContentScraper {
      * @return a list of languages the phet simulation was translated to
      * @throws IOException
      */
-    public ArrayList<OpdsEntryWithRelations> getTranslations(File destinationDirectory) throws IOException {
+    public ArrayList<ContentEntry>  getTranslations(File destinationDirectory, ContentEntryDao contentEntryDao) throws IOException {
 
-        ArrayList<OpdsEntryWithRelations> translationsEntry = new ArrayList<>();
+        ArrayList<ContentEntry> translationsEntry = new ArrayList<>();
 
         for (File translationDir : destinationDirectory.listFiles()) {
 
@@ -238,10 +278,24 @@ public class PhetContentScraper {
                             if (file.getName().endsWith(".html")) {
                                 // TODO recheck entry id for translations
                                 String langTitle = Jsoup.parse(file, ScraperConstants.UTF_ENCODING).title();
-                                OpdsEntryWithRelations newEntry = new OpdsEntryWithRelations(
-                                        UmUuidUtil.encodeUuidWithAscii85(UUID.randomUUID()), this.title + "\\" + langCode, langTitle);
-                                newEntry.setLanguage(langCode);
-                                translationsEntry.add(newEntry);
+
+                                String path = this.title + "\\" + langCode;
+                                ContentEntry languageContentEntry = contentEntryDao.findBySourceUrl(path);
+                                if (languageContentEntry == null) {
+                                    languageContentEntry = new ContentEntry();
+                                    languageContentEntry = setContentEntryData(languageContentEntry, path, langTitle, path, langCode);
+                                    languageContentEntry.setContentEntryUid(contentEntryDao.insert(languageContentEntry));
+                                } else {
+                                    languageContentEntry = setContentEntryData(languageContentEntry, path, langTitle, path, langCode);
+                                    contentEntryDao.updateContentEntry(languageContentEntry);
+                                }
+
+                                if(getLanguageUpdatedMap().get(langCode)){
+
+                                    // TODO create entry file, create entry file join
+
+                                }
+                                translationsEntry.add(languageContentEntry);
                                 break;
                             }
                         }

@@ -2,6 +2,11 @@ package com.ustadmobile.lib.contentscrapers;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.ustadmobile.core.db.dao.ContentEntryContentCategoryJoinDao;
+import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
+import com.ustadmobile.lib.db.entities.ContentEntry;
+import com.ustadmobile.lib.db.entities.ContentEntryContentCategoryJoin;
+import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -401,5 +406,84 @@ public class ContentScraperUtil {
         FileUtils.writeStringToFile(modifiedFile, lastModified, ScraperConstants.UTF_ENCODING);
 
         return true;
+    }
+
+
+    /**
+     * Insert or Update the database for those parentChild Joins where the child have 1 parent
+     * @param dao
+     * @param parentEntry
+     * @param childEntry
+     * @param index
+     * @return the updated/created join
+     */
+    public static ContentEntryParentChildJoin insertOrUpdateParentChildJoin(ContentEntryParentChildJoinDao dao, ContentEntry parentEntry, ContentEntry childEntry, int index) {
+
+        ContentEntryParentChildJoin parentChildJoin = dao.findParentByChildUuids(childEntry.getContentEntryUid());
+        if (parentChildJoin == null) {
+            parentChildJoin = new ContentEntryParentChildJoin();
+            parentChildJoin.setCepcjParentContentEntryUid(parentEntry.getContentEntryUid());
+            parentChildJoin.setCepcjChildContentEntryUid(childEntry.getContentEntryUid());
+            parentChildJoin.setChildIndex(index);
+            parentChildJoin.setCepcjUid(dao.insert(parentChildJoin));
+        }else{
+            parentChildJoin.setCepcjParentContentEntryUid(parentEntry.getContentEntryUid());
+            parentChildJoin.setCepcjChildContentEntryUid(childEntry.getContentEntryUid());
+            parentChildJoin.setChildIndex(index);
+            dao.updateParentChildJoin(parentChildJoin);
+        }
+        return parentChildJoin;
+    }
+
+
+    /**
+     * Insert or Update the database for those parentChildJoin where the child might have multiple parents (search by uuids of parent and child)
+     * @param dao database to search
+     * @param parentEntry parent entry
+     * @param childEntry child entry
+     * @param index count
+     * @return the updated/created join
+     */
+    public static ContentEntryParentChildJoin insertOrUpdateChildWithMultipleParentsJoin(ContentEntryParentChildJoinDao dao, ContentEntry parentEntry, ContentEntry childEntry, int index) {
+
+        ContentEntryParentChildJoin parentChildJoin = dao.findJoinByParentChildUuids(parentEntry.getContentEntryUid(),childEntry.getContentEntryUid());
+        if (parentChildJoin == null) {
+            parentChildJoin = new ContentEntryParentChildJoin();
+            parentChildJoin.setCepcjParentContentEntryUid(parentEntry.getContentEntryUid());
+            parentChildJoin.setCepcjChildContentEntryUid(childEntry.getContentEntryUid());
+            parentChildJoin.setChildIndex(index);
+            parentChildJoin.setCepcjUid(dao.insert(parentChildJoin));
+        }else{
+            parentChildJoin.setCepcjParentContentEntryUid(parentEntry.getContentEntryUid());
+            parentChildJoin.setCepcjChildContentEntryUid(childEntry.getContentEntryUid());
+            parentChildJoin.setChildIndex(index);
+            dao.updateParentChildJoin(parentChildJoin);
+        }
+        return parentChildJoin;
+    }
+
+
+    /**
+     * Insert or Update the database for those parentChildJoin where the child might have multiple categories (search by uuids of category and child)
+     * @param contentEntryCategoryJoinDao database to search
+     * @param category parent entry
+     * @param childEntry child entry
+     *
+     * @return the updated/created join
+     */
+    public static ContentEntryContentCategoryJoin insertOrUpdateChildWithMultipleCategoriesJoin(ContentEntryContentCategoryJoinDao contentEntryCategoryJoinDao, ContentEntry category, ContentEntry childEntry) {
+        ContentEntryContentCategoryJoin categoryToSimlationJoin = contentEntryCategoryJoinDao.findJoinByParentChildUuids(category.getContentEntryUid(), childEntry.getContentEntryUid());
+        if (categoryToSimlationJoin == null) {
+            categoryToSimlationJoin = new ContentEntryContentCategoryJoin();
+            categoryToSimlationJoin.setCeccjContentCategoryUid(category.getContentEntryUid());
+            categoryToSimlationJoin.setCeccjContentEntryUid(childEntry.getContentEntryUid());
+            categoryToSimlationJoin.setCeccjUid(contentEntryCategoryJoinDao.insert(categoryToSimlationJoin));
+
+        } else {
+            categoryToSimlationJoin.setCeccjContentCategoryUid(category.getContentEntryUid());
+            categoryToSimlationJoin.setCeccjContentEntryUid(childEntry.getContentEntryUid());
+            contentEntryCategoryJoinDao.updateCategoryChildJoin(categoryToSimlationJoin);
+        }
+        return categoryToSimlationJoin;
     }
 }

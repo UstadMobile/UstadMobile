@@ -1,23 +1,36 @@
 package com.ustadmobile.lib.contentscrapers.phetsimulation;
 
-import com.ustadmobile.lib.db.entities.OpdsEntry;
-import com.ustadmobile.lib.db.entities.OpdsEntryParentToChildJoin;
-import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
-import com.ustadmobile.lib.db.entities.OpdsLink;
-import com.ustadmobile.lib.util.UmUuidUtil;
+import com.ustadmobile.core.db.UmAppDatabase;
+import com.ustadmobile.core.db.dao.ContentEntryContentCategoryJoinDao;
+import com.ustadmobile.core.db.dao.ContentEntryContentEntryFileJoinDao;
+import com.ustadmobile.core.db.dao.ContentEntryDao;
+import com.ustadmobile.core.db.dao.ContentEntryFileDao;
+import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
+import com.ustadmobile.core.db.dao.ContentEntryRelatedEntryJoinDao;
+import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
+import com.ustadmobile.lib.contentscrapers.ScraperConstants;
+import com.ustadmobile.lib.db.entities.ContentEntry;
+import com.ustadmobile.lib.db.entities.ContentEntryContentCategoryJoin;
+import com.ustadmobile.lib.db.entities.ContentEntryContentEntryFileJoin;
+import com.ustadmobile.lib.db.entities.ContentEntryFile;
+import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin;
+import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoin;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.UUID;
+import java.util.List;
+
+import static com.ustadmobile.lib.db.entities.ContentEntry.LICENSE_TYPE_CC_BY;
 
 /**
  * The Phet Simulation Website provides a list of all the available Html5 Content in one of their categories found at
@@ -28,11 +41,14 @@ import java.util.UUID;
  */
 public class IndexPhetContentScraper {
 
-    static final int ENTRY_SIZE_LINK_LENGTH = 1000;
     private File destinationDirectory;
     private URL url;
-    private ArrayList<OpdsEntryWithRelations> entryWithRelationsList;
-    private ArrayList<OpdsEntryParentToChildJoin> parentToChildJoins;
+    private ContentEntryDao contentEntryDao;
+    private ContentEntryParentChildJoinDao contentParentChildJoinDao;
+    private ContentEntryFileDao contentEntryFileDao;
+    private ContentEntryContentEntryFileJoinDao contentEntryFileJoin;
+    private ContentEntryContentCategoryJoinDao contentEntryCategoryJoinDao;
+    private ContentEntryRelatedEntryJoinDao contentEntryRelatedJoinDao;
 
 
     public static void main(String[] args) {
@@ -70,8 +86,13 @@ public class IndexPhetContentScraper {
         destinationDir.mkdirs();
         destinationDirectory = destinationDir;
 
-        entryWithRelationsList = new ArrayList<>();
-        parentToChildJoins = new ArrayList<>();
+        UmAppDatabase db = UmAppDatabase.getInstance(null);
+        contentEntryDao = db.getContentEntryDao();
+        contentParentChildJoinDao = db.getContentEntryParentChildJoinDao();
+        contentEntryFileDao = db.getContentEntryFileDao();
+        contentEntryFileJoin = db.getContentEntryContentEntryFileJoinDao();
+        contentEntryCategoryJoinDao = db.getContentEntryContentCategoryJoinDao();
+        contentEntryRelatedJoinDao = db.getContentEntryRelatedEntryJoinDao();
 
         Document document = Jsoup.connect(urlString).get();
 
@@ -84,10 +105,17 @@ public class IndexPhetContentScraper {
 
         Elements simulationList = document.select("td.simulation-list-item span.sim-badge-html");
 
-        OpdsEntryWithRelations parentPhet = new OpdsEntryWithRelations(
-                UmUuidUtil.encodeUuidWithAscii85(UUID.randomUUID()), "https://phet.colorado.edu/", "Phet Interactive Simulations");
-
-        entryWithRelationsList.add(parentPhet);
+        ContentEntry phetParentEntry = contentEntryDao.findBySourceUrl("https://phet.colorado.edu/");
+        if (phetParentEntry == null) {
+            phetParentEntry = new ContentEntry();
+            phetParentEntry = setContentEntryData(phetParentEntry, "https://phet.colorado.edu/",
+                    "Phet Interactive Simulations", "https://phet.colorado.edu/", ScraperConstants.ENGLISH_LANG_CODE);
+            phetParentEntry.setContentEntryUid(contentEntryDao.insert(phetParentEntry));
+        } else {
+            phetParentEntry = setContentEntryData(phetParentEntry, "https://phet.colorado.edu/",
+                    "Phet Interactive Simulations", "https://phet.colorado.edu/", ScraperConstants.ENGLISH_LANG_CODE);
+            contentEntryDao.updateContentEntry(phetParentEntry);
+        }
 
         for (Element simulation : simulationList) {
 
@@ -95,55 +123,80 @@ public class IndexPhetContentScraper {
             String simulationUrl = new URL(url, path).toString();
             String title = simulationUrl.substring(simulationUrl.lastIndexOf("/") + 1, simulationUrl.length());
 
-            OpdsEntryWithRelations simulationChild = new OpdsEntryWithRelations(
-                    UmUuidUtil.encodeUuidWithAscii85(UUID.randomUUID()), path, title);
-
-            ArrayList<OpdsEntryWithRelations> categoryList;
-            ArrayList<OpdsEntryWithRelations> translationList;
+            ContentEntry englishSimContentEntry = contentEntryDao.findBySourceUrl(path);
+            if (englishSimContentEntry == null) {
+                englishSimContentEntry = new ContentEntry();
+                englishSimContentEntry = setContentEntryData(englishSimContentEntry, path, title, path, ScraperConstants.ENGLISH_LANG_CODE);
+                englishSimContentEntry.setContentEntryUid(contentEntryDao.insert(englishSimContentEntry));
+            } else {
+                englishSimContentEntry = setContentEntryData(englishSimContentEntry, path, title, path, ScraperConstants.ENGLISH_LANG_CODE);
+                contentEntryDao.updateContentEntry(englishSimContentEntry);
+            }
 
             PhetContentScraper scraper = new PhetContentScraper(simulationUrl, destinationDirectory);
             try {
                 scraper.scrapeContent();
 
-                categoryList = scraper.getCategoryRelations();
-                translationList = scraper.getTranslations(destinationDirectory);
+                if (scraper.isAnyContentUpdated()) {
 
-                entryWithRelationsList.add(simulationChild);
-                int count = 0;
-                for (OpdsEntryWithRelations category : categoryList) {
+                    boolean isEnglishUpdated = scraper.getLanguageUpdatedMap().get("en");
+                    if(isEnglishUpdated){
 
-                    entryWithRelationsList.add(category);
+                         // TODO create entryFile, create join
+                    }
 
-                    OpdsEntryParentToChildJoin phetToCategoryJoin = new OpdsEntryParentToChildJoin(parentPhet.getUuid(),
-                            category.getUuid(), count++);
+                    ArrayList<ContentEntry> categoryList = scraper.getCategoryRelations(contentEntryDao);
+                    ArrayList<ContentEntry> translationList = scraper.getTranslations(destinationDirectory, contentEntryDao);
 
-                    OpdsEntryParentToChildJoin categoryToSimulationJoin = new OpdsEntryParentToChildJoin(category.getUuid(),
-                            simulationChild.getUuid(), count++);
+                    // TODO remove all categories that no longer exist
+                    // TODO remove all categories that dont belong in a phet simulation anymore
 
-                    parentToChildJoins.add(phetToCategoryJoin);
-                    parentToChildJoins.add(categoryToSimulationJoin);
+                    int categoryCount = 0;
+                    for (ContentEntry category : categoryList) {
 
-                    for (OpdsEntryWithRelations translation : translationList) {
+                        ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, phetParentEntry, category, categoryCount++);
+                        ContentScraperUtil.insertOrUpdateChildWithMultipleParentsJoin(contentParentChildJoinDao, category, englishSimContentEntry, 0);
+                        ContentScraperUtil.insertOrUpdateChildWithMultipleCategoriesJoin(contentEntryCategoryJoinDao, category, englishSimContentEntry);
 
-                        OpdsEntryParentToChildJoin categoryToSimulationTranslationJoin = new OpdsEntryParentToChildJoin(category.getUuid(),
-                                translation.getUuid(), count++);
+                        int translationsCount = 1;
+                        for (ContentEntry translation : translationList) {
 
-                        parentToChildJoins.add(categoryToSimulationTranslationJoin);
+                            ContentEntryRelatedEntryJoin relatedTranslationJoin = contentEntryRelatedJoinDao.findPrimaryByTranslation(translation.getContentEntryUid());
+                            if (relatedTranslationJoin == null) {
+                                relatedTranslationJoin = new ContentEntryRelatedEntryJoin();
+                                relatedTranslationJoin.setCerejRelLanguage(translation.getPrimaryLanguage());
+                                relatedTranslationJoin.setCerejContentEntryUid(englishSimContentEntry.getContentEntryUid());
+                                relatedTranslationJoin.setCerejRelatedEntryUid(translation.getContentEntryUid());
+                                relatedTranslationJoin.setCerejUid(contentEntryRelatedJoinDao.insert(relatedTranslationJoin));
+                            } else {
+                                relatedTranslationJoin.setCerejRelLanguage(translation.getPrimaryLanguage());
+                                relatedTranslationJoin.setCerejContentEntryUid(englishSimContentEntry.getContentEntryUid());
+                                relatedTranslationJoin.setCerejRelatedEntryUid(translation.getContentEntryUid());
+                                relatedTranslationJoin.setCerejUid(contentEntryRelatedJoinDao.insert(relatedTranslationJoin));
+                                contentEntryRelatedJoinDao.updateSimTranslationJoin(relatedTranslationJoin);
+                            }
 
+                            ContentScraperUtil.insertOrUpdateChildWithMultipleParentsJoin(contentParentChildJoinDao, category, translation, translationsCount++);
+                            ContentScraperUtil.insertOrUpdateChildWithMultipleCategoriesJoin(contentEntryCategoryJoinDao, category, translation);
 
+                        }
                     }
                 }
-
-
-                OpdsLink newEntryLink = new OpdsLink(simulationChild.getUuid(), "application/zip",
-                        destinationDirectory.getPath() + "\\" + title + ".zip", OpdsEntry.LINK_REL_ACQUIRE);
-                newEntryLink.setLength(ENTRY_SIZE_LINK_LENGTH);
-                simulationChild.setLinks(Collections.singletonList(newEntryLink));
 
             } catch (Exception e) {
                 System.out.println(e.getCause());
             }
         }
+    }
+
+    private ContentEntry setContentEntryData(ContentEntry entry, String id, String title, String sourceUrl, String lang) {
+        entry.setEntryId(id);
+        entry.setTitle(title);
+        entry.setSourceUrl(sourceUrl);
+        entry.setPublisher("Phet");
+        entry.setLicenseType(LICENSE_TYPE_CC_BY);
+        entry.setPrimaryLanguage(lang);
+        return entry;
     }
 
 }

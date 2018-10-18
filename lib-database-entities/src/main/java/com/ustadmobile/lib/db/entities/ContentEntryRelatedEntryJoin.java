@@ -17,39 +17,39 @@ public class ContentEntryRelatedEntryJoin {
     public static final int REL_TYPE_SEE_ALSO = 2;
 
     @UmPrimaryKey(autoIncrement = true)
-    private int cerejUid;
+    private long cerejUid;
 
-    private int cerejContentEntryUid;
+    private long cerejContentEntryUid;
 
-    private int cerejRelatedEntryUid;
+    private long cerejRelatedEntryUid;
 
     private int relType;
 
-    private int cerejRelLanguage;
+    private String cerejRelLanguage;
 
     private String comment;
 
-    public int getCerejUid() {
+    public long getCerejUid() {
         return cerejUid;
     }
 
-    public void setCerejUid(int cerejUid) {
+    public void setCerejUid(long cerejUid) {
         this.cerejUid = cerejUid;
     }
 
-    public int getCerejContentEntryUid() {
+    public long getCerejContentEntryUid() {
         return cerejContentEntryUid;
     }
 
-    public void setCerejContentEntryUid(int cerejContentEntryUid) {
+    public void setCerejContentEntryUid(long cerejContentEntryUid) {
         this.cerejContentEntryUid = cerejContentEntryUid;
     }
 
-    public int getCerejRelatedEntryUid() {
+    public long getCerejRelatedEntryUid() {
         return cerejRelatedEntryUid;
     }
 
-    public void setCerejRelatedEntryUid(int cerejRelatedEntryUid) {
+    public void setCerejRelatedEntryUid(long cerejRelatedEntryUid) {
         this.cerejRelatedEntryUid = cerejRelatedEntryUid;
     }
 
@@ -61,11 +61,11 @@ public class ContentEntryRelatedEntryJoin {
         this.relType = relType;
     }
 
-    public int getCerejRelLanguage() {
+    public String getCerejRelLanguage() {
         return cerejRelLanguage;
     }
 
-    public void setCerejRelLanguage(int cerejRelLanguage) {
+    public void setCerejRelLanguage(String cerejRelLanguage) {
         this.cerejRelLanguage = cerejRelLanguage;
     }
 

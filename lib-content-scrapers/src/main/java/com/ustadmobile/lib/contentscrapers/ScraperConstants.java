@@ -101,7 +101,7 @@ public class ScraperConstants {
            ComponentType.TEST.getType());
 
 
-    public static final String PNG_EXT = ".png";
+
     public static final String ARABIC_FONT_REGULAR = "DroidNaskh-Regular.woff2";
     public static final String ARABIC_FONT_BOLD = "DroidNaskh-Bold.woiff2";
     public static final String INDEX_HTML = "index.html";
@@ -110,8 +110,10 @@ public class ScraperConstants {
     public static final String MIMETYPE_ZIP = "application/zip";
 
     public static final String ZIP_EXT = ".zip";
+    public static final String PNG_EXT = ".png";
 
     public static final String ARABIC_LANG_CODE = "ar";
+    public static final String ENGLISH_LANG_CODE = "en";
 
 
 
