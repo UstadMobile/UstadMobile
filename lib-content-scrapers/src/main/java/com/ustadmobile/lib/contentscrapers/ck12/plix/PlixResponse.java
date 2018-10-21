@@ -3,8 +3,7 @@ package com.ustadmobile.lib.contentscrapers.ck12.plix;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public abstract class PlixResponse {
-
+public class PlixResponse {
 
     @Expose
     @SerializedName("response")

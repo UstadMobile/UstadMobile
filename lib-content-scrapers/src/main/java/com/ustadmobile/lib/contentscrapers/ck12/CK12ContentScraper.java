@@ -487,7 +487,7 @@ public class CK12ContentScraper {
     }
 
     private boolean isPageUpdated(Document doc, File file){
-        String date = doc.select("h3:contains(Last Modified) ~ span").attr("data-date");
+        String date = doc.select("h2:contains(Last Modified) ~ span").attr("data-date");
         long parsedDate = ContentScraperUtil.parseServerDate(date);
         return ContentScraperUtil.isContentUpdated(parsedDate, file);
     }
