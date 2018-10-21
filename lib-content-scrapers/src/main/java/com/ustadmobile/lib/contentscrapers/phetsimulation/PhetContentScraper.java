@@ -210,7 +210,7 @@ public class PhetContentScraper {
         entry.setLicenseType(LICENSE_TYPE_CC_BY);
         String[] country = lang.replaceAll("_","-").split("-");
         entry.setPrimaryLanguage(country[0]);
-        entry.setPrimaryLanguage(country.length > 1 ? country[1] : "");
+        entry.setPrimaryLanguageCountry(country.length > 1 ? country[1] : "");
         return entry;
     }
 
