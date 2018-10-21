@@ -1,5 +1,14 @@
 package com.ustadmobile.lib.contentscrapers.ddl;
 
+import com.ustadmobile.core.db.UmAppDatabase;
+import com.ustadmobile.core.db.dao.ContentEntryContentCategoryJoinDao;
+import com.ustadmobile.core.db.dao.ContentEntryContentEntryFileJoinDao;
+import com.ustadmobile.core.db.dao.ContentEntryDao;
+import com.ustadmobile.core.db.dao.ContentEntryFileDao;
+import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
+import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
+import com.ustadmobile.lib.contentscrapers.ScraperConstants;
+import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.OpdsEntry;
 import com.ustadmobile.lib.db.entities.OpdsEntryParentToChildJoin;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
@@ -28,12 +37,13 @@ public class IndexDdlContent {
     private URL url;
     private File destinationDirectory;
 
-    private List<OpdsEntryWithRelations> entryWithRelationsList;
-    private List<OpdsEntryParentToChildJoin> parentToChildJoins;
     private int maxNumber;
-    private OpdsEntryWithRelations parentDdl;
-    private OpdsEntryWithRelations langEntry;
+    private ContentEntry parentDdl;
+    private ContentEntry langEntry;
     private int langCount = 0;
+    private ContentEntryDao contentEntryDao;
+    private ContentEntryParentChildJoinDao contentParentChildJoinDao;
+    private ContentEntryContentCategoryJoinDao contentCategoryChildJoinDao;
 
     public void findContent(String urlString, File destinationDir) throws IOException {
 
@@ -47,20 +57,37 @@ public class IndexDdlContent {
         destinationDir.mkdirs();
         destinationDirectory = destinationDir;
 
+        UmAppDatabase db = UmAppDatabase.getInstance(null);
+        contentEntryDao = db.getContentEntryDao();
+        contentParentChildJoinDao = db.getContentEntryParentChildJoinDao();
+        contentCategoryChildJoinDao = db.getContentEntryContentCategoryJoinDao();
 
-        entryWithRelationsList = new ArrayList<>();
-        parentToChildJoins = new ArrayList<>();
+        parentDdl = contentEntryDao.findBySourceUrl("https://www.ddl.af/");
+        if (parentDdl == null) {
+            parentDdl = new ContentEntry();
+            parentDdl = setContentEntryData(parentDdl, "https://www.ddl.af/",
+                    "Darakht-e Danesh", "https://www.ddl.af/", ScraperConstants.ENGLISH_LANG_CODE);
+            parentDdl.setContentEntryUid(contentEntryDao.insert(parentDdl));
+        } else {
+            parentDdl = setContentEntryData(parentDdl, "https://www.ddl.af/",
+                    "Darakht-e Danesh", "https://www.ddl.af/", ScraperConstants.ENGLISH_LANG_CODE);
+            contentEntryDao.updateContentEntry(parentDdl);
+        }
 
-
-        parentDdl = new OpdsEntryWithRelations(
-                UmUuidUtil.encodeUuidWithAscii85(UUID.randomUUID()), "https://www.ddl.af/", "Darakht-e Danesh");
-
-        entryWithRelationsList.add(parentDdl);
-
-        browseLanguages("ps");
-        browseLanguages("fa");
         browseLanguages("en");
+        browseLanguages("fa");
+        browseLanguages("ps");
 
+    }
+
+    private ContentEntry setContentEntryData(ContentEntry entry, String id, String title, String sourceUrl, String lang) {
+        entry.setEntryId(id);
+        entry.setTitle(title);
+        entry.setSourceUrl(sourceUrl);
+        entry.setPublisher("DDL");
+        entry.setLicenseType(ContentEntry.LICENSE_TYPE_CC_BY);
+        entry.setPrimaryLanguage(lang);
+        return entry;
     }
 
     private void browseLanguages(String lang) throws IOException {
@@ -70,14 +97,19 @@ public class IndexDdlContent {
 
         Elements pageList = document.select("a.page-link");
 
-        langEntry = new OpdsEntryWithRelations(
-                UmUuidUtil.encodeUuidWithAscii85(UUID.randomUUID()), lang + "/resources/list", lang);
+        langEntry = contentEntryDao.findBySourceUrl("lang" + "/resources/list");
+        if (langEntry == null) {
+            langEntry = new ContentEntry();
+            langEntry = setContentEntryData(langEntry, "lang" + "/resources/list",
+                    lang, "lang" + "/resources/list", lang);
+            langEntry.setContentEntryUid(contentEntryDao.insert(langEntry));
+        } else {
+            langEntry = setContentEntryData(langEntry, "lang" + "/resources/list",
+                    lang, "lang" + "/resources/list", lang);
+            contentEntryDao.updateContentEntry(langEntry);
+        }
 
-        entryWithRelationsList.add(langEntry);
-
-        OpdsEntryParentToChildJoin join = new OpdsEntryParentToChildJoin(parentDdl.getUuid(),
-                langEntry.getUuid(), langCount);
-        parentToChildJoins.add(join);
+        ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, parentDdl, langEntry, langCount);
 
         maxNumber = 0;
         for (Element page : pageList) {
@@ -115,29 +147,24 @@ public class IndexDdlContent {
                 DdlContentScraper scraper = new DdlContentScraper(url, destinationDirectory);
                 try {
                     scraper.scrapeContent();
-                    ArrayList<OpdsEntryWithRelations> categories = scraper.getCategoryRelations();
-                    ArrayList<OpdsEntryWithRelations> files = scraper.getOpdsFiles();
+                    ArrayList<ContentEntry> categories = scraper.getCategoryRelations();
+                    ArrayList<ContentEntry> files = scraper.getOpdsFiles();
                     int categoryCount = 0;
-                    for(OpdsEntryWithRelations category: categories){
-                        OpdsEntryParentToChildJoin join = new OpdsEntryParentToChildJoin(langEntry.getUuid(),
-                                category.getUuid(), categoryCount++);
+                    for (ContentEntry category : categories) {
 
-                        entryWithRelationsList.add(category);
-                        parentToChildJoins.add(join);
+                        ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao,
+                                langEntry, category, categoryCount++);
 
                         int fileCount = 0;
-                        for(OpdsEntryWithRelations file: files){
+                        for (ContentEntry file : files) {
 
-                            OpdsEntryParentToChildJoin categoryFileJoin = new OpdsEntryParentToChildJoin(category.getUuid(),
-                                    file.getUuid(), fileCount++);
-
-                            parentToChildJoins.add(categoryFileJoin);
-
+                            ContentScraperUtil.insertOrUpdateChildWithMultipleParentsJoin(contentParentChildJoinDao,
+                                    category, file, fileCount++);
+                            ContentScraperUtil.insertOrUpdateChildWithMultipleCategoriesJoin(contentCategoryChildJoinDao,
+                                    category, file);
 
                         }
                     }
-                    entryWithRelationsList.addAll(files);
-
 
                 } catch (IOException | URISyntaxException e) {
                     System.out.println("Error downloading resource at " + url);
