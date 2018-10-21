@@ -23,7 +23,7 @@ public abstract class OpdsEntryDao {
     public abstract void insertList(List<OpdsEntry> entries);
 
 
-    @UmQuery("SELECT (COUNT(*) > 0) From OpdsEntry WHERE uuid = :entryId")
+    @UmQuery("SELECT COUNT(uuid) FROM OpdsEntry WHERE uuid = :entryId")
     public abstract UmLiveData<Boolean> isEntryPresent(String entryId);
 
     @UmQuery("Select title From OpdsEntry Where uuid = :uuid")

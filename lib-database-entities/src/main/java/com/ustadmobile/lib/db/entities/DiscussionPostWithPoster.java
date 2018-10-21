@@ -5,16 +5,26 @@ import com.ustadmobile.lib.database.annotation.UmEmbedded;
 public class DiscussionPostWithPoster extends DiscussionPost {
 
     @UmEmbedded
-    private Person poster;
+    private Person person;
 
     private boolean liked;
 
-    public Person getPoster() {
-        return poster;
+    private boolean following;
+
+    public Person getPerson() {
+        return person;
     }
 
-    public void setPoster(Person poster) {
-        this.poster = poster;
+    public void setPerson(Person person) {
+        this.person = person;
+    }
+
+    public boolean isFollowing() {
+        return following;
+    }
+
+    public void setFollowing(boolean following) {
+        this.following = following;
     }
 
     public boolean isLiked() {

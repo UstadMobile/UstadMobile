@@ -4,6 +4,7 @@ import com.ustadmobile.core.db.dao.ClazzDao;
 import com.ustadmobile.core.db.dao.ClazzMemberDao;
 import com.ustadmobile.core.db.dao.ContainerFileDao;
 import com.ustadmobile.core.db.dao.ContainerFileEntryDao;
+import com.ustadmobile.core.db.dao.ContentEntryDao;
 import com.ustadmobile.core.db.dao.CrawJoblItemDao;
 import com.ustadmobile.core.db.dao.CrawlJobDao;
 import com.ustadmobile.core.db.dao.DiscussionPostDao;
@@ -162,6 +163,7 @@ public abstract class UmAppDatabase{
     public abstract WamdaUpdateDao getWamdaUpdateDao();
 
     public abstract WamdaShareDao getWamdaShareDao();
+    public abstract ContentEntryDao getContentEntryDao();
 
     @UmDbContext
     public abstract Object getContext();

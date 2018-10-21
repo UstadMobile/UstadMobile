@@ -13,6 +13,8 @@ public class DiscussionPost {
 
     private String postContent;
 
+    private String quotedContent;
+
     private long timePosted;
 
     private long clazzClazzUid;
@@ -55,5 +57,13 @@ public class DiscussionPost {
 
     public void setClazzClazzUid(long clazzClazzUid) {
         this.clazzClazzUid = clazzClazzUid;
+    }
+
+    public String getQuotedContent() {
+        return quotedContent;
+    }
+
+    public void setQuotedContent(String quotedContent) {
+        this.quotedContent = quotedContent;
     }
 }

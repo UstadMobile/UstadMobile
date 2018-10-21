@@ -16,24 +16,18 @@ import com.ustadmobile.lib.database.annotation.UmDbContext;
 import com.ustadmobile.lib.database.annotation.UmDelete;
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
+import com.ustadmobile.lib.database.annotation.UmQueryFindByPrimaryKey;
 import com.ustadmobile.lib.database.annotation.UmUpdate;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import javax.annotation.processing.Filer;
-import javax.annotation.processing.Messager;
-import javax.annotation.processing.ProcessingEnvironment;
-import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedOptions;
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.Element;
@@ -45,7 +39,6 @@ import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
-import javax.tools.Diagnostic;
 
 import static com.ustadmobile.lib.annotationprocessor.core.DbProcessorCore.OPT_ROOM_OUTPUT;
 
@@ -85,7 +78,7 @@ public class DbProcessorRoom extends AbstractDbProcessor{
      * @throws IOException If there are IO exceptions writing newly generated classes
      */
     @Override
-    public void processDbClass(TypeElement dbType,  File destinationDir) throws IOException {
+    public void processDbClass(TypeElement dbType,  String destination) throws IOException {
         String roomDbClassName = dbType.getSimpleName() + "_RoomDb";
         String roomDbManagerClassName = dbType.getSimpleName() + SUFFIX_ROOM_DBMANAGER;
 
@@ -195,9 +188,12 @@ public class DbProcessorRoom extends AbstractDbProcessor{
         }
 
 
-        JavaFile.builder(packageName, roomDbTypeSpec.build()).build().writeTo(destinationDir);
-        JavaFile.builder(packageName, dbManagerImplSpec.build()).build().writeTo(destinationDir);
-        JavaFile.builder(packageName, factoryClassSpec.build()).build().writeTo(destinationDir);
+        writeJavaFileToDestination(JavaFile.builder(packageName, roomDbTypeSpec.build()).build(),
+            destination);
+        writeJavaFileToDestination(JavaFile.builder(packageName, dbManagerImplSpec.build()).build(),
+            destination);
+        writeJavaFileToDestination(JavaFile.builder(packageName, factoryClassSpec.build()).build(),
+            destination);
     }
 
     private void addDaoMethod(TypeSpec.Builder roomDbTypeSpec, TypeSpec.Builder dbManagerSpec,
@@ -236,11 +232,11 @@ public class DbProcessorRoom extends AbstractDbProcessor{
      * Process the given DAO class and generate a child class with the appropriate room annotations.
      *
      * @param daoClass TypeElement representing the class with @UmDao annotation
-     * @param destinationDir Root package directory for generated source output
+     * @param destination Root package directory for generated source output
      *
      * @throws IOException When there is an IO issue writing the generated output
      */
-    public void processDbDao(TypeElement daoClass, File destinationDir) throws IOException {
+    public void processDbDao(TypeElement daoClass, TypeElement dbType, String destination) throws IOException {
         String daoClassName = daoClass.getSimpleName() + SUFFIX_ROOM_DAO;
         TypeSpec.Builder roomDaoClassSpec = TypeSpec.classBuilder(daoClassName)
                 .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
@@ -254,28 +250,29 @@ public class DbProcessorRoom extends AbstractDbProcessor{
                 .addCode("this.dbExecutor = dbExecutor;\n").build());
 
         //now generate methods for all query, insert, and delete methods
-        for(Element subElement : daoClass.getEnclosedElements()) {
-            if(subElement.getKind() != ElementKind.METHOD)
-                continue;
-
-            ExecutableElement daoMethod = (ExecutableElement) subElement;
+        for(ExecutableElement daoMethod : findDaoMethodsToImplement(daoClass)) {
             MethodSpec.Builder methodBuilder = null;
 
             if(daoMethod.getAnnotation(UmInsert.class) != null) {
                 UmInsert umInsert = daoMethod.getAnnotation(UmInsert.class);
                 AnnotationSpec annotation = AnnotationSpec.builder(ClassName.get(ROOM_PKG_NAME, "Insert"))
                         .addMember("onConflict", ""+umInsert.onConflict()).build();
-                methodBuilder = generateAnnotatedMethod(daoMethod, annotation, roomDaoClassSpec);
+                methodBuilder = generateAnnotatedMethod(daoMethod, daoClass, annotation, roomDaoClassSpec);
             }else if(daoMethod.getAnnotation(UmDelete.class) != null) {
-                methodBuilder = generateAnnotatedMethod(daoMethod,
+                methodBuilder = generateAnnotatedMethod(daoMethod, daoClass,
                         AnnotationSpec.builder(ClassName.get(ROOM_PKG_NAME, "Delete")).build(),
                         roomDaoClassSpec);
             }else if(daoMethod.getAnnotation(UmUpdate.class) != null) {
-                methodBuilder = generateAnnotatedMethod(daoMethod,
+                methodBuilder = generateAnnotatedMethod(daoMethod, daoClass,
                         AnnotationSpec.builder(ClassName.get(ROOM_PKG_NAME, "Update")).build(),
                         roomDaoClassSpec);
             }else if(daoMethod.getAnnotation(UmQuery.class) != null) {
-                methodBuilder = generateQueryMethod(daoMethod, roomDaoClassSpec);
+                methodBuilder = generateQueryMethod(daoMethod.getAnnotation(UmQuery.class).value(),
+                        daoMethod, daoClass, roomDaoClassSpec);
+            }else if(daoMethod.getAnnotation(UmQueryFindByPrimaryKey.class) != null) {
+                methodBuilder = generateQueryMethod(
+                        generateFindByPrimaryKeySql(daoClass, daoMethod, processingEnv, '`'),
+                        daoMethod, daoClass, roomDaoClassSpec);
             }
 
             if(methodBuilder != null){
@@ -283,8 +280,9 @@ public class DbProcessorRoom extends AbstractDbProcessor{
             }
         }
 
-        JavaFile.builder(processingEnv.getElementUtils().getPackageOf(daoClass).toString(),
-                roomDaoClassSpec.build()).build().writeTo(destinationDir);
+        writeJavaFileToDestination(
+                JavaFile.builder(processingEnv.getElementUtils().getPackageOf(daoClass).toString(),
+                roomDaoClassSpec.build()).build(), destination);
     }
 
     /**
@@ -300,19 +298,19 @@ public class DbProcessorRoom extends AbstractDbProcessor{
      * @return MethodSpec.Builder for the override implementation of the method.
      */
     private MethodSpec.Builder generateAnnotatedMethod(ExecutableElement daoMethod,
+                                                       TypeElement daoType,
                                                        AnnotationSpec annotationSpec,
                                                        TypeSpec.Builder roomDaoClassSpec) {
         MethodSpec.Builder methodBuilder;
 
         List<? extends VariableElement> variableElementList = daoMethod.getParameters();
-        List<Element> variableTypeElements = new ArrayList<>();
-        for(VariableElement variableElement : variableElementList) {
-            variableTypeElements.add(processingEnv.getTypeUtils().asElement(variableElement.asType()));
-        }
+        List<Element> variableTypeElements = getMethodParametersAsElements(daoMethod);
 
         TypeElement umCallbackTypeElement = processingEnv.getElementUtils().getTypeElement(
                 "com.ustadmobile.core.impl.UmCallback");
 
+
+        DaoMethodInfo daoMethodInfo = new DaoMethodInfo(daoMethod, daoType, processingEnv);
 
         boolean isAsyncMethod = variableTypeElements.contains(umCallbackTypeElement);
 
@@ -335,7 +333,7 @@ public class DbProcessorRoom extends AbstractDbProcessor{
                 .returns(insertRetType);
 
 
-        addParametersToMethodBuilder(roomInsertMethodBuilder, daoMethod, umCallbackTypeElement);
+        addParametersToMethodBuilder(roomInsertMethodBuilder, daoMethod, daoType, umCallbackTypeElement);
 
         addAccessModifiersFromMethod(roomInsertMethodBuilder, daoMethod);
 
@@ -347,7 +345,7 @@ public class DbProcessorRoom extends AbstractDbProcessor{
             DeclaredType declaredType = (DeclaredType)variableElementList.get(asyncParamIndex).asType();
             methodBuilder = MethodSpec.methodBuilder(daoMethod.getSimpleName().toString())
                     .returns(TypeName.VOID);
-            addParametersToMethodBuilder(methodBuilder, daoMethod);
+            addParametersToMethodBuilder(methodBuilder, daoMethod, daoType);
             addAccessModifiersFromMethod(methodBuilder, daoMethod);
             String callbackParamName = variableElementList.get(asyncParamIndex).getSimpleName().toString();
             CodeBlock.Builder asyncInsert = CodeBlock.builder();
@@ -380,10 +378,12 @@ public class DbProcessorRoom extends AbstractDbProcessor{
      *
      * @param methodBuilder MethodSpec.Builder for the method being created
      * @param method source method from which argument parameters will be added
+     * @param clazz the direct parent class, for which a method is being overridden (used for type argument resolution)
      * @param excludedTypes excluded TypeElements that should not be added to the given MethodSpec.Builder
      */
     private void addParametersToMethodBuilder(MethodSpec.Builder methodBuilder,
-                                              ExecutableElement method, Element... excludedTypes) {
+                                              ExecutableElement method, TypeElement clazz,
+                                              Element... excludedTypes) {
         List<Element> excludedTypeList = Arrays.asList(excludedTypes);
         List<? extends VariableElement> variableElementList = method.getParameters();
 
@@ -392,7 +392,9 @@ public class DbProcessorRoom extends AbstractDbProcessor{
             if(excludedTypeList.contains(processingEnv.getTypeUtils().asElement(variableType)))
                 continue;
 
-            methodBuilder.addParameter(TypeName.get(variableElementList.get(i).asType()),
+            TypeMirror paramTypeMirror = resolveDeclaredType(variableElementList.get(i).asType(),
+                    clazz, (TypeElement)method.getEnclosingElement(), processingEnv);
+            methodBuilder.addParameter(TypeName.get(paramTypeMirror),
                     variableElementList.get(i).getSimpleName().toString());
         }
     }
@@ -424,7 +426,9 @@ public class DbProcessorRoom extends AbstractDbProcessor{
      *
      * @return MethodSpec.Builder for the implementation of this DAO method.
      */
-    private MethodSpec.Builder generateQueryMethod(ExecutableElement daoMethod,
+    private MethodSpec.Builder generateQueryMethod(String querySql,
+                                                   ExecutableElement daoMethod,
+                                                   TypeElement daoType,
                                                    TypeSpec.Builder daoClassBuilder) {
         //check for livedata return types
         //Class returnType = daoMethod.getReturnType();
@@ -433,13 +437,14 @@ public class DbProcessorRoom extends AbstractDbProcessor{
         TypeElement umLiveDataTypeElement = processingEnv.getElementUtils().getTypeElement(
                 UMDB_CORE_PKG_NAME + ".UmLiveData");
 
-        UmQuery umQuery = daoMethod.getAnnotation(UmQuery.class);
         ClassName queryClassName = ClassName.get(ROOM_PKG_NAME, "Query");
         AnnotationSpec.Builder querySpec = AnnotationSpec.builder(queryClassName)
-                .addMember("value", CodeBlock.builder().add("$S", umQuery.value()).build());
+                .addMember("value", CodeBlock.builder().add("$S", querySql).build());
+
+        DaoMethodInfo daoMethodInfo = new DaoMethodInfo(daoMethod, daoType, processingEnv);
 
         MethodSpec.Builder retMethod = MethodSpec.methodBuilder(daoMethod.getSimpleName().toString())
-                .returns(TypeName.get(returnType));
+                .returns(TypeName.get(daoMethodInfo.resolveReturnType()));
         addAccessModifiersFromMethod(retMethod, daoMethod);
 
 
@@ -473,7 +478,7 @@ public class DbProcessorRoom extends AbstractDbProcessor{
                     ClassName.get("com.ustadmobile.port.android.db",
                             "UmLiveDataAndroid"), liveDataMethodName);
 
-            addParametersToMethodBuilder(roomLiveDataBuilder, daoMethod);
+            addParametersToMethodBuilder(roomLiveDataBuilder, daoMethod, daoType);
             retMethodCodeBlock.add(makeNamedParameterMethodCall(daoMethod.getParameters())).add(");\n");
 
             retMethod.addCode(retMethodCodeBlock.build());
@@ -497,7 +502,7 @@ public class DbProcessorRoom extends AbstractDbProcessor{
                     .addAnnotation(querySpec.build())
                     .addModifiers(Modifier.ABSTRACT, Modifier.PROTECTED)
                     .returns(factoryReturnType);
-            addParametersToMethodBuilder(factoryMethodBuilder, daoMethod);
+            addParametersToMethodBuilder(factoryMethodBuilder, daoMethod, daoType);
             daoClassBuilder.addMethod(factoryMethodBuilder.build());
         }else if(paramTypeElements.contains(umCallbackTypeElement)){
             //this is an async method, run it on the executor
@@ -515,7 +520,7 @@ public class DbProcessorRoom extends AbstractDbProcessor{
                     .addAnnotation(querySpec.build())
                     .returns(returnTypeName);
 
-            addParametersToMethodBuilder(roomMethodBuilder, daoMethod, umCallbackTypeElement);
+            addParametersToMethodBuilder(roomMethodBuilder, daoMethod, daoType, umCallbackTypeElement);
             daoClassBuilder.addMethod(roomMethodBuilder.build());
 
             String callbackParamName = daoMethod.getParameters().get(callbackParamNum)
