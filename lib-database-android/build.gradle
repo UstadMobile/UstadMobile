@@ -61,7 +61,7 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
     implementation project(":lib-database")
-    implementation project(":lib-database-annotation")
+    implementation project(':lib-database-runtime')
     implementation project(":lib-util")
 
     //ViewModel and LiveData

@@ -18,12 +18,12 @@
             <option value="$PROJECT_DIR$/lib-core-fs-tests" />
             <option value="$PROJECT_DIR$/lib-database" />
             <option value="$PROJECT_DIR$/lib-database-android" />
-            <option value="$PROJECT_DIR$/lib-database-annotation" />
-            <option value="$PROJECT_DIR$/lib-database-annotation-processor-core" />
+            <option value="$PROJECT_DIR$/lib-database-annotation-processor" />
             <option value="$PROJECT_DIR$/lib-database-entities" />
             <option value="$PROJECT_DIR$/lib-database-entity-processor" />
             <option value="$PROJECT_DIR$/lib-database-jdbc" />
-            <option value="$PROJECT_DIR$/lib-database-util-jdbc" />
+            <option value="$PROJECT_DIR$/lib-database-runtime" />
+            <option value="$PROJECT_DIR$/lib-database-runtime-jdbc" />
             <option value="$PROJECT_DIR$/lib-http-testserver" />
             <option value="$PROJECT_DIR$/lib-util" />
             <option value="$PROJECT_DIR$/sharedse" />
