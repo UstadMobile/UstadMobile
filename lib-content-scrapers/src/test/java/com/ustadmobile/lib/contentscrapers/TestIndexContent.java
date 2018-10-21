@@ -1,15 +1,26 @@
 package com.ustadmobile.lib.contentscrapers;
 
 
+import com.ustadmobile.core.db.UmAppDatabase;
+import com.ustadmobile.core.db.dao.ContentEntryContentEntryFileJoinDao;
+import com.ustadmobile.core.db.dao.ContentEntryDao;
+import com.ustadmobile.core.db.dao.ContentEntryFileDao;
+import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
 import com.ustadmobile.lib.contentscrapers.edraakK12.IndexEdraakK12Content;
+import com.ustadmobile.lib.db.entities.ContentEntry;
+import com.ustadmobile.lib.db.entities.ContentEntryContentEntryFileJoin;
+import com.ustadmobile.lib.db.entities.ContentEntryFile;
+import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin;
 
 import org.apache.commons.io.IOUtils;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.List;
 
 import okhttp3.mockwebserver.Dispatcher;
 import okhttp3.mockwebserver.MockResponse;
@@ -55,6 +66,9 @@ public class TestIndexContent {
     @Test
     public void givenServerOnline_whenUrlFound_FindImportedContent() throws IOException {
 
+        UmAppDatabase db = UmAppDatabase.getInstance(null);
+        db.clearAllTables();
+
         IndexEdraakK12Content indexObj = new IndexEdraakK12Content();
         MockWebServer mockWebServer = new MockWebServer();
         mockWebServer.setDispatcher(indexDispatcher);
@@ -63,7 +77,34 @@ public class TestIndexContent {
 
         indexObj.findContent(MAIN_CONTENT_CONTENT_FILE, mockWebServer.url("/api/").toString(), 41, tmpDir);
 
+        ContentEntryDao contentEntryDao = db.getContentEntryDao();
+        ContentEntryParentChildJoinDao parentChildDaoJoin = db.getContentEntryParentChildJoinDao();
+        ContentEntryFileDao fileDao = db.getContentEntryFileDao();
+        ContentEntryContentEntryFileJoinDao fileEntryJoin = db.getContentEntryContentEntryFileJoinDao();
 
+        ContentEntry parentEntry = contentEntryDao.findBySourceUrl("https://www.edraak.org/k12/");
+
+        Assert.assertEquals(true, parentEntry.getEntryId().equalsIgnoreCase("https://www.edraak.org/k12/"));
+
+        ContentEntry childEntry = contentEntryDao.findBySourceUrl(mockWebServer.url("api/5a608815f3a50d049abf68e9").toString());
+
+        Assert.assertEquals(true, childEntry.getEntryId().equalsIgnoreCase("5a608815f3a50d049abf68e9"));
+
+        ContentEntryParentChildJoin parentChildJoinEntry = parentChildDaoJoin.findParentByChildUuids(childEntry.getContentEntryUid());
+
+        Assert.assertEquals(true, parentChildJoinEntry.getCepcjParentContentEntryUid() == parentEntry.getContentEntryUid());
+
+        ContentEntry courseEntry = contentEntryDao.findBySourceUrl(mockWebServer.url("api/5a60a25f0ed49f0498cb201d").toString());
+
+        Assert.assertEquals(true, courseEntry.getEntryId().equalsIgnoreCase("5a60a25f0ed49f0498cb201d"));
+
+        List<ContentEntryContentEntryFileJoin> listOfFiles = fileEntryJoin.findChildByParentUUid(courseEntry.getContentEntryUid());
+
+        Assert.assertEquals(true, listOfFiles.size() > 0);
+
+        ContentEntryFile file = fileDao.findByUid(listOfFiles.get(0).getCecefjContentEntryFileUid());
+
+        Assert.assertEquals(true, ScraperConstants.MIMETYPE_ZIP.equalsIgnoreCase(file.getMimeType()));
     }
 
 

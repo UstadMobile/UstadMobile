@@ -97,15 +97,15 @@ public class IndexDdlContent {
 
         Elements pageList = document.select("a.page-link");
 
-        langEntry = contentEntryDao.findBySourceUrl("lang" + "/resources/list");
+        langEntry = contentEntryDao.findBySourceUrl(lang + "/resources/list");
         if (langEntry == null) {
             langEntry = new ContentEntry();
-            langEntry = setContentEntryData(langEntry, "lang" + "/resources/list",
-                    lang, "lang" + "/resources/list", lang);
+            langEntry = setContentEntryData(langEntry, lang + "/resources/list",
+                    lang, lang + "/resources/list", lang);
             langEntry.setContentEntryUid(contentEntryDao.insert(langEntry));
         } else {
-            langEntry = setContentEntryData(langEntry, "lang" + "/resources/list",
-                    lang, "lang" + "/resources/list", lang);
+            langEntry = setContentEntryData(langEntry, lang + "/resources/list",
+                    lang, lang + "/resources/list", lang);
             contentEntryDao.updateContentEntry(langEntry);
         }
 
