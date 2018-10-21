@@ -17,6 +17,7 @@ import com.ustadmobile.core.view.PersonEditView;
 import com.ustadmobile.lib.db.entities.Person;
 import com.ustadmobile.lib.db.entities.PersonCustomFieldValue;
 import com.ustadmobile.lib.db.entities.PersonField;
+import com.ustadmobile.lib.db.entities.PersonWithEnrollment;
 
 import static com.ustadmobile.core.controller.ClazzListPresenter.ARG_CLAZZ_UID;
 import static com.ustadmobile.core.view.ClazzDetailEnrollStudentView.ARG_NEW_PERSON;
@@ -31,10 +32,9 @@ public class PeopleListPresenter
         extends CommonHandlerPresenter<PeopleListView> {
 
     //Any arguments stored as variables here
-    //eg: private long clazzUid = -1;
 
     //Provider 
-    UmProvider<Person> providerList;
+    UmProvider<PersonWithEnrollment> personWithEnrollmentUmProvider;
 
     public PeopleListPresenter(Object context, Hashtable arguments, PeopleListView view) {
         super(context, arguments, view);
@@ -45,12 +45,9 @@ public class PeopleListPresenter
     public void onCreate(Hashtable savedState) {
         super.onCreate(savedState);
 
-        //Populate the provider
-        providerList = UmAppDatabase.getInstance(context).getPersonDao()
-                .findAllPeopleAsync();
-
-        //set Provider.
-        view.setListProvider(providerList);
+        personWithEnrollmentUmProvider = UmAppDatabase.getInstance(context).getPersonDao()
+                .findAllPeopleWithEnrollment();
+        view.setPeopleListProvider(personWithEnrollmentUmProvider);
 
     }
 
@@ -117,5 +114,10 @@ public class PeopleListPresenter
         Hashtable args = new Hashtable();
         args.put(ARG_PERSON_UID, arg);
         impl.go(PersonDetailView.VIEW_NAME, args, view.getContext());
+    }
+
+    @Override
+    public void handleSecondaryPressed(Object arg) {
+        //No secondary action for every item here.
     }
 }

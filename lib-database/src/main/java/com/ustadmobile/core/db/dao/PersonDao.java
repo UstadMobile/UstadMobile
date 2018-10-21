@@ -8,6 +8,7 @@ import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.database.annotation.UmUpdate;
 import com.ustadmobile.lib.db.entities.Person;
+import com.ustadmobile.lib.db.entities.PersonWithEnrollment;
 
 import java.util.List;
 
@@ -40,4 +41,10 @@ public abstract class PersonDao implements BaseDao<Person>{
 
     @UmQuery("SELECT * From Person")
     public abstract UmProvider<Person> findAllPeopleAsync();
+
+    @UmQuery("SELECT Person.* , (0) AS clazzUid, " +
+            " (0) AS attendancePercentage, " +
+            " (0) AS enrolled FROM Person WHERE Person.active = 1 ")
+    public abstract UmProvider<PersonWithEnrollment> findAllPeopleWithEnrollment();
+
 }

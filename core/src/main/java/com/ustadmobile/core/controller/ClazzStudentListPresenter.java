@@ -9,6 +9,7 @@ import com.ustadmobile.core.view.PersonDetailView;
 import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.ClazzMember;
 import com.ustadmobile.lib.db.entities.ClazzMemberWithPerson;
+import com.ustadmobile.lib.db.entities.PersonWithEnrollment;
 
 import java.util.Hashtable;
 
@@ -20,7 +21,8 @@ import static com.ustadmobile.core.view.PersonDetailView.ARG_PERSON_UID;
  * The Presenter/Controller for ClazzStudentListFragment. This is responsible in creating the
  * provider from the Dao and assigning it to the View.
  */
-public class ClazzStudentListPresenter extends UstadBaseController<ClazzStudentListView> {
+public class ClazzStudentListPresenter extends
+        CommonHandlerPresenter<ClazzStudentListView>{
 
     private long currentClazzId = -1L;
 
@@ -52,7 +54,7 @@ public class ClazzStudentListPresenter extends UstadBaseController<ClazzStudentL
 
     }
 
-    private UmProvider<ClazzMemberWithPerson> clazzStudentListProvider;
+    private UmProvider<PersonWithEnrollment> clazzPersonListProvider;
 
     /**
      * The Presenter here's onCreate. This populates the provider and sets it to the View.
@@ -66,9 +68,10 @@ public class ClazzStudentListPresenter extends UstadBaseController<ClazzStudentL
     public void onCreate(Hashtable savedState) {
         super.onCreate(savedState);
 
-        clazzStudentListProvider = UmAppDatabase.getInstance(context).getClazzMemberDao()
-                .findClazzMembersByClazzId(currentClazzId);
-        view.setClazzMembersProvider(clazzStudentListProvider);
+        clazzPersonListProvider = UmAppDatabase.getInstance(context).getClazzMemberDao()
+                .findAllPersonWithEnrollmentInClazzByClazzUid(currentClazzId);
+        view.setPersonWithEnrollmentProvider(clazzPersonListProvider);
+
     }
 
     /**
@@ -100,4 +103,13 @@ public class ClazzStudentListPresenter extends UstadBaseController<ClazzStudentL
     }
 
 
+    @Override
+    public void handleCommonPressed(Object arg) {
+        handleClickStudent((Long)arg);
+    }
+
+    @Override
+    public void handleSecondaryPressed(Object arg) {
+        //No secondary action here.
+    }
 }

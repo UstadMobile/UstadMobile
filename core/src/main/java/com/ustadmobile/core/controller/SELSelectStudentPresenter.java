@@ -75,4 +75,9 @@ public class SELSelectStudentPresenter extends CommonHandlerPresenter<SELSelectS
 
 
     }
+
+    @Override
+    public void handleSecondaryPressed(Object arg) {
+        // No secondary button for this here.
+    }
 }

@@ -88,4 +88,9 @@ public class SELAnswerListPresenter extends CommonHandlerPresenter<SELAnswerList
         //TODO: this
 
     }
+
+    @Override
+    public void handleSecondaryPressed(Object arg) {
+        // No secondary option here.
+    }
 }

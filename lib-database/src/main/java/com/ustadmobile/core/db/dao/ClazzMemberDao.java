@@ -76,6 +76,18 @@ public abstract class ClazzMemberDao implements BaseDao<ClazzMember> {
             " AND clazzMemberPersonUid = Person.personUid) AS enrolled FROM Person WHERE Person.active = 1 ")
     public abstract UmProvider<PersonWithEnrollment> findAllPeopleWithEnrollmentForClassUid(long clazzUid);
 
+    @UmQuery("SELECT Person.* , (:clazzUid) AS clazzUid, " +
+            " (SELECT attendancePercentage FROM ClazzMember WHERE clazzMemberPersonUid = Person.personUid) AS attendancePercentage, " +
+            " (SELECT clazzMemberActive FROM ClazzMember WHERE ClazzMember.clazzMemberClazzUid = :clazzUid " +
+            " AND clazzMemberPersonUid = Person.personUid) AS enrolled " +
+            " FROM Person " +
+            " WHERE personUid IN ( " +
+            " SELECT Person.personUid FROM ClazzMember " +
+            " LEFT  JOIN Person On ClazzMember.clazzMemberPersonUid = Person.personUid " +
+            " WHERE ClazzMember.clazzMemberClazzUid = :clazzUid AND ClazzMember.clazzMemberActive = 1 " +
+            " AND ClazzMember.role = 1) AND Person.active = 1 ")
+    public abstract UmProvider<PersonWithEnrollment> findAllPersonWithEnrollmentInClazzByClazzUid(long clazzUid);
+
 
     @UmQuery("SELECT AVG(attendancePercentage) FROM ClazzMember WHERE clazzMemberPersonUid = :personUid")
     public abstract void getAverageAttendancePercentageByPersonUidAsync(long personUid, UmCallback<Float> callback);

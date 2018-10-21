@@ -18,6 +18,7 @@ import com.ustadmobile.core.controller.PeopleListPresenter;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.view.PeopleListView;
 import com.ustadmobile.lib.db.entities.Person;
+import com.ustadmobile.lib.db.entities.PersonWithEnrollment;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import ru.dimorinny.floatingtextbutton.FloatingTextButton;
@@ -96,20 +97,20 @@ public class PeopleListFragment extends UstadBaseFragment implements PeopleListV
 
     }
 
-    public static final DiffUtil.ItemCallback<Person> DIFF_CALLBACK =
-        new DiffUtil.ItemCallback<Person>() {
-            @Override
-            public boolean areItemsTheSame(Person oldItem,
-                                           Person newItem) {
-                return oldItem.getPersonUid() == newItem.getPersonUid();
-            }
+    public static final DiffUtil.ItemCallback<PersonWithEnrollment> DIFF_CALLBACK2 =
+            new DiffUtil.ItemCallback<PersonWithEnrollment>() {
+                @Override
+                public boolean areItemsTheSame(PersonWithEnrollment oldItem,
+                                               PersonWithEnrollment newItem) {
+                    return oldItem.getPersonUid() == newItem.getPersonUid();
+                }
 
-            @Override
-            public boolean areContentsTheSame(Person oldItem,
-                                              Person newItem) {
-                return oldItem.equals(newItem);
-            }
-        };
+                @Override
+                public boolean areContentsTheSame(PersonWithEnrollment oldItem,
+                                                  PersonWithEnrollment newItem) {
+                    return oldItem.equals(newItem);
+                }
+            };
 
     @Override
     public void onClick(View v) {
@@ -121,16 +122,20 @@ public class PeopleListFragment extends UstadBaseFragment implements PeopleListV
         return false;
     }
 
+
     @Override
-    public void setListProvider(UmProvider<Person> listProvider) {
-        SimplePeopleListRecyclerAdapter recyclerAdapter =
-                new SimplePeopleListRecyclerAdapter(DIFF_CALLBACK, getContext(), mPresenter);
-        DataSource.Factory<Integer, Person> factory =
-                (DataSource.Factory<Integer, Person>)listProvider.getProvider();
-        LiveData<PagedList<Person>> data =
+    public void setPeopleListProvider(UmProvider<PersonWithEnrollment> listProvider) {
+
+        PersonWithEnrollmentRecyclerAdapter recyclerAdapter =
+                new PersonWithEnrollmentRecyclerAdapter(DIFF_CALLBACK2, getContext(),
+                        this, mPresenter, false, false);
+        DataSource.Factory<Integer, PersonWithEnrollment> factory =
+                (DataSource.Factory<Integer, PersonWithEnrollment>)listProvider.getProvider();
+        LiveData<PagedList<PersonWithEnrollment>> data =
                 new LivePagedListBuilder<>(factory, 20).build();
         data.observe(this, recyclerAdapter::submitList);
 
         mRecyclerView.setAdapter(recyclerAdapter);
+
     }
 }

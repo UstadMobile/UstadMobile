@@ -254,4 +254,9 @@ public class SELEditPresenter
         });
 
     }
+
+    @Override
+    public void handleSecondaryPressed(Object arg) {
+        //No secondary option here.
+    }
 }

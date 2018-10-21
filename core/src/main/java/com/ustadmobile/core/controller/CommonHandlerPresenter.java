@@ -19,5 +19,15 @@ public abstract class CommonHandlerPresenter<V extends UstadView>
         super(context, arguments, (V) view);
     }
 
+    /**
+     * Primary action on item.
+     * @param arg
+     */
     public abstract void handleCommonPressed(Object arg);
+
+    /**
+     * Secondary action on item.
+     * @param arg
+     */
+    public abstract void handleSecondaryPressed(Object arg);
 }

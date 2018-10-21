@@ -32,7 +32,8 @@ import static com.ustadmobile.lib.db.entities.PersonDetailPresenterField.CUSTOM_
  *
  */
 public class ClazzDetailEnrollStudentPresenter extends
-        UstadBaseController<ClazzDetailEnrollStudentView> {
+        CommonHandlerPresenter<ClazzDetailEnrollStudentView> {
+        //UstadBaseController<ClazzDetailEnrollStudentView> {
 
 
     private long currentClazzUid = -1L;
@@ -143,6 +144,19 @@ public class ClazzDetailEnrollStudentPresenter extends
         //TODO
     }
 
+    @Override
+    public void handleCommonPressed(Object arg) {
+        //Do nothing. We don't want to see Student Details when we are in the enrollment screen.
+    }
+
+    @Override
+    public void handleSecondaryPressed(Object arg) {
+        Map.Entry<PersonWithEnrollment, Boolean> argument =
+                (Map.Entry<PersonWithEnrollment, Boolean>) arg;
+
+        handleEnrollChanged(argument.getKey(), argument.getValue());
+    }
+
 
     public void handleEnrollChanged(PersonWithEnrollment person, boolean enrolled){
         System.out.println("handleEnrollChanged : " + person.getFirstNames() + " " +
@@ -215,4 +229,5 @@ public class ClazzDetailEnrollStudentPresenter extends
     public void setUIStrings() {
 
     }
+
 }

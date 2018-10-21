@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:id="@+id/item_studentlist_student_cl"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
 
@@ -23,6 +24,7 @@
     <ImageView
         android:id="@+id/item_studentlist_student_simple_attendance_trafficlight"
         android:layout_width="12dp"
+        android:visibility="invisible"
         android:layout_height="12dp"
         android:layout_marginStart="58dp"
         android:layout_marginTop="12dp"
@@ -34,6 +36,7 @@
         android:id="@+id/item_studentlist_student_simple_attendance_percentage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:visibility="invisible"
         android:layout_marginBottom="6dp"
         android:layout_marginStart="4dp"
         android:text="TextView"
@@ -65,6 +68,7 @@
 
     <CheckBox
         android:id="@+id/item_studentlist_student_simple_student_checkbox"
+        android:visibility="invisible"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"

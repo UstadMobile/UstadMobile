@@ -216,4 +216,9 @@ public class SELRecognitionPresenter
         System.out.println("Toggle student name for SEL to see if the student got it correct.");
         //Doesn't do more than this. If you want it to do something, you would put it over here.
     }
+
+    @Override
+    public void handleSecondaryPressed(Object arg) {
+        //No secondary option here.
+    }
 }

@@ -4,23 +4,12 @@ import android.arch.lifecycle.LiveData;
 import android.arch.paging.DataSource;
 import android.arch.paging.LivePagedListBuilder;
 import android.arch.paging.PagedList;
-import android.arch.paging.PagedListAdapter;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.util.DiffUtil;
-import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.CheckBox;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.ClazzDetailEnrollStudentPresenter;
@@ -103,9 +92,10 @@ public class ClazzDetailEnrollStudentActivity extends UstadBaseActivity implemen
 
     @Override
     public void setStudentsProvider(UmProvider<PersonWithEnrollment> studentsProvider) {
-        ClazzDetailEnrollStudentRecyclerAdapter recyclerAdapter =
-                new ClazzDetailEnrollStudentRecyclerAdapter(DIFF_CALLBACK, getApplicationContext(),
-                        this, mPresenter);
+
+        PersonWithEnrollmentRecyclerAdapter recyclerAdapter =
+                new PersonWithEnrollmentRecyclerAdapter(DIFF_CALLBACK, getApplicationContext(),
+                        this, mPresenter, true, true);
 
         DataSource.Factory<Integer, PersonWithEnrollment> factory =
                 (DataSource.Factory<Integer, PersonWithEnrollment>)
