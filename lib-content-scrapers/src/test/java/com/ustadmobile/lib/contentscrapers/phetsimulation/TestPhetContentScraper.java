@@ -239,6 +239,21 @@ public class TestPhetContentScraper {
 
     }
 
+    @Test
+    public void testReal() throws IOException {
+
+       // UmAppDatabase db = UmAppDatabase.getInstance(null);
+      //  db.clearAllTables();
+
+        File tmpDir = Files.createTempDirectory("testphetcontentscraper").toFile();
+
+        IndexPhetContentScraper content = new IndexPhetContentScraper();
+        content.findContent("https://phet.colorado.edu/en/simulations/category/physics/heat-and-thermodynamics", tmpDir);
+
+    }
+
+
+
 
     @Test
     public void givenParametersFromGradleCommandLineAndServerOnline_whenPhetContentScraped_thenShouldConvertAndDownload() throws IOException {

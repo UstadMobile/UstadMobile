@@ -210,7 +210,7 @@ public class PhetContentScraper {
         entry.setLicenseType(LICENSE_TYPE_CC_BY);
         String[] country = lang.replaceAll("_","-").split("-");
         entry.setPrimaryLanguage(country[0]);
-        entry.setPrimaryLanguage(country[1]);
+        entry.setPrimaryLanguage(country.length > 1 ? country[1] : "");
         return entry;
     }
 
@@ -277,7 +277,7 @@ public class PhetContentScraper {
                                 // TODO recheck entry id for translations
                                 String langTitle = Jsoup.parse(file, ScraperConstants.UTF_ENCODING).title();
 
-                                String path = this.title + "\\" + langCode;
+                                String path =  langCode + "\\" + this.title;
                                 ContentEntry languageContentEntry = contentEntryDao.findBySourceUrl(path);
                                 if (languageContentEntry == null) {
                                     languageContentEntry = new ContentEntry();
