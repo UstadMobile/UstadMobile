@@ -1,8 +1,10 @@
 package com.ustadmobile.lib.contentscrapers.phetsimulation;
 
+import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.lib.contentscrapers.ScraperConstants;
 import com.ustadmobile.lib.contentscrapers.phetsimulation.IndexPhetContentScraper;
 import com.ustadmobile.lib.contentscrapers.phetsimulation.PhetContentScraper;
+import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
 
 import org.junit.Assert;
@@ -94,16 +96,12 @@ public class TestPhetContentScraper {
     }
 
 
-    public void AssertAllFiles(File tmpDir, PhetContentScraper scraper) throws IOException {
+    public void AssertAllFiles(File tmpDir, PhetContentScraper scraper) {
 
         File englishLocation = new File(tmpDir, "en");
         Assert.assertTrue("English Folder exists", englishLocation.isDirectory());
 
-        File englishZip = new File(tmpDir, "en.zip");
-        Assert.assertTrue("English Zip exists", englishZip.length() > 0);
-
         File titleDirectory = new File(englishLocation, scraper.getTitle());
-
         Assert.assertTrue("English Simulation Folder exists", titleDirectory.isDirectory());
 
         File aboutFile = new File(titleDirectory, ScraperConstants.ABOUT_HTML);
@@ -112,19 +110,20 @@ public class TestPhetContentScraper {
         File englishSimulation = new File(titleDirectory, SIM_EN);
         Assert.assertTrue("English Simulation exists", englishSimulation.length() > 0);
 
-        File engETag = new File(titleDirectory, ScraperConstants.ETAG_TXT);
+        File engETag = new File(titleDirectory, "simulation_en" + ScraperConstants.ETAG_TXT);
         Assert.assertTrue("English ETag exists", engETag.length() > 0);
 
-        File engModified = new File(titleDirectory, ScraperConstants.LAST_MODIFIED_TXT);
+        File engModified = new File(titleDirectory, "simulation_en" +ScraperConstants.LAST_MODIFIED_TXT);
         Assert.assertTrue("English Last Modified exists", engModified.length() > 0);
+
+        File titleZip = new File(englishLocation,  scraper.getTitle() + ScraperConstants.ZIP_EXT);
+        Assert.assertTrue("English Simulation Folder exists", titleZip.length() > 0);
 
         File spanishDir = new File(tmpDir, "es");
         Assert.assertTrue("Spanish Folder exists", spanishDir.isDirectory());
 
-        File spanishZip = new File(tmpDir, "es.zip");
-        Assert.assertTrue("Spanish Zip exists", spanishZip.length() > 0);
-
         File spanishTitleDirectory = new File(spanishDir, scraper.getTitle());
+        Assert.assertTrue("Spanish Zip exists", spanishTitleDirectory.isDirectory());
 
         File aboutSpanishFile = new File(spanishTitleDirectory, ScraperConstants.ABOUT_HTML);
         Assert.assertTrue("About File English Exists", aboutSpanishFile.length() > 0);
@@ -132,11 +131,14 @@ public class TestPhetContentScraper {
         File spanishSimulation = new File(spanishTitleDirectory, SIM_ES);
         Assert.assertTrue("Spanish Simulation exists", spanishSimulation.length() > 0);
 
-        File spanishETag = new File(titleDirectory, ScraperConstants.ETAG_TXT);
+        File spanishETag = new File(spanishTitleDirectory, "simulation_es" + ScraperConstants.ETAG_TXT);
         Assert.assertTrue("Spanish ETag exists", spanishETag.length() > 0);
 
-        File spanishModified = new File(spanishTitleDirectory, ScraperConstants.LAST_MODIFIED_TXT);
+        File spanishModified = new File(spanishTitleDirectory, "simulation_es" +ScraperConstants.LAST_MODIFIED_TXT);
         Assert.assertTrue("Spanish Last Modified exists", spanishModified.length() > 0);
+
+        File spanishTitleZip = new File(spanishDir, scraper.getTitle() + ScraperConstants.ZIP_EXT);
+        Assert.assertTrue("Spanish Title Zip exists", spanishTitleDirectory.length() > 0);
 
     }
 
@@ -220,6 +222,8 @@ public class TestPhetContentScraper {
     @Test
     public void givenDirectoryOfTranslationsIsCreated_findAllTranslationRelations() throws IOException {
 
+        UmAppDatabase db = UmAppDatabase.getInstance(null);
+        db.clearAllTables();
 
         File tmpDir = Files.createTempDirectory("testphetcontentscraper").toFile();
 
@@ -229,10 +233,9 @@ public class TestPhetContentScraper {
         PhetContentScraper scraper = new PhetContentScraper(mockWebServer.url("/api/simulation/equality-explorer-two-variables").toString(), tmpDir);
         scraper.scrapeContent();
 
+        ArrayList<ContentEntry> translationList = scraper.getTranslations(tmpDir, db.getContentEntryDao());
 
-        ArrayList<OpdsEntryWithRelations> translationList = scraper.getTranslations(tmpDir);
-
-        Assert.assertEquals("first translation == es", translationList.get(0).getLanguage(), ("es"));
+        Assert.assertEquals("first translation == es", translationList.get(0).getPrimaryLanguage(), ("es"));
 
     }
 

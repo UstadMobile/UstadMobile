@@ -4,9 +4,12 @@ import com.ustadmobile.core.db.dao.ContentEntryDao;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.ScraperConstants;
 import com.ustadmobile.lib.db.entities.ContentEntry;
+import com.ustadmobile.lib.db.entities.ContentEntryContentEntryFileJoin;
+import com.ustadmobile.lib.db.entities.ContentEntryFile;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
 import com.ustadmobile.lib.util.UmUuidUtil;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -14,6 +17,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -150,13 +154,6 @@ public class PhetContentScraper {
 
         }
 
-        if (contentUpdated) {
-            for (File langDirectory : destinationDirectory.listFiles()) {
-                if (langDirectory.isDirectory()) {
-                    ContentScraperUtil.zipDirectory(langDirectory, langDirectory.getName(), langDirectory.getParentFile());
-                }
-            }
-        }
         this.contentUpdated = contentUpdated;
     }
 
@@ -211,7 +208,7 @@ public class PhetContentScraper {
         entry.setSourceUrl(sourceUrl);
         entry.setPublisher("Phet");
         entry.setLicenseType(LICENSE_TYPE_CC_BY);
-        String[] country = lang.split("-");
+        String[] country = lang.replaceAll("_","-").split("-");
         entry.setPrimaryLanguage(country[0]);
         entry.setPrimaryLanguage(country[1]);
         return entry;
@@ -241,11 +238,12 @@ public class PhetContentScraper {
         try {
             ContentScraperUtil.generateTinCanXMLFile(simulationLocation, simulationTitle,
                     languageLocation.getName(), fileName, ScraperConstants.simulationTinCanFile,
-                    this.title + "\\" + languageLocation.getName(),
+                    languageLocation.getName() + "\\" + this.title,
                     aboutDescription, "en");
         } catch (ParserConfigurationException | TransformerException e) {
             e.printStackTrace();
         }
+        ContentScraperUtil.zipDirectory(simulationLocation, title, languageLocation);
 
         return true;
     }
@@ -290,11 +288,6 @@ public class PhetContentScraper {
                                     contentEntryDao.updateContentEntry(languageContentEntry);
                                 }
 
-                                if(getLanguageUpdatedMap().get(langCode)){
-
-                                    // TODO create entry file, create entry file join
-
-                                }
                                 translationsEntry.add(languageContentEntry);
                                 break;
                             }

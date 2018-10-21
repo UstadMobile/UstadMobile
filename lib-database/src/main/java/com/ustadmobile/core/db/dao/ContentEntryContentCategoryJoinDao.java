@@ -10,7 +10,7 @@ import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin;
 public abstract class ContentEntryContentCategoryJoinDao
         implements BaseDao<ContentEntryContentCategoryJoin> {
 
-    @UmQuery("SELECT * from ContentEntryParentChildJoin WHERE " +
+    @UmQuery("SELECT * from ContentEntryContentCategoryJoin WHERE " +
             "ceccjContentCategoryUid = :categoryUid AND ceccjContentEntryUid = :contentEntry")
     public abstract ContentEntryContentCategoryJoin findJoinByParentChildUuids(long categoryUid, long contentEntry);
 

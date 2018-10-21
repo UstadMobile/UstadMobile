@@ -142,7 +142,23 @@ public class IndexPhetContentScraper {
                     boolean isEnglishUpdated = scraper.getLanguageUpdatedMap().get("en");
                     if(isEnglishUpdated){
 
-                         // TODO create entryFile, create join
+                        File langLocation = new File(destinationDirectory, "en");
+                        File content = new File(langLocation, title + ScraperConstants.ZIP_EXT);
+                        FileInputStream fis = new FileInputStream(content);
+                        String md5 = DigestUtils.md5Hex(fis);
+                        fis.close();
+
+                        ContentEntryFile contentEntryFile = new ContentEntryFile();
+                        contentEntryFile.setMimeType(ScraperConstants.MIMETYPE_EPUB);
+                        contentEntryFile.setFileSize(content.length());
+                        contentEntryFile.setLastModified(content.lastModified());
+                        contentEntryFile.setMd5sum(md5);
+                        contentEntryFile.setContentEntryFileUid(contentEntryFileDao.insert(contentEntryFile));
+
+                        ContentEntryContentEntryFileJoin fileJoin = new ContentEntryContentEntryFileJoin();
+                        fileJoin.setCecefjContentEntryFileUid(contentEntryFile.getContentEntryFileUid());
+                        fileJoin.setCecefjContentEntryUid(englishSimContentEntry.getContentEntryUid());
+                        fileJoin.setCecefjUid(contentEntryFileJoin.insert(fileJoin));
                     }
 
                     ArrayList<ContentEntry> categoryList = scraper.getCategoryRelations(contentEntryDao);
@@ -175,6 +191,32 @@ public class IndexPhetContentScraper {
                                 relatedTranslationJoin.setCerejUid(contentEntryRelatedJoinDao.insert(relatedTranslationJoin));
                                 contentEntryRelatedJoinDao.updateSimTranslationJoin(relatedTranslationJoin);
                             }
+
+                            String langCode = translation.getPrimaryLanguage() +
+                                    ((translation.getPrimaryLanguageCountry() != null) ? "-" + translation.getPrimaryLanguageCountry() : "");
+
+                            if(scraper.getLanguageUpdatedMap().get(langCode)){
+
+                                File langLocation = new File(destinationDirectory, langCode);
+                                File content = new File(langLocation, title + ScraperConstants.ZIP_EXT);
+                                FileInputStream fis = new FileInputStream(content);
+                                String md5 = DigestUtils.md5Hex(fis);
+                                fis.close();
+
+                                ContentEntryFile contentEntryFile = new ContentEntryFile();
+                                contentEntryFile.setMimeType(ScraperConstants.MIMETYPE_EPUB);
+                                contentEntryFile.setFileSize(content.length());
+                                contentEntryFile.setLastModified(content.lastModified());
+                                contentEntryFile.setMd5sum(md5);
+                                contentEntryFile.setContentEntryFileUid(contentEntryFileDao.insert(contentEntryFile));
+
+                                ContentEntryContentEntryFileJoin fileJoin = new ContentEntryContentEntryFileJoin();
+                                fileJoin.setCecefjContentEntryFileUid(contentEntryFile.getContentEntryFileUid());
+                                fileJoin.setCecefjContentEntryUid(englishSimContentEntry.getContentEntryUid());
+                                fileJoin.setCecefjUid(contentEntryFileJoin.insert(fileJoin));
+
+                            }
+
 
                             ContentScraperUtil.insertOrUpdateChildWithMultipleParentsJoin(contentParentChildJoinDao, category, translation, translationsCount++);
                             ContentScraperUtil.insertOrUpdateChildWithMultipleCategoriesJoin(contentEntryCategoryJoinDao, category, translation);
