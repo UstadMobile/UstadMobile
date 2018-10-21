@@ -33,9 +33,13 @@ import ru.dimorinny.floatingtextbutton.FloatingTextButton;
 
 import static com.ustadmobile.core.controller.ClazzListPresenter.ARG_CLAZZ_UID;
 
+/**
+ * Clazz detail Enroll Student - Enrollment activity.
+ * Gets called when "Add Student" is clicked on both the current Clazz selected as well as
+ * from the People Bottom Navigation.
+ */
 public class ClazzDetailEnrollStudentActivity extends UstadBaseActivity implements
         ClazzDetailEnrollStudentView {
-
 
     //Toolbar
     private Toolbar toolbar;
@@ -44,6 +48,7 @@ public class ClazzDetailEnrollStudentActivity extends UstadBaseActivity implemen
     private RecyclerView mRecyclerView;
     private RecyclerView.LayoutManager mRecyclerLayoutManager;
 
+    //Presenter
     private ClazzDetailEnrollStudentPresenter mPresenter;
 
     private long currentClazzUid;
@@ -61,18 +66,16 @@ public class ClazzDetailEnrollStudentActivity extends UstadBaseActivity implemen
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        //Get the clazz Uid from thearguments
+        //Get the clazz Uid from the arguments
         if(getIntent().hasExtra(ARG_CLAZZ_UID)){
             currentClazzUid = getIntent().getLongExtra(ARG_CLAZZ_UID, -1L);
         }
 
         //RecyclerView:
-        mRecyclerView = (RecyclerView) findViewById(
+        mRecyclerView = findViewById(
                 R.id.activity_clazz_detail_enroll_student_recycler_view);
         mRecyclerLayoutManager = new LinearLayoutManager(getApplicationContext());
         mRecyclerView.setLayoutManager(mRecyclerLayoutManager);
-        DividerItemDecoration dividerItemDecoration =
-                new DividerItemDecoration(mRecyclerView.getContext(), LinearLayout.VERTICAL);
 
         //Presenter
         mPresenter = new ClazzDetailEnrollStudentPresenter(this,
@@ -87,6 +90,7 @@ public class ClazzDetailEnrollStudentActivity extends UstadBaseActivity implemen
         FloatingTextButton fab = findViewById(R.id.activity_clazz_detail_enroll_student_fab_done);
         fab.setOnClickListener(v -> mPresenter.handleClickDone());
 
+        //TODO:
         //Filter / Sort
         //findViewById(R.id.activity_clazz_detail_enroll_student_filter)
         //        .setOnClickListener(mPresenter.handleChangeSortOrder(...));
@@ -100,11 +104,13 @@ public class ClazzDetailEnrollStudentActivity extends UstadBaseActivity implemen
     @Override
     public void setStudentsProvider(UmProvider<PersonWithEnrollment> studentsProvider) {
         ClazzDetailEnrollStudentRecyclerAdapter recyclerAdapter =
-                new ClazzDetailEnrollStudentRecyclerAdapter(DIFF_CALLBACK);
+                new ClazzDetailEnrollStudentRecyclerAdapter(DIFF_CALLBACK, getApplicationContext(),
+                        this, mPresenter);
 
         DataSource.Factory<Integer, PersonWithEnrollment> factory =
                 (DataSource.Factory<Integer, PersonWithEnrollment>)
                         studentsProvider.getProvider();
+
         LiveData<PagedList<PersonWithEnrollment>> data =
                 new LivePagedListBuilder<>(factory, 20).build();
         data.observe(this, recyclerAdapter::submitList);
@@ -131,84 +137,5 @@ public class ClazzDetailEnrollStudentActivity extends UstadBaseActivity implemen
             };
 
 
-    protected class ClazzDetailEnrollStudentRecyclerAdapter
-            extends PagedListAdapter<PersonWithEnrollment,
-                        ClazzDetailEnrollStudentRecyclerAdapter.ClazzLogDetailViewHolder> {
 
-        protected class ClazzLogDetailViewHolder extends RecyclerView.ViewHolder{
-            protected ClazzLogDetailViewHolder(View itemView){
-                super(itemView);
-            }
-        }
-
-        protected ClazzDetailEnrollStudentRecyclerAdapter(
-                @NonNull DiffUtil.ItemCallback<PersonWithEnrollment> diffCallback){
-            super(diffCallback);
-        }
-
-        @NonNull
-        @Override
-        public ClazzLogDetailViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType){
-
-            View clazzLogDetailListItem =
-                    LayoutInflater.from(getApplicationContext()).inflate(
-                            R.layout.item_studentlistenroll_student, parent, false);
-            return new ClazzLogDetailViewHolder(clazzLogDetailListItem);
-        }
-
-        /**
-         * This method sets the elements after it has been obtained for that item'th position.
-         *
-         * Every item in the recycler view will have set its colors if no attendance status is set.
-         * every attendance button will have it-self mapped to tints on activation.
-         *
-         * @param holder
-         * @param position
-         */
-        @Override
-        public void onBindViewHolder(@NonNull ClazzLogDetailViewHolder holder, int position){
-            PersonWithEnrollment personWithEnrollment = getItem(position);
-
-            String studentName = personWithEnrollment.getFirstNames() + " " +
-                    personWithEnrollment.getLastName();
-
-            long attendancePercentage =
-                    (long) (personWithEnrollment.getAttendancePercentage() * 100);
-            String studentAttendancePercentage = attendancePercentage +
-                    "% " + getText(R.string.attendance);
-            ImageView trafficLight = ((ImageView) holder.itemView
-                    .findViewById(R.id.item_studentlist_student_simple_attendance_trafficlight));
-            if(attendancePercentage > 75L){
-                trafficLight.setColorFilter(ContextCompat.getColor(getApplicationContext(),
-                        R.color.traffic_green));
-            }else if(attendancePercentage > 50L){
-                trafficLight.setColorFilter(ContextCompat.getColor(getApplicationContext(),
-                        R.color.traffic_orange));
-            }else{
-                trafficLight.setColorFilter(ContextCompat.getColor(getApplicationContext(),
-                        R.color.traffic_red));
-            }
-
-            ((TextView)holder.itemView
-                    .findViewById(R.id.item_studentlist_student_simple_student_title))
-                    .setText(studentName);
-            ((TextView)holder.itemView
-                    .findViewById(R.id.item_studentlist_student_simple_attendance_percentage))
-                    .setText(studentAttendancePercentage);
-
-            holder.itemView.findViewById(R.id.item_studentlist_student_simple_student_checkbox).setVisibility(View.VISIBLE);
-            boolean personWithEnrollmentBoolean = false;
-            if (personWithEnrollment.getEnrolled() != null){
-                personWithEnrollmentBoolean = personWithEnrollment.getEnrolled();
-            }
-            ((CheckBox)holder.itemView.findViewById(R.id.item_studentlist_student_simple_student_checkbox))
-                    .setChecked(personWithEnrollmentBoolean);
-            ((CheckBox)holder.itemView.findViewById(R.id.item_studentlist_student_simple_student_checkbox))
-                    .setOnCheckedChangeListener((buttonView, isChecked) ->
-                            mPresenter.handleEnrollChanged(personWithEnrollment, isChecked));
-
-
-
-        }
-    }
 }

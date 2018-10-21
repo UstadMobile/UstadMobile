@@ -80,4 +80,28 @@ public abstract class ClazzMemberDao implements BaseDao<ClazzMember> {
     @UmQuery("SELECT AVG(attendancePercentage) FROM ClazzMember WHERE clazzMemberPersonUid = :personUid")
     public abstract void getAverageAttendancePercentageByPersonUidAsync(long personUid, UmCallback<Float> callback);
 
+
+    @UmQuery("UPDATE ClazzMember SET clazzMemberActive = :enrolled WHERE " +
+            "clazzMemberPersonUid = :personUid AND clazzMemberClazzUid = :clazzUid")
+    public abstract int updateClazzMemberActiveForPersonAndClazz(long personUid, long clazzUid, int enrolled);
+
+    public int updateClazzMemberActiveForPersonAndClazz(long personUid, long clazzUid, boolean enrolled){
+        if(enrolled){
+            return updateClazzMemberActiveForPersonAndClazz(personUid, clazzUid, 1);
+        }else{
+            return updateClazzMemberActiveForPersonAndClazz(personUid, clazzUid, 0);
+        }
+    }
+
+    @UmQuery("UPDATE ClazzMember SET clazzMemberActive = :enrolled WHERE clazzMemberUid = :clazzMemberUid")
+    public abstract int updateClazzMemberActiveForClazzMember(long clazzMemberUid, int enrolled);
+
+    public int updateClazzMemberActiveForClazzMember(long clazzMemberUid, boolean enrolled){
+        if(enrolled){
+           return updateClazzMemberActiveForClazzMember(clazzMemberUid, 1);
+        }else{
+           return updateClazzMemberActiveForClazzMember(clazzMemberUid, 0);
+        }
+    }
+
 }

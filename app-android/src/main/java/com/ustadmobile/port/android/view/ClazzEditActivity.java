@@ -42,7 +42,7 @@ public class ClazzEditActivity extends UstadBaseActivity implements ClazzEditVie
         toolbar = findViewById(R.id.activity_clazz_edit_toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        
+
 
         //Call the Presenter
         mPresenter = new ClazzEditPresenter(this,
