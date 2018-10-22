@@ -17,6 +17,8 @@ public class WamdaClazz {
 
     private String wamdaClazzDescription;
 
+    private String wamdaClazzSubtitle;
+
 
     public long getWamdaClazzUid() {
         return wamdaClazzUid;
@@ -56,5 +58,13 @@ public class WamdaClazz {
 
     public void setWamdaClazzDescription(String wamdaClazzDescription) {
         this.wamdaClazzDescription = wamdaClazzDescription;
+    }
+
+    public String getWamdaClazzSubtitle() {
+        return wamdaClazzSubtitle;
+    }
+
+    public void setWamdaClazzSubtitle(String wamdaClazzSubtitle) {
+        this.wamdaClazzSubtitle = wamdaClazzSubtitle;
     }
 }
