@@ -46,6 +46,8 @@ public class ContentEntry {
 
     private String sourceUrl;
 
+    private String thumbnailUrl;
+
     public long getContentEntryUid() {
         return contentEntryUid;
     }
@@ -187,4 +189,9 @@ public class ContentEntry {
     public void setSourceUrl(String sourceUrl) {
         this.sourceUrl = sourceUrl;
     }
+
+
+    public String getThumbnailUrl() { return thumbnailUrl; }
+
+    public void setThumbnailUrl(String thumbnailUrl){ this.thumbnailUrl = thumbnailUrl; }
 }
