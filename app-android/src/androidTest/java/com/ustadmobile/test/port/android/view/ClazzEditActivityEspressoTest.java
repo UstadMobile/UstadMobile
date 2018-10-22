@@ -11,7 +11,6 @@ import com.ustadmobile.core.controller.ClazzListPresenter;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.port.android.view.ClazzEditActivity;
-import com.ustadmobile.port.android.view.SELEditActivity;
 import com.ustadmobile.test.port.android.testutil.UmDbTestUtil;
 
 import org.junit.Assert;

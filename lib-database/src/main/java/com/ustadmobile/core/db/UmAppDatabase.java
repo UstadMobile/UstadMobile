@@ -27,6 +27,7 @@ import com.ustadmobile.core.db.dao.PersonCustomFieldDao;
 import com.ustadmobile.core.db.dao.PersonCustomFieldValueDao;
 import com.ustadmobile.core.db.dao.PersonDao;
 import com.ustadmobile.core.db.dao.PersonDetailPresenterFieldDao;
+import com.ustadmobile.core.db.dao.ScheduleDao;
 import com.ustadmobile.core.db.dao.SocialNominationQuestionDao;
 import com.ustadmobile.core.db.dao.SocialNominationQuestionResponseDao;
 import com.ustadmobile.core.db.dao.SocialNominationQuestionResponseNominationDao;
@@ -62,6 +63,7 @@ import com.ustadmobile.lib.db.entities.Person;
 import com.ustadmobile.lib.db.entities.PersonField;
 import com.ustadmobile.lib.db.entities.PersonCustomFieldValue;
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField;
+import com.ustadmobile.lib.db.entities.Schedule;
 import com.ustadmobile.lib.db.entities.SocialNominationQuestion;
 import com.ustadmobile.lib.db.entities.SocialNominationQuestionResponse;
 import com.ustadmobile.lib.db.entities.SocialNominationQuestionResponseNomination;
@@ -82,7 +84,8 @@ import com.ustadmobile.lib.db.entities.SocialNominationQuestionSetResponse;
         PersonDetailPresenterField.class,
         SocialNominationQuestion.class, SocialNominationQuestionResponse.class,
         SocialNominationQuestionResponseNomination.class, SocialNominationQuestionSet.class,
-        SocialNominationQuestionSetRecognition.class, SocialNominationQuestionSetResponse.class
+        SocialNominationQuestionSetRecognition.class, SocialNominationQuestionSetResponse.class,
+        Schedule.class
 })
 public abstract class UmAppDatabase{
 
@@ -174,6 +177,8 @@ public abstract class UmAppDatabase{
     public abstract SocialNominationQuestionResponseNominationDao getSocialNominationQuestionResponseNominationDao();
 
     public abstract SocialNominationQuestionResponseDao getSocialNominationQuestionResponseDao();
+
+    public abstract ScheduleDao getScheduleDao();
 
     @UmDbContext
     public abstract Object getContext();

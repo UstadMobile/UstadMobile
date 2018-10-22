@@ -7,9 +7,19 @@ import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 public class Schedule implements SyncableEntity {
 
     public static final int SCHEDULE_FREQUENCY_ONCE = 1;
-    public static final int SCHEDULE_FREQUENCY_WEEKLY = 2;
-    public static final int SCHEDULE_FREQUENCY_MONTHLY = 3;
-    public static final int SCHEDULE_FREQUENCY_YEARLY = 4;
+    public static final int SCHEDULE_FREQUENCY_DAILY = 2;
+    public static final int SCHEDULE_FREQUENCY_WEEKLY = 3;
+    public static final int SCHEDULE_FREQUENCY_MONTHLY = 4;
+    public static final int SCHEDULE_FREQUENCY_YEARLY = 5;
+
+    public static final int DAY_SUNDAY = 1;
+    public static final int DAY_MONDAY = 2;
+    public static final int DAY_TUESDAY = 3;
+    public static final int DAY_WEDNESDAY = 4;
+    public static final int DAY_THURSDAY = 5;
+    public static final int DAY_FRIDAY = 6;
+    public static final int DAY_SATURDAY = 7;
+
 
     public static final int MONTH_JANUARY = 1;
     public static final int MONTH_FEBUARY = 2;
@@ -28,22 +38,35 @@ public class Schedule implements SyncableEntity {
     @UmPrimaryKey(autoIncrement = true)
     private long scheduleUid;
 
+    //Start time
     private long sceduleStartTime;
 
+    //End time
     private long scheduleEndTime;
 
+    //What day for this frequency
     private int scheduleDay;
 
-    private int scheuleMoth;
+    //What month for this frequency
+    private int scheduleMonth;
 
-    private int scheduleYear;
-
-    // Frequency - Once, Every Week, Every Month, Every Year
+    // Frequency - Once, Daily, Every Week, Every Month, Every Year
     private int scheduleFrequency;
 
     //The Calendar this will be set to.
     private long umCalendarUid;
 
+    //What clazz is this Schedule for
+    private long scheduleClazzUid;
+
+
+    public long getScheduleClazzUid() {
+        return scheduleClazzUid;
+    }
+
+    public void setScheduleClazzUid(long scheduleClazzUid) {
+        this.scheduleClazzUid = scheduleClazzUid;
+    }
 
     public long getSceduleStartTime() {
         return sceduleStartTime;
@@ -69,21 +92,14 @@ public class Schedule implements SyncableEntity {
         this.scheduleDay = scheduleDay;
     }
 
-    public int getScheuleMoth() {
-        return scheuleMoth;
+    public int getScheduleMonth() {
+        return scheduleMonth;
     }
 
-    public void setScheuleMoth(int scheuleMoth) {
-        this.scheuleMoth = scheuleMoth;
+    public void setScheduleMonth(int scheduleMonth) {
+        this.scheduleMonth = scheduleMonth;
     }
 
-    public int getScheduleYear() {
-        return scheduleYear;
-    }
-
-    public void setScheduleYear(int scheduleYear) {
-        this.scheduleYear = scheduleYear;
-    }
 
     public int getScheduleFrequency() {
         return scheduleFrequency;

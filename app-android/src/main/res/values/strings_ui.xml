@@ -341,6 +341,16 @@ This is the one you should be editing. The one in /core/locale/main/values/strin
     <string name="add_person">Add Person</string>
     <string name="update_picture">Update picture</string>
     <string name="add_class">Add Class</string>
+    <string name="class_name">Class name</string>
+    <string name="class_description">Class description</string>
+    <string name="add_class_day">Add a class day</string>
+    <string name="from">from</string>
+    <string name="to">to</string>
+    <string name="holiday_calendar">Holiday Calendar</string>
+    <string name="features_enabled">Features enabled</string>
+    <string name="activity_tracker">Activity tracker</string>
+    <string name="class_setup">Class Setup</string>
+
 
 
 

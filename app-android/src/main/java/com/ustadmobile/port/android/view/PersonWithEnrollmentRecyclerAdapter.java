@@ -146,6 +146,8 @@ public class PersonWithEnrollmentRecyclerAdapter
             attendanceTextView.setText(studentAttendancePercentage);
         }else{
 
+            //Change the constraint layout so that the hidden bits are not empty spaces.
+
             ConstraintLayout mainCL = holder.itemView.findViewById(R.id.item_studentlist_student_cl);
             ConstraintSet constraintSet = new ConstraintSet();
             constraintSet.clone(mainCL);

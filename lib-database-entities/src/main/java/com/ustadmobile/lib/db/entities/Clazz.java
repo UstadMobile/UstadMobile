@@ -25,6 +25,16 @@ public class Clazz implements SyncableEntity{
     //Gives the schedule calendar ui
     private long clazzScheuleUMCalendarUid;
 
+    //Active
+    private boolean clazzActive;
+
+    public boolean isClazzActive() {
+        return clazzActive;
+    }
+
+    public void setClazzActive(boolean clazzActive) {
+        this.clazzActive = clazzActive;
+    }
 
     public String getClazzDesc() {
         return clazzDesc;

@@ -41,8 +41,10 @@ public class ClazzListPresenter extends UstadBaseController<ClazzListView> {
         //TODO: Remove. Replace with Logged-In User
         currentPersonUid = 1L;
 
+//        clazzListProvider = UmAppDatabase.getInstance(context).getClazzDao()
+//                .findAllClazzesByPersonUid(currentPersonUid);
         clazzListProvider = UmAppDatabase.getInstance(context).getClazzDao()
-                .findAllClazzesByPersonUid(currentPersonUid);
+                .findAllClazzes();
         view.setClazzListProvider(clazzListProvider);
     }
 

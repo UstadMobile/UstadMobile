@@ -338,14 +338,22 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
 
     }
 
-
+    /**
+     * Creates the options on the toolbar - specifically the Done tick menu item
+     * @param menu  The menu options
+     * @return  true. always.
+     */
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_done, menu);
         return true;
     }
 
-    //Handling Action Bar button click
+    /**
+     * Handles Action Bar menu button click.
+     * @param item  The MenuItem clicked.
+     * @return  Boolean if handled or not.
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle item selection
@@ -542,18 +550,18 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
 
     // Diff callback.
     public static final DiffUtil.ItemCallback<ClazzWithNumStudents> DIFF_CALLBACK =
-            new DiffUtil.ItemCallback<ClazzWithNumStudents>() {
-                @Override
-                public boolean areItemsTheSame(ClazzWithNumStudents oldItem,
-                                               ClazzWithNumStudents newItem) {
-                    return oldItem.getClazzUid() ==
-                            newItem.getClazzUid();
-                }
+        new DiffUtil.ItemCallback<ClazzWithNumStudents>() {
+            @Override
+            public boolean areItemsTheSame(ClazzWithNumStudents oldItem,
+                                           ClazzWithNumStudents newItem) {
+                return oldItem.getClazzUid() ==
+                        newItem.getClazzUid();
+            }
 
-                @Override
-                public boolean areContentsTheSame(ClazzWithNumStudents oldItem,
-                                                  ClazzWithNumStudents newItem) {
-                    return oldItem.equals(newItem);
-                }
-            };
+            @Override
+            public boolean areContentsTheSame(ClazzWithNumStudents oldItem,
+                                              ClazzWithNumStudents newItem) {
+                return oldItem.equals(newItem);
+            }
+        };
 }

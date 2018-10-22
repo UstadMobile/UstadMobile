@@ -17,7 +17,8 @@ import static com.ustadmobile.core.view.PersonDetailView.ARG_PERSON_UID;
 import static com.ustadmobile.core.view.SELEditView.ARG_CLAZZMEMBER_UID;
 
 //public class SELAnswerListPresenter extends UstadBaseController<SELAnswerListView> {
-public class SELAnswerListPresenter extends CommonHandlerPresenter<SELAnswerListView>{
+public class SELAnswerListPresenter extends
+        CommonHandlerPresenter<SELAnswerListView>{
 
     private long currentClazzUid = -1L;
 

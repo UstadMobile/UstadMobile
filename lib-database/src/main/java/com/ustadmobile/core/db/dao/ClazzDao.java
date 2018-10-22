@@ -6,6 +6,7 @@ import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
+import com.ustadmobile.lib.database.annotation.UmUpdate;
 import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.ClazzWithEnrollment;
 import com.ustadmobile.lib.db.entities.ClazzWithNumStudents;
@@ -32,12 +33,19 @@ public abstract class ClazzDao implements BaseDao<Clazz> {
     @UmQuery("SELECT * FROM Clazz WHERE clazzUid = :uid")
     public abstract void findByUidAsync(long uid, UmCallback<Clazz> result);
 
+    @UmUpdate
+    public abstract void updateAsync(Clazz entity, UmCallback<Integer> result);
 
     @UmQuery("SELECT Clazz.*, " +
             " (SELECT COUNT(*) FROM ClazzMember WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid AND ClazzMember.role = 1) AS numStudents" +
             " FROM Clazz WHERE :personUid in " +
             " (SELECT ClazzMember.clazzMemberPersonUid FROM ClazzMember WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid)")
     public abstract UmProvider<ClazzWithNumStudents> findAllClazzesByPersonUid(long personUid);
+
+    @UmQuery("SELECT Clazz.*, " +
+            " (SELECT COUNT(*) FROM ClazzMember WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid AND ClazzMember.role = 1) AS numStudents" +
+            " FROM Clazz ")
+    public abstract UmProvider<ClazzWithNumStudents> findAllClazzes();
 
     @UmQuery("SELECT Clazz.*, (:personUid) AS personUid, " +
             "(SELECT COUNT(*) FROM ClazzMember WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid AND ClazzMember.role = 1) AS numStudents, " +

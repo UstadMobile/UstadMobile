@@ -18,6 +18,7 @@ import com.ustadmobile.core.controller.SELAnswerListPresenter;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.view.SELAnswerListView;
 import com.ustadmobile.lib.db.entities.Person;
+import com.ustadmobile.lib.db.entities.PersonWithEnrollment;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import ru.dimorinny.floatingtextbutton.FloatingTextButton;
@@ -54,6 +55,21 @@ public class SELAnswerListFragment extends UstadBaseFragment implements SELAnswe
                 }
             };
 
+    public static final DiffUtil.ItemCallback<PersonWithEnrollment> DIFF_CALLBACK2 =
+            new DiffUtil.ItemCallback<PersonWithEnrollment>() {
+                @Override
+                public boolean areItemsTheSame(PersonWithEnrollment oldItem,
+                                               PersonWithEnrollment newItem) {
+                    return oldItem.getPersonUid() == newItem.getPersonUid();
+                }
+
+                @Override
+                public boolean areContentsTheSame(PersonWithEnrollment oldItem,
+                                                  PersonWithEnrollment newItem) {
+                    return oldItem.equals(newItem);
+                }
+            };
+
     /**
      * Generates a new Fragment for a page fragment*
      * @return A new instance of fragment SELAnswerListFragment.
@@ -69,8 +85,8 @@ public class SELAnswerListFragment extends UstadBaseFragment implements SELAnswe
     @Override
     public void setSELAnswerListProvider(UmProvider<Person> selAnswersProvider) {
         // Specify the mAdapter
-        SimplePeopleListRecyclerAdapter recyclerAdapter =
-                new SimplePeopleListRecyclerAdapter(DIFF_CALLBACK, getContext(), this, mPresenter);
+        SimplePeopleListRecyclerAdapter recyclerAdapter = new SimplePeopleListRecyclerAdapter(
+                DIFF_CALLBACK, getContext(),this, mPresenter);
 
         // get the provider, set , observe, etc.
         DataSource.Factory<Integer, Person> factory =
@@ -109,8 +125,8 @@ public class SELAnswerListFragment extends UstadBaseFragment implements SELAnswe
         // Use Layout: set layout manager. Change defaults
         mRecyclerLayoutManager = new LinearLayoutManager(getContext());
         mRecyclerView.setLayoutManager(mRecyclerLayoutManager);
-        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(mRecyclerView.getContext(),
-                LinearLayoutManager.VERTICAL);
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(
+                mRecyclerView.getContext(), LinearLayoutManager.VERTICAL);
         mRecyclerView.addItemDecoration(dividerItemDecoration);
 
         // Set the presenter

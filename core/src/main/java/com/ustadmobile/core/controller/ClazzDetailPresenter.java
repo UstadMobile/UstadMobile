@@ -5,7 +5,9 @@ import java.util.Hashtable;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.ClazzDao;
 import com.ustadmobile.core.impl.UmCallback;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.ClassDetailView;
+import com.ustadmobile.core.view.ClazzEditView;
 import com.ustadmobile.lib.db.entities.Clazz;
 
 import static com.ustadmobile.core.controller.ClazzListPresenter.ARG_CLAZZ_UID;
@@ -19,6 +21,7 @@ public class ClazzDetailPresenter
 
     //Any arguments stored as variables here
     private long currentClazzUid = -1;
+    ClazzDao clazzDao = UmAppDatabase.getInstance(context).getClazzDao();
 
 
     public ClazzDetailPresenter(Object context, Hashtable arguments, ClassDetailView view) {
@@ -35,7 +38,10 @@ public class ClazzDetailPresenter
     public void onCreate(Hashtable savedState) {
         super.onCreate(savedState);
 
-        ClazzDao clazzDao = UmAppDatabase.getInstance(context).getClazzDao();
+        updateToolbarTitle();
+    }
+
+    public void updateToolbarTitle(){
 
         clazzDao.findByUidAsync(currentClazzUid, new UmCallback<Clazz>() {
             @Override
@@ -48,6 +54,13 @@ public class ClazzDetailPresenter
                 System.out.println("ClazzDetailPresenter: Fail to get Clazz");
             }
         });
+    }
+
+    public void handleClickClazzEdit(){
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        Hashtable args = new Hashtable();
+        args.put(ARG_CLAZZ_UID, currentClazzUid);
+        impl.go(ClazzEditView.VIEW_NAME, args, view.getContext());
 
     }
 
