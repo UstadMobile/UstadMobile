@@ -1,10 +1,21 @@
 package com.ustadmobile.lib.contentscrapers.phetsimulation;
 
 import com.ustadmobile.core.db.UmAppDatabase;
+import com.ustadmobile.core.db.dao.ContentEntryContentCategoryJoinDao;
+import com.ustadmobile.core.db.dao.ContentEntryContentEntryFileJoinDao;
+import com.ustadmobile.core.db.dao.ContentEntryDao;
+import com.ustadmobile.core.db.dao.ContentEntryFileDao;
+import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
+import com.ustadmobile.core.db.dao.ContentEntryRelatedEntryJoinDao;
 import com.ustadmobile.lib.contentscrapers.ScraperConstants;
 import com.ustadmobile.lib.contentscrapers.phetsimulation.IndexPhetContentScraper;
 import com.ustadmobile.lib.contentscrapers.phetsimulation.PhetContentScraper;
 import com.ustadmobile.lib.db.entities.ContentEntry;
+import com.ustadmobile.lib.db.entities.ContentEntryContentCategoryJoin;
+import com.ustadmobile.lib.db.entities.ContentEntryContentEntryFileJoin;
+import com.ustadmobile.lib.db.entities.ContentEntryFile;
+import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin;
+import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoin;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
 
 import org.junit.Assert;
@@ -15,6 +26,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.List;
 
 import okhttp3.mockwebserver.Dispatcher;
 import okhttp3.mockwebserver.MockResponse;
@@ -113,10 +125,10 @@ public class TestPhetContentScraper {
         File engETag = new File(titleDirectory, "simulation_en" + ScraperConstants.ETAG_TXT);
         Assert.assertTrue("English ETag exists", engETag.length() > 0);
 
-        File engModified = new File(titleDirectory, "simulation_en" +ScraperConstants.LAST_MODIFIED_TXT);
+        File engModified = new File(titleDirectory, "simulation_en" + ScraperConstants.LAST_MODIFIED_TXT);
         Assert.assertTrue("English Last Modified exists", engModified.length() > 0);
 
-        File titleZip = new File(englishLocation,  scraper.getTitle() + ScraperConstants.ZIP_EXT);
+        File titleZip = new File(englishLocation, scraper.getTitle() + ScraperConstants.ZIP_EXT);
         Assert.assertTrue("English Simulation Folder exists", titleZip.length() > 0);
 
         File spanishDir = new File(tmpDir, "es");
@@ -134,11 +146,11 @@ public class TestPhetContentScraper {
         File spanishETag = new File(spanishTitleDirectory, "simulation_es" + ScraperConstants.ETAG_TXT);
         Assert.assertTrue("Spanish ETag exists", spanishETag.length() > 0);
 
-        File spanishModified = new File(spanishTitleDirectory, "simulation_es" +ScraperConstants.LAST_MODIFIED_TXT);
+        File spanishModified = new File(spanishTitleDirectory, "simulation_es" + ScraperConstants.LAST_MODIFIED_TXT);
         Assert.assertTrue("Spanish Last Modified exists", spanishModified.length() > 0);
 
         File spanishTitleZip = new File(spanishDir, scraper.getTitle() + ScraperConstants.ZIP_EXT);
-        Assert.assertTrue("Spanish Title Zip exists", spanishTitleDirectory.length() > 0);
+        Assert.assertTrue("Spanish Title Zip exists", spanishTitleZip.length() > 0);
 
     }
 
@@ -208,6 +220,9 @@ public class TestPhetContentScraper {
     @Test
     public void givenServerOnline_whenUrlFound_findAllSimulations() throws IOException {
 
+        UmAppDatabase db = UmAppDatabase.getInstance(null);
+        db.clearAllTables();
+
         IndexPhetContentScraper index = new IndexPhetContentScraper();
         MockWebServer mockWebServer = new MockWebServer();
         mockWebServer.setDispatcher(dispatcher);
@@ -215,6 +230,54 @@ public class TestPhetContentScraper {
         File tmpDir = Files.createTempDirectory("testphetindexscraper").toFile();
 
         index.findContent(mockWebServer.url(PHET_MAIN_CONTENT).toString(), tmpDir);
+
+        ContentEntryDao contentEntryDao = db.getContentEntryDao();
+        ContentEntryParentChildJoinDao parentChildDaoJoin = db.getContentEntryParentChildJoinDao();
+        ContentEntryFileDao fileDao = db.getContentEntryFileDao();
+        ContentEntryContentEntryFileJoinDao fileEntryJoin = db.getContentEntryContentEntryFileJoinDao();
+        ContentEntryContentCategoryJoinDao categoryJoinDao = db.getContentEntryContentCategoryJoinDao();
+        ContentEntryRelatedEntryJoinDao relatedJoin = db.getContentEntryRelatedEntryJoinDao();
+
+        ContentEntry parentEntry = contentEntryDao.findBySourceUrl("https://phet.colorado.edu/");
+        Assert.assertEquals("Main parent content entry exsits", true, parentEntry.getEntryId().equalsIgnoreCase("https://phet.colorado.edu/"));
+
+        ContentEntry categoryEntry = contentEntryDao.findBySourceUrl("/en/simulations/category/math");
+        ContentEntryParentChildJoin parentChildJoinEntry = parentChildDaoJoin.findParentByChildUuids(categoryEntry.getContentEntryUid());
+        Assert.assertEquals("Category Math entry exists", true, parentChildJoinEntry.getCepcjParentContentEntryUid() == parentEntry.getContentEntryUid());
+
+        ContentEntry englishSimulationEntry = contentEntryDao.findBySourceUrl("/api/simulation/test");
+        Assert.assertEquals("Simulation entry english exists", true, englishSimulationEntry.getEntryId().equalsIgnoreCase("/api/simulation/test"));
+
+        List<ContentEntryParentChildJoin> categorySimulationEntryLists = parentChildDaoJoin.findListOfParentsByChildUuid(englishSimulationEntry.getContentEntryUid());
+        boolean hasMathCategory = false;
+        for(ContentEntryParentChildJoin category : categorySimulationEntryLists){
+
+            if(category.getCepcjParentContentEntryUid() == categoryEntry.getContentEntryUid()){
+                hasMathCategory = true;
+                break;
+            }
+        }
+        Assert.assertEquals("Parent child join between category and simulation exists",true, hasMathCategory);
+
+
+        ContentEntryContentCategoryJoin categoryJoinEntry = categoryJoinDao.findJoinByParentChildUuids(categoryEntry.getContentEntryUid(), englishSimulationEntry.getContentEntryUid());
+        Assert.assertEquals("Category Join with Simulation Exists - Category Match",true, categoryJoinEntry.getCeccjContentCategoryUid() == categoryEntry.getContentEntryUid());
+        Assert.assertEquals("Category Join with Simulation Exists - Simulation Match",true, englishSimulationEntry.getContentEntryUid() == categoryJoinEntry.getCeccjContentEntryUid());
+
+        ContentEntry spanishEntry = contentEntryDao.findBySourceUrl("es/test");
+        Assert.assertEquals("Simulation entry spanish exists", true, spanishEntry.getEntryId().equalsIgnoreCase("es/test"));
+
+        ContentEntryRelatedEntryJoin spanishEnglishJoin = relatedJoin.findPrimaryByTranslation(spanishEntry.getContentEntryUid());
+        Assert.assertEquals("Related Join with Simulation Exists - Spanish Match",true, spanishEnglishJoin.getCerejRelatedEntryUid() == spanishEntry.getContentEntryUid());
+        Assert.assertEquals("Related Join with Simulation Exists - English Match",true, spanishEnglishJoin.getCerejContentEntryUid() == englishSimulationEntry.getContentEntryUid());
+        Assert.assertEquals("Related Join exists - lang match", true, spanishEntry.getPrimaryLanguage().equalsIgnoreCase("es"));
+
+
+        List<ContentEntryContentEntryFileJoin> listOfFiles = fileEntryJoin.findChildByParentUUid(englishSimulationEntry.getContentEntryUid());
+        Assert.assertEquals(true, listOfFiles.size() > 0);
+
+        ContentEntryFile file = fileDao.findByUid(listOfFiles.get(0).getCecefjContentEntryFileUid());
+        Assert.assertEquals(true, ScraperConstants.MIMETYPE_ZIP.equalsIgnoreCase(file.getMimeType()));
 
     }
 

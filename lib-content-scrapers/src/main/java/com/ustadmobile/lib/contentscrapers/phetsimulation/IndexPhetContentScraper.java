@@ -149,7 +149,7 @@ public class IndexPhetContentScraper {
                         fis.close();
 
                         ContentEntryFile contentEntryFile = new ContentEntryFile();
-                        contentEntryFile.setMimeType(ScraperConstants.MIMETYPE_EPUB);
+                        contentEntryFile.setMimeType(ScraperConstants.MIMETYPE_ZIP);
                         contentEntryFile.setFileSize(content.length());
                         contentEntryFile.setLastModified(content.lastModified());
                         contentEntryFile.setMd5sum(md5);
@@ -204,7 +204,7 @@ public class IndexPhetContentScraper {
                                 fis.close();
 
                                 ContentEntryFile contentEntryFile = new ContentEntryFile();
-                                contentEntryFile.setMimeType(ScraperConstants.MIMETYPE_EPUB);
+                                contentEntryFile.setMimeType(ScraperConstants.MIMETYPE_ZIP);
                                 contentEntryFile.setFileSize(content.length());
                                 contentEntryFile.setLastModified(content.lastModified());
                                 contentEntryFile.setMd5sum(md5);

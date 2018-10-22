@@ -277,7 +277,7 @@ public class PhetContentScraper {
                                 // TODO recheck entry id for translations
                                 String langTitle = Jsoup.parse(file, ScraperConstants.UTF_ENCODING).title();
 
-                                String path =  langCode + "\\" + this.title;
+                                String path =  langCode + "/" + this.title;
                                 ContentEntry languageContentEntry = contentEntryDao.findBySourceUrl(path);
                                 if (languageContentEntry == null) {
                                     languageContentEntry = new ContentEntry();
