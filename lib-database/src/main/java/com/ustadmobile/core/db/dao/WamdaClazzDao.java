@@ -13,13 +13,12 @@ import com.ustadmobile.lib.db.entities.WamdaClazzWithSocialInfoClazzMember;
 @UmDao
 public abstract class WamdaClazzDao {
 
-    @UmQuery("SELECT Clazz.*, " +
-            "(SELECT COUNT(*) FROM WamdaLike WHERE WamdaLike.wamdaLikeClazzUid = Clazz.clazzUid) AS numLikes," +
-            "(SELECT COUNT(*) FROM ClazzMember WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid) AS numStudents," +
-            "(SELECT COUNT(*) FROM WamdaLike WHERE WamdaLike.wamdaLikeClazzUid = Clazz.clazzUid" +
-            " AND WamdaLike.wamdaLikePersonUid =:personUid) AS liked, " +
-            "(SELECT  COUNT(*) FROM WamdaShare WHERE WamdaShare.wamdaShareClazzUid = Clazz.clazzUid) AS numShares " +
-            "FROM Clazz ORDER BY Clazz.clazzUid DESC")
+    @UmQuery("SELECT Clazz.*,WamdaClazz.*, (SELECT COUNT(*) FROM WamdaLike WHERE WamdaLike.wamdaLikeClazzUid = Clazz.clazzUid) AS numLikes,(\n" +
+            "SELECT COUNT(*) FROM ClazzMember WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid) AS numStudents,\n" +
+            "(SELECT COUNT(*) FROM WamdaLike WHERE WamdaLike.wamdaLikeClazzUid = Clazz.clazzUid AND WamdaLike.wamdaLikePersonUid = :personUid) AS liked, \n" +
+            "(SELECT  COUNT(*) FROM WamdaShare WHERE WamdaShare.wamdaShareClazzUid = Clazz.clazzUid) AS numShares \n" +
+            "FROM Clazz \n" +
+            "LEFT JOIN WamdaClazz ON WamdaClazz.wamdaClazzUid = Clazz.clazzUid ORDER BY Clazz.clazzUid DESC")
     public abstract UmProvider<WamdaClazzWithSocialInfo> findAll(long personUid);
 
     @UmQuery("SELECT Clazz.* , WamdaClazz.*, Person.*, \n" +
