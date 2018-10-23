@@ -1,8 +1,19 @@
 package com.ustadmobile.lib.contentscrapers;
 
+import com.ustadmobile.core.db.UmAppDatabase;
+import com.ustadmobile.core.db.dao.ContentEntryContentCategoryJoinDao;
+import com.ustadmobile.core.db.dao.ContentEntryContentEntryFileJoinDao;
+import com.ustadmobile.core.db.dao.ContentEntryDao;
+import com.ustadmobile.core.db.dao.ContentEntryFileDao;
+import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
+import com.ustadmobile.core.db.dao.ContentEntryRelatedEntryJoinDao;
 import com.ustadmobile.lib.contentscrapers.ck12.CK12ContentScraper;
 import com.ustadmobile.lib.contentscrapers.ck12.IndexCategoryCK12Content;
 import com.ustadmobile.lib.contentscrapers.ck12.practice.ScriptEngineReader;
+import com.ustadmobile.lib.db.entities.ContentEntry;
+import com.ustadmobile.lib.db.entities.ContentEntryContentEntryFileJoin;
+import com.ustadmobile.lib.db.entities.ContentEntryFile;
+import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
@@ -14,6 +25,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.util.List;
 
 import okhttp3.mockwebserver.Dispatcher;
 import okhttp3.mockwebserver.MockResponse;
@@ -26,6 +38,7 @@ import okio.Okio;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 
 public class TestCK12ContentScraper {
@@ -98,6 +111,14 @@ public class TestCK12ContentScraper {
                     Buffer buffer = new Buffer();
                     source.readAll(buffer);
                     return new MockResponse().setResponseCode(200).setBody(buffer);
+                } else if(request.getPath().contains("json")){
+
+                    int start = request.getPath().indexOf("/", request.getPath().indexOf("/") + 1);
+                    String fileName = request.getPath().substring(start,
+                            request.getPath().length());
+                    String body = IOUtils.toString(getClass().getResourceAsStream(fileName), UTF_ENCODING);
+                    return new MockResponse().setBody(body);
+
                 }
 
             } catch (IOException e) {
@@ -284,5 +305,86 @@ public class TestCK12ContentScraper {
 
     }
 
+    @Test
+    public void givenServerOnline_scrapeAndIndexCK12Content() throws IOException {
+
+        UmAppDatabase db = UmAppDatabase.getInstance(null);
+        db.clearAllTables();
+
+
+        MockWebServer mockWebServer = new MockWebServer();
+        mockWebServer.setDispatcher(dispatcher);
+
+        File tmpDir = Files.createTempDirectory("testCK12IndexContentScraper").toFile();
+
+        IndexCategoryCK12Content ck12Content = new IndexCategoryCK12Content(
+                mockWebServer.url("/json/com/ustadmobile/lib/contentscrapers/ck12/index/categorypage.txt").toString(),
+                tmpDir);
+
+        ck12Content.findContent();
+
+
+        ContentEntryDao contentEntryDao = db.getContentEntryDao();
+        ContentEntryParentChildJoinDao parentChildDaoJoin = db.getContentEntryParentChildJoinDao();
+        ContentEntryFileDao fileDao = db.getContentEntryFileDao();
+        ContentEntryContentEntryFileJoinDao fileEntryJoin = db.getContentEntryContentEntryFileJoinDao();
+        ContentEntryContentCategoryJoinDao categoryJoinDao = db.getContentEntryContentCategoryJoinDao();
+        ContentEntryRelatedEntryJoinDao relatedJoin = db.getContentEntryRelatedEntryJoinDao();
+
+        ContentEntry parentEntry = contentEntryDao.findBySourceUrl("https://www.ck12.org/");
+        Assert.assertEquals("Main parent content entry exsits", true, parentEntry.getEntryId().equalsIgnoreCase("https://www.ck12.org/"));
+
+        ContentEntry subjectEntry = contentEntryDao.findBySourceUrl("/json/com/ustadmobile/lib/contentscrapers/ck12/index/classes.txt");
+        ContentEntryParentChildJoin parentChildJoinEntry = parentChildDaoJoin.findParentByChildUuids(subjectEntry.getContentEntryUid());
+        Assert.assertEquals("Subject Grade 1- 5  entry exists", true, parentChildJoinEntry.getCepcjParentContentEntryUid() == parentEntry.getContentEntryUid());
+
+        ContentEntry gradeEntry = contentEntryDao.findBySourceUrl("/json-grade/com/ustadmobile/lib/contentscrapers/ck12/index/classes.txt");
+        ContentEntryParentChildJoin gradeSubjectJoin = parentChildDaoJoin.findParentByChildUuids(gradeEntry.getContentEntryUid());
+        Assert.assertEquals("Grade 1 entry exists", true, gradeSubjectJoin.getCepcjParentContentEntryUid() == subjectEntry.getContentEntryUid());
+
+        ContentEntry headingTopicEntry = contentEntryDao.findBySourceUrl("/json-grade/com/ustadmobile/lib/contentscrapers/ck12/index/classes.txt/Addition and Subtraction to 20");
+        ContentEntryParentChildJoin subjectHeadingJoin = parentChildDaoJoin.findParentByChildUuids(headingTopicEntry.getContentEntryUid());
+        Assert.assertEquals("Heading Topic entry exists", true, subjectHeadingJoin.getCepcjParentContentEntryUid() == gradeEntry.getContentEntryUid());
+
+        ContentEntry topicEntry = contentEntryDao.findBySourceUrl("/json-grade/com/ustadmobile/lib/contentscrapers/ck12/index/classes.txt/Addition and Subtraction to 20/Addition and Subtraction facts to 20");
+        ContentEntryParentChildJoin headingTopicJoin = parentChildDaoJoin.findParentByChildUuids(topicEntry.getContentEntryUid());
+        Assert.assertEquals("Heading Topic entry exists", true, headingTopicJoin.getCepcjParentContentEntryUid() == headingTopicEntry.getContentEntryUid());
+
+        ContentEntry subTopicEntry = contentEntryDao.findBySourceUrl("/json/com/ustadmobile/lib/contentscrapers/ck12/index/plix-list.txt");
+        ContentEntryParentChildJoin subTopicTopicJoin = parentChildDaoJoin.findParentByChildUuids(subTopicEntry.getContentEntryUid());
+        Assert.assertEquals("SubTopic entry exists", true, subTopicTopicJoin.getCepcjParentContentEntryUid() == topicEntry.getContentEntryUid());
+
+        ContentEntry courseEntry = contentEntryDao.findBySourceUrl("/content/plix.txt");
+        ContentEntryParentChildJoin courseTopicEntry = parentChildDaoJoin.findParentByChildUuids(courseEntry.getContentEntryUid());
+        Assert.assertEquals("Course entry exists", true, courseTopicEntry.getCepcjParentContentEntryUid() == subTopicEntry.getContentEntryUid());
+
+        ContentEntry subjectArtEntry = contentEntryDao.findBySourceUrl("/json/com/ustadmobile/lib/contentscrapers/ck12/index/topics.txt");
+        ContentEntryParentChildJoin arthemicParentChildJoin = parentChildDaoJoin.findParentByChildUuids(subjectArtEntry.getContentEntryUid());
+        Assert.assertEquals("Subject Arithmetic  entry exists", true, arthemicParentChildJoin.getCepcjParentContentEntryUid() == parentEntry.getContentEntryUid());
+
+        ContentEntry tableContentEntry = contentEntryDao.findBySourceUrl("/json/com/ustadmobile/lib/contentscrapers/ck12/index/topics.txt/Whole Numbers");
+        ContentEntryParentChildJoin tableSubjectJoin = parentChildDaoJoin.findParentByChildUuids(tableContentEntry.getContentEntryUid());
+        Assert.assertEquals("Table of Content Whole Numbers entry exists", true, tableSubjectJoin.getCepcjParentContentEntryUid() == subjectArtEntry.getContentEntryUid());
+
+        ContentEntry parentTopic = contentEntryDao.findBySourceUrl("/json/com/ustadmobile/lib/contentscrapers/ck12/index/topics.txt/Whole Numbers/Basic Place Value");
+        ContentEntryParentChildJoin tableParentJoin = parentChildDaoJoin.findParentByChildUuids(parentTopic.getContentEntryUid());
+        Assert.assertEquals("Parent Content Basic entry exists", true, tableParentJoin.getCepcjParentContentEntryUid() == tableContentEntry.getContentEntryUid());
+
+        ContentEntry childTopic = contentEntryDao.findBySourceUrl("/json/com/ustadmobile/lib/contentscrapers/ck12/index/video-practice-list.txt");
+        ContentEntryParentChildJoin parentChildTopicJoin = parentChildDaoJoin.findParentByChildUuids(childTopic.getContentEntryUid());
+        Assert.assertEquals("Child Content Course entry exists", true, parentChildTopicJoin.getCepcjParentContentEntryUid() == parentTopic.getContentEntryUid());
+
+        ContentEntry videoCourseEntry = contentEntryDao.findBySourceUrl("/c//com/ustadmobile/lib/contentscrapers/ck12/ck12-video-genie.txt");
+        ContentEntryParentChildJoin videoCourseJoin = parentChildDaoJoin.findParentByChildUuids(videoCourseEntry.getContentEntryUid());
+        Assert.assertEquals("Child Content Course entry exists", true, videoCourseJoin.getCepcjParentContentEntryUid() == childTopic.getContentEntryUid());
+
+        List<ContentEntryContentEntryFileJoin> listOfFiles = fileEntryJoin.findChildByParentUUid(videoCourseEntry.getContentEntryUid());
+        Assert.assertEquals(true, listOfFiles.size() > 0);
+
+        ContentEntryFile file = fileDao.findByUid(listOfFiles.get(0).getCecefjContentEntryFileUid());
+        Assert.assertEquals(true, ScraperConstants.MIMETYPE_ZIP.equalsIgnoreCase(file.getMimeType()));
+
+
+    }
 
 }

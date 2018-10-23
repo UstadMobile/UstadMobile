@@ -246,7 +246,7 @@ public class IndexCategoryCK12Content {
         for (Element category : categoryList) {
 
             String level1CategoryTitle = category.select("span.concept-name").attr("title");
-            String fakePath = url.getPath() + level1CategoryTitle;
+            String fakePath = url.getPath() + "/" + level1CategoryTitle;
 
             System.out.println("Opening Heading = " + level1CategoryTitle + " at url " + fakePath);
 
@@ -485,6 +485,22 @@ public class IndexCategoryCK12Content {
 
             URL url = new URL(contentUrl, hrefLink);
 
+            ContentEntry topicEntry = contentEntryDao.findBySourceUrl(url.getPath());
+            if (topicEntry == null) {
+                topicEntry = new ContentEntry();
+                topicEntry = setContentEntryData(topicEntry, url.getPath(),
+                        title, url.getPath(), ScraperConstants.ENGLISH_LANG_CODE);
+                topicEntry.setDescription(summary);
+                topicEntry.setContentEntryUid(contentEntryDao.insert(topicEntry));
+            } else {
+                topicEntry = setContentEntryData(topicEntry, url.getPath(),
+                        title, url.getPath(), ScraperConstants.ENGLISH_LANG_CODE);
+                topicEntry.setDescription(summary);
+                contentEntryDao.updateContentEntry(topicEntry);
+            }
+
+            ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, parent, topicEntry, courseCount++);
+
             CK12ContentScraper scraper = new CK12ContentScraper(url.toString(), topicDestination);
             try {
                 switch (groupType.toLowerCase()) {
@@ -508,7 +524,7 @@ public class IndexCategoryCK12Content {
                     default:
                         System.out.println("found a group type not supported " + groupType);
                 }
-            }catch (Exception e){
+            } catch (Exception e) {
                 System.err.println("Unable to scrape content from " + groupType + " at url " + url);
                 e.printStackTrace();
                 continue;
@@ -516,25 +532,9 @@ public class IndexCategoryCK12Content {
 
             System.out.println("Found Content = " + groupType + " at url " + url);
 
-            ContentEntry topicEntry = contentEntryDao.findBySourceUrl(hrefLink);
-            if (topicEntry == null) {
-                topicEntry = new ContentEntry();
-                topicEntry = setContentEntryData(topicEntry, hrefLink,
-                        title, hrefLink, ScraperConstants.ENGLISH_LANG_CODE);
-                topicEntry.setDescription(summary);
-                topicEntry.setContentEntryUid(contentEntryDao.insert(topicEntry));
-            } else {
-                topicEntry = setContentEntryData(topicEntry, hrefLink,
-                        title, hrefLink, ScraperConstants.ENGLISH_LANG_CODE);
-                topicEntry.setDescription(summary);
-                contentEntryDao.updateContentEntry(topicEntry);
-            }
+            if (scraper.isContentUpdated()) {
 
-            ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, parent, topicEntry, courseCount++);
-
-            if(scraper.isContentUpdated()){
-
-                File content = new File(destinationDirectory, FilenameUtils.getBaseName(url.getPath()) + ScraperConstants.ZIP_EXT);
+                File content = new File(topicDestination, FilenameUtils.getBaseName(url.getPath()) + ScraperConstants.ZIP_EXT);
                 FileInputStream fis = new FileInputStream(content);
                 String md5 = DigestUtils.md5Hex(fis);
                 fis.close();
