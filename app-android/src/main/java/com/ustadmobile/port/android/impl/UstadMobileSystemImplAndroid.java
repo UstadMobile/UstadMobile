@@ -77,6 +77,7 @@ import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.view.AboutView;
 import com.ustadmobile.core.view.AddFeedDialogView;
+import com.ustadmobile.core.view.AddScheduleDialogView;
 import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.core.view.BasePointView;
 import com.ustadmobile.core.view.CatalogEntryView;
@@ -211,6 +212,8 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         viewNameToAndroidImplMap.put(SELQuestionEditView.VIEW_NAME, SELQuestionEditActivity.class);
         viewNameToAndroidImplMap.put(SELRecognitionView.VIEW_NAME, SELRecognitionActivity.class);
         viewNameToAndroidImplMap.put(ClazzEditView.VIEW_NAME, ClazzEditActivity.class);
+        viewNameToAndroidImplMap.put(AddScheduleDialogView.VIEW_NAME, AddScheduleDialogFragment.class);
+
 
     }
 

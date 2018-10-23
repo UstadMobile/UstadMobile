@@ -350,6 +350,35 @@ This is the one you should be editing. The one in /core/locale/main/values/strin
     <string name="features_enabled">Features enabled</string>
     <string name="activity_tracker">Activity tracker</string>
     <string name="class_setup">Class Setup</string>
+    <string name="add_session">Add session</string>
+    <string name="weekly">Weekly</string>
+    <string name="once">Once</string>
+    <string name="daily">Daily</string>
+    <string name="monthly">Monthly</string>
+    <string name="yearly">Yearly</string>
+    <string name="sunday">Sunday</string>
+    <string name="monday">Monday</string>
+    <string name="tuesday">Tuesday</string>
+    <string name="wednesday">Wednesday</string>
+    <string name="thursday">Thursday</string>
+    <string name="friday">Friday</string>
+    <string name="saturday">Saturday</string>
+    <string name="jan">January</string>
+    <string name="feb">Febuary</string>
+    <string name="mar">Marh</string>
+    <string name="apr">April</string>
+    <string name="may">May</string>
+    <string name="jun">June</string>
+    <string name="jul">July</string>
+    <string name="aug">August</string>
+    <string name="sep">September</string>
+    <string name="oct">October</string>
+    <string name="nov">November</string>
+    <string name="dec">December</string>
+    <string name="day">Day</string>
+    <string name="fromC">From</string>
+    <string name="toC">To</string>
+
 
 
 

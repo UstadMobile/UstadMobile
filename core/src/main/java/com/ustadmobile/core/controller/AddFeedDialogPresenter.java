@@ -25,7 +25,8 @@ import java.util.UUID;
  * preferences keys, using OpdsEndpoint.
  */
 
-public class AddFeedDialogPresenter extends UstadBaseController implements OpdsEntry.OpdsItemLoadCallback {
+public class AddFeedDialogPresenter extends UstadBaseController
+        implements OpdsEntry.OpdsItemLoadCallback {
 
     private AddFeedDialogView addFeedDialogView;
 

@@ -18,6 +18,8 @@ import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.lib.db.entities.Clazz;
@@ -49,6 +51,7 @@ public class ClazzEditActivity extends UstadBaseActivity implements ClazzEditVie
 
     TextInputLayout classNameTIP;
     TextInputLayout classDescTIP;
+    Button addScheduleButton;
 
 
     @Override
@@ -115,6 +118,15 @@ public class ClazzEditActivity extends UstadBaseActivity implements ClazzEditVie
         //FAB and its listener
         FloatingTextButton fab = findViewById(R.id.activity_clazz_edit_fab);
         fab.setOnClickListener(v -> mPresenter.handleClickDone());
+
+        //Add schedule button listener
+        addScheduleButton = findViewById(R.id.activity_clazz_edit_add_schedule);
+        addScheduleButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mPresenter.handleClickAddSchedule();
+            }
+        });
 
     }
 

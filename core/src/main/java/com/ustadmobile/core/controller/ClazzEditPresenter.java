@@ -6,6 +6,7 @@ import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.db.dao.ClazzDao;
 import com.ustadmobile.core.impl.UmCallback;
+import com.ustadmobile.core.view.AddScheduleDialogView;
 import com.ustadmobile.core.view.ClazzEditView;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.lib.db.entities.Clazz;
@@ -98,6 +99,13 @@ public class ClazzEditPresenter
 
             mUpdatedClazz = clazz;
         }
+    }
+
+    public void handleClickAddSchedule(){
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        Hashtable args = new Hashtable();
+        args.put(ARG_CLAZZ_UID, currentClazzUid);
+        impl.go(AddScheduleDialogView.VIEW_NAME, args, getContext());
     }
 
     public void handleClickDone() {

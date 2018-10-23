@@ -16,6 +16,10 @@ import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.CommonHandlerPresenter;
 import com.ustadmobile.lib.db.entities.Schedule;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import static com.ustadmobile.lib.db.entities.Schedule.DAY_FRIDAY;
 import static com.ustadmobile.lib.db.entities.Schedule.DAY_MONDAY;
 import static com.ustadmobile.lib.db.entities.Schedule.DAY_SATURDAY;
@@ -117,9 +121,15 @@ public class ScheduleRecyclerAdapter extends
         long startTimeLong = thisSchedule.getSceduleStartTime();
         long endTimeLong = thisSchedule.getScheduleEndTime();
 
-        //TODO: this
-        String startTime = "";
-        String endTime = "";
+        Date startTimeDate = new Date(startTimeLong);
+        DateFormat formatter = new SimpleDateFormat("HH:mm");
+        String startTime = formatter.format(startTimeDate);
+
+        Date endTimeDate = new Date(endTimeLong);
+        String endTime = formatter.format(endTimeDate);
+
+
+
 
         int scheduleDayCode = thisSchedule.getScheduleDay();
         int scheduleMonthCode = thisSchedule.getScheduleMonth();
