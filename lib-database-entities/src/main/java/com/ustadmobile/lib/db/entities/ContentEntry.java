@@ -48,6 +48,8 @@ public class ContentEntry {
 
     private String thumbnailUrl;
 
+    private long lastModified;
+
     public long getContentEntryUid() {
         return contentEntryUid;
     }
@@ -194,4 +196,12 @@ public class ContentEntry {
     public String getThumbnailUrl() { return thumbnailUrl; }
 
     public void setThumbnailUrl(String thumbnailUrl){ this.thumbnailUrl = thumbnailUrl; }
+
+    public long getLastModified() {
+        return lastModified;
+    }
+
+    public void setLastModified(long lastModified) {
+        this.lastModified = lastModified;
+    }
 }
