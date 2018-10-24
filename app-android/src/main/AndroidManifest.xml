@@ -145,7 +145,8 @@
         <activity
             android:name="com.ustadmobile.port.android.view.ClazzEditActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
-            android:theme="@style/Theme.UstadTheme" />
+            android:theme="@style/Theme.UstadTheme"
+            android:windowSoftInputMode="stateHidden"/>
 
         <activity
             android:name="com.ustadmobile.port.android.view.AboutActivity"

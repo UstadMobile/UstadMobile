@@ -28,4 +28,8 @@ public interface ClazzEditView extends UstadView {
 
     void updateClazzEditView(Clazz updatedClazz );
 
+    void setHolidayPresets(String[] presets, int position);
+
+    void setHolidaySelected(String name, int id);
+
 }

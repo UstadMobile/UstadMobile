@@ -58,6 +58,7 @@ public class ClazzListPresenter extends UstadBaseController<ClazzListView> {
         Hashtable args = new Hashtable();
         long clazzUid = clazz.getClazzUid();
         args.put(ARG_CLAZZ_UID, clazzUid);
+
         impl.go(ClassDetailView.VIEW_NAME, args, view.getContext());
     }
 

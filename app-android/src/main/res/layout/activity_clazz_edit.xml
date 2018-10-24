@@ -43,7 +43,7 @@
                 android:id="@+id/activity_clazz_edit_basic_details_heading"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
+                android:layout_marginStart="8dp"
                 android:layout_marginTop="8dp"
                 android:text="@string/basic_details"
                 app:layout_constraintStart_toStartOf="parent"
@@ -54,6 +54,7 @@
                 android:layout_width="368dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
+                android:layout_marginTop="16dp"
                 android:layout_marginEnd="8dp"
                 android:hint="@string/class_name"
                 app:hintEnabled="true"
@@ -86,8 +87,8 @@
                 android:id="@+id/activity_clazz_edit_schedule_heading"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="8dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="16dp"
                 android:text="@string/schedule"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/activity_clazz_edit_description" />
@@ -103,6 +104,7 @@
                 android:drawablePadding="@dimen/dimen_16dp"
                 android:text="@string/add_class_day"
                 android:textAlignment="textStart"
+                android:textSize="14sp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/activity_clazz_edit_schedule_heading" />
 
@@ -124,22 +126,40 @@
                 android:id="@+id/activity_clazz_edit_holiday_calendar_heading"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="8dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="16dp"
                 android:text="@string/holiday_calendar"
+                android:textSize="14sp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/activity_clazz_edit_schedule_recyclerview" />
 
-            <TextView
+
+            <Spinner
                 android:id="@+id/activity_clazz_edit_holiday_calendar_selected"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:text="@string/holiday_calendar"
-                android:textColor="@android:color/black"
-                android:textSize="18sp"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:paddingTop="20dp"
+                android:spinnerMode="dialog"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/activity_clazz_edit_holiday_calendar_heading" />
+                app:layout_constraintTop_toBottomOf="@+id/activity_clazz_edit_holiday_calendar_heading">
+
+            </Spinner>
+
+
+            <!--<TextView-->
+                <!--android:id="@+id/"-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_marginStart="8dp"-->
+                <!--android:layout_marginTop="8dp"-->
+                <!--android:text="@string/holiday_calendar"-->
+                <!--android:textColor="@android:color/black"-->
+                <!--android:textSize="16sp"-->
+                <!--app:layout_constraintStart_toStartOf="parent"-->
+                <!--app:layout_constraintTop_toBottomOf="@+id/" />-->
 
             <TextView
                 android:id="@+id/activity_clazz_edit_features_heading"

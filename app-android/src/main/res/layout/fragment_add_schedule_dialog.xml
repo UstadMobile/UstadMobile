@@ -10,10 +10,14 @@
         android:id="@+id/fragment_add_schedule_dialog_day_spinner"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
         android:layout_marginTop="8dp"
+        android:layout_marginEnd="24dp"
         android:paddingTop="20dp"
-        app:layout_constraintTop_toBottomOf="@+id/fragment_add_schedule_dialog_day_heading"
-        tools:layout_editor_absoluteX="8dp"></Spinner>
+        android:spinnerMode="dialog"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/fragment_add_schedule_dialog_day_heading"></Spinner>
 
     <TextView
         android:id="@+id/fragment_add_schedule_dialog_schedule_heading"
@@ -30,9 +34,10 @@
         android:id="@+id/fragment_add_schedule_dialog_schedule_spinner"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="24dp"
         android:paddingTop="20dp"
+        android:spinnerMode="dialog"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/fragment_add_schedule_dialog_schedule_heading"></Spinner>
@@ -61,7 +66,7 @@
         android:id="@+id/fragment_add_schedule_dialog_to_heading"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="102dp"
+        android:layout_marginStart="124dp"
         android:layout_marginTop="16dp"
         android:text="@string/toC"
         app:layout_constraintStart_toEndOf="@+id/fragment_add_schedule_dialog_from_heading"
@@ -72,7 +77,9 @@
         android:id="@+id/fragment_add_schedule_dialog_from_time"
         android:layout_width="97dp"
         android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/fragment_add_schedule_dialog_from_heading" />
 
     <EditText

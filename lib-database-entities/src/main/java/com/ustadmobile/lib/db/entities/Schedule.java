@@ -6,9 +6,10 @@ import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 @UmEntity
 public class Schedule implements SyncableEntity {
 
-    public static final int SCHEDULE_FREQUENCY_ONCE = 1;
-    public static final int SCHEDULE_FREQUENCY_DAILY = 2;
-    public static final int SCHEDULE_FREQUENCY_WEEKLY = 3;
+    public static final int SCHEDULE_FREQUENCY_DAILY = 1;
+    public static final int SCHEDULE_FREQUENCY_WEEKLY = 2;
+
+    public static final int SCHEDULE_FREQUENCY_ONCE = 3;
     public static final int SCHEDULE_FREQUENCY_MONTHLY = 4;
     public static final int SCHEDULE_FREQUENCY_YEARLY = 5;
 

@@ -1,8 +1,6 @@
 package com.ustadmobile.port.android.view;
 
 
-import com.ustadmobile.core.controller.ClazzEditPresenter;
-
 import android.arch.lifecycle.LiveData;
 import android.arch.paging.DataSource;
 import android.arch.paging.LivePagedListBuilder;
@@ -15,20 +13,19 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.Spinner;
 
+import com.toughra.ustadmobile.R;
+import com.ustadmobile.core.controller.ClazzEditPresenter;
 import com.ustadmobile.core.db.UmProvider;
+import com.ustadmobile.core.view.ClazzEditView;
 import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.Schedule;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
-import com.toughra.ustadmobile.R;
-
-
-import com.ustadmobile.core.view.ClazzEditView;
 
 import ru.dimorinny.floatingtextbutton.FloatingTextButton;
 
@@ -52,7 +49,7 @@ public class ClazzEditActivity extends UstadBaseActivity implements ClazzEditVie
     TextInputLayout classNameTIP;
     TextInputLayout classDescTIP;
     Button addScheduleButton;
-
+    Spinner holidaySpinner;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -128,6 +125,19 @@ public class ClazzEditActivity extends UstadBaseActivity implements ClazzEditVie
             }
         });
 
+        holidaySpinner = findViewById(R.id.activity_clazz_edit_holiday_calendar_selected);
+        holidaySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                mPresenter.updateHoliday(position, id);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
     }
 
     @Override
@@ -196,5 +206,19 @@ public class ClazzEditActivity extends UstadBaseActivity implements ClazzEditVie
         });
 
 
+    }
+
+    @Override
+    public void setHolidayPresets(String[] presets, int position) {
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(getApplicationContext(),
+                android.R.layout.simple_spinner_item, presets);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        holidaySpinner.setAdapter(adapter);
+        holidaySpinner.setSelection(position);
+    }
+
+    @Override
+    public void setHolidaySelected(String name, int id) {
+        //nothing?
     }
 }

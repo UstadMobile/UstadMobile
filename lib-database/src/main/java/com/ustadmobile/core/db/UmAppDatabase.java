@@ -15,6 +15,7 @@ import com.ustadmobile.core.db.dao.DownloadSetDao;
 import com.ustadmobile.core.db.dao.DownloadSetItemDao;
 import com.ustadmobile.core.db.dao.EntryStatusResponseDao;
 import com.ustadmobile.core.db.dao.FeedEntryDao;
+import com.ustadmobile.core.db.dao.HolidayDao;
 import com.ustadmobile.core.db.dao.HttpCachedEntryDao;
 import com.ustadmobile.core.db.dao.NetworkNodeDao;
 import com.ustadmobile.core.db.dao.OpdsEntryDao;
@@ -33,6 +34,7 @@ import com.ustadmobile.core.db.dao.SocialNominationQuestionResponseDao;
 import com.ustadmobile.core.db.dao.SocialNominationQuestionResponseNominationDao;
 import com.ustadmobile.core.db.dao.SocialNominationQuestionSetDao;
 import com.ustadmobile.core.db.dao.SocialNominationQuestionSetResponseDao;
+import com.ustadmobile.core.db.dao.UMCalendarDao;
 import com.ustadmobile.lib.database.annotation.UmClearAll;
 import com.ustadmobile.lib.database.annotation.UmDatabase;
 import com.ustadmobile.lib.database.annotation.UmDbContext;
@@ -52,6 +54,7 @@ import com.ustadmobile.lib.db.entities.DownloadSet;
 import com.ustadmobile.lib.db.entities.DownloadSetItem;
 import com.ustadmobile.lib.db.entities.EntryStatusResponse;
 import com.ustadmobile.lib.db.entities.FeedEntry;
+import com.ustadmobile.lib.db.entities.Holiday;
 import com.ustadmobile.lib.db.entities.HttpCachedEntry;
 import com.ustadmobile.lib.db.entities.NetworkNode;
 import com.ustadmobile.lib.db.entities.OpdsEntry;
@@ -70,6 +73,7 @@ import com.ustadmobile.lib.db.entities.SocialNominationQuestionResponseNominatio
 import com.ustadmobile.lib.db.entities.SocialNominationQuestionSet;
 import com.ustadmobile.lib.db.entities.SocialNominationQuestionSetRecognition;
 import com.ustadmobile.lib.db.entities.SocialNominationQuestionSetResponse;
+import com.ustadmobile.lib.db.entities.UMCalendar;
 
 @UmDatabase(version = 1, entities = {
         OpdsEntry.class, OpdsLink.class, OpdsEntryParentToChildJoin.class,
@@ -85,7 +89,7 @@ import com.ustadmobile.lib.db.entities.SocialNominationQuestionSetResponse;
         SocialNominationQuestion.class, SocialNominationQuestionResponse.class,
         SocialNominationQuestionResponseNomination.class, SocialNominationQuestionSet.class,
         SocialNominationQuestionSetRecognition.class, SocialNominationQuestionSetResponse.class,
-        Schedule.class
+        Schedule.class, Holiday.class, UMCalendar.class
 })
 public abstract class UmAppDatabase{
 
@@ -179,6 +183,10 @@ public abstract class UmAppDatabase{
     public abstract SocialNominationQuestionResponseDao getSocialNominationQuestionResponseDao();
 
     public abstract ScheduleDao getScheduleDao();
+
+    public abstract UMCalendarDao getUMCalendarDao();
+
+    public abstract HolidayDao getHolidayDao();
 
     @UmDbContext
     public abstract Object getContext();

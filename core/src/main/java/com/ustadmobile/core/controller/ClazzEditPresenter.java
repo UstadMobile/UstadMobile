@@ -1,6 +1,8 @@
 package com.ustadmobile.core.controller;
 
+import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.List;
 
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmProvider;
@@ -12,6 +14,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.lib.db.entities.Schedule;
+import com.ustadmobile.lib.db.entities.UMCalendar;
 
 import static com.ustadmobile.core.controller.ClazzListPresenter.ARG_CLAZZ_UID;
 
@@ -31,6 +34,8 @@ public class ClazzEditPresenter
 
     private UmLiveData<Clazz> clazzLiveData;
     private UmProvider<Schedule> clazzScheduleLiveData;
+    private UmLiveData<List<UMCalendar>> holidaysLiveData;
+
 
     private ClazzDao clazzDao = UmAppDatabase.getInstance(context).getClazzDao();
 
@@ -61,6 +66,10 @@ public class ClazzEditPresenter
             public void onSuccess(Clazz result) {
                 mUpdatedClazz = result;
                 view.updateClazzEditView(result);
+                holidaysLiveData = UmAppDatabase.getInstance(context).getUMCalendarDao()
+                        .findAllUMCalendarsAsLiveDataList();
+                holidaysLiveData.observe(ClazzEditPresenter.this,
+                        ClazzEditPresenter.this::handleAllHolidaysChanged);
             }
 
             @Override
@@ -77,6 +86,26 @@ public class ClazzEditPresenter
 
     }
 
+    private void handleAllHolidaysChanged(List<UMCalendar> umCalendar) {
+        System.out.println("handleAllHolidaysChanged");
+        int selectedPosition = 0;
+
+        ArrayList<String> holidayList = new ArrayList<>();
+        for(UMCalendar ec : umCalendar){
+            holidayList.add(ec.getUmCalendarName());
+        }
+        String[] holidayPreset = new String[holidayList.size()];
+        holidayPreset = holidayList.toArray(holidayPreset);
+
+        if(mOriginalClazz.getClazzHolidayUMCalendarUid() > 0){
+            selectedPosition = (int) mOriginalClazz.getClazzHolidayUMCalendarUid();
+        }
+
+        view.setHolidayPresets(holidayPreset, selectedPosition);
+
+    }
+
+
     public void updateName(String newName){
         mUpdatedClazz.setClazzName(newName);
     }
@@ -85,8 +114,12 @@ public class ClazzEditPresenter
         mUpdatedClazz.setClazzDesc(newDesc);
     }
 
+    public void updateHoliday(long position, long id){
+        mUpdatedClazz.setClazzHolidayUMCalendarUid(position);
+    }
+
     public void handleClazzValueChanged(Clazz clazz){
-        //TODO: check this
+        //TODO: check this test this
 
         //set the og person value
         if(mOriginalClazz == null)

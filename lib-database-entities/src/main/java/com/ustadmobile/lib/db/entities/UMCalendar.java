@@ -40,7 +40,6 @@ public class UMCalendar implements SyncableEntity{
 
     @Override
     public void setMasterChangeSeqNum(long masterChangeSeqNum) {
-
     }
 
     @Override

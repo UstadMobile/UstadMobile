@@ -136,10 +136,8 @@ public class AddScheduleDialogFragment extends UstadDialogFragment implements
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(getArguments()));
 
         ArrayList<String> scheduleAL = new ArrayList<>();
-        scheduleAL.add(getText(R.string.once).toString());
+        scheduleAL.add(getText(R.string.daily).toString());
         scheduleAL.add(getText(R.string.weekly).toString());
-        scheduleAL.add(getText(R.string.monthly).toString());
-        scheduleAL.add(getText(R.string.yearly).toString());
 
         String[] s = new String[scheduleAL.size()];
         s = scheduleAL.toArray(s);

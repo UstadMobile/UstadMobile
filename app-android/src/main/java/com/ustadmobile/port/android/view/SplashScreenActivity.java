@@ -57,6 +57,7 @@ import com.ustadmobile.core.db.dao.PersonDao;
 import com.ustadmobile.core.db.dao.PersonDetailPresenterFieldDao;
 import com.ustadmobile.core.db.dao.SocialNominationQuestionDao;
 import com.ustadmobile.core.db.dao.SocialNominationQuestionSetDao;
+import com.ustadmobile.core.db.dao.UMCalendarDao;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
@@ -66,12 +67,14 @@ import com.ustadmobile.core.view.PersonDetailViewField;
 import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.ClazzMember;
 import com.ustadmobile.lib.db.entities.FeedEntry;
+import com.ustadmobile.lib.db.entities.Holiday;
 import com.ustadmobile.lib.db.entities.Person;
 import com.ustadmobile.lib.db.entities.PersonCustomFieldValue;
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField;
 import com.ustadmobile.lib.db.entities.PersonField;
 import com.ustadmobile.lib.db.entities.SocialNominationQuestion;
 import com.ustadmobile.lib.db.entities.SocialNominationQuestionSet;
+import com.ustadmobile.lib.db.entities.UMCalendar;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -752,6 +755,17 @@ public class SplashScreenActivity extends AppCompatActivity
 
                 }
             });
+
+            //Add Holiday Calendar
+            UMCalendarDao calendarDao =
+                    UmAppDatabase.getInstance(getApplicationContext()).getUMCalendarDao();
+            UMCalendar newCalendar1 = new UMCalendar();
+            newCalendar1.setUmCalendarName("IRC Holiday Calendar");
+            newCalendar1.setUmCalendarUid(calendarDao.insert(newCalendar1));
+
+            UMCalendar newCalendar2 = new UMCalendar();
+            newCalendar2.setUmCalendarName("Lebanon Holiday Calendar");
+            newCalendar2.setUmCalendarUid(calendarDao.insert(newCalendar2));
 
 
             //Set that we have created dummy data so that check for this and don't create it again.
