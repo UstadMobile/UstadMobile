@@ -9,7 +9,12 @@ public abstract class SyncStatusDao implements BaseDao<SyncStatus> {
 
     public long getAndIncrementNextLocalChangeSeqNum(int tableId, int numEntries) {
         long seqNum = getNextLocalChangeSeqNum(tableId);
-        updateNextLocalChangeSeqNum(tableId, numEntries);
+        if(seqNum >= 1) {
+            updateNextLocalChangeSeqNum(tableId, numEntries);
+        }else {
+            insert(new SyncStatus(tableId));
+        }
+
         return seqNum + 1;
     }
 
@@ -21,7 +26,12 @@ public abstract class SyncStatusDao implements BaseDao<SyncStatus> {
 
     public long getAndIncrementNextMasterChangeSeqNum(int tableId, int numEntries) {
         long seqNum = getNextMasterChangeSeqNum(tableId);
-        updateNextMasterChangeSeqNum(tableId, numEntries);
+        if(seqNum >= 1){
+            updateNextMasterChangeSeqNum(tableId, numEntries);
+        }else {
+            insert(new SyncStatus(tableId));
+        }
+
         return seqNum + 1;
     }
 

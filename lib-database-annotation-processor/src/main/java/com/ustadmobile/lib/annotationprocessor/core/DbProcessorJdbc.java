@@ -24,6 +24,7 @@ import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.database.annotation.UmQueryFindByPrimaryKey;
 import com.ustadmobile.lib.database.annotation.UmSyncIncoming;
+import com.ustadmobile.lib.database.annotation.UmSyncOutgoing;
 import com.ustadmobile.lib.database.annotation.UmUpdate;
 import com.ustadmobile.lib.database.jdbc.DbChangeListener;
 import com.ustadmobile.lib.database.jdbc.JdbcDatabaseUtils;
@@ -520,11 +521,13 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                 addQueryMethod(daoMethod, daoType, dbType, jdbcDaoClassSpec, '`',
                         generateFindByPrimaryKeySql(daoType, daoMethod, processingEnv, '`'));
             }else if(daoMethod.getAnnotation(UmUpdate.class) != null) {
-                addUpdateMethod(daoMethod, dbType, jdbcDaoClassSpec, '`');
+                addUpdateMethod(daoMethod, dbType, daoType, jdbcDaoClassSpec, '`');
             }else if(daoMethod.getAnnotation(UmDelete.class) != null) {
                 addDeleteMethod(daoMethod, jdbcDaoClassSpec, '`');
             }else if(daoMethod.getAnnotation(UmSyncIncoming.class) != null) {
                 addSyncHandleIncomingMethod(daoMethod, daoType, jdbcDaoClassSpec, "_db");
+            }else if(daoMethod.getAnnotation(UmSyncOutgoing.class) != null) {
+                addSyncOutgoing(daoMethod, daoType, jdbcDaoClassSpec, "_db");
             }
         }
 
@@ -723,14 +726,16 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
      *
      * @param daoMethod daoMethod to generate an implementation for
      * @param dbType The database class
+     * @param daoClass The DAO class being implemented
      * @param daoBuilder The builder for the dao being generated, to which the new method will be added
      * @param identifierQuote The quote character to use to quote SQL identifiers
      */
     public void addUpdateMethod(ExecutableElement daoMethod, TypeElement dbType,
-                                TypeSpec.Builder daoBuilder, char identifierQuote) {
+                                TypeElement daoClass, TypeSpec.Builder daoBuilder,
+                                char identifierQuote) {
         String identifierQuoteStr = String.valueOf(identifierQuote);
         CodeBlock.Builder codeBlock = CodeBlock.builder();
-        MethodSpec.Builder methodBuilder = MethodSpec.overriding(daoMethod);
+        MethodSpec.Builder methodBuilder = overrideAndResolve(daoMethod, daoClass, processingEnv);
 
         TypeElement umCallbackTypeElement = processingEnv.getElementUtils().getTypeElement(
                 UmCallback.class.getName());
@@ -755,6 +760,7 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                 entityTypeElement.equals(processingEnv.getElementUtils().getTypeElement(
                         List.class.getName()))) {
             entityType = ((DeclaredType)entityType).getTypeArguments().get(0);
+            entityType = DbProcessorUtils.resolveType(entityType, daoClass, processingEnv);
             entityTypeElement = (TypeElement)processingEnv.getTypeUtils().asElement(entityType);
             isListOrArray = true;
         }else if(entityType.getKind().equals(TypeKind.ARRAY)) {
@@ -1105,9 +1111,18 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
         }
 
         codeBlock.add("try (\n").indent()
-            .add("$T connection = _db.getConnection();\n", Connection.class)
-            .add("$T stmt = connection.prepareStatement($S);\n", PreparedStatement.class, preparedStmtSql)
-            .unindent().beginControlFlow(")");
+            .add("$T connection = _db.getConnection();\n", Connection.class);
+        if(daoMethodInfo.hasArrayOrListParameter()) {
+            codeBlock.add("$1T stmt = _db.isArraySupported() ? connection.prepareStatement($2S) : " +
+                            "new $3T($2S, connection);\n", PreparedStatement.class, preparedStmtSql,
+                    PreparedStatementArrayProxy.class);
+        }else {
+            codeBlock.add("$T stmt = connection.prepareStatement($S);\n", PreparedStatement.class,
+                    preparedStmtSql);
+        }
+
+
+        codeBlock.unindent().beginControlFlow(")");
 
 
         for(int i = 0; i < namedParams.size(); i++) {

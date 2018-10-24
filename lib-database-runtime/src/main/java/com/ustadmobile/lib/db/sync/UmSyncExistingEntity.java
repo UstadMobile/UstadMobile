@@ -11,6 +11,10 @@ public class UmSyncExistingEntity {
         this.userCanUpdate = userCanUpdate;
     }
 
+    public UmSyncExistingEntity() {
+
+    }
+
     public long getPrimaryKey() {
         return primaryKey;
     }

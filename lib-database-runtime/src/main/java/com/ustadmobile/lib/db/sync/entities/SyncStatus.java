@@ -17,6 +17,17 @@ public class SyncStatus {
 
     private long syncedToLocalChangeSeqNum;
 
+    public SyncStatus() {
+
+    }
+
+    public SyncStatus(int tableId) {
+        this.tableId = tableId;
+        this.nextMasterChangeNum = 1;
+        this.nextLocalChangeSeqNum = 1;
+    }
+
+
     public int getTableId() {
         return tableId;
     }

@@ -146,6 +146,8 @@ public class DbProcessorUtils {
         }
     }
 
+
+
     public static TypeMirror resolveType(TypeMirror typeMirror, TypeElement implementationClass,
                                          ProcessingEnvironment processingEnv) {
         return resolveType(typeMirror, implementationClass, true, true,

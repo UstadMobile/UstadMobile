@@ -16,15 +16,23 @@ import com.ustadmobile.lib.database.annotation.UmDatabase;
 import com.ustadmobile.lib.database.annotation.UmDbContext;
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
+import com.ustadmobile.lib.database.annotation.UmSyncFindAllChanges;
+import com.ustadmobile.lib.database.annotation.UmSyncFindLocalChanges;
+import com.ustadmobile.lib.database.annotation.UmSyncFindUpdateable;
+import com.ustadmobile.lib.database.annotation.UmSyncIncoming;
 import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
 import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 import com.ustadmobile.lib.db.sync.SyncResponse;
+import com.ustadmobile.lib.db.sync.UmSyncExistingEntity;
 import com.ustadmobile.lib.db.sync.UmSyncableDatabase;
+import com.ustadmobile.lib.db.sync.entities.SyncStatus;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.processing.Filer;
@@ -450,12 +458,26 @@ public abstract class AbstractDbProcessor {
         return null;
     }
 
-    protected String formatMethodForErrorMessage(ExecutableElement element) {
+    protected String formatMethodForErrorMessage(ExecutableElement element, TypeElement daoClass) {
         return ((TypeElement)element.getEnclosingElement()).getQualifiedName() + "." +
                 element.getSimpleName();
     }
 
+    protected String formatMethodForErrorMessage(ExecutableElement element) {
+        return formatMethodForErrorMessage(element, null);
+    }
 
+
+    /**
+     * Generates a handle incoming sync method implementation
+     *
+     * @param daoMethod method to generate an implementation for
+     * @param daoType TypeElement representing the DAO
+     * @param daoBuilder TypeSpec.Builder for the DAO implementation class being generated
+     * @param dbName the variable name of the database object
+     *
+     * @return MethodSpec.Builder object for a generated handle incoming sync method
+     */
     public MethodSpec.Builder addSyncHandleIncomingMethod(ExecutableElement daoMethod,
                                                           TypeElement daoType,
                                                           TypeSpec.Builder daoBuilder,
@@ -463,14 +485,21 @@ public abstract class AbstractDbProcessor {
         MethodSpec.Builder methodBuilder = overrideAndResolve(daoMethod, daoType, processingEnv);
 
         CodeBlock.Builder codeBlock = CodeBlock.builder();
+        VariableElement incomingChangesParam = daoMethod.getParameters().get(0);
+        VariableElement fromLocalChangeSeqNumParam = daoMethod.getParameters().get(1);
+        VariableElement fromMasterChangeSeqNumParam = daoMethod.getParameters().get(2);
+        VariableElement accountPersonUidParam = daoMethod.getParameters().get(3);
+
         DaoMethodInfo daoMethodInfo = new DaoMethodInfo(daoMethod, daoType, processingEnv);
         TypeMirror entityType = daoMethodInfo.resolveEntityParameterType();
         TypeElement entityTypeElement = (TypeElement)processingEnv.getTypeUtils()
                 .asElement(entityType);
+        String entityPrimaryKeyFieldName = findPrimaryKey(entityTypeElement).getSimpleName().toString();
         UmEntity umEntityAnnotation = entityTypeElement.getAnnotation(UmEntity.class);
         String incomingChangesParamName = daoMethod.getParameters().get(0).getSimpleName().toString();
         Element masterChangeSeqFieldEl = DbProcessorUtils.findElementWithAnnotation(
                 entityTypeElement, UmSyncMasterChangeSeqNum.class, processingEnv);
+
         if(masterChangeSeqFieldEl == null){
             messager.printMessage(Diagnostic.Kind.ERROR, formatMethodForErrorMessage(daoMethod) +
                     ": Method annotated @UmSyncIncoming entity type must have one field " +
@@ -484,6 +513,23 @@ public abstract class AbstractDbProcessor {
             messager.printMessage(Diagnostic.Kind.ERROR, formatMethodForErrorMessage(daoMethod) +
                     ": Method annotated @UmSyncIncoming entity type must have one field " +
                     "annotated with @UmSyncLocalChangeSeqNum", daoMethod);
+            return methodBuilder;
+        }
+
+        Element findUpdateableEntitiesMethod = DbProcessorUtils.findElementWithAnnotation(
+                daoType, UmSyncFindUpdateable.class, processingEnv);
+        if(findUpdateableEntitiesMethod == null){
+            messager.printMessage(Diagnostic.Kind.ERROR, formatMethodForErrorMessage(daoMethod) +
+                ": Method Method annotated @UmSyncIncoming requires a method annotated with @UmSyncFindUpdateable");
+            return methodBuilder;
+        }
+
+        Element findChangedEntitiesMethod = DbProcessorUtils.findElementWithAnnotation(daoType,
+                UmSyncFindAllChanges.class, processingEnv);
+        if(findChangedEntitiesMethod == null) {
+            messager.printMessage(Diagnostic.Kind.ERROR,
+                    formatMethodForErrorMessage(daoMethod, daoType) +" method annotated " +
+                            "@UmSyncIncoming requires a method anotated with @UmSincFindAllChanges");
             return methodBuilder;
         }
 
@@ -506,6 +552,42 @@ public abstract class AbstractDbProcessor {
                     .add("_changed.set$L(0);\n", capitalize(localChangeSeqFieldEl.getSimpleName()))
                 .endControlFlow()
             .endControlFlow()
+            .add("$T<$T> _updateList = new $T<>();\n", List.class, entityTypeElement,
+                    ArrayList.class)
+            .add("$T<$T> _insertList = new $T<>();\n", List.class, entityTypeElement,
+                    ArrayList.class)
+            .add("$T<$T> _primaryKeyList = new $T<>();\n", List.class, Long.class, ArrayList.class)
+            .beginControlFlow("for($T _entry : $L)", entityTypeElement,
+                    incomingChangesParam.getSimpleName())
+                .add("_primaryKeyList.add(_entry.get$L());\n",
+                        capitalize(entityPrimaryKeyFieldName))
+            .endControlFlow()
+            .add("$T<$T> _updateableEntities = $L(_primaryKeyList, $L);\n", List.class,
+                    UmSyncExistingEntity.class, findUpdateableEntitiesMethod.getSimpleName(),
+                    accountPersonUidParam.getSimpleName())
+            .add("$T<$T, $T> _updateableMap = new $T<>();\n", Map.class, Long.class,
+                    UmSyncExistingEntity.class, HashMap.class)
+            .beginControlFlow("for($T _entity: _updateableEntities)", UmSyncExistingEntity.class)
+                .add("_updateableMap.put(_entity.getPrimaryKey(), _entity);\n")
+            .endControlFlow()
+            .beginControlFlow("for($T _entity : $L)", entityType, incomingChangesParamName)
+                .beginControlFlow("if(_updateableMap.containsKey(_entity.get$L()))",
+                        capitalize(entityPrimaryKeyFieldName))
+                    .beginControlFlow("if(_updateableMap.get(_entity.get$L()).isUserCanUpdate())",
+                            capitalize(entityPrimaryKeyFieldName))
+                        .add("_updateList.add(_entity);\n")
+                    .endControlFlow()
+                .nextControlFlow("else")
+                    .add("_insertList.add(_entity);\n")
+                .endControlFlow()
+            .endControlFlow()
+            .add("insertList(_insertList);\n")
+            .add("updateList(_updateList);\n")
+            .add("_response.setRemoteChangedEntities($L($L, $L, $L, $L, $L));\n",
+                    findChangedEntitiesMethod.getSimpleName(),
+                    fromLocalChangeSeqNumParam.getSimpleName(), "_toLocalChangeSeq",
+                    fromMasterChangeSeqNumParam.getSimpleName(), "_toMasterChangeSeq",
+                    accountPersonUidParam.getSimpleName())
             .add("return _response;\n");
 
 
@@ -514,5 +596,66 @@ public abstract class AbstractDbProcessor {
 
         return methodBuilder;
     }
+
+
+    /**
+     * Generate an outgoing sync method to sync with another database.
+     *
+     * @param daoMethod The dao method that we are generating an implementation for
+     * @param daoType The TypeElement representing the DAO
+     * @param daoBuilder TypeSpec.Builder for the DAO implementation class being generated
+     * @param dbName The variable name of the database object
+     *
+     * @return MethodSpec.Builder with a generated method to handle outgoing synchronization
+     */
+    public MethodSpec.Builder addSyncOutgoing(ExecutableElement daoMethod,
+                                              TypeElement daoType,
+                                              TypeSpec.Builder daoBuilder,
+                                              String dbName) {
+        MethodSpec.Builder methodBuilder = overrideAndResolve(daoMethod, daoType, processingEnv);
+        Element syncIncomingMethod = DbProcessorUtils.findElementWithAnnotation(daoType,
+                UmSyncIncoming.class, processingEnv);
+
+        if(syncIncomingMethod == null) {
+            messager.printMessage(Diagnostic.Kind.ERROR,
+                    formatMethodForErrorMessage(daoMethod, daoType) + " class with " +
+                    "@UmSyncOutgoing method must have corresponding method annotated @UmSyncIncoming");
+            return methodBuilder;
+        }
+
+        DaoMethodInfo daoMethodInfo = new DaoMethodInfo((ExecutableElement)syncIncomingMethod, daoType,
+                processingEnv);
+        TypeMirror entityType = daoMethodInfo.resolveEntityParameterType();
+        TypeElement entityTypeElement = (TypeElement)processingEnv.getTypeUtils().asElement(
+                entityType);
+        UmEntity umEntityAnnotation = entityTypeElement.getAnnotation(UmEntity.class);
+        Element findLocalChangesMethod = DbProcessorUtils.findElementWithAnnotation(daoType,
+                UmSyncFindLocalChanges.class, processingEnv);
+        VariableElement otherDaoParam = daoMethod.getParameters().get(0);
+        VariableElement accountPersonUidParam = daoMethod.getParameters().get(1);
+
+        CodeBlock.Builder codeBlock = CodeBlock.builder()
+                .add("$1T _syncableDb = ($1T)$2L;\n", UmSyncableDatabase.class, dbName)
+                .add("$T _syncStatus = _syncableDb.getSyncStatusDao().findByUid($L);\n",
+                        SyncStatus.class, umEntityAnnotation.tableId())
+                .add("$T<$T> _locallyChangedEntities = $L(_syncStatus.getSyncedToLocalChangeSeqNum(), $L);\n",
+                        List.class, entityType, findLocalChangesMethod.getSimpleName(),
+                        accountPersonUidParam.getSimpleName())
+                .add("$T<$T> _remoteChanges = $L.$L(_locallyChangedEntities, 0, " +
+                        "_syncStatus.getSyncedToMasterChangeNum(), $L);\n",
+                        SyncResponse.class, entityType, otherDaoParam.getSimpleName(),
+                        syncIncomingMethod.getSimpleName(),
+                        accountPersonUidParam.getSimpleName())
+                .add("replaceList(_remoteChanges.getRemoteChangedEntities());\n")
+                .add("_syncableDb.getSyncStatusDao().updateSyncedToChangeSeqNums(" +
+                        "$L, _syncStatus.getNextLocalChangeSeqNum(), " +
+                        "_remoteChanges.getSyncedUpToMasterChangeSeqNum());\n",
+                        umEntityAnnotation.tableId());
+
+        methodBuilder.addCode(codeBlock.build());
+        daoBuilder.addMethod(methodBuilder.build());
+        return methodBuilder;
+    }
+
 
 }

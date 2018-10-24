@@ -37,6 +37,8 @@ public class DaoMethodInfo {
 
     TypeElement umCallbackTypeElement;
 
+    TypeElement listTypeElement;
+
     /**
      * Wrapper constructor
      *
@@ -53,6 +55,7 @@ public class DaoMethodInfo {
         this.daoClass = daoClass;
         umCallbackTypeElement = processingEnv.getElementUtils().getTypeElement(
                 UmCallback.class.getName());
+        listTypeElement = processingEnv.getElementUtils().getTypeElement(List.class.getName());
     }
 
     private VariableElement getFirstParam() {
@@ -158,6 +161,17 @@ public class DaoMethodInfo {
         }
 
         return variableTypeElements;
+    }
+
+    public boolean hasArrayOrListParameter() {
+        for(VariableElement param : method.getParameters()) {
+            if(param.asType().getKind().equals(TypeKind.ARRAY))
+                return true;
+            else if(listTypeElement.equals(processingEnv.getTypeUtils().asElement(param.asType())))
+                return true;
+        }
+
+        return false;
     }
 
 

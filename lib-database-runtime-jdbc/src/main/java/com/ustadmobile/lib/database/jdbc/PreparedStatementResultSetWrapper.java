@@ -47,11 +47,13 @@ class PreparedStatementResultSetWrapper implements ResultSet {
     @Override
     public void close() throws SQLException {
         try {
-            resultSet.close();
+            if(!resultSet.isClosed())
+                resultSet.close();
         }catch(SQLException e) {
             throw e;
         }finally {
-            stmt.close();
+            if(!stmt.getConnection().isClosed() && !stmt.isClosed())
+                stmt.close();
         }
     }
 

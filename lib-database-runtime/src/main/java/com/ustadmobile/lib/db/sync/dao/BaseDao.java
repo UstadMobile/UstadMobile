@@ -4,6 +4,7 @@ import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmOnConflictStrategy;
 import com.ustadmobile.lib.database.annotation.UmQueryFindByPrimaryKey;
+import com.ustadmobile.lib.database.annotation.UmUpdate;
 
 import java.util.List;
 
@@ -33,8 +34,15 @@ public interface BaseDao<T> {
     @UmInsert
     void insertAsync(T entity, UmCallback<Long> result);
 
-    @UmInsert(onConflict = UmOnConflictStrategy.REPLACE)
+    @UmInsert
     void insertList(List<T> entityList);
+
+    /**
+     *
+     * @param entityList
+     */
+    @UmUpdate
+    void updateList(List<T> entityList);
 
     /**
      * Find the given entity by the primary key

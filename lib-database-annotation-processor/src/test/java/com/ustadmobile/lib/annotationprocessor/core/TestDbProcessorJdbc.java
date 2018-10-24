@@ -121,4 +121,5 @@ public class TestDbProcessorJdbc {
                 db.getExampleDao().findByUid(entityToDelete.getUid()));
     }
 
+
 }

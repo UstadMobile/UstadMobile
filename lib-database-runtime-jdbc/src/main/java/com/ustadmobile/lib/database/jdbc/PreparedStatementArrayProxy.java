@@ -71,11 +71,17 @@ public class PreparedStatementArrayProxy implements PreparedStatement {
                 case "VARCHAR":
                     baseType = Types.VARCHAR;
                     break;
-                case "LONG":
+                case "BIGINT":
                     baseType = Types.BIGINT;
                     break;
                 case "SHORT":
                     baseType = Types.SMALLINT;
+                    break;
+                case "BOOLEAN":
+                    baseType = Types.BOOLEAN;
+                    break;
+
+
 
             }
         }
@@ -208,6 +214,14 @@ public class PreparedStatementArrayProxy implements PreparedStatement {
                     case Types.VARCHAR:
                         stmt.setString(paramIndex, (String)value);
                         break;
+
+                    case Types.BIGINT:
+                        stmt.setLong(paramIndex, (Long)value);
+                        break;
+
+                    case Types.FLOAT:
+                        stmt.setFloat(paramIndex, (Float)value);
+                        break;
                 }
 
             }
@@ -232,11 +246,12 @@ public class PreparedStatementArrayProxy implements PreparedStatement {
 
 
     private String makeArrayPlaceholders(int numPlaceholders) {
-        StringBuffer sb = new StringBuffer((2*numPlaceholders)-1).append('?');
-        String extraParam = ",?";
+        StringBuffer sb = new StringBuffer(Math.max(0, (2*numPlaceholders)-1));
 
-        for(int i = 1; i < numPlaceholders; i++){
-            sb.append(extraParam);
+        for(int i = 0; i < numPlaceholders; i++){
+            sb.append('?');
+            if(i != 0)
+                sb.append(',');
         }
 
         return sb.toString();

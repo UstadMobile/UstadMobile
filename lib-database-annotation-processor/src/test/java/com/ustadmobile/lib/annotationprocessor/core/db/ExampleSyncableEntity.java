@@ -5,10 +5,12 @@ import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
 import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 
-@UmEntity
+@UmEntity(tableId = 42)
 public class ExampleSyncableEntity {
 
-    @UmPrimaryKey
+    public static final int TABLE_ID = 42;
+
+    @UmPrimaryKey(autoIncrement = true)
     private long exampleSyncableUid;
 
     @UmSyncMasterChangeSeqNum

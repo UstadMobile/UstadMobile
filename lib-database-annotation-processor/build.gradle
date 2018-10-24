@@ -8,7 +8,7 @@ compileTestJava {
      */
     options.compilerArgs += [
             "-Aumdb_jdbc_out=filer",
-            "-Aumdb_no_default_factory=true",
+            "-Aumdb_no_default_factory=true"
     ]
 
     //Due to a bug, the JDK8 annotation processor provides incorrect parameter names, thus we need

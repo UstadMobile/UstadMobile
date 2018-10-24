@@ -1,10 +1,19 @@
 package com.ustadmobile.lib.db.sync.dao;
 
+import com.ustadmobile.lib.database.annotation.UmInsert;
+import com.ustadmobile.lib.database.annotation.UmOnConflictStrategy;
 import com.ustadmobile.lib.database.annotation.UmSyncIncoming;
+import com.ustadmobile.lib.database.annotation.UmSyncOutgoing;
 import com.ustadmobile.lib.db.sync.SyncResponse;
 
 import java.util.List;
 
+/**
+ * A base interface for DAOs which support synchronization.
+ *
+ * @param <T> The Entity Type
+ * @param <D> The DAO Type (generally the DAO class that is implementing SyncableDao)
+ */
 public interface SyncableDao<T, D> extends BaseDao<T> {
 
     /**
@@ -13,22 +22,14 @@ public interface SyncableDao<T, D> extends BaseDao<T> {
      * @param otherDao
      * @param accountPersonUid
      */
-//    @UmSyncOutgoing
-//    void syncWith(D otherDao, long accountPersonUid);
+    @UmSyncOutgoing
+    void syncWith(D otherDao, long accountPersonUid);
 
     @UmSyncIncoming
-    SyncResponse<T> handlingIncomingSync(List<T> incomingChanges, long fromChangeSequenceNumber,
-                                         long userId);
+    SyncResponse<T> handlingIncomingSync(List<T> incomingChanges, long fromLocalChangeSeqNum,
+                                         long fromMasterChangeSeqNum, long userId);
 
-//    @UmSyncFindLocalChanges
-//    List<T> findLocalChanges(long fromLocalChangeSeqNum, long userId);
-//
-//    @UmSyncFindAllChanges
-//    List<T> syncFindAllChanges(long fromLocalChangeSeqNum, long toLocalChangeSeqNum,
-//                               long fromMasterChangeSeqNum, long toMasterChangeSeqNum,
-//                               long accountPersonUid);
-//
-//    @UmSyncFindUpdateable
-//    List<UmSyncExistingEntity> syncFindExistingEntities(long[] primaryKey, long accountPersonUid);
+    @UmInsert(onConflict = UmOnConflictStrategy.REPLACE)
+    void replaceList(List<T> entities);
 
 }
