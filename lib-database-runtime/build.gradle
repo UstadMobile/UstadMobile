@@ -4,6 +4,7 @@ apply plugin: "maven-publish"
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation project(":lib-util")
+    compileOnly project(":lib-room-annotations")
 }
 
 sourceCompatibility = "1.8"

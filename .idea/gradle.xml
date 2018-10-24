@@ -25,6 +25,7 @@
             <option value="$PROJECT_DIR$/lib-database-runtime" />
             <option value="$PROJECT_DIR$/lib-database-runtime-jdbc" />
             <option value="$PROJECT_DIR$/lib-http-testserver" />
+            <option value="$PROJECT_DIR$/lib-room-annotations" />
             <option value="$PROJECT_DIR$/lib-util" />
             <option value="$PROJECT_DIR$/sharedse" />
             <option value="$PROJECT_DIR$/sharedse-tests" />

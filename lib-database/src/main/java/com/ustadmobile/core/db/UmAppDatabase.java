@@ -75,7 +75,8 @@ import com.ustadmobile.lib.db.entities.PersonCustomFieldValue;
         PersonCustomField.class, PersonCustomFieldValue.class,
         ContentEntry.class, ContentEntryContentCategoryJoin.class,
         ContentEntryContentEntryFileJoin.class, ContentEntryFile.class,
-        ContentEntryParentChildJoin.class, ContentEntryRelatedEntryJoin.class
+        ContentEntryParentChildJoin.class, ContentEntryRelatedEntryJoin.class,
+        SyncStatus.class
 })
 public abstract class UmAppDatabase {
 
@@ -161,6 +162,8 @@ public abstract class UmAppDatabase {
     public abstract ContentEntryParentChildJoinDao getContentEntryParentChildJoinDao();
 
     public abstract ContentEntryRelatedEntryJoinDao getContentEntryRelatedEntryJoinDao();
+
+    public abstract SyncStatusDao getSyncStatusDao();
 
     @UmDbContext
     public abstract Object getContext();

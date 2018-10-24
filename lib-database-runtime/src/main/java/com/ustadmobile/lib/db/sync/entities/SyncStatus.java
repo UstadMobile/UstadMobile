@@ -1,12 +1,17 @@
 package com.ustadmobile.lib.db.sync.entities;
 
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.PrimaryKey;
+
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 
 @UmEntity
+@Entity
 public class SyncStatus {
 
     @UmPrimaryKey
+    @PrimaryKey
     private int tableId;
 
     private long nextMasterChangeNum;
