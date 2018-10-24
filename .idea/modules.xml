@@ -7,6 +7,7 @@
       <module fileurl="file://$PROJECT_DIR$/app-android-launcher/app-android-launcher.iml" filepath="$PROJECT_DIR$/app-android-launcher/app-android-launcher.iml" />
       <module fileurl="file://$PROJECT_DIR$/app-android-testserver/app-android-testserver.iml" filepath="$PROJECT_DIR$/app-android-testserver/app-android-testserver.iml" />
       <module fileurl="file://$PROJECT_DIR$/app-javase/app-javase.iml" filepath="$PROJECT_DIR$/app-javase/app-javase.iml" />
+      <module fileurl="file://$PROJECT_DIR$/app-rest-server/app-rest-server.iml" filepath="$PROJECT_DIR$/app-rest-server/app-rest-server.iml" />
       <module fileurl="file://$PROJECT_DIR$/core/core.iml" filepath="$PROJECT_DIR$/core/core.iml" />
       <module fileurl="file://$PROJECT_DIR$/core-tests/core-tests.iml" filepath="$PROJECT_DIR$/core-tests/core-tests.iml" />
       <module fileurl="file://$PROJECT_DIR$/lib-core-fs/lib-core-fs.iml" filepath="$PROJECT_DIR$/lib-core-fs/lib-core-fs.iml" />
