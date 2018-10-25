@@ -12,12 +12,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.github.clans.fab.FloatingActionButton;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.PeopleListPresenter;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.view.PeopleListView;
-import com.ustadmobile.lib.db.entities.Person;
 import com.ustadmobile.lib.db.entities.PersonWithEnrollment;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
@@ -26,8 +24,7 @@ import ru.dimorinny.floatingtextbutton.FloatingTextButton;
 /**
  * PeopleListFragment Android fragment extends UstadBaseFragment
  */
-public class PeopleListFragment extends UstadBaseFragment implements PeopleListView,
-        View.OnClickListener, View.OnLongClickListener {
+public class PeopleListFragment extends UstadBaseFragment implements PeopleListView {
 
     View rootContainer;
     //RecyclerView
@@ -111,17 +108,6 @@ public class PeopleListFragment extends UstadBaseFragment implements PeopleListV
                     return oldItem.equals(newItem);
                 }
             };
-
-    @Override
-    public void onClick(View v) {
-
-    }
-
-    @Override
-    public boolean onLongClick(View v) {
-        return false;
-    }
-
 
     @Override
     public void setPeopleListProvider(UmProvider<PersonWithEnrollment> listProvider) {

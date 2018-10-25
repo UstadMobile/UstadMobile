@@ -35,7 +35,6 @@ public class SELAnswerListFragment extends UstadBaseFragment implements SELAnswe
     //RecyclerView
     private RecyclerView mRecyclerView;
     private RecyclerView.LayoutManager mRecyclerLayoutManager;
-    private RecyclerView.Adapter mAdapter; //replaced with object in set view provider method.
     private SELAnswerListPresenter mPresenter;
 
     public long clazzUid;

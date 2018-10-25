@@ -1,8 +1,6 @@
 package com.ustadmobile.port.android.view;
 
 
-import com.ustadmobile.core.controller.SELQuestionEditPresenter;
-
 import android.os.Bundle;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.widget.LinearLayoutManager;
@@ -12,13 +10,13 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.CheckBox;
-import android.widget.TextView;
 
-import com.ustadmobile.port.android.util.UMAndroidUtil;
 import com.toughra.ustadmobile.R;
-
-
+import com.ustadmobile.core.controller.SELQuestionEditPresenter;
 import com.ustadmobile.core.view.SELQuestionEditView;
+import com.ustadmobile.port.android.util.UMAndroidUtil;
+
+import java.util.Objects;
 
 
 /**
@@ -33,7 +31,6 @@ public class SELQuestionEditActivity extends UstadBaseActivity implements SELQue
     //RecyclerView
     private RecyclerView mRecyclerView;
     private RecyclerView.LayoutManager mRecyclerLayoutManager;
-    private RecyclerView.Adapter mAdapter; //replaced with object in set view provider method.
     private SELQuestionEditPresenter mPresenter;
 
 
@@ -47,10 +44,10 @@ public class SELQuestionEditActivity extends UstadBaseActivity implements SELQue
         //Toolbar:
         toolbar = findViewById(R.id.activity_sel_question_edit_toolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
         //Recycler View:
-        mRecyclerView = (RecyclerView) findViewById(
+        mRecyclerView = findViewById(
                 R.id.activity_sel_question_edit_recyclerview);
         mRecyclerLayoutManager = new LinearLayoutManager(getApplicationContext());
         mRecyclerView.setLayoutManager(mRecyclerLayoutManager);
@@ -80,7 +77,7 @@ public class SELQuestionEditActivity extends UstadBaseActivity implements SELQue
                     findViewById(R.id.activity_sel_question_edit_assign_to_all_classes);
             CheckBox allowMultipleNominations =
                     findViewById(R.id.activity_sel_question_edit_allow_multiple_nominations);
-            mPresenter.handleClickDone(newQuestion.getEditText().getText().toString(),
+            mPresenter.handleClickDone(Objects.requireNonNull(newQuestion.getEditText()).getText().toString(),
                     assignToAllClasses.isChecked(), allowMultipleNominations.isChecked());
 
             return super.onOptionsItemSelected(item);

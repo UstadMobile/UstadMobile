@@ -18,9 +18,9 @@ import org.junit.runner.RunWith;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.ClazzListPresenter;
-import com.ustadmobile.core.controller.ClazzLogDetailPresenter;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.util.UMCalendarUtil;
+import com.ustadmobile.core.view.ClazzListView;
 import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.port.android.view.ClazzDetailActivity;
 import com.ustadmobile.port.android.view.ClazzLogDetailActivity;
@@ -209,7 +209,7 @@ public class ClassLogListFragmentEspressoTest {
         intended(allOf(hasComponent(ClazzLogDetailActivity.class.getCanonicalName())
                 , hasExtras(allOf( hasEntry(equalTo(ClazzListPresenter.ARG_CLAZZ_UID),
                         equalTo(testClazz.getClazzUid())),
-                        hasEntry(equalTo(ClazzLogDetailPresenter.ARG_LOGDATE),
+                        hasEntry(equalTo(ClazzListView.ARG_LOGDATE),
                                 equalTo(TEST_LOG_DATE1))))));
 
         //Assert nothing filled for this un-taken attendance

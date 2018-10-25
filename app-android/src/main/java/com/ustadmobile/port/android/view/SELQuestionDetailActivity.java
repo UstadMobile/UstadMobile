@@ -4,22 +4,19 @@ import android.arch.lifecycle.LiveData;
 import android.arch.paging.DataSource;
 import android.arch.paging.LivePagedListBuilder;
 import android.arch.paging.PagedList;
-import android.support.v7.util.DiffUtil;
-
-import com.ustadmobile.core.controller.SELQuestionDetailPresenter;
-import com.ustadmobile.core.db.UmProvider;
-import com.ustadmobile.core.view.SELQuestionDetailView;
-import com.ustadmobile.lib.db.entities.SocialNominationQuestion;
-
 import android.os.Bundle;
+import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.widget.Button;
 
-import com.ustadmobile.port.android.util.UMAndroidUtil;
 import com.toughra.ustadmobile.R;
-
+import com.ustadmobile.core.controller.SELQuestionDetailPresenter;
+import com.ustadmobile.core.db.UmProvider;
+import com.ustadmobile.core.view.SELQuestionDetailView;
+import com.ustadmobile.lib.db.entities.SocialNominationQuestion;
+import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import ru.dimorinny.floatingtextbutton.FloatingTextButton;
 
@@ -36,7 +33,6 @@ public class SELQuestionDetailActivity extends UstadBaseActivity implements SELQ
     //RecyclerView
     private RecyclerView mRecyclerView;
     private RecyclerView.LayoutManager mRecyclerLayoutManager;
-    private RecyclerView.Adapter mAdapter; //replaced with object in set view provider method.
     private SELQuestionDetailPresenter mPresenter;
 
     public static final DiffUtil.ItemCallback<SocialNominationQuestion> DIFF_CALLBACK =
@@ -87,7 +83,7 @@ public class SELQuestionDetailActivity extends UstadBaseActivity implements SELQ
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         //Recycler View:
-        mRecyclerView = (RecyclerView) findViewById(
+        mRecyclerView = findViewById(
                 R.id.activity_sel_question_detail_recyclerview);
         mRecyclerLayoutManager = new LinearLayoutManager(getApplicationContext());
         mRecyclerView.setLayoutManager(mRecyclerLayoutManager);

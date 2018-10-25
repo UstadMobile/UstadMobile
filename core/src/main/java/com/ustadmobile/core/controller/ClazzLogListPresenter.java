@@ -3,7 +3,6 @@ package com.ustadmobile.core.controller;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.core.view.ClassLogDetailView;
 import com.ustadmobile.core.view.ClassLogListView;
 import com.ustadmobile.lib.db.entities.ClazzLog;
@@ -11,7 +10,7 @@ import com.ustadmobile.lib.db.entities.ClazzLog;
 import java.util.Hashtable;
 
 import static com.ustadmobile.core.controller.ClazzListPresenter.ARG_CLAZZ_UID;
-import static com.ustadmobile.core.controller.ClazzLogDetailPresenter.ARG_LOGDATE;
+import static com.ustadmobile.core.view.ClazzListView.ARG_LOGDATE;
 
 /**
  * The Presenter/Controller for ClazzLogListFragment. This is responsible in creating the provider

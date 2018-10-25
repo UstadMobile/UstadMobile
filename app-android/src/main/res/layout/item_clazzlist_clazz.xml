@@ -12,7 +12,7 @@
     >
 
     <android.support.constraint.ConstraintLayout
-
+        android:id="@+id/item_clazzlist_clazz_cl"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
@@ -23,7 +23,7 @@
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
             android:textSize="20sp"
-            android:text="TextView"
+            android:text=""
             android:textAppearance="@android:style/TextAppearance.Material.Headline"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -37,7 +37,8 @@
             android:tint="@color/text_secondary"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/item_clazzlist_clazz_title"
-            app:srcCompat="@drawable/ic_people_black_24dp" />
+            app:srcCompat="@drawable/ic_people_black_24dp"
+            android:contentDescription="@string/people" />
 
         <TextView
             android:id="@+id/item_clazzlist_numstudents_text"
@@ -46,7 +47,7 @@
             android:layout_marginStart="8dp"
             android:textColor="@color/text_secondary"
             android:layout_marginTop="8dp"
-            android:text="TextView"
+            android:text=""
             app:layout_constraintStart_toEndOf="@+id/item_clazzlist_people_icon"
             app:layout_constraintTop_toBottomOf="@+id/item_clazzlist_clazz_title" />
 
@@ -58,7 +59,8 @@
             android:layout_marginTop="8dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/item_clazzlist_people_icon"
-            app:srcCompat="@drawable/ic_lens_black_24dp" />
+            app:srcCompat="@drawable/ic_lens_black_24dp"
+            android:contentDescription="@string/attendance" />
 
         <TextView
             android:id="@+id/item_clazzlist_attendance_percentage"
@@ -91,7 +93,8 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/item_clazzlist_horizontal_divider"
             android:tint="@color/accent"
-            android:src="@drawable/ic_assignment_turned_in_black_24dp" />
+            android:src="@drawable/ic_assignment_turned_in_black_24dp"
+            android:contentDescription="@string/attendance" />
 
         <Button
             android:id="@+id/item_clazzlist_attendance_record_attendance_button"

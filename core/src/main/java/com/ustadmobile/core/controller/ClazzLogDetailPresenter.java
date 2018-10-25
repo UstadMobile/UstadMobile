@@ -11,6 +11,7 @@ import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.ClassLogDetailView;
+import com.ustadmobile.core.view.ClazzListView;
 import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.ClazzLog;
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecordWithPerson;
@@ -28,12 +29,9 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
     private long currentClazzUid = -1L;
     private long currentLogDate = -1L;
 
-    public static final String ARG_LOGDATE = "logdate";
-
     private UmProvider<ClazzLogAttendanceRecordWithPerson> clazzLogAttendanceRecordUmProvider;
 
     private ClazzLog currentClazzLog;
-
     public Clazz currentClazz;
 
     /**
@@ -51,8 +49,8 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
         if(arguments.containsKey(ARG_CLAZZ_UID)){
             currentClazzUid = Long.parseLong(arguments.get(ARG_CLAZZ_UID).toString());
         }
-        if(arguments.containsKey(ARG_LOGDATE)){
-            String thisLogDate = arguments.get(ARG_LOGDATE).toString();
+        if(arguments.containsKey(ClazzListView.ARG_LOGDATE)){
+            String thisLogDate = arguments.get(ClazzListView.ARG_LOGDATE).toString();
             currentLogDate = Long.parseLong(thisLogDate);
         }
     }
@@ -90,7 +88,8 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
         ClazzDao clazzDao = UmAppDatabase.getInstance(getContext()).getClazzDao();
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
 
-        clazzLogDao.findByClazzIdAndDateAsync(currentClazzUid, currentLogDate, new UmCallback<ClazzLog>() {
+        clazzLogDao.findByClazzIdAndDateAsync(currentClazzUid, currentLogDate,
+                new UmCallback<ClazzLog>() {
             @Override
             public void onSuccess(ClazzLog result) {
 
@@ -101,7 +100,8 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
 
                 if(result == null){
                     //Create one anyway if not set
-                    clazzLogDao.createClazzLogForDate(currentClazzUid, currentLogDate, new UmCallback<Long>() {
+                    clazzLogDao.createClazzLogForDate(currentClazzUid, currentLogDate,
+                            new UmCallback<Long>() {
                         @Override
                         public void onSuccess(Long result) {
 
@@ -194,7 +194,7 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
                         UmAppDatabase.getInstance(getContext()).getFeedEntryDao();
                 String possibleFeedLink = ClassLogDetailView.VIEW_NAME + "?" +
                         ClazzListPresenter.ARG_CLAZZ_UID + "=" + currentClazzUid +
-                        "&" + ClazzLogDetailPresenter.ARG_LOGDATE + "=" + currentLogDate;
+                        "&" + ClazzListView.ARG_LOGDATE + "=" + currentLogDate;
                 FeedEntry parentFeed =
                         feedEntryDao.findByLink(FeedListPresenter.TEST_DEFAULT_PERSON_UID, possibleFeedLink);
                 if(parentFeed != null){

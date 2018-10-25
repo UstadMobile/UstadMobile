@@ -27,6 +27,8 @@ import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.Schedule;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
+import java.util.Objects;
+
 import ru.dimorinny.floatingtextbutton.FloatingTextButton;
 
 
@@ -42,9 +44,7 @@ public class ClazzEditActivity extends UstadBaseActivity implements ClazzEditVie
     //RecyclerView
     private RecyclerView scheduleRecyclerView;
     private RecyclerView.LayoutManager mRecyclerLayoutManager;
-    private RecyclerView.Adapter mAdapter; //replaced with object in set view provider method.
     private ClazzEditPresenter mPresenter;
-    Clazz mUpdatedClazz;
 
     TextInputLayout classNameTIP;
     TextInputLayout classDescTIP;
@@ -61,7 +61,7 @@ public class ClazzEditActivity extends UstadBaseActivity implements ClazzEditVie
         //Toolbar:
         toolbar = findViewById(R.id.activity_clazz_edit_toolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
         //Recycler View:
         scheduleRecyclerView = (RecyclerView) findViewById(
@@ -78,14 +78,10 @@ public class ClazzEditActivity extends UstadBaseActivity implements ClazzEditVie
         classNameTIP = findViewById(R.id.activity_clazz_edit_name);
         classNameTIP.getEditText().addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-            }
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
 
             @Override
             public void afterTextChanged(Editable s) {
@@ -97,14 +93,10 @@ public class ClazzEditActivity extends UstadBaseActivity implements ClazzEditVie
         classDescTIP = findViewById(R.id.activity_clazz_edit_description);
         classDescTIP.getEditText().addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-            }
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
 
             @Override
             public void afterTextChanged(Editable s) {
@@ -118,12 +110,7 @@ public class ClazzEditActivity extends UstadBaseActivity implements ClazzEditVie
 
         //Add schedule button listener
         addScheduleButton = findViewById(R.id.activity_clazz_edit_add_schedule);
-        addScheduleButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mPresenter.handleClickAddSchedule();
-            }
-        });
+        addScheduleButton.setOnClickListener(v -> mPresenter.handleClickAddSchedule());
 
         holidaySpinner = findViewById(R.id.activity_clazz_edit_holiday_calendar_selected);
         holidaySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -133,9 +120,7 @@ public class ClazzEditActivity extends UstadBaseActivity implements ClazzEditVie
             }
 
             @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
+            public void onNothingSelected(AdapterView<?> parent) {}
         });
 
     }
@@ -144,7 +129,7 @@ public class ClazzEditActivity extends UstadBaseActivity implements ClazzEditVie
     public void updateToolbarTitle(String titleName){
         toolbar.setTitle(titleName);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
     }
 
     // Diff callback.
@@ -201,8 +186,8 @@ public class ClazzEditActivity extends UstadBaseActivity implements ClazzEditVie
         String finalClazzName = clazzName;
         String finalClazzDesc = clazzDesc;
         runOnUiThread(() -> {
-            classNameTIP.getEditText().setText(finalClazzName);
-            classDescTIP.getEditText().setText(finalClazzDesc);
+            Objects.requireNonNull(classNameTIP.getEditText()).setText(finalClazzName);
+            Objects.requireNonNull(classDescTIP.getEditText()).setText(finalClazzDesc);
         });
 
 

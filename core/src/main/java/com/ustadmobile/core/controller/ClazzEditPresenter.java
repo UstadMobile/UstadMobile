@@ -97,6 +97,9 @@ public class ClazzEditPresenter
         String[] holidayPreset = new String[holidayList.size()];
         holidayPreset = holidayList.toArray(holidayPreset);
 
+        if(mOriginalClazz == null){
+            mOriginalClazz = new Clazz();
+        }
         if(mOriginalClazz.getClazzHolidayUMCalendarUid() > 0){
             selectedPosition = (int) mOriginalClazz.getClazzHolidayUMCalendarUid();
         }

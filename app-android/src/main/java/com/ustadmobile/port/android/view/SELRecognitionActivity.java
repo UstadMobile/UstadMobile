@@ -4,25 +4,21 @@ import android.arch.lifecycle.LiveData;
 import android.arch.paging.DataSource;
 import android.arch.paging.LivePagedListBuilder;
 import android.arch.paging.PagedList;
-import android.support.v7.util.DiffUtil;
-
-import com.ustadmobile.core.db.UmProvider;
-import com.ustadmobile.lib.db.entities.Person;
-
-import com.ustadmobile.core.controller.SELRecognitionPresenter;
-
 import android.os.Bundle;
+import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.widget.CheckBox;
 
-import com.ustadmobile.port.android.util.UMAndroidUtil;
 import com.toughra.ustadmobile.R;
-
-
+import com.ustadmobile.core.controller.SELRecognitionPresenter;
+import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.view.SELRecognitionView;
+import com.ustadmobile.lib.db.entities.Person;
+import com.ustadmobile.port.android.util.UMAndroidUtil;
+
+import java.util.Objects;
 
 import ru.dimorinny.floatingtextbutton.FloatingTextButton;
 
@@ -39,7 +35,6 @@ public class SELRecognitionActivity extends UstadBaseActivity implements SELReco
     //RecyclerView
     private RecyclerView mRecyclerView;
     private RecyclerView.LayoutManager mRecyclerLayoutManager;
-    private RecyclerView.Adapter mAdapter; //replaced with object in set view provider method.
     private SELRecognitionPresenter mPresenter;
 
     public static final DiffUtil.ItemCallback<Person> DIFF_CALLBACK =
@@ -89,11 +84,11 @@ public class SELRecognitionActivity extends UstadBaseActivity implements SELReco
         toolbar = findViewById(R.id.activity_sel_recognition_toolbar);
         toolbar.setTitle(getText(R.string.social_nomination));
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
 
         //Recycler View:
-        mRecyclerView = (RecyclerView) findViewById(
+        mRecyclerView = findViewById(
                 R.id.activity_sel_recognition_recyclerview);
         //mRecyclerLayoutManager = new LinearLayoutManager(getApplicationContext());
         mRecyclerLayoutManager = new GridLayoutManager(getApplicationContext(), 3);

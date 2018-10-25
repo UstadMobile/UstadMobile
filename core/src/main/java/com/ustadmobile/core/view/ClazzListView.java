@@ -11,6 +11,10 @@ public interface ClazzListView extends UstadView {
 
     String VIEW_NAME = "ClassList";
 
+    String ARGS_CLAZZLOG_UID = "clazzloguid";
+    String TAG_STATUS = "status";
+    String ARG_LOGDATE = "logdate";
+
     void setClazzListProvider(UmProvider<ClazzWithNumStudents> clazzListProvider);
 
 }

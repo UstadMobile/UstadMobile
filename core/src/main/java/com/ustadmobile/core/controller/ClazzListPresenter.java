@@ -14,7 +14,7 @@ import com.ustadmobile.lib.db.entities.ClazzWithNumStudents;
 
 import java.util.Hashtable;
 
-import static com.ustadmobile.core.controller.ClazzLogDetailPresenter.ARG_LOGDATE;
+import static com.ustadmobile.core.view.ClazzListView.ARG_LOGDATE;
 
 public class ClazzListPresenter extends UstadBaseController<ClazzListView> {
 

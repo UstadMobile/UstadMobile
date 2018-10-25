@@ -46,7 +46,6 @@ import android.view.MenuItem;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.ClazzListPresenter;
-import com.ustadmobile.core.controller.ClazzLogDetailPresenter;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.ClazzDao;
 import com.ustadmobile.core.db.dao.ClazzMemberDao;
@@ -63,11 +62,11 @@ import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.core.view.ClassLogDetailView;
+import com.ustadmobile.core.view.ClazzListView;
 import com.ustadmobile.core.view.PersonDetailViewField;
 import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.ClazzMember;
 import com.ustadmobile.lib.db.entities.FeedEntry;
-import com.ustadmobile.lib.db.entities.Holiday;
 import com.ustadmobile.lib.db.entities.Person;
 import com.ustadmobile.lib.db.entities.PersonCustomFieldValue;
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField;
@@ -108,12 +107,9 @@ public class SplashScreenActivity extends AppCompatActivity
      * Calls startUi to be run. This is usually called after we have checked permissions.
      */
     public void startTheUI(){
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                UstadMobileSystemImpl.getInstance().startUI(SplashScreenActivity.this);
-            }
-        }, 0);
+        new Handler().postDelayed(
+                () -> UstadMobileSystemImpl.getInstance()
+                        .startUI(SplashScreenActivity.this), 0);
     }
 
     /**
@@ -163,12 +159,9 @@ public class SplashScreenActivity extends AppCompatActivity
         }
 
         if(allGranted) {
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    UstadMobileSystemImpl.getInstance().startUI(SplashScreenActivity.this);
-                }
-            }, 0);
+            new Handler().postDelayed(
+                    () -> UstadMobileSystemImpl.getInstance()
+                            .startUI(SplashScreenActivity.this), 0);
         }else {
             /* avoid possibly getting into an infinite loop if we had no user interaction
                 and permission was denied
@@ -730,7 +723,7 @@ public class SplashScreenActivity extends AppCompatActivity
             thisFeed.setFeedEntryPersonUid(thisPersonUid);
             thisFeed.setLink(ClassLogDetailView.VIEW_NAME + "?" +
                     ClazzListPresenter.ARG_CLAZZ_UID + "=" + feedClazzUid + "&" +
-                    ClazzLogDetailPresenter.ARG_LOGDATE + "=" + thisDate);
+                    ClazzListView.ARG_LOGDATE + "=" + thisDate);
             thisFeed.setFeedEntryHash(123);
 
             feedEntryDao.insertAsync(thisFeed, new UmCallback<Long>() {
@@ -745,7 +738,7 @@ public class SplashScreenActivity extends AppCompatActivity
                     newFeed.setFeedEntryPersonUid(thisPersonUid);
                     newFeed.setLink(ClassLogDetailView.VIEW_NAME + "?" +
                             ClazzListPresenter.ARG_CLAZZ_UID + "=" + feedClazzUid + "&" +
-                            ClazzLogDetailPresenter.ARG_LOGDATE + "=" + newDate);
+                            ClazzListView.ARG_LOGDATE + "=" + newDate);
                     newFeed.setFeedEntryHash(456);
                     feedEntryDao.insertAsync(newFeed, null);
                 }

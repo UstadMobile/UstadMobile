@@ -35,8 +35,6 @@ public class PersonDetailEnrollClazzPresenter extends UstadBaseController<Person
 
         //Populate clazzes
         ClazzDao clazzDao = UmAppDatabase.getInstance(context).getClazzDao();
-        //clazzListProvider = clazzDao.findAllClazzesByPersonUid(currentPersonUid);
-        //view.setClazzListProvider(clazzListProvider);
 
         clazzWithEnrollmentUmProvider =
                 clazzDao.findAllClazzesWithEnrollmentByPersonUid(currentPersonUid);

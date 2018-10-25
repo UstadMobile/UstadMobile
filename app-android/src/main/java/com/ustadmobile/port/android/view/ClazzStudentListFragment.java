@@ -6,7 +6,6 @@ import android.arch.paging.LivePagedListBuilder;
 import android.arch.paging.PagedList;
 import android.os.Bundle;
 import android.support.v7.util.DiffUtil;
-import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -27,31 +26,13 @@ import static com.ustadmobile.core.controller.ClazzListPresenter.ARG_CLAZZ_UID;
 /**
  * ClazzStudentListFragment Android fragment extends UstadBaseFragment
  */
-public class ClazzStudentListFragment extends UstadBaseFragment implements ClazzStudentListView,
-        View.OnClickListener, View.OnLongClickListener {
+public class ClazzStudentListFragment extends UstadBaseFragment implements ClazzStudentListView {
 
     View rootContainer;
     private RecyclerView mRecyclerView;
     private RecyclerView.LayoutManager mRecyclerLayoutManager;
     private ClazzStudentListPresenter mPresenter;
 
-    public long clazzUid;
-
-
-    public static final DiffUtil.ItemCallback<PersonWithEnrollment> DIFF_CALLBACK2 =
-            new DiffUtil.ItemCallback<PersonWithEnrollment>() {
-                @Override
-                public boolean areItemsTheSame(PersonWithEnrollment oldItem,
-                                               PersonWithEnrollment newItem) {
-                    return oldItem.getPersonUid() == newItem.getPersonUid();
-                }
-
-                @Override
-                public boolean areContentsTheSame(PersonWithEnrollment oldItem,
-                                                  PersonWithEnrollment newItem) {
-                    return oldItem.equals(newItem);
-                }
-            };
     /**
      * Generates a new Fragment for a page fragment
      *
@@ -100,8 +81,6 @@ public class ClazzStudentListFragment extends UstadBaseFragment implements Clazz
         mRecyclerView = rootContainer.findViewById(R.id.fragment_class_student_list_recyclerview);
         mRecyclerLayoutManager = new LinearLayoutManager(getContext());
         mRecyclerView.setLayoutManager(mRecyclerLayoutManager);
-        DividerItemDecoration dividerItemDecoration =
-                new DividerItemDecoration(mRecyclerView.getContext(), LinearLayoutManager.VERTICAL);
 
         //Create the presenter and call its onCreate method. This will populate the provider data
         // and call setProvider to set it
@@ -116,6 +95,21 @@ public class ClazzStudentListFragment extends UstadBaseFragment implements Clazz
         return rootContainer;
     }
 
+    public static final DiffUtil.ItemCallback<PersonWithEnrollment> DIFF_CALLBACK2 =
+            new DiffUtil.ItemCallback<PersonWithEnrollment>() {
+                @Override
+                public boolean areItemsTheSame(PersonWithEnrollment oldItem,
+                                               PersonWithEnrollment newItem) {
+                    return oldItem.getPersonUid() == newItem.getPersonUid();
+                }
+
+                @Override
+                public boolean areContentsTheSame(PersonWithEnrollment oldItem,
+                                                  PersonWithEnrollment newItem) {
+                    return oldItem.equals(newItem);
+                }
+            };
+
     @Override
     public void setPersonWithEnrollmentProvider(
             UmProvider<PersonWithEnrollment> setPersonUmProvider) {
@@ -123,7 +117,6 @@ public class ClazzStudentListFragment extends UstadBaseFragment implements Clazz
         PersonWithEnrollmentRecyclerAdapter recyclerAdapter =
                 new PersonWithEnrollmentRecyclerAdapter(DIFF_CALLBACK2, getContext(),
                         this, mPresenter, true, false);
-
 
         DataSource.Factory<Integer, PersonWithEnrollment> factory =
                 (DataSource.Factory<Integer, PersonWithEnrollment>)
@@ -141,16 +134,5 @@ public class ClazzStudentListFragment extends UstadBaseFragment implements Clazz
         // Setup any handles to view objects here
 
     }
-
-    @Override
-    public void onClick(View v) {
-
-    }
-
-    @Override
-    public boolean onLongClick(View v) {
-        return false;
-    }
-
 
 }

@@ -15,9 +15,9 @@ import org.junit.runner.RunWith;
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.ClazzListPresenter;
-import com.ustadmobile.core.controller.ClazzLogDetailPresenter;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.util.UMCalendarUtil;
+import com.ustadmobile.core.view.ClazzListView;
 import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.port.android.view.BasePointActivity2;
 import com.ustadmobile.port.android.view.ClazzLogDetailActivity;
@@ -129,7 +129,7 @@ public class FeedListFragmentEspressoTest {
         intended(allOf(hasComponent(ClazzLogDetailActivity.class.getCanonicalName())
                 , hasExtras(allOf( hasEntry(equalTo(ClazzListPresenter.ARG_CLAZZ_UID),
                     equalTo(Long.toString(testClazz.getClazzUid()))),
-                        hasEntry(equalTo(ClazzLogDetailPresenter.ARG_LOGDATE),
+                        hasEntry(equalTo(ClazzListView.ARG_LOGDATE),
                                 equalTo(Long.toString(TEST_FEED1_LOGDATE)))))));
 
     }

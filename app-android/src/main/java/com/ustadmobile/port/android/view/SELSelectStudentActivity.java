@@ -17,6 +17,8 @@ import com.ustadmobile.core.view.SELSelectStudentView;
 import com.ustadmobile.lib.db.entities.Person;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
+import java.util.Objects;
+
 public class SELSelectStudentActivity extends UstadBaseActivity implements SELSelectStudentView
 {
 
@@ -25,7 +27,6 @@ public class SELSelectStudentActivity extends UstadBaseActivity implements SELSe
     //RecyclerView
     private RecyclerView mRecyclerView;
     private RecyclerView.LayoutManager mRecyclerLayoutManager;
-    private RecyclerView.Adapter mAdapter; //replaced with object in set view provider method.
     private SELSelectStudentPresenter mPresenter;
 
     public long clazzUid;
@@ -76,12 +77,12 @@ public class SELSelectStudentActivity extends UstadBaseActivity implements SELSe
         toolbar = findViewById(R.id.activity_sel_select_student_toolbar);
         toolbar.setTitle(getText(R.string.social_nomination));
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
 
 
         //Recycler View:
-        mRecyclerView = (RecyclerView) findViewById(
+        mRecyclerView = findViewById(
                 R.id.activity_sel_select_student_recyclerview);
         mRecyclerLayoutManager = new LinearLayoutManager(getApplicationContext());
         mRecyclerView.setLayoutManager(mRecyclerLayoutManager);

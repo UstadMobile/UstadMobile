@@ -1,5 +1,6 @@
 package com.ustadmobile.port.android.view;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.arch.paging.PagedListAdapter;
 import android.content.Context;
@@ -27,29 +28,25 @@ public class PersonWithEnrollmentRecyclerAdapter
         extends PagedListAdapter<PersonWithEnrollment,
         PersonWithEnrollmentRecyclerAdapter.ClazzLogDetailViewHolder> {
 
-    Context theContext;
-    Activity theActivity;
-    Fragment theFragment;
+    private Context theContext;
+    private Activity theActivity;
+    private Fragment theFragment;
     private CommonHandlerPresenter mPresenter;
-    boolean showAttendance = false;
-    boolean showEnrollment = false;
+    private boolean showAttendance;
+    private boolean showEnrollment;
 
-    HashMap checkBoxHM = new HashMap();
+    @SuppressLint("UseSparseArrays")
+    private HashMap<Long, Boolean> checkBoxHM = new HashMap<>();
 
-    protected class ClazzLogDetailViewHolder extends RecyclerView.ViewHolder{
-        protected ClazzLogDetailViewHolder(View itemView){
+    class ClazzLogDetailViewHolder extends RecyclerView.ViewHolder{
+        ClazzLogDetailViewHolder(View itemView){
             super(itemView);
         }
     }
 
-    protected PersonWithEnrollmentRecyclerAdapter(
-            @NonNull DiffUtil.ItemCallback<PersonWithEnrollment> diffCallback){
-        super(diffCallback);
-    }
-
-    protected PersonWithEnrollmentRecyclerAdapter(
+    PersonWithEnrollmentRecyclerAdapter(
             @NonNull DiffUtil.ItemCallback<PersonWithEnrollment> diffCallback, Context context,
-            Activity activity, CommonHandlerPresenter  presenter, boolean attendance,
+            Activity activity, CommonHandlerPresenter presenter, boolean attendance,
             boolean enrollment){
         super(diffCallback);
         theContext = context;
@@ -59,9 +56,9 @@ public class PersonWithEnrollmentRecyclerAdapter
         showEnrollment = enrollment;
     }
 
-    protected PersonWithEnrollmentRecyclerAdapter(
+    PersonWithEnrollmentRecyclerAdapter(
             @NonNull DiffUtil.ItemCallback<PersonWithEnrollment> diffCallback, Context context,
-            Fragment fragment, CommonHandlerPresenter  presenter, boolean attendance,
+            Fragment fragment, CommonHandlerPresenter presenter, boolean attendance,
             boolean enrollment){
         super(diffCallback);
         theContext = context;
@@ -85,12 +82,11 @@ public class PersonWithEnrollmentRecyclerAdapter
 
     /**
      * This method sets the elements after it has been obtained for that item'th position.
+     *  Every item in the recycler view will have set its colors if no attendance status is set.
+     *  every attendance button will have it-self mapped to tints on activation.
      *
-     * Every item in the recycler view will have set its colors if no attendance status is set.
-     * every attendance button will have it-self mapped to tints on activation.
-     *
-     * @param holder
-     * @param position
+     * @param holder Holder that has the view
+     * @param position  The position in the recycler view.
      */
     @Override
     public void onBindViewHolder(
@@ -99,21 +95,23 @@ public class PersonWithEnrollmentRecyclerAdapter
 
         PersonWithEnrollment personWithEnrollment = getItem(position);
 
+        assert personWithEnrollment != null;
         String studentName = personWithEnrollment.getFirstNames() + " " +
                 personWithEnrollment.getLastName();
+        Long personUid = personWithEnrollment.getPersonUid();
 
         TextView studentNameTextView =
                 holder.itemView.findViewById(R.id.item_studentlist_student_simple_student_title);
         studentNameTextView.setText(studentName);
 
-        ImageView trafficLight = ((ImageView) holder.itemView
-                .findViewById(R.id.item_studentlist_student_simple_attendance_trafficlight));
+        ImageView trafficLight = holder.itemView
+                .findViewById(R.id.item_studentlist_student_simple_attendance_trafficlight);
         TextView attendanceTextView =
                 holder.itemView.findViewById(R.id.item_studentlist_student_simple_attendance_percentage);
 
-        View cl = holder.itemView.findViewById(R.id.item_studentlist_student_cl);
+        ConstraintLayout cl = holder.itemView.findViewById(R.id.item_studentlist_student_cl);
         cl.setOnClickListener(v ->
-                mPresenter.handleCommonPressed(personWithEnrollment.getPersonUid()));
+                mPresenter.handleCommonPressed(personUid));
 
         if(showAttendance){
             long attendancePercentage =
@@ -141,16 +139,14 @@ public class PersonWithEnrollmentRecyclerAdapter
                         R.color.traffic_red));
             }
 
-
             attendanceTextView.setVisibility(View.VISIBLE);
             attendanceTextView.setText(studentAttendancePercentage);
         }else{
 
             //Change the constraint layout so that the hidden bits are not empty spaces.
 
-            ConstraintLayout mainCL = holder.itemView.findViewById(R.id.item_studentlist_student_cl);
             ConstraintSet constraintSet = new ConstraintSet();
-            constraintSet.clone(mainCL);
+            constraintSet.clone(cl);
 
             constraintSet.connect(R.id.item_studentlist_student_simple_horizontal_divider,
                     ConstraintSet.TOP, R.id.item_studentlist_student_simple_student_image,
@@ -161,10 +157,9 @@ public class PersonWithEnrollmentRecyclerAdapter
             constraintSet.connect(R.id.item_studentlist_student_simple_attendance_trafficlight,
                     ConstraintSet.TOP, R.id.item_studentlist_student_simple_student_title,
                     ConstraintSet.BOTTOM, 0);
-            constraintSet.applyTo(mainCL);
+            constraintSet.applyTo(cl);
 
         }
-
 
         if(showEnrollment){
 
@@ -182,7 +177,7 @@ public class PersonWithEnrollmentRecyclerAdapter
             //To preserve checkboxes, add this enrollment to the Map.
             checkBoxHM.put(personWithEnrollment.getPersonUid(), personWithEnrollmentBoolean);
             //set the value of the check according to the value..
-            checkBox.setChecked((Boolean) checkBoxHM.get(personWithEnrollment.getPersonUid()));
+            checkBox.setChecked(checkBoxHM.get(personWithEnrollment.getPersonUid()));
 
             //Add a change listener to the checkbox
             checkBox.setOnCheckedChangeListener((buttonView, isChecked) ->
@@ -190,7 +185,6 @@ public class PersonWithEnrollmentRecyclerAdapter
 
             checkBox.setOnClickListener(v -> {
                 final boolean isChecked = checkBox.isChecked();
-                //mPresenter.handleEnrollChanged(personWithEnrollment, isChecked);
                 HashMap<PersonWithEnrollment, Boolean> arguments = new HashMap<>();
                 arguments.put(personWithEnrollment, isChecked);
                 mPresenter.handleSecondaryPressed(arguments.entrySet().iterator().next());

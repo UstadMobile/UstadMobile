@@ -40,13 +40,6 @@ public class PeopleBlobListRecyclerAdapter extends
         }
     }
 
-
-    protected PeopleBlobListRecyclerAdapter(@NonNull DiffUtil.ItemCallback<Person> diffCallback,
-                                              Context context) {
-        super(diffCallback);
-        theContext = context;
-    }
-
     protected PeopleBlobListRecyclerAdapter(@NonNull DiffUtil.ItemCallback<Person> diffCallback,
                                               Context context, CommonHandlerPresenter presenter) {
         super(diffCallback);
@@ -135,7 +128,7 @@ public class PeopleBlobListRecyclerAdapter extends
                     thisPerson.getLastName();
         }
 
-        ImageView studentImage = (ImageView) holder.itemView
+        ImageView studentImage = holder.itemView
                 .findViewById(R.id.item_peopleblob_image);
 
         //TODO: Add image of student here.
@@ -152,41 +145,38 @@ public class PeopleBlobListRecyclerAdapter extends
 
         CardView personCard = holder.itemView.findViewById(R.id.item_peoplblob_card);
 
-        personCard.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        personCard.setOnClickListener(v -> {
 
 
-                if (colorMap.containsKey(position)) {
-                    if (colorMap.get(position) == "selected") {
-                        if (hideNames){
-                            studentEntry.setText("");
-                        }else {
-                            personCard.setBackgroundColor(Color.parseColor("#FFFFFF"));
+            if (colorMap.containsKey(position)) {
+                if (colorMap.get(position) == "selected") {
+                    if (hideNames){
+                        studentEntry.setText("");
+                    }else {
+                        personCard.setBackgroundColor(Color.parseColor("#FFFFFF"));
 
-                        }
-                        colorMap.put(position, "unselected");
-                    } else {
-                        if (hideNames){
-                            studentEntry.setText(studentName);
-                        }else {
-                            personCard.setBackgroundColor(Color.parseColor("#FF6666"));
-
-                        }
-                        colorMap.put(position, "selected");
                     }
+                    colorMap.put(position, "unselected");
                 } else {
-                    colorMap.put(position, "selected");
                     if (hideNames){
                         studentEntry.setText(studentName);
                     }else {
                         personCard.setBackgroundColor(Color.parseColor("#FF6666"));
+
                     }
+                    colorMap.put(position, "selected");
                 }
-
-
-                mPresenter.handleCommonPressed(thisPerson.getPersonUid());
+            } else {
+                colorMap.put(position, "selected");
+                if (hideNames){
+                    studentEntry.setText(studentName);
+                }else {
+                    personCard.setBackgroundColor(Color.parseColor("#FF6666"));
+                }
             }
+
+
+            mPresenter.handleCommonPressed(thisPerson.getPersonUid());
         });
 
 

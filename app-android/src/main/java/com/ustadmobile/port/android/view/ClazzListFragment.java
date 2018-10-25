@@ -33,8 +33,7 @@ import ru.dimorinny.floatingtextbutton.FloatingTextButton;
 /**
  * ClazzListFragment Android fragment extends UstadBaseFragment
  */
-public class ClazzListFragment extends UstadBaseFragment implements ClazzListView,
-        View.OnClickListener, View.OnLongClickListener{
+public class ClazzListFragment extends UstadBaseFragment implements ClazzListView{
 
     private View rootContainer;
 
@@ -43,83 +42,6 @@ public class ClazzListFragment extends UstadBaseFragment implements ClazzListVie
     private RecyclerView.LayoutManager mRecyclerLayoutManager;
 
     private ClazzListPresenter mPresenter;
-
-    /**
-     * The ClazzList Recycler Adapter used here.
-     */
-    protected class ClazzListRecyclerAdapter extends
-            PagedListAdapter<ClazzWithNumStudents, ClazzListRecyclerAdapter.ClazzViewHolder> {
-
-        protected class ClazzViewHolder extends RecyclerView.ViewHolder {
-
-            protected ClazzViewHolder(View itemView) {
-                super(itemView);
-            }
-        }
-
-        protected ClazzListRecyclerAdapter(@NonNull DiffUtil.ItemCallback<ClazzWithNumStudents>
-                                                   diffCallback) {
-            super(diffCallback);
-        }
-
-        @NonNull
-        @Override
-        public ClazzViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            View clazzListItem =
-                    LayoutInflater.from(getContext()).inflate(R.layout.item_clazzlist_clazz,
-                    parent, false);
-            return new ClazzViewHolder(clazzListItem);
-        }
-
-        /**
-         * This method sets the elements after it has been obtained for that item'th position.
-         *
-         * @param holder The view holder
-         * @param position The position of the item
-         */
-        @Override
-        public void onBindViewHolder  (@NonNull ClazzViewHolder holder, int position) {
-            ClazzWithNumStudents clazz = getItem(position);
-            long attendancePercentage = (long) (clazz.getAttendanceAverage() * 100);
-            String lastRecordedAttendance = "";
-            ((TextView)holder.itemView.findViewById(R.id.item_clazzlist_clazz_title))
-                    .setText(clazz.getClazzName());
-            ((TextView)holder.itemView.findViewById(R.id.item_clazzlist_numstudents_text))
-                    .setText(clazz.getNumStudents() + " " + getResources()
-                            .getText(R.string.students_literal).toString());
-            ((TextView)holder.itemView.findViewById(R.id.item_clazzlist_attendance_percentage))
-                    .setText(attendancePercentage + "% " + getText(R.string.attendance)
-                    + " (" + getText(R.string.last_recorded) + " " + lastRecordedAttendance + ")");
-            holder.itemView.setOnClickListener((view) -> mPresenter.handleClickClazz(clazz));
-            holder.itemView.findViewById(R.id.item_clazzlist_attendance_record_attendance_button)
-                    .setOnClickListener((view)-> mPresenter.handleClickClazzRecordAttendance(clazz));
-
-            ImageView trafficLight = ((ImageView) holder.itemView
-                    .findViewById(R.id.item_clazzlist_attendance_trafficlight));
-            if(attendancePercentage > 75L){
-                trafficLight.setColorFilter(ContextCompat.getColor(getContext(), R.color.traffic_green));
-            }else if(attendancePercentage > 50L){
-                trafficLight.setColorFilter(ContextCompat.getColor(getContext(), R.color.traffic_orange));
-            }else{
-                trafficLight.setColorFilter(ContextCompat.getColor(getContext(), R.color.traffic_red));
-            }
-        }
-    }
-
-    public static final DiffUtil.ItemCallback<ClazzWithNumStudents> DIFF_CALLBACK =
-            new DiffUtil.ItemCallback<ClazzWithNumStudents>() {
-        @Override
-        public boolean areItemsTheSame(ClazzWithNumStudents oldItem,
-                                       ClazzWithNumStudents newItem) {
-            return oldItem.getClazzUid() == newItem.getClazzUid();
-        }
-
-        @Override
-        public boolean areContentsTheSame(ClazzWithNumStudents oldItem,
-                                          ClazzWithNumStudents newItem) {
-            return oldItem.equals(newItem);
-        }
-    };
 
     /**
      * Generates a new Fragment for a page fragment
@@ -154,7 +76,6 @@ public class ClazzListFragment extends UstadBaseFragment implements ClazzListVie
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
         rootContainer =
                 inflater.inflate(R.layout.fragment_clazz_list, container, false);
         setHasOptionsMenu(true);
@@ -163,9 +84,6 @@ public class ClazzListFragment extends UstadBaseFragment implements ClazzListVie
 
         mRecyclerLayoutManager = new LinearLayoutManager(getContext());
         mRecyclerView.setLayoutManager(mRecyclerLayoutManager);
-        DividerItemDecoration dividerItemDecoration =
-                new DividerItemDecoration(mRecyclerView.getContext(),
-                LinearLayoutManager.VERTICAL);
 
         //set up Presenter
         mPresenter = new ClazzListPresenter(this,
@@ -179,9 +97,26 @@ public class ClazzListFragment extends UstadBaseFragment implements ClazzListVie
         return rootContainer;
     }
 
+    public static final DiffUtil.ItemCallback<ClazzWithNumStudents> DIFF_CALLBACK =
+            new DiffUtil.ItemCallback<ClazzWithNumStudents>() {
+                @Override
+                public boolean areItemsTheSame(ClazzWithNumStudents oldItem,
+                                               ClazzWithNumStudents newItem) {
+                    return oldItem.getClazzUid() == newItem.getClazzUid();
+                }
+
+                @Override
+                public boolean areContentsTheSame(ClazzWithNumStudents oldItem,
+                                                  ClazzWithNumStudents newItem) {
+                    return oldItem.equals(newItem);
+                }
+            };
+
     @Override
     public void setClazzListProvider(UmProvider<ClazzWithNumStudents> clazzListProvider) {
-        ClazzListRecyclerAdapter recyclerAdapter = new ClazzListRecyclerAdapter(DIFF_CALLBACK);
+        ClazzListRecyclerAdapter recyclerAdapter = new ClazzListRecyclerAdapter(DIFF_CALLBACK,
+                getContext(), this, mPresenter);
+
         DataSource.Factory<Integer, ClazzWithNumStudents> factory =
                 (DataSource.Factory<Integer, ClazzWithNumStudents>)clazzListProvider.getProvider();
         LiveData<PagedList<ClazzWithNumStudents>> data =
@@ -196,16 +131,6 @@ public class ClazzListFragment extends UstadBaseFragment implements ClazzListVie
     public void onViewCreated(View view, Bundle savedInstanceState) {
         // Setup any handles to view objects here
 
-    }
-
-    @Override
-    public void onClick(View v) {
-
-    }
-
-    @Override
-    public boolean onLongClick(View v) {
-        return false;
     }
 
 }
