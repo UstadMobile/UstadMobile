@@ -99,6 +99,19 @@ public class AsbScraper {
         contentEntryFileDao = db.getContentEntryFileDao();
         contentEntryFileJoinDao = db.getContentEntryContentEntryFileJoinDao();
 
+        ContentEntry masterRootParent = contentEntryDao.findBySourceUrl("root");
+        if (masterRootParent == null) {
+            masterRootParent = new ContentEntry();
+            masterRootParent= setContentEntryData(masterRootParent, "root",
+                    "Ustad Mobile", "root", ScraperConstants.ENGLISH_LANG_CODE);
+            masterRootParent.setContentEntryUid(contentEntryDao.insert(masterRootParent));
+        } else {
+            masterRootParent = setContentEntryData(masterRootParent, "root",
+                    "Ustad Mobile", "root", ScraperConstants.ENGLISH_LANG_CODE);
+            contentEntryDao.updateContentEntry(masterRootParent);
+        }
+
+
         ContentEntry asbParentEntry = contentEntryDao.findBySourceUrl("https://www.africanstorybook.org/");
         if (asbParentEntry == null) {
             asbParentEntry = new ContentEntry();
@@ -110,6 +123,8 @@ public class AsbScraper {
                     "African Story Books", "https://www.africanstorybook.org/", ScraperConstants.ENGLISH_LANG_CODE);
             contentEntryDao.updateContentEntry(asbParentEntry);
         }
+
+        ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, masterRootParent, asbParentEntry, 4);
 
         driver = ContentScraperUtil.setupChrome(true);
 
