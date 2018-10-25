@@ -103,6 +103,19 @@ public class IndexEdraakK12Content {
         }
 
 
+        ContentEntry masterRootParent = contentEntryDao.findBySourceUrl("root");
+        if (masterRootParent == null) {
+            masterRootParent = new ContentEntry();
+            masterRootParent= setContentEntryData(masterRootParent, "root",
+                    "Ustad Mobile", "root");
+            masterRootParent.setContentEntryUid(contentEntryDao.insert(masterRootParent));
+        } else {
+            masterRootParent = setContentEntryData(masterRootParent, "root",
+                    "Ustad Mobile", "root");
+            contentEntryDao.updateContentEntry(masterRootParent);
+        }
+
+
         ContentEntry edraakParentEntry = contentEntryDao.findBySourceUrl("https://www.edraak.org/k12/");
         if (edraakParentEntry == null) {
             edraakParentEntry = new ContentEntry();
@@ -114,6 +127,9 @@ public class IndexEdraakK12Content {
                     "Edraak K12", "https://www.edraak.org/k12/");
             contentEntryDao.updateContentEntry(edraakParentEntry);
         }
+
+        ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, masterRootParent, edraakParentEntry, 0);
+
 
 
         findImportedComponent(response, edraakParentEntry);

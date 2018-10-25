@@ -445,7 +445,6 @@ dependencies {
     implementation project(':lib-database-android')
     implementation project(":lib-util")
 
-    implementation 'com.android.support.constraint:constraint-layout:1.1.3'
     vanillamultidexApi "com.android.support:multidex:$version_android_multidex"
 
     androidTestImplementation project(":core-tests")
@@ -478,14 +477,13 @@ dependencies {
     implementation "com.android.support:design:$version_android_support_lib"
     implementation "com.android.support:support-v4:$version_android_support_lib"
     implementation "com.android.support:recyclerview-v7:$version_android_support_lib"
+    implementation "com.android.support.constraint:constraint-layout:$version_android_constraint_layout"
 
     //Image loading library
     implementation 'com.squareup.picasso:picasso:2.5.2'
 
     //Floating action button with support for popup choices
     implementation 'com.github.clans:fab:1.6.4'
-
-    implementation "com.android.support.constraint:constraint-layout:$version_android_constraint_layout"
 
     //Wifi direct library
     implementation 'com.ustadmobile.wifibuddy:wifibuddy:1.1.45-SNAPSHOT'

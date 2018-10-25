@@ -98,6 +98,19 @@ public class IndexPrathamContentScraper {
         contentEntryFileDao = db.getContentEntryFileDao();
         contentEntryFileJoinDao = db.getContentEntryContentEntryFileJoinDao();
 
+        ContentEntry masterRootParent = contentEntryDao.findBySourceUrl("root");
+        if (masterRootParent == null) {
+            masterRootParent = new ContentEntry();
+            masterRootParent= setContentEntryData(masterRootParent, "root",
+                    "Ustad Mobile", "root", ScraperConstants.ENGLISH_LANG_CODE);
+            masterRootParent.setContentEntryUid(contentEntryDao.insert(masterRootParent));
+        } else {
+            masterRootParent = setContentEntryData(masterRootParent, "root",
+                    "Ustad Mobile", "root", ScraperConstants.ENGLISH_LANG_CODE);
+            contentEntryDao.updateContentEntry(masterRootParent);
+        }
+
+
         ContentEntry prathamParentEntry = contentEntryDao.findBySourceUrl("https://storyweaver.org.in/");
         if (prathamParentEntry == null) {
             prathamParentEntry = new ContentEntry();
@@ -109,6 +122,8 @@ public class IndexPrathamContentScraper {
                     "Pratham Books", "https://storyweaver.org.in/", ScraperConstants.ENGLISH_LANG_CODE);
             contentEntryDao.updateContentEntry(prathamParentEntry);
         }
+
+        ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, masterRootParent, prathamParentEntry, 3);
 
         gson = new GsonBuilder().disableHtmlEscaping().create();
 
