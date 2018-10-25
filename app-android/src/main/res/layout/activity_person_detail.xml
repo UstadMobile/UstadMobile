@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_person_detail_cl"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.ustadmobile.port.android.view.PersonDetailActivity">
+
+
+    <ScrollView
+        android:id="@+id/activity_person_detail_fields_scroll"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+        <!--app:layout_constraintTop_toBottomOf="@+id/activity_person_detail_appbar">-->
+
+        <android.support.constraint.ConstraintLayout
+            android:id="@+id/activity_peron_detail_constraint"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <android.support.design.widget.AppBarLayout
+                android:id="@+id/activity_person_detail_appbar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:elevation="4dp"
+                android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <android.support.v7.widget.Toolbar
+                    android:id="@+id/activity_person_detail_toolbar"
+                    android:layout_width="match_parent"
+                    android:layout_height="?attr/actionBarSize"
+                    android:background="@color/primary"
+                    app:layout_scrollFlags="scroll|enterAlways" />
+
+            </android.support.design.widget.AppBarLayout>
+
+            <ImageView
+                android:id="@+id/activity_person_detail_student_image"
+                android:layout_width="match_parent"
+                android:layout_height="120dp"
+                android:background="@color/primary_light"
+                android:contentDescription="@string/student_image"
+                android:src="@drawable/ic_person_black_24dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/activity_person_detail_appbar" />
+
+            <TextView
+                android:id="@+id/activity_person_detail_student_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:text=""
+                android:textSize="24sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/activity_person_detail_student_image" />
+
+            <View
+                android:id="@+id/activity_person_detail_divider1"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:background="?android:attr/listDivider"
+                android:visibility="visible"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/activity_person_detail_student_name" />
+
+            <ImageView
+                android:id="@+id/activity_person_detail_action_call_parent_icon"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_marginStart="24dp"
+                android:layout_marginTop="8dp"
+                android:adjustViewBounds="false"
+                android:contentDescription="@string/call_parent"
+                android:cropToPadding="true"
+                android:src="@drawable/ic_phone_forwarded_bcd4_24dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/activity_person_detail_divider1"
+                app:srcCompat="@drawable/ic_phone_forwarded_bcd4_24dp" />
+
+            <TextView
+                android:id="@+id/activity_person_detail_action_call_parent_text"
+                android:layout_width="60dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:text="@string/call_parent"
+                android:textColor="@color/primary"
+                android:textSize="14sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/activity_person_detail_action_call_parent_icon" />
+
+            <ImageView
+                android:id="@+id/activity_person_detail_action_text_parent_icon"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_marginStart="32dp"
+                android:layout_marginTop="8dp"
+                android:adjustViewBounds="false"
+                android:contentDescription="@string/text_parent"
+                android:cropToPadding="false"
+                android:src="@drawable/ic_message_bcd4_24dp"
+                app:layout_constraintStart_toEndOf="@+id/activity_person_detail_action_call_parent_icon"
+                app:layout_constraintTop_toBottomOf="@+id/activity_person_detail_divider1" />
+
+            <TextView
+                android:id="@+id/activity_person_detail_action_text_parent_text"
+                android:layout_width="60dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:text="@string/text_parent"
+                android:textColor="@color/primary"
+                android:textSize="14sp"
+                app:layout_constraintStart_toEndOf="@+id/activity_person_detail_action_call_parent_text"
+                app:layout_constraintTop_toBottomOf="@+id/activity_person_detail_action_text_parent_icon" />
+
+            <ImageView
+                android:id="@+id/activity_person_detail_action_enroll_in_class_icon"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_marginStart="40dp"
+                android:layout_marginTop="8dp"
+                android:adjustViewBounds="false"
+                android:contentDescription="@string/enroll_in_class"
+                android:cropToPadding="false"
+                android:src="@drawable/ic_group_add_bcd4_24dp"
+                app:layout_constraintStart_toEndOf="@+id/activity_person_detail_action_text_parent_icon"
+                app:layout_constraintTop_toBottomOf="@+id/activity_person_detail_divider1" />
+
+            <TextView
+                android:id="@+id/activity_person_detail_action_enroll_in_class_text"
+                android:layout_width="60dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:text="@string/enroll_in_class"
+                android:textColor="@color/primary"
+                android:textSize="14sp"
+                app:layout_constraintStart_toEndOf="@+id/activity_person_detail_action_text_parent_text"
+                app:layout_constraintTop_toBottomOf="@+id/activity_person_detail_action_enroll_in_class_icon" />
+
+            <ImageView
+                android:id="@+id/activity_person_detail_action_attendance_report_icon"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_marginStart="40dp"
+                android:layout_marginTop="8dp"
+                android:adjustViewBounds="false"
+                android:contentDescription="@string/attendance_report"
+                android:cropToPadding="false"
+                android:src="@drawable/ic_assignment_turned_in_bcd4_24dp"
+                app:layout_constraintStart_toEndOf="@+id/activity_person_detail_action_enroll_in_class_icon"
+                app:layout_constraintTop_toBottomOf="@+id/activity_person_detail_divider1" />
+
+            <TextView
+                android:id="@+id/activity_person_detail_action_attendance_report_text"
+                android:layout_width="60dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:text="@string/attendance_report"
+                android:textColor="@color/primary"
+                android:textSize="14sp"
+                app:layout_constraintStart_toEndOf="@+id/activity_person_detail_action_enroll_in_class_text"
+                app:layout_constraintTop_toBottomOf="@+id/activity_person_detail_action_attendance_report_icon" />
+
+            <ImageView
+                android:id="@+id/activity_person_detail_action_record_dropout_icon"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_marginStart="40dp"
+                android:layout_marginTop="8dp"
+                android:adjustViewBounds="false"
+                android:contentDescription="@string/record_dropout"
+                android:cropToPadding="false"
+                android:src="@drawable/ic_dropout_bcd4_24dp"
+                app:layout_constraintStart_toEndOf="@+id/activity_person_detail_action_attendance_report_icon"
+                app:layout_constraintTop_toBottomOf="@+id/activity_person_detail_divider1" />
+
+            <TextView
+                android:id="@+id/activity_person_detail_action_record_dropout_text"
+                android:layout_width="60dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:text="@string/record_dropout"
+                android:textColor="@color/primary"
+                android:textSize="14sp"
+                app:layout_constraintStart_toEndOf="@+id/activity_person_detail_action_attendance_report_text"
+                app:layout_constraintTop_toBottomOf="@+id/activity_person_detail_action_record_dropout_icon" />
+
+            <View
+                android:id="@+id/activity_person_detail_divider2"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:background="?android:attr/listDivider"
+                android:visibility="invisible"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/activity_person_detail_action_attendance_report_text" />
+
+            <LinearLayout
+                android:id="@+id/activity_person_detail_fields_linear_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="100dp"
+                android:orientation="vertical"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/activity_person_detail_divider2">
+
+            </LinearLayout> <!-- activity_person_detail_fields_linear_layout -->
+
+        </android.support.constraint.ConstraintLayout> <!-- activity_peron_detail_constraint -->
+
+    </ScrollView> <!--activity_person_detail_fields_scroll-->
+
+    <ru.dimorinny.floatingtextbutton.FloatingTextButton
+        android:id="@+id/activity_person_detail_fab_edit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        app:floating_background_color="@color/accent"
+        app:floating_left_icon="@drawable/ic_edit_white_24dp"
+        app:floating_title="@string/edit"
+        app:floating_title_color="@android:color/white"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+    </ru.dimorinny.floatingtextbutton.FloatingTextButton>
+
+
+</android.support.constraint.ConstraintLayout>

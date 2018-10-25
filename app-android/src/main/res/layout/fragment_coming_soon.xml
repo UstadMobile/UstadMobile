@@ -1,0 +1,28 @@
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:id="@+id/fragment_catalog_root"
+    tools:context="com.ustadmobile.port.android.view.ComingSoonFragment">
+
+
+
+    <FrameLayout
+        android:id="@+id/base_point_people_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+
+        <TextView
+            android:id="@+id/name_text"
+            android:text="Coming Soon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="60sp"/>
+
+
+    </FrameLayout>
+
+
+</RelativeLayout>
