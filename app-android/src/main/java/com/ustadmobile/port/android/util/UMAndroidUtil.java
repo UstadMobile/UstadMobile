@@ -56,8 +56,6 @@ public class UMAndroidUtil {
                 retVal.put(key, val);
             }else if(val instanceof String[]) {
                 retVal.put(key, val);
-            }else if(val instanceof  Long){
-                retVal.put(key, val);
             }
         }
 
@@ -82,8 +80,6 @@ public class UMAndroidUtil {
                 bundle.putString(key, (String)val);
             }else if(val instanceof String[]) {
                 bundle.putStringArray(key, (String[])val);
-            }else if(val instanceof Long){
-                bundle.putLong(key, (Long) val);
             }
         }
         return bundle;

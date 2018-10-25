@@ -116,18 +116,6 @@ public class IndexCategoryCK12Content {
         contentEntryFileDao = db.getContentEntryFileDao();
         contentEntryFileJoinDao = db.getContentEntryContentEntryFileJoinDao();
 
-        ContentEntry masterRootParent = contentEntryDao.findBySourceUrl("root");
-        if (masterRootParent == null) {
-            masterRootParent = new ContentEntry();
-            masterRootParent= setContentEntryData(masterRootParent, "root",
-                    "Ustad Mobile", "root", ScraperConstants.ENGLISH_LANG_CODE);
-            masterRootParent.setContentEntryUid(contentEntryDao.insert(masterRootParent));
-        } else {
-            masterRootParent = setContentEntryData(masterRootParent, "root",
-                    "Ustad Mobile", "root", ScraperConstants.ENGLISH_LANG_CODE);
-            contentEntryDao.updateContentEntry(masterRootParent);
-        }
-
         ck12ParentEntry = contentEntryDao.findBySourceUrl("https://www.ck12.org/");
         if (ck12ParentEntry == null) {
             ck12ParentEntry = new ContentEntry();
@@ -139,8 +127,6 @@ public class IndexCategoryCK12Content {
                     "CK-12 Foundation", "https://www.ck12.org/", ScraperConstants.ENGLISH_LANG_CODE);
             contentEntryDao.updateContentEntry(ck12ParentEntry);
         }
-
-        ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, masterRootParent, ck12ParentEntry, 2);
 
     }
 

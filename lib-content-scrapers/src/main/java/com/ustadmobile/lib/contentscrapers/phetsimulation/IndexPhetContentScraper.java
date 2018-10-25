@@ -105,18 +105,6 @@ public class IndexPhetContentScraper {
 
         Elements simulationList = document.select("td.simulation-list-item span.sim-badge-html");
 
-        ContentEntry masterRootParent = contentEntryDao.findBySourceUrl("root");
-        if (masterRootParent == null) {
-            masterRootParent = new ContentEntry();
-            masterRootParent= setContentEntryData(masterRootParent, "root",
-                    "Ustad Mobile", "root", ScraperConstants.ENGLISH_LANG_CODE);
-            masterRootParent.setContentEntryUid(contentEntryDao.insert(masterRootParent));
-        } else {
-            masterRootParent = setContentEntryData(masterRootParent, "root",
-                    "Ustad Mobile", "root", ScraperConstants.ENGLISH_LANG_CODE);
-            contentEntryDao.updateContentEntry(masterRootParent);
-        }
-
         ContentEntry phetParentEntry = contentEntryDao.findBySourceUrl("https://phet.colorado.edu/");
         if (phetParentEntry == null) {
             phetParentEntry = new ContentEntry();
@@ -128,8 +116,6 @@ public class IndexPhetContentScraper {
                     "Phet Interactive Simulations", "https://phet.colorado.edu/", ScraperConstants.ENGLISH_LANG_CODE);
             contentEntryDao.updateContentEntry(phetParentEntry);
         }
-
-        ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, masterRootParent, phetParentEntry, 1);
 
         for (Element simulation : simulationList) {
 

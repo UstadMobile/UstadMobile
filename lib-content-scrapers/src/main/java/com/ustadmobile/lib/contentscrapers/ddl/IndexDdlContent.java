@@ -62,18 +62,6 @@ public class IndexDdlContent {
         contentParentChildJoinDao = db.getContentEntryParentChildJoinDao();
         contentCategoryChildJoinDao = db.getContentEntryContentCategoryJoinDao();
 
-        ContentEntry masterRootParent = contentEntryDao.findBySourceUrl("root");
-        if (masterRootParent == null) {
-            masterRootParent = new ContentEntry();
-            masterRootParent= setContentEntryData(masterRootParent, "root",
-                    "Ustad Mobile", "root", ScraperConstants.ENGLISH_LANG_CODE);
-            masterRootParent.setContentEntryUid(contentEntryDao.insert(masterRootParent));
-        } else {
-            masterRootParent = setContentEntryData(masterRootParent, "root",
-                    "Ustad Mobile", "root", ScraperConstants.ENGLISH_LANG_CODE);
-            contentEntryDao.updateContentEntry(masterRootParent);
-        }
-
         parentDdl = contentEntryDao.findBySourceUrl("https://www.ddl.af/");
         if (parentDdl == null) {
             parentDdl = new ContentEntry();
@@ -85,8 +73,6 @@ public class IndexDdlContent {
                     "Darakht-e Danesh", "https://www.ddl.af/", ScraperConstants.ENGLISH_LANG_CODE);
             contentEntryDao.updateContentEntry(parentDdl);
         }
-
-        ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, masterRootParent, parentDdl, 5);
 
         browseLanguages("en");
         browseLanguages("fa");
