@@ -569,41 +569,5 @@ public class DbProcessorRoom extends AbstractDbProcessor{
         }
     }
 
-    /**
-     * Generates a CodeBlock that contains a string starting with open brackets, and passing
-     * on the same arguments of an input method in the same order.
-     *
-     * e.g. for the method signature void doSomething(String str1, int number) this will generate
-     *   (str1, number)
-     *
-     * This method can also exclude particular types of parameters, which can be useful to exclude
-     * callbacks. For example if UmCallback typeElement is given as an excludedElement then
-     *
-     * for the method void doSomething(String str1, int number, UmCallback&lt;Long&gt;) it will
-     * generate (str1, number)
-     *
-     * @param parameters The parameters from which to generate the callback. Normally from ExecutableElement.getParameters
-     * @param excludedElements Elements that should be excluded e.g. callback parameters as above
-     *
-     * @return CodeBlock with the generated source as above
-     */
-    private CodeBlock makeNamedParameterMethodCall(List<? extends VariableElement> parameters,
-                                                   Element... excludedElements) {
-        List<Element> excludedElementList = Arrays.asList(excludedElements);
-        CodeBlock.Builder block = CodeBlock.builder().add("(");
-        List<String> paramNames = new ArrayList<>();
-
-        for(VariableElement variable : parameters) {
-            Element variableTypeElement = processingEnv.getTypeUtils().asElement(variable.asType());
-            if(excludedElementList.contains(variableTypeElement))
-                continue;
-
-            paramNames.add(variable.getSimpleName().toString());
-        }
-
-        block.add(String.join(", ", paramNames));
-
-        return block.add(")").build();
-    }
 
 }

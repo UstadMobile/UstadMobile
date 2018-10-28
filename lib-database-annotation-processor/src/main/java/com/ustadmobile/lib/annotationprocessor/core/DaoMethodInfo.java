@@ -91,6 +91,10 @@ public class DaoMethodInfo {
         return getMethodParametersAsElements().indexOf(umCallbackTypeElement);
     }
 
+    public boolean isAsyncMethod() {
+        return getAsyncParamIndex() != -1;
+    }
+
     /**
      * Determine what type of entity parameter is being used for an Insert, Update, or Delete method
      * (where the entity is a parameter of the method). This will figure out the actually entity

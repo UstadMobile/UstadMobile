@@ -4,24 +4,30 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
+import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.Name;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVariable;
+import javax.lang.model.util.Types;
 
 public class DbProcessorUtils {
 
@@ -55,7 +61,16 @@ public class DbProcessorUtils {
     }
 
     public static List<Element> findElementsWithAnnotation(TypeElement typeElement,
-                                                           Class<? extends Annotation> annotationClass,
+                                                           Class<? extends Annotation>  annotationClassList,
+                                                           List<Element> resultsList,
+                                                           int maxResults,
+                                                           ProcessingEnvironment processingEnv) {
+        return findElementsWithAnnotation(typeElement, Arrays.asList(annotationClassList),
+                resultsList, maxResults, processingEnv);
+    }
+
+    public static List<Element> findElementsWithAnnotation(TypeElement typeElement,
+                                                           List<Class<? extends Annotation>> annotationClassList,
                                                            List<Element> resultsList,
                                                            int maxResults,
                                                            ProcessingEnvironment processingEnv) {
@@ -64,18 +79,19 @@ public class DbProcessorUtils {
             TypeElement searchElement = (TypeElement) processingEnv.getTypeUtils()
                     .asElement(searchTypeMirror);
             for(Element subElement : searchElement.getEnclosedElements()){
-                if(subElement.getAnnotation(annotationClass) != null) {
-                    resultsList.add(subElement);
-                    if(resultsList.size() >= maxResults)
-                        return resultsList;
+                for(Class<? extends Annotation> annotationClass : annotationClassList) {
+                    if(subElement.getAnnotation(annotationClass) != null) {
+                        resultsList.add(subElement);
+                        if(maxResults > 0 && resultsList.size() >= maxResults)
+                            return resultsList;
+                    }
                 }
-
             }
 
             for(TypeMirror interfaceMirror : searchElement.getInterfaces()){
                 TypeElement interfaceElement = (TypeElement)processingEnv.getTypeUtils()
                     .asElement(interfaceMirror);
-                findElementsWithAnnotation(interfaceElement, annotationClass, resultsList, maxResults,
+                findElementsWithAnnotation(interfaceElement, annotationClassList, resultsList, maxResults,
                         processingEnv);
             }
 
@@ -153,6 +169,95 @@ public class DbProcessorUtils {
         return resolveType(typeMirror, implementationClass, true, true,
                 processingEnv);
     }
+
+
+    /**
+     * Determine if the given type can be transmitted as a query variable when using REST - e.g.
+     * the parameter is either a primitive, String, or an array/list thereof.
+     *
+     * @param typeMirror TypeMirror of the given parameter
+     * @param processingEnv ProcessingEnvironment
+     * @return true if the type meets the criteria to be a query parameter for REST calls, false otherwise
+     */
+    public static boolean isQueryParam(TypeMirror typeMirror, ProcessingEnvironment processingEnv) {
+        if (typeMirror.getKind().equals(TypeKind.ARRAY)) {
+            typeMirror = ((ArrayType) typeMirror).getComponentType();
+        }else if(processingEnv.getElementUtils().getTypeElement(List.class.getName())
+                .equals(processingEnv.getTypeUtils().asElement(typeMirror))) {
+            typeMirror = ((DeclaredType)typeMirror).getTypeArguments().get(0);
+        }
+
+        TypeName typeName = TypeName.get(typeMirror);
+        if(typeName.isBoxedPrimitive() ||typeName.isPrimitive()) {
+            return true;
+        }else if(processingEnv.getElementUtils().getTypeElement(String.class.getName())
+                .equals(processingEnv.getTypeUtils().asElement(typeMirror))) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Get the number of parameters for a given method that cannot be transmitted as query parameters.
+     * This is significant as JAX-WS REST APIs should not generally have more than one non-query
+     * param variable, which is then transmitted as the request body.
+     *
+     * @param method ExecutableElement represeting the method
+     * @param processingEnv Processing Environment
+     * @param excludedTypes Types that are not actually transmitted... e.g. Callback arguments
+     *
+     * @return the number of non-query parameter arguments, excluding excludedTypes
+     */
+    public static int getNonQueryParamCount(ExecutableElement method,
+                                            ProcessingEnvironment processingEnv,
+                                            TypeElement... excludedTypes) {
+        Types types = processingEnv.getTypeUtils();
+        int nonQueryParamCount = 0;
+
+        paramLoop:
+        for(VariableElement param : method.getParameters()) {
+            for(TypeElement excludedType : excludedTypes) {
+                if(excludedType.equals(types.asElement(param.asType())))
+                    continue paramLoop;
+            }
+
+            if(!isQueryParam(param.asType(), processingEnv))
+                nonQueryParamCount++;
+        }
+
+        return nonQueryParamCount;
+    }
+
+    /**
+     * Given a database class TypeElement and the DAO TypeElement, find the method on the
+     * database class that will return the desired DAO.
+     *
+     * @param daoType DAO TypeElement
+     * @param dbType Database TypeElement
+     * @param processsingEnv Processing Environment
+     *
+     * @return ExecutableElement representing the database method that returns the desired DAO, or null if not found.
+     */
+    public static ExecutableElement findDaoGetter(TypeElement daoType, TypeElement dbType,
+                                                  ProcessingEnvironment processsingEnv) {
+        TypeMirror searchMirror = dbType.asType();
+        while(!searchMirror.getKind().equals(TypeKind.NONE)) {
+            TypeElement searchType = (TypeElement)processsingEnv.getTypeUtils().asElement(searchMirror);
+            for(Element subElement : searchType.getEnclosedElements()) {
+                if(!subElement.getKind().equals(ElementKind.METHOD))
+                    continue;
+
+                ExecutableElement executableElement = (ExecutableElement)subElement;
+                if(daoType.equals(processsingEnv.getTypeUtils()
+                        .asElement(executableElement.getReturnType())))
+                    return executableElement;
+            }
+        }
+
+        return null;
+    }
+
 
 
 }

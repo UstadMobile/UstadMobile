@@ -1,7 +1,9 @@
 package com.ustadmobile.lib.annotationprocessor.core.db;
 
+import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmQuery;
+import com.ustadmobile.lib.database.annotation.UmRestAccessible;
 import com.ustadmobile.lib.database.annotation.UmSyncFindAllChanges;
 import com.ustadmobile.lib.database.annotation.UmSyncFindLocalChanges;
 import com.ustadmobile.lib.database.annotation.UmSyncFindUpdateable;
@@ -31,4 +33,26 @@ public abstract class ExampleSyncableDao implements SyncableDao<ExampleSyncableE
     @UmSyncFindLocalChanges
     @UmQuery("SELECT ExampleSyncableEntity.* FROM ExampleSyncableEntity WHERE localChangeSeqNum > :fromLocalChangeSeqNum AND (:userId = :userId)")
     public abstract List<ExampleSyncableEntity> findLocalChanges(long fromLocalChangeSeqNum, long userId);
+
+    @UmQuery("SELECT localChangeSeqNum FROM ExampleSyncableEntity WHERE exampleSyncableUid = :uid")
+    @UmRestAccessible
+    public abstract int getLocalChangeByUid(long uid);
+
+    @UmQuery("SELECT title FROM ExampleSyncableEntity WHERE exampleSyncableUid = :uid")
+    @UmRestAccessible
+    public abstract String getTitleByUid(long uid);
+
+    @UmQuery("SELECT title FROM ExampleSyncableEntity WHERE exampleSyncableUid = :uid")
+    @UmRestAccessible
+    public abstract void getTitleByUidAsync(long uid, UmCallback<String> callback);
+
+    @UmQuery("UPDATE ExampleSyncableEntity SET title = :title WHERE uid = :uid")
+    @UmRestAccessible
+    public abstract void updateTitle(long uid, String title);
+
+    @UmQuery("UPDATE ExampleSyncableEntity SET title = :title WHERE uid = :uid")
+    @UmRestAccessible
+    public abstract void updateTitleAsync(long uid, String title, UmCallback<Void> callback);
+
+
 }

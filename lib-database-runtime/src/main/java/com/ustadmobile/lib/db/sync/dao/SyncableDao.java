@@ -2,6 +2,7 @@ package com.ustadmobile.lib.db.sync.dao;
 
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmOnConflictStrategy;
+import com.ustadmobile.lib.database.annotation.UmRestAccessible;
 import com.ustadmobile.lib.database.annotation.UmSyncIncoming;
 import com.ustadmobile.lib.database.annotation.UmSyncOutgoing;
 import com.ustadmobile.lib.db.sync.SyncResponse;
@@ -26,6 +27,7 @@ public interface SyncableDao<T, D> extends BaseDao<T> {
     void syncWith(D otherDao, long accountPersonUid);
 
     @UmSyncIncoming
+    @UmRestAccessible
     SyncResponse<T> handlingIncomingSync(List<T> incomingChanges, long fromLocalChangeSeqNum,
                                          long fromMasterChangeSeqNum, long userId);
 
