@@ -12,9 +12,13 @@ public class DummyActivity extends UstadBaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dummy);
 
-        if (getSupportFragmentManager().findFragmentById(android.R.id.content)==null) {
+        setUMToolbar(R.id.entry_toolbar);
+        setDirectionFromSystem();
+
+        ContentLibraryViewPagerFragment currentFrag = new ContentLibraryViewPagerFragment();
+        if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
-                    .add(android.R.id.content, new ContentLibraryViewPagerFragment())
+                    .add(R.id.entry_content, currentFrag)
                     .commit();
         }
 

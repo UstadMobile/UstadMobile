@@ -3,9 +3,6 @@ package com.ustadmobile.port.android.view;
 import android.os.Bundle;
 
 import com.toughra.ustadmobile.R;
-import com.ustadmobile.core.db.UmProvider;
-import com.ustadmobile.core.view.ContentEntryView;
-import com.ustadmobile.lib.db.entities.ContentEntry;
 
 public class ContentEntryListActivity extends UstadBaseActivity {
 
@@ -14,9 +11,15 @@ public class ContentEntryListActivity extends UstadBaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dummy);
 
-        if (getSupportFragmentManager().findFragmentById(android.R.id.content)==null) {
+        setUMToolbar(R.id.entry_toolbar);
+        setDirectionFromSystem();
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+
+        ContentEntryListFragment currentFrag = ContentEntryListFragment.newInstance(getIntent().getExtras());
+        if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
-                    .add(android.R.id.content, ContentEntryListFragment.newInstance(getIntent().getExtras()))
+                    .add(R.id.entry_content, currentFrag)
                     .commit();
         }
 
