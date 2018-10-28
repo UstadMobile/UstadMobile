@@ -25,7 +25,8 @@ public abstract class ClazzLogDao implements BaseDao<ClazzLog>{
     public abstract ClazzLog findByClazzIdAndDate(long clazzid, long date);
 
     @UmQuery("SELECT * FROM ClazzLog WHERE clazzClazzUid = :clazzid and logDate = :date")
-    public abstract void findByClazzIdAndDateAsync(long clazzid, long date, UmCallback<ClazzLog> result);
+    public abstract void findByClazzIdAndDateAsync(long clazzid, long date,
+                                                   UmCallback<ClazzLog> result);
 
     @UmQuery("SELECT * FROM ClazzLog")
     public abstract List<ClazzLog> findAll();
@@ -36,10 +37,14 @@ public abstract class ClazzLogDao implements BaseDao<ClazzLog>{
     @UmQuery("SELECT * FROM ClazzLog where clazzClazzUid = :clazzUid")
     public abstract UmProvider<ClazzLog> findByClazzUid(long clazzUid);
 
-    @UmQuery("UPDATE ClazzLog SET numPresent = :numPresent,  numAbsent = :numAbsent, numPartial = :numPartial WHERE clazzLogUid = :clazzLogUid")
-    public abstract void updateClazzAttendanceNumbersAsync(long clazzLogUid, int numPresent, int numAbsent, int numPartial, UmCallback<Void> callback);
+    @UmQuery("UPDATE ClazzLog SET numPresent = :numPresent,  numAbsent = :numAbsent, " +
+            "numPartial = :numPartial WHERE clazzLogUid = :clazzLogUid")
+    public abstract void updateClazzAttendanceNumbersAsync(long clazzLogUid, int numPresent,
+                                                           int numAbsent, int numPartial,
+                                                           UmCallback<Void> callback);
 
-    public void createClazzLogForDate(long currentClazzUid, long currentLogDate, UmCallback<Long> callback){
+    public void createClazzLogForDate(long currentClazzUid, long currentLogDate,
+                                      UmCallback<Long> callback){
 
         findByClazzIdAndDateAsync(currentClazzUid, currentLogDate, new UmCallback<ClazzLog>() {
             @Override
@@ -47,7 +52,6 @@ public abstract class ClazzLogDao implements BaseDao<ClazzLog>{
                 if(result != null){
                     callback.onSuccess(result.getClazzClazzUid());
                 }else{
-                    System.out.println("Sucess but null");
                     //Create one
                     ClazzLog newClazzLog = new ClazzLog();
                     newClazzLog.setLogDate(currentLogDate);
@@ -63,7 +67,7 @@ public abstract class ClazzLogDao implements BaseDao<ClazzLog>{
 
                         @Override
                         public void onFailure(Throwable exception) {
-                            System.out.println(exception);
+                            exception.printStackTrace();
                         }
                     });
                 }
@@ -71,7 +75,7 @@ public abstract class ClazzLogDao implements BaseDao<ClazzLog>{
 
             @Override
             public void onFailure(Throwable exception) {
-                System.out.println("Fail: " + exception);
+                exception.printStackTrace();
             }
         });
     }

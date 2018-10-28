@@ -378,7 +378,12 @@ This is the one you should be editing. The one in /core/locale/main/values/strin
     <string name="day">Day</string>
     <string name="fromC">From</string>
     <string name="toC">To</string>
-
+    <string name="this_month">This Month</string>
+    <string name="last_year">Last Year</string>
+    <string name="attended_green">Attended over 80% of lessons</string>
+    <string name="attended_orange">Attended 60-79% of lessons</string>
+    <string name="attended_red">Attended less than 60% of lessons</string>
+    <string name="last_month">Last Month</string>
 
 
 

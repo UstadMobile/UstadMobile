@@ -543,6 +543,8 @@ dependencies {
 
     implementation "id.zelory:compressor:${version_compressor}"
 
+    implementation "com.github.PhilJay:MPAndroidChart:$version_mpandroidchart"
+
     testImplementation "junit:junit:$version_junit"
 }
 
