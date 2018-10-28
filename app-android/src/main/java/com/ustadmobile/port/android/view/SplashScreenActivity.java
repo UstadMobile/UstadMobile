@@ -519,7 +519,7 @@ public class SplashScreenActivity extends AppCompatActivity
 
             //Setting test custom values. //Sprint 2 stuff:
             customFieldValues.add("42%");
-            customFieldValues.add("Springfield Elementary School");
+            customFieldValues.add("Rjem Hussein Public school");
 
             //Create Custom Fields:
             PersonCustomFieldDao personCustomFieldDao =
@@ -598,6 +598,7 @@ public class SplashScreenActivity extends AppCompatActivity
             Clazz clazz1 = new Clazz();
             clazz1.setClazzName("Class A");
             clazz1.setAttendanceAverage(0L);
+            clazz1.setClazzActive(true);
             long thisClazzUid = clazzDao.insert(clazz1);
             clazz1.setClazzUid(thisClazzUid);
 

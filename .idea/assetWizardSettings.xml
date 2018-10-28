@@ -18,7 +18,7 @@
                                 <PersistentState>
                                   <option name="values">
                                     <map>
-                                      <entry key="url" value="jar:file:/C:/Program%20Files/Android/Android%20Studio/plugins/android/lib/android.jar!/images/material_design_icons/action/ic_assignment_turned_in_black_24dp.xml" />
+                                      <entry key="url" value="jar:file:/C:/Program%20Files/Android/Android%20Studio/plugins/android/lib/android.jar!/images/material_design_icons/action/ic_thumb_down_black_24dp.xml" />
                                     </map>
                                   </option>
                                 </PersistentState>
@@ -28,8 +28,7 @@
                         </option>
                         <option name="values">
                           <map>
-                            <entry key="color" value="9b9b9b" />
-                            <entry key="outputName" value="ic_assignment_turned_in_grey_24dp" />
+                            <entry key="outputName" value="ic_thumb_down_black_24dp" />
                             <entry key="sourceFile" value="C:\Users\Varuna\Downloads\checkbox-multiple-marked.svg" />
                           </map>
                         </option>

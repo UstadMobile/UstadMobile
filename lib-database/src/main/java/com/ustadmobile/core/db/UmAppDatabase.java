@@ -1,5 +1,7 @@
 package com.ustadmobile.core.db;
 
+import com.ustadmobile.core.db.dao.ClazzActivityChangeDao;
+import com.ustadmobile.core.db.dao.ClazzActivityDao;
 import com.ustadmobile.core.db.dao.ClazzDao;
 import com.ustadmobile.core.db.dao.ClazzLogAttendanceRecordDao;
 import com.ustadmobile.core.db.dao.ClazzLogDao;
@@ -39,6 +41,8 @@ import com.ustadmobile.lib.database.annotation.UmClearAll;
 import com.ustadmobile.lib.database.annotation.UmDatabase;
 import com.ustadmobile.lib.database.annotation.UmDbContext;
 import com.ustadmobile.lib.db.entities.Clazz;
+import com.ustadmobile.lib.db.entities.ClazzActivity;
+import com.ustadmobile.lib.db.entities.ClazzActivityChange;
 import com.ustadmobile.lib.db.entities.ClazzLog;
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord;
 import com.ustadmobile.lib.db.entities.ClazzMember;
@@ -89,7 +93,8 @@ import com.ustadmobile.lib.db.entities.UMCalendar;
         SocialNominationQuestion.class, SocialNominationQuestionResponse.class,
         SocialNominationQuestionResponseNomination.class, SocialNominationQuestionSet.class,
         SocialNominationQuestionSetRecognition.class, SocialNominationQuestionSetResponse.class,
-        Schedule.class, Holiday.class, UMCalendar.class
+        Schedule.class, Holiday.class, UMCalendar.class,
+        ClazzActivity.class, ClazzActivityChange.class
 })
 public abstract class UmAppDatabase{
 
@@ -187,6 +192,10 @@ public abstract class UmAppDatabase{
     public abstract UMCalendarDao getUMCalendarDao();
 
     public abstract HolidayDao getHolidayDao();
+
+    public abstract ClazzActivityDao getClazzActivityDao();
+
+    public abstract ClazzActivityChangeDao getClazzActivityChangeDao();
 
     @UmDbContext
     public abstract Object getContext();

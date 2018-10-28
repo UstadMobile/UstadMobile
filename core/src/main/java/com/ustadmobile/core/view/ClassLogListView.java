@@ -4,6 +4,7 @@ import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.lib.db.entities.ClazzLog;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 /**
  * ClassLogList Core View extends Core UstadView. Will be implemented
@@ -44,12 +45,12 @@ public interface ClassLogListView extends UstadView {
      * Takes a map of x, y values for the chart and updates the Line chart on the View.
      * @param dataMap The hashmap containing the values
      */
-    void updateAttendanceLineChart(HashMap<Float, Float> dataMap);
+    void updateAttendanceLineChart(LinkedHashMap<Float, Float> dataMap);
 
     /**
      * Takes a map of x, y values for the chart and updates the bar chart on the View.
      * @param dataMap the Hashmap containing the values.
      */
-    void updateAttendanceBarChart(HashMap<Float, Float> dataMap);
+    void updateAttendanceBarChart(LinkedHashMap<Float, Float> dataMap);
 
 }

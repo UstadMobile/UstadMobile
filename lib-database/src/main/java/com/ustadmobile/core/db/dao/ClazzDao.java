@@ -52,12 +52,21 @@ public abstract class ClazzDao implements BaseDao<Clazz> {
             " FROM Clazz ")
     public abstract UmProvider<ClazzWithNumStudents> findAllClazzes();
 
+
+    @UmQuery("SELECT Clazz.*, " +
+            " (SELECT COUNT(*) FROM ClazzMember " +
+            " WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid " +
+            " AND ClazzMember.role = 1) AS numStudents" +
+            " FROM Clazz WHERE Clazz.clazzActive = 1 ")
+    public abstract UmProvider<ClazzWithNumStudents> findAllActiveClazzes();
+
+
     @UmQuery("SELECT Clazz.*, (:personUid) AS personUid, " +
             "(SELECT COUNT(*) FROM ClazzMember WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid AND ClazzMember.role = 1) AS numStudents, " +
             "(SELECT (EXISTS (SELECT * FROM ClazzMember WHERE clazzMemberPersonUid = :personUid " +
             " AND clazzMemberClazzUid = Clazz.clazzUid " +
             "))) AS enrolled " +
-            "FROM Clazz")
+            "FROM Clazz WHERE Clazz.clazzActive = 1")
     public abstract UmProvider<ClazzWithEnrollment> findAllClazzesWithEnrollmentByPersonUid(long personUid);
 
     @UmQuery("SELECT Clazz.*, " +

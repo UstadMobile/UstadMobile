@@ -39,6 +39,7 @@ import com.ustadmobile.port.android.util.UMAndroidUtil;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -154,7 +155,7 @@ public class ClazzLogListFragment extends UstadBaseFragment implements ClassLogL
 
 
     @Override
-    public void updateAttendanceLineChart(HashMap<Float, Float> dataMap){
+    public void updateAttendanceLineChart(LinkedHashMap<Float, Float> dataMap){
         List<Entry> lineDataEntries = new ArrayList<Entry>();
         Iterator<Map.Entry<Float, Float>> dataMapIterator = dataMap.entrySet().iterator();
         while(dataMapIterator.hasNext()){
@@ -192,7 +193,7 @@ public class ClazzLogListFragment extends UstadBaseFragment implements ClassLogL
     }
 
     @Override
-    public void updateAttendanceBarChart(HashMap<Float, Float> dataMap){
+    public void updateAttendanceBarChart(LinkedHashMap<Float, Float> dataMap){
         List<BarEntry> barDataEntries = new ArrayList<BarEntry>();
         Iterator<Map.Entry<Float, Float>> dataMapIterator = dataMap.entrySet().iterator();
         while(dataMapIterator.hasNext()){

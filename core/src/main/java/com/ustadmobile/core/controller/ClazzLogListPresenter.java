@@ -10,8 +10,6 @@ import com.ustadmobile.core.view.ClassLogDetailView;
 import com.ustadmobile.core.view.ClassLogListView;
 import com.ustadmobile.lib.db.entities.ClazzLog;
 import com.ustadmobile.lib.db.entities.DailyAttendanceNumbers;
-import com.ustadmobile.lib.db.entities.UMCalendar;
-import com.ustadmobile.lib.util.UMUtil;
 
 import java.util.Calendar;
 import java.util.HashMap;
@@ -184,9 +182,9 @@ public class ClazzLogListPresenter extends UstadBaseController<ClassLogListView>
 
                 view.updateAttendanceLineChart(lineDataMapFixedX);
 
-                barDataMap.put(1f, attendanceGreenTotal/ result.size());
+                barDataMap.put(3f, attendanceGreenTotal/ result.size());
                 barDataMap.put(2f, attendanceOrangeTotal/result.size());
-                barDataMap.put(3f, attendanceRedTotal/result.size());
+                barDataMap.put(1f, attendanceRedTotal/result.size());
                 view.updateAttendanceBarChart(barDataMap);
             }
 
@@ -199,7 +197,7 @@ public class ClazzLogListPresenter extends UstadBaseController<ClassLogListView>
 
 
     public void generateAttendanceLineChartDataTest(){
-        HashMap<Float, Float> lineData = new LinkedHashMap<>();
+        LinkedHashMap<Float, Float> lineData = new LinkedHashMap<>();
         lineData.put(1f, 0.1f);
         lineData.put(2f, 0.4f);
         lineData.put(3f, 0.2f);
@@ -214,7 +212,7 @@ public class ClazzLogListPresenter extends UstadBaseController<ClassLogListView>
 
     public void generateAttendanceBarChartDataTest(){
 
-        HashMap<Float, Float> barData = new HashMap<>();
+        LinkedHashMap<Float, Float> barData = new LinkedHashMap<>();
         for(float i=1; i<4; i++){
             barData.put(i, 0.3f*i);
         }

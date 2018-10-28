@@ -44,7 +44,7 @@ public class ClazzListPresenter extends UstadBaseController<ClazzListView> {
 //        clazzListProvider = UmAppDatabase.getInstance(context).getClazzDao()
 //                .findAllClazzesByPersonUid(currentPersonUid);
         clazzListProvider = UmAppDatabase.getInstance(context).getClazzDao()
-                .findAllClazzes();
+                .findAllActiveClazzes();
         view.setClazzListProvider(clazzListProvider);
     }
 
