@@ -85,15 +85,19 @@ public class DdlContentScraper {
 
             FileUtils.copyURLToFile(uri.toURL(), resourceFile);
 
+            String thumbnail = doc.selectFirst("aside img").attr("src");
+
             ContentEntry contentEntry = contentEntryDao.findBySourceUrl(uri.toURL().getPath());
             if (contentEntry == null) {
                 contentEntry = new ContentEntry();
                 contentEntry = setContentEntryData(contentEntry, uri.toString(),
                         doc.title(), uri.toURL().getPath(), doc.select("html").attr("lang"));
+                contentEntry.setThumbnailUrl(thumbnail);
                 contentEntry.setContentEntryUid(contentEntryDao.insert(contentEntry));
             } else {
                 contentEntry = setContentEntryData(contentEntry, uri.toString(),
                         doc.title(), uri.toURL().getPath(), doc.select("html").attr("lang"));
+                contentEntry.setThumbnailUrl(thumbnail);
                 contentEntryDao.updateContentEntry(contentEntry);
             }
 

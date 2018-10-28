@@ -173,10 +173,12 @@ public class IndexPrathamContentScraper {
                     prathamParentEntry = new ContentEntry();
                     prathamParentEntry = setContentEntryData(prathamParentEntry, data.slug,
                             data.title , epubUrl.getPath(), LanguageCode.findByName(data.language).get(0).name());
+                    prathamParentEntry.setThumbnailUrl(data.coverImage.sizes.get(0).url);
                     prathamParentEntry.setContentEntryUid(contentEntryDao.insert(prathamParentEntry));
                 } else {
                     prathamParentEntry = setContentEntryData(prathamParentEntry, data.slug,
                             data.title, epubUrl.getPath(), ScraperConstants.ENGLISH_LANG_CODE);
+                    prathamParentEntry.setThumbnailUrl(data.coverImage.sizes.get(0).url);
                     contentEntryDao.updateContentEntry(prathamParentEntry);
                 }
 
