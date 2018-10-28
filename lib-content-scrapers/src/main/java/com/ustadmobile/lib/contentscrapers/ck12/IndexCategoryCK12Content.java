@@ -382,16 +382,19 @@ public class IndexCategoryCK12Content {
 
             System.out.println("Opening Heading = " + headingTitle + " at url " + fakePathTopic);
 
+            String thumbnailUrl = doc.selectFirst("div.topic-wrapper[title*=" + headingTitle + "] img").attr("src");
 
             ContentEntry headingEntry = contentEntryDao.findBySourceUrl(fakePathTopic);
             if (headingEntry == null) {
                 headingEntry = new ContentEntry();
                 headingEntry = setContentEntryData(headingEntry, fakePathTopic,
                         headingTitle, fakePathTopic, ScraperConstants.ENGLISH_LANG_CODE);
+                headingEntry.setThumbnailUrl(thumbnailUrl);
                 headingEntry.setContentEntryUid(contentEntryDao.insert(headingEntry));
             } else {
                 headingEntry = setContentEntryData(headingEntry, fakePathTopic,
                         headingTitle, fakePathTopic, ScraperConstants.ENGLISH_LANG_CODE);
+                headingEntry.setThumbnailUrl(thumbnailUrl);
                 contentEntryDao.updateContentEntry(headingEntry);
             }
 
@@ -405,18 +408,21 @@ public class IndexCategoryCK12Content {
                 String title = topic.selectFirst("div.concept-track-parent").attr("title");
                 String fakeParentTopic = fakePathTopic + "/" + title;
 
-                System.out.println("Found Topic = " + title + " at url " + fakeParentTopic);
+                String topicThumbnailUrl = topic.selectFirst("div.concept-track-parent span img").attr("src");
 
+                System.out.println("Found Topic = " + title + " at url " + fakeParentTopic);
 
                 ContentEntry topicEntry = contentEntryDao.findBySourceUrl(fakeParentTopic);
                 if (topicEntry == null) {
                     topicEntry = new ContentEntry();
                     topicEntry = setContentEntryData(topicEntry, fakeParentTopic,
                             title, fakeParentTopic, ScraperConstants.ENGLISH_LANG_CODE);
+                    topicEntry.setThumbnailUrl(topicThumbnailUrl);
                     topicEntry.setContentEntryUid(contentEntryDao.insert(topicEntry));
                 } else {
                     topicEntry = setContentEntryData(topicEntry, fakeParentTopic,
                             title, fakeParentTopic, ScraperConstants.ENGLISH_LANG_CODE);
+                    topicEntry.setThumbnailUrl(topicThumbnailUrl);
                     contentEntryDao.updateContentEntry(topicEntry);
                 }
 
@@ -505,11 +511,13 @@ public class IndexCategoryCK12Content {
                 topicEntry = setContentEntryData(topicEntry, url.getPath(),
                         title, url.getPath(), ScraperConstants.ENGLISH_LANG_CODE);
                 topicEntry.setDescription(summary);
+                topicEntry.setThumbnailUrl(imageLink);
                 topicEntry.setContentEntryUid(contentEntryDao.insert(topicEntry));
             } else {
                 topicEntry = setContentEntryData(topicEntry, url.getPath(),
                         title, url.getPath(), ScraperConstants.ENGLISH_LANG_CODE);
                 topicEntry.setDescription(summary);
+                topicEntry.setThumbnailUrl(imageLink);
                 contentEntryDao.updateContentEntry(topicEntry);
             }
 

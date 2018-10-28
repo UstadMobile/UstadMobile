@@ -4,12 +4,7 @@ import com.ustadmobile.core.db.dao.ContentEntryDao;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.ScraperConstants;
 import com.ustadmobile.lib.db.entities.ContentEntry;
-import com.ustadmobile.lib.db.entities.ContentEntryContentEntryFileJoin;
-import com.ustadmobile.lib.db.entities.ContentEntryFile;
-import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
-import com.ustadmobile.lib.util.UmUuidUtil;
 
-import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -17,7 +12,6 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -25,9 +19,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
-import javax.swing.text.AbstractDocument;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 
@@ -157,19 +149,19 @@ public class PhetContentScraper {
         this.contentUpdated = contentUpdated;
     }
 
-    public Map<String, Boolean> getLanguageUpdatedMap(){
+    public Map<String, Boolean> getLanguageUpdatedMap() {
         return languageMapUpdate;
     }
 
-    public boolean isAnyContentUpdated(){
+    public boolean isAnyContentUpdated() {
         return contentUpdated;
     }
 
     /**
      * Find the category for the phet simulation
      *
-     * @return a list of categories a single phet simulation could be in
      * @param contentEntryDao
+     * @return a list of categories a single phet simulation could be in
      */
     public ArrayList<ContentEntry> getCategoryRelations(ContentEntryDao contentEntryDao) {
 
@@ -208,7 +200,7 @@ public class PhetContentScraper {
         entry.setSourceUrl(sourceUrl);
         entry.setPublisher("Phet");
         entry.setLicenseType(LICENSE_TYPE_CC_BY);
-        String[] country = lang.replaceAll("_","-").split("-");
+        String[] country = lang.replaceAll("_", "-").split("-");
         entry.setPrimaryLanguage(country[0]);
         entry.setPrimaryLanguageCountry(country.length > 1 ? country[1] : "");
         return entry;
@@ -227,7 +219,7 @@ public class PhetContentScraper {
         String fileName = hrefLink.substring(hrefLink.lastIndexOf("/") + 1, hrefLink.lastIndexOf("?"));
         File simulationFile = new File(simulationLocation, fileName);
 
-        if(!ContentScraperUtil.isFileModified(conn, simulationLocation, fileName)){
+        if (!ContentScraperUtil.isFileModified(conn, simulationLocation, fileName)) {
             return false;
         }
 
@@ -253,10 +245,11 @@ public class PhetContentScraper {
      * Given a directory of phet simulation content, find the languages it was translated to
      *
      * @param destinationDirectory directory of the all phet simulations
+     * @param thumbnailUrl
      * @return a list of languages the phet simulation was translated to
      * @throws IOException
      */
-    public ArrayList<ContentEntry>  getTranslations(File destinationDirectory, ContentEntryDao contentEntryDao) throws IOException {
+    public ArrayList<ContentEntry> getTranslations(File destinationDirectory, ContentEntryDao contentEntryDao, String thumbnailUrl) throws IOException {
 
         ArrayList<ContentEntry> translationsEntry = new ArrayList<>();
 
@@ -277,11 +270,12 @@ public class PhetContentScraper {
                                 // TODO recheck entry id for translations
                                 String langTitle = Jsoup.parse(file, ScraperConstants.UTF_ENCODING).title();
 
-                                String path =  langCode + "/" + this.title;
+                                String path = langCode + "/" + this.title;
                                 ContentEntry languageContentEntry = contentEntryDao.findBySourceUrl(path);
                                 if (languageContentEntry == null) {
                                     languageContentEntry = new ContentEntry();
                                     languageContentEntry = setContentEntryData(languageContentEntry, path, langTitle, path, langCode);
+                                    languageContentEntry.setThumbnailUrl(thumbnailUrl);
                                     languageContentEntry.setContentEntryUid(contentEntryDao.insert(languageContentEntry));
                                 } else {
                                     languageContentEntry = setContentEntryData(languageContentEntry, path, langTitle, path, langCode);

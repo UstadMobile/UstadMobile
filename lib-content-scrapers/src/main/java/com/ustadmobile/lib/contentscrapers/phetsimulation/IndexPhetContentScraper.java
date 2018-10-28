@@ -136,11 +136,13 @@ public class IndexPhetContentScraper {
             String path = simulation.parent().attr("href");
             String simulationUrl = new URL(url, path).toString();
             String title = simulationUrl.substring(simulationUrl.lastIndexOf("/") + 1, simulationUrl.length());
+            String thumbnail = simulation.parent().selectFirst("img").attr("src");
 
             ContentEntry englishSimContentEntry = contentEntryDao.findBySourceUrl(path);
             if (englishSimContentEntry == null) {
                 englishSimContentEntry = new ContentEntry();
                 englishSimContentEntry = setContentEntryData(englishSimContentEntry, path, title, path, ScraperConstants.ENGLISH_LANG_CODE);
+                englishSimContentEntry.setThumbnailUrl(thumbnail);
                 englishSimContentEntry.setContentEntryUid(contentEntryDao.insert(englishSimContentEntry));
             } else {
                 englishSimContentEntry = setContentEntryData(englishSimContentEntry, path, title, path, ScraperConstants.ENGLISH_LANG_CODE);
@@ -176,7 +178,7 @@ public class IndexPhetContentScraper {
                     }
 
                     ArrayList<ContentEntry> categoryList = scraper.getCategoryRelations(contentEntryDao);
-                    ArrayList<ContentEntry> translationList = scraper.getTranslations(destinationDirectory, contentEntryDao);
+                    ArrayList<ContentEntry> translationList = scraper.getTranslations(destinationDirectory, contentEntryDao, thumbnail);
 
                     // TODO remove all categories that no longer exist
                     // TODO remove all categories that dont belong in a phet simulation anymore

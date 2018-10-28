@@ -8,15 +8,12 @@ import com.ustadmobile.core.db.dao.ContentEntryFileDao;
 import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryRelatedEntryJoinDao;
 import com.ustadmobile.lib.contentscrapers.ScraperConstants;
-import com.ustadmobile.lib.contentscrapers.phetsimulation.IndexPhetContentScraper;
-import com.ustadmobile.lib.contentscrapers.phetsimulation.PhetContentScraper;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.ContentEntryContentCategoryJoin;
 import com.ustadmobile.lib.db.entities.ContentEntryContentEntryFileJoin;
 import com.ustadmobile.lib.db.entities.ContentEntryFile;
 import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin;
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoin;
-import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -296,7 +293,7 @@ public class TestPhetContentScraper {
         PhetContentScraper scraper = new PhetContentScraper(mockWebServer.url("/api/simulation/equality-explorer-two-variables").toString(), tmpDir);
         scraper.scrapeContent();
 
-        ArrayList<ContentEntry> translationList = scraper.getTranslations(tmpDir, db.getContentEntryDao());
+        ArrayList<ContentEntry> translationList = scraper.getTranslations(tmpDir, db.getContentEntryDao(), "");
 
         Assert.assertEquals("first translation == es", translationList.get(0).getPrimaryLanguage(), ("es"));
 
