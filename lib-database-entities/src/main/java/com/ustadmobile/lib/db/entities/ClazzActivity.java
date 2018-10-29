@@ -9,15 +9,51 @@ public class ClazzActivity {
     @UmPrimaryKey(autoIncrement = true)
     private long clazzActivityUid;
 
+    //The activity change ClazzActivityChange
     private long clazzActivityClazzActivityChangeUid;
 
-    private long clazzActivityDuration;
-
+    //thumbs up or thumbs down
     private boolean clazzActivityGoodFeedback;
 
+    //any notes
     private String clazzActivityNotes;
 
+    //the date
     private long clazzActivityLogDate;
+
+    //the clazz
+    private long clazzActivityClazzUid;
+
+    //is it done?
+    private boolean clazzActivityDone;
+
+    //the quantity of activity - from unit of measure (frequency, duration, binary)
+    private long clazzActivityQuantity;
+
+
+    public long getClazzActivityQuantity() {
+        return clazzActivityQuantity;
+    }
+
+    public void setClazzActivityQuantity(long clazzActivityQuantity) {
+        this.clazzActivityQuantity = clazzActivityQuantity;
+    }
+
+    public boolean isClazzActivityDone() {
+        return clazzActivityDone;
+    }
+
+    public void setClazzActivityDone(boolean clazzActivityDone) {
+        this.clazzActivityDone = clazzActivityDone;
+    }
+
+    public long getClazzActivityClazzUid() {
+        return clazzActivityClazzUid;
+    }
+
+    public void setClazzActivityClazzUid(long clazzActivityClazzUid) {
+        this.clazzActivityClazzUid = clazzActivityClazzUid;
+    }
 
     public long getClazzActivityUid() {
         return clazzActivityUid;
@@ -33,14 +69,6 @@ public class ClazzActivity {
 
     public void setClazzActivityClazzActivityChangeUid(long clazzActivityClazzActivityChangeUid) {
         this.clazzActivityClazzActivityChangeUid = clazzActivityClazzActivityChangeUid;
-    }
-
-    public long getClazzActivityDuration() {
-        return clazzActivityDuration;
-    }
-
-    public void setClazzActivityDuration(long clazzActivityDuration) {
-        this.clazzActivityDuration = clazzActivityDuration;
     }
 
     public boolean isClazzActivityGoodFeedback() {

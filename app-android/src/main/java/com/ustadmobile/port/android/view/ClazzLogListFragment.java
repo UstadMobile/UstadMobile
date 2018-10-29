@@ -283,16 +283,17 @@ public class ClazzLogListFragment extends UstadBaseFragment implements ClassLogL
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
 
         //Record attendance FAB
-        FloatingTextButton fab = rootContainer.findViewById(R.id.fragment_class_log_record_attendance_fab);
+        FloatingTextButton fab =
+                rootContainer.findViewById(R.id.fragment_class_log_record_attendance_fab);
         fab.setOnClickListener(v -> mPresenter.goToNewClazzLogDetailActivity());
 
         //Buttons
-        Button lastWeekButton =
-                rootContainer.findViewById(R.id.fragment_clazz_log_list_line_chart_selector_button_thisweek);
-        Button lastMonthButton =
-                rootContainer.findViewById(R.id.fragment_clazz_log_list_line_chart_selector_button_thismonth);
-        Button lastYearButton =
-                rootContainer.findViewById(R.id.fragment_clazz_log_list_line_chart_selector_button_lastyear);
+        Button lastWeekButton = rootContainer.findViewById(
+                R.id.fragment_clazz_log_list_line_chart_selector_button_thisweek);
+        Button lastMonthButton = rootContainer.findViewById(
+                R.id.fragment_clazz_log_list_line_chart_selector_button_thismonth);
+        Button lastYearButton =rootContainer.findViewById(
+                R.id.fragment_clazz_log_list_line_chart_selector_button_lastyear);
 
 
         lastWeekButton.setOnClickListener(

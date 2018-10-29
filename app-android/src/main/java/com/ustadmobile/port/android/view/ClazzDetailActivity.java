@@ -43,8 +43,8 @@ public class ClazzDetailActivity extends UstadBaseActivity implements
         mPagerAdapter = new ClassDetailViewPagerAdapter(getSupportFragmentManager());
         mPagerAdapter.addFragments(0, ClazzStudentListFragment.newInstance(this.clazzUid));
         mPagerAdapter.addFragments(1, ClazzLogListFragment.newInstance(this.clazzUid));
-        //mPagerAdapter.addFragments(2, ComingSoonFragment.newInstance());
-        mPagerAdapter.addFragments(2, SELAnswerListFragment.newInstance(this.clazzUid));
+        mPagerAdapter.addFragments(2, ClazzActivityListFragment.newInstance(this.clazzUid));
+        mPagerAdapter.addFragments(3, SELAnswerListFragment.newInstance(this.clazzUid));
         mPager.setAdapter(mPagerAdapter);
     }
 
@@ -180,6 +180,8 @@ public class ClazzDetailActivity extends UstadBaseActivity implements
                     case 1:
                         return ClazzLogListFragment.newInstance(clazzUid);
                     case 2:
+                        return ClazzActivityListFragment.newInstance(clazzUid);
+                    case 3:
                         return SELAnswerListFragment.newInstance(clazzUid);
                     default:
                         return null;
@@ -210,6 +212,8 @@ public class ClazzDetailActivity extends UstadBaseActivity implements
                 case 1:
                     return ((String) getText(R.string.attendance)).toUpperCase();
                 case 2:
+                    return ((String) getText(R.string.activity)).toUpperCase();
+                case 3:
                     return ((String) getText(R.string.sel)).toUpperCase();
                 default:
                     return "";

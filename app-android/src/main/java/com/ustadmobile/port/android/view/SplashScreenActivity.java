@@ -47,6 +47,8 @@ import android.view.MenuItem;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.ClazzListPresenter;
 import com.ustadmobile.core.db.UmAppDatabase;
+import com.ustadmobile.core.db.dao.ClazzActivityChangeDao;
+import com.ustadmobile.core.db.dao.ClazzActivityDao;
 import com.ustadmobile.core.db.dao.ClazzDao;
 import com.ustadmobile.core.db.dao.ClazzMemberDao;
 import com.ustadmobile.core.db.dao.FeedEntryDao;
@@ -65,6 +67,8 @@ import com.ustadmobile.core.view.ClassLogDetailView;
 import com.ustadmobile.core.view.ClazzListView;
 import com.ustadmobile.core.view.PersonDetailViewField;
 import com.ustadmobile.lib.db.entities.Clazz;
+import com.ustadmobile.lib.db.entities.ClazzActivity;
+import com.ustadmobile.lib.db.entities.ClazzActivityChange;
 import com.ustadmobile.lib.db.entities.ClazzMember;
 import com.ustadmobile.lib.db.entities.FeedEntry;
 import com.ustadmobile.lib.db.entities.Person;
@@ -760,6 +764,91 @@ public class SplashScreenActivity extends AppCompatActivity
             UMCalendar newCalendar2 = new UMCalendar();
             newCalendar2.setUmCalendarName("Lebanon Holiday Calendar");
             newCalendar2.setUmCalendarUid(calendarDao.insert(newCalendar2));
+
+
+            //Adding some Activity Changes
+            ClazzActivityChangeDao clazzActivityChangeDao =
+                    UmAppDatabase.getInstance(getApplicationContext()).getClazzActivityChangeDao();
+            ClazzActivityChange newChange1 = new ClazzActivityChange();
+            newChange1.setClazzActivityChangeTitle("Increased group work");
+            newChange1.setClazzActivityUnitOfMeasure(ClazzActivityChange.UOM_FREQUENCY);
+            newChange1.setClazzActivityChangeUid(clazzActivityChangeDao.insert(newChange1));
+
+            ClazzActivityChange newChange2 = new ClazzActivityChange();
+            newChange2.setClazzActivityChangeTitle("Call students by name");
+            newChange2.setClazzActivityUnitOfMeasure(ClazzActivityChange.UOM_FREQUENCY);
+            newChange2.setClazzActivityChangeUid(clazzActivityChangeDao.insert(newChange2));
+
+            ClazzActivityChange newChange3 = new ClazzActivityChange();
+            newChange3.setClazzActivityChangeTitle("One to one interaction");
+            newChange3.setClazzActivityUnitOfMeasure(ClazzActivityChange.UOM_FREQUENCY);
+            newChange3.setClazzActivityChangeUid(clazzActivityChangeDao.insert(newChange3));
+
+            //Adding some Activities
+            ClazzActivityDao activityDao =
+                    UmAppDatabase.getInstance(getApplicationContext()).getClazzActivityDao();
+
+            for(int i = 0; i<34; i++){
+                boolean thisBoolean = false;
+                long quantity = 1L;
+
+                if (i % 2 == 0){
+                    thisBoolean=true;
+                    quantity = 3L;
+
+                    ClazzActivity activity4 = new ClazzActivity();
+                    activity4.setClazzActivityClazzActivityChangeUid(newChange1.getClazzActivityChangeUid());
+                    activity4.setClazzActivityGoodFeedback(thisBoolean);
+                    activity4.setClazzActivityLogDate(UMCalendarUtil.getDateInMilliPlusDays(-i));
+                    activity4.setClazzActivityQuantity(quantity);
+                    activity4.setClazzActivityDone(true);
+                    activity4.setClazzActivityClazzUid(clazz1.getClazzUid());
+                    activityDao.insert(activity4);
+
+                    ClazzActivity activity5 = new ClazzActivity();
+                    activity5.setClazzActivityClazzActivityChangeUid(newChange1.getClazzActivityChangeUid());
+                    activity5.setClazzActivityGoodFeedback(thisBoolean);
+                    activity5.setClazzActivityLogDate(UMCalendarUtil.getDateInMilliPlusDays(-i));
+                    activity5.setClazzActivityQuantity(quantity);
+                    activity5.setClazzActivityDone(true);
+                    activity5.setClazzActivityClazzUid(clazz1.getClazzUid());
+                    activityDao.insert(activity5);
+                }
+
+                ClazzActivity activity1 = new ClazzActivity();
+                activity1.setClazzActivityClazzActivityChangeUid(newChange1.getClazzActivityChangeUid());
+                activity1.setClazzActivityGoodFeedback(thisBoolean);
+                activity1.setClazzActivityLogDate(UMCalendarUtil.getDateInMilliPlusDays(-i));
+                activity1.setClazzActivityQuantity(quantity);
+                activity1.setClazzActivityDone(true);
+                activity1.setClazzActivityClazzUid(clazz1.getClazzUid());
+
+                activityDao.insert(activity1);
+
+                ClazzActivity activity2 = new ClazzActivity();
+
+                activity2.setClazzActivityClazzActivityChangeUid(newChange2.getClazzActivityChangeUid());
+                activity2.setClazzActivityGoodFeedback(thisBoolean);
+                activity2.setClazzActivityLogDate(UMCalendarUtil.getDateInMilliPlusDays(-i));
+                activity2.setClazzActivityQuantity(quantity);
+                activity2.setClazzActivityDone(true);
+                activity2.setClazzActivityClazzUid(clazz1.getClazzUid());
+
+                activityDao.insert(activity2);
+
+                ClazzActivity activity3 = new ClazzActivity();
+
+                activity3.setClazzActivityClazzActivityChangeUid(newChange3.getClazzActivityChangeUid());
+                activity3.setClazzActivityGoodFeedback(thisBoolean);
+                activity3.setClazzActivityLogDate(UMCalendarUtil.getDateInMilliPlusDays(-i));
+                activity3.setClazzActivityQuantity(quantity);
+                activity3.setClazzActivityDone(true);
+                activity3.setClazzActivityClazzUid(clazz1.getClazzUid());
+
+                activityDao.insert(activity3);
+
+
+            }
 
 
             //Set that we have created dummy data so that check for this and don't create it again.

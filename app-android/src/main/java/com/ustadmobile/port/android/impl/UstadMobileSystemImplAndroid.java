@@ -84,6 +84,7 @@ import com.ustadmobile.core.view.CatalogEntryView;
 import com.ustadmobile.core.view.CatalogView;
 import com.ustadmobile.core.view.ClassDetailView;
 import com.ustadmobile.core.view.ClassLogDetailView;
+import com.ustadmobile.core.view.ClazzActivityEditView;
 import com.ustadmobile.core.view.ClazzDetailEnrollStudentView;
 import com.ustadmobile.core.view.ClazzEditView;
 import com.ustadmobile.core.view.PersonDetailEnrollClazzView;
@@ -213,6 +214,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         viewNameToAndroidImplMap.put(SELRecognitionView.VIEW_NAME, SELRecognitionActivity.class);
         viewNameToAndroidImplMap.put(ClazzEditView.VIEW_NAME, ClazzEditActivity.class);
         viewNameToAndroidImplMap.put(AddScheduleDialogView.VIEW_NAME, AddScheduleDialogFragment.class);
+        viewNameToAndroidImplMap.put(ClazzActivityEditView.VIEW_NAME, ClazzActivityEditActivity.class);
 
 
     }

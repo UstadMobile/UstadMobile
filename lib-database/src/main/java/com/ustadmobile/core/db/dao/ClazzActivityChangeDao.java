@@ -8,6 +8,8 @@ import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.database.annotation.UmUpdate;
 import com.ustadmobile.lib.db.entities.ClazzActivityChange;
 
+import java.util.List;
+
 @UmDao
 public abstract  class ClazzActivityChangeDao implements BaseDao<ClazzActivityChange> {
 
@@ -22,6 +24,9 @@ public abstract  class ClazzActivityChangeDao implements BaseDao<ClazzActivityCh
 
     @UmQuery("SELECT * FROM ClazzActivityChange")
     public abstract UmProvider<ClazzActivityChange> findAllClazzActivityChanges();
+
+    @UmQuery("SELECT * FROM ClazzActivityChange")
+    public abstract void findAllClazzActivityChangesAsync(UmCallback<List<ClazzActivityChange>> result);
 
     @UmUpdate
     public abstract void updateAsync(ClazzActivityChange entity, UmCallback<Integer> result);

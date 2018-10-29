@@ -15,36 +15,38 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
-import com.ustadmobile.core.controller.ClazzLogListPresenter;
+import com.ustadmobile.core.controller.ClazzActivityListPresenter;
 import com.ustadmobile.core.util.UMCalendarUtil;
-import com.ustadmobile.lib.db.entities.ClazzLog;
+import com.ustadmobile.lib.db.entities.ClazzActivity;
 
 /**
- * The ClazzLogList's recycler adapter.
+ * The ClazzActivityList's recycler adapter.
  */
-public class ClazzLogListRecyclerAdapter extends
-        PagedListAdapter<ClazzLog, ClazzLogListRecyclerAdapter.ClazzLogViewHolder> {
+public class ClazzActivityListRecyclerAdapter extends
+        PagedListAdapter<ClazzActivity, ClazzActivityListRecyclerAdapter.ClazzActivityViewHolder> {
 
     Context theContext;
     Fragment theFragment;
-    ClazzLogListPresenter thePresenter;
+    ClazzActivityListPresenter thePresenter;
     Boolean showImage = false;
 
-    protected class ClazzLogViewHolder extends RecyclerView.ViewHolder{
-        protected ClazzLogViewHolder(View itemView){
+    protected class ClazzActivityViewHolder extends RecyclerView.ViewHolder{
+        protected ClazzActivityViewHolder(View itemView){
             super(itemView);
         }
     }
 
-    protected ClazzLogListRecyclerAdapter(@NonNull DiffUtil.ItemCallback<ClazzLog>
-              diffCallback, Context context, Fragment fragment, ClazzLogListPresenter mPresenter){
+    protected ClazzActivityListRecyclerAdapter(@NonNull DiffUtil.ItemCallback<ClazzActivity>
+                                                  diffCallback, Context context, Fragment fragment,
+                                               ClazzActivityListPresenter mPresenter){
         super(diffCallback);
         theContext = context;
         theFragment = fragment;
         thePresenter = mPresenter;
     }
-    protected ClazzLogListRecyclerAdapter(@NonNull DiffUtil.ItemCallback<ClazzLog>
-              diffCallback, Context context, Fragment fragment, ClazzLogListPresenter mPresenter,
+    protected ClazzActivityListRecyclerAdapter(@NonNull DiffUtil.ItemCallback<ClazzActivity>
+                                                  diffCallback, Context context, Fragment fragment,
+                                               ClazzActivityListPresenter mPresenter,
                                           boolean imageShow){
         super(diffCallback);
         theContext = context;
@@ -55,11 +57,11 @@ public class ClazzLogListRecyclerAdapter extends
 
     @NonNull
     @Override
-    public ClazzLogViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType){
+    public ClazzActivityViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType){
         View clazzLogListItem =
                 LayoutInflater.from(theContext).inflate(
                         R.layout.item_clazzlog_log, parent, false);
-        return new ClazzLogViewHolder(clazzLogListItem);
+        return new ClazzActivityViewHolder(clazzLogListItem);
 
     }
 
@@ -73,20 +75,21 @@ public class ClazzLogListRecyclerAdapter extends
      * @param position
      */
     @Override
-    public void onBindViewHolder(@NonNull ClazzLogViewHolder holder, int position){
-        ClazzLog clazzLog = getItem(position);
+    public void onBindViewHolder(@NonNull ClazzActivityViewHolder holder, int position){
+        ClazzActivity clazzActivity = getItem(position);
 
-        String prettyDate = UMCalendarUtil.getPrettyDateFromLong(clazzLog.getLogDate());
-        String prettyShortDay = UMCalendarUtil.getSimpleDayFromLongDate(clazzLog.getLogDate());
+        String prettyDate =
+                UMCalendarUtil.getPrettyDateFromLong(clazzActivity.getClazzActivityLogDate());
+        String prettyShortDay =
+                UMCalendarUtil.getSimpleDayFromLongDate(clazzActivity.getClazzActivityLogDate());
 
         ImageView secondaryTextImageView =
                 holder.itemView.findViewById(R.id.item_clazzlog_log_status_text_imageview);
 
-        int presentCount = clazzLog.getNumPresent();
-        int absentCount = clazzLog.getNumAbsent();
-        String clazzLogAttendanceStatus = presentCount + " " +
-                theFragment.getText(R.string.present) + ", " + absentCount + " " +
-                theFragment.getText(R.string.absent);
+        long clazzActivityChangeUid = clazzActivity.getClazzActivityClazzActivityChangeUid();
+
+
+        String clazzActivityStatus = "Hello change uid: " + clazzActivityChangeUid;
 
         TextView statusTextView = holder.itemView
                 .findViewById(R.id.item_clazzlog_log_status_text);
@@ -97,7 +100,7 @@ public class ClazzLogListRecyclerAdapter extends
         ((TextView)holder.itemView
                 .findViewById(R.id.item_clazzlog_log_day))
                 .setText(prettyShortDay);
-        statusTextView.setText(clazzLogAttendanceStatus);
+        statusTextView.setText(clazzActivityStatus);
 
         if(!showImage){
             secondaryTextImageView.setVisibility(View.INVISIBLE);
@@ -118,7 +121,8 @@ public class ClazzLogListRecyclerAdapter extends
             secondaryTextImageView.setVisibility(View.VISIBLE);
         }
 
-
-        holder.itemView.setOnClickListener(v -> thePresenter.goToClazzLogDetailActivity(clazzLog));
+        //TODO: Not part of Sprint 3. Change as new views are set up.
+        //holder.itemView.setOnClickListener(
+        //        v -> thePresenter.goToClazzActivityDetailActivity(clazzLog));
     }
 }
