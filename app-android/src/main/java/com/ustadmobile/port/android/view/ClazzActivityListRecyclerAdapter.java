@@ -16,8 +16,12 @@ import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.ClazzActivityListPresenter;
+import com.ustadmobile.core.db.UmAppDatabase;
+import com.ustadmobile.core.db.dao.ClazzActivityChangeDao;
+import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.lib.db.entities.ClazzActivity;
+import com.ustadmobile.lib.db.entities.ClazzActivityChange;
 
 /**
  * The ClazzActivityList's recycler adapter.
@@ -29,6 +33,9 @@ public class ClazzActivityListRecyclerAdapter extends
     Fragment theFragment;
     ClazzActivityListPresenter thePresenter;
     Boolean showImage = false;
+
+    ClazzActivityChangeDao activityChangeDao =
+            UmAppDatabase.getInstance(theContext).getClazzActivityChangeDao();
 
     protected class ClazzActivityViewHolder extends RecyclerView.ViewHolder{
         protected ClazzActivityViewHolder(View itemView){
@@ -77,22 +84,25 @@ public class ClazzActivityListRecyclerAdapter extends
     @Override
     public void onBindViewHolder(@NonNull ClazzActivityViewHolder holder, int position){
         ClazzActivity clazzActivity = getItem(position);
+        boolean wasItGood = clazzActivity.isClazzActivityGoodFeedback();
+
 
         String prettyDate =
                 UMCalendarUtil.getPrettyDateFromLong(clazzActivity.getClazzActivityLogDate());
         String prettyShortDay =
                 UMCalendarUtil.getSimpleDayFromLongDate(clazzActivity.getClazzActivityLogDate());
 
-        ImageView secondaryTextImageView =
-                holder.itemView.findViewById(R.id.item_clazzlog_log_status_text_imageview);
-
-        long clazzActivityChangeUid = clazzActivity.getClazzActivityClazzActivityChangeUid();
-
-
-        String clazzActivityStatus = "Hello change uid: " + clazzActivityChangeUid;
-
         TextView statusTextView = holder.itemView
                 .findViewById(R.id.item_clazzlog_log_status_text);
+
+        ImageView secondaryTextImageView =
+                holder.itemView.findViewById(R.id.item_clazzlog_log_status_text_imageview);
+        statusTextView.setText("Increased group work 3 times");
+        if(!wasItGood){
+            secondaryTextImageView.setBackgroundResource(R.drawable.ic_thumb_down_black_24dp);
+        }else{
+            secondaryTextImageView.setBackgroundResource(R.drawable.ic_thumb_up_black_24dp);
+        }
 
         ((TextView)holder.itemView
                 .findViewById(R.id.item_clazzlog_log_date))
@@ -100,7 +110,16 @@ public class ClazzActivityListRecyclerAdapter extends
         ((TextView)holder.itemView
                 .findViewById(R.id.item_clazzlog_log_day))
                 .setText(prettyShortDay);
-        statusTextView.setText(clazzActivityStatus);
+
+
+        //TODO: Put ClazzActivityChange part of the return object
+//        ClazzActivityChange result =
+//                activityChangeDao.findByUid(clazzActivity.getClazzActivityClazzActivityChangeUid());
+//
+//        String uomverb = "times";
+//        String clazzActivityStatus = "" + result.getClazzActivityChangeTitle()
+//                + " " + result.getClazzActivityUnitOfMeasure() + " " + uomverb;
+//        statusTextView.setText(clazzActivityStatus);
 
         if(!showImage){
             secondaryTextImageView.setVisibility(View.INVISIBLE);
@@ -120,6 +139,9 @@ public class ClazzActivityListRecyclerAdapter extends
         }else{
             secondaryTextImageView.setVisibility(View.VISIBLE);
         }
+
+
+
 
         //TODO: Not part of Sprint 3. Change as new views are set up.
         //holder.itemView.setOnClickListener(

@@ -34,6 +34,9 @@ public abstract  class ClazzActivityChangeDao implements BaseDao<ClazzActivityCh
     @UmQuery("SELECT * FROM ClazzActivityChange WHERE clazzActivityChangeUid = :uid")
     public abstract ClazzActivityChange findByUid(long uid);
 
+    @UmQuery("SELECT * FROM ClazzActivityChange WHERE clazzActivityChangeUid = :uid")
+    public abstract  void findByUidAsync(long uid, UmCallback<ClazzActivityChange> result);
+
     @UmQuery("SELECT * FROM ClazzActivityChange WHERE clazzActivityChangeTitle = :title")
     public abstract ClazzActivityChange findByTitle(String title);
 }

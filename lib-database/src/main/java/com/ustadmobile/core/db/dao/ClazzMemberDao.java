@@ -12,6 +12,8 @@ import com.ustadmobile.lib.db.entities.ClazzMemberWithPerson;
 import com.ustadmobile.lib.db.entities.Person;
 import com.ustadmobile.lib.db.entities.PersonWithEnrollment;
 
+import java.util.List;
+
 @UmDao
 public abstract class ClazzMemberDao implements BaseDao<ClazzMember> {
 
@@ -91,6 +93,26 @@ public abstract class ClazzMemberDao implements BaseDao<ClazzMember> {
 
     @UmQuery("SELECT AVG(attendancePercentage) FROM ClazzMember WHERE clazzMemberPersonUid = :personUid")
     public abstract void getAverageAttendancePercentageByPersonUidAsync(long personUid, UmCallback<Float> callback);
+
+
+    @UmQuery("SELECT " +
+            " (SELECT COUNT(*) FROM ClazzLogAttendanceRecord " +
+            " LEFT JOIN ClazzLog ON ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid = ClazzLog.clazzLogUid " +
+            " WHERE ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzMemberUid = ClazzMember.clazzMemberUid " +
+            " AND ClazzLog.done = 1 " +
+            " AND ClazzLog.logDate > :fromDate " +
+            " AND ClazzLog.logDate < :toDate " +
+            " AND ClazzLogAttendanceRecord.attendanceStatus =  " + ClazzLogAttendanceRecord.STATUS_ATTENDED + " ) * 1.0 " +
+            " / " +
+            " MAX(1.0, (SELECT COUNT(*)  FROM ClazzLogAttendanceRecord " +
+            " LEFT JOIN ClazzLog ON ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid = ClazzLog.clazzLogUid " +
+            " WHERE ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzMemberUid = ClazzMember.clazzMemberUid " +
+            " AND ClazzLog.done = 1) * 1.0) as attended_average " +
+            " FROM ClazzMember " +
+            " WHERE ClazzMember.clazzMemberClazzUid = :clazzUid ")
+    public abstract void getAttendanceAverageAsListForClazzBetweenDates(long clazzUid,
+                                                                long fromDate, long toDate,
+                                                                UmCallback<List<Float>> results);
 
 
     @UmQuery("UPDATE ClazzMember SET clazzMemberActive = :enrolled WHERE " +

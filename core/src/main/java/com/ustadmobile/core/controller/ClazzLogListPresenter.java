@@ -3,6 +3,7 @@ package com.ustadmobile.core.controller;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.db.dao.ClazzLogAttendanceRecordDao;
+import com.ustadmobile.core.db.dao.ClazzMemberDao;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMCalendarUtil;
@@ -146,9 +147,7 @@ public class ClazzLogListPresenter extends UstadBaseController<ClassLogListView>
             @Override
             public void onSuccess(List<DailyAttendanceNumbers> result) {
 
-                float attendanceGreenTotal = 0f;
-                float attendanceOrangeTotal = 0f;
-                float attendanceRedTotal = 0f;
+
 
                 for(DailyAttendanceNumbers everyDayAttendance: result){
                     Long dd =everyDayAttendance.getLogDate();
@@ -160,14 +159,7 @@ public class ClazzLogListPresenter extends UstadBaseController<ClassLogListView>
                     calendar.set(Calendar.MILLISECOND, 0);
                     Long d = calendar.getTimeInMillis();
                     float a = everyDayAttendance.getAttendancePercentage();
-                    lineDataMap.put(d.floatValue() / 1000, (float) a);
-                    if(everyDayAttendance.getAttendancePercentage() > 0.79){
-                        attendanceGreenTotal += everyDayAttendance.getAttendancePercentage();
-                    }else if(everyDayAttendance.getAttendancePercentage() > 0.59){
-                        attendanceOrangeTotal += everyDayAttendance.getAttendancePercentage();
-                    }else{
-                        attendanceRedTotal += everyDayAttendance.getAttendancePercentage();
-                    }
+                    lineDataMap.put(d.floatValue() / 1000, a);
 
                 }
 
@@ -182,10 +174,6 @@ public class ClazzLogListPresenter extends UstadBaseController<ClassLogListView>
 
                 view.updateAttendanceLineChart(lineDataMapFixedX);
 
-                barDataMap.put(3f, attendanceGreenTotal/ result.size());
-                barDataMap.put(2f, attendanceOrangeTotal/result.size());
-                barDataMap.put(1f, attendanceRedTotal/result.size());
-                view.updateAttendanceBarChart(barDataMap);
             }
 
             @Override
@@ -193,6 +181,40 @@ public class ClazzLogListPresenter extends UstadBaseController<ClassLogListView>
 
             }
         });
+
+
+        ClazzMemberDao clazzMemberDao = UmAppDatabase.getInstance(context).getClazzMemberDao();
+        clazzMemberDao.getAttendanceAverageAsListForClazzBetweenDates(currentClazzUid, fromDate,
+                toDate, new UmCallback<List<Float>>() {
+                    @Override
+                    public void onSuccess(List<Float> result) {
+
+                        float attendanceGreenTotal = 0f;
+                        float attendanceOrangeTotal = 0f;
+                        float attendanceRedTotal = 0f;
+
+
+                        for(Float everyValue: result){
+                            if(everyValue > 0.79){
+                                attendanceGreenTotal += everyValue;
+                            }else if(everyValue > 0.59){
+                                attendanceOrangeTotal += everyValue;
+                            }else{
+                                attendanceRedTotal += everyValue;
+                            }
+                        }
+
+                        barDataMap.put(3f, attendanceGreenTotal/ result.size());
+                        barDataMap.put(2f, attendanceOrangeTotal/result.size());
+                        barDataMap.put(1f, attendanceRedTotal/result.size());
+                        view.updateAttendanceBarChart(barDataMap);
+                    }
+
+                    @Override
+                    public void onFailure(Throwable exception) {
+
+                    }
+                });
     }
 
 
@@ -213,9 +235,10 @@ public class ClazzLogListPresenter extends UstadBaseController<ClassLogListView>
     public void generateAttendanceBarChartDataTest(){
 
         LinkedHashMap<Float, Float> barData = new LinkedHashMap<>();
-        for(float i=1; i<4; i++){
-            barData.put(i, 0.3f*i);
-        }
+
+        barData.put(3f, 0.9f);
+        barData.put(2f, 0.6f);
+        barData.put(1f, 0.3f);
         view.updateAttendanceBarChart(barData);
     }
 

@@ -130,12 +130,14 @@ public class ClazzLogListFragment extends UstadBaseFragment implements ClassLogL
 
         @Override
         public int getColor(int index) {
-            if(getEntryForIndex(index).getY() > 79)
-                return mColors.get(0);
-            else if(getEntryForIndex(index).getY() > 59)
-                return mColors.get(1);
-            else
-                return mColors.get(2);
+            return mColors.get(index);
+//
+//            if(getEntryForIndex(index).getY() > 79)
+//                return mColors.get(0);
+//            else if(getEntryForIndex(index).getY() > 59)
+//                return mColors.get(1);
+//            else
+//                return mColors.get(2);
         }
 
     }
@@ -207,7 +209,7 @@ public class ClazzLogListFragment extends UstadBaseFragment implements ClassLogL
         //Create Bar color
         AttendanceBarDataSet dataSetBar1 = new AttendanceBarDataSet(barDataEntries,
                 ATTENDANCE_BAR_LABEL_DESC);
-        dataSetBar1.setValueTextColor(Color.WHITE);
+        dataSetBar1.setValueTextColor(Color.GRAY);
         dataSetBar1.setDrawValues(true);
         dataSetBar1.setValueFormatter(
                 (value, entry, dataSetIndex, viewPortHandler) -> "" + ((int) value) + "%");
@@ -224,7 +226,7 @@ public class ClazzLogListFragment extends UstadBaseFragment implements ClassLogL
             barChart.setData(barData);
             barChart.setFitBars(true);
             barChart.invalidate();
-            barChart.setDrawValueAboveBar(false);
+            //barChart.setDrawValueAboveBar(false);
         });
 
 

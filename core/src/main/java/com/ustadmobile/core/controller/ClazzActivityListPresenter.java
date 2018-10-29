@@ -110,7 +110,6 @@ public class ClazzActivityListPresenter
         //Update Change options
         updateChangeOptions();
 
-
         //Load test data for now TODO: remove in production.
         generateActivityBarChartDataTest();
 
@@ -132,9 +131,12 @@ public class ClazzActivityListPresenter
     public void generateActivityBarChartDataTest(){
 
         LinkedHashMap<Float, Float> barData = new LinkedHashMap<>();
-        for(float i=1; i<4; i++){
-            barData.put(i, 0.3f*i);
-        }
+
+        barData.put(1f, 5f);
+        barData.put(2f,  -2f);
+        barData.put(3f, 5f);
+        barData.put(4f, -2f);
+        barData.put(5f, -2f);
         view.updateActivityBarChart(barData);
     }
 
