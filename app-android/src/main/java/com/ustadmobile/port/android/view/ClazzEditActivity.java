@@ -13,6 +13,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -50,6 +51,16 @@ public class ClazzEditActivity extends UstadBaseActivity implements ClazzEditVie
     TextInputLayout classDescTIP;
     Button addScheduleButton;
     Spinner holidaySpinner;
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case android.R.id.home:
+                onBackPressed();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {

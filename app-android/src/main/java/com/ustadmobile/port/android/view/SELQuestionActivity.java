@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.view.MenuItem;
 import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
@@ -31,6 +32,15 @@ public class SELQuestionActivity extends UstadBaseActivity implements SELQuestio
     private RecyclerView.LayoutManager mRecyclerLayoutManager;
     private SELQuestionPresenter mPresenter;
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case android.R.id.home:
+                onBackPressed();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {

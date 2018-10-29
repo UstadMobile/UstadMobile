@@ -9,6 +9,7 @@ import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.view.MenuItem;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.SELSelectStudentPresenter;
@@ -66,6 +67,17 @@ public class SELSelectStudentActivity extends UstadBaseActivity implements SELSe
         mRecyclerView.setAdapter(recyclerAdapter);
     }
 
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case android.R.id.home:
+                onBackPressed();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
@@ -77,6 +89,7 @@ public class SELSelectStudentActivity extends UstadBaseActivity implements SELSe
         toolbar = findViewById(R.id.activity_sel_select_student_toolbar);
         toolbar.setTitle(getText(R.string.social_nomination));
         setSupportActionBar(toolbar);
+
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
 

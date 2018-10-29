@@ -9,6 +9,7 @@ import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.view.MenuItem;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.ClazzLogDetailPresenter;
@@ -44,6 +45,16 @@ public class ClazzLogDetailActivity extends UstadBaseActivity
     public long clazzLogUid;
     public long clazzUid;
     public long logDate;
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case android.R.id.home:
+                onBackPressed();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
 
     /**
      * onCreate of the Activity does the following:

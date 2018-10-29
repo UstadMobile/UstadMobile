@@ -9,6 +9,7 @@ import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.view.MenuItem;
 import android.widget.Button;
 
 import com.toughra.ustadmobile.R;
@@ -68,6 +69,16 @@ public class SELQuestionDetailActivity extends UstadBaseActivity implements SELQ
 
         //set the adapter
         mRecyclerView.setAdapter(recyclerAdapter);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case android.R.id.home:
+                onBackPressed();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override

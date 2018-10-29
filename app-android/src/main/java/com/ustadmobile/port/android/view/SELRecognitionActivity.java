@@ -9,6 +9,7 @@ import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.view.MenuItem;
 import android.widget.CheckBox;
 
 import com.toughra.ustadmobile.R;
@@ -51,6 +52,16 @@ public class SELRecognitionActivity extends UstadBaseActivity implements SELReco
                     return oldItem.equals(newItem);
                 }
             };
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case android.R.id.home:
+                onBackPressed();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
 
     @Override
     public void setListProvider(UmProvider<Person> listProvider) {
