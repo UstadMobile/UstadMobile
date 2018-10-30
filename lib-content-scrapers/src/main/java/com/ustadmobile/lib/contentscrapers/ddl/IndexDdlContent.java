@@ -2,20 +2,12 @@ package com.ustadmobile.lib.contentscrapers.ddl;
 
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.ContentEntryContentCategoryJoinDao;
-import com.ustadmobile.core.db.dao.ContentEntryContentEntryFileJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryDao;
-import com.ustadmobile.core.db.dao.ContentEntryFileDao;
 import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.ScraperConstants;
 import com.ustadmobile.lib.db.entities.ContentEntry;
-import com.ustadmobile.lib.db.entities.OpdsEntry;
-import com.ustadmobile.lib.db.entities.OpdsEntryParentToChildJoin;
-import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
-import com.ustadmobile.lib.db.entities.OpdsLink;
-import com.ustadmobile.lib.util.UmUuidUtil;
 
-import org.apache.commons.io.FilenameUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -27,10 +19,17 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
 
+
+/**
+ * The DDL Website comes in 3 languages - English, Farsi and Pashto
+ * To scrape all content, we would need to go to each page and traverse the list
+ * First we find our the max number of pages for each language by using the css selector on a.page-link
+ * Once we found the max number, open each page on ddl website with the parameters /resources/list?page= and the page number until you hit the max
+ *
+ * Every resource is found by searching the html with a[href] and checking if href url contains "resource/"
+ * Traverse all the pages until you hit Max number and then move to next language
+ */
 public class IndexDdlContent {
 
 
@@ -164,7 +163,7 @@ public class IndexDdlContent {
                 try {
                     scraper.scrapeContent();
                     ArrayList<ContentEntry> categories = scraper.getCategoryRelations();
-                    ArrayList<ContentEntry> files = scraper.getOpdsFiles();
+                    ArrayList<ContentEntry> contentEntryArrayList = scraper.getContentEntries();
                     int categoryCount = 0;
                     for (ContentEntry category : categories) {
 
@@ -172,12 +171,12 @@ public class IndexDdlContent {
                                 langEntry, category, categoryCount++);
 
                         int fileCount = 0;
-                        for (ContentEntry file : files) {
+                        for (ContentEntry contentEntry : contentEntryArrayList) {
 
                             ContentScraperUtil.insertOrUpdateChildWithMultipleParentsJoin(contentParentChildJoinDao,
-                                    category, file, fileCount++);
+                                    category, contentEntry, fileCount++);
                             ContentScraperUtil.insertOrUpdateChildWithMultipleCategoriesJoin(contentCategoryChildJoinDao,
-                                    category, file);
+                                    category, contentEntry);
 
                         }
                     }

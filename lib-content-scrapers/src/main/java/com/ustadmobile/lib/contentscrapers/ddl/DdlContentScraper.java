@@ -1,19 +1,13 @@
 package com.ustadmobile.lib.contentscrapers.ddl;
 
-import com.neovisionaries.i18n.LanguageCode;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.ContentEntryContentEntryFileJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryDao;
 import com.ustadmobile.core.db.dao.ContentEntryFileDao;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
-import com.ustadmobile.lib.contentscrapers.ScraperConstants;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.ContentEntryContentEntryFileJoin;
 import com.ustadmobile.lib.db.entities.ContentEntryFile;
-import com.ustadmobile.lib.db.entities.OpdsEntry;
-import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
-import com.ustadmobile.lib.db.entities.OpdsLink;
-import com.ustadmobile.lib.util.UmUuidUtil;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
@@ -33,11 +27,15 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.Files;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.UUID;
 
-import javax.swing.text.AbstractDocument;
 
+/**
+ * Once the resource page is opened.
+ * You can download the list of files by searching with css selector - span.download-item a[href]
+ * The url may contain spaces and needs to be encoded. This is done by constructing the url into a uri
+ * Check if the file was downloaded before with etag or last modified
+ * Create the content entry
+ */
 public class DdlContentScraper {
 
     private final String urlString;
@@ -47,7 +45,7 @@ public class DdlContentScraper {
     private final ContentEntryFileDao contentEntryFileDao;
     private final ContentEntryContentEntryFileJoinDao contentEntryFileJoinDao;
     private Document doc;
-    ArrayList<ContentEntry> opdsFiles;
+    ArrayList<ContentEntry> contentEntries;
 
     public DdlContentScraper(String url, File destination) throws MalformedURLException {
         this.urlString = url;
@@ -69,7 +67,7 @@ public class DdlContentScraper {
 
         Elements downloadList = doc.select("span.download-item a[href]");
 
-        opdsFiles = new ArrayList<>();
+        contentEntries = new ArrayList<>();
         for (Element downloadItem : downloadList) {
 
             String href = downloadItem.attr("href");
@@ -119,7 +117,7 @@ public class DdlContentScraper {
             fileJoin.setCecefjContentEntryUid(contentEntry.getContentEntryUid());
             fileJoin.setCecefjUid(contentEntryFileJoinDao.insert(fileJoin));
 
-            opdsFiles.add(contentEntry);
+            contentEntries.add(contentEntry);
         }
     }
 
@@ -134,8 +132,8 @@ public class DdlContentScraper {
     }
 
 
-    protected ArrayList<ContentEntry> getOpdsFiles() {
-        return opdsFiles;
+    protected ArrayList<ContentEntry> getContentEntries() {
+        return contentEntries;
     }
 
     public ArrayList<ContentEntry> getCategoryRelations() {
