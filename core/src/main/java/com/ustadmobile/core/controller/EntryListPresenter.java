@@ -26,7 +26,20 @@ public class EntryListPresenter extends UstadBaseController<ContentEntryView> {
     public void onCreate(Hashtable hashtable) {
         UmAppDatabase appDatabase = UmAppDatabase.getInstance(context);
         contentEntryDao = appDatabase.getContentEntryDao();
-        viewContract.setContentEntryProvider(contentEntryDao.getChildrenByParentUid((Long) getArguments().get(ARG_CONTENT_ENTRY_UID)));
+        Long parentUid = (Long) getArguments().get(ARG_CONTENT_ENTRY_UID);
+        viewContract.setContentEntryProvider(contentEntryDao.getChildrenByParentUid(parentUid));
+        contentEntryDao.getContentByUuid(parentUid, new UmCallback<ContentEntry>() {
+            @Override
+            public void onSuccess(ContentEntry result) {
+                viewContract.setToolbarTitle(result.getTitle());
+            }
+
+            @Override
+            public void onFailure(Throwable exception) {
+
+            }
+        });
+
     }
 
 

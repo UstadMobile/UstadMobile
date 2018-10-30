@@ -31,12 +31,19 @@ public class ContentEntryListFragment extends UstadBaseFragment implements Conte
 
     private EntryListPresenter entryListPresenter;
     private RecyclerView recyclerView;
+    private ContentEntryListener contentEntryListener;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
      */
     public ContentEntryListFragment() {
+    }
+
+    public interface ContentEntryListener {
+
+        void setTitle(String title);
+
     }
 
 
@@ -77,11 +84,15 @@ public class ContentEntryListFragment extends UstadBaseFragment implements Conte
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
+        if(context instanceof ContentEntryListener) {
+            this.contentEntryListener = (ContentEntryListener) context;
+        }
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
+        this.contentEntryListener = null;
     }
 
     @Override
@@ -94,6 +105,12 @@ public class ContentEntryListFragment extends UstadBaseFragment implements Conte
         data.observe(this, recyclerAdapter::submitList);
 
         recyclerView.setAdapter(recyclerAdapter);
+    }
+
+    @Override
+    public void setToolbarTitle(String title) {
+        if(contentEntryListener != null)
+            contentEntryListener.setTitle(title);
     }
 
 }

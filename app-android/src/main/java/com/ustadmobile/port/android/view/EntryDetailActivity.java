@@ -13,6 +13,7 @@ import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.EntryDetailPresenter;
+import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.view.ContentEntryDetailView;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.ContentEntryFile;
@@ -71,14 +72,14 @@ public class EntryDetailActivity extends UstadBaseActivity implements ContentEnt
             ContentEntryFile contentEntryFile = contentEntryFileList.get(0);
 
             TextView downloadSize = findViewById(R.id.entry_detail_content_size);
-            downloadSize.setText(String.valueOf(contentEntryFile.getFileSize()));
+            downloadSize.setText(UMFileUtil.formatFileSize(contentEntryFile.getFileSize()));
 
         }else{
 
             ContentEntryFile contentEntryFile = contentEntryFileList.get(0);
 
             TextView downloadSize = findViewById(R.id.entry_detail_content_size);
-            downloadSize.setText(String.valueOf(contentEntryFile.getFileSize()));
+            downloadSize.setText(UMFileUtil.formatFileSize(contentEntryFile.getFileSize()));
 
 
         }

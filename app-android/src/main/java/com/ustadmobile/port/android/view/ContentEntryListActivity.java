@@ -4,7 +4,7 @@ import android.os.Bundle;
 
 import com.toughra.ustadmobile.R;
 
-public class ContentEntryListActivity extends UstadBaseActivity {
+public class ContentEntryListActivity extends UstadBaseActivity implements ContentEntryListFragment.ContentEntryListener{
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,5 +23,10 @@ public class ContentEntryListActivity extends UstadBaseActivity {
                     .commit();
         }
 
+    }
+
+    @Override
+    public void setTitle(String title) {
+        getSupportActionBar().setTitle(title);
     }
 }
