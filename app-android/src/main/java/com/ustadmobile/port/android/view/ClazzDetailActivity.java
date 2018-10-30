@@ -76,6 +76,7 @@ public class ClazzDetailActivity extends UstadBaseActivity implements
         setupViewPager();
 
         mTabLayout= (TabLayout)findViewById(R.id.activity_class_detail_tablayout);
+        mTabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
         mTabLayout.setupWithViewPager(mPager);
     }
 
