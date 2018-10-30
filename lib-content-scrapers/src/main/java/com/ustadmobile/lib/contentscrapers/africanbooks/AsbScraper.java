@@ -67,6 +67,7 @@ public class AsbScraper {
     public static final int DOWNLOAD_RETRY_INTERVAL = 10000;
 
     public static final int DOWNLOAD_NEXT_INTERVAL = 5000;
+    private final String COVER_URL = "https://www.africanstorybook.org/illustrations/covers/";
     private ChromeDriver driver;
     private ContentEntryDao contentEntryDao;
     private ContentEntryParentChildJoinDao contentParentChildJoinDao;
@@ -117,10 +118,12 @@ public class AsbScraper {
             asbParentEntry = new ContentEntry();
             asbParentEntry = setContentEntryData(asbParentEntry, "https://www.africanstorybook.org/",
                     "African Story Books", "https://www.africanstorybook.org/", ScraperConstants.ENGLISH_LANG_CODE);
+            asbParentEntry.setThumbnailUrl("https://www.africanstorybook.org/img/asb120.png");
             asbParentEntry.setContentEntryUid(contentEntryDao.insert(asbParentEntry));
         } else {
             asbParentEntry = setContentEntryData(asbParentEntry, "https://www.africanstorybook.org/",
                     "African Story Books", "https://www.africanstorybook.org/", ScraperConstants.ENGLISH_LANG_CODE);
+            asbParentEntry.setThumbnailUrl("https://www.africanstorybook.org/img/asb120.png");
             contentEntryDao.updateContentEntry(asbParentEntry);
         }
 
@@ -159,15 +162,17 @@ public class AsbScraper {
                     }
 
                     ContentEntry childEntry = contentEntryDao.findBySourceUrl(epubUrl.getPath());
-                    if (asbParentEntry == null) {
-                        asbParentEntry = new ContentEntry();
-                        asbParentEntry = setContentEntryData(asbParentEntry, epubUrl.getPath(),
+                    if (childEntry == null) {
+                        childEntry = new ContentEntry();
+                        childEntry = setContentEntryData(childEntry, epubUrl.getPath(),
                                 bookObj.title, epubUrl.getPath(), bookObj.lang);
-                        asbParentEntry.setContentEntryUid(contentEntryDao.insert(asbParentEntry));
+                        childEntry.setThumbnailUrl(getCoverUrl(bookId));
+                        childEntry.setContentEntryUid(contentEntryDao.insert(childEntry));
                     } else {
-                        asbParentEntry = setContentEntryData(asbParentEntry, epubUrl.getPath(),
+                        childEntry = setContentEntryData(asbParentEntry, epubUrl.getPath(),
                                 bookObj.title, epubUrl.getPath(), bookObj.lang);
-                        contentEntryDao.updateContentEntry(asbParentEntry);
+                        childEntry.setThumbnailUrl(getCoverUrl(bookId));
+                        contentEntryDao.updateContentEntry(childEntry);
                     }
 
                     ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, asbParentEntry, childEntry, i);
@@ -199,6 +204,10 @@ public class AsbScraper {
         }
         driver.close();
 
+    }
+
+    private String getCoverUrl(String bookId) {
+        return COVER_URL + bookId + ScraperConstants.PNG_EXT;
     }
 
     private ContentEntry setContentEntryData(ContentEntry entry, String id, String title, String sourceUrl, String lang) {

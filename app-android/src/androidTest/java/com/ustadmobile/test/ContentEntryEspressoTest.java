@@ -7,9 +7,13 @@ import android.support.test.espresso.intent.rule.IntentsTestRule;
 import android.support.test.runner.AndroidJUnit4;
 
 import com.ustadmobile.core.db.UmAppDatabase;
+import com.ustadmobile.core.db.dao.ContentEntryContentEntryFileJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryDao;
+import com.ustadmobile.core.db.dao.ContentEntryFileDao;
 import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
 import com.ustadmobile.lib.db.entities.ContentEntry;
+import com.ustadmobile.lib.db.entities.ContentEntryContentEntryFileJoin;
+import com.ustadmobile.lib.db.entities.ContentEntryFile;
 import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin;
 import com.ustadmobile.port.android.view.DummyActivity;
 
@@ -46,6 +50,8 @@ public class ContentEntryEspressoTest {
 
         ContentEntryDao contentDao = db.getContentEntryDao();
         ContentEntryParentChildJoinDao pcjdao = db.getContentEntryParentChildJoinDao();
+        ContentEntryFileDao contentFileDao = db.getContentEntryFileDao();
+        ContentEntryContentEntryFileJoinDao contentEntryFileJoinDao = db.getContentEntryContentEntryFileJoinDao();
 
         ContentEntry entry = new ContentEntry();
         entry.setContentEntryUid(1);
@@ -57,9 +63,8 @@ public class ContentEntryEspressoTest {
         ck12.setContentEntryUid(2);
         ck12.setTitle("Ck-12 Foundation");
         ck12.setDescription("All content");
+        ck12.setThumbnailUrl("https://www.edraak.org/static/images/logo-dark-ar.fa1399e8d134.png");
         contentDao.insert(ck12);
-        // long ck12uuid = contentDao.insert(ck12);
-        //ck12.setContentEntryUid(ck12uuid);
 
         ContentEntryParentChildJoin parentChildJoin = new ContentEntryParentChildJoin();
         parentChildJoin.setCepcjParentContentEntryUid(entry.getContentEntryUid());
@@ -71,6 +76,7 @@ public class ContentEntryEspressoTest {
         ContentEntry grade5parent = new ContentEntry();
         grade5parent.setContentEntryUid(3);
         grade5parent.setTitle("Grade 1-5");
+        grade5parent.setThumbnailUrl("https://phet.colorado.edu/images/phet-social-media-logo.png");
         contentDao.insert(grade5parent);
 
         ContentEntryParentChildJoin subjectgradejoin = new ContentEntryParentChildJoin();
@@ -83,6 +89,7 @@ public class ContentEntryEspressoTest {
         ContentEntry grade1child = new ContentEntry();
         grade1child.setContentEntryUid(4);
         grade1child.setTitle("Grade 1");
+        grade1child.setThumbnailUrl("https://img1.ck12.org/media/build-20181015164501/images/ck12-logo-livetile.png");
         contentDao.insert(grade1child);
 
         ContentEntryParentChildJoin gradeChildJoin = new ContentEntryParentChildJoin();
@@ -95,6 +102,7 @@ public class ContentEntryEspressoTest {
         ContentEntry wholenumbers = new ContentEntry();
         wholenumbers.setContentEntryUid(5);
         wholenumbers.setTitle("Whole Numbers");
+        wholenumbers.setThumbnailUrl("https://prathambooks.org/wp-content/uploads/2018/04/Logo-black.png");
         contentDao.insert(wholenumbers);
 
         ContentEntryParentChildJoin GradeNumberJoin = new ContentEntryParentChildJoin();
@@ -107,6 +115,10 @@ public class ContentEntryEspressoTest {
         ContentEntry quiz = new ContentEntry();
         quiz.setContentEntryUid(6);
         quiz.setTitle("Quiz Time");
+        quiz.setThumbnailUrl("https://www.africanstorybook.org/img/asb120.png");
+        quiz.setDescription("All content");
+        quiz.setPublisher("CK12");
+        quiz.setAuthor("Binge");
         contentDao.insert(quiz);
 
         ContentEntryParentChildJoin NumberQuizJoin = new ContentEntryParentChildJoin();
@@ -116,8 +128,31 @@ public class ContentEntryEspressoTest {
         NumberQuizJoin.setCepcjUid(7);
         pcjdao.insert(NumberQuizJoin);
 
-        List<ContentEntry> list = contentDao.getChildrenByParentUidTest(entry.getContentEntryUid());
-        list.size();
+        ContentEntryFile contentEntryFile = new ContentEntryFile();
+        contentEntryFile.setMimeType("application/zip");
+        contentEntryFile.setFileSize(10);
+        contentEntryFile.setLastModified(1540728217);
+        contentEntryFile.setContentEntryFileUid(8);
+        contentFileDao.insert(contentEntryFile);
+
+        ContentEntryFile updatedFile = new ContentEntryFile();
+        updatedFile.setMimeType("application/zip");
+        updatedFile.setFileSize(10);
+        updatedFile.setLastModified(1540728218);
+        updatedFile.setContentEntryFileUid(9);
+        contentFileDao.insert(updatedFile);
+
+        ContentEntryContentEntryFileJoin fileJoin = new ContentEntryContentEntryFileJoin();
+        fileJoin.setCecefjContentEntryFileUid(contentEntryFile.getContentEntryFileUid());
+        fileJoin.setCecefjContentEntryUid(quiz.getContentEntryUid());
+        fileJoin.setCecefjUid(10);
+        contentEntryFileJoinDao.insert(fileJoin);
+
+        ContentEntryContentEntryFileJoin sameFileJoin = new ContentEntryContentEntryFileJoin();
+        sameFileJoin.setCecefjContentEntryFileUid(updatedFile.getContentEntryFileUid());
+        sameFileJoin.setCecefjContentEntryUid(quiz.getContentEntryUid());
+        sameFileJoin.setCecefjUid(11);
+        contentEntryFileJoinDao.insert(sameFileJoin);
 
         Intent launchActivityIntent = new Intent();
         mActivityRule.launchActivity(launchActivityIntent);

@@ -116,10 +116,12 @@ public class IndexPrathamContentScraper {
             prathamParentEntry = new ContentEntry();
             prathamParentEntry = setContentEntryData(prathamParentEntry, "https://storyweaver.org.in/",
                     "Pratham Books", "https://storyweaver.org.in/", ScraperConstants.ENGLISH_LANG_CODE);
+            prathamParentEntry.setThumbnailUrl("https://prathambooks.org/wp-content/uploads/2018/04/Logo-black.png");
             prathamParentEntry.setContentEntryUid(contentEntryDao.insert(prathamParentEntry));
         } else {
             prathamParentEntry = setContentEntryData(prathamParentEntry, "https://storyweaver.org.in/",
                     "Pratham Books", "https://storyweaver.org.in/", ScraperConstants.ENGLISH_LANG_CODE);
+            prathamParentEntry.setThumbnailUrl("https://prathambooks.org/wp-content/uploads/2018/04/Logo-black.png");
             contentEntryDao.updateContentEntry(prathamParentEntry);
         }
 

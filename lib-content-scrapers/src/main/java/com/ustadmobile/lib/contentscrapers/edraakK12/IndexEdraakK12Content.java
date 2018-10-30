@@ -121,10 +121,14 @@ public class IndexEdraakK12Content {
             edraakParentEntry = new ContentEntry();
             edraakParentEntry = setContentEntryData(edraakParentEntry, "https://www.edraak.org/k12/",
                     "Edraak K12", "https://www.edraak.org/k12/");
+            edraakParentEntry.setThumbnailUrl("https://www.edraak.org/static/images/logo-dark-ar.fa1399e8d134.png");
+            edraakParentEntry.setLicenseType(ContentEntry.ALL_RIGHTS_RESERVED);
             edraakParentEntry.setContentEntryUid(contentEntryDao.insert(edraakParentEntry));
         } else {
             edraakParentEntry = setContentEntryData(edraakParentEntry, "https://www.edraak.org/k12/",
                     "Edraak K12", "https://www.edraak.org/k12/");
+            edraakParentEntry.setThumbnailUrl("https://www.edraak.org/static/images/logo-dark-ar.fa1399e8d134.png");
+            edraakParentEntry.setLicenseType(ContentEntry.ALL_RIGHTS_RESERVED);
             contentEntryDao.updateContentEntry(edraakParentEntry);
         }
 
@@ -192,9 +196,11 @@ public class IndexEdraakK12Content {
                 if (childEntry == null) {
                     childEntry = new ContentEntry();
                     childEntry = setContentEntryData(childEntry, children.id, children.title, sourceUrl);
+                    childEntry.setLicenseType(getLicenseType(children.license));
                     childEntry.setContentEntryUid(contentEntryDao.insert(childEntry));
                 } else {
                     childEntry = setContentEntryData(childEntry, children.id, children.title, sourceUrl);
+                    childEntry.setLicenseType(getLicenseType(children.license));
                     contentEntryDao.updateContentEntry(childEntry);
                 }
 
@@ -204,6 +210,17 @@ public class IndexEdraakK12Content {
 
             }
 
+        }
+    }
+
+    private int getLicenseType(String license) {
+        if(license.toLowerCase().contains("cc-by-nc-sa")){
+            return ContentEntry.LICESNE_TYPE_CC_BY_NC_SA;
+        }else if(license.toLowerCase().contains("all_rights_reserved")){
+            return ContentEntry.ALL_RIGHTS_RESERVED;
+        }else {
+            System.err.println("License type not matched for license: " + license);
+            return ContentEntry.ALL_RIGHTS_RESERVED;
         }
     }
 

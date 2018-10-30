@@ -19,7 +19,11 @@ public class ContentEntry {
 
     public static final int LICENSE_TYPE_CC_BY_SA_NC = 3;
 
-    public static final int LICENSE_TYPE_CC_BY_NC_3 = 4;
+    public static final int LICENSE_TYPE_CC_BY_NC = 4;
+
+    public static final int ALL_RIGHTS_RESERVED = 5;
+
+    public static final int LICESNE_TYPE_CC_BY_NC_SA = 6;
 
     @UmPrimaryKey(autoIncrement = true)
     private long contentEntryUid;

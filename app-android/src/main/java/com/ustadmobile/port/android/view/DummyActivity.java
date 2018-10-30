@@ -10,7 +10,7 @@ public class DummyActivity extends UstadBaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_dummy);
+        setContentView(R.layout.activity_entry_list);
 
         setUMToolbar(R.id.entry_toolbar);
         setDirectionFromSystem();

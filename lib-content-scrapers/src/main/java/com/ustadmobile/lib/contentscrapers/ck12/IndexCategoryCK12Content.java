@@ -1,7 +1,6 @@
 package com.ustadmobile.lib.contentscrapers.ck12;
 
 import com.ustadmobile.core.db.UmAppDatabase;
-import com.ustadmobile.core.db.dao.ContentEntryContentCategoryJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryContentEntryFileJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryDao;
 import com.ustadmobile.core.db.dao.ContentEntryFileDao;
@@ -11,10 +10,6 @@ import com.ustadmobile.lib.contentscrapers.ScraperConstants;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.ContentEntryContentEntryFileJoin;
 import com.ustadmobile.lib.db.entities.ContentEntryFile;
-import com.ustadmobile.lib.db.entities.OpdsEntryParentToChildJoin;
-import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
-import com.ustadmobile.lib.db.entities.OpdsLink;
-import com.ustadmobile.lib.util.UmUuidUtil;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -38,9 +33,8 @@ import java.net.URL;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 
-import static com.ustadmobile.lib.db.entities.ContentEntry.LICENSE_TYPE_CC_BY_NC_3;
+import static com.ustadmobile.lib.db.entities.ContentEntry.LICENSE_TYPE_CC_BY_NC;
 
 
 /**
@@ -133,10 +127,12 @@ public class IndexCategoryCK12Content {
             ck12ParentEntry = new ContentEntry();
             ck12ParentEntry = setContentEntryData(ck12ParentEntry, "https://www.ck12.org/",
                     "CK-12 Foundation", "https://www.ck12.org/", ScraperConstants.ENGLISH_LANG_CODE);
+            ck12ParentEntry.setThumbnailUrl("https://img1.ck12.org/media/build-20181015164501/images/ck12-logo-livetile.png");
             ck12ParentEntry.setContentEntryUid(contentEntryDao.insert(ck12ParentEntry));
         } else {
             ck12ParentEntry = setContentEntryData(ck12ParentEntry, "https://www.ck12.org/",
                     "CK-12 Foundation", "https://www.ck12.org/", ScraperConstants.ENGLISH_LANG_CODE);
+            ck12ParentEntry.setThumbnailUrl("https://img1.ck12.org/media/build-20181015164501/images/ck12-logo-livetile.png");
             contentEntryDao.updateContentEntry(ck12ParentEntry);
         }
 
@@ -149,7 +145,7 @@ public class IndexCategoryCK12Content {
         entry.setTitle(title);
         entry.setSourceUrl(sourceUrl);
         entry.setPublisher("CK12");
-        entry.setLicenseType(LICENSE_TYPE_CC_BY_NC_3);
+        entry.setLicenseType(LICENSE_TYPE_CC_BY_NC);
         entry.setPrimaryLanguage(langCode);
         return entry;
     }

@@ -122,10 +122,12 @@ public class IndexPhetContentScraper {
             phetParentEntry = new ContentEntry();
             phetParentEntry = setContentEntryData(phetParentEntry, "https://phet.colorado.edu/",
                     "Phet Interactive Simulations", "https://phet.colorado.edu/", ScraperConstants.ENGLISH_LANG_CODE);
+            phetParentEntry.setThumbnailUrl("https://phet.colorado.edu/images/phet-social-media-logo.png");
             phetParentEntry.setContentEntryUid(contentEntryDao.insert(phetParentEntry));
         } else {
             phetParentEntry = setContentEntryData(phetParentEntry, "https://phet.colorado.edu/",
                     "Phet Interactive Simulations", "https://phet.colorado.edu/", ScraperConstants.ENGLISH_LANG_CODE);
+            phetParentEntry.setThumbnailUrl("https://phet.colorado.edu/images/phet-social-media-logo.png");
             contentEntryDao.updateContentEntry(phetParentEntry);
         }
 

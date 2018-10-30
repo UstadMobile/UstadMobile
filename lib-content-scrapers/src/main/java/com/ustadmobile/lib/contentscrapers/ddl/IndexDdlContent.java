@@ -79,10 +79,12 @@ public class IndexDdlContent {
             parentDdl = new ContentEntry();
             parentDdl = setContentEntryData(parentDdl, "https://www.ddl.af/",
                     "Darakht-e Danesh", "https://www.ddl.af/", ScraperConstants.ENGLISH_LANG_CODE);
+            parentDdl.setThumbnailUrl("https://www.ddl.af/storage/files/logo-dd.png");
             parentDdl.setContentEntryUid(contentEntryDao.insert(parentDdl));
         } else {
             parentDdl = setContentEntryData(parentDdl, "https://www.ddl.af/",
                     "Darakht-e Danesh", "https://www.ddl.af/", ScraperConstants.ENGLISH_LANG_CODE);
+            parentDdl.setThumbnailUrl("https://www.ddl.af/storage/files/logo-dd.png");
             contentEntryDao.updateContentEntry(parentDdl);
         }
 

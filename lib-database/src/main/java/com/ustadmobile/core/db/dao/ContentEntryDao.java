@@ -1,6 +1,7 @@
 package com.ustadmobile.core.db.dao;
 
 import com.ustadmobile.core.db.UmProvider;
+import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.database.annotation.UmUpdate;
@@ -24,10 +25,15 @@ public abstract class ContentEntryDao implements BaseDao<ContentEntry> {
             "WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = :parentUid")
     public abstract UmProvider<ContentEntry> getChildrenByParentUid(long parentUid);
 
-    @UmQuery("Select ContentEntry.* FROM ContentEntry LEFT Join ContentEntryParentChildJoin " +
+    @UmQuery("Select COUNT(*) FROM ContentEntry LEFT Join ContentEntryParentChildJoin " +
             "ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid " +
             "WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = :parentUid")
-    public abstract List<ContentEntry> getChildrenByParentUidTest(long parentUid);
+    public abstract void getCountNumberOfChildrenByParentUUid(long parentUid, UmCallback<Integer> callback);
+
+
+    @UmQuery("Select * FROM ContentEntry where contentEntryUid = :parentUid")
+    public abstract void getContentByUuid(long parentUid, UmCallback<ContentEntry> callback);
+
 
 
 }
