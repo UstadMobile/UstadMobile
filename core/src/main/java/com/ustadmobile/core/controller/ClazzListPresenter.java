@@ -99,8 +99,6 @@ public class ClazzListPresenter extends UstadBaseController<ClazzListView> {
             }
         });
 
-
-
     }
 
     @Override

@@ -61,11 +61,14 @@ public abstract class ClazzDao implements BaseDao<Clazz> {
     public abstract UmProvider<ClazzWithNumStudents> findAllActiveClazzes();
 
 
-    @UmQuery("SELECT Clazz.*, (:personUid) AS personUid, " +
-            "(SELECT COUNT(*) FROM ClazzMember WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid AND ClazzMember.role = 1) AS numStudents, " +
+    @UmQuery(
+        "SELECT Clazz.*, (:personUid) AS personUid, " +
+            "(SELECT COUNT(*) FROM ClazzMember " +
+            "WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid AND ClazzMember.role = 1) " +
+                " AS numStudents, " +
             "(SELECT (EXISTS (SELECT * FROM ClazzMember WHERE clazzMemberPersonUid = :personUid " +
-            " AND clazzMemberClazzUid = Clazz.clazzUid " +
-            "))) AS enrolled " +
+                " AND clazzMemberClazzUid = Clazz.clazzUid " +
+                " ))) AS enrolled " +
             "FROM Clazz WHERE Clazz.clazzActive = 1")
     public abstract UmProvider<ClazzWithEnrollment> findAllClazzesWithEnrollmentByPersonUid(long personUid);
 
@@ -79,11 +82,14 @@ public abstract class ClazzDao implements BaseDao<Clazz> {
             " = (SELECT COUNT(*) FROM ClazzLogAttendanceRecord  " +
             " LEFT JOIN ClazzLog ON ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid = ClazzLog.clazzLogUid " +
             " WHERE ClazzLog.done = 1 " +
+            " AND ClazzLog.clazzClazzUid = :clazzUid " +
             " AND ClazzLogAttendanceRecord.attendanceStatus = 1) * 1.0 " +
             " /  " +
             "MAX(1, (SELECT COUNT(*) FROM ClazzLogAttendanceRecord  " +
             "LEFT JOIN ClazzLog ON ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid = ClazzLog.clazzLogUid " +
-            "WHERE ClazzLog.done = 1)) * 1.0 " +
+            "WHERE ClazzLog.done = 1 " +
+            " AND ClazzLog.clazzClazzUid = :clazzUid " +
+            ")) * 1.0 " +
             "Where Clazz.clazzUid = :clazzUid")
     public abstract void updateAttendancePercentage(long clazzUid);
 
