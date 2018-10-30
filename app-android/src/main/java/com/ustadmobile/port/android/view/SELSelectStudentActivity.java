@@ -5,6 +5,8 @@ import android.arch.paging.DataSource;
 import android.arch.paging.LivePagedListBuilder;
 import android.arch.paging.PagedList;
 import android.os.Bundle;
+import android.support.constraint.ConstraintLayout;
+import android.support.design.widget.Snackbar;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -31,6 +33,7 @@ public class SELSelectStudentActivity extends UstadBaseActivity implements SELSe
     private SELSelectStudentPresenter mPresenter;
 
     public long clazzUid;
+    private Snackbar studentDoneSnackBar;
 
     public static final DiffUtil.ItemCallback<Person> DIFF_CALLBACK =
             new DiffUtil.ItemCallback<Person>() {
@@ -67,6 +70,18 @@ public class SELSelectStudentActivity extends UstadBaseActivity implements SELSe
         mRecyclerView.setAdapter(recyclerAdapter);
     }
 
+    @Override
+    public void showStudentDoneMoveOn() {
+        studentDoneSnackBar.show();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        //showStudentDoneMoveOn();
+    }
+
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -92,6 +107,10 @@ public class SELSelectStudentActivity extends UstadBaseActivity implements SELSe
 
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
+        ConstraintLayout cl = findViewById(R.id.activity_sel_select_student_cl);
+
+        studentDoneSnackBar = Snackbar
+                .make(cl, getText(R.string.sel_done_select_another_student), Snackbar.LENGTH_LONG);
 
 
         //Recycler View:
@@ -104,6 +123,10 @@ public class SELSelectStudentActivity extends UstadBaseActivity implements SELSe
         mPresenter = new SELSelectStudentPresenter(this,
                 UMAndroidUtil.bundleToHashtable(getIntent().getExtras()), this);
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
+
+        if (getIntent().hasExtra(ARG_STUDENT_DONE)){
+            studentDoneSnackBar.show();
+        }
 
     }
 

@@ -391,7 +391,7 @@ This is the one you should be editing. The one in /core/locale/main/values/strin
     <string name="how_did_it_go">How did it go ?</string>
     <string name="notes">Notes</string>
     <string name="activity">Activity</string>
-
+    <string name="sel_done_select_another_student">SEL done. You can now move to another student</string>
 
 
 

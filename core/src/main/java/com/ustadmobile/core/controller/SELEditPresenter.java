@@ -17,6 +17,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.view.SELQuestionView;
+import com.ustadmobile.core.view.SELSelectStudentView;
 import com.ustadmobile.lib.db.entities.ClazzMember;
 import com.ustadmobile.lib.db.entities.Person;
 import com.ustadmobile.lib.db.entities.SocialNominationQuestion;
@@ -35,6 +36,7 @@ import static com.ustadmobile.core.view.SELEditView.ARG_QUESTION_UID;
 import static com.ustadmobile.core.view.SELQuestionView.ARG_QUESTION_INDEX;
 import static com.ustadmobile.core.view.SELQuestionView.ARG_QUESTION_TEXT;
 import static com.ustadmobile.core.view.SELQuestionView.ARG_QUESTION_TOTAL;
+import static com.ustadmobile.core.view.SELSelectStudentView.ARG_STUDENT_DONE;
 
 
 /**
@@ -191,10 +193,13 @@ public class SELEditPresenter
 
 
                                     }else{
-                                        //TODO. end the SEL activitieS properly.
                                         System.out.println("All Question gone through OK..");
+                                        Hashtable args = new Hashtable();
+                                        args.put(ARG_STUDENT_DONE, currentPersonUid);
+                                        args.put(ARG_CLAZZ_UID, currentClazzUid);
+
+                                        impl.go(SELSelectStudentView.VIEW_NAME, args, getContext());
                                         view.finish();
-                                        //TODO: Maybe go to SELAnswerFragment
                                     }
                                 }
 

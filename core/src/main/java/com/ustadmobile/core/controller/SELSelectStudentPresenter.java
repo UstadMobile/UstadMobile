@@ -64,6 +64,7 @@ public class SELSelectStudentPresenter extends CommonHandlerPresenter<SELSelectS
                     public void onSuccess(ClazzMember clazzMember) {
                         args.put(ARG_CLAZZMEMBER_UID, clazzMember.getClazzMemberUid());
                         impl.go(SELSelectConsentView.VIEW_NAME, args, view.getContext());
+                        view.finish();
                     }
 
                     @Override

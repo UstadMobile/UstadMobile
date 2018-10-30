@@ -10,6 +10,7 @@ import com.ustadmobile.lib.db.entities.Person;
 public interface SELSelectStudentView extends UstadView {
 
     String VIEW_NAME = "SELSelectStudent";
+    String ARG_STUDENT_DONE = "studentDone";
 
     /**
      * Sets Current SEL answers by students list
@@ -22,5 +23,7 @@ public interface SELSelectStudentView extends UstadView {
     void setSELAnswerListProvider(UmProvider<Person> selStudentsProvider);
 
     void finish();
+
+    void showStudentDoneMoveOn();
 
 }
