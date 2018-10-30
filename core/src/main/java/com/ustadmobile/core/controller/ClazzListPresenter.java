@@ -3,6 +3,7 @@ package com.ustadmobile.core.controller;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.db.dao.ClazzDao;
+import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.ClassDetailView;
@@ -12,9 +13,14 @@ import com.ustadmobile.core.view.ClazzListView;
 import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.ClazzWithNumStudents;
 
+import java.util.ArrayList;
 import java.util.Hashtable;
 
 import static com.ustadmobile.core.view.ClazzListView.ARG_LOGDATE;
+import static com.ustadmobile.core.view.ClazzListView.SORT_ORDER_ATTENDANCE_ASC;
+import static com.ustadmobile.core.view.ClazzListView.SORT_ORDER_ATTENDANCE_DESC;
+import static com.ustadmobile.core.view.ClazzListView.SORT_ORDER_NAME_ASC;
+import static com.ustadmobile.core.view.ClazzListView.SORT_ORDER_NAME_DESC;
 
 public class ClazzListPresenter extends UstadBaseController<ClazzListView> {
 
@@ -26,6 +32,19 @@ public class ClazzListPresenter extends UstadBaseController<ClazzListView> {
 
     public ClazzListPresenter(Object context, Hashtable arguments, ClazzListView view) {
         super(context, arguments, view);
+    }
+
+    Hashtable<Long, Integer> idToOrderInteger;
+    String[] sortPresets;
+
+
+    public String[] arrayListToStringArray(ArrayList<String> presetAL){
+        Object[] objectArr = presetAL.toArray();
+        String[] strArr = new String[objectArr.length];
+        for(int j = 0 ; j < objectArr.length ; j ++){
+            strArr[j] = (String) objectArr[j];
+        }
+        return strArr;
     }
 
     /**
@@ -41,10 +60,57 @@ public class ClazzListPresenter extends UstadBaseController<ClazzListView> {
         //TODO: Remove. Replace with Logged-In User
         currentPersonUid = 1L;
 
-//        clazzListProvider = UmAppDatabase.getInstance(context).getClazzDao()
-//                .findAllClazzesByPersonUid(currentPersonUid);
         clazzListProvider = UmAppDatabase.getInstance(context).getClazzDao()
                 .findAllActiveClazzes();
+        view.setClazzListProvider(clazzListProvider);
+
+        idToOrderInteger = new Hashtable<>();
+
+        updateSortSpinnerPreset();
+    }
+
+    /**
+     * Updates preset on the view.
+     * TOOD: clean this.
+     */
+    public void updateSortSpinnerPreset(){
+        ArrayList<String> presetAL = new ArrayList<>();
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+
+        idToOrderInteger = new Hashtable<>();
+
+        presetAL.add(impl.getString(MessageID.namesb, getContext()));
+        idToOrderInteger.put((long) presetAL.size(), SORT_ORDER_NAME_ASC);
+        presetAL.add(impl.getString(MessageID.attendance_high_to_low, getContext()));
+        idToOrderInteger.put((long) presetAL.size(), SORT_ORDER_ATTENDANCE_DESC);
+        presetAL.add(impl.getString(MessageID.attendance_low_to_high, getContext()));
+        idToOrderInteger.put((long) presetAL.size(), SORT_ORDER_ATTENDANCE_ASC);
+        sortPresets = arrayListToStringArray(presetAL);
+
+        view.updateSortSpinner(sortPresets);
+    }
+
+    private void getAndSetProvider(int order){
+        switch (order){
+
+            case SORT_ORDER_NAME_DESC:
+                clazzListProvider = UmAppDatabase.getInstance(context).getClazzDao()
+                        .findAllActiveClazzesSortByNameDesc();
+                break;
+            case SORT_ORDER_ATTENDANCE_ASC:
+                clazzListProvider = UmAppDatabase.getInstance(context).getClazzDao()
+                        .findAllActiveClazzesSortByAttendanceAsc();
+                break;
+            case SORT_ORDER_ATTENDANCE_DESC:
+                clazzListProvider = UmAppDatabase.getInstance(context).getClazzDao()
+                        .findAllActiveClazzesSortByAttendanceDesc();
+                break;
+            default:
+                //SORT_ORDER_NAME_ASC
+                clazzListProvider = UmAppDatabase.getInstance(context).getClazzDao()
+                        .findAllActiveClazzesSortByNameAsc();
+                break;
+        }
         view.setClazzListProvider(clazzListProvider);
     }
 
@@ -99,6 +165,19 @@ public class ClazzListPresenter extends UstadBaseController<ClazzListView> {
             }
         });
 
+    }
+
+    /**
+     * Method logic for what happens when we change the order of the clazz list.
+     *
+     * @param order The order flag. 0 to Sort by Name, 1 to Sort by Attendance, 2 to Sort by date
+     */
+    public void handleChangeSortOrder(long order){
+        order=order+1;
+        if(idToOrderInteger.containsKey(order)){
+            int sortCode = idToOrderInteger.get(order);
+            getAndSetProvider(sortCode);
+        }
     }
 
     @Override

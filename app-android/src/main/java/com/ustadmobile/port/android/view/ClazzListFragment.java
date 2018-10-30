@@ -4,26 +4,20 @@ import android.arch.lifecycle.LiveData;
 import android.arch.paging.DataSource;
 import android.arch.paging.LivePagedListBuilder;
 import android.arch.paging.PagedList;
-import android.arch.paging.PagedListAdapter;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.util.DiffUtil;
-import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.TextView;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.ClazzListPresenter;
-import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmProvider;
-import com.ustadmobile.core.db.dao.ClazzDao;
 import com.ustadmobile.core.view.ClazzListView;
 import com.ustadmobile.lib.db.entities.ClazzWithNumStudents;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
@@ -42,6 +36,8 @@ public class ClazzListFragment extends UstadBaseFragment implements ClazzListVie
     private RecyclerView.LayoutManager mRecyclerLayoutManager;
 
     private ClazzListPresenter mPresenter;
+    Spinner sortSpinner;
+    String[] sortSpinnerPresets;
 
     /**
      * Generates a new Fragment for a page fragment
@@ -85,13 +81,27 @@ public class ClazzListFragment extends UstadBaseFragment implements ClazzListVie
         mRecyclerLayoutManager = new LinearLayoutManager(getContext());
         mRecyclerView.setLayoutManager(mRecyclerLayoutManager);
 
+        sortSpinner = rootContainer.findViewById(R.id.fragment_clazz_list_sort_spinner);
+
         //set up Presenter
-        mPresenter = new ClazzListPresenter(this,
+        mPresenter = new ClazzListPresenter(getContext(),
                 UMAndroidUtil.bundleToHashtable(getArguments()), this);
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
 
         FloatingTextButton fab = rootContainer.findViewById(R.id.fragment_clazz_list_fab);
         fab.setOnClickListener(v -> mPresenter.handleClickPrimaryActionButton());
+
+        sortSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                mPresenter.handleChangeSortOrder(id);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
 
         //return container
         return rootContainer;
@@ -124,6 +134,15 @@ public class ClazzListFragment extends UstadBaseFragment implements ClazzListVie
         data.observe(this, recyclerAdapter::submitList);
 
         mRecyclerView.setAdapter(recyclerAdapter);
+    }
+
+    @Override
+    public void updateSortSpinner(String[] presets) {
+        this.sortSpinnerPresets = presets;
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(),
+                R.layout.spinner_item, sortSpinnerPresets);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        sortSpinner.setAdapter(adapter);
     }
 
     // This event is triggered soon after onCreateView().

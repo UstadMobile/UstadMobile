@@ -15,6 +15,13 @@ public interface ClazzListView extends UstadView {
     String TAG_STATUS = "status";
     String ARG_LOGDATE = "logdate";
 
+    int SORT_ORDER_NAME_ASC = 1;
+    int SORT_ORDER_NAME_DESC = 2;
+    int SORT_ORDER_ATTENDANCE_ASC = 3;
+    int SORT_ORDER_ATTENDANCE_DESC = 4;
+
     void setClazzListProvider(UmProvider<ClazzWithNumStudents> clazzListProvider);
+
+    void updateSortSpinner(String[] presets);
 
 }

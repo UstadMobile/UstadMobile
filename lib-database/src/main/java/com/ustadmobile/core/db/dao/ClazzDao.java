@@ -60,6 +60,36 @@ public abstract class ClazzDao implements BaseDao<Clazz> {
             " FROM Clazz WHERE Clazz.clazzActive = 1 ")
     public abstract UmProvider<ClazzWithNumStudents> findAllActiveClazzes();
 
+    @UmQuery("SELECT Clazz.*, " +
+            " (SELECT COUNT(*) FROM ClazzMember " +
+            " WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid " +
+            " AND ClazzMember.role = 1) AS numStudents" +
+            " FROM Clazz WHERE Clazz.clazzActive = 1 " +
+            " ORDER BY Clazz.clazzName ASC")
+    public abstract UmProvider<ClazzWithNumStudents> findAllActiveClazzesSortByNameAsc();
+    @UmQuery("SELECT Clazz.*, " +
+            " (SELECT COUNT(*) FROM ClazzMember " +
+            " WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid " +
+            " AND ClazzMember.role = 1) AS numStudents" +
+            " FROM Clazz WHERE Clazz.clazzActive = 1 " +
+            " ORDER BY Clazz.clazzName DESC")
+    public abstract UmProvider<ClazzWithNumStudents> findAllActiveClazzesSortByNameDesc();
+    @UmQuery("SELECT Clazz.*, " +
+            " (SELECT COUNT(*) FROM ClazzMember " +
+            " WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid " +
+            " AND ClazzMember.role = 1) AS numStudents" +
+            " FROM Clazz WHERE Clazz.clazzActive = 1 " +
+            " ORDER BY Clazz.attendanceAverage ASC ")
+    public abstract UmProvider<ClazzWithNumStudents> findAllActiveClazzesSortByAttendanceAsc();
+    @UmQuery("SELECT Clazz.*, " +
+            " (SELECT COUNT(*) FROM ClazzMember " +
+            " WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid " +
+            " AND ClazzMember.role = 1) AS numStudents" +
+            " FROM Clazz WHERE Clazz.clazzActive = 1 " +
+            " ORDER BY Clazz.attendanceAverage DESC ")
+    public abstract UmProvider<ClazzWithNumStudents> findAllActiveClazzesSortByAttendanceDesc();
+
+
 
     @UmQuery(
         "SELECT Clazz.*, (:personUid) AS personUid, " +
