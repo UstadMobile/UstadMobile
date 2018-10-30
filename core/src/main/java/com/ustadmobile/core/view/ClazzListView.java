@@ -19,6 +19,7 @@ public interface ClazzListView extends UstadView {
     int SORT_ORDER_NAME_DESC = 2;
     int SORT_ORDER_ATTENDANCE_ASC = 3;
     int SORT_ORDER_ATTENDANCE_DESC = 4;
+    int SORT_ORDER_TEACHER_ASC = 5;
 
     void setClazzListProvider(UmProvider<ClazzWithNumStudents> clazzListProvider);
 

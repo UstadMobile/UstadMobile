@@ -21,6 +21,7 @@ import static com.ustadmobile.core.view.ClazzListView.SORT_ORDER_ATTENDANCE_ASC;
 import static com.ustadmobile.core.view.ClazzListView.SORT_ORDER_ATTENDANCE_DESC;
 import static com.ustadmobile.core.view.ClazzListView.SORT_ORDER_NAME_ASC;
 import static com.ustadmobile.core.view.ClazzListView.SORT_ORDER_NAME_DESC;
+import static com.ustadmobile.core.view.ClazzListView.SORT_ORDER_TEACHER_ASC;
 
 public class ClazzListPresenter extends UstadBaseController<ClazzListView> {
 
@@ -85,6 +86,8 @@ public class ClazzListPresenter extends UstadBaseController<ClazzListView> {
         idToOrderInteger.put((long) presetAL.size(), SORT_ORDER_ATTENDANCE_DESC);
         presetAL.add(impl.getString(MessageID.attendance_low_to_high, getContext()));
         idToOrderInteger.put((long) presetAL.size(), SORT_ORDER_ATTENDANCE_ASC);
+        presetAL.add(impl.getString(MessageID.teacher, getContext()));
+        idToOrderInteger.put((long)presetAL.size(), SORT_ORDER_TEACHER_ASC);
         sortPresets = arrayListToStringArray(presetAL);
 
         view.updateSortSpinner(sortPresets);
@@ -102,6 +105,10 @@ public class ClazzListPresenter extends UstadBaseController<ClazzListView> {
                         .findAllActiveClazzesSortByAttendanceAsc();
                 break;
             case SORT_ORDER_ATTENDANCE_DESC:
+                clazzListProvider = UmAppDatabase.getInstance(context).getClazzDao()
+                        .findAllActiveClazzesSortByAttendanceDesc();
+                break;
+            case SORT_ORDER_TEACHER_ASC:
                 clazzListProvider = UmAppDatabase.getInstance(context).getClazzDao()
                         .findAllActiveClazzesSortByAttendanceDesc();
                 break;

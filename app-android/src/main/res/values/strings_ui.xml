@@ -399,7 +399,7 @@ This is the one you should be editing. The one in /core/locale/main/values/strin
     <string name="namesb">name</string>
     <string name="attendance_high_to_low">attendance (high to low)</string>
     <string name="attendance_low_to_high">attendance (low to high)</string>
-
+    <string name="teacher">Teacher</string>
 
 
 
