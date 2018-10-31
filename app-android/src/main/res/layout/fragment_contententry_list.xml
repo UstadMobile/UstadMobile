@@ -11,6 +11,6 @@
         android:id="@+id/list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:listitem="@layout/fragment_contententry" />
+        tools:listitem="@layout/list_item_content_entry" />
 
 </RelativeLayout>

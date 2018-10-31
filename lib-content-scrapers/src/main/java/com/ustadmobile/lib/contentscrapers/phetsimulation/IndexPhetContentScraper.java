@@ -151,6 +151,23 @@ public class IndexPhetContentScraper {
                 contentEntryDao.updateContentEntry(englishSimContentEntry);
             }
 
+            ContentEntryRelatedEntryJoin englishEnglishJoin = contentEntryRelatedJoinDao.findPrimaryByTranslation(englishSimContentEntry.getContentEntryUid());
+            if (englishEnglishJoin == null) {
+                englishEnglishJoin = new ContentEntryRelatedEntryJoin();
+                englishEnglishJoin.setCerejRelLanguage(englishSimContentEntry.getPrimaryLanguage());
+                englishEnglishJoin.setCerejContentEntryUid(englishSimContentEntry.getContentEntryUid());
+                englishEnglishJoin.setCerejRelatedEntryUid(englishSimContentEntry.getContentEntryUid());
+                englishEnglishJoin.setRelType(ContentEntryRelatedEntryJoin.REL_TYPE_TRANSLATED_VERSION);
+                englishEnglishJoin.setCerejUid(contentEntryRelatedJoinDao.insert(englishEnglishJoin));
+            } else {
+                englishEnglishJoin.setCerejRelLanguage(englishSimContentEntry.getPrimaryLanguage());
+                englishEnglishJoin.setCerejContentEntryUid(englishSimContentEntry.getContentEntryUid());
+                englishEnglishJoin.setCerejRelatedEntryUid(englishSimContentEntry.getContentEntryUid());
+                englishEnglishJoin.setCerejUid(contentEntryRelatedJoinDao.insert(englishEnglishJoin));
+                englishEnglishJoin.setRelType(ContentEntryRelatedEntryJoin.REL_TYPE_TRANSLATED_VERSION);
+                contentEntryRelatedJoinDao.updateSimTranslationJoin(englishEnglishJoin);
+            }
+
             PhetContentScraper scraper = new PhetContentScraper(simulationUrl, destinationDirectory);
             try {
                 scraper.scrapeContent();
@@ -201,12 +218,14 @@ public class IndexPhetContentScraper {
                                 relatedTranslationJoin.setCerejRelLanguage(translation.getPrimaryLanguage());
                                 relatedTranslationJoin.setCerejContentEntryUid(englishSimContentEntry.getContentEntryUid());
                                 relatedTranslationJoin.setCerejRelatedEntryUid(translation.getContentEntryUid());
+                                relatedTranslationJoin.setRelType(ContentEntryRelatedEntryJoin.REL_TYPE_TRANSLATED_VERSION);
                                 relatedTranslationJoin.setCerejUid(contentEntryRelatedJoinDao.insert(relatedTranslationJoin));
                             } else {
                                 relatedTranslationJoin.setCerejRelLanguage(translation.getPrimaryLanguage());
                                 relatedTranslationJoin.setCerejContentEntryUid(englishSimContentEntry.getContentEntryUid());
                                 relatedTranslationJoin.setCerejRelatedEntryUid(translation.getContentEntryUid());
                                 relatedTranslationJoin.setCerejUid(contentEntryRelatedJoinDao.insert(relatedTranslationJoin));
+                                relatedTranslationJoin.setRelType(ContentEntryRelatedEntryJoin.REL_TYPE_TRANSLATED_VERSION);
                                 contentEntryRelatedJoinDao.updateSimTranslationJoin(relatedTranslationJoin);
                             }
 

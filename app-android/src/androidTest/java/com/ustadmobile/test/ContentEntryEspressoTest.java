@@ -11,18 +11,18 @@ import com.ustadmobile.core.db.dao.ContentEntryContentEntryFileJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryDao;
 import com.ustadmobile.core.db.dao.ContentEntryFileDao;
 import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
+import com.ustadmobile.core.db.dao.ContentEntryRelatedEntryJoinDao;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.ContentEntryContentEntryFileJoin;
 import com.ustadmobile.lib.db.entities.ContentEntryFile;
 import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin;
+import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoin;
 import com.ustadmobile.port.android.view.DummyActivity;
 
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import java.util.List;
 
 @RunWith(AndroidJUnit4.class)
 public class ContentEntryEspressoTest {
@@ -52,6 +52,7 @@ public class ContentEntryEspressoTest {
         ContentEntryParentChildJoinDao pcjdao = db.getContentEntryParentChildJoinDao();
         ContentEntryFileDao contentFileDao = db.getContentEntryFileDao();
         ContentEntryContentEntryFileJoinDao contentEntryFileJoinDao = db.getContentEntryContentEntryFileJoinDao();
+        ContentEntryRelatedEntryJoinDao contentEntryRelatedEntryJoinDao = db.getContentEntryRelatedEntryJoinDao();
 
         ContentEntry entry = new ContentEntry();
         entry.setContentEntryUid(1);
@@ -119,6 +120,7 @@ public class ContentEntryEspressoTest {
         quiz.setDescription("All content");
         quiz.setPublisher("CK12");
         quiz.setAuthor("Binge");
+        quiz.setPrimaryLanguage("en");
         contentDao.insert(quiz);
 
         ContentEntryParentChildJoin NumberQuizJoin = new ContentEntryParentChildJoin();
@@ -135,24 +137,83 @@ public class ContentEntryEspressoTest {
         contentEntryFile.setContentEntryFileUid(8);
         contentFileDao.insert(contentEntryFile);
 
+        ContentEntryContentEntryFileJoin fileJoin = new ContentEntryContentEntryFileJoin();
+        fileJoin.setCecefjContentEntryFileUid(contentEntryFile.getContentEntryFileUid());
+        fileJoin.setCecefjContentEntryUid(quiz.getContentEntryUid());
+        fileJoin.setCecefjUid(9);
+        contentEntryFileJoinDao.insert(fileJoin);
+
+        ContentEntryRelatedEntryJoin englishEnglishJoin = new ContentEntryRelatedEntryJoin();
+        englishEnglishJoin.setCerejContentEntryUid(quiz.getContentEntryUid());
+        englishEnglishJoin.setCerejRelatedEntryUid(quiz.getContentEntryUid());
+        englishEnglishJoin.setCerejUid(18);
+        englishEnglishJoin.setCerejRelLanguage("en");
+        englishEnglishJoin.setRelType(ContentEntryRelatedEntryJoin.REL_TYPE_TRANSLATED_VERSION);
+        contentEntryRelatedEntryJoinDao.insert(englishEnglishJoin);
+
+        // arabic
+        ContentEntry arabicQuiz = new ContentEntry();
+        arabicQuiz.setContentEntryUid(10);
+        arabicQuiz.setTitle("وقت الاختبار");
+        arabicQuiz.setThumbnailUrl("https://www.africanstorybook.org/img/asb120.png");
+        arabicQuiz.setDescription("كل المحتوى");
+        arabicQuiz.setPublisher("CK12");
+        arabicQuiz.setAuthor("حفلة");
+        arabicQuiz.setPrimaryLanguage("ar");
+        contentDao.insert(arabicQuiz);
+
         ContentEntryFile updatedFile = new ContentEntryFile();
         updatedFile.setMimeType("application/zip");
         updatedFile.setFileSize(10);
         updatedFile.setLastModified(1540728218);
-        updatedFile.setContentEntryFileUid(9);
+        updatedFile.setContentEntryFileUid(11);
         contentFileDao.insert(updatedFile);
-
-        ContentEntryContentEntryFileJoin fileJoin = new ContentEntryContentEntryFileJoin();
-        fileJoin.setCecefjContentEntryFileUid(contentEntryFile.getContentEntryFileUid());
-        fileJoin.setCecefjContentEntryUid(quiz.getContentEntryUid());
-        fileJoin.setCecefjUid(10);
-        contentEntryFileJoinDao.insert(fileJoin);
 
         ContentEntryContentEntryFileJoin sameFileJoin = new ContentEntryContentEntryFileJoin();
         sameFileJoin.setCecefjContentEntryFileUid(updatedFile.getContentEntryFileUid());
-        sameFileJoin.setCecefjContentEntryUid(quiz.getContentEntryUid());
-        sameFileJoin.setCecefjUid(11);
+        sameFileJoin.setCecefjContentEntryUid(arabicQuiz.getContentEntryUid());
+        sameFileJoin.setCecefjUid(12);
         contentEntryFileJoinDao.insert(sameFileJoin);
+
+        ContentEntryRelatedEntryJoin arabicEnglishJoin = new ContentEntryRelatedEntryJoin();
+        arabicEnglishJoin.setCerejContentEntryUid(quiz.getContentEntryUid());
+        arabicEnglishJoin.setCerejRelatedEntryUid(arabicQuiz.getContentEntryUid());
+        arabicEnglishJoin.setCerejUid(13);
+        arabicEnglishJoin.setCerejRelLanguage("ar");
+        arabicEnglishJoin.setRelType(ContentEntryRelatedEntryJoin.REL_TYPE_TRANSLATED_VERSION);
+        contentEntryRelatedEntryJoinDao.insert(arabicEnglishJoin);
+
+
+        ContentEntry spanishQuiz = new ContentEntry();
+        spanishQuiz.setContentEntryUid(14);
+        spanishQuiz.setTitle("tiempo de prueba");
+        spanishQuiz.setThumbnailUrl("https://www.africanstorybook.org/img/asb120.png");
+        spanishQuiz.setDescription("todo el contenido");
+        spanishQuiz.setPublisher("CK12");
+        spanishQuiz.setAuthor("borrachera");
+        spanishQuiz.setPrimaryLanguage("es");
+        contentDao.insert(spanishQuiz);
+
+        ContentEntryFile spanishFile = new ContentEntryFile();
+        spanishFile.setMimeType("application/zip");
+        spanishFile.setFileSize(10);
+        spanishFile.setLastModified(1540728218);
+        spanishFile.setContentEntryFileUid(15);
+        contentFileDao.insert(spanishFile);
+
+        ContentEntryContentEntryFileJoin spanishFileJoin = new ContentEntryContentEntryFileJoin();
+        spanishFileJoin.setCecefjContentEntryFileUid(spanishFile.getContentEntryFileUid());
+        spanishFileJoin.setCecefjContentEntryUid(spanishQuiz.getContentEntryUid());
+        spanishFileJoin.setCecefjUid(16);
+        contentEntryFileJoinDao.insert(spanishFileJoin);
+
+        ContentEntryRelatedEntryJoin spanishEnglishJoin = new ContentEntryRelatedEntryJoin();
+        spanishEnglishJoin.setCerejContentEntryUid(quiz.getContentEntryUid());
+        spanishEnglishJoin.setCerejRelatedEntryUid(spanishQuiz.getContentEntryUid());
+        spanishEnglishJoin.setCerejUid(17);
+        spanishEnglishJoin.setCerejRelLanguage("es");
+        spanishEnglishJoin.setRelType(ContentEntryRelatedEntryJoin.REL_TYPE_TRANSLATED_VERSION);
+        contentEntryRelatedEntryJoinDao.insert(spanishEnglishJoin);
 
         Intent launchActivityIntent = new Intent();
         mActivityRule.launchActivity(launchActivityIntent);

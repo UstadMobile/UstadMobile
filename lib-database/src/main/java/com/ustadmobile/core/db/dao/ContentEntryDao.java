@@ -35,5 +35,9 @@ public abstract class ContentEntryDao implements BaseDao<ContentEntry> {
     public abstract void getContentByUuid(long parentUid, UmCallback<ContentEntry> callback);
 
 
+    @UmQuery("Select ContentEntry.* FROM ContentEntry LEFT JOIN ContentEntryRelatedEntryJoin " +
+            "ON ContentEntryRelatedEntryJoin.cerejRelatedEntryUid = ContentEntry.contentEntryUid " +
+            "WHERE ContentEntryRelatedEntryJoin.relType = 1 AND ContentEntryRelatedEntryJoin.cerejRelatedEntryUid != :entryUuid")
+    public abstract void findAllLanguageRelatedEntries(long entryUuid, UmCallback<List<ContentEntry>> umCallback);
 
 }

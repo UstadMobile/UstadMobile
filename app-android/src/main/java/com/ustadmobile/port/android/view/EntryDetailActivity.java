@@ -1,16 +1,16 @@
 package com.ustadmobile.port.android.view;
 
-import android.graphics.Bitmap;
-import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.support.v7.widget.RecyclerView;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.google.android.flexbox.FlexDirection;
+import com.google.android.flexbox.FlexboxLayoutManager;
 import com.squareup.picasso.Picasso;
-import com.squareup.picasso.Target;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.EntryDetailPresenter;
 import com.ustadmobile.core.util.UMFileUtil;
@@ -21,7 +21,7 @@ import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.util.List;
 
-public class EntryDetailActivity extends UstadBaseActivity implements ContentEntryDetailView {
+public class EntryDetailActivity extends UstadBaseActivity implements ContentEntryDetailView, ContentEntryLanguageAdapter.AdapterViewListener {
 
     private EntryDetailPresenter entryDetailPresenter;
 
@@ -54,7 +54,7 @@ public class EntryDetailActivity extends UstadBaseActivity implements ContentEnt
                 .into((ImageView) findViewById(R.id.entry_detail_thumbnail)));
 
 
-        getUMToolbar().setTitle(contentEntry.getTitle());
+        getSupportActionBar().setTitle(contentEntry.getTitle());
 
         TextView license = findViewById(R.id.entry_detail_license);
         license.setText(contentEntry.getLicenseName());
@@ -67,23 +67,50 @@ public class EntryDetailActivity extends UstadBaseActivity implements ContentEnt
     @Override
     public void setFileInfo(List<ContentEntryFile> contentEntryFileList) {
 
-        if(contentEntryFileList.size() == 1){
+        if (contentEntryFileList.size() == 1) {
 
             ContentEntryFile contentEntryFile = contentEntryFileList.get(0);
 
             TextView downloadSize = findViewById(R.id.entry_detail_content_size);
             downloadSize.setText(UMFileUtil.formatFileSize(contentEntryFile.getFileSize()));
 
-        }else{
+        } else {
+
+            // TODO
 
             ContentEntryFile contentEntryFile = contentEntryFileList.get(0);
 
             TextView downloadSize = findViewById(R.id.entry_detail_content_size);
             downloadSize.setText(UMFileUtil.formatFileSize(contentEntryFile.getFileSize()));
-
 
         }
 
 
+    }
+
+    @Override
+    public void setLanguageContent(List<ContentEntry> result) {
+
+        RecyclerView flexBox = findViewById(R.id.entry_detail_flex);
+
+        if (result.size() == 0) {
+            flexBox.setVisibility(View.GONE);
+        } else {
+            flexBox.setVisibility(View.VISIBLE);
+
+            FlexboxLayoutManager flexboxLayoutManager = new FlexboxLayoutManager(getApplicationContext());
+            flexboxLayoutManager.setFlexDirection(FlexDirection.ROW);
+            flexBox.setLayoutManager(flexboxLayoutManager);
+
+            ContentEntryLanguageAdapter adapter = new ContentEntryLanguageAdapter(result, this);
+            flexBox.setAdapter(adapter);
+        }
+
+
+    }
+
+    @Override
+    public void selectLang(ContentEntry contentEntry) {
+        entryDetailPresenter.openTranslation(contentEntry);
     }
 }

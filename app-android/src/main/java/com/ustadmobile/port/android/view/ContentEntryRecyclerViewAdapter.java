@@ -12,23 +12,26 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 import com.toughra.ustadmobile.R;
-import com.ustadmobile.core.controller.EntryListPresenter;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 
 public class ContentEntryRecyclerViewAdapter extends PagedListAdapter<ContentEntry, ContentEntryRecyclerViewAdapter.ViewHolder> {
 
+    private final AdapterViewListener listener;
 
-    private final EntryListPresenter presenter;
-
-    protected ContentEntryRecyclerViewAdapter(EntryListPresenter presenter) {
+    protected ContentEntryRecyclerViewAdapter(AdapterViewListener listener) {
         super(DIFF_CALLBACK);
-        this.presenter = presenter;
+        this.listener = listener;
     }
+
+    protected interface AdapterViewListener {
+        void contentEntryClicked(ContentEntry entry);
+    }
+
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.fragment_contententry, parent, false);
+                .inflate(R.layout.list_item_content_entry, parent, false);
         return new ViewHolder(view);
     }
 
@@ -40,7 +43,7 @@ public class ContentEntryRecyclerViewAdapter extends PagedListAdapter<ContentEnt
         Picasso.with(holder.thumbnailView.getContext())
                 .load(entry.getThumbnailUrl())
                 .into(holder.thumbnailView);
-        holder.mView.setOnClickListener(view -> presenter.handleContentEntryClicked(entry));
+        holder.mView.setOnClickListener(view -> listener.contentEntryClicked(entry));
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {

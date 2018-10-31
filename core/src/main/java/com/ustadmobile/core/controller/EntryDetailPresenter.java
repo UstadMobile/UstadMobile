@@ -4,6 +4,9 @@ import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.ContentEntryDao;
 import com.ustadmobile.core.db.dao.ContentEntryFileDao;
 import com.ustadmobile.core.impl.UmCallback;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.util.UMCalendarUtil;
+import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.view.ContentEntryDetailView;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.ContentEntryFile;
@@ -56,11 +59,32 @@ public class EntryDetailPresenter extends UstadBaseController<ContentEntryDetail
             }
         });
 
+        contentEntryDao.findAllLanguageRelatedEntries(entryUuid, new UmCallback<List<ContentEntry>>() {
+
+            @Override
+            public void onSuccess(List<ContentEntry> result) {
+                viewContract.setLanguageContent(result);
+            }
+
+            @Override
+            public void onFailure(Throwable exception) {
+
+            }
+        });
+
 
     }
 
     @Override
     public void setUIStrings() {
 
+    }
+
+    public void openTranslation(ContentEntry entry) {
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        Hashtable args = new Hashtable();
+        Long entryUid = entry.getContentEntryUid();
+        args.put(ARG_CONTENT_ENTRY_UID, entryUid);
+        impl.go(ContentEntryDetailView.VIEW_NAME, args, view.getContext());
     }
 }

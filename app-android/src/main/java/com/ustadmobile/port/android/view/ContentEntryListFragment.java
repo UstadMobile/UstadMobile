@@ -26,7 +26,7 @@ import com.ustadmobile.port.android.util.UMAndroidUtil;
  * Activities containing this fragment MUST implement the {@link}
  * interface.
  */
-public class ContentEntryListFragment extends UstadBaseFragment implements ContentEntryView{
+public class ContentEntryListFragment extends UstadBaseFragment implements ContentEntryView, ContentEntryRecyclerViewAdapter.AdapterViewListener {
 
 
     private EntryListPresenter entryListPresenter;
@@ -40,10 +40,9 @@ public class ContentEntryListFragment extends UstadBaseFragment implements Conte
     public ContentEntryListFragment() {
     }
 
+
     public interface ContentEntryListener {
-
         void setTitle(String title);
-
     }
 
 
@@ -97,7 +96,7 @@ public class ContentEntryListFragment extends UstadBaseFragment implements Conte
 
     @Override
     public void setContentEntryProvider(UmProvider<ContentEntry> entryProvider) {
-        ContentEntryRecyclerViewAdapter recyclerAdapter = new ContentEntryRecyclerViewAdapter(entryListPresenter);
+        ContentEntryRecyclerViewAdapter recyclerAdapter = new ContentEntryRecyclerViewAdapter(this);
         DataSource.Factory<Integer, ContentEntry> factory =
                 (DataSource.Factory<Integer, ContentEntry>) entryProvider.getProvider();
         LiveData<PagedList<ContentEntry>> data =
@@ -111,6 +110,11 @@ public class ContentEntryListFragment extends UstadBaseFragment implements Conte
     public void setToolbarTitle(String title) {
         if(contentEntryListener != null)
             contentEntryListener.setTitle(title);
+    }
+
+    @Override
+    public void contentEntryClicked(ContentEntry entry) {
+        entryListPresenter.handleContentEntryClicked(entry);
     }
 
 }

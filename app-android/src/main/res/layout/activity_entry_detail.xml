@@ -14,8 +14,8 @@
             layout="@layout/toolbar"
             android:layout_width="0dp"
             android:layout_height="56dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"/>
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
 
         <ImageView
             android:id="@+id/entry_detail_thumbnail"
@@ -31,6 +31,9 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
+            android:textColor="@android:color/black"
+            android:textSize="20sp"
+            tools:text="Content Title"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/entry_detail_thumbnail"
             app:layout_constraintTop_toBottomOf="@id/entry_detail_toolbar" />
@@ -40,6 +43,9 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
+            android:textSize="16sp"
+            tools:text="Author"
+            android:textColor="@android:color/black"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/entry_detail_thumbnail"
             app:layout_constraintTop_toBottomOf="@id/entry_detail_title" />
@@ -49,6 +55,9 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
+            android:textSize="14sp"
+            tools:text="BY_SA"
+            android:textColor="@android:color/black"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/entry_detail_thumbnail"
             app:layout_constraintTop_toBottomOf="@id/entry_detail_author" />
@@ -57,11 +66,11 @@
             android:id="@+id/entry_detail_button"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:text="Download"
             android:layout_margin="8dp"
-            android:textColor="@android:color/white"
             android:background="@color/primary"
+            android:text="Download"
+            android:textColor="@android:color/white"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/entry_detail_thumbnail" />
 
@@ -81,10 +90,10 @@
             android:layout_width="@dimen/dimen_16dp"
             android:layout_height="@dimen/dimen_16dp"
             android:layout_marginTop="@dimen/dimen_8dp"
-            app:layout_constraintStart_toStartOf="@id/entry_detail_content_size"
+            android:src="@drawable/download_archive_tray"
             app:layout_constraintEnd_toEndOf="@id/entry_detail_content_size"
-            app:layout_constraintTop_toBottomOf="@id/library_size_divider"
-            android:src="@drawable/download_archive_tray"/>
+            app:layout_constraintStart_toStartOf="@id/entry_detail_content_size"
+            app:layout_constraintTop_toBottomOf="@id/library_size_divider" />
 
 
         <TextView
@@ -92,11 +101,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
-            app:layout_constraintStart_toStartOf="parent"
+            android:textColor="@android:color/black"
+            android:textSize="14sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.1"
-            tools:text="50 mb"
-            app:layout_constraintTop_toBottomOf="@id/image_content_size"/>
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/image_content_size"
+            tools:text="50 mb" />
 
         <View
             android:id="@+id/description_divider"
@@ -112,8 +123,10 @@
             android:id="@+id/entry_detail_description_label"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="Description"
             android:layout_margin="8dp"
+            android:text="Description"
+            android:textColor="@android:color/black"
+            android:textSize="16sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/description_divider" />
@@ -123,10 +136,11 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
+            android:textColor="@android:color/black"
+            android:textSize="14sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/entry_detail_description_label" />
-
 
         <View
             android:id="@+id/language_divider"
@@ -142,22 +156,34 @@
             android:id="@+id/entry_detail_available_label"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="Also Available in:"
             android:layout_margin="8dp"
+            android:textSize="16sp"
+            android:textColor="@android:color/black"
+            android:text="Also Available in:"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/language_divider" />
 
 
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/entry_detail_flex"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/entry_detail_available_label" />
+
         <TextView
             android:id="@+id/entry_detail_see_also_label"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="SEE ALSO"
             android:layout_margin="8dp"
+            android:text="SEE ALSO"
+            android:textSize="16sp"
+            android:textColor="@android:color/black"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/entry_detail_available_label" />
+            app:layout_constraintTop_toBottomOf="@id/entry_detail_flex" />
 
 
     </android.support.constraint.ConstraintLayout>

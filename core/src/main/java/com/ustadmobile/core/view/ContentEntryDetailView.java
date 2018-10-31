@@ -12,4 +12,6 @@ public interface ContentEntryDetailView extends UstadView {
     void setContentInfo(ContentEntry contentEntry);
 
     void setFileInfo(List<ContentEntryFile> filesByContentEntryUid);
+
+    void setLanguageContent(List<ContentEntry> result);
 }
