@@ -6,6 +6,7 @@ import com.ustadmobile.core.db.dao.ContentEntryDao;
 import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.ScraperConstants;
+import com.ustadmobile.lib.contentscrapers.edraakK12.IndexEdraakK12Content;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 
 import org.jsoup.Jsoup;
@@ -43,6 +44,20 @@ public class IndexDdlContent {
     private ContentEntryDao contentEntryDao;
     private ContentEntryParentChildJoinDao contentParentChildJoinDao;
     private ContentEntryContentCategoryJoinDao contentCategoryChildJoinDao;
+
+
+    public static void main(String[] args) throws IOException {
+        if (args.length != 2) {
+            System.err.println("Usage: <ddl website url> <file destination>");
+            System.exit(1);
+        }
+
+        System.out.println(args[0]);
+        System.out.println(args[1]);
+        new IndexDdlContent().findContent(args[0], new File(args[1]));
+    }
+
+
 
     public void findContent(String urlString, File destinationDir) throws IOException {
 

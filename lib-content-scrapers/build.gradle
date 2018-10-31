@@ -48,6 +48,16 @@ task scrapeContent(type: JavaExec) {
         args project.getProperties().get("findAsbDir")
     }
 
+    if(project.hasProperty("findDdlUrl") && project.hasProperty("findDdlDir")) {
+        main "com.ustadmobile.lib.contentscrapers.ddl.IndexDdlContent"
+        args  project.getProperties().get("findDdlUrl"), project.getProperties().get("findDdlDir")
+    }
+    if(project.hasProperty("ddlUrl") && project.hasProperty("ddlDir")) {
+        main "com.ustadmobile.lib.contentscrapers.ddl.DdlContentScraper"
+        args  project.getProperties().get("ddlUrl"), project.getProperties().get("ddlDir")
+    }
+
+
 
     outputs.upToDateWhen { false }
 }

@@ -5,6 +5,7 @@ import com.ustadmobile.core.db.dao.ContentEntryContentEntryFileJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryDao;
 import com.ustadmobile.core.db.dao.ContentEntryFileDao;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
+import com.ustadmobile.lib.contentscrapers.edraakK12.EdraakK12ContentScraper;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.ContentEntryContentEntryFileJoin;
 import com.ustadmobile.lib.db.entities.ContentEntryFile;
@@ -57,6 +58,25 @@ public class DdlContentScraper {
         contentEntryFileDao = db.getContentEntryFileDao();
         contentEntryFileJoinDao = db.getContentEntryContentEntryFileJoinDao();
     }
+
+    public static void main(String[] args) throws URISyntaxException {
+        if (args.length != 2) {
+            System.err.println("Usage: <ddl website url> <file destination>");
+            System.exit(1);
+        }
+
+        System.out.println(args[0]);
+        System.out.println(args[1]);
+        try {
+            new DdlContentScraper(args[0], new File(args[1])).scrapeContent();
+        } catch (IOException e) {
+            System.err.println("Exception running scrapeContent");
+            e.printStackTrace();
+        }
+
+    }
+
+
 
     public void scrapeContent() throws IOException, URISyntaxException {
 
