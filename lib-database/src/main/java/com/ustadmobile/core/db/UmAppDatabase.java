@@ -74,7 +74,7 @@ import com.ustadmobile.lib.db.entities.PersonCustomFieldValue;
         PersonCustomField.class, PersonCustomFieldValue.class,
         ContentEntry.class, ContentEntryContentCategoryJoin.class,
         ContentEntryContentEntryFileJoin.class, ContentEntryFile.class,
-        ContentEntryParentChildJoin.class, ContentEntryRelatedEntryJoin.class
+        ContentEntryParentChildJoin.class, ContentEntryRelatedEntryJoin.class, ContentEntryFileStatus.class
 })
 public abstract class UmAppDatabase{
 
