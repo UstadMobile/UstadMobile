@@ -214,6 +214,7 @@ public class IndexCategoryCK12Content {
         }
 
         Document doc = Jsoup.parse(driver.getPageSource());
+        driver.close();
 
         Set<String> subCategory = new HashSet<>();
         Elements gradesList = doc.select("li.js-grade a");
@@ -367,6 +368,7 @@ public class IndexCategoryCK12Content {
         }
 
         Document doc = Jsoup.parse(driver.getPageSource());
+        driver.close();
 
         int count = 0;
         Elements headerList = doc.select("div.topic-details-container");
@@ -573,6 +575,7 @@ public class IndexCategoryCK12Content {
 
         }
 
+        driver.close();
 
     }
 
