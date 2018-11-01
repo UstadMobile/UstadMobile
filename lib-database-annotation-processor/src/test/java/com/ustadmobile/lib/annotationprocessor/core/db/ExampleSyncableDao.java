@@ -1,5 +1,6 @@
 package com.ustadmobile.lib.annotationprocessor.core.db;
 
+import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmQuery;
@@ -53,6 +54,14 @@ public abstract class ExampleSyncableDao implements SyncableDao<ExampleSyncableE
     @UmQuery("UPDATE ExampleSyncableEntity SET title = :title WHERE uid = :uid")
     @UmRestAccessible
     public abstract void updateTitleAsync(long uid, String title, UmCallback<Void> callback);
+
+    @UmQuery("SELECT title FROM ExampleSyncableEntity WHERE exampleSyncableUid = :uid")
+    @UmRestAccessible
+    public abstract UmLiveData<String> findTitleLive(long uid);
+
+    @UmQuery("SELECT * FROM ExampleSyncableEntity")
+    @UmRestAccessible
+    public abstract UmLiveData<List<ExampleSyncableEntity>> findAllLive();
 
 
 }

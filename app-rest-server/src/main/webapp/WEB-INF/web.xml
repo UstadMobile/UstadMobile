@@ -12,7 +12,7 @@
 
         <init-param>
             <param-name>jersey.config.server.provider.classnames</param-name>
-            <param-value>org.glassfish.jersey.jackson.JacksonFeature</param-value>
+            <param-value>org.glassfish.jersey.jackson.JacksonFeature;org.glassfish.jersey.media.multipart.MultiPartFeature</param-value>
         </init-param>
 
     </servlet>

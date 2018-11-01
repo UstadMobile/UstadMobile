@@ -1,6 +1,7 @@
 package com.ustadmobile.lib.annotationprocessor.core;
 
 
+import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.impl.UmCallback;
 
 import java.util.ArrayList;
@@ -96,6 +97,21 @@ public class DaoMethodInfo {
     }
 
     /**
+     * Determine if this method uses a live data return type
+     *
+     * @return true if the return type is live data, false otherwise
+     */
+    public boolean isLiveDataReturn() {
+        if(processingEnv.getElementUtils().getTypeElement(UmLiveData.class.getName())
+                .equals(processingEnv.getTypeUtils().asElement(method.getReturnType()))) {
+            return true;
+        }else {
+            return false;
+        }
+    }
+
+
+    /**
      * Determine what type of entity parameter is being used for an Insert, Update, or Delete method
      * (where the entity is a parameter of the method). This will figure out the actually entity
      * TypeMirror, regardless of whether the parameter is specified directly, or if the method accepts
@@ -137,6 +153,23 @@ public class DaoMethodInfo {
 
         return DbProcessorUtils.resolveType(resultType, daoClass, processingEnv);
     }
+
+    /**
+     * Resolve the type of entity, or primitive. The difference to resolveResultType is that this
+     * will resolve UmLiveData type parameters.
+     *
+     * @return TypeMirror of the entity of primitive that is being returned. This will not unwrap
+     * the List or Array type if applicable, but types will be resolved.
+     */
+    public TypeMirror resolveEntityType() {
+        if(isLiveDataReturn()) {
+            TypeMirror resultType = ((DeclaredType)method.getReturnType()).getTypeArguments().get(0);
+            return DbProcessorUtils.resolveType(resultType, daoClass, processingEnv);
+        }else {
+            return resolveResultType();
+        }
+    }
+
 
     /**
      * As per resolveResultType, but returning an element. Synonymous to

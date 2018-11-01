@@ -15,6 +15,8 @@ import org.junit.Test;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -110,6 +112,39 @@ public class TestJerseyResource {
 
         Assert.assertEquals("Expected result for getTitleByUid returned", "Hello Async World",
                 result);
+    }
+
+    @Test
+    public void testLiveDataReturn() {
+        ExampleDatabase db = ExampleDatabase.getInstance(null);
+        db.clearAll();
+
+        ExampleSyncableEntity e2 = new ExampleSyncableEntity();
+        e2.setTitle("LiveData Return");
+        long insertedUid = db.getExampleSyncableDao().insert(e2);
+
+        String result = target.path("ExampleSyncableDao/findTitleLive")
+                .queryParam("uid", String.valueOf(insertedUid))
+                .request().get(String.class);
+        Assert.assertEquals("Expected result for getTitleByUidLive returned", "LiveData Return",
+                result);
+    }
+
+    @Test
+    public void testLiveDataList() {
+        ExampleDatabase db = ExampleDatabase.getInstance(null);
+        db.clearAll();
+        ExampleSyncableEntity e1 = new ExampleSyncableEntity();
+        e1.setTitle("e1");
+        ExampleSyncableEntity e2 = new ExampleSyncableEntity();
+        e2.setTitle("e2");
+
+        db.getExampleSyncableDao().insertList(Arrays.asList(e1, e2));
+
+        List<ExampleSyncableEntity> resultList = target.path("ExampleSyncableDao/findAllLive")
+                .request().get(new GenericType<List<ExampleSyncableEntity>>(){});
+        Assert.assertEquals("LiveData list has two entities which were inserted", 2,
+                resultList.size());
     }
 
 }

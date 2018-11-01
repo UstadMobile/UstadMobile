@@ -10,6 +10,7 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
+import com.ustadmobile.core.db.UmObserver;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.lib.database.annotation.UmRestAccessible;
 
@@ -19,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
@@ -75,35 +77,35 @@ public class DbProcessorJerseyResource extends AbstractDbProcessor {
                         FIELDNAME_SERVLET_CONTEXT).addAnnotation(Context.class).build());
 
         for(Element annotatedElement : annotatedElementList) {
-            ExecutableElement methodElement = (ExecutableElement)annotatedElement;
+            ExecutableElement methodElement = (ExecutableElement) annotatedElement;
             DaoMethodInfo methodInfo = new DaoMethodInfo(methodElement, daoType, processingEnv);
-            TypeName resultTypeName = TypeName.get(methodInfo.resolveResultType());
+            TypeName resultTypeName = TypeName.get(methodInfo.resolveEntityType());
             boolean primitiveToStringResult = false;
             boolean isVoidResult = isVoid(methodInfo.resolveResultType());
 
-            if(resultTypeName.isPrimitive() || resultTypeName.isBoxedPrimitive()) {
+            if (resultTypeName.isPrimitive() || resultTypeName.isBoxedPrimitive()) {
                 resultTypeName = ClassName.get(String.class);
                 primitiveToStringResult = true;
             }
 
-            if(resultTypeName.equals(ClassName.get(Void.class))) {
+            if (resultTypeName.equals(ClassName.get(Void.class))) {
                 resultTypeName = TypeName.VOID;
             }
 
 
             MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(
                     methodElement.getSimpleName().toString())
-                .addModifiers(Modifier.PUBLIC)
-                .returns(resultTypeName)
-                .addAnnotation(AnnotationSpec.builder(Path.class).addMember("value",
-                        "\"/$L\"", methodElement.getSimpleName().toString()).build());
+                    .addModifiers(Modifier.PUBLIC)
+                    .returns(resultTypeName)
+                    .addAnnotation(AnnotationSpec.builder(Path.class).addMember("value",
+                            "\"/$L\"", methodElement.getSimpleName().toString()).build());
 
             addJaxWsParameters(methodElement, daoType, methodBuilder);
             addJaxWsMethodAnnotations(methodElement, daoType, methodBuilder);
 
             ExecutableElement daoGetter = DbProcessorUtils.findDaoGetter(daoType, dbType,
                     processingEnv);
-            if(daoGetter == null) {
+            if (daoGetter == null) {
                 messager.printMessage(Diagnostic.Kind.ERROR,
                         formatMethodForErrorMessage(methodElement, daoType) + " : cannot find database getter method");
                 continue;
@@ -114,7 +116,79 @@ public class DbProcessorJerseyResource extends AbstractDbProcessor {
                             FIELDNAME_SERVLET_CONTEXT, daoGetter.getSimpleName());
 
 
-            if(!methodInfo.isAsyncMethod()) {
+            if (methodInfo.isAsyncMethod()) {
+                codeBlock.add("$1T _latch = new $1T(1);\n", CountDownLatch.class);
+                if (!isVoidResult)
+                    codeBlock.add("$1T[] _resultArr = new $1T[1];\n", methodInfo.resolveResultType());
+
+
+                codeBlock.add("_dao.$L(", methodElement.getSimpleName());
+                int paramCount = 0;
+                for (VariableElement param : methodElement.getParameters()) {
+                    if (paramCount > 0)
+                        codeBlock.add(",");
+                    if (!umCallbackTypeElement.equals(processingEnv.getTypeUtils()
+                            .asElement(param.asType()))) {
+                        codeBlock.add(param.getSimpleName().toString());
+                    } else {
+                        CodeBlock.Builder onSuccessCode = CodeBlock.builder();
+                        if (!isVoidResult)
+                            onSuccessCode.add("_resultArr[0] = _result;\n");
+
+                        onSuccessCode.add("_latch.countDown();\n");
+
+                        TypeSpec callbackTypeSpec = TypeSpec.anonymousClassBuilder("")
+                                .addSuperinterface(ParameterizedTypeName.get(ClassName.get(UmCallback.class),
+                                        TypeName.get(methodInfo.resolveResultType())))
+                                .addMethod(
+                                        MethodSpec.methodBuilder("onSuccess")
+                                                .addParameter(TypeName.get(methodInfo.resolveResultType()), "_result")
+                                                .addModifiers(Modifier.PUBLIC)
+                                                .addCode(onSuccessCode.build()).build())
+                                .addMethod(
+                                        MethodSpec.methodBuilder("onFailure")
+                                                .addModifiers(Modifier.PUBLIC)
+                                                .addParameter(Throwable.class, "_throwable")
+                                                .addCode("_latch.countDown();\n").build()).build();
+                        codeBlock.add("$L", callbackTypeSpec);
+
+                    }
+
+                    paramCount++;
+                }
+
+                codeBlock.add(");\n")
+                        .beginControlFlow("try")
+                        .add("_latch.await($L, $T.MILLISECONDS);\n", ASYNC_TIMEOUT_DEFAULT,
+                                TimeUnit.class)
+                        .nextControlFlow("catch($T _e)", InterruptedException.class)
+                        .endControlFlow();
+                if (!isVoidResult)
+                    codeBlock.add("return _resultArr[0];\n");
+            }else if(methodInfo.isLiveDataReturn()) {
+                TypeMirror liveDataType = methodInfo.resolveEntityType();
+                codeBlock.add("$1T _latch = new $1T(1);\n", CountDownLatch.class)
+                    .add("$1T<$2T> _resultRef = new $1T<>();\n", AtomicReference.class,
+                            liveDataType)
+                    .add("$T _liveData = _dao.$L",
+                        methodInfo.resolveResultType(), methodElement.getSimpleName())
+                    .add(makeNamedParameterMethodCall(methodElement.getParameters()))
+                    .add(";\n")
+                    .beginControlFlow("$T<$T> _observer = (_value) -> ",
+                        UmObserver.class, liveDataType)
+                        .add("_resultRef.set(_value);\n")
+                        .add("_latch.countDown();\n")
+                    .endControlFlow(" ")
+                    .add("_liveData.observeForever(_observer);\n")
+                    .beginControlFlow("try")
+                        .add("_latch.await($L, $T.MILLISECONDS);\n", ASYNC_TIMEOUT_DEFAULT,
+                                TimeUnit.class)
+                    .nextControlFlow("catch($T _e)", InterruptedException.class)
+                        .add("_e.printStackTrace();\n")
+                    .endControlFlow()
+                    .add("_liveData.removeObserver(_observer);\n")
+                    .add("return _resultRef.get();\n");
+            }else {
                 if(!isVoidResult)
                     codeBlock.add("return ");
 
@@ -128,55 +202,6 @@ public class DbProcessorJerseyResource extends AbstractDbProcessor {
                     codeBlock.add(")");
 
                 codeBlock.add(";\n");
-            }else {
-                codeBlock.add("$1T _latch = new $1T(1);\n", CountDownLatch.class);
-                if(!isVoidResult)
-                    codeBlock.add("$1T[] _resultArr = new $1T[1];\n", methodInfo.resolveResultType());
-
-
-                codeBlock.add("_dao.$L(", methodElement.getSimpleName());
-                int paramCount = 0;
-                for(VariableElement param : methodElement.getParameters()){
-                    if(paramCount > 0)
-                        codeBlock.add(",");
-                    if(!umCallbackTypeElement.equals(processingEnv.getTypeUtils()
-                            .asElement(param.asType()))) {
-                        codeBlock.add(param.getSimpleName().toString());
-                    }else {
-                        CodeBlock.Builder onSuccessCode = CodeBlock.builder();
-                        if(!isVoidResult)
-                            onSuccessCode.add("_resultArr[0] = _result;\n");
-
-                        onSuccessCode.add("_latch.countDown();\n");
-
-                        TypeSpec callbackTypeSpec = TypeSpec.anonymousClassBuilder("")
-                                .addSuperinterface(ParameterizedTypeName.get(ClassName.get(UmCallback.class),
-                                        TypeName.get(methodInfo.resolveResultType())))
-                                .addMethod(
-                                    MethodSpec.methodBuilder("onSuccess")
-                                        .addParameter(TypeName.get(methodInfo.resolveResultType()), "_result")
-                                        .addModifiers(Modifier.PUBLIC)
-                                        .addCode(onSuccessCode.build()).build())
-                                .addMethod(
-                                    MethodSpec.methodBuilder("onFailure")
-                                        .addModifiers(Modifier.PUBLIC)
-                                        .addParameter(Throwable.class, "_throwable")
-                                        .addCode("_latch.countDown();\n").build()).build();
-                        codeBlock.add("$L", callbackTypeSpec);
-
-                    }
-
-                    paramCount++;
-                }
-
-                codeBlock.add(");\n")
-                    .beginControlFlow("try")
-                    .add("_latch.await($L, $T.MILLISECONDS);\n", ASYNC_TIMEOUT_DEFAULT,
-                            TimeUnit.class)
-                    .nextControlFlow("catch($T _e)", InterruptedException.class)
-                    .endControlFlow();
-                if(!isVoidResult)
-                    codeBlock.add("return _resultArr[0];\n");
             }
 
             methodBuilder.addCode(codeBlock.build());
@@ -238,7 +263,7 @@ public class DbProcessorJerseyResource extends AbstractDbProcessor {
         }
 
         DaoMethodInfo methodInfo = new DaoMethodInfo(method, clazzDao, processingEnv);
-        TypeMirror resultType = methodInfo.resolveResultType();
+        TypeMirror resultType = methodInfo.resolveEntityType();
         TypeName resultTypeName = TypeName.get(resultType);
         TypeElement stringTypeEl = processingEnv.getElementUtils().getTypeElement(
                 String.class.getName());
