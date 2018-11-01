@@ -8,6 +8,7 @@ import com.ustadmobile.core.db.dao.ContentEntryContentCategoryJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryContentEntryFileJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryDao;
 import com.ustadmobile.core.db.dao.ContentEntryFileDao;
+import com.ustadmobile.core.db.dao.ContentEntryFileStatusDao;
 import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryRelatedEntryJoinDao;
 import com.ustadmobile.core.db.dao.CrawJoblItemDao;
@@ -40,6 +41,7 @@ import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.ContentEntryContentCategoryJoin;
 import com.ustadmobile.lib.db.entities.ContentEntryContentEntryFileJoin;
 import com.ustadmobile.lib.db.entities.ContentEntryFile;
+import com.ustadmobile.lib.db.entities.ContentEntryFileStatus;
 import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin;
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoin;
 import com.ustadmobile.lib.db.entities.CrawlJob;
@@ -158,6 +160,8 @@ public abstract class UmAppDatabase{
     public abstract ContentEntryParentChildJoinDao getContentEntryParentChildJoinDao();
 
     public abstract ContentEntryRelatedEntryJoinDao getContentEntryRelatedEntryJoinDao();
+
+    public abstract ContentEntryFileStatusDao getContentEntryFileStatusDao();
 
     @UmDbContext
     public abstract Object getContext();

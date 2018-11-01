@@ -3,15 +3,18 @@ package com.ustadmobile.lib.contentscrapers.edraakK12;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.ustadmobile.core.db.UmAppDatabase;
+import com.ustadmobile.core.db.dao.ClazzDao_JdbcDaoImpl;
 import com.ustadmobile.core.db.dao.ContentEntryContentEntryFileJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryDao;
 import com.ustadmobile.core.db.dao.ContentEntryFileDao;
+import com.ustadmobile.core.db.dao.ContentEntryFileStatusDao;
 import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.ScraperConstants;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.ContentEntryContentEntryFileJoin;
 import com.ustadmobile.lib.db.entities.ContentEntryFile;
+import com.ustadmobile.lib.db.entities.ContentEntryFileStatus;
 import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin;
 
 import org.apache.commons.codec.digest.DigestUtils;
@@ -56,6 +59,7 @@ public class IndexEdraakK12Content {
     private ContentEntryParentChildJoinDao contentParentChildJoinDao;
     private ContentEntryFileDao contentEntryFileDao;
     private ContentEntryContentEntryFileJoinDao contentEntryFileJoin;
+    private ContentEntryFileStatusDao contentFileStatusDao;
 
 
     public static void main(String[] args) {
@@ -93,6 +97,7 @@ public class IndexEdraakK12Content {
         contentParentChildJoinDao = db.getContentEntryParentChildJoinDao();
         contentEntryFileDao = db.getContentEntryFileDao();
         contentEntryFileJoin = db.getContentEntryContentEntryFileJoinDao();
+        contentFileStatusDao = db.getContentEntryFileStatusDao();
 
         try {
             URLConnection connection = url.openConnection();
@@ -178,6 +183,12 @@ public class IndexEdraakK12Content {
                     fileJoin.setCecefjContentEntryFileUid(contentEntryFile.getContentEntryFileUid());
                     fileJoin.setCecefjContentEntryUid(parentEntry.getContentEntryUid());
                     fileJoin.setCecefjUid(contentEntryFileJoin.insert(fileJoin));
+
+                    ContentEntryFileStatus fileStatus = new ContentEntryFileStatus();
+                    fileStatus.setCefsContentEntryFileUid(contentEntryFile.getContentEntryFileUid());
+                    fileStatus.setFilePath(content.getAbsolutePath());
+                    fileStatus.setCefsUid(contentFileStatusDao.insert(fileStatus));
+
 
                 }
 

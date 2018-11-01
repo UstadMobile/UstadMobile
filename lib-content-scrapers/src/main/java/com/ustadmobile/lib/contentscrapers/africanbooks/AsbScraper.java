@@ -6,12 +6,14 @@ import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.ContentEntryContentEntryFileJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryDao;
 import com.ustadmobile.core.db.dao.ContentEntryFileDao;
+import com.ustadmobile.core.db.dao.ContentEntryFileStatusDao;
 import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.ScraperConstants;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.ContentEntryContentEntryFileJoin;
 import com.ustadmobile.lib.db.entities.ContentEntryFile;
+import com.ustadmobile.lib.db.entities.ContentEntryFileStatus;
 import com.ustadmobile.lib.db.entities.OpdsEntry;
 import com.ustadmobile.lib.db.entities.OpdsEntryParentToChildJoin;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
@@ -73,6 +75,7 @@ public class AsbScraper {
     private ContentEntryParentChildJoinDao contentParentChildJoinDao;
     private ContentEntryFileDao contentEntryFileDao;
     private ContentEntryContentEntryFileJoinDao contentEntryFileJoinDao;
+    private ContentEntryFileStatusDao contentFileStatusDao;
 
     public static void main(String[] args) {
         if (args.length != 1) {
@@ -99,6 +102,7 @@ public class AsbScraper {
         contentParentChildJoinDao = db.getContentEntryParentChildJoinDao();
         contentEntryFileDao = db.getContentEntryFileDao();
         contentEntryFileJoinDao = db.getContentEntryContentEntryFileJoinDao();
+        contentFileStatusDao = db.getContentEntryFileStatusDao();
 
         ContentEntry masterRootParent = contentEntryDao.findBySourceUrl("root");
         if (masterRootParent == null) {
@@ -196,6 +200,12 @@ public class AsbScraper {
                     fileJoin.setCecefjContentEntryFileUid(contentEntryFile.getContentEntryFileUid());
                     fileJoin.setCecefjContentEntryUid(childEntry.getContentEntryUid());
                     fileJoin.setCecefjUid(contentEntryFileJoinDao.insert(fileJoin));
+
+                    ContentEntryFileStatus fileStatus = new ContentEntryFileStatus();
+                    fileStatus.setCefsContentEntryFileUid(contentEntryFile.getContentEntryFileUid());
+                    fileStatus.setFilePath(ePubFile.getAbsolutePath());
+                    fileStatus.setCefsUid(contentFileStatusDao.insert(fileStatus));
+
 
                 } catch (IOException e) {
                     System.err.println("IO Exception downloading/checking : " + ePubFile.getName());

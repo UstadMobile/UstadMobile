@@ -1,10 +1,12 @@
 package com.ustadmobile.lib.contentscrapers.phetsimulation;
 
 import com.ustadmobile.core.db.UmAppDatabase;
+import com.ustadmobile.core.db.dao.ClazzDao_JdbcDaoImpl;
 import com.ustadmobile.core.db.dao.ContentEntryContentCategoryJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryContentEntryFileJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryDao;
 import com.ustadmobile.core.db.dao.ContentEntryFileDao;
+import com.ustadmobile.core.db.dao.ContentEntryFileStatusDao;
 import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryRelatedEntryJoinDao;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
@@ -13,6 +15,7 @@ import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.ContentEntryContentCategoryJoin;
 import com.ustadmobile.lib.db.entities.ContentEntryContentEntryFileJoin;
 import com.ustadmobile.lib.db.entities.ContentEntryFile;
+import com.ustadmobile.lib.db.entities.ContentEntryFileStatus;
 import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin;
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoin;
 
@@ -49,6 +52,7 @@ public class IndexPhetContentScraper {
     private ContentEntryContentEntryFileJoinDao contentEntryFileJoin;
     private ContentEntryContentCategoryJoinDao contentEntryCategoryJoinDao;
     private ContentEntryRelatedEntryJoinDao contentEntryRelatedJoinDao;
+    private ContentEntryFileStatusDao contentFileStatusDao;
 
 
     public static void main(String[] args) {
@@ -93,6 +97,7 @@ public class IndexPhetContentScraper {
         contentEntryFileJoin = db.getContentEntryContentEntryFileJoinDao();
         contentEntryCategoryJoinDao = db.getContentEntryContentCategoryJoinDao();
         contentEntryRelatedJoinDao = db.getContentEntryRelatedEntryJoinDao();
+        contentFileStatusDao = db.getContentEntryFileStatusDao();
 
         Document document = Jsoup.connect(urlString).get();
 
@@ -194,6 +199,12 @@ public class IndexPhetContentScraper {
                         fileJoin.setCecefjContentEntryFileUid(contentEntryFile.getContentEntryFileUid());
                         fileJoin.setCecefjContentEntryUid(englishSimContentEntry.getContentEntryUid());
                         fileJoin.setCecefjUid(contentEntryFileJoin.insert(fileJoin));
+
+                        ContentEntryFileStatus fileStatus = new ContentEntryFileStatus();
+                        fileStatus.setCefsContentEntryFileUid(contentEntryFile.getContentEntryFileUid());
+                        fileStatus.setFilePath(content.getAbsolutePath());
+                        fileStatus.setCefsUid(contentFileStatusDao.insert(fileStatus));
+
                     }
 
                     ArrayList<ContentEntry> categoryList = scraper.getCategoryRelations(contentEntryDao);
@@ -251,6 +262,12 @@ public class IndexPhetContentScraper {
                                 fileJoin.setCecefjContentEntryFileUid(contentEntryFile.getContentEntryFileUid());
                                 fileJoin.setCecefjContentEntryUid(englishSimContentEntry.getContentEntryUid());
                                 fileJoin.setCecefjUid(contentEntryFileJoin.insert(fileJoin));
+
+                                ContentEntryFileStatus fileStatus = new ContentEntryFileStatus();
+                                fileStatus.setCefsContentEntryFileUid(contentEntryFile.getContentEntryFileUid());
+                                fileStatus.setFilePath(content.getAbsolutePath());
+                                fileStatus.setCefsUid(contentFileStatusDao.insert(fileStatus));
+
 
                             }
 

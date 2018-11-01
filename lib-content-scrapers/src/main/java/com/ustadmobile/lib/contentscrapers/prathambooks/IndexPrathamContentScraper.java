@@ -4,16 +4,19 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.neovisionaries.i18n.LanguageCode;
 import com.ustadmobile.core.db.UmAppDatabase;
+import com.ustadmobile.core.db.dao.ClazzDao_JdbcDaoImpl;
 import com.ustadmobile.core.db.dao.ContentEntryContentCategoryJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryContentEntryFileJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryDao;
 import com.ustadmobile.core.db.dao.ContentEntryFileDao;
+import com.ustadmobile.core.db.dao.ContentEntryFileStatusDao;
 import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.ScraperConstants;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.ContentEntryContentEntryFileJoin;
 import com.ustadmobile.lib.db.entities.ContentEntryFile;
+import com.ustadmobile.lib.db.entities.ContentEntryFileStatus;
 import com.ustadmobile.lib.db.entities.OpdsEntry;
 import com.ustadmobile.lib.db.entities.OpdsEntryParentToChildJoin;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
@@ -68,6 +71,7 @@ public class IndexPrathamContentScraper {
     private ContentEntryParentChildJoinDao contentParentChildJoinDao;
     private ContentEntryFileDao contentEntryFileDao;
     private ContentEntryContentEntryFileJoinDao contentEntryFileJoinDao;
+    private ContentEntryFileStatusDao contentFileStatusDao;
 
     public static void main(String[] args) {
         if (args.length != 1) {
@@ -97,6 +101,7 @@ public class IndexPrathamContentScraper {
         contentParentChildJoinDao = db.getContentEntryParentChildJoinDao();
         contentEntryFileDao = db.getContentEntryFileDao();
         contentEntryFileJoinDao = db.getContentEntryContentEntryFileJoinDao();
+        contentFileStatusDao = db.getContentEntryFileStatusDao();
 
         ContentEntry masterRootParent = contentEntryDao.findBySourceUrl("root");
         if (masterRootParent == null) {
@@ -202,6 +207,12 @@ public class IndexPrathamContentScraper {
                 fileJoin.setCecefjContentEntryFileUid(contentEntryFile.getContentEntryFileUid());
                 fileJoin.setCecefjContentEntryUid(prathamParentEntry.getContentEntryUid());
                 fileJoin.setCecefjUid(contentEntryFileJoinDao.insert(fileJoin));
+
+                ContentEntryFileStatus fileStatus = new ContentEntryFileStatus();
+                fileStatus.setCefsContentEntryFileUid(contentEntryFile.getContentEntryFileUid());
+                fileStatus.setFilePath(content.getAbsolutePath());
+                fileStatus.setCefsUid(contentFileStatusDao.insert(fileStatus));
+
 
             } catch (Exception e) {
                 System.err.println("Error saving book " + contentBooksList.data.get(contentCount).slug);

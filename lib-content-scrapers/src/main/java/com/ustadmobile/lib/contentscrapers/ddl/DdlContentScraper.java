@@ -4,11 +4,12 @@ import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.ContentEntryContentEntryFileJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryDao;
 import com.ustadmobile.core.db.dao.ContentEntryFileDao;
+import com.ustadmobile.core.db.dao.ContentEntryFileStatusDao;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
-import com.ustadmobile.lib.contentscrapers.edraakK12.EdraakK12ContentScraper;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.ContentEntryContentEntryFileJoin;
 import com.ustadmobile.lib.db.entities.ContentEntryFile;
+import com.ustadmobile.lib.db.entities.ContentEntryFileStatus;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
@@ -45,6 +46,7 @@ public class DdlContentScraper {
     private final ContentEntryDao contentEntryDao;
     private final ContentEntryFileDao contentEntryFileDao;
     private final ContentEntryContentEntryFileJoinDao contentEntryFileJoinDao;
+    private final ContentEntryFileStatusDao contentFileStatusDao;
     private Document doc;
     ArrayList<ContentEntry> contentEntries;
 
@@ -57,6 +59,7 @@ public class DdlContentScraper {
         contentEntryDao = db.getContentEntryDao();
         contentEntryFileDao = db.getContentEntryFileDao();
         contentEntryFileJoinDao = db.getContentEntryContentEntryFileJoinDao();
+        contentFileStatusDao = db.getContentEntryFileStatusDao();
     }
 
     public static void main(String[] args) throws URISyntaxException {
@@ -136,6 +139,13 @@ public class DdlContentScraper {
             fileJoin.setCecefjContentEntryFileUid(contentEntryFile.getContentEntryFileUid());
             fileJoin.setCecefjContentEntryUid(contentEntry.getContentEntryUid());
             fileJoin.setCecefjUid(contentEntryFileJoinDao.insert(fileJoin));
+
+            ContentEntryFileStatus fileStatus = new ContentEntryFileStatus();
+            fileStatus.setCefsContentEntryFileUid(contentEntryFile.getContentEntryFileUid());
+            fileStatus.setFilePath(resourceFile.getAbsolutePath());
+            fileStatus.setCefsUid(contentFileStatusDao.insert(fileStatus));
+
+
 
             contentEntries.add(contentEntry);
         }
