@@ -41,6 +41,7 @@ import javax.tools.Diagnostic;
 import static com.ustadmobile.lib.annotationprocessor.core.DbProcessorCore.OPT_JDBC_OUTPUT;
 import static com.ustadmobile.lib.annotationprocessor.core.DbProcessorCore.OPT_JERSEY_RESOURCE_OUT;
 import static com.ustadmobile.lib.annotationprocessor.core.DbProcessorCore.OPT_NO_DEFAULT_FACTORY;
+import static com.ustadmobile.lib.annotationprocessor.core.DbProcessorCore.OPT_RETROFIT_OUTPUT;
 import static com.ustadmobile.lib.annotationprocessor.core.DbProcessorCore.OPT_ROOM_OUTPUT;
 
 /**
@@ -48,7 +49,8 @@ import static com.ustadmobile.lib.annotationprocessor.core.DbProcessorCore.OPT_R
  * processors for each implementation to be generated.
  */
 
-@SupportedOptions({OPT_ROOM_OUTPUT, OPT_JDBC_OUTPUT, OPT_NO_DEFAULT_FACTORY, OPT_JERSEY_RESOURCE_OUT})
+@SupportedOptions({OPT_ROOM_OUTPUT, OPT_JDBC_OUTPUT, OPT_NO_DEFAULT_FACTORY,
+        OPT_JERSEY_RESOURCE_OUT, OPT_RETROFIT_OUTPUT})
 public class DbProcessorCore extends AbstractProcessor{
 
     public static final String OPT_ROOM_OUTPUT = "umdb_room_out";
@@ -56,6 +58,8 @@ public class DbProcessorCore extends AbstractProcessor{
     public static final String OPT_JDBC_OUTPUT = "umdb_jdbc_out";
 
     public static final String OPT_JERSEY_RESOURCE_OUT = "umdb_jersey_res_out";
+
+    public static final String OPT_RETROFIT_OUTPUT = "umdb_retrofit_out";
 
     public static final String OPT_NO_DEFAULT_FACTORY = "umdb_no_default_factory";
 
@@ -68,6 +72,8 @@ public class DbProcessorCore extends AbstractProcessor{
     private DbProcessorJdbc dbProcessorJdbc;
 
     private DbProcessorJerseyResource dbProcessorJerseyResource;
+
+    private DbProcessorRetrofitRepository dbProcessorRetrofitRepository;
 
     @Override
     public Set<String> getSupportedAnnotationTypes() {
@@ -94,7 +100,8 @@ public class DbProcessorCore extends AbstractProcessor{
         dbProcessorJdbc.init(processingEnvironment);
         dbProcessorJerseyResource = new DbProcessorJerseyResource();
         dbProcessorJerseyResource.init(processingEnvironment);
-
+        dbProcessorRetrofitRepository = new DbProcessorRetrofitRepository();
+        dbProcessorRetrofitRepository.init(processingEnvironment);
     }
 
     @Override
@@ -108,6 +115,7 @@ public class DbProcessorCore extends AbstractProcessor{
         boolean result = dbProcessorRoom.process(annotations, roundEnvironment);
         result &= dbProcessorJdbc.process(annotations, roundEnvironment);
         result &= dbProcessorJerseyResource.process(annotations, roundEnvironment);
+        result &= dbProcessorRetrofitRepository.process(annotations, roundEnvironment);
 
         return result;
     }

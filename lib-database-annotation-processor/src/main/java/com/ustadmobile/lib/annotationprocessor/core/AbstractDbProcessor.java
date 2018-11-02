@@ -16,6 +16,7 @@ import com.ustadmobile.lib.database.annotation.UmDatabase;
 import com.ustadmobile.lib.database.annotation.UmDbContext;
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
+import com.ustadmobile.lib.database.annotation.UmRestAccessible;
 import com.ustadmobile.lib.database.annotation.UmSyncFindAllChanges;
 import com.ustadmobile.lib.database.annotation.UmSyncFindLocalChanges;
 import com.ustadmobile.lib.database.annotation.UmSyncFindUpdateable;
@@ -48,10 +49,15 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
-import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.tools.Diagnostic;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
 
 import static com.ustadmobile.lib.annotationprocessor.core.DbProcessorUtils.capitalize;
 import static com.ustadmobile.lib.annotationprocessor.core.DbProcessorUtils.findElementWithAnnotation;
@@ -774,5 +780,94 @@ public abstract class AbstractDbProcessor {
         }
     }
 
+    /**
+     * Get a list of all elements that could be accessible using a REST interface - this is used
+     * for generation of the Jersey resource and retrofit interface
+     *
+     * @param daoType TypeElement representing the DAO class
+     * @return List of elements that could be accessed via a REST interface
+     */
+    protected List<Element> findRestEnabledMethods(TypeElement daoType) {
+        List<Class<? extends Annotation>> annotationList = new ArrayList<>();
+        annotationList.add(UmRestAccessible.class);
 
+        return DbProcessorUtils.findElementsWithAnnotation(daoType,
+                annotationList, new ArrayList<>(), 0, processingEnv);
+    }
+
+
+    protected void addJaxWsParameters(ExecutableElement method, TypeElement clazzDao,
+                                      MethodSpec.Builder methodBuilder,
+                                      Class<? extends Annotation> queryParamAnnotation,
+                                      Class<? extends Annotation> requestBodyAnnotation) {
+
+        for(VariableElement param : method.getParameters()) {
+            if(umCallbackTypeElement.equals(processingEnv.getTypeUtils().asElement(param.asType())))
+                continue;
+
+            ParameterSpec.Builder paramSpec = ParameterSpec.builder(TypeName.get(
+                    DbProcessorUtils.resolveType(param.asType(), clazzDao, processingEnv)),
+                    param.getSimpleName().toString());
+
+            if(DbProcessorUtils.isQueryParam(param.asType(), processingEnv)) {
+                paramSpec.addAnnotation(AnnotationSpec.builder(queryParamAnnotation)
+                        .addMember("value", "$S", param.getSimpleName().toString()).build());
+            }else if(requestBodyAnnotation != null) {
+                paramSpec.addAnnotation(requestBodyAnnotation);
+            }
+
+            methodBuilder.addParameter(paramSpec.build());
+        }
+    }
+
+
+    protected void addJaxWsParameters(ExecutableElement method, TypeElement clazzDao,
+                                      MethodSpec.Builder methodBuilder) {
+        addJaxWsParameters(method, clazzDao, methodBuilder, QueryParam.class, null);
+    }
+
+    /**
+     * Add Produces, Consumes, GET/POST, etc.
+     *
+     * @param method
+     * @param clazzDao
+     * @param methodBuilder
+     */
+    protected void addJaxWsMethodAnnotations(ExecutableElement method, TypeElement clazzDao,
+                                             MethodSpec.Builder methodBuilder) {
+        int numNonQueryParams = DbProcessorUtils.getNonQueryParamCount(method, processingEnv,
+                processingEnv.getElementUtils().getTypeElement(UmCallback.class.getName()));
+
+        if(numNonQueryParams == 1) {
+            methodBuilder.addAnnotation(AnnotationSpec.builder(Consumes.class)
+                    .addMember("value", "$T.APPLICATION_JSON", MediaType.class).build())
+                    .addAnnotation(POST.class);
+        }else if(numNonQueryParams > 1) {
+            messager.printMessage(Diagnostic.Kind.ERROR,
+                    formatMethodForErrorMessage(method, clazzDao) + " : must not have " +
+                            "more than one non-query param type for a method with JAX-RS annotations");
+            return;
+        }else {
+            methodBuilder.addAnnotation(GET.class);
+        }
+
+        DaoMethodInfo methodInfo = new DaoMethodInfo(method, clazzDao, processingEnv);
+        TypeMirror resultType = methodInfo.resolveResultEntityType();
+        TypeName resultTypeName = TypeName.get(resultType);
+        TypeElement stringTypeEl = processingEnv.getElementUtils().getTypeElement(
+                String.class.getName());
+        String producesFormat;
+
+        if(!isVoid(resultType)) {
+            if (resultTypeName.isPrimitive() || resultTypeName.isBoxedPrimitive()
+                    || stringTypeEl.equals(processingEnv.getTypeUtils().asElement(resultType))) {
+                producesFormat = "$T.TEXT_PLAIN";
+            } else {
+                producesFormat = "$T.APPLICATION_JSON";
+            }
+
+            methodBuilder.addAnnotation(AnnotationSpec.builder(Produces.class).addMember("value",
+                    producesFormat, MediaType.class).build());
+        }
+    }
 }

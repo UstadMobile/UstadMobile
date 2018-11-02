@@ -163,7 +163,7 @@ public class DaoMethodInfo {
      * @return TypeMirror of the entity of primitive that is being returned. This will not unwrap
      * the List or Array type if applicable, but types will be resolved.
      */
-    public TypeMirror resolveEntityType() {
+    public TypeMirror resolveResultEntityType() {
         if(isLiveDataReturn()) {
             TypeMirror resultType = ((DeclaredType)method.getReturnType()).getTypeArguments().get(0);
             return DbProcessorUtils.resolveType(resultType, daoClass, processingEnv);

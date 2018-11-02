@@ -13,6 +13,7 @@ compileTestJava {
     options.compilerArgs += [
             "-Aumdb_jdbc_out=filer",
             "-Aumdb_jersey_res_out=filer",
+            "-Aumdb_retrofit_out=filer",
             "-Aumdb_no_default_factory=true"
     ]
 
@@ -24,6 +25,7 @@ compileTestJava {
     }
 }
 
+//sourceSets.test.java.srcDirs += ["$projectDir/tmp/java"]
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
@@ -32,6 +34,7 @@ dependencies {
     implementation project(":lib-util")
     implementation "com.squareup:javapoet:$version_javapoet"
     implementation "com.github.jsqlparser:jsqlparser:$version_jsqlparser"
+    implementation "com.squareup.retrofit2:retrofit:$version_retrofit"
 
     //SQLite dependencies
     implementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
@@ -47,6 +50,11 @@ dependencies {
     testImplementation "org.glassfish.jersey.inject:jersey-hk2:$version_jersey"
     testImplementation "org.glassfish.jersey.media:jersey-media-json-jackson:$version_jersey"
     testImplementation "org.glassfish.jersey.containers:jersey-container-grizzly2-http:$version_jersey"
+
+    //retrofit usage
+    testImplementation "com.squareup.retrofit2:converter-jackson:$version_retrofit"
+    testImplementation "com.squareup.retrofit2:converter-gson:$version_retrofit"
+    testImplementation "com.squareup.retrofit2:converter-scalars:$version_retrofit"
 
     testImplementation "javax.servlet:servlet-api:2.5"
 

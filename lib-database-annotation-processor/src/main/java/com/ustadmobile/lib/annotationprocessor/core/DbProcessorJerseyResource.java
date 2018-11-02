@@ -6,17 +6,13 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import com.ustadmobile.core.db.UmObserver;
 import com.ustadmobile.core.impl.UmCallback;
-import com.ustadmobile.lib.database.annotation.UmRestAccessible;
 
 import java.io.IOException;
-import java.lang.annotation.Annotation;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -30,14 +26,8 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.TypeMirror;
 import javax.tools.Diagnostic;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
 import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
 
 import static com.ustadmobile.lib.annotationprocessor.core.DbProcessorCore.OPT_JERSEY_RESOURCE_OUT;
 
@@ -61,12 +51,7 @@ public class DbProcessorJerseyResource extends AbstractDbProcessor {
 
     @Override
     public void processDbDao(TypeElement daoType, TypeElement dbType, String destination) throws IOException {
-        List<Class<? extends Annotation>> annotationList = new ArrayList<>();
-        annotationList.add(UmRestAccessible.class);
-
-        List<Element> resutList = new ArrayList<>();
-        List<Element> annotatedElementList =DbProcessorUtils.findElementsWithAnnotation(daoType,
-                        annotationList, resutList, 0, processingEnv);
+        List<Element> annotatedElementList = findRestEnabledMethods(daoType);
 
         TypeSpec.Builder resBuilder = TypeSpec.classBuilder(daoType.getSimpleName().toString() +
                 POSTFIX_RESUORCE)
@@ -79,7 +64,7 @@ public class DbProcessorJerseyResource extends AbstractDbProcessor {
         for(Element annotatedElement : annotatedElementList) {
             ExecutableElement methodElement = (ExecutableElement) annotatedElement;
             DaoMethodInfo methodInfo = new DaoMethodInfo(methodElement, daoType, processingEnv);
-            TypeName resultTypeName = TypeName.get(methodInfo.resolveEntityType());
+            TypeName resultTypeName = TypeName.get(methodInfo.resolveResultEntityType());
             boolean primitiveToStringResult = false;
             boolean isVoidResult = isVoid(methodInfo.resolveResultType());
 
@@ -184,7 +169,7 @@ public class DbProcessorJerseyResource extends AbstractDbProcessor {
                     codeBlock.add(";\n");
                 }
             }else if(methodInfo.isLiveDataReturn()) {
-                TypeMirror liveDataType = methodInfo.resolveEntityType();
+                TypeMirror liveDataType = methodInfo.resolveResultEntityType();
                 codeBlock.add("$1T _latch = new $1T(1);\n", CountDownLatch.class)
                     .add("$1T<$2T> _resultRef = new $1T<>();\n", AtomicReference.class,
                             liveDataType)
@@ -235,69 +220,6 @@ public class DbProcessorJerseyResource extends AbstractDbProcessor {
 
     }
 
-    protected void addJaxWsParameters(ExecutableElement method, TypeElement clazzDao,
-                                      MethodSpec.Builder methodBuilder) {
 
-        for(VariableElement param : method.getParameters()) {
-            if(umCallbackTypeElement.equals(processingEnv.getTypeUtils().asElement(param.asType())))
-                continue;
-
-            ParameterSpec.Builder paramSpec = ParameterSpec.builder(TypeName.get(
-                    DbProcessorUtils.resolveType(param.asType(), clazzDao, processingEnv)),
-                    param.getSimpleName().toString());
-
-            if(DbProcessorUtils.isQueryParam(param.asType(), processingEnv)) {
-                paramSpec.addAnnotation(AnnotationSpec.builder(QueryParam.class)
-                        .addMember("value", "$S", param.getSimpleName().toString()).build());
-            }
-
-            methodBuilder.addParameter(paramSpec.build());
-        }
-    }
-
-    /**
-     * Add Produces, Consumes, GET/POST, etc.
-     *
-     * @param method
-     * @param clazzDao
-     * @param methodBuilder
-     */
-    protected void addJaxWsMethodAnnotations(ExecutableElement method, TypeElement clazzDao,
-                                             MethodSpec.Builder methodBuilder) {
-        int numNonQueryParams = DbProcessorUtils.getNonQueryParamCount(method, processingEnv,
-                processingEnv.getElementUtils().getTypeElement(UmCallback.class.getName()));
-
-        if(numNonQueryParams == 1) {
-            methodBuilder.addAnnotation(AnnotationSpec.builder(Consumes.class)
-                    .addMember("value", "$T.APPLICATION_JSON", MediaType.class).build())
-                    .addAnnotation(POST.class);
-        }else if(numNonQueryParams > 1) {
-            messager.printMessage(Diagnostic.Kind.ERROR,
-                    formatMethodForErrorMessage(method, clazzDao) + " : must not have " +
-                            "more than one non-query param type for a method with JAX-RS annotations");
-            return;
-        }else {
-            methodBuilder.addAnnotation(GET.class);
-        }
-
-        DaoMethodInfo methodInfo = new DaoMethodInfo(method, clazzDao, processingEnv);
-        TypeMirror resultType = methodInfo.resolveEntityType();
-        TypeName resultTypeName = TypeName.get(resultType);
-        TypeElement stringTypeEl = processingEnv.getElementUtils().getTypeElement(
-                String.class.getName());
-        String producesFormat;
-
-        if(!isVoid(resultType)) {
-            if (resultTypeName.isPrimitive() || resultTypeName.isBoxedPrimitive()
-                    || stringTypeEl.equals(processingEnv.getTypeUtils().asElement(resultType))) {
-                producesFormat = "$T.TEXT_PLAIN";
-            } else {
-                producesFormat = "$T.APPLICATION_JSON";
-            }
-
-            methodBuilder.addAnnotation(AnnotationSpec.builder(Produces.class).addMember("value",
-                    producesFormat, MediaType.class).build());
-        }
-    }
 
 }
