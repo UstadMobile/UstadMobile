@@ -8,4 +8,6 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface UmDao {
+
+    int syncType() default UmSyncType.SYNC_NONE;
 }

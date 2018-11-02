@@ -3,17 +3,19 @@ package com.ustadmobile.lib.annotationprocessor.core.db;
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.lib.database.annotation.UmDao;
+import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.database.annotation.UmRestAccessible;
 import com.ustadmobile.lib.database.annotation.UmSyncFindAllChanges;
 import com.ustadmobile.lib.database.annotation.UmSyncFindLocalChanges;
 import com.ustadmobile.lib.database.annotation.UmSyncFindUpdateable;
+import com.ustadmobile.lib.database.annotation.UmSyncType;
 import com.ustadmobile.lib.db.sync.UmSyncExistingEntity;
 import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
 import java.util.List;
 
-@UmDao
+@UmDao(syncType = UmSyncType.SYNC_PROACTIVE)
 public abstract class ExampleSyncableDao implements SyncableDao<ExampleSyncableEntity, ExampleSyncableDao>  {
 
     @UmSyncFindUpdateable
@@ -62,6 +64,18 @@ public abstract class ExampleSyncableDao implements SyncableDao<ExampleSyncableE
     @UmQuery("SELECT * FROM ExampleSyncableEntity")
     @UmRestAccessible
     public abstract UmLiveData<List<ExampleSyncableEntity>> findAllLive();
+
+    @UmInsert
+    @UmRestAccessible
+    public abstract void insertRest(ExampleSyncableEntity entity, UmCallback<Long> callback);
+
+    @UmInsert
+    @UmRestAccessible
+    public abstract void insertRestList(List<ExampleSyncableEntity> entityList, UmCallback<Void> callback);
+
+    @UmInsert
+    @UmRestAccessible
+    public abstract void insertRestListAndReturnIds(List<ExampleSyncableEntity> entityList, UmCallback<List<Long>> callback);
 
 
 }

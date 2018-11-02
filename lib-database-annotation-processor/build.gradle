@@ -5,6 +5,10 @@ compileTestJava {
     /*
      *  Annotation processor arguments:
      *   umdb_room_out - Destination directory for the generated room version of database and DAO classes
+     *
+     *   If desired for to enable debugging of generated sources in intellij, output can be changed to
+     *   a directory ( e.g. $projectDir/tmp/java instead of filer ), and then that directory can be
+     *   added to the test sources ( e.g. sourceSets.test.java += ["$projectDir/tmp/java"] )
      */
     options.compilerArgs += [
             "-Aumdb_jdbc_out=filer",
@@ -14,9 +18,12 @@ compileTestJava {
 
     //Due to a bug, the JDK8 annotation processor provides incorrect parameter names, thus we need
     // to use JDK9+ to run the annotation processor https://bugs.openjdk.java.net/browse/JDK-8191074
-    options.fork = true
-    options.forkOptions.executable = rootProject.ext.localProperties["javac.9plus"]
+    if(JavaVersion.current() == JavaVersion.VERSION_1_8) {
+        options.fork = true
+        options.forkOptions.executable = rootProject.ext.localProperties["javac.9plus"]
+    }
 }
+
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])

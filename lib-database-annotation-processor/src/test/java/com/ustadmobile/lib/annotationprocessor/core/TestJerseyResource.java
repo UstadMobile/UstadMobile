@@ -1,7 +1,7 @@
 package com.ustadmobile.lib.annotationprocessor.core;
 
-import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.lib.annotationprocessor.core.db.ExampleDatabase;
+import com.ustadmobile.lib.annotationprocessor.core.db.ExampleSyncableDao;
 import com.ustadmobile.lib.annotationprocessor.core.db.ExampleSyncableEntity;
 import com.ustadmobile.lib.db.sync.SyncResponse;
 
@@ -146,5 +146,26 @@ public class TestJerseyResource {
         Assert.assertEquals("LiveData list has two entities which were inserted", 2,
                 resultList.size());
     }
+
+    @Test
+    public void testListInsert() {
+        ExampleDatabase.getInstance(null).clearAll();
+
+        ExampleSyncableEntity e1 = new ExampleSyncableEntity();
+        e1.setTitle("Entity 1");
+        ExampleSyncableEntity e2 = new ExampleSyncableEntity();
+        e2.setTitle("Entity 2");
+
+        List<Long> response = target
+                .path("ExampleSyncableDao/insertRestListAndReturnIds").request()
+                .post(Entity.entity(Arrays.asList(e1, e2), MediaType.APPLICATION_JSON),
+                        new GenericType<List<Long>>() {});
+
+        //Note: we would test looking up other entities, but the underlying JDBC implementation
+        // of getGeneratedKeys does not always return everything when we use executeBatch
+        ExampleSyncableDao dao = ExampleDatabase.getInstance(null).getExampleSyncableDao();
+        Assert.assertNotNull("Entity e1 was inserted", dao.findByUid(response.get(0)));
+    }
+
 
 }

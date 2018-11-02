@@ -112,14 +112,23 @@ public class DbProcessorJerseyResource extends AbstractDbProcessor {
             }
 
             CodeBlock.Builder codeBlock = CodeBlock.builder()
-                    .add("$T _dao = $T.getInstance($L).$L();\n", daoType, dbType,
-                            FIELDNAME_SERVLET_CONTEXT, daoGetter.getSimpleName());
+                    .add("$1T _db = $1T.getInstance($2L);\n", dbType, FIELDNAME_SERVLET_CONTEXT)
+                    .add("$T _dao = _db.$L();\n", daoType,
+                            daoGetter.getSimpleName());
+
+            //TODO: this may need extra annotations
+            if(methodInfo.isUpdateOrInsert()) {
+                codeBlock.add(generateIncrementChangeSeqNumsCodeBlock(methodInfo.getEntityParameterElement().asType(),
+                        methodInfo.getEntityParameterElement().getSimpleName().toString(), "_db",
+                        null));
+            }
 
 
             if (methodInfo.isAsyncMethod()) {
                 codeBlock.add("$1T _latch = new $1T(1);\n", CountDownLatch.class);
                 if (!isVoidResult)
-                    codeBlock.add("$1T[] _resultArr = new $1T[1];\n", methodInfo.resolveResultType());
+                    codeBlock.add("$1T<$2T> _resultRef = new $1T<>();\n", AtomicReference.class,
+                            methodInfo.resolveResultType());
 
 
                 codeBlock.add("_dao.$L(", methodElement.getSimpleName());
@@ -133,7 +142,7 @@ public class DbProcessorJerseyResource extends AbstractDbProcessor {
                     } else {
                         CodeBlock.Builder onSuccessCode = CodeBlock.builder();
                         if (!isVoidResult)
-                            onSuccessCode.add("_resultArr[0] = _result;\n");
+                            onSuccessCode.add("_resultRef.set(_result);\n");
 
                         onSuccessCode.add("_latch.countDown();\n");
 
@@ -163,8 +172,17 @@ public class DbProcessorJerseyResource extends AbstractDbProcessor {
                                 TimeUnit.class)
                         .nextControlFlow("catch($T _e)", InterruptedException.class)
                         .endControlFlow();
-                if (!isVoidResult)
-                    codeBlock.add("return _resultArr[0];\n");
+                if (!isVoidResult) {
+                    codeBlock.add("return ");
+                    if(primitiveToStringResult)
+                        codeBlock.add("String.valueOf(");
+
+                    codeBlock.add("_resultRef.get()");
+                    if(primitiveToStringResult)
+                        codeBlock.add(")");
+
+                    codeBlock.add(";\n");
+                }
             }else if(methodInfo.isLiveDataReturn()) {
                 TypeMirror liveDataType = methodInfo.resolveEntityType();
                 codeBlock.add("$1T _latch = new $1T(1);\n", CountDownLatch.class)

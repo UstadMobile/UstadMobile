@@ -29,6 +29,7 @@ import com.ustadmobile.lib.db.sync.entities.SyncStatus;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -53,6 +54,7 @@ import javax.lang.model.type.TypeMirror;
 import javax.tools.Diagnostic;
 
 import static com.ustadmobile.lib.annotationprocessor.core.DbProcessorUtils.capitalize;
+import static com.ustadmobile.lib.annotationprocessor.core.DbProcessorUtils.findElementWithAnnotation;
 
 /**
  * This base processor is overriden to make platform specific implementations of the database. By
@@ -698,5 +700,79 @@ public abstract class AbstractDbProcessor {
 
         return block.add(")").build();
     }
+
+    /**
+     * Generate a CodeBlock that will increment the change sequence numbers on an entity class
+     * or List/Array thereof.
+     *
+     * @param paramType TypeMirror representing the parameter type
+     * @param paramVariableName The variable name of the parameter
+     * @param dbVariableName The variable name of the database class itself
+     * @param syncableDbVariableName The variable name of the database class, casted to UmSyncableDatabase, or null if none is available.
+     *
+     * @return CodeBlock that will increment teh change sequence numbers on an entity class or List/Array thereof
+     */
+    protected CodeBlock generateIncrementChangeSeqNumsCodeBlock(TypeMirror paramType,
+                                                                String paramVariableName,
+                                                                String dbVariableName,
+                                                                String syncableDbVariableName) {
+
+        CodeBlock.Builder codeBlock = CodeBlock.builder();
+        if(syncableDbVariableName == null) {
+            codeBlock.add("$1T _syncableDb = ($1T)$2L;\n", UmSyncableDatabase.class, dbVariableName);
+            syncableDbVariableName = "_syncableDb";
+        }
+
+        codeBlock.beginControlFlow("if($L.isMaster())", syncableDbVariableName);
+        generateIncrementSection(codeBlock, UmSyncMasterChangeSeqNum.class, paramType,
+                paramVariableName, syncableDbVariableName,
+                "getAndIncrementNextMasterChangeSeqNum");
+        codeBlock.nextControlFlow("else");
+        generateIncrementSection(codeBlock, UmSyncLocalChangeSeqNum.class, paramType,
+                paramVariableName, syncableDbVariableName,
+                "getAndIncrementNextLocalChangeSeqNum");
+        codeBlock.endControlFlow();
+
+        return codeBlock.build();
+    }
+
+    private void generateIncrementSection(CodeBlock.Builder codeBlock,
+                                          Class<? extends Annotation> annotation,
+                                          TypeMirror paramType,
+                                          String paramVariableName,
+                                          String syncableDbVariableName,
+                                          String changeSeqNumMethodName) {
+        String elementVarName = paramVariableName;
+        TypeElement paramEntityTypeElement;
+        if(DbProcessorUtils.isList(paramType, processingEnv)) {
+            paramEntityTypeElement = (TypeElement)processingEnv.getTypeUtils().asElement(
+                    DbProcessorUtils.getArrayOrListComponentType(paramType, processingEnv));
+        }else {
+            paramEntityTypeElement = (TypeElement)processingEnv.getTypeUtils().asElement(paramType);
+        }
+
+
+        int tableNum = paramEntityTypeElement.getAnnotation(UmEntity.class).tableId();
+        codeBlock.add("long _changeSeqNum = $L.getSyncStatusDao().$L($L, 1);\n",
+                syncableDbVariableName, changeSeqNumMethodName, tableNum);
+
+        boolean isListOrArray = paramType.getKind().equals(TypeKind.ARRAY)
+                || DbProcessorUtils.isList(paramType, processingEnv);
+        if(isListOrArray) {
+            codeBlock.beginControlFlow("for($T _element : $L)",
+                    DbProcessorUtils.getArrayOrListComponentType(paramType, processingEnv),
+                    paramVariableName);
+            elementVarName = "_element";
+        }
+
+        Element changeSeqNumElement = findElementWithAnnotation(paramEntityTypeElement, annotation,
+                processingEnv);
+        codeBlock.add("$L.set$L(_changeSeqNum);\n", elementVarName,
+                capitalize(changeSeqNumElement.getSimpleName()));
+        if(isListOrArray) {
+            codeBlock.endControlFlow();
+        }
+    }
+
 
 }

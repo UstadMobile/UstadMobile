@@ -258,6 +258,36 @@ public class DbProcessorUtils {
         return null;
     }
 
+    /**
+     * Determine if the given type mirror is a List
+     *
+     * @param typeMirror TypeMirror to check
+     * @param processingEnv processing environment
+     * @return true if typeMirror is a List, false otherwise
+     */
+    public static boolean isList(TypeMirror typeMirror, ProcessingEnvironment processingEnv) {
+        return processingEnv.getElementUtils().getTypeElement(List.class.getName())
+                .equals(processingEnv.getTypeUtils().asElement(typeMirror));
+    }
+
+    /**
+     * Get the component type of an array or list
+     *
+     * @param typeMirror TypeMirror that represents an array or a list
+     * @param processingEnv Processing Environment
+     * @return the component type of typeMirror, or null if it is neither a list or array
+     */
+    public static TypeMirror getArrayOrListComponentType(TypeMirror typeMirror,
+                                                ProcessingEnvironment processingEnv) {
+        if(typeMirror.getKind().equals(TypeKind.ARRAY)) {
+            return ((ArrayType) typeMirror).getComponentType();
+        }else if(isList(typeMirror, processingEnv)) {
+            return ((DeclaredType)typeMirror).getTypeArguments().get(0);
+        }else {
+            return null;
+        }
+    }
+
 
 
 }

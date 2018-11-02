@@ -667,17 +667,16 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                 .unindent().beginControlFlow(")");
 
             if(isList || isArray) {
+                TypeMirror primaryKeyType = DbProcessorUtils.getArrayOrListComponentType(resultType,
+                        processingEnv);
                 String arrayListVarName = isList ? "_result" : "_resultList";
                 ParameterizedTypeName listTypeName =ParameterizedTypeName.get(
-                        ClassName.get(ArrayList.class), ClassName.get(String.class));
+                        ClassName.get(ArrayList.class), ClassName.get(primaryKeyType));
                 if(isArray)
                     codeBlock.add("$T ", listTypeName);
 
                 codeBlock.add("$L = new $T();\n", arrayListVarName, listTypeName);
 
-                TypeMirror primaryKeyType = isArray ?
-                        ((DeclaredType)resultType).getTypeArguments().get(0) :
-                        ((ArrayType)resultType).getComponentType();
                 codeBlock.beginControlFlow("while(generatedKeys.next())")
                         .add("$L.add(generatedKeys.get$L(1));\n", arrayListVarName,
                                 getPreparedStatementSetterGetterTypeName(primaryKeyType))

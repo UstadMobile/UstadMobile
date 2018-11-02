@@ -3,6 +3,8 @@ package com.ustadmobile.lib.annotationprocessor.core;
 
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.impl.UmCallback;
+import com.ustadmobile.lib.database.annotation.UmInsert;
+import com.ustadmobile.lib.database.annotation.UmUpdate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -209,6 +211,26 @@ public class DaoMethodInfo {
         }
 
         return false;
+    }
+
+    /**
+     * Determine if the given method is an Update or Insert method (e.g. may require code to
+     * increment change sequence numbers)
+     *
+     * @return true if the method is annotated with Update or Insert, false otherwise
+     */
+    public boolean isUpdateOrInsert() {
+        return method.getAnnotation(UmUpdate.class) != null
+                || method.getAnnotation(UmInsert.class) != null;
+    }
+
+    /**
+     *
+     * @return
+     */
+    public VariableElement getEntityParameterElement() {
+        //TODO: go over the list to find the entity parameter
+        return method.getParameters().get(0);
     }
 
 
