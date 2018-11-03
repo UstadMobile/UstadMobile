@@ -2,6 +2,7 @@ package com.ustadmobile.lib.annotationprocessor.core;
 
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
@@ -19,6 +20,7 @@ import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 
 import retrofit2.Call;
+import retrofit2.Retrofit;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
@@ -45,8 +47,8 @@ public class DbProcessorRetrofitRepository extends AbstractDbProcessor {
     @Override
     public void processDbDao(TypeElement daoType, TypeElement dbType, String destination) throws IOException {
         List<Element> restAccessibleMethods = findRestEnabledMethods(daoType);
-        TypeSpec.Builder retrofitBuilder = TypeSpec.interfaceBuilder(
-                daoType.getSimpleName() + POSTFIX_RETROFIT_INTERFACE)
+        String retrofitInterfaceName = daoType.getSimpleName() + POSTFIX_RETROFIT_INTERFACE;
+        TypeSpec.Builder retrofitBuilder = TypeSpec.interfaceBuilder(retrofitInterfaceName)
                 .addModifiers(Modifier.PUBLIC);
 
         for(Element annotatedElement: restAccessibleMethods) {
@@ -79,5 +81,36 @@ public class DbProcessorRetrofitRepository extends AbstractDbProcessor {
                 retrofitBuilder.build())
                 .indent("    ").build();
         writeJavaFileToDestination(databaseJavaFile, destination);
+
+        //now generate the repository
+        TypeName retrofitTypeName = ClassName.get(packageElement.getQualifiedName().toString(),
+                retrofitInterfaceName);
+
+        TypeSpec.Builder repoBuilder = TypeSpec.classBuilder(daoType.getSimpleName() +
+                POSTFIX_REPOSITORY_DAO)
+                .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
+                .superclass(ClassName.get(daoType))
+                .addField(retrofitTypeName, "_retrofit")
+                .addField(ClassName.get(dbType), "_db")
+                .addField(ClassName.get(daoType), "_dao")
+                .addField(ClassName.get(dbType), "_repo")
+                .addMethod(MethodSpec.constructorBuilder()
+                    .addModifiers(Modifier.PUBLIC)
+                    .addParameter(Retrofit.class, "_retrofit")
+                    .addParameter(ClassName.get(dbType), "_db")
+                    .addParameter(ClassName.get(daoType), "_dao")
+                    .addParameter(ClassName.get(dbType), "_repo")
+                    .addCode(CodeBlock.builder()
+                            .add("this._retrofit = _retrofit.create($L.class);\n",
+                                    retrofitInterfaceName)
+                            .add("this._db = _db;\n")
+                            .add("this._dao = _dao;\n")
+                            .add("this._repo = _repo;\n").build())
+                    .build());
+
+        JavaFile repoJavaFile = JavaFile.builder(packageElement.getQualifiedName().toString(),
+                repoBuilder.build())
+                .indent("    ").build();
+        writeJavaFileToDestination(repoJavaFile, destination);
     }
 }
