@@ -176,17 +176,17 @@ public class IndexPrathamContentScraper {
                 retry = 0;
 
                 ContentEntry contentEntry = contentEntryDao.findBySourceUrl(epubUrl.getPath());
-                if (prathamParentEntry == null) {
-                    prathamParentEntry = new ContentEntry();
-                    prathamParentEntry = setContentEntryData(prathamParentEntry, data.slug,
+                if (contentEntry == null) {
+                    contentEntry = new ContentEntry();
+                    contentEntry = setContentEntryData(contentEntry, data.slug,
                             data.title , epubUrl.getPath(), LanguageCode.findByName(data.language).get(0).name());
-                    prathamParentEntry.setThumbnailUrl(data.coverImage.sizes.get(0).url);
-                    prathamParentEntry.setContentEntryUid(contentEntryDao.insert(prathamParentEntry));
+                    contentEntry.setThumbnailUrl(data.coverImage.sizes.get(0).url);
+                    contentEntry.setContentEntryUid(contentEntryDao.insert(contentEntry));
                 } else {
-                    prathamParentEntry = setContentEntryData(prathamParentEntry, data.slug,
+                    contentEntry = setContentEntryData(contentEntry, data.slug,
                             data.title, epubUrl.getPath(), ScraperConstants.ENGLISH_LANG_CODE);
-                    prathamParentEntry.setThumbnailUrl(data.coverImage.sizes.get(0).url);
-                    contentEntryDao.updateContentEntry(prathamParentEntry);
+                    contentEntry.setThumbnailUrl(data.coverImage.sizes.get(0).url);
+                    contentEntryDao.updateContentEntry(contentEntry);
                 }
 
                 ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao,
@@ -205,7 +205,7 @@ public class IndexPrathamContentScraper {
 
                 ContentEntryContentEntryFileJoin fileJoin = new ContentEntryContentEntryFileJoin();
                 fileJoin.setCecefjContentEntryFileUid(contentEntryFile.getContentEntryFileUid());
-                fileJoin.setCecefjContentEntryUid(prathamParentEntry.getContentEntryUid());
+                fileJoin.setCecefjContentEntryUid(contentEntry.getContentEntryUid());
                 fileJoin.setCecefjUid(contentEntryFileJoinDao.insert(fileJoin));
 
                 ContentEntryFileStatus fileStatus = new ContentEntryFileStatus();
