@@ -53,7 +53,7 @@ task scrapeContent(type: JavaExec) {
         args  project.getProperties().get("findDdlUrl"), project.getProperties().get("findDdlDir")
     }
     if(project.hasProperty("ddlUrl") && project.hasProperty("ddlDir")) {
-        main "com.ustadmobile.lib.contentscrapers.ddl.IndexDdlContentScraper"
+        main "com.ustadmobile.lib.contentscrapers.ddl.DdlContentScraper"
         args  project.getProperties().get("ddlUrl"), project.getProperties().get("ddlDir")
     }
 
