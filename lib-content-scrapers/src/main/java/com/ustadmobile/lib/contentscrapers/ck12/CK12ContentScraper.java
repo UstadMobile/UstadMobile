@@ -720,8 +720,6 @@ public class CK12ContentScraper {
             questionResponse.response.stem.displayText = ContentScraperUtil.downloadAllResources(
                     questionResponse.response.stem.displayText, questionAsset, scrapUrl);
 
-            System.out.println(questionResponse.response.stem.displayText);
-
             List<String> hintsList = questionResponse.response.hints;
             for (int j = 0; j < hintsList.size(); j++) {
                 hintsList.set(j, ContentScraperUtil.downloadAllResources(hintsList.get(j), practiceAssetDirectory, scrapUrl));
@@ -729,8 +727,6 @@ public class CK12ContentScraper {
             questionResponse.response.hints = hintsList;
 
             String answerResponse = extractAnswerFromEncryption(questionResponse.response.data);
-
-            System.out.println(answerResponse);
 
             AnswerResponse answer = gson.fromJson(answerResponse, AnswerResponse.class);
             answer.instance.solution = ContentScraperUtil.downloadAllResources(answer.instance.solution, questionAsset, scrapUrl);
