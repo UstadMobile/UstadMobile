@@ -224,7 +224,7 @@ public class CK12ContentScraper {
 
         Gson gson = new GsonBuilder().disableHtmlEscaping().create();
 
-        String plixId = FilenameUtils.getBaseName(scrapUrl.getPath());
+        String plixId = scrapUrl.getPath().substring(scrapUrl.getPath().lastIndexOf("-") + 1, scrapUrl.getPath().lastIndexOf("?"));
 
         File plixDirectory = new File(destinationDirectory, plixId);
         plixDirectory.mkdirs();
@@ -241,7 +241,7 @@ public class CK12ContentScraper {
         isContentUpdated = ContentScraperUtil.isContentUpdated(
                 ContentScraperUtil.parseServerDate(response.response.question.updated), fileLastModified);
 
-        if(!isContentUpdated){
+        if (!isContentUpdated) {
             return;
         }
 
@@ -379,7 +379,7 @@ public class CK12ContentScraper {
         File lastUpdated = new File(videoHtmlLocation, "video-last-modified.txt");
         isContentUpdated = isPageUpdated(fullSite, lastUpdated);
 
-        if(!isContentUpdated){
+        if (!isContentUpdated) {
             return;
         }
 
@@ -486,7 +486,7 @@ public class CK12ContentScraper {
         return null;
     }
 
-    private boolean isPageUpdated(Document doc, File file){
+    private boolean isPageUpdated(Document doc, File file) {
         String date = doc.select("h2:contains(Last Modified) ~ span").attr("data-date");
         long parsedDate = ContentScraperUtil.parseServerDate(date);
         return ContentScraperUtil.isContentUpdated(parsedDate, file);
@@ -507,7 +507,7 @@ public class CK12ContentScraper {
         File lastUpdated = new File(readHtmlLocation, "read-last-modified.txt");
         isContentUpdated = isPageUpdated(html, lastUpdated);
 
-        if(!isContentUpdated){
+        if (!isContentUpdated) {
             return;
         }
 
@@ -616,12 +616,12 @@ public class CK12ContentScraper {
 
 
     /**
-     *
      * Given the id, generate the plix link to find out if it was updated
+     *
      * @param id
      * @return full url
      */
-    public String generatePlixLink(String id){
+    public String generatePlixLink(String id) {
         return plixLink + id + "?includeBasicPlixDataOnly=true";
     }
 
