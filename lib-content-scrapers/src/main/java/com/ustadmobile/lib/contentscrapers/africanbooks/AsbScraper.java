@@ -173,7 +173,7 @@ public class AsbScraper {
                         childEntry.setThumbnailUrl(getCoverUrl(bookId));
                         childEntry.setContentEntryUid(contentEntryDao.insert(childEntry));
                     } else {
-                        childEntry = setContentEntryData(asbParentEntry, epubUrl.getPath(),
+                        childEntry = setContentEntryData(childEntry, epubUrl.getPath(),
                                 bookObj.title, epubUrl.getPath(), bookObj.lang);
                         childEntry.setThumbnailUrl(getCoverUrl(bookId));
                         contentEntryDao.updateContentEntry(childEntry);
