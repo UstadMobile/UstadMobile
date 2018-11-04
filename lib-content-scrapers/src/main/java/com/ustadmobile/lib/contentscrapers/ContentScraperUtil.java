@@ -380,32 +380,38 @@ public class ContentScraperUtil {
     public static boolean isFileModified(URLConnection conn, File destinationDir, String fileName) throws IOException {
         
         String eTag = conn.getHeaderField("ETag");
+        boolean eTagAvailable = false;
+        if (eTag == null) {
+            eTagAvailable = true;
+        }else{
+            String text;
+            eTag = eTag.replaceAll("\"", "");
+            File eTagFile = new File(destinationDir, FilenameUtils.getBaseName(fileName) + ScraperConstants.ETAG_TXT);
+
+            if(ContentScraperUtil.fileHasContent(eTagFile)){
+                text = FileUtils.readFileToString(eTagFile, UTF_ENCODING);
+                FileUtils.writeStringToFile(eTagFile, eTag, ScraperConstants.UTF_ENCODING);
+                return !eTag.equalsIgnoreCase(text);
+            }
+        }
+
         String lastModified = conn.getHeaderField("Last-Modified");
+        boolean lastModifiedAvailable = false;
 
-        if (eTag == null && lastModified == null) {
-            return true;
-        }
-
-        eTag = eTag.replaceAll("\"", "");
-
-        File eTagFile = new File(destinationDir, FilenameUtils.getBaseName(fileName) + ScraperConstants.ETAG_TXT);
         File modifiedFile = new File(destinationDir, FilenameUtils.getBaseName(fileName) + ScraperConstants.LAST_MODIFIED_TXT);
-
         String text;
-        if(ContentScraperUtil.fileHasContent(eTagFile)){
-            text = FileUtils.readFileToString(eTagFile, UTF_ENCODING);
-            return !eTag.equalsIgnoreCase(text);
+
+        if(lastModified == null){
+            lastModifiedAvailable = true;
+        }else{
+            if(ContentScraperUtil.fileHasContent(modifiedFile)){
+                text = FileUtils.readFileToString(modifiedFile, UTF_ENCODING);
+                FileUtils.writeStringToFile(modifiedFile, lastModified, ScraperConstants.UTF_ENCODING);
+                return !lastModified.equalsIgnoreCase(text);
+            }
         }
 
-        if(ContentScraperUtil.fileHasContent(modifiedFile)){
-            text = FileUtils.readFileToString(modifiedFile, UTF_ENCODING);
-            return !lastModified.equalsIgnoreCase(text);
-        }
-
-        FileUtils.writeStringToFile(eTagFile, eTag, ScraperConstants.UTF_ENCODING);
-        FileUtils.writeStringToFile(modifiedFile, lastModified, ScraperConstants.UTF_ENCODING);
-
-        return true;
+        return eTagAvailable || lastModifiedAvailable;
     }
 
 
