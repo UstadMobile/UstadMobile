@@ -180,8 +180,6 @@ public class IndexCategoryCK12Content {
                 URL subjectUrl = new URL(url, hrefLink);
                 String title = subject.attr("title");
 
-                System.out.println("Found Subject = " + title + " at url " + subjectUrl);
-
                 ContentEntry subjectEntry = contentEntryDao.findBySourceUrl(hrefLink);
                 if (subjectEntry == null) {
                     subjectEntry = new ContentEntry();
@@ -234,8 +232,6 @@ public class IndexCategoryCK12Content {
                 String title = grade.text();
                 URL subCategoryUrl = new URL(url, hrefLink);
 
-                System.out.println("Opening Grade = " + title + " at url " + subCategoryUrl);
-
                 File gradeFolder = new File(destinationDirectory, title);
                 gradeFolder.mkdirs();
 
@@ -263,8 +259,6 @@ public class IndexCategoryCK12Content {
 
             String level1CategoryTitle = category.select("span.concept-name").attr("title");
             String fakePath = url.getPath() + "/" + level1CategoryTitle;
-
-            System.out.println("Opening Heading = " + level1CategoryTitle + " at url " + fakePath);
 
             ContentEntry topicEntry = contentEntryDao.findBySourceUrl(fakePath);
             if (topicEntry == null) {
@@ -309,8 +303,6 @@ public class IndexCategoryCK12Content {
 
                 URL contentUrl = new URL(url, hrefLink);
 
-                System.out.println("Found Topic = " + title + " at url " + contentUrl);
-
                 ContentEntry lastTopicEntry = contentEntryDao.findBySourceUrl(hrefLink);
                 if (lastTopicEntry == null) {
                     lastTopicEntry = new ContentEntry();
@@ -335,8 +327,6 @@ public class IndexCategoryCK12Content {
                 String title = secondCategory.select("span").attr("title");
 
                 String appendPath = fakePath + "/" + title;
-
-                System.out.println("Found Parent Topic = " + title + " at url " + appendPath);
 
                 ContentEntry subTopicEntry = contentEntryDao.findBySourceUrl(appendPath);
                 if (subTopicEntry == null) {
@@ -383,8 +373,6 @@ public class IndexCategoryCK12Content {
 
             String fakePathTopic = subCategoryUrl.getPath() + "/" + headingTitle;
 
-            System.out.println("Opening Heading = " + headingTitle + " at url " + fakePathTopic);
-
             String thumbnailUrl = doc.selectFirst("div.topic-wrapper[title*=" + headingTitle + "] img").attr("src");
 
             ContentEntry headingEntry = contentEntryDao.findBySourceUrl(fakePathTopic);
@@ -413,8 +401,6 @@ public class IndexCategoryCK12Content {
 
                 String topicThumbnailUrl = topic.selectFirst("div.concept-track-parent span img").attr("src");
 
-                System.out.println("Found Topic = " + title + " at url " + fakeParentTopic);
-
                 ContentEntry topicEntry = contentEntryDao.findBySourceUrl(fakeParentTopic);
                 if (topicEntry == null) {
                     topicEntry = new ContentEntry();
@@ -442,8 +428,6 @@ public class IndexCategoryCK12Content {
                     File topicDestination = new File(destination, subTitle);
                     topicDestination.mkdirs();
                     URL contentUrl = new URL(subCategoryUrl, hrefLink);
-
-                    System.out.println("Found SubTopic = " + subTitle + " at url " + contentUrl);
 
                     ContentEntry subTopicEntry = contentEntryDao.findBySourceUrl(hrefLink);
                     if (subTopicEntry == null) {
@@ -554,8 +538,6 @@ public class IndexCategoryCK12Content {
                 e.printStackTrace();
                 continue;
             }
-
-            System.out.println("Found Content = " + groupType + " at url " + url);
 
             if (scraper.isContentUpdated()) {
 
