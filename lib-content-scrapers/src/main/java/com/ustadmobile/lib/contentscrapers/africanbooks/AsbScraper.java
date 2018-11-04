@@ -148,7 +148,7 @@ public class AsbScraper {
             URL epubUrl = generateEPubUrl(africanBooksUrl, bookId);
             URL publishUrl = generatePublishUrl(africanBooksUrl, bookId);
 
-            if (ePubFile.exists() && ePubFile.lastModified() > Integer.parseInt(bookObj.date)) {
+            if (ContentScraperUtil.fileHasContent(ePubFile) && ePubFile.lastModified() > Integer.parseInt(bookObj.date)) {
                 System.out.println("ASB " + bookId + " is up to date");
             } else {
                 try {
@@ -157,13 +157,6 @@ public class AsbScraper {
 
                     driver.get(publishUrl.toString());
                     ContentScraperUtil.waitForJSandJQueryToLoad(waitDriver);
-
-                    FileUtils.copyURLToFile(epubUrl, ePubFile);
-
-                    if (ePubFile.length() == 0) {
-                        System.out.println(ePubFile.getName() + " size 0 bytes: failed!");
-                        continue;
-                    }
 
                     ContentEntry childEntry = contentEntryDao.findBySourceUrl(epubUrl.getPath());
                     if (childEntry == null) {
@@ -180,6 +173,13 @@ public class AsbScraper {
                     }
 
                     ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, asbParentEntry, childEntry, i);
+
+                    FileUtils.copyURLToFile(epubUrl, ePubFile);
+
+                    if (ePubFile.length() == 0) {
+                        System.out.println(ePubFile.getName() + " size 0 bytes: failed!");
+                        continue;
+                    }
 
                     if (ContentScraperUtil.fileHasContent(ePubFile)) {
                         updateAsbEpub(bookObj, ePubFile);

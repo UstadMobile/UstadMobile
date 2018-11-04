@@ -2,6 +2,7 @@ package com.ustadmobile.lib.contentscrapers.prathambooks;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.neovisionaries.i18n.LanguageAlpha3Code;
 import com.neovisionaries.i18n.LanguageCode;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.ClazzDao_JdbcDaoImpl;
@@ -24,6 +25,7 @@ import com.ustadmobile.lib.db.entities.OpdsLink;
 import com.ustadmobile.lib.util.UmUuidUtil;
 
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.codec.language.bm.Lang;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
@@ -152,9 +154,27 @@ public class IndexPrathamContentScraper {
                 URLConnection connection = epubUrl.openConnection();
                 connection.setRequestProperty("Cookie", cookie);
 
+                String lang = getLangCode(data.language);
                 File resourceFolder = new File(destinationDir, String.valueOf(data.id));
                 resourceFolder.mkdirs();
                 String resourceFileName = data.slug + ePubExt;
+
+                ContentEntry contentEntry = contentEntryDao.findBySourceUrl(epubUrl.getPath());
+                if (contentEntry == null) {
+                    contentEntry = new ContentEntry();
+                    contentEntry = setContentEntryData(contentEntry, data.slug,
+                            data.title , epubUrl.getPath(), lang);
+                    contentEntry.setThumbnailUrl(data.coverImage.sizes.get(0).url);
+                    contentEntry.setContentEntryUid(contentEntryDao.insert(contentEntry));
+                } else {
+                    contentEntry = setContentEntryData(contentEntry, data.slug,
+                            data.title, epubUrl.getPath(), lang);
+                    contentEntry.setThumbnailUrl(data.coverImage.sizes.get(0).url);
+                    contentEntryDao.updateContentEntry(contentEntry);
+                }
+
+                ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao,
+                        prathamParentEntry, contentEntry, contentCount);
 
                 File content = new File(resourceFolder, resourceFileName);
                 if (!ContentScraperUtil.isFileModified(connection, resourceFolder, String.valueOf(data.id))) {
@@ -174,23 +194,6 @@ public class IndexPrathamContentScraper {
                     continue;
                 }
                 retry = 0;
-
-                ContentEntry contentEntry = contentEntryDao.findBySourceUrl(epubUrl.getPath());
-                if (contentEntry == null) {
-                    contentEntry = new ContentEntry();
-                    contentEntry = setContentEntryData(contentEntry, data.slug,
-                            data.title , epubUrl.getPath(), LanguageCode.findByName(data.language).get(0).name());
-                    contentEntry.setThumbnailUrl(data.coverImage.sizes.get(0).url);
-                    contentEntry.setContentEntryUid(contentEntryDao.insert(contentEntry));
-                } else {
-                    contentEntry = setContentEntryData(contentEntry, data.slug,
-                            data.title, epubUrl.getPath(), ScraperConstants.ENGLISH_LANG_CODE);
-                    contentEntry.setThumbnailUrl(data.coverImage.sizes.get(0).url);
-                    contentEntryDao.updateContentEntry(contentEntry);
-                }
-
-                ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao,
-                        prathamParentEntry, contentEntry, contentCount);
 
                 FileInputStream fis = new FileInputStream(content);
                 String md5 = DigestUtils.md5Hex(fis);
@@ -221,6 +224,11 @@ public class IndexPrathamContentScraper {
 
         }
 
+    }
+
+    private String getLangCode(String language) {
+        String[] list = language.split("-");
+        return LanguageAlpha3Code.findByName(list[0]).get(0).name();
     }
 
     private ContentEntry setContentEntryData(ContentEntry entry, String id, String title, String sourceUrl, String lang) {
