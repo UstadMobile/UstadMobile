@@ -34,7 +34,7 @@ task scrapeContent(type: JavaExec) {
     }
 
     if(project.hasProperty("findCK12Url") && project.hasProperty("findCK12Dir")){
-        main "com.ustadmobile.lib.contentscrapers.ck12.CK12ContentScraper"
+        main "com.ustadmobile.lib.contentscrapers.ck12.IndexCategoryCK12Content"
         args  project.getProperties().get("findCK12Url"), project.getProperties().get("findCK12Dir")
     }
 
