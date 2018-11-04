@@ -9,8 +9,8 @@ import android.support.test.runner.AndroidJUnit4;
 import android.view.View;
 
 import com.toughra.ustadmobile.R;
-import com.ustadmobile.core.controller.ClazzListPresenter;
 import com.ustadmobile.core.db.UmAppDatabase;
+import com.ustadmobile.core.view.ClazzListView;
 import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.Person;
 import com.ustadmobile.port.android.view.ClazzDetailActivity;
@@ -83,7 +83,7 @@ public class SELAnswerListFragmentEspressoTest {
         //Start the activity
         Intent launchActivityIntent = new Intent();
         Bundle b = new Bundle();
-        b.putLong(ClazzListPresenter.ARG_CLAZZ_UID, testClazz.getClazzUid());
+        b.putLong(ClazzListView.ARG_CLAZZ_UID, testClazz.getClazzUid());
         launchActivityIntent.putExtras(b);
         mActivityRule.launchActivity(launchActivityIntent);
 

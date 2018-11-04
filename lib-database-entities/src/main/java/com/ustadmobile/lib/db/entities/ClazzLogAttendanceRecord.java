@@ -6,10 +6,10 @@ import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 @UmEntity
 public class ClazzLogAttendanceRecord {
 
+    //Attendance statuses for every Person's Entry in every Class Attendance Log Entry:
+
     public static final int STATUS_ATTENDED = 1;
-
     public static final int STATUS_ABSENT = 2;
-
     public static final int STATUS_PARTIAL = 4;
 
     @UmPrimaryKey(autoIncrement = true)

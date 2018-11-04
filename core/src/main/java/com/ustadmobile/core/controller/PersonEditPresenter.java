@@ -26,7 +26,6 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
-import static com.ustadmobile.core.controller.ClazzListPresenter.ARG_CLAZZ_UID;
 import static com.ustadmobile.core.view.ClazzDetailEnrollStudentView.ARG_NEW_PERSON;
 import static com.ustadmobile.core.view.PersonDetailView.ARG_PERSON_UID;
 import static com.ustadmobile.core.view.PersonDetailViewField.FIELD_TYPE_HEADER;
@@ -43,6 +42,7 @@ import static com.ustadmobile.lib.db.entities.PersonDetailPresenterField.PERSON_
 import static com.ustadmobile.lib.db.entities.PersonDetailPresenterField.PERSON_FIELD_UID_MOTHER_NAME;
 import static com.ustadmobile.lib.db.entities.PersonDetailPresenterField.PERSON_FIELD_UID_MOTHER_NAME_AND_PHONE_NUMBER;
 import static com.ustadmobile.lib.db.entities.PersonDetailPresenterField.PERSON_FIELD_UID_MOTHER_NUMBER;
+
 /**
  * PersonEditPresenter : This is responsible for generating the Edit data along with its Custom
  * Fields. It is also responsible for updating the data and checking for changes and handling
@@ -59,8 +59,6 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
 
     private long personUid;
 
-    private long assignToThisClazzUid;
-
     private Person mUpdatedPerson;
 
     //OG person before Done/Save/Discard clicked.
@@ -71,13 +69,13 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
     //The custom fields' values
     private Map<Long, PersonCustomFieldWithPersonCustomFieldValue> customFieldWithFieldValueMap;
 
-    PersonDao personDao = UmAppDatabase.getInstance(context).getPersonDao();
+    private PersonDao personDao = UmAppDatabase.getInstance(context).getPersonDao();
 
     private String newPersonString = "";
 
-    List<PersonCustomFieldValue> customFieldsToUpdate;
+    private List<PersonCustomFieldValue> customFieldsToUpdate;
 
-    PersonCustomFieldValueDao personCustomFieldValueDao =
+    private PersonCustomFieldValueDao personCustomFieldValueDao =
             UmAppDatabase.getInstance(context).getPersonCustomFieldValueDao();
 
     /**
@@ -95,10 +93,6 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
             personUid = Long.parseLong(arguments.get(ARG_PERSON_UID).toString());
         }
 
-        if(arguments.containsKey(ARG_CLAZZ_UID)){
-            assignToThisClazzUid = Long.parseLong(arguments.get(ARG_CLAZZ_UID).toString());
-        }
-
         if(arguments.containsKey(ARG_NEW_PERSON)){
             newPersonString = arguments.get(ARG_NEW_PERSON).toString();
         }
@@ -109,7 +103,7 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
 
     /**
      * Presenter's Overridden onCreate that: Gets the mPerson LiveData and observe it.
-     * @param savedState
+     * @param savedState    The saved state
      */
     @Override
     public void onCreate(Hashtable savedState){
@@ -169,6 +163,11 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
 
     }
 
+    /**
+     * Updates the pic of the person after taken to the Person object directly
+     *
+     * @param picPath    The whole path of the picture.
+     */
     public void updatePersonPic(String picPath){
         personDao.findByUidAsync(personUid, new UmCallback<Person>() {
             @Override
@@ -179,9 +178,6 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
                     @Override
                     public void onSuccess(Integer result) {
                         System.out.println("Success updating person with Pic..");
-                        //Update pic on the view
-                        //view.updateImageOnView(picPath);
-
                     }
 
                     @Override
@@ -193,7 +189,7 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
 
             @Override
             public void onFailure(Throwable exception) {
-
+                exception.printStackTrace();
             }
         });
     }
@@ -204,17 +200,29 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
     public void generateAssignedClazzesLiveData(){
         ClazzDao clazzDao = UmAppDatabase.getInstance(context).getClazzDao();
         assignedClazzes = clazzDao.findAllClazzesByPersonUid(personUid);
+        updateClazzListProviderToView();
+    }
+
+    /**
+     * Updates the Clazz List provider of type ClazzWithNumStudents that is set on this Presenter to
+     * the View.
+     */
+    private void updateClazzListProviderToView(){
         view.setClazzListProvider(assignedClazzes);
     }
 
-    @Override
-    public void setUIStrings() {
 
-    }
-
-    public void setFieldsOnView(Person thisPerson, List<PersonDetailPresenterField> allFields,
-                                String attendanceAverage, PersonEditView thisView,
-                                Map<Long, PersonCustomFieldWithPersonCustomFieldValue> valueMap ){
+    /**
+     * Common method to set edit fields up for the current Person Editing.
+     *
+     * @param thisPerson The person being edited
+     * @param allFields The Fields
+     * @param thisView  The View
+     * @param valueMap  The Custom fields value map
+     */
+    private void setFieldsOnView(Person thisPerson, List<PersonDetailPresenterField> allFields,
+                                 PersonEditView thisView,
+                                 Map<Long, PersonCustomFieldWithPersonCustomFieldValue> valueMap){
 
 
         if(thisPerson.getImagePath() != null){
@@ -226,7 +234,8 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
             String thisValue = "";
 
             if(field.getFieldType() == FIELD_TYPE_HEADER) {
-                thisView.setField(field.getFieldIndex(), field.getFieldUid(), new PersonDetailViewField(FIELD_TYPE_HEADER,
+                thisView.setField(field.getFieldIndex(), field.getFieldUid(),
+                        new PersonDetailViewField(FIELD_TYPE_HEADER,
                         field.getHeaderMessageId(), null), field.getHeaderMessageId());
                 continue;
             }
@@ -250,9 +259,8 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
                         field.getLabelMessageId(),field.getFieldIcon()), thisValue);
 
             } else if (field.getFieldUid() == PERSON_FIELD_UID_ATTENDANCE) {
-                if(attendanceAverage != null) {
-                    thisValue = attendanceAverage;
-                }
+                //TODO: Check if we are still using attendance
+
                 thisView.setField(field.getFieldIndex(), field.getFieldUid(),
                         new PersonDetailViewField(field.getFieldType(),
                         field.getLabelMessageId(),field.getFieldIcon()), thisValue);
@@ -352,8 +360,8 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
      * @param value The value to update the Person's field.
      * @return  The updated Person with the updated field.
      */
-    public Person updateSansPersistPersonField(Person updateThisPerson,
-                                               long fieldcode, Object value){
+    private Person updateSansPersistPersonField(Person updateThisPerson,
+                                                long fieldcode, Object value){
 
         //Update Core fields
         if (fieldcode == PERSON_FIELD_UID_FIRST_NAMES) {
@@ -375,6 +383,7 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
             updateThisPerson.setMotherNum((String) value);
 
         } else if (fieldcode == PERSON_FIELD_UID_BIRTHDAY) {
+            System.out.println(" ");
             //TODO: Change and work this
             //updateThisPerson.setDateOfBirth((Long) value);
 
@@ -382,7 +391,6 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
             updateThisPerson.setAddress((String) value);
 
         } else {
-            System.out.println("Custom field edit.");
             //This is actually a custom field.
 
             personCustomFieldValueDao.findCustomFieldByFieldAndPersonAsync(fieldcode,
@@ -393,7 +401,6 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
                         result.setFieldValue(value.toString());
                         customFieldsToUpdate.add(result);
                     }
-
                 }
 
                 @Override
@@ -402,10 +409,6 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
                 }
             });
         }
-
-        //Update Custom Fields:
-        //TODO
-
 
         return updateThisPerson;
 
@@ -417,14 +420,14 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
      *
      * @param person The person that needs to be displayed.
      */
-    public void handlePersonValueChanged(Person person) {
+    private void handlePersonValueChanged(Person person) {
         //set the og person value
         if(mOriginalValuePerson == null)
             mOriginalValuePerson = person;
 
         if(mUpdatedPerson == null || !mUpdatedPerson.equals(person)) {
             //set fields on the view as they change and arrive.
-            setFieldsOnView(person, headersAndFields, null, view,
+            setFieldsOnView(person, headersAndFields, view,
                     customFieldWithFieldValueMap);
 
             mUpdatedPerson = person;
@@ -439,45 +442,26 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
      * @param value The new value of the field from the view
      */
     public void handleFieldEdited(long fieldCode, Object value) {
-
-
         mUpdatedPerson = updateSansPersistPersonField(mUpdatedPerson, fieldCode, value);
-        /*
-        //update the DAO with mUpdatedPerson
-        //TODO: Check if we need to update or insert
-        personDao.insertAsync(mUpdatedPerson, new UmCallback<Long>() {
-            @Override
-            public void onSuccess(Long result) {
-                mUpdatedPerson.setPersonUid(result);
-            }
-
-            @Override
-            public void onFailure(Throwable exception) {
-
-            }
-        });
-        */
-
     }
 
-    /**
-     * Handle discarding the edits done so far when leaving the activity / clicking discard.
-     */
-    public void handleClickDiscardChanges(){
-        //TODO:  Make use of this method?
-        //Update dao with mOriginalValuePerson
-        personDao.insert(mOriginalValuePerson);
-
-    }
+//    /**
+//     * Handle discarding the edits done so far when leaving the activity / clicking discard.
+//     */
+//    public void handleClickDiscardChanges(){
+//        //TODO:  Make use of this method?
+//        //Update dao with mOriginalValuePerson
+//        personDao.insert(mOriginalValuePerson);
+//
+//    }
 
     /**
      * Click handler when Add new Class clicked on Classes section
      */
     public void handleClickAddNewClazz(){
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        Hashtable args = new Hashtable();
+        Hashtable<String, Object> args = new Hashtable<>();
         args.put(ARG_PERSON_UID, personUid);
-
         impl.go(PersonDetailEnrollClazzView.VIEW_NAME, args, context);
     }
 
@@ -504,7 +488,7 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
 
                     @Override
                     public void onFailure(Throwable exception) {
-
+                        exception.printStackTrace();
                     }
                 });
 
@@ -515,6 +499,14 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
                 exception.printStackTrace();
             }
         });
+
+    }
+
+    /**
+     * Overridden. Does'nt do anything.
+     */
+    @Override
+    public void setUIStrings() {
 
     }
 

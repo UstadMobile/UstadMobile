@@ -24,7 +24,7 @@ import java.util.Objects;
 
 import ru.dimorinny.floatingtextbutton.FloatingTextButton;
 
-import static com.ustadmobile.core.controller.ClazzListPresenter.ARG_CLAZZ_UID;
+import static com.ustadmobile.core.view.ClazzListView.ARG_CLAZZ_UID;
 import static com.ustadmobile.core.view.ClazzListView.ARG_LOGDATE;
 
 /**

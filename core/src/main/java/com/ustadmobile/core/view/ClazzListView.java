@@ -12,8 +12,8 @@ public interface ClazzListView extends UstadView {
     String VIEW_NAME = "ClassList";
 
     String ARGS_CLAZZLOG_UID = "clazzloguid";
-    String TAG_STATUS = "status";
     String ARG_LOGDATE = "logdate";
+    String ARG_CLAZZ_UID = "ClazzUid";
 
     int SORT_ORDER_NAME_ASC = 1;
     int SORT_ORDER_NAME_DESC = 2;
@@ -21,8 +21,17 @@ public interface ClazzListView extends UstadView {
     int SORT_ORDER_ATTENDANCE_DESC = 4;
     int SORT_ORDER_TEACHER_ASC = 5;
 
+    /**
+     * Sets the class list as provider to the view.
+     * @param clazzListProvider The UMProvider provider of ClazzWithNumStudents Type.
+     */
     void setClazzListProvider(UmProvider<ClazzWithNumStudents> clazzListProvider);
 
+    /**
+     * Sorts the sorting drop down (spinner) for sort options in the Class list view.
+     *
+     * @param presets A String array String[] of the presets available.
+     */
     void updateSortSpinner(String[] presets);
 
 }

@@ -10,8 +10,8 @@ import android.support.test.runner.AndroidJUnit4;
 
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
 import com.toughra.ustadmobile.R;
-import com.ustadmobile.core.controller.ClazzListPresenter;
 import com.ustadmobile.core.db.UmAppDatabase;
+import com.ustadmobile.core.view.ClazzListView;
 import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.port.android.view.BasePointActivity2;
 import com.ustadmobile.port.android.view.ClazzDetailActivity;
@@ -117,7 +117,7 @@ public class ClassListFragmentEspressoTest {
 
         intended(allOf(
                 hasComponent(ClazzLogDetailActivity.class.getCanonicalName()),
-                hasExtra(equalTo(ClazzListPresenter.ARG_CLAZZ_UID),
+                hasExtra(equalTo(ClazzListView.ARG_CLAZZ_UID),
                         equalTo(testClazz.getClazzUid()))
         ));
     }
@@ -135,7 +135,7 @@ public class ClassListFragmentEspressoTest {
         intended(allOf(
                 hasComponent(new ComponentName(InstrumentationRegistry.getTargetContext(),
                         ClazzDetailActivity.class)),
-                hasExtra(equalTo(ClazzListPresenter.ARG_CLAZZ_UID),
+                hasExtra(equalTo(ClazzListView.ARG_CLAZZ_UID),
                         equalTo(testClazz.getClazzUid()))
         ));
 

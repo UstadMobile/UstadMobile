@@ -73,7 +73,7 @@ public class ClazzListEnrollPersonRecyclerAdapter extends
         ((CheckBox)holder.itemView.findViewById(R.id.item_clazz_list_enroll_person_checkbox))
                 .setChecked(clazz.getEnrolled());
 
-        holder.itemView.setOnClickListener((view) -> thePresenter.handleClickClazz(clazz));
+        holder.itemView.setOnClickListener((view) -> thePresenter.handleClickClazz());
 
     }
 }

@@ -5,7 +5,6 @@ import android.arch.paging.DataSource;
 import android.arch.paging.LivePagedListBuilder;
 import android.arch.paging.PagedList;
 import android.graphics.Color;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.util.DiffUtil;
@@ -39,7 +38,7 @@ import java.util.Map;
 
 import ru.dimorinny.floatingtextbutton.FloatingTextButton;
 
-import static com.ustadmobile.core.controller.ClazzListPresenter.ARG_CLAZZ_UID;
+import static com.ustadmobile.core.view.ClazzListView.ARG_CLAZZ_UID;
 
 
 
@@ -227,8 +226,7 @@ public class ClazzActivityListFragment extends UstadBaseFragment implements Claz
         //Record attendance FAB
         FloatingTextButton fab =
                 rootContainer.findViewById(R.id.fragment_clazz_log_record_attendance_fab);
-        //TODO: Sprint 4
-        //fab.setOnClickListener(v -> mPresenter.goToNewClazzActivityEditActivity());
+        fab.setOnClickListener(v -> mPresenter.goToNewClazzActivityEditActivity());
 
         //Buttons
         Button lastWeekButton = rootContainer.findViewById(

@@ -18,7 +18,7 @@ import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.util.WeakHashMap;
 
-import static com.ustadmobile.core.controller.ClazzListPresenter.ARG_CLAZZ_UID;
+import static com.ustadmobile.core.view.ClazzListView.ARG_CLAZZ_UID;
 
 /**
  * The ClassDetail activity.

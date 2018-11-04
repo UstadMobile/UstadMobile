@@ -16,32 +16,30 @@ import com.ustadmobile.lib.db.entities.PersonCustomFieldValue;
 import com.ustadmobile.lib.db.entities.PersonField;
 import com.ustadmobile.lib.db.entities.PersonWithEnrollment;
 
-import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
-import static com.ustadmobile.core.controller.ClazzListPresenter.ARG_CLAZZ_UID;
+import static com.ustadmobile.core.view.ClazzListView.ARG_CLAZZ_UID;
 import static com.ustadmobile.core.view.ClazzDetailEnrollStudentView.ARG_NEW_PERSON;
 import static com.ustadmobile.core.view.PersonDetailView.ARG_PERSON_UID;
 import static com.ustadmobile.lib.db.entities.PersonDetailPresenterField.CUSTOM_FIELD_MIN_UID;
 
 /**
- * The Enrollment person list's presenter for that Clazz.
+ * The ClazzDetailEnrollStudent's presenter - responsible for the logic of Enrolling a student
+ * Enrollment detail screen shows all students that are enrolled as well as students not enrolled
+ * along with an enrollment tick mark.
+ *
  * Gets called when Add Student is pressed when within a Clazz.
  *
  */
 public class ClazzDetailEnrollStudentPresenter extends
         CommonHandlerPresenter<ClazzDetailEnrollStudentView> {
-        //UstadBaseController<ClazzDetailEnrollStudentView> {
-
 
     private long currentClazzUid = -1L;
     private UmProvider<PersonWithEnrollment> personWithEnrollmentUmProvider;
 
     private ClazzMemberDao clazzMemberDao = UmAppDatabase.getInstance(context).getClazzMemberDao();
-
-    private Map<Long, Boolean> enrollmentMap;
 
     public ClazzDetailEnrollStudentPresenter(Object context, Hashtable arguments,
                                              ClazzDetailEnrollStudentView view) {
@@ -52,17 +50,30 @@ public class ClazzDetailEnrollStudentPresenter extends
             currentClazzUid = (long) arguments.get(ARG_CLAZZ_UID);
         }
 
-        enrollmentMap = new HashMap<>();
     }
 
+    /**
+     * Order:
+     *      1. Gets all students with enrollment information from the database.
+     *      2. Sets the provider to the view.
+     *
+     * @param savedState The savedState
+     */
     @Override
     public void onCreate(Hashtable savedState) {
         super.onCreate(savedState);
 
         personWithEnrollmentUmProvider = UmAppDatabase.getInstance(context).getClazzMemberDao()
                 .findAllPeopleWithEnrollmentForClassUid(currentClazzUid);
-        view.setStudentsProvider(personWithEnrollmentUmProvider);
+        setProviderToView();
 
+    }
+
+    /**
+     * Sets the provider attached to this Presenter to the View.
+     */
+    private void setProviderToView(){
+        view.setStudentsProvider(personWithEnrollmentUmProvider);
     }
 
     /**
@@ -101,7 +112,7 @@ public class ClazzDetailEnrollStudentPresenter extends
                             cfv.setPersonCustomFieldValueUid(customFieldValueDao.insert(cfv));
                         }
 
-                        Hashtable args = new Hashtable();
+                        Hashtable<String, Object> args = new Hashtable<>();
                         args.put(ARG_CLAZZ_UID, currentClazzUid);
                         args.put(ARG_PERSON_UID, result);
                         args.put(ARG_NEW_PERSON, "true");
@@ -129,40 +140,42 @@ public class ClazzDetailEnrollStudentPresenter extends
     }
 
     /**
-     * Handles what happens when sort order changed from the UI
-     * @param order The sort order flag.
+     * Does nothing. Any common handler goes here. Here we are doing nothing. We don't want to see Student Details
+     * when we are in the enrollment screen.
+     *
+     * @param arg   Any argument to the handler.
      */
-    public void handleChangeSortOrder(int order){
-        //TODO
+    @Override
+    public void handleCommonPressed(Object arg) {
     }
 
     /**
-     * Handles what happens when searched for something in the recycler view.
-     * @param query The query // string to be searched.
+     * The secondary handler for the Enrollment screen on the main recycler view - is to toggle
+     * enrollment for that student pressed.
+     *
+     * @param arg The argument here - is a Map of the student id and the enrollment status
      */
-    public void handleClickSearch(String query){
-        //TODO
-    }
-
-    @Override
-    public void handleCommonPressed(Object arg) {
-        //Do nothing. We don't want to see Student Details when we are in the enrollment screen.
-    }
-
     @Override
     public void handleSecondaryPressed(Object arg) {
+
+        //The Unchecked cast warning is expected. We are making a personal assumption from the View.
         Map.Entry<PersonWithEnrollment, Boolean> argument =
                 (Map.Entry<PersonWithEnrollment, Boolean>) arg;
 
         handleEnrollChanged(argument.getKey(), argument.getValue());
     }
 
-
-    public void handleEnrollChanged(PersonWithEnrollment person, boolean enrolled){
+    /**
+     * Handles role changed for every person. This method will update the clazzMember for the
+     * person whose role changed. If the student person does not have a Clazz Member entry, it will
+     * create one and persist the database with the new value.
+     *
+     * @param person The person with Enrollment object whose to be enrolled or not.
+     * @param enrolled  The enrolled status. True for enrolled, False for un-enrolled.
+     */
+    private void handleEnrollChanged(PersonWithEnrollment person, boolean enrolled){
         System.out.println("handleEnrollChanged : " + person.getFirstNames() + " " +
             person.getLastName() + " is to be " + enrolled);
-
-        enrollmentMap.put(person.getPersonUid(), enrolled);
 
         clazzMemberDao.findByPersonUidAndClazzUidAsync(person.getPersonUid(), currentClazzUid,
                 new UmCallback<ClazzMember>() {
@@ -178,7 +191,7 @@ public class ClazzDetailEnrollStudentPresenter extends
                         newClazzMember.setRole(ClazzMember.ROLE_STUDENT);
                         newClazzMember.setClazzMemberPersonUid(person.getPersonUid());
                         newClazzMember.setDateJoined(System.currentTimeMillis());
-                        newClazzMember.setClazzMemberActive(enrolled);
+                        newClazzMember.setClazzMemberActive(true);
                         clazzMemberDao.insertAsync(newClazzMember, new UmCallback<Long>() {
                             @Override
                             public void onSuccess(Long result) {
@@ -187,7 +200,7 @@ public class ClazzDetailEnrollStudentPresenter extends
 
                             @Override
                             public void onFailure(Throwable exception) {
-
+                                exception.printStackTrace();
                             }
                         });
                     }else {
@@ -221,7 +234,6 @@ public class ClazzDetailEnrollStudentPresenter extends
      * already made those changes. Just exit the activity (finish).
      */
     public void handleClickDone(){
-
         view.finish();
     }
 

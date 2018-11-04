@@ -3,14 +3,11 @@ package com.ustadmobile.core.controller;
 import java.util.Hashtable;
 
 import com.ustadmobile.core.db.dao.ClazzMemberDao;
-import com.ustadmobile.core.db.dao.PersonDao;
 import com.ustadmobile.core.db.dao.SocialNominationQuestionDao;
 import com.ustadmobile.core.db.dao.SocialNominationQuestionResponseDao;
 import com.ustadmobile.core.db.dao.SocialNominationQuestionResponseNominationDao;
-import com.ustadmobile.core.db.dao.SocialNominationQuestionSetDao;
 import com.ustadmobile.core.db.dao.SocialNominationQuestionSetResponseDao;
 import com.ustadmobile.core.impl.UmCallback;
-import com.ustadmobile.core.view.PersonDetailView;
 import com.ustadmobile.core.view.SELEditView;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 
@@ -25,7 +22,7 @@ import com.ustadmobile.lib.db.entities.SocialNominationQuestionResponse;
 import com.ustadmobile.lib.db.entities.SocialNominationQuestionResponseNomination;
 import com.ustadmobile.lib.db.entities.SocialNominationQuestionSetResponse;
 
-import static com.ustadmobile.core.controller.ClazzListPresenter.ARG_CLAZZ_UID;
+import static com.ustadmobile.core.view.ClazzListView.ARG_CLAZZ_UID;
 import static com.ustadmobile.core.view.PersonDetailView.ARG_PERSON_UID;
 import static com.ustadmobile.core.view.SELEditView.ARG_CLAZZMEMBER_UID;
 import static com.ustadmobile.core.view.SELEditView.ARG_QUESTION_INDEX_ID;
@@ -40,7 +37,9 @@ import static com.ustadmobile.core.view.SELSelectStudentView.ARG_STUDENT_DONE;
 
 
 /**
- * The SELEdit Presenter.
+ * The SELEdit's Presenter - responsible for the logic behind editing every SEL Question attempt.
+ * This involves setting up the Students as blobs with images on them and implement check for
+ * the next SEL Question in a repetition until the end of all applicable SEL questions.
  */
 public class SELEditPresenter
         extends CommonHandlerPresenter<SELEditView> {
@@ -49,47 +48,58 @@ public class SELEditPresenter
     private long currentClazzUid = -1;
     private long currentPersonUid = -1;
     private long currentQuestionSetUid = -1;
-    private long currentQuestionUid = -1;
     private long currentClazzMemberUid = -1;
     private int currentQuestionIndexId = 0;
     private long currentQuestionSetResponseUid = -1;
     private long currentQuestionResponseUid = -1;
 
     //Provider 
-    UmProvider<Person> providerList;
+    private UmProvider<Person> providerList;
 
+    /**
+     * Gets arguments needed to conduct SEL activity and progression and update heading accordingly.
+     *
+     * @param context       The application context
+     * @param arguments     The arguments to the presenter and view
+     * @param view          The view
+     */
     public SELEditPresenter(Object context, Hashtable arguments, SELEditView view) {
         super(context, arguments, view);
 
-        //Get arguments and set them.
+        //Get current class and store it.
         if(arguments.containsKey(ARG_CLAZZ_UID)){
             currentClazzUid = (long) arguments.get(ARG_CLAZZ_UID);
         }
+        //Get current person and store it.
         if(arguments.containsKey(ARG_PERSON_UID)){
             currentPersonUid = (long) arguments.get(ARG_PERSON_UID);
         }
+        //Get current clazz member  and store it.
         if(arguments.containsKey(ARG_CLAZZMEMBER_UID)){
             currentClazzMemberUid = (long) arguments.get(ARG_CLAZZMEMBER_UID);
         }
+        //Get current question set and store it.
         if(arguments.containsKey(ARG_QUESTION_SET_UID)){
             currentQuestionSetUid = (long) arguments.get(ARG_QUESTION_SET_UID);
         }
-        if(arguments.containsKey(ARG_QUESTION_UID)){
-            currentQuestionUid = (long) arguments.get(ARG_QUESTION_UID);
-        }
+        //Get current question index and store it.
         if(arguments.containsKey(ARG_QUESTION_INDEX_ID)){
             currentQuestionIndexId = (int) arguments.get(ARG_QUESTION_INDEX_ID);
         }
+        //Get current question set response uid and store it.
         if(arguments.containsKey(ARG_QUESTION_SET_RESPONSE_UID)){
             currentQuestionSetResponseUid = (long) arguments.get(ARG_QUESTION_SET_RESPONSE_UID);
         }
+        //Get current question response uid and store it.
         if(arguments.containsKey(ARG_QUESTION_RESPONSE_UID)){
             currentQuestionResponseUid = (long) arguments.get(ARG_QUESTION_RESPONSE_UID);
         }
+        //Get current question text and update the heading.
         if(arguments.containsKey(ARG_QUESTION_TEXT)){
             view.updateHeading(arguments.get(ARG_QUESTION_TEXT).toString());
         }
 
+        //Check if question index exists. If it does, update the heading accordingly.
         if(arguments.containsKey(ARG_QUESTION_INDEX)){
             if(arguments.containsKey(ARG_QUESTION_TOTAL)){
                 view.updateHeading(arguments.get(ARG_QUESTION_INDEX).toString(),
@@ -100,6 +110,13 @@ public class SELEditPresenter
 
     }
 
+    /**
+     * In Order:
+     *      1. Find all clazz members to be part of this clazz to populate the Students.
+     *      2. Set the Clazz Member people list provider to the view.
+     *
+     * @param savedState    The saved state
+     */
     @Override
     public void onCreate(Hashtable savedState) {
         super.onCreate(savedState);
@@ -109,10 +126,23 @@ public class SELEditPresenter
                 .findAllPeopleInClassUid(currentClazzUid);
 
         //set Provider.
-        view.setListProvider(providerList);
+        setPeopleProviderToView();
 
     }
 
+    /**
+     * Sets the currently set UMProvider of People type to the View
+     */
+    private void setPeopleProviderToView(){
+        view.setListProvider(providerList);
+    }
+
+    /**
+     * Handle the primary button after/while editing the SEL task. This means we either
+     * end the SEL task or progress it further to the next SEL questions. this method checks for
+     * those and also persists the SEL nominations accordingly.
+     *
+     */
     public void handleClickPrimaryActionButton() {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         SocialNominationQuestionDao  questionDao =
@@ -167,7 +197,7 @@ public class SELEditPresenter
                                                 questionResponse.setSocialNominationQuestionResponseUid(questionResponseDao.insert(questionResponse));
 
                                                 //Create arguments
-                                                Hashtable args = new Hashtable();
+                                                Hashtable<String, Object> args = new Hashtable<>();
                                                 args.put(ARG_CLAZZ_UID, currentClazzUid);
                                                 args.put(ARG_PERSON_UID, currentPersonUid);
                                                 args.put(ARG_QUESTION_SET_UID, currentQuestionSetUid);
@@ -180,21 +210,18 @@ public class SELEditPresenter
                                                 args.put(ARG_QUESTION_TOTAL, totalSELQuestions);
                                                 args.put(ARG_QUESTION_RESPONSE_UID, questionResponse.getSocialNominationQuestionResponseUid());
 
-                                                //impl.go(SELEditView.VIEW_NAME, args, view.getContext());
                                                 impl.go(SELQuestionView.VIEW_NAME, args, view.getContext());
 
                                             }
 
                                             @Override
                                             public void onFailure(Throwable exception) {
-                                                System.out.println("Fail-3");
+                                                exception.printStackTrace();
                                             }
                                         });
-
-
                                     }else{
                                         System.out.println("All Question gone through OK..");
-                                        Hashtable args = new Hashtable();
+                                        Hashtable<String, Object> args = new Hashtable<>();
                                         args.put(ARG_STUDENT_DONE, currentPersonUid);
                                         args.put(ARG_CLAZZ_UID, currentClazzUid);
 
@@ -205,35 +232,36 @@ public class SELEditPresenter
 
                                 @Override
                                 public void onFailure(Throwable exception) {
-                                    System.out.println("Fail-2");
+                                    exception.printStackTrace();
                                 }
                             });
                     }
 
                     @Override
                     public void onFailure(Throwable exception) {
-                        System.out.println("Fail-1");
+                        exception.printStackTrace();
                     }
                 });
             }
 
             @Override
             public void onFailure(Throwable exception) {
-
+                exception.printStackTrace();
             }
         });
     }
 
-    @Override
-    public void setUIStrings() {
 
-    }
-
+    /**
+     * Handles what happens when every Clazz Member Person Blob 's primary button in the SEL
+     * activity is pressed. Here we save every Nomination to the database as it happens.
+     * We also highlight the selected.
+     *
+     * @param arg   The argument to be passed to the presenter for primary action pressed.
+     */
     @Override
     public void handleCommonPressed(Object arg) {
         //Record nomination and highlight selected.
-        System.out.println("Handling nomination pressed..");
-
         ClazzMemberDao clazzMemberDao = UmAppDatabase.getInstance(context).getClazzMemberDao();
         SocialNominationQuestionResponseNominationDao questionResponseNominationDao =
                 UmAppDatabase.getInstance(context).getSocialNominationQuestionResponseNominationDao();
@@ -249,19 +277,33 @@ public class SELEditPresenter
                 responseNomination.setSocialNominationQuestionResponseNominationClazzMemberUid(result.getClazzMemberUid());
 
                 questionResponseNominationDao.insert(responseNomination);
-
             }
 
             @Override
             public void onFailure(Throwable exception) {
-
+                exception.printStackTrace();
             }
         });
 
     }
 
+    /**
+     * Handles what happens when every Clazz Member Person Blob 's secondary button in the SEL
+     * activity is pressed.
+     * Here there is no secondary button or task for every item. Does nothing here.
+     *
+     * @param arg   The argument to be passed to the presenter for secondary action pressed.
+     */
     @Override
     public void handleSecondaryPressed(Object arg) {
         //No secondary option here.
+    }
+
+    /**
+     * Overridden. Doesn't do anything.
+     */
+    @Override
+    public void setUIStrings() {
+
     }
 }

@@ -127,7 +127,7 @@ public class ClazzEditActivity extends UstadBaseActivity implements ClazzEditVie
         holidaySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                mPresenter.updateHoliday(position, id);
+                mPresenter.updateHoliday(position);
             }
 
             @Override

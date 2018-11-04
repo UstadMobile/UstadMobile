@@ -12,27 +12,26 @@ import com.ustadmobile.lib.db.entities.SocialNominationQuestion;
 
 
 /**
- * The SELQuestionDetail Presenter.
+ * The SELQuestionDetail Presenter - responsible for the logic of showing all SEL Questions
+ * and the ability to add new Questions for the SEL task. This is a Class Management feature.
+ *
  */
 public class SELQuestionDetailPresenter
         extends UstadBaseController<SELQuestionDetailView> {
 
-    //Any arguments stored as variables here
-    //eg: private long clazzUid = -1;
-
     //Provider 
-    UmProvider<SocialNominationQuestion> providerList;
+    private UmProvider<SocialNominationQuestion> providerList;
 
     public SELQuestionDetailPresenter(Object context, Hashtable arguments, SELQuestionDetailView view) {
         super(context, arguments, view);
-
-        //Get arguments and set them.
-        //eg: if(arguments.containsKey(ARG_CLAZZ_UID)){
-        //    currentClazzUid = (long) arguments.get(ARG_CLAZZ_UID);
-        //}
-
     }
 
+    /**
+     * In Order:
+ *          1. Gets all Social Nomination Questions and sets the SocialNominationQuestion Provider
+     *          to the view.
+     * @param savedState    The saved state
+     */
     @Override
     public void onCreate(Hashtable savedState) {
         super.onCreate(savedState);
@@ -40,27 +39,44 @@ public class SELQuestionDetailPresenter
         //Populate the provider
         providerList = UmAppDatabase.getInstance(context).getSocialNominationQuestionDao()
                 .findAllQuestions();
-
-        //set Provider.
-        view.setListProvider(providerList);
+        setQuestionListProviderToView();
 
     }
 
+    /**
+     * Sets already set SocialNominationQuestion UmProvider to the View.
+     */
+    private void setQuestionListProviderToView(){
+        //set Provider.
+        view.setListProvider(providerList);
+    }
+
+    /**
+     * Handler for when Add Question is pressed - it takes the application to the SELQuestionEdit
+     * screen - where new Question can be added.
+     *
+     */
     public void handleClickAddQuestion(){
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         impl.go(SELQuestionEditView.VIEW_NAME, view.getContext());
     }
 
+    /**
+     * Clicking done will close the activity. Since everything is already persisted OK.
+     */
     public void handleClickDone(){
         //Exit the activity
         view.finish();
     }
 
-    public void handleClickSortOrder(int sortOrder){
-        //TODO: Sort order
+//    public void handleClickSortOrder(int sortOrder){
+//        //TODO: Sort order
+//
+//    }
 
-    }
-
+    /**
+     * Overridden. Does nothing here.
+     */
     @Override
     public void setUIStrings() {
 

@@ -7,15 +7,11 @@ import android.support.test.InstrumentationRegistry;
 import android.support.test.espresso.intent.rule.IntentsTestRule;
 import android.support.test.runner.AndroidJUnit4;
 
-import com.toughra.ustadmobile.R;
-import com.ustadmobile.core.controller.ClazzListPresenter;
-import com.ustadmobile.core.controller.ClazzLogDetailPresenter;
 import com.ustadmobile.core.db.UmAppDatabase;
-import com.ustadmobile.core.util.UMCalendarUtil;
+import com.ustadmobile.core.view.ClazzListView;
 import com.ustadmobile.core.view.PersonDetailView;
 import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.Person;
-import com.ustadmobile.port.android.view.ClazzLogDetailActivity;
 import com.ustadmobile.port.android.view.PersonDetailActivity;
 import com.ustadmobile.test.port.android.testutil.UmDbTestUtil;
 
@@ -81,7 +77,7 @@ public class PersonDetailActivityEspressoTest {
         //Start the activity
         Intent launchActivityIntent = new Intent();
         Bundle b = new Bundle();
-        b.putLong(ClazzListPresenter.ARG_CLAZZ_UID, testClazz.getClazzUid());
+        b.putLong(ClazzListView.ARG_CLAZZ_UID, testClazz.getClazzUid());
         b.putLong(PersonDetailView.ARG_PERSON_UID, personUid);
         launchActivityIntent.putExtras(b);
         mActivityRule.launchActivity(launchActivityIntent);

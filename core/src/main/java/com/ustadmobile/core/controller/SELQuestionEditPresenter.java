@@ -1,48 +1,49 @@
 package com.ustadmobile.core.controller;
 
-import java.util.Hashtable;
-
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.SocialNominationQuestionDao;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.view.SELQuestionEditView;
-import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.lib.db.entities.SocialNominationQuestion;
+
+import java.util.Hashtable;
 
 
 /**
- * The SELQuestionEdit Presenter.
+ * The SELQuestionEdit's Presenter - Responsible for the logic to add a new SocialNomination
+ * Question. This is part of Class Management.
+ *
  */
 public class SELQuestionEditPresenter
         extends UstadBaseController<SELQuestionEditView> {
 
     private long DEFAULT_QUESTION_SET_UID = 1;
 
-    //Any arguments stored as variables here
-    //eg: private long clazzUid = -1;
-    SocialNominationQuestionDao socialNominationQuestionDao;
+    private SocialNominationQuestionDao socialNominationQuestionDao;
 
 
     public SELQuestionEditPresenter(Object context, Hashtable arguments, SELQuestionEditView view) {
         super(context, arguments, view);
 
-        //Get arguments and set them.
-        //eg: if(arguments.containsKey(ARG_CLAZZ_UID)){
-        //    currentClazzUid = (long) arguments.get(ARG_CLAZZ_UID);
-        //}
         socialNominationQuestionDao =
                 UmAppDatabase.getInstance(context).getSocialNominationQuestionDao();
-
 
     }
 
     @Override
     public void onCreate(Hashtable savedState) {
         super.onCreate(savedState);
-
-
     }
 
+    /**
+     * Done click handler when a new Question has been filled in -  This will add the new Question
+     * in to the database where SEL task will pick it up for future SEL runs.
+     *
+     * @param newQuestion   The string of the new Question
+     * @param allClasses    The checkbox value if this question is for every class (default true)
+     * @param multiNominations  The checkbox value to check if mulitple nominations for this
+     *                          Question is allowed (default true)
+     */
     public void handleClickDone(String newQuestion, boolean allClasses, boolean multiNominations){
 
         socialNominationQuestionDao.getMaxIndexAsync(new UmCallback<Integer>() {
@@ -65,19 +66,22 @@ public class SELQuestionEditPresenter
 
                     @Override
                     public void onFailure(Throwable exception) {
-
+                        exception.printStackTrace();
                     }
                 });
             }
 
             @Override
             public void onFailure(Throwable exception) {
-
+                exception.printStackTrace();
             }
         });
 
     }
 
+    /**
+     * Overridden method. Does nothing.
+     */
     @Override
     public void setUIStrings() {
 

@@ -9,7 +9,6 @@ import android.support.test.espresso.intent.rule.IntentsTestRule;
 import android.support.test.runner.AndroidJUnit4;
 
 import com.toughra.ustadmobile.R;
-import com.ustadmobile.core.controller.ClazzListPresenter;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.core.view.ClazzListView;
@@ -87,7 +86,7 @@ public class ClazzLogDetailActivityActivityEspressoTest {
         //Start the activity
         Intent launchActivityIntent = new Intent();
         Bundle b = new Bundle();
-        b.putLong(ClazzListPresenter.ARG_CLAZZ_UID, testClazz.getClazzUid());
+        b.putLong(ClazzListView.ARG_CLAZZ_UID, testClazz.getClazzUid());
         b.putLong(ClazzListView.ARG_LOGDATE, UMCalendarUtil.getDateInMilliPlusDays(0));
         launchActivityIntent.putExtras(b);
         mActivityRule.launchActivity(launchActivityIntent);

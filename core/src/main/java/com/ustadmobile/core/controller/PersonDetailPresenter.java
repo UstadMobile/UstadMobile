@@ -15,7 +15,6 @@ import com.ustadmobile.core.view.PersonDetailEnrollClazzView;
 import com.ustadmobile.core.view.PersonDetailView;
 import com.ustadmobile.core.view.PersonDetailViewField;
 import com.ustadmobile.core.view.PersonEditView;
-import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.ClazzWithNumStudents;
 import com.ustadmobile.lib.db.entities.Person;
 import com.ustadmobile.lib.db.entities.PersonCustomFieldWithPersonCustomFieldValue;
@@ -44,6 +43,13 @@ import static com.ustadmobile.lib.db.entities.PersonDetailPresenterField.PERSON_
 import static com.ustadmobile.lib.db.entities.PersonDetailPresenterField.PERSON_FIELD_UID_MOTHER_NUMBER;
 
 
+/**
+ * PersonDetail's Presenter - responsible for the logic of displaying all the details of a person
+ * that is being displayed (for viewing). It also handles going to Edit page for this person; showing
+ * all assigned classes for this person; setting ui bits for calling/texting parent, showing
+ * attendance numbers, marking dropouts, showing profile image, etc.
+ *
+ */
 public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>{
 
     private UmLiveData<Person> mPerson;
@@ -100,13 +106,12 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
                 }
                 if(thisPerson.getImagePath() != null){
                     view.runOnUiThread(() -> view.updateImageOnView(thisPerson.getImagePath()));
-
                 }
             }
 
             @Override
             public void onFailure(Throwable exception) {
-
+                exception.printStackTrace();
             }
         });
 
@@ -148,42 +153,48 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
 
                             @Override
                             public void onFailure(Throwable exception) {
-
+                                exception.printStackTrace();
                             }
                         });
                     }
 
                     @Override
                     public void onFailure(Throwable exception) {
-
+                        exception.printStackTrace();
                     }
                 });
             }
 
             @Override
             public void onFailure(Throwable exception) {
-
+                exception.printStackTrace();
             }
         });
     }
 
+    /**
+     * Generates the all class list with assignation for the person being displayed.
+     */
     public void generateAssignedClazzesLiveData(){
         ClazzDao clazzDao = UmAppDatabase.getInstance(context).getClazzDao();
 
         assignedClazzes = clazzDao.findAllClazzesByPersonUid(personUid);
 
-        view.setClazzListProvider(assignedClazzes);
+        setClazzListOnView();
     }
 
-    public void setItemOnView(){
-
+    /**
+     * Sets the Class List provider of ClazzNumWithStudents type to the view.
+     */
+    private void setClazzListOnView(){
+        view.setClazzListProvider(assignedClazzes);
     }
 
     /**
      * This method tells the View what to show. It will set every field item to the view.
      * @param person The person that needs to be displayed.
      */
-    public void handlePersonDataChanged(Person person) {
+    private void handlePersonDataChanged(Person person) {
 
         view.clearAllFields();
 
@@ -323,39 +334,51 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
 
         view.finish();
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        Hashtable args = new Hashtable();
+        Hashtable<String, Object> args = new Hashtable<>();
         args.put(ARG_PERSON_UID, personUid);
         impl.go(PersonEditView.VIEW_NAME, args, view.getContext());
     }
 
+    /**
+     * Handles call parent button - calls the method that calls the parent (open platform native
+     * call UI)
+     */
     public void handleClickCallParent(){
         if(!oneParentNumber.isEmpty()) {
             handleClickCall(oneParentNumber);
         }
     }
 
+    /**
+     * Handles text parent button - calls the method that texts the parent (opens platform native
+     * text UI)
+     */
     public void handleClickTextParent(){
         if(!oneParentNumber.isEmpty()) {
             handleClickText(oneParentNumber);
         }
     }
 
+    /**
+     * Handles what happens when Enroll in Class is clicked at the top common big buttons
+     * - opens the View that shows the list of classes with their enrollment status ie:
+     *      PersonDetailEnrollClazz
+     */
     public void handleClickEnrollInClass(){
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        Hashtable args = new Hashtable();
+        Hashtable<String, Object> args = new Hashtable<>();
         args.put(ARG_PERSON_UID, personUid);
 
         impl.go(PersonDetailEnrollClazzView.VIEW_NAME, args, context);
     }
+
     /**
      * Handler to what happens when call button pressed on an entry (usually to call a person)
      *
      * @param number The phone number
      */
     public void handleClickCall(String number){
-        System.out.println("Call this number: " + number);
         view.handleClickCall(number);
-
     }
 
     /**
@@ -365,10 +388,12 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
      * @param number The phone number
      */
     public void handleClickText(String number){
-        System.out.println("Text this number: " + number);
         view.handleClickText(number);
     }
 
+    /**
+     * Overriding. Doesn't do anything.
+     */
     @Override
     public void setUIStrings() {
     }

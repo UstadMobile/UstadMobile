@@ -4,7 +4,6 @@ package com.ustadmobile.port.android.view;
 import com.ustadmobile.core.controller.ClazzActivityEditPresenter;
 
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
@@ -79,7 +78,7 @@ public class ClazzActivityEditActivity extends UstadBaseActivity implements Claz
 
         //FAB and its listener
         FloatingTextButton fab = findViewById(R.id.activity_clazz_activity_edit_fab);
-        fab.setOnClickListener(v -> mPresenter.handleClickPrimaryActionButton(-1));
+        fab.setOnClickListener(v -> mPresenter.handleClickPrimaryActionButton());
 
         activityChangeSpinner = findViewById(R.id.activity_clazz_activity_edit_change_spinner);
         activityChangeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {

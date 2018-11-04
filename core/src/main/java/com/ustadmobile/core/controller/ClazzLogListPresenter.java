@@ -13,60 +13,49 @@ import com.ustadmobile.lib.db.entities.ClazzLog;
 import com.ustadmobile.lib.db.entities.DailyAttendanceNumbers;
 
 import java.util.Calendar;
-import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.ustadmobile.core.controller.ClazzListPresenter.ARG_CLAZZ_UID;
+import static com.ustadmobile.core.view.ClazzListView.ARG_CLAZZ_UID;
 import static com.ustadmobile.core.view.ClassLogListView.CHART_DURATION_LAST_MONTH;
 import static com.ustadmobile.core.view.ClassLogListView.CHART_DURATION_LAST_WEEK;
 import static com.ustadmobile.core.view.ClassLogListView.CHART_DURATION_LAST_YEAR;
 import static com.ustadmobile.core.view.ClazzListView.ARG_LOGDATE;
 
 /**
- * The Presenter/Controller for ClazzLogListFragment. This is responsible in creating the provider
- * from the Dao and assigning it to the View. Any click handlers are also here.
+ * The Presenter/Controller for ClazzLogListFragment. This is responsible for the logic behind
+ * displaying every Clazz Attendance Logs via the database provider from the database/repository.
+ * It is also responsible for the logic for displaying attendance charts for that class.
  */
 public class ClazzLogListPresenter extends UstadBaseController<ClassLogListView>{
 
     private long currentClazzUid = -1L;
 
-    /**
-     * Constructor to the ClazzLogList Presenter.
-     * We got the class uid from the arguments passed to it.
-     *
-     * @param context
-     * @param arguments
-     * @param view
-     */
+    private UmProvider<ClazzLog> clazzLogListProvider;
+
     public ClazzLogListPresenter(Object context, Hashtable arguments, ClassLogListView view) {
         super(context, arguments, view);
 
+        //Get clazz uid and set it
         if(arguments.containsKey(ARG_CLAZZ_UID)){
             currentClazzUid = (long) arguments.get(ARG_CLAZZ_UID);
         }
     }
 
-    /**
-     * Presenter's setUiStrings method that doesn't do anything here.
-     */
-    @Override
-    public void setUIStrings() {
-
-    }
-
-    private UmProvider<ClazzLog> clazzLogListProvider;
 
     /**
-     * The Presenter here's onCreate(). This populates the provider and sets it to the View.
+     * In Order:
+     *      1. This populates the Attendance/Log Entry list provider and sets it to the View.
+     *      2. Generate attendance line chart
+     *      3. Generate attendance bar chart
      *
      * This will be called when the implementation's View is ready.
      * (ie: on Android, this is called in the Fragment's onCreateView() )
      *
-     * @param savedState
+     * @param savedState    The savedState
      */
     @Override
     public void onCreate(Hashtable savedState){
@@ -74,7 +63,7 @@ public class ClazzLogListPresenter extends UstadBaseController<ClassLogListView>
 
         clazzLogListProvider = UmAppDatabase.getInstance(context).getClazzLogDao()
                 .findByClazzUid(currentClazzUid);
-        view.setClazzLogListProvider(clazzLogListProvider);
+        setProviderToView();
 
         generateAttendanceBarChartDataTest();
         generateAttendanceLineChartDataTest();
@@ -82,13 +71,23 @@ public class ClazzLogListPresenter extends UstadBaseController<ClassLogListView>
     }
 
     /**
-     * Method logic to go to the Log Detail activity.
-     * @param clazzLog
+     * Sets the clazz log list / clazz attendance list UMProvider provider set in this Presenter
+     * to the View object.
+     */
+    private void setProviderToView(){
+        view.setClazzLogListProvider(clazzLogListProvider);
+    }
+
+    /**
+     * Method logic to go to the Log Detail activity - To see the attendance entry details and edit
+     * them.
+     *
+     * @param clazzLog  The clazz log entry uid that we want to edit.
      */
     public void goToClazzLogDetailActivity(ClazzLog clazzLog){
 
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        Hashtable args = new Hashtable();
+        Hashtable<String, Object> args = new Hashtable<>();
         args.put(ARG_CLAZZ_UID, clazzLog.getClazzClazzUid());
         args.put(ARG_LOGDATE, clazzLog.getLogDate());
         impl.go(ClassLogDetailView.VIEW_NAME, args, view.getContext());
@@ -99,14 +98,19 @@ public class ClazzLogListPresenter extends UstadBaseController<ClassLogListView>
      */
     public void goToNewClazzLogDetailActivity(){
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        Hashtable args = new Hashtable();
+        Hashtable<String, Object> args = new Hashtable<>();
         args.put(ARG_CLAZZ_UID, currentClazzUid);
-
-        //args.put(ARG_LOGDATE, UMCalendarUtil.getDateInMilliPlusDays(0));
         args.put(ARG_LOGDATE, System.currentTimeMillis());
         impl.go(ClassLogDetailView.VIEW_NAME, args, view.getContext());
     }
 
+    /**
+     * Method that takes the duration flag and calculated daily attendance numbers for the current
+     * class and updates both the line and bar charts.
+     *
+     * @param duration The duration flag (CHART_DURATION_LAST_WEEK, CHART_DURATION_LAST_MONTH,
+     *                 CHART_DURATION_LAST_YEAR) as per defined in ClassLogListView
+     */
     public void getAttendanceDataAndUpdateCharts(int duration){
 
         LinkedHashMap<Float, Float> lineDataMap = new LinkedHashMap<>();
@@ -140,6 +144,8 @@ public class ClazzLogListPresenter extends UstadBaseController<ClassLogListView>
                 //Do nothing.
                 break;
         }
+
+        //Calculate daily attendance numbers from the database for the line chart.
         ClazzLogAttendanceRecordDao attendanceRecordDao =
                 UmAppDatabase.getInstance(context).getClazzLogAttendanceRecordDao();
         attendanceRecordDao.findDailyAttendanceByClazzUidAndDateAsync(currentClazzUid, fromDate, toDate,
@@ -178,11 +184,11 @@ public class ClazzLogListPresenter extends UstadBaseController<ClassLogListView>
 
             @Override
             public void onFailure(Throwable exception) {
-
+                exception.printStackTrace();
             }
         });
 
-
+        //Calculate attendance average numbers for the bar chart.
         ClazzMemberDao clazzMemberDao = UmAppDatabase.getInstance(context).getClazzMemberDao();
         clazzMemberDao.getAttendanceAverageAsListForClazzBetweenDates(currentClazzUid, fromDate,
                 toDate, new UmCallback<List<Float>>() {
@@ -212,13 +218,16 @@ public class ClazzLogListPresenter extends UstadBaseController<ClassLogListView>
 
                     @Override
                     public void onFailure(Throwable exception) {
-
+                        exception.printStackTrace();
                     }
                 });
     }
 
 
-    public void generateAttendanceLineChartDataTest(){
+    /**
+     * Generate and calculate test data for the line chart. TODO: Remove for production
+     */
+    private void generateAttendanceLineChartDataTest(){
         LinkedHashMap<Float, Float> lineData = new LinkedHashMap<>();
         lineData.put(1f, 0.1f);
         lineData.put(2f, 0.4f);
@@ -232,7 +241,10 @@ public class ClazzLogListPresenter extends UstadBaseController<ClassLogListView>
         view.updateAttendanceLineChart(lineData);
     }
 
-    public void generateAttendanceBarChartDataTest(){
+    /**
+     * Generate and calculate test data for the bar chart. TODO: Remove for production.
+     */
+    private void generateAttendanceBarChartDataTest(){
 
         LinkedHashMap<Float, Float> barData = new LinkedHashMap<>();
 
@@ -242,13 +254,21 @@ public class ClazzLogListPresenter extends UstadBaseController<ClassLogListView>
         view.updateAttendanceBarChart(barData);
     }
 
+//    /**
+//     * Method logic for what happens when we change the order of the log list
+//     *
+//     * @param order The order flag. 1 - Attendance, 2 - Date
+//     */
+//    public void handleChangeSortOrder(int order){
+//        //TODO: Change provider's sort order
+//    }
+
     /**
-     * Method logic for what happens when we change the order of the log list
-     *
-     * @param order The order flag. 1 - Attendance, 2 - Date
+     * Presenter's setUiStrings method that doesn't do anything here.
      */
-    public void handleChangeSortOrder(int order){
-        //TODO: Change provider's sort order
+    @Override
+    public void setUIStrings() {
+
     }
 
 

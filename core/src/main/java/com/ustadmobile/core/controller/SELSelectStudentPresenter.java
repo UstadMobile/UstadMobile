@@ -12,51 +12,60 @@ import com.ustadmobile.lib.db.entities.Person;
 
 import java.util.Hashtable;
 
-import static com.ustadmobile.core.controller.ClazzListPresenter.ARG_CLAZZ_UID;
+import static com.ustadmobile.core.view.ClazzListView.ARG_CLAZZ_UID;
 import static com.ustadmobile.core.view.PersonDetailView.ARG_PERSON_UID;
 import static com.ustadmobile.core.view.SELEditView.ARG_CLAZZMEMBER_UID;
 
-//public class SELSelectStudentPresenter extends UstadBaseController<SELSelectStudentView>  {
+/**
+ * SELSelectStudent's Presenter - Responsible for showing every Clazz Member that will participate
+ * in the SEL questions run task before consent, recognition and aswers.
+ *
+ */
 public class SELSelectStudentPresenter extends CommonHandlerPresenter<SELSelectStudentView>  {
 
-    UmProvider<Person> selStudentsProvider;
     private long currentClazzUid = -1;
 
     public SELSelectStudentPresenter(Object context, Hashtable arguments,
                                      SELSelectStudentView view) {
         super(context, arguments, view);
 
+        //Get Clazz Uid for the current Clazz.
         if(arguments.containsKey(ARG_CLAZZ_UID)){
             currentClazzUid = (long) arguments.get(ARG_CLAZZ_UID);
         }
 
-
     }
 
+    /**
+     * In Order:
+     *      1. Get all Clazz Members and set it to the View.
+     *
+     * @param savedState    The saved state.
+     */
     @Override
     public void onCreate(Hashtable savedState) {
         super.onCreate(savedState);
 
-        selStudentsProvider = UmAppDatabase.getInstance(context).getClazzMemberDao()
+        UmProvider<Person> selStudentsProvider = UmAppDatabase.getInstance(context).getClazzMemberDao()
                 .findAllPeopleInClassUid(currentClazzUid);
 
         view.setSELAnswerListProvider(selStudentsProvider);
     }
 
-    @Override
-    public void setUIStrings() {
-
-    }
-
+    /**
+     * Handles primary press on the student list - Selects that student that runs the SEL. Passes
+     * its Clazz Member Ui (gets it first) and begins asking for consent.
+     *
+     * @param arg   The argument to be passed to the presenter for primary action pressed.
+     */
     @Override
     public void handleCommonPressed(Object arg) {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         ClazzMemberDao clazzMemberDao = UmAppDatabase.getInstance(context).getClazzMemberDao();
         Long currentPersonUid = (Long) arg;
-        Hashtable args = new Hashtable();
+        Hashtable<String, Object> args = new Hashtable<>();
         args.put(ARG_CLAZZ_UID, currentClazzUid);
         args.put(ARG_PERSON_UID, currentPersonUid);
-
 
         clazzMemberDao.findByPersonUidAndClazzUidAsync(currentPersonUid, currentClazzUid,
                 new UmCallback<ClazzMember>() {
@@ -69,16 +78,26 @@ public class SELSelectStudentPresenter extends CommonHandlerPresenter<SELSelectS
 
                     @Override
                     public void onFailure(Throwable exception) {
-                        System.out.println("SELSelectStudentPresenter - Fail");
+                        exception.printStackTrace();
                     }
                 });
-
-
-
     }
 
+    /**
+     * Handles secondary press on the students - Nothing for this screen. Does nothing.
+     *
+     * @param arg   The argument to be passed to the presenter for secondary action pressed.
+     */
     @Override
     public void handleSecondaryPressed(Object arg) {
         // No secondary button for this here.
+    }
+
+    /**
+     * Overridden. Does nothing.
+     */
+    @Override
+    public void setUIStrings() {
+
     }
 }

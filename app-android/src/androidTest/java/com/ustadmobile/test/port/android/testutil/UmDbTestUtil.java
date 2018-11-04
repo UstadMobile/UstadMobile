@@ -1,6 +1,5 @@
 package com.ustadmobile.test.port.android.testutil;
 
-import com.ustadmobile.core.controller.ClazzListPresenter;
 import com.ustadmobile.core.db.dao.SocialNominationQuestionDao;
 import com.ustadmobile.core.db.dao.SocialNominationQuestionSetDao;
 import com.ustadmobile.core.view.ClazzListView;
@@ -689,7 +688,7 @@ public class UmDbTestUtil {
         for(String feedTitle: feedMapKeys){
             long feedLogDate = (long)feedsToCreate.get(feedTitle);
             String feedEntryLink = ClassLogDetailView.VIEW_NAME + "?" +
-                    ClazzListPresenter.ARG_CLAZZ_UID + "=" + feedClazzUid + "&" +
+                    ClazzListView.ARG_CLAZZ_UID + "=" + feedClazzUid + "&" +
                     ClazzListView.ARG_LOGDATE + "=" + feedLogDate;
             long feedEntryHash = 456;
 

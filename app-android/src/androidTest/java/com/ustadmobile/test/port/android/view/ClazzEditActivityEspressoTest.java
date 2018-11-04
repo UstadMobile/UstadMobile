@@ -7,8 +7,8 @@ import android.support.test.InstrumentationRegistry;
 import android.support.test.espresso.intent.rule.IntentsTestRule;
 import android.support.test.runner.AndroidJUnit4;
 
-import com.ustadmobile.core.controller.ClazzListPresenter;
 import com.ustadmobile.core.db.UmAppDatabase;
+import com.ustadmobile.core.view.ClazzListView;
 import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.port.android.view.ClazzEditActivity;
 import com.ustadmobile.test.port.android.testutil.UmDbTestUtil;
@@ -72,7 +72,7 @@ public class ClazzEditActivityEspressoTest {
         //Start the activity
         Intent launchActivityIntent = new Intent();
         Bundle b = new Bundle();
-        b.putLong(ClazzListPresenter.ARG_CLAZZ_UID, testClazz.getClazzUid());
+        b.putLong(ClazzListView.ARG_CLAZZ_UID, testClazz.getClazzUid());
         b.putLong(ARG_PERSON_UID, TEST_USER_UID);
         launchActivityIntent.putExtras(b);
         mActivityRule.launchActivity(launchActivityIntent);

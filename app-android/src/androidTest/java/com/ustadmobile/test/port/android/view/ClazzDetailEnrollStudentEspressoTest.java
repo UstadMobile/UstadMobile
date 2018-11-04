@@ -21,7 +21,7 @@ import org.junit.runner.RunWith;
 
 import java.util.Hashtable;
 
-import static com.ustadmobile.core.controller.ClazzListPresenter.ARG_CLAZZ_UID;
+import static com.ustadmobile.core.view.ClazzListView.ARG_CLAZZ_UID;
 
 @RunWith(AndroidJUnit4.class)
 public class ClazzDetailEnrollStudentEspressoTest {

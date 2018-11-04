@@ -45,7 +45,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 
 import com.toughra.ustadmobile.R;
-import com.ustadmobile.core.controller.ClazzListPresenter;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.ClazzActivityChangeDao;
 import com.ustadmobile.core.db.dao.ClazzActivityDao;
@@ -727,7 +726,7 @@ public class SplashScreenActivity extends AppCompatActivity
             thisFeed.setTitle("Record attendance for Class " + 1);
             thisFeed.setFeedEntryPersonUid(thisPersonUid);
             thisFeed.setLink(ClassLogDetailView.VIEW_NAME + "?" +
-                    ClazzListPresenter.ARG_CLAZZ_UID + "=" + feedClazzUid + "&" +
+                    ClazzListView.ARG_CLAZZ_UID + "=" + feedClazzUid + "&" +
                     ClazzListView.ARG_LOGDATE + "=" + thisDate);
             thisFeed.setFeedEntryHash(123);
 
@@ -742,7 +741,7 @@ public class SplashScreenActivity extends AppCompatActivity
                     newFeed.setTitle("Record attendance for Class " + 1);
                     newFeed.setFeedEntryPersonUid(thisPersonUid);
                     newFeed.setLink(ClassLogDetailView.VIEW_NAME + "?" +
-                            ClazzListPresenter.ARG_CLAZZ_UID + "=" + feedClazzUid + "&" +
+                            ClazzListView.ARG_CLAZZ_UID + "=" + feedClazzUid + "&" +
                             ClazzListView.ARG_LOGDATE + "=" + newDate);
                     newFeed.setFeedEntryHash(456);
                     feedEntryDao.insertAsync(newFeed, null);

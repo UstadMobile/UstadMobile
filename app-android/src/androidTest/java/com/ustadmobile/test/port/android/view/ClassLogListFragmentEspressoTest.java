@@ -17,7 +17,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import com.toughra.ustadmobile.R;
-import com.ustadmobile.core.controller.ClazzListPresenter;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.core.view.ClazzListView;
@@ -147,7 +146,7 @@ public class ClassLogListFragmentEspressoTest {
         //Start the activity
         Intent launchActivityIntent = new Intent();
         Bundle b = new Bundle();
-        b.putLong(ClazzListPresenter.ARG_CLAZZ_UID, testClazz.getClazzUid());
+        b.putLong(ClazzListView.ARG_CLAZZ_UID, testClazz.getClazzUid());
         launchActivityIntent.putExtras(b);
         mActivityRule.launchActivity(launchActivityIntent);
 
@@ -207,7 +206,7 @@ public class ClassLogListFragmentEspressoTest {
         for that item
          */
         intended(allOf(hasComponent(ClazzLogDetailActivity.class.getCanonicalName())
-                , hasExtras(allOf( hasEntry(equalTo(ClazzListPresenter.ARG_CLAZZ_UID),
+                , hasExtras(allOf( hasEntry(equalTo(ClazzListView.ARG_CLAZZ_UID),
                         equalTo(testClazz.getClazzUid())),
                         hasEntry(equalTo(ClazzListView.ARG_LOGDATE),
                                 equalTo(TEST_LOG_DATE1))))));

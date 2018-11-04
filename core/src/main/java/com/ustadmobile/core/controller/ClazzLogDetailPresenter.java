@@ -19,11 +19,18 @@ import com.ustadmobile.lib.db.entities.FeedEntry;
 
 import java.util.Hashtable;
 
-import static com.ustadmobile.core.controller.ClazzListPresenter.ARG_CLAZZ_UID;
+import static com.ustadmobile.core.view.ClazzListView.ARG_CLAZZ_UID;
 import static com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.STATUS_ABSENT;
 import static com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.STATUS_ATTENDED;
 import static com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.STATUS_PARTIAL;
 
+
+/**
+ * ClazzLogDetail's presenter - responsible for the logic of displaying (and editing) every
+ * Attendance Logs Entry attempt for a clazz and a date. (who's id we get from arguments). This is common
+ * with a new Attendance Log Entry.
+ *
+ */
 public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailView> {
 
     private long currentClazzUid = -1L;
@@ -34,21 +41,17 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
     private ClazzLog currentClazzLog;
     public Clazz currentClazz;
 
-    /**
-     * Constructor. We get the ClazzLog Uid and date from the arguments
-     *
-     * @param context
-     * @param arguments
-     * @param view
-     */
     public ClazzLogDetailPresenter(Object context,
                                    Hashtable arguments,
                                    ClassLogDetailView view) {
         super(context, arguments, view);
 
+        //Get clazz uid and set it
         if(arguments.containsKey(ARG_CLAZZ_UID)){
             currentClazzUid = Long.parseLong(arguments.get(ARG_CLAZZ_UID).toString());
         }
+
+        //Get log date and set it
         if(arguments.containsKey(ClazzListView.ARG_LOGDATE)){
             String thisLogDate = arguments.get(ClazzListView.ARG_LOGDATE).toString();
             currentLogDate = Long.parseLong(thisLogDate);
@@ -110,7 +113,7 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
                         }
                         @Override
                         public void onFailure(Throwable exception) {
-
+                            exception.printStackTrace();
                         }
                     });
                 }else{
@@ -121,7 +124,7 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
 
             @Override
             public void onFailure(Throwable exception) {
-                System.out.println(exception);
+                exception.printStackTrace();
             }
         });
 
@@ -134,7 +137,7 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
      *
      * @param result The ClazzLog for which to insert and get provider data for.
      */
-    public void insertAllAndSetProvider(ClazzLog result){
+    private void insertAllAndSetProvider(ClazzLog result){
 
         ClazzLogAttendanceRecordDao clazzLogAttendanceRecordDao =
                 UmAppDatabase.getInstance(getContext()).getClazzLogAttendanceRecordDao();
@@ -155,7 +158,7 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
 
                     @Override
                     public void onFailure(Throwable exception) {
-                        System.out.println(exception);
+                        exception.printStackTrace();
                     }
                 });
     }
@@ -193,7 +196,7 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
                 FeedEntryDao feedEntryDao =
                         UmAppDatabase.getInstance(getContext()).getFeedEntryDao();
                 String possibleFeedLink = ClassLogDetailView.VIEW_NAME + "?" +
-                        ClazzListPresenter.ARG_CLAZZ_UID + "=" + currentClazzUid +
+                        ClazzListView.ARG_CLAZZ_UID + "=" + currentClazzUid +
                         "&" + ClazzListView.ARG_LOGDATE + "=" + currentLogDate;
                 FeedEntry parentFeed =
                         feedEntryDao.findByLink(FeedListPresenter.TEST_DEFAULT_PERSON_UID, possibleFeedLink);
@@ -208,20 +211,20 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
 
             @Override
             public void onFailure(Throwable exception) {
-
+                exception.printStackTrace();
             }
         });
 
     }
 
-    /**
-     * Method logic for what happens when we change the order of the student list.
-     *
-     * @param order The order flag. 0 to Sort by Name, 1 to Sort by Attendance, 2 to Sort by date.
-     */
-    public void handleChangeSortOrder(int order){
-        //TODO: Change provider's sort order
-    }
+//    /**
+//     * Method logic for what happens when we change the order of the student list.
+//     *
+//     * @param order The order flag. 0 to Sort by Name, 1 to Sort by Attendance, 2 to Sort by date.
+//     */
+//    public void handleChangeSortOrder(int order){
+//        //TODO: Change provider's sort order
+//    }
 
     /**
      * Handle when the user taps to mark all present, or mark all absent. This will update the
@@ -240,8 +243,10 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
      * Handle when the user taps a student and marks it. This will update the database and
      * therefore the recycler view via LiveData.
      *
-     * @param clazzLogAttendanceRecordUid
-     * @param attendanceStatus
+     * @param clazzLogAttendanceRecordUid       The Attendance Log Entry's per person Record Uid
+     * @param attendanceStatus      The Person Attendance Log Entry's attendance status. Can be:
+     *                              STATUS_ATTENDED, STATUS_ABSENT, STATUS_PARTIAL as defined in
+     *                              ClazzLogAttendanceRecord
      */
     public void handleMarkStudent(long clazzLogAttendanceRecordUid, int attendanceStatus) {
         UmAppDatabase.getInstance(context).getClazzLogAttendanceRecordDao()

@@ -23,11 +23,11 @@ import static com.ustadmobile.core.view.ClazzListView.SORT_ORDER_NAME_ASC;
 import static com.ustadmobile.core.view.ClazzListView.SORT_ORDER_NAME_DESC;
 import static com.ustadmobile.core.view.ClazzListView.SORT_ORDER_TEACHER_ASC;
 
+/**
+ * The ClazzList's Presenter - responsible for the logic of listing the relevant classes on the
+ * Class list screen.
+ */
 public class ClazzListPresenter extends UstadBaseController<ClazzListView> {
-
-    private long currentPersonUid = -1L;
-
-    public static final String ARG_CLAZZ_UID = "ClazzUid";
 
     private UmProvider<ClazzWithNumStudents> clazzListProvider;
 
@@ -35,11 +35,15 @@ public class ClazzListPresenter extends UstadBaseController<ClazzListView> {
         super(context, arguments, view);
     }
 
-    Hashtable<Long, Integer> idToOrderInteger;
-    String[] sortPresets;
+    private Hashtable<Long, Integer> idToOrderInteger;
 
-
-    public String[] arrayListToStringArray(ArrayList<String> presetAL){
+    /**
+     * Common method to convert Array List to String Array
+     *
+     * @param presetAL The array list of string type
+     * @return  String array
+     */
+    private String[] arrayListToStringArray(ArrayList<String> presetAL){
         Object[] objectArr = presetAL.toArray();
         String[] strArr = new String[objectArr.length];
         for(int j = 0 ; j < objectArr.length ; j ++){
@@ -49,8 +53,9 @@ public class ClazzListPresenter extends UstadBaseController<ClazzListView> {
     }
 
     /**
-     * The ClazzListPresenter does the following:
-     * 1. Populates the clazzListProvider and sets it to the view.
+     * The ClazzListPresenter does the following in order:
+     *      1. Populates the clazzListProvider and sets it to the view.
+     *      2. Updates the Sort drop down options.
      *
      * @param savedState The state
      */
@@ -58,23 +63,27 @@ public class ClazzListPresenter extends UstadBaseController<ClazzListView> {
     public void onCreate(Hashtable savedState) {
         super.onCreate(savedState);
 
-        //TODO: Remove. Replace with Logged-In User
-        currentPersonUid = 1L;
+        //TODO: Remove. Replace with Logged-In User for Sprint 4
 
         clazzListProvider = UmAppDatabase.getInstance(context).getClazzDao()
                 .findAllActiveClazzes();
-        view.setClazzListProvider(clazzListProvider);
+        updateProviderToView();
 
         idToOrderInteger = new Hashtable<>();
 
         updateSortSpinnerPreset();
     }
 
+    private void updateProviderToView(){
+        view.setClazzListProvider(clazzListProvider);
+    }
+
     /**
-     * Updates preset on the view.
-     * TOOD: clean this.
+     * Updates the sort by drop down (spinner) on the Class list. For now the sort options are
+     * defined within this method and will automatically update the sort options without any
+     * database call.
      */
-    public void updateSortSpinnerPreset(){
+    private void updateSortSpinnerPreset(){
         ArrayList<String> presetAL = new ArrayList<>();
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
 
@@ -88,11 +97,18 @@ public class ClazzListPresenter extends UstadBaseController<ClazzListView> {
         idToOrderInteger.put((long) presetAL.size(), SORT_ORDER_ATTENDANCE_ASC);
         presetAL.add(impl.getString(MessageID.teacher, getContext()));
         idToOrderInteger.put((long)presetAL.size(), SORT_ORDER_TEACHER_ASC);
-        sortPresets = arrayListToStringArray(presetAL);
+        String[] sortPresets = arrayListToStringArray(presetAL);
 
         view.updateSortSpinner(sortPresets);
     }
 
+    /**
+     * This method updates the Class List provider based on the sort order flag selected.
+     * Every order has a corresponding order by change in the database query where this method
+     * reloads the class list provider.
+     *
+     * @param order The order selected.
+     */
     private void getAndSetProvider(int order){
         switch (order){
 
@@ -118,38 +134,47 @@ public class ClazzListPresenter extends UstadBaseController<ClazzListView> {
                         .findAllActiveClazzesSortByNameAsc();
                 break;
         }
-        view.setClazzListProvider(clazzListProvider);
+
+        updateProviderToView();
+
     }
 
     /**
-     * Click class card handler
+     * Click class card handler. This should go within a class - opening the Class Detail View.
      *
-     * @param clazz
+     * @param clazz The class the user clicked on.
      */
     public void handleClickClazz(Clazz clazz) {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        Hashtable args = new Hashtable();
+        Hashtable<String, Object> args = new Hashtable<>();
         long clazzUid = clazz.getClazzUid();
-        args.put(ARG_CLAZZ_UID, clazzUid);
+        args.put(ClazzListView.ARG_CLAZZ_UID, clazzUid);
 
         impl.go(ClassDetailView.VIEW_NAME, args, view.getContext());
     }
 
     /**
-     * Click attendance button in Class card handler
+     * Click attendance button in Class card handler (as part of every Class item in the Class List
+     * recycler view.
      *
-     * @param clazz
+     * @param clazz The class the user wants to record attendance for.
      */
     public void handleClickClazzRecordAttendance(Clazz clazz) {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        Hashtable args = new Hashtable();
+        Hashtable<String, Object> args = new Hashtable<>();
         long clazzUid = clazz.getClazzUid();
-        args.put(ARG_CLAZZ_UID, clazzUid);
+        args.put(ClazzListView.ARG_CLAZZ_UID, clazzUid);
         args.put(ARG_LOGDATE, System.currentTimeMillis());
         impl.go(ClassLogDetailView.VIEW_NAME, args, view.getContext());
     }
 
-
+    /**
+     * The primary action button for the Class List - here it is to add a new Class . (On Android it
+     * is the Floating Action Button).
+     * This method will create a new class, get its new ID and open up Class Edit View with the new
+     * ID to edit it.
+     *
+     */
     public void handleClickPrimaryActionButton(){
         //Goes to ClazzEditActivity with currentClazzUid passed as argument
 
@@ -161,14 +186,14 @@ public class ClazzListPresenter extends UstadBaseController<ClazzListView> {
         clazzDao.insertAsync(newClazz, new UmCallback<Long>() {
             @Override
             public void onSuccess(Long result) {
-                Hashtable args = new Hashtable();
-                args.put(ARG_CLAZZ_UID, result);
+                Hashtable<String, Object> args = new Hashtable<>();
+                args.put(ClazzListView.ARG_CLAZZ_UID, result);
                 impl.go(ClazzEditView.VIEW_NAME, args, view.getContext());
             }
 
             @Override
             public void onFailure(Throwable exception) {
-
+                exception.printStackTrace();
             }
         });
 

@@ -1,40 +1,33 @@
 package com.ustadmobile.core.controller;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
-import com.ustadmobile.core.db.dao.ClazzActivityChangeDao;
-import com.ustadmobile.core.db.dao.ClazzActivityDao;
-import com.ustadmobile.core.db.dao.ClazzDao;
-import com.ustadmobile.core.db.dao.ClazzLogAttendanceRecordDao;
-import com.ustadmobile.core.impl.UmCallback;
-import com.ustadmobile.core.util.UMCalendarUtil;
-import com.ustadmobile.core.view.ClazzActivityEditView;
-import com.ustadmobile.core.view.ClazzActivityListView;
-import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmProvider;
+import com.ustadmobile.core.db.dao.ClazzActivityChangeDao;
+import com.ustadmobile.core.db.dao.ClazzActivityDao;
+import com.ustadmobile.core.impl.UmCallback;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.util.UMCalendarUtil;
+import com.ustadmobile.core.view.ClazzActivityListView;
 import com.ustadmobile.lib.db.entities.ClazzActivity;
 import com.ustadmobile.lib.db.entities.ClazzActivityChange;
 import com.ustadmobile.lib.db.entities.DailyActivityNumbers;
-import com.ustadmobile.lib.db.entities.DailyAttendanceNumbers;
 
-import static com.ustadmobile.core.controller.ClazzListPresenter.ARG_CLAZZ_UID;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.LinkedHashMap;
+import java.util.List;
+
+import static com.ustadmobile.core.view.ClazzListView.ARG_CLAZZ_UID;
 import static com.ustadmobile.core.view.ClassLogListView.CHART_DURATION_LAST_MONTH;
 import static com.ustadmobile.core.view.ClassLogListView.CHART_DURATION_LAST_WEEK;
 import static com.ustadmobile.core.view.ClassLogListView.CHART_DURATION_LAST_YEAR;
-import static com.ustadmobile.core.view.ClazzListView.ARG_LOGDATE;
 
 
 /**
- * The ClazzActivityList Presenter.
+ * The ClazzActivityList Presenter - Responsible for the logic of Activity Tab in Clazz Detail.
+ * ie: Showing Activity List on the view and showing Activity bar charts as well.
+ *
  */
 public class ClazzActivityListPresenter
         extends UstadBaseController<ClazzActivityListView> {
@@ -45,39 +38,43 @@ public class ClazzActivityListPresenter
 
     private HashMap<Float, Long> changeToIdMap;
     private HashMap<Float, Long> barMapWithOGDateTimes;
+
     //Provider 
-    UmProvider<ClazzActivity> providerList;
+    private UmProvider<ClazzActivity> providerList;
 
     UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-    ClazzDao clazzDao = UmAppDatabase.getInstance(getContext()).getClazzDao();
-    ClazzActivityDao clazzActivityDao =
+    private ClazzActivityDao clazzActivityDao =
             UmAppDatabase.getInstance(context).getClazzActivityDao();
-    ClazzActivityChangeDao activityChangeDao =
+    private ClazzActivityChangeDao activityChangeDao =
             UmAppDatabase.getInstance(context).getClazzActivityChangeDao();
 
 
     public ClazzActivityListPresenter(Object context, Hashtable arguments, ClazzActivityListView view) {
         super(context, arguments, view);
 
-        //Get arguments and set them.
+        //Get Clazz Uid and save it.
         if(arguments.containsKey(ARG_CLAZZ_UID)){
             currentClazzUid = (long) arguments.get(ARG_CLAZZ_UID);
         }
 
     }
 
-    public void updateChangeOptions(){
+    /**
+     * Method to update the Activity Change options in the view for the bar chart.
+     */
+    private void updateChangeOptions(){
 
-        activityChangeDao.findAllClazzActivityChangesAsync(new UmCallback<List<ClazzActivityChange>>() {
+        activityChangeDao.findAllClazzActivityChangesAsync(
+                new UmCallback<List<ClazzActivityChange>>() {
             @Override
             public void onSuccess(List<ClazzActivityChange> result) {
                 changeToIdMap = new HashMap<>();
-                ArrayList<String> presetAL = new ArrayList<String>();
+                ArrayList<String> presetAL = new ArrayList<>();
                 float i=0;
                 for(ClazzActivityChange everyChange: result){
-
                     presetAL.add(everyChange.getClazzActivityChangeTitle());
-                    //TODO: any way to send id as well ?
+
+                    // Save mapping of position and activity change's uid to handle it.
                     changeToIdMap.put(i, everyChange.getClazzActivityChangeUid());
                     i++;
                 }
@@ -91,21 +88,29 @@ public class ClazzActivityListPresenter
 
             @Override
             public void onFailure(Throwable exception) {
-
+                exception.printStackTrace();
             }
         });
     }
 
+    /**
+     * Order:
+     *      1. Get all the activity for the current clazz.
+     *      2. Set the provider to the view
+     *      3. Update Activity Change presets from Database
+     *      4. Populate chart.
+     *
+     * @param savedState    The savedState
+     */
     @Override
     public void onCreate(Hashtable savedState) {
         super.onCreate(savedState);
 
-        //TODO: check
         //Populate the provider
         providerList = UmAppDatabase.getInstance(context).getClazzActivityDao()
                 .findByClazzUid(currentClazzUid);
-        //set Provider.
-        view.setListProvider(providerList);
+
+        setProviderOnView();
 
         //Update Change options
         updateChangeOptions();
@@ -115,20 +120,28 @@ public class ClazzActivityListPresenter
 
     }
 
-    public long getClazzActivityChangeUid() {
-        return clazzActivityChangeUid;
+    private void setProviderOnView(){
+        //set Provider.
+        view.setListProvider(providerList);
     }
 
+    /**
+     * Sets the current Activity Change Uid for the charts.
+     * @param clazzActivityChangeUid The Activity Change Uid to be set to this presenter
+     *                               (usually for charts)
+     */
     public void setClazzActivityChangeUid(long clazzActivityChangeUid) {
         if(changeToIdMap != null) {
             if(changeToIdMap.containsKey((float)clazzActivityChangeUid)) {
-                long actualChangeUid = changeToIdMap.get((float)clazzActivityChangeUid);
-                this.clazzActivityChangeUid = actualChangeUid;
+                this.clazzActivityChangeUid = changeToIdMap.get((float)clazzActivityChangeUid);
             }
         }
     }
 
-    public void generateActivityBarChartDataTest(){
+    /**
+     * Generates test data for the Bar chart. TODO: Remove in production
+     */
+    private void generateActivityBarChartDataTest(){
 
         LinkedHashMap<Float, Float> barData = new LinkedHashMap<>();
 
@@ -140,15 +153,30 @@ public class ClazzActivityListPresenter
         view.updateActivityBarChart(barData);
     }
 
+    /**
+     * Handles going to Creating a new Activity. This is to be called when "Record Activity" FAB is
+     * clicked.
+     */
     public void goToNewClazzActivityEditActivity(){
+        /* TODO Sprint 4
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         Hashtable args = new Hashtable();
         args.put(ARG_CLAZZ_UID, currentClazzUid);
         args.put(ARG_LOGDATE, System.currentTimeMillis());
 
         impl.go(ClazzActivityEditView.VIEW_NAME, args, view.getContext());
+        */
     }
 
+    /**
+     * The common method to update the Activity Bar chart based on the duration given to it.
+     * The Activity Change is already set from this Presenter's setters.
+     * The method queries the database and gets a daily aggregate for that clazz based on the
+     * duration given to it (WEEK/MONTH/YEAR).
+     *
+     * @param duration The duration constant that is defined in ClazzLogListView for WEEK, MONTH,
+     *                 YEAR.
+     */
     public void getActivityDataAndUpdateCharts(int duration){
 
         LinkedHashMap<Float, Float> barDataMap = new LinkedHashMap<>();
@@ -170,6 +198,7 @@ public class ClazzActivityListPresenter
                 break;
         }
 
+        //Get aggregate daily data about Clazz Activity.
         clazzActivityDao.getDailyAggregateFeedbackByActivityChange(currentClazzUid, fromDate,
                 toDate,clazzActivityChangeUid, new UmCallback<List<DailyActivityNumbers>>() {
                     @Override
@@ -187,6 +216,7 @@ public class ClazzActivityListPresenter
 
                             barMapWithOGDateTimes.put(f, thisDate);
 
+                            //Sum up the good and bad for the day
                             if(good>bad) {
                                 barDataMap.put(f, (float) good);
                             }else{
@@ -200,11 +230,9 @@ public class ClazzActivityListPresenter
 
                     @Override
                     public void onFailure(Throwable exception) {
-
+                        exception.printStackTrace();
                     }
                 });
-
-
     }
 
     @Override

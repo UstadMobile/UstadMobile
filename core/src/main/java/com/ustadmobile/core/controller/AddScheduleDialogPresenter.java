@@ -8,7 +8,7 @@ import com.ustadmobile.lib.db.entities.Schedule;
 
 import java.util.Hashtable;
 
-import static com.ustadmobile.core.controller.ClazzListPresenter.ARG_CLAZZ_UID;
+import static com.ustadmobile.core.view.ClazzListView.ARG_CLAZZ_UID;
 
 
 public class AddScheduleDialogPresenter  extends UstadBaseController<AddScheduleDialogView> {

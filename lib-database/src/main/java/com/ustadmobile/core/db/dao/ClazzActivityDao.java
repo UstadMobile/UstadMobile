@@ -35,6 +35,9 @@ public abstract class ClazzActivityDao implements BaseDao<ClazzActivity> {
     @UmQuery("SELECT * FROM ClazzActivity WHERE clazzActivityUid = :uid")
     public abstract ClazzActivity findByUid(long uid);
 
+    @UmQuery("SELECT * FROM ClazzActivity WHERE clazzActivityUid = :uid")
+    public abstract void findByUidAsync(long uid, UmCallback<ClazzActivity> result);
+
     @UmQuery("SELECT * FROM ClazzActivity WHERE clazzActivityClazzUid = :clazzUid AND " +
             " clazzActivityLogDate = :logDate")
     public abstract ClazzActivity findByClazzAndDate(long clazzUid, long logDate);
