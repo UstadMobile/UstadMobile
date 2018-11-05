@@ -265,6 +265,7 @@ public class CK12ContentScraper {
             e.printStackTrace();
         }
         LogEntries les = driver.manage().logs().get(LogType.PERFORMANCE);
+        driver.close();
 
         List<PlixIndex> index = new ArrayList<>();
 
