@@ -355,6 +355,7 @@ public class ContentScraperUtil {
 
     /**
      * Setup Chrome driver for selenium
+     *
      * @param headless true if chrome browser is required to open
      * @return
      */
@@ -378,45 +379,45 @@ public class ContentScraperUtil {
      * @throws IOException
      */
     public static boolean isFileModified(URLConnection conn, File destinationDir, String fileName) throws IOException {
-        
+
         String eTag = conn.getHeaderField("ETag");
-        boolean eTagAvailable = false;
-        if (eTag == null) {
-            eTagAvailable = true;
-        }else{
+        if (eTag != null) {
             String text;
             eTag = eTag.replaceAll("\"", "");
             File eTagFile = new File(destinationDir, FilenameUtils.getBaseName(fileName) + ScraperConstants.ETAG_TXT);
 
-            if(ContentScraperUtil.fileHasContent(eTagFile)){
+            if (ContentScraperUtil.fileHasContent(eTagFile)) {
                 text = FileUtils.readFileToString(eTagFile, UTF_ENCODING);
                 FileUtils.writeStringToFile(eTagFile, eTag, ScraperConstants.UTF_ENCODING);
                 return !eTag.equalsIgnoreCase(text);
+            } else {
+                FileUtils.writeStringToFile(eTagFile, eTag, ScraperConstants.UTF_ENCODING);
+                return true;
             }
+
         }
 
         String lastModified = conn.getHeaderField("Last-Modified");
-        boolean lastModifiedAvailable = false;
-
         File modifiedFile = new File(destinationDir, FilenameUtils.getBaseName(fileName) + ScraperConstants.LAST_MODIFIED_TXT);
         String text;
 
-        if(lastModified == null){
-            lastModifiedAvailable = true;
-        }else{
-            if(ContentScraperUtil.fileHasContent(modifiedFile)){
+        if (lastModified != null) {
+            if (ContentScraperUtil.fileHasContent(modifiedFile)) {
                 text = FileUtils.readFileToString(modifiedFile, UTF_ENCODING);
-                FileUtils.writeStringToFile(modifiedFile, lastModified, ScraperConstants.UTF_ENCODING);
                 return !lastModified.equalsIgnoreCase(text);
+            } else {
+                FileUtils.writeStringToFile(modifiedFile, lastModified, ScraperConstants.UTF_ENCODING);
+                return true;
             }
         }
 
-        return eTagAvailable || lastModifiedAvailable;
+        return true;
     }
 
 
     /**
      * Insert or Update the database for those parentChild Joins where the child have 1 parent
+     *
      * @param dao
      * @param parentEntry
      * @param childEntry
@@ -432,7 +433,7 @@ public class ContentScraperUtil {
             parentChildJoin.setCepcjChildContentEntryUid(childEntry.getContentEntryUid());
             parentChildJoin.setChildIndex(index);
             parentChildJoin.setCepcjUid(dao.insert(parentChildJoin));
-        }else{
+        } else {
             parentChildJoin.setCepcjParentContentEntryUid(parentEntry.getContentEntryUid());
             parentChildJoin.setCepcjChildContentEntryUid(childEntry.getContentEntryUid());
             parentChildJoin.setChildIndex(index);
@@ -444,22 +445,23 @@ public class ContentScraperUtil {
 
     /**
      * Insert or Update the database for those parentChildJoin where the child might have multiple parents (search by uuids of parent and child)
-     * @param dao database to search
+     *
+     * @param dao         database to search
      * @param parentEntry parent entry
-     * @param childEntry child entry
-     * @param index count
+     * @param childEntry  child entry
+     * @param index       count
      * @return the updated/created join
      */
     public static ContentEntryParentChildJoin insertOrUpdateChildWithMultipleParentsJoin(ContentEntryParentChildJoinDao dao, ContentEntry parentEntry, ContentEntry childEntry, int index) {
 
-        ContentEntryParentChildJoin parentChildJoin = dao.findJoinByParentChildUuids(parentEntry.getContentEntryUid(),childEntry.getContentEntryUid());
+        ContentEntryParentChildJoin parentChildJoin = dao.findJoinByParentChildUuids(parentEntry.getContentEntryUid(), childEntry.getContentEntryUid());
         if (parentChildJoin == null) {
             parentChildJoin = new ContentEntryParentChildJoin();
             parentChildJoin.setCepcjParentContentEntryUid(parentEntry.getContentEntryUid());
             parentChildJoin.setCepcjChildContentEntryUid(childEntry.getContentEntryUid());
             parentChildJoin.setChildIndex(index);
             parentChildJoin.setCepcjUid(dao.insert(parentChildJoin));
-        }else{
+        } else {
             parentChildJoin.setCepcjParentContentEntryUid(parentEntry.getContentEntryUid());
             parentChildJoin.setCepcjChildContentEntryUid(childEntry.getContentEntryUid());
             parentChildJoin.setChildIndex(index);
@@ -471,10 +473,10 @@ public class ContentScraperUtil {
 
     /**
      * Insert or Update the database for those parentChildJoin where the child might have multiple categories (search by uuids of category and child)
-     * @param contentEntryCategoryJoinDao database to search
-     * @param category parent entry
-     * @param childEntry child entry
      *
+     * @param contentEntryCategoryJoinDao database to search
+     * @param category                    parent entry
+     * @param childEntry                  child entry
      * @return the updated/created join
      */
     public static ContentEntryContentCategoryJoin insertOrUpdateChildWithMultipleCategoriesJoin(ContentEntryContentCategoryJoinDao contentEntryCategoryJoinDao, ContentEntry category, ContentEntry childEntry) {

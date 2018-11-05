@@ -168,7 +168,6 @@ public class IndexPhetContentScraper {
                 englishEnglishJoin.setCerejRelLanguage(englishSimContentEntry.getPrimaryLanguage());
                 englishEnglishJoin.setCerejContentEntryUid(englishSimContentEntry.getContentEntryUid());
                 englishEnglishJoin.setCerejRelatedEntryUid(englishSimContentEntry.getContentEntryUid());
-                englishEnglishJoin.setCerejUid(contentEntryRelatedJoinDao.insert(englishEnglishJoin));
                 englishEnglishJoin.setRelType(ContentEntryRelatedEntryJoin.REL_TYPE_TRANSLATED_VERSION);
                 contentEntryRelatedJoinDao.updateSimTranslationJoin(englishEnglishJoin);
             }
