@@ -362,7 +362,7 @@ public class CK12ContentScraper {
         }
 
         FileUtils.writeStringToFile(new File(plixDirectory, "index.json"), gson.toJson(index), UTF_ENCODING);
-        ContentScraperUtil.zipDirectory(plixDirectory, plixId, destinationDirectory);
+        ContentScraperUtil.zipDirectory(plixDirectory, FilenameUtils.getBaseName(scrapUrl.getPath()), destinationDirectory);
     }
 
     public void scrapeVideoContent() throws IOException {
