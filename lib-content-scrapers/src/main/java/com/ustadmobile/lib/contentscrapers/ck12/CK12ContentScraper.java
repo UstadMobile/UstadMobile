@@ -691,8 +691,14 @@ public class CK12ContentScraper {
             return;
         }
 
-        String nextPracticeName = response.response.test.nextPractice.nameOfNextPractice;
-        String nextPracticeUrl = practiceIdLink + nextPracticeName + practicePost;
+        String nextPracticeName = "";
+        String nextPracticeUrl = "";
+        // not all practice urls have next practice
+        if (response.response.test.nextPractice != null) {
+            nextPracticeName = response.response.test.nextPractice.nameOfNextPractice;
+            nextPracticeUrl = practiceIdLink + nextPracticeName + practicePost;
+
+        }
 
         String testLink = generateTestUrl(testId);
         TestResponse testResponse = gson.fromJson(
