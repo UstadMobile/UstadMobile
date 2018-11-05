@@ -224,7 +224,7 @@ public class CK12ContentScraper {
 
         Gson gson = new GsonBuilder().disableHtmlEscaping().create();
 
-        String plixId = scrapUrl.getPath().substring(scrapUrl.getPath().lastIndexOf("-") + 1, scrapUrl.getPath().lastIndexOf("?"));
+        String plixId = urlString.substring(urlString.lastIndexOf("-") + 1, urlString.lastIndexOf("?"));
 
         File plixDirectory = new File(destinationDirectory, plixId);
         plixDirectory.mkdirs();

@@ -213,7 +213,6 @@ public class PhetContentScraper {
         File simulationLocation = new File(languageLocation, title);
         simulationLocation.mkdirs();
 
-        System.out.println(link);
         URLConnection conn = link.openConnection();
 
         String fileName = hrefLink.substring(hrefLink.lastIndexOf("/") + 1, hrefLink.lastIndexOf("?"));
