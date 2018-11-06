@@ -98,14 +98,6 @@ public class DdlContentScraper {
             // this was done to encode url that had empty spaces in the name or other illegal characters
             URI uri = new URI(fileUrl.getProtocol(), fileUrl.getUserInfo(), fileUrl.getHost(), fileUrl.getPort(), fileUrl.getPath(), fileUrl.getQuery(), fileUrl.getRef());
 
-            URLConnection conn =  uri.toURL().openConnection();
-            File resourceFile = new File(resourceFolder, FilenameUtils.getName(href));
-            if (!ContentScraperUtil.isFileModified(conn, resourceFolder, FilenameUtils.getName(href))) {
-                continue;
-            }
-
-            FileUtils.copyURLToFile(uri.toURL(), resourceFile);
-
             String thumbnail = doc.selectFirst("aside img").attr("src");
 
             ContentEntry contentEntry = contentEntryDao.findBySourceUrl(uri.toURL().getPath());
@@ -121,6 +113,16 @@ public class DdlContentScraper {
                 contentEntry.setThumbnailUrl(thumbnail);
                 contentEntryDao.updateContentEntry(contentEntry);
             }
+
+
+            URLConnection conn =  uri.toURL().openConnection();
+            File resourceFile = new File(resourceFolder, FilenameUtils.getName(href));
+            if (!ContentScraperUtil.isFileModified(conn, resourceFolder, FilenameUtils.getName(href))) {
+                continue;
+            }
+
+            FileUtils.copyURLToFile(uri.toURL(), resourceFile);
+
 
             FileInputStream fis = new FileInputStream(resourceFile);
             String md5 = DigestUtils.md5Hex(fis);
@@ -144,8 +146,6 @@ public class DdlContentScraper {
             fileStatus.setCefsContentEntryFileUid(contentEntryFile.getContentEntryFileUid());
             fileStatus.setFilePath(resourceFile.getAbsolutePath());
             fileStatus.setCefsUid(contentFileStatusDao.insert(fileStatus));
-
-
 
             contentEntries.add(contentEntry);
         }
