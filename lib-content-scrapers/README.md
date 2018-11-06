@@ -125,3 +125,10 @@ All pratham books are found in a single url
 All african books are found in a single url 
 
 >$ gradlew scrapeContent -PfindAsbDir="C:\africanbooks\"
+
+#### Find all DDL content
+
+Download all ddl content for all 3 languages
+
+>$ gradlew scrapeContent -PfindDdlUrl="https://www.ddl.af/en/resources" -PfindDdlDir="C:\ddl\"
+
