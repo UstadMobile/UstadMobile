@@ -4,6 +4,8 @@ apply plugin: "maven-publish"
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation project(":lib-util")
+    implementation "com.squareup.retrofit2:retrofit:$version_retrofit"
+
     compileOnly project(":lib-room-annotations")
 }
 

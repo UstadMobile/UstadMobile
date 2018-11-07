@@ -117,11 +117,12 @@ public class DaoMethodInfo {
      * Determine what type of entity parameter is being used for an Insert, Update, or Delete method
      * (where the entity is a parameter of the method). This will figure out the actually entity
      * TypeMirror, regardless of whether the parameter is specified directly, or if the method accepts
-     * a list or array of the entity.
+     * a list or array of the entity. If the parameter is a list or array, this will return the
+     * component type
      *
      * @return TypeMirror representing the entity type
      */
-    public TypeMirror resolveEntityParameterType() {
+    public TypeMirror resolveEntityParameterComponentType() {
         TypeMirror entityTypeMirror;
         if(hasEntityListParam()) {
             entityTypeMirror = ((DeclaredType)getFirstParam().asType()).getTypeArguments().get(0);
@@ -135,6 +136,11 @@ public class DaoMethodInfo {
 
         return entityTypeMirror;
     }
+
+    public TypeMirror resolveEntityParameterType() {
+        return DbProcessorUtils.resolveType(getFirstParam().asType(), daoClass, processingEnv);
+    }
+
 
     /**
      * Determine the result type of the method. The result is either the return value, or the callback

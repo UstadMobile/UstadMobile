@@ -5,6 +5,7 @@ import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
+import com.ustadmobile.lib.database.annotation.UmRepository;
 import com.ustadmobile.lib.database.annotation.UmRestAccessible;
 import com.ustadmobile.lib.database.annotation.UmSyncFindAllChanges;
 import com.ustadmobile.lib.database.annotation.UmSyncFindLocalChanges;
@@ -16,6 +17,7 @@ import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 import java.util.List;
 
 @UmDao(syncType = UmSyncType.SYNC_PROACTIVE)
+@UmRepository
 public abstract class ExampleSyncableDao implements SyncableDao<ExampleSyncableEntity, ExampleSyncableDao>  {
 
     @UmSyncFindUpdateable
@@ -78,4 +80,8 @@ public abstract class ExampleSyncableDao implements SyncableDao<ExampleSyncableE
     public abstract void insertRestListAndReturnIds(List<ExampleSyncableEntity> entityList, UmCallback<List<Long>> callback);
 
 
+    @UmQuery("SELECT * FROM ExampleSyncableEntity WHERE exampleSyncableUid = :uid")
+    @UmRepository(delegateType = UmRepository.UmRepositoryMethodType.DELEGATE_TO_WEBSERVICE)
+    @UmRestAccessible
+    public abstract void findByUidAsyncRepo(long uid, UmCallback<ExampleSyncableEntity> callback);
 }

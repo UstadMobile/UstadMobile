@@ -504,7 +504,7 @@ public abstract class AbstractDbProcessor {
         VariableElement accountPersonUidParam = daoMethod.getParameters().get(3);
 
         DaoMethodInfo daoMethodInfo = new DaoMethodInfo(daoMethod, daoType, processingEnv);
-        TypeMirror entityType = daoMethodInfo.resolveEntityParameterType();
+        TypeMirror entityType = daoMethodInfo.resolveEntityParameterComponentType();
         TypeElement entityTypeElement = (TypeElement)processingEnv.getTypeUtils()
                 .asElement(entityType);
         String entityPrimaryKeyFieldName = findPrimaryKey(entityTypeElement).getSimpleName().toString();
@@ -638,7 +638,7 @@ public abstract class AbstractDbProcessor {
 
         DaoMethodInfo daoMethodInfo = new DaoMethodInfo((ExecutableElement)syncIncomingMethod, daoType,
                 processingEnv);
-        TypeMirror entityType = daoMethodInfo.resolveEntityParameterType();
+        TypeMirror entityType = daoMethodInfo.resolveEntityParameterComponentType();
         TypeElement entityTypeElement = (TypeElement)processingEnv.getTypeUtils().asElement(
                 entityType);
         UmEntity umEntityAnnotation = entityTypeElement.getAnnotation(UmEntity.class);

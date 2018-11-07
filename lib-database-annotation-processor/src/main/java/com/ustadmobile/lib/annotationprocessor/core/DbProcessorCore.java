@@ -10,7 +10,6 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmDatabase;
-import com.ustadmobile.lib.database.annotation.UmNamedParameter;
 import com.ustadmobile.lib.database.annotation.UmTransaction;
 
 import java.io.IOException;
