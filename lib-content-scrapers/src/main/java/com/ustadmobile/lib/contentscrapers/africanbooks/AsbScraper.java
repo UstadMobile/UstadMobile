@@ -133,7 +133,7 @@ public class AsbScraper {
 
         ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, masterRootParent, asbParentEntry, 4);
 
-        driver = ContentScraperUtil.setupChrome(false);
+        driver = ContentScraperUtil.setupChrome(true);
 
         InputStream inputStreamOfBooks = africanBooksUrl.openStream();
         List<AfricanBooksResponse> africanBooksList = parseBooklist(inputStreamOfBooks);
@@ -147,7 +147,7 @@ public class AsbScraper {
             File ePubFile = new File(destinationDir, "asb" + bookId + ".epub");
             URL epubUrl = generateEPubUrl(africanBooksUrl, bookId);
             URL publishUrl = generatePublishUrl(africanBooksUrl, bookId);
-            URL makeUrl = generatePublishUrl(africanBooksUrl, bookId);
+            URL makeUrl = generateMakeUrl(africanBooksUrl, bookId);
 
             if (ContentScraperUtil.fileHasContent(ePubFile) && ePubFile.lastModified() > Integer.parseInt(bookObj.date)) {
 
