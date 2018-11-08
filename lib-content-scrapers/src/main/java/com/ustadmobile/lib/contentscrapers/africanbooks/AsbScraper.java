@@ -133,7 +133,7 @@ public class AsbScraper {
 
         ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, masterRootParent, asbParentEntry, 4);
 
-        driver = ContentScraperUtil.setupChrome(false);
+        driver = ContentScraperUtil.setupChrome(true);
 
         InputStream inputStreamOfBooks = africanBooksUrl.openStream();
         List<AfricanBooksResponse> africanBooksList = parseBooklist(inputStreamOfBooks);
@@ -232,7 +232,7 @@ public class AsbScraper {
     }
 
     public URL generatePublishUrl(URL africanBooksUrl, String bookId) throws MalformedURLException {
-        return new URL(africanBooksUrl, "/myspace/publish/epub.php?id=" + bookId);
+        return new URL(africanBooksUrl, "/make/publish/epub.php?id=" + bookId);
     }
 
     public URL generateEPubUrl(URL africanBooksUrl, String bookId) throws MalformedURLException {
