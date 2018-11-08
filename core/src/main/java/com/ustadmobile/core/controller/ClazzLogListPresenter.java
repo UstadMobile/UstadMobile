@@ -62,7 +62,7 @@ public class ClazzLogListPresenter extends UstadBaseController<ClassLogListView>
         super.onCreate(savedState);
 
         clazzLogListProvider = UmAppDatabase.getInstance(context).getClazzLogDao()
-                .findByClazzUid(currentClazzUid);
+                .findByClazzUidThatAreDone(currentClazzUid);
         setProviderToView();
 
         generateAttendanceBarChartDataTest();
@@ -112,6 +112,9 @@ public class ClazzLogListPresenter extends UstadBaseController<ClassLogListView>
      *                 CHART_DURATION_LAST_YEAR) as per defined in ClassLogListView
      */
     public void getAttendanceDataAndUpdateCharts(int duration){
+
+        //Reset report buttons
+        view.resetReportButtons();
 
         LinkedHashMap<Float, Float> lineDataMap = new LinkedHashMap<>();
         LinkedHashMap<Float, Float> barDataMap = new LinkedHashMap<>();

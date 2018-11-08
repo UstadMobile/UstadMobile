@@ -179,6 +179,9 @@ public class ClazzActivityListPresenter
      */
     public void getActivityDataAndUpdateCharts(int duration){
 
+        //Reset the report buttons
+        view.resetReportButtons();
+
         LinkedHashMap<Float, Float> barDataMap = new LinkedHashMap<>();
         long toDate = System.currentTimeMillis();
         Long fromDate = toDate;

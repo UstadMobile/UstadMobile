@@ -42,6 +42,11 @@ public interface ClazzActivityListView extends UstadView {
 
     public void setClazzActivityChangesDropdownPresets(String[] presets);
 
+    /**
+     * Resets the report buttons
+     */
+    public void resetReportButtons();
+
 
 
 }

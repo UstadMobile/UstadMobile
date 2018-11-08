@@ -28,6 +28,7 @@ import static com.ustadmobile.core.view.SELQuestionView.ARG_QUESTION_INDEX;
 import static com.ustadmobile.core.view.SELQuestionView.ARG_QUESTION_TEXT;
 import static com.ustadmobile.core.view.SELQuestionView.ARG_QUESTION_TOTAL;
 import static com.ustadmobile.core.view.SELRecognitionView.ARG_RECOGNITION_UID;
+import static com.ustadmobile.core.view.SELSelectStudentView.ARG_DONE_CLAZZMEMBER_UIDS;
 
 
 /**
@@ -43,6 +44,7 @@ public class SELSelectConsentPresenter
     private long currentPersonUid = -1;
     private long currentClazzMemberUid = -1;
     private int MIN_RECOGNITION_SUCCESSES = 0;
+    private String doneClazzMemberUids = "";
 
     public SELSelectConsentPresenter(Object context, Hashtable arguments, SELSelectConsentView view) {
         super(context, arguments, view);
@@ -58,6 +60,9 @@ public class SELSelectConsentPresenter
         //Get clazz member doing the sel
         if(arguments.containsKey(ARG_CLAZZMEMBER_UID)){
             currentClazzMemberUid = (long) arguments.get(ARG_CLAZZMEMBER_UID);
+        }
+        if(arguments.containsKey(ARG_DONE_CLAZZMEMBER_UIDS)){
+            doneClazzMemberUids = (String) arguments.get(ARG_DONE_CLAZZMEMBER_UIDS);
         }
 
     }
@@ -106,6 +111,8 @@ public class SELSelectConsentPresenter
                         args.put(ARG_CLAZZ_UID, currentClazzUid);
                         args.put(ARG_PERSON_UID, currentPersonUid);
                         args.put(ARG_CLAZZMEMBER_UID, currentClazzMemberUid);
+                        doneClazzMemberUids += "," + String.valueOf(currentClazzMemberUid);
+                        args.put(ARG_DONE_CLAZZMEMBER_UIDS, doneClazzMemberUids);
 
                         view.finish();
 

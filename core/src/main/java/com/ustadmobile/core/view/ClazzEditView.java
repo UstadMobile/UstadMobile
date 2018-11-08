@@ -13,6 +13,8 @@ public interface ClazzEditView extends UstadView {
 
     String VIEW_NAME = "ClazzEdit";
 
+    public static final String ARG_SCHEDULE_UID = "argScheduleUid";
+
     /**
      * For Android: closes the activity.
      */
@@ -30,6 +32,10 @@ public interface ClazzEditView extends UstadView {
 
     void setHolidayPresets(String[] presets, int position);
 
-    void setHolidaySelected(String name, int id);
+    /**
+     * Handles holiday selected
+     * @param id    The id/position of the Holiday selected from the drop-down.
+     */
+    void setHolidaySelected(long id);
 
 }

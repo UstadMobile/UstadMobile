@@ -34,8 +34,10 @@ import ru.dimorinny.floatingtextbutton.FloatingTextButton;
 
 
 /**
- * The ClazzEdit activity.
- * <p>
+ * The ClazzEdit activity - responsible for the Class Edit screen activity on Android.
+ * The ClazzEdit screen has Schedule recycler view and a Holiday calendar spinner along side
+ * EditText for Class name and description.
+ *
  * This Activity extends UstadBaseActivity and implements ClazzEditView
  */
 public class ClazzEditActivity extends UstadBaseActivity implements ClazzEditView {
@@ -44,7 +46,6 @@ public class ClazzEditActivity extends UstadBaseActivity implements ClazzEditVie
 
     //RecyclerView
     private RecyclerView scheduleRecyclerView;
-    private RecyclerView.LayoutManager mRecyclerLayoutManager;
     private ClazzEditPresenter mPresenter;
 
     TextInputLayout classNameTIP;
@@ -75,9 +76,10 @@ public class ClazzEditActivity extends UstadBaseActivity implements ClazzEditVie
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
         //Recycler View:
-        scheduleRecyclerView = (RecyclerView) findViewById(
+        scheduleRecyclerView = findViewById(
                 R.id.activity_clazz_edit_schedule_recyclerview);
-        mRecyclerLayoutManager = new LinearLayoutManager(getApplicationContext());
+        RecyclerView.LayoutManager mRecyclerLayoutManager =
+                new LinearLayoutManager(getApplicationContext());
         scheduleRecyclerView.setLayoutManager(mRecyclerLayoutManager);
 
         //Call the Presenter
@@ -87,7 +89,7 @@ public class ClazzEditActivity extends UstadBaseActivity implements ClazzEditVie
 
         //Clazz Name
         classNameTIP = findViewById(R.id.activity_clazz_edit_name);
-        classNameTIP.getEditText().addTextChangedListener(new TextWatcher() {
+        Objects.requireNonNull(classNameTIP.getEditText()).addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
@@ -123,11 +125,12 @@ public class ClazzEditActivity extends UstadBaseActivity implements ClazzEditVie
         addScheduleButton = findViewById(R.id.activity_clazz_edit_add_schedule);
         addScheduleButton.setOnClickListener(v -> mPresenter.handleClickAddSchedule());
 
+        //Holiday Spinner (drop-down)
         holidaySpinner = findViewById(R.id.activity_clazz_edit_holiday_calendar_selected);
         holidaySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                mPresenter.updateHoliday(position);
+                setHolidaySelected(id);
             }
 
             @Override
@@ -147,15 +150,12 @@ public class ClazzEditActivity extends UstadBaseActivity implements ClazzEditVie
     public static final DiffUtil.ItemCallback<Schedule> SCHEDULE_DIFF_CALLBACK =
             new DiffUtil.ItemCallback<Schedule>() {
                 @Override
-                public boolean areItemsTheSame(Schedule oldItem,
-                                               Schedule newItem) {
-                    return oldItem.getScheduleUid() ==
-                            newItem.getScheduleUid();
+                public boolean areItemsTheSame(Schedule oldItem, Schedule newItem) {
+                    return oldItem.getScheduleUid() == newItem.getScheduleUid();
                 }
 
                 @Override
-                public boolean areContentsTheSame(Schedule oldItem,
-                                                  Schedule newItem) {
+                public boolean areContentsTheSame(Schedule oldItem, Schedule newItem) {
                     return oldItem.equals(newItem);
                 }
             };
@@ -168,6 +168,7 @@ public class ClazzEditActivity extends UstadBaseActivity implements ClazzEditVie
                 new ScheduleRecyclerAdapter(SCHEDULE_DIFF_CALLBACK, getApplicationContext(),
                         this, mPresenter);
 
+        //Unchecked warning is expected.
         DataSource.Factory<Integer, Schedule> factory =
                 (DataSource.Factory<Integer, Schedule>)
                         clazzScheduleProvider.getProvider();
@@ -213,8 +214,12 @@ public class ClazzEditActivity extends UstadBaseActivity implements ClazzEditVie
         holidaySpinner.setSelection(position);
     }
 
+    /**
+     * Handles holiday selected
+     * @param id    The id/position of the Holiday selected from the spinner.
+     */
     @Override
-    public void setHolidaySelected(String name, int id) {
-        //nothing?
+    public void setHolidaySelected(long id) {
+        mPresenter.updateHoliday(id);
     }
 }

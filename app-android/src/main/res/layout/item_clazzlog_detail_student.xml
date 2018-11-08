@@ -71,7 +71,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:src="@drawable/ic_timer_black_24dp" />
+        android:src="@drawable/ic_half_moon_contrast_black_24dp" />
 
 
 

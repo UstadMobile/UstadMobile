@@ -229,6 +229,9 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
             view.updateImageOnView(thisPerson.getImagePath());
         }
 
+        //Clear all view before setting fields ?
+        view.clearAllFields();
+
         for(PersonDetailPresenterField field : allFields) {
 
             String thisValue = "";

@@ -4,6 +4,7 @@ import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.db.dao.ClazzDao;
+import com.ustadmobile.core.db.dao.ScheduleDao;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.AddScheduleDialogView;
@@ -16,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 
+import static com.ustadmobile.core.view.ClazzEditView.ARG_SCHEDULE_UID;
 import static com.ustadmobile.core.view.ClazzListView.ARG_CLAZZ_UID;
 
 
@@ -123,9 +125,7 @@ public class ClazzEditPresenter
         }
 
         view.setHolidayPresets(holidayPreset, selectedPosition);
-
     }
-
 
     /**
      * Updates the class name of the currently editing class. Does NOT persist the data.
@@ -199,7 +199,6 @@ public class ClazzEditPresenter
         mUpdatedClazz.setClazzActive(true);
 
         clazzDao.updateAsync(mUpdatedClazz, new UmCallback<Integer>(){
-
             @Override
             public void onSuccess(Integer result) {
                 //Close the activity.
@@ -219,26 +218,34 @@ public class ClazzEditPresenter
     }
 
     /**
-     * Handles the primary button pressed on the recycler adapter on the Class Edit page. Since we
-     * do not have any primary click methods on the Holiday Recycler view, this primary handler
-     * does nothing.
+     * Handles the primary button pressed on the recycler adapter on the Class Edit page. This is
+     * triggered from the options menu of each schedule in the Class edit screen. The primary task
+     * here is to edit this Schedule assigned to this Clazz.
      *
      * @param arg Any argument needed - Not used here.
      */
     @Override
     public void handleCommonPressed(Object arg) {
-        // No primary option
+        // To edit the schedule assigned to clazz
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        Hashtable<String, Object> args = new Hashtable<>();
+        args.put(ARG_CLAZZ_UID, currentClazzUid);
+        args.put(ARG_SCHEDULE_UID, arg);
+        impl.go(AddScheduleDialogView.VIEW_NAME, args, getContext());
     }
 
     /**
-     * Handles the secondary button pressed on the recycler adapter on the Class Edit page. Since we
-     * do not have any secondary click methods on the Holiday Recycler view, this secondary handler
-     * does nothing.
+     * Handles the secondary button pressed on the recycler adapter on the Class Edit page. This is
+     * triggered from the options menu of each schedule in the Class edit screen. The secondary task
+     * here is to remove this Schedule assigned to this Clazz.
      *
-     * @param arg Any argument needed - Not used here.
+     * @param arg Any argument needed - The Schedule to be deleted's UID
      */
     @Override
     public void handleSecondaryPressed(Object arg) {
-        //No secondary option
+        //To delete schedule assigned to clazz
+        ScheduleDao scheduleDao = UmAppDatabase.getInstance(context).getScheduleDao();
+        scheduleDao.disableSchedule((Long) arg);
+
     }
 }

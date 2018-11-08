@@ -53,4 +53,9 @@ public interface ClassLogListView extends UstadView {
      */
     void updateAttendanceBarChart(LinkedHashMap<Float, Float> dataMap);
 
+    /**
+     * Reset report buttons color
+     */
+    void resetReportButtons();
+
 }

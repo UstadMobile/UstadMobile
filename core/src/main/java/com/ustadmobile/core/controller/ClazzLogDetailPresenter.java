@@ -173,6 +173,7 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
         ClazzMemberDao clazzMemberDao = UmAppDatabase.getInstance(getContext()).getClazzMemberDao();
         ClazzLogAttendanceRecordDao clazzLogAttendanceRecordDao =
                 UmAppDatabase.getInstance(getContext()).getClazzLogAttendanceRecordDao();
+        currentClazzLog.setDone(true);
         clazzLogDao.updateDoneForClazzLogAsync(currentClazzLog.getClazzLogUid(),
                 new UmCallback<Long>() {
             @Override

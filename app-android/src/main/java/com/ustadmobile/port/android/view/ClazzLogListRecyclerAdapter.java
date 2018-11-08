@@ -84,9 +84,18 @@ public class ClazzLogListRecyclerAdapter extends
 
         int presentCount = clazzLog.getNumPresent();
         int absentCount = clazzLog.getNumAbsent();
-        String clazzLogAttendanceStatus = presentCount + " " +
-                theFragment.getText(R.string.present) + ", " + absentCount + " " +
-                theFragment.getText(R.string.absent);
+        int partialCount = clazzLog.getNumPartial();
+        String clazzLogAttendanceStatus ;
+        if(partialCount > 0){
+            clazzLogAttendanceStatus = presentCount + " " +
+                    theFragment.getText(R.string.present) + ", " + absentCount + " " +
+                    theFragment.getText(R.string.absent)  + ", " + partialCount + " " + 
+                    theFragment.getText(R.string.partial);
+        }else{
+            clazzLogAttendanceStatus = presentCount + " " +
+                    theFragment.getText(R.string.present) + ", " + absentCount + " " +
+                    theFragment.getText(R.string.absent);
+        }
 
         TextView statusTextView = holder.itemView
                 .findViewById(R.id.item_clazzlog_log_status_text);

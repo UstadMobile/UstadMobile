@@ -54,6 +54,9 @@ public class ClazzActivityListFragment extends UstadBaseFragment implements Claz
     String[] changesPresets;
     Spinner activityChangesSpinner;
     HashMap<Float, Boolean> negativeValue;
+    private Button lastWeekButton;
+    private Button lastMonthButton;
+    private Button lastYearButton;
 
     public BarChart hideEverythingInBarChart(BarChart barChart){
 
@@ -229,19 +232,28 @@ public class ClazzActivityListFragment extends UstadBaseFragment implements Claz
         fab.setOnClickListener(v -> mPresenter.goToNewClazzActivityEditActivity());
 
         //Buttons
-        Button lastWeekButton = rootContainer.findViewById(
+        lastWeekButton = rootContainer.findViewById(
                 R.id.fragment_clazz_activity_list_bar_chart_selector_button_thisweek);
-        Button lastMonthButton = rootContainer.findViewById(
+        lastMonthButton = rootContainer.findViewById(
                 R.id.fragment_clazz_activity_list_bar_chart_selector_button_thismonth);
-        Button lastYearButton =rootContainer.findViewById(
+        lastYearButton =rootContainer.findViewById(
                 R.id.fragment_clazz_activity_list_bar_chart_selector_button_lastyear);
 
         lastWeekButton.setOnClickListener(
-                v -> mPresenter.getActivityDataAndUpdateCharts(CHART_DURATION_LAST_WEEK));
+                v -> {
+                    mPresenter.getActivityDataAndUpdateCharts(CHART_DURATION_LAST_WEEK);
+                    lastWeekButton.getBackground().setTint(getResources().getColor(R.color.primary));
+                });
         lastMonthButton.setOnClickListener(
-                v -> mPresenter.getActivityDataAndUpdateCharts(CHART_DURATION_LAST_MONTH));
+                v -> {
+                    mPresenter.getActivityDataAndUpdateCharts(CHART_DURATION_LAST_MONTH);
+                    lastMonthButton.getBackground().setTint(getResources().getColor(R.color.primary));
+                });
         lastYearButton.setOnClickListener(
-                v -> mPresenter.getActivityDataAndUpdateCharts(CHART_DURATION_LAST_YEAR));
+                v -> {
+                    mPresenter.getActivityDataAndUpdateCharts(CHART_DURATION_LAST_YEAR);
+                    lastYearButton.getBackground().setTint(getResources().getColor(R.color.primary));
+                });
 
         activityChangesSpinner =
                 rootContainer.findViewById(R.id.fragment_clazz_activity_list_bar_chart_spinner);
@@ -266,8 +278,23 @@ public class ClazzActivityListFragment extends UstadBaseFragment implements Claz
                 }
         );
 
+        //Default start to Last Week's data:
+        //lastWeekButton.callOnClick();
+
         //return container
         return rootContainer;
+    }
+
+    /**
+     * Removes background color from View's report button
+     */
+    @Override
+    public void resetReportButtons() {
+        runOnUiThread(() -> {
+            lastWeekButton.getBackground().setTint(getResources().getColor(R.color.color_gray));
+            lastMonthButton.getBackground().setTint(getResources().getColor(R.color.color_gray));
+            lastYearButton.getBackground().setTint(getResources().getColor(R.color.color_gray));
+        });
     }
 
     //TODO: Maybe change from ClazzActivity to CumulativeClazzActivity

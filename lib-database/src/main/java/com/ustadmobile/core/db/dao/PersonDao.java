@@ -33,6 +33,9 @@ public abstract class PersonDao implements BaseDao<Person>{
     @UmQuery("SELECT * From Person WHERE personUid = :uid")
     public abstract Person findByUid(long uid);
 
+    @UmQuery("SELECT * From Person where username = :username")
+    public abstract void findByUsernameAsync(String username, UmCallback<Person> result);
+
     @UmQuery("SELECT * From Person WHERE personUid = :uid")
     public abstract void findByUidAsync(long uid, UmCallback<Person> person);
 
@@ -46,5 +49,12 @@ public abstract class PersonDao implements BaseDao<Person>{
             " (0) AS attendancePercentage, " +
             " (0) AS enrolled FROM Person WHERE Person.active = 1 ")
     public abstract UmProvider<PersonWithEnrollment> findAllPeopleWithEnrollment();
+
+    @UmQuery("SELECT * From Person WHERE username = :username AND passwordHash = :passwordHash")
+    public abstract Person authenticateHash(String username, String passwordHash);
+
+    @UmQuery("SELECT * From Person WHERE username = :username AND passwordHash = :passwordHash")
+    public abstract void authenticateHashAsync(String username, String passwordHash,
+                                               UmCallback<Person> person);
 
 }

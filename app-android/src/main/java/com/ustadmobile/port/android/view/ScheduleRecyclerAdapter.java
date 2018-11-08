@@ -4,12 +4,13 @@ import android.app.Activity;
 import android.arch.paging.PagedListAdapter;
 import android.content.Context;
 import android.support.annotation.NonNull;
-import android.support.v4.app.Fragment;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
@@ -49,18 +50,17 @@ public class ScheduleRecyclerAdapter extends
         PagedListAdapter<Schedule, ScheduleRecyclerAdapter.ScheduleViewHolder> {
 
     Context theContext;
-    Fragment theFragment;
-    Activity theActivity;
+    private Activity theActivity;
     CommonHandlerPresenter mPresenter;
 
-    protected class ScheduleViewHolder extends RecyclerView.ViewHolder{
-        protected ScheduleViewHolder(View itemView){super(itemView);}
+    class ScheduleViewHolder extends RecyclerView.ViewHolder{
+        ScheduleViewHolder(View itemView){super(itemView);}
 
     }
 
-    protected ScheduleRecyclerAdapter(@NonNull DiffUtil.ItemCallback<Schedule> diffCallback,
-                                      Context context, Activity activity,
-                                      CommonHandlerPresenter presenter){
+    ScheduleRecyclerAdapter(@NonNull DiffUtil.ItemCallback<Schedule> diffCallback,
+                            Context context, Activity activity,
+                            CommonHandlerPresenter presenter){
         super(diffCallback);
         theContext =context;
         theActivity = activity;
@@ -94,23 +94,44 @@ public class ScheduleRecyclerAdapter extends
             @NonNull ScheduleRecyclerAdapter.ScheduleViewHolder holder, int position) {
 
         Schedule thisSchedule = getItem(position);
+
+        long startTimeLong = thisSchedule.getSceduleStartTime();
+        long endTimeLong = thisSchedule.getScheduleEndTime();
+        int scheduleDayCode = thisSchedule.getScheduleDay();
+        int scheduleMonthCode = thisSchedule.getScheduleMonth();
         int scheduleFrequencyCode = thisSchedule.getScheduleFrequency();
+
+        //start time
+        Date startTimeDate = new Date(startTimeLong);
+        SimpleDateFormat formatter = new SimpleDateFormat("HH:mm");
+        String startTime = formatter.format(startTimeDate);
+
+        //end time
+        Date endTimeDate = new Date(endTimeLong);
+        String endTime = formatter.format(endTimeDate);
+
+
+        String scheduleDay;
+        String scheduleMonth;
         String scheduleFrequency;
+
+        //Get the text corresponding the schedule codes:
+        //Frequency
         switch (scheduleFrequencyCode){
             case SCHEDULE_FREQUENCY_ONCE:
-                scheduleFrequency = "Once";
+                scheduleFrequency = theActivity.getText(R.string.once).toString();
                 break;
             case SCHEDULE_FREQUENCY_WEEKLY:
-                scheduleFrequency = "Weekly";
+                scheduleFrequency = theActivity.getText(R.string.weekly).toString();
                 break;
             case SCHEDULE_FREQUENCY_DAILY:
-                scheduleFrequency = "Daily";
+                scheduleFrequency = theActivity.getText(R.string.daily).toString();
                 break;
             case SCHEDULE_FREQUENCY_MONTHLY:
-                scheduleFrequency = "Monthly";
+                scheduleFrequency = theActivity.getText(R.string.monthly).toString();
                 break;
             case SCHEDULE_FREQUENCY_YEARLY:
-                scheduleFrequency = "Yearly";
+                scheduleFrequency = theActivity.getText(R.string.yearly).toString();
                 break;
             default:
                 scheduleFrequency = "";
@@ -118,88 +139,71 @@ public class ScheduleRecyclerAdapter extends
 
         }
 
-        long startTimeLong = thisSchedule.getSceduleStartTime();
-        long endTimeLong = thisSchedule.getScheduleEndTime();
-
-        Date startTimeDate = new Date(startTimeLong);
-        DateFormat formatter = new SimpleDateFormat("HH:mm");
-        String startTime = formatter.format(startTimeDate);
-
-        Date endTimeDate = new Date(endTimeLong);
-        String endTime = formatter.format(endTimeDate);
-
-
-
-
-        int scheduleDayCode = thisSchedule.getScheduleDay();
-        int scheduleMonthCode = thisSchedule.getScheduleMonth();
-        
-        String scheduleDay;
-        String scheduleMonth;
-        
+        //Day
         switch(scheduleDayCode){
             case DAY_SUNDAY:
-                scheduleDay = "Sunday";
+                scheduleDay = theActivity.getText(R.string.sunday).toString();
                 break;
             case DAY_MONDAY:
-                scheduleDay = "Monday";
+                scheduleDay = theActivity.getText(R.string.monday).toString();
                 break;
             case DAY_TUESDAY:
-                scheduleDay = "Tuesday";
+                scheduleDay = theActivity.getText(R.string.tuesday).toString();
                 break;
             case DAY_WEDNESDAY:
-                scheduleDay = "Wednesday";
+                scheduleDay = theActivity.getText(R.string.wednesday).toString();
                 break;
             case DAY_THURSDAY:
-                scheduleDay = "Thursday";
+                scheduleDay = theActivity.getText(R.string.thursday).toString();
                 break;
             case DAY_FRIDAY:
-                scheduleDay = "Friday";
+                scheduleDay = theActivity.getText(R.string.friday).toString();
                 break;
             case DAY_SATURDAY:
-                scheduleDay = "Saturday";
+                scheduleDay = theActivity.getText(R.string.saturday).toString();
                 break;
             default:
                 scheduleDay = "";
                 break;
         }
-        
+
+        //Month
         switch (scheduleMonthCode){
             case MONTH_JANUARY :
-                scheduleMonth = "January";
+                scheduleMonth = theActivity.getText(R.string.jan).toString();
                 break;
             case MONTH_FEBUARY :
-                scheduleMonth = "Febuary";
+                scheduleMonth = theActivity.getText(R.string.feb).toString();
                 break;
             case MONTH_MARCH :
-                scheduleMonth = "March";
+                scheduleMonth = theActivity.getText(R.string.mar).toString();
                 break;
             case MONTH_APRIL :
-                scheduleMonth = "April";
+                scheduleMonth = theActivity.getText(R.string.apr).toString();
                 break;
             case MONTH_MAY :
-                scheduleMonth = "May";
+                scheduleMonth = theActivity.getText(R.string.may).toString();
                 break;
             case MONTH_JUNE :
-                scheduleMonth = "June";
+                scheduleMonth = theActivity.getText(R.string.jun).toString();
                 break;
             case MONTH_JULY :
-                scheduleMonth = "July";
+                scheduleMonth = theActivity.getText(R.string.jul).toString();
                 break;
             case MONTH_AUGUST :
-                scheduleMonth = "August";
+                scheduleMonth = theActivity.getText(R.string.aug).toString();
                 break;
             case MONTH_SEPTEMBER :
-                scheduleMonth = "September";
+                scheduleMonth = theActivity.getText(R.string.sep).toString();
                 break;
             case MONTH_OCTOBER :
-                scheduleMonth = "October";
+                scheduleMonth = theActivity.getText(R.string.oct).toString();
                 break;
             case MONTH_NOVEMBER :
-                scheduleMonth = "November";
+                scheduleMonth = theActivity.getText(R.string.nov).toString();
                 break;
             case MONTH_DECEMBER :
-                scheduleMonth = "December";
+                scheduleMonth = theActivity.getText(R.string.dec).toString();
                 break;
             default:
                 scheduleMonth = "";
@@ -207,13 +211,39 @@ public class ScheduleRecyclerAdapter extends
 
         }
 
+        //Add text to entry for this schedule
         TextView scheduleText = holder.itemView.findViewById(R.id.item_schedule_title);
         String scheduleEntryText = scheduleFrequency + " - " + scheduleDay + scheduleMonth + " " +
                 theContext.getText(R.string.from) + " " + startTime + " " +
                 theContext.getText(R.string.to) + " " + endTime;
         scheduleText.setText(scheduleEntryText);
 
-        //TODO: Add Menu time and their handlers.
+        //Options to Edit/Delete every schedule in the list
+        ImageView optionsImageView =
+                holder.itemView.findViewById(R.id.item_schedule_secondary_menu_imageview);
+        optionsImageView.setOnClickListener((View v) -> {
+            //creating a popup menu
+            PopupMenu popup = new PopupMenu(theActivity.getApplicationContext(), v);
+
+            popup.setOnMenuItemClickListener(item -> {
+                int i = item.getItemId();
+                if (i == R.id.edit) {
+                    mPresenter.handleCommonPressed(thisSchedule.getScheduleUid());
+                    return true;
+                } else if (i == R.id.delete) {
+                    mPresenter.handleSecondaryPressed(thisSchedule.getScheduleUid());
+                    return true;
+                } else {
+                    return false;
+                }
+            });
+            //inflating menu from xml resource
+            popup.inflate(R.menu.menu_item_schedule);
+
+            //displaying the popup
+            popup.show();
+        });
+
 
     }
 }

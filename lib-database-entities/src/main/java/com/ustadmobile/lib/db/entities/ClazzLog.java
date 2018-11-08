@@ -41,9 +41,9 @@ public class ClazzLog implements SyncableEntity{
     }
 
     /**
-     * Sets the number of members passed
+     * Sets the number of members present
      *
-     * @param numPassed
+     * @param numPresent    number of present members
      */
     public void setNumPresent(int numPresent) {
         this.numPresent = numPresent;

@@ -11,6 +11,7 @@ public interface SELSelectStudentView extends UstadView {
 
     String VIEW_NAME = "SELSelectStudent";
     String ARG_STUDENT_DONE = "studentDone";
+    String ARG_DONE_CLAZZMEMBER_UIDS = "donePersonUids";
 
     /**
      * Sets Current SEL answers by students list
@@ -22,8 +23,14 @@ public interface SELSelectStudentView extends UstadView {
      */
     void setSELAnswerListProvider(UmProvider<Person> selStudentsProvider);
 
+    /**
+     * Finish the activity (close it)
+     */
     void finish();
 
+    /**
+     * Method to pop up that one student SEL done, you can select a new student now.
+     */
     void showStudentDoneMoveOn();
 
 }

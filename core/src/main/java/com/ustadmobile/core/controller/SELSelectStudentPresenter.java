@@ -10,11 +10,16 @@ import com.ustadmobile.core.view.SELSelectStudentView;
 import com.ustadmobile.lib.db.entities.ClazzMember;
 import com.ustadmobile.lib.db.entities.Person;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Hashtable;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.ustadmobile.core.view.ClazzListView.ARG_CLAZZ_UID;
 import static com.ustadmobile.core.view.PersonDetailView.ARG_PERSON_UID;
 import static com.ustadmobile.core.view.SELEditView.ARG_CLAZZMEMBER_UID;
+import static com.ustadmobile.core.view.SELSelectStudentView.ARG_DONE_CLAZZMEMBER_UIDS;
 
 /**
  * SELSelectStudent's Presenter - Responsible for showing every Clazz Member that will participate
@@ -25,6 +30,8 @@ public class SELSelectStudentPresenter extends CommonHandlerPresenter<SELSelectS
 
     private long currentClazzUid = -1;
 
+    private String doneClazzMemberUids = "";
+
     public SELSelectStudentPresenter(Object context, Hashtable arguments,
                                      SELSelectStudentView view) {
         super(context, arguments, view);
@@ -32,6 +39,10 @@ public class SELSelectStudentPresenter extends CommonHandlerPresenter<SELSelectS
         //Get Clazz Uid for the current Clazz.
         if(arguments.containsKey(ARG_CLAZZ_UID)){
             currentClazzUid = (long) arguments.get(ARG_CLAZZ_UID);
+        }
+
+        if(arguments.containsKey(ARG_DONE_CLAZZMEMBER_UIDS)){
+            doneClazzMemberUids = (String) arguments.get(ARG_DONE_CLAZZMEMBER_UIDS);
         }
 
     }
@@ -46,8 +57,19 @@ public class SELSelectStudentPresenter extends CommonHandlerPresenter<SELSelectS
     public void onCreate(Hashtable savedState) {
         super.onCreate(savedState);
 
+        //Convert doneClazzMemberUids csv to List<Integer>
+        List<Integer> donClazzMemberUidsList = new ArrayList<>();
+        for (String s : doneClazzMemberUids.split(",")) {
+            if(s.length() > 0) {
+                donClazzMemberUidsList.add(Integer.parseInt(s));
+            }
+        }
+
         UmProvider<Person> selStudentsProvider = UmAppDatabase.getInstance(context).getClazzMemberDao()
-                .findAllPeopleInClassUid(currentClazzUid);
+                .findAllPeopleInClassUidExcept(currentClazzUid, donClazzMemberUidsList);
+
+        //UmProvider<Person> selStudentsProvider = UmAppDatabase.getInstance(context).getClazzMemberDao()
+        //        .findAllPeopleInClassUid(currentClazzUid);
 
         view.setSELAnswerListProvider(selStudentsProvider);
     }
@@ -72,6 +94,7 @@ public class SELSelectStudentPresenter extends CommonHandlerPresenter<SELSelectS
                     @Override
                     public void onSuccess(ClazzMember clazzMember) {
                         args.put(ARG_CLAZZMEMBER_UID, clazzMember.getClazzMemberUid());
+                        args.put(ARG_DONE_CLAZZMEMBER_UIDS, doneClazzMemberUids);
                         impl.go(SELSelectConsentView.VIEW_NAME, args, view.getContext());
                         view.finish();
                     }

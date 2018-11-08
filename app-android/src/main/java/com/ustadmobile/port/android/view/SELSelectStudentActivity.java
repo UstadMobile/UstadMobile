@@ -22,6 +22,9 @@ import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.util.Objects;
 
+/**
+ * The activity that shows the list of students in this clazz who will be doing the SEL nominations
+ */
 public class SELSelectStudentActivity extends UstadBaseActivity implements SELSelectStudentView
 {
 
@@ -32,7 +35,6 @@ public class SELSelectStudentActivity extends UstadBaseActivity implements SELSe
     private RecyclerView.LayoutManager mRecyclerLayoutManager;
     private SELSelectStudentPresenter mPresenter;
 
-    public long clazzUid;
     private Snackbar studentDoneSnackBar;
 
     public static final DiffUtil.ItemCallback<Person> DIFF_CALLBACK =

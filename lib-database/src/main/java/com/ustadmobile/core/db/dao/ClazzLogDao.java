@@ -37,6 +37,9 @@ public abstract class ClazzLogDao implements BaseDao<ClazzLog>{
     @UmQuery("SELECT * FROM ClazzLog where clazzClazzUid = :clazzUid")
     public abstract UmProvider<ClazzLog> findByClazzUid(long clazzUid);
 
+    @UmQuery("SELECT * FROM ClazzLog where clazzClazzUid = :clazzUid AND done = 1")
+    public abstract UmProvider<ClazzLog> findByClazzUidThatAreDone(long clazzUid);
+
     @UmQuery("UPDATE ClazzLog SET numPresent = :numPresent,  numAbsent = :numAbsent, " +
             "numPartial = :numPartial WHERE clazzLogUid = :clazzLogUid")
     public abstract void updateClazzAttendanceNumbersAsync(long clazzLogUid, int numPresent,

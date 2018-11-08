@@ -1,5 +1,6 @@
 package com.ustadmobile.port.android.view;
 
+import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.app.TimePickerDialog;
 import android.content.Context;
@@ -20,18 +21,21 @@ import com.ustadmobile.core.view.AddScheduleDialogView;
 import com.ustadmobile.core.view.DismissableDialog;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Objects;
 
 import io.reactivex.annotations.NonNull;
 
+/**
+ * The Android View for adding a schedule to Class while editing it.
+ */
 public class AddScheduleDialogFragment extends UstadDialogFragment implements
         AddScheduleDialogView, AdapterView.OnItemSelectedListener,
         DialogInterface.OnClickListener, DialogInterface.OnShowListener,
         View.OnClickListener, DismissableDialog {
 
-
-    private View rootView;
     TextView errorMessageTextView;
     EditText fromET;
     EditText toET;
@@ -39,17 +43,22 @@ public class AddScheduleDialogFragment extends UstadDialogFragment implements
     Spinner daySpinner;
     AddScheduleDialogPresenter mPresenter;
     AlertDialog dialog;
+    View rootView;
     String[] schedulePresets;
     String[] dayPresets;
 
+    @android.support.annotation.NonNull
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState){
 
-        LayoutInflater inflater = (LayoutInflater)getContext().getSystemService(
-                Context.LAYOUT_INFLATER_SERVICE);
+        LayoutInflater inflater =
+                (LayoutInflater)Objects.requireNonNull(getContext()).getSystemService(
+                    Context.LAYOUT_INFLATER_SERVICE);
         Calendar myCalendar = Calendar.getInstance();
         Calendar myCalendar2 = Calendar.getInstance();
+
+        assert inflater != null;
 
         rootView = inflater.inflate(R.layout.fragment_add_schedule_dialog, null);
 
@@ -59,37 +68,43 @@ public class AddScheduleDialogFragment extends UstadDialogFragment implements
         scheduleSpinner = rootView.findViewById(R.id.fragment_add_schedule_dialog_schedule_spinner);
         daySpinner = rootView.findViewById(R.id.fragment_add_schedule_dialog_day_spinner);
 
+        //Date format to show in the Date picker
+        SimpleDateFormat justTheTimeFormat = new SimpleDateFormat("HH:mm");
 
+        //A Time picker listener that sets the from time.
         TimePickerDialog.OnTimeSetListener timeF = (view, hourOfDay, minute) -> {
-            myCalendar.set(Calendar.HOUR, hourOfDay);
+            myCalendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
             myCalendar.set(Calendar.MINUTE, minute);
-            String timeOnET = hourOfDay + ":" + minute;
+            String timeOnET = justTheTimeFormat.format(myCalendar.getTime());
+
             mPresenter.handleScheduleFromTimeSelected(myCalendar.getTime().getTime());
             fromET.setText(timeOnET);
         };
-
+        //Default view: not focusable.
         fromET.setFocusable(false);
 
+        //From time on click -> opens a timer picker.
         fromET.setOnClickListener(v -> new TimePickerDialog(getContext(), timeF,
                 myCalendar.get(Calendar.HOUR), myCalendar.get(Calendar.MINUTE),
                   false).show());
 
-
-
+        //A Time picker listener that sets the to time.
         TimePickerDialog.OnTimeSetListener timeT = (view, hourOfDay, minute) -> {
-            myCalendar2.set(Calendar.HOUR, hourOfDay);
+            myCalendar2.set(Calendar.HOUR_OF_DAY, hourOfDay);
             myCalendar2.set(Calendar.MINUTE, minute);
-            String timeOnET = hourOfDay + ":" + minute;
+            String timeOnET = justTheTimeFormat.format(myCalendar2.getTime());
             mPresenter.handleScheduleToTimeSelected(myCalendar2.getTime().getTime());
             toET.setText(timeOnET);
         };
-
+        //Default view: not focusable.
         toET.setFocusable(false);
 
+        //To time on click -> opens a time picker.
         toET.setOnClickListener(v -> new TimePickerDialog(
                 getContext(), timeT, myCalendar2.get(Calendar.HOUR),
                 myCalendar.get(Calendar.MINUTE), false).show());
 
+        //Schedule spinner's on click listener
         scheduleSpinner.setOnItemSelectedListener(
                 new AdapterView.OnItemSelectedListener() {
                     @Override
@@ -122,7 +137,7 @@ public class AddScheduleDialogFragment extends UstadDialogFragment implements
         DialogInterface.OnClickListener negativeOCL =
                 (dialog, which) -> mPresenter.handleCancelSchedule();
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        AlertDialog.Builder builder = new AlertDialog.Builder(Objects.requireNonNull(getContext()));
         builder.setTitle(R.string.add_session);
         builder.setView(rootView);
         builder.setPositiveButton(R.string.add, positiveOCL);
@@ -162,56 +177,63 @@ public class AddScheduleDialogFragment extends UstadDialogFragment implements
     }
 
     @Override
-    public void onClick(DialogInterface dialog, int which) {
-        System.out.println("onClickDialog");
-    }
+    public void onClick(DialogInterface dialog, int which) {  }
 
     @Override
-    public void onShow(DialogInterface dialog) {
-        System.out.println("onShow");
-    }
+    public void onShow(DialogInterface dialog) {  }
 
     @Override
-    public void onClick(View v) {
-        System.out.println("onClick");
-    }
+    public void onClick(View v) {  }
 
     @Override
-    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-
-    }
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {   }
 
     @Override
-    public void onNothingSelected(AdapterView<?> parent) {
-
-    }
+    public void onNothingSelected(AdapterView<?> parent) {    }
 
     @Override
-    public void finish() {
+    public void finish() { }
 
-    }
-
+    /**
+     * Adds given list of schedule presets to the Dialog Spinner
+     *
+     * @param presets   a string array of the presets in order.
+     */
     @Override
     public void setScheduleDropdownPresets(String[] presets) {
         this.schedulePresets = presets;
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(),
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(Objects.requireNonNull(getContext()),
                 android.R.layout.simple_spinner_item, schedulePresets);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         scheduleSpinner.setAdapter(adapter);
-
     }
 
+    /**
+     * Adds given list of day presets to the Dialog Spinner
+     * @param presets   a string array of the presets in order.
+     */
     @Override
     public void setDayDropdownPresets(String[] presets) {
         this.dayPresets = presets;
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(),
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(Objects.requireNonNull(getContext()),
                 android.R.layout.simple_spinner_item, dayPresets);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         daySpinner.setAdapter(adapter);
     }
 
     @Override
-    public void setError(String errorMessage) {
+    public void setError(String errorMessage) {    }
 
+    @Override
+    public void hideDayPicker(boolean hide) {
+        if(hide){
+            rootView.findViewById(R.id.fragment_add_schedule_dialog_day_heading)
+                    .setVisibility(View.INVISIBLE);
+            daySpinner.setVisibility(View.INVISIBLE);
+        }else{
+            rootView.findViewById(R.id.fragment_add_schedule_dialog_day_heading)
+                    .setVisibility(View.VISIBLE);
+            daySpinner.setVisibility(View.VISIBLE);
+        }
     }
 }

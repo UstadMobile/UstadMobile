@@ -277,6 +277,7 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
 
                     Calendar myCalendar = Calendar.getInstance();
 
+                    //Date pickers's on click listener - sets text
                     DatePickerDialog.OnDateSetListener date = (view, year, month, dayOfMonth) -> {
                         myCalendar.set(Calendar.YEAR, year);
                         myCalendar.set(Calendar.MONTH, month);
@@ -288,10 +289,13 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
 
                     et.setFocusable(false);
 
-                    et.setOnClickListener(v -> new DatePickerDialog(
-                            PersonEditActivity.this, date, myCalendar
-                            .get(Calendar.YEAR), myCalendar.get(Calendar.MONTH),
-                            myCalendar.get(Calendar.DAY_OF_MONTH)).show());
+                    //date listener - opens a new date picker.
+                    DatePickerDialog dateFieldPicker = new DatePickerDialog(
+                            PersonEditActivity.this, date, myCalendar.get(Calendar.YEAR),
+                            myCalendar.get(Calendar.MONTH), myCalendar.get(Calendar.DAY_OF_MONTH));
+                    dateFieldPicker.getDatePicker().setMaxDate(System.currentTimeMillis());
+
+                    et.setOnClickListener(v -> dateFieldPicker.show());
 
 
                 }

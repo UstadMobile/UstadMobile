@@ -33,6 +33,7 @@ import static com.ustadmobile.core.view.SELEditView.ARG_QUESTION_UID;
 import static com.ustadmobile.core.view.SELQuestionView.ARG_QUESTION_INDEX;
 import static com.ustadmobile.core.view.SELQuestionView.ARG_QUESTION_TEXT;
 import static com.ustadmobile.core.view.SELQuestionView.ARG_QUESTION_TOTAL;
+import static com.ustadmobile.core.view.SELSelectStudentView.ARG_DONE_CLAZZMEMBER_UIDS;
 import static com.ustadmobile.core.view.SELSelectStudentView.ARG_STUDENT_DONE;
 
 
@@ -52,6 +53,7 @@ public class SELEditPresenter
     private int currentQuestionIndexId = 0;
     private long currentQuestionSetResponseUid = -1;
     private long currentQuestionResponseUid = -1;
+    private String doneClazzMemberUids = "";
 
     //Provider 
     private UmProvider<Person> providerList;
@@ -106,6 +108,11 @@ public class SELEditPresenter
                         arguments.get(ARG_QUESTION_TOTAL).toString());
             }
 
+        }
+
+        //Add on any SEL things done
+        if(arguments.containsKey(ARG_DONE_CLAZZMEMBER_UIDS)){
+            doneClazzMemberUids = (String) arguments.get(ARG_DONE_CLAZZMEMBER_UIDS);
         }
 
     }
@@ -209,6 +216,7 @@ public class SELEditPresenter
                                                 args.put(ARG_QUESTION_INDEX, nextQuestion.getQuestionIndex());
                                                 args.put(ARG_QUESTION_TOTAL, totalSELQuestions);
                                                 args.put(ARG_QUESTION_RESPONSE_UID, questionResponse.getSocialNominationQuestionResponseUid());
+                                                args.put(ARG_DONE_CLAZZMEMBER_UIDS, doneClazzMemberUids);
 
                                                 impl.go(SELQuestionView.VIEW_NAME, args, view.getContext());
 
@@ -224,7 +232,14 @@ public class SELEditPresenter
                                         Hashtable<String, Object> args = new Hashtable<>();
                                         args.put(ARG_STUDENT_DONE, currentPersonUid);
                                         args.put(ARG_CLAZZ_UID, currentClazzUid);
-
+                                        if(doneClazzMemberUids != null){
+                                            if(doneClazzMemberUids.equals("")){
+                                                doneClazzMemberUids += currentClazzMemberUid ;
+                                            }else{
+                                                doneClazzMemberUids += "," + currentClazzMemberUid ;
+                                            }
+                                        }
+                                        args.put(ARG_DONE_CLAZZMEMBER_UIDS, doneClazzMemberUids);
                                         impl.go(SELSelectStudentView.VIEW_NAME, args, getContext());
                                         view.finish();
                                     }

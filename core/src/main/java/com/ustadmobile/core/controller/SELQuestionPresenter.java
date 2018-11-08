@@ -17,6 +17,7 @@ import static com.ustadmobile.core.view.SELEditView.ARG_QUESTION_UID;
 import static com.ustadmobile.core.view.SELQuestionView.ARG_QUESTION_INDEX;
 import static com.ustadmobile.core.view.SELQuestionView.ARG_QUESTION_TEXT;
 import static com.ustadmobile.core.view.SELQuestionView.ARG_QUESTION_TOTAL;
+import static com.ustadmobile.core.view.SELSelectStudentView.ARG_DONE_CLAZZMEMBER_UIDS;
 
 
 /**
@@ -30,6 +31,7 @@ public class SELQuestionPresenter
         extends UstadBaseController<SELQuestionView> {
 
     //Any arguments stored as variables here
+    private String doneClazzMemberUids = "";
     private long currentClazzUid = -1;
     private long currentPersonUid = -1;
     private long currentQuestionSetUid = -1;
@@ -39,6 +41,8 @@ public class SELQuestionPresenter
     private long currentQuestionSetResponseUid = -1;
     private long currentQuestionResponseUid = -1;
     private String questionText = "";
+
+    private Hashtable gottenArguments;
 
 
     public SELQuestionPresenter(Object context, Hashtable arguments, SELQuestionView view) {
@@ -91,6 +95,13 @@ public class SELQuestionPresenter
 
         }
 
+        //Add on any SEL things done
+        if(arguments.containsKey(ARG_DONE_CLAZZMEMBER_UIDS)){
+            doneClazzMemberUids = (String) arguments.get(ARG_DONE_CLAZZMEMBER_UIDS);
+        }
+
+        gottenArguments = arguments;
+
     }
 
     @Override
@@ -106,9 +117,7 @@ public class SELQuestionPresenter
     public void handleClickPrimaryActionButton() {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
 
-        view.finish();
-
-        //Create arguments
+        //Create arguments  - OR- just sent arguments ?
         Hashtable<String, Object> args = new Hashtable<>();
         args.put(ARG_CLAZZ_UID, currentClazzUid);
         args.put(ARG_PERSON_UID, currentPersonUid);
@@ -119,10 +128,15 @@ public class SELQuestionPresenter
         args.put(ARG_QUESTION_SET_RESPONSE_UID, currentQuestionSetResponseUid);
         args.put(ARG_QUESTION_RESPONSE_UID, currentQuestionResponseUid);
         args.put(ARG_QUESTION_TEXT, questionText);
+        args.put(ARG_DONE_CLAZZMEMBER_UIDS, doneClazzMemberUids);
+
+        //TODO: test this:
+        //args = gottenArguments;
+
+        view.finish();
 
         //Go to view
         impl.go(SELEditView.VIEW_NAME, args, view.getContext());
-
 
     }
 

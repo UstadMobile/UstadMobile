@@ -53,6 +53,17 @@ public class ClazzLogListFragment extends UstadBaseFragment implements ClassLogL
     LineChart lineChart;
     HorizontalBarChart barChart;
 
+    private Button lastWeekButton;
+    private Button lastMonthButton;
+    private Button lastYearButton;
+
+    /**
+     * Hides elements of MPAndroid Chart that we do not need as part of the Bar Chart in the
+     * Attendance Log list fragment. Hides things as per UI intended (axis, labels, etc)
+     *
+     * @param barChart  The horizontal bar chart
+     * @return  The horizontal bar chart with elements hidden
+     */
     public HorizontalBarChart hideEverythingInBarChart(HorizontalBarChart barChart){
 
         //Hide only the grid lines and not axis:
@@ -68,7 +79,6 @@ public class ClazzLogListFragment extends UstadBaseFragment implements ClassLogL
         //Right Values:
         barChart.getAxisRight().setEnabled(false);
 
-
         //Legend:
         barChart.getLegend().setEnabled(false);
 
@@ -82,6 +92,13 @@ public class ClazzLogListFragment extends UstadBaseFragment implements ClassLogL
         return barChart;
     }
 
+    /**
+     * Hides elements of MpAndroid Chart that we do not need as part of the Line Chart in the
+     * Attendance Log list fragment. Hides things as per UI intended (axis, labels, etc)
+     *
+     * @param lineChart The line chart
+     * @return  The line chart with elements hidden.
+     */
     public LineChart hideEverythingInLineChart(LineChart lineChart){
 
         //We want the Left Axis grid (vertical lines)
@@ -115,6 +132,9 @@ public class ClazzLogListFragment extends UstadBaseFragment implements ClassLogL
         return lineChart;
     }
 
+    /**
+     * Custom Bar Data Set. The idea is any color logic can be applied here.
+     */
     class AttendanceBarDataSet extends BarDataSet {
 
         public AttendanceBarDataSet(List<BarEntry> yVals, String label) {
@@ -124,13 +144,6 @@ public class ClazzLogListFragment extends UstadBaseFragment implements ClassLogL
         @Override
         public int getColor(int index) {
             return mColors.get(index);
-//
-//            if(getEntryForIndex(index).getY() > 79)
-//                return mColors.get(0);
-//            else if(getEntryForIndex(index).getY() > 59)
-//                return mColors.get(1);
-//            else
-//                return mColors.get(2);
         }
 
     }
@@ -149,15 +162,20 @@ public class ClazzLogListFragment extends UstadBaseFragment implements ClassLogL
     }
 
 
+    /**
+     * Updates the line chart with attendance with data specified to it. This is directly drawing
+     * on the MPAndroid Chart View in the Fragment.
+     *
+     * @param dataMap The hash map containing the values
+     */
     @Override
     public void updateAttendanceLineChart(LinkedHashMap<Float, Float> dataMap){
         List<Entry> lineDataEntries = new ArrayList<Entry>();
-        Iterator<Map.Entry<Float, Float>> dataMapIterator = dataMap.entrySet().iterator();
-        while(dataMapIterator.hasNext()){
-            Entry anEntry  = new Entry();
-            Map.Entry<Float, Float> nextEntry = dataMapIterator.next();
+        for (Map.Entry<Float, Float> floatFloatEntry : dataMap.entrySet()) {
+            Entry anEntry = new Entry();
+            Map.Entry<Float, Float> nextEntry = floatFloatEntry;
             anEntry.setX(nextEntry.getKey());
-            anEntry.setY(nextEntry.getValue()*100);
+            anEntry.setY(nextEntry.getValue() * 100);
             lineDataEntries.add(anEntry);
         }
 
@@ -173,7 +191,7 @@ public class ClazzLogListFragment extends UstadBaseFragment implements ClassLogL
         //Add LineDataSet to LineData
         LineData lineData = new LineData(dataSetLine1);
 
-
+        //Update the lineChart on the UI thread (since this method is called via the Presenter)
         runOnUiThread(() -> {
             setUpCharts();
             if(lineDataEntries.size() > 0){
@@ -187,17 +205,19 @@ public class ClazzLogListFragment extends UstadBaseFragment implements ClassLogL
         });
     }
 
+    /**
+     * Update the bar chart with attendance with data specified to it. This is directly drawing
+     * on the MPAndroid Chart View in the Fragment.
+     * @param dataMap the Hashmap containing the values.
+     */
     @Override
     public void updateAttendanceBarChart(LinkedHashMap<Float, Float> dataMap){
         List<BarEntry> barDataEntries = new ArrayList<BarEntry>();
-        Iterator<Map.Entry<Float, Float>> dataMapIterator = dataMap.entrySet().iterator();
-        while(dataMapIterator.hasNext()){
-            Map.Entry<Float, Float> nextEntry = dataMapIterator.next();
-            BarEntry anEntry  = new BarEntry(nextEntry.getKey(),
-                    nextEntry.getValue()*100);
+        for (Map.Entry<Float, Float> nextEntry : dataMap.entrySet()) {
+            BarEntry anEntry = new BarEntry(nextEntry.getKey(),
+                    nextEntry.getValue() * 100);
             barDataEntries.add(anEntry);
         }
-
 
         //Create Bar color
         AttendanceBarDataSet dataSetBar1 = new AttendanceBarDataSet(barDataEntries,
@@ -222,8 +242,6 @@ public class ClazzLogListFragment extends UstadBaseFragment implements ClassLogL
             //barChart.setDrawValueAboveBar(false);
         });
 
-
-
     }
 
     /**
@@ -238,6 +256,8 @@ public class ClazzLogListFragment extends UstadBaseFragment implements ClassLogL
         lineChart.getXAxis().setValueFormatter((value, axis) -> (int)value + "");
         lineChart.setTouchEnabled(false);
         lineChart.getXAxis().setLabelCount(4,true);
+        //lineChart.setExtraTopOffset(-10);
+        // lineChart.setPadding(0, 50,0,0);
 
         barChart = rootContainer.findViewById(R.id.fragment_clazz_log_list_bar_chart);
         barChart.setMinimumHeight(ATTENDANCE_BAR_CHART_HEIGHT);
@@ -245,6 +265,7 @@ public class ClazzLogListFragment extends UstadBaseFragment implements ClassLogL
         barChart.getAxisLeft().setAxisMaximum(ATTENDANCE_BAR_CHART_AXIS_MAXIMUM);
         barChart.getAxisLeft().setAxisMinimum(ATTENDANCE_BAR_CHART_AXIS_MINIMUM);
         barChart.setTouchEnabled(false);
+
     }
 
 
@@ -283,23 +304,50 @@ public class ClazzLogListFragment extends UstadBaseFragment implements ClassLogL
         fab.setOnClickListener(v -> mPresenter.goToNewClazzLogDetailActivity());
 
         //Buttons
-        Button lastWeekButton = rootContainer.findViewById(
+        lastWeekButton = rootContainer.findViewById(
                 R.id.fragment_clazz_log_list_line_chart_selector_button_thisweek);
-        Button lastMonthButton = rootContainer.findViewById(
+        lastMonthButton = rootContainer.findViewById(
                 R.id.fragment_clazz_log_list_line_chart_selector_button_thismonth);
-        Button lastYearButton =rootContainer.findViewById(
+        lastYearButton =rootContainer.findViewById(
                 R.id.fragment_clazz_log_list_line_chart_selector_button_lastyear);
 
 
         lastWeekButton.setOnClickListener(
-                v -> mPresenter.getAttendanceDataAndUpdateCharts(CHART_DURATION_LAST_WEEK));
+                v -> {
+                    mPresenter.getAttendanceDataAndUpdateCharts(CHART_DURATION_LAST_WEEK);
+                    lastWeekButton.getBackground().setTint(getResources().getColor(R.color.primary));
+                });
         lastMonthButton.setOnClickListener(
-                v -> mPresenter.getAttendanceDataAndUpdateCharts(CHART_DURATION_LAST_MONTH));
+                v -> {
+                    mPresenter.getAttendanceDataAndUpdateCharts(CHART_DURATION_LAST_MONTH);
+                    lastMonthButton.getBackground().setTint(getResources().getColor(R.color.primary));
+                });
         lastYearButton.setOnClickListener(
-                v -> mPresenter.getAttendanceDataAndUpdateCharts(CHART_DURATION_LAST_YEAR));
+                v ->{
+                    mPresenter.getAttendanceDataAndUpdateCharts(CHART_DURATION_LAST_YEAR);
+                    lastYearButton.getBackground().setTint(getResources().getColor(R.color.primary));
+                });
+
+        //Default start to Last Week's data:
+        lastWeekButton.callOnClick();
 
         //return container
         return rootContainer;
+    }
+
+    /**
+     * Removes background color from View's report button
+     */
+    @Override
+    public void resetReportButtons() {
+        runOnUiThread(() -> {
+
+            lastWeekButton.getBackground().setTint(getResources().getColor(R.color.color_gray));
+            lastMonthButton.getBackground().setTint(getResources().getColor(R.color.color_gray));
+            lastYearButton.getBackground().setTint(getResources().getColor(R.color.color_gray));
+        });
+
+
     }
 
     // ClassLogList's DIFF callback

@@ -29,7 +29,24 @@ public abstract class ScheduleDao implements BaseDao<Schedule> {
     @UmQuery("SELECT * FROM Schedule WHERE scheduleUid = :uid")
     public abstract Schedule findByUid(long uid);
 
+    @UmQuery("SELECT * FROM Schedule WHERE scheduleUid = :uid")
+    public abstract void findByUidAsync(long uid, UmCallback<Schedule> result);
 
-    @UmQuery("SELECT * FROM Schedule WHERE scheduleClazzUid = :clazzUid")
+    @UmQuery("SELECT * FROM Schedule WHERE scheduleClazzUid = :clazzUid AND scheduleActive = 1")
     public abstract UmProvider<Schedule> findAllSchedulesByClazzUid(long clazzUid);
+
+    public void disableSchedule(long scheduleUid){
+        findByUidAsync(scheduleUid, new UmCallback<Schedule>() {
+            @Override
+            public void onSuccess(Schedule result) {
+                result.setScheduleActive(false);
+                update(result);
+            }
+
+            @Override
+            public void onFailure(Throwable exception) {
+
+            }
+        });
+    }
 }

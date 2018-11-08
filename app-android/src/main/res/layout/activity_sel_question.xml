@@ -56,7 +56,7 @@
         android:layout_marginTop="8dp"
         android:text="@string/sel_question_tell_student"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/activity_sel_question_number_position" />
+        app:layout_constraintTop_toBottomOf="@+id/activity_sel_question_question" />
 
     <TextView
         android:id="@+id/activity_sel_question_instruction_2"
@@ -97,10 +97,12 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
         android:text="SEL Question"
-        app:layout_constraintStart_toEndOf="@+id/activity_sel_question_number_position"
-        app:layout_constraintTop_toBottomOf="@+id/activity_sel_question_info_imageview" />
+        android:textSize="18sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/activity_sel_question_title" />
 
 
 </android.support.constraint.ConstraintLayout>

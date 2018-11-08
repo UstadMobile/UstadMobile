@@ -60,6 +60,16 @@ public class Schedule implements SyncableEntity {
     //What clazz is this Schedule for
     private long scheduleClazzUid;
 
+    //active or removed
+    private boolean scheduleActive;
+
+    public boolean isScheduleActive() {
+        return scheduleActive;
+    }
+
+    public void setScheduleActive(boolean scheduleActive) {
+        this.scheduleActive = scheduleActive;
+    }
 
     public long getScheduleClazzUid() {
         return scheduleClazzUid;

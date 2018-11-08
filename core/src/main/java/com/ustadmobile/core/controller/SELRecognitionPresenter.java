@@ -29,6 +29,7 @@ import static com.ustadmobile.core.view.SELQuestionView.ARG_QUESTION_INDEX;
 import static com.ustadmobile.core.view.SELQuestionView.ARG_QUESTION_TEXT;
 import static com.ustadmobile.core.view.SELQuestionView.ARG_QUESTION_TOTAL;
 import static com.ustadmobile.core.view.SELRecognitionView.ARG_RECOGNITION_UID;
+import static com.ustadmobile.core.view.SELSelectStudentView.ARG_DONE_CLAZZMEMBER_UIDS;
 
 
 /**
@@ -43,6 +44,7 @@ public class SELRecognitionPresenter
     private long currentPersonUid = -1;
     private long currentClazzMemberUid = -1;
     private long currentRecognitionQuestionNominationResponse = -1;
+    private String doneClazzMemberUids ="";
 
     //Provider 
     private UmProvider<Person> providerList;
@@ -65,6 +67,11 @@ public class SELRecognitionPresenter
         //Recognition Uid.
         if(arguments.containsKey(ARG_RECOGNITION_UID)){
             currentRecognitionQuestionNominationResponse = (long) arguments.get(ARG_RECOGNITION_UID);
+        }
+
+        //Add on any SEL things done
+        if(arguments.containsKey(ARG_DONE_CLAZZMEMBER_UIDS)){
+            doneClazzMemberUids = (String) arguments.get(ARG_DONE_CLAZZMEMBER_UIDS);
         }
 
     }
@@ -151,6 +158,7 @@ public class SELRecognitionPresenter
                                         args.put(ARG_QUESTION_TEXT, nextQuestion.getQuestionText());
                                         args.put(ARG_QUESTION_INDEX, nextQuestion.getQuestionIndex());
                                         args.put(ARG_QUESTION_TOTAL, totalSELQuestions);
+                                        args.put(ARG_DONE_CLAZZMEMBER_UIDS, doneClazzMemberUids);
 
                                         impl.go(SELQuestionView.VIEW_NAME, args, view.getContext());
 
