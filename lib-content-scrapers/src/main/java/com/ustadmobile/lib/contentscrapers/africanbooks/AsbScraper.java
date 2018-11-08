@@ -70,7 +70,6 @@ public class AsbScraper {
 
     public static final int DOWNLOAD_NEXT_INTERVAL = 5000;
     private final String COVER_URL = "https://www.africanstorybook.org/illustrations/covers/";
-    private ChromeDriver driver;
     private ContentEntryDao contentEntryDao;
     private ContentEntryParentChildJoinDao contentParentChildJoinDao;
     private ContentEntryFileDao contentEntryFileDao;
@@ -154,7 +153,7 @@ public class AsbScraper {
                 try {
 
                     System.out.println("Download ASB: " + bookId + " from " + epubUrl.toString() + " to " + ePubFile.getAbsolutePath());
-                    driver = ContentScraperUtil.setupChrome(true);
+                    ChromeDriver driver = ContentScraperUtil.setupChrome(true);
                     WebDriverWait waitDriver = new WebDriverWait(driver, 10000);
                     driver.get(publishUrl.toString());
                     ContentScraperUtil.waitForJSandJQueryToLoad(waitDriver);
