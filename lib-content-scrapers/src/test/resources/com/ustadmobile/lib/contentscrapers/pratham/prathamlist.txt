@@ -1,1 +1,110 @@
-{"ok":true,"metadata":{"hits":9439,"perPage":5,"page":1,"totalPages":1888},"data":[{"id":5859,"title":"Come Home, Papa","language":"English","level":"2","slug":"content/5859-come-home-papa","recommended":false,"editorsPick":true,"coverImage":{"aspectRatio":1.0,"cropCoords":{"x":0.2221494102228047,"y":0.0},"sizes":[{"height":129.0,"width":268.0,"url":"https://storage.googleapis.com/story-weaver-e2e-production/illustration_crops/22965/size1/38a74faee55a1a90fab450ea5a833f1c.jpg"},{"height":148.0,"width":308.0,"url":"https://storage.googleapis.com/story-weaver-e2e-production/illustration_crops/22965/size2/38a74faee55a1a90fab450ea5a833f1c.jpg"},{"height":205.0,"width":428.0,"url":"https://storage.googleapis.com/story-weaver-e2e-production/illustration_crops/22965/size3/38a74faee55a1a90fab450ea5a833f1c.jpg"},{"height":263.0,"width":548.0,"url":"https://storage.googleapis.com/story-weaver-e2e-production/illustration_crops/22965/size4/38a74faee55a1a90fab450ea5a833f1c.jpg"},{"height":340.0,"width":708.0,"url":"https://storage.googleapis.com/story-weaver-e2e-production/illustration_crops/22965/size5/38a74faee55a1a90fab450ea5a833f1c.jpg"},{"height":385.0,"width":803.0,"url":"https://storage.googleapis.com/story-weaver-e2e-production/illustration_crops/22965/size6/38a74faee55a1a90fab450ea5a833f1c.jpg"},{"height":460.0,"width":959.0,"url":"https://storage.googleapis.com/story-weaver-e2e-production/illustration_crops/22965/size7/38a74faee55a1a90fab450ea5a833f1c.jpg"}]},"authors":[{"slug":"content/4853-apoorva-mathur","name":"Apoorva Mathur"}],"storyDownloaded":false,"illustrators":[{"name":"Hari Kumar Nair","slug":"content/274-hari-kumar-nair"},{"name":"Kabini  Amin","slug":"content/3443-kabini-amin"},{"name":"Kaveri Gopalakrishnan","slug":"989-kaveri-gopalakrishnan"},{"name":"Soumya Menon","slug":"content/52-soumya-menon"},{"name":"Vartika  Sharma ","slug":"content/4451-vartika-sharma"},{"name":"Vishnu  M Nair","slug":"content/3907-vishnu-m-nair"}],"readsCount":2342,"likesCount":20,"description":"What do you do when our father goes missing? Would you look for him? To whom will you turn for help? \r\nRead Vishakha's tale to unravel this mystery.\r\nWould she be able to find her father?","publisher":{"name":"StoryWeaver Community","slug":null,"logo":"https://storyweaver.org.in/assets/publisher_logos/community-9e787c5445f0899c9d2470f33ca4bf57.jpg"},"contest":null,"availableForOfflineMode":true,"isAudio":false,"audioStatus":null,"isGif":false},{"id":4084,"title":"The Birthday Party","language":"English","level":"1","slug":"content/4084-the-birthday-party","recommended":true,"editorsPick":true,"coverImage":{"aspectRatio":1.0,"cropCoords":{"x":0.1711980878398566,"y":0.0},"sizes":[{"height":129.0,"width":268.0,"url":"https://storage.googleapis.com/story-weaver-e2e-production/illustration_crops/18517/size1/c5bfc9b1787f3e20696a6492f63b55c2.jpg"},{"height":148.0,"width":308.0,"url":"https://storage.googleapis.com/story-weaver-e2e-production/illustration_crops/18517/size2/c5bfc9b1787f3e20696a6492f63b55c2.jpg"},{"height":205.0,"width":428.0,"url":"https://storage.googleapis.com/story-weaver-e2e-production/illustration_crops/18517/size3/c5bfc9b1787f3e20696a6492f63b55c2.jpg"},{"height":263.0,"width":548.0,"url":"https://storage.googleapis.com/story-weaver-e2e-production/illustration_crops/18517/size4/c5bfc9b1787f3e20696a6492f63b55c2.jpg"},{"height":340.0,"width":708.0,"url":"https://storage.googleapis.com/story-weaver-e2e-production/illustration_crops/18517/size5/c5bfc9b1787f3e20696a6492f63b55c2.jpg"},{"height":385.0,"width":803.0,"url":"https://storage.googleapis.com/story-weaver-e2e-production/illustration_crops/18517/size6/c5bfc9b1787f3e20696a6492f63b55c2.jpg"},{"height":460.0,"width":959.0,"url":"https://storage.googleapis.com/story-weaver-e2e-production/illustration_crops/18517/size7/c5bfc9b1787f3e20696a6492f63b55c2.jpg"}]},"authors":[{"slug":"content/357-storyweaver-pratham-books","name":"Storyweaver, Pratham Books"}],"storyDownloaded":false,"illustrators":[{"name":"Megha Vishwanath","slug":"content/1132-megha-vishwanath"}],"readsCount":1998,"likesCount":12,"description":"After his birthday party, the boy in the story opens his gifts and is thrilled to find a camera. But as he's playing with his new gift, he notices his mother crying in the kitchen. Find out what he does next!","publisher":{"name":"StoryWeaver","slug":"content/439-storyweaver","logo":"https://storage.googleapis.com/story-weaver-e2e-production/publishers/logos/439/original/Storyweaver-Logo.png?1505365238"},"contest":null,"availableForOfflineMode":true,"isAudio":false,"audioStatus":null,"isGif":false},{"id":38652,"title":"குயில் பாட்டு கேட்குதா?","language":"Tamil","level":"2","slug":"content/38652-kuyil-paattu-ketkuthaa","recommended":true,"editorsPick":true,"coverImage":{"aspectRatio":1.0,"cropCoords":{"x":0.0,"y":0.0},"sizes":[{"height":263.0,"width":268.0,"url":"https://storage.googleapis.com/story-weaver-e2e-production/illustration_crops/56964/size1/d1a6cf51dc5f7d40827c6cb8a959cdd3.jpg"},{"height":303.0,"width":308.0,"url":"https://storage.googleapis.com/story-weaver-e2e-production/illustration_crops/56964/size2/d1a6cf51dc5f7d40827c6cb8a959cdd3.jpg"},{"height":421.0,"width":428.0,"url":"https://storage.googleapis.com/story-weaver-e2e-production/illustration_crops/56964/size3/d1a6cf51dc5f7d40827c6cb8a959cdd3.jpg"},{"height":539.0,"width":548.0,"url":"https://storage.googleapis.com/story-weaver-e2e-production/illustration_crops/56964/size4/d1a6cf51dc5f7d40827c6cb8a959cdd3.jpg"},{"height":696.0,"width":708.0,"url":"https://storage.googleapis.com/story-weaver-e2e-production/illustration_crops/56964/size5/d1a6cf51dc5f7d40827c6cb8a959cdd3.jpg"},{"height":790.0,"width":803.0,"url":"https://storage.googleapis.com/story-weaver-e2e-production/illustration_crops/56964/size6/d1a6cf51dc5f7d40827c6cb8a959cdd3.jpg"},{"height":943.0,"width":959.0,"url":"https://storage.googleapis.com/story-weaver-e2e-production/illustration_crops/56964/size7/d1a6cf51dc5f7d40827c6cb8a959cdd3.jpg"}]},"authors":[{"slug":"content/4567-sudha-thilak","name":"Sudha  Thilak"}],"storyDownloaded":false,"illustrators":[{"name":"211 Studio","slug":"content/13269-211-studio"}],"readsCount":96,"likesCount":0,"description":"இது பருவ மழைக்காலம். பள்ளியில் எங்கோ ஒரு குயில் கூவுவது கேட்கிறது. ஆனால் அதற்கு தொண்டைகட்டிக் கொண்டது போல் இருக்கிறது! பர்வேஸும் ஸ்டெல்லாவும் தொண்டைகட்டிக் கொண்ட ஒரு பறவையை இதுவரைக்கும் பார்த்ததில்லை. ஆகவே அவர்கள் அதைத் தேடிக்கொண்டு போகிறார்கள்.","publisher":{"name":"Pratham Books","slug":"content/441-pratham-books","logo":"https://storage.googleapis.com/story-weaver-e2e-production/publishers/logos/441/original/PB_Logo.png?1505365233"},"contest":null,"availableForOfflineMode":true,"isAudio":false,"audioStatus":null,"isGif":false},{"id":987,"title":"टक टक","language":"Hindi","level":"3","slug":"content/987-tak-tak","recommended":true,"editorsPick":true,"coverImage":{"aspectRatio":1.0,"cropCoords":{"x":0.5122388059701493,"y":0.0},"sizes":[{"height":128.0,"width":268.0,"url":"https://storage.googleapis.com/story-weaver-e2e-production/illustration_crops/12317/size1/28a48d4eb3ac0c56c1d24b4999ef7456.jpg"},{"height":147.0,"width":308.0,"url":"https://storage.googleapis.com/story-weaver-e2e-production/illustration_crops/12317/size2/28a48d4eb3ac0c56c1d24b4999ef7456.jpg"},{"height":205.0,"width":428.0,"url":"https://storage.googleapis.com/story-weaver-e2e-production/illustration_crops/12317/size3/28a48d4eb3ac0c56c1d24b4999ef7456.jpg"},{"height":262.0,"width":548.0,"url":"https://storage.googleapis.com/story-weaver-e2e-production/illustration_crops/12317/size4/28a48d4eb3ac0c56c1d24b4999ef7456.jpg"},{"height":339.0,"width":708.0,"url":"https://storage.googleapis.com/story-weaver-e2e-production/illustration_crops/12317/size5/28a48d4eb3ac0c56c1d24b4999ef7456.jpg"},{"height":384.0,"width":803.0,"url":"https://storage.googleapis.com/story-weaver-e2e-production/illustration_crops/12317/size6/28a48d4eb3ac0c56c1d24b4999ef7456.jpg"},{"height":459.0,"width":959.0,"url":"https://storage.googleapis.com/story-weaver-e2e-production/illustration_crops/12317/size7/28a48d4eb3ac0c56c1d24b4999ef7456.jpg"}]},"authors":[{"slug":"content/33-madhubala-joshi","name":"Madhubala Joshi"}],"storyDownloaded":false,"illustrators":[{"name":"Reshma Barve","slug":"content/114-reshma-barve"}],"readsCount":1069,"likesCount":13,"description":"सोनापुर के भोजनभट्ट राजा अपने कक्ष में आती रहस्यमयी आवाज़ के कारण सो नहीं पाए। यह रहस्यमयी आवाज़ किस की थी?","publisher":{"name":"Pratham Books","slug":"content/441-pratham-books","logo":"https://storage.googleapis.com/story-weaver-e2e-production/publishers/logos/441/original/PB_Logo.png?1505365233"},"contest":null,"availableForOfflineMode":true,"isAudio":false,"audioStatus":null,"isGif":false},{"id":1943,"title":"ताईचा रंगीत खजिना ","language":"Marathi","level":"2","slug":"content/1943-taicha-rangeet-khajina","recommended":false,"editorsPick":true,"coverImage":{"aspectRatio":1.0,"cropCoords":{"x":0.01701492537313433,"y":0.0},"sizes":[{"height":128.0,"width":268.0,"url":"https://storage.googleapis.com/story-weaver-e2e-production/illustration_crops/14888/size1/248b9d456b62cb3f1dc80cb81be1b041.jpg"},{"height":147.0,"width":308.0,"url":"https://storage.googleapis.com/story-weaver-e2e-production/illustration_crops/14888/size2/248b9d456b62cb3f1dc80cb81be1b041.jpg"},{"height":205.0,"width":428.0,"url":"https://storage.googleapis.com/story-weaver-e2e-production/illustration_crops/14888/size3/248b9d456b62cb3f1dc80cb81be1b041.jpg"},{"height":262.0,"width":548.0,"url":"https://storage.googleapis.com/story-weaver-e2e-production/illustration_crops/14888/size4/248b9d456b62cb3f1dc80cb81be1b041.jpg"},{"height":339.0,"width":708.0,"url":"https://storage.googleapis.com/story-weaver-e2e-production/illustration_crops/14888/size5/248b9d456b62cb3f1dc80cb81be1b041.jpg"},{"height":384.0,"width":803.0,"url":"https://storage.googleapis.com/story-weaver-e2e-production/illustration_crops/14888/size6/248b9d456b62cb3f1dc80cb81be1b041.jpg"},{"height":459.0,"width":959.0,"url":"https://storage.googleapis.com/story-weaver-e2e-production/illustration_crops/14888/size7/248b9d456b62cb3f1dc80cb81be1b041.jpg"}]},"authors":[{"slug":"content/38-sandhya-taksale","name":"Sandhya Taksale"}],"storyDownloaded":false,"illustrators":[{"name":"Kaveri Gopalakrishnan","slug":"content/989-kaveri-gopalakrishnan"}],"readsCount":72,"likesCount":3,"description":"सगळ्या  बाजूंनी कचऱ्याचे ढीग लागलेले, अशा अवस्थेत मुलांना मजा कशी येणार?\r\nपण एक दिवस, कुठूनतरी एक ताई येते आणि त्या छोट्यांच्या जीवनात रंगत आणते. \r\nपुस्तकांशी मैत्री होते आणि मुलांना मजा वाटायला लागते. ","publisher":{"name":"StoryWeaver Community","slug":null,"logo":"https://storyweaver.org.in/assets/publisher_logos/community-9e787c5445f0899c9d2470f33ca4bf57.jpg"},"contest":null,"availableForOfflineMode":true,"isAudio":false,"audioStatus":null,"isGif":false}]}
+{
+  "ok": true,
+  "metadata": {
+    "hits": 9439,
+    "perPage": 5,
+    "page": 2,
+    "totalPages": 1888
+  },
+  "data": [
+    {
+      "id": 5859,
+      "title": "Come Home, Papa",
+      "language": "English",
+      "level": "2",
+      "slug": "content/5859-come-home-papa",
+      "recommended": false,
+      "editorsPick": true,
+      "coverImage": {
+        "aspectRatio": 1.0,
+        "cropCoords": {
+          "x": 0.2221494102228047,
+          "y": 0.0
+        },
+        "sizes": [
+          {
+            "height": 129.0,
+            "width": 268.0,
+            "url": "https://storage.googleapis.com/story-weaver-e2e-production/illustration_crops/22965/size1/38a74faee55a1a90fab450ea5a833f1c.jpg"
+          },
+          {
+            "height": 148.0,
+            "width": 308.0,
+            "url": "https://storage.googleapis.com/story-weaver-e2e-production/illustration_crops/22965/size2/38a74faee55a1a90fab450ea5a833f1c.jpg"
+          },
+          {
+            "height": 205.0,
+            "width": 428.0,
+            "url": "https://storage.googleapis.com/story-weaver-e2e-production/illustration_crops/22965/size3/38a74faee55a1a90fab450ea5a833f1c.jpg"
+          },
+          {
+            "height": 263.0,
+            "width": 548.0,
+            "url": "https://storage.googleapis.com/story-weaver-e2e-production/illustration_crops/22965/size4/38a74faee55a1a90fab450ea5a833f1c.jpg"
+          },
+          {
+            "height": 340.0,
+            "width": 708.0,
+            "url": "https://storage.googleapis.com/story-weaver-e2e-production/illustration_crops/22965/size5/38a74faee55a1a90fab450ea5a833f1c.jpg"
+          },
+          {
+            "height": 385.0,
+            "width": 803.0,
+            "url": "https://storage.googleapis.com/story-weaver-e2e-production/illustration_crops/22965/size6/38a74faee55a1a90fab450ea5a833f1c.jpg"
+          },
+          {
+            "height": 460.0,
+            "width": 959.0,
+            "url": "https://storage.googleapis.com/story-weaver-e2e-production/illustration_crops/22965/size7/38a74faee55a1a90fab450ea5a833f1c.jpg"
+          }
+        ]
+      },
+      "authors": [
+        {
+          "slug": "content/4853-apoorva-mathur",
+          "name": "Apoorva Mathur"
+        }
+      ],
+      "storyDownloaded": false,
+      "illustrators": [
+        {
+          "name": "Hari Kumar Nair",
+          "slug": "content/274-hari-kumar-nair"
+        },
+        {
+          "name": "Kabini  Amin",
+          "slug": "content/3443-kabini-amin"
+        },
+        {
+          "name": "Kaveri Gopalakrishnan",
+          "slug": "989-kaveri-gopalakrishnan"
+        },
+        {
+          "name": "Soumya Menon",
+          "slug": "content/52-soumya-menon"
+        },
+        {
+          "name": "Vartika  Sharma ",
+          "slug": "content/4451-vartika-sharma"
+        },
+        {
+          "name": "Vishnu  M Nair",
+          "slug": "content/3907-vishnu-m-nair"
+        }
+      ],
+      "readsCount": 2342,
+      "likesCount": 20,
+      "description": "What do you do when our father goes missing? Would you look for him? To whom will you turn for help? \r\nRead Vishakha's tale to unravel this mystery.\r\nWould she be able to find her father?",
+      "publisher": {
+        "name": "StoryWeaver Community",
+        "slug": null,
+        "logo": "https://storyweaver.org.in/assets/publisher_logos/community-9e787c5445f0899c9d2470f33ca4bf57.jpg"
+      },
+      "contest": null,
+      "availableForOfflineMode": true,
+      "isAudio": false,
+      "audioStatus": null,
+      "isGif": false
+    }
+  ]
+}

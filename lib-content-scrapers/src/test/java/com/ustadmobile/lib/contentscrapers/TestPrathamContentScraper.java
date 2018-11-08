@@ -74,18 +74,19 @@ public class TestPrathamContentScraper {
 
         IndexPrathamContentScraper scraper = spy(new IndexPrathamContentScraper());
         doReturn(mockWebServer.url("/json/com/ustadmobile/lib/contentscrapers/pratham/prathamonebook.txt").url()).when(scraper).generatePrathamUrl("1");
-        doReturn(mockWebServer.url("/json/com/ustadmobile/lib/contentscrapers/pratham/prathamlist.txt").url()).when(scraper).generatePrathamUrl("5");
+        doReturn(mockWebServer.url("/json/com/ustadmobile/lib/contentscrapers/pratham/prathamlist.txt").url()).when(scraper).generatePrathamUrl("2");
+        doReturn(mockWebServer.url("/json/com/ustadmobile/lib/contentscrapers/pratham/prathamempty.txt").url()).when(scraper).generatePrathamUrl("3");
         doReturn(mockWebServer.url("/content/com/ustadmobile/lib/contentscrapers/pratham/24620-a-book-for-puchku.epub").url()).when(scraper).generatePrathamEPubFileUrl(Mockito.anyString());
         doReturn("").when(scraper).loginPratham();
 
         scraper.findContent(tmpDir);
 
-        File resourceFolder = new File(tmpDir, "987");
+        File resourceFolder = new File(tmpDir, "5859");
         Assert.assertEquals(true, resourceFolder.isDirectory());
 
         File contentFolder = new File(resourceFolder, "content");
 
-        File contentFile = new File(contentFolder, "987-tak-tak.epub");
+        File contentFile = new File(contentFolder, "5859-come-home-papa.epub");
         Assert.assertEquals(true, ContentScraperUtil.fileHasContent(contentFile));
 
     }

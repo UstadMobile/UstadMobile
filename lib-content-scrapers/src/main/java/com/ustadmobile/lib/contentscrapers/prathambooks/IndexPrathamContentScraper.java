@@ -61,7 +61,7 @@ import java.util.UUID;
  */
 public class IndexPrathamContentScraper {
 
-    String prefixUrl = "https://storyweaver.org.in/api/v1/books-search?page=1&per_page=";
+    String prefixUrl = "https://storyweaver.org.in/api/v1/books-search?page=";
 
     String prefixEPub = "https://storyweaver.org.in/v0/stories/download-story/";
     String ePubExt = ".epub";
@@ -74,6 +74,7 @@ public class IndexPrathamContentScraper {
     private ContentEntryFileDao contentEntryFileDao;
     private ContentEntryContentEntryFileJoinDao contentEntryFileJoinDao;
     private ContentEntryFileStatusDao contentFileStatusDao;
+    private ContentEntry prathamParentEntry;
 
     public static void main(String[] args) {
         if (args.length != 1) {
@@ -91,8 +92,6 @@ public class IndexPrathamContentScraper {
     }
 
     public void findContent(File destinationDir) throws IOException, URISyntaxException {
-
-        URL firstUrl = generatePrathamUrl("1");
 
         destinationDir.mkdirs();
 
@@ -118,7 +117,7 @@ public class IndexPrathamContentScraper {
         }
 
 
-        ContentEntry prathamParentEntry = contentEntryDao.findBySourceUrl("https://storyweaver.org.in/");
+        prathamParentEntry = contentEntryDao.findBySourceUrl("https://storyweaver.org.in/");
         if (prathamParentEntry == null) {
             prathamParentEntry = new ContentEntry();
             prathamParentEntry = setContentEntryData(prathamParentEntry, "https://storyweaver.org.in/",
@@ -136,11 +135,18 @@ public class IndexPrathamContentScraper {
 
         gson = new GsonBuilder().disableHtmlEscaping().create();
 
-        BooksResponse books = gson.fromJson(IOUtils.toString(firstUrl.toURI(), ScraperConstants.UTF_ENCODING), BooksResponse.class);
+        downloadPrathamContentList(generatePrathamUrl(String.valueOf(1)), cookie, destinationDir);
 
-        URL contentUrl = generatePrathamUrl(String.valueOf(books.metadata.hits));
+    }
+
+
+    private void downloadPrathamContentList(URL contentUrl, String cookie, File destinationDir) throws URISyntaxException, IOException {
 
         BooksResponse contentBooksList = gson.fromJson(IOUtils.toString(contentUrl.toURI(), ScraperConstants.UTF_ENCODING), BooksResponse.class);
+
+        if(contentBooksList.data.size() == 0){
+            return;
+        }
 
         int retry = 0;
         for (int contentCount = 0; contentCount < contentBooksList.data.size(); contentCount++) {
@@ -223,6 +229,8 @@ public class IndexPrathamContentScraper {
             }
 
         }
+
+        downloadPrathamContentList(generatePrathamUrl(String.valueOf(++contentBooksList.metadata.page)), cookie, destinationDir);
 
     }
 
