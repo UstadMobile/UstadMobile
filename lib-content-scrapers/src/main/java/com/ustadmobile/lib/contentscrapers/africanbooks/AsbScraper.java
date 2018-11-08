@@ -107,7 +107,7 @@ public class AsbScraper {
         ContentEntry masterRootParent = contentEntryDao.findBySourceUrl("root");
         if (masterRootParent == null) {
             masterRootParent = new ContentEntry();
-            masterRootParent= setContentEntryData(masterRootParent, "root",
+            masterRootParent = setContentEntryData(masterRootParent, "root",
                     "Ustad Mobile", "root", ScraperConstants.ENGLISH_LANG_CODE);
             masterRootParent.setContentEntryUid(contentEntryDao.insert(masterRootParent));
         } else {
@@ -133,13 +133,12 @@ public class AsbScraper {
 
         ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, masterRootParent, asbParentEntry, 4);
 
-        driver = ContentScraperUtil.setupChrome(true);
 
         InputStream inputStreamOfBooks = africanBooksUrl.openStream();
         List<AfricanBooksResponse> africanBooksList = parseBooklist(inputStreamOfBooks);
 
         AfricanBooksResponse bookObj;
-        WebDriverWait waitDriver = new WebDriverWait(driver, 10000);
+
         for (int i = 0; i < africanBooksList.size(); i++) {
             //Download the EPUB itself
             bookObj = africanBooksList.get(i);
@@ -155,7 +154,8 @@ public class AsbScraper {
                 try {
 
                     System.out.println("Download ASB: " + bookId + " from " + epubUrl.toString() + " to " + ePubFile.getAbsolutePath());
-
+                    driver = ContentScraperUtil.setupChrome(true);
+                    WebDriverWait waitDriver = new WebDriverWait(driver, 10000);
                     driver.get(publishUrl.toString());
                     ContentScraperUtil.waitForJSandJQueryToLoad(waitDriver);
 
@@ -179,6 +179,7 @@ public class AsbScraper {
                     ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, asbParentEntry, childEntry, i);
 
                     FileUtils.copyURLToFile(epubUrl, ePubFile);
+                    driver.close();
 
                     if (ePubFile.length() == 0) {
                         System.out.println(ePubFile.getName() + " size 0 bytes: failed!");
@@ -216,7 +217,6 @@ public class AsbScraper {
                 }
             }
         }
-        driver.close();
 
     }
 
@@ -237,6 +237,7 @@ public class AsbScraper {
     public URL generatePublishUrl(URL africanBooksUrl, String bookId) throws MalformedURLException {
         return new URL(africanBooksUrl, "/myspace/publish/epub.php?id=" + bookId);
     }
+
     public URL generateMakeUrl(URL africanBooksUrl, String bookId) throws MalformedURLException {
         return new URL(africanBooksUrl, "/make/publish/epub.php?id=" + bookId);
     }
