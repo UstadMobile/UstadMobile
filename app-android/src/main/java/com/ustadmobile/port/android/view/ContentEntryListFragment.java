@@ -72,7 +72,7 @@ public class ContentEntryListFragment extends UstadBaseFragment implements Conte
                 LinearLayoutManager.VERTICAL);
         recyclerView.addItemDecoration(dividerItemDecoration);
 
-        entryListPresenter = new EntryListPresenter(this,
+        entryListPresenter = new EntryListPresenter(getContext(),
                 UMAndroidUtil.bundleToHashtable(getArguments()), this);
         entryListPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
 

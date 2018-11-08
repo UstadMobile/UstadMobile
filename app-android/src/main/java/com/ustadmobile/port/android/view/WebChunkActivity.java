@@ -28,7 +28,7 @@ public class WebChunkActivity extends UstadBaseActivity implements WebChunkView{
         mWebView.getSettings().setAllowUniversalAccessFromFileURLs(true);
         mWebView.getSettings().setAllowFileAccessFromFileURLs(true);
 
-        mPresenter = new WebChunkPresenter(this,
+        mPresenter = new WebChunkPresenter(getContext(),
                 UMAndroidUtil.bundleToHashtable(getIntent().getExtras()), this);
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
 

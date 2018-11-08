@@ -7,7 +7,6 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.ContentEntryDetailView;
 import com.ustadmobile.core.view.ContentEntryView;
 import com.ustadmobile.lib.db.entities.ContentEntry;
-
 import java.util.Hashtable;
 
 public class EntryListPresenter extends UstadBaseController<ContentEntryView> {
@@ -24,7 +23,7 @@ public class EntryListPresenter extends UstadBaseController<ContentEntryView> {
 
 
     public void onCreate(Hashtable hashtable) {
-        UmAppDatabase appDatabase = UmAppDatabase.getInstance(context);
+        UmAppDatabase appDatabase = UmAppDatabase.getInstance(getContext());
         contentEntryDao = appDatabase.getContentEntryDao();
         Long parentUid = (Long) getArguments().get(ARG_CONTENT_ENTRY_UID);
         viewContract.setContentEntryProvider(contentEntryDao.getChildrenByParentUid(parentUid));

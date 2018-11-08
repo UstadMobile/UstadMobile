@@ -35,7 +35,7 @@ public class EntryDetailActivity extends UstadBaseActivity implements ContentEnt
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        entryDetailPresenter = new EntryDetailPresenter(this,
+        entryDetailPresenter = new EntryDetailPresenter(getContext(),
                 UMAndroidUtil.bundleToHashtable(getIntent().getExtras()), this);
         entryDetailPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
     }
