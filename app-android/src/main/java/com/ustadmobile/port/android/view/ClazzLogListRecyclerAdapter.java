@@ -89,7 +89,7 @@ public class ClazzLogListRecyclerAdapter extends
         if(partialCount > 0){
             clazzLogAttendanceStatus = presentCount + " " +
                     theFragment.getText(R.string.present) + ", " + absentCount + " " +
-                    theFragment.getText(R.string.absent)  + ", " + partialCount + " " + 
+                    theFragment.getText(R.string.absent)  + ", " + partialCount + " " +
                     theFragment.getText(R.string.partial);
         }else{
             clazzLogAttendanceStatus = presentCount + " " +

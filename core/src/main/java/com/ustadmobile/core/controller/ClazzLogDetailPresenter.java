@@ -9,14 +9,19 @@ import com.ustadmobile.core.db.dao.ClazzMemberDao;
 import com.ustadmobile.core.db.dao.FeedEntryDao;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UmCallback;
+import com.ustadmobile.core.impl.UmCallbackUtil;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.core.view.ClassLogDetailView;
 import com.ustadmobile.core.view.ClazzListView;
 import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.ClazzLog;
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecordWithPerson;
 import com.ustadmobile.lib.db.entities.FeedEntry;
+import com.ustadmobile.lib.db.entities.UMCalendar;
 
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Hashtable;
 
 import static com.ustadmobile.core.view.ClazzListView.ARG_CLAZZ_UID;
@@ -85,7 +90,13 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
     @Override
     public void onCreate(Hashtable savedState){
         super.onCreate(savedState);
+        setUpLogDetail();
+    }
 
+    /**
+     * Sets up Log Detail Attendance View.
+     */
+    private void setUpLogDetail(){
         //Check for ClassLog
         ClazzLogDao clazzLogDao = UmAppDatabase.getInstance(getContext()).getClazzLogDao();
         ClazzDao clazzDao = UmAppDatabase.getInstance(getContext()).getClazzDao();
@@ -93,42 +104,53 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
 
         clazzLogDao.findByClazzIdAndDateAsync(currentClazzUid, currentLogDate,
                 new UmCallback<ClazzLog>() {
-            @Override
-            public void onSuccess(ClazzLog result) {
+                    @Override
+                    public void onSuccess(ClazzLog result) {
 
-                currentClazz = clazzDao.findByUid(currentClazzUid);
+                        currentClazz = clazzDao.findByUid(currentClazzUid);
 
-                view.updateToolbarTitle(currentClazz.getClazzName() + " "
-                        + impl.getString(MessageID.attendance, context));
+                        view.updateToolbarTitle(currentClazz.getClazzName() + " "
+                                + impl.getString(MessageID.attendance, context));
 
-                if(result == null){
-                    //Create one anyway if not set
-                    clazzLogDao.createClazzLogForDate(currentClazzUid, currentLogDate,
-                            new UmCallback<Long>() {
-                        @Override
-                        public void onSuccess(Long result) {
+                        updateViewDateHeading();
 
-                            currentClazzLog = clazzLogDao.findByUid(result);
+                        if(result == null){
+                            //Create one anyway if not set
+                            clazzLogDao.createClazzLogForDate(currentClazzUid, currentLogDate,
+                                    new UmCallback<Long>() {
+                                        @Override
+                                        public void onSuccess(Long result) {
+
+                                            currentClazzLog = clazzLogDao.findByUid(result);
+                                            insertAllAndSetProvider(currentClazzLog);
+                                        }
+                                        @Override
+                                        public void onFailure(Throwable exception) {
+                                            exception.printStackTrace();
+                                        }
+                                    });
+                        }else{
+                            currentClazzLog = result;
                             insertAllAndSetProvider(currentClazzLog);
                         }
-                        @Override
-                        public void onFailure(Throwable exception) {
-                            exception.printStackTrace();
-                        }
-                    });
-                }else{
-                    currentClazzLog = result;
-                    insertAllAndSetProvider(currentClazzLog);
-                }
-            }
+                    }
 
-            @Override
-            public void onFailure(Throwable exception) {
-                exception.printStackTrace();
-            }
-        });
+                    @Override
+                    public void onFailure(Throwable exception) {
+                        exception.printStackTrace();
+                    }
+                });
+    }
 
+    public void updateViewDateHeading(){
+        Date currentLogDateDate = new Date(currentLogDate);
+        String prettyDate="";
+        if(UMCalendarUtil.isToday(currentLogDateDate)){
+            prettyDate = "Today";
+        }
+        prettyDate += "(" + UMCalendarUtil.getPrettyDateFromLong(currentLogDate) + ")";
 
+        view.updateDateHeading(prettyDate);
     }
 
     /**
@@ -161,6 +183,49 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
                         exception.printStackTrace();
                     }
                 });
+    }
+
+    /**
+     * Re loads the attendance log detail view
+     *
+     * @param newDate The new date set
+     */
+    public void reloadLogDetailForDate(long newDate){
+        System.out.println("Reload for date: " + newDate);
+
+        //1. Set currentLogDate to newDate
+        currentLogDate = newDate;
+
+        //2. Re load view and recycler
+        setUpLogDetail();
+
+        //3. Update date heading
+        updateViewDateHeading();
+
+
+    }
+
+    public void handleClickGoBackDate(){
+        long newDate = UMCalendarUtil.getDateInMilliPlusDaysRelativeTo(currentLogDate, -1);
+        System.out.println("Go back: " + newDate);
+
+        reloadLogDetailForDate(newDate);
+
+    }
+
+    public void handleClickGoForwardDate(){
+        Date currentLogDateDate = new Date(currentLogDate);
+
+        if(!UMCalendarUtil.isToday(currentLogDateDate)){
+            if(currentLogDate < System.currentTimeMillis()){
+                //Go to next day's
+                long newDate = UMCalendarUtil.getDateInMilliPlusDaysRelativeTo(currentLogDate, 1);
+                System.out.println("go forawrd: " + newDate);
+                reloadLogDetailForDate(newDate);
+
+            }
+        }
+
     }
 
     /**

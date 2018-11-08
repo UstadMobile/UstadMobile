@@ -192,6 +192,19 @@ public class UMCalendarUtil {
 
     }
 
+    public static long getDateInMilliPlusDaysRelativeTo(long dateLong, int days){
+        // get a calendar instance, which defaults to "now"
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(dateLong);
+        calendar.add(Calendar.DAY_OF_YEAR, days);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        return calendar.getTimeInMillis();
+
+    }
+
     public static String getPrettyDateFromLong(long thisDate){
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(thisDate);
@@ -208,6 +221,16 @@ public class UMCalendarUtil {
         SimpleDateFormat formatShortDay = new SimpleDateFormat("EEE");
         String prettyShortDay = formatShortDay.format(calendar.getTime());
         return prettyShortDay;
+    }
+
+    public static boolean isToday(Date date){
+        Calendar today = Calendar.getInstance();
+        Calendar specifiedDate  = Calendar.getInstance();
+        specifiedDate.setTime(date);
+
+        return today.get(Calendar.DAY_OF_MONTH) == specifiedDate.get(Calendar.DAY_OF_MONTH)
+                &&  today.get(Calendar.MONTH) == specifiedDate.get(Calendar.MONTH)
+                &&  today.get(Calendar.YEAR) == specifiedDate.get(Calendar.YEAR);
     }
 
 }

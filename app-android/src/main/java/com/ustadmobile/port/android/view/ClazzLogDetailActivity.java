@@ -10,6 +10,10 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.ClazzLogDetailPresenter;
@@ -45,6 +49,9 @@ public class ClazzLogDetailActivity extends UstadBaseActivity
     public long clazzLogUid;
     public long clazzUid;
     public long logDate;
+    private TextView dateHeading;
+    private ImageButton goOneDayBackImageView;
+    private ImageButton goOneDayForwardImageView;
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -120,7 +127,19 @@ public class ClazzLogDetailActivity extends UstadBaseActivity
         findViewById(R.id.activity_class_log_detail_mark_all_absent_text)
             .setOnClickListener((view) ->
                     mPresenter.handleMarkAll(ClazzLogAttendanceRecord.STATUS_ABSENT));
+
+        //Date heading
+        dateHeading = findViewById(R.id.activity_class_log_detail_date_heading);
+
+        goOneDayBackImageView = findViewById(R.id.activity_class_log_detail_date_go_back);
+        goOneDayBackImageView.setOnClickListener(v -> mPresenter.handleClickGoBackDate());
+
+        goOneDayForwardImageView = findViewById(R.id.activity_class_log_detail_date_go_forward);
+        goOneDayForwardImageView.setOnClickListener(v -> mPresenter.handleClickGoForwardDate());
+
     }
+
+
 
     // Diff callback.
     public static final DiffUtil.ItemCallback<ClazzLogAttendanceRecordWithPerson> DIFF_CALLBACK =
@@ -164,6 +183,18 @@ public class ClazzLogDetailActivity extends UstadBaseActivity
             Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
         });
 
+    }
+
+    /**
+     * Sets the dateString to the View
+     *
+     * @param dateString    The date in readable format that will be set to the ClazzLogDetail view
+     */
+    @Override
+    public void updateDateHeading(String dateString) {
+        //Since its called from the presenter, need to run on ui thread.
+
+        runOnUiThread(() -> dateHeading.setText(dateString));
     }
 
 

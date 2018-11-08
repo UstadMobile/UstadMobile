@@ -66,7 +66,7 @@ public abstract class ClazzLogAttendanceRecordDao implements BaseDao<ClazzLogAtt
             " AND ClazzLog.logDate > :fromDate " +
             " AND ClazzLog.logDate < :toDate " +
             " AND ClazzLog.clazzClazzUid = :clazzUid " +
-            "group by date(ClazzLog.logDate)")
+            "group by (ClazzLog.logDate)")
     public abstract void findDailyAttendanceByClazzUidAndDateAsync(
             long clazzUid, long fromDate, long toDate, UmCallback<List<DailyAttendanceNumbers>> result);
 
