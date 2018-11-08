@@ -133,7 +133,7 @@ public class AsbScraper {
 
         ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, masterRootParent, asbParentEntry, 4);
 
-        driver = ContentScraperUtil.setupChrome(true);
+        driver = ContentScraperUtil.setupChrome(false);
 
         InputStream inputStreamOfBooks = africanBooksUrl.openStream();
         List<AfricanBooksResponse> africanBooksList = parseBooklist(inputStreamOfBooks);
@@ -147,15 +147,19 @@ public class AsbScraper {
             File ePubFile = new File(destinationDir, "asb" + bookId + ".epub");
             URL epubUrl = generateEPubUrl(africanBooksUrl, bookId);
             URL publishUrl = generatePublishUrl(africanBooksUrl, bookId);
+            URL makeUrl = generatePublishUrl(africanBooksUrl, bookId);
 
             if (ContentScraperUtil.fileHasContent(ePubFile) && ePubFile.lastModified() > Integer.parseInt(bookObj.date)) {
-                System.out.println("ASB " + bookId + " is up to date");
+
             } else {
                 try {
 
                     System.out.println("Download ASB: " + bookId + " from " + epubUrl.toString() + " to " + ePubFile.getAbsolutePath());
 
                     driver.get(publishUrl.toString());
+                    ContentScraperUtil.waitForJSandJQueryToLoad(waitDriver);
+
+                    driver.get(makeUrl.toString());
                     ContentScraperUtil.waitForJSandJQueryToLoad(waitDriver);
 
                     ContentEntry childEntry = contentEntryDao.findBySourceUrl(epubUrl.getPath());
@@ -231,6 +235,9 @@ public class AsbScraper {
     }
 
     public URL generatePublishUrl(URL africanBooksUrl, String bookId) throws MalformedURLException {
+        return new URL(africanBooksUrl, "/myspace/publish/epub.php?id=" + bookId);
+    }
+    public URL generateMakeUrl(URL africanBooksUrl, String bookId) throws MalformedURLException {
         return new URL(africanBooksUrl, "/make/publish/epub.php?id=" + bookId);
     }
 
@@ -303,7 +310,6 @@ public class AsbScraper {
         try {
 
             zipFs = FileSystems.newFileSystem(path.toPath(), ClassLoader.getSystemClassLoader());
-            System.out.println("Opened filesystem for " + path);
             opfReader = new BufferedReader(
                     new InputStreamReader(Files.newInputStream(zipFs.getPath("content.opf")), "UTF-8"));
             StringBuffer opfModBuffer = new StringBuffer();
