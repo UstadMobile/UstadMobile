@@ -14,15 +14,9 @@ import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.ContentEntryContentEntryFileJoin;
 import com.ustadmobile.lib.db.entities.ContentEntryFile;
 import com.ustadmobile.lib.db.entities.ContentEntryFileStatus;
-import com.ustadmobile.lib.db.entities.OpdsEntry;
-import com.ustadmobile.lib.db.entities.OpdsEntryParentToChildJoin;
-import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
-import com.ustadmobile.lib.db.entities.OpdsLink;
-import com.ustadmobile.lib.util.UmUuidUtil;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -43,10 +37,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.UUID;
-import java.util.zip.ZipFile;
 
 
 /**
@@ -131,7 +122,6 @@ public class AsbScraper {
         }
 
         ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, masterRootParent, asbParentEntry, 4);
-
 
         InputStream inputStreamOfBooks = africanBooksUrl.openStream();
         List<AfricanBooksResponse> africanBooksList = parseBooklist(inputStreamOfBooks);
@@ -291,6 +281,9 @@ public class AsbScraper {
         }
 
         System.out.println("Parsed " + parsedCounter + " / failed " + failCounter + " items from booklist.php");
+
+        reader.close();
+        booklistIn.close();
 
         return retVal;
     }
