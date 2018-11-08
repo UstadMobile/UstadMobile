@@ -133,7 +133,7 @@ public class AsbScraper {
 
         ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, masterRootParent, asbParentEntry, 4);
 
-        driver = ContentScraperUtil.setupChrome(true);
+        driver = ContentScraperUtil.setupChrome(false);
 
         InputStream inputStreamOfBooks = africanBooksUrl.openStream();
         List<AfricanBooksResponse> africanBooksList = parseBooklist(inputStreamOfBooks);
@@ -175,6 +175,7 @@ public class AsbScraper {
                     ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, asbParentEntry, childEntry, i);
 
                     FileUtils.copyURLToFile(epubUrl, ePubFile);
+                    driver.close();
 
                     if (ePubFile.length() == 0) {
                         System.out.println(ePubFile.getName() + " size 0 bytes: failed!");
