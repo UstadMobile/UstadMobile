@@ -546,6 +546,8 @@ dependencies {
 
 
     testImplementation "junit:junit:$version_junit"
+
+    implementation "id.zelory:compressor:${version_compressor}"
 }
 
 task sourceJar(type: Jar) {

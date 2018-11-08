@@ -268,7 +268,7 @@
     <string name="wamda_following_title">Following</string>
     <string name="wamda_likes">Likes</string>
     <string name="wamda_shares">Shares</string>
-    <string name="wamda_students">Students</string>
+    <string name="wamda_students">Learners</string>
     <string name="wamda_post_empty_message">Comment is empty, write something first</string>
     <string name="wamda_course_overview">Course Overview</string>
 </resources>

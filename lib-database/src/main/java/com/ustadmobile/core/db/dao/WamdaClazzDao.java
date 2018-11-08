@@ -18,7 +18,7 @@ public abstract class WamdaClazzDao {
             "(SELECT COUNT(*) FROM WamdaLike WHERE WamdaLike.wamdaLikeClazzUid = Clazz.clazzUid AND WamdaLike.wamdaLikePersonUid = :personUid) AS liked, \n" +
             "(SELECT  COUNT(*) FROM WamdaShare WHERE WamdaShare.wamdaShareClazzUid = Clazz.clazzUid) AS numShares \n" +
             "FROM Clazz \n" +
-            "LEFT JOIN WamdaClazz ON WamdaClazz.wamdaClazzUid = Clazz.clazzUid ORDER BY Clazz.clazzUid DESC")
+            "LEFT JOIN WamdaClazz ON WamdaClazz.wamdaClazzUid = Clazz.clazzUid ORDER BY Clazz.clazzUid")
     public abstract UmProvider<WamdaClazzWithSocialInfo> findAll(long personUid);
 
     @UmQuery("SELECT Clazz.* , WamdaClazz.*, Person.*, \n" +
@@ -28,7 +28,7 @@ public abstract class WamdaClazzDao {
             "FROM Clazz \n" +
             "LEFT JOIN WamdaClazz ON Clazz.clazzUid = WamdaClazz.wamdaClazzClazzUid \n" +
             "LEFT JOIN Person ON Person.personUid = WamdaClazz.wamdaClazzPersonUid\n" +
-            "WHERE Clazz.clazzUid = :wamdaClazzUid")
+            "WHERE Clazz.clazzUid = :wamdaClazzUid ORDER BY Clazz.clazzUid")
     public abstract UmLiveData<WamdaClazzWithSocialInfoClazzMember> findByClazzUid(long wamdaClazzUid);
 
     @UmInsert

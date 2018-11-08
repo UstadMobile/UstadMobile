@@ -15,6 +15,8 @@ public class WamdaPerson {
 
     private String profileStatus;
 
+    private String profileImage;
+
     public long getWamdaPersonUid() {
         return wamdaPersonUid;
     }
@@ -45,5 +47,13 @@ public class WamdaPerson {
 
     public void setProfileStatus(String profileStatus) {
         this.profileStatus = profileStatus;
+    }
+
+    public String getProfileImage() {
+        return profileImage;
+    }
+
+    public void setProfileImage(String profileImage) {
+        this.profileImage = profileImage;
     }
 }

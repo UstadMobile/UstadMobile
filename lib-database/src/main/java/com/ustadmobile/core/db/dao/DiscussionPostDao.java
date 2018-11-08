@@ -7,6 +7,7 @@ import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.db.entities.DiscussionPost;
 import com.ustadmobile.lib.db.entities.DiscussionPostWithPoster;
+import com.ustadmobile.lib.util.UMUtil;
 
 import java.util.List;
 
@@ -21,17 +22,21 @@ public abstract class DiscussionPostDao implements BaseDao<DiscussionPost> {
     @UmInsert
     public abstract void insertAsync(DiscussionPost entity, UmCallback<Long> result);
 
+    @UmQuery("UPDATE DiscussionPost SET hasAttachments = :hasAttachment WHERE discussionPostUid = :postUid")
+    public abstract void updatePost(long postUid,boolean hasAttachment, UmCallback<Integer> callback);
+
     @Override
     @UmQuery("SELECT * From DiscussionPost WHERE discussionPostUid = :uid")
     public abstract DiscussionPost findByUid(long uid);
 
-    @UmQuery("SELECT DiscussionPost.*,Person.* ,\n" +
+    @UmQuery("SELECT DiscussionPost.*,Person.*,WamdaPerson.* ,\n" +
             "(SELECT COUNT(*) FROM WamdaLike WHERE WamdaLike.wamdaLikeDiscussionUid = DiscussionPost.discussionPostUid" +
             " AND WamdaLike.wamdaLikePersonUid = :personUid) AS liked,\n" +
             "(SELECT COUNT(*) FROM WamdaFollower WHERE WamdaFollower.wamdaFollowerPersonUid = :personUid " +
             "AND WamdaFollower.wamdaFollowingPersonUid = DiscussionPost.posterPersonUid ) AS following\n" +
-            "FROM DiscussionPost ,Person \n" +
+            "FROM DiscussionPost ,Person, WamdaPerson \n" +
             "WHERE Person.personUid = DiscussionPost.posterPersonUid \n" +
+            "AND WamdaPerson.wamdaPersonPersonUid = Person.personUid \n" +
             "AND DiscussionPost.clazzClazzUid = :clazzUid ORDER BY DiscussionPost.timePosted DESC")
     public abstract UmProvider<DiscussionPostWithPoster> findByClazzUidAsProvider(long clazzUid, long personUid);
 
@@ -41,13 +46,14 @@ public abstract class DiscussionPostDao implements BaseDao<DiscussionPost> {
             " ORDER BY timePosted DESC")
     public abstract List<DiscussionPost> findByClazzUidAsList(long clazzUid);
 
-    @UmQuery("SELECT DiscussionPost.*,Person.*,\n" +
+    @UmQuery("SELECT DiscussionPost.*,Person.*,WamdaPerson.*,\n" +
             "(SELECT COUNT(*) FROM WamdaLike " +
             "WHERE WamdaLike.wamdaLikeDiscussionUid = DiscussionPost.discussionPostUid " +
             "AND WamdaLike.wamdaLikePersonUid = :personUid) AS liked,\n" +
             "0 AS following\n" +
-            "FROM DiscussionPost  ,Person\n" +
+            "FROM DiscussionPost  ,Person, WamdaPerson\n" +
             "WHERE Person.personUid = DiscussionPost.posterPersonUid\n" +
+            "AND WamdaPerson.wamdaPersonPersonUid = Person.personUid \n" +
             "AND Person.personUid= :personUid\n" +
             "ORDER BY DiscussionPost.timePosted DESC")
     public abstract UmProvider<DiscussionPostWithPoster> findByPersonUid(long personUid);
