@@ -7,6 +7,9 @@ public class DiscussionPostWithPoster extends DiscussionPost {
     @UmEmbedded
     private Person person;
 
+    @UmEmbedded
+    private WamdaPerson wamdaPerson;
+
     private boolean liked;
 
     private boolean following;
@@ -33,5 +36,13 @@ public class DiscussionPostWithPoster extends DiscussionPost {
 
     public void setLiked(boolean liked) {
         this.liked = liked;
+    }
+
+    public WamdaPerson getWamdaPerson() {
+        return wamdaPerson;
+    }
+
+    public void setWamdaPerson(WamdaPerson wamdaPerson) {
+        this.wamdaPerson = wamdaPerson;
     }
 }

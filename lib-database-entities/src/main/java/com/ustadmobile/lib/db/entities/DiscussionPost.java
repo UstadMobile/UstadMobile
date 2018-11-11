@@ -19,6 +19,8 @@ public class DiscussionPost {
 
     private long clazzClazzUid;
 
+    private long hasAttachments;
+
     public long getDiscussionPostUid() {
         return discussionPostUid;
     }
@@ -65,5 +67,13 @@ public class DiscussionPost {
 
     public void setQuotedContent(String quotedContent) {
         this.quotedContent = quotedContent;
+    }
+
+    public long getHasAttachments() {
+        return hasAttachments;
+    }
+
+    public void setHasAttachments(long hasAttachments) {
+        this.hasAttachments = hasAttachments;
     }
 }
