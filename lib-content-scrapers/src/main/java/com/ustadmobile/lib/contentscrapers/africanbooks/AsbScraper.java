@@ -18,6 +18,7 @@ import com.ustadmobile.lib.db.entities.ContentEntryFileStatus;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
@@ -38,6 +39,10 @@ import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
+
+import io.github.bonigarcia.wdm.WebDriverManager;
+
+import static io.github.bonigarcia.wdm.DriverManagerType.CHROME;
 
 
 /**
@@ -127,6 +132,7 @@ public class AsbScraper {
         List<AfricanBooksResponse> africanBooksList = parseBooklist(inputStreamOfBooks);
 
         AfricanBooksResponse bookObj;
+        WebDriverManager.getInstance(CHROME).setup();
 
         for (int i = 0; i < africanBooksList.size(); i++) {
             //Download the EPUB itself
