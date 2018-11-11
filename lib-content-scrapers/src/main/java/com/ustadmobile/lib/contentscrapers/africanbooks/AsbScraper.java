@@ -133,6 +133,8 @@ public class AsbScraper {
 
         AfricanBooksResponse bookObj;
         ContentScraperUtil.setChromeDriverLocation();
+        ChromeDriver driver = ContentScraperUtil.setupChrome(true);
+        WebDriverWait waitDriver = new WebDriverWait(driver, 10000);
 
         for (int i = 0; i < africanBooksList.size(); i++) {
             //Download the EPUB itself
@@ -148,9 +150,6 @@ public class AsbScraper {
             } else {
                 try {
 
-                    System.out.println("Download ASB: " + bookId + " from " + epubUrl.toString() + " to " + ePubFile.getAbsolutePath());
-                    ChromeDriver driver = ContentScraperUtil.setupChrome(true);
-                    WebDriverWait waitDriver = new WebDriverWait(driver, 10000);
                     driver.get(publishUrl.toString());
                     ContentScraperUtil.waitForJSandJQueryToLoad(waitDriver);
 
@@ -174,10 +173,9 @@ public class AsbScraper {
                     ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, asbParentEntry, childEntry, i);
 
                     FileUtils.copyURLToFile(epubUrl, ePubFile);
-                    driver.quit();
 
                     if (ePubFile.length() == 0) {
-                        System.out.println(ePubFile.getName() + " size 0 bytes: failed!");
+                        System.out.println(ePubFile.getName() + " size 0 bytes: failed! for title " + bookObj.title);
                         continue;
                     }
 
@@ -208,11 +206,13 @@ public class AsbScraper {
 
 
                 } catch (IOException e) {
-                    System.err.println("IO Exception downloading/checking : " + ePubFile.getName());
+                    System.err.println("IO Exception downloading/checking : " + ePubFile.getName() + " with title " + bookObj.title);
+                    e.printStackTrace();
+                    driver.quit();
                 }
             }
         }
-
+        driver.quit();
     }
 
     private String getCoverUrl(String bookId) {
