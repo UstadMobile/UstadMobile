@@ -284,28 +284,38 @@ public abstract class AbstractDbProcessor {
      *
      * @return A list of methods that need to be implemented for any non-abstract child class.
      */
-    protected List<ExecutableElement> findDaoMethodsToImplement(TypeElement clazz) {
-        return findDaoMethodsToImplement(clazz, clazz, new ArrayList<>());
+    protected List<ExecutableElement> findMethodsToImplement(TypeElement clazz) {
+        return findMethodsToImplement(clazz, clazz, new ArrayList<>());
     }
 
 
-    protected List<ExecutableElement> findDaoMethodsToImplement(TypeElement clazz,
-                                                                TypeElement daoClass,
-                                                                List<ExecutableElement> methodsToImplement) {
+    /**
+     * Method used to implement findMethodToImplement(TypeElement). This is called recursively to
+     * traverse all parent classes and interfaces.
+     *
+     * @param clazz The class or interface to examine
+     * @param implementerParentClazz the parent of the class that is going to implement the method.
+     *                               This is used to resolve type variables.
+     * @param methodsToImplement Methods that have already been found and identified as requiring
+     *                           implementation
+     * @return List of methods that require an implementation in order for the child class to be non-abstract
+     */
+    protected List<ExecutableElement> findMethodsToImplement(TypeElement clazz,
+                                                             TypeElement implementerParentClazz,
+                                                             List<ExecutableElement> methodsToImplement) {
         TypeElement searchClass = clazz;
 
         List<TypeMirror> interfaces = new ArrayList<>();
         while(searchClass != null) {
             for(Element subElement : searchClass.getEnclosedElements()) {
-                if (!subElement.getKind().equals(ElementKind.METHOD))
-                    continue;
-
-                if (!subElement.getModifiers().contains(Modifier.ABSTRACT))
+                if (!subElement.getKind().equals(ElementKind.METHOD)
+                    || !subElement.getModifiers().contains(Modifier.ABSTRACT)
+                    || subElement.getModifiers().contains(Modifier.STATIC))
                     continue;
 
                 ExecutableElement method = (ExecutableElement) subElement;
-                if(!isMethodImplemented(method, daoClass)
-                        && !listContainsMethod(method, methodsToImplement, daoClass)) {
+                if(!isMethodImplemented(method, implementerParentClazz)
+                        && !listContainsMethod(method, methodsToImplement, implementerParentClazz)) {
                     methodsToImplement.add(method);
                 }
             }
@@ -317,9 +327,9 @@ public abstract class AbstractDbProcessor {
         }
 
         for(TypeMirror interfaceMirror : interfaces) {
-            findDaoMethodsToImplement(
+            findMethodsToImplement(
                     (TypeElement)processingEnv.getTypeUtils().asElement(interfaceMirror),
-                    daoClass, methodsToImplement);
+                    implementerParentClazz, methodsToImplement);
         }
 
         return methodsToImplement;
@@ -649,7 +659,7 @@ public abstract class AbstractDbProcessor {
 
         CodeBlock.Builder codeBlock = CodeBlock.builder()
                 .add("$1T _syncableDb = ($1T)$2L;\n", UmSyncableDatabase.class, dbName)
-                .add("$T _syncStatus = _syncableDb.getSyncStatusDao().findByUid($L);\n",
+                .add("$T _syncStatus = _syncableDb.getSyncStatusDao().getByUid($L);\n",
                         SyncStatus.class, umEntityAnnotation.tableId())
                 .add("$T<$T> _locallyChangedEntities = $L(_syncStatus.getSyncedToLocalChangeSeqNum(), $L);\n",
                         List.class, entityType, findLocalChangesMethod.getSimpleName(),

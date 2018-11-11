@@ -23,6 +23,7 @@ import com.ustadmobile.lib.database.annotation.UmOnConflictStrategy;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.database.annotation.UmQueryFindByPrimaryKey;
+import com.ustadmobile.lib.database.annotation.UmRepository;
 import com.ustadmobile.lib.database.annotation.UmSyncIncoming;
 import com.ustadmobile.lib.database.annotation.UmSyncOutgoing;
 import com.ustadmobile.lib.database.annotation.UmUpdate;
@@ -31,6 +32,8 @@ import com.ustadmobile.lib.database.jdbc.JdbcDatabaseUtils;
 import com.ustadmobile.lib.database.jdbc.PreparedStatementArrayProxy;
 import com.ustadmobile.lib.database.jdbc.UmJdbcDatabase;
 import com.ustadmobile.lib.database.jdbc.UmLiveDataJdbc;
+import com.ustadmobile.lib.db.sync.UmRepositoryDb;
+import com.ustadmobile.lib.db.sync.UmRepositoryUtils;
 
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
@@ -44,7 +47,6 @@ import org.sqlite.SQLiteDataSource;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Parameter;
 import java.sql.Array;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -68,7 +70,6 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
@@ -76,7 +77,6 @@ import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVariable;
-import javax.lang.model.util.SimpleTypeVisitor8;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
@@ -122,12 +122,15 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                 .addField(ClassName.get(ExecutorService.class), "_executor", Modifier.PRIVATE)
                 .addField(dbChangeListenersMapType, "_dbChangeListeners", Modifier.PRIVATE)
                 .addField(TypeName.BOOLEAN, "_arraySupported", Modifier.PRIVATE)
+                .addField(ParameterizedTypeName.get(List.class, UmRepositoryDb.class), "_repositories",
+                        Modifier.PRIVATE)
                 .addMethod(MethodSpec.constructorBuilder()
                     .addModifiers(Modifier.PUBLIC)
                     .addParameter(TypeName.get(Object.class), "context")
                     .addParameter(TypeName.get(String.class), "dbName")
                     .addCode(CodeBlock.builder().add("\tthis._context = context;\n")
                         .add("this._dbChangeListeners = new $T<>();\n", HashMap.class)
+                        .add("this._repositories = new $T<>();\n", ArrayList.class)
                         .beginControlFlow("try ")
                             .add("$T iContext = new $T();\n", initialContextClassName, initialContextClassName)
                             .add("_executor = $T.newCachedThreadPool();\n", Executors.class)
@@ -214,6 +217,8 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                 overrideSpec.addCode("return _context;\n");
             }else if(dbMethod.getAnnotation(UmClearAll.class) != null) {
                 addClearAllTablesCodeToMethod(dbType, overrideSpec, '`');
+            }else if(dbMethod.getAnnotation(UmRepository.class) != null) {
+                addGetRepositoryMethod(dbType, dbMethod, overrideSpec);
             }else {
                 String daoFieldName = "_" + returnTypeElement.getSimpleName();
                 jdbcDbTypeSpec.addField(TypeName.get(dbMethod.getReturnType()), daoFieldName, Modifier.PRIVATE);
@@ -323,6 +328,26 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
 
         builder.addCode(codeBlock.build());
     }
+
+    protected void addGetRepositoryMethod(TypeElement dbType, ExecutableElement method,
+                                          MethodSpec.Builder builder) {
+        String baseUrlParamName = method.getParameters().get(0).getSimpleName().toString();
+        String authUrlParamName = method.getParameters().get(1).getSimpleName().toString();
+        builder.addCode(CodeBlock.builder()
+                .add("$T _repo = $T.findRepository($L, $L, this, _repositories);\n",
+                         UmRepositoryDb.class,
+                         UmRepositoryUtils.class,
+                         baseUrlParamName,
+                         authUrlParamName)
+                .beginControlFlow("if(_repo == null)")
+                    .add("_repo = new $L(this, $L, $L);\n", dbType.getSimpleName() +
+                                    DbProcessorRetrofitRepository.POSTFIX_REPOSITORY_DB,
+                            baseUrlParamName, authUrlParamName)
+                    .add("_repositories.add(_repo);\n")
+                .endControlFlow()
+                .add("return ($T)_repo;\n", dbType).build());
+    }
+
 
     /**
      * Get the TypeElements that correspond to the entities on the @UmDatabase annotation of the given
@@ -510,7 +535,7 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                     .addParameter(ClassName.get(UmJdbcDatabase.class), "_db")
                     .addCode("this._db = _db;\n").build());
 
-        List<ExecutableElement> methodsToImplement = findDaoMethodsToImplement(daoType);
+        List<ExecutableElement> methodsToImplement = findMethodsToImplement(daoType);
         for(ExecutableElement daoMethod : methodsToImplement) {
             if(daoMethod.getAnnotation(UmInsert.class) != null) {
                 addInsertMethod(daoMethod, daoType, jdbcDaoClassSpec, '`');

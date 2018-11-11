@@ -52,9 +52,9 @@ dependencies {
     testImplementation "org.glassfish.jersey.containers:jersey-container-grizzly2-http:$version_jersey"
 
     //retrofit usage
-    testImplementation "com.squareup.retrofit2:converter-jackson:$version_retrofit"
-    testImplementation "com.squareup.retrofit2:converter-gson:$version_retrofit"
-    testImplementation "com.squareup.retrofit2:converter-scalars:$version_retrofit"
+    implementation "com.squareup.retrofit2:converter-jackson:$version_retrofit"
+    implementation "com.squareup.retrofit2:converter-gson:$version_retrofit"
+    implementation "com.squareup.retrofit2:converter-scalars:$version_retrofit"
 
     testImplementation "javax.servlet:servlet-api:2.5"
 

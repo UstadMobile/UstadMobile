@@ -2,13 +2,18 @@ package com.ustadmobile.lib.annotationprocessor.core.db;
 
 import com.ustadmobile.lib.database.annotation.UmClearAll;
 import com.ustadmobile.lib.database.annotation.UmDatabase;
+import com.ustadmobile.lib.database.annotation.UmRepository;
 import com.ustadmobile.lib.db.sync.UmSyncableDatabase;
 import com.ustadmobile.lib.db.sync.dao.SyncStatusDao;
+import com.ustadmobile.lib.db.sync.dao.SyncablePrimaryKeyDao;
+import com.ustadmobile.lib.db.sync.entities.SyncDeviceBits;
 import com.ustadmobile.lib.db.sync.entities.SyncStatus;
+import com.ustadmobile.lib.db.sync.entities.SyncablePrimaryKey;
 
 
 @UmDatabase(version = 1, entities = {ExampleEntity.class, ExampleLocation.class,
-        ExampleSyncableEntity.class, SyncStatus.class})
+        ExampleSyncableEntity.class, SyncStatus.class, SyncablePrimaryKey.class,
+        SyncDeviceBits.class})
 public abstract class ExampleDatabase implements UmSyncableDatabase {
 
     private static volatile ExampleDatabase instance;
@@ -39,6 +44,9 @@ public abstract class ExampleDatabase implements UmSyncableDatabase {
     public abstract SyncStatusDao getSyncStatusDao();
 
     @Override
+    public abstract SyncablePrimaryKeyDao getSyncablePrimaryKeyDao();
+
+    @Override
     public boolean isMaster() {
         return master;
     }
@@ -46,4 +54,8 @@ public abstract class ExampleDatabase implements UmSyncableDatabase {
     public void setMaster(boolean master) {
         this.master = master;
     }
+
+    @UmRepository
+    public abstract ExampleDatabase getRepository(String baseUrl, String auth);
+
 }

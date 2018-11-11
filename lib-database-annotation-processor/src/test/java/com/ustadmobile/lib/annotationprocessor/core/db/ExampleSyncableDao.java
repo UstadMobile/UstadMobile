@@ -11,6 +11,7 @@ import com.ustadmobile.lib.database.annotation.UmSyncFindAllChanges;
 import com.ustadmobile.lib.database.annotation.UmSyncFindLocalChanges;
 import com.ustadmobile.lib.database.annotation.UmSyncFindUpdateable;
 import com.ustadmobile.lib.database.annotation.UmSyncType;
+import com.ustadmobile.lib.database.annotation.UmUpdate;
 import com.ustadmobile.lib.db.sync.UmSyncExistingEntity;
 import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
@@ -58,6 +59,10 @@ public abstract class ExampleSyncableDao implements SyncableDao<ExampleSyncableE
     @UmQuery("UPDATE ExampleSyncableEntity SET title = :title WHERE uid = :uid")
     @UmRestAccessible
     public abstract void updateTitleAsync(long uid, String title, UmCallback<Void> callback);
+
+    @UmRestAccessible
+    @UmUpdate
+    public abstract void updateEntity(ExampleSyncableEntity entity);
 
     @UmQuery("SELECT title FROM ExampleSyncableEntity WHERE exampleSyncableUid = :uid")
     @UmRestAccessible

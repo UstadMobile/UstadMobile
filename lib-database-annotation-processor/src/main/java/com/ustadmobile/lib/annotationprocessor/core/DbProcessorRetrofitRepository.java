@@ -8,11 +8,16 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
-import com.ustadmobile.core.impl.UmCallback;
+import com.ustadmobile.lib.database.annotation.UmClearAll;
+import com.ustadmobile.lib.database.annotation.UmDao;
+import com.ustadmobile.lib.database.annotation.UmDbContext;
 import com.ustadmobile.lib.database.annotation.UmQuery;
+import com.ustadmobile.lib.database.annotation.UmQueryFindByPrimaryKey;
 import com.ustadmobile.lib.database.annotation.UmRepository;
 import com.ustadmobile.lib.database.annotation.UmSyncIncoming;
+import com.ustadmobile.lib.database.annotation.UmSyncOutgoing;
 import com.ustadmobile.lib.db.retrofit.RetrofitUmCallbackAdapter;
+import com.ustadmobile.lib.db.sync.UmRepositoryDb;
 import com.ustadmobile.lib.db.sync.UmSyncableDatabase;
 
 import java.io.IOException;
@@ -25,9 +30,13 @@ import javax.lang.model.element.Modifier;
 import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeKind;
+import javax.lang.model.type.TypeMirror;
+import javax.tools.Diagnostic;
 
 import retrofit2.Call;
 import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+import retrofit2.converter.scalars.ScalarsConverterFactory;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
@@ -41,6 +50,8 @@ public class DbProcessorRetrofitRepository extends AbstractDbProcessor {
 
     public static final String POSTFIX_REPOSITORY_DAO = "_RetrofitRepository";
 
+    public static final String POSTFIX_REPOSITORY_DB = "_DbRetrofitRepository";
+
     public DbProcessorRetrofitRepository() {
         setOutputDirOpt(OPT_RETROFIT_OUTPUT);
     }
@@ -48,7 +59,114 @@ public class DbProcessorRetrofitRepository extends AbstractDbProcessor {
 
     @Override
     public void processDbClass(TypeElement dbType, String destination) throws IOException {
+        TypeSpec.Builder dbRepoBuilder = TypeSpec.classBuilder(dbType.getSimpleName() +
+                POSTFIX_REPOSITORY_DB)
+                .superclass(ClassName.get(dbType))
+                .addSuperinterface(UmRepositoryDb.class)
+                .addModifiers(Modifier.PUBLIC)
+                .addField(Retrofit.class, "_retrofit", Modifier.PRIVATE)
+                .addField(ClassName.get(dbType), "_db", Modifier.PRIVATE)
+                .addField(String.class, "_auth", Modifier.PRIVATE)
+                .addField(String.class, "_baseUrl", Modifier.PRIVATE)
+                .addMethod(MethodSpec.constructorBuilder()
+                    .addModifiers(Modifier.PUBLIC)
+                    .addParameter(ClassName.get(dbType), "_db")
+                    .addParameter(String.class, "_baseUrl")
+                    .addParameter(String.class, "_auth")
+                    .addCode(CodeBlock.builder()
+                            .add("this._db = _db;\n")
+                            .add("this._auth = _auth;\n")
+                            .add("this._baseUrl = _baseUrl;\n")
+                            .add("this._retrofit = new $T.Builder()" +
+                                    ".addConverterFactory($T.create())" +
+                                    ".addConverterFactory($T.create())" +
+                                    ".baseUrl(_baseUrl)" +
+                                    ".build();\n", Retrofit.class,
+                                        ScalarsConverterFactory.class,
+                                        GsonConverterFactory.class).build())
+                    .build())
+                .addMethod(MethodSpec.methodBuilder("getBaseUrl")
+                        .addCode("return _baseUrl;\n")
+                        .addModifiers(Modifier.PUBLIC)
+                        .returns(String.class)
+                        .addAnnotation(Override.class)
+                    .build())
+                .addMethod(MethodSpec.methodBuilder("getAuth")
+                        .addCode("return _auth;\n")
+                        .addModifiers(Modifier.PUBLIC)
+                        .returns(String.class)
+                        .addAnnotation(Override.class)
+                    .build())
+                .addMethod(MethodSpec.methodBuilder("getDatabase")
+                        .addCode("return _db;\n")
+                        .addModifiers(Modifier.PUBLIC)
+                        .returns(Object.class)
+                        .addAnnotation(Override.class)
+                    .build());
 
+        for(ExecutableElement subElement : findMethodsToImplement(dbType)) {
+            if (subElement.getAnnotation(UmDbContext.class) != null) {
+                dbRepoBuilder.addMethod(MethodSpec.overriding(subElement)
+                        .addCode("return _db.$L();\n", subElement.getSimpleName()).build());
+            }else if(subElement.getAnnotation(UmClearAll.class) != null) {
+                dbRepoBuilder.addMethod(MethodSpec.overriding(subElement)
+                        .addCode("throw new $T($S);\n",
+                                RuntimeException.class,
+                                "Cannot use repository to clear database!")
+                        .build());
+            }else if(subElement.getAnnotation(UmRepository.class) != null) {
+                dbRepoBuilder.addMethod(MethodSpec.overriding(subElement)
+                        .addCode("throw new RuntimeException($S);\n",
+                                "Cannot get a repository for a repository")
+                        .build());
+            }else {
+                TypeMirror retType = subElement.getReturnType();
+                if(!retType.getKind().equals(TypeKind.DECLARED)
+                        || processingEnv.getTypeUtils().asElement(retType)
+                            .getAnnotation(UmDao.class) == null) {
+                    messager.printMessage(Diagnostic.Kind.ERROR, formatMethodForErrorMessage(
+                            subElement, dbType) + " return type is not a class annotated with UmDao",
+                            subElement);
+                    continue;
+                }
+
+                TypeElement daoTypeEl = (TypeElement)processingEnv.getTypeUtils().asElement(retType);
+
+                if(daoTypeEl.getAnnotation(UmRepository.class) == null) {
+                    dbRepoBuilder.addMethod(MethodSpec.overriding(subElement)
+                            .addCode("System.err.println($S);\n",
+                                    "WARNING: Attempt to access repository getter for DAO " +
+                                            "not annotated with @UmRepository")
+                            .addCode("(new Throwable()).printStackTrace();\n")
+                            .addCode("return null;\n")
+                            .build());
+                    continue;
+                }
+
+                PackageElement daoPackageEl = processingEnv.getElementUtils().getPackageOf(daoTypeEl);
+                String retrofitDaoName = daoTypeEl.getQualifiedName() + POSTFIX_REPOSITORY_DAO;
+                String daoFieldName = "_" + daoTypeEl.getSimpleName();
+                ClassName repoDaoClassName = ClassName.get(daoPackageEl.getQualifiedName().toString(),
+                        retrofitDaoName);
+                dbRepoBuilder.addField(repoDaoClassName, daoFieldName);
+                dbRepoBuilder.addMethod(MethodSpec.overriding(subElement)
+                        .addCode(CodeBlock.builder()
+                            .beginControlFlow("if($L == null)", daoFieldName)
+                                .add("$L = new $T(_retrofit, _db, _db.$L(), this);\n",
+                                        daoFieldName, repoDaoClassName, subElement.getSimpleName())
+                            .endControlFlow()
+                            .add("return $L;\n", daoFieldName)
+                            .build())
+                        .build());
+            }
+        }
+
+
+        PackageElement packageElement = processingEnv.getElementUtils().getPackageOf(dbType);
+        JavaFile repoJavaFile = JavaFile.builder(packageElement.getQualifiedName().toString(),
+                    dbRepoBuilder.build())
+                .indent("    ").build();
+        writeJavaFileToDestination(repoJavaFile, destination);
     }
 
     @Override
@@ -98,7 +216,7 @@ public class DbProcessorRetrofitRepository extends AbstractDbProcessor {
 
         TypeSpec.Builder repoBuilder = TypeSpec.classBuilder(daoType.getSimpleName() +
                 POSTFIX_REPOSITORY_DAO)
-                .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
+                .addModifiers(Modifier.PUBLIC)
                 .superclass(ClassName.get(daoType))
                 .addField(retrofitTypeName, "_webService", Modifier.PRIVATE)
                 .addField(ClassName.get(dbType), "_db", Modifier.PRIVATE)
@@ -118,7 +236,7 @@ public class DbProcessorRetrofitRepository extends AbstractDbProcessor {
                             .add("this._repo = _repo;\n").build())
                     .build());
 
-        List<ExecutableElement> repoMethodsToImplement = findDaoMethodsToImplement(daoType);
+        List<ExecutableElement> repoMethodsToImplement = findMethodsToImplement(daoType);
 
         for(ExecutableElement repoMethod : repoMethodsToImplement) {
             MethodSpec.Builder methodBuilder = overrideAndResolve(repoMethod, daoType, processingEnv);
@@ -133,12 +251,16 @@ public class DbProcessorRetrofitRepository extends AbstractDbProcessor {
                 if(methodInfo.isUpdateOrInsert()) {
                     repoMethodMode = UmRepository.UmRepositoryMethodType
                             .INCREMENT_CHANGE_SEQ_NUMS_THEN_DELEGATE_TO_DAO;
-                }else if(repoMethod.getAnnotation(UmQuery.class) != null) {
+                }else if(repoMethod.getAnnotation(UmQuery.class) != null
+                        || repoMethod.getAnnotation(UmQueryFindByPrimaryKey.class) != null) {
                     repoMethodMode = UmRepository.UmRepositoryMethodType
                             .DELEGATE_TO_DAO;
                 }else if(repoMethod.getAnnotation(UmSyncIncoming.class) != null) {
                     repoMethodMode = UmRepository.UmRepositoryMethodType
                             .DELEGATE_TO_WEBSERVICE;
+                }else if(repoMethod.getAnnotation(UmSyncOutgoing.class) != null) {
+                    repoMethodMode = UmRepository.UmRepositoryMethodType
+                            .DELEGATE_TO_DAO;
                 }
             }
 

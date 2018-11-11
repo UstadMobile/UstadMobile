@@ -19,7 +19,6 @@ import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.database.annotation.UmQueryFindByPrimaryKey;
 import com.ustadmobile.lib.database.annotation.UmUpdate;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -249,7 +248,7 @@ public class DbProcessorRoom extends AbstractDbProcessor{
                 .addCode("this.dbExecutor = dbExecutor;\n").build());
 
         //now generate methods for all query, insert, and delete methods
-        for(ExecutableElement daoMethod : findDaoMethodsToImplement(daoClass)) {
+        for(ExecutableElement daoMethod : findMethodsToImplement(daoClass)) {
             MethodSpec.Builder methodBuilder = null;
 
             if(daoMethod.getAnnotation(UmInsert.class) != null) {

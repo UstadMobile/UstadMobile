@@ -29,7 +29,6 @@ import retrofit2.converter.scalars.ScalarsConverterFactory;
 public class TestRetrofitInterface {
 
     private HttpServer server;
-    private WebTarget target;
 
     private ExampleSyncableDao_Retrofit exampleSyncableDaoRetrofit;
 

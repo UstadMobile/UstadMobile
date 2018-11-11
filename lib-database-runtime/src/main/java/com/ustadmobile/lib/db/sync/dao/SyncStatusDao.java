@@ -7,6 +7,22 @@ import com.ustadmobile.lib.db.sync.entities.SyncStatus;
 @UmDao
 public abstract class SyncStatusDao implements BaseDao<SyncStatus> {
 
+    /**
+     * Finder method that will auto-create the desired entity if it does not already exist
+     *
+     * @param tableId
+     * @return
+     */
+    public SyncStatus getByUid(int tableId) {
+        SyncStatus syncStatus = findByUid(tableId);
+        if(syncStatus != null)
+            return syncStatus;
+
+        syncStatus = new SyncStatus(tableId);
+        insert(syncStatus);
+        return syncStatus;
+    }
+
     public long getAndIncrementNextLocalChangeSeqNum(int tableId, int numEntries) {
         long seqNum = getNextLocalChangeSeqNum(tableId);
         if(seqNum >= 1) {
