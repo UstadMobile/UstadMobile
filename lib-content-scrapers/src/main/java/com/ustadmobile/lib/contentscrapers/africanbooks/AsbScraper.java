@@ -208,7 +208,6 @@ public class AsbScraper {
                 } catch (IOException e) {
                     System.err.println("IO Exception downloading/checking : " + ePubFile.getName() + " with title " + bookObj.title);
                     e.printStackTrace();
-                    driver.quit();
                 }
             }
         }
