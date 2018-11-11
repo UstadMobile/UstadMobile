@@ -132,7 +132,7 @@ public class AsbScraper {
         List<AfricanBooksResponse> africanBooksList = parseBooklist(inputStreamOfBooks);
 
         AfricanBooksResponse bookObj;
-        WebDriverManager.getInstance(CHROME).setup();
+        ContentScraperUtil.setChromeDriverLocation();
 
         for (int i = 0; i < africanBooksList.size(); i++) {
             //Download the EPUB itself

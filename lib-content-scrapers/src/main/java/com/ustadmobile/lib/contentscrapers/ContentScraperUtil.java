@@ -361,11 +361,13 @@ public class ContentScraperUtil {
      */
     public static ChromeDriver setupChrome(boolean headless) {
 
-        //System.setProperty("webdriver.chrome.driver", chromeDriverLocation);
-
         ChromeOptions option = new ChromeOptions();
         option.setHeadless(headless);
         return new ChromeDriver(option);
+    }
+
+    public static void setChromeDriverLocation(){
+        System.setProperty("webdriver.chrome.driver", chromeDriverLocation);
     }
 
 
