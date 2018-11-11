@@ -133,8 +133,9 @@ public class AsbScraper {
 
         AfricanBooksResponse bookObj;
         ContentScraperUtil.setChromeDriverLocation();
-        ChromeDriver driver = ContentScraperUtil.setupChrome(false);
+        ChromeDriver driver = ContentScraperUtil.setupChrome(true);
         WebDriverWait waitDriver = new WebDriverWait(driver, 10000);
+        int retry = 0;
 
         for (int i = 0; i < africanBooksList.size(); i++) {
             //Download the EPUB itself
@@ -177,10 +178,16 @@ public class AsbScraper {
 
                     if (ePubFile.length() == 0) {
                         System.out.println(ePubFile.getName() + " size 0 bytes: failed! for title " + bookObj.title);
+                        retry++;
+                        if (retry == 2) {
+                            retry = 0;
+                            continue;
+                        }
+                        i--;
+                        driver.manage().deleteAllCookies();
                         continue;
                     }
-                    
-                    System.out.println("Downloaded " + ePubFile.getName());
+                    retry = 0;
 
                     if (ContentScraperUtil.fileHasContent(ePubFile)) {
                         updateAsbEpub(bookObj, ePubFile);
