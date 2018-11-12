@@ -1,4 +1,4 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -6,25 +6,51 @@
     tools:context="com.ustadmobile.port.android.view.ClazzStudentListFragment">
 
 
+    <TextView
+        android:id="@+id/fragment_class_student_list_sort_by_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="13dp"
+        android:text="@string/sort_by_text"
+        android:textColor="@color/color_gray"
+        android:textSize="12sp"
+        app:layout_constraintEnd_toStartOf="@+id/fragment_class_student_list_sort_spinner"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Spinner
+        android:id="@+id/fragment_class_student_list_sort_spinner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
 
     <android.support.v7.widget.RecyclerView
-        android:layout_height="match_parent"
-        android:layout_width="match_parent"
         android:id="@+id/fragment_class_student_list_recyclerview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:scrollbars="vertical"
-        />
+        android:layout_marginTop="32dp"
+        app:layout_constraintTop_toBottomOf="@+id/fragment_class_student_list_sort_by_text" />
 
     <ru.dimorinny.floatingtextbutton.FloatingTextButton
         android:id="@+id/class_student_list_add_student_fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center"
+        android:layout_margin="16dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
         app:floating_background_color="@color/accent"
         app:floating_left_icon="@drawable/ic_add_white_trans_24dp"
         app:floating_title="@string/add_student"
-        android:layout_gravity="bottom|center"
         app:floating_title_color="@android:color/white"
-        android:layout_margin="16dp"/>
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
-</FrameLayout>
+</android.support.constraint.ConstraintLayout>
 
 

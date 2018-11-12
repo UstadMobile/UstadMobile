@@ -401,6 +401,10 @@ This is the one you should be editing. The one in /core/locale/main/values/strin
     <string name="attendance_low_to_high">attendance (low to high)</string>
     <string name="teacher">Teacher</string>
     <string name="partial">Partial</string>
+    <string name="teachers_literal">Teachers</string>
+    <string name="add_teacher">Add teacher</string>
+
+
 
 
 

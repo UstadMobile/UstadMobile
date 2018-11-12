@@ -8,6 +8,16 @@ public class PersonWithEnrollment extends Person {
 
     private float attendancePercentage;
 
+    private int clazzMemberRole;
+
+
+    public int getClazzMemberRole() {
+        return clazzMemberRole;
+    }
+
+    public void setClazzMemberRole(int clazzMemberRole) {
+        this.clazzMemberRole = clazzMemberRole;
+    }
 
     public long getClazzUid() {
         return clazzUid;

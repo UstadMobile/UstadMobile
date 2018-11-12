@@ -12,6 +12,7 @@ import com.ustadmobile.lib.db.entities.ClazzActivity;
 import com.ustadmobile.lib.db.entities.ClazzActivityChange;
 import com.ustadmobile.lib.db.entities.DailyActivityNumbers;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -185,6 +186,7 @@ public class ClazzActivityListPresenter
         LinkedHashMap<Float, Float> barDataMap = new LinkedHashMap<>();
         long toDate = System.currentTimeMillis();
         Long fromDate = toDate;
+        int groupOffset=1;
 
         switch (duration){
             case CHART_DURATION_LAST_WEEK:
@@ -192,9 +194,11 @@ public class ClazzActivityListPresenter
                 break;
             case CHART_DURATION_LAST_MONTH:
                 fromDate = UMCalendarUtil.getDateInMilliPlusDays(-31);
+                groupOffset = 7;
                 break;
             case CHART_DURATION_LAST_YEAR:
                 fromDate = UMCalendarUtil.getDateInMilliPlusDays(-365);
+                groupOffset = 30;
                 break;
             default:
                 //Do nothing.
@@ -202,16 +206,26 @@ public class ClazzActivityListPresenter
         }
 
         //Get aggregate daily data about Clazz Activity.
+        int finalGroupOffset = groupOffset;
         clazzActivityDao.getDailyAggregateFeedbackByActivityChange(currentClazzUid, fromDate,
                 toDate,clazzActivityChangeUid, new UmCallback<List<DailyActivityNumbers>>() {
                     @Override
                     public void onSuccess(List<DailyActivityNumbers> result) {
 
+                        LinkedHashMap<Float, Float> barDataMapGrouped = new LinkedHashMap<>();
+
                         barMapWithOGDateTimes = new HashMap<>();
                         float f = 0f;
+                        float h=1f;
+                        float g=0f;
+
+                        int goodGrouped = 0;
+                        int badGrouped = 0;
+
                         for(DailyActivityNumbers everyDayAttendance: result){
 
                             f++;
+                            //h++;
 
                             int good = everyDayAttendance.getGood();
                             int bad = everyDayAttendance.getBad();
@@ -226,9 +240,29 @@ public class ClazzActivityListPresenter
                                 barDataMap.put(f, -(float)bad);
                             }
 
+                            if(h <= finalGroupOffset){
+                                goodGrouped = goodGrouped + good;
+                                badGrouped = badGrouped + bad;
+
+                                h++;
+                                if(h>finalGroupOffset){
+                                    g++;
+
+                                    if(goodGrouped>badGrouped) {
+                                        barDataMapGrouped.put( g, (float) goodGrouped);
+                                    }else{
+                                        barDataMapGrouped.put( g, (float) -(badGrouped));
+                                    }
+
+                                    h=1;
+                                    goodGrouped=0;
+                                    badGrouped = 0;
+                                }
+                            }
                         }
 
-                        view.updateActivityBarChart(barDataMap);
+                        //view.updateActivityBarChart(barDataMap);
+                        view.updateActivityBarChart(barDataMapGrouped);
                     }
 
                     @Override

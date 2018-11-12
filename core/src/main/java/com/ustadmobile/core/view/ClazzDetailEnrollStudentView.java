@@ -15,6 +15,9 @@ public interface ClazzDetailEnrollStudentView extends UstadView {
     // ARGUMENT TO VIEWS THAT DENOTES that this is a new person.
     String ARG_NEW_PERSON = "argNewPerson";
 
+    //ARG to see if adding a teacher or a student
+    String ARG_NEW_PERSON_TYPE = "argNewPersonType";
+
     /**
      * Method to set the Person provider.
      *

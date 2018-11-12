@@ -2,15 +2,23 @@ package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmProvider;
+import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.ClazzDetailEnrollStudentView;
 import com.ustadmobile.core.view.ClazzStudentListView;
 import com.ustadmobile.core.view.PersonDetailView;
+import com.ustadmobile.lib.db.entities.ClazzMember;
 import com.ustadmobile.lib.db.entities.PersonWithEnrollment;
 
+import java.util.ArrayList;
 import java.util.Hashtable;
 
+import static com.ustadmobile.core.view.ClazzDetailEnrollStudentView.ARG_NEW_PERSON_TYPE;
 import static com.ustadmobile.core.view.ClazzListView.ARG_CLAZZ_UID;
+import static com.ustadmobile.core.view.ClazzListView.SORT_ORDER_ATTENDANCE_ASC;
+import static com.ustadmobile.core.view.ClazzListView.SORT_ORDER_ATTENDANCE_DESC;
+import static com.ustadmobile.core.view.ClazzListView.SORT_ORDER_NAME_ASC;
+import static com.ustadmobile.core.view.ClazzListView.SORT_ORDER_NAME_DESC;
 import static com.ustadmobile.core.view.PersonDetailView.ARG_PERSON_UID;
 
 
@@ -25,6 +33,8 @@ public class ClazzStudentListPresenter extends
 
     private long currentClazzId = -1L;
     private UmProvider<PersonWithEnrollment> clazzPersonListProvider;
+
+    private Hashtable<Long, Integer> idToOrderInteger;
 
 
     public ClazzStudentListPresenter(Object context,
@@ -52,10 +62,54 @@ public class ClazzStudentListPresenter extends
     public void onCreate(Hashtable savedState) {
         super.onCreate(savedState);
 
+        //Find the Provider
         clazzPersonListProvider = UmAppDatabase.getInstance(context).getClazzMemberDao()
                 .findAllPersonWithEnrollmentInClazzByClazzUid(currentClazzId);
         setProviderToView();
+
+        //Initialise sort spinner data:
+        idToOrderInteger = new Hashtable<>();
+        updateSortSpinnerPreset();
     }
+
+    /**
+     * Common method to convert Array List to String Array
+     *
+     * @param presetAL The array list of string type
+     * @return  String array
+     */
+    private String[] arrayListToStringArray(ArrayList<String> presetAL){
+        Object[] objectArr = presetAL.toArray();
+        String[] strArr = new String[objectArr.length];
+        for(int j = 0 ; j < objectArr.length ; j ++){
+            strArr[j] = (String) objectArr[j];
+        }
+        return strArr;
+    }
+
+    /**
+     * Updates the sort by drop down (spinner) on the Class list. For now the sort options are
+     * defined within this method and will automatically update the sort options without any
+     * database call.
+     */
+    private void updateSortSpinnerPreset(){
+        ArrayList<String> presetAL = new ArrayList<>();
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+
+        idToOrderInteger = new Hashtable<>();
+
+        presetAL.add(impl.getString(MessageID.namesb, getContext()));
+        idToOrderInteger.put((long) presetAL.size(), SORT_ORDER_NAME_ASC);
+        presetAL.add(impl.getString(MessageID.attendance_high_to_low, getContext()));
+        idToOrderInteger.put((long) presetAL.size(), SORT_ORDER_ATTENDANCE_DESC);
+        presetAL.add(impl.getString(MessageID.attendance_low_to_high, getContext()));
+        idToOrderInteger.put((long) presetAL.size(), SORT_ORDER_ATTENDANCE_ASC);
+
+        String[] sortPresets = arrayListToStringArray(presetAL);
+
+        view.updateSortSpinner(sortPresets);
+    }
+
 
     /**
      * Sets the provider set to this Presenter to the view.
@@ -65,13 +119,26 @@ public class ClazzStudentListPresenter extends
     }
 
     /**
-     * Method logic for what happens when you click the FAB Add Student
+     * Method logic for what happens when you click Add Student
      *
      */
     public void goToAddStudentFragment(){
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         Hashtable<String, Object> args = new Hashtable<>();
         args.put(ARG_CLAZZ_UID, currentClazzId);
+        args.put(ARG_NEW_PERSON_TYPE, ClazzMember.ROLE_STUDENT);
+        impl.go(ClazzDetailEnrollStudentView.VIEW_NAME, args, view.getContext());
+    }
+
+    /**
+     * Method logic for what happens when you click Add Teacher
+     *
+     */
+    public void handleAddTeacher(){
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        Hashtable<String, Object> args = new Hashtable<>();
+        args.put(ARG_CLAZZ_UID, currentClazzId);
+        args.put(ARG_NEW_PERSON_TYPE, ClazzMember.ROLE_TEACHER);
         impl.go(ClazzDetailEnrollStudentView.VIEW_NAME, args, view.getContext());
     }
 
@@ -89,15 +156,62 @@ public class ClazzStudentListPresenter extends
         impl.go(PersonDetailView.VIEW_NAME, args, view.getContext());
     }
 
-//    /**
-//     * Method logic for what happens when we change the order of the student list.
-//     *
-//     * @param order The order flag. 0 to Sort by Name, 1 to Sort by Attendance, 2 to Sort by date
-//     */
-//    public void handleChangeSortOrder(int order){
-//        //TODO: Change provider's sort order
-//    }
+    /**
+     * Method logic for what happens when we change the order of the student list.
+     *
+     * @param order The order flag. 0 to Sort by Name, 1 to Sort by Attendance, 2 to Sort by date
+     */
+    public void handleChangeSortOrder(long order){
+        order=order+1;
 
+        if(idToOrderInteger.containsKey(order)){
+            int sortCode = idToOrderInteger.get(order);
+            getAndSetProvider(sortCode);
+        }
+    }
+
+    /**
+     * This method updates the Class List provider based on the sort order flag selected.
+     * Every order has a corresponding order by change in the database query where this method
+     * reloads the class list provider.
+     *
+     * @param order The order selected.
+     */
+    private void getAndSetProvider(int order){
+        switch (order){
+            case SORT_ORDER_NAME_ASC:
+                clazzPersonListProvider =
+                        UmAppDatabase.getInstance(context).getClazzMemberDao()
+                        .findAllPersonWithEnrollmentInClazzByClazzUidSortByNameAsc(currentClazzId);
+            case SORT_ORDER_NAME_DESC:
+                clazzPersonListProvider =
+                        UmAppDatabase.getInstance(context).getClazzMemberDao()
+                        .findAllPersonWithEnrollmentInClazzByClazzUidSortByNameDesc(currentClazzId);
+                break;
+            case SORT_ORDER_ATTENDANCE_ASC:
+                clazzPersonListProvider =
+                        UmAppDatabase.getInstance(context).getClazzMemberDao()
+                        .findAllPersonWithEnrollmentInClazzByClazzUidSortByAttendanceAsc(currentClazzId);
+                break;
+            case SORT_ORDER_ATTENDANCE_DESC:
+                clazzPersonListProvider =
+                        UmAppDatabase.getInstance(context).getClazzMemberDao()
+                        .findAllPersonWithEnrollmentInClazzByClazzUidSortByAttendanceDesc(currentClazzId);
+                break;
+            default:
+                clazzPersonListProvider =
+                        UmAppDatabase.getInstance(context).getClazzMemberDao()
+                        .findAllPersonWithEnrollmentInClazzByClazzUidSortByNameAsc(currentClazzId);
+                break;
+        }
+
+        updateProviderToView();
+
+    }
+
+    private void updateProviderToView(){
+        view.setPersonWithEnrollmentProvider(clazzPersonListProvider);
+    }
 
     /**
      * This is the the primary action button for the list of students in this screen. It calls
@@ -107,7 +221,12 @@ public class ClazzStudentListPresenter extends
      */
     @Override
     public void handleCommonPressed(Object arg) {
-        handleClickStudent((Long)arg);
+
+        if((Long)arg < 0){
+            goToAddStudentFragment();
+        }else {
+            handleClickStudent((Long) arg);
+        }
     }
 
     /**
@@ -119,6 +238,9 @@ public class ClazzStudentListPresenter extends
     @Override
     public void handleSecondaryPressed(Object arg) {
         //No secondary action here.
+        if((Long)arg < 0){
+            handleAddTeacher();
+        }
     }
 
     /**

@@ -48,7 +48,7 @@
 
     <View
         android:id="@+id/item_studentlist_student_simple_horizontal_divider"
-        android:layout_width="368dp"
+        android:layout_width="match_parent"
         android:layout_height="1dp"
         android:layout_marginTop="16dp"
         android:background="?android:attr/listDivider"

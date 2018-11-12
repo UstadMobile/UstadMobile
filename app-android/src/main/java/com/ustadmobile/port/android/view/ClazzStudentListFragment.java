@@ -11,6 +11,9 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.ClazzStudentListPresenter;
@@ -32,6 +35,8 @@ public class ClazzStudentListFragment extends UstadBaseFragment implements Clazz
     private RecyclerView mRecyclerView;
     private RecyclerView.LayoutManager mRecyclerLayoutManager;
     private ClazzStudentListPresenter mPresenter;
+    private Spinner sortSpinner;
+    String[] sortSpinnerPresets;
 
     /**
      * Generates a new Fragment for a page fragment
@@ -82,6 +87,10 @@ public class ClazzStudentListFragment extends UstadBaseFragment implements Clazz
         mRecyclerLayoutManager = new LinearLayoutManager(getContext());
         mRecyclerView.setLayoutManager(mRecyclerLayoutManager);
 
+
+        //Sort Fragment:
+        sortSpinner = rootContainer.findViewById(R.id.fragment_class_student_list_sort_spinner);
+
         //Create the presenter and call its onCreate method. This will populate the provider data
         // and call setProvider to set it
         mPresenter = new ClazzStudentListPresenter(getContext(),
@@ -91,6 +100,19 @@ public class ClazzStudentListFragment extends UstadBaseFragment implements Clazz
         //FAB
         FloatingTextButton fab = rootContainer.findViewById(R.id.class_student_list_add_student_fab);
         fab.setOnClickListener(v -> mPresenter.goToAddStudentFragment());
+
+        //Sort handler
+        sortSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                mPresenter.handleChangeSortOrder(id);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
 
         return rootContainer;
     }
@@ -126,6 +148,15 @@ public class ClazzStudentListFragment extends UstadBaseFragment implements Clazz
         data.observe(this, recyclerAdapter::submitList);
 
         mRecyclerView.setAdapter(recyclerAdapter);
+    }
+
+    @Override
+    public void updateSortSpinner(String[] presets) {
+        this.sortSpinnerPresets = presets;
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(),
+                R.layout.spinner_item, sortSpinnerPresets);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        sortSpinner.setAdapter(adapter);
     }
 
     // This event is triggered soon after onCreateView().

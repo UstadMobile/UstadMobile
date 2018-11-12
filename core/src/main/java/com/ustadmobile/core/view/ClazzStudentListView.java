@@ -22,4 +22,12 @@ public interface ClazzStudentListView extends UstadView {
     void setPersonWithEnrollmentProvider(UmProvider<PersonWithEnrollment>
                                          setPersonUmProvider);
 
+
+    /**
+     * Sorts the sorting drop down (spinner) for sort options in the Class Student list view.
+     *
+     * @param presets A String array String[] of the presets available.
+     */
+    void updateSortSpinner(String[] presets);
+
 }
