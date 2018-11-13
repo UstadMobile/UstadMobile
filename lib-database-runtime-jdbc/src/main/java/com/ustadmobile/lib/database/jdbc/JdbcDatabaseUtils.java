@@ -18,6 +18,13 @@ import javax.sql.DataSource;
  */
 public class JdbcDatabaseUtils {
 
+    public static final String PRODUCT_NAME_POSTGRES = "PostgreSQL";
+
+    public static final String PRODUCT_NAME_SQLITE = "SQLite";
+
+    public static final String[] SUPPORTED_DB_PRODUCT_NAMES = new String[]{PRODUCT_NAME_POSTGRES,
+            PRODUCT_NAME_SQLITE};
+
     /**
      * Represents a request to monitor specific tables on the database, and receive an event if they
      * have changed. This is
@@ -102,7 +109,8 @@ public class JdbcDatabaseUtils {
      */
     public static void closeQuietly(AutoCloseable closeable) {
         try {
-            closeable.close();
+            if(closeable != null)
+                closeable.close();
         }catch(Exception e) {
             e.printStackTrace();
         }

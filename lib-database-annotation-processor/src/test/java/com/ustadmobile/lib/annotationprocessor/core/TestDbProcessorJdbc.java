@@ -7,6 +7,7 @@ import com.ustadmobile.lib.database.jdbc.JdbcDatabaseUtils;
 import com.ustadmobile.lib.annotationprocessor.core.db.ExampleDatabase;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.sqlite.SQLiteDataSource;
@@ -26,16 +27,23 @@ import javax.sql.DataSource;
  * Tests the result of the JDBC generation
  */
 public class TestDbProcessorJdbc {
+    private ExampleDatabase db;
+
+    @Before
+    public void setUp() {
+        db = ExampleDatabase.getInstance(null);
+        db.clearAll();
+    }
 
     @Test
     public void testConnection() {
-        ExampleDatabase db = ExampleDatabase.getInstance(null, "ds");
+        ExampleDatabase db = ExampleDatabase.getInstance(null);
         Assert.assertNotNull(db);
     }
 
     @Test
     public void givenDatabaseInstance_whenInitialized_thenTableShouldBeCreated() throws NamingException, SQLException{
-        ExampleDatabase db = ExampleDatabase.getInstance(null, "ds");
+        ExampleDatabase db = ExampleDatabase.getInstance(null);
 
         InitialContext ic = new InitialContext();
         DataSource ds = (DataSource)ic.lookup("java:/comp/env/jdbc/ds");
@@ -51,7 +59,7 @@ public class TestDbProcessorJdbc {
 
     @Test
     public void givenDatabaseInstance_whenDataInserted_thenShouldBeRetrievable() {
-        ExampleDatabase db = ExampleDatabase.getInstance(null, "ds");
+
         ExampleEntity entity = new ExampleEntity();
         entity.setName("Bob Jones");
         int newId = db.getExampleDao().insertGetId(entity);
@@ -65,7 +73,6 @@ public class TestDbProcessorJdbc {
 
     @Test
     public void givenLiveDataObserving_whenDataUpdated_thenShouldCallOnChange() {
-        ExampleDatabase db = ExampleDatabase.getInstance(null, "ds");
         ExampleEntity entityToUpdate = new ExampleEntity();
         entityToUpdate.setName("Name1");
         int uid = db.getExampleDao().insertGetId(entityToUpdate);
@@ -90,7 +97,6 @@ public class TestDbProcessorJdbc {
 
     @Test
     public void givenEntityInserted_whenUpdateMethodRuns_thenShouldReturnUpdateCount() {
-        ExampleDatabase db = ExampleDatabase.getInstance(null, "ds");
         ExampleEntity entityToUpdate = new ExampleEntity();
         entityToUpdate.setName("Update Me");
         int id = db.getExampleDao().insertGetId(entityToUpdate);
@@ -107,7 +113,6 @@ public class TestDbProcessorJdbc {
 
     @Test
     public void givenEntityCreated_whenDeleteMethodRuns_thenShouldBeDeleted() {
-        ExampleDatabase db = ExampleDatabase.getInstance(null, "ds");
         ExampleEntity entityToDelete = new ExampleEntity();
         entityToDelete.setName("Delete Me");
         entityToDelete.setUid(db.getExampleDao().insertGetId(entityToDelete));

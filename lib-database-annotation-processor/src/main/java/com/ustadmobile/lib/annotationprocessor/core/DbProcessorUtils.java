@@ -6,6 +6,7 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
+import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
@@ -289,6 +290,20 @@ public class DbProcessorUtils {
     }
 
 
+    /**
+     * Determine if the given element has an auto-increment primary key
+     *
+     * @param typeElement TypeElement representing the entity
+     * @param processingEnv Processing Environment
+     * @return true if the given element has an auto increment primary key, false otherwise
+     */
+    public static boolean entityHasAutoIncrementPrimaryKey(TypeElement typeElement,
+                                                    ProcessingEnvironment processingEnv) {
+        Element pkElement = findElementWithAnnotation(typeElement, UmPrimaryKey.class, processingEnv);
+        if(pkElement == null)
+            return false;
 
+        return pkElement.getAnnotation(UmPrimaryKey.class).autoIncrement();
+    }
 }
 

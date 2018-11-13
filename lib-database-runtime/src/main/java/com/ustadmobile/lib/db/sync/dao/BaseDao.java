@@ -22,7 +22,7 @@ public interface BaseDao<T> {
      *
      * @return the generated primary key (if any)
      */
-    @UmInsert(onConflict = UmOnConflictStrategy.REPLACE)
+    @UmInsert
     long insert(T entity);
 
     /**

@@ -46,6 +46,8 @@ ext {
     version_gson = "2.8.2"
     version_apache_commons_cli = "1.4"
     version_apache_commons_lang = "3.8.1"
+    version_apache_commons_text = "1.6"
+
     version_mockwebserver = "3.10.0"
     version_javapoet = "1.11.1"
     version_reflections = "0.9.11"
