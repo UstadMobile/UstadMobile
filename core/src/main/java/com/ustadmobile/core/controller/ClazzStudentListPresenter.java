@@ -134,7 +134,7 @@ public class ClazzStudentListPresenter extends
      * Method logic for what happens when you click Add Teacher
      *
      */
-    public void handleAddTeacher(){
+    private void handleAddTeacher(){
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         Hashtable<String, Object> args = new Hashtable<>();
         args.put(ARG_CLAZZ_UID, currentClazzId);

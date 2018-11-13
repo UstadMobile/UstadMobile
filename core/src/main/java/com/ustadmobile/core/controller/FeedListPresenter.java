@@ -2,8 +2,10 @@ package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmProvider;
+import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.FeedListView;
+import com.ustadmobile.lib.db.entities.ClazzAverage;
 import com.ustadmobile.lib.db.entities.FeedEntry;
 
 import java.util.Hashtable;
@@ -40,6 +42,26 @@ public class FeedListPresenter extends UstadBaseController<FeedListView>{
         feedEntryUmProvider = UmAppDatabase.getInstance(view.getContext()).getFeedEntryDao()
                 .findByPersonUid(personUid);
         updateFeedProviderToView();
+
+        //Get numbers
+        UmAppDatabase.getInstance(view.getContext()).getClazzDao().getClazzSummaryAsync(
+                new UmCallback<ClazzAverage>() {
+            @Override
+            public void onSuccess(ClazzAverage result) {
+                int attendanceaverage = Math.round(result.getAttendanceAverage() * 100);
+                view.updateAttendancePercentage(attendanceaverage);
+                view.updateNumClasses(result.getNumClazzes());
+                view.updateNumStudents(result.getNumStudents());
+                //TODO: Sprint 4
+                view.updateAttendanceTrend(0, 0);
+
+            }
+
+            @Override
+            public void onFailure(Throwable exception) {
+
+            }
+        });
 
     }
 

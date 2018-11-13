@@ -19,6 +19,7 @@ import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.AddScheduleDialogPresenter;
 import com.ustadmobile.core.view.AddScheduleDialogView;
 import com.ustadmobile.core.view.DismissableDialog;
+import com.ustadmobile.lib.db.entities.Schedule;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.text.SimpleDateFormat;
@@ -26,7 +27,11 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Objects;
 
+import android.text.format.DateFormat;
+
 import io.reactivex.annotations.NonNull;
+
+import static com.ustadmobile.core.view.ClazzEditView.ARG_SCHEDULE_UID;
 
 /**
  * The Android View for adding a schedule to Class while editing it.
@@ -46,6 +51,7 @@ public class AddScheduleDialogFragment extends UstadDialogFragment implements
     View rootView;
     String[] schedulePresets;
     String[] dayPresets;
+    private long currentScheduleUid = -1L;
 
     @android.support.annotation.NonNull
     @NonNull
@@ -60,6 +66,10 @@ public class AddScheduleDialogFragment extends UstadDialogFragment implements
 
         assert inflater != null;
 
+        if(getArguments().containsKey(ARG_SCHEDULE_UID)) {
+            currentScheduleUid = getArguments().getLong(ARG_SCHEDULE_UID);
+        }
+
         rootView = inflater.inflate(R.layout.fragment_add_schedule_dialog, null);
 
         errorMessageTextView = rootView.findViewById(R.id.fragment_add_schedule_dialog_error_message);
@@ -67,6 +77,8 @@ public class AddScheduleDialogFragment extends UstadDialogFragment implements
         toET = rootView.findViewById(R.id.fragment_add_schedule_dialog_to_time);
         scheduleSpinner = rootView.findViewById(R.id.fragment_add_schedule_dialog_schedule_spinner);
         daySpinner = rootView.findViewById(R.id.fragment_add_schedule_dialog_day_spinner);
+
+
 
         //Date format to show in the Date picker
         SimpleDateFormat justTheTimeFormat = new SimpleDateFormat("HH:mm");
@@ -86,7 +98,7 @@ public class AddScheduleDialogFragment extends UstadDialogFragment implements
         //From time on click -> opens a timer picker.
         fromET.setOnClickListener(v -> new TimePickerDialog(getContext(), timeF,
                 myCalendar.get(Calendar.HOUR), myCalendar.get(Calendar.MINUTE),
-                  false).show());
+                DateFormat.is24HourFormat(getContext())).show());
 
         //A Time picker listener that sets the to time.
         TimePickerDialog.OnTimeSetListener timeT = (view, hourOfDay, minute) -> {
@@ -99,10 +111,12 @@ public class AddScheduleDialogFragment extends UstadDialogFragment implements
         //Default view: not focusable.
         toET.setFocusable(false);
 
+
+
         //To time on click -> opens a time picker.
         toET.setOnClickListener(v -> new TimePickerDialog(
                 getContext(), timeT, myCalendar2.get(Calendar.HOUR),
-                myCalendar.get(Calendar.MINUTE), false).show());
+                myCalendar.get(Calendar.MINUTE), DateFormat.is24HourFormat(getContext())).show());
 
         //Schedule spinner's on click listener
         scheduleSpinner.setOnItemSelectedListener(
@@ -235,5 +249,23 @@ public class AddScheduleDialogFragment extends UstadDialogFragment implements
                     .setVisibility(View.VISIBLE);
             daySpinner.setVisibility(View.VISIBLE);
         }
+    }
+
+    @Override
+    public void updateFields(Schedule schedule) {
+
+        runOnUiThread(() -> {
+            SimpleDateFormat justTheTimeFormat = new SimpleDateFormat("HH:mm");
+            String timeOnET = justTheTimeFormat.format(schedule.getSceduleStartTime());
+            String timeOnToET = justTheTimeFormat.format(schedule.getScheduleEndTime());
+
+            fromET.setText(timeOnET);
+            toET.setText(timeOnToET);
+
+            scheduleSpinner.setSelection(schedule.getScheduleFrequency() -1);
+            daySpinner.setSelection(schedule.getScheduleDay() -1);
+        });
+
+
     }
 }

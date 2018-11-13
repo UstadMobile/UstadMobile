@@ -9,6 +9,7 @@ import com.ustadmobile.lib.db.entities.Schedule;
 import java.util.Hashtable;
 
 import static com.ustadmobile.core.view.AddScheduleDialogView.EVERY_DAY_SCHEDULE_POSITION;
+import static com.ustadmobile.core.view.ClazzEditView.ARG_SCHEDULE_UID;
 import static com.ustadmobile.core.view.ClazzListView.ARG_CLAZZ_UID;
 
 
@@ -17,15 +18,37 @@ public class AddScheduleDialogPresenter  extends UstadBaseController<AddSchedule
     Schedule currentSchedule;
     ScheduleDao scheduleDao;
     long currentClazzUid = -1;
+    private long currentScheduleUid = -1L;
 
     public AddScheduleDialogPresenter(Object context, Hashtable arguments, AddScheduleDialogView view) {
         super(context, arguments, view);
 
         scheduleDao = UmAppDatabase.getInstance(context).getScheduleDao();
-        currentSchedule = new Schedule();
 
         if(getArguments().containsKey(ARG_CLAZZ_UID)){
             currentClazzUid = (long) getArguments().get(ARG_CLAZZ_UID);
+        }
+
+
+
+        if(getArguments().containsKey(ARG_SCHEDULE_UID)){
+            currentScheduleUid = (long) getArguments().get(ARG_SCHEDULE_UID);
+        }
+
+        if(currentScheduleUid > 0){
+            scheduleDao.findByUidAsync(currentClazzUid, new UmCallback<Schedule>() {
+                @Override
+                public void onSuccess(Schedule result) {
+                    view.updateFields(result);
+                }
+
+                @Override
+                public void onFailure(Throwable exception) {
+
+                }
+            });
+        }else{
+            currentSchedule = new Schedule();
         }
     }
 

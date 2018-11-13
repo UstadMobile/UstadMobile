@@ -48,9 +48,11 @@
     <android.support.v7.widget.RecyclerView
         android:id="@+id/activity_sel_select_student_recyclerview"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
         android:scrollbars="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/activity_sel_select_student_title" />
 
 

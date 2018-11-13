@@ -81,15 +81,32 @@ public abstract class ClazzMemberDao implements BaseDao<ClazzMember> {
 
 
     @UmQuery("SELECT Person.* , (:clazzUid) AS clazzUid, " +
-            " (SELECT attendancePercentage FROM ClazzMember WHERE clazzMemberPersonUid = Person.personUid AND clazzMemberClazzUid = :clazzUid) AS attendancePercentage, " +
+            " (SELECT attendancePercentage FROM ClazzMember WHERE clazzMemberPersonUid = Person.personUid " +
+            " AND clazzMemberClazzUid = :clazzUid) AS attendancePercentage, " +
             " (SELECT role FROM ClazzMember WHERE ClazzMember.clazzMemberClazzUid = :clazzUid " +
             " AND clazzMemberPersonUid = Person.personUid) as clazzMemberRole, " +
             " (SELECT clazzMemberActive FROM ClazzMember WHERE ClazzMember.clazzMemberClazzUid = :clazzUid " +
             " AND clazzMemberPersonUid = Person.personUid) AS enrolled FROM Person WHERE Person.active = 1 ")
     public abstract UmProvider<PersonWithEnrollment> findAllPeopleWithEnrollmentForClassUid(long clazzUid);
 
+
     @UmQuery("SELECT Person.* , (:clazzUid) AS clazzUid, " +
-            " (SELECT attendancePercentage FROM ClazzMember WHERE clazzMemberPersonUid = Person.personUid AND clazzMemberClazzUid = :clazzUid) AS attendancePercentage, " +
+            " (SELECT attendancePercentage FROM ClazzMember WHERE clazzMemberPersonUid = Person.personUid AND " +
+            " clazzMemberClazzUid = :clazzUid) AS attendancePercentage, " +
+            " (SELECT role FROM ClazzMember WHERE ClazzMember.clazzMemberClazzUid = :clazzUid " +
+            " AND clazzMemberPersonUid = Person.personUid) as clazzMemberRole, " +
+            " (SELECT clazzMemberActive FROM ClazzMember WHERE ClazzMember.clazzMemberClazzUid = :clazzUid " +
+            " AND clazzMemberPersonUid = Person.personUid) AS enrolled, " +
+            " (SELECT COUNT(*) FROM ClazzMember WHERE ClazzMember.clazzMemberPersonUid = Person.personUid " +
+            "   AND ClazzMember.role = 1) as isClazzStudent " +
+            " FROM Person WHERE Person.active = 1 " +
+            " AND isClazzStudent = 0")
+    public abstract UmProvider<PersonWithEnrollment> findAllEligibleTeachersWithEnrollmentForClassUid(long clazzUid);
+
+
+    @UmQuery("SELECT Person.* , (:clazzUid) AS clazzUid, " +
+            " (SELECT attendancePercentage FROM ClazzMember WHERE clazzMemberPersonUid = Person.personUid " +
+            "AND clazzMemberClazzUid = :clazzUid) AS attendancePercentage, " +
             " (SELECT clazzMemberActive FROM ClazzMember WHERE ClazzMember.clazzMemberClazzUid = :clazzUid " +
             " AND clazzMemberPersonUid = Person.personUid) AS enrolled, " +
             " (SELECT role FROM ClazzMember WHERE ClazzMember.clazzMemberClazzUid = :clazzUid " +
@@ -99,7 +116,7 @@ public abstract class ClazzMemberDao implements BaseDao<ClazzMember> {
             " SELECT Person.personUid FROM ClazzMember " +
             " LEFT  JOIN Person On ClazzMember.clazzMemberPersonUid = Person.personUid " +
             " WHERE ClazzMember.clazzMemberClazzUid = :clazzUid AND ClazzMember.clazzMemberActive = 1 " +
-            " AND ClazzMember.role = 1) AND Person.active = 1 ")
+            " ) AND Person.active = 1 ORDER BY clazzMemberRole DESC")
     public abstract UmProvider<PersonWithEnrollment> findAllPersonWithEnrollmentInClazzByClazzUid(long clazzUid);
 
 
@@ -114,7 +131,7 @@ public abstract class ClazzMemberDao implements BaseDao<ClazzMember> {
             " SELECT Person.personUid FROM ClazzMember " +
             " LEFT  JOIN Person On ClazzMember.clazzMemberPersonUid = Person.personUid " +
             " WHERE ClazzMember.clazzMemberClazzUid = :clazzUid AND ClazzMember.clazzMemberActive = 1 " +
-            " AND ClazzMember.role = 1) AND Person.active = 1 ORDER BY Person.firstNames ASC")
+            " ) AND Person.active = 1 ORDER BY clazzMemberRole DESC, Person.firstNames ASC")
     public abstract UmProvider<PersonWithEnrollment> findAllPersonWithEnrollmentInClazzByClazzUidSortByNameAsc(long clazzUid);
 
     @UmQuery("SELECT Person.* , (:clazzUid) AS clazzUid, " +
@@ -128,7 +145,7 @@ public abstract class ClazzMemberDao implements BaseDao<ClazzMember> {
             " SELECT Person.personUid FROM ClazzMember " +
             " LEFT  JOIN Person On ClazzMember.clazzMemberPersonUid = Person.personUid " +
             " WHERE ClazzMember.clazzMemberClazzUid = :clazzUid AND ClazzMember.clazzMemberActive = 1 " +
-            " AND ClazzMember.role = 1) AND Person.active = 1 ORDER BY attendancePercentage ASC")
+            " ) AND Person.active = 1 ORDER BY clazzMemberRole DESC, attendancePercentage ASC")
     public abstract UmProvider<PersonWithEnrollment> findAllPersonWithEnrollmentInClazzByClazzUidSortByAttendanceAsc(long clazzUid);
 
     @UmQuery("SELECT Person.* , (:clazzUid) AS clazzUid, " +
@@ -142,7 +159,7 @@ public abstract class ClazzMemberDao implements BaseDao<ClazzMember> {
             " SELECT Person.personUid FROM ClazzMember " +
             " LEFT  JOIN Person On ClazzMember.clazzMemberPersonUid = Person.personUid " +
             " WHERE ClazzMember.clazzMemberClazzUid = :clazzUid AND ClazzMember.clazzMemberActive = 1 " +
-            " AND ClazzMember.role = 1) AND Person.active = 1 ORDER BY attendancePercentage DESC")
+            " ) AND Person.active = 1 ORDER BY clazzMemberRole DESC, attendancePercentage DESC")
     public abstract UmProvider<PersonWithEnrollment> findAllPersonWithEnrollmentInClazzByClazzUidSortByAttendanceDesc(long clazzUid);
 
 
@@ -157,7 +174,7 @@ public abstract class ClazzMemberDao implements BaseDao<ClazzMember> {
             " SELECT Person.personUid FROM ClazzMember " +
             " LEFT  JOIN Person On ClazzMember.clazzMemberPersonUid = Person.personUid " +
             " WHERE ClazzMember.clazzMemberClazzUid = :clazzUid AND ClazzMember.clazzMemberActive = 1 " +
-            " AND ClazzMember.role = 1) AND Person.active = 1 ORDER BY Person.firstNames DESC")
+            " ) AND Person.active = 1 ORDER BY clazzMemberRole DESC, Person.firstNames DESC")
     public abstract UmProvider<PersonWithEnrollment> findAllPersonWithEnrollmentInClazzByClazzUidSortByNameDesc(long clazzUid);
 
 

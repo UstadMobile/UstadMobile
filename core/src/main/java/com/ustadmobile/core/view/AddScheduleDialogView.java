@@ -1,6 +1,8 @@
 package com.ustadmobile.core.view;
 
 
+import com.ustadmobile.lib.db.entities.Schedule;
+
 /**
  * AddScheduleDialog Core View extends Core UstadView. Will be implemented
  * on various implementations.
@@ -43,4 +45,10 @@ public interface AddScheduleDialogView extends UstadView, DismissableDialog {
      * @param hide  true if we want to hide it. false if we want to show it.
      */
     void hideDayPicker(boolean hide);
+
+    /**
+     * Updates the schedule for editing existing schedule
+     * @param schedule  The schedule object
+     */
+    void updateFields(Schedule schedule);
 }

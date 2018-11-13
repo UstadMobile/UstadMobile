@@ -20,6 +20,7 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
+import static com.ustadmobile.core.view.ClazzDetailEnrollStudentView.ARG_NEW_PERSON_TYPE;
 import static com.ustadmobile.core.view.ClazzListView.ARG_CLAZZ_UID;
 import static com.ustadmobile.core.view.ClazzDetailEnrollStudentView.ARG_NEW_PERSON;
 import static com.ustadmobile.core.view.PersonDetailView.ARG_PERSON_UID;
@@ -37,6 +38,7 @@ public class ClazzDetailEnrollStudentPresenter extends
         CommonHandlerPresenter<ClazzDetailEnrollStudentView> {
 
     private long currentClazzUid = -1L;
+    private int currentRole = -1;
     private UmProvider<PersonWithEnrollment> personWithEnrollmentUmProvider;
 
     private ClazzMemberDao clazzMemberDao = UmAppDatabase.getInstance(context).getClazzMemberDao();
@@ -48,6 +50,10 @@ public class ClazzDetailEnrollStudentPresenter extends
         //Set current Clazz being enrolled.
         if(arguments.containsKey(ARG_CLAZZ_UID)){
             currentClazzUid = (long) arguments.get(ARG_CLAZZ_UID);
+        }
+
+        if(arguments.containsKey(ARG_NEW_PERSON_TYPE)){
+            currentRole = (int) arguments.get(ARG_NEW_PERSON_TYPE);
         }
 
     }
@@ -63,8 +69,14 @@ public class ClazzDetailEnrollStudentPresenter extends
     public void onCreate(Hashtable savedState) {
         super.onCreate(savedState);
 
-        personWithEnrollmentUmProvider = UmAppDatabase.getInstance(context).getClazzMemberDao()
-                .findAllPeopleWithEnrollmentForClassUid(currentClazzUid);
+        if(currentRole == ClazzMember.ROLE_TEACHER){
+            personWithEnrollmentUmProvider = UmAppDatabase.getInstance(context).getClazzMemberDao()
+                    .findAllEligibleTeachersWithEnrollmentForClassUid(currentClazzUid);
+        }else{
+            personWithEnrollmentUmProvider = UmAppDatabase.getInstance(context).getClazzMemberDao()
+                    .findAllPeopleWithEnrollmentForClassUid(currentClazzUid);
+        }
+
         setProviderToView();
 
     }
@@ -115,6 +127,7 @@ public class ClazzDetailEnrollStudentPresenter extends
                         Hashtable<String, Object> args = new Hashtable<>();
                         args.put(ARG_CLAZZ_UID, currentClazzUid);
                         args.put(ARG_PERSON_UID, result);
+                        args.put(ARG_NEW_PERSON_TYPE, currentRole);
                         args.put(ARG_NEW_PERSON, "true");
                         impl.go(PersonEditView.VIEW_NAME, args, view.getContext());
                     }
@@ -188,7 +201,11 @@ public class ClazzDetailEnrollStudentPresenter extends
                         //Create the ClazzMember
                         ClazzMember newClazzMember = new ClazzMember();
                         newClazzMember.setClazzMemberClazzUid(currentClazzUid);
-                        newClazzMember.setRole(ClazzMember.ROLE_STUDENT);
+                        if(currentRole == ClazzMember.ROLE_TEACHER){
+                            newClazzMember.setRole(ClazzMember.ROLE_TEACHER);
+                        }else {
+                            newClazzMember.setRole(ClazzMember.ROLE_STUDENT);
+                        }
                         newClazzMember.setClazzMemberPersonUid(person.getPersonUid());
                         newClazzMember.setDateJoined(System.currentTimeMillis());
                         newClazzMember.setClazzMemberActive(true);

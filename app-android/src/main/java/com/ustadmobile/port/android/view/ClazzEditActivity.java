@@ -74,6 +74,7 @@ public class ClazzEditActivity extends UstadBaseActivity implements ClazzEditVie
         toolbar = findViewById(R.id.activity_clazz_edit_toolbar);
         setSupportActionBar(toolbar);
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
+        toolbar.setTitle(R.string.class_setup);
 
         //Recycler View:
         scheduleRecyclerView = findViewById(

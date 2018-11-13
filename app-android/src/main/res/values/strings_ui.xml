@@ -353,7 +353,7 @@ This is the one you should be editing. The one in /core/locale/main/values/strin
     <string name="add_session">Add session</string>
     <string name="weekly">Weekly</string>
     <string name="once">Once</string>
-    <string name="daily">Every day</string>
+    <string name="daily">Every working day</string>
     <string name="monthly">Monthly</string>
     <string name="yearly">Yearly</string>
     <string name="sunday">Sunday</string>
@@ -403,6 +403,13 @@ This is the one you should be editing. The one in /core/locale/main/values/strin
     <string name="partial">Partial</string>
     <string name="teachers_literal">Teachers</string>
     <string name="add_teacher">Add teacher</string>
+    <string name="enroll_new_teacher">Enroll new teacher</string>
+    <string name="view_more_reports_and_analytics">View more reports and analytics</string>
+    <string name="your_summary">Your summary</string>
+    <string name="average_attendance_is">Average attendance is </string>
+    <string name="up">up</string>
+    <string name="down">down</string>
+    <string name="from_last_week">from last week</string>
 
 
 

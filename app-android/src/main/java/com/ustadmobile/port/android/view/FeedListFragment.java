@@ -39,6 +39,8 @@ public class FeedListFragment extends UstadBaseFragment implements FeedListView,
     private RecyclerView.LayoutManager mRecyclerLayoutManager;
     private Toolbar toolbar;
 
+    private TextView numClassesView, numStudentsView, attendancePercentageView;
+
     private FeedListPresenter mPresenter;
 
     /**
@@ -165,6 +167,12 @@ public class FeedListFragment extends UstadBaseFragment implements FeedListView,
                 LinearLayoutManager.VERTICAL);
         mRecyclerView.addItemDecoration(dividerItemDecoration);
 
+
+        numClassesView = rootContainer.findViewById(R.id.fragment_feed_list_report_card_num_classes);
+        numStudentsView = rootContainer.findViewById(R.id.fragment_feed_list_report_card_num_students);
+        attendancePercentageView =
+                rootContainer.findViewById(R.id.fragment_feed_list_report_card_attendance_percentage);
+
         //Create presetner and call its onCreate()
         mPresenter = new FeedListPresenter(this, UMAndroidUtil.bundleToHashtable(
                 getArguments()), this);
@@ -187,6 +195,40 @@ public class FeedListFragment extends UstadBaseFragment implements FeedListView,
         data.observe(this, recyclerAdapter::submitList);
 
         mRecyclerView.setAdapter(recyclerAdapter);
+    }
+
+
+    @Override
+    public void updateNumClasses(int num) {
+
+        runOnUiThread(() -> numClassesView.setText(Integer.toString(num)));
+    }
+
+    @Override
+    public void updateNumStudents(int num) {
+        runOnUiThread(() ->numStudentsView.setText(Integer.toString(num)));
+    }
+
+    @Override
+    public void updateAttendancePercentage(int per) {
+        String concatString = Integer.toString(per) + "%";
+        runOnUiThread(() -> attendancePercentageView.setText(concatString));
+
+    }
+
+    //TODO: Sprint 4
+    @Override
+    public void updateAttendanceTrend(int trend, int per) {
+        switch(trend){
+            case FEED_LIST_ATTENDANCE_TREND_UP:
+                break;
+            case FEED_LIST_ATTENDANCE_TREND_DOWN:
+                break;
+            case FEED_LIST_ATTENDANCE_TREND_FLAT:
+                break;
+            default:
+                break;
+        }
     }
 
 

@@ -97,10 +97,6 @@ public class ClazzStudentListFragment extends UstadBaseFragment implements Clazz
                 UMAndroidUtil.bundleToHashtable(getArguments()), this);
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
 
-        //FAB
-        FloatingTextButton fab = rootContainer.findViewById(R.id.class_student_list_add_student_fab);
-        fab.setOnClickListener(v -> mPresenter.goToAddStudentFragment());
-
         //Sort handler
         sortSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override

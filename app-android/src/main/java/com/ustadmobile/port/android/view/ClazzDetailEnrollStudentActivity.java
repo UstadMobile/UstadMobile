@@ -16,6 +16,7 @@ import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.ClazzDetailEnrollStudentPresenter;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.view.ClazzDetailEnrollStudentView;
+import com.ustadmobile.lib.db.entities.ClazzMember;
 import com.ustadmobile.lib.db.entities.PersonWithEnrollment;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
@@ -42,6 +43,7 @@ public class ClazzDetailEnrollStudentActivity extends UstadBaseActivity implemen
     private ClazzDetailEnrollStudentPresenter mPresenter;
 
     private long currentClazzUid;
+    private int currentRole;
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -63,13 +65,27 @@ public class ClazzDetailEnrollStudentActivity extends UstadBaseActivity implemen
 
         //Toolbar:
         toolbar = findViewById(R.id.activity_clazz_detail_enroll_student_toolbar);
-        toolbar.setTitle(getText(R.string.add_student));
+
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         //Get the clazz Uid from the arguments
         if(getIntent().hasExtra(ARG_CLAZZ_UID)){
             currentClazzUid = getIntent().getLongExtra(ARG_CLAZZ_UID, -1L);
+        }
+
+        if(getIntent().hasExtra(ARG_NEW_PERSON_TYPE)){
+            currentRole = getIntent().getIntExtra(ARG_NEW_PERSON_TYPE, -1);
+        }
+
+        Button enrollNewClazzMemberButton =
+                findViewById(R.id.activity_clazz_Detail_enroll_student_new);
+
+        if(currentRole == ClazzMember.ROLE_TEACHER){
+            toolbar.setTitle(getText(R.string.add_teacher));
+            enrollNewClazzMemberButton.setText(getText(R.string.enroll_new_teacher));
+        }else{
+            toolbar.setTitle(getText(R.string.add_student));
         }
 
         //RecyclerView:
@@ -90,15 +106,6 @@ public class ClazzDetailEnrollStudentActivity extends UstadBaseActivity implemen
         //FAB
         FloatingTextButton fab = findViewById(R.id.activity_clazz_detail_enroll_student_fab_done);
         fab.setOnClickListener(v -> mPresenter.handleClickDone());
-
-        //TODO:
-        //Filter / Sort
-        //findViewById(R.id.activity_clazz_detail_enroll_student_filter)
-        //        .setOnClickListener(mPresenter.handleChangeSortOrder(...));
-
-        //Search:
-        //findViewById(R.id.activity_clazz_detail_enroll_student_search)
-        //        .setOnClickListener(mPresenter.handleClickSearch(...););
 
     }
 

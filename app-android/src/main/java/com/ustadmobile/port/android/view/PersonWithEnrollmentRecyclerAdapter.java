@@ -42,18 +42,9 @@ public class PersonWithEnrollmentRecyclerAdapter
     private boolean showEnrollment;
 
     private int currentTop = -1;
+    boolean teacherAdded = false;
 
-    private int headingIdT;
-    private int headingImageIdT;
-    private int addClazzMemberIdT;
-    private int hLineIdT;
-    private int headingIdS;
-    private int headingImageIdS;
-    private int addClazzMemberIdS;
-    private int hLineIdS;
-
-    private int addClazzMemberCLId = View.generateViewId();
-    ConstraintLayout addClazzMemberCL;
+    private int addCMCLT, addCMCLS;
 
     PersonWithEnrollment previousPerson = null;
 
@@ -168,25 +159,8 @@ public class PersonWithEnrollmentRecyclerAdapter
             @NonNull PersonWithEnrollmentRecyclerAdapter.ClazzLogDetailViewHolder holder,
             int position){
 
-        //1. Check if empty of not.
-
-        //2. Check if start of query
-
-        //3. If start -> Create Teacher heading as well as add Teacher entry.
-
-        //4. If not, check if personWithEnrollment is a student and previousPerson is teacher
-
-        //5. If so, add Student and add Student entry.
-
-        //6. Add the Student entry.
-
-        //7. If  not, add teacher entry
-
-        //1. Check if empty or not.
 
         PersonWithEnrollment personWithEnrollment = getItem(position);
-
-        //if this is the first student... add header for students, add student button, etc
 
         assert personWithEnrollment != null;
         String studentName = personWithEnrollment.getFirstNames() + " " +
@@ -287,7 +261,9 @@ public class PersonWithEnrollmentRecyclerAdapter
                 mPresenter.handleSecondaryPressed(arguments.entrySet().iterator().next());
             });
 
-        }else{
+        }
+
+        if(!showEnrollment && showAttendance){
 
             if (position == 0) {//First Entry. Add Teacher and Add Teacher item
                 addHeadingAndNew(cl, ClazzMember.ROLE_TEACHER);
@@ -306,6 +282,27 @@ public class PersonWithEnrollmentRecyclerAdapter
                 }
             }
         }
+
+        if(personWithEnrollment.getClazzMemberRole() == ClazzMember.ROLE_TEACHER){
+
+            trafficLight.setVisibility(View.INVISIBLE);
+            attendanceTextView.setVisibility(View.INVISIBLE);
+
+            ConstraintSet constraintSet = new ConstraintSet();
+            constraintSet.clone(cl);
+
+            //connect divider's top to image's bottom
+            constraintSet.connect(R.id.item_studentlist_student_simple_horizontal_divider,
+                    ConstraintSet.TOP, R.id.item_studentlist_student_simple_student_image,
+                    ConstraintSet.BOTTOM, 16);
+            constraintSet.connect(R.id.item_studentlist_student_simple_attendance_percentage,
+                    ConstraintSet.TOP, R.id.item_studentlist_student_simple_student_title,
+                    ConstraintSet.BOTTOM, 0);
+            constraintSet.connect(R.id.item_studentlist_student_simple_attendance_trafficlight,
+                    ConstraintSet.TOP, R.id.item_studentlist_student_simple_student_title,
+                    ConstraintSet.BOTTOM, 0);
+            constraintSet.applyTo(cl);
+        }
     }
 
 
@@ -318,52 +315,59 @@ public class PersonWithEnrollmentRecyclerAdapter
     private void removeAllAddClazzMemberView(ConstraintLayout cl,
                      @NonNull PersonWithEnrollmentRecyclerAdapter.ClazzLogDetailViewHolder holder){
 
-        View headingView = holder.itemView.findViewById(headingIdT);
-        View headingImageView = holder.itemView.findViewById(headingImageIdT);
-        View addClazzMemberView = holder.itemView.findViewById(addClazzMemberIdT);
-        View hLineView = holder.itemView.findViewById(hLineIdT);
-
-        View headingViewS = holder.itemView.findViewById(headingIdS);
-        View headingImageViewS = holder.itemView.findViewById(headingImageIdS);
-        View addClazzMemberViewS = holder.itemView.findViewById(addClazzMemberIdS);
-        View hLineViewS = holder.itemView.findViewById(hLineIdS);
-
-        cl.removeView(headingView);
-        cl.removeView(headingImageView);
-        cl.removeView(addClazzMemberView);
-        cl.removeView(hLineView);
-
-        cl.removeView(headingViewS);
-        cl.removeView(headingImageViewS);
-        cl.removeView(addClazzMemberViewS);
-        cl.removeView(hLineViewS);
-
-        if(headingView != null){
-            headingView.setVisibility(View.INVISIBLE);
+//        View headingView = holder.itemView.findViewById(headingIdT);
+//        View headingImageView = holder.itemView.findViewById(headingImageIdT);
+//        View addClazzMemberView = holder.itemView.findViewById(addClazzMemberIdT);
+//        View hLineView = holder.itemView.findViewById(hLineIdT);
+//
+//        View headingViewS = holder.itemView.findViewById(headingIdS);
+//        View headingImageViewS = holder.itemView.findViewById(headingImageIdS);
+//        View addClazzMemberViewS = holder.itemView.findViewById(addClazzMemberIdS);
+//        View hLineViewS = holder.itemView.findViewById(hLineIdS);
+        View addCMCLViewS = holder.itemView.findViewById(addCMCLS);
+        View addCMCLViewT = holder.itemView.findViewById(addCMCLT);
+//        cl.removeView(headingView);
+//        cl.removeView(headingImageView);
+//        cl.removeView(addClazzMemberView);
+//        cl.removeView(hLineView);
+//
+//        cl.removeView(headingViewS);
+//        cl.removeView(headingImageViewS);
+//        cl.removeView(addClazzMemberViewS);
+//        cl.removeView(hLineViewS);
+        cl.removeView(addCMCLViewS);
+        cl.removeView(addCMCLViewT);
+//        if(headingView != null){
+//            headingView.setVisibility(View.INVISIBLE);
+//        }
+//        if(headingImageView != null){
+//            headingImageView.setVisibility(View.INVISIBLE);
+//        }
+//        if(addClazzMemberView != null){
+//            addClazzMemberView.setVisibility(View.INVISIBLE);
+//        }
+//        if(hLineView != null){
+//            hLineView.setVisibility(View.INVISIBLE);
+//        }
+//
+//        if(headingViewS != null){
+//            headingViewS.setVisibility(View.INVISIBLE);
+//        }
+//        if(headingImageViewS != null){
+//            headingImageViewS.setVisibility(View.INVISIBLE);
+//        }
+//        if(addClazzMemberViewS != null){
+//            addClazzMemberViewS.setVisibility(View.INVISIBLE);
+//        }
+//        if(hLineViewS != null){
+//            hLineViewS.setVisibility(View.INVISIBLE);
+//        }
+        if(addCMCLViewS != null){
+            addCMCLViewS.setVisibility(View.INVISIBLE);
         }
-        if(headingImageView != null){
-            headingImageView.setVisibility(View.INVISIBLE);
+        if(addCMCLViewT != null){
+            addCMCLViewT.setVisibility(View.INVISIBLE);
         }
-        if(addClazzMemberView != null){
-            addClazzMemberView.setVisibility(View.INVISIBLE);
-        }
-        if(hLineView != null){
-            hLineView.setVisibility(View.INVISIBLE);
-        }
-
-        if(headingViewS != null){
-            headingViewS.setVisibility(View.INVISIBLE);
-        }
-        if(headingImageViewS != null){
-            headingImageViewS.setVisibility(View.INVISIBLE);
-        }
-        if(addClazzMemberViewS != null){
-            addClazzMemberViewS.setVisibility(View.INVISIBLE);
-        }
-        if(hLineViewS != null){
-            hLineViewS.setVisibility(View.INVISIBLE);
-        }
-
     }
 
     /**
@@ -373,6 +377,10 @@ public class PersonWithEnrollmentRecyclerAdapter
      */
     public void addHeadingAndNew(ConstraintLayout cl, int role){
 
+        ConstraintLayout addCl = new ConstraintLayout(theContext);
+        int defaultPadding = getDp(DEFAULT_PADDING);
+        int defaultPaddingBy2 = getDp(DEFAULT_PADDING/2);
+
         TextView clazzMemberRoleHeadingTextView = new TextView(theContext);
         clazzMemberRoleHeadingTextView.setTextColor(Color.BLACK);
         clazzMemberRoleHeadingTextView.setTextSize(16);
@@ -381,6 +389,7 @@ public class PersonWithEnrollmentRecyclerAdapter
         int addIconResId = getIconRes(ADD_PERSON_ICON);
         ImageView addPersonImageView = new ImageView(theContext);
         addPersonImageView.setImageResource(addIconResId);
+
         TextView addClazzMemberTextView = new TextView(theContext);
         addClazzMemberTextView.setTextColor(Color.BLACK);
         addClazzMemberTextView.setTextSize(16);
@@ -399,31 +408,32 @@ public class PersonWithEnrollmentRecyclerAdapter
         int headingImageId = View.generateViewId();
         int addClazzMemberId = View.generateViewId();
         int hLineId = View.generateViewId();
+        int addCMCL = View.generateViewId();
 
 
+        //Set strings and handler on the components based on role.
         if (role == ClazzMember.ROLE_STUDENT) {
             addClazzMemberTextView.setText(getText(R.string.add_student));
             clazzMemberRoleHeadingTextView.setText(getText(R.string.students_literal));
-            addClazzMemberTextView.setOnClickListener(v -> mPresenter.handleCommonPressed(-1L));
+            addCl.setOnClickListener( v -> mPresenter.handleCommonPressed(-1L));
 
             //Storing in separate variables so we can remove them.
-            headingIdS = headingId;
-            headingImageIdS = headingImageId;
-            addClazzMemberIdS = addClazzMemberId;
-            hLineIdS = hLineId;
+            addCMCLS = addCMCL;
 
         } else {
 
+            teacherAdded = false;
+
             addClazzMemberTextView.setText(getText(R.string.add_teacher));
             clazzMemberRoleHeadingTextView.setText(getText(R.string.teachers_literal));
-            addClazzMemberTextView.setOnClickListener(v -> mPresenter.handleSecondaryPressed(-1L));
-            currentTop = cl.getId();
+            addCl.setOnClickListener(v -> mPresenter.handleSecondaryPressed(-1L));
 
             //Storing in separate variables so we can remove them.
-            headingIdT = headingId;
-            headingImageIdT = headingImageId;
-            addClazzMemberIdT = addClazzMemberId;
-            hLineIdT = hLineId;
+            addCMCLT = addCMCL;
+
+            //For Teachers (which will always be the start of the recycler view: we keep the top as
+            // the top of the whole inner constraint layout .
+            currentTop = addCMCL;
         }
 
         //Set ids for all components.
@@ -431,73 +441,121 @@ public class PersonWithEnrollmentRecyclerAdapter
         addClazzMemberTextView.setId(addClazzMemberId);
         horizontalLine.setId(hLineId);
         addPersonImageView.setId(headingImageId);
-        
-        //Add view components to the CL
-        cl.addView(clazzMemberRoleHeadingTextView);
-        cl.addView(addPersonImageView);
-        cl.addView(addClazzMemberTextView);
-        cl.addView(horizontalLine);
+        addCl.setId(addCMCL);
 
-        int defaultPadding = getDp(DEFAULT_PADDING);
-        int defaultPaddingBy2 = getDp(DEFAULT_PADDING/2);
+        //Add these components to the new "add" Constraint Layout
+        addCl.addView(clazzMemberRoleHeadingTextView);
+        addCl.addView(addPersonImageView);
+        addCl.addView(addClazzMemberTextView);
+        addCl.addView(horizontalLine);
 
-        ConstraintSet constraintSetForHeader = new ConstraintSet();
-        constraintSetForHeader.clone(cl);
+        ConstraintSet constraintSetForHeader2 = new ConstraintSet();
+        constraintSetForHeader2.clone(addCl);
 
         //[Teachers / Students Heading] TOP to TOP of whichever the top
         //  (can be Parent or horizontal line of previous item)
-        constraintSetForHeader.connect(
+        constraintSetForHeader2.connect(
                 headingId, ConstraintSet.TOP,
-                currentTop, ConstraintSet.TOP,
+                addCl.getId(), ConstraintSet.TOP,
                 defaultPaddingBy2);
+
         //[Teachers / Students Heading] START to START of PARENT (always)
-        constraintSetForHeader.connect(
+        constraintSetForHeader2.connect(
                 headingId, ConstraintSet.START,
-                cl.getId(), ConstraintSet.START,
+                addCl.getId(), ConstraintSet.START,
                 defaultPaddingBy2);
 
         //[Add teacher/student Icon] START to START of Parent (always)
-        constraintSetForHeader.connect(
+        constraintSetForHeader2.connect(
                 headingImageId, ConstraintSet.START,
-                cl.getId(), ConstraintSet.START, defaultPadding);
+                addCl.getId(), ConstraintSet.START, defaultPadding);
 
         //[Add teacher/student Icon] TOP to BOTTOM of Heading
-        constraintSetForHeader.connect(
+        constraintSetForHeader2.connect(
                 headingImageId, ConstraintSet.TOP,
                 headingId, ConstraintSet.BOTTOM, defaultPaddingBy2);
 
         //[Add teacher/student Text]  START to Icon END (always)
-        constraintSetForHeader.connect(
+        constraintSetForHeader2.connect(
                 addClazzMemberId, ConstraintSet.START,
                 headingImageId, ConstraintSet.END, defaultPadding);
 
         //[Add teacher/student Text] TOP to [Teacher / Students Heading] Bottom (always)
-        constraintSetForHeader.connect(
+        constraintSetForHeader2.connect(
                 addClazzMemberId, ConstraintSet.TOP,
                 headingId, ConstraintSet.BOTTOM, defaultPaddingBy2);
 
-        //[Add Teacher/Student HLine] TOP to [Teacher / Student Icon] BOTTON (always)
-        constraintSetForHeader.connect(
+        //[Add Teacher/Student HLine] TOP to [Teacher / Student Icon] BOTTOM (always)
+        constraintSetForHeader2.connect(
                 hLineId, ConstraintSet.TOP,
                 headingImageId, ConstraintSet.BOTTOM, defaultPaddingBy2);
 
         //[Add Teacher/Student HLine] START to Parent (always)
-        constraintSetForHeader.connect(hLineId, ConstraintSet.START,
-                cl.getId(), ConstraintSet.START, 0);
+        constraintSetForHeader2.connect(hLineId, ConstraintSet.START,
+                addCl.getId(), ConstraintSet.START, 0);
 
         //Current Person image TOP to BOTTOM of horizontal line (always)
-        constraintSetForHeader.connect(
+        constraintSetForHeader2.connect(
                 R.id.item_studentlist_student_simple_student_image,ConstraintSet.TOP,
                 hLineId, ConstraintSet.BOTTOM, defaultPaddingBy2);
 
         //Current Person title TOP to BOTTOM of horizontal line (always)
-        constraintSetForHeader.connect(
+        constraintSetForHeader2.connect(
                 R.id.item_studentlist_student_simple_student_title, ConstraintSet.TOP,
                 hLineId, ConstraintSet.BOTTOM, defaultPaddingBy2);
 
+        constraintSetForHeader2.applyTo(addCl);
+
+        cl.addView(addCl);
+
+        ConstraintSet constraintSetForHeader = new ConstraintSet();
+        constraintSetForHeader.clone(cl);
+
+
+        if(teacherAdded){
+
+            // [Add CL Student ] always on top to top parent.
+            constraintSetForHeader.connect(
+                    addCl.getId(), ConstraintSet.TOP,
+                    currentTop, ConstraintSet.BOTTOM, defaultPaddingBy2);
+
+            // [ Add CL [Teachers] ] always start to start parent.
+            constraintSetForHeader.connect(
+                    addCl.getId(), ConstraintSet.START,
+                    cl.getId(), ConstraintSet.START, defaultPaddingBy2);
+
+        } else {
+
+            // [Add CL Teacher ] always on top to top parent.
+            constraintSetForHeader.connect(
+                    addCl.getId(), ConstraintSet.TOP,
+                    cl.getId(), ConstraintSet.TOP, defaultPaddingBy2);
+
+            // [ Add CL [Teachers] ] always start to start parent.
+            constraintSetForHeader.connect(
+                    addCl.getId(), ConstraintSet.START,
+                    cl.getId(), ConstraintSet.START, defaultPaddingBy2);
+        }
+
+        //Current Person image TOP to BOTTOM of [ Add CL ] (always)
+        constraintSetForHeader.connect(
+                R.id.item_studentlist_student_simple_student_image,ConstraintSet.TOP,
+                addCl.getId(), ConstraintSet.BOTTOM, defaultPaddingBy2);
+
+        //Current Person title TOP to BOTTOM of [ Add CL ] (always)
+        constraintSetForHeader.connect(
+                R.id.item_studentlist_student_simple_student_title, ConstraintSet.TOP,
+                addCl.getId(), ConstraintSet.BOTTOM, defaultPaddingBy2);
+
+
         constraintSetForHeader.applyTo(cl);
 
-        currentTop = hLineId;
+        //Update the top for the next
+        currentTop = addCl.getId();
+
+        if(role == ClazzMember.ROLE_TEACHER){
+            teacherAdded = true;
+        }
 
     }
 }
