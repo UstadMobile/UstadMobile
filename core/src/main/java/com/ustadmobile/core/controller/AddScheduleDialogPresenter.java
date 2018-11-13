@@ -36,7 +36,7 @@ public class AddScheduleDialogPresenter  extends UstadBaseController<AddSchedule
         }
 
         if(currentScheduleUid > 0){
-            scheduleDao.findByUidAsync(currentClazzUid, new UmCallback<Schedule>() {
+            scheduleDao.findByUidAsync(currentScheduleUid, new UmCallback<Schedule>() {
                 @Override
                 public void onSuccess(Schedule result) {
                     view.updateFields(result);

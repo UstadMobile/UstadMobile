@@ -145,6 +145,7 @@ public class ClazzEditActivity extends UstadBaseActivity implements ClazzEditVie
         toolbar.setTitle(titleName);
         setSupportActionBar(toolbar);
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
+        toolbar.setTitle(R.string.class_setup);
     }
 
     // Diff callback.
