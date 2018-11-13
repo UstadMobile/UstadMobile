@@ -3,6 +3,7 @@ package com.ustadmobile.core.db.dao;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQueryFindByPrimaryKey;
+import com.ustadmobile.lib.database.annotation.UmUpdate;
 
 import java.util.List;
 
@@ -43,5 +44,8 @@ public interface BaseDao<T> {
      */
     @UmQueryFindByPrimaryKey
     T findByUid(long uid);
+
+    @UmUpdate
+    void update(T entity);
 
 }

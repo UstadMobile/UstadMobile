@@ -568,6 +568,11 @@ public abstract class AbstractDbProcessor {
                 element.getSimpleName();
     }
 
+    protected String formatMethodForErrorMessage(ExecutableElement method, TypeElement implementingClass) {
+        return ((TypeElement)method.getEnclosingElement()).getQualifiedName() + "." +
+                method.getSimpleName() + " implementing in: " + implementingClass.getQualifiedName();
+    }
+
 
 
 }
