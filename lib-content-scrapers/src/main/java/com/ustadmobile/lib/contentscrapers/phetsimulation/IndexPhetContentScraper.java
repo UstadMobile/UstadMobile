@@ -156,21 +156,7 @@ public class IndexPhetContentScraper {
                 contentEntryDao.updateContentEntry(englishSimContentEntry);
             }
 
-            ContentEntryRelatedEntryJoin englishEnglishJoin = contentEntryRelatedJoinDao.findPrimaryByTranslation(englishSimContentEntry.getContentEntryUid());
-            if (englishEnglishJoin == null) {
-                englishEnglishJoin = new ContentEntryRelatedEntryJoin();
-                englishEnglishJoin.setCerejRelLanguage(englishSimContentEntry.getPrimaryLanguage());
-                englishEnglishJoin.setCerejContentEntryUid(englishSimContentEntry.getContentEntryUid());
-                englishEnglishJoin.setCerejRelatedEntryUid(englishSimContentEntry.getContentEntryUid());
-                englishEnglishJoin.setRelType(ContentEntryRelatedEntryJoin.REL_TYPE_TRANSLATED_VERSION);
-                englishEnglishJoin.setCerejUid(contentEntryRelatedJoinDao.insert(englishEnglishJoin));
-            } else {
-                englishEnglishJoin.setCerejRelLanguage(englishSimContentEntry.getPrimaryLanguage());
-                englishEnglishJoin.setCerejContentEntryUid(englishSimContentEntry.getContentEntryUid());
-                englishEnglishJoin.setCerejRelatedEntryUid(englishSimContentEntry.getContentEntryUid());
-                englishEnglishJoin.setRelType(ContentEntryRelatedEntryJoin.REL_TYPE_TRANSLATED_VERSION);
-                contentEntryRelatedJoinDao.updateSimTranslationJoin(englishEnglishJoin);
-            }
+            ContentScraperUtil.insertOrUpdateRelatedContentJoin(contentEntryRelatedJoinDao, englishSimContentEntry, englishSimContentEntry, ContentEntryRelatedEntryJoin.REL_TYPE_TRANSLATED_VERSION);
 
             PhetContentScraper scraper = new PhetContentScraper(simulationUrl, destinationDirectory);
             try {
@@ -222,22 +208,7 @@ public class IndexPhetContentScraper {
                         int translationsCount = 1;
                         for (ContentEntry translation : translationList) {
 
-                            ContentEntryRelatedEntryJoin relatedTranslationJoin = contentEntryRelatedJoinDao.findPrimaryByTranslation(translation.getContentEntryUid());
-                            if (relatedTranslationJoin == null) {
-                                relatedTranslationJoin = new ContentEntryRelatedEntryJoin();
-                                relatedTranslationJoin.setCerejRelLanguage(translation.getPrimaryLanguage());
-                                relatedTranslationJoin.setCerejContentEntryUid(englishSimContentEntry.getContentEntryUid());
-                                relatedTranslationJoin.setCerejRelatedEntryUid(translation.getContentEntryUid());
-                                relatedTranslationJoin.setRelType(ContentEntryRelatedEntryJoin.REL_TYPE_TRANSLATED_VERSION);
-                                relatedTranslationJoin.setCerejUid(contentEntryRelatedJoinDao.insert(relatedTranslationJoin));
-                            } else {
-                                relatedTranslationJoin.setCerejRelLanguage(translation.getPrimaryLanguage());
-                                relatedTranslationJoin.setCerejContentEntryUid(englishSimContentEntry.getContentEntryUid());
-                                relatedTranslationJoin.setCerejRelatedEntryUid(translation.getContentEntryUid());
-                                relatedTranslationJoin.setCerejUid(contentEntryRelatedJoinDao.insert(relatedTranslationJoin));
-                                relatedTranslationJoin.setRelType(ContentEntryRelatedEntryJoin.REL_TYPE_TRANSLATED_VERSION);
-                                contentEntryRelatedJoinDao.updateSimTranslationJoin(relatedTranslationJoin);
-                            }
+                            ContentScraperUtil.insertOrUpdateRelatedContentJoin(contentEntryRelatedJoinDao, translation, englishSimContentEntry, ContentEntryRelatedEntryJoin.REL_TYPE_TRANSLATED_VERSION);
 
                             String langCode = translation.getPrimaryLanguage() +
                                     ((translation.getPrimaryLanguageCountry() != null) ? "-" + translation.getPrimaryLanguageCountry() : "");

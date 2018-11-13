@@ -4,6 +4,8 @@ import com.ustadmobile.core.db.dao.ClazzDao;
 import com.ustadmobile.core.db.dao.ClazzMemberDao;
 import com.ustadmobile.core.db.dao.ContainerFileDao;
 import com.ustadmobile.core.db.dao.ContainerFileEntryDao;
+import com.ustadmobile.core.db.dao.ContentCategoryDao;
+import com.ustadmobile.core.db.dao.ContentCategorySchemaDao;
 import com.ustadmobile.core.db.dao.ContentEntryContentCategoryJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryContentEntryFileJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryDao;
@@ -20,6 +22,7 @@ import com.ustadmobile.core.db.dao.DownloadSetDao;
 import com.ustadmobile.core.db.dao.DownloadSetItemDao;
 import com.ustadmobile.core.db.dao.EntryStatusResponseDao;
 import com.ustadmobile.core.db.dao.HttpCachedEntryDao;
+import com.ustadmobile.core.db.dao.LanguageDao;
 import com.ustadmobile.core.db.dao.NetworkNodeDao;
 import com.ustadmobile.core.db.dao.OpdsEntryDao;
 import com.ustadmobile.core.db.dao.OpdsEntryParentToChildJoinDao;
@@ -37,6 +40,8 @@ import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.ClazzMember;
 import com.ustadmobile.lib.db.entities.ContainerFile;
 import com.ustadmobile.lib.db.entities.ContainerFileEntry;
+import com.ustadmobile.lib.db.entities.ContentCategory;
+import com.ustadmobile.lib.db.entities.ContentCategorySchema;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.ContentEntryContentCategoryJoin;
 import com.ustadmobile.lib.db.entities.ContentEntryContentEntryFileJoin;
@@ -53,6 +58,7 @@ import com.ustadmobile.lib.db.entities.DownloadSet;
 import com.ustadmobile.lib.db.entities.DownloadSetItem;
 import com.ustadmobile.lib.db.entities.EntryStatusResponse;
 import com.ustadmobile.lib.db.entities.HttpCachedEntry;
+import com.ustadmobile.lib.db.entities.Language;
 import com.ustadmobile.lib.db.entities.NetworkNode;
 import com.ustadmobile.lib.db.entities.OpdsEntry;
 import com.ustadmobile.lib.db.entities.OpdsEntryParentToChildJoin;
@@ -74,7 +80,9 @@ import com.ustadmobile.lib.db.entities.PersonCustomFieldValue;
         PersonCustomField.class, PersonCustomFieldValue.class,
         ContentEntry.class, ContentEntryContentCategoryJoin.class,
         ContentEntryContentEntryFileJoin.class, ContentEntryFile.class,
-        ContentEntryParentChildJoin.class, ContentEntryRelatedEntryJoin.class, ContentEntryFileStatus.class
+        ContentEntryParentChildJoin.class, ContentEntryRelatedEntryJoin.class,
+        ContentEntryFileStatus.class, ContentCategorySchema.class,
+        ContentCategory.class, Language.class
 })
 public abstract class UmAppDatabase{
 
@@ -162,6 +170,12 @@ public abstract class UmAppDatabase{
     public abstract ContentEntryRelatedEntryJoinDao getContentEntryRelatedEntryJoinDao();
 
     public abstract ContentEntryFileStatusDao getContentEntryFileStatusDao();
+
+    public abstract ContentCategorySchemaDao getContentCategorySchemaDao();
+
+    public abstract ContentCategoryDao getContentCategoryDao();
+
+    public abstract LanguageDao getLanguageDao();
 
     @UmDbContext
     public abstract Object getContext();

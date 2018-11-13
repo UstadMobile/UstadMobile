@@ -104,7 +104,8 @@ public class TestPrathamContentScraper {
         doReturn(mockWebServer.url("/content/com/ustadmobile/lib/contentscrapers/africanbooks/asb18187.epub").url()).when(scraper).generateEPubUrl(Mockito.any(), Mockito.anyString());
         doReturn(mockWebServer.url("/json/com/ustadmobile/lib/contentscrapers/africanbooks/abslist.txt").url()).when(scraper).generatePublishUrl(Mockito.any(), Mockito.anyString());
         doReturn(mockWebServer.url("/json/com/ustadmobile/lib/contentscrapers/africanbooks/abslist.txt").url()).when(scraper).generateMakeUrl(Mockito.any(), Mockito.anyString());
-
+        doReturn(mockWebServer.url("/json/com/ustadmobile/lib/contentscrapers/africanbooks/asbreader.txt").url().toString()).when(scraper).generateReaderUrl(Mockito.any(), Mockito.anyString());
+        doReturn(mockWebServer.url("/json/com/ustadmobile/lib/contentscrapers/africanbooks/asburl.txt").url().toString()).when(scraper).getAfricanStoryBookUrl();
 
         scraper.findContent(tmpDir);
 

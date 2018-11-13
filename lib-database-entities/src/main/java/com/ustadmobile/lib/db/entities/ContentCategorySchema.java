@@ -9,18 +9,18 @@ import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 @UmEntity
 public class ContentCategorySchema {
 
-    @UmPrimaryKey
-    private int contentCategorySchemaUid;
+    @UmPrimaryKey(autoIncrement = true)
+    private long contentCategorySchemaUid;
 
     private String schemaName;
 
     private String schemaUrl;
 
-    public int getContentCategorySchemaUid() {
+    public long getContentCategorySchemaUid() {
         return contentCategorySchemaUid;
     }
 
-    public void setContentCategorySchemaUid(int contentCategorySchemaUid) {
+    public void setContentCategorySchemaUid(long contentCategorySchemaUid) {
         this.contentCategorySchemaUid = contentCategorySchemaUid;
     }
 

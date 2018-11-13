@@ -2,11 +2,17 @@ package com.ustadmobile.lib.contentscrapers;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.ustadmobile.core.db.dao.ContentCategoryDao;
+import com.ustadmobile.core.db.dao.ContentCategorySchemaDao;
 import com.ustadmobile.core.db.dao.ContentEntryContentCategoryJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
+import com.ustadmobile.core.db.dao.ContentEntryRelatedEntryJoinDao;
+import com.ustadmobile.lib.db.entities.ContentCategory;
+import com.ustadmobile.lib.db.entities.ContentCategorySchema;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.ContentEntryContentCategoryJoin;
 import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin;
+import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoin;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -481,19 +487,71 @@ public class ContentScraperUtil {
      * @param childEntry                  child entry
      * @return the updated/created join
      */
-    public static ContentEntryContentCategoryJoin insertOrUpdateChildWithMultipleCategoriesJoin(ContentEntryContentCategoryJoinDao contentEntryCategoryJoinDao, ContentEntry category, ContentEntry childEntry) {
-        ContentEntryContentCategoryJoin categoryToSimlationJoin = contentEntryCategoryJoinDao.findJoinByParentChildUuids(category.getContentEntryUid(), childEntry.getContentEntryUid());
+    public static ContentEntryContentCategoryJoin insertOrUpdateChildWithMultipleCategoriesJoin(ContentEntryContentCategoryJoinDao contentEntryCategoryJoinDao,
+                                                                                                ContentCategory category, ContentEntry childEntry) {
+        ContentEntryContentCategoryJoin categoryToSimlationJoin = contentEntryCategoryJoinDao.findJoinByParentChildUuids(category.getContentCategoryUid(), childEntry.getContentEntryUid());
         if (categoryToSimlationJoin == null) {
             categoryToSimlationJoin = new ContentEntryContentCategoryJoin();
-            categoryToSimlationJoin.setCeccjContentCategoryUid(category.getContentEntryUid());
+            categoryToSimlationJoin.setCeccjContentCategoryUid(category.getContentCategoryUid());
             categoryToSimlationJoin.setCeccjContentEntryUid(childEntry.getContentEntryUid());
             categoryToSimlationJoin.setCeccjUid(contentEntryCategoryJoinDao.insert(categoryToSimlationJoin));
 
         } else {
-            categoryToSimlationJoin.setCeccjContentCategoryUid(category.getContentEntryUid());
+            categoryToSimlationJoin.setCeccjContentCategoryUid(category.getContentCategoryUid());
             categoryToSimlationJoin.setCeccjContentEntryUid(childEntry.getContentEntryUid());
             contentEntryCategoryJoinDao.updateCategoryChildJoin(categoryToSimlationJoin);
         }
         return categoryToSimlationJoin;
     }
+
+    public static ContentCategorySchema insertOrUpdateSchema(ContentCategorySchemaDao categorySchemeDao, String schemaName, String schemaUrl) {
+        ContentCategorySchema schema = categorySchemeDao.findBySchemaUrl(schemaUrl);
+        if (schema == null) {
+            schema = new ContentCategorySchema();
+            schema.setSchemaName(schemaName);
+            schema.setSchemaUrl(schemaUrl);
+            schema.setContentCategorySchemaUid(categorySchemeDao.insert(schema));
+        }else{
+            schema.setSchemaName(schemaName);
+            schema.setSchemaUrl(schemaUrl);
+            categorySchemeDao.updateSchema(schema);
+        }
+        return schema;
+    }
+
+    public static ContentCategory insertOrUpdateCategoryContent(ContentCategoryDao categoryDao, ContentCategorySchema schema, String categoryName) {
+        ContentCategory category = categoryDao.findCategoryBySchemaIdAndName(schema.getContentCategorySchemaUid(), categoryName);
+        if (category == null) {
+            category = new ContentCategory();
+            category.setCtnCatContentCategorySchemaUid(schema.getContentCategorySchemaUid());
+            category.setName(categoryName);
+            category.setContentCategoryUid(categoryDao.insert(category));
+        } else {
+            category.setCtnCatContentCategorySchemaUid(schema.getContentCategorySchemaUid());
+            category.setName(categoryName);
+            categoryDao.updateCategory(category);
+        }
+        return category;
+    }
+
+    // TODO change to primaryUuid
+    public static ContentEntryRelatedEntryJoin insertOrUpdateRelatedContentJoin(ContentEntryRelatedEntryJoinDao contentEntryRelatedJoinDao, ContentEntry relatedEntry, ContentEntry parentEntry, int relatedType) {
+        ContentEntryRelatedEntryJoin relatedTranslationJoin = contentEntryRelatedJoinDao.findPrimaryByTranslation(relatedEntry.getContentEntryUid());
+        if (relatedTranslationJoin == null) {
+            relatedTranslationJoin = new ContentEntryRelatedEntryJoin();
+            relatedTranslationJoin.setCerejRelLanguageUid(relatedEntry.getPrimaryLanguageUid());
+            relatedTranslationJoin.setCerejContentEntryUid(parentEntry.getContentEntryUid());
+            relatedTranslationJoin.setCerejRelatedEntryUid(relatedEntry.getContentEntryUid());
+            relatedTranslationJoin.setRelType(relatedType);
+            relatedTranslationJoin.setCerejUid(contentEntryRelatedJoinDao.insert(relatedTranslationJoin));
+        } else {
+            relatedTranslationJoin.setCerejRelLanguageUid(relatedEntry.getPrimaryLanguageUid());
+            relatedTranslationJoin.setCerejContentEntryUid(parentEntry.getContentEntryUid());
+            relatedTranslationJoin.setCerejRelatedEntryUid(relatedEntry.getContentEntryUid());
+            relatedTranslationJoin.setRelType(relatedType);
+            contentEntryRelatedJoinDao.updateSimTranslationJoin(relatedTranslationJoin);
+        }
+        return relatedTranslationJoin;
+    }
+
 }

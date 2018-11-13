@@ -27,6 +27,8 @@ public class ContentEntryRelatedEntryJoin {
 
     private String cerejRelLanguage;
 
+    private long cerejRelLanguageUid;
+
     private String comment;
 
     public long getCerejUid() {
@@ -67,6 +69,14 @@ public class ContentEntryRelatedEntryJoin {
 
     public void setCerejRelLanguage(String cerejRelLanguage) {
         this.cerejRelLanguage = cerejRelLanguage;
+    }
+
+    public long getCerejRelLanguageUid() {
+        return cerejRelLanguageUid;
+    }
+
+    public void setCerejRelLanguageUid(long cerejRelLanguageUid) {
+        this.cerejRelLanguageUid = cerejRelLanguageUid;
     }
 
     public String getComment() {

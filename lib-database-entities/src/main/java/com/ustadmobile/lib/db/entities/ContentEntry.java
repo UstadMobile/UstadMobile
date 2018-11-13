@@ -54,6 +54,16 @@ public class ContentEntry {
 
     private long lastModified;
 
+    private long primaryLanguageUid;
+
+    public long getPrimaryLanguageUid() {
+        return primaryLanguageUid;
+    }
+
+    public void setPrimaryLanguageUid(long primaryLanguageUid) {
+        this.primaryLanguageUid = primaryLanguageUid;
+    }
+
     public long getContentEntryUid() {
         return contentEntryUid;
     }
