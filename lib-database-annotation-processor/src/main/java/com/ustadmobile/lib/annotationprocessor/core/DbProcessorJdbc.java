@@ -576,7 +576,7 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                 addQueryMethod(daoMethod, daoType, dbType, jdbcDaoClassSpec, SQL_IDENTIFIER_CHAR,
                         generateFindByPrimaryKeySql(daoType, daoMethod, processingEnv, SQL_IDENTIFIER_CHAR));
             }else if(daoMethod.getAnnotation(UmUpdate.class) != null) {
-                addUpdateMethod(daoMethod, dbType, daoType, jdbcDaoClassSpec, SQL_IDENTIFIER_CHAR);
+                addUpdateMethod(daoMethod, daoType, dbType, jdbcDaoClassSpec, SQL_IDENTIFIER_CHAR);
             }else if(daoMethod.getAnnotation(UmDelete.class) != null) {
                 addDeleteMethod(daoMethod, jdbcDaoClassSpec, SQL_IDENTIFIER_CHAR);
             }else if(daoMethod.getAnnotation(UmSyncIncoming.class) != null) {
@@ -841,47 +841,22 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
      * @param daoBuilder The builder for the dao being generated, to which the new method will be added
      * @param identifierQuote The quote character to use to quote SQL identifiers
      */
-    public void addUpdateMethod(ExecutableElement daoMethod, TypeElement dbType,
-                                TypeElement daoClass, TypeSpec.Builder daoBuilder,
+    public void addUpdateMethod(ExecutableElement daoMethod, TypeElement daoClass,
+                                TypeElement dbType, TypeSpec.Builder daoBuilder,
                                 char identifierQuote) {
         String identifierQuoteStr = StringEscapeUtils.escapeJava(String.valueOf(identifierQuote));
         CodeBlock.Builder codeBlock = CodeBlock.builder();
         MethodSpec.Builder methodBuilder = overrideAndResolve(daoMethod, daoClass, processingEnv);
+        DaoMethodInfo methodInfo = new DaoMethodInfo(daoMethod, daoClass, processingEnv);
 
-        TypeElement umCallbackTypeElement = processingEnv.getElementUtils().getTypeElement(
-                UmCallback.class.getName());
-        List<Element> variableTypeElements = getMethodParametersAsElements(daoMethod);
-        int asyncParamIndex = variableTypeElements.indexOf(umCallbackTypeElement);
-        boolean asyncMethod = asyncParamIndex != -1;
+        TypeMirror resultType = methodInfo.resolveResultType();
 
-        TypeMirror resultType;
-        if(asyncMethod) {
-            resultType = ((DeclaredType)daoMethod.getParameters().get(asyncParamIndex)
-                    .asType()).getTypeArguments().get(0);
-        }else {
-            resultType = daoMethod.getReturnType();
-        }
+        TypeMirror entityType = methodInfo.resolveEntityParameterComponentType();
+        TypeElement entityTypeElement = (TypeElement)processingEnv.getTypeUtils().asElement(entityType);
 
-        TypeMirror entityType = daoMethod.getParameters().get(0).asType();
-        TypeElement entityTypeElement = entityType.getKind().equals(TypeKind.DECLARED) ?
-                (TypeElement)processingEnv.getTypeUtils().asElement(entityType) : null;
+        boolean isListOrArray = methodInfo.hasEntityListParam() || methodInfo.hasEntityArrayParam();
 
-        boolean isListOrArray = false;
-        if(entityTypeElement != null &&
-                entityTypeElement.equals(processingEnv.getElementUtils().getTypeElement(
-                        List.class.getName()))) {
-            entityType = ((DeclaredType)entityType).getTypeArguments().get(0);
-            entityType = DbProcessorUtils.resolveType(entityType, daoClass, processingEnv);
-            entityTypeElement = (TypeElement)processingEnv.getTypeUtils().asElement(entityType);
-            isListOrArray = true;
-        }else if(entityType.getKind().equals(TypeKind.ARRAY)) {
-            entityType = ((ArrayType)entityType).getComponentType();
-            entityTypeElement = (TypeElement)processingEnv.getTypeUtils().asElement(entityType);
-            isListOrArray = true;
-        }
-
-
-        if(asyncMethod) {
+        if(methodInfo.isAsyncMethod()) {
             codeBlock.beginControlFlow("_db.getExecutor().execute(() ->");
         }
 
@@ -958,9 +933,9 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
 
         if(isListOrArray) {
             codeBlock.add("_stmt.addBatch();\n")
-                .endControlFlow()
-                .add("numUpdates = $T.sumUpdateTotals(_stmt.executeBatch());\n",
-                        JdbcDatabaseUtils.class);
+                    .endControlFlow()
+                    .add("numUpdates = $T.sumUpdateTotals(_stmt.executeBatch());\n",
+                            JdbcDatabaseUtils.class);
         }else {
             codeBlock.add("numUpdates = _stmt.executeUpdate();\n");
         }
@@ -975,9 +950,9 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
 
 
 
-        if(asyncMethod) {
+        if(methodInfo.isAsyncMethod()) {
             codeBlock.add("$T.onSuccessIfNotNull($L, $L);\n",
-                    UmCallbackUtil.class, daoMethod.getParameters().get(asyncParamIndex)
+                    UmCallbackUtil.class, daoMethod.getParameters().get(methodInfo.getAsyncParamIndex())
                             .getSimpleName().toString(),
                     isVoid(resultType) ? "null" : "numUpdates");
             codeBlock.endControlFlow(")");

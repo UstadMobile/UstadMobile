@@ -53,4 +53,7 @@ public interface BaseDao<T> {
     @UmQueryFindByPrimaryKey
     T findByUid(long uid);
 
+    @UmUpdate
+    void update(T entity);
+
 }
