@@ -69,7 +69,7 @@ import com.ustadmobile.lib.db.entities.Person;
 import com.ustadmobile.lib.db.entities.PersonCustomField;
 import com.ustadmobile.lib.db.entities.PersonCustomFieldValue;
 
-@UmDatabase(version = 1, entities = {
+@UmDatabase(version = 2, entities = {
         OpdsEntry.class, OpdsLink.class, OpdsEntryParentToChildJoin.class,
         ContainerFile.class, ContainerFileEntry.class, DownloadSet.class,
         DownloadSetItem.class, NetworkNode.class, EntryStatusResponse.class,
