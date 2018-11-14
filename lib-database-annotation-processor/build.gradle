@@ -11,9 +11,9 @@ compileTestJava {
      *   added to the test sources ( e.g. sourceSets.test.java += ["$projectDir/tmp/java"] )
      */
     options.compilerArgs += [
-            "-Aumdb_jdbc_out=filer",
-            "-Aumdb_jersey_res_out=filer",
-            "-Aumdb_retrofit_out=filer",
+            "-Aumdb_jdbc_out=$projectDir/tmp/java",
+            "-Aumdb_jersey_res_out=$projectDir/tmp/java",
+            "-Aumdb_retrofit_out=$projectDir/tmp/java",
             "-Aumdb_no_default_factory=true"
     ]
 
@@ -25,7 +25,7 @@ compileTestJava {
     }
 }
 
-//sourceSets.test.java.srcDirs += ["$projectDir/tmp/java"]
+sourceSets.test.java.srcDirs += ["$projectDir/tmp/java"]
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])

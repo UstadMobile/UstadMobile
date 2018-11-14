@@ -10,6 +10,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.sql.DataSource;
 
@@ -24,6 +26,10 @@ public class JdbcDatabaseUtils {
 
     public static final String[] SUPPORTED_DB_PRODUCT_NAMES = new String[]{PRODUCT_NAME_POSTGRES,
             PRODUCT_NAME_SQLITE};
+
+    private static final Pattern POSTGRES_SELECT_IN_PATTERN = Pattern.compile("IN(\\s*)\\((\\s*)\\?(\\s*)\\)");
+
+    private static final String POSTGRES_SELECT_IN_REPLACEMENT = "IN (SELECT UNNEST(?))";
 
     /**
      * Represents a request to monitor specific tables on the database, and receive an event if they
@@ -90,7 +96,7 @@ public class JdbcDatabaseUtils {
         List<String> tableNames = new ArrayList<>();
 
         try(
-            ResultSet tableResult = connection.getMetaData().getTables(null, null, "%", null);
+            ResultSet tableResult = connection.getMetaData().getTables(null, null, "%", new String[]{"TABLE"});
         ) {
             while(tableResult.next()){
                 tableNames.add(tableResult.getString("TABLE_NAME"));
@@ -207,5 +213,41 @@ public class JdbcDatabaseUtils {
             }
         }
     }
+
+
+    /**
+     * Reformat a select query that uses a select IN .. array parameter type query. When using
+     * SQLite on Android/JDBC we can use SELECT .. WHERE uid in (:arrayParameter). On Postgres,
+     * this needs to be SELECT .. WHERE uid in (select unnest(:arrayParameter)).
+     *
+     * @param querySql Original SQL query to format
+     * @return reformatted SQL query (converted using a pre-compiled regular expression)
+     */
+    public static String convertSelectInForPostgres(String querySql) {
+        Matcher matcher = POSTGRES_SELECT_IN_PATTERN.matcher(querySql);
+        querySql = matcher.replaceAll(POSTGRES_SELECT_IN_REPLACEMENT);
+
+        return querySql;
+    }
+
+    /**
+     * Check if a string list contains a given entry, ignoring case.
+     *
+     * Useful for checking if a list of tables contains the given table, as SQL is not supposed to
+     * be case sensitive.
+     *
+     * @param list list of strings
+     * @param str entry to look for
+     * @return true if any string in the list equals (ignoring case) str, false otherwise
+     */
+    public static boolean listContainsStringIgnoreCase(List<String> list, String str) {
+        for(String listStr : list) {
+            if(listStr != null && listStr.equalsIgnoreCase(str))
+                return true;
+        }
+
+        return false;
+    }
+
 
 }

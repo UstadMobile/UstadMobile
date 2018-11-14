@@ -80,6 +80,9 @@ public class PreparedStatementArrayProxy implements PreparedStatement {
                 case "BOOLEAN":
                     baseType = Types.BOOLEAN;
                     break;
+                case "TEXT":
+                    baseType = Types.LONGVARCHAR;
+                    break;
 
 
 
@@ -212,6 +215,7 @@ public class PreparedStatementArrayProxy implements PreparedStatement {
                         break;
 
                     case Types.VARCHAR:
+                    case Types.LONGVARCHAR:
                         stmt.setString(paramIndex, (String)value);
                         break;
 
@@ -222,6 +226,10 @@ public class PreparedStatementArrayProxy implements PreparedStatement {
                     case Types.FLOAT:
                         stmt.setFloat(paramIndex, (Float)value);
                         break;
+
+
+
+
                 }
 
             }
@@ -249,9 +257,10 @@ public class PreparedStatementArrayProxy implements PreparedStatement {
         StringBuffer sb = new StringBuffer(Math.max(0, (2*numPlaceholders)-1));
 
         for(int i = 0; i < numPlaceholders; i++){
-            sb.append('?');
             if(i != 0)
                 sb.append(',');
+
+            sb.append('?');
         }
 
         return sb.toString();

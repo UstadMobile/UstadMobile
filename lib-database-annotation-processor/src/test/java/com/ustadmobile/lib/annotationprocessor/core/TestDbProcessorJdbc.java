@@ -8,13 +8,12 @@ import com.ustadmobile.lib.annotationprocessor.core.db.ExampleDatabase;
 
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
-import org.sqlite.SQLiteDataSource;
 
-import java.io.File;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -22,6 +21,8 @@ import java.util.concurrent.TimeUnit;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
+
+import static com.ustadmobile.lib.database.jdbc.JdbcDatabaseUtils.listContainsStringIgnoreCase;
 
 /**
  * Tests the result of the JDBC generation
@@ -46,14 +47,14 @@ public class TestDbProcessorJdbc {
         ExampleDatabase db = ExampleDatabase.getInstance(null);
 
         InitialContext ic = new InitialContext();
-        DataSource ds = (DataSource)ic.lookup("java:/comp/env/jdbc/ds");
+        DataSource ds = (DataSource)ic.lookup("java:/comp/env/jdbc/ExampleDatabase");
 
         try (
                 Connection con = ds.getConnection();
         ){
             List<String> tableNames = JdbcDatabaseUtils.getTableNames(con);
             Assert.assertTrue("ExampleEntity table was created",
-                    tableNames.contains("ExampleEntity"));
+                    listContainsStringIgnoreCase(tableNames, "ExampleEntity"));
         }
     }
 
@@ -125,6 +126,37 @@ public class TestDbProcessorJdbc {
         Assert.assertNull("When attempting to get a deleted item, this returns null",
                 db.getExampleDao().findByUid(entityToDelete.getUid()));
     }
+
+    @Test
+    public void givenEntityCreated_whenQueriedWithStringArray_thenQueryShouldReturnResult() {
+        ExampleEntity entity = new ExampleEntity();
+        entity.setUid(1);
+        entity.setName("a");
+        db.getExampleDao().insertE(entity);
+
+        List<ExampleEntity> resultList = db.getExampleDao().findByTitleArrValues(
+                Arrays.asList("a", "b", "c"));
+        Assert.assertEquals("Array query returns one match as expected", 1,
+                resultList.size());
+    }
+
+    @Test
+    public void givenEntityCreated_whenQueriedWithLongArray_thenShouldReturnResult() {
+        ExampleEntity entity = new ExampleEntity();
+        entity.setUid(2);
+        entity.setName("a");
+        db.getExampleDao().insertE(entity);
+
+        List<Long> arrList = new ArrayList<>();
+        arrList.add(1L);
+        arrList.add(2L);
+        arrList.add(3L);
+
+        List<ExampleEntity> resultList = db.getExampleDao().findByUidArrValues(arrList);
+        Assert.assertEquals("Array query returns one match as expected", 1,
+                resultList.size());
+    }
+
 
 
 }

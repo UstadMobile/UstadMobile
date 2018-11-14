@@ -96,4 +96,11 @@ public abstract class ExampleDao {
     @UmQuery("SELECT * FROM ExampleEntity")
     public abstract UmProvider<ExampleEntity> getAllAsProvider();
 
+    @UmQuery("SELECT * FROM ExampleEntity WHERE name IN (:nameArr)")
+    public abstract List<ExampleEntity> findByTitleArrValues(List<String> nameArr);
+
+    @UmQuery("SELECT * FROM ExampleEntity WHERE uid IN (:uidArr)")
+    public abstract List<ExampleEntity> findByUidArrValues(List<Long> uidArr);
+
+
 }

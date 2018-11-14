@@ -54,4 +54,12 @@ public interface UmJdbcDatabase {
      */
     boolean isArraySupported();
 
+    /**
+     * Get the name of the database type as per JDBC Metadata
+     *
+     * @return Product name as per JDBC Metadata getProductName()
+     */
+    String getJdbcProductName();
+
+
 }

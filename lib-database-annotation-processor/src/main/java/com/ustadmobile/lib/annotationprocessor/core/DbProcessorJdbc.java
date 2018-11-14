@@ -131,6 +131,7 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                 .addField(TypeName.BOOLEAN, "_arraySupported", Modifier.PRIVATE)
                 .addField(ParameterizedTypeName.get(List.class, UmRepositoryDb.class), "_repositories",
                         Modifier.PRIVATE)
+                .addField(String.class, "_jdbcProductName", Modifier.PRIVATE)
                 .addMethod(MethodSpec.constructorBuilder()
                     .addModifiers(Modifier.PUBLIC)
                     .addParameter(TypeName.get(Object.class), "context")
@@ -198,7 +199,24 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                         .addModifiers(Modifier.PUBLIC)
                         .returns(TypeName.BOOLEAN)
                         .addCode("return this._arraySupported;\n")
-                        .build());
+                        .build())
+                .addMethod(MethodSpec.methodBuilder("getJdbcProductName")
+                        .addAnnotation(Override.class)
+                        .addModifiers(Modifier.PUBLIC)
+                        .returns(String.class)
+                        .addCode(CodeBlock.builder()
+                                .beginControlFlow("if(_jdbcProductName == null)")
+                                    .add("try(").indent()
+                                        .add("$T _connection = getConnection();\n", Connection.class)
+                                    .unindent().beginControlFlow(")")
+                                        .add("$T _metaData = _connection.getMetaData();\n",
+                                            DatabaseMetaData.class)
+                                        .add("_jdbcProductName = _metaData.getDatabaseProductName();\n")
+                                    .nextControlFlow("catch ($T _sqlE)", SQLException.class)
+                                        .add("_sqlE.printStackTrace();\n")
+                                    .endControlFlow()
+                                .endControlFlow()
+                                .add("return _jdbcProductName;\n").build()).build());
 
         TypeSpec.Builder factoryClassSpec = DbProcessorUtils.makeFactoryClass(dbType, jdbcDbClassName);
 
@@ -602,6 +620,8 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
         boolean isArray = false;
         TypeMirror resultType;
         DaoMethodInfo methodInfo = new DaoMethodInfo(daoMethod, daoType, processingEnv);
+        boolean replaceEnabled =
+                daoMethod.getAnnotation(UmInsert.class).onConflict() == UmOnConflictStrategy.REPLACE;
 
         TypeElement umCallbackTypeElement = processingEnv.getElementUtils().getTypeElement(
                 UmCallback.class.getName());
@@ -662,17 +682,53 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
             codeBlock.add("$T _result = $L;\n", resultType, defaultValue(resultType));
         }
 
-        codeBlock.add("try (\n").indent()
-                    .add("$T _connection = _db.getConnection();\n", Connection.class);
+        List<VariableElement> entityFields = getEntityFieldElements(entityTypeElement, true);
 
-        codeBlock.add(generateInsertStatementCodeBlock(entityTypeElement, "_stmt",
-                false, false, identifierQuoteStr));
+        String postgresReplaceSuffxVarName = null;
+        if(replaceEnabled){
+            String postgresReplaceSuffx = " ON CONFLICT UPDATE SET ";
+            boolean commaRequired = false;
+            for(VariableElement field : entityFields) {
+                if(field.getAnnotation(UmPrimaryKey.class) != null)
+                    continue;
+
+                if(commaRequired)
+                    postgresReplaceSuffx += ",";
+
+                postgresReplaceSuffx += field.getSimpleName() + " = excluded." + field.getSimpleName();
+                commaRequired = true;
+            }
+
+            postgresReplaceSuffxVarName = "_query_PostgresReplaceSuffix";
+            codeBlock.add("$T $L = $S;\n", String.class, postgresReplaceSuffxVarName,
+                    postgresReplaceSuffx);
+        }
+
+
+
+        codeBlock.add(generateInsertSqlStatementCodeBlock(entityTypeElement,
+                preparedStmtVarName + "_querySql",
+                false,  identifierQuoteStr, replaceEnabled,
+                postgresReplaceSuffxVarName));
         boolean hasAutoIncrementKey = DbProcessorUtils.entityHasAutoIncrementPrimaryKey(
                 entityTypeElement, processingEnv);
         if(hasAutoIncrementKey)
-            codeBlock.add(generateInsertStatementCodeBlock(entityTypeElement,
-                    autoIncPreparedStmtVarName,true, !isVoid(resultType),
-                    identifierQuoteStr));
+            codeBlock.add(generateInsertSqlStatementCodeBlock(entityTypeElement,
+                    autoIncPreparedStmtVarName + "_querySql",true,
+                    identifierQuoteStr, replaceEnabled, postgresReplaceSuffxVarName));
+
+        codeBlock.add("try (\n").indent()
+                    .add("$T _connection = _db.getConnection();\n", Connection.class)
+                    .add("$1T $2L = _connection.prepareStatement($2L_querySql);\n", PreparedStatement.class,
+                            preparedStmtVarName);
+        if(hasAutoIncrementKey) {
+            codeBlock.add("$1T $2L = _connection.prepareStatement($2L_querySql",
+                    PreparedStatement.class, autoIncPreparedStmtVarName);
+            if(!isVoid(resultType))
+                codeBlock.add(", $T.RETURN_GENERATED_KEYS", Statement.class);
+            codeBlock.add(");\n");
+        }
+
 
 
         codeBlock.unindent().beginControlFlow(")");
@@ -683,7 +739,6 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                     daoMethod.getParameters().get(0).getSimpleName().toString());
         }
 
-        List<VariableElement> entityFields = getEntityFieldElements(entityTypeElement, true);
         String preparedStmtToUseVarName = hasAutoIncrementKey ? "_stmtToUse" : preparedStmtVarName;
 
         String elVariableName = (isList|| isArray) ?
@@ -786,15 +841,17 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
         daoBuilder.addMethod(methodBuilder.build());
     }
 
-    private CodeBlock generateInsertStatementCodeBlock(TypeElement entityTypeElement,
-                                                       String stmtVarName,
-                                                       boolean isAutoIncrementInsert,
-                                                       boolean returnGeneratedKeys,
-                                                       String identifierQuoteStr) {
+    private CodeBlock generateInsertSqlStatementCodeBlock(TypeElement entityTypeElement,
+                                                          String querySqlVarName,
+                                                          boolean isAutoIncrementInsert,
+                                                          String identifierQuoteStr,
+                                                          boolean replaceEnabled,
+                                                          String postgresReplaceSuffixVarName) {
+
         CodeBlock.Builder codeBlock = CodeBlock.builder()
-                .add("$T $L = _connection.prepareStatement(\"$L INTO $L$L$L (",
-                PreparedStatement.class, stmtVarName, "INSERT", identifierQuoteStr,
-                entityTypeElement.getSimpleName().toString(), identifierQuoteStr);
+                .add("$1T $2L = \"INSERT INTO $3L$4L$3L (",
+                    String.class, querySqlVarName, identifierQuoteStr,
+                        entityTypeElement.getSimpleName());
 
         List<VariableElement> entityFields = getEntityFieldElements(entityTypeElement, true);
         boolean commaRequired = false;
@@ -820,14 +877,20 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
             if(i < numFields - 1)
                 codeBlock.add(", ");
         }
-        codeBlock.add(")\"");
+        codeBlock.add(")\";\n");
 
-        //!isVoid(resultType)
-        if(returnGeneratedKeys) {
-            codeBlock.add(", $T.RETURN_GENERATED_KEYS", Statement.class);
+        if(replaceEnabled) {
+            codeBlock.beginControlFlow("if($T.PRODUCT_NAME_POSTGRES.equals(_db.getJdbcProductName()))",
+                            JdbcDatabaseUtils.class)
+                        .add("$L += $L;\n", querySqlVarName, postgresReplaceSuffixVarName)
+                    .nextControlFlow("else if($T.PRODUCT_NAME_SQLITE.equals(_db.getJdbcProductName()))",
+                            JdbcDatabaseUtils.class)
+                        .add("$1L = \"REPLACE\" + $1L.substring(" + "INSERT".length() + ");\n",
+                                querySqlVarName)
+                    .endControlFlow();
         }
 
-        codeBlock.add(");\n");
+
         return codeBlock.build();
     }
 
@@ -1196,15 +1259,23 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
             codeBlock.add("$T _$L_sqlArr = null;\n", Array.class, arrayParamName);
         }
 
+        codeBlock.add("$T _querySql = $S;\n", String.class, preparedStmtSql);
+        if(daoMethodInfo.hasArrayOrListParameter()) {
+            codeBlock.beginControlFlow("if($T.PRODUCT_NAME_POSTGRES.equals(_db.getJdbcProductName()))",
+                    JdbcDatabaseUtils.class)
+                    .add("_querySql = $T.convertSelectInForPostgres(_querySql);\n", JdbcDatabaseUtils.class)
+                    .endControlFlow();
+        }
+
         codeBlock.add("try (\n").indent()
             .add("$T connection = _db.getConnection();\n", Connection.class);
         if(daoMethodInfo.hasArrayOrListParameter()) {
-            codeBlock.add("$1T stmt = _db.isArraySupported() ? connection.prepareStatement($2S) : " +
-                            "new $3T($2S, connection);\n", PreparedStatement.class, preparedStmtSql,
+            codeBlock.add("$T stmt = _db.isArraySupported() ? connection.prepareStatement(_querySql) : " +
+                            "new $T(_querySql, connection);\n", PreparedStatement.class,
                     PreparedStatementArrayProxy.class);
         }else {
-            codeBlock.add("$T stmt = connection.prepareStatement($S);\n", PreparedStatement.class,
-                    preparedStmtSql);
+            codeBlock.add("$T stmt = connection.prepareStatement(_querySql);\n",
+                    PreparedStatement.class);
         }
 
 
