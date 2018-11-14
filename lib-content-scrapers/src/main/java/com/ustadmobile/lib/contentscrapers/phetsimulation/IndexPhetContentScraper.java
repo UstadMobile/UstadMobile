@@ -199,7 +199,7 @@ public class IndexPhetContentScraper {
 
                         ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, phetParentEntry, category, categoryCount++);
                         ContentScraperUtil.insertOrUpdateChildWithMultipleParentsJoin(contentParentChildJoinDao, category, englishSimContentEntry, 0);
-                        ContentScraperUtil.insertOrUpdateChildWithMultipleCategoriesJoin(contentEntryCategoryJoinDao, category, englishSimContentEntry);
+                       // ContentScraperUtil.insertOrUpdateChildWithMultipleCategoriesJoin(contentEntryCategoryJoinDao, category, englishSimContentEntry);
 
                         int translationsCount = 1;
                         for (ContentEntry translation : translationList) {
@@ -238,7 +238,7 @@ public class IndexPhetContentScraper {
                             }
 
                             ContentScraperUtil.insertOrUpdateChildWithMultipleParentsJoin(contentParentChildJoinDao, category, translation, translationsCount++);
-                            ContentScraperUtil.insertOrUpdateChildWithMultipleCategoriesJoin(contentEntryCategoryJoinDao, category, translation);
+                           // ContentScraperUtil.insertOrUpdateChildWithMultipleCategoriesJoin(contentEntryCategoryJoinDao, category, translation);
 
                         }
                     }
