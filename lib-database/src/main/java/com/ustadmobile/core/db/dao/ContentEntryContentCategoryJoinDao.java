@@ -15,5 +15,6 @@ public abstract class ContentEntryContentCategoryJoinDao
     public abstract ContentEntryContentCategoryJoin findJoinByParentChildUuids(long categoryUid, long contentEntry);
 
     @UmUpdate
-    public abstract void updateCategoryChildJoin(ContentEntryContentCategoryJoin categoryToSimlationJoin);
+    public abstract void update(ContentEntryContentCategoryJoin entity);
+
 }

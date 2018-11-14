@@ -25,7 +25,6 @@ public abstract class ContentEntryParentChildJoinDao
     public abstract ContentEntryParentChildJoin findJoinByParentChildUuids(long parentUid, long childUid);
 
     @UmUpdate
-    public abstract int updateParentChildJoin(ContentEntryParentChildJoin edraakParentJoin);
-
+    public abstract void update(ContentEntryParentChildJoin entity);
 
 }

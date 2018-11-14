@@ -1,7 +1,6 @@
 package com.ustadmobile.lib.contentscrapers.ck12;
 
 import com.ustadmobile.core.db.UmAppDatabase;
-import com.ustadmobile.core.db.dao.ClazzDao_JdbcDaoImpl;
 import com.ustadmobile.core.db.dao.ContentEntryContentEntryFileJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryDao;
 import com.ustadmobile.core.db.dao.ContentEntryFileDao;
@@ -124,7 +123,7 @@ public class IndexCategoryCK12Content {
         } else {
             masterRootParent = setContentEntryData(masterRootParent, "root",
                     "Ustad Mobile", "root", ScraperConstants.ENGLISH_LANG_CODE);
-            contentEntryDao.updateContentEntry(masterRootParent);
+            contentEntryDao.update(masterRootParent);
         }
 
         ck12ParentEntry = contentEntryDao.findBySourceUrl("https://www.ck12.org/");
@@ -138,7 +137,7 @@ public class IndexCategoryCK12Content {
             ck12ParentEntry = setContentEntryData(ck12ParentEntry, "https://www.ck12.org/",
                     "CK-12 Foundation", "https://www.ck12.org/", ScraperConstants.ENGLISH_LANG_CODE);
             ck12ParentEntry.setThumbnailUrl("https://img1.ck12.org/media/build-20181015164501/images/ck12-logo-livetile.png");
-            contentEntryDao.updateContentEntry(ck12ParentEntry);
+            contentEntryDao.update(ck12ParentEntry);
         }
 
         ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, masterRootParent, ck12ParentEntry, 2);
@@ -189,7 +188,7 @@ public class IndexCategoryCK12Content {
                 } else {
                     subjectEntry = setContentEntryData(subjectEntry, hrefLink,
                             title, hrefLink, ScraperConstants.ENGLISH_LANG_CODE);
-                    contentEntryDao.updateContentEntry(subjectEntry);
+                    contentEntryDao.update(subjectEntry);
                 }
 
                 ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, ck12ParentEntry, subjectEntry, count++);
@@ -244,7 +243,7 @@ public class IndexCategoryCK12Content {
                 } else {
                     gradeEntry = setContentEntryData(gradeEntry, hrefLink,
                             title, hrefLink, ScraperConstants.ENGLISH_LANG_CODE);
-                    contentEntryDao.updateContentEntry(gradeEntry);
+                    contentEntryDao.update(gradeEntry);
                 }
 
                 ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, parent, gradeEntry, count++);
@@ -269,7 +268,7 @@ public class IndexCategoryCK12Content {
             } else {
                 topicEntry = setContentEntryData(topicEntry, fakePath,
                         level1CategoryTitle, fakePath, ScraperConstants.ENGLISH_LANG_CODE);
-                contentEntryDao.updateContentEntry(topicEntry);
+                contentEntryDao.update(topicEntry);
             }
 
             ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, parent, topicEntry, count++);
@@ -312,7 +311,7 @@ public class IndexCategoryCK12Content {
                 } else {
                     lastTopicEntry = setContentEntryData(lastTopicEntry, hrefLink,
                             title, hrefLink, ScraperConstants.ENGLISH_LANG_CODE);
-                    contentEntryDao.updateContentEntry(lastTopicEntry);
+                    contentEntryDao.update(lastTopicEntry);
                 }
 
                 ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, parent, lastTopicEntry, count++);
@@ -337,7 +336,7 @@ public class IndexCategoryCK12Content {
                 } else {
                     subTopicEntry = setContentEntryData(subTopicEntry, appendPath,
                             title, appendPath, ScraperConstants.ENGLISH_LANG_CODE);
-                    contentEntryDao.updateContentEntry(subTopicEntry);
+                    contentEntryDao.update(subTopicEntry);
                 }
 
                 ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, parent, subTopicEntry, count++);
@@ -386,7 +385,7 @@ public class IndexCategoryCK12Content {
                 headingEntry = setContentEntryData(headingEntry, fakePathTopic,
                         headingTitle, fakePathTopic, ScraperConstants.ENGLISH_LANG_CODE);
                 headingEntry.setThumbnailUrl(thumbnailUrl);
-                contentEntryDao.updateContentEntry(headingEntry);
+                contentEntryDao.update(headingEntry);
             }
 
             ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, parent, headingEntry, count++);
@@ -412,7 +411,7 @@ public class IndexCategoryCK12Content {
                     topicEntry = setContentEntryData(topicEntry, fakeParentTopic,
                             title, fakeParentTopic, ScraperConstants.ENGLISH_LANG_CODE);
                     topicEntry.setThumbnailUrl(topicThumbnailUrl);
-                    contentEntryDao.updateContentEntry(topicEntry);
+                    contentEntryDao.update(topicEntry);
                 }
 
                 ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, headingEntry, topicEntry, topicCount++);
@@ -438,7 +437,7 @@ public class IndexCategoryCK12Content {
                     } else {
                         subTopicEntry = setContentEntryData(subTopicEntry, hrefLink,
                                 subTitle, hrefLink, ScraperConstants.ENGLISH_LANG_CODE);
-                        contentEntryDao.updateContentEntry(subTopicEntry);
+                        contentEntryDao.update(subTopicEntry);
                     }
 
                     ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, topicEntry, subTopicEntry, subTopicCount++);
@@ -505,7 +504,7 @@ public class IndexCategoryCK12Content {
                         title, url.getPath(), ScraperConstants.ENGLISH_LANG_CODE);
                 topicEntry.setDescription(summary);
                 topicEntry.setThumbnailUrl(imageLink);
-                contentEntryDao.updateContentEntry(topicEntry);
+                contentEntryDao.update(topicEntry);
             }
 
             ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, parent, topicEntry, courseCount++);

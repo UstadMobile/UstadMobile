@@ -1,7 +1,6 @@
 package com.ustadmobile.lib.contentscrapers.phetsimulation;
 
 import com.ustadmobile.core.db.UmAppDatabase;
-import com.ustadmobile.core.db.dao.ClazzDao_JdbcDaoImpl;
 import com.ustadmobile.core.db.dao.ContentEntryContentCategoryJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryContentEntryFileJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryDao;
@@ -12,11 +11,9 @@ import com.ustadmobile.core.db.dao.ContentEntryRelatedEntryJoinDao;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.ScraperConstants;
 import com.ustadmobile.lib.db.entities.ContentEntry;
-import com.ustadmobile.lib.db.entities.ContentEntryContentCategoryJoin;
 import com.ustadmobile.lib.db.entities.ContentEntryContentEntryFileJoin;
 import com.ustadmobile.lib.db.entities.ContentEntryFile;
 import com.ustadmobile.lib.db.entities.ContentEntryFileStatus;
-import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin;
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoin;
 
 import org.apache.commons.codec.digest.DigestUtils;
@@ -31,7 +28,6 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.List;
 
 import static com.ustadmobile.lib.db.entities.ContentEntry.LICENSE_TYPE_CC_BY;
 
@@ -119,7 +115,7 @@ public class IndexPhetContentScraper {
         } else {
             masterRootParent = setContentEntryData(masterRootParent, "root",
                     "Ustad Mobile", "root", ScraperConstants.ENGLISH_LANG_CODE);
-            contentEntryDao.updateContentEntry(masterRootParent);
+            contentEntryDao.update(masterRootParent);
         }
 
         ContentEntry phetParentEntry = contentEntryDao.findBySourceUrl("https://phet.colorado.edu/");
@@ -133,7 +129,7 @@ public class IndexPhetContentScraper {
             phetParentEntry = setContentEntryData(phetParentEntry, "https://phet.colorado.edu/",
                     "Phet Interactive Simulations", "https://phet.colorado.edu/", ScraperConstants.ENGLISH_LANG_CODE);
             phetParentEntry.setThumbnailUrl("https://phet.colorado.edu/images/phet-social-media-logo.png");
-            contentEntryDao.updateContentEntry(phetParentEntry);
+            contentEntryDao.update(phetParentEntry);
         }
 
         ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, masterRootParent, phetParentEntry, 1);
@@ -153,7 +149,7 @@ public class IndexPhetContentScraper {
                 englishSimContentEntry.setContentEntryUid(contentEntryDao.insert(englishSimContentEntry));
             } else {
                 englishSimContentEntry = setContentEntryData(englishSimContentEntry, path, title, path, ScraperConstants.ENGLISH_LANG_CODE);
-                contentEntryDao.updateContentEntry(englishSimContentEntry);
+                contentEntryDao.update(englishSimContentEntry);
             }
 
             ContentScraperUtil.insertOrUpdateRelatedContentJoin(contentEntryRelatedJoinDao, englishSimContentEntry, englishSimContentEntry, ContentEntryRelatedEntryJoin.REL_TYPE_TRANSLATED_VERSION);

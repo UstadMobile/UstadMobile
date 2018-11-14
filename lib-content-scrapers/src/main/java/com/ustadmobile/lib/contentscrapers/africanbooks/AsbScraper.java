@@ -142,38 +142,10 @@ public class AsbScraper {
                     for (Element lang : langList) {
 
                         String id = lang.attr("value");
-                        String value = StringUtils.capitalize(lang.text());
+                        String value = StringUtils.capitalize(lang.text().toLowerCase());
 
                         langMap.put(id, value);
-                        String three_letter_code = "";
-                        String two_letter_code = "";
-                        List<LanguageAlpha3Code> langAlpha3List = LanguageAlpha3Code.findByName(value);
-                        if (!langAlpha3List.isEmpty()) {
-                            three_letter_code = langAlpha3List.get(0).name();
-                            LanguageCode code = LanguageCode.getByCode(three_letter_code);
-                            if (code != null) {
-                                two_letter_code = LanguageCode.getByCode(three_letter_code).name();
-                            }
-                        }
-
-                        Language langObj = languageDao.findByName(value);
-                        if (langObj == null) {
-                            langObj = new Language();
-                            langObj.setName(value);
-                            if (!three_letter_code.isEmpty()) {
-                                langObj.setIso_639_1_standard(two_letter_code);
-                                langObj.setIso_639_2_standard(three_letter_code);
-                            }
-                            langObj.setLangUid(languageDao.insert(langObj));
-                        } else {
-                            langObj.setName(value);
-                            if (!three_letter_code.isEmpty()) {
-                                langObj.setIso_639_1_standard(two_letter_code);
-                                langObj.setIso_639_2_standard(three_letter_code);
-                            }
-                            languageDao.updateLanguage(langObj);
-                        }
-
+                        ContentScraperUtil.insertOrUpdateLocation(languageDao, value);
                     }
                 }
             }
@@ -191,7 +163,7 @@ public class AsbScraper {
         } else {
             masterRootParent = setContentEntryData(masterRootParent, "root",
                     "Ustad Mobile", "root", englishLang.getLangUid());
-            contentEntryDao.updateContentEntry(masterRootParent);
+            contentEntryDao.update(masterRootParent);
         }
 
 
@@ -206,7 +178,7 @@ public class AsbScraper {
             asbParentEntry = setContentEntryData(asbParentEntry, "https://www.africanstorybook.org/",
                     "African Story Books", "https://www.africanstorybook.org/", englishLang.getLangUid());
             asbParentEntry.setThumbnailUrl("https://www.africanstorybook.org/img/asb120.png");
-            contentEntryDao.updateContentEntry(asbParentEntry);
+            contentEntryDao.update(asbParentEntry);
         }
 
         ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, masterRootParent, asbParentEntry, 4);
@@ -229,61 +201,65 @@ public class AsbScraper {
             URL publishUrl = generatePublishUrl(africanBooksUrl, bookId);
             URL makeUrl = generateMakeUrl(africanBooksUrl, bookId);
 
+            try {
 
-            if (ContentScraperUtil.fileHasContent(ePubFile) && ePubFile.lastModified() > Integer.parseInt(bookObj.date)) {
+                driver.get(publishUrl.toString());
+                ContentScraperUtil.waitForJSandJQueryToLoad(waitDriver);
 
-            } else {
-                try {
+                driver.get(makeUrl.toString());
+                ContentScraperUtil.waitForJSandJQueryToLoad(waitDriver);
 
-                    driver.get(publishUrl.toString());
-                    ContentScraperUtil.waitForJSandJQueryToLoad(waitDriver);
+                String langName = langMap.get(bookObj.lang);
 
-                    driver.get(makeUrl.toString());
-                    ContentScraperUtil.waitForJSandJQueryToLoad(waitDriver);
+                Language language = languageDao.findByName(langName);
 
-                    String langName = langMap.get(bookObj.lang);
-                    Language language = languageDao.findByName(langName);
+                String sourceUrl = epubUrl.getPath() + epubUrl.getPath();
+                ContentEntry childEntry = contentEntryDao.findBySourceUrl(sourceUrl);
+                if (childEntry == null) {
+                    childEntry = new ContentEntry();
+                    childEntry = setContentEntryData(childEntry, sourceUrl,
+                            bookObj.title, sourceUrl, language.getLangUid());
+                    childEntry.setThumbnailUrl(getCoverUrl(bookId));
+                    childEntry.setContentEntryUid(contentEntryDao.insert(childEntry));
+                } else {
+                    childEntry = setContentEntryData(childEntry, sourceUrl,
+                            bookObj.title, sourceUrl, language.getLangUid());
+                    childEntry.setThumbnailUrl(getCoverUrl(bookId));
+                    contentEntryDao.update(childEntry);
+                }
 
-                    ContentEntry childEntry = contentEntryDao.findBySourceUrl(epubUrl.getPath());
-                    if (childEntry == null) {
-                        childEntry = new ContentEntry();
-                        childEntry = setContentEntryData(childEntry, epubUrl.getPath(),
-                                bookObj.title, epubUrl.getPath(), language.getLangUid());
-                        childEntry.setThumbnailUrl(getCoverUrl(bookId));
-                        childEntry.setContentEntryUid(contentEntryDao.insert(childEntry));
-                    } else {
-                        childEntry = setContentEntryData(childEntry, epubUrl.getPath(),
-                                bookObj.title, epubUrl.getPath(), language.getLangUid());
-                        childEntry.setThumbnailUrl(getCoverUrl(bookId));
-                        contentEntryDao.updateContentEntry(childEntry);
-                    }
+                Document readerDoc = Jsoup.connect(generateReaderUrl(africanBooksUrl, bookId)).get();
 
-                    Document readerDoc = Jsoup.connect(generateReaderUrl(africanBooksUrl, bookId)).get();
+                Elements langList = readerDoc.select("li#accordianRelatedStories div.accordion-item-content a");
 
-                    Elements langList = readerDoc.select("li#accordianRelatedStories div.accordion-item-content a");
+                // find the list of translations for the book we are currently on
+                ContentEntry originalEntry = childEntry;
+                List<ContentEntry> relatedEntries = new ArrayList<>();
+                for (Element element : langList) {
 
-                    // find the list of translations for the book we are currently on
-                    ContentEntry originalEntry = childEntry;
-                    List<ContentEntry> relatedEntries = new ArrayList<>();
-                    for (Element element : langList) {
-
+                    String lang = "";
+                    try {
                         String id = element.attr("onclickss");
                         id = id.substring(id.indexOf("(") + 1, id.lastIndexOf(")"));
                         String value = element.selectFirst("span").text();
 
-                        String lang = value;
+                        lang = value;
                         lang = StringUtils.remove(lang, "(Original)");
                         lang = StringUtils.remove(lang, "(Adaptation)");
-                        lang = StringUtils.remove(lang, "(Translation)").trim();
-
+                        lang = StringUtils.remove(lang, "(Translation)").trim().toLowerCase();
+                        lang = StringUtils.capitalize(lang);
 
                         Language relatedLanguage = languageDao.findByName(lang);
+                        if(relatedLanguage == null){
+                            relatedLanguage = ContentScraperUtil.insertOrUpdateLocation(languageDao, lang);
+                        }
 
-                        String sourceUrl = generateEPubUrl(africanBooksUrl, id).getPath();
-                        ContentEntry contentEntry = contentEntryDao.findBySourceUrl(sourceUrl);
+                        URL content = generateEPubUrl(africanBooksUrl, id);
+                        String relatedSourceUrl = content.getPath() + content.getQuery();
+                        ContentEntry contentEntry = contentEntryDao.findBySourceUrl(relatedSourceUrl);
                         if (contentEntry == null) {
                             contentEntry = new ContentEntry();
-                            contentEntry.setSourceUrl(sourceUrl);
+                            contentEntry.setSourceUrl(relatedSourceUrl);
                             contentEntry.setPrimaryLanguageUid(relatedLanguage.getLangUid());
                             contentEntry.setContentEntryUid(contentEntryDao.insert(contentEntry));
                         }
@@ -292,76 +268,88 @@ public class AsbScraper {
                         if (value.contains("Original")) {
                             originalEntry = contentEntry;
                         }
-
+                    }catch (NullPointerException e){
+                        System.err.println("A translated book could not be parsed " + lang + "for book " + bookObj.title);
                     }
 
-                    for (ContentEntry entry : relatedEntries) {
+                }
 
-                        ContentScraperUtil.insertOrUpdateRelatedContentJoin(relatedEntryJoinDao, entry, originalEntry,
-                                ContentEntryRelatedEntryJoin.REL_TYPE_TRANSLATED_VERSION);
+                for (ContentEntry entry : relatedEntries) {
 
-                    }
-                    ContentScraperUtil.insertOrUpdateRelatedContentJoin(relatedEntryJoinDao, childEntry, originalEntry,
+                    ContentScraperUtil.insertOrUpdateRelatedContentJoin(relatedEntryJoinDao, entry, originalEntry,
                             ContentEntryRelatedEntryJoin.REL_TYPE_TRANSLATED_VERSION);
 
-                    ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, asbParentEntry, childEntry, i);
+                }
+                ContentScraperUtil.insertOrUpdateRelatedContentJoin(relatedEntryJoinDao, childEntry, originalEntry,
+                        ContentEntryRelatedEntryJoin.REL_TYPE_TRANSLATED_VERSION);
 
-                    ContentCategorySchema schema = ContentScraperUtil.insertOrUpdateSchema(categorySchemeDao,
-                            "African Storybooks Reading Level", "africanstorybooks/reading/");
+                ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, asbParentEntry, childEntry, i);
 
-                    ContentCategory category = ContentScraperUtil.insertOrUpdateCategoryContent(categoryDao, schema, "Reading Level " + bookObj.level);
-                    ContentScraperUtil.insertOrUpdateChildWithMultipleCategoriesJoin(contentCategoryJoinDao, category, childEntry);
+                ContentCategorySchema schema = ContentScraperUtil.insertOrUpdateSchema(categorySchemeDao,
+                        "African Storybooks Reading Level", "africanstorybooks/reading/");
 
+                ContentCategory category = ContentScraperUtil.insertOrUpdateCategoryContent(categoryDao, schema, "Reading Level " + bookObj.level);
+                ContentScraperUtil.insertOrUpdateChildWithMultipleCategoriesJoin(contentCategoryJoinDao, category, childEntry);
 
-                    FileUtils.copyURLToFile(epubUrl, ePubFile);
+                if (ContentScraperUtil.fileHasContent(ePubFile) && ePubFile.lastModified() > Integer.parseInt(bookObj.date)) {
 
-                    if (ePubFile.length() == 0) {
-                        retry++;
-                        if (retry == 3) {
-                            retry = 0;
-                            System.out.println(ePubFile.getName() + " size 0 bytes: failed! for title " + bookObj.title);
-                            continue;
-                        }
-                        i--;
-                        driver.manage().deleteAllCookies();
+                    List<ContentEntryContentEntryFileJoin> listOfJoins = contentEntryFileJoinDao.findChildByParentUUid(childEntry.getContentEntryUid());
+                    for(ContentEntryContentEntryFileJoin joins: listOfJoins){
+                        joins.setCecefjContentEntryUid(childEntry.getContentEntryUid());
+                        contentEntryFileJoinDao.update(joins);
+                    }
+                    continue;
+
+                }
+
+                FileUtils.copyURLToFile(epubUrl, ePubFile);
+
+                if (ePubFile.length() == 0) {
+                    retry++;
+                    if (retry == 3) {
+                        retry = 0;
+                        System.out.println(ePubFile.getName() + " size 0 bytes: failed! for title " + bookObj.title);
                         continue;
                     }
-                    retry = 0;
-
-                    if (ContentScraperUtil.fileHasContent(ePubFile)) {
-                        updateAsbEpub(bookObj, ePubFile);
-                    }
-
-                    FileInputStream fis = new FileInputStream(ePubFile);
-                    String md5 = DigestUtils.md5Hex(fis);
-                    fis.close();
-
-                    ContentEntryFile contentEntryFile = new ContentEntryFile();
-                    contentEntryFile.setMimeType(ScraperConstants.MIMETYPE_EPUB);
-                    contentEntryFile.setFileSize(ePubFile.length());
-                    contentEntryFile.setLastModified(ePubFile.lastModified());
-                    contentEntryFile.setMd5sum(md5);
-                    contentEntryFile.setContentEntryFileUid(contentEntryFileDao.insert(contentEntryFile));
-
-                    ContentEntryContentEntryFileJoin fileJoin = new ContentEntryContentEntryFileJoin();
-                    fileJoin.setCecefjContentEntryFileUid(contentEntryFile.getContentEntryFileUid());
-                    fileJoin.setCecefjContentEntryUid(childEntry.getContentEntryUid());
-                    fileJoin.setCecefjUid(contentEntryFileJoinDao.insert(fileJoin));
-
-                    ContentEntryFileStatus fileStatus = new ContentEntryFileStatus();
-                    fileStatus.setCefsContentEntryFileUid(contentEntryFile.getContentEntryFileUid());
-                    fileStatus.setFilePath(ePubFile.getAbsolutePath());
-                    fileStatus.setCefsUid(contentFileStatusDao.insert(fileStatus));
-
-
-                } catch (IOException e) {
-                    System.err.println("IO Exception downloading/checking : " + ePubFile.getName() + " with title " + bookObj.title);
-                    e.printStackTrace();
+                    i--;
+                    driver.manage().deleteAllCookies();
+                    continue;
                 }
+                retry = 0;
+
+                if (ContentScraperUtil.fileHasContent(ePubFile)) {
+                    updateAsbEpub(bookObj, ePubFile);
+                }
+
+                FileInputStream fis = new FileInputStream(ePubFile);
+                String md5 = DigestUtils.md5Hex(fis);
+                fis.close();
+
+                ContentEntryFile contentEntryFile = new ContentEntryFile();
+                contentEntryFile.setMimeType(ScraperConstants.MIMETYPE_EPUB);
+                contentEntryFile.setFileSize(ePubFile.length());
+                contentEntryFile.setLastModified(ePubFile.lastModified());
+                contentEntryFile.setMd5sum(md5);
+                contentEntryFile.setContentEntryFileUid(contentEntryFileDao.insert(contentEntryFile));
+
+                ContentEntryContentEntryFileJoin fileJoin = new ContentEntryContentEntryFileJoin();
+                fileJoin.setCecefjContentEntryFileUid(contentEntryFile.getContentEntryFileUid());
+                fileJoin.setCecefjContentEntryUid(childEntry.getContentEntryUid());
+                fileJoin.setCecefjUid(contentEntryFileJoinDao.insert(fileJoin));
+
+                ContentEntryFileStatus fileStatus = new ContentEntryFileStatus();
+                fileStatus.setCefsContentEntryFileUid(contentEntryFile.getContentEntryFileUid());
+                fileStatus.setFilePath(ePubFile.getAbsolutePath());
+                fileStatus.setCefsUid(contentFileStatusDao.insert(fileStatus));
+
+
+            } catch (Exception e) {
+                System.err.println("Exception downloading/checking : " + ePubFile.getName() + " with title " + bookObj.title);
+                e.printStackTrace();
             }
         }
         driver.quit();
-    }
+}
 
     private ContentEntry setContentEntryData(ContentEntry entry, String id, String title, String sourceUrl, long lang) {
         entry.setEntryId(id);

@@ -12,5 +12,6 @@ public abstract class ContentCategorySchemaDao implements BaseDao<ContentCategor
     public abstract ContentCategorySchema findBySchemaUrl(String schemaUrl);
 
     @UmUpdate
-    public abstract void updateSchema(ContentCategorySchema schema);
+    public abstract void update(ContentCategorySchema entity);
+
 }

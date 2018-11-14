@@ -182,7 +182,7 @@ public class PhetContentScraper {
                     categoryContentEntry.setContentEntryUid(contentEntryDao.insert(categoryContentEntry));
                 } else {
                     categoryContentEntry = setContentEntryData(categoryContentEntry, path, categoryName, path, ScraperConstants.ENGLISH_LANG_CODE);
-                    contentEntryDao.updateContentEntry(categoryContentEntry);
+                    contentEntryDao.update(categoryContentEntry);
                 }
 
                 categoryRelations.add(categoryContentEntry);
@@ -278,7 +278,7 @@ public class PhetContentScraper {
                                     languageContentEntry.setContentEntryUid(contentEntryDao.insert(languageContentEntry));
                                 } else {
                                     languageContentEntry = setContentEntryData(languageContentEntry, path, langTitle, path, langCode);
-                                    contentEntryDao.updateContentEntry(languageContentEntry);
+                                    contentEntryDao.update(languageContentEntry);
                                 }
 
                                 translationsEntry.add(languageContentEntry);

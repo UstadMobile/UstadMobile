@@ -17,9 +17,6 @@ public abstract class ContentEntryDao implements BaseDao<ContentEntry> {
     @UmQuery("SELECT * FROM ContentEntry WHERE sourceUrl = :sourceUrl")
     public abstract ContentEntry findBySourceUrl(String sourceUrl);
 
-    @UmUpdate
-    public abstract int updateContentEntry(ContentEntry entry);
-
     @UmQuery("Select ContentEntry.* FROM ContentEntry LEFT Join ContentEntryParentChildJoin " +
             "ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid " +
             "WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = :parentUid")
@@ -39,5 +36,9 @@ public abstract class ContentEntryDao implements BaseDao<ContentEntry> {
             "ON ContentEntryRelatedEntryJoin.cerejRelatedEntryUid = ContentEntry.contentEntryUid " +
             "WHERE ContentEntryRelatedEntryJoin.relType = 1 AND ContentEntryRelatedEntryJoin.cerejRelatedEntryUid != :entryUuid")
     public abstract void findAllLanguageRelatedEntries(long entryUuid, UmCallback<List<ContentEntry>> umCallback);
+
+
+    @UmUpdate
+    public abstract void update(ContentEntry entity);
 
 }

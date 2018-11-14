@@ -111,7 +111,7 @@ public class DdlContentScraper {
                 contentEntry = setContentEntryData(contentEntry, uri.toString(),
                         doc.title(), uri.toURL().getPath(), doc.select("html").attr("lang"));
                 contentEntry.setThumbnailUrl(thumbnail);
-                contentEntryDao.updateContentEntry(contentEntry);
+                contentEntryDao.update(contentEntry);
             }
 
 
@@ -186,7 +186,7 @@ public class DdlContentScraper {
             } else {
                 contentEntry = setContentEntryData(contentEntry, href,
                         title, href, doc.select("html").attr("lang"));
-                contentEntryDao.updateContentEntry(contentEntry);
+                contentEntryDao.update(contentEntry);
             }
 
             categoryRelations.add(contentEntry);

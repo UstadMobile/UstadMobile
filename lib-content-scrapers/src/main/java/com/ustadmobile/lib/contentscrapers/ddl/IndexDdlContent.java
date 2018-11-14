@@ -85,7 +85,7 @@ public class IndexDdlContent {
         } else {
             masterRootParent = setContentEntryData(masterRootParent, "root",
                     "Ustad Mobile", "root", ScraperConstants.ENGLISH_LANG_CODE);
-            contentEntryDao.updateContentEntry(masterRootParent);
+            contentEntryDao.update(masterRootParent);
         }
 
         parentDdl = contentEntryDao.findBySourceUrl("https://www.ddl.af/");
@@ -99,7 +99,7 @@ public class IndexDdlContent {
             parentDdl = setContentEntryData(parentDdl, "https://www.ddl.af/",
                     "Darakht-e Danesh", "https://www.ddl.af/", ScraperConstants.ENGLISH_LANG_CODE);
             parentDdl.setThumbnailUrl("https://www.ddl.af/storage/files/logo-dd.png");
-            contentEntryDao.updateContentEntry(parentDdl);
+            contentEntryDao.update(parentDdl);
         }
 
         ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, masterRootParent, parentDdl, 5);
@@ -136,7 +136,7 @@ public class IndexDdlContent {
         } else {
             langEntry = setContentEntryData(langEntry, lang + "/resources/list",
                     lang, lang + "/resources/list", lang);
-            contentEntryDao.updateContentEntry(langEntry);
+            contentEntryDao.update(langEntry);
         }
 
         ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, parentDdl, langEntry, langCount);
@@ -180,7 +180,7 @@ public class IndexDdlContent {
                     ArrayList<ContentEntry> categories = scraper.getCategoryRelations();
                     ArrayList<ContentEntry> contentEntryArrayList = scraper.getContentEntries();
                     int categoryCount = 0;
-                    for (ContentEntry category : categories) {
+                   /* for (ContentEntry category : categories) {
 
                         ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao,
                                 langEntry, category, categoryCount++);
@@ -194,7 +194,7 @@ public class IndexDdlContent {
                                     category, contentEntry);
 
                         }
-                    }
+                    } */
 
                 } catch (IOException | URISyntaxException e) {
                     System.out.println("Error downloading resource at " + url);

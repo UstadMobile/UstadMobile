@@ -2,17 +2,21 @@ package com.ustadmobile.lib.contentscrapers;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.neovisionaries.i18n.LanguageAlpha3Code;
+import com.neovisionaries.i18n.LanguageCode;
 import com.ustadmobile.core.db.dao.ContentCategoryDao;
 import com.ustadmobile.core.db.dao.ContentCategorySchemaDao;
 import com.ustadmobile.core.db.dao.ContentEntryContentCategoryJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryRelatedEntryJoinDao;
+import com.ustadmobile.core.db.dao.LanguageDao;
 import com.ustadmobile.lib.db.entities.ContentCategory;
 import com.ustadmobile.lib.db.entities.ContentCategorySchema;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.ContentEntryContentCategoryJoin;
 import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin;
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoin;
+import com.ustadmobile.lib.db.entities.Language;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -445,7 +449,7 @@ public class ContentScraperUtil {
             parentChildJoin.setCepcjParentContentEntryUid(parentEntry.getContentEntryUid());
             parentChildJoin.setCepcjChildContentEntryUid(childEntry.getContentEntryUid());
             parentChildJoin.setChildIndex(index);
-            dao.updateParentChildJoin(parentChildJoin);
+            dao.update(parentChildJoin);
         }
         return parentChildJoin;
     }
@@ -473,7 +477,7 @@ public class ContentScraperUtil {
             parentChildJoin.setCepcjParentContentEntryUid(parentEntry.getContentEntryUid());
             parentChildJoin.setCepcjChildContentEntryUid(childEntry.getContentEntryUid());
             parentChildJoin.setChildIndex(index);
-            dao.updateParentChildJoin(parentChildJoin);
+            dao.update(parentChildJoin);
         }
         return parentChildJoin;
     }
@@ -499,7 +503,7 @@ public class ContentScraperUtil {
         } else {
             categoryToSimlationJoin.setCeccjContentCategoryUid(category.getContentCategoryUid());
             categoryToSimlationJoin.setCeccjContentEntryUid(childEntry.getContentEntryUid());
-            contentEntryCategoryJoinDao.updateCategoryChildJoin(categoryToSimlationJoin);
+            contentEntryCategoryJoinDao.update(categoryToSimlationJoin);
         }
         return categoryToSimlationJoin;
     }
@@ -514,7 +518,7 @@ public class ContentScraperUtil {
         }else{
             schema.setSchemaName(schemaName);
             schema.setSchemaUrl(schemaUrl);
-            categorySchemeDao.updateSchema(schema);
+            categorySchemeDao.update(schema);
         }
         return schema;
     }
@@ -529,7 +533,7 @@ public class ContentScraperUtil {
         } else {
             category.setCtnCatContentCategorySchemaUid(schema.getContentCategorySchemaUid());
             category.setName(categoryName);
-            categoryDao.updateCategory(category);
+            categoryDao.update(category);
         }
         return category;
     }
@@ -549,9 +553,41 @@ public class ContentScraperUtil {
             relatedTranslationJoin.setCerejContentEntryUid(parentEntry.getContentEntryUid());
             relatedTranslationJoin.setCerejRelatedEntryUid(relatedEntry.getContentEntryUid());
             relatedTranslationJoin.setRelType(relatedType);
-            contentEntryRelatedJoinDao.updateSimTranslationJoin(relatedTranslationJoin);
+            contentEntryRelatedJoinDao.update(relatedTranslationJoin);
         }
         return relatedTranslationJoin;
     }
 
+    public static Language insertOrUpdateLocation(LanguageDao languageDao, String langValue) {
+        String three_letter_code = "";
+        String two_letter_code = "";
+
+        List<LanguageAlpha3Code> langAlpha3List = LanguageAlpha3Code.findByName(langValue);
+        if (!langAlpha3List.isEmpty()) {
+            three_letter_code = langAlpha3List.get(0).name();
+            LanguageCode code = LanguageCode.getByCode(three_letter_code);
+            if (code != null) {
+                two_letter_code = LanguageCode.getByCode(three_letter_code).name();
+            }
+        }
+
+        Language langObj = languageDao.findByName(langValue);
+        if (langObj == null) {
+            langObj = new Language();
+            langObj.setName(langValue);
+            if (!three_letter_code.isEmpty()) {
+                langObj.setIso_639_1_standard(two_letter_code);
+                langObj.setIso_639_2_standard(three_letter_code);
+            }
+            langObj.setLangUid(languageDao.insert(langObj));
+        } else {
+            langObj.setName(langValue);
+            if (!three_letter_code.isEmpty()) {
+                langObj.setIso_639_1_standard(two_letter_code);
+                langObj.setIso_639_2_standard(three_letter_code);
+            }
+            languageDao.update(langObj);
+        }
+        return langObj;
+    }
 }

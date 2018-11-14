@@ -14,5 +14,5 @@ public abstract class ContentEntryRelatedEntryJoinDao
     public abstract ContentEntryRelatedEntryJoin findPrimaryByTranslation(long contentEntryUid);
 
     @UmUpdate
-    public abstract void updateSimTranslationJoin(ContentEntryRelatedEntryJoin relatedTranslationJoin);
+    public abstract void update(ContentEntryRelatedEntryJoin entity);
 }

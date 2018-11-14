@@ -14,12 +14,12 @@ public abstract class LanguageDao implements BaseDao<Language> {
     @UmQuery("SELECT * from Language WHERE name = :name")
     public abstract Language findByName(String name);
 
-    @UmUpdate
-    public abstract void updateLanguage(Language language);
-
     @UmQuery("SELECT * from Language WHERE iso_639_1_standard = :langCode")
     public abstract Language findByTwoCode(String langCode);
 
     @UmQuery("Select COUNT(*) FROM LANGUAGE")
     public abstract int totalLanguageCount();
+
+    @UmUpdate
+    public abstract void update(Language entity);
 }

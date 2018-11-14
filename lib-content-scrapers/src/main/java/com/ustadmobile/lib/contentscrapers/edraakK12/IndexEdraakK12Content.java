@@ -3,7 +3,6 @@ package com.ustadmobile.lib.contentscrapers.edraakK12;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.ustadmobile.core.db.UmAppDatabase;
-import com.ustadmobile.core.db.dao.ClazzDao_JdbcDaoImpl;
 import com.ustadmobile.core.db.dao.ContentEntryContentEntryFileJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryDao;
 import com.ustadmobile.core.db.dao.ContentEntryFileDao;
@@ -15,7 +14,6 @@ import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.ContentEntryContentEntryFileJoin;
 import com.ustadmobile.lib.db.entities.ContentEntryFile;
 import com.ustadmobile.lib.db.entities.ContentEntryFileStatus;
-import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
@@ -26,7 +24,6 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.List;
 
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING;
 
@@ -117,7 +114,7 @@ public class IndexEdraakK12Content {
         } else {
             masterRootParent = setContentEntryData(masterRootParent, "root",
                     "Ustad Mobile", "root");
-            contentEntryDao.updateContentEntry(masterRootParent);
+            contentEntryDao.update(masterRootParent);
         }
 
 
@@ -134,7 +131,7 @@ public class IndexEdraakK12Content {
                     "Edraak K12", "https://www.edraak.org/k12/");
             edraakParentEntry.setThumbnailUrl("https://www.edraak.org/static/images/logo-dark-ar.fa1399e8d134.png");
             edraakParentEntry.setLicenseType(ContentEntry.ALL_RIGHTS_RESERVED);
-            contentEntryDao.updateContentEntry(edraakParentEntry);
+            contentEntryDao.update(edraakParentEntry);
         }
 
         ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, masterRootParent, edraakParentEntry, 0);
@@ -212,7 +209,7 @@ public class IndexEdraakK12Content {
                 } else {
                     childEntry = setContentEntryData(childEntry, children.id, children.title, sourceUrl);
                     childEntry.setLicenseType(getLicenseType(children.license));
-                    contentEntryDao.updateContentEntry(childEntry);
+                    contentEntryDao.update(childEntry);
                 }
 
                 ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, parentEntry, childEntry, children.child_index);

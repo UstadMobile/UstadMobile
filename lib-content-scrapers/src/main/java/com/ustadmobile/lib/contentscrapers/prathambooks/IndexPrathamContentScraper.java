@@ -3,10 +3,7 @@ package com.ustadmobile.lib.contentscrapers.prathambooks;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.neovisionaries.i18n.LanguageAlpha3Code;
-import com.neovisionaries.i18n.LanguageCode;
 import com.ustadmobile.core.db.UmAppDatabase;
-import com.ustadmobile.core.db.dao.ClazzDao_JdbcDaoImpl;
-import com.ustadmobile.core.db.dao.ContentEntryContentCategoryJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryContentEntryFileJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryDao;
 import com.ustadmobile.core.db.dao.ContentEntryFileDao;
@@ -18,16 +15,9 @@ import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.ContentEntryContentEntryFileJoin;
 import com.ustadmobile.lib.db.entities.ContentEntryFile;
 import com.ustadmobile.lib.db.entities.ContentEntryFileStatus;
-import com.ustadmobile.lib.db.entities.OpdsEntry;
-import com.ustadmobile.lib.db.entities.OpdsEntryParentToChildJoin;
-import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
-import com.ustadmobile.lib.db.entities.OpdsLink;
-import com.ustadmobile.lib.util.UmUuidUtil;
 
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.codec.language.bm.Lang;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Cookie;
@@ -41,10 +31,6 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Locale;
-import java.util.UUID;
 
 
 /**
@@ -113,7 +99,7 @@ public class IndexPrathamContentScraper {
         } else {
             masterRootParent = setContentEntryData(masterRootParent, "root",
                     "Ustad Mobile", "root", ScraperConstants.ENGLISH_LANG_CODE);
-            contentEntryDao.updateContentEntry(masterRootParent);
+            contentEntryDao.update(masterRootParent);
         }
 
 
@@ -128,7 +114,7 @@ public class IndexPrathamContentScraper {
             prathamParentEntry = setContentEntryData(prathamParentEntry, "https://storyweaver.org.in/",
                     "Pratham Books", "https://storyweaver.org.in/", ScraperConstants.ENGLISH_LANG_CODE);
             prathamParentEntry.setThumbnailUrl("https://prathambooks.org/wp-content/uploads/2018/04/Logo-black.png");
-            contentEntryDao.updateContentEntry(prathamParentEntry);
+            contentEntryDao.update(prathamParentEntry);
         }
 
         ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, masterRootParent, prathamParentEntry, 3);
@@ -176,7 +162,7 @@ public class IndexPrathamContentScraper {
                     contentEntry = setContentEntryData(contentEntry, data.slug,
                             data.title, epubUrl.getPath(), lang);
                     contentEntry.setThumbnailUrl(data.coverImage.sizes.get(0).url);
-                    contentEntryDao.updateContentEntry(contentEntry);
+                    contentEntryDao.update(contentEntry);
                 }
 
                 ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao,
