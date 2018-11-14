@@ -27,9 +27,9 @@ public class ContentEntryRelatedEntryJoin {
 
     private String cerejRelLanguage;
 
-    private long cerejRelLanguageUid;
-
     private String comment;
+
+    private long cerejRelLanguageUid;
 
     public long getCerejUid() {
         return cerejUid;
