@@ -24,17 +24,17 @@ public class ClazzListRecyclerAdapter extends
         PagedListAdapter<ClazzWithNumStudents, ClazzListRecyclerAdapter.ClazzViewHolder> {
 
     Context theContext;
-    Fragment theFragment;
-    ClazzListPresenter thePresenter;
+    private Fragment theFragment;
+    private ClazzListPresenter thePresenter;
 
-    protected class ClazzViewHolder extends RecyclerView.ViewHolder {
+    class ClazzViewHolder extends RecyclerView.ViewHolder {
 
-        protected ClazzViewHolder(View itemView) {
+        ClazzViewHolder(View itemView) {
             super(itemView);
         }
     }
 
-    protected ClazzListRecyclerAdapter(@NonNull DiffUtil.ItemCallback<ClazzWithNumStudents>
+    ClazzListRecyclerAdapter(@NonNull DiffUtil.ItemCallback<ClazzWithNumStudents>
                    diffCallback, Context context, Fragment fragment, ClazzListPresenter mPresenter) {
         super(diffCallback);
         theContext = context;

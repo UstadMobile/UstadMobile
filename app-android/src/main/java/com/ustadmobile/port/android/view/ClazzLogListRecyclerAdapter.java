@@ -26,24 +26,17 @@ public class ClazzLogListRecyclerAdapter extends
         PagedListAdapter<ClazzLog, ClazzLogListRecyclerAdapter.ClazzLogViewHolder> {
 
     Context theContext;
-    Fragment theFragment;
-    ClazzLogListPresenter thePresenter;
-    Boolean showImage = false;
+    private Fragment theFragment;
+    private ClazzLogListPresenter thePresenter;
+    private Boolean showImage;
 
-    protected class ClazzLogViewHolder extends RecyclerView.ViewHolder{
-        protected ClazzLogViewHolder(View itemView){
+    class ClazzLogViewHolder extends RecyclerView.ViewHolder{
+        ClazzLogViewHolder(View itemView){
             super(itemView);
         }
     }
 
-    protected ClazzLogListRecyclerAdapter(@NonNull DiffUtil.ItemCallback<ClazzLog>
-              diffCallback, Context context, Fragment fragment, ClazzLogListPresenter mPresenter){
-        super(diffCallback);
-        theContext = context;
-        theFragment = fragment;
-        thePresenter = mPresenter;
-    }
-    protected ClazzLogListRecyclerAdapter(@NonNull DiffUtil.ItemCallback<ClazzLog>
+    ClazzLogListRecyclerAdapter(@NonNull DiffUtil.ItemCallback<ClazzLog>
               diffCallback, Context context, Fragment fragment, ClazzLogListPresenter mPresenter,
                                           boolean imageShow){
         super(diffCallback);
@@ -69,13 +62,12 @@ public class ClazzLogListRecyclerAdapter extends
      * For every item part of the recycler adapter, this will be called and every item in it
      * will be set as per this function.
      *
-     * @param holder
-     * @param position
      */
     @Override
     public void onBindViewHolder(@NonNull ClazzLogViewHolder holder, int position){
         ClazzLog clazzLog = getItem(position);
 
+        assert clazzLog != null;
         String prettyDate = UMCalendarUtil.getPrettyDateFromLong(clazzLog.getLogDate());
         String prettyShortDay = UMCalendarUtil.getSimpleDayFromLongDate(clazzLog.getLogDate());
 

@@ -24,30 +24,36 @@ import com.ustadmobile.lib.db.entities.Person;
 import java.io.File;
 import java.util.Hashtable;
 
+/**
+ * The Recycler adapter for blobs of people list used in SEL's recognition, selection, nomination
+ * lists. A blob here is basically a square with the image of the person and an optional text.
+ * Click handlers can be implemented via a common CommonHandlerPresenter.
+ *
+ */
 public class PeopleBlobListRecyclerAdapter extends
         PagedListAdapter<Person, PeopleBlobListRecyclerAdapter.PeopleViewHolder> {
 
     Context theContext;
     CommonHandlerPresenter mPresenter;
-    boolean hideNames = false;
+    private boolean hideNames = false;
 
-    Hashtable colorMap = new Hashtable();
+    private Hashtable<Integer, String> colorMap = new Hashtable<>();
 
 
-    protected class PeopleViewHolder extends RecyclerView.ViewHolder {
-        protected PeopleViewHolder(View itemView) {
+    class PeopleViewHolder extends RecyclerView.ViewHolder {
+        PeopleViewHolder(View itemView) {
             super(itemView);
         }
     }
 
-    protected PeopleBlobListRecyclerAdapter(@NonNull DiffUtil.ItemCallback<Person> diffCallback,
+    PeopleBlobListRecyclerAdapter(@NonNull DiffUtil.ItemCallback<Person> diffCallback,
                                               Context context, CommonHandlerPresenter presenter) {
         super(diffCallback);
         theContext = context;
         mPresenter = presenter;
     }
 
-    protected PeopleBlobListRecyclerAdapter(@NonNull DiffUtil.ItemCallback<Person> diffCallback,
+    PeopleBlobListRecyclerAdapter(@NonNull DiffUtil.ItemCallback<Person> diffCallback,
                                             Context context, CommonHandlerPresenter presenter,
                                             boolean namesHidden) {
         super(diffCallback);
@@ -58,6 +64,7 @@ public class PeopleBlobListRecyclerAdapter extends
 
     /**
      * This method inflates the card layout (to parent view given) and returns it.
+     *
      * @param parent View given.
      * @param viewType View Type not used here.
      * @return New ViewHolder for the ClazzStudent type
@@ -73,6 +80,9 @@ public class PeopleBlobListRecyclerAdapter extends
         return new PeopleBlobListRecyclerAdapter.PeopleViewHolder(clazzStudentListItem);
     }
 
+    /**
+     * Transform a bitmap ?
+     */
     public class CropSquareTransformation implements Transformation {
         @Override public Bitmap transform(Bitmap source) {
             int size = Math.min(source.getWidth(), source.getHeight());
@@ -88,10 +98,14 @@ public class PeopleBlobListRecyclerAdapter extends
         @Override public String key() { return "square()"; }
     }
 
-    public void updateImageOnView(String imagePath, ImageView personImageView){
+    /**
+     * Updates image from the path given to it to the view.
+     *
+     * @param imagePath         The path of the image (local to the device)
+     * @param personImageView   The View where to set the image.
+     */
+    private void updateImageOnView(String imagePath, ImageView personImageView){
         Uri profileImage = Uri.fromFile(new File(imagePath));
-
-//        personImageView.setImageURI(profileImage);
 
         Picasso.with(theContext)
                 .load(profileImage)
@@ -110,7 +124,13 @@ public class PeopleBlobListRecyclerAdapter extends
     }
 
     /**
-     * This method sets the elements after it has been obtained for that item'th position.
+     * In Order:
+     *      1.  Gets student name for every item, gets image and sets it to the card.
+     *      2.  Depending on constructor, hides or shows the name
+     *      3.  Adds an onClick listener on the item Card so that it changes color depending on the
+     *          selection.
+ *          4.  Also calls presenter's primary action method (ie: for nominations)
+     *
      * @param holder    The holder
      * @param position  The position in the recycler view.
      */
@@ -131,12 +151,12 @@ public class PeopleBlobListRecyclerAdapter extends
         ImageView studentImage = holder.itemView
                 .findViewById(R.id.item_peopleblob_image);
 
-        //TODO: Add image of student here.
+        assert thisPerson != null;
         if(thisPerson.getImagePath() != null && !thisPerson.getImagePath().isEmpty()){
             updateImageOnView(thisPerson.getImagePath(), studentImage);
         }
 
-        TextView studentEntry = (TextView) holder.itemView
+        TextView studentEntry = holder.itemView
                 .findViewById(R.id.item_peopleblob_name);
 
         if (!hideNames) {
@@ -147,9 +167,8 @@ public class PeopleBlobListRecyclerAdapter extends
 
         personCard.setOnClickListener(v -> {
 
-
             if (colorMap.containsKey(position)) {
-                if (colorMap.get(position) == "selected") {
+                if (colorMap.get(position).equals("selected")) {
                     if (hideNames){
                         studentEntry.setText("");
                     }else {

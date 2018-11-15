@@ -84,7 +84,8 @@ public class ClazzActivityEditActivity extends UstadBaseActivity implements Claz
         activityChangeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                mPresenter.handleChangeActivityChange(id);
+                //TODO: Check and Test if +1 works
+                mPresenter.handleChangeActivityChange(id+1);
             }
 
             @Override

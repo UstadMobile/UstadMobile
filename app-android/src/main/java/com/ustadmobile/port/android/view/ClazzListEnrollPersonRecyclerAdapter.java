@@ -24,17 +24,17 @@ public class ClazzListEnrollPersonRecyclerAdapter extends
                 ClazzListEnrollPersonRecyclerAdapter.ClazzViewHolder> {
 
     Context theContext;
-    Activity theActivity;
-    PersonDetailEnrollClazzPresenter thePresenter;
+    private Activity theActivity;
+    private PersonDetailEnrollClazzPresenter thePresenter;
 
-    protected class ClazzViewHolder extends RecyclerView.ViewHolder {
+    class ClazzViewHolder extends RecyclerView.ViewHolder {
 
-        protected ClazzViewHolder(View itemView) {
+        ClazzViewHolder(View itemView) {
             super(itemView);
         }
     }
 
-    protected ClazzListEnrollPersonRecyclerAdapter(
+    ClazzListEnrollPersonRecyclerAdapter(
             @NonNull DiffUtil.ItemCallback<ClazzWithEnrollment>
                     diffCallback, Context context, Activity activity,
             PersonDetailEnrollClazzPresenter mPresenter) {

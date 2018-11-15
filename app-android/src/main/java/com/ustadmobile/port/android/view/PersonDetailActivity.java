@@ -34,6 +34,7 @@ import com.ustadmobile.lib.db.entities.ClazzWithNumStudents;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.io.File;
+import java.util.Objects;
 
 import ru.dimorinny.floatingtextbutton.FloatingTextButton;
 
@@ -46,18 +47,15 @@ import static com.ustadmobile.core.view.PersonDetailViewField.FIELD_TYPE_TEXT;
 import static com.ustadmobile.port.android.view.PersonEditActivity.ADD_PERSON_ICON;
 
 /**
- * The PersonDetail activity.
- * <p>
+ * The PersonDetail activity - Shows the detail of a person (like a contact in an address book)
+ *
  * This Activity extends UstadBaseActivity and implements PersonDetailView
  */
 public class PersonDetailActivity extends UstadBaseActivity implements PersonDetailView {
 
-    //Toolbar
-    private Toolbar toolbar;
     private LinearLayout mLinearLayout;
 
     private RecyclerView mRecyclerView;
-    private RecyclerView.LayoutManager mRecyclerLayoutManager;
 
     private PersonDetailPresenter mPresenter;
     ImageView personEditImage;
@@ -82,9 +80,9 @@ public class PersonDetailActivity extends UstadBaseActivity implements PersonDet
         setContentView(R.layout.activity_person_detail);
 
         //Toolbar
-        toolbar = findViewById(R.id.activity_person_detail_toolbar);
+        Toolbar toolbar = findViewById(R.id.activity_person_detail_toolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
         mLinearLayout = findViewById(R.id.activity_person_detail_fields_linear_layout);
 
@@ -179,6 +177,7 @@ public class PersonDetailActivity extends UstadBaseActivity implements PersonDet
 
                 //Add the Header
                 TextView header = new TextView(this);
+                assert label != null;
                 header.setText(label.toUpperCase());
                 header.setTextSize(12);
                 header.setPadding(16,0,0,2);
@@ -188,7 +187,7 @@ public class PersonDetailActivity extends UstadBaseActivity implements PersonDet
                     //Add a recyclerview of classes
                     mRecyclerView = new RecyclerView(this);
 
-                    mRecyclerLayoutManager = new LinearLayoutManager(getApplicationContext());
+                    RecyclerView.LayoutManager mRecyclerLayoutManager = new LinearLayoutManager(getApplicationContext());
                     mRecyclerView.setLayoutManager(mRecyclerLayoutManager);
 
                     //Add the layout
@@ -223,9 +222,7 @@ public class PersonDetailActivity extends UstadBaseActivity implements PersonDet
                 int iconResId = getResourceId(iconName, "drawable", getPackageName());
                 ImageView icon = new ImageView(this);
                 icon.setImageResource(iconResId);
-                if(iconName.equals(ADD_PERSON_ICON)){
-                    icon.setAlpha(0);
-                }
+                if(iconName.equals(ADD_PERSON_ICON)) icon.setAlpha(0);
                 icon.setPadding(16,0,4,0);
                 hll.addView(icon);
 
@@ -255,19 +252,13 @@ public class PersonDetailActivity extends UstadBaseActivity implements PersonDet
                     textIcon.setImageResource(getResourceId(TEXT_ICON_NAME,
                             "drawable", getPackageName()));
                     textIcon.setPadding(8,16, 32,16);
-                    textIcon.setOnClickListener(v -> {
-                        mPresenter.handleClickText(field.getActionParam());
-
-                    });
+                    textIcon.setOnClickListener(v -> mPresenter.handleClickText(field.getActionParam()));
 
                     ImageView callIcon = new ImageView(this);
                     callIcon.setImageResource(getResourceId(CALL_ICON_NAME,
                             "drawable", getPackageName()));
                     callIcon.setPadding(8,16, 32,16);
-                    callIcon.setOnClickListener(v -> {
-                        mPresenter.handleClickCall(field.getActionParam());
-
-                    });
+                    callIcon.setOnClickListener(v -> mPresenter.handleClickCall(field.getActionParam()));
 
                     LinearLayout.LayoutParams heavyLayout = new LinearLayout.LayoutParams(
                             LinearLayout.LayoutParams.MATCH_PARENT,
@@ -300,11 +291,11 @@ public class PersonDetailActivity extends UstadBaseActivity implements PersonDet
     @Override
     public void setClazzListProvider(UmProvider<ClazzWithNumStudents> clazzListProvider) {
 
-        ClazzListRecyclerAdapter recyclerAdapter =
-                new ClazzListRecyclerAdapter(DIFF_CALLBACK);
+        SimpleClazzListRecyclerAdapter recyclerAdapter =
+                new SimpleClazzListRecyclerAdapter(DIFF_CALLBACK, getApplicationContext());
+        // A warning is expected
         DataSource.Factory<Integer, ClazzWithNumStudents> factory =
-                (DataSource.Factory<Integer, ClazzWithNumStudents>)
-                        clazzListProvider.getProvider();
+                (DataSource.Factory<Integer, ClazzWithNumStudents>) clazzListProvider.getProvider();
         LiveData<PagedList<ClazzWithNumStudents>> data =
                 new LivePagedListBuilder<>(factory, 20).build();
         data.observe(this, recyclerAdapter::submitList);
@@ -324,54 +315,11 @@ public class PersonDetailActivity extends UstadBaseActivity implements PersonDet
                 number, null)));
     }
 
+
+
     /**
-     * The Recycler Adapter
+     * The DIFF CALLBACK
      */
-    protected class ClazzListRecyclerAdapter
-            extends PagedListAdapter<ClazzWithNumStudents,
-                        ClazzListRecyclerAdapter.ClazzLogDetailViewHolder> {
-
-        protected class ClazzLogDetailViewHolder extends RecyclerView.ViewHolder{
-            protected ClazzLogDetailViewHolder(View itemView){
-                super(itemView);
-            }
-        }
-
-        protected ClazzListRecyclerAdapter(
-                @NonNull DiffUtil.ItemCallback<ClazzWithNumStudents> diffCallback){
-            super(diffCallback);
-        }
-
-        @NonNull
-        @Override
-        public ClazzLogDetailViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType){
-
-            View clazzLogDetailListItem =
-                    LayoutInflater.from(getApplicationContext()).inflate(
-                            R.layout.item_clazzlist_clazz_simple, parent, false);
-            return new ClazzLogDetailViewHolder(clazzLogDetailListItem);
-        }
-
-        /**
-         * This method sets the elements after it has been obtained for that item'th position.
-         *
-         * Every item in the recycler view will have set its colors if no attendance status is set.
-         * every attendance button will have it-self mapped to tints on activation.
-         *
-         * @param holder
-         * @param position
-         */
-        @Override
-        public void onBindViewHolder(@NonNull ClazzLogDetailViewHolder holder, int position){
-            ClazzWithNumStudents thisClazz = getItem(position);
-
-            ((TextView)holder.itemView.findViewById(R.id.item_clazzlist_clazz_simple_clazz_name))
-                    .setText(thisClazz.getClazzName());
-
-        }
-    }
-
-    // Diff callback.
     public static final DiffUtil.ItemCallback<ClazzWithNumStudents> DIFF_CALLBACK =
             new DiffUtil.ItemCallback<ClazzWithNumStudents>() {
                 @Override

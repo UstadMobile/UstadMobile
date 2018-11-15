@@ -42,7 +42,6 @@ public class ClazzLogDetailActivity extends UstadBaseActivity
     private Toolbar toolbar;
 
     private RecyclerView mRecyclerView;
-    private RecyclerView.LayoutManager mRecyclerLayoutManager;
 
     private ClazzLogDetailPresenter mPresenter;
 
@@ -50,8 +49,6 @@ public class ClazzLogDetailActivity extends UstadBaseActivity
     public long clazzUid;
     public long logDate;
     private TextView dateHeading;
-    private ImageButton goOneDayBackImageView;
-    private ImageButton goOneDayForwardImageView;
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -70,7 +67,7 @@ public class ClazzLogDetailActivity extends UstadBaseActivity
      * 2. sets the recycler view
      * 3. adds handlers to all buttons on the view
      *
-     * @param savedInstanceState
+     * @param savedInstanceState    The bundle saved state
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -99,7 +96,7 @@ public class ClazzLogDetailActivity extends UstadBaseActivity
 
 
         mRecyclerView = findViewById(R.id.class_log_detail_container_recyclerview);
-        mRecyclerLayoutManager = new LinearLayoutManager(getApplicationContext());
+        RecyclerView.LayoutManager mRecyclerLayoutManager = new LinearLayoutManager(getApplicationContext());
         mRecyclerView.setLayoutManager(mRecyclerLayoutManager);
 
 
@@ -131,10 +128,10 @@ public class ClazzLogDetailActivity extends UstadBaseActivity
         //Date heading
         dateHeading = findViewById(R.id.activity_class_log_detail_date_heading);
 
-        goOneDayBackImageView = findViewById(R.id.activity_class_log_detail_date_go_back);
+        ImageButton goOneDayBackImageView = findViewById(R.id.activity_class_log_detail_date_go_back);
         goOneDayBackImageView.setOnClickListener(v -> mPresenter.handleClickGoBackDate());
 
-        goOneDayForwardImageView = findViewById(R.id.activity_class_log_detail_date_go_forward);
+        ImageButton goOneDayForwardImageView = findViewById(R.id.activity_class_log_detail_date_go_forward);
         goOneDayForwardImageView.setOnClickListener(v -> mPresenter.handleClickGoForwardDate());
 
     }
@@ -166,6 +163,7 @@ public class ClazzLogDetailActivity extends UstadBaseActivity
                 new ClazzLogDetailRecyclerAdapter(DIFF_CALLBACK, getApplicationContext(),
                         this, mPresenter);
 
+        //A warning is expected
         DataSource.Factory<Integer, ClazzLogAttendanceRecordWithPerson> factory =
                 (DataSource.Factory<Integer, ClazzLogAttendanceRecordWithPerson>)
                         clazzLogAttendanceRecordProvider.getProvider();

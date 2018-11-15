@@ -22,14 +22,12 @@ import com.ustadmobile.port.android.util.UMAndroidUtil;
 import ru.dimorinny.floatingtextbutton.FloatingTextButton;
 
 /**
- * PeopleListFragment Android fragment extends UstadBaseFragment
+ * PeopleListFragment responsible for showing people list on the people bottom navigation 
  */
 public class PeopleListFragment extends UstadBaseFragment implements PeopleListView {
 
     View rootContainer;
-    //RecyclerView
     private RecyclerView mRecyclerView;
-    private RecyclerView.LayoutManager mRecyclerLayoutManager;
     private PeopleListPresenter mPresenter;
 
     /**
@@ -44,23 +42,19 @@ public class PeopleListFragment extends UstadBaseFragment implements PeopleListV
         return fragment;
     }
 
-    /**
-     * On Create of the fragment.
-     *
-     * @param savedInstanceState
-     */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
     }
 
     /**
-     * On Create of the View fragment . Part of Android's Fragment Override
+     * On Create of the View fragment. Sets up the presenter and the floating action button's
+     * on click listener.
      *
-     * @param inflater
-     * @param container
-     * @param savedInstanceState
-     * @return the root container
+     * @param inflater              The inflater
+     * @param container             The view group container
+     * @param savedInstanceState    The saved instance state
+     * @return                      The view
      */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -71,7 +65,7 @@ public class PeopleListFragment extends UstadBaseFragment implements PeopleListV
         setHasOptionsMenu(true);
 
         mRecyclerView = rootContainer.findViewById(R.id.fragment_people_list_recyclerview);
-        mRecyclerLayoutManager = new LinearLayoutManager(getContext());
+        RecyclerView.LayoutManager mRecyclerLayoutManager = new LinearLayoutManager(getContext());
         mRecyclerView.setLayoutManager(mRecyclerLayoutManager);
 
         //set up Presenter
@@ -82,18 +76,12 @@ public class PeopleListFragment extends UstadBaseFragment implements PeopleListV
         FloatingTextButton fab = rootContainer.findViewById(R.id.fragment_people_list_fab);
         fab.setOnClickListener(v -> mPresenter.handleClickPrimaryActionButton());
 
-
-        //return container
         return rootContainer;
     }
 
-    // This event is triggered soon after onCreateView().
-    @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        // Setup any handles to view objects here
-
-    }
-
+    /**
+     * The DIFF CALLBACK
+     */
     public static final DiffUtil.ItemCallback<PersonWithEnrollment> DIFF_CALLBACK2 =
             new DiffUtil.ItemCallback<PersonWithEnrollment>() {
                 @Override
@@ -115,6 +103,7 @@ public class PeopleListFragment extends UstadBaseFragment implements PeopleListV
         PersonWithEnrollmentRecyclerAdapter recyclerAdapter =
                 new PersonWithEnrollmentRecyclerAdapter(DIFF_CALLBACK2, getContext(),
                         this, mPresenter, false, false);
+        //A warning is expected
         DataSource.Factory<Integer, PersonWithEnrollment> factory =
                 (DataSource.Factory<Integer, PersonWithEnrollment>)listProvider.getProvider();
         LiveData<PagedList<PersonWithEnrollment>> data =

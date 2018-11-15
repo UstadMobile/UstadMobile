@@ -44,7 +44,6 @@ public class ClazzEditActivity extends UstadBaseActivity implements ClazzEditVie
 
     private Toolbar toolbar;
 
-    //RecyclerView
     private RecyclerView scheduleRecyclerView;
     private ClazzEditPresenter mPresenter;
 
@@ -105,7 +104,7 @@ public class ClazzEditActivity extends UstadBaseActivity implements ClazzEditVie
 
         //Clazz Desc
         classDescTIP = findViewById(R.id.activity_clazz_edit_description);
-        classDescTIP.getEditText().addTextChangedListener(new TextWatcher() {
+        Objects.requireNonNull(classDescTIP.getEditText()).addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 

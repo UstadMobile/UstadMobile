@@ -19,15 +19,25 @@ import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.util.Objects;
 
-public class PersonDetailEnrollClazzActivity extends UstadBaseActivity implements PersonDetailEnrollClazzView {
-
-    private Toolbar toolbar;
+/**
+ * This activity opens the page that enrolls a class to the person. Usually triggered from the
+ *  Person edit page.
+ */
+public class PersonDetailEnrollClazzActivity extends UstadBaseActivity
+        implements PersonDetailEnrollClazzView {
 
     private RecyclerView mRecyclerView;
-    private RecyclerView.LayoutManager mRecyclerLayoutManager;
 
     private PersonDetailEnrollClazzPresenter mPresenter;
 
+    /**
+     * In Order:
+     *      1. Sets up recycler view of the class list.
+     *      2. Calls the presenter's onCreate
+     *      3. Sets the floating action button's onClick listener to handle click done.
+     *
+     * @param savedInstanceState    the Android bundle
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -36,13 +46,13 @@ public class PersonDetailEnrollClazzActivity extends UstadBaseActivity implement
         setContentView(R.layout.activity_clazz_list_enroll_person);
 
         //Toolbar
-        toolbar = findViewById(R.id.activity_clazz_list_enroll_person_toolbar);
+        Toolbar toolbar = findViewById(R.id.activity_clazz_list_enroll_person_toolbar);
         setSupportActionBar(toolbar);
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
         mRecyclerView = findViewById(
                 R.id.activity_clazz_list_enroll_person_recyclerview);
-        mRecyclerLayoutManager = new LinearLayoutManager(getApplicationContext());
+        RecyclerView.LayoutManager mRecyclerLayoutManager = new LinearLayoutManager(getApplicationContext());
         mRecyclerView.setLayoutManager(mRecyclerLayoutManager);
 
         //Call the presenter
@@ -56,6 +66,9 @@ public class PersonDetailEnrollClazzActivity extends UstadBaseActivity implement
 
     }
 
+    /**
+     * The DIFF CALLBACK
+     */
     public static final DiffUtil.ItemCallback<ClazzWithEnrollment> DIFF_CALLBACK =
         new DiffUtil.ItemCallback<ClazzWithEnrollment>() {
             @Override
@@ -71,12 +84,15 @@ public class PersonDetailEnrollClazzActivity extends UstadBaseActivity implement
             }
         };
 
+
     @Override
     public void setClazzListProvider(UmProvider<ClazzWithEnrollment> clazzListProvider) {
 
         ClazzListEnrollPersonRecyclerAdapter recyclerAdapter =
                 new ClazzListEnrollPersonRecyclerAdapter(DIFF_CALLBACK, getApplicationContext(),
                         this, mPresenter);
+
+        //A warning is expected
         DataSource.Factory<Integer, ClazzWithEnrollment> factory =
                 (DataSource.Factory<Integer, ClazzWithEnrollment>)clazzListProvider.getProvider();
         LiveData<PagedList<ClazzWithEnrollment>> data =

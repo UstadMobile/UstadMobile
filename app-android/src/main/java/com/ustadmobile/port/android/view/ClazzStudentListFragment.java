@@ -5,6 +5,7 @@ import android.arch.paging.DataSource;
 import android.arch.paging.LivePagedListBuilder;
 import android.arch.paging.PagedList;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -22,6 +23,8 @@ import com.ustadmobile.core.view.ClazzStudentListView;
 import com.ustadmobile.lib.db.entities.PersonWithEnrollment;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
+import java.util.Objects;
+
 import ru.dimorinny.floatingtextbutton.FloatingTextButton;
 
 import static com.ustadmobile.core.view.ClazzListView.ARG_CLAZZ_UID;
@@ -33,7 +36,6 @@ public class ClazzStudentListFragment extends UstadBaseFragment implements Clazz
 
     View rootContainer;
     private RecyclerView mRecyclerView;
-    private RecyclerView.LayoutManager mRecyclerLayoutManager;
     private ClazzStudentListPresenter mPresenter;
     private Spinner sortSpinner;
     String[] sortSpinnerPresets;
@@ -51,11 +53,6 @@ public class ClazzStudentListFragment extends UstadBaseFragment implements Clazz
         return fragment;
     }
 
-    /**
-     * On Create of the fragment.
-     *
-     * @param savedInstanceState
-     */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -69,14 +66,9 @@ public class ClazzStudentListFragment extends UstadBaseFragment implements Clazz
      * This method readies the recycler view and its layout
      * This method sets the presenter and calls its onCreate
      * That then populates the recycler view.
-     *
-     * @param inflater
-     * @param container
-     * @param savedInstanceState
-     * @return the root container
      */
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
         rootContainer =
@@ -84,7 +76,7 @@ public class ClazzStudentListFragment extends UstadBaseFragment implements Clazz
         setHasOptionsMenu(true);
 
         mRecyclerView = rootContainer.findViewById(R.id.fragment_class_student_list_recyclerview);
-        mRecyclerLayoutManager = new LinearLayoutManager(getContext());
+        RecyclerView.LayoutManager mRecyclerLayoutManager = new LinearLayoutManager(getContext());
         mRecyclerView.setLayoutManager(mRecyclerLayoutManager);
 
 
@@ -136,6 +128,7 @@ public class ClazzStudentListFragment extends UstadBaseFragment implements Clazz
                 new PersonWithEnrollmentRecyclerAdapter(DIFF_CALLBACK2, getContext(),
                         this, mPresenter, true, false);
 
+        //A warning is expected
         DataSource.Factory<Integer, PersonWithEnrollment> factory =
                 (DataSource.Factory<Integer, PersonWithEnrollment>)
                         setPersonUmProvider.getProvider();
@@ -149,17 +142,10 @@ public class ClazzStudentListFragment extends UstadBaseFragment implements Clazz
     @Override
     public void updateSortSpinner(String[] presets) {
         this.sortSpinnerPresets = presets;
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(),
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(Objects.requireNonNull(getContext()),
                 R.layout.spinner_item, sortSpinnerPresets);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         sortSpinner.setAdapter(adapter);
-    }
-
-    // This event is triggered soon after onCreateView().
-    @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        // Setup any handles to view objects here
-
     }
 
 }

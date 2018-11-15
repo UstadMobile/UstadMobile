@@ -1,5 +1,6 @@
 package com.ustadmobile.port.android.view;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.arch.paging.PagedListAdapter;
 import android.content.Context;
@@ -33,16 +34,21 @@ public class ClazzLogDetailRecyclerAdapter
         ClazzLogDetailRecyclerAdapter.ClazzLogDetailViewHolder> {
 
     Context theContext;
-    Activity theActivity;
-    ClazzLogDetailPresenter thePresenter;
+    private Activity theActivity;
+    private ClazzLogDetailPresenter thePresenter;
+
     //static map matching attendance status code value with color tint
+    @SuppressLint("UseSparseArrays")
     private static Map<Integer, Integer> STATUS_TO_COLOR_MAP = new HashMap<>();
 
     //static map matching attendance status code value with
+    @SuppressLint("UseSparseArrays")
     private static Map<Integer, Integer> STATUS_TO_STRING_ID_MAP = new HashMap<>();
 
+    @SuppressLint("UseSparseArrays")
     private static Map<Integer, Integer> SELECTED_STATUS_TO_STATUS_TAG = new HashMap<>();
 
+    @SuppressLint("UseSparseArrays")
     private static Map<Integer, Integer> UNSELECTED_STATUS_TO_STATUS_TAG = new HashMap<>();
 
     static {
@@ -64,13 +70,13 @@ public class ClazzLogDetailRecyclerAdapter
 
     }
 
-    protected class ClazzLogDetailViewHolder extends RecyclerView.ViewHolder{
-        protected ClazzLogDetailViewHolder(View itemView){
+    class ClazzLogDetailViewHolder extends RecyclerView.ViewHolder{
+        ClazzLogDetailViewHolder(View itemView){
             super(itemView);
         }
     }
 
-    protected ClazzLogDetailRecyclerAdapter(
+    ClazzLogDetailRecyclerAdapter(
             @NonNull DiffUtil.ItemCallback<ClazzLogAttendanceRecordWithPerson> diffCallback,
             Context context, Activity activity, ClazzLogDetailPresenter mPresenter){
         super(diffCallback);
@@ -96,13 +102,12 @@ public class ClazzLogDetailRecyclerAdapter
      * Every item in the recycler view will have set its colors if no attendance status is set.
      * every attendance button will have it-self mapped to tints on activation.
      *
-     * @param holder
-     * @param position
      */
     @Override
     public void onBindViewHolder(@NonNull ClazzLogDetailViewHolder holder, int position){
         ClazzLogAttendanceRecordWithPerson attendanceRecord = getItem(position);
 
+        assert attendanceRecord != null;
         String studentName = attendanceRecord.getPerson().getFirstNames() + " " +
                 attendanceRecord.getPerson().getLastName();
 
@@ -117,7 +122,7 @@ public class ClazzLogDetailRecyclerAdapter
         final long clazzLogAttendanceRecordUid =
                 attendanceRecord.getClazzLogAttendanceRecordUid();
 
-        Map<Integer, ImageView> attendanceButtons = new HashMap<>();
+        @SuppressLint("UseSparseArrays") Map<Integer, ImageView> attendanceButtons = new HashMap<>();
         attendanceButtons.put(STATUS_ATTENDED, holder.itemView.findViewById(
                 R.id.item_clazzlog_detail_student_present_icon));
         attendanceButtons.put(STATUS_ABSENT, holder.itemView.findViewById(
@@ -125,6 +130,7 @@ public class ClazzLogDetailRecyclerAdapter
         attendanceButtons.put(STATUS_PARTIAL, holder.itemView.findViewById(
                 R.id.item_clazzlog_detail_student_delay_icon));
 
+        //Loop through every attendance button
         for(Map.Entry<Integer, ImageView> entry : attendanceButtons.entrySet()) {
             boolean selectedOption = attendanceRecord.getAttendanceStatus() == entry.getKey();
             entry.getValue().setOnClickListener((view) -> thePresenter.handleMarkStudent(

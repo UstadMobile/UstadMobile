@@ -6,6 +6,7 @@ import android.arch.paging.LivePagedListBuilder;
 import android.arch.paging.PagedList;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.LinearLayoutManager;
@@ -31,10 +32,10 @@ import com.ustadmobile.lib.db.entities.ClazzLog;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import ru.dimorinny.floatingtextbutton.FloatingTextButton;
 
@@ -47,7 +48,6 @@ public class ClazzLogListFragment extends UstadBaseFragment implements ClassLogL
 
     View rootContainer;
     private RecyclerView mRecyclerView;
-    private RecyclerView.LayoutManager mRecyclerLayoutManager;
 
     private ClazzLogListPresenter mPresenter;
     LineChart lineChart;
@@ -137,7 +137,7 @@ public class ClazzLogListFragment extends UstadBaseFragment implements ClassLogL
      */
     class AttendanceBarDataSet extends BarDataSet {
 
-        public AttendanceBarDataSet(List<BarEntry> yVals, String label) {
+        AttendanceBarDataSet(List<BarEntry> yVals, String label) {
             super(yVals, label);
         }
 
@@ -170,12 +170,11 @@ public class ClazzLogListFragment extends UstadBaseFragment implements ClassLogL
      */
     @Override
     public void updateAttendanceLineChart(LinkedHashMap<Float, Float> dataMap){
-        List<Entry> lineDataEntries = new ArrayList<Entry>();
+        List<Entry> lineDataEntries = new ArrayList<>();
         for (Map.Entry<Float, Float> floatFloatEntry : dataMap.entrySet()) {
             Entry anEntry = new Entry();
-            Map.Entry<Float, Float> nextEntry = floatFloatEntry;
-            anEntry.setX(nextEntry.getKey());
-            anEntry.setY(nextEntry.getValue() * 100);
+            anEntry.setX(floatFloatEntry.getKey());
+            anEntry.setY(floatFloatEntry.getValue() * 100);
             lineDataEntries.add(anEntry);
         }
 
@@ -212,7 +211,7 @@ public class ClazzLogListFragment extends UstadBaseFragment implements ClassLogL
      */
     @Override
     public void updateAttendanceBarChart(LinkedHashMap<Float, Float> dataMap){
-        List<BarEntry> barDataEntries = new ArrayList<BarEntry>();
+        List<BarEntry> barDataEntries = new ArrayList<>();
         for (Map.Entry<Float, Float> nextEntry : dataMap.entrySet()) {
             BarEntry anEntry = new BarEntry(nextEntry.getKey(),
                     nextEntry.getValue() * 100);
@@ -227,9 +226,10 @@ public class ClazzLogListFragment extends UstadBaseFragment implements ClassLogL
         dataSetBar1.setValueFormatter(
                 (value, entry, dataSetIndex, viewPortHandler) -> "" + ((int) value) + "%");
 
-        dataSetBar1.setColors(new int[]{ContextCompat.getColor(getContext(), R.color.traffic_green),
+        int[] colors = new int[]{ContextCompat.getColor(Objects.requireNonNull(getContext()), R.color.traffic_green),
                 ContextCompat.getColor(getContext(), R.color.traffic_orange),
-                ContextCompat.getColor(getContext(), R.color.traffic_red)});
+                ContextCompat.getColor(getContext(), R.color.traffic_red)};
+        dataSetBar1.setColors(colors);
 
 
         BarData barData = new BarData(dataSetBar1);
@@ -268,18 +268,8 @@ public class ClazzLogListFragment extends UstadBaseFragment implements ClassLogL
 
     }
 
-
-
-    /**
-     * On Create of the View fragment . Part of Android's Fragment Override
-     *
-     * @param inflater
-     * @param container
-     * @param savedInstanceState
-     * @return the root container
-     */
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
         rootContainer =
@@ -287,7 +277,7 @@ public class ClazzLogListFragment extends UstadBaseFragment implements ClassLogL
         setHasOptionsMenu(true);
 
         mRecyclerView = rootContainer.findViewById(R.id.fragment_class_log_list_recyclerview);
-        mRecyclerLayoutManager = new LinearLayoutManager(getContext());
+        RecyclerView.LayoutManager mRecyclerLayoutManager = new LinearLayoutManager(getContext());
         mRecyclerView.setLayoutManager(mRecyclerLayoutManager);
 
         //Separated out Chart initialisation
@@ -370,8 +360,9 @@ public class ClazzLogListFragment extends UstadBaseFragment implements ClassLogL
 
         //Create a recycler adapter to set on the Recycler View.
         ClazzLogListRecyclerAdapter recyclerAdapter =
-            new ClazzLogListRecyclerAdapter(DIFF_CALLBACK, getContext(), this, mPresenter);
+            new ClazzLogListRecyclerAdapter(DIFF_CALLBACK, getContext(), this, mPresenter, false);
 
+        //warning is expected
         DataSource.Factory<Integer, ClazzLog> factory =
                 (DataSource.Factory<Integer, ClazzLog>) clazzLogListProvider.getProvider();
 

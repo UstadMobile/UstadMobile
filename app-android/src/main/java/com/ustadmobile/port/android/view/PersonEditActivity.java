@@ -60,6 +60,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.Calendar;
+import java.util.Objects;
 
 import id.zelory.compressor.Compressor;
 
@@ -70,13 +71,16 @@ import static com.ustadmobile.core.view.PersonDetailViewField.FIELD_TYPE_HEADER;
 import static com.ustadmobile.core.view.PersonDetailViewField.FIELD_TYPE_PHONE_NUMBER;
 import static com.ustadmobile.core.view.PersonDetailViewField.FIELD_TYPE_TEXT;
 
+/**
+ * This activity is responsible for showing the edit page for a person. Used for editing a new
+ * person as well as
+ */
 public class PersonEditActivity extends UstadBaseActivity implements PersonEditView {
 
     private Toolbar toolbar;
     private LinearLayout mLinearLayout;
 
     private RecyclerView mRecyclerView;
-    private RecyclerView.LayoutManager mRecyclerLayoutManager;
 
     private PersonEditPresenter mPresenter;
 
@@ -86,10 +90,8 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
     public static final int DEFAULT_PADDING_HEADER_BOTTOM = 16;
     public static final int DEFAULT_DIVIDER_HEIGHT = 2;
     public static final int DEFAULT_TEXT_PADDING_RIGHT = 4;
-    public static final String BLANK_ICON = "ic_none_24dp";
     public static final String ADD_PERSON_ICON = "ic_person_add_black_24dp";
     public static final int HEADER_TEXT_SIZE = 12;
-    public static final int LABEL_TEXT_SIZE = 10;
     public static final String COLOR_GREY= "#B3B3B3";
 
     private static final int CAMERA_PERMISSION_REQUEST = 100;
@@ -109,7 +111,7 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
         toolbar = findViewById(R.id.activity_person_edit_toolbar);
         toolbar.setTitle(getText(R.string.edit_person));
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
         //Get the header & fields layout
         mLinearLayout = findViewById(R.id.activity_person_edit_fields_linear_layout);
@@ -128,6 +130,16 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
 
     }
 
+    /**
+     * Gets resource id of a resource image like an image. Usually used to get the resource id
+     * from an image
+     *
+     * @param pVariableName     The variable name of the resource eg: ic_person_24dp
+     * @param pResourcename     The name of the type of resource eg: drawable
+     * @param pPackageName      The package name calling the resource (usually getPackageName() from
+     *                          an activity)
+     * @return                  The resource ID
+     */
     public int getResourceId(String pVariableName, String pResourcename, String pPackageName)
     {
         try {
@@ -138,20 +150,41 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
         }
     }
 
+    /**
+     * Clears all fields.
+     */
     @Override
     public void clearAllFields() {
         mLinearLayout.removeAllViews();
     }
 
-    public void setEditField(long fieldUid, int fieldType, String label, int labelId,
-                             String iconName, boolean editMode,
+    /**
+     * Adds edit fields to the linear layout given to it. This method will figure out which type
+     * of field it is and add the corresponding necessary view component to it. This method is to
+     * be called for every field applicable to that person in order of visibility as it will be
+     * added linearly.
+     *
+     * @param fieldUid              The field Uid of this field. This is used to set it to the
+     *                              presenter's update method : handleFieldEdit() that uses this
+     *                              field uid to figure out which field to update.
+     * @param fieldType             The field type is used to determine which field type this is as
+     *                              defined in PersonDetailViewField class.
+     * @param label                 The label of the field if required it will be added before the
+     *                              view component is added. eg: "Profile" label before Name, DOB,
+     *                              etc are added.
+     * @param labelId               The label Id
+     * @param iconName              The icon name - to add custom icons to the view (if any)
+     * @param editMode              Edit mode - true if yes, false if no
+     * @param thisLinearLayout      The linear layout where the edit view will be added to.
+     * @param thisValue             The value of the edit view component to be pre populated.
+     */
+    public void setEditField(long fieldUid, int fieldType, String label,
+                             int labelId, String iconName, boolean editMode,
                              LinearLayout thisLinearLayout, Object thisValue){
 
 
         //Set icon if not present (for margins to align ok)
-        if(iconName == null || iconName.length() == 0){
-            iconName = ADD_PERSON_ICON;
-        }
+        if(iconName == null || iconName.length() == 0) iconName = ADD_PERSON_ICON;
 
         LinearLayout.LayoutParams dividerLayout =
                 new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
@@ -218,7 +251,6 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
                     Button addPersonButton = new Button(this);
                     addPersonButton.setIncludeFontPadding(false);
                     addPersonButton.setMinHeight(0);
-                    //addPersonButton.setLayoutParams(buttonLayout);
                     addPersonButton.setText(impl.getString(MessageID.add_person_to_class,
                             getContext()));
                     addPersonButton.setBackground(null);
@@ -228,10 +260,10 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
 
                     mLinearLayout.addView(addPersonToClazzHL);
 
-                    //Add a recyclerview of classes
+                    //Add a recycler view of classes
                     mRecyclerView = new RecyclerView(this);
 
-                    mRecyclerLayoutManager = new LinearLayoutManager(getApplicationContext());
+                    RecyclerView.LayoutManager mRecyclerLayoutManager = new LinearLayoutManager(getApplicationContext());
                     mRecyclerView.setLayoutManager(mRecyclerLayoutManager);
 
                     //Add the layout
@@ -252,7 +284,7 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
                 int iconResId = getResourceId(iconName, "drawable", getPackageName());
                 ImageView icon = new ImageView(this);
                 if(iconName.equals(ADD_PERSON_ICON)){
-                    icon.setAlpha(0);
+                    icon.setImageAlpha(0);
                 }
                 icon.setImageResource(iconResId);
                 icon.setPadding(DEFAULT_PADDING,0,DEFAULT_TEXT_PADDING_RIGHT,0);
@@ -273,7 +305,6 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
 
                 }
                 if (fieldType == FIELD_TYPE_DATE) {
-                    //et.setInputType(InputType.TYPE_DATETIME_VARIATION_DATE);
 
                     Calendar myCalendar = Calendar.getInstance();
 
@@ -373,6 +404,14 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
         }
     }
 
+    /**
+     * Sets the field of given parameters to the view.
+     *
+     * @param index The index where the field should go in the (Linear) layout
+     * @param fieldUid  The field uid
+     * @param field The PersonDetailViewField field representation that has its id, type label & options
+     * @param value The value of the field to be set to the view.
+     */
     @Override
     public void setField(int index, long fieldUid, PersonDetailViewField field, Object value) {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
@@ -390,8 +429,9 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
 
     @Override
     public void setClazzListProvider(UmProvider<ClazzWithNumStudents> clazzListProvider) {
-        ClazzListRecyclerAdapter recyclerAdapter =
-                new ClazzListRecyclerAdapter(DIFF_CALLBACK);
+        SimpleClazzListRecyclerAdapter recyclerAdapter =
+                new SimpleClazzListRecyclerAdapter(DIFF_CALLBACK, getApplicationContext());
+        //A warning is expected.
         DataSource.Factory<Integer, ClazzWithNumStudents> factory =
                 (DataSource.Factory<Integer, ClazzWithNumStudents>)
                         clazzListProvider.getProvider();
@@ -406,7 +446,7 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
     public void updateToolbarTitle(String titleName) {
         toolbar.setTitle(titleName);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
     }
 
     private void startCameraIntent(){
@@ -435,19 +475,10 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
         }
     }
 
-    /*Since most camera capture inverted
-    images then you might want to rotate it first and get it as bitmap*/
-
-    public Bitmap getCompressedImage(int quality){
-        Bitmap bmp = BitmapFactory.decodeFile(imagePathFromCamera);
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        bmp.compress(Bitmap.CompressFormat.JPEG, quality, bos);
-        Matrix matrix = new Matrix();
-        matrix.postRotate(90);
-        return Bitmap.createBitmap(bmp, 0, 0, bmp.getWidth(), bmp.getHeight(), matrix,
-                true);
-    }
-
+    /**
+     * Compress the image set using Compressor.
+     *
+     */
     public void compressImage() {
         File imageFile = new File(imagePathFromCamera);
         try {
@@ -455,7 +486,9 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
             c.setDestinationDirectoryPath(imageFile.getPath() + "_" + imageFile.getName() );
 
             File compressedImageFile = c.compressToFile(imageFile);
-            imageFile.delete();
+            if(!imageFile.delete()){
+                System.out.print("Could not delete " + imagePathFromCamera);
+            }
             imagePathFromCamera = compressedImageFile.getAbsolutePath();
 
         } catch (IOException e) {
@@ -480,10 +513,10 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
             switch (requestCode){
                 case CAMERA_IMAGE_CAPTURE_REQUEST:
 
-                    //Copress the image:
+                    //Compress the image:
                     compressImage();
 
-                    //set imagePathFromCamera to Person.
+                    //set imagePathFromCamera to Person (persist)
                     updateImageOnView(imagePathFromCamera);
                     mPresenter.updatePersonPic(imagePathFromCamera);
 
@@ -540,13 +573,14 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
          * Every item in the recycler view will have set its colors if no attendance status is set.
          * every attendance button will have it-self mapped to tints on activation.
          *
-         * @param holder
-         * @param position
+         * @param holder        View holder
+         * @param position      position of item
          */
         @Override
         public void onBindViewHolder(@NonNull ClazzLogDetailViewHolder holder, int position){
             ClazzWithNumStudents thisClazz = getItem(position);
 
+            assert thisClazz != null;
             ((TextView)holder.itemView.findViewById(R.id.item_clazzlist_clazz_simple_clazz_name))
                     .setText(thisClazz.getClazzName());
 

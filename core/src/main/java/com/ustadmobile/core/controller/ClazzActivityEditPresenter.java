@@ -210,7 +210,8 @@ public class ClazzActivityEditPresenter
                 }
 
                 //set the presets to the view's activity change drop down (spinner)
-                view.setClazzActivityChangesDropdownPresets((String[]) presetAL.toArray());
+                view.setClazzActivityChangesDropdownPresets(presetAL.toArray(new String[presetAL.size()]));
+                //view.setClazzActivityChangesDropdownPresets((String[]) presetAL.toArray());
             }
 
             @Override

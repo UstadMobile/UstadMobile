@@ -7,6 +7,7 @@ import com.ustadmobile.core.db.dao.ClazzActivityDao;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMCalendarUtil;
+import com.ustadmobile.core.view.ClazzActivityEditView;
 import com.ustadmobile.core.view.ClazzActivityListView;
 import com.ustadmobile.lib.db.entities.ClazzActivity;
 import com.ustadmobile.lib.db.entities.ClazzActivityChange;
@@ -23,6 +24,7 @@ import static com.ustadmobile.core.view.ClazzListView.ARG_CLAZZ_UID;
 import static com.ustadmobile.core.view.ClassLogListView.CHART_DURATION_LAST_MONTH;
 import static com.ustadmobile.core.view.ClassLogListView.CHART_DURATION_LAST_WEEK;
 import static com.ustadmobile.core.view.ClassLogListView.CHART_DURATION_LAST_YEAR;
+import static com.ustadmobile.core.view.ClazzListView.ARG_LOGDATE;
 
 
 /**
@@ -159,14 +161,14 @@ public class ClazzActivityListPresenter
      * clicked.
      */
     public void goToNewClazzActivityEditActivity(){
-        /* TODO Sprint 4
+        //TODO Sprint 4
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        Hashtable args = new Hashtable();
+        Hashtable<String, Long> args = new Hashtable<>();
         args.put(ARG_CLAZZ_UID, currentClazzUid);
         args.put(ARG_LOGDATE, System.currentTimeMillis());
 
-        impl.go(ClazzActivityEditView.VIEW_NAME, args, view.getContext());
-        */
+        //impl.go(ClazzActivityEditView.VIEW_NAME, args, view.getContext());
+
     }
 
     /**

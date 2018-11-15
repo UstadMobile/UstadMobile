@@ -5,6 +5,7 @@ import android.arch.paging.DataSource;
 import android.arch.paging.LivePagedListBuilder;
 import android.arch.paging.PagedList;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -22,6 +23,8 @@ import com.ustadmobile.core.view.ClazzListView;
 import com.ustadmobile.lib.db.entities.ClazzWithNumStudents;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
+import java.util.Objects;
+
 import ru.dimorinny.floatingtextbutton.FloatingTextButton;
 
 /**
@@ -29,11 +32,8 @@ import ru.dimorinny.floatingtextbutton.FloatingTextButton;
  */
 public class ClazzListFragment extends UstadBaseFragment implements ClazzListView{
 
-    private View rootContainer;
-
     //RecyclerView
     private RecyclerView mRecyclerView;
-    private RecyclerView.LayoutManager mRecyclerLayoutManager;
 
     private ClazzListPresenter mPresenter;
     Spinner sortSpinner;
@@ -54,31 +54,22 @@ public class ClazzListFragment extends UstadBaseFragment implements ClazzListVie
     /**
      * On Create of the fragment.
      *
-     * @param savedInstanceState
+     * @param savedInstanceState    The bundle state
      */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
     }
 
-    /**
-     * On Create of the View fragment . Part of Android's Fragment Override
-     *
-     * @param inflater
-     * @param container
-     * @param savedInstanceState
-     * @return the root container
-     */
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        rootContainer =
-                inflater.inflate(R.layout.fragment_clazz_list, container, false);
+        View rootContainer = inflater.inflate(R.layout.fragment_clazz_list, container, false);
         setHasOptionsMenu(true);
 
         mRecyclerView = rootContainer.findViewById(R.id.fragment_class_list_recyclerview);
 
-        mRecyclerLayoutManager = new LinearLayoutManager(getContext());
+        RecyclerView.LayoutManager mRecyclerLayoutManager = new LinearLayoutManager(getContext());
         mRecyclerView.setLayoutManager(mRecyclerLayoutManager);
 
         sortSpinner = rootContainer.findViewById(R.id.fragment_clazz_list_sort_spinner);
@@ -107,6 +98,9 @@ public class ClazzListFragment extends UstadBaseFragment implements ClazzListVie
         return rootContainer;
     }
 
+    /**
+     * The DIFF Callback.
+     */
     public static final DiffUtil.ItemCallback<ClazzWithNumStudents> DIFF_CALLBACK =
             new DiffUtil.ItemCallback<ClazzWithNumStudents>() {
                 @Override
@@ -122,11 +116,17 @@ public class ClazzListFragment extends UstadBaseFragment implements ClazzListVie
                 }
             };
 
+    /**
+     * Sets the provider to the view.
+     *
+     * @param clazzListProvider The UMProvider provider of ClazzWithNumStudents Type.
+     */
     @Override
     public void setClazzListProvider(UmProvider<ClazzWithNumStudents> clazzListProvider) {
         ClazzListRecyclerAdapter recyclerAdapter = new ClazzListRecyclerAdapter(DIFF_CALLBACK,
                 getContext(), this, mPresenter);
 
+        // a warning is expected.
         DataSource.Factory<Integer, ClazzWithNumStudents> factory =
                 (DataSource.Factory<Integer, ClazzWithNumStudents>)clazzListProvider.getProvider();
         LiveData<PagedList<ClazzWithNumStudents>> data =
@@ -136,20 +136,18 @@ public class ClazzListFragment extends UstadBaseFragment implements ClazzListVie
         mRecyclerView.setAdapter(recyclerAdapter);
     }
 
+    /**
+     * Updates the sort spinner with string list given
+     *
+     * @param presets A String array String[] of the presets available.
+     */
     @Override
     public void updateSortSpinner(String[] presets) {
         this.sortSpinnerPresets = presets;
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(),
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(Objects.requireNonNull(getContext()),
                 R.layout.spinner_item, sortSpinnerPresets);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         sortSpinner.setAdapter(adapter);
-    }
-
-    // This event is triggered soon after onCreateView().
-    @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        // Setup any handles to view objects here
-
     }
 
 }
