@@ -49,6 +49,9 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.ArrayType;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.tools.Diagnostic;
@@ -783,17 +786,41 @@ public abstract class AbstractDbProcessor {
     protected CodeBlock generateSetSyncablePrimaryKey(ExecutableElement daoMethod,
                                                       TypeElement daoClass,
                                                       ProcessingEnvironment processingEnv,
-                                                      String dbVarName, String syncableDbVarName) {
+                                                      String dbVarName, String syncableDbVarName,
+                                                      String resultVarName) {
         CodeBlock.Builder codeBlock = CodeBlock.builder();
         DaoMethodInfo methodInfo = new DaoMethodInfo(daoMethod, daoClass, processingEnv);
         TypeElement entityTypeElement = (TypeElement)processingEnv.getTypeUtils().asElement(
                 methodInfo.resolveEntityParameterComponentType());
         String paramVarName = methodInfo.getEntityParameterElement().getSimpleName().toString();
+        TypeMirror resultType = methodInfo.resolveResultType();
+
+        String resultVarNameActive = resultVarName;
+
+        boolean isVoid = isVoid(resultType);
+        if(!isVoid) {
+            if(methodInfo.hasListResultType()) {
+                codeBlock.add("$T $L = new $T<>();\n", resultType, resultVarName, ArrayList.class);
+            }else if(methodInfo.hasArrayResultType()) {
+                TypeMirror componentType = ((ArrayType)methodInfo.resolveResultType())
+                        .getComponentType();
+                if(componentType.getKind().isPrimitive()) {
+                    componentType = processingEnv.getTypeUtils()
+                            .boxedClass((PrimitiveType) componentType).asType();
+                }
+
+                codeBlock.add("$T<$T> $L_list = new $T<>();\n", List.class,
+                        componentType, resultVarName, ArrayList.class);
+                resultVarNameActive = resultVarName + "_list";
+            }else {
+                codeBlock.add("$T $L = $L;\n", resultType, resultVarName, defaultValue(resultType));
+            }
+        }
 
         int tableId = entityTypeElement.getAnnotation(UmEntity.class).tableId();
         if(syncableDbVarName == null) {
             syncableDbVarName = "_syncableDbPk";
-            codeBlock.add("$1T $2L = ($1T)$3L", UmSyncableDatabase.class, syncableDbVarName,
+            codeBlock.add("$1T $2L = ($1T)$3L;\n", UmSyncableDatabase.class, syncableDbVarName,
                     dbVarName);
         }
 
@@ -803,9 +830,14 @@ public abstract class AbstractDbProcessor {
         Object[] ifStmtArgs = new Object[]{isListOrArray ? "_element" : paramVarName,
                 capitalize(pkElement.getSimpleName()), defaultValue(pkElement.asType())};
 
-
-
         if(isListOrArray) {
+            String addKeyToListStr = "";
+            Object[] addKeyToListArgs = new Object[0];
+            if(!isVoid) {
+                addKeyToListStr = "$L.add(_baseSyncablePk);\n";
+                addKeyToListArgs = new Object[]{resultVarNameActive};
+            }
+
             codeBlock.add("$T<$T> _syncablePksRequired = new $T<>();\n", List.class,
                     methodInfo.resolveEntityParameterComponentType(), ArrayList.class)
                     .beginControlFlow("for($T _element : $L)", entityTypeElement,
@@ -820,6 +852,7 @@ public abstract class AbstractDbProcessor {
                             syncableDbVarName, tableId)
                         .beginControlFlow("for($T _element : _syncablePksRequired)",
                                 entityTypeElement)
+                            .add(addKeyToListStr, addKeyToListArgs)
                             .add("_element.set$L(_baseSyncablePk++);\n",
                                 capitalize(pkElement.getSimpleName()))
                         .endControlFlow()
@@ -830,8 +863,19 @@ public abstract class AbstractDbProcessor {
                             methodInfo.getEntityParameterElement().getSimpleName(),
                             capitalize(pkElement.getSimpleName()),
                             syncableDbVarName,
-                            tableId)
-                    .endControlFlow();
+                            tableId);
+            if(!isVoid) {
+                codeBlock.add("$L = $L.get$L();\n", resultVarNameActive, paramVarName,
+                        capitalize(pkElement.getSimpleName()));
+            }
+            codeBlock.endControlFlow();
+        }
+
+        if(!isVoid && methodInfo.hasArrayResultType()){
+            codeBlock.add("$1T $2L = resultList.toArray(new $3T[$2L_list.size()]);\n",
+                    resultType,
+                    resultVarName,
+                    ((ArrayType)resultType).getComponentType());
         }
 
         return codeBlock.build();

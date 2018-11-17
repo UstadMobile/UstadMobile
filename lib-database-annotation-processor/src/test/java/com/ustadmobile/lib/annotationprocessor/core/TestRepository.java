@@ -48,6 +48,7 @@ public class TestRepository {
     public void givenEntryInsertedInClientDb_whenSynced_shouldBeInServerDb() {
         ExampleDatabase clientDb = ExampleDatabase.getInstance(null, "db1");
         ExampleDatabase serverDb = ExampleDatabase.getInstance(null);
+        serverDb.setMaster(true);
 
         clientDb.clearAll();
         serverDb.clearAll();

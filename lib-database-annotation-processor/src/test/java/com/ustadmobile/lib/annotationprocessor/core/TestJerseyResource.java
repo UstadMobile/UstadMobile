@@ -67,10 +67,15 @@ public class TestJerseyResource {
     public void testPrimitiveReturnType() {
         ExampleDatabase db = ExampleDatabase.getInstance(null);
         db.clearAll();
+        db.setMaster(true);
 
         ExampleSyncableEntity e1 = new ExampleSyncableEntity();
         e1.setLocalChangeSeqNum(42);
-        long insertedUid = db.getExampleSyncableDao().insert(e1);
+
+
+        long insertedUid = target.path("ExampleSyncableDao/insertRest").request()
+                .post(Entity.entity(e1, MediaType.APPLICATION_JSON),
+                        new GenericType<Long>() {});
 
 
         String result = target.path("ExampleSyncableDao/getLocalChangeByUid")
@@ -139,7 +144,10 @@ public class TestJerseyResource {
         ExampleSyncableEntity e2 = new ExampleSyncableEntity();
         e2.setTitle("e2");
 
-        db.getExampleSyncableDao().insertList(Arrays.asList(e1, e2));
+        target.path("ExampleSyncableDao/insertRestListAndReturnIds").request()
+                .post(Entity.entity(Arrays.asList(e1, e2), MediaType.APPLICATION_JSON),
+                        new GenericType<List<Long>>() {});
+
 
         List<ExampleSyncableEntity> resultList = target.path("ExampleSyncableDao/findAllLive")
                 .request().get(new GenericType<List<ExampleSyncableEntity>>(){});

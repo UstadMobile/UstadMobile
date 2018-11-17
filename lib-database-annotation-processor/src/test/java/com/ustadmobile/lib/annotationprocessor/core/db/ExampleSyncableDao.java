@@ -72,6 +72,9 @@ public abstract class ExampleSyncableDao implements SyncableDao<ExampleSyncableE
     @UmRestAccessible
     public abstract UmLiveData<List<ExampleSyncableEntity>> findAllLive();
 
+    @UmQuery("SELECT * FROM ExampleSyncableEntity")
+    public abstract List<ExampleSyncableEntity> findAll();
+
     @UmInsert
     @UmRestAccessible
     public abstract void insertRest(ExampleSyncableEntity entity, UmCallback<Long> callback);

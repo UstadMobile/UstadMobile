@@ -78,6 +78,33 @@ public class DaoMethodInfo {
     }
 
     /**
+     * Determines if the result type uses a java.util.List result (directly). This includes when a
+     * value is returned directly, or via a callback. This does not check for LiveData where LiveData
+     * contains a list.
+     *
+     * @return true if the result type is a list, false otherwise.
+     */
+    public boolean hasListResultType() {
+        TypeMirror resultType = resolveResultType();
+        if(!resultType.getKind().equals(TypeKind.DECLARED))
+            return false;
+
+        return listTypeElement.equals(processingEnv.getTypeUtils().asElement(resultType));
+    }
+
+    /**
+     * Determine if the result type uses an array (directly). This includes when a value is returned
+     * directly, or via a callback. This does not check for LiveData where the LiveData contains an
+     * array.
+     *
+     * @return true if the result type is an array, false otherwise
+     */
+    public boolean hasArrayResultType() {
+        return resolveResultType().getKind().equals(TypeKind.ARRAY);
+    }
+
+
+    /**
      * Determine if the first parameter of this method is an array
      *
      * @return true if the first parameter is an array, false otherwise
