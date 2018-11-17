@@ -305,5 +305,66 @@ public class DbProcessorUtils {
 
         return pkElement.getAnnotation(UmPrimaryKey.class).autoIncrement();
     }
+
+    public static VariableElement findPrimaryKey(TypeElement entityType,
+                                                 ProcessingEnvironment processingEnv) {
+        for(Element subElement : getEntityFieldElements(entityType, processingEnv)) {
+            if(subElement.getAnnotation(UmPrimaryKey.class) != null)
+                return (VariableElement)subElement;
+        }
+
+        return null;
+    }
+
+
+    /**
+     * Returns a list of the entity fields of a particular object. Synonamous to
+     * getEntityFieldElements(entityTypeElement, false)
+     *
+     * @param entityTypeElement The TypeElement representing the entity, from which we wish to get
+     *                          the field names
+     * @return List of VariableElement representing the entity fields that are persisted
+     */
+    public static List<VariableElement> getEntityFieldElements(TypeElement entityTypeElement,
+                                                           ProcessingEnvironment processingEnv) {
+        return getEntityFieldElements(entityTypeElement, processingEnv, false);
+    }
+
+
+    /**
+     * Returns a list of the entity fields of a particular object. If getAutoIncLast is true, then
+     * any autoincrement primary key will always be returned at the end of the list, e.g. so that a
+     * preparedstatement insert with or without an autoincrement id can share the same code to set
+     * all other parameters.
+     *
+     * @param entityTypeElement The TypeElement representing the entity, from which we wish to get
+     *                          the field names
+     * @param getAutoIncLast if true, then always return any field that is auto increment at the very end
+     * @return List of VariableElement representing the entity fields that are persisted
+     */
+    public static List<VariableElement> getEntityFieldElements(TypeElement entityTypeElement,
+                                                               ProcessingEnvironment processingEnv,
+                                                               boolean getAutoIncLast) {
+        List<VariableElement> entityFieldsList = new ArrayList<>();
+        VariableElement pkAutoIncField = null;
+        for(Element subElement : entityTypeElement.getEnclosedElements()) {
+            if(!subElement.getKind().equals(ElementKind.FIELD) ||
+                    subElement.getModifiers().contains(Modifier.STATIC))
+                continue;
+
+            if(getAutoIncLast
+                    && subElement.getAnnotation(UmPrimaryKey.class) != null
+                    && subElement.getAnnotation(UmPrimaryKey.class).autoIncrement()) {
+                pkAutoIncField = (VariableElement) subElement;
+            }else {
+                entityFieldsList.add((VariableElement) subElement);
+            }
+        }
+
+        if(pkAutoIncField != null)
+            entityFieldsList.add(pkAutoIncField);
+
+        return entityFieldsList;
+    }
 }
 

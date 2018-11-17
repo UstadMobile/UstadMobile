@@ -260,52 +260,7 @@ public abstract class AbstractDbProcessor {
         }
     }
 
-    /**
-     * Returns a list of the entity fields of a particular object. If getAutoIncLast is true, then
-     * any autoincrement primary key will always be returned at the end of the list, e.g. so that a
-     * preparedstatement insert with or without an autoincrement id can share the same code to set
-     * all other parameters.
-     *
-     * @param entityTypeElement The TypeElement representing the entity, from which we wish to get
-     *                          the field names
-     * @param getAutoIncLast if true, then always return any field that is auto increment at the very end
-     * @return List of VariableElement representing the entity fields that are persisted
-     */
-    protected List<VariableElement> getEntityFieldElements(TypeElement entityTypeElement,
-                                                           boolean getAutoIncLast) {
-        List<VariableElement> entityFieldsList = new ArrayList<>();
-        VariableElement pkAutoIncField = null;
-        for(Element subElement : entityTypeElement.getEnclosedElements()) {
-            if(!subElement.getKind().equals(ElementKind.FIELD) ||
-                    subElement.getModifiers().contains(Modifier.STATIC))
-                continue;
 
-            if(getAutoIncLast
-                    && subElement.getAnnotation(UmPrimaryKey.class) != null
-                    && subElement.getAnnotation(UmPrimaryKey.class).autoIncrement()) {
-                pkAutoIncField = (VariableElement) subElement;
-            }else {
-                entityFieldsList.add((VariableElement) subElement);
-            }
-        }
-
-        if(pkAutoIncField != null)
-            entityFieldsList.add(pkAutoIncField);
-
-        return entityFieldsList;
-    }
-
-    /**
-     * Returns a list of the entity fields of a particular object. Synonamous to
-     * getEntityFieldElements(entityTypeElement, false)
-     *
-     * @param entityTypeElement The TypeElement representing the entity, from which we wish to get
-     *                          the field names
-     * @return List of VariableElement representing the entity fields that are persisted
-     */
-    protected List<VariableElement> getEntityFieldElements(TypeElement entityTypeElement) {
-        return getEntityFieldElements(entityTypeElement, false);
-    }
 
 
     /**
@@ -507,7 +462,7 @@ public abstract class AbstractDbProcessor {
     }
 
     protected VariableElement findPrimaryKey(TypeElement entityType) {
-        for(Element subElement : getEntityFieldElements(entityType)) {
+        for(Element subElement : DbProcessorUtils.getEntityFieldElements(entityType, processingEnv)) {
             if(subElement.getAnnotation(UmPrimaryKey.class) != null)
                 return (VariableElement)subElement;
         }
@@ -782,6 +737,102 @@ public abstract class AbstractDbProcessor {
                 paramVariableName, syncableDbVariableName,
                 "getAndIncrementNextLocalChangeSeqNum");
         codeBlock.endControlFlow();
+
+        return codeBlock.build();
+    }
+
+    /**
+     * Generate a code block that will set syncable primary keys. This is for use on entities
+     * that are using the syncable primary key system.
+     *
+     * This will generate code along the lines of this for a single entity insert:
+     * <code>
+     * if(entityVarName.getPrimaryKey() == 0L) {
+     *     long _baseSyncablePrimaryKey = _syncableDb.getSyncablePrimaryKeyDao().getAndIncrement(
+     *          tableId, 1)
+     *     entityVarName.setPrimaryKey(_baseSyncablePrimaryKey);
+     * }
+     * </code>
+     * ... and this for an array or list insert:
+     *
+     * <code>
+     * List&lt;EntityType&gt; _syncablePksRequired = new ArrayList&gt;&lt;();
+     * for(EntityType _element : entityVarName) {
+     *     if(_element.getPrimaryKey() == 0L)
+     *          _syncablePksRequired.add(_element);
+     * }
+     * if(!_syncablePksRequired.isEmpty()) {
+     *      long _baseSyncablePrimaryKey = _syncableDb.getSyncablePrimaryKeyDao().getAndIncrement(
+     *          tableId, _syncablePksRequired.size());
+     *      for(EntityType _element : _syncablePksRequired) {
+     *          _element.setPrimaryKey(_baseSyncablePrimaryKey++);
+     *      }
+     * }
+     * </code>
+     *
+     *
+     *
+     * @param daoMethod ExecutableElement representing the method that we are generating
+     * @param daoClass The DAO class itself (used to resolve type variables etc)
+     * @param processingEnv Processing Environment
+     * @param dbVarName Variable name of the database class
+     * @param syncableDbVarName Variable name of the database class, casted to UmSyncableDatabase (
+     *                          or null if no such variable exists)
+     * @return A CodeBlock that will set a syncable primary key on the entity parameter arguments
+     */
+    protected CodeBlock generateSetSyncablePrimaryKey(ExecutableElement daoMethod,
+                                                      TypeElement daoClass,
+                                                      ProcessingEnvironment processingEnv,
+                                                      String dbVarName, String syncableDbVarName) {
+        CodeBlock.Builder codeBlock = CodeBlock.builder();
+        DaoMethodInfo methodInfo = new DaoMethodInfo(daoMethod, daoClass, processingEnv);
+        TypeElement entityTypeElement = (TypeElement)processingEnv.getTypeUtils().asElement(
+                methodInfo.resolveEntityParameterComponentType());
+        String paramVarName = methodInfo.getEntityParameterElement().getSimpleName().toString();
+
+        int tableId = entityTypeElement.getAnnotation(UmEntity.class).tableId();
+        if(syncableDbVarName == null) {
+            syncableDbVarName = "_syncableDbPk";
+            codeBlock.add("$1T $2L = ($1T)$3L", UmSyncableDatabase.class, syncableDbVarName,
+                    dbVarName);
+        }
+
+        boolean isListOrArray =methodInfo.hasEntityListParam() || methodInfo.hasEntityArrayParam();
+        VariableElement pkElement = findPrimaryKey(entityTypeElement);
+        String ifStmtStr = "if($L.get$L() == $L)";
+        Object[] ifStmtArgs = new Object[]{isListOrArray ? "_element" : paramVarName,
+                capitalize(pkElement.getSimpleName()), defaultValue(pkElement.asType())};
+
+
+
+        if(isListOrArray) {
+            codeBlock.add("$T<$T> _syncablePksRequired = new $T<>();\n", List.class,
+                    methodInfo.resolveEntityParameterComponentType(), ArrayList.class)
+                    .beginControlFlow("for($T _element : $L)", entityTypeElement,
+                            paramVarName)
+                        .beginControlFlow(ifStmtStr, ifStmtArgs)
+                            .add("_syncablePksRequired.add(_element);\n")
+                        .endControlFlow()
+                    .endControlFlow()
+                    .beginControlFlow("if(!_syncablePksRequired.isEmpty())")
+                        .add("long _baseSyncablePk = $L.getSyncablePrimaryKeyDao()" +
+                                        ".getAndIncrement($L, _syncablePksRequired.size());\n",
+                            syncableDbVarName, tableId)
+                        .beginControlFlow("for($T _element : _syncablePksRequired)",
+                                entityTypeElement)
+                            .add("_element.set$L(_baseSyncablePk++);\n",
+                                capitalize(pkElement.getSimpleName()))
+                        .endControlFlow()
+                    .endControlFlow();
+        }else {
+            codeBlock.beginControlFlow(ifStmtStr, ifStmtArgs)
+                    .add("$L.set$L($L.getSyncablePrimaryKeyDao().getAndIncrement($L, 1));\n",
+                            methodInfo.getEntityParameterElement().getSimpleName(),
+                            capitalize(pkElement.getSimpleName()),
+                            syncableDbVarName,
+                            tableId)
+                    .endControlFlow();
+        }
 
         return codeBlock.build();
     }

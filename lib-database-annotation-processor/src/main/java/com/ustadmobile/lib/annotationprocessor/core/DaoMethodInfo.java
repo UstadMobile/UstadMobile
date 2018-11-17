@@ -4,6 +4,7 @@ package com.ustadmobile.lib.annotationprocessor.core;
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.lib.database.annotation.UmInsert;
+import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 import com.ustadmobile.lib.database.annotation.UmUpdate;
 
 import java.util.ArrayList;
@@ -237,6 +238,24 @@ public class DaoMethodInfo {
     public VariableElement getEntityParameterElement() {
         //TODO: go over the list to find the entity parameter
         return method.getParameters().get(0);
+    }
+
+    /**
+     * Check if this is an insert method, where the entity has a syncable primary key.
+     *
+     * @return true if this is an insert method, and the entity being inserted using a syncable
+     * primary key, false otherwise
+     */
+    public boolean isInsertWithAutoSyncPrimaryKey() {
+        if(method.getAnnotation(UmInsert.class) == null)
+            return false;
+
+        TypeElement entityTypeParam = (TypeElement)processingEnv.getTypeUtils().asElement(
+                resolveEntityParameterComponentType());
+        VariableElement primaryKeyEl = DbProcessorUtils.findPrimaryKey(entityTypeParam,
+                processingEnv);
+
+        return primaryKeyEl.getAnnotation(UmPrimaryKey.class).autoGenerateSyncable();
     }
 
 

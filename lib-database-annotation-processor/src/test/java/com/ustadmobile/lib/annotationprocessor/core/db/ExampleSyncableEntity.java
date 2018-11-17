@@ -10,7 +10,7 @@ public class ExampleSyncableEntity {
 
     public static final int TABLE_ID = 42;
 
-    @UmPrimaryKey(autoIncrement = true)
+    @UmPrimaryKey(autoGenerateSyncable = true)
     private long exampleSyncableUid;
 
     @UmSyncMasterChangeSeqNum

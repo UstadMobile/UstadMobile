@@ -11,6 +11,9 @@ import com.squareup.javapoet.TypeSpec;
 import com.ustadmobile.lib.database.annotation.UmClearAll;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmDbContext;
+import com.ustadmobile.lib.database.annotation.UmEntity;
+import com.ustadmobile.lib.database.annotation.UmInsert;
+import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.database.annotation.UmQueryFindByPrimaryKey;
 import com.ustadmobile.lib.database.annotation.UmRepository;
@@ -276,6 +279,12 @@ public class DbProcessorRetrofitRepository extends AbstractDbProcessor {
                 codeBlock.add(generateIncrementChangeSeqNumsCodeBlock(methodInfo.resolveEntityParameterType(),
                         methodInfo.getEntityParameterElement().getSimpleName().toString(),
                         "_db", "_syncableDb"));
+            }
+
+            if(methodInfo.isInsertWithAutoSyncPrimaryKey()) {
+                codeBlock.add(generateSetSyncablePrimaryKey(repoMethod, daoType, processingEnv,
+                        "_db", "_syncableDb"));
+
             }
 
             if(repoMethodMode == UmRepository.UmRepositoryMethodType

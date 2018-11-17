@@ -11,6 +11,7 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import com.ustadmobile.core.db.UmObserver;
 import com.ustadmobile.core.impl.UmCallback;
+import com.ustadmobile.lib.db.sync.UmSyncableDatabase;
 
 import java.io.IOException;
 import java.util.List;
@@ -101,11 +102,23 @@ public class DbProcessorJerseyResource extends AbstractDbProcessor {
                     .add("$T _dao = _db.$L();\n", daoType,
                             daoGetter.getSimpleName());
 
-            //TODO: this may need extra annotations
+            String syncableDbVariableName = null;
+            if(methodInfo.isUpdateOrInsert() || methodInfo.isInsertWithAutoSyncPrimaryKey()) {
+                syncableDbVariableName = "_syncableDb";
+                codeBlock.add("$1T $2L = ($1T)_db;", UmSyncableDatabase.class,
+                        syncableDbVariableName);
+            }
+
+
             if(methodInfo.isUpdateOrInsert()) {
                 codeBlock.add(generateIncrementChangeSeqNumsCodeBlock(methodInfo.getEntityParameterElement().asType(),
                         methodInfo.getEntityParameterElement().getSimpleName().toString(), "_db",
-                        null));
+                        syncableDbVariableName));
+            }
+
+            if(methodInfo.isInsertWithAutoSyncPrimaryKey()) {
+                codeBlock.add(generateSetSyncablePrimaryKey(methodElement, daoType, processingEnv,
+                        "_db", syncableDbVariableName));
             }
 
 

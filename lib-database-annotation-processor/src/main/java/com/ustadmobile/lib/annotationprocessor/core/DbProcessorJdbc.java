@@ -432,7 +432,8 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                                                  String sqlProductName) {
 
         Map<String, List<String>> indexes = new HashMap<>();
-        for(VariableElement fieldVariable : getEntityFieldElements(entitySpec)) {
+        for(VariableElement fieldVariable : DbProcessorUtils.getEntityFieldElements(entitySpec,
+                processingEnv)) {
             if(fieldVariable.getAnnotation(UmIndexField.class) != null) {
                 indexes.put("index_" + entitySpec.getSimpleName() + '_' + fieldVariable.getSimpleName(),
                         Collections.singletonList(fieldVariable.getSimpleName().toString()));
@@ -487,7 +488,8 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
 
 
 
-        for(VariableElement fieldVariable : getEntityFieldElements(entitySpec)) {
+        for(VariableElement fieldVariable : DbProcessorUtils.getEntityFieldElements(entitySpec,
+                processingEnv)) {
             if (fieldVariablesStarted)
                 sbuf.append(", ");
 
@@ -682,7 +684,8 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
             codeBlock.add("$T _result = $L;\n", resultType, defaultValue(resultType));
         }
 
-        List<VariableElement> entityFields = getEntityFieldElements(entityTypeElement, true);
+        List<VariableElement> entityFields = DbProcessorUtils.getEntityFieldElements(
+                entityTypeElement, processingEnv, true);
 
         String postgresReplaceSuffxVarName = null;
         if(replaceEnabled){
@@ -853,7 +856,8 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                     String.class, querySqlVarName, identifierQuoteStr,
                         entityTypeElement.getSimpleName());
 
-        List<VariableElement> entityFields = getEntityFieldElements(entityTypeElement, true);
+        List<VariableElement> entityFields = DbProcessorUtils.getEntityFieldElements(
+                entityTypeElement, processingEnv, true);
         boolean commaRequired = false;
         int numFields = 0;
 
@@ -936,7 +940,8 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
         boolean commaRequired = false;
         int positionCounter = 1;
         Element pkElement = null;
-        for(Element subElement : getEntityFieldElements(entityTypeElement, true)) {
+        for(Element subElement : DbProcessorUtils.getEntityFieldElements(entityTypeElement,
+                processingEnv, true)) {
             if(subElement.getAnnotation(UmPrimaryKey.class) != null) {
                 pkElement = subElement;
                 continue;

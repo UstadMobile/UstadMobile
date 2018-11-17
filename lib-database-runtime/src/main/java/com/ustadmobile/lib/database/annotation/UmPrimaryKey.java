@@ -7,4 +7,7 @@ package com.ustadmobile.lib.database.annotation;
 public @interface UmPrimaryKey {
 
     boolean autoIncrement() default false;
+
+    boolean autoGenerateSyncable() default false;
+
 }
