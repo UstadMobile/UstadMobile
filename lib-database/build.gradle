@@ -10,13 +10,17 @@ compileJava {
     options.compilerArgs += [
             "-Aumdb_room_out=" + rootProject.file("lib-database-android/build/generated/source/umdbprocessor").getAbsolutePath(),
             "-Aumdb_jdbc_out=" + rootProject.file("lib-database-jdbc/build/generated/source/umdbprocessor").getAbsolutePath(),
+            "-Aumdb_retrofit_out=" + rootProject.file("lib-database-retrofitrepository/build/generated/source/umdbprocessor").getAbsolutePath(),
+            "-Aumdb_jersey_res_out=" + rootProject.file("app-rest-server/build/generated/source/umdbprocessor").getAbsolutePath(),
             "-parameters"
     ]
 
     //Due to a bug, the JDK8 annotation processor provides incorrect parameter names, thus we need
     // to use JDK9+ to run the annotation processor https://bugs.openjdk.java.net/browse/JDK-8191074
-    options.fork = true
-    options.forkOptions.executable = rootProject.ext.localProperties["javac.9plus"]
+    if(JavaVersion.current() == JavaVersion.VERSION_1_8) {
+        options.fork = true
+        options.forkOptions.executable = rootProject.ext.localProperties["javac.9plus"]
+    }
 }
 
 jar {

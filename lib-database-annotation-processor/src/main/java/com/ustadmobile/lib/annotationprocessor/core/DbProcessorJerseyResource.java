@@ -114,7 +114,7 @@ public class DbProcessorJerseyResource extends AbstractDbProcessor {
             if(methodInfo.isUpdateOrInsert()) {
                 codeBlock.add(generateIncrementChangeSeqNumsCodeBlock(methodInfo.getEntityParameterElement().asType(),
                         methodInfo.getEntityParameterElement().getSimpleName().toString(), "_db",
-                        syncableDbVariableName));
+                        syncableDbVariableName, methodElement, daoType));
             }
 
             if(isAutoSyncInsert) {

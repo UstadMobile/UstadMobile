@@ -63,6 +63,7 @@ dependencies {
     implementation project(":lib-database")
     implementation project(':lib-database-runtime')
     implementation project(":lib-util")
+    implementation project(":lib-database-retrofitrepository")
 
     //ViewModel and LiveData
     implementation "android.arch.lifecycle:extensions:$version_android_lifecycle"

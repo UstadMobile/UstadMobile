@@ -24,6 +24,8 @@ import com.ustadmobile.lib.database.annotation.UmSyncIncoming;
 import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
 import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 import com.ustadmobile.lib.db.sync.SyncResponse;
+import com.ustadmobile.lib.db.sync.UmRepositoryDb;
+import com.ustadmobile.lib.db.sync.UmRepositoryUtils;
 import com.ustadmobile.lib.db.sync.UmSyncExistingEntity;
 import com.ustadmobile.lib.db.sync.UmSyncableDatabase;
 import com.ustadmobile.lib.db.sync.entities.SyncStatus;
@@ -474,8 +476,14 @@ public abstract class AbstractDbProcessor {
     }
 
     protected String formatMethodForErrorMessage(ExecutableElement element, TypeElement daoClass) {
-        return ((TypeElement)element.getEnclosingElement()).getQualifiedName() + "." +
+        String msg = ((TypeElement)element.getEnclosingElement()).getQualifiedName() + "." +
                 element.getSimpleName();
+
+        if(daoClass != null)
+                msg += ", being implemented for " +
+                    ((daoClass != null) ? daoClass.getQualifiedName().toString() : " (unknown)");
+
+        return msg;
     }
 
     protected String formatMethodForErrorMessage(ExecutableElement element) {
@@ -716,14 +724,21 @@ public abstract class AbstractDbProcessor {
      * @param paramType TypeMirror representing the parameter type
      * @param paramVariableName The variable name of the parameter
      * @param dbVariableName The variable name of the database class itself
-     * @param syncableDbVariableName The variable name of the database class, casted to UmSyncableDatabase, or null if none is available.
+     * @param syncableDbVariableName The variable name of the database class,
+     *                               casted to UmSyncableDatabase, or null if none is available.
+     * @param method The method that is being generated. This is used only to generate error messages
+     *               (e.g. when local / master change sequence numbers are missing)
+     * @param daoType The DAO class that is being generated. This is also used only to generate error
+     *                messages.
      *
      * @return CodeBlock that will increment teh change sequence numbers on an entity class or List/Array thereof
      */
     protected CodeBlock generateIncrementChangeSeqNumsCodeBlock(TypeMirror paramType,
                                                                 String paramVariableName,
                                                                 String dbVariableName,
-                                                                String syncableDbVariableName) {
+                                                                String syncableDbVariableName,
+                                                                ExecutableElement method,
+                                                                TypeElement daoType) {
 
         CodeBlock.Builder codeBlock = CodeBlock.builder();
         if(syncableDbVariableName == null) {
@@ -734,11 +749,11 @@ public abstract class AbstractDbProcessor {
         codeBlock.beginControlFlow("if($L.isMaster())", syncableDbVariableName);
         generateIncrementSection(codeBlock, UmSyncMasterChangeSeqNum.class, paramType,
                 paramVariableName, syncableDbVariableName,
-                "getAndIncrementNextMasterChangeSeqNum");
+                "getAndIncrementNextMasterChangeSeqNum", method, daoType);
         codeBlock.nextControlFlow("else");
         generateIncrementSection(codeBlock, UmSyncLocalChangeSeqNum.class, paramType,
                 paramVariableName, syncableDbVariableName,
-                "getAndIncrementNextLocalChangeSeqNum");
+                "getAndIncrementNextLocalChangeSeqNum", method, daoType);
         codeBlock.endControlFlow();
 
         return codeBlock.build();
@@ -886,7 +901,9 @@ public abstract class AbstractDbProcessor {
                                           TypeMirror paramType,
                                           String paramVariableName,
                                           String syncableDbVariableName,
-                                          String changeSeqNumMethodName) {
+                                          String changeSeqNumMethodName,
+                                          ExecutableElement daoMethod,
+                                          TypeElement daoType) {
         String elementVarName = paramVariableName;
         TypeElement paramEntityTypeElement;
         if(DbProcessorUtils.isList(paramType, processingEnv)) {
@@ -912,6 +929,14 @@ public abstract class AbstractDbProcessor {
 
         Element changeSeqNumElement = findElementWithAnnotation(paramEntityTypeElement, annotation,
                 processingEnv);
+        if(changeSeqNumElement == null) {
+            messager.printMessage(Diagnostic.Kind.ERROR, formatMethodForErrorMessage(daoMethod,
+                    daoType) + ": method requires entity that has a local and master change " +
+                    "sequence number fields, but " + paramEntityTypeElement.getQualifiedName() +
+                    " has no variable annotated with @" + annotation.getSimpleName());
+            return;
+        }
+
         codeBlock.add("$L.set$L(_changeSeqNum);\n", elementVarName,
                 capitalize(changeSeqNumElement.getSimpleName()));
         if(isListOrArray) {
@@ -1008,5 +1033,34 @@ public abstract class AbstractDbProcessor {
             methodBuilder.addAnnotation(AnnotationSpec.builder(Produces.class).addMember("value",
                     producesFormat, MediaType.class).build());
         }
+    }
+
+    /**
+     * Generates a repository getter method.
+     *
+     * @param dbType TypeElement for the database class
+     * @param method ExecutableElement for the method being implemented
+     * @param builder MethodSpec.Builder for the given method
+     * @param repositoriesListFieldName Field name of a List of UmRepositoryDb
+     */
+    protected void addGetRepositoryMethod(TypeElement dbType, ExecutableElement method,
+                                          MethodSpec.Builder builder,
+                                          String repositoriesListFieldName) {
+        String baseUrlParamName = method.getParameters().get(0).getSimpleName().toString();
+        String authUrlParamName = method.getParameters().get(1).getSimpleName().toString();
+        builder.addCode(CodeBlock.builder()
+                .add("$T _repo = $T.findRepository($L, $L, this, $L);\n",
+                        UmRepositoryDb.class,
+                        UmRepositoryUtils.class,
+                        baseUrlParamName,
+                        authUrlParamName,
+                        repositoriesListFieldName)
+                .beginControlFlow("if(_repo == null)")
+                .add("_repo = new $L(this, $L, $L);\n", dbType.getSimpleName() +
+                                DbProcessorRetrofitRepository.POSTFIX_REPOSITORY_DB,
+                        baseUrlParamName, authUrlParamName)
+                .add("_repositories.add(_repo);\n")
+                .endControlFlow()
+                .add("return ($T)_repo;\n", dbType).build());
     }
 }

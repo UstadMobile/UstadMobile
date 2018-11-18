@@ -32,8 +32,11 @@ import com.ustadmobile.core.db.dao.PersonDao;
 import com.ustadmobile.lib.database.annotation.UmClearAll;
 import com.ustadmobile.lib.database.annotation.UmDatabase;
 import com.ustadmobile.lib.database.annotation.UmDbContext;
+import com.ustadmobile.lib.database.annotation.UmRepository;
 import com.ustadmobile.lib.db.sync.UmSyncableDatabase;
 import com.ustadmobile.lib.db.sync.dao.SyncStatusDao;
+import com.ustadmobile.lib.db.sync.dao.SyncablePrimaryKeyDao;
+import com.ustadmobile.lib.db.sync.entities.SyncDeviceBits;
 import com.ustadmobile.lib.db.sync.entities.SyncStatus;
 import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.ClazzMember;
@@ -63,6 +66,7 @@ import com.ustadmobile.lib.db.entities.OpdsLink;
 import com.ustadmobile.lib.db.entities.Person;
 import com.ustadmobile.lib.db.entities.PersonCustomField;
 import com.ustadmobile.lib.db.entities.PersonCustomFieldValue;
+import com.ustadmobile.lib.db.sync.entities.SyncablePrimaryKey;
 
 @UmDatabase(version = 1, entities = {
         OpdsEntry.class, OpdsLink.class, OpdsEntryParentToChildJoin.class,
@@ -76,11 +80,13 @@ import com.ustadmobile.lib.db.entities.PersonCustomFieldValue;
         ContentEntry.class, ContentEntryContentCategoryJoin.class,
         ContentEntryContentEntryFileJoin.class, ContentEntryFile.class,
         ContentEntryParentChildJoin.class, ContentEntryRelatedEntryJoin.class,
-        SyncStatus.class
+        SyncStatus.class, SyncablePrimaryKey.class, SyncDeviceBits.class
 })
-public abstract class UmAppDatabase {
+public abstract class UmAppDatabase implements UmSyncableDatabase{
 
     private static volatile UmAppDatabase instance;
+
+    private boolean master;
 
     /**
      * For use by other projects using this app as a library. By calling setInstance before
@@ -171,5 +177,20 @@ public abstract class UmAppDatabase {
     @UmClearAll
     public abstract void clearAllTables();
 
+
+    @Override
+    public abstract SyncablePrimaryKeyDao getSyncablePrimaryKeyDao();
+
+    @Override
+    public boolean isMaster() {
+        return master;
+    }
+
+    public void setMaster(boolean master) {
+        this.master = master;
+    }
+
+    @UmRepository
+    public abstract UmAppDatabase getRepository(String baseUrl, String auth);
 
 }

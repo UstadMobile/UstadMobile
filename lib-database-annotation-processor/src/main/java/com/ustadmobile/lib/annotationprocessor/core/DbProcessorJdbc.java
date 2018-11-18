@@ -251,7 +251,7 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
             }else if(dbMethod.getAnnotation(UmClearAll.class) != null) {
                 addClearAllTablesCodeToMethod(dbType, overrideSpec, SQL_IDENTIFIER_CHAR);
             }else if(dbMethod.getAnnotation(UmRepository.class) != null) {
-                addGetRepositoryMethod(dbType, dbMethod, overrideSpec);
+                addGetRepositoryMethod(dbType, dbMethod, overrideSpec, "_repositories");
             }else {
                 String daoFieldName = "_" + returnTypeElement.getSimpleName();
                 jdbcDbTypeSpec.addField(TypeName.get(dbMethod.getReturnType()), daoFieldName, Modifier.PRIVATE);
@@ -372,24 +372,7 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
         builder.addCode(codeBlock.build());
     }
 
-    protected void addGetRepositoryMethod(TypeElement dbType, ExecutableElement method,
-                                          MethodSpec.Builder builder) {
-        String baseUrlParamName = method.getParameters().get(0).getSimpleName().toString();
-        String authUrlParamName = method.getParameters().get(1).getSimpleName().toString();
-        builder.addCode(CodeBlock.builder()
-                .add("$T _repo = $T.findRepository($L, $L, this, _repositories);\n",
-                         UmRepositoryDb.class,
-                         UmRepositoryUtils.class,
-                         baseUrlParamName,
-                         authUrlParamName)
-                .beginControlFlow("if(_repo == null)")
-                    .add("_repo = new $L(this, $L, $L);\n", dbType.getSimpleName() +
-                                    DbProcessorRetrofitRepository.POSTFIX_REPOSITORY_DB,
-                            baseUrlParamName, authUrlParamName)
-                    .add("_repositories.add(_repo);\n")
-                .endControlFlow()
-                .add("return ($T)_repo;\n", dbType).build());
-    }
+
 
 
     /**

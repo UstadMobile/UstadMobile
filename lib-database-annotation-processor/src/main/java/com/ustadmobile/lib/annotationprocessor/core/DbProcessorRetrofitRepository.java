@@ -147,7 +147,7 @@ public class DbProcessorRetrofitRepository extends AbstractDbProcessor {
                 }
 
                 PackageElement daoPackageEl = processingEnv.getElementUtils().getPackageOf(daoTypeEl);
-                String retrofitDaoName = daoTypeEl.getQualifiedName() + POSTFIX_REPOSITORY_DAO;
+                String retrofitDaoName = daoTypeEl.getSimpleName() + POSTFIX_REPOSITORY_DAO;
                 String daoFieldName = "_" + daoTypeEl.getSimpleName();
                 ClassName repoDaoClassName = ClassName.get(daoPackageEl.getQualifiedName().toString(),
                         retrofitDaoName);
@@ -288,7 +288,7 @@ public class DbProcessorRetrofitRepository extends AbstractDbProcessor {
                     .INCREMENT_CHANGE_SEQ_NUMS_THEN_DELEGATE_TO_DAO) {
                 codeBlock.add(generateIncrementChangeSeqNumsCodeBlock(methodInfo.resolveEntityParameterType(),
                         methodInfo.getEntityParameterElement().getSimpleName().toString(),
-                        "_db", "_syncableDb"));
+                        "_db", "_syncableDb", repoMethod, daoType));
             }
 
             if(methodInfo.isInsertWithAutoSyncPrimaryKey()) {

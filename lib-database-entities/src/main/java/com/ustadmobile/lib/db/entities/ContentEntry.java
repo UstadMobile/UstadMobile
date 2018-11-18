@@ -2,6 +2,8 @@ package com.ustadmobile.lib.db.entities;
 
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
+import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
+import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 
 import static com.ustadmobile.lib.db.entities.ContentEntry.TABLE_ID;
 
@@ -23,7 +25,7 @@ public class ContentEntry {
 
     public static final int LICENSE_TYPE_CC_BY_SA_NC = 3;
 
-    @UmPrimaryKey(autoIncrement = true)
+    @UmPrimaryKey(autoGenerateSyncable = true)
     private long contentEntryUid;
 
     private String title;
@@ -50,8 +52,10 @@ public class ContentEntry {
 
     private long lastModified;
 
+    @UmSyncLocalChangeSeqNum
     private long contentEntryLocalChangeSeqNum;
 
+    @UmSyncMasterChangeSeqNum
     private long contentEntryMasterChangeSeqNum;
 
     public long getContentEntryUid() {

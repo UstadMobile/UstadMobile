@@ -17,7 +17,11 @@ import com.ustadmobile.lib.database.annotation.UmDelete;
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.database.annotation.UmQueryFindByPrimaryKey;
+import com.ustadmobile.lib.database.annotation.UmRepository;
+import com.ustadmobile.lib.database.annotation.UmSyncIncoming;
+import com.ustadmobile.lib.database.annotation.UmSyncOutgoing;
 import com.ustadmobile.lib.database.annotation.UmUpdate;
+import com.ustadmobile.lib.db.sync.UmRepositoryDb;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -72,8 +76,8 @@ public class DbProcessorRoom extends AbstractDbProcessor{
      *
      *
      * @param dbType TypeElement representing the class annotated with @UmDatabase
-     * @param destinationDir Root package directory (e.g. build/generated/source/umdbprocessor) to
-     *                       place generated sources in.
+     * @param destination Root package directory (e.g. build/generated/source/umdbprocessor) to
+     *                       place generated sources in, or "filer" to use the annotation processor filer
      * @throws IOException If there are IO exceptions writing newly generated classes
      */
     @Override
@@ -94,6 +98,8 @@ public class DbProcessorRoom extends AbstractDbProcessor{
                 .addModifiers(Modifier.PUBLIC)
                 .superclass(ClassName.get(dbType))
                 .addField(ClassName.get(ExecutorService.class), "dbExecutor", Modifier.PRIVATE)
+                .addField(ParameterizedTypeName.get(List.class, UmRepositoryDb.class), "_repositories",
+                        Modifier.PRIVATE)
                 .addField(ClassName.get("android.content", "Context"),
                         "context",Modifier.PRIVATE)
                 .addField(ClassName.get(packageName,
@@ -169,6 +175,11 @@ public class DbProcessorRoom extends AbstractDbProcessor{
                 dbManagerImplSpec.addMethod(contextMethodBuilder.build());
             }else if(daoMethod.getAnnotation(UmClearAll.class) != null) {
                 dbManagerImplSpec.addMethod(generateClearAllMethod(daoMethod).build());
+            }else if(daoMethod.getAnnotation(UmRepository.class) != null) {
+                MethodSpec.Builder repoMethodBuilder = MethodSpec.overriding(daoMethod);
+                addGetRepositoryMethod(dbType, daoMethod, repoMethodBuilder,
+                        "_repositories");
+                dbManagerImplSpec.addMethod(repoMethodBuilder.build());
             }
 
             //Lookup using processingEnv.getElementUtils.getTypeElement
@@ -217,10 +228,11 @@ public class DbProcessorRoom extends AbstractDbProcessor{
                 .addAnnotation(Override.class)
                 .returns(ClassName.get(daoMethod.getReturnType()))
                 .addCode(CodeBlock.builder()
-                        .add("if($L == null){\n", daoFieldName)
-                        .add("\t $L = _roomDb.$L();\n", daoFieldName, daoMethodName)
-                        .add("\t $L.setExecutor(dbExecutor);\n", daoFieldName)
-                        .add("}\n")
+                        .beginControlFlow("if($L == null)", daoFieldName)
+                            .add("$L = _roomDb.$L();\n", daoFieldName, daoMethodName)
+                            .add("$L.setExecutor(dbExecutor);\n", daoFieldName)
+                            .add("$L.setDbManager(this);\n", daoFieldName)
+                        .endControlFlow()
                         .add("return $L;\n", daoFieldName).build()).build());
 
     }
@@ -240,12 +252,18 @@ public class DbProcessorRoom extends AbstractDbProcessor{
                 .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
                 .addAnnotation(ClassName.get(ROOM_PKG_NAME, "Dao"))
                 .superclass(ClassName.get(daoClass))
-                .addField(ClassName.get(ExecutorService.class), "dbExecutor", Modifier.PRIVATE);
+                .addField(ClassName.get(ExecutorService.class), "dbExecutor", Modifier.PRIVATE)
+                .addField(Object.class, "_dbManager", Modifier.PRIVATE);
 
         roomDaoClassSpec.addMethod(MethodSpec.methodBuilder("setExecutor")
                 .addParameter(ClassName.get(ExecutorService.class), "dbExecutor")
                 .addModifiers(Modifier.PUBLIC)
                 .addCode("this.dbExecutor = dbExecutor;\n").build());
+
+        roomDaoClassSpec.addMethod(MethodSpec.methodBuilder("setDbManager")
+                .addParameter(Object.class, "_dbManager")
+                .addModifiers(Modifier.PUBLIC)
+                .addCode("this._dbManager = _dbManager;\n").build());
 
         //now generate methods for all query, insert, and delete methods
         for(ExecutableElement daoMethod : findMethodsToImplement(daoClass)) {
@@ -271,6 +289,10 @@ public class DbProcessorRoom extends AbstractDbProcessor{
                 methodBuilder = generateQueryMethod(
                         generateFindByPrimaryKeySql(daoClass, daoMethod, processingEnv, '`'),
                         daoMethod, daoClass, roomDaoClassSpec);
+            }else if(daoMethod.getAnnotation(UmSyncIncoming.class) != null) {
+                addSyncHandleIncomingMethod(daoMethod, daoClass, roomDaoClassSpec, "_dbManager");
+            }else if(daoMethod.getAnnotation(UmSyncOutgoing.class) != null) {
+                addSyncOutgoing(daoMethod, daoClass, roomDaoClassSpec, "_dbManager");
             }
 
             if(methodBuilder != null){
