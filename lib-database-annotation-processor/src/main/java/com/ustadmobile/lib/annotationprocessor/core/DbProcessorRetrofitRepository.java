@@ -12,14 +12,12 @@ import com.ustadmobile.core.impl.UmCallbackResultOverrider;
 import com.ustadmobile.lib.database.annotation.UmClearAll;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmDbContext;
-import com.ustadmobile.lib.database.annotation.UmEntity;
-import com.ustadmobile.lib.database.annotation.UmInsert;
-import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.database.annotation.UmQueryFindByPrimaryKey;
 import com.ustadmobile.lib.database.annotation.UmRepository;
 import com.ustadmobile.lib.database.annotation.UmSyncIncoming;
 import com.ustadmobile.lib.database.annotation.UmSyncOutgoing;
+import com.ustadmobile.lib.db.UmDbWithExecutor;
 import com.ustadmobile.lib.db.retrofit.RetrofitUmCallbackAdapter;
 import com.ustadmobile.lib.db.sync.UmRepositoryDb;
 import com.ustadmobile.lib.db.sync.UmSyncableDatabase;
@@ -269,9 +267,19 @@ public class DbProcessorRetrofitRepository extends AbstractDbProcessor {
                 }
             }
 
+            boolean runOnExecutor = methodInfo.isAsyncMethod()
+                    && (repoMethodMode == UmRepository.UmRepositoryMethodType
+                    .INCREMENT_CHANGE_SEQ_NUMS_THEN_DELEGATE_TO_DAO
+                    || repoMethodMode == UmRepository.UmRepositoryMethodType.DELEGATE_TO_DAO);
+
             if(repoMethodMode == -1)
                 continue;
 
+
+            if(runOnExecutor) {
+                codeBlock.beginControlFlow("(($T)_db).execute(() ->",
+                        UmDbWithExecutor.class);
+            }
 
             codeBlock.add("$1T _syncableDb = ($1T)_db;\n", UmSyncableDatabase.class);
 
@@ -339,10 +347,7 @@ public class DbProcessorRetrofitRepository extends AbstractDbProcessor {
                                 umCallbackTypeElement));
 
                 if(methodInfo.isAsyncMethod()){
-                    codeBlock.add("_webService.$L$L.enqueue(new $T<$T>($L));\n",
-                            repoMethod.getSimpleName(),
-                            makeNamedParameterMethodCall(repoMethod.getParameters(),
-                                    umCallbackTypeElement),
+                    codeBlock.add("_call.enqueue(new $T<$T>($L));\n",
                             RetrofitUmCallbackAdapter.class,
                             methodInfo.resolveResultType(),
                             repoMethod.getParameters().get(methodInfo.getAsyncParamIndex())
@@ -363,6 +368,11 @@ public class DbProcessorRetrofitRepository extends AbstractDbProcessor {
                         codeBlock.add("return $L;\n", defaultValue(methodInfo.resolveResultType()));
                 }
             }
+
+            if(runOnExecutor) {
+                codeBlock.endControlFlow(")");
+            }
+
 
             methodBuilder.addCode(codeBlock.build());
             repoBuilder.addMethod(methodBuilder.build());

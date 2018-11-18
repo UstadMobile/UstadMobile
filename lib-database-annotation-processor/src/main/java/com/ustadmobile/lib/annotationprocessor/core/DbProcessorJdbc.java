@@ -32,6 +32,7 @@ import com.ustadmobile.lib.database.jdbc.JdbcDatabaseUtils;
 import com.ustadmobile.lib.database.jdbc.PreparedStatementArrayProxy;
 import com.ustadmobile.lib.database.jdbc.UmJdbcDatabase;
 import com.ustadmobile.lib.database.jdbc.UmLiveDataJdbc;
+import com.ustadmobile.lib.db.UmDbWithExecutor;
 import com.ustadmobile.lib.db.sync.UmRepositoryDb;
 import com.ustadmobile.lib.db.sync.UmRepositoryUtils;
 
@@ -123,6 +124,7 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                 .addModifiers(Modifier.PUBLIC)
                 .superclass(ClassName.get(dbType))
                 .addSuperinterface(ClassName.get(UmJdbcDatabase.class))
+                .addSuperinterface(UmDbWithExecutor.class)
                 .addJavadoc("Generated code - DO NOT EDIT!\n")
                 .addField(ClassName.get(Object.class), "_context", Modifier.PRIVATE)
                 .addField(ClassName.get(DataSource.class), "_dataSource", Modifier.PRIVATE)
@@ -158,6 +160,12 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                         .addModifiers(Modifier.PUBLIC)
                         .returns(ClassName.get(ExecutorService.class))
                         .addCode("return this._executor;\n").build())
+                .addMethod(MethodSpec.methodBuilder("execute")
+                        .addAnnotation(Override.class)
+                        .addModifiers(Modifier.PUBLIC)
+                        .addParameter(Runnable.class, "runnable")
+                        .addCode("this._executor.execute(runnable);\n")
+                        .build())
                 .addMethod(MethodSpec.methodBuilder("getConnection")
                         .addException(ClassName.get(SQLException.class))
                         .addAnnotation(Override.class)
