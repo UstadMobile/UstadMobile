@@ -14,7 +14,7 @@ import com.ustadmobile.lib.db.entities.ContentEntryFile;
 import java.util.Hashtable;
 import java.util.List;
 
-public class EntryDetailPresenter extends UstadBaseController<ContentEntryDetailView> {
+public class ContentEntryDetailPresenter extends UstadBaseController<ContentEntryDetailView> {
 
 
     public static final String ARG_CONTENT_ENTRY_UID = "entryid";
@@ -22,7 +22,7 @@ public class EntryDetailPresenter extends UstadBaseController<ContentEntryDetail
     private ContentEntryFileDao contentFileDao;
     private ContentEntryDao contentEntryDao;
 
-    public EntryDetailPresenter(Object context, Hashtable arguments, ContentEntryDetailView viewContract) {
+    public ContentEntryDetailPresenter(Object context, Hashtable arguments, ContentEntryDetailView viewContract) {
         super(context, arguments, viewContract);
         this.viewContract = viewContract;
 
@@ -80,7 +80,7 @@ public class EntryDetailPresenter extends UstadBaseController<ContentEntryDetail
 
     }
 
-    public void openTranslation(ContentEntry entry) {
+    public void handleClickTranslatedEntry(ContentEntry entry) {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         Hashtable args = new Hashtable();
         Long entryUid = entry.getContentEntryUid();

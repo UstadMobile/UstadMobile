@@ -185,7 +185,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         viewNameToAndroidImplMap.put(H5PContentView.VIEW_NAME, H5PContentActivity.class);
         viewNameToAndroidImplMap.put(DownloadDialogView.VIEW_NAME, DownloadDialogFragment.class);
         viewNameToAndroidImplMap.put(ContentEntryView.VIEW_NAME, ContentEntryListActivity.class);
-        viewNameToAndroidImplMap.put(ContentEntryDetailView.VIEW_NAME, EntryDetailActivity.class);
+        viewNameToAndroidImplMap.put(ContentEntryDetailView.VIEW_NAME, ContentEntryDetailActivity.class);
         viewNameToAndroidImplMap.put(DummyView.VIEW_NAME, DummyActivity.class);
     }
 
