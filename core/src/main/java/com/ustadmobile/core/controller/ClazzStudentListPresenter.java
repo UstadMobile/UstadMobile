@@ -183,6 +183,7 @@ public class ClazzStudentListPresenter extends
                 clazzPersonListProvider =
                         UmAppDatabase.getInstance(context).getClazzMemberDao()
                         .findAllPersonWithEnrollmentInClazzByClazzUidSortByNameAsc(currentClazzId);
+                break;
             case SORT_ORDER_NAME_DESC:
                 clazzPersonListProvider =
                         UmAppDatabase.getInstance(context).getClazzMemberDao()

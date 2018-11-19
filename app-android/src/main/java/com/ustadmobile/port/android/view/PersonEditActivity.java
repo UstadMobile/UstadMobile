@@ -449,6 +449,9 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
     }
 
+    /**
+     * Starts the camera intent.
+     */
     private void startCameraIntent(){
         String imageId = String.valueOf(System.currentTimeMillis());
         Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
@@ -536,55 +539,6 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
             return;
         }
         startCameraIntent();
-    }
-
-
-    /**
-     * The Recycler Adapter
-     */
-    protected class ClazzListRecyclerAdapter
-            extends PagedListAdapter<ClazzWithNumStudents,
-                                    ClazzListRecyclerAdapter.ClazzLogDetailViewHolder> {
-
-        protected class ClazzLogDetailViewHolder extends RecyclerView.ViewHolder{
-            protected ClazzLogDetailViewHolder(View itemView){
-                super(itemView);
-            }
-        }
-
-        protected ClazzListRecyclerAdapter(
-                @NonNull DiffUtil.ItemCallback<ClazzWithNumStudents> diffCallback){
-            super(diffCallback);
-        }
-
-        @NonNull
-        @Override
-        public ClazzLogDetailViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType){
-
-            View clazzLogDetailListItem =
-                    LayoutInflater.from(getApplicationContext()).inflate(
-                            R.layout.item_clazzlist_clazz_simple, parent, false);
-            return new ClazzLogDetailViewHolder(clazzLogDetailListItem);
-        }
-
-        /**
-         * This method sets the elements after it has been obtained for that item'th position.
-         *
-         * Every item in the recycler view will have set its colors if no attendance status is set.
-         * every attendance button will have it-self mapped to tints on activation.
-         *
-         * @param holder        View holder
-         * @param position      position of item
-         */
-        @Override
-        public void onBindViewHolder(@NonNull ClazzLogDetailViewHolder holder, int position){
-            ClazzWithNumStudents thisClazz = getItem(position);
-
-            assert thisClazz != null;
-            ((TextView)holder.itemView.findViewById(R.id.item_clazzlist_clazz_simple_clazz_name))
-                    .setText(thisClazz.getClazzName());
-
-        }
     }
 
     // Diff callback.

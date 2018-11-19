@@ -5,6 +5,7 @@ import android.arch.paging.DataSource;
 import android.arch.paging.LivePagedListBuilder;
 import android.arch.paging.PagedList;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
@@ -18,7 +19,6 @@ import com.ustadmobile.core.controller.SELAnswerListPresenter;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.view.SELAnswerListView;
 import com.ustadmobile.lib.db.entities.Person;
-import com.ustadmobile.lib.db.entities.PersonWithEnrollment;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import ru.dimorinny.floatingtextbutton.FloatingTextButton;
@@ -26,7 +26,10 @@ import ru.dimorinny.floatingtextbutton.FloatingTextButton;
 import static com.ustadmobile.core.view.ClazzListView.ARG_CLAZZ_UID;
 
 /**
- * SELAnswerListFragment Android fragment extends UstadBaseFragment
+ * SELAnswerListFragment Android fragment extends UstadBaseFragment -  is responsible for
+ * showing the Answer list (ie: students who have taken the SEL in the SEL tab of Clazz.
+ * It should also show a primary action button to record new SEL.
+ *
  */
 public class SELAnswerListFragment extends UstadBaseFragment implements SELAnswerListView,
         View.OnClickListener, View.OnLongClickListener{
@@ -34,10 +37,7 @@ public class SELAnswerListFragment extends UstadBaseFragment implements SELAnswe
     View rootContainer;
     //RecyclerView
     private RecyclerView mRecyclerView;
-    private RecyclerView.LayoutManager mRecyclerLayoutManager;
     private SELAnswerListPresenter mPresenter;
-
-    public long clazzUid;
 
     public static final DiffUtil.ItemCallback<Person> DIFF_CALLBACK =
             new DiffUtil.ItemCallback<Person>() {
@@ -54,23 +54,9 @@ public class SELAnswerListFragment extends UstadBaseFragment implements SELAnswe
                 }
             };
 
-    public static final DiffUtil.ItemCallback<PersonWithEnrollment> DIFF_CALLBACK2 =
-            new DiffUtil.ItemCallback<PersonWithEnrollment>() {
-                @Override
-                public boolean areItemsTheSame(PersonWithEnrollment oldItem,
-                                               PersonWithEnrollment newItem) {
-                    return oldItem.getPersonUid() == newItem.getPersonUid();
-                }
-
-                @Override
-                public boolean areContentsTheSame(PersonWithEnrollment oldItem,
-                                                  PersonWithEnrollment newItem) {
-                    return oldItem.equals(newItem);
-                }
-            };
-
     /**
-     * Generates a new Fragment for a page fragment*
+     * Generates a new Fragment for a page fragment
+     *
      * @return A new instance of fragment SELAnswerListFragment.
      */
     public static SELAnswerListFragment newInstance(long clazzUid) {
@@ -88,6 +74,7 @@ public class SELAnswerListFragment extends UstadBaseFragment implements SELAnswe
                 DIFF_CALLBACK, getContext(),this, mPresenter);
 
         // get the provider, set , observe, etc.
+        // A warning is expected
         DataSource.Factory<Integer, Person> factory =
                 (DataSource.Factory<Integer, Person>)
                         selAnswersProvider.getProvider();
@@ -101,16 +88,8 @@ public class SELAnswerListFragment extends UstadBaseFragment implements SELAnswe
 
     }
 
-    /**
-     * On Create of the View fragment . Part of Android's Fragment Override
-     *
-     * @param inflater
-     * @param container
-     * @param savedInstanceState
-     * @return the root container
-     */
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
         // Inflate the layout for this fragment
@@ -122,7 +101,7 @@ public class SELAnswerListFragment extends UstadBaseFragment implements SELAnswe
         mRecyclerView = rootContainer.findViewById(R.id.fragment_sel_answer_list_recyclerview);
 
         // Use Layout: set layout manager. Change defaults
-        mRecyclerLayoutManager = new LinearLayoutManager(getContext());
+        RecyclerView.LayoutManager mRecyclerLayoutManager = new LinearLayoutManager(getContext());
         mRecyclerView.setLayoutManager(mRecyclerLayoutManager);
         DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(
                 mRecyclerView.getContext(), LinearLayoutManager.VERTICAL);
@@ -141,27 +120,9 @@ public class SELAnswerListFragment extends UstadBaseFragment implements SELAnswe
         //FAB's onClickListener:
         fab.setOnClickListener(v -> mPresenter.handleClickRecordSEL());
 
-        //return container
         return rootContainer;
     }
 
-    /**
-     * On Create of the fragment.
-     *
-     * @param savedInstanceState
-     */
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-    }
-
-
-    // This event is triggered soon after onCreateView().
-    @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        // Setup any handles to view objects here
-
-    }
 
     @Override
     public void onClick(View v) {

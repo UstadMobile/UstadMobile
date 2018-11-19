@@ -161,12 +161,12 @@ public class ClazzActivityListPresenter
      * clicked.
      */
     public void goToNewClazzActivityEditActivity(){
-        //TODO Sprint 4
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         Hashtable<String, Long> args = new Hashtable<>();
         args.put(ARG_CLAZZ_UID, currentClazzUid);
         args.put(ARG_LOGDATE, System.currentTimeMillis());
 
+        //TODO: Uncomment for Sprint 4
         //impl.go(ClazzActivityEditView.VIEW_NAME, args, view.getContext());
 
     }

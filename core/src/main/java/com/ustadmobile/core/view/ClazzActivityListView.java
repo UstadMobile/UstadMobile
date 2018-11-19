@@ -14,8 +14,7 @@ public interface ClazzActivityListView extends UstadView {
     String VIEW_NAME = "ClazzActivityList";
 
     String ACTIVITY_BAR_LABEL_DESC = "Activity Bar chart";
-    int ACTIVITY_BAR_CHART_HEIGHT = 200;
-    int ACTIVITY_BAR_CHART_AXIS_MAXIMUM = 100;
+    int ACTIVITY_BAR_CHART_HEIGHT = 100;
     int ACTIVITY_BAR_CHART_AXIS_MINIMUM = 0;
 
     int CHART_DURATION_LAST_WEEK = 1;

@@ -116,7 +116,7 @@ public abstract class ClazzMemberDao implements BaseDao<ClazzMember> {
             " SELECT Person.personUid FROM ClazzMember " +
             " LEFT  JOIN Person On ClazzMember.clazzMemberPersonUid = Person.personUid " +
             " WHERE ClazzMember.clazzMemberClazzUid = :clazzUid AND ClazzMember.clazzMemberActive = 1 " +
-            " ) AND Person.active = 1 ORDER BY clazzMemberRole DESC")
+            " ) AND Person.active = 1 ORDER BY clazzMemberRole ASC")
     public abstract UmProvider<PersonWithEnrollment> findAllPersonWithEnrollmentInClazzByClazzUid(long clazzUid);
 
 

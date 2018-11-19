@@ -94,7 +94,6 @@ public class ClazzListFragment extends UstadBaseFragment implements ClazzListVie
             }
         });
 
-        //return container
         return rootContainer;
     }
 

@@ -17,11 +17,21 @@ public class FeedEntry implements SyncableEntity{
 
     private String link;
 
+    private String feedEntryClazzName;
+
     private long deadline;
 
     private long feedEntryHash;
 
     private boolean feedEntryDone;
+
+    public String getFeedEntryClazzName() {
+        return feedEntryClazzName;
+    }
+
+    public void setFeedEntryClazzName(String feedEntryClazzName) {
+        this.feedEntryClazzName = feedEntryClazzName;
+    }
 
     public boolean isFeedEntryDone() {
         return feedEntryDone;

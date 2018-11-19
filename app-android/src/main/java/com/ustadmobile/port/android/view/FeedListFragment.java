@@ -28,49 +28,46 @@ import com.ustadmobile.core.view.FeedListView;
 import com.ustadmobile.lib.db.entities.FeedEntry;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
+import java.util.Objects;
+
 /**
- * FeedListFragment Android fragment extends UstadBaseFragment
+ * FeedListFragment Android fragment extends UstadBaseFragment - fragment responsible for displaying
+ * the feed page and actions on them depending on the feed.
  */
-public class FeedListFragment extends UstadBaseFragment implements FeedListView,
-        View.OnClickListener, View.OnLongClickListener {
+public class FeedListFragment extends UstadBaseFragment implements FeedListView {
 
     View rootContainer;
     private RecyclerView mRecyclerView;
-    private RecyclerView.LayoutManager mRecyclerLayoutManager;
-    private Toolbar toolbar;
-
     private TextView numClassesView, numStudentsView, attendancePercentageView;
-
     private FeedListPresenter mPresenter;
 
     /**
      * The Recycler Adapter for Feed Entries.
      */
-    //FeedViewHolder
     protected class FeedListRecyclerAdapter extends
             PagedListAdapter<FeedEntry,
                     FeedListRecyclerAdapter.FeedViewHolder> {
 
-        protected class FeedViewHolder extends RecyclerView.ViewHolder {
-            protected FeedViewHolder(View itemView) {
+        class FeedViewHolder extends RecyclerView.ViewHolder {
+            FeedViewHolder(View itemView) {
                 super(itemView);
             }
         }
 
-        protected FeedListRecyclerAdapter(@NonNull DiffUtil.ItemCallback<FeedEntry> diffCallback) {
+        FeedListRecyclerAdapter(@NonNull DiffUtil.ItemCallback<FeedEntry> diffCallback) {
             super(diffCallback);
         }
 
         /**
          * This method inflates the card layout (to parent view given) and returns it.
-         * @param parent View given.
-         * @param viewType View Type not used here.
-         * @return New ViewHolder for the ClazzStudent type
+         *
+         * @param parent        View given.
+         * @param viewType      View Type not used here.
+         * @return              New ViewHolder for the ClazzStudent type
          */
         @NonNull
         @Override
         public FeedViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-
             View feedEntryListItem =
                     LayoutInflater.from(getContext()).inflate(
                             R.layout.item_feedlist_feed, parent, false);
@@ -87,23 +84,36 @@ public class FeedListFragment extends UstadBaseFragment implements FeedListView,
 
             FeedEntry feedEntry = getItem(position);
 
-            TextView feedText = ((TextView)holder.itemView
-                .findViewById(R.id.item_feedlist_feed_title));
-            ImageView feedIcon = ((ImageView)holder.itemView
-                .findViewById(R.id.item_feedlist_feed_icon));
+            TextView feedTitle = holder.itemView
+                .findViewById(R.id.item_feedlist_feed_title);
+
+            TextView feedText = holder.itemView
+                    .findViewById(R.id.item_feedlist_feed_card_subtitle);
+
+            ImageView feedIcon = holder.itemView
+                .findViewById(R.id.item_feedlist_feed_icon);
+
+            assert feedEntry != null;
+
             feedText.setText(feedEntry.getTitle());
+            feedTitle.setText(feedEntry.getFeedEntryClazzName());
+
+            String feedTextString = feedEntry.getTitle() + " (" + getText(R.string.overdue)+ ")";
             if (UMCalendarUtil.getDateInMilliPlusDays(0) > feedEntry.getDeadline()){
                 //Apply more complex deadline with scheduling in the future ie Check schedule
-                feedIcon.setColorFilter(ContextCompat.getColor(getContext(), R.color.accent));
-                feedText.setText(feedEntry.getTitle() + " (" + getText(R.string.overdue)+ ")");
+                feedText.setTextColor(ContextCompat.getColor(Objects.requireNonNull(getContext()),
+                        R.color.accent));
+                feedText.setText(feedTextString);
             }
 
             holder.itemView.setOnClickListener(v -> mPresenter.handleClickFeedEntry(feedEntry));
 
-
         }
     }
 
+    /**
+     * The Diff callback
+     */
     public static final DiffUtil.ItemCallback<FeedEntry> DIFF_CALLBACK =
             new DiffUtil.ItemCallback<FeedEntry>() {
                 @Override
@@ -122,7 +132,6 @@ public class FeedListFragment extends UstadBaseFragment implements FeedListView,
     /**
      * Generates a new Fragment for a page fragment
      *
-     *
      * @return A new instance of fragment ContainerPageFragment.
      */
     public static FeedListFragment newInstance() {
@@ -132,24 +141,8 @@ public class FeedListFragment extends UstadBaseFragment implements FeedListView,
         return fragment;
     }
 
-    /**
-     * On Create of the fragment.
-     * @param savedInstanceState
-     */
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-    }
-
-    /**
-     * On Create of the View fragment . Part of Android's Fragment Override
-     * @param inflater
-     * @param container
-     * @param savedInstanceState
-     * @return the root container
-     */
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
         // Inflate the layout for this fragment
@@ -160,25 +153,25 @@ public class FeedListFragment extends UstadBaseFragment implements FeedListView,
         mRecyclerView = rootContainer.findViewById(R.id.fragment_feed_list_recyclerview);
 
         //Use Linear Layout Manager : Set layout Manager
-        mRecyclerLayoutManager = new LinearLayoutManager(getContext());
+        RecyclerView.LayoutManager mRecyclerLayoutManager = new LinearLayoutManager(getContext());
         mRecyclerView.setLayoutManager(mRecyclerLayoutManager);
         DividerItemDecoration dividerItemDecoration =
                 new DividerItemDecoration(mRecyclerView.getContext(),
                 LinearLayoutManager.VERTICAL);
         mRecyclerView.addItemDecoration(dividerItemDecoration);
 
-
-        numClassesView = rootContainer.findViewById(R.id.fragment_feed_list_report_card_num_classes);
-        numStudentsView = rootContainer.findViewById(R.id.fragment_feed_list_report_card_num_students);
+        numClassesView =
+                rootContainer.findViewById(R.id.fragment_feed_list_report_card_num_classes);
+        numStudentsView =
+                rootContainer.findViewById(R.id.fragment_feed_list_report_card_num_students);
         attendancePercentageView =
                 rootContainer.findViewById(R.id.fragment_feed_list_report_card_attendance_percentage);
 
-        //Create presetner and call its onCreate()
+        //Create presenter and call its onCreate()
         mPresenter = new FeedListPresenter(this, UMAndroidUtil.bundleToHashtable(
                 getArguments()), this);
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
 
-        //return container
         return rootContainer;
     }
 
@@ -187,6 +180,7 @@ public class FeedListFragment extends UstadBaseFragment implements FeedListView,
         FeedListRecyclerAdapter recyclerAdapter =
                 new FeedListRecyclerAdapter(DIFF_CALLBACK);
 
+        // A warning is expected
         DataSource.Factory<Integer, FeedEntry> factory =
                 (DataSource.Factory<Integer, FeedEntry>) feedEntryUmProvider.getProvider();
 
@@ -197,23 +191,44 @@ public class FeedListFragment extends UstadBaseFragment implements FeedListView,
         mRecyclerView.setAdapter(recyclerAdapter);
     }
 
-
+    /**
+     * Updates the number of classes in the Summary card. View is updated on UI Thread since it is
+     * being called from the presenter (probably on another async thread)
+     *
+     * @param num   The total number of classes
+     */
     @Override
     public void updateNumClasses(int num) {
-
-        runOnUiThread(() -> numClassesView.setText(Integer.toString(num)));
+        runOnUiThread(() -> {
+            String numClassesText = Integer.toString(num);
+            numClassesView.setText(numClassesText);
+        });
     }
 
+    /**
+     * Update the number of students on the Summary card. View is updated on UI Thread since it is
+     * being called from the presenter (probably on another async thread)
+     *
+     * @param num   The total number of students
+     */
     @Override
     public void updateNumStudents(int num) {
-        runOnUiThread(() ->numStudentsView.setText(Integer.toString(num)));
+        runOnUiThread(() -> {
+            String numStudentsText = Integer.toString(num);
+            numStudentsView.setText(numStudentsText);
+        });
     }
 
+    /**
+     * Update the number of attendance percentage of the Summary card. View is updated on UI Thread
+     * since it is bring called from the presenter (probably on another async thread)
+     *
+     * @param per   The percentage value in double - triple digits (ie: 42 or 100)
+     */
     @Override
     public void updateAttendancePercentage(int per) {
         String concatString = Integer.toString(per) + "%";
         runOnUiThread(() -> attendancePercentageView.setText(concatString));
-
     }
 
     //TODO: Sprint 4
@@ -231,19 +246,16 @@ public class FeedListFragment extends UstadBaseFragment implements FeedListView,
         }
     }
 
-
     @Override
     public void onResume(){
         super.onResume();
         updateTitle(getText(R.string.feed).toString());
-
     }
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
         updateTitle(getText(R.string.feed).toString());
-
     }
 
     // This event is triggered soon after onCreateView().
@@ -254,23 +266,15 @@ public class FeedListFragment extends UstadBaseFragment implements FeedListView,
 
     }
 
-    @Override
-    public void onClick(View v) {
-
-    }
-
-    @Override
-    public boolean onLongClick(View v) {
-        return false;
-    }
-
     /**
      * Updates the title of the toolbar.
-     * @param title
+     *
+     * @param title     The title of the toolbar that needs updating
      */
     public void updateTitle(String title){
         //Update the parent header toolbar
-        toolbar = getActivity().findViewById(R.id.base_point_2_toolbar);
+        Toolbar toolbar =
+                Objects.requireNonNull(getActivity()).findViewById(R.id.base_point_2_toolbar);
         if(toolbar != null) {
             toolbar.setTitle(title);
         }

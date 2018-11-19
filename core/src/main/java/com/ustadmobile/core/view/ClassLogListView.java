@@ -22,8 +22,8 @@ public interface ClassLogListView extends UstadView {
     String ATTENDANCE_BAR_LABEL_DESC = "Bar 1 Label";
 
     //Attendance chart limits
-    int ATTENDANCE_LINE_CHART_HEIGHT = 200;
-    int ATTENDANCE_BAR_CHART_HEIGHT = 150;
+    int ATTENDANCE_LINE_CHART_HEIGHT = 100;
+    int ATTENDANCE_BAR_CHART_HEIGHT = 78;
     int ATTENDANCE_BAR_CHART_AXIS_MAXIMUM = 100;
     int ATTENDANCE_BAR_CHART_AXIS_MINIMUM = 0;
 

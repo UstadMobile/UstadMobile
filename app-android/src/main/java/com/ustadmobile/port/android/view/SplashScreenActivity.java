@@ -722,6 +722,7 @@ public class SplashScreenActivity extends AppCompatActivity
             FeedEntry thisFeed = new FeedEntry();
             thisFeed.setDeadline(thisDate);
             thisFeed.setFeedEntryDone(false);
+            thisFeed.setFeedEntryClazzName(clazz1.getClazzName());
             thisFeed.setDescription("This is your regular attendance alert.");
             thisFeed.setTitle("Record attendance for Class " + 1);
             thisFeed.setFeedEntryPersonUid(thisPersonUid);
@@ -737,6 +738,7 @@ public class SplashScreenActivity extends AppCompatActivity
                     FeedEntry newFeed = new FeedEntry();
                     newFeed.setDeadline(newDate);
                     newFeed.setFeedEntryDone(false);
+                    newFeed.setFeedEntryClazzName(clazz1.getClazzName());
                     newFeed.setDescription("This is your regular attendance alert.");
                     newFeed.setTitle("Record attendance for Class " + 1);
                     newFeed.setFeedEntryPersonUid(thisPersonUid);

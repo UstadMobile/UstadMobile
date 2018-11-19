@@ -410,6 +410,8 @@ This is the one you should be editing. The one in /core/locale/main/values/strin
     <string name="up">up</string>
     <string name="down">down</string>
     <string name="from_last_week">from last week</string>
+    <string name="taught_by">Taught by</string>
+    <string name="take_attendance">Take attendance</string>
 
 
 

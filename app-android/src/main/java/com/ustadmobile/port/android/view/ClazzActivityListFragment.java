@@ -4,6 +4,7 @@ import android.arch.lifecycle.LiveData;
 import android.arch.paging.DataSource;
 import android.arch.paging.LivePagedListBuilder;
 import android.arch.paging.PagedList;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
@@ -46,7 +47,6 @@ public class ClazzActivityListFragment extends UstadBaseFragment implements Claz
 
     View rootContainer;
     private RecyclerView mRecyclerView;
-    private RecyclerView.LayoutManager mRecyclerLayoutManager;
 
     private ClazzActivityListPresenter mPresenter;
     BarChart barChart;
@@ -60,29 +60,12 @@ public class ClazzActivityListFragment extends UstadBaseFragment implements Claz
 
     public BarChart hideEverythingInBarChart(BarChart barChart){
 
-        //Hide only the grid lines and not axis:
-        //barChart.getAxisLeft().setDrawGridLines(false);
-        //barChart.getXAxis().setDrawGridLines(false);
-        //barChart.getAxisRight().setDrawGridLines(false);
-
-        //Hide all lines from x, left and right
-        //Top values on X Axis
-        //barChart.getXAxis().setEnabled(false);
         barChart.getXAxis().setDrawLabels(true);
         barChart.getXAxis().setDrawGridLines(false);
 
-        //Left Values
-        //barChart.getAxisLeft().setEnabled(false);
-        //Right Values:
         barChart.getAxisRight().setEnabled(false);
 
-
-        //Legend:
         barChart.getLegend().setEnabled(false);
-
-        //barChart.getAxisLeft().setDrawLabels(false);
-        //barChart.getAxisRight().setDrawLabels(false);
-        //barChart.getXAxis().setDrawLabels(false);
 
         //Label Description
         barChart.getDescription().setEnabled(false);
@@ -92,7 +75,7 @@ public class ClazzActivityListFragment extends UstadBaseFragment implements Claz
 
     class AttendanceBarDataSet extends BarDataSet {
 
-        public AttendanceBarDataSet(List<BarEntry> yVals, String label) {
+        AttendanceBarDataSet(List<BarEntry> yVals, String label) {
             super(yVals, label);
         }
 
@@ -176,6 +159,10 @@ public class ClazzActivityListFragment extends UstadBaseFragment implements Claz
 
     }
 
+    public static int dpToPx(int dp) {
+        return (int) (dp * Resources.getSystem().getDisplayMetrics().density);
+    }
+
     @Override
     public void setClazzActivityChangesDropdownPresets(String[] presets) {
         this.changesPresets = presets;
@@ -194,9 +181,8 @@ public class ClazzActivityListFragment extends UstadBaseFragment implements Claz
     public void setUpCharts(){
         //Get the chart view
         barChart = rootContainer.findViewById(R.id.fragment_clazz_activity_list_bar_chart);
-        barChart.setMinimumHeight(ACTIVITY_BAR_CHART_HEIGHT);
+        barChart.setMinimumHeight(dpToPx(ACTIVITY_BAR_CHART_HEIGHT));
         barChart = hideEverythingInBarChart(barChart);
-        //barChart.getAxisLeft().setAxisMaximum(ACTIVITY_BAR_CHART_AXIS_MAXIMUM);
         barChart.getAxisLeft().setAxisMinimum(ACTIVITY_BAR_CHART_AXIS_MINIMUM);
         barChart.setTouchEnabled(false);
     }
@@ -219,7 +205,7 @@ public class ClazzActivityListFragment extends UstadBaseFragment implements Claz
         setHasOptionsMenu(true);
 
         mRecyclerView = rootContainer.findViewById(R.id.fragment_clazz_activity_list_recyclerview);
-        mRecyclerLayoutManager = new LinearLayoutManager(getContext());
+        RecyclerView.LayoutManager mRecyclerLayoutManager = new LinearLayoutManager(getContext());
         mRecyclerView.setLayoutManager(mRecyclerLayoutManager);
 
         //Separated out Chart initialisation
@@ -269,6 +255,8 @@ public class ClazzActivityListFragment extends UstadBaseFragment implements Claz
                     @Override
                     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                         mPresenter.setClazzActivityChangeUid(id);
+                        //Default start to Last Week's data:
+                        lastMonthButton.callOnClick();
                     }
 
                     @Override
@@ -277,9 +265,6 @@ public class ClazzActivityListFragment extends UstadBaseFragment implements Claz
                     }
                 }
         );
-
-        //Default start to Last Week's data:
-        //lastWeekButton.callOnClick();
 
         //return container
         return rootContainer;

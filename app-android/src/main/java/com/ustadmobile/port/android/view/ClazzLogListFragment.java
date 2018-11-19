@@ -4,6 +4,7 @@ import android.arch.lifecycle.LiveData;
 import android.arch.paging.DataSource;
 import android.arch.paging.LivePagedListBuilder;
 import android.arch.paging.PagedList;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -66,11 +67,6 @@ public class ClazzLogListFragment extends UstadBaseFragment implements ClassLogL
      */
     public HorizontalBarChart hideEverythingInBarChart(HorizontalBarChart barChart){
 
-        //Hide only the grid lines and not axis:
-        //barChart.getAxisLeft().setDrawGridLines(false);
-        //barChart.getXAxis().setDrawGridLines(false);
-        //barChart.getAxisRight().setDrawGridLines(false);
-
         //Hide all lines from x, left and right
         //Top values on X Axis
         barChart.getXAxis().setEnabled(false);
@@ -81,10 +77,6 @@ public class ClazzLogListFragment extends UstadBaseFragment implements ClassLogL
 
         //Legend:
         barChart.getLegend().setEnabled(false);
-
-        //barChart.getAxisLeft().setDrawLabels(false);
-        //barChart.getAxisRight().setDrawLabels(false);
-        //barChart.getXAxis().setDrawLabels(false);
 
         //Label Description
         barChart.getDescription().setEnabled(false);
@@ -107,24 +99,11 @@ public class ClazzLogListFragment extends UstadBaseFragment implements ClassLogL
         //We don't want horizontal grid lines:
         lineChart.getXAxis().setDrawGridLines(false);
 
-        //We need the x axis and values on the left and right
-        //lineChart.getXAxis().setEnabled(false);
-        //lineChart.getAxisLeft().setEnabled(false);
-        //lineChart.getAxisRight().setEnabled(false);
-
-        //lineChart.getAxisRight().setDrawGridLines(false);
-
         //No need for legend:
         lineChart.getLegend().setEnabled(false);
 
-        //We want the left label
-        //lineChart.getAxisLeft().setDrawLabels(false);
-
         //We don't want the right label
         lineChart.getAxisRight().setDrawLabels(false);
-
-        //We want the top labels.
-        //lineChart.getXAxis().setDrawLabels(false);
 
         //We don't want the description label here
         lineChart.getDescription().setEnabled(false);
@@ -245,22 +224,30 @@ public class ClazzLogListFragment extends UstadBaseFragment implements ClassLogL
     }
 
     /**
+     * Converts dp to pixels (used in MPAndroid charts)
+     *
+     * @param dp    dp number
+     * @return      pixels number
+     */
+    public static int dpToPx(int dp) {
+        return (int) (dp * Resources.getSystem().getDisplayMetrics().density);
+    }
+
+    /**
      * Separated out method to set the charts up. Called on onCreateView
      */
     public void setUpCharts(){
         //Get the chart view
         lineChart = rootContainer.findViewById(R.id.fragment_clazz_log_list_line_chart);
-        lineChart.setMinimumHeight(ATTENDANCE_LINE_CHART_HEIGHT);
+        lineChart.setMinimumHeight(dpToPx(ATTENDANCE_LINE_CHART_HEIGHT));
         lineChart = hideEverythingInLineChart(lineChart);
         lineChart.getAxisLeft().setValueFormatter((value, axis) -> (int)value + "%");
         lineChart.getXAxis().setValueFormatter((value, axis) -> (int)value + "");
         lineChart.setTouchEnabled(false);
         lineChart.getXAxis().setLabelCount(4,true);
-        //lineChart.setExtraTopOffset(-10);
-        // lineChart.setPadding(0, 50,0,0);
 
         barChart = rootContainer.findViewById(R.id.fragment_clazz_log_list_bar_chart);
-        barChart.setMinimumHeight(ATTENDANCE_BAR_CHART_HEIGHT);
+        barChart.setMinimumHeight(dpToPx(ATTENDANCE_BAR_CHART_HEIGHT));
         barChart = hideEverythingInBarChart(barChart);
         barChart.getAxisLeft().setAxisMaximum(ATTENDANCE_BAR_CHART_AXIS_MAXIMUM);
         barChart.getAxisLeft().setAxisMinimum(ATTENDANCE_BAR_CHART_AXIS_MINIMUM);
@@ -293,7 +280,6 @@ public class ClazzLogListFragment extends UstadBaseFragment implements ClassLogL
                 rootContainer.findViewById(R.id.fragment_class_log_record_attendance_fab);
         fab.setOnClickListener(v -> mPresenter.goToNewClazzLogDetailActivity());
 
-        //Buttons
         lastWeekButton = rootContainer.findViewById(
                 R.id.fragment_clazz_log_list_line_chart_selector_button_thisweek);
         lastMonthButton = rootContainer.findViewById(
@@ -321,7 +307,6 @@ public class ClazzLogListFragment extends UstadBaseFragment implements ClassLogL
         //Default start to Last Week's data:
         lastWeekButton.callOnClick();
 
-        //return container
         return rootContainer;
     }
 
@@ -336,7 +321,6 @@ public class ClazzLogListFragment extends UstadBaseFragment implements ClassLogL
             lastMonthButton.getBackground().setTint(getResources().getColor(R.color.color_gray));
             lastYearButton.getBackground().setTint(getResources().getColor(R.color.color_gray));
         });
-
 
     }
 

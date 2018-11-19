@@ -65,14 +65,22 @@ public class ClazzListRecyclerAdapter extends
         String lastRecordedAttendance = "";
         ((TextView)holder.itemView.findViewById(R.id.item_clazzlist_clazz_title))
                 .setText(clazz.getClazzName());
+
         String numStudentsText = clazz.getNumStudents() + " " + theFragment.getResources()
                 .getText(R.string.students_literal).toString();
+        String subTitle;
+        if(clazz.getNumTeachers() > 0) {
+            subTitle = theFragment.getResources().getText(R.string.taught_by) + ": " +
+                    clazz.getTeacherNames() + " - " + numStudentsText;
+        }else{
+            subTitle = numStudentsText;
+        }
         String attendancePercentageText =
                 attendancePercentage + "% " + theFragment.getText(R.string.attendance)
                         + " (" + theFragment.getText(R.string.last_recorded)
                         + " " + lastRecordedAttendance + ")";
         ((TextView)holder.itemView.findViewById(R.id.item_clazzlist_numstudents_text))
-                .setText(numStudentsText);
+                .setText(subTitle);
         ((TextView)holder.itemView.findViewById(R.id.item_clazzlist_attendance_percentage))
                 .setText(attendancePercentageText);
         holder.itemView.setOnClickListener((view) -> thePresenter.handleClickClazz(clazz));

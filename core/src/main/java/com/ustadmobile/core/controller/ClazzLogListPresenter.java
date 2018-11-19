@@ -156,8 +156,6 @@ public class ClazzLogListPresenter extends UstadBaseController<ClassLogListView>
             @Override
             public void onSuccess(List<DailyAttendanceNumbers> result) {
 
-
-
                 for(DailyAttendanceNumbers everyDayAttendance: result){
                     Long dd =everyDayAttendance.getLogDate();
                     Calendar calendar = Calendar.getInstance();
@@ -256,15 +254,6 @@ public class ClazzLogListPresenter extends UstadBaseController<ClassLogListView>
         barData.put(1f, 0.3f);
         view.updateAttendanceBarChart(barData);
     }
-
-//    /**
-//     * Method logic for what happens when we change the order of the log list
-//     *
-//     * @param order The order flag. 1 - Attendance, 2 - Date
-//     */
-//    public void handleChangeSortOrder(int order){
-//        //TODO: Change provider's sort order
-//    }
 
     /**
      * Presenter's setUiStrings method that doesn't do anything here.
