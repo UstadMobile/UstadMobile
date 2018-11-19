@@ -14,7 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.toughra.ustadmobile.R;
-import com.ustadmobile.core.controller.EntryListPresenter;
+import com.ustadmobile.core.controller.ContentEntryListPresenter;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.view.ContentEntryView;
 import com.ustadmobile.lib.db.entities.ContentEntry;
@@ -29,7 +29,7 @@ import com.ustadmobile.port.android.util.UMAndroidUtil;
 public class ContentEntryListFragment extends UstadBaseFragment implements ContentEntryView, ContentEntryRecyclerViewAdapter.AdapterViewListener {
 
 
-    private EntryListPresenter entryListPresenter;
+    private ContentEntryListPresenter entryListPresenter;
     private RecyclerView recyclerView;
     private ContentEntryListener contentEntryListener;
 
@@ -72,7 +72,7 @@ public class ContentEntryListFragment extends UstadBaseFragment implements Conte
                 LinearLayoutManager.VERTICAL);
         recyclerView.addItemDecoration(dividerItemDecoration);
 
-        entryListPresenter = new EntryListPresenter(getContext(),
+        entryListPresenter = new ContentEntryListPresenter(getContext(),
                 UMAndroidUtil.bundleToHashtable(getArguments()), this);
         entryListPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
 

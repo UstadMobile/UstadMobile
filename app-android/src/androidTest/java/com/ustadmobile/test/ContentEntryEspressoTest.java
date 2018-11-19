@@ -41,10 +41,14 @@ public class ContentEntryEspressoTest {
 
     }
 
-    @Test
-    public void givenServerOffline_whenPlixZippedIsOpened_WebviewLoads() {
+    public UmAppDatabase getDb(){
         Context context = InstrumentationRegistry.getTargetContext();
-        UmAppDatabase db = UmAppDatabase.getInstance(context);
+        return UmAppDatabase.getInstance(context);
+    }
+
+
+    public void createDummyContent(){
+        UmAppDatabase db = getDb();
 
         db.clearAllTables();
 
@@ -215,8 +219,19 @@ public class ContentEntryEspressoTest {
         spanishEnglishJoin.setRelType(ContentEntryRelatedEntryJoin.REL_TYPE_TRANSLATED_VERSION);
         contentEntryRelatedEntryJoinDao.insert(spanishEnglishJoin);
 
+
+
+    }
+
+    @Test
+    public void givenServerOffline_whenPlixZippedIsOpened_WebviewLoads() {
+
+        createDummyContent();
+
         Intent launchActivityIntent = new Intent();
         mActivityRule.launchActivity(launchActivityIntent);
+
+        // TODO assert page opens
 
     }
 

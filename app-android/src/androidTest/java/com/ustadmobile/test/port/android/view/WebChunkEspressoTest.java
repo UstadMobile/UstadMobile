@@ -66,8 +66,8 @@ public class WebChunkEspressoTest {
 
         UmAndroidTestUtil.setAirplaneModeEnabled(true);
         Bundle b = new Bundle();
-        String pathToZip = "/com/ustadmobile/app/android/56953eed8e0e086aa6e2d3c2.zip";
-        InputStream inputStream = getClass().getResourceAsStream(pathToZip);
+        String testScrapedPlixPath = "/com/ustadmobile/app/android/56953eed8e0e086aa6e2d3c2.zip";
+        InputStream inputStream = getClass().getResourceAsStream(testScrapedPlixPath);
         File path = Environment.getExternalStorageDirectory();
         File targetFile = new File(path, "53d147578e0e0876d4df82f1.zip");
         OutputStream outStream = new FileOutputStream(targetFile);

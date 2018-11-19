@@ -1,6 +1,5 @@
 package com.ustadmobile.port.android.view;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -15,7 +14,7 @@ import android.view.ViewGroup;
 
 import com.toughra.ustadmobile.R;
 
-import static com.ustadmobile.core.controller.EntryListPresenter.ARG_CONTENT_ENTRY_UID;
+import static com.ustadmobile.core.controller.ContentEntryListPresenter.ARG_CONTENT_ENTRY_UID;
 
 public class ContentLibraryViewPagerFragment extends UstadBaseFragment {
 

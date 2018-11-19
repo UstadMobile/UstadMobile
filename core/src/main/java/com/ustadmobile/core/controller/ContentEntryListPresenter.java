@@ -9,13 +9,13 @@ import com.ustadmobile.core.view.ContentEntryView;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import java.util.Hashtable;
 
-public class EntryListPresenter extends UstadBaseController<ContentEntryView> {
+public class ContentEntryListPresenter extends UstadBaseController<ContentEntryView> {
 
     public static final String ARG_CONTENT_ENTRY_UID = "entryid";
     private final ContentEntryView viewContract;
     private ContentEntryDao contentEntryDao;
 
-    public EntryListPresenter(Object context, Hashtable arguments, ContentEntryView viewContract) {
+    public ContentEntryListPresenter(Object context, Hashtable arguments, ContentEntryView viewContract) {
         super(context, arguments, viewContract);
         this.viewContract = viewContract;
 

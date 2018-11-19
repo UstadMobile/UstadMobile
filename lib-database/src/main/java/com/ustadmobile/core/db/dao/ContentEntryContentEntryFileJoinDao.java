@@ -2,6 +2,7 @@ package com.ustadmobile.core.db.dao;
 
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmQuery;
+import com.ustadmobile.lib.database.annotation.UmRepository;
 import com.ustadmobile.lib.database.annotation.UmUpdate;
 import com.ustadmobile.lib.db.entities.ContentEntryContentEntryFileJoin;
 import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin;
@@ -11,8 +12,9 @@ import com.ustadmobile.lib.db.sync.dao.BaseDao;
 import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
 @UmDao
+@UmRepository
 public abstract class ContentEntryContentEntryFileJoinDao
-        implements SyncableDao<ContentEntryContentEntryFileJoin, ContentEntryContentEntryFileJoinDao> {
+        implements BaseDao<ContentEntryContentEntryFileJoin> { //SyncableDao<ContentEntryContentEntryFileJoin, ContentEntryContentEntryFileJoinDao> {
 
     @UmQuery("SELECT * from ContentEntryContentEntryFileJoin WHERE " +
             "cecefjContentEntryUid = :parentEntryContentUid")
