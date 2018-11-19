@@ -10,13 +10,14 @@ include ':app-android',
         ':lib-database-entities',
         ':lib-util',
         ':lib-database-entity-processor',
-        ':lib-database-annotation',
+        ':lib-database-runtime',
         ':app-android-testserver',
         ':lib-http-testserver',
-        ':lib-database-annotation-processor-core',
+        ':lib-database-annotation-processor',
         ':lib-database',
         ':lib-database-android',
-        ':lib-database-processor',
-        ':lib-database-util-jdbc',
-        ':lib-database-jdbc',
-        ':lib-content-scrapers'
+        ':lib-database-runtime-jdbc',
+        ':lib-room-annotations'
+include ':lib-database-jdbc'
+include ':app-rest-server'
+include ':lib-database-retrofitrepository'

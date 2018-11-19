@@ -1,0 +1,17 @@
+apply plugin: 'java-library'
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation project(":lib-database")
+    implementation project(":lib-database-entities")
+    implementation project(":lib-database-runtime")
+
+    implementation "com.squareup.retrofit2:retrofit:$version_retrofit"
+    implementation "com.squareup.retrofit2:converter-gson:$version_retrofit"
+    implementation "com.squareup.retrofit2:converter-scalars:$version_retrofit"
+}
+
+sourceSets.main.java.srcDirs += ["build/generated/source/umdbprocessor"]
+
+sourceCompatibility = "8"
+targetCompatibility = "8"

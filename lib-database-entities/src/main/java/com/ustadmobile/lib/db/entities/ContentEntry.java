@@ -2,6 +2,10 @@ package com.ustadmobile.lib.db.entities;
 
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
+import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
+import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
+
+import static com.ustadmobile.lib.db.entities.ContentEntry.TABLE_ID;
 
 /**
  * Entity that represents content as it is browsed by the user. A ContentEntry can be either:
@@ -10,8 +14,10 @@ import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
  *  2. A navigation directory (e.g. a category as it is scraped from another site, etc), in which case
  *     there should be the appropriate ContentEntryParentChildJoin entities present.
  */
-@UmEntity
+@UmEntity(tableId = TABLE_ID)
 public class ContentEntry {
+
+    public static final int TABLE_ID = 42;
 
     public static final int LICENSE_TYPE_CC_BY = 1;
 
@@ -25,7 +31,7 @@ public class ContentEntry {
 
     public static final int LICESNE_TYPE_CC_BY_NC_SA = 6;
 
-    @UmPrimaryKey(autoIncrement = true)
+    @UmPrimaryKey(autoGenerateSyncable = true)
     private long contentEntryUid;
 
     private String title;
@@ -73,6 +79,12 @@ public class ContentEntry {
     public void setPrimaryLanguageUid(long primaryLanguageUid) {
         this.primaryLanguageUid = primaryLanguageUid;
     }
+
+    @UmSyncLocalChangeSeqNum
+    private long contentEntryLocalChangeSeqNum;
+
+    @UmSyncMasterChangeSeqNum
+    private long contentEntryMasterChangeSeqNum;
 
     public long getContentEntryUid() {
         return contentEntryUid;
@@ -227,5 +239,22 @@ public class ContentEntry {
 
     public void setLastModified(long lastModified) {
         this.lastModified = lastModified;
+    }
+
+
+    public long getContentEntryLocalChangeSeqNum() {
+        return contentEntryLocalChangeSeqNum;
+    }
+
+    public void setContentEntryLocalChangeSeqNum(long contentEntryLocalChangeSeqNum) {
+        this.contentEntryLocalChangeSeqNum = contentEntryLocalChangeSeqNum;
+    }
+
+    public long getContentEntryMasterChangeSeqNum() {
+        return contentEntryMasterChangeSeqNum;
+    }
+
+    public void setContentEntryMasterChangeSeqNum(long contentEntryMasterChangeSeqNum) {
+        this.contentEntryMasterChangeSeqNum = contentEntryMasterChangeSeqNum;
     }
 }
