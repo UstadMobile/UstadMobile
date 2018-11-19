@@ -3,8 +3,9 @@ package com.ustadmobile.port.android.view;
 import android.os.Bundle;
 
 import com.toughra.ustadmobile.R;
+import com.ustadmobile.core.view.DummyView;
 
-public class DummyActivity extends UstadBaseActivity {
+public class DummyActivity extends UstadBaseActivity implements DummyView {
 
 
     @Override

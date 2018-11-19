@@ -84,6 +84,7 @@ import com.ustadmobile.core.view.CatalogView;
 import com.ustadmobile.core.view.ContainerView;
 import com.ustadmobile.core.view.ContentEntryDetailView;
 import com.ustadmobile.core.view.ContentEntryView;
+import com.ustadmobile.core.view.DummyView;
 import com.ustadmobile.core.view.H5PContentView;
 import com.ustadmobile.core.view.LoginView;
 import com.ustadmobile.core.view.RegistrationView;
@@ -185,6 +186,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         viewNameToAndroidImplMap.put(DownloadDialogView.VIEW_NAME, DownloadDialogFragment.class);
         viewNameToAndroidImplMap.put(ContentEntryView.VIEW_NAME, ContentEntryListActivity.class);
         viewNameToAndroidImplMap.put(ContentEntryDetailView.VIEW_NAME, EntryDetailActivity.class);
+        viewNameToAndroidImplMap.put(DummyView.VIEW_NAME, DummyActivity.class);
     }
 
     /**
