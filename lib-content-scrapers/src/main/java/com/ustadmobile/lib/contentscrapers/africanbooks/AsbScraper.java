@@ -2,8 +2,6 @@ package com.ustadmobile.lib.contentscrapers.africanbooks;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.neovisionaries.i18n.LanguageAlpha3Code;
-import com.neovisionaries.i18n.LanguageCode;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.ContentCategoryDao;
 import com.ustadmobile.core.db.dao.ContentCategorySchemaDao;
@@ -145,7 +143,7 @@ public class AsbScraper {
                         String value = StringUtils.capitalize(lang.text().toLowerCase());
 
                         langMap.put(id, value);
-                        ContentScraperUtil.insertOrUpdateLocation(languageDao, value);
+                        ContentScraperUtil.insertOrUpdateLanguage(languageDao, value);
                     }
                 }
             }
@@ -251,7 +249,7 @@ public class AsbScraper {
 
                         Language relatedLanguage = languageDao.findByName(lang);
                         if(relatedLanguage == null){
-                            relatedLanguage = ContentScraperUtil.insertOrUpdateLocation(languageDao, lang);
+                            relatedLanguage = ContentScraperUtil.insertOrUpdateLanguage(languageDao, lang);
                         }
 
                         URL content = generateEPubUrl(africanBooksUrl, id);

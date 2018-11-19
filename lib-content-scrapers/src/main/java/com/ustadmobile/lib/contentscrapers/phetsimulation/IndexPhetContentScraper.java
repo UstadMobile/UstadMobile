@@ -8,6 +8,8 @@ import com.ustadmobile.core.db.dao.ContentEntryFileDao;
 import com.ustadmobile.core.db.dao.ContentEntryFileStatusDao;
 import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryRelatedEntryJoinDao;
+import com.ustadmobile.core.db.dao.LanguageDao;
+import com.ustadmobile.core.db.dao.LanguageVariantDao;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.ScraperConstants;
 import com.ustadmobile.lib.db.entities.ContentEntry;
@@ -15,6 +17,7 @@ import com.ustadmobile.lib.db.entities.ContentEntryContentEntryFileJoin;
 import com.ustadmobile.lib.db.entities.ContentEntryFile;
 import com.ustadmobile.lib.db.entities.ContentEntryFileStatus;
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoin;
+import com.ustadmobile.lib.db.entities.Language;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.jsoup.Jsoup;
@@ -49,6 +52,9 @@ public class IndexPhetContentScraper {
     private ContentEntryContentCategoryJoinDao contentEntryCategoryJoinDao;
     private ContentEntryRelatedEntryJoinDao contentEntryRelatedJoinDao;
     private ContentEntryFileStatusDao contentFileStatusDao;
+    private LanguageDao languageDao;
+    private Language englishLang;
+    private LanguageVariantDao languageVariantDao;
 
 
     public static void main(String[] args) {
@@ -94,6 +100,8 @@ public class IndexPhetContentScraper {
         contentEntryCategoryJoinDao = db.getContentEntryContentCategoryJoinDao();
         contentEntryRelatedJoinDao = db.getContentEntryRelatedEntryJoinDao();
         contentFileStatusDao = db.getContentEntryFileStatusDao();
+        languageDao = db.getLanguageDao();
+        languageVariantDao = db.getLanguageVariantDao();
 
         Document document = Jsoup.connect(urlString).get();
 
@@ -106,15 +114,17 @@ public class IndexPhetContentScraper {
 
         Elements simulationList = document.select("td.simulation-list-item span.sim-badge-html");
 
+        englishLang = ContentScraperUtil.insertOrUpdateLanguage(languageDao, "English");
+
         ContentEntry masterRootParent = contentEntryDao.findBySourceUrl("root");
         if (masterRootParent == null) {
             masterRootParent = new ContentEntry();
             masterRootParent= setContentEntryData(masterRootParent, "root",
-                    "Ustad Mobile", "root", ScraperConstants.ENGLISH_LANG_CODE);
+                    "Ustad Mobile", "root", englishLang);
             masterRootParent.setContentEntryUid(contentEntryDao.insert(masterRootParent));
         } else {
             masterRootParent = setContentEntryData(masterRootParent, "root",
-                    "Ustad Mobile", "root", ScraperConstants.ENGLISH_LANG_CODE);
+                    "Ustad Mobile", "root", englishLang);
             contentEntryDao.update(masterRootParent);
         }
 
@@ -122,12 +132,12 @@ public class IndexPhetContentScraper {
         if (phetParentEntry == null) {
             phetParentEntry = new ContentEntry();
             phetParentEntry = setContentEntryData(phetParentEntry, "https://phet.colorado.edu/",
-                    "Phet Interactive Simulations", "https://phet.colorado.edu/", ScraperConstants.ENGLISH_LANG_CODE);
+                    "Phet Interactive Simulations", "https://phet.colorado.edu/", englishLang);
             phetParentEntry.setThumbnailUrl("https://phet.colorado.edu/images/phet-social-media-logo.png");
             phetParentEntry.setContentEntryUid(contentEntryDao.insert(phetParentEntry));
         } else {
             phetParentEntry = setContentEntryData(phetParentEntry, "https://phet.colorado.edu/",
-                    "Phet Interactive Simulations", "https://phet.colorado.edu/", ScraperConstants.ENGLISH_LANG_CODE);
+                    "Phet Interactive Simulations", "https://phet.colorado.edu/", englishLang);
             phetParentEntry.setThumbnailUrl("https://phet.colorado.edu/images/phet-social-media-logo.png");
             contentEntryDao.update(phetParentEntry);
         }
@@ -144,11 +154,12 @@ public class IndexPhetContentScraper {
             ContentEntry englishSimContentEntry = contentEntryDao.findBySourceUrl(path);
             if (englishSimContentEntry == null) {
                 englishSimContentEntry = new ContentEntry();
-                englishSimContentEntry = setContentEntryData(englishSimContentEntry, path, title, path, ScraperConstants.ENGLISH_LANG_CODE);
+                englishSimContentEntry = setContentEntryData(englishSimContentEntry, path, title, path, englishLang);
                 englishSimContentEntry.setThumbnailUrl(thumbnail);
                 englishSimContentEntry.setContentEntryUid(contentEntryDao.insert(englishSimContentEntry));
             } else {
-                englishSimContentEntry = setContentEntryData(englishSimContentEntry, path, title, path, ScraperConstants.ENGLISH_LANG_CODE);
+                englishSimContentEntry = setContentEntryData(englishSimContentEntry, path, title, path, englishLang);
+                englishSimContentEntry.setThumbnailUrl(thumbnail);
                 contentEntryDao.update(englishSimContentEntry);
             }
 
@@ -188,8 +199,8 @@ public class IndexPhetContentScraper {
 
                     }
 
-                    ArrayList<ContentEntry> categoryList = scraper.getCategoryRelations(contentEntryDao);
-                    ArrayList<ContentEntry> translationList = scraper.getTranslations(destinationDirectory, contentEntryDao, thumbnail);
+                    ArrayList<ContentEntry> categoryList = scraper.getCategoryRelations(contentEntryDao, englishLang);
+                    ArrayList<ContentEntry> translationList = scraper.getTranslations(destinationDirectory, contentEntryDao, thumbnail, languageDao, languageVariantDao);
 
                     // TODO remove all categories that no longer exist
                     // TODO remove all categories that dont belong in a phet simulation anymore
@@ -199,7 +210,6 @@ public class IndexPhetContentScraper {
 
                         ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, phetParentEntry, category, categoryCount++);
                         ContentScraperUtil.insertOrUpdateChildWithMultipleParentsJoin(contentParentChildJoinDao, category, englishSimContentEntry, 0);
-                       // ContentScraperUtil.insertOrUpdateChildWithMultipleCategoriesJoin(contentEntryCategoryJoinDao, category, englishSimContentEntry);
 
                         int translationsCount = 1;
                         for (ContentEntry translation : translationList) {
@@ -238,8 +248,6 @@ public class IndexPhetContentScraper {
                             }
 
                             ContentScraperUtil.insertOrUpdateChildWithMultipleParentsJoin(contentParentChildJoinDao, category, translation, translationsCount++);
-                           // ContentScraperUtil.insertOrUpdateChildWithMultipleCategoriesJoin(contentEntryCategoryJoinDao, category, translation);
-
                         }
                     }
                 }
@@ -250,13 +258,13 @@ public class IndexPhetContentScraper {
         }
     }
 
-    private ContentEntry setContentEntryData(ContentEntry entry, String id, String title, String sourceUrl, String lang) {
+    private ContentEntry setContentEntryData(ContentEntry entry, String id, String title, String sourceUrl, Language lang) {
         entry.setEntryId(id);
         entry.setTitle(title);
         entry.setSourceUrl(sourceUrl);
         entry.setPublisher("Phet");
         entry.setLicenseType(LICENSE_TYPE_CC_BY);
-        entry.setPrimaryLanguage(lang);
+        entry.setPrimaryLanguageUid(lang.getLangUid());
         return entry;
     }
 

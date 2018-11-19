@@ -127,7 +127,7 @@ public class TestPrathamContentScraper {
                 tmpDir);
         try {
             scraper.scrapeContent();
-            scraper.getCategoryRelations();
+            scraper.getParentSubjectAreas();
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }

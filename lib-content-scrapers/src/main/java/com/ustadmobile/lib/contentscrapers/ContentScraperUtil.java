@@ -558,7 +558,7 @@ public class ContentScraperUtil {
         return relatedTranslationJoin;
     }
 
-    public static Language insertOrUpdateLocation(LanguageDao languageDao, String langValue) {
+    public static Language insertOrUpdateLanguage(LanguageDao languageDao, String langValue) {
         String three_letter_code = "";
         String two_letter_code = "";
 
@@ -590,4 +590,7 @@ public class ContentScraperUtil {
         }
         return langObj;
     }
+
+
+
 }

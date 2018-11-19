@@ -1,10 +1,18 @@
 package com.ustadmobile.lib.contentscrapers.phetsimulation;
 
+import com.neovisionaries.i18n.CountryCode;
+import com.neovisionaries.i18n.LanguageAlpha3Code;
+import com.neovisionaries.i18n.LanguageCode;
 import com.ustadmobile.core.db.dao.ContentEntryDao;
+import com.ustadmobile.core.db.dao.LanguageDao;
+import com.ustadmobile.core.db.dao.LanguageVariantDao;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.ScraperConstants;
 import com.ustadmobile.lib.db.entities.ContentEntry;
+import com.ustadmobile.lib.db.entities.Language;
+import com.ustadmobile.lib.db.entities.LanguageVariant;
 
+import org.apache.commons.codec.language.bm.Lang;
 import org.apache.commons.io.FileUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -163,7 +171,7 @@ public class PhetContentScraper {
      * @param contentEntryDao
      * @return a list of categories a single phet simulation could be in
      */
-    public ArrayList<ContentEntry> getCategoryRelations(ContentEntryDao contentEntryDao) {
+    public ArrayList<ContentEntry> getCategoryRelations(ContentEntryDao contentEntryDao, Language language) {
 
         Elements selected = simulationDoc.select("ul.nav-ul div.link-holder span.selected");
 
@@ -178,10 +186,10 @@ public class PhetContentScraper {
                 ContentEntry categoryContentEntry = contentEntryDao.findBySourceUrl(path);
                 if (categoryContentEntry == null) {
                     categoryContentEntry = new ContentEntry();
-                    categoryContentEntry = setContentEntryData(categoryContentEntry, path, categoryName, path, ScraperConstants.ENGLISH_LANG_CODE);
+                    categoryContentEntry = setContentEntryData(categoryContentEntry, path, categoryName, path, language, null);
                     categoryContentEntry.setContentEntryUid(contentEntryDao.insert(categoryContentEntry));
                 } else {
-                    categoryContentEntry = setContentEntryData(categoryContentEntry, path, categoryName, path, ScraperConstants.ENGLISH_LANG_CODE);
+                    categoryContentEntry = setContentEntryData(categoryContentEntry, path, categoryName, path, language, null);
                     contentEntryDao.update(categoryContentEntry);
                 }
 
@@ -194,15 +202,16 @@ public class PhetContentScraper {
 
     }
 
-    private ContentEntry setContentEntryData(ContentEntry entry, String id, String title, String sourceUrl, String lang) {
+    private ContentEntry setContentEntryData(ContentEntry entry, String id, String title, String sourceUrl, Language lang, LanguageVariant variant) {
         entry.setEntryId(id);
         entry.setTitle(title);
         entry.setSourceUrl(sourceUrl);
         entry.setPublisher("Phet");
         entry.setLicenseType(LICENSE_TYPE_CC_BY);
-        String[] country = lang.replaceAll("_", "-").split("-");
-        entry.setPrimaryLanguage(country[0]);
-        entry.setPrimaryLanguageCountry(country.length > 1 ? country[1] : "");
+        if(variant != null){
+            entry.setLanguageVariantUid(variant.getLangVariantUid());
+        }
+        entry.setPrimaryLanguageUid(lang.getLangUid());
         return entry;
     }
 
@@ -248,7 +257,7 @@ public class PhetContentScraper {
      * @return a list of languages the phet simulation was translated to
      * @throws IOException
      */
-    public ArrayList<ContentEntry> getTranslations(File destinationDirectory, ContentEntryDao contentEntryDao, String thumbnailUrl) throws IOException {
+    public ArrayList<ContentEntry> getTranslations(File destinationDirectory, ContentEntryDao contentEntryDao, String thumbnailUrl, LanguageDao languageDao, LanguageVariantDao languageVariantDao) throws IOException {
 
         ArrayList<ContentEntry> translationsEntry = new ArrayList<>();
 
@@ -266,18 +275,57 @@ public class PhetContentScraper {
                         for (File file : contentDirectory.listFiles()) {
 
                             if (file.getName().endsWith(".html")) {
-                                // TODO recheck entry id for translations
                                 String langTitle = Jsoup.parse(file, ScraperConstants.UTF_ENCODING).title();
 
                                 String path = langCode + "/" + this.title;
+                                String[] country = langCode.replaceAll("_", "-").split("-");
+
+                                String lang = country[0];
+                                String variant = country.length > 1 ? country[1] : "";
+
+                                Language language = languageDao.findByTwoCode(lang);
+                                if(language ==  null){
+                                    language = new Language();
+                                    language.setIso_639_1_standard(lang);
+                                    language.setName(LanguageCode.getByCode(lang).getName());
+                                    language.setLangUid(languageDao.insert(language));
+                                }else{
+                                    language.setIso_639_1_standard(lang);
+                                    language.setName(LanguageCode.getByCode(lang).getName());
+                                    languageDao.update(language);
+                                }
+
+                                LanguageVariant languageVariant = null;
+                                if(!variant.isEmpty()){
+                                    CountryCode countryCode = CountryCode.getByCode(variant);
+                                    if(countryCode != null){
+                                        String alpha2 = countryCode.getAlpha2();
+                                        String name = countryCode.getName();
+                                        languageVariant = languageVariantDao.findByCode(alpha2);
+                                        if(languageVariant == null){
+                                            languageVariant = new LanguageVariant();
+                                            languageVariant.setCountryCode(alpha2);
+                                            languageVariant.setName(language.getName() + "(" + name + ")");
+                                            languageVariant.setLangUid(language.getLangUid());
+                                            languageVariant.setLangVariantUid(languageVariantDao.insert(languageVariant));
+                                        }else{
+                                            languageVariant.setCountryCode(alpha2);
+                                            languageVariant.setName(language.getName() + "(" + name + ")");
+                                            languageVariant.setLangUid(language.getLangUid());
+                                            languageVariantDao.update(languageVariant);
+                                        }
+                                    }
+                                }
+
+
                                 ContentEntry languageContentEntry = contentEntryDao.findBySourceUrl(path);
                                 if (languageContentEntry == null) {
                                     languageContentEntry = new ContentEntry();
-                                    languageContentEntry = setContentEntryData(languageContentEntry, path, langTitle, path, langCode);
+                                    languageContentEntry = setContentEntryData(languageContentEntry, path, langTitle, path, language, languageVariant);
                                     languageContentEntry.setThumbnailUrl(thumbnailUrl);
                                     languageContentEntry.setContentEntryUid(contentEntryDao.insert(languageContentEntry));
                                 } else {
-                                    languageContentEntry = setContentEntryData(languageContentEntry, path, langTitle, path, langCode);
+                                    languageContentEntry = setContentEntryData(languageContentEntry, path, langTitle, path, language, languageVariant);
                                     contentEntryDao.update(languageContentEntry);
                                 }
 

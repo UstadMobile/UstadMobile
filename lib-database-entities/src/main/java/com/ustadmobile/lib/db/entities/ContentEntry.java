@@ -56,6 +56,16 @@ public class ContentEntry {
 
     private long primaryLanguageUid;
 
+    private long languageVariantUid;
+
+    public long getLanguageVariantUid() {
+        return languageVariantUid;
+    }
+
+    public void setLanguageVariantUid(long languageVariantUid) {
+        this.languageVariantUid = languageVariantUid;
+    }
+
     public long getPrimaryLanguageUid() {
         return primaryLanguageUid;
     }

@@ -1,11 +1,15 @@
 package com.ustadmobile.lib.contentscrapers.ddl;
 
 import com.ustadmobile.core.db.UmAppDatabase;
+import com.ustadmobile.core.db.dao.ContentCategoryDao;
+import com.ustadmobile.core.db.dao.ContentCategorySchemaDao;
 import com.ustadmobile.core.db.dao.ContentEntryContentEntryFileJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryDao;
 import com.ustadmobile.core.db.dao.ContentEntryFileDao;
 import com.ustadmobile.core.db.dao.ContentEntryFileStatusDao;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
+import com.ustadmobile.lib.db.entities.ContentCategory;
+import com.ustadmobile.lib.db.entities.ContentCategorySchema;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.ContentEntryContentEntryFileJoin;
 import com.ustadmobile.lib.db.entities.ContentEntryFile;
@@ -47,6 +51,8 @@ public class DdlContentScraper {
     private final ContentEntryFileDao contentEntryFileDao;
     private final ContentEntryContentEntryFileJoinDao contentEntryFileJoinDao;
     private final ContentEntryFileStatusDao contentFileStatusDao;
+    private final ContentCategorySchemaDao categorySchemaDao;
+    private final ContentCategoryDao contentCategoryDao;
     private Document doc;
     ArrayList<ContentEntry> contentEntries;
 
@@ -60,7 +66,10 @@ public class DdlContentScraper {
         contentEntryFileDao = db.getContentEntryFileDao();
         contentEntryFileJoinDao = db.getContentEntryContentEntryFileJoinDao();
         contentFileStatusDao = db.getContentEntryFileStatusDao();
+        categorySchemaDao = db.getContentCategorySchemaDao();
+        contentCategoryDao = db.getContentCategoryDao();
     }
+
 
     public static void main(String[] args) throws URISyntaxException {
         if (args.length != 2) {
@@ -166,9 +175,9 @@ public class DdlContentScraper {
         return contentEntries;
     }
 
-    public ArrayList<ContentEntry> getCategoryRelations() {
+    public ArrayList<ContentEntry> getParentSubjectAreas() {
 
-        ArrayList<ContentEntry> categoryRelations = new ArrayList<>();
+        ArrayList<ContentEntry> subjectAreaList = new ArrayList<>();
         Elements subjectContainer = doc.select("article.resource-view-details h3:contains(Subject Area) ~ p");
 
         Elements subjectList = subjectContainer.select("a");
@@ -189,12 +198,33 @@ public class DdlContentScraper {
                 contentEntryDao.update(contentEntry);
             }
 
-            categoryRelations.add(contentEntry);
+            subjectAreaList.add(contentEntry);
+
+        }
+
+        return subjectAreaList;
+    }
+
+
+    public ArrayList<ContentCategory> getContentCategories() {
+
+
+        ArrayList<ContentCategory> categoryRelations = new ArrayList<>();
+        Elements subjectContainer = doc.select("article.resource-view-details h3:contains(Resource Level) ~ p");
+
+        ContentCategorySchema ddlSchema = ContentScraperUtil.insertOrUpdateSchema(categorySchemaDao, "DDL Resource Level", "ddl/resource-level/");
+
+        Elements subjectList = subjectContainer.select("a");
+        for (Element subject : subjectList) {
+
+            String title = subject.attr("title");
+
+            ContentCategory categoryEntry = ContentScraperUtil.insertOrUpdateCategoryContent(contentCategoryDao, ddlSchema, title);
+
+            categoryRelations.add(categoryEntry);
 
         }
 
         return categoryRelations;
     }
-
-
 }

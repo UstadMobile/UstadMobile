@@ -23,6 +23,7 @@ import com.ustadmobile.core.db.dao.DownloadSetItemDao;
 import com.ustadmobile.core.db.dao.EntryStatusResponseDao;
 import com.ustadmobile.core.db.dao.HttpCachedEntryDao;
 import com.ustadmobile.core.db.dao.LanguageDao;
+import com.ustadmobile.core.db.dao.LanguageVariantDao;
 import com.ustadmobile.core.db.dao.NetworkNodeDao;
 import com.ustadmobile.core.db.dao.OpdsEntryDao;
 import com.ustadmobile.core.db.dao.OpdsEntryParentToChildJoinDao;
@@ -59,6 +60,7 @@ import com.ustadmobile.lib.db.entities.DownloadSetItem;
 import com.ustadmobile.lib.db.entities.EntryStatusResponse;
 import com.ustadmobile.lib.db.entities.HttpCachedEntry;
 import com.ustadmobile.lib.db.entities.Language;
+import com.ustadmobile.lib.db.entities.LanguageVariant;
 import com.ustadmobile.lib.db.entities.NetworkNode;
 import com.ustadmobile.lib.db.entities.OpdsEntry;
 import com.ustadmobile.lib.db.entities.OpdsEntryParentToChildJoin;
@@ -82,7 +84,7 @@ import com.ustadmobile.lib.db.entities.PersonCustomFieldValue;
         ContentEntryContentEntryFileJoin.class, ContentEntryFile.class,
         ContentEntryParentChildJoin.class, ContentEntryRelatedEntryJoin.class,
         ContentEntryFileStatus.class, ContentCategorySchema.class,
-        ContentCategory.class, Language.class
+        ContentCategory.class, Language.class, LanguageVariant.class
 })
 public abstract class UmAppDatabase{
 
@@ -176,6 +178,8 @@ public abstract class UmAppDatabase{
     public abstract ContentCategoryDao getContentCategoryDao();
 
     public abstract LanguageDao getLanguageDao();
+
+    public abstract LanguageVariantDao getLanguageVariantDao();
 
     @UmDbContext
     public abstract Object getContext();

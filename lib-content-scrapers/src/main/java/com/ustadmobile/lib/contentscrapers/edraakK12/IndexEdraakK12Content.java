@@ -8,12 +8,14 @@ import com.ustadmobile.core.db.dao.ContentEntryDao;
 import com.ustadmobile.core.db.dao.ContentEntryFileDao;
 import com.ustadmobile.core.db.dao.ContentEntryFileStatusDao;
 import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
+import com.ustadmobile.core.db.dao.LanguageDao;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.ScraperConstants;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.ContentEntryContentEntryFileJoin;
 import com.ustadmobile.lib.db.entities.ContentEntryFile;
 import com.ustadmobile.lib.db.entities.ContentEntryFileStatus;
+import com.ustadmobile.lib.db.entities.Language;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
@@ -57,6 +59,8 @@ public class IndexEdraakK12Content {
     private ContentEntryFileDao contentEntryFileDao;
     private ContentEntryContentEntryFileJoinDao contentEntryFileJoin;
     private ContentEntryFileStatusDao contentFileStatusDao;
+    private LanguageDao languageDao;
+    private Language arabicLang;
 
 
     public static void main(String[] args) {
@@ -95,6 +99,9 @@ public class IndexEdraakK12Content {
         contentEntryFileDao = db.getContentEntryFileDao();
         contentEntryFileJoin = db.getContentEntryContentEntryFileJoinDao();
         contentFileStatusDao = db.getContentEntryFileStatusDao();
+        languageDao = db.getLanguageDao();
+
+        arabicLang = ContentScraperUtil.insertOrUpdateLanguage(languageDao, "Arabic");
 
         try {
             URLConnection connection = url.openConnection();
@@ -147,7 +154,7 @@ public class IndexEdraakK12Content {
         entry.setTitle(title);
         entry.setSourceUrl(sourceUrl);
         entry.setPublisher("Edraak");
-        entry.setPrimaryLanguage(ScraperConstants.ARABIC_LANG_CODE);
+        entry.setPrimaryLanguageUid(arabicLang.getLangUid());
         return entry;
     }
 

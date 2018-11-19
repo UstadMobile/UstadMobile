@@ -293,7 +293,7 @@ public class TestPhetContentScraper {
         PhetContentScraper scraper = new PhetContentScraper(mockWebServer.url("/api/simulation/equality-explorer-two-variables").toString(), tmpDir);
         scraper.scrapeContent();
 
-        ArrayList<ContentEntry> translationList = scraper.getTranslations(tmpDir, db.getContentEntryDao(), "");
+        ArrayList<ContentEntry> translationList = scraper.getTranslations(tmpDir, db.getContentEntryDao(), "", db.getLanguageDao(), db.getLanguageVariantDao());
 
         Assert.assertEquals("first translation == es", translationList.get(0).getPrimaryLanguage(), ("es"));
 

@@ -4,10 +4,11 @@ import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.ContentEntryContentCategoryJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryDao;
 import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
+import com.ustadmobile.core.db.dao.LanguageDao;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
-import com.ustadmobile.lib.contentscrapers.ScraperConstants;
-import com.ustadmobile.lib.contentscrapers.edraakK12.IndexEdraakK12Content;
+import com.ustadmobile.lib.db.entities.ContentCategory;
 import com.ustadmobile.lib.db.entities.ContentEntry;
+import com.ustadmobile.lib.db.entities.Language;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -44,6 +45,7 @@ public class IndexDdlContent {
     private ContentEntryDao contentEntryDao;
     private ContentEntryParentChildJoinDao contentParentChildJoinDao;
     private ContentEntryContentCategoryJoinDao contentCategoryChildJoinDao;
+    private LanguageDao languageDao;
 
 
     public static void main(String[] args) throws IOException {
@@ -75,16 +77,24 @@ public class IndexDdlContent {
         contentEntryDao = db.getContentEntryDao();
         contentParentChildJoinDao = db.getContentEntryParentChildJoinDao();
         contentCategoryChildJoinDao = db.getContentEntryContentCategoryJoinDao();
+        languageDao = db.getLanguageDao();
+
+
+        Language englishLang = ContentScraperUtil.insertOrUpdateLanguage(languageDao, "English");
+        Language farsiLang = ContentScraperUtil.insertOrUpdateLanguage(languageDao, "Persian");
+        Language pashtoLang = ContentScraperUtil.insertOrUpdateLanguage(languageDao, "Pashto");
+
+
 
         ContentEntry masterRootParent = contentEntryDao.findBySourceUrl("root");
         if (masterRootParent == null) {
             masterRootParent = new ContentEntry();
             masterRootParent= setContentEntryData(masterRootParent, "root",
-                    "Ustad Mobile", "root", ScraperConstants.ENGLISH_LANG_CODE);
+                    "Ustad Mobile", "root", englishLang);
             masterRootParent.setContentEntryUid(contentEntryDao.insert(masterRootParent));
         } else {
             masterRootParent = setContentEntryData(masterRootParent, "root",
-                    "Ustad Mobile", "root", ScraperConstants.ENGLISH_LANG_CODE);
+                    "Ustad Mobile", "root", englishLang);
             contentEntryDao.update(masterRootParent);
         }
 
@@ -92,50 +102,53 @@ public class IndexDdlContent {
         if (parentDdl == null) {
             parentDdl = new ContentEntry();
             parentDdl = setContentEntryData(parentDdl, "https://www.ddl.af/",
-                    "Darakht-e Danesh", "https://www.ddl.af/", ScraperConstants.ENGLISH_LANG_CODE);
+                    "Darakht-e Danesh", "https://www.ddl.af/", englishLang);
             parentDdl.setThumbnailUrl("https://www.ddl.af/storage/files/logo-dd.png");
             parentDdl.setContentEntryUid(contentEntryDao.insert(parentDdl));
         } else {
             parentDdl = setContentEntryData(parentDdl, "https://www.ddl.af/",
-                    "Darakht-e Danesh", "https://www.ddl.af/", ScraperConstants.ENGLISH_LANG_CODE);
+                    "Darakht-e Danesh", "https://www.ddl.af/", englishLang);
             parentDdl.setThumbnailUrl("https://www.ddl.af/storage/files/logo-dd.png");
             contentEntryDao.update(parentDdl);
         }
 
         ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, masterRootParent, parentDdl, 5);
 
-        browseLanguages("en");
-        browseLanguages("fa");
-        browseLanguages("ps");
+
+
+        browseLanguages("en", englishLang);
+        browseLanguages("fa", farsiLang);
+        browseLanguages("ps", pashtoLang);
 
     }
 
-    private ContentEntry setContentEntryData(ContentEntry entry, String id, String title, String sourceUrl, String lang) {
+    private ContentEntry setContentEntryData(ContentEntry entry, String id, String title, String sourceUrl, Language lang) {
         entry.setEntryId(id);
         entry.setTitle(title);
         entry.setSourceUrl(sourceUrl);
         entry.setPublisher("DDL");
         entry.setLicenseType(ContentEntry.LICENSE_TYPE_CC_BY);
-        entry.setPrimaryLanguage(lang);
+        entry.setPrimaryLanguageUid(lang.getLangUid());
         return entry;
     }
 
-    private void browseLanguages(String lang) throws IOException {
+    private void browseLanguages(String lang, Language langEntity) throws IOException {
 
         Document document = Jsoup.connect("https://www.darakhtdanesh.org/" + lang + "/resources/list")
                 .header("X-Requested-With", "XMLHttpRequest").get();
 
         Elements pageList = document.select("a.page-link");
 
+
         langEntry = contentEntryDao.findBySourceUrl(lang + "/resources/list");
         if (langEntry == null) {
             langEntry = new ContentEntry();
             langEntry = setContentEntryData(langEntry, lang + "/resources/list",
-                    lang, lang + "/resources/list", lang);
+                    lang, lang + "/resources/list", langEntity);
             langEntry.setContentEntryUid(contentEntryDao.insert(langEntry));
         } else {
             langEntry = setContentEntryData(langEntry, lang + "/resources/list",
-                    lang, lang + "/resources/list", lang);
+                    lang, lang + "/resources/list", langEntity);
             contentEntryDao.update(langEntry);
         }
 
@@ -177,24 +190,30 @@ public class IndexDdlContent {
                 DdlContentScraper scraper = new DdlContentScraper(url, destinationDirectory);
                 try {
                     scraper.scrapeContent();
-                    ArrayList<ContentEntry> categories = scraper.getCategoryRelations();
+                    ArrayList<ContentEntry> subjectAreas = scraper.getParentSubjectAreas();
                     ArrayList<ContentEntry> contentEntryArrayList = scraper.getContentEntries();
-                    int categoryCount = 0;
-                   /* for (ContentEntry category : categories) {
+                    ArrayList<ContentCategory> contentCategories = scraper.getContentCategories();
+                    int subjectAreaCount = 0;
+                    for (ContentEntry subjectArea : subjectAreas) {
 
                         ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao,
-                                langEntry, category, categoryCount++);
+                                langEntry, subjectArea, subjectAreaCount++);
 
                         int fileCount = 0;
                         for (ContentEntry contentEntry : contentEntryArrayList) {
 
                             ContentScraperUtil.insertOrUpdateChildWithMultipleParentsJoin(contentParentChildJoinDao,
-                                    category, contentEntry, fileCount++);
-                            ContentScraperUtil.insertOrUpdateChildWithMultipleCategoriesJoin(contentCategoryChildJoinDao,
-                                    category, contentEntry);
+                                    subjectArea, contentEntry, fileCount++);
+
+                            for(ContentCategory category: contentCategories){
+
+                                ContentScraperUtil.insertOrUpdateChildWithMultipleCategoriesJoin(
+                                        contentCategoryChildJoinDao, category, contentEntry);
+
+                            }
 
                         }
-                    } */
+                    }
 
                 } catch (IOException | URISyntaxException e) {
                     System.out.println("Error downloading resource at " + url);

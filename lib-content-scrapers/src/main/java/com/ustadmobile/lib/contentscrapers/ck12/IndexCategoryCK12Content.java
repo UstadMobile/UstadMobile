@@ -6,12 +6,14 @@ import com.ustadmobile.core.db.dao.ContentEntryDao;
 import com.ustadmobile.core.db.dao.ContentEntryFileDao;
 import com.ustadmobile.core.db.dao.ContentEntryFileStatusDao;
 import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
+import com.ustadmobile.core.db.dao.LanguageDao;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.ScraperConstants;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.ContentEntryContentEntryFileJoin;
 import com.ustadmobile.lib.db.entities.ContentEntryFile;
 import com.ustadmobile.lib.db.entities.ContentEntryFileStatus;
+import com.ustadmobile.lib.db.entities.Language;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -77,6 +79,8 @@ public class IndexCategoryCK12Content {
     private final ContentEntryParentChildJoinDao contentParentChildJoinDao;
     private final ContentEntryFileDao contentEntryFileDao;
     private final ContentEntryContentEntryFileJoinDao contentEntryFileJoinDao;
+    private final LanguageDao languageDao;
+    private Language englishLang;
     private ContentEntry ck12ParentEntry;
     URL url;
     private File destinationDirectory;
@@ -113,16 +117,27 @@ public class IndexCategoryCK12Content {
         contentEntryFileDao = db.getContentEntryFileDao();
         contentEntryFileJoinDao = db.getContentEntryContentEntryFileJoinDao();
         contentFileStatusDao = db.getContentEntryFileStatusDao();
+        languageDao = db.getLanguageDao();
+
+        englishLang = languageDao.findByTwoCode(ScraperConstants.ENGLISH_LANG_CODE);
+        if(englishLang == null){
+            englishLang = new Language();
+            englishLang.setName("English");
+            englishLang.setIso_639_1_standard(ScraperConstants.ENGLISH_LANG_CODE);
+            englishLang.setIso_639_2_standard("eng");
+            englishLang.setIso_639_3_standard("eng");
+            englishLang.setLangUid(languageDao.insert(englishLang));
+        }
 
         ContentEntry masterRootParent = contentEntryDao.findBySourceUrl("root");
         if (masterRootParent == null) {
             masterRootParent = new ContentEntry();
             masterRootParent= setContentEntryData(masterRootParent, "root",
-                    "Ustad Mobile", "root", ScraperConstants.ENGLISH_LANG_CODE);
+                    "Ustad Mobile", "root");
             masterRootParent.setContentEntryUid(contentEntryDao.insert(masterRootParent));
         } else {
             masterRootParent = setContentEntryData(masterRootParent, "root",
-                    "Ustad Mobile", "root", ScraperConstants.ENGLISH_LANG_CODE);
+                    "Ustad Mobile", "root");
             contentEntryDao.update(masterRootParent);
         }
 
@@ -130,12 +145,12 @@ public class IndexCategoryCK12Content {
         if (ck12ParentEntry == null) {
             ck12ParentEntry = new ContentEntry();
             ck12ParentEntry = setContentEntryData(ck12ParentEntry, "https://www.ck12.org/",
-                    "CK-12 Foundation", "https://www.ck12.org/", ScraperConstants.ENGLISH_LANG_CODE);
+                    "CK-12 Foundation", "https://www.ck12.org/");
             ck12ParentEntry.setThumbnailUrl("https://img1.ck12.org/media/build-20181015164501/images/ck12-logo-livetile.png");
             ck12ParentEntry.setContentEntryUid(contentEntryDao.insert(ck12ParentEntry));
         } else {
             ck12ParentEntry = setContentEntryData(ck12ParentEntry, "https://www.ck12.org/",
-                    "CK-12 Foundation", "https://www.ck12.org/", ScraperConstants.ENGLISH_LANG_CODE);
+                    "CK-12 Foundation", "https://www.ck12.org/");
             ck12ParentEntry.setThumbnailUrl("https://img1.ck12.org/media/build-20181015164501/images/ck12-logo-livetile.png");
             contentEntryDao.update(ck12ParentEntry);
         }
@@ -144,13 +159,13 @@ public class IndexCategoryCK12Content {
 
     }
 
-    private ContentEntry setContentEntryData(ContentEntry entry, String entryId, String title, String sourceUrl, String langCode) {
+    private ContentEntry setContentEntryData(ContentEntry entry, String entryId, String title, String sourceUrl) {
         entry.setEntryId(entryId);
         entry.setTitle(title);
         entry.setSourceUrl(sourceUrl);
         entry.setPublisher("CK12");
         entry.setLicenseType(LICENSE_TYPE_CC_BY_NC);
-        entry.setPrimaryLanguage(langCode);
+        entry.setPrimaryLanguageUid(englishLang.getLangUid());
         return entry;
     }
 
@@ -183,11 +198,11 @@ public class IndexCategoryCK12Content {
                 if (subjectEntry == null) {
                     subjectEntry = new ContentEntry();
                     subjectEntry = setContentEntryData(subjectEntry, hrefLink,
-                            title, hrefLink, ScraperConstants.ENGLISH_LANG_CODE);
+                            title, hrefLink);
                     subjectEntry.setContentEntryUid(contentEntryDao.insert(subjectEntry));
                 } else {
                     subjectEntry = setContentEntryData(subjectEntry, hrefLink,
-                            title, hrefLink, ScraperConstants.ENGLISH_LANG_CODE);
+                            title, hrefLink);
                     contentEntryDao.update(subjectEntry);
                 }
 
@@ -238,11 +253,11 @@ public class IndexCategoryCK12Content {
                 if (gradeEntry == null) {
                     gradeEntry = new ContentEntry();
                     gradeEntry = setContentEntryData(gradeEntry, hrefLink,
-                            title, hrefLink, ScraperConstants.ENGLISH_LANG_CODE);
+                            title, hrefLink);
                     gradeEntry.setContentEntryUid(contentEntryDao.insert(gradeEntry));
                 } else {
                     gradeEntry = setContentEntryData(gradeEntry, hrefLink,
-                            title, hrefLink, ScraperConstants.ENGLISH_LANG_CODE);
+                            title, hrefLink);
                     contentEntryDao.update(gradeEntry);
                 }
 
@@ -263,11 +278,11 @@ public class IndexCategoryCK12Content {
             if (topicEntry == null) {
                 topicEntry = new ContentEntry();
                 topicEntry = setContentEntryData(topicEntry, fakePath,
-                        level1CategoryTitle, fakePath, ScraperConstants.ENGLISH_LANG_CODE);
+                        level1CategoryTitle, fakePath);
                 topicEntry.setContentEntryUid(contentEntryDao.insert(topicEntry));
             } else {
                 topicEntry = setContentEntryData(topicEntry, fakePath,
-                        level1CategoryTitle, fakePath, ScraperConstants.ENGLISH_LANG_CODE);
+                        level1CategoryTitle, fakePath);
                 contentEntryDao.update(topicEntry);
             }
 
@@ -306,11 +321,11 @@ public class IndexCategoryCK12Content {
                 if (lastTopicEntry == null) {
                     lastTopicEntry = new ContentEntry();
                     lastTopicEntry = setContentEntryData(lastTopicEntry, hrefLink,
-                            title, hrefLink, ScraperConstants.ENGLISH_LANG_CODE);
+                            title, hrefLink);
                     lastTopicEntry.setContentEntryUid(contentEntryDao.insert(lastTopicEntry));
                 } else {
                     lastTopicEntry = setContentEntryData(lastTopicEntry, hrefLink,
-                            title, hrefLink, ScraperConstants.ENGLISH_LANG_CODE);
+                            title, hrefLink);
                     contentEntryDao.update(lastTopicEntry);
                 }
 
@@ -331,11 +346,11 @@ public class IndexCategoryCK12Content {
                 if (subTopicEntry == null) {
                     subTopicEntry = new ContentEntry();
                     subTopicEntry = setContentEntryData(subTopicEntry, appendPath,
-                            title, appendPath, ScraperConstants.ENGLISH_LANG_CODE);
+                            title, appendPath);
                     subTopicEntry.setContentEntryUid(contentEntryDao.insert(subTopicEntry));
                 } else {
                     subTopicEntry = setContentEntryData(subTopicEntry, appendPath,
-                            title, appendPath, ScraperConstants.ENGLISH_LANG_CODE);
+                            title, appendPath);
                     contentEntryDao.update(subTopicEntry);
                 }
 
@@ -378,12 +393,12 @@ public class IndexCategoryCK12Content {
             if (headingEntry == null) {
                 headingEntry = new ContentEntry();
                 headingEntry = setContentEntryData(headingEntry, fakePathTopic,
-                        headingTitle, fakePathTopic, ScraperConstants.ENGLISH_LANG_CODE);
+                        headingTitle, fakePathTopic);
                 headingEntry.setThumbnailUrl(thumbnailUrl);
                 headingEntry.setContentEntryUid(contentEntryDao.insert(headingEntry));
             } else {
                 headingEntry = setContentEntryData(headingEntry, fakePathTopic,
-                        headingTitle, fakePathTopic, ScraperConstants.ENGLISH_LANG_CODE);
+                        headingTitle, fakePathTopic);
                 headingEntry.setThumbnailUrl(thumbnailUrl);
                 contentEntryDao.update(headingEntry);
             }
@@ -404,12 +419,12 @@ public class IndexCategoryCK12Content {
                 if (topicEntry == null) {
                     topicEntry = new ContentEntry();
                     topicEntry = setContentEntryData(topicEntry, fakeParentTopic,
-                            title, fakeParentTopic, ScraperConstants.ENGLISH_LANG_CODE);
+                            title, fakeParentTopic);
                     topicEntry.setThumbnailUrl(topicThumbnailUrl);
                     topicEntry.setContentEntryUid(contentEntryDao.insert(topicEntry));
                 } else {
                     topicEntry = setContentEntryData(topicEntry, fakeParentTopic,
-                            title, fakeParentTopic, ScraperConstants.ENGLISH_LANG_CODE);
+                            title, fakeParentTopic);
                     topicEntry.setThumbnailUrl(topicThumbnailUrl);
                     contentEntryDao.update(topicEntry);
                 }
@@ -432,11 +447,11 @@ public class IndexCategoryCK12Content {
                     if (subTopicEntry == null) {
                         subTopicEntry = new ContentEntry();
                         subTopicEntry = setContentEntryData(subTopicEntry, hrefLink,
-                                subTitle, hrefLink, ScraperConstants.ENGLISH_LANG_CODE);
+                                subTitle, hrefLink);
                         subTopicEntry.setContentEntryUid(contentEntryDao.insert(subTopicEntry));
                     } else {
                         subTopicEntry = setContentEntryData(subTopicEntry, hrefLink,
-                                subTitle, hrefLink, ScraperConstants.ENGLISH_LANG_CODE);
+                                subTitle, hrefLink);
                         contentEntryDao.update(subTopicEntry);
                     }
 
@@ -495,13 +510,13 @@ public class IndexCategoryCK12Content {
             if (topicEntry == null) {
                 topicEntry = new ContentEntry();
                 topicEntry = setContentEntryData(topicEntry, url.getPath(),
-                        title, url.getPath(), ScraperConstants.ENGLISH_LANG_CODE);
+                        title, url.getPath());
                 topicEntry.setDescription(summary);
                 topicEntry.setThumbnailUrl(imageLink);
                 topicEntry.setContentEntryUid(contentEntryDao.insert(topicEntry));
             } else {
                 topicEntry = setContentEntryData(topicEntry, url.getPath(),
-                        title, url.getPath(), ScraperConstants.ENGLISH_LANG_CODE);
+                        title, url.getPath());
                 topicEntry.setDescription(summary);
                 topicEntry.setThumbnailUrl(imageLink);
                 contentEntryDao.update(topicEntry);
