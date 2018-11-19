@@ -74,6 +74,7 @@ dependencies {
     implementation "org.seleniumhq.selenium:selenium-chrome-driver:$version_selenium"
     implementation "io.github.bonigarcia:webdrivermanager:$version_web_driver"
     implementation "com.neovisionaries:nv-i18n:$version_nv_lang"
+    implementation "org.postgresql:postgresql:$version_postgres_jdbc"
 
     testImplementation "junit:junit:$version_junit"
     testImplementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"

@@ -122,9 +122,6 @@ public class TestPhetContentScraper {
         File engETag = new File(titleDirectory, "simulation_en" + ScraperConstants.ETAG_TXT);
         Assert.assertTrue("English ETag exists", engETag.length() > 0);
 
-        File engModified = new File(titleDirectory, "simulation_en" + ScraperConstants.LAST_MODIFIED_TXT);
-        Assert.assertTrue("English Last Modified exists", engModified.length() > 0);
-
         File titleZip = new File(englishLocation, scraper.getTitle() + ScraperConstants.ZIP_EXT);
         Assert.assertTrue("English Simulation Folder exists", titleZip.length() > 0);
 
@@ -142,9 +139,6 @@ public class TestPhetContentScraper {
 
         File spanishETag = new File(spanishTitleDirectory, "simulation_es" + ScraperConstants.ETAG_TXT);
         Assert.assertTrue("Spanish ETag exists", spanishETag.length() > 0);
-
-        File spanishModified = new File(spanishTitleDirectory, "simulation_es" + ScraperConstants.LAST_MODIFIED_TXT);
-        Assert.assertTrue("Spanish Last Modified exists", spanishModified.length() > 0);
 
         File spanishTitleZip = new File(spanishDir, scraper.getTitle() + ScraperConstants.ZIP_EXT);
         Assert.assertTrue("Spanish Title Zip exists", spanishTitleZip.length() > 0);
