@@ -4,6 +4,7 @@ import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.database.annotation.UmUpdate;
 import com.ustadmobile.lib.db.entities.Language;
+import com.ustadmobile.lib.db.sync.dao.BaseDao;
 
 import java.util.List;
 
