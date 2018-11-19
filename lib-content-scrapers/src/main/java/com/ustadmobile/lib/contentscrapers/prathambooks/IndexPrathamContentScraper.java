@@ -84,11 +84,12 @@ public class IndexPrathamContentScraper {
         String cookie = loginPratham();
 
         UmAppDatabase db = UmAppDatabase.getInstance(null);
-        contentEntryDao = db.getContentEntryDao();
-        contentParentChildJoinDao = db.getContentEntryParentChildJoinDao();
-        contentEntryFileDao = db.getContentEntryFileDao();
-        contentEntryFileJoinDao = db.getContentEntryContentEntryFileJoinDao();
-        contentFileStatusDao = db.getContentEntryFileStatusDao();
+        UmAppDatabase repository = db.getRepository("", "");
+        contentEntryDao = repository.getContentEntryDao();
+        contentParentChildJoinDao = repository.getContentEntryParentChildJoinDao();
+        contentEntryFileDao = repository.getContentEntryFileDao();
+        contentEntryFileJoinDao = repository.getContentEntryContentEntryFileJoinDao();
+        contentFileStatusDao = repository.getContentEntryFileStatusDao();
 
         ContentEntry masterRootParent = contentEntryDao.findBySourceUrl("root");
         if (masterRootParent == null) {

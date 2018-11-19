@@ -2,11 +2,17 @@ package com.ustadmobile.lib.db.entities;
 
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
+import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
+import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 
-@UmEntity
+import static com.ustadmobile.lib.db.entities.ContentEntry.TABLE_ID;
+
+@UmEntity(tableId = TABLE_ID)
 public class LanguageVariant {
 
-    @UmPrimaryKey(autoIncrement = true)
+    public static final int TABLE_ID = 10;
+
+    @UmPrimaryKey(autoGenerateSyncable = true)
     private long langVariantUid;
 
     private long langUid;
@@ -14,6 +20,13 @@ public class LanguageVariant {
     private String countryCode;
 
     private String name;
+
+    @UmSyncLocalChangeSeqNum
+    private long langVariantLocalChangeSeqNum;
+
+    @UmSyncMasterChangeSeqNum
+    private long langVariantMasterChangeSeqNum;
+
 
     public long getLangVariantUid() {
         return langVariantUid;
@@ -45,5 +58,21 @@ public class LanguageVariant {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public long getLangVariantLocalChangeSeqNum() {
+        return langVariantLocalChangeSeqNum;
+    }
+
+    public void setLangVariantLocalChangeSeqNum(long langVariantLocalChangeSeqNum) {
+        this.langVariantLocalChangeSeqNum = langVariantLocalChangeSeqNum;
+    }
+
+    public long getLangVariantMasterChangeSeqNum() {
+        return langVariantMasterChangeSeqNum;
+    }
+
+    public void setLangVariantMasterChangeSeqNum(long langVariantMasterChangeSeqNum) {
+        this.langVariantMasterChangeSeqNum = langVariantMasterChangeSeqNum;
     }
 }

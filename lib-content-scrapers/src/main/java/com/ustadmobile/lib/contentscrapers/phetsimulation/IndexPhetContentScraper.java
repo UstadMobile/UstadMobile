@@ -93,15 +93,16 @@ public class IndexPhetContentScraper {
         destinationDirectory = destinationDir;
 
         UmAppDatabase db = UmAppDatabase.getInstance(null);
-        contentEntryDao = db.getContentEntryDao();
-        contentParentChildJoinDao = db.getContentEntryParentChildJoinDao();
-        contentEntryFileDao = db.getContentEntryFileDao();
-        contentEntryFileJoin = db.getContentEntryContentEntryFileJoinDao();
-        contentEntryCategoryJoinDao = db.getContentEntryContentCategoryJoinDao();
-        contentEntryRelatedJoinDao = db.getContentEntryRelatedEntryJoinDao();
-        contentFileStatusDao = db.getContentEntryFileStatusDao();
-        languageDao = db.getLanguageDao();
-        languageVariantDao = db.getLanguageVariantDao();
+        UmAppDatabase repository = db.getRepository("", "");
+        contentEntryDao = repository.getContentEntryDao();
+        contentParentChildJoinDao = repository.getContentEntryParentChildJoinDao();
+        contentEntryFileDao = repository.getContentEntryFileDao();
+        contentEntryFileJoin = repository.getContentEntryContentEntryFileJoinDao();
+        contentEntryCategoryJoinDao = repository.getContentEntryContentCategoryJoinDao();
+        contentEntryRelatedJoinDao = repository.getContentEntryRelatedEntryJoinDao();
+        contentFileStatusDao = repository.getContentEntryFileStatusDao();
+        languageDao = repository.getLanguageDao();
+        languageVariantDao = repository.getLanguageVariantDao();
 
         Document document = Jsoup.connect(urlString).get();
 

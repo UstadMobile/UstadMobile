@@ -5,10 +5,11 @@ import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.database.annotation.UmUpdate;
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoin;
 import com.ustadmobile.lib.db.sync.dao.BaseDao;
+import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
 @UmDao
 public abstract class ContentEntryRelatedEntryJoinDao
-        implements BaseDao<ContentEntryRelatedEntryJoin> {
+        implements SyncableDao<ContentEntryRelatedEntryJoin, ContentEntryRelatedEntryJoinDao> {
 
     @UmQuery("SELECT * from ContentEntryRelatedEntryJoin WHERE " +
             "cerejRelatedEntryUid = :contentEntryUid")

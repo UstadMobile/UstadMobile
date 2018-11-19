@@ -112,12 +112,13 @@ public class IndexCategoryCK12Content {
 
 
         UmAppDatabase db = UmAppDatabase.getInstance(null);
-        contentEntryDao = db.getContentEntryDao();
-        contentParentChildJoinDao = db.getContentEntryParentChildJoinDao();
-        contentEntryFileDao = db.getContentEntryFileDao();
-        contentEntryFileJoinDao = db.getContentEntryContentEntryFileJoinDao();
-        contentFileStatusDao = db.getContentEntryFileStatusDao();
-        languageDao = db.getLanguageDao();
+        UmAppDatabase repository = db.getRepository("", "");
+        contentEntryDao = repository.getContentEntryDao();
+        contentParentChildJoinDao = repository.getContentEntryParentChildJoinDao();
+        contentEntryFileDao = repository.getContentEntryFileDao();
+        contentEntryFileJoinDao = repository.getContentEntryContentEntryFileJoinDao();
+        contentFileStatusDao = repository.getContentEntryFileStatusDao();
+        languageDao = repository.getLanguageDao();
 
         englishLang = languageDao.findByTwoCode(ScraperConstants.ENGLISH_LANG_CODE);
         if(englishLang == null){

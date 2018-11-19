@@ -8,10 +8,11 @@ import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin;
 
 import java.util.List;
 import com.ustadmobile.lib.db.sync.dao.BaseDao;
+import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
 @UmDao
 public abstract class ContentEntryContentEntryFileJoinDao
-        implements BaseDao<ContentEntryContentEntryFileJoin> {
+        implements SyncableDao<ContentEntryContentEntryFileJoin, ContentEntryContentEntryFileJoinDao> {
 
     @UmQuery("SELECT * from ContentEntryContentEntryFileJoin WHERE " +
             "cecefjContentEntryUid = :parentEntryContentUid")

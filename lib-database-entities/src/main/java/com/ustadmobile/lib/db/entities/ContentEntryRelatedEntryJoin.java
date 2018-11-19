@@ -2,6 +2,10 @@ package com.ustadmobile.lib.db.entities;
 
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
+import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
+import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
+
+import static com.ustadmobile.lib.db.entities.ContentEntry.TABLE_ID;
 
 /**
  * Represents a relationship between two ContentEntry items. This could be that one ContentEntry is
@@ -9,14 +13,16 @@ import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
  * could be that the other entry is a see also link.
  */
 //shortcode cerej
-@UmEntity
+@UmEntity(tableId = TABLE_ID)
 public class ContentEntryRelatedEntryJoin {
+
+    public static final int TABLE_ID = 8;
 
     public static final int REL_TYPE_TRANSLATED_VERSION = 1;
 
     public static final int REL_TYPE_SEE_ALSO = 2;
 
-    @UmPrimaryKey(autoIncrement = true)
+    @UmPrimaryKey(autoGenerateSyncable = true)
     private long cerejUid;
 
     private long cerejContentEntryUid;
@@ -30,6 +36,12 @@ public class ContentEntryRelatedEntryJoin {
     private String comment;
 
     private long cerejRelLanguageUid;
+
+    @UmSyncLocalChangeSeqNum
+    private long cerejLocalChangeSeqNum;
+
+    @UmSyncMasterChangeSeqNum
+    private long cerejMasterChangeSeqNum;
 
     public long getCerejUid() {
         return cerejUid;
@@ -85,5 +97,21 @@ public class ContentEntryRelatedEntryJoin {
 
     public void setComment(String comment) {
         this.comment = comment;
+    }
+
+    public long getCerejLocalChangeSeqNum() {
+        return cerejLocalChangeSeqNum;
+    }
+
+    public void setCerejLocalChangeSeqNum(long cerejLocalChangeSeqNum) {
+        this.cerejLocalChangeSeqNum = cerejLocalChangeSeqNum;
+    }
+
+    public long getCerejMasterChangeSeqNum() {
+        return cerejMasterChangeSeqNum;
+    }
+
+    public void setCerejMasterChangeSeqNum(long cerejMasterChangeSeqNum) {
+        this.cerejMasterChangeSeqNum = cerejMasterChangeSeqNum;
     }
 }

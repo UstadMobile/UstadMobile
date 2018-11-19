@@ -6,12 +6,13 @@ import com.ustadmobile.lib.database.annotation.UmUpdate;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin;
 import com.ustadmobile.lib.db.sync.dao.BaseDao;
+import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
 import java.util.List;
 
 @UmDao
 public abstract class ContentEntryParentChildJoinDao
-        implements BaseDao<ContentEntryParentChildJoin> {
+        implements SyncableDao<ContentEntryParentChildJoin, ContentEntryParentChildJoinDao> {
 
     @UmQuery("SELECT * from ContentEntryParentChildJoin WHERE " +
            "cepcjChildContentEntryUid = :childEntryContentUid")

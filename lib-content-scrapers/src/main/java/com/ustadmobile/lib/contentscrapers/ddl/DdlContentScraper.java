@@ -62,12 +62,13 @@ public class DdlContentScraper {
         this.url = new URL(url);
         destinationDirectory.mkdirs();
         UmAppDatabase db = UmAppDatabase.getInstance(null);
-        contentEntryDao = db.getContentEntryDao();
-        contentEntryFileDao = db.getContentEntryFileDao();
-        contentEntryFileJoinDao = db.getContentEntryContentEntryFileJoinDao();
-        contentFileStatusDao = db.getContentEntryFileStatusDao();
-        categorySchemaDao = db.getContentCategorySchemaDao();
-        contentCategoryDao = db.getContentCategoryDao();
+        UmAppDatabase repository = db.getRepository("", "");
+        contentEntryDao = repository.getContentEntryDao();
+        contentEntryFileDao = repository.getContentEntryFileDao();
+        contentEntryFileJoinDao = repository.getContentEntryContentEntryFileJoinDao();
+        contentFileStatusDao = repository.getContentEntryFileStatusDao();
+        categorySchemaDao = repository.getContentCategorySchemaDao();
+        contentCategoryDao = repository.getContentCategoryDao();
     }
 
 

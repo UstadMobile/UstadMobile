@@ -2,15 +2,21 @@ package com.ustadmobile.lib.db.entities;
 
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
+import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
+import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
+
+import static com.ustadmobile.lib.db.entities.ContentEntry.TABLE_ID;
 
 /**
  * Represents a file that contains one or more ContentEntry . This file could be an EPUB, xAPI Zip,
  * etc.
  */
-@UmEntity
+@UmEntity(tableId = TABLE_ID)
 public class ContentEntryFile {
 
-    @UmPrimaryKey(autoIncrement = true)
+    public static final int TABLE_ID = 5;
+
+    @UmPrimaryKey(autoGenerateSyncable = true)
     private long contentEntryFileUid;
 
     private long fileSize;
@@ -24,6 +30,12 @@ public class ContentEntryFile {
     private String remarks;
 
     private boolean mobileOptimized;
+
+    @UmSyncLocalChangeSeqNum
+    private long contentEntryFileLocalChangeSeqNum;
+
+    @UmSyncMasterChangeSeqNum
+    private long contentEntryFileMasterChangeSeqNum;
 
 
     public long getContentEntryFileUid() {
@@ -80,5 +92,21 @@ public class ContentEntryFile {
 
     public void setMobileOptimized(boolean mobileOptimized) {
         this.mobileOptimized = mobileOptimized;
+    }
+
+    public long getContentEntryFileLocalChangeSeqNum() {
+        return contentEntryFileLocalChangeSeqNum;
+    }
+
+    public void setContentEntryFileLocalChangeSeqNum(long contentEntryFileLocalChangeSeqNum) {
+        this.contentEntryFileLocalChangeSeqNum = contentEntryFileLocalChangeSeqNum;
+    }
+
+    public long getContentEntryFileMasterChangeSeqNum() {
+        return contentEntryFileMasterChangeSeqNum;
+    }
+
+    public void setContentEntryFileMasterChangeSeqNum(long contentEntryFileMasterChangeSeqNum) {
+        this.contentEntryFileMasterChangeSeqNum = contentEntryFileMasterChangeSeqNum;
     }
 }

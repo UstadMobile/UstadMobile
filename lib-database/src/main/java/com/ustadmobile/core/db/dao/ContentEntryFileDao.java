@@ -5,11 +5,12 @@ import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.db.entities.ContentEntryFile;
 import com.ustadmobile.lib.db.sync.dao.BaseDao;
+import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
 import java.util.List;
 
 @UmDao
-public abstract class ContentEntryFileDao implements BaseDao<ContentEntryFile> {
+public abstract class ContentEntryFileDao implements SyncableDao<ContentEntryFile, ContentEntryFileDao> {
 
     @UmQuery("Select ContentEntryFile.* FROM ContentEntryFile LEFT JOIN ContentEntryContentEntryFileJoin " +
                     "ON ContentEntryFile.contentEntryFileUid = ContentEntryContentEntryFileJoin.cecefjContentEntryFileUid " +

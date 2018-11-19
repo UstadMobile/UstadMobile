@@ -94,12 +94,13 @@ public class IndexEdraakK12Content {
         destinationDirectory = destinationDir;
 
         UmAppDatabase db = UmAppDatabase.getInstance(null);
-        contentEntryDao = db.getContentEntryDao();
-        contentParentChildJoinDao = db.getContentEntryParentChildJoinDao();
-        contentEntryFileDao = db.getContentEntryFileDao();
-        contentEntryFileJoin = db.getContentEntryContentEntryFileJoinDao();
-        contentFileStatusDao = db.getContentEntryFileStatusDao();
-        languageDao = db.getLanguageDao();
+        UmAppDatabase repository = db.getRepository("", "");
+        contentEntryDao = repository.getContentEntryDao();
+        contentParentChildJoinDao = repository.getContentEntryParentChildJoinDao();
+        contentEntryFileDao = repository.getContentEntryFileDao();
+        contentEntryFileJoin = repository.getContentEntryContentEntryFileJoinDao();
+        contentFileStatusDao = repository.getContentEntryFileStatusDao();
+        languageDao = repository.getLanguageDao();
 
         arabicLang = ContentScraperUtil.insertOrUpdateLanguage(languageDao, "Arabic");
 

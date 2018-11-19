@@ -108,16 +108,17 @@ public class AsbScraper {
         URL africanBooksUrl = generateURL();
 
         UmAppDatabase db = UmAppDatabase.getInstance(null);
-        ContentEntryDao contentEntryDao = db.getContentEntryDao();
-        ContentEntryParentChildJoinDao contentParentChildJoinDao = db.getContentEntryParentChildJoinDao();
-        ContentEntryFileDao contentEntryFileDao = db.getContentEntryFileDao();
-        ContentEntryContentEntryFileJoinDao contentEntryFileJoinDao = db.getContentEntryContentEntryFileJoinDao();
-        ContentEntryFileStatusDao contentFileStatusDao = db.getContentEntryFileStatusDao();
-        ContentCategorySchemaDao categorySchemeDao = db.getContentCategorySchemaDao();
-        ContentCategoryDao categoryDao = db.getContentCategoryDao();
-        ContentEntryContentCategoryJoinDao contentCategoryJoinDao = db.getContentEntryContentCategoryJoinDao();
-        LanguageDao languageDao = db.getLanguageDao();
-        ContentEntryRelatedEntryJoinDao relatedEntryJoinDao = db.getContentEntryRelatedEntryJoinDao();
+        UmAppDatabase repository = db.getRepository("", "");
+        ContentEntryDao contentEntryDao = repository.getContentEntryDao();
+        ContentEntryParentChildJoinDao contentParentChildJoinDao = repository.getContentEntryParentChildJoinDao();
+        ContentEntryFileDao contentEntryFileDao = repository.getContentEntryFileDao();
+        ContentEntryContentEntryFileJoinDao contentEntryFileJoinDao = repository.getContentEntryContentEntryFileJoinDao();
+        ContentEntryFileStatusDao contentFileStatusDao = repository.getContentEntryFileStatusDao();
+        ContentCategorySchemaDao categorySchemeDao = repository.getContentCategorySchemaDao();
+        ContentCategoryDao categoryDao = repository.getContentCategoryDao();
+        ContentEntryContentCategoryJoinDao contentCategoryJoinDao = repository.getContentEntryContentCategoryJoinDao();
+        LanguageDao languageDao = repository.getLanguageDao();
+        ContentEntryRelatedEntryJoinDao relatedEntryJoinDao = repository.getContentEntryRelatedEntryJoinDao();
 
         new LanguageList().addAllLanguages();
 

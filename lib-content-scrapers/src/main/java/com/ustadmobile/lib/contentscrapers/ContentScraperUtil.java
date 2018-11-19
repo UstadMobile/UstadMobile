@@ -538,7 +538,6 @@ public class ContentScraperUtil {
         return category;
     }
 
-    // TODO change to primaryUuid
     public static ContentEntryRelatedEntryJoin insertOrUpdateRelatedContentJoin(ContentEntryRelatedEntryJoinDao contentEntryRelatedJoinDao, ContentEntry relatedEntry, ContentEntry parentEntry, int relatedType) {
         ContentEntryRelatedEntryJoin relatedTranslationJoin = contentEntryRelatedJoinDao.findPrimaryByTranslation(relatedEntry.getContentEntryUid());
         if (relatedTranslationJoin == null) {

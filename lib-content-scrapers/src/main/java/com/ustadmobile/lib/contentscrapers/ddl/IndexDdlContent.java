@@ -74,10 +74,11 @@ public class IndexDdlContent {
         destinationDirectory = destinationDir;
 
         UmAppDatabase db = UmAppDatabase.getInstance(null);
-        contentEntryDao = db.getContentEntryDao();
-        contentParentChildJoinDao = db.getContentEntryParentChildJoinDao();
-        contentCategoryChildJoinDao = db.getContentEntryContentCategoryJoinDao();
-        languageDao = db.getLanguageDao();
+        UmAppDatabase repository = db.getRepository("", "");
+        contentEntryDao = repository.getContentEntryDao();
+        contentParentChildJoinDao = repository.getContentEntryParentChildJoinDao();
+        contentCategoryChildJoinDao = repository.getContentEntryContentCategoryJoinDao();
+        languageDao = repository.getLanguageDao();
 
 
         Language englishLang = ContentScraperUtil.insertOrUpdateLanguage(languageDao, "English");
