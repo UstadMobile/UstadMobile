@@ -5,7 +5,7 @@ apply plugin: "maven-publish"
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile project(":lib-database-annotation")
+    compile project(':lib-database-runtime')
     compile "org.jboss.forge.roaster:roaster-api:2.19.4.Final"
     compile "org.jboss.forge.roaster:roaster-jdt:2.19.4.Final"
     compile "commons-io:commons-io:$version_commons_io"

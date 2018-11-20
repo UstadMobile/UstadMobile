@@ -51,7 +51,7 @@ dependencies {
     implementation "com.ustadmobile.qrcodelibomrfork:qrcode-core:$version_qrcodelibfork"
     implementation project(":lib-database")
     compileOnly project(':lib-database-entities')
-    implementation project(":lib-database-annotation")
+    implementation project(':lib-database-runtime')
     implementation project(":lib-util")
 
 

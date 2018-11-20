@@ -7,7 +7,7 @@ import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.db.entities.DiscussionPost;
 import com.ustadmobile.lib.db.entities.DiscussionPostWithPoster;
-import com.ustadmobile.lib.util.UMUtil;
+import com.ustadmobile.lib.db.sync.dao.BaseDao;
 
 import java.util.List;
 

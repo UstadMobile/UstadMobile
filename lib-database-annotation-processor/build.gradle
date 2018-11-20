@@ -1,0 +1,99 @@
+apply plugin: 'java-library'
+apply plugin: "maven-publish"
+
+compileTestJava {
+    /*
+     *  Annotation processor arguments:
+     *   umdb_room_out - Destination directory for the generated room version of database and DAO classes
+     *
+     *   If desired for to enable debugging of generated sources in intellij, output can be changed to
+     *   a directory ( e.g. $projectDir/tmp/java instead of filer ), and then that directory can be
+     *   added to the test sources ( e.g. sourceSets.test.java += ["$projectDir/tmp/java"] )
+     */
+    options.compilerArgs += [
+            "-Aumdb_jdbc_out=filer",
+            "-Aumdb_jersey_res_out=filer",
+            "-Aumdb_retrofit_out=filer",
+            "-Aumdb_no_default_factory=true"
+    ]
+
+    //Due to a bug, the JDK8 annotation processor provides incorrect parameter names, thus we need
+    // to use JDK9+ to run the annotation processor https://bugs.openjdk.java.net/browse/JDK-8191074
+    if(JavaVersion.current() == JavaVersion.VERSION_1_8) {
+        options.fork = true
+        options.forkOptions.executable = rootProject.ext.localProperties["javac.9plus"]
+    }
+}
+
+//sourceSets.test.java.srcDirs += ["$projectDir/tmp/java"]
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation project(':lib-database-runtime')
+    implementation project(':lib-database-runtime-jdbc')
+    implementation project(":lib-util")
+    implementation "com.squareup:javapoet:$version_javapoet"
+    implementation "com.github.jsqlparser:jsqlparser:$version_jsqlparser"
+    implementation "com.squareup.retrofit2:retrofit:$version_retrofit"
+    implementation "org.apache.commons:commons-text:$version_apache_commons_text"
+
+    //SQLite dependencies
+    implementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
+    implementation "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
+    implementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
+
+    implementation "javax.ws.rs:javax.ws.rs-api:2.1"
+
+    //Test implementation of Postgres
+    testImplementation "org.postgresql:postgresql:42.2.5"
+
+    //Jersey dependencies
+    testImplementation "org.glassfish.jersey.core:jersey-server:$version_jersey"
+    testImplementation "org.glassfish.jersey.containers:jersey-container-servlet:$version_jersey"
+    testImplementation "org.glassfish.jersey.core:jersey-client:$version_jersey"
+    testImplementation "org.glassfish.jersey.inject:jersey-hk2:$version_jersey"
+    testImplementation "org.glassfish.jersey.media:jersey-media-json-jackson:$version_jersey"
+    testImplementation "org.glassfish.jersey.containers:jersey-container-grizzly2-http:$version_jersey"
+
+    //retrofit usage
+    implementation "com.squareup.retrofit2:converter-jackson:$version_retrofit"
+    implementation "com.squareup.retrofit2:converter-gson:$version_retrofit"
+    implementation "com.squareup.retrofit2:converter-scalars:$version_retrofit"
+
+    testImplementation "javax.servlet:servlet-api:2.5"
+
+    testAnnotationProcessor project(':lib-database-annotation-processor')
+
+    testImplementation "junit:junit:$version_junit"
+
+}
+
+sourceCompatibility = "1.8"
+targetCompatibility = "1.8"
+
+task sourceJar(type: Jar) {
+    from sourceSets.main.allJava
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId rootProject.group
+            artifactId project.name
+            version rootProject.version
+
+            from components.java
+
+            artifact sourceJar {
+                classifier = 'sources'
+            }
+        }
+    }
+
+    repositories {
+        maven {
+            url rootProject.ext.buildConfigProperties['repo.dir']
+        }
+    }
+}
+

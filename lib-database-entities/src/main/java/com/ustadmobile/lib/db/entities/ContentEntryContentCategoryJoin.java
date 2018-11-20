@@ -9,7 +9,7 @@ import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 @UmEntity
 public class ContentEntryContentCategoryJoin {
 
-    @UmPrimaryKey
+    @UmPrimaryKey(autoIncrement = true)
     private long ceccjUid;
 
     private long ceccjContentEntryUid;

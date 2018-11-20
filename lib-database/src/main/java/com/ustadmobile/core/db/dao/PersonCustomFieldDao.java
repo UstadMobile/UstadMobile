@@ -5,6 +5,7 @@ import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.db.entities.PersonCustomField;
+import com.ustadmobile.lib.db.sync.dao.BaseDao;
 
 @UmDao
 public abstract class PersonCustomFieldDao implements BaseDao<PersonCustomField> {

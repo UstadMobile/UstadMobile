@@ -10,7 +10,7 @@ dependencies {
     implementation project(":sharedse")
     implementation project(":lib-core-fs")
     implementation project(":lib-util")
-    implementation project(':lib-database-util-jdbc')
+    implementation project(':lib-database-runtime-jdbc')
 
     testImplementation "junit:junit:$version_junit"
     testImplementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
