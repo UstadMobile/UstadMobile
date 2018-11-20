@@ -37,6 +37,8 @@ public class Person implements SyncableEntity {
 
     private boolean active;
 
+    private boolean socialAccount;
+
     private long masterChangeSeqNum;
 
     private long localChangeSeqNum;
@@ -132,6 +134,14 @@ public class Person implements SyncableEntity {
 
     public void setActive(boolean active) {
         this.active = active;
+    }
+
+    public boolean isSocialAccount() {
+        return socialAccount;
+    }
+
+    public void setSocialAccount(boolean socialAccount) {
+        this.socialAccount = socialAccount;
     }
 
     @Override

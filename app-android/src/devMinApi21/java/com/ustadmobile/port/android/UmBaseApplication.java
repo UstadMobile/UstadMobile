@@ -7,5 +7,9 @@ import android.app.Application;
  */
 
 public class UmBaseApplication extends Application {
+    @Override
+    public void onCreate() {
+        super.onCreate();
 
+    }
 }

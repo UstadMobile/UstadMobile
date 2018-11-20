@@ -37,6 +37,7 @@ import com.ustadmobile.lib.db.entities.Person;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 
+
 public class LoginActivity2 extends UstadBaseActivity implements LoginView2{
 
     private LoginPresenter2 mPresenter;
@@ -62,15 +63,12 @@ public class LoginActivity2 extends UstadBaseActivity implements LoginView2{
         setContentView(R.layout.activity_login2);
         FacebookSdk.setApplicationId(CoreBuildConfig.FACEBOOK_APPID);
         FacebookSdk.sdkInitialize(getApplicationContext());
-        TwitterAuthConfig authConfig =
-                new TwitterAuthConfig(CoreBuildConfig.TWITTER_KEY, CoreBuildConfig.TWITTER_SECRET);
-        TwitterConfig twitterConfig = new TwitterConfig.Builder(this)
+        TwitterConfig config = new TwitterConfig.Builder(this)
                 .logger(new DefaultLogger(Log.DEBUG))
-                .twitterAuthConfig(authConfig)
+                .twitterAuthConfig(new TwitterAuthConfig(CoreBuildConfig.TWITTER_KEY, CoreBuildConfig.TWITTER_SECRET))
                 .debug(true)
                 .build();
-        Twitter.initialize(twitterConfig);
-
+        Twitter.initialize(config);
 
         setSupportActionBar(findViewById(R.id.activity_login2_toolbar));
         usernameEditText = findViewById(R.id.activity_login2_username_edit_text);
@@ -119,6 +117,7 @@ public class LoginActivity2 extends UstadBaseActivity implements LoginView2{
 
             @Override
             public void onError(FacebookException error) {
+                error.printStackTrace();
             }
         });
 
@@ -129,7 +128,9 @@ public class LoginActivity2 extends UstadBaseActivity implements LoginView2{
             }
 
             @Override
-            public void failure(TwitterException exception) { }
+            public void failure(TwitterException exception) {
+                exception.printStackTrace();
+            }
         });
 
     }
@@ -213,8 +214,8 @@ public class LoginActivity2 extends UstadBaseActivity implements LoginView2{
         person.setFirstNames(fullName[0]);
         person.setLastName(fullName.length > 1 ? fullName[1]:fullName[0]);
         person.setUsername(fullName[0]);
+        person.setSocialAccount(true);
         mPresenter.handleSocialNetworkSignUp(person);
     }
-
 
 }
