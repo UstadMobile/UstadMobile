@@ -432,7 +432,8 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
 
         }
 
-        codeBlock.beginControlFlow("if(!_existingTableNames.contains($S))",
+        codeBlock.beginControlFlow("if(!$T.listContainsStringIgnoreCase(_existingTableNames, $S))",
+                JdbcDatabaseUtils.class,
                 entitySpec.getSimpleName().toString())
                 .add("$L.executeUpdate($S);\n", stmtVariableName,
                         makeCreateTableStatement(entitySpec, quoteChar, sqlProductName));
