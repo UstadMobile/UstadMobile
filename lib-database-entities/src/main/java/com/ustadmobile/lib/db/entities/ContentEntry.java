@@ -64,6 +64,8 @@ public class ContentEntry {
 
     private long languageVariantUid;
 
+    private boolean isLeaf;
+
     public long getLanguageVariantUid() {
         return languageVariantUid;
     }
@@ -256,5 +258,13 @@ public class ContentEntry {
 
     public void setContentEntryMasterChangeSeqNum(long contentEntryMasterChangeSeqNum) {
         this.contentEntryMasterChangeSeqNum = contentEntryMasterChangeSeqNum;
+    }
+
+    public boolean isLeaf() {
+        return isLeaf;
+    }
+
+    public void setLeaf(boolean leaf) {
+        isLeaf = leaf;
     }
 }

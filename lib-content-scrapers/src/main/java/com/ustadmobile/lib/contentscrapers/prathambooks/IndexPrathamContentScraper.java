@@ -95,11 +95,11 @@ public class IndexPrathamContentScraper {
         if (masterRootParent == null) {
             masterRootParent = new ContentEntry();
             masterRootParent= setContentEntryData(masterRootParent, "root",
-                    "Ustad Mobile", "root", ScraperConstants.ENGLISH_LANG_CODE);
+                    "Ustad Mobile", "root", ScraperConstants.ENGLISH_LANG_CODE, false);
             masterRootParent.setContentEntryUid(contentEntryDao.insert(masterRootParent));
         } else {
             masterRootParent = setContentEntryData(masterRootParent, "root",
-                    "Ustad Mobile", "root", ScraperConstants.ENGLISH_LANG_CODE);
+                    "Ustad Mobile", "root", ScraperConstants.ENGLISH_LANG_CODE, false);
             contentEntryDao.update(masterRootParent);
         }
 
@@ -108,12 +108,12 @@ public class IndexPrathamContentScraper {
         if (prathamParentEntry == null) {
             prathamParentEntry = new ContentEntry();
             prathamParentEntry = setContentEntryData(prathamParentEntry, "https://storyweaver.org.in/",
-                    "Pratham Books", "https://storyweaver.org.in/", ScraperConstants.ENGLISH_LANG_CODE);
+                    "Pratham Books", "https://storyweaver.org.in/", ScraperConstants.ENGLISH_LANG_CODE, false);
             prathamParentEntry.setThumbnailUrl("https://prathambooks.org/wp-content/uploads/2018/04/Logo-black.png");
             prathamParentEntry.setContentEntryUid(contentEntryDao.insert(prathamParentEntry));
         } else {
             prathamParentEntry = setContentEntryData(prathamParentEntry, "https://storyweaver.org.in/",
-                    "Pratham Books", "https://storyweaver.org.in/", ScraperConstants.ENGLISH_LANG_CODE);
+                    "Pratham Books", "https://storyweaver.org.in/", ScraperConstants.ENGLISH_LANG_CODE, false);
             prathamParentEntry.setThumbnailUrl("https://prathambooks.org/wp-content/uploads/2018/04/Logo-black.png");
             contentEntryDao.update(prathamParentEntry);
         }
@@ -156,12 +156,12 @@ public class IndexPrathamContentScraper {
                 if (contentEntry == null) {
                     contentEntry = new ContentEntry();
                     contentEntry = setContentEntryData(contentEntry, data.slug,
-                            data.title , epubUrl.getPath(), lang);
+                            data.title , epubUrl.getPath(), lang, true);
                     contentEntry.setThumbnailUrl(data.coverImage.sizes.get(0).url);
                     contentEntry.setContentEntryUid(contentEntryDao.insert(contentEntry));
                 } else {
                     contentEntry = setContentEntryData(contentEntry, data.slug,
-                            data.title, epubUrl.getPath(), lang);
+                            data.title, epubUrl.getPath(), lang, true);
                     contentEntry.setThumbnailUrl(data.coverImage.sizes.get(0).url);
                     contentEntryDao.update(contentEntry);
                 }
@@ -226,13 +226,14 @@ public class IndexPrathamContentScraper {
         return LanguageAlpha3Code.findByName(list[0]).get(0).name();
     }
 
-    private ContentEntry setContentEntryData(ContentEntry entry, String id, String title, String sourceUrl, String lang) {
+    private ContentEntry setContentEntryData(ContentEntry entry, String id, String title, String sourceUrl, String lang, boolean isLeaf) {
         entry.setEntryId(id);
         entry.setTitle(title);
         entry.setSourceUrl(sourceUrl);
         entry.setPublisher("Pratham");
         entry.setLicenseType(ContentEntry.LICENSE_TYPE_CC_BY);
         entry.setPrimaryLanguage(lang);
+        entry.setLeaf(isLeaf);
         return entry;
     }
 

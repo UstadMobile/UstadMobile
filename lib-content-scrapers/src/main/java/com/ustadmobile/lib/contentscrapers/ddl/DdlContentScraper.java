@@ -114,12 +114,12 @@ public class DdlContentScraper {
             if (contentEntry == null) {
                 contentEntry = new ContentEntry();
                 contentEntry = setContentEntryData(contentEntry, uri.toString(),
-                        doc.title(), uri.toURL().getPath(), doc.select("html").attr("lang"));
+                        doc.title(), uri.toURL().getPath(), doc.select("html").attr("lang"), true);
                 contentEntry.setThumbnailUrl(thumbnail);
                 contentEntry.setContentEntryUid(contentEntryDao.insert(contentEntry));
             } else {
                 contentEntry = setContentEntryData(contentEntry, uri.toString(),
-                        doc.title(), uri.toURL().getPath(), doc.select("html").attr("lang"));
+                        doc.title(), uri.toURL().getPath(), doc.select("html").attr("lang"), true);
                 contentEntry.setThumbnailUrl(thumbnail);
                 contentEntryDao.update(contentEntry);
             }
@@ -161,13 +161,14 @@ public class DdlContentScraper {
         }
     }
 
-    private ContentEntry setContentEntryData(ContentEntry entry, String id, String title, String sourceUrl, String lang) {
+    private ContentEntry setContentEntryData(ContentEntry entry, String id, String title, String sourceUrl, String lang, boolean isLeaf) {
         entry.setEntryId(id);
         entry.setTitle(title);
         entry.setSourceUrl(sourceUrl);
         entry.setPublisher("DDL");
         entry.setLicenseType(ContentEntry.LICENSE_TYPE_CC_BY);
         entry.setPrimaryLanguage(lang);
+        entry.setLeaf(isLeaf);
         return entry;
     }
 
@@ -191,11 +192,11 @@ public class DdlContentScraper {
             if (contentEntry == null) {
                 contentEntry = new ContentEntry();
                 contentEntry = setContentEntryData(contentEntry, href,
-                        title, href, doc.select("html").attr("lang"));
+                        title, href, doc.select("html").attr("lang"), false);
                 contentEntry.setContentEntryUid(contentEntryDao.insert(contentEntry));
             } else {
                 contentEntry = setContentEntryData(contentEntry, href,
-                        title, href, doc.select("html").attr("lang"));
+                        title, href, doc.select("html").attr("lang"), false);
                 contentEntryDao.update(contentEntry);
             }
 

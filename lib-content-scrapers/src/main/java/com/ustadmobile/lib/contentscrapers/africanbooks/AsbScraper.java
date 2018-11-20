@@ -157,11 +157,11 @@ public class AsbScraper {
         if (masterRootParent == null) {
             masterRootParent = new ContentEntry();
             masterRootParent = setContentEntryData(masterRootParent, "root",
-                    "Ustad Mobile", "root", englishLang.getLangUid());
+                    "Ustad Mobile", "root", englishLang.getLangUid(), false);
             masterRootParent.setContentEntryUid(contentEntryDao.insert(masterRootParent));
         } else {
             masterRootParent = setContentEntryData(masterRootParent, "root",
-                    "Ustad Mobile", "root", englishLang.getLangUid());
+                    "Ustad Mobile", "root", englishLang.getLangUid(), false);
             contentEntryDao.update(masterRootParent);
         }
 
@@ -170,12 +170,12 @@ public class AsbScraper {
         if (asbParentEntry == null) {
             asbParentEntry = new ContentEntry();
             asbParentEntry = setContentEntryData(asbParentEntry, "https://www.africanstorybook.org/",
-                    "African Story Books", "https://www.africanstorybook.org/", englishLang.getLangUid());
+                    "African Story Books", "https://www.africanstorybook.org/", englishLang.getLangUid(), false);
             asbParentEntry.setThumbnailUrl("https://www.africanstorybook.org/img/asb120.png");
             asbParentEntry.setContentEntryUid(contentEntryDao.insert(asbParentEntry));
         } else {
             asbParentEntry = setContentEntryData(asbParentEntry, "https://www.africanstorybook.org/",
-                    "African Story Books", "https://www.africanstorybook.org/", englishLang.getLangUid());
+                    "African Story Books", "https://www.africanstorybook.org/", englishLang.getLangUid(), false);
             asbParentEntry.setThumbnailUrl("https://www.africanstorybook.org/img/asb120.png");
             contentEntryDao.update(asbParentEntry);
         }
@@ -217,12 +217,12 @@ public class AsbScraper {
                 if (childEntry == null) {
                     childEntry = new ContentEntry();
                     childEntry = setContentEntryData(childEntry, sourceUrl,
-                            bookObj.title, sourceUrl, language.getLangUid());
+                            bookObj.title, sourceUrl, language.getLangUid(), true);
                     childEntry.setThumbnailUrl(getCoverUrl(bookId));
                     childEntry.setContentEntryUid(contentEntryDao.insert(childEntry));
                 } else {
                     childEntry = setContentEntryData(childEntry, sourceUrl,
-                            bookObj.title, sourceUrl, language.getLangUid());
+                            bookObj.title, sourceUrl, language.getLangUid(), true);
                     childEntry.setThumbnailUrl(getCoverUrl(bookId));
                     contentEntryDao.update(childEntry);
                 }
@@ -350,13 +350,14 @@ public class AsbScraper {
         driver.quit();
 }
 
-    private ContentEntry setContentEntryData(ContentEntry entry, String id, String title, String sourceUrl, long lang) {
+    private ContentEntry setContentEntryData(ContentEntry entry, String id, String title, String sourceUrl, long lang, boolean isLeaf) {
         entry.setEntryId(id);
         entry.setTitle(title);
         entry.setSourceUrl(sourceUrl);
         entry.setPublisher("African Story Books");
         entry.setLicenseType(ContentEntry.LICENSE_TYPE_CC_BY);
         entry.setPrimaryLanguageUid(lang);
+        entry.setLeaf(isLeaf);
         return entry;
     }
 

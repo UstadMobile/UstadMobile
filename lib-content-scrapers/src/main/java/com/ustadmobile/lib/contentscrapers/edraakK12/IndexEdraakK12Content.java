@@ -117,11 +117,11 @@ public class IndexEdraakK12Content {
         if (masterRootParent == null) {
             masterRootParent = new ContentEntry();
             masterRootParent= setContentEntryData(masterRootParent, "root",
-                    "Ustad Mobile", "root");
+                    "Ustad Mobile", "root", false);
             masterRootParent.setContentEntryUid(contentEntryDao.insert(masterRootParent));
         } else {
             masterRootParent = setContentEntryData(masterRootParent, "root",
-                    "Ustad Mobile", "root");
+                    "Ustad Mobile", "root", false);
             contentEntryDao.update(masterRootParent);
         }
 
@@ -130,13 +130,13 @@ public class IndexEdraakK12Content {
         if (edraakParentEntry == null) {
             edraakParentEntry = new ContentEntry();
             edraakParentEntry = setContentEntryData(edraakParentEntry, "https://www.edraak.org/k12/",
-                    "Edraak K12", "https://www.edraak.org/k12/");
+                    "Edraak K12", "https://www.edraak.org/k12/", false);
             edraakParentEntry.setThumbnailUrl("https://www.edraak.org/static/images/logo-dark-ar.fa1399e8d134.png");
             edraakParentEntry.setLicenseType(ContentEntry.ALL_RIGHTS_RESERVED);
             edraakParentEntry.setContentEntryUid(contentEntryDao.insert(edraakParentEntry));
         } else {
             edraakParentEntry = setContentEntryData(edraakParentEntry, "https://www.edraak.org/k12/",
-                    "Edraak K12", "https://www.edraak.org/k12/");
+                    "Edraak K12", "https://www.edraak.org/k12/", false);
             edraakParentEntry.setThumbnailUrl("https://www.edraak.org/static/images/logo-dark-ar.fa1399e8d134.png");
             edraakParentEntry.setLicenseType(ContentEntry.ALL_RIGHTS_RESERVED);
             contentEntryDao.update(edraakParentEntry);
@@ -150,12 +150,13 @@ public class IndexEdraakK12Content {
 
     }
 
-    private ContentEntry setContentEntryData(ContentEntry entry, String id, String title, String sourceUrl) {
+    private ContentEntry setContentEntryData(ContentEntry entry, String id, String title, String sourceUrl, boolean isLeaf) {
         entry.setEntryId(id);
         entry.setTitle(title);
         entry.setSourceUrl(sourceUrl);
         entry.setPublisher("Edraak");
         entry.setPrimaryLanguageUid(arabicLang.getLangUid());
+        entry.setLeaf(isLeaf);
         return entry;
     }
 
@@ -208,14 +209,15 @@ public class IndexEdraakK12Content {
             for (ContentResponse children : parentContent.children) {
 
                 String sourceUrl = url.toString().substring(0, url.toString().indexOf("component/")) + children.id;
+                boolean isLeaf = ContentScraperUtil.isImportedComponent(parentContent.component_type);
                 ContentEntry childEntry = contentEntryDao.findBySourceUrl(sourceUrl);
                 if (childEntry == null) {
                     childEntry = new ContentEntry();
-                    childEntry = setContentEntryData(childEntry, children.id, children.title, sourceUrl);
+                    childEntry = setContentEntryData(childEntry, children.id, children.title, sourceUrl, isLeaf);
                     childEntry.setLicenseType(getLicenseType(children.license));
                     childEntry.setContentEntryUid(contentEntryDao.insert(childEntry));
                 } else {
-                    childEntry = setContentEntryData(childEntry, children.id, children.title, sourceUrl);
+                    childEntry = setContentEntryData(childEntry, children.id, children.title, sourceUrl, isLeaf);
                     childEntry.setLicenseType(getLicenseType(children.license));
                     contentEntryDao.update(childEntry);
                 }

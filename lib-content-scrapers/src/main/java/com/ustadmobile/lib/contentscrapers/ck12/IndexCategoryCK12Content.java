@@ -134,11 +134,11 @@ public class IndexCategoryCK12Content {
         if (masterRootParent == null) {
             masterRootParent = new ContentEntry();
             masterRootParent= setContentEntryData(masterRootParent, "root",
-                    "Ustad Mobile", "root");
+                    "Ustad Mobile", "root", false);
             masterRootParent.setContentEntryUid(contentEntryDao.insert(masterRootParent));
         } else {
             masterRootParent = setContentEntryData(masterRootParent, "root",
-                    "Ustad Mobile", "root");
+                    "Ustad Mobile", "root", false);
             contentEntryDao.update(masterRootParent);
         }
 
@@ -146,12 +146,12 @@ public class IndexCategoryCK12Content {
         if (ck12ParentEntry == null) {
             ck12ParentEntry = new ContentEntry();
             ck12ParentEntry = setContentEntryData(ck12ParentEntry, "https://www.ck12.org/",
-                    "CK-12 Foundation", "https://www.ck12.org/");
+                    "CK-12 Foundation", "https://www.ck12.org/", false);
             ck12ParentEntry.setThumbnailUrl("https://img1.ck12.org/media/build-20181015164501/images/ck12-logo-livetile.png");
             ck12ParentEntry.setContentEntryUid(contentEntryDao.insert(ck12ParentEntry));
         } else {
             ck12ParentEntry = setContentEntryData(ck12ParentEntry, "https://www.ck12.org/",
-                    "CK-12 Foundation", "https://www.ck12.org/");
+                    "CK-12 Foundation", "https://www.ck12.org/", false);
             ck12ParentEntry.setThumbnailUrl("https://img1.ck12.org/media/build-20181015164501/images/ck12-logo-livetile.png");
             contentEntryDao.update(ck12ParentEntry);
         }
@@ -160,13 +160,14 @@ public class IndexCategoryCK12Content {
 
     }
 
-    private ContentEntry setContentEntryData(ContentEntry entry, String entryId, String title, String sourceUrl) {
+    private ContentEntry setContentEntryData(ContentEntry entry, String entryId, String title, String sourceUrl, boolean isLeaf) {
         entry.setEntryId(entryId);
         entry.setTitle(title);
         entry.setSourceUrl(sourceUrl);
         entry.setPublisher("CK12");
         entry.setLicenseType(LICENSE_TYPE_CC_BY_NC);
         entry.setPrimaryLanguageUid(englishLang.getLangUid());
+        entry.setLeaf(isLeaf);
         return entry;
     }
 
@@ -199,11 +200,11 @@ public class IndexCategoryCK12Content {
                 if (subjectEntry == null) {
                     subjectEntry = new ContentEntry();
                     subjectEntry = setContentEntryData(subjectEntry, hrefLink,
-                            title, hrefLink);
+                            title, hrefLink, false);
                     subjectEntry.setContentEntryUid(contentEntryDao.insert(subjectEntry));
                 } else {
                     subjectEntry = setContentEntryData(subjectEntry, hrefLink,
-                            title, hrefLink);
+                            title, hrefLink, false);
                     contentEntryDao.update(subjectEntry);
                 }
 
@@ -254,11 +255,11 @@ public class IndexCategoryCK12Content {
                 if (gradeEntry == null) {
                     gradeEntry = new ContentEntry();
                     gradeEntry = setContentEntryData(gradeEntry, hrefLink,
-                            title, hrefLink);
+                            title, hrefLink, false);
                     gradeEntry.setContentEntryUid(contentEntryDao.insert(gradeEntry));
                 } else {
                     gradeEntry = setContentEntryData(gradeEntry, hrefLink,
-                            title, hrefLink);
+                            title, hrefLink, false);
                     contentEntryDao.update(gradeEntry);
                 }
 
@@ -279,11 +280,11 @@ public class IndexCategoryCK12Content {
             if (topicEntry == null) {
                 topicEntry = new ContentEntry();
                 topicEntry = setContentEntryData(topicEntry, fakePath,
-                        level1CategoryTitle, fakePath);
+                        level1CategoryTitle, fakePath, false);
                 topicEntry.setContentEntryUid(contentEntryDao.insert(topicEntry));
             } else {
                 topicEntry = setContentEntryData(topicEntry, fakePath,
-                        level1CategoryTitle, fakePath);
+                        level1CategoryTitle, fakePath, false);
                 contentEntryDao.update(topicEntry);
             }
 
@@ -322,11 +323,11 @@ public class IndexCategoryCK12Content {
                 if (lastTopicEntry == null) {
                     lastTopicEntry = new ContentEntry();
                     lastTopicEntry = setContentEntryData(lastTopicEntry, hrefLink,
-                            title, hrefLink);
+                            title, hrefLink, false);
                     lastTopicEntry.setContentEntryUid(contentEntryDao.insert(lastTopicEntry));
                 } else {
                     lastTopicEntry = setContentEntryData(lastTopicEntry, hrefLink,
-                            title, hrefLink);
+                            title, hrefLink, false);
                     contentEntryDao.update(lastTopicEntry);
                 }
 
@@ -347,11 +348,11 @@ public class IndexCategoryCK12Content {
                 if (subTopicEntry == null) {
                     subTopicEntry = new ContentEntry();
                     subTopicEntry = setContentEntryData(subTopicEntry, appendPath,
-                            title, appendPath);
+                            title, appendPath, false);
                     subTopicEntry.setContentEntryUid(contentEntryDao.insert(subTopicEntry));
                 } else {
                     subTopicEntry = setContentEntryData(subTopicEntry, appendPath,
-                            title, appendPath);
+                            title, appendPath, false);
                     contentEntryDao.update(subTopicEntry);
                 }
 
@@ -394,12 +395,12 @@ public class IndexCategoryCK12Content {
             if (headingEntry == null) {
                 headingEntry = new ContentEntry();
                 headingEntry = setContentEntryData(headingEntry, fakePathTopic,
-                        headingTitle, fakePathTopic);
+                        headingTitle, fakePathTopic, false);
                 headingEntry.setThumbnailUrl(thumbnailUrl);
                 headingEntry.setContentEntryUid(contentEntryDao.insert(headingEntry));
             } else {
                 headingEntry = setContentEntryData(headingEntry, fakePathTopic,
-                        headingTitle, fakePathTopic);
+                        headingTitle, fakePathTopic, false);
                 headingEntry.setThumbnailUrl(thumbnailUrl);
                 contentEntryDao.update(headingEntry);
             }
@@ -420,12 +421,12 @@ public class IndexCategoryCK12Content {
                 if (topicEntry == null) {
                     topicEntry = new ContentEntry();
                     topicEntry = setContentEntryData(topicEntry, fakeParentTopic,
-                            title, fakeParentTopic);
+                            title, fakeParentTopic, false);
                     topicEntry.setThumbnailUrl(topicThumbnailUrl);
                     topicEntry.setContentEntryUid(contentEntryDao.insert(topicEntry));
                 } else {
                     topicEntry = setContentEntryData(topicEntry, fakeParentTopic,
-                            title, fakeParentTopic);
+                            title, fakeParentTopic, false);
                     topicEntry.setThumbnailUrl(topicThumbnailUrl);
                     contentEntryDao.update(topicEntry);
                 }
@@ -448,11 +449,11 @@ public class IndexCategoryCK12Content {
                     if (subTopicEntry == null) {
                         subTopicEntry = new ContentEntry();
                         subTopicEntry = setContentEntryData(subTopicEntry, hrefLink,
-                                subTitle, hrefLink);
+                                subTitle, hrefLink, false);
                         subTopicEntry.setContentEntryUid(contentEntryDao.insert(subTopicEntry));
                     } else {
                         subTopicEntry = setContentEntryData(subTopicEntry, hrefLink,
-                                subTitle, hrefLink);
+                                subTitle, hrefLink, false);
                         contentEntryDao.update(subTopicEntry);
                     }
 
@@ -511,13 +512,13 @@ public class IndexCategoryCK12Content {
             if (topicEntry == null) {
                 topicEntry = new ContentEntry();
                 topicEntry = setContentEntryData(topicEntry, url.getPath(),
-                        title, url.getPath());
+                        title, url.getPath(), true);
                 topicEntry.setDescription(summary);
                 topicEntry.setThumbnailUrl(imageLink);
                 topicEntry.setContentEntryUid(contentEntryDao.insert(topicEntry));
             } else {
                 topicEntry = setContentEntryData(topicEntry, url.getPath(),
-                        title, url.getPath());
+                        title, url.getPath(), true);
                 topicEntry.setDescription(summary);
                 topicEntry.setThumbnailUrl(imageLink);
                 contentEntryDao.update(topicEntry);

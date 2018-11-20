@@ -1,7 +1,6 @@
 package com.ustadmobile.lib.contentscrapers.phetsimulation;
 
 import com.neovisionaries.i18n.CountryCode;
-import com.neovisionaries.i18n.LanguageAlpha3Code;
 import com.neovisionaries.i18n.LanguageCode;
 import com.ustadmobile.core.db.dao.ContentEntryDao;
 import com.ustadmobile.core.db.dao.LanguageDao;
@@ -12,7 +11,6 @@ import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.Language;
 import com.ustadmobile.lib.db.entities.LanguageVariant;
 
-import org.apache.commons.codec.language.bm.Lang;
 import org.apache.commons.io.FileUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -186,10 +184,10 @@ public class PhetContentScraper {
                 ContentEntry categoryContentEntry = contentEntryDao.findBySourceUrl(path);
                 if (categoryContentEntry == null) {
                     categoryContentEntry = new ContentEntry();
-                    categoryContentEntry = setContentEntryData(categoryContentEntry, path, categoryName, path, language, null);
+                    categoryContentEntry = setContentEntryData(categoryContentEntry, path, categoryName, path, language, null, false);
                     categoryContentEntry.setContentEntryUid(contentEntryDao.insert(categoryContentEntry));
                 } else {
-                    categoryContentEntry = setContentEntryData(categoryContentEntry, path, categoryName, path, language, null);
+                    categoryContentEntry = setContentEntryData(categoryContentEntry, path, categoryName, path, language, null, false);
                     contentEntryDao.update(categoryContentEntry);
                 }
 
@@ -202,7 +200,7 @@ public class PhetContentScraper {
 
     }
 
-    private ContentEntry setContentEntryData(ContentEntry entry, String id, String title, String sourceUrl, Language lang, LanguageVariant variant) {
+    private ContentEntry setContentEntryData(ContentEntry entry, String id, String title, String sourceUrl, Language lang, LanguageVariant variant, boolean isLeaf) {
         entry.setEntryId(id);
         entry.setTitle(title);
         entry.setSourceUrl(sourceUrl);
@@ -212,6 +210,7 @@ public class PhetContentScraper {
             entry.setLanguageVariantUid(variant.getLangVariantUid());
         }
         entry.setPrimaryLanguageUid(lang.getLangUid());
+        entry.setLeaf(isLeaf);
         return entry;
     }
 
@@ -321,11 +320,11 @@ public class PhetContentScraper {
                                 ContentEntry languageContentEntry = contentEntryDao.findBySourceUrl(path);
                                 if (languageContentEntry == null) {
                                     languageContentEntry = new ContentEntry();
-                                    languageContentEntry = setContentEntryData(languageContentEntry, path, langTitle, path, language, languageVariant);
+                                    languageContentEntry = setContentEntryData(languageContentEntry, path, langTitle, path, language, languageVariant, true);
                                     languageContentEntry.setThumbnailUrl(thumbnailUrl);
                                     languageContentEntry.setContentEntryUid(contentEntryDao.insert(languageContentEntry));
                                 } else {
-                                    languageContentEntry = setContentEntryData(languageContentEntry, path, langTitle, path, language, languageVariant);
+                                    languageContentEntry = setContentEntryData(languageContentEntry, path, langTitle, path, language, languageVariant, true);
                                     contentEntryDao.update(languageContentEntry);
                                 }
 

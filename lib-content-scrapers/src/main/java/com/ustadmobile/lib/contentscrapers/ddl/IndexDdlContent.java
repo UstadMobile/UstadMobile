@@ -91,11 +91,11 @@ public class IndexDdlContent {
         if (masterRootParent == null) {
             masterRootParent = new ContentEntry();
             masterRootParent= setContentEntryData(masterRootParent, "root",
-                    "Ustad Mobile", "root", englishLang);
+                    "Ustad Mobile", "root", englishLang, false);
             masterRootParent.setContentEntryUid(contentEntryDao.insert(masterRootParent));
         } else {
             masterRootParent = setContentEntryData(masterRootParent, "root",
-                    "Ustad Mobile", "root", englishLang);
+                    "Ustad Mobile", "root", englishLang, false);
             contentEntryDao.update(masterRootParent);
         }
 
@@ -103,12 +103,12 @@ public class IndexDdlContent {
         if (parentDdl == null) {
             parentDdl = new ContentEntry();
             parentDdl = setContentEntryData(parentDdl, "https://www.ddl.af/",
-                    "Darakht-e Danesh", "https://www.ddl.af/", englishLang);
+                    "Darakht-e Danesh", "https://www.ddl.af/", englishLang, false);
             parentDdl.setThumbnailUrl("https://www.ddl.af/storage/files/logo-dd.png");
             parentDdl.setContentEntryUid(contentEntryDao.insert(parentDdl));
         } else {
             parentDdl = setContentEntryData(parentDdl, "https://www.ddl.af/",
-                    "Darakht-e Danesh", "https://www.ddl.af/", englishLang);
+                    "Darakht-e Danesh", "https://www.ddl.af/", englishLang, false);
             parentDdl.setThumbnailUrl("https://www.ddl.af/storage/files/logo-dd.png");
             contentEntryDao.update(parentDdl);
         }
@@ -123,13 +123,14 @@ public class IndexDdlContent {
 
     }
 
-    private ContentEntry setContentEntryData(ContentEntry entry, String id, String title, String sourceUrl, Language lang) {
+    private ContentEntry setContentEntryData(ContentEntry entry, String id, String title, String sourceUrl, Language lang, boolean isLeaf) {
         entry.setEntryId(id);
         entry.setTitle(title);
         entry.setSourceUrl(sourceUrl);
         entry.setPublisher("DDL");
         entry.setLicenseType(ContentEntry.LICENSE_TYPE_CC_BY);
         entry.setPrimaryLanguageUid(lang.getLangUid());
+        entry.setLeaf(isLeaf);
         return entry;
     }
 
@@ -145,11 +146,11 @@ public class IndexDdlContent {
         if (langEntry == null) {
             langEntry = new ContentEntry();
             langEntry = setContentEntryData(langEntry, lang + "/resources/list",
-                    lang, lang + "/resources/list", langEntity);
+                    lang, lang + "/resources/list", langEntity, false);
             langEntry.setContentEntryUid(contentEntryDao.insert(langEntry));
         } else {
             langEntry = setContentEntryData(langEntry, lang + "/resources/list",
-                    lang, lang + "/resources/list", langEntity);
+                    lang, lang + "/resources/list", langEntity, false);
             contentEntryDao.update(langEntry);
         }
 

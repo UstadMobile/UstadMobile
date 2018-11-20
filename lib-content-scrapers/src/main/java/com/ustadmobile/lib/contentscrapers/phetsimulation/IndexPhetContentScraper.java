@@ -121,11 +121,11 @@ public class IndexPhetContentScraper {
         if (masterRootParent == null) {
             masterRootParent = new ContentEntry();
             masterRootParent= setContentEntryData(masterRootParent, "root",
-                    "Ustad Mobile", "root", englishLang);
+                    "Ustad Mobile", "root", englishLang, false);
             masterRootParent.setContentEntryUid(contentEntryDao.insert(masterRootParent));
         } else {
             masterRootParent = setContentEntryData(masterRootParent, "root",
-                    "Ustad Mobile", "root", englishLang);
+                    "Ustad Mobile", "root", englishLang, false);
             contentEntryDao.update(masterRootParent);
         }
 
@@ -133,12 +133,12 @@ public class IndexPhetContentScraper {
         if (phetParentEntry == null) {
             phetParentEntry = new ContentEntry();
             phetParentEntry = setContentEntryData(phetParentEntry, "https://phet.colorado.edu/",
-                    "Phet Interactive Simulations", "https://phet.colorado.edu/", englishLang);
+                    "Phet Interactive Simulations", "https://phet.colorado.edu/", englishLang, false);
             phetParentEntry.setThumbnailUrl("https://phet.colorado.edu/images/phet-social-media-logo.png");
             phetParentEntry.setContentEntryUid(contentEntryDao.insert(phetParentEntry));
         } else {
             phetParentEntry = setContentEntryData(phetParentEntry, "https://phet.colorado.edu/",
-                    "Phet Interactive Simulations", "https://phet.colorado.edu/", englishLang);
+                    "Phet Interactive Simulations", "https://phet.colorado.edu/", englishLang, false);
             phetParentEntry.setThumbnailUrl("https://phet.colorado.edu/images/phet-social-media-logo.png");
             contentEntryDao.update(phetParentEntry);
         }
@@ -155,11 +155,11 @@ public class IndexPhetContentScraper {
             ContentEntry englishSimContentEntry = contentEntryDao.findBySourceUrl(path);
             if (englishSimContentEntry == null) {
                 englishSimContentEntry = new ContentEntry();
-                englishSimContentEntry = setContentEntryData(englishSimContentEntry, path, title, path, englishLang);
+                englishSimContentEntry = setContentEntryData(englishSimContentEntry, path, title, path, englishLang, true);
                 englishSimContentEntry.setThumbnailUrl(thumbnail);
                 englishSimContentEntry.setContentEntryUid(contentEntryDao.insert(englishSimContentEntry));
             } else {
-                englishSimContentEntry = setContentEntryData(englishSimContentEntry, path, title, path, englishLang);
+                englishSimContentEntry = setContentEntryData(englishSimContentEntry, path, title, path, englishLang, true);
                 englishSimContentEntry.setThumbnailUrl(thumbnail);
                 contentEntryDao.update(englishSimContentEntry);
             }
@@ -259,13 +259,14 @@ public class IndexPhetContentScraper {
         }
     }
 
-    private ContentEntry setContentEntryData(ContentEntry entry, String id, String title, String sourceUrl, Language lang) {
+    private ContentEntry setContentEntryData(ContentEntry entry, String id, String title, String sourceUrl, Language lang, boolean isLeaf) {
         entry.setEntryId(id);
         entry.setTitle(title);
         entry.setSourceUrl(sourceUrl);
         entry.setPublisher("Phet");
         entry.setLicenseType(LICENSE_TYPE_CC_BY);
         entry.setPrimaryLanguageUid(lang.getLangUid());
+        entry.setLeaf(isLeaf);
         return entry;
     }
 
