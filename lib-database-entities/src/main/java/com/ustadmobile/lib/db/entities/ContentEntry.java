@@ -64,7 +64,7 @@ public class ContentEntry {
 
     private long languageVariantUid;
 
-    private boolean isLeaf;
+    private boolean leaf;
 
     public long getLanguageVariantUid() {
         return languageVariantUid;
@@ -261,10 +261,10 @@ public class ContentEntry {
     }
 
     public boolean isLeaf() {
-        return isLeaf;
+        return leaf;
     }
 
     public void setLeaf(boolean leaf) {
-        isLeaf = leaf;
+        this.leaf = leaf;
     }
 }

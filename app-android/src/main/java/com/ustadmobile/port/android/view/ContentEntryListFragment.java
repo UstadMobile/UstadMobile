@@ -12,6 +12,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.ContentEntryListPresenter;
@@ -110,6 +111,11 @@ public class ContentEntryListFragment extends UstadBaseFragment implements Conte
     public void setToolbarTitle(String title) {
         if(contentEntryListener != null)
             contentEntryListener.setTitle(title);
+    }
+
+    @Override
+    public void showError() {
+        Toast.makeText(getContext(), R.string.content_entry_not_found, Toast.LENGTH_SHORT).show();
     }
 
     @Override

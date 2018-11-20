@@ -67,7 +67,7 @@ public class ContentEntryDetailActivity extends UstadBaseActivity implements Con
 
     @Override
     public void setFileInfo(List<ContentEntryFile> contentEntryFileList) {
-        Button button = findViewById(R.id.entry_detail_download_button);
+        Button button = findViewById(R.id.entry_detail_button);
         if(contentEntryFileList == null || contentEntryFileList.isEmpty()){
             button.setEnabled(false);
             return;

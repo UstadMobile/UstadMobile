@@ -1,5 +1,6 @@
 package com.ustadmobile.port.android.view;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -13,6 +14,8 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.toughra.ustadmobile.R;
+import com.ustadmobile.core.generated.locale.MessageID;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 
 import static com.ustadmobile.core.controller.ContentEntryListPresenter.ARG_CONTENT_ENTRY_UID;
 
@@ -39,7 +42,7 @@ public class ContentLibraryViewPagerFragment extends UstadBaseFragment {
         View rootContainer = inflater.inflate(R.layout.fragment_library_viewpager, container, false);
 
         ViewPager viewPager = rootContainer.findViewById(R.id.library_viewpager);
-        viewPager.setAdapter(new LibraryPagerAdapter(getChildFragmentManager()));
+        viewPager.setAdapter(new LibraryPagerAdapter(getChildFragmentManager(), getContext()));
         TabLayout tabLayout = rootContainer.findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(viewPager);
 
@@ -48,9 +51,13 @@ public class ContentLibraryViewPagerFragment extends UstadBaseFragment {
 
     public static class LibraryPagerAdapter extends FragmentPagerAdapter {
         private static int NUM_ITEMS = 2;
+        private final Context context;
+        private final UstadMobileSystemImpl impl;
 
-        public LibraryPagerAdapter(FragmentManager fragmentManager) {
+        LibraryPagerAdapter(FragmentManager fragmentManager, Context context) {
             super(fragmentManager);
+            this.context = context;
+            impl = UstadMobileSystemImpl.getInstance();
         }
 
         // Returns total number of pages
@@ -77,14 +84,15 @@ public class ContentLibraryViewPagerFragment extends UstadBaseFragment {
         // Returns the page title for the top indicator
         @Override
         public CharSequence getPageTitle(int position) {
+
             switch (position) {
                 case 0:
-                    return "Libraries";
+                    return impl.getString(MessageID.libraries, context);
                 case 1:
-                    return "Downloaded";
+                    return impl.getString(MessageID.downloaded, context);
 
             }
-            return "Error";
+            return null;
 
         }
 
