@@ -28,6 +28,7 @@ import com.ustadmobile.lib.db.sync.UmRepositoryDb;
 import com.ustadmobile.lib.db.sync.UmRepositoryUtils;
 import com.ustadmobile.lib.db.sync.UmSyncExistingEntity;
 import com.ustadmobile.lib.db.sync.UmSyncableDatabase;
+import com.ustadmobile.lib.db.sync.dao.BaseDao;
 import com.ustadmobile.lib.db.sync.entities.SyncStatus;
 
 import java.io.File;
@@ -52,7 +53,6 @@ import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.ArrayType;
-import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
@@ -464,6 +464,141 @@ public abstract class AbstractDbProcessor {
                 identifierQuoteChar + " WHERE " + identifierQuoteChar +
                 primaryKeyEl.getSimpleName() + identifierQuoteChar + " = :" +
                 daoMethod.getParameters().get(0).getSimpleName();
+    }
+
+    protected String generateFindLocalChangesSql(TypeElement daoType, ExecutableElement daoMethod,
+                                                 ProcessingEnvironment processingEnv) {
+        DaoMethodInfo methodInfo = new DaoMethodInfo(daoMethod, daoType, processingEnv);
+        TypeElement entityTypeEl = (TypeElement)processingEnv.getTypeUtils().asElement(
+                methodInfo.resolveResultEntityComponentType());
+        Element localChangeSeqNumEl = DbProcessorUtils.findElementWithAnnotation(entityTypeEl,
+                UmSyncLocalChangeSeqNum.class, processingEnv);
+        if(localChangeSeqNumEl == null) {
+            messager.printMessage(Diagnostic.Kind.ERROR,
+                    formatMethodForErrorMessage(daoMethod, daoType) + "Attempting to generate a " +
+                    "findLocalChangeSeq method: no element annotated @UmSyncLocalChangeSeqNum");
+            return "";
+        }
+
+        String readPermissionCondition = daoType.getAnnotation(UmDao.class) != null ?
+                                daoType.getAnnotation(UmDao.class).readPermissionCondition() : "";
+        if(readPermissionCondition.equals("")) {
+            messager.printMessage(Diagnostic.Kind.ERROR,
+                    formatMethodForErrorMessage(daoMethod, daoType) + " Attempting to generate " +
+                            "findLocalchangeSeq method: UmDao does not have a readPermissionCondition" +
+                            " set to use for the where clause. It needs to be added");
+            return "";
+        }
+
+        if(daoMethod.getParameters().size() != 2) {
+            messager.printMessage(Diagnostic.Kind.ERROR,
+                    formatMethodForErrorMessage(daoMethod, daoType) + " Attempting to generate" +
+                            "findLocalChangeSeq method: method must have exactly two long " +
+                            "parameters - the starting local change sequence number and the account " +
+                            "uid of the account being used for the sync");
+            return "";
+        }
+
+        return String.format("SELECT * FROM %s WHERE %s >= :%s AND %s",
+                entityTypeEl.getSimpleName().toString(),
+                localChangeSeqNumEl.getSimpleName().toString(),
+                daoMethod.getParameters().get(0).getSimpleName().toString(),
+                readPermissionCondition);
+    }
+
+    protected String generateSyncFindAllChanges(TypeElement daoType, ExecutableElement daoMethod,
+                                                ProcessingEnvironment processingEnv) {
+        DaoMethodInfo methodInfo = new DaoMethodInfo(daoMethod, daoType, processingEnv);
+        TypeElement entityTypeEl = (TypeElement)processingEnv.getTypeUtils().asElement(
+                methodInfo.resolveResultEntityComponentType());
+        Element localChangeSeqNumEl = DbProcessorUtils.findElementWithAnnotation(entityTypeEl,
+                UmSyncLocalChangeSeqNum.class, processingEnv);
+        Element masterChangeSeqNumEl = DbProcessorUtils.findElementWithAnnotation(entityTypeEl,
+                UmSyncMasterChangeSeqNum.class, processingEnv);
+        if(localChangeSeqNumEl == null) {
+            messager.printMessage(Diagnostic.Kind.ERROR,
+                    formatMethodForErrorMessage(daoMethod, daoType) + "Attempting to generate a " +
+                            "findAllChanges method: no element annotated @UmSyncLocalChangeSeqNum",
+                            daoType);
+            return "";
+        }else if(masterChangeSeqNumEl == null) {
+            messager.printMessage(Diagnostic.Kind.ERROR,
+                    formatMethodForErrorMessage(daoMethod, daoType) + " attempting to" +
+                            "generate findAllChanges method: no element annotated " +
+                            "@UmSyncMasterChangeSeqNum",
+                    daoType);
+            return "";
+        }
+
+        String readPermissionCondition = daoType.getAnnotation(UmDao.class) != null ?
+                daoType.getAnnotation(UmDao.class).readPermissionCondition() : "";
+        if(readPermissionCondition.equals("")) {
+            messager.printMessage(Diagnostic.Kind.ERROR,
+                    formatMethodForErrorMessage(daoMethod, daoType) + " attempting to" +
+                            "generate findAllChanges method: Dao has no readPermissionCondition",
+                    daoType);
+            return "";
+        }
+
+        if(daoMethod.getParameters().size() != 5) {
+            messager.printMessage(Diagnostic.Kind.ERROR,
+                    formatMethodForErrorMessage(daoMethod, daoType) + " attempting to" +
+                            "generate findAllChanges method: method must have exactly 5 parameters" +
+                            " - fromLocalChangeSeqNum, toLocalChangeSeqNum, fromMasterChangeSeqNum," +
+                            "toMasterChangeSeqNum, and accountPersonUid",
+                    daoType);
+            return "";
+        }
+
+        return String.format("SELECT * FROM %s WHERE %s BETWEEN :%s AND :%s " +
+                "AND %s BETWEEN :%s AND :%s AND %s",
+                entityTypeEl.getSimpleName(),
+                localChangeSeqNumEl.getSimpleName(),
+                daoMethod.getParameters().get(0).getSimpleName(),
+                daoMethod.getParameters().get(1).getSimpleName(),
+                masterChangeSeqNumEl.getSimpleName(),
+                daoMethod.getParameters().get(2).getSimpleName(),
+                daoMethod.getParameters().get(3).getSimpleName(),
+                readPermissionCondition);
+
+    }
+
+    protected String generateSyncFindUpdatable(TypeElement daoType, ExecutableElement daoMethod,
+                                               ProcessingEnvironment processingEnv) {
+        TypeElement baseDaoTypeEl = processingEnv.getElementUtils().getTypeElement(
+                BaseDao.class.getName());
+        TypeMirror entityTypeMirror = daoType.asType().accept(
+                new TypeVariableResolutionVisitor("T", baseDaoTypeEl), new ArrayList<>());
+
+        if(entityTypeMirror == null) {
+            messager.printMessage(Diagnostic.Kind.ERROR,
+                    formatMethodForErrorMessage(daoMethod, daoType) + " attempting to" +
+                            "generate syncFindUpdateable: DAO class must extend a BaseDao with an " +
+                            "entity type variable argument.");
+            return "";
+        }
+
+        TypeElement entityTypeEl = (TypeElement)processingEnv.getTypeUtils().asElement(entityTypeMirror);
+        Element primaryKeyEl = findPrimaryKey(entityTypeEl);
+        String readPermissionCondition = daoType.getAnnotation(UmDao.class) != null ?
+                daoType.getAnnotation(UmDao.class).readPermissionCondition() : "";
+        if(readPermissionCondition.equals("")) {
+            messager.printMessage(Diagnostic.Kind.ERROR,
+                    formatMethodForErrorMessage(daoMethod, daoType) + " attempting to" +
+                    "generate syncFindUpdateable: DAO class must have readPermissionCondition.");
+            return "";
+        }
+
+
+        return String.format("SELECT %s.%s as primaryKey, 1 as userCanUpdate FROM %s " +
+                "WHERE %s.%s in (:%s) AND %s",
+                entityTypeEl.getSimpleName(),
+                primaryKeyEl.getSimpleName(),
+                entityTypeEl.getSimpleName(),
+                entityTypeEl.getSimpleName(),
+                primaryKeyEl.getSimpleName(),
+                daoMethod.getParameters().get(0).getSimpleName(),
+                readPermissionCondition);
     }
 
     protected VariableElement findPrimaryKey(TypeElement entityType) {
