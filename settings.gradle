@@ -1,3 +1,5 @@
-include ':app-android', ':core', ':sharedse', ':core-tests', ':sharedse-tests', ':app-javase', ':app-android-launcher', ':lib-core-fs', ':lib-core-fs-tests', ':lib-database-entities', ':lib-util', ':lib-database-entity-processor', ':lib-database-annotation', ':app-android-testserver', ':lib-http-testserver', ':lib-database-annotation-processor-core', ':lib-database', ':lib-database-android', ':lib-database-util-jdbc'
+include ':app-android', ':core', ':sharedse', ':core-tests', ':sharedse-tests', ':app-javase', ':app-android-launcher', ':lib-core-fs', ':lib-core-fs-tests', ':lib-database-entities', ':lib-util', ':lib-database-entity-processor', ':lib-database-runtime', ':app-android-testserver', ':lib-http-testserver', ':lib-database-annotation-processor', ':lib-database', ':lib-database-android', ':lib-database-runtime-jdbc', ':lib-room-annotations'
 include ':lib-database-jdbc'
+include ':app-rest-server'
+include ':lib-database-retrofitrepository'
 

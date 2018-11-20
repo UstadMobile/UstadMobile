@@ -9,7 +9,9 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation project(":lib-database")
     implementation project(":lib-database-entities")
-    implementation project(":lib-database-util-jdbc")
+    implementation project(":lib-database-retrofitrepository")
+    implementation project(":lib-database-runtime")
+    implementation project(':lib-database-runtime-jdbc')
 
     testImplementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
     testImplementation "org.apache.commons:commons-pool2:$version_apache_commons_pool2"

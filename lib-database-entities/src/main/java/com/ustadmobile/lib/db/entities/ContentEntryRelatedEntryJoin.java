@@ -16,7 +16,7 @@ public class ContentEntryRelatedEntryJoin {
 
     public static final int REL_TYPE_SEE_ALSO = 2;
 
-    @UmPrimaryKey
+    @UmPrimaryKey(autoIncrement = true)
     private int cerejUid;
 
     private int cerejContentEntryUid;

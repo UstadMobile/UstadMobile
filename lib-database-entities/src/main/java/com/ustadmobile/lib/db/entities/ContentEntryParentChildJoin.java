@@ -1,6 +1,7 @@
 package com.ustadmobile.lib.db.entities;
 
 import com.ustadmobile.lib.database.annotation.UmEntity;
+import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 
 /**
  * ContentEntry child - parent join entity
@@ -9,6 +10,7 @@ import com.ustadmobile.lib.database.annotation.UmEntity;
 @UmEntity
 public class ContentEntryParentChildJoin {
 
+    @UmPrimaryKey(autoIncrement = true)
     private long cepcjUid;
 
     private long cepcjChildContentEntryUid;

@@ -42,6 +42,7 @@ dependencies {
 
     implementation project(":core")
     implementation project(":lib-database")
+    implementation project(":lib-database-runtime")
     compileOnly project(':lib-database-entities')
     implementation project(':lib-core-fs')
     implementation project(":lib-util")

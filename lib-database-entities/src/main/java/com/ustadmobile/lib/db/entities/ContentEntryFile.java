@@ -10,8 +10,8 @@ import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 @UmEntity
 public class ContentEntryFile {
 
-    @UmPrimaryKey
-    private int contentEntryFileUid;
+    @UmPrimaryKey(autoIncrement = true)
+    private long contentEntryFileUid;
 
     private long fileSize;
 
@@ -26,11 +26,11 @@ public class ContentEntryFile {
     private boolean mobileOptimized;
 
 
-    public int getContentEntryFileUid() {
+    public long getContentEntryFileUid() {
         return contentEntryFileUid;
     }
 
-    public void setContentEntryFileUid(int contentEntryFileUid) {
+    public void setContentEntryFileUid(long contentEntryFileUid) {
         this.contentEntryFileUid = contentEntryFileUid;
     }
 
