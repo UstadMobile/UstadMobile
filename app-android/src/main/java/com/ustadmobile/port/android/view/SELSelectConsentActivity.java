@@ -16,16 +16,20 @@ import ru.dimorinny.floatingtextbutton.FloatingTextButton;
 
 
 /**
- * The SELSelectConsent activity.
- * <p>
- * This Activity extends UstadBaseActivity and implements SELSelectConsentView
+ * The SELSelectConsent activity. This Activity extends UstadBaseActivity and implements
+ * SELSelectConsentView. This activity is responsible for showing explicitly to seek for student
+ * consent and will only allow to proceed if consent check box is explicitly checked.
  */
 public class SELSelectConsentActivity extends UstadBaseActivity implements SELSelectConsentView {
 
-    private Toolbar toolbar;
-
     private SELSelectConsentPresenter mPresenter;
 
+    /**
+     * Handles every item selected on the toolbar. Here handles back button pressed.
+     *
+     * @param item  The menu item pressed
+     * @return  true if accounted for.
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
@@ -44,7 +48,7 @@ public class SELSelectConsentActivity extends UstadBaseActivity implements SELSe
         setContentView(R.layout.activity_selselect_consent);
 
         //Toolbar:
-        toolbar = findViewById(R.id.activity_selselect_consent_toolbar);
+        Toolbar toolbar = findViewById(R.id.activity_selselect_consent_toolbar);
         toolbar.setTitle(getText(R.string.social_nomination));
         setSupportActionBar(toolbar);
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
@@ -62,6 +66,5 @@ public class SELSelectConsentActivity extends UstadBaseActivity implements SELSe
                 mPresenter.handleClickPrimaryActionButton(consentCheckBox.isChecked()));
 
     }
-
 
 }

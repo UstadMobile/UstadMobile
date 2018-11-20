@@ -4,12 +4,16 @@ import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.lib.db.entities.Person;
 
 /**
+ * View responsible for selecting student that will do the SEL nominations.
  * SELSelectStudentView Core View extends Core UstadView. Will be implemented
  * on various implementations.
  */
 public interface SELSelectStudentView extends UstadView {
 
+    //View name
     String VIEW_NAME = "SELSelectStudent";
+
+    //Arguments
     String ARG_STUDENT_DONE = "studentDone";
     String ARG_DONE_CLAZZMEMBER_UIDS = "donePersonUids";
 
@@ -24,13 +28,9 @@ public interface SELSelectStudentView extends UstadView {
     void setSELAnswerListProvider(UmProvider<Person> selStudentsProvider);
 
     /**
-     * Finish the activity (close it)
+     * Finish the view (closes it)
      */
     void finish();
 
-    /**
-     * Method to pop up that one student SEL done, you can select a new student now.
-     */
-    void showStudentDoneMoveOn();
 
 }

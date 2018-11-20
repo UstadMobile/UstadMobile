@@ -1,8 +1,6 @@
 package com.ustadmobile.core.view;
 
 import com.ustadmobile.core.db.UmProvider;
-import com.ustadmobile.lib.db.entities.ClazzMember;
-import com.ustadmobile.lib.db.entities.ClazzMemberWithPerson;
 import com.ustadmobile.lib.db.entities.PersonWithEnrollment;
 
 /**

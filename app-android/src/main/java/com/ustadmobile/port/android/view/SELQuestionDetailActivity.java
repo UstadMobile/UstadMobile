@@ -19,23 +19,24 @@ import com.ustadmobile.core.view.SELQuestionDetailView;
 import com.ustadmobile.lib.db.entities.SocialNominationQuestion;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
+import java.util.Objects;
+
 import ru.dimorinny.floatingtextbutton.FloatingTextButton;
 
 
 /**
- * The SELQuestionDetail activity.
- * <p>
- * This Activity extends UstadBaseActivity and implements SELQuestionDetailView
+ * The SELQuestionDetail activity.This Activity extends UstadBaseActivity and implements
+ * SELQuestionDetailView. This activity is responsible for displaying all questions for SEL
+ * and UI component to add more questions.
  */
 public class SELQuestionDetailActivity extends UstadBaseActivity implements SELQuestionDetailView {
 
-    private Toolbar toolbar;
-
-    //RecyclerView
     private RecyclerView mRecyclerView;
-    private RecyclerView.LayoutManager mRecyclerLayoutManager;
     private SELQuestionDetailPresenter mPresenter;
 
+    /**
+     * The DIFF CALLBACK
+     */
     public static final DiffUtil.ItemCallback<SocialNominationQuestion> DIFF_CALLBACK =
             new DiffUtil.ItemCallback<SocialNominationQuestion>() {
                 @Override
@@ -51,6 +52,11 @@ public class SELQuestionDetailActivity extends UstadBaseActivity implements SELQ
                 }
             };
 
+    /**
+     * Sets questions list provider to the recycler adapter.
+     *
+     * @param listProvider The provider data
+     */
     @Override
     public void setListProvider(UmProvider<SocialNominationQuestion> listProvider) {
 
@@ -59,6 +65,7 @@ public class SELQuestionDetailActivity extends UstadBaseActivity implements SELQ
                 new SocialNominationQuestionRecyclerAdapter(DIFF_CALLBACK, getApplicationContext());
 
         // get the provider, set , observe, etc.
+        // A warning is expected
         DataSource.Factory<Integer, SocialNominationQuestion> factory =
                 (DataSource.Factory<Integer, SocialNominationQuestion>)
                         listProvider.getProvider();
@@ -71,6 +78,13 @@ public class SELQuestionDetailActivity extends UstadBaseActivity implements SELQ
         mRecyclerView.setAdapter(recyclerAdapter);
     }
 
+    /**
+     This method catches menu buttons/options pressed in the toolbar. Here it is making sure
+     * the activity goes back when the back button is pressed.
+     *
+     * @param item  The item selected
+     * @return  true if accounted for
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
@@ -89,14 +103,14 @@ public class SELQuestionDetailActivity extends UstadBaseActivity implements SELQ
         setContentView(R.layout.activity_sel_question_detail);
 
         //Toolbar:
-        toolbar = findViewById(R.id.activity_sel_question_detail_toolbar);
+        Toolbar toolbar = findViewById(R.id.activity_sel_question_detail_toolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
         //Recycler View:
         mRecyclerView = findViewById(
                 R.id.activity_sel_question_detail_recyclerview);
-        mRecyclerLayoutManager = new LinearLayoutManager(getApplicationContext());
+        RecyclerView.LayoutManager mRecyclerLayoutManager = new LinearLayoutManager(getApplicationContext());
         mRecyclerView.setLayoutManager(mRecyclerLayoutManager);
 
         //Call the Presenter

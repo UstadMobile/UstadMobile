@@ -42,7 +42,10 @@ import ru.dimorinny.floatingtextbutton.FloatingTextButton;
 import static com.ustadmobile.core.view.ClazzListView.ARG_CLAZZ_UID;
 
 
-
+/**
+ * This is the fragment that shows a list of activity done as well has charts at the top within a
+ * Clazz.
+ */
 public class ClazzActivityListFragment extends UstadBaseFragment implements ClazzActivityListView {
 
     View rootContainer;

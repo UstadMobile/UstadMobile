@@ -166,8 +166,7 @@ public class ClazzActivityListPresenter
         args.put(ARG_CLAZZ_UID, currentClazzUid);
         args.put(ARG_LOGDATE, System.currentTimeMillis());
 
-        //TODO: Uncomment for Sprint 4
-        //impl.go(ClazzActivityEditView.VIEW_NAME, args, view.getContext());
+        impl.go(ClazzActivityEditView.VIEW_NAME, args, view.getContext());
 
     }
 

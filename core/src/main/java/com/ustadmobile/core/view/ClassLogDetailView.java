@@ -1,7 +1,6 @@
 package com.ustadmobile.core.view;
 
 import com.ustadmobile.core.db.UmProvider;
-import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord;
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecordWithPerson;
 
 /**

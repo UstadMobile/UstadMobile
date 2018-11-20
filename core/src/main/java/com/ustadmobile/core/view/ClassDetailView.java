@@ -11,6 +11,7 @@ public interface ClassDetailView extends UstadView {
 
     /**
      * Sets the toolbar of the view.
+     *
      * @param toolbarTitle The toolbar title
      */
     void setToolbarTitle(String toolbarTitle);

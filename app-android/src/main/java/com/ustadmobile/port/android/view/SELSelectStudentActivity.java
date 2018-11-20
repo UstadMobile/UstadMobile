@@ -27,14 +27,8 @@ import java.util.Objects;
  */
 public class SELSelectStudentActivity extends UstadBaseActivity implements SELSelectStudentView
 {
-
-    private Toolbar toolbar;
-
-    //RecyclerView
     private RecyclerView mRecyclerView;
-    private RecyclerView.LayoutManager mRecyclerLayoutManager;
     private SELSelectStudentPresenter mPresenter;
-
     private Snackbar studentDoneSnackBar;
 
     public static final DiffUtil.ItemCallback<Person> DIFF_CALLBACK =
@@ -60,6 +54,7 @@ public class SELSelectStudentActivity extends UstadBaseActivity implements SELSe
                 DIFF_CALLBACK, getApplicationContext(), mPresenter);
 
         // get the provider, set , observe, etc.
+        // A warning is expected
         DataSource.Factory<Integer, Person> factory =
                 (DataSource.Factory<Integer, Person>)
                         selStudentsProvider.getProvider();
@@ -72,19 +67,14 @@ public class SELSelectStudentActivity extends UstadBaseActivity implements SELSe
         mRecyclerView.setAdapter(recyclerAdapter);
     }
 
-    @Override
-    public void showStudentDoneMoveOn() {
-        studentDoneSnackBar.show();
-    }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        //showStudentDoneMoveOn();
-    }
-
-
-
+    /**
+     * Handles what happens when toolbar menu option selected. Here it is handling what happens when
+     * back button is pressed.
+     *
+     * @param item  The item selected.
+     * @return      true if accounted for.
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
@@ -103,22 +93,20 @@ public class SELSelectStudentActivity extends UstadBaseActivity implements SELSe
         setContentView(R.layout.activity_sel_select_student);
 
         //Toolbar:
-        toolbar = findViewById(R.id.activity_sel_select_student_toolbar);
+        Toolbar toolbar = findViewById(R.id.activity_sel_select_student_toolbar);
         toolbar.setTitle(getText(R.string.social_nomination));
         setSupportActionBar(toolbar);
 
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
         ConstraintLayout cl = findViewById(R.id.activity_sel_select_student_cl);
-
         studentDoneSnackBar = Snackbar
                 .make(cl, getText(R.string.sel_done_select_another_student), Snackbar.LENGTH_LONG);
-
 
         //Recycler View:
         mRecyclerView = findViewById(
                 R.id.activity_sel_select_student_recyclerview);
-        mRecyclerLayoutManager = new LinearLayoutManager(getApplicationContext());
+        RecyclerView.LayoutManager mRecyclerLayoutManager = new LinearLayoutManager(getApplicationContext());
         mRecyclerView.setLayoutManager(mRecyclerLayoutManager);
 
         //Call the Presenter
@@ -126,6 +114,7 @@ public class SELSelectStudentActivity extends UstadBaseActivity implements SELSe
                 UMAndroidUtil.bundleToHashtable(getIntent().getExtras()), this);
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
 
+        //If student done in argument, show toast/snackbar
         if (getIntent().hasExtra(ARG_STUDENT_DONE)){
             studentDoneSnackBar.show();
         }

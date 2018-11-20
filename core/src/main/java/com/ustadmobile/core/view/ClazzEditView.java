@@ -13,7 +13,7 @@ public interface ClazzEditView extends UstadView {
 
     String VIEW_NAME = "ClazzEdit";
 
-    public static final String ARG_SCHEDULE_UID = "argScheduleUid";
+    String ARG_SCHEDULE_UID = "argScheduleUid";
 
     /**
      * For Android: closes the activity.
@@ -24,7 +24,8 @@ public interface ClazzEditView extends UstadView {
 
     /**
      * Provider for schedule of this class.
-     * @param clazzScheduleProvider
+     *
+     * @param clazzScheduleProvider The Provider of Schedule type
      */
     void setClazzScheduleProvider(UmProvider<Schedule> clazzScheduleProvider);
 

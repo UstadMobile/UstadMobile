@@ -1,7 +1,6 @@
 package com.ustadmobile.port.android.view;
 
 import android.os.Bundle;
-import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
@@ -32,32 +31,23 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
     private Toolbar toolbar;
 
     /**
-     *
-     * @param menuItems String menuItems
-     */
-    @Override
-    public void setBottomNavigationItems(String[] menuItems) {
-
-    }
-
-    /**
      * ViewPager set up in its own method for clarity.
      */
     private void setupViewPager() {
-        mPager = (ViewPager) findViewById(R.id.container_feedlist);
+        mPager = findViewById(R.id.container_feedlist);
         mPagerAdapter = new BasePointViewPagerAdapter(getSupportFragmentManager());
-        Fragment selectedFragment = mPagerAdapter.getItem(0);
+        mPagerAdapter.getItem(0);
         mPager.setAdapter(mPagerAdapter);
     }
 
     /**
-     * The overriden onCreate method does the following:
+     * The overridden onCreate method does the following:
      *
      * 1. Creates, names, styles and sets the Bottom Navigation
      * 2. Sets the default location (Feed)
      * 3. Sets the toolbar title upon navigation
      *
-     * @param savedInstanceState
+     * @param savedInstanceState        The application's bundle
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -99,7 +89,6 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
         bottomNavigation.addItem(feed_item);
         bottomNavigation.addItem(classes_item);
         bottomNavigation.addItem(people_item);
-//        bottomNavigation.addItem(lessons_item);
 
         // Setting the very 1st item as default home screen.
         bottomNavigation.setCurrentItem(0);
@@ -109,32 +98,29 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
         bottomNavigation.setTitleState(AHBottomNavigation.TitleState.ALWAYS_SHOW);
 
         //Click listeners for the items.
-        bottomNavigation.setOnTabSelectedListener(new AHBottomNavigation.OnTabSelectedListener() {
-            @Override
-            public boolean onTabSelected(int position, boolean wasSelected) {
+        bottomNavigation.setOnTabSelectedListener((position, wasSelected) -> {
 
-                if (!wasSelected) {
-                    mPagerAdapter.notifyDataSetChanged();
-                    Fragment selectedFragment = mPagerAdapter.getItem(position);
-                    mPagerAdapter.notifyDataSetChanged();
-                    mPager.setCurrentItem(position);
-                }
-
-                //Update title
-                switch(position){
-                    case 0:
-                        updateTitle(getText(R.string.feed).toString());
-                        break;
-                    case 1:
-                        updateTitle(getText(R.string.my_classes).toString());
-                        break;
-                    case 2:
-                        updateTitle(getText(R.string.people).toString());
-                        break;
-
-                }
-                return true;
+            if (!wasSelected) {
+                mPagerAdapter.notifyDataSetChanged();
+                mPagerAdapter.getItem(position);
+                mPagerAdapter.notifyDataSetChanged();
+                mPager.setCurrentItem(position);
             }
+
+            //Update title
+            switch(position){
+                case 0:
+                    updateTitle(getText(R.string.feed).toString());
+                    break;
+                case 1:
+                    updateTitle(getText(R.string.my_classes).toString());
+                    break;
+                case 2:
+                    updateTitle(getText(R.string.people).toString());
+                    break;
+
+            }
+            return true;
         });
     }
 
@@ -155,23 +141,20 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
         WeakHashMap<Integer, UstadBaseFragment> positionMap;
 
         //Constructor creates the adapter
-        public BasePointViewPagerAdapter(FragmentManager fm) {
+        BasePointViewPagerAdapter(FragmentManager fm) {
             super(fm);
             positionMap = new WeakHashMap<>();
         }
 
-        public void addFragments(int pos, Fragment fragment) {
-            positionMap.put(pos, (UstadBaseFragment)fragment);
-        }
-
         /**
          * Generate fragment for that page/position
-         * @param position
-         * @return
+         *
+         * @param position  position of item
+         * @return  the fragment
          */
         @Override
         public Fragment getItem(int position) {
-            UstadBaseFragment thisFragment = positionMap.get(new Integer(position));
+            UstadBaseFragment thisFragment = positionMap.get(position);
             if(thisFragment != null){
                 return thisFragment;
             }else{
@@ -207,9 +190,10 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
     }
 
     /**
-     * Get color
-     * @param color
-     * @return
+     * Get color from ContextCompat
+     *
+     * @param color The color code
+     * @return  the color
      */
     public int fetchColor(int color){
         return ContextCompat.getColor(this, color);

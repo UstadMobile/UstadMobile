@@ -37,14 +37,14 @@ public interface ClazzActivityListView extends UstadView {
      */
     void finish();
 
-    public void updateActivityBarChart(LinkedHashMap<Float, Float> dataMap);
+    void updateActivityBarChart(LinkedHashMap<Float, Float> dataMap);
 
-    public void setClazzActivityChangesDropdownPresets(String[] presets);
+    void setClazzActivityChangesDropdownPresets(String[] presets);
 
     /**
      * Resets the report buttons
      */
-    public void resetReportButtons();
+    void resetReportButtons();
 
 
 

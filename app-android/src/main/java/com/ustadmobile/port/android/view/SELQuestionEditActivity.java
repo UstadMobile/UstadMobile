@@ -20,19 +20,12 @@ import java.util.Objects;
 
 
 /**
- * The SELQuestionEdit activity.
- * <p>
- * This Activity extends UstadBaseActivity and implements SELQuestionEditView
+ * The SELQuestionEdit activity. This Activity extends UstadBaseActivity and implements
+ * SELQuestionEditView. This activity is responsible for editing and viewing an SEL question.
  */
 public class SELQuestionEditActivity extends UstadBaseActivity implements SELQuestionEditView {
 
-    private Toolbar toolbar;
-
-    //RecyclerView
-    private RecyclerView mRecyclerView;
-    private RecyclerView.LayoutManager mRecyclerLayoutManager;
     private SELQuestionEditPresenter mPresenter;
-
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -42,21 +35,20 @@ public class SELQuestionEditActivity extends UstadBaseActivity implements SELQue
         setContentView(R.layout.activity_sel_question_edit);
 
         //Toolbar:
-        toolbar = findViewById(R.id.activity_sel_question_edit_toolbar);
+        Toolbar toolbar = findViewById(R.id.activity_sel_question_edit_toolbar);
         setSupportActionBar(toolbar);
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
         //Recycler View:
-        mRecyclerView = findViewById(
+        RecyclerView mRecyclerView = findViewById(
                 R.id.activity_sel_question_edit_recyclerview);
-        mRecyclerLayoutManager = new LinearLayoutManager(getApplicationContext());
+        RecyclerView.LayoutManager mRecyclerLayoutManager = new LinearLayoutManager(getApplicationContext());
         mRecyclerView.setLayoutManager(mRecyclerLayoutManager);
 
         //Call the Presenter
         mPresenter = new SELQuestionEditPresenter(this,
                 UMAndroidUtil.bundleToHashtable(getIntent().getExtras()), this);
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
-
 
     }
 
@@ -66,7 +58,13 @@ public class SELQuestionEditActivity extends UstadBaseActivity implements SELQue
         return true;
     }
 
-    //Handling Action Bar button click
+    /**
+     * This method catches menu buttons/options pressed in the toolbar. Here it is Handling
+     * Action Bar button click done. - which will persist the opened / editing SEL question
+     *
+     * @param item  The item selected (from Menu Item)
+     * @return  true if accounted for
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle item selection

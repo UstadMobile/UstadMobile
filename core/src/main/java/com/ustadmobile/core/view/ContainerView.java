@@ -31,7 +31,6 @@
 package com.ustadmobile.core.view;
 
 import com.ustadmobile.core.controller.ContainerController;
-import com.ustadmobile.core.epubnav.EPUBNavDocument;
 import com.ustadmobile.core.epubnav.EPUBNavItem;
 
 /**
@@ -40,7 +39,7 @@ import com.ustadmobile.core.epubnav.EPUBNavItem;
  */
 public interface ContainerView extends UstadView {
 
-    public static final String VIEW_NAME = "Container";
+    String VIEW_NAME = "Container";
 
     void setController(ContainerController controller);
         

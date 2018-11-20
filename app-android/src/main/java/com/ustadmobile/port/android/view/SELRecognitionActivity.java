@@ -25,19 +25,19 @@ import ru.dimorinny.floatingtextbutton.FloatingTextButton;
 
 
 /**
- * The SELRecognition activity.
- * <p>
- * This Activity extends UstadBaseActivity and implements SELRecognitionView
+ * The SELRecognition activity. This Activity extends UstadBaseActivity and implements
+ * SELRecognitionView. This activity is responsible for showing and handling recognition which is
+ * merely a toggle on people blob lists and it will only allow to proceed if recognition check box
+ * is explicitly checked.
  */
 public class SELRecognitionActivity extends UstadBaseActivity implements SELRecognitionView {
 
-    private Toolbar toolbar;
-
-    //RecyclerView
     private RecyclerView mRecyclerView;
-    private RecyclerView.LayoutManager mRecyclerLayoutManager;
     private SELRecognitionPresenter mPresenter;
 
+    /**
+     * The DIFF callback
+     */
     public static final DiffUtil.ItemCallback<Person> DIFF_CALLBACK =
             new DiffUtil.ItemCallback<Person>() {
                 @Override
@@ -53,6 +53,13 @@ public class SELRecognitionActivity extends UstadBaseActivity implements SELReco
                 }
             };
 
+    /**
+     * This method catches menu buttons/options pressed in the toolbar. Here it is Handling
+     *  back button pressed.
+     *
+     * @param item  The menu item that was selected / clicked
+     * @return      true if accounted for.
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
@@ -63,6 +70,11 @@ public class SELRecognitionActivity extends UstadBaseActivity implements SELReco
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * Sets the people blob list recycler adapter to the recycler view and observes it.
+     *
+     * @param listProvider The provider data
+     */
     @Override
     public void setListProvider(UmProvider<Person> listProvider) {
 
@@ -72,6 +84,7 @@ public class SELRecognitionActivity extends UstadBaseActivity implements SELReco
                         mPresenter, true);
 
         // get the provider, set , observe, etc.
+        // A warning is expected.
         DataSource.Factory<Integer, Person> factory =
                 (DataSource.Factory<Integer, Person>)
                         listProvider.getProvider();
@@ -84,6 +97,18 @@ public class SELRecognitionActivity extends UstadBaseActivity implements SELReco
         mRecyclerView.setAdapter(recyclerAdapter);
     }
 
+    /**
+     * In Order:
+     *      1. Sets layout
+     *      2. Sets toolbar
+     *      3. Sets Recycler View
+     *      4. Sets layout of Recycler View with Grid (for people blobs)
+     *      5. Instantiates the presenter and calls it's onCreate()
+     *      6. Sets the Floating action button (that starts the SEL) to presenter's method along
+     *      with the value of recognized checkbox.
+     *
+     * @param savedInstanceState    The application bundle
+     */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -92,17 +117,16 @@ public class SELRecognitionActivity extends UstadBaseActivity implements SELReco
         setContentView(R.layout.activity_sel_recognition);
 
         //Toolbar:
-        toolbar = findViewById(R.id.activity_sel_recognition_toolbar);
+        Toolbar toolbar = findViewById(R.id.activity_sel_recognition_toolbar);
         toolbar.setTitle(getText(R.string.social_nomination));
         setSupportActionBar(toolbar);
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
-
         //Recycler View:
         mRecyclerView = findViewById(
                 R.id.activity_sel_recognition_recyclerview);
-        //mRecyclerLayoutManager = new LinearLayoutManager(getApplicationContext());
-        mRecyclerLayoutManager = new GridLayoutManager(getApplicationContext(), 3);
+        //View people blobs as a grid
+        RecyclerView.LayoutManager mRecyclerLayoutManager = new GridLayoutManager(getApplicationContext(), 3);
         mRecyclerView.setLayoutManager(mRecyclerLayoutManager);
 
         //Call the Presenter
@@ -117,8 +141,6 @@ public class SELRecognitionActivity extends UstadBaseActivity implements SELReco
         fab.setOnClickListener(v ->
                 mPresenter.handleClickPrimaryActionButton(recognizedCheckBox.isChecked()));
 
-
     }
-
 
 }

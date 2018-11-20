@@ -9,7 +9,8 @@ import com.ustadmobile.lib.db.entities.Person;
  */
 public interface SELAnswerListView extends UstadView {
 
-    public static final String VIEW_NAME = "SELAnswerList";
+    //View name
+    String VIEW_NAME = "SELAnswerList";
 
     /**
      * Sets Current SEL answers by students list
@@ -20,6 +21,5 @@ public interface SELAnswerListView extends UstadView {
      * @param selAnswersProvider The provider data
      */
     void setSELAnswerListProvider(UmProvider<Person> selAnswersProvider);
-
 
 }
