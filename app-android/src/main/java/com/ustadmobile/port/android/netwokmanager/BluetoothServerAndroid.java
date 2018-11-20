@@ -66,32 +66,36 @@ public class BluetoothServerAndroid extends BluetoothServer implements Runnable{
                 BluetoothServer.SERVICE_NAME + " on UUID : " + BluetoothServer.SERVICE_UUID);
 
             while(running) {
-                final BluetoothSocket clientSocket = mServerSocket.accept();
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        OutputStream out = null;
-                        InputStream in = null;
-                        try{
-                            out = clientSocket.getOutputStream();
-                            in = clientSocket.getInputStream();
-                            handleNodeConnected(clientSocket.getRemoteDevice().getAddress(), in, out);
-                            Log.d(TAG,"Connected to "+clientSocket.getRemoteDevice().getName());
-                        } catch (IOException e) {
-                            UstadMobileSystemImpl.l(UMLog.ERROR, 668,
-                                    "BluetoothServeRAndroid: IOException", e);
-                        }finally {
-                            UMIOUtils.closeInputStream(in);
-                            UMIOUtils.closeOutputStream(out);
-                            if(clientSocket != null){
-                                try { clientSocket.close(); }
-                                catch(IOException e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                        }
-                    }
-                }).start();
+              try{
+                  final BluetoothSocket clientSocket = mServerSocket.accept();
+                  new Thread(new Runnable() {
+                      @Override
+                      public void run() {
+                          OutputStream out = null;
+                          InputStream in = null;
+                          try{
+                              out = clientSocket.getOutputStream();
+                              in = clientSocket.getInputStream();
+                              handleNodeConnected(clientSocket.getRemoteDevice().getAddress(), in, out);
+                              Log.d(TAG,"Connected to "+clientSocket.getRemoteDevice().getName());
+                          } catch (IOException e) {
+                              UstadMobileSystemImpl.l(UMLog.ERROR, 668,
+                                      "BluetoothServeRAndroid: IOException", e);
+                          }finally {
+                              UMIOUtils.closeInputStream(in);
+                              UMIOUtils.closeOutputStream(out);
+                              if(clientSocket != null){
+                                  try { clientSocket.close(); }
+                                  catch(IOException e) {
+                                      e.printStackTrace();
+                                  }
+                              }
+                          }
+                      }
+                  }).start();
+              }catch (IOException e){
+                  e.printStackTrace();
+              }
             }
             UstadMobileSystemImpl.l(UMLog.INFO, 380,
                     "BluetoothServerAndroid: finished listening running=false");
