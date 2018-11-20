@@ -5,6 +5,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -66,7 +67,13 @@ public class ContentEntryDetailActivity extends UstadBaseActivity implements Con
 
     @Override
     public void setFileInfo(List<ContentEntryFile> contentEntryFileList) {
+        Button button = findViewById(R.id.entry_detail_download_button);
+        if(contentEntryFileList == null || contentEntryFileList.isEmpty()){
+            button.setEnabled(false);
+            return;
+        }
 
+        button.setEnabled(true);
         if (contentEntryFileList.size() == 1) {
 
             ContentEntryFile contentEntryFile = contentEntryFileList.get(0);

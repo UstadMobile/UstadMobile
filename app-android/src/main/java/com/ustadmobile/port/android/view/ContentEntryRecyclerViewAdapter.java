@@ -47,13 +47,13 @@ public class ContentEntryRecyclerViewAdapter extends PagedListAdapter<ContentEnt
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
-        public final View mView;
-        public final TextView entryTitle;
-        public final TextView entryDescription;
-        public final TextView entrySize;
-        public final ImageView thumbnailView;
+        final View mView;
+        final TextView entryTitle;
+        final TextView entryDescription;
+        final TextView entrySize;
+        final ImageView thumbnailView;
 
-        public ViewHolder(View view) {
+        ViewHolder(View view) {
             super(view);
             mView = view;
             entryTitle = view.findViewById(R.id.entry_title);

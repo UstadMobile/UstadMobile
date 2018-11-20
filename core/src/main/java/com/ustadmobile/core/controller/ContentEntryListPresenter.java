@@ -58,6 +58,7 @@ public class ContentEntryListPresenter extends UstadBaseController<ContentEntryV
             public void onSuccess(ContentEntry result) {
                 if (result == null) {
                     viewContract.showError();
+                    return;
                 }
 
                 if (result.isLeaf()) {
