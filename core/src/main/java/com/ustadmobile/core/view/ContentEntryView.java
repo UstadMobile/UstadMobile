@@ -10,4 +10,7 @@ public interface ContentEntryView extends UstadView {
     void setContentEntryProvider(UmProvider<ContentEntry> entryProvider);
 
     void setToolbarTitle(String title);
+
+    void showError();
+
 }

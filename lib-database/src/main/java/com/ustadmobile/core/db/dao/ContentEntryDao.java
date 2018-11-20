@@ -4,6 +4,7 @@ import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmQuery;
+import com.ustadmobile.lib.database.annotation.UmQueryFindByPrimaryKey;
 import com.ustadmobile.lib.database.annotation.UmUpdate;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.database.annotation.UmRepository;
@@ -72,4 +73,6 @@ public abstract class ContentEntryDao implements SyncableDao<ContentEntry, Conte
     @UmUpdate
     public abstract void update(ContentEntry entity);
 
+    @UmQueryFindByPrimaryKey
+    public abstract void findByUid(Long entryUid, UmCallback<ContentEntry> umCallback);
 }

@@ -7,6 +7,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.ContentEntryDetailView;
 import com.ustadmobile.core.view.ContentEntryView;
 import com.ustadmobile.lib.db.entities.ContentEntry;
+
 import java.util.Hashtable;
 
 public class ContentEntryListPresenter extends UstadBaseController<ContentEntryView> {
@@ -52,23 +53,26 @@ public class ContentEntryListPresenter extends UstadBaseController<ContentEntryV
         Hashtable args = new Hashtable();
         Long entryUid = entry.getContentEntryUid();
 
-        contentEntryDao.getCountNumberOfChildrenByParentUUid(entryUid, new UmCallback<Integer>() {
+        contentEntryDao.findByUid(entryUid, new UmCallback<ContentEntry>() {
             @Override
-            public void onSuccess(Integer result) {
-                if(result > 0){
-                    args.put(ARG_CONTENT_ENTRY_UID, entryUid);
-                    impl.go(ContentEntryView.VIEW_NAME, args, view.getContext());
-                }else{
+            public void onSuccess(ContentEntry result) {
+                if (result == null) {
+                    viewContract.showError();
+                }
+
+                if (result.isLeaf()) {
                     args.put(ARG_CONTENT_ENTRY_UID, entryUid);
                     impl.go(ContentEntryDetailView.VIEW_NAME, args, view.getContext());
+                } else {
+                    args.put(ARG_CONTENT_ENTRY_UID, entryUid);
+                    impl.go(ContentEntryView.VIEW_NAME, args, view.getContext());
                 }
             }
 
             @Override
             public void onFailure(Throwable exception) {
-
+                viewContract.showError();
             }
         });
-
     }
 }
