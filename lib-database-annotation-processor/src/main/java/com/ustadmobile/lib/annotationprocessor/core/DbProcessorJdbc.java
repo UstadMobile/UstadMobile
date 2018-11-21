@@ -255,6 +255,8 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                 addClearAllTablesCodeToMethod(dbType, overrideSpec, SQL_IDENTIFIER_CHAR);
             }else if(dbMethod.getAnnotation(UmRepository.class) != null) {
                 addGetRepositoryMethod(dbType, dbMethod, overrideSpec, "_repositories");
+            }else if(dbMethod.getAnnotation(UmSyncOutgoing.class) != null) {
+                overrideSpec = generateDbSyncOutgoingMethod(dbType, dbMethod);
             }else {
                 String daoFieldName = "_" + returnTypeElement.getSimpleName();
                 jdbcDbTypeSpec.addField(TypeName.get(dbMethod.getReturnType()), daoFieldName, Modifier.PRIVATE);

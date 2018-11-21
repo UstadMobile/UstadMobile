@@ -183,6 +183,8 @@ public class DbProcessorRoom extends AbstractDbProcessor{
                 addGetRepositoryMethod(dbType, daoMethod, repoMethodBuilder,
                         "_repositories");
                 dbManagerImplSpec.addMethod(repoMethodBuilder.build());
+            }else if(daoMethod.getAnnotation(UmSyncOutgoing.class) != null) {
+                dbManagerImplSpec.addMethod(generateDbSyncOutgoingMethod(dbType, daoMethod).build());
             }
 
             //Lookup using processingEnv.getElementUtils.getTypeElement

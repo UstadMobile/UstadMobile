@@ -125,6 +125,11 @@ public class DbProcessorRetrofitRepository extends AbstractDbProcessor {
                         .addCode("throw new RuntimeException($S);\n",
                                 "Cannot get a repository for a repository")
                         .build());
+            }else if(subElement.getAnnotation(UmSyncOutgoing.class) != null) {
+                dbRepoBuilder.addMethod(MethodSpec.overriding(subElement)
+                        .addCode("throw new RuntimeException($S);\n",
+                                "Cannot run outgoing sync on repository. Must be outgoing from database")
+                        .build());
             }else {
                 TypeMirror retType = subElement.getReturnType();
                 if(!retType.getKind().equals(TypeKind.DECLARED)

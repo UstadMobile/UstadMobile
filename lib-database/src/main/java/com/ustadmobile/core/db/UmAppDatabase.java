@@ -33,6 +33,7 @@ import com.ustadmobile.lib.database.annotation.UmClearAll;
 import com.ustadmobile.lib.database.annotation.UmDatabase;
 import com.ustadmobile.lib.database.annotation.UmDbContext;
 import com.ustadmobile.lib.database.annotation.UmRepository;
+import com.ustadmobile.lib.database.annotation.UmSyncOutgoing;
 import com.ustadmobile.lib.db.sync.UmSyncableDatabase;
 import com.ustadmobile.lib.db.sync.dao.SyncStatusDao;
 import com.ustadmobile.lib.db.sync.dao.SyncablePrimaryKeyDao;
@@ -192,5 +193,8 @@ public abstract class UmAppDatabase implements UmSyncableDatabase{
 
     @UmRepository
     public abstract UmAppDatabase getRepository(String baseUrl, String auth);
+
+    @UmSyncOutgoing
+    public abstract void syncWith(UmAppDatabase otherDb, long accountUid);
 
 }

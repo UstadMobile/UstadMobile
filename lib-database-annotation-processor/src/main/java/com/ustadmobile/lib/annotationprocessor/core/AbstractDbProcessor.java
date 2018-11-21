@@ -23,6 +23,7 @@ import com.ustadmobile.lib.database.annotation.UmSyncFindUpdateable;
 import com.ustadmobile.lib.database.annotation.UmSyncIncoming;
 import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
 import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
+import com.ustadmobile.lib.database.annotation.UmSyncOutgoing;
 import com.ustadmobile.lib.db.sync.SyncResponse;
 import com.ustadmobile.lib.db.sync.UmRepositoryDb;
 import com.ustadmobile.lib.db.sync.UmRepositoryUtils;
@@ -34,6 +35,7 @@ import com.ustadmobile.lib.db.sync.entities.SyncStatus;
 import java.io.File;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -115,7 +117,8 @@ public abstract class AbstractDbProcessor {
                         continue;
 
                     if(dbMethod.getAnnotation(UmDbContext.class) != null
-                            || dbMethod.getAnnotation(UmClearAll.class) != null)
+                            || dbMethod.getAnnotation(UmClearAll.class) != null
+                            || dbMethod.getAnnotation(UmSyncOutgoing.class) != null)
                         continue;
 
 
@@ -124,7 +127,8 @@ public abstract class AbstractDbProcessor {
                         messager.printMessage(Diagnostic.Kind.ERROR,
                                 dbClassElement.getSimpleName().toString() + "." +
                                         dbMethod.getSimpleName() +
-                                        " abstract method must return a DAO or be annotated with @UmContext");
+                                        " abstract method must return a DAO or be annotated with " +
+                                        "@UmContext, @UmClearAll, or @UmSyncOutgoing.");
                         continue;
                     }
 
@@ -1198,4 +1202,48 @@ public abstract class AbstractDbProcessor {
                 .endControlFlow()
                 .add("return ($T)_repo;\n", dbType).build());
     }
+
+    protected MethodSpec.Builder generateDbSyncOutgoingMethod(TypeElement dbType, ExecutableElement dbMethod) {
+        List<ExecutableElement> daoGettersToSync = new ArrayList<>();
+
+        for(ExecutableElement subMethod : findMethodsToImplement(dbType)) {
+            TypeMirror returnType = subMethod.getReturnType();
+            if(!returnType.getKind().equals(TypeKind.DECLARED))
+                continue;
+
+            TypeElement returnTypeEl = (TypeElement)processingEnv.getTypeUtils()
+                    .asElement(returnType);
+            if(returnTypeEl.getAnnotation(UmDao.class) == null)
+                continue;
+
+            Element outgoingSyncMethod = findElementWithAnnotation(returnTypeEl,
+                    UmSyncOutgoing.class, processingEnv);
+            if(outgoingSyncMethod != null){
+                daoGettersToSync.add((ExecutableElement)subMethod);
+            }
+        }
+
+        MethodSpec.Builder methodBuilder = MethodSpec.overriding(dbMethod);
+        CodeBlock.Builder codeBlock = CodeBlock.builder();
+
+        String otherDbParamName = dbMethod.getParameters().get(0).getSimpleName().toString();
+        String accountUidParamName = dbMethod.getParameters().get(1).getSimpleName().toString();
+
+
+        for(ExecutableElement syncableDaoGetter : daoGettersToSync) {
+            Element syncMethodEl = findElementWithAnnotation((TypeElement)processingEnv
+                            .getTypeUtils().asElement(syncableDaoGetter.getReturnType()),
+                    UmSyncOutgoing.class, processingEnv);
+
+            codeBlock.add("$1L().$2L($3L.$1L(), $4L);\n",
+                    syncableDaoGetter.getSimpleName(),
+                    syncMethodEl.getSimpleName(),
+                    otherDbParamName,
+                    accountUidParamName);
+        }
+        methodBuilder.addCode(codeBlock.build());
+
+        return methodBuilder;
+    }
+
 }
