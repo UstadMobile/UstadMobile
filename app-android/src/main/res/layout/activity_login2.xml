@@ -41,6 +41,7 @@
 
 
             <Button
+                android:visibility="gone"
                 android:id="@+id/activity_login2_facebook_button"
                 android:layout_width="0dp"
                 android:drawableLeft="@drawable/icon_facebook"
@@ -56,6 +57,7 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <Button
+                android:visibility="invisible"
                 android:padding="@dimen/dimen_16dp"
                 android:drawableLeft="@drawable/icon_twitter"
                 android:id="@+id/activity_login2_twitter_button"

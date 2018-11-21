@@ -35,12 +35,16 @@ import com.ustadmobile.core.db.dao.WamdaClazzDao;
 import com.ustadmobile.core.db.dao.WamdaFollowerDao;
 import com.ustadmobile.core.db.dao.WamdaLikeDao;
 import com.ustadmobile.core.db.dao.WamdaPersonDao;
+import com.ustadmobile.core.db.dao.WamdaPersonSubjectDao;
 import com.ustadmobile.core.db.dao.WamdaShareDao;
+import com.ustadmobile.core.db.dao.WamdaSubjectDao;
 import com.ustadmobile.core.db.dao.WamdaUpdateDao;
 import com.ustadmobile.lib.database.annotation.UmClearAll;
 import com.ustadmobile.lib.database.annotation.UmDatabase;
 import com.ustadmobile.lib.database.annotation.UmDbContext;
 import com.ustadmobile.lib.database.annotation.UmRepository;
+import com.ustadmobile.lib.db.entities.WamdaPersonSubject;
+import com.ustadmobile.lib.db.entities.WamdaSubject;
 import com.ustadmobile.lib.db.sync.UmSyncableDatabase;
 import com.ustadmobile.lib.db.sync.dao.SyncStatusDao;
 import com.ustadmobile.lib.db.sync.dao.SyncablePrimaryKeyDao;
@@ -98,7 +102,8 @@ import com.ustadmobile.lib.db.sync.entities.SyncablePrimaryKey;
         DiscussionPostAttachment.class,ContentEntryContentCategoryJoin.class,
         ContentEntryContentEntryFileJoin.class, ContentEntryFile.class,
         ContentEntryParentChildJoin.class, ContentEntryRelatedEntryJoin.class,
-        SyncStatus.class, SyncablePrimaryKey.class, SyncDeviceBits.class
+        SyncStatus.class, SyncablePrimaryKey.class, SyncDeviceBits.class,
+        WamdaSubject.class,WamdaPersonSubject.class
 })
 public abstract class UmAppDatabase implements UmSyncableDatabase{
 
@@ -204,6 +209,10 @@ public abstract class UmAppDatabase implements UmSyncableDatabase{
     public abstract ContentEntryRelatedEntryJoinDao getContentEntryRelatedEntryJoinDao();
 
     public abstract SyncStatusDao getSyncStatusDao();
+
+    public abstract WamdaSubjectDao getSubjectDao();
+
+    public abstract WamdaPersonSubjectDao getPersonSubjectDao();
 
     @UmDbContext
     public abstract Object getContext();
