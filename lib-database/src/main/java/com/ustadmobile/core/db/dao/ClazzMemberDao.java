@@ -6,9 +6,10 @@ import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.db.entities.ClazzMember;
 import com.ustadmobile.lib.db.sync.dao.BaseDao;
+import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
-@UmDao
-public abstract class ClazzMemberDao implements BaseDao<ClazzMember> {
+@UmDao(readPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
+public abstract class ClazzMemberDao implements SyncableDao<ClazzMember, ClazzMemberDao> {
 
     @UmInsert
     public abstract long insert(ClazzMember entity);

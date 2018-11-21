@@ -8,9 +8,10 @@ import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.ClazzWithNumStudents;
 import com.ustadmobile.lib.db.sync.dao.BaseDao;
+import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
-@UmDao
-public abstract class ClazzDao implements BaseDao<Clazz> {
+@UmDao(readPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
+public abstract class ClazzDao implements SyncableDao<Clazz, ClazzDao> {
 
     @Override
     @UmInsert

@@ -2,12 +2,14 @@ package com.ustadmobile.lib.db.entities;
 
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
+import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
+import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 
 /**
  * This class mediates the relationship between a person and a clazz. A member can be a teacher,
  * or a student. Each member has a joining date, and a leaving date.
  */
-@UmEntity
+@UmEntity(tableId = 7)
 public class ClazzMember implements SyncableEntity {
 
     public static final int ROLE_STUDENT = 1;
@@ -30,6 +32,12 @@ public class ClazzMember implements SyncableEntity {
     private long masterChangeSeqNum;
 
     private long localChangeSeqNum;
+
+    @UmSyncLocalChangeSeqNum
+    private long clazzMemberLocalChangeSeqNum;
+
+    @UmSyncMasterChangeSeqNum
+    private long clazzMemberMasterChangeSeqNum;
 
     public long getClazzMemberUid() {
         return clazzMemberUid;
@@ -102,5 +110,21 @@ public class ClazzMember implements SyncableEntity {
     @Override
     public void setLocalChangeSeqNum(long localChangeSeqNum) {
         this.localChangeSeqNum = localChangeSeqNum;
+    }
+
+    public long getClazzMemberLocalChangeSeqNum() {
+        return clazzMemberLocalChangeSeqNum;
+    }
+
+    public void setClazzMemberLocalChangeSeqNum(long clazzMemberLocalChangeSeqNum) {
+        this.clazzMemberLocalChangeSeqNum = clazzMemberLocalChangeSeqNum;
+    }
+
+    public long getClazzMemberMasterChangeSeqNum() {
+        return clazzMemberMasterChangeSeqNum;
+    }
+
+    public void setClazzMemberMasterChangeSeqNum(long clazzMemberMasterChangeSeqNum) {
+        this.clazzMemberMasterChangeSeqNum = clazzMemberMasterChangeSeqNum;
     }
 }

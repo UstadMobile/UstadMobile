@@ -2,8 +2,10 @@ package com.ustadmobile.lib.db.entities;
 
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
+import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
+import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 
-@UmEntity
+@UmEntity(tableId = 6)
 public class Clazz implements SyncableEntity{
 
     @UmPrimaryKey(autoIncrement = true)
@@ -16,6 +18,12 @@ public class Clazz implements SyncableEntity{
     private long localChangeSeqNum;
 
     private float attendanceAverage;
+
+    @UmSyncMasterChangeSeqNum
+    private long clazzMasterChangeSeqNum;
+
+    @UmSyncLocalChangeSeqNum
+    private long clazzLocalChangeSeqNum;
 
     public float getAttendanceAverage() {
         return attendanceAverage;
@@ -59,5 +67,21 @@ public class Clazz implements SyncableEntity{
     @Override
     public void setLocalChangeSeqNum(long localChangeSeqNum) {
         this.localChangeSeqNum = localChangeSeqNum;
+    }
+
+    public long getClazzMasterChangeSeqNum() {
+        return clazzMasterChangeSeqNum;
+    }
+
+    public void setClazzMasterChangeSeqNum(long clazzMasterChangeSeqNum) {
+        this.clazzMasterChangeSeqNum = clazzMasterChangeSeqNum;
+    }
+
+    public long getClazzLocalChangeSeqNum() {
+        return clazzLocalChangeSeqNum;
+    }
+
+    public void setClazzLocalChangeSeqNum(long clazzLocalChangeSeqNum) {
+        this.clazzLocalChangeSeqNum = clazzLocalChangeSeqNum;
     }
 }
