@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Vector;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -121,6 +122,7 @@ public class DbProcessorRoom extends AbstractDbProcessor{
                     .addModifiers(Modifier.PUBLIC)
                     .addCode("this.context = (Context)context;\n")
                     .addCode("this.dbExecutor = $T.newCachedThreadPool();\n", Executors.class)
+                    .addCode("this._repositories = new $T<>();\n", Vector.class)
                     .addCode("_roomDb = $T.databaseBuilder(this.context, " + roomDbClassName +
                             ".class, dbName).build();\n",
                             ClassName.get("android.arch.persistence.room", "Room"))
