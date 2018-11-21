@@ -8,6 +8,8 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 
+import com.ustadmobile.core.db.UmAppDatabase;
+import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
@@ -41,10 +43,16 @@ public class NetworkServiceAndroid extends Service {
 
     private boolean isSyncHappening = false;
 
+    private Runnable syncRunnable = () -> {
+        UmAppDatabase repo = UmAccountManager.getRepositoryForActiveAccount(getApplicationContext());
+        UmAppDatabase.getInstance(getApplicationContext()).syncWith(repo, 0);
+        System.out.print("syncWith completed");
+    };
+
     /**
      * Default time interval for Wi-Fi Direct service rebroadcasting.
      */
-    public static final int SERVICE_REBROADCASTING_TIMER=120000;
+    public static final int SERVICE_REBROADCASTING_TIMER = 120000;
 
     public NetworkServiceAndroid(){}
 
@@ -58,6 +66,7 @@ public class NetworkServiceAndroid extends Service {
         //Bind WifiService
         Intent wifiServiceIntent = new Intent(this, WifiDirectHandler.class);
         bindService(wifiServiceIntent, wifiP2PServiceConnection, BIND_AUTO_CREATE);
+//        new Thread(syncRunnable).start();
     }
 
     @Override
