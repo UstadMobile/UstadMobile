@@ -2,11 +2,13 @@ package com.ustadmobile.lib.db.entities;
 
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
+import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
+import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 
-@UmEntity
+@UmEntity(tableId = 1002)
 public class WamdaClazz {
 
-    @UmPrimaryKey (autoIncrement = true)
+    @UmPrimaryKey (autoGenerateSyncable = true)
     private long wamdaClazzUid;
 
     private long wamdaClazzPersonUid;
@@ -18,6 +20,12 @@ public class WamdaClazz {
     private String wamdaClazzDescription;
 
     private String wamdaClazzSubtitle;
+
+    @UmSyncLocalChangeSeqNum
+    private long wamdaClazzLocalChangeSeqNum;
+
+    @UmSyncMasterChangeSeqNum
+    private long wamdaClazzMasterChangeSeqNum;
 
 
     public long getWamdaClazzUid() {
@@ -66,5 +74,21 @@ public class WamdaClazz {
 
     public void setWamdaClazzSubtitle(String wamdaClazzSubtitle) {
         this.wamdaClazzSubtitle = wamdaClazzSubtitle;
+    }
+
+    public long getWamdaClazzLocalChangeSeqNum() {
+        return wamdaClazzLocalChangeSeqNum;
+    }
+
+    public void setWamdaClazzLocalChangeSeqNum(long wamdaClazzLocalChangeSeqNum) {
+        this.wamdaClazzLocalChangeSeqNum = wamdaClazzLocalChangeSeqNum;
+    }
+
+    public long getWamdaClazzMasterChangeSeqNum() {
+        return wamdaClazzMasterChangeSeqNum;
+    }
+
+    public void setWamdaClazzMasterChangeSeqNum(long wamdaClazzMasterChangeSeqNum) {
+        this.wamdaClazzMasterChangeSeqNum = wamdaClazzMasterChangeSeqNum;
     }
 }

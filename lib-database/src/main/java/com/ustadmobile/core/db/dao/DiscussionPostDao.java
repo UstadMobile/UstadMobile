@@ -8,11 +8,12 @@ import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.db.entities.DiscussionPost;
 import com.ustadmobile.lib.db.entities.DiscussionPostWithPoster;
 import com.ustadmobile.lib.db.sync.dao.BaseDao;
+import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
 import java.util.List;
 
-@UmDao
-public abstract class DiscussionPostDao implements BaseDao<DiscussionPost> {
+@UmDao(readPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
+public abstract class DiscussionPostDao implements SyncableDao<DiscussionPost, DiscussionPostDao> {
 
     @Override
     @UmInsert

@@ -2,11 +2,13 @@ package com.ustadmobile.lib.db.entities;
 
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
+import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
+import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 
-@UmEntity
+@UmEntity(tableId = 1004)
 public class WamdaLike {
 
-    @UmPrimaryKey (autoIncrement =  true)
+    @UmPrimaryKey (autoGenerateSyncable =  true)
     private long wamdaLikeUid;
 
     private long wamdaLikePersonUid;
@@ -16,6 +18,12 @@ public class WamdaLike {
     private long wamdaLikeDiscussionUid;
 
     private long timeStamp;
+
+    @UmSyncLocalChangeSeqNum
+    private long wamdaLikeLocalChangeSeqNum;
+
+    @UmSyncMasterChangeSeqNum
+    private long wamdaLikeMasterChangeSeqNum;
 
     public long getWamdaLikeUid() {
         return wamdaLikeUid;
@@ -55,5 +63,21 @@ public class WamdaLike {
 
     public void setTimeStamp(long timeStamp) {
         this.timeStamp = timeStamp;
+    }
+
+    public long getWamdaLikeLocalChangeSeqNum() {
+        return wamdaLikeLocalChangeSeqNum;
+    }
+
+    public void setWamdaLikeLocalChangeSeqNum(long wamdaLikeLocalChangeSeqNum) {
+        this.wamdaLikeLocalChangeSeqNum = wamdaLikeLocalChangeSeqNum;
+    }
+
+    public long getWamdaLikeMasterChangeSeqNum() {
+        return wamdaLikeMasterChangeSeqNum;
+    }
+
+    public void setWamdaLikeMasterChangeSeqNum(long wamdaLikeMasterChangeSeqNum) {
+        this.wamdaLikeMasterChangeSeqNum = wamdaLikeMasterChangeSeqNum;
     }
 }

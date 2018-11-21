@@ -2,11 +2,13 @@ package com.ustadmobile.lib.db.entities;
 
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
+import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
+import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 
-@UmEntity
+@UmEntity(tableId = 1005)
 public class WamdaPerson {
 
-    @UmPrimaryKey(autoIncrement = true)
+    @UmPrimaryKey(autoGenerateSyncable = true)
     private long wamdaPersonUid;
 
     private long wamdaPersonPersonUid;
@@ -16,6 +18,12 @@ public class WamdaPerson {
     private String profileStatus;
 
     private String profileImage;
+
+    @UmSyncLocalChangeSeqNum
+    private long wamdaPersonLocalChangeSeqNum;
+
+    @UmSyncMasterChangeSeqNum
+    private long wamdaPersonMasterChangeSeqNum;
 
     public long getWamdaPersonUid() {
         return wamdaPersonUid;
@@ -55,5 +63,21 @@ public class WamdaPerson {
 
     public void setProfileImage(String profileImage) {
         this.profileImage = profileImage;
+    }
+
+    public long getWamdaPersonLocalChangeSeqNum() {
+        return wamdaPersonLocalChangeSeqNum;
+    }
+
+    public void setWamdaPersonLocalChangeSeqNum(long wamdaPersonLocalChangeSeqNum) {
+        this.wamdaPersonLocalChangeSeqNum = wamdaPersonLocalChangeSeqNum;
+    }
+
+    public long getWamdaPersonMasterChangeSeqNum() {
+        return wamdaPersonMasterChangeSeqNum;
+    }
+
+    public void setWamdaPersonMasterChangeSeqNum(long wamdaPersonMasterChangeSeqNum) {
+        this.wamdaPersonMasterChangeSeqNum = wamdaPersonMasterChangeSeqNum;
     }
 }

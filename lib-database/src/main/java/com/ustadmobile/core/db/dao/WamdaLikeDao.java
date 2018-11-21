@@ -7,9 +7,10 @@ import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.db.entities.WamdaLike;
 import com.ustadmobile.lib.db.entities.WamdaLikeWithDiscussionPersonClazz;
+import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
-@UmDao
-public abstract class WamdaLikeDao {
+@UmDao(readPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
+public abstract class WamdaLikeDao implements SyncableDao<WamdaLike, WamdaLikeDao> {
 
     @UmInsert
     public abstract void insertAsync(WamdaLike like, UmCallback<Long> callback);

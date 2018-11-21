@@ -2,11 +2,13 @@ package com.ustadmobile.lib.db.entities;
 
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
+import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
+import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 
-@UmEntity
+@UmEntity(tableId = 1007)
 public class WamdaShare {
 
-    @UmPrimaryKey (autoIncrement =  true)
+    @UmPrimaryKey (autoGenerateSyncable=  true)
     private long wamdaShareUid;
 
     private long wamdaSharePersonUid;
@@ -14,6 +16,12 @@ public class WamdaShare {
     private long wamdaShareClazzUid;
 
     private long wamdaShareDiscussionUid;
+
+    @UmSyncLocalChangeSeqNum
+    private long localChangeSeqNum;
+
+    @UmSyncMasterChangeSeqNum
+    private long masterChangeSeqNum;
 
     public long getWamdaShareUid() {
         return wamdaShareUid;
@@ -45,5 +53,21 @@ public class WamdaShare {
 
     public void setWamdaShareDiscussionUid(long wamdaShareDiscussionUid) {
         this.wamdaShareDiscussionUid = wamdaShareDiscussionUid;
+    }
+
+    public long getLocalChangeSeqNum() {
+        return localChangeSeqNum;
+    }
+
+    public void setLocalChangeSeqNum(long localChangeSeqNum) {
+        this.localChangeSeqNum = localChangeSeqNum;
+    }
+
+    public long getMasterChangeSeqNum() {
+        return masterChangeSeqNum;
+    }
+
+    public void setMasterChangeSeqNum(long masterChangeSeqNum) {
+        this.masterChangeSeqNum = masterChangeSeqNum;
     }
 }

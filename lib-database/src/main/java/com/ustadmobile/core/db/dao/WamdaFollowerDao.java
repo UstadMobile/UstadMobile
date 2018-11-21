@@ -7,9 +7,10 @@ import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.db.entities.WamdaFollower;
 import com.ustadmobile.lib.db.entities.WamdaFollowerWithPerson;
+import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
-@UmDao
-public abstract class WamdaFollowerDao {
+@UmDao(readPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
+public abstract class WamdaFollowerDao implements SyncableDao<WamdaFollower, WamdaFollowerDao> {
 
 
     @UmInsert

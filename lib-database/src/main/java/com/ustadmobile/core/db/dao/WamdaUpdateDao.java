@@ -7,9 +7,10 @@ import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.db.entities.WamdaUpdate;
 import com.ustadmobile.lib.db.entities.WamdaUpdateWithPerson;
+import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
-@UmDao
-public abstract class WamdaUpdateDao {
+@UmDao(readPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
+public abstract class WamdaUpdateDao implements SyncableDao<WamdaUpdate, WamdaUpdateDao> {
 
     @UmInsert
     public abstract void insert(WamdaUpdate update, UmCallback<Long> callback);

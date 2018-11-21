@@ -1805,7 +1805,6 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
         codeBlock.add(".$L(", getPreparedStatementSetterMethodName(field.asType()));
 
 
-        //TODO: add error message here if there is no match
         List<ExecutableElement> getterCallchain = findGetterOrSetter("get", daoMethod,
                 field.getSimpleName().toString(), entityTypeElement, new ArrayList<>(), false);
         codeBlock.add("$L, $L.", index, entityVariableName);
@@ -1813,7 +1812,7 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
         if(getterCallchain != null && !getterCallchain.isEmpty()) {
             codeBlock.add(getterCallchain.get(0).getSimpleName().toString()).add("());\n");
         }else {
-            messager.printMessage(Diagnostic.Kind.ERROR, "Error: field " +
+            messager.printMessage(Diagnostic.Kind.ERROR, "Error: Ffield " +
                     field.getSimpleName() + " on " + entityTypeElement.getQualifiedName() +
                     ": cannot find getter method. Attempting to generate " +
                     daoMethod.getSimpleName());

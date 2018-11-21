@@ -2,11 +2,13 @@ package com.ustadmobile.lib.db.entities;
 
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
+import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
+import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 
-@UmEntity
+@UmEntity(tableId = 1009)
 public class WamdaUpdate {
 
-    @UmPrimaryKey (autoIncrement = true)
+    @UmPrimaryKey (autoGenerateSyncable = true)
     private long wamdUpdateUid;
 
     private long wamdaUpdatePersonUid;
@@ -17,6 +19,11 @@ public class WamdaUpdate {
 
     private long timestamp;
 
+    @UmSyncLocalChangeSeqNum
+    private long wamdaUpdateLocalChangeSeqNum;
+
+    @UmSyncMasterChangeSeqNum
+    private long wamdaUpdateMasterChangeSeqNum;
 
     public long getWamdUpdateUid() {
         return wamdUpdateUid;
@@ -56,5 +63,21 @@ public class WamdaUpdate {
 
     public void setTimestamp(long timestamp) {
         this.timestamp = timestamp;
+    }
+
+    public long getWamdaUpdateLocalChangeSeqNum() {
+        return wamdaUpdateLocalChangeSeqNum;
+    }
+
+    public void setWamdaUpdateLocalChangeSeqNum(long wamdaUpdateLocalChangeSeqNum) {
+        this.wamdaUpdateLocalChangeSeqNum = wamdaUpdateLocalChangeSeqNum;
+    }
+
+    public long getWamdaUpdateMasterChangeSeqNum() {
+        return wamdaUpdateMasterChangeSeqNum;
+    }
+
+    public void setWamdaUpdateMasterChangeSeqNum(long wamdaUpdateMasterChangeSeqNum) {
+        this.wamdaUpdateMasterChangeSeqNum = wamdaUpdateMasterChangeSeqNum;
     }
 }

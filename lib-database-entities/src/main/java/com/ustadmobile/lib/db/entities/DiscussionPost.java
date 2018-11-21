@@ -2,11 +2,13 @@ package com.ustadmobile.lib.db.entities;
 
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
+import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
+import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 
-@UmEntity
+@UmEntity(tableId = 14)
 public class DiscussionPost {
 
-    @UmPrimaryKey(autoIncrement = true)
+    @UmPrimaryKey(autoGenerateSyncable = true)
     private long discussionPostUid;
 
     private long posterPersonUid;
@@ -20,6 +22,12 @@ public class DiscussionPost {
     private long clazzClazzUid;
 
     private long hasAttachments;
+
+    @UmSyncLocalChangeSeqNum
+    private long discussionPostLocalChangeSeqNum;
+
+    @UmSyncMasterChangeSeqNum
+    private long discussionPostMasterChangeSeqNum;
 
     public long getDiscussionPostUid() {
         return discussionPostUid;
@@ -75,5 +83,21 @@ public class DiscussionPost {
 
     public void setHasAttachments(long hasAttachments) {
         this.hasAttachments = hasAttachments;
+    }
+
+    public long getDiscussionPostLocalChangeSeqNum() {
+        return discussionPostLocalChangeSeqNum;
+    }
+
+    public void setDiscussionPostLocalChangeSeqNum(long discussionPostLocalChangeSeqNum) {
+        this.discussionPostLocalChangeSeqNum = discussionPostLocalChangeSeqNum;
+    }
+
+    public long getDiscussionPostMasterChangeSeqNum() {
+        return discussionPostMasterChangeSeqNum;
+    }
+
+    public void setDiscussionPostMasterChangeSeqNum(long discussionPostMasterChangeSeqNum) {
+        this.discussionPostMasterChangeSeqNum = discussionPostMasterChangeSeqNum;
     }
 }

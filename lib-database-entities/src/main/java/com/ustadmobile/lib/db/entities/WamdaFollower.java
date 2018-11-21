@@ -2,11 +2,13 @@ package com.ustadmobile.lib.db.entities;
 
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
+import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
+import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 
-@UmEntity
+@UmEntity(tableId = 1003)
 public class WamdaFollower {
 
-    @UmPrimaryKey(autoIncrement = true)
+    @UmPrimaryKey(autoGenerateSyncable = true)
     private long wamdaFollowerUid;
 
     private long wamdaFollowerPersonUid;
@@ -14,6 +16,12 @@ public class WamdaFollower {
     private long timeStamp;
 
     private long wamdaFollowingPersonUid;
+
+    @UmSyncLocalChangeSeqNum
+    private long wamdaFollowerLocalChangeSeqNum;
+
+    @UmSyncMasterChangeSeqNum
+    private long wamdaFollowerMasterChangeSeqNum;
 
     public long getWamdaFollowerUid() {
         return wamdaFollowerUid;
@@ -66,5 +74,21 @@ public class WamdaFollower {
         result = 31 * result + (int) (timeStamp ^ (timeStamp >>> 32));
         result = 31 * result + (int) (wamdaFollowingPersonUid ^ (wamdaFollowingPersonUid >>> 32));
         return result;
+    }
+
+    public long getWamdaFollowerLocalChangeSeqNum() {
+        return wamdaFollowerLocalChangeSeqNum;
+    }
+
+    public void setWamdaFollowerLocalChangeSeqNum(long wamdaFollowerLocalChangeSeqNum) {
+        this.wamdaFollowerLocalChangeSeqNum = wamdaFollowerLocalChangeSeqNum;
+    }
+
+    public long getWamdaFollowerMasterChangeSeqNum() {
+        return wamdaFollowerMasterChangeSeqNum;
+    }
+
+    public void setWamdaFollowerMasterChangeSeqNum(long wamdaFollowerMasterChangeSeqNum) {
+        this.wamdaFollowerMasterChangeSeqNum = wamdaFollowerMasterChangeSeqNum;
     }
 }
