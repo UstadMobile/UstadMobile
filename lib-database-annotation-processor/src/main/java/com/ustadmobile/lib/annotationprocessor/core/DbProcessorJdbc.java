@@ -1592,8 +1592,8 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                                 "get" + getPreparedStatementSetterGetterTypeName(method.getParameters()
                                         .get(0).asType()));
                         paramMap.put("resultSetVarName", resultSetVariableName);
-                        paramMap.put("index", i + 1);
-                        setFromResultCodeBlock.addNamed(".$setterName:L($resultSetVarName:L.$resultSetGetter:L($index:L));\n",
+                        paramMap.put("colname", metaData.getColumnLabel(i+1));
+                        setFromResultCodeBlock.addNamed(".$setterName:L($resultSetVarName:L.$resultSetGetter:L($colname:S));\n",
                                 paramMap);
                     }else if(method.getSimpleName().toString().startsWith("get")) {
                         //this is an embedded field
