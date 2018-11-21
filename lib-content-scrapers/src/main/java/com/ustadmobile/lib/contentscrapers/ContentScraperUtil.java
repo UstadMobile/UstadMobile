@@ -599,15 +599,16 @@ public class ContentScraperUtil {
     }
 
     public static ContentEntryFile insertContentEntryFile(File ePubFile, ContentEntryFileDao contentEntryFileDao,
-                                                    ContentEntryFileStatusDao contentEntryFileStatusDao,
-                                                    ContentEntry contentEntry, String md5,
-                                                    ContentEntryContentEntryFileJoinDao contentEntryContentEntryFileJoinDao) {
+                                                          ContentEntryFileStatusDao contentEntryFileStatusDao,
+                                                          ContentEntry contentEntry, String md5,
+                                                          ContentEntryContentEntryFileJoinDao contentEntryContentEntryFileJoinDao, boolean mobileOptimized) {
 
         ContentEntryFile contentEntryFile = new ContentEntryFile();
         contentEntryFile.setMimeType(ScraperConstants.MIMETYPE_EPUB);
         contentEntryFile.setFileSize(ePubFile.length());
         contentEntryFile.setLastModified(ePubFile.lastModified());
         contentEntryFile.setMd5sum(md5);
+        contentEntryFile.setMobileOptimized(mobileOptimized);
         contentEntryFile.setContentEntryFileUid(contentEntryFileDao.insert(contentEntryFile));
 
         ContentEntryContentEntryFileJoin fileJoin = new ContentEntryContentEntryFileJoin();

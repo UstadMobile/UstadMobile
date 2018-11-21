@@ -74,7 +74,7 @@ public class IndexDdlContent {
         destinationDirectory = destinationDir;
 
         UmAppDatabase db = UmAppDatabase.getInstance(null);
-        UmAppDatabase repository = db.getRepository("", "");
+        UmAppDatabase repository = db.getRepository("https://localhost", "");
         contentEntryDao = repository.getContentEntryDao();
         contentParentChildJoinDao = repository.getContentEntryParentChildJoinDao();
         contentCategoryChildJoinDao = repository.getContentEntryContentCategoryJoinDao();

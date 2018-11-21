@@ -66,7 +66,7 @@ public class DdlContentScraper {
         this.url = new URL(url);
         destinationDirectory.mkdirs();
         UmAppDatabase db = UmAppDatabase.getInstance(null);
-        UmAppDatabase repository = db.getRepository("", "");
+        UmAppDatabase repository = db.getRepository("https://localhost", "");
         contentEntryDao = repository.getContentEntryDao();
         contentEntryFileDao = repository.getContentEntryFileDao();
         contentEntryFileJoinDao = repository.getContentEntryContentEntryFileJoinDao();
@@ -117,8 +117,10 @@ public class DdlContentScraper {
             String lang = doc.select("html").attr("lang");
             Language langEntity = ContentScraperUtil.insertOrUpdateLanguage(languageDao, LanguageCode.getByCode(lang).getName());
             String description = doc.selectFirst("meta[name=description]").attr("content");
-            String author = doc.selectFirst("article.resource-view-details h3:contains(Author) ~ p").text();
-            String publisher = doc.selectFirst("article.resource-view-details h3:contains(Publisher) ~ p").text();
+            Element authorTag = doc.selectFirst("article.resource-view-details h3:contains(Author) ~ p");
+            String author = authorTag != null ? authorTag.text() : "";
+            Element publisherTag = doc.selectFirst("article.resource-view-details h3:contains(Publisher) ~ p");
+            String publisher = publisherTag != null ? publisherTag.text() : "";
 
             ContentEntry contentEntry = contentEntryDao.findBySourceUrl(uri.toURL().getPath());
             if (contentEntry == null) {

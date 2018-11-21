@@ -123,6 +123,7 @@ public class TestPrathamContentScraper {
 
     }
 
+
     @Test
     public void testDdl() throws IOException {
 
@@ -147,15 +148,6 @@ public class TestPrathamContentScraper {
         File contentFile = new File(contentFolder, "311.pdf");
         Assert.assertEquals(true, ContentScraperUtil.fileHasContent(contentFile));
 
-
-    }
-
-    @Test
-    public void testIndexDdl() throws IOException{
-
-        File tmpDir = Files.createTempDirectory("testindexDdlontentscraper").toFile();
-
-       new IndexDdlContent().findContent("https://www.darakhtdanesh.org/en/resources/list?page=2", tmpDir);
 
     }
 }

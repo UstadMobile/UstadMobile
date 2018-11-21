@@ -19,9 +19,7 @@ import com.ustadmobile.lib.contentscrapers.ScraperConstants;
 import com.ustadmobile.lib.db.entities.ContentCategory;
 import com.ustadmobile.lib.db.entities.ContentCategorySchema;
 import com.ustadmobile.lib.db.entities.ContentEntry;
-import com.ustadmobile.lib.db.entities.ContentEntryContentEntryFileJoin;
 import com.ustadmobile.lib.db.entities.ContentEntryFile;
-import com.ustadmobile.lib.db.entities.ContentEntryFileStatus;
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoin;
 import com.ustadmobile.lib.db.entities.Language;
 
@@ -106,6 +104,7 @@ public class AsbScraper {
         URL africanBooksUrl = generateURL();
 
         UmAppDatabase db = UmAppDatabase.getInstance(null);
+        db.setMaster(true);
         UmAppDatabase repository = db.getRepository("https://localhost", "");
         ContentEntryDao contentEntryDao = repository.getContentEntryDao();
         ContentEntryParentChildJoinDao contentParentChildJoinDao = repository.getContentEntryParentChildJoinDao();
@@ -297,7 +296,7 @@ public class AsbScraper {
 
                     List<ContentEntryFile> listOfFiles = contentEntryFileDao.findFilesByContentEntryUid(childEntry.getContentEntryUid());
                     if (listOfFiles == null || listOfFiles.isEmpty()) {
-                        ContentScraperUtil.insertContentEntryFile(ePubFile, contentEntryFileDao, contentFileStatusDao, childEntry, md5EpubFile, contentEntryFileJoinDao);
+                        ContentScraperUtil.insertContentEntryFile(ePubFile, contentEntryFileDao, contentFileStatusDao, childEntry, md5EpubFile, contentEntryFileJoinDao, true);
                         continue;
                     } else {
 
@@ -310,7 +309,7 @@ public class AsbScraper {
                             }
                         }
                         if (!isFileFound) {
-                            ContentScraperUtil.insertContentEntryFile(ePubFile, contentEntryFileDao, contentFileStatusDao, childEntry, md5EpubFile, contentEntryFileJoinDao);
+                            ContentScraperUtil.insertContentEntryFile(ePubFile, contentEntryFileDao, contentFileStatusDao, childEntry, md5EpubFile, contentEntryFileJoinDao, true);
                             continue;
                         }
                     }
@@ -335,7 +334,7 @@ public class AsbScraper {
                     updateAsbEpub(bookObj, ePubFile);
                 }
 
-                ContentScraperUtil.insertContentEntryFile(ePubFile, contentEntryFileDao, contentFileStatusDao, childEntry, ContentScraperUtil.getMd5(ePubFile), contentEntryFileJoinDao);
+                ContentScraperUtil.insertContentEntryFile(ePubFile, contentEntryFileDao, contentFileStatusDao, childEntry, ContentScraperUtil.getMd5(ePubFile), contentEntryFileJoinDao, true);
 
             } catch (Exception e) {
                 System.err.println("Exception downloading/checking : " + ePubFile.getName() + " with title " + bookObj.title);
@@ -351,31 +350,6 @@ public class AsbScraper {
             }
         }
         driver.quit();
-    }
-
-    private ContentEntryFile setContentEntryFile(File ePubFile, ContentEntryFileDao contentEntryFileDao,
-                                                 ContentEntryFileStatusDao contentEntryFileStatusDao,
-                                                 ContentEntry contentEntry, String md5,
-                                                 ContentEntryContentEntryFileJoinDao contentEntryContentEntryFileJoinDao) {
-
-        ContentEntryFile contentEntryFile = new ContentEntryFile();
-        contentEntryFile.setMimeType(ScraperConstants.MIMETYPE_EPUB);
-        contentEntryFile.setFileSize(ePubFile.length());
-        contentEntryFile.setLastModified(ePubFile.lastModified());
-        contentEntryFile.setMd5sum(md5);
-        contentEntryFile.setContentEntryFileUid(contentEntryFileDao.insert(contentEntryFile));
-
-        ContentEntryContentEntryFileJoin fileJoin = new ContentEntryContentEntryFileJoin();
-        fileJoin.setCecefjContentEntryFileUid(contentEntryFile.getContentEntryFileUid());
-        fileJoin.setCecefjContentEntryUid(contentEntry.getContentEntryUid());
-        fileJoin.setCecefjUid(contentEntryContentEntryFileJoinDao.insert(fileJoin));
-
-        ContentEntryFileStatus fileStatus = new ContentEntryFileStatus();
-        fileStatus.setCefsContentEntryFileUid(contentEntryFile.getContentEntryFileUid());
-        fileStatus.setFilePath(ePubFile.getAbsolutePath());
-        fileStatus.setCefsUid(contentEntryFileStatusDao.insert(fileStatus));
-
-        return contentEntryFile;
     }
 
     private ContentEntry setContentEntryData(ContentEntry entry, String id, String title, String sourceUrl, long lang, boolean isLeaf, String desc, String author) {
