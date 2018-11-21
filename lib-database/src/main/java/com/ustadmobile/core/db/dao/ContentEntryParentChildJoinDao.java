@@ -11,10 +11,10 @@ import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
 import java.util.List;
 
-@UmDao
+@UmDao(readPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
 @UmRepository
 public abstract class ContentEntryParentChildJoinDao
-        implements BaseDao<ContentEntryParentChildJoin> { //SyncableDao<ContentEntryParentChildJoin, ContentEntryParentChildJoinDao> {
+        implements SyncableDao<ContentEntryParentChildJoin, ContentEntryParentChildJoinDao> {
 
     @UmQuery("SELECT * from ContentEntryParentChildJoin WHERE " +
            "cepcjChildContentEntryUid = :childEntryContentUid")

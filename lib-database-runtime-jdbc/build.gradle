@@ -1,4 +1,5 @@
 apply plugin: 'java-library'
+apply plugin: 'maven-publish'
 
 compileTestJava {
     /*
@@ -35,5 +36,31 @@ dependencies {
     compile project(path: ':lib-util')
 }
 
+task sourceJar(type: Jar) {
+    from sourceSets.main.allJava
+}
+
 sourceCompatibility = "1.8"
 targetCompatibility = "1.8"
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId rootProject.group
+            artifactId project.name
+            version rootProject.version
+
+            from components.java
+
+            artifact sourceJar {
+                classifier = 'sources'
+            }
+        }
+    }
+
+    repositories {
+        maven {
+            url rootProject.ext.buildConfigProperties['repo.dir']
+        }
+    }
+}

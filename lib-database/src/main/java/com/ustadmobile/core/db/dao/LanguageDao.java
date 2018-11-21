@@ -10,9 +10,9 @@ import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
 import java.util.List;
 
-@UmDao
+@UmDao(readPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
 @UmRepository
-public abstract class LanguageDao implements BaseDao<Language> { //SyncableDao<Language, LanguageDao> {
+public abstract class LanguageDao implements SyncableDao<Language, LanguageDao> {
 
 
     @UmQuery("SELECT * from Language WHERE name = :name")

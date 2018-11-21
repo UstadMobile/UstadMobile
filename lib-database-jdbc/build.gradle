@@ -23,7 +23,6 @@ task sourceJar(type: Jar) {
     from sourceSets.main.allJava
 }
 
-
 sourceCompatibility = "1.8"
 targetCompatibility = "1.8"
 

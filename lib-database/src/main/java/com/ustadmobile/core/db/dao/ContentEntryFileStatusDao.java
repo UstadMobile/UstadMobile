@@ -6,9 +6,9 @@ import com.ustadmobile.lib.db.entities.ContentEntryFileStatus;
 import com.ustadmobile.lib.db.sync.dao.BaseDao;
 import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
-@UmDao
+@UmDao(readPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
 @UmRepository
-public abstract class ContentEntryFileStatusDao implements BaseDao<ContentEntryFileStatus>  {//SyncableDao<ContentEntryFileStatus, ContentEntryFileStatusDao> {
+public abstract class ContentEntryFileStatusDao implements SyncableDao<ContentEntryFileStatus, ContentEntryFileStatusDao> {
 
 
 

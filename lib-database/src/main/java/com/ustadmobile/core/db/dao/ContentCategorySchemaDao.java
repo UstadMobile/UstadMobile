@@ -8,9 +8,9 @@ import com.ustadmobile.lib.db.entities.ContentCategorySchema;
 import com.ustadmobile.lib.db.sync.dao.BaseDao;
 import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
-@UmDao
+@UmDao(readPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
 @UmRepository
-public abstract class ContentCategorySchemaDao implements BaseDao<ContentCategorySchema> /* SyncableDao<ContentCategorySchema, ContentCategorySchemaDao> */ {
+public abstract class ContentCategorySchemaDao implements SyncableDao<ContentCategorySchema, ContentCategorySchemaDao> {
 
     @UmQuery("SELECT * FROM ContentCategorySchema WHERE schemaUrl = :schemaUrl")
     public abstract ContentCategorySchema findBySchemaUrl(String schemaUrl);

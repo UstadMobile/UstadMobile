@@ -1,4 +1,5 @@
 apply plugin: 'java-library'
+apply plugin: 'maven-publish'
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
@@ -6,3 +7,30 @@ dependencies {
 
 sourceCompatibility = "8"
 targetCompatibility = "8"
+
+task sourceJar(type: Jar) {
+    from sourceSets.main.allJava
+}
+
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId rootProject.group
+            artifactId project.name
+            version rootProject.version
+
+            from components.java
+
+            artifact sourceJar {
+                classifier = 'sources'
+            }
+        }
+    }
+
+    repositories {
+        maven {
+            url rootProject.ext.buildConfigProperties['repo.dir']
+        }
+    }
+}

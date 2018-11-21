@@ -24,6 +24,9 @@ import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.database.annotation.UmQueryFindByPrimaryKey;
 import com.ustadmobile.lib.database.annotation.UmRepository;
+import com.ustadmobile.lib.database.annotation.UmSyncFindAllChanges;
+import com.ustadmobile.lib.database.annotation.UmSyncFindLocalChanges;
+import com.ustadmobile.lib.database.annotation.UmSyncFindUpdateable;
 import com.ustadmobile.lib.database.annotation.UmSyncIncoming;
 import com.ustadmobile.lib.database.annotation.UmSyncOutgoing;
 import com.ustadmobile.lib.database.annotation.UmUpdate;
@@ -432,7 +435,8 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
 
         }
 
-        codeBlock.beginControlFlow("if(!_existingTableNames.contains($S))",
+        codeBlock.beginControlFlow("if(!$T.listContainsStringIgnoreCase(_existingTableNames, $S))",
+                JdbcDatabaseUtils.class,
                 entitySpec.getSimpleName().toString())
                 .add("$L.executeUpdate($S);\n", stmtVariableName,
                         makeCreateTableStatement(entitySpec, quoteChar, sqlProductName));
@@ -594,6 +598,15 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                 addSyncHandleIncomingMethod(daoMethod, daoType, jdbcDaoClassSpec, "_db");
             }else if(daoMethod.getAnnotation(UmSyncOutgoing.class) != null) {
                 addSyncOutgoing(daoMethod, daoType, jdbcDaoClassSpec, "_db");
+            }else if(daoMethod.getAnnotation(UmSyncFindLocalChanges.class) != null) {
+                addQueryMethod(daoMethod, daoType, dbType, jdbcDaoClassSpec, SQL_IDENTIFIER_CHAR,
+                        generateFindLocalChangesSql(daoType, daoMethod, processingEnv));
+            }else if(daoMethod.getAnnotation(UmSyncFindAllChanges.class) != null) {
+                addQueryMethod(daoMethod, daoType, dbType, jdbcDaoClassSpec, SQL_IDENTIFIER_CHAR,
+                        generateSyncFindAllChanges(daoType, daoMethod, processingEnv));
+            }else if(daoMethod.getAnnotation(UmSyncFindUpdateable.class) != null) {
+                addQueryMethod(daoMethod, daoType, dbType, jdbcDaoClassSpec, SQL_IDENTIFIER_CHAR,
+                        generateSyncFindUpdatable(daoType, daoMethod, processingEnv));
             }
         }
 

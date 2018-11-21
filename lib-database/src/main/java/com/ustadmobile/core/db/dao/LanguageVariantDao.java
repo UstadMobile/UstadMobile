@@ -8,9 +8,9 @@ import com.ustadmobile.lib.db.entities.LanguageVariant;
 import com.ustadmobile.lib.db.sync.dao.BaseDao;
 import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
-@UmDao
+@UmDao(readPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
 @UmRepository
-public abstract class LanguageVariantDao implements BaseDao<LanguageVariant> { //SyncableDao<LanguageVariant, LanguageVariantDao> {
+public abstract class LanguageVariantDao implements SyncableDao<LanguageVariant, LanguageVariantDao> {
 
     @UmQuery("SELECT * from LanguageVariant where countryCode = :countryCode")
     public abstract LanguageVariant findByCode(String countryCode);

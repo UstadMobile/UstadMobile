@@ -8,10 +8,10 @@ import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoin;
 import com.ustadmobile.lib.db.sync.dao.BaseDao;
 import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
-@UmDao
+@UmDao(readPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
 @UmRepository
 public abstract class ContentEntryRelatedEntryJoinDao
-        implements BaseDao<ContentEntryRelatedEntryJoin> { //SyncableDao<ContentEntryRelatedEntryJoin, ContentEntryRelatedEntryJoinDao> {
+        implements SyncableDao<ContentEntryRelatedEntryJoin, ContentEntryRelatedEntryJoinDao> {
 
     @UmQuery("SELECT * from ContentEntryRelatedEntryJoin WHERE " +
             "cerejRelatedEntryUid = :contentEntryUid")
