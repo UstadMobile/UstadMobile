@@ -112,13 +112,16 @@ public class IndexCategoryCK12Content {
 
 
         UmAppDatabase db = UmAppDatabase.getInstance(null);
-        UmAppDatabase repository = db.getRepository("", "");
+        db.setMaster(true);
+        UmAppDatabase repository = db.getRepository("https://localhost", "");
         contentEntryDao = repository.getContentEntryDao();
         contentParentChildJoinDao = repository.getContentEntryParentChildJoinDao();
         contentEntryFileDao = repository.getContentEntryFileDao();
         contentEntryFileJoinDao = repository.getContentEntryContentEntryFileJoinDao();
         contentFileStatusDao = repository.getContentEntryFileStatusDao();
         languageDao = repository.getLanguageDao();
+
+        ContentScraperUtil.setChromeDriverLocation();
 
         englishLang = languageDao.findByTwoCode(ScraperConstants.ENGLISH_LANG_CODE);
         if(englishLang == null){
@@ -554,29 +557,17 @@ public class IndexCategoryCK12Content {
                 continue;
             }
 
+            File content = new File(topicDestination, FilenameUtils.getBaseName(url.getPath()) + ScraperConstants.ZIP_EXT);
+
             if (scraper.isContentUpdated()) {
+                ContentScraperUtil.insertContentEntryFile(content, contentEntryFileDao, contentFileStatusDao,
+                        topicEntry, ContentScraperUtil.getMd5(content), contentEntryFileJoinDao, true,
+                        ScraperConstants.MIMETYPE_ZIP);
 
-                File content = new File(topicDestination, FilenameUtils.getBaseName(url.getPath()) + ScraperConstants.ZIP_EXT);
-                FileInputStream fis = new FileInputStream(content);
-                String md5 = DigestUtils.md5Hex(fis);
-                fis.close();
+            }else{
 
-                ContentEntryFile contentEntryFile = new ContentEntryFile();
-                contentEntryFile.setMimeType(ScraperConstants.MIMETYPE_ZIP);
-                contentEntryFile.setFileSize(content.length());
-                contentEntryFile.setLastModified(content.lastModified());
-                contentEntryFile.setMd5sum(md5);
-                contentEntryFile.setContentEntryFileUid(contentEntryFileDao.insert(contentEntryFile));
-
-                ContentEntryContentEntryFileJoin fileJoin = new ContentEntryContentEntryFileJoin();
-                fileJoin.setCecefjContentEntryFileUid(contentEntryFile.getContentEntryFileUid());
-                fileJoin.setCecefjContentEntryUid(topicEntry.getContentEntryUid());
-                fileJoin.setCecefjUid(contentEntryFileJoinDao.insert(fileJoin));
-
-                ContentEntryFileStatus fileStatus = new ContentEntryFileStatus();
-                fileStatus.setCefsContentEntryFileUid(contentEntryFile.getContentEntryFileUid());
-                fileStatus.setFilePath(content.getAbsolutePath());
-                fileStatus.setCefsUid(contentFileStatusDao.insert(fileStatus));
+                ContentScraperUtil.checkAndUpdateDatabaseIfFileDownloadedButNoDataFound(content, topicEntry, contentEntryFileDao,
+                        contentEntryFileJoinDao, contentFileStatusDao, ScraperConstants.MIMETYPE_ZIP, true);
 
             }
 

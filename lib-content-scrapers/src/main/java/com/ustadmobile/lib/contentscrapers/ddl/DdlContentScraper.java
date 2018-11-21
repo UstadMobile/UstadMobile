@@ -10,6 +10,7 @@ import com.ustadmobile.core.db.dao.ContentEntryFileDao;
 import com.ustadmobile.core.db.dao.ContentEntryFileStatusDao;
 import com.ustadmobile.core.db.dao.LanguageDao;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
+import com.ustadmobile.lib.contentscrapers.ScraperConstants;
 import com.ustadmobile.lib.db.entities.ContentCategory;
 import com.ustadmobile.lib.db.entities.ContentCategorySchema;
 import com.ustadmobile.lib.db.entities.ContentEntry;
@@ -66,6 +67,7 @@ public class DdlContentScraper {
         this.url = new URL(url);
         destinationDirectory.mkdirs();
         UmAppDatabase db = UmAppDatabase.getInstance(null);
+        db.setMaster(true);
         UmAppDatabase repository = db.getRepository("https://localhost", "");
         contentEntryDao = repository.getContentEntryDao();
         contentEntryFileDao = repository.getContentEntryFileDao();
@@ -139,37 +141,22 @@ public class DdlContentScraper {
             }
 
 
+
             URLConnection conn = uri.toURL().openConnection();
             File resourceFile = new File(resourceFolder, FilenameUtils.getName(href));
+            String mimeType = Files.probeContentType(resourceFile.toPath());
+
             if (!ContentScraperUtil.isFileModified(conn, resourceFolder, FilenameUtils.getName(href))) {
+
+                ContentScraperUtil.checkAndUpdateDatabaseIfFileDownloadedButNoDataFound(resourceFile, contentEntry, contentEntryFileDao,
+                        contentEntryFileJoinDao, contentFileStatusDao, mimeType, true);
                 continue;
             }
 
             FileUtils.copyURLToFile(uri.toURL(), resourceFile);
 
-
-            FileInputStream fis = new FileInputStream(resourceFile);
-            String md5 = DigestUtils.md5Hex(fis);
-            fis.close();
-
-            String mimeType = Files.probeContentType(resourceFile.toPath());
-
-            ContentEntryFile contentEntryFile = new ContentEntryFile();
-            contentEntryFile.setMimeType(mimeType);
-            contentEntryFile.setFileSize(resourceFile.length());
-            contentEntryFile.setLastModified(resourceFile.lastModified());
-            contentEntryFile.setMd5sum(md5);
-            contentEntryFile.setContentEntryFileUid(contentEntryFileDao.insert(contentEntryFile));
-
-            ContentEntryContentEntryFileJoin fileJoin = new ContentEntryContentEntryFileJoin();
-            fileJoin.setCecefjContentEntryFileUid(contentEntryFile.getContentEntryFileUid());
-            fileJoin.setCecefjContentEntryUid(contentEntry.getContentEntryUid());
-            fileJoin.setCecefjUid(contentEntryFileJoinDao.insert(fileJoin));
-
-            ContentEntryFileStatus fileStatus = new ContentEntryFileStatus();
-            fileStatus.setCefsContentEntryFileUid(contentEntryFile.getContentEntryFileUid());
-            fileStatus.setFilePath(resourceFile.getAbsolutePath());
-            fileStatus.setCefsUid(contentFileStatusDao.insert(fileStatus));
+            ContentScraperUtil.insertContentEntryFile(resourceFile,contentEntryFileDao, contentFileStatusDao, contentEntry,
+                    ContentScraperUtil.getMd5(resourceFile), contentEntryFileJoinDao, true, mimeType);
 
             contentEntries.add(contentEntry);
         }

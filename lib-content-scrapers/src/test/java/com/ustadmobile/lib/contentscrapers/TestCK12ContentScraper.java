@@ -124,7 +124,7 @@ public class TestCK12ContentScraper {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            return new MockResponse().setResponseCode(404);
+            return new MockResponse().setResponseCode(200);
         }
     };
 
@@ -294,7 +294,7 @@ public class TestCK12ContentScraper {
         doReturn(mockWebServer.url("/c/" + LAST_MODIFIED_FILE).toString()).when(scraper).generatePlixLink(Mockito.anyString());
         scraper.scrapePlixContent();
 
-        File plixFolder = new File(tmpDir, "plix");
+        File plixFolder = new File(tmpDir, "53d147578e0e0876d4df82f1");
         Assert.assertEquals("directory for plix exists", true, plixFolder.isDirectory());
 
         File indexJson = new File(plixFolder, "index.json");

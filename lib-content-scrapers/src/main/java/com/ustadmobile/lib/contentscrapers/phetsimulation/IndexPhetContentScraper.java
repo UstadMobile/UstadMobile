@@ -93,6 +93,7 @@ public class IndexPhetContentScraper {
         destinationDirectory = destinationDir;
 
         UmAppDatabase db = UmAppDatabase.getInstance(null);
+        db.setMaster(true);
         UmAppDatabase repository = db.getRepository("", "");
         contentEntryDao = repository.getContentEntryDao();
         contentParentChildJoinDao = repository.getContentEntryParentChildJoinDao();
@@ -120,7 +121,7 @@ public class IndexPhetContentScraper {
         ContentEntry masterRootParent = contentEntryDao.findBySourceUrl("root");
         if (masterRootParent == null) {
             masterRootParent = new ContentEntry();
-            masterRootParent= setContentEntryData(masterRootParent, "root",
+            masterRootParent = setContentEntryData(masterRootParent, "root",
                     "Ustad Mobile", "root", englishLang, false, "");
             masterRootParent.setContentEntryUid(contentEntryDao.insert(masterRootParent));
         } else {
@@ -177,30 +178,17 @@ public class IndexPhetContentScraper {
                 if (scraper.isAnyContentUpdated()) {
 
                     boolean isEnglishUpdated = scraper.getLanguageUpdatedMap().get("en");
-                    if(isEnglishUpdated){
+                    File enLangLocation = new File(destinationDirectory, "en");
+                    File englishContentFile = new File(enLangLocation, title + ScraperConstants.ZIP_EXT);
+                    if (isEnglishUpdated) {
 
-                        File langLocation = new File(destinationDirectory, "en");
-                        File content = new File(langLocation, title + ScraperConstants.ZIP_EXT);
-                        FileInputStream fis = new FileInputStream(content);
-                        String md5 = DigestUtils.md5Hex(fis);
-                        fis.close();
+                        ContentScraperUtil.insertContentEntryFile(englishContentFile, contentEntryFileDao, contentFileStatusDao, englishSimContentEntry,
+                                ContentScraperUtil.getMd5(englishContentFile), contentEntryFileJoin, true, ScraperConstants.MIMETYPE_ZIP);
 
-                        ContentEntryFile contentEntryFile = new ContentEntryFile();
-                        contentEntryFile.setMimeType(ScraperConstants.MIMETYPE_ZIP);
-                        contentEntryFile.setFileSize(content.length());
-                        contentEntryFile.setLastModified(content.lastModified());
-                        contentEntryFile.setMd5sum(md5);
-                        contentEntryFile.setContentEntryFileUid(contentEntryFileDao.insert(contentEntryFile));
 
-                        ContentEntryContentEntryFileJoin fileJoin = new ContentEntryContentEntryFileJoin();
-                        fileJoin.setCecefjContentEntryFileUid(contentEntryFile.getContentEntryFileUid());
-                        fileJoin.setCecefjContentEntryUid(englishSimContentEntry.getContentEntryUid());
-                        fileJoin.setCecefjUid(contentEntryFileJoin.insert(fileJoin));
-
-                        ContentEntryFileStatus fileStatus = new ContentEntryFileStatus();
-                        fileStatus.setCefsContentEntryFileUid(contentEntryFile.getContentEntryFileUid());
-                        fileStatus.setFilePath(content.getAbsolutePath());
-                        fileStatus.setCefsUid(contentFileStatusDao.insert(fileStatus));
+                    } else {
+                        ContentScraperUtil.checkAndUpdateDatabaseIfFileDownloadedButNoDataFound(englishContentFile, englishSimContentEntry, contentEntryFileDao,
+                                contentEntryFileJoin, contentFileStatusDao, ScraperConstants.MIMETYPE_ZIP, true);
 
                     }
 
@@ -223,32 +211,17 @@ public class IndexPhetContentScraper {
 
                             String langCode = scraper.getContentEntryLangMap().get(translation.getContentEntryUid());
 
-                            if(scraper.getLanguageUpdatedMap().get(langCode)){
+                            File langLocation = new File(destinationDirectory, langCode);
+                            File content = new File(langLocation, title + ScraperConstants.ZIP_EXT);
+                            if (scraper.getLanguageUpdatedMap().get(langCode)) {
 
-                                File langLocation = new File(destinationDirectory, langCode);
-                                File content = new File(langLocation, title + ScraperConstants.ZIP_EXT);
+                                ContentScraperUtil.insertContentEntryFile(content, contentEntryFileDao, contentFileStatusDao, translation,
+                                        ContentScraperUtil.getMd5(content), contentEntryFileJoin, true, ScraperConstants.MIMETYPE_ZIP);
 
-                                FileInputStream fis = new FileInputStream(content);
-                                String md5 = DigestUtils.md5Hex(fis);
-                                fis.close();
 
-                                ContentEntryFile contentEntryFile = new ContentEntryFile();
-                                contentEntryFile.setMimeType(ScraperConstants.MIMETYPE_ZIP);
-                                contentEntryFile.setFileSize(content.length());
-                                contentEntryFile.setLastModified(content.lastModified());
-                                contentEntryFile.setMd5sum(md5);
-                                contentEntryFile.setContentEntryFileUid(contentEntryFileDao.insert(contentEntryFile));
-
-                                ContentEntryContentEntryFileJoin fileJoin = new ContentEntryContentEntryFileJoin();
-                                fileJoin.setCecefjContentEntryFileUid(contentEntryFile.getContentEntryFileUid());
-                                fileJoin.setCecefjContentEntryUid(englishSimContentEntry.getContentEntryUid());
-                                fileJoin.setCecefjUid(contentEntryFileJoin.insert(fileJoin));
-
-                                ContentEntryFileStatus fileStatus = new ContentEntryFileStatus();
-                                fileStatus.setCefsContentEntryFileUid(contentEntryFile.getContentEntryFileUid());
-                                fileStatus.setFilePath(content.getAbsolutePath());
-                                fileStatus.setCefsUid(contentFileStatusDao.insert(fileStatus));
-
+                            } else {
+                                ContentScraperUtil.checkAndUpdateDatabaseIfFileDownloadedButNoDataFound(content, translation, contentEntryFileDao,
+                                        contentEntryFileJoin, contentFileStatusDao, ScraperConstants.MIMETYPE_ZIP, true);
 
                             }
 

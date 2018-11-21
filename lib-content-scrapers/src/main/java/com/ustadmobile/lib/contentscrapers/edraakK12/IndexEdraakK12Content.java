@@ -94,6 +94,7 @@ public class IndexEdraakK12Content {
         destinationDirectory = destinationDir;
 
         UmAppDatabase db = UmAppDatabase.getInstance(null);
+        db.setMaster(true);
         UmAppDatabase repository = db.getRepository("", "");
         contentEntryDao = repository.getContentEntryDao();
         contentParentChildJoinDao = repository.getContentEntryParentChildJoinDao();
@@ -116,7 +117,7 @@ public class IndexEdraakK12Content {
         ContentEntry masterRootParent = contentEntryDao.findBySourceUrl("root");
         if (masterRootParent == null) {
             masterRootParent = new ContentEntry();
-            masterRootParent= setContentEntryData(masterRootParent, "root",
+            masterRootParent = setContentEntryData(masterRootParent, "root",
                     "Ustad Mobile", "root", false);
             masterRootParent.setContentEntryUid(contentEntryDao.insert(masterRootParent));
         } else {
@@ -153,7 +154,6 @@ public class IndexEdraakK12Content {
         ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, masterRootParent, edraakParentEntry, 0);
 
 
-
         findImportedComponent(response, edraakParentEntry);
 
     }
@@ -179,30 +179,15 @@ public class IndexEdraakK12Content {
             try {
                 scraper.scrapeContent();
 
-                if(scraper.hasContentUpdated()){
+                File content = new File(destinationDirectory, parentContent.id + ScraperConstants.ZIP_EXT);
+                if (scraper.hasContentUpdated()) {
 
-                    File content = new File(destinationDirectory, parentContent.id + ScraperConstants.ZIP_EXT);
-                    FileInputStream fis = new FileInputStream(content);
-                    String md5 = DigestUtils.md5Hex(fis);
-                    fis.close();
+                    ContentScraperUtil.insertContentEntryFile(content, contentEntryFileDao, contentFileStatusDao, parentEntry,
+                            ContentScraperUtil.getMd5(content), contentEntryFileJoin, true, ScraperConstants.MIMETYPE_ZIP);
 
-                    ContentEntryFile contentEntryFile = new ContentEntryFile();
-                    contentEntryFile.setMimeType(ScraperConstants.MIMETYPE_ZIP);
-                    contentEntryFile.setFileSize(content.length());
-                    contentEntryFile.setLastModified(content.lastModified());
-                    contentEntryFile.setMd5sum(md5);
-                    contentEntryFile.setContentEntryFileUid(contentEntryFileDao.insert(contentEntryFile));
-
-                    ContentEntryContentEntryFileJoin fileJoin = new ContentEntryContentEntryFileJoin();
-                    fileJoin.setCecefjContentEntryFileUid(contentEntryFile.getContentEntryFileUid());
-                    fileJoin.setCecefjContentEntryUid(parentEntry.getContentEntryUid());
-                    fileJoin.setCecefjUid(contentEntryFileJoin.insert(fileJoin));
-
-                    ContentEntryFileStatus fileStatus = new ContentEntryFileStatus();
-                    fileStatus.setCefsContentEntryFileUid(contentEntryFile.getContentEntryFileUid());
-                    fileStatus.setFilePath(content.getAbsolutePath());
-                    fileStatus.setCefsUid(contentFileStatusDao.insert(fileStatus));
-
+                } else {
+                    ContentScraperUtil.checkAndUpdateDatabaseIfFileDownloadedButNoDataFound(content, parentEntry, contentEntryFileDao,
+                            contentEntryFileJoin, contentFileStatusDao, ScraperConstants.MIMETYPE_ZIP, true);
 
                 }
 
@@ -240,11 +225,11 @@ public class IndexEdraakK12Content {
     }
 
     private int getLicenseType(String license) {
-        if(license.toLowerCase().contains("cc-by-nc-sa")){
+        if (license.toLowerCase().contains("cc-by-nc-sa")) {
             return ContentEntry.LICESNE_TYPE_CC_BY_NC_SA;
-        }else if(license.toLowerCase().contains("all_rights_reserved")){
+        } else if (license.toLowerCase().contains("all_rights_reserved")) {
             return ContentEntry.ALL_RIGHTS_RESERVED;
-        }else {
+        } else {
             System.err.println("License type not matched for license: " + license);
             return ContentEntry.ALL_RIGHTS_RESERVED;
         }

@@ -598,13 +598,27 @@ public class ContentScraperUtil {
         return langObj;
     }
 
+
+    /**
+     *
+     * @param ePubFile file that was downloaded
+     * @param contentEntryFileDao dao to insert the file to database
+     * @param contentEntryFileStatusDao dao to insert path of file to database
+     * @param contentEntry entry that is joined to file
+     * @param md5 md5 of file
+     * @param contentEntryContentEntryFileJoinDao file join with entry
+     * @param mobileOptimized isMobileOptimized
+     * @param fileType filetype of file
+     * @returns the entry file
+     */
     public static ContentEntryFile insertContentEntryFile(File ePubFile, ContentEntryFileDao contentEntryFileDao,
                                                           ContentEntryFileStatusDao contentEntryFileStatusDao,
                                                           ContentEntry contentEntry, String md5,
-                                                          ContentEntryContentEntryFileJoinDao contentEntryContentEntryFileJoinDao, boolean mobileOptimized) {
+                                                          ContentEntryContentEntryFileJoinDao contentEntryContentEntryFileJoinDao,
+                                                          boolean mobileOptimized, String fileType) {
 
         ContentEntryFile contentEntryFile = new ContentEntryFile();
-        contentEntryFile.setMimeType(ScraperConstants.MIMETYPE_EPUB);
+        contentEntryFile.setMimeType(fileType);
         contentEntryFile.setFileSize(ePubFile.length());
         contentEntryFile.setLastModified(ePubFile.lastModified());
         contentEntryFile.setMd5sum(md5);
@@ -632,4 +646,45 @@ public class ContentScraperUtil {
         return md5EpubFile;
     }
 
+
+    /**
+     *
+     * Checks if data is missing from the database by checking the file md5 and updates the database
+     *
+     * @param contentFile file that is already downloaded
+     * @param contentEntry content entry that is joined to file
+     * @param contentEntryFileDao dao to insert the missing file entry
+     * @param contentEntryFileJoinDao dao to insert the missing file join entry
+     * @param contentEntryFileStatusDao dao to insert the missing status path entry
+     * @param fileType file type of the file downloaded
+     * @param isMobileOptimized is the file mobileOptimized
+     * @throws IOException
+     */
+    public static void checkAndUpdateDatabaseIfFileDownloadedButNoDataFound(File contentFile, ContentEntry contentEntry,
+                                                                            ContentEntryFileDao contentEntryFileDao,
+                                                                            ContentEntryContentEntryFileJoinDao contentEntryFileJoinDao,
+                                                                            ContentEntryFileStatusDao contentEntryFileStatusDao,
+                                                                            String fileType, boolean isMobileOptimized) throws IOException {
+
+        String md5EpubFile = ContentScraperUtil.getMd5(contentFile);
+
+        List<ContentEntryFile> listOfFiles = contentEntryFileDao.findFilesByContentEntryUid(contentEntry.getContentEntryUid());
+        if (listOfFiles == null || listOfFiles.isEmpty()) {
+            ContentScraperUtil.insertContentEntryFile(contentFile, contentEntryFileDao, contentEntryFileStatusDao, contentEntry, md5EpubFile, contentEntryFileJoinDao, isMobileOptimized, fileType);
+        } else {
+
+            boolean isFileFound = false;
+            // if file is found, it already exists in database and not needed to be added
+            for (ContentEntryFile file : listOfFiles) {
+                if (file.getMd5sum().equals(md5EpubFile)) {
+                    isFileFound = true;
+                    break;
+                }
+            }
+            if (!isFileFound) {
+                ContentScraperUtil.insertContentEntryFile(contentFile, contentEntryFileDao, contentEntryFileStatusDao, contentEntry, md5EpubFile, contentEntryFileJoinDao, isMobileOptimized, fileType);
+            }
+        }
+
+    }
 }

@@ -88,6 +88,7 @@ public class IndexPrathamContentScraper {
         String cookie = loginPratham();
 
         UmAppDatabase db = UmAppDatabase.getInstance(null);
+        db.setMaster(true);
         UmAppDatabase repository = db.getRepository("https://localhost", "");
         contentEntryDao = repository.getContentEntryDao();
         contentParentChildJoinDao = repository.getContentEntryParentChildJoinDao();
@@ -179,6 +180,11 @@ public class IndexPrathamContentScraper {
 
                 File content = new File(resourceFolder, resourceFileName);
                 if (!ContentScraperUtil.isFileModified(connection, resourceFolder, String.valueOf(data.id))) {
+
+                    ContentScraperUtil.checkAndUpdateDatabaseIfFileDownloadedButNoDataFound(content, contentEntry, contentEntryFileDao,
+                            contentEntryFileJoinDao, contentFileStatusDao, ScraperConstants.MIMETYPE_EPUB, true);
+
+
                     continue;
                 }
                 try {
@@ -196,27 +202,8 @@ public class IndexPrathamContentScraper {
                 }
                 retry = 0;
 
-                FileInputStream fis = new FileInputStream(content);
-                String md5 = DigestUtils.md5Hex(fis);
-                fis.close();
-
-                ContentEntryFile contentEntryFile = new ContentEntryFile();
-                contentEntryFile.setMimeType(ScraperConstants.MIMETYPE_EPUB);
-                contentEntryFile.setFileSize(content.length());
-                contentEntryFile.setLastModified(content.lastModified());
-                contentEntryFile.setMd5sum(md5);
-                contentEntryFile.setContentEntryFileUid(contentEntryFileDao.insert(contentEntryFile));
-
-                ContentEntryContentEntryFileJoin fileJoin = new ContentEntryContentEntryFileJoin();
-                fileJoin.setCecefjContentEntryFileUid(contentEntryFile.getContentEntryFileUid());
-                fileJoin.setCecefjContentEntryUid(contentEntry.getContentEntryUid());
-                fileJoin.setCecefjUid(contentEntryFileJoinDao.insert(fileJoin));
-
-                ContentEntryFileStatus fileStatus = new ContentEntryFileStatus();
-                fileStatus.setCefsContentEntryFileUid(contentEntryFile.getContentEntryFileUid());
-                fileStatus.setFilePath(content.getAbsolutePath());
-                fileStatus.setCefsUid(contentFileStatusDao.insert(fileStatus));
-
+                ContentScraperUtil.insertContentEntryFile(content, contentEntryFileDao, contentFileStatusDao, contentEntry,
+                        ContentScraperUtil.getMd5(content), contentEntryFileJoinDao, true, ScraperConstants.MIMETYPE_EPUB);
 
             } catch (Exception e) {
                 System.err.println("Error saving book " + contentBooksList.data.get(contentCount).slug);

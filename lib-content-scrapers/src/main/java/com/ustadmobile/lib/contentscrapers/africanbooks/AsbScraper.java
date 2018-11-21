@@ -292,27 +292,9 @@ public class AsbScraper {
 
                 if (ContentScraperUtil.fileHasContent(ePubFile) && ePubFile.lastModified() > Integer.parseInt(bookObj.date)) {
 
-                    String md5EpubFile = ContentScraperUtil.getMd5(ePubFile);
-
-                    List<ContentEntryFile> listOfFiles = contentEntryFileDao.findFilesByContentEntryUid(childEntry.getContentEntryUid());
-                    if (listOfFiles == null || listOfFiles.isEmpty()) {
-                        ContentScraperUtil.insertContentEntryFile(ePubFile, contentEntryFileDao, contentFileStatusDao, childEntry, md5EpubFile, contentEntryFileJoinDao, true);
-                        continue;
-                    } else {
-
-                        boolean isFileFound = false;
-                        // if file is found, it already exists in database and not needed to be added
-                        for (ContentEntryFile file : listOfFiles) {
-                            if (file.getMd5sum().equals(md5EpubFile)) {
-                                isFileFound = true;
-                                break;
-                            }
-                        }
-                        if (!isFileFound) {
-                            ContentScraperUtil.insertContentEntryFile(ePubFile, contentEntryFileDao, contentFileStatusDao, childEntry, md5EpubFile, contentEntryFileJoinDao, true);
-                            continue;
-                        }
-                    }
+                    ContentScraperUtil.checkAndUpdateDatabaseIfFileDownloadedButNoDataFound(ePubFile, childEntry, contentEntryFileDao,
+                            contentEntryFileJoinDao, contentFileStatusDao, ScraperConstants.MIMETYPE_EPUB, true);
+                    continue;
                 }
 
                 FileUtils.copyURLToFile(epubUrl, ePubFile);
@@ -334,7 +316,9 @@ public class AsbScraper {
                     updateAsbEpub(bookObj, ePubFile);
                 }
 
-                ContentScraperUtil.insertContentEntryFile(ePubFile, contentEntryFileDao, contentFileStatusDao, childEntry, ContentScraperUtil.getMd5(ePubFile), contentEntryFileJoinDao, true);
+                ContentScraperUtil.insertContentEntryFile(ePubFile, contentEntryFileDao,
+                        contentFileStatusDao, childEntry, ContentScraperUtil.getMd5(ePubFile),
+                        contentEntryFileJoinDao, true, ScraperConstants.MIMETYPE_EPUB);
 
             } catch (Exception e) {
                 System.err.println("Exception downloading/checking : " + ePubFile.getName() + " with title " + bookObj.title);
