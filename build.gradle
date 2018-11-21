@@ -28,7 +28,7 @@ task clean(type: Delete) {
 }
 
 //Major.minor.database version
-version = "0.2.8.65L1025"
+version = "0.2.8.65L1027"
 group = "com.ustadmobile.app"
 
 ext {
