@@ -66,7 +66,7 @@ public class TestPrathamContentScraper {
 
 
     @Test
-    public void givenServerOnline_whenVideoContentScraped_thenShouldConvertAndDownload() throws IOException, URISyntaxException {
+    public void givenServerOnline_whenDdlSiteScraped_thenShouldFindConvertAndDownloadAllFiles() throws IOException, URISyntaxException {
 
         File tmpDir = Files.createTempDirectory("testindexPrathamcontentscraper").toFile();
 
@@ -94,7 +94,7 @@ public class TestPrathamContentScraper {
     }
 
     @Test
-    public void testasb() throws IOException {
+    public void givenServerOnline_whenAsbSiteScraped_thenShouldFindConvertAndDownloadAllFiles() throws IOException {
 
         UmAppDatabase db = UmAppDatabase.getInstance(null);
         db.clearAllTables();
@@ -125,7 +125,7 @@ public class TestPrathamContentScraper {
 
 
     @Test
-    public void testDdl() throws IOException {
+    public void givenServerOnline_whenDdlEpubScraped_thenShouldConvertAndDownload() throws IOException {
 
         File tmpDir = Files.createTempDirectory("testindexDdlontentscraper").toFile();
 
