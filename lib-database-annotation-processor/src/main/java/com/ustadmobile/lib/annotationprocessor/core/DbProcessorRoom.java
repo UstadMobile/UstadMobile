@@ -18,6 +18,9 @@ import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.database.annotation.UmQueryFindByPrimaryKey;
 import com.ustadmobile.lib.database.annotation.UmRepository;
+import com.ustadmobile.lib.database.annotation.UmSyncFindAllChanges;
+import com.ustadmobile.lib.database.annotation.UmSyncFindLocalChanges;
+import com.ustadmobile.lib.database.annotation.UmSyncFindUpdateable;
 import com.ustadmobile.lib.database.annotation.UmSyncIncoming;
 import com.ustadmobile.lib.database.annotation.UmSyncOutgoing;
 import com.ustadmobile.lib.database.annotation.UmUpdate;
@@ -180,6 +183,8 @@ public class DbProcessorRoom extends AbstractDbProcessor{
                 addGetRepositoryMethod(dbType, daoMethod, repoMethodBuilder,
                         "_repositories");
                 dbManagerImplSpec.addMethod(repoMethodBuilder.build());
+            }else if(daoMethod.getAnnotation(UmSyncOutgoing.class) != null) {
+                dbManagerImplSpec.addMethod(generateDbSyncOutgoingMethod(dbType, daoMethod).build());
             }
 
             //Lookup using processingEnv.getElementUtils.getTypeElement
@@ -293,6 +298,15 @@ public class DbProcessorRoom extends AbstractDbProcessor{
                 addSyncHandleIncomingMethod(daoMethod, daoClass, roomDaoClassSpec, "_dbManager");
             }else if(daoMethod.getAnnotation(UmSyncOutgoing.class) != null) {
                 addSyncOutgoing(daoMethod, daoClass, roomDaoClassSpec, "_dbManager");
+            }else if(daoMethod.getAnnotation(UmSyncFindLocalChanges.class) != null) {
+                methodBuilder = generateQueryMethod(generateFindLocalChangesSql(daoClass, daoMethod,
+                        processingEnv), daoMethod, daoClass, roomDaoClassSpec);
+            }else if(daoMethod.getAnnotation(UmSyncFindAllChanges.class) != null) {
+                methodBuilder = generateQueryMethod(generateSyncFindAllChanges(daoClass, daoMethod,
+                        processingEnv), daoMethod, daoClass, roomDaoClassSpec);
+            }else if(daoMethod.getAnnotation(UmSyncFindUpdateable.class) != null) {
+                methodBuilder = generateQueryMethod(generateSyncFindUpdatable(daoClass, daoMethod,
+                        processingEnv), daoMethod, daoClass, roomDaoClassSpec);
             }
 
             if(methodBuilder != null){

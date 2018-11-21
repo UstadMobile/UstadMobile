@@ -33,6 +33,8 @@ public class TypeVariableResolutionVisitor extends SimpleTypeVisitor8<TypeMirror
 
     private Element typeVariableOwner;
 
+    private String typeVariableName;
+
     /**
      * Constructor
      *
@@ -40,7 +42,13 @@ public class TypeVariableResolutionVisitor extends SimpleTypeVisitor8<TypeMirror
      */
     public TypeVariableResolutionVisitor(TypeVariable typeVariable) {
         this.typeVariable = typeVariable;
+        typeVariableName = typeVariable.asElement().getSimpleName().toString();
         this.typeVariableOwner = typeVariable.asElement().getEnclosingElement();
+    }
+
+    public TypeVariableResolutionVisitor(String typeVariableName, TypeElement typeVariableOwner) {
+        this.typeVariableName = typeVariableName;
+        this.typeVariableOwner = typeVariableOwner;
     }
 
     /**
@@ -64,7 +72,7 @@ public class TypeVariableResolutionVisitor extends SimpleTypeVisitor8<TypeMirror
 
         if(declaredType.asElement().equals(typeVariableOwner)) {
             //found it - return the resolved type
-            return typeMap.get(typeVariable.asElement().getSimpleName().toString());
+            return typeMap.get(typeVariableName);
         }
 
         if(!typeElement.getSuperclass().getKind().equals(TypeKind.NONE)) {

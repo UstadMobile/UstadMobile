@@ -1,5 +1,6 @@
 package com.ustadmobile.core.impl;
 
+import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.lib.db.entities.UmAccount;
 
 public class UmAccountManager {
@@ -38,7 +39,7 @@ public class UmAccountManager {
         if(account != null) {
             impl.setAppPref(PREFKEY_PERSON_ID, String.valueOf(account.getPersonUid()), context);
             impl.setAppPref(PREFKEY_USERNAME, account.getUsername(), context);
-            impl.setAppPref(PREFKEY_ACCESS_TOKEN, account.getAccessToken(), context);
+            impl.setAppPref(PREFKEY_ACCESS_TOKEN, account.getAuth(), context);
             impl.setAppPref(PREFKEY_ENDPOINT_URL, account.getEndpointUrl(), context);
         }else {
             impl.setAppPref(PREFKEY_PERSON_ID, "0", context);
@@ -51,4 +52,14 @@ public class UmAccountManager {
     public static void setActiveAccount(UmAccount account, Object context) {
         setActiveAccount(account, context, UstadMobileSystemImpl.getInstance());
     }
+
+    public static UmAppDatabase getRepositoryForActiveAccount(Object context) {
+        if(activeAccount == null)
+            return UmAppDatabase.getInstance(context);
+
+        UmAccount activeAccount =getActiveAccount(context);
+        return UmAppDatabase.getInstance(context).getRepository(activeAccount.getEndpointUrl(),
+                activeAccount.getAuth());
+    }
+
 }

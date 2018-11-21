@@ -206,6 +206,16 @@ public class DaoMethodInfo {
         }
     }
 
+    /**
+     * As per resolveResultEntityType, but if the result is a list or array, it will resolve the
+     * component type
+     *
+     * @return
+     */
+    public TypeMirror resolveResultEntityComponentType() {
+        return DbProcessorUtils.getArrayOrListComponentType(resolveResultType(), processingEnv);
+    }
+
 
     /**
      * As per resolveResultType, but returning an element. Synonymous to

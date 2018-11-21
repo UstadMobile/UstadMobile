@@ -10,4 +10,7 @@ import java.lang.annotation.Target;
 public @interface UmDao {
 
     int syncType() default UmSyncType.SYNC_NONE;
+
+    String readPermissionCondition() default "";
+
 }

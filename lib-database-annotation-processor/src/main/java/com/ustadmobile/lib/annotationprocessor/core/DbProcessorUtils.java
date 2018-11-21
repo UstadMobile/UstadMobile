@@ -9,6 +9,7 @@ import com.squareup.javapoet.TypeSpec;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
