@@ -86,7 +86,7 @@ public class TestIndexContent {
 
         Assert.assertEquals(true, parentEntry.getEntryId().equalsIgnoreCase("https://www.edraak.org/k12/"));
 
-        ContentEntry childEntry = contentEntryDao.findBySourceUrl(mockWebServer.url("api/5a608815f3a50d049abf68e9").toString());
+        ContentEntry childEntry = contentEntryDao.findBySourceUrl("5a608815f3a50d049abf68e9");
 
         Assert.assertEquals(true, childEntry.getEntryId().equalsIgnoreCase("5a608815f3a50d049abf68e9"));
 
@@ -94,7 +94,7 @@ public class TestIndexContent {
 
         Assert.assertEquals(true, parentChildJoinEntry.getCepcjParentContentEntryUid() == parentEntry.getContentEntryUid());
 
-        ContentEntry courseEntry = contentEntryDao.findBySourceUrl(mockWebServer.url("api/5a60a25f0ed49f0498cb201d").toString());
+        ContentEntry courseEntry = contentEntryDao.findBySourceUrl("5a60a25f0ed49f0498cb201d");
 
         Assert.assertEquals(true, courseEntry.getEntryId().equalsIgnoreCase("5a60a25f0ed49f0498cb201d"));
 

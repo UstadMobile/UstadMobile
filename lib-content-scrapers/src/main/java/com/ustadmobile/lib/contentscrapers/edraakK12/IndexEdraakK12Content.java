@@ -95,7 +95,7 @@ public class IndexEdraakK12Content {
 
         UmAppDatabase db = UmAppDatabase.getInstance(null);
         db.setMaster(true);
-        UmAppDatabase repository = db.getRepository("", "");
+        UmAppDatabase repository = db.getRepository("https://localhost", "");
         contentEntryDao = repository.getContentEntryDao();
         contentParentChildJoinDao = repository.getContentEntryParentChildJoinDao();
         contentEntryFileDao = repository.getContentEntryFileDao();
@@ -201,7 +201,7 @@ public class IndexEdraakK12Content {
 
             for (ContentResponse children : parentContent.children) {
 
-                String sourceUrl = url.toString().substring(0, url.toString().indexOf("component/")) + children.id;
+                String sourceUrl = children.id;
                 boolean isLeaf = ContentScraperUtil.isImportedComponent(parentContent.component_type);
                 ContentEntry childEntry = contentEntryDao.findBySourceUrl(sourceUrl);
                 if (childEntry == null) {

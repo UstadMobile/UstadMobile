@@ -250,11 +250,6 @@ public class TestPhetContentScraper {
         }
         Assert.assertEquals("Parent child join between category and simulation exists",true, hasMathCategory);
 
-
-        ContentEntryContentCategoryJoin categoryJoinEntry = categoryJoinDao.findJoinByParentChildUuids(categoryEntry.getContentEntryUid(), englishSimulationEntry.getContentEntryUid());
-        Assert.assertEquals("Category Join with Simulation Exists - Category Match",true, categoryJoinEntry.getCeccjContentCategoryUid() == categoryEntry.getContentEntryUid());
-        Assert.assertEquals("Category Join with Simulation Exists - Simulation Match",true, englishSimulationEntry.getContentEntryUid() == categoryJoinEntry.getCeccjContentEntryUid());
-
         ContentEntry spanishEntry = contentEntryDao.findBySourceUrl("es/test");
         Assert.assertEquals("Simulation entry spanish exists", true, spanishEntry.getEntryId().equalsIgnoreCase("es/test"));
 
