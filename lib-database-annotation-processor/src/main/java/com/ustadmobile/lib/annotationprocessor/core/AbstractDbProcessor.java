@@ -808,11 +808,13 @@ public abstract class AbstractDbProcessor {
                         SyncResponse.class, entityType, otherDaoParam.getSimpleName(),
                         syncIncomingMethod.getSimpleName(),
                         accountPersonUidParam.getSimpleName())
-                .add("replaceList(_remoteChanges.getRemoteChangedEntities());\n")
-                .add("_syncableDb.getSyncStatusDao().updateSyncedToChangeSeqNums(" +
-                        "$L, _syncStatus.getNextLocalChangeSeqNum(), " +
-                        "_remoteChanges.getSyncedUpToMasterChangeSeqNum());\n",
-                        umEntityAnnotation.tableId());
+                .beginControlFlow("if(_remoteChanges != null)")
+                    .add("replaceList(_remoteChanges.getRemoteChangedEntities());\n")
+                    .add("_syncableDb.getSyncStatusDao().updateSyncedToChangeSeqNums(" +
+                                "$L, _syncStatus.getNextLocalChangeSeqNum(), " +
+                                "_remoteChanges.getSyncedUpToMasterChangeSeqNum());\n",
+                        umEntityAnnotation.tableId())
+                .endControlFlow();
 
         methodBuilder.addCode(codeBlock.build());
         daoBuilder.addMethod(methodBuilder.build());
