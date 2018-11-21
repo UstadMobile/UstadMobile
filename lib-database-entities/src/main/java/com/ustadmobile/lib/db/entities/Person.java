@@ -2,13 +2,15 @@ package com.ustadmobile.lib.db.entities;
 
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
+import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
+import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 
 /**
  * Created by mike on 3/8/18.
  */
 
-@UmEntity
-public class Person implements SyncableEntity {
+@UmEntity(tableId = 9)
+public class Person  {
 
     public static final int GENDER_UNSET = 0;
 
@@ -18,7 +20,7 @@ public class Person implements SyncableEntity {
 
     public static final int GENDER_OTHER = 4;
 
-    @UmPrimaryKey(autoIncrement = true)
+    @UmPrimaryKey(autoGenerateSyncable = true)
     private long personUid;
 
     private String username;
@@ -39,10 +41,11 @@ public class Person implements SyncableEntity {
 
     private boolean socialAccount;
 
-    private long masterChangeSeqNum;
+    @UmSyncMasterChangeSeqNum
+    private long personMasterChangeSeqNum;
 
-    private long localChangeSeqNum;
-
+    @UmSyncLocalChangeSeqNum
+    private long personLocalChangeSeqNum;
 
     public long getPersonUid() {
         return personUid;
@@ -100,24 +103,20 @@ public class Person implements SyncableEntity {
         this.phoneNum = phoneNum;
     }
 
-    @Override
-    public long getMasterChangeSeqNum() {
-        return masterChangeSeqNum;
+    public long getPersonMasterChangeSeqNum() {
+        return personMasterChangeSeqNum;
     }
 
-    @Override
-    public void setMasterChangeSeqNum(long masterChangeSeqNum) {
-        this.masterChangeSeqNum = masterChangeSeqNum;
+    public void setPersonMasterChangeSeqNum(long personMasterChangeSeqNum) {
+        this.personMasterChangeSeqNum = personMasterChangeSeqNum;
     }
 
-    @Override
-    public long getLocalChangeSeqNum() {
-        return localChangeSeqNum;
+    public long getPersonLocalChangeSeqNum() {
+        return personLocalChangeSeqNum;
     }
 
-    @Override
-    public void setLocalChangeSeqNum(long localChangeSeqNum) {
-        this.localChangeSeqNum = localChangeSeqNum;
+    public void setPersonLocalChangeSeqNum(long personLocalChangeSeqNum) {
+        this.personLocalChangeSeqNum = personLocalChangeSeqNum;
     }
 
     public int getGender() {
@@ -154,8 +153,6 @@ public class Person implements SyncableEntity {
         if (personUid != person.personUid) return false;
         if (gender != person.gender) return false;
         if (active != person.active) return false;
-        if (masterChangeSeqNum != person.masterChangeSeqNum) return false;
-        if (localChangeSeqNum != person.localChangeSeqNum) return false;
         if (username != null ? !username.equals(person.username) : person.username != null)
             return false;
         if (passwordHash != null ? !passwordHash.equals(person.passwordHash) : person.passwordHash != null)
@@ -180,8 +177,6 @@ public class Person implements SyncableEntity {
         result = 31 * result + (phoneNum != null ? phoneNum.hashCode() : 0);
         result = 31 * result + gender;
         result = 31 * result + (active ? 1 : 0);
-        result = 31 * result + (int) (masterChangeSeqNum ^ (masterChangeSeqNum >>> 32));
-        result = 31 * result + (int) (localChangeSeqNum ^ (localChangeSeqNum >>> 32));
         return result;
     }
 }

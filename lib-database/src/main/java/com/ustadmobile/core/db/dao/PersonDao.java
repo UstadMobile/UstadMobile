@@ -9,9 +9,10 @@ import com.ustadmobile.core.impl.UmCallbackUtil;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.db.entities.Person;
 import com.ustadmobile.lib.db.sync.dao.BaseDao;
+import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
-@UmDao
-public abstract class PersonDao implements BaseDao<Person> {
+@UmDao(readPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
+public abstract class PersonDao implements SyncableDao<Person, PersonDao> {
 
     @Override
     @UmInsert
