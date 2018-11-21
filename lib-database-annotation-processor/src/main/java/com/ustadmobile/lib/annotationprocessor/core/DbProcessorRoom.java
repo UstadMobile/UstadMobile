@@ -24,6 +24,7 @@ import com.ustadmobile.lib.database.annotation.UmSyncFindUpdateable;
 import com.ustadmobile.lib.database.annotation.UmSyncIncoming;
 import com.ustadmobile.lib.database.annotation.UmSyncOutgoing;
 import com.ustadmobile.lib.database.annotation.UmUpdate;
+import com.ustadmobile.lib.db.UmDbWithExecutor;
 import com.ustadmobile.lib.db.sync.UmRepositoryDb;
 
 import java.io.IOException;
@@ -101,6 +102,7 @@ public class DbProcessorRoom extends AbstractDbProcessor{
         TypeSpec.Builder dbManagerImplSpec = TypeSpec.classBuilder(roomDbManagerClassName)
                 .addModifiers(Modifier.PUBLIC)
                 .superclass(ClassName.get(dbType))
+                .addSuperinterface(UmDbWithExecutor.class)
                 .addField(ClassName.get(ExecutorService.class), "dbExecutor", Modifier.PRIVATE)
                 .addField(ParameterizedTypeName.get(List.class, UmRepositoryDb.class), "_repositories",
                         Modifier.PRIVATE)
@@ -126,7 +128,12 @@ public class DbProcessorRoom extends AbstractDbProcessor{
                     .addCode("_roomDb = $T.databaseBuilder(this.context, " + roomDbClassName +
                             ".class, dbName).build();\n",
                             ClassName.get("android.arch.persistence.room", "Room"))
-                .build());
+                .build())
+            .addMethod(MethodSpec.methodBuilder("execute")
+                    .addModifiers(Modifier.PUBLIC)
+                    .addAnnotation(Override.class)
+                    .addParameter(Runnable.class, "_runnable")
+                    .addCode("this.dbExecutor.execute(_runnable);\n").build());
 
         UmDatabase db = dbType.getAnnotation(UmDatabase.class);
 
