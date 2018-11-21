@@ -7,6 +7,9 @@ import com.neovisionaries.i18n.LanguageCode;
 import com.ustadmobile.core.db.dao.ContentCategoryDao;
 import com.ustadmobile.core.db.dao.ContentCategorySchemaDao;
 import com.ustadmobile.core.db.dao.ContentEntryContentCategoryJoinDao;
+import com.ustadmobile.core.db.dao.ContentEntryContentEntryFileJoinDao;
+import com.ustadmobile.core.db.dao.ContentEntryFileDao;
+import com.ustadmobile.core.db.dao.ContentEntryFileStatusDao;
 import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryRelatedEntryJoinDao;
 import com.ustadmobile.core.db.dao.LanguageDao;
@@ -14,10 +17,14 @@ import com.ustadmobile.lib.db.entities.ContentCategory;
 import com.ustadmobile.lib.db.entities.ContentCategorySchema;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.ContentEntryContentCategoryJoin;
+import com.ustadmobile.lib.db.entities.ContentEntryContentEntryFileJoin;
+import com.ustadmobile.lib.db.entities.ContentEntryFile;
+import com.ustadmobile.lib.db.entities.ContentEntryFileStatus;
 import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin;
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoin;
 import com.ustadmobile.lib.db.entities.Language;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.jsoup.Jsoup;
@@ -32,6 +39,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import org.w3c.dom.Attr;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -590,6 +598,37 @@ public class ContentScraperUtil {
         return langObj;
     }
 
+    public static ContentEntryFile insertContentEntryFile(File ePubFile, ContentEntryFileDao contentEntryFileDao,
+                                                    ContentEntryFileStatusDao contentEntryFileStatusDao,
+                                                    ContentEntry contentEntry, String md5,
+                                                    ContentEntryContentEntryFileJoinDao contentEntryContentEntryFileJoinDao) {
 
+        ContentEntryFile contentEntryFile = new ContentEntryFile();
+        contentEntryFile.setMimeType(ScraperConstants.MIMETYPE_EPUB);
+        contentEntryFile.setFileSize(ePubFile.length());
+        contentEntryFile.setLastModified(ePubFile.lastModified());
+        contentEntryFile.setMd5sum(md5);
+        contentEntryFile.setContentEntryFileUid(contentEntryFileDao.insert(contentEntryFile));
+
+        ContentEntryContentEntryFileJoin fileJoin = new ContentEntryContentEntryFileJoin();
+        fileJoin.setCecefjContentEntryFileUid(contentEntryFile.getContentEntryFileUid());
+        fileJoin.setCecefjContentEntryUid(contentEntry.getContentEntryUid());
+        fileJoin.setCecefjUid(contentEntryContentEntryFileJoinDao.insert(fileJoin));
+
+        ContentEntryFileStatus fileStatus = new ContentEntryFileStatus();
+        fileStatus.setCefsContentEntryFileUid(contentEntryFile.getContentEntryFileUid());
+        fileStatus.setFilePath(ePubFile.getAbsolutePath());
+        fileStatus.setCefsUid(contentEntryFileStatusDao.insert(fileStatus));
+
+        return contentEntryFile;
+    }
+
+    public static String getMd5(File ePubFile) throws IOException {
+        FileInputStream fis = new FileInputStream(ePubFile);
+        String md5EpubFile = DigestUtils.md5Hex(fis);
+        fis.close();
+
+        return md5EpubFile;
+    }
 
 }

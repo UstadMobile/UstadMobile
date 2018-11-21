@@ -1,5 +1,6 @@
 package com.ustadmobile.lib.contentscrapers;
 
+import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.lib.contentscrapers.africanbooks.AsbScraper;
 import com.ustadmobile.lib.contentscrapers.ddl.DdlContentScraper;
 import com.ustadmobile.lib.contentscrapers.ddl.IndexDdlContent;
@@ -89,10 +90,14 @@ public class TestPrathamContentScraper {
         File contentFile = new File(contentFolder, "5859-come-home-papa.epub");
         Assert.assertEquals(true, ContentScraperUtil.fileHasContent(contentFile));
 
+
     }
 
     @Test
     public void testasb() throws IOException {
+
+        UmAppDatabase db = UmAppDatabase.getInstance(null);
+        db.clearAllTables();
 
         File tmpDir = Files.createTempDirectory("testindexAsbcontentscraper").toFile();
 
@@ -111,6 +116,10 @@ public class TestPrathamContentScraper {
 
         File contentFile = new File(tmpDir, "asb10674.epub");
         Assert.assertEquals(true, ContentScraperUtil.fileHasContent(contentFile));
+
+        db.clearAllTables();
+
+        scraper.findContent(tmpDir);
 
     }
 

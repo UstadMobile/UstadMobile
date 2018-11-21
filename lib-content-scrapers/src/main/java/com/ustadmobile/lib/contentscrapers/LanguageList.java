@@ -7,6 +7,7 @@ import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.LanguageDao;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.lib.db.entities.Language;
+import com.ustadmobile.lib.db.sync.dao.SyncablePrimaryKeyDao;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -31,7 +32,8 @@ public class LanguageList {
                 getClass().getResourceAsStream(LANGUAGE_LIST_LOCATION)), new TypeToken<List<Language>>() {}.getType());
 
         UmAppDatabase db = UmAppDatabase.getInstance(null);
-        LanguageDao langDao = db.getLanguageDao();
+        UmAppDatabase repository = db.getRepository("https://localhost", "");
+        LanguageDao langDao = repository.getLanguageDao();
         if(langDao.totalLanguageCount() < 7000){
             langDao.insertList(langList);
         }
