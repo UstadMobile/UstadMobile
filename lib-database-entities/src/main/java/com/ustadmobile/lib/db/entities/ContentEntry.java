@@ -38,10 +38,6 @@ public class ContentEntry {
 
     private String description;
 
-    private String primaryLanguage;
-
-    private String primaryLanguageCountry;
-
     private String entryId;
 
     private String author;
@@ -110,42 +106,6 @@ public class ContentEntry {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    /**
-     * Get the two letter language code as per IETF language tag - e.g. "en", "es", "ar" etc.
-     * This is for the primary langauge of this entry. The entry may, occasionally,  contain
-     * content in other languages.
-     *
-     * @return the two letter language code as per IETF language tag - e.g. "en", "es", "ar" etc.
-     */
-    public String getPrimaryLanguage() {
-        return primaryLanguage;
-    }
-
-    /**
-     * Set the two letter language code as per IETF language tag - e.g. "en", "es", "ar" etc.
-     * @param primaryLanguage the two letter language code as per IETF language tag - e.g. "en", "es", "ar" etc.
-     */
-    public void setPrimaryLanguage(String primaryLanguage) {
-        this.primaryLanguage = primaryLanguage;
-    }
-
-    /**
-     * Get the two letter language country code (if any) as per the IETF language tag - e.g. "us", "ae", etc
-     *
-     * @return the two letter language country code (if any) as per the IETF language tag - e.g. "us", "ae", etc
-     */
-    public String getPrimaryLanguageCountry() {
-        return primaryLanguageCountry;
-    }
-
-    /**
-     * Set the two letter language country code (if any) as per the IETF language tag - e.g. "us", "ae", etc
-     * @param primaryLanguageCountry the two letter language country code (if any) as per the IETF language tag - e.g. "us", "ae", etc
-     */
-    public void setPrimaryLanguageCountry(String primaryLanguageCountry) {
-        this.primaryLanguageCountry = primaryLanguageCountry;
     }
 
     /**

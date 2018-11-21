@@ -25,7 +25,6 @@ import com.ustadmobile.lib.db.entities.ContentEntryFileStatus;
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoin;
 import com.ustadmobile.lib.db.entities.Language;
 
-import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -39,7 +38,6 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -157,11 +155,11 @@ public class AsbScraper {
         if (masterRootParent == null) {
             masterRootParent = new ContentEntry();
             masterRootParent = setContentEntryData(masterRootParent, "root",
-                    "Ustad Mobile", "root", englishLang.getLangUid(), false);
+                    "Ustad Mobile", "root", englishLang.getLangUid(), false, "", "");
             masterRootParent.setContentEntryUid(contentEntryDao.insert(masterRootParent));
         } else {
             masterRootParent = setContentEntryData(masterRootParent, "root",
-                    "Ustad Mobile", "root", englishLang.getLangUid(), false);
+                    "Ustad Mobile", "root", englishLang.getLangUid(), false, "", "");
             contentEntryDao.update(masterRootParent);
         }
 
@@ -170,12 +168,14 @@ public class AsbScraper {
         if (asbParentEntry == null) {
             asbParentEntry = new ContentEntry();
             asbParentEntry = setContentEntryData(asbParentEntry, "https://www.africanstorybook.org/",
-                    "African Story Books", "https://www.africanstorybook.org/", englishLang.getLangUid(), false);
+                    "African Story Books", "https://www.africanstorybook.org/", englishLang.getLangUid(), false, "Open access to picture storybooks in the languages of Africa. \n" +
+                            "For children’s literacy, enjoyment and imagination. ", "");
             asbParentEntry.setThumbnailUrl("https://www.africanstorybook.org/img/asb120.png");
             asbParentEntry.setContentEntryUid(contentEntryDao.insert(asbParentEntry));
         } else {
             asbParentEntry = setContentEntryData(asbParentEntry, "https://www.africanstorybook.org/",
-                    "African Story Books", "https://www.africanstorybook.org/", englishLang.getLangUid(), false);
+                    "African Story Books", "https://www.africanstorybook.org/", englishLang.getLangUid(), false, "Open access to picture storybooks in the languages of Africa. \n" +
+                            "For children’s literacy, enjoyment and imagination. ", "");
             asbParentEntry.setThumbnailUrl("https://www.africanstorybook.org/img/asb120.png");
             contentEntryDao.update(asbParentEntry);
         }
@@ -217,12 +217,12 @@ public class AsbScraper {
                 if (childEntry == null) {
                     childEntry = new ContentEntry();
                     childEntry = setContentEntryData(childEntry, sourceUrl,
-                            bookObj.title, sourceUrl, language.getLangUid(), true);
+                            bookObj.title, sourceUrl, language.getLangUid(), true, bookObj.summary, bookObj.author);
                     childEntry.setThumbnailUrl(getCoverUrl(bookId));
                     childEntry.setContentEntryUid(contentEntryDao.insert(childEntry));
                 } else {
                     childEntry = setContentEntryData(childEntry, sourceUrl,
-                            bookObj.title, sourceUrl, language.getLangUid(), true);
+                            bookObj.title, sourceUrl, language.getLangUid(), true, bookObj.summary, bookObj.author);
                     childEntry.setThumbnailUrl(getCoverUrl(bookId));
                     contentEntryDao.update(childEntry);
                 }
@@ -370,14 +370,16 @@ public class AsbScraper {
         return contentEntryFile;
     }
 
-    private ContentEntry setContentEntryData(ContentEntry entry, String id, String title, String sourceUrl, long lang, boolean isLeaf) {
+    private ContentEntry setContentEntryData(ContentEntry entry, String id, String title, String sourceUrl, long lang, boolean isLeaf, String desc, String author) {
         entry.setEntryId(id);
         entry.setTitle(title);
         entry.setSourceUrl(sourceUrl);
         entry.setPublisher("African Story Books");
         entry.setLicenseType(ContentEntry.LICENSE_TYPE_CC_BY);
         entry.setPrimaryLanguageUid(lang);
+        entry.setDescription(desc);
         entry.setLeaf(isLeaf);
+        entry.setAuthor(author);
         return entry;
     }
 

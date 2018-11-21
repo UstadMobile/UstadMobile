@@ -60,6 +60,7 @@ public class PhetContentScraper {
     private String aboutText;
     private ArrayList<String> langugageList;
     private Map<String, Boolean> languageMapUpdate;
+    private Map<Long, String> langIdMap;
 
     private String aboutDescription;
     private boolean contentUpdated;
@@ -163,6 +164,10 @@ public class PhetContentScraper {
         return contentUpdated;
     }
 
+    public String getAboutDescription(){
+        return aboutDescription;
+    }
+
     /**
      * Find the category for the phet simulation
      *
@@ -259,6 +264,7 @@ public class PhetContentScraper {
     public ArrayList<ContentEntry> getTranslations(File destinationDirectory, ContentEntryDao contentEntryDao, String thumbnailUrl, LanguageDao languageDao, LanguageVariantDao languageVariantDao) throws IOException {
 
         ArrayList<ContentEntry> translationsEntry = new ArrayList<>();
+        langIdMap = new HashMap<>();
 
         for (File translationDir : destinationDirectory.listFiles()) {
 
@@ -322,11 +328,16 @@ public class PhetContentScraper {
                                     languageContentEntry = new ContentEntry();
                                     languageContentEntry = setContentEntryData(languageContentEntry, path, langTitle, path, language, languageVariant, true);
                                     languageContentEntry.setThumbnailUrl(thumbnailUrl);
+                                    languageContentEntry.setDescription(getAboutDescription());
                                     languageContentEntry.setContentEntryUid(contentEntryDao.insert(languageContentEntry));
                                 } else {
                                     languageContentEntry = setContentEntryData(languageContentEntry, path, langTitle, path, language, languageVariant, true);
+                                    languageContentEntry.setThumbnailUrl(thumbnailUrl);
+                                    languageContentEntry.setDescription(getAboutDescription());
                                     contentEntryDao.update(languageContentEntry);
                                 }
+
+                                langIdMap.put(languageContentEntry.getContentEntryUid(), langCode);
 
                                 translationsEntry.add(languageContentEntry);
                                 break;
@@ -338,6 +349,10 @@ public class PhetContentScraper {
         }
 
         return translationsEntry;
+    }
+
+    public Map<Long, String> getContentEntryLangMap(){
+        return langIdMap;
     }
 
     /**

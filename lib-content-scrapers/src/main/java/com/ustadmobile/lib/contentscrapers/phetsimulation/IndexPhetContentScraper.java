@@ -121,11 +121,11 @@ public class IndexPhetContentScraper {
         if (masterRootParent == null) {
             masterRootParent = new ContentEntry();
             masterRootParent= setContentEntryData(masterRootParent, "root",
-                    "Ustad Mobile", "root", englishLang, false);
+                    "Ustad Mobile", "root", englishLang, false, "");
             masterRootParent.setContentEntryUid(contentEntryDao.insert(masterRootParent));
         } else {
             masterRootParent = setContentEntryData(masterRootParent, "root",
-                    "Ustad Mobile", "root", englishLang, false);
+                    "Ustad Mobile", "root", englishLang, false, "");
             contentEntryDao.update(masterRootParent);
         }
 
@@ -133,12 +133,16 @@ public class IndexPhetContentScraper {
         if (phetParentEntry == null) {
             phetParentEntry = new ContentEntry();
             phetParentEntry = setContentEntryData(phetParentEntry, "https://phet.colorado.edu/",
-                    "Phet Interactive Simulations", "https://phet.colorado.edu/", englishLang, false);
+                    "Phet Interactive Simulations", "https://phet.colorado.edu/", englishLang, false, "");
+            phetParentEntry.setDescription("INTERACTIVE SIMULATIONS" +
+                    " FOR SCIENCE AND MATH");
             phetParentEntry.setThumbnailUrl("https://phet.colorado.edu/images/phet-social-media-logo.png");
             phetParentEntry.setContentEntryUid(contentEntryDao.insert(phetParentEntry));
         } else {
             phetParentEntry = setContentEntryData(phetParentEntry, "https://phet.colorado.edu/",
-                    "Phet Interactive Simulations", "https://phet.colorado.edu/", englishLang, false);
+                    "Phet Interactive Simulations", "https://phet.colorado.edu/", englishLang, false, "");
+            phetParentEntry.setDescription("INTERACTIVE SIMULATIONS" +
+                    " FOR SCIENCE AND MATH");
             phetParentEntry.setThumbnailUrl("https://phet.colorado.edu/images/phet-social-media-logo.png");
             contentEntryDao.update(phetParentEntry);
         }
@@ -152,23 +156,23 @@ public class IndexPhetContentScraper {
             String title = simulationUrl.substring(simulationUrl.lastIndexOf("/") + 1, simulationUrl.length());
             String thumbnail = simulation.parent().selectFirst("img").attr("src");
 
-            ContentEntry englishSimContentEntry = contentEntryDao.findBySourceUrl(path);
-            if (englishSimContentEntry == null) {
-                englishSimContentEntry = new ContentEntry();
-                englishSimContentEntry = setContentEntryData(englishSimContentEntry, path, title, path, englishLang, true);
-                englishSimContentEntry.setThumbnailUrl(thumbnail);
-                englishSimContentEntry.setContentEntryUid(contentEntryDao.insert(englishSimContentEntry));
-            } else {
-                englishSimContentEntry = setContentEntryData(englishSimContentEntry, path, title, path, englishLang, true);
-                englishSimContentEntry.setThumbnailUrl(thumbnail);
-                contentEntryDao.update(englishSimContentEntry);
-            }
-
-            ContentScraperUtil.insertOrUpdateRelatedContentJoin(contentEntryRelatedJoinDao, englishSimContentEntry, englishSimContentEntry, ContentEntryRelatedEntryJoin.REL_TYPE_TRANSLATED_VERSION);
-
             PhetContentScraper scraper = new PhetContentScraper(simulationUrl, destinationDirectory);
             try {
                 scraper.scrapeContent();
+
+                ContentEntry englishSimContentEntry = contentEntryDao.findBySourceUrl(path);
+                if (englishSimContentEntry == null) {
+                    englishSimContentEntry = new ContentEntry();
+                    englishSimContentEntry = setContentEntryData(englishSimContentEntry, path, title, path, englishLang, true, scraper.getAboutDescription());
+                    englishSimContentEntry.setThumbnailUrl(thumbnail);
+                    englishSimContentEntry.setContentEntryUid(contentEntryDao.insert(englishSimContentEntry));
+                } else {
+                    englishSimContentEntry = setContentEntryData(englishSimContentEntry, path, title, path, englishLang, true, scraper.getAboutDescription());
+                    englishSimContentEntry.setThumbnailUrl(thumbnail);
+                    contentEntryDao.update(englishSimContentEntry);
+                }
+
+                ContentScraperUtil.insertOrUpdateRelatedContentJoin(contentEntryRelatedJoinDao, englishSimContentEntry, englishSimContentEntry, ContentEntryRelatedEntryJoin.REL_TYPE_TRANSLATED_VERSION);
 
                 if (scraper.isAnyContentUpdated()) {
 
@@ -217,13 +221,13 @@ public class IndexPhetContentScraper {
 
                             ContentScraperUtil.insertOrUpdateRelatedContentJoin(contentEntryRelatedJoinDao, translation, englishSimContentEntry, ContentEntryRelatedEntryJoin.REL_TYPE_TRANSLATED_VERSION);
 
-                            String langCode = translation.getPrimaryLanguage() +
-                                    ((translation.getPrimaryLanguageCountry() != null) ? "-" + translation.getPrimaryLanguageCountry() : "");
+                            String langCode = scraper.getContentEntryLangMap().get(translation.getContentEntryUid());
 
                             if(scraper.getLanguageUpdatedMap().get(langCode)){
 
                                 File langLocation = new File(destinationDirectory, langCode);
                                 File content = new File(langLocation, title + ScraperConstants.ZIP_EXT);
+
                                 FileInputStream fis = new FileInputStream(content);
                                 String md5 = DigestUtils.md5Hex(fis);
                                 fis.close();
@@ -259,7 +263,7 @@ public class IndexPhetContentScraper {
         }
     }
 
-    private ContentEntry setContentEntryData(ContentEntry entry, String id, String title, String sourceUrl, Language lang, boolean isLeaf) {
+    private ContentEntry setContentEntryData(ContentEntry entry, String id, String title, String sourceUrl, Language lang, boolean isLeaf, String desc) {
         entry.setEntryId(id);
         entry.setTitle(title);
         entry.setSourceUrl(sourceUrl);
@@ -267,6 +271,7 @@ public class IndexPhetContentScraper {
         entry.setLicenseType(LICENSE_TYPE_CC_BY);
         entry.setPrimaryLanguageUid(lang.getLangUid());
         entry.setLeaf(isLeaf);
+        entry.setDescription(desc);
         return entry;
     }
 

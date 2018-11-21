@@ -19,4 +19,9 @@ public abstract class ContentEntryFileDao implements SyncableDao<ContentEntryFil
                     "WHERE ContentEntryContentEntryFileJoin.cecefjContentEntryUid = :contentEntryUid")
     public abstract void findFilesByContentEntryUid(long contentEntryUid, UmCallback<List<ContentEntryFile>> callback);
 
+    @UmQuery("Select ContentEntryFile.* FROM ContentEntryFile LEFT JOIN ContentEntryContentEntryFileJoin " +
+            "ON ContentEntryFile.contentEntryFileUid = ContentEntryContentEntryFileJoin.cecefjContentEntryFileUid " +
+            "WHERE ContentEntryContentEntryFileJoin.cecefjContentEntryUid = :contentEntryUid")
+    public abstract List<ContentEntryFile> findFilesByContentEntryUid(long contentEntryUid);
+
 }

@@ -1,5 +1,6 @@
 package com.ustadmobile.lib.contentscrapers.ddl;
 
+import com.neovisionaries.i18n.LanguageCode;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.ContentCategoryDao;
 import com.ustadmobile.core.db.dao.ContentCategorySchemaDao;
@@ -7,6 +8,7 @@ import com.ustadmobile.core.db.dao.ContentEntryContentEntryFileJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryDao;
 import com.ustadmobile.core.db.dao.ContentEntryFileDao;
 import com.ustadmobile.core.db.dao.ContentEntryFileStatusDao;
+import com.ustadmobile.core.db.dao.LanguageDao;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.db.entities.ContentCategory;
 import com.ustadmobile.lib.db.entities.ContentCategorySchema;
@@ -14,6 +16,7 @@ import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.ContentEntryContentEntryFileJoin;
 import com.ustadmobile.lib.db.entities.ContentEntryFile;
 import com.ustadmobile.lib.db.entities.ContentEntryFileStatus;
+import com.ustadmobile.lib.db.entities.Language;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
@@ -53,6 +56,7 @@ public class DdlContentScraper {
     private final ContentEntryFileStatusDao contentFileStatusDao;
     private final ContentCategorySchemaDao categorySchemaDao;
     private final ContentCategoryDao contentCategoryDao;
+    private final LanguageDao languageDao;
     private Document doc;
     ArrayList<ContentEntry> contentEntries;
 
@@ -69,6 +73,7 @@ public class DdlContentScraper {
         contentFileStatusDao = repository.getContentEntryFileStatusDao();
         categorySchemaDao = repository.getContentCategorySchemaDao();
         contentCategoryDao = repository.getContentCategoryDao();
+        languageDao = repository.getLanguageDao();
     }
 
 
@@ -90,7 +95,6 @@ public class DdlContentScraper {
     }
 
 
-
     public void scrapeContent() throws IOException, URISyntaxException {
 
         File resourceFolder = new File(destinationDirectory, FilenameUtils.getBaseName(urlString));
@@ -110,22 +114,30 @@ public class DdlContentScraper {
 
             String thumbnail = doc.selectFirst("aside img").attr("src");
 
+            String lang = doc.select("html").attr("lang");
+            Language langEntity = ContentScraperUtil.insertOrUpdateLanguage(languageDao, LanguageCode.getByCode(lang).getName());
+            String description = doc.selectFirst("meta[name=description]").attr("content");
+            String author = doc.selectFirst("article.resource-view-details h3:contains(Author) ~ p").text();
+            String publisher = doc.selectFirst("article.resource-view-details h3:contains(Publisher) ~ p").text();
+
             ContentEntry contentEntry = contentEntryDao.findBySourceUrl(uri.toURL().getPath());
             if (contentEntry == null) {
                 contentEntry = new ContentEntry();
                 contentEntry = setContentEntryData(contentEntry, uri.toString(),
-                        doc.title(), uri.toURL().getPath(), doc.select("html").attr("lang"), true);
+                        doc.title(), uri.toURL().getPath(), langEntity, true, description, publisher);
                 contentEntry.setThumbnailUrl(thumbnail);
+                contentEntry.setAuthor(author);
                 contentEntry.setContentEntryUid(contentEntryDao.insert(contentEntry));
             } else {
                 contentEntry = setContentEntryData(contentEntry, uri.toString(),
-                        doc.title(), uri.toURL().getPath(), doc.select("html").attr("lang"), true);
+                        doc.title(), uri.toURL().getPath(), langEntity, true, description, publisher);
                 contentEntry.setThumbnailUrl(thumbnail);
+                contentEntry.setAuthor(author);
                 contentEntryDao.update(contentEntry);
             }
 
 
-            URLConnection conn =  uri.toURL().openConnection();
+            URLConnection conn = uri.toURL().openConnection();
             File resourceFile = new File(resourceFolder, FilenameUtils.getName(href));
             if (!ContentScraperUtil.isFileModified(conn, resourceFolder, FilenameUtils.getName(href))) {
                 continue;
@@ -161,14 +173,15 @@ public class DdlContentScraper {
         }
     }
 
-    private ContentEntry setContentEntryData(ContentEntry entry, String id, String title, String sourceUrl, String lang, boolean isLeaf) {
+    private ContentEntry setContentEntryData(ContentEntry entry, String id, String title, String sourceUrl, Language lang, boolean isLeaf, String description, String publisher) {
         entry.setEntryId(id);
         entry.setTitle(title);
         entry.setSourceUrl(sourceUrl);
-        entry.setPublisher("DDL");
+        entry.setPublisher((publisher != null && !publisher.isEmpty() ? publisher : "DDL"));
         entry.setLicenseType(ContentEntry.LICENSE_TYPE_CC_BY);
-        entry.setPrimaryLanguage(lang);
+        entry.setPrimaryLanguageUid(lang.getLangUid());
         entry.setLeaf(isLeaf);
+        entry.setDescription(description);
         return entry;
     }
 
@@ -188,15 +201,18 @@ public class DdlContentScraper {
             String title = subject.attr("title");
             String href = subject.attr("href");
 
+            String lang = doc.select("html").attr("lang");
+            Language langEntity = ContentScraperUtil.insertOrUpdateLanguage(languageDao, LanguageCode.getByCode(lang).getName());
+
             ContentEntry contentEntry = contentEntryDao.findBySourceUrl(href);
             if (contentEntry == null) {
                 contentEntry = new ContentEntry();
                 contentEntry = setContentEntryData(contentEntry, href,
-                        title, href, doc.select("html").attr("lang"), false);
+                        title, href, langEntity, false, "", "");
                 contentEntry.setContentEntryUid(contentEntryDao.insert(contentEntry));
             } else {
                 contentEntry = setContentEntryData(contentEntry, href,
-                        title, href, doc.select("html").attr("lang"), false);
+                        title, href, langEntity, false, "", "");
                 contentEntryDao.update(contentEntry);
             }
 

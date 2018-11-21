@@ -9,12 +9,14 @@ import com.ustadmobile.core.db.dao.ContentEntryDao;
 import com.ustadmobile.core.db.dao.ContentEntryFileDao;
 import com.ustadmobile.core.db.dao.ContentEntryFileStatusDao;
 import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
+import com.ustadmobile.core.db.dao.LanguageDao;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.ScraperConstants;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.ContentEntryContentEntryFileJoin;
 import com.ustadmobile.lib.db.entities.ContentEntryFile;
 import com.ustadmobile.lib.db.entities.ContentEntryFileStatus;
+import com.ustadmobile.lib.db.entities.Language;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
@@ -61,6 +63,8 @@ public class IndexPrathamContentScraper {
     private ContentEntryContentEntryFileJoinDao contentEntryFileJoinDao;
     private ContentEntryFileStatusDao contentFileStatusDao;
     private ContentEntry prathamParentEntry;
+    private Language englishLang;
+    private LanguageDao languageDao;
 
     public static void main(String[] args) {
         if (args.length != 1) {
@@ -90,16 +94,19 @@ public class IndexPrathamContentScraper {
         contentEntryFileDao = repository.getContentEntryFileDao();
         contentEntryFileJoinDao = repository.getContentEntryContentEntryFileJoinDao();
         contentFileStatusDao = repository.getContentEntryFileStatusDao();
+        languageDao = repository.getLanguageDao();
+
+        englishLang = ContentScraperUtil.insertOrUpdateLanguage(languageDao, "English");
 
         ContentEntry masterRootParent = contentEntryDao.findBySourceUrl("root");
         if (masterRootParent == null) {
             masterRootParent = new ContentEntry();
             masterRootParent= setContentEntryData(masterRootParent, "root",
-                    "Ustad Mobile", "root", ScraperConstants.ENGLISH_LANG_CODE, false, "");
+                    "Ustad Mobile", "root", englishLang, false, "");
             masterRootParent.setContentEntryUid(contentEntryDao.insert(masterRootParent));
         } else {
             masterRootParent = setContentEntryData(masterRootParent, "root",
-                    "Ustad Mobile", "root", ScraperConstants.ENGLISH_LANG_CODE, false, "");
+                    "Ustad Mobile", "root", englishLang, false, "");
             contentEntryDao.update(masterRootParent);
         }
 
@@ -108,12 +115,12 @@ public class IndexPrathamContentScraper {
         if (prathamParentEntry == null) {
             prathamParentEntry = new ContentEntry();
             prathamParentEntry = setContentEntryData(prathamParentEntry, "https://storyweaver.org.in/",
-                    "Pratham Books", "https://storyweaver.org.in/", ScraperConstants.ENGLISH_LANG_CODE, false, "");
+                    "Pratham Books", "https://storyweaver.org.in/", englishLang, false, "");
             prathamParentEntry.setThumbnailUrl("https://prathambooks.org/wp-content/uploads/2018/04/Logo-black.png");
             prathamParentEntry.setContentEntryUid(contentEntryDao.insert(prathamParentEntry));
         } else {
             prathamParentEntry = setContentEntryData(prathamParentEntry, "https://storyweaver.org.in/",
-                    "Pratham Books", "https://storyweaver.org.in/", ScraperConstants.ENGLISH_LANG_CODE, false, "");
+                    "Pratham Books", "https://storyweaver.org.in/", englishLang, false, "");
             prathamParentEntry.setThumbnailUrl("https://prathambooks.org/wp-content/uploads/2018/04/Logo-black.png");
             contentEntryDao.update(prathamParentEntry);
         }
@@ -148,6 +155,7 @@ public class IndexPrathamContentScraper {
                 connection.setRequestProperty("Cookie", cookie);
 
                 String lang = getLangCode(data.language);
+                Language langEntity = ContentScraperUtil.insertOrUpdateLanguage(languageDao,LanguageAlpha3Code.getByCode(lang).getName());
                 File resourceFolder = new File(destinationDir, String.valueOf(data.id));
                 resourceFolder.mkdirs();
                 String resourceFileName = data.slug + ePubExt;
@@ -156,12 +164,12 @@ public class IndexPrathamContentScraper {
                 if (contentEntry == null) {
                     contentEntry = new ContentEntry();
                     contentEntry = setContentEntryData(contentEntry, data.slug,
-                            data.title , epubUrl.getPath(), lang, true, data.description);
+                            data.title , epubUrl.getPath(), langEntity, true, data.description);
                     contentEntry.setThumbnailUrl(data.coverImage.sizes.get(0).url);
                     contentEntry.setContentEntryUid(contentEntryDao.insert(contentEntry));
                 } else {
                     contentEntry = setContentEntryData(contentEntry, data.slug,
-                            data.title, epubUrl.getPath(), lang, true, data.description);
+                            data.title, epubUrl.getPath(), langEntity, true, data.description);
                     contentEntry.setThumbnailUrl(data.coverImage.sizes.get(0).url);
                     contentEntryDao.update(contentEntry);
                 }
@@ -226,14 +234,14 @@ public class IndexPrathamContentScraper {
         return LanguageAlpha3Code.findByName(list[0]).get(0).name();
     }
 
-    private ContentEntry setContentEntryData(ContentEntry entry, String id, String title, String sourceUrl, String lang, boolean isLeaf, String desc) {
+    private ContentEntry setContentEntryData(ContentEntry entry, String id, String title, String sourceUrl, Language lang, boolean isLeaf, String desc) {
         entry.setEntryId(id);
         entry.setTitle(title);
         entry.setDescription(desc);
         entry.setSourceUrl(sourceUrl);
         entry.setPublisher("Pratham");
         entry.setLicenseType(ContentEntry.LICENSE_TYPE_CC_BY);
-        entry.setPrimaryLanguage(lang);
+        entry.setPrimaryLanguageUid(lang.getLangUid());
         entry.setLeaf(isLeaf);
         return entry;
     }

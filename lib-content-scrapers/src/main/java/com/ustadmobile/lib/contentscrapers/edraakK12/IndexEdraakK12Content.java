@@ -133,11 +133,19 @@ public class IndexEdraakK12Content {
                     "Edraak K12", "https://www.edraak.org/k12/", false);
             edraakParentEntry.setThumbnailUrl("https://www.edraak.org/static/images/logo-dark-ar.fa1399e8d134.png");
             edraakParentEntry.setLicenseType(ContentEntry.ALL_RIGHTS_RESERVED);
+            edraakParentEntry.setDescription("تعليم مجانيّ\n" +
+                    "إلكترونيّ باللغة العربيّة!" +
+                    "\n Free Online \n" +
+                    "Education, In Arabic!");
             edraakParentEntry.setContentEntryUid(contentEntryDao.insert(edraakParentEntry));
         } else {
             edraakParentEntry = setContentEntryData(edraakParentEntry, "https://www.edraak.org/k12/",
                     "Edraak K12", "https://www.edraak.org/k12/", false);
             edraakParentEntry.setThumbnailUrl("https://www.edraak.org/static/images/logo-dark-ar.fa1399e8d134.png");
+            edraakParentEntry.setDescription("تعليم مجانيّ\n" +
+                    "إلكترونيّ باللغة العربيّة!" +
+                    "\n Free Online \n" +
+                    "Education, In Arabic!");
             edraakParentEntry.setLicenseType(ContentEntry.ALL_RIGHTS_RESERVED);
             contentEntryDao.update(edraakParentEntry);
         }
