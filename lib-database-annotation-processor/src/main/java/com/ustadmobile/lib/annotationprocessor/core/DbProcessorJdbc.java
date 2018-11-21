@@ -150,6 +150,8 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                             .add("this._dataSource = (DataSource)iContext.lookup(\"java:/comp/env/jdbc/\"+dbName);\n")
                             .add("this._arraySupported = $T.isArraySupported(this._dataSource);\n",
                                     JdbcDatabaseUtils.class)
+                            .add("$T.setIsMasterFromJndi(this, dbName, iContext);\n",
+                                    JdbcDatabaseUtils.class)
                             .add("createAllTables();\n")
                         .endControlFlow()
                         .beginControlFlow("catch($T e)",
