@@ -261,8 +261,6 @@ public class TestPhetContentScraper {
         ContentEntryRelatedEntryJoin spanishEnglishJoin = relatedJoin.findPrimaryByTranslation(spanishEntry.getContentEntryUid());
         Assert.assertEquals("Related Join with Simulation Exists - Spanish Match",true, spanishEnglishJoin.getCerejRelatedEntryUid() == spanishEntry.getContentEntryUid());
         Assert.assertEquals("Related Join with Simulation Exists - English Match",true, spanishEnglishJoin.getCerejContentEntryUid() == englishSimulationEntry.getContentEntryUid());
-        Assert.assertEquals("Related Join exists - lang match", true, spanishEntry.getPrimaryLanguage().equalsIgnoreCase("es"));
-
 
         List<ContentEntryContentEntryFileJoin> listOfFiles = fileEntryJoin.findChildByParentUUid(englishSimulationEntry.getContentEntryUid());
         Assert.assertEquals(true, listOfFiles.size() > 0);
@@ -288,8 +286,6 @@ public class TestPhetContentScraper {
         scraper.scrapeContent();
 
         ArrayList<ContentEntry> translationList = scraper.getTranslations(tmpDir, db.getContentEntryDao(), "", db.getLanguageDao(), db.getLanguageVariantDao());
-
-        Assert.assertEquals("first translation == es", translationList.get(0).getPrimaryLanguage(), ("es"));
 
     }
 

@@ -212,7 +212,7 @@ public class AsbScraper {
 
                 Language language = languageDao.findByName(langName);
 
-                String sourceUrl = epubUrl.getPath() + epubUrl.getPath();
+                String sourceUrl = epubUrl.getPath() + "?" + epubUrl.getQuery();
                 ContentEntry childEntry = contentEntryDao.findBySourceUrl(sourceUrl);
                 if (childEntry == null) {
                     childEntry = new ContentEntry();
@@ -254,7 +254,7 @@ public class AsbScraper {
                         }
 
                         URL content = generateEPubUrl(africanBooksUrl, id);
-                        String relatedSourceUrl = content.getPath() + content.getQuery();
+                        String relatedSourceUrl = content.getPath() + "?" + content.getQuery();
                         ContentEntry contentEntry = contentEntryDao.findBySourceUrl(relatedSourceUrl);
                         if (contentEntry == null) {
                             contentEntry = new ContentEntry();
@@ -339,6 +339,14 @@ public class AsbScraper {
 
             } catch (Exception e) {
                 System.err.println("Exception downloading/checking : " + ePubFile.getName() + " with title " + bookObj.title);
+                retry++;
+                if (retry == 3) {
+                    retry = 0;
+                    System.out.println(ePubFile.getName() + " size 0 bytes: failed! for title " + bookObj.title);
+                    continue;
+                }
+                i--;
+                driver.manage().deleteAllCookies();
                 e.printStackTrace();
             }
         }
