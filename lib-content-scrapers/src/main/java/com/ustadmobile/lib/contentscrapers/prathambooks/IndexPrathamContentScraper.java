@@ -115,12 +115,12 @@ public class IndexPrathamContentScraper {
         if (prathamParentEntry == null) {
             prathamParentEntry = new ContentEntry();
             prathamParentEntry = setContentEntryData(prathamParentEntry, "https://storyweaver.org.in/",
-                    "Pratham Books", "https://storyweaver.org.in/", englishLang, false, "");
+                    "Pratham Books", "https://storyweaver.org.in/", englishLang, false, "Every Child in School & Learning Well");
             prathamParentEntry.setThumbnailUrl("https://prathambooks.org/wp-content/uploads/2018/04/Logo-black.png");
             prathamParentEntry.setContentEntryUid(contentEntryDao.insert(prathamParentEntry));
         } else {
             prathamParentEntry = setContentEntryData(prathamParentEntry, "https://storyweaver.org.in/",
-                    "Pratham Books", "https://storyweaver.org.in/", englishLang, false, "");
+                    "Pratham Books", "https://storyweaver.org.in/", englishLang, false, "Every Child in School & Learning Well");
             prathamParentEntry.setThumbnailUrl("https://prathambooks.org/wp-content/uploads/2018/04/Logo-black.png");
             contentEntryDao.update(prathamParentEntry);
         }
