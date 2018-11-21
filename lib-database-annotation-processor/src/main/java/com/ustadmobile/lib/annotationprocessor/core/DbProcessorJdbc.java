@@ -1810,7 +1810,14 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                 field.getSimpleName().toString(), entityTypeElement, new ArrayList<>(), false);
         codeBlock.add("$L, $L.", index, entityVariableName);
 
-        codeBlock.add(getterCallchain.get(0).getSimpleName().toString()).add("());\n");
+        if(getterCallchain != null && !getterCallchain.isEmpty()) {
+            codeBlock.add(getterCallchain.get(0).getSimpleName().toString()).add("());\n");
+        }else {
+            messager.printMessage(Diagnostic.Kind.ERROR, "Error: field " +
+                    field.getSimpleName() + " on " + entityTypeElement.getQualifiedName() +
+                    ": cannot find getter method. Attempting to generate " +
+                    daoMethod.getSimpleName());
+        }
     }
 
     private String getPreparedStatementSetterMethodName(TypeMirror variableType) {
