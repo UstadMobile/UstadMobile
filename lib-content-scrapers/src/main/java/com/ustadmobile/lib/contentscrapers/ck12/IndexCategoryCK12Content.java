@@ -8,6 +8,7 @@ import com.ustadmobile.core.db.dao.ContentEntryFileStatusDao;
 import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
 import com.ustadmobile.core.db.dao.LanguageDao;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
+import com.ustadmobile.lib.contentscrapers.LanguageList;
 import com.ustadmobile.lib.contentscrapers.ScraperConstants;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.ContentEntryContentEntryFileJoin;
@@ -98,7 +99,7 @@ public class IndexCategoryCK12Content {
     }
 
 
-    public IndexCategoryCK12Content(String urlString, File destinationDirectory) {
+    public IndexCategoryCK12Content(String urlString, File destinationDirectory) throws IOException {
 
         try {
             url = new URL(urlString);
@@ -120,6 +121,8 @@ public class IndexCategoryCK12Content {
         contentEntryFileJoinDao = repository.getContentEntryContentEntryFileJoinDao();
         contentFileStatusDao = repository.getContentEntryFileStatusDao();
         languageDao = repository.getLanguageDao();
+
+        new LanguageList().addAllLanguages();
 
         ContentScraperUtil.setChromeDriverLocation();
 

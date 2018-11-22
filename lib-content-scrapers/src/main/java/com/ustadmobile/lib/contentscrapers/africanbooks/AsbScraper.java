@@ -259,6 +259,7 @@ public class AsbScraper {
                             contentEntry = new ContentEntry();
                             contentEntry.setSourceUrl(relatedSourceUrl);
                             contentEntry.setPrimaryLanguageUid(relatedLanguage.getLangUid());
+                            contentEntry.setLeaf(true);
                             contentEntry.setContentEntryUid(contentEntryDao.insert(contentEntry));
                         }
                         relatedEntries.add(contentEntry);

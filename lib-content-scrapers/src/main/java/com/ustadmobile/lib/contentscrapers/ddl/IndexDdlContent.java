@@ -6,6 +6,7 @@ import com.ustadmobile.core.db.dao.ContentEntryDao;
 import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
 import com.ustadmobile.core.db.dao.LanguageDao;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
+import com.ustadmobile.lib.contentscrapers.LanguageList;
 import com.ustadmobile.lib.db.entities.ContentCategory;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.Language;
@@ -81,6 +82,7 @@ public class IndexDdlContent {
         contentCategoryChildJoinDao = repository.getContentEntryContentCategoryJoinDao();
         languageDao = repository.getLanguageDao();
 
+        new LanguageList().addAllLanguages();
 
         Language englishLang = ContentScraperUtil.insertOrUpdateLanguage(languageDao, "English");
         Language farsiLang = ContentScraperUtil.insertOrUpdateLanguage(languageDao, "Persian");
@@ -115,8 +117,6 @@ public class IndexDdlContent {
         }
 
         ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, masterRootParent, parentDdl, 5);
-
-
 
         browseLanguages("en", englishLang);
         browseLanguages("fa", farsiLang);

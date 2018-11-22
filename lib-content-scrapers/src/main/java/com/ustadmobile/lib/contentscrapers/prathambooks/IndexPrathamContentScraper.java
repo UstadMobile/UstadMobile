@@ -11,6 +11,7 @@ import com.ustadmobile.core.db.dao.ContentEntryFileStatusDao;
 import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
 import com.ustadmobile.core.db.dao.LanguageDao;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
+import com.ustadmobile.lib.contentscrapers.LanguageList;
 import com.ustadmobile.lib.contentscrapers.ScraperConstants;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.ContentEntryContentEntryFileJoin;
@@ -33,6 +34,7 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.List;
 
 
 /**
@@ -84,7 +86,7 @@ public class IndexPrathamContentScraper {
     public void findContent(File destinationDir) throws IOException, URISyntaxException {
 
         destinationDir.mkdirs();
-
+        ContentScraperUtil.setChromeDriverLocation();
         String cookie = loginPratham();
 
         UmAppDatabase db = UmAppDatabase.getInstance(null);
@@ -96,6 +98,8 @@ public class IndexPrathamContentScraper {
         contentEntryFileJoinDao = repository.getContentEntryContentEntryFileJoinDao();
         contentFileStatusDao = repository.getContentEntryFileStatusDao();
         languageDao = repository.getLanguageDao();
+
+        new LanguageList().addAllLanguages();
 
         englishLang = ContentScraperUtil.insertOrUpdateLanguage(languageDao, "English");
 
@@ -156,7 +160,7 @@ public class IndexPrathamContentScraper {
                 connection.setRequestProperty("Cookie", cookie);
 
                 String lang = getLangCode(data.language);
-                Language langEntity = ContentScraperUtil.insertOrUpdateLanguage(languageDao,LanguageAlpha3Code.getByCode(lang).getName());
+                Language langEntity = ContentScraperUtil.insertOrUpdateLanguage(languageDao, lang);
                 File resourceFolder = new File(destinationDir, String.valueOf(data.id));
                 resourceFolder.mkdirs();
                 String resourceFileName = data.slug + ePubExt;
@@ -192,7 +196,8 @@ public class IndexPrathamContentScraper {
                 } catch (IOException io) {
                     cookie = loginPratham();
                     retry++;
-                    System.err.println("Login and retry the link again attempt" + retry);
+                    io.printStackTrace();
+                    System.err.println("Error for book " + data.title + " with id " + data.slug);
                     if (retry == 2) {
                         retry = 0;
                         continue;
@@ -218,7 +223,7 @@ public class IndexPrathamContentScraper {
 
     private String getLangCode(String language) {
         String[] list = language.split("-");
-        return LanguageAlpha3Code.findByName(list[0]).get(0).name();
+        return list[0];
     }
 
     private ContentEntry setContentEntryData(ContentEntry entry, String id, String title, String sourceUrl, Language lang, boolean isLeaf, String desc) {

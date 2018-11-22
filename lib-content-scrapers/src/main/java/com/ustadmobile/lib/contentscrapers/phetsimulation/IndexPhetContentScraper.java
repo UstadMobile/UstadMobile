@@ -11,6 +11,7 @@ import com.ustadmobile.core.db.dao.ContentEntryRelatedEntryJoinDao;
 import com.ustadmobile.core.db.dao.LanguageDao;
 import com.ustadmobile.core.db.dao.LanguageVariantDao;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
+import com.ustadmobile.lib.contentscrapers.LanguageList;
 import com.ustadmobile.lib.contentscrapers.ScraperConstants;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.ContentEntryContentEntryFileJoin;
@@ -104,6 +105,8 @@ public class IndexPhetContentScraper {
         contentFileStatusDao = repository.getContentEntryFileStatusDao();
         languageDao = repository.getLanguageDao();
         languageVariantDao = repository.getLanguageVariantDao();
+
+        new LanguageList().addAllLanguages();
 
         Document document = Jsoup.connect(urlString).get();
 

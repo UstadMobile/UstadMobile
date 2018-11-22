@@ -10,6 +10,7 @@ import com.ustadmobile.core.db.dao.ContentEntryFileStatusDao;
 import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
 import com.ustadmobile.core.db.dao.LanguageDao;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
+import com.ustadmobile.lib.contentscrapers.LanguageList;
 import com.ustadmobile.lib.contentscrapers.ScraperConstants;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.ContentEntryContentEntryFileJoin;
@@ -63,7 +64,7 @@ public class IndexEdraakK12Content {
     private Language arabicLang;
 
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         if (args.length != 2) {
             System.err.println("Usage: <edraak k12 json url> <file destination>");
             System.exit(1);
@@ -81,7 +82,7 @@ public class IndexEdraakK12Content {
      * @param urlString      url for edraak content
      * @param destinationDir directory the content will be saved
      */
-    public void findContent(String urlString, File destinationDir) {
+    public void findContent(String urlString, File destinationDir) throws IOException {
 
         try {
             url = new URL(urlString);
@@ -102,6 +103,8 @@ public class IndexEdraakK12Content {
         contentEntryFileJoin = repository.getContentEntryContentEntryFileJoinDao();
         contentFileStatusDao = repository.getContentEntryFileStatusDao();
         languageDao = repository.getLanguageDao();
+
+        new LanguageList().addAllLanguages();
 
         arabicLang = ContentScraperUtil.insertOrUpdateLanguage(languageDao, "Arabic");
 
@@ -244,7 +247,7 @@ public class IndexEdraakK12Content {
      * @param programId      program id for the course
      * @param destinationDir directory where the course will be saved
      */
-    public void findContent(String contentId, String baseUrl, int programId, File destinationDir) {
+    public void findContent(String contentId, String baseUrl, int programId, File destinationDir) throws IOException {
         findContent(baseUrl + "component/" + contentId + "/?states_program_id=" + programId, destinationDir);
     }
 
