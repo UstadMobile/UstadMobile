@@ -106,8 +106,10 @@ public class DdlContentScraper {
 
         Elements downloadList = doc.select("span.download-item a[href]");
 
-        contentEntries = new ArrayList<>();
-        for (Element downloadItem : downloadList) {
+        contentEntries = new ArrayList<>();;
+        for (int downloadCount = 0; downloadCount < downloadList.size(); downloadCount++) {
+
+            Element downloadItem = downloadList.get(downloadCount);
 
             String href = downloadItem.attr("href");
             URL fileUrl = new URL(url, href);
@@ -141,7 +143,6 @@ public class DdlContentScraper {
             }
 
 
-
             URLConnection conn = uri.toURL().openConnection();
             File resourceFile = new File(resourceFolder, FilenameUtils.getName(href));
             String mimeType = Files.probeContentType(resourceFile.toPath());
@@ -155,7 +156,8 @@ public class DdlContentScraper {
 
             FileUtils.copyURLToFile(uri.toURL(), resourceFile);
 
-            ContentScraperUtil.insertContentEntryFile(resourceFile,contentEntryFileDao, contentFileStatusDao, contentEntry,
+
+            ContentScraperUtil.insertContentEntryFile(resourceFile, contentEntryFileDao, contentFileStatusDao, contentEntry,
                     ContentScraperUtil.getMd5(resourceFile), contentEntryFileJoinDao, true, mimeType);
 
             contentEntries.add(contentEntry);
