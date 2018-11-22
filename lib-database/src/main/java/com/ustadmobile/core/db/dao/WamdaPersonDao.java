@@ -33,13 +33,12 @@ public abstract class WamdaPersonDao implements SyncableDao<WamdaPerson, WamdaPe
             " WHERE Person.personUid = :personUid ")
     public abstract UmLiveData<WamdaPersonWithTotalFollowers> findWithTotalNumFollowers(long personUid);
 
-    public static void makeWamdaPersonForNewUser(long newPersonUid, String profileStatus,
+    public static WamdaPerson makeWamdaPersonForNewUser(long newPersonUid, String profileStatus,
                                                  Object context) {
         WamdaPerson wamdaPerson = new WamdaPerson();
         wamdaPerson.setWamdaPersonPersonUid(newPersonUid);
         wamdaPerson.setProfileStatus(profileStatus);
-        UmAppDatabase.getInstance(context).getWamdaPersonDao().insertAsync(wamdaPerson,
-                null);
+        return wamdaPerson;
     }
 
 }

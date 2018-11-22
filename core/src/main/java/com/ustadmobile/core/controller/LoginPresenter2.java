@@ -11,6 +11,7 @@ import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.CreateAccountView;
 import com.ustadmobile.core.view.LoginView2;
+import com.ustadmobile.lib.db.entities.WamdaPerson;
 
 import java.util.Hashtable;
 
@@ -36,6 +37,8 @@ public class LoginPresenter2 extends UstadBaseController<LoginView2>{
             @Override
             public void onSuccess(UmAccount result) {
                 if(result != null) {
+                    result.setEndpointUrl(UstadMobileSystemImpl.getInstance().getAppConfigString(
+                            "apiUrl", "http://localhost/", context));
                     UmAccountManager.setActiveAccount(result, context);
                     view.runOnUiThread(() -> {
                         view.setInProgress(false);
@@ -85,9 +88,11 @@ public class LoginPresenter2 extends UstadBaseController<LoginView2>{
                         getArgumentString(ARG_NEXT) :
                         impl.getAppConfigString(AppConfig.KEY_FIRST_DEST, null, context);
 
-                WamdaPersonDao.makeWamdaPersonForNewUser(result.getPersonUid(),
+                WamdaPerson newWamdaPerson = WamdaPersonDao.makeWamdaPersonForNewUser(result.getPersonUid(),
                         impl.getString(MessageID.wamda_default_profile_status, getContext()),
                         getContext());
+                UmAccountManager.getRepositoryForActiveAccount(context).getWamdaPersonDao()
+                        .insertAsync(newWamdaPerson, null);
 
                 impl.go(nextDest, context);
             }
