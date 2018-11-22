@@ -12,4 +12,6 @@ public interface UmSyncableDatabase {
 
     boolean isMaster();
 
+    void setMaster(boolean master);
+
 }

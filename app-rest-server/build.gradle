@@ -31,8 +31,9 @@ gretty {
     debugPort = 5008
     debugSuspend = true
     enableNaming = true
-    contextPath = "/api"
+    contextPath = "/app-rest-server"
     servletContainer = "tomcat8"
+    contextConfigFile = project.file("tomcat-context.xml")
 }
 
 sourceCompatibility = "1.8"
