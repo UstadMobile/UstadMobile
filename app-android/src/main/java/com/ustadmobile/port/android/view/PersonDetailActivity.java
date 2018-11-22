@@ -131,13 +131,6 @@ public class PersonDetailActivity extends UstadBaseActivity implements PersonDet
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-
-        System.out.println("RESUME");
-    }
-
-    @Override
     public void clearAllFields() {
         mLinearLayout.removeAllViews();
     }

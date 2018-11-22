@@ -1,5 +1,6 @@
 package com.ustadmobile.test.port.android.testutil;
 
+import com.ustadmobile.core.db.dao.ClazzActivityChangeDao;
 import com.ustadmobile.core.db.dao.SocialNominationQuestionDao;
 import com.ustadmobile.core.db.dao.SocialNominationQuestionSetDao;
 import com.ustadmobile.core.view.ClazzListView;
@@ -18,6 +19,7 @@ import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.core.view.ClassLogDetailView;
 import com.ustadmobile.lib.db.entities.Clazz;
+import com.ustadmobile.lib.db.entities.ClazzActivityChange;
 import com.ustadmobile.lib.db.entities.ClazzLog;
 import com.ustadmobile.lib.db.entities.ClazzMember;
 import com.ustadmobile.lib.db.entities.FeedEntry;
@@ -582,7 +584,34 @@ public class UmDbTestUtil {
         questionDao.insert(question3);
 
     }
-    
+
+    /**
+     * Adds activity change data to db
+     * @param context
+     */
+    public static void addActivityChangeDetails(Object context){
+        ClazzActivityChangeDao activityChangeDao =
+                UmAppDatabase.getInstance(context).getClazzActivityChangeDao();
+        ClazzActivityChange ac1 = new ClazzActivityChange();
+        ac1.setClazzActivityUnitOfMeasure(ClazzActivityChange.UOM_FREQUENCY);
+        ac1.setClazzActivityChangeTitle("Activity Change 1");
+        ac1.setClazzActivityDesc("Testing Activity Change 1");
+        activityChangeDao.insert(ac1);
+
+        ClazzActivityChange ac2 = new ClazzActivityChange();
+        ac2.setClazzActivityUnitOfMeasure(ClazzActivityChange.UOM_BINARY);
+        ac2.setClazzActivityChangeTitle("Activity Change 2");
+        ac2.setClazzActivityDesc("Testing Activity Change 2");
+        activityChangeDao.insert(ac2);
+
+        ClazzActivityChange ac3 = new ClazzActivityChange();
+        ac3.setClazzActivityUnitOfMeasure(ClazzActivityChange.UOM_DURATION);
+        ac3.setClazzActivityChangeTitle("Activity Change 3");
+        ac3.setClazzActivityDesc("Testing Activity Change 3");
+        activityChangeDao.insert(ac3);
+
+
+    }
     
 
     /**

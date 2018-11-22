@@ -412,5 +412,12 @@ This is the one you should be editing. The one in /core/locale/main/values/strin
     <string name="from_last_week">from last week</string>
     <string name="taught_by">Taught by</string>
     <string name="take_attendance">Take attendance</string>
+    <string name="activity_went_good">Activity went good</string>
+    <string name="activity_went_bad">Activity didn't go as good</string>
+    <string name="activity_enter_any_notes">Enter any notes you have about this activity</string>
+    <string name="uom_frequency_title">How many times</string>
+    <string name="uom_duration_title">Length of time</string>
+    <string name="uom_boolean_title">True or false</string>
+    <string name="uom_default_title">Unit of measurement</string>
 
 </resources>

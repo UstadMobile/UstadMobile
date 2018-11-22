@@ -36,10 +36,14 @@ public class ClazzActivityEditPresenter
     private long currentLogDate = -1L;
     private long currentClazzActivityUid = -1L;
 
+    //The current clazz activity being edited.
     private ClazzActivity currentClazzActivity;
 
+    //The mapping of activity change uid to drop - down id on the view.
     private HashMap<Long, Long> changeToIdMap;
+    private HashMap<Long, Long> unitToUidMap;
 
+    //Daos needed - ClazzActivtyDao and ClazzActivityChangeDao
     private ClazzActivityDao clazzActivityDao =
             UmAppDatabase.getInstance(context).getClazzActivityDao();
     private ClazzActivityChangeDao activityChangeDao =
@@ -120,7 +124,7 @@ public class ClazzActivityEditPresenter
 
     /**
      * Common method to check if given ClazzActivity exists. If it doesn't create it. Afterwards
-     * update the ClazzActivityChange options.
+     * update the ClazzActivityChange options on the view
      *
      * @param result The ClazzActivity object to check.
      */
@@ -175,6 +179,35 @@ public class ClazzActivityEditPresenter
     public void handleChangeActivityChange(long chosenId){
         Long newChangeUid = changeToIdMap.get(chosenId);
         currentClazzActivity.setClazzActivityClazzActivityChangeUid(newChangeUid);
+
+        //TODOing: Update Unit of measurement as well
+        ClazzActivityChangeDao clazzActivityChangeDao =
+                UmAppDatabase.getInstance(context).getClazzActivityChangeDao();
+        clazzActivityChangeDao.findByUidAsync(newChangeUid, new UmCallback<ClazzActivityChange>() {
+            @Override
+            public void onSuccess(ClazzActivityChange result) {
+                handleChangeUnitOfMeasure(result.getClazzActivityUnitOfMeasure());
+            }
+
+            @Override
+            public void onFailure(Throwable exception) {
+
+            }
+        });
+
+    }
+
+    /**
+     * Handles Unit of measure selection for this Clazz Activity Change selected. The given
+     * selection is the position taht will be looked up to get the uid of the corresponding
+     * Unit of measurement selected.
+     * This will update the unit of measure on the view as well.
+     *
+     * @param choosenUnitId     The id of the selected preset form the drop down / spinner
+     */
+    public void handleChangeUnitOfMeasure(long choosenUnitId){
+        currentClazzActivity.setClazzActivityQuantity(choosenUnitId);
+        view.setUnitOfMeasureType(choosenUnitId);
     }
 
     /**
@@ -211,7 +244,7 @@ public class ClazzActivityEditPresenter
 
                 //set the presets to the view's activity change drop down (spinner)
                 view.setClazzActivityChangesDropdownPresets(presetAL.toArray(new String[presetAL.size()]));
-                //view.setClazzActivityChangesDropdownPresets((String[]) presetAL.toArray());
+
             }
 
             @Override
