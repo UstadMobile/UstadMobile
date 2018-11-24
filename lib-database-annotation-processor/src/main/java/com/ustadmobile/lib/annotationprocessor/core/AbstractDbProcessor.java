@@ -811,7 +811,7 @@ public abstract class AbstractDbProcessor {
                 .beginControlFlow("if(_remoteChanges != null)")
                     .add("replaceList(_remoteChanges.getRemoteChangedEntities());\n")
                     .add("_syncableDb.getSyncStatusDao().updateSyncedToChangeSeqNums(" +
-                                "$L, _syncStatus.getNextLocalChangeSeqNum(), " +
+                                "$L, _syncStatus.getLocalChangeSeqNum(), " +
                                 "_remoteChanges.getSyncedUpToMasterChangeSeqNum());\n",
                         umEntityAnnotation.tableId())
                 .endControlFlow();
