@@ -4,9 +4,13 @@ buildscript {
             url 'https://plugins.gradle.org/m2/'
         }
     }
+    dependencies {
+        classpath 'gradle.plugin.de.fuerstenau:BuildConfigPlugin:1.1.7'
+    }
 }
 
 apply plugin: 'java-library'
+
 
 task scrapeContent(type: JavaExec) {
 
@@ -56,11 +60,33 @@ task scrapeContent(type: JavaExec) {
         main "com.ustadmobile.lib.contentscrapers.ddl.DdlContentScraper"
         args  project.getProperties().get("ddlUrl"), project.getProperties().get("ddlDir")
     }
-
-
-
     outputs.upToDateWhen { false }
 }
+
+ext.buildConfigProperties = new Properties()
+ext.buildConfigProperties.load(new FileInputStream(rootProject.file("buildconfig.default.properties")))
+ext.localProperties = new Properties()
+ext.localProperties.load(new FileInputStream(rootProject.file("local.properties")))
+
+task generateScraperBuildConfig (type: de.fuerstenau.gradle.buildconfig.GenerateBuildConfigTask) {
+    inputs.files(fileTree(dir: rootProject.file(".")).matching { include 'buildconfig.*.properties' })
+    outputDir = new File ("${projectDir}/src/main/java")
+    packageName = "com.ustadmobile.lib.contentscrapers.buildconfig"
+    appName = project.ext.buildConfigProperties['appName']
+    clsName = "ScraperBuildConfig"
+    version = rootProject.version
+
+    buildConfigField "String", "CHROME_DRIVER_PATH", rootProject.ext.localProperties["chrome_driver_path"]
+
+}
+compileJava.dependsOn(generateScraperBuildConfig)
+
+if(!ext.localProperties.containsKey("scraper.chrome_driver_path")) {
+    throw new GradleException("Content Scraping requires Selenium which needs a chrome driver to run." +
+            " You must define a path to the chrome driver in local.properties. " +
+            "Please open the README file in lib-content-scrapers for further instructions")
+}
+
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])

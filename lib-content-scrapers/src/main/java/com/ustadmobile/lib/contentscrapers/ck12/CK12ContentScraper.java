@@ -245,7 +245,7 @@ public class CK12ContentScraper {
             return;
         }
 
-        System.setProperty("webdriver.chrome.driver", ScraperConstants.chromeDriverLocation);
+        ContentScraperUtil.setChromeDriverLocation();
 
         DesiredCapabilities d = DesiredCapabilities.chrome();
         d.setCapability("opera.arguments", "-screenwidth 1024 -screenheight 768");

@@ -5,7 +5,8 @@ import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
 import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 
-import static com.ustadmobile.lib.db.entities.ContentEntry.TABLE_ID;
+import static com.ustadmobile.lib.db.entities.ContentEntryFileStatus.TABLE_ID;
+
 
 /**
  * This entity represents a downloaded ContentEntryFile. This entity is not synced, and represents

@@ -13,6 +13,7 @@ import com.ustadmobile.core.db.dao.ContentEntryFileStatusDao;
 import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryRelatedEntryJoinDao;
 import com.ustadmobile.core.db.dao.LanguageDao;
+import com.ustadmobile.lib.contentscrapers.buildconfig.ScraperBuildConfig;
 import com.ustadmobile.lib.db.entities.ContentCategory;
 import com.ustadmobile.lib.db.entities.ContentCategorySchema;
 import com.ustadmobile.lib.db.entities.ContentEntry;
@@ -69,7 +70,6 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING;
-import static com.ustadmobile.lib.contentscrapers.ScraperConstants.chromeDriverLocation;
 
 
 public class ContentScraperUtil {
@@ -385,7 +385,7 @@ public class ContentScraperUtil {
     }
 
     public static void setChromeDriverLocation(){
-        System.setProperty("webdriver.chrome.driver", chromeDriverLocation);
+        System.setProperty("webdriver.chrome.driver", ScraperBuildConfig.CHROME_DRIVER_PATH);
     }
 
 

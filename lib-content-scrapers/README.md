@@ -2,6 +2,15 @@
 
 A content scraper to find and download content to make them available for offline use
 
+
+## Setup Chrome Driver for Selenium
+
+Download the latest chrome driver for your operating system from http://chromedriver.chromium.org/downloads
+Unzip the file and copy the file path to the chromedriver 
+Open local.properties and add the following line of code:
+
+scraper.chrome_driver_path= path_to_file
+
 ###Find and Scrap Edraak K12 Content
 
 ####To Find All Edraak Content

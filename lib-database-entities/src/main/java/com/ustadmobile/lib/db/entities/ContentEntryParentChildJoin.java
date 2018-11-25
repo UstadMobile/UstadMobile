@@ -5,7 +5,8 @@ import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
 import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 
-import static com.ustadmobile.lib.db.entities.ContentEntry.TABLE_ID;
+import static com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin.TABLE_ID;
+
 
 /**
  * ContentEntry child - parent join entity

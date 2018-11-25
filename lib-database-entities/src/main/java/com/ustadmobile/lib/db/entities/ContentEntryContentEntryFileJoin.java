@@ -5,7 +5,8 @@ import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
 import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 
-import static com.ustadmobile.lib.db.entities.ContentEntry.TABLE_ID;
+import static com.ustadmobile.lib.db.entities.ContentEntryContentEntryFileJoin.TABLE_ID;
+
 
 /**
  * Join Entry to link a ContentEntry to a ContentEntryFile that actually contains the content. That
