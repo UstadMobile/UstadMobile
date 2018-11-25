@@ -3,6 +3,8 @@ package com.ustadmobile.lib.db.entities;
 
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
+import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
+import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 
 /**
  * This entity represents the custom field value associated with any custom field for a given
@@ -10,7 +12,7 @@ import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
  *
  * A custom field is a field in PersonField.
  */
-@UmEntity
+@UmEntity(tableId = 18)
 public class PersonCustomFieldValue {
 
     //PK
@@ -26,6 +28,28 @@ public class PersonCustomFieldValue {
     //The value itself
     private String fieldValue;
 
+    @UmSyncMasterChangeSeqNum
+    private long personCustomFieldValueMasterChangeSeqNum;
+
+    @UmSyncLocalChangeSeqNum
+    private long personCustomFieldValueLocalChangeSeqNum;
+
+
+    public long getPersonCustomFieldValueMasterChangeSeqNum() {
+        return personCustomFieldValueMasterChangeSeqNum;
+    }
+
+    public void setPersonCustomFieldValueMasterChangeSeqNum(long personCustomFieldValueMasterChangeSeqNum) {
+        this.personCustomFieldValueMasterChangeSeqNum = personCustomFieldValueMasterChangeSeqNum;
+    }
+
+    public long getPersonCustomFieldValueLocalChangeSeqNum() {
+        return personCustomFieldValueLocalChangeSeqNum;
+    }
+
+    public void setPersonCustomFieldValueLocalChangeSeqNum(long personCustomFieldValueLocalChangeSeqNum) {
+        this.personCustomFieldValueLocalChangeSeqNum = personCustomFieldValueLocalChangeSeqNum;
+    }
 
     public long getPersonCustomFieldValueUid() {
         return personCustomFieldValueUid;

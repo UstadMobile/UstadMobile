@@ -2,11 +2,13 @@ package com.ustadmobile.lib.db.entities;
 
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
+import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
+import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 
 /**
  * Represents one run through of a question set for one particular student.
  */
-@UmEntity
+@UmEntity(tableId = 27)
 public class SocialNominationQuestionSetResponse {
 
     @UmPrimaryKey(autoIncrement = true)
@@ -28,6 +30,11 @@ public class SocialNominationQuestionSetResponse {
     private float socialNominationQuestionSetResponseRecognitionPercentage;
 
 
+    @UmSyncMasterChangeSeqNum
+    private long scheduleNominationQuestionSetResponseMasterChangeSeqNum;
+
+    @UmSyncLocalChangeSeqNum
+    private long scheduleNominationQuestionSetResponseLocalChangeSeqNum;
 
     public long getSocialNominationQuestionSetResposeUid() {
         return socialNominationQuestionSetResposeUid;
@@ -75,5 +82,21 @@ public class SocialNominationQuestionSetResponse {
 
     public void setSocialNominationQuestionSetResponseRecognitionPercentage(float socialNominationQuestionSetResponseRecognitionPercentage) {
         this.socialNominationQuestionSetResponseRecognitionPercentage = socialNominationQuestionSetResponseRecognitionPercentage;
+    }
+
+    public long getScheduleNominationQuestionSetResponseMasterChangeSeqNum() {
+        return scheduleNominationQuestionSetResponseMasterChangeSeqNum;
+    }
+
+    public void setScheduleNominationQuestionSetResponseMasterChangeSeqNum(long scheduleNominationQuestionSetResponseMasterChangeSeqNum) {
+        this.scheduleNominationQuestionSetResponseMasterChangeSeqNum = scheduleNominationQuestionSetResponseMasterChangeSeqNum;
+    }
+
+    public long getScheduleNominationQuestionSetResponseLocalChangeSeqNum() {
+        return scheduleNominationQuestionSetResponseLocalChangeSeqNum;
+    }
+
+    public void setScheduleNominationQuestionSetResponseLocalChangeSeqNum(long scheduleNominationQuestionSetResponseLocalChangeSeqNum) {
+        this.scheduleNominationQuestionSetResponseLocalChangeSeqNum = scheduleNominationQuestionSetResponseLocalChangeSeqNum;
     }
 }

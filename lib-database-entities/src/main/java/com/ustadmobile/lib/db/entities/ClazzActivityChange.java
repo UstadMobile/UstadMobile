@@ -2,9 +2,11 @@ package com.ustadmobile.lib.db.entities;
 
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
+import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
+import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 
-@UmEntity
-public class ClazzActivityChange {
+@UmEntity(tableId = 12)
+public class ClazzActivityChange{
 
     public static final int UOM_FREQUENCY = 1;
     public static final int UOM_DURATION = 2;
@@ -19,6 +21,11 @@ public class ClazzActivityChange {
 
     private int clazzActivityUnitOfMeasure;
 
+    @UmSyncMasterChangeSeqNum
+    private long clazzActivityChangeMasterChangeSeqNum;
+
+    @UmSyncLocalChangeSeqNum
+    private long clazzActivityChangeLocalChangeSeqNum;
 
     public int getClazzActivityUnitOfMeasure() {
         return clazzActivityUnitOfMeasure;
@@ -50,5 +57,21 @@ public class ClazzActivityChange {
 
     public void setClazzActivityDesc(String clazzActivityDesc) {
         this.clazzActivityDesc = clazzActivityDesc;
+    }
+
+    public long getClazzActivityChangeMasterChangeSeqNum() {
+        return clazzActivityChangeMasterChangeSeqNum;
+    }
+
+    public void setClazzActivityChangeMasterChangeSeqNum(long clazzActivityChangeMasterChangeSeqNum) {
+        this.clazzActivityChangeMasterChangeSeqNum = clazzActivityChangeMasterChangeSeqNum;
+    }
+
+    public long getClazzActivityChangeLocalChangeSeqNum() {
+        return clazzActivityChangeLocalChangeSeqNum;
+    }
+
+    public void setClazzActivityChangeLocalChangeSeqNum(long clazzActivityChangeLocalChangeSeqNum) {
+        this.clazzActivityChangeLocalChangeSeqNum = clazzActivityChangeLocalChangeSeqNum;
     }
 }

@@ -2,9 +2,11 @@ package com.ustadmobile.lib.db.entities;
 
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
+import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
+import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 
-@UmEntity
-public class Holiday implements SyncableEntity{
+@UmEntity(tableId = 17)
+public class Holiday {
 
 
     @UmPrimaryKey(autoIncrement = true)
@@ -19,6 +21,28 @@ public class Holiday implements SyncableEntity{
     //The name of this holiday set.
     private long holidayName;
 
+    @UmSyncLocalChangeSeqNum
+    private long holidayLocalChangeSeqNum;
+
+    @UmSyncMasterChangeSeqNum
+    private long holidayMasterChangeSeqNum;
+
+    public long getHolidayMasterChangeSeqNum() {
+        return holidayMasterChangeSeqNum;
+    }
+
+    public void setHolidayMasterChangeSeqNum(long holidayMasterChangeSeqNum) {
+        this.holidayMasterChangeSeqNum = holidayMasterChangeSeqNum;
+    }
+
+    public long getHolidayLocalChangeSeqNum() {
+
+        return holidayLocalChangeSeqNum;
+    }
+
+    public void setHolidayLocalChangeSeqNum(long holidayLocalChangeSeqNum) {
+        this.holidayLocalChangeSeqNum = holidayLocalChangeSeqNum;
+    }
 
     public long getHolidayUMCalendarUid() {
         return holidayUMCalendarUid;
@@ -52,23 +76,4 @@ public class Holiday implements SyncableEntity{
         this.holidayName = holidayName;
     }
 
-    @Override
-    public long getMasterChangeSeqNum() {
-        return 0;
-    }
-
-    @Override
-    public void setMasterChangeSeqNum(long masterChangeSeqNum) {
-
-    }
-
-    @Override
-    public long getLocalChangeSeqNum() {
-        return 0;
-    }
-
-    @Override
-    public void setLocalChangeSeqNum(long localChangeSeqNum) {
-
-    }
 }

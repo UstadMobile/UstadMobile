@@ -6,18 +6,21 @@ import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
+import com.ustadmobile.lib.database.annotation.UmRepository;
 import com.ustadmobile.lib.database.annotation.UmUpdate;
 import com.ustadmobile.lib.db.entities.Clazz;
-import com.ustadmobile.lib.db.entities.ClazzActivity;
 import com.ustadmobile.lib.db.entities.ClazzAverage;
 import com.ustadmobile.lib.db.entities.ClazzMember;
 import com.ustadmobile.lib.db.entities.ClazzWithEnrollment;
 import com.ustadmobile.lib.db.entities.ClazzWithNumStudents;
+import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
 import java.util.List;
 
-@UmDao
-public abstract class ClazzDao implements BaseDao<Clazz> {
+@UmDao(readPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
+@UmRepository
+public abstract class ClazzDao implements SyncableDao<Clazz, ClazzDao> {
+
 
     public static final String CLAZZ_WHERE = " SELECT Clazz.*, (SELECT COUNT(*) " +
             " FROM ClazzMember WHERE " +

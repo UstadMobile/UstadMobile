@@ -5,11 +5,14 @@ import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
+import com.ustadmobile.lib.database.annotation.UmRepository;
 import com.ustadmobile.lib.database.annotation.UmUpdate;
 import com.ustadmobile.lib.db.entities.Schedule;
+import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
-@UmDao
-public abstract class ScheduleDao implements BaseDao<Schedule> {
+@UmDao(readPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
+@UmRepository
+public abstract class ScheduleDao implements SyncableDao<Schedule, ScheduleDao> {
 
     @UmInsert
     public abstract long insert(Schedule entity);

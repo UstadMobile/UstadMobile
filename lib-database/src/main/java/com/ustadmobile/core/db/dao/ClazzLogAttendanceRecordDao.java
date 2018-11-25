@@ -6,15 +6,18 @@ import com.ustadmobile.core.impl.UmCallbackUtil;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
+import com.ustadmobile.lib.database.annotation.UmRepository;
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord;
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecordWithPerson;
 import com.ustadmobile.lib.db.entities.DailyAttendanceNumbers;
+import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@UmDao
-public abstract class ClazzLogAttendanceRecordDao implements BaseDao<ClazzLogAttendanceRecord>{
+@UmDao(readPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
+@UmRepository
+public abstract class ClazzLogAttendanceRecordDao implements SyncableDao<ClazzLogAttendanceRecord, ClazzLogAttendanceRecordDao> {
 
     @UmInsert
     public abstract long insert(ClazzLogAttendanceRecord entity);

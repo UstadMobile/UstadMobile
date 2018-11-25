@@ -68,7 +68,6 @@ public class ClazzEditActivityEspressoTest {
         testClazz = UmDbTestUtil.createClazzWithClazzMembers(TEST_CLASS_NAME, TEST_CLASS_PERCENTAGE,
                 peopleMap, TEST_USER_UID, context);
 
-
         //Start the activity
         Intent launchActivityIntent = new Intent();
         Bundle b = new Bundle();

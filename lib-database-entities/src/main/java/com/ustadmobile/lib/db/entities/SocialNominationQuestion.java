@@ -2,13 +2,15 @@ package com.ustadmobile.lib.db.entities;
 
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
+import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
+import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 
 /**
  * Represents the question within a question set.
  * eg: "Select the students who sit alone"
  *
  */
-@UmEntity
+@UmEntity(tableId = 22)
 public class SocialNominationQuestion {
 
     @UmPrimaryKey(autoIncrement = true)
@@ -29,6 +31,11 @@ public class SocialNominationQuestion {
     boolean multiNominations;
 
 
+    @UmSyncMasterChangeSeqNum
+    private long scheduleNominationQuestionMasterChangeSeqNum;
+
+    @UmSyncLocalChangeSeqNum
+    private long scheduleNominationQuestionLocalChangeSeqNum;
 
     public boolean isAssignToAllClasses() {
         return assignToAllClasses;
@@ -76,5 +83,21 @@ public class SocialNominationQuestion {
 
     public void setQuestionIndex(int questionIndex) {
         this.questionIndex = questionIndex;
+    }
+
+    public long getScheduleNominationQuestionMasterChangeSeqNum() {
+        return scheduleNominationQuestionMasterChangeSeqNum;
+    }
+
+    public void setScheduleNominationQuestionMasterChangeSeqNum(long scheduleNominationQuestionMasterChangeSeqNum) {
+        this.scheduleNominationQuestionMasterChangeSeqNum = scheduleNominationQuestionMasterChangeSeqNum;
+    }
+
+    public long getScheduleNominationQuestionLocalChangeSeqNum() {
+        return scheduleNominationQuestionLocalChangeSeqNum;
+    }
+
+    public void setScheduleNominationQuestionLocalChangeSeqNum(long scheduleNominationQuestionLocalChangeSeqNum) {
+        this.scheduleNominationQuestionLocalChangeSeqNum = scheduleNominationQuestionLocalChangeSeqNum;
     }
 }

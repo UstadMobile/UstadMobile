@@ -51,7 +51,7 @@ dependencies {
     implementation "com.ustadmobile.qrcodelibomrfork:qrcode-core:$version_qrcodelibfork"
     implementation project(":lib-database")
     compileOnly project(':lib-database-entities')
-    implementation project(":lib-database-annotation")
+    implementation project(':lib-database-runtime')
     implementation project(":lib-util")
 
 
@@ -394,9 +394,9 @@ processTestResources.dependsOn copyTestResources
 
 publishing {
     publications {
-        nanolrscore(MavenPublication) {
-            groupId 'com.ustadmobile.app'
-            artifactId 'core'
+        maven(MavenPublication) {
+            groupId rootProject.group
+            artifactId project.name
             version rootProject.version
 
             from components.java

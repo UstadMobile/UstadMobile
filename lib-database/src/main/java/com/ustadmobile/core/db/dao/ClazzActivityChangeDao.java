@@ -5,13 +5,16 @@ import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
+import com.ustadmobile.lib.database.annotation.UmRepository;
 import com.ustadmobile.lib.database.annotation.UmUpdate;
 import com.ustadmobile.lib.db.entities.ClazzActivityChange;
+import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
 import java.util.List;
 
-@UmDao
-public abstract  class ClazzActivityChangeDao implements BaseDao<ClazzActivityChange> {
+@UmDao(readPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
+@UmRepository
+public abstract  class ClazzActivityChangeDao implements SyncableDao<ClazzActivityChange, ClazzActivityChangeDao> {
 
     @UmInsert
     public abstract long insert(ClazzActivityChange entity);

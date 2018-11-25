@@ -2,6 +2,8 @@ package com.ustadmobile.lib.db.entities;
 
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
+import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
+import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 
 /**
  * This Entity represents every field associated with the Person. This includes Core fields to be
@@ -19,7 +21,7 @@ import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
  * fieldName is internal and could just be "height of the person".
  *
  */
-@UmEntity
+@UmEntity(tableId = 20)
 public class PersonField {
 
     @UmPrimaryKey(autoIncrement = true)
@@ -33,6 +35,12 @@ public class PersonField {
 
     //The field icon used in the view.
     private String fieldIcon;
+
+    @UmSyncMasterChangeSeqNum
+    private long personFieldMasterChangeSeqNum;
+
+    @UmSyncLocalChangeSeqNum
+    private long personFieldLocalChangeSeqNum;
 
     public long getPersonCustomFieldUid() {
         return personCustomFieldUid;
@@ -64,5 +72,21 @@ public class PersonField {
 
     public void setFieldIcon(String fieldIcon) {
         this.fieldIcon = fieldIcon;
+    }
+
+    public long getPersonFieldMasterChangeSeqNum() {
+        return personFieldMasterChangeSeqNum;
+    }
+
+    public void setPersonFieldMasterChangeSeqNum(long personFieldMasterChangeSeqNum) {
+        this.personFieldMasterChangeSeqNum = personFieldMasterChangeSeqNum;
+    }
+
+    public long getPersonFieldLocalChangeSeqNum() {
+        return personFieldLocalChangeSeqNum;
+    }
+
+    public void setPersonFieldLocalChangeSeqNum(long personFieldLocalChangeSeqNum) {
+        this.personFieldLocalChangeSeqNum = personFieldLocalChangeSeqNum;
     }
 }

@@ -8,6 +8,12 @@ import com.ustadmobile.core.db.dao.ClazzLogDao;
 import com.ustadmobile.core.db.dao.ClazzMemberDao;
 import com.ustadmobile.core.db.dao.ContainerFileDao;
 import com.ustadmobile.core.db.dao.ContainerFileEntryDao;
+import com.ustadmobile.core.db.dao.ContentEntryContentCategoryJoinDao;
+import com.ustadmobile.core.db.dao.ContentEntryContentEntryFileJoinDao;
+import com.ustadmobile.core.db.dao.ContentEntryDao;
+import com.ustadmobile.core.db.dao.ContentEntryFileDao;
+import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
+import com.ustadmobile.core.db.dao.ContentEntryRelatedEntryJoinDao;
 import com.ustadmobile.core.db.dao.CrawJoblItemDao;
 import com.ustadmobile.core.db.dao.CrawlJobDao;
 import com.ustadmobile.core.db.dao.DownloadJobDao;
@@ -40,6 +46,13 @@ import com.ustadmobile.core.db.dao.UMCalendarDao;
 import com.ustadmobile.lib.database.annotation.UmClearAll;
 import com.ustadmobile.lib.database.annotation.UmDatabase;
 import com.ustadmobile.lib.database.annotation.UmDbContext;
+import com.ustadmobile.lib.database.annotation.UmRepository;
+import com.ustadmobile.lib.database.annotation.UmSyncOutgoing;
+import com.ustadmobile.lib.db.sync.UmSyncableDatabase;
+import com.ustadmobile.lib.db.sync.dao.SyncStatusDao;
+import com.ustadmobile.lib.db.sync.dao.SyncablePrimaryKeyDao;
+import com.ustadmobile.lib.db.sync.entities.SyncDeviceBits;
+import com.ustadmobile.lib.db.sync.entities.SyncStatus;
 import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.ClazzActivity;
 import com.ustadmobile.lib.db.entities.ClazzActivityChange;
@@ -49,6 +62,11 @@ import com.ustadmobile.lib.db.entities.ClazzMember;
 import com.ustadmobile.lib.db.entities.ContainerFile;
 import com.ustadmobile.lib.db.entities.ContainerFileEntry;
 import com.ustadmobile.lib.db.entities.ContentEntry;
+import com.ustadmobile.lib.db.entities.ContentEntryContentCategoryJoin;
+import com.ustadmobile.lib.db.entities.ContentEntryContentEntryFileJoin;
+import com.ustadmobile.lib.db.entities.ContentEntryFile;
+import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin;
+import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoin;
 import com.ustadmobile.lib.db.entities.CrawlJob;
 import com.ustadmobile.lib.db.entities.CrawlJobItem;
 import com.ustadmobile.lib.db.entities.DownloadJob;
@@ -69,6 +87,7 @@ import com.ustadmobile.lib.db.entities.OpdsLink;
 import com.ustadmobile.lib.db.entities.Person;
 import com.ustadmobile.lib.db.entities.PersonField;
 import com.ustadmobile.lib.db.entities.PersonCustomFieldValue;
+
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField;
 import com.ustadmobile.lib.db.entities.Schedule;
 import com.ustadmobile.lib.db.entities.SocialNominationQuestion;
@@ -78,6 +97,9 @@ import com.ustadmobile.lib.db.entities.SocialNominationQuestionSet;
 import com.ustadmobile.lib.db.entities.SocialNominationQuestionSetRecognition;
 import com.ustadmobile.lib.db.entities.SocialNominationQuestionSetResponse;
 import com.ustadmobile.lib.db.entities.UMCalendar;
+
+import com.ustadmobile.lib.db.sync.entities.SyncablePrimaryKey;
+
 
 @UmDatabase(version = 1, entities = {
         OpdsEntry.class, OpdsLink.class, OpdsEntryParentToChildJoin.class,
@@ -94,11 +116,18 @@ import com.ustadmobile.lib.db.entities.UMCalendar;
         SocialNominationQuestionResponseNomination.class, SocialNominationQuestionSet.class,
         SocialNominationQuestionSetRecognition.class, SocialNominationQuestionSetResponse.class,
         Schedule.class, Holiday.class, UMCalendar.class,
-        ClazzActivity.class, ClazzActivityChange.class
+        ClazzActivity.class, ClazzActivityChange.class,
+        ContentEntry.class, ContentEntryContentCategoryJoin.class,
+        ContentEntryContentEntryFileJoin.class, ContentEntryFile.class,
+        ContentEntryParentChildJoin.class, ContentEntryRelatedEntryJoin.class,
+        SyncStatus.class, SyncablePrimaryKey.class, SyncDeviceBits.class
+
 })
-public abstract class UmAppDatabase{
+public abstract class UmAppDatabase implements UmSyncableDatabase{
 
     private static volatile UmAppDatabase instance;
+
+    private boolean master;
 
     /**
      * For use by other projects using this app as a library. By calling setInstance before
@@ -197,11 +226,43 @@ public abstract class UmAppDatabase{
 
     public abstract ClazzActivityChangeDao getClazzActivityChangeDao();
 
+    public abstract ContentEntryDao getContentEntryDao();
+
+    public abstract ContentEntryContentCategoryJoinDao getContentEntryContentCategoryJoinDao();
+
+    public abstract ContentEntryContentEntryFileJoinDao getContentEntryContentEntryFileJoinDao();
+
+    public abstract ContentEntryFileDao getContentEntryFileDao();
+
+    public abstract ContentEntryParentChildJoinDao getContentEntryParentChildJoinDao();
+
+    public abstract ContentEntryRelatedEntryJoinDao getContentEntryRelatedEntryJoinDao();
+
+    public abstract SyncStatusDao getSyncStatusDao();
+
     @UmDbContext
     public abstract Object getContext();
 
     @UmClearAll
     public abstract void clearAllTables();
 
+
+    @Override
+    public abstract SyncablePrimaryKeyDao getSyncablePrimaryKeyDao();
+
+    @Override
+    public boolean isMaster() {
+        return master;
+    }
+
+    public void setMaster(boolean master) {
+        this.master = master;
+    }
+
+    @UmRepository
+    public abstract UmAppDatabase getRepository(String baseUrl, String auth);
+
+    @UmSyncOutgoing
+    public abstract void syncWith(UmAppDatabase otherDb, long accountUid);
 
 }

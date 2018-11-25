@@ -5,13 +5,11 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.espresso.intent.rule.IntentsTestRule;
-import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
 
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.port.android.view.ClazzActivityEditActivity;
-import com.ustadmobile.port.android.view.ClazzDetailActivity;
 import com.ustadmobile.test.port.android.testutil.UmDbTestUtil;
 
 import junit.framework.Assert;
@@ -60,8 +58,8 @@ public class ClazzActivityEditActivityEspressoTest {
      * This sets the activity that we want floating around
      */
     @Rule
-    public IntentsTestRule<ClazzActivityEditActivity> mActivityRule =
-            new IntentsTestRule<>(ClazzActivityEditActivity.class, false, false);
+    public IntentsTestRule<ClazzActivityEditActivity> mActivityRule = new IntentsTestRule<>
+            (ClazzActivityEditActivity.class, false, false);
 
 
     @Before

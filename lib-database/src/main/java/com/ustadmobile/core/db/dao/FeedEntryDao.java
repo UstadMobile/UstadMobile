@@ -5,12 +5,15 @@ import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
+import com.ustadmobile.lib.database.annotation.UmRepository;
 import com.ustadmobile.lib.db.entities.FeedEntry;
+import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
 import java.util.List;
 
-@UmDao
-public abstract class FeedEntryDao implements BaseDao<FeedEntry> {
+@UmDao(readPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
+@UmRepository
+public abstract class FeedEntryDao implements SyncableDao<FeedEntry, FeedEntryDao> {
 
     @UmInsert
     public abstract long insert(FeedEntry entity);
@@ -30,7 +33,8 @@ public abstract class FeedEntryDao implements BaseDao<FeedEntry> {
     @UmQuery("SELECT * FROM FeedEntry")
     public abstract List<FeedEntry> findAll();
 
-    @UmQuery("SELECT * FROM FeedEntry WHERE link = :link AND feedEntryDone = 0 AND feedEntryPersonUid = :personUid")
+    @UmQuery("SELECT * FROM FeedEntry WHERE link = :link AND feedEntryDone = 0 " +
+            "AND feedEntryPersonUid = :personUid")
     public abstract FeedEntry findByLink(long personUid, String link);
 
     @UmQuery("UPDATE FeedEntry SET feedEntryDone = 1 WHERE feedEntryUid = :feedEntryUid")

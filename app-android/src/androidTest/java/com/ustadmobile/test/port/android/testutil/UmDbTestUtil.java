@@ -312,6 +312,35 @@ public class UmDbTestUtil {
 
     }
 
+    public static Clazz createDummyData(Object context){
+        String TEST_CLASS_NAME = "Class A";
+        float TEST_CLASS_PERCENTAGE = 0.42F;
+        long TEST_USER_UID = 1L;
+        String TEST_CLASS_MEMBER1_NAME = "Test User1";
+        float TEST_CLASS_MEMBER1_PERCENTAGE = 0.15F;
+        float TEST_CLASS_MEMBER2_PERCENTAGE = 0.35F;
+        float TEST_CLASS_MEMBER3_PERCENTAGE = 0.55F;
+        float TEST_CLASS_MEMBER4_PERCENTAGE = 0.85F;
+        String TEST_CLASS_MEMBER2_NAME = "Test User2";
+        String TEST_CLASS_MEMBER3_NAME = "Test User3";
+        String TEST_CLASS_MEMBER4_NAME = "Test User4";
+        Hashtable peopleMap;
+
+        Clazz testClazz;
+
+        peopleMap = new Hashtable();
+        peopleMap.put(TEST_CLASS_MEMBER1_NAME, TEST_CLASS_MEMBER1_PERCENTAGE);
+        peopleMap.put(TEST_CLASS_MEMBER2_NAME, TEST_CLASS_MEMBER2_PERCENTAGE);
+        peopleMap.put(TEST_CLASS_MEMBER3_NAME, TEST_CLASS_MEMBER3_PERCENTAGE);
+        peopleMap.put(TEST_CLASS_MEMBER4_NAME, TEST_CLASS_MEMBER4_PERCENTAGE);
+
+
+        //Populate the database with test class:
+        testClazz = createClazzWithClazzMembers(TEST_CLASS_NAME, TEST_CLASS_PERCENTAGE,
+        peopleMap, TEST_USER_UID, context);
+        return testClazz;
+    }
+
     /**
      * Just a POJO for this test class to loop through and create the fields.
      */

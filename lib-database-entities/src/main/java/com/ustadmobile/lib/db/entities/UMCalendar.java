@@ -2,12 +2,14 @@ package com.ustadmobile.lib.db.entities;
 
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
+import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
+import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 
 /**
  * Represents a Caledar which will be liked to multiple holidays, schedules etc
  * Its basically a collection of dates and time. (holidays and schedules)
  */
-@UmEntity
+@UmEntity(tableId = 28)
 public class UMCalendar implements SyncableEntity{
 
     @UmPrimaryKey(autoIncrement = true)
@@ -16,6 +18,27 @@ public class UMCalendar implements SyncableEntity{
     //The name of this calendar
     private String umCalendarName;
 
+    @UmSyncMasterChangeSeqNum
+    private long personMasterChangeSeqNum;
+
+    @UmSyncLocalChangeSeqNum
+    private long personLocalChangeSeqNum;
+
+    public long getPersonMasterChangeSeqNum() {
+        return personMasterChangeSeqNum;
+    }
+
+    public void setPersonMasterChangeSeqNum(long personMasterChangeSeqNum) {
+        this.personMasterChangeSeqNum = personMasterChangeSeqNum;
+    }
+
+    public long getPersonLocalChangeSeqNum() {
+        return personLocalChangeSeqNum;
+    }
+
+    public void setPersonLocalChangeSeqNum(long personLocalChangeSeqNum) {
+        this.personLocalChangeSeqNum = personLocalChangeSeqNum;
+    }
 
     public long getUmCalendarUid() {
         return umCalendarUid;

@@ -1,11 +1,26 @@
 apply plugin: 'java-library'
+apply plugin: "maven-publish"
+
 
 compileJava {
     /*
      *  Annotation processor arguments:
      *   umdb_room_out - Destination directory for the generated room version of database and DAO classes
      */
-    options.compilerArgs += ["-Aumdb_room_out=" + rootProject.file("lib-database-android/build/generated/source/umdbprocessor").getAbsolutePath()]
+    options.compilerArgs += [
+            "-Aumdb_room_out=" + rootProject.file("lib-database-android/build/generated/source/umdbprocessor").getAbsolutePath(),
+            "-Aumdb_jdbc_out=" + rootProject.file("lib-database-jdbc/build/generated/source/umdbprocessor").getAbsolutePath(),
+            "-Aumdb_retrofit_out=" + rootProject.file("lib-database-retrofitrepository/build/generated/source/umdbprocessor").getAbsolutePath(),
+            "-Aumdb_jersey_res_out=" + rootProject.file("app-rest-server/build/generated/source/umdbprocessor").getAbsolutePath(),
+            "-parameters"
+    ]
+
+    //Due to a bug, the JDK8 annotation processor provides incorrect parameter names, thus we need
+    // to use JDK9+ to run the annotation processor https://bugs.openjdk.java.net/browse/JDK-8191074
+    if(JavaVersion.current() == JavaVersion.VERSION_1_8) {
+        options.fork = true
+        options.forkOptions.executable = rootProject.ext.localProperties["javac.9plus"]
+    }
 }
 
 jar {
@@ -15,11 +30,38 @@ jar {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     compileOnly project(":lib-database-entities")
-    implementation project(":lib-database-annotation")
+    implementation project(':lib-database-runtime')
     implementation project(":lib-util")
 
-    annotationProcessor project(":lib-database-annotation-processor-core")
+    annotationProcessor project(':lib-database-annotation-processor')
 }
+
+task sourceJar(type: Jar) {
+    from sourceSets.main.allJava
+}
+
 
 sourceCompatibility = "1.8"
 targetCompatibility = "1.8"
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId rootProject.group
+            artifactId project.name
+            version rootProject.version
+
+            from components.java
+
+            artifact sourceJar {
+                classifier = 'sources'
+            }
+        }
+    }
+
+    repositories {
+        maven {
+            url rootProject.ext.buildConfigProperties['repo.dir']
+        }
+    }
+}

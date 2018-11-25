@@ -2,6 +2,8 @@ package com.ustadmobile.lib.db.entities;
 
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
+import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
+import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 
 /**
  * FOR RECOGNITION
@@ -13,7 +15,7 @@ import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
  * SocialNominationQuestionSetResponse for each student in the class..
  *
  */
-@UmEntity
+@UmEntity(tableId = 26)
 public class SocialNominationQuestionSetRecognition {
 
     @UmPrimaryKey(autoIncrement = true)
@@ -28,7 +30,11 @@ public class SocialNominationQuestionSetRecognition {
     // Boolean if recognized or not by the ClazzMember doing this QuestionSet in QuestionSetResponse.
     private boolean socialNominationQuestionSetRecognitionRecognized;
 
+    @UmSyncMasterChangeSeqNum
+    private long scheduleNominationQuestionSetRecognitionMasterChangeSeqNum;
 
+    @UmSyncLocalChangeSeqNum
+    private long scheduleNominationQuestionSetRecognitionLocalChangeSeqNum;
 
     public long getSocialNominationQuestionSetRecognitionUid() {
         return socialNominationQuestionSetRecognitionUid;
@@ -60,5 +66,21 @@ public class SocialNominationQuestionSetRecognition {
 
     public void setSocialNominationQuestionSetRecognitionRecognized(boolean socialNominationQuestionSetRecognitionRecognized) {
         this.socialNominationQuestionSetRecognitionRecognized = socialNominationQuestionSetRecognitionRecognized;
+    }
+
+    public long getScheduleNominationQuestionSetRecognitionMasterChangeSeqNum() {
+        return scheduleNominationQuestionSetRecognitionMasterChangeSeqNum;
+    }
+
+    public void setScheduleNominationQuestionSetRecognitionMasterChangeSeqNum(long scheduleNominationQuestionSetRecognitionMasterChangeSeqNum) {
+        this.scheduleNominationQuestionSetRecognitionMasterChangeSeqNum = scheduleNominationQuestionSetRecognitionMasterChangeSeqNum;
+    }
+
+    public long getScheduleNominationQuestionSetRecognitionLocalChangeSeqNum() {
+        return scheduleNominationQuestionSetRecognitionLocalChangeSeqNum;
+    }
+
+    public void setScheduleNominationQuestionSetRecognitionLocalChangeSeqNum(long scheduleNominationQuestionSetRecognitionLocalChangeSeqNum) {
+        this.scheduleNominationQuestionSetRecognitionLocalChangeSeqNum = scheduleNominationQuestionSetRecognitionLocalChangeSeqNum;
     }
 }

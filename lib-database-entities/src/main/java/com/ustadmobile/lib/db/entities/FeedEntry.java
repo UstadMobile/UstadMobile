@@ -2,9 +2,11 @@ package com.ustadmobile.lib.db.entities;
 
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
+import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
+import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 
-@UmEntity
-public class FeedEntry implements SyncableEntity{
+@UmEntity(tableId = 16)
+public class FeedEntry {
 
     @UmPrimaryKey(autoIncrement = true)
     private long feedEntryUid;
@@ -24,6 +26,29 @@ public class FeedEntry implements SyncableEntity{
     private long feedEntryHash;
 
     private boolean feedEntryDone;
+
+    @UmSyncLocalChangeSeqNum
+    private long feedEntryLocalChangeSeqNum;
+
+    @UmSyncMasterChangeSeqNum
+    private long feedEntryMasterChangeSeqNum;
+
+
+    public long getFeedEntryLocalChangeSeqNum() {
+        return feedEntryLocalChangeSeqNum;
+    }
+
+    public void setFeedEntryLocalChangeSeqNum(long feedEntryLocalChangeSeqNum) {
+        this.feedEntryLocalChangeSeqNum = feedEntryLocalChangeSeqNum;
+    }
+
+    public long getFeedEntryMasterChangeSeqNum() {
+        return feedEntryMasterChangeSeqNum;
+    }
+
+    public void setFeedEntryMasterChangeSeqNum(long feedEntryMasterChangeSeqNum) {
+        this.feedEntryMasterChangeSeqNum = feedEntryMasterChangeSeqNum;
+    }
 
     public String getFeedEntryClazzName() {
         return feedEntryClazzName;
@@ -121,23 +146,4 @@ public class FeedEntry implements SyncableEntity{
         this.feedEntryHash = feedEntryHash;
     }
 
-    @Override
-    public long getMasterChangeSeqNum() {
-        return 0;
-    }
-
-    @Override
-    public void setMasterChangeSeqNum(long masterChangeSeqNum) {
-
-    }
-
-    @Override
-    public long getLocalChangeSeqNum() {
-        return 0;
-    }
-
-    @Override
-    public void setLocalChangeSeqNum(long localChangeSeqNum) {
-
-    }
 }

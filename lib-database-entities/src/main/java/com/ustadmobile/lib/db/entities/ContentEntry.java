@@ -2,16 +2,61 @@ package com.ustadmobile.lib.db.entities;
 
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
+import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
+import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 
-@UmEntity
+import static com.ustadmobile.lib.db.entities.ContentEntry.TABLE_ID;
+
+/**
+ * Entity that represents content as it is browsed by the user. A ContentEntry can be either:
+ *  1. An actual piece of content (e.g. book, course, etc), in which case there should be an associated
+ *     ContentEntryFile.
+ *  2. A navigation directory (e.g. a category as it is scraped from another site, etc), in which case
+ *     there should be the appropriate ContentEntryParentChildJoin entities present.
+ */
+@UmEntity(tableId = TABLE_ID)
 public class ContentEntry {
 
-    @UmPrimaryKey
+    public static final int TABLE_ID = 42;
+
+    public static final int LICENSE_TYPE_CC_BY = 1;
+
+    public static final int LICENSE_TYPE_CC_BY_SA = 2;
+
+    public static final int LICENSE_TYPE_CC_BY_SA_NC = 3;
+
+    @UmPrimaryKey(autoGenerateSyncable = true)
     private long contentEntryUid;
 
     private String title;
 
     private String description;
+
+    private String primaryLanguage;
+
+    private String primaryLanguageCountry;
+
+    private String entryId;
+
+    private String author;
+
+    private String publisher;
+
+    private int licenseType;
+
+    private String licenseName;
+
+    private String licenseUrl;
+
+    private String sourceUrl;
+
+    private long lastModified;
+
+    @UmSyncLocalChangeSeqNum
+    private long contentEntryLocalChangeSeqNum;
+
+    @UmSyncMasterChangeSeqNum
+    private long contentEntryMasterChangeSeqNum;
 
     public long getContentEntryUid() {
         return contentEntryUid;
@@ -35,5 +80,148 @@ public class ContentEntry {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    /**
+     * Get the two letter language code as per IETF language tag - e.g. "en", "es", "ar" etc.
+     * This is for the primary langauge of this entry. The entry may, occasionally,  contain
+     * content in other languages.
+     *
+     * @return the two letter language code as per IETF language tag - e.g. "en", "es", "ar" etc.
+     */
+    public String getPrimaryLanguage() {
+        return primaryLanguage;
+    }
+
+    /**
+     * Set the two letter language code as per IETF language tag - e.g. "en", "es", "ar" etc.
+     * @param primaryLanguage the two letter language code as per IETF language tag - e.g. "en", "es", "ar" etc.
+     */
+    public void setPrimaryLanguage(String primaryLanguage) {
+        this.primaryLanguage = primaryLanguage;
+    }
+
+    /**
+     * Get the two letter language country code (if any) as per the IETF language tag - e.g. "us", "ae", etc
+     *
+     * @return the two letter language country code (if any) as per the IETF language tag - e.g. "us", "ae", etc
+     */
+    public String getPrimaryLanguageCountry() {
+        return primaryLanguageCountry;
+    }
+
+    /**
+     * Set the two letter language country code (if any) as per the IETF language tag - e.g. "us", "ae", etc
+     * @param primaryLanguageCountry the two letter language country code (if any) as per the IETF language tag - e.g. "us", "ae", etc
+     */
+    public void setPrimaryLanguageCountry(String primaryLanguageCountry) {
+        this.primaryLanguageCountry = primaryLanguageCountry;
+    }
+
+    /**
+     * Get the embedded unique ID which can be found in the underlying file, if any. For
+     * example the EPUB identifier for EPUB files, or the ID attribute of an xAPI zip file.
+     *
+     * @return The embedded unique ID which can be found in the underlying file
+     */
+    public String getEntryId() {
+        return entryId;
+    }
+
+    /**
+     * Set the embedded unique ID which can be found in the underlying file, if any. For
+     * example the EPUB identifier for EPUB files, or the ID attribute of an xAPI zip file.
+     *
+     * @param entryId The embedded unique ID which can be found in the underlying file
+     */
+    public void setEntryId(String entryId) {
+        this.entryId = entryId;
+    }
+
+    public String getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(String author) {
+        this.author = author;
+    }
+
+    public String getPublisher() {
+        return publisher;
+    }
+
+    public void setPublisher(String publisher) {
+        this.publisher = publisher;
+    }
+
+    public int getLicenseType() {
+        return licenseType;
+    }
+
+    public void setLicenseType(int licenseType) {
+        this.licenseType = licenseType;
+    }
+
+    public String getLicenseName() {
+        return licenseName;
+    }
+
+    public void setLicenseName(String licenseName) {
+        this.licenseName = licenseName;
+    }
+
+    public String getLicenseUrl() {
+        return licenseUrl;
+    }
+
+    public void setLicenseUrl(String licenseUrl) {
+        this.licenseUrl = licenseUrl;
+    }
+
+    /**
+     * Get the original URL this resource came from. In the case of resources that
+     * were generated by scraping, this refers to the URL that the scraper targeted to
+     * generated the resource.
+     *
+     * @return the original URL this resource came from
+     */
+    public String getSourceUrl() {
+        return sourceUrl;
+    }
+
+    /**
+     * Set the original URL this resource came from. In the case of resources that
+     * were generated by scraping, this refers to the URL that the scraper targeted to
+     * generated the resource.
+     *
+     * @param sourceUrl the original URL this resource came from
+     */
+    public void setSourceUrl(String sourceUrl) {
+        this.sourceUrl = sourceUrl;
+    }
+
+    public long getLastModified() {
+        return lastModified;
+    }
+
+    public void setLastModified(long lastModified) {
+        this.lastModified = lastModified;
+    }
+
+
+    public long getContentEntryLocalChangeSeqNum() {
+        return contentEntryLocalChangeSeqNum;
+    }
+
+    public void setContentEntryLocalChangeSeqNum(long contentEntryLocalChangeSeqNum) {
+        this.contentEntryLocalChangeSeqNum = contentEntryLocalChangeSeqNum;
+    }
+
+    public long getContentEntryMasterChangeSeqNum() {
+        return contentEntryMasterChangeSeqNum;
+    }
+
+    public void setContentEntryMasterChangeSeqNum(long contentEntryMasterChangeSeqNum) {
+        this.contentEntryMasterChangeSeqNum = contentEntryMasterChangeSeqNum;
     }
 }

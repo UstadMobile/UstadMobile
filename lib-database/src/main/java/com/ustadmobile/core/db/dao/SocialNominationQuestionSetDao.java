@@ -5,13 +5,17 @@ import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
+import com.ustadmobile.lib.database.annotation.UmRepository;
 import com.ustadmobile.lib.database.annotation.UmUpdate;
 import com.ustadmobile.lib.db.entities.SocialNominationQuestionSet;
+import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
 import java.util.List;
 
-@UmDao
-public abstract class SocialNominationQuestionSetDao {
+@UmDao(readPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
+@UmRepository
+public abstract class SocialNominationQuestionSetDao implements
+        SyncableDao<SocialNominationQuestionSet, SocialNominationQuestionSetDao> {
 
     @UmInsert
     public abstract long insert(SocialNominationQuestionSet entity);

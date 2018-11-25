@@ -2,8 +2,10 @@ package com.ustadmobile.lib.db.entities;
 
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
+import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
+import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 
-@UmEntity
+@UmEntity(tableId = 15)
 public class ClazzLogAttendanceRecord {
 
     //Attendance statuses for every Person's Entry in every Class Attendance Log Entry:
@@ -20,6 +22,12 @@ public class ClazzLogAttendanceRecord {
     private long clazzLogAttendanceRecordClazzMemberUid;
 
     private int attendanceStatus;
+
+    @UmSyncMasterChangeSeqNum
+    private long clazzLogAttendanceRecordMasterChangeSeqNum;
+
+    @UmSyncLocalChangeSeqNum
+    private long clazzLogAttendanceRecordLocalChangeSeqNum;
 
     public long getClazzLogAttendanceRecordUid() {
         return clazzLogAttendanceRecordUid;
@@ -51,6 +59,22 @@ public class ClazzLogAttendanceRecord {
 
     public void setAttendanceStatus(int attendanceStatus) {
         this.attendanceStatus = attendanceStatus;
+    }
+
+    public long getClazzLogAttendanceRecordMasterChangeSeqNum() {
+        return clazzLogAttendanceRecordMasterChangeSeqNum;
+    }
+
+    public void setClazzLogAttendanceRecordMasterChangeSeqNum(long clazzLogAttendanceRecordMasterChangeSeqNum) {
+        this.clazzLogAttendanceRecordMasterChangeSeqNum = clazzLogAttendanceRecordMasterChangeSeqNum;
+    }
+
+    public long getClazzLogAttendanceRecordLocalChangeSeqNum() {
+        return clazzLogAttendanceRecordLocalChangeSeqNum;
+    }
+
+    public void setClazzLogAttendanceRecordLocalChangeSeqNum(long clazzLogAttendanceRecordLocalChangeSeqNum) {
+        this.clazzLogAttendanceRecordLocalChangeSeqNum = clazzLogAttendanceRecordLocalChangeSeqNum;
     }
 
     @Override

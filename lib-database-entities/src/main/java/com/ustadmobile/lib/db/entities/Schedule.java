@@ -2,9 +2,11 @@ package com.ustadmobile.lib.db.entities;
 
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
+import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
+import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 
-@UmEntity
-public class Schedule implements SyncableEntity {
+@UmEntity(tableId = 21)
+public class Schedule {
 
     public static final int SCHEDULE_FREQUENCY_DAILY = 1;
     public static final int SCHEDULE_FREQUENCY_WEEKLY = 2;
@@ -59,6 +61,12 @@ public class Schedule implements SyncableEntity {
 
     //What clazz is this Schedule for
     private long scheduleClazzUid;
+
+    @UmSyncMasterChangeSeqNum
+    private long scheduleMasterChangeSeqNum;
+
+    @UmSyncLocalChangeSeqNum
+    private long scheduleLocalChangeSeqNum;
 
     //active or removed
     private boolean scheduleActive;
@@ -136,23 +144,19 @@ public class Schedule implements SyncableEntity {
         this.scheduleUid = scheduleUid;
     }
 
-    @Override
-    public long getMasterChangeSeqNum() {
-        return 0;
+    public long getScheduleMasterChangeSeqNum() {
+        return scheduleMasterChangeSeqNum;
     }
 
-    @Override
-    public void setMasterChangeSeqNum(long masterChangeSeqNum) {
-
+    public void setScheduleMasterChangeSeqNum(long scheduleMasterChangeSeqNum) {
+        this.scheduleMasterChangeSeqNum = scheduleMasterChangeSeqNum;
     }
 
-    @Override
-    public long getLocalChangeSeqNum() {
-        return 0;
+    public long getScheduleLocalChangeSeqNum() {
+        return scheduleLocalChangeSeqNum;
     }
 
-    @Override
-    public void setLocalChangeSeqNum(long localChangeSeqNum) {
-
+    public void setScheduleLocalChangeSeqNum(long scheduleLocalChangeSeqNum) {
+        this.scheduleLocalChangeSeqNum = scheduleLocalChangeSeqNum;
     }
 }

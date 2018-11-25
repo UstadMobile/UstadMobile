@@ -28,6 +28,10 @@ public class OpdsEntryParentToChildJoin {
         this.childIndex = childIndex;
     }
 
+    public OpdsEntryParentToChildJoin() {
+
+    }
+
     public String getParentEntry() {
         return parentEntry;
     }

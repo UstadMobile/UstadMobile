@@ -2,6 +2,8 @@ package com.ustadmobile.lib.db.entities;
 
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
+import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
+import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 
 /**
  * This entity represents all the fields including the headers and extra information that will
@@ -9,7 +11,7 @@ import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
  * (header or text/date/drop-down/phone/etc), the index for order and view flags.
  *
  */
-@UmEntity
+@UmEntity(tableId = 19)
 public class PersonDetailPresenterField {
 
     /* Begin constants that represent Person core fields */
@@ -74,6 +76,12 @@ public class PersonDetailPresenterField {
 
     //Set if its uneditable
     private boolean readyOnly;
+
+    @UmSyncMasterChangeSeqNum
+    private long personDetailPresenterFieldMasterChangeSeqNum;
+
+    @UmSyncLocalChangeSeqNum
+    private long personDetailPresenterFieldLocalChangeSeqNum;
 
     public int getLabelMessageId() {
         return labelMessageId;
@@ -155,5 +163,21 @@ public class PersonDetailPresenterField {
 
     public void setHeaderMessageId(int headerMessageId) {
         this.headerMessageId = headerMessageId;
+    }
+
+    public long getPersonDetailPresenterFieldMasterChangeSeqNum() {
+        return personDetailPresenterFieldMasterChangeSeqNum;
+    }
+
+    public void setPersonDetailPresenterFieldMasterChangeSeqNum(long personDetailPresenterFieldMasterChangeSeqNum) {
+        this.personDetailPresenterFieldMasterChangeSeqNum = personDetailPresenterFieldMasterChangeSeqNum;
+    }
+
+    public long getPersonDetailPresenterFieldLocalChangeSeqNum() {
+        return personDetailPresenterFieldLocalChangeSeqNum;
+    }
+
+    public void setPersonDetailPresenterFieldLocalChangeSeqNum(long personDetailPresenterFieldLocalChangeSeqNum) {
+        this.personDetailPresenterFieldLocalChangeSeqNum = personDetailPresenterFieldLocalChangeSeqNum;
     }
 }

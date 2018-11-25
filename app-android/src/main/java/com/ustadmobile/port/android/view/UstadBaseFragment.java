@@ -56,8 +56,6 @@ public class UstadBaseFragment  extends Fragment{
         }
 
         mUILocale = new String(sysLocale);
-        if(baseController != null)
-            baseController.handleViewResume();
     }
 
     @Override

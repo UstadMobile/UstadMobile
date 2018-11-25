@@ -2,13 +2,15 @@ package com.ustadmobile.lib.db.entities;
 
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
+import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
+import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 
 /**
  * Represents one session (e.g. day) in the class log book. This is related to attendance records, but
  * could also be related to behavior logs etc. in the future.
  */
-@UmEntity
-public class ClazzLog implements SyncableEntity{
+@UmEntity(tableId = 14)
+public class ClazzLog{
 
     @UmPrimaryKey(autoIncrement = true)
     private long clazzLogUid;
@@ -19,10 +21,6 @@ public class ClazzLog implements SyncableEntity{
 
     private long timeRecorded;
 
-    private long masterChangeSeqNum;
-
-    private long localChangeSeqNum;
-
     private boolean done;
 
     private int numPresent;
@@ -30,6 +28,12 @@ public class ClazzLog implements SyncableEntity{
     private int numAbsent;
 
     private int numPartial;
+
+    @UmSyncMasterChangeSeqNum
+    private long clazzLogChangeMasterChangeSeqNum;
+
+    @UmSyncLocalChangeSeqNum
+    private long clazzLogChangeLocalChangeSeqNum;
 
     /**
      * Gets the number of members passed
@@ -130,23 +134,20 @@ public class ClazzLog implements SyncableEntity{
         this.timeRecorded = timeRecorded;
     }
 
-    @Override
-    public long getMasterChangeSeqNum() {
-        return masterChangeSeqNum;
+
+    public long getClazzLogChangeMasterChangeSeqNum() {
+        return clazzLogChangeMasterChangeSeqNum;
     }
 
-    @Override
-    public void setMasterChangeSeqNum(long masterChangeSeqNum) {
-        this.masterChangeSeqNum = masterChangeSeqNum;
+    public void setClazzLogChangeMasterChangeSeqNum(long clazzLogChangeMasterChangeSeqNum) {
+        this.clazzLogChangeMasterChangeSeqNum = clazzLogChangeMasterChangeSeqNum;
     }
 
-    @Override
-    public long getLocalChangeSeqNum() {
-        return localChangeSeqNum;
+    public long getClazzLogChangeLocalChangeSeqNum() {
+        return clazzLogChangeLocalChangeSeqNum;
     }
 
-    @Override
-    public void setLocalChangeSeqNum(long localChangeSeqNum) {
-        this.localChangeSeqNum = localChangeSeqNum;
+    public void setClazzLogChangeLocalChangeSeqNum(long clazzLogChangeLocalChangeSeqNum) {
+        this.clazzLogChangeLocalChangeSeqNum = clazzLogChangeLocalChangeSeqNum;
     }
 }

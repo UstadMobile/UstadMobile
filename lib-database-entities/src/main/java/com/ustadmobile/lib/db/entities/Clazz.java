@@ -2,9 +2,11 @@ package com.ustadmobile.lib.db.entities;
 
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
+import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
+import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 
-@UmEntity
-public class Clazz implements SyncableEntity{
+@UmEntity(tableId = 6)
+public class Clazz {
 
     @UmPrimaryKey(autoIncrement = true)
     private long clazzUid;
@@ -12,10 +14,6 @@ public class Clazz implements SyncableEntity{
     private String clazzName;
 
     private String clazzDesc;
-
-    private long masterChangeSeqNum;
-
-    private long localChangeSeqNum;
 
     private float attendanceAverage;
 
@@ -27,6 +25,12 @@ public class Clazz implements SyncableEntity{
 
     //Active
     private boolean clazzActive;
+
+    @UmSyncMasterChangeSeqNum
+    private long clazzMasterChangeSeqNum;
+
+    @UmSyncLocalChangeSeqNum
+    private long clazzLocalChangeSeqNum;
 
     public boolean isClazzActive() {
         return clazzActive;
@@ -84,23 +88,20 @@ public class Clazz implements SyncableEntity{
         this.clazzName = clazzName;
     }
 
-    @Override
-    public long getMasterChangeSeqNum() {
-        return masterChangeSeqNum;
+
+    public long getClazzMasterChangeSeqNum() {
+        return clazzMasterChangeSeqNum;
     }
 
-    @Override
-    public void setMasterChangeSeqNum(long masterChangeSeqNum) {
-        this.masterChangeSeqNum = masterChangeSeqNum;
+    public void setClazzMasterChangeSeqNum(long clazzMasterChangeSeqNum) {
+        this.clazzMasterChangeSeqNum = clazzMasterChangeSeqNum;
     }
 
-    @Override
-    public long getLocalChangeSeqNum() {
-        return localChangeSeqNum;
+    public long getClazzLocalChangeSeqNum() {
+        return clazzLocalChangeSeqNum;
     }
 
-    @Override
-    public void setLocalChangeSeqNum(long localChangeSeqNum) {
-        this.localChangeSeqNum = localChangeSeqNum;
+    public void setClazzLocalChangeSeqNum(long clazzLocalChangeSeqNum) {
+        this.clazzLocalChangeSeqNum = clazzLocalChangeSeqNum;
     }
 }

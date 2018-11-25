@@ -2,8 +2,10 @@ package com.ustadmobile.lib.db.entities;
 
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
+import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
+import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 
-@UmEntity
+@UmEntity(tableId = 11)
 public class ClazzActivity {
 
     @UmPrimaryKey(autoIncrement = true)
@@ -30,6 +32,28 @@ public class ClazzActivity {
     //the quantity of activity - from unit of measure (frequency, duration, binary)
     private long clazzActivityQuantity;
 
+    @UmSyncMasterChangeSeqNum
+    private long clazzActivityMasterChangeSeqNum;
+
+    @UmSyncLocalChangeSeqNum
+    private long clazzActivityLocalChangeSeqNum;
+
+
+    public long getClazzActivityMasterChangeSeqNum() {
+        return clazzActivityMasterChangeSeqNum;
+    }
+
+    public void setClazzActivityMasterChangeSeqNum(long clazzActivityMasterChangeSeqNum) {
+        this.clazzActivityMasterChangeSeqNum = clazzActivityMasterChangeSeqNum;
+    }
+
+    public long getClazzActivityLocalChangeSeqNum() {
+        return clazzActivityLocalChangeSeqNum;
+    }
+
+    public void setClazzActivityLocalChangeSeqNum(long clazzActivityLocalChangeSeqNum) {
+        this.clazzActivityLocalChangeSeqNum = clazzActivityLocalChangeSeqNum;
+    }
 
     public long getClazzActivityQuantity() {
         return clazzActivityQuantity;
@@ -94,4 +118,5 @@ public class ClazzActivity {
     public void setClazzActivityLogDate(long clazzActivityLogDate) {
         this.clazzActivityLogDate = clazzActivityLogDate;
     }
+
 }
