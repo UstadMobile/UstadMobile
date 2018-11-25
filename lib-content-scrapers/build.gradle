@@ -13,7 +13,6 @@ apply plugin: 'java-library'
 
 
 task scrapeContent(type: JavaExec) {
-
     classpath sourceSets.main.runtimeClasspath
     if(project.hasProperty("edraakUrl") && project.hasProperty("edraakDir")) {
         main "com.ustadmobile.lib.contentscrapers.edraakK12.EdraakK12ContentScraper"
@@ -60,6 +59,15 @@ task scrapeContent(type: JavaExec) {
         main "com.ustadmobile.lib.contentscrapers.ddl.DdlContentScraper"
         args  project.getProperties().get("ddlUrl"), project.getProperties().get("ddlDir")
     }
+
+
+    systemProperties["java.naming.factory.initial"] = "org.osjava.sj.SimpleContextFactory"
+    systemProperties["java.naming.factory.object"] = "org.apache.commons.dbcp2.BasicDataSourceFactory"
+    systemProperties["org.osjava.sj.delimiter"] = "/"
+    systemProperties["org.osjava.sj.space"] = "java:/comp/env"
+    systemProperties["org.osjava.sj.root"] = "jndi-config/"
+    systemProperties["org.osjava.sj.jndi.shared"] = "true"
+
     outputs.upToDateWhen { false }
 }
 
@@ -69,14 +77,14 @@ ext.localProperties = new Properties()
 ext.localProperties.load(new FileInputStream(rootProject.file("local.properties")))
 
 task generateScraperBuildConfig (type: de.fuerstenau.gradle.buildconfig.GenerateBuildConfigTask) {
-    inputs.files(fileTree(dir: rootProject.file(".")).matching { include 'buildconfig.*.properties' })
+    inputs.files(rootProject.file("local.properties"))
     outputDir = new File ("${projectDir}/src/main/java")
     packageName = "com.ustadmobile.lib.contentscrapers.buildconfig"
     appName = project.ext.buildConfigProperties['appName']
     clsName = "ScraperBuildConfig"
     version = rootProject.version
 
-    buildConfigField "String", "CHROME_DRIVER_PATH", rootProject.ext.localProperties["chrome_driver_path"]
+    buildConfigField "String", "CHROME_DRIVER_PATH", rootProject.ext.localProperties["scraper.chrome_driver_path"]
 
 }
 compileJava.dependsOn(generateScraperBuildConfig)
@@ -117,7 +125,9 @@ dependencies {
 task copyTestResources(type: Copy) {
     from "${projectDir}/src/main/resources"
     into "${buildDir}/classes/test"
+    exclude "**/jndi.properties"
 }
+
 processTestResources.dependsOn copyTestResources
 compileTestJava.options.encoding = 'UTF-8'
 
