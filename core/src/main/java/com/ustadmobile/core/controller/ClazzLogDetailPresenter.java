@@ -240,9 +240,9 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
                 UmAppDatabase.getInstance(getContext()).getClazzLogAttendanceRecordDao();
         currentClazzLog.setDone(true);
         clazzLogDao.updateDoneForClazzLogAsync(currentClazzLog.getClazzLogUid(),
-                new UmCallback<Long>() {
+                new UmCallback<Integer>() {
             @Override
-            public void onSuccess(Long result) {
+            public void onSuccess(Integer result) {
                 //2. Update Attendance numbers for this clazzUid
                 clazzDao.updateAttendancePercentage(currentClazzUid);
                 //3. Update Attendance numbers for ClazzMember for this clazzUid.

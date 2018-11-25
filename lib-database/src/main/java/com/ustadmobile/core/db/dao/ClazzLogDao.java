@@ -35,7 +35,7 @@ public abstract class ClazzLogDao implements SyncableDao<ClazzLog, ClazzLogDao> 
     public abstract List<ClazzLog> findAll();
 
     @UmQuery("UPDATE ClazzLog SET done = 1 where clazzLogUid = :clazzLogUid ")
-    public abstract void updateDoneForClazzLogAsync(long clazzLogUid, UmCallback<Long> callback);
+    public abstract void updateDoneForClazzLogAsync(long clazzLogUid, UmCallback<Integer> callback);
 
     @UmQuery("SELECT * FROM ClazzLog where clazzClazzUid = :clazzUid")
     public abstract UmProvider<ClazzLog> findByClazzUid(long clazzUid);

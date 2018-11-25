@@ -109,7 +109,7 @@ import com.ustadmobile.lib.db.sync.entities.SyncablePrimaryKey;
         OpdsEntryStatusCache.class, OpdsEntryStatusCacheAncestor.class,
         HttpCachedEntry.class, DownloadJob.class, DownloadJobItem.class,
         Person.class, Clazz.class, ClazzMember.class, ClazzLog.class,
-        ClazzLogAttendanceRecord.class, FeedEntry.class, ContentEntry.class,
+        ClazzLogAttendanceRecord.class, FeedEntry.class,
         PersonField.class, PersonCustomFieldValue.class,
         PersonDetailPresenterField.class,
         SocialNominationQuestion.class, SocialNominationQuestionResponse.class,
