@@ -798,15 +798,18 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                             autoIncPreparedStmtVarName)
                 .unindent().beginControlFlow(")");
 
-            if(isList || isArray) {
+            boolean resultIsList = DbProcessorUtils.isList(resultType, processingEnv);
+            boolean resultIsArray = resultType.getKind().equals(TypeKind.ARRAY);
+            if(resultIsList || resultIsArray) {
                 TypeMirror primaryKeyType = DbProcessorUtils.getArrayOrListComponentType(resultType,
                         processingEnv);
-                String arrayListVarName = isList ? "_result" : "_resultList";
+                String arrayListVarName = resultIsList ? "_result" : "_resultList";
 
                 ParameterizedTypeName listTypeName =ParameterizedTypeName.get(
                         ClassName.get(ArrayList.class),
                         ClassName.get(DbProcessorUtils.boxIfPrimitive(primaryKeyType, processingEnv)));
-                if(isArray)
+
+                if(resultIsArray)
                     codeBlock.add("$T ", listTypeName);
 
                 codeBlock.add("$L = new $T();\n", arrayListVarName, listTypeName);
@@ -814,10 +817,10 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                 codeBlock.beginControlFlow("while(generatedKeys.next())")
                         .add("$L.add(generatedKeys.get$L(1));\n", arrayListVarName,
                                 getPreparedStatementSetterGetterTypeName(primaryKeyType))
-                    .endControlFlow();
+                        .endControlFlow();
 
-                if(isArray) {
-                    codeBlock.add("_result = arrayList.toArray(new $T[arrayList.size()]);\n",
+                if(resultIsArray) {
+                    codeBlock.add("_result = _resultList.toArray(new $T[_resultList.size()]);\n",
                             primaryKeyType);
                 }
             }else {
