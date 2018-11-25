@@ -25,13 +25,13 @@ public abstract class ClazzMemberDao implements SyncableDao<ClazzMember, ClazzMe
     public abstract long insert(ClazzMember entity);
 
     @UmInsert
-    public abstract void insertAsync(ClazzMember entity, UmCallback<Long> result);
+    public abstract void insertAsync(ClazzMember entity, UmCallback<Long> resultObject);
 
     @UmUpdate
     public abstract void update(ClazzMember entity);
 
     @UmUpdate
-    public abstract void updateAsync(ClazzMember entity, UmCallback<Integer> result);
+    public abstract void updateAsync(ClazzMember entity, UmCallback<Integer> resultObject);
 
     @UmQuery("SELECT * FROM ClazzMember WHERE clazzMemberUid = :uid")
     public abstract ClazzMember findByUid(long uid);
@@ -48,7 +48,8 @@ public abstract class ClazzMemberDao implements SyncableDao<ClazzMember, ClazzMe
 
     @UmQuery("SELECT * FROM ClazzMember WHERE clazzMemberPersonUid = :personUid " +
             "AND clazzMemberClazzUid = :clazzUid")
-    public abstract void findByPersonUidAndClazzUidAsync(long personUid, long clazzUid, UmCallback<ClazzMember> result);
+    public abstract void findByPersonUidAndClazzUidAsync(long personUid, long clazzUid,
+                                                         UmCallback<ClazzMember> resultObject);
 
     @UmQuery("Update ClazzMember SET attendancePercentage " +
             " = (SELECT COUNT(*) FROM ClazzLogAttendanceRecord " +
@@ -232,7 +233,7 @@ public abstract class ClazzMemberDao implements SyncableDao<ClazzMember, ClazzMe
             " WHERE ClazzMember.clazzMemberClazzUid = :clazzUid ")
     public abstract void getAttendanceAverageAsListForClazzBetweenDates(long clazzUid,
                                                                 long fromDate, long toDate,
-                                                                UmCallback<List<Float>> results);
+                                                                UmCallback<List<Float>> resultList);
 
 
     @UmQuery("UPDATE ClazzMember SET clazzMemberActive = :enrolled WHERE " +

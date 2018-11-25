@@ -19,7 +19,7 @@ public abstract class ClazzLogDao implements SyncableDao<ClazzLog, ClazzLogDao> 
     public abstract long insert(ClazzLog entity);
 
     @UmInsert
-    public abstract void insertAsync(ClazzLog entity, UmCallback<Long> result);
+    public abstract void insertAsync(ClazzLog entity, UmCallback<Long> resultObject);
 
     @UmQuery("SELECT * FROM ClazzLog WHERE clazzLogUid = :uid")
     public abstract ClazzLog findByUid(long uid);
@@ -29,7 +29,7 @@ public abstract class ClazzLogDao implements SyncableDao<ClazzLog, ClazzLogDao> 
 
     @UmQuery("SELECT * FROM ClazzLog WHERE clazzClazzUid = :clazzid and logDate = :date")
     public abstract void findByClazzIdAndDateAsync(long clazzid, long date,
-                                                   UmCallback<ClazzLog> result);
+                                                   UmCallback<ClazzLog> resultObject);
 
     @UmQuery("SELECT * FROM ClazzLog")
     public abstract List<ClazzLog> findAll();

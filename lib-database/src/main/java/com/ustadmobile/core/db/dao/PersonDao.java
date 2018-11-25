@@ -24,18 +24,18 @@ public abstract class PersonDao implements SyncableDao<Person, PersonDao> {
     public abstract void update(Person entity);
 
     @UmUpdate
-    public abstract void updateAsync(Person entity, UmCallback<Integer> result);
+    public abstract void updateAsync(Person entity, UmCallback<Integer> resultObject);
 
     @UmInsert
     @Override
-    public abstract void insertAsync(Person entity, UmCallback<Long> result);
+    public abstract void insertAsync(Person entity, UmCallback<Long> resultObject);
 
     @Override
     @UmQuery("SELECT * From Person WHERE personUid = :uid")
     public abstract Person findByUid(long uid);
 
     @UmQuery("SELECT * From Person where username = :username")
-    public abstract void findByUsernameAsync(String username, UmCallback<Person> result);
+    public abstract void findByUsernameAsync(String username, UmCallback<Person> resultObject);
 
     @UmQuery("SELECT * From Person WHERE personUid = :uid")
     public abstract void findByUidAsync(long uid, UmCallback<Person> person);

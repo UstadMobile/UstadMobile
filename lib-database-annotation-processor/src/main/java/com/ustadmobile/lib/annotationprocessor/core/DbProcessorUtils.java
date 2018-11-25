@@ -26,6 +26,7 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVariable;
@@ -366,6 +367,24 @@ public class DbProcessorUtils {
             entityFieldsList.add(pkAutoIncField);
 
         return entityFieldsList;
+    }
+
+
+    /**
+     * Box the given type if it's a primitive. Useful for creating List / Collection classes.
+     *
+     * @param typeMirror TypeMirror of the type to look at
+     * @param processingEnv Processing Environment
+     * @return The boxed class for the given primitive type if it's a primitive, otherwise the
+     * original typeMirror argument.
+     */
+    public static TypeMirror boxIfPrimitive(TypeMirror typeMirror,
+                                            ProcessingEnvironment processingEnv) {
+        if(typeMirror.getKind().isPrimitive()) {
+            return processingEnv.getTypeUtils().boxedClass((PrimitiveType)typeMirror).asType();
+        }else{
+            return typeMirror;
+        }
     }
 }
 

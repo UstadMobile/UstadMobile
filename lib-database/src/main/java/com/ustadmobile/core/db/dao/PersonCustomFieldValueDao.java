@@ -23,7 +23,7 @@ public abstract class PersonCustomFieldValueDao implements
 
     @Override
     @UmInsert
-    public abstract void insertAsync(PersonCustomFieldValue entity, UmCallback<Long> result);
+    public abstract void insertAsync(PersonCustomFieldValue entity, UmCallback<Long> resultObject);
 
     @Override
     @UmQuery("SELECT * FROM PersonCustomFieldValue WHERE personCustomFieldValueUid = :uid")
@@ -33,10 +33,10 @@ public abstract class PersonCustomFieldValueDao implements
             "personCustomFieldValuePersonUid = :personUid AND " +
             "personCustomFieldValuePersonCustomFieldUid = :fieldUid")
     public abstract void findCustomFieldByFieldAndPersonAsync(long fieldUid, long personUid,
-                                                      UmCallback<PersonCustomFieldValue> result);
+                                                      UmCallback<PersonCustomFieldValue> resultObject);
 
     @UmUpdate
-    public abstract void updateAsync(PersonCustomFieldValue entity, UmCallback<Integer> result);
+    public abstract void updateAsync(PersonCustomFieldValue entity, UmCallback<Integer> resultObject);
 
     @UmUpdate
     public abstract void updateListAsync(List<PersonCustomFieldValue> entities,

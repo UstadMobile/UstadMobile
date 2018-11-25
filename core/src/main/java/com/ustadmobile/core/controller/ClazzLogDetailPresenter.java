@@ -165,9 +165,9 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
                 UmAppDatabase.getInstance(getContext()).getClazzLogAttendanceRecordDao();
 
         clazzLogAttendanceRecordDao.insertAllAttendanceRecords(currentClazzUid,
-                result.getClazzLogUid(), new UmCallback<long[]>() {
+                result.getClazzLogUid(), new UmCallback<Long[]>() {
                     @Override
-                    public void onSuccess(long[] result2) {
+                    public void onSuccess(Long[] result2) {
                         //Get provider
                         clazzLogAttendanceRecordUmProvider = UmAppDatabase.getInstance(context)
                                 .getClazzLogAttendanceRecordDao()

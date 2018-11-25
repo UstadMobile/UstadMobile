@@ -26,14 +26,14 @@ public abstract class SocialNominationQuestionSetResponseDao implements
 
     @UmInsert
     public abstract void insertAsync(SocialNominationQuestionSetResponse entity,
-                                     UmCallback<Long> result);
+                                     UmCallback<Long> resultObject);
 
     @UmQuery("SELECT * FROM SocialNominationQuestionSetResponse")
     public abstract UmProvider<SocialNominationQuestionSetResponse> findAllQuestionSetResponses();
 
     @UmUpdate
     public abstract void updateAsync(SocialNominationQuestionSetResponse entity,
-                                     UmCallback<Integer> result);
+                                     UmCallback<Integer> resultObject);
 
     @UmQuery("SELECT * FROM SocialNominationQuestionSetResponse " +
             "where socialNominationQuestionSetResposeUid = :uid")
@@ -42,13 +42,13 @@ public abstract class SocialNominationQuestionSetResponseDao implements
     @UmQuery("SELECT * FROM SocialNominationQuestionSetResponse " +
             "where socialNominationQuestionSetResposeUid = :uid")
     public abstract void findByUidAsync(long uid,
-                                        UmCallback<SocialNominationQuestionSetResponse> result);
+                                        UmCallback<SocialNominationQuestionSetResponse> resultObject);
 
     @UmQuery("SELECT * FROM SocialNominationQuestionSetResponse WHERE " +
             "socialNominationQuestionSetResponseClazzMemberUid = :uid AND " +
             "socialNominationQuestionSetResponseRecognitionPercentage > 0.8")
     public abstract void findAllPassedRecognitionByPersonUid(long uid,
-                                    UmCallback<List<SocialNominationQuestionSetResponse>> result);
+                                    UmCallback<List<SocialNominationQuestionSetResponse>> resultList);
 
     @UmQuery("SELECT Person.*   from " +
             "ClazzMember INNER JOIN PERSON ON " +

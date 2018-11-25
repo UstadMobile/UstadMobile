@@ -26,7 +26,7 @@ public abstract class SyncStatusDao implements BaseDao<SyncStatus> {
     public long getAndIncrementNextLocalChangeSeqNum(int tableId, int numEntries) {
         long seqNum = getNextLocalChangeSeqNum(tableId);
         if(seqNum >= 1) {
-            updateNextLocalChangeSeqNum(tableId, numEntries);
+            incrementLocalChangeSeqNum(tableId, numEntries);
         }else {
             insert(new SyncStatus(tableId));
         }
@@ -34,16 +34,16 @@ public abstract class SyncStatusDao implements BaseDao<SyncStatus> {
         return seqNum + 1;
     }
 
-    @UmQuery("SELECT nextLocalChangeSeqNum FROM SyncStatus WHERE tableId = :tableId")
+    @UmQuery("SELECT localChangeSeqNum FROM SyncStatus WHERE tableId = :tableId")
     public abstract long getNextLocalChangeSeqNum(int tableId);
 
-    @UmQuery("UPDATE SyncStatus SET nextLocalChangeSeqNum = nextLocalChangeSeqNum + :increment WHERE tableId = :tableId")
-    public abstract void updateNextLocalChangeSeqNum(int tableId, int increment);
+    @UmQuery("UPDATE SyncStatus SET localChangeSeqNum = localChangeSeqNum + :increment WHERE tableId = :tableId")
+    public abstract void incrementLocalChangeSeqNum(int tableId, int increment);
 
     public long getAndIncrementNextMasterChangeSeqNum(int tableId, int numEntries) {
-        long seqNum = getNextMasterChangeSeqNum(tableId);
+        long seqNum = getMasterChangeSeqNum(tableId);
         if(seqNum >= 1){
-            updateNextMasterChangeSeqNum(tableId, numEntries);
+            incrementMasterChangeSeqNum(tableId, numEntries);
         }else {
             insert(new SyncStatus(tableId));
         }
@@ -51,11 +51,11 @@ public abstract class SyncStatusDao implements BaseDao<SyncStatus> {
         return seqNum + 1;
     }
 
-    @UmQuery("SELECT nextMasterChangeNum FROM SyncStatus WHERE tableId = :tableId")
-    public abstract long getNextMasterChangeSeqNum(int tableId);
+    @UmQuery("SELECT masterChangeSeqNum FROM SyncStatus WHERE tableId = :tableId")
+    public abstract long getMasterChangeSeqNum(int tableId);
 
-    @UmQuery("UPDATE SyncStatus SET nextMasterChangeNum = nextMasterChangeNum + :increment WHERE tableId = :tableId")
-    public abstract void updateNextMasterChangeSeqNum(int tableId, int increment);
+    @UmQuery("UPDATE SyncStatus SET masterChangeSeqNum = masterChangeSeqNum + :increment WHERE tableId = :tableId")
+    public abstract void incrementMasterChangeSeqNum(int tableId, int increment);
 
     @UmQuery("UPDATE SyncStatus SET syncedToLocalChangeSeqNum = :syncedToLocalChangeSeqNum, syncedToMasterChangeNum = :syncdToMasterChangeNum WHERE tableId = :tableId")
     public abstract void updateSyncedToChangeSeqNums(int tableId, long syncedToLocalChangeSeqNum, long syncdToMasterChangeNum);

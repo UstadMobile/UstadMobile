@@ -21,19 +21,19 @@ public abstract class ScheduleDao implements SyncableDao<Schedule, ScheduleDao> 
     public abstract void update(Schedule entity);
 
     @UmInsert
-    public abstract void insertAsync(Schedule entity, UmCallback<Long> result);
+    public abstract void insertAsync(Schedule entity, UmCallback<Long> resultObject);
 
     @UmQuery("SELECT * FROM Schedule")
     public abstract UmProvider<Schedule> findAllSchedules();
 
     @UmUpdate
-    public abstract void updateAsync(Schedule entity, UmCallback<Integer> result);
+    public abstract void updateAsync(Schedule entity, UmCallback<Integer> resultObject);
 
     @UmQuery("SELECT * FROM Schedule WHERE scheduleUid = :uid")
     public abstract Schedule findByUid(long uid);
 
     @UmQuery("SELECT * FROM Schedule WHERE scheduleUid = :uid")
-    public abstract void findByUidAsync(long uid, UmCallback<Schedule> result);
+    public abstract void findByUidAsync(long uid, UmCallback<Schedule> resultObject);
 
     @UmQuery("SELECT * FROM Schedule WHERE scheduleClazzUid = :clazzUid AND scheduleActive = 1")
     public abstract UmProvider<Schedule> findAllSchedulesByClazzUid(long clazzUid);

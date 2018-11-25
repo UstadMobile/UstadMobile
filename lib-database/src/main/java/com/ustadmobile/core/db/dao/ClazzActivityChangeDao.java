@@ -23,22 +23,22 @@ public abstract  class ClazzActivityChangeDao implements SyncableDao<ClazzActivi
     public abstract void update(ClazzActivityChange entity);
 
     @UmInsert
-    public abstract void insertAsync(ClazzActivityChange entity, UmCallback<Long> result);
+    public abstract void insertAsync(ClazzActivityChange entity, UmCallback<Long> resultObject);
 
     @UmQuery("SELECT * FROM ClazzActivityChange")
     public abstract UmProvider<ClazzActivityChange> findAllClazzActivityChanges();
 
     @UmQuery("SELECT * FROM ClazzActivityChange")
-    public abstract void findAllClazzActivityChangesAsync(UmCallback<List<ClazzActivityChange>> result);
+    public abstract void findAllClazzActivityChangesAsync(UmCallback<List<ClazzActivityChange>> resultList);
 
     @UmUpdate
-    public abstract void updateAsync(ClazzActivityChange entity, UmCallback<Integer> result);
+    public abstract void updateAsync(ClazzActivityChange entity, UmCallback<Integer> resultObject);
 
     @UmQuery("SELECT * FROM ClazzActivityChange WHERE clazzActivityChangeUid = :uid")
     public abstract ClazzActivityChange findByUid(long uid);
 
     @UmQuery("SELECT * FROM ClazzActivityChange WHERE clazzActivityChangeUid = :uid")
-    public abstract  void findByUidAsync(long uid, UmCallback<ClazzActivityChange> result);
+    public abstract  void findByUidAsync(long uid, UmCallback<ClazzActivityChange> resultObject);
 
     @UmQuery("SELECT * FROM ClazzActivityChange WHERE clazzActivityChangeTitle = :title")
     public abstract ClazzActivityChange findByTitle(String title);

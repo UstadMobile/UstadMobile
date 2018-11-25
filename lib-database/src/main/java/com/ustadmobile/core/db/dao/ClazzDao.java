@@ -44,7 +44,7 @@ public abstract class ClazzDao implements SyncableDao<Clazz, ClazzDao> {
 
     @Override
     @UmInsert
-    public abstract void insertAsync(Clazz entity, UmCallback<Long> result);
+    public abstract void insertAsync(Clazz entity, UmCallback<Long> resultObject);
 
     @UmQuery("SELECT * FROM Clazz WHERE clazzUid = :uid")
     public abstract Clazz findByUid(long uid);
@@ -53,10 +53,10 @@ public abstract class ClazzDao implements SyncableDao<Clazz, ClazzDao> {
     public abstract UmLiveData<Clazz> findByUidLive(long uid);
 
     @UmQuery("SELECT * FROM Clazz WHERE clazzUid = :uid")
-    public abstract void findByUidAsync(long uid, UmCallback<Clazz> result);
+    public abstract void findByUidAsync(long uid, UmCallback<Clazz> resultObject);
 
     @UmUpdate
-    public abstract void updateAsync(Clazz entity, UmCallback<Integer> result);
+    public abstract void updateAsync(Clazz entity, UmCallback<Integer> resultObject);
 
     @UmQuery(CLAZZ_WHERE +
             " FROM Clazz WHERE :personUid in " +
@@ -100,7 +100,7 @@ public abstract class ClazzDao implements SyncableDao<Clazz, ClazzDao> {
             " AND ClazzMember.role = " + ClazzMember.ROLE_TEACHER + ") as numTeachers, " +
             " ((SELECT SUM(Clazz.attendanceAverage) FROM Clazz WHERE Clazz.clazzActive = 1 ) / " +
             " (SELECT COUNT(*) FROM Clazz Where Clazz.clazzActive = 1)) as attendanceAverage ")
-    public abstract void getClazzSummaryAsync(UmCallback<ClazzAverage> result);
+    public abstract void getClazzSummaryAsync(UmCallback<ClazzAverage> resultObject);
 
     @UmQuery(
         "SELECT Clazz.*, (:personUid) AS personUid, " +

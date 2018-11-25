@@ -24,24 +24,24 @@ public abstract class SocialNominationQuestionDao implements
     public abstract void update(SocialNominationQuestion entity);
 
     @UmInsert
-    public abstract void insertAsync(SocialNominationQuestion entity, UmCallback<Long> result);
+    public abstract void insertAsync(SocialNominationQuestion entity, UmCallback<Long> resultObject);
 
     @UmQuery("SELECT * FROM SocialNominationQuestion")
     public abstract UmProvider<SocialNominationQuestion> findAllQuestions();
 
     @UmUpdate
-    public abstract void updateAsync(SocialNominationQuestion entity, UmCallback<Integer> result);
+    public abstract void updateAsync(SocialNominationQuestion entity, UmCallback<Integer> resultObject);
 
     @UmQuery("SELECT * FROM SocialNominationQuestion WHERE socialNominationQuestionUid = :uid")
     public abstract SocialNominationQuestion findByUid(long uid);
 
     @UmQuery("SELECT MAX(questionIndex) FROM SocialNominationQuestion")
-    public abstract void getMaxIndexAsync(UmCallback<Integer> result);
+    public abstract void getMaxIndexAsync(UmCallback<Integer> resultObject);
 
     @UmQuery("SELECT * FROM SocialNominationQuestion where " +
             "socialNominationQuestionSocialNominationQuestionSetUid = :questionSetUid")
     public abstract void findAllByQuestionSetUidAsync(long questionSetUid,
-                                          UmCallback<List<SocialNominationQuestion>> result);
+                                          UmCallback<List<SocialNominationQuestion>> resultObject);
 
     @UmQuery("SELECT * FROM SocialNominationQuestion WHERE " +
             " socialNominationQuestionSocialNominationQuestionSetUid = :questionSetUid " +
@@ -50,7 +50,7 @@ public abstract class SocialNominationQuestionDao implements
                                int previousIndex, UmCallback<SocialNominationQuestion> snQuestion);
 
     @UmQuery("SELECT MIN(questionIndex) FROM SocialNominationQuestion")
-    public abstract void getMinIndexAsync(UmCallback<Integer> result);
+    public abstract void getMinIndexAsync(UmCallback<Integer> resultObject);
 
     @UmQuery("SELECT COUNT(*) FROM SocialNominationQuestion")
     public abstract int findTotalNumberOfQuestions();

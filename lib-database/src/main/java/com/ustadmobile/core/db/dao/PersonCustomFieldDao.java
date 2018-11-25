@@ -14,25 +14,25 @@ import java.util.List;
 @UmDao(readPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
 @UmRepository
 public abstract class PersonCustomFieldDao
-        implements SyncableDao<PersonField, PersonCustomFieldValueDao> {
+        implements SyncableDao<PersonField, PersonCustomFieldDao> {
 
     @UmInsert
     public abstract long insert(PersonField entity);
 
     @UmInsert
-    public abstract void insertAsync(PersonField entity, UmCallback<Long> result);
+    public abstract void insertAsync(PersonField entity, UmCallback<Long> resultObject);
 
     @Override
     @UmQuery("SELECT * FROM PersonField WHERE personCustomFieldUid = :uid")
     public abstract PersonField findByUid(long uid);
 
     @UmQuery("SELECT * FROM PersonField WHERE personCustomFieldUid = :uid")
-    public abstract void findByUidAsync(long uid, UmCallback<PersonField> result);
+    public abstract void findByUidAsync(long uid, UmCallback<PersonField> resultObject);
 
     @UmQuery("SELECT MAX(personCustomFieldUid) FROM PersonField")
     public abstract int findLatestUid();
 
     @UmQuery("SELECT * FROM PersonField WHERE personCustomFieldUid > :minCustomFieldUid")
     public abstract void findAllCustomFields(int minCustomFieldUid,
-                                             UmCallback<List<PersonField>> result);
+                                             UmCallback<List<PersonField>> resultObject);
 }

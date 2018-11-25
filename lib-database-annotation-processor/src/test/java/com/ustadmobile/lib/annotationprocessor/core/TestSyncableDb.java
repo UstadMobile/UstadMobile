@@ -3,6 +3,7 @@ package com.ustadmobile.lib.annotationprocessor.core;
 import com.ustadmobile.lib.annotationprocessor.core.db.ExampleDatabase;
 import com.ustadmobile.lib.annotationprocessor.core.db.ExampleSyncableDao;
 import com.ustadmobile.lib.annotationprocessor.core.db.ExampleSyncableEntity;
+import com.ustadmobile.lib.db.sync.entities.SyncStatus;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -67,5 +68,63 @@ public class TestSyncableDb  {
                 syncableEntity1.getTitle());
     }
 
+
+    @Test
+    public void givenSyncableEntityInserted_whenUpdated_syncStatusShouldIncrementByOne() {
+        ExampleDatabase masterDb = ExampleDatabase.getInstance(null);
+        masterDb.setMaster(true);
+        ExampleDatabase clientDb = ExampleDatabase.getInstance(null, "db1");
+        clientDb.setMaster(false);
+        ExampleDatabase clientRepo = clientDb.getRepository("http://localhost/", "");
+        masterDb.clearAll();
+        clientDb.clearAll();
+
+        ExampleSyncableEntity entity1 = new ExampleSyncableEntity();
+        entity1.setTitle("Syncable 1 inserted");
+        clientRepo.getExampleSyncableDao().insert(entity1);
+        long localChangeSeqNumAfterInsert = clientRepo.getExampleSyncableDao().findByUid(
+                entity1.getExampleSyncableUid()).getLocalChangeSeqNum();
+
+        entity1.setTitle("Syncable 1 updated");
+        clientRepo.getExampleSyncableDao().updateEntity(entity1);
+        SyncStatus status = clientDb.getSyncStatusDao().getByUid(ExampleSyncableEntity.TABLE_ID);
+        long localChangeSeqNumAfterUpdate = clientRepo.getExampleSyncableDao().findByUid(
+                entity1.getExampleSyncableUid()).getLocalChangeSeqNum();
+
+
+        Assert.assertEquals("After insert of first entity, entity's local change sequence " +
+                        "number = 1", 1, localChangeSeqNumAfterInsert);
+        Assert.assertEquals("Next local change seq num = 2", 2,
+                status.getLocalChangeSeqNum());
+        Assert.assertEquals("After update of entity, entity's local change sequence number = 2",
+                2, localChangeSeqNumAfterUpdate);
+    }
+
+    @Test
+    public void givenSyncableEntityStatusCreated_whenMasterSeqNumGetAndIncrementCalled_shouldStartAt1AndIncrement() {
+        ExampleDatabase db1 = ExampleDatabase.getInstance(null);
+        db1.clearAll();
+        long firstMasterChangeSeqNum = db1.getSyncStatusDao().getAndIncrementNextMasterChangeSeqNum(
+                42, 1);
+        long masterChangeSeqAfterUpdate = db1.getSyncStatusDao().getAndIncrementNextMasterChangeSeqNum(
+                42, 1);
+
+        Assert.assertEquals(1, firstMasterChangeSeqNum);
+        Assert.assertEquals(2, masterChangeSeqAfterUpdate);
+    }
+
+    @Test
+    public void givenSyncableEntityStatusCreated_whenLocalSeqNumGetAndIncrementCalled_shouldStartAt1AndIncrement() {
+        ExampleDatabase db1 = ExampleDatabase.getInstance(null);
+        db1.clearAll();
+
+        long firstLocalChangeSeqNum = db1.getSyncStatusDao().getAndIncrementNextLocalChangeSeqNum(
+                42, 1);
+        long localChangeSeqAfterUpdate = db1.getSyncStatusDao().getAndIncrementNextLocalChangeSeqNum(
+                42, 1);
+
+        Assert.assertEquals(1, firstLocalChangeSeqNum);
+        Assert.assertEquals(2, localChangeSeqAfterUpdate);
+    }
 
 }

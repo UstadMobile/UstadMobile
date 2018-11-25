@@ -24,13 +24,13 @@ public abstract class ClazzActivityDao implements SyncableDao<ClazzActivity, Cla
     public abstract void update(ClazzActivity entity);
 
     @UmInsert
-    public abstract void insertAsync(ClazzActivity entity, UmCallback<Long> result);
+    public abstract void insertAsync(ClazzActivity entity, UmCallback<Long> resultObject);
 
     @UmQuery("SELECT * FROM ClazzActivity")
     public abstract UmProvider<ClazzActivity> findAllClazzActivityChanges();
 
     @UmUpdate
-    public abstract void updateAsync(ClazzActivity entity, UmCallback<Integer> result);
+    public abstract void updateAsync(ClazzActivity entity, UmCallback<Integer> resultObject);
 
     @UmQuery("SELECT * FROM ClazzActivity where clazzActivityClazzUid = :clazzUid")
     public abstract UmProvider<ClazzActivity> findByClazzUid(long clazzUid);
@@ -39,7 +39,7 @@ public abstract class ClazzActivityDao implements SyncableDao<ClazzActivity, Cla
     public abstract ClazzActivity findByUid(long uid);
 
     @UmQuery("SELECT * FROM ClazzActivity WHERE clazzActivityUid = :uid")
-    public abstract void findByUidAsync(long uid, UmCallback<ClazzActivity> result);
+    public abstract void findByUidAsync(long uid, UmCallback<ClazzActivity> resultObject);
 
     @UmQuery("SELECT * FROM ClazzActivity WHERE clazzActivityClazzUid = :clazzUid AND " +
             " clazzActivityLogDate = :logDate")
@@ -47,7 +47,7 @@ public abstract class ClazzActivityDao implements SyncableDao<ClazzActivity, Cla
 
     @UmQuery("SELECT * FROM ClazzActivity WHERE clazzActivityClazzUid = :clazzUid AND " +
             " clazzActivityLogDate = :logDate")
-    public abstract void findByClazzAndDateAsync(long clazzUid, long logDate, UmCallback<ClazzActivity> result);
+    public abstract void findByClazzAndDateAsync(long clazzUid, long logDate, UmCallback<ClazzActivity> resultObject);
 
 
     @UmQuery("SELECT  " +
@@ -61,7 +61,7 @@ public abstract class ClazzActivityDao implements SyncableDao<ClazzActivity, Cla
             " AND ClazzActivity.clazzActivityLogDate < :toDate " +
             " GROUP BY ClazzActivity.clazzActivityLogDate ")
     public abstract void getDailyAggregateFeedback(long clazzUid, long fromDate, long toDate,
-                                                   UmCallback<List<DailyActivityNumbers>> results);
+                                                   UmCallback<List<DailyActivityNumbers>> resultList);
 
     @UmQuery("SELECT  " +
             " COUNT(CASE WHEN ClazzActivity.clazzActivityGoodFeedback THEN 1 END) as good, " +
@@ -76,7 +76,7 @@ public abstract class ClazzActivityDao implements SyncableDao<ClazzActivity, Cla
             " GROUP BY ClazzActivity.clazzActivityLogDate ")
     public abstract void getDailyAggregateFeedbackByActivityChange(
             long clazzUid, long fromDate, long toDate, long activityChangeUid,
-                                                   UmCallback<List<DailyActivityNumbers>> results);
+                                                   UmCallback<List<DailyActivityNumbers>> resultList);
 
     public void createClazzActivityForDate(long currentClazzUid, long currentLogDate,
                                       UmCallback<Long> callback){
