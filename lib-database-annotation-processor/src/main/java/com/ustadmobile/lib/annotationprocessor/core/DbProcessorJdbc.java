@@ -802,8 +802,10 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                 TypeMirror primaryKeyType = DbProcessorUtils.getArrayOrListComponentType(resultType,
                         processingEnv);
                 String arrayListVarName = isList ? "_result" : "_resultList";
+
                 ParameterizedTypeName listTypeName =ParameterizedTypeName.get(
-                        ClassName.get(ArrayList.class), ClassName.get(primaryKeyType));
+                        ClassName.get(ArrayList.class),
+                        ClassName.get(DbProcessorUtils.boxIfPrimitive(primaryKeyType, processingEnv)));
                 if(isArray)
                     codeBlock.add("$T ", listTypeName);
 
