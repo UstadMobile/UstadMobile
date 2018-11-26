@@ -46,7 +46,7 @@ public class PersonDetailPresenterField {
     public static final int CUSTOM_FIELD_MIN_UID = 1000;
 
     //PK
-    @UmPrimaryKey(autoIncrement = true)
+    @UmPrimaryKey(autoGenerateSyncable = true)
     private long personDetailPresenterFieldUid;
 
     //The field id associated with PersonField. For Core Fields it is as above. For Custom

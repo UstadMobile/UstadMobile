@@ -8,7 +8,7 @@ import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 @UmEntity(tableId = 16)
 public class FeedEntry {
 
-    @UmPrimaryKey(autoIncrement = true)
+    @UmPrimaryKey(autoGenerateSyncable = true)
     private long feedEntryUid;
 
     private long feedEntryPersonUid;

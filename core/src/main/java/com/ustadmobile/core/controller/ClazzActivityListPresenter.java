@@ -4,6 +4,7 @@ import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.db.dao.ClazzActivityChangeDao;
 import com.ustadmobile.core.db.dao.ClazzActivityDao;
+import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMCalendarUtil;
@@ -46,10 +47,9 @@ public class ClazzActivityListPresenter
     private UmProvider<ClazzActivity> providerList;
 
     UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-    private ClazzActivityDao clazzActivityDao =
-            UmAppDatabase.getInstance(context).getClazzActivityDao();
-    private ClazzActivityChangeDao activityChangeDao =
-            UmAppDatabase.getInstance(context).getClazzActivityChangeDao();
+    UmAppDatabase repository = UmAccountManager.getRepositoryForActiveAccount(context);
+    private ClazzActivityDao clazzActivityDao =repository.getClazzActivityDao();
+    private ClazzActivityChangeDao activityChangeDao = repository.getClazzActivityChangeDao();
 
 
     public ClazzActivityListPresenter(Object context, Hashtable arguments, ClazzActivityListView view) {
@@ -110,8 +110,7 @@ public class ClazzActivityListPresenter
         super.onCreate(savedState);
 
         //Populate the provider
-        providerList = UmAppDatabase.getInstance(context).getClazzActivityDao()
-                .findByClazzUid(currentClazzUid);
+        providerList = repository.getClazzActivityDao().findByClazzUid(currentClazzUid);
 
         setProviderOnView();
 

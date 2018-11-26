@@ -13,7 +13,7 @@ import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 @UmEntity(tableId = 22)
 public class SocialNominationQuestion {
 
-    @UmPrimaryKey(autoIncrement = true)
+    @UmPrimaryKey(autoGenerateSyncable = true)
     private long socialNominationQuestionUid;
 
     private String questionText;

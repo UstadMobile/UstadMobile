@@ -4,6 +4,7 @@ import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.db.dao.ClazzLogAttendanceRecordDao;
 import com.ustadmobile.core.db.dao.ClazzMemberDao;
+import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMCalendarUtil;
@@ -36,6 +37,8 @@ public class ClazzLogListPresenter extends UstadBaseController<ClassLogListView>
 
     private UmProvider<ClazzLog> clazzLogListProvider;
 
+    UmAppDatabase repository = UmAccountManager.getRepositoryForActiveAccount(context);
+
     public ClazzLogListPresenter(Object context, Hashtable arguments, ClassLogListView view) {
         super(context, arguments, view);
 
@@ -61,8 +64,7 @@ public class ClazzLogListPresenter extends UstadBaseController<ClassLogListView>
     public void onCreate(Hashtable savedState){
         super.onCreate(savedState);
 
-        clazzLogListProvider = UmAppDatabase.getInstance(context).getClazzLogDao()
-                .findByClazzUidThatAreDone(currentClazzUid);
+        clazzLogListProvider = repository.getClazzLogDao().findByClazzUidThatAreDone(currentClazzUid);
         setProviderToView();
 
         generateAttendanceBarChartDataTest();
@@ -149,8 +151,7 @@ public class ClazzLogListPresenter extends UstadBaseController<ClassLogListView>
         }
 
         //Calculate daily attendance numbers from the database for the line chart.
-        ClazzLogAttendanceRecordDao attendanceRecordDao =
-                UmAppDatabase.getInstance(context).getClazzLogAttendanceRecordDao();
+        ClazzLogAttendanceRecordDao attendanceRecordDao = repository.getClazzLogAttendanceRecordDao();
         attendanceRecordDao.findDailyAttendanceByClazzUidAndDateAsync(currentClazzUid, fromDate, toDate,
                 new UmCallback<List<DailyAttendanceNumbers>>() {
             @Override
@@ -190,7 +191,7 @@ public class ClazzLogListPresenter extends UstadBaseController<ClassLogListView>
         });
 
         //Calculate attendance average numbers for the bar chart.
-        ClazzMemberDao clazzMemberDao = UmAppDatabase.getInstance(context).getClazzMemberDao();
+        ClazzMemberDao clazzMemberDao = repository.getClazzMemberDao();
         clazzMemberDao.getAttendanceAverageAsListForClazzBetweenDates(currentClazzUid, fromDate,
                 toDate, new UmCallback<List<Float>>() {
                     @Override

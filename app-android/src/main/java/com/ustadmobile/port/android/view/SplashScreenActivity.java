@@ -59,6 +59,7 @@ import com.ustadmobile.core.db.dao.SocialNominationQuestionDao;
 import com.ustadmobile.core.db.dao.SocialNominationQuestionSetDao;
 import com.ustadmobile.core.db.dao.UMCalendarDao;
 import com.ustadmobile.core.generated.locale.MessageID;
+import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMCalendarUtil;
@@ -222,12 +223,12 @@ public class SplashScreenActivity extends AppCompatActivity
         if(createStatus != null)
             return;
 
-        ClazzDao clazzDao =
-                UmAppDatabase.getInstance(getApplicationContext()).getClazzDao();
-        ClazzMemberDao clazzMemberDao = UmAppDatabase.getInstance(getApplicationContext())
-                .getClazzMemberDao();
-        PersonDao personDao =
-                UmAppDatabase.getInstance(getApplicationContext()).getPersonDao();
+        UmAppDatabase repository = UmAccountManager.getRepositoryForActiveAccount(
+                getApplicationContext());
+
+        ClazzDao clazzDao = repository.getClazzDao();
+        ClazzMemberDao clazzMemberDao = repository.getClazzMemberDao();
+        PersonDao personDao =repository.getPersonDao();
 
 
 
@@ -525,12 +526,12 @@ public class SplashScreenActivity extends AppCompatActivity
             customFieldValues.add("Rjem Hussein Public school");
 
             //Create Custom Fields:
-            PersonCustomFieldDao personCustomFieldDao =
-                    UmAppDatabase.getInstance(getApplicationContext()).getPersonCustomFieldDao();
+
+            PersonCustomFieldDao personCustomFieldDao = repository.getPersonCustomFieldDao();
             PersonDetailPresenterFieldDao personDetailPresenterFieldDao =
-                    UmAppDatabase.getInstance(getApplicationContext()).getPersonDetailPresenterFieldDao();
+                    repository.getPersonDetailPresenterFieldDao();
             PersonCustomFieldValueDao personCustomFieldValueDao =
-                    UmAppDatabase.getInstance(getApplicationContext()).getPersonCustomFieldValueDao();
+                    repository.getPersonCustomFieldValueDao();
 
             customFieldsCreated = new ArrayList<>();
 
@@ -675,13 +676,12 @@ public class SplashScreenActivity extends AppCompatActivity
 
             //Create SEL questions :
             SocialNominationQuestionSetDao questionSetDao =
-                    UmAppDatabase.getInstance(getApplicationContext()).getSocialNominationQuestionSetDao();
+                    repository.getSocialNominationQuestionSetDao();
             SocialNominationQuestionSet questionSet = new SocialNominationQuestionSet();
             questionSet.setTitle("Default set");
             questionSet.setSocialNominationQuestionSetUid(questionSetDao.insert(questionSet));
 
-            SocialNominationQuestionDao questionDao =
-                    UmAppDatabase.getInstance(getApplicationContext()).getSocialNominationQuestionDao();
+            SocialNominationQuestionDao questionDao = repository.getSocialNominationQuestionDao();
             SocialNominationQuestion question1 = new SocialNominationQuestion();
             question1.setSocialNominationQuestionSocialNominationQuestionSetUid(
                     questionSet.getSocialNominationQuestionSetUid());
@@ -711,8 +711,7 @@ public class SplashScreenActivity extends AppCompatActivity
 
 
             //Create some feeds. The feeds upon interaction will in-turn create ClazzLogs.
-            FeedEntryDao feedEntryDao =
-                    UmAppDatabase.getInstance(getApplicationContext()).getFeedEntryDao();
+            FeedEntryDao feedEntryDao = repository.getFeedEntryDao();
 
             long feedClazzUid = clazz1.getClazzUid();
             long thisPersonUid = 1L;
@@ -756,8 +755,7 @@ public class SplashScreenActivity extends AppCompatActivity
             });
 
             //Add Holiday Calendar
-            UMCalendarDao calendarDao =
-                    UmAppDatabase.getInstance(getApplicationContext()).getUMCalendarDao();
+            UMCalendarDao calendarDao = repository.getUMCalendarDao();
             UMCalendar newCalendar1 = new UMCalendar();
             newCalendar1.setUmCalendarName("IRC Holiday Calendar");
             newCalendar1.setUmCalendarUid(calendarDao.insert(newCalendar1));
@@ -768,8 +766,7 @@ public class SplashScreenActivity extends AppCompatActivity
 
 
             //Adding some Activity Changes
-            ClazzActivityChangeDao clazzActivityChangeDao =
-                    UmAppDatabase.getInstance(getApplicationContext()).getClazzActivityChangeDao();
+            ClazzActivityChangeDao clazzActivityChangeDao = repository.getClazzActivityChangeDao();
             ClazzActivityChange newChange1 = new ClazzActivityChange();
             newChange1.setClazzActivityChangeTitle("Increased group work");
             newChange1.setClazzActivityUnitOfMeasure(ClazzActivityChange.UOM_FREQUENCY);
@@ -786,8 +783,7 @@ public class SplashScreenActivity extends AppCompatActivity
             newChange3.setClazzActivityChangeUid(clazzActivityChangeDao.insert(newChange3));
 
             //Adding some Activities
-            ClazzActivityDao activityDao =
-                    UmAppDatabase.getInstance(getApplicationContext()).getClazzActivityDao();
+            ClazzActivityDao activityDao = repository.getClazzActivityDao();
 
             for(int i = 0; i<34; i++){
                 boolean thisBoolean = false;

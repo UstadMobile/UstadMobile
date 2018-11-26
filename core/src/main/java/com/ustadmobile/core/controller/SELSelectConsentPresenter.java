@@ -6,6 +6,7 @@ import java.util.List;
 import com.ustadmobile.core.db.dao.SocialNominationQuestionDao;
 import com.ustadmobile.core.db.dao.SocialNominationQuestionSetDao;
 import com.ustadmobile.core.db.dao.SocialNominationQuestionSetResponseDao;
+import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.view.SELQuestionView;
 import com.ustadmobile.core.view.SELRecognitionView;
@@ -46,6 +47,8 @@ public class SELSelectConsentPresenter
     private int MIN_RECOGNITION_SUCCESSES = 0;
     private String doneClazzMemberUids = "";
 
+    UmAppDatabase repository = UmAccountManager.getRepositoryForActiveAccount(context);
+
     public SELSelectConsentPresenter(Object context, Hashtable arguments, SELSelectConsentView view) {
         super(context, arguments, view);
 
@@ -80,7 +83,7 @@ public class SELSelectConsentPresenter
      */
     public void handleClickPrimaryActionButton(boolean consentGiven) {
         SocialNominationQuestionSetResponseDao socialNominationQuestionSetResponseDao =
-                UmAppDatabase.getInstance(context).getSocialNominationQuestionSetResponseDao();
+                repository.getSocialNominationQuestionSetResponseDao();
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
 
         //Check selectedObject for consent given.
@@ -143,10 +146,10 @@ public class SELSelectConsentPresenter
 
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         SocialNominationQuestionSetResponseDao socialNominationQuestionSetResponseDao =
-                UmAppDatabase.getInstance(context).getSocialNominationQuestionSetResponseDao();
-        SocialNominationQuestionSetDao questionSetDao = UmAppDatabase.getInstance(context)
+                repository.getSocialNominationQuestionSetResponseDao();
+        SocialNominationQuestionSetDao questionSetDao = repository
                 .getSocialNominationQuestionSetDao();
-        SocialNominationQuestionDao questionDao = UmAppDatabase.getInstance(context)
+        SocialNominationQuestionDao questionDao = repository
                 .getSocialNominationQuestionDao();
 
         //Loop through questions.

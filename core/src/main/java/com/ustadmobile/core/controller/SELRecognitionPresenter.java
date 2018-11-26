@@ -6,6 +6,7 @@ import java.util.List;
 import com.ustadmobile.core.db.dao.SocialNominationQuestionDao;
 import com.ustadmobile.core.db.dao.SocialNominationQuestionSetDao;
 import com.ustadmobile.core.db.dao.SocialNominationQuestionSetResponseDao;
+import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.view.SELQuestionView;
 import com.ustadmobile.core.view.SELRecognitionView;
@@ -49,6 +50,8 @@ public class SELRecognitionPresenter
     //Provider 
     private UmProvider<Person> providerList;
 
+    UmAppDatabase repository = UmAccountManager.getRepositoryForActiveAccount(context);
+
     public SELRecognitionPresenter(Object context, Hashtable arguments, SELRecognitionView view) {
         super(context, arguments, view);
 
@@ -88,7 +91,7 @@ public class SELRecognitionPresenter
         super.onCreate(savedState);
 
         //Populate the provider
-        providerList = UmAppDatabase.getInstance(context).getClazzMemberDao()
+        providerList = repository.getClazzMemberDao()
                 .findAllPeopleInClassUid(currentClazzUid);
         setListProviderToView();
 
@@ -111,10 +114,10 @@ public class SELRecognitionPresenter
 
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         SocialNominationQuestionSetResponseDao socialNominationQuestionSetResponseDao =
-                UmAppDatabase.getInstance(context).getSocialNominationQuestionSetResponseDao();
-        SocialNominationQuestionSetDao questionSetDao = UmAppDatabase.getInstance(context)
+                repository.getSocialNominationQuestionSetResponseDao();
+        SocialNominationQuestionSetDao questionSetDao = repository
                 .getSocialNominationQuestionSetDao();
-        SocialNominationQuestionDao questionDao = UmAppDatabase.getInstance(context)
+        SocialNominationQuestionDao questionDao = repository
                 .getSocialNominationQuestionDao();
 
         //Loop through questions.
@@ -201,7 +204,7 @@ public class SELRecognitionPresenter
      */
     public void handleClickPrimaryActionButton(boolean recognitionDone) {
         SocialNominationQuestionSetResponseDao questionResponseNominationDao =
-                UmAppDatabase.getInstance(context).getSocialNominationQuestionSetResponseDao();
+                repository.getSocialNominationQuestionSetResponseDao();
 
         if(recognitionDone){
 

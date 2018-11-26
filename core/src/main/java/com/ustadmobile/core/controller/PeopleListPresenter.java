@@ -6,6 +6,7 @@ import java.util.List;
 import com.ustadmobile.core.db.dao.PersonCustomFieldDao;
 import com.ustadmobile.core.db.dao.PersonCustomFieldValueDao;
 import com.ustadmobile.core.db.dao.PersonDao;
+import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.view.PeopleListView;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
@@ -35,6 +36,9 @@ public class PeopleListPresenter
     //Provider 
     private UmProvider<PersonWithEnrollment> personWithEnrollmentUmProvider;
 
+
+    UmAppDatabase repository = UmAccountManager.getRepositoryForActiveAccount(context);
+
     public PeopleListPresenter(Object context, Hashtable arguments, PeopleListView view) {
         super(context, arguments, view);
 
@@ -50,7 +54,7 @@ public class PeopleListPresenter
     public void onCreate(Hashtable savedState) {
         super.onCreate(savedState);
 
-        personWithEnrollmentUmProvider = UmAppDatabase.getInstance(context).getPersonDao()
+        personWithEnrollmentUmProvider = repository.getPersonDao()
                 .findAllPeopleWithEnrollment();
         setPeopleProviderToView();
 
@@ -73,11 +77,11 @@ public class PeopleListPresenter
         //Goes to PersonEditActivity with currentClazzUid passed as argument
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         Person newPerson = new Person();
-        PersonDao personDao = UmAppDatabase.getInstance(context).getPersonDao();
+        PersonDao personDao = repository.getPersonDao();
         PersonCustomFieldDao personFieldDao =
-                UmAppDatabase.getInstance(context).getPersonCustomFieldDao();
+                repository.getPersonCustomFieldDao();
         PersonCustomFieldValueDao customFieldValueDao =
-                UmAppDatabase.getInstance(context).getPersonCustomFieldValueDao();
+                repository.getPersonCustomFieldValueDao();
 
         personDao.insertAsync(newPerson, new UmCallback<Long>() {
 

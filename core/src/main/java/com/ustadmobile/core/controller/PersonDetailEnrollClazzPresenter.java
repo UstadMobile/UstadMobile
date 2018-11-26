@@ -3,6 +3,7 @@ package com.ustadmobile.core.controller;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.db.dao.ClazzDao;
+import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.view.PersonDetailEnrollClazzView;
 import com.ustadmobile.lib.db.entities.ClazzWithEnrollment;
 
@@ -20,6 +21,8 @@ public class PersonDetailEnrollClazzPresenter extends UstadBaseController<Person
 
     private UmProvider<ClazzWithEnrollment> clazzWithEnrollmentUmProvider;
 
+    UmAppDatabase repository = UmAccountManager.getRepositoryForActiveAccount(context);
+
     public PersonDetailEnrollClazzPresenter(Object context,
                                             Hashtable arguments, PersonDetailEnrollClazzView view) {
         super(context, arguments, view);
@@ -35,7 +38,7 @@ public class PersonDetailEnrollClazzPresenter extends UstadBaseController<Person
         super.onCreate(savedState);
 
         //Populate classes
-        ClazzDao clazzDao = UmAppDatabase.getInstance(context).getClazzDao();
+        ClazzDao clazzDao = repository.getClazzDao();
         clazzWithEnrollmentUmProvider =
                 clazzDao.findAllClazzesWithEnrollmentByPersonUid(currentPersonUid);
 

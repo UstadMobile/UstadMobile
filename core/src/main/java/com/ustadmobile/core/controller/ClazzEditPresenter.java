@@ -5,6 +5,7 @@ import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.db.dao.ClazzDao;
 import com.ustadmobile.core.db.dao.ScheduleDao;
+import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.AddScheduleDialogView;
@@ -37,7 +38,8 @@ public class ClazzEditPresenter
     private UmProvider<Schedule> clazzScheduleLiveData;
     private UmLiveData<List<UMCalendar>> holidaysLiveData;
 
-    private ClazzDao clazzDao = UmAppDatabase.getInstance(context).getClazzDao();
+    UmAppDatabase repository = UmAccountManager.getRepositoryForActiveAccount(context);
+    private ClazzDao clazzDao = repository.getClazzDao();
 
     public ClazzEditPresenter(Object context, Hashtable arguments, ClazzEditView view) {
         super(context, arguments, view);
@@ -74,7 +76,7 @@ public class ClazzEditPresenter
             public void onSuccess(Clazz result) {
                 mUpdatedClazz = result;
                 view.updateClazzEditView(result);
-                holidaysLiveData = UmAppDatabase.getInstance(context).getUMCalendarDao()
+                holidaysLiveData = repository.getUMCalendarDao()
                         .findAllUMCalendarsAsLiveDataList();
                 holidaysLiveData.observe(ClazzEditPresenter.this,
                         ClazzEditPresenter.this::handleAllHolidaysChanged);
@@ -87,7 +89,7 @@ public class ClazzEditPresenter
         });
 
         //Set Schedule live data:
-        clazzScheduleLiveData = UmAppDatabase.getInstance(context).getScheduleDao()
+        clazzScheduleLiveData = repository.getScheduleDao()
                 .findAllSchedulesByClazzUid(currentClazzUid);
         updateViewWithProvider();
 
@@ -244,7 +246,7 @@ public class ClazzEditPresenter
     @Override
     public void handleSecondaryPressed(Object arg) {
         //To delete schedule assigned to clazz
-        ScheduleDao scheduleDao = UmAppDatabase.getInstance(context).getScheduleDao();
+        ScheduleDao scheduleDao = repository.getScheduleDao();
         scheduleDao.disableSchedule((Long) arg);
 
     }

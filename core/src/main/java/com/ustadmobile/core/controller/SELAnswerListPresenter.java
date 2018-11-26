@@ -2,6 +2,7 @@ package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmProvider;
+import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.SELAnswerListView;
 import com.ustadmobile.core.view.SELSelectStudentView;
@@ -47,7 +48,9 @@ public class SELAnswerListPresenter extends
     public void onCreate(Hashtable savedState){
         super.onCreate(savedState);
 
-        selAnswersProvider = UmAppDatabase.getInstance(context).getSocialNominationQuestionSetResponseDao()
+        UmAppDatabase repository = UmAccountManager.getRepositoryForActiveAccount(context);
+
+        selAnswersProvider = repository.getSocialNominationQuestionSetResponseDao()
                 .findAllDoneSN();
         setSELAnswerProviderToView();
 

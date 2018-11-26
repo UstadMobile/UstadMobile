@@ -8,6 +8,7 @@ import com.ustadmobile.core.db.dao.ClazzLogDao;
 import com.ustadmobile.core.db.dao.ClazzMemberDao;
 import com.ustadmobile.core.db.dao.FeedEntryDao;
 import com.ustadmobile.core.generated.locale.MessageID;
+import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UmCallbackUtil;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
@@ -42,6 +43,9 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
     private long currentLogDate = -1L;
 
     private UmProvider<ClazzLogAttendanceRecordWithPerson> clazzLogAttendanceRecordUmProvider;
+
+
+    UmAppDatabase repository = UmAccountManager.getRepositoryForActiveAccount(context);
 
     private ClazzLog currentClazzLog;
     public Clazz currentClazz;
@@ -98,8 +102,8 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
      */
     private void setUpLogDetail(){
         //Check for ClassLog
-        ClazzLogDao clazzLogDao = UmAppDatabase.getInstance(getContext()).getClazzLogDao();
-        ClazzDao clazzDao = UmAppDatabase.getInstance(getContext()).getClazzDao();
+        ClazzLogDao clazzLogDao = repository.getClazzLogDao();
+        ClazzDao clazzDao = repository.getClazzDao();
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
 
         clazzLogDao.findByClazzIdAndDateAsync(currentClazzUid, currentLogDate,
@@ -162,14 +166,14 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
     private void insertAllAndSetProvider(ClazzLog result){
 
         ClazzLogAttendanceRecordDao clazzLogAttendanceRecordDao =
-                UmAppDatabase.getInstance(getContext()).getClazzLogAttendanceRecordDao();
+                repository.getClazzLogAttendanceRecordDao();
 
         clazzLogAttendanceRecordDao.insertAllAttendanceRecords(currentClazzUid,
                 result.getClazzLogUid(), new UmCallback<Long[]>() {
                     @Override
                     public void onSuccess(Long[] result2) {
                         //Get provider
-                        clazzLogAttendanceRecordUmProvider = UmAppDatabase.getInstance(context)
+                        clazzLogAttendanceRecordUmProvider = repository
                                 .getClazzLogAttendanceRecordDao()
                                 .findAttendanceRecordsWithPersonByClassLogId(result.getClazzLogUid());
                         //Set to view
@@ -233,11 +237,11 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
      */
     public void handleClickDone(){
         //1. Update Done status on ClazzLog for this clazzLogUid
-        ClazzLogDao clazzLogDao = UmAppDatabase.getInstance(getContext()).getClazzLogDao();
-        ClazzDao clazzDao = UmAppDatabase.getInstance(getContext()).getClazzDao();
-        ClazzMemberDao clazzMemberDao = UmAppDatabase.getInstance(getContext()).getClazzMemberDao();
+        ClazzLogDao clazzLogDao = repository.getClazzLogDao();
+        ClazzDao clazzDao = repository.getClazzDao();
+        ClazzMemberDao clazzMemberDao = repository.getClazzMemberDao();
         ClazzLogAttendanceRecordDao clazzLogAttendanceRecordDao =
-                UmAppDatabase.getInstance(getContext()).getClazzLogAttendanceRecordDao();
+                repository.getClazzLogAttendanceRecordDao();
         currentClazzLog.setDone(true);
         clazzLogDao.updateDoneForClazzLogAsync(currentClazzLog.getClazzLogUid(),
                 new UmCallback<Integer>() {
@@ -260,7 +264,7 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
 
                 //4. Set any parent feed to done.
                 FeedEntryDao feedEntryDao =
-                        UmAppDatabase.getInstance(getContext()).getFeedEntryDao();
+                        repository.getFeedEntryDao();
                 String possibleFeedLink = ClassLogDetailView.VIEW_NAME + "?" +
                         ClazzListView.ARG_CLAZZ_UID + "=" + currentClazzUid +
                         "&" + ClazzListView.ARG_LOGDATE + "=" + currentLogDate;
@@ -300,7 +304,7 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
      *                         are in this ClazzLog
      */
     public void handleMarkAll(int attendanceStatus){
-        UmAppDatabase.getInstance(context).getClazzLogAttendanceRecordDao()
+        repository.getClazzLogAttendanceRecordDao()
                 .updateAllByClazzLogUid(currentClazzLog.getClazzLogUid(),
                         attendanceStatus, null);
     }
@@ -315,7 +319,7 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
      *                              ClazzLogAttendanceRecord
      */
     public void handleMarkStudent(long clazzLogAttendanceRecordUid, int attendanceStatus) {
-        UmAppDatabase.getInstance(context).getClazzLogAttendanceRecordDao()
+        repository  .getClazzLogAttendanceRecordDao()
                 .updateAttendanceStatus(clazzLogAttendanceRecordUid,
                         attendanceStatus, null);
     }

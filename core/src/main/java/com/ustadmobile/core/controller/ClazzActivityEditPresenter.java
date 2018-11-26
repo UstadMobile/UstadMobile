@@ -5,6 +5,7 @@ import com.ustadmobile.core.db.dao.ClazzActivityChangeDao;
 import com.ustadmobile.core.db.dao.ClazzActivityDao;
 import com.ustadmobile.core.db.dao.ClazzDao;
 import com.ustadmobile.core.generated.locale.MessageID;
+import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.ClazzActivityEditView;
@@ -44,10 +45,10 @@ public class ClazzActivityEditPresenter
     private HashMap<Long, Long> unitToUidMap;
 
     //Daos needed - ClazzActivtyDao and ClazzActivityChangeDao
-    private ClazzActivityDao clazzActivityDao =
-            UmAppDatabase.getInstance(context).getClazzActivityDao();
-    private ClazzActivityChangeDao activityChangeDao =
-            UmAppDatabase.getInstance(context).getClazzActivityChangeDao();
+    UmAppDatabase repository = UmAccountManager.getRepositoryForActiveAccount(context);
+
+    private ClazzActivityDao clazzActivityDao  = repository.getClazzActivityDao();
+    private ClazzActivityChangeDao activityChangeDao = repository.getClazzActivityChangeDao();
 
     /**
      * Constructor that gets Clazz Uid, Log Date and Activity Uid (to be edited)\
@@ -131,7 +132,7 @@ public class ClazzActivityEditPresenter
     private void checkActivityCreateIfNotExist(ClazzActivity result){
 
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        ClazzDao clazzDao = UmAppDatabase.getInstance(getContext()).getClazzDao();
+        ClazzDao clazzDao = repository.getClazzDao();
         //Update any toolbar title
         Clazz currentClazz = clazzDao.findByUid(currentClazzUid);
 
@@ -182,7 +183,7 @@ public class ClazzActivityEditPresenter
 
         //TODOing: Update Unit of measurement as well
         ClazzActivityChangeDao clazzActivityChangeDao =
-                UmAppDatabase.getInstance(context).getClazzActivityChangeDao();
+                repository.getClazzActivityChangeDao();
         clazzActivityChangeDao.findByUidAsync(newChangeUid, new UmCallback<ClazzActivityChange>() {
             @Override
             public void onSuccess(ClazzActivityChange result) {

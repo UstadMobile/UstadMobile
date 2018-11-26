@@ -16,7 +16,7 @@ import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 public class PersonCustomFieldValue {
 
     //PK
-    @UmPrimaryKey(autoIncrement = true)
+    @UmPrimaryKey(autoGenerateSyncable = true)
     private long personCustomFieldValueUid;
 
     //The Custom field's uid

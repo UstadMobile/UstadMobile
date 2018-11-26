@@ -3,6 +3,7 @@ package com.ustadmobile.core.controller;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.generated.locale.MessageID;
+import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.ClazzDetailEnrollStudentView;
 import com.ustadmobile.core.view.ClazzStudentListView;
@@ -37,6 +38,8 @@ public class ClazzStudentListPresenter extends
     private Hashtable<Long, Integer> idToOrderInteger;
 
 
+    UmAppDatabase repository = UmAccountManager.getRepositoryForActiveAccount(context);
+
     public ClazzStudentListPresenter(Object context,
                                      Hashtable arguments,
                                      ClazzStudentListView view) {
@@ -63,7 +66,7 @@ public class ClazzStudentListPresenter extends
         super.onCreate(savedState);
 
         //Find the Provider
-        clazzPersonListProvider = UmAppDatabase.getInstance(context).getClazzMemberDao()
+        clazzPersonListProvider = repository.getClazzMemberDao()
                 .findAllPersonWithEnrollmentInClazzByClazzUid(currentClazzId);
         setProviderToView();
 
@@ -181,27 +184,27 @@ public class ClazzStudentListPresenter extends
         switch (order){
             case SORT_ORDER_NAME_ASC:
                 clazzPersonListProvider =
-                        UmAppDatabase.getInstance(context).getClazzMemberDao()
+                        repository.getClazzMemberDao()
                         .findAllPersonWithEnrollmentInClazzByClazzUidSortByNameAsc(currentClazzId);
                 break;
             case SORT_ORDER_NAME_DESC:
                 clazzPersonListProvider =
-                        UmAppDatabase.getInstance(context).getClazzMemberDao()
+                        repository.getClazzMemberDao()
                         .findAllPersonWithEnrollmentInClazzByClazzUidSortByNameDesc(currentClazzId);
                 break;
             case SORT_ORDER_ATTENDANCE_ASC:
                 clazzPersonListProvider =
-                        UmAppDatabase.getInstance(context).getClazzMemberDao()
+                        repository.getClazzMemberDao()
                         .findAllPersonWithEnrollmentInClazzByClazzUidSortByAttendanceAsc(currentClazzId);
                 break;
             case SORT_ORDER_ATTENDANCE_DESC:
                 clazzPersonListProvider =
-                        UmAppDatabase.getInstance(context).getClazzMemberDao()
+                        repository.getClazzMemberDao()
                         .findAllPersonWithEnrollmentInClazzByClazzUidSortByAttendanceDesc(currentClazzId);
                 break;
             default:
                 clazzPersonListProvider =
-                        UmAppDatabase.getInstance(context).getClazzMemberDao()
+                        repository.getClazzMemberDao()
                         .findAllPersonWithEnrollmentInClazzByClazzUidSortByNameAsc(currentClazzId);
                 break;
         }

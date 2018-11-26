@@ -38,7 +38,7 @@ public class Schedule {
     public static final int MONTH_DECEMBER = 12;
 
 
-    @UmPrimaryKey(autoIncrement = true)
+    @UmPrimaryKey(autoGenerateSyncable = true)
     private long scheduleUid;
 
     //Start time

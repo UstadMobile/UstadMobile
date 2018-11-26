@@ -7,6 +7,7 @@ import com.ustadmobile.core.db.dao.SocialNominationQuestionDao;
 import com.ustadmobile.core.db.dao.SocialNominationQuestionResponseDao;
 import com.ustadmobile.core.db.dao.SocialNominationQuestionResponseNominationDao;
 import com.ustadmobile.core.db.dao.SocialNominationQuestionSetResponseDao;
+import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.view.SELEditView;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
@@ -54,6 +55,8 @@ public class SELEditPresenter
     private long currentQuestionSetResponseUid = -1;
     private long currentQuestionResponseUid = -1;
     private String doneClazzMemberUids = "";
+
+    UmAppDatabase repository = UmAccountManager.getRepositoryForActiveAccount(context);
 
     //Provider 
     private UmProvider<Person> providerList;
@@ -129,7 +132,7 @@ public class SELEditPresenter
         super.onCreate(savedState);
 
         //Populate the provider
-        providerList = UmAppDatabase.getInstance(context).getClazzMemberDao()
+        providerList = repository.getClazzMemberDao()
                 .findAllPeopleInClassUid(currentClazzUid);
 
         //set Provider.
@@ -153,11 +156,11 @@ public class SELEditPresenter
     public void handleClickPrimaryActionButton() {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         SocialNominationQuestionDao  questionDao =
-                UmAppDatabase.getInstance(context).getSocialNominationQuestionDao();
+                repository.getSocialNominationQuestionDao();
         SocialNominationQuestionSetResponseDao questionSetResponseDao =
-                UmAppDatabase.getInstance(context).getSocialNominationQuestionSetResponseDao();
+                repository.getSocialNominationQuestionSetResponseDao();
         SocialNominationQuestionResponseDao questionResponseDao =
-                UmAppDatabase.getInstance(context).getSocialNominationQuestionResponseDao();
+                repository.getSocialNominationQuestionResponseDao();
 
 
         //TODO:Check: Go to Next SEL question part of this set. Or End. (ie: get back to SELAnswerFragment
@@ -277,9 +280,9 @@ public class SELEditPresenter
     @Override
     public void handleCommonPressed(Object arg) {
         //Record nomination and highlight selected.
-        ClazzMemberDao clazzMemberDao = UmAppDatabase.getInstance(context).getClazzMemberDao();
+        ClazzMemberDao clazzMemberDao = repository.getClazzMemberDao();
         SocialNominationQuestionResponseNominationDao questionResponseNominationDao =
-                UmAppDatabase.getInstance(context).getSocialNominationQuestionResponseNominationDao();
+                repository.getSocialNominationQuestionResponseNominationDao();
 
         clazzMemberDao.findByPersonUidAndClazzUidAsync((Long) arg, currentClazzUid,
                 new UmCallback<ClazzMember>() {

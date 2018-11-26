@@ -6,6 +6,7 @@ import com.ustadmobile.core.db.dao.ClazzMemberDao;
 import com.ustadmobile.core.db.dao.PersonCustomFieldDao;
 import com.ustadmobile.core.db.dao.PersonCustomFieldValueDao;
 import com.ustadmobile.core.db.dao.PersonDao;
+import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.ClazzDetailEnrollStudentView;
@@ -41,7 +42,8 @@ public class ClazzDetailEnrollStudentPresenter extends
     private int currentRole = -1;
     private UmProvider<PersonWithEnrollment> personWithEnrollmentUmProvider;
 
-    private ClazzMemberDao clazzMemberDao = UmAppDatabase.getInstance(context).getClazzMemberDao();
+    UmAppDatabase repository = UmAccountManager.getRepositoryForActiveAccount(context);
+    private ClazzMemberDao clazzMemberDao = repository.getClazzMemberDao();
 
     public ClazzDetailEnrollStudentPresenter(Object context, Hashtable arguments,
                                              ClazzDetailEnrollStudentView view) {
@@ -70,10 +72,10 @@ public class ClazzDetailEnrollStudentPresenter extends
         super.onCreate(savedState);
 
         if(currentRole == ClazzMember.ROLE_TEACHER){
-            personWithEnrollmentUmProvider = UmAppDatabase.getInstance(context).getClazzMemberDao()
+            personWithEnrollmentUmProvider = repository.getClazzMemberDao()
                     .findAllEligibleTeachersWithEnrollmentForClassUid(currentClazzUid);
         }else{
-            personWithEnrollmentUmProvider = UmAppDatabase.getInstance(context).getClazzMemberDao()
+            personWithEnrollmentUmProvider = repository.getClazzMemberDao()
                     .findAllPeopleWithEnrollmentForClassUid(currentClazzUid);
         }
 
@@ -99,11 +101,11 @@ public class ClazzDetailEnrollStudentPresenter extends
         //Goes to PersonEditActivity with currentClazzUid passed as argument
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         Person newPerson = new Person();
-        PersonDao personDao = UmAppDatabase.getInstance(context).getPersonDao();
+        PersonDao personDao = repository.getPersonDao();
         PersonCustomFieldDao personFieldDao =
-                UmAppDatabase.getInstance(context).getPersonCustomFieldDao();
+                repository.getPersonCustomFieldDao();
         PersonCustomFieldValueDao customFieldValueDao =
-                UmAppDatabase.getInstance(context).getPersonCustomFieldValueDao();
+                repository.getPersonCustomFieldValueDao();
 
         personDao.insertAsync(newPerson, new UmCallback<Long>() {
 

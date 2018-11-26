@@ -12,7 +12,8 @@ import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 @UmEntity(tableId = 28)
 public class UMCalendar implements SyncableEntity{
 
-    @UmPrimaryKey(autoIncrement = true)
+
+    @UmPrimaryKey(autoGenerateSyncable = true)
     private long umCalendarUid;
 
     //The name of this calendar

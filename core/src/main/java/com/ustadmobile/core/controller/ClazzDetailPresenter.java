@@ -2,6 +2,7 @@ package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.ClazzDao;
+import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.ClassDetailView;
@@ -23,7 +24,8 @@ public class ClazzDetailPresenter
 
     //Any arguments stored as variables here
     private long currentClazzUid = -1;
-    private ClazzDao clazzDao = UmAppDatabase.getInstance(context).getClazzDao();
+    UmAppDatabase repository = UmAccountManager.getRepositoryForActiveAccount(context);
+    private ClazzDao clazzDao = repository.getClazzDao();
 
 
     public ClazzDetailPresenter(Object context, Hashtable arguments, ClassDetailView view) {

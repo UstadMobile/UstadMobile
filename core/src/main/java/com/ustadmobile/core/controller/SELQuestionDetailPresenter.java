@@ -3,6 +3,7 @@ package com.ustadmobile.core.controller;
 import java.util.Hashtable;
 
 import com.ustadmobile.core.db.UmAppDatabase;
+import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 
 import com.ustadmobile.core.db.UmProvider;
@@ -36,8 +37,10 @@ public class SELQuestionDetailPresenter
     public void onCreate(Hashtable savedState) {
         super.onCreate(savedState);
 
+        UmAppDatabase repository = UmAccountManager.getRepositoryForActiveAccount(context);
+
         //Populate the provider
-        providerList = UmAppDatabase.getInstance(context).getSocialNominationQuestionDao()
+        providerList = repository.getSocialNominationQuestionDao()
                 .findAllQuestions();
         setQuestionListProviderToView();
 

@@ -3,6 +3,7 @@ package com.ustadmobile.core.controller;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.db.dao.ClazzMemberDao;
+import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.SELSelectConsentView;
@@ -31,6 +32,8 @@ public class SELSelectStudentPresenter extends CommonHandlerPresenter<SELSelectS
     private long currentClazzUid = -1;
 
     private String doneClazzMemberUids = "";
+
+    UmAppDatabase repository = UmAccountManager.getRepositoryForActiveAccount(context);
 
     public SELSelectStudentPresenter(Object context, Hashtable arguments,
                                      SELSelectStudentView view) {
@@ -65,10 +68,10 @@ public class SELSelectStudentPresenter extends CommonHandlerPresenter<SELSelectS
             }
         }
 
-        UmProvider<Person> selStudentsProvider = UmAppDatabase.getInstance(context).getClazzMemberDao()
+        UmProvider<Person> selStudentsProvider = repository.getClazzMemberDao()
                 .findAllPeopleInClassUidExcept(currentClazzUid, donClazzMemberUidsList);
 
-        //UmProvider<Person> selStudentsProvider = UmAppDatabase.getInstance(context).getClazzMemberDao()
+        //UmProvider<Person> selStudentsProvider = repository.getClazzMemberDao()
         //        .findAllPeopleInClassUid(currentClazzUid);
 
         view.setSELAnswerListProvider(selStudentsProvider);
@@ -83,7 +86,7 @@ public class SELSelectStudentPresenter extends CommonHandlerPresenter<SELSelectS
     @Override
     public void handleCommonPressed(Object arg) {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        ClazzMemberDao clazzMemberDao = UmAppDatabase.getInstance(context).getClazzMemberDao();
+        ClazzMemberDao clazzMemberDao = repository.getClazzMemberDao();
         Long currentPersonUid = (Long) arg;
         Hashtable<String, Object> args = new Hashtable<>();
         args.put(ARG_CLAZZ_UID, currentClazzUid);

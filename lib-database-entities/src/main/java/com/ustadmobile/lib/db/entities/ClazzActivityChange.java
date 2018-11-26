@@ -12,7 +12,7 @@ public class ClazzActivityChange{
     public static final int UOM_DURATION = 2;
     public static final int UOM_BINARY = 3;
 
-    @UmPrimaryKey(autoIncrement = true)
+    @UmPrimaryKey(autoGenerateSyncable = true)
     private long clazzActivityChangeUid;
 
     private String clazzActivityChangeTitle;

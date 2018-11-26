@@ -14,7 +14,7 @@ public class ClazzLogAttendanceRecord {
     public static final int STATUS_ABSENT = 2;
     public static final int STATUS_PARTIAL = 4;
 
-    @UmPrimaryKey(autoIncrement = true)
+    @UmPrimaryKey(autoGenerateSyncable = true)
     private long clazzLogAttendanceRecordUid;
 
     private long clazzLogAttendanceRecordClazzLogUid;

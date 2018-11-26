@@ -11,7 +11,7 @@ import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 @UmEntity(tableId = 23)
 public class SocialNominationQuestionResponse {
 
-    @UmPrimaryKey(autoIncrement = true)
+    @UmPrimaryKey(autoGenerateSyncable = true)
     private long socialNominationQuestionResponseUid;
 
     // -> SocialNominationQuestionSetResponse

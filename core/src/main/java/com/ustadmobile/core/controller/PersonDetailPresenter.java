@@ -8,6 +8,7 @@ import com.ustadmobile.core.db.dao.ClazzMemberDao;
 import com.ustadmobile.core.db.dao.PersonCustomFieldValueDao;
 import com.ustadmobile.core.db.dao.PersonDao;
 import com.ustadmobile.core.db.dao.PersonDetailPresenterFieldDao;
+import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMCalendarUtil;
@@ -66,6 +67,8 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
 
     private UmProvider<ClazzWithNumStudents> assignedClazzes;
 
+    UmAppDatabase repository = UmAccountManager.getRepositoryForActiveAccount(context);
+
     /**
      * Presenter's constructor where we are getting arguments and setting the personUid
      *
@@ -88,13 +91,13 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
     public void onCreate(Hashtable savedState) {
         super.onCreate(savedState);
 
-        PersonDao personDao = UmAppDatabase.getInstance(context).getPersonDao();
+        PersonDao personDao = repository.getPersonDao();
         PersonCustomFieldValueDao personCustomFieldValueDao =
-                UmAppDatabase.getInstance(context).getPersonCustomFieldValueDao();
+                repository.getPersonCustomFieldValueDao();
         PersonDetailPresenterFieldDao personDetailPresenterFieldDao =
-                UmAppDatabase.getInstance(context).getPersonDetailPresenterFieldDao();
+                repository.getPersonDetailPresenterFieldDao();
         ClazzMemberDao clazzMemberDao =
-                UmAppDatabase.getInstance(context).getClazzMemberDao();
+                repository.getClazzMemberDao();
 
         personDao.findByUidAsync(personUid, new UmCallback<Person>() {
             @Override
@@ -176,7 +179,7 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
      * Generates the all class list with assignation for the person being displayed.
      */
     public void generateAssignedClazzesLiveData(){
-        ClazzDao clazzDao = UmAppDatabase.getInstance(context).getClazzDao();
+        ClazzDao clazzDao = repository.getClazzDao();
 
         assignedClazzes = clazzDao.findAllClazzesByPersonUid(personUid);
 

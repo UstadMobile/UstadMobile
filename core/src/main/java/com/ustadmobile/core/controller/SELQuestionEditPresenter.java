@@ -2,6 +2,7 @@ package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.SocialNominationQuestionDao;
+import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.view.SELQuestionEditView;
 import com.ustadmobile.lib.db.entities.SocialNominationQuestion;
@@ -25,8 +26,9 @@ public class SELQuestionEditPresenter
     public SELQuestionEditPresenter(Object context, Hashtable arguments, SELQuestionEditView view) {
         super(context, arguments, view);
 
+        UmAppDatabase repository = UmAccountManager.getRepositoryForActiveAccount(context);
         socialNominationQuestionDao =
-                UmAppDatabase.getInstance(context).getSocialNominationQuestionDao();
+                repository.getSocialNominationQuestionDao();
 
     }
 

@@ -18,7 +18,7 @@ import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 @UmEntity(tableId = 26)
 public class SocialNominationQuestionSetRecognition {
 
-    @UmPrimaryKey(autoIncrement = true)
+    @UmPrimaryKey(autoGenerateSyncable = true)
     private long socialNominationQuestionSetRecognitionUid;
 
     // -> SocialNominationQuestionSetResponse - The question set response (which has recognition percentages)

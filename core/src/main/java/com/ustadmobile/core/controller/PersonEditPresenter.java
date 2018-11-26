@@ -8,6 +8,7 @@ import com.ustadmobile.core.db.dao.PersonCustomFieldValueDao;
 import com.ustadmobile.core.db.dao.PersonDao;
 import com.ustadmobile.core.db.dao.PersonDetailPresenterFieldDao;
 import com.ustadmobile.core.generated.locale.MessageID;
+import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMCalendarUtil;
@@ -71,14 +72,16 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
     //The custom fields' values
     private Map<Long, PersonCustomFieldWithPersonCustomFieldValue> customFieldWithFieldValueMap;
 
-    private PersonDao personDao = UmAppDatabase.getInstance(context).getPersonDao();
+    UmAppDatabase repository = UmAccountManager.getRepositoryForActiveAccount(context);
+
+    private PersonDao personDao = repository.getPersonDao();
 
     private String newPersonString = "";
 
     private List<PersonCustomFieldValue> customFieldsToUpdate;
 
     private PersonCustomFieldValueDao personCustomFieldValueDao =
-            UmAppDatabase.getInstance(context).getPersonCustomFieldValueDao();
+            repository.getPersonCustomFieldValueDao();
 
     private int currentRole = -1;
 
@@ -124,9 +127,9 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
         super.onCreate(savedState);
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         PersonCustomFieldValueDao personCustomFieldValueDao =
-                UmAppDatabase.getInstance(context).getPersonCustomFieldValueDao();
+                repository.getPersonCustomFieldValueDao();
         PersonDetailPresenterFieldDao personDetailPresenterFieldDao =
-                UmAppDatabase.getInstance(context).getPersonDetailPresenterFieldDao();
+                repository.getPersonDetailPresenterFieldDao();
 
 
         if(newPersonString.equals("true")){
@@ -212,7 +215,7 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
      * Generates live data for Clazz list to be assigned to the current Person being edited.
      */
     public void generateAssignedClazzesLiveData(){
-        ClazzDao clazzDao = UmAppDatabase.getInstance(context).getClazzDao();
+        ClazzDao clazzDao = repository.getClazzDao();
         assignedClazzes = clazzDao.findAllClazzesByPersonUid(personUid);
         updateClazzListProviderToView();
     }

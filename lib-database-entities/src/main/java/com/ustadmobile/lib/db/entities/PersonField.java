@@ -24,7 +24,7 @@ import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 @UmEntity(tableId = 20)
 public class PersonField {
 
-    @UmPrimaryKey(autoIncrement = true)
+    @UmPrimaryKey(autoGenerateSyncable = true)
     private long personCustomFieldUid;
 
     //Any extra field names that isn't used in the views.
