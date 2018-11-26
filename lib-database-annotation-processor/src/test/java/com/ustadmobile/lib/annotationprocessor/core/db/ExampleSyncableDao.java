@@ -92,4 +92,9 @@ public abstract class ExampleSyncableDao implements SyncableDao<ExampleSyncableE
     @UmRepository(delegateType = UmRepository.UmRepositoryMethodType.DELEGATE_TO_WEBSERVICE)
     @UmRestAccessible
     public abstract void findByUidAsyncRepo(long uid, UmCallback<ExampleSyncableEntity> callback);
+
+    @UmInsert
+    public abstract void insertListAsyncArr(List<ExampleSyncableEntity> entityList,
+                                            UmCallback<Long[]> insertedKeys);
+
 }

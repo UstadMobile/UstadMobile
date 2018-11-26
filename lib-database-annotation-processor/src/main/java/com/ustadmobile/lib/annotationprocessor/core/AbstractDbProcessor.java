@@ -1028,7 +1028,7 @@ public abstract class AbstractDbProcessor {
         }
 
         if(!isVoid && methodInfo.hasArrayResultType()){
-            codeBlock.add("$1T $2L = resultList.toArray(new $3T[$2L_list.size()]);\n",
+            codeBlock.add("$1T $2L = $2L_list.toArray(new $3T[$2L_list.size()]);\n",
                     resultType,
                     resultVarName,
                     ((ArrayType)resultType).getComponentType());
