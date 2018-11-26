@@ -1055,9 +1055,18 @@ public abstract class AbstractDbProcessor {
         }
 
 
+        String numChangesStr;
+        if(DbProcessorUtils.isList(paramType, processingEnv)) {
+            numChangesStr = paramVariableName + ".size()";
+        }else if(paramType.getKind().equals(TypeKind.ARRAY)) {
+            numChangesStr = paramVariableName = ".length";
+        }else {
+            numChangesStr = "1";
+        }
+
         int tableNum = paramEntityTypeElement.getAnnotation(UmEntity.class).tableId();
-        codeBlock.add("long _changeSeqNum = $L.getSyncStatusDao().$L($L, 1);\n",
-                syncableDbVariableName, changeSeqNumMethodName, tableNum);
+        codeBlock.add("long _changeSeqNum = $L.getSyncStatusDao().$L($L, $L);\n",
+                syncableDbVariableName, changeSeqNumMethodName, tableNum, numChangesStr);
 
         boolean isListOrArray = paramType.getKind().equals(TypeKind.ARRAY)
                 || DbProcessorUtils.isList(paramType, processingEnv);
@@ -1078,8 +1087,9 @@ public abstract class AbstractDbProcessor {
             return;
         }
 
-        codeBlock.add("$L.set$L(_changeSeqNum);\n", elementVarName,
-                capitalize(changeSeqNumElement.getSimpleName()));
+        codeBlock.add("$L.set$L(_changeSeqNum$L);\n", elementVarName,
+                capitalize(changeSeqNumElement.getSimpleName()),
+                isListOrArray ? "++" : "");
         if(isListOrArray) {
             codeBlock.endControlFlow();
         }
