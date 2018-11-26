@@ -29,6 +29,8 @@ import java.util.Map;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.EMPTY_STRING;
+import static com.ustadmobile.lib.contentscrapers.phetsimulation.IndexPhetContentScraper.PHET;
 import static com.ustadmobile.lib.db.entities.ContentEntry.LICENSE_TYPE_CC_BY;
 
 
@@ -186,15 +188,11 @@ public class PhetContentScraper {
                 String categoryName = category.text(); // category name
                 String path = category.parent().attr("href"); // url path to category
 
-                ContentEntry categoryContentEntry = contentEntryDao.findBySourceUrl(path);
-                if (categoryContentEntry == null) {
-                    categoryContentEntry = new ContentEntry();
-                    categoryContentEntry = setContentEntryData(categoryContentEntry, path, categoryName, path, language, null, false);
-                    categoryContentEntry.setContentEntryUid(contentEntryDao.insert(categoryContentEntry));
-                } else {
-                    categoryContentEntry = setContentEntryData(categoryContentEntry, path, categoryName, path, language, null, false);
-                    contentEntryDao.update(categoryContentEntry);
-                }
+
+                ContentEntry categoryContentEntry = ContentScraperUtil.createOrUpdateContentEntry(path, categoryName,
+                        path, PHET, LICENSE_TYPE_CC_BY, language.getLangUid(), null,
+                        EMPTY_STRING, false, EMPTY_STRING, EMPTY_STRING,
+                        EMPTY_STRING, EMPTY_STRING, contentEntryDao);
 
                 categoryRelations.add(categoryContentEntry);
                 System.out.println(categoryName);
@@ -203,20 +201,6 @@ public class PhetContentScraper {
 
         return categoryRelations;
 
-    }
-
-    private ContentEntry setContentEntryData(ContentEntry entry, String id, String title, String sourceUrl, Language lang, LanguageVariant variant, boolean isLeaf) {
-        entry.setEntryId(id);
-        entry.setTitle(title);
-        entry.setSourceUrl(sourceUrl);
-        entry.setPublisher("Phet");
-        entry.setLicenseType(LICENSE_TYPE_CC_BY);
-        if(variant != null){
-            entry.setLanguageVariantUid(variant.getLangVariantUid());
-        }
-        entry.setPrimaryLanguageUid(lang.getLangUid());
-        entry.setLeaf(isLeaf);
-        return entry;
     }
 
     private boolean downloadContent(URL simulationUrl, String hrefLink, File languageLocation) throws IOException {
@@ -295,47 +279,31 @@ public class PhetContentScraper {
                                     language.setName(LanguageCode.getByCode(lang).getName());
                                     language.setLangUid(languageDao.insert(language));
                                 }else{
-                                    language.setIso_639_1_standard(lang);
-                                    language.setName(LanguageCode.getByCode(lang).getName());
-                                    languageDao.update(language);
-                                }
+                                    Language changedLang = new Language();
+                                    changedLang.setLangUid(language.getLangUid());
+                                    changedLang.setIso_639_1_standard(lang);
+                                    changedLang.setName(LanguageCode.getByCode(lang).getName());
 
-                                LanguageVariant languageVariant = null;
-                                if(!variant.isEmpty()){
-                                    CountryCode countryCode = CountryCode.getByCode(variant);
-                                    if(countryCode != null){
-                                        String alpha2 = countryCode.getAlpha2();
-                                        String name = countryCode.getName();
-                                        languageVariant = languageVariantDao.findByCode(alpha2);
-                                        if(languageVariant == null){
-                                            languageVariant = new LanguageVariant();
-                                            languageVariant.setCountryCode(alpha2);
-                                            languageVariant.setName(language.getName() + "(" + name + ")");
-                                            languageVariant.setLangUid(language.getLangUid());
-                                            languageVariant.setLangVariantUid(languageVariantDao.insert(languageVariant));
-                                        }else{
-                                            languageVariant.setCountryCode(alpha2);
-                                            languageVariant.setName(language.getName() + "(" + name + ")");
-                                            languageVariant.setLangUid(language.getLangUid());
-                                            languageVariantDao.update(languageVariant);
-                                        }
+                                    boolean isChanged = false;
+                                    if(!language.getIso_639_1_standard().equals(changedLang.getIso_639_1_standard())){
+                                        isChanged = true;
                                     }
+                                    if(!language.getName().equals(changedLang.getName())){
+                                        isChanged = true;
+                                    }
+                                    if(isChanged){
+                                        languageDao.update(changedLang);
+                                    }
+                                    language = changedLang;
                                 }
 
+                                LanguageVariant languageVariant = ContentScraperUtil.insertOrUpdateLanguageVariant(languageVariantDao, variant, language);
 
-                                ContentEntry languageContentEntry = contentEntryDao.findBySourceUrl(path);
-                                if (languageContentEntry == null) {
-                                    languageContentEntry = new ContentEntry();
-                                    languageContentEntry = setContentEntryData(languageContentEntry, path, langTitle, path, language, languageVariant, true);
-                                    languageContentEntry.setThumbnailUrl(thumbnailUrl);
-                                    languageContentEntry.setDescription(getAboutDescription());
-                                    languageContentEntry.setContentEntryUid(contentEntryDao.insert(languageContentEntry));
-                                } else {
-                                    languageContentEntry = setContentEntryData(languageContentEntry, path, langTitle, path, language, languageVariant, true);
-                                    languageContentEntry.setThumbnailUrl(thumbnailUrl);
-                                    languageContentEntry.setDescription(getAboutDescription());
-                                    contentEntryDao.update(languageContentEntry);
-                                }
+
+                                ContentEntry languageContentEntry = ContentScraperUtil.createOrUpdateContentEntry(path, langTitle,
+                                        path, PHET, LICENSE_TYPE_CC_BY, language.getLangUid(), languageVariant != null ? languageVariant.getLangVariantUid() : null,
+                                        getAboutDescription(), true, EMPTY_STRING, thumbnailUrl,
+                                        EMPTY_STRING, EMPTY_STRING, contentEntryDao);
 
                                 langIdMap.put(languageContentEntry.getContentEntryUid(), langCode);
 

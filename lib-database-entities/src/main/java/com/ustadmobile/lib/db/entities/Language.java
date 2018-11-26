@@ -88,4 +88,30 @@ public class Language {
     public void setLangMasterChangeSeqNum(long langMasterChangeSeqNum) {
         this.langMasterChangeSeqNum = langMasterChangeSeqNum;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Language language = (Language) o;
+
+        if (langUid != language.langUid) return false;
+        if (name != null ? !name.equals(language.name) : language.name != null) return false;
+        if (iso_639_1_standard != null ? !iso_639_1_standard.equals(language.iso_639_1_standard) : language.iso_639_1_standard != null)
+            return false;
+        if (iso_639_2_standard != null ? !iso_639_2_standard.equals(language.iso_639_2_standard) : language.iso_639_2_standard != null)
+            return false;
+        return iso_639_3_standard != null ? iso_639_3_standard.equals(language.iso_639_3_standard) : language.iso_639_3_standard == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = (int) (langUid ^ (langUid >>> 32));
+        result = 31 * result + (name != null ? name.hashCode() : 0);
+        result = 31 * result + (iso_639_1_standard != null ? iso_639_1_standard.hashCode() : 0);
+        result = 31 * result + (iso_639_2_standard != null ? iso_639_2_standard.hashCode() : 0);
+        result = 31 * result + (iso_639_3_standard != null ? iso_639_3_standard.hashCode() : 0);
+        return result;
+    }
 }

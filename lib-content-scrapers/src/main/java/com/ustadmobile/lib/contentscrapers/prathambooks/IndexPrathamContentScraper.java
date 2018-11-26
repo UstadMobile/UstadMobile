@@ -36,6 +36,11 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.List;
 
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.EMPTY_STRING;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.ROOT;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.USTAD_MOBILE;
+import static com.ustadmobile.lib.db.entities.ContentEntry.LICENSE_TYPE_CC_BY;
+
 
 /**
  * Storyweaver has an api for all their epub books.
@@ -51,6 +56,7 @@ import java.util.List;
  */
 public class IndexPrathamContentScraper {
 
+    public static final String PRATHAM = "Pratham";
     String prefixUrl = "https://storyweaver.org.in/api/v1/books-search?page=";
 
     String prefixEPub = "https://storyweaver.org.in/v0/stories/download-story/";
@@ -103,32 +109,19 @@ public class IndexPrathamContentScraper {
 
         englishLang = ContentScraperUtil.insertOrUpdateLanguage(languageDao, "English");
 
-        ContentEntry masterRootParent = contentEntryDao.findBySourceUrl("root");
-        if (masterRootParent == null) {
-            masterRootParent = new ContentEntry();
-            masterRootParent= setContentEntryData(masterRootParent, "root",
-                    "Ustad Mobile", "root", englishLang, false, "");
-            masterRootParent.setContentEntryUid(contentEntryDao.insert(masterRootParent));
-        } else {
-            masterRootParent = setContentEntryData(masterRootParent, "root",
-                    "Ustad Mobile", "root", englishLang, false, "");
-            contentEntryDao.update(masterRootParent);
-        }
 
 
-        prathamParentEntry = contentEntryDao.findBySourceUrl("https://storyweaver.org.in/");
-        if (prathamParentEntry == null) {
-            prathamParentEntry = new ContentEntry();
-            prathamParentEntry = setContentEntryData(prathamParentEntry, "https://storyweaver.org.in/",
-                    "Pratham Books", "https://storyweaver.org.in/", englishLang, false, "Every Child in School & Learning Well");
-            prathamParentEntry.setThumbnailUrl("https://prathambooks.org/wp-content/uploads/2018/04/Logo-black.png");
-            prathamParentEntry.setContentEntryUid(contentEntryDao.insert(prathamParentEntry));
-        } else {
-            prathamParentEntry = setContentEntryData(prathamParentEntry, "https://storyweaver.org.in/",
-                    "Pratham Books", "https://storyweaver.org.in/", englishLang, false, "Every Child in School & Learning Well");
-            prathamParentEntry.setThumbnailUrl("https://prathambooks.org/wp-content/uploads/2018/04/Logo-black.png");
-            contentEntryDao.update(prathamParentEntry);
-        }
+        ContentEntry masterRootParent = ContentScraperUtil.createOrUpdateContentEntry(ROOT, USTAD_MOBILE,
+                ROOT, USTAD_MOBILE, LICENSE_TYPE_CC_BY, englishLang.getLangUid(), null,
+                EMPTY_STRING, false, EMPTY_STRING, EMPTY_STRING,
+                EMPTY_STRING, EMPTY_STRING, contentEntryDao);
+
+
+
+        prathamParentEntry = ContentScraperUtil.createOrUpdateContentEntry("https://storyweaver.org.in/", "Pratham Books",
+                "https://storyweaver.org.in/", PRATHAM, LICENSE_TYPE_CC_BY, englishLang.getLangUid(), null,
+                "Every Child in School & Learning Well", false, EMPTY_STRING,
+                "https://prathambooks.org/wp-content/uploads/2018/04/Logo-black.png", EMPTY_STRING, EMPTY_STRING, contentEntryDao);
 
         ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, masterRootParent, prathamParentEntry, 3);
 
@@ -165,19 +158,10 @@ public class IndexPrathamContentScraper {
                 resourceFolder.mkdirs();
                 String resourceFileName = data.slug + ePubExt;
 
-                ContentEntry contentEntry = contentEntryDao.findBySourceUrl(epubUrl.getPath());
-                if (contentEntry == null) {
-                    contentEntry = new ContentEntry();
-                    contentEntry = setContentEntryData(contentEntry, data.slug,
-                            data.title , epubUrl.getPath(), langEntity, true, data.description);
-                    contentEntry.setThumbnailUrl(data.coverImage.sizes.get(0).url);
-                    contentEntry.setContentEntryUid(contentEntryDao.insert(contentEntry));
-                } else {
-                    contentEntry = setContentEntryData(contentEntry, data.slug,
-                            data.title, epubUrl.getPath(), langEntity, true, data.description);
-                    contentEntry.setThumbnailUrl(data.coverImage.sizes.get(0).url);
-                    contentEntryDao.update(contentEntry);
-                }
+                ContentEntry contentEntry = ContentScraperUtil.createOrUpdateContentEntry(data.slug, data.title,
+                        epubUrl.getPath(), PRATHAM, LICENSE_TYPE_CC_BY, langEntity.getLangUid(), null,
+                        data.description, true, EMPTY_STRING, data.coverImage.sizes.get(0).url,
+                        EMPTY_STRING, EMPTY_STRING, contentEntryDao);
 
                 ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao,
                         prathamParentEntry, contentEntry, contentCount);
@@ -224,18 +208,6 @@ public class IndexPrathamContentScraper {
     private String getLangCode(String language) {
         String[] list = language.split("-");
         return list[0];
-    }
-
-    private ContentEntry setContentEntryData(ContentEntry entry, String id, String title, String sourceUrl, Language lang, boolean isLeaf, String desc) {
-        entry.setEntryId(id);
-        entry.setTitle(title);
-        entry.setDescription(desc);
-        entry.setSourceUrl(sourceUrl);
-        entry.setPublisher("Pratham");
-        entry.setLicenseType(ContentEntry.LICENSE_TYPE_CC_BY);
-        entry.setPrimaryLanguageUid(lang.getLangUid());
-        entry.setLeaf(isLeaf);
-        return entry;
     }
 
     public URL generatePrathamEPubFileUrl(String resourceId) throws MalformedURLException {

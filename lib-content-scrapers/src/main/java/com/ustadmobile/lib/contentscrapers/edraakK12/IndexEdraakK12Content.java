@@ -28,7 +28,12 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.EMPTY_STRING;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.ROOT;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.USTAD_MOBILE;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING;
+import static com.ustadmobile.lib.db.entities.ContentEntry.ALL_RIGHTS_RESERVED;
+import static com.ustadmobile.lib.db.entities.ContentEntry.LICENSE_TYPE_CC_BY;
 
 
 /**
@@ -52,6 +57,7 @@ import static com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING;
  */
 public class IndexEdraakK12Content {
 
+    public static final String EDRAAK = "Edraak";
     private URL url;
     private File destinationDirectory;
     private ContentResponse response;
@@ -117,58 +123,26 @@ public class IndexEdraakK12Content {
         }
 
 
-        ContentEntry masterRootParent = contentEntryDao.findBySourceUrl("root");
-        if (masterRootParent == null) {
-            masterRootParent = new ContentEntry();
-            masterRootParent = setContentEntryData(masterRootParent, "root",
-                    "Ustad Mobile", "root", false);
-            masterRootParent.setContentEntryUid(contentEntryDao.insert(masterRootParent));
-        } else {
-            masterRootParent = setContentEntryData(masterRootParent, "root",
-                    "Ustad Mobile", "root", false);
-            contentEntryDao.update(masterRootParent);
-        }
+        ContentEntry masterRootParent = ContentScraperUtil.createOrUpdateContentEntry(ROOT, USTAD_MOBILE,
+                ROOT, USTAD_MOBILE, ALL_RIGHTS_RESERVED, arabicLang.getLangUid(), null,
+                EMPTY_STRING, false, EMPTY_STRING, EMPTY_STRING,
+                EMPTY_STRING, EMPTY_STRING, contentEntryDao);
 
 
-        ContentEntry edraakParentEntry = contentEntryDao.findBySourceUrl("https://www.edraak.org/k12/");
-        if (edraakParentEntry == null) {
-            edraakParentEntry = new ContentEntry();
-            edraakParentEntry = setContentEntryData(edraakParentEntry, "https://www.edraak.org/k12/",
-                    "Edraak K12", "https://www.edraak.org/k12/", false);
-            edraakParentEntry.setThumbnailUrl("https://www.edraak.org/static/images/logo-dark-ar.fa1399e8d134.png");
-            edraakParentEntry.setLicenseType(ContentEntry.ALL_RIGHTS_RESERVED);
-            edraakParentEntry.setDescription("تعليم مجانيّ\n" +
-                    "إلكترونيّ باللغة العربيّة!" +
-                    "\n Free Online \n" +
-                    "Education, In Arabic!");
-            edraakParentEntry.setContentEntryUid(contentEntryDao.insert(edraakParentEntry));
-        } else {
-            edraakParentEntry = setContentEntryData(edraakParentEntry, "https://www.edraak.org/k12/",
-                    "Edraak K12", "https://www.edraak.org/k12/", false);
-            edraakParentEntry.setThumbnailUrl("https://www.edraak.org/static/images/logo-dark-ar.fa1399e8d134.png");
-            edraakParentEntry.setDescription("تعليم مجانيّ\n" +
-                    "إلكترونيّ باللغة العربيّة!" +
-                    "\n Free Online \n" +
-                    "Education, In Arabic!");
-            edraakParentEntry.setLicenseType(ContentEntry.ALL_RIGHTS_RESERVED);
-            contentEntryDao.update(edraakParentEntry);
-        }
+        ContentEntry edraakParentEntry = ContentScraperUtil.createOrUpdateContentEntry("https://www.edraak.org/k12/", "Edraak K12",
+                "https://www.edraak.org/k12/", EDRAAK, ALL_RIGHTS_RESERVED, arabicLang.getLangUid(), null,
+                "تعليم مجانيّ\n" +
+                        "إلكترونيّ باللغة العربيّة!" +
+                        "\n Free Online \n" +
+                        "Education, In Arabic!", false, EMPTY_STRING, "https://www.edraak.org/static/images/logo-dark-ar.fa1399e8d134.png",
+                EMPTY_STRING, EMPTY_STRING, contentEntryDao);
+
 
         ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, masterRootParent, edraakParentEntry, 0);
 
 
         findImportedComponent(response, edraakParentEntry);
 
-    }
-
-    private ContentEntry setContentEntryData(ContentEntry entry, String id, String title, String sourceUrl, boolean isLeaf) {
-        entry.setEntryId(id);
-        entry.setTitle(title);
-        entry.setSourceUrl(sourceUrl);
-        entry.setPublisher("Edraak");
-        entry.setPrimaryLanguageUid(arabicLang.getLangUid());
-        entry.setLeaf(isLeaf);
-        return entry;
     }
 
     private void findImportedComponent(ContentResponse parentContent, ContentEntry parentEntry) {
@@ -206,17 +180,12 @@ public class IndexEdraakK12Content {
 
                 String sourceUrl = children.id;
                 boolean isLeaf = ContentScraperUtil.isImportedComponent(parentContent.component_type);
-                ContentEntry childEntry = contentEntryDao.findBySourceUrl(sourceUrl);
-                if (childEntry == null) {
-                    childEntry = new ContentEntry();
-                    childEntry = setContentEntryData(childEntry, children.id, children.title, sourceUrl, isLeaf);
-                    childEntry.setLicenseType(getLicenseType(children.license));
-                    childEntry.setContentEntryUid(contentEntryDao.insert(childEntry));
-                } else {
-                    childEntry = setContentEntryData(childEntry, children.id, children.title, sourceUrl, isLeaf);
-                    childEntry.setLicenseType(getLicenseType(children.license));
-                    contentEntryDao.update(childEntry);
-                }
+
+                ContentEntry childEntry = ContentScraperUtil.createOrUpdateContentEntry(children.id, children.title,
+                        sourceUrl, EDRAAK, getLicenseType(children.license), arabicLang.getLangUid(), null,
+                        EMPTY_STRING, isLeaf, EMPTY_STRING, EMPTY_STRING,
+                        EMPTY_STRING, EMPTY_STRING, contentEntryDao);
+
 
                 ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, parentEntry, childEntry, children.child_index);
 
@@ -231,10 +200,10 @@ public class IndexEdraakK12Content {
         if (license.toLowerCase().contains("cc-by-nc-sa")) {
             return ContentEntry.LICESNE_TYPE_CC_BY_NC_SA;
         } else if (license.toLowerCase().contains("all_rights_reserved")) {
-            return ContentEntry.ALL_RIGHTS_RESERVED;
+            return ALL_RIGHTS_RESERVED;
         } else {
             System.err.println("License type not matched for license: " + license);
-            return ContentEntry.ALL_RIGHTS_RESERVED;
+            return ALL_RIGHTS_RESERVED;
         }
     }
 

@@ -69,4 +69,25 @@ public class ContentCategorySchema {
     public void setContentCategorySchemaMasterChangeSeqNum(long contentCategorySchemaMasterChangeSeqNum) {
         this.contentCategorySchemaMasterChangeSeqNum = contentCategorySchemaMasterChangeSeqNum;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ContentCategorySchema schema = (ContentCategorySchema) o;
+
+        if (contentCategorySchemaUid != schema.contentCategorySchemaUid) return false;
+        if (schemaName != null ? !schemaName.equals(schema.schemaName) : schema.schemaName != null)
+            return false;
+        return schemaUrl != null ? schemaUrl.equals(schema.schemaUrl) : schema.schemaUrl == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = (int) (contentCategorySchemaUid ^ (contentCategorySchemaUid >>> 32));
+        result = 31 * result + (schemaName != null ? schemaName.hashCode() : 0);
+        result = 31 * result + (schemaUrl != null ? schemaUrl.hashCode() : 0);
+        return result;
+    }
 }

@@ -71,4 +71,24 @@ public class ContentCategory {
     public void setContentCategoryMasterChangeSeqNum(long contentCategoryMasterChangeSeqNum) {
         this.contentCategoryMasterChangeSeqNum = contentCategoryMasterChangeSeqNum;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ContentCategory category = (ContentCategory) o;
+
+        if (contentCategoryUid != category.contentCategoryUid) return false;
+        if (ctnCatContentCategorySchemaUid != category.ctnCatContentCategorySchemaUid) return false;
+        return name != null ? name.equals(category.name) : category.name == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = (int) (contentCategoryUid ^ (contentCategoryUid >>> 32));
+        result = 31 * result + (int) (ctnCatContentCategorySchemaUid ^ (ctnCatContentCategorySchemaUid >>> 32));
+        result = 31 * result + (name != null ? name.hashCode() : 0);
+        return result;
+    }
 }

@@ -2,17 +2,20 @@ package com.ustadmobile.lib.contentscrapers;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.neovisionaries.i18n.CountryCode;
 import com.neovisionaries.i18n.LanguageAlpha3Code;
 import com.neovisionaries.i18n.LanguageCode;
 import com.ustadmobile.core.db.dao.ContentCategoryDao;
 import com.ustadmobile.core.db.dao.ContentCategorySchemaDao;
 import com.ustadmobile.core.db.dao.ContentEntryContentCategoryJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryContentEntryFileJoinDao;
+import com.ustadmobile.core.db.dao.ContentEntryDao;
 import com.ustadmobile.core.db.dao.ContentEntryFileDao;
 import com.ustadmobile.core.db.dao.ContentEntryFileStatusDao;
 import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryRelatedEntryJoinDao;
 import com.ustadmobile.core.db.dao.LanguageDao;
+import com.ustadmobile.core.db.dao.LanguageVariantDao;
 import com.ustadmobile.lib.contentscrapers.buildconfig.ScraperBuildConfig;
 import com.ustadmobile.lib.db.entities.ContentCategory;
 import com.ustadmobile.lib.db.entities.ContentCategorySchema;
@@ -24,6 +27,7 @@ import com.ustadmobile.lib.db.entities.ContentEntryFileStatus;
 import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin;
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoin;
 import com.ustadmobile.lib.db.entities.Language;
+import com.ustadmobile.lib.db.entities.LanguageVariant;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
@@ -48,6 +52,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -454,10 +459,16 @@ public class ContentScraperUtil {
             parentChildJoin.setChildIndex(index);
             parentChildJoin.setCepcjUid(dao.insert(parentChildJoin));
         } else {
-            parentChildJoin.setCepcjParentContentEntryUid(parentEntry.getContentEntryUid());
-            parentChildJoin.setCepcjChildContentEntryUid(childEntry.getContentEntryUid());
-            parentChildJoin.setChildIndex(index);
-            dao.update(parentChildJoin);
+            ContentEntryParentChildJoin changedEntryJoin = new ContentEntryParentChildJoin();
+            changedEntryJoin.setCepcjUid(parentChildJoin.getCepcjUid());
+            changedEntryJoin.setCepcjParentContentEntryUid(parentEntry.getContentEntryUid());
+            changedEntryJoin.setCepcjChildContentEntryUid(childEntry.getContentEntryUid());
+            changedEntryJoin.setChildIndex(index);
+
+            if(!changedEntryJoin.equals(parentChildJoin)){
+                dao.update(changedEntryJoin);
+            }
+            parentChildJoin = changedEntryJoin;
         }
         return parentChildJoin;
     }
@@ -482,10 +493,16 @@ public class ContentScraperUtil {
             parentChildJoin.setChildIndex(index);
             parentChildJoin.setCepcjUid(dao.insert(parentChildJoin));
         } else {
-            parentChildJoin.setCepcjParentContentEntryUid(parentEntry.getContentEntryUid());
-            parentChildJoin.setCepcjChildContentEntryUid(childEntry.getContentEntryUid());
-            parentChildJoin.setChildIndex(index);
-            dao.update(parentChildJoin);
+            ContentEntryParentChildJoin changedParentChildJoin = new ContentEntryParentChildJoin();
+            changedParentChildJoin.setCepcjUid(parentChildJoin.getCepcjUid());
+            changedParentChildJoin.setCepcjParentContentEntryUid(parentEntry.getContentEntryUid());
+            changedParentChildJoin.setCepcjChildContentEntryUid(childEntry.getContentEntryUid());
+            changedParentChildJoin.setChildIndex(index);
+
+            if(!changedParentChildJoin.equals(parentChildJoin)){
+                dao.update(changedParentChildJoin);
+            }
+            parentChildJoin = changedParentChildJoin;
         }
         return parentChildJoin;
     }
@@ -501,19 +518,24 @@ public class ContentScraperUtil {
      */
     public static ContentEntryContentCategoryJoin insertOrUpdateChildWithMultipleCategoriesJoin(ContentEntryContentCategoryJoinDao contentEntryCategoryJoinDao,
                                                                                                 ContentCategory category, ContentEntry childEntry) {
-        ContentEntryContentCategoryJoin categoryToSimlationJoin = contentEntryCategoryJoinDao.findJoinByParentChildUuids(category.getContentCategoryUid(), childEntry.getContentEntryUid());
-        if (categoryToSimlationJoin == null) {
-            categoryToSimlationJoin = new ContentEntryContentCategoryJoin();
-            categoryToSimlationJoin.setCeccjContentCategoryUid(category.getContentCategoryUid());
-            categoryToSimlationJoin.setCeccjContentEntryUid(childEntry.getContentEntryUid());
-            categoryToSimlationJoin.setCeccjUid(contentEntryCategoryJoinDao.insert(categoryToSimlationJoin));
+        ContentEntryContentCategoryJoin categoryToSimulationJoin = contentEntryCategoryJoinDao.findJoinByParentChildUuids(category.getContentCategoryUid(), childEntry.getContentEntryUid());
+        if (categoryToSimulationJoin == null) {
+            categoryToSimulationJoin = new ContentEntryContentCategoryJoin();
+            categoryToSimulationJoin.setCeccjContentCategoryUid(category.getContentCategoryUid());
+            categoryToSimulationJoin.setCeccjContentEntryUid(childEntry.getContentEntryUid());
+            categoryToSimulationJoin.setCeccjUid(contentEntryCategoryJoinDao.insert(categoryToSimulationJoin));
 
         } else {
-            categoryToSimlationJoin.setCeccjContentCategoryUid(category.getContentCategoryUid());
-            categoryToSimlationJoin.setCeccjContentEntryUid(childEntry.getContentEntryUid());
-            contentEntryCategoryJoinDao.update(categoryToSimlationJoin);
+            ContentEntryContentCategoryJoin changedCategoryEntryJoin = new ContentEntryContentCategoryJoin();
+            changedCategoryEntryJoin.setCeccjUid(changedCategoryEntryJoin.getCeccjUid());
+            changedCategoryEntryJoin.setCeccjContentCategoryUid(category.getContentCategoryUid());
+            changedCategoryEntryJoin.setCeccjContentEntryUid(childEntry.getContentEntryUid());
+            if(!changedCategoryEntryJoin.equals(categoryToSimulationJoin)){
+                contentEntryCategoryJoinDao.update(changedCategoryEntryJoin);
+            }
+            categoryToSimulationJoin = changedCategoryEntryJoin;
         }
-        return categoryToSimlationJoin;
+        return categoryToSimulationJoin;
     }
 
     public static ContentCategorySchema insertOrUpdateSchema(ContentCategorySchemaDao categorySchemeDao, String schemaName, String schemaUrl) {
@@ -524,9 +546,14 @@ public class ContentScraperUtil {
             schema.setSchemaUrl(schemaUrl);
             schema.setContentCategorySchemaUid(categorySchemeDao.insert(schema));
         }else{
-            schema.setSchemaName(schemaName);
-            schema.setSchemaUrl(schemaUrl);
-            categorySchemeDao.update(schema);
+            ContentCategorySchema changedSchema = new ContentCategorySchema();
+            changedSchema.setContentCategorySchemaUid(schema.getContentCategorySchemaUid());
+            changedSchema.setSchemaName(schemaName);
+            changedSchema.setSchemaUrl(schemaUrl);
+            if(!changedSchema.equals(schema)){
+                categorySchemeDao.update(changedSchema);
+            }
+            schema = changedSchema;
         }
         return schema;
     }
@@ -539,9 +566,14 @@ public class ContentScraperUtil {
             category.setName(categoryName);
             category.setContentCategoryUid(categoryDao.insert(category));
         } else {
-            category.setCtnCatContentCategorySchemaUid(schema.getContentCategorySchemaUid());
-            category.setName(categoryName);
-            categoryDao.update(category);
+            ContentCategory changedCategory = new ContentCategory();
+            changedCategory.setContentCategoryUid(category.getCtnCatContentCategorySchemaUid());
+            changedCategory.setCtnCatContentCategorySchemaUid(schema.getContentCategorySchemaUid());
+            changedCategory.setName(categoryName);
+            if(!changedCategory.equals(category)){
+                categoryDao.update(changedCategory);
+            }
+            category = changedCategory;
         }
         return category;
     }
@@ -556,11 +588,16 @@ public class ContentScraperUtil {
             relatedTranslationJoin.setRelType(relatedType);
             relatedTranslationJoin.setCerejUid(contentEntryRelatedJoinDao.insert(relatedTranslationJoin));
         } else {
-            relatedTranslationJoin.setCerejRelLanguageUid(relatedEntry.getPrimaryLanguageUid());
-            relatedTranslationJoin.setCerejContentEntryUid(parentEntry.getContentEntryUid());
-            relatedTranslationJoin.setCerejRelatedEntryUid(relatedEntry.getContentEntryUid());
-            relatedTranslationJoin.setRelType(relatedType);
-            contentEntryRelatedJoinDao.update(relatedTranslationJoin);
+            ContentEntryRelatedEntryJoin changedRelatedJoin = new ContentEntryRelatedEntryJoin();
+            changedRelatedJoin.setCerejUid(relatedTranslationJoin.getCerejUid());
+            changedRelatedJoin.setCerejRelLanguageUid(relatedEntry.getPrimaryLanguageUid());
+            changedRelatedJoin.setCerejContentEntryUid(parentEntry.getContentEntryUid());
+            changedRelatedJoin.setCerejRelatedEntryUid(relatedEntry.getContentEntryUid());
+            changedRelatedJoin.setRelType(relatedType);
+            if(!changedRelatedJoin.equals(relatedTranslationJoin)){
+                contentEntryRelatedJoinDao.update(changedRelatedJoin);
+            }
+            relatedTranslationJoin = changedRelatedJoin;
         }
         return relatedTranslationJoin;
     }
@@ -588,12 +625,34 @@ public class ContentScraperUtil {
             }
             langObj.setLangUid(languageDao.insert(langObj));
         } else {
-            langObj.setName(langValue);
-            if (!three_letter_code.isEmpty()) {
-                langObj.setIso_639_1_standard(two_letter_code);
-                langObj.setIso_639_2_standard(three_letter_code);
+            Language changedLang = new Language();
+            changedLang.setLangUid(langObj.getLangUid());
+            changedLang.setName(langValue);
+            boolean isChanged = false;
+
+            if(!changedLang.getName().equals(langObj.getName())){
+                isChanged = true;
             }
-            languageDao.update(langObj);
+
+            if (!three_letter_code.isEmpty()) {
+                changedLang.setIso_639_1_standard(two_letter_code);
+                changedLang.setIso_639_2_standard(three_letter_code);
+
+                if(!changedLang.getIso_639_1_standard().equals(langObj.getIso_639_1_standard())){
+                    isChanged = true;
+                }
+
+                if(!changedLang.getIso_639_2_standard().equals(langObj.getIso_639_2_standard())){
+                    isChanged = true;
+                }
+
+            }
+
+            if(isChanged){
+                languageDao.update(changedLang);
+            }
+            langObj = changedLang;
+
         }
         return langObj;
     }
@@ -686,5 +745,124 @@ public class ContentScraperUtil {
             }
         }
 
+    }
+
+    public static LanguageVariant insertOrUpdateLanguageVariant(LanguageVariantDao variantDao, String variant, Language language) {
+        LanguageVariant languageVariant = null;
+        if(!variant.isEmpty()){
+            CountryCode countryCode = CountryCode.getByCode(variant);
+            if(countryCode == null){
+                List<CountryCode> countryList = CountryCode.findByName(variant);
+                if(countryList != null && !countryList.isEmpty()){
+                    countryCode = countryList.get(0);
+                }
+            }
+            if(countryCode != null){
+                String alpha2 = countryCode.getAlpha2();
+                String name = countryCode.getName();
+                languageVariant = variantDao.findByCode(alpha2);
+                if(languageVariant == null){
+                    languageVariant = new LanguageVariant();
+                    languageVariant.setCountryCode(alpha2);
+                    languageVariant.setName(name);
+                    languageVariant.setLangUid(language.getLangUid());
+                    languageVariant.setLangVariantUid(variantDao.insert(languageVariant));
+                }else{
+                    LanguageVariant changedVariant = new LanguageVariant();
+                    changedVariant.setLangVariantUid(languageVariant.getLangVariantUid());
+                    changedVariant.setCountryCode(alpha2);
+                    changedVariant.setName(name);
+                    changedVariant.setLangUid(language.getLangUid());
+                    if(!changedVariant.equals(languageVariant)){
+                        variantDao.update(languageVariant);
+                    }
+                    languageVariant = changedVariant;
+                }
+            }
+        }
+        return languageVariant;
+    }
+
+    public static ContentEntry checkContentEntryChanges(ContentEntry changedEntry, ContentEntry oldEntry, ContentEntryDao contentEntryDao) {
+        changedEntry.setContentEntryUid(oldEntry.getContentEntryUid());
+        if(!changedEntry.equals(oldEntry)){
+            changedEntry.setLastModified(System.currentTimeMillis());
+            contentEntryDao.update(changedEntry);
+        }
+        return changedEntry;
+    }
+
+    /**
+     * @param id entry id
+     * @param title title of entry
+     * @param sourceUrl source url of entry
+     * @param publisher publisher of entry
+     * @param licenseType license Type of entry(predefined)
+     * @param primaryLanguage primary language uid of entry
+     * @param languageVariant language variant uid of entry
+     * @param description description of entry
+     * @param isLeaf is the entry a leaf (last child)
+     * @param author author of entry
+     * @param thumbnailUrl thumbnail Url of entry if exists
+     * @param licenseName license name of entry
+     * @param licenseUrl license Url of entry
+     * @return the contententry
+     */
+    private static ContentEntry createContentEntryObject(String id, String title, String sourceUrl, String publisher, int licenseType,
+                                        long primaryLanguage, Long languageVariant, String description, boolean isLeaf,
+                                                        String author, String thumbnailUrl, String licenseName, String licenseUrl){
+        ContentEntry contentEntry = new ContentEntry();
+        contentEntry.setEntryId(id);
+        contentEntry.setTitle(title);
+        contentEntry.setSourceUrl(sourceUrl);
+        contentEntry.setPublisher(publisher);
+        contentEntry.setLicenseType(licenseType);
+        contentEntry.setPrimaryLanguageUid(primaryLanguage);
+        if(languageVariant != null){
+            contentEntry.setLanguageVariantUid(languageVariant);
+        }
+        contentEntry.setDescription(description);
+        contentEntry.setLeaf(isLeaf);
+        contentEntry.setAuthor(author);
+        contentEntry.setThumbnailUrl(thumbnailUrl);
+        contentEntry.setLicenseName(licenseName);
+        contentEntry.setLicenseUrl(licenseUrl);
+        return contentEntry;
+    }
+
+    /**
+     * @param id entry id
+     * @param title title of entry
+     * @param sourceUrl source url of entry
+     * @param publisher publisher of entry
+     * @param licenseType license Type of entry(predefined)
+     * @param primaryLanguage primary language uid of entry
+     * @param languageVariant language variant uid of entry
+     * @param description description of entry
+     * @param isLeaf is the entry a leaf (last child)
+     * @param author author of entry
+     * @param thumbnailUrl thumbnail Url of entry if exists
+     * @param licenseName license name of entry
+     * @param licenseUrl license Url of entry
+     * @param contentEntryDao dao to insert or update
+     * @return the updated content entry
+     */
+    public static ContentEntry createOrUpdateContentEntry(String id, String title, String sourceUrl, String publisher, int licenseType,
+                                                          long primaryLanguage, Long languageVariant, String description, boolean isLeaf,
+                                                          String author, String thumbnailUrl, String licenseName, String licenseUrl,
+                                                          ContentEntryDao contentEntryDao){
+
+        ContentEntry contentEntry = contentEntryDao.findBySourceUrl(sourceUrl);
+        if (contentEntry == null) {
+            contentEntry = createContentEntryObject(id, title,sourceUrl, publisher, licenseType, primaryLanguage,
+                    languageVariant, description, isLeaf, author, thumbnailUrl, licenseName, licenseUrl);
+            contentEntry.setLastModified(System.currentTimeMillis());
+            contentEntry.setContentEntryUid(contentEntryDao.insert(contentEntry));
+        } else {
+            ContentEntry changedEntry = createContentEntryObject(id, title,sourceUrl, publisher, licenseType, primaryLanguage,
+                    languageVariant, description, isLeaf, author, thumbnailUrl, licenseName, licenseUrl);
+            contentEntry = ContentScraperUtil.checkContentEntryChanges(changedEntry, contentEntry, contentEntryDao);
+        }
+        return contentEntry;
     }
 }

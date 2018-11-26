@@ -309,8 +309,6 @@ public class TestCK12ContentScraper {
     public void givenServerOnline_scrapeAndIndexCK12Content() throws IOException {
 
         UmAppDatabase db = UmAppDatabase.getInstance(null);
-        db.clearAllTables();
-
 
         MockWebServer mockWebServer = new MockWebServer();
         mockWebServer.setDispatcher(dispatcher);

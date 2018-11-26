@@ -76,4 +76,27 @@ public class LanguageVariant {
     public void setLangVariantMasterChangeSeqNum(long langVariantMasterChangeSeqNum) {
         this.langVariantMasterChangeSeqNum = langVariantMasterChangeSeqNum;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        LanguageVariant that = (LanguageVariant) o;
+
+        if (langVariantUid != that.langVariantUid) return false;
+        if (langUid != that.langUid) return false;
+        if (countryCode != null ? !countryCode.equals(that.countryCode) : that.countryCode != null)
+            return false;
+        return name != null ? name.equals(that.name) : that.name == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = (int) (langVariantUid ^ (langVariantUid >>> 32));
+        result = 31 * result + (int) (langUid ^ (langUid >>> 32));
+        result = 31 * result + (countryCode != null ? countryCode.hashCode() : 0);
+        result = 31 * result + (name != null ? name.hashCode() : 0);
+        return result;
+    }
 }

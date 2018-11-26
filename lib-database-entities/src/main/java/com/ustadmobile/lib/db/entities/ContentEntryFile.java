@@ -110,4 +110,33 @@ public class ContentEntryFile {
     public void setContentEntryFileMasterChangeSeqNum(long contentEntryFileMasterChangeSeqNum) {
         this.contentEntryFileMasterChangeSeqNum = contentEntryFileMasterChangeSeqNum;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ContentEntryFile that = (ContentEntryFile) o;
+
+        if (contentEntryFileUid != that.contentEntryFileUid) return false;
+        if (fileSize != that.fileSize) return false;
+        if (lastModified != that.lastModified) return false;
+        if (mobileOptimized != that.mobileOptimized) return false;
+        if (md5sum != null ? !md5sum.equals(that.md5sum) : that.md5sum != null) return false;
+        if (mimeType != null ? !mimeType.equals(that.mimeType) : that.mimeType != null)
+            return false;
+        return remarks != null ? remarks.equals(that.remarks) : that.remarks == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = (int) (contentEntryFileUid ^ (contentEntryFileUid >>> 32));
+        result = 31 * result + (int) (fileSize ^ (fileSize >>> 32));
+        result = 31 * result + (md5sum != null ? md5sum.hashCode() : 0);
+        result = 31 * result + (int) (lastModified ^ (lastModified >>> 32));
+        result = 31 * result + (mimeType != null ? mimeType.hashCode() : 0);
+        result = 31 * result + (remarks != null ? remarks.hashCode() : 0);
+        result = 31 * result + (mobileOptimized ? 1 : 0);
+        return result;
+    }
 }

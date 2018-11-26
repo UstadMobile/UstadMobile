@@ -7,6 +7,7 @@ import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
 import com.ustadmobile.core.db.dao.LanguageDao;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.LanguageList;
+import com.ustadmobile.lib.contentscrapers.ScraperConstants;
 import com.ustadmobile.lib.db.entities.ContentCategory;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.Language;
@@ -23,6 +24,12 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.EMPTY_STRING;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.ROOT;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.USTAD_MOBILE;
+import static com.ustadmobile.lib.db.entities.ContentEntry.LICENSE_TYPE_CC_BY;
+import static com.ustadmobile.lib.db.entities.ContentEntry.LICENSE_TYPE_CC_BY_NC;
+
 
 /**
  * The DDL Website comes in 3 languages - English, Farsi and Pashto
@@ -36,6 +43,7 @@ import java.util.ArrayList;
 public class IndexDdlContent {
 
 
+    public static final String DDL = "DDL";
     private URL url;
     private File destinationDirectory;
 
@@ -89,32 +97,17 @@ public class IndexDdlContent {
         Language pashtoLang = ContentScraperUtil.insertOrUpdateLanguage(languageDao, "Pashto");
 
 
+        ContentEntry masterRootParent = ContentScraperUtil.createOrUpdateContentEntry(ROOT, USTAD_MOBILE,
+                ROOT, USTAD_MOBILE, LICENSE_TYPE_CC_BY, englishLang.getLangUid(), null,
+                EMPTY_STRING, false, EMPTY_STRING, EMPTY_STRING,
+                EMPTY_STRING, EMPTY_STRING, contentEntryDao);
 
-        ContentEntry masterRootParent = contentEntryDao.findBySourceUrl("root");
-        if (masterRootParent == null) {
-            masterRootParent = new ContentEntry();
-            masterRootParent= setContentEntryData(masterRootParent, "root",
-                    "Ustad Mobile", "root", englishLang, false, "");
-            masterRootParent.setContentEntryUid(contentEntryDao.insert(masterRootParent));
-        } else {
-            masterRootParent = setContentEntryData(masterRootParent, "root",
-                    "Ustad Mobile", "root", englishLang, false, "");
-            contentEntryDao.update(masterRootParent);
-        }
 
-        parentDdl = contentEntryDao.findBySourceUrl("https://www.ddl.af/");
-        if (parentDdl == null) {
-            parentDdl = new ContentEntry();
-            parentDdl = setContentEntryData(parentDdl, "https://www.ddl.af/",
-                    "Darakht-e Danesh", "https://www.ddl.af/", englishLang, false, "Free and open educational resources for Afghanistan");
-            parentDdl.setThumbnailUrl("https://www.ddl.af/storage/files/logo-dd.png");
-            parentDdl.setContentEntryUid(contentEntryDao.insert(parentDdl));
-        } else {
-            parentDdl = setContentEntryData(parentDdl, "https://www.ddl.af/",
-                    "Darakht-e Danesh", "https://www.ddl.af/", englishLang, false, "Free and open educational resources for Afghanistan");
-            parentDdl.setThumbnailUrl("https://www.ddl.af/storage/files/logo-dd.png");
-            contentEntryDao.update(parentDdl);
-        }
+        parentDdl = ContentScraperUtil.createOrUpdateContentEntry("https://www.ddl.af/", "Darakht-e Danesh",
+                "https://www.ddl.af/", DDL, LICENSE_TYPE_CC_BY, englishLang.getLangUid(), null,
+                "Free and open educational resources for Afghanistan", false, EMPTY_STRING,
+                "https://www.ddl.af/storage/files/logo-dd.png", EMPTY_STRING, EMPTY_STRING, contentEntryDao);
+
 
         ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, masterRootParent, parentDdl, 5);
 
@@ -124,18 +117,6 @@ public class IndexDdlContent {
 
     }
 
-    private ContentEntry setContentEntryData(ContentEntry entry, String id, String title, String sourceUrl, Language lang, boolean isLeaf, String desc) {
-        entry.setEntryId(id);
-        entry.setTitle(title);
-        entry.setSourceUrl(sourceUrl);
-        entry.setPublisher("DDL");
-        entry.setLicenseType(ContentEntry.LICENSE_TYPE_CC_BY);
-        entry.setPrimaryLanguageUid(lang.getLangUid());
-        entry.setLeaf(isLeaf);
-        entry.setDescription(desc);
-        return entry;
-    }
-
     private void browseLanguages(String lang, Language langEntity) throws IOException {
 
         Document document = Jsoup.connect("https://www.darakhtdanesh.org/" + lang + "/resources/list")
@@ -143,18 +124,10 @@ public class IndexDdlContent {
 
         Elements pageList = document.select("a.page-link");
 
-
-        langEntry = contentEntryDao.findBySourceUrl(lang + "/resources/list");
-        if (langEntry == null) {
-            langEntry = new ContentEntry();
-            langEntry = setContentEntryData(langEntry, lang + "/resources/list",
-                    lang, lang + "/resources/list", langEntity, false, "");
-            langEntry.setContentEntryUid(contentEntryDao.insert(langEntry));
-        } else {
-            langEntry = setContentEntryData(langEntry, lang + "/resources/list",
-                    lang, lang + "/resources/list", langEntity, false, "");
-            contentEntryDao.update(langEntry);
-        }
+        langEntry = ContentScraperUtil.createOrUpdateContentEntry(lang + "/resources/list", lang,
+                lang + "/resources/list", DDL, LICENSE_TYPE_CC_BY, langEntity.getLangUid(), null,
+                EMPTY_STRING, false, EMPTY_STRING, EMPTY_STRING,
+                EMPTY_STRING, EMPTY_STRING, contentEntryDao);
 
         ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, parentDdl, langEntry, langCount);
 

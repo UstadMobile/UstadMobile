@@ -69,4 +69,24 @@ public class ContentEntryFileStatus {
     public void setCefsMasterChangeSeqNum(long cefsMasterChangeSeqNum) {
         this.cefsMasterChangeSeqNum = cefsMasterChangeSeqNum;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ContentEntryFileStatus that = (ContentEntryFileStatus) o;
+
+        if (cefsUid != that.cefsUid) return false;
+        if (cefsContentEntryFileUid != that.cefsContentEntryFileUid) return false;
+        return filePath != null ? filePath.equals(that.filePath) : that.filePath == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = (int) (cefsUid ^ (cefsUid >>> 32));
+        result = 31 * result + (int) (cefsContentEntryFileUid ^ (cefsContentEntryFileUid >>> 32));
+        result = 31 * result + (filePath != null ? filePath.hashCode() : 0);
+        return result;
+    }
 }

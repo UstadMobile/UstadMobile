@@ -67,7 +67,6 @@ public class TestIndexContent {
     public void givenServerOnline_whenUrlFound_FindImportedContent() throws IOException {
 
         UmAppDatabase db = UmAppDatabase.getInstance(null);
-        db.clearAllTables();
 
         IndexEdraakK12Content indexObj = new IndexEdraakK12Content();
         MockWebServer mockWebServer = new MockWebServer();

@@ -113,7 +113,9 @@ public class ScraperConstants {
 
     public static final String ARABIC_LANG_CODE = "ar";
     public static final String ENGLISH_LANG_CODE = "en";
-
+    public static final String USTAD_MOBILE = "Ustad Mobile";
+    public static final String ROOT = "root";
+    public static final String EMPTY_STRING = "";
 
 
     public enum QUESTION_TYPE{

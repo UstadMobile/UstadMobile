@@ -115,4 +115,33 @@ public class ContentEntryRelatedEntryJoin {
     public void setCerejMasterChangeSeqNum(long cerejMasterChangeSeqNum) {
         this.cerejMasterChangeSeqNum = cerejMasterChangeSeqNum;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ContentEntryRelatedEntryJoin that = (ContentEntryRelatedEntryJoin) o;
+
+        if (cerejUid != that.cerejUid) return false;
+        if (cerejContentEntryUid != that.cerejContentEntryUid) return false;
+        if (cerejRelatedEntryUid != that.cerejRelatedEntryUid) return false;
+        if (relType != that.relType) return false;
+        if (cerejRelLanguageUid != that.cerejRelLanguageUid) return false;
+        if (cerejRelLanguage != null ? !cerejRelLanguage.equals(that.cerejRelLanguage) : that.cerejRelLanguage != null)
+            return false;
+        return comment != null ? comment.equals(that.comment) : that.comment == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = (int) (cerejUid ^ (cerejUid >>> 32));
+        result = 31 * result + (int) (cerejContentEntryUid ^ (cerejContentEntryUid >>> 32));
+        result = 31 * result + (int) (cerejRelatedEntryUid ^ (cerejRelatedEntryUid >>> 32));
+        result = 31 * result + relType;
+        result = 31 * result + (cerejRelLanguage != null ? cerejRelLanguage.hashCode() : 0);
+        result = 31 * result + (comment != null ? comment.hashCode() : 0);
+        result = 31 * result + (int) (cerejRelLanguageUid ^ (cerejRelLanguageUid >>> 32));
+        return result;
+    }
 }

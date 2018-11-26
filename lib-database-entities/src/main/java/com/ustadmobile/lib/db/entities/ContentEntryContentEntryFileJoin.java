@@ -70,4 +70,24 @@ public class ContentEntryContentEntryFileJoin {
     public void setCecefjMasterChangeSeqNum(long cecefjMasterChangeSeqNum) {
         this.cecefjMasterChangeSeqNum = cecefjMasterChangeSeqNum;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ContentEntryContentEntryFileJoin fileJoin = (ContentEntryContentEntryFileJoin) o;
+
+        if (cecefjUid != fileJoin.cecefjUid) return false;
+        if (cecefjContentEntryUid != fileJoin.cecefjContentEntryUid) return false;
+        return cecefjContentEntryFileUid == fileJoin.cecefjContentEntryFileUid;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = (int) (cecefjUid ^ (cecefjUid >>> 32));
+        result = 31 * result + (int) (cecefjContentEntryUid ^ (cecefjContentEntryUid >>> 32));
+        result = 31 * result + (int) (cecefjContentEntryFileUid ^ (cecefjContentEntryFileUid >>> 32));
+        return result;
+    }
 }

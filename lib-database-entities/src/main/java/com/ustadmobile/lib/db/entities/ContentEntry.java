@@ -227,4 +227,52 @@ public class ContentEntry {
     public void setLeaf(boolean leaf) {
         this.leaf = leaf;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ContentEntry entry = (ContentEntry) o;
+
+        if (contentEntryUid != entry.contentEntryUid) return false;
+        if (licenseType != entry.licenseType) return false;
+        if (primaryLanguageUid != entry.primaryLanguageUid) return false;
+        if (languageVariantUid != entry.languageVariantUid) return false;
+        if (leaf != entry.leaf) return false;
+        if (title != null ? !title.equals(entry.title) : entry.title != null) return false;
+        if (description != null ? !description.equals(entry.description) : entry.description != null)
+            return false;
+        if (entryId != null ? !entryId.equals(entry.entryId) : entry.entryId != null) return false;
+        if (author != null ? !author.equals(entry.author) : entry.author != null) return false;
+        if (publisher != null ? !publisher.equals(entry.publisher) : entry.publisher != null)
+            return false;
+        if (licenseName != null ? !licenseName.equals(entry.licenseName) : entry.licenseName != null)
+            return false;
+        if (licenseUrl != null ? !licenseUrl.equals(entry.licenseUrl) : entry.licenseUrl != null)
+            return false;
+        if (sourceUrl != null ? !sourceUrl.equals(entry.sourceUrl) : entry.sourceUrl != null)
+            return false;
+        return thumbnailUrl != null ? thumbnailUrl.equals(entry.thumbnailUrl) : entry.thumbnailUrl == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = (int) (contentEntryUid ^ (contentEntryUid >>> 32));
+        result = 31 * result + (title != null ? title.hashCode() : 0);
+        result = 31 * result + (description != null ? description.hashCode() : 0);
+        result = 31 * result + (entryId != null ? entryId.hashCode() : 0);
+        result = 31 * result + (author != null ? author.hashCode() : 0);
+        result = 31 * result + (publisher != null ? publisher.hashCode() : 0);
+        result = 31 * result + licenseType;
+        result = 31 * result + (licenseName != null ? licenseName.hashCode() : 0);
+        result = 31 * result + (licenseUrl != null ? licenseUrl.hashCode() : 0);
+        result = 31 * result + (sourceUrl != null ? sourceUrl.hashCode() : 0);
+        result = 31 * result + (thumbnailUrl != null ? thumbnailUrl.hashCode() : 0);
+        result = 31 * result + (int) (primaryLanguageUid ^ (primaryLanguageUid >>> 32));
+        result = 31 * result + (int) (languageVariantUid ^ (languageVariantUid >>> 32));
+        result = 31 * result + (leaf ? 1 : 0);
+        return result;
+    }
+
 }

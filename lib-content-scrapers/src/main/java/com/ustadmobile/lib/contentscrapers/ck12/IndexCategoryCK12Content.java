@@ -11,12 +11,8 @@ import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.LanguageList;
 import com.ustadmobile.lib.contentscrapers.ScraperConstants;
 import com.ustadmobile.lib.db.entities.ContentEntry;
-import com.ustadmobile.lib.db.entities.ContentEntryContentEntryFileJoin;
-import com.ustadmobile.lib.db.entities.ContentEntryFile;
-import com.ustadmobile.lib.db.entities.ContentEntryFileStatus;
 import com.ustadmobile.lib.db.entities.Language;
 
-import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -31,7 +27,6 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -39,6 +34,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.swing.text.AbstractDocument;
+
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.EMPTY_STRING;
 import static com.ustadmobile.lib.db.entities.ContentEntry.LICENSE_TYPE_CC_BY_NC;
 
 
@@ -76,6 +74,7 @@ import static com.ustadmobile.lib.db.entities.ContentEntry.LICENSE_TYPE_CC_BY_NC
  */
 public class IndexCategoryCK12Content {
 
+    public static final String CK_12 = "CK12";
     private final ContentEntryDao contentEntryDao;
     private final ContentEntryParentChildJoinDao contentParentChildJoinDao;
     private final ContentEntryFileDao contentEntryFileDao;
@@ -127,7 +126,7 @@ public class IndexCategoryCK12Content {
         ContentScraperUtil.setChromeDriverLocation();
 
         englishLang = languageDao.findByTwoCode(ScraperConstants.ENGLISH_LANG_CODE);
-        if(englishLang == null){
+        if (englishLang == null) {
             englishLang = new Language();
             englishLang.setName("English");
             englishLang.setIso_639_1_standard(ScraperConstants.ENGLISH_LANG_CODE);
@@ -136,48 +135,21 @@ public class IndexCategoryCK12Content {
             englishLang.setLangUid(languageDao.insert(englishLang));
         }
 
-        ContentEntry masterRootParent = contentEntryDao.findBySourceUrl("root");
-        if (masterRootParent == null) {
-            masterRootParent = new ContentEntry();
-            masterRootParent= setContentEntryData(masterRootParent, "root",
-                    "Ustad Mobile", "root", false, "");
-            masterRootParent.setContentEntryUid(contentEntryDao.insert(masterRootParent));
-        } else {
-            masterRootParent = setContentEntryData(masterRootParent, "root",
-                    "Ustad Mobile", "root", false, "");
-            contentEntryDao.update(masterRootParent);
-        }
+        ContentEntry masterRootParent = ContentScraperUtil.createOrUpdateContentEntry(ScraperConstants.ROOT, ScraperConstants.USTAD_MOBILE,
+                ScraperConstants.ROOT, ScraperConstants.USTAD_MOBILE, LICENSE_TYPE_CC_BY_NC,
+                englishLang.getLangUid(), null, EMPTY_STRING, false, EMPTY_STRING, EMPTY_STRING,
+                EMPTY_STRING, EMPTY_STRING, contentEntryDao);
 
-        ck12ParentEntry = contentEntryDao.findBySourceUrl("https://www.ck12.org/");
-        if (ck12ParentEntry == null) {
-            ck12ParentEntry = new ContentEntry();
-            ck12ParentEntry = setContentEntryData(ck12ParentEntry, "https://www.ck12.org/",
-                    "CK-12 Foundation", "https://www.ck12.org/", false, "100% Free, Personalized Learning for Every Student");
-            ck12ParentEntry.setThumbnailUrl("https://img1.ck12.org/media/build-20181015164501/images/ck12-logo-livetile.png");
-            ck12ParentEntry.setContentEntryUid(contentEntryDao.insert(ck12ParentEntry));
-        } else {
-            ck12ParentEntry = setContentEntryData(ck12ParentEntry, "https://www.ck12.org/",
-                    "CK-12 Foundation", "https://www.ck12.org/", false, "100% Free, Personalized Learning for Every Student");
-            ck12ParentEntry.setThumbnailUrl("https://img1.ck12.org/media/build-20181015164501/images/ck12-logo-livetile.png");
-            contentEntryDao.update(ck12ParentEntry);
-        }
+
+        ck12ParentEntry = ContentScraperUtil.createOrUpdateContentEntry("https://www.ck12.org/", "CK-12 Foundation",
+                "https://www.ck12.org/", CK_12, LICENSE_TYPE_CC_BY_NC, englishLang.getLangUid(), null,
+                "100% Free, Personalized Learning for Every Student", false, EMPTY_STRING,
+                "https://img1.ck12.org/media/build-20181015164501/images/ck12-logo-livetile.png",
+                EMPTY_STRING, EMPTY_STRING, contentEntryDao);
 
         ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, masterRootParent, ck12ParentEntry, 2);
 
     }
-
-    private ContentEntry setContentEntryData(ContentEntry entry, String entryId, String title, String sourceUrl, boolean isLeaf, String desc) {
-        entry.setEntryId(entryId);
-        entry.setTitle(title);
-        entry.setSourceUrl(sourceUrl);
-        entry.setPublisher("CK12");
-        entry.setLicenseType(LICENSE_TYPE_CC_BY_NC);
-        entry.setPrimaryLanguageUid(englishLang.getLangUid());
-        entry.setLeaf(isLeaf);
-        entry.setDescription(desc);
-        return entry;
-    }
-
 
     /**
      * Given a ck12 url, find the content and download it all
@@ -203,17 +175,9 @@ public class IndexCategoryCK12Content {
                 URL subjectUrl = new URL(url, hrefLink);
                 String title = subject.attr("title");
 
-                ContentEntry subjectEntry = contentEntryDao.findBySourceUrl(hrefLink);
-                if (subjectEntry == null) {
-                    subjectEntry = new ContentEntry();
-                    subjectEntry = setContentEntryData(subjectEntry, hrefLink,
-                            title, hrefLink, false, "");
-                    subjectEntry.setContentEntryUid(contentEntryDao.insert(subjectEntry));
-                } else {
-                    subjectEntry = setContentEntryData(subjectEntry, hrefLink,
-                            title, hrefLink, false, "");
-                    contentEntryDao.update(subjectEntry);
-                }
+                ContentEntry subjectEntry = ContentScraperUtil.createOrUpdateContentEntry(hrefLink, title, hrefLink, CK_12,
+                        LICENSE_TYPE_CC_BY_NC, englishLang.getLangUid(), null, EMPTY_STRING, false,
+                        EMPTY_STRING, EMPTY_STRING, EMPTY_STRING, EMPTY_STRING, contentEntryDao);
 
                 ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, ck12ParentEntry, subjectEntry, count++);
 
@@ -258,17 +222,9 @@ public class IndexCategoryCK12Content {
                 File gradeFolder = new File(destinationDirectory, title);
                 gradeFolder.mkdirs();
 
-                ContentEntry gradeEntry = contentEntryDao.findBySourceUrl(hrefLink);
-                if (gradeEntry == null) {
-                    gradeEntry = new ContentEntry();
-                    gradeEntry = setContentEntryData(gradeEntry, hrefLink,
-                            title, hrefLink, false, "");
-                    gradeEntry.setContentEntryUid(contentEntryDao.insert(gradeEntry));
-                } else {
-                    gradeEntry = setContentEntryData(gradeEntry, hrefLink,
-                            title, hrefLink, false, "");
-                    contentEntryDao.update(gradeEntry);
-                }
+                ContentEntry gradeEntry = ContentScraperUtil.createOrUpdateContentEntry(hrefLink, title, hrefLink, CK_12, LICENSE_TYPE_CC_BY_NC,
+                        englishLang.getLangUid(), null, EMPTY_STRING, false, EMPTY_STRING, EMPTY_STRING,
+                        EMPTY_STRING, EMPTY_STRING, contentEntryDao);
 
                 ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, parent, gradeEntry, count++);
 
@@ -283,17 +239,9 @@ public class IndexCategoryCK12Content {
             String level1CategoryTitle = category.select("span.concept-name").attr("title");
             String fakePath = url.getPath() + "/" + level1CategoryTitle;
 
-            ContentEntry topicEntry = contentEntryDao.findBySourceUrl(fakePath);
-            if (topicEntry == null) {
-                topicEntry = new ContentEntry();
-                topicEntry = setContentEntryData(topicEntry, fakePath,
-                        level1CategoryTitle, fakePath, false, "");
-                topicEntry.setContentEntryUid(contentEntryDao.insert(topicEntry));
-            } else {
-                topicEntry = setContentEntryData(topicEntry, fakePath,
-                        level1CategoryTitle, fakePath, false, "");
-                contentEntryDao.update(topicEntry);
-            }
+            ContentEntry topicEntry = ContentScraperUtil.createOrUpdateContentEntry(fakePath, level1CategoryTitle, fakePath, CK_12,
+                    LICENSE_TYPE_CC_BY_NC, englishLang.getLangUid(), null, EMPTY_STRING, false,
+                    EMPTY_STRING, EMPTY_STRING, EMPTY_STRING, EMPTY_STRING, contentEntryDao);
 
             ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, parent, topicEntry, count++);
 
@@ -326,17 +274,9 @@ public class IndexCategoryCK12Content {
 
                 URL contentUrl = new URL(url, hrefLink);
 
-                ContentEntry lastTopicEntry = contentEntryDao.findBySourceUrl(hrefLink);
-                if (lastTopicEntry == null) {
-                    lastTopicEntry = new ContentEntry();
-                    lastTopicEntry = setContentEntryData(lastTopicEntry, hrefLink,
-                            title, hrefLink, false, "");
-                    lastTopicEntry.setContentEntryUid(contentEntryDao.insert(lastTopicEntry));
-                } else {
-                    lastTopicEntry = setContentEntryData(lastTopicEntry, hrefLink,
-                            title, hrefLink, false, "");
-                    contentEntryDao.update(lastTopicEntry);
-                }
+                ContentEntry lastTopicEntry = ContentScraperUtil.createOrUpdateContentEntry(hrefLink, title, hrefLink, CK_12,
+                        LICENSE_TYPE_CC_BY_NC, englishLang.getLangUid(), null, EMPTY_STRING, false,
+                        EMPTY_STRING, EMPTY_STRING, EMPTY_STRING, EMPTY_STRING, contentEntryDao);
 
                 ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, parent, lastTopicEntry, count++);
 
@@ -351,17 +291,11 @@ public class IndexCategoryCK12Content {
 
                 String appendPath = fakePath + "/" + title;
 
-                ContentEntry subTopicEntry = contentEntryDao.findBySourceUrl(appendPath);
-                if (subTopicEntry == null) {
-                    subTopicEntry = new ContentEntry();
-                    subTopicEntry = setContentEntryData(subTopicEntry, appendPath,
-                            title, appendPath, false, "");
-                    subTopicEntry.setContentEntryUid(contentEntryDao.insert(subTopicEntry));
-                } else {
-                    subTopicEntry = setContentEntryData(subTopicEntry, appendPath,
-                            title, appendPath, false, "");
-                    contentEntryDao.update(subTopicEntry);
-                }
+                ContentEntry subTopicEntry = ContentScraperUtil.createOrUpdateContentEntry(appendPath, title, appendPath, CK_12,
+                        LICENSE_TYPE_CC_BY_NC, englishLang.getLangUid(), null,
+                        EMPTY_STRING, false, EMPTY_STRING, EMPTY_STRING, EMPTY_STRING,
+                        EMPTY_STRING, contentEntryDao);
+
 
                 ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, parent, subTopicEntry, count++);
 
@@ -398,19 +332,9 @@ public class IndexCategoryCK12Content {
 
             String thumbnailUrl = doc.selectFirst("div.topic-wrapper[title*=" + headingTitle + "] img").attr("src");
 
-            ContentEntry headingEntry = contentEntryDao.findBySourceUrl(fakePathTopic);
-            if (headingEntry == null) {
-                headingEntry = new ContentEntry();
-                headingEntry = setContentEntryData(headingEntry, fakePathTopic,
-                        headingTitle, fakePathTopic, false, "");
-                headingEntry.setThumbnailUrl(thumbnailUrl);
-                headingEntry.setContentEntryUid(contentEntryDao.insert(headingEntry));
-            } else {
-                headingEntry = setContentEntryData(headingEntry, fakePathTopic,
-                        headingTitle, fakePathTopic, false, "");
-                headingEntry.setThumbnailUrl(thumbnailUrl);
-                contentEntryDao.update(headingEntry);
-            }
+            ContentEntry headingEntry = ContentScraperUtil.createOrUpdateContentEntry(fakePathTopic, headingTitle, fakePathTopic, CK_12,
+                    LICENSE_TYPE_CC_BY_NC, englishLang.getLangUid(), null, EMPTY_STRING, false,
+                    EMPTY_STRING, thumbnailUrl, EMPTY_STRING, EMPTY_STRING, contentEntryDao);
 
             ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, parent, headingEntry, count++);
 
@@ -424,19 +348,9 @@ public class IndexCategoryCK12Content {
 
                 String topicThumbnailUrl = topic.selectFirst("div.concept-track-parent span img").attr("src");
 
-                ContentEntry topicEntry = contentEntryDao.findBySourceUrl(fakeParentTopic);
-                if (topicEntry == null) {
-                    topicEntry = new ContentEntry();
-                    topicEntry = setContentEntryData(topicEntry, fakeParentTopic,
-                            title, fakeParentTopic, false, "");
-                    topicEntry.setThumbnailUrl(topicThumbnailUrl);
-                    topicEntry.setContentEntryUid(contentEntryDao.insert(topicEntry));
-                } else {
-                    topicEntry = setContentEntryData(topicEntry, fakeParentTopic,
-                            title, fakeParentTopic, false, "");
-                    topicEntry.setThumbnailUrl(topicThumbnailUrl);
-                    contentEntryDao.update(topicEntry);
-                }
+                ContentEntry topicEntry = ContentScraperUtil.createOrUpdateContentEntry(fakeParentTopic, title, fakeParentTopic, CK_12,
+                        LICENSE_TYPE_CC_BY_NC, englishLang.getLangUid(), null, EMPTY_STRING, false,
+                        EMPTY_STRING, topicThumbnailUrl, EMPTY_STRING, EMPTY_STRING, contentEntryDao);
 
                 ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, headingEntry, topicEntry, topicCount++);
 
@@ -452,17 +366,10 @@ public class IndexCategoryCK12Content {
                     topicDestination.mkdirs();
                     URL contentUrl = new URL(subCategoryUrl, hrefLink);
 
-                    ContentEntry subTopicEntry = contentEntryDao.findBySourceUrl(hrefLink);
-                    if (subTopicEntry == null) {
-                        subTopicEntry = new ContentEntry();
-                        subTopicEntry = setContentEntryData(subTopicEntry, hrefLink,
-                                subTitle, hrefLink, false, "");
-                        subTopicEntry.setContentEntryUid(contentEntryDao.insert(subTopicEntry));
-                    } else {
-                        subTopicEntry = setContentEntryData(subTopicEntry, hrefLink,
-                                subTitle, hrefLink, false, "");
-                        contentEntryDao.update(subTopicEntry);
-                    }
+                    ContentEntry subTopicEntry = ContentScraperUtil.createOrUpdateContentEntry(hrefLink, subTitle, hrefLink, CK_12,
+                            LICENSE_TYPE_CC_BY_NC, englishLang.getLangUid(), null, EMPTY_STRING, false,
+                            EMPTY_STRING, EMPTY_STRING, EMPTY_STRING, EMPTY_STRING, contentEntryDao);
+
 
                     ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, topicEntry, subTopicEntry, subTopicCount++);
 
@@ -515,19 +422,9 @@ public class IndexCategoryCK12Content {
 
             URL url = new URL(contentUrl, hrefLink);
 
-            ContentEntry topicEntry = contentEntryDao.findBySourceUrl(url.getPath());
-            if (topicEntry == null) {
-                topicEntry = new ContentEntry();
-                topicEntry = setContentEntryData(topicEntry, url.getPath(),
-                        title, url.getPath(), true, summary);
-                topicEntry.setThumbnailUrl(imageLink);
-                topicEntry.setContentEntryUid(contentEntryDao.insert(topicEntry));
-            } else {
-                topicEntry = setContentEntryData(topicEntry, url.getPath(),
-                        title, url.getPath(), true, summary);
-                topicEntry.setThumbnailUrl(imageLink);
-                contentEntryDao.update(topicEntry);
-            }
+            ContentEntry topicEntry = ContentScraperUtil.createOrUpdateContentEntry(url.getPath(), title, url.getPath(), CK_12,
+                    LICENSE_TYPE_CC_BY_NC, englishLang.getLangUid(), null, summary, true,
+                    EMPTY_STRING, imageLink, EMPTY_STRING, EMPTY_STRING, contentEntryDao);
 
             ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, parent, topicEntry, courseCount++);
 
@@ -567,7 +464,7 @@ public class IndexCategoryCK12Content {
                         topicEntry, ContentScraperUtil.getMd5(content), contentEntryFileJoinDao, true,
                         ScraperConstants.MIMETYPE_ZIP);
 
-            }else{
+            } else {
 
                 ContentScraperUtil.checkAndUpdateDatabaseIfFileDownloadedButNoDataFound(content, topicEntry, contentEntryFileDao,
                         contentEntryFileJoinDao, contentFileStatusDao, ScraperConstants.MIMETYPE_ZIP, true);

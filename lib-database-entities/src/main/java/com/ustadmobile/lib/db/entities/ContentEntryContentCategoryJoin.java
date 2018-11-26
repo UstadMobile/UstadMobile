@@ -68,4 +68,24 @@ public class ContentEntryContentCategoryJoin {
     public void setCeccjMasterChangeSeqNum(long ceccjMasterChangeSeqNum) {
         this.ceccjMasterChangeSeqNum = ceccjMasterChangeSeqNum;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ContentEntryContentCategoryJoin that = (ContentEntryContentCategoryJoin) o;
+
+        if (ceccjUid != that.ceccjUid) return false;
+        if (ceccjContentEntryUid != that.ceccjContentEntryUid) return false;
+        return ceccjContentCategoryUid == that.ceccjContentCategoryUid;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = (int) (ceccjUid ^ (ceccjUid >>> 32));
+        result = 31 * result + (int) (ceccjContentEntryUid ^ (ceccjContentEntryUid >>> 32));
+        result = 31 * result + (int) (ceccjContentCategoryUid ^ (ceccjContentCategoryUid >>> 32));
+        return result;
+    }
 }

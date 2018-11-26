@@ -79,4 +79,26 @@ public class ContentEntryParentChildJoin {
     public void setCepcjMasterChangeSeqNum(long cepcjMasterChangeSeqNum) {
         this.cepcjMasterChangeSeqNum = cepcjMasterChangeSeqNum;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ContentEntryParentChildJoin that = (ContentEntryParentChildJoin) o;
+
+        if (cepcjUid != that.cepcjUid) return false;
+        if (cepcjChildContentEntryUid != that.cepcjChildContentEntryUid) return false;
+        if (cepcjParentContentEntryUid != that.cepcjParentContentEntryUid) return false;
+        return childIndex == that.childIndex;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = (int) (cepcjUid ^ (cepcjUid >>> 32));
+        result = 31 * result + (int) (cepcjChildContentEntryUid ^ (cepcjChildContentEntryUid >>> 32));
+        result = 31 * result + (int) (cepcjParentContentEntryUid ^ (cepcjParentContentEntryUid >>> 32));
+        result = 31 * result + childIndex;
+        return result;
+    }
 }

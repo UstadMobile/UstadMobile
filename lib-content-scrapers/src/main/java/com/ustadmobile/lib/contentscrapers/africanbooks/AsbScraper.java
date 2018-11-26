@@ -13,15 +13,16 @@ import com.ustadmobile.core.db.dao.ContentEntryFileStatusDao;
 import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryRelatedEntryJoinDao;
 import com.ustadmobile.core.db.dao.LanguageDao;
+import com.ustadmobile.core.db.dao.LanguageVariantDao;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.LanguageList;
 import com.ustadmobile.lib.contentscrapers.ScraperConstants;
 import com.ustadmobile.lib.db.entities.ContentCategory;
 import com.ustadmobile.lib.db.entities.ContentCategorySchema;
 import com.ustadmobile.lib.db.entities.ContentEntry;
-import com.ustadmobile.lib.db.entities.ContentEntryFile;
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoin;
 import com.ustadmobile.lib.db.entities.Language;
+import com.ustadmobile.lib.db.entities.LanguageVariant;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
@@ -53,6 +54,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.EMPTY_STRING;
+
 
 /**
  * African Storybooks support many languages. They can all be found in the source code on https://www.africanstorybook.org/booklist.php
@@ -81,6 +84,7 @@ import java.util.Map;
  */
 public class AsbScraper {
 
+    public static final String AFRICAN_STORY_BOOKS = "African Story Books";
     private final String COVER_URL = "https://www.africanstorybook.org/illustrations/covers/";
 
     public static void main(String[] args) {
@@ -105,7 +109,7 @@ public class AsbScraper {
 
         UmAppDatabase db = UmAppDatabase.getInstance(null);
         db.setMaster(true);
-        UmAppDatabase repository = db.getRepository("https://localhost", "");
+        UmAppDatabase repository = db.getRepository("https://localhost", EMPTY_STRING);
         ContentEntryDao contentEntryDao = repository.getContentEntryDao();
         ContentEntryParentChildJoinDao contentParentChildJoinDao = repository.getContentEntryParentChildJoinDao();
         ContentEntryFileDao contentEntryFileDao = repository.getContentEntryFileDao();
@@ -115,6 +119,7 @@ public class AsbScraper {
         ContentCategoryDao categoryDao = repository.getContentCategoryDao();
         ContentEntryContentCategoryJoinDao contentCategoryJoinDao = repository.getContentEntryContentCategoryJoinDao();
         LanguageDao languageDao = repository.getLanguageDao();
+        LanguageVariantDao variantDao = repository.getLanguageVariantDao();
         ContentEntryRelatedEntryJoinDao relatedEntryJoinDao = repository.getContentEntryRelatedEntryJoinDao();
 
         new LanguageList().addAllLanguages();
@@ -140,8 +145,18 @@ public class AsbScraper {
                         String id = lang.attr("value");
                         String value = StringUtils.capitalize(lang.text().toLowerCase());
 
-                        langMap.put(id, value);
-                        ContentScraperUtil.insertOrUpdateLanguage(languageDao, value);
+                        String variant = EMPTY_STRING;
+                        String langValue = value;
+                        if (value.contains("(")) {
+                            variant = StringUtils.capitalize(value.substring(value.indexOf("(") + 1, value.indexOf(")")));
+                            langValue = value.substring(0, value.indexOf("(")).trim();
+                        }
+                        langMap.put(id, langValue);
+                        Language langEntity = ContentScraperUtil.insertOrUpdateLanguage(languageDao, langValue);
+
+                        if (!variant.isEmpty()) {
+                            ContentScraperUtil.insertOrUpdateLanguageVariant(variantDao, variant, langEntity);
+                        }
                     }
                 }
             }
@@ -150,34 +165,17 @@ public class AsbScraper {
 
         Language englishLang = languageDao.findByTwoCode(ScraperConstants.ENGLISH_LANG_CODE);
 
-        ContentEntry masterRootParent = contentEntryDao.findBySourceUrl("root");
-        if (masterRootParent == null) {
-            masterRootParent = new ContentEntry();
-            masterRootParent = setContentEntryData(masterRootParent, "root",
-                    "Ustad Mobile", "root", englishLang.getLangUid(), false, "", "");
-            masterRootParent.setContentEntryUid(contentEntryDao.insert(masterRootParent));
-        } else {
-            masterRootParent = setContentEntryData(masterRootParent, "root",
-                    "Ustad Mobile", "root", englishLang.getLangUid(), false, "", "");
-            contentEntryDao.update(masterRootParent);
-        }
+        ContentEntry masterRootParent = ContentScraperUtil.createOrUpdateContentEntry(ScraperConstants.ROOT, ScraperConstants.USTAD_MOBILE, ScraperConstants.ROOT,
+                ScraperConstants.USTAD_MOBILE, ContentEntry.LICENSE_TYPE_CC_BY, englishLang.getLangUid(), null, EMPTY_STRING,
+                false, EMPTY_STRING, EMPTY_STRING, EMPTY_STRING, EMPTY_STRING, contentEntryDao);
 
 
-        ContentEntry asbParentEntry = contentEntryDao.findBySourceUrl("https://www.africanstorybook.org/");
-        if (asbParentEntry == null) {
-            asbParentEntry = new ContentEntry();
-            asbParentEntry = setContentEntryData(asbParentEntry, "https://www.africanstorybook.org/",
-                    "African Story Books", "https://www.africanstorybook.org/", englishLang.getLangUid(), false, "Open access to picture storybooks in the languages of Africa. \n" +
-                            "For children’s literacy, enjoyment and imagination. ", "");
-            asbParentEntry.setThumbnailUrl("https://www.africanstorybook.org/img/asb120.png");
-            asbParentEntry.setContentEntryUid(contentEntryDao.insert(asbParentEntry));
-        } else {
-            asbParentEntry = setContentEntryData(asbParentEntry, "https://www.africanstorybook.org/",
-                    "African Story Books", "https://www.africanstorybook.org/", englishLang.getLangUid(), false, "Open access to picture storybooks in the languages of Africa. \n" +
-                            "For children’s literacy, enjoyment and imagination. ", "");
-            asbParentEntry.setThumbnailUrl("https://www.africanstorybook.org/img/asb120.png");
-            contentEntryDao.update(asbParentEntry);
-        }
+        ContentEntry asbParentEntry = ContentScraperUtil.createOrUpdateContentEntry("https://www.africanstorybook.org/", AFRICAN_STORY_BOOKS,
+                "https://www.africanstorybook.org/", AFRICAN_STORY_BOOKS, ContentEntry.LICENSE_TYPE_CC_BY,
+                englishLang.getLangUid(), null, "Open access to picture storybooks in the languages of Africa. \n " +
+                        "For children’s literacy, enjoyment and imagination.", false, EMPTY_STRING,
+                "https://www.africanstorybook.org/img/asb120.png", EMPTY_STRING, EMPTY_STRING, contentEntryDao);
+
 
         ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, masterRootParent, asbParentEntry, 4);
 
@@ -207,24 +205,30 @@ public class AsbScraper {
                 driver.get(makeUrl.toString());
                 ContentScraperUtil.waitForJSandJQueryToLoad(waitDriver);
 
+                if(bookObj.lang.contains(",")){
+                    bookObj.lang = bookObj.lang.split(",")[0];
+                }
+
                 String langName = langMap.get(bookObj.lang);
 
-                Language language = languageDao.findByName(langName);
-
-                String sourceUrl = epubUrl.getPath() + "?" + epubUrl.getQuery();
-                ContentEntry childEntry = contentEntryDao.findBySourceUrl(sourceUrl);
-                if (childEntry == null) {
-                    childEntry = new ContentEntry();
-                    childEntry = setContentEntryData(childEntry, sourceUrl,
-                            bookObj.title, sourceUrl, language.getLangUid(), true, bookObj.summary, bookObj.author);
-                    childEntry.setThumbnailUrl(getCoverUrl(bookId));
-                    childEntry.setContentEntryUid(contentEntryDao.insert(childEntry));
-                } else {
-                    childEntry = setContentEntryData(childEntry, sourceUrl,
-                            bookObj.title, sourceUrl, language.getLangUid(), true, bookObj.summary, bookObj.author);
-                    childEntry.setThumbnailUrl(getCoverUrl(bookId));
-                    contentEntryDao.update(childEntry);
+                String variant = EMPTY_STRING;
+                String langValue = langName;
+                if (langName != null && langName.contains("(")) {
+                    variant = StringUtils.capitalize(langName.substring(langName.indexOf("(") + 1, langName.indexOf(")")));
+                    langValue = langName.substring(0, langName.indexOf("(")).trim();
                 }
+
+                Language language = languageDao.findByName(langValue);
+
+                LanguageVariant languageVariant = null;
+                if (!variant.isEmpty()) {
+                    languageVariant = ContentScraperUtil.insertOrUpdateLanguageVariant(variantDao, variant, language);
+                }
+                String sourceUrl = epubUrl.getPath() + "?" + epubUrl.getQuery();
+
+                ContentEntry childEntry = ContentScraperUtil.createOrUpdateContentEntry(sourceUrl, bookObj.title, sourceUrl, AFRICAN_STORY_BOOKS, ContentEntry.LICENSE_TYPE_CC_BY,
+                        language.getLangUid(), languageVariant  == null ? null : languageVariant.getLangVariantUid(), bookObj.summary, true, bookObj.author, getCoverUrl(bookId),
+                        EMPTY_STRING, EMPTY_STRING, contentEntryDao);
 
                 Document readerDoc = Jsoup.connect(generateReaderUrl(africanBooksUrl, bookId)).get();
 
@@ -235,7 +239,7 @@ public class AsbScraper {
                 List<ContentEntry> relatedEntries = new ArrayList<>();
                 for (Element element : langList) {
 
-                    String lang = "";
+                    String lang = EMPTY_STRING;
                     try {
                         String id = element.attr("onclickss");
                         id = id.substring(id.indexOf("(") + 1, id.lastIndexOf(")"));
@@ -247,9 +251,20 @@ public class AsbScraper {
                         lang = StringUtils.remove(lang, "(Translation)").trim().toLowerCase();
                         lang = StringUtils.capitalize(lang);
 
-                        Language relatedLanguage = languageDao.findByName(lang);
+                        String relatedVariant = EMPTY_STRING;
+                        String relatedLangValue = lang;
+                        if (lang.contains("(")) {
+                            relatedVariant = StringUtils.capitalize(lang.substring(lang.indexOf("(") + 1, lang.indexOf(")")));
+                            relatedLangValue = lang.substring(0, lang.indexOf("(")).trim();
+                        }
+
+                        Language relatedLanguage = languageDao.findByName(relatedLangValue);
                         if (relatedLanguage == null) {
                             relatedLanguage = ContentScraperUtil.insertOrUpdateLanguage(languageDao, lang);
+                        }
+                        LanguageVariant relatedLanguageVariant = null;
+                        if (!variant.isEmpty()) {
+                            relatedLanguageVariant = ContentScraperUtil.insertOrUpdateLanguageVariant(variantDao, relatedVariant, relatedLanguage);
                         }
 
                         URL content = generateEPubUrl(africanBooksUrl, id);
@@ -259,6 +274,9 @@ public class AsbScraper {
                             contentEntry = new ContentEntry();
                             contentEntry.setSourceUrl(relatedSourceUrl);
                             contentEntry.setPrimaryLanguageUid(relatedLanguage.getLangUid());
+                            if (relatedLanguageVariant != null) {
+                                contentEntry.setLanguageVariantUid(relatedLanguageVariant.getLangVariantUid());
+                            }
                             contentEntry.setLeaf(true);
                             contentEntry.setContentEntryUid(contentEntryDao.insert(contentEntry));
                         }
@@ -322,10 +340,10 @@ public class AsbScraper {
                         contentEntryFileJoinDao, true, ScraperConstants.MIMETYPE_EPUB);
 
             } catch (Exception e) {
-                System.err.println("Exception downloading/checking : " + ePubFile.getName() + " with title " + bookObj.title);
                 retry++;
                 if (retry == 3) {
                     retry = 0;
+                    System.err.println("Exception downloading/checking : " + ePubFile.getName() + " with title " + bookObj.title);
                     System.out.println(ePubFile.getName() + " size 0 bytes: failed! for title " + bookObj.title);
                     continue;
                 }
@@ -335,19 +353,6 @@ public class AsbScraper {
             }
         }
         driver.quit();
-    }
-
-    private ContentEntry setContentEntryData(ContentEntry entry, String id, String title, String sourceUrl, long lang, boolean isLeaf, String desc, String author) {
-        entry.setEntryId(id);
-        entry.setTitle(title);
-        entry.setSourceUrl(sourceUrl);
-        entry.setPublisher("African Story Books");
-        entry.setLicenseType(ContentEntry.LICENSE_TYPE_CC_BY);
-        entry.setPrimaryLanguageUid(lang);
-        entry.setDescription(desc);
-        entry.setLeaf(isLeaf);
-        entry.setAuthor(author);
-        return entry;
     }
 
     public String getAfricanStoryBookUrl() {

@@ -96,9 +96,6 @@ public class TestPrathamContentScraper {
     @Test
     public void givenServerOnline_whenAsbSiteScraped_thenShouldFindConvertAndDownloadAllFiles() throws IOException {
 
-        UmAppDatabase db = UmAppDatabase.getInstance(null);
-        db.clearAllTables();
-
         File tmpDir = Files.createTempDirectory("testindexAsbcontentscraper").toFile();
 
         MockWebServer mockWebServer = new MockWebServer();
@@ -116,10 +113,6 @@ public class TestPrathamContentScraper {
 
         File contentFile = new File(tmpDir, "asb10674.epub");
         Assert.assertEquals(true, ContentScraperUtil.fileHasContent(contentFile));
-
-        db.clearAllTables();
-
-        scraper.findContent(tmpDir);
 
     }
 

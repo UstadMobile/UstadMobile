@@ -38,6 +38,10 @@ import java.net.URLConnection;
 import java.nio.file.Files;
 import java.util.ArrayList;
 
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.EMPTY_STRING;
+import static com.ustadmobile.lib.contentscrapers.ddl.IndexDdlContent.DDL;
+import static com.ustadmobile.lib.db.entities.ContentEntry.LICENSE_TYPE_CC_BY;
+
 
 /**
  * Once the resource page is opened.
@@ -126,21 +130,11 @@ public class DdlContentScraper {
             Element publisherTag = doc.selectFirst("article.resource-view-details h3:contains(Publisher) ~ p");
             String publisher = publisherTag != null ? publisherTag.text() : "";
 
-            ContentEntry contentEntry = contentEntryDao.findBySourceUrl(uri.toURL().getPath());
-            if (contentEntry == null) {
-                contentEntry = new ContentEntry();
-                contentEntry = setContentEntryData(contentEntry, uri.toString(),
-                        doc.title(), uri.toURL().getPath(), langEntity, true, description, publisher);
-                contentEntry.setThumbnailUrl(thumbnail);
-                contentEntry.setAuthor(author);
-                contentEntry.setContentEntryUid(contentEntryDao.insert(contentEntry));
-            } else {
-                contentEntry = setContentEntryData(contentEntry, uri.toString(),
-                        doc.title(), uri.toURL().getPath(), langEntity, true, description, publisher);
-                contentEntry.setThumbnailUrl(thumbnail);
-                contentEntry.setAuthor(author);
-                contentEntryDao.update(contentEntry);
-            }
+
+            ContentEntry contentEntry = ContentScraperUtil.createOrUpdateContentEntry(uri.toString(), doc.title(),
+                    uri.toURL().getPath(), (publisher != null && !publisher.isEmpty() ? publisher : DDL),
+                    LICENSE_TYPE_CC_BY, langEntity.getLangUid(), null, description, true, author,
+                    thumbnail, EMPTY_STRING, EMPTY_STRING, contentEntryDao);
 
 
             URLConnection conn = uri.toURL().openConnection();
@@ -164,19 +158,6 @@ public class DdlContentScraper {
         }
     }
 
-    private ContentEntry setContentEntryData(ContentEntry entry, String id, String title, String sourceUrl, Language lang, boolean isLeaf, String description, String publisher) {
-        entry.setEntryId(id);
-        entry.setTitle(title);
-        entry.setSourceUrl(sourceUrl);
-        entry.setPublisher((publisher != null && !publisher.isEmpty() ? publisher : "DDL"));
-        entry.setLicenseType(ContentEntry.LICENSE_TYPE_CC_BY);
-        entry.setPrimaryLanguageUid(lang.getLangUid());
-        entry.setLeaf(isLeaf);
-        entry.setDescription(description);
-        return entry;
-    }
-
-
     protected ArrayList<ContentEntry> getContentEntries() {
         return contentEntries;
     }
@@ -195,17 +176,11 @@ public class DdlContentScraper {
             String lang = doc.select("html").attr("lang");
             Language langEntity = ContentScraperUtil.insertOrUpdateLanguage(languageDao, LanguageCode.getByCode(lang).getName());
 
-            ContentEntry contentEntry = contentEntryDao.findBySourceUrl(href);
-            if (contentEntry == null) {
-                contentEntry = new ContentEntry();
-                contentEntry = setContentEntryData(contentEntry, href,
-                        title, href, langEntity, false, "", "");
-                contentEntry.setContentEntryUid(contentEntryDao.insert(contentEntry));
-            } else {
-                contentEntry = setContentEntryData(contentEntry, href,
-                        title, href, langEntity, false, "", "");
-                contentEntryDao.update(contentEntry);
-            }
+
+            ContentEntry contentEntry = ContentScraperUtil.createOrUpdateContentEntry(href, title, href,
+                    DDL, LICENSE_TYPE_CC_BY, langEntity.getLangUid(), null,
+                    EMPTY_STRING, false, EMPTY_STRING, EMPTY_STRING,
+                    EMPTY_STRING, EMPTY_STRING, contentEntryDao);
 
             subjectAreaList.add(contentEntry);
 
