@@ -14,9 +14,9 @@ public class SyncStatus {
     @PrimaryKey
     private int tableId;
 
-    private long nextMasterChangeNum;
+    private long masterChangeSeqNum;
 
-    private long nextLocalChangeSeqNum;
+    private long localChangeSeqNum;
 
     private long syncedToMasterChangeNum;
 
@@ -28,8 +28,8 @@ public class SyncStatus {
 
     public SyncStatus(int tableId) {
         this.tableId = tableId;
-        this.nextMasterChangeNum = 1;
-        this.nextLocalChangeSeqNum = 1;
+        this.masterChangeSeqNum = 1;
+        this.localChangeSeqNum = 1;
     }
 
 
@@ -41,20 +41,20 @@ public class SyncStatus {
         this.tableId = tableId;
     }
 
-    public long getNextMasterChangeNum() {
-        return nextMasterChangeNum;
+    public long getMasterChangeSeqNum() {
+        return masterChangeSeqNum;
     }
 
-    public void setNextMasterChangeNum(long nextMasterChangeNum) {
-        this.nextMasterChangeNum = nextMasterChangeNum;
+    public void setMasterChangeSeqNum(long masterChangeSeqNum) {
+        this.masterChangeSeqNum = masterChangeSeqNum;
     }
 
-    public long getNextLocalChangeSeqNum() {
-        return nextLocalChangeSeqNum;
+    public long getLocalChangeSeqNum() {
+        return localChangeSeqNum;
     }
 
-    public void setNextLocalChangeSeqNum(long nextLocalChangeSeqNum) {
-        this.nextLocalChangeSeqNum = nextLocalChangeSeqNum;
+    public void setLocalChangeSeqNum(long localChangeSeqNum) {
+        this.localChangeSeqNum = localChangeSeqNum;
     }
 
     public long getSyncedToMasterChangeNum() {

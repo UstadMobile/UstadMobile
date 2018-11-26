@@ -14,12 +14,12 @@ public class TestSync {
 //
 //        SyncStatus masterSyncStatus = new SyncStatus();
 //        masterSyncStatus.setTableId(TABLE_ID);
-//        masterSyncStatus.setNextLocalChangeSeqNum(1);
+//        masterSyncStatus.setLocalChangeSeqNum(1);
 //        localDb.getSyncStatusDao().insert(masterSyncStatus);
 //
 //        SyncStatus localSyncStatus = new SyncStatus();
 //        localSyncStatus.setTableId(TABLE_ID);
-//        localSyncStatus.setNextMasterChangeNum(1);
+//        localSyncStatus.setMasterChangeSeqNum(1);
 //        masterDb.getSyncStatusDao().insert(localSyncStatus);
 //
 //        ContentEntry contentEntry1 = new ContentEntry();
@@ -49,12 +49,12 @@ public class TestSync {
 //
 //        SyncStatus masterSyncStatus = new SyncStatus();
 //        masterSyncStatus.setTableId(TABLE_ID);
-//        masterSyncStatus.setNextLocalChangeSeqNum(1);
+//        masterSyncStatus.setLocalChangeSeqNum(1);
 //        localDb.getSyncStatusDao().insert(masterSyncStatus);
 //
 //        SyncStatus localSyncStatus = new SyncStatus();
 //        localSyncStatus.setTableId(TABLE_ID);
-//        localSyncStatus.setNextMasterChangeNum(1);
+//        localSyncStatus.setMasterChangeSeqNum(1);
 //        masterDb.getSyncStatusDao().insert(localSyncStatus);
 //
 //        ContentEntry contentEntry1 = new ContentEntry();
