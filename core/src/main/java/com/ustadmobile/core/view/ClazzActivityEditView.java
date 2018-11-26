@@ -10,6 +10,10 @@ public interface ClazzActivityEditView extends UstadView {
     //View name
     String VIEW_NAME = "ClazzActivityEdit";
 
+    int THUMB_OFF = 0;
+    int THUMB_GOOD = 1;
+    int THUMB_BAD = 2;
+
     //Arguments
     String ARG_CLAZZACTIVITY_UID = "clazzActivityUid";
 
@@ -39,4 +43,26 @@ public interface ClazzActivityEditView extends UstadView {
      * @param uomType   The type as per ClazzActivityChange
      */
     void setUnitOfMeasureType(long uomType);
+
+    /**
+     * Sets which thumb is active based on the flag
+     *
+     * @param thumbs    The thumb flag
+     */
+    void setThumbs(int thumbs);
+
+    /**
+     * Set notes to the view.
+     *
+     * @param notes The notes
+     */
+    void setNotes(String notes);
+
+    /**
+     * Sets the unit of measure string
+     *
+     * @param uomText   The unit of measurement value to be populated.
+     */
+    void setUOMText(String uomText);
+
 }

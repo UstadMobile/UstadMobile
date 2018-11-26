@@ -65,11 +65,8 @@ public class ClazzActivityListFragment extends UstadBaseFragment implements Claz
 
         barChart.getXAxis().setDrawLabels(true);
         barChart.getXAxis().setDrawGridLines(false);
-
         barChart.getAxisRight().setEnabled(false);
-
         barChart.getLegend().setEnabled(false);
-
         //Label Description
         barChart.getDescription().setEnabled(false);
 

@@ -19,6 +19,8 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 
+import static com.ustadmobile.core.view.ClazzActivityEditView.THUMB_BAD;
+import static com.ustadmobile.core.view.ClazzActivityEditView.THUMB_GOOD;
 import static com.ustadmobile.core.view.ClazzListView.ARG_CLAZZ_UID;
 import static com.ustadmobile.core.view.ClazzActivityEditView.ARG_CLAZZACTIVITY_UID;
 
@@ -100,6 +102,8 @@ public class ClazzActivityEditPresenter
             clazzActivityDao.findByUidAsync(currentClazzActivityUid, new UmCallback<ClazzActivity>() {
                 @Override
                 public void onSuccess(ClazzActivity result) {
+                    currentClazzUid = result.getClazzActivityClazzUid();
+                    currentLogDate = result.getClazzActivityLogDate();
                     checkActivityCreateIfNotExist(result);
                 }
 
@@ -156,6 +160,9 @@ public class ClazzActivityEditPresenter
                     });
         else{
             currentClazzActivity = result;
+            handleChangeFeedback(currentClazzActivity.isClazzActivityGoodFeedback());
+            view.setNotes(currentClazzActivity.getClazzActivityNotes());
+            view.setUOMText(String.valueOf(currentClazzActivity.getClazzActivityQuantity()));
         }
 
         //Update Activity Change options
@@ -218,6 +225,11 @@ public class ClazzActivityEditPresenter
      */
     public void handleChangeFeedback(boolean didItGoWell){
         currentClazzActivity.setClazzActivityGoodFeedback(didItGoWell);
+        if(didItGoWell) {
+            view.setThumbs(THUMB_GOOD);
+        }else{
+            view.setThumbs(THUMB_BAD);
+        }
     }
 
     /**

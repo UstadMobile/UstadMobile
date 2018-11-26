@@ -21,6 +21,8 @@ import java.util.Hashtable;
 import java.util.LinkedHashMap;
 import java.util.List;
 
+import static com.ustadmobile.core.view.ClazzActivityEditView.ARG_CLAZZACTIVITY_UID;
+import static com.ustadmobile.core.view.ClazzListView.ARGS_CLAZZLOG_UID;
 import static com.ustadmobile.core.view.ClazzListView.ARG_CLAZZ_UID;
 import static com.ustadmobile.core.view.ClassLogListView.CHART_DURATION_LAST_MONTH;
 import static com.ustadmobile.core.view.ClassLogListView.CHART_DURATION_LAST_WEEK;
@@ -164,6 +166,15 @@ public class ClazzActivityListPresenter
         Hashtable<String, Long> args = new Hashtable<>();
         args.put(ARG_CLAZZ_UID, currentClazzUid);
         args.put(ARG_LOGDATE, System.currentTimeMillis());
+
+        impl.go(ClazzActivityEditView.VIEW_NAME, args, view.getContext());
+
+    }
+
+    public void goToNewClazzActivityEditActivity(long clazzLog){
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        Hashtable<String, Long> args = new Hashtable<>();
+        args.put(ARG_CLAZZACTIVITY_UID, clazzLog);
 
         impl.go(ClazzActivityEditView.VIEW_NAME, args, view.getContext());
 

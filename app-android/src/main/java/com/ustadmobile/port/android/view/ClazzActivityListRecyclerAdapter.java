@@ -97,12 +97,20 @@ public class ClazzActivityListRecyclerAdapter extends
 
         ImageView secondaryTextImageView =
                 holder.itemView.findViewById(R.id.item_clazzlog_log_status_text_imageview);
-        statusTextView.setText("Increased group work 3 times");
+
+        String verb = "Increased group work by ";
+
         if(!wasItGood){
             secondaryTextImageView.setBackgroundResource(R.drawable.ic_thumb_down_black_24dp);
         }else{
             secondaryTextImageView.setBackgroundResource(R.drawable.ic_thumb_up_black_24dp);
         }
+
+        String desc = verb + clazzActivity.getClazzActivityQuantity()
+                + " times";
+        statusTextView.setText(desc);
+
+
 
         ((TextView)holder.itemView
                 .findViewById(R.id.item_clazzlog_log_date))
@@ -141,10 +149,7 @@ public class ClazzActivityListRecyclerAdapter extends
         }
 
 
-
-
-        //TODO: Not part of Sprint 3. Change as new views are set up.
-        //holder.itemView.setOnClickListener(
-        //        v -> thePresenter.goToClazzActivityDetailActivity(clazzLog));
+        holder.itemView.setOnClickListener(
+                v -> thePresenter.goToNewClazzActivityEditActivity(clazzActivity.getClazzActivityUid()));
     }
 }

@@ -1,6 +1,7 @@
 package com.ustadmobile.port.android.view;
 
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
@@ -45,8 +46,13 @@ public class ClazzActivityEditActivity extends UstadBaseActivity implements Claz
     //The unit of measure / length of time metric drop down / spinner that will be populated
     EditText unitOfMeasureEditText;
 
+    //Good and Bad thumbs up
+    ImageView thumbsUp, thumbsDown;
+
     //Unit of measure title
     TextView unitOfMeasureTitle;
+
+    TextView notesET;
 
     /**
      * Handles option selected from the toolbar. Here it is handling back button pressed.
@@ -89,6 +95,12 @@ public class ClazzActivityEditActivity extends UstadBaseActivity implements Claz
         setSupportActionBar(toolbar);
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
+        //Get items
+        thumbsUp = findViewById(R.id.activity_clazz_activity_edit_went_good);
+        thumbsDown = findViewById(R.id.activity_clazz_activity_edit_went_bad);
+        notesET = findViewById(R.id.activity_clazz_activity_edit_notes);
+        unitOfMeasureTitle = findViewById(R.id.activity_clazz_activity_edit_change_uom_title);
+        unitOfMeasureEditText = findViewById(R.id.activity_clazz_activity_edit_change_spinner2);
 
         //Call the Presenter
         mPresenter = new ClazzActivityEditPresenter(this,
@@ -113,13 +125,11 @@ public class ClazzActivityEditActivity extends UstadBaseActivity implements Claz
             }
         });
 
+        //Thumbs listener
+        thumbsUp.setOnClickListener(v -> mPresenter.handleChangeFeedback(true));
+        thumbsDown.setOnClickListener(v -> mPresenter.handleChangeFeedback(false));
 
-        ImageView wentGood = findViewById(R.id.activity_clazz_activity_edit_went_good);
-        wentGood.setOnClickListener(v -> mPresenter.handleChangeFeedback(true));
-        ImageView wentBad = findViewById(R.id.activity_clazz_activity_edit_went_bad);
-        wentBad.setOnClickListener(v -> mPresenter.handleChangeFeedback(false));
-
-        EditText notesET = findViewById(R.id.activity_clazz_activity_edit_notes);
+        //Notes listener
         notesET.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -137,10 +147,8 @@ public class ClazzActivityEditActivity extends UstadBaseActivity implements Claz
             }
         });
 
-        unitOfMeasureTitle = findViewById(R.id.activity_clazz_activity_edit_change_uom_title);
 
-        unitOfMeasureEditText = findViewById(R.id.activity_clazz_activity_edit_change_spinner2);
-
+        //Unit of Measure text listener
         unitOfMeasureEditText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -220,5 +228,33 @@ public class ClazzActivityEditActivity extends UstadBaseActivity implements Claz
             unitOfMeasureTitle.setText(uomTitle);
         });
 
+    }
+
+    @Override
+    public void setThumbs(int thumbs) {
+        switch (thumbs){
+            case THUMB_OFF:
+                thumbsUp.clearColorFilter();
+                thumbsDown.clearColorFilter();
+                break;
+            case THUMB_GOOD:
+                thumbsUp.setColorFilter(Color.BLACK);
+                thumbsDown.clearColorFilter();
+                break;
+            case THUMB_BAD:
+                thumbsUp.clearColorFilter();
+                thumbsDown.setColorFilter(Color.BLACK);
+                break;
+        }
+    }
+
+    @Override
+    public void setNotes(String notes) {
+        notesET.setText(notes);
+    }
+
+    @Override
+    public void setUOMText(String uomText) {
+        unitOfMeasureEditText.setText(uomText);
     }
 }
