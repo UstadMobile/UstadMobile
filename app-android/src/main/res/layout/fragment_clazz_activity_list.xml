@@ -4,97 +4,130 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     >
 
-
-    <Spinner
-        android:id="@+id/fragment_clazz_activity_list_bar_chart_spinner"
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/fragment_clazz_activity_list_graph"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="4dp"
-        android:layout_marginEnd="8dp"
-        android:paddingTop="20dp"
-        android:spinnerMode="dialog"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-    </Spinner>
 
-    <com.github.mikephil.charting.charts.BarChart
-        android:id="@+id/fragment_clazz_activity_list_bar_chart"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/fragment_clazz_activity_list_bar_chart_spinner">
+        <Spinner
+            android:id="@+id/fragment_clazz_activity_list_bar_chart_spinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginEnd="8dp"
+            android:paddingTop="20dp"
+            android:spinnerMode="dialog"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
-    </com.github.mikephil.charting.charts.BarChart>
+        </Spinner>
 
+        <com.github.mikephil.charting.charts.BarChart
+            android:id="@+id/fragment_clazz_activity_list_bar_chart"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/fragment_clazz_activity_list_bar_chart_spinner">
 
-    <LinearLayout
-        android:id="@+id/fragment_clazz_activity_list_bar_chart_selector_ll"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"
-        android:orientation="horizontal"
-        android:gravity="center_horizontal"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/fragment_clazz_activity_list_bar_chart">
-
-        <Button
-            android:id="@+id/fragment_clazz_activity_list_bar_chart_selector_button_thisweek"
-            style="@android:style/Widget.Material.Light.Button"
-            android:layout_width="wrap_content"
-            android:layout_height="25dp"
-            android:layout_marginLeft="@dimen/dimen_2dp"
-            android:layout_marginRight="@dimen/dimen_2dp"
-            android:background="@drawable/rounded_button_selector"
-            android:textSize="12sp"
-            android:text="@string/last_week"
-            android:textColor="@color/icons" />
-
-        <Button
-            android:id="@+id/fragment_clazz_activity_list_bar_chart_selector_button_thismonth"
-            style="@android:style/Widget.Material.Light.Button"
-            android:layout_width="wrap_content"
-            android:layout_height="25dp"
-            android:layout_marginLeft="@dimen/dimen_2dp"
-            android:layout_marginRight="@dimen/dimen_2dp"
-            android:background="@drawable/rounded_button_selector"
-            android:text="@string/this_month"
-            android:textSize="12sp"
-            android:textColor="@color/icons" />
-
-        <Button
-            android:id="@+id/fragment_clazz_activity_list_bar_chart_selector_button_lastyear"
-            style="@android:style/Widget.Material.Light.Button"
-            android:layout_width="wrap_content"
-            android:layout_height="25dp"
-            android:layout_marginLeft="@dimen/dimen_2dp"
-            android:layout_marginRight="@dimen/dimen_2dp"
-            android:background="@drawable/rounded_button_selector"
-            android:text="@string/last_year"
-            android:textColor="@color/icons"
-            android:textSize="12sp" />
+        </com.github.mikephil.charting.charts.BarChart>
 
 
-    </LinearLayout>
+        <LinearLayout
+            android:id="@+id/fragment_clazz_activity_list_bar_chart_selector_ll"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:gravity="center_horizontal"
+            android:orientation="horizontal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/fragment_clazz_activity_list_bar_chart">
+
+            <Button
+                android:id="@+id/fragment_clazz_activity_list_bar_chart_selector_button_thisweek"
+                style="@android:style/Widget.Material.Light.Button"
+                android:layout_width="wrap_content"
+                android:layout_height="25dp"
+                android:layout_marginLeft="@dimen/dimen_2dp"
+                android:layout_marginRight="@dimen/dimen_2dp"
+                android:background="@drawable/rounded_button_selector"
+                android:text="@string/last_week"
+                android:textColor="@color/icons"
+                android:textSize="12sp" />
+
+            <Button
+                android:id="@+id/fragment_clazz_activity_list_bar_chart_selector_button_thismonth"
+                style="@android:style/Widget.Material.Light.Button"
+                android:layout_width="wrap_content"
+                android:layout_height="25dp"
+                android:layout_marginLeft="@dimen/dimen_2dp"
+                android:layout_marginRight="@dimen/dimen_2dp"
+                android:background="@drawable/rounded_button_selector"
+                android:text="@string/this_month"
+                android:textColor="@color/icons"
+                android:textSize="12sp" />
+
+            <Button
+                android:id="@+id/fragment_clazz_activity_list_bar_chart_selector_button_lastyear"
+                style="@android:style/Widget.Material.Light.Button"
+                android:layout_width="wrap_content"
+                android:layout_height="25dp"
+                android:layout_marginLeft="@dimen/dimen_2dp"
+                android:layout_marginRight="@dimen/dimen_2dp"
+                android:background="@drawable/rounded_button_selector"
+                android:text="@string/last_year"
+                android:textColor="@color/icons"
+                android:textSize="12sp" />
+
+
+        </LinearLayout>
+
+    </android.support.constraint.ConstraintLayout>
+
+
+    <!--<android.support.design.widget.AppBarLayout-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--&gt;-->
+        <!--<android.support.design.widget.CollapsingToolbarLayout-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="match_parent"-->
+            <!--app:layout_scrollFlags="scroll|exitUntilCollapsed"-->
+            <!--&gt;-->
+
+            <!--<LinearLayout-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--app:layout_collapseMode="parallax"-->
+                <!--&gt;-->
+                <!--<Button-->
+                    <!--android:layout_width="match_parent"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--/>-->
+            <!--</LinearLayout>-->
+        <!--</android.support.design.widget.CollapsingToolbarLayout>-->
+
+    <!--</android.support.design.widget.AppBarLayout>-->
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/fragment_clazz_activity_list_recyclerview"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginTop="8dp"
         android:layout_marginBottom="8dp"
         android:scrollbars="vertical"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/fragment_clazz_activity_list_bar_chart_selector_ll" />
+        app:layout_constraintTop_toBottomOf="@+id/fragment_clazz_activity_list_graph" />
 
     <ru.dimorinny.floatingtextbutton.FloatingTextButton
         android:id="@+id/fragment_clazz_log_record_attendance_fab"

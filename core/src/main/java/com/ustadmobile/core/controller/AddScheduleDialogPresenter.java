@@ -2,6 +2,7 @@ package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.ScheduleDao;
+import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.view.AddScheduleDialogView;
 import com.ustadmobile.lib.db.entities.Schedule;
@@ -23,12 +24,12 @@ public class AddScheduleDialogPresenter  extends UstadBaseController<AddSchedule
     public AddScheduleDialogPresenter(Object context, Hashtable arguments, AddScheduleDialogView view) {
         super(context, arguments, view);
 
-        scheduleDao = UmAppDatabase.getInstance(context).getScheduleDao();
+        UmAppDatabase repository = UmAccountManager.getRepositoryForActiveAccount(context);
+        scheduleDao = repository.getScheduleDao();
 
         if(getArguments().containsKey(ARG_CLAZZ_UID)){
             currentClazzUid = (long) getArguments().get(ARG_CLAZZ_UID);
         }
-
 
 
         if(getArguments().containsKey(ARG_SCHEDULE_UID)){

@@ -3,6 +3,7 @@ package com.ustadmobile.port.android.view;
 
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.v7.widget.AppCompatSpinner;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.InputType;
@@ -12,6 +13,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -22,9 +24,13 @@ import com.ustadmobile.core.view.ClazzActivityEditView;
 import com.ustadmobile.lib.db.entities.ClazzActivityChange;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
+import java.util.ArrayList;
 import java.util.Objects;
 
 import ru.dimorinny.floatingtextbutton.FloatingTextButton;
+
+import static com.ustadmobile.core.controller.ClazzActivityEditPresenter.FALSE_ID;
+import static com.ustadmobile.core.controller.ClazzActivityEditPresenter.TRUE_ID;
 
 
 /**
@@ -39,7 +45,9 @@ public class ClazzActivityEditActivity extends UstadBaseActivity implements Claz
     private ClazzActivityEditPresenter mPresenter;
 
     //The Activity change options drop down / spinner.
-    Spinner activityChangeSpinner;
+    AppCompatSpinner activityChangeSpinner;
+    Spinner trueFalseSpinner;
+
     //The list of activity changes as a string list (used to populate the drop down / spinner)
     String[] changesPresets;
 
@@ -52,7 +60,11 @@ public class ClazzActivityEditActivity extends UstadBaseActivity implements Claz
     //Unit of measure title
     TextView unitOfMeasureTitle;
 
+    //Notes in the ClazzActivity
     TextView notesET;
+
+    //Date heading
+    TextView dateHeading;
 
     /**
      * Handles option selected from the toolbar. Here it is handling back button pressed.
@@ -74,7 +86,7 @@ public class ClazzActivityEditActivity extends UstadBaseActivity implements Claz
      * In Order:
      *      1. Sets layout
      *      2. Sets toolbar
-     *      3. Calls the presenter and its onCreate()
+     *      3. Calls the presenter and its onCreate() < sets the spinner, fills data
      *      4. Sets the [Activity change] drop down / spinner 's on select listener -> to presenter
      *      5. Sets good / bad click listener -> to presenter
      *      6. Sets notes text edit listener -> to presenter
@@ -101,6 +113,9 @@ public class ClazzActivityEditActivity extends UstadBaseActivity implements Claz
         notesET = findViewById(R.id.activity_clazz_activity_edit_notes);
         unitOfMeasureTitle = findViewById(R.id.activity_clazz_activity_edit_change_uom_title);
         unitOfMeasureEditText = findViewById(R.id.activity_clazz_activity_edit_change_spinner2);
+        dateHeading = findViewById(R.id.activity_class_activity_date_heading3);
+        ImageButton goOneDayBackImageView = findViewById(R.id.activity_class_activity_date_go_back3);
+        ImageButton goOneDayForwardImageView = findViewById(R.id.activity_class_activity_date_go_forward3);
 
         //Call the Presenter
         mPresenter = new ClazzActivityEditPresenter(this,
@@ -112,11 +127,25 @@ public class ClazzActivityEditActivity extends UstadBaseActivity implements Claz
         fab.setOnClickListener(v -> mPresenter.handleClickPrimaryActionButton());
 
         activityChangeSpinner = findViewById(R.id.activity_clazz_activity_edit_change_spinner);
+
         activityChangeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                //TODO: Check and Test if +1 works
-                mPresenter.handleChangeActivityChange(id+1);
+                //The change to id map starts from an offset
+                mPresenter.handleChangeActivityChange(id);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
+
+        trueFalseSpinner = findViewById(R.id.activity_clazz_activity_edit_change_measurement_spinner);
+        setTrueFalseDropdownPresets();
+        trueFalseSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                //Handle true/false value selected from the spinner.
+                mPresenter.handleChangeTrueFalseMeasurement(position);
             }
 
             @Override
@@ -125,6 +154,8 @@ public class ClazzActivityEditActivity extends UstadBaseActivity implements Claz
             }
         });
 
+
+
         //Thumbs listener
         thumbsUp.setOnClickListener(v -> mPresenter.handleChangeFeedback(true));
         thumbsDown.setOnClickListener(v -> mPresenter.handleChangeFeedback(false));
@@ -132,14 +163,10 @@ public class ClazzActivityEditActivity extends UstadBaseActivity implements Claz
         //Notes listener
         notesET.addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-            }
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
 
             @Override
             public void afterTextChanged(Editable s) {
@@ -166,6 +193,10 @@ public class ClazzActivityEditActivity extends UstadBaseActivity implements Claz
                 mPresenter.handleChangeUnitOfMeasure(Long.valueOf(s.toString()));
             }
         });
+
+        //Date switching
+        goOneDayBackImageView.setOnClickListener(v -> mPresenter.handleClickGoBackDate());
+        goOneDayForwardImageView.setOnClickListener(v -> mPresenter.handleClickGoForwardDate());
     }
 
 
@@ -183,6 +214,19 @@ public class ClazzActivityEditActivity extends UstadBaseActivity implements Claz
         });
     }
 
+    public void setTrueFalseDropdownPresets(){
+
+        ArrayList<String> presetAL = new ArrayList<>();
+        presetAL.add("True");
+        presetAL.add("False");
+
+        String[] trueFalsePresets = presetAL.toArray(new String[presetAL.size()]);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(getApplicationContext(),
+                android.R.layout.simple_spinner_item, trueFalsePresets);
+
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        trueFalseSpinner.setAdapter(adapter);
+    }
 
     /**
      * Updates the activity change drop down / spinner with values given.
@@ -210,19 +254,21 @@ public class ClazzActivityEditActivity extends UstadBaseActivity implements Claz
                 case ClazzActivityChange.UOM_FREQUENCY:
                     uomTitle = getText(R.string.uom_frequency_title).toString();
                     unitOfMeasureEditText.setInputType(InputType.TYPE_CLASS_NUMBER);
-
+                    setTrueFalseVisibility(false);
                     break;
                 case ClazzActivityChange.UOM_BINARY:
                     uomTitle = getText(R.string.uom_boolean_title).toString();
-                    unitOfMeasureEditText.setInputType(InputType.TYPE_CLASS_NUMBER);
+                    setTrueFalseVisibility(true);
                     break;
                 case ClazzActivityChange.UOM_DURATION:
                     uomTitle = getText(R.string.uom_duration_title).toString();
                     unitOfMeasureEditText.setInputType(InputType.TYPE_CLASS_NUMBER);
+                    setTrueFalseVisibility(false);
                     break;
                 default:
                     uomTitle = getText(R.string.uom_default_title).toString();
                     unitOfMeasureEditText.setInputType(InputType.TYPE_CLASS_NUMBER);
+                    setTrueFalseVisibility(false);
                     break;
             }
             unitOfMeasureTitle.setText(uomTitle);
@@ -232,29 +278,68 @@ public class ClazzActivityEditActivity extends UstadBaseActivity implements Claz
 
     @Override
     public void setThumbs(int thumbs) {
-        switch (thumbs){
-            case THUMB_OFF:
-                thumbsUp.clearColorFilter();
-                thumbsDown.clearColorFilter();
-                break;
-            case THUMB_GOOD:
-                thumbsUp.setColorFilter(Color.BLACK);
-                thumbsDown.clearColorFilter();
-                break;
-            case THUMB_BAD:
-                thumbsUp.clearColorFilter();
-                thumbsDown.setColorFilter(Color.BLACK);
-                break;
-        }
+        runOnUiThread(() -> {
+            switch (thumbs){
+                case THUMB_OFF:
+                    thumbsUp.clearColorFilter();
+                    thumbsDown.clearColorFilter();
+                    break;
+                case THUMB_GOOD:
+                    thumbsUp.setColorFilter(Color.BLACK);
+                    thumbsDown.clearColorFilter();
+                    break;
+                case THUMB_BAD:
+                    thumbsUp.clearColorFilter();
+                    thumbsDown.setColorFilter(Color.BLACK);
+                    break;
+            }
+        });
+
     }
 
     @Override
     public void setNotes(String notes) {
-        notesET.setText(notes);
+        runOnUiThread(() -> notesET.setText(notes));
     }
 
     @Override
     public void setUOMText(String uomText) {
-        unitOfMeasureEditText.setText(uomText);
+        runOnUiThread(() ->unitOfMeasureEditText.setText(uomText));
+    }
+
+    @Override
+    public void setMeasureBitVisibility(boolean visible) {
+        runOnUiThread(() -> {
+            if (visible) {
+                unitOfMeasureTitle.setVisibility(View.VISIBLE);
+                unitOfMeasureEditText.setVisibility(View.VISIBLE);
+            } else {
+                unitOfMeasureTitle.setVisibility(View.INVISIBLE);
+                unitOfMeasureEditText.setVisibility(View.INVISIBLE);
+            }
+        });
+    }
+
+    @Override
+    public void setTrueFalseVisibility(boolean visible) {
+        runOnUiThread(() -> {
+            if (visible) {
+                trueFalseSpinner.setVisibility(View.VISIBLE);
+                unitOfMeasureEditText.setVisibility(View.INVISIBLE);
+            } else {
+                trueFalseSpinner.setVisibility(View.INVISIBLE);
+            }
+        });
+    }
+
+    /**
+     * Sets the dateString to the View
+     *
+     * @param dateString    The date in readable format that will be set to the ClazzLogDetail view
+     */
+    @Override
+    public void updateDateHeading(String dateString) {
+        //Since its called from the presenter, need to run on ui thread.
+        runOnUiThread(() -> dateHeading.setText(dateString));
     }
 }

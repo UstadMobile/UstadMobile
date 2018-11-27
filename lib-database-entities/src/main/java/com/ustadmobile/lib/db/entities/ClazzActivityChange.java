@@ -21,6 +21,16 @@ public class ClazzActivityChange{
 
     private int clazzActivityUnitOfMeasure;
 
+    private boolean clazzActivityChangeActive;
+
+    public boolean isClazzActivityChangeActive() {
+        return clazzActivityChangeActive;
+    }
+
+    public void setClazzActivityChangeActive(boolean clazzActivityChangeActive) {
+        this.clazzActivityChangeActive = clazzActivityChangeActive;
+    }
+
     @UmSyncMasterChangeSeqNum
     private long clazzActivityChangeMasterChangeSeqNum;
 

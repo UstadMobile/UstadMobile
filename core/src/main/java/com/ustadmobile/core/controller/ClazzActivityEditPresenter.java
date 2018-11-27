@@ -1,6 +1,7 @@
 package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.db.UmAppDatabase;
+import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.dao.ClazzActivityChangeDao;
 import com.ustadmobile.core.db.dao.ClazzActivityDao;
 import com.ustadmobile.core.db.dao.ClazzDao;
@@ -8,6 +9,8 @@ import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.util.UMCalendarUtil;
+import com.ustadmobile.core.view.AddActivityChangeDialogView;
 import com.ustadmobile.core.view.ClazzActivityEditView;
 import com.ustadmobile.core.view.ClazzListView;
 import com.ustadmobile.lib.db.entities.Clazz;
@@ -15,6 +18,7 @@ import com.ustadmobile.lib.db.entities.ClazzActivity;
 import com.ustadmobile.lib.db.entities.ClazzActivityChange;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
@@ -39,12 +43,24 @@ public class ClazzActivityEditPresenter
     private long currentLogDate = -1L;
     private long currentClazzActivityUid = -1L;
 
+    private static final long CHANGEUIDMAPSTART = 2;
+    private static final long ADD_NEW_ACTIVITY_DROPDOWN_ID = 1;
+    private static final long SELECT_ONE_ID = 0;
+    public static final int TRUE_ID = 0;
+    public static final int FALSE_ID = 1;
+
+    private boolean changeSelected = false;
+    private boolean measurementEntered = false;
+
+
     //The current clazz activity being edited.
     private ClazzActivity currentClazzActivity;
 
     //The mapping of activity change uid to drop - down id on the view.
     private HashMap<Long, Long> changeToIdMap;
     private HashMap<Long, Long> unitToUidMap;
+
+    private UmLiveData<List<ClazzActivityChange>> activityChangeLiveData;
 
     //Daos needed - ClazzActivtyDao and ClazzActivityChangeDao
     UmAppDatabase repository = UmAccountManager.getRepositoryForActiveAccount(context);
@@ -95,27 +111,40 @@ public class ClazzActivityEditPresenter
     public void onCreate(Hashtable savedState) {
         super.onCreate(savedState);
 
+        fillClazzActivity();
+    }
+
+    /**
+     * Starts the logic for filling up activity page.
+     */
+    private void fillClazzActivity(){
         //Find Activity first by activity id. If it is not valid, find by clazz uid and log date.
 
-        //Find if Activity Uid :
+        //If activity uid given , find the ClazzActivity:
         if(currentClazzActivityUid > 0)
-            clazzActivityDao.findByUidAsync(currentClazzActivityUid, new UmCallback<ClazzActivity>() {
-                @Override
-                public void onSuccess(ClazzActivity result) {
-                    currentClazzUid = result.getClazzActivityClazzUid();
-                    currentLogDate = result.getClazzActivityLogDate();
-                    checkActivityCreateIfNotExist(result);
-                }
-
-                @Override
-                public void onFailure(Throwable exception) { exception.printStackTrace(); }
-            });
-        else {
-            //Find by Clazz and LogDate .
-            clazzActivityDao.findByClazzAndDateAsync(currentClazzUid, currentLogDate,
+            clazzActivityDao.findByUidAsync(currentClazzActivityUid,
                     new UmCallback<ClazzActivity>() {
+                        //success doesn't mean it exists
                         @Override
                         public void onSuccess(ClazzActivity result) {
+                            currentClazzUid = result.getClazzActivityClazzUid();
+                            currentLogDate = result.getClazzActivityLogDate();
+
+                            //Check if ClazzActivity exists. If it doesn't, create it (It ought to exist)
+                            checkActivityCreateIfNotExist(result);
+                        }
+
+                        @Override
+                        public void onFailure(Throwable exception) { exception.printStackTrace(); }
+                    });
+            //Else find by Clazz uid and Log date given:
+        else {
+            clazzActivityDao.findByClazzAndDateAsync(currentClazzUid, currentLogDate,
+                    new UmCallback<ClazzActivity>() {
+                        //success doesn't mean it exists.
+                        @Override
+                        public void onSuccess(ClazzActivity result) {
+                            //Check if activity given exists or not - create if it doesn't.
                             checkActivityCreateIfNotExist(result);
                         }
 
@@ -137,13 +166,13 @@ public class ClazzActivityEditPresenter
 
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         ClazzDao clazzDao = repository.getClazzDao();
+
         //Update any toolbar title
         Clazz currentClazz = clazzDao.findByUid(currentClazzUid);
-
         view.updateToolbarTitle(currentClazz.getClazzName() + " "
                 + impl.getString(MessageID.activity, context));
 
-        //Create one anyway if not set
+        //Create one anyway given ClazzActivity doesn't exist (is null)
         if(result == null)
             clazzActivityDao.createClazzActivityForDate(currentClazzUid, currentLogDate,
                     new UmCallback<Long>() {
@@ -158,7 +187,11 @@ public class ClazzActivityEditPresenter
                             exception.printStackTrace();
                         }
                     });
+
+        //Set up presenter and start filling the UI with its elements
         else{
+            currentLogDate = currentClazzActivity.getClazzActivityLogDate();
+
             currentClazzActivity = result;
             handleChangeFeedback(currentClazzActivity.isClazzActivityGoodFeedback());
             view.setNotes(currentClazzActivity.getClazzActivityNotes());
@@ -167,6 +200,9 @@ public class ClazzActivityEditPresenter
 
         //Update Activity Change options
         updateChangeOptions();
+
+        //Update date
+        updateViewDateHeading();
     }
 
     /**
@@ -179,30 +215,78 @@ public class ClazzActivityEditPresenter
     }
 
     /**
+     * Opens new Add ActivityChange Dialog
+     */
+    private void handleClickAddNewActivityChange(){
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        Hashtable<String, Object> args = new Hashtable<>();
+        args.put(ARG_CLAZZ_UID, currentClazzUid);
+        impl.go(AddActivityChangeDialogView.VIEW_NAME, args, getContext());
+    }
+
+    /**
      * Handles Activity Change selected for this Clazz Activity. The given selection id is the
      * position that will be looked up to get the uid of the Activity Change selected.
      *
      * @param chosenId The id of the selected preset from the drop-down (spinner).
      */
     public void handleChangeActivityChange(long chosenId){
+        measurementEntered = false;
         Long newChangeUid = changeToIdMap.get(chosenId);
-        currentClazzActivity.setClazzActivityClazzActivityChangeUid(newChangeUid);
 
-        //TODOing: Update Unit of measurement as well
-        ClazzActivityChangeDao clazzActivityChangeDao =
-                repository.getClazzActivityChangeDao();
-        clazzActivityChangeDao.findByUidAsync(newChangeUid, new UmCallback<ClazzActivityChange>() {
-            @Override
-            public void onSuccess(ClazzActivityChange result) {
-                handleChangeUnitOfMeasure(result.getClazzActivityUnitOfMeasure());
-            }
+        if(chosenId == SELECT_ONE_ID){
+            changeSelected = false;
+            view.setMeasureBitVisibility(false);
+            view.setTrueFalseVisibility(false);
+        }
+        //If add new activity selected
+        else if(chosenId == ADD_NEW_ACTIVITY_DROPDOWN_ID ) {
+            changeSelected = false;
+            handleClickAddNewActivityChange();
+            view.setMeasureBitVisibility(false);
+            view.setTrueFalseVisibility(false);
 
-            @Override
-            public void onFailure(Throwable exception) {
+        //Get the ClazzActivityChange object, set the unit of measure as well.
+        }else if(chosenId >= CHANGEUIDMAPSTART){
+            view.setMeasureBitVisibility(true);
+            currentClazzActivity.setClazzActivityClazzActivityChangeUid(newChangeUid);
 
-            }
-        });
+            ClazzActivityChangeDao clazzActivityChangeDao =
+                    repository.getClazzActivityChangeDao();
+            clazzActivityChangeDao.findByUidAsync(newChangeUid,
+                                                    new UmCallback<ClazzActivityChange>() {
+                @Override
+                public void onSuccess(ClazzActivityChange result) {
+                    if(result != null) {
+                        //Set the unit of measure for this ClazzActivityChange
+                        //handleChangeUnitOfMeasure(result.getClazzActivityUnitOfMeasure());
+                        view.setUnitOfMeasureType(result.getClazzActivityUnitOfMeasure());
+                        changeSelected = true;
+                    }
+                }
 
+                @Override
+                public void onFailure(Throwable exception) {}
+            });
+        }
+
+    }
+
+    /**
+     * Adds choosen true/false as per given id.
+     *
+     * @param choosenId The id choosen.
+     */
+    public void handleChangeTrueFalseMeasurement(int choosenId){
+        measurementEntered = true;
+        switch (choosenId){
+            case TRUE_ID:
+                currentClazzActivity.setClazzActivityQuantity(1);
+                break;
+            case FALSE_ID:
+                currentClazzActivity.setClazzActivityQuantity(0);
+                break;
+        }
     }
 
     /**
@@ -214,8 +298,8 @@ public class ClazzActivityEditPresenter
      * @param choosenUnitId     The id of the selected preset form the drop down / spinner
      */
     public void handleChangeUnitOfMeasure(long choosenUnitId){
+        measurementEntered = true;
         currentClazzActivity.setClazzActivityQuantity(choosenUnitId);
-        view.setUnitOfMeasureType(choosenUnitId);
     }
 
     /**
@@ -233,6 +317,40 @@ public class ClazzActivityEditPresenter
     }
 
     /**
+     * Updates the activity changes given to it to the view.
+     */
+    private void updateActivityChangesOnView(List<ClazzActivityChange> result){
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        changeToIdMap = new HashMap<>();
+        ArrayList<String> presetAL = new ArrayList<>();
+
+        //Add Select one option
+        presetAL.add("Select one");
+        changeToIdMap.put(SELECT_ONE_ID, SELECT_ONE_ID);
+
+        //Add "Add new activity" option
+        presetAL.add(impl.getString(MessageID.add_activity, context));
+        changeToIdMap.put(ADD_NEW_ACTIVITY_DROPDOWN_ID, ADD_NEW_ACTIVITY_DROPDOWN_ID);
+
+        //Add all other options starting from CHANGEUIDMAPSTART
+        long i = CHANGEUIDMAPSTART;
+        for(ClazzActivityChange everyChange: result){
+
+            presetAL.add(everyChange.getClazzActivityChangeTitle());
+
+            //Add the preset to a mapping where position is paired with the Activity
+            // Change's uid so that we can handle which Activity Change got selected.
+            changeToIdMap.put(i, everyChange.getClazzActivityChangeUid());
+
+            i++;
+        }
+
+        //set the presets to the view's activity change drop down (spinner)
+        view.setClazzActivityChangesDropdownPresets(presetAL.toArray(new String[presetAL.size()]));
+
+    }
+
+    /**
      * Finds all Activity Changes available for a clazz and gives it to the view to render.
      * Also saves the mapping to the Presenter such that we can handle what Activity change was
      * selected.
@@ -240,31 +358,11 @@ public class ClazzActivityEditPresenter
      */
     private void updateChangeOptions(){
 
-        activityChangeDao.findAllClazzActivityChangesAsync(new UmCallback<List<ClazzActivityChange>>() {
-            @Override
-            public void onSuccess(List<ClazzActivityChange> result) {
-                changeToIdMap = new HashMap<>();
-                ArrayList<String> presetAL = new ArrayList<>();
-                int i=0;
-                for(ClazzActivityChange everyChange: result){
-                    i++;
-                    presetAL.add(everyChange.getClazzActivityChangeTitle());
-
-                    //Add the preset to a mapping where position is paired with the Activity
-                    // Change's uid so that we can handle which Activity Change got selected.
-                    changeToIdMap.put((long) i, everyChange.getClazzActivityChangeUid());
-                }
-
-                //set the presets to the view's activity change drop down (spinner)
-                view.setClazzActivityChangesDropdownPresets(presetAL.toArray(new String[presetAL.size()]));
-
-            }
-
-            @Override
-            public void onFailure(Throwable exception) {
-                exception.printStackTrace();
-            }
-        });
+        //Get activity change list live data
+        activityChangeLiveData = activityChangeDao.findAllClazzActivityChangesAsyncLive();
+        //Observing it
+        activityChangeLiveData.observe(ClazzActivityEditPresenter.this,
+                ClazzActivityEditPresenter.this::updateActivityChangesOnView);
     }
 
     /**
@@ -276,18 +374,76 @@ public class ClazzActivityEditPresenter
      */
     public void handleClickPrimaryActionButton() {
 
-        currentClazzActivity.setClazzActivityDone(true);
-        clazzActivityDao.updateAsync(currentClazzActivity, new UmCallback<Integer>() {
-            @Override
-            public void onSuccess(Integer result) {
-                view.finish();
-            }
+        if(changeSelected && measurementEntered) {
+            currentClazzActivity.setClazzActivityDone(true);
+            clazzActivityDao.updateAsync(currentClazzActivity, new UmCallback<Integer>() {
+                @Override
+                public void onSuccess(Integer result) {
+                    view.finish();
+                }
 
-            @Override
-            public void onFailure(Throwable exception) {
+                @Override
+                public void onFailure(Throwable exception) {
+
+                }
+            });
+        }
+        //else maybe alert/nodd the user that you need to select and fill everything.
+    }
+
+    public void handleClickGoBackDate(){
+        long newDate = UMCalendarUtil.getDateInMilliPlusDaysRelativeTo(currentLogDate, -1);
+        System.out.println("Go back: " + newDate);
+
+        reloadLogDetailForDate(newDate);
+    }
+
+    public void handleClickGoForwardDate(){
+        Date currentLogDateDate = new Date(currentLogDate);
+
+        if(!UMCalendarUtil.isToday(currentLogDateDate)){
+            if(currentLogDate < System.currentTimeMillis()){
+                //Go to next day's
+                long newDate = UMCalendarUtil.getDateInMilliPlusDaysRelativeTo(currentLogDate, 1);
+                System.out.println("go forawrd: " + newDate);
+                reloadLogDetailForDate(newDate);
 
             }
-        });
+        }
+    }
+
+    public void updateViewDateHeading(){
+        Date currentLogDateDate = new Date(currentLogDate);
+        String prettyDate="";
+        if(UMCalendarUtil.isToday(currentLogDateDate)){
+            prettyDate = "Today";
+        }
+        prettyDate += "(" + UMCalendarUtil.getPrettyDateFromLong(currentLogDate) + ")";
+
+        view.updateDateHeading(prettyDate);
+    }
+
+    /**
+     * Re loads the attendance log detail view
+     *
+     * @param newDate The new date set
+     */
+    public void reloadLogDetailForDate(long newDate){
+        System.out.println("Reload for date: " + newDate);
+
+        //1. Set currentLogDate to newDate
+        currentLogDate = newDate;
+
+        //2. Reset the current ClazzActivity uid
+        currentClazzActivityUid = -1;
+
+        //3. Re load view and recycler
+        fillClazzActivity();
+
+        //4. Update date heading
+        updateViewDateHeading();
+
+
     }
 
     @Override

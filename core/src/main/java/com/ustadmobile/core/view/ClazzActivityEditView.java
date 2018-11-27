@@ -65,4 +65,23 @@ public interface ClazzActivityEditView extends UstadView {
      */
     void setUOMText(String uomText);
 
+    /**
+     * Method to hide / show the measurement bit - useful when no Activity Change is selected.
+     */
+    void setMeasureBitVisibility(boolean visible);
+
+    /**
+     * Sets the true/false visibility
+     *
+     * @param visible   true if visible, false if invisible
+     */
+    void setTrueFalseVisibility(boolean visible);
+
+    /**
+     * Sets the dateString to the View
+     *
+     * @param dateString    The date in readable format that will be set to the ClazzLogDetail view
+     */
+    void updateDateHeading(String dateString);
+
 }

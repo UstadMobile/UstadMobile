@@ -76,6 +76,7 @@ import com.ustadmobile.core.tincan.TinCanResultListener;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.view.AboutView;
+import com.ustadmobile.core.view.AddActivityChangeDialogView;
 import com.ustadmobile.core.view.AddFeedDialogView;
 import com.ustadmobile.core.view.AddScheduleDialogView;
 import com.ustadmobile.core.view.AppView;
@@ -215,6 +216,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         viewNameToAndroidImplMap.put(ClazzEditView.VIEW_NAME, ClazzEditActivity.class);
         viewNameToAndroidImplMap.put(AddScheduleDialogView.VIEW_NAME, AddScheduleDialogFragment.class);
         viewNameToAndroidImplMap.put(ClazzActivityEditView.VIEW_NAME, ClazzActivityEditActivity.class);
+        viewNameToAndroidImplMap.put(AddActivityChangeDialogView.VIEW_NAME, AddActivityChangeDialogFragment.class);
 
 
     }

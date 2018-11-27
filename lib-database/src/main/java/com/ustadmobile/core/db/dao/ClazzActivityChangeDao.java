@@ -1,5 +1,6 @@
 package com.ustadmobile.core.db.dao;
 
+import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.lib.database.annotation.UmDao;
@@ -30,6 +31,9 @@ public abstract  class ClazzActivityChangeDao implements SyncableDao<ClazzActivi
 
     @UmQuery("SELECT * FROM ClazzActivityChange")
     public abstract void findAllClazzActivityChangesAsync(UmCallback<List<ClazzActivityChange>> resultList);
+
+    @UmQuery("SELECT * FROM ClazzActivityChange")
+    public abstract UmLiveData<List<ClazzActivityChange>> findAllClazzActivityChangesAsyncLive();
 
     @UmUpdate
     public abstract void updateAsync(ClazzActivityChange entity, UmCallback<Integer> resultObject);

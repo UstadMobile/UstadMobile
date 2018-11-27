@@ -770,16 +770,20 @@ public class SplashScreenActivity extends AppCompatActivity
             ClazzActivityChange newChange1 = new ClazzActivityChange();
             newChange1.setClazzActivityChangeTitle("Increased group work");
             newChange1.setClazzActivityUnitOfMeasure(ClazzActivityChange.UOM_FREQUENCY);
+            newChange1.setClazzActivityChangeActive(true);
             newChange1.setClazzActivityChangeUid(clazzActivityChangeDao.insert(newChange1));
+
 
             ClazzActivityChange newChange2 = new ClazzActivityChange();
             newChange2.setClazzActivityChangeTitle("Call students by name");
             newChange2.setClazzActivityUnitOfMeasure(ClazzActivityChange.UOM_FREQUENCY);
+            newChange2.setClazzActivityChangeActive(true);
             newChange2.setClazzActivityChangeUid(clazzActivityChangeDao.insert(newChange2));
 
             ClazzActivityChange newChange3 = new ClazzActivityChange();
             newChange3.setClazzActivityChangeTitle("One to one interaction");
             newChange3.setClazzActivityUnitOfMeasure(ClazzActivityChange.UOM_FREQUENCY);
+            newChange3.setClazzActivityChangeActive(true);
             newChange3.setClazzActivityChangeUid(clazzActivityChangeDao.insert(newChange3));
 
             //Adding some Activities

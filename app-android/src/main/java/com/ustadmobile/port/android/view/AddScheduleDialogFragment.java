@@ -1,12 +1,12 @@
 package com.ustadmobile.port.android.view;
 
-import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
+import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
@@ -26,8 +26,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Objects;
-
-import android.text.format.DateFormat;
 
 import io.reactivex.annotations.NonNull;
 
@@ -51,7 +49,6 @@ public class AddScheduleDialogFragment extends UstadDialogFragment implements
     View rootView;
     String[] schedulePresets;
     String[] dayPresets;
-    private long currentScheduleUid = -1L;
 
     @android.support.annotation.NonNull
     @NonNull
@@ -67,7 +64,7 @@ public class AddScheduleDialogFragment extends UstadDialogFragment implements
         assert inflater != null;
 
         if(getArguments().containsKey(ARG_SCHEDULE_UID)) {
-            currentScheduleUid = getArguments().getLong(ARG_SCHEDULE_UID);
+            long currentScheduleUid = getArguments().getLong(ARG_SCHEDULE_UID);
         }
 
         rootView = inflater.inflate(R.layout.fragment_add_schedule_dialog, null);

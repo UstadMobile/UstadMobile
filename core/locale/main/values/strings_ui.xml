@@ -419,5 +419,13 @@ This is the one you should be editing. The one in /core/locale/main/values/strin
     <string name="uom_duration_title">Length of time</string>
     <string name="uom_boolean_title">True or false</string>
     <string name="uom_default_title">Unit of measurement</string>
+    <string name="add_activity">Add a new activity...</string>
+    <string name="add_activity_literal">Add activity</string>
+    <string name="select_one">Select one</string>
+    <string name="measurement_type">Measurement type</string>
+    <string name="frequency">Frequency</string>
+    <string name="yes_no">Yes\/No</string>
+    <string name="true_literal">True</string>
+    <string name="false_literal">False</string>
 
 </resources>

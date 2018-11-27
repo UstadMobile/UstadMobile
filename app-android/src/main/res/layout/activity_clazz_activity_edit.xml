@@ -6,6 +6,38 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <TextView
+        android:id="@+id/activity_class_activity_date_heading3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginEnd="8dp"
+        android:text=""
+        app:layout_constraintEnd_toStartOf="@+id/activity_class_activity_date_go_forward3"
+        app:layout_constraintStart_toEndOf="@+id/activity_class_activity_date_go_back3"
+        app:layout_constraintTop_toBottomOf="@+id/activity_clazz_activity_edit_appbar" />
+
+    <ImageButton
+        android:id="@+id/activity_class_activity_date_go_back3"
+        style="?android:attr/borderlessButtonStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/activity_clazz_activity_edit_appbar"
+        app:srcCompat="@drawable/ic_chevron_left_black_24dp" />
+
+    <ImageButton
+        android:id="@+id/activity_class_activity_date_go_forward3"
+        style="?android:attr/borderlessButtonStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/activity_clazz_activity_edit_appbar"
+        app:srcCompat="@drawable/ic_chevron_right_black_24dp" />
+
     <android.support.design.widget.AppBarLayout
         android:id="@+id/activity_clazz_activity_edit_appbar"
         android:layout_width="match_parent"
@@ -29,35 +61,36 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:text="@string/activity_change"
+        android:textColor="@color/text_primary"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/activity_clazz_activity_edit_appbar" />
+        app:layout_constraintTop_toBottomOf="@+id/activity_class_activity_date_go_back3" />
 
-    <Spinner
+    <android.support.v7.widget.AppCompatSpinner
         android:id="@+id/activity_clazz_activity_edit_change_spinner"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:paddingTop="20dp"
-        android:spinnerMode="dialog"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView3">
 
-    </Spinner>
+    </android.support.v7.widget.AppCompatSpinner>
 
     <EditText
         android:id="@+id/activity_clazz_activity_edit_change_spinner2"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="64dp"
+        android:layout_marginStart="44dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
+        android:autofillHints="@string/duration"
+        android:inputType=""
         android:paddingTop="20dp"
         android:spinnerMode="dialog"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/activity_clazz_activity_edit_change_spinner"
-        app:layout_constraintTop_toBottomOf="@+id/activity_clazz_activity_edit_change_uom_title"
-        android:autofillHints="@string/duration"
-        android:inputType="">
+        app:layout_constraintStart_toEndOf="@+id/textView3"
+        app:layout_constraintTop_toBottomOf="@+id/activity_clazz_activity_edit_change_uom_title">
 
     </EditText>
 
@@ -68,6 +101,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:text="@string/change_implemented_if_any"
+        android:textSize="12sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/activity_clazz_activity_edit_heading" />
 
@@ -75,10 +109,11 @@
         android:id="@+id/activity_clazz_activity_edit_change_uom_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="32dp"
+        android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:text="@string/duration"
-        app:layout_constraintStart_toEndOf="@+id/textView3"
+        android:textSize="12sp"
+        app:layout_constraintStart_toStartOf="@+id/activity_clazz_activity_edit_change_spinner2"
         app:layout_constraintTop_toBottomOf="@+id/activity_clazz_activity_edit_heading" />
 
     <TextView
@@ -88,6 +123,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="32dp"
         android:text="@string/how_did_it_go"
+        android:textSize="12sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/activity_clazz_activity_edit_change_spinner" />
 
@@ -121,6 +157,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:text="@string/notes"
+        android:textSize="12sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/activity_clazz_activity_edit_went_bad" />
 
@@ -129,14 +166,13 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
+        android:autofillHints="@string/activity_enter_any_notes"
         android:ems="10"
         android:inputType="textPersonName"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView6"
-        android:autofillHints="@string/activity_enter_any_notes" />
+        app:layout_constraintTop_toBottomOf="@+id/textView6" />
 
     <ru.dimorinny.floatingtextbutton.FloatingTextButton
         android:id="@+id/activity_clazz_activity_edit_fab"
@@ -154,5 +190,17 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
+
+    <Spinner
+        android:id="@+id/activity_clazz_activity_edit_change_measurement_spinner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="44dp"
+        android:layout_marginTop="28dp"
+        android:layout_marginEnd="8dp"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/textView3"
+        app:layout_constraintTop_toBottomOf="@+id/activity_clazz_activity_edit_change_uom_title" />
 
 </android.support.constraint.ConstraintLayout>
