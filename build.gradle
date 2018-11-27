@@ -46,6 +46,8 @@ ext {
     version_gson = "2.8.2"
     version_apache_commons_cli = "1.4"
     version_apache_commons_lang = "3.8.1"
+    version_apache_commons_text = "1.6"
+
     version_mockwebserver = "3.10.0"
     version_javapoet = "1.11.1"
     version_reflections = "0.9.11"
@@ -54,6 +56,8 @@ ext {
     version_jsqlparser = "0.9"
     version_core_mockito = "2.13.0"
     version_apache_commons_pool2 = "2.6.0"
+    version_jersey = "2.27"
+    version_retrofit = "2.4.0"
 
     version_android_buildtools = "28.0.3"
     version_android_compile_sdk = 27
@@ -80,6 +84,18 @@ ext.buildConfigProperties = new Properties()
 ext.buildConfigProperties.load(new FileInputStream(project.file("buildconfig.default.properties")))
 if(project.file("buildconfig.local.properties").exists()) {
     ext.buildConfigProperties.load(new FileInputStream(project.file("buildconfig.local.properties")))
+}
+
+ext.localProperties = new Properties()
+ext.localProperties.load(new FileInputStream(project.file("local.properties")))
+
+//Due to a bug, the JDK8 annotation processor provides incorrect parameter names, thus we need
+// to use JDK9+ to run the annotation processor https://bugs.openjdk.java.net/browse/JDK-8191074
+if(!ext.localProperties.containsKey("javac.9plus")) {
+    throw new GradleException("Due to a JDK8 bug ( https://bugs.openjdk.java.net/browse/JDK-8191074 ) " +
+            "with providing parameter names to the annotation processor, you must define a path to a " +
+            "JDK9+ javac for use with the database annotation processor in local.properties " +
+            "e.g. javac.9plus=/path/to/jvm9/bin/javac")
 }
 
 /**

@@ -2,13 +2,15 @@ package com.ustadmobile.lib.db.entities;
 
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
+import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
+import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 
 /**
  * Created by mike on 3/8/18.
  */
 
-@UmEntity
-public class Person implements SyncableEntity {
+@UmEntity(tableId = 9)
+public class Person  {
 
     public static final int GENDER_UNSET = 0;
 
@@ -18,7 +20,7 @@ public class Person implements SyncableEntity {
 
     public static final int GENDER_OTHER = 4;
 
-    @UmPrimaryKey(autoIncrement = true)
+    @UmPrimaryKey(autoGenerateSyncable = true)
     private long personUid;
 
     private String username;
@@ -37,10 +39,11 @@ public class Person implements SyncableEntity {
 
     private boolean active;
 
-    private long masterChangeSeqNum;
+    @UmSyncMasterChangeSeqNum
+    private long personMasterChangeSeqNum;
 
-    private long localChangeSeqNum;
-
+    @UmSyncLocalChangeSeqNum
+    private long personLocalChangeSeqNum;
 
     public long getPersonUid() {
         return personUid;
@@ -98,24 +101,20 @@ public class Person implements SyncableEntity {
         this.phoneNum = phoneNum;
     }
 
-    @Override
-    public long getMasterChangeSeqNum() {
-        return masterChangeSeqNum;
+    public long getPersonMasterChangeSeqNum() {
+        return personMasterChangeSeqNum;
     }
 
-    @Override
-    public void setMasterChangeSeqNum(long masterChangeSeqNum) {
-        this.masterChangeSeqNum = masterChangeSeqNum;
+    public void setPersonMasterChangeSeqNum(long personMasterChangeSeqNum) {
+        this.personMasterChangeSeqNum = personMasterChangeSeqNum;
     }
 
-    @Override
-    public long getLocalChangeSeqNum() {
-        return localChangeSeqNum;
+    public long getPersonLocalChangeSeqNum() {
+        return personLocalChangeSeqNum;
     }
 
-    @Override
-    public void setLocalChangeSeqNum(long localChangeSeqNum) {
-        this.localChangeSeqNum = localChangeSeqNum;
+    public void setPersonLocalChangeSeqNum(long personLocalChangeSeqNum) {
+        this.personLocalChangeSeqNum = personLocalChangeSeqNum;
     }
 
     public int getGender() {

@@ -1,0 +1,46 @@
+apply plugin: 'java-library'
+apply plugin: "maven-publish"
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation project(":lib-util")
+    implementation "com.squareup.retrofit2:retrofit:$version_retrofit"
+    implementation "com.squareup.retrofit2:converter-gson:$version_retrofit"
+    implementation "com.squareup.retrofit2:converter-scalars:$version_retrofit"
+
+
+    compileOnly project(":lib-room-annotations")
+}
+
+sourceCompatibility = "1.8"
+targetCompatibility = "1.8"
+
+compileJava {
+    options.compilerArgs += ["-parameters"]
+}
+
+task sourceJar(type: Jar) {
+    from sourceSets.main.allJava
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId rootProject.group
+            artifactId project.name
+            version rootProject.version
+
+            from components.java
+
+            artifact sourceJar {
+                classifier = 'sources'
+            }
+        }
+    }
+
+    repositories {
+        maven {
+            url rootProject.ext.buildConfigProperties['repo.dir']
+        }
+    }
+}

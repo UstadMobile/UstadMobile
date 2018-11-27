@@ -8,6 +8,7 @@ dependencies {
     implementation project(":lib-core-fs")
     implementation project(":lib-database")
     implementation project(':lib-database-entities')
+    implementation project(':lib-database-runtime')
     implementation "junit:junit:$version_junit"
     implementation "net.sf.kxml:kxml2:$version_kxml"
     implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"

@@ -10,6 +10,7 @@ dependencies {
     testCompile project(":sharedse-tests")
     testCompile project(":app-javase")
     implementation project(":lib-database")
+    implementation project(":lib-database-runtime")
     compileOnly project(':lib-database-entities')
 
     implementation "org.json:json:$version_json"
