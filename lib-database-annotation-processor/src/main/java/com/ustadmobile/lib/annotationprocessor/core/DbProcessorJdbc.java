@@ -1406,9 +1406,11 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                     commaRequired = true;
                 }
                 codeBlock.add(");\n").endControlFlow();
-            }catch(JSQLParserException je) {
-                messager.printMessage(Diagnostic.Kind.ERROR, formatMethodForErrorMessage(daoMethod) +
-                    " exception parsing update/delete query: " + je.getMessage());
+            }catch(Exception je) {
+                messager.printMessage(Diagnostic.Kind.ERROR,
+                        formatMethodForErrorMessage(daoMethod, daoType) +
+                    " exception parsing update/delete query: " + je.getClass().getSimpleName() +
+                    ": " + je.getMessage());
             }
 
 
