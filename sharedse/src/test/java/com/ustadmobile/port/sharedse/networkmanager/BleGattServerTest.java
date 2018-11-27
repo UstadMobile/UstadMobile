@@ -1,8 +1,5 @@
 package com.ustadmobile.port.sharedse.networkmanager;
 
-
-import android.content.Context;
-
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.test.core.impl.PlatformTestUtil;
@@ -52,7 +49,7 @@ public class BleGattServerTest {
 
     @Before
     public void setUpSpy(){
-        Context context = (Context) PlatformTestUtil.getTargetContext();
+        Object context =  PlatformTestUtil.getTargetContext();
         Collections.sort(entries);
         mockedNetworkManager = spy(NetworkManagerBle.class);
         mockedNetworkManager.init(context);
@@ -212,7 +209,7 @@ public class BleGattServerTest {
     @Test
     public void givenRequestWithAvailableEntries_whenHandlingIt_thenShouldReplyTheyAreAvailable(){
         BleMessage messageToSend = new BleMessage(ENTRY_STATUS_REQUEST, bleMessageLongToBytes(entries));
-        long [] rowCount = umAppDatabase.getContentEntryDao().insert(contentEntryList);
+        Long [] rowCount = umAppDatabase.getContentEntryDao().insert(contentEntryList);
 
         assertTrue("Content added successfully", rowCount.length == entries.size());
 
@@ -233,7 +230,7 @@ public class BleGattServerTest {
     @Test
     public void givenRequestWithUnAvailableEntries_whenHandlingIt_thenShouldReplyTheyAreNotAvailable(){
         BleMessage messageToSend = new BleMessage(ENTRY_STATUS_REQUEST, bleMessageLongToBytes(entries));
-        umAppDatabase.getContentEntryDao().deleteAll();
+        umAppDatabase.clearAllTables();
 
         BleMessage responseMessage = gattServer.handleRequest(messageToSend);
         List<Long> responseList = BleMessageUtil.bleMessageBytesToLong(responseMessage.getPayload());

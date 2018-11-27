@@ -1,6 +1,5 @@
 package com.ustadmobile.port.sharedse.networkmanager;
 
-import android.content.Context;
 
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.EntryStatusResponseDao;
@@ -37,7 +36,7 @@ public class BleEntryStatusTaskTest {
     private NetworkNode networkNode;
     @Before
     public void setUpSpy(){
-        Context context = (Context) PlatformTestUtil.getTargetContext();
+        Object context =  PlatformTestUtil.getTargetContext();
         UmAppDatabase.getInstance(context).clearAllTables();
         networkNode = new NetworkNode();
         networkNode.setBluetoothMacAddress("00:3F:2F:64:C6:4F");

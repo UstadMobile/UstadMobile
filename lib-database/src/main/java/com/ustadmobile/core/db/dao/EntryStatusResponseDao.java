@@ -16,7 +16,7 @@ import java.util.List;
 public abstract class EntryStatusResponseDao {
 
     @UmInsert(onConflict = UmOnConflictStrategy.REPLACE)
-    public abstract long[] insert(List<EntryStatusResponse> responses);
+    public abstract Long[] insert(List<EntryStatusResponse> responses);
 
 
     @UmQuery("SELECT (COUNT(*) > 0) FROM EntryStatusResponse WHERE entryId = :entryId and available = 1 ")

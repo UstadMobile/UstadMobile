@@ -537,6 +537,7 @@ dependencies {
     implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
 
     testImplementation "junit:junit:$version_junit"
+    testImplementation "com.squareup.okhttp3:okhttp:$version_okhttp"
 }
 
 task sourceJar(type: Jar) {

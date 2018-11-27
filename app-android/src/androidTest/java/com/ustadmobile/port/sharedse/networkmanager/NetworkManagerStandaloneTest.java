@@ -8,6 +8,7 @@ import com.ustadmobile.core.networkmanager.NetworkTask;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.lib.db.entities.CrawlJob;
 import com.ustadmobile.lib.db.entities.DownloadJob;
+import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
 import com.ustadmobile.test.core.ResourcesHttpdTestServer;
 import com.ustadmobile.test.core.impl.PlatformTestUtil;
 import com.ustadmobile.test.sharedse.network.TestDownloadTaskStandalone;
@@ -21,9 +22,6 @@ import org.junit.Test;
 import java.io.IOException;
 import java.util.Arrays;
 
-import static com.ustadmobile.test.sharedse.network.TestDownloadTaskStandalone.CRAWL_JOB_TIMEOUT;
-import static com.ustadmobile.test.sharedse.network.TestDownloadTaskStandalone.CRAWL_ROOT_ENTRY_ID_SLOW;
-import static com.ustadmobile.test.sharedse.network.TestDownloadTaskStandalone.waitForDownloadStatus;
 
 public class NetworkManagerStandaloneTest extends TestWithNetworkService {
 
@@ -44,9 +42,9 @@ public class NetworkManagerStandaloneTest extends TestWithNetworkService {
         CrawlJob crawlJob = TestDownloadTaskStandalone.runCrawlJob(
                 UMFileUtil.resolveLink(ResourcesHttpdTestServer.getHttpRoot(),
                         TestDownloadTaskStandalone.OPDS_PATH_SPEED_LIMITED),
-                        CRAWL_ROOT_ENTRY_ID_SLOW, true, CRAWL_JOB_TIMEOUT,
+                        TestDownloadTaskStandalone.CRAWL_ROOT_ENTRY_ID_SLOW, true, TestDownloadTaskStandalone.CRAWL_JOB_TIMEOUT,
                 true);
-        waitForDownloadStatus(crawlJob.getContainersDownloadJobId(), NetworkTask.STATUS_RUNNING,
+        TestDownloadTaskStandalone.waitForDownloadStatus(crawlJob.getContainersDownloadJobId(), NetworkTask.STATUS_RUNNING,
             5*1000);
         try { Thread.sleep(500);}
         catch(InterruptedException e) {}
@@ -75,7 +73,7 @@ public class NetworkManagerStandaloneTest extends TestWithNetworkService {
                 NetworkTask.STATUS_COMPLETE, dlJob.getStatus());
 
         UstadMobileSystemImpl.getInstance().deleteEntries(PlatformTestUtil.getTargetContext(),
-                Arrays.asList(CRAWL_ROOT_ENTRY_ID_SLOW), true);
+                Arrays.asList(TestDownloadTaskStandalone.CRAWL_ROOT_ENTRY_ID_SLOW), true);
     }
 
     @Test
@@ -87,9 +85,9 @@ public class NetworkManagerStandaloneTest extends TestWithNetworkService {
         CrawlJob crawlJob = TestDownloadTaskStandalone.runCrawlJob(
                 UMFileUtil.resolveLink(ResourcesHttpdTestServer.getHttpRoot(),
                         TestDownloadTaskStandalone.OPDS_PATH_SPEED_LIMITED),
-                CRAWL_ROOT_ENTRY_ID_SLOW, false, CRAWL_JOB_TIMEOUT,
+                TestDownloadTaskStandalone.CRAWL_ROOT_ENTRY_ID_SLOW, false, TestDownloadTaskStandalone.CRAWL_JOB_TIMEOUT,
                 true);
-        waitForDownloadStatus(crawlJob.getContainersDownloadJobId(), NetworkTask.STATUS_RUNNING,
+        TestDownloadTaskStandalone.waitForDownloadStatus(crawlJob.getContainersDownloadJobId(), NetworkTask.STATUS_RUNNING,
                 5*1000);
 
         try { Thread.sleep(500);}
@@ -119,7 +117,7 @@ public class NetworkManagerStandaloneTest extends TestWithNetworkService {
 
         //now delete the entries
         UstadMobileSystemImpl.getInstance().deleteEntries(PlatformTestUtil.getTargetContext(),
-                Arrays.asList(CRAWL_ROOT_ENTRY_ID_SLOW), true);
+                Arrays.asList(TestDownloadTaskStandalone.CRAWL_ROOT_ENTRY_ID_SLOW), true);
     }
 
 

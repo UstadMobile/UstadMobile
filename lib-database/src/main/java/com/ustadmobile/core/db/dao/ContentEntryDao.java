@@ -13,12 +13,10 @@ import java.util.List;
 @UmDao(readPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
 @UmRepository
 public abstract class ContentEntryDao implements SyncableDao<ContentEntry, ContentEntryDao> {
+
     @UmInsert
-    public abstract long [] insert(List<ContentEntry> contentEntries);
+    public abstract Long[] insert(List<ContentEntry> contentEntries);
 
     @UmQuery("SELECT * FROM ContentEntry WHERE contentEntryUid=:entryUuid")
     public abstract ContentEntry findByEntryId(long entryUuid);
-
-    @UmQuery("DELETE FROM ContentEntry")
-    public abstract void deleteAll();
 }

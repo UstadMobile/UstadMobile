@@ -98,7 +98,7 @@ public abstract class BleEntryStatusTask implements Runnable,BleMessageResponseL
             entryStatusResponses.add(statusResponse);
 
         }
-        long [] rowCount = entryStatusResponseDao.insert(entryStatusResponses);
+        Long [] rowCount = entryStatusResponseDao.insert(entryStatusResponses);
         if(rowCount.length == entryStatusResponses.size()){
             UstadMobileSystemImpl.l(UMLog.DEBUG,697,
                     rowCount.length+" responses saved to the db");

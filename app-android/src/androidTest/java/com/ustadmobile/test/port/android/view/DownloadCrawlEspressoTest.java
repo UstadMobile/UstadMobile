@@ -25,16 +25,12 @@ import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.lib.db.entities.DownloadJob;
 import com.ustadmobile.port.android.view.BasePointActivity;
 import com.ustadmobile.port.android.view.CatalogOPDSFragment;
-import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
-import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerStandaloneTest;
 import com.ustadmobile.test.core.ResourcesHttpdTestServer;
-import com.ustadmobile.test.core.buildconfig.TestConstants;
 import com.ustadmobile.test.core.impl.PlatformTestUtil;
 import com.ustadmobile.test.port.android.UmAndroidTestUtil;
 import com.ustadmobile.test.port.android.UmViewActions;
 import com.ustadmobile.test.sharedse.http.UmHttpTestServerClient;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;

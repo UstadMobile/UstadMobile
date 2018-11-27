@@ -1,7 +1,6 @@
 package com.ustadmobile.port.sharedse.networkmanager;
 
 
-import android.content.Context;
 
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.lib.db.entities.ContentEntry;
@@ -28,7 +27,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
- * Test class which tests {@link com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroidBle}
+ * Test class which tests {@link NetworkManagerBle}
  * to make sure it behaves as expected on entry status monitoring logic
  *
  * @author kileha3
@@ -44,11 +43,11 @@ public class BleNetworkManagerTest {
     private List<EntryStatusResponse> entryStatusResponseList = new ArrayList<>();
     private List<ContentEntry> contentEntryList = new ArrayList<>();
     private BleEntryStatusTask mockedEntryStatusTask;
-    private Context context;
+    private Object context;
 
     @Before
     public void setUp(){
-        context = (Context) PlatformTestUtil.getTargetContext();
+        context =  PlatformTestUtil.getTargetContext();
         mockedEntryStatusTask = mock(BleEntryStatusTask.class);
         Collections.sort(entries);
         networkNode = new NetworkNode();
