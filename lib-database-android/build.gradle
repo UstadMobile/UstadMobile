@@ -60,8 +60,9 @@ afterEvaluate {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
-    implementation project(":lib-database")
+    implementation project(':lib-database')
     implementation project(':lib-database-runtime')
+    implementation project(':lib-database-runtime-android')
     implementation project(":lib-util")
     implementation project(":lib-database-retrofitrepository")
 

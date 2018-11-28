@@ -7,7 +7,7 @@ sourceSets{
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation project(":lib-database")
+    implementation project(':lib-database')
     implementation project(":lib-database-entities")
     implementation project(":lib-database-retrofitrepository")
     implementation project(":lib-database-runtime")

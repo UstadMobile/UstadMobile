@@ -113,10 +113,6 @@ public class DbProcessorRoom extends AbstractDbProcessor{
                         Modifier.PRIVATE)
                 .addJavadoc("Generated code - DO NOT EDIT!");
 
-        TypeSpec.Builder factoryClassSpec = DbProcessorUtils.makeFactoryClass(dbType,
-                roomDbManagerClassName);
-
-
 
         dbManagerImplSpec.addMethod(MethodSpec.constructorBuilder()
                     .addParameter(ClassName.get(Object.class), "context")
@@ -214,8 +210,6 @@ public class DbProcessorRoom extends AbstractDbProcessor{
         writeJavaFileToDestination(JavaFile.builder(packageName, roomDbTypeSpec.build()).build(),
             destination);
         writeJavaFileToDestination(JavaFile.builder(packageName, dbManagerImplSpec.build()).build(),
-            destination);
-        writeJavaFileToDestination(JavaFile.builder(packageName, factoryClassSpec.build()).build(),
             destination);
     }
 

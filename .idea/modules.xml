@@ -20,6 +20,8 @@
       <module fileurl="file://$PROJECT_DIR$/lib-database-jdbc/lib-database-jdbc.iml" filepath="$PROJECT_DIR$/lib-database-jdbc/lib-database-jdbc.iml" />
       <module fileurl="file://$PROJECT_DIR$/lib-database-retrofitrepository/lib-database-retrofitrepository.iml" filepath="$PROJECT_DIR$/lib-database-retrofitrepository/lib-database-retrofitrepository.iml" />
       <module fileurl="file://$PROJECT_DIR$/lib-database-runtime/lib-database-runtime.iml" filepath="$PROJECT_DIR$/lib-database-runtime/lib-database-runtime.iml" />
+      <module fileurl="file://$PROJECT_DIR$/lib-database-runtime-android/lib-database-runtime-android.iml" filepath="$PROJECT_DIR$/lib-database-runtime-android/lib-database-runtime-android.iml" />
+      <module fileurl="file://$PROJECT_DIR$/lib-database-runtime-core-compileonly/lib-database-runtime-core-compileonly.iml" filepath="$PROJECT_DIR$/lib-database-runtime-core-compileonly/lib-database-runtime-core-compileonly.iml" />
       <module fileurl="file://$PROJECT_DIR$/lib-database-runtime-jdbc/lib-database-runtime-jdbc.iml" filepath="$PROJECT_DIR$/lib-database-runtime-jdbc/lib-database-runtime-jdbc.iml" />
       <module fileurl="file://$PROJECT_DIR$/lib-http-testserver/lib-http-testserver.iml" filepath="$PROJECT_DIR$/lib-http-testserver/lib-http-testserver.iml" />
       <module fileurl="file://$PROJECT_DIR$/lib-room-annotations/lib-room-annotations.iml" filepath="$PROJECT_DIR$/lib-room-annotations/lib-room-annotations.iml" />

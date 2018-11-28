@@ -25,6 +25,8 @@
             <option value="$PROJECT_DIR$/lib-database-jdbc" />
             <option value="$PROJECT_DIR$/lib-database-retrofitrepository" />
             <option value="$PROJECT_DIR$/lib-database-runtime" />
+            <option value="$PROJECT_DIR$/lib-database-runtime-android" />
+            <option value="$PROJECT_DIR$/lib-database-runtime-core-compileonly" />
             <option value="$PROJECT_DIR$/lib-database-runtime-jdbc" />
             <option value="$PROJECT_DIR$/lib-http-testserver" />
             <option value="$PROJECT_DIR$/lib-room-annotations" />
