@@ -1,5 +1,6 @@
 package com.ustadmobile.lib.annotationprocessor.core.db;
 
+import com.ustadmobile.lib.database.UmDbBuilder;
 import com.ustadmobile.lib.database.annotation.UmClearAll;
 import com.ustadmobile.lib.database.annotation.UmDatabase;
 import com.ustadmobile.lib.database.annotation.UmRepository;
@@ -9,6 +10,8 @@ import com.ustadmobile.lib.db.sync.dao.SyncablePrimaryKeyDao;
 import com.ustadmobile.lib.db.sync.entities.SyncDeviceBits;
 import com.ustadmobile.lib.db.sync.entities.SyncStatus;
 import com.ustadmobile.lib.db.sync.entities.SyncablePrimaryKey;
+
+import java.util.Hashtable;
 
 
 @UmDatabase(version = 1, entities = {ExampleEntity.class, ExampleLocation.class,
@@ -20,16 +23,24 @@ public abstract class ExampleDatabase implements UmSyncableDatabase {
 
     private boolean master;
 
+    private static volatile Hashtable<String, ExampleDatabase> namedInstances = new Hashtable<>();
+
     public static synchronized ExampleDatabase getInstance(Object context) {
         if(instance == null){
-            instance = ExampleDatabase_Factory.makeExampleDatabase(context);
+            instance = UmDbBuilder.makeDatabase(ExampleDatabase.class, context);
         }
 
         return instance;
     }
 
     public static synchronized ExampleDatabase getInstance(Object context, String dbName) {
-        return ExampleDatabase_Factory.makeExampleDatabase(context, dbName);
+        ExampleDatabase db = namedInstances.get(dbName);
+        if(db == null) {
+            db = UmDbBuilder.makeDatabase(ExampleDatabase.class, context, dbName);
+            namedInstances.put(dbName, db);
+        }
+
+        return db;
     }
 
 

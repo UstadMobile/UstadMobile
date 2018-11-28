@@ -13,8 +13,7 @@ compileTestJava {
     options.compilerArgs += [
             "-Aumdb_jdbc_out=filer",
             "-Aumdb_jersey_res_out=filer",
-            "-Aumdb_retrofit_out=filer",
-            "-Aumdb_no_default_factory=true"
+            "-Aumdb_retrofit_out=filer"
     ]
 
     //Due to a bug, the JDK8 annotation processor provides incorrect parameter names, thus we need
