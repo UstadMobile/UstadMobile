@@ -155,8 +155,6 @@ public class IndexPhetContentScraper {
                         scraper.getAboutDescription(), true, EMPTY_STRING,
                         thumbnail, EMPTY_STRING, EMPTY_STRING, contentEntryDao);
 
-                ContentScraperUtil.insertOrUpdateRelatedContentJoin(contentEntryRelatedJoinDao, englishSimContentEntry, englishSimContentEntry, ContentEntryRelatedEntryJoin.REL_TYPE_TRANSLATED_VERSION);
-
                 if (scraper.isAnyContentUpdated()) {
 
                     boolean isEnglishUpdated = scraper.getLanguageUpdatedMap().get("en");

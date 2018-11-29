@@ -32,8 +32,6 @@ public class ContentEntryRelatedEntryJoin {
 
     private int relType;
 
-    private String cerejRelLanguage;
-
     private String comment;
 
     private long cerejRelLanguageUid;
@@ -74,14 +72,6 @@ public class ContentEntryRelatedEntryJoin {
 
     public void setRelType(int relType) {
         this.relType = relType;
-    }
-
-    public String getCerejRelLanguage() {
-        return cerejRelLanguage;
-    }
-
-    public void setCerejRelLanguage(String cerejRelLanguage) {
-        this.cerejRelLanguage = cerejRelLanguage;
     }
 
     public long getCerejRelLanguageUid() {
@@ -128,8 +118,6 @@ public class ContentEntryRelatedEntryJoin {
         if (cerejRelatedEntryUid != that.cerejRelatedEntryUid) return false;
         if (relType != that.relType) return false;
         if (cerejRelLanguageUid != that.cerejRelLanguageUid) return false;
-        if (cerejRelLanguage != null ? !cerejRelLanguage.equals(that.cerejRelLanguage) : that.cerejRelLanguage != null)
-            return false;
         return comment != null ? comment.equals(that.comment) : that.comment == null;
     }
 
@@ -139,7 +127,6 @@ public class ContentEntryRelatedEntryJoin {
         result = 31 * result + (int) (cerejContentEntryUid ^ (cerejContentEntryUid >>> 32));
         result = 31 * result + (int) (cerejRelatedEntryUid ^ (cerejRelatedEntryUid >>> 32));
         result = 31 * result + relType;
-        result = 31 * result + (cerejRelLanguage != null ? cerejRelLanguage.hashCode() : 0);
         result = 31 * result + (comment != null ? comment.hashCode() : 0);
         result = 31 * result + (int) (cerejRelLanguageUid ^ (cerejRelLanguageUid >>> 32));
         return result;

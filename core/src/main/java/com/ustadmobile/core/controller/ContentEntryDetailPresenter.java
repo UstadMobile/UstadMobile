@@ -3,13 +3,14 @@ package com.ustadmobile.core.controller;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.ContentEntryDao;
 import com.ustadmobile.core.db.dao.ContentEntryFileDao;
+import com.ustadmobile.core.db.dao.ContentEntryRelatedEntryJoinDao;
+import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.core.util.UMCalendarUtil;
-import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.view.ContentEntryDetailView;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.ContentEntryFile;
+import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage;
 
 import java.util.Hashtable;
 import java.util.List;
@@ -21,6 +22,7 @@ public class ContentEntryDetailPresenter extends UstadBaseController<ContentEntr
     private final ContentEntryDetailView viewContract;
     private ContentEntryFileDao contentFileDao;
     private ContentEntryDao contentEntryDao;
+    private ContentEntryRelatedEntryJoinDao contentRelatedEntryDao;
 
     public ContentEntryDetailPresenter(Object context, Hashtable arguments, ContentEntryDetailView viewContract) {
         super(context, arguments, viewContract);
@@ -29,8 +31,9 @@ public class ContentEntryDetailPresenter extends UstadBaseController<ContentEntr
     }
 
     public void onCreate(Hashtable hashtable) {
-        UmAppDatabase appDatabase = UmAppDatabase.getInstance(context);
+        UmAppDatabase appDatabase = UmAccountManager.getRepositoryForActiveAccount(getContext());
         contentFileDao = appDatabase.getContentEntryFileDao();
+        contentRelatedEntryDao = appDatabase.getContentEntryRelatedEntryJoinDao();
         contentEntryDao = appDatabase.getContentEntryDao();
 
         long entryUuid = (Long) getArguments().get(ARG_CONTENT_ENTRY_UID);
@@ -59,11 +62,11 @@ public class ContentEntryDetailPresenter extends UstadBaseController<ContentEntr
             }
         });
 
-        contentEntryDao.findAllLanguageRelatedEntries(entryUuid, new UmCallback<List<ContentEntry>>() {
+        contentRelatedEntryDao.findAllTranslationsForContentEntry(entryUuid, new UmCallback<List<ContentEntryRelatedEntryJoinWithLanguage>>() {
 
             @Override
-            public void onSuccess(List<ContentEntry> result) {
-                viewContract.setLanguageContent(result);
+            public void onSuccess(List<ContentEntryRelatedEntryJoinWithLanguage> result) {
+                viewContract.setTranslationsAvailable(result);
             }
 
             @Override
@@ -80,11 +83,10 @@ public class ContentEntryDetailPresenter extends UstadBaseController<ContentEntr
 
     }
 
-    public void handleClickTranslatedEntry(ContentEntry entry) {
+    public void handleClickTranslatedEntry(long uid) {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         Hashtable args = new Hashtable();
-        Long entryUid = entry.getContentEntryUid();
-        args.put(ARG_CONTENT_ENTRY_UID, entryUid);
+        args.put(ARG_CONTENT_ENTRY_UID, uid);
         impl.go(ContentEntryDetailView.VIEW_NAME, args, view.getContext());
     }
 }

@@ -67,7 +67,7 @@ public class ContentEntryListFragment extends UstadBaseFragment implements Conte
 
         // Set the adapter
         Context context = rootContainer.getContext();
-        recyclerView =  rootContainer.findViewById(R.id.list);
+        recyclerView =  rootContainer.findViewById(R.id.content_entry_list);
         recyclerView.setLayoutManager(new LinearLayoutManager(context));
         DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(context,
                 LinearLayoutManager.VERTICAL);

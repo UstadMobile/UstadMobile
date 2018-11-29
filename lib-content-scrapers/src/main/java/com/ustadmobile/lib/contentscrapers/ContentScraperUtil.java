@@ -135,8 +135,6 @@ public class ContentScraperUtil {
                 // content.html("We cannot download slideshare content, please watch using the link below <p></p><img href=" + url + "\" src=\"video-thumbnail.jpg\"/>");
                 content.parent().html("");
                 continue;
-                //    videoSource = Jsoup.connect(link).followRedirects(true).get().select("div.player").outerHtml();
-                //   videoSource = ContentScraperUtil.downloadAllResources(videoSource, destinationDirectory, "slideshare.jpg", scrapUrl);
             }
             try {
                 URL contentUrl = new URL(baseUrl, url);
@@ -153,31 +151,14 @@ public class ContentScraperUtil {
                 FileUtils.copyURLToFile(contentUrl, contentFile);
 
             } catch (IOException e) {
-                continue;
+                System.out.println("Url path " +url + " failed to download to file with base url " + baseUrl);
+                e.printStackTrace();
             }
 
         }
 
         return doc.body().html();
     }
-
-
-    /**
-     * Given a fileName, check if the file exists. If it does, generate a new fileName
-     *
-     * @param destinationDirectory folder where the file will be stored
-     * @param fileName             name of the file
-     * @return returns the file object which is unique
-     */
-    public static File getUniqueFile(File destinationDirectory, String fileName) {
-        int count = 0;
-        File file = new File(destinationDirectory, fileName);
-        while (file.exists()) {
-            file = new File(destinationDirectory, count++ + fileName);
-        }
-        return file;
-    }
-
 
     /**
      * Given a url link, find the file name, if fileName does not exist in path, use the url to create the filename
@@ -451,26 +432,22 @@ public class ContentScraperUtil {
      */
     public static ContentEntryParentChildJoin insertOrUpdateParentChildJoin(ContentEntryParentChildJoinDao dao, ContentEntry parentEntry, ContentEntry childEntry, int index) {
 
-        ContentEntryParentChildJoin parentChildJoin = dao.findParentByChildUuids(childEntry.getContentEntryUid());
-        if (parentChildJoin == null) {
-            parentChildJoin = new ContentEntryParentChildJoin();
-            parentChildJoin.setCepcjParentContentEntryUid(parentEntry.getContentEntryUid());
-            parentChildJoin.setCepcjChildContentEntryUid(childEntry.getContentEntryUid());
-            parentChildJoin.setChildIndex(index);
-            parentChildJoin.setCepcjUid(dao.insert(parentChildJoin));
-        } else {
-            ContentEntryParentChildJoin changedEntryJoin = new ContentEntryParentChildJoin();
-            changedEntryJoin.setCepcjUid(parentChildJoin.getCepcjUid());
-            changedEntryJoin.setCepcjParentContentEntryUid(parentEntry.getContentEntryUid());
-            changedEntryJoin.setCepcjChildContentEntryUid(childEntry.getContentEntryUid());
-            changedEntryJoin.setChildIndex(index);
+        ContentEntryParentChildJoin existingParentChildJoin = dao.findParentByChildUuids(childEntry.getContentEntryUid());
 
-            if(!changedEntryJoin.equals(parentChildJoin)){
-                dao.update(changedEntryJoin);
+        ContentEntryParentChildJoin newJoin = new ContentEntryParentChildJoin();
+        newJoin.setCepcjParentContentEntryUid(parentEntry.getContentEntryUid());
+        newJoin.setCepcjChildContentEntryUid(childEntry.getContentEntryUid());
+        newJoin.setChildIndex(index);
+        if(existingParentChildJoin == null) {
+            newJoin.setCepcjUid(dao.insert(newJoin));
+            return newJoin;
+        }else {
+            newJoin.setCepcjUid(existingParentChildJoin.getCepcjUid());
+            if(!newJoin.equals(existingParentChildJoin)){
+                dao.update(newJoin);
             }
-            parentChildJoin = changedEntryJoin;
+            return newJoin;
         }
-        return parentChildJoin;
     }
 
 
@@ -485,26 +462,22 @@ public class ContentScraperUtil {
      */
     public static ContentEntryParentChildJoin insertOrUpdateChildWithMultipleParentsJoin(ContentEntryParentChildJoinDao dao, ContentEntry parentEntry, ContentEntry childEntry, int index) {
 
-        ContentEntryParentChildJoin parentChildJoin = dao.findJoinByParentChildUuids(parentEntry.getContentEntryUid(), childEntry.getContentEntryUid());
-        if (parentChildJoin == null) {
-            parentChildJoin = new ContentEntryParentChildJoin();
-            parentChildJoin.setCepcjParentContentEntryUid(parentEntry.getContentEntryUid());
-            parentChildJoin.setCepcjChildContentEntryUid(childEntry.getContentEntryUid());
-            parentChildJoin.setChildIndex(index);
-            parentChildJoin.setCepcjUid(dao.insert(parentChildJoin));
-        } else {
-            ContentEntryParentChildJoin changedParentChildJoin = new ContentEntryParentChildJoin();
-            changedParentChildJoin.setCepcjUid(parentChildJoin.getCepcjUid());
-            changedParentChildJoin.setCepcjParentContentEntryUid(parentEntry.getContentEntryUid());
-            changedParentChildJoin.setCepcjChildContentEntryUid(childEntry.getContentEntryUid());
-            changedParentChildJoin.setChildIndex(index);
+        ContentEntryParentChildJoin existingParentChildJoin = dao.findJoinByParentChildUuids(parentEntry.getContentEntryUid(), childEntry.getContentEntryUid());
 
-            if(!changedParentChildJoin.equals(parentChildJoin)){
-                dao.update(changedParentChildJoin);
+        ContentEntryParentChildJoin newJoin = new ContentEntryParentChildJoin();
+        newJoin.setCepcjParentContentEntryUid(parentEntry.getContentEntryUid());
+        newJoin.setCepcjChildContentEntryUid(childEntry.getContentEntryUid());
+        newJoin.setChildIndex(index);
+        if(existingParentChildJoin == null) {
+            newJoin.setCepcjUid(dao.insert(newJoin));
+            return newJoin;
+        }else {
+            newJoin.setCepcjUid(existingParentChildJoin.getCepcjUid());
+            if(!newJoin.equals(existingParentChildJoin)){
+                dao.update(newJoin);
             }
-            parentChildJoin = changedParentChildJoin;
+            return newJoin;
         }
-        return parentChildJoin;
     }
 
 
@@ -603,15 +576,15 @@ public class ContentScraperUtil {
     }
 
     public static Language insertOrUpdateLanguage(LanguageDao languageDao, String langValue) {
-        String three_letter_code = "";
-        String two_letter_code = "";
+        String threeLetterCode = "";
+        String twoLetterCode = "";
 
         List<LanguageAlpha3Code> langAlpha3List = LanguageAlpha3Code.findByName(langValue);
         if (!langAlpha3List.isEmpty()) {
-            three_letter_code = langAlpha3List.get(0).name();
-            LanguageCode code = LanguageCode.getByCode(three_letter_code);
+            threeLetterCode = langAlpha3List.get(0).name();
+            LanguageCode code = LanguageCode.getByCode(threeLetterCode);
             if (code != null) {
-                two_letter_code = LanguageCode.getByCode(three_letter_code).name();
+                twoLetterCode = LanguageCode.getByCode(threeLetterCode).name();
             }
         }
 
@@ -619,9 +592,9 @@ public class ContentScraperUtil {
         if (langObj == null) {
             langObj = new Language();
             langObj.setName(langValue);
-            if (!three_letter_code.isEmpty()) {
-                langObj.setIso_639_1_standard(two_letter_code);
-                langObj.setIso_639_2_standard(three_letter_code);
+            if (!threeLetterCode.isEmpty()) {
+                langObj.setIso_639_1_standard(twoLetterCode);
+                langObj.setIso_639_2_standard(threeLetterCode);
             }
             langObj.setLangUid(languageDao.insert(langObj));
         } else {
@@ -634,9 +607,9 @@ public class ContentScraperUtil {
                 isChanged = true;
             }
 
-            if (!three_letter_code.isEmpty()) {
-                changedLang.setIso_639_1_standard(two_letter_code);
-                changedLang.setIso_639_2_standard(three_letter_code);
+            if (!threeLetterCode.isEmpty()) {
+                changedLang.setIso_639_1_standard(twoLetterCode);
+                changedLang.setIso_639_2_standard(threeLetterCode);
 
                 if(!changedLang.getIso_639_1_standard().equals(langObj.getIso_639_1_standard())){
                     isChanged = true;

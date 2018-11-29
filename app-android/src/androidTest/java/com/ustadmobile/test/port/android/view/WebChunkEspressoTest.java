@@ -81,8 +81,10 @@ public class WebChunkEspressoTest {
         launchActivityIntent.putExtras(b);
         mActivityRule.launchActivity(launchActivityIntent);
 
+        // the webview looks for an element "questionController" which is the start button of plix.
+        // This is only available once plix has fully loaded and displayed to the user
         onWebView()
-                .withTimeout(10000, TimeUnit.MILLISECONDS)
+                .withTimeout(1000000, TimeUnit.MILLISECONDS)
                 .withElement(findElement(Locator.CLASS_NAME,"questionController"))
                 .perform(webClick());
     }

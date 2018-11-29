@@ -51,14 +51,6 @@ public class WebChunkWebViewClient extends WebViewClient {
         }
     }
 
-    @Override
-    public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-        // handle any new urls being loaded
-        System.out.println("request override url = " + request.getUrl().toString());
-        return super.shouldOverrideUrlLoading(view, request);
-    }
-
-
     @Nullable
     @Override
     public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
@@ -107,12 +99,17 @@ public class WebChunkWebViewClient extends WebViewClient {
     }
 
 
+
     public void setUrl(String url) {
         this.url = url;
     }
 
     public String getUrl() {
         return url;
+    }
+
+    public void close() {
+        zipFile = null;
     }
 
     public class IndexLog {

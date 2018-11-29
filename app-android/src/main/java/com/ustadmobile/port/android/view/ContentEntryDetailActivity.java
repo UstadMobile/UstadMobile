@@ -18,11 +18,12 @@ import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.view.ContentEntryDetailView;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.ContentEntryFile;
+import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.util.List;
 
-public class ContentEntryDetailActivity extends UstadBaseActivity implements ContentEntryDetailView, ContentEntryLanguageAdapter.AdapterViewListener {
+public class ContentEntryDetailActivity extends UstadBaseActivity implements ContentEntryDetailView, ContentEntryDetailLanguageAdapter.AdapterViewListener {
 
     private ContentEntryDetailPresenter entryDetailPresenter;
 
@@ -96,7 +97,7 @@ public class ContentEntryDetailActivity extends UstadBaseActivity implements Con
     }
 
     @Override
-    public void setLanguageContent(List<ContentEntry> result) {
+    public void setTranslationsAvailable(List<ContentEntryRelatedEntryJoinWithLanguage> result) {
 
         RecyclerView flexBox = findViewById(R.id.entry_detail_flex);
 
@@ -109,7 +110,7 @@ public class ContentEntryDetailActivity extends UstadBaseActivity implements Con
             flexboxLayoutManager.setFlexDirection(FlexDirection.ROW);
             flexBox.setLayoutManager(flexboxLayoutManager);
 
-            ContentEntryLanguageAdapter adapter = new ContentEntryLanguageAdapter(result, this);
+            ContentEntryDetailLanguageAdapter adapter = new ContentEntryDetailLanguageAdapter(result, this);
             flexBox.setAdapter(adapter);
         }
 
@@ -117,7 +118,7 @@ public class ContentEntryDetailActivity extends UstadBaseActivity implements Con
     }
 
     @Override
-    public void selectLang(ContentEntry contentEntry) {
-        entryDetailPresenter.handleClickTranslatedEntry(contentEntry);
+    public void selectContentEntryOfLanguage(long uid) {
+        entryDetailPresenter.handleClickTranslatedEntry(uid);
     }
 }
