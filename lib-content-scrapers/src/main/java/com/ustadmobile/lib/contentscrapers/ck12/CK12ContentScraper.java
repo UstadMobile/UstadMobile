@@ -42,7 +42,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 
-import javax.swing.text.AbstractDocument;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 
@@ -430,7 +429,7 @@ public class CK12ContentScraper {
 
         try {
             ContentScraperUtil.generateTinCanXMLFile(videoHtmlLocation, videoContentName, "en", "index.html",
-                    ScraperConstants.videoTinCanFile, scrapUrl.getPath(), "", "");
+                    ScraperConstants.VIDEO_TIN_CAN_FILE, scrapUrl.getPath(), "", "");
         } catch (TransformerException | ParserConfigurationException e) {
             e.printStackTrace();
         }
@@ -560,7 +559,7 @@ public class CK12ContentScraper {
 
         try {
             ContentScraperUtil.generateTinCanXMLFile(readHtmlLocation, readContentName, "en", "index.html",
-                    ScraperConstants.articleTinCanFile, scrapUrl.getPath(), "", "");
+                    ScraperConstants.ARTICLE_TIN_CAN_FILE, scrapUrl.getPath(), "", "");
         } catch (TransformerException | ParserConfigurationException e) {
             e.printStackTrace();
         }
@@ -767,7 +766,7 @@ public class CK12ContentScraper {
 
         try {
             ContentScraperUtil.generateTinCanXMLFile(practiceDirectory, practiceUrl, "en", "index.html",
-                    ScraperConstants.assesmentTinCanFile, scrapUrl.getPath(), "", "");
+                    ScraperConstants.ASSESMENT_TIN_CAN_FILE, scrapUrl.getPath(), "", "");
         } catch (TransformerException | ParserConfigurationException e) {
             e.printStackTrace();
         }

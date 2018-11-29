@@ -16,8 +16,6 @@ import com.ustadmobile.core.view.WebChunkView;
 import com.ustadmobile.port.android.view.WebChunkActivity;
 import com.ustadmobile.test.port.android.UmAndroidTestUtil;
 
-import junit.framework.Assert;
-
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -29,8 +27,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.concurrent.TimeUnit;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 
 import static android.support.test.espresso.action.ViewActions.click;
 import static android.support.test.espresso.web.sugar.Web.onWebView;
@@ -66,10 +62,10 @@ public class WebChunkEspressoTest {
 
         UmAndroidTestUtil.setAirplaneModeEnabled(true);
         Bundle b = new Bundle();
-        String testScrapedPlixPath = "/com/ustadmobile/app/android/56953eed8e0e086aa6e2d3c2.zip";
+        String testScrapedPlixPath = "/com/ustadmobile/app/android/plix-scraped-content.zip";
         InputStream inputStream = getClass().getResourceAsStream(testScrapedPlixPath);
         File path = Environment.getExternalStorageDirectory();
-        File targetFile = new File(path, "53d147578e0e0876d4df82f1.zip");
+        File targetFile = new File(path, "plix-scraped-content.zip");
         OutputStream outStream = new FileOutputStream(targetFile);
         byte[] buffer = new byte[1024];
         int read;

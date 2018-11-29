@@ -88,11 +88,11 @@ public class ScraperConstants {
     public static final String brainGenieLink = "braingenie.ck12.org";
     public static final String slideShareLink = "www.slideshare.net";
 
-    public static final String moduleTinCanFile = "http://adlnet.gov/expapi/activities/module";
-    public static final String simulationTinCanFile = "http://adlnet.gov/expapi/activities/simulation";
-    public static final String videoTinCanFile = "http://activitystrea.ms/schema/1.0/video";
-    public static final String articleTinCanFile = "http://activitystrea.ms/schema/1.0/articleTinCanFile";
-    public static final String assesmentTinCanFile = "http://adlnet.gov/expapi/activities/assessment";
+    public static final String MODULE_TIN_CAN_FILE = "http://adlnet.gov/expapi/activities/module";
+    public static final String SIMULATION_TIN_CAN_FILE = "http://adlnet.gov/expapi/activities/simulation";
+    public static final String VIDEO_TIN_CAN_FILE = "http://activitystrea.ms/schema/1.0/video";
+    public static final String ARTICLE_TIN_CAN_FILE = "http://activitystrea.ms/schema/1.0/ARTICLE_TIN_CAN_FILE";
+    public static final String ASSESMENT_TIN_CAN_FILE = "http://adlnet.gov/expapi/activities/assessment";
 
     public static final List<String> QUESTION_SET_HOLDER_TYPES = Arrays.asList(
            ComponentType.EXCERCISE.getType(), ComponentType.ONLINE.getType(),
