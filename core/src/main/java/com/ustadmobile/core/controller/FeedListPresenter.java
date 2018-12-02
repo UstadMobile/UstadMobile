@@ -11,6 +11,9 @@ import com.ustadmobile.lib.db.entities.FeedEntry;
 
 import java.util.Hashtable;
 
+import static com.ustadmobile.core.view.ReportEditView.ARG_REPORT_LINK;
+import static com.ustadmobile.core.view.ReportEditView.ARG_REPORT_NAME;
+
 /**
  * The FeedList's Presenter - responsible for the logic to display all feeds and action on opening
  * them to the right place.
@@ -93,7 +96,9 @@ public class FeedListPresenter extends UstadBaseController<FeedListView>{
 
     public void handleClickViewReports(){
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        impl.go(ReportEditView.VIEW_NAME, null, context);
+        Hashtable args = new Hashtable();
+        args.put(ARG_REPORT_NAME, "Test Report");
+        impl.go(ReportEditView.VIEW_NAME, args, view.getContext());
     }
 
     /**

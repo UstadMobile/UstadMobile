@@ -20,7 +20,7 @@ public class ReportEditPresenter
 
     //Any arguments stored as variables here
     //eg: private long clazzUid = -1;
-    private String reportName;
+    private String reportName = "";
     private String reportLink;
     private HashMap<Integer, String> timePeriodOptions;
     private boolean genderDisaggregate = false;
