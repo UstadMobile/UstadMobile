@@ -17,6 +17,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -40,6 +41,7 @@ public class FeedListFragment extends UstadBaseFragment implements FeedListView 
     private RecyclerView mRecyclerView;
     private TextView numClassesView, numStudentsView, attendancePercentageView;
     private FeedListPresenter mPresenter;
+    private Button reportButton;
 
     /**
      * The Recycler Adapter for Feed Entries.
@@ -166,11 +168,15 @@ public class FeedListFragment extends UstadBaseFragment implements FeedListView 
                 rootContainer.findViewById(R.id.fragment_feed_list_report_card_num_students);
         attendancePercentageView =
                 rootContainer.findViewById(R.id.fragment_feed_list_report_card_attendance_percentage);
+        reportButton =
+                rootContainer.findViewById(R.id.fragment_feed_list_report_card_view_report);
 
         //Create presenter and call its onCreate()
         mPresenter = new FeedListPresenter(this, UMAndroidUtil.bundleToHashtable(
                 getArguments()), this);
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
+
+        reportButton.setOnClickListener(v -> mPresenter.handleClickViewReports());
 
         return rootContainer;
     }

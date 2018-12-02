@@ -5,6 +5,7 @@ import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.FeedListView;
+import com.ustadmobile.core.view.ReportEditView;
 import com.ustadmobile.lib.db.entities.ClazzAverage;
 import com.ustadmobile.lib.db.entities.FeedEntry;
 
@@ -89,6 +90,11 @@ public class FeedListPresenter extends UstadBaseController<FeedListView>{
         return query_pairs;
     }
 
+
+    public void handleClickViewReports(){
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        impl.go(ReportEditView.VIEW_NAME, null, context);
+    }
 
     /**
      * Takes action on a feed. This splits the feed's link and builds its destination and arguments

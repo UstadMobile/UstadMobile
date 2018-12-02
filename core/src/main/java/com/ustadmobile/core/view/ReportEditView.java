@@ -1,0 +1,58 @@
+package com.ustadmobile.core.view;
+
+
+import java.util.HashMap;
+
+/**
+ * ReportEdit Core View extends Core UstadView. Will be implemented
+ * on various implementations.
+ */
+public interface ReportEditView extends UstadView {
+
+    String VIEW_NAME = "ReportEdit";
+
+    String ARG_REPORT_NAME = "ReportName";
+    String ARG_REPORT_LINK = "ReportLink";
+
+    /**
+     * For Android: closes the activity.
+     */
+    void finish();
+
+    /**
+     * Populate the view with the list of time periods. The hashmap also has every option mapped
+     * to an id to handle.
+     *
+     * @param options   A hashmap of the id and the string option of time periods
+     */
+    void populateTimePeriod(HashMap<Integer, String> options);
+
+    /**
+     * Updates locations list as string on the locations text field on the view.
+     *
+     * @param locations The location selected string (eg: "Location1, Location2")
+     */
+    void updateLocationsSelected(String locations);
+
+    /**
+     * Sets if the "Disaggregate by gender" checkbox is set
+     * @param byGender
+     */
+    void updateGenderDisaggregationSet(boolean byGender);
+
+    /**
+     * Updates the classes on the view. The hashmap also has Clazz ids associated mapped to the
+     * Clazz name.
+     *
+     * @param options   A hashmap of the clazz id and the clazz name selected. 0 is all classes.
+     */
+    void updateClassesSet(HashMap<Long, String> options);
+
+    /**
+     * Updates the report name heading.
+     *
+     * @param name  The report name
+     */
+    void updateReportName(String name);
+
+}
