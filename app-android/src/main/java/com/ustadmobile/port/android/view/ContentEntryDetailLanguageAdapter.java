@@ -6,26 +6,25 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
-import com.ustadmobile.lib.db.entities.ContentEntry;
+import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage;
 
 import java.util.List;
 
-public class ContentEntryLanguageAdapter extends RecyclerView.Adapter<ContentEntryLanguageAdapter.LangHolder> {
+public class ContentEntryDetailLanguageAdapter extends RecyclerView.Adapter<ContentEntryDetailLanguageAdapter.LangHolder> {
 
 
-    private final List<ContentEntry> data;
+    private final List<ContentEntryRelatedEntryJoinWithLanguage> data;
     private AdapterViewListener listener;
 
-    public ContentEntryLanguageAdapter(List<ContentEntry> data, AdapterViewListener listener){
+    public ContentEntryDetailLanguageAdapter(List<ContentEntryRelatedEntryJoinWithLanguage> data, AdapterViewListener listener){
         this.data = data;
         this.listener = listener;
     }
 
     protected interface AdapterViewListener {
-        void selectLang(ContentEntry contentEntry);
+        void selectContentEntryOfLanguage(long contentEntryUid);
     }
 
 
@@ -38,9 +37,9 @@ public class ContentEntryLanguageAdapter extends RecyclerView.Adapter<ContentEnt
 
     @Override
     public void onBindViewHolder(@NonNull LangHolder holder, int position) {
-        ContentEntry entry = data.get(position);
-        holder.entryLang.setText(entry.getPrimaryLanguage());
-        holder.entryLang.setOnClickListener(view -> listener.selectLang(entry));
+        ContentEntryRelatedEntryJoinWithLanguage entry = data.get(position);
+        holder.entryLang.setText(entry.getLanguageName());
+        holder.entryLang.setOnClickListener(view -> listener.selectContentEntryOfLanguage(entry.getCerejContentEntryUid()));
     }
 
     @Override

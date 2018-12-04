@@ -212,6 +212,7 @@ public class TestPhetContentScraper {
     public void givenServerOnline_whenUrlFound_findAllSimulations() throws IOException {
 
         UmAppDatabase db = UmAppDatabase.getInstance(null);
+        UmAppDatabase repo = db.getRepository("https://localhost", "");
         db.clearAllTables();
 
         IndexPhetContentScraper index = new IndexPhetContentScraper();
@@ -222,12 +223,12 @@ public class TestPhetContentScraper {
 
         index.findContent(mockWebServer.url(PHET_MAIN_CONTENT).toString(), tmpDir);
 
-        ContentEntryDao contentEntryDao = db.getContentEntryDao();
-        ContentEntryParentChildJoinDao parentChildDaoJoin = db.getContentEntryParentChildJoinDao();
-        ContentEntryFileDao fileDao = db.getContentEntryFileDao();
-        ContentEntryContentEntryFileJoinDao fileEntryJoin = db.getContentEntryContentEntryFileJoinDao();
-        ContentEntryContentCategoryJoinDao categoryJoinDao = db.getContentEntryContentCategoryJoinDao();
-        ContentEntryRelatedEntryJoinDao relatedJoin = db.getContentEntryRelatedEntryJoinDao();
+        ContentEntryDao contentEntryDao = repo.getContentEntryDao();
+        ContentEntryParentChildJoinDao parentChildDaoJoin = repo.getContentEntryParentChildJoinDao();
+        ContentEntryFileDao fileDao = repo.getContentEntryFileDao();
+        ContentEntryContentEntryFileJoinDao fileEntryJoin = repo.getContentEntryContentEntryFileJoinDao();
+        ContentEntryContentCategoryJoinDao categoryJoinDao = repo.getContentEntryContentCategoryJoinDao();
+        ContentEntryRelatedEntryJoinDao relatedJoin = repo.getContentEntryRelatedEntryJoinDao();
 
         ContentEntry parentEntry = contentEntryDao.findBySourceUrl("https://phet.colorado.edu/");
         Assert.assertEquals("Main parent content entry exsits", true, parentEntry.getEntryId().equalsIgnoreCase("https://phet.colorado.edu/"));

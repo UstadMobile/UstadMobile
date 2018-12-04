@@ -124,7 +124,7 @@ public class IndexEdraakK12Content {
 
 
         ContentEntry masterRootParent = ContentScraperUtil.createOrUpdateContentEntry(ROOT, USTAD_MOBILE,
-                ROOT, USTAD_MOBILE, ALL_RIGHTS_RESERVED, arabicLang.getLangUid(), null,
+                ROOT, USTAD_MOBILE, LICENSE_TYPE_CC_BY, arabicLang.getLangUid(), null,
                 EMPTY_STRING, false, EMPTY_STRING, EMPTY_STRING,
                 EMPTY_STRING, EMPTY_STRING, contentEntryDao);
 

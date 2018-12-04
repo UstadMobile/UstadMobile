@@ -533,7 +533,6 @@ dependencies {
     implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
 
     testImplementation "junit:junit:$version_junit"
-    implementation project(path: ':lib-database-entities')
 }
 
 task sourceJar(type: Jar) {

@@ -2,6 +2,7 @@ package com.ustadmobile.core.view;
 
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.ContentEntryFile;
+import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage;
 
 import java.util.List;
 
@@ -13,5 +14,5 @@ public interface ContentEntryDetailView extends UstadView {
 
     void setFileInfo(List<ContentEntryFile> filesByContentEntryUid);
 
-    void setLanguageContent(List<ContentEntry> result);
+    void setTranslationsAvailable(List<ContentEntryRelatedEntryJoinWithLanguage> result);
 }

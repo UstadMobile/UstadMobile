@@ -37,6 +37,7 @@ import java.util.Set;
 import javax.swing.text.AbstractDocument;
 
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.EMPTY_STRING;
+import static com.ustadmobile.lib.db.entities.ContentEntry.LICENSE_TYPE_CC_BY;
 import static com.ustadmobile.lib.db.entities.ContentEntry.LICENSE_TYPE_CC_BY_NC;
 
 
@@ -136,7 +137,7 @@ public class IndexCategoryCK12Content {
         }
 
         ContentEntry masterRootParent = ContentScraperUtil.createOrUpdateContentEntry(ScraperConstants.ROOT, ScraperConstants.USTAD_MOBILE,
-                ScraperConstants.ROOT, ScraperConstants.USTAD_MOBILE, LICENSE_TYPE_CC_BY_NC,
+                ScraperConstants.ROOT, ScraperConstants.USTAD_MOBILE, LICENSE_TYPE_CC_BY,
                 englishLang.getLangUid(), null, EMPTY_STRING, false, EMPTY_STRING, EMPTY_STRING,
                 EMPTY_STRING, EMPTY_STRING, contentEntryDao);
 

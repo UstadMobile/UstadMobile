@@ -1,6 +1,5 @@
 package com.ustadmobile.lib.contentscrapers.phetsimulation;
 
-import com.neovisionaries.i18n.CountryCode;
 import com.neovisionaries.i18n.LanguageCode;
 import com.ustadmobile.core.db.dao.ContentEntryDao;
 import com.ustadmobile.core.db.dao.LanguageDao;
@@ -225,7 +224,7 @@ public class PhetContentScraper {
         String simulationTitle = Jsoup.parse(simulationFile, ScraperConstants.UTF_ENCODING).title();
         try {
             ContentScraperUtil.generateTinCanXMLFile(simulationLocation, simulationTitle,
-                    languageLocation.getName(), fileName, ScraperConstants.simulationTinCanFile,
+                    languageLocation.getName(), fileName, ScraperConstants.SIMULATION_TIN_CAN_FILE,
                     languageLocation.getName() + "\\" + this.title,
                     aboutDescription, "en");
         } catch (ParserConfigurationException | TransformerException e) {

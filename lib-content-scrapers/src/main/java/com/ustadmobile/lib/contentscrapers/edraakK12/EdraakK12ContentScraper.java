@@ -3,7 +3,6 @@ package com.ustadmobile.lib.contentscrapers.edraakK12;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
-import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.ScraperConstants;
 
@@ -11,9 +10,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -164,7 +161,7 @@ public class EdraakK12ContentScraper {
         if (!ContentScraperUtil.fileHasContent(tinCanFile)) {
             try {
                 ContentScraperUtil.generateTinCanXMLFile(courseDirectory, response.title, "ar",
-                        ScraperConstants.INDEX_HTML, ScraperConstants.moduleTinCanFile,
+                        ScraperConstants.INDEX_HTML, ScraperConstants.MODULE_TIN_CAN_FILE,
                         url.substring(0, url.indexOf("component/")) + response.id,
                         "", "en");
             } catch (ParserConfigurationException | TransformerException e) {

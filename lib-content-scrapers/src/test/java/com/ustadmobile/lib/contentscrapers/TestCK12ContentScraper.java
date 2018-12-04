@@ -309,6 +309,7 @@ public class TestCK12ContentScraper {
     public void givenServerOnline_scrapeAndIndexCK12Content() throws IOException {
 
         UmAppDatabase db = UmAppDatabase.getInstance(null);
+        UmAppDatabase repo = db.getRepository("https://localhost", "");
 
         MockWebServer mockWebServer = new MockWebServer();
         mockWebServer.setDispatcher(dispatcher);
@@ -322,12 +323,12 @@ public class TestCK12ContentScraper {
         ck12Content.findContent();
 
 
-        ContentEntryDao contentEntryDao = db.getContentEntryDao();
-        ContentEntryParentChildJoinDao parentChildDaoJoin = db.getContentEntryParentChildJoinDao();
-        ContentEntryFileDao fileDao = db.getContentEntryFileDao();
-        ContentEntryContentEntryFileJoinDao fileEntryJoin = db.getContentEntryContentEntryFileJoinDao();
-        ContentEntryContentCategoryJoinDao categoryJoinDao = db.getContentEntryContentCategoryJoinDao();
-        ContentEntryRelatedEntryJoinDao relatedJoin = db.getContentEntryRelatedEntryJoinDao();
+        ContentEntryDao contentEntryDao = repo.getContentEntryDao();
+        ContentEntryParentChildJoinDao parentChildDaoJoin = repo.getContentEntryParentChildJoinDao();
+        ContentEntryFileDao fileDao = repo.getContentEntryFileDao();
+        ContentEntryContentEntryFileJoinDao fileEntryJoin = repo.getContentEntryContentEntryFileJoinDao();
+        ContentEntryContentCategoryJoinDao categoryJoinDao = repo.getContentEntryContentCategoryJoinDao();
+        ContentEntryRelatedEntryJoinDao relatedJoin = repo.getContentEntryRelatedEntryJoinDao();
 
         ContentEntry parentEntry = contentEntryDao.findBySourceUrl("https://www.ck12.org/");
         Assert.assertEquals("Main parent content entry exsits", true, parentEntry.getEntryId().equalsIgnoreCase("https://www.ck12.org/"));

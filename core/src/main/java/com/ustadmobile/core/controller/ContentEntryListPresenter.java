@@ -2,6 +2,7 @@ package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.ContentEntryDao;
+import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.ContentEntryDetailView;
@@ -24,7 +25,7 @@ public class ContentEntryListPresenter extends UstadBaseController<ContentEntryV
 
 
     public void onCreate(Hashtable hashtable) {
-        UmAppDatabase appDatabase = UmAppDatabase.getInstance(getContext());
+        UmAppDatabase appDatabase = UmAccountManager.getRepositoryForActiveAccount(getContext());
         contentEntryDao = appDatabase.getContentEntryDao();
         Long parentUid = (Long) getArguments().get(ARG_CONTENT_ENTRY_UID);
         viewContract.setContentEntryProvider(contentEntryDao.getChildrenByParentUid(parentUid));

@@ -18,7 +18,7 @@ public class ContentEntryRecyclerViewAdapter extends PagedListAdapter<ContentEnt
 
     private final AdapterViewListener listener;
 
-    protected ContentEntryRecyclerViewAdapter(AdapterViewListener listener) {
+    ContentEntryRecyclerViewAdapter(AdapterViewListener listener) {
         super(DIFF_CALLBACK);
         this.listener = listener;
     }
@@ -38,12 +38,12 @@ public class ContentEntryRecyclerViewAdapter extends PagedListAdapter<ContentEnt
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
         ContentEntry entry = getItem(position);
-        holder.entryTitle.setText(entry.getTitle());
-        holder.entryDescription.setText(entry.getDescription());
-        Picasso.with(holder.thumbnailView.getContext())
+        holder.getEntryTitle().setText(entry.getTitle());
+        holder.getEntryDescription().setText(entry.getDescription());
+        Picasso.with(holder.getThumbnailView().getContext())
                 .load(entry.getThumbnailUrl())
-                .into(holder.thumbnailView);
-        holder.mView.setOnClickListener(view -> listener.contentEntryClicked(entry));
+                .into(holder.getThumbnailView());
+        holder.getView().setOnClickListener(view -> listener.contentEntryClicked(entry));
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
@@ -67,6 +67,25 @@ public class ContentEntryRecyclerViewAdapter extends PagedListAdapter<ContentEnt
             return super.toString() + " '" + entryDescription.getText() + "'";
         }
 
+        public View getView() {
+            return mView;
+        }
+
+        TextView getEntryTitle() {
+            return entryTitle;
+        }
+
+        TextView getEntryDescription() {
+            return entryDescription;
+        }
+
+        public TextView getEntrySize() {
+            return entrySize;
+        }
+
+        ImageView getThumbnailView() {
+            return thumbnailView;
+        }
     }
 
     private static final DiffUtil.ItemCallback<ContentEntry> DIFF_CALLBACK = new DiffUtil.ItemCallback<ContentEntry>() {

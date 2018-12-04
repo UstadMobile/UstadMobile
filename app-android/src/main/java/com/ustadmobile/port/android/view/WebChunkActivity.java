@@ -10,7 +10,9 @@ import com.ustadmobile.core.view.WebChunkView;
 import com.ustadmobile.port.android.impl.WebChunkWebViewClient;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
-public class WebChunkActivity extends UstadBaseActivity implements WebChunkView{
+import java.util.zip.ZipFile;
+
+public class WebChunkActivity extends UstadBaseActivity implements WebChunkView {
 
     private WebChunkPresenter mPresenter;
 
@@ -37,8 +39,14 @@ public class WebChunkActivity extends UstadBaseActivity implements WebChunkView{
     @Override
     public void mountChunk(String webChunkPath, UmCallback<String> callback) {
         webClient = new WebChunkWebViewClient(webChunkPath);
-                mWebView.setWebViewClient(webClient);
+        mWebView.setWebViewClient(webClient);
         callback.onSuccess(webClient.getUrl());
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        webClient.close();
     }
 
     @Override

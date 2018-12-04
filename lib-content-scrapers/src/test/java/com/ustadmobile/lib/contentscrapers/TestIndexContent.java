@@ -67,6 +67,7 @@ public class TestIndexContent {
     public void givenServerOnline_whenUrlFound_FindImportedContent() throws IOException {
 
         UmAppDatabase db = UmAppDatabase.getInstance(null);
+        UmAppDatabase repo = db.getRepository("https://localhost", "");
 
         IndexEdraakK12Content indexObj = new IndexEdraakK12Content();
         MockWebServer mockWebServer = new MockWebServer();
@@ -76,10 +77,10 @@ public class TestIndexContent {
 
         indexObj.findContent(MAIN_CONTENT_CONTENT_FILE, mockWebServer.url("/api/").toString(), 41, tmpDir);
 
-        ContentEntryDao contentEntryDao = db.getContentEntryDao();
-        ContentEntryParentChildJoinDao parentChildDaoJoin = db.getContentEntryParentChildJoinDao();
-        ContentEntryFileDao fileDao = db.getContentEntryFileDao();
-        ContentEntryContentEntryFileJoinDao fileEntryJoin = db.getContentEntryContentEntryFileJoinDao();
+        ContentEntryDao contentEntryDao = repo.getContentEntryDao();
+        ContentEntryParentChildJoinDao parentChildDaoJoin = repo.getContentEntryParentChildJoinDao();
+        ContentEntryFileDao fileDao = repo.getContentEntryFileDao();
+        ContentEntryContentEntryFileJoinDao fileEntryJoin = repo.getContentEntryContentEntryFileJoinDao();
 
         ContentEntry parentEntry = contentEntryDao.findBySourceUrl("https://www.edraak.org/k12/");
 

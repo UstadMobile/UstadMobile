@@ -3,9 +3,12 @@ package com.ustadmobile.test;
 import android.content.Context;
 import android.content.Intent;
 import android.support.test.InstrumentationRegistry;
+import android.support.test.espresso.contrib.RecyclerViewActions;
 import android.support.test.espresso.intent.rule.IntentsTestRule;
+import android.support.test.espresso.matcher.ViewMatchers;
 import android.support.test.runner.AndroidJUnit4;
 
+import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.ContentEntryContentEntryFileJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryDao;
@@ -19,10 +22,16 @@ import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin;
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoin;
 import com.ustadmobile.port.android.view.DummyActivity;
 
+import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import static android.support.test.espresso.Espresso.onView;
+import static android.support.test.espresso.action.ViewActions.click;
+import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
+import static android.support.test.espresso.matcher.ViewMatchers.withId;
 
 @RunWith(AndroidJUnit4.class)
 public class ContentEntryEspressoTest {
@@ -124,7 +133,6 @@ public class ContentEntryEspressoTest {
         quiz.setDescription("All content");
         quiz.setPublisher("CK12");
         quiz.setAuthor("Binge");
-        quiz.setPrimaryLanguage("en");
         contentDao.insert(quiz);
 
         ContentEntryParentChildJoin NumberQuizJoin = new ContentEntryParentChildJoin();
@@ -151,7 +159,6 @@ public class ContentEntryEspressoTest {
         englishEnglishJoin.setCerejContentEntryUid(quiz.getContentEntryUid());
         englishEnglishJoin.setCerejRelatedEntryUid(quiz.getContentEntryUid());
         englishEnglishJoin.setCerejUid(18);
-        englishEnglishJoin.setCerejRelLanguage("en");
         englishEnglishJoin.setRelType(ContentEntryRelatedEntryJoin.REL_TYPE_TRANSLATED_VERSION);
         contentEntryRelatedEntryJoinDao.insert(englishEnglishJoin);
 
@@ -163,7 +170,6 @@ public class ContentEntryEspressoTest {
         arabicQuiz.setDescription("كل المحتوى");
         arabicQuiz.setPublisher("CK12");
         arabicQuiz.setAuthor("حفلة");
-        arabicQuiz.setPrimaryLanguage("ar");
         contentDao.insert(arabicQuiz);
 
         ContentEntryFile updatedFile = new ContentEntryFile();
@@ -183,7 +189,6 @@ public class ContentEntryEspressoTest {
         arabicEnglishJoin.setCerejContentEntryUid(quiz.getContentEntryUid());
         arabicEnglishJoin.setCerejRelatedEntryUid(arabicQuiz.getContentEntryUid());
         arabicEnglishJoin.setCerejUid(13);
-        arabicEnglishJoin.setCerejRelLanguage("ar");
         arabicEnglishJoin.setRelType(ContentEntryRelatedEntryJoin.REL_TYPE_TRANSLATED_VERSION);
         contentEntryRelatedEntryJoinDao.insert(arabicEnglishJoin);
 
@@ -195,7 +200,6 @@ public class ContentEntryEspressoTest {
         spanishQuiz.setDescription("todo el contenido");
         spanishQuiz.setPublisher("CK12");
         spanishQuiz.setAuthor("borrachera");
-        spanishQuiz.setPrimaryLanguage("es");
         contentDao.insert(spanishQuiz);
 
         ContentEntryFile spanishFile = new ContentEntryFile();
@@ -215,7 +219,6 @@ public class ContentEntryEspressoTest {
         spanishEnglishJoin.setCerejContentEntryUid(quiz.getContentEntryUid());
         spanishEnglishJoin.setCerejRelatedEntryUid(spanishQuiz.getContentEntryUid());
         spanishEnglishJoin.setCerejUid(17);
-        spanishEnglishJoin.setCerejRelLanguage("es");
         spanishEnglishJoin.setRelType(ContentEntryRelatedEntryJoin.REL_TYPE_TRANSLATED_VERSION);
         contentEntryRelatedEntryJoinDao.insert(spanishEnglishJoin);
 
@@ -224,7 +227,7 @@ public class ContentEntryEspressoTest {
     }
 
     @Test
-    public void givenServerOffline_whenPlixZippedIsOpened_WebviewLoads() {
+    public void givenContentEntryPresent_whenOpened_entryIsDisplayed() {
 
         createDummyContent();
 
@@ -232,8 +235,11 @@ public class ContentEntryEspressoTest {
         mActivityRule.launchActivity(launchActivityIntent);
 
         // TODO assert page opens
+        onView(Matchers.allOf(isDisplayed(), withId(R.id.content_entry_list)))
+                .perform(RecyclerViewActions.actionOnItemAtPosition(0,click()));
 
     }
+
 
 
 }
