@@ -1,5 +1,6 @@
 package com.ustadmobile.lib.annotationprocessor.core;
 
+import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.lib.annotationprocessor.core.db.ExampleDatabase;
 import com.ustadmobile.lib.annotationprocessor.core.db.ExampleSyncableDao;
 import com.ustadmobile.lib.annotationprocessor.core.db.ExampleSyncableEntity;
@@ -9,6 +10,10 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class TestSyncableDb  {
 
@@ -126,5 +131,46 @@ public class TestSyncableDb  {
         Assert.assertEquals(1, firstLocalChangeSeqNum);
         Assert.assertEquals(2, localChangeSeqAfterUpdate);
     }
+
+    @Test
+    public void givenEntityList_whenAsyncListInsertedByRepo_shouldBeInsertedAndReturnSyncablePksGenerated() {
+        ExampleDatabase db1 = ExampleDatabase.getInstance(null);
+        db1.clearAll();
+        ExampleDatabase repo1 = db1.getRepository("http://localhost", "");
+        CountDownLatch latch = new CountDownLatch(1);
+
+        ExampleSyncableEntity entity1 = new ExampleSyncableEntity();
+        entity1.setTitle("Entity 1");
+        ExampleSyncableEntity entity2 = new ExampleSyncableEntity();
+        entity2.setTitle("Entity 2");
+        AtomicReference<Long[]> resultRef = new AtomicReference<>();
+
+        repo1.getExampleSyncableDao().insertListAsyncArr(Arrays.asList(entity1, entity2),
+                new UmCallback<Long[]>() {
+            @Override
+            public void onSuccess(Long[] result) {
+                resultRef.set(result);
+                latch.countDown();
+            }
+
+            @Override
+            public void onFailure(Throwable exception) {
+                latch.countDown();
+            }
+        });
+
+        try { latch.await(2, TimeUnit.MINUTES); }
+        catch(InterruptedException e) {
+            // will not be interrupted
+        }
+
+        ExampleSyncableEntity entity1Retrieved = db1.getExampleSyncableDao().findByUid(
+                resultRef.get()[0]);
+        ExampleSyncableEntity entity2Retrieved = db1.getExampleSyncableDao().findByUid(
+                resultRef.get()[1]);
+        Assert.assertNotNull("Entity 1 lookup by uid OK", entity1Retrieved);
+        Assert.assertNotNull("Entity 2 lookup by uid OK", entity2Retrieved);
+    }
+
 
 }

@@ -3,23 +3,17 @@ apply plugin: 'maven-publish'
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation project(':lib-database')
-    compileOnly project(":lib-database-entities")
-    implementation project(":lib-database-runtime")
 
-    implementation "com.squareup.retrofit2:retrofit:$version_retrofit"
-    implementation "com.squareup.retrofit2:converter-gson:$version_retrofit"
-    implementation "com.squareup.retrofit2:converter-scalars:$version_retrofit"
 }
 
-sourceSets.main.java.srcDirs += ["build/generated/source/umdbprocessor"]
+
+sourceCompatibility = "1.8"
+targetCompatibility = "1.8"
 
 task sourceJar(type: Jar) {
     from sourceSets.main.allJava
 }
 
-sourceCompatibility = "8"
-targetCompatibility = "8"
 
 publishing {
     publications {
