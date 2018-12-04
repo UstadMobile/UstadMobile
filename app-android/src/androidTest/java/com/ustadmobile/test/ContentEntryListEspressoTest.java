@@ -10,18 +10,21 @@ import android.support.test.espresso.matcher.ViewMatchers;
 import android.support.test.runner.AndroidJUnit4;
 
 import com.toughra.ustadmobile.R;
+import com.ustadmobile.core.controller.ContentEntryListPresenter;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.ContentEntryContentEntryFileJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryDao;
 import com.ustadmobile.core.db.dao.ContentEntryFileDao;
 import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryRelatedEntryJoinDao;
+import com.ustadmobile.core.db.dao.LanguageDao;
 import com.ustadmobile.core.view.ContentEntryView;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.ContentEntryContentEntryFileJoin;
 import com.ustadmobile.lib.db.entities.ContentEntryFile;
 import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin;
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoin;
+import com.ustadmobile.lib.db.entities.Language;
 import com.ustadmobile.port.android.view.ContentEntryDetailActivity;
 import com.ustadmobile.port.android.view.ContentEntryListActivity;
 import com.ustadmobile.port.android.view.DummyActivity;
@@ -57,30 +60,29 @@ import static org.hamcrest.core.IsEqual.equalTo;
 public class ContentEntryListEspressoTest {
 
     @Rule
-    public IntentsTestRule<DummyActivity> mActivityRule =
-            new IntentsTestRule<>(DummyActivity.class, false, false);
+    public IntentsTestRule<ContentEntryListActivity> mActivityRule =
+            new IntentsTestRule<>(ContentEntryListActivity.class, false, false);
+
+    public static final long ROOT_CONTENT_ENTRY_UID = 1L;
 
     @Before
-    public void beforeTest() {
-        Context context = InstrumentationRegistry.getTargetContext();
-        UmAppDatabase.getInstance(context).clearAllTables();
-
-        //Start the activity
-
-
+    public void before() {
+        initDb();
+        launchActivity();
     }
 
-    public UmAppDatabase getDb(){
-        Context context = InstrumentationRegistry.getTargetContext();
-        return UmAppDatabase.getInstance(context);
+    public void launchActivity() {
+        Intent launchActivityIntent = new Intent();
+        launchActivityIntent.putExtra(ContentEntryListPresenter.ARG_CONTENT_ENTRY_UID,
+                ROOT_CONTENT_ENTRY_UID);
+        mActivityRule.launchActivity(launchActivityIntent);
     }
 
-
-    public void createDummyContent(){
-        UmAppDatabase db = getDb();
-        UmAppDatabase repo = db.getRepository("https://localhost", "");
-
+    public void initDb(){
+        Context context = InstrumentationRegistry.getTargetContext();
+        UmAppDatabase db = UmAppDatabase.getInstance(context);
         db.clearAllTables();
+        UmAppDatabase repo = db.getRepository("https://localhost", "");
 
         ContentEntryDao contentDao = repo.getContentEntryDao();
         ContentEntryParentChildJoinDao pcjdao = repo.getContentEntryParentChildJoinDao();
@@ -89,10 +91,9 @@ public class ContentEntryListEspressoTest {
         ContentEntryRelatedEntryJoinDao contentEntryRelatedEntryJoinDao = repo.getContentEntryRelatedEntryJoinDao();
 
         ContentEntry entry = new ContentEntry();
-        entry.setContentEntryUid(1);
+        entry.setContentEntryUid(ROOT_CONTENT_ENTRY_UID);
         entry.setTitle("Ustad Mobile");
         contentDao.insert(entry);
-
 
         ContentEntry ck12 = new ContentEntry();
         ck12.setContentEntryUid(2);
@@ -254,10 +255,6 @@ public class ContentEntryListEspressoTest {
 
     @Test
     public void givenContentEntryPresent_whenOpened_entryIsDisplayed() {
-        createDummyContent();
-
-        Intent launchActivityIntent = new Intent();
-        mActivityRule.launchActivity(launchActivityIntent);
 
         onView(allOf(withId(R.id.content_entry_list),isDisplayed()))
                 .check(matches(hasDescendant(withText("Ck-12 Foundation"))));
@@ -267,13 +264,6 @@ public class ContentEntryListEspressoTest {
 
     @Test
     public void givenContentEntryWithChildrenPresent_whenEntryClicked_intentToViewListIsFired() {
-
-        createDummyContent();
-
-        Intent launchActivityIntent = new Intent();
-        mActivityRule.launchActivity(launchActivityIntent);
-
-
         onView(Matchers.allOf(isDisplayed(), withId(R.id.content_entry_list)))
                 .perform(RecyclerViewActions.actionOnItemAtPosition(0,click()));
 
@@ -286,12 +276,6 @@ public class ContentEntryListEspressoTest {
 
     @Test
     public void givenContentEntryLeafPresent_whenEntryClicked_intentToViewDetailIsFired() {
-
-        createDummyContent();
-
-        Intent launchActivityIntent = new Intent();
-        mActivityRule.launchActivity(launchActivityIntent);
-
         onView(Matchers.allOf(isDisplayed(), withId(R.id.content_entry_list)))
                 .perform(RecyclerViewActions.actionOnItemAtPosition(0,click()));
 

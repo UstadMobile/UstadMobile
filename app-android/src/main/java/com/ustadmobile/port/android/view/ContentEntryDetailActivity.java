@@ -97,7 +97,7 @@ public class ContentEntryDetailActivity extends UstadBaseActivity implements Con
     }
 
     @Override
-    public void setTranslationsAvailable(List<ContentEntryRelatedEntryJoinWithLanguage> result) {
+    public void setTranslationsAvailable(List<ContentEntryRelatedEntryJoinWithLanguage> result, long entryUuid) {
 
         RecyclerView flexBox = findViewById(R.id.entry_detail_flex);
 
@@ -110,7 +110,7 @@ public class ContentEntryDetailActivity extends UstadBaseActivity implements Con
             flexboxLayoutManager.setFlexDirection(FlexDirection.ROW);
             flexBox.setLayoutManager(flexboxLayoutManager);
 
-            ContentEntryDetailLanguageAdapter adapter = new ContentEntryDetailLanguageAdapter(result, this);
+            ContentEntryDetailLanguageAdapter adapter = new ContentEntryDetailLanguageAdapter(result, this, entryUuid);
             flexBox.setAdapter(adapter);
         }
 
