@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="@dimen/dimen_8dp">
+
+    <ImageView
+        android:id="@+id/entry_thumbnail"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:src="@drawable/cross" />
+
+    <TextView
+        android:id="@+id/entry_title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/dimen_4dp"
+        android:textColor="@android:color/black"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toStartOf="@id/entry_download"
+        app:layout_constraintStart_toEndOf="@id/entry_thumbnail"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="Content Title" />
+
+    <TextView
+        android:id="@+id/entry_description"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/dimen_4dp"
+        android:textSize="12sp"
+        app:layout_constraintStart_toEndOf="@id/entry_thumbnail"
+        app:layout_constraintTop_toBottomOf="@+id/entry_title"
+        tools:text="Content Description" />
+
+    <ImageView
+        android:id="@+id/entry_imageview"
+        android:tint="@color/text_secondary"
+        android:layout_width="16dp"
+        android:layout_height="16dp"
+        android:layout_margin="@dimen/dimen_4dp"
+        app:layout_constraintStart_toEndOf="@+id/entry_thumbnail"
+        app:layout_constraintTop_toBottomOf="@+id/entry_description"
+        app:srcCompat="@drawable/ic_book_black_24dp" />
+
+    <TextView
+        android:id="@+id/entry_library_size"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/dimen_4dp"
+        android:gravity="start"
+        tools:text="Content Library (50 Mb)"
+        android:textSize="13sp"
+        android:tint="@color/text_secondary"
+        app:layout_constraintStart_toEndOf="@id/entry_imageview"
+        app:layout_constraintEnd_toStartOf="@id/entry_download"
+        app:layout_constraintTop_toBottomOf="@id/entry_description" />
+
+    <com.ustadmobile.port.android.view.DownloadStatusButton
+        android:id="@+id/entry_download"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_margin="@dimen/dimen_8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:tint="@color/text_secondary"
+        android:contentDescription="@string/download"
+        app:srcCompat="@drawable/ic_file_download_black_24dp"/>
+
+
+
+</android.support.constraint.ConstraintLayout>

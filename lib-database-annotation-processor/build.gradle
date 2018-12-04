@@ -44,7 +44,7 @@ dependencies {
     implementation "javax.ws.rs:javax.ws.rs-api:2.1"
 
     //Test implementation of Postgres
-    testImplementation "org.postgresql:postgresql:42.2.5"
+    testImplementation "org.postgresql:postgresql:$version_postgres_jdbc"
 
     //Jersey dependencies
     testImplementation "org.glassfish.jersey.core:jersey-server:$version_jersey"
