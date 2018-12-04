@@ -28,6 +28,8 @@ import com.ustadmobile.lib.database.annotation.UmSyncFindAllChanges;
 import com.ustadmobile.lib.database.annotation.UmSyncFindLocalChanges;
 import com.ustadmobile.lib.database.annotation.UmSyncFindUpdateable;
 import com.ustadmobile.lib.database.annotation.UmSyncIncoming;
+import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
+import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 import com.ustadmobile.lib.database.annotation.UmSyncOutgoing;
 import com.ustadmobile.lib.database.annotation.UmUpdate;
 import com.ustadmobile.lib.database.jdbc.DbChangeListener;
@@ -38,6 +40,7 @@ import com.ustadmobile.lib.database.jdbc.UmLiveDataJdbc;
 import com.ustadmobile.lib.db.UmDbWithExecutor;
 import com.ustadmobile.lib.db.sync.UmRepositoryDb;
 import com.ustadmobile.lib.db.sync.UmRepositoryUtils;
+import com.ustadmobile.lib.db.sync.entities.SyncStatus;
 
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
@@ -63,6 +66,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -333,7 +337,17 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
         for(String sqlProductName : SUPPORTED_DB_PRODUCT_NAMES) {
             createCb.beginControlFlow("if($S.equals(_metaData.getDatabaseProductName()))",
                     sqlProductName);
-            for(TypeElement entityTypeElement : findEntityTypes(dbType)) {
+            List<TypeElement> entityTypes = findEntityTypes(dbType);
+
+            //Make sure that the SyncStatus is teh first table
+            TypeElement syncStatusTypeEl = processingEnv.getElementUtils().getTypeElement(
+                    SyncStatus.class.getName());
+            if(entityTypes.contains(syncStatusTypeEl)) {
+                entityTypes.remove(syncStatusTypeEl);
+                entityTypes.add(0, syncStatusTypeEl);
+            }
+
+            for(TypeElement entityTypeElement : entityTypes) {
                 addCreateTableStatements(createCb, "_stmt", entityTypeElement,
                         SQL_IDENTIFIER_CHAR, sqlProductName);
             }
@@ -361,10 +375,19 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                 .add("$T connection = getConnection();\n", Connection.class)
                 .add("$T stmt = connection.createStatement();\n", Statement.class)
                 .unindent().beginControlFlow(") ");
+        TypeElement syncStatusTypeEL = processingEnv.getElementUtils().getTypeElement(
+                SyncStatus.class.getName());
+
 
         for(TypeElement entityType : findEntityTypes(dbType)) {
-            codeBlock.add("stmt.executeUpdate(\"DELETE FROM $1L$2L$1L\");\n",
+            if(!entityType.equals(syncStatusTypeEL))
+                codeBlock.add("stmt.executeUpdate(\"DELETE FROM $1L$2L$1L\");\n",
                     identifierQuoteStr, entityType.getSimpleName().toString());
+            else
+                codeBlock.add("stmt.executeUpdate(\"UPDATE SyncStatus SET masterChangeSeqNum = 1, " +
+                        "localChangeSeqNum = 1, " +
+                        "syncedToMasterChangeNum = 0, " +
+                        "syncedToLocalChangeSeqNum = 0\");\n");
         }
 
         codeBlock.nextControlFlow("catch($T e)", SQLException.class)
@@ -439,6 +462,69 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                 entitySpec.getSimpleName().toString())
                 .add("$L.executeUpdate($S);\n", stmtVariableName,
                         makeCreateTableStatement(entitySpec, quoteChar, sqlProductName));
+        Element localChangeSeqnumEl = DbProcessorUtils.findElementWithAnnotation(entitySpec,
+                UmSyncLocalChangeSeqNum.class, processingEnv);
+        Element masterChangeSeqNumEl = DbProcessorUtils.findElementWithAnnotation(entitySpec,
+                UmSyncMasterChangeSeqNum.class, processingEnv);
+
+        if(localChangeSeqnumEl != null && masterChangeSeqNumEl != null) {
+            //we need to add a trigger to handle change sequence numbers
+            Map<String, String> triggerSqlArgs = new HashMap<>();
+            triggerSqlArgs.put("tableNameLower",
+                    entitySpec.getSimpleName().toString().toLowerCase());
+            triggerSqlArgs.put("tableName", entitySpec.getSimpleName().toString());
+            triggerSqlArgs.put("localCsnName", localChangeSeqnumEl.getSimpleName().toString());
+            triggerSqlArgs.put("masterCsnName", masterChangeSeqNumEl.getSimpleName().toString());
+            triggerSqlArgs.put("pkName", DbProcessorUtils.findElementWithAnnotation(entitySpec,
+                    UmPrimaryKey.class, processingEnv).getSimpleName().toString());
+            triggerSqlArgs.put("tableId", ""+entitySpec.getAnnotation(UmEntity.class).tableId());
+            triggerSqlArgs.put("stmtVarName", stmtVariableName);
+
+            codeBlock.addNamed("String _tableColName_$tableName:L = isMaster() ? " +
+                    "$masterCsnName:S : $localCsnName:S;\n", triggerSqlArgs);
+            codeBlock.add("String _syncStatusColName_$L = isMaster() ? $S: $S;\n",
+                    entitySpec.getSimpleName(), "masterChangeSeqNum", "localChangeSeqNum");
+
+            Map<String, String> triggerTemplateArgs = new HashMap<>(triggerSqlArgs);
+            triggerTemplateArgs.put("triggerOn", "update");
+            String triggerTemplate =
+                    "CREATE TRIGGER $triggerOn:L_csn_$tableNameLower:L " +
+                    "AFTER $triggerOn:L ON $tableName:L FOR EACH ROW ";
+            codeBlock.addNamed("String _createUpdateTriggerStmt_$tableName:L = \""
+                            + triggerTemplate + " WHEN OLD.\" + _tableColName_$tableName:L + \" > 0\";\n",
+                    triggerTemplateArgs);
+
+            triggerTemplateArgs.put("triggerOn", "insert");
+            codeBlock.addNamed("String _createInsertTriggerStmt_$tableName:L = \"" +
+                            triggerTemplate + "\";\n",
+                    triggerTemplateArgs);
+
+
+            codeBlock.addNamed("String _triggerSql_$tableNameLower:L = \"" +
+                    "UPDATE $tableName:L " +
+                    "SET \" + _tableColName_$tableName:L + \" = " +
+                    "(SELECT \" + _syncStatusColName_$tableName:L + \" FROM SyncStatus WHERE tableId = $tableId:L) " +
+                    "WHERE $pkName:L = NEW.$pkName:L; " +
+                    "UPDATE SyncStatus SET \" + " +
+                    "_syncStatusColName_$tableName:L + \" = \" + _syncStatusColName_$tableName:L + \" + 1 " +
+                    " WHERE tableId = $tableId:L; " +
+                    "\";\n"
+                    , triggerSqlArgs);
+            codeBlock.addNamed("$stmtVarName:L.executeUpdate(\"INSERT INTO SyncStatus(tableId, " +
+                            "localChangeSeqNum, masterChangeSeqNum) VALUES($tableId:L, 1, 1)\");\n",
+                    triggerSqlArgs);
+
+            if(sqlProductName.equals(PRODUCT_NAME_SQLITE)) {
+                codeBlock.addNamed("$stmtVarName:L.executeUpdate(_createUpdateTriggerStmt_$tableName:L " +
+                        " + \" BEGIN \" + _triggerSql_$tableNameLower:L + \" END\");\n",
+                        triggerSqlArgs);
+                codeBlock.addNamed("$stmtVarName:L.executeUpdate(_createInsertTriggerStmt_$tableName:L " +
+                                " + \" BEGIN \" + _triggerSql_$tableNameLower:L + \" END\");\n",
+                        triggerSqlArgs);
+            }
+        }
+
+
         for(Map.Entry<String, List<String>> index : indexes.entrySet()) {
             Map<String, String> formatArgs = new HashMap<>();
             formatArgs.put("quot", StringEscapeUtils.escapeJava(String.valueOf(quoteChar)));

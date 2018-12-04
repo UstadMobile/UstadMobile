@@ -38,9 +38,26 @@ public interface SyncableDao<T, D> extends BaseDao<T> {
     @UmInsert(onConflict = UmOnConflictStrategy.REPLACE)
     void replaceList(List<T> entities);
 
+    /**
+     * Find all local changes using the local change sequence number
+     *
+     * @param fromLocalChangeSeqNum The number to find all local changes from (inclusive)
+     * @param accountPersonUid The account performing the sync
+     * @return List of entities that have been locally modified since fromLocalChangeSeqNum
+     */
     @UmSyncFindLocalChanges
     List<T> findLocalChanges(long fromLocalChangeSeqNum, long accountPersonUid);
 
+    /**
+     * Find all changes made
+     *
+     * @param fromLocalChangeSeqNum  (inclusive)
+     * @param toLocalChangeSeqNum (inclusive)
+     * @param fromMasterChangeSeqNum (inclusive)
+     * @param toMasterChangeSeqNum (inclusive)
+     * @param accountPersonUid
+     * @return
+     */
     @UmSyncFindAllChanges
     List<T> syncFindAllChanges(long fromLocalChangeSeqNum, long toLocalChangeSeqNum,
                                                           long fromMasterChangeSeqNum, long toMasterChangeSeqNum,

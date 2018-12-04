@@ -703,14 +703,13 @@ public abstract class AbstractDbProcessor {
             .add("long _toLocalChangeSeq = Long.MAX_VALUE;\n")
             .add("boolean _isMaster = _syncableDb.isMaster();\n")
             .beginControlFlow("if(_isMaster)")
-                .add("long _changeSeqNum = _syncableDb.getSyncStatusDao().getAndIncrementNextMasterChangeSeqNum($L, 1);\n",
-                    umEntityAnnotation.tableId())
-                .add("_response.setSyncedUpToMasterChangeSeqNum(_changeSeqNum + 1);\n")
-                .add("_toMasterChangeSeq = _changeSeqNum - 1;\n")
+//                .add("long _changeSeqNum = _syncableDb.getSyncStatusDao().getMasterChangeSeqNum($L);\n",
+//                    umEntityAnnotation.tableId())
+//                .add("_toMasterChangeSeq = _changeSeqNum - 1;\n")
                 .beginControlFlow("for($T _changed : $L)",
                         entityType, incomingChangesParamName)
-                    .add("_changed.set$L(_changeSeqNum);\n",
-                            capitalize(masterChangeSeqFieldEl.getSimpleName()))
+//                    .add("_changed.set$L(_changeSeqNum);\n",
+//                            capitalize(masterChangeSeqFieldEl.getSimpleName()))
                     .add("_changed.set$L(0);\n", capitalize(localChangeSeqFieldEl.getSimpleName()))
                 .endControlFlow()
             .endControlFlow()
@@ -745,6 +744,10 @@ public abstract class AbstractDbProcessor {
             .endControlFlow()
             .add("insertList(_insertList);\n")
             .add("updateList(_updateList);\n")
+            .beginControlFlow("if(_isMaster)")
+                .add("_response.setSyncedUpToMasterChangeSeqNum(_syncableDb.getSyncStatusDao()" +
+                        ".getMasterChangeSeqNum($L) - 1);\n", umEntityAnnotation.tableId())
+            .endControlFlow()
             .add("_response.setRemoteChangedEntities($L($L, $L, $L, $L, $L));\n",
                     findChangedEntitiesMethod.getSimpleName(),
                     fromLocalChangeSeqNumParam.getSimpleName(), "_toLocalChangeSeq",
@@ -800,18 +803,22 @@ public abstract class AbstractDbProcessor {
                 .add("$1T _syncableDb = ($1T)$2L;\n", UmSyncableDatabase.class, dbName)
                 .add("$T _syncStatus = _syncableDb.getSyncStatusDao().getByUid($L);\n",
                         SyncStatus.class, umEntityAnnotation.tableId())
-                .add("$T<$T> _locallyChangedEntities = $L(_syncStatus.getSyncedToLocalChangeSeqNum(), $L);\n",
+                .add("$T<$T> _locallyChangedEntities = $L(_syncStatus.getSyncedToLocalChangeSeqNum() + 1, $L);\n",
                         List.class, entityType, findLocalChangesMethod.getSimpleName(),
                         accountPersonUidParam.getSimpleName())
                 .add("$T<$T> _remoteChanges = $L.$L(_locallyChangedEntities, 0, " +
-                        "_syncStatus.getSyncedToMasterChangeNum(), $L);\n",
+                        "_syncStatus.getSyncedToMasterChangeNum() + 1, $L);\n",
                         SyncResponse.class, entityType, otherDaoParam.getSimpleName(),
                         syncIncomingMethod.getSimpleName(),
                         accountPersonUidParam.getSimpleName())
                 .beginControlFlow("if(_remoteChanges != null)")
+                    //TODO: Add code to handle if any changes happened whilst this sync was ongoing
+                    //TODO: e.g. before replace, check if there was any change to the local change
+                    // sequence number, then bump the change numbers for these entities so they get
+                    //picked up by the next sync round
                     .add("replaceList(_remoteChanges.getRemoteChangedEntities());\n")
                     .add("_syncableDb.getSyncStatusDao().updateSyncedToChangeSeqNums(" +
-                                "$L, _syncStatus.getLocalChangeSeqNum(), " +
+                                "$1L, _syncableDb.getSyncStatusDao().getLocalChangeSeqNum($1L) - 1, " +
                                 "_remoteChanges.getSyncedUpToMasterChangeSeqNum());\n",
                         umEntityAnnotation.tableId())
                 .endControlFlow();
@@ -882,20 +889,20 @@ public abstract class AbstractDbProcessor {
                                                                 TypeElement daoType) {
 
         CodeBlock.Builder codeBlock = CodeBlock.builder();
-        if(syncableDbVariableName == null) {
-            codeBlock.add("$1T _syncableDb = ($1T)$2L;\n", UmSyncableDatabase.class, dbVariableName);
-            syncableDbVariableName = "_syncableDb";
-        }
-
-        codeBlock.beginControlFlow("if($L.isMaster())", syncableDbVariableName);
-        generateIncrementSection(codeBlock, UmSyncMasterChangeSeqNum.class, paramType,
-                paramVariableName, syncableDbVariableName,
-                "getAndIncrementNextMasterChangeSeqNum", method, daoType);
-        codeBlock.nextControlFlow("else");
-        generateIncrementSection(codeBlock, UmSyncLocalChangeSeqNum.class, paramType,
-                paramVariableName, syncableDbVariableName,
-                "getAndIncrementNextLocalChangeSeqNum", method, daoType);
-        codeBlock.endControlFlow();
+//        if(syncableDbVariableName == null) {
+//            codeBlock.add("$1T _syncableDb = ($1T)$2L;\n", UmSyncableDatabase.class, dbVariableName);
+//            syncableDbVariableName = "_syncableDb";
+//        }
+//
+//        codeBlock.beginControlFlow("if($L.isMaster())", syncableDbVariableName);
+//        generateIncrementSection(codeBlock, UmSyncMasterChangeSeqNum.class, paramType,
+//                paramVariableName, syncableDbVariableName,
+//                "getAndIncrementNextMasterChangeSeqNum", method, daoType);
+//        codeBlock.nextControlFlow("else");
+//        generateIncrementSection(codeBlock, UmSyncLocalChangeSeqNum.class, paramType,
+//                paramVariableName, syncableDbVariableName,
+//                "getAndIncrementNextLocalChangeSeqNum", method, daoType);
+//        codeBlock.endControlFlow();
 
         return codeBlock.build();
     }
