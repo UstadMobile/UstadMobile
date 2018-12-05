@@ -1,5 +1,6 @@
 package com.ustadmobile.test;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.support.test.InstrumentationRegistry;
@@ -9,75 +10,97 @@ import android.support.test.espresso.matcher.ViewMatchers;
 import android.support.test.runner.AndroidJUnit4;
 
 import com.toughra.ustadmobile.R;
+import com.ustadmobile.core.controller.ContentEntryListPresenter;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.ContentEntryContentEntryFileJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryDao;
 import com.ustadmobile.core.db.dao.ContentEntryFileDao;
 import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryRelatedEntryJoinDao;
+import com.ustadmobile.core.db.dao.LanguageDao;
+import com.ustadmobile.core.view.ContentEntryView;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.ContentEntryContentEntryFileJoin;
 import com.ustadmobile.lib.db.entities.ContentEntryFile;
 import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin;
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoin;
+import com.ustadmobile.lib.db.entities.Language;
+import com.ustadmobile.port.android.view.ContentEntryDetailActivity;
+import com.ustadmobile.port.android.view.ContentEntryListActivity;
 import com.ustadmobile.port.android.view.DummyActivity;
 
 import org.hamcrest.Matchers;
+import org.hamcrest.core.AllOf;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.EnumSet;
+import java.util.concurrent.TimeUnit;
+
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.action.ViewActions.click;
+import static android.support.test.espresso.assertion.ViewAssertions.matches;
+import static android.support.test.espresso.intent.Intents.intended;
+import static android.support.test.espresso.intent.matcher.IntentMatchers.hasComponent;
+import static android.support.test.espresso.intent.matcher.IntentMatchers.hasExtra;
+import static android.support.test.espresso.matcher.ViewMatchers.hasDescendant;
+import static android.support.test.espresso.matcher.ViewMatchers.hasSibling;
+import static android.support.test.espresso.matcher.ViewMatchers.isDescendantOfA;
 import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
+import static android.support.test.espresso.matcher.ViewMatchers.withChild;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
+import static android.support.test.espresso.matcher.ViewMatchers.withText;
+import static com.ustadmobile.core.controller.ContentEntryListPresenter.ARG_CONTENT_ENTRY_UID;
+import static org.hamcrest.core.AllOf.allOf;
+import static org.hamcrest.core.IsEqual.equalTo;
 
 @RunWith(AndroidJUnit4.class)
-public class ContentEntryEspressoTest {
+public class ContentEntryListEspressoTest {
 
     @Rule
-    public IntentsTestRule<DummyActivity> mActivityRule =
-            new IntentsTestRule<>(DummyActivity.class, false, false);
+    public IntentsTestRule<ContentEntryListActivity> mActivityRule =
+            new IntentsTestRule<>(ContentEntryListActivity.class, false, false);
+
+    public static final long ROOT_CONTENT_ENTRY_UID = 1L;
 
     @Before
-    public void beforeTest() {
-        Context context = InstrumentationRegistry.getTargetContext();
-        UmAppDatabase.getInstance(context).clearAllTables();
-
-        //Start the activity
-
-
+    public void before() {
+        initDb();
+        launchActivity();
     }
 
-    public UmAppDatabase getDb(){
-        Context context = InstrumentationRegistry.getTargetContext();
-        return UmAppDatabase.getInstance(context);
+    public void launchActivity() {
+        Intent launchActivityIntent = new Intent();
+        launchActivityIntent.putExtra(ContentEntryListPresenter.ARG_CONTENT_ENTRY_UID,
+                ROOT_CONTENT_ENTRY_UID);
+        mActivityRule.launchActivity(launchActivityIntent);
     }
 
-
-    public void createDummyContent(){
-        UmAppDatabase db = getDb();
-
+    public void initDb(){
+        Context context = InstrumentationRegistry.getTargetContext();
+        UmAppDatabase db = UmAppDatabase.getInstance(context);
         db.clearAllTables();
+        UmAppDatabase repo = db.getRepository("https://localhost", "");
 
-        ContentEntryDao contentDao = db.getContentEntryDao();
-        ContentEntryParentChildJoinDao pcjdao = db.getContentEntryParentChildJoinDao();
-        ContentEntryFileDao contentFileDao = db.getContentEntryFileDao();
-        ContentEntryContentEntryFileJoinDao contentEntryFileJoinDao = db.getContentEntryContentEntryFileJoinDao();
-        ContentEntryRelatedEntryJoinDao contentEntryRelatedEntryJoinDao = db.getContentEntryRelatedEntryJoinDao();
+        ContentEntryDao contentDao = repo.getContentEntryDao();
+        ContentEntryParentChildJoinDao pcjdao = repo.getContentEntryParentChildJoinDao();
+        ContentEntryFileDao contentFileDao = repo.getContentEntryFileDao();
+        ContentEntryContentEntryFileJoinDao contentEntryFileJoinDao = repo.getContentEntryContentEntryFileJoinDao();
+        ContentEntryRelatedEntryJoinDao contentEntryRelatedEntryJoinDao = repo.getContentEntryRelatedEntryJoinDao();
 
         ContentEntry entry = new ContentEntry();
-        entry.setContentEntryUid(1);
+        entry.setContentEntryUid(ROOT_CONTENT_ENTRY_UID);
         entry.setTitle("Ustad Mobile");
         contentDao.insert(entry);
-
 
         ContentEntry ck12 = new ContentEntry();
         ck12.setContentEntryUid(2);
         ck12.setTitle("Ck-12 Foundation");
         ck12.setDescription("All content");
         ck12.setThumbnailUrl("https://www.edraak.org/static/images/logo-dark-ar.fa1399e8d134.png");
+        ck12.setLeaf(false);
         contentDao.insert(ck12);
 
         ContentEntryParentChildJoin parentChildJoin = new ContentEntryParentChildJoin();
@@ -91,6 +114,7 @@ public class ContentEntryEspressoTest {
         grade5parent.setContentEntryUid(3);
         grade5parent.setTitle("Grade 1-5");
         grade5parent.setThumbnailUrl("https://phet.colorado.edu/images/phet-social-media-logo.png");
+        grade5parent.setLeaf(false);
         contentDao.insert(grade5parent);
 
         ContentEntryParentChildJoin subjectgradejoin = new ContentEntryParentChildJoin();
@@ -104,6 +128,7 @@ public class ContentEntryEspressoTest {
         grade1child.setContentEntryUid(4);
         grade1child.setTitle("Grade 1");
         grade1child.setThumbnailUrl("https://img1.ck12.org/media/build-20181015164501/images/ck12-logo-livetile.png");
+        grade1child.setLeaf(false);
         contentDao.insert(grade1child);
 
         ContentEntryParentChildJoin gradeChildJoin = new ContentEntryParentChildJoin();
@@ -117,6 +142,7 @@ public class ContentEntryEspressoTest {
         wholenumbers.setContentEntryUid(5);
         wholenumbers.setTitle("Whole Numbers");
         wholenumbers.setThumbnailUrl("https://prathambooks.org/wp-content/uploads/2018/04/Logo-black.png");
+        wholenumbers.setLeaf(false);
         contentDao.insert(wholenumbers);
 
         ContentEntryParentChildJoin GradeNumberJoin = new ContentEntryParentChildJoin();
@@ -133,6 +159,7 @@ public class ContentEntryEspressoTest {
         quiz.setDescription("All content");
         quiz.setPublisher("CK12");
         quiz.setAuthor("Binge");
+        quiz.setLeaf(true);
         contentDao.insert(quiz);
 
         ContentEntryParentChildJoin NumberQuizJoin = new ContentEntryParentChildJoin();
@@ -229,17 +256,48 @@ public class ContentEntryEspressoTest {
     @Test
     public void givenContentEntryPresent_whenOpened_entryIsDisplayed() {
 
-        createDummyContent();
-
-        Intent launchActivityIntent = new Intent();
-        mActivityRule.launchActivity(launchActivityIntent);
-
-        // TODO assert page opens
-        onView(Matchers.allOf(isDisplayed(), withId(R.id.content_entry_list)))
-                .perform(RecyclerViewActions.actionOnItemAtPosition(0,click()));
+        onView(allOf(withId(R.id.content_entry_list),isDisplayed()))
+                .check(matches(hasDescendant(withText("Ck-12 Foundation"))));
 
     }
 
+
+    @Test
+    public void givenContentEntryWithChildrenPresent_whenEntryClicked_intentToViewListIsFired() {
+        onView(Matchers.allOf(isDisplayed(), withId(R.id.content_entry_list)))
+                .perform(RecyclerViewActions.actionOnItemAtPosition(0,click()));
+
+        intended(allOf(
+                hasComponent(ContentEntryListActivity.class.getCanonicalName()),
+                hasExtra(equalTo(ARG_CONTENT_ENTRY_UID),
+                        equalTo(2l)
+        )));
+    }
+
+    @Test
+    public void givenContentEntryLeafPresent_whenEntryClicked_intentToViewDetailIsFired() {
+        onView(Matchers.allOf(isDisplayed(), withId(R.id.content_entry_list)))
+                .perform(RecyclerViewActions.actionOnItemAtPosition(0,click()));
+
+        onView(Matchers.allOf(isDisplayed(), withId(R.id.content_entry_list)))
+                .perform(RecyclerViewActions.actionOnItemAtPosition(0,click()));
+
+        onView(Matchers.allOf(isDisplayed(), withId(R.id.content_entry_list)))
+                .perform(RecyclerViewActions.actionOnItemAtPosition(0,click()));
+
+        onView(Matchers.allOf(isDisplayed(), withId(R.id.content_entry_list)))
+                .perform(RecyclerViewActions.actionOnItemAtPosition(0,click()));
+
+        onView(Matchers.allOf(isDisplayed(), withId(R.id.content_entry_list)))
+                .perform(RecyclerViewActions.actionOnItemAtPosition(0,click()));
+
+        intended(allOf(
+                hasComponent(ContentEntryDetailActivity.class.getCanonicalName()),
+                hasExtra(equalTo(ARG_CONTENT_ENTRY_UID),
+                        equalTo(6l)
+                )));
+
+    }
 
 
 }

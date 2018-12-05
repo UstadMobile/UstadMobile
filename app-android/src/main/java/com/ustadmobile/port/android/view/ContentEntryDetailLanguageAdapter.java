@@ -16,11 +16,13 @@ public class ContentEntryDetailLanguageAdapter extends RecyclerView.Adapter<Cont
 
 
     private final List<ContentEntryRelatedEntryJoinWithLanguage> data;
+    private final long entryUid;
     private AdapterViewListener listener;
 
-    public ContentEntryDetailLanguageAdapter(List<ContentEntryRelatedEntryJoinWithLanguage> data, AdapterViewListener listener){
+    public ContentEntryDetailLanguageAdapter(List<ContentEntryRelatedEntryJoinWithLanguage> data, AdapterViewListener listener, long entryUuid){
         this.data = data;
         this.listener = listener;
+        this.entryUid = entryUuid;
     }
 
     protected interface AdapterViewListener {
@@ -39,7 +41,7 @@ public class ContentEntryDetailLanguageAdapter extends RecyclerView.Adapter<Cont
     public void onBindViewHolder(@NonNull LangHolder holder, int position) {
         ContentEntryRelatedEntryJoinWithLanguage entry = data.get(position);
         holder.entryLang.setText(entry.getLanguageName());
-        holder.entryLang.setOnClickListener(view -> listener.selectContentEntryOfLanguage(entry.getCerejContentEntryUid()));
+        holder.entryLang.setOnClickListener(view -> listener.selectContentEntryOfLanguage(entry.getCerejContentEntryUid() == entryUid ? entry.getCerejRelatedEntryUid() : entry.getCerejContentEntryUid()));
     }
 
     @Override

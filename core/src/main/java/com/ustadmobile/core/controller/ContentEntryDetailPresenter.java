@@ -66,7 +66,7 @@ public class ContentEntryDetailPresenter extends UstadBaseController<ContentEntr
 
             @Override
             public void onSuccess(List<ContentEntryRelatedEntryJoinWithLanguage> result) {
-                viewContract.setTranslationsAvailable(result);
+                viewContract.setTranslationsAvailable(result, entryUuid);
             }
 
             @Override

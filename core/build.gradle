@@ -48,7 +48,7 @@ dependencies {
     implementation "org.json:json:$version_json"
     implementation "net.sf.kxml:kxml2:$version_kxml"
     implementation "com.ustadmobile.qrcodelibomrfork:qrcode-core:$version_qrcodelibfork"
-    implementation project(":lib-database")
+    implementation project(':lib-database')
     compileOnly project(':lib-database-entities')
     implementation project(':lib-database-runtime')
     implementation project(":lib-util")

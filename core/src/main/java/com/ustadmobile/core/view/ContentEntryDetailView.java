@@ -14,5 +14,5 @@ public interface ContentEntryDetailView extends UstadView {
 
     void setFileInfo(List<ContentEntryFile> filesByContentEntryUid);
 
-    void setTranslationsAvailable(List<ContentEntryRelatedEntryJoinWithLanguage> result);
+    void setTranslationsAvailable(List<ContentEntryRelatedEntryJoinWithLanguage> result, long entryUuid);
 }

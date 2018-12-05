@@ -231,8 +231,6 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                                 .endControlFlow()
                                 .add("return _jdbcProductName;\n").build()).build());
 
-        TypeSpec.Builder factoryClassSpec = DbProcessorUtils.makeFactoryClass(dbType, jdbcDbClassName);
-
         addCreateTablesMethodToClassSpec(dbType, jdbcDbTypeSpec);
 
         for(Element subElement : dbType.getEnclosedElements()) {
@@ -279,9 +277,6 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
 
 
 
-        JavaFile factoryClassJavaFile = JavaFile.builder(packageElement.getQualifiedName().toString(), factoryClassSpec.build())
-                .indent("    ").build();
-        writeJavaFileToDestination(factoryClassJavaFile, destination);
 
         JavaFile databaseJavaFile = JavaFile.builder(packageElement.getQualifiedName().toString(), jdbcDbTypeSpec.build())
                 .indent("    ").build();
@@ -1406,9 +1401,11 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                     commaRequired = true;
                 }
                 codeBlock.add(");\n").endControlFlow();
-            }catch(JSQLParserException je) {
-                messager.printMessage(Diagnostic.Kind.ERROR, formatMethodForErrorMessage(daoMethod) +
-                    " exception parsing update/delete query: " + je.getMessage());
+            }catch(Exception je) {
+                messager.printMessage(Diagnostic.Kind.ERROR,
+                        formatMethodForErrorMessage(daoMethod, daoType) +
+                    " exception parsing update/delete query: " + je.getClass().getSimpleName() +
+                    ": " + je.getMessage());
             }
 
 
