@@ -15,6 +15,7 @@ import android.widget.CompoundButton;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.ustadmobile.core.view.SelectAttendanceThresholdsDialogView;
 import com.ustadmobile.core.view.SelectMultipleTreeDialogView;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 import com.toughra.ustadmobile.R;
@@ -33,8 +34,10 @@ import ru.dimorinny.floatingtextbutton.FloatingTextButton;
  * <p>
  * This Activity extends UstadBaseActivity and implements ReportEditView
  */
-public class ReportEditActivity extends UstadBaseActivity implements ReportEditView, SelectClazzesDialogFragment.ClazzSelectDialogListener,
-        SelectMultipleTreeDialogFragment.MultiSelectTreeDialogListener {
+public class ReportEditActivity extends UstadBaseActivity implements ReportEditView,
+        SelectClazzesDialogFragment.ClazzSelectDialogListener,
+        SelectMultipleTreeDialogFragment.MultiSelectTreeDialogListener,
+        SelectAttendanceThresholdsDialogFragment.ThresholdsSelectedDialogListener {
 
     private Toolbar toolbar;
 
@@ -47,6 +50,7 @@ public class ReportEditActivity extends UstadBaseActivity implements ReportEditV
     private TextView attendanceThresholdsTextView;
     private HashMap<String, Long> selectedClasses;
     private HashMap<String, Long> selectedLocations;
+    private SelectAttendanceThresholdsDialogFragment.ThresholdValues thresholdValues;
 
 
     @Override
@@ -157,5 +161,11 @@ public class ReportEditActivity extends UstadBaseActivity implements ReportEditV
     public void onLocationResult(HashMap<String, Long> selectedLocations) {
         this.selectedLocations = selectedLocations;
         locationsTextView.setText("Got location. TODO: Fill me up");
+    }
+
+    @Override
+    public void onThresholdResult(SelectAttendanceThresholdsDialogFragment.ThresholdValues values) {
+        this.thresholdValues = values;
+        attendanceThresholdsTextView.setText("Got threshold values. TOOD: Fill me up.");
     }
 }

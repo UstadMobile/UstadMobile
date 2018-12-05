@@ -38,9 +38,15 @@ public class SelectAttendanceThresholdsDialogFragment extends UstadDialogFragmen
     //Context (Activity calling this)
     private Context mAttachedContext;
 
+    public class ThresholdValues{
+        public int low, med, high;
+    }
+
+    private ThresholdValues selectedValues;
+
     //Presenter should implement this ?
     public interface ThresholdsSelectedDialogListener{
-        void onResult();
+        void onThresholdResult(ThresholdValues values);
     }
 
 
@@ -102,7 +108,7 @@ public class SelectAttendanceThresholdsDialogFragment extends UstadDialogFragmen
         //Dialog stuff:
         //Dialog's positive / negative listeners :
         DialogInterface.OnClickListener positiveOCL =
-                (dialog, which) -> System.out.print("Positive");
+                (dialog, which) -> finish();
 
         DialogInterface.OnClickListener negativeOCL =
                 (dialog, which) -> System.out.println("Negative");
@@ -127,19 +133,22 @@ public class SelectAttendanceThresholdsDialogFragment extends UstadDialogFragmen
     public void onAttach(Context context){
         super.onAttach(context);
         this.mAttachedContext = context;
+        selectedValues = new ThresholdValues();
     }
 
     @Override
     public void onDetach(){
         super.onDetach();
         this.mAttachedContext = null;
+        selectedValues = null;
     }
 
     @Override
     public void finish(){
         if(mAttachedContext instanceof ThresholdsSelectedDialogListener){
-            ((ThresholdsSelectedDialogListener) mAttachedContext).onResult();
+            ((ThresholdsSelectedDialogListener) mAttachedContext).onThresholdResult(selectedValues);
         }
+        dialog.dismiss();
     }
 
     @Override
