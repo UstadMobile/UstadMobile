@@ -11,6 +11,7 @@ import com.ustadmobile.core.view.SelectMultipleTreeDialogView;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.LinkedHashMap;
 
 import static com.ustadmobile.core.view.ReportEditView.ARG_LOCATIONS_SET;
 import static com.ustadmobile.core.view.ReportEditView.ARG_REPORT_LINK;
@@ -27,7 +28,7 @@ public class ReportEditPresenter
     //eg: private long clazzUid = -1;
     private String reportName = "";
     private String reportLink;
-    private HashMap<Integer, String> timePeriodOptions;
+    private LinkedHashMap<Integer, String> timePeriodOptions;
     private boolean genderDisaggregate = false;
 
     private static final int TIME_PERIOD_LAST_WEEK = 1;
@@ -69,7 +70,7 @@ public class ReportEditPresenter
      * Generates the time period options. Generates the hashmap and sends it to the view.
      */
     private void updateTimePeriod(){
-        timePeriodOptions = new HashMap<>();
+        timePeriodOptions = new LinkedHashMap<>();
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         timePeriodOptions.put(TIME_PERIOD_LAST_WEEK,
                 impl.getString(MessageID.last_week, context));
@@ -97,7 +98,7 @@ public class ReportEditPresenter
      */
     public void handleTimePeriodSelected(int selected){
         toTime = System.currentTimeMillis();
-
+        selected++;
         switch (selected){
             case TIME_PERIOD_LAST_WEEK:
                 fromTime = UMCalendarUtil.getDateInMilliPlusDays(-7);
@@ -115,6 +116,7 @@ public class ReportEditPresenter
                 break;
             case TIME_PERIOD_CUSTOM:
                 toTime = 0L;
+                view.showCustomDateSelector();
                 break;
         }
     }

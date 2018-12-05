@@ -49,6 +49,11 @@ public interface ReportEditView extends UstadView {
     void updateReportName(String name);
 
     /**
+     * Shows the custom from/to date selector when Custom date option selected on time period spinner
+     */
+    void showCustomDateSelector();
+
+    /**
      * Show attendance threshold options or remove them.
      * @param show  true if yes. false if no
      */

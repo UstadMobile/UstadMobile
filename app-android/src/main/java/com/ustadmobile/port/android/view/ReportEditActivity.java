@@ -3,6 +3,7 @@ package com.ustadmobile.port.android.view;
 
 import com.ustadmobile.core.controller.ReportEditPresenter;
 
+import android.app.DatePickerDialog;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -15,6 +16,7 @@ import android.widget.CompoundButton;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.core.view.SelectAttendanceThresholdsDialogView;
 import com.ustadmobile.core.view.SelectMultipleTreeDialogView;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
@@ -23,6 +25,7 @@ import com.toughra.ustadmobile.R;
 
 import com.ustadmobile.core.view.ReportEditView;
 
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 
@@ -48,6 +51,7 @@ public class ReportEditActivity extends UstadBaseActivity implements ReportEditV
     private ReportEditPresenter mPresenter;
     private TextView classesTextView;
     private TextView attendanceThresholdsTextView;
+
     private HashMap<String, Long> selectedClasses;
     private HashMap<String, Long> selectedLocations;
     private SelectAttendanceThresholdsDialogFragment.ThresholdValues thresholdValues;
@@ -137,6 +141,30 @@ public class ReportEditActivity extends UstadBaseActivity implements ReportEditV
     }
 
     @Override
+    public void showCustomDateSelector() {
+
+        Calendar myCalendar = Calendar.getInstance();
+
+        //Date pickers's on click listener - sets text
+        DatePickerDialog.OnDateSetListener date = (view, year, month, dayOfMonth) -> {
+            myCalendar.set(Calendar.YEAR, year);
+            myCalendar.set(Calendar.MONTH, month);
+            myCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+        };
+        //date listener - opens a new date picker.
+        DatePickerDialog dateFieldPicker = new DatePickerDialog(
+                ReportEditActivity.this, date, myCalendar.get(Calendar.YEAR),
+                myCalendar.get(Calendar.MONTH), myCalendar.get(Calendar.DAY_OF_MONTH));
+        dateFieldPicker.getDatePicker().setMaxDate(System.currentTimeMillis());
+
+        dateFieldPicker.show();
+
+        //Set values like so:
+//        mPresenter.setFromTime(...);
+//        mPresenter.setToTime(...);
+    }
+
+    @Override
     public void showAttendanceThresholdView(boolean show) {
         //TODO
         //1: Show/Hide
@@ -160,7 +188,7 @@ public class ReportEditActivity extends UstadBaseActivity implements ReportEditV
     @Override
     public void onLocationResult(HashMap<String, Long> selectedLocations) {
         this.selectedLocations = selectedLocations;
-        locationsTextView.setText("Got location. TODO: Fill me up");
+        updateLocationsSelected("Got location. TODO: Fill me up");
     }
 
     @Override
