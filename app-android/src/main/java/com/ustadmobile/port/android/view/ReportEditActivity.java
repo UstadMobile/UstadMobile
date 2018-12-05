@@ -15,6 +15,7 @@ import android.widget.CompoundButton;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.ustadmobile.core.view.SelectMultipleTreeDialogView;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 import com.toughra.ustadmobile.R;
 
@@ -22,6 +23,7 @@ import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.view.ReportEditView;
 
 import java.util.HashMap;
+import java.util.List;
 
 import ru.dimorinny.floatingtextbutton.FloatingTextButton;
 
@@ -31,7 +33,8 @@ import ru.dimorinny.floatingtextbutton.FloatingTextButton;
  * <p>
  * This Activity extends UstadBaseActivity and implements ReportEditView
  */
-public class ReportEditActivity extends UstadBaseActivity implements ReportEditView {
+public class ReportEditActivity extends UstadBaseActivity implements ReportEditView, SelectClazzesDialogFragment.ClazzSelectDialogListener,
+        SelectMultipleTreeDialogFragment.MultiSelectTreeDialogListener {
 
     private Toolbar toolbar;
 
@@ -41,7 +44,9 @@ public class ReportEditActivity extends UstadBaseActivity implements ReportEditV
     private CheckBox genderDisaggregateCheck;
     private ReportEditPresenter mPresenter;
     private TextView classesTextView;
-    private  TextView attendanceThresholdsTextView;
+    private TextView attendanceThresholdsTextView;
+    private HashMap<String, Long> selectedClasses;
+    private HashMap<String, Long> selectedLocations;
 
 
     @Override
@@ -139,5 +144,18 @@ public class ReportEditActivity extends UstadBaseActivity implements ReportEditV
         //TODO:
         //1. Show/Hide
         //2. Update Constraint Layout
+    }
+
+
+    @Override
+    public void onSelectClazzesResult(HashMap<String, Long> selectedClazzes) {
+        this.selectedClasses = selectedClazzes;
+        classesTextView.setText("Got classes. TODO: Fill me up");
+    }
+
+    @Override
+    public void onLocationResult(HashMap<String, Long> selectedLocations) {
+        this.selectedLocations = selectedLocations;
+        locationsTextView.setText("Got location. TODO: Fill me up");
     }
 }

@@ -57,14 +57,9 @@ public class SelectClazzesDialogPresenter
 
     @Override
     public void handleCommonPressed(Object arg) {
-        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
 
-        //Create arguments
-        Hashtable args = new Hashtable();
-        //eg: args.put(ARG_CLAZZ_UID, selectedObjectUid);
-
-        //Go to view
-        //eg: impl.go(SELEditView.VIEW_NAME, args, view.getContext());
+        //TODO: Check if nothing else required. The finish() should call the onResult method in parent activity, etc. Make sure you send the list
+        view.finish();
     }
 
     @Override

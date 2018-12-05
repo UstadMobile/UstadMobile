@@ -19,11 +19,14 @@ import android.widget.AdapterView;
 import android.widget.ImageView;
 
 import com.toughra.ustadmobile.R;
+import com.ustadmobile.core.controller.SelectMultipleTreeDialogPresenter;
 import com.ustadmobile.core.view.DismissableDialog;
 import com.ustadmobile.core.view.SelectMultipleTreeDialogView;
+import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 
@@ -55,14 +58,17 @@ public class SelectMultipleTreeDialogFragment extends UstadDialogFragment implem
 
     Toolbar toolbar;
 
+    HashMap<String, Long> selectedOptions;
+
 
     public interface MultiSelectTreeDialogListener {
 
-        void onResult();
+        void onLocationResult(HashMap<String, Long> selected);
 
     }
 
     //Presenter?
+    SelectMultipleTreeDialogPresenter mPresenter;
 
     @android.support.annotation.NonNull
     @NonNull
@@ -135,6 +141,8 @@ public class SelectMultipleTreeDialogFragment extends UstadDialogFragment implem
             int i = item.getItemId();
             if (i == R.id.menu_catalog_entry_presenter_share) {
                 System.out.println("DONE");
+                //TOOD: check
+                mPresenter.handleClickPrimaryActionButton();
             }
             return false;
         });
@@ -151,6 +159,10 @@ public class SelectMultipleTreeDialogFragment extends UstadDialogFragment implem
 
         //Set presenter.
         //Call it's onCreate()
+
+        mPresenter = new SelectMultipleTreeDialogPresenter(getContext(),
+                UMAndroidUtil.bundleToHashtable(getArguments()), this);
+        mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
 
         //Set any view components and its listener (post presenter work)
 
@@ -231,21 +243,22 @@ public class SelectMultipleTreeDialogFragment extends UstadDialogFragment implem
     @Override
     public void finish() {
         if(mAttachedContext instanceof MultiSelectTreeDialogListener) {
-            ((MultiSelectTreeDialogListener)mAttachedContext).onResult();
+            ((MultiSelectTreeDialogListener)mAttachedContext).onLocationResult(selectedOptions);
         }
+        dialog.dismiss();
     }
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-
         this.mAttachedContext = context;
+        this.selectedOptions = new HashMap<>();
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-
         this.mAttachedContext = null;
+        this.selectedOptions = null;
     }
 }

@@ -25,6 +25,7 @@ import com.ustadmobile.core.view.SelectClazzesDialogView;
 import com.ustadmobile.lib.db.entities.ClazzWithNumStudents;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
+import java.util.HashMap;
 import java.util.Objects;
 
 import io.reactivex.annotations.NonNull;
@@ -52,9 +53,11 @@ public class SelectClazzesDialogFragment extends UstadDialogFragment implements
 
     Toolbar toolbar;
 
-    //Presenter should implement this ?
+    HashMap<String, Long> selectedClazzes;
+
+    //Main Activity should implement this ?
     public interface ClazzSelectDialogListener{
-        void onResult();
+        void onSelectClazzesResult(HashMap<String, Long> selected);
     }
 
     /**
@@ -96,6 +99,8 @@ public class SelectClazzesDialogFragment extends UstadDialogFragment implements
             int i = item.getItemId();
             if (i == R.id.menu_catalog_entry_presenter_share) {
                 System.out.println("DONE");
+                //TODO: Check
+                mPresenter.handleCommonPressed(-1);
             }
             return false;
         });
@@ -111,9 +116,6 @@ public class SelectClazzesDialogFragment extends UstadDialogFragment implements
 
         DialogInterface.OnClickListener negativeOCL =
                 (dialog, which) -> System.out.println("Negative");
-
-        //Set presenter.
-        //Call it's onCreate()
 
         //Set any view components and its listener (post presenter work)
 
@@ -136,19 +138,22 @@ public class SelectClazzesDialogFragment extends UstadDialogFragment implements
     public void onAttach(Context context){
         super.onAttach(context);
         this.mAttachedContext = context;
+        this.selectedClazzes = new HashMap<>();
     }
 
     @Override
     public void onDetach(){
         super.onDetach();
         this.mAttachedContext = null;
+        this.selectedClazzes = null;
     }
 
     @Override
     public void finish(){
         if(mAttachedContext instanceof ClazzSelectDialogListener){
-             ((ClazzSelectDialogListener) mAttachedContext).onResult();
+             ((ClazzSelectDialogListener) mAttachedContext).onSelectClazzesResult(selectedClazzes);
         }
+        dialog.dismiss();
     }
 
     /**
