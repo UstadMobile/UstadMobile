@@ -55,4 +55,15 @@ public interface ReportEditView extends UstadView {
      */
     void updateReportName(String name);
 
+    /**
+     * Show attendance threshold options or remove them.
+     * @param show  true if yes. false if no
+     */
+    void showAttendanceThresholdView(boolean show);
+
+    /**
+     * Show radio button group or not (to show student numbers and percentages(
+     * @param show  true is yes, false if no
+     */
+    void showShowStudentNumberPercentageView(boolean show);
 }

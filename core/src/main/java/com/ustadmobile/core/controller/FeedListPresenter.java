@@ -6,6 +6,7 @@ import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.FeedListView;
 import com.ustadmobile.core.view.ReportEditView;
+import com.ustadmobile.core.view.ReportSelectionView;
 import com.ustadmobile.lib.db.entities.ClazzAverage;
 import com.ustadmobile.lib.db.entities.FeedEntry;
 
@@ -98,7 +99,7 @@ public class FeedListPresenter extends UstadBaseController<FeedListView>{
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         Hashtable args = new Hashtable();
         args.put(ARG_REPORT_NAME, "Test Report");
-        impl.go(ReportEditView.VIEW_NAME, args, view.getContext());
+        impl.go(ReportSelectionView.VIEW_NAME, args, view.getContext());
     }
 
     /**

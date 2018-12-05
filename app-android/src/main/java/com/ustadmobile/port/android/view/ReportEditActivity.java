@@ -91,6 +91,13 @@ public class ReportEditActivity extends UstadBaseActivity implements ReportEditV
             }
         });
 
+        locationsTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mPresenter.goToLocationDialog();
+            }
+        });
+
         genderDisaggregateCheck.setOnCheckedChangeListener(
                 (buttonView, isChecked) -> mPresenter.setGenderDisaggregate(isChecked));
 
@@ -139,5 +146,19 @@ public class ReportEditActivity extends UstadBaseActivity implements ReportEditV
     @Override
     public void updateReportName(String name) {
         heading.setText(name);
+    }
+
+    @Override
+    public void showAttendanceThresholdView(boolean show) {
+        //TODO
+        //1: Show/Hide
+        //2. Update Constraint Layout
+    }
+
+    @Override
+    public void showShowStudentNumberPercentageView(boolean show) {
+        //TODO:
+        //1. Show/Hide
+        //2. Update Constraint Layout
     }
 }

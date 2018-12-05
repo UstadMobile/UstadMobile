@@ -541,9 +541,14 @@ dependencies {
     //Floating text button
     implementation "com.github.dimorinny:floating-text-button:$version_android_floating_text_button"
 
+    //Image compression library
     implementation "id.zelory:compressor:${version_compressor}"
 
+    //Chart library
     implementation "com.github.PhilJay:MPAndroidChart:$version_mpandroidchart"
+
+    //Recycler tree view library
+    implementation "com.github.TellH:RecyclerTreeView:$version_tellh_recyclertreeview"
 
     testImplementation "junit:junit:$version_junit"
 }

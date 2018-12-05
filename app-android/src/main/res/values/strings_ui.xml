@@ -438,6 +438,20 @@ This is the one you should be editing. The one in /core/locale/main/values/strin
     <string name="select_locations">Select Locations</string>
     <string name="location_name">Location name</string>
     <string name="sub_location_name">Sub\-location name</string>
+    <string name="show_student_numbers">Show student numbers</string>
+    <string name="show_student_percentages">Show student percentages</string>
+    <string name="attendance_thresholds">Attendance thresholds</string>
+    <string name="low">Low</string>
+    <string name="mid">Mid</string>
+    <string name="high">High</string>
+    <string name="overall_attendance">Overall attendance</string>
+    <string name="attendance_grouped_by_threshold">Attendance grouped by threshold</string>
+    <string name="at_risk_students">At risk students</string>
+    <string name="operations_report">Operations report</string>
+    <string name="number_of_days_classes_open">Number of days classes open</string>
+    <string name="irc_master_list_report">IRC master list report</string>
+    <string name="sel_report">SEL report</string>
+    <string name="select_report_type">Select Report Type</string>
 
 
 </resources>

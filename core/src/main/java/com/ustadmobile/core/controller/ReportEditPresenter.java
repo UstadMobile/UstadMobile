@@ -1,12 +1,13 @@
 package com.ustadmobile.core.controller;
 
-import java.util.HashMap;
-import java.util.Hashtable;
-
 import com.ustadmobile.core.generated.locale.MessageID;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.core.view.ReportEditView;
-import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.view.SelectMultipleTreeDialogView;
+
+import java.util.HashMap;
+import java.util.Hashtable;
 
 import static com.ustadmobile.core.view.ReportEditView.ARG_REPORT_LINK;
 import static com.ustadmobile.core.view.ReportEditView.ARG_REPORT_NAME;
@@ -25,11 +26,11 @@ public class ReportEditPresenter
     private HashMap<Integer, String> timePeriodOptions;
     private boolean genderDisaggregate = false;
 
-    public static final int TIME_PERIOD_LAST_WEEK = 1;
-    public static final int TIME_PERIOD_LAST_TWO_WEEK = 2;
-    public static final int TIME_PERIOD_LAST_MONTH = 3;
-    public static final int TIME_PERIOD_LAST_THREE_MONTHS = 4;
-    public static final int TIME_PERIOD_CUSTOM = 5;
+    private static final int TIME_PERIOD_LAST_WEEK = 1;
+    private static final int TIME_PERIOD_LAST_TWO_WEEK = 2;
+    private static final int TIME_PERIOD_LAST_MONTH = 3;
+    private static final int TIME_PERIOD_LAST_THREE_MONTHS = 4;
+    private static final int TIME_PERIOD_CUSTOM = 5;
 
     private long fromTime, toTime;
 
@@ -59,7 +60,6 @@ public class ReportEditPresenter
         updateTimePeriod();
 
     }
-
 
     /**
      * Generates the time period options. Generates the hashmap and sends it to the view.
@@ -121,6 +121,16 @@ public class ReportEditPresenter
      */
     public void handleClassesSelected(int selected){
         //TODO:
+    }
+
+    /**
+     * Goes and opens up the Location dialog
+     */
+    public void goToLocationDialog(){
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        Hashtable args = new Hashtable();
+
+        impl.go(SelectMultipleTreeDialogView.VIEW_NAME, args, context);
     }
 
     /**

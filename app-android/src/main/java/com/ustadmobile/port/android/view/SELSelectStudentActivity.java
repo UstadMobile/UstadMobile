@@ -106,7 +106,8 @@ public class SELSelectStudentActivity extends UstadBaseActivity implements SELSe
         //Recycler View:
         mRecyclerView = findViewById(
                 R.id.activity_sel_select_student_recyclerview);
-        RecyclerView.LayoutManager mRecyclerLayoutManager = new LinearLayoutManager(getApplicationContext());
+        RecyclerView.LayoutManager mRecyclerLayoutManager =
+                new LinearLayoutManager(getApplicationContext());
         mRecyclerView.setLayoutManager(mRecyclerLayoutManager);
 
         //Call the Presenter

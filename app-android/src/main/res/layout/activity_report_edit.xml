@@ -5,6 +5,20 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context="com.ustadmobile.port.android.view.ReportEditActivity">
 
+    <android.support.design.widget.AppBarLayout
+        android:id="@+id/activity_report_edit_appbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" android:elevation="4dp"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/activity_report_edit_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?android:attr/actionBarSize"
+            android:background="@color/primary"
+            app:layout_scrollFlags="scroll|enterAlways" />
+
+    </android.support.design.widget.AppBarLayout>
 
     <TextView
         android:id="@+id/activity_report_edit_location_heading"
@@ -26,6 +40,16 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/activity_report_edit_location_detail" />
 
+    <View
+        android:id="@+id/activity_report_edit_hline2"
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:layout_marginStart="8dp"
+        android:background="?android:attr/listDivider"
+        app:layout_constraintStart_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/activity_report_edit_attendance_threshold_selector" />
+
     <TextView
         android:id="@+id/activity_report_edit_classes_heading"
         android:layout_width="wrap_content"
@@ -37,11 +61,21 @@
         app:layout_constraintTop_toBottomOf="@+id/activity_report_edit_hline" />
 
     <TextView
+        android:id="@+id/activity_report_edit_attendance_thresholds_heading"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:text="@string/attendance_thresholds"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/activity_report_classes_spinner" />
+
+    <TextView
         android:id="@+id/activity_report_edit_time_period_heading"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
         android:text="@string/time_period"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/activity_report_edit_title_info_imageview" />
@@ -64,7 +98,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:paddingTop="20dp"
         android:spinnerMode="dropdown"
@@ -72,21 +105,6 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/activity_report_edit_classes_heading" />
-
-    <android.support.design.widget.AppBarLayout
-        android:id="@+id/activity_report_edit_appbar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" android:elevation="4dp"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
-
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/activity_report_edit_toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?android:attr/actionBarSize"
-            android:background="@color/primary"
-            app:layout_scrollFlags="scroll|enterAlways" />
-
-    </android.support.design.widget.AppBarLayout>
 
 
     <ImageView
@@ -121,17 +139,28 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/activity_report_edit_location_heading" />
 
+    <TextView
+        android:id="@+id/activity_report_edit_attendance_threshold_selector"
+        android:layout_width="0dp"
+        android:layout_height="38dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/activity_report_edit_attendance_thresholds_heading" />
+
     <CheckBox
         android:id="@+id/activity_report_edit_gender"
-        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:text="@string/disaggregate_by_gender"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/activity_report_classes_spinner"
-        android:layout_width="match_parent" />
+        app:layout_constraintTop_toBottomOf="@+id/activity_report_edit_show_student_radio_options" />
 
     <ru.dimorinny.floatingtextbutton.FloatingTextButton
         android:id="@+id/activity_report_edit_fab"
@@ -150,5 +179,37 @@
         app:layout_constraintStart_toStartOf="parent">
 
     </ru.dimorinny.floatingtextbutton.FloatingTextButton>
+
+    <RadioGroup
+        android:id="@+id/activity_report_edit_show_student_radio_options"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:orientation="horizontal"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        app:layout_constraintTop_toTopOf="@+id/activity_report_edit_hline2"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+
+
+        app:layout_constraintTop_toBottomOf="@+id/activity_report_edit_attendance_threshold_selector">
+
+        <RadioButton
+            android:id="@+id/activity_report_edit_show_student_number_option"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/show_student_numbers"
+            android:textSize="12sp" />
+
+        <RadioButton
+            android:id="@+id/activity_report_edit_show_student_percentage_option"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/show_student_percentages"
+            android:textSize="12sp" />
+    </RadioGroup>
 
 </android.support.constraint.ConstraintLayout>
