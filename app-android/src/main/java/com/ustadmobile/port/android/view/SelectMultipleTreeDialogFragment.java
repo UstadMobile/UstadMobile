@@ -6,14 +6,14 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputLayout;
-import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ImageView;
@@ -44,14 +44,16 @@ public class SelectMultipleTreeDialogFragment extends UstadDialogFragment implem
 
     AlertDialog dialog;
     View rootView;
-    TextInputLayout titleText;
 
     //Recycler view for the tree
     private RecyclerView recyclerView;
     //Adater for tree
     private TreeViewAdapter adapter;
 
+    //Context (activity calling this)
     private Context mAttachedContext;
+
+    Toolbar toolbar;
 
 
     public interface MultiSelectTreeDialogListener {
@@ -61,35 +63,6 @@ public class SelectMultipleTreeDialogFragment extends UstadDialogFragment implem
     }
 
     //Presenter?
-
-
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        //setStyle();
-        //setStyle(DialogFragment.STYLE_NORMAL, R.style.FullScreenDialogStyle);
-    }
-
-    @Override
-    public void onResume(){
-        super.onResume();
-
-        //Almost fullscreen the dialog
-        ViewGroup.LayoutParams params = getDialog().getWindow().getAttributes();
-        params.width = WindowManager.LayoutParams.MATCH_PARENT;
-        params.height = WindowManager.LayoutParams.MATCH_PARENT;
-        //Does something but its chopped
-        //getDialog().getWindow().setAttributes((android.view.WindowManager.LayoutParams) params);
-
-        //Does the same with chopped
-        int width = ViewGroup.LayoutParams.MATCH_PARENT;
-        int height = ViewGroup.LayoutParams.MATCH_PARENT;
-        //dialog.getWindow().setLayout(width, height);
-
-        //Does nothing apparantely
-        //setStyle(DialogFragment.STYLE_NORMAL, R.style.FullScreenDialogStyle);
-    }
 
     @android.support.annotation.NonNull
     @NonNull
@@ -153,6 +126,18 @@ public class SelectMultipleTreeDialogFragment extends UstadDialogFragment implem
         //Set adapter to Recycler view.
         recyclerView.setAdapter(adapter);
 
+        toolbar = rootView.findViewById(R.id.fragment_select_multiple_tree_dialog_toolbar);
+        toolbar.setTitle(R.string.select_locations);
+        toolbar.setNavigationIcon(R.drawable.ic_arrow_back_white_24dp);
+        toolbar.setNavigationOnClickListener(v -> dialog.dismiss());
+        toolbar.inflateMenu(R.menu.menu_done);
+        toolbar.setOnMenuItemClickListener(item -> {
+            int i = item.getItemId();
+            if (i == R.id.menu_catalog_entry_presenter_share) {
+                System.out.println("DONE");
+            }
+            return false;
+        });
 
         //Set view components
         //Set component listeners

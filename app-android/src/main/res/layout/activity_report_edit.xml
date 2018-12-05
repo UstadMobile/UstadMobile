@@ -5,6 +5,15 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context="com.ustadmobile.port.android.view.ReportEditActivity">
 
+    <View
+        android:id="@+id/activity_report_edit_hline3"
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:layout_marginStart="8dp"
+        android:background="?android:attr/listDivider"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/activity_report_classes_textview" />
+
     <android.support.design.widget.AppBarLayout
         android:id="@+id/activity_report_edit_appbar"
         android:layout_width="match_parent"
@@ -27,6 +36,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:text="@string/location"
+        android:textColor="#000000"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/activity_report_edittime_period_spinner" />
 
@@ -68,7 +78,7 @@
         android:layout_marginTop="8dp"
         android:text="@string/attendance_thresholds"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/activity_report_classes_spinner" />
+        app:layout_constraintTop_toBottomOf="@+id/activity_report_edit_hline3" />
 
     <TextView
         android:id="@+id/activity_report_edit_time_period_heading"
@@ -93,8 +103,8 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/activity_report_edit_time_period_heading" />
 
-    <Spinner
-        android:id="@+id/activity_report_classes_spinner"
+    <TextView
+        android:id="@+id/activity_report_classes_textview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"

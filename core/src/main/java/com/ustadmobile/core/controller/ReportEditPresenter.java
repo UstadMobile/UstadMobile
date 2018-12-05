@@ -4,11 +4,15 @@ import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.core.view.ReportEditView;
+import com.ustadmobile.core.view.SelectAttendanceThresholdsDialogView;
+import com.ustadmobile.core.view.SelectClazzesDialogView;
 import com.ustadmobile.core.view.SelectMultipleTreeDialogView;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
 
+import static com.ustadmobile.core.view.ReportEditView.ARG_LOCATIONS_SET;
 import static com.ustadmobile.core.view.ReportEditView.ARG_REPORT_LINK;
 import static com.ustadmobile.core.view.ReportEditView.ARG_REPORT_NAME;
 
@@ -133,11 +137,20 @@ public class ReportEditPresenter
         impl.go(SelectMultipleTreeDialogView.VIEW_NAME, args, context);
     }
 
-    /**
-     * Handles what happens when you click Location.
-     */
-    public void handleClickLocation(){
-        //TODO:
+    public void goToSelectClassesDialog(){
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        Hashtable args = new Hashtable();
+
+        //TODO: put locations set in the args to show only the classes in that location
+        args.put(ARG_LOCATIONS_SET, new ArrayList<>());
+
+        impl.go(SelectClazzesDialogView.VIEW_NAME, args, context);
+    }
+
+    public void goToSelectAttendanceThresholdsDialog(){
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        Hashtable args = new Hashtable();
+        impl.go(SelectAttendanceThresholdsDialogView.VIEW_NAME, args, context);
     }
 
     /**

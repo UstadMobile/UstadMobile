@@ -452,6 +452,7 @@ This is the one you should be editing. The one in /core/locale/main/values/strin
     <string name="irc_master_list_report">IRC master list report</string>
     <string name="sel_report">SEL report</string>
     <string name="select_report_type">Select Report Type</string>
-
+    <string name="select_attendance_thresholds">Select Attendance Thresholds</string>
+    <string name="select_classes">Select classes</string>
 
 </resources>

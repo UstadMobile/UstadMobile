@@ -40,7 +40,8 @@ public class ReportEditActivity extends UstadBaseActivity implements ReportEditV
     private TextView heading;
     private CheckBox genderDisaggregateCheck;
     private ReportEditPresenter mPresenter;
-    private Spinner classesSpinner;
+    private TextView classesTextView;
+    private  TextView attendanceThresholdsTextView;
 
 
     @Override
@@ -57,9 +58,12 @@ public class ReportEditActivity extends UstadBaseActivity implements ReportEditV
 
         locationsTextView = findViewById(R.id.activity_report_edit_location_detail);
         timePeriodSpinner = findViewById(R.id.activity_report_edittime_period_spinner);
+
         heading = findViewById(R.id.activity_report_edit_report_title);
         genderDisaggregateCheck = findViewById(R.id.activity_report_edit_gender);
-        classesSpinner = findViewById(R.id.activity_report_classes_spinner);
+        classesTextView = findViewById(R.id.activity_report_classes_textview);
+        attendanceThresholdsTextView =
+                findViewById(R.id.activity_report_edit_attendance_threshold_selector);
 
         //Call the Presenter
         mPresenter = new ReportEditPresenter(this,
@@ -78,29 +82,16 @@ public class ReportEditActivity extends UstadBaseActivity implements ReportEditV
             }
         });
 
-        //TODO: Maybe we don't need this but need a custom multi spinner selector
-        classesSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                mPresenter.handleClassesSelected(position);
-            }
+        classesTextView.setOnClickListener(v -> mPresenter.goToSelectClassesDialog());
 
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
-
-        locationsTextView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mPresenter.goToLocationDialog();
-            }
-        });
+        locationsTextView.setOnClickListener(v -> mPresenter.goToLocationDialog());
 
         genderDisaggregateCheck.setOnCheckedChangeListener(
                 (buttonView, isChecked) -> mPresenter.setGenderDisaggregate(isChecked));
 
+
+        attendanceThresholdsTextView.setOnClickListener(v ->
+                mPresenter.goToSelectAttendanceThresholdsDialog());
 
         //FAB and its listener
         FloatingTextButton fab = findViewById(R.id.activity_report_edit_fab);
@@ -115,22 +106,10 @@ public class ReportEditActivity extends UstadBaseActivity implements ReportEditV
 
         String[] timePeriodPresets = options.values().toArray(new String[options.size()]);
         ArrayAdapter<String> adapter = new ArrayAdapter<>(getApplicationContext(),
-                android.R.layout.simple_spinner_item, timePeriodPresets);
+                R.layout.item_simple_spinner, timePeriodPresets);
 
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         timePeriodSpinner.setAdapter(adapter);
-    }
-
-    @Override
-    public void updateClassesSet(HashMap<Long, String> options) {
-
-        String[] classesPresets = options.values().toArray(new String[options.size()]);
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(getApplicationContext(),
-                android.R.layout.simple_spinner_item, classesPresets);
-
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        classesSpinner.setAdapter(adapter);
-
     }
 
     @Override

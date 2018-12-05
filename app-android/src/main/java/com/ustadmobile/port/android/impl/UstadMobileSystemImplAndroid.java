@@ -106,6 +106,8 @@ import com.ustadmobile.core.view.SELRecognitionView;
 import com.ustadmobile.core.view.SELSelectConsentView;
 import com.ustadmobile.core.view.SELSelectStudentView;
 import com.ustadmobile.core.view.ScormPackageView;
+import com.ustadmobile.core.view.SelectAttendanceThresholdsDialogView;
+import com.ustadmobile.core.view.SelectClazzesDialogView;
 import com.ustadmobile.core.view.SelectMultipleTreeDialogView;
 import com.ustadmobile.core.view.SettingsDataSyncListView;
 import com.ustadmobile.core.view.SettingsDataUsageView;
@@ -151,6 +153,8 @@ import com.ustadmobile.port.android.view.SELRecognitionActivity;
 import com.ustadmobile.port.android.view.SELSelectConsentActivity;
 import com.ustadmobile.port.android.view.SELSelectStudentActivity;
 import com.ustadmobile.port.android.view.ScormPackageActivity;
+import com.ustadmobile.port.android.view.SelectAttendanceThresholdsDialogFragment;
+import com.ustadmobile.port.android.view.SelectClazzesDialogFragment;
 import com.ustadmobile.port.android.view.SelectMultipleTreeDialogFragment;
 import com.ustadmobile.port.android.view.SendCourseDialogFragment;
 import com.ustadmobile.port.android.view.SettingsDataSyncListActivity;
@@ -264,6 +268,9 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         viewNameToAndroidImplMap.put(ReportEditView.VIEW_NAME, ReportEditActivity.class);
         viewNameToAndroidImplMap.put(SelectMultipleTreeDialogView.VIEW_NAME, SelectMultipleTreeDialogFragment.class);
         viewNameToAndroidImplMap.put(ReportSelectionView.VIEW_NAME, ReportSelectionActivity.class);
+        viewNameToAndroidImplMap.put(SelectClazzesDialogView.VIEW_NAME, SelectClazzesDialogFragment.class);
+        viewNameToAndroidImplMap.put(SelectAttendanceThresholdsDialogView.VIEW_NAME, SelectAttendanceThresholdsDialogFragment.class);
+
 
 
     }

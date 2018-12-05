@@ -13,6 +13,7 @@ public interface ReportEditView extends UstadView {
 
     String ARG_REPORT_NAME = "ReportName";
     String ARG_REPORT_LINK = "ReportLink";
+    String ARG_LOCATIONS_SET = "Locations";
 
     /**
      * For Android: closes the activity.
@@ -39,14 +40,6 @@ public interface ReportEditView extends UstadView {
      * @param byGender
      */
     void updateGenderDisaggregationSet(boolean byGender);
-
-    /**
-     * Updates the classes on the view. The hashmap also has Clazz ids associated mapped to the
-     * Clazz name.
-     *
-     * @param options   A hashmap of the clazz id and the clazz name selected. 0 is all classes.
-     */
-    void updateClassesSet(HashMap<Long, String> options);
 
     /**
      * Updates the report name heading.
