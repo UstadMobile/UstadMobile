@@ -454,5 +454,10 @@ This is the one you should be editing. The one in /core/locale/main/values/strin
     <string name="select_report_type">Select Report Type</string>
     <string name="select_attendance_thresholds">Select Attendance Thresholds</string>
     <string name="select_classes">Select classes</string>
+    <string name="overall_attendance_report">Overall attendance report</string>
+    <string name="export">Export</string>
+    <string name="xls">XLS</string>
+    <string name="csv">CSV</string>
+    <string name="json">JSON</string>
 
 </resources>

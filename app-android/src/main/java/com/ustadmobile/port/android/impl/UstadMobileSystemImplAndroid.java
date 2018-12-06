@@ -97,6 +97,7 @@ import com.ustadmobile.core.view.PersonDetailView;
 import com.ustadmobile.core.view.PersonEditView;
 import com.ustadmobile.core.view.RegistrationView;
 import com.ustadmobile.core.view.ReportEditView;
+import com.ustadmobile.core.view.ReportOverallAttendanceView;
 import com.ustadmobile.core.view.ReportSelectionView;
 import com.ustadmobile.core.view.SELEditView;
 import com.ustadmobile.core.view.SELQuestionDetailView;
@@ -109,6 +110,7 @@ import com.ustadmobile.core.view.ScormPackageView;
 import com.ustadmobile.core.view.SelectAttendanceThresholdsDialogView;
 import com.ustadmobile.core.view.SelectClazzesDialogView;
 import com.ustadmobile.core.view.SelectMultipleTreeDialogView;
+import com.ustadmobile.core.view.SelectTwoDatesDialogView;
 import com.ustadmobile.core.view.SettingsDataSyncListView;
 import com.ustadmobile.core.view.SettingsDataUsageView;
 import com.ustadmobile.core.view.UserSettingsView;
@@ -144,6 +146,7 @@ import com.ustadmobile.port.android.view.PersonEditActivity;
 import com.ustadmobile.port.android.view.ReceiveCourseDialogFragment;
 import com.ustadmobile.port.android.view.RegistrationDialogFragment;
 import com.ustadmobile.port.android.view.ReportEditActivity;
+import com.ustadmobile.port.android.view.ReportOverallAttendanceActivity;
 import com.ustadmobile.port.android.view.ReportSelectionActivity;
 import com.ustadmobile.port.android.view.SELEditActivity;
 import com.ustadmobile.port.android.view.SELQuestionActivity;
@@ -156,6 +159,7 @@ import com.ustadmobile.port.android.view.ScormPackageActivity;
 import com.ustadmobile.port.android.view.SelectAttendanceThresholdsDialogFragment;
 import com.ustadmobile.port.android.view.SelectClazzesDialogFragment;
 import com.ustadmobile.port.android.view.SelectMultipleTreeDialogFragment;
+import com.ustadmobile.port.android.view.SelectTwoDatesDialogFragment;
 import com.ustadmobile.port.android.view.SendCourseDialogFragment;
 import com.ustadmobile.port.android.view.SettingsDataSyncListActivity;
 import com.ustadmobile.port.android.view.SettingsDataUsageActivity;
@@ -270,6 +274,8 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         viewNameToAndroidImplMap.put(ReportSelectionView.VIEW_NAME, ReportSelectionActivity.class);
         viewNameToAndroidImplMap.put(SelectClazzesDialogView.VIEW_NAME, SelectClazzesDialogFragment.class);
         viewNameToAndroidImplMap.put(SelectAttendanceThresholdsDialogView.VIEW_NAME, SelectAttendanceThresholdsDialogFragment.class);
+        viewNameToAndroidImplMap.put(SelectTwoDatesDialogView.VIEW_NAME, SelectTwoDatesDialogFragment.class);
+        viewNameToAndroidImplMap.put(ReportOverallAttendanceView.VIEW_NAME, ReportOverallAttendanceActivity.class);
 
 
 

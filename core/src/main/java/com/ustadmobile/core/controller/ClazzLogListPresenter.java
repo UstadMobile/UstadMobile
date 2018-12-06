@@ -151,9 +151,10 @@ public class ClazzLogListPresenter extends UstadBaseController<ClassLogListView>
         }
 
         //Calculate daily attendance numbers from the database for the line chart.
-        ClazzLogAttendanceRecordDao attendanceRecordDao = repository.getClazzLogAttendanceRecordDao();
-        attendanceRecordDao.findDailyAttendanceByClazzUidAndDateAsync(currentClazzUid, fromDate, toDate,
-                new UmCallback<List<DailyAttendanceNumbers>>() {
+        ClazzLogAttendanceRecordDao attendanceRecordDao =
+                repository.getClazzLogAttendanceRecordDao();
+        attendanceRecordDao.findDailyAttendanceByClazzUidAndDateAsync( currentClazzUid, fromDate,
+                toDate, new UmCallback<List<DailyAttendanceNumbers>>() {
             @Override
             public void onSuccess(List<DailyAttendanceNumbers> result) {
 

@@ -1,33 +1,22 @@
 package com.ustadmobile.port.android.view;
 
 
-import com.ustadmobile.core.controller.ReportEditPresenter;
-
-import android.app.DatePickerDialog;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import com.ustadmobile.core.util.UMCalendarUtil;
-import com.ustadmobile.core.view.SelectAttendanceThresholdsDialogView;
-import com.ustadmobile.core.view.SelectMultipleTreeDialogView;
-import com.ustadmobile.port.android.util.UMAndroidUtil;
 import com.toughra.ustadmobile.R;
-
-
+import com.ustadmobile.core.controller.ReportEditPresenter;
 import com.ustadmobile.core.view.ReportEditView;
+import com.ustadmobile.port.android.util.UMAndroidUtil;
 
-import java.util.Calendar;
 import java.util.HashMap;
-import java.util.List;
 
 import ru.dimorinny.floatingtextbutton.FloatingTextButton;
 
@@ -40,7 +29,8 @@ import ru.dimorinny.floatingtextbutton.FloatingTextButton;
 public class ReportEditActivity extends UstadBaseActivity implements ReportEditView,
         SelectClazzesDialogFragment.ClazzSelectDialogListener,
         SelectMultipleTreeDialogFragment.MultiSelectTreeDialogListener,
-        SelectAttendanceThresholdsDialogFragment.ThresholdsSelectedDialogListener {
+        SelectAttendanceThresholdsDialogFragment.ThresholdsSelectedDialogListener,
+        SelectTwoDatesDialogFragment.CustomTimePeriodDialogListener {
 
     private Toolbar toolbar;
 
@@ -143,25 +133,7 @@ public class ReportEditActivity extends UstadBaseActivity implements ReportEditV
     @Override
     public void showCustomDateSelector() {
 
-        Calendar myCalendar = Calendar.getInstance();
-
-        //Date pickers's on click listener - sets text
-        DatePickerDialog.OnDateSetListener date = (view, year, month, dayOfMonth) -> {
-            myCalendar.set(Calendar.YEAR, year);
-            myCalendar.set(Calendar.MONTH, month);
-            myCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-        };
-        //date listener - opens a new date picker.
-        DatePickerDialog dateFieldPicker = new DatePickerDialog(
-                ReportEditActivity.this, date, myCalendar.get(Calendar.YEAR),
-                myCalendar.get(Calendar.MONTH), myCalendar.get(Calendar.DAY_OF_MONTH));
-        dateFieldPicker.getDatePicker().setMaxDate(System.currentTimeMillis());
-
-        dateFieldPicker.show();
-
-        //Set values like so:
-//        mPresenter.setFromTime(...);
-//        mPresenter.setToTime(...);
+        //TODOone: Replace by custom two date selector Dialog.
     }
 
     @Override
@@ -195,5 +167,17 @@ public class ReportEditActivity extends UstadBaseActivity implements ReportEditV
     public void onThresholdResult(SelectAttendanceThresholdsDialogFragment.ThresholdValues values) {
         this.thresholdValues = values;
         attendanceThresholdsTextView.setText("Got threshold values. TOOD: Fill me up.");
+    }
+
+    @Override
+    public void onCustomTimesResult(long from, long to) {
+        mPresenter.setFromTime(from);
+        mPresenter.setToTime(to);
+        Toast.makeText(
+                getApplicationContext(),
+                "Custom date from : " + from + " to " + to,
+                Toast.LENGTH_SHORT
+        ).show();
+
     }
 }

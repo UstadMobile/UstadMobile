@@ -9,6 +9,25 @@ public class DailyAttendanceNumbers {
     private float absentPercentage;
     private float partialPercentage;
 
+    private float femaleAttendance;
+    private float maleAttendance;
+
+    public float getFemaleAttendance() {
+        return femaleAttendance;
+    }
+
+    public void setFemaleAttendance(float femaleAttendance) {
+        this.femaleAttendance = femaleAttendance;
+    }
+
+    public float getMaleAttendance() {
+        return maleAttendance;
+    }
+
+    public void setMaleAttendance(float maleAttendance) {
+        this.maleAttendance = maleAttendance;
+    }
+
     public long getClazzUid() {
         return clazzUid;
     }

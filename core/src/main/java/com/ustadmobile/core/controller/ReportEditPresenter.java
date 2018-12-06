@@ -7,15 +7,19 @@ import com.ustadmobile.core.view.ReportEditView;
 import com.ustadmobile.core.view.SelectAttendanceThresholdsDialogView;
 import com.ustadmobile.core.view.SelectClazzesDialogView;
 import com.ustadmobile.core.view.SelectMultipleTreeDialogView;
+import com.ustadmobile.core.view.SelectTwoDatesDialogView;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.LinkedHashMap;
 
+import static com.ustadmobile.core.view.ReportEditView.ARG_FROM_DATE;
+import static com.ustadmobile.core.view.ReportEditView.ARG_GENDER_DISAGGREGATE;
 import static com.ustadmobile.core.view.ReportEditView.ARG_LOCATIONS_SET;
 import static com.ustadmobile.core.view.ReportEditView.ARG_REPORT_LINK;
 import static com.ustadmobile.core.view.ReportEditView.ARG_REPORT_NAME;
+import static com.ustadmobile.core.view.ReportEditView.ARG_TO_DATE;
 
 
 /**
@@ -117,8 +121,15 @@ public class ReportEditPresenter
             case TIME_PERIOD_CUSTOM:
                 toTime = 0L;
                 view.showCustomDateSelector();
+                goToSelectTwoDatesDialog();
                 break;
         }
+    }
+
+    public void goToSelectTwoDatesDialog(){
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        Hashtable args = new Hashtable();
+        impl.go(SelectTwoDatesDialogView.VIEW_NAME, args, context);
     }
 
     /**
@@ -166,9 +177,18 @@ public class ReportEditPresenter
         Hashtable args = new Hashtable();
         args.put(ARG_REPORT_NAME, reportName);
 
-        //TODO: Add time period to argument
+        //TODone: Add time period to argument
+        args.put(ARG_FROM_DATE, fromTime);
+        args.put(ARG_TO_DATE, toTime);
 
         //TODO: Add location to argument
+
+        //TODO: Add Clazzes
+
+        //TODO: Add gender disaggregate boolean
+        args.put(ARG_GENDER_DISAGGREGATE, genderDisaggregate);
+
+        //TODO: Add others
 
         //Go to report with those arguments / Generate report
         String linkViewName = reportLink.split("\\?")[0];

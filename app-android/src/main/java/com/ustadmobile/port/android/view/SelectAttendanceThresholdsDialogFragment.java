@@ -44,7 +44,7 @@ public class SelectAttendanceThresholdsDialogFragment extends UstadDialogFragmen
 
     private ThresholdValues selectedValues;
 
-    //Presenter should implement this ?
+    //Activity should implement this.
     public interface ThresholdsSelectedDialogListener{
         void onThresholdResult(ThresholdValues values);
     }

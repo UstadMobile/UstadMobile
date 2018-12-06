@@ -10,6 +10,7 @@ import com.ustadmobile.lib.database.annotation.UmRepository;
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord;
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecordWithPerson;
 import com.ustadmobile.lib.db.entities.DailyAttendanceNumbers;
+import com.ustadmobile.lib.db.entities.Person;
 import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
 import java.util.ArrayList;
@@ -64,16 +65,53 @@ public abstract class ClazzLogAttendanceRecordDao implements
             " sum(case when attendanceStatus = 2 then 1 else 0 end) * 1.0 / COUNT(*) as absentPercentage, " +
             " sum(case when attendanceStatus = 4 then 1 else 0 end) * 1.0 / COUNT(*) as partialPercentage, " +
             " (:clazzUid) as clazzUid, " +
+            " sum(case when attendanceStatus = 1 and Person.gender = " + Person.GENDER_FEMALE+
+            " then 1 else 0 end) *1.0/ COUNT(*) as femaleAttendance, " +
+            " sum(case when attendanceStatus = 1 and Person.gender = " + Person.GENDER_MALE +
+            " then 1 else 0 end) *1.0/ COUNT(*) as maleAttendance, " +
             " ClazzLog.clazzLogUid as clazzLogUid " +
             " from ClazzLogAttendanceRecord " +
             " LEFT JOIN ClazzLog ON " +
             " ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid = ClazzLog.clazzLogUid " +
+            " LEFT JOIN ClazzMember ON " +
+            "ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzMemberUid = ClazzMember.clazzMemberUid " +
+            " LEFT JOIN Person ON ClazzMember.clazzMemberPersonUid = Person.personUid " +
+
             " WHERE ClazzLog.done = 1 " +
             " AND ClazzLog.logDate > :fromDate " +
             " AND ClazzLog.logDate < :toDate " +
             " AND ClazzLog.clazzClazzUid = :clazzUid " +
             "group by (ClazzLog.logDate)")
     public abstract void findDailyAttendanceByClazzUidAndDateAsync( long clazzUid, long fromDate,
+                            long toDate, UmCallback<List<DailyAttendanceNumbers>> resultObject);
+
+
+    @UmQuery("select ClazzLogAttendanceRecordClazzLogUid as clazzLogUid, " +
+            " ClazzLog.logDate, " +
+            " sum(case when attendanceStatus = " + ClazzLogAttendanceRecord.STATUS_ATTENDED +
+            " then 1 else 0 end) * 1.0 / COUNT(*) as attendancePercentage, " +
+            " sum(case when attendanceStatus = " + ClazzLogAttendanceRecord.STATUS_ABSENT +
+            " then 1 else 0 end) * 1.0 / COUNT(*) as absentPercentage, " +
+            " sum(case when attendanceStatus = " + ClazzLogAttendanceRecord.STATUS_PARTIAL +
+            " then 1 else 0 end) * 1.0 / COUNT(*) as partialPercentage, " +
+            " ClazzLog.clazzClazzUid as clazzUid, " +
+            " sum(case when attendanceStatus = 1 and Person.gender = " + Person.GENDER_FEMALE +
+            " then 1 else 0 end) * 1.0 / COUNT(*) as femaleAttendance, " +
+            " sum(case when attendanceStatus = 1 and Person.gender =  " + Person.GENDER_MALE +
+            " then 1 else 0 end) * 1.0/COUNT(*) as maleAttendance, " +
+            " ClazzLog.clazzLogUid as clazzLogUid " +
+            " from ClazzLogAttendanceRecord " +
+            " LEFT JOIN ClazzLog ON " +
+            " ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid = ClazzLog.clazzLogUid " +
+
+            " LEFT JOIN ClazzMember ON " +
+            " ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzMemberUid = ClazzMember.clazzMemberUid " +
+            " LEFT JOIN Person ON ClazzMember.clazzMemberPersonUid = Person.personUid " +
+            " WHERE ClazzLog.done = 1 " +
+            " AND ClazzLog.logDate > :fromDate " +
+            " AND ClazzLog.logDate < :toDate " +
+            "group by (ClazzLog.logDate)")
+    public abstract void findOverallDailyAttendanceNumbersByDateAndStuff(long fromDate,
                             long toDate, UmCallback<List<DailyAttendanceNumbers>> resultObject);
 
     /**

@@ -5,8 +5,10 @@ import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 
+import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -58,6 +60,10 @@ public class UMAndroidUtil {
                 retVal.put(key, val);
             }else if(val instanceof Long){
                 retVal.put(key, val);
+            }else if(val instanceof Boolean){
+                retVal.put(key, val);
+            }else if(val instanceof  Long[]){
+                retVal.put(key, val);
             }
         }
 
@@ -84,6 +90,10 @@ public class UMAndroidUtil {
                 bundle.putStringArray(key, (String[])val);
             }else if(val instanceof  Long){
                 bundle.putLong(key, (long)val);
+            }else if(val instanceof  Boolean){
+                bundle.putBoolean(key, (Boolean)val);
+            }else if(val instanceof Long[]){
+                bundle.putLongArray(key, (long[]) val);
             }
         }
         return bundle;

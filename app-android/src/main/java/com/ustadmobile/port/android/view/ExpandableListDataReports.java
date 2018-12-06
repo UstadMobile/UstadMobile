@@ -3,6 +3,7 @@ package com.ustadmobile.port.android.view;
 import android.content.Context;
 
 import com.toughra.ustadmobile.R;
+import com.ustadmobile.core.view.ReportOverallAttendanceView;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,7 +33,7 @@ public class ExpandableListDataReports {
         List<ExpandableListDataReports> attendanceReport = new ArrayList<>();
         attendanceReport.add(new ExpandableListDataReports(
                 context.getText(R.string.overall_attendance).toString(),
-                -1, ""));
+                -1, ReportOverallAttendanceView.VIEW_NAME ));
         attendanceReport.add(new ExpandableListDataReports(
                 context.getText(R.string.attendance_grouped_by_threshold).toString(),
                 -1, ""));

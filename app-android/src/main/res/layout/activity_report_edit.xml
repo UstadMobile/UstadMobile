@@ -98,6 +98,7 @@
         android:layout_marginEnd="8dp"
         android:paddingTop="20dp"
         android:spinnerMode="dropdown"
+        android:prompt="@string/select_one"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
