@@ -11,10 +11,8 @@ import com.ustadmobile.lib.db.entities.DailyAttendanceNumbers;
 
 import java.util.Calendar;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 import static com.ustadmobile.core.view.ReportEditView.ARG_CLAZZ_LIST;
 import static com.ustadmobile.core.view.ReportEditView.ARG_FROM_DATE;
@@ -79,9 +77,9 @@ public class ReportOverallAttendancePresenter
         if(arguments.containsKey(ARG_STUDENT_IDENTIFIER_NUMBER)){
             Boolean numberIdentifier = (Boolean) arguments.get(ARG_STUDENT_IDENTIFIER_NUMBER);
             if (numberIdentifier){
-                showPercentages = false;
+                setShowPercentages(false);
             }else{
-                showPercentages = true;
+                setShowPercentages(true);
             }
 
         }
@@ -137,9 +135,12 @@ public class ReportOverallAttendancePresenter
                             Long d = calendar.getTimeInMillis();
 
                             //Put just date and attendance value
-                            lineDataMap.put(d.floatValue() / 1000, everyDayAttendance.getAttendancePercentage());
-                            lineDataMapMale.put(d.floatValue() / 1000, everyDayAttendance.getMaleAttendance());
-                            lineDataMapFemale.put(d.floatValue() / 1000, everyDayAttendance.getFemaleAttendance());
+                            lineDataMap.put(d.floatValue() / 1000,
+                                    everyDayAttendance.getAttendancePercentage());
+                            lineDataMapMale.put(d.floatValue() / 1000,
+                                    everyDayAttendance.getMaleAttendance());
+                            lineDataMapFemale.put(d.floatValue() / 1000,
+                                    everyDayAttendance.getFemaleAttendance());
 
                             tableDataAverage.put(UMCalendarUtil.getPrettyDateSuperSimpleFromLong(d),
                                     everyDayAttendance.getAttendancePercentage() * 100);
@@ -156,42 +157,9 @@ public class ReportOverallAttendancePresenter
 
 
 
-                        //Remove messy date keys
-//                        Iterator<Map.Entry<Float, Float>> ldpi = lineDataMap.entrySet().iterator();
-//                        Iterator<Map.Entry<Float, Float>> ldpiMale = lineDataMapMale.entrySet().iterator();
-//                        Iterator<Map.Entry<Float, Float>> ldpiFemale = lineDataMapFemale.entrySet().iterator();
-
-//                        LinkedHashMap<Float, Float> lineDataMapFixedX = new LinkedHashMap<>();
-//                        LinkedHashMap<Float, Float> lineDataMapFixedXMale = new LinkedHashMap<>();
-//                        LinkedHashMap<Float, Float> lineDataMapFixedXFemale = new LinkedHashMap<>();
-//
-//
-//                        float l = 0f;
-//                        while(ldpi.hasNext()){
-//                            l++;
-//                            lineDataMapFixedX.put(l, ldpi.next().getValue());
-//
-//                        }
-//                        l = 0f;
-//                        while(ldpiMale.hasNext()){
-//                            l++;
-//                            lineDataMapFixedXMale.put(l, ldpiMale.next().getValue());
-//
-//                        }
-//                        l = 0f;
-//                        while(ldpiFemale.hasNext()){
-//                            l++;
-//                            lineDataMapFixedXFemale.put(l, ldpiFemale.next().getValue());
-//
-//                        }
-
                         dataMaps = new LinkedHashMap<>();
 
                         if(genderDisaggregate) {
-//                            dataMaps.put(ATTENDANCE_LINE_MALE_LABEL_DESC, lineDataMapFixedXMale);
-//                            dataMaps.put(ATTENDANCE_LINE_FEMALE_LABEL_DESC, lineDataMapFixedXFemale);
-//                            dataMaps.put(ATTENDANCE_LINE_AVERAGE_LABEL_DESC, lineDataMapFixedX);
-
                             dataMaps.put(ATTENDANCE_LINE_MALE_LABEL_DESC, lineDataMapMale);
                             dataMaps.put(ATTENDANCE_LINE_FEMALE_LABEL_DESC, lineDataMapFemale);
                             dataMaps.put(ATTENDANCE_LINE_AVERAGE_LABEL_DESC, lineDataMap);
@@ -224,24 +192,11 @@ public class ReportOverallAttendancePresenter
 
     }
 
-
-
     @Override
     public void onCreate(Hashtable savedState) {
         super.onCreate(savedState);
 
         getAttendanceDataAndUpdateCharts();
-    }
-
-    public void handleClickPrimaryActionButton(long selectedObjectUid) {
-        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-
-        //Create arguments
-        Hashtable args = new Hashtable();
-        //eg: args.put(ARG_CLAZZ_UID, selectedObjectUid);
-
-        //Go to view
-        //eg: impl.go(SELEditView.VIEW_NAME, args, view.getContext());
     }
 
     @Override

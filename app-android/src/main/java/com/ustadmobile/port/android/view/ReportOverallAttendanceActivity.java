@@ -4,33 +4,26 @@ package com.ustadmobile.port.android.view;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.support.constraint.ConstraintLayout;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
 import com.github.mikephil.charting.charts.LineChart;
-import com.github.mikephil.charting.components.AxisBase;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
-import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.ReportOverallAttendancePresenter;
-import com.ustadmobile.core.impl.UmCallbackUtil;
 import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.core.view.ReportOverallAttendanceView;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -51,7 +44,7 @@ public class ReportOverallAttendanceActivity extends UstadBaseActivity
     //RecyclerView
     private ReportOverallAttendancePresenter mPresenter;
     LineChart lineChart;
-    TableLayout dataTable;
+    TableLayout tableLayout;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -66,7 +59,7 @@ public class ReportOverallAttendanceActivity extends UstadBaseActivity
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        dataTable = findViewById(R.id.activity_report_overall_attendance_table);
+        tableLayout = findViewById(R.id.activity_report_overall_attendance_table);
 
         //Call the Presenter
         mPresenter = new ReportOverallAttendancePresenter(this,
@@ -368,7 +361,7 @@ public class ReportOverallAttendanceActivity extends UstadBaseActivity
             }
 
             for(View everyRow: addThese){
-                dataTable.addView(everyRow);
+                tableLayout.addView(everyRow);
 
             }
 

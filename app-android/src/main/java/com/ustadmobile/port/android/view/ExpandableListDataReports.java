@@ -3,6 +3,7 @@ package com.ustadmobile.port.android.view;
 import android.content.Context;
 
 import com.toughra.ustadmobile.R;
+import com.ustadmobile.core.view.ReportNumberOfDaysClassesOpenView;
 import com.ustadmobile.core.view.ReportOverallAttendanceView;
 
 import java.util.ArrayList;
@@ -46,7 +47,7 @@ public class ExpandableListDataReports {
         List<ExpandableListDataReports> operationsReport = new ArrayList<>();
         operationsReport.add(new ExpandableListDataReports(
                 context.getText(R.string.number_of_days_classes_open).toString(),
-                -1, ""));
+                -1, ReportNumberOfDaysClassesOpenView.VIEW_NAME));
 
         List<ExpandableListDataReports> ircMasterListReport = new ArrayList<>();
 

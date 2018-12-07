@@ -188,12 +188,12 @@ public class ReportEditPresenter
 
         //TODO: Add Clazzes
 
-        //TODO: Add gender disaggregate boolean
+        //TODO: Add Thresholds
+
         args.put(ARG_GENDER_DISAGGREGATE, genderDisaggregate);
 
         args.put(ARG_STUDENT_IDENTIFIER_NUMBER, studentNumbers);
         args.put(ARG_STUDENT_IDENTIFIER_PERCENTAGE, studentPercentages);
-        //TODO: Add others
 
         //Go to report with those arguments / Generate report
         String linkViewName = reportLink.split("\\?")[0];

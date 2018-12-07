@@ -3,6 +3,7 @@ package com.ustadmobile.port.android.view;
 
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -48,7 +49,6 @@ public class ReportEditActivity extends UstadBaseActivity implements ReportEditV
     private HashMap<String, Long> selectedLocations;
     private SelectAttendanceThresholdsDialogFragment.ThresholdValues thresholdValues;
 
-    private RadioButton studentNumberRadioButton, studentPercentageRadioButton;
     private RadioGroup studentNumberOrPercentageRadioGroup;
 
 
@@ -70,8 +70,6 @@ public class ReportEditActivity extends UstadBaseActivity implements ReportEditV
         heading = findViewById(R.id.activity_report_edit_report_title);
         genderDisaggregateCheck = findViewById(R.id.activity_report_edit_gender);
         studentNumberOrPercentageRadioGroup = findViewById(R.id.activity_report_edit_show_student_radio_options);
-        studentNumberRadioButton = findViewById(R.id.activity_report_edit_show_student_number_option);
-        studentPercentageRadioButton = findViewById(R.id.activity_report_edit_show_student_percentage_option);
 
         classesTextView = findViewById(R.id.activity_report_classes_textview);
         attendanceThresholdsTextView =
@@ -126,6 +124,24 @@ public class ReportEditActivity extends UstadBaseActivity implements ReportEditV
         fab.setOnClickListener(v -> mPresenter.handleClickPrimaryActionButton());
 
 
+    }
+
+
+    /**
+     * Handles what happens when toolbar menu option selected. Here it is handling what happens when
+     * back button is pressed.
+     *
+     * @param item  The item selected.
+     * @return      true if accounted for.
+     */
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case android.R.id.home:
+                onBackPressed();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
 
