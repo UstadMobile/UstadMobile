@@ -3,7 +3,6 @@ package com.ustadmobile.port.sharedse.networkmanager;
 
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.EntryStatusResponseDao;
-import com.ustadmobile.core.db.dao.NetworkNodeDao;
 import com.ustadmobile.lib.db.entities.NetworkNode;
 import com.ustadmobile.test.core.impl.PlatformTestUtil;
 
@@ -15,6 +14,8 @@ import java.util.List;
 
 import static com.ustadmobile.port.sharedse.networkmanager.BleMessageUtil.bleMessageLongToBytes;
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.ENTRY_STATUS_RESPONSE;
+import static junit.framework.TestCase.assertNotNull;
+import static junit.framework.TestCase.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -30,26 +31,27 @@ import static org.mockito.Mockito.when;
 public class BleEntryStatusTaskTest {
 
     private List<Long> entries = Arrays.asList(1056289670L,9076137860L,4590875612L,2912543894L);
+
     private List<Long> entriesResponse = Arrays.asList(0L,9076137860000L,0L,2912543894000L);
+
     private BleEntryStatusTask mockedEntryStatusTask;
-    private EntryStatusResponseDao mockedResponseDao;
+
+    private EntryStatusResponseDao entryStatusResponseDao;
+
     private NetworkNode networkNode;
+
     @Before
     public void setUpSpy(){
         Object context =  PlatformTestUtil.getTargetContext();
-        UmAppDatabase.getInstance(context).clearAllTables();
+        UmAppDatabase umAppDatabase = UmAppDatabase.getInstance(context);
+        umAppDatabase.clearAllTables();
+
         networkNode = new NetworkNode();
         networkNode.setBluetoothMacAddress("00:3F:2F:64:C6:4F");
         networkNode.setNodeId(1);
+        umAppDatabase.getNetworkNodeDao().insert(networkNode);
 
-        mockedResponseDao = mock(EntryStatusResponseDao.class);
-        NetworkNodeDao mockedNodeDao = mock(NetworkNodeDao.class);
-        UmAppDatabase mockedDb = mock(UmAppDatabase.class);
-        UmAppDatabase.setInstance(mockedDb);
-        when(mockedDb.getEntryStatusResponseDao()).thenReturn(mockedResponseDao);
-        when(mockedDb.getNetworkNodeDao()).thenReturn(mockedNodeDao);
-        when(mockedNodeDao.findNodeByBluetoothAddress(networkNode.getBluetoothMacAddress()))
-                .thenReturn(networkNode);
+        entryStatusResponseDao = umAppDatabase.getEntryStatusResponseDao();
 
         mockedEntryStatusTask = spy(BleEntryStatusTask.class);
         mockedEntryStatusTask.setContext(context);
@@ -57,11 +59,12 @@ public class BleEntryStatusTaskTest {
     }
     @Test
     public void givenBleMessageWithRequest_whenResponseReceived_thenShouldUpdateEntryStatusResponseInDatabase() {
+
         BleMessage responseMessage = new BleMessage(ENTRY_STATUS_RESPONSE,
                 bleMessageLongToBytes(entriesResponse));
         mockedEntryStatusTask.onResponseReceived(networkNode.getBluetoothMacAddress(),responseMessage);
 
-        //Verify that all the entry check status response will be saved to the database
-        verify(mockedResponseDao).insert(any());
+        assertNotNull("entry check status response will be saved to the database",
+                entryStatusResponseDao.findByEntryIdAndNetworkNode(entries.get(0), networkNode.getNodeId()));
     }
 }

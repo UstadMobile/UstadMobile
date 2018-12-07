@@ -1,6 +1,7 @@
 package com.ustadmobile.port.sharedse.networkmanager;
 
 import com.ustadmobile.core.db.UmAppDatabase;
+import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.test.core.impl.PlatformTestUtil;
 
@@ -38,13 +39,20 @@ import static org.mockito.Mockito.verify;
 
 public class BleGattServerTest {
 
-    private UmAppDatabase umAppDatabase;
+    private UmAppDatabase repository;
+
     private NetworkManagerBle mockedNetworkManager;
+
     private List<Long> entries = Arrays.asList(1056289670L,9076137860L,4590875612L,2912543894L);
+
     private BleGattServer gattServer;
+
     private List<ContentEntry> contentEntryList = new ArrayList<>();
+
     private WiFiDirectGroupBle wiFiDirectGroupBle;
+
     private final Object wifiCreationLock = new Object();
+
     private long testCaseTimeOut = TimeUnit.SECONDS.toMillis(1);
 
     @Before
@@ -54,8 +62,8 @@ public class BleGattServerTest {
         mockedNetworkManager = spy(NetworkManagerBle.class);
         mockedNetworkManager.init(context);
 
-        umAppDatabase = UmAppDatabase.getInstance(context);
-        umAppDatabase.clearAllTables();
+        repository = UmAccountManager.getRepositoryForActiveAccount(context);
+        repository.clearAllTables();
         gattServer = spy(BleGattServer.class);
         wiFiDirectGroupBle = new WiFiDirectGroupBle("NetworkSsId","@@@1234");
         gattServer.setNetworkManager(mockedNetworkManager);
@@ -209,7 +217,7 @@ public class BleGattServerTest {
     @Test
     public void givenRequestWithAvailableEntries_whenHandlingIt_thenShouldReplyTheyAreAvailable(){
         BleMessage messageToSend = new BleMessage(ENTRY_STATUS_REQUEST, bleMessageLongToBytes(entries));
-        Long [] rowCount = umAppDatabase.getContentEntryDao().insert(contentEntryList);
+        Long [] rowCount = repository.getContentEntryDao().insert(contentEntryList);
 
         assertTrue("Content added successfully", rowCount.length == entries.size());
 
@@ -230,7 +238,7 @@ public class BleGattServerTest {
     @Test
     public void givenRequestWithUnAvailableEntries_whenHandlingIt_thenShouldReplyTheyAreNotAvailable(){
         BleMessage messageToSend = new BleMessage(ENTRY_STATUS_REQUEST, bleMessageLongToBytes(entries));
-        umAppDatabase.clearAllTables();
+        repository.clearAllTables();
 
         BleMessage responseMessage = gattServer.handleRequest(messageToSend);
         List<Long> responseList = BleMessageUtil.bleMessageBytesToLong(responseMessage.getPayload());

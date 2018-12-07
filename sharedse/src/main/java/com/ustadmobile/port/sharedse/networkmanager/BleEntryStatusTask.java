@@ -78,8 +78,7 @@ public abstract class BleEntryStatusTask implements Runnable,BleMessageResponseL
         EntryStatusResponseDao entryStatusResponseDao = umAppDatabase.getEntryStatusResponseDao();
         NetworkNodeDao networkNodeDao = umAppDatabase.getNetworkNodeDao();
 
-        int networkNodeId = networkNodeDao
-                .findNodeByBluetoothAddress(sourceDeviceAddress).getNodeId();
+        int networkNodeId = networkNodeDao.findNodeByBluetoothAddress(sourceDeviceAddress).getNodeId();
         long currentTimeStamp = Calendar.getInstance().getTimeInMillis();
         List<EntryStatusResponse> entryStatusResponses = new ArrayList<>();
         List<Long> statusCheckResponse = bleMessageBytesToLong(response.getPayload());

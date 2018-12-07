@@ -5,7 +5,6 @@ import com.ustadmobile.core.catalog.contenttype.EPUBTypePlugin;
 import com.ustadmobile.core.impl.ContainerMountRequest;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UmCallback;
-import com.ustadmobile.core.opds.db.UmOpdsDbManager;
 import com.ustadmobile.core.tincan.TinCanResultListener;
 import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
@@ -88,7 +87,7 @@ public class UstadMobileSystemImplTest extends UstadMobileSystemImplSE {
     public void getAppSetupFile(Object context, boolean zip, UmCallback callback) {
 
     }
-    
+
     public String getCacheDir(int mode, Object context) {
         File tmpDir = cacheDirs.get(mode);
         if(tmpDir == null) {
@@ -199,7 +198,7 @@ public class UstadMobileSystemImplTest extends UstadMobileSystemImplSE {
         String[] propNames = new String[keySet.size()];
         keySet.toArray(propNames);
 
-         return propNames;
+        return propNames;
     }
 
     @Override
@@ -262,12 +261,17 @@ public class UstadMobileSystemImplTest extends UstadMobileSystemImplSE {
 
     @Override
     public void getAsset(Object context, String path, UmCallback<InputStream> callback) {
-
+        InputStream inputStream = getClass().getResourceAsStream(path);
+        if(inputStream != null){
+            callback.onSuccess(inputStream);
+        }else{
+            callback.onFailure(new NullPointerException("Input stream is null, probably "+path+" doesn't exist"));
+        }
     }
 
     @Override
     public InputStream getAssetSync(Object context, String path) throws IOException {
-        return null;
+        return getClass().getResourceAsStream(path);
     }
 
     @Override
