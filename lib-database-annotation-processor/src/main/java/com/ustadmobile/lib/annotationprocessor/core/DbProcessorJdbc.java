@@ -368,6 +368,14 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
         return createMethod.build();
     }
 
+    /**
+     * Generate a method to create sequence number triggers on tables. The generated method takes a
+     * single class object as an argument. This is designed so it can one day be used for migration
+     * purposes etc.
+     *
+     * @param dbType The TypeElement representing the database class
+     * @return MethodSpec with a generated implementation
+     */
     protected MethodSpec generateCreateSeqNumTriggersMethod(TypeElement dbType) {
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("createSeqNumTriggers")
                 .addModifiers(Modifier.PROTECTED)
@@ -452,6 +460,16 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                     codeBlock.addNamed("$stmtVarName:L.executeUpdate(_createInsertTriggerStmt_$tableName:L " +
                                     " + \" BEGIN \" + _triggerSql_$tableNameLower:L + \" END\");\n",
                             triggerSqlArgs);
+                }else if(sqlProductName.equals(PRODUCT_NAME_POSTGRES)) {
+                    codeBlock.addNamed("$stmtVarName:L.executeUpdate(\"CREATE OR REPLACE FUNCTION " +
+                            " increment_csn_$tableNameLower:L_fn() RETURNS trigger AS $$$$ BEGIN \"" +
+                            " + _triggerSql_$tableNameLower:L + \" RETURN null; END $$$$ " +
+                            "LANGUAGE plpgsql\");\n",
+                            triggerSqlArgs);
+                    codeBlock.addNamed("$stmtVarName:L.executeUpdate(\"CREATE TRIGGER " +
+                            "increment_csn_$tableNameLower:L_trigger AFTER UPDATE OR INSERT ON " +
+                            "$tableName:L FOR EACH ROW WHEN (pg_trigger_depth() = 0) " +
+                            "EXECUTE PROCEDURE increment_csn_$tableNameLower:L_fn()\");\n", triggerSqlArgs);
                 }
 
 
