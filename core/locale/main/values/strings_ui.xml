@@ -459,5 +459,7 @@ This is the one you should be editing. The one in /core/locale/main/values/strin
     <string name="xls">XLS</string>
     <string name="csv">CSV</string>
     <string name="json">JSON</string>
+    <string name="date">Date</string>
+    <string name="average">Average</string>
 
 </resources>

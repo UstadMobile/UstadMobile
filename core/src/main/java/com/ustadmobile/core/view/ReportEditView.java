@@ -20,6 +20,9 @@ public interface ReportEditView extends UstadView {
     String ARG_LOCATION_LIST = "locationList";
     String ARG_CLAZZ_LIST = "clazzList";
     String ARG_GENDER_DISAGGREGATE = "genderDisaggregate";
+    String ARG_STUDENT_IDENTIFIER_NUMBER = "studentIdentifierNumber";
+    String ARG_STUDENT_IDENTIFIER_PERCENTAGE = "studentIdentifierPercentage";
+
 
     /**
      * For Android: closes the activity.

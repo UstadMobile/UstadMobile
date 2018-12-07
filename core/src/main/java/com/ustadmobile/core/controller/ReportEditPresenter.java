@@ -10,7 +10,6 @@ import com.ustadmobile.core.view.SelectMultipleTreeDialogView;
 import com.ustadmobile.core.view.SelectTwoDatesDialogView;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.LinkedHashMap;
 
@@ -19,6 +18,8 @@ import static com.ustadmobile.core.view.ReportEditView.ARG_GENDER_DISAGGREGATE;
 import static com.ustadmobile.core.view.ReportEditView.ARG_LOCATIONS_SET;
 import static com.ustadmobile.core.view.ReportEditView.ARG_REPORT_LINK;
 import static com.ustadmobile.core.view.ReportEditView.ARG_REPORT_NAME;
+import static com.ustadmobile.core.view.ReportEditView.ARG_STUDENT_IDENTIFIER_NUMBER;
+import static com.ustadmobile.core.view.ReportEditView.ARG_STUDENT_IDENTIFIER_PERCENTAGE;
 import static com.ustadmobile.core.view.ReportEditView.ARG_TO_DATE;
 
 
@@ -34,6 +35,8 @@ public class ReportEditPresenter
     private String reportLink;
     private LinkedHashMap<Integer, String> timePeriodOptions;
     private boolean genderDisaggregate = false;
+    private boolean studentNumbers = false;
+    private boolean studentPercentages = false;
 
     private static final int TIME_PERIOD_LAST_WEEK = 1;
     private static final int TIME_PERIOD_LAST_TWO_WEEK = 2;
@@ -188,12 +191,30 @@ public class ReportEditPresenter
         //TODO: Add gender disaggregate boolean
         args.put(ARG_GENDER_DISAGGREGATE, genderDisaggregate);
 
+        args.put(ARG_STUDENT_IDENTIFIER_NUMBER, studentNumbers);
+        args.put(ARG_STUDENT_IDENTIFIER_PERCENTAGE, studentPercentages);
         //TODO: Add others
 
         //Go to report with those arguments / Generate report
         String linkViewName = reportLink.split("\\?")[0];
         impl.go(linkViewName, args, view.getContext());
 
+    }
+
+    public boolean isStudentNumbers() {
+        return studentNumbers;
+    }
+
+    public void setStudentNumbers(boolean studentNumbers) {
+        this.studentNumbers = studentNumbers;
+    }
+
+    public boolean isStudentPercentages() {
+        return studentPercentages;
+    }
+
+    public void setStudentPercentages(boolean studentPercentages) {
+        this.studentPercentages = studentPercentages;
     }
 
     /**

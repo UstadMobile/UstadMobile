@@ -3,6 +3,8 @@ package com.ustadmobile.core.view;
 
 import java.util.LinkedHashMap;
 
+import sun.awt.image.ImageWatched;
+
 /**
  * ReportOverallAttendance Core View extends Core UstadView. Will be implemented
  * on various implementations.
@@ -29,7 +31,8 @@ public interface ReportOverallAttendanceView extends UstadView {
      * Takes a map of x, y values for the chart and updates the Line chart on the View.
      * @param dataMap The hashmap containing the values
      */
-    void updateAttendanceMultiLineChart(LinkedHashMap<String, LinkedHashMap<Float, Float>> dataMap);
+    void updateAttendanceMultiLineChart(LinkedHashMap<String, LinkedHashMap<Float, Float>> dataMap,
+                                        LinkedHashMap<String, LinkedHashMap<String, Float>> tableData);
 
     /**
      * For Android: closes the activity.

@@ -214,6 +214,23 @@ public class UMCalendarUtil {
         return prettyDate;
     }
 
+    public static String getPrettyDateSuperSimpleFromLong(long thisDate){
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(thisDate);
+        SimpleDateFormat format = new SimpleDateFormat("dd/MMM/yy");
+        String prettyDate = format.format(calendar.getTime());
+        return prettyDate;
+    }
+
+    public static String getPrettyDateSimpleFromLong(long thisDate){
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(thisDate);
+        SimpleDateFormat format = new SimpleDateFormat("EEE, dd/MMM/yyyy");
+        SimpleDateFormat formatShortDay = new SimpleDateFormat("EEE");
+        String prettyDate = format.format(calendar.getTime());
+        return prettyDate;
+    }
+
     public static String getSimpleDayFromLongDate(long thisDate){
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(thisDate);

@@ -1,17 +1,10 @@
 package com.ustadmobile.port.android.view;
 
 
-import com.github.mikephil.charting.charts.LineChart;
-import com.github.mikephil.charting.data.Entry;
-import com.github.mikephil.charting.data.LineData;
-import com.github.mikephil.charting.data.LineDataSet;
-import com.ustadmobile.core.controller.ReportOverallAttendancePresenter;
-
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.support.design.widget.TabLayout;
-import android.support.v7.widget.LinearLayoutManager;
+import android.support.constraint.ConstraintLayout;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuInflater;
@@ -23,13 +16,21 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
-import com.ustadmobile.port.android.util.UMAndroidUtil;
+import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.components.AxisBase;
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.LineData;
+import com.github.mikephil.charting.data.LineDataSet;
+import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 import com.toughra.ustadmobile.R;
-
-
+import com.ustadmobile.core.controller.ReportOverallAttendancePresenter;
+import com.ustadmobile.core.impl.UmCallbackUtil;
+import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.core.view.ReportOverallAttendanceView;
+import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -168,56 +169,143 @@ public class ReportOverallAttendanceActivity extends UstadBaseActivity
         lineChart.getXAxis().setValueFormatter((value, axis) -> (int) value + "");
         lineChart.setTouchEnabled(false);
         lineChart.getXAxis().setLabelCount(4, true);
+
+        lineChart.getXAxis().setValueFormatter((value, axis) ->
+                UMCalendarUtil.getPrettyDateSuperSimpleFromLong((long) value * 1000));
     }
+
+    public List<View> generateAllViewRowsForTable(String valueIdentifier,
+                                                  LinkedHashMap<String,
+                                                          LinkedHashMap<String,
+                                                                  Float>> dataTableMaps ){
+
+        //RETURN THIS LIST OF VIEWS
+        List<View> addThese = new ArrayList<>();
+
+        //LAYOUT
+        TableRow.LayoutParams rowParams = new TableRow.LayoutParams(
+                TableRow.LayoutParams.WRAP_CONTENT, TableRow.LayoutParams.WRAP_CONTENT);
+
+        TableRow.LayoutParams everyItemParam = new TableRow.LayoutParams(
+                TableRow.LayoutParams.WRAP_CONTENT, TableRow.LayoutParams.WRAP_CONTENT);
+        everyItemParam.setMargins(dpToPx(4), dpToPx(4), dpToPx(4), dpToPx(4));
+
+
+        //HEADING
+        TableRow headingRow = new TableRow(getApplicationContext());
+        headingRow.setLayoutParams(rowParams);
+
+        TextView dateHeading = new TextView(getApplicationContext());
+        dateHeading.setTextColor(Color.BLACK);
+        dateHeading.setLayoutParams(everyItemParam);
+        dateHeading.setText(R.string.date);
+
+
+        TextView averageHeading = new TextView(getApplicationContext());
+        averageHeading.setTextColor(Color.BLACK);
+        averageHeading.setLayoutParams(everyItemParam);
+        averageHeading.setText(R.string.average);
+
+        headingRow.addView(dateHeading);
+        headingRow.addView(averageHeading);
+
+
+        if(mPresenter.isGenderDisaggregate()){
+
+            TextView maleHeading = new TextView(getApplicationContext());
+            maleHeading.setTextColor(Color.BLACK);
+            maleHeading.setLayoutParams(everyItemParam);
+            maleHeading.setText(R.string.male);
+
+            TextView femaleHeading = new TextView(getApplicationContext());
+            femaleHeading.setTextColor(Color.BLACK);
+            femaleHeading.setLayoutParams(everyItemParam);
+            femaleHeading.setText(R.string.female);
+
+            headingRow.addView(maleHeading);
+            headingRow.addView(femaleHeading);
+        }
+
+        addThese.add(headingRow);
+
+
+        //DATA ROWS
+
+        LinkedHashMap<String, Float> tableDataAverage;
+        LinkedHashMap<String, Float> tableDataMale = new LinkedHashMap<>();
+        LinkedHashMap<String, Float> tableDataFemale = new LinkedHashMap<>();
+
+        tableDataAverage = dataTableMaps.get(ATTENDANCE_LINE_AVERAGE_LABEL_DESC);
+        if(mPresenter.isGenderDisaggregate()){
+            tableDataMale = dataTableMaps.get(ATTENDANCE_LINE_MALE_LABEL_DESC);
+            tableDataFemale = dataTableMaps.get(ATTENDANCE_LINE_FEMALE_LABEL_DESC);
+        }
+
+        List<String> dates = new ArrayList<>();
+        dates.addAll(tableDataAverage.keySet());
+        for(String every_date: dates){
+            TableRow iRow = new TableRow(getApplicationContext());
+            iRow.setLayoutParams(rowParams);
+
+            String iDate = every_date;
+            TextView dateView = new TextView(getApplicationContext());
+            dateView.setTextColor(Color.BLACK);
+            dateView.setLayoutParams(everyItemParam);
+            dateView.setText(iDate);
+
+            Float averageP = tableDataAverage.get(every_date);
+            TextView averageView = new TextView(getApplicationContext());
+            averageView.setTextColor(Color.BLACK);
+            averageView.setLayoutParams(everyItemParam);
+            averageView.setText(String.valueOf(averageP) + valueIdentifier );
+
+            iRow.addView(dateView);
+            iRow.addView(averageView);
+
+
+            if(mPresenter.isGenderDisaggregate()){
+                Float maleP = tableDataMale.get(every_date);
+                TextView maleView = new TextView(getApplicationContext());
+                maleView.setTextColor(Color.BLACK);
+                maleView.setLayoutParams(everyItemParam);
+                maleView.setText(String.valueOf(maleP) + valueIdentifier);
+
+                Float femaleP = tableDataFemale.get(every_date);
+                TextView femaleView = new TextView(getApplicationContext());
+                femaleView.setTextColor(Color.BLACK);
+                femaleView.setLayoutParams(everyItemParam);
+                femaleView.setText(String.valueOf(femaleP) + valueIdentifier);
+
+                iRow.addView(maleView);
+                iRow.addView(femaleView);
+            }
+
+            addThese.add(iRow);
+        }
+
+        //RETURN LIST OF ROW VIEWS
+        return addThese;
+    }
+
 
     @Override
     public void updateAttendanceMultiLineChart(LinkedHashMap<String,
-            LinkedHashMap<Float, Float>> dataMaps) {
+            LinkedHashMap<Float, Float>> dataMaps, LinkedHashMap<String,
+            LinkedHashMap<String, Float>> tableDataMap) {
 
 
         LineData lineData = new LineData();
         Boolean hasSomething = false;
-        Boolean headingCreated = false;
 
-        View hline = new View(this);
-        hline.setLayoutParams(new LinearLayout.LayoutParams(
-                RecyclerView.LayoutParams.MATCH_PARENT,
-                2
-        ));
-        hline.setBackgroundColor(Color.parseColor("#DEDEDE"));
+        String valueIdentifier = "";
 
-        //Update the table
-        if(!headingCreated){
-            TableRow headingRow = new TableRow(this);
-
-            TextView dateHeading = new TextView(this);
-            dateHeading.setText("Date");
-
-
-            TextView averageHeading = new TextView(this);
-            averageHeading.setText("Average");
-
-
-            headingRow.addView(dateHeading);
-            headingRow.addView(averageHeading);
-
-
-            if(mPresenter.isGenderDisaggregate()){
-
-                TextView maleHeading = new TextView(this);
-                maleHeading.setText("Male");
-
-                TextView femaleHeading = new TextView(this);
-                femaleHeading.setText("Female");
-
-                headingRow.addView(maleHeading);
-                headingRow.addView(femaleHeading);
-            }
-
-            headingCreated = true;
-            dataTable.addView(headingRow);
+        if(mPresenter.getShowPercentages()){
+            valueIdentifier = "%";
         }
 
+
+
+        //Generate and draw lines for line chart
         for(Map.Entry<String, LinkedHashMap<Float, Float>> everyLineDataMap : dataMaps.entrySet()){
             LinkedHashMap<Float, Float> dataMap = everyLineDataMap.getValue();
             String dataSetType = everyLineDataMap.getKey();
@@ -242,6 +330,7 @@ public class ReportOverallAttendanceActivity extends UstadBaseActivity
                     labelColor = "#000000";
 
             }
+
             List<Entry> lineDataEntries = new ArrayList<>();
             for (Map.Entry<Float, Float> floatFloatEntry : dataMap.entrySet()) {
                 hasSomething = true;
@@ -262,10 +351,9 @@ public class ReportOverallAttendanceActivity extends UstadBaseActivity
 
             lineData.addDataSet(dataSetLine1);
 
-
-
-
         }
+
+        List<View> addThese = generateAllViewRowsForTable(valueIdentifier, tableDataMap);
 
         //Update the lineChart on the UI thread (since this method is called via the Presenter)
         Boolean finalHasSomething = hasSomething;
@@ -277,6 +365,11 @@ public class ReportOverallAttendanceActivity extends UstadBaseActivity
             }else{
                 lineChart.setData(null);
                 lineChart.invalidate();
+            }
+
+            for(View everyRow: addThese){
+                dataTable.addView(everyRow);
+
             }
 
         });

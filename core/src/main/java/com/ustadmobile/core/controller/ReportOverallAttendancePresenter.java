@@ -5,6 +5,7 @@ import com.ustadmobile.core.db.dao.ClazzLogAttendanceRecordDao;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.core.view.ReportOverallAttendanceView;
 import com.ustadmobile.lib.db.entities.DailyAttendanceNumbers;
 
@@ -19,6 +20,8 @@ import static com.ustadmobile.core.view.ReportEditView.ARG_CLAZZ_LIST;
 import static com.ustadmobile.core.view.ReportEditView.ARG_FROM_DATE;
 import static com.ustadmobile.core.view.ReportEditView.ARG_GENDER_DISAGGREGATE;
 import static com.ustadmobile.core.view.ReportEditView.ARG_LOCATION_LIST;
+import static com.ustadmobile.core.view.ReportEditView.ARG_STUDENT_IDENTIFIER_NUMBER;
+import static com.ustadmobile.core.view.ReportEditView.ARG_STUDENT_IDENTIFIER_PERCENTAGE;
 import static com.ustadmobile.core.view.ReportEditView.ARG_TO_DATE;
 import static com.ustadmobile.core.view.ReportOverallAttendanceView.ATTENDANCE_LINE_AVERAGE_LABEL_DESC;
 import static com.ustadmobile.core.view.ReportOverallAttendanceView.ATTENDANCE_LINE_FEMALE_LABEL_DESC;
@@ -38,6 +41,7 @@ public class ReportOverallAttendancePresenter
     private Long[] locations;
     private Long[] clazzes;
     private boolean genderDisaggregate;
+    private Boolean showPercentages = false;
 
     LinkedHashMap<String, LinkedHashMap<Float, Float>> dataMaps;
 
@@ -72,12 +76,44 @@ public class ReportOverallAttendancePresenter
             genderDisaggregate = (Boolean) arguments.get(ARG_GENDER_DISAGGREGATE);
         }
 
+        if(arguments.containsKey(ARG_STUDENT_IDENTIFIER_NUMBER)){
+            Boolean numberIdentifier = (Boolean) arguments.get(ARG_STUDENT_IDENTIFIER_NUMBER);
+            if (numberIdentifier){
+                showPercentages = false;
+            }else{
+                showPercentages = true;
+            }
+
+        }
+
+        if(arguments.containsKey(ARG_STUDENT_IDENTIFIER_PERCENTAGE)){
+            Boolean percentageIdentifier = (Boolean) arguments.get(ARG_STUDENT_IDENTIFIER_PERCENTAGE);
+            if(percentageIdentifier){
+                showPercentages = true;
+            }else{
+                showPercentages = false;
+            }
+        }
+    }
+
+    public Boolean getShowPercentages() {
+        return showPercentages;
+    }
+
+    public void setShowPercentages(Boolean showPercentages) {
+        this.showPercentages = showPercentages;
     }
 
     public void getAttendanceDataAndUpdateCharts(){
         LinkedHashMap<Float, Float> lineDataMap = new LinkedHashMap<>();
         LinkedHashMap<Float, Float> lineDataMapMale = new LinkedHashMap<>();
         LinkedHashMap<Float, Float> lineDataMapFemale = new LinkedHashMap<>();
+
+        LinkedHashMap<String, LinkedHashMap<String, Float>> tableData = new LinkedHashMap<>();
+
+        LinkedHashMap<String, Float> tableDataAverage = new LinkedHashMap<>();
+        LinkedHashMap<String, Float> tableDataMale = new LinkedHashMap<>();
+        LinkedHashMap<String, Float> tableDataFemale = new LinkedHashMap<>();
 
         ClazzLogAttendanceRecordDao attendanceRecordDao =
                 repository.getClazzLogAttendanceRecordDao();
@@ -87,7 +123,11 @@ public class ReportOverallAttendancePresenter
                     public void onSuccess(List<DailyAttendanceNumbers> result) {
 
                         for(DailyAttendanceNumbers everyDayAttendance: result){
+
+                            //Get date and time.
                             Long dd =everyDayAttendance.getLogDate();
+
+                            //Remove time and just get date
                             Calendar calendar = Calendar.getInstance();
                             calendar.setTimeInMillis(dd);
                             calendar.set(Calendar.HOUR_OF_DAY, 0);
@@ -95,57 +135,73 @@ public class ReportOverallAttendancePresenter
                             calendar.set(Calendar.SECOND, 0);
                             calendar.set(Calendar.MILLISECOND, 0);
                             Long d = calendar.getTimeInMillis();
-                            float a = everyDayAttendance.getAttendancePercentage();
-                            lineDataMap.put(d.floatValue() / 1000, a);
 
+                            //Put just date and attendance value
+                            lineDataMap.put(d.floatValue() / 1000, everyDayAttendance.getAttendancePercentage());
                             lineDataMapMale.put(d.floatValue() / 1000, everyDayAttendance.getMaleAttendance());
                             lineDataMapFemale.put(d.floatValue() / 1000, everyDayAttendance.getFemaleAttendance());
 
+                            tableDataAverage.put(UMCalendarUtil.getPrettyDateSuperSimpleFromLong(d),
+                                    everyDayAttendance.getAttendancePercentage() * 100);
+                            tableDataMale.put(UMCalendarUtil.getPrettyDateSuperSimpleFromLong(d),
+                                    everyDayAttendance.getMaleAttendance() * 100);
+                            tableDataFemale.put(UMCalendarUtil.getPrettyDateSuperSimpleFromLong(d),
+                                    everyDayAttendance.getFemaleAttendance() * 100);
 
                         }
+
+                        tableData.put(ATTENDANCE_LINE_AVERAGE_LABEL_DESC, tableDataAverage);
+                        tableData.put(ATTENDANCE_LINE_MALE_LABEL_DESC, tableDataMale);
+                        tableData.put(ATTENDANCE_LINE_FEMALE_LABEL_DESC, tableDataFemale);
+
 
 
                         //Remove messy date keys
-                        Iterator<Map.Entry<Float, Float>> ldpi = lineDataMap.entrySet().iterator();
-                        Iterator<Map.Entry<Float, Float>> ldpiMale = lineDataMapMale.entrySet().iterator();
-                        Iterator<Map.Entry<Float, Float>> ldpiFemale = lineDataMapFemale.entrySet().iterator();
+//                        Iterator<Map.Entry<Float, Float>> ldpi = lineDataMap.entrySet().iterator();
+//                        Iterator<Map.Entry<Float, Float>> ldpiMale = lineDataMapMale.entrySet().iterator();
+//                        Iterator<Map.Entry<Float, Float>> ldpiFemale = lineDataMapFemale.entrySet().iterator();
 
-                        LinkedHashMap<Float, Float> lineDataMapFixedX = new LinkedHashMap<>();
-                        LinkedHashMap<Float, Float> lineDataMapFixedXMale = new LinkedHashMap<>();
-                        LinkedHashMap<Float, Float> lineDataMapFixedXFemale = new LinkedHashMap<>();
-
-                        float l = 0f;
-                        while(ldpi.hasNext()){
-                            l++;
-                            lineDataMapFixedX.put(l, ldpi.next().getValue());
-
-                        }
-                        l = 0f;
-                        while(ldpiMale.hasNext()){
-                            l++;
-                            lineDataMapFixedXMale.put(l, ldpiMale.next().getValue());
-
-                        }
-                        l = 0f;
-                        while(ldpiFemale.hasNext()){
-                            l++;
-                            lineDataMapFixedXFemale.put(l, ldpiFemale.next().getValue());
-
-                        }
+//                        LinkedHashMap<Float, Float> lineDataMapFixedX = new LinkedHashMap<>();
+//                        LinkedHashMap<Float, Float> lineDataMapFixedXMale = new LinkedHashMap<>();
+//                        LinkedHashMap<Float, Float> lineDataMapFixedXFemale = new LinkedHashMap<>();
+//
+//
+//                        float l = 0f;
+//                        while(ldpi.hasNext()){
+//                            l++;
+//                            lineDataMapFixedX.put(l, ldpi.next().getValue());
+//
+//                        }
+//                        l = 0f;
+//                        while(ldpiMale.hasNext()){
+//                            l++;
+//                            lineDataMapFixedXMale.put(l, ldpiMale.next().getValue());
+//
+//                        }
+//                        l = 0f;
+//                        while(ldpiFemale.hasNext()){
+//                            l++;
+//                            lineDataMapFixedXFemale.put(l, ldpiFemale.next().getValue());
+//
+//                        }
 
                         dataMaps = new LinkedHashMap<>();
 
                         if(genderDisaggregate) {
-                            dataMaps.put(ATTENDANCE_LINE_MALE_LABEL_DESC, lineDataMapFixedXMale);
-                            dataMaps.put(ATTENDANCE_LINE_FEMALE_LABEL_DESC, lineDataMapFixedXFemale);
-                            dataMaps.put(ATTENDANCE_LINE_AVERAGE_LABEL_DESC, lineDataMapFixedX);
+//                            dataMaps.put(ATTENDANCE_LINE_MALE_LABEL_DESC, lineDataMapFixedXMale);
+//                            dataMaps.put(ATTENDANCE_LINE_FEMALE_LABEL_DESC, lineDataMapFixedXFemale);
+//                            dataMaps.put(ATTENDANCE_LINE_AVERAGE_LABEL_DESC, lineDataMapFixedX);
+
+                            dataMaps.put(ATTENDANCE_LINE_MALE_LABEL_DESC, lineDataMapMale);
+                            dataMaps.put(ATTENDANCE_LINE_FEMALE_LABEL_DESC, lineDataMapFemale);
+                            dataMaps.put(ATTENDANCE_LINE_AVERAGE_LABEL_DESC, lineDataMap);
                         }else{
-                            dataMaps.put(ATTENDANCE_LINE_AVERAGE_LABEL_DESC, lineDataMapFixedX);
+                            dataMaps.put(ATTENDANCE_LINE_AVERAGE_LABEL_DESC, lineDataMap);
                         }
 
                         //view.updateAttendanceLineChart(lineDataMapFixedX);
 
-                        view.updateAttendanceMultiLineChart(dataMaps);
+                        view.updateAttendanceMultiLineChart(dataMaps, tableData);
 
                     }
 

@@ -31,21 +31,31 @@
         app:layout_constraintTop_toBottomOf="@+id/activity_report_overall_attendance_appbar" />
 
 
-    <TableLayout
-        android:id="@+id/activity_report_overall_attendance_table"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+    <ScrollView
+        android:layout_width="wrap_content"
+        android:layout_height="220dp"
+        android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="8dp"
-        android:isScrollContainer="true"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/activity_report_overall_attendance_fab"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/activity_report_overall_attendance_line_chart">
-
-    </TableLayout>
+        app:layout_constraintStart_toStartOf="parent">
 
 
+        <TableLayout
+            android:id="@+id/activity_report_overall_attendance_table"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:layout_marginEnd="8dp"
+            android:isScrollContainer="true"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/activity_report_overall_attendance_line_chart">
+
+        </TableLayout>
+
+    </ScrollView>
 
     <ru.dimorinny.floatingtextbutton.FloatingTextButton
         android:id="@+id/activity_report_overall_attendance_fab"

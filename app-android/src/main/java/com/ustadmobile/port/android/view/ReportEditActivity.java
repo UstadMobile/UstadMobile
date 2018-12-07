@@ -7,6 +7,8 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -46,6 +48,9 @@ public class ReportEditActivity extends UstadBaseActivity implements ReportEditV
     private HashMap<String, Long> selectedLocations;
     private SelectAttendanceThresholdsDialogFragment.ThresholdValues thresholdValues;
 
+    private RadioButton studentNumberRadioButton, studentPercentageRadioButton;
+    private RadioGroup studentNumberOrPercentageRadioGroup;
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -64,6 +69,10 @@ public class ReportEditActivity extends UstadBaseActivity implements ReportEditV
 
         heading = findViewById(R.id.activity_report_edit_report_title);
         genderDisaggregateCheck = findViewById(R.id.activity_report_edit_gender);
+        studentNumberOrPercentageRadioGroup = findViewById(R.id.activity_report_edit_show_student_radio_options);
+        studentNumberRadioButton = findViewById(R.id.activity_report_edit_show_student_number_option);
+        studentPercentageRadioButton = findViewById(R.id.activity_report_edit_show_student_percentage_option);
+
         classesTextView = findViewById(R.id.activity_report_classes_textview);
         attendanceThresholdsTextView =
                 findViewById(R.id.activity_report_edit_attendance_threshold_selector);
@@ -72,6 +81,22 @@ public class ReportEditActivity extends UstadBaseActivity implements ReportEditV
         mPresenter = new ReportEditPresenter(this,
                 UMAndroidUtil.bundleToHashtable(getIntent().getExtras()), this);
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
+
+        studentNumberOrPercentageRadioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                if (checkedId == R.id.activity_report_edit_show_student_number_option) {
+                    mPresenter.setStudentNumbers(true);
+                    mPresenter.setStudentPercentages(false);
+                }else if(checkedId == R.id.activity_report_edit_show_student_percentage_option) {
+                    mPresenter.setStudentPercentages(true);
+                    mPresenter.setStudentNumbers(false);
+                }else{
+                    mPresenter.setStudentPercentages(false);
+                    mPresenter.setStudentNumbers(false);
+                }
+            }
+        });
 
         timePeriodSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
