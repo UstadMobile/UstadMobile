@@ -61,6 +61,7 @@ public class ReportEditActivity extends UstadBaseActivity implements ReportEditV
 
         //Toolbar:
         toolbar = findViewById(R.id.activity_report_edit_toolbar);
+        toolbar.setTitle(R.string.choose_report_options);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -125,7 +126,6 @@ public class ReportEditActivity extends UstadBaseActivity implements ReportEditV
 
 
     }
-
 
     /**
      * Handles what happens when toolbar menu option selected. Here it is handling what happens when

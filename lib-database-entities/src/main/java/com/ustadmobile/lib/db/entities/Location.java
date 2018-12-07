@@ -15,18 +15,26 @@ public class Location {
 
     private String desc;
 
-    private String long;
+    private String lng;
 
     private String lat;
 
     private long parentLocationUid;
 
     @UmSyncLocalChangeSeqNum
-    private long clazzMemberLocalChangeSeqNum;
+    private long locationLocalChangeSeqNum;
 
     @UmSyncMasterChangeSeqNum
-    private long clazzMemberMasterChangeSeqNum;
+    private long locationMasterChangeSeqNum;
 
+
+    public String getLng() {
+        return lng;
+    }
+
+    public void setLng(String lng) {
+        this.lng = lng;
+    }
 
     public long getLocationUid() {
         return locationUid;
@@ -68,19 +76,19 @@ public class Location {
         this.parentLocationUid = parentLocationUid;
     }
 
-    public long getClazzMemberLocalChangeSeqNum() {
-        return clazzMemberLocalChangeSeqNum;
+    public long getLocationLocalChangeSeqNum() {
+        return locationLocalChangeSeqNum;
     }
 
-    public void setClazzMemberLocalChangeSeqNum(long clazzMemberLocalChangeSeqNum) {
-        this.clazzMemberLocalChangeSeqNum = clazzMemberLocalChangeSeqNum;
+    public void setLocationLocalChangeSeqNum(long locationLocalChangeSeqNum) {
+        this.locationLocalChangeSeqNum = locationLocalChangeSeqNum;
     }
 
-    public long getClazzMemberMasterChangeSeqNum() {
-        return clazzMemberMasterChangeSeqNum;
+    public long getLocationMasterChangeSeqNum() {
+        return locationMasterChangeSeqNum;
     }
 
-    public void setClazzMemberMasterChangeSeqNum(long clazzMemberMasterChangeSeqNum) {
-        this.clazzMemberMasterChangeSeqNum = clazzMemberMasterChangeSeqNum;
+    public void setLocationMasterChangeSeqNum(long locationMasterChangeSeqNum) {
+        this.locationMasterChangeSeqNum = locationMasterChangeSeqNum;
     }
 }

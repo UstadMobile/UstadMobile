@@ -23,6 +23,8 @@ public class Clazz {
     //Gives the schedule calendar ui
     private long clazzScheuleUMCalendarUid;
 
+    private long locationUid;
+
     //Active
     private boolean clazzActive;
 
@@ -62,6 +64,14 @@ public class Clazz {
 
     public void setClazzScheuleUMCalendarUid(long clazzScheuleUMCalendarUid) {
         this.clazzScheuleUMCalendarUid = clazzScheuleUMCalendarUid;
+    }
+
+    public long getLocationUid() {
+        return locationUid;
+    }
+
+    public void setLocationUid(long locationUid) {
+        this.locationUid = locationUid;
     }
 
     public float getAttendanceAverage() {

@@ -25,6 +25,7 @@ import com.ustadmobile.core.db.dao.EntryStatusResponseDao;
 import com.ustadmobile.core.db.dao.FeedEntryDao;
 import com.ustadmobile.core.db.dao.HolidayDao;
 import com.ustadmobile.core.db.dao.HttpCachedEntryDao;
+import com.ustadmobile.core.db.dao.LocationDao;
 import com.ustadmobile.core.db.dao.NetworkNodeDao;
 import com.ustadmobile.core.db.dao.OpdsEntryDao;
 import com.ustadmobile.core.db.dao.OpdsEntryParentToChildJoinDao;
@@ -48,6 +49,7 @@ import com.ustadmobile.lib.database.annotation.UmDatabase;
 import com.ustadmobile.lib.database.annotation.UmDbContext;
 import com.ustadmobile.lib.database.annotation.UmRepository;
 import com.ustadmobile.lib.database.annotation.UmSyncOutgoing;
+import com.ustadmobile.lib.db.entities.Location;
 import com.ustadmobile.lib.db.sync.UmSyncableDatabase;
 import com.ustadmobile.lib.db.sync.dao.SyncStatusDao;
 import com.ustadmobile.lib.db.sync.dao.SyncablePrimaryKeyDao;
@@ -120,7 +122,7 @@ import com.ustadmobile.lib.db.sync.entities.SyncablePrimaryKey;
         ContentEntry.class, ContentEntryContentCategoryJoin.class,
         ContentEntryContentEntryFileJoin.class, ContentEntryFile.class,
         ContentEntryParentChildJoin.class, ContentEntryRelatedEntryJoin.class,
-        SyncStatus.class, SyncablePrimaryKey.class, SyncDeviceBits.class
+        SyncStatus.class, SyncablePrimaryKey.class, SyncDeviceBits.class, Location.class
 
 })
 public abstract class UmAppDatabase implements UmSyncableDatabase{
@@ -239,6 +241,8 @@ public abstract class UmAppDatabase implements UmSyncableDatabase{
     public abstract ContentEntryRelatedEntryJoinDao getContentEntryRelatedEntryJoinDao();
 
     public abstract SyncStatusDao getSyncStatusDao();
+
+    public abstract LocationDao getLocationDao();
 
     @UmDbContext
     public abstract Object getContext();

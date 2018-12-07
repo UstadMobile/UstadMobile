@@ -1,9 +1,15 @@
 package com.ustadmobile.core.controller;
 
 import java.util.Hashtable;
+import java.util.List;
 
+import com.ustadmobile.core.db.UmAppDatabase;
+import com.ustadmobile.core.db.dao.LocationDao;
+import com.ustadmobile.core.impl.UmAccountManager;
+import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.view.SelectMultipleTreeDialogView;
-import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.lib.db.entities.Location;
+
 
 
 /**
@@ -15,6 +21,7 @@ public class SelectMultipleTreeDialogPresenter
     //Any arguments stored as variables here
     //eg: private long clazzUid = -1;
 
+    UmAppDatabase repository = UmAccountManager.getRepositoryForActiveAccount(context);
 
     public SelectMultipleTreeDialogPresenter(Object context, Hashtable arguments,
                                              SelectMultipleTreeDialogView view) {
@@ -25,6 +32,41 @@ public class SelectMultipleTreeDialogPresenter
         //    currentClazzUid = (long) arguments.get(ARG_CLAZZ_UID);
         //}
 
+        getTopLocations();
+
+    }
+
+    public void getTopLocations(){
+        LocationDao locationDao = repository.getLocationDao();
+        locationDao.findTopLocationsAsync(new UmCallback<List<Location>>() {
+            @Override
+            public void onSuccess(List<Location> result) {
+                view.populateTopLocation(result, null, null);
+            }
+
+            @Override
+            public void onFailure(Throwable exception) {
+
+            }
+        });
+    }
+
+
+
+    public void getLocationForParentUid(long parentUid, Object treeNode, Object parentNode){
+        LocationDao locationDao = repository.getLocationDao();
+        locationDao.findAllChildLocationsForUidAsync(parentUid, new UmCallback<List<Location>>() {
+            @Override
+            public void onSuccess(List<Location> result) {
+
+                view.populateTopLocation(result, treeNode, parentNode);
+            }
+
+            @Override
+            public void onFailure(Throwable exception) {
+
+            }
+        });
     }
 
     @Override

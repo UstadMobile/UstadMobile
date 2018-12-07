@@ -71,6 +71,7 @@ import com.ustadmobile.lib.db.entities.ClazzActivity;
 import com.ustadmobile.lib.db.entities.ClazzActivityChange;
 import com.ustadmobile.lib.db.entities.ClazzMember;
 import com.ustadmobile.lib.db.entities.FeedEntry;
+import com.ustadmobile.lib.db.entities.Location;
 import com.ustadmobile.lib.db.entities.Person;
 import com.ustadmobile.lib.db.entities.PersonCustomFieldValue;
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField;
@@ -597,14 +598,54 @@ public class SplashScreenActivity extends AppCompatActivity
 
             }
 
+            //Create Locations
+            Location lebanonLocation = new Location();
+            lebanonLocation.setTitle("Lebanon");
+            lebanonLocation.setParentLocationUid(0);
 
-            //Create Class
+            repository.getLocationDao().insert(lebanonLocation);
+
+            Location lebanonNorthLocation = new Location();
+            lebanonNorthLocation.setTitle("Lebanon North");
+            lebanonNorthLocation.setParentLocationUid(lebanonLocation.getLocationUid());
+            repository.getLocationDao().insert(lebanonNorthLocation);
+
+            Location lebanonEastLocation = new Location();
+            lebanonEastLocation.setTitle("Lebanon East");
+            lebanonEastLocation.setParentLocationUid(lebanonLocation.getLocationUid());
+            repository.getLocationDao().insert(lebanonEastLocation);
+
+
+            Location bekaaLocation = new Location();
+            bekaaLocation.setTitle("Bekka");
+            bekaaLocation.setParentLocationUid(lebanonEastLocation.getLocationUid());
+            repository.getLocationDao().insert(bekaaLocation);
+
+            Location akkarLocation = new Location();
+            akkarLocation.setTitle("Akkar");
+            akkarLocation.setParentLocationUid(lebanonNorthLocation.getLocationUid());
+            repository.getLocationDao().insert(akkarLocation);
+
+
+
+            //Create Class with location
             Clazz clazz1 = new Clazz();
             clazz1.setClazzName("Class A");
             clazz1.setAttendanceAverage(0L);
             clazz1.setClazzActive(true);
+            clazz1.setLocationUid(akkarLocation.getLocationUid());
             long thisClazzUid = clazzDao.insert(clazz1);
             clazz1.setClazzUid(thisClazzUid);
+
+
+            //2nd class with 2nd location
+            Clazz clazz2 = new Clazz();
+            clazz2.setClazzName("Class B");
+            clazz2.setAttendanceAverage(0L);
+            clazz2.setClazzActive(true);
+            clazz2.setLocationUid(bekaaLocation.getLocationUid());
+            long thisClazz2Uid = clazzDao.insert(clazz2);
+            clazz2.setClazzUid(thisClazz2Uid);
 
 
             //Names
@@ -627,7 +668,11 @@ public class SplashScreenActivity extends AppCompatActivity
 
 
                 person.setEmailAddr(first_name + last_name + "@ustadmobile.com");
-                person.setGender(Person.GENDER_FEMALE);
+                if(first_name.endsWith("a")) {
+                    person.setGender(Person.GENDER_FEMALE);
+                }else{
+                    person.setGender(Person.GENDER_MALE);
+                }
                 person.setDateOfBirth(UMCalendarUtil.getLongDateFromPrettyString("12-Jan-2001"));
                 person.setFatherName("Addulla " + last_name);
                 person.setMotherName("Aysha " + last_name);

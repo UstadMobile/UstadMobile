@@ -4,24 +4,23 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ImageView;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.SelectMultipleTreeDialogPresenter;
+import com.ustadmobile.core.db.UmAppDatabase;
+import com.ustadmobile.core.impl.UmAccountManager;
+import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.view.DismissableDialog;
 import com.ustadmobile.core.view.SelectMultipleTreeDialogView;
+import com.ustadmobile.lib.db.entities.Location;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.util.ArrayList;
@@ -86,51 +85,10 @@ public class SelectMultipleTreeDialogFragment extends UstadDialogFragment implem
         initView();
 
         //Get initial data
-        List<TreeNode> nodes = initTestData();
+        //List<TreeNode> nodes = initTestData();
 
-        //Init adapter with the location node binder as types of data to accept
-        adapter = new TreeViewAdapter(nodes, Arrays.asList(new LocationNodeBinder()));
 
-        //Set adapter listener
-        adapter.setOnTreeNodeListener(new TreeViewAdapter.OnTreeNodeListener() {
-            @Override
-            public boolean onClick(TreeNode treeNode, RecyclerView.ViewHolder viewHolder) {
-                //get the location object associated with this node (using treeNodegetContent)
-                 // would be something like getContent().isSite() or isLeaf()
 
-                //Location nodeLocation = treeNode.getContent();
-                //boolean ourLocationIsLeaf = nodeLocation.isSite();
-
-                if(treeNode.isLeaf()) {
-                    //now run the query async, get the result, and add children to treeNode
-
-                    treeNode.addChild(
-                            new TreeNode<>(new LocationLayoutType("NEW"))
-                    );
-
-                }
-
-                if(!treeNode.isLeaf()){
-                    //Update and toggle the node.
-                    onToggle(!treeNode.isExpand(), viewHolder);
-                }
-                return false;
-            }
-
-            @Override
-            public void onToggle(boolean b, RecyclerView.ViewHolder viewHolder) {
-
-                //Change icon of the item.
-                LocationNodeBinder.ViewHolder locationViewHolder =
-                        (LocationNodeBinder.ViewHolder) viewHolder;
-                ImageView arrowImage = locationViewHolder.getIvArrow();
-                int rotateDegree = b ? 90 : -90;
-                arrowImage.animate().rotationBy(rotateDegree).start();
-            }
-        });
-
-        //Set adapter to Recycler view.
-        recyclerView.setAdapter(adapter);
 
         toolbar = rootView.findViewById(R.id.fragment_select_multiple_tree_dialog_toolbar);
         toolbar.setTitle(R.string.select_locations);
@@ -180,8 +138,123 @@ public class SelectMultipleTreeDialogFragment extends UstadDialogFragment implem
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
     }
 
+    @Override
+    public void populateTopLocation(List<Location> locations, Object treeNode, Object parentNode) {
+        List<TreeNode> nodes = new ArrayList<>();
+        TreeNode thisTreeNode = null;
+        TreeNode thisParentNode = null;
+
+        if(treeNode != null){
+            thisTreeNode = (TreeNode) treeNode;
+            thisTreeNode.getContent().getLayoutId();
+        }
+        if(parentNode != null){
+            thisParentNode = (TreeNode) parentNode;
+        }
+
+        for(Location every_location : locations){
+            TreeNode<LocationLayoutType> app = new TreeNode<>(
+                    new LocationLayoutType(
+                            every_location.getTitle(), every_location.getLocationUid()
+                    )
+            );
+
+            if(thisParentNode != null){
+                thisParentNode.addChild(app);
+
+            }else if(thisTreeNode != null) {
+                thisTreeNode.addChild(app);
+
+            }else{
+                nodes.add(app);
+            }
+
+
+        }
+        if(parentNode != null) {
+            nodes.add(thisParentNode);
+        }else if(treeNode != null){
+
+            nodes.add(thisTreeNode);
+
+        }
+
+        //Init adapter with the location node binder as types of data to accept
+        adapter = new TreeViewAdapter(nodes, Arrays.asList(new LocationNodeBinder()));
+
+
+
+        //Set adapter to Recycler view.
+        runOnUiThread(() -> recyclerView.setAdapter(adapter));
+
+
+        //Set adapter listener
+        adapter.setOnTreeNodeListener(new TreeViewAdapter.OnTreeNodeListener() {
+            @Override
+            public boolean onClick(TreeNode treeNode, RecyclerView.ViewHolder viewHolder) {
+
+                //get the location object associated with this node (using treeNodegetContent)
+                // would be something like getContent().isSite() or isLeaf()
+
+                //Location nodeLocation = treeNode.getContent();
+                //boolean ourLocationIsLeaf = nodeLocation.isSite();
+                //mPresenter.getLocationForParentUid(((LocationLayoutType)treeNode.getContent()).getUid(), treeNode, treeNode.getParent());
+
+
+                if(treeNode.isLeaf()) {
+                    //now run the query async, get the result, and add children to treeNode
+                    UmAppDatabase repository = UmAccountManager.getRepositoryForActiveAccount(getContext());
+                    repository.getLocationDao().findAllChildLocationsForUidAsync(
+                            ((LocationLayoutType) treeNode.getContent()).getUid(),
+                            new UmCallback<List<Location>>() {
+                                @Override
+                                public void onSuccess(List<Location> result) {
+
+                                    for(Location every_location : result) {
+                                        treeNode.addChild(new TreeNode<>(
+                                                new LocationLayoutType(
+                                                        every_location.getTitle(), every_location.getLocationUid()
+                                                )
+                                        ));
+                                    }
+                                }
+
+                                @Override
+                                public void onFailure(Throwable exception) {
+
+                                }
+                            });
+
+                }
+
+                if(!treeNode.isLeaf()){
+                    //Update and toggle the node.
+                    onToggle(!treeNode.isExpand(), viewHolder);
+                }
+                return false;
+            }
+
+            @Override
+            public void onToggle(boolean b, RecyclerView.ViewHolder viewHolder) {
+
+                //Change icon of the item.
+                LocationNodeBinder.ViewHolder locationViewHolder =
+                        (LocationNodeBinder.ViewHolder) viewHolder;
+                ImageView arrowImage = locationViewHolder.getIvArrow();
+                int rotateDegree = b ? 90 : -90;
+                arrowImage.animate().rotationBy(rotateDegree).start();
+            }
+        });
+
+
+
+
+    }
+
     private List<TreeNode> initTestData(){
         List<TreeNode> nodes = new ArrayList<>();
+
+
         TreeNode<LocationLayoutType> app = new TreeNode<>(new LocationLayoutType(("Earth")));
         nodes.add(app);
         app.addChild(
@@ -239,6 +312,8 @@ public class SelectMultipleTreeDialogFragment extends UstadDialogFragment implem
     public void onNothingSelected(AdapterView<?> parent) {
 
     }
+
+
 
     @Override
     public void finish() {
