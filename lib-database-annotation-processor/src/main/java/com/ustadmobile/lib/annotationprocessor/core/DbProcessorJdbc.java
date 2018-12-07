@@ -235,7 +235,8 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                                 .endControlFlow()
                                 .add("return _jdbcProductName;\n").build()).build());
 
-        addCreateTablesMethodToClassSpec(dbType, jdbcDbTypeSpec);
+        jdbcDbTypeSpec.addMethod(generateCreateTablesMethod(dbType));
+        jdbcDbTypeSpec.addMethod(generateCreateSeqNumTriggersMethod(dbType));
 
         for(Element subElement : dbType.getEnclosedElements()) {
             if (subElement.getKind() != ElementKind.METHOD)
@@ -320,9 +321,9 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
      * all entities on the given database type.
      *
      * @param dbType TypeElement representing the class annotated with @UmDatabase
-     * @param classBuilder TypeSpec.Builder being used to generate the JDBC database class implementation
+     * @return MethodSpec with a generated implementation to create all tables for this database
      */
-    protected void addCreateTablesMethodToClassSpec(TypeElement dbType, TypeSpec.Builder classBuilder) {
+    protected MethodSpec generateCreateTablesMethod(TypeElement dbType) {
         MethodSpec.Builder createMethod = MethodSpec.methodBuilder("createAllTables");
         CodeBlock.Builder createCb = CodeBlock.builder();
         createCb.add("try (\n").indent()
@@ -364,7 +365,111 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
 
 
         createMethod.addCode(createCb.build());
-        classBuilder.addMethod(createMethod.build());
+        return createMethod.build();
+    }
+
+    protected MethodSpec generateCreateSeqNumTriggersMethod(TypeElement dbType) {
+        MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("createSeqNumTriggers")
+                .addModifiers(Modifier.PROTECTED)
+                .addParameter(Class.class, "_entityClass");
+        CodeBlock.Builder codeBlock = CodeBlock.builder();
+
+        codeBlock.add("try (").indent()
+                .add("$T _connection = getConnection();\n", Connection.class)
+                .add("$T _stmt = _connection.createStatement();\n", Statement.class)
+            .unindent().beginControlFlow(")");
+
+        for(String sqlProductName : SUPPORTED_DB_PRODUCT_NAMES) {
+            codeBlock.beginControlFlow("if($S.equals(getJdbcProductName()))",
+                    sqlProductName);
+            List<TypeElement> entityTypes = findEntityTypes(dbType);
+            boolean isFirst = true;
+            String ifStmtStr = "if(_entityClass.equals($T.class))";
+            for(TypeElement entityType : entityTypes) {
+                if(!DbProcessorUtils.entityHasChangeSequenceNumbers(entityType, processingEnv))
+                    continue;
+
+                if(isFirst)
+                    codeBlock.beginControlFlow(ifStmtStr, entityType);
+                else
+                    codeBlock.nextControlFlow("else " + ifStmtStr, entityType);
+
+
+                Element localChangeSeqnumEl = DbProcessorUtils.findElementWithAnnotation(entityType,
+                        UmSyncLocalChangeSeqNum.class, processingEnv);
+                Element masterChangeSeqNumEl = DbProcessorUtils.findElementWithAnnotation(entityType,
+                        UmSyncMasterChangeSeqNum.class, processingEnv);
+
+                Map<String, String> triggerSqlArgs = new HashMap<>();
+                triggerSqlArgs.put("tableNameLower",
+                        entityType.getSimpleName().toString().toLowerCase());
+                triggerSqlArgs.put("tableName", entityType.getSimpleName().toString());
+                triggerSqlArgs.put("localCsnName", localChangeSeqnumEl.getSimpleName().toString());
+                triggerSqlArgs.put("masterCsnName", masterChangeSeqNumEl.getSimpleName().toString());
+                triggerSqlArgs.put("pkName", DbProcessorUtils.findElementWithAnnotation(entityType,
+                        UmPrimaryKey.class, processingEnv).getSimpleName().toString());
+                triggerSqlArgs.put("tableId", ""+entityType.getAnnotation(UmEntity.class).tableId());
+                triggerSqlArgs.put("stmtVarName", "_stmt");
+
+                codeBlock.addNamed("String _tableColName_$tableName:L = isMaster() ? " +
+                        "$masterCsnName:S : $localCsnName:S;\n", triggerSqlArgs);
+                codeBlock.add("String _syncStatusColName_$L = isMaster() ? $S: $S;\n",
+                        entityType.getSimpleName(), "masterChangeSeqNum", "localChangeSeqNum");
+
+                Map<String, String> triggerTemplateArgs = new HashMap<>(triggerSqlArgs);
+                triggerTemplateArgs.put("triggerOn", "update");
+                String triggerTemplate =
+                        "CREATE TRIGGER $triggerOn:L_csn_$tableNameLower:L " +
+                                "AFTER $triggerOn:L ON $tableName:L FOR EACH ROW ";
+                codeBlock.addNamed("String _createUpdateTriggerStmt_$tableName:L = \""
+                                + triggerTemplate + " WHEN OLD.\" + _tableColName_$tableName:L + \" > 0\";\n",
+                        triggerTemplateArgs);
+
+                triggerTemplateArgs.put("triggerOn", "insert");
+                codeBlock.addNamed("String _createInsertTriggerStmt_$tableName:L = \"" +
+                                triggerTemplate + "\";\n",
+                        triggerTemplateArgs);
+
+
+                codeBlock.addNamed("String _triggerSql_$tableNameLower:L = \"" +
+                                "UPDATE $tableName:L " +
+                                "SET \" + _tableColName_$tableName:L + \" = " +
+                                "(SELECT \" + _syncStatusColName_$tableName:L + \" FROM SyncStatus WHERE tableId = $tableId:L) " +
+                                "WHERE $pkName:L = NEW.$pkName:L; " +
+                                "UPDATE SyncStatus SET \" + " +
+                                "_syncStatusColName_$tableName:L + \" = \" + _syncStatusColName_$tableName:L + \" + 1 " +
+                                " WHERE tableId = $tableId:L; " +
+                                "\";\n"
+                        , triggerSqlArgs);
+                codeBlock.addNamed("$stmtVarName:L.executeUpdate(\"INSERT INTO SyncStatus(tableId, " +
+                                "localChangeSeqNum, masterChangeSeqNum) VALUES($tableId:L, 1, 1)\");\n",
+                        triggerSqlArgs);
+
+                if(sqlProductName.equals(PRODUCT_NAME_SQLITE)) {
+                    codeBlock.addNamed("$stmtVarName:L.executeUpdate(_createUpdateTriggerStmt_$tableName:L " +
+                                    " + \" BEGIN \" + _triggerSql_$tableNameLower:L + \" END\");\n",
+                            triggerSqlArgs);
+                    codeBlock.addNamed("$stmtVarName:L.executeUpdate(_createInsertTriggerStmt_$tableName:L " +
+                                    " + \" BEGIN \" + _triggerSql_$tableNameLower:L + \" END\");\n",
+                            triggerSqlArgs);
+                }
+
+
+                isFirst = false;
+            }
+
+            if(!isFirst)
+                codeBlock.endControlFlow();//end the if statement only if there was one
+
+            codeBlock.endControlFlow();
+        }
+
+        codeBlock.nextControlFlow("catch($T _sqlE)", SQLException.class)
+                .add("_sqlE.printStackTrace();\n")
+                .endControlFlow();
+
+        methodBuilder.addCode(codeBlock.build());
+        return methodBuilder.build();
     }
 
     protected void addClearAllTablesCodeToMethod(TypeElement dbType, MethodSpec.Builder builder,
@@ -462,66 +567,10 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                 entitySpec.getSimpleName().toString())
                 .add("$L.executeUpdate($S);\n", stmtVariableName,
                         makeCreateTableStatement(entitySpec, quoteChar, sqlProductName));
-        Element localChangeSeqnumEl = DbProcessorUtils.findElementWithAnnotation(entitySpec,
-                UmSyncLocalChangeSeqNum.class, processingEnv);
-        Element masterChangeSeqNumEl = DbProcessorUtils.findElementWithAnnotation(entitySpec,
-                UmSyncMasterChangeSeqNum.class, processingEnv);
 
-        if(localChangeSeqnumEl != null && masterChangeSeqNumEl != null) {
+        if(DbProcessorUtils.entityHasChangeSequenceNumbers(entitySpec, processingEnv)) {
             //we need to add a trigger to handle change sequence numbers
-            Map<String, String> triggerSqlArgs = new HashMap<>();
-            triggerSqlArgs.put("tableNameLower",
-                    entitySpec.getSimpleName().toString().toLowerCase());
-            triggerSqlArgs.put("tableName", entitySpec.getSimpleName().toString());
-            triggerSqlArgs.put("localCsnName", localChangeSeqnumEl.getSimpleName().toString());
-            triggerSqlArgs.put("masterCsnName", masterChangeSeqNumEl.getSimpleName().toString());
-            triggerSqlArgs.put("pkName", DbProcessorUtils.findElementWithAnnotation(entitySpec,
-                    UmPrimaryKey.class, processingEnv).getSimpleName().toString());
-            triggerSqlArgs.put("tableId", ""+entitySpec.getAnnotation(UmEntity.class).tableId());
-            triggerSqlArgs.put("stmtVarName", stmtVariableName);
-
-            codeBlock.addNamed("String _tableColName_$tableName:L = isMaster() ? " +
-                    "$masterCsnName:S : $localCsnName:S;\n", triggerSqlArgs);
-            codeBlock.add("String _syncStatusColName_$L = isMaster() ? $S: $S;\n",
-                    entitySpec.getSimpleName(), "masterChangeSeqNum", "localChangeSeqNum");
-
-            Map<String, String> triggerTemplateArgs = new HashMap<>(triggerSqlArgs);
-            triggerTemplateArgs.put("triggerOn", "update");
-            String triggerTemplate =
-                    "CREATE TRIGGER $triggerOn:L_csn_$tableNameLower:L " +
-                    "AFTER $triggerOn:L ON $tableName:L FOR EACH ROW ";
-            codeBlock.addNamed("String _createUpdateTriggerStmt_$tableName:L = \""
-                            + triggerTemplate + " WHEN OLD.\" + _tableColName_$tableName:L + \" > 0\";\n",
-                    triggerTemplateArgs);
-
-            triggerTemplateArgs.put("triggerOn", "insert");
-            codeBlock.addNamed("String _createInsertTriggerStmt_$tableName:L = \"" +
-                            triggerTemplate + "\";\n",
-                    triggerTemplateArgs);
-
-
-            codeBlock.addNamed("String _triggerSql_$tableNameLower:L = \"" +
-                    "UPDATE $tableName:L " +
-                    "SET \" + _tableColName_$tableName:L + \" = " +
-                    "(SELECT \" + _syncStatusColName_$tableName:L + \" FROM SyncStatus WHERE tableId = $tableId:L) " +
-                    "WHERE $pkName:L = NEW.$pkName:L; " +
-                    "UPDATE SyncStatus SET \" + " +
-                    "_syncStatusColName_$tableName:L + \" = \" + _syncStatusColName_$tableName:L + \" + 1 " +
-                    " WHERE tableId = $tableId:L; " +
-                    "\";\n"
-                    , triggerSqlArgs);
-            codeBlock.addNamed("$stmtVarName:L.executeUpdate(\"INSERT INTO SyncStatus(tableId, " +
-                            "localChangeSeqNum, masterChangeSeqNum) VALUES($tableId:L, 1, 1)\");\n",
-                    triggerSqlArgs);
-
-            if(sqlProductName.equals(PRODUCT_NAME_SQLITE)) {
-                codeBlock.addNamed("$stmtVarName:L.executeUpdate(_createUpdateTriggerStmt_$tableName:L " +
-                        " + \" BEGIN \" + _triggerSql_$tableNameLower:L + \" END\");\n",
-                        triggerSqlArgs);
-                codeBlock.addNamed("$stmtVarName:L.executeUpdate(_createInsertTriggerStmt_$tableName:L " +
-                                " + \" BEGIN \" + _triggerSql_$tableNameLower:L + \" END\");\n",
-                        triggerSqlArgs);
-            }
+            codeBlock.add("createSeqNumTriggers($T.class);\n", entitySpec);
         }
 
 
