@@ -28,6 +28,8 @@ import com.ustadmobile.lib.database.annotation.UmSyncFindAllChanges;
 import com.ustadmobile.lib.database.annotation.UmSyncFindLocalChanges;
 import com.ustadmobile.lib.database.annotation.UmSyncFindUpdateable;
 import com.ustadmobile.lib.database.annotation.UmSyncIncoming;
+import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
+import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 import com.ustadmobile.lib.database.annotation.UmSyncOutgoing;
 import com.ustadmobile.lib.database.annotation.UmUpdate;
 import com.ustadmobile.lib.database.jdbc.DbChangeListener;
@@ -38,6 +40,7 @@ import com.ustadmobile.lib.database.jdbc.UmLiveDataJdbc;
 import com.ustadmobile.lib.db.UmDbWithExecutor;
 import com.ustadmobile.lib.db.sync.UmRepositoryDb;
 import com.ustadmobile.lib.db.sync.UmRepositoryUtils;
+import com.ustadmobile.lib.db.sync.entities.SyncStatus;
 
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
@@ -63,6 +66,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -231,7 +235,8 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                                 .endControlFlow()
                                 .add("return _jdbcProductName;\n").build()).build());
 
-        addCreateTablesMethodToClassSpec(dbType, jdbcDbTypeSpec);
+        jdbcDbTypeSpec.addMethod(generateCreateTablesMethod(dbType));
+        jdbcDbTypeSpec.addMethod(generateCreateSeqNumTriggersMethod(dbType));
 
         for(Element subElement : dbType.getEnclosedElements()) {
             if (subElement.getKind() != ElementKind.METHOD)
@@ -316,9 +321,9 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
      * all entities on the given database type.
      *
      * @param dbType TypeElement representing the class annotated with @UmDatabase
-     * @param classBuilder TypeSpec.Builder being used to generate the JDBC database class implementation
+     * @return MethodSpec with a generated implementation to create all tables for this database
      */
-    protected void addCreateTablesMethodToClassSpec(TypeElement dbType, TypeSpec.Builder classBuilder) {
+    protected MethodSpec generateCreateTablesMethod(TypeElement dbType) {
         MethodSpec.Builder createMethod = MethodSpec.methodBuilder("createAllTables");
         CodeBlock.Builder createCb = CodeBlock.builder();
         createCb.add("try (\n").indent()
@@ -333,7 +338,17 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
         for(String sqlProductName : SUPPORTED_DB_PRODUCT_NAMES) {
             createCb.beginControlFlow("if($S.equals(_metaData.getDatabaseProductName()))",
                     sqlProductName);
-            for(TypeElement entityTypeElement : findEntityTypes(dbType)) {
+            List<TypeElement> entityTypes = findEntityTypes(dbType);
+
+            //Make sure that the SyncStatus is teh first table
+            TypeElement syncStatusTypeEl = processingEnv.getElementUtils().getTypeElement(
+                    SyncStatus.class.getName());
+            if(entityTypes.contains(syncStatusTypeEl)) {
+                entityTypes.remove(syncStatusTypeEl);
+                entityTypes.add(0, syncStatusTypeEl);
+            }
+
+            for(TypeElement entityTypeElement : entityTypes) {
                 addCreateTableStatements(createCb, "_stmt", entityTypeElement,
                         SQL_IDENTIFIER_CHAR, sqlProductName);
             }
@@ -350,7 +365,42 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
 
 
         createMethod.addCode(createCb.build());
-        classBuilder.addMethod(createMethod.build());
+        return createMethod.build();
+    }
+
+    /**
+     * Generate a method to create sequence number triggers on tables. The generated method takes a
+     * single class object as an argument. This is designed so it can one day be used for migration
+     * purposes etc.
+     *
+     * @param dbType The TypeElement representing the database class
+     * @return MethodSpec with a generated implementation
+     */
+    protected MethodSpec generateCreateSeqNumTriggersMethod(TypeElement dbType) {
+        MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("createSeqNumTriggers")
+                .addModifiers(Modifier.PROTECTED)
+                .addParameter(Class.class, "_entityClass");
+        CodeBlock.Builder codeBlock = CodeBlock.builder();
+
+        codeBlock.add("try (").indent()
+                .add("$T _connection = getConnection();\n", Connection.class)
+                .add("$T _stmt = _connection.createStatement();\n", Statement.class)
+            .unindent().beginControlFlow(")");
+
+        for(String sqlProductName : SUPPORTED_DB_PRODUCT_NAMES) {
+            codeBlock.beginControlFlow("if($S.equals(getJdbcProductName()))",
+                    sqlProductName);
+            addCreateTriggersForEntitiesToCodeBlock(sqlProductName,
+                    "_stmt.executeUpdate", dbType, codeBlock);
+            codeBlock.endControlFlow();
+        }
+
+        codeBlock.nextControlFlow("catch($T _sqlE)", SQLException.class)
+                .add("_sqlE.printStackTrace();\n")
+                .endControlFlow();
+
+        methodBuilder.addCode(codeBlock.build());
+        return methodBuilder.build();
     }
 
     protected void addClearAllTablesCodeToMethod(TypeElement dbType, MethodSpec.Builder builder,
@@ -361,10 +411,19 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                 .add("$T connection = getConnection();\n", Connection.class)
                 .add("$T stmt = connection.createStatement();\n", Statement.class)
                 .unindent().beginControlFlow(") ");
+        TypeElement syncStatusTypeEL = processingEnv.getElementUtils().getTypeElement(
+                SyncStatus.class.getName());
+
 
         for(TypeElement entityType : findEntityTypes(dbType)) {
-            codeBlock.add("stmt.executeUpdate(\"DELETE FROM $1L$2L$1L\");\n",
+            if(!entityType.equals(syncStatusTypeEL))
+                codeBlock.add("stmt.executeUpdate(\"DELETE FROM $1L$2L$1L\");\n",
                     identifierQuoteStr, entityType.getSimpleName().toString());
+            else
+                codeBlock.add("stmt.executeUpdate(\"UPDATE SyncStatus SET masterChangeSeqNum = 1, " +
+                        "localChangeSeqNum = 1, " +
+                        "syncedToMasterChangeNum = 0, " +
+                        "syncedToLocalChangeSeqNum = 0\");\n");
         }
 
         codeBlock.nextControlFlow("catch($T e)", SQLException.class)
@@ -377,35 +436,6 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
 
 
 
-    /**
-     * Get the TypeElements that correspond to the entities on the @UmDatabase annotation of the given
-     * TypeElement
-     *
-     * TODO: make sure that we check each annotation, this currently **ASSUMES** the first annotation is @UmDatabase
-     *
-     * @param dbTypeElement TypeElement representing the class with the @UmDatabase annotation
-     * @return List of TypeElement that represents the values found on entities
-     */
-    private List<TypeElement> findEntityTypes(TypeElement dbTypeElement){
-        List<TypeElement> entityTypeElements = new ArrayList<>();
-        Map<? extends ExecutableElement, ? extends AnnotationValue> annotationEntryMap =
-                dbTypeElement.getAnnotationMirrors().get(0).getElementValues();
-        for(Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entry :
-                annotationEntryMap.entrySet()) {
-            String key = entry.getKey().getSimpleName().toString();
-            Object value = entry.getValue().getValue();
-            if (key.equals("entities")) {
-                List<? extends AnnotationValue> typeMirrors =
-                        (List<? extends AnnotationValue>) value;
-                for(AnnotationValue entityValue : typeMirrors) {
-                    entityTypeElements.add((TypeElement) processingEnv.getTypeUtils()
-                            .asElement((TypeMirror) entityValue.getValue()));
-                }
-            }
-        }
-
-        return entityTypeElements;
-    }
 
     /**
      * Generates code that will execute CREATE TABLE and CREATE INDEX as required for the given
@@ -439,6 +469,13 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                 entitySpec.getSimpleName().toString())
                 .add("$L.executeUpdate($S);\n", stmtVariableName,
                         makeCreateTableStatement(entitySpec, quoteChar, sqlProductName));
+
+        if(DbProcessorUtils.entityHasChangeSequenceNumbers(entitySpec, processingEnv)) {
+            //we need to add a trigger to handle change sequence numbers
+            codeBlock.add("createSeqNumTriggers($T.class);\n", entitySpec);
+        }
+
+
         for(Map.Entry<String, List<String>> index : indexes.entrySet()) {
             Map<String, String> formatArgs = new HashMap<>();
             formatArgs.put("quot", StringEscapeUtils.escapeJava(String.valueOf(quoteChar)));

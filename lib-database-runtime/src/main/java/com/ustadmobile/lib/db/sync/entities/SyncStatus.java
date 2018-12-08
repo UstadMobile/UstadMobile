@@ -14,12 +14,24 @@ public class SyncStatus {
     @PrimaryKey
     private int tableId;
 
+    /**
+     * Represents the next master change sequence number that will be used.
+     */
     private long masterChangeSeqNum;
 
+    /**
+     * Represents the next local change sequence number that will be used.
+     */
     private long localChangeSeqNum;
 
+    /**
+     * The master change sequence number that we have sync'd up to (inclusive).
+     */
     private long syncedToMasterChangeNum;
 
+    /**
+     * The local change sequence number that we have sync'd up to (inclusive)
+     */
     private long syncedToLocalChangeSeqNum;
 
     public SyncStatus() {

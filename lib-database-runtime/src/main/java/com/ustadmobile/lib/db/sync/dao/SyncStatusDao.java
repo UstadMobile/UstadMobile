@@ -24,7 +24,7 @@ public abstract class SyncStatusDao implements BaseDao<SyncStatus> {
     }
 
     public long getAndIncrementNextLocalChangeSeqNum(int tableId, int numEntries) {
-        long seqNum = getNextLocalChangeSeqNum(tableId);
+        long seqNum = getLocalChangeSeqNum(tableId);
         if(seqNum >= 1) {
             incrementLocalChangeSeqNum(tableId, numEntries);
         }else {
@@ -35,7 +35,7 @@ public abstract class SyncStatusDao implements BaseDao<SyncStatus> {
     }
 
     @UmQuery("SELECT localChangeSeqNum FROM SyncStatus WHERE tableId = :tableId")
-    public abstract long getNextLocalChangeSeqNum(int tableId);
+    public abstract long getLocalChangeSeqNum(int tableId);
 
     @UmQuery("UPDATE SyncStatus SET localChangeSeqNum = localChangeSeqNum + :increment WHERE tableId = :tableId")
     public abstract void incrementLocalChangeSeqNum(int tableId, int increment);
