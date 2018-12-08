@@ -48,6 +48,7 @@ import javax.annotation.processing.Messager;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
@@ -68,6 +69,8 @@ import javax.ws.rs.core.MediaType;
 
 import static com.ustadmobile.lib.annotationprocessor.core.DbProcessorUtils.capitalize;
 import static com.ustadmobile.lib.annotationprocessor.core.DbProcessorUtils.findElementWithAnnotation;
+import static com.ustadmobile.lib.database.jdbc.JdbcDatabaseUtils.PRODUCT_NAME_POSTGRES;
+import static com.ustadmobile.lib.database.jdbc.JdbcDatabaseUtils.PRODUCT_NAME_SQLITE;
 
 /**
  * This base processor is overriden to make platform specific implementations of the database. By
@@ -1263,6 +1266,143 @@ public abstract class AbstractDbProcessor {
         methodBuilder.addCode(codeBlock.build());
 
         return methodBuilder;
+    }
+
+
+    /**
+     * Get the TypeElements that correspond to the entities on the @UmDatabase annotation of the given
+     * TypeElement
+     *
+     * TODO: make sure that we check each annotation, this currently **ASSUMES** the first annotation is @UmDatabase
+     *
+     * @param dbTypeElement TypeElement representing the class with the @UmDatabase annotation
+     * @return List of TypeElement that represents the values found on entities
+     */
+    protected List<TypeElement> findEntityTypes(TypeElement dbTypeElement){
+        List<TypeElement> entityTypeElements = new ArrayList<>();
+        Map<? extends ExecutableElement, ? extends AnnotationValue> annotationEntryMap =
+                dbTypeElement.getAnnotationMirrors().get(0).getElementValues();
+        for(Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entry :
+                annotationEntryMap.entrySet()) {
+            String key = entry.getKey().getSimpleName().toString();
+            Object value = entry.getValue().getValue();
+            if (key.equals("entities")) {
+                List<? extends AnnotationValue> typeMirrors =
+                        (List<? extends AnnotationValue>) value;
+                for(AnnotationValue entityValue : typeMirrors) {
+                    entityTypeElements.add((TypeElement) processingEnv.getTypeUtils()
+                            .asElement((TypeMirror) entityValue.getValue()));
+                }
+            }
+        }
+
+        return entityTypeElements;
+    }
+
+
+    /**
+     * Add the required statements to the codeblock for code that will add the needed triggers
+     * for change sequence numbers to be updated on insert or update of an entity.
+     *
+     * @param sqlProductName SQLite or Postgres as per JdbcDatabaseUtils.PRODUCT_NAME_ constants
+     * @param execSqlMethod a method, accessible in this codeblock, that will run SQL e.g. 'statement.executeUpdate'
+     * @param dbType TypeElement representing the database
+     * @param codeBlock CodeBlock to add to
+     */
+    public void addCreateTriggersForEntitiesToCodeBlock(String sqlProductName,
+                                                        String execSqlMethod,
+                                                        TypeElement dbType,
+                                                        CodeBlock.Builder codeBlock) {
+        List<TypeElement> entityTypes = findEntityTypes(dbType);
+        boolean isFirst = true;
+        String ifStmtStr = "if(_entityClass.equals($T.class))";
+        for(TypeElement entityType : entityTypes) {
+            if(!DbProcessorUtils.entityHasChangeSequenceNumbers(entityType, processingEnv))
+                continue;
+
+            if(isFirst)
+                codeBlock.beginControlFlow(ifStmtStr, entityType);
+            else
+                codeBlock.nextControlFlow("else " + ifStmtStr, entityType);
+
+
+            Element localChangeSeqnumEl = DbProcessorUtils.findElementWithAnnotation(entityType,
+                    UmSyncLocalChangeSeqNum.class, processingEnv);
+            Element masterChangeSeqNumEl = DbProcessorUtils.findElementWithAnnotation(entityType,
+                    UmSyncMasterChangeSeqNum.class, processingEnv);
+
+            Map<String, String> triggerSqlArgs = new HashMap<>();
+            triggerSqlArgs.put("tableNameLower",
+                    entityType.getSimpleName().toString().toLowerCase());
+            triggerSqlArgs.put("tableName", entityType.getSimpleName().toString());
+            triggerSqlArgs.put("localCsnName", localChangeSeqnumEl.getSimpleName().toString());
+            triggerSqlArgs.put("masterCsnName", masterChangeSeqNumEl.getSimpleName().toString());
+            triggerSqlArgs.put("pkName", DbProcessorUtils.findElementWithAnnotation(entityType,
+                    UmPrimaryKey.class, processingEnv).getSimpleName().toString());
+            triggerSqlArgs.put("tableId", ""+entityType.getAnnotation(UmEntity.class).tableId());
+            triggerSqlArgs.put("execSqlMethod", execSqlMethod);
+
+            codeBlock.addNamed("String _tableColName_$tableName:L = isMaster() ? " +
+                    "$masterCsnName:S : $localCsnName:S;\n", triggerSqlArgs);
+            codeBlock.add("String _syncStatusColName_$L = isMaster() ? $S: $S;\n",
+                    entityType.getSimpleName(), "masterChangeSeqNum", "localChangeSeqNum");
+
+            Map<String, String> triggerTemplateArgs = new HashMap<>(triggerSqlArgs);
+            triggerTemplateArgs.put("triggerOn", "update");
+            String triggerTemplate =
+                    "CREATE TRIGGER $triggerOn:L_csn_$tableNameLower:L " +
+                            "AFTER $triggerOn:L ON $tableName:L FOR EACH ROW ";
+            codeBlock.addNamed("String _createUpdateTriggerStmt_$tableName:L = \""
+                            + triggerTemplate + " WHEN OLD.\" + _tableColName_$tableName:L + \" > 0\";\n",
+                    triggerTemplateArgs);
+
+            triggerTemplateArgs.put("triggerOn", "insert");
+            codeBlock.addNamed("String _createInsertTriggerStmt_$tableName:L = \"" +
+                            triggerTemplate + "\";\n",
+                    triggerTemplateArgs);
+
+
+            codeBlock.addNamed("String _triggerSql_$tableNameLower:L = \"" +
+                            "UPDATE $tableName:L " +
+                            "SET \" + _tableColName_$tableName:L + \" = " +
+                            "(SELECT \" + _syncStatusColName_$tableName:L + \" FROM SyncStatus WHERE tableId = $tableId:L) " +
+                            "WHERE $pkName:L = NEW.$pkName:L; " +
+                            "UPDATE SyncStatus SET \" + " +
+                            "_syncStatusColName_$tableName:L + \" = \" + _syncStatusColName_$tableName:L + \" + 1 " +
+                            " WHERE tableId = $tableId:L; " +
+                            "\";\n"
+                    , triggerSqlArgs);
+            codeBlock.addNamed("$execSqlMethod:L(\"INSERT INTO SyncStatus(tableId, " +
+                        "localChangeSeqNum, masterChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) " +
+                            "VALUES($tableId:L, 1, 1, 0, 0)\");\n",
+                    triggerSqlArgs);
+
+            if(sqlProductName.equals(PRODUCT_NAME_SQLITE)) {
+                codeBlock.addNamed("$execSqlMethod:L(_createUpdateTriggerStmt_$tableName:L " +
+                                " + \" BEGIN \" + _triggerSql_$tableNameLower:L + \" END\");\n",
+                        triggerSqlArgs);
+                codeBlock.addNamed("$execSqlMethod:L(_createInsertTriggerStmt_$tableName:L " +
+                                " + \" BEGIN \" + _triggerSql_$tableNameLower:L + \" END\");\n",
+                        triggerSqlArgs);
+            }else if(sqlProductName.equals(PRODUCT_NAME_POSTGRES)) {
+                codeBlock.addNamed("$execSqlMethod:L(\"CREATE OR REPLACE FUNCTION " +
+                                " increment_csn_$tableNameLower:L_fn() RETURNS trigger AS $$$$ BEGIN \"" +
+                                " + _triggerSql_$tableNameLower:L + \" RETURN null; END $$$$ " +
+                                "LANGUAGE plpgsql\");\n",
+                        triggerSqlArgs);
+                codeBlock.addNamed("$execSqlMethod:L(\"CREATE TRIGGER " +
+                        "increment_csn_$tableNameLower:L_trigger AFTER UPDATE OR INSERT ON " +
+                        "$tableName:L FOR EACH ROW WHEN (pg_trigger_depth() = 0) " +
+                        "EXECUTE PROCEDURE increment_csn_$tableNameLower:L_fn()\");\n", triggerSqlArgs);
+            }
+
+
+            isFirst = false;
+        }
+
+        if(!isFirst)
+            codeBlock.endControlFlow();//end the if statement only if there was one
+
     }
 
 }
