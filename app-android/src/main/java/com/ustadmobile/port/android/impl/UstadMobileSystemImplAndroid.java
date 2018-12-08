@@ -68,7 +68,6 @@ import com.ustadmobile.core.fs.contenttype.ScormTypePluginFs;
 import com.ustadmobile.core.fs.contenttype.XapiPackageTypePluginFs;
 import com.ustadmobile.core.fs.db.ContainerFileHelper;
 import com.ustadmobile.core.impl.ContainerMountRequest;
-import com.ustadmobile.core.impl.UMDownloadCompleteReceiver;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
@@ -218,8 +217,6 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
     public static final String START_AUTH = "START_AUTH";
 
     private WeakHashMap<Context, AppViewAndroid> appViews;
-
-    private HashMap<UMDownloadCompleteReceiver, BroadcastReceiver> downloadCompleteReceivers;
 
     private Timer sendStatementsTimer;
 
@@ -379,7 +376,6 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
     public UstadMobileSystemImplAndroid() {
         logger = new UMLogAndroid();
         appViews = new WeakHashMap<>();
-        downloadCompleteReceivers = new HashMap<>();
         networkManagerAndroid = new NetworkManagerAndroid();
         networkManagerAndroid.setServiceConnectionMap(networkServiceConnections);
     }

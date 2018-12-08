@@ -108,21 +108,7 @@ public class UMIOUtils {
         closeOutputStream(out, false);
     }
     
-    /**
-     * Close the given ZipHandle
-     * 
-     * @param zip The ZipFileHandle to close
-     */
-    public static final void closeZipFileHandle(ZipFileHandle zip) {
-        try {
-            if(zip != null) {
-                zip.close();
-            }
-        }catch(IOException e) {
-            
-        }
-    }
-    
+
     /**
      * Read from the given input stream and write to the given output stream.  
      * This will not close the streams themselves

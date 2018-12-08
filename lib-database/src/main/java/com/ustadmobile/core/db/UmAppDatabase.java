@@ -40,6 +40,7 @@ import com.ustadmobile.lib.database.annotation.UmDatabase;
 import com.ustadmobile.lib.database.annotation.UmDbContext;
 import com.ustadmobile.lib.database.annotation.UmRepository;
 import com.ustadmobile.lib.database.annotation.UmSyncOutgoing;
+import com.ustadmobile.lib.db.entities.AccessToken;
 import com.ustadmobile.lib.db.sync.UmSyncableDatabase;
 import com.ustadmobile.lib.db.sync.dao.SyncStatusDao;
 import com.ustadmobile.lib.db.sync.dao.SyncablePrimaryKeyDao;
@@ -96,7 +97,8 @@ import java.util.Hashtable;
         ContentEntryParentChildJoin.class, ContentEntryRelatedEntryJoin.class,
         ContentEntryFileStatus.class, ContentCategorySchema.class,
         ContentCategory.class, Language.class, LanguageVariant.class,
-        SyncStatus.class, SyncablePrimaryKey.class, SyncDeviceBits.class
+        SyncStatus.class, SyncablePrimaryKey.class, SyncDeviceBits.class,
+        AccessToken.class
 })
 public abstract class UmAppDatabase implements UmSyncableDatabase{
 

@@ -39,7 +39,7 @@ public class EpubTypePluginFs extends EPUBTypePlugin implements ContentTypePlugi
         InputStream ocfIn;
         List<OpdsEntryWithRelations> results = new ArrayList<>();
         try {
-            ZipFile epubZip = ZipContentTypePluginHelper.openAndUnlock(file);
+            ZipFile epubZip = new ZipFile(file);
 
             UstadOCF ocf = new UstadOCF();
             FileHeader ocfEntry = epubZip.getFileHeader(OCF_CONTAINER_PATH);

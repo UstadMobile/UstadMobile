@@ -15,7 +15,7 @@ import static com.ustadmobile.lib.db.entities.ContentEntryFileStatus.TABLE_ID;
 @UmEntity(tableId = TABLE_ID)
 public class ContentEntryFileStatus {
 
-    public static final int TABLE_ID = 6;
+    public static final int TABLE_ID = 12;
 
     @UmPrimaryKey(autoGenerateSyncable = true)
     private long cefsUid;

@@ -250,39 +250,6 @@ public class UMUtil {
             return "0"+i;
         }
     }
-
-    
-    /**
-     * This method is here because Arrays.sort is not available in J2ME
-     * 
-     * @param arr The array to be sorted
-     * @param c An interface that implements UMUtil.Comparer
-     * 
-     * @return The array sorted: the sort is also done to the originally referenced array 
-     */
-    public static Object[] bubbleSort(Object[] arr, Comparer c) {
-        int n = arr.length;
-        Object tmp = null;
-        
-        int j;
-        int diff;
-        
-        boolean swapped = true;
-        while(swapped) {
-            swapped = false;
-            for(j = 1; j < arr.length; j++) {
-                diff = c.compare(arr[j-1], arr[j]);
-                if(diff > 0) {
-                    tmp = arr[j-1];
-                    arr[j-1] = arr[j];
-                    arr[j] = tmp;
-                    swapped = true;
-                }
-            }
-        }
-        
-        return arr;
-    }
     
     /**
      * Copy references from one hashtable to another hashtable
@@ -297,19 +264,6 @@ public class UMUtil {
             key = keys.nextElement();
             dst.put(key, src.get(key));
         }
-    }
-    
-    public static interface Comparer {
-        
-        /**
-         * Return o1 - 02 as per java.util.Comparator
-         * @param o1 First object to be compared
-         * @param o2 Second object to be compared
-         * 
-         * @return 
-         */
-        public int compare(Object o1, Object o2);
-        
     }
 
     /**
