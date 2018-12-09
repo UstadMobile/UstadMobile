@@ -1,20 +1,21 @@
 package com.ustadmobile.port.sharedse.networkmanager;
 
-import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.ContentEntryDao;
+import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import static com.ustadmobile.port.sharedse.networkmanager.BleMessageUtil.bleMessageBytesToLong;
 import static com.ustadmobile.port.sharedse.networkmanager.BleMessageUtil.bleMessageLongToBytes;
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.ENTRY_STATUS_REQUEST;
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.ENTRY_STATUS_RESPONSE;
+import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.WIFI_GROUP_CREATION_RESPONSE;
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.WIFI_GROUP_INFO_SEPARATOR;
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.WIFI_GROUP_REQUEST;
-import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.WIFI_GROUP_CREATION_RESPONSE;
 
 /**
  * This is an abstract class which is used to implement platform specific BleGattServer.
@@ -34,7 +35,7 @@ public abstract class BleGattServer implements WiFiDirectGroupListenerBle{
 
     private NetworkManagerBle networkManager;
 
-    private final Object p2pGroupCreationLock = new Object();
+    private CountDownLatch mLatch = new CountDownLatch(1);
 
     private long GROUP_CREATION_TIMEOUT = TimeUnit.SECONDS.toMillis(5);
 
@@ -70,8 +71,8 @@ public abstract class BleGattServer implements WiFiDirectGroupListenerBle{
         byte requestType = requestReceived.getRequestType();
         switch (requestType){
             case ENTRY_STATUS_REQUEST:
-                UmAppDatabase database = UmAppDatabase.getInstance(context);
-                ContentEntryDao contentEntryDao = database.getContentEntryDao();
+                ContentEntryDao contentEntryDao =
+                        UmAccountManager.getRepositoryForActiveAccount(context).getContentEntryDao();
                 List<Long> entryStatusResponse = new ArrayList<>();
                 for(long entryUuid: bleMessageBytesToLong(requestReceived.getPayload())){
                     ContentEntry contentEntry = contentEntryDao.findByEntryId(entryUuid);
@@ -82,15 +83,13 @@ public abstract class BleGattServer implements WiFiDirectGroupListenerBle{
                         bleMessageLongToBytes(entryStatusResponse));
 
             case WIFI_GROUP_REQUEST:
-                synchronized (p2pGroupCreationLock){
-                    try{
-                        networkManager.handleWiFiDirectGroupChangeRequest(this);
-                        networkManager.createWifiDirectGroup();
-                        p2pGroupCreationLock.wait(GROUP_CREATION_TIMEOUT);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                        p2pGroupCreationLock.notify();
-                    }
+
+                networkManager.handleWiFiDirectGroupChangeRequest(this);
+                networkManager.createWifiDirectGroup();
+                try { mLatch.await(GROUP_CREATION_TIMEOUT, TimeUnit.SECONDS); }
+                catch(InterruptedException e) {
+                    e.printStackTrace();
+                    mLatch.countDown();
                 }
                 return new BleMessage(WIFI_GROUP_CREATION_RESPONSE,message.getBytes());
                 default: return null;
@@ -99,10 +98,8 @@ public abstract class BleGattServer implements WiFiDirectGroupListenerBle{
 
     @Override
     public void groupCreated(WiFiDirectGroupBle group, Exception err) {
-        synchronized (p2pGroupCreationLock){
-            this.message = group.getSsid()+WIFI_GROUP_INFO_SEPARATOR+group.getPassphrase();
-            p2pGroupCreationLock.notify();
-        }
+        this.message = group.getSsid()+WIFI_GROUP_INFO_SEPARATOR+group.getPassphrase();
+        mLatch.countDown();
     }
 
     @Override
