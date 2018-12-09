@@ -1,0 +1,10 @@
+<Context>
+    <Resource name="jdbc/UmAppDatabase" auth="Container" type="javax.sql.DataSource"
+              maxTotal="100" maxIdle="30" maxWaitMillis="10000"
+              driverClassName="org.sqlite.JDBC"
+              url="jdbc:sqlite:build/tmp/db/UmAppDatabase.sqlite"/>
+
+    <Environment name="jdbc/UmAppDatabase_master" value="true"
+        type="java.lang.Boolean" override="false"/>
+
+</Context>

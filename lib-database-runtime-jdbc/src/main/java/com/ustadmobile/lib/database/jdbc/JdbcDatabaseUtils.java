@@ -1,5 +1,7 @@
 package com.ustadmobile.lib.database.jdbc;
 
+import com.ustadmobile.lib.db.sync.UmSyncableDatabase;
+
 import java.sql.Array;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -13,6 +15,8 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.sql.DataSource;
 
 /**
@@ -247,6 +251,22 @@ public class JdbcDatabaseUtils {
         }
 
         return false;
+    }
+
+    public static void setIsMasterFromJndi(UmJdbcDatabase db, String dbName,
+                                           InitialContext initialContext) {
+        if(db instanceof UmSyncableDatabase) {
+            try {
+                Object _masterDbVal = initialContext.lookup("java:/comp/env/umdb/" + dbName +
+                        "/isMaster");
+                if(_masterDbVal instanceof Boolean) {
+                    ((UmSyncableDatabase)db).setMaster((Boolean)_masterDbVal);
+                }
+            }catch(NamingException e) {
+                System.err.println("WARNING: could not look/set if db is master: " +
+                        e.getExplanation());
+            }
+        }
     }
 
 

@@ -9,7 +9,7 @@ dependencies {
     testCompile project(':lib-core-fs-tests')
     testCompile project(":sharedse-tests")
     testCompile project(":app-javase")
-    implementation project(":lib-database")
+    implementation project(':lib-database')
     implementation project(":lib-database-runtime")
     compileOnly project(':lib-database-entities')
 

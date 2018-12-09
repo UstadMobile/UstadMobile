@@ -7,6 +7,8 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
+import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
+import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
@@ -26,6 +28,7 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVariable;
@@ -33,34 +36,6 @@ import javax.lang.model.util.Types;
 
 public class DbProcessorUtils {
 
-    public static TypeSpec.Builder makeFactoryClass(TypeElement dbType, String implClassName) {
-        return TypeSpec.classBuilder(dbType.getSimpleName() + "_Factory")
-                .addModifiers(Modifier.PUBLIC)
-                .addField(ClassName.get(dbType), "defaultInstance", Modifier.PRIVATE,
-                        Modifier.STATIC, Modifier.VOLATILE)
-                .addField(ParameterizedTypeName.get(ClassName.get(HashMap.class),
-                        ClassName.get(String.class), ClassName.get(dbType)), "namedInstances",
-                        Modifier.PRIVATE, Modifier.STATIC, Modifier.VOLATILE)
-                .addStaticBlock(CodeBlock.of("namedInstances = new HashMap<>();\n"))
-                .addMethod(MethodSpec.methodBuilder("make" + dbType.getSimpleName())
-                        .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.SYNCHRONIZED)
-                        .addParameter(ClassName.get(Object.class), "context")
-                        .returns(ClassName.get(dbType))
-                        .addCode(CodeBlock.builder().add("if(defaultInstance == null) \n")
-                                .add("\tdefaultInstance = new $L(context, \"$L\");\n",
-                                        implClassName, dbType.getSimpleName().toString())
-                                .add("return defaultInstance;\n").build()).build())
-                .addMethod(MethodSpec.methodBuilder("make" + dbType.getSimpleName())
-                        .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.SYNCHRONIZED)
-                        .addParameter(ClassName.get(Object.class), "context")
-                        .addParameter(ClassName.get(String.class), "dbName")
-                        .returns(ClassName.get(dbType))
-                        .addCode(CodeBlock.builder().add("if(!namedInstances.containsKey(dbName)){\n")
-                                .add("\tnamedInstances.put(dbName, new $L(context, dbName));\n", implClassName)
-                                .add("}\n")
-                                .add("return namedInstances.get(dbName);\n").build()).build())
-                .addJavadoc("Generated code - DO NOT EDIT!");
-    }
 
     public static List<Element> findElementsWithAnnotation(TypeElement typeElement,
                                                            Class<? extends Annotation>  annotationClassList,
@@ -366,6 +341,43 @@ public class DbProcessorUtils {
             entityFieldsList.add(pkAutoIncField);
 
         return entityFieldsList;
+    }
+
+
+    /**
+     * Box the given type if it's a primitive. Useful for creating List / Collection classes.
+     *
+     * @param typeMirror TypeMirror of the type to look at
+     * @param processingEnv Processing Environment
+     * @return The boxed class for the given primitive type if it's a primitive, otherwise the
+     * original typeMirror argument.
+     */
+    public static TypeMirror boxIfPrimitive(TypeMirror typeMirror,
+                                            ProcessingEnvironment processingEnv) {
+        if(typeMirror.getKind().isPrimitive()) {
+            return processingEnv.getTypeUtils().boxedClass((PrimitiveType)typeMirror).asType();
+        }else{
+            return typeMirror;
+        }
+    }
+
+
+    /**
+     * Determine if the given entity has annotated change sequence number member variables
+     * (local and master)
+     *
+     * @param entityType The TypeElement representing the entity class
+     * @param processingEnv Processing environment
+     * @return true if the given entity has member variables for master and local change sequence
+     * number, false otherwise
+     */
+    public static boolean entityHasChangeSequenceNumbers(TypeElement entityType,
+                                                         ProcessingEnvironment processingEnv) {
+        Element localChangeSeqnumEl = DbProcessorUtils.findElementWithAnnotation(entityType,
+                UmSyncLocalChangeSeqNum.class, processingEnv);
+        Element masterChangeSeqNumEl = DbProcessorUtils.findElementWithAnnotation(entityType,
+                UmSyncMasterChangeSeqNum.class, processingEnv);
+        return localChangeSeqnumEl != null && masterChangeSeqNumEl != null;
     }
 }
 

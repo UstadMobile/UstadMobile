@@ -12,6 +12,7 @@
     <string name='course_catalog_load_error'>Sorry: Error loading %s :</string>
     <string name="download">Download</string>
     <string name="downloaded" value="81">Downloaded</string>
+    <string name="libraries">Libraries</string>
     <string name="paused">Paused</string>
     <string name="pause_download">Pause download</string>
     <string name='download_q'>Download?</string>
@@ -271,4 +272,5 @@
     <string name="wamda_students">Learners</string>
     <string name="wamda_post_empty_message">Comment is empty, write something first</string>
     <string name="wamda_course_overview">Course Overview</string>
+    <string name="content_entry_not_found">ContentEntry Not Found</string>
 </resources>

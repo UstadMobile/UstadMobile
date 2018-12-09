@@ -41,7 +41,7 @@ dependencies {
     implementation "org.json:json:$version_json"
 
     implementation project(":core")
-    implementation project(":lib-database")
+    implementation project(':lib-database')
     implementation project(":lib-database-runtime")
     compileOnly project(':lib-database-entities')
     implementation project(':lib-core-fs')
