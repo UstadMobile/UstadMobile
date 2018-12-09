@@ -383,7 +383,7 @@ public abstract class AbstractDbProcessor {
         return true;
     }
 
-    private boolean listContainsMethod(ExecutableElement method, List<ExecutableElement> methodList,
+    protected boolean listContainsMethod(ExecutableElement method, List<ExecutableElement> methodList,
                                        TypeElement implementingClass) {
         for(ExecutableElement checkMethod : methodList) {
             if(!checkMethod.getSimpleName().equals(method.getSimpleName()))

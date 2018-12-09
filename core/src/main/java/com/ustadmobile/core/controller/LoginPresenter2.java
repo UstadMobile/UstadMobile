@@ -32,12 +32,14 @@ public class LoginPresenter2 extends UstadBaseController<LoginView2> {
                     result.setEndpointUrl(serverUrl);
                     UmAccountManager.setActiveAccount(result, getContext());
                     UstadMobileSystemImpl.getInstance().go(mNextDest, getContext());
+                }else {
+                    getView().setErrorMessage("Invalid username/password, or offline");
                 }
             }
 
             @Override
             public void onFailure(Throwable exception) {
-
+                getView().setErrorMessage("OnFailure");
             }
         });
     }

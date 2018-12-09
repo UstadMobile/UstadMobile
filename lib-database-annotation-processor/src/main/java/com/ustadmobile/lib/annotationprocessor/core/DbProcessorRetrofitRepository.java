@@ -39,6 +39,10 @@ import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.tools.Diagnostic;
 
+import okhttp3.Interceptor;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 import retrofit2.Call;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -83,7 +87,10 @@ public class DbProcessorRetrofitRepository extends AbstractDbProcessor {
                             .add("this._db = _db;\n")
                             .add("this._auth = _auth;\n")
                             .add("this._baseUrl = _baseUrl;\n")
+                            .add("$1T _client = new $1T.Builder().addInterceptor(this::addAuthHeader)" +
+                                    ".build();\n", OkHttpClient.class)
                             .add("this._retrofit = new $T.Builder()" +
+                                    ".client(_client)" +
                                     ".addConverterFactory($T.create())" +
                                     ".addConverterFactory($T.create())" +
                                     ".baseUrl(_baseUrl)" +
@@ -108,7 +115,15 @@ public class DbProcessorRetrofitRepository extends AbstractDbProcessor {
                         .addModifiers(Modifier.PUBLIC)
                         .returns(Object.class)
                         .addAnnotation(Override.class)
-                    .build());
+                    .build())
+                .addMethod(MethodSpec.methodBuilder("addAuthHeader")
+                        .addParameter(Interceptor.Chain.class, "_chain")
+                        .addException(IOException.class)
+                        .addModifiers(Modifier.PUBLIC)
+                        .returns(Response.class)
+                        .addCode("$T _request = _chain.request().newBuilder()" +
+                                ".addHeader($S, this._auth).build();\n", Request.class, "X-Auth")
+                        .addCode("return _chain.proceed(_request);\n").build());
 
         for(ExecutableElement subElement : findMethodsToImplement(dbType)) {
             if (subElement.getAnnotation(UmDbContext.class) != null) {
@@ -248,6 +263,21 @@ public class DbProcessorRetrofitRepository extends AbstractDbProcessor {
                     .build());
 
         List<ExecutableElement> repoMethodsToImplement = findMethodsToImplement(daoType);
+
+        /*
+         * Sometimes a non-abstract implemented method might be annotated as DELEGATE_TO_WEBSERVICE
+         * (e.g. for code that should always run on the server side). When creating the repository
+         * this needs to be overriden, so it will use retrofit to call the method on the server side.
+         */
+        for(Element restAccessibleMethod : restAccessibleMethods) {
+            if(restAccessibleMethod.getAnnotation(UmRepository.class) != null
+                && restAccessibleMethod.getAnnotation(UmRepository.class).delegateType() ==
+                        UmRepository.UmRepositoryMethodType.DELEGATE_TO_WEBSERVICE) {
+                ExecutableElement methodToOverride = (ExecutableElement)restAccessibleMethod;
+                if(!listContainsMethod(methodToOverride, repoMethodsToImplement, daoType))
+                    repoMethodsToImplement.add(methodToOverride);
+            }
+        }
 
         for(ExecutableElement repoMethod : repoMethodsToImplement) {
             MethodSpec.Builder methodBuilder = overrideAndResolve(repoMethod, daoType, processingEnv);
