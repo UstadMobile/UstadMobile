@@ -54,10 +54,11 @@ public class UmAccountManager {
     }
 
     public static UmAppDatabase getRepositoryForActiveAccount(Object context) {
-        if(activeAccount == null)
-            return UmAppDatabase.getInstance(context).getRepository(
-                    UstadMobileSystemImpl.getInstance().getAppConfigString("apiUrl",
-                            "http://localhost", context), "");
+        if(activeAccount == null) {
+            String baseUrl = UstadMobileSystemImpl.getInstance().getAppConfigString("apiUrl",
+                    "http://localhost/", context);
+            return UmAppDatabase.getInstance(context).getRepository(baseUrl, "");
+        }
         UmAccount activeAccount =getActiveAccount(context);
         return UmAppDatabase.getInstance(context).getRepository(activeAccount.getEndpointUrl(),
                 activeAccount.getAuth());

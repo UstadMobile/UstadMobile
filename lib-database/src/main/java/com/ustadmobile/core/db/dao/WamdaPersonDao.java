@@ -6,12 +6,14 @@ import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
+import com.ustadmobile.lib.database.annotation.UmRepository;
 import com.ustadmobile.lib.database.annotation.UmUpdate;
 import com.ustadmobile.lib.db.entities.WamdaPerson;
 import com.ustadmobile.lib.db.entities.WamdaPersonWithTotalFollowers;
 import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
 @UmDao(readPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
+@UmRepository
 public abstract class WamdaPersonDao implements SyncableDao<WamdaPerson, WamdaPersonDao> {
 
     @UmInsert
@@ -31,13 +33,12 @@ public abstract class WamdaPersonDao implements SyncableDao<WamdaPerson, WamdaPe
             " WHERE Person.personUid = :personUid ")
     public abstract UmLiveData<WamdaPersonWithTotalFollowers> findWithTotalNumFollowers(long personUid);
 
-    public static void makeWamdaPersonForNewUser(long newPersonUid, String profileStatus,
+    public static WamdaPerson makeWamdaPersonForNewUser(long newPersonUid, String profileStatus,
                                                  Object context) {
         WamdaPerson wamdaPerson = new WamdaPerson();
         wamdaPerson.setWamdaPersonPersonUid(newPersonUid);
         wamdaPerson.setProfileStatus(profileStatus);
-        UmAppDatabase.getInstance(context).getWamdaPersonDao().insertAsync(wamdaPerson,
-                null);
+        return wamdaPerson;
     }
 
 }

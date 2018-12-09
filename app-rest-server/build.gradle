@@ -10,6 +10,9 @@ sourceSets.main.java.srcDirs += ["build/generated/source/umdbprocessor"]
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
+    gretty 'org.apache.tomcat:tomcat-dbcp:8.0.23'
+    gretty "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
+
     implementation "javax.ws.rs:javax.ws.rs-api:2.1"
 
     implementation project(":lib-database-jdbc")

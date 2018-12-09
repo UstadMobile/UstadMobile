@@ -6,12 +6,14 @@ import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
+import com.ustadmobile.lib.database.annotation.UmRepository;
 import com.ustadmobile.lib.db.entities.WamdaClazz;
 import com.ustadmobile.lib.db.entities.WamdaClazzWithSocialInfo;
 import com.ustadmobile.lib.db.entities.WamdaClazzWithSocialInfoClazzMember;
 import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
 @UmDao(readPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
+@UmRepository
 public abstract class WamdaClazzDao implements SyncableDao<WamdaClazz, WamdaClazzDao> {
 
     @UmQuery("SELECT Clazz.*,WamdaClazz.*, (SELECT COUNT(*) FROM WamdaLike WHERE WamdaLike.wamdaLikeClazzUid = Clazz.clazzUid) AS numLikes,(\n" +

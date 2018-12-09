@@ -8,11 +8,15 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 
+import com.ustadmobile.core.db.UmAppDatabase;
+import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
 
 import java.sql.SQLException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import edu.rit.se.wifibuddy.WifiDirectHandler;
 
@@ -40,6 +44,26 @@ public class NetworkServiceAndroid extends Service {
 
     private boolean isSyncHappening = false;
 
+    private ExecutorService syncExecutor;
+
+    private Runnable syncRunnable = () -> {
+        UmAppDatabase repo = UmAccountManager.getRepositoryForActiveAccount(getApplicationContext());
+        UmAppDatabase.getInstance(getApplicationContext()).syncWith(repo, 0);
+        System.out.print("syncWith completed");
+        try {
+            Thread.sleep(60 * 1000);
+        }catch(InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        requestSync();
+    };
+
+
+    private void requestSync() {
+        if(!syncExecutor.isShutdown())
+            syncExecutor.execute(syncRunnable);
+    }
     /**
      * Default time interval for Wi-Fi Direct service rebroadcasting.
      */
@@ -58,11 +82,14 @@ public class NetworkServiceAndroid extends Service {
         //Bind WifiService
         Intent wifiServiceIntent = new Intent(this, WifiDirectHandler.class);
         bindService(wifiServiceIntent, wifiP2PServiceConnection, BIND_AUTO_CREATE);
+        syncExecutor = Executors.newSingleThreadExecutor();
+        syncExecutor.execute(syncRunnable);
     }
 
     @Override
     public void onDestroy() {
         networkManagerAndroid.onDestroy();
+        syncExecutor.shutdownNow();
 
         if (wifiDirectHandler != null) {
             wifiDirectHandler.removeGroup();

@@ -34,24 +34,29 @@ public class CreateAccountPresenter extends UstadBaseController<CreateAccountVie
         person.setPasswordHash(view.getFieldValue(CreateAccountView.FIELD_PASSWORD));
         person.setSocialAccount(false);
 
-        UmAppDatabase.getInstance(context).getPersonDao().createNewAccount(person, new UmCallback<UmAccount>() {
+        UmAppDatabase repo = UmAccountManager.getRepositoryForActiveAccount(context);
+        repo.getPersonDao().createNewAccount(person, new UmCallback<UmAccount>() {
             @Override
             public void onSuccess(UmAccount result) {
+                result.setEndpointUrl(UstadMobileSystemImpl.getInstance().getAppConfigString("apiUrl",
+                        "http://localhost/", context));
                 UmAccountManager.setActiveAccount(result, context);
                 UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
                 String nextDest = getArgumentString(ARG_NEXT) != null ?
                         getArgumentString(ARG_NEXT) :
                         impl.getAppConfigString(AppConfig.KEY_FIRST_DEST, null, context);
 
-                WamdaPersonDao.makeWamdaPersonForNewUser(result.getPersonUid(),
+                WamdaPerson wamdaPerson = WamdaPersonDao.makeWamdaPersonForNewUser(result.getPersonUid(),
                         impl.getString(MessageID.wamda_default_profile_status, getContext()),
                         getContext());
+                UmAccountManager.getRepositoryForActiveAccount(context).getWamdaPersonDao()
+                        .insertAsync(wamdaPerson, null);
                 impl.go(nextDest, context);
             }
 
             @Override
             public void onFailure(Throwable exception) {
-                view.setErrorMessage(exception  .getMessage());
+                view.setErrorMessage(exception.getMessage());
             }
         });
 
