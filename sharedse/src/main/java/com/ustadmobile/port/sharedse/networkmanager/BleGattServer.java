@@ -37,11 +37,11 @@ public abstract class BleGattServer implements WiFiDirectGroupListenerBle{
 
     private CountDownLatch mLatch = new CountDownLatch(1);
 
-    private long GROUP_CREATION_TIMEOUT = TimeUnit.SECONDS.toMillis(5);
-
     private String message = null;
 
     private Object context;
+
+    public static final int GROUP_CREATION_TIMEOUT = 5;
 
     public BleGattServer (Object context){
         this.context = context;

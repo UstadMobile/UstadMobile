@@ -3,6 +3,7 @@ package com.ustadmobile.port.sharedse.networkmanager;
 
 
 import com.ustadmobile.core.db.UmAppDatabase;
+import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.EntryStatusResponse;
 import com.ustadmobile.lib.db.entities.NetworkNode;
@@ -13,10 +14,12 @@ import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import static com.ustadmobile.port.sharedse.networkmanager.BleGattServerTest.MAX_ENTITIES_NUMBER;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -35,56 +38,66 @@ import static org.mockito.Mockito.when;
 public class BleNetworkManagerTest {
 
     private UmAppDatabase umAppDatabase;
+
     private NetworkManagerBle mockedNetworkManager;
+
     private NetworkNode networkNode;
+
     private Object monitor = new Object();
+
     private long testCaseVerifyTimeOut = TimeUnit.SECONDS.toMillis(5);
-    private List<Long> entries = Arrays.asList(1056289670L,9076137860L,4590875612L,2912543894L);
+
+    private List<Long> contentEntryUids = new ArrayList<>();
+
     private List<EntryStatusResponse> entryStatusResponseList = new ArrayList<>();
+
     private List<ContentEntry> contentEntryList = new ArrayList<>();
+
     private BleEntryStatusTask mockedEntryStatusTask;
+
     private Object context;
 
     @Before
     public void setUp(){
         context =  PlatformTestUtil.getTargetContext();
         mockedEntryStatusTask = mock(BleEntryStatusTask.class);
-        Collections.sort(entries);
+        Collections.sort(contentEntryUids);
         networkNode = new NetworkNode();
         mockedNetworkManager = spy(NetworkManagerBle.class);
         mockedNetworkManager.init(context);
         when(mockedNetworkManager
-                .makeEntryStatusTask(eq(context),eq(entries),any()))
+                .makeEntryStatusTask(eq(context),eq(contentEntryUids),any()))
                 .thenReturn(mockedEntryStatusTask);
 
+        UmAppDatabase.getInstance(context).clearAllTables();
         umAppDatabase = UmAppDatabase.getInstance(context);
-        umAppDatabase.clearAllTables();
 
-
-        for(int i = 0 ; i < entries.size(); i++){
-            long entryId = entries.get(i);
+        for(int i = 0; i < MAX_ENTITIES_NUMBER; i++){
+            long currentTimeStamp = Calendar.getInstance().getTimeInMillis();
             ContentEntry contentEntry = new ContentEntry();
-            contentEntry.setContentEntryUid(entryId);
-            contentEntry.setDescription("Content of entry number "+entryId);
-            contentEntry.setTitle("Title of entry number "+entryId);
+            contentEntry.setLastUpdateTime(currentTimeStamp);
+            contentEntry.setDescription("Content entry description");
+            contentEntry.setTitle("Content entry title");
             contentEntryList.add(contentEntry);
         }
 
-        umAppDatabase.getContentEntryDao().insert(contentEntryList);
+        UmAppDatabase repository = UmAccountManager.getRepositoryForActiveAccount(context);
+        Long [] contentEntryUids = repository.getContentEntryDao().insert(contentEntryList);
+        this.contentEntryUids.addAll(Arrays.asList(contentEntryUids));
     }
 
 
     @Test
     public void givenMonitoringAvailabilityStarted_whenNewNodeDiscovered_thenShouldCreateEntryStatusTask() {
         networkNode.setBluetoothMacAddress("00:3F:2F:64:C6:4F");
-        mockedNetworkManager.startMonitoringAvailability(monitor,entries);
+        mockedNetworkManager.startMonitoringAvailability(monitor, contentEntryUids);
         mockedNetworkManager.handleNodeDiscovered(networkNode);
 
         /*Verify that entry status task was created, we are interested in call
         from handleNodeDiscovered method since startMonitoringAvailability can
         call this method too*/
         verify(mockedNetworkManager,timeout(testCaseVerifyTimeOut))
-                .makeEntryStatusTask(eq(context),eq(entries),any());
+                .makeEntryStatusTask(eq(context),eq(contentEntryUids),any());
 
         //Verify if the run() method was called
         verify(mockedEntryStatusTask,timeout(testCaseVerifyTimeOut)).run();
@@ -94,11 +107,11 @@ public class BleNetworkManagerTest {
     public void givenEntryStatusNotKnown_whenStartMonitoringAvailabilityCalled_thenShouldCreateEntryStatusTask() {
         networkNode.setBluetoothMacAddress("00:3F:2F:64:C6:4B");
         umAppDatabase.getNetworkNodeDao().insert(networkNode);
-        mockedNetworkManager.startMonitoringAvailability(monitor,entries);
+        mockedNetworkManager.startMonitoringAvailability(monitor, contentEntryUids);
 
         //Verify that entry status task was created
         verify(mockedNetworkManager,timeout(testCaseVerifyTimeOut))
-                .makeEntryStatusTask(eq(context),eq(entries),any());
+                .makeEntryStatusTask(eq(context),eq(contentEntryUids),any());
 
         //Verify that the run() method was called
         verify(mockedEntryStatusTask,timeout(testCaseVerifyTimeOut)).run();
@@ -106,12 +119,12 @@ public class BleNetworkManagerTest {
 
     @Test
     public void givenMonitoringAvailabilityStopped_whenNewNodeDiscovered_thenShouldNotCreateEntryStatusTask() {
-        mockedNetworkManager.startMonitoringAvailability(monitor,entries);
+        mockedNetworkManager.startMonitoringAvailability(monitor, contentEntryUids);
         mockedNetworkManager.stopMonitoringAvailability(monitor);
         mockedNetworkManager.handleNodeDiscovered(networkNode);
 
         //Verify that entry status task was not created
-        verify(mockedNetworkManager.makeEntryStatusTask(context,entries,networkNode),
+        verify(mockedNetworkManager.makeEntryStatusTask(context, contentEntryUids,networkNode),
                 times(0));
     }
 
@@ -120,8 +133,8 @@ public class BleNetworkManagerTest {
         networkNode.setBluetoothMacAddress("00:3F:2F:64:C6:4F");
         long nodeId = umAppDatabase.getNetworkNodeDao().insert(networkNode);
 
-        for(int i = 0 ; i < entries.size(); i++){
-            long entryId = entries.get(i);
+        for(int i = 0; i < contentEntryUids.size(); i++){
+            long entryId = contentEntryUids.get(i);
             EntryStatusResponse response = new EntryStatusResponse();
             response.setAvailable(true);
             response.setEntryId(entryId);
@@ -133,11 +146,11 @@ public class BleNetworkManagerTest {
         }
 
         umAppDatabase.getEntryStatusResponseDao().insert(entryStatusResponseList);
-        mockedNetworkManager.startMonitoringAvailability(monitor,entries);
+        mockedNetworkManager.startMonitoringAvailability(monitor, contentEntryUids);
 
         //Verify that entry status task was not created
         verify(mockedNetworkManager, times(0))
-                .makeEntryStatusTask(context,entries,networkNode);
+                .makeEntryStatusTask(context, contentEntryUids,networkNode);
     }
 
 }

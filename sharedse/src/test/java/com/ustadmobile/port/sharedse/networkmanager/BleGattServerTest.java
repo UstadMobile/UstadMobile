@@ -11,10 +11,11 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import static com.ustadmobile.port.sharedse.networkmanager.BleGattServer.GROUP_CREATION_TIMEOUT;
 import static com.ustadmobile.port.sharedse.networkmanager.BleMessageUtil.bleMessageLongToBytes;
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.ENTRY_STATUS_REQUEST;
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.ENTRY_STATUS_RESPONSE;
@@ -30,6 +31,7 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
+
 /**
  * Test class which tests {@link com.ustadmobile.port.sharedse.networkmanager.BleGattServer}
  * to make sure it behaves as expected when given different message with different request types.
@@ -39,11 +41,9 @@ import static org.mockito.Mockito.verify;
 
 public class BleGattServerTest {
 
-    private UmAppDatabase repository;
-
     private NetworkManagerBle mockedNetworkManager;
 
-    private List<Long> entries = Arrays.asList(1056289670L,9076137860L,4590875612L,2912543894L);
+    private List<Long> contentEntryUids = new ArrayList<>();
 
     private BleGattServer gattServer;
 
@@ -51,38 +51,44 @@ public class BleGattServerTest {
 
     private WiFiDirectGroupBle wiFiDirectGroupBle;
 
-    private final Object wifiCreationLock = new Object();
+    private CountDownLatch mLatch = new CountDownLatch(1);
 
-    private long testCaseTimeOut = TimeUnit.SECONDS.toMillis(1);
+    public static final int MAX_ENTITIES_NUMBER = 4;
+
+    private UmAppDatabase umAppDatabase;
+
 
     @Before
-    public void setUpSpy(){
+    public void setUp(){
         Object context =  PlatformTestUtil.getTargetContext();
-        Collections.sort(entries);
         mockedNetworkManager = spy(NetworkManagerBle.class);
         mockedNetworkManager.init(context);
 
-        repository = UmAccountManager.getRepositoryForActiveAccount(context);
-        repository.clearAllTables();
+        umAppDatabase =  UmAppDatabase.getInstance(context);
+        umAppDatabase.clearAllTables();
+
         gattServer = spy(BleGattServer.class);
         wiFiDirectGroupBle = new WiFiDirectGroupBle("NetworkSsId","@@@1234");
         gattServer.setNetworkManager(mockedNetworkManager);
 
-        long currentTimeStamp = Calendar.getInstance().getTimeInMillis();
-        for(int i = 0 ; i < entries.size(); i++){
-            long entryId = entries.get(i);
+        for(int i = 0; i < MAX_ENTITIES_NUMBER; i++){
+            long currentTimeStamp = Calendar.getInstance().getTimeInMillis();
             ContentEntry contentEntry = new ContentEntry();
-            contentEntry.setContentEntryUid(entryId);
             contentEntry.setLastUpdateTime(currentTimeStamp);
-            contentEntry.setDescription("Content of entry number "+entryId);
-            contentEntry.setTitle("Title of entry number "+entryId);
+            contentEntry.setDescription("Content entry description");
+            contentEntry.setTitle("Content entry title");
             contentEntryList.add(contentEntry);
         }
+
+        UmAppDatabase repository = UmAccountManager.getRepositoryForActiveAccount(context);
+        Long [] contentEntryUids = repository.getContentEntryDao().insert(contentEntryList);
+        this.contentEntryUids.addAll(Arrays.asList(contentEntryUids));
+
     }
 
     @Test
     public void givenRequestMessageWithCorrectRequestHeader_whenHandlingIt_thenShouldReturnResponseMessage(){
-        BleMessage messageToSend = new BleMessage(ENTRY_STATUS_REQUEST, bleMessageLongToBytes(entries));
+        BleMessage messageToSend = new BleMessage(ENTRY_STATUS_REQUEST, bleMessageLongToBytes(contentEntryUids));
 
         BleMessage responseMessage = gattServer.handleRequest(messageToSend);
 
@@ -93,7 +99,7 @@ public class BleGattServerTest {
 
     @Test
     public void givenRequestMessageWithWrongRequestHeader_whenHandlingIt_thenShouldNotReturnResponseMessage(){
-        BleMessage messageToSend = new BleMessage((byte) 0, bleMessageLongToBytes(entries));
+        BleMessage messageToSend = new BleMessage((byte) 0, bleMessageLongToBytes(contentEntryUids));
 
         BleMessage responseMessage = gattServer.handleRequest(messageToSend);
 
@@ -108,7 +114,7 @@ public class BleGattServerTest {
             return null;
         }).when(mockedNetworkManager).createWifiDirectGroup();
 
-        BleMessage messageToSend = new BleMessage(WIFI_GROUP_REQUEST, bleMessageLongToBytes(entries));
+        BleMessage messageToSend = new BleMessage(WIFI_GROUP_REQUEST, bleMessageLongToBytes(contentEntryUids));
 
         BleMessage responseMessage = gattServer.handleRequest(messageToSend);
         String [] groupInfo = new String(responseMessage.getPayload()).split(WIFI_GROUP_INFO_SEPARATOR);
@@ -131,17 +137,20 @@ public class BleGattServerTest {
         doAnswer(invocation -> {
             if(mockedNetworkManager.getWifiDirectGroupChangeStatus() ==
                     WIFI_DIRECT_GROUP_UNDER_CREATION_STATUS){
-                synchronized (wifiCreationLock){
-                    wifiCreationLock.wait(testCaseTimeOut);
-                    gattServer.groupCreated(wiFiDirectGroupBle,null);
+
+                try { mLatch.await(GROUP_CREATION_TIMEOUT, TimeUnit.SECONDS); }
+                catch(InterruptedException e) {
+                    e.printStackTrace();
+                    mLatch.countDown();
                 }
+                gattServer.groupCreated(wiFiDirectGroupBle,null);
             }
             return null;
         }).when(mockedNetworkManager).createWifiDirectGroup();
 
         mockedNetworkManager.setWifiDirectGroupChangeStatus(WIFI_DIRECT_GROUP_UNDER_CREATION_STATUS);
 
-        BleMessage messageToSend = new BleMessage(WIFI_GROUP_REQUEST, bleMessageLongToBytes(entries));
+        BleMessage messageToSend = new BleMessage(WIFI_GROUP_REQUEST, bleMessageLongToBytes(contentEntryUids));
         BleMessage responseMessage = gattServer.handleRequest(messageToSend);
         String [] groupInfo = new String(responseMessage.getPayload()).split(WIFI_GROUP_INFO_SEPARATOR);
         WiFiDirectGroupBle groupBle = new WiFiDirectGroupBle(groupInfo[0],groupInfo[1]);
@@ -167,7 +176,7 @@ public class BleGattServerTest {
             return null;
         }).when(mockedNetworkManager).createWifiDirectGroup();
 
-        BleMessage messageToSend = new BleMessage(WIFI_GROUP_REQUEST, bleMessageLongToBytes(entries));
+        BleMessage messageToSend = new BleMessage(WIFI_GROUP_REQUEST, bleMessageLongToBytes(contentEntryUids));
         mockedNetworkManager.setWifiDirectGroupChangeStatus(WIFI_DIRECT_GROUP_ACTIVE_STATUS);
 
         BleMessage responseMessage = gattServer.handleRequest(messageToSend);
@@ -188,16 +197,18 @@ public class BleGattServerTest {
     @Test
     public void givenWifiDirectGroupBeingRemoved_whenWifiDirectGroupRequested_thenShouldWaitAndCreateNewGroup() {
         doAnswer(invocation -> {
-            synchronized (wifiCreationLock){
-                wifiCreationLock.wait(testCaseTimeOut);
-                gattServer.groupCreated(wiFiDirectGroupBle,null);
+            try { mLatch.await(GROUP_CREATION_TIMEOUT, TimeUnit.SECONDS); }
+            catch(InterruptedException e) {
+                e.printStackTrace();
+                mLatch.countDown();
             }
+            gattServer.groupCreated(wiFiDirectGroupBle,null);
             return null;
         }).when(mockedNetworkManager).createWifiDirectGroup();
 
         mockedNetworkManager.removeWifiDirectGroup();
 
-        BleMessage messageToSend = new BleMessage(WIFI_GROUP_REQUEST, bleMessageLongToBytes(entries));
+        BleMessage messageToSend = new BleMessage(WIFI_GROUP_REQUEST, bleMessageLongToBytes(contentEntryUids));
         BleMessage responseMessage = gattServer.handleRequest(messageToSend);
         String [] groupInfo = new String(responseMessage.getPayload()).split(WIFI_GROUP_INFO_SEPARATOR);
         WiFiDirectGroupBle groupBle = new WiFiDirectGroupBle(groupInfo[0],groupInfo[1]);
@@ -216,10 +227,9 @@ public class BleGattServerTest {
 
     @Test
     public void givenRequestWithAvailableEntries_whenHandlingIt_thenShouldReplyTheyAreAvailable(){
-        BleMessage messageToSend = new BleMessage(ENTRY_STATUS_REQUEST, bleMessageLongToBytes(entries));
-        Long [] rowCount = repository.getContentEntryDao().insert(contentEntryList);
 
-        assertTrue("Content added successfully", rowCount.length == entries.size());
+
+        BleMessage messageToSend = new BleMessage(ENTRY_STATUS_REQUEST, bleMessageLongToBytes(contentEntryUids));
 
         BleMessage responseMessage = gattServer.handleRequest(messageToSend);
         List<Long> responseList = BleMessageUtil.bleMessageBytesToLong(responseMessage.getPayload());
@@ -230,16 +240,16 @@ public class BleGattServerTest {
             }
         }
 
-        assertTrue("All requested entry uuids status are available",
-                entries.size()==availabilityCounter);
+        assertEquals("All requested entry uuids status are available",
+                contentEntryUids.size(), availabilityCounter);
 
     }
 
     @Test
     public void givenRequestWithUnAvailableEntries_whenHandlingIt_thenShouldReplyTheyAreNotAvailable(){
-        BleMessage messageToSend = new BleMessage(ENTRY_STATUS_REQUEST, bleMessageLongToBytes(entries));
-        repository.clearAllTables();
 
+        BleMessage messageToSend = new BleMessage(ENTRY_STATUS_REQUEST, bleMessageLongToBytes(contentEntryUids));
+        umAppDatabase.clearAllTables();
         BleMessage responseMessage = gattServer.handleRequest(messageToSend);
         List<Long> responseList = BleMessageUtil.bleMessageBytesToLong(responseMessage.getPayload());
         int availabilityCounter = 0;
@@ -249,8 +259,8 @@ public class BleGattServerTest {
             }
         }
 
-        assertTrue("All requested entry uuids status are not available",
-                availabilityCounter == 0);
+        assertEquals("All requested entry uuids status are not available",
+                0, availabilityCounter);
     }
 
 }

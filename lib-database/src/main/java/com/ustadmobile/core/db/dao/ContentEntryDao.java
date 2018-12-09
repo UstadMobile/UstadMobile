@@ -23,6 +23,9 @@ public abstract class ContentEntryDao implements SyncableDao<ContentEntry, Conte
     @UmQuery("SELECT * FROM ContentEntry WHERE contentEntryUid=:entryUuid")
     public abstract ContentEntry findByEntryId(long entryUuid);
 
+    @UmQuery("SELECT * FROM ContentEntry")
+    public abstract List<ContentEntry> getAllEntries();
+
     @UmQuery("SELECT * FROM ContentEntry WHERE sourceUrl = :sourceUrl")
     public abstract ContentEntry findBySourceUrl(String sourceUrl);
 

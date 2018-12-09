@@ -41,7 +41,7 @@ public class BleEntryStatusTaskTest {
     private NetworkNode networkNode;
 
     @Before
-    public void setUpSpy(){
+    public void setUp(){
         Object context =  PlatformTestUtil.getTargetContext();
         UmAppDatabase umAppDatabase = UmAppDatabase.getInstance(context);
         umAppDatabase.clearAllTables();
