@@ -56,8 +56,13 @@ ext {
     version_jsqlparser = "0.9"
     version_core_mockito = "2.13.0"
     version_apache_commons_pool2 = "2.6.0"
+    version_jsoup = "1.11.3"
+    version_selenium = "3.14.0"
+    version_nv_lang = "1.23"
+    version_web_driver = "3.0.0"
     version_jersey = "2.27"
     version_retrofit = "2.4.0"
+    version_postgres_jdbc = "42.2.5"
 
     version_android_buildtools = "28.0.3"
     version_android_compile_sdk = 27

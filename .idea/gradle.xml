@@ -15,6 +15,7 @@
             <option value="$PROJECT_DIR$/app-rest-server" />
             <option value="$PROJECT_DIR$/core" />
             <option value="$PROJECT_DIR$/core-tests" />
+            <option value="$PROJECT_DIR$/lib-content-scrapers" />
             <option value="$PROJECT_DIR$/lib-core-fs" />
             <option value="$PROJECT_DIR$/lib-core-fs-tests" />
             <option value="$PROJECT_DIR$/lib-database" />

@@ -148,7 +148,6 @@ afterEvaluate {
     }
 }
 
-
 /*
  * Anything under the localconfig variant is not stored in Git. The class UmBaseApplication.java
  * exists in each variant, and controls whether the Application class does or does not extend
@@ -167,11 +166,11 @@ task copyLocalconfigUmBaseApplication(type: Copy) {
 tasks.whenTaskAdded { task ->
     if (task.name == "assembleRemotetestslaveDebug") {
         startTestSlaveServer.dependsOn task
-    }else if (task.name == "installLocalconfigDebugAndroidTest") {
+    } else if (task.name == "installLocalconfigDebugAndroidTest") {
         testEmulatorLocalconfigDebug.dependsOn task
     } else if (task.name == "installLocalconfigDebug") {
         testEmulatorLocalconfigDebug.dependsOn task
-    }else if(task.name == "assembleLocalconfigDebug" || task.name == "assembleLocalconfigRelease") {
+    } else if (task.name == "assembleLocalconfigDebug" || task.name == "assembleLocalconfigRelease") {
         task.dependsOn(copyLocalconfigUmBaseApplication)
     }
 }
@@ -224,7 +223,7 @@ android {
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         buildConfigField "String", "ACRA_HTTP_URI", "\"" + project.ext.buildConfigProperties["android.acra.httpUri"] + "\""
         buildConfigField "String", "ACRA_BASIC_LOGIN", "\"" + project.ext.buildConfigProperties["android.acra.basicLogin"] + "\""
-        buildConfigField "String", "ACRA_BASIC_PASS", "\"" + project.ext.buildConfigProperties["android.acra.basicPass"]+ "\""
+        buildConfigField "String", "ACRA_BASIC_PASS", "\"" + project.ext.buildConfigProperties["android.acra.basicPass"] + "\""
 
         manifestPlaceholders = [applicationClass: "android.app.Application"]
 
@@ -467,7 +466,6 @@ dependencies {
 
     api 'com.ustadmobile.qrcodelibomrfork:qrcode-core:1.0.3'
 
-
     /*
      * If this needs to be made compatible as a library for something using older appcompat libs -
      * use this format:
@@ -479,14 +477,13 @@ dependencies {
     implementation "com.android.support:design:$version_android_support_lib"
     implementation "com.android.support:support-v4:$version_android_support_lib"
     implementation "com.android.support:recyclerview-v7:$version_android_support_lib"
+    implementation "com.android.support.constraint:constraint-layout:$version_android_constraint_layout"
 
     //Image loading library
     implementation 'com.squareup.picasso:picasso:2.5.2'
 
     //Floating action button with support for popup choices
     implementation 'com.github.clans:fab:1.6.4'
-
-    implementation "com.android.support.constraint:constraint-layout:$version_android_constraint_layout"
 
     //Wifi direct library
     implementation 'com.ustadmobile.wifibuddy:wifibuddy:1.1.45-SNAPSHOT'
@@ -524,6 +521,8 @@ dependencies {
     androidTestImplementation "com.android.support.test:rules:$version_android_junit_runner"
     androidTestImplementation "com.android.support.test.espresso:espresso-core:$version_android_espresso"
     androidTestImplementation "com.android.support.test.espresso:espresso-contrib:$version_android_espresso"
+    androidTestImplementation "com.android.support.test.espresso:espresso-intents:$version_android_espresso"
+    androidTestImplementation "com.android.support.test.espresso:espresso-web:$version_android_espresso"
 
     androidTestImplementation "com.android.support.test.uiautomator:uiautomator-v18:$version_android_uiautomator"
 
@@ -565,4 +564,3 @@ publishing {
         }
     }
 }
-
