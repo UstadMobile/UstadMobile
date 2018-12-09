@@ -1,10 +1,7 @@
 package com.ustadmobile.port.android;
 
+import android.app.Application;
 import android.content.Context;
-
-//import com.evernote.android.job.Job;
-//import com.evernote.android.job.JobManager;
-//import com.evernote.android.job.JobRequest;
 import com.toughra.ustadmobile.BuildConfig;
 
 import org.acra.ACRA;
@@ -20,7 +17,7 @@ import org.acra.sender.HttpSender;
  * normal android.app.Application on non-multidex variants.
  *
  */
-public class App extends UmBaseApplication {
+public class App extends Application {
 
     @Override
     public void onCreate() {
@@ -31,7 +28,7 @@ public class App extends UmBaseApplication {
     protected void attachBaseContext(Context base) {
         super.attachBaseContext(base);
 
-        /*CoreConfigurationBuilder builder = new CoreConfigurationBuilder(this);
+        CoreConfigurationBuilder builder = new CoreConfigurationBuilder(this);
         builder.setReportFormat(StringFormat.JSON);
 
         builder.getPluginConfigurationBuilder(HttpSenderConfigurationBuilder.class)
@@ -40,7 +37,7 @@ public class App extends UmBaseApplication {
                 .setBasicAuthPassword(BuildConfig.ACRA_BASIC_PASS)
                 .setHttpMethod(HttpSender.Method.POST).setEnabled(true);
 
-        ACRA.init(this, builder);*/
+        ACRA.init(this, builder);
     }
 }
 
