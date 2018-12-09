@@ -38,15 +38,8 @@ public class ContentEntry {
 
     private String description;
 
-<<<<<<< HEAD
     private long lastUpdateTime;
 
-    private String primaryLanguage;
-
-    private String primaryLanguageCountry;
-
-=======
->>>>>>> 80de05d3238ac19a94ff24c7343d64e4f6687e54
     private String entryId;
 
     private String author;
