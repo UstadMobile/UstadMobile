@@ -1,5 +1,6 @@
 package com.ustadmobile.port.android;
 
+import android.app.Application;
 import android.content.Context;
 
 //import com.evernote.android.job.Job;
@@ -20,7 +21,7 @@ import org.acra.sender.HttpSender;
  * normal android.app.Application on non-multidex variants.
  *
  */
-public class App extends UmBaseApplication {
+public class App extends Application {
 
     @Override
     public void onCreate() {

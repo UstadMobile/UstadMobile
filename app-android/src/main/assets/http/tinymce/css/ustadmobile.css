@@ -1,0 +1,150 @@
+html {
+    display: table;
+}
+
+body{
+    min-height: 100%;
+}
+
+#umPreview {
+    margin: 0px;
+    padding-top: 10px;
+    border: 0 solid transparent !important;
+    outline: 0 solid transparent !important;
+}
+
+
+.no-padding {
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+.no-left-padding{
+    padding-left: 0 !important;
+    margin-left: 0 !important;
+}
+
+.hide-element{
+    display: none!important;
+}
+
+.show-element{
+    display: block!important;
+}
+
+.um-labels{
+    margin-top: 16px;
+    z-index: -200;
+    color: #767676;
+    cursor: pointer;
+    font-size: .8em;
+    line-height: 1.4em;
+}
+
+.select-option{
+    border: 1px solid #ccc;
+    margin-left: 16px;
+    max-width: 90%;
+    border-radius: 3px;
+    overflow: hidden;
+    background: white;
+}
+
+.question-choice-answer{
+    margin-left: 0 !important;
+}
+
+
+select {
+    padding: 5px 8px;
+    width: 130%;
+    border: none;
+    box-shadow: none;
+    font-size: 1em;
+    background: transparent none;
+    -webkit-appearance: none;
+}
+
+
+select,button :focus :active{
+    outline: none;
+}
+
+
+.fill-the-blanks-input{
+    font-size: 1em;
+    line-height: 2em;
+}
+
+#mce-editor{
+    margin: 2%;
+}
+
+
+/*data edit and data preview control classes*/
+.preview-main{
+    font-size: 1.12em;
+    color: black;
+}
+
+.preview-support{
+    font-size: 1em;
+    color: #131313;
+}
+
+.preview-alert{
+    font-size: 1em;
+}
+
+.default-margin-bottom{
+    margin-bottom: 16px;
+}
+
+.default-margin-top{
+    margin-top: 10px;
+}
+
+.default-padding-top{
+    padding-top: 16px;
+}
+
+.default-padding-bottom{
+    padding-bottom: 16px;
+}
+
+.question-choice-pointer{
+    cursor: pointer;
+    margin-top: -5px !important;
+}
+
+.question-choice-pointer:hover{
+    box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+}
+
+.media-audio{
+    margin-top: 10px;
+    background: transparent;
+    max-height: 53px;
+    width: 100%;
+}
+
+.um-media{
+    margin-top: 10px;
+}
+
+
+.selected-choice{
+    background-color: black !important;
+    color: white !important;
+    font-size: 1.1em;
+    font-weight: 300;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+}
+
+.selected-choice:hover {
+    box-shadow: 0 6px 12px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
+}
+
+.card{
+    margin-bottom:16px;
+}

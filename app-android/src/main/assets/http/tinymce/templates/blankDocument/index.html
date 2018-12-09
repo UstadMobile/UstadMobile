@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <link href="css/ustadmobile.css" rel="stylesheet" />
+    <link href="css/bootstrap.min.css" rel="stylesheet" />
+    <script src="js/jquery3.3.1.min.js" type="text/javascript"></script>
+    <script src="js/tinymce.min.js" type="text/javascript"></script>
+    <script src="js/UstadWidgets.js" type="text/javascript"></script>
+    <script src="js/UstadEditor.js" type="text/javascript"></script>
+    <script src="js/rangy-core.js" type="text/javascript"></script>
+
+    <script type="text/javascript">
+        $(window).on("load", function() {
+            $('body').css('width', $(window).width());
+            try{rangy.init();}catch (e) {console.log("Rangy exception",e);}
+            QuestionWidget.handleEditOff();
+        });
+    </script>
+</head>
+<body>
+
+    <!-- TinyMCE content editor container-->
+    <div class="container-fluid default-margin-top">
+        <!--Content preview container-->
+        <div class="row" id="umPreview"></div>
+    </div>
+
+    <script src="js/bootstrap.min.js" type="text/javascript"></script>
+</body>
+</html>
