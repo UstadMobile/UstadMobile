@@ -61,6 +61,8 @@ public class ClazzActivityListFragment extends UstadBaseFragment implements Claz
     private Button lastMonthButton;
     private Button lastYearButton;
 
+    FloatingTextButton fab;
+
     public BarChart hideEverythingInBarChart(BarChart barChart){
 
         barChart.getXAxis().setDrawLabels(true);
@@ -208,8 +210,7 @@ public class ClazzActivityListFragment extends UstadBaseFragment implements Claz
 
 
         //Record attendance FAB
-        FloatingTextButton fab =
-                rootContainer.findViewById(R.id.fragment_clazz_log_record_attendance_fab);
+        fab = rootContainer.findViewById(R.id.fragment_clazz_log_record_attendance_fab);
         fab.setOnClickListener(v -> mPresenter.goToNewClazzActivityEditActivity());
 
         //Buttons
@@ -310,6 +311,15 @@ public class ClazzActivityListFragment extends UstadBaseFragment implements Claz
         data.observe(this, recyclerAdapter::submitList);
 
         mRecyclerView.setAdapter(recyclerAdapter);
+    }
+
+    @Override
+    public void setFABVisibility(boolean visible) {
+        if(visible){
+            fab.setVisibility(View.VISIBLE);
+        }else{
+            fab.setVisibility(View.INVISIBLE);
+        }
     }
 
     @Override

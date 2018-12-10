@@ -47,5 +47,5 @@ public interface ClazzActivityListView extends UstadView {
     void resetReportButtons();
 
 
-
+    void setFABVisibility(boolean visible);
 }

@@ -23,4 +23,8 @@ public interface ClassDetailView extends UstadView {
 
     void setSELVisibility(boolean visible);
 
+    void setSettingsVisibility(boolean visible);
+
+    void set
+
 }

@@ -10,6 +10,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.ClazzDetailPresenter;
@@ -35,6 +36,7 @@ public class ClazzDetailActivity extends UstadBaseActivity implements
     private ClazzDetailPresenter mPresenter;
     Long clazzUid;
     private boolean attendanceVisibility, activityVisibility, selVisibility;
+    Menu menu;
 
     /**
      * Separated out view pager setup for clarity.
@@ -98,6 +100,7 @@ public class ClazzDetailActivity extends UstadBaseActivity implements
      * @return  true. always.
      */
     public boolean onCreateOptionsMenu(Menu menu) {
+        this.menu = menu;
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_clazzdetail, menu);
         return true;
@@ -163,6 +166,19 @@ public class ClazzDetailActivity extends UstadBaseActivity implements
     public void setSELVisibility(boolean visible) {
         selVisibility = visible;
     }
+
+    @Override
+    public void setSettingsVisibility(boolean visible) {
+        if(menu != null) {
+            MenuItem menuItem = menu.findItem(R.menu.menu_clazzdetail);
+            if(visible){
+                menuItem.setVisible(true);
+            }else {
+                menuItem.setVisible(false);
+            }
+        }
+    }
+
 
     /**
      * ClassDetailView's view pager adapter

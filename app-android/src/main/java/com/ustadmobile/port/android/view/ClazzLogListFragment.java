@@ -58,6 +58,8 @@ public class ClazzLogListFragment extends UstadBaseFragment implements ClassLogL
     private Button lastMonthButton;
     private Button lastYearButton;
 
+    FloatingTextButton fab;
+
     /**
      * Hides elements of MPAndroid Chart that we do not need as part of the Bar Chart in the
      * Attendance Log list fragment. Hides things as per UI intended (axis, labels, etc)
@@ -276,8 +278,7 @@ public class ClazzLogListFragment extends UstadBaseFragment implements ClassLogL
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
 
         //Record attendance FAB
-        FloatingTextButton fab =
-                rootContainer.findViewById(R.id.fragment_class_log_record_attendance_fab);
+        fab = rootContainer.findViewById(R.id.fragment_class_log_record_attendance_fab);
         fab.setOnClickListener(v -> mPresenter.goToNewClazzLogDetailActivity());
 
         lastWeekButton = rootContainer.findViewById(
@@ -322,6 +323,15 @@ public class ClazzLogListFragment extends UstadBaseFragment implements ClassLogL
             lastYearButton.getBackground().setTint(getResources().getColor(R.color.color_gray));
         });
 
+    }
+
+    @Override
+    public void setFABVisibility(boolean visible) {
+        if(visible){
+            fab.setVisibility(View.VISIBLE);
+        }else{
+            fab.setVisibility(View.INVISIBLE);
+        }
     }
 
     // ClassLogList's DIFF callback

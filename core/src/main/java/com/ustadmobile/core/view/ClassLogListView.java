@@ -58,4 +58,7 @@ public interface ClassLogListView extends UstadView {
      */
     void resetReportButtons();
 
+
+    void setFABVisibility(boolean visible);
+
 }
