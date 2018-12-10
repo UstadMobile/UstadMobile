@@ -101,9 +101,9 @@ public class IndexKhanContentScraper {
 
     }
 
-    private String getJsonStringFromScript(URL url) throws IOException {
+    public static String getJsonStringFromScript(String url) throws IOException {
 
-        Document document = Jsoup.connect(url.toString()).maxBodySize(9437184).get();
+        Document document = Jsoup.connect(url).maxBodySize(9437184).get();
 
         Elements scriptList = document.getElementsByTag("script");
         for (Element script : scriptList) {
@@ -127,7 +127,7 @@ public class IndexKhanContentScraper {
 
     public void browseTopics(ContentEntry parent, URL url, File fileLocation) throws IOException {
 
-        String jsonString = getJsonStringFromScript(url);
+        String jsonString = getJsonStringFromScript(url.toString());
 
         TopicListResponse response = gson.fromJson(jsonString, TopicListResponse.class);
 
@@ -164,7 +164,7 @@ public class IndexKhanContentScraper {
 
     private void browseSubjects(ContentEntry topicEntry, URL topicUrl, File topicFolder) throws IOException {
 
-        String subjectJson = getJsonStringFromScript(topicUrl);
+        String subjectJson = getJsonStringFromScript(topicUrl.toString());
 
         SubjectListResponse response = gson.fromJson(subjectJson, SubjectListResponse.class);
 
@@ -260,16 +260,20 @@ public class IndexKhanContentScraper {
                         , contentCount++);
 
                 KhanContentScraper scraper = new KhanContentScraper(contentFolder);
-                switch (contentItem.kind){
+                try {
+                    switch (contentItem.kind) {
 
-                    case "Video":
-                        scraper.scrapeVideoContent(contentItem.downloadUrl.mp4Low);
-                        break;
-                    case "Exercise":
+                        case "Video":
+                            scraper.scrapeVideoContent(contentItem.downloadUrl.mp4Low);
+                            break;
+                        case "Exercise":
+                            scraper.scrapeExerciseContent(new URL(url,contentItem.nodeUrl).toString());
+                            break;
 
-
-                        break;
-
+                    }
+                } catch (Exception e) {
+                    System.err.println("Unable to scrape content from " + contentItem.title + " at url " + url);
+                    e.printStackTrace();
                 }
 
 

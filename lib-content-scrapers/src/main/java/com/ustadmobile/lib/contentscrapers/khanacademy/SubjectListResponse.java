@@ -10,6 +10,10 @@ class SubjectListResponse {
 
         public Curation curation;
 
+        public ItemResponse initialItem;
+
+        public Card initialCards;
+
         public class Curation {
 
             public List<Tab> tabs;
@@ -17,6 +21,38 @@ class SubjectListResponse {
             public class Tab {
 
                 public List<ModuleResponse> modules;
+
+            }
+        }
+
+        public class Card {
+
+            public List<UserExercise> userExercises;
+
+            public class UserExercise {
+
+                public Model exerciseModel;
+
+                public class Model {
+
+                    public String id;
+
+                    public String name;
+
+                    public List<AssessmentItem> allAssessmentItems;
+
+                    public class AssessmentItem {
+
+                        public String id;
+
+                        public boolean live;
+
+                        public String sha;
+
+                    }
+
+                }
+
 
             }
         }

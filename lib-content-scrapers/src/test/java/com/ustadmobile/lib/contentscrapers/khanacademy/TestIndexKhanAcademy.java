@@ -6,7 +6,6 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
 
 public class TestIndexKhanAcademy {
@@ -28,9 +27,16 @@ public class TestIndexKhanAcademy {
         indexScraper.findContent("https://www.khanacademy.org/", tmpDir);
 
 
+    }
 
+    @Test
+    public void testPractice() throws IOException {
 
+        File tmpDir = Files.createTempDirectory("testKhanExercisecontentscraper").toFile();
 
+        KhanContentScraper scraper = new KhanContentScraper(tmpDir);
+       // scraper.scrapeExerciseContent("https://www.khanacademy.org/math/early-math/cc-early-math-counting-topic/cc-early-math-counting/e/counting-out-1-20-objects");
+        scraper.scrapeExerciseContent("https://www.khanacademy.org/math/early-math/cc-early-math-counting-topic/cc-early-math-counting/e/counting-objects");
     }
 
 }

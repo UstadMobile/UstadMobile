@@ -29,6 +29,12 @@ public class ScraperConstants {
     public static final String CHECK_PATH = "/com/ustadmobile/lib/contentscrapers/ck12/check.svg";
     public static final String CHECK_NAME = "check.svg";
 
+    public static final String CORRECT_KHAN_LINK = "/com/ustadmobile/lib/contentscrapers/khan/exercise-correct.svg";
+    public static final String CORRECT_FILE = "exercise-correct.svg";
+
+    public static final String TRY_AGAIN_KHAN_LINK = "/com/ustadmobile/lib/contentscrapers/khan/exercise-try-again.svg";
+    public static final String TRY_AGAIN_FILE = "exercise-try-again.svg";
+
     // math jax links
     public static final String MATH_JAX_LINK = "/com/ustadmobile/lib/contentscrapers/ck12/mathjax/MathJax.js";
     public static final String MATH_JAX_FILE = "MathJax.js";
@@ -81,6 +87,11 @@ public class ScraperConstants {
     public static final String CONFIG_OUTPUT_LINK = "/com/ustadmobile/lib/contentscrapers/ck12/mathjax/output/config.js";
     public static final String CONFIG_OUTPUT_FILE = "/jax/output/HTML-CSS/config.js";
 
+    public static final String HINT_JSON_LINK = "/com/ustadmobile/lib/contentscrapers/khan/hint.json";
+    public static final String HINT_JSON_FILE = "/hint.json";
+
+    public static final String ATTEMPT_JSON_LINK = "/com/ustadmobile/lib/contentscrapers/khan/attempt.json";
+    public static final String ATTEMPT_JSON_FILE = "/attempt.json";
 
     public static final String MATERIAL_JS = "materialize.min.js";
     public static final String MATERIAL_CSS = "materialize.min.css";
@@ -107,6 +118,9 @@ public class ScraperConstants {
 
     public static final String MIMETYPE_ZIP = "application/zip";
     public static final String MIMETYPE_EPUB = "application/epub+zip";
+    public static final String MIMETYPE_JSON = "application/json";
+    public static final String MIMETYPE_SVG = "image/svg+xml";
+    public static final String MIMETYPE_JPG = "image/jpg";
 
     public static final String ZIP_EXT = ".zip";
     public static final String PNG_EXT = ".png";

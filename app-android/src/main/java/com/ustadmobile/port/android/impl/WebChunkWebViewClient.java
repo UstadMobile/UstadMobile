@@ -74,17 +74,35 @@ public class WebChunkWebViewClient extends WebViewClient {
                     log = indexMap.get(e.getKey());
                     break;
                 }
-                if(e.getKey().contains("https://www.ck12.org/assessment/api/start/tests/") &&
-                        requestUrl.contains("https://www.ck12.org/assessment/api/start/tests/")){
+                if (e.getKey().contains("https://www.ck12.org/assessment/api/start/tests/") &&
+                        requestUrl.contains("https://www.ck12.org/assessment/api/start/tests/")) {
                     log = indexMap.get(e.getKey());
                     break;
+                }
+                if (e.getKey().contains("hint") && requestUrl.contains("hint")) {
+                    log = indexMap.get(e.getKey());
+                    break;
+                }
+                if (e.getKey().contains("attempt") && requestUrl.contains("attempt")) {
+                    log = indexMap.get(e.getKey());
+                    break;
+                }
+                if (e.getKey().contains("/assessment_item") && requestUrl.contains("/assessment_item")) {
+                    int langIndex = requestUrl.indexOf("&lang");
+
+                    String newRequestUrl = requestUrl.substring(0, langIndex);
+                    log = indexMap.get(newRequestUrl);
+                    if(log != null){
+                        break;
+                    }
                 }
             }
         }
 
+
         if (log == null) {
             System.err.println("did not find match for url in indexMap " + request.getUrl().toString());
-            return super.shouldInterceptRequest(view, request);
+            return new WebResourceResponse("", "utf-8", 200, "OK", null, null);
         }
         try {
             ZipEntry entry = zipFile.getEntry(log.path);
@@ -97,7 +115,6 @@ public class WebChunkWebViewClient extends WebViewClient {
         }
         return super.shouldInterceptRequest(view, request);
     }
-
 
 
     public void setUrl(String url) {

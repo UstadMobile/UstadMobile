@@ -17,6 +17,7 @@ import com.ustadmobile.core.db.dao.ContentEntryRelatedEntryJoinDao;
 import com.ustadmobile.core.db.dao.LanguageDao;
 import com.ustadmobile.core.db.dao.LanguageVariantDao;
 import com.ustadmobile.lib.contentscrapers.buildconfig.ScraperBuildConfig;
+import com.ustadmobile.lib.contentscrapers.ck12.plix.PlixIndex;
 import com.ustadmobile.lib.db.entities.ContentCategory;
 import com.ustadmobile.lib.db.entities.ContentCategorySchema;
 import com.ustadmobile.lib.db.entities.ContentEntry;
@@ -36,6 +37,8 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.openqa.selenium.By;
+import org.openqa.selenium.Cookie;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -46,13 +49,13 @@ import org.w3c.dom.Attr;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -74,6 +77,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.CORRECT_KHAN_LINK;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING;
 
 
@@ -151,7 +155,7 @@ public class ContentScraperUtil {
                 FileUtils.copyURLToFile(contentUrl, contentFile);
 
             } catch (IOException e) {
-                System.out.println("Url path " +url + " failed to download to file with base url " + baseUrl);
+                System.out.println("Url path " + url + " failed to download to file with base url " + baseUrl);
                 e.printStackTrace();
             }
 
@@ -370,7 +374,7 @@ public class ContentScraperUtil {
         return new ChromeDriver(option);
     }
 
-    public static void setChromeDriverLocation(){
+    public static void setChromeDriverLocation() {
         System.setProperty("webdriver.chrome.driver", ScraperBuildConfig.CHROME_DRIVER_PATH);
     }
 
@@ -438,12 +442,12 @@ public class ContentScraperUtil {
         newJoin.setCepcjParentContentEntryUid(parentEntry.getContentEntryUid());
         newJoin.setCepcjChildContentEntryUid(childEntry.getContentEntryUid());
         newJoin.setChildIndex(index);
-        if(existingParentChildJoin == null) {
+        if (existingParentChildJoin == null) {
             newJoin.setCepcjUid(dao.insert(newJoin));
             return newJoin;
-        }else {
+        } else {
             newJoin.setCepcjUid(existingParentChildJoin.getCepcjUid());
-            if(!newJoin.equals(existingParentChildJoin)){
+            if (!newJoin.equals(existingParentChildJoin)) {
                 dao.update(newJoin);
             }
             return newJoin;
@@ -468,12 +472,12 @@ public class ContentScraperUtil {
         newJoin.setCepcjParentContentEntryUid(parentEntry.getContentEntryUid());
         newJoin.setCepcjChildContentEntryUid(childEntry.getContentEntryUid());
         newJoin.setChildIndex(index);
-        if(existingParentChildJoin == null) {
+        if (existingParentChildJoin == null) {
             newJoin.setCepcjUid(dao.insert(newJoin));
             return newJoin;
-        }else {
+        } else {
             newJoin.setCepcjUid(existingParentChildJoin.getCepcjUid());
-            if(!newJoin.equals(existingParentChildJoin)){
+            if (!newJoin.equals(existingParentChildJoin)) {
                 dao.update(newJoin);
             }
             return newJoin;
@@ -503,7 +507,7 @@ public class ContentScraperUtil {
             changedCategoryEntryJoin.setCeccjUid(changedCategoryEntryJoin.getCeccjUid());
             changedCategoryEntryJoin.setCeccjContentCategoryUid(category.getContentCategoryUid());
             changedCategoryEntryJoin.setCeccjContentEntryUid(childEntry.getContentEntryUid());
-            if(!changedCategoryEntryJoin.equals(categoryToSimulationJoin)){
+            if (!changedCategoryEntryJoin.equals(categoryToSimulationJoin)) {
                 contentEntryCategoryJoinDao.update(changedCategoryEntryJoin);
             }
             categoryToSimulationJoin = changedCategoryEntryJoin;
@@ -518,12 +522,12 @@ public class ContentScraperUtil {
             schema.setSchemaName(schemaName);
             schema.setSchemaUrl(schemaUrl);
             schema.setContentCategorySchemaUid(categorySchemeDao.insert(schema));
-        }else{
+        } else {
             ContentCategorySchema changedSchema = new ContentCategorySchema();
             changedSchema.setContentCategorySchemaUid(schema.getContentCategorySchemaUid());
             changedSchema.setSchemaName(schemaName);
             changedSchema.setSchemaUrl(schemaUrl);
-            if(!changedSchema.equals(schema)){
+            if (!changedSchema.equals(schema)) {
                 categorySchemeDao.update(changedSchema);
             }
             schema = changedSchema;
@@ -543,7 +547,7 @@ public class ContentScraperUtil {
             changedCategory.setContentCategoryUid(category.getCtnCatContentCategorySchemaUid());
             changedCategory.setCtnCatContentCategorySchemaUid(schema.getContentCategorySchemaUid());
             changedCategory.setName(categoryName);
-            if(!changedCategory.equals(category)){
+            if (!changedCategory.equals(category)) {
                 categoryDao.update(changedCategory);
             }
             category = changedCategory;
@@ -567,7 +571,7 @@ public class ContentScraperUtil {
             changedRelatedJoin.setCerejContentEntryUid(parentEntry.getContentEntryUid());
             changedRelatedJoin.setCerejRelatedEntryUid(relatedEntry.getContentEntryUid());
             changedRelatedJoin.setRelType(relatedType);
-            if(!changedRelatedJoin.equals(relatedTranslationJoin)){
+            if (!changedRelatedJoin.equals(relatedTranslationJoin)) {
                 contentEntryRelatedJoinDao.update(changedRelatedJoin);
             }
             relatedTranslationJoin = changedRelatedJoin;
@@ -603,7 +607,7 @@ public class ContentScraperUtil {
             changedLang.setName(langValue);
             boolean isChanged = false;
 
-            if(!changedLang.getName().equals(langObj.getName())){
+            if (!changedLang.getName().equals(langObj.getName())) {
                 isChanged = true;
             }
 
@@ -611,17 +615,17 @@ public class ContentScraperUtil {
                 changedLang.setIso_639_1_standard(twoLetterCode);
                 changedLang.setIso_639_2_standard(threeLetterCode);
 
-                if(!changedLang.getIso_639_1_standard().equals(langObj.getIso_639_1_standard())){
+                if (!changedLang.getIso_639_1_standard().equals(langObj.getIso_639_1_standard())) {
                     isChanged = true;
                 }
 
-                if(!changedLang.getIso_639_2_standard().equals(langObj.getIso_639_2_standard())){
+                if (!changedLang.getIso_639_2_standard().equals(langObj.getIso_639_2_standard())) {
                     isChanged = true;
                 }
 
             }
 
-            if(isChanged){
+            if (isChanged) {
                 languageDao.update(changedLang);
             }
             langObj = changedLang;
@@ -632,15 +636,14 @@ public class ContentScraperUtil {
 
 
     /**
-     *
-     * @param ePubFile file that was downloaded
-     * @param contentEntryFileDao dao to insert the file to database
-     * @param contentEntryFileStatusDao dao to insert path of file to database
-     * @param contentEntry entry that is joined to file
-     * @param md5 md5 of file
+     * @param ePubFile                            file that was downloaded
+     * @param contentEntryFileDao                 dao to insert the file to database
+     * @param contentEntryFileStatusDao           dao to insert path of file to database
+     * @param contentEntry                        entry that is joined to file
+     * @param md5                                 md5 of file
      * @param contentEntryContentEntryFileJoinDao file join with entry
-     * @param mobileOptimized isMobileOptimized
-     * @param fileType filetype of file
+     * @param mobileOptimized                     isMobileOptimized
+     * @param fileType                            filetype of file
      * @returns the entry file
      */
     public static ContentEntryFile insertContentEntryFile(File ePubFile, ContentEntryFileDao contentEntryFileDao,
@@ -680,16 +683,15 @@ public class ContentScraperUtil {
 
 
     /**
-     *
      * Checks if data is missing from the database by checking the file md5 and updates the database
      *
-     * @param contentFile file that is already downloaded
-     * @param contentEntry content entry that is joined to file
-     * @param contentEntryFileDao dao to insert the missing file entry
-     * @param contentEntryFileJoinDao dao to insert the missing file join entry
+     * @param contentFile               file that is already downloaded
+     * @param contentEntry              content entry that is joined to file
+     * @param contentEntryFileDao       dao to insert the missing file entry
+     * @param contentEntryFileJoinDao   dao to insert the missing file join entry
      * @param contentEntryFileStatusDao dao to insert the missing status path entry
-     * @param fileType file type of the file downloaded
-     * @param isMobileOptimized is the file mobileOptimized
+     * @param fileType                  file type of the file downloaded
+     * @param isMobileOptimized         is the file mobileOptimized
      * @throws IOException
      */
     public static void checkAndUpdateDatabaseIfFileDownloadedButNoDataFound(File contentFile, ContentEntry contentEntry,
@@ -722,31 +724,31 @@ public class ContentScraperUtil {
 
     public static LanguageVariant insertOrUpdateLanguageVariant(LanguageVariantDao variantDao, String variant, Language language) {
         LanguageVariant languageVariant = null;
-        if(!variant.isEmpty()){
+        if (!variant.isEmpty()) {
             CountryCode countryCode = CountryCode.getByCode(variant);
-            if(countryCode == null){
+            if (countryCode == null) {
                 List<CountryCode> countryList = CountryCode.findByName(variant);
-                if(countryList != null && !countryList.isEmpty()){
+                if (countryList != null && !countryList.isEmpty()) {
                     countryCode = countryList.get(0);
                 }
             }
-            if(countryCode != null){
+            if (countryCode != null) {
                 String alpha2 = countryCode.getAlpha2();
                 String name = countryCode.getName();
                 languageVariant = variantDao.findByCode(alpha2);
-                if(languageVariant == null){
+                if (languageVariant == null) {
                     languageVariant = new LanguageVariant();
                     languageVariant.setCountryCode(alpha2);
                     languageVariant.setName(name);
                     languageVariant.setLangUid(language.getLangUid());
                     languageVariant.setLangVariantUid(variantDao.insert(languageVariant));
-                }else{
+                } else {
                     LanguageVariant changedVariant = new LanguageVariant();
                     changedVariant.setLangVariantUid(languageVariant.getLangVariantUid());
                     changedVariant.setCountryCode(alpha2);
                     changedVariant.setName(name);
                     changedVariant.setLangUid(language.getLangUid());
-                    if(!changedVariant.equals(languageVariant)){
+                    if (!changedVariant.equals(languageVariant)) {
                         variantDao.update(languageVariant);
                     }
                     languageVariant = changedVariant;
@@ -758,7 +760,7 @@ public class ContentScraperUtil {
 
     public static ContentEntry checkContentEntryChanges(ContentEntry changedEntry, ContentEntry oldEntry, ContentEntryDao contentEntryDao) {
         changedEntry.setContentEntryUid(oldEntry.getContentEntryUid());
-        if(!changedEntry.equals(oldEntry)){
+        if (!changedEntry.equals(oldEntry)) {
             changedEntry.setLastModified(System.currentTimeMillis());
             contentEntryDao.update(changedEntry);
         }
@@ -766,24 +768,24 @@ public class ContentScraperUtil {
     }
 
     /**
-     * @param id entry id
-     * @param title title of entry
-     * @param sourceUrl source url of entry
-     * @param publisher publisher of entry
-     * @param licenseType license Type of entry(predefined)
+     * @param id              entry id
+     * @param title           title of entry
+     * @param sourceUrl       source url of entry
+     * @param publisher       publisher of entry
+     * @param licenseType     license Type of entry(predefined)
      * @param primaryLanguage primary language uid of entry
      * @param languageVariant language variant uid of entry
-     * @param description description of entry
-     * @param isLeaf is the entry a leaf (last child)
-     * @param author author of entry
-     * @param thumbnailUrl thumbnail Url of entry if exists
-     * @param licenseName license name of entry
-     * @param licenseUrl license Url of entry
+     * @param description     description of entry
+     * @param isLeaf          is the entry a leaf (last child)
+     * @param author          author of entry
+     * @param thumbnailUrl    thumbnail Url of entry if exists
+     * @param licenseName     license name of entry
+     * @param licenseUrl      license Url of entry
      * @return the contententry
      */
     private static ContentEntry createContentEntryObject(String id, String title, String sourceUrl, String publisher, int licenseType,
-                                        long primaryLanguage, Long languageVariant, String description, boolean isLeaf,
-                                                        String author, String thumbnailUrl, String licenseName, String licenseUrl){
+                                                         long primaryLanguage, Long languageVariant, String description, boolean isLeaf,
+                                                         String author, String thumbnailUrl, String licenseName, String licenseUrl) {
         ContentEntry contentEntry = new ContentEntry();
         contentEntry.setEntryId(id);
         contentEntry.setTitle(title);
@@ -791,7 +793,7 @@ public class ContentScraperUtil {
         contentEntry.setPublisher(publisher);
         contentEntry.setLicenseType(licenseType);
         contentEntry.setPrimaryLanguageUid(primaryLanguage);
-        if(languageVariant != null){
+        if (languageVariant != null) {
             contentEntry.setLanguageVariantUid(languageVariant);
         }
         contentEntry.setDescription(description);
@@ -804,38 +806,82 @@ public class ContentScraperUtil {
     }
 
     /**
-     * @param id entry id
-     * @param title title of entry
-     * @param sourceUrl source url of entry
-     * @param publisher publisher of entry
-     * @param licenseType license Type of entry(predefined)
+     * @param id              entry id
+     * @param title           title of entry
+     * @param sourceUrl       source url of entry
+     * @param publisher       publisher of entry
+     * @param licenseType     license Type of entry(predefined)
      * @param primaryLanguage primary language uid of entry
      * @param languageVariant language variant uid of entry
-     * @param description description of entry
-     * @param isLeaf is the entry a leaf (last child)
-     * @param author author of entry
-     * @param thumbnailUrl thumbnail Url of entry if exists
-     * @param licenseName license name of entry
-     * @param licenseUrl license Url of entry
+     * @param description     description of entry
+     * @param isLeaf          is the entry a leaf (last child)
+     * @param author          author of entry
+     * @param thumbnailUrl    thumbnail Url of entry if exists
+     * @param licenseName     license name of entry
+     * @param licenseUrl      license Url of entry
      * @param contentEntryDao dao to insert or update
      * @return the updated content entry
      */
     public static ContentEntry createOrUpdateContentEntry(String id, String title, String sourceUrl, String publisher, int licenseType,
                                                           long primaryLanguage, Long languageVariant, String description, boolean isLeaf,
                                                           String author, String thumbnailUrl, String licenseName, String licenseUrl,
-                                                          ContentEntryDao contentEntryDao){
+                                                          ContentEntryDao contentEntryDao) {
 
         ContentEntry contentEntry = contentEntryDao.findBySourceUrl(sourceUrl);
         if (contentEntry == null) {
-            contentEntry = createContentEntryObject(id, title,sourceUrl, publisher, licenseType, primaryLanguage,
+            contentEntry = createContentEntryObject(id, title, sourceUrl, publisher, licenseType, primaryLanguage,
                     languageVariant, description, isLeaf, author, thumbnailUrl, licenseName, licenseUrl);
             contentEntry.setLastModified(System.currentTimeMillis());
             contentEntry.setContentEntryUid(contentEntryDao.insert(contentEntry));
         } else {
-            ContentEntry changedEntry = createContentEntryObject(id, title,sourceUrl, publisher, licenseType, primaryLanguage,
+            ContentEntry changedEntry = createContentEntryObject(id, title, sourceUrl, publisher, licenseType, primaryLanguage,
                     languageVariant, description, isLeaf, author, thumbnailUrl, licenseName, licenseUrl);
             contentEntry = ContentScraperUtil.checkContentEntryChanges(changedEntry, contentEntry, contentEntryDao);
         }
         return contentEntry;
     }
+
+    public static PlixIndex createIndexWithResourceFiles(String url, File directory, String mimeType, InputStream filePath, String fileName) throws IOException {
+
+        URL imageUrl = new URL(url);
+        File imageFile = new File(directory, imageUrl.getAuthority().replaceAll("[^a-zA-Z0-9\\.\\-]", "_"));
+        imageFile.mkdirs();
+
+        File correctImageFile = new File(imageFile, fileName);
+        FileUtils.copyToFile(filePath, correctImageFile);
+
+        PlixIndex khanImages = new PlixIndex();
+        khanImages.url = imageUrl.toString();
+        khanImages.mimeType = mimeType;
+        khanImages.path = imageFile.getName() + "/" + correctImageFile.getName();
+
+        return khanImages;
+    }
+
+    public static String getCookieForKhan(String url) {
+
+        ChromeDriver driver = ContentScraperUtil.setupChrome(false);
+
+        String cookie = "";
+        driver.get(url);
+        WebDriverWait waitDriver = new WebDriverWait(driver, 10000);
+        ContentScraperUtil.waitForJSandJQueryToLoad(waitDriver);
+
+        driver.findElement(By.cssSelector("div#login-signup-root input[id*=email-or-username]")).sendKeys("samih.mustafa@gmail.com");
+        driver.findElement(By.cssSelector("div#login-signup-root input[id*=text-field-1-password]")).sendKeys("ustad123");
+        driver.findElement(By.cssSelector("div#login-signup-root div:contains(Log in)")).click();
+
+        for (Cookie ck : driver.manage().getCookies()) {
+
+            if (ck.getName().equalsIgnoreCase("KAID")) {
+                cookie = ck.getName() + "=" + ck.getValue();
+                System.out.println(cookie);
+            }
+        }
+
+        driver.close();
+
+        return cookie;
+    }
+
 }

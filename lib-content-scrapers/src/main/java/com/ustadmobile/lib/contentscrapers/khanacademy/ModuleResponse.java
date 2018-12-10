@@ -53,6 +53,8 @@ public class ModuleResponse {
 
             public String title;
 
+            public int expectedDoNCount;
+
             public DownloadUrl downloadUrl;
 
             public class DownloadUrl {
