@@ -36,6 +36,7 @@ import com.ustadmobile.core.impl.UMStorageDir;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.TestUtils;
 import com.ustadmobile.core.util.UMIOUtils;
+import com.ustadmobile.test.core.impl.PlatformTestUtil;
 
 import junit.framework.TestCase;
 
@@ -74,7 +75,8 @@ public abstract class TestCacheAndStorageDir extends TestCase{
     }
     
     public void testCacheDir()  {
-        Object context = UMContextGetter.getContext(this);
+//        Object context = UMContextGetter.getContext(this);
+        Object context = PlatformTestUtil.getTargetContext();
         TestUtils utils = new TestUtils();
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         impl.init(context);

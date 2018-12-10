@@ -1,62 +1,44 @@
 package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.db.UmAppDatabase;
+
 import com.ustadmobile.core.db.dao.WamdaPersonDao;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.AppConfig;
 import com.ustadmobile.core.impl.UmAccountManager;
-import com.ustadmobile.lib.db.entities.Person;
-import com.ustadmobile.lib.db.entities.UmAccount;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.CreateAccountView;
 import com.ustadmobile.core.view.LoginView2;
+import com.ustadmobile.lib.db.entities.Person;
+import com.ustadmobile.lib.db.entities.UmAccount;
 import com.ustadmobile.lib.db.entities.WamdaPerson;
 
 import java.util.Hashtable;
 
-import static com.ustadmobile.core.view.LoginView2.ARG_PERSON_UID;
+public class LoginPresenter2 extends UstadBaseController<LoginView2> {
 
-public class LoginPresenter2 extends UstadBaseController<LoginView2>{
-    private Hashtable arguments;
+    public static final String ARG_NEXT = "next";
+
+    private String mNextDest;
+
     public LoginPresenter2(Object context, Hashtable arguments, LoginView2 view) {
         super(context, arguments, view);
-        this.arguments = arguments;
-    }
-
-    @Override
-    public void setUIStrings() {
-
+        if(arguments.containsKey(ARG_NEXT)){
+            mNextDest = arguments.get(ARG_NEXT).toString();
+        }
     }
 
     public void handleClickLogin(String username, String password, String serverUrl) {
-        view.setInProgress(true);
-        view.setErrorMessage(null);
-        UmAppDatabase.getInstance(context).getPersonDao().authenticate(username, password,
-                new UmCallback<UmAccount>() {
+        UmAppDatabase loginRepoDb = UmAppDatabase.getInstance(getContext()).getRepository(serverUrl,
+                "");
+        loginRepoDb.getPersonDao().login(username, password, new UmCallback<UmAccount>() {
             @Override
             public void onSuccess(UmAccount result) {
                 if(result != null) {
-                    result.setEndpointUrl(UstadMobileSystemImpl.getInstance().getAppConfigString(
-                            "apiUrl", "http://localhost/", context));
-                    UmAccountManager.setActiveAccount(result, context);
-                    view.runOnUiThread(() -> {
-                        view.setInProgress(false);
-                        view.setPassword("");
-                        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-                        String nextDest = getArgumentString(ARG_NEXT) != null ?
-                                getArgumentString(ARG_NEXT) :
-                                impl.getAppConfigString(AppConfig.KEY_FIRST_DEST, null,
-                                        context);
-                        arguments.put(ARG_PERSON_UID,String.valueOf(result.getPersonUid()));
-                        UstadMobileSystemImpl.getInstance().go(nextDest,arguments, context);
-                    });
-                }else {
-                    view.runOnUiThread(() -> {
-                        view.setPassword("");
-                        view.setErrorMessage(UstadMobileSystemImpl.getInstance().getString(
-                                        MessageID.invalid_username_or_password, context));
-                    });
+                    result.setEndpointUrl(serverUrl);
+                    UmAccountManager.setActiveAccount(result, getContext());
+                    UstadMobileSystemImpl.getInstance().go(mNextDest, getContext());
                 }
             }
 
@@ -104,4 +86,8 @@ public class LoginPresenter2 extends UstadBaseController<LoginView2>{
         });
     }
 
+    @Override
+    public void setUIStrings() {
+
+    }
 }

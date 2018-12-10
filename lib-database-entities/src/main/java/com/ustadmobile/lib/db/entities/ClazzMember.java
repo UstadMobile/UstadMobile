@@ -9,7 +9,7 @@ import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
  * This class mediates the relationship between a person and a clazz. A member can be a teacher,
  * or a student. Each member has a joining date, and a leaving date.
  */
-@UmEntity(tableId = 7)
+@UmEntity(tableId = 11)
 public class ClazzMember implements SyncableEntity {
 
     public static final int ROLE_STUDENT = 1;

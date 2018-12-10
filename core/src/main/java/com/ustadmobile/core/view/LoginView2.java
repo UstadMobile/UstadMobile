@@ -17,5 +17,4 @@ public interface LoginView2 extends UstadView {
     void setErrorMessage(String errorMessage);
 
     void setInProgress(boolean inProgress);
-
 }

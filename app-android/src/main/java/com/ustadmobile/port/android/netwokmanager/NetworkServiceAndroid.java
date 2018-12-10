@@ -12,16 +12,11 @@ import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
-import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
 
-import java.sql.SQLException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import edu.rit.se.wifibuddy.WifiDirectHandler;
-
-import com.ustadmobile.core.listener.ActiveSyncListener;
-import com.ustadmobile.core.listener.ActiveUserListener;
 
 import static com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroid.PREF_KEY_SUPERNODE;
 

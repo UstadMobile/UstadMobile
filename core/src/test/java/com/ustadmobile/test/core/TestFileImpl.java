@@ -42,6 +42,8 @@ import junit.framework.TestCase;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import okhttp3.internal.platform.Platform;
+
 /* $if umplatform == 2  $
     import j2meunit.framework.TestCase;
  $else$ */
@@ -75,7 +77,7 @@ public abstract class TestFileImpl extends TestCase {
     public void testFileImpl() throws IOException{
         UstadMobileSystemImpl.l(UMLog.DEBUG, 600, "testFileImpl Asking for context");
 
-        Object context = UMContextGetter.getContext(this);
+        Object context = PlatformTestUtil.getTargetContext();
         TestUtils utils = new TestUtils();
         
         UstadMobileSystemImpl.l(UMLog.DEBUG, 600, "testFileImpl got context");

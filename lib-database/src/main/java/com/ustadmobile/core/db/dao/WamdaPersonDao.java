@@ -1,6 +1,5 @@
 package com.ustadmobile.core.db.dao;
 
-import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.lib.database.annotation.UmDao;
@@ -21,6 +20,9 @@ public abstract class WamdaPersonDao implements SyncableDao<WamdaPerson, WamdaPe
 
     @UmQuery("SELECT * FROM WamdaPerson WHERE wamdaPersonUid = :personUid")
     public abstract void findByUidAsync(long personUid,UmCallback<WamdaPerson> callback);
+
+    @UmQuery("UPDATE WamdaPerson SET pointScore = pointScore + :score WHERE wamdaPersonUid = :personUid")
+    public abstract void updateScore(long personUid, int score);
 
     @UmUpdate
     public abstract void updateAsync(WamdaPerson wamdaPerson,UmCallback<Integer> callback);

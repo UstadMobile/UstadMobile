@@ -11,7 +11,7 @@ import static com.ustadmobile.lib.db.entities.Language.TABLE_ID;
 @UmEntity(tableId = TABLE_ID)
 public class Language {
 
-    public static final int TABLE_ID = 9;
+    public static final int TABLE_ID = 13;
 
     @UmPrimaryKey(autoGenerateSyncable = true)
     private long langUid;
