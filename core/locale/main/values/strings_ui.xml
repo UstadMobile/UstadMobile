@@ -463,5 +463,8 @@ This is the one you should be editing. The one in /core/locale/main/values/strin
     <string name="average">Average</string>
     <string name="age">Age</string>
     <string name="days">Days</string>
+    <string name="onboarding_easily_record_student_attendance">Easily record student attendance</string>
+    <string name="get_started">Get started</string>
+
 
 </resources>

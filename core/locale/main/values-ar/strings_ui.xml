@@ -364,5 +364,7 @@ This is the one you should be editing. The one in /core/locale/main/values/strin
 <string name='json'>JSON تدوين مواضيع بجافا سكريبت </string>
 <string name='date'>التاريخ</string>
 <string name='average'>المعدل</string>
+<string name="onboarding_easily_record_student_attendance">بسهولة تسجيل حضور الطلاب</string>
+<string name="get_started">البدء</string>
 
 </resources>

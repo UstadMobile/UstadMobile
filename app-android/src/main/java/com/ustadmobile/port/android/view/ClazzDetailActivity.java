@@ -179,7 +179,6 @@ public class ClazzDetailActivity extends UstadBaseActivity implements
         }
     }
 
-
     /**
      * ClassDetailView's view pager adapter
      */
