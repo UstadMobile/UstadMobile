@@ -109,6 +109,20 @@ public abstract class AbstractDbProcessor {
 
         for(Element dbClassElement : roundEnvironment.getElementsAnnotatedWith(UmDatabase.class)) {
             try {
+                HashMap<Integer, TypeElement> tableIdMap = new HashMap<>();
+                for(TypeElement entityType : findEntityTypes((TypeElement)dbClassElement)) {
+                    int tableId = entityType.getAnnotation(UmEntity.class).tableId();
+                    if(tableId != 0 && tableIdMap.containsKey(tableId)) {
+                        messager.printMessage(Diagnostic.Kind.ERROR, "Duplicate UmEntity " +
+                                "tableId: " + tableId + " assigned to " +
+                                entityType.getQualifiedName() + " and " +
+                                tableIdMap.get(tableId).getQualifiedName(), entityType);
+                    }
+
+                    tableIdMap.put(tableId, entityType);
+                }
+
+
                 processDbClass((TypeElement)dbClassElement, destination);
 
                 for(Element subElement : dbClassElement.getEnclosedElements()) {
