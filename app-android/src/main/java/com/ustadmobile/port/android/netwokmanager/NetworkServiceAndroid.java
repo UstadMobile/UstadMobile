@@ -43,7 +43,7 @@ public class NetworkServiceAndroid extends Service {
 
     private Runnable syncRunnable = () -> {
         UmAppDatabase repo = UmAccountManager.getRepositoryForActiveAccount(getApplicationContext());
-        UmAppDatabase.getInstance(getApplicationContext()).syncWith(repo, 0);
+        //UmAppDatabase.getInstance(getApplicationContext()).syncWith(repo, 0);
         System.out.print("syncWith completed");
         try {
             Thread.sleep(60 * 1000);
