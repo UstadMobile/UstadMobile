@@ -95,11 +95,10 @@ public class SelectClazzesDialogFragment extends UstadDialogFragment implements
         toolbar.setNavigationIcon(R.drawable.ic_arrow_back_white_24dp);
         toolbar.setNavigationOnClickListener(v -> dialog.dismiss());
         toolbar.inflateMenu(R.menu.menu_done);
+        //Click the tick button on the toolbar:
         toolbar.setOnMenuItemClickListener(item -> {
             int i = item.getItemId();
             if (i == R.id.menu_catalog_entry_presenter_share) {
-                System.out.println("DONE");
-                //TODO: Check
                 mPresenter.handleCommonPressed(-1);
             }
             return false;
@@ -110,15 +109,7 @@ public class SelectClazzesDialogFragment extends UstadDialogFragment implements
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
 
         //Dialog stuff:
-        //Dialog's positive / negative listeners :
-        DialogInterface.OnClickListener positiveOCL =
-                (dialog, which) -> System.out.print("Positive");
-
-        DialogInterface.OnClickListener negativeOCL =
-                (dialog, which) -> System.out.println("Negative");
-
         //Set any view components and its listener (post presenter work)
-
         dialog = new android.support.v7.app.AlertDialog.Builder(getContext(),
                 R.style.FullScreenDialogStyle)
                 .setView(rootView)
@@ -150,6 +141,7 @@ public class SelectClazzesDialogFragment extends UstadDialogFragment implements
 
     @Override
     public void finish(){
+        selectedClazzes = mPresenter.getClazzes();
         if(mAttachedContext instanceof ClazzSelectDialogListener){
              ((ClazzSelectDialogListener) mAttachedContext).onSelectClazzesResult(selectedClazzes);
         }

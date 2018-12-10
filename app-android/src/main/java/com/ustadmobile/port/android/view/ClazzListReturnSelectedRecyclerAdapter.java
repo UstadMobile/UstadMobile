@@ -10,10 +10,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
-import com.ustadmobile.core.controller.CommonHandlerPresenter;
+import com.ustadmobile.core.controller.SelectClazzesDialogPresenter;
 import com.ustadmobile.lib.db.entities.ClazzWithNumStudents;
 
 public class ClazzListReturnSelectedRecyclerAdapter extends PagedListAdapter<ClazzWithNumStudents,
@@ -21,7 +22,7 @@ public class ClazzListReturnSelectedRecyclerAdapter extends PagedListAdapter<Cla
 
     Context theContext;
     private Fragment theFragment;
-    private CommonHandlerPresenter thePresenter;
+    private SelectClazzesDialogPresenter thePresenter;
 
     class ClazzViewHolder extends RecyclerView.ViewHolder {
         ClazzViewHolder(View itemView){super(itemView);}
@@ -30,7 +31,7 @@ public class ClazzListReturnSelectedRecyclerAdapter extends PagedListAdapter<Cla
     ClazzListReturnSelectedRecyclerAdapter(
             @NonNull DiffUtil.ItemCallback<ClazzWithNumStudents>
                     diffCallback, Context context, Fragment fragment,
-            CommonHandlerPresenter mPresenter) {
+            SelectClazzesDialogPresenter mPresenter) {
         super(diffCallback);
         theContext = context;
         theFragment = fragment;
@@ -59,11 +60,18 @@ public class ClazzListReturnSelectedRecyclerAdapter extends PagedListAdapter<Cla
                 .setText(numStudentsText);
 
         ((CheckBox)holder.itemView.findViewById(R.id.item_clazz_list_enroll_person_checkbox)).setText("");
-        //TODO: Handle
-//        ((CheckBox)holder.itemView.findViewById(R.id.item_clazz_list_enroll_person_checkbox))
-//                .setChecked(false);
 
-        holder.itemView.setOnClickListener((view) -> thePresenter.handleCommonPressed(-1));
+        CheckBox theCheckbox = holder.itemView.findViewById(R.id.item_clazz_list_enroll_person_checkbox);
+        theCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(isChecked){
+                    thePresenter.addToClazzes(clazz);
+                }else{
+                    thePresenter.removeFromClazzes(clazz);
+                }
+            }
+        });
 
     }
 

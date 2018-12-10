@@ -38,6 +38,7 @@ public class ClazzListFragment extends UstadBaseFragment implements ClazzListVie
     private ClazzListPresenter mPresenter;
     Spinner sortSpinner;
     String[] sortSpinnerPresets;
+    FloatingTextButton fab;
 
     /**
      * Generates a new Fragment for a page fragment
@@ -79,7 +80,7 @@ public class ClazzListFragment extends UstadBaseFragment implements ClazzListVie
                 UMAndroidUtil.bundleToHashtable(getArguments()), this);
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
 
-        FloatingTextButton fab = rootContainer.findViewById(R.id.fragment_clazz_list_fab);
+        fab = rootContainer.findViewById(R.id.fragment_clazz_list_fab);
         fab.setOnClickListener(v -> mPresenter.handleClickPrimaryActionButton());
 
         sortSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -147,6 +148,15 @@ public class ClazzListFragment extends UstadBaseFragment implements ClazzListVie
                 R.layout.spinner_item, sortSpinnerPresets);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         sortSpinner.setAdapter(adapter);
+    }
+
+    @Override
+    public void showAddClassButton(boolean show) {
+        if(true){
+            fab.setVisibility(View.VISIBLE);
+        }else{
+            fab.setVisibility(View.INVISIBLE);
+        }
     }
 
 }

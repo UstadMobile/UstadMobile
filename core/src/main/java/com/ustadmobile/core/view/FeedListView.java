@@ -56,4 +56,6 @@ public interface FeedListView extends UstadView {
      */
     void updateAttendanceTrend(int trend, int per);
 
+    void hideReportOptionsOnSummaryCard(boolean visible);
+
 }

@@ -11,6 +11,7 @@ import android.widget.AdapterView;
 import android.widget.NumberPicker;
 
 import com.toughra.ustadmobile.R;
+import com.ustadmobile.core.controller.ReportAttendanceGroupedByThresholdsPresenter;
 import com.ustadmobile.core.controller.SelectAttendanceThresholdsDialogPresenter;
 import com.ustadmobile.core.view.DismissableDialog;
 import com.ustadmobile.core.view.SelectAttendanceThresholdsDialogView;
@@ -38,21 +39,15 @@ public class SelectAttendanceThresholdsDialogFragment extends UstadDialogFragmen
     //Context (Activity calling this)
     private Context mAttachedContext;
 
-    public class ThresholdValues{
-        public int low, med, high;
-    }
-
-    private ThresholdValues selectedValues;
+    private ReportAttendanceGroupedByThresholdsPresenter.ThresholdValues selectedValues;
 
     //Activity should implement this.
     public interface ThresholdsSelectedDialogListener{
-        void onThresholdResult(ThresholdValues values);
+        void onThresholdResult(ReportAttendanceGroupedByThresholdsPresenter.ThresholdValues values);
     }
-
 
     /**
      * Generates a new Fragment for a page fragment
-     * TODO: Add any args if needed
      *
      * @return A new instance of fragment SelectAttendanceThresholdsDialogFragment.
      */
@@ -73,7 +68,6 @@ public class SelectAttendanceThresholdsDialogFragment extends UstadDialogFragmen
         String[] nums = new String[101];
         for(int i=1; i<nums.length; i++)
             nums[i] = Integer.toString(i);
-
 
         //np.setDisplayedValues(nums);
         np.setValue(setVal);
@@ -107,14 +101,18 @@ public class SelectAttendanceThresholdsDialogFragment extends UstadDialogFragmen
 
         //Dialog stuff:
         //Dialog's positive / negative listeners :
-        DialogInterface.OnClickListener positiveOCL =
-                (dialog, which) -> finish();
+        DialogInterface.OnClickListener positiveOCL = (dialog, which) -> {
+
+            selectedValues.low = lowNumberPicker.getValue();
+            selectedValues.med = midNumberPicker.getValue();
+            selectedValues.high = highNumberPicker.getValue();
+
+            finish();
+        };
+
 
         DialogInterface.OnClickListener negativeOCL =
-                (dialog, which) -> System.out.println("Negative");
-
-        //Set presenter.
-        //Call it's onCreate()
+                (dialog, which) -> selectedValues = null;
 
         //Set any view components and its listener (post presenter work)
 
@@ -122,7 +120,7 @@ public class SelectAttendanceThresholdsDialogFragment extends UstadDialogFragmen
         AlertDialog.Builder builder = new AlertDialog.Builder(Objects.requireNonNull(getContext()));
         builder.setTitle(R.string.select_attendance_thresholds);
         builder.setView(rootView);
-        builder.setPositiveButton(R.string.add, positiveOCL);
+        builder.setPositiveButton(R.string.done, positiveOCL);
         builder.setNegativeButton(R.string.cancel, negativeOCL);
         dialog = builder.create();
 
@@ -133,7 +131,7 @@ public class SelectAttendanceThresholdsDialogFragment extends UstadDialogFragmen
     public void onAttach(Context context){
         super.onAttach(context);
         this.mAttachedContext = context;
-        selectedValues = new ThresholdValues();
+        selectedValues = new ReportAttendanceGroupedByThresholdsPresenter.ThresholdValues();
     }
 
     @Override

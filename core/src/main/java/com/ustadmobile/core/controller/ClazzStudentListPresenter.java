@@ -37,6 +37,15 @@ public class ClazzStudentListPresenter extends
 
     private Hashtable<Long, Integer> idToOrderInteger;
 
+    private boolean teachersEditable = false;
+
+    public boolean isTeachersEditable() {
+        return teachersEditable;
+    }
+
+    public void setTeachersEditable(boolean teachersEditable) {
+        this.teachersEditable = teachersEditable;
+    }
 
     UmAppDatabase repository = UmAccountManager.getRepositoryForActiveAccount(context);
 
@@ -64,6 +73,8 @@ public class ClazzStudentListPresenter extends
     @Override
     public void onCreate(Hashtable savedState) {
         super.onCreate(savedState);
+
+        this.teachersEditable = true;
 
         //Find the Provider
         clazzPersonListProvider = repository.getClazzMemberDao()

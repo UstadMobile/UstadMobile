@@ -6,4 +6,13 @@ package com.ustadmobile.core.view;
 public interface BasePointView2 extends UstadView {
 
     String VIEW_NAME = "PeopleHome";
+
+    /**
+     * Show a dialog used to share the application itself offline
+     */
+    void showShareAppDialog();
+
+    void dismissShareAppDialog();
+
+    void shareAppSetupFile(String filePath);
 }

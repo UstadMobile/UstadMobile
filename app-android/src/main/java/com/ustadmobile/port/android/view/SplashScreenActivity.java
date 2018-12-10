@@ -656,8 +656,10 @@ public class SplashScreenActivity extends AppCompatActivity
                     "Mahdi el-Mahmoud","Badraan el-Zaman","Saeed el-Rafiq","Husaam el-Wakim",
                     "Mansoor el-Saidi","Nazmi al-Hares"};
 
+            int i = 0;
             //Persist names to DB <-> ClazzMembers <-> Clazz
             for (String full_name: names){
+                i++;
                 //Create Person
                 String first_name = full_name.split(" ")[0];
                 String last_name = full_name.split(" ")[1];
@@ -673,7 +675,13 @@ public class SplashScreenActivity extends AppCompatActivity
                 }else{
                     person.setGender(Person.GENDER_MALE);
                 }
-                person.setDateOfBirth(UMCalendarUtil.getLongDateFromPrettyString("12-Jan-2001"));
+                int year = 2010;
+
+                if(first_name.toLowerCase().startsWith("a") || first_name.toLowerCase().startsWith("h")){
+                    year = 2010 - i;
+                }
+
+                person.setDateOfBirth(UMCalendarUtil.getLongDateFromPrettyString("12-Jan-"+year));
                 person.setFatherName("Addulla " + last_name);
                 person.setMotherName("Aysha " + last_name);
                 person.setFatherNumber("+96212345678");
@@ -834,7 +842,7 @@ public class SplashScreenActivity extends AppCompatActivity
             //Adding some Activities
             ClazzActivityDao activityDao = repository.getClazzActivityDao();
 
-            for(int i = 0; i<34; i++){
+            for(i = 0; i<34; i++){
                 boolean thisBoolean = false;
                 long quantity = 1L;
 

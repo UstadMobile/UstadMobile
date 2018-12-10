@@ -1,18 +1,29 @@
 package com.ustadmobile.port.android.view;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.FileProvider;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.widget.Button;
 
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigationItem;
 import com.toughra.ustadmobile.R;
+import com.ustadmobile.core.controller.BasePointActivity2Presenter;
 import com.ustadmobile.core.view.BasePointView2;
+import com.ustadmobile.port.android.util.UMAndroidUtil;
 
+import java.io.File;
 import java.util.WeakHashMap;
 
 
@@ -30,6 +41,9 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
 
     private Toolbar toolbar;
 
+    private AlertDialog shareAppDialog;
+
+    private BasePointActivity2Presenter mPresenter;
     /**
      * ViewPager set up in its own method for clarity.
      */
@@ -62,6 +76,12 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
         toolbar = findViewById(R.id.base_point_2_toolbar);
         toolbar.setTitle("Ustad Mobile");
         setSupportActionBar(toolbar);
+
+
+        mPresenter = new BasePointActivity2Presenter(this,
+                UMAndroidUtil.bundleToHashtable(getIntent().getExtras()), this);
+        mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
+
 
         //Get the bottom navigation component.
         AHBottomNavigation bottomNavigation = findViewById(R.id.bottom_navigation);
@@ -122,6 +142,57 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
             }
             return true;
         });
+
+
+
+    }
+
+    @Override
+    public void shareAppSetupFile(String filePath) {
+        String applicationId = getPackageName();
+        Uri sharedUri = FileProvider.getUriForFile(this,
+                applicationId+".fileprovider",
+                new File(filePath));
+        Intent shareIntent = new Intent(Intent.ACTION_SEND);
+        shareIntent.setType("*/*");
+        shareIntent.putExtra(Intent.EXTRA_STREAM, sharedUri);
+        shareIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+        if(shareIntent.resolveActivity(getPackageManager()) != null) {
+            startActivity(shareIntent);
+        }
+
+        dismissShareAppDialog();
+    }
+
+    /**
+     * Handles Action Bar menu button click.
+     * @param item  The MenuItem clicked.
+     * @return  Boolean if handled or not.
+     */
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle item selection
+        int i = item.getItemId();
+        //If this activity started from other activity
+        if (i == R.id.menu_basepoint_share) {
+            mPresenter.handleClickShareIcon();
+            //shareAppSetupFile();
+            return super.onOptionsItemSelected(item);
+        } else {
+            return super.onOptionsItemSelected(item);
+        }
+    }
+
+    /**
+     * Creates the options on the toolbar - specifically the Done tick menu item
+     * @param menu  The menu options
+     * @return  true. always.
+     */
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_share, menu);
+        return true;
     }
 
     /**
@@ -130,6 +201,30 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
      */
     public void updateTitle(String title){
         toolbar.setTitle(title);
+    }
+
+    @Override
+    public void showShareAppDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.share_application);
+        builder.setView(R.layout.fragment_share_app_dialog);
+        builder.setPositiveButton(R.string.share, null);
+        builder.setNegativeButton(R.string.cancel, null);
+        shareAppDialog = builder.create();
+        shareAppDialog.setOnShowListener(dialogInterface -> {
+            Button okButton = shareAppDialog.getButton(AlertDialog.BUTTON_POSITIVE);
+            okButton.setOnClickListener(v -> mPresenter.handleConfirmShareApp());
+        });
+        shareAppDialog.show();
+    }
+
+
+
+    @Override
+    public void dismissShareAppDialog() {
+
+        shareAppDialog.dismiss();
+        shareAppDialog=null;
     }
 
     /**

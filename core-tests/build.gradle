@@ -1,34 +1,34 @@
 
 buildscript {
-    repositories {
-        maven {
-            url 'https://plugins.gradle.org/m2/'
-        }
-    }
-    dependencies {
-        classpath 'gradle.plugin.de.fuerstenau:BuildConfigPlugin:1.1.7'
-    }
+     repositories {
+          maven {
+               url 'https://plugins.gradle.org/m2/'
+          }
+     }
+     dependencies {
+          classpath 'gradle.plugin.de.fuerstenau:BuildConfigPlugin:1.1.7'
+     }
 }
 
 apply plugin: 'java-library'
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    api project(":core")
-    api project(":sharedse")
-    implementation project(':lib-database-entities')
+     compile fileTree(dir: 'libs', include: ['*.jar'])
+     api project(":core")
+     api project(":sharedse")
+     implementation project(':lib-database-entities')
 
 
-    implementation "net.sf.kxml:kxml2:$version_kxml"
-    implementation "org.json:json:$version_json"
-    implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
-    implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
+     implementation "net.sf.kxml:kxml2:$version_kxml"
+     implementation "org.json:json:$version_json"
+     implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
+     implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
 
-    implementation "junit:junit:$version_junit"
+     implementation "junit:junit:$version_junit"
 }
 
 jar {
-    exclude("com/ustadmobile/test/core/impl/PlatformTestUtil.class")
+     exclude("com/ustadmobile/test/core/impl/PlatformTestUtil.class")
 }
 
 sourceCompatibility = JavaVersion.VERSION_1_8
@@ -37,35 +37,35 @@ targetCompatibility = JavaVersion.VERSION_1_8
 ext.buildConfigProperties = new Properties()
 ext.buildConfigProperties.load(new FileInputStream(rootProject.file("buildconfig.default.properties")))
 if(rootProject.file("buildconfig.local.properties").exists()) {
-    ext.buildConfigProperties.load(new FileInputStream(rootProject.file("buildconfig.local.properties")))
+     ext.buildConfigProperties.load(new FileInputStream(rootProject.file("buildconfig.local.properties")))
 }
 
 /**
  * Generate build constants for testing purposes (e.g. remote servers etc.
  */
 task generateCoreTestConstantsBuildConfig (type: de.fuerstenau.gradle.buildconfig.GenerateBuildConfigTask) {
-    inputs.files(fileTree(dir: rootProject.file(".")).matching { include 'buildconfig.*.properties' })
-    outputDir = new File("${projectDir}/src/main/java")
-    packageName ="com.ustadmobile.test.core.buildconfig"
-    clsName = "TestConstants"
-    buildConfigField "String", "LOGIN_USER", project.ext.buildConfigProperties["test.remote_user"]
-    buildConfigField "String", "LOGIN_PASS", project.ext.buildConfigProperties["test.remote_auth"]
-    buildConfigField "String", "XAPI_SERVER", project.ext.buildConfigProperties["test.remote_xapi_server"]
-    buildConfigField "String", "LOGIN_URL", project.ext.buildConfigProperties["test.remote_login_url"]
-    buildConfigField "String", "UM_HTTP_TESTSERVER_HOSTNAME", project.ext.buildConfigProperties["test.um_http_testserver"]
-    buildConfigField "int", "UM_HTTP_TESTSERVER_CONTROL_PORT", project.ext.buildConfigProperties["test.um_http_testserver_controlport"]
-    buildConfigField "String", "CATALOG_OPDS_ROOT", project.ext.buildConfigProperties["test.catalog_opds_root"]
-    buildConfigField "int", "DEFAULT_NETWORK_INTERVAL", project.ext.buildConfigProperties["test.remote_network_interval"]
-    buildConfigField "int", "DEFAULT_NETWORK_TIMEOUT", project.ext.buildConfigProperties["test.remote_network_timeout"]
-    buildConfigField "String", "REGISTER_URL", project.ext.buildConfigProperties["test.register_url"]
-    buildConfigField "String", "TEST_REMOTE_BLUETOOTH_DEVICE", project.ext.buildConfigProperties["test.remote_bluetooth_device"]
-    buildConfigField "String", "TEST_NETWORK_SERVICE_NAME", project.ext.buildConfigProperties['test.network_service_name']
-    buildConfigField "String", "TEST_MOCK_LOCAL_BLUETOOTH_DEVICE", project.ext.buildConfigProperties["test.mock_local_bluetooth_device"]
-    buildConfigField "int", "TEST_REMOTE_SLAVE_SERVER_PORT", project.ext.buildConfigProperties["test.remote_slave_server_port"]
-    buildConfigField "String", "TEST_REMOTE_SLAVE_SERVER", project.ext.buildConfigProperties["test.remote_slave_server"]
-    buildConfigField "String", "TEST_REMOTE_MOCK_SLAVE_SERVER", project.ext.buildConfigProperties["test.mock_remote_slave_server"]
-    buildConfigField "String", "TEST_REMOTE_SLAVE_SERVER_SERIAL", project.ext.buildConfigProperties["test.remote_slave_server_serial"]
-    buildConfigField "String", "TEST_REMOTE_SLAVE_SERVER_WLAN_MAC", project.ext.buildConfigProperties["test.remote_wlan_mac_addr"]
+     inputs.files(fileTree(dir: rootProject.file(".")).matching { include 'buildconfig.*.properties' })
+     outputDir = new File("${projectDir}/src/main/java")
+     packageName ="com.ustadmobile.test.core.buildconfig"
+     clsName = "TestConstants"
+     buildConfigField "String", "LOGIN_USER", project.ext.buildConfigProperties["test.remote_user"]
+     buildConfigField "String", "LOGIN_PASS", project.ext.buildConfigProperties["test.remote_auth"]
+     buildConfigField "String", "XAPI_SERVER", project.ext.buildConfigProperties["test.remote_xapi_server"]
+     buildConfigField "String", "LOGIN_URL", project.ext.buildConfigProperties["test.remote_login_url"]
+     buildConfigField "String", "UM_HTTP_TESTSERVER_HOSTNAME", project.ext.buildConfigProperties["test.um_http_testserver"]
+     buildConfigField "int", "UM_HTTP_TESTSERVER_CONTROL_PORT", project.ext.buildConfigProperties["test.um_http_testserver_controlport"]
+     buildConfigField "String", "CATALOG_OPDS_ROOT", project.ext.buildConfigProperties["test.catalog_opds_root"]
+     buildConfigField "int", "DEFAULT_NETWORK_INTERVAL", project.ext.buildConfigProperties["test.remote_network_interval"]
+     buildConfigField "int", "DEFAULT_NETWORK_TIMEOUT", project.ext.buildConfigProperties["test.remote_network_timeout"]
+     buildConfigField "String", "REGISTER_URL", project.ext.buildConfigProperties["test.register_url"]
+     buildConfigField "String", "TEST_REMOTE_BLUETOOTH_DEVICE", project.ext.buildConfigProperties["test.remote_bluetooth_device"]
+     buildConfigField "String", "TEST_NETWORK_SERVICE_NAME", project.ext.buildConfigProperties['test.network_service_name']
+     buildConfigField "String", "TEST_MOCK_LOCAL_BLUETOOTH_DEVICE", project.ext.buildConfigProperties["test.mock_local_bluetooth_device"]
+     buildConfigField "int", "TEST_REMOTE_SLAVE_SERVER_PORT", project.ext.buildConfigProperties["test.remote_slave_server_port"]
+     buildConfigField "String", "TEST_REMOTE_SLAVE_SERVER", project.ext.buildConfigProperties["test.remote_slave_server"]
+     buildConfigField "String", "TEST_REMOTE_MOCK_SLAVE_SERVER", project.ext.buildConfigProperties["test.mock_remote_slave_server"]
+     buildConfigField "String", "TEST_REMOTE_SLAVE_SERVER_SERIAL", project.ext.buildConfigProperties["test.remote_slave_server_serial"]
+     buildConfigField "String", "TEST_REMOTE_SLAVE_SERVER_WLAN_MAC", project.ext.buildConfigProperties["test.remote_wlan_mac_addr"]
 }
 
 compileJava.dependsOn(generateCoreTestConstantsBuildConfig)
@@ -74,8 +74,8 @@ compileJava.dependsOn(generateCoreTestConstantsBuildConfig)
  * When running in test mode we use getClass.getResource to load assets.
  */
 task copyCoreResources(type: Copy) {
-    from "${projectDir}/../core/src/main/assets"
-    into "${buildDir}/classes/main/res"
+     from "${projectDir}/../core/src/main/assets"
+     into "${buildDir}/classes/main/res"
 }
 
 processResources.dependsOn(copyCoreResources)

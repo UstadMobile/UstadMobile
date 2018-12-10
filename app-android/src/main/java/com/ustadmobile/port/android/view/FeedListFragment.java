@@ -42,6 +42,7 @@ public class FeedListFragment extends UstadBaseFragment implements FeedListView 
     private TextView numClassesView, numStudentsView, attendancePercentageView;
     private FeedListPresenter mPresenter;
     private Button reportButton;
+    private ImageView reportImageView;
 
     /**
      * The Recycler Adapter for Feed Entries.
@@ -170,6 +171,8 @@ public class FeedListFragment extends UstadBaseFragment implements FeedListView 
                 rootContainer.findViewById(R.id.fragment_feed_list_report_card_attendance_percentage);
         reportButton =
                 rootContainer.findViewById(R.id.fragment_feed_list_report_card_view_report);
+        reportImageView =
+                rootContainer.findViewById(R.id.fragment_feed_list_report_card_report_icon);
 
         //Create presenter and call its onCreate()
         mPresenter = new FeedListPresenter(this, UMAndroidUtil.bundleToHashtable(
@@ -249,6 +252,17 @@ public class FeedListFragment extends UstadBaseFragment implements FeedListView 
                 break;
             default:
                 break;
+        }
+    }
+
+    @Override
+    public void hideReportOptionsOnSummaryCard(boolean visible) {
+        if(visible) {
+            reportImageView.setVisibility(View.VISIBLE);
+            reportButton.setVisibility(View.VISIBLE);
+        }else{
+            reportImageView.setVisibility(View.INVISIBLE);
+            reportButton.setVisibility(View.INVISIBLE);
         }
     }
 

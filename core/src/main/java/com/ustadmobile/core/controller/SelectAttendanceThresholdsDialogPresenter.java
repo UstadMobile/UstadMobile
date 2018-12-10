@@ -12,17 +12,10 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 public class SelectAttendanceThresholdsDialogPresenter
         extends UstadBaseController<SelectAttendanceThresholdsDialogView> {
 
-    //Any arguments stored as variables here
-    //eg: private long clazzUid = -1;
 
-
-    public SelectAttendanceThresholdsDialogPresenter(Object context, Hashtable arguments, SelectAttendanceThresholdsDialogView view) {
+    public SelectAttendanceThresholdsDialogPresenter(Object context, Hashtable arguments,
+                                                     SelectAttendanceThresholdsDialogView view) {
         super(context, arguments, view);
-
-        //Get arguments and set them.
-        //eg: if(arguments.containsKey(ARG_CLAZZ_UID)){
-        //    currentClazzUid = (long) arguments.get(ARG_CLAZZ_UID);
-        //}
 
     }
 
@@ -34,14 +27,7 @@ public class SelectAttendanceThresholdsDialogPresenter
     }
 
     public void handleClickPrimaryActionButton(long selectedObjectUid) {
-        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
 
-        //Create arguments
-        Hashtable args = new Hashtable();
-        //eg: args.put(ARG_CLAZZ_UID, selectedObjectUid);
-
-        //Go to view
-        //eg: impl.go(SELEditView.VIEW_NAME, args, view.getContext());
     }
 
     @Override

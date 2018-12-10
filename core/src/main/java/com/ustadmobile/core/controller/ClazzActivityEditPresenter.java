@@ -22,6 +22,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.ustadmobile.core.view.ClazzActivityEditView.THUMB_BAD;
 import static com.ustadmobile.core.view.ClazzActivityEditView.THUMB_GOOD;
@@ -52,13 +54,15 @@ public class ClazzActivityEditPresenter
     private boolean changeSelected = false;
     private boolean measurementEntered = false;
 
+    private long currentClazzActivityChangeUid = -1L;
+
 
     //The current clazz activity being edited.
     private ClazzActivity currentClazzActivity;
 
     //The mapping of activity change uid to drop - down id on the view.
     private HashMap<Long, Long> changeToIdMap;
-    private HashMap<Long, Long> unitToUidMap;
+    private HashMap<Long, Long> idToChangeMap;
 
     private UmLiveData<List<ClazzActivityChange>> activityChangeLiveData;
 
@@ -167,6 +171,11 @@ public class ClazzActivityEditPresenter
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         ClazzDao clazzDao = repository.getClazzDao();
 
+
+        //Update Activity Change options
+        updateChangeOptions();
+
+
         //Update any toolbar title
         Clazz currentClazz = clazzDao.findByUid(currentClazzUid);
         view.updateToolbarTitle(currentClazz.getClazzName() + " "
@@ -190,16 +199,22 @@ public class ClazzActivityEditPresenter
 
         //Set up presenter and start filling the UI with its elements
         else{
-            currentLogDate = currentClazzActivity.getClazzActivityLogDate();
 
+            //Bug fix 101220181732
+//            currentLogDate = currentClazzActivity.getClazzActivityLogDate();
+//
             currentClazzActivity = result;
+
+            //updateActivityChangeChoosenOption(currentClazzActivity.getClazzActivityClazzActivityChangeUid());
+            //set current clazz activity change
+            currentClazzActivityChangeUid = currentClazzActivity.getClazzActivityClazzActivityChangeUid();
+            currentLogDate = currentClazzActivity.getClazzActivityLogDate();
             handleChangeFeedback(currentClazzActivity.isClazzActivityGoodFeedback());
             view.setNotes(currentClazzActivity.getClazzActivityNotes());
             view.setUOMText(String.valueOf(currentClazzActivity.getClazzActivityQuantity()));
         }
 
-        //Update Activity Change options
-        updateChangeOptions();
+
 
         //Update date
         updateViewDateHeading();
@@ -223,6 +238,8 @@ public class ClazzActivityEditPresenter
         args.put(ARG_CLAZZ_UID, currentClazzUid);
         impl.go(AddActivityChangeDialogView.VIEW_NAME, args, getContext());
     }
+
+
 
     /**
      * Handles Activity Change selected for this Clazz Activity. The given selection id is the
@@ -322,15 +339,19 @@ public class ClazzActivityEditPresenter
     private void updateActivityChangesOnView(List<ClazzActivityChange> result){
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         changeToIdMap = new HashMap<>();
+        idToChangeMap = new HashMap<>();
         ArrayList<String> presetAL = new ArrayList<>();
 
         //Add Select one option
         presetAL.add("Select one");
         changeToIdMap.put(SELECT_ONE_ID, SELECT_ONE_ID);
+        idToChangeMap.put(SELECT_ONE_ID, SELECT_ONE_ID);
+
 
         //Add "Add new activity" option
         presetAL.add(impl.getString(MessageID.add_activity, context));
         changeToIdMap.put(ADD_NEW_ACTIVITY_DROPDOWN_ID, ADD_NEW_ACTIVITY_DROPDOWN_ID);
+        idToChangeMap.put(ADD_NEW_ACTIVITY_DROPDOWN_ID, ADD_NEW_ACTIVITY_DROPDOWN_ID);
 
         //Add all other options starting from CHANGEUIDMAPSTART
         long i = CHANGEUIDMAPSTART;
@@ -341,12 +362,16 @@ public class ClazzActivityEditPresenter
             //Add the preset to a mapping where position is paired with the Activity
             // Change's uid so that we can handle which Activity Change got selected.
             changeToIdMap.put(i, everyChange.getClazzActivityChangeUid());
-
+            idToChangeMap.put(everyChange.getClazzActivityChangeUid(), i);
             i++;
         }
 
         //set the presets to the view's activity change drop down (spinner)
         view.setClazzActivityChangesDropdownPresets(presetAL.toArray(new String[presetAL.size()]));
+
+        if(currentClazzActivityChangeUid > 0){
+            view.setActivityChangeOption(idToChangeMap.get(currentClazzActivityChangeUid));
+        }
 
     }
 

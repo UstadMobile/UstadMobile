@@ -49,6 +49,12 @@ public class ClazzDetailPresenter
         super.onCreate(savedState);
 
         updateToolbarTitle();
+
+        view.setActivityVisibility(true);
+        view.setAttendanceVisibility(true);
+        view.setSELVisibility(true);
+
+
     }
 
     /**

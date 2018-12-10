@@ -1,21 +1,18 @@
 package com.ustadmobile.core.controller;
 
+import com.ustadmobile.core.db.UmAppDatabase;
+import com.ustadmobile.core.db.dao.ClazzLogDao;
+import com.ustadmobile.core.impl.UmAccountManager;
+import com.ustadmobile.core.impl.UmCallback;
+import com.ustadmobile.core.view.ReportNumberOfDaysClassesOpenView;
+
 import java.util.Hashtable;
 import java.util.LinkedHashMap;
-
-import com.ustadmobile.core.db.UmAppDatabase;
-import com.ustadmobile.core.impl.UmAccountManager;
-import com.ustadmobile.core.util.UMCalendarUtil;
-import com.ustadmobile.core.view.ReportNumberOfDaysClassesOpenView;
-import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.lib.db.entities.UMCalendar;
+import java.util.List;
 
 import static com.ustadmobile.core.view.ReportEditView.ARG_CLAZZ_LIST;
 import static com.ustadmobile.core.view.ReportEditView.ARG_FROM_DATE;
-import static com.ustadmobile.core.view.ReportEditView.ARG_GENDER_DISAGGREGATE;
 import static com.ustadmobile.core.view.ReportEditView.ARG_LOCATION_LIST;
-import static com.ustadmobile.core.view.ReportEditView.ARG_STUDENT_IDENTIFIER_NUMBER;
-import static com.ustadmobile.core.view.ReportEditView.ARG_STUDENT_IDENTIFIER_PERCENTAGE;
 import static com.ustadmobile.core.view.ReportEditView.ARG_TO_DATE;
 
 
@@ -29,15 +26,12 @@ public class ReportNumberOfDaysClassesOpenPresenter
     private long toDate;
     private Long[] locations;
     private Long[] clazzes;
-
-
-    LinkedHashMap<Float, Float> dataMaps;
-    LinkedHashMap<String, Float> tableData;
+    public List<Long> barChartTimestamps;
 
     UmAppDatabase repository = UmAccountManager.getRepositoryForActiveAccount(context);
 
-
-    public ReportNumberOfDaysClassesOpenPresenter(Object context, Hashtable arguments, ReportNumberOfDaysClassesOpenView view) {
+    public ReportNumberOfDaysClassesOpenPresenter(Object context, Hashtable arguments,
+                                                  ReportNumberOfDaysClassesOpenView view) {
         super(context, arguments, view);
 
         if(arguments.containsKey(ARG_FROM_DATE)){
@@ -53,8 +47,46 @@ public class ReportNumberOfDaysClassesOpenPresenter
             clazzes = (Long[]) arguments.get(ARG_CLAZZ_LIST);
         }
 
-
     }
+
+    @Override
+    public void onCreate(Hashtable savedState) {
+        super.onCreate(savedState);
+
+        getNumberOfDaysOpenDataAndUpdateCharts();
+    }
+
+    /**
+     * Separated out method that queries the database and updates the report upon getting and
+     * ordering the result.
+     */
+    private void getNumberOfDaysOpenDataAndUpdateCharts(){
+
+        LinkedHashMap<Float, Float> dataMap = new LinkedHashMap<>();
+
+        //TODO: Account for location and clazzes.
+
+        repository.getClazzLogDao().getNumberOfClassesOpenForDateLocationClazzes(fromDate, toDate,
+                new UmCallback<List<ClazzLogDao.NumberOfDaysClazzesOpen>>() {
+            @Override
+            public void onSuccess(List<ClazzLogDao.NumberOfDaysClazzesOpen> resultList) {
+                for(ClazzLogDao.NumberOfDaysClazzesOpen everyResult:resultList){
+                    dataMap.put(
+                            everyResult.getDate() / 1000f,
+                            (float) everyResult.getNumber());
+                }
+                //Update the report data on the view:
+                view.updateBarChart(dataMap);
+            }
+
+            @Override
+            public void onFailure(Throwable exception) {
+                exception.printStackTrace();
+            }
+        });
+    }
+
+    //TODO: Export
 
     public void dataToCSV(){
 
@@ -65,33 +97,6 @@ public class ReportNumberOfDaysClassesOpenPresenter
     }
 
     public void dataToJSON(){
-
-    }
-
-    @Override
-    public void onCreate(Hashtable savedState) {
-        super.onCreate(savedState);
-
-        getNumberOfDaysOpenDataAndUpdateCharts();
-
-    }
-
-
-    public void getNumberOfDaysOpenDataAndUpdateCharts(){
-
-
-        LinkedHashMap<Float, Float> dataMap = new LinkedHashMap<>();
-
-
-        for (int i=0; i<7;  i++){
-            Long iDate = UMCalendarUtil.getDateInMilliPlusDays(-i);
-            dataMap.put(iDate.floatValue(), (float) (4 + i));
-        }
-
-
-
-
-        view.updateBarChart(dataMap);
 
     }
 

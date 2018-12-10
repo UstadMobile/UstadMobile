@@ -1,20 +1,9 @@
 package com.ustadmobile.port.android.view;
 
 
-import com.github.mikephil.charting.charts.BarChart;
-import com.github.mikephil.charting.components.AxisBase;
-import com.github.mikephil.charting.data.BarData;
-import com.github.mikephil.charting.data.BarDataSet;
-import com.github.mikephil.charting.data.BarEntry;
-import com.github.mikephil.charting.formatter.IAxisValueFormatter;
-import com.ustadmobile.core.controller.ReportNumberOfDaysClassesOpenPresenter;
-
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -24,19 +13,21 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
-import com.ustadmobile.core.util.UMCalendarUtil;
-import com.ustadmobile.lib.db.entities.UMCalendar;
-import com.ustadmobile.port.android.util.UMAndroidUtil;
+import com.github.mikephil.charting.charts.BarChart;
+import com.github.mikephil.charting.components.Description;
+import com.github.mikephil.charting.data.BarData;
+import com.github.mikephil.charting.data.BarDataSet;
+import com.github.mikephil.charting.data.BarEntry;
 import com.toughra.ustadmobile.R;
-
-
+import com.ustadmobile.core.controller.ReportNumberOfDaysClassesOpenPresenter;
+import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.core.view.ReportNumberOfDaysClassesOpenView;
+import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import ru.dimorinny.floatingtextbutton.FloatingTextButton;
 
@@ -77,8 +68,6 @@ public class ReportNumberOfDaysClassesOpenActivity extends UstadBaseActivity
                 UMAndroidUtil.bundleToHashtable(getIntent().getExtras()), this);
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
 
-
-
         //FAB and its listener
         //eg:
         FloatingTextButton fab = findViewById(R.id.activity_report_number_of_days_classes_open_fab);
@@ -89,13 +78,26 @@ public class ReportNumberOfDaysClassesOpenActivity extends UstadBaseActivity
 
     public void setUpChart(){
         toolbar.setTitle(R.string.number_of_days_classes_open);
+
         barChart = findViewById(R.id.activity_report_number_of_days_classes_open_bar_chart);
+
         barChart.setMinimumHeight(dpToPx(BAR_CHART_HEIGHT));
 
+        Description barChartDes = new Description();
+        barChartDes.setText("");
+        barChart.setDescription(barChartDes);
 
-        barChart.setMinimumWidth(10);
-        barChart.getXAxis().setValueFormatter((value, axis) ->
-                UMCalendarUtil.getPrettyDateSuperSimpleFromLong((long) (value)));
+        barChart.setDrawBarShadow(false);
+        barChart.setDrawValueAboveBar(true);
+
+        barChart.getXAxis().setValueFormatter((value, axis) -> {
+            String prettyDate = UMCalendarUtil.getPrettyDateSuperSimpleFromLong(
+                    mPresenter.barChartTimestamps.get((int) value)
+            );
+            return prettyDate;
+        });
+
+
         barChart.setTouchEnabled(false);
     }
 
@@ -124,47 +126,31 @@ public class ReportNumberOfDaysClassesOpenActivity extends UstadBaseActivity
         }
     }
 
-    class AttendanceBarDataSet extends BarDataSet {
-
-        AttendanceBarDataSet(List<BarEntry> yVals, String label) {
-            super(yVals, label);
-        }
-
-        @Override
-        public int getColor(int index) {
-            return mColors.get(0);
-        }
-
-    }
-
     @Override
     public void updateBarChart(LinkedHashMap<Float, Float> dataMap) {
 
         Boolean hasSomething = false;
-
+        mPresenter.barChartTimestamps = new ArrayList<>();
+        int index = 0;
         //RENDER HERE
 
         List<BarEntry> barDataEntries = new ArrayList<>();
         for (Map.Entry<Float, Float> nextEntry : dataMap.entrySet()) {
             hasSomething = true;
-            BarEntry anEntry = new BarEntry(nextEntry.getKey(),
+            mPresenter.barChartTimestamps.add((long) (nextEntry.getKey() * 1000));
+            BarEntry anEntry = new BarEntry(index,
                     nextEntry.getValue());
             barDataEntries.add(anEntry);
+            index ++;
         }
-
 
         //Create Bar color
         BarDataSet dataSetBar1 = new BarDataSet(barDataEntries, BAR_LABEL);
         dataSetBar1.setValueTextColor(Color.BLACK);
         dataSetBar1.setDrawValues(true);
         dataSetBar1.setColor(Color.parseColor(BAR_CHART_BAR_COLOR));
-        dataSetBar1.setValueFormatter(
-                (value, entry, dataSetIndex, viewPortHandler) -> "" + ((int) value));
-
 
         BarData barData = new BarData(dataSetBar1);
-
-
 
         List<View> addThese = generateAllViewRowsForTable(dataMap);
 
@@ -181,12 +167,10 @@ public class ReportNumberOfDaysClassesOpenActivity extends UstadBaseActivity
 
             for(View everyRow: addThese){
                 tableLayout.addView(everyRow);
-
             }
 
         });
     }
-
 
     /**
      * Converts dp to pixels (used in MPAndroid charts)
@@ -224,7 +208,10 @@ public class ReportNumberOfDaysClassesOpenActivity extends UstadBaseActivity
         TextView valueHeading = new TextView(getApplicationContext());
         valueHeading.setTextColor(Color.BLACK);
         valueHeading.setLayoutParams(everyItemParam);
-        valueHeading.setTextColor(R.string.day);
+        valueHeading.setText(R.string.days);
+
+        headingRow.addView(dateHeading);
+        headingRow.addView(valueHeading);
 
         //ADD HEADING
         addThese.add(headingRow);
@@ -233,9 +220,10 @@ public class ReportNumberOfDaysClassesOpenActivity extends UstadBaseActivity
         List<Float> dates = new ArrayList<>();
         dates.addAll(dataTableMaps.keySet());
 
-        for(Float everyDate: dates){
+        for(float everyDate: dates){
             String everyDateString =
-                    UMCalendarUtil.getPrettyDateSuperSimpleFromLong(everyDate.longValue());
+                    UMCalendarUtil.getPrettyDateSuperSimpleFromLong(
+                            (long)everyDate * 1000);
 
             TableRow everyDateRow = new TableRow(getApplicationContext());
             everyDateRow.setLayoutParams(rowParams);
@@ -248,7 +236,7 @@ public class ReportNumberOfDaysClassesOpenActivity extends UstadBaseActivity
             TextView valueView = new TextView(getApplicationContext());
             valueView.setTextColor(Color.BLACK);
             valueView.setLayoutParams(everyItemParam);
-            valueView.setText(String.valueOf(dataTableMaps.get(everyDate)));
+            valueView.setText(String.valueOf(Math.round(dataTableMaps.get(everyDate))));
 
             everyDateRow.addView(dateView);
             everyDateRow.addView(valueView);

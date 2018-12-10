@@ -34,6 +34,7 @@ public class ClazzDetailActivity extends UstadBaseActivity implements
     private TabLayout mTabLayout;
     private ClazzDetailPresenter mPresenter;
     Long clazzUid;
+    private boolean attendanceVisibility, activityVisibility, selVisibility;
 
     /**
      * Separated out view pager setup for clarity.
@@ -42,8 +43,11 @@ public class ClazzDetailActivity extends UstadBaseActivity implements
         mPager = (ViewPager) findViewById(R.id.class_detail_view_pager_container);
         mPagerAdapter = new ClassDetailViewPagerAdapter(getSupportFragmentManager());
         mPagerAdapter.addFragments(0, ClazzStudentListFragment.newInstance(this.clazzUid));
+        if(attendanceVisibility)
         mPagerAdapter.addFragments(1, ClazzLogListFragment.newInstance(this.clazzUid));
+        if(activityVisibility)
         mPagerAdapter.addFragments(2, ClazzActivityListFragment.newInstance(this.clazzUid));
+        if(selVisibility)
         mPagerAdapter.addFragments(3, SELAnswerListFragment.newInstance(this.clazzUid));
         mPager.setAdapter(mPagerAdapter);
     }
@@ -75,7 +79,7 @@ public class ClazzDetailActivity extends UstadBaseActivity implements
         //set up view pager
         setupViewPager();
 
-        mTabLayout= (TabLayout)findViewById(R.id.activity_class_detail_tablayout);
+        mTabLayout= findViewById(R.id.activity_class_detail_tablayout);
         mTabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
         mTabLayout.setupWithViewPager(mPager);
     }
@@ -143,6 +147,21 @@ public class ClazzDetailActivity extends UstadBaseActivity implements
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         });
 
+    }
+
+    @Override
+    public void setAttendanceVisibility(boolean visible) {
+        attendanceVisibility = visible;
+    }
+
+    @Override
+    public void setActivityVisibility(boolean visible) {
+        activityVisibility = visible;
+    }
+
+    @Override
+    public void setSELVisibility(boolean visible) {
+        selVisibility = visible;
     }
 
     /**

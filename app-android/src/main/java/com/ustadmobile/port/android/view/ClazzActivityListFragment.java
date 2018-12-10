@@ -81,7 +81,6 @@ public class ClazzActivityListFragment extends UstadBaseFragment implements Claz
 
         @Override
         public int getColor(int index) {
-            //TODO: clean up
             if(negativeValue != null) {
                 if (negativeValue.containsKey(getEntryForIndex(index).getX())) {
                     if(negativeValue.get(getEntryForIndex(index).getX())){
@@ -92,7 +91,6 @@ public class ClazzActivityListFragment extends UstadBaseFragment implements Claz
 
             return mColors.get(0);
         }
-
     }
 
     /**
@@ -170,9 +168,6 @@ public class ClazzActivityListFragment extends UstadBaseFragment implements Claz
                 android.R.layout.simple_spinner_item, changesPresets);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         activityChangesSpinner.setAdapter(adapter);
-
-
-
     }
 
     /**

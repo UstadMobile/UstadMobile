@@ -11,6 +11,8 @@
     <color name="primary_text">#FFFFFF</color>
     <color name="secondary_text">#727272</color>
 
+    <color name="just_black">#000000</color>
+
     <color name="color_gray">#FF888888</color>
 
     <color name="traffic_green">#009900</color>

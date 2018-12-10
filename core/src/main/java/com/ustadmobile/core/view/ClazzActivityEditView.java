@@ -44,6 +44,9 @@ public interface ClazzActivityEditView extends UstadView {
      */
     void setUnitOfMeasureType(long uomType);
 
+
+    void setActivityChangeOption(long option);
+
     /**
      * Sets which thumb is active based on the flag
      *

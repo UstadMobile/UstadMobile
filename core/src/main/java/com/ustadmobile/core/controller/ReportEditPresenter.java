@@ -12,6 +12,7 @@ import com.ustadmobile.core.view.SelectTwoDatesDialogView;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.LinkedHashMap;
+import java.util.List;
 
 import static com.ustadmobile.core.view.ReportEditView.ARG_FROM_DATE;
 import static com.ustadmobile.core.view.ReportEditView.ARG_GENDER_DISAGGREGATE;
@@ -20,6 +21,9 @@ import static com.ustadmobile.core.view.ReportEditView.ARG_REPORT_LINK;
 import static com.ustadmobile.core.view.ReportEditView.ARG_REPORT_NAME;
 import static com.ustadmobile.core.view.ReportEditView.ARG_STUDENT_IDENTIFIER_NUMBER;
 import static com.ustadmobile.core.view.ReportEditView.ARG_STUDENT_IDENTIFIER_PERCENTAGE;
+import static com.ustadmobile.core.view.ReportEditView.ARG_THRESHOLD_HIGH;
+import static com.ustadmobile.core.view.ReportEditView.ARG_THRESHOLD_LOW;
+import static com.ustadmobile.core.view.ReportEditView.ARG_THRESHOLD_MID;
 import static com.ustadmobile.core.view.ReportEditView.ARG_TO_DATE;
 
 
@@ -37,6 +41,9 @@ public class ReportEditPresenter
     private boolean genderDisaggregate = false;
     private boolean studentNumbers = false;
     private boolean studentPercentages = false;
+    private List<Long> selectedClasses;
+    private List<Long> selectedLocations;
+    private ReportAttendanceGroupedByThresholdsPresenter.ThresholdValues thresholdValues;
 
     private static final int TIME_PERIOD_LAST_WEEK = 1;
     private static final int TIME_PERIOD_LAST_TWO_WEEK = 2;
@@ -143,6 +150,30 @@ public class ReportEditPresenter
         //TODO:
     }
 
+    public List<Long> getSelectedClasses() {
+        return selectedClasses;
+    }
+
+    public void setSelectedClasses(List<Long> selectedClasses) {
+        this.selectedClasses = selectedClasses;
+    }
+
+    public List<Long> getSelectedLocations() {
+        return selectedLocations;
+    }
+
+    public void setSelectedLocations(List<Long> selectedLocations) {
+        this.selectedLocations = selectedLocations;
+    }
+
+    public ReportAttendanceGroupedByThresholdsPresenter.ThresholdValues getThresholdValues() {
+        return thresholdValues;
+    }
+
+    public void setThresholdValues(ReportAttendanceGroupedByThresholdsPresenter.ThresholdValues thresholdValues) {
+        this.thresholdValues = thresholdValues;
+    }
+
     /**
      * Goes and opens up the Location dialog
      */
@@ -189,6 +220,11 @@ public class ReportEditPresenter
         //TODO: Add Clazzes
 
         //TODO: Add Thresholds
+        if(thresholdValues != null) {
+            args.put(ARG_THRESHOLD_LOW, thresholdValues.low);
+            args.put(ARG_THRESHOLD_MID, thresholdValues.med);
+            args.put(ARG_THRESHOLD_HIGH, thresholdValues.high);
+        }
 
         args.put(ARG_GENDER_DISAGGREGATE, genderDisaggregate);
 

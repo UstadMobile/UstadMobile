@@ -9,4 +9,6 @@ public interface BasePointPeopleView extends UstadView {
 
     String VIEW_NAME = "BasePointPeople";
 
+
+
 }

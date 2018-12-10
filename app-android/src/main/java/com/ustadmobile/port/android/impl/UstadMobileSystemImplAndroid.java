@@ -96,6 +96,7 @@ import com.ustadmobile.core.view.PersonDetailEnrollClazzView;
 import com.ustadmobile.core.view.PersonDetailView;
 import com.ustadmobile.core.view.PersonEditView;
 import com.ustadmobile.core.view.RegistrationView;
+import com.ustadmobile.core.view.ReportAttendanceGroupedByThresholdsView;
 import com.ustadmobile.core.view.ReportEditView;
 import com.ustadmobile.core.view.ReportNumberOfDaysClassesOpenView;
 import com.ustadmobile.core.view.ReportOverallAttendanceView;
@@ -146,6 +147,7 @@ import com.ustadmobile.port.android.view.PersonDetailEnrollClazzActivity;
 import com.ustadmobile.port.android.view.PersonEditActivity;
 import com.ustadmobile.port.android.view.ReceiveCourseDialogFragment;
 import com.ustadmobile.port.android.view.RegistrationDialogFragment;
+import com.ustadmobile.port.android.view.ReportAttendanceGroupedByThresholdsActivity;
 import com.ustadmobile.port.android.view.ReportEditActivity;
 import com.ustadmobile.port.android.view.ReportNumberOfDaysClassesOpenActivity;
 import com.ustadmobile.port.android.view.ReportOverallAttendanceActivity;
@@ -279,6 +281,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         viewNameToAndroidImplMap.put(SelectTwoDatesDialogView.VIEW_NAME, SelectTwoDatesDialogFragment.class);
         viewNameToAndroidImplMap.put(ReportOverallAttendanceView.VIEW_NAME, ReportOverallAttendanceActivity.class);
         viewNameToAndroidImplMap.put(ReportNumberOfDaysClassesOpenView.VIEW_NAME, ReportNumberOfDaysClassesOpenActivity.class);
+        viewNameToAndroidImplMap.put(ReportAttendanceGroupedByThresholdsView.VIEW_NAME, ReportAttendanceGroupedByThresholdsActivity.class);
 
 
 

@@ -237,7 +237,7 @@ public class ClazzActivityEditActivity extends UstadBaseActivity implements Claz
     public void setClazzActivityChangesDropdownPresets(String[] presets) {
 
         this.changesPresets = presets;
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(getApplicationContext(),
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_spinner_item, changesPresets);
 
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -272,8 +272,14 @@ public class ClazzActivityEditActivity extends UstadBaseActivity implements Claz
                     break;
             }
             unitOfMeasureTitle.setText(uomTitle);
+
         });
 
+    }
+
+    @Override
+    public void setActivityChangeOption(long option) {
+        activityChangeSpinner.setSelection((int) option);
     }
 
     @Override

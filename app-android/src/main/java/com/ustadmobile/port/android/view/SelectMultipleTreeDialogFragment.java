@@ -251,43 +251,6 @@ public class SelectMultipleTreeDialogFragment extends UstadDialogFragment implem
 
     }
 
-    private List<TreeNode> initTestData(){
-        List<TreeNode> nodes = new ArrayList<>();
-
-
-        TreeNode<LocationLayoutType> app = new TreeNode<>(new LocationLayoutType(("Earth")));
-        nodes.add(app);
-        app.addChild(
-            new TreeNode<>(new LocationLayoutType("Asia"))
-                .addChild(new TreeNode<>(new LocationLayoutType("UAE"))
-
-            ));
-
-        app.addChild(
-            new TreeNode<>(new LocationLayoutType("java")).addChild(
-                new TreeNode<>(new LocationLayoutType("tellh")).addChild(
-                    new TreeNode<>(new LocationLayoutType("com")).addChild(
-                        new TreeNode<>(new LocationLayoutType("recyclertreeview"))
-                            .addChild(new TreeNode<>(new LocationLayoutType("Dir")))
-                            .addChild(new TreeNode<>(new LocationLayoutType("DirectoryNodeBinder")))
-                            .addChild(new TreeNode<>(new LocationLayoutType("File")))
-                            .addChild(new TreeNode<>(new LocationLayoutType("FileNodeBinder")))
-                            .addChild(new TreeNode<>(new LocationLayoutType("TreeViewBinder")))
-                    )
-                )
-            )
-        );
-        TreeNode<LocationLayoutType> res = new TreeNode<>(new LocationLayoutType("res"));
-        nodes.add(res);
-
-        res.addChild(
-                new TreeNode<>(new LocationLayoutType("mipmap"))
-                        .addChild(new TreeNode<>(new LocationLayoutType("ic_launcher.png")))
-        );
-
-        return nodes;
-    }
-
     @Override
     public void onClick(DialogInterface dialog, int which) {
 

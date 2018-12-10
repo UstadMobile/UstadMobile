@@ -8,18 +8,21 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
-import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.toughra.ustadmobile.R;
+import com.ustadmobile.core.controller.ReportAttendanceGroupedByThresholdsPresenter;
 import com.ustadmobile.core.controller.ReportEditPresenter;
 import com.ustadmobile.core.view.ReportEditView;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 
 import ru.dimorinny.floatingtextbutton.FloatingTextButton;
 
@@ -47,7 +50,7 @@ public class ReportEditActivity extends UstadBaseActivity implements ReportEditV
 
     private HashMap<String, Long> selectedClasses;
     private HashMap<String, Long> selectedLocations;
-    private SelectAttendanceThresholdsDialogFragment.ThresholdValues thresholdValues;
+    private ReportAttendanceGroupedByThresholdsPresenter.ThresholdValues thresholdValues;
 
     private RadioGroup studentNumberOrPercentageRadioGroup;
 
@@ -81,19 +84,16 @@ public class ReportEditActivity extends UstadBaseActivity implements ReportEditV
                 UMAndroidUtil.bundleToHashtable(getIntent().getExtras()), this);
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
 
-        studentNumberOrPercentageRadioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(RadioGroup group, int checkedId) {
-                if (checkedId == R.id.activity_report_edit_show_student_number_option) {
-                    mPresenter.setStudentNumbers(true);
-                    mPresenter.setStudentPercentages(false);
-                }else if(checkedId == R.id.activity_report_edit_show_student_percentage_option) {
-                    mPresenter.setStudentPercentages(true);
-                    mPresenter.setStudentNumbers(false);
-                }else{
-                    mPresenter.setStudentPercentages(false);
-                    mPresenter.setStudentNumbers(false);
-                }
+        studentNumberOrPercentageRadioGroup.setOnCheckedChangeListener((group, checkedId) -> {
+            if (checkedId == R.id.activity_report_edit_show_student_number_option) {
+                mPresenter.setStudentNumbers(true);
+                mPresenter.setStudentPercentages(false);
+            }else if(checkedId == R.id.activity_report_edit_show_student_percentage_option) {
+                mPresenter.setStudentPercentages(true);
+                mPresenter.setStudentNumbers(false);
+            }else{
+                mPresenter.setStudentPercentages(false);
+                mPresenter.setStudentNumbers(false);
             }
         });
 
@@ -174,7 +174,16 @@ public class ReportEditActivity extends UstadBaseActivity implements ReportEditV
     @Override
     public void showCustomDateSelector() {
 
-        //TODOone: Replace by custom two date selector Dialog.
+    }
+
+    @Override
+    public void updateThresholdSelected(String thresholdString) {
+        attendanceThresholdsTextView.setText(thresholdString);
+    }
+
+    @Override
+    public void updateClazzesSelected(String clazzes) {
+        classesTextView.setText(clazzes);
     }
 
     @Override
@@ -195,25 +204,48 @@ public class ReportEditActivity extends UstadBaseActivity implements ReportEditV
     @Override
     public void onSelectClazzesResult(HashMap<String, Long> selectedClazzes) {
         this.selectedClasses = selectedClazzes;
-        classesTextView.setText("Got classes. TODO: Fill me up");
+        String classesSelectedString = "";
+        Iterator<String> selectedClazzesNameIterator = selectedClazzes.keySet().iterator();
+        while(selectedClazzesNameIterator.hasNext()){
+            classesSelectedString  += selectedClazzesNameIterator.next();
+            if(selectedClazzesNameIterator.hasNext()){
+                classesSelectedString += ", ";
+            }
+        }
+        List<Long> selectedClasses = new ArrayList<>(selectedClazzes.values());
+        mPresenter.setSelectedClasses(selectedClasses);
+
+        updateClazzesSelected(classesSelectedString);
     }
 
     @Override
     public void onLocationResult(HashMap<String, Long> selectedLocations) {
         this.selectedLocations = selectedLocations;
-        updateLocationsSelected("Got location. TODO: Fill me up");
+        Iterator<String> selectedLocationsNameIterator = selectedLocations.keySet().iterator();
+        String locationsSelectedString = "";
+        while(selectedLocationsNameIterator.hasNext()){
+            locationsSelectedString += selectedLocationsNameIterator.next();
+            if(selectedLocationsNameIterator.hasNext()){
+                locationsSelectedString += ", ";
+            }
+        }
+
+        updateLocationsSelected(locationsSelectedString);
     }
 
     @Override
-    public void onThresholdResult(SelectAttendanceThresholdsDialogFragment.ThresholdValues values) {
+    public void onThresholdResult(ReportAttendanceGroupedByThresholdsPresenter.ThresholdValues values) {
         this.thresholdValues = values;
-        attendanceThresholdsTextView.setText("Got threshold values. TOOD: Fill me up.");
+        String thresholdString = values.low + "%, " + values.med + "%, " + values.high + "%";
+        mPresenter.setThresholdValues(thresholdValues);
+        updateThresholdSelected(thresholdString);
     }
 
     @Override
     public void onCustomTimesResult(long from, long to) {
         mPresenter.setFromTime(from);
         mPresenter.setToTime(to);
+
         Toast.makeText(
                 getApplicationContext(),
                 "Custom date from : " + from + " to " + to,

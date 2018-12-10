@@ -14,6 +14,7 @@ import android.widget.TableRow;
 import android.widget.TextView;
 
 import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.components.Description;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
@@ -157,6 +158,10 @@ public class ReportOverallAttendanceActivity extends UstadBaseActivity
         //Get the chart view
         lineChart = findViewById(R.id.activity_report_overall_attendance_line_chart);
         lineChart.setMinimumHeight(dpToPx(ATTENDANCE_LINE_CHART_HEIGHT));
+
+        Description description = new Description();
+        lineChart.setDescription(description);
+
         //lineChart = hideEverythingInLineChart(lineChart);
         lineChart.getAxisLeft().setValueFormatter((value, axis) -> (int) value + "%");
         lineChart.getXAxis().setValueFormatter((value, axis) -> (int) value + "");

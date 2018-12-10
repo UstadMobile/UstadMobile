@@ -15,6 +15,27 @@ import java.util.List;
 @UmRepository
 public abstract class ClazzLogDao implements SyncableDao<ClazzLog, ClazzLogDao> {
 
+    public static class NumberOfDaysClazzesOpen{
+        long date;
+        int number;
+
+        public long getDate() {
+            return date;
+        }
+
+        public void setDate(long date) {
+            this.date = date;
+        }
+
+        public int getNumber() {
+            return number;
+        }
+
+        public void setNumber(int number) {
+            this.number = number;
+        }
+    }
+
     @UmInsert
     public abstract long insert(ClazzLog entity);
 
@@ -48,6 +69,15 @@ public abstract class ClazzLogDao implements SyncableDao<ClazzLog, ClazzLogDao> 
     public abstract void updateClazzAttendanceNumbersAsync(long clazzLogUid, int numPresent,
                                                            int numAbsent, int numPartial,
                                                            UmCallback<Void> callback);
+
+   
+
+    @UmQuery ("SELECT COUNT(Clazz.clazzName) as number, clazzLog.logDate as date from ClazzLog " +
+            " LEFT JOIN Clazz ON ClazzLog.clazzClazzUid = Clazz.clazzUid" +
+            "   WHERE ClazzLog.logDate > :fromDate and ClazzLog.logDate < :toDate " +
+            " GROUP BY ClazzLog.logDate")
+    public abstract void getNumberOfClassesOpenForDateLocationClazzes(long fromDate, long toDate,
+            UmCallback<List<NumberOfDaysClazzesOpen>> resultList);
 
     public void createClazzLogForDate(long currentClazzUid, long currentLogDate,
                                       UmCallback<Long> callback){

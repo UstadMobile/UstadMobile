@@ -76,12 +76,12 @@ This is the one you should be editing. The one in /core/locale/main/values/strin
     <string name='add_library'>Add Library</string>
     <string name='select_library'>Select Library</string>
     <string name='add'>Add</string>
-    <string name='library_title'>Library Name e.g. A Library</string>
-    <string name='library_url'>Library OPDS URL e.g. http://..</string>
-    <string name='enter_phone_num'>Please enter phone number</string>
+    <string name='library_title'></string>
+    <string name='library_url'></string>
+    <string name='enter_phone_num'></string>
     <string name="phone">Phone</string>
     <string name="tablet">Tablet</string>
-    <string name='enter_name'>Please enter name</string>
+    <string name='enter_name'></string>
     <string name='attendance'>Attendance</string>
     <string name='processing'>Processing</string>
     <string name='classes'>Classes</string>
@@ -461,5 +461,7 @@ This is the one you should be editing. The one in /core/locale/main/values/strin
     <string name="json">JSON</string>
     <string name="date">Date</string>
     <string name="average">Average</string>
+    <string name="age">Age</string>
+    <string name="days">Days</string>
 
 </resources>

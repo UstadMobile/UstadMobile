@@ -22,6 +22,9 @@ public interface ReportEditView extends UstadView {
     String ARG_GENDER_DISAGGREGATE = "genderDisaggregate";
     String ARG_STUDENT_IDENTIFIER_NUMBER = "studentIdentifierNumber";
     String ARG_STUDENT_IDENTIFIER_PERCENTAGE = "studentIdentifierPercentage";
+    String ARG_THRESHOLD_LOW = "thesholdLow";
+    String ARG_THRESHOLD_MID = "thresholdMid";
+    String ARG_THRESHOLD_HIGH = "thresholdHigh";
 
 
     /**
@@ -61,6 +64,20 @@ public interface ReportEditView extends UstadView {
      * Shows the custom from/to date selector when Custom date option selected on time period spinner
      */
     void showCustomDateSelector();
+
+    /**
+     * Update text to view
+     *
+     * @param thresholdString   The text
+     */
+    void updateThresholdSelected(String thresholdString);
+
+    /**
+     * Updates string to view
+     *
+     * @param clazzes   The string to update to the view
+     */
+    void updateClazzesSelected(String clazzes);
 
     /**
      * Show attendance threshold options or remove them.

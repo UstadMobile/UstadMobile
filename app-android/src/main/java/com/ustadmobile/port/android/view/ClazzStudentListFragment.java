@@ -200,7 +200,10 @@ public class ClazzStudentListFragment extends UstadBaseFragment implements Clazz
      * Add new "Add Student/Teacher" headings
      */
     private void addAddClazzMemberHeadings(){
-        addHeadingAndNew(cl, ClazzMember.ROLE_TEACHER, getContext());
+        if(mPresenter.isTeachersEditable()) {
+            addHeadingAndNew(cl, ClazzMember.ROLE_TEACHER, getContext());
+        }
+
         addHeadingAndNew(cl, ClazzMember.ROLE_STUDENT, getContext());
     }
 

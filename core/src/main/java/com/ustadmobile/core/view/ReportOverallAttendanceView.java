@@ -3,8 +3,6 @@ package com.ustadmobile.core.view;
 
 import java.util.LinkedHashMap;
 
-import sun.awt.image.ImageWatched;
-
 /**
  * ReportOverallAttendance Core View extends Core UstadView. Will be implemented
  * on various implementations.

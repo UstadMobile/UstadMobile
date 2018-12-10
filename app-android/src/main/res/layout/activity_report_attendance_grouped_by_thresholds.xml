@@ -2,17 +2,18 @@
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical">
 
     <android.support.design.widget.AppBarLayout
-        android:id="@+id/activity_report_overall_attendance_appbar"
+        android:id="@+id/activity_report_attendance_grouped_by_thresholds_appbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:elevation="4dp"
         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
         <android.support.v7.widget.Toolbar
-            android:id="@+id/activity_report_overall_attendance_toolbar"
+            android:id="@+id/activity_report_attendance_grouped_by_thresholds_toolbar"
             android:layout_width="match_parent"
             android:layout_height="?android:attr/actionBarSize"
             android:background="@color/primary"
@@ -20,45 +21,23 @@
 
     </android.support.design.widget.AppBarLayout>
 
-
-    <com.github.mikephil.charting.charts.LineChart
-        android:id="@+id/activity_report_overall_attendance_line_chart"
+    <LinearLayout
+        android:id="@+id/actvity_report_attendance_grouped_by_thresholds_ll"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/activity_report_overall_attendance_appbar" />
-
-
-    <ScrollView
-        android:layout_width="wrap_content"
-        android:layout_height="220dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"
+        android:layout_height="0dp"
         android:layout_marginBottom="8dp"
-        app:layout_constraintBottom_toTopOf="@+id/activity_report_overall_attendance_fab"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/activity_report_attendance_grouped_by_thresholds_appbar"
+        android:orientation="vertical">
 
 
-        <TableLayout
-            android:id="@+id/activity_report_overall_attendance_table"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="8dp"
-            android:isScrollContainer="true"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/activity_report_overall_attendance_line_chart">
 
-        </TableLayout>
+    </LinearLayout>
 
-    </ScrollView>
+
 
     <ru.dimorinny.floatingtextbutton.FloatingTextButton
-        android:id="@+id/activity_report_overall_attendance_fab"
+        android:id="@+id/activity_report_attendance_grouped_by_thresholds_fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|center"

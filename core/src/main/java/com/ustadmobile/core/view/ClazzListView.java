@@ -34,4 +34,7 @@ public interface ClazzListView extends UstadView {
      */
     void updateSortSpinner(String[] presets);
 
+
+    void showAddClassButton(boolean show);
+
 }

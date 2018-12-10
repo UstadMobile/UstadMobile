@@ -38,6 +38,183 @@ public abstract class ClazzLogAttendanceRecordDao implements
             "WHERE clazzLogAttendanceRecordClazzLogUid = :clazzLogUid")
     public abstract UmProvider<ClazzLogAttendanceRecord> findAttendanceLogsByClassLogId(long clazzLogUid);
 
+    public static class AttendanceByThresholdRow {
+
+        private int age;
+
+        private int totalLowAttendanceMale;
+
+        private int totalLowAttendanceFemale;
+
+        private int totalMediumAttendanceMale;
+
+        private int totalMediumAttendanceFemale;
+
+        private int totalHighAttendanceMale;
+
+        private int totalHighAttendanceFemale;
+
+        public int getAge() {
+            return age;
+        }
+
+        public void setAge(int age) {
+            this.age = age;
+        }
+
+        public int getTotalLowAttendanceMale() {
+            return totalLowAttendanceMale;
+        }
+
+        public void setTotalLowAttendanceMale(int totalLowAttendanceMale) {
+            this.totalLowAttendanceMale = totalLowAttendanceMale;
+        }
+
+        public int getTotalLowAttendanceFemale() {
+            return totalLowAttendanceFemale;
+        }
+
+        public void setTotalLowAttendanceFemale(int totalLowAttendanceFemale) {
+            this.totalLowAttendanceFemale = totalLowAttendanceFemale;
+        }
+
+        public int getTotalMediumAttendanceMale() {
+            return totalMediumAttendanceMale;
+        }
+
+        public void setTotalMediumAttendanceMale(int totalMediumAttendanceMale) {
+            this.totalMediumAttendanceMale = totalMediumAttendanceMale;
+        }
+
+        public int getTotalMediumAttendanceFemale() {
+            return totalMediumAttendanceFemale;
+        }
+
+        public void setTotalMediumAttendanceFemale(int totalMediumAttendanceFemale) {
+            this.totalMediumAttendanceFemale = totalMediumAttendanceFemale;
+        }
+
+        public int getTotalHighAttendanceMale() {
+            return totalHighAttendanceMale;
+        }
+
+        public void setTotalHighAttendanceMale(int totalHighAttendanceMale) {
+            this.totalHighAttendanceMale = totalHighAttendanceMale;
+        }
+
+        public int getTotalHighAttendanceFemale() {
+            return totalHighAttendanceFemale;
+        }
+
+        public void setTotalHighAttendanceFemale(int totalHighAttendanceFemale) {
+            this.totalHighAttendanceFemale = totalHighAttendanceFemale;
+        }
+    }
+
+    public class AttendanceResultGroupedByAgeAndThreshold{
+        int total;
+        int gender;
+        int age;
+        String thresholdGroup;
+
+        public int getTotal() {
+            return total;
+        }
+
+        public void setTotal(int total) {
+            this.total = total;
+        }
+
+        public int getGender() {
+            return gender;
+        }
+
+        public void setGender(int gender) {
+            this.gender = gender;
+        }
+
+        public int getAge() {
+            return age;
+        }
+
+        public void setAge(int age) {
+            this.age = age;
+        }
+
+        public String getThresholdGroup() {
+            return thresholdGroup;
+        }
+
+        public void setThresholdGroup(String thresholdGroup) {
+            this.thresholdGroup = thresholdGroup;
+        }
+    }
+
+
+//    @UmQuery("select " +
+//            " count(DISTINCT Person.personUid) as total," +
+//            " Person.gender," +
+//            " cast((:datetimeNow - Person.dateOfBirth) / (365.25 * 24 * 60 * 60 * 1000) as int) as age," +
+//            " CASE " +
+//            " WHEN numSessionsTbl.attendancePercentage < :lowAttendanceThreshold THEN \"LOW\"" +
+//            " WHEN numSessionsTbl.attendancePercentage < :midAttendanceThreshold THEN \"MEDIUM\" " +
+//            " ELSE \"HIGH\" " +
+//            " END thresholdGroup/*, " +
+//            " Person.firstNames*/ " +
+//            " FROM " +
+//            " (SELECT cast( " +
+//            " SUM(CASE WHEN attendanceStatus = " + ClazzLogAttendanceRecord.STATUS_ATTENDED + " THEN 1 ELSE 0 END) as float) / COUNT(*) as attendancePercentage, " +
+//            " clazzLogAttendanceRecordClazzMemberUid " +
+//            " FROM ClazzLogAttendanceRecord as numSessions GROUP BY clazzLogAttendanceRecordClazzMemberUid) numSessionsTbl " +
+//            " LEFT JOIN ClazzLogAttendanceRecord ON numSessionsTbl.clazzLogAttendanceRecordClazzMemberUid = ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzMemberUid " +
+//            " LEFT JOIN ClazzMember on ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzMemberUid = ClazzMember.clazzMemberUid" +
+//            " LEFT JOIN Person on ClazzMember.clazzMemberPersonUid = Person.personUid" +
+//            " GROUP BY Person.gender, age, thresholdGroup ")
+
+
+
+    @UmQuery("select  " +
+            " count(DISTINCT Person.personUid) as total, " +
+            " Person.gender, " +
+            " cast((:datetimeNow - Person.dateOfBirth) / (365.25 * 24 * 60 * 60 * 1000) as int) as age, " +
+            " CASE  " +
+            "  WHEN numSessionsTbl.attendancePercentage < :lowAttendanceThreshold THEN \"LOW\" " +
+            "  WHEN numSessionsTbl.attendancePercentage < :midAttendanceThreshold THEN \"MEDIUM\" " +
+            "  ELSE \"HIGH\" " +
+            " END thresholdGroup " +
+            "  " +
+            "  " +
+            " " +
+            " " +
+            "FROM  " +
+            " ( " +
+            "  SELECT  " +
+            "   cast( SUM(CASE WHEN attendanceStatus = " + ClazzLogAttendanceRecord.STATUS_ATTENDED + " THEN 1 ELSE 0 END) as float) / COUNT(*) as attendancePercentage, " +
+            "   ClazzLogAttendanceRecordClazzLogUid, " +
+            "   clazzLogAttendanceRecordClazzMemberUid " +
+            "   FROM ClazzLogAttendanceRecord as numSessions  " +
+            "    " +
+            "   LEFT JOIN ClazzLog on ClazzLogAttendanceRecordClazzLogUid = ClazzLog.clazzLogUid " +
+            "   WHERE ClazzLog.logDate > :fromTime AND ClazzLog.logDate < :toTime " +
+            "    " +
+            "   GROUP BY clazzLogAttendanceRecordClazzMemberUid " +
+            "    " +
+            "    " +
+            " ) numSessionsTbl " +
+            " " +
+            " " +
+            " " +
+            "LEFT JOIN ClazzLog ON numSessionsTbl.ClazzLogAttendanceRecordClazzLogUid = ClazzLog.clazzLogUid " +
+            "LEFT JOIN ClazzLogAttendanceRecord ON numSessionsTbl.clazzLogAttendanceRecordClazzMemberUid = ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzMemberUid " +
+            "LEFT JOIN ClazzMember on ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzMemberUid = ClazzMember.clazzMemberUid " +
+            "LEFT JOIN Person on ClazzMember.clazzMemberPersonUid = Person.personUid " +
+            " " +
+            "GROUP BY Person.gender, age, thresholdGroup " +
+            " ORDER BY age, thresholdGroup ")
+    public abstract void getAttendanceGroupedByThresholds(long datetimeNow, long fromTime,
+                                                          long toTime, float lowAttendanceThreshold,
+                                                          float midAttendanceThreshold,
+                                                          UmCallback<List<AttendanceResultGroupedByAgeAndThreshold>> resultList);
 
     @UmQuery("SELECT ClazzLogAttendanceRecord.* , Person.* " +
             " FROM ClazzLogAttendanceRecord " +

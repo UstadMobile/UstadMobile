@@ -16,4 +16,11 @@ public interface ClassDetailView extends UstadView {
      */
     void setToolbarTitle(String toolbarTitle);
 
+
+    void setAttendanceVisibility(boolean visible);
+
+    void setActivityVisibility(boolean visible);
+
+    void setSELVisibility(boolean visible);
+
 }

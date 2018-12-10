@@ -1,18 +1,8 @@
 package com.ustadmobile.port.android;
 
 import android.content.Context;
-import android.support.v4.content.ContextCompat;
 
-//import com.evernote.android.job.Job;
-//import com.evernote.android.job.JobManager;
-//import com.evernote.android.job.JobRequest;
 import com.toughra.ustadmobile.BuildConfig;
-import com.ustadmobile.core.db.UmAppDatabase;
-import com.ustadmobile.core.db.dao.ClazzDao;
-import com.ustadmobile.core.db.dao.ClazzMemberDao;
-import com.ustadmobile.core.impl.UmCallback;
-import com.ustadmobile.lib.db.entities.Clazz;
-import com.ustadmobile.lib.db.entities.ClazzMember;
 
 import org.acra.ACRA;
 import org.acra.config.CoreConfigurationBuilder;
@@ -29,26 +19,26 @@ import org.acra.sender.HttpSender;
  */
 public class App extends UmBaseApplication {
 
-    @Override
-    public void onCreate() {
-        super.onCreate();
-    }
+	@Override
+	public void onCreate() {
+		super.onCreate();
+	}
 
-    @Override
-    protected void attachBaseContext(Context base) {
-        super.attachBaseContext(base);
+	@Override
+	protected void attachBaseContext(Context base) {
+		super.attachBaseContext(base);
 
-        CoreConfigurationBuilder builder = new CoreConfigurationBuilder(this);
-        builder.setReportFormat(StringFormat.JSON);
+		CoreConfigurationBuilder builder = new CoreConfigurationBuilder(this);
+		builder.setReportFormat(StringFormat.JSON);
 
-        builder.getPluginConfigurationBuilder(HttpSenderConfigurationBuilder.class)
-                .setUri(BuildConfig.ACRA_HTTP_URI)
-                .setBasicAuthLogin(BuildConfig.ACRA_BASIC_LOGIN)
-                .setBasicAuthPassword(BuildConfig.ACRA_BASIC_PASS)
-                .setHttpMethod(HttpSender.Method.POST).setEnabled(true);
+		builder.getPluginConfigurationBuilder(HttpSenderConfigurationBuilder.class)
+				.setUri(BuildConfig.ACRA_HTTP_URI)
+				.setBasicAuthLogin(BuildConfig.ACRA_BASIC_LOGIN)
+				.setBasicAuthPassword(BuildConfig.ACRA_BASIC_PASS)
+				.setHttpMethod(HttpSender.Method.POST).setEnabled(true);
 
-        ACRA.init(this, builder);
+		ACRA.init(this, builder);
 
-    }
+	}
 }
 
