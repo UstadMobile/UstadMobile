@@ -24,7 +24,7 @@ public class LoginPresenter2 extends UstadBaseController<LoginView2> {
 
     public LoginPresenter2(Object context, Hashtable arguments, LoginView2 view) {
         super(context, arguments, view);
-        if(arguments.containsKey(ARG_NEXT)){
+        if(arguments != null && arguments.containsKey(ARG_NEXT)){
             mNextDest = arguments.get(ARG_NEXT).toString();
         }
     }

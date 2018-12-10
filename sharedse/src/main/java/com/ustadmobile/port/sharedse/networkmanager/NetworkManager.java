@@ -1716,8 +1716,8 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
         setConnectivityState(state);
         fireOnConnectivityChanged(state);
 
-        if(state == CONNECTIVITY_STATE_METERED || state == CONNECTIVITY_STATE_UNMETERED)
-            checkDownloadJobQueueAsync(null);
+//        if(state == CONNECTIVITY_STATE_METERED || state == CONNECTIVITY_STATE_UNMETERED)
+//            checkDownloadJobQueueAsync(null);
     }
 
     protected synchronized void setConnectivityState(int connectivityState) {
