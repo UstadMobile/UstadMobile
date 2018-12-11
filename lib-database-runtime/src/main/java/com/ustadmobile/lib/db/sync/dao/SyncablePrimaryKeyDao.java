@@ -18,7 +18,7 @@ public abstract class SyncablePrimaryKeyDao  {
 
     private long deviceBits = -1;
 
-    public long getAndIncrement(int tableId, int increment) {
+    public synchronized long getAndIncrement(int tableId, int increment) {
         if(deviceBits == -1) {
             deviceBits = getDeviceBits();
             if(deviceBits == 0) {

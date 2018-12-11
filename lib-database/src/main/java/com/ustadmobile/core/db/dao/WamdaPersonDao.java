@@ -21,8 +21,8 @@ public abstract class WamdaPersonDao implements SyncableDao<WamdaPerson, WamdaPe
     @UmQuery("SELECT * FROM WamdaPerson WHERE wamdaPersonUid = :personUid")
     public abstract void findByUidAsync(long personUid,UmCallback<WamdaPerson> callback);
 
-    @UmQuery("UPDATE WamdaPerson SET pointScore = pointScore + :score WHERE wamdaPersonUid = :personUid")
-    public abstract void updateScore(long personUid, int score);
+    @UmQuery("UPDATE WamdaPerson SET pointScore = pointScore + 1 WHERE wamdaPersonUid = :personUid")
+    public abstract void updateScoreAsync(long personUid,UmCallback<Integer> callback);
 
     @UmUpdate
     public abstract void updateAsync(WamdaPerson wamdaPerson,UmCallback<Integer> callback);
