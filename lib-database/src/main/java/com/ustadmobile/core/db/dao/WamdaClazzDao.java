@@ -20,8 +20,7 @@ public abstract class WamdaClazzDao implements SyncableDao<WamdaClazz, WamdaClaz
             "SELECT COUNT(*) FROM ClazzMember WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid) AS numStudents,\n" +
             "(SELECT COUNT(*) FROM WamdaLike WHERE WamdaLike.wamdaLikeClazzUid = Clazz.clazzUid AND WamdaLike.wamdaLikePersonUid = :personUid) AS liked, \n" +
             "(SELECT  COUNT(*) FROM WamdaShare WHERE WamdaShare.wamdaShareClazzUid = Clazz.clazzUid) AS numShares \n" +
-            "FROM Clazz \n" +
-            "LEFT JOIN WamdaClazz ON WamdaClazz.wamdaClazzUid = Clazz.clazzUid ORDER BY Clazz.clazzUid")
+            "FROM Clazz LEFT JOIN WamdaClazz ON WamdaClazz.wamdaClazzClazzUid = Clazz.clazzUid ORDER BY Clazz.clazzUid")
     public abstract UmProvider<WamdaClazzWithSocialInfo> findAll(long personUid);
 
     @UmQuery("SELECT Clazz.* , WamdaClazz.*, Person.*, \n" +
