@@ -200,11 +200,9 @@ public class SelectMultipleTreeDialogFragment extends UstadDialogFragment implem
                                     // of toggling the node. 
                                     if(result.size() > 0){
                                         runOnUiThread(() -> {
-
                                             treeNode.expand();
                                             adapter.notifyDataSetChanged();
                                             treeNode.expand();
-
                                             onClick(treeNode, viewHolder);
                                         });
 
