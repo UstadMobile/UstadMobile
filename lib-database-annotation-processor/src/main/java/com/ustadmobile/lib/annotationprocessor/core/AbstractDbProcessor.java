@@ -883,48 +883,6 @@ public abstract class AbstractDbProcessor {
     }
 
     /**
-     * Generate a CodeBlock that will increment the change sequence numbers on an entity class
-     * or List/Array thereof.
-     *
-     * @param paramType TypeMirror representing the parameter type
-     * @param paramVariableName The variable name of the parameter
-     * @param dbVariableName The variable name of the database class itself
-     * @param syncableDbVariableName The variable name of the database class,
-     *                               casted to UmSyncableDatabase, or null if none is available.
-     * @param method The method that is being generated. This is used only to generate error messages
-     *               (e.g. when local / master change sequence numbers are missing)
-     * @param daoType The DAO class that is being generated. This is also used only to generate error
-     *                messages.
-     *
-     * @return CodeBlock that will increment teh change sequence numbers on an entity class or List/Array thereof
-     */
-    protected CodeBlock generateIncrementChangeSeqNumsCodeBlock(TypeMirror paramType,
-                                                                String paramVariableName,
-                                                                String dbVariableName,
-                                                                String syncableDbVariableName,
-                                                                ExecutableElement method,
-                                                                TypeElement daoType) {
-
-        CodeBlock.Builder codeBlock = CodeBlock.builder();
-//        if(syncableDbVariableName == null) {
-//            codeBlock.add("$1T _syncableDb = ($1T)$2L;\n", UmSyncableDatabase.class, dbVariableName);
-//            syncableDbVariableName = "_syncableDb";
-//        }
-//
-//        codeBlock.beginControlFlow("if($L.isMaster())", syncableDbVariableName);
-//        generateIncrementSection(codeBlock, UmSyncMasterChangeSeqNum.class, paramType,
-//                paramVariableName, syncableDbVariableName,
-//                "getAndIncrementNextMasterChangeSeqNum", method, daoType);
-//        codeBlock.nextControlFlow("else");
-//        generateIncrementSection(codeBlock, UmSyncLocalChangeSeqNum.class, paramType,
-//                paramVariableName, syncableDbVariableName,
-//                "getAndIncrementNextLocalChangeSeqNum", method, daoType);
-//        codeBlock.endControlFlow();
-
-        return codeBlock.build();
-    }
-
-    /**
      * Generate a code block that will set syncable primary keys. This is for use on entities
      * that are using the syncable primary key system.
      *
@@ -1061,62 +1019,64 @@ public abstract class AbstractDbProcessor {
         return codeBlock.build();
     }
 
-    private void generateIncrementSection(CodeBlock.Builder codeBlock,
-                                          Class<? extends Annotation> annotation,
-                                          TypeMirror paramType,
-                                          String paramVariableName,
-                                          String syncableDbVariableName,
-                                          String changeSeqNumMethodName,
-                                          ExecutableElement daoMethod,
-                                          TypeElement daoType) {
-        String elementVarName = paramVariableName;
-        TypeElement paramEntityTypeElement;
-        if(DbProcessorUtils.isList(paramType, processingEnv)) {
-            paramEntityTypeElement = (TypeElement)processingEnv.getTypeUtils().asElement(
-                    DbProcessorUtils.getArrayOrListComponentType(paramType, processingEnv));
-        }else {
-            paramEntityTypeElement = (TypeElement)processingEnv.getTypeUtils().asElement(paramType);
+    /**
+     * Note: When an update is run, we need to make sure the database triggers runs once, and only once.
+     * Query methods that run an update query don't touch the sync sequence numbers, and the trigger
+     * will when the change sequence number is unchanged after an update. With the Update method, all
+     * fields are updated. If the object supplied has a different value (e.g. it came from a query,
+     * and then other update methods etc. were run), then the new and old change seq num values won't
+     * match, and that won't cause the trigger to run. Therefor when running an annotated update
+     * method, we set all change seq numbers to zero. A second trigger condition catches this, and
+     * the trigger runs appropriately.
+     *
+     * @param daoMethod
+     * @param daoType
+     * @param sycnableDbVariableName
+     * @return
+     */
+    protected CodeBlock.Builder generateUpdateSetChangeSeqNumSection(ExecutableElement daoMethod,
+                                                        TypeElement daoType,
+                                                        String sycnableDbVariableName) {
+        CodeBlock.Builder codeBlock = CodeBlock.builder();
+
+        codeBlock.beginControlFlow("if($L.isMaster())", sycnableDbVariableName);
+        DaoMethodInfo methodInfo = new DaoMethodInfo(daoMethod, daoType, processingEnv);
+        boolean isListOrArray = methodInfo.hasArrayOrListParameter();
+        List<Class<? extends Annotation>> seqNumAnnotations = Arrays.asList(
+                UmSyncMasterChangeSeqNum.class, UmSyncLocalChangeSeqNum.class);
+        TypeElement entityType = (TypeElement)processingEnv.getTypeUtils().asElement(
+                methodInfo.resolveEntityParameterComponentType());
+        boolean elseAdded = false;
+        for(Class<? extends Annotation> annotation : seqNumAnnotations) {
+            if(isListOrArray) {
+                codeBlock.beginControlFlow("for($T _entity : $L)", entityType,
+                        methodInfo.getEntityParameterElement().getSimpleName());
+            }
+            Element seqNumElement = findElementWithAnnotation(entityType, annotation,
+                    processingEnv);
+
+            if(seqNumElement != null) {
+                codeBlock.add("$L.set$L(0);\n", isListOrArray ? "_entity" :
+                                methodInfo.getEntityParameterElement().getSimpleName(),
+                        capitalize(seqNumElement.getSimpleName()));
+            }else {
+                messager.printMessage(Diagnostic.Kind.ERROR, formatMethodForErrorMessage(daoMethod,
+                        daoType) + ": generate update seq num section: cannot find element annotated " +
+                        annotation.getCanonicalName(), daoType);
+            }
+
+            if(isListOrArray)
+                codeBlock.endControlFlow();
+
+            if(!elseAdded) {
+                codeBlock.nextControlFlow("else");
+                elseAdded = true;
+            }
         }
 
+        codeBlock.endControlFlow();
 
-        String numChangesStr;
-        if(DbProcessorUtils.isList(paramType, processingEnv)) {
-            numChangesStr = paramVariableName + ".size()";
-        }else if(paramType.getKind().equals(TypeKind.ARRAY)) {
-            numChangesStr = paramVariableName = ".length";
-        }else {
-            numChangesStr = "1";
-        }
-
-        int tableNum = paramEntityTypeElement.getAnnotation(UmEntity.class).tableId();
-        codeBlock.add("long _changeSeqNum = $L.getSyncStatusDao().$L($L, $L);\n",
-                syncableDbVariableName, changeSeqNumMethodName, tableNum, numChangesStr);
-
-        boolean isListOrArray = paramType.getKind().equals(TypeKind.ARRAY)
-                || DbProcessorUtils.isList(paramType, processingEnv);
-        if(isListOrArray) {
-            codeBlock.beginControlFlow("for($T _element : $L)",
-                    DbProcessorUtils.getArrayOrListComponentType(paramType, processingEnv),
-                    paramVariableName);
-            elementVarName = "_element";
-        }
-
-        Element changeSeqNumElement = findElementWithAnnotation(paramEntityTypeElement, annotation,
-                processingEnv);
-        if(changeSeqNumElement == null) {
-            messager.printMessage(Diagnostic.Kind.ERROR, formatMethodForErrorMessage(daoMethod,
-                    daoType) + ": method requires entity that has a local and master change " +
-                    "sequence number fields, but " + paramEntityTypeElement.getQualifiedName() +
-                    " has no variable annotated with @" + annotation.getSimpleName());
-            return;
-        }
-
-        codeBlock.add("$L.set$L(_changeSeqNum$L);\n", elementVarName,
-                capitalize(changeSeqNumElement.getSimpleName()),
-                isListOrArray ? "++" : "");
-        if(isListOrArray) {
-            codeBlock.endControlFlow();
-        }
+        return codeBlock;
     }
 
     /**
@@ -1367,8 +1327,8 @@ public abstract class AbstractDbProcessor {
                     "CREATE TRIGGER $triggerOn:L_csn_$tableNameLower:L " +
                             "AFTER $triggerOn:L ON $tableName:L FOR EACH ROW ";
             codeBlock.addNamed("String _createUpdateTriggerStmt_$tableName:L = \""
-                            + triggerTemplate + " WHEN (OLD.\" + _tableColName_$tableName:L + \" > 0 " +
-                            "AND OLD.\" + _tableColName_$tableName:L + \" " +
+                            + triggerTemplate + " WHEN (NEW.\" + _tableColName_$tableName:L + \" = 0" + //
+                            " OR OLD.\" + _tableColName_$tableName:L + \" " +
                             "= NEW.\" + _tableColName_$tableName:L  + \") \";\n",
                     triggerTemplateArgs);
 
