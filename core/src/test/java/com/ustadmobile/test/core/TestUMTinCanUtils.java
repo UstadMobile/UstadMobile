@@ -37,11 +37,6 @@ import junit.framework.TestCase;
 
 import org.json.JSONObject;
 
-/* $if umplatform == 2  $
-    import com.ustadmobile.test.port.j2me.TestCase;
-    import org.json.me.*;
- $else$ */
-/* $endif$ */
 
 
 /**

@@ -5,7 +5,7 @@ import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
 import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 
-@UmEntity(tableId = 12)
+@UmEntity(tableId = 32)
 public class ClazzActivityChange{
 
     public static final int UOM_FREQUENCY = 1;

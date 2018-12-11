@@ -14,6 +14,7 @@
 .idea/markdown-navigator
 .idea/markdown-navigator.xml
 .idea/caches/build_file_checksums.ser
+.idea/modules.xml
 
 
 # Java class files
@@ -51,6 +52,9 @@ core/libs/downloads/
 core/dist/*.jar
 core/lib/
 core/build/
+
+#Scraper files
+lib-content-scrapers/src/main/java/com/ustadmobile/lib/contentscrapers/buildconfig/*
 
 #Android Studio files
 ports/android/.idea

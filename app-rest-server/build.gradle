@@ -14,8 +14,9 @@ dependencies {
 
     implementation project(":lib-database-jdbc")
     implementation project(":lib-database-entities")
-    implementation project(":lib-database")
+    implementation project(':lib-database')
     implementation project(":lib-database-runtime")
+    implementation project(':lib-database-runtime-jdbc')
 
 
     implementation "org.glassfish.jersey.core:jersey-server:$version_jersey"

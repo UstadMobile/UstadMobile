@@ -4,7 +4,7 @@
 This is the one you should be editing. The one in /core/locale/main/values/strings.ui.xml
 -->
 <resources>
-<string name="app_name_classbook">كلاس بوك</string>
+<string name="app_name_classbook">كلاسبوك</string>
 <string name="app_name">كلاس بوك</string>
 <string name='login'>الدخول</string>
 <string name='error'>خطأ</string>

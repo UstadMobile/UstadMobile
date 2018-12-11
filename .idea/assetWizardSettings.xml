@@ -14,8 +14,8 @@
                         <option name="values">
                           <map>
                             <entry key="assetSourceType" value="FILE" />
-                            <entry key="outputName" value="ic_logo_classbook_with_text_eng_ar" />
-                            <entry key="sourceFile" value="C:\Users\Varuna\Ustadmobile\IRC\Sprint 4\Logo\logo_classbook_with_text_eng_ar.svg" />
+                            <entry key="outputName" value="ic_onboarding_attendance_icon" />
+                            <entry key="sourceFile" value="C:\Users\Varuna\Ustadmobile\IRC\Sprint 4\Logo\onboarding_attendance_icon.svg" />
                           </map>
                         </option>
                       </PersistentState>

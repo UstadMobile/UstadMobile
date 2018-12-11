@@ -23,13 +23,10 @@ compileJava {
     }
 }
 
-jar {
-    exclude("com/ustadmobile/core/db/*_Factory.*")
-}
-
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     compileOnly project(":lib-database-entities")
+    compileOnly project(":lib-database-runtime-core-compileonly")
     implementation project(':lib-database-runtime')
     implementation project(":lib-util")
 

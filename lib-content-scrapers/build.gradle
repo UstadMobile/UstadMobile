@@ -1,0 +1,135 @@
+buildscript {
+    repositories {
+        maven {
+            url 'https://plugins.gradle.org/m2/'
+        }
+    }
+    dependencies {
+        classpath 'gradle.plugin.de.fuerstenau:BuildConfigPlugin:1.1.7'
+    }
+}
+
+apply plugin: 'java-library'
+
+
+task scrapeContent(type: JavaExec) {
+    classpath sourceSets.main.runtimeClasspath
+    if(project.hasProperty("edraakUrl") && project.hasProperty("edraakDir")) {
+        main "com.ustadmobile.lib.contentscrapers.edraakK12.EdraakK12ContentScraper"
+        args  project.getProperties().get("edraakUrl"), project.getProperties().get("edraakDir")
+    }
+    if(project.hasProperty("findEdraakUrl") && project.hasProperty("findEdraakDir")) {
+        main "com.ustadmobile.lib.contentscrapers.edraakK12.IndexEdraakK12Content"
+        args  project.getProperties().get("findEdraakUrl"), project.getProperties().get("findEdraakDir")
+    }
+    if(project.hasProperty("phetUrl") && project.hasProperty("phetDir")){
+        main "com.ustadmobile.lib.contentscrapers.phetsimulation.PhetContentScraper"
+        args  project.getProperties().get("phetUrl"), project.getProperties().get("phetDir")
+    }
+    if(project.hasProperty("findPhetUrl") && project.hasProperty("findPhetDir")){
+        main "com.ustadmobile.lib.contentscrapers.phetsimulation.IndexPhetContentScraper"
+        args  project.getProperties().get("findPhetUrl"), project.getProperties().get("findPhetDir")
+    }
+
+    if(project.hasProperty("ck12Url") && project.hasProperty("ck12Dir") && project.hasProperty("ck12type")){
+        main "com.ustadmobile.lib.contentscrapers.ck12.CK12ContentScraper"
+        args  project.getProperties().get("ck12Url"), project.getProperties().get("ck12Dir"), project.getProperties().get("ck12type")
+    }
+
+    if(project.hasProperty("findCK12Url") && project.hasProperty("findCK12Dir")){
+        main "com.ustadmobile.lib.contentscrapers.ck12.IndexCategoryCK12Content"
+        args  project.getProperties().get("findCK12Url"), project.getProperties().get("findCK12Dir")
+    }
+
+    if(project.hasProperty("findPratDir")){
+        main "com.ustadmobile.lib.contentscrapers.prathambooks.IndexPrathamContentScraper"
+        args project.getProperties().get("findPratDir")
+    }
+
+    if(project.hasProperty("findAsbDir")){
+        main "com.ustadmobile.lib.contentscrapers.africanbooks.AsbScraper"
+        args project.getProperties().get("findAsbDir")
+    }
+
+    if(project.hasProperty("findDdlUrl") && project.hasProperty("findDdlDir")) {
+        main "com.ustadmobile.lib.contentscrapers.ddl.IndexDdlContent"
+        args  project.getProperties().get("findDdlUrl"), project.getProperties().get("findDdlDir")
+    }
+    if(project.hasProperty("ddlUrl") && project.hasProperty("ddlDir")) {
+        main "com.ustadmobile.lib.contentscrapers.ddl.DdlContentScraper"
+        args  project.getProperties().get("ddlUrl"), project.getProperties().get("ddlDir")
+    }
+
+
+    systemProperties["java.naming.factory.initial"] = "org.osjava.sj.SimpleContextFactory"
+    systemProperties["java.naming.factory.object"] = "org.apache.commons.dbcp2.BasicDataSourceFactory"
+    systemProperties["org.osjava.sj.delimiter"] = "/"
+    systemProperties["org.osjava.sj.space"] = "java:/comp/env"
+    systemProperties["org.osjava.sj.root"] = "jndi-config/"
+    systemProperties["org.osjava.sj.jndi.shared"] = "true"
+
+    outputs.upToDateWhen { false }
+}
+
+ext.buildConfigProperties = new Properties()
+ext.buildConfigProperties.load(new FileInputStream(rootProject.file("buildconfig.default.properties")))
+ext.localProperties = new Properties()
+ext.localProperties.load(new FileInputStream(rootProject.file("local.properties")))
+
+task generateScraperBuildConfig (type: de.fuerstenau.gradle.buildconfig.GenerateBuildConfigTask) {
+    inputs.files(rootProject.file("local.properties"))
+    outputDir = new File ("${projectDir}/src/main/java")
+    packageName = "com.ustadmobile.lib.contentscrapers.buildconfig"
+    appName = project.ext.buildConfigProperties['appName']
+    clsName = "ScraperBuildConfig"
+    version = rootProject.version
+
+    buildConfigField "String", "CHROME_DRIVER_PATH", rootProject.ext.localProperties["scraper.chrome_driver_path"]
+
+}
+compileJava.dependsOn(generateScraperBuildConfig)
+
+if(!ext.localProperties.containsKey("scraper.chrome_driver_path")) {
+    throw new GradleException("Content Scraping requires Selenium which needs a chrome driver to run." +
+            " You must define a path to the chrome driver in local.properties. " +
+            "Please open the README file in lib-content-scrapers for further instructions")
+}
+
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation "org.jsoup:jsoup:$version_jsoup"
+    implementation "com.google.code.gson:gson:$version_gson"
+    implementation project(":core")
+    implementation project(":lib-database-entities")
+    implementation "commons-io:commons-io:$version_commons_io"
+    implementation "org.apache.commons:commons-lang3:$version_apache_commons_lang"
+    implementation "org.seleniumhq.selenium:selenium-java:$version_selenium"
+    implementation "org.seleniumhq.selenium:selenium-chrome-driver:$version_selenium"
+    implementation "io.github.bonigarcia:webdrivermanager:$version_web_driver"
+    implementation "com.neovisionaries:nv-i18n:$version_nv_lang"
+    implementation "org.postgresql:postgresql:$version_postgres_jdbc"
+
+    testImplementation "junit:junit:$version_junit"
+    testImplementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
+    testImplementation "org.mockito:mockito-core:$version_android_mockito"
+    implementation project(":lib-database-jdbc")
+    implementation project(":lib-database")
+    implementation project(":lib-database-entities")
+    implementation project(":lib-database-runtime")
+    implementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
+    implementation "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
+    implementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
+}
+
+task copyTestResources(type: Copy) {
+    from "${projectDir}/src/main/resources"
+    into "${buildDir}/classes/test"
+    exclude "**/jndi.properties"
+}
+
+processTestResources.dependsOn copyTestResources
+compileTestJava.options.encoding = 'UTF-8'
+
+sourceCompatibility = "1.8"
+targetCompatibility = "1.8"

@@ -8,10 +8,13 @@ import com.ustadmobile.core.db.dao.ClazzLogDao;
 import com.ustadmobile.core.db.dao.ClazzMemberDao;
 import com.ustadmobile.core.db.dao.ContainerFileDao;
 import com.ustadmobile.core.db.dao.ContainerFileEntryDao;
+import com.ustadmobile.core.db.dao.ContentCategoryDao;
+import com.ustadmobile.core.db.dao.ContentCategorySchemaDao;
 import com.ustadmobile.core.db.dao.ContentEntryContentCategoryJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryContentEntryFileJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryDao;
 import com.ustadmobile.core.db.dao.ContentEntryFileDao;
+import com.ustadmobile.core.db.dao.ContentEntryFileStatusDao;
 import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryRelatedEntryJoinDao;
 import com.ustadmobile.core.db.dao.CrawJoblItemDao;
@@ -25,6 +28,8 @@ import com.ustadmobile.core.db.dao.EntryStatusResponseDao;
 import com.ustadmobile.core.db.dao.FeedEntryDao;
 import com.ustadmobile.core.db.dao.HolidayDao;
 import com.ustadmobile.core.db.dao.HttpCachedEntryDao;
+import com.ustadmobile.core.db.dao.LanguageDao;
+import com.ustadmobile.core.db.dao.LanguageVariantDao;
 import com.ustadmobile.core.db.dao.LocationDao;
 import com.ustadmobile.core.db.dao.NetworkNodeDao;
 import com.ustadmobile.core.db.dao.OpdsEntryDao;
@@ -44,17 +49,13 @@ import com.ustadmobile.core.db.dao.SocialNominationQuestionResponseNominationDao
 import com.ustadmobile.core.db.dao.SocialNominationQuestionSetDao;
 import com.ustadmobile.core.db.dao.SocialNominationQuestionSetResponseDao;
 import com.ustadmobile.core.db.dao.UMCalendarDao;
+import com.ustadmobile.lib.database.UmDbBuilder;
 import com.ustadmobile.lib.database.annotation.UmClearAll;
 import com.ustadmobile.lib.database.annotation.UmDatabase;
 import com.ustadmobile.lib.database.annotation.UmDbContext;
 import com.ustadmobile.lib.database.annotation.UmRepository;
 import com.ustadmobile.lib.database.annotation.UmSyncOutgoing;
-import com.ustadmobile.lib.db.entities.Location;
-import com.ustadmobile.lib.db.sync.UmSyncableDatabase;
-import com.ustadmobile.lib.db.sync.dao.SyncStatusDao;
-import com.ustadmobile.lib.db.sync.dao.SyncablePrimaryKeyDao;
-import com.ustadmobile.lib.db.sync.entities.SyncDeviceBits;
-import com.ustadmobile.lib.db.sync.entities.SyncStatus;
+import com.ustadmobile.lib.db.entities.AccessToken;
 import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.ClazzActivity;
 import com.ustadmobile.lib.db.entities.ClazzActivityChange;
@@ -63,10 +64,13 @@ import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord;
 import com.ustadmobile.lib.db.entities.ClazzMember;
 import com.ustadmobile.lib.db.entities.ContainerFile;
 import com.ustadmobile.lib.db.entities.ContainerFileEntry;
+import com.ustadmobile.lib.db.entities.ContentCategory;
+import com.ustadmobile.lib.db.entities.ContentCategorySchema;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.ContentEntryContentCategoryJoin;
 import com.ustadmobile.lib.db.entities.ContentEntryContentEntryFileJoin;
 import com.ustadmobile.lib.db.entities.ContentEntryFile;
+import com.ustadmobile.lib.db.entities.ContentEntryFileStatus;
 import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin;
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoin;
 import com.ustadmobile.lib.db.entities.CrawlJob;
@@ -80,6 +84,9 @@ import com.ustadmobile.lib.db.entities.EntryStatusResponse;
 import com.ustadmobile.lib.db.entities.FeedEntry;
 import com.ustadmobile.lib.db.entities.Holiday;
 import com.ustadmobile.lib.db.entities.HttpCachedEntry;
+import com.ustadmobile.lib.db.entities.Language;
+import com.ustadmobile.lib.db.entities.LanguageVariant;
+import com.ustadmobile.lib.db.entities.Location;
 import com.ustadmobile.lib.db.entities.NetworkNode;
 import com.ustadmobile.lib.db.entities.OpdsEntry;
 import com.ustadmobile.lib.db.entities.OpdsEntryParentToChildJoin;
@@ -87,10 +94,9 @@ import com.ustadmobile.lib.db.entities.OpdsEntryStatusCache;
 import com.ustadmobile.lib.db.entities.OpdsEntryStatusCacheAncestor;
 import com.ustadmobile.lib.db.entities.OpdsLink;
 import com.ustadmobile.lib.db.entities.Person;
-import com.ustadmobile.lib.db.entities.PersonField;
 import com.ustadmobile.lib.db.entities.PersonCustomFieldValue;
-
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField;
+import com.ustadmobile.lib.db.entities.PersonField;
 import com.ustadmobile.lib.db.entities.Schedule;
 import com.ustadmobile.lib.db.entities.SocialNominationQuestion;
 import com.ustadmobile.lib.db.entities.SocialNominationQuestionResponse;
@@ -99,9 +105,14 @@ import com.ustadmobile.lib.db.entities.SocialNominationQuestionSet;
 import com.ustadmobile.lib.db.entities.SocialNominationQuestionSetRecognition;
 import com.ustadmobile.lib.db.entities.SocialNominationQuestionSetResponse;
 import com.ustadmobile.lib.db.entities.UMCalendar;
-
+import com.ustadmobile.lib.db.sync.UmSyncableDatabase;
+import com.ustadmobile.lib.db.sync.dao.SyncStatusDao;
+import com.ustadmobile.lib.db.sync.dao.SyncablePrimaryKeyDao;
+import com.ustadmobile.lib.db.sync.entities.SyncDeviceBits;
+import com.ustadmobile.lib.db.sync.entities.SyncStatus;
 import com.ustadmobile.lib.db.sync.entities.SyncablePrimaryKey;
 
+import java.util.Hashtable;
 
 @UmDatabase(version = 1, entities = {
         OpdsEntry.class, OpdsLink.class, OpdsEntryParentToChildJoin.class,
@@ -122,12 +133,17 @@ import com.ustadmobile.lib.db.sync.entities.SyncablePrimaryKey;
         ContentEntry.class, ContentEntryContentCategoryJoin.class,
         ContentEntryContentEntryFileJoin.class, ContentEntryFile.class,
         ContentEntryParentChildJoin.class, ContentEntryRelatedEntryJoin.class,
-        SyncStatus.class, SyncablePrimaryKey.class, SyncDeviceBits.class, Location.class
+        Location.class, ContentEntryFileStatus.class, ContentCategorySchema.class,
+        ContentCategory.class, Language.class, LanguageVariant.class,
+        SyncStatus.class, SyncablePrimaryKey.class, SyncDeviceBits.class,
+        AccessToken.class
 
 })
 public abstract class UmAppDatabase implements UmSyncableDatabase{
 
     private static volatile UmAppDatabase instance;
+
+    private static volatile Hashtable<String, UmAppDatabase> namedInstances = new Hashtable<>();
 
     private boolean master;
 
@@ -144,14 +160,20 @@ public abstract class UmAppDatabase implements UmSyncableDatabase{
 
     public static synchronized UmAppDatabase getInstance(Object context) {
         if(instance == null){
-            instance = com.ustadmobile.core.db.UmAppDatabase_Factory.makeUmAppDatabase(context);
+            instance = UmDbBuilder.makeDatabase(UmAppDatabase.class, context);
         }
 
         return instance;
     }
 
     public static synchronized UmAppDatabase getInstance(Object context, String dbName) {
-        return UmAppDatabase_Factory.makeUmAppDatabase(context, dbName);
+        UmAppDatabase db = namedInstances.get(dbName);
+        if(db == null){
+            db = UmDbBuilder.makeDatabase(UmAppDatabase.class, context, dbName);
+            namedInstances.put(dbName, db);
+        }
+
+        return db;
     }
 
     public abstract OpdsEntryDao getOpdsEntryDao();
@@ -243,6 +265,15 @@ public abstract class UmAppDatabase implements UmSyncableDatabase{
     public abstract SyncStatusDao getSyncStatusDao();
 
     public abstract LocationDao getLocationDao();
+    public abstract ContentEntryFileStatusDao getContentEntryFileStatusDao();
+
+    public abstract ContentCategorySchemaDao getContentCategorySchemaDao();
+
+    public abstract ContentCategoryDao getContentCategoryDao();
+
+    public abstract LanguageDao getLanguageDao();
+
+    public abstract LanguageVariantDao getLanguageVariantDao();
 
     @UmDbContext
     public abstract Object getContext();

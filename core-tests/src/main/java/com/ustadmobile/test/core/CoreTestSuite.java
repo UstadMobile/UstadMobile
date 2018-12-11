@@ -17,7 +17,6 @@ import org.junit.runners.Suite;
         TestXapiPackageTypePlugin.class,
 //        TestUstadJSOPDSFeed.class,
 //        TestUstadJSOPDSEntry.class,
-        TestUMFileUtil.class,
         TestUstadJSOPF.class,
         TestUmCalendarUtil.class,
         TestScormManifest.class,

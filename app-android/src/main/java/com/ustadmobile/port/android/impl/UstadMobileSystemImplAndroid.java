@@ -68,7 +68,6 @@ import com.ustadmobile.core.fs.contenttype.ScormTypePluginFs;
 import com.ustadmobile.core.fs.contenttype.XapiPackageTypePluginFs;
 import com.ustadmobile.core.fs.db.ContainerFileHelper;
 import com.ustadmobile.core.impl.ContainerMountRequest;
-import com.ustadmobile.core.impl.UMDownloadCompleteReceiver;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
@@ -90,6 +89,9 @@ import com.ustadmobile.core.view.ClazzActivityEditView;
 import com.ustadmobile.core.view.ClazzDetailEnrollStudentView;
 import com.ustadmobile.core.view.ClazzEditView;
 import com.ustadmobile.core.view.ContainerView;
+import com.ustadmobile.core.view.ContentEntryDetailView;
+import com.ustadmobile.core.view.ContentEntryView;
+import com.ustadmobile.core.view.DummyView;
 import com.ustadmobile.core.view.H5PContentView;
 import com.ustadmobile.core.view.LoginView;
 import com.ustadmobile.core.view.PersonDetailEnrollClazzView;
@@ -139,7 +141,10 @@ import com.ustadmobile.port.android.view.ClazzDetailEnrollStudentActivity;
 import com.ustadmobile.port.android.view.ClazzEditActivity;
 import com.ustadmobile.port.android.view.ClazzLogDetailActivity;
 import com.ustadmobile.port.android.view.ContainerActivity;
+import com.ustadmobile.port.android.view.ContentEntryDetailActivity;
+import com.ustadmobile.port.android.view.ContentEntryListActivity;
 import com.ustadmobile.port.android.view.DownloadDialogFragment;
+import com.ustadmobile.port.android.view.DummyActivity;
 import com.ustadmobile.port.android.view.H5PContentActivity;
 import com.ustadmobile.port.android.view.LoginDialogFragment;
 import com.ustadmobile.port.android.view.PersonDetailActivity;
@@ -282,9 +287,9 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         viewNameToAndroidImplMap.put(ReportOverallAttendanceView.VIEW_NAME, ReportOverallAttendanceActivity.class);
         viewNameToAndroidImplMap.put(ReportNumberOfDaysClassesOpenView.VIEW_NAME, ReportNumberOfDaysClassesOpenActivity.class);
         viewNameToAndroidImplMap.put(ReportAttendanceGroupedByThresholdsView.VIEW_NAME, ReportAttendanceGroupedByThresholdsActivity.class);
-
-
-
+        viewNameToAndroidImplMap.put(ContentEntryView.VIEW_NAME, ContentEntryListActivity.class);
+        viewNameToAndroidImplMap.put(ContentEntryDetailView.VIEW_NAME, ContentEntryDetailActivity.class);
+        viewNameToAndroidImplMap.put(DummyView.VIEW_NAME, DummyActivity.class);
     }
 
     /**
@@ -316,8 +321,6 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
     public static final String START_AUTH = "START_AUTH";
 
     private WeakHashMap<Context, AppViewAndroid> appViews;
-
-    private HashMap<UMDownloadCompleteReceiver, BroadcastReceiver> downloadCompleteReceivers;
 
     private Timer sendStatementsTimer;
 
@@ -477,7 +480,6 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
     public UstadMobileSystemImplAndroid() {
         logger = new UMLogAndroid();
         appViews = new WeakHashMap<>();
-        downloadCompleteReceivers = new HashMap<>();
         networkManagerAndroid = new NetworkManagerAndroid();
         networkManagerAndroid.setServiceConnectionMap(networkServiceConnections);
     }
