@@ -172,28 +172,12 @@ public class SelectMultipleTreeDialogFragment extends UstadDialogFragment implem
 
         //Set adapter listener
         adapter.setOnTreeNodeListener(new TreeViewAdapter.OnTreeNodeListener() {
+
             @Override
             public boolean onClick(TreeNode treeNode, RecyclerView.ViewHolder viewHolder) {
 
                 //get the location object associated with this node (using treeNodegetContent)
                 // would be something like getContent().isSite() or isLeaf()
-
-                //Location nodeLocation = treeNode.getContent();
-                //boolean ourLocationIsLeaf = nodeLocation.isSite();
-                //mPresenter.getLocationForParentUid(((LocationLayoutType)treeNode.getContent()).getUid(), treeNode, treeNode.getParent());
-
-//                LocationNodeBinder.ViewHolder locationViewHolder =
-//                        (LocationNodeBinder.ViewHolder) viewHolder;
-//                Long locationSelected = ((LocationLayoutType)treeNode.getContent()).getUid();
-//                String locationNameSelected = ((LocationLayoutType)treeNode.getContent()).getName();
-//
-//                if(locationViewHolder.getCheckBox().isChecked()){
-//                    selectedOptions.put(locationNameSelected, locationSelected);
-//                }else{
-//                    if(selectedOptions.containsKey(locationNameSelected)){
-//                        selectedOptions.remove(locationNameSelected);
-//                    }
-//                }
 
                 if(treeNode.isLeaf()) {
                     //now run the query async, get the result, and add children to treeNode
@@ -211,11 +195,25 @@ public class SelectMultipleTreeDialogFragment extends UstadDialogFragment implem
                                                 )
                                         ));
                                     }
+
+                                    //TODO: Replace this; doeesnt work. Need to find a working way
+                                    // of toggling the node. 
+                                    if(result.size() > 0){
+                                        runOnUiThread(() -> {
+
+                                            treeNode.expand();
+                                            adapter.notifyDataSetChanged();
+                                            treeNode.expand();
+
+                                            onClick(treeNode, viewHolder);
+                                        });
+
+                                    }
                                 }
 
                                 @Override
                                 public void onFailure(Throwable exception) {
-
+                                    exception.printStackTrace();
                                 }
                             });
 
