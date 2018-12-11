@@ -4,6 +4,8 @@
 This is the one you should be editing. The one in /core/locale/main/values/strings.ui.xml
 -->
 <resources>
+<string name="app_name_classbook">كلاس بوك</string>
+<string name="app_name">كلاس بوك</string>
 <string name='login'>الدخول</string>
 <string name='error'>خطأ</string>
 <string name='err_registering_new_user'>خطأ في تسجيل مستخدم جديد</string>
@@ -364,5 +366,7 @@ This is the one you should be editing. The one in /core/locale/main/values/strin
 <string name='json'>JSON تدوين مواضيع بجافا سكريبت </string>
 <string name='date'>التاريخ</string>
 <string name='average'>المعدل</string>
+<string name="onboarding_easily_record_student_attendance">بسهولة تسجيل حضور الطلاب</string>
+<string name="get_started">البدء</string>
 
 </resources>

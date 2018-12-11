@@ -550,6 +550,9 @@ dependencies {
     //Recycler tree view library
     implementation "com.github.TellH:RecyclerTreeView:$version_tellh_recyclertreeview"
 
+    //Work manager
+    implementation "android.arch.work:work-runtime:$version_work_manager"
+
     testImplementation "junit:junit:$version_junit"
 }
 

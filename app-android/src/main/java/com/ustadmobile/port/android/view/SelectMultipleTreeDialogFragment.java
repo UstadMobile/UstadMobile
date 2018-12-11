@@ -87,9 +87,6 @@ public class SelectMultipleTreeDialogFragment extends UstadDialogFragment implem
         //Get initial data
         //List<TreeNode> nodes = initTestData();
 
-
-
-
         toolbar = rootView.findViewById(R.id.fragment_select_multiple_tree_dialog_toolbar);
         toolbar.setTitle(R.string.select_locations);
         toolbar.setNavigationIcon(R.drawable.ic_arrow_back_white_24dp);

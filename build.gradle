@@ -83,6 +83,7 @@ ext {
     version_compressor = "2.1.0"
     version_mpandroidchart = "v3.0.3"
     version_tellh_recyclertreeview = "1.2.0"
+    version_work_manager = "1.0.0-alpha02"
 }
 
 ext.buildConfigProperties = new Properties()

@@ -4,7 +4,8 @@
 This is the one you should be editing. The one in /core/locale/main/values/strings.ui.xml
 -->
 <resources>
-    <string name="app_name">Ustad Mobile</string>
+    <string name="app_name">ClassBook</string>
+    <string name="app_name_classbook">ClassBook</string>
     <string name='dir'>ltr</string>
     <string name='login'>Login</string>
     <string name='error'>Error</string>
@@ -463,5 +464,8 @@ This is the one you should be editing. The one in /core/locale/main/values/strin
     <string name="average">Average</string>
     <string name="age">Age</string>
     <string name="days">Days</string>
+    <string name="onboarding_easily_record_student_attendance">Easily record student attendance</string>
+    <string name="get_started">Get started</string>
+
 
 </resources>
