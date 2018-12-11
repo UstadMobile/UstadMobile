@@ -59,7 +59,6 @@ public class SelectMultipleTreeDialogFragment extends UstadDialogFragment implem
 
     HashMap<String, Long> selectedOptions;
 
-
     public interface MultiSelectTreeDialogListener {
 
         void onLocationResult(HashMap<String, Long> selected);
@@ -96,21 +95,10 @@ public class SelectMultipleTreeDialogFragment extends UstadDialogFragment implem
             int i = item.getItemId();
             if (i == R.id.menu_catalog_entry_presenter_share) {
                 System.out.println("DONE");
-                //TOOD: check
                 mPresenter.handleClickPrimaryActionButton();
             }
             return false;
         });
-
-        //Set view components
-        //Set component listeners
-
-        //Dialog's positive / negative listeners :
-        DialogInterface.OnClickListener positiveOCL =
-                (dialog, which) -> System.out.print("Positive");
-
-        DialogInterface.OnClickListener negativeOCL =
-                (dialog, which) -> System.out.println("Negative");
 
         //Set presenter.
         //Call it's onCreate()
@@ -177,13 +165,10 @@ public class SelectMultipleTreeDialogFragment extends UstadDialogFragment implem
         }
 
         //Init adapter with the location node binder as types of data to accept
-        adapter = new TreeViewAdapter(nodes, Arrays.asList(new LocationNodeBinder()));
-
-
+        adapter = new TreeViewAdapter(nodes, Arrays.asList(new LocationNodeBinder(mPresenter)));
 
         //Set adapter to Recycler view.
         runOnUiThread(() -> recyclerView.setAdapter(adapter));
-
 
         //Set adapter listener
         adapter.setOnTreeNodeListener(new TreeViewAdapter.OnTreeNodeListener() {
@@ -197,6 +182,18 @@ public class SelectMultipleTreeDialogFragment extends UstadDialogFragment implem
                 //boolean ourLocationIsLeaf = nodeLocation.isSite();
                 //mPresenter.getLocationForParentUid(((LocationLayoutType)treeNode.getContent()).getUid(), treeNode, treeNode.getParent());
 
+//                LocationNodeBinder.ViewHolder locationViewHolder =
+//                        (LocationNodeBinder.ViewHolder) viewHolder;
+//                Long locationSelected = ((LocationLayoutType)treeNode.getContent()).getUid();
+//                String locationNameSelected = ((LocationLayoutType)treeNode.getContent()).getName();
+//
+//                if(locationViewHolder.getCheckBox().isChecked()){
+//                    selectedOptions.put(locationNameSelected, locationSelected);
+//                }else{
+//                    if(selectedOptions.containsKey(locationNameSelected)){
+//                        selectedOptions.remove(locationNameSelected);
+//                    }
+//                }
 
                 if(treeNode.isLeaf()) {
                     //now run the query async, get the result, and add children to treeNode
@@ -277,6 +274,7 @@ public class SelectMultipleTreeDialogFragment extends UstadDialogFragment implem
 
     @Override
     public void finish() {
+        selectedOptions = mPresenter.getSelectedOptions();
         if(mAttachedContext instanceof MultiSelectTreeDialogListener) {
             ((MultiSelectTreeDialogListener)mAttachedContext).onLocationResult(selectedOptions);
         }

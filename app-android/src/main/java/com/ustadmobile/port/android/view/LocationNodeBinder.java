@@ -6,11 +6,18 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
+import com.ustadmobile.core.controller.SelectMultipleTreeDialogPresenter;
 
 import tellh.com.recyclertreeview_lib.TreeNode;
 import tellh.com.recyclertreeview_lib.TreeViewBinder;
 
 public class LocationNodeBinder extends TreeViewBinder<LocationNodeBinder.ViewHolder> {
+
+    SelectMultipleTreeDialogPresenter mPresenter;
+
+    LocationNodeBinder(SelectMultipleTreeDialogPresenter presenter){
+        this.mPresenter = presenter;
+    }
 
     @Override
     public ViewHolder provideViewHolder(View view) {
@@ -21,6 +28,7 @@ public class LocationNodeBinder extends TreeViewBinder<LocationNodeBinder.ViewHo
     public void bindView(ViewHolder viewHolder, int i, TreeNode treeNode) {
         LocationLayoutType locationNode = (LocationLayoutType) treeNode.getContent();
         viewHolder.tvName.setText(locationNode.name);
+        viewHolder.locationUid = locationNode.uid;
     }
 
     @Override
@@ -33,10 +41,15 @@ public class LocationNodeBinder extends TreeViewBinder<LocationNodeBinder.ViewHo
         private ImageView ivArrow;
         TextView tvName;
         CheckBox checkBox;
+        Long locationUid;
 
 
         public ImageView getIvArrow() {
             return ivArrow;
+        }
+
+        public CheckBox getCheckBox() {
+            return checkBox;
         }
 
         public ViewHolder(View rootView) {
@@ -46,8 +59,9 @@ public class LocationNodeBinder extends TreeViewBinder<LocationNodeBinder.ViewHo
             this.ivArrow = rootView.findViewById(R.id.item_select_multiple_tree_dialog_arrow);
             this.checkBox = rootView.findViewById(R.id.item_select_multiple_tree_dialog_checkbox);
 
-
             checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                this.checkBox.setChecked(isChecked);
+                mPresenter.locationChecked(tvName.getText().toString(), locationUid, isChecked);
 
             });
         }

@@ -1,5 +1,6 @@
 package com.ustadmobile.core.controller;
 
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 
@@ -18,8 +19,7 @@ import com.ustadmobile.lib.db.entities.Location;
 public class SelectMultipleTreeDialogPresenter
         extends UstadBaseController<SelectMultipleTreeDialogView> {
 
-    //Any arguments stored as variables here
-    //eg: private long clazzUid = -1;
+    HashMap<String, Long> selectedOptions;
 
     UmAppDatabase repository = UmAccountManager.getRepositoryForActiveAccount(context);
 
@@ -27,13 +27,13 @@ public class SelectMultipleTreeDialogPresenter
                                              SelectMultipleTreeDialogView view) {
         super(context, arguments, view);
 
-        //Get arguments and set them.
-        //eg: if(arguments.containsKey(ARG_CLAZZ_UID)){
-        //    currentClazzUid = (long) arguments.get(ARG_CLAZZ_UID);
-        //}
-
+        selectedOptions = new HashMap<>();
         getTopLocations();
 
+    }
+
+    public HashMap<String, Long> getSelectedOptions() {
+        return selectedOptions;
     }
 
     public void getTopLocations(){
@@ -51,30 +51,23 @@ public class SelectMultipleTreeDialogPresenter
         });
     }
 
-
-
-    public void getLocationForParentUid(long parentUid, Object treeNode, Object parentNode){
-        LocationDao locationDao = repository.getLocationDao();
-        locationDao.findAllChildLocationsForUidAsync(parentUid, new UmCallback<List<Location>>() {
-            @Override
-            public void onSuccess(List<Location> result) {
-
-                view.populateTopLocation(result, treeNode, parentNode);
-            }
-
-            @Override
-            public void onFailure(Throwable exception) {
-
-            }
-        });
-    }
-
     @Override
     public void onCreate(Hashtable savedState) {
         super.onCreate(savedState);
+    }
 
+
+    public void locationChecked(String locationName, Long locationUid, boolean checked){
+        if(checked){
+            selectedOptions.put(locationName, locationUid);
+        }else{
+            if(selectedOptions.containsKey(locationName)){
+                selectedOptions.remove(locationName);
+            }
+        }
 
     }
+
 
     public void handleClickPrimaryActionButton() {
         //TODO: Check if nothing else required. The finish() should call the onResult method in parent activity, etc. Make sure you send the list
