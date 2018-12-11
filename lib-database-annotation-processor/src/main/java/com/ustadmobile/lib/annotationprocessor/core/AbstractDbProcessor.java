@@ -1367,7 +1367,9 @@ public abstract class AbstractDbProcessor {
                     "CREATE TRIGGER $triggerOn:L_csn_$tableNameLower:L " +
                             "AFTER $triggerOn:L ON $tableName:L FOR EACH ROW ";
             codeBlock.addNamed("String _createUpdateTriggerStmt_$tableName:L = \""
-                            + triggerTemplate + " WHEN OLD.\" + _tableColName_$tableName:L + \" > 0\";\n",
+                            + triggerTemplate + " WHEN (OLD.\" + _tableColName_$tableName:L + \" > 0 " +
+                            "AND OLD.\" + _tableColName_$tableName:L + \" " +
+                            "= NEW.\" + _tableColName_$tableName:L  + \") \";\n",
                     triggerTemplateArgs);
 
             triggerTemplateArgs.put("triggerOn", "insert");
