@@ -61,10 +61,10 @@ public class SELSelectStudentPresenter extends CommonHandlerPresenter<SELSelectS
         super.onCreate(savedState);
 
         //Convert doneClazzMemberUids csv to List<Integer>
-        List<Integer> donClazzMemberUidsList = new ArrayList<>();
+        List<Long> donClazzMemberUidsList = new ArrayList<>();
         for (String s : doneClazzMemberUids.split(",")) {
             if(s.length() > 0) {
-                donClazzMemberUidsList.add(Integer.parseInt(s));
+                donClazzMemberUidsList.add(Long.parseLong(s));
             }
         }
 

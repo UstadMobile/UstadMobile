@@ -84,7 +84,7 @@ public abstract class ClazzMemberDao implements SyncableDao<ClazzMember, ClazzMe
             "AND ClazzMember.clazzMemberActive = 1 " +
             " AND ClazzMember.role = 1 AND ClazzMember.clazzMemberUid NOT IN (:notIn)) " +
             "AND Person.active = 1 ")
-    public abstract UmProvider<Person> findAllPeopleInClassUidExcept(long clazzUid, List<Integer> notIn);
+    public abstract UmProvider<Person> findAllPeopleInClassUidExcept(long clazzUid, List<Long> notIn);
 
 
     @UmQuery("SELECT * FROM Person where personUid NOT IN ( " +
