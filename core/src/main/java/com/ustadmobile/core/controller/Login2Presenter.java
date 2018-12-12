@@ -1,21 +1,22 @@
 package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.db.UmAppDatabase;
+import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.core.view.LoginView2;
+import com.ustadmobile.core.view.Login2View;
 import com.ustadmobile.lib.db.entities.UmAccount;
 
 import java.util.Hashtable;
 
-public class LoginPresenter2 extends UstadBaseController<LoginView2> {
+public class Login2Presenter extends UstadBaseController<Login2View> {
 
     public static final String ARG_NEXT = "next";
 
     private String mNextDest;
 
-    public LoginPresenter2(Object context, Hashtable arguments, LoginView2 view) {
+    public Login2Presenter(Object context, Hashtable arguments, Login2View view) {
         super(context, arguments, view);
         if(arguments.containsKey(ARG_NEXT)){
             mNextDest = arguments.get(ARG_NEXT).toString();
@@ -25,21 +26,25 @@ public class LoginPresenter2 extends UstadBaseController<LoginView2> {
     public void handleClickLogin(String username, String password, String serverUrl) {
         UmAppDatabase loginRepoDb = UmAppDatabase.getInstance(getContext()).getRepository(serverUrl,
                 "");
+        UstadMobileSystemImpl systemImpl = UstadMobileSystemImpl.getInstance();
         loginRepoDb.getPersonDao().login(username, password, new UmCallback<UmAccount>() {
             @Override
             public void onSuccess(UmAccount result) {
                 if(result != null) {
                     result.setEndpointUrl(serverUrl);
                     UmAccountManager.setActiveAccount(result, getContext());
-                    UstadMobileSystemImpl.getInstance().go(mNextDest, getContext());
+                    systemImpl.go(mNextDest, getContext());
                 }else {
-                    getView().setErrorMessage("Invalid username/password, or offline");
+                    getView().setErrorMessage(systemImpl.getString(MessageID.wrong_user_pass_combo,
+                            getContext()));
+                    getView().setPassword("");
                 }
             }
 
             @Override
             public void onFailure(Throwable exception) {
-                getView().setErrorMessage("OnFailure");
+                getView().setErrorMessage(systemImpl.getString(MessageID.login_network_error,
+                        getContext()));
             }
         });
     }

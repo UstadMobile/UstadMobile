@@ -1,0 +1,130 @@
+package com.ustadmobile.core.controller;
+
+import com.ustadmobile.core.db.UmAppDatabase;
+import com.ustadmobile.core.generated.locale.MessageID;
+import com.ustadmobile.core.impl.UmAccountManager;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.view.Login2View;
+import com.ustadmobile.lib.db.entities.Person;
+import com.ustadmobile.lib.db.entities.UmAccount;
+import com.ustadmobile.test.core.impl.PlatformTestUtil;
+
+import org.glassfish.grizzly.http.server.HttpServer;
+import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
+import org.glassfish.jersey.server.ResourceConfig;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mockito;
+
+import java.net.URI;
+import java.util.Hashtable;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.verify;
+
+public class TestLogin2Presenter {
+
+
+    UstadMobileSystemImpl mainImpl;
+
+    UstadMobileSystemImpl systemImplSpy;
+
+    public static final String TEST_URI = "http://localhost:8089/api/";
+
+    private HttpServer server;
+
+    private UmAppDatabase db;
+
+    private UmAppDatabase repo;
+
+    private static final String VALID_USER = "testuser";
+
+    private static final String VALID_PASS = "secret";
+
+    public static HttpServer startServer() {
+        final ResourceConfig resourceConfig = new ResourceConfig()
+                .packages("com.ustadmobile.core.db.dao");
+        return GrizzlyHttpServerFactory.createHttpServer(URI.create(TEST_URI), resourceConfig);
+    }
+
+    @Before
+    public void setUp() {
+        mainImpl = UstadMobileSystemImpl.getInstance();
+        systemImplSpy = Mockito.spy(mainImpl);
+        UstadMobileSystemImpl.setMainInstance(systemImplSpy);
+        server = startServer();
+
+        db = UmAppDatabase.getInstance(PlatformTestUtil.getTargetContext());
+        repo = db.getRepository(TEST_URI, "");
+
+        db.clearAllTables();
+        Person testPerson = new Person();
+        testPerson.setUsername(VALID_USER);
+        testPerson.setPasswordHash(VALID_PASS);
+        repo.getPersonDao().insert(testPerson);
+    }
+
+    @After
+    public void tearDown() {
+        UstadMobileSystemImpl.setMainInstance(mainImpl);
+        systemImplSpy = null;
+        server.shutdownNow();
+    }
+
+    @Test
+    public void givenValidUsernameAndPassword_whenHandleLoginCalled_thenShouldCallSystemImplGo() {
+        Login2View mockView = Mockito.mock(Login2View.class);
+        Hashtable args = new Hashtable();
+        args.put(Login2Presenter.ARG_NEXT, "somewhere");
+
+        Login2Presenter presenter = new Login2Presenter(PlatformTestUtil.getTargetContext(),
+                args, mockView);
+        presenter.handleClickLogin(VALID_USER, VALID_PASS, TEST_URI);
+
+
+        verify(systemImplSpy, timeout(5000)).go("somewhere",
+                PlatformTestUtil.getTargetContext());
+
+        UmAccount activeAccount = UmAccountManager.getActiveAccount(
+                PlatformTestUtil.getTargetContext());
+        Assert.assertNotNull(activeAccount);
+    }
+
+    @Test
+    public void givenInvalidUsernameAndPassword_whenHandleLoginCalled_thenShouldCallSetErrorMessage() {
+        Login2View mockView = Mockito.mock(Login2View.class);
+        Hashtable args = new Hashtable();
+
+        Login2Presenter presenter = new Login2Presenter(PlatformTestUtil.getTargetContext(),
+                args, mockView);
+        presenter.handleClickLogin(VALID_USER, "wrongpassword", TEST_URI);
+
+        String expectedErrorMsg = UstadMobileSystemImpl.getInstance().getString(
+                MessageID.wrong_user_pass_combo, PlatformTestUtil.getTargetContext());
+
+        verify(mockView, timeout(5000)).setErrorMessage(expectedErrorMsg);
+        verify(mockView, timeout(5000)).setPassword("");
+    }
+
+
+    @Test
+    public void givenServerOffline_whenHandleLoginCalled_thenShouldCallSetErrorMessage() {
+        Login2View mockView = Mockito.mock(Login2View.class);
+        Hashtable args = new Hashtable();
+        server.shutdownNow();
+
+        Login2Presenter presenter = new Login2Presenter(PlatformTestUtil.getTargetContext(),
+                args, mockView);
+        presenter.handleClickLogin(VALID_USER, VALID_PASS, TEST_URI);
+        String expectedErrorMsg = UstadMobileSystemImpl.getInstance().getString(
+                MessageID.login_network_error, PlatformTestUtil.getTargetContext());
+        verify(mockView, timeout(5000)).setErrorMessage(expectedErrorMsg);
+    }
+
+
+
+
+}

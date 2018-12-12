@@ -1,6 +1,6 @@
 package com.ustadmobile.core.view;
 
-public interface LoginView2 extends UstadView{
+public interface Login2View extends UstadView{
 
     void setInProgress(boolean inProgress);
 
