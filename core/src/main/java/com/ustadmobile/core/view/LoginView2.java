@@ -6,4 +6,10 @@ public interface LoginView2 extends UstadView{
 
     void setErrorMessage(String errorMessage);
 
+    void setServerUrl(String serverUrl);
+
+    void setUsername(String username);
+
+    void setPassword(String password);
+
 }

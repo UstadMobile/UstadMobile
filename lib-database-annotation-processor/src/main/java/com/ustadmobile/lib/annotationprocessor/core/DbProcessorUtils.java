@@ -379,5 +379,14 @@ public class DbProcessorUtils {
                 UmSyncMasterChangeSeqNum.class, processingEnv);
         return localChangeSeqnumEl != null && masterChangeSeqNumEl != null;
     }
+
+    public static boolean entityHasChangeSequenceNumbers(TypeMirror entityTypeMirror,
+                                                         ProcessingEnvironment processingEnv) {
+        if(!entityTypeMirror.getKind().equals(TypeKind.DECLARED))
+            return false;
+        else
+            return entityHasChangeSequenceNumbers((TypeElement)processingEnv.getTypeUtils()
+                    .asElement(entityTypeMirror), processingEnv);
+    }
 }
 
