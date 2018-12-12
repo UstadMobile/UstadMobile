@@ -35,4 +35,5 @@ public abstract class WamdaClazzDao implements SyncableDao<WamdaClazz, WamdaClaz
 
     @UmInsert
     public abstract void insertSync(WamdaClazz wamdaClazz, UmCallback<Long> callback);
+
 }

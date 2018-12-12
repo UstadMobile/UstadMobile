@@ -18,6 +18,7 @@ public abstract class ClazzMemberDao implements SyncableDao<ClazzMember, ClazzMe
     @UmInsert
     public abstract void insertAsync(ClazzMember entity, UmCallback<Long> result);
 
-    @UmQuery("SELECT * FROM ClazzMember WHERE clazzMemberPersonUid = :memberPersonUid")
-    public abstract ClazzMember findByUid(long memberPersonUid);
+    @UmQuery("SELECT * FROM ClazzMember " +
+            "WHERE clazzMemberPersonUid = :memberPersonUid AND clazzMemberClazzUid = :clazzUid")
+    public abstract ClazzMember findByUid(long clazzUid,long memberPersonUid);
 }
