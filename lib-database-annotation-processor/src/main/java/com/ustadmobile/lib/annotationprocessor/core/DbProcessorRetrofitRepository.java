@@ -20,6 +20,7 @@ import com.ustadmobile.lib.database.annotation.UmSyncFindLocalChanges;
 import com.ustadmobile.lib.database.annotation.UmSyncFindUpdateable;
 import com.ustadmobile.lib.database.annotation.UmSyncIncoming;
 import com.ustadmobile.lib.database.annotation.UmSyncOutgoing;
+import com.ustadmobile.lib.database.annotation.UmUpdate;
 import com.ustadmobile.lib.db.UmDbWithExecutor;
 import com.ustadmobile.lib.db.retrofit.RetrofitUmCallbackAdapter;
 import com.ustadmobile.lib.db.sync.UmRepositoryDb;
@@ -299,10 +300,12 @@ public class DbProcessorRetrofitRepository extends AbstractDbProcessor {
 
 
             if(repoMethodMode == UmRepository.UmRepositoryMethodType
-                    .INCREMENT_CHANGE_SEQ_NUMS_THEN_DELEGATE_TO_DAO) {
-                codeBlock.add(generateIncrementChangeSeqNumsCodeBlock(methodInfo.resolveEntityParameterType(),
-                        methodInfo.getEntityParameterElement().getSimpleName().toString(),
-                        "_db", "_syncableDb", repoMethod, daoType));
+                    .INCREMENT_CHANGE_SEQ_NUMS_THEN_DELEGATE_TO_DAO
+                    && repoMethod.getAnnotation(UmUpdate.class) != null
+                    && DbProcessorUtils.entityHasChangeSequenceNumbers(
+                            methodInfo.resolveEntityParameterComponentType(), processingEnv)) {
+                codeBlock.add(generateUpdateSetChangeSeqNumSection(repoMethod, daoType,
+                        "_syncableDb").build());
             }
 
             if(methodInfo.isInsertWithAutoSyncPrimaryKey()) {
