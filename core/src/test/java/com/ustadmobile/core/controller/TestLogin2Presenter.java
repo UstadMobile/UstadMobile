@@ -6,6 +6,7 @@ import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.Login2View;
 import com.ustadmobile.lib.db.entities.Person;
+import com.ustadmobile.lib.db.entities.PersonAuth;
 import com.ustadmobile.lib.db.entities.UmAccount;
 import com.ustadmobile.test.core.impl.PlatformTestUtil;
 
@@ -66,8 +67,13 @@ public class TestLogin2Presenter {
         db.clearAllTables();
         Person testPerson = new Person();
         testPerson.setUsername(VALID_USER);
-        testPerson.setPasswordHash(VALID_PASS);
-        repo.getPersonDao().insert(testPerson);
+        long personUid = repo.getPersonDao().insert(testPerson);
+
+
+//        testPerson.setPasswordHash(VALID_PASS);
+
+        PersonAuth testPersonAuth = new PersonAuth(personUid, VALID_PASS);
+        repo.getPersonAuthDao().insert(testPersonAuth);
 
         mockView = Mockito.mock(Login2View.class);
         doAnswer((invocationOnMock) -> {

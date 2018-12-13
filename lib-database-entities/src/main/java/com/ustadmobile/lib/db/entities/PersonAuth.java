@@ -5,13 +5,17 @@ import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
 import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 
+/**
+ * This is a 1:1 relationship with Person. It avoids synchronizing login credentials with any other
+ * devices in cases where another user has permission to view someone else's profile.
+ *
+ * There is no foreign key field, personAuthUid simply equals personUid.
+ */
 @UmEntity(tableId = 30)
 public class PersonAuth {
 
     @UmPrimaryKey(autoGenerateSyncable = true)
     private long personAuthUid;
-
-    private long personAuthPersonUid;
 
     private String passwordHash;
 
@@ -21,20 +25,21 @@ public class PersonAuth {
     @UmSyncMasterChangeSeqNum
     private long personAuthMasterChangeSeqNum;
 
+    public PersonAuth() {
+
+    }
+
+    public PersonAuth(long personAuthUid, String passwordHash) {
+        this.personAuthUid = personAuthUid;
+        this.passwordHash = passwordHash;
+    }
+
     public long getPersonAuthUid() {
         return personAuthUid;
     }
 
     public void setPersonAuthUid(long personAuthUid) {
         this.personAuthUid = personAuthUid;
-    }
-
-    public long getPersonAuthPersonUid() {
-        return personAuthPersonUid;
-    }
-
-    public void setPersonAuthPersonUid(long personAuthPersonUid) {
-        this.personAuthPersonUid = personAuthPersonUid;
     }
 
     public String getPasswordHash() {

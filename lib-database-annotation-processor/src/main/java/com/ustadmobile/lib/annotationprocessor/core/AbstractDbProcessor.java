@@ -109,8 +109,18 @@ public abstract class AbstractDbProcessor {
 
         for(Element dbClassElement : roundEnvironment.getElementsAnnotatedWith(UmDatabase.class)) {
             try {
+                TypeElement dbTypeEl = (TypeElement)dbClassElement;
                 HashMap<Integer, TypeElement> tableIdMap = new HashMap<>();
                 for(TypeElement entityType : findEntityTypes((TypeElement)dbClassElement)) {
+                    if(entityType.getAnnotation(UmEntity.class) == null) {
+                        messager.printMessage(Diagnostic.Kind.ERROR, "Entity " +
+                                entityType.getQualifiedName() + "referenced " +
+                                " by @UmDatabase annotation on " +
+                                dbTypeEl.getQualifiedName() + " not annotated" +
+                                " with @UmEntity ", entityType);
+                        continue;
+                    }
+
                     int tableId = entityType.getAnnotation(UmEntity.class).tableId();
                     if(tableId != 0 && tableIdMap.containsKey(tableId)) {
                         messager.printMessage(Diagnostic.Kind.ERROR, "Duplicate UmEntity " +

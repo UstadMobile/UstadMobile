@@ -76,7 +76,9 @@ public abstract class PersonDao implements SyncableDao<Person, PersonDao> {
     public abstract void insertAccessToken(AccessToken token);
 
 
-    @UmQuery("SELECT personUid, passwordHash FROM Person WHERE username = :username")
+    @UmQuery("SELECT Person.personUid, PersonAuth.passwordHash " +
+            " FROM Person LEFT JOIN PersonAuth ON Person.personUid = PersonAuth.personAuthUid " +
+            "WHERE Person.username = :username")
     public abstract void findUidAndPasswordHash(String username,
                                                 UmCallback<PersonUidAndPasswordHash> callback);
 
