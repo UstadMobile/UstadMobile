@@ -25,8 +25,6 @@ public class Person  {
 
     private String username;
 
-    private String passwordHash;
-
     private String firstNames;
 
     private String lastName;
@@ -59,14 +57,6 @@ public class Person  {
 
     public void setUsername(String username) {
         this.username = username;
-    }
-
-    public String getPasswordHash() {
-        return passwordHash;
-    }
-
-    public void setPasswordHash(String passwordHash) {
-        this.passwordHash = passwordHash;
     }
 
     public String getFirstNames() {

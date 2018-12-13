@@ -10,6 +10,9 @@ import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
  * devices in cases where another user has permission to view someone else's profile.
  *
  * There is no foreign key field, personAuthUid simply equals personUid.
+ *
+ * Note: this entity has change sequence numbers as it may be sync'd with particular, authorized
+ * devices to provide a local login service.
  */
 @UmEntity(tableId = 30)
 public class PersonAuth {
