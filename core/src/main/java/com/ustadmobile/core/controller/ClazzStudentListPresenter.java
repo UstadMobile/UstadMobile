@@ -237,7 +237,7 @@ public class ClazzStudentListPresenter extends
     @Override
     public void handleCommonPressed(Object arg) {
 
-        if((Long)arg < 0){
+        if((Long)arg == 0){
             goToAddStudentFragment();
         }else {
             handleClickStudent((Long) arg);

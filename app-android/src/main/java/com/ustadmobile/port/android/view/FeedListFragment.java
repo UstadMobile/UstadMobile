@@ -96,6 +96,9 @@ public class FeedListFragment extends UstadBaseFragment implements FeedListView 
             ImageView feedIcon = holder.itemView
                 .findViewById(R.id.item_feedlist_feed_icon);
 
+            Button recordAttendanceButton = holder.itemView
+                    .findViewById(R.id.item_feedlist_attendance_record_attendance_button);
+
             assert feedEntry != null;
 
             feedText.setText(feedEntry.getTitle());
@@ -109,6 +112,7 @@ public class FeedListFragment extends UstadBaseFragment implements FeedListView 
                 feedText.setText(feedTextString);
             }
 
+            recordAttendanceButton.setOnClickListener(v -> mPresenter.handleClickFeedEntry(feedEntry));
             holder.itemView.setOnClickListener(v -> mPresenter.handleClickFeedEntry(feedEntry));
 
         }

@@ -58,6 +58,6 @@ public abstract class SocialNominationQuestionSetResponseDao implements
             "SocialNominationQuestionSetResponse.socialNominationQuestionSetResponseClazzMemberUid " +
             "WHERE " +
             "SocialNominationQuestionSetResponse.socialNominationQuestionSetResponseFinishTime > 0 " +
-            "AND SocialNominationQuestionSetResponse.socialNominationQuestionSetResponseSocialNominationQuestionSetUid > 0")
+            "AND SocialNominationQuestionSetResponse.socialNominationQuestionSetResponseSocialNominationQuestionSetUid != 0")
     public abstract UmProvider<Person> findAllDoneSN();
 }

@@ -6,6 +6,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 import java.util.TimeZone;
 import java.util.Vector;
 
@@ -170,7 +171,7 @@ public class UMCalendarUtil {
      * @return the long date representation
      */
     public static long getLongDateFromPrettyString(String dateString){
-        SimpleDateFormat formatter = new SimpleDateFormat("dd-MMM-yyyy");
+        SimpleDateFormat formatter = new SimpleDateFormat("dd-MMM-yyyy", Locale.US);
         Date date = null;
         try {
             date = (Date)formatter.parse(dateString);
