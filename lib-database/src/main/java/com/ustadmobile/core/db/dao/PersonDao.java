@@ -46,9 +46,7 @@ public abstract class PersonDao implements SyncableDao<Person, PersonDao> {
         findUidAndPasswordHash(username, new UmCallback<PersonUidAndPasswordHash>() {
             @Override
             public void onSuccess(PersonUidAndPasswordHash person) {
-                if(person == null) {
-                    callback.onSuccess(null);
-                }else if(!person.getPasswordHash().equals(password)) {
+                if(person == null || !person.getPasswordHash().equals(password)) {
                     callback.onSuccess(null);
                 }else {
                     AccessToken accessToken = new AccessToken(person.getPersonUid(),
