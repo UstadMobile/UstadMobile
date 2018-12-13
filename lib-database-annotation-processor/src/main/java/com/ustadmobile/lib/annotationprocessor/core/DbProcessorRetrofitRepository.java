@@ -123,7 +123,7 @@ public class DbProcessorRetrofitRepository extends AbstractDbProcessor {
                         .addModifiers(Modifier.PUBLIC)
                         .returns(Response.class)
                         .addCode("$T _request = _chain.request().newBuilder()" +
-                                ".addHeader($S, this._auth).build();\n", Request.class, "X-Auth")
+                                ".addHeader($S, this._auth).build();\n", Request.class, "X-Auth-Token")
                         .addCode("return _chain.proceed(_request);\n").build());
 
         for(ExecutableElement subElement : findMethodsToImplement(dbType)) {

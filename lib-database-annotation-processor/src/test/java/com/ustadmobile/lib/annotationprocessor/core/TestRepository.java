@@ -56,10 +56,11 @@ public class TestRepository {
         ExampleSyncableEntity entity = new ExampleSyncableEntity();
         String entityTitle = "Syncable " + System.currentTimeMillis();
         entity.setTitle(entityTitle);
-        ExampleSyncableDao repo = clientDb.getRepository(TEST_URI, "").getExampleSyncableDao();
+        ExampleSyncableDao repo = clientDb.getRepository(TEST_URI,
+                ExampleDatabase.VALID_AUTH_TOKEN).getExampleSyncableDao();
 
         long uid = repo.insert(entity);
-        clientDb.getExampleSyncableDao().syncWith(repo, 0);
+        clientDb.getExampleSyncableDao().syncWith(repo, ExampleDatabase.VALID_AUTH_TOKEN_USER_UID);
 
         ExampleSyncableEntity entityOnServer = serverDb.getExampleSyncableDao().findByUid(uid);
         Assert.assertNotNull("Entity present in server db", entityOnServer);
@@ -79,16 +80,17 @@ public class TestRepository {
         ExampleSyncableEntity entity = new ExampleSyncableEntity();
         String entityTitle = "Syncable " + System.currentTimeMillis();
         entity.setTitle(entityTitle);
-        ExampleSyncableDao repo = clientDb.getRepository(TEST_URI, "").getExampleSyncableDao();
+        ExampleSyncableDao repo = clientDb.getRepository(TEST_URI,
+                ExampleDatabase.VALID_AUTH_TOKEN).getExampleSyncableDao();
         long uid = repo.insert(entity);
         entity.setExampleSyncableUid(uid);
-        clientDb.getExampleSyncableDao().syncWith(repo, 0);
+        clientDb.getExampleSyncableDao().syncWith(repo, ExampleDatabase.VALID_AUTH_TOKEN_USER_UID);
         String entityTitleUpdated = "Syncable " + System.currentTimeMillis() + " updated";
         entity.setTitle(entityTitleUpdated);
 
 
         repo.updateEntity(entity);
-        clientDb.getExampleSyncableDao().syncWith(repo,0);
+        clientDb.getExampleSyncableDao().syncWith(repo,ExampleDatabase.VALID_AUTH_TOKEN_USER_UID);
 
 
         Assert.assertEquals("Entity title was updated on server",
@@ -118,7 +120,8 @@ public class TestRepository {
 
 
         clientDb.getExampleSyncableDao().syncWith(
-                clientDb.getRepository(TEST_URI, "").getExampleSyncableDao(), 0L);
+                clientDb.getRepository(TEST_URI, ExampleDatabase.VALID_AUTH_TOKEN)
+                        .getExampleSyncableDao(), ExampleDatabase.VALID_AUTH_TOKEN_USER_UID);
 
 
         Assert.assertNotNull("Entity created on server is present on client",
@@ -148,7 +151,8 @@ public class TestRepository {
                         Long.class);
         insertedEntity.setExampleSyncableUid(insertUid);
         clientDb.getExampleSyncableDao().syncWith(
-                clientDb.getRepository(TEST_URI, "").getExampleSyncableDao(), 0L);
+                clientDb.getRepository(TEST_URI, ExampleDatabase.VALID_AUTH_TOKEN)
+                        .getExampleSyncableDao(), ExampleDatabase.VALID_AUTH_TOKEN_USER_UID);
 
         String updatedTitle = "Server Created " + System.currentTimeMillis() + " updated";
         insertedEntity.setTitle(updatedTitle);
@@ -157,7 +161,8 @@ public class TestRepository {
 
 
         clientDb.getExampleSyncableDao().syncWith(
-                clientDb.getRepository(TEST_URI, "").getExampleSyncableDao(), 0L);
+                clientDb.getRepository(TEST_URI, ExampleDatabase.VALID_AUTH_TOKEN)
+                        .getExampleSyncableDao(), ExampleDatabase.VALID_AUTH_TOKEN_USER_UID);
 
 
         Assert.assertEquals("Title updated on client database after update on server", updatedTitle,

@@ -17,6 +17,7 @@ import com.ustadmobile.lib.database.annotation.UmDbContext;
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 import com.ustadmobile.lib.database.annotation.UmRestAccessible;
+import com.ustadmobile.lib.database.annotation.UmRestAuthorizedUidParam;
 import com.ustadmobile.lib.database.annotation.UmSyncFindAllChanges;
 import com.ustadmobile.lib.database.annotation.UmSyncFindLocalChanges;
 import com.ustadmobile.lib.database.annotation.UmSyncFindUpdateable;
@@ -62,6 +63,7 @@ import javax.lang.model.type.TypeMirror;
 import javax.tools.Diagnostic;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
@@ -1105,17 +1107,34 @@ public abstract class AbstractDbProcessor {
     }
 
 
-    protected void addJaxWsParameters(ExecutableElement method, TypeElement clazzDao,
+    /**
+     * Add web service parameter annotation to a given methodBuilder, to match a given dao method.
+     * This is used for generation of Jersey Resource methods and Retrofit interface methods.
+     *
+     * @param method The DAO method we want to generate a webservice method signature for
+     * @param daoType DAO type the method belongs to (used for type variable resolution etc)
+     * @param methodBuilder JavaPoet MethodBuilder to add parameters to
+     * @param queryParamAnnotation Annotation to add for a parameter that can be passed as query
+     *                             parameters (primitives and list/arrays of primitives)
+     * @param requestBodyAnnotation Annotation to add for a parameter that should be the request body
+     *                              (if any).
+     * @param addAuthHeaderParamToMethod if true, if we find a parameter annotated
+     *                                   UmRestAuthorizedUidParam, then an additional parameter will
+     *                                   be added to the end to get the auth token.
+     */
+    protected void addJaxWsParameters(ExecutableElement method, TypeElement daoType,
                                       MethodSpec.Builder methodBuilder,
                                       Class<? extends Annotation> queryParamAnnotation,
-                                      Class<? extends Annotation> requestBodyAnnotation) {
+                                      Class<? extends Annotation> requestBodyAnnotation,
+                                      boolean addAuthHeaderParamToMethod) {
 
+        DaoMethodInfo methodInfo = new DaoMethodInfo(method, daoType, processingEnv);
         for(VariableElement param : method.getParameters()) {
             if(umCallbackTypeElement.equals(processingEnv.getTypeUtils().asElement(param.asType())))
                 continue;
 
             ParameterSpec.Builder paramSpec = ParameterSpec.builder(TypeName.get(
-                    DbProcessorUtils.resolveType(param.asType(), clazzDao, processingEnv)),
+                    DbProcessorUtils.resolveType(param.asType(), daoType, processingEnv)),
                     param.getSimpleName().toString());
 
             if(DbProcessorUtils.isQueryParam(param.asType(), processingEnv)) {
@@ -1127,13 +1146,41 @@ public abstract class AbstractDbProcessor {
 
             methodBuilder.addParameter(paramSpec.build());
         }
+
+        VariableElement uidParam = methodInfo.getAuthorizedUidParam();
+        if(addAuthHeaderParamToMethod && uidParam != null) {
+            methodBuilder.addParameter(ParameterSpec.builder(String.class,
+                    "_authHeader")
+                    .addAnnotation(AnnotationSpec.builder(HeaderParam.class)
+                            .addMember("value", "$S", uidParam
+                                .getAnnotation(UmRestAuthorizedUidParam.class).headerName()).build())
+                    .build());
+        }
     }
 
-
-    protected void addJaxWsParameters(ExecutableElement method, TypeElement clazzDao,
-                                      MethodSpec.Builder methodBuilder) {
-        addJaxWsParameters(method, clazzDao, methodBuilder, QueryParam.class, null);
+    /**
+     * Add web service parameter annotation to a given methodBuilder, to match a given dao method.
+     * This is used for generation of Jersey Resource methods and Retrofit interface methods.
+     *
+     * Synonamous to addJaxWsParameters(method, daoType, methodBuilder, queryParamAnnotation,
+     *  requestBodyAnnotation, false)
+     *
+     * @param method The DAO method we want to generate a webservice method signature for
+     * @param daoType DAO type the method belongs to (used for type variable resolution etc)
+     * @param methodBuilder JavaPoet MethodBuilder to add parameters to
+     * @param queryParamAnnotation Annotation to add for a parameter that can be passed as query
+     *                             parameters (primitives and list/arrays of primitives)
+     * @param requestBodyAnnotation Annotation to add for a parameter that should be the request body
+     *                              (if any).
+     */
+    protected void addJaxWsParameters(ExecutableElement method, TypeElement daoType,
+                                      MethodSpec.Builder methodBuilder,
+                                      Class<? extends Annotation> queryParamAnnotation,
+                                      Class<? extends Annotation> requestBodyAnnotation) {
+        addJaxWsParameters(method, daoType, methodBuilder, queryParamAnnotation,
+                requestBodyAnnotation, false);
     }
+
 
     /**
      * Add Produces, Consumes, GET/POST, etc.
