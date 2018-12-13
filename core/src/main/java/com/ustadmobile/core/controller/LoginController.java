@@ -41,7 +41,7 @@ import com.ustadmobile.core.impl.http.UmHttpException;
 import com.ustadmobile.core.impl.http.UmHttpRequest;
 import com.ustadmobile.core.impl.http.UmHttpResponse;
 import com.ustadmobile.core.impl.http.UmHttpResponseCallback;
-import com.ustadmobile.core.util.Base64Coder;
+import com.ustadmobile.lib.util.Base64Coder;
 import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.view.DialogResultListener;

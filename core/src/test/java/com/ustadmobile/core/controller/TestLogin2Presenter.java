@@ -1,6 +1,7 @@
 package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.db.UmAppDatabase;
+import com.ustadmobile.core.db.dao.PersonAuthDao;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
@@ -69,10 +70,9 @@ public class TestLogin2Presenter {
         testPerson.setUsername(VALID_USER);
         long personUid = repo.getPersonDao().insert(testPerson);
 
-
-//        testPerson.setPasswordHash(VALID_PASS);
-
-        PersonAuth testPersonAuth = new PersonAuth(personUid, VALID_PASS);
+        PersonAuth testPersonAuth = new PersonAuth(personUid,
+                PersonAuthDao.ENCRYPTED_PASS_PREFIX +
+                        PersonAuthDao.encryptPassword(VALID_PASS));
         repo.getPersonAuthDao().insert(testPersonAuth);
 
         mockView = Mockito.mock(Login2View.class);

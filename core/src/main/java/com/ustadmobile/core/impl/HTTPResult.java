@@ -30,7 +30,7 @@
  */
 package com.ustadmobile.core.impl;
 
-    import com.ustadmobile.core.util.Base64Coder;
+    import com.ustadmobile.lib.util.Base64Coder;
     import com.ustadmobile.core.util.UMFileUtil;
 
     import java.util.Enumeration;
