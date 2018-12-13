@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/UstadMobileAgain.iml" filepath="$PROJECT_DIR$/UstadMobileAgain.iml" />
       <module fileurl="file://$PROJECT_DIR$/app-android/app-android.iml" filepath="$PROJECT_DIR$/app-android/app-android.iml" />
       <module fileurl="file://$PROJECT_DIR$/app-android-launcher/app-android-launcher.iml" filepath="$PROJECT_DIR$/app-android-launcher/app-android-launcher.iml" />
       <module fileurl="file://$PROJECT_DIR$/app-android-testserver/app-android-testserver.iml" filepath="$PROJECT_DIR$/app-android-testserver/app-android-testserver.iml" />
@@ -10,7 +9,6 @@
       <module fileurl="file://$PROJECT_DIR$/app-rest-server/app-rest-server.iml" filepath="$PROJECT_DIR$/app-rest-server/app-rest-server.iml" />
       <module fileurl="file://$PROJECT_DIR$/core/core.iml" filepath="$PROJECT_DIR$/core/core.iml" />
       <module fileurl="file://$PROJECT_DIR$/core-tests/core-tests.iml" filepath="$PROJECT_DIR$/core-tests/core-tests.iml" />
-      <module fileurl="file://$PROJECT_DIR$/lib-content-scrapers/lib-content-scrapers.iml" filepath="$PROJECT_DIR$/lib-content-scrapers/lib-content-scrapers.iml" />
       <module fileurl="file://$PROJECT_DIR$/lib-content-scrapers/lib-content-scrapers.iml" filepath="$PROJECT_DIR$/lib-content-scrapers/lib-content-scrapers.iml" />
       <module fileurl="file://$PROJECT_DIR$/lib-core-fs/lib-core-fs.iml" filepath="$PROJECT_DIR$/lib-core-fs/lib-core-fs.iml" />
       <module fileurl="file://$PROJECT_DIR$/lib-core-fs-tests/lib-core-fs-tests.iml" filepath="$PROJECT_DIR$/lib-core-fs-tests/lib-core-fs-tests.iml" />
@@ -23,8 +21,6 @@
       <module fileurl="file://$PROJECT_DIR$/lib-database-retrofitrepository/lib-database-retrofitrepository.iml" filepath="$PROJECT_DIR$/lib-database-retrofitrepository/lib-database-retrofitrepository.iml" />
       <module fileurl="file://$PROJECT_DIR$/lib-database-runtime/lib-database-runtime.iml" filepath="$PROJECT_DIR$/lib-database-runtime/lib-database-runtime.iml" />
       <module fileurl="file://$PROJECT_DIR$/lib-database-runtime-android/lib-database-runtime-android.iml" filepath="$PROJECT_DIR$/lib-database-runtime-android/lib-database-runtime-android.iml" />
-      <module fileurl="file://$PROJECT_DIR$/lib-database-runtime-android/lib-database-runtime-android.iml" filepath="$PROJECT_DIR$/lib-database-runtime-android/lib-database-runtime-android.iml" />
-      <module fileurl="file://$PROJECT_DIR$/lib-database-runtime-core-compileonly/lib-database-runtime-core-compileonly.iml" filepath="$PROJECT_DIR$/lib-database-runtime-core-compileonly/lib-database-runtime-core-compileonly.iml" />
       <module fileurl="file://$PROJECT_DIR$/lib-database-runtime-core-compileonly/lib-database-runtime-core-compileonly.iml" filepath="$PROJECT_DIR$/lib-database-runtime-core-compileonly/lib-database-runtime-core-compileonly.iml" />
       <module fileurl="file://$PROJECT_DIR$/lib-database-runtime-jdbc/lib-database-runtime-jdbc.iml" filepath="$PROJECT_DIR$/lib-database-runtime-jdbc/lib-database-runtime-jdbc.iml" />
       <module fileurl="file://$PROJECT_DIR$/lib-http-testserver/lib-http-testserver.iml" filepath="$PROJECT_DIR$/lib-http-testserver/lib-http-testserver.iml" />
