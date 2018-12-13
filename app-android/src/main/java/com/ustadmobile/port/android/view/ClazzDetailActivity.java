@@ -17,6 +17,8 @@ import com.ustadmobile.core.controller.ClazzDetailPresenter;
 import com.ustadmobile.core.view.ClassDetailView;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.WeakHashMap;
 
 import static com.ustadmobile.core.view.ClazzListView.ARG_CLAZZ_UID;
@@ -38,19 +40,33 @@ public class ClazzDetailActivity extends UstadBaseActivity implements
     private boolean attendanceVisibility, activityVisibility, selVisibility;
     Menu menu;
 
+    private Map<Integer, Class> fragPosMap = new HashMap<>();
+
     /**
      * Separated out view pager setup for clarity.
      */
     private void setupViewPager() {
         mPager = (ViewPager) findViewById(R.id.class_detail_view_pager_container);
         mPagerAdapter = new ClassDetailViewPagerAdapter(getSupportFragmentManager());
-        mPagerAdapter.addFragments(0, ClazzStudentListFragment.newInstance(this.clazzUid));
-        if(attendanceVisibility)
-        mPagerAdapter.addFragments(1, ClazzLogListFragment.newInstance(this.clazzUid));
-        if(activityVisibility)
-        mPagerAdapter.addFragments(2, ClazzActivityListFragment.newInstance(this.clazzUid));
-        if(selVisibility)
-        mPagerAdapter.addFragments(3, SELAnswerListFragment.newInstance(this.clazzUid));
+        int fragCount = 0;
+        mPagerAdapter.addFragments(fragCount, ClazzStudentListFragment.newInstance(this.clazzUid));
+        fragPosMap.put(fragCount++, ClazzStudentListFragment.class);
+
+        if(attendanceVisibility) {
+            mPagerAdapter.addFragments(fragCount, ClazzLogListFragment.newInstance(this.clazzUid));
+            fragPosMap.put(fragCount++, ClazzLogListFragment.class);
+        }
+
+        if(activityVisibility) {
+            mPagerAdapter.addFragments(fragCount, ClazzActivityListFragment.newInstance(this.clazzUid));
+            fragPosMap.put(fragCount++, ClazzActivityListFragment.class);
+        }
+
+        if(selVisibility) {
+            mPagerAdapter.addFragments(fragCount, SELAnswerListFragment.newInstance(this.clazzUid));
+            fragPosMap.put(fragCount++, SELAnswerListFragment.class);
+        }
+
         mPager.setAdapter(mPagerAdapter);
     }
 
@@ -209,17 +225,17 @@ public class ClazzDetailActivity extends UstadBaseActivity implements
             if (thisFragment != null) {
                 return thisFragment;
             } else {
-                switch (position) {
-                    case 0:
-                        return ClazzStudentListFragment.newInstance(clazzUid);
-                    case 1:
-                        return ClazzLogListFragment.newInstance(clazzUid);
-                    case 2:
-                        return ClazzActivityListFragment.newInstance(clazzUid);
-                    case 3:
-                        return SELAnswerListFragment.newInstance(clazzUid);
-                    default:
-                        return null;
+                Class fragClass = fragPosMap.get(position);
+                if(fragClass.equals(ClazzStudentListFragment.class)) {
+                    return ClazzStudentListFragment.newInstance(clazzUid);
+                }else if(fragClass.equals(ClazzLogListFragment.class)) {
+                    return ClazzLogListFragment.newInstance(clazzUid);
+                }else if(fragClass.equals(ClazzActivityListFragment.class)) {
+                    return ClazzActivityListFragment.newInstance(clazzUid);
+                }else if(fragClass.equals(SELAnswerListFragment.class)) {
+                    return SELAnswerListFragment.newInstance(clazzUid);
+                }else{
+                    return null;
                 }
             }
         }
@@ -241,17 +257,17 @@ public class ClazzDetailActivity extends UstadBaseActivity implements
          */
         @Override
         public CharSequence getPageTitle(int position){
-            switch (position){
-                case 0:
-                    return ((String) getText(R.string.students_literal)).toUpperCase();
-                case 1:
-                    return ((String) getText(R.string.attendance)).toUpperCase();
-                case 2:
-                    return ((String) getText(R.string.activity)).toUpperCase();
-                case 3:
-                    return ((String) getText(R.string.sel)).toUpperCase();
-                default:
-                    return "";
+            Class fragClass = fragPosMap.get(position);
+            if(fragClass.equals(ClazzStudentListFragment.class)) {
+                return ((String) getText(R.string.students_literal)).toUpperCase();
+            }else if(fragClass.equals(ClazzLogListFragment.class)) {
+                return ((String) getText(R.string.attendance)).toUpperCase();
+            }else if(fragClass.equals(ClazzActivityListFragment.class)) {
+                return ((String) getText(R.string.activity)).toUpperCase();
+            }else if(fragClass.equals(SELAnswerListFragment.class)) {
+                return ((String) getText(R.string.sel)).toUpperCase();
+            }else {
+                return "";
             }
         }
     }

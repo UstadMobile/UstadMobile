@@ -739,7 +739,7 @@ public class SplashScreenActivity extends AppCompatActivity
             question1.setSocialNominationQuestionSocialNominationQuestionSetUid(
                     questionSet.getSocialNominationQuestionSetUid());
             question1.setQuestionIndex(1);
-            question1.setQuestionText("Who sits alone in the class?");
+            question1.setQuestionText("Who sits next to you?");
             question1.setMultiNominations(true);
             question1.setAssignToAllClasses(true);
             questionDao.insert(question1);
@@ -748,7 +748,7 @@ public class SplashScreenActivity extends AppCompatActivity
             question2.setSocialNominationQuestionSocialNominationQuestionSetUid(
                     questionSet.getSocialNominationQuestionSetUid());
             question2.setQuestionIndex(2);
-            question2.setQuestionText("Who are your friends?");
+            question2.setQuestionText("Who participates a lot in class?");
             question2.setMultiNominations(true);
             question2.setAssignToAllClasses(true);
             questionDao.insert(question2);
@@ -757,10 +757,40 @@ public class SplashScreenActivity extends AppCompatActivity
             question3.setSocialNominationQuestionSocialNominationQuestionSetUid(
                     questionSet.getSocialNominationQuestionSetUid());
             question3.setQuestionIndex(3);
-            question3.setQuestionText("Who annoys you?");
+            question3.setQuestionText("Who is disruptive during class?");
             question3.setMultiNominations(true);
             question3.setAssignToAllClasses(true);
             questionDao.insert(question3);
+
+            SocialNominationQuestion question4 = new SocialNominationQuestion();
+            question4.setSocialNominationQuestionSocialNominationQuestionSetUid(
+                    questionSet.getSocialNominationQuestionSetUid());
+            question4.setQuestionIndex(4);
+            question4.setQuestionText("Who are your friends in class?");
+            question4.setMultiNominations(true);
+            question4.setAssignToAllClasses(true);
+            questionDao.insert(question4);
+
+            SocialNominationQuestion question5 = new SocialNominationQuestion();
+            question5.setSocialNominationQuestionSocialNominationQuestionSetUid(
+                    questionSet.getSocialNominationQuestionSetUid());
+            question5.setQuestionIndex(5);
+            question5.setQuestionText("Who are the kids you spend time with outside of class?");
+            question5.setMultiNominations(true);
+            question5.setAssignToAllClasses(true);
+            questionDao.insert(question5);
+
+//            SocialNominationQuestion question6 = new SocialNominationQuestion();
+//            question6.setSocialNominationQuestionSocialNominationQuestionSetUid(
+//                    questionSet.getSocialNominationQuestionSetUid());
+//            question6.setQuestionIndex(6);
+//            question6.setQuestionText("How are you feeling today?");
+//            //question5.setMultiNominations(true);
+//            question6.setAssignToAllClasses(true);
+//            questionDao.insert(question6);
+
+
+
 
 
             //Create some feeds. The feeds upon interaction will in-turn create ClazzLogs.
