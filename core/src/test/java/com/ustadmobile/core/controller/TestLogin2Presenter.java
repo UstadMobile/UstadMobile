@@ -22,6 +22,7 @@ import java.net.URI;
 import java.util.Hashtable;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 
@@ -44,6 +45,8 @@ public class TestLogin2Presenter {
 
     private static final String VALID_PASS = "secret";
 
+    private Login2View mockView;
+
     public static HttpServer startServer() {
         final ResourceConfig resourceConfig = new ResourceConfig()
                 .packages("com.ustadmobile.core.db.dao");
@@ -65,6 +68,12 @@ public class TestLogin2Presenter {
         testPerson.setUsername(VALID_USER);
         testPerson.setPasswordHash(VALID_PASS);
         repo.getPersonDao().insert(testPerson);
+
+        mockView = Mockito.mock(Login2View.class);
+        doAnswer((invocationOnMock) -> {
+            new Thread(((Runnable)invocationOnMock.getArgument(0))).start();
+            return null;
+        }).when(mockView).runOnUiThread(any());
     }
 
     @After
@@ -76,7 +85,6 @@ public class TestLogin2Presenter {
 
     @Test
     public void givenValidUsernameAndPassword_whenHandleLoginCalled_thenShouldCallSystemImplGo() {
-        Login2View mockView = Mockito.mock(Login2View.class);
         Hashtable args = new Hashtable();
         args.put(Login2Presenter.ARG_NEXT, "somewhere");
 
@@ -95,7 +103,6 @@ public class TestLogin2Presenter {
 
     @Test
     public void givenInvalidUsernameAndPassword_whenHandleLoginCalled_thenShouldCallSetErrorMessage() {
-        Login2View mockView = Mockito.mock(Login2View.class);
         Hashtable args = new Hashtable();
 
         Login2Presenter presenter = new Login2Presenter(PlatformTestUtil.getTargetContext(),
@@ -112,7 +119,6 @@ public class TestLogin2Presenter {
 
     @Test
     public void givenServerOffline_whenHandleLoginCalled_thenShouldCallSetErrorMessage() {
-        Login2View mockView = Mockito.mock(Login2View.class);
         Hashtable args = new Hashtable();
         server.shutdownNow();
 

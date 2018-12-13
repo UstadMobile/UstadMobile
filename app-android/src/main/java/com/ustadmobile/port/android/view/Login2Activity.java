@@ -18,6 +18,8 @@ public class Login2Activity extends UstadBaseActivity implements Login2View {
 
     private TextView mPasswordTextView;
 
+    private TextView mErrorTextView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -28,6 +30,7 @@ public class Login2Activity extends UstadBaseActivity implements Login2View {
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
         mUsernameTextView = findViewById(R.id.activity_login_username);
         mPasswordTextView = findViewById(R.id.activity_login_password);
+        mErrorTextView = findViewById(R.id.activity_login_errormessage);
         findViewById(R.id.activity_login_button_login).setOnClickListener(
                 (evt) -> mPresenter.handleClickLogin(mUsernameTextView.getText().toString(),
                         mPasswordTextView.getText().toString(), mServerUrl));
@@ -40,7 +43,7 @@ public class Login2Activity extends UstadBaseActivity implements Login2View {
 
     @Override
     public void setErrorMessage(String errorMessage) {
-
+        mErrorTextView.setText(errorMessage);
     }
 
     @Override
