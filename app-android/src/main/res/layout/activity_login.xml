@@ -24,7 +24,6 @@
             app:layout_scrollFlags="scroll|enterAlways"
             tools:layout_editor_absoluteY="0dp"
             />
-
     </android.support.design.widget.AppBarLayout>
 
     <EditText

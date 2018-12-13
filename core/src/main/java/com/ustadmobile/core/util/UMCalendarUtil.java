@@ -179,6 +179,7 @@ public class UMCalendarUtil {
             e.printStackTrace();
         }
         return date.getTime();
+        
     }
 
     public static long getDateInMilliPlusDays(int days){
