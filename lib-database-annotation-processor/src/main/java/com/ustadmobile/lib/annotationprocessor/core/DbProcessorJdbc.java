@@ -1212,10 +1212,7 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
         TypeMirror resultType = daoMethodInfo.resolveResultType();
 
         List<String> namedParams = getNamedParameters(querySql);
-        String preparedStmtSql = querySql;
-        for(String paramName : namedParams) {
-            preparedStmtSql = preparedStmtSql.replace(":" + paramName, "?");
-        }
+        String preparedStmtSql = replaceNamedParameters(namedParams, querySql, "?");
 
         boolean returnsList = false;
         boolean returnsArray = false;
@@ -1515,11 +1512,13 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
         codeBlock.add("resultSet = stmt.executeQuery();\n");
 
 
+        List<String> namedParams = getNamedParameters(querySql);
+        String testQuery = replaceNamedParameters(namedParams, querySql, "1");
         try(
             Connection dbConnection = nameToDataSourceMap.get(dbType.getQualifiedName().toString())
                     .getConnection();
             Statement stmt = dbConnection.createStatement();
-            ResultSet results = stmt.executeQuery(querySql);
+            ResultSet results = stmt.executeQuery(testQuery);
         ) {
             ResultSetMetaData metaData = results.getMetaData();
             if(primitiveOrStringReturn && metaData.getColumnCount() != 1) {
@@ -1575,6 +1574,7 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
             messager.printMessage(Diagnostic.Kind.ERROR,
                     "Exception generating query method for: " +
                             formatMethodForErrorMessage(daoMethod) + ": " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -1707,6 +1707,15 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
         }
 
         return namedParams;
+    }
+
+    private String replaceNamedParameters(List<String> namedParams, String querySql, String replacement) {
+        String preparedStmtSql = querySql;
+        for(String paramName : namedParams) {
+            preparedStmtSql = preparedStmtSql.replace(":" + paramName, replacement);
+        }
+
+        return preparedStmtSql;
     }
 
     private Map<String, String> findArrayParameters(List<? extends VariableElement> paramList) {

@@ -506,6 +506,16 @@ public abstract class AbstractDbProcessor {
                 methodInfo.resolveResultEntityComponentType());
         Element localChangeSeqNumEl = DbProcessorUtils.findElementWithAnnotation(entityTypeEl,
                 UmSyncLocalChangeSeqNum.class, processingEnv);
+
+        if(daoMethod.getParameters().size() != 3) {
+            messager.printMessage(Diagnostic.Kind.ERROR, "Method "
+                            + daoMethod.toString() + " has " + daoMethod.getParameters().size() +
+                            " parameters. FindLocalChanges method " +
+                    "must have 3 parameters: long fromLocalChangeSeqNum, long accountPersonUid, " +
+                    "int limit", daoType);
+            return "";
+        }
+
         if(localChangeSeqNumEl == null) {
             messager.printMessage(Diagnostic.Kind.ERROR,
                     formatMethodForErrorMessage(daoMethod, daoType) + "Attempting to generate a " +
@@ -523,20 +533,13 @@ public abstract class AbstractDbProcessor {
             return "";
         }
 
-        if(daoMethod.getParameters().size() != 2) {
-            messager.printMessage(Diagnostic.Kind.ERROR,
-                    formatMethodForErrorMessage(daoMethod, daoType) + " Attempting to generate" +
-                            "findLocalChangeSeq method: method must have exactly two long " +
-                            "parameters - the starting local change sequence number and the account " +
-                            "uid of the account being used for the sync");
-            return "";
-        }
+        VariableElement limitParam = daoMethod.getParameters().get(2);
 
-        return String.format("SELECT * FROM %s WHERE %s >= :%s AND %s",
+        return String.format("SELECT * FROM %s WHERE %s >= :%s AND %s LIMIT :%s",
                 entityTypeEl.getSimpleName().toString(),
                 localChangeSeqNumEl.getSimpleName().toString(),
                 daoMethod.getParameters().get(0).getSimpleName().toString(),
-                readPermissionCondition);
+                readPermissionCondition, limitParam.getSimpleName());
     }
 
     protected String generateSyncFindAllChanges(TypeElement daoType, ExecutableElement daoMethod,
@@ -573,18 +576,18 @@ public abstract class AbstractDbProcessor {
             return "";
         }
 
-        if(daoMethod.getParameters().size() != 5) {
+        if(daoMethod.getParameters().size() != 6) {
             messager.printMessage(Diagnostic.Kind.ERROR,
                     formatMethodForErrorMessage(daoMethod, daoType) + " attempting to" +
-                            "generate findAllChanges method: method must have exactly 5 parameters" +
+                            "generate findAllChanges method: method must have exactly 6 parameters" +
                             " - fromLocalChangeSeqNum, toLocalChangeSeqNum, fromMasterChangeSeqNum," +
-                            "toMasterChangeSeqNum, and accountPersonUid",
+                            "toMasterChangeSeqNum, accountPersonUid, and limit",
                     daoType);
             return "";
         }
 
         return String.format("SELECT * FROM %s WHERE %s BETWEEN :%s AND :%s " +
-                "AND %s BETWEEN :%s AND :%s AND %s",
+                "AND %s BETWEEN :%s AND :%s AND %s ORDER BY %s, %s LIMIT :%s",
                 entityTypeEl.getSimpleName(),
                 localChangeSeqNumEl.getSimpleName(),
                 daoMethod.getParameters().get(0).getSimpleName(),
@@ -592,7 +595,10 @@ public abstract class AbstractDbProcessor {
                 masterChangeSeqNumEl.getSimpleName(),
                 daoMethod.getParameters().get(2).getSimpleName(),
                 daoMethod.getParameters().get(3).getSimpleName(),
-                readPermissionCondition);
+                readPermissionCondition,
+                masterChangeSeqNumEl.getSimpleName(),
+                localChangeSeqNumEl.getSimpleName(),
+                daoMethod.getParameters().get(5).getSimpleName());
 
     }
 
@@ -675,11 +681,23 @@ public abstract class AbstractDbProcessor {
                                                           String dbName) {
         MethodSpec.Builder methodBuilder = overrideAndResolve(daoMethod, daoType, processingEnv);
 
+        if(daoMethod.getParameters().size() != 5) {
+            messager.printMessage(Diagnostic.Kind.ERROR,
+                    "Method " + daoMethod.toString() + " " +
+                    "annotated UmSyncIncoming must have 5 parameters " +
+                    "incomingChanges List<T>, double fromLocalChangeSeqNum, " +
+                    "double fromMasterChangeSeqNum, long accountPersonUid, int receiveLimit. " +
+                            "Actually has : " + daoMethod.getParameters().size() + " parameters.",
+                    daoType);
+            return methodBuilder;
+        }
+
         CodeBlock.Builder codeBlock = CodeBlock.builder();
         VariableElement incomingChangesParam = daoMethod.getParameters().get(0);
         VariableElement fromLocalChangeSeqNumParam = daoMethod.getParameters().get(1);
         VariableElement fromMasterChangeSeqNumParam = daoMethod.getParameters().get(2);
         VariableElement accountPersonUidParam = daoMethod.getParameters().get(3);
+        VariableElement receiveLimitParam = daoMethod.getParameters().get(4);
 
         DaoMethodInfo daoMethodInfo = new DaoMethodInfo(daoMethod, daoType, processingEnv);
         TypeMirror entityType = daoMethodInfo.resolveEntityParameterComponentType();
@@ -777,11 +795,12 @@ public abstract class AbstractDbProcessor {
                 .add("_response.setSyncedUpToMasterChangeSeqNum(_syncableDb.getSyncStatusDao()" +
                         ".getMasterChangeSeqNum($L) - 1);\n", umEntityAnnotation.tableId())
             .endControlFlow()
-            .add("_response.setRemoteChangedEntities($L($L, $L, $L, $L, $L));\n",
+            .add("_response.setRemoteChangedEntities($L($L, $L, $L, $L, $L, $L));\n",
                     findChangedEntitiesMethod.getSimpleName(),
                     fromLocalChangeSeqNumParam.getSimpleName(), "_toLocalChangeSeq",
                     fromMasterChangeSeqNumParam.getSimpleName(), "_toMasterChangeSeq",
-                    accountPersonUidParam.getSimpleName())
+                    accountPersonUidParam.getSimpleName(),
+                    receiveLimitParam.getSimpleName())
             .add("return _response;\n");
 
 
@@ -825,21 +844,32 @@ public abstract class AbstractDbProcessor {
         UmEntity umEntityAnnotation = entityTypeElement.getAnnotation(UmEntity.class);
         Element findLocalChangesMethod = DbProcessorUtils.findElementWithAnnotation(daoType,
                 UmSyncFindLocalChanges.class, processingEnv);
+
+        if(daoMethod.getParameters().size() != 4) {
+            messager.printMessage(Diagnostic.Kind.ERROR, "UmSyncOutgoing must have 4" +
+                    "parameters: D otherDao, long accountPersonUid, int sendLimit, int receiveLimit");
+            return methodBuilder;
+        }
+
         VariableElement otherDaoParam = daoMethod.getParameters().get(0);
         VariableElement accountPersonUidParam = daoMethod.getParameters().get(1);
+        VariableElement sendLimitParam = daoMethod.getParameters().get(2);
+        VariableElement receiveLimitParam = daoMethod.getParameters().get(3);
 
         CodeBlock.Builder codeBlock = CodeBlock.builder()
                 .add("$1T _syncableDb = ($1T)$2L;\n", UmSyncableDatabase.class, dbName)
                 .add("$T _syncStatus = _syncableDb.getSyncStatusDao().getByUid($L);\n",
                         SyncStatus.class, umEntityAnnotation.tableId())
-                .add("$T<$T> _locallyChangedEntities = $L(_syncStatus.getSyncedToLocalChangeSeqNum() + 1, $L);\n",
+                .add("$T<$T> _locallyChangedEntities = $L(_syncStatus.getSyncedToLocalChangeSeqNum() + 1, $L, $L);\n",
                         List.class, entityType, findLocalChangesMethod.getSimpleName(),
-                        accountPersonUidParam.getSimpleName())
+                        accountPersonUidParam.getSimpleName(),
+                        sendLimitParam.getSimpleName())
                 .add("$T<$T> _remoteChanges = $L.$L(_locallyChangedEntities, 0, " +
-                        "_syncStatus.getSyncedToMasterChangeNum() + 1, $L);\n",
+                        "_syncStatus.getSyncedToMasterChangeNum() + 1, $L, $L);\n",
                         SyncResponse.class, entityType, otherDaoParam.getSimpleName(),
                         syncIncomingMethod.getSimpleName(),
-                        accountPersonUidParam.getSimpleName())
+                        accountPersonUidParam.getSimpleName(),
+                        receiveLimitParam.getSimpleName())
                 .beginControlFlow("if(_remoteChanges != null)")
                     //TODO: Add code to handle if any changes happened whilst this sync was ongoing
                     //TODO: e.g. before replace, check if there was any change to the local change

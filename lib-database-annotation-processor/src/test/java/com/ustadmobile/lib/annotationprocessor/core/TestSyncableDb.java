@@ -35,7 +35,7 @@ public class TestSyncableDb  {
 
         ExampleSyncableDao dao1 = db1.getExampleSyncableDao();
         ExampleSyncableDao dao2 = db2.getExampleSyncableDao();
-        dao1.syncWith(dao2, 0);
+        dao1.syncWith(dao2, 0, 100, 100);
 
         ExampleSyncableEntity syncableEntity2 = db2.getExampleSyncableDao().findByUid(insertedUid);
         Assert.assertNotNull("Syncable entity was transferred to db2", syncableEntity2);
@@ -59,14 +59,14 @@ public class TestSyncableDb  {
                 clientDb.getSyncStatusDao().getAndIncrementNextLocalChangeSeqNum(
                         ExampleSyncableEntity.TABLE_ID, 1));
         long insertedUid = clientDb.getExampleSyncableDao().insert(syncableEntity1);
-        clientDao.syncWith(serverDao, 0);
+        clientDao.syncWith(serverDao, 0, 100, 100);
         ExampleSyncableEntity syncableEntity2 = serverDao.findByUid(insertedUid);
         syncableEntity2.setTitle("Updated");
         syncableEntity2.setMasterChangeSeqNum(serverDb.getSyncStatusDao()
                 .getAndIncrementNextMasterChangeSeqNum(ExampleSyncableEntity.TABLE_ID, 1));
         serverDao.updateList(Arrays.asList(syncableEntity2));
 
-        clientDao.syncWith(serverDao, 0);
+        clientDao.syncWith(serverDao, 0, 100, 100);
 
         syncableEntity1 = clientDao.findByUid(insertedUid);;
         Assert.assertEquals("After sync - entity has been updated on client", "Updated",
