@@ -21,6 +21,14 @@ public class ExampleSyncableEntity {
 
     private String title;
 
+    public ExampleSyncableEntity() {
+
+    }
+
+    public ExampleSyncableEntity(String title) {
+        this.title = title;
+    }
+
     public long getExampleSyncableUid() {
         return exampleSyncableUid;
     }

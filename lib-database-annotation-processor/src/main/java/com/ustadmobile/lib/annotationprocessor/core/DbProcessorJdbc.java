@@ -778,8 +778,9 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
 
 
         if(isList || isArray) {
-            codeBlock.beginControlFlow("for($T _element : $L)", entityTypeElement,
-                    daoMethod.getParameters().get(0).getSimpleName().toString());
+            codeBlock.add("_connection.setAutoCommit(false);\n")
+                    .beginControlFlow("for($T _element : $L)", entityTypeElement,
+                        daoMethod.getParameters().get(0).getSimpleName().toString());
         }
 
         String preparedStmtToUseVarName = hasAutoIncrementKey ? "_stmtToUse" : preparedStmtVarName;
@@ -817,6 +818,8 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
             if(hasAutoIncrementKey)
                 codeBlock.add("$L.executeBatch();\n", autoIncPreparedStmtVarName);
 
+            codeBlock.add("_connection.commit();\n")
+                    .add("_connection.setAutoCommit(true);\n");
         }else {
             codeBlock.add("$L.execute();\n", preparedStmtToUseVarName);
         }
@@ -1022,7 +1025,8 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                 daoMethod.getParameters().get(0).getSimpleName().toString();
 
         if(isListOrArray) {
-            codeBlock.beginControlFlow("for($T _element : $L)",
+            codeBlock.add("_connection.setAutoCommit(false);\n")
+                .beginControlFlow("for($T _element : $L)",
                     entityTypeElement, daoMethod.getParameters().get(0).getSimpleName().toString());
         }
 
@@ -1048,7 +1052,9 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
             codeBlock.add("_stmt.addBatch();\n")
                     .endControlFlow()
                     .add("numUpdates = $T.sumUpdateTotals(_stmt.executeBatch());\n",
-                            JdbcDatabaseUtils.class);
+                            JdbcDatabaseUtils.class)
+                    .add("_connection.commit();\n")
+                    .add("_connection.setAutoCommit(true);\n");
         }else {
             codeBlock.add("numUpdates = _stmt.executeUpdate();\n");
         }

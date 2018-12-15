@@ -403,9 +403,13 @@ public class DbProcessorRetrofitRepository extends AbstractDbProcessor {
                     boolean isVoid = methodInfo.resolveResultType().getKind().equals(TypeKind.VOID);
                     codeBlock.beginControlFlow("try");
                     if(!isVoid) {
-                        codeBlock.add("return _call.execute().body();\n");
+                        codeBlock.add("$T<$T> _response = _call.execute();\n",
+                                retrofit2.Response.class, methodInfo.resolveResultType())
+                                .add("$T _result = _response.body();\n",
+                                methodInfo.resolveResultType())
+                            .add("return _result;\n");
                     }else {
-                        codeBlock.add("_cal.execute();\n");
+                        codeBlock.add("_call.execute();\n");
                     }
                     codeBlock.nextControlFlow("catch($T _ioe)", IOException.class)
                             .add("_ioe.printStackTrace();\n")
