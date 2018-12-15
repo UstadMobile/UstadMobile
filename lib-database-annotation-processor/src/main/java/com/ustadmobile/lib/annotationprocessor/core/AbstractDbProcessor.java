@@ -792,7 +792,7 @@ public abstract class AbstractDbProcessor {
             .add("insertList(_insertList);\n")
             .add("updateList(_updateList);\n")
             .beginControlFlow("if(_isMaster)")
-                .add("_response.setSyncedUpToMasterChangeSeqNum(_syncableDb.getSyncStatusDao()" +
+                .add("_response.setCurrentMasterChangeSeqNum(_syncableDb.getSyncStatusDao()" +
                         ".getMasterChangeSeqNum($L) - 1);\n", umEntityAnnotation.tableId())
             .endControlFlow()
             .add("_response.setRemoteChangedEntities($L($L, $L, $L, $L, $L, $L));\n",
@@ -878,7 +878,7 @@ public abstract class AbstractDbProcessor {
                     .add("replaceList(_remoteChanges.getRemoteChangedEntities());\n")
                     .add("_syncableDb.getSyncStatusDao().updateSyncedToChangeSeqNums(" +
                                 "$1L, _syncableDb.getSyncStatusDao().getLocalChangeSeqNum($1L) - 1, " +
-                                "_remoteChanges.getSyncedUpToMasterChangeSeqNum());\n",
+                                "_remoteChanges.getCurrentMasterChangeSeqNum());\n",
                         umEntityAnnotation.tableId())
                 .endControlFlow();
 

@@ -3,6 +3,7 @@ package com.ustadmobile.lib.annotationprocessor.core;
 import com.ustadmobile.lib.annotationprocessor.core.db.ExampleDatabase;
 import com.ustadmobile.lib.annotationprocessor.core.db.ExampleSyncableDao;
 import com.ustadmobile.lib.annotationprocessor.core.db.ExampleSyncableEntity;
+import com.ustadmobile.lib.database.jdbc.UmJdbcDatabase;
 
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
@@ -13,11 +14,17 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.net.URI;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
+import javax.sql.DataSource;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 
 public class TestRepository {
@@ -178,6 +185,42 @@ public class TestRepository {
         Assert.assertEquals("Title updated on client database after update on server", updatedTitle,
                 clientDb.getExampleSyncableDao().getTitleByUid(insertUid));
     }
+
+    @Test
+    public void givenMoreEntitiesChangedRemotelyThanReceiveLimit_whenSynced_thenShouldComplete() {
+        Client c = ClientBuilder.newClient();
+        target = c.target(TEST_URI);
+
+        ExampleDatabase clientDb = ExampleDatabase.getInstance(null, "db1");
+        ExampleDatabase serverDb = ExampleDatabase.getInstance(null);
+//        serverDb.setMaster(true);
+
+        ExampleDatabase clientRepo = clientDb.getRepository(TEST_URI,
+                ExampleDatabase.VALID_AUTH_TOKEN);
+
+        clientDb.clearAll();
+        serverDb.clearAll();
+
+        List<ExampleSyncableEntity> entityList = new ArrayList<>(2000);
+        for(int i = 0; i < 2000; i++){
+            entityList.add(new ExampleSyncableEntity("Entity " + i));
+        }
+
+        List<Long> idsCreated = target.path("ExampleSyncableDao/insertRestListAndReturnIds").request().post(
+                Entity.entity(entityList, MediaType.APPLICATION_JSON),
+                new GenericType<List<Long>>() {});
+        System.out.print(idsCreated);
+
+        clientDb.getExampleSyncableDao().syncWith(clientRepo.getExampleSyncableDao(),
+                ExampleDatabase.VALID_AUTH_TOKEN_USER_UID, 100, 100);
+
+        Assert.assertEquals("All entities now in client db",
+                serverDb.getExampleSyncableDao().findAll().size(),
+                clientDb.getExampleSyncableDao().findAll().size());
+
+
+    }
+
 
 
 
