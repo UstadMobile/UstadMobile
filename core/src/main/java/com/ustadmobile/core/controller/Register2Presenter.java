@@ -64,7 +64,7 @@ public class Register2Presenter extends UstadBaseController<Register2View> {
      * @param serverUrl Server url where the account should be created
      */
     public void handleClickRegister(Person person, String password,String serverUrl) {
-        view.setInProgress(true);
+        view.runOnUiThread(() -> view.setInProgress(true));
 
         UstadMobileSystemImpl systemImpl = UstadMobileSystemImpl.getInstance();
         if(umAppDatabase == null){
@@ -99,9 +99,9 @@ public class Register2Presenter extends UstadBaseController<Register2View> {
             @Override
             public void onFailure(Throwable exception) {
                 view.runOnUiThread(() -> {
+                    view.setInProgress(false);
                     view.setErrorMessageView(systemImpl.getString(
                             MessageID.login_network_error, getContext()));
-                    view.setInProgress(false);
                 });
             }
         });
