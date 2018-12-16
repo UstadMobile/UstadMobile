@@ -7,6 +7,7 @@ import android.arch.lifecycle.OnLifecycleEvent;
 import android.arch.lifecycle.ProcessLifecycleOwner;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Binder;
 import android.os.IBinder;
 
 import com.ustadmobile.core.db.UmAppDatabase;
@@ -36,7 +37,16 @@ public class UmAppDatabaseSyncService extends Service implements LifecycleObserv
 
     private long lastForegroundTime = 0L;
 
-    private TimerTask syncTask = new TimerTask() {
+    private final IBinder mBinder = new LocalServiceBinder();
+
+    public class LocalServiceBinder extends Binder {
+
+        public UmAppDatabaseSyncService getService() {
+            return UmAppDatabaseSyncService.this;
+        }
+    }
+
+    private class SyncTimerTask extends TimerTask {
         @Override
         public void run() {
             long startTime = System.currentTimeMillis();
@@ -56,9 +66,9 @@ public class UmAppDatabaseSyncService extends Service implements LifecycleObserv
                 }
             }
             long timeToNextRun = (startTime + MAX_INTERVAL) - System.currentTimeMillis();
-            syncTimer.schedule(this, Math.max(MIN_INTERVAL, timeToNextRun));
+            syncTimer.schedule(new SyncTimerTask(), Math.max(MIN_INTERVAL, timeToNextRun));
         }
-    };
+    }
 
     public UmAppDatabaseSyncService() {
 
@@ -68,7 +78,7 @@ public class UmAppDatabaseSyncService extends Service implements LifecycleObserv
     public void onCreate() {
         super.onCreate();
         syncTimer = new Timer();
-        syncTimer.schedule(syncTask, MIN_INTERVAL);
+        syncTimer.schedule(new SyncTimerTask(), MIN_INTERVAL);
         ProcessLifecycleOwner.get().getLifecycle().addObserver(this);
     }
 
@@ -82,7 +92,7 @@ public class UmAppDatabaseSyncService extends Service implements LifecycleObserv
     @Override
     public IBinder onBind(Intent intent) {
         // not supported
-        return null;
+        return mBinder;
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_START)
