@@ -126,7 +126,8 @@
             android:name="com.ustadmobile.port.android.view.Login2Activity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
             android:label="@string/login"
-            android:theme="@style/Theme.UstadTheme"/>
+            android:theme="@style/Theme.UstadTheme" />
+        <activity android:name="com.ustadmobile.port.android.view.Register2Activity"></activity>
     </application>
 
 </manifest>

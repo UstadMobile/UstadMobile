@@ -35,7 +35,7 @@ public class TestRegister2Presenter {
 
     private UmAppDatabase repo;
 
-    private UmAppDatabase db;
+    private UmAppDatabase clientDb;
 
     private static final String VALID_PASS = "secret";
 
@@ -61,7 +61,8 @@ public class TestRegister2Presenter {
         UstadMobileSystemImpl.setMainInstance(systemImplSpy);
         server = startServer();
 
-        db = UmAppDatabase.getInstance(PlatformTestUtil.getTargetContext());
+        UmAppDatabase db = UmAppDatabase.getInstance(PlatformTestUtil.getTargetContext());
+        clientDb = UmAppDatabase.getInstance(PlatformTestUtil.getTargetContext(), "db1");
         repo = db.getRepository(TEST_URI, "");
 
         db.clearAllTables();
@@ -103,6 +104,8 @@ public class TestRegister2Presenter {
     public void givenNewPersonDetails_whenHandleRegisterCalled_thenShouldCreateAnAccountAndGenerateAuthToken() {
         Register2Presenter presenter =
                 new Register2Presenter(PlatformTestUtil.getTargetContext(), args, mockView);
+        presenter.onCreate(null);
+        presenter.setClientDb(clientDb);
         presenter.handleClickRegister(testPerson,VALID_PASS,TEST_URI);
 
         verify(systemImplSpy, timeout(5000)).go(DESTINATION,
@@ -112,8 +115,10 @@ public class TestRegister2Presenter {
                 PlatformTestUtil.getTargetContext());
         Assert.assertNotNull(activeAccount);
 
-        Assert.assertNotNull("After registering, person is in database",
-                db.getPersonDao().findByUid(presenter.getPersonUid()));
+        Assert.assertNotNull("Person object created on client",
+                clientDb.getPersonDao().findByUid(activeAccount.getPersonUid()));
+        Assert.assertNotNull("Person object created on server",
+                repo.getPersonDao().findByUid(activeAccount.getPersonUid()));
     }
 
     @Test

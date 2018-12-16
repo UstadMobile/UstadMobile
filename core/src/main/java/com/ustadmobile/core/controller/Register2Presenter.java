@@ -20,7 +20,7 @@ public class Register2Presenter extends UstadBaseController<Register2View> {
 
     private String mNextDest;
 
-    private long personUid = 0L;
+    private UmAppDatabase umAppDatabase;
 
     public Register2Presenter(Object context, Hashtable arguments, Register2View view) {
         super(context, arguments, view);
@@ -46,6 +46,10 @@ public class Register2Presenter extends UstadBaseController<Register2View> {
 
     }
 
+    public void setClientDb(UmAppDatabase database){
+        this.umAppDatabase = database;
+    }
+
     /**
      * Registering new user's account
      * @param person Person object to be registered
@@ -54,16 +58,18 @@ public class Register2Presenter extends UstadBaseController<Register2View> {
      */
     public void handleClickRegister(Person person, String password,String serverUrl) {
         view.setInProgress(true);
-        UmAppDatabase registerDao = UmAppDatabase.getInstance(getContext()).getRepository(serverUrl,
-                "");
+
         UstadMobileSystemImpl systemImpl = UstadMobileSystemImpl.getInstance();
-        registerDao.getPersonDao().register(person, password, new UmCallback<UmAccount>() {
+        if(umAppDatabase == null){
+            umAppDatabase = UmAppDatabase.getInstance(getContext()).getRepository(serverUrl,
+                    "");
+        }
+        umAppDatabase.getPersonDao().register(person, password, new UmCallback<UmAccount>() {
             @Override
             public void onSuccess(UmAccount result) {
                 if(result != null) {
-                    personUid = result.getPersonUid();
-                    person.setPersonUid(personUid);
-                    registerDao.getPersonDao().insert(person);
+                    person.setPersonUid(result.getPersonUid());
+                    umAppDatabase.getPersonDao().insert(person);
                     result.setEndpointUrl(serverUrl);
                     view.runOnUiThread(() -> view.setInProgress(false));
                     UmAccountManager.setActiveAccount(result, getContext());
@@ -83,13 +89,5 @@ public class Register2Presenter extends UstadBaseController<Register2View> {
                         MessageID.login_network_error, getContext())));
             }
         });
-    }
-
-    /**
-     * Get created account personUid.
-     * @return created personUid
-     */
-    public long getPersonUid() {
-        return personUid;
     }
 }
