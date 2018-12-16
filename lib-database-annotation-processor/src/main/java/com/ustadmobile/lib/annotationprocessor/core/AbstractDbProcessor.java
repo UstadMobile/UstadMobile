@@ -507,11 +507,12 @@ public abstract class AbstractDbProcessor {
         Element localChangeSeqNumEl = DbProcessorUtils.findElementWithAnnotation(entityTypeEl,
                 UmSyncLocalChangeSeqNum.class, processingEnv);
 
-        if(daoMethod.getParameters().size() != 3) {
+        if(daoMethod.getParameters().size() != 4) {
             messager.printMessage(Diagnostic.Kind.ERROR, "Method "
                             + daoMethod.toString() + " has " + daoMethod.getParameters().size() +
                             " parameters. FindLocalChanges method " +
-                    "must have 3 parameters: long fromLocalChangeSeqNum, long accountPersonUid, " +
+                    "must have 4 parameters: long fromLocalChangeSeqNum, long toLocalChangeSeqNum," +
+                    "long accountPersonUid, " +
                     "int limit", daoType);
             return "";
         }
@@ -533,12 +534,13 @@ public abstract class AbstractDbProcessor {
             return "";
         }
 
-        VariableElement limitParam = daoMethod.getParameters().get(2);
+        VariableElement limitParam = daoMethod.getParameters().get(3);
 
-        return String.format("SELECT * FROM %s WHERE %s >= :%s AND %s LIMIT :%s",
+        return String.format("SELECT * FROM %s WHERE %s BETWEEN :%s AND :%s AND %s LIMIT :%s",
                 entityTypeEl.getSimpleName().toString(),
                 localChangeSeqNumEl.getSimpleName().toString(),
                 daoMethod.getParameters().get(0).getSimpleName().toString(),
+                daoMethod.getParameters().get(1).getSimpleName().toString(),
                 readPermissionCondition, limitParam.getSimpleName());
     }
 
@@ -855,32 +857,66 @@ public abstract class AbstractDbProcessor {
         VariableElement accountPersonUidParam = daoMethod.getParameters().get(1);
         VariableElement sendLimitParam = daoMethod.getParameters().get(2);
         VariableElement receiveLimitParam = daoMethod.getParameters().get(3);
+        String localChangeSeqNumFieldName = findElementWithAnnotation(entityTypeElement,
+                UmSyncLocalChangeSeqNum.class, processingEnv).getSimpleName().toString();
+        String masterChangeSeqNumFieldName = findElementWithAnnotation(entityTypeElement,
+                UmSyncMasterChangeSeqNum.class, processingEnv).getSimpleName().toString();
+
 
         CodeBlock.Builder codeBlock = CodeBlock.builder()
                 .add("$1T _syncableDb = ($1T)$2L;\n", UmSyncableDatabase.class, dbName)
-                .add("$T _syncStatus = _syncableDb.getSyncStatusDao().getByUid($L);\n",
+                .add("$T _initialSyncStatus = _syncableDb.getSyncStatusDao().getByUid($L);\n",
                         SyncStatus.class, umEntityAnnotation.tableId())
-                .add("$T<$T> _locallyChangedEntities = $L(_syncStatus.getSyncedToLocalChangeSeqNum() + 1, $L, $L);\n",
+                .add("boolean _syncComplete = false;\n")
+                .add("int _retryCount = 0;\n")
+                .add("long _syncCompleteMasterChangeSeqNum = -1L;\n")
+                .beginControlFlow("do")
+                    .add("$T _attemptSyncStatus = _syncableDb.getSyncStatusDao().getByUid($L);\n",
+                            SyncStatus.class, umEntityAnnotation.tableId())
+                    .add("$T<$T> _locallyChangedEntities = $L(" +
+                                    "_initialSyncStatus.getSyncedToLocalChangeSeqNum() + 1, " +
+                                    "_initialSyncStatus.getLocalChangeSeqNum() - 1, " +
+                                    "$L, $L);\n",
                         List.class, entityType, findLocalChangesMethod.getSimpleName(),
                         accountPersonUidParam.getSimpleName(),
                         sendLimitParam.getSimpleName())
-                .add("$T<$T> _remoteChanges = $L.$L(_locallyChangedEntities, 0, " +
-                        "_syncStatus.getSyncedToMasterChangeNum() + 1, $L, $L);\n",
+                    .add("long _syncedToLocalSeqNum = _locallyChangedEntities.isEmpty() ? " +
+                        "_attemptSyncStatus.getSyncedToLocalChangeSeqNum() : " +
+                        "_locallyChangedEntities.get(_locallyChangedEntities.size()-1)" +
+                        ".get$L();\n", capitalize(localChangeSeqNumFieldName))
+                    .add("$T<$T> _remoteChanges = $L.$L(_locallyChangedEntities, 0, " +
+                        "_attemptSyncStatus.getSyncedToMasterChangeNum() + 1, $L, $L);\n",
                         SyncResponse.class, entityType, otherDaoParam.getSimpleName(),
                         syncIncomingMethod.getSimpleName(),
                         accountPersonUidParam.getSimpleName(),
                         receiveLimitParam.getSimpleName())
-                .beginControlFlow("if(_remoteChanges != null)")
-                    //TODO: Add code to handle if any changes happened whilst this sync was ongoing
-                    //TODO: e.g. before replace, check if there was any change to the local change
-                    // sequence number, then bump the change numbers for these entities so they get
-                    //picked up by the next sync round
-                    .add("replaceList(_remoteChanges.getRemoteChangedEntities());\n")
-                    .add("_syncableDb.getSyncStatusDao().updateSyncedToChangeSeqNums(" +
-                                "$1L, _syncableDb.getSyncStatusDao().getLocalChangeSeqNum($1L) - 1, " +
-                                "_remoteChanges.getCurrentMasterChangeSeqNum());\n",
-                        umEntityAnnotation.tableId())
-                .endControlFlow();
+                    .beginControlFlow("if(_remoteChanges != null)")
+                        .add("$T<$T> _remoteChangedEntities = _remoteChanges" +
+                                ".getRemoteChangedEntities();\n", List.class,
+                                entityTypeElement)
+                        .add("long _syncedToMasterSeqNum = _remoteChangedEntities.isEmpty() ? " +
+                            "_attemptSyncStatus.getSyncedToMasterChangeNum() : " +
+                            "_remoteChangedEntities.get(_remoteChangedEntities.size()-1)" +
+                            ".get$L();\n", capitalize(masterChangeSeqNumFieldName))
+                        //TODO: Add code to handle if any changes happened whilst this sync was ongoing
+                        //TODO: e.g. before replace, check if there was any change to the local change
+                        // sequence number, then bump the change numbers for these entities so they get
+                        //picked up by the next sync round
+                        .beginControlFlow("if(_syncCompleteMasterChangeSeqNum == -1)")
+                            .add("_syncCompleteMasterChangeSeqNum  = _remoteChanges." +
+                                    "getCurrentMasterChangeSeqNum();\n")
+                        .endControlFlow()
+                        .add("replaceList(_remoteChanges.getRemoteChangedEntities());\n")
+                        .add("_syncableDb.getSyncStatusDao().updateSyncedToChangeSeqNums(" +
+                                "$1L, _syncedToLocalSeqNum, _syncedToMasterSeqNum);\n",
+                                umEntityAnnotation.tableId())
+                        //TODO: just in case we wasted some sequence numbers: check if both are empty
+                        .add("_syncComplete = _syncedToMasterSeqNum >= _syncCompleteMasterChangeSeqNum " +
+                                " && _syncedToLocalSeqNum >= _initialSyncStatus.getLocalChangeSeqNum() - 1;\n")
+                    .nextControlFlow("else")
+                        .add("_retryCount++;\n")
+                    .endControlFlow()
+                .endControlFlow("while(!_syncComplete && _retryCount < 3)");
 
         methodBuilder.addCode(codeBlock.build());
         daoBuilder.addMethod(methodBuilder.build());

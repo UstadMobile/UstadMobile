@@ -19,25 +19,24 @@ public class TestSyncableDb  {
 
     @Test
     public void givenSyncableEntityCreatedOnClient_whenSynced_shouldBeRetrievableOnMaster() {
-        ExampleDatabase db1 = ExampleDatabase.getInstance(null, "db1");
-        ExampleDatabase db2 = ExampleDatabase.getInstance(null, "db2");
-        db1.clearAll();
-        db2.clearAll();
+        ExampleDatabase clientDb = ExampleDatabase.getInstance(null, "db1");
+        ExampleDatabase masterDb = ExampleDatabase.getInstance(null);
+        clientDb.clearAll();
+        masterDb.clearAll();
 
-        db2.setMaster(true);
+        masterDb.setMaster(true);
 
         ExampleSyncableEntity syncableEntity1 = new ExampleSyncableEntity();
         syncableEntity1.setTitle("Syncable 1");
-        syncableEntity1.setLocalChangeSeqNum(
-                db1.getSyncStatusDao().getAndIncrementNextLocalChangeSeqNum(
-                        ExampleSyncableEntity.TABLE_ID, 1));
-        long insertedUid = db1.getExampleSyncableDao().insert(syncableEntity1);
 
-        ExampleSyncableDao dao1 = db1.getExampleSyncableDao();
-        ExampleSyncableDao dao2 = db2.getExampleSyncableDao();
+        long insertedUid = clientDb.getRepository("http://localhost/", "")
+            .getExampleSyncableDao().insert(syncableEntity1);
+
+        ExampleSyncableDao dao1 = clientDb.getExampleSyncableDao();
+        ExampleSyncableDao dao2 = masterDb.getExampleSyncableDao();
         dao1.syncWith(dao2, 0, 100, 100);
 
-        ExampleSyncableEntity syncableEntity2 = db2.getExampleSyncableDao().findByUid(insertedUid);
+        ExampleSyncableEntity syncableEntity2 = masterDb.getExampleSyncableDao().findByUid(insertedUid);
         Assert.assertNotNull("Syncable entity was transferred to db2", syncableEntity2);
     }
 
@@ -134,7 +133,7 @@ public class TestSyncableDb  {
             }
         });
 
-        try { latch.await(2, TimeUnit.MINUTES); }
+        try { latch.await(5, TimeUnit.SECONDS); }
         catch(InterruptedException e) {
             // will not be interrupted
         }
