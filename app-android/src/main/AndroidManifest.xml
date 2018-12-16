@@ -126,13 +126,11 @@
         <activity
             android:name="com.ustadmobile.port.android.view.Login2Activity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
-            android:label="@string/login"
-            android:theme="@style/Theme.UstadTheme" />
+            android:label="@string/login" />
 
         <activity android:name="com.ustadmobile.port.android.view.Register2Activity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
             android:label="@string/register"
-            android:theme="@style/Theme.UstadTheme"
             />
 
 
