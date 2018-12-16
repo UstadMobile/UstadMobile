@@ -240,6 +240,13 @@ public abstract class UstadMobileSystemImpl {
     }
 
     /**
+     * Only for testing purposes (e.g. to use a mockito spy)
+     */
+    public static void setMainInstance(UstadMobileSystemImpl instance) {
+        mainInstance = instance;
+    }
+
+    /**
      * Convenience shortcut for logging
      * @see UMLog#l(int, int, java.lang.String)
      *

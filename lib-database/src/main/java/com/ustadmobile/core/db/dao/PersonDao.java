@@ -66,7 +66,12 @@ public abstract class PersonDao implements SyncableDao<Person, PersonDao> {
             public void onSuccess(PersonUidAndPasswordHash person) {
                 if(person == null) {
                     callback.onSuccess(null);
-                }else if(!person.getPasswordHash().equals(password)) {
+                }else if(person.getPasswordHash().startsWith(PersonAuthDao.PLAIN_PASS_PREFIX)
+                        && !person.getPasswordHash().substring(2).equals(password)) {
+                    callback.onSuccess(null);
+                }else if(person.getPasswordHash().startsWith(PersonAuthDao.ENCRYPTED_PASS_PREFIX)
+                        && !PersonAuthDao.authenticateEncryptedPassword(password,
+                            person.getPasswordHash().substring(2))) {
                     callback.onSuccess(null);
                 }else {
                     AccessToken accessToken = new AccessToken(person.getPersonUid(),
@@ -118,7 +123,9 @@ public abstract class PersonDao implements SyncableDao<Person, PersonDao> {
     public abstract void insertAccessToken(AccessToken token);
 
 
-    @UmQuery("SELECT personUid, passwordHash FROM Person WHERE username = :username")
+    @UmQuery("SELECT Person.personUid, PersonAuth.passwordHash " +
+            " FROM Person LEFT JOIN PersonAuth ON Person.personUid = PersonAuth.personAuthUid " +
+            "WHERE Person.username = :username")
     public abstract void findUidAndPasswordHash(String username,
                                                 UmCallback<PersonUidAndPasswordHash> callback);
 

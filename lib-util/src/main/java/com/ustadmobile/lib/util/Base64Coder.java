@@ -16,7 +16,7 @@
 // This module is provided "as is", without warranties of any kind.
 //
 // Project home page: www.source-code.biz/base64coder/java
-package com.ustadmobile.core.util;
+package com.ustadmobile.lib.util;
 
 /**
  * A Base64 encoder/decoder.

@@ -31,7 +31,6 @@ public class CreateAccountPresenter extends UstadBaseController<CreateAccountVie
         person.setLastName(view.getFieldValue(CreateAccountView.FIELD_LASTNAME));
         person.setUsername(view.getFieldValue(CreateAccountView.FIELD_USERNAME));
         person.setEmailAddr(view.getFieldValue(CreateAccountView.FIELD_EMAIL));
-        person.setPasswordHash(view.getFieldValue(CreateAccountView.FIELD_PASSWORD));
         person.setSocialAccount(false);
 
         UmAppDatabase repo = UmAccountManager.getRepositoryForActiveAccount(context);

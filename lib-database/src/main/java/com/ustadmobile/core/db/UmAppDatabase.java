@@ -33,6 +33,7 @@ import com.ustadmobile.core.db.dao.OpdsEntryStatusCacheAncestorDao;
 import com.ustadmobile.core.db.dao.OpdsEntryStatusCacheDao;
 import com.ustadmobile.core.db.dao.OpdsEntryWithRelationsDao;
 import com.ustadmobile.core.db.dao.OpdsLinkDao;
+import com.ustadmobile.core.db.dao.PersonAuthDao;
 import com.ustadmobile.core.db.dao.PersonCustomFieldDao;
 import com.ustadmobile.core.db.dao.PersonCustomFieldValueDao;
 import com.ustadmobile.core.db.dao.PersonDao;
@@ -53,6 +54,7 @@ import com.ustadmobile.lib.db.entities.WamdaPersonSubject;
 import com.ustadmobile.lib.db.entities.WamdaSubject;
 import com.ustadmobile.lib.database.annotation.UmSyncOutgoing;
 import com.ustadmobile.lib.db.entities.AccessToken;
+import com.ustadmobile.lib.db.entities.PersonAuth;
 import com.ustadmobile.lib.db.sync.UmSyncableDatabase;
 import com.ustadmobile.lib.db.sync.dao.SyncStatusDao;
 import com.ustadmobile.lib.db.sync.dao.SyncablePrimaryKeyDao;
@@ -120,7 +122,8 @@ import java.util.Hashtable;
         ContentEntryFileStatus.class, ContentCategorySchema.class,
         ContentCategory.class, Language.class, LanguageVariant.class,
         SyncStatus.class, SyncablePrimaryKey.class, SyncDeviceBits.class,
-        WamdaSubject.class,WamdaPersonSubject.class,AccessToken.class
+        WamdaSubject.class,WamdaPersonSubject.class, AccessToken.class,
+        PersonAuth.class
 })
 public abstract class UmAppDatabase implements UmSyncableDatabase{
 
@@ -248,6 +251,8 @@ public abstract class UmAppDatabase implements UmSyncableDatabase{
     public abstract LanguageDao getLanguageDao();
 
     public abstract LanguageVariantDao getLanguageVariantDao();
+
+    public abstract PersonAuthDao getPersonAuthDao();
 
     @UmDbContext
     public abstract Object getContext();

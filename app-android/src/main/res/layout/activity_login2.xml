@@ -1,193 +1,99 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<android.support.design.widget.CoordinatorLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="com.ustadmobile.port.android.view.LoginActivity2"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/background_white">
+    android:layout_height="match_parent">
+
 
     <android.support.design.widget.AppBarLayout
+        android:id="@+id/activity_login_appbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:elevation="4dp">
-
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/activity_login2_toolbar"
-            android:layout_width="fill_parent"
-            android:layout_height="?attr/actionBarSize"
-            app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-            app:layout_scrollFlags="scroll|enterAlways"/>
-
+        android:elevation="4dp"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
     </android.support.design.widget.AppBarLayout>
 
-    <android.support.v4.widget.NestedScrollView
+    <EditText
+        android:id="@+id/activity_login_password"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:ems="10"
+        android:hint="@string/password"
+        android:inputType="textPassword"
+        app:layout_constraintBottom_toTopOf="@+id/activity_login_errormessage"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/activity_login_username" />
 
-        android:padding="@dimen/dimen_10dp"
-        android:id="@+id/activity_login2_nested_scroll_view"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+    <EditText
+        android:id="@+id/activity_login_username"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="28dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:ems="10"
+        android:hint="@string/username"
+        android:inputType="textPersonName"
+        android:shadowColor="@color/primary"
+        app:layout_constraintBottom_toTopOf="@+id/activity_login_password"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/activity_login_appbar"
+        app:layout_constraintVertical_chainStyle="packed" />
 
-        <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-            xmlns:app="http://schemas.android.com/apk/res-auto"
-            xmlns:tools="http://schemas.android.com/tools"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            tools:context="com.ustadmobile.port.android.view.LoginActivity2">
+    <Button
+        android:id="@+id/activity_login_button_login"
+        android:layout_width="186dp"
+        android:layout_height="45dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:backgroundTint="@color/accent"
+        android:text="@string/login"
+        android:textAppearance="@style/TextAppearance.AppCompat.Button"
+        android:textColor="@android:color/white"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/activity_login_forgot_password" />
 
+    <TextView
+        android:id="@+id/activity_login_forgot_password"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:text="@string/forgot_password"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        android:textColor="@color/primary"
+        app:layout_constraintBottom_toTopOf="@+id/activity_login_button_login"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/activity_login_errormessage" />
 
-            <Button
-                android:visibility="gone"
-                android:id="@+id/activity_login2_facebook_button"
-                android:layout_width="0dp"
-                android:drawableLeft="@drawable/icon_facebook"
-                android:layout_height="wrap_content"
-                android:padding="@dimen/dimen_16dp"
-                android:layout_marginTop="8dp"
-                android:backgroundTint="@color/login_facebook_button_color"
-                android:text="@string/continue_with_facebook"
+    <TextView
+        android:id="@+id/activity_login_errormessage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:text="@string/error"
+        app:layout_constraintBottom_toTopOf="@+id/activity_login_forgot_password"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/activity_login_password" />
 
-                android:textColor="@color/primary_text"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <Button
-                android:visibility="invisible"
-                android:padding="@dimen/dimen_16dp"
-                android:drawableLeft="@drawable/icon_twitter"
-                android:id="@+id/activity_login2_twitter_button"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="@string/continue_with_twitter"
-                android:textColor="@color/primary_text"
-                android:backgroundTint="@color/login_twitter_button_color"
-
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/activity_login2_facebook_button" />
-
-            <android.support.constraint.Barrier
-                android:id="@+id/activity_login2_barrier"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:barrierDirection="bottom"
-                app:constraint_referenced_ids="activity_login2_twitter_button, activity_login2_facebook_button"
-                />
-
-            <TextView
-                android:paddingStart="@dimen/dimen_2dp"
-                android:id="@+id/activity_login2_login_desc"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/default_margin_dimension"
-                android:text="@string/already_have_an_account"
-                android:textColor="@color/text_primary"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/activity_login2_barrier" />
-
-            <android.support.design.widget.TextInputLayout
-                android:id="@+id/activity_login2_username_text_input_layout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/dimen_16dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.0"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/activity_login2_login_desc">
-
-                <android.support.design.widget.TextInputEditText
-                    android:id="@+id/activity_login2_username_edit_text"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="textNoSuggestions"
-                    android:hint="@string/username" />
-            </android.support.design.widget.TextInputLayout>
-
-            <android.support.design.widget.TextInputLayout
-                android:id="@+id/activity_login2_password_text_input_layout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/activity_login2_username_text_input_layout">
-
-                <android.support.design.widget.TextInputEditText
-                    android:id="@+id/activity_login2_password_edit_text"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="textPassword"
-                    android:hint="@string/password" />
-
-
-            </android.support.design.widget.TextInputLayout>
-
-            <TextView
-                android:paddingStart="@dimen/dimen_2dp"
-                android:id="@+id/activity_login2_forgot_password"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/dimen_16dp"
-                android:text="@string/forgot_password"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/activity_login2_password_text_input_layout" />
-
-            <TextView
-                android:paddingEnd="@dimen/dimen_4dp"
-                android:gravity="end"
-                android:id="@+id/activity_login2_create_account"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/dimen_16dp"
-                android:text="@string/create_new_account"
-                android:clickable="true"
-                android:textColor="@color/text_link_color"
-                android:background="?attr/selectableItemBackground"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/activity_login2_password_text_input_layout" />
-
-            <TextView
-                android:id="@+id/activity_login2_error_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="@dimen/dimen_16dp"
-                android:visibility="gone"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/activity_login2_forgot_password" />
-
-            <android.support.constraint.Barrier
-                android:id="@+id/activity_login2_barrier_bottom"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:barrierDirection="bottom"
-                app:constraint_referenced_ids="activity_login2_error_text, activity_login2_error_text"
-                />
-
-            <Button
-                android:id="@+id/activity_login2_login_button"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:padding="@dimen/dimen_16dp"
-                android:layout_marginTop="@dimen/dimen_16dp"
-                android:layout_weight="1"
-                android:backgroundTint="?attr/colorAccent"
-                android:text="@string/login"
-                android:textSize="18sp"
-                android:textColor="@color/primary_text"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.0"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="@+id/activity_login2_barrier_bottom" />
-
-        </android.support.constraint.ConstraintLayout>
-
-    </android.support.v4.widget.NestedScrollView>
-
-</android.support.design.widget.CoordinatorLayout>
+</android.support.constraint.ConstraintLayout>

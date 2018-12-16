@@ -7,6 +7,7 @@ import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.database.annotation.UmRepository;
 import com.ustadmobile.lib.database.annotation.UmRestAccessible;
+import com.ustadmobile.lib.database.annotation.UmRestAuthorizedUidParam;
 import com.ustadmobile.lib.database.annotation.UmSyncFindAllChanges;
 import com.ustadmobile.lib.database.annotation.UmSyncFindLocalChanges;
 import com.ustadmobile.lib.database.annotation.UmSyncFindUpdateable;
@@ -83,5 +84,11 @@ public abstract class ExampleSyncableDao implements SyncableDao<ExampleSyncableE
     @UmInsert
     public abstract void insertListAsyncArr(List<ExampleSyncableEntity> entityList,
                                             UmCallback<Long[]> insertedKeys);
+
+
+    @UmQuery("SELECT title FROM ExampleSyncableEntity WHERE exampleSyncableUid = :uid AND (:personUid = :personUid)")
+    @UmRestAccessible
+    public abstract String getTitleByUidAuthenticated(long uid, @UmRestAuthorizedUidParam long personUid);
+
 
 }

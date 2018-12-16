@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     package="com.toughra.ustadmobile">
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -105,32 +104,30 @@
             android:label="" />
 
         <activity
-            android:name="com.ustadmobile.port.android.view.LoginActivity2"
+            android:name="com.ustadmobile.port.android.view.WebChunkActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
-            android:label="@string/login" />
-        <activity android:name="com.ustadmobile.port.android.view.CreateAccountActivity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
-            android:label="@string/create_new_account"
-            />
-
-        <activity android:name="com.ustadmobile.port.android.view.WebChunkActivity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
-            android:theme="@style/Theme.UstadTheme"
             android:label=""
-           />
-        <activity android:name="com.ustadmobile.port.android.view.DummyActivity"
+            android:theme="@style/Theme.UstadTheme" />
+        <activity
+            android:name="com.ustadmobile.port.android.view.DummyActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
-            android:theme="@style/Theme.UstadTheme"
-            android:label="" />
-        <activity android:name="com.ustadmobile.port.android.view.ContentEntryListActivity"
+            android:label=""
+            android:theme="@style/Theme.UstadTheme" />
+        <activity
+            android:name="com.ustadmobile.port.android.view.ContentEntryListActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
-            android:theme="@style/Theme.UstadTheme"
-            android:label="" />
-
-        <activity android:name="com.ustadmobile.port.android.view.ContentEntryDetailActivity"
+            android:label=""
+            android:theme="@style/Theme.UstadTheme" />
+        <activity
+            android:name="com.ustadmobile.port.android.view.ContentEntryDetailActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
-            android:theme="@style/Theme.UstadTheme"
-            android:label="" />
+            android:label=""
+            android:theme="@style/Theme.UstadTheme" />
+        <activity
+            android:name="com.ustadmobile.port.android.view.Login2Activity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
+            android:label="@string/login"
+            android:theme="@style/Theme.UstadTheme"/>
     </application>
 
 </manifest>

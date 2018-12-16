@@ -42,7 +42,6 @@ import junit.framework.TestCase;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import okhttp3.internal.platform.Platform;
 
 /* $if umplatform == 2  $
     import j2meunit.framework.TestCase;

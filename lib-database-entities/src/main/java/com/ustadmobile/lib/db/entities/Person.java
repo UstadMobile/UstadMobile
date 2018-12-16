@@ -25,8 +25,6 @@ public class Person  {
 
     private String username;
 
-    private String passwordHash;
-
     private String firstNames;
 
     private String lastName;
@@ -61,14 +59,6 @@ public class Person  {
 
     public void setUsername(String username) {
         this.username = username;
-    }
-
-    public String getPasswordHash() {
-        return passwordHash;
-    }
-
-    public void setPasswordHash(String passwordHash) {
-        this.passwordHash = passwordHash;
     }
 
     public String getFirstNames() {
@@ -155,8 +145,6 @@ public class Person  {
         if (active != person.active) return false;
         if (username != null ? !username.equals(person.username) : person.username != null)
             return false;
-        if (passwordHash != null ? !passwordHash.equals(person.passwordHash) : person.passwordHash != null)
-            return false;
         if (firstNames != null ? !firstNames.equals(person.firstNames) : person.firstNames != null)
             return false;
         if (lastName != null ? !lastName.equals(person.lastName) : person.lastName != null)
@@ -170,7 +158,6 @@ public class Person  {
     public int hashCode() {
         int result = (int) (personUid ^ (personUid >>> 32));
         result = 31 * result + (username != null ? username.hashCode() : 0);
-        result = 31 * result + (passwordHash != null ? passwordHash.hashCode() : 0);
         result = 31 * result + (firstNames != null ? firstNames.hashCode() : 0);
         result = 31 * result + (lastName != null ? lastName.hashCode() : 0);
         result = 31 * result + (emailAddr != null ? emailAddr.hashCode() : 0);
