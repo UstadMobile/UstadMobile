@@ -40,4 +40,7 @@ public abstract class LocationDao implements SyncableDao<Location, LocationDao> 
     @UmQuery("SELECT * FROM Location WHERE parentLocationUid = :uid")
     public abstract void findAllChildLocationsForUidAsync(long uid, UmCallback<List<Location>> resultList);
 
+    @UmQuery("SELECT * FROM Location WHERE title = :name")
+    public abstract void findByTitleAsync(String name, UmCallback<List<Location>> resultList);
+
 }

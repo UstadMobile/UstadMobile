@@ -38,6 +38,7 @@ import com.ustadmobile.core.db.dao.OpdsEntryStatusCacheAncestorDao;
 import com.ustadmobile.core.db.dao.OpdsEntryStatusCacheDao;
 import com.ustadmobile.core.db.dao.OpdsEntryWithRelationsDao;
 import com.ustadmobile.core.db.dao.OpdsLinkDao;
+import com.ustadmobile.core.db.dao.PersonAuthDao;
 import com.ustadmobile.core.db.dao.PersonCustomFieldDao;
 import com.ustadmobile.core.db.dao.PersonCustomFieldValueDao;
 import com.ustadmobile.core.db.dao.PersonDao;
@@ -94,6 +95,7 @@ import com.ustadmobile.lib.db.entities.OpdsEntryStatusCache;
 import com.ustadmobile.lib.db.entities.OpdsEntryStatusCacheAncestor;
 import com.ustadmobile.lib.db.entities.OpdsLink;
 import com.ustadmobile.lib.db.entities.Person;
+import com.ustadmobile.lib.db.entities.PersonAuth;
 import com.ustadmobile.lib.db.entities.PersonCustomFieldValue;
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField;
 import com.ustadmobile.lib.db.entities.PersonField;
@@ -136,8 +138,7 @@ import java.util.Hashtable;
         Location.class, ContentEntryFileStatus.class, ContentCategorySchema.class,
         ContentCategory.class, Language.class, LanguageVariant.class,
         SyncStatus.class, SyncablePrimaryKey.class, SyncDeviceBits.class,
-        AccessToken.class
-
+        AccessToken.class, PersonAuth.class
 })
 public abstract class UmAppDatabase implements UmSyncableDatabase{
 
@@ -152,7 +153,7 @@ public abstract class UmAppDatabase implements UmSyncableDatabase{
      * any other usage (e.g. in the Android Application class) a child class of this database (eg.
      * with additional entities) can be used.
      *
-     * @param instance
+     * @param instance  The database instance
      */
     public static synchronized void setInstance(UmAppDatabase instance) {
         UmAppDatabase.instance = instance;
@@ -274,6 +275,8 @@ public abstract class UmAppDatabase implements UmSyncableDatabase{
     public abstract LanguageDao getLanguageDao();
 
     public abstract LanguageVariantDao getLanguageVariantDao();
+
+    public abstract PersonAuthDao getPersonAuthDao();
 
     @UmDbContext
     public abstract Object getContext();

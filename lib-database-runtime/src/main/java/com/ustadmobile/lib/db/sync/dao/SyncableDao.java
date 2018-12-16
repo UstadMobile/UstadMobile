@@ -3,6 +3,7 @@ package com.ustadmobile.lib.db.sync.dao;
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmOnConflictStrategy;
 import com.ustadmobile.lib.database.annotation.UmRestAccessible;
+import com.ustadmobile.lib.database.annotation.UmRestAuthorizedUidParam;
 import com.ustadmobile.lib.database.annotation.UmSyncFindAllChanges;
 import com.ustadmobile.lib.database.annotation.UmSyncFindLocalChanges;
 import com.ustadmobile.lib.database.annotation.UmSyncFindUpdateable;
@@ -33,7 +34,7 @@ public interface SyncableDao<T, D> extends BaseDao<T> {
     @UmSyncIncoming
     @UmRestAccessible
     SyncResponse<T> handlingIncomingSync(List<T> incomingChanges, long fromLocalChangeSeqNum,
-                                         long fromMasterChangeSeqNum, long userId);
+                                         long fromMasterChangeSeqNum, @UmRestAuthorizedUidParam long userId);
 
     @UmInsert(onConflict = UmOnConflictStrategy.REPLACE)
     void replaceList(List<T> entities);
@@ -61,7 +62,7 @@ public interface SyncableDao<T, D> extends BaseDao<T> {
     @UmSyncFindAllChanges
     List<T> syncFindAllChanges(long fromLocalChangeSeqNum, long toLocalChangeSeqNum,
                                                           long fromMasterChangeSeqNum, long toMasterChangeSeqNum,
-                                                          long accountPersonUid);
+                                                          @UmRestAuthorizedUidParam long accountPersonUid);
     @UmSyncFindUpdateable
     List<UmSyncExistingEntity> syncFindExistingEntities(List<Long> primaryKeys, long accountPersonUid);
 

@@ -91,6 +91,9 @@ public abstract class ClazzDao implements SyncableDao<Clazz, ClazzDao> {
             " ORDER BY Clazz.attendanceAverage DESC ")
     public abstract UmProvider<ClazzWithNumStudents> findAllActiveClazzesSortByAttendanceDesc();
 
+    @UmQuery("SELECT * FROM Clazz WHERE clazzName = :name")
+    public abstract void findByClazzNameAsync(String name, UmCallback<List<Clazz>> resultList);
+
 
     @UmQuery("SELECT " +
             " (SELECT COUNT(*) FROM Clazz Where Clazz.clazzActive = 1) as numClazzes, " +

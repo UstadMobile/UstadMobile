@@ -81,6 +81,7 @@ import com.ustadmobile.core.view.AddScheduleDialogView;
 import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.core.view.BasePointView;
 import com.ustadmobile.core.view.BasePointView2;
+import com.ustadmobile.core.view.BulkUploadMasterView;
 import com.ustadmobile.core.view.CatalogEntryView;
 import com.ustadmobile.core.view.CatalogView;
 import com.ustadmobile.core.view.ClassDetailView;
@@ -133,6 +134,7 @@ import com.ustadmobile.port.android.view.AddScheduleDialogFragment;
 import com.ustadmobile.port.android.view.AppViewAndroid;
 import com.ustadmobile.port.android.view.BasePointActivity;
 import com.ustadmobile.port.android.view.BasePointActivity2;
+import com.ustadmobile.port.android.view.BulkUploadMasterActivity;
 import com.ustadmobile.port.android.view.CatalogActivity;
 import com.ustadmobile.port.android.view.CatalogEntryActivity;
 import com.ustadmobile.port.android.view.ClazzActivityEditActivity;
@@ -290,6 +292,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         viewNameToAndroidImplMap.put(ContentEntryView.VIEW_NAME, ContentEntryListActivity.class);
         viewNameToAndroidImplMap.put(ContentEntryDetailView.VIEW_NAME, ContentEntryDetailActivity.class);
         viewNameToAndroidImplMap.put(DummyView.VIEW_NAME, DummyActivity.class);
+        viewNameToAndroidImplMap.put(BulkUploadMasterView.VIEW_NAME, BulkUploadMasterActivity.class);
     }
 
     /**

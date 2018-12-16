@@ -1,18 +1,15 @@
 package com.ustadmobile.core.view;
 
+public interface Login2View extends UstadView{
 
-/**
- * Login2 Core View extends Core UstadView. Will be implemented
- * on various implementations.
- */
-public interface Login2View extends UstadView {
+    void setInProgress(boolean inProgress);
 
-    String VIEW_NAME = "Login2";
+    void setErrorMessage(String errorMessage);
 
+    void setServerUrl(String serverUrl);
 
-    /**
-     * For Android: closes the activity.
-     */
-    void finish();
+    void setUsername(String username);
+
+    void setPassword(String password);
 
 }

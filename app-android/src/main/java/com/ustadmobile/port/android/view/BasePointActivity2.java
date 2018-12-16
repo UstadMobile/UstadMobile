@@ -179,7 +179,10 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
             mPresenter.handleClickShareIcon();
             //shareAppSetupFile();
             return super.onOptionsItemSelected(item);
-        } else {
+        } else if (i == R.id.menu_basepoint_bulk_upload_master){
+            mPresenter.handleClickBulkUpload();
+            return super.onOptionsItemSelected(item);
+        }else {
             return super.onOptionsItemSelected(item);
         }
     }

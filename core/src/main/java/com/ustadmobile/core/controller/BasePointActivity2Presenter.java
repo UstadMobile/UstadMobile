@@ -3,6 +3,7 @@ package com.ustadmobile.core.controller;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.BasePointView2;
+import com.ustadmobile.core.view.BulkUploadMasterView;
 
 import java.util.Hashtable;
 
@@ -16,6 +17,12 @@ public class BasePointActivity2Presenter extends UstadBaseController<BasePointVi
 
     public void handleClickShareIcon(){
         view.showShareAppDialog();
+    }
+
+    public void handleClickBulkUpload(){
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        Hashtable args = new Hashtable();
+        impl.go(BulkUploadMasterView.VIEW_NAME, args, context);
     }
 
 

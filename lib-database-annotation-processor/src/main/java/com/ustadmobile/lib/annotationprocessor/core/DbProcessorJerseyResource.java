@@ -11,7 +11,9 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import com.ustadmobile.core.db.UmObserver;
 import com.ustadmobile.core.impl.UmCallback;
+import com.ustadmobile.lib.database.annotation.UmRestAuthorizedUidParam;
 import com.ustadmobile.lib.database.annotation.UmUpdate;
+import com.ustadmobile.lib.db.UmDbWithAuthenticator;
 import com.ustadmobile.lib.db.sync.UmSyncableDatabase;
 
 import java.io.IOException;
@@ -29,6 +31,8 @@ import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.TypeMirror;
 import javax.tools.Diagnostic;
 import javax.ws.rs.Path;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 
 import static com.ustadmobile.lib.annotationprocessor.core.DbProcessorCore.OPT_JERSEY_RESOURCE_OUT;
@@ -88,7 +92,8 @@ public class DbProcessorJerseyResource extends AbstractDbProcessor {
                     .addAnnotation(AnnotationSpec.builder(Path.class).addMember("value",
                             "\"/$L\"", methodElement.getSimpleName().toString()).build());
 
-            addJaxWsParameters(methodElement, daoType, methodBuilder);
+            addJaxWsParameters(methodElement, daoType, methodBuilder, QueryParam.class, null,
+                    true);
             addJaxWsMethodAnnotations(methodElement, daoType, methodBuilder);
 
             ExecutableElement daoGetter = DbProcessorUtils.findDaoGetter(daoType, dbType,
@@ -103,6 +108,17 @@ public class DbProcessorJerseyResource extends AbstractDbProcessor {
                     .add("$1T _db = $1T.getInstance($2L);\n", dbType, FIELDNAME_SERVLET_CONTEXT)
                     .add("$T _dao = _db.$L();\n", daoType,
                             daoGetter.getSimpleName());
+
+            //TODO: check at compile time that this database implements UmDbWithAuthenticator
+
+            if(methodInfo.getAuthorizedUidParam() != null) {
+                VariableElement uidParamEl = methodInfo.getAuthorizedUidParam();
+                codeBlock.beginControlFlow("if(!(($T)_db).validateAuth($L, _authHeader))",
+                            UmDbWithAuthenticator.class, uidParamEl.getSimpleName())
+                            .add("throw new $T($S, 403);\n", WebApplicationException.class,
+                                    "Invalid authorization")
+                        .endControlFlow();
+            }
 
             String syncableDbVariableName = null;
             if(methodInfo.isUpdateOrInsert() || isAutoSyncInsert) {

@@ -17,6 +17,7 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <!-- To obtain wifi lock -->
     <uses-permission android:name="android.permission.WAKE_LOCK" />
@@ -177,6 +178,11 @@
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
             android:theme="@style/Theme.UstadTheme"
             android:windowSoftInputMode="stateHidden"/>
+        <activity
+            android:name="com.ustadmobile.port.android.view.BulkUploadMasterActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
+            android:theme="@style/Theme.UstadTheme"
+            android:windowSoftInputMode="stateHidden"/>
 
         <activity
             android:name="com.ustadmobile.port.android.view.AboutActivity"
@@ -200,24 +206,31 @@
             android:name="com.ustadmobile.port.android.view.H5PContentActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
             android:label="" />
-        <activity android:name="com.ustadmobile.port.android.view.WebChunkActivity"
+        <activity
+            android:name="com.ustadmobile.port.android.view.WebChunkActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
-            android:theme="@style/Theme.UstadTheme"
             android:label=""
-           />
-        <activity android:name="com.ustadmobile.port.android.view.DummyActivity"
+            android:theme="@style/Theme.UstadTheme" />
+        <activity
+            android:name="com.ustadmobile.port.android.view.DummyActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
-            android:theme="@style/Theme.UstadTheme"
-            android:label="" />
-        <activity android:name="com.ustadmobile.port.android.view.ContentEntryListActivity"
+            android:label=""
+            android:theme="@style/Theme.UstadTheme" />
+        <activity
+            android:name="com.ustadmobile.port.android.view.ContentEntryListActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
-            android:theme="@style/Theme.UstadTheme"
-            android:label="" />
-
-        <activity android:name="com.ustadmobile.port.android.view.ContentEntryDetailActivity"
+            android:label=""
+            android:theme="@style/Theme.UstadTheme" />
+        <activity
+            android:name="com.ustadmobile.port.android.view.ContentEntryDetailActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
-            android:theme="@style/Theme.UstadTheme"
-            android:label="" />
+            android:label=""
+            android:theme="@style/Theme.UstadTheme" />
+        <activity
+            android:name="com.ustadmobile.port.android.view.Login2Activity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
+            android:label="@string/login"
+            android:theme="@style/Theme.UstadTheme"/>
     </application>
 
 </manifest>

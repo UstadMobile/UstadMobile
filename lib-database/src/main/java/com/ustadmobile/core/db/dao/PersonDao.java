@@ -12,8 +12,11 @@ import com.ustadmobile.lib.database.annotation.UmUpdate;
 import com.ustadmobile.lib.db.entities.AccessToken;
 import com.ustadmobile.lib.db.entities.Person;
 import com.ustadmobile.lib.db.entities.PersonWithEnrollment;
+import com.ustadmobile.lib.db.entities.PersonAuth;
 import com.ustadmobile.lib.db.entities.UmAccount;
 import com.ustadmobile.lib.db.sync.dao.SyncableDao;
+
+import static com.ustadmobile.core.db.dao.PersonAuthDao.ENCRYPTED_PASS_PREFIX;
 
 
 @UmDao(readPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
@@ -57,13 +60,6 @@ public abstract class PersonDao implements SyncableDao<Person, PersonDao> {
             " (0) AS enrolled FROM Person WHERE Person.active = 1 ")
     public abstract UmProvider<PersonWithEnrollment> findAllPeopleWithEnrollment();
 
-    @UmQuery("SELECT * From Person WHERE username = :username AND passwordHash = :passwordHash")
-    public abstract Person authenticateHash(String username, String passwordHash);
-
-    @UmQuery("SELECT * From Person WHERE username = :username AND passwordHash = :passwordHash")
-    public abstract void authenticateHashAsync(String username, String passwordHash,
-                                               UmCallback<Person> person);
-
     public static final long SESSION_LENGTH = 28L * 24L * 60L * 60L * 1000L;// 28 days
 
     protected class PersonUidAndPasswordHash {
@@ -96,15 +92,15 @@ public abstract class PersonDao implements SyncableDao<Person, PersonDao> {
             public void onSuccess(PersonUidAndPasswordHash person) {
                 if(person == null) {
                     callback.onSuccess(null);
-                }else if(!person.getPasswordHash().equals(password)) {
+                }else if(person.getPasswordHash().startsWith(PersonAuthDao.PLAIN_PASS_PREFIX)
+                        && !person.getPasswordHash().substring(2).equals(password)) {
+                    callback.onSuccess(null);
+                }else if(person.getPasswordHash().startsWith(ENCRYPTED_PASS_PREFIX)
+                        && !PersonAuthDao.authenticateEncryptedPassword(password,
+                            person.getPasswordHash().substring(2))) {
                     callback.onSuccess(null);
                 }else {
-                    AccessToken accessToken = new AccessToken(person.getPersonUid(),
-                            System.currentTimeMillis() + SESSION_LENGTH);
-                    insertAccessToken(accessToken);
-                    callback.onSuccess(new UmAccount(
-                            person.getPersonUid(), username,
-                            accessToken.getToken(), null));
+                    onSuccessCreateAccessToken(person.getPersonUid(), username, callback);
                 }
             }
 
@@ -113,6 +109,40 @@ public abstract class PersonDao implements SyncableDao<Person, PersonDao> {
                 callback.onFailure(exception);
             }
         });
+    }
+
+    @UmRestAccessible
+    @UmRepository(delegateType = UmRepository.UmRepositoryMethodType.DELEGATE_TO_WEBSERVICE)
+    public void register(Person newPerson, String password, UmCallback<UmAccount> callback) {
+        findUidAndPasswordHash(newPerson.getUsername(), new UmCallback<PersonUidAndPasswordHash>() {
+            @Override
+            public void onSuccess(PersonUidAndPasswordHash result) {
+                if(result == null) {
+                    //OK to go ahead and create
+                    insert(newPerson);
+                    PersonAuth newPersonAuth = new PersonAuth(newPerson.getPersonUid(),
+                            ENCRYPTED_PASS_PREFIX + PersonAuthDao.encryptPassword(password));
+                    insertPersonAuth(newPersonAuth);
+                    onSuccessCreateAccessToken(newPerson.getPersonUid(), newPerson.getUsername(),
+                            callback);
+                }else {
+                    callback.onFailure(new IllegalArgumentException("Username already exists"));
+                }
+            }
+
+            @Override
+            public void onFailure(Throwable exception) {
+                callback.onFailure(exception);
+            }
+        });
+    }
+
+    protected void onSuccessCreateAccessToken(long personUid, String username, UmCallback<UmAccount> callback) {
+        AccessToken accessToken = new AccessToken(personUid,
+                System.currentTimeMillis() + SESSION_LENGTH);
+        insertAccessToken(accessToken);
+        callback.onSuccess(new UmAccount(personUid, username, accessToken.getToken(),
+                null));
     }
 
     public boolean authenticate(String token, long personUid) {
@@ -127,9 +157,13 @@ public abstract class PersonDao implements SyncableDao<Person, PersonDao> {
     public abstract void insertAccessToken(AccessToken token);
 
 
-    @UmQuery("SELECT personUid, passwordHash FROM Person WHERE username = :username")
+    @UmQuery("SELECT Person.personUid, PersonAuth.passwordHash " +
+            " FROM Person LEFT JOIN PersonAuth ON Person.personUid = PersonAuth.personAuthUid " +
+            "WHERE Person.username = :username")
     public abstract void findUidAndPasswordHash(String username,
                                                 UmCallback<PersonUidAndPasswordHash> callback);
+    @UmInsert
+    public abstract void insertPersonAuth(PersonAuth personAuth);
 
 
 }

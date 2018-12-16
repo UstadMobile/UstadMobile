@@ -64,7 +64,7 @@ public class UstadMobileSystemImplJavaSe extends UstadMobileSystemImplSE {
 
     @Override
     public String getString(int messageCode, Object context) {
-        return null;
+        return ""+messageCode;
     }
 
     @Override

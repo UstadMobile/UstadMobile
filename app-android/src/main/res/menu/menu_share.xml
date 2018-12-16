@@ -6,4 +6,9 @@
         android:icon="@drawable/ic_share_white_24dp"
         android:title="@string/share_application"
         app:showAsAction="always"/>
+
+    <item android:id="@+id/menu_basepoint_bulk_upload_master"
+        android:icon="@drawable/ic_file_upload_white_24dp"
+        android:title="@string/settings"
+        app:showAsAction="always"/>
 </menu>
