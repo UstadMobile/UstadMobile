@@ -16,15 +16,15 @@ import java.util.Vector;
  */
 public class UMCalendarUtil {
 
-    public static final String[] HTTP_MONTH_NAMES = new String[]{"Jan", "Feb",
+    private static final String[] HTTP_MONTH_NAMES = new String[]{"Jan", "Feb",
             "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 
-    public static final int[] HTTP_DAYS = new int[]{ Calendar.MONDAY, Calendar.TUESDAY,
+    private static final int[] HTTP_DAYS = new int[]{ Calendar.MONDAY, Calendar.TUESDAY,
             Calendar.WEDNESDAY, Calendar.THURSDAY, Calendar.FRIDAY, Calendar.SATURDAY,
             Calendar.SUNDAY
     };
 
-    public static final String[] HTTP_DAY_LABELS = new String[]{"Mon", "Tue",
+    private static final String[] HTTP_DAY_LABELS = new String[]{"Mon", "Tue",
             "Wed", "Thu", "Fri", "Sat", "Sun"};
 
 
@@ -65,14 +65,14 @@ public class UMCalendarUtil {
      * Parse the given http date according to :
      *  http://tools.ietf.org/html/rfc2616#section-3.3
      *
-     * @param httpDate
-     * @return
+     * @param httpDate  The string http date
+     * @return  The date in long
      */
     public static long parseHTTPDate(String httpDate) {
         char[] delimChars = new char[]{' ', ':', '-'};
 
         Vector tokens = UMUtil.tokenize(httpDate, delimChars, 0, httpDate.length());
-        Calendar cal = null;
+        Calendar cal;
 
         if(tokens.size() == 8) {//this includes the timezone
             cal = Calendar.getInstance(TimeZone.getTimeZone(
@@ -112,32 +112,6 @@ public class UMCalendarUtil {
         return cal.getTime().getTime();
     }
 
-    /**
-     * Parse the ISO 8601 combined date and time format string
-     *
-     * e.g.
-     * 2016-04-18T17:08:07.563789+00:00
-     *
-     */
-    public static Calendar parse8601Timestamp(String timestamp) {
-        Calendar cal = Calendar.getInstance();
-        cal.set(Calendar.YEAR, Integer.parseInt(timestamp.substring(0, 4)));
-        cal.set(Calendar.MONTH, Integer.parseInt(timestamp.substring(5, 7)));
-        cal.set(Calendar.DAY_OF_MONTH, Integer.parseInt(timestamp.substring(8, 10)));
-
-        if(timestamp.length() < 12) {
-            return cal;
-        }
-
-        //There is a time section
-        cal.set(Calendar.HOUR_OF_DAY, Integer.parseInt(timestamp.substring(11, 13)));
-        cal.set(Calendar.MINUTE, Integer.parseInt(timestamp.substring(14, 16)));
-        cal.set(Calendar.SECOND, Integer.parseInt(timestamp.substring(17, 19)));
-
-        return cal;
-    }
-
-
 
     /**
      * Appends two digits for the integer i; if i < 10; prepend a leading 0
@@ -172,16 +146,23 @@ public class UMCalendarUtil {
      */
     public static long getLongDateFromPrettyString(String dateString){
         SimpleDateFormat formatter = new SimpleDateFormat("dd-MMM-yyyy", Locale.US);
-        Date date = null;
+        Date date;
         try {
-            date = (Date)formatter.parse(dateString);
+            date = formatter.parse(dateString);
+            return date.getTime();
         } catch (ParseException e) {
             e.printStackTrace();
         }
-        return date.getTime();
-        
+        return -1;
+
     }
 
+    /**
+     * Gets date in long plus/minus the days specified from today.
+     *
+     * @param days  The days (positive or negative) off from today
+     * @return  The date in long
+     */
     public static long getDateInMilliPlusDays(int days){
         // get a calendar instance, which defaults to "now"
         Calendar calendar = Calendar.getInstance();
@@ -191,9 +172,14 @@ public class UMCalendarUtil {
         calendar.set(Calendar.SECOND, 0);
         calendar.set(Calendar.MILLISECOND, 0);
         return calendar.getTimeInMillis();
-
     }
 
+    /**
+     * Get date in long w.r.t plus/minus the days specified from a specified date
+     * @param dateLong  The specified date (in long) where the days to be calculated.
+     * @param days  The days (positive or negative) off from the dateLong specified
+     * @return  The date in long
+     */
     public static long getDateInMilliPlusDaysRelativeTo(long dateLong, int days){
         // get a calendar instance, which defaults to "now"
         Calendar calendar = Calendar.getInstance();
@@ -207,41 +193,52 @@ public class UMCalendarUtil {
 
     }
 
+    /**
+     * Gets pretty looking date (eg: Mon, 23/Jan/1989) from a long date specified.
+     *
+     * @param thisDate The date in long for which we want a pretty date
+     * @return  The pretty date for the long date specified as string.
+     */
     public static String getPrettyDateFromLong(long thisDate){
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(thisDate);
-        SimpleDateFormat format = new SimpleDateFormat("EEEE, dd/MMMM/yyyy");
-        SimpleDateFormat formatShortDay = new SimpleDateFormat("EEE");
-        String prettyDate = format.format(calendar.getTime());
-        return prettyDate;
+        SimpleDateFormat format = new SimpleDateFormat("EEEE, dd/MMMM/yyyy", Locale.US);
+        return format.format(calendar.getTime());
     }
 
+    /**
+     * Gets simple pretty looking date (eg; 23/Jan/89) from a long date specified.
+     *
+     * @param thisDate  The date in long for which we want a pretty simple date.
+     * @return  The pretty simple date for the long date specified as string.
+     */
     public static String getPrettyDateSuperSimpleFromLong(long thisDate){
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(thisDate);
-        SimpleDateFormat format = new SimpleDateFormat("dd/MMM/yy");
-        String prettyDate = format.format(calendar.getTime());
-        return prettyDate;
+        SimpleDateFormat format = new SimpleDateFormat("dd/MMM/yy", Locale.US);
+        return format.format(calendar.getTime());
     }
 
-    public static String getPrettyDateSimpleFromLong(long thisDate){
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(thisDate);
-        SimpleDateFormat format = new SimpleDateFormat("EEE, dd/MMM/yyyy");
-        SimpleDateFormat formatShortDay = new SimpleDateFormat("EEE");
-        String prettyDate = format.format(calendar.getTime());
-        return prettyDate;
-    }
-
+    /**
+     * Gets simple day only (eg: Mon) from a long date specified.
+     *
+     * @param thisDate  The date in long for which we want the day for.
+     * @return  The day for the long date specified as string.
+     */
     public static String getSimpleDayFromLongDate(long thisDate){
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(thisDate);
-        SimpleDateFormat format = new SimpleDateFormat("EEEE, dd/MMMM/yyyy");
-        SimpleDateFormat formatShortDay = new SimpleDateFormat("EEE");
-        String prettyShortDay = formatShortDay.format(calendar.getTime());
-        return prettyShortDay;
+        SimpleDateFormat formatShortDay = new SimpleDateFormat("EEE", Locale.US);
+        return formatShortDay.format(calendar.getTime());
     }
 
+    /**
+     * Checks if a given long date is today or not.
+     *
+     * @param date  The Date object which we want to check if its a today date.
+     *
+     * @return  true if given date is today, false if it isn't
+     */
     public static boolean isToday(Date date){
         Calendar today = Calendar.getInstance();
         Calendar specifiedDate  = Calendar.getInstance();
