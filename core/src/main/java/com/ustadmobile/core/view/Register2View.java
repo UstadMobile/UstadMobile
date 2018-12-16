@@ -6,4 +6,6 @@ public interface Register2View extends UstadView {
 
     void setServerUrl(String url);
 
+    void setInProgress(boolean inProgress);
+
 }
