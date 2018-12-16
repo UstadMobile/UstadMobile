@@ -120,9 +120,13 @@ public class BulkUploadMasterActivity extends UstadBaseActivity implements BulkU
 
     @Override
     public void parseFile(String filePath) {
-        showMessage(getText(R.string.loading).toString());
-        File sourceFile = new File(filePath);
-        readFile(sourceFile);
+        if(filePath == null || filePath.isEmpty()){
+            showMessage(getText(R.string.select_file).toString());
+        }else {
+            showMessage(getText(R.string.loading).toString());
+            File sourceFile = new File(filePath);
+            readFile(sourceFile);
+        }
     }
 
 
