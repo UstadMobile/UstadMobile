@@ -119,7 +119,8 @@ public class Register2Activity extends UstadBaseActivity implements Register2Vie
                     person.setLastName(getFieldValue(FIELD_LAST_NAME));
                     person.setEmailAddr(getFieldValue(FIELD_EMAIL));
                     person.setUsername(getFieldValue(FIELD_USERNAME));
-                    presenter.handleClickRegister(person,getFieldValue(FIELD_PASSWORD),serverUrl);
+                    new Thread(() -> presenter.handleClickRegister(person,
+                            getFieldValue(FIELD_PASSWORD),serverUrl)).start();
                 }
             }else{
                 disableButton(true);
