@@ -256,12 +256,17 @@ public class UstadMobileSystemImplTest extends UstadMobileSystemImplSE {
 
     @Override
     public void getAsset(Object context, String path, UmCallback<InputStream> callback) {
-
+        InputStream inputStream = getClass().getResourceAsStream(path);
+        if(inputStream != null){
+            callback.onSuccess(inputStream);
+        }else{
+            callback.onFailure(new NullPointerException("Input stream is null, probably "+path+" doesn't exist"));
+        }
     }
 
     @Override
     public InputStream getAssetSync(Object context, String path) throws IOException {
-        return null;
+        return getClass().getResourceAsStream(path);
     }
 
     @Override
