@@ -48,6 +48,7 @@ public class TestRegister2Presenter {
     private Hashtable args;
 
 
+
     public static HttpServer startServer() {
         final ResourceConfig resourceConfig = new ResourceConfig()
                 .packages("com.ustadmobile.core.db.dao");
@@ -72,6 +73,7 @@ public class TestRegister2Presenter {
         testPerson.setEmailAddr("johndoe@example.com");
         testPerson.setUsername("John");
         testPerson.setLastName("Doe");
+
 
 
         args = new Hashtable();
@@ -106,12 +108,11 @@ public class TestRegister2Presenter {
     public void givenNewPersonDetails_whenHandleRegisterCalled_thenShouldCreateAnAccountAndGenerateAuthToken() {
         Register2Presenter presenter =
                 new Register2Presenter(PlatformTestUtil.getTargetContext(), args, mockView);
-        presenter.onCreate(null);
         presenter.setClientDb(clientDb);
         presenter.setRepo(repo);
         presenter.handleClickRegister(testPerson,VALID_PASS,TEST_URI);
 
-        verify(systemImplSpy, timeout(5000* 1000)).go(DESTINATION,
+        verify(systemImplSpy, timeout(5000)).go(DESTINATION,
                 PlatformTestUtil.getTargetContext());
 
         UmAccount activeAccount = UmAccountManager.getActiveAccount(
