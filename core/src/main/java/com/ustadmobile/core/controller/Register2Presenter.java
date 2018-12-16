@@ -20,6 +20,8 @@ public class Register2Presenter extends UstadBaseController<Register2View> {
 
     private String mNextDest;
 
+    private long personUid = 0L;
+
     public Register2Presenter(Object context, Hashtable arguments, Register2View view) {
         super(context, arguments, view);
         if(arguments.containsKey(ARG_NEXT)){
@@ -44,15 +46,24 @@ public class Register2Presenter extends UstadBaseController<Register2View> {
 
     }
 
+    /**
+     * Registering new user's account
+     * @param person Person object to be registered
+     * @param password Person password to be associated with the account.
+     * @param serverUrl Server url where the account should be created
+     */
     public void handleClickRegister(Person person, String password,String serverUrl) {
         view.setInProgress(true);
-        UmAppDatabase loginRepoDb = UmAppDatabase.getInstance(getContext()).getRepository(serverUrl,
+        UmAppDatabase registerDao = UmAppDatabase.getInstance(getContext()).getRepository(serverUrl,
                 "");
         UstadMobileSystemImpl systemImpl = UstadMobileSystemImpl.getInstance();
-        loginRepoDb.getPersonDao().register(person, password, new UmCallback<UmAccount>() {
+        registerDao.getPersonDao().register(person, password, new UmCallback<UmAccount>() {
             @Override
             public void onSuccess(UmAccount result) {
                 if(result != null) {
+                    personUid = result.getPersonUid();
+                    person.setPersonUid(personUid);
+                    registerDao.getPersonDao().insert(person);
                     result.setEndpointUrl(serverUrl);
                     view.runOnUiThread(() -> view.setInProgress(false));
                     UmAccountManager.setActiveAccount(result, getContext());
@@ -74,4 +85,11 @@ public class Register2Presenter extends UstadBaseController<Register2View> {
         });
     }
 
+    /**
+     * Get created account personUid.
+     * @return created personUid
+     */
+    public long getPersonUid() {
+        return personUid;
+    }
 }

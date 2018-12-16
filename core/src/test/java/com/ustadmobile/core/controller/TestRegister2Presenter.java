@@ -35,6 +35,8 @@ public class TestRegister2Presenter {
 
     private UmAppDatabase repo;
 
+    private UmAppDatabase db;
+
     private static final String VALID_PASS = "secret";
 
     private static final String DESTINATION = "somewhere";
@@ -59,7 +61,7 @@ public class TestRegister2Presenter {
         UstadMobileSystemImpl.setMainInstance(systemImplSpy);
         server = startServer();
 
-        UmAppDatabase db = UmAppDatabase.getInstance(PlatformTestUtil.getTargetContext());
+        db = UmAppDatabase.getInstance(PlatformTestUtil.getTargetContext());
         repo = db.getRepository(TEST_URI, "");
 
         db.clearAllTables();
@@ -109,6 +111,9 @@ public class TestRegister2Presenter {
         UmAccount activeAccount = UmAccountManager.getActiveAccount(
                 PlatformTestUtil.getTargetContext());
         Assert.assertNotNull(activeAccount);
+
+        Assert.assertNotNull("After registering, person is in database",
+                db.getPersonDao().findByUid(presenter.getPersonUid()));
     }
 
     @Test
