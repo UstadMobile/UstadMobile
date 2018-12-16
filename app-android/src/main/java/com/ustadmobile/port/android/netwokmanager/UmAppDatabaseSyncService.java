@@ -18,6 +18,9 @@ import com.ustadmobile.lib.db.entities.UmAccount;
 
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * This service calls the database sync periodically whilst the app is in the foreground, or was
@@ -25,7 +28,7 @@ import java.util.TimerTask;
  */
 public class UmAppDatabaseSyncService extends Service implements LifecycleObserver {
 
-    private Timer syncTimer;
+    private ScheduledExecutorService syncExecutor;
 
     private int MAX_INTERVAL = 60*1000;
 
@@ -66,7 +69,14 @@ public class UmAppDatabaseSyncService extends Service implements LifecycleObserv
                 }
             }
             long timeToNextRun = (startTime + MAX_INTERVAL) - System.currentTimeMillis();
-            syncTimer.schedule(new SyncTimerTask(), Math.max(MIN_INTERVAL, timeToNextRun));
+
+            synchronized (UmAppDatabaseSyncService.this) {
+                if(!syncExecutor.isShutdown())
+                    syncExecutor.schedule(new SyncTimerTask(), Math.max(MIN_INTERVAL, timeToNextRun),
+                            TimeUnit.MILLISECONDS);
+
+            }
+
         }
     }
 
@@ -77,15 +87,18 @@ public class UmAppDatabaseSyncService extends Service implements LifecycleObserv
     @Override
     public void onCreate() {
         super.onCreate();
-        syncTimer = new Timer();
-        syncTimer.schedule(new SyncTimerTask(), MIN_INTERVAL);
+        syncExecutor = Executors.newSingleThreadScheduledExecutor();
+        syncExecutor.schedule(new SyncTimerTask(), MIN_INTERVAL, TimeUnit.MILLISECONDS);
         ProcessLifecycleOwner.get().getLifecycle().addObserver(this);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        syncTimer.cancel();
+        synchronized (this) {
+            syncExecutor.shutdownNow();
+        }
+
         ProcessLifecycleOwner.get().getLifecycle().removeObserver(this);
     }
 
