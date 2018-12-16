@@ -66,6 +66,8 @@ public class TestRegister2Presenter {
         repo = db.getRepository(TEST_URI, "");
 
         db.clearAllTables();
+        clientDb.clearAllTables();
+
         testPerson = new Person();
         testPerson.setEmailAddr("johndoe@example.com");
         testPerson.setUsername("John");
@@ -106,9 +108,10 @@ public class TestRegister2Presenter {
                 new Register2Presenter(PlatformTestUtil.getTargetContext(), args, mockView);
         presenter.onCreate(null);
         presenter.setClientDb(clientDb);
+        presenter.setRepo(repo);
         presenter.handleClickRegister(testPerson,VALID_PASS,TEST_URI);
 
-        verify(systemImplSpy, timeout(5000)).go(DESTINATION,
+        verify(systemImplSpy, timeout(5000* 1000)).go(DESTINATION,
                 PlatformTestUtil.getTargetContext());
 
         UmAccount activeAccount = UmAccountManager.getActiveAccount(

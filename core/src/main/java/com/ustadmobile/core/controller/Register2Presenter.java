@@ -22,6 +22,8 @@ public class Register2Presenter extends UstadBaseController<Register2View> {
 
     private UmAppDatabase umAppDatabase;
 
+    private UmAppDatabase repo;
+
     public Register2Presenter(Object context, Hashtable arguments, Register2View view) {
         super(context, arguments, view);
         if(arguments.containsKey(ARG_NEXT)){
@@ -46,8 +48,13 @@ public class Register2Presenter extends UstadBaseController<Register2View> {
 
     }
 
+    //only for testing
     public void setClientDb(UmAppDatabase database){
         this.umAppDatabase = database;
+    }
+
+    public void setRepo(UmAppDatabase repo){
+        this.repo = repo;
     }
 
     /**
@@ -64,7 +71,13 @@ public class Register2Presenter extends UstadBaseController<Register2View> {
             umAppDatabase = UmAppDatabase.getInstance(getContext()).getRepository(serverUrl,
                     "");
         }
-        umAppDatabase.getPersonDao().register(person, password, new UmCallback<UmAccount>() {
+
+        if(repo == null) {
+            repo = UmAccountManager.getRepositoryForActiveAccount(getContext());
+        }
+
+        repo.getPersonDao()
+                .register(person, password, new UmCallback<UmAccount>() {
             @Override
             public void onSuccess(UmAccount result) {
                 if(result != null) {
