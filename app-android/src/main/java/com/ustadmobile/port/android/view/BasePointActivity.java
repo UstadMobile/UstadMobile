@@ -124,9 +124,6 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
         mBasePointController = new BasePointController(this, this);
         mBasePointController.onCreate(UMAndroidUtil.bundleToHashtable(getIntent().getExtras()),
                 UMAndroidUtil.bundleToHashtable(savedInstanceState));
-        Hashtable args = new Hashtable();
-        args.put(Login2Presenter.ARG_NEXT, "somewhere");
-        UstadMobileSystemImpl.getInstance().go(Register2View.VIEW_NAME,args,getContext());
 
     }
 
