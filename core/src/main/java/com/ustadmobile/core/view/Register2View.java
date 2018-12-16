@@ -16,7 +16,7 @@ public interface Register2View extends UstadView {
 
     int FIELD_CONFIRM_PASSWORD = 6;
 
-    void setErrorMessage(String errorMessage);
+    void setErrorMessageView(String errorMessageView);
 
     void setServerUrl(String url);
 

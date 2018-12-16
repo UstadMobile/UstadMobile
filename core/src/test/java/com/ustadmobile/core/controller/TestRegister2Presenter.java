@@ -101,7 +101,7 @@ public class TestRegister2Presenter {
 
         String expectedErrorMsg = UstadMobileSystemImpl.getInstance().getString(
                 MessageID.err_registering_new_user, PlatformTestUtil.getTargetContext());
-        verify(mockView, timeout(5000)).setErrorMessage(expectedErrorMsg);
+        verify(mockView, timeout(5000)).setErrorMessageView(expectedErrorMsg);
     }
 
     @Test
@@ -136,6 +136,6 @@ public class TestRegister2Presenter {
 
         String expectedErrorMsg = UstadMobileSystemImpl.getInstance().getString(
                 MessageID.login_network_error, PlatformTestUtil.getTargetContext());
-        verify(mockView, timeout(5000)).setErrorMessage(expectedErrorMsg);
+        verify(mockView, timeout(5000)).setErrorMessageView(expectedErrorMsg);
     }
 }

@@ -89,7 +89,7 @@ public class Register2Presenter extends UstadBaseController<Register2View> {
                     systemImpl.go(mNextDest, getContext());
                 }else {
                     view.runOnUiThread(() -> {
-                        view.setErrorMessage(systemImpl.getString(MessageID.err_registering_new_user,
+                        view.setErrorMessageView(systemImpl.getString(MessageID.err_registering_new_user,
                                 getContext()));
                         view.setInProgress(false);
                     });
@@ -98,8 +98,11 @@ public class Register2Presenter extends UstadBaseController<Register2View> {
 
             @Override
             public void onFailure(Throwable exception) {
-                view.runOnUiThread(() -> view.setErrorMessage(systemImpl.getString(
-                        MessageID.login_network_error, getContext())));
+                view.runOnUiThread(() -> {
+                    view.setErrorMessageView(systemImpl.getString(
+                            MessageID.login_network_error, getContext()));
+                    view.setInProgress(false);
+                });
             }
         });
     }

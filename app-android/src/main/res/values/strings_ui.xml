@@ -231,7 +231,8 @@
     <!-- Registration dialog feedback -->
     <string name="field_required_prompt">This field is required</string>
     <string name="field_password_min">Minimum 5 characters</string>
-    <string name="filed_password_no_match">Password doesn't match</string>
+    <string name="field_password_error_min">Password should be at least 5 characters</string>
+    <string name="filed_password_no_match">Password doesn\'t match, try again</string>
 
     <!-- Update student details action button -->
     <string name="update">Update</string>
