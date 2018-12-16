@@ -64,8 +64,11 @@ public class Login2Presenter extends UstadBaseController<Login2View> {
 
             @Override
             public void onFailure(Throwable exception) {
-                view.runOnUiThread(() -> view.setErrorMessage(systemImpl.getString(
-                        MessageID.login_network_error, getContext())));
+                view.runOnUiThread(() -> {
+                    view.setInProgress(false);
+                    view.setErrorMessage(systemImpl.getString(
+                            MessageID.login_network_error, getContext()));
+                });
             }
         });
     }
