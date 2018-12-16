@@ -10,8 +10,11 @@ import com.ustadmobile.lib.database.annotation.UmRestAccessible;
 import com.ustadmobile.lib.database.annotation.UmUpdate;
 import com.ustadmobile.lib.db.entities.AccessToken;
 import com.ustadmobile.lib.db.entities.Person;
+import com.ustadmobile.lib.db.entities.PersonAuth;
 import com.ustadmobile.lib.db.entities.UmAccount;
 import com.ustadmobile.lib.db.sync.dao.SyncableDao;
+
+import static com.ustadmobile.core.db.dao.PersonAuthDao.ENCRYPTED_PASS_PREFIX;
 
 
 @UmDao(readPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
@@ -69,17 +72,12 @@ public abstract class PersonDao implements SyncableDao<Person, PersonDao> {
                 }else if(person.getPasswordHash().startsWith(PersonAuthDao.PLAIN_PASS_PREFIX)
                         && !person.getPasswordHash().substring(2).equals(password)) {
                     callback.onSuccess(null);
-                }else if(person.getPasswordHash().startsWith(PersonAuthDao.ENCRYPTED_PASS_PREFIX)
+                }else if(person.getPasswordHash().startsWith(ENCRYPTED_PASS_PREFIX)
                         && !PersonAuthDao.authenticateEncryptedPassword(password,
                             person.getPasswordHash().substring(2))) {
                     callback.onSuccess(null);
                 }else {
-                    AccessToken accessToken = new AccessToken(person.getPersonUid(),
-                            System.currentTimeMillis() + SESSION_LENGTH);
-                    insertAccessToken(accessToken);
-                    callback.onSuccess(new UmAccount(
-                            person.getPersonUid(), username,
-                            accessToken.getToken(), null));
+                    onSuccessCreateAccessToken(person.getPersonUid(), username, callback);
                 }
             }
 
@@ -88,6 +86,40 @@ public abstract class PersonDao implements SyncableDao<Person, PersonDao> {
                 UmCallbackUtil.onFailIfNotNull(callback, exception);
             }
         });
+    }
+
+    @UmRestAccessible
+    @UmRepository(delegateType = UmRepository.UmRepositoryMethodType.DELEGATE_TO_WEBSERVICE)
+    public void register(Person newPerson, String password, UmCallback<UmAccount> callback) {
+        findUidAndPasswordHash(newPerson.getUsername(), new UmCallback<PersonUidAndPasswordHash>() {
+            @Override
+            public void onSuccess(PersonUidAndPasswordHash result) {
+                if(result == null) {
+                    //OK to go ahead and create
+                    insert(newPerson);
+                    PersonAuth newPersonAuth = new PersonAuth(newPerson.getPersonUid(),
+                            ENCRYPTED_PASS_PREFIX + PersonAuthDao.encryptPassword(password));
+                    insertPersonAuth(newPersonAuth);
+                    onSuccessCreateAccessToken(newPerson.getPersonUid(), newPerson.getUsername(),
+                            callback);
+                }else {
+                    callback.onFailure(new IllegalArgumentException("Username already exists"));
+                }
+            }
+
+            @Override
+            public void onFailure(Throwable exception) {
+                callback.onFailure(exception);
+            }
+        });
+    }
+
+    protected void onSuccessCreateAccessToken(long personUid, String username, UmCallback<UmAccount> callback) {
+        AccessToken accessToken = new AccessToken(personUid,
+                System.currentTimeMillis() + SESSION_LENGTH);
+        insertAccessToken(accessToken);
+        callback.onSuccess(new UmAccount(personUid, username, accessToken.getToken(),
+                null));
     }
 
     public boolean authenticate(String token, long personUid) {
@@ -128,5 +160,8 @@ public abstract class PersonDao implements SyncableDao<Person, PersonDao> {
             "WHERE Person.username = :username")
     public abstract void findUidAndPasswordHash(String username,
                                                 UmCallback<PersonUidAndPasswordHash> callback);
+
+    @UmInsert
+    public abstract void insertPersonAuth(PersonAuth personAuth);
 
 }

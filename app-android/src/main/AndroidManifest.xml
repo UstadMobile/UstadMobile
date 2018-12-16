@@ -127,7 +127,12 @@
             android:name="com.ustadmobile.port.android.view.Login2Activity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
             android:label="@string/login"
-            android:theme="@style/Theme.UstadTheme"/>
+            android:theme="@style/Theme.UstadTheme" />
+
+        <service
+            android:name="com.ustadmobile.port.android.netwokmanager.UmAppDatabaseSyncService"
+            android:enabled="true"
+            android:exported="true"></service>
     </application>
 
 </manifest>
