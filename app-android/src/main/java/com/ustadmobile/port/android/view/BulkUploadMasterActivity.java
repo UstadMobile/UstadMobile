@@ -10,6 +10,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.Toolbar;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.toughra.ustadmobile.R;
@@ -20,11 +21,11 @@ import com.ustadmobile.port.android.util.UmAndroidUriUtil;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 import ru.dimorinny.floatingtextbutton.FloatingTextButton;
@@ -37,6 +38,8 @@ public class BulkUploadMasterActivity extends UstadBaseActivity implements BulkU
 
     private static final int FILE_PERMISSION_REQUEST = 400;
     private static final int FILE_CAPUTURE_REQUEST = 401;
+
+    private TextView heading;
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
@@ -59,6 +62,9 @@ public class BulkUploadMasterActivity extends UstadBaseActivity implements BulkU
         //Button
         Button selectFileButton = findViewById(R.id.activity_bulk_upload_master_upload_button);
         selectFileButton.setOnClickListener(v -> chooseFileFromDevice());
+
+        //Heading TextView
+        heading = findViewById(R.id.activity_bulk_upload_select_file_text);
 
         //FAB
         FloatingTextButton fab = findViewById(R.id.activity_bulk_upload_master_fab);
@@ -114,23 +120,24 @@ public class BulkUploadMasterActivity extends UstadBaseActivity implements BulkU
 
     @Override
     public void parseFile(String filePath) {
+        showMessage(getText(R.string.loading).toString());
         File sourceFile = new File(filePath);
         readFile(sourceFile);
     }
 
+
     public void readFile(File sourceFile){
-
-
-        try (
-                FileInputStream fis = new FileInputStream(sourceFile);
-                BufferedReader br = new BufferedReader(new InputStreamReader(fis));
-        ) {
+        try (BufferedReader br = new BufferedReader(new FileReader(sourceFile))) {
             String line;
+            List<String> lines = new ArrayList<>();
             while ((line = br.readLine()) != null) {
-                mPresenter.parseMasterListLineToDatabase(line);
+                lines.add(line);
             }
-            //Done processing:
-            finish();
+
+            mPresenter.setLines(lines);
+            mPresenter.setCurrentPosition(-1);
+            mPresenter.processNextLine();
+
         } catch (FileNotFoundException e) {
             showMessage("File not found");
             e.printStackTrace();
@@ -162,7 +169,9 @@ public class BulkUploadMasterActivity extends UstadBaseActivity implements BulkU
                             UmAndroidUriUtil.getPath(this, selectedUri)));
                     //Do something with your file
                     filePathFromFilePicker = sourceFile.getAbsolutePath();
-
+                    String fileSelectedString = getText(R.string.file_selected) + " " +
+                            sourceFile.getName();
+                    heading.setText(fileSelectedString);
                     break;
             }
         }

@@ -1,6 +1,7 @@
 package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.db.UmAppDatabase;
+import com.ustadmobile.core.db.dao.LocationDao;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.view.BulkUploadMasterView;
@@ -10,11 +11,6 @@ import com.ustadmobile.lib.db.entities.Location;
 import com.ustadmobile.lib.db.entities.Person;
 import com.ustadmobile.lib.db.entities.PersonAuth;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.Hashtable;
 import java.util.List;
 
@@ -25,28 +21,267 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
         super(context, arguments, view);
     }
 
-    UmAppDatabase repository = UmAccountManager.getRepositoryForActiveAccount(context);
+    private int currentPosition = -1;
+    private List<String> lines;
 
-    public void readFile(String filePath){
-        File sourceFile = new File(filePath);
-        readFile(sourceFile);
+    public int getCurrentPosition() {
+        return currentPosition;
     }
 
-    public void readFile(File sourceFile){
-        try (BufferedReader br = new BufferedReader(new FileReader(sourceFile))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                parseMasterListLineToDatabase(line);
-            }
-            //Done processing:
+    public void setCurrentPosition(int currentPosition) {
+        this.currentPosition = currentPosition;
+    }
+
+    public List<String> getLines() {
+        return lines;
+    }
+
+    public void setLines(List<String> lines) {
+        this.lines = lines;
+    }
+
+    UmAppDatabase repository = UmAccountManager.getRepositoryForActiveAccount(context);
+
+
+    public void processNextLine(){
+        currentPosition ++;
+        System.out.println("BULK UPLOAD LINE : " + currentPosition);
+        if(currentPosition >= lines.size()){
             view.finish();
-        } catch (FileNotFoundException e) {
-            view.showMessage("File not found");
-            e.printStackTrace();
-        } catch (IOException e) {
-            view.showMessage("Unable to process the file");
-            e.printStackTrace();
+        }else {
+            parseMasterListLineToDatabase(lines.get(currentPosition));
         }
+
+    }
+
+    public void processLocations(BulkUploadLine bulkLine){
+
+        String location1Title = bulkLine.location1;
+        String location2Title = bulkLine.location2;
+        String location3Title = bulkLine.location3;
+        String locationLeafTitle = bulkLine.locationLeaf;
+
+        Location location1 = new Location();
+        location1.setTitle(location1Title);
+
+        Location location2 = new Location();
+        location2.setTitle(location2Title);
+
+        Location location3 = new Location();
+        location3.setTitle(location3Title);
+
+        Location locationLeaf = new Location();
+        locationLeaf.setTitle(locationLeafTitle);
+
+        LocationDao locationDao = repository.getLocationDao();
+
+        locationDao.findByTitleAsync(location1Title, new UmCallback<List<Location>>() {
+            @Override
+            public void onSuccess(List<Location> location1s) {
+
+                boolean move = false;
+                if(location1s.size() == 0){
+
+                    //Location not created. Create it.
+                    location1.setLocationUid(locationDao.insert(location1));
+                    move = true;
+                }else if(location1s.size() == 1){
+
+                    //Location already exists. Getting uid.
+                    location1.setLocationUid(location1s.get(0).getLocationUid());
+                    move = true;
+                }else{
+                    System.out.println("ERROR: Location: 1st level: More than 1 with the same title");
+                }
+
+                if(move)
+                //Move on to the 2nd level
+                locationDao.findByTitleAsync(location2Title, new UmCallback<List<Location>>() {
+                    @Override
+                    public void onSuccess(List<Location> location2s) {
+                        boolean move = false;
+                        if(location2s.size() ==0){
+                            move = true;
+                            //Location not created. Create it.
+                            location2.setParentLocationUid(location1.getLocationUid());
+                            location2.setLocationUid(locationDao.insert(location2));
+                        }else if(location2s.size() == 1){
+                            move = true;
+                            //Location already exists. Getting uid.
+                            location2.setLocationUid(location2s.get(0).getLocationUid());
+                        }else{
+                            System.out.println("ERROR: Location: 2nd level: More than 1 with the same title");
+                        }
+
+                        if(move)
+                        //Move on to the 3rd level
+                        locationDao.findByTitleAsync(location3Title, new UmCallback<List<Location>>() {
+                            @Override
+                            public void onSuccess(List<Location> location3s) {
+                                boolean move = false;
+                                if(location3s.size() == 0){
+                                    move = true;
+                                    location3.setParentLocationUid(location2.getLocationUid());
+                                    location3.setLocationUid(locationDao.insert(location3));
+                                }else if(location3s.size() == 1){
+                                    move = true;
+                                    location3.setLocationUid(location3s.get(0).getLocationUid());
+                                }else{
+                                    System.out.println("ERROR: Location: 3rd level: More than 1" +
+                                            " with the same title");
+                                }
+
+                                if(move)
+                                //Move on the the leaf level
+                                locationDao.findByTitleAsync(locationLeafTitle, new UmCallback<List<Location>>() {
+                                    @Override
+                                    public void onSuccess(List<Location> locationLeafs) {
+
+                                        boolean moveOn = false;
+                                        if(locationLeafs.size() == 0){
+                                            //Location leaf not created. Setting parent and
+                                            //persisting to get uid.
+                                            locationLeaf.setParentLocationUid(location3.getLocationUid());
+                                            locationLeaf.setLocationUid(locationDao.insert(locationLeaf));
+                                            moveOn = true;
+
+                                        }else if(locationLeafs.size() == 1){
+                                            //Location leaf already exists. Getting uid
+                                            locationLeaf.setLocationUid(locationLeafs.get(0).getLocationUid());
+                                            moveOn = true;
+                                        }else{
+                                            System.out.println("ERROR: Location Leaf: More than " +
+                                                    "1 location leaf with the same title");
+                                        }
+
+                                        //Moving forward
+                                        if(moveOn)
+                                        processClazz(bulkLine, locationLeaf);
+                                    }
+
+                                    @Override
+                                    public void onFailure(Throwable exception) {
+                                        exception.printStackTrace();
+                                    }
+                                });
+                            }
+
+                            @Override
+                            public void onFailure(Throwable exception) {
+                                exception.printStackTrace();
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onFailure(Throwable exception) {
+                        exception.printStackTrace();
+                    }
+                });
+
+            }
+
+            @Override
+            public void onFailure(Throwable exception) {
+                exception.printStackTrace();
+            }
+        });
+    }
+
+    public void processClazz(BulkUploadLine bulkLine, Location locationLeaf){
+        //2. Class
+        String clazzName = bulkLine.class_name;
+        String clazzLocation = bulkLine.class_location;
+
+        //Get clazz by name:
+        repository.getClazzDao().findByClazzNameAsync(clazzName,
+                new UmCallback<List<Clazz>>() {
+                    @Override
+                    public void onSuccess(List<Clazz> clazzes) {
+                        boolean move = false;
+                        Clazz thisClazz;
+                        if(clazzes.size() == 0){   //No clazzes with that name.
+                            //Create clazz
+                            thisClazz = new Clazz();
+                            thisClazz.setClazzName(clazzName);
+
+                            repository.getClazzDao().insertAsync(thisClazz, new UmCallback<Long>() {
+                                @Override
+                                public void onSuccess(Long newClazzUid) {
+                                    thisClazz.setClazzUid(newClazzUid);
+
+                                    //Add location
+                                    repository.getLocationDao()
+                                            .findByTitleAsync(clazzLocation, new UmCallback<List<Location>>() {
+                                                @Override
+                                                public void onSuccess(List<Location> result) {
+                                                    boolean move = false;
+                                                    if (result.size() == 1) {
+                                                        //Location exists and is unique
+                                                        Location clazzLocation = result.get(0);
+                                                        thisClazz.setLocationUid(clazzLocation.getLocationUid());
+                                                        thisClazz.setClazzActive(true);
+                                                        thisClazz.setLocationUid(locationLeaf.getLocationUid());
+                                                        move = true;
+
+                                                        repository.getClazzDao().updateAsync(thisClazz, new UmCallback<Integer>() {
+                                                            @Override
+                                                            public void onSuccess(Integer result) {
+                                                                if(result != null) {
+                                                                    //thisClazz already has uid set
+
+                                                                    //Move on
+                                                                    checkPerson(thisClazz, bulkLine, ClazzMember.ROLE_TEACHER);
+                                                                }
+                                                            }
+
+                                                            @Override
+                                                            public void onFailure(Throwable exception) {
+
+                                                            }
+
+                                                    });
+
+
+
+                                                    }else{
+                                                        //Location does not exist.
+                                                        System.out.println("FAIL: LOCATION : " + clazzLocation
+                                                                + " DOESN'T EXIST");
+                                                    }
+
+
+                                                }
+
+                                                @Override
+                                                public void onFailure(Throwable exception) {
+                                                    exception.printStackTrace();
+                                                }
+                                            });
+                                }
+
+                                @Override
+                                public void onFailure(Throwable exception) {
+                                    exception.printStackTrace();
+                                }
+                            });
+
+
+
+                        }else if (clazzes.size() > 1){   //Multiple clazzes with that name (ERROR)
+                            System.out.println("ERROR : MULTIPLE CLAZZ WITH NAME: " + clazzName);
+                        }else{
+                            thisClazz = clazzes.get(0);
+                            //Not updating clazz. Moving on
+                            checkPerson(thisClazz, bulkLine, ClazzMember.ROLE_TEACHER);
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Throwable exception) {
+                        exception.printStackTrace();
+                    }
+                });
     }
 
     public void parseMasterListLineToDatabase(String line){
@@ -59,91 +294,7 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
         //3. Teacher
         //4. Student
 
-
-        Location location1 = new Location();
-        location1.setTitle(bulkLine.location1);
-
-        Location location2 = new Location();
-        location2.setTitle(bulkLine.location2);
-
-        Location location3 = new Location();
-        location3.setTitle(bulkLine.location3);
-
-        Location locationLeaf = new Location();
-        locationLeaf.setTitle(bulkLine.locationLeaf);
-
-
-        //2. Class
-        String clazzName = bulkLine.class_name;
-        String clazzLocation = bulkLine.class_location;
-
-        //Get clazz by name:
-        repository.getClazzDao().findByClazzNameAsync(bulkLine.class_name,
-                new UmCallback<List<Clazz>>() {
-            @Override
-            public void onSuccess(List<Clazz> clazzes) {
-                Clazz thisClazz;
-                if(clazzes.size() == 0){   //No clazzes with that name.
-                    //Create clazz
-                    thisClazz = new Clazz();
-                    thisClazz.setClazzName(clazzName);
-                    repository.getClazzDao().insertAsync(thisClazz, new UmCallback<Long>() {
-                        @Override
-                        public void onSuccess(Long newClazzUid) {
-                            thisClazz.setClazzUid(newClazzUid);
-
-                            //Add location
-                            repository.getLocationDao()
-                                .findByTitleAsync(clazzLocation, new UmCallback<List<Location>>() {
-                                    @Override
-                                    public void onSuccess(List<Location> result) {
-                                        if (result.size() == 1) {
-                                            Location clazzLocation = result.get(0);
-                                            thisClazz.setLocationUid(clazzLocation.getLocationUid());
-                                            thisClazz.setClazzActive(true);
-
-                                            repository.getClazzDao().insertAsync(thisClazz,
-                                                    null);
-                                            int x= 2+2;
-
-                                        }else{
-                                            System.out.println("FAIL: LOCATION : " + clazzLocation
-                                                    + " DOESN'T EXIST");
-                                        }
-
-                                        //Move on to teachers :
-                                        checkPerson(thisClazz, bulkLine, ClazzMember.ROLE_TEACHER);
-                                            //Which will inturn move on to Students.
-                                    }
-
-                                    @Override
-                                    public void onFailure(Throwable exception) {
-                                        exception.printStackTrace();
-                                    }
-                                });
-                        }
-
-                        @Override
-                        public void onFailure(Throwable exception) {
-                            exception.printStackTrace();
-                        }
-                    });
-
-
-
-                }else if (clazzes.size() > 1){   //Multiple clazzes with that name (ERROR)
-                    System.out.println("ERROR : MULTIPLE CLAZZ WITH NAME: " + clazzName);
-                }else{
-                    //Not updating clazz.
-                }
-            }
-
-            @Override
-            public void onFailure(Throwable exception) {
-                exception.printStackTrace();
-            }
-        });
-
+        processLocations(bulkLine);
 
     }
 
@@ -152,8 +303,64 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
         return 0;
     }
 
-    public void checkStudents(Clazz thisClazz, BulkUploadLine bulkLine){
+    public void checkClazzMember(Clazz thisClazz, BulkUploadLine bulkLine, long personPersonUid, int role){
 
+
+        repository.getClazzMemberDao().findByPersonUidAndClazzUidAsync(
+                personPersonUid, thisClazz.getClazzUid(),
+                new UmCallback<ClazzMember>() {
+                    @Override
+                    public void onSuccess(ClazzMember clazzMember) {
+                        if(clazzMember == null){
+                            //Create one.
+                            ClazzMember personClazzMember;
+                            personClazzMember = new ClazzMember();
+                            personClazzMember.setClazzMemberPersonUid(personPersonUid);
+                            personClazzMember.setClazzMemberClazzUid(thisClazz.getClazzUid());
+                            personClazzMember.setClazzMemberActive(true);
+                            personClazzMember.setDateJoined(System.currentTimeMillis());
+                            personClazzMember.setRole(role);
+
+                            repository.getClazzMemberDao().insertAsync(personClazzMember, new UmCallback<Long>() {
+                                @Override
+                                public void onSuccess(Long clazzMemberUid) {
+                                    if(clazzMemberUid != null) {
+                                        if (role == ClazzMember.ROLE_TEACHER) {
+                                            checkPerson(thisClazz, bulkLine, ClazzMember.ROLE_STUDENT);
+                                        }else{
+                                            processNextLine();
+
+                                        }
+                                    }else{
+                                        System.out.println("ERROR: UNABLE TO PERSIST CLAZZMEMBER??");
+                                    }
+                                }
+
+                                @Override
+                                public void onFailure(Throwable exception) {
+                                    exception.printStackTrace();
+                                }
+                            });
+
+
+
+                        }else{
+                            //Exists already
+                            if (role == ClazzMember.ROLE_TEACHER) {
+                                checkPerson(thisClazz, bulkLine, ClazzMember.ROLE_STUDENT);
+                            }else{
+                                processNextLine();
+
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Throwable exception) {
+                        exception.printStackTrace();
+                    }
+                }
+        );
     }
 
     public void checkPerson(Clazz thisClazz, BulkUploadLine bulkLine, int role){
@@ -176,13 +383,23 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
         String studentFatherName = bulkLine.father_name;
 
 
-        repository.getPersonDao().findByUsernameAsync(teacherUsername, new UmCallback<Person>() {
+        String username;
+        if(role == ClazzMember.ROLE_TEACHER){
+            username = teacherUsername;
+        }else{
+            username = studentUsername;
+        }
+        repository.getPersonDao().findByUsernameAsync(username, new UmCallback<Person>() {
             @Override
             public void onSuccess(Person thePerson) {
                 if(thePerson != null){
-                    //teacher exists
+                    //person object exists
+
+                    //Check for ClazzMember then  directly
+                    checkClazzMember(thisClazz, bulkLine, thePerson.getPersonUid(), role);
+
                 }else{
-                    //Create new teacher
+                    //Create new person
                     Person person = new Person();
 
                     if(role == ClazzMember.ROLE_TEACHER) {
@@ -190,6 +407,7 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
                         person.setLastName(teacherLastName);
                         person.setPhoneNum(teacherPhoneNo);
                         person.setUsername(teacherUsername);
+
                         //TODO: Set teacher id
                         //TODO: Set teacher authentication:
                         PersonAuth personAuth = new PersonAuth();
@@ -221,54 +439,7 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
                             if(personPersonUid != null ){
                                 //Done teachers person - create clazzMember
 
-                                repository.getClazzMemberDao().findByPersonUidAndClazzUidAsync(
-                                        personPersonUid, thisClazz.getClazzUid(),
-                                        new UmCallback<ClazzMember>() {
-                                        @Override
-                                        public void onSuccess(ClazzMember clazzMember) {
-                                            if(clazzMember != null){
-                                                //Create one.
-                                                ClazzMember teacherClazzMember;
-                                                teacherClazzMember = new ClazzMember();
-                                                teacherClazzMember.setClazzMemberPersonUid(personPersonUid);
-                                                teacherClazzMember.setClazzMemberClazzUid(thisClazz.getClazzUid());
-                                                teacherClazzMember.setClazzMemberActive(true);
-                                                teacherClazzMember.setDateJoined(System.currentTimeMillis());
-                                                teacherClazzMember.setRole(role);
-
-                                                repository.getClazzMemberDao().insertAsync(teacherClazzMember, new UmCallback<Long>() {
-                                                    @Override
-                                                    public void onSuccess(Long clazzMemberUid) {
-                                                        if(clazzMemberUid != null) {
-                                                            if (role == ClazzMember.ROLE_TEACHER) {
-                                                                checkPerson(thisClazz, bulkLine, ClazzMember.ROLE_STUDENT);
-                                                            }
-                                                        }else{
-                                                            System.out.println("ERROR: UNABLE TO PERSIST CLAZZMEMBER??");
-                                                        }
-                                                    }
-
-                                                    @Override
-                                                    public void onFailure(Throwable exception) {
-                                                        exception.printStackTrace();
-                                                    }
-                                                });
-
-
-
-                                            }else{
-                                                System.out.println("ERROR: ClazzMember Exists " +
-                                                        "for new Teacher ??");
-                                            }
-                                        }
-
-                                        @Override
-                                        public void onFailure(Throwable exception) {
-                                            exception.printStackTrace();
-                                        }
-                                    }
-                                );
-
+                                checkClazzMember(thisClazz, bulkLine, personPersonUid, role);
 
                             }else{
                                 System.out.println("ERROR: UNABLE TO PERSIST TEACHER!");
@@ -289,10 +460,6 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
 
             }
         });
-    }
-
-    public void startBulkUpload(String file){
-        readFile(file);
     }
 
     @Override
