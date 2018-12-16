@@ -58,8 +58,6 @@ dependencies {
     testImplementation project(":core-tests")
     testImplementation project(":sharedse")
     testImplementation project(":app-javase")
-    testImplementation project(":lib-core-fs-tests")
-    testImplementation project(":sharedse-tests")
     testImplementation project(":lib-database-jdbc")
     testImplementation project(":lib-database-entities")
     testImplementation project(":app-rest-server")
@@ -403,6 +401,7 @@ task convertAppConfigToPropertiesXml {
  */
 task copyTestResources(type: Copy) {
     from "${projectDir}/src/test/resources"
+    from "${projectDir}/src/main/assets"
     from "${projectDir}/../core-tests/src/main/resources"
     into "${buildDir}/classes/test"
 }
