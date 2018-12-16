@@ -2,6 +2,7 @@ package com.ustadmobile.port.android.view;
 
 import android.os.Bundle;
 import android.support.design.widget.TextInputEditText;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
@@ -40,6 +41,7 @@ public class Register2Activity extends UstadBaseActivity implements Register2Vie
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register2);
 
+        setUMToolbar(R.id.um_toolbar);
         fieldToViewIdMap.put(FIELD_FIRST_NAME, R.id.activity_create_account_firstname_text);
         fieldToViewIdMap.put(FIELD_LAST_NAME, R.id.activity_create_account_lastname_text);
         fieldToViewIdMap.put(FIELD_EMAIL, R.id.activity_create_account_email_text);
@@ -94,7 +96,14 @@ public class Register2Activity extends UstadBaseActivity implements Register2Vie
         }
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
 
+        if(item.getItemId() == android.R.id.home){
+            finish();
+        }
+        return true;
+    }
 
     @Override
     public void setErrorMessage(String errorMessage) {
