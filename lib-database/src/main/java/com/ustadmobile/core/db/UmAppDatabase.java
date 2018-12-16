@@ -1,5 +1,6 @@
 package com.ustadmobile.core.db;
 
+import com.ustadmobile.core.db.dao.AccessTokenDao;
 import com.ustadmobile.core.db.dao.ClazzDao;
 import com.ustadmobile.core.db.dao.ClazzMemberDao;
 import com.ustadmobile.core.db.dao.ContainerFileDao;
@@ -41,6 +42,7 @@ import com.ustadmobile.lib.database.annotation.UmDatabase;
 import com.ustadmobile.lib.database.annotation.UmDbContext;
 import com.ustadmobile.lib.database.annotation.UmRepository;
 import com.ustadmobile.lib.database.annotation.UmSyncOutgoing;
+import com.ustadmobile.lib.db.UmDbWithAuthenticator;
 import com.ustadmobile.lib.db.entities.AccessToken;
 import com.ustadmobile.lib.db.entities.PersonAuth;
 import com.ustadmobile.lib.db.sync.UmSyncableDatabase;
@@ -102,7 +104,7 @@ import java.util.Hashtable;
         SyncStatus.class, SyncablePrimaryKey.class, SyncDeviceBits.class,
         AccessToken.class, PersonAuth.class
 })
-public abstract class UmAppDatabase implements UmSyncableDatabase{
+public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthenticator {
 
     private static volatile UmAppDatabase instance;
 
@@ -211,6 +213,8 @@ public abstract class UmAppDatabase implements UmSyncableDatabase{
 
     public abstract PersonAuthDao getPersonAuthDao();
 
+    public abstract AccessTokenDao getAccessTokenDao();
+
     @UmDbContext
     public abstract Object getContext();
 
@@ -235,5 +239,14 @@ public abstract class UmAppDatabase implements UmSyncableDatabase{
 
     @UmSyncOutgoing
     public abstract void syncWith(UmAppDatabase otherDb, long accountUid);
+
+
+    @Override
+    public boolean validateAuth(long personUid, String auth) {
+        if(personUid == 0)
+            return true;//Anonymous or guest access
+
+        return getAccessTokenDao().isValidToken(personUid, auth);
+    }
 
 }
