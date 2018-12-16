@@ -29,7 +29,6 @@
       <module fileurl="file://$PROJECT_DIR$/lib-util/lib-util.iml" filepath="$PROJECT_DIR$/lib-util/lib-util.iml" />
       <module fileurl="file://$PROJECT_DIR$/sharedse/sharedse.iml" filepath="$PROJECT_DIR$/sharedse/sharedse.iml" />
       <module fileurl="file://$PROJECT_DIR$/sharedse-tests/sharedse-tests.iml" filepath="$PROJECT_DIR$/sharedse-tests/sharedse-tests.iml" />
-      <module fileurl="file://$PROJECT_DIR$/ustadmobile.iml" filepath="$PROJECT_DIR$/ustadmobile.iml" />
     </modules>
   </component>
 </project>
