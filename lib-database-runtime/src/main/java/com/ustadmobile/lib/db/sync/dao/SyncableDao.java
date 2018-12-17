@@ -61,7 +61,8 @@ public interface SyncableDao<T, D> extends BaseDao<T> {
      * @return List of entities that have been locally modified since fromLocalChangeSeqNum
      */
     @UmSyncFindLocalChanges
-    List<T> findLocalChanges(long fromLocalChangeSeqNum, long toLocalChangeSeqNum, long accountPersonUid, int limit);
+    List<T> findLocalChanges(long fromLocalChangeSeqNum, long toLocalChangeSeqNum,
+                             long accountPersonUid, int localDeviceId, int limit);
 
     /**
      * Find all changes made

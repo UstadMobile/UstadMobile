@@ -44,8 +44,12 @@ public class TestSyncableDb  {
     public void givenSyncableEntityUpdatedOnMaster_whenSynced_shouldBeUpdatedOnClient() {
         ExampleDatabase clientDb = ExampleDatabase.getInstance(null, "db1");
         ExampleDatabase serverDb = ExampleDatabase.getInstance(null);
+        ExampleDatabase clientRepo = clientDb.getRepository("http://localhost/dummy/", "");
+
         ExampleSyncableDao clientDao = clientDb.getExampleSyncableDao();
         ExampleSyncableDao serverDao = serverDb.getExampleSyncableDao();
+
+        ExampleSyncableDao clientDaoRepo = clientRepo.getExampleSyncableDao();
 
         clientDb.clearAll();
         serverDb.clearAll();
@@ -54,15 +58,14 @@ public class TestSyncableDb  {
 
         ExampleSyncableEntity syncableEntity1 = new ExampleSyncableEntity();
         syncableEntity1.setTitle("Syncable 1");
-        syncableEntity1.setLocalChangeSeqNum(
-                clientDb.getSyncStatusDao().getAndIncrementNextLocalChangeSeqNum(
-                        ExampleSyncableEntity.TABLE_ID, 1));
-        long insertedUid = clientDb.getExampleSyncableDao().insert(syncableEntity1);
+        //use a dummy repo object to ensure that a syncableprimarykey is generated
+        long insertedUid = clientRepo.getExampleSyncableDao().insert(syncableEntity1);
+
+
         clientDao.syncWith(serverDao, 0, 100, 100);
         ExampleSyncableEntity syncableEntity2 = serverDao.findByUid(insertedUid);
         syncableEntity2.setTitle("Updated");
-        syncableEntity2.setMasterChangeSeqNum(serverDb.getSyncStatusDao()
-                .getAndIncrementNextMasterChangeSeqNum(ExampleSyncableEntity.TABLE_ID, 1));
+        syncableEntity2.setLastChangedBy(0);
         serverDao.updateList(Arrays.asList(syncableEntity2));
 
         clientDao.syncWith(serverDao, 0, 100, 100);

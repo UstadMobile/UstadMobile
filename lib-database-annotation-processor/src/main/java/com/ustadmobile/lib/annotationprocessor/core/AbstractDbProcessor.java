@@ -508,12 +508,12 @@ public abstract class AbstractDbProcessor {
         Element localChangeSeqNumEl = DbProcessorUtils.findElementWithAnnotation(entityTypeEl,
                 UmSyncLocalChangeSeqNum.class, processingEnv);
 
-        if(daoMethod.getParameters().size() != 4) {
+        if(daoMethod.getParameters().size() != 5) {
             messager.printMessage(Diagnostic.Kind.ERROR, "Method "
                             + daoMethod.toString() + " has " + daoMethod.getParameters().size() +
                             " parameters. FindLocalChanges method " +
-                    "must have 4 parameters: long fromLocalChangeSeqNum, long toLocalChangeSeqNum," +
-                    "long accountPersonUid, " +
+                    "must have 5 parameters: long fromLocalChangeSeqNum, long toLocalChangeSeqNum," +
+                    "long accountPersonUid, int deviceId, " +
                     "int limit", daoType);
             return "";
         }
@@ -535,13 +535,31 @@ public abstract class AbstractDbProcessor {
             return "";
         }
 
-        VariableElement limitParam = daoMethod.getParameters().get(3);
 
-        return String.format("SELECT * FROM %s WHERE %s BETWEEN :%s AND :%s AND %s LIMIT :%s",
+
+        VariableElement fromLocalChangeSeqNumParam = daoMethod.getParameters().get(0);
+        VariableElement toLocalChangeSeqNumParam = daoMethod.getParameters().get(1);
+        VariableElement localDeviceId = daoMethod.getParameters().get(3);
+        VariableElement limitParam = daoMethod.getParameters().get(4);
+        Element lastChangedByField = findElementWithAnnotation(entityTypeEl,
+                UmSyncLastChangedBy.class, processingEnv);
+
+        if(lastChangedByField == null) {
+            messager.printMessage(Diagnostic.Kind.ERROR,
+                    formatMethodForErrorMessage(daoMethod, daoType) +
+                            " findLocalchanges method: entity " + entityTypeEl.getQualifiedName() +
+                            " does not have a UmSyncLastChangedBy field",
+                    daoType);
+            return "";
+        }
+
+        return String.format("SELECT * FROM %s WHERE %s BETWEEN :%s AND :%s AND %s = :%s AND %s LIMIT :%s",
                 entityTypeEl.getSimpleName().toString(),
                 localChangeSeqNumEl.getSimpleName().toString(),
-                daoMethod.getParameters().get(0).getSimpleName().toString(),
-                daoMethod.getParameters().get(1).getSimpleName().toString(),
+                fromLocalChangeSeqNumParam.getSimpleName().toString(),
+                toLocalChangeSeqNumParam.getSimpleName().toString(),
+                lastChangedByField.getSimpleName(),
+                localDeviceId.getSimpleName(),
                 readPermissionCondition, limitParam.getSimpleName());
     }
 
@@ -888,7 +906,7 @@ public abstract class AbstractDbProcessor {
                     .add("$T<$T> _locallyChangedEntities = $L(" +
                                     "_attemptSyncStatus.getSyncedToLocalChangeSeqNum() + 1, " +
                                     "_initialSyncStatus.getLocalChangeSeqNum() - 1, " +
-                                    "$L, $L);\n",
+                                    "$L, _syncableDb.getDeviceBits(), $L);\n",
                         List.class, entityType, findLocalChangesMethod.getSimpleName(),
                         accountPersonUidParam.getSimpleName(),
                         sendLimitParam.getSimpleName())
@@ -927,7 +945,7 @@ public abstract class AbstractDbProcessor {
                         //When we have put entries into the server, but no one else has, there won't
                         //be any new entries coming down the pipe.
                         .add("_syncComplete = (_syncedToMasterSeqNum >= _syncCompleteMasterChangeSeqNum || _remoteChanges.getRemoteChangedEntities().isEmpty()) " +
-                                " && _syncedToLocalSeqNum >= _initialSyncStatus.getLocalChangeSeqNum() - 1;\n")
+                                " && (_syncedToLocalSeqNum >= _initialSyncStatus.getLocalChangeSeqNum() - 1 || _locallyChangedEntities.isEmpty());\n")
                     .nextControlFlow("else")
                         .add("_retryCount++;\n")
                     .endControlFlow()
