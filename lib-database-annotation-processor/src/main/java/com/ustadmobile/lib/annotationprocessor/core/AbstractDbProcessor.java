@@ -1420,17 +1420,21 @@ public abstract class AbstractDbProcessor {
         String otherDbParamName = dbMethod.getParameters().get(0).getSimpleName().toString();
         String accountUidParamName = dbMethod.getParameters().get(1).getSimpleName().toString();
 
+        String sendLimitParamName = dbMethod.getParameters().get(2).getSimpleName().toString();
+        String receiveLimitParamName = dbMethod.getParameters().get(3).getSimpleName().toString();
 
         for(ExecutableElement syncableDaoGetter : daoGettersToSync) {
             Element syncMethodEl = findElementWithAnnotation((TypeElement)processingEnv
                             .getTypeUtils().asElement(syncableDaoGetter.getReturnType()),
                     UmSyncOutgoing.class, processingEnv);
 
-            codeBlock.add("$1L().$2L($3L.$1L(), $4L);\n",
+            codeBlock.add("$1L().$2L($3L.$1L(), $4L, $5L, $6L);\n",
                     syncableDaoGetter.getSimpleName(),
                     syncMethodEl.getSimpleName(),
                     otherDbParamName,
-                    accountUidParamName);
+                    accountUidParamName,
+                    sendLimitParamName,
+                    receiveLimitParamName);
         }
         methodBuilder.addCode(codeBlock.build());
 

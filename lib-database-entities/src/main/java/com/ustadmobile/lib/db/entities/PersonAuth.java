@@ -2,6 +2,7 @@ package com.ustadmobile.lib.db.entities;
 
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
+import com.ustadmobile.lib.database.annotation.UmSyncLastChangedBy;
 import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
 import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 
@@ -13,6 +14,8 @@ import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
  *
  * Note: this entity has change sequence numbers as it may be sync'd with particular, authorized
  * devices to provide a local login service.
+ *
+ * Currently, as PersonAuthDao does not extend syncable dao, it will not sync
  */
 @UmEntity(tableId = 30)
 public class PersonAuth {
@@ -27,6 +30,9 @@ public class PersonAuth {
 
     @UmSyncMasterChangeSeqNum
     private long personAuthMasterChangeSeqNum;
+
+    @UmSyncLastChangedBy
+    private int lastChangedBy;
 
     public PersonAuth() {
 
@@ -67,5 +73,13 @@ public class PersonAuth {
 
     public void setPersonAuthMasterChangeSeqNum(long personAuthMasterChangeSeqNum) {
         this.personAuthMasterChangeSeqNum = personAuthMasterChangeSeqNum;
+    }
+
+    public int getLastChangedBy() {
+        return lastChangedBy;
+    }
+
+    public void setLastChangedBy(int lastChangedBy) {
+        this.lastChangedBy = lastChangedBy;
     }
 }
