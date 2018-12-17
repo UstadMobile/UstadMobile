@@ -36,7 +36,7 @@
 
     <Button
         android:id="@+id/activity_bulk_upload_master_upload_button"
-        style="@style/-"
+        style="@style/Widget.AppCompat.Button.Small"
         android:layout_width="172dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"

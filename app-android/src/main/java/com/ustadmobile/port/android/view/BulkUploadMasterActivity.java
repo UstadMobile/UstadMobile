@@ -139,7 +139,7 @@ public class BulkUploadMasterActivity extends UstadBaseActivity implements BulkU
             }
 
             mPresenter.setLines(lines);
-            mPresenter.setCurrentPosition(-1);
+            mPresenter.setCurrentPosition(0); //skip first line
             mPresenter.processNextLine();
 
         } catch (FileNotFoundException e) {

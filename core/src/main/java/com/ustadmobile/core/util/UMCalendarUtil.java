@@ -157,6 +157,19 @@ public class UMCalendarUtil {
 
     }
 
+    public static long getLongDateFromStringAndFormat(String dateString, String format){
+        SimpleDateFormat formatter = new SimpleDateFormat(format, Locale.US);
+        Date date;
+        try {
+            date = formatter.parse(dateString);
+            return date.getTime();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return -1;
+
+    }
+
     /**
      * Gets date in long plus/minus the days specified from today.
      *

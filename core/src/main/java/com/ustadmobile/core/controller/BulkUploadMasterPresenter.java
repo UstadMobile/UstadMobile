@@ -4,6 +4,7 @@ import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.LocationDao;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
+import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.core.view.BulkUploadMasterView;
 import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.ClazzMember;
@@ -21,7 +22,7 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
         super(context, arguments, view);
     }
 
-    private int currentPosition = -1;
+    private int currentPosition = 0;
     private List<String> lines;
 
     public int getCurrentPosition() {
@@ -299,9 +300,10 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
     }
 
     public long getDOBFromString(String dateString){
-        //TODO: This
-        return 0;
+        return UMCalendarUtil.getLongDateFromStringAndFormat(dateString,"dd/MM/yyyy");
     }
+
+
 
     public void checkClazzMember(Clazz thisClazz, BulkUploadLine bulkLine, long personPersonUid, int role){
 
@@ -381,6 +383,7 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
         String studentSchool = bulkLine.school;
         String studentAddress = bulkLine.address;
         String studentFatherName = bulkLine.father_name;
+        String studentDateOfBirth = bulkLine.dob;
 
 
         String username;
@@ -419,11 +422,13 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
                         person.setFatherName(studentFatherName);
                         person.setAddress(studentAddress);
                         person.setPhoneNum(studentPhoneNo);
+                        person.setDateOfBirth(getDOBFromString(studentDateOfBirth));
                         if (studentGender.toLowerCase().startsWith("f")) {
                             person.setGender(Person.GENDER_FEMALE);
                         }else if(studentGender.toLowerCase().startsWith("m")){
                             person.setGender(Person.GENDER_MALE);
                         }
+
 
                         //TODO: Set student Id
                         //TODO: Set student authentication
