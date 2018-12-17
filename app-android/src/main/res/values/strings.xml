@@ -1,1 +1,5 @@
-<resources></resources>
+<resources>
+
+    <string name="create_one">Create One</string>
+    <string name="don_t_have_an_account_yet">Don\'t have an account yet?</string>
+</resources>
