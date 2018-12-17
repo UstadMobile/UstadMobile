@@ -238,8 +238,9 @@ public class PreparedStatementArrayProxy implements PreparedStatement {
         }catch(SQLException e) {
             if(stmt != null) {
                 stmt.close();
-                throw e;
             }
+
+            throw e;
         }
 
         return stmt;

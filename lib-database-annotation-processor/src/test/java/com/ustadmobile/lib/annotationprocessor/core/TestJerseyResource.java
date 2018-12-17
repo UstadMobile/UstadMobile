@@ -57,7 +57,7 @@ public class TestJerseyResource {
         ArrayList<ExampleSyncableEntity> localChangeList = new ArrayList<>();
 
         SyncResponse<ExampleSyncableEntity> response = target
-                .path("ExampleSyncableDao/handlingIncomingSync")
+                .path("ExampleSyncableDao/handleIncomingSync")
                 .queryParam("userId", ExampleDatabase.VALID_AUTH_TOKEN_USER_UID).request()
                 .header("X-Auth-Token", ExampleDatabase.VALID_AUTH_TOKEN)
                 .post(Entity.entity(localChangeList, MediaType.APPLICATION_JSON),

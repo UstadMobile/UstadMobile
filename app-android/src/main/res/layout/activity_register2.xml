@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/white">
+
+    <android.support.design.widget.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:elevation="4dp">
+
+        <include
+            layout="@layout/toolbar_with_progress"/>
+
+
+    </android.support.design.widget.AppBarLayout>
+
+    <android.support.v4.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <LinearLayout
+            android:padding="@dimen/default_margin_dimension"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+
+            <include
+                layout="@layout/activity_create_account_fields"/>
+
+            <TextView
+                android:textColor="@android:color/holo_red_dark"
+                android:visibility="gone"
+                android:layout_marginTop="@dimen/dimen_16dp"
+                android:id="@+id/activity_create_account_error_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <Button
+                android:enabled="false"
+                android:layout_marginTop="@dimen/dimen_16dp"
+                android:padding="@dimen/default_margin_dimension"
+                android:textSize="18sp"
+                android:id="@+id/activity_create_account_create_account_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:elevation="@dimen/dimen_4dp"
+                android:background="@color/divider"
+                android:textColor="@color/primary_text"
+                android:text="@string/create_new_account" />
+
+        </LinearLayout>
+
+    </android.support.v4.widget.NestedScrollView>
+</android.support.design.widget.CoordinatorLayout>

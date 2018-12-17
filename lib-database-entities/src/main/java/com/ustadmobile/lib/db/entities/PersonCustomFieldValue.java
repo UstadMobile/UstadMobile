@@ -3,6 +3,7 @@ package com.ustadmobile.lib.db.entities;
 
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
+import com.ustadmobile.lib.database.annotation.UmSyncLastChangedBy;
 import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
 import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 
@@ -33,6 +34,9 @@ public class PersonCustomFieldValue {
 
     @UmSyncLocalChangeSeqNum
     private long personCustomFieldValueLocalChangeSeqNum;
+
+    @UmSyncLastChangedBy
+    private int personCustomFieldLastChangedBy;
 
 
     public long getPersonCustomFieldValueMasterChangeSeqNum() {
@@ -82,5 +86,13 @@ public class PersonCustomFieldValue {
 
     public void setFieldValue(String fieldValue) {
         this.fieldValue = fieldValue;
+    }
+
+    public int getPersonCustomFieldLastChangedBy() {
+        return personCustomFieldLastChangedBy;
+    }
+
+    public void setPersonCustomFieldLastChangedBy(int personCustomFieldLastChangedBy) {
+        this.personCustomFieldLastChangedBy = personCustomFieldLastChangedBy;
     }
 }

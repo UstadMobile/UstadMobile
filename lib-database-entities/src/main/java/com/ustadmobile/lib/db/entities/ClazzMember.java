@@ -2,6 +2,7 @@ package com.ustadmobile.lib.db.entities;
 
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
+import com.ustadmobile.lib.database.annotation.UmSyncLastChangedBy;
 import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
 import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 
@@ -38,6 +39,9 @@ public class ClazzMember {
 
     @UmSyncMasterChangeSeqNum
     private long clazzMemberMasterChangeSeqNum;
+
+    @UmSyncLastChangedBy
+    private int clazzMemberLastChangedBy;
 
     public boolean isClazzMemberActive() {
         return clazzMemberActive;
@@ -106,6 +110,14 @@ public class ClazzMember {
 
     public void setAttendancePercentage(float attendancePercentage) {
         this.attendancePercentage = attendancePercentage;
+    }
+
+    public int getClazzMemberLastChangedBy() {
+        return clazzMemberLastChangedBy;
+    }
+
+    public void setClazzMemberLastChangedBy(int clazzMemberLastChangedBy) {
+        this.clazzMemberLastChangedBy = clazzMemberLastChangedBy;
     }
 
     public long getClazzMemberLocalChangeSeqNum() {
