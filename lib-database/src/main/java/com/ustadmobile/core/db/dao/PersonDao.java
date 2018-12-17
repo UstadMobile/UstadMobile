@@ -78,7 +78,7 @@ public abstract class PersonDao implements SyncableDao<Person, PersonDao> {
             public void onSuccess(PersonUidAndPasswordHash result) {
                 if(result == null) {
                     //OK to go ahead and create
-                    insert(newPerson);
+                    newPerson.setPersonUid(insert(newPerson));
                     PersonAuth newPersonAuth = new PersonAuth(newPerson.getPersonUid(),
                             ENCRYPTED_PASS_PREFIX + PersonAuthDao.encryptPassword(password));
                     insertPersonAuth(newPersonAuth);
