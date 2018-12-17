@@ -41,6 +41,7 @@ public class Login2Presenter extends UstadBaseController<Login2View> {
 
     public void handleClickLogin(String username, String password, String serverUrl) {
         view.setInProgress(true);
+        view.setErrorMessage("");
         UmAppDatabase loginRepoDb = UmAppDatabase.getInstance(getContext()).getRepository(serverUrl,
                 "");
         UstadMobileSystemImpl systemImpl = UstadMobileSystemImpl.getInstance();
@@ -64,8 +65,11 @@ public class Login2Presenter extends UstadBaseController<Login2View> {
 
             @Override
             public void onFailure(Throwable exception) {
-                view.runOnUiThread(() -> view.setErrorMessage(systemImpl.getString(
-                        MessageID.login_network_error, getContext())));
+                view.runOnUiThread(() -> {
+                    view.setErrorMessage(systemImpl.getString(
+                            MessageID.login_network_error, getContext()));
+                    view.setInProgress(false);
+                });
             }
         });
     }
