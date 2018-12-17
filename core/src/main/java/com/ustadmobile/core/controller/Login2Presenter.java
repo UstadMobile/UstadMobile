@@ -23,6 +23,9 @@ public class Login2Presenter extends UstadBaseController<Login2View> {
         super(context, arguments, view);
         if(arguments != null && arguments.containsKey(ARG_NEXT)){
             mNextDest = arguments.get(ARG_NEXT).toString();
+        }else {
+            mNextDest = UstadMobileSystemImpl.getInstance().getAppConfigString(
+                    AppConfig.KEY_FIRST_DEST, "BasePoint", context);
         }
     }
 
