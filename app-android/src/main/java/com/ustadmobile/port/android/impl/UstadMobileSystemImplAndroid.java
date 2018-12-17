@@ -96,13 +96,10 @@ import com.ustadmobile.core.view.DummyView;
 import com.ustadmobile.core.view.H5PContentView;
 import com.ustadmobile.core.view.Login2View;
 import com.ustadmobile.core.view.LoginView;
-<<<<<<< HEAD
 import com.ustadmobile.core.view.PersonDetailEnrollClazzView;
 import com.ustadmobile.core.view.PersonDetailView;
 import com.ustadmobile.core.view.PersonEditView;
-=======
 import com.ustadmobile.core.view.Register2View;
->>>>>>> master
 import com.ustadmobile.core.view.RegistrationView;
 import com.ustadmobile.core.view.ReportAttendanceGroupedByThresholdsView;
 import com.ustadmobile.core.view.ReportEditView;
@@ -153,11 +150,13 @@ import com.ustadmobile.port.android.view.ContentEntryListActivity;
 import com.ustadmobile.port.android.view.DownloadDialogFragment;
 import com.ustadmobile.port.android.view.DummyActivity;
 import com.ustadmobile.port.android.view.H5PContentActivity;
+import com.ustadmobile.port.android.view.Login2Activity;
 import com.ustadmobile.port.android.view.LoginDialogFragment;
 import com.ustadmobile.port.android.view.PersonDetailActivity;
 import com.ustadmobile.port.android.view.PersonDetailEnrollClazzActivity;
 import com.ustadmobile.port.android.view.PersonEditActivity;
 import com.ustadmobile.port.android.view.ReceiveCourseDialogFragment;
+import com.ustadmobile.port.android.view.Register2Activity;
 import com.ustadmobile.port.android.view.RegistrationDialogFragment;
 import com.ustadmobile.port.android.view.ReportAttendanceGroupedByThresholdsActivity;
 import com.ustadmobile.port.android.view.ReportEditActivity;
@@ -298,11 +297,9 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         viewNameToAndroidImplMap.put(ContentEntryView.VIEW_NAME, ContentEntryListActivity.class);
         viewNameToAndroidImplMap.put(ContentEntryDetailView.VIEW_NAME, ContentEntryDetailActivity.class);
         viewNameToAndroidImplMap.put(DummyView.VIEW_NAME, DummyActivity.class);
-<<<<<<< HEAD
+
         viewNameToAndroidImplMap.put(BulkUploadMasterView.VIEW_NAME, BulkUploadMasterActivity.class);
-=======
         viewNameToAndroidImplMap.put(Register2View.VIEW_NAME, Register2Activity.class);
->>>>>>> master
     }
 
     /**
