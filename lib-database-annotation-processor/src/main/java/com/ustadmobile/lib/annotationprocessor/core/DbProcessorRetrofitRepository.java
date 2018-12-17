@@ -384,7 +384,7 @@ public class DbProcessorRetrofitRepository extends AbstractDbProcessor {
                                 .asElement(varEl.asType()))){
                             codeBlock.add(varEl.getSimpleName().toString());
                         }else {
-                            codeBlock.add("new $T($L, _syncablePkResult)",
+                            codeBlock.add("new $T<>($L, _syncablePkResult)",
                                     UmCallbackResultOverrider.class,
                                     varEl.getSimpleName());
                         }

@@ -579,29 +579,42 @@ public abstract class AbstractDbProcessor {
             return "";
         }
 
-        if(daoMethod.getParameters().size() != 6) {
+        if(daoMethod.getParameters().size() != 7) {
             messager.printMessage(Diagnostic.Kind.ERROR,
                     formatMethodForErrorMessage(daoMethod, daoType) + " attempting to" +
-                            "generate findAllChanges method: method must have exactly 6 parameters" +
+                            "generate findAllChanges method: method must have exactly 7 parameters" +
                             " - fromLocalChangeSeqNum, toLocalChangeSeqNum, fromMasterChangeSeqNum," +
-                            "toMasterChangeSeqNum, accountPersonUid, and limit",
+                            "toMasterChangeSeqNum, accountPersonUid, notLastChangedBy, and limit",
                     daoType);
             return "";
         }
 
+        VariableElement fromLocalChangeSeqNumParam = daoMethod.getParameters().get(0);
+        VariableElement toLocalChangeSeqNumParam = daoMethod.getParameters().get(1);
+        VariableElement fromMasterChangeSeqNumParam = daoMethod.getParameters().get(2);
+        VariableElement toMasterChangeSeqNumParam = daoMethod.getParameters().get(3);
+        VariableElement notLastChangedByParam = daoMethod.getParameters().get(5);
+        VariableElement limitParam = daoMethod.getParameters().get(6);
+
+        Element lastChangedFieldElement = findElementWithAnnotation(entityTypeEl,
+                UmSyncLastChangedBy.class, processingEnv);
+
+
         return String.format("SELECT * FROM %s WHERE %s BETWEEN :%s AND :%s " +
-                "AND %s BETWEEN :%s AND :%s AND %s ORDER BY %s, %s LIMIT :%s",
+                "AND %s BETWEEN :%s AND :%s AND %s != :%s  AND %s ORDER BY %s, %s LIMIT :%s",
                 entityTypeEl.getSimpleName(),
                 localChangeSeqNumEl.getSimpleName(),
-                daoMethod.getParameters().get(0).getSimpleName(),
-                daoMethod.getParameters().get(1).getSimpleName(),
+                fromLocalChangeSeqNumParam.getSimpleName(),
+                toLocalChangeSeqNumParam.getSimpleName(),
                 masterChangeSeqNumEl.getSimpleName(),
-                daoMethod.getParameters().get(2).getSimpleName(),
-                daoMethod.getParameters().get(3).getSimpleName(),
+                fromMasterChangeSeqNumParam.getSimpleName(),
+                toMasterChangeSeqNumParam.getSimpleName(),
+                lastChangedFieldElement.getSimpleName(),
+                notLastChangedByParam.getSimpleName(),
                 readPermissionCondition,
                 masterChangeSeqNumEl.getSimpleName(),
                 localChangeSeqNumEl.getSimpleName(),
-                daoMethod.getParameters().get(5).getSimpleName());
+                limitParam.getSimpleName());
 
     }
 
@@ -684,12 +697,13 @@ public abstract class AbstractDbProcessor {
                                                           String dbName) {
         MethodSpec.Builder methodBuilder = overrideAndResolve(daoMethod, daoType, processingEnv);
 
-        if(daoMethod.getParameters().size() != 5) {
+        if(daoMethod.getParameters().size() != 6) {
             messager.printMessage(Diagnostic.Kind.ERROR,
                     "Method " + daoMethod.toString() + " " +
-                    "annotated UmSyncIncoming must have 5 parameters " +
+                    "annotated UmSyncIncoming must have 6 parameters " +
                     "incomingChanges List<T>, double fromLocalChangeSeqNum, " +
-                    "double fromMasterChangeSeqNum, long accountPersonUid, int receiveLimit. " +
+                    "double fromMasterChangeSeqNum, long accountPersonUid, int deviceId, " +
+                            "int receiveLimit. " +
                             "Actually has : " + daoMethod.getParameters().size() + " parameters.",
                     daoType);
             return methodBuilder;
@@ -700,7 +714,8 @@ public abstract class AbstractDbProcessor {
         VariableElement fromLocalChangeSeqNumParam = daoMethod.getParameters().get(1);
         VariableElement fromMasterChangeSeqNumParam = daoMethod.getParameters().get(2);
         VariableElement accountPersonUidParam = daoMethod.getParameters().get(3);
-        VariableElement receiveLimitParam = daoMethod.getParameters().get(4);
+        VariableElement deviceIdParam = daoMethod.getParameters().get(4);
+        VariableElement receiveLimitParam = daoMethod.getParameters().get(5);
 
         DaoMethodInfo daoMethodInfo = new DaoMethodInfo(daoMethod, daoType, processingEnv);
         TypeMirror entityType = daoMethodInfo.resolveEntityParameterComponentType();
@@ -753,13 +768,12 @@ public abstract class AbstractDbProcessor {
             .add("long _toLocalChangeSeq = Long.MAX_VALUE;\n")
             .add("boolean _isMaster = _syncableDb.isMaster();\n")
             .beginControlFlow("if(_isMaster)")
-//                .add("long _changeSeqNum = _syncableDb.getSyncStatusDao().getMasterChangeSeqNum($L);\n",
-//                    umEntityAnnotation.tableId())
-//                .add("_toMasterChangeSeq = _changeSeqNum - 1;\n")
+            .add("_response.setCurrentMasterChangeSeqNum(_syncableDb.getSyncStatusDao()" +
+                    ".getMasterChangeSeqNum($L) - 1);\n", umEntityAnnotation.tableId())
+            .endControlFlow()
+                .beginControlFlow("if(_isMaster)")
                 .beginControlFlow("for($T _changed : $L)",
                         entityType, incomingChangesParamName)
-//                    .add("_changed.set$L(_changeSeqNum);\n",
-//                            capitalize(masterChangeSeqFieldEl.getSimpleName()))
                     .add("_changed.set$L(0);\n", capitalize(localChangeSeqFieldEl.getSimpleName()))
                 .endControlFlow()
             .endControlFlow()
@@ -794,15 +808,12 @@ public abstract class AbstractDbProcessor {
             .endControlFlow()
             .add("insertList(_insertList);\n")
             .add("updateList(_updateList);\n")
-            .beginControlFlow("if(_isMaster)")
-                .add("_response.setCurrentMasterChangeSeqNum(_syncableDb.getSyncStatusDao()" +
-                        ".getMasterChangeSeqNum($L) - 1);\n", umEntityAnnotation.tableId())
-            .endControlFlow()
-            .add("_response.setRemoteChangedEntities($L($L, $L, $L, $L, $L, $L));\n",
+            .add("_response.setRemoteChangedEntities($L($L, $L, $L, $L, $L, $L, $L));\n",
                     findChangedEntitiesMethod.getSimpleName(),
                     fromLocalChangeSeqNumParam.getSimpleName(), "_toLocalChangeSeq",
                     fromMasterChangeSeqNumParam.getSimpleName(), "_toMasterChangeSeq",
                     accountPersonUidParam.getSimpleName(),
+                    deviceIdParam.getSimpleName(),
                     receiveLimitParam.getSimpleName())
             .add("return _response;\n");
 
@@ -875,7 +886,7 @@ public abstract class AbstractDbProcessor {
                     .add("$T _attemptSyncStatus = _syncableDb.getSyncStatusDao().getByUid($L);\n",
                             SyncStatus.class, umEntityAnnotation.tableId())
                     .add("$T<$T> _locallyChangedEntities = $L(" +
-                                    "_initialSyncStatus.getSyncedToLocalChangeSeqNum() + 1, " +
+                                    "_attemptSyncStatus.getSyncedToLocalChangeSeqNum() + 1, " +
                                     "_initialSyncStatus.getLocalChangeSeqNum() - 1, " +
                                     "$L, $L);\n",
                         List.class, entityType, findLocalChangesMethod.getSimpleName(),
@@ -886,7 +897,8 @@ public abstract class AbstractDbProcessor {
                         "_locallyChangedEntities.get(_locallyChangedEntities.size()-1)" +
                         ".get$L();\n", capitalize(localChangeSeqNumFieldName))
                     .add("$T<$T> _remoteChanges = $L.$L(_locallyChangedEntities, 0, " +
-                        "_attemptSyncStatus.getSyncedToMasterChangeNum() + 1, $L, $L);\n",
+                        "_attemptSyncStatus.getSyncedToMasterChangeNum() + 1, $L, " +
+                                    "_syncableDb.getDeviceBits(), $L);\n",
                         SyncResponse.class, entityType, otherDaoParam.getSimpleName(),
                         syncIncomingMethod.getSimpleName(),
                         accountPersonUidParam.getSimpleName(),
@@ -912,7 +924,9 @@ public abstract class AbstractDbProcessor {
                                 "$1L, _syncedToLocalSeqNum, _syncedToMasterSeqNum);\n",
                                 umEntityAnnotation.tableId())
                         //TODO: just in case we wasted some sequence numbers: check if both are empty
-                        .add("_syncComplete = _syncedToMasterSeqNum >= _syncCompleteMasterChangeSeqNum " +
+                        //When we have put entries into the server, but no one else has, there won't
+                        //be any new entries coming down the pipe.
+                        .add("_syncComplete = (_syncedToMasterSeqNum >= _syncCompleteMasterChangeSeqNum || _remoteChanges.getRemoteChangedEntities().isEmpty()) " +
                                 " && _syncedToLocalSeqNum >= _initialSyncStatus.getLocalChangeSeqNum() - 1;\n")
                     .nextControlFlow("else")
                         .add("_retryCount++;\n")

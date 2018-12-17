@@ -201,6 +201,44 @@ public class TestRepository {
     }
 
     @Test
+    public void givenMoreEntitiesChangedLocallyThenSendLimit_whenSynced_thenShouldComplete() {
+        ExampleDatabase clientDb = ExampleDatabase.getInstance(null, "db1");
+        ExampleDatabase serverDb = ExampleDatabase.getInstance(null);
+        serverDbStatic = serverDb;
+
+        ExampleDatabase clientRepo = clientDb.getRepository(TEST_URI,
+                ExampleDatabase.VALID_AUTH_TOKEN);
+
+        ExampleSyncableDao clientRepoDao = spy(clientRepo.getExampleSyncableDao());
+        clientDb.clearAll();
+        serverDb.clearAll();
+
+        List<ExampleSyncableEntity> entityList = new ArrayList<>(2000);
+        for(int i = 0; i < 1950; i++){
+            entityList.add(new ExampleSyncableEntity("Entity " + i));
+        }
+
+        clientRepoDao.insertList(entityList);
+        clientDb.getExampleSyncableDao().syncWith(clientRepoDao,
+                ExampleDatabase.VALID_AUTH_TOKEN_USER_UID,100, 100);
+
+        int serverNumEntitiesAfterSync = serverDb.getExampleSyncableDao().findAll().size();
+        int clientNumEntitiesAfterSync = serverDb.getExampleSyncableDao().findAll().size();
+
+
+        clientDb.getExampleSyncableDao().syncWith(clientRepoDao,
+                ExampleDatabase.VALID_AUTH_TOKEN_USER_UID,100, 100);
+
+        Assert.assertEquals(serverNumEntitiesAfterSync, clientNumEntitiesAfterSync);
+
+        verify(clientRepoDao, times(21))
+                .handleIncomingSync(any(), anyLong(), anyLong(), anyLong(), anyInt(), anyInt());
+
+
+    }
+
+
+    @Test
     public void givenMoreEntitiesChangedRemotelyThanReceiveLimit_whenSynced_thenShouldComplete() {
         Client c = ClientBuilder.newClient();
         target = c.target(TEST_URI);
@@ -241,8 +279,8 @@ public class TestRepository {
                 100, 100);
 
         //Ensure that sync'd entities don't have to go back over the connection.
-//        verify(clientRepoDao, times(21))
-//                .handleIncomingSync(any(), anyLong(), anyLong(), anyLong(), anyInt());
+        verify(clientRepoDao, times(21))
+                .handleIncomingSync(any(), anyLong(), anyLong(), anyLong(), anyInt(), anyInt());
     }
 
 //    @Test

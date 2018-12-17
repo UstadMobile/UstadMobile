@@ -33,11 +33,22 @@ public interface SyncableDao<T, D> extends BaseDao<T> {
     @UmSyncOutgoing
     void syncWith(D otherDao, long accountPersonUid, int sendLimit, int receiveLimit);
 
+    /**
+     * Handle an incoming sync request
+     * @param incomingChanges Incoming changes that are to be received
+     * @param fromLocalChangeSeqNum send changes from localChangeSequenceNumber
+     * @param fromMasterChangeSeqNum send changes from masterChangeSequenceNumber
+     * @param userId authorized account uid that will be running the sync
+     * @param deviceId the deviceBits of the device sending the incomingChanges (to avoid those
+     *                 changes being sent back)
+     * @param limit maximum number of changes to send back
+     * @return SyncResponse representing the current state of sync after this request has been processed
+     */
     @UmSyncIncoming
     @UmRestAccessible
     SyncResponse<T> handleIncomingSync(List<T> incomingChanges, long fromLocalChangeSeqNum,
                                        long fromMasterChangeSeqNum, @UmRestAuthorizedUidParam long userId,
-                                       int limit);
+                                       int deviceId, int limit);
 
     @UmInsert(onConflict = UmOnConflictStrategy.REPLACE)
     void replaceList(List<T> entities);
@@ -67,7 +78,7 @@ public interface SyncableDao<T, D> extends BaseDao<T> {
     List<T> syncFindAllChanges(long fromLocalChangeSeqNum, long toLocalChangeSeqNum,
                                long fromMasterChangeSeqNum, long toMasterChangeSeqNum,
                                @UmRestAuthorizedUidParam long accountPersonUid,
-                               int limit);
+                               int deviceId, int limit);
     @UmSyncFindUpdateable
     List<UmSyncExistingEntity> syncFindExistingEntities(List<Long> primaryKeys, long accountPersonUid);
 
