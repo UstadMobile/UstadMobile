@@ -7,6 +7,7 @@ import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.database.annotation.UmRepository;
 import com.ustadmobile.lib.database.annotation.UmRestAccessible;
+import com.ustadmobile.lib.database.annotation.UmRestAuthorizedUidParam;
 import com.ustadmobile.lib.database.annotation.UmSyncFindAllChanges;
 import com.ustadmobile.lib.database.annotation.UmSyncFindLocalChanges;
 import com.ustadmobile.lib.database.annotation.UmSyncFindUpdateable;
@@ -17,7 +18,7 @@ import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
 import java.util.List;
 
-@UmDao(syncType = UmSyncType.SYNC_PROACTIVE)
+@UmDao(syncType = UmSyncType.SYNC_PROACTIVE, readPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
 @UmRepository
 public abstract class ExampleSyncableDao implements SyncableDao<ExampleSyncableEntity, ExampleSyncableDao>  {
 
@@ -26,19 +27,6 @@ public abstract class ExampleSyncableDao implements SyncableDao<ExampleSyncableE
             "FROM ExampleSyncableEntity " +
             "WHERE ExampleSyncableEntity.exampleSyncableUid IN (:primaryKeys)")
     public abstract List<UmSyncExistingEntity> syncFindExistingEntities(List<Long> primaryKeys, long accountPersonUid);
-
-    @UmSyncFindAllChanges
-    @UmQuery("SELECT * FROM ExampleSyncableEntity " +
-            "WHERE localChangeSeqNum BETWEEN :fromLocalChangeSeqNum AND :toLocalChangeSeqNum" +
-            " AND masterChangeSeqNum BETWEEN :fromMasterChangeSeqNum AND :toMasterChangeSeqNum " +
-            " AND (:accountPersonUid = :accountPersonUid)  ")
-    public abstract List<ExampleSyncableEntity> syncFindAllChanges(long fromLocalChangeSeqNum, long toLocalChangeSeqNum,
-                               long fromMasterChangeSeqNum, long toMasterChangeSeqNum,
-                               long accountPersonUid);
-
-    @UmSyncFindLocalChanges
-    @UmQuery("SELECT ExampleSyncableEntity.* FROM ExampleSyncableEntity WHERE localChangeSeqNum > :fromLocalChangeSeqNum AND (:userId = :userId)")
-    public abstract List<ExampleSyncableEntity> findLocalChanges(long fromLocalChangeSeqNum, long userId);
 
     @UmQuery("SELECT localChangeSeqNum FROM ExampleSyncableEntity WHERE exampleSyncableUid = :uid")
     @UmRestAccessible
@@ -96,5 +84,11 @@ public abstract class ExampleSyncableDao implements SyncableDao<ExampleSyncableE
     @UmInsert
     public abstract void insertListAsyncArr(List<ExampleSyncableEntity> entityList,
                                             UmCallback<Long[]> insertedKeys);
+
+
+    @UmQuery("SELECT title FROM ExampleSyncableEntity WHERE exampleSyncableUid = :uid AND (:personUid = :personUid)")
+    @UmRestAccessible
+    public abstract String getTitleByUidAuthenticated(long uid, @UmRestAuthorizedUidParam long personUid);
+
 
 }

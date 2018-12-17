@@ -37,7 +37,7 @@ public class ScormTypePluginFs extends ScormTypePlugin implements ContentTypePlu
 
         ZipFile zipFile = null;
         try {
-            zipFile = ZipContentTypePluginHelper.openAndUnlock(file);
+            zipFile = new ZipFile(file);
             FileHeader zipEntry = zipFile.getFileHeader("imsmanifest.xml");
 
             if(zipEntry == null)

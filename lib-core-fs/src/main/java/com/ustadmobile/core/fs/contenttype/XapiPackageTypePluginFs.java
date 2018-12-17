@@ -49,7 +49,7 @@ public class XapiPackageTypePluginFs extends XapiPackageTypePlugin implements Co
         OpdsEntryWithRelations tincanEntry = null;
 
         try {
-            zipFile = ZipContentTypePluginHelper.openAndUnlock(file);
+            zipFile = new ZipFile(file);
 
             //find tincan.xml
             Iterator<FileHeader> entries = zipFile.getFileHeaders().iterator();

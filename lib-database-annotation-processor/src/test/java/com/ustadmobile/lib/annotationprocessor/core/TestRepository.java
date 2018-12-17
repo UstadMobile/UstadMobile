@@ -3,6 +3,8 @@ package com.ustadmobile.lib.annotationprocessor.core;
 import com.ustadmobile.lib.annotationprocessor.core.db.ExampleDatabase;
 import com.ustadmobile.lib.annotationprocessor.core.db.ExampleSyncableDao;
 import com.ustadmobile.lib.annotationprocessor.core.db.ExampleSyncableEntity;
+import com.ustadmobile.lib.database.jdbc.UmJdbcDatabase;
+import com.ustadmobile.test.http.MockReverseProxyDispatcher;
 
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
@@ -13,12 +15,29 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.net.URI;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
+import javax.sql.DataSource;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
+
+import okhttp3.HttpUrl;
+import okhttp3.mockwebserver.MockWebServer;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 public class TestRepository {
 
@@ -28,11 +47,17 @@ public class TestRepository {
 
     public static final String TEST_URI = "http://localhost:8089/api/";
 
+    private static final int SYNC_SEND_LIMIT = 100;
+
+    private static final int SYNC_RECEIVE_LIMIT = 100;
+
     public static HttpServer startServer() {
         final ResourceConfig resourceConfig = new ResourceConfig()
                 .packages("com.ustadmobile.lib.annotationprocessor.core.db");
         return GrizzlyHttpServerFactory.createHttpServer(URI.create(TEST_URI), resourceConfig);
     }
+
+    public static ExampleDatabase serverDbStatic;
 
     @Before
     public void setUp() {
@@ -41,7 +66,7 @@ public class TestRepository {
 
     @After
     public void tearDown() {
-        server.stop();
+        server.shutdownNow();
     }
 
     @Test
@@ -56,10 +81,12 @@ public class TestRepository {
         ExampleSyncableEntity entity = new ExampleSyncableEntity();
         String entityTitle = "Syncable " + System.currentTimeMillis();
         entity.setTitle(entityTitle);
-        ExampleSyncableDao repo = clientDb.getRepository(TEST_URI, "").getExampleSyncableDao();
+        ExampleSyncableDao repo = clientDb.getRepository(TEST_URI,
+                ExampleDatabase.VALID_AUTH_TOKEN).getExampleSyncableDao();
 
         long uid = repo.insert(entity);
-        clientDb.getExampleSyncableDao().syncWith(repo, 0);
+        clientDb.getExampleSyncableDao().syncWith(repo, ExampleDatabase.VALID_AUTH_TOKEN_USER_UID,
+                SYNC_SEND_LIMIT, SYNC_RECEIVE_LIMIT);
 
         ExampleSyncableEntity entityOnServer = serverDb.getExampleSyncableDao().findByUid(uid);
         Assert.assertNotNull("Entity present in server db", entityOnServer);
@@ -79,16 +106,19 @@ public class TestRepository {
         ExampleSyncableEntity entity = new ExampleSyncableEntity();
         String entityTitle = "Syncable " + System.currentTimeMillis();
         entity.setTitle(entityTitle);
-        ExampleSyncableDao repo = clientDb.getRepository(TEST_URI, "").getExampleSyncableDao();
+        ExampleSyncableDao repo = clientDb.getRepository(TEST_URI,
+                ExampleDatabase.VALID_AUTH_TOKEN).getExampleSyncableDao();
         long uid = repo.insert(entity);
         entity.setExampleSyncableUid(uid);
-        clientDb.getExampleSyncableDao().syncWith(repo, 0);
+        clientDb.getExampleSyncableDao().syncWith(repo, ExampleDatabase.VALID_AUTH_TOKEN_USER_UID,
+                SYNC_SEND_LIMIT, SYNC_RECEIVE_LIMIT);
         String entityTitleUpdated = "Syncable " + System.currentTimeMillis() + " updated";
         entity.setTitle(entityTitleUpdated);
 
 
         repo.updateEntity(entity);
-        clientDb.getExampleSyncableDao().syncWith(repo,0);
+        clientDb.getExampleSyncableDao().syncWith(repo,ExampleDatabase.VALID_AUTH_TOKEN_USER_UID,
+                SYNC_SEND_LIMIT, SYNC_RECEIVE_LIMIT);
 
 
         Assert.assertEquals("Entity title was updated on server",
@@ -118,7 +148,9 @@ public class TestRepository {
 
 
         clientDb.getExampleSyncableDao().syncWith(
-                clientDb.getRepository(TEST_URI, "").getExampleSyncableDao(), 0L);
+                clientDb.getRepository(TEST_URI, ExampleDatabase.VALID_AUTH_TOKEN)
+                        .getExampleSyncableDao(), ExampleDatabase.VALID_AUTH_TOKEN_USER_UID,
+                SYNC_SEND_LIMIT, SYNC_RECEIVE_LIMIT);
 
 
         Assert.assertNotNull("Entity created on server is present on client",
@@ -148,7 +180,9 @@ public class TestRepository {
                         Long.class);
         insertedEntity.setExampleSyncableUid(insertUid);
         clientDb.getExampleSyncableDao().syncWith(
-                clientDb.getRepository(TEST_URI, "").getExampleSyncableDao(), 0L);
+                clientDb.getRepository(TEST_URI, ExampleDatabase.VALID_AUTH_TOKEN)
+                        .getExampleSyncableDao(), ExampleDatabase.VALID_AUTH_TOKEN_USER_UID,
+                SYNC_SEND_LIMIT, SYNC_RECEIVE_LIMIT);
 
         String updatedTitle = "Server Created " + System.currentTimeMillis() + " updated";
         insertedEntity.setTitle(updatedTitle);
@@ -157,12 +191,174 @@ public class TestRepository {
 
 
         clientDb.getExampleSyncableDao().syncWith(
-                clientDb.getRepository(TEST_URI, "").getExampleSyncableDao(), 0L);
+                clientDb.getRepository(TEST_URI, ExampleDatabase.VALID_AUTH_TOKEN)
+                        .getExampleSyncableDao(), ExampleDatabase.VALID_AUTH_TOKEN_USER_UID,
+                    SYNC_SEND_LIMIT, SYNC_RECEIVE_LIMIT);
 
 
         Assert.assertEquals("Title updated on client database after update on server", updatedTitle,
                 clientDb.getExampleSyncableDao().getTitleByUid(insertUid));
     }
+
+    @Test
+    public void givenMoreEntitiesChangedLocallyThenSendLimit_whenSynced_thenShouldComplete() {
+        ExampleDatabase clientDb = ExampleDatabase.getInstance(null, "db1");
+        ExampleDatabase serverDb = ExampleDatabase.getInstance(null);
+        serverDbStatic = serverDb;
+
+        ExampleDatabase clientRepo = clientDb.getRepository(TEST_URI,
+                ExampleDatabase.VALID_AUTH_TOKEN);
+
+        ExampleSyncableDao clientRepoDao = spy(clientRepo.getExampleSyncableDao());
+        clientDb.clearAll();
+        serverDb.clearAll();
+
+        List<ExampleSyncableEntity> entityList = new ArrayList<>(2000);
+        for(int i = 0; i < 1950; i++){
+            entityList.add(new ExampleSyncableEntity("Entity " + i));
+        }
+
+        clientRepoDao.insertList(entityList);
+        clientDb.getExampleSyncableDao().syncWith(clientRepoDao,
+                ExampleDatabase.VALID_AUTH_TOKEN_USER_UID,100, 100);
+
+        int serverNumEntitiesAfterSync = serverDb.getExampleSyncableDao().findAll().size();
+        int clientNumEntitiesAfterSync = serverDb.getExampleSyncableDao().findAll().size();
+
+
+        clientDb.getExampleSyncableDao().syncWith(clientRepoDao,
+                ExampleDatabase.VALID_AUTH_TOKEN_USER_UID,100, 100);
+
+        Assert.assertEquals(serverNumEntitiesAfterSync, clientNumEntitiesAfterSync);
+
+        verify(clientRepoDao, times(21))
+                .handleIncomingSync(any(), anyLong(), anyLong(), anyLong(), anyInt(), anyInt());
+
+
+    }
+
+
+    @Test
+    public void givenMoreEntitiesChangedRemotelyThanReceiveLimit_whenSynced_thenShouldComplete() {
+        Client c = ClientBuilder.newClient();
+        target = c.target(TEST_URI);
+
+        ExampleDatabase clientDb = ExampleDatabase.getInstance(null, "db1");
+        ExampleDatabase serverDb = ExampleDatabase.getInstance(null);
+        serverDbStatic = serverDb;
+
+        ExampleDatabase clientRepo = clientDb.getRepository(TEST_URI,
+                ExampleDatabase.VALID_AUTH_TOKEN);
+
+        ExampleSyncableDao clientRepoDao = spy(clientRepo.getExampleSyncableDao());
+
+
+        clientDb.clearAll();
+        serverDb.clearAll();
+
+        List<ExampleSyncableEntity> entityList = new ArrayList<>(2000);
+        for(int i = 0; i < 1950; i++){
+            entityList.add(new ExampleSyncableEntity("Entity " + i));
+        }
+
+        List<Long> idsCreated = target.path("ExampleSyncableDao/insertRestListAndReturnIds").request().post(
+                Entity.entity(entityList, MediaType.APPLICATION_JSON),
+                new GenericType<List<Long>>() {});
+        System.out.print(idsCreated);
+
+        clientDb.getExampleSyncableDao().syncWith(clientRepoDao,
+                ExampleDatabase.VALID_AUTH_TOKEN_USER_UID, 100, 100);
+
+        int serverNumEntitiesAfterSync = serverDb.getExampleSyncableDao().findAll().size();
+        int clientNumEntitiesAfterSync = serverDb.getExampleSyncableDao().findAll().size();
+
+        Assert.assertEquals("All entities now in client db",
+                serverNumEntitiesAfterSync, clientNumEntitiesAfterSync);
+
+        clientDb.getExampleSyncableDao().syncWith(clientRepoDao, ExampleDatabase.VALID_AUTH_TOKEN_USER_UID,
+                100, 100);
+
+        //Ensure that sync'd entities don't have to go back over the connection.
+        verify(clientRepoDao, times(21))
+                .handleIncomingSync(any(), anyLong(), anyLong(), anyLong(), anyInt(), anyInt());
+    }
+
+//    @Test
+    public void givenLocalEntityChangedDuringSync_whenSyncedAgain_thenShouldBePresentOnServer() {
+        MockWebServer proxyMock = new MockWebServer();
+        MockReverseProxyDispatcher dispatcher = new MockReverseProxyDispatcher(HttpUrl.parse(TEST_URI));
+        proxyMock.setDispatcher(dispatcher);
+        dispatcher.setLatency(5000);
+
+
+        ExampleDatabase clientDb = ExampleDatabase.getInstance(null, "db1");
+        ExampleDatabase serverDb = ExampleDatabase.getInstance(null);
+
+        ExampleDatabase clientRepo = clientDb.getRepository(proxyMock.url("/").toString(),
+                ExampleDatabase.VALID_AUTH_TOKEN);
+
+        ExampleSyncableDao clientDao = clientDb.getExampleSyncableDao();
+        ExampleSyncableDao clientRepoDao = clientRepo.getExampleSyncableDao();
+        ExampleSyncableDao serverDao = serverDb.getExampleSyncableDao();
+
+        clientDb.clearAll();
+        serverDb.clearAll();
+
+        ExampleSyncableEntity e1 = new ExampleSyncableEntity("Entity 1");
+        e1.setExampleSyncableUid(clientRepo.getExampleSyncableDao().insert(e1));
+
+        CountDownLatch latch = new CountDownLatch(1);
+        new Thread(() -> {
+            clientDao.syncWith(clientRepoDao, ExampleDatabase.VALID_AUTH_TOKEN_USER_UID,
+                    100, 100);
+            latch.countDown();
+        }).start();
+        ExampleSyncableEntity e2 = new ExampleSyncableEntity("Entity 2");
+        clientRepoDao.insert(e2);
+
+        boolean e1OnServerAfterSync1 = serverDao.findByUid(e1.getExampleSyncableUid()) != null;
+        boolean e2OnServerAfterSync1 = serverDao.findByUid(e2.getExampleSyncableUid()) != null;
+
+        dispatcher.setLatency(0);
+
+        clientDao.syncWith(clientRepoDao, ExampleDatabase.VALID_AUTH_TOKEN_USER_UID,
+                100, 100);
+
+        Assert.assertTrue("Entity e1 created before sync was sync'd to server on first sync",
+                e1OnServerAfterSync1);
+        Assert.assertFalse("Entity e2 created during sync was not sync'd to server on first sync",
+                e2OnServerAfterSync1);
+
+        Assert.assertNotNull("Entity e1 on server after sync2",
+                serverDao.findByUid(e1.getExampleSyncableUid()));
+
+        Assert.assertNotNull("Entity e2 on server after sync2",
+                serverDao.findByUid(e2.getExampleSyncableUid()));
+    }
+
+//    @Test
+    public void givenEntitiesNotSynced_whenDbSyncWithCalled_thenEntitiesAreSynced(){
+        ExampleDatabase clientDb = ExampleDatabase.getInstance(null, "db1");
+        ExampleDatabase serverDb = ExampleDatabase.getInstance(null);
+
+        ExampleDatabase clientRepo = clientDb.getRepository(TEST_URI,
+                ExampleDatabase.VALID_AUTH_TOKEN);
+
+        List<ExampleSyncableEntity> itemList = new ArrayList<>();
+        for(int i = 0; i < 1000; i++) {
+            itemList.add(new ExampleSyncableEntity("Entity " + i));
+        }
+
+        clientRepo.getExampleSyncableDao().insertList(itemList);
+
+        clientDb.syncWith(clientRepo, ExampleDatabase.VALID_AUTH_TOKEN_USER_UID, 100, 100);
+
+        Assert.assertEquals("After database sync, all entities have sync'd",
+                clientDb.getExampleSyncableDao().findAll().size(),
+                serverDb.getExampleSyncableDao().findAll().size());
+    }
+
+
 
 
 

@@ -7,6 +7,8 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
+import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
+import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
@@ -357,6 +359,34 @@ public class DbProcessorUtils {
         }else{
             return typeMirror;
         }
+    }
+
+
+    /**
+     * Determine if the given entity has annotated change sequence number member variables
+     * (local and master)
+     *
+     * @param entityType The TypeElement representing the entity class
+     * @param processingEnv Processing environment
+     * @return true if the given entity has member variables for master and local change sequence
+     * number, false otherwise
+     */
+    public static boolean entityHasChangeSequenceNumbers(TypeElement entityType,
+                                                         ProcessingEnvironment processingEnv) {
+        Element localChangeSeqnumEl = DbProcessorUtils.findElementWithAnnotation(entityType,
+                UmSyncLocalChangeSeqNum.class, processingEnv);
+        Element masterChangeSeqNumEl = DbProcessorUtils.findElementWithAnnotation(entityType,
+                UmSyncMasterChangeSeqNum.class, processingEnv);
+        return localChangeSeqnumEl != null && masterChangeSeqNumEl != null;
+    }
+
+    public static boolean entityHasChangeSequenceNumbers(TypeMirror entityTypeMirror,
+                                                         ProcessingEnvironment processingEnv) {
+        if(!entityTypeMirror.getKind().equals(TypeKind.DECLARED))
+            return false;
+        else
+            return entityHasChangeSequenceNumbers((TypeElement)processingEnv.getTypeUtils()
+                    .asElement(entityTypeMirror), processingEnv);
     }
 }
 

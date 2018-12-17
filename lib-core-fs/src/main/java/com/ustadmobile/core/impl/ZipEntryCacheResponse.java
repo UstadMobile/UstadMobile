@@ -30,14 +30,6 @@ public class ZipEntryCacheResponse extends AbstractCacheResponse {
         this.entryPath = entryPath;
         try {
             this.zipFile = new ZipFile(file);
-            if(zipFile.isEncrypted()) {
-                DecryptionSecretProvider secretProvider = UstadMobileSystemImpl.getInstance()
-                        .getDecryptionSecretProvider();
-                if(secretProvider != null){
-                    zipFile.setPassword(secretProvider.getSecret(file.getAbsolutePath())
-                            .getAsCharArray());
-                }
-            }
             this.zipEntry = zipFile.getFileHeader(entryPath);
         }catch(ZipException e) {
             e.printStackTrace();

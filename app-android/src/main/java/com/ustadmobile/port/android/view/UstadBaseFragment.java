@@ -97,7 +97,7 @@ public class UstadBaseFragment  extends Fragment{
      * to override the back button press.  This could be used to handle a back button press
      * on an internal browser or to close a menu etc.
      *
-     * @return true if the fragment can go back and wants to intercept the back button press, false otherwise
+     * @return true if the fragment can go back and wants to addAuthHeader the back button press, false otherwise
      */
     public boolean canGoBack() {
         return false;

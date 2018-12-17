@@ -257,8 +257,8 @@ public class JdbcDatabaseUtils {
                                            InitialContext initialContext) {
         if(db instanceof UmSyncableDatabase) {
             try {
-                Object _masterDbVal = initialContext.lookup("java:/comp/env/jdbc/" + dbName +
-                        "_master");
+                Object _masterDbVal = initialContext.lookup("java:/comp/env/umdb/" + dbName +
+                        "/isMaster");
                 if(_masterDbVal instanceof Boolean) {
                     ((UmSyncableDatabase)db).setMaster((Boolean)_masterDbVal);
                 }

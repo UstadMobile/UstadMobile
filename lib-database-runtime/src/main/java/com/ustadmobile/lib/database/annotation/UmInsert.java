@@ -14,4 +14,6 @@ public @interface UmInsert {
 
     int onConflict() default UmOnConflictStrategy.ABORT;
 
+    boolean preserveLastChangedBy() default false;
+
 }

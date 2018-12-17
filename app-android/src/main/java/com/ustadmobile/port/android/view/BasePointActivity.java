@@ -25,12 +25,14 @@ import android.widget.CheckBox;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.BaseCatalogPresenter;
 import com.ustadmobile.core.controller.BasePointController;
+import com.ustadmobile.core.controller.Login2Presenter;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.BasePointMenuItem;
 import com.ustadmobile.core.view.BasePointView;
 import com.ustadmobile.core.view.DialogResultListener;
 import com.ustadmobile.core.view.DismissableDialog;
+import com.ustadmobile.core.view.Register2View;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.util.ArrayList;

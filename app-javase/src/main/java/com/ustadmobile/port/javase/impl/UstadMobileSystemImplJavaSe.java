@@ -64,7 +64,7 @@ public class UstadMobileSystemImplJavaSe extends UstadMobileSystemImplSE {
 
     @Override
     public String getString(int messageCode, Object context) {
-        return null;
+        return ""+messageCode;
     }
 
     @Override
@@ -210,7 +210,6 @@ public class UstadMobileSystemImplJavaSe extends UstadMobileSystemImplSE {
 
     @Override
     public void getAsset(Object context, String path, UmCallback<InputStream> callback) {
-        //TODO: convert this to using NIO
         if(!path.startsWith("/"))
             path = '/' + path;
 
@@ -223,7 +222,10 @@ public class UstadMobileSystemImplJavaSe extends UstadMobileSystemImplSE {
 
     @Override
     public InputStream getAssetSync(Object context, String path) throws IOException {
-        return null;
+        if(!path.startsWith("/"))
+            path = '/' + path;
+
+        return getClass().getResourceAsStream(path);
     }
 
     @Override

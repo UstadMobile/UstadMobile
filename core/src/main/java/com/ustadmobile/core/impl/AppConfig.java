@@ -16,4 +16,6 @@ public class AppConfig {
 
     public static final String KEY_FIRST_DEST_LOGIN_REQUIRED = "first_dest_login_required";
 
+    public static final String KEY_API_URL = "apiUrl";
+
 }

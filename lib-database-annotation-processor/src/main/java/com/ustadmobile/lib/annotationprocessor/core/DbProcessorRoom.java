@@ -24,6 +24,7 @@ import com.ustadmobile.lib.database.annotation.UmSyncFindUpdateable;
 import com.ustadmobile.lib.database.annotation.UmSyncIncoming;
 import com.ustadmobile.lib.database.annotation.UmSyncOutgoing;
 import com.ustadmobile.lib.database.annotation.UmUpdate;
+import com.ustadmobile.lib.database.jdbc.JdbcDatabaseUtils;
 import com.ustadmobile.lib.db.UmDbWithExecutor;
 import com.ustadmobile.lib.db.sync.UmRepositoryDb;
 
@@ -122,14 +123,19 @@ public class DbProcessorRoom extends AbstractDbProcessor{
                     .addCode("this.dbExecutor = $T.newCachedThreadPool();\n", Executors.class)
                     .addCode("this._repositories = new $T<>();\n", Vector.class)
                     .addCode("_roomDb = $T.databaseBuilder(this.context, " + roomDbClassName +
-                            ".class, dbName).build();\n",
+                            ".class, dbName).addCallback(new DbManagerCallback()).build();\n",
                             ClassName.get("android.arch.persistence.room", "Room"))
                 .build())
             .addMethod(MethodSpec.methodBuilder("execute")
                     .addModifiers(Modifier.PUBLIC)
                     .addAnnotation(Override.class)
                     .addParameter(Runnable.class, "_runnable")
-                    .addCode("this.dbExecutor.execute(_runnable);\n").build());
+                    .addCode("this.dbExecutor.execute(_runnable);\n").build())
+            .addType(TypeSpec.classBuilder("DbManagerCallback")
+                    .superclass(ClassName.get(ROOM_PKG_NAME, "RoomDatabase")
+                            .nestedClass("Callback"))
+                    .addMethod(generateOnCreateMethod(dbType)).build())
+            .addMethod(generateCreateSeqNumTriggersMethod(dbType));
 
         UmDatabase db = dbType.getAnnotation(UmDatabase.class);
 
@@ -211,6 +217,37 @@ public class DbProcessorRoom extends AbstractDbProcessor{
             destination);
         writeJavaFileToDestination(JavaFile.builder(packageName, dbManagerImplSpec.build()).build(),
             destination);
+    }
+
+    private MethodSpec generateCreateSeqNumTriggersMethod(TypeElement dbType) {
+        MethodSpec.Builder builder = MethodSpec.methodBuilder("createSeqNumTriggers")
+                .addParameter(Class.class, "_entityClass")
+                .addParameter(ClassName.get("android.arch.persistence.db",
+                                "SupportSQLiteDatabase"), "_db");
+
+        CodeBlock.Builder codeBlock = CodeBlock.builder();
+        addCreateTriggersForEntitiesToCodeBlock(JdbcDatabaseUtils.PRODUCT_NAME_SQLITE,
+                "_db.execSQL", dbType, codeBlock);
+
+        builder.addCode(codeBlock.build());
+        return builder.build();
+    }
+
+    private MethodSpec generateOnCreateMethod(TypeElement dbType) {
+        MethodSpec.Builder builder = MethodSpec.methodBuilder("onCreate")
+                .addParameter(ClassName.get("android.arch.persistence.db",
+                        "SupportSQLiteDatabase"), "_db")
+                .addAnnotation(Override.class)
+                .addModifiers(Modifier.PUBLIC);
+        CodeBlock.Builder codeBlock = CodeBlock.builder();
+        for(TypeElement entityType : findEntityTypes(dbType)) {
+            if(DbProcessorUtils.entityHasChangeSequenceNumbers(entityType, processingEnv)) {
+                codeBlock.add("createSeqNumTriggers($T.class, _db);\n", entityType);
+            }
+        }
+
+        builder.addCode(codeBlock.build());
+        return builder.build();
     }
 
     private void addDaoMethod(TypeSpec.Builder roomDbTypeSpec, TypeSpec.Builder dbManagerSpec,

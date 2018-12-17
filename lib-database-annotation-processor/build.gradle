@@ -65,6 +65,9 @@ dependencies {
 
     testImplementation "junit:junit:$version_junit"
 
+    testImplementation project(":lib-http-testserver")
+    testImplementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
+    testImplementation "org.mockito:mockito-core:$version_core_mockito"
 }
 
 sourceCompatibility = "1.8"

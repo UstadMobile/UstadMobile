@@ -5,6 +5,7 @@ import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
+import com.ustadmobile.lib.database.annotation.UmRestAuthorizedUidParam;
 import com.ustadmobile.lib.database.annotation.UmUpdate;
 
 import java.util.ArrayList;
@@ -293,6 +294,21 @@ public class DaoMethodInfo {
                 processingEnv);
 
         return primaryKeyEl.getAnnotation(UmPrimaryKey.class).autoGenerateSyncable();
+    }
+
+    /**
+     * Find the parameter annotated with UmRestAuthorizedUidParam
+     *
+     * @return VariableElement representing the parameter annotated with UmRestAuthorizedUidParam
+     *  if present, otherwise null
+     */
+    public VariableElement getAuthorizedUidParam(){
+        for(VariableElement param : method.getParameters()) {
+            if(param.getAnnotation(UmRestAuthorizedUidParam.class) != null)
+                return param;
+        }
+
+        return null;
     }
 
 

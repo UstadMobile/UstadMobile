@@ -1,5 +1,6 @@
 package com.ustadmobile.core.db;
 
+import com.ustadmobile.core.db.dao.AccessTokenDao;
 import com.ustadmobile.core.db.dao.ClazzDao;
 import com.ustadmobile.core.db.dao.ClazzMemberDao;
 import com.ustadmobile.core.db.dao.ContainerFileDao;
@@ -31,6 +32,7 @@ import com.ustadmobile.core.db.dao.OpdsEntryStatusCacheAncestorDao;
 import com.ustadmobile.core.db.dao.OpdsEntryStatusCacheDao;
 import com.ustadmobile.core.db.dao.OpdsEntryWithRelationsDao;
 import com.ustadmobile.core.db.dao.OpdsLinkDao;
+import com.ustadmobile.core.db.dao.PersonAuthDao;
 import com.ustadmobile.core.db.dao.PersonCustomFieldDao;
 import com.ustadmobile.core.db.dao.PersonCustomFieldValueDao;
 import com.ustadmobile.core.db.dao.PersonDao;
@@ -40,6 +42,9 @@ import com.ustadmobile.lib.database.annotation.UmDatabase;
 import com.ustadmobile.lib.database.annotation.UmDbContext;
 import com.ustadmobile.lib.database.annotation.UmRepository;
 import com.ustadmobile.lib.database.annotation.UmSyncOutgoing;
+import com.ustadmobile.lib.db.UmDbWithAuthenticator;
+import com.ustadmobile.lib.db.entities.AccessToken;
+import com.ustadmobile.lib.db.entities.PersonAuth;
 import com.ustadmobile.lib.db.sync.UmSyncableDatabase;
 import com.ustadmobile.lib.db.sync.dao.SyncStatusDao;
 import com.ustadmobile.lib.db.sync.dao.SyncablePrimaryKeyDao;
@@ -96,9 +101,10 @@ import java.util.Hashtable;
         ContentEntryParentChildJoin.class, ContentEntryRelatedEntryJoin.class,
         ContentEntryFileStatus.class, ContentCategorySchema.class,
         ContentCategory.class, Language.class, LanguageVariant.class,
-        SyncStatus.class, SyncablePrimaryKey.class, SyncDeviceBits.class
+        SyncStatus.class, SyncablePrimaryKey.class, SyncDeviceBits.class,
+        AccessToken.class, PersonAuth.class
 })
-public abstract class UmAppDatabase implements UmSyncableDatabase{
+public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthenticator {
 
     private static volatile UmAppDatabase instance;
 
@@ -205,6 +211,10 @@ public abstract class UmAppDatabase implements UmSyncableDatabase{
 
     public abstract LanguageVariantDao getLanguageVariantDao();
 
+    public abstract PersonAuthDao getPersonAuthDao();
+
+    public abstract AccessTokenDao getAccessTokenDao();
+
     @UmDbContext
     public abstract Object getContext();
 
@@ -228,6 +238,19 @@ public abstract class UmAppDatabase implements UmSyncableDatabase{
     public abstract UmAppDatabase getRepository(String baseUrl, String auth);
 
     @UmSyncOutgoing
-    public abstract void syncWith(UmAppDatabase otherDb, long accountUid);
+    public abstract void syncWith(UmAppDatabase otherDb, long accountUid, int sendLimit, int receiveLimit);
 
+
+    @Override
+    public boolean validateAuth(long personUid, String auth) {
+        if(personUid == 0)
+            return true;//Anonymous or guest access
+
+        return getAccessTokenDao().isValidToken(personUid, auth);
+    }
+
+    @Override
+    public int getDeviceBits() {
+        return getSyncablePrimaryKeyDao().getDeviceBits();
+    }
 }

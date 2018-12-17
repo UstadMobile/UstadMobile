@@ -17,10 +17,12 @@ import com.ustadmobile.lib.database.annotation.UmDbContext;
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 import com.ustadmobile.lib.database.annotation.UmRestAccessible;
+import com.ustadmobile.lib.database.annotation.UmRestAuthorizedUidParam;
 import com.ustadmobile.lib.database.annotation.UmSyncFindAllChanges;
 import com.ustadmobile.lib.database.annotation.UmSyncFindLocalChanges;
 import com.ustadmobile.lib.database.annotation.UmSyncFindUpdateable;
 import com.ustadmobile.lib.database.annotation.UmSyncIncoming;
+import com.ustadmobile.lib.database.annotation.UmSyncLastChangedBy;
 import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
 import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 import com.ustadmobile.lib.database.annotation.UmSyncOutgoing;
@@ -48,6 +50,7 @@ import javax.annotation.processing.Messager;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
@@ -61,6 +64,7 @@ import javax.lang.model.type.TypeMirror;
 import javax.tools.Diagnostic;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
@@ -68,6 +72,8 @@ import javax.ws.rs.core.MediaType;
 
 import static com.ustadmobile.lib.annotationprocessor.core.DbProcessorUtils.capitalize;
 import static com.ustadmobile.lib.annotationprocessor.core.DbProcessorUtils.findElementWithAnnotation;
+import static com.ustadmobile.lib.database.jdbc.JdbcDatabaseUtils.PRODUCT_NAME_POSTGRES;
+import static com.ustadmobile.lib.database.jdbc.JdbcDatabaseUtils.PRODUCT_NAME_SQLITE;
 
 /**
  * This base processor is overriden to make platform specific implementations of the database. By
@@ -106,6 +112,30 @@ public abstract class AbstractDbProcessor {
 
         for(Element dbClassElement : roundEnvironment.getElementsAnnotatedWith(UmDatabase.class)) {
             try {
+                TypeElement dbTypeEl = (TypeElement)dbClassElement;
+                HashMap<Integer, TypeElement> tableIdMap = new HashMap<>();
+                for(TypeElement entityType : findEntityTypes((TypeElement)dbClassElement)) {
+                    if(entityType.getAnnotation(UmEntity.class) == null) {
+                        messager.printMessage(Diagnostic.Kind.ERROR, "Entity " +
+                                entityType.getQualifiedName() + "referenced " +
+                                " by @UmDatabase annotation on " +
+                                dbTypeEl.getQualifiedName() + " not annotated" +
+                                " with @UmEntity ", entityType);
+                        continue;
+                    }
+
+                    int tableId = entityType.getAnnotation(UmEntity.class).tableId();
+                    if(tableId != 0 && tableIdMap.containsKey(tableId)) {
+                        messager.printMessage(Diagnostic.Kind.ERROR, "Duplicate UmEntity " +
+                                "tableId: " + tableId + " assigned to " +
+                                entityType.getQualifiedName() + " and " +
+                                tableIdMap.get(tableId).getQualifiedName(), entityType);
+                    }
+
+                    tableIdMap.put(tableId, entityType);
+                }
+
+
                 processDbClass((TypeElement)dbClassElement, destination);
 
                 for(Element subElement : dbClassElement.getEnclosedElements()) {
@@ -380,7 +410,7 @@ public abstract class AbstractDbProcessor {
         return true;
     }
 
-    private boolean listContainsMethod(ExecutableElement method, List<ExecutableElement> methodList,
+    protected boolean listContainsMethod(ExecutableElement method, List<ExecutableElement> methodList,
                                        TypeElement implementingClass) {
         for(ExecutableElement checkMethod : methodList) {
             if(!checkMethod.getSimpleName().equals(method.getSimpleName()))
@@ -477,6 +507,17 @@ public abstract class AbstractDbProcessor {
                 methodInfo.resolveResultEntityComponentType());
         Element localChangeSeqNumEl = DbProcessorUtils.findElementWithAnnotation(entityTypeEl,
                 UmSyncLocalChangeSeqNum.class, processingEnv);
+
+        if(daoMethod.getParameters().size() != 5) {
+            messager.printMessage(Diagnostic.Kind.ERROR, "Method "
+                            + daoMethod.toString() + " has " + daoMethod.getParameters().size() +
+                            " parameters. FindLocalChanges method " +
+                    "must have 5 parameters: long fromLocalChangeSeqNum, long toLocalChangeSeqNum," +
+                    "long accountPersonUid, int deviceId, " +
+                    "int limit", daoType);
+            return "";
+        }
+
         if(localChangeSeqNumEl == null) {
             messager.printMessage(Diagnostic.Kind.ERROR,
                     formatMethodForErrorMessage(daoMethod, daoType) + "Attempting to generate a " +
@@ -494,20 +535,32 @@ public abstract class AbstractDbProcessor {
             return "";
         }
 
-        if(daoMethod.getParameters().size() != 2) {
+
+
+        VariableElement fromLocalChangeSeqNumParam = daoMethod.getParameters().get(0);
+        VariableElement toLocalChangeSeqNumParam = daoMethod.getParameters().get(1);
+        VariableElement localDeviceId = daoMethod.getParameters().get(3);
+        VariableElement limitParam = daoMethod.getParameters().get(4);
+        Element lastChangedByField = findElementWithAnnotation(entityTypeEl,
+                UmSyncLastChangedBy.class, processingEnv);
+
+        if(lastChangedByField == null) {
             messager.printMessage(Diagnostic.Kind.ERROR,
-                    formatMethodForErrorMessage(daoMethod, daoType) + " Attempting to generate" +
-                            "findLocalChangeSeq method: method must have exactly two long " +
-                            "parameters - the starting local change sequence number and the account " +
-                            "uid of the account being used for the sync");
+                    formatMethodForErrorMessage(daoMethod, daoType) +
+                            " findLocalchanges method: entity " + entityTypeEl.getQualifiedName() +
+                            " does not have a UmSyncLastChangedBy field",
+                    daoType);
             return "";
         }
 
-        return String.format("SELECT * FROM %s WHERE %s >= :%s AND %s",
+        return String.format("SELECT * FROM %s WHERE %s BETWEEN :%s AND :%s AND %s = :%s AND %s LIMIT :%s",
                 entityTypeEl.getSimpleName().toString(),
                 localChangeSeqNumEl.getSimpleName().toString(),
-                daoMethod.getParameters().get(0).getSimpleName().toString(),
-                readPermissionCondition);
+                fromLocalChangeSeqNumParam.getSimpleName().toString(),
+                toLocalChangeSeqNumParam.getSimpleName().toString(),
+                lastChangedByField.getSimpleName(),
+                localDeviceId.getSimpleName(),
+                readPermissionCondition, limitParam.getSimpleName());
     }
 
     protected String generateSyncFindAllChanges(TypeElement daoType, ExecutableElement daoMethod,
@@ -544,26 +597,42 @@ public abstract class AbstractDbProcessor {
             return "";
         }
 
-        if(daoMethod.getParameters().size() != 5) {
+        if(daoMethod.getParameters().size() != 7) {
             messager.printMessage(Diagnostic.Kind.ERROR,
                     formatMethodForErrorMessage(daoMethod, daoType) + " attempting to" +
-                            "generate findAllChanges method: method must have exactly 5 parameters" +
+                            "generate findAllChanges method: method must have exactly 7 parameters" +
                             " - fromLocalChangeSeqNum, toLocalChangeSeqNum, fromMasterChangeSeqNum," +
-                            "toMasterChangeSeqNum, and accountPersonUid",
+                            "toMasterChangeSeqNum, accountPersonUid, notLastChangedBy, and limit",
                     daoType);
             return "";
         }
 
+        VariableElement fromLocalChangeSeqNumParam = daoMethod.getParameters().get(0);
+        VariableElement toLocalChangeSeqNumParam = daoMethod.getParameters().get(1);
+        VariableElement fromMasterChangeSeqNumParam = daoMethod.getParameters().get(2);
+        VariableElement toMasterChangeSeqNumParam = daoMethod.getParameters().get(3);
+        VariableElement notLastChangedByParam = daoMethod.getParameters().get(5);
+        VariableElement limitParam = daoMethod.getParameters().get(6);
+
+        Element lastChangedFieldElement = findElementWithAnnotation(entityTypeEl,
+                UmSyncLastChangedBy.class, processingEnv);
+
+
         return String.format("SELECT * FROM %s WHERE %s BETWEEN :%s AND :%s " +
-                "AND %s BETWEEN :%s AND :%s AND %s",
+                "AND %s BETWEEN :%s AND :%s AND %s != :%s  AND %s ORDER BY %s, %s LIMIT :%s",
                 entityTypeEl.getSimpleName(),
                 localChangeSeqNumEl.getSimpleName(),
-                daoMethod.getParameters().get(0).getSimpleName(),
-                daoMethod.getParameters().get(1).getSimpleName(),
+                fromLocalChangeSeqNumParam.getSimpleName(),
+                toLocalChangeSeqNumParam.getSimpleName(),
                 masterChangeSeqNumEl.getSimpleName(),
-                daoMethod.getParameters().get(2).getSimpleName(),
-                daoMethod.getParameters().get(3).getSimpleName(),
-                readPermissionCondition);
+                fromMasterChangeSeqNumParam.getSimpleName(),
+                toMasterChangeSeqNumParam.getSimpleName(),
+                lastChangedFieldElement.getSimpleName(),
+                notLastChangedByParam.getSimpleName(),
+                readPermissionCondition,
+                masterChangeSeqNumEl.getSimpleName(),
+                localChangeSeqNumEl.getSimpleName(),
+                limitParam.getSimpleName());
 
     }
 
@@ -646,11 +715,25 @@ public abstract class AbstractDbProcessor {
                                                           String dbName) {
         MethodSpec.Builder methodBuilder = overrideAndResolve(daoMethod, daoType, processingEnv);
 
+        if(daoMethod.getParameters().size() != 6) {
+            messager.printMessage(Diagnostic.Kind.ERROR,
+                    "Method " + daoMethod.toString() + " " +
+                    "annotated UmSyncIncoming must have 6 parameters " +
+                    "incomingChanges List<T>, double fromLocalChangeSeqNum, " +
+                    "double fromMasterChangeSeqNum, long accountPersonUid, int deviceId, " +
+                            "int receiveLimit. " +
+                            "Actually has : " + daoMethod.getParameters().size() + " parameters.",
+                    daoType);
+            return methodBuilder;
+        }
+
         CodeBlock.Builder codeBlock = CodeBlock.builder();
         VariableElement incomingChangesParam = daoMethod.getParameters().get(0);
         VariableElement fromLocalChangeSeqNumParam = daoMethod.getParameters().get(1);
         VariableElement fromMasterChangeSeqNumParam = daoMethod.getParameters().get(2);
         VariableElement accountPersonUidParam = daoMethod.getParameters().get(3);
+        VariableElement deviceIdParam = daoMethod.getParameters().get(4);
+        VariableElement receiveLimitParam = daoMethod.getParameters().get(5);
 
         DaoMethodInfo daoMethodInfo = new DaoMethodInfo(daoMethod, daoType, processingEnv);
         TypeMirror entityType = daoMethodInfo.resolveEntityParameterComponentType();
@@ -703,14 +786,12 @@ public abstract class AbstractDbProcessor {
             .add("long _toLocalChangeSeq = Long.MAX_VALUE;\n")
             .add("boolean _isMaster = _syncableDb.isMaster();\n")
             .beginControlFlow("if(_isMaster)")
-                .add("long _changeSeqNum = _syncableDb.getSyncStatusDao().getAndIncrementNextMasterChangeSeqNum($L, 1);\n",
-                    umEntityAnnotation.tableId())
-                .add("_response.setSyncedUpToMasterChangeSeqNum(_changeSeqNum + 1);\n")
-                .add("_toMasterChangeSeq = _changeSeqNum - 1;\n")
+            .add("_response.setCurrentMasterChangeSeqNum(_syncableDb.getSyncStatusDao()" +
+                    ".getMasterChangeSeqNum($L) - 1);\n", umEntityAnnotation.tableId())
+            .endControlFlow()
+                .beginControlFlow("if(_isMaster)")
                 .beginControlFlow("for($T _changed : $L)",
                         entityType, incomingChangesParamName)
-                    .add("_changed.set$L(_changeSeqNum);\n",
-                            capitalize(masterChangeSeqFieldEl.getSimpleName()))
                     .add("_changed.set$L(0);\n", capitalize(localChangeSeqFieldEl.getSimpleName()))
                 .endControlFlow()
             .endControlFlow()
@@ -745,11 +826,13 @@ public abstract class AbstractDbProcessor {
             .endControlFlow()
             .add("insertList(_insertList);\n")
             .add("updateList(_updateList);\n")
-            .add("_response.setRemoteChangedEntities($L($L, $L, $L, $L, $L));\n",
+            .add("_response.setRemoteChangedEntities($L($L, $L, $L, $L, $L, $L, $L));\n",
                     findChangedEntitiesMethod.getSimpleName(),
                     fromLocalChangeSeqNumParam.getSimpleName(), "_toLocalChangeSeq",
                     fromMasterChangeSeqNumParam.getSimpleName(), "_toMasterChangeSeq",
-                    accountPersonUidParam.getSimpleName())
+                    accountPersonUidParam.getSimpleName(),
+                    deviceIdParam.getSimpleName(),
+                    receiveLimitParam.getSimpleName())
             .add("return _response;\n");
 
 
@@ -793,28 +876,80 @@ public abstract class AbstractDbProcessor {
         UmEntity umEntityAnnotation = entityTypeElement.getAnnotation(UmEntity.class);
         Element findLocalChangesMethod = DbProcessorUtils.findElementWithAnnotation(daoType,
                 UmSyncFindLocalChanges.class, processingEnv);
+
+        if(daoMethod.getParameters().size() != 4) {
+            messager.printMessage(Diagnostic.Kind.ERROR, "UmSyncOutgoing must have 4" +
+                    "parameters: D otherDao, long accountPersonUid, int sendLimit, int receiveLimit");
+            return methodBuilder;
+        }
+
         VariableElement otherDaoParam = daoMethod.getParameters().get(0);
         VariableElement accountPersonUidParam = daoMethod.getParameters().get(1);
+        VariableElement sendLimitParam = daoMethod.getParameters().get(2);
+        VariableElement receiveLimitParam = daoMethod.getParameters().get(3);
+        String localChangeSeqNumFieldName = findElementWithAnnotation(entityTypeElement,
+                UmSyncLocalChangeSeqNum.class, processingEnv).getSimpleName().toString();
+        String masterChangeSeqNumFieldName = findElementWithAnnotation(entityTypeElement,
+                UmSyncMasterChangeSeqNum.class, processingEnv).getSimpleName().toString();
+
 
         CodeBlock.Builder codeBlock = CodeBlock.builder()
                 .add("$1T _syncableDb = ($1T)$2L;\n", UmSyncableDatabase.class, dbName)
-                .add("$T _syncStatus = _syncableDb.getSyncStatusDao().getByUid($L);\n",
+                .add("$T _initialSyncStatus = _syncableDb.getSyncStatusDao().getByUid($L);\n",
                         SyncStatus.class, umEntityAnnotation.tableId())
-                .add("$T<$T> _locallyChangedEntities = $L(_syncStatus.getSyncedToLocalChangeSeqNum(), $L);\n",
+                .add("boolean _syncComplete = false;\n")
+                .add("int _retryCount = 0;\n")
+                .add("long _syncCompleteMasterChangeSeqNum = -1L;\n")
+                .beginControlFlow("do")
+                    .add("$T _attemptSyncStatus = _syncableDb.getSyncStatusDao().getByUid($L);\n",
+                            SyncStatus.class, umEntityAnnotation.tableId())
+                    .add("$T<$T> _locallyChangedEntities = $L(" +
+                                    "_attemptSyncStatus.getSyncedToLocalChangeSeqNum() + 1, " +
+                                    "_initialSyncStatus.getLocalChangeSeqNum() - 1, " +
+                                    "$L, _syncableDb.getDeviceBits(), $L);\n",
                         List.class, entityType, findLocalChangesMethod.getSimpleName(),
-                        accountPersonUidParam.getSimpleName())
-                .add("$T<$T> _remoteChanges = $L.$L(_locallyChangedEntities, 0, " +
-                        "_syncStatus.getSyncedToMasterChangeNum(), $L);\n",
+                        accountPersonUidParam.getSimpleName(),
+                        sendLimitParam.getSimpleName())
+                    .add("long _syncedToLocalSeqNum = _locallyChangedEntities.isEmpty() ? " +
+                        "_attemptSyncStatus.getSyncedToLocalChangeSeqNum() : " +
+                        "_locallyChangedEntities.get(_locallyChangedEntities.size()-1)" +
+                        ".get$L();\n", capitalize(localChangeSeqNumFieldName))
+                    .add("$T<$T> _remoteChanges = $L.$L(_locallyChangedEntities, 0, " +
+                        "_attemptSyncStatus.getSyncedToMasterChangeNum() + 1, $L, " +
+                                    "_syncableDb.getDeviceBits(), $L);\n",
                         SyncResponse.class, entityType, otherDaoParam.getSimpleName(),
                         syncIncomingMethod.getSimpleName(),
-                        accountPersonUidParam.getSimpleName())
-                .beginControlFlow("if(_remoteChanges != null)")
-                    .add("replaceList(_remoteChanges.getRemoteChangedEntities());\n")
-                    .add("_syncableDb.getSyncStatusDao().updateSyncedToChangeSeqNums(" +
-                                "$L, _syncStatus.getLocalChangeSeqNum(), " +
-                                "_remoteChanges.getSyncedUpToMasterChangeSeqNum());\n",
-                        umEntityAnnotation.tableId())
-                .endControlFlow();
+                        accountPersonUidParam.getSimpleName(),
+                        receiveLimitParam.getSimpleName())
+                    .beginControlFlow("if(_remoteChanges != null)")
+                        .add("$T<$T> _remoteChangedEntities = _remoteChanges" +
+                                ".getRemoteChangedEntities();\n", List.class,
+                                entityTypeElement)
+                        .add("long _syncedToMasterSeqNum = _remoteChangedEntities.isEmpty() ? " +
+                            "_attemptSyncStatus.getSyncedToMasterChangeNum() : " +
+                            "_remoteChangedEntities.get(_remoteChangedEntities.size()-1)" +
+                            ".get$L();\n", capitalize(masterChangeSeqNumFieldName))
+                        //TODO: Add code to handle if any changes happened whilst this sync was ongoing
+                        //TODO: e.g. before replace, check if there was any change to the local change
+                        // sequence number, then bump the change numbers for these entities so they get
+                        //picked up by the next sync round
+                        .beginControlFlow("if(_syncCompleteMasterChangeSeqNum == -1)")
+                            .add("_syncCompleteMasterChangeSeqNum  = _remoteChanges." +
+                                    "getCurrentMasterChangeSeqNum();\n")
+                        .endControlFlow()
+                        .add("replaceList(_remoteChanges.getRemoteChangedEntities());\n")
+                        .add("_syncableDb.getSyncStatusDao().updateSyncedToChangeSeqNums(" +
+                                "$1L, _syncedToLocalSeqNum, _syncedToMasterSeqNum);\n",
+                                umEntityAnnotation.tableId())
+                        //TODO: just in case we wasted some sequence numbers: check if both are empty
+                        //When we have put entries into the server, but no one else has, there won't
+                        //be any new entries coming down the pipe.
+                        .add("_syncComplete = (_syncedToMasterSeqNum >= _syncCompleteMasterChangeSeqNum || _remoteChanges.getRemoteChangedEntities().isEmpty()) " +
+                                " && (_syncedToLocalSeqNum >= _initialSyncStatus.getLocalChangeSeqNum() - 1 || _locallyChangedEntities.isEmpty());\n")
+                    .nextControlFlow("else")
+                        .add("_retryCount++;\n")
+                    .endControlFlow()
+                .endControlFlow("while(!_syncComplete && _retryCount < 3)");
 
         methodBuilder.addCode(codeBlock.build());
         daoBuilder.addMethod(methodBuilder.build());
@@ -856,48 +991,6 @@ public abstract class AbstractDbProcessor {
         block.add(String.join(", ", paramNames));
 
         return block.add(")").build();
-    }
-
-    /**
-     * Generate a CodeBlock that will increment the change sequence numbers on an entity class
-     * or List/Array thereof.
-     *
-     * @param paramType TypeMirror representing the parameter type
-     * @param paramVariableName The variable name of the parameter
-     * @param dbVariableName The variable name of the database class itself
-     * @param syncableDbVariableName The variable name of the database class,
-     *                               casted to UmSyncableDatabase, or null if none is available.
-     * @param method The method that is being generated. This is used only to generate error messages
-     *               (e.g. when local / master change sequence numbers are missing)
-     * @param daoType The DAO class that is being generated. This is also used only to generate error
-     *                messages.
-     *
-     * @return CodeBlock that will increment teh change sequence numbers on an entity class or List/Array thereof
-     */
-    protected CodeBlock generateIncrementChangeSeqNumsCodeBlock(TypeMirror paramType,
-                                                                String paramVariableName,
-                                                                String dbVariableName,
-                                                                String syncableDbVariableName,
-                                                                ExecutableElement method,
-                                                                TypeElement daoType) {
-
-        CodeBlock.Builder codeBlock = CodeBlock.builder();
-        if(syncableDbVariableName == null) {
-            codeBlock.add("$1T _syncableDb = ($1T)$2L;\n", UmSyncableDatabase.class, dbVariableName);
-            syncableDbVariableName = "_syncableDb";
-        }
-
-        codeBlock.beginControlFlow("if($L.isMaster())", syncableDbVariableName);
-        generateIncrementSection(codeBlock, UmSyncMasterChangeSeqNum.class, paramType,
-                paramVariableName, syncableDbVariableName,
-                "getAndIncrementNextMasterChangeSeqNum", method, daoType);
-        codeBlock.nextControlFlow("else");
-        generateIncrementSection(codeBlock, UmSyncLocalChangeSeqNum.class, paramType,
-                paramVariableName, syncableDbVariableName,
-                "getAndIncrementNextLocalChangeSeqNum", method, daoType);
-        codeBlock.endControlFlow();
-
-        return codeBlock.build();
     }
 
     /**
@@ -1037,62 +1130,103 @@ public abstract class AbstractDbProcessor {
         return codeBlock.build();
     }
 
-    private void generateIncrementSection(CodeBlock.Builder codeBlock,
-                                          Class<? extends Annotation> annotation,
-                                          TypeMirror paramType,
-                                          String paramVariableName,
-                                          String syncableDbVariableName,
-                                          String changeSeqNumMethodName,
-                                          ExecutableElement daoMethod,
-                                          TypeElement daoType) {
-        String elementVarName = paramVariableName;
-        TypeElement paramEntityTypeElement;
-        if(DbProcessorUtils.isList(paramType, processingEnv)) {
-            paramEntityTypeElement = (TypeElement)processingEnv.getTypeUtils().asElement(
-                    DbProcessorUtils.getArrayOrListComponentType(paramType, processingEnv));
-        }else {
-            paramEntityTypeElement = (TypeElement)processingEnv.getTypeUtils().asElement(paramType);
+    /**
+     * Note: When an update is run, we need to make sure the database triggers runs once, and only once.
+     * Query methods that run an update query don't touch the sync sequence numbers, and the trigger
+     * will when the change sequence number is unchanged after an update. With the Update method, all
+     * fields are updated. If the object supplied has a different value (e.g. it came from a query,
+     * and then other update methods etc. were run), then the new and old change seq num values won't
+     * match, and that won't cause the trigger to run. Therefor when running an annotated update
+     * method, we set all change seq numbers to zero. A second trigger condition catches this, and
+     * the trigger runs appropriately.
+     *
+     * @param daoMethod
+     * @param daoType
+     * @param sycnableDbVariableName
+     * @return
+     */
+    protected CodeBlock.Builder generateUpdateSetChangeSeqNumSection(ExecutableElement daoMethod,
+                                                        TypeElement daoType,
+                                                        String sycnableDbVariableName) {
+        CodeBlock.Builder codeBlock = CodeBlock.builder();
+
+        codeBlock.beginControlFlow("if($L.isMaster())", sycnableDbVariableName);
+        DaoMethodInfo methodInfo = new DaoMethodInfo(daoMethod, daoType, processingEnv);
+        boolean isListOrArray = methodInfo.hasArrayOrListParameter();
+        List<Class<? extends Annotation>> seqNumAnnotations = Arrays.asList(
+                UmSyncMasterChangeSeqNum.class, UmSyncLocalChangeSeqNum.class);
+        TypeElement entityType = (TypeElement)processingEnv.getTypeUtils().asElement(
+                methodInfo.resolveEntityParameterComponentType());
+        boolean elseAdded = false;
+        for(Class<? extends Annotation> annotation : seqNumAnnotations) {
+            if(isListOrArray) {
+                codeBlock.beginControlFlow("for($T _entity : $L)", entityType,
+                        methodInfo.getEntityParameterElement().getSimpleName());
+            }
+            Element seqNumElement = findElementWithAnnotation(entityType, annotation,
+                    processingEnv);
+
+            if(seqNumElement != null) {
+                codeBlock.add("$L.set$L(0);\n", isListOrArray ? "_entity" :
+                                methodInfo.getEntityParameterElement().getSimpleName(),
+                        capitalize(seqNumElement.getSimpleName()));
+            }else {
+                messager.printMessage(Diagnostic.Kind.ERROR, formatMethodForErrorMessage(daoMethod,
+                        daoType) + ": generate update seq num section: cannot find element annotated " +
+                        annotation.getCanonicalName(), daoType);
+            }
+
+            if(isListOrArray)
+                codeBlock.endControlFlow();
+
+            if(!elseAdded) {
+                codeBlock.nextControlFlow("else");
+                elseAdded = true;
+            }
         }
 
+        codeBlock.endControlFlow();
 
-        String numChangesStr;
-        if(DbProcessorUtils.isList(paramType, processingEnv)) {
-            numChangesStr = paramVariableName + ".size()";
-        }else if(paramType.getKind().equals(TypeKind.ARRAY)) {
-            numChangesStr = paramVariableName = ".length";
-        }else {
-            numChangesStr = "1";
-        }
+        return codeBlock;
+    }
 
-        int tableNum = paramEntityTypeElement.getAnnotation(UmEntity.class).tableId();
-        codeBlock.add("long _changeSeqNum = $L.getSyncStatusDao().$L($L, $L);\n",
-                syncableDbVariableName, changeSeqNumMethodName, tableNum, numChangesStr);
+    protected CodeBlock generateSetLastChangedBy(ExecutableElement daoMethod,
+                                                    TypeElement daoType,
+                                                    String syncableDbVariableName) {
+        CodeBlock.Builder codeBlock = CodeBlock.builder();
+        DaoMethodInfo methodInfo = new DaoMethodInfo(daoMethod, daoType, processingEnv);
+        TypeMirror entityTypeMirror = methodInfo.resolveEntityParameterComponentType();
+        TypeElement entityTypeEl = (TypeElement)processingEnv.getTypeUtils()
+                .asElement(entityTypeMirror);
+        boolean isListOrArray = methodInfo.hasArrayOrListParameter();
 
-        boolean isListOrArray = paramType.getKind().equals(TypeKind.ARRAY)
-                || DbProcessorUtils.isList(paramType, processingEnv);
+
+        codeBlock.add("int _lastChangedBy = $L.getDeviceBits();\n", syncableDbVariableName);
         if(isListOrArray) {
-            codeBlock.beginControlFlow("for($T _element : $L)",
-                    DbProcessorUtils.getArrayOrListComponentType(paramType, processingEnv),
-                    paramVariableName);
-            elementVarName = "_element";
+            codeBlock.beginControlFlow("for($T _entity : $L)", entityTypeMirror,
+                    methodInfo.getEntityParameterElement().getSimpleName());
         }
 
-        Element changeSeqNumElement = findElementWithAnnotation(paramEntityTypeElement, annotation,
-                processingEnv);
-        if(changeSeqNumElement == null) {
-            messager.printMessage(Diagnostic.Kind.ERROR, formatMethodForErrorMessage(daoMethod,
-                    daoType) + ": method requires entity that has a local and master change " +
-                    "sequence number fields, but " + paramEntityTypeElement.getQualifiedName() +
-                    " has no variable annotated with @" + annotation.getSimpleName());
-            return;
+        Element lastChangedByField = findElementWithAnnotation(entityTypeEl,
+                UmSyncLastChangedBy.class, processingEnv);
+        if(lastChangedByField == null) {
+            messager.printMessage(Diagnostic.Kind.ERROR,
+                    formatMethodForErrorMessage(daoMethod, daoType) +
+                            "GenerateUpdateLastChangedBy entity " +
+                            entityTypeEl.getQualifiedName() + " does not have a field " +
+                            "annotated with UmSyncLastChangedBy", daoType);
+            return CodeBlock.builder().build();
         }
 
-        codeBlock.add("$L.set$L(_changeSeqNum$L);\n", elementVarName,
-                capitalize(changeSeqNumElement.getSimpleName()),
-                isListOrArray ? "++" : "");
-        if(isListOrArray) {
+        codeBlock.add("$L.set$L(_lastChangedBy);\n",
+                isListOrArray ? "_entity" : methodInfo.getEntityParameterElement().getSimpleName(),
+                capitalize(lastChangedByField.getSimpleName()));
+
+        if(isListOrArray){
             codeBlock.endControlFlow();
         }
+
+        return codeBlock.build();
     }
 
     /**
@@ -1111,17 +1245,34 @@ public abstract class AbstractDbProcessor {
     }
 
 
-    protected void addJaxWsParameters(ExecutableElement method, TypeElement clazzDao,
+    /**
+     * Add web service parameter annotation to a given methodBuilder, to match a given dao method.
+     * This is used for generation of Jersey Resource methods and Retrofit interface methods.
+     *
+     * @param method The DAO method we want to generate a webservice method signature for
+     * @param daoType DAO type the method belongs to (used for type variable resolution etc)
+     * @param methodBuilder JavaPoet MethodBuilder to add parameters to
+     * @param queryParamAnnotation Annotation to add for a parameter that can be passed as query
+     *                             parameters (primitives and list/arrays of primitives)
+     * @param requestBodyAnnotation Annotation to add for a parameter that should be the request body
+     *                              (if any).
+     * @param addAuthHeaderParamToMethod if true, if we find a parameter annotated
+     *                                   UmRestAuthorizedUidParam, then an additional parameter will
+     *                                   be added to the end to get the auth token.
+     */
+    protected void addJaxWsParameters(ExecutableElement method, TypeElement daoType,
                                       MethodSpec.Builder methodBuilder,
                                       Class<? extends Annotation> queryParamAnnotation,
-                                      Class<? extends Annotation> requestBodyAnnotation) {
+                                      Class<? extends Annotation> requestBodyAnnotation,
+                                      boolean addAuthHeaderParamToMethod) {
 
+        DaoMethodInfo methodInfo = new DaoMethodInfo(method, daoType, processingEnv);
         for(VariableElement param : method.getParameters()) {
             if(umCallbackTypeElement.equals(processingEnv.getTypeUtils().asElement(param.asType())))
                 continue;
 
             ParameterSpec.Builder paramSpec = ParameterSpec.builder(TypeName.get(
-                    DbProcessorUtils.resolveType(param.asType(), clazzDao, processingEnv)),
+                    DbProcessorUtils.resolveType(param.asType(), daoType, processingEnv)),
                     param.getSimpleName().toString());
 
             if(DbProcessorUtils.isQueryParam(param.asType(), processingEnv)) {
@@ -1133,13 +1284,41 @@ public abstract class AbstractDbProcessor {
 
             methodBuilder.addParameter(paramSpec.build());
         }
+
+        VariableElement uidParam = methodInfo.getAuthorizedUidParam();
+        if(addAuthHeaderParamToMethod && uidParam != null) {
+            methodBuilder.addParameter(ParameterSpec.builder(String.class,
+                    "_authHeader")
+                    .addAnnotation(AnnotationSpec.builder(HeaderParam.class)
+                            .addMember("value", "$S", uidParam
+                                .getAnnotation(UmRestAuthorizedUidParam.class).headerName()).build())
+                    .build());
+        }
     }
 
-
-    protected void addJaxWsParameters(ExecutableElement method, TypeElement clazzDao,
-                                      MethodSpec.Builder methodBuilder) {
-        addJaxWsParameters(method, clazzDao, methodBuilder, QueryParam.class, null);
+    /**
+     * Add web service parameter annotation to a given methodBuilder, to match a given dao method.
+     * This is used for generation of Jersey Resource methods and Retrofit interface methods.
+     *
+     * Synonamous to addJaxWsParameters(method, daoType, methodBuilder, queryParamAnnotation,
+     *  requestBodyAnnotation, false)
+     *
+     * @param method The DAO method we want to generate a webservice method signature for
+     * @param daoType DAO type the method belongs to (used for type variable resolution etc)
+     * @param methodBuilder JavaPoet MethodBuilder to add parameters to
+     * @param queryParamAnnotation Annotation to add for a parameter that can be passed as query
+     *                             parameters (primitives and list/arrays of primitives)
+     * @param requestBodyAnnotation Annotation to add for a parameter that should be the request body
+     *                              (if any).
+     */
+    protected void addJaxWsParameters(ExecutableElement method, TypeElement daoType,
+                                      MethodSpec.Builder methodBuilder,
+                                      Class<? extends Annotation> queryParamAnnotation,
+                                      Class<? extends Annotation> requestBodyAnnotation) {
+        addJaxWsParameters(method, daoType, methodBuilder, queryParamAnnotation,
+                requestBodyAnnotation, false);
     }
+
 
     /**
      * Add Produces, Consumes, GET/POST, etc.
@@ -1241,21 +1420,164 @@ public abstract class AbstractDbProcessor {
         String otherDbParamName = dbMethod.getParameters().get(0).getSimpleName().toString();
         String accountUidParamName = dbMethod.getParameters().get(1).getSimpleName().toString();
 
+        String sendLimitParamName = dbMethod.getParameters().get(2).getSimpleName().toString();
+        String receiveLimitParamName = dbMethod.getParameters().get(3).getSimpleName().toString();
 
         for(ExecutableElement syncableDaoGetter : daoGettersToSync) {
             Element syncMethodEl = findElementWithAnnotation((TypeElement)processingEnv
                             .getTypeUtils().asElement(syncableDaoGetter.getReturnType()),
                     UmSyncOutgoing.class, processingEnv);
 
-            codeBlock.add("$1L().$2L($3L.$1L(), $4L);\n",
+            codeBlock.add("$1L().$2L($3L.$1L(), $4L, $5L, $6L);\n",
                     syncableDaoGetter.getSimpleName(),
                     syncMethodEl.getSimpleName(),
                     otherDbParamName,
-                    accountUidParamName);
+                    accountUidParamName,
+                    sendLimitParamName,
+                    receiveLimitParamName);
         }
         methodBuilder.addCode(codeBlock.build());
 
         return methodBuilder;
+    }
+
+
+    /**
+     * Get the TypeElements that correspond to the entities on the @UmDatabase annotation of the given
+     * TypeElement
+     *
+     * TODO: make sure that we check each annotation, this currently **ASSUMES** the first annotation is @UmDatabase
+     *
+     * @param dbTypeElement TypeElement representing the class with the @UmDatabase annotation
+     * @return List of TypeElement that represents the values found on entities
+     */
+    protected List<TypeElement> findEntityTypes(TypeElement dbTypeElement){
+        List<TypeElement> entityTypeElements = new ArrayList<>();
+        Map<? extends ExecutableElement, ? extends AnnotationValue> annotationEntryMap =
+                dbTypeElement.getAnnotationMirrors().get(0).getElementValues();
+        for(Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entry :
+                annotationEntryMap.entrySet()) {
+            String key = entry.getKey().getSimpleName().toString();
+            Object value = entry.getValue().getValue();
+            if (key.equals("entities")) {
+                List<? extends AnnotationValue> typeMirrors =
+                        (List<? extends AnnotationValue>) value;
+                for(AnnotationValue entityValue : typeMirrors) {
+                    entityTypeElements.add((TypeElement) processingEnv.getTypeUtils()
+                            .asElement((TypeMirror) entityValue.getValue()));
+                }
+            }
+        }
+
+        return entityTypeElements;
+    }
+
+
+    /**
+     * Add the required statements to the codeblock for code that will add the needed triggers
+     * for change sequence numbers to be updated on insert or update of an entity.
+     *
+     * @param sqlProductName SQLite or Postgres as per JdbcDatabaseUtils.PRODUCT_NAME_ constants
+     * @param execSqlMethod a method, accessible in this codeblock, that will run SQL e.g. 'statement.executeUpdate'
+     * @param dbType TypeElement representing the database
+     * @param codeBlock CodeBlock to add to
+     */
+    public void addCreateTriggersForEntitiesToCodeBlock(String sqlProductName,
+                                                        String execSqlMethod,
+                                                        TypeElement dbType,
+                                                        CodeBlock.Builder codeBlock) {
+        List<TypeElement> entityTypes = findEntityTypes(dbType);
+        boolean isFirst = true;
+        String ifStmtStr = "if(_entityClass.equals($T.class))";
+        for(TypeElement entityType : entityTypes) {
+            if(!DbProcessorUtils.entityHasChangeSequenceNumbers(entityType, processingEnv))
+                continue;
+
+            if(isFirst)
+                codeBlock.beginControlFlow(ifStmtStr, entityType);
+            else
+                codeBlock.nextControlFlow("else " + ifStmtStr, entityType);
+
+
+            Element localChangeSeqnumEl = DbProcessorUtils.findElementWithAnnotation(entityType,
+                    UmSyncLocalChangeSeqNum.class, processingEnv);
+            Element masterChangeSeqNumEl = DbProcessorUtils.findElementWithAnnotation(entityType,
+                    UmSyncMasterChangeSeqNum.class, processingEnv);
+
+            Map<String, String> triggerSqlArgs = new HashMap<>();
+            triggerSqlArgs.put("tableNameLower",
+                    entityType.getSimpleName().toString().toLowerCase());
+            triggerSqlArgs.put("tableName", entityType.getSimpleName().toString());
+            triggerSqlArgs.put("localCsnName", localChangeSeqnumEl.getSimpleName().toString());
+            triggerSqlArgs.put("masterCsnName", masterChangeSeqNumEl.getSimpleName().toString());
+            triggerSqlArgs.put("pkName", DbProcessorUtils.findElementWithAnnotation(entityType,
+                    UmPrimaryKey.class, processingEnv).getSimpleName().toString());
+            triggerSqlArgs.put("tableId", ""+entityType.getAnnotation(UmEntity.class).tableId());
+            triggerSqlArgs.put("execSqlMethod", execSqlMethod);
+
+            codeBlock.addNamed("String _tableColName_$tableName:L = isMaster() ? " +
+                    "$masterCsnName:S : $localCsnName:S;\n", triggerSqlArgs);
+            codeBlock.add("String _syncStatusColName_$L = isMaster() ? $S: $S;\n",
+                    entityType.getSimpleName(), "masterChangeSeqNum", "localChangeSeqNum");
+
+            Map<String, String> triggerTemplateArgs = new HashMap<>(triggerSqlArgs);
+            triggerTemplateArgs.put("triggerOn", "update");
+            String triggerTemplate =
+                    "CREATE TRIGGER $triggerOn:L_csn_$tableNameLower:L " +
+                            "AFTER $triggerOn:L ON $tableName:L FOR EACH ROW ";
+            codeBlock.addNamed("String _createUpdateTriggerStmt_$tableName:L = \""
+                            + triggerTemplate + " WHEN (NEW.\" + _tableColName_$tableName:L + \" = 0" + //
+                            " OR OLD.\" + _tableColName_$tableName:L + \" " +
+                            "= NEW.\" + _tableColName_$tableName:L  + \") \";\n",
+                    triggerTemplateArgs);
+
+            triggerTemplateArgs.put("triggerOn", "insert");
+            codeBlock.addNamed("String _createInsertTriggerStmt_$tableName:L = \"" +
+                            triggerTemplate + "\";\n",
+                    triggerTemplateArgs);
+
+
+            codeBlock.addNamed("String _triggerSql_$tableNameLower:L = \"" +
+                            "UPDATE $tableName:L " +
+                            "SET \" + _tableColName_$tableName:L + \" = " +
+                            "(SELECT \" + _syncStatusColName_$tableName:L + \" FROM SyncStatus WHERE tableId = $tableId:L) " +
+                            "WHERE $pkName:L = NEW.$pkName:L; " +
+                            "UPDATE SyncStatus SET \" + " +
+                            "_syncStatusColName_$tableName:L + \" = \" + _syncStatusColName_$tableName:L + \" + 1 " +
+                            " WHERE tableId = $tableId:L; " +
+                            "\";\n"
+                    , triggerSqlArgs);
+            codeBlock.addNamed("$execSqlMethod:L(\"INSERT INTO SyncStatus(tableId, " +
+                        "localChangeSeqNum, masterChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) " +
+                            "VALUES($tableId:L, 1, 1, 0, 0)\");\n",
+                    triggerSqlArgs);
+
+            if(sqlProductName.equals(PRODUCT_NAME_SQLITE)) {
+                codeBlock.addNamed("$execSqlMethod:L(_createUpdateTriggerStmt_$tableName:L " +
+                                " + \" BEGIN \" + _triggerSql_$tableNameLower:L + \" END\");\n",
+                        triggerSqlArgs);
+                codeBlock.addNamed("$execSqlMethod:L(_createInsertTriggerStmt_$tableName:L " +
+                                " + \" BEGIN \" + _triggerSql_$tableNameLower:L + \" END\");\n",
+                        triggerSqlArgs);
+            }else if(sqlProductName.equals(PRODUCT_NAME_POSTGRES)) {
+                codeBlock.addNamed("$execSqlMethod:L(\"CREATE OR REPLACE FUNCTION " +
+                                " increment_csn_$tableNameLower:L_fn() RETURNS trigger AS $$$$ BEGIN \"" +
+                                " + _triggerSql_$tableNameLower:L + \" RETURN null; END $$$$ " +
+                                "LANGUAGE plpgsql\");\n",
+                        triggerSqlArgs);
+                codeBlock.addNamed("$execSqlMethod:L(\"CREATE TRIGGER " +
+                        "increment_csn_$tableNameLower:L_trigger AFTER UPDATE OR INSERT ON " +
+                        "$tableName:L FOR EACH ROW WHEN (pg_trigger_depth() = 0) " +
+                        "EXECUTE PROCEDURE increment_csn_$tableNameLower:L_fn()\");\n", triggerSqlArgs);
+            }
+
+
+            isFirst = false;
+        }
+
+        if(!isFirst)
+            codeBlock.endControlFlow();//end the if statement only if there was one
+
     }
 
 }

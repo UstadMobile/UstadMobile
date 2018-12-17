@@ -31,42 +31,28 @@
 package com.ustadmobile.test.core;
 
 
-/* $if umplatform == 1 $
-        import android.test.ActivityInstrumentationTestCase2;
-        import com.toughra.ustadmobile.UstadMobileActivity;
-   $endif$ */
-/* $if umplatform == 2  $
-    import j2meunit.framework.TestCase;
- $else$ */
 
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.TestUtils;
 import com.ustadmobile.lib.util.UMUtil;
+import com.ustadmobile.test.core.impl.PlatformTestUtil;
 
 import junit.framework.TestCase;
 
-/* $endif$ */
 
 /**
  *
  * @author mike
  */
-/* $if umplatform == 1  $
-public class TestPreferences extends ActivityInstrumentationTestCase2<UstadMobileActivity> {
- $else$ */
 public abstract class TestPreferences extends TestCase {
-/* $endif */
-   
+
     
     public TestPreferences() {
-        /* $if umplatform == 1 $ 
-        super(UstadMobileActivity.class);
-        $endif */
     }
     
     public void testPreferences() {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        Object context = UMContextGetter.getContext(this);
+        Object context = PlatformTestUtil.getTargetContext();
         TestUtils utils = new TestUtils();
         
         impl.setActiveUser(utils.getTestProperty(TestUtils.PROP_TESTUSER), context);

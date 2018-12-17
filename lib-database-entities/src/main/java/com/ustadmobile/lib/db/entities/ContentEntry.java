@@ -2,6 +2,7 @@ package com.ustadmobile.lib.db.entities;
 
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
+import com.ustadmobile.lib.database.annotation.UmSyncLastChangedBy;
 import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
 import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 
@@ -62,6 +63,15 @@ public class ContentEntry {
 
     private boolean leaf;
 
+    @UmSyncLocalChangeSeqNum
+    private long contentEntryLocalChangeSeqNum;
+
+    @UmSyncMasterChangeSeqNum
+    private long contentEntryMasterChangeSeqNum;
+
+    @UmSyncLastChangedBy
+    private int contentEntryLastChangedBy;
+
     public long getLanguageVariantUid() {
         return languageVariantUid;
     }
@@ -77,12 +87,6 @@ public class ContentEntry {
     public void setPrimaryLanguageUid(long primaryLanguageUid) {
         this.primaryLanguageUid = primaryLanguageUid;
     }
-
-    @UmSyncLocalChangeSeqNum
-    private long contentEntryLocalChangeSeqNum;
-
-    @UmSyncMasterChangeSeqNum
-    private long contentEntryMasterChangeSeqNum;
 
     public long getContentEntryUid() {
         return contentEntryUid;
@@ -226,6 +230,14 @@ public class ContentEntry {
 
     public void setLeaf(boolean leaf) {
         this.leaf = leaf;
+    }
+
+    public int getContentEntryLastChangedBy() {
+        return contentEntryLastChangedBy;
+    }
+
+    public void setContentEntryLastChangedBy(int contentEntryLastChangedBy) {
+        this.contentEntryLastChangedBy = contentEntryLastChangedBy;
     }
 
     @Override

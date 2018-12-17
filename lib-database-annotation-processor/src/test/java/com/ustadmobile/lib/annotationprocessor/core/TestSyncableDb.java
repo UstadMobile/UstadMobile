@@ -19,56 +19,58 @@ public class TestSyncableDb  {
 
     @Test
     public void givenSyncableEntityCreatedOnClient_whenSynced_shouldBeRetrievableOnMaster() {
-        ExampleDatabase db1 = ExampleDatabase.getInstance(null, "db1");
-        ExampleDatabase db2 = ExampleDatabase.getInstance(null, "db2");
-        db1.clearAll();
-        db2.clearAll();
+        ExampleDatabase clientDb = ExampleDatabase.getInstance(null, "db1");
+        ExampleDatabase masterDb = ExampleDatabase.getInstance(null);
+        clientDb.clearAll();
+        masterDb.clearAll();
 
-        db2.setMaster(true);
+        masterDb.setMaster(true);
 
         ExampleSyncableEntity syncableEntity1 = new ExampleSyncableEntity();
         syncableEntity1.setTitle("Syncable 1");
-        syncableEntity1.setLocalChangeSeqNum(
-                db1.getSyncStatusDao().getAndIncrementNextLocalChangeSeqNum(
-                        ExampleSyncableEntity.TABLE_ID, 1));
-        long insertedUid = db1.getExampleSyncableDao().insert(syncableEntity1);
 
-        ExampleSyncableDao dao1 = db1.getExampleSyncableDao();
-        ExampleSyncableDao dao2 = db2.getExampleSyncableDao();
-        dao1.syncWith(dao2, 0);
+        long insertedUid = clientDb.getRepository("http://localhost/", "")
+            .getExampleSyncableDao().insert(syncableEntity1);
 
-        ExampleSyncableEntity syncableEntity2 = db2.getExampleSyncableDao().findByUid(insertedUid);
+        ExampleSyncableDao dao1 = clientDb.getExampleSyncableDao();
+        ExampleSyncableDao dao2 = masterDb.getExampleSyncableDao();
+        dao1.syncWith(dao2, 0, 100, 100);
+
+        ExampleSyncableEntity syncableEntity2 = masterDb.getExampleSyncableDao().findByUid(insertedUid);
         Assert.assertNotNull("Syncable entity was transferred to db2", syncableEntity2);
     }
 
     @Test
     public void givenSyncableEntityUpdatedOnMaster_whenSynced_shouldBeUpdatedOnClient() {
-        ExampleDatabase db1 = ExampleDatabase.getInstance(null, "db1");
-        ExampleDatabase db2 = ExampleDatabase.getInstance(null, "db2");
-        ExampleSyncableDao dao1 = db1.getExampleSyncableDao();
-        ExampleSyncableDao dao2 = db2.getExampleSyncableDao();
+        ExampleDatabase clientDb = ExampleDatabase.getInstance(null, "db1");
+        ExampleDatabase serverDb = ExampleDatabase.getInstance(null);
+        ExampleDatabase clientRepo = clientDb.getRepository("http://localhost/dummy/", "");
 
-        db1.clearAll();
-        db2.clearAll();
+        ExampleSyncableDao clientDao = clientDb.getExampleSyncableDao();
+        ExampleSyncableDao serverDao = serverDb.getExampleSyncableDao();
 
-        db2.setMaster(true);
+        ExampleSyncableDao clientDaoRepo = clientRepo.getExampleSyncableDao();
+
+        clientDb.clearAll();
+        serverDb.clearAll();
+
+        serverDb.setMaster(true);
 
         ExampleSyncableEntity syncableEntity1 = new ExampleSyncableEntity();
         syncableEntity1.setTitle("Syncable 1");
-        syncableEntity1.setLocalChangeSeqNum(
-                db1.getSyncStatusDao().getAndIncrementNextLocalChangeSeqNum(
-                        ExampleSyncableEntity.TABLE_ID, 1));
-        long insertedUid = db1.getExampleSyncableDao().insert(syncableEntity1);
-        dao1.syncWith(dao2, 0);
-        ExampleSyncableEntity syncableEntity2 = dao2.findByUid(insertedUid);
+        //use a dummy repo object to ensure that a syncableprimarykey is generated
+        long insertedUid = clientRepo.getExampleSyncableDao().insert(syncableEntity1);
+
+
+        clientDao.syncWith(serverDao, 0, 100, 100);
+        ExampleSyncableEntity syncableEntity2 = serverDao.findByUid(insertedUid);
         syncableEntity2.setTitle("Updated");
-        syncableEntity2.setMasterChangeSeqNum(db2.getSyncStatusDao()
-                .getAndIncrementNextMasterChangeSeqNum(ExampleSyncableEntity.TABLE_ID, 1));
-        dao2.updateList(Arrays.asList(syncableEntity2));
+        syncableEntity2.setLastChangedBy(0);
+        serverDao.updateList(Arrays.asList(syncableEntity2));
 
-        dao1.syncWith(dao2, 0);
+        clientDao.syncWith(serverDao, 0, 100, 100);
 
-        syncableEntity1 = dao1.findByUid(insertedUid);;
+        syncableEntity1 = clientDao.findByUid(insertedUid);;
         Assert.assertEquals("After sync - entity has been updated on client", "Updated",
                 syncableEntity1.getTitle());
     }
@@ -99,38 +101,13 @@ public class TestSyncableDb  {
 
         Assert.assertEquals("After insert of first entity, entity's local change sequence " +
                         "number = 1", 1, localChangeSeqNumAfterInsert);
-        Assert.assertEquals("Next local change seq num = 2", 2,
-                status.getLocalChangeSeqNum());
         Assert.assertEquals("After update of entity, entity's local change sequence number = 2",
                 2, localChangeSeqNumAfterUpdate);
+        Assert.assertEquals("Next local change seq num = 3", 3,
+                status.getLocalChangeSeqNum());
     }
 
-    @Test
-    public void givenSyncableEntityStatusCreated_whenMasterSeqNumGetAndIncrementCalled_shouldStartAt1AndIncrement() {
-        ExampleDatabase db1 = ExampleDatabase.getInstance(null);
-        db1.clearAll();
-        long firstMasterChangeSeqNum = db1.getSyncStatusDao().getAndIncrementNextMasterChangeSeqNum(
-                42, 1);
-        long masterChangeSeqAfterUpdate = db1.getSyncStatusDao().getAndIncrementNextMasterChangeSeqNum(
-                42, 1);
 
-        Assert.assertEquals(1, firstMasterChangeSeqNum);
-        Assert.assertEquals(2, masterChangeSeqAfterUpdate);
-    }
-
-    @Test
-    public void givenSyncableEntityStatusCreated_whenLocalSeqNumGetAndIncrementCalled_shouldStartAt1AndIncrement() {
-        ExampleDatabase db1 = ExampleDatabase.getInstance(null);
-        db1.clearAll();
-
-        long firstLocalChangeSeqNum = db1.getSyncStatusDao().getAndIncrementNextLocalChangeSeqNum(
-                42, 1);
-        long localChangeSeqAfterUpdate = db1.getSyncStatusDao().getAndIncrementNextLocalChangeSeqNum(
-                42, 1);
-
-        Assert.assertEquals(1, firstLocalChangeSeqNum);
-        Assert.assertEquals(2, localChangeSeqAfterUpdate);
-    }
 
     @Test
     public void givenEntityList_whenAsyncListInsertedByRepo_shouldBeInsertedAndReturnSyncablePksGenerated() {
@@ -159,7 +136,7 @@ public class TestSyncableDb  {
             }
         });
 
-        try { latch.await(2, TimeUnit.MINUTES); }
+        try { latch.await(5, TimeUnit.SECONDS); }
         catch(InterruptedException e) {
             // will not be interrupted
         }
