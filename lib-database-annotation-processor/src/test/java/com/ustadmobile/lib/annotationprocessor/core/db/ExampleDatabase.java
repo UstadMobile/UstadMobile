@@ -94,4 +94,8 @@ public abstract class ExampleDatabase implements UmSyncableDatabase, UmDbWithAut
 
     }
 
+    @Override
+    public int getDeviceBits() {
+        return getSyncablePrimaryKeyDao().getDeviceBits();
+    }
 }

@@ -22,6 +22,7 @@ import com.ustadmobile.lib.database.annotation.UmSyncFindAllChanges;
 import com.ustadmobile.lib.database.annotation.UmSyncFindLocalChanges;
 import com.ustadmobile.lib.database.annotation.UmSyncFindUpdateable;
 import com.ustadmobile.lib.database.annotation.UmSyncIncoming;
+import com.ustadmobile.lib.database.annotation.UmSyncLastChangedBy;
 import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
 import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 import com.ustadmobile.lib.database.annotation.UmSyncOutgoing;
@@ -1155,6 +1156,45 @@ public abstract class AbstractDbProcessor {
         codeBlock.endControlFlow();
 
         return codeBlock;
+    }
+
+    protected CodeBlock generateSetLastChangedBy(ExecutableElement daoMethod,
+                                                    TypeElement daoType,
+                                                    String syncableDbVariableName) {
+        CodeBlock.Builder codeBlock = CodeBlock.builder();
+        DaoMethodInfo methodInfo = new DaoMethodInfo(daoMethod, daoType, processingEnv);
+        TypeMirror entityTypeMirror = methodInfo.resolveEntityParameterComponentType();
+        TypeElement entityTypeEl = (TypeElement)processingEnv.getTypeUtils()
+                .asElement(entityTypeMirror);
+        boolean isListOrArray = methodInfo.hasArrayOrListParameter();
+
+
+        codeBlock.add("int _lastChangedBy = $L.getDeviceBits();\n", syncableDbVariableName);
+        if(isListOrArray) {
+            codeBlock.beginControlFlow("for($T _entity : $L)", entityTypeMirror,
+                    methodInfo.getEntityParameterElement().getSimpleName());
+        }
+
+        Element lastChangedByField = findElementWithAnnotation(entityTypeEl,
+                UmSyncLastChangedBy.class, processingEnv);
+        if(lastChangedByField == null) {
+            messager.printMessage(Diagnostic.Kind.ERROR,
+                    formatMethodForErrorMessage(daoMethod, daoType) +
+                            "GenerateUpdateLastChangedBy entity " +
+                            entityTypeEl.getQualifiedName() + " does not have a field " +
+                            "annotated with UmSyncLastChangedBy", daoType);
+            return CodeBlock.builder().build();
+        }
+
+        codeBlock.add("$L.set$L(_lastChangedBy);\n",
+                isListOrArray ? "_entity" : methodInfo.getEntityParameterElement().getSimpleName(),
+                capitalize(lastChangedByField.getSimpleName()));
+
+        if(isListOrArray){
+            codeBlock.endControlFlow();
+        }
+
+        return codeBlock.build();
     }
 
     /**
