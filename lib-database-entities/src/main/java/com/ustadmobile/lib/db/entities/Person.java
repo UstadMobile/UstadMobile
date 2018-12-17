@@ -5,12 +5,16 @@ import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
 import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 
+import static com.ustadmobile.lib.db.entities.Person.TABLE_ID;
+
 /**
  * Created by mike on 3/8/18.
  */
 
-@UmEntity(tableId = 9)
+@UmEntity(tableId = TABLE_ID)
 public class Person  {
+
+    public static final int TABLE_ID = 9;
 
     public static final int GENDER_UNSET = 0;
 

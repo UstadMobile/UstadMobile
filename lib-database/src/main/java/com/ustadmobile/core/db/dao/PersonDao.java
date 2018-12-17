@@ -4,6 +4,7 @@ import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UmCallbackUtil;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmInsert;
+import com.ustadmobile.lib.database.annotation.UmOnConflictStrategy;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.database.annotation.UmRepository;
 import com.ustadmobile.lib.database.annotation.UmRestAccessible;
@@ -13,6 +14,10 @@ import com.ustadmobile.lib.db.entities.Person;
 import com.ustadmobile.lib.db.entities.PersonAuth;
 import com.ustadmobile.lib.db.entities.UmAccount;
 import com.ustadmobile.lib.db.sync.dao.SyncableDao;
+import com.ustadmobile.lib.db.sync.entities.SyncDeviceBits;
+import com.ustadmobile.lib.db.sync.entities.SyncablePrimaryKey;
+
+import java.util.Random;
 
 import static com.ustadmobile.core.db.dao.PersonAuthDao.ENCRYPTED_PASS_PREFIX;
 
@@ -96,6 +101,8 @@ public abstract class PersonDao implements SyncableDao<Person, PersonDao> {
             public void onSuccess(PersonUidAndPasswordHash result) {
                 if(result == null) {
                     //OK to go ahead and create
+                    long personUid = getAndIncrementPrimaryKey();
+                    newPerson.setPersonUid(personUid);
                     insert(newPerson);
                     PersonAuth newPersonAuth = new PersonAuth(newPerson.getPersonUid(),
                             ENCRYPTED_PASS_PREFIX + PersonAuthDao.encryptPassword(password));
@@ -113,6 +120,37 @@ public abstract class PersonDao implements SyncableDao<Person, PersonDao> {
             }
         });
     }
+
+    protected long getAndIncrementPrimaryKey() {
+        if(getDeviceBits() == 0)
+            insertDeviceBits(new SyncDeviceBits(new Random().nextInt()));
+
+        if(getSequenceNum() == 0)
+            insertSyncablePk(new SyncablePrimaryKey(Person.TABLE_ID, 1));
+
+        long primaryKey = getPrimaryKey();
+        incrementPrimaryKey();
+        return primaryKey;
+    }
+
+    @UmQuery("UPDATE SyncablePrimaryKey SET sequenceNumber = sequenceNumber + 1 WHERE tableId = " + Person.TABLE_ID)
+    protected abstract void incrementPrimaryKey();
+
+    @UmQuery("SELECT (((SELECT deviceBits FROM SyncDeviceBits WHERE id = " + SyncDeviceBits.PRIMARY_KEY + ") << 32) \n" +
+            "           | (SELECT sequenceNumber FROM SyncablePrimaryKey WHERE tableId = " + Person.TABLE_ID +" )) AS newPrimaryKey")
+    protected abstract long getPrimaryKey();
+
+    @UmQuery("SELECT sequenceNumber FROM SyncablePrimaryKey WHERE tableId = " + Person.TABLE_ID)
+    protected abstract int getSequenceNum();
+
+    @UmInsert(onConflict = UmOnConflictStrategy.REPLACE)
+    protected abstract void insertSyncablePk(SyncablePrimaryKey syncablePrimaryKey);
+
+    @UmQuery("SELECT deviceBits FROM SyncDeviceBits WHERE id = " + SyncDeviceBits.PRIMARY_KEY)
+    public abstract long getDeviceBits();
+
+    @UmInsert
+    public abstract void insertDeviceBits(SyncDeviceBits deviceBits);
 
     protected void onSuccessCreateAccessToken(long personUid, String username, UmCallback<UmAccount> callback) {
         AccessToken accessToken = new AccessToken(personUid,
