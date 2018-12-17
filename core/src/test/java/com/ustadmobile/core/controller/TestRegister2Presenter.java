@@ -112,12 +112,14 @@ public class TestRegister2Presenter {
         presenter.setRepo(repo);
         presenter.handleClickRegister(testPerson,VALID_PASS,TEST_URI);
 
-        verify(systemImplSpy, timeout(5000)).go(DESTINATION,
+        verify(systemImplSpy, timeout(5000 * 100)).go(DESTINATION,
                 PlatformTestUtil.getTargetContext());
 
         UmAccount activeAccount = UmAccountManager.getActiveAccount(
                 PlatformTestUtil.getTargetContext());
         Assert.assertNotNull(activeAccount);
+        Assert.assertNotEquals("Active account uid is set ( != 0 )",
+                activeAccount.getPersonUid(), 0);
 
         Assert.assertNotNull("Person object created on client",
                 clientDb.getPersonDao().findByUid(activeAccount.getPersonUid()));
