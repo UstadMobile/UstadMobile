@@ -38,11 +38,16 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.openqa.selenium.By;
-import org.openqa.selenium.Cookie;
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.logging.LogType;
+import org.openqa.selenium.logging.LoggingPreferences;
+import org.openqa.selenium.remote.CapabilityType;
+import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.support.ui.ExpectedCondition;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.w3c.dom.Attr;
 
@@ -64,6 +69,8 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -77,7 +84,8 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-import static com.ustadmobile.lib.contentscrapers.ScraperConstants.CORRECT_KHAN_LINK;
+import sun.rmi.runtime.Log;
+
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING;
 
 
@@ -293,6 +301,22 @@ public class ContentScraperUtil {
 
         return waitDriver.until(jQueryLoad) && waitDriver.until(jsLoad);
     }
+
+    /**
+     * Once Selenium is setup and you load a page, use this method to wait for the page to load completely
+     *
+     * @param waitDriver driver used to wait for conditions on webpage
+     * @return true once wait is complete
+     */
+    public static boolean waitForJSToClearConsole(WebDriverWait waitDriver) {
+
+        // wait for jQuery to load
+        ExpectedCondition<Boolean> jQueryLoad = driver ->
+            ((JavascriptExecutor) driver).executeScript("console.clear()").toString().equals("complete");
+
+        return waitDriver.until(jQueryLoad);
+    }
+
 
 
     /**
@@ -858,30 +882,45 @@ public class ContentScraperUtil {
         return khanImages;
     }
 
-    public static String getCookieForKhan(String url) {
+    public static ChromeDriver getCookieForKhan(String url) {
 
-        ChromeDriver driver = ContentScraperUtil.setupChrome(false);
+        DesiredCapabilities d = DesiredCapabilities.chrome();
+        d.setCapability("opera.arguments", "-screenwidth 1024 -screenheight 768");
+        // d.merge(capabilities);
+        LoggingPreferences logPrefs = new LoggingPreferences();
+        logPrefs.enable(LogType.PERFORMANCE, Level.ALL);
+        d.setCapability(CapabilityType.LOGGING_PREFS, logPrefs);
 
-        String cookie = "";
+        ChromeDriver driver = new ChromeDriver(d);
+
         driver.get(url);
         WebDriverWait waitDriver = new WebDriverWait(driver, 10000);
         ContentScraperUtil.waitForJSandJQueryToLoad(waitDriver);
+        waitDriver.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("div#login-signup-root")));
 
         driver.findElement(By.cssSelector("div#login-signup-root input[id*=email-or-username]")).sendKeys("samih.mustafa@gmail.com");
         driver.findElement(By.cssSelector("div#login-signup-root input[id*=text-field-1-password]")).sendKeys("ustad123");
-        driver.findElement(By.cssSelector("div#login-signup-root div:contains(Log in)")).click();
 
-        for (Cookie ck : driver.manage().getCookies()) {
-
-            if (ck.getName().equalsIgnoreCase("KAID")) {
-                cookie = ck.getName() + "=" + ck.getValue();
-                System.out.println(cookie);
+        List<WebElement> elements = driver.findElements(By.cssSelector("div#login-signup-root div[class*=inner]"));
+        for(WebElement element: elements){
+            if(element.getText().contains("Log in")){
+                element.click();
+                break;
             }
         }
 
-        driver.close();
+        waitDriver.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("h2[class*=moduleTitle]")));
 
-        return cookie;
+
+        JavascriptExecutor js = (JavascriptExecutor)driver;
+        js.executeScript("console.clear()");
+
+        while (driver.manage().logs().get(LogType.PERFORMANCE).getAll().size() != 0){
+            driver.manage().timeouts().implicitlyWait(120, TimeUnit.SECONDS);
+        }
+
+
+        return driver;
     }
 
 }

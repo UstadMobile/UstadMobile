@@ -10,6 +10,8 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Cookie;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -33,8 +35,12 @@ import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.ATTEMPT_FILE;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.ATTEMPT_JSON_FILE;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.ATTEMPT_JSON_LINK;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.ATTEMPT_KHAN_LINK;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.COMPLETE_FILE;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.COMPLETE_KHAN_LINK;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.CORRECT_FILE;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.CORRECT_KHAN_LINK;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.HINT_JSON_FILE;
@@ -90,23 +96,15 @@ public class KhanContentScraper {
 
         ContentScraperUtil.setChromeDriverLocation();
 
-        //String cookie = ContentScraperUtil.getCookieForKhan("https://www.khanacademy.org/login");
+        ChromeDriver driver = ContentScraperUtil.getCookieForKhan("https://www.khanacademy.org/login");
 
         Gson gson = new GsonBuilder().disableHtmlEscaping().create();
 
         File khanDirectory = new File(destinationDirectory, FilenameUtils.getBaseName(scrapUrl));
         khanDirectory.mkdirs();
 
-        DesiredCapabilities d = DesiredCapabilities.chrome();
-        d.setCapability("opera.arguments", "-screenwidth 1024 -screenheight 768");
-        // d.merge(capabilities);
-        LoggingPreferences logPrefs = new LoggingPreferences();
-        logPrefs.enable(LogType.PERFORMANCE, Level.ALL);
-        d.setCapability(CapabilityType.LOGGING_PREFS, logPrefs);
-
         String initialJson = IndexKhanContentScraper.getJsonStringFromScript(scrapUrl);
         SubjectListResponse response = gson.fromJson(initialJson, SubjectListResponse.class);
-        String keyOfNextExercise = response.componentProps.initialItem.sha;
         String exerciseId = "0";
         List<SubjectListResponse.ComponentData.Card.UserExercise.Model.AssessmentItem> exerciseList = null;
         String exerciseName = "";
@@ -128,9 +126,6 @@ public class KhanContentScraper {
 
         }
 
-
-        ChromeDriver driver = new ChromeDriver(d);
-       // driver.manage().addCookie(new Cookie("KAID", cookie));
         driver.get(scrapUrl);
         WebDriverWait waitDriver = new WebDriverWait(driver, 10000);
         ContentScraperUtil.waitForJSandJQueryToLoad(waitDriver);
@@ -172,7 +167,6 @@ public class KhanContentScraper {
                         FileUtils.copyURLToFile(url, file);
                     }
 
-
                     PlixIndex plixIndex = new PlixIndex();
                     plixIndex.url = urlString;
                     plixIndex.mimeType = mimeType;
@@ -183,7 +177,7 @@ public class KhanContentScraper {
 
                 } catch (Exception e) {
                     System.err.println(urlString);
-                    System.err.println(le.getMessage());
+                    System.err.println(le.getMessage()); 
                     e.printStackTrace();
 
                 }
@@ -203,9 +197,7 @@ public class KhanContentScraper {
 
             File file = new File(urlFile, exerciseCount + " question");
 
-            URLConnection connection = practiceUrl.openConnection();
-           // connection.setRequestProperty("Cookie", cookie);
-            String itemData = IOUtils.toString(connection.getInputStream(), UTF_ENCODING);
+            String itemData = IOUtils.toString(practiceUrl, UTF_ENCODING);
             FileUtils.writeStringToFile(file, itemData, UTF_ENCODING);
             ItemResponse itemResponse = gson.fromJson(itemData, ItemResponse.class);
 
@@ -215,18 +207,6 @@ public class KhanContentScraper {
             exerciseIndex.path = urlFile.getName() + "/" + file.getName();
 
             index.add(exerciseIndex);
-
-            for(int sizeCount = 1; sizeCount < exerciseList.size(); sizeCount++){
-
-                PlixIndex sameExercise = new PlixIndex();
-                sameExercise.url = exerciseUrl + exerciseName + exerciseNameUrl + sizeCount + postFixUrl + keyOfNextExercise;
-                sameExercise.mimeType = MIMETYPE_JSON;
-                sameExercise.path = urlFile.getName() + "/" + file.getName();
-
-                index.add(sameExercise);
-            }
-
-            keyOfNextExercise = itemResponse.sha;
 
             ItemData itemContent = gson.fromJson(itemResponse.itemData, ItemData.class);
 
@@ -311,6 +291,14 @@ public class KhanContentScraper {
         PlixIndex tryAgainIndex = ContentScraperUtil.createIndexWithResourceFiles("https://cdn.kastatic.org/images/exercise-try-again.svg",
                 khanDirectory, MIMETYPE_SVG, getClass().getResourceAsStream(TRY_AGAIN_KHAN_LINK), TRY_AGAIN_FILE);
         index.add(tryAgainIndex);
+
+        PlixIndex attmeptIndex = ContentScraperUtil.createIndexWithResourceFiles("https://cdn.kastatic.org/images/end-of-task-card/star-attempted.svg",
+                khanDirectory, MIMETYPE_SVG, getClass().getResourceAsStream(ATTEMPT_KHAN_LINK), ATTEMPT_FILE);
+        index.add(attmeptIndex);
+
+        PlixIndex completeIndex = ContentScraperUtil.createIndexWithResourceFiles("https://cdn.kastatic.org/images/end-of-task-card/star-complete.svg",
+                khanDirectory, MIMETYPE_SVG, getClass().getResourceAsStream(COMPLETE_KHAN_LINK), COMPLETE_FILE);
+        index.add(completeIndex);
 
 
         FileUtils.writeStringToFile(new File(khanDirectory, "index.json"), gson.toJson(index), UTF_ENCODING);

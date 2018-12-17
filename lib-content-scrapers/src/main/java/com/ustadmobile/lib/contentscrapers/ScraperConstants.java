@@ -32,6 +32,12 @@ public class ScraperConstants {
     public static final String CORRECT_KHAN_LINK = "/com/ustadmobile/lib/contentscrapers/khan/exercise-correct.svg";
     public static final String CORRECT_FILE = "exercise-correct.svg";
 
+    public static final String ATTEMPT_KHAN_LINK = "/com/ustadmobile/lib/contentscrapers/khan/star-attempt.svg";
+    public static final String ATTEMPT_FILE = "star-attempt.svg";
+
+    public static final String COMPLETE_KHAN_LINK = "/com/ustadmobile/lib/contentscrapers/khan/star-complete.svg";
+    public static final String COMPLETE_FILE = "star-complete.svg";
+
     public static final String TRY_AGAIN_KHAN_LINK = "/com/ustadmobile/lib/contentscrapers/khan/exercise-try-again.svg";
     public static final String TRY_AGAIN_FILE = "exercise-try-again.svg";
 

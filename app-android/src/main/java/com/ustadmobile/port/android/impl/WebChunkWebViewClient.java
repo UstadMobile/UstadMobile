@@ -88,7 +88,7 @@ public class WebChunkWebViewClient extends WebViewClient {
                     break;
                 }
                 if (e.getKey().contains("/assessment_item") && requestUrl.contains("/assessment_item")) {
-                    int langIndex = requestUrl.indexOf("&lang");
+                    int langIndex = requestUrl.indexOf("?lang");
 
                     String newRequestUrl = requestUrl.substring(0, langIndex);
                     log = indexMap.get(newRequestUrl);

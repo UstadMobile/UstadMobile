@@ -35,8 +35,8 @@ public class TestIndexKhanAcademy {
         File tmpDir = Files.createTempDirectory("testKhanExercisecontentscraper").toFile();
 
         KhanContentScraper scraper = new KhanContentScraper(tmpDir);
-       // scraper.scrapeExerciseContent("https://www.khanacademy.org/math/early-math/cc-early-math-counting-topic/cc-early-math-counting/e/counting-out-1-20-objects");
-        scraper.scrapeExerciseContent("https://www.khanacademy.org/math/early-math/cc-early-math-counting-topic/cc-early-math-counting/e/counting-objects");
+        scraper.scrapeExerciseContent("https://www.khanacademy.org/math/early-math/cc-early-math-counting-topic/cc-early-math-counting/e/counting-out-1-20-objects");
+     //   scraper.scrapeExerciseContent("https://www.khanacademy.org/math/early-math/cc-early-math-counting-topic/cc-early-math-counting/e/counting-objects");
     }
 
 }
