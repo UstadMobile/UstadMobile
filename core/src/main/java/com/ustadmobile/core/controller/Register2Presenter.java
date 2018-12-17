@@ -82,11 +82,23 @@ public class Register2Presenter extends UstadBaseController<Register2View> {
             public void onSuccess(UmAccount result) {
                 if(result != null) {
                     person.setPersonUid(result.getPersonUid());
-                    umAppDatabase.getPersonDao().insert(person);
-                    result.setEndpointUrl(serverUrl);
-                    view.runOnUiThread(() -> view.setInProgress(false));
-                    UmAccountManager.setActiveAccount(result, getContext());
-                    systemImpl.go(mNextDest, getContext());
+                    umAppDatabase.getPersonDao().insertAsync(person, new UmCallback<Long>() {
+                        @Override
+                        public void onSuccess(Long personUid) {
+                            result.setEndpointUrl(serverUrl);
+                            view.runOnUiThread(() -> view.setInProgress(false));
+                            UmAccountManager.setActiveAccount(result, getContext());
+                            systemImpl.go(mNextDest, getContext());
+                        }
+
+                        @Override
+                        public void onFailure(Throwable exception) {
+                            //simple insert - this should not happen
+                            view.runOnUiThread(() -> view.setErrorMessageView(systemImpl.getString(
+                                    MessageID.err_registering_new_user, getContext())));
+                        }
+                    });
+
                 }else {
                     view.runOnUiThread(() -> {
                         view.setErrorMessageView(systemImpl.getString(MessageID.err_registering_new_user,
