@@ -107,7 +107,6 @@ public class KhanContentScraper {
         SubjectListResponse response = gson.fromJson(initialJson, SubjectListResponse.class);
         String exerciseId = "0";
         List<SubjectListResponse.ComponentData.Card.UserExercise.Model.AssessmentItem> exerciseList = null;
-        String exerciseName = "";
 
         List<SubjectListResponse.ComponentData.Card.UserExercise> contentModel = response.componentProps.initialCards.userExercises;
         for(SubjectListResponse.ComponentData.Card.UserExercise content: contentModel){
@@ -122,7 +121,8 @@ public class KhanContentScraper {
 
             exerciseList = content.exerciseModel.allAssessmentItems;
             exerciseId = content.exerciseModel.id;
-            exerciseName = content.exerciseModel.name;
+
+            break;
 
         }
 
@@ -177,7 +177,7 @@ public class KhanContentScraper {
 
                 } catch (Exception e) {
                     System.err.println(urlString);
-                    System.err.println(le.getMessage()); 
+                    System.err.println(le.getMessage());
                     e.printStackTrace();
 
                 }
