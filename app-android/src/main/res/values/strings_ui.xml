@@ -11,6 +11,9 @@ This is the one you should be editing. The one in /core/locale/main/values/strin
     <string name='error'>Error</string>
     <string name='err_registering_new_user'>Error registering new user:</string>
     <string name='registering'>Registering</string>
+    <string name="register_empty_fields">Please fill out all required fields</string>
+    <string name="register_incorrect_email">Wrong email address</string>
+
     <string name='wrong_user_pass_combo'>Wrong username/password: try again.</string>
     <string name='login_network_error'>Network error: please check you are online.</string>P
     <string name='authenticating'>Authenticating</string>
@@ -233,6 +236,8 @@ This is the one you should be editing. The one in /core/locale/main/values/strin
     <!-- Registration dialog feedback -->
     <string name="field_required_prompt">This field is required</string>
     <string name="field_password_min">Minimum 5 characters</string>
+    <string name="field_password_error_min">Password should be at least 5 characters</string>
+    <string name="filed_password_no_match">Password doesn\'t match, try again</string>
 
     <!-- Update student details action button -->
     <string name="update">Update</string>
@@ -475,5 +480,7 @@ This is the one you should be editing. The one in /core/locale/main/values/strin
 
 
     <string name="content_entry_not_found">ContentEntry Not Found</string>
+
+
 
 </resources>

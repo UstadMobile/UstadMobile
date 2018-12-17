@@ -61,6 +61,8 @@ public class TestRetrofitInterface {
     @Test
     public void testGetString() throws IOException {
         ExampleDatabase db = ExampleDatabase.getInstance(null);
+        db.clearAll();
+
         ExampleSyncableEntity e1 = new ExampleSyncableEntity();
         e1.setTitle("Get Retrofit");
         long uid = db.getExampleSyncableDao().insert(e1);

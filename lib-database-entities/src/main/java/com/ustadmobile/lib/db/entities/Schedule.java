@@ -2,6 +2,7 @@ package com.ustadmobile.lib.db.entities;
 
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
+import com.ustadmobile.lib.database.annotation.UmSyncLastChangedBy;
 import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
 import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 
@@ -67,6 +68,17 @@ public class Schedule {
 
     @UmSyncLocalChangeSeqNum
     private long scheduleLocalChangeSeqNum;
+
+    @UmSyncLastChangedBy
+    private int scheduleLastChangedBy;
+
+    public int getScheduleLastChangedBy() {
+        return scheduleLastChangedBy;
+    }
+
+    public void setScheduleLastChangedBy(int scheduleLastChangedBy) {
+        this.scheduleLastChangedBy = scheduleLastChangedBy;
+    }
 
     //active or removed
     private boolean scheduleActive;

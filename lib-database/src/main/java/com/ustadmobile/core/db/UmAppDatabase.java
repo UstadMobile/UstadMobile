@@ -1,5 +1,6 @@
 package com.ustadmobile.core.db;
 
+import com.ustadmobile.core.db.dao.AccessTokenDao;
 import com.ustadmobile.core.db.dao.ClazzActivityChangeDao;
 import com.ustadmobile.core.db.dao.ClazzActivityDao;
 import com.ustadmobile.core.db.dao.ClazzDao;
@@ -56,6 +57,7 @@ import com.ustadmobile.lib.database.annotation.UmDatabase;
 import com.ustadmobile.lib.database.annotation.UmDbContext;
 import com.ustadmobile.lib.database.annotation.UmRepository;
 import com.ustadmobile.lib.database.annotation.UmSyncOutgoing;
+import com.ustadmobile.lib.db.UmDbWithAuthenticator;
 import com.ustadmobile.lib.db.entities.AccessToken;
 import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.ClazzActivity;
@@ -140,7 +142,7 @@ import java.util.Hashtable;
         SyncStatus.class, SyncablePrimaryKey.class, SyncDeviceBits.class,
         AccessToken.class, PersonAuth.class
 })
-public abstract class UmAppDatabase implements UmSyncableDatabase{
+public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthenticator {
 
     private static volatile UmAppDatabase instance;
 
@@ -278,6 +280,8 @@ public abstract class UmAppDatabase implements UmSyncableDatabase{
 
     public abstract PersonAuthDao getPersonAuthDao();
 
+    public abstract AccessTokenDao getAccessTokenDao();
+
     @UmDbContext
     public abstract Object getContext();
 
@@ -301,6 +305,19 @@ public abstract class UmAppDatabase implements UmSyncableDatabase{
     public abstract UmAppDatabase getRepository(String baseUrl, String auth);
 
     @UmSyncOutgoing
-    public abstract void syncWith(UmAppDatabase otherDb, long accountUid);
+    public abstract void syncWith(UmAppDatabase otherDb, long accountUid, int sendLimit, int receiveLimit);
 
+
+    @Override
+    public boolean validateAuth(long personUid, String auth) {
+        if(personUid == 0)
+            return true;//Anonymous or guest access
+
+        return getAccessTokenDao().isValidToken(personUid, auth);
+    }
+
+    @Override
+    public int getDeviceBits() {
+        return getSyncablePrimaryKeyDao().getDeviceBits();
+    }
 }

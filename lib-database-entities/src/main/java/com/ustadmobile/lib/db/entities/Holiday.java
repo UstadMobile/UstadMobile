@@ -2,6 +2,7 @@ package com.ustadmobile.lib.db.entities;
 
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
+import com.ustadmobile.lib.database.annotation.UmSyncLastChangedBy;
 import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
 import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 
@@ -26,6 +27,17 @@ public class Holiday {
 
     @UmSyncMasterChangeSeqNum
     private long holidayMasterChangeSeqNum;
+
+    public int getHolidayLastChangedBy() {
+        return holidayLastChangedBy;
+    }
+
+    public void setHolidayLastChangedBy(int holidayLastChangedBy) {
+        this.holidayLastChangedBy = holidayLastChangedBy;
+    }
+
+    @UmSyncLastChangedBy
+    private int holidayLastChangedBy;
 
     public long getHolidayMasterChangeSeqNum() {
         return holidayMasterChangeSeqNum;

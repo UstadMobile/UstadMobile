@@ -2,6 +2,7 @@ package com.ustadmobile.lib.db.entities;
 
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
+import com.ustadmobile.lib.database.annotation.UmSyncLastChangedBy;
 import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
 import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 
@@ -22,6 +23,19 @@ public class ClazzActivityChange{
     private int clazzActivityUnitOfMeasure;
 
     private boolean clazzActivityChangeActive;
+
+    public int getClazzActivityChangeLastChangedBy() {
+        return clazzActivityChangeLastChangedBy;
+    }
+
+    public void setClazzActivityChangeLastChangedBy(int clazzActivityChangeLastChangedBy) {
+        this.clazzActivityChangeLastChangedBy = clazzActivityChangeLastChangedBy;
+    }
+
+    @UmSyncLastChangedBy
+    private int clazzActivityChangeLastChangedBy;
+
+
 
     public boolean isClazzActivityChangeActive() {
         return clazzActivityChangeActive;

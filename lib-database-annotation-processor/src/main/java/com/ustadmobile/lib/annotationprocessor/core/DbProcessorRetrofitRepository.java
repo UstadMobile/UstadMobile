@@ -12,6 +12,7 @@ import com.ustadmobile.core.impl.UmCallbackResultOverrider;
 import com.ustadmobile.lib.database.annotation.UmClearAll;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmDbContext;
+import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.database.annotation.UmQueryFindByPrimaryKey;
 import com.ustadmobile.lib.database.annotation.UmRepository;
@@ -329,6 +330,9 @@ public class DbProcessorRetrofitRepository extends AbstractDbProcessor {
             codeBlock.add("$1T _syncableDb = ($1T)_db;\n", UmSyncableDatabase.class);
 
 
+            TypeMirror entityParamComponentType = methodInfo.isUpdateOrInsert() ?
+                    methodInfo.resolveEntityParameterComponentType() : null;
+
             if(repoMethodMode == UmRepository.UmRepositoryMethodType
                     .INCREMENT_CHANGE_SEQ_NUMS_THEN_DELEGATE_TO_DAO
                     && repoMethod.getAnnotation(UmUpdate.class) != null
@@ -337,6 +341,24 @@ public class DbProcessorRetrofitRepository extends AbstractDbProcessor {
                 codeBlock.add(generateUpdateSetChangeSeqNumSection(repoMethod, daoType,
                         "_syncableDb").build());
             }
+
+            boolean isUpdateOrInsertSetLastChangedBy = methodInfo.isUpdateOrInsert() &&
+                    ((repoMethod.getAnnotation(UmUpdate.class) != null
+                            && !repoMethod.getAnnotation(UmUpdate.class).preserveLastChangedBy())
+                    || (repoMethod.getAnnotation(UmInsert.class) != null
+                            && !repoMethod.getAnnotation(UmInsert.class).preserveLastChangedBy()));
+
+            if((repoMethodMode == UmRepository.UmRepositoryMethodType
+                    .INCREMENT_CHANGE_SEQ_NUMS_THEN_DELEGATE_TO_DAO
+                        || repoMethodMode == UmRepository.UmRepositoryMethodType.DELEGATE_TO_DAO)
+                    && isUpdateOrInsertSetLastChangedBy
+                    && DbProcessorUtils.entityHasChangeSequenceNumbers(entityParamComponentType,
+                    processingEnv)) {
+
+                codeBlock.add(generateSetLastChangedBy(repoMethod, daoType, "_syncableDb"));
+            }
+
+
 
             if(methodInfo.isInsertWithAutoSyncPrimaryKey()) {
                 codeBlock.add(generateSetSyncablePrimaryKey(repoMethod, daoType, processingEnv,
@@ -362,7 +384,7 @@ public class DbProcessorRetrofitRepository extends AbstractDbProcessor {
                                 .asElement(varEl.asType()))){
                             codeBlock.add(varEl.getSimpleName().toString());
                         }else {
-                            codeBlock.add("new $T($L, _syncablePkResult)",
+                            codeBlock.add("new $T<>($L, _syncablePkResult)",
                                     UmCallbackResultOverrider.class,
                                     varEl.getSimpleName());
                         }
@@ -403,9 +425,13 @@ public class DbProcessorRetrofitRepository extends AbstractDbProcessor {
                     boolean isVoid = methodInfo.resolveResultType().getKind().equals(TypeKind.VOID);
                     codeBlock.beginControlFlow("try");
                     if(!isVoid) {
-                        codeBlock.add("return _call.execute().body();\n");
+                        codeBlock.add("$T<$T> _response = _call.execute();\n",
+                                retrofit2.Response.class, methodInfo.resolveResultType())
+                                .add("$T _result = _response.body();\n",
+                                methodInfo.resolveResultType())
+                            .add("return _result;\n");
                     }else {
-                        codeBlock.add("_cal.execute();\n");
+                        codeBlock.add("_call.execute();\n");
                     }
                     codeBlock.nextControlFlow("catch($T _ioe)", IOException.class)
                             .add("_ioe.printStackTrace();\n")

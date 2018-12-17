@@ -2,6 +2,7 @@ package com.ustadmobile.lib.db.entities;
 
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
+import com.ustadmobile.lib.database.annotation.UmSyncLastChangedBy;
 import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
 import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 
@@ -27,6 +28,16 @@ public class Location {
     @UmSyncMasterChangeSeqNum
     private long locationMasterChangeSeqNum;
 
+    public int getLocationLastChangedBy() {
+        return locationLastChangedBy;
+    }
+
+    public void setLocationLastChangedBy(int locationLastChangedBy) {
+        this.locationLastChangedBy = locationLastChangedBy;
+    }
+
+    @UmSyncLastChangedBy
+    private int locationLastChangedBy;
 
     public String getLng() {
         return lng;

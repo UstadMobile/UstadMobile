@@ -19,25 +19,24 @@ public class TestSyncableDb  {
 
     @Test
     public void givenSyncableEntityCreatedOnClient_whenSynced_shouldBeRetrievableOnMaster() {
-        ExampleDatabase db1 = ExampleDatabase.getInstance(null, "db1");
-        ExampleDatabase db2 = ExampleDatabase.getInstance(null, "db2");
-        db1.clearAll();
-        db2.clearAll();
+        ExampleDatabase clientDb = ExampleDatabase.getInstance(null, "db1");
+        ExampleDatabase masterDb = ExampleDatabase.getInstance(null);
+        clientDb.clearAll();
+        masterDb.clearAll();
 
-        db2.setMaster(true);
+        masterDb.setMaster(true);
 
         ExampleSyncableEntity syncableEntity1 = new ExampleSyncableEntity();
         syncableEntity1.setTitle("Syncable 1");
-        syncableEntity1.setLocalChangeSeqNum(
-                db1.getSyncStatusDao().getAndIncrementNextLocalChangeSeqNum(
-                        ExampleSyncableEntity.TABLE_ID, 1));
-        long insertedUid = db1.getExampleSyncableDao().insert(syncableEntity1);
 
-        ExampleSyncableDao dao1 = db1.getExampleSyncableDao();
-        ExampleSyncableDao dao2 = db2.getExampleSyncableDao();
-        dao1.syncWith(dao2, 0);
+        long insertedUid = clientDb.getRepository("http://localhost/", "")
+            .getExampleSyncableDao().insert(syncableEntity1);
 
-        ExampleSyncableEntity syncableEntity2 = db2.getExampleSyncableDao().findByUid(insertedUid);
+        ExampleSyncableDao dao1 = clientDb.getExampleSyncableDao();
+        ExampleSyncableDao dao2 = masterDb.getExampleSyncableDao();
+        dao1.syncWith(dao2, 0, 100, 100);
+
+        ExampleSyncableEntity syncableEntity2 = masterDb.getExampleSyncableDao().findByUid(insertedUid);
         Assert.assertNotNull("Syncable entity was transferred to db2", syncableEntity2);
     }
 
@@ -45,8 +44,12 @@ public class TestSyncableDb  {
     public void givenSyncableEntityUpdatedOnMaster_whenSynced_shouldBeUpdatedOnClient() {
         ExampleDatabase clientDb = ExampleDatabase.getInstance(null, "db1");
         ExampleDatabase serverDb = ExampleDatabase.getInstance(null);
+        ExampleDatabase clientRepo = clientDb.getRepository("http://localhost/dummy/", "");
+
         ExampleSyncableDao clientDao = clientDb.getExampleSyncableDao();
         ExampleSyncableDao serverDao = serverDb.getExampleSyncableDao();
+
+        ExampleSyncableDao clientDaoRepo = clientRepo.getExampleSyncableDao();
 
         clientDb.clearAll();
         serverDb.clearAll();
@@ -55,18 +58,17 @@ public class TestSyncableDb  {
 
         ExampleSyncableEntity syncableEntity1 = new ExampleSyncableEntity();
         syncableEntity1.setTitle("Syncable 1");
-        syncableEntity1.setLocalChangeSeqNum(
-                clientDb.getSyncStatusDao().getAndIncrementNextLocalChangeSeqNum(
-                        ExampleSyncableEntity.TABLE_ID, 1));
-        long insertedUid = clientDb.getExampleSyncableDao().insert(syncableEntity1);
-        clientDao.syncWith(serverDao, 0);
+        //use a dummy repo object to ensure that a syncableprimarykey is generated
+        long insertedUid = clientRepo.getExampleSyncableDao().insert(syncableEntity1);
+
+
+        clientDao.syncWith(serverDao, 0, 100, 100);
         ExampleSyncableEntity syncableEntity2 = serverDao.findByUid(insertedUid);
         syncableEntity2.setTitle("Updated");
-        syncableEntity2.setMasterChangeSeqNum(serverDb.getSyncStatusDao()
-                .getAndIncrementNextMasterChangeSeqNum(ExampleSyncableEntity.TABLE_ID, 1));
+        syncableEntity2.setLastChangedBy(0);
         serverDao.updateList(Arrays.asList(syncableEntity2));
 
-        clientDao.syncWith(serverDao, 0);
+        clientDao.syncWith(serverDao, 0, 100, 100);
 
         syncableEntity1 = clientDao.findByUid(insertedUid);;
         Assert.assertEquals("After sync - entity has been updated on client", "Updated",
@@ -134,7 +136,7 @@ public class TestSyncableDb  {
             }
         });
 
-        try { latch.await(2, TimeUnit.MINUTES); }
+        try { latch.await(5, TimeUnit.SECONDS); }
         catch(InterruptedException e) {
             // will not be interrupted
         }

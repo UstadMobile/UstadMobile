@@ -2,6 +2,7 @@ package com.ustadmobile.lib.db.entities;
 
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
+import com.ustadmobile.lib.database.annotation.UmSyncLastChangedBy;
 import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
 import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 
@@ -32,6 +33,17 @@ public class FeedEntry {
 
     @UmSyncMasterChangeSeqNum
     private long feedEntryMasterChangeSeqNum;
+
+    public int getFeedEntryLastChangedBy() {
+        return feedEntryLastChangedBy;
+    }
+
+    public void setFeedEntryLastChangedBy(int feedEntryLastChangedBy) {
+        this.feedEntryLastChangedBy = feedEntryLastChangedBy;
+    }
+
+    @UmSyncLastChangedBy
+    private int feedEntryLastChangedBy;
 
 
     public long getFeedEntryLocalChangeSeqNum() {

@@ -16,17 +16,15 @@ import java.util.Random;
 @UmDao
 public abstract class SyncablePrimaryKeyDao  {
 
-    private long deviceBits = -1;
+    private int deviceBits = -1;
+
+    private long deviceMask = -1L;
+
 
     public long getAndIncrement(int tableId, int increment) {
-        if(deviceBits == -1) {
+        if(deviceMask== -1) {
             deviceBits = getDeviceBits();
-            if(deviceBits == 0) {
-                deviceBits = new Random().nextInt();
-                insertDeviceBits(new SyncDeviceBits((int)deviceBits));
-            }
-
-            deviceBits <<= 32;
+            deviceMask = ((long)deviceBits << 32);
         }
 
 
@@ -37,7 +35,7 @@ public abstract class SyncablePrimaryKeyDao  {
 
         updateNextSequenceNumber(tableId, increment);
 
-        return deviceBits | nextSequenceNumber;
+        return deviceMask | nextSequenceNumber;
     }
 
     @UmQuery("SELECT sequenceNumber FROM SyncablePrimaryKey WHERE tableId = :tableId")
@@ -49,8 +47,21 @@ public abstract class SyncablePrimaryKeyDao  {
     @UmQuery("UPDATE SyncablePrimaryKey SET sequenceNumber = sequenceNumber + :increment WHERE tableId = :tableId")
     public abstract void updateNextSequenceNumber(int tableId, int increment);
 
+
+    public int getDeviceBits() {
+        if(deviceBits == -1) {
+            deviceBits = selectDeviceBits();
+            if(deviceBits == 0) {
+                deviceBits = new Random().nextInt();
+                insertDeviceBits(new SyncDeviceBits((int)deviceBits));
+            }
+        }
+
+        return deviceBits;
+    }
+
     @UmQuery("SELECT deviceBits FROM SyncDeviceBits WHERE id = " + SyncDeviceBits.PRIMARY_KEY)
-    public abstract long getDeviceBits();
+    protected abstract int selectDeviceBits();
 
     @UmInsert
     public abstract void insertDeviceBits(SyncDeviceBits deviceBits);

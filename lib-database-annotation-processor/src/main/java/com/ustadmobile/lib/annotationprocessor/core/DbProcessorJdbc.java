@@ -778,8 +778,9 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
 
 
         if(isList || isArray) {
-            codeBlock.beginControlFlow("for($T _element : $L)", entityTypeElement,
-                    daoMethod.getParameters().get(0).getSimpleName().toString());
+            codeBlock.add("_connection.setAutoCommit(false);\n")
+                    .beginControlFlow("for($T _element : $L)", entityTypeElement,
+                        daoMethod.getParameters().get(0).getSimpleName().toString());
         }
 
         String preparedStmtToUseVarName = hasAutoIncrementKey ? "_stmtToUse" : preparedStmtVarName;
@@ -817,6 +818,8 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
             if(hasAutoIncrementKey)
                 codeBlock.add("$L.executeBatch();\n", autoIncPreparedStmtVarName);
 
+            codeBlock.add("_connection.commit();\n")
+                    .add("_connection.setAutoCommit(true);\n");
         }else {
             codeBlock.add("$L.execute();\n", preparedStmtToUseVarName);
         }
@@ -1022,7 +1025,8 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                 daoMethod.getParameters().get(0).getSimpleName().toString();
 
         if(isListOrArray) {
-            codeBlock.beginControlFlow("for($T _element : $L)",
+            codeBlock.add("_connection.setAutoCommit(false);\n")
+                .beginControlFlow("for($T _element : $L)",
                     entityTypeElement, daoMethod.getParameters().get(0).getSimpleName().toString());
         }
 
@@ -1048,7 +1052,9 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
             codeBlock.add("_stmt.addBatch();\n")
                     .endControlFlow()
                     .add("numUpdates = $T.sumUpdateTotals(_stmt.executeBatch());\n",
-                            JdbcDatabaseUtils.class);
+                            JdbcDatabaseUtils.class)
+                    .add("_connection.commit();\n")
+                    .add("_connection.setAutoCommit(true);\n");
         }else {
             codeBlock.add("numUpdates = _stmt.executeUpdate();\n");
         }
@@ -1212,10 +1218,7 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
         TypeMirror resultType = daoMethodInfo.resolveResultType();
 
         List<String> namedParams = getNamedParameters(querySql);
-        String preparedStmtSql = querySql;
-        for(String paramName : namedParams) {
-            preparedStmtSql = preparedStmtSql.replace(":" + paramName, "?");
-        }
+        String preparedStmtSql = replaceNamedParameters(namedParams, querySql, "?");
 
         boolean returnsList = false;
         boolean returnsArray = false;
@@ -1515,11 +1518,13 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
         codeBlock.add("resultSet = stmt.executeQuery();\n");
 
 
+        List<String> namedParams = getNamedParameters(querySql);
+        String testQuery = replaceNamedParameters(namedParams, querySql, "1");
         try(
             Connection dbConnection = nameToDataSourceMap.get(dbType.getQualifiedName().toString())
                     .getConnection();
             Statement stmt = dbConnection.createStatement();
-            ResultSet results = stmt.executeQuery(querySql);
+            ResultSet results = stmt.executeQuery(testQuery);
         ) {
             ResultSetMetaData metaData = results.getMetaData();
             if(primitiveOrStringReturn && metaData.getColumnCount() != 1) {
@@ -1575,6 +1580,7 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
             messager.printMessage(Diagnostic.Kind.ERROR,
                     "Exception generating query method for: " +
                             formatMethodForErrorMessage(daoMethod) + ": " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -1707,6 +1713,15 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
         }
 
         return namedParams;
+    }
+
+    private String replaceNamedParameters(List<String> namedParams, String querySql, String replacement) {
+        String preparedStmtSql = querySql;
+        for(String paramName : namedParams) {
+            preparedStmtSql = preparedStmtSql.replace(":" + paramName, replacement);
+        }
+
+        return preparedStmtSql;
     }
 
     private Map<String, String> findArrayParameters(List<? extends VariableElement> paramList) {

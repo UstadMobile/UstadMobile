@@ -2,6 +2,7 @@ package com.ustadmobile.lib.db.entities;
 
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
+import com.ustadmobile.lib.database.annotation.UmSyncLastChangedBy;
 import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
 import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 
@@ -19,12 +20,22 @@ public class SocialNominationQuestionResponseNomination {
     //<-> SocialNominationQuestionResponse entity.
     private long socialNominationQuestionResponseNominationSocialNominationQuestionResponseUId;
 
-
     @UmSyncMasterChangeSeqNum
     private long scheduleNominationQuestionResponseNominationMasterChangeSeqNum;
 
     @UmSyncLocalChangeSeqNum
     private long scheduleNominationQuestionResponseNominationLocalChangeSeqNum;
+
+    public int getSocialNominationQuestionResponseNominationLastChangedBy() {
+        return socialNominationQuestionResponseNominationLastChangedBy;
+    }
+
+    public void setSocialNominationQuestionResponseNominationLastChangedBy(int socialNominationQuestionResponseNominationLastChangedBy) {
+        this.socialNominationQuestionResponseNominationLastChangedBy = socialNominationQuestionResponseNominationLastChangedBy;
+    }
+
+    @UmSyncLastChangedBy
+    private int socialNominationQuestionResponseNominationLastChangedBy;
 
     public long getSocialNominationQuestionResponseNominationUid() {
         return socialNominationQuestionResponseNominationUid;

@@ -89,4 +89,13 @@ public abstract class ExampleDatabase implements UmSyncableDatabase, UmDbWithAut
         else
             return validAuthTokens.get(userUid).equals(auth);
     }
+
+    public void syncWith(ExampleDatabase otherDb, long personUid, int sendLimit,int receiveLimit) {
+
+    }
+
+    @Override
+    public int getDeviceBits() {
+        return getSyncablePrimaryKeyDao().getDeviceBits();
+    }
 }

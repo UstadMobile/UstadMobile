@@ -26,6 +26,10 @@ sourceSets {
         java {
             srcDirs += ["build/generated/source/umdbprocessor"]
         }
+
+        resources {
+            srcDirs += "../core/src/main/assets"
+        }
     }
 }
 

@@ -2,6 +2,7 @@ package com.ustadmobile.lib.db.entities;
 
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
+import com.ustadmobile.lib.database.annotation.UmSyncLastChangedBy;
 import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
 import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 
@@ -31,6 +32,9 @@ public class ContentCategory {
 
     @UmSyncMasterChangeSeqNum
     private long contentCategoryMasterChangeSeqNum;
+
+    @UmSyncLastChangedBy
+    private int contentCategoryLastChangedBy;
 
     public long getContentCategoryUid() {
         return contentCategoryUid;
@@ -70,6 +74,14 @@ public class ContentCategory {
 
     public void setContentCategoryMasterChangeSeqNum(long contentCategoryMasterChangeSeqNum) {
         this.contentCategoryMasterChangeSeqNum = contentCategoryMasterChangeSeqNum;
+    }
+
+    public int getContentCategoryLastChangedBy() {
+        return contentCategoryLastChangedBy;
+    }
+
+    public void setContentCategoryLastChangedBy(int contentCategoryLastChangedBy) {
+        this.contentCategoryLastChangedBy = contentCategoryLastChangedBy;
     }
 
     @Override
