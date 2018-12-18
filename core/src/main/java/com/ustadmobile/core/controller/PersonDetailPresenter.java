@@ -102,14 +102,19 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
         personDao.findByUidAsync(personUid, new UmCallback<Person>() {
             @Override
             public void onSuccess(Person thisPerson) {
-                if(thisPerson.getFatherNumber() != null && !thisPerson.getFatherNumber().isEmpty()){
-                    oneParentNumber = thisPerson.getFatherNumber();
-                }else if(thisPerson.getMotherNum() != null && !thisPerson.getMotherNum().isEmpty()){
-                    oneParentNumber = thisPerson.getMotherNum();
+                if(thisPerson != null) {
+                    if(thisPerson.getFatherNumber() != null && !thisPerson.getFatherNumber().isEmpty()){
+                        oneParentNumber = thisPerson.getFatherNumber();
+                    }else if(thisPerson.getMotherNum() != null && !thisPerson.getMotherNum().isEmpty()){
+                        oneParentNumber = thisPerson.getMotherNum();
+                    }
+                    if(thisPerson.getImagePath() != null){
+                        view.runOnUiThread(() -> view.updateImageOnView(thisPerson.getImagePath()));
+                    }
+                }else {
+                    //Todo: show this entity has not loaded yet
                 }
-                if(thisPerson.getImagePath() != null){
-                    view.runOnUiThread(() -> view.updateImageOnView(thisPerson.getImagePath()));
-                }
+
             }
 
             @Override

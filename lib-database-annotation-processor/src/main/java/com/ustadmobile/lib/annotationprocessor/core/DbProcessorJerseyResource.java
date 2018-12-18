@@ -142,6 +142,9 @@ public class DbProcessorJerseyResource extends AbstractDbProcessor {
 
             if (methodInfo.isAsyncMethod()) {
                 codeBlock.add("$1T _latch = new $1T(1);\n", CountDownLatch.class);
+                codeBlock.add("$1T<Throwable> _exceptionRef = new $1T<>();\n",
+                        AtomicReference.class);
+
                 if (!isVoidResult)
                     codeBlock.add("$1T<$2T> _resultRef = new $1T<>($3L);\n", AtomicReference.class,
                             methodInfo.resolveResultType(),isAutoSyncInsert ? "_syncablePkResult" : "");
@@ -176,6 +179,7 @@ public class DbProcessorJerseyResource extends AbstractDbProcessor {
                                         MethodSpec.methodBuilder("onFailure")
                                                 .addModifiers(Modifier.PUBLIC)
                                                 .addParameter(Throwable.class, "_throwable")
+                                                .addCode("_exceptionRef.set(_throwable);\n")
                                                 .addCode("_latch.countDown();\n").build()).build();
                         codeBlock.add("$L", callbackTypeSpec);
 
@@ -190,6 +194,12 @@ public class DbProcessorJerseyResource extends AbstractDbProcessor {
                                 TimeUnit.class)
                         .nextControlFlow("catch($T _e)", InterruptedException.class)
                         .endControlFlow();
+
+                codeBlock.beginControlFlow("if(_exceptionRef.get() != null)")
+                        .add("throw new $T($S, _exceptionRef.get(), 500);\n", WebApplicationException.class,
+                                "Exception")
+                        .endControlFlow();
+
                 if (!isVoidResult) {
                     codeBlock.add("return ");
                     if(primitiveToStringResult)
