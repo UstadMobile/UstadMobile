@@ -28,14 +28,6 @@ public class Location {
     @UmSyncMasterChangeSeqNum
     private long locationMasterChangeSeqNum;
 
-    public int getLocationLastChangedBy() {
-        return locationLastChangedBy;
-    }
-
-    public void setLocationLastChangedBy(int locationLastChangedBy) {
-        this.locationLastChangedBy = locationLastChangedBy;
-    }
-
     @UmSyncLastChangedBy
     private int locationLastChangedBy;
 
@@ -101,5 +93,13 @@ public class Location {
 
     public void setLocationMasterChangeSeqNum(long locationMasterChangeSeqNum) {
         this.locationMasterChangeSeqNum = locationMasterChangeSeqNum;
+    }
+
+    public int getLocationLastChangedBy() {
+        return locationLastChangedBy;
+    }
+
+    public void setLocationLastChangedBy(int locationLastChangedBy) {
+        this.locationLastChangedBy = locationLastChangedBy;
     }
 }

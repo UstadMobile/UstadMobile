@@ -40,6 +40,9 @@ public class ClazzMember {
     @UmSyncMasterChangeSeqNum
     private long clazzMemberMasterChangeSeqNum;
 
+    @UmSyncLastChangedBy
+    private int clazzMemberLastChangedBy;
+
     public boolean isClazzMemberActive() {
         return clazzMemberActive;
     }
@@ -47,9 +50,6 @@ public class ClazzMember {
     public void setClazzMemberActive(boolean clazzMemberActive) {
         this.clazzMemberActive = clazzMemberActive;
     }
-
-    @UmSyncLastChangedBy
-    private int clazzMemberLastChangedBy;
 
     public long getClazzMemberUid() {
         return clazzMemberUid;

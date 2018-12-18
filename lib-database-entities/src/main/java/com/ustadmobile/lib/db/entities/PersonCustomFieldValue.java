@@ -35,6 +35,9 @@ public class PersonCustomFieldValue {
     @UmSyncLocalChangeSeqNum
     private long personCustomFieldValueLocalChangeSeqNum;
 
+    @UmSyncLastChangedBy
+    private int personCustomFieldValueLastChangedBy;
+
     public int getPersonCustomFieldValueLastChangedBy() {
         return personCustomFieldValueLastChangedBy;
     }
@@ -42,10 +45,6 @@ public class PersonCustomFieldValue {
     public void setPersonCustomFieldValueLastChangedBy(int personCustomFieldValueLastChangedBy) {
         this.personCustomFieldValueLastChangedBy = personCustomFieldValueLastChangedBy;
     }
-
-    @UmSyncLastChangedBy
-    private int personCustomFieldValueLastChangedBy;
-
 
     public long getPersonCustomFieldValueMasterChangeSeqNum() {
         return personCustomFieldValueMasterChangeSeqNum;
@@ -95,4 +94,5 @@ public class PersonCustomFieldValue {
     public void setFieldValue(String fieldValue) {
         this.fieldValue = fieldValue;
     }
+
 }

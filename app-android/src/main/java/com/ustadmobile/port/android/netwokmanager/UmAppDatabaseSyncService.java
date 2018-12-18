@@ -64,8 +64,8 @@ public class UmAppDatabaseSyncService extends Service implements LifecycleObserv
                             activeAccount != null ? activeAccount.getPersonUid() : 0, 100, 100);
                     UstadMobileSystemImpl.l(UMLog.INFO, 100, "database syncWith repo ran");
                 }catch(Exception e) {
-                    UstadMobileSystemImpl.l(UMLog.WARN, 101, "Exception running syncWith",
-                            e);
+                    UstadMobileSystemImpl.l(UMLog.WARN, 101, "Exception running syncWith :" +
+                            e.getMessage());
                 }
             }
             long timeToNextRun = (startTime + MAX_INTERVAL) - System.currentTimeMillis();

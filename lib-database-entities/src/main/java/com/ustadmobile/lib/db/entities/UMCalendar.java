@@ -20,6 +20,8 @@ public class UMCalendar implements SyncableEntity{
     //The name of this calendar
     private String umCalendarName;
 
+
+    //todo: seems like wrong prefix
     @UmSyncMasterChangeSeqNum
     private long personMasterChangeSeqNum;
 
@@ -28,14 +30,6 @@ public class UMCalendar implements SyncableEntity{
 
     @UmSyncLastChangedBy
     private int umCalendarLastChangedBy;
-
-    public int getUmCalendarLastChangedBy() {
-        return umCalendarLastChangedBy;
-    }
-
-    public void setUmCalendarLastChangedBy(int umCalendarLastChangedBy) {
-        this.umCalendarLastChangedBy = umCalendarLastChangedBy;
-    }
 
     public long getPersonMasterChangeSeqNum() {
         return personMasterChangeSeqNum;
@@ -86,5 +80,13 @@ public class UMCalendar implements SyncableEntity{
     @Override
     public void setLocalChangeSeqNum(long localChangeSeqNum) {
 
+    }
+
+    public int getUmCalendarLastChangedBy() {
+        return umCalendarLastChangedBy;
+    }
+
+    public void setUmCalendarLastChangedBy(int umCalendarLastChangedBy) {
+        this.umCalendarLastChangedBy = umCalendarLastChangedBy;
     }
 }

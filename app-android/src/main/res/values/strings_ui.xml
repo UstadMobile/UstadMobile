@@ -482,5 +482,8 @@ This is the one you should be editing. The one in /core/locale/main/values/strin
     <string name="content_entry_not_found">ContentEntry Not Found</string>
 
 
+    <string name="confirm_password">Confirm password</string>
+    <string name="first_name">First name</string>
+    <string name="create_new_account">Register Now</string>
 
 </resources>

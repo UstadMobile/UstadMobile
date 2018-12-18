@@ -42,14 +42,6 @@ public class ClazzActivity {
     @UmSyncLastChangedBy
     private int clazzActivityLastChangedBy;
 
-    public int getClazzActivityLastChangedBy() {
-        return clazzActivityLastChangedBy;
-    }
-
-    public void setClazzActivityLastChangedBy(int clazzActivityLastChangedBy) {
-        this.clazzActivityLastChangedBy = clazzActivityLastChangedBy;
-    }
-
     public long getClazzActivityMasterChangeSeqNum() {
         return clazzActivityMasterChangeSeqNum;
     }
@@ -130,4 +122,11 @@ public class ClazzActivity {
         this.clazzActivityLogDate = clazzActivityLogDate;
     }
 
+    public int getClazzActivityLastChangedBy() {
+        return clazzActivityLastChangedBy;
+    }
+
+    public void setClazzActivityLastChangedBy(int clazzActivityLastChangedBy) {
+        this.clazzActivityLastChangedBy = clazzActivityLastChangedBy;
+    }
 }

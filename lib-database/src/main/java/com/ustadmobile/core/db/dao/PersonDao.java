@@ -50,6 +50,9 @@ public abstract class PersonDao implements SyncableDao<Person, PersonDao> {
     @UmQuery("SELECT * From Person where username = :username")
     public abstract void findByUsernameAsync(String username, UmCallback<Person> resultObject);
 
+    @UmQuery("SELECT * From Person where username = :username")
+    public abstract Person findByUsername(String username);
+
     @UmQuery("SELECT * From Person WHERE personUid = :uid")
     public abstract void findByUidAsync(long uid, UmCallback<Person> person);
 
@@ -143,6 +146,29 @@ public abstract class PersonDao implements SyncableDao<Person, PersonDao> {
             }
         });
     }
+
+    @UmRestAccessible
+    protected String createAdmin() {
+        Person adminPerson = findByUsername("admin");
+        if(adminPerson == null) {
+            adminPerson = new Person();
+            adminPerson.setUsername("admin");
+            adminPerson.setPersonUid(getAndIncrementPrimaryKey());
+            adminPerson.setFirstNames("Admin");
+            adminPerson.setLastName("Admin");
+
+            insert(adminPerson);
+
+            PersonAuth adminPersonAuth = new PersonAuth(adminPerson.getPersonUid(),
+                    PersonAuthDao.encryptPassword("irZahle2"));
+            insertPersonAuth(adminPersonAuth);
+
+            return "Created";
+        }else {
+            return "Already created";
+        }
+    }
+
 
     protected long getAndIncrementPrimaryKey() {
         if(getDeviceBits() == 0)

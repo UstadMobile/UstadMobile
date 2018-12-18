@@ -34,17 +34,8 @@ public class FeedEntry {
     @UmSyncMasterChangeSeqNum
     private long feedEntryMasterChangeSeqNum;
 
-    public int getFeedEntryLastChangedBy() {
-        return feedEntryLastChangedBy;
-    }
-
-    public void setFeedEntryLastChangedBy(int feedEntryLastChangedBy) {
-        this.feedEntryLastChangedBy = feedEntryLastChangedBy;
-    }
-
     @UmSyncLastChangedBy
     private int feedEntryLastChangedBy;
-
 
     public long getFeedEntryLocalChangeSeqNum() {
         return feedEntryLocalChangeSeqNum;
@@ -158,4 +149,11 @@ public class FeedEntry {
         this.feedEntryHash = feedEntryHash;
     }
 
+    public int getFeedEntryLastChangedBy() {
+        return feedEntryLastChangedBy;
+    }
+
+    public void setFeedEntryLastChangedBy(int feedEntryLastChangedBy) {
+        this.feedEntryLastChangedBy = feedEntryLastChangedBy;
+    }
 }

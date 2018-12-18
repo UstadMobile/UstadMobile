@@ -48,6 +48,10 @@ public class Person  {
     @UmSyncLocalChangeSeqNum
     private long personLocalChangeSeqNum;
 
+    @UmSyncLastChangedBy
+    private int personLastChangedBy;
+
+
     private String fatherName;
 
     private String fatherNumber;
@@ -117,9 +121,6 @@ public class Person  {
     public void setDateOfBirth(long dateOfBirth) {
         this.dateOfBirth = dateOfBirth;
     }
-
-    @UmSyncLastChangedBy
-    private int personLastChangedBy;
 
     public long getPersonUid() {
         return personUid;

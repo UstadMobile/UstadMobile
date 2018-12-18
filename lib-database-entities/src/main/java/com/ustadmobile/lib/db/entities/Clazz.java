@@ -35,6 +35,9 @@ public class Clazz {
     @UmSyncLocalChangeSeqNum
     private long clazzLocalChangeSeqNum;
 
+    @UmSyncLastChangedBy
+    private int clazzLastChangedBy;
+
     public boolean isClazzActive() {
         return clazzActive;
     }
@@ -74,9 +77,6 @@ public class Clazz {
     public void setLocationUid(long locationUid) {
         this.locationUid = locationUid;
     }
-
-    @UmSyncLastChangedBy
-    private int clazzLastChangedBy;
 
     public float getAttendanceAverage() {
         return attendanceAverage;

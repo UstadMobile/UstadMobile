@@ -51,6 +51,9 @@ public class ClazzActivityChange{
     @UmSyncLocalChangeSeqNum
     private long clazzActivityChangeLocalChangeSeqNum;
 
+    @UmSyncLastChangedBy
+    private int clazzActivityLastChangedBy;
+
     public int getClazzActivityUnitOfMeasure() {
         return clazzActivityUnitOfMeasure;
     }
@@ -97,5 +100,13 @@ public class ClazzActivityChange{
 
     public void setClazzActivityChangeLocalChangeSeqNum(long clazzActivityChangeLocalChangeSeqNum) {
         this.clazzActivityChangeLocalChangeSeqNum = clazzActivityChangeLocalChangeSeqNum;
+    }
+
+    public int getClazzActivityLastChangedBy() {
+        return clazzActivityLastChangedBy;
+    }
+
+    public void setClazzActivityLastChangedBy(int clazzActivityLastChangedBy) {
+        this.clazzActivityLastChangedBy = clazzActivityLastChangedBy;
     }
 }

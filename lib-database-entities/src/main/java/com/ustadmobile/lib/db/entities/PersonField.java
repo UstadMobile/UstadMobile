@@ -43,14 +43,6 @@ public class PersonField {
     @UmSyncLocalChangeSeqNum
     private long personFieldLocalChangeSeqNum;
 
-    public int getPersonFieldLastChangedBy() {
-        return personFieldLastChangedBy;
-    }
-
-    public void setPersonFieldLastChangedBy(int personFieldLastChangedBy) {
-        this.personFieldLastChangedBy = personFieldLastChangedBy;
-    }
-
     @UmSyncLastChangedBy
     private int personFieldLastChangedBy;
 
@@ -100,5 +92,13 @@ public class PersonField {
 
     public void setPersonFieldLocalChangeSeqNum(long personFieldLocalChangeSeqNum) {
         this.personFieldLocalChangeSeqNum = personFieldLocalChangeSeqNum;
+    }
+
+    public int getPersonFieldLastChangedBy() {
+        return personFieldLastChangedBy;
+    }
+
+    public void setPersonFieldLastChangedBy(int personFieldLastChangedBy) {
+        this.personFieldLastChangedBy = personFieldLastChangedBy;
     }
 }

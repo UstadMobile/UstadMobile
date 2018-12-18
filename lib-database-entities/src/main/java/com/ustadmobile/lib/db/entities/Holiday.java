@@ -28,14 +28,6 @@ public class Holiday {
     @UmSyncMasterChangeSeqNum
     private long holidayMasterChangeSeqNum;
 
-    public int getHolidayLastChangedBy() {
-        return holidayLastChangedBy;
-    }
-
-    public void setHolidayLastChangedBy(int holidayLastChangedBy) {
-        this.holidayLastChangedBy = holidayLastChangedBy;
-    }
-
     @UmSyncLastChangedBy
     private int holidayLastChangedBy;
 
@@ -88,4 +80,11 @@ public class Holiday {
         this.holidayName = holidayName;
     }
 
+    public int getHolidayLastChangedBy() {
+        return holidayLastChangedBy;
+    }
+
+    public void setHolidayLastChangedBy(int holidayLastChangedBy) {
+        this.holidayLastChangedBy = holidayLastChangedBy;
+    }
 }

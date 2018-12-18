@@ -30,14 +30,6 @@ public class ClazzLogAttendanceRecord {
     @UmSyncLocalChangeSeqNum
     private long clazzLogAttendanceRecordLocalChangeSeqNum;
 
-    public int getClazzLogAttendanceRecordLastChangedBy() {
-        return clazzLogAttendanceRecordLastChangedBy;
-    }
-
-    public void setClazzLogAttendanceRecordLastChangedBy(int clazzLogAttendanceRecordLastChangedBy) {
-        this.clazzLogAttendanceRecordLastChangedBy = clazzLogAttendanceRecordLastChangedBy;
-    }
-
     @UmSyncLastChangedBy
     private int clazzLogAttendanceRecordLastChangedBy;
 
@@ -87,6 +79,14 @@ public class ClazzLogAttendanceRecord {
 
     public void setClazzLogAttendanceRecordLocalChangeSeqNum(long clazzLogAttendanceRecordLocalChangeSeqNum) {
         this.clazzLogAttendanceRecordLocalChangeSeqNum = clazzLogAttendanceRecordLocalChangeSeqNum;
+    }
+
+    public int getClazzLogAttendanceRecordLastChangedBy() {
+        return clazzLogAttendanceRecordLastChangedBy;
+    }
+
+    public void setClazzLogAttendanceRecordLastChangedBy(int clazzLogAttendanceRecordLastChangedBy) {
+        this.clazzLogAttendanceRecordLastChangedBy = clazzLogAttendanceRecordLastChangedBy;
     }
 
     @Override

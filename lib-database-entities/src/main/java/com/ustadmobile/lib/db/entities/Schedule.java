@@ -72,14 +72,6 @@ public class Schedule {
     @UmSyncLastChangedBy
     private int scheduleLastChangedBy;
 
-    public int getScheduleLastChangedBy() {
-        return scheduleLastChangedBy;
-    }
-
-    public void setScheduleLastChangedBy(int scheduleLastChangedBy) {
-        this.scheduleLastChangedBy = scheduleLastChangedBy;
-    }
-
     //active or removed
     private boolean scheduleActive;
 
@@ -170,5 +162,13 @@ public class Schedule {
 
     public void setScheduleLocalChangeSeqNum(long scheduleLocalChangeSeqNum) {
         this.scheduleLocalChangeSeqNum = scheduleLocalChangeSeqNum;
+    }
+
+    public int getScheduleLastChangedBy() {
+        return scheduleLastChangedBy;
+    }
+
+    public void setScheduleLastChangedBy(int scheduleLastChangedBy) {
+        this.scheduleLastChangedBy = scheduleLastChangedBy;
     }
 }
