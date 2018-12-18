@@ -230,10 +230,6 @@ public class SplashScreenActivity extends AppCompatActivity
         UmAppDatabase repository = UmAccountManager.getRepositoryForActiveAccount(
                 getApplicationContext());
 
-        ClazzDao clazzDao = repository.getClazzDao();
-        ClazzMemberDao clazzMemberDao = repository.getClazzMemberDao();
-        PersonDao personDao =repository.getPersonDao();
-
 
 
         //Running all insertions in a separate thread.
@@ -289,7 +285,7 @@ public class SplashScreenActivity extends AppCompatActivity
 
              List<HeadersAndFields> allFields = new ArrayList<>();
              List<String> customFieldValues = new ArrayList<>();
-             List<PersonField> customFieldsCreated = null;
+             List<PersonField> customFieldsCreated;
 
             allFields.add(new HeadersAndFields(
                     "",
@@ -534,8 +530,7 @@ public class SplashScreenActivity extends AppCompatActivity
             PersonCustomFieldDao personCustomFieldDao = repository.getPersonCustomFieldDao();
             PersonDetailPresenterFieldDao personDetailPresenterFieldDao =
                     repository.getPersonDetailPresenterFieldDao();
-            PersonCustomFieldValueDao personCustomFieldValueDao =
-                    repository.getPersonCustomFieldValueDao();
+
 
             customFieldsCreated = new ArrayList<>();
 
@@ -601,342 +596,8 @@ public class SplashScreenActivity extends AppCompatActivity
 
             }
 
-            //Create Locations
-            Location lebanonLocation = new Location();
-            lebanonLocation.setTitle("Lebanon");
-            lebanonLocation.setParentLocationUid(0);
-
-            repository.getLocationDao().insert(lebanonLocation);
-
-            Location lebanonNorthLocation = new Location();
-            lebanonNorthLocation.setTitle("Lebanon North");
-            lebanonNorthLocation.setParentLocationUid(lebanonLocation.getLocationUid());
-            repository.getLocationDao().insert(lebanonNorthLocation);
-
-            Location lebanonEastLocation = new Location();
-            lebanonEastLocation.setTitle("Lebanon East");
-            lebanonEastLocation.setParentLocationUid(lebanonLocation.getLocationUid());
-            repository.getLocationDao().insert(lebanonEastLocation);
-
-
-            Location bekaaLocation = new Location();
-            bekaaLocation.setTitle("Bekka");
-            bekaaLocation.setParentLocationUid(lebanonEastLocation.getLocationUid());
-            repository.getLocationDao().insert(bekaaLocation);
-
-            Location akkarLocation = new Location();
-            akkarLocation.setTitle("Akkar");
-            akkarLocation.setParentLocationUid(lebanonNorthLocation.getLocationUid());
-            repository.getLocationDao().insert(akkarLocation);
-
-
-
-            //Create Class with location
-            Clazz clazz1 = new Clazz();
-            clazz1.setClazzName("Class A");
-            clazz1.setAttendanceAverage(0L);
-            clazz1.setClazzActive(true);
-            clazz1.setLocationUid(akkarLocation.getLocationUid());
-            long thisClazzUid = clazzDao.insert(clazz1);
-            clazz1.setClazzUid(thisClazzUid);
-
-
-            //2nd class with 2nd location
-            Clazz clazz2 = new Clazz();
-            clazz2.setClazzName("Class B");
-            clazz2.setAttendanceAverage(0L);
-            clazz2.setClazzActive(true);
-            clazz2.setLocationUid(bekaaLocation.getLocationUid());
-            long thisClazz2Uid = clazzDao.insert(clazz2);
-            clazz2.setClazzUid(thisClazz2Uid);
-
-
-            //Names
-            String[] names = {"Shukriyya al-Azzam", "Ummu Kulthoom al-Munir","Azeema el-Saleem",
-                    "Fuaada el-Qadir","Amatullah al-Baluch","Sham'a al-Wali","Haamida al-Sinai",
-                    "Hasnaa el-Khalili","Nawwaara al-Salim","Qamraaa el-Shakoor",
-                    "Riyaal al-Moustafa","Haazim al-Salah","Hamdaan el-Ishmael","Baheej el-Huda",
-                    "Mahdi el-Mahmoud","Badraan el-Zaman","Saeed el-Rafiq","Husaam el-Wakim",
-                    "Mansoor el-Saidi","Nazmi al-Hares"};
-
-            int i = 0;
-            //Persist names to DB <-> ClazzMembers <-> Clazz
-            for (String full_name: names){
-                i++;
-                //Create Person
-                String first_name = full_name.split(" ")[0];
-                String last_name = full_name.split(" ")[1];
-                Person person = new Person();
-                person.setActive(true);
-                person.setFirstNames(first_name);
-                person.setLastName(last_name);
-
-
-                person.setEmailAddr(first_name + last_name + "@ustadmobile.com");
-                if(first_name.endsWith("a")) {
-                    person.setGender(Person.GENDER_FEMALE);
-                }else{
-                    person.setGender(Person.GENDER_MALE);
-                }
-                int year = 2010;
-
-                if(first_name.toLowerCase().startsWith("a") || first_name.toLowerCase().startsWith("h")){
-                    year = 2010 - i;
-                }
-
-                person.setDateOfBirth(UMCalendarUtil.getLongDateFromPrettyString("12-Jan-"+year));
-                person.setFatherName("Addulla " + last_name);
-                person.setMotherName("Aysha " + last_name);
-                person.setFatherNumber("+96212345678");
-                person.setMotherNum("+96287654321");
-                person.setAddress("123 Fourth Street, FiftySix Avenue, SevenCity, Eightland");
-
-
-                long thisPersonUid = personDao.insert(person);
-                person.setPersonUid(thisPersonUid);
-
-
-                //Add Custom Fields as well:
-
-                //Sprint 2 stuff:
-                //Create values based on the created custom fields
-                Iterator<PersonField> cfi = customFieldsCreated.iterator();
-                Iterator<String> cvi = customFieldValues.iterator();
-
-                while(cfi.hasNext() && cvi.hasNext()){
-                    PersonField cf = cfi.next();
-                    String cv = cvi.next();
-
-                    PersonCustomFieldValue personCustomFieldValue = new PersonCustomFieldValue();
-                    personCustomFieldValue.setPersonCustomFieldValuePersonUid(person.getPersonUid());
-                    personCustomFieldValue.setPersonCustomFieldValuePersonCustomFieldUid(
-                            cf.getPersonCustomFieldUid());
-                    personCustomFieldValue.setFieldValue(cv);
-                    personCustomFieldValue.setPersonCustomFieldValueUid(
-                            personCustomFieldValueDao.insert(personCustomFieldValue));
-
-                }
-
-
-                //Create ClazzMember
-                ClazzMember member = new ClazzMember();
-                member.setRole(ClazzMember.ROLE_STUDENT);
-                member.setClazzMemberClazzUid(clazz1.getClazzUid());
-                member.setClazzMemberPersonUid(thisPersonUid);
-                member.setAttendancePercentage(0L);
-                member.setClazzMemberActive(true);
-                clazzMemberDao.insertAsync(member, null);
-            }
-
-            //Sprint 2 stuff:
-
-            //Create SEL questions :
-            SocialNominationQuestionSetDao questionSetDao =
-                    repository.getSocialNominationQuestionSetDao();
-            SocialNominationQuestionSet questionSet = new SocialNominationQuestionSet();
-            questionSet.setTitle("Default set");
-            questionSet.setSocialNominationQuestionSetUid(questionSetDao.insert(questionSet));
-
-            SocialNominationQuestionDao questionDao = repository.getSocialNominationQuestionDao();
-            SocialNominationQuestion question1 = new SocialNominationQuestion();
-            question1.setSocialNominationQuestionSocialNominationQuestionSetUid(
-                    questionSet.getSocialNominationQuestionSetUid());
-            question1.setQuestionIndex(1);
-            question1.setQuestionText("Who sits next to you?");
-            question1.setMultiNominations(true);
-            question1.setAssignToAllClasses(true);
-            questionDao.insert(question1);
-
-            SocialNominationQuestion question2 = new SocialNominationQuestion();
-            question2.setSocialNominationQuestionSocialNominationQuestionSetUid(
-                    questionSet.getSocialNominationQuestionSetUid());
-            question2.setQuestionIndex(2);
-            question2.setQuestionText("Who participates a lot in class?");
-            question2.setMultiNominations(true);
-            question2.setAssignToAllClasses(true);
-            questionDao.insert(question2);
-
-            SocialNominationQuestion question3 = new SocialNominationQuestion();
-            question3.setSocialNominationQuestionSocialNominationQuestionSetUid(
-                    questionSet.getSocialNominationQuestionSetUid());
-            question3.setQuestionIndex(3);
-            question3.setQuestionText("Who is disruptive during class?");
-            question3.setMultiNominations(true);
-            question3.setAssignToAllClasses(true);
-            questionDao.insert(question3);
-
-            SocialNominationQuestion question4 = new SocialNominationQuestion();
-            question4.setSocialNominationQuestionSocialNominationQuestionSetUid(
-                    questionSet.getSocialNominationQuestionSetUid());
-            question4.setQuestionIndex(4);
-            question4.setQuestionText("Who are your friends in class?");
-            question4.setMultiNominations(true);
-            question4.setAssignToAllClasses(true);
-            questionDao.insert(question4);
-
-            SocialNominationQuestion question5 = new SocialNominationQuestion();
-            question5.setSocialNominationQuestionSocialNominationQuestionSetUid(
-                    questionSet.getSocialNominationQuestionSetUid());
-            question5.setQuestionIndex(5);
-            question5.setQuestionText("Who are the kids you spend time with outside of class?");
-            question5.setMultiNominations(true);
-            question5.setAssignToAllClasses(true);
-            questionDao.insert(question5);
-
-//            SocialNominationQuestion question6 = new SocialNominationQuestion();
-//            question6.setSocialNominationQuestionSocialNominationQuestionSetUid(
-//                    questionSet.getSocialNominationQuestionSetUid());
-//            question6.setQuestionIndex(6);
-//            question6.setQuestionText("How are you feeling today?");
-//            //question5.setMultiNominations(true);
-//            question6.setAssignToAllClasses(true);
-//            questionDao.insert(question6);
-
-
-
-
-
-            //Create some feeds. The feeds upon interaction will in-turn create ClazzLogs.
-            FeedEntryDao feedEntryDao = repository.getFeedEntryDao();
-
-            long feedClazzUid = clazz1.getClazzUid();
-            long thisPersonUid = 1L;
-
-
-            long thisDate = UMCalendarUtil.getDateInMilliPlusDays(0);
-            FeedEntry thisFeed = new FeedEntry();
-            thisFeed.setDeadline(thisDate);
-            thisFeed.setFeedEntryDone(false);
-            thisFeed.setFeedEntryClazzName(clazz1.getClazzName());
-            thisFeed.setDescription("This is your regular attendance alert.");
-            thisFeed.setTitle("Record attendance for Class " + 1);
-            thisFeed.setFeedEntryPersonUid(thisPersonUid);
-            thisFeed.setLink(ClassLogDetailView.VIEW_NAME + "?" +
-                    ClazzListView.ARG_CLAZZ_UID + "=" + feedClazzUid + "&" +
-                    ClazzListView.ARG_LOGDATE + "=" + thisDate);
-            thisFeed.setFeedEntryHash(123);
-
-            feedEntryDao.insertAsync(thisFeed, new UmCallback<Long>() {
-                @Override
-                public void onSuccess(Long result) {
-                    long newDate = UMCalendarUtil.getDateInMilliPlusDays(-1);
-                    FeedEntry newFeed = new FeedEntry();
-                    newFeed.setDeadline(newDate);
-                    newFeed.setFeedEntryDone(false);
-                    newFeed.setFeedEntryClazzName(clazz1.getClazzName());
-                    newFeed.setDescription("This is your regular attendance alert.");
-                    newFeed.setTitle("Record attendance for Class " + 1);
-                    newFeed.setFeedEntryPersonUid(thisPersonUid);
-                    newFeed.setLink(ClassLogDetailView.VIEW_NAME + "?" +
-                            ClazzListView.ARG_CLAZZ_UID + "=" + feedClazzUid + "&" +
-                            ClazzListView.ARG_LOGDATE + "=" + newDate);
-                    newFeed.setFeedEntryHash(456);
-                    feedEntryDao.insertAsync(newFeed, null);
-                }
-
-                @Override
-                public void onFailure(Throwable exception) {
-
-                }
-            });
-
-            //Add Holiday Calendar
-            UMCalendarDao calendarDao = repository.getUMCalendarDao();
-            UMCalendar newCalendar1 = new UMCalendar();
-            newCalendar1.setUmCalendarName("IRC Holiday Calendar");
-            newCalendar1.setUmCalendarUid(calendarDao.insert(newCalendar1));
-
-            UMCalendar newCalendar2 = new UMCalendar();
-            newCalendar2.setUmCalendarName("Lebanon Holiday Calendar");
-            newCalendar2.setUmCalendarUid(calendarDao.insert(newCalendar2));
-
-
-            //Adding some Activity Changes
-            ClazzActivityChangeDao clazzActivityChangeDao = repository.getClazzActivityChangeDao();
-            ClazzActivityChange newChange1 = new ClazzActivityChange();
-            newChange1.setClazzActivityChangeTitle("Increased group work");
-            newChange1.setClazzActivityUnitOfMeasure(ClazzActivityChange.UOM_FREQUENCY);
-            newChange1.setClazzActivityChangeActive(true);
-            newChange1.setClazzActivityChangeUid(clazzActivityChangeDao.insert(newChange1));
-
-
-            ClazzActivityChange newChange2 = new ClazzActivityChange();
-            newChange2.setClazzActivityChangeTitle("Call students by name");
-            newChange2.setClazzActivityUnitOfMeasure(ClazzActivityChange.UOM_FREQUENCY);
-            newChange2.setClazzActivityChangeActive(true);
-            newChange2.setClazzActivityChangeUid(clazzActivityChangeDao.insert(newChange2));
-
-            ClazzActivityChange newChange3 = new ClazzActivityChange();
-            newChange3.setClazzActivityChangeTitle("One to one interaction");
-            newChange3.setClazzActivityUnitOfMeasure(ClazzActivityChange.UOM_FREQUENCY);
-            newChange3.setClazzActivityChangeActive(true);
-            newChange3.setClazzActivityChangeUid(clazzActivityChangeDao.insert(newChange3));
-
-            //Adding some Activities
-            ClazzActivityDao activityDao = repository.getClazzActivityDao();
-
-            for(i = 0; i<34; i++){
-                boolean thisBoolean = false;
-                long quantity = 1L;
-
-                if (i % 2 == 0){
-                    thisBoolean=true;
-                    quantity = 3L;
-
-                    ClazzActivity activity4 = new ClazzActivity();
-                    activity4.setClazzActivityClazzActivityChangeUid(newChange1.getClazzActivityChangeUid());
-                    activity4.setClazzActivityGoodFeedback(thisBoolean);
-                    activity4.setClazzActivityLogDate(UMCalendarUtil.getDateInMilliPlusDays(-i));
-                    activity4.setClazzActivityQuantity(quantity);
-                    activity4.setClazzActivityDone(true);
-                    activity4.setClazzActivityClazzUid(clazz1.getClazzUid());
-                    activityDao.insert(activity4);
-
-                    ClazzActivity activity5 = new ClazzActivity();
-                    activity5.setClazzActivityClazzActivityChangeUid(newChange1.getClazzActivityChangeUid());
-                    activity5.setClazzActivityGoodFeedback(thisBoolean);
-                    activity5.setClazzActivityLogDate(UMCalendarUtil.getDateInMilliPlusDays(-i));
-                    activity5.setClazzActivityQuantity(quantity);
-                    activity5.setClazzActivityDone(true);
-                    activity5.setClazzActivityClazzUid(clazz1.getClazzUid());
-                    activityDao.insert(activity5);
-                }
-
-                ClazzActivity activity1 = new ClazzActivity();
-                activity1.setClazzActivityClazzActivityChangeUid(newChange1.getClazzActivityChangeUid());
-                activity1.setClazzActivityGoodFeedback(thisBoolean);
-                activity1.setClazzActivityLogDate(UMCalendarUtil.getDateInMilliPlusDays(-i));
-                activity1.setClazzActivityQuantity(quantity);
-                activity1.setClazzActivityDone(true);
-                activity1.setClazzActivityClazzUid(clazz1.getClazzUid());
-
-                activityDao.insert(activity1);
-
-                ClazzActivity activity2 = new ClazzActivity();
-
-                activity2.setClazzActivityClazzActivityChangeUid(newChange2.getClazzActivityChangeUid());
-                activity2.setClazzActivityGoodFeedback(thisBoolean);
-                activity2.setClazzActivityLogDate(UMCalendarUtil.getDateInMilliPlusDays(-i));
-                activity2.setClazzActivityQuantity(quantity);
-                activity2.setClazzActivityDone(true);
-                activity2.setClazzActivityClazzUid(clazz1.getClazzUid());
-
-                activityDao.insert(activity2);
-
-                ClazzActivity activity3 = new ClazzActivity();
-
-                activity3.setClazzActivityClazzActivityChangeUid(newChange3.getClazzActivityChangeUid());
-                activity3.setClazzActivityGoodFeedback(thisBoolean);
-                activity3.setClazzActivityLogDate(UMCalendarUtil.getDateInMilliPlusDays(-i));
-                activity3.setClazzActivityQuantity(quantity);
-                activity3.setClazzActivityDone(true);
-                activity3.setClazzActivityClazzUid(clazz1.getClazzUid());
-
-                activityDao.insert(activity3);
-
-
-            }
-
+            //Add people specific data
+            //addDummyData2(customFieldsCreated, customFieldValues);
 
             //Set that we have created dummy data so that check for this and don't create it again.
             UstadMobileSystemImpl.getInstance().setAppPref("dummydata", "created",
@@ -944,6 +605,341 @@ public class SplashScreenActivity extends AppCompatActivity
             UstadMobileSystemImpl.getInstance().startUI(SplashScreenActivity.this);
         }).start();
 
+    }
+
+    public void addDummyData2(List<PersonField> customFieldsCreated, List<String> customFieldValues){
+
+        UmAppDatabase repository = UmAccountManager.getRepositoryForActiveAccount(
+                getApplicationContext());
+        ClazzDao clazzDao = repository.getClazzDao();
+        ClazzMemberDao clazzMemberDao = repository.getClazzMemberDao();
+        PersonDao personDao =repository.getPersonDao();
+        PersonCustomFieldValueDao personCustomFieldValueDao =
+                repository.getPersonCustomFieldValueDao();
+
+        //Create Locations
+        Location lebanonLocation = new Location();
+        lebanonLocation.setTitle("Lebanon");
+        lebanonLocation.setParentLocationUid(0);
+
+        repository.getLocationDao().insert(lebanonLocation);
+
+        Location lebanonNorthLocation = new Location();
+        lebanonNorthLocation.setTitle("Lebanon North");
+        lebanonNorthLocation.setParentLocationUid(lebanonLocation.getLocationUid());
+        repository.getLocationDao().insert(lebanonNorthLocation);
+
+        Location lebanonEastLocation = new Location();
+        lebanonEastLocation.setTitle("Lebanon East");
+        lebanonEastLocation.setParentLocationUid(lebanonLocation.getLocationUid());
+        repository.getLocationDao().insert(lebanonEastLocation);
+
+
+        Location bekaaLocation = new Location();
+        bekaaLocation.setTitle("Bekka");
+        bekaaLocation.setParentLocationUid(lebanonEastLocation.getLocationUid());
+        repository.getLocationDao().insert(bekaaLocation);
+
+        Location akkarLocation = new Location();
+        akkarLocation.setTitle("Akkar");
+        akkarLocation.setParentLocationUid(lebanonNorthLocation.getLocationUid());
+        repository.getLocationDao().insert(akkarLocation);
+
+
+
+        //Create Class with location
+        Clazz clazz1 = new Clazz();
+        clazz1.setClazzName("Class A");
+        clazz1.setAttendanceAverage(0L);
+        clazz1.setClazzActive(true);
+        clazz1.setLocationUid(akkarLocation.getLocationUid());
+        long thisClazzUid = clazzDao.insert(clazz1);
+        clazz1.setClazzUid(thisClazzUid);
+
+
+        //2nd class with 2nd location
+        Clazz clazz2 = new Clazz();
+        clazz2.setClazzName("Class B");
+        clazz2.setAttendanceAverage(0L);
+        clazz2.setClazzActive(true);
+        clazz2.setLocationUid(bekaaLocation.getLocationUid());
+        long thisClazz2Uid = clazzDao.insert(clazz2);
+        clazz2.setClazzUid(thisClazz2Uid);
+
+
+        //Names
+        String[] names = {"Shukriyya al-Azzam", "Ummu Kulthoom al-Munir","Azeema el-Saleem",
+                "Fuaada el-Qadir","Amatullah al-Baluch","Sham'a al-Wali","Haamida al-Sinai",
+                "Hasnaa el-Khalili","Nawwaara al-Salim","Qamraaa el-Shakoor",
+                "Riyaal al-Moustafa","Haazim al-Salah","Hamdaan el-Ishmael","Baheej el-Huda",
+                "Mahdi el-Mahmoud","Badraan el-Zaman","Saeed el-Rafiq","Husaam el-Wakim",
+                "Mansoor el-Saidi","Nazmi al-Hares"};
+
+        int i = 0;
+        //Persist names to DB <-> ClazzMembers <-> Clazz
+        for (String full_name: names){
+            i++;
+            //Create Person
+            String first_name = full_name.split(" ")[0];
+            String last_name = full_name.split(" ")[1];
+            Person person = new Person();
+            person.setActive(true);
+            person.setFirstNames(first_name);
+            person.setLastName(last_name);
+
+
+            person.setEmailAddr(first_name + last_name + "@ustadmobile.com");
+            if(first_name.endsWith("a")) {
+                person.setGender(Person.GENDER_FEMALE);
+            }else{
+                person.setGender(Person.GENDER_MALE);
+            }
+            int year = 2010;
+
+            if(first_name.toLowerCase().startsWith("a") || first_name.toLowerCase().startsWith("h")){
+                year = 2010 - i;
+            }
+
+            person.setDateOfBirth(UMCalendarUtil.getLongDateFromPrettyString("12-Jan-"+year));
+            person.setFatherName("Addulla " + last_name);
+            person.setMotherName("Aysha " + last_name);
+            person.setFatherNumber("+96212345678");
+            person.setMotherNum("+96287654321");
+            person.setAddress("123 Fourth Street, FiftySix Avenue, SevenCity, Eightland");
+
+
+            long thisPersonUid = personDao.insert(person);
+            person.setPersonUid(thisPersonUid);
+
+
+            //Add Custom Fields as well:
+
+            //Sprint 2 stuff:
+            //Create values based on the created custom fields
+            Iterator<PersonField> cfi = customFieldsCreated.iterator();
+            Iterator<String> cvi = customFieldValues.iterator();
+
+            while(cfi.hasNext() && cvi.hasNext()){
+                PersonField cf = cfi.next();
+                String cv = cvi.next();
+
+                PersonCustomFieldValue personCustomFieldValue = new PersonCustomFieldValue();
+                personCustomFieldValue.setPersonCustomFieldValuePersonUid(person.getPersonUid());
+                personCustomFieldValue.setPersonCustomFieldValuePersonCustomFieldUid(
+                        cf.getPersonCustomFieldUid());
+                personCustomFieldValue.setFieldValue(cv);
+                personCustomFieldValue.setPersonCustomFieldValueUid(
+                        personCustomFieldValueDao.insert(personCustomFieldValue));
+
+            }
+
+
+            //Create ClazzMember
+            ClazzMember member = new ClazzMember();
+            member.setRole(ClazzMember.ROLE_STUDENT);
+            member.setClazzMemberClazzUid(clazz1.getClazzUid());
+            member.setClazzMemberPersonUid(thisPersonUid);
+            member.setAttendancePercentage(0L);
+            member.setClazzMemberActive(true);
+            clazzMemberDao.insertAsync(member, null);
+        }
+
+        //Sprint 2 stuff:
+
+        //Create SEL questions :
+        SocialNominationQuestionSetDao questionSetDao =
+                repository.getSocialNominationQuestionSetDao();
+        SocialNominationQuestionSet questionSet = new SocialNominationQuestionSet();
+        questionSet.setTitle("Default set");
+        questionSet.setSocialNominationQuestionSetUid(questionSetDao.insert(questionSet));
+
+        SocialNominationQuestionDao questionDao = repository.getSocialNominationQuestionDao();
+        SocialNominationQuestion question1 = new SocialNominationQuestion();
+        question1.setSocialNominationQuestionSocialNominationQuestionSetUid(
+                questionSet.getSocialNominationQuestionSetUid());
+        question1.setQuestionIndex(1);
+        question1.setQuestionText("Who sits next to you?");
+        question1.setMultiNominations(true);
+        question1.setAssignToAllClasses(true);
+        questionDao.insert(question1);
+
+        SocialNominationQuestion question2 = new SocialNominationQuestion();
+        question2.setSocialNominationQuestionSocialNominationQuestionSetUid(
+                questionSet.getSocialNominationQuestionSetUid());
+        question2.setQuestionIndex(2);
+        question2.setQuestionText("Who participates a lot in class?");
+        question2.setMultiNominations(true);
+        question2.setAssignToAllClasses(true);
+        questionDao.insert(question2);
+
+        SocialNominationQuestion question3 = new SocialNominationQuestion();
+        question3.setSocialNominationQuestionSocialNominationQuestionSetUid(
+                questionSet.getSocialNominationQuestionSetUid());
+        question3.setQuestionIndex(3);
+        question3.setQuestionText("Who is disruptive during class?");
+        question3.setMultiNominations(true);
+        question3.setAssignToAllClasses(true);
+        questionDao.insert(question3);
+
+        SocialNominationQuestion question4 = new SocialNominationQuestion();
+        question4.setSocialNominationQuestionSocialNominationQuestionSetUid(
+                questionSet.getSocialNominationQuestionSetUid());
+        question4.setQuestionIndex(4);
+        question4.setQuestionText("Who are your friends in class?");
+        question4.setMultiNominations(true);
+        question4.setAssignToAllClasses(true);
+        questionDao.insert(question4);
+
+        SocialNominationQuestion question5 = new SocialNominationQuestion();
+        question5.setSocialNominationQuestionSocialNominationQuestionSetUid(
+                questionSet.getSocialNominationQuestionSetUid());
+        question5.setQuestionIndex(5);
+        question5.setQuestionText("Who are the kids you spend time with outside of class?");
+        question5.setMultiNominations(true);
+        question5.setAssignToAllClasses(true);
+        questionDao.insert(question5);
+
+
+        //Create some feeds. The feeds upon interaction will in-turn create ClazzLogs.
+        FeedEntryDao feedEntryDao = repository.getFeedEntryDao();
+
+        long feedClazzUid = clazz1.getClazzUid();
+        long thisPersonUid = 1L;
+
+
+        long thisDate = UMCalendarUtil.getDateInMilliPlusDays(0);
+        FeedEntry thisFeed = new FeedEntry();
+        thisFeed.setDeadline(thisDate);
+        thisFeed.setFeedEntryDone(false);
+        thisFeed.setFeedEntryClazzName(clazz1.getClazzName());
+        thisFeed.setDescription("This is your regular attendance alert.");
+        thisFeed.setTitle("Record attendance for Class " + 1);
+        thisFeed.setFeedEntryPersonUid(thisPersonUid);
+        thisFeed.setLink(ClassLogDetailView.VIEW_NAME + "?" +
+                ClazzListView.ARG_CLAZZ_UID + "=" + feedClazzUid + "&" +
+                ClazzListView.ARG_LOGDATE + "=" + thisDate);
+        thisFeed.setFeedEntryHash(123);
+
+        feedEntryDao.insertAsync(thisFeed, new UmCallback<Long>() {
+            @Override
+            public void onSuccess(Long result) {
+                long newDate = UMCalendarUtil.getDateInMilliPlusDays(-1);
+                FeedEntry newFeed = new FeedEntry();
+                newFeed.setDeadline(newDate);
+                newFeed.setFeedEntryDone(false);
+                newFeed.setFeedEntryClazzName(clazz1.getClazzName());
+                newFeed.setDescription("This is your regular attendance alert.");
+                newFeed.setTitle("Record attendance for Class " + 1);
+                newFeed.setFeedEntryPersonUid(thisPersonUid);
+                newFeed.setLink(ClassLogDetailView.VIEW_NAME + "?" +
+                        ClazzListView.ARG_CLAZZ_UID + "=" + feedClazzUid + "&" +
+                        ClazzListView.ARG_LOGDATE + "=" + newDate);
+                newFeed.setFeedEntryHash(456);
+                feedEntryDao.insertAsync(newFeed, null);
+            }
+
+            @Override
+            public void onFailure(Throwable exception) {
+
+            }
+        });
+
+        //Add Holiday Calendar
+        UMCalendarDao calendarDao = repository.getUMCalendarDao();
+        UMCalendar newCalendar1 = new UMCalendar();
+        newCalendar1.setUmCalendarName("IRC Holiday Calendar");
+        newCalendar1.setUmCalendarUid(calendarDao.insert(newCalendar1));
+
+        UMCalendar newCalendar2 = new UMCalendar();
+        newCalendar2.setUmCalendarName("Lebanon Holiday Calendar");
+        newCalendar2.setUmCalendarUid(calendarDao.insert(newCalendar2));
+
+
+        //Adding some Activity Changes
+        ClazzActivityChangeDao clazzActivityChangeDao = repository.getClazzActivityChangeDao();
+        ClazzActivityChange newChange1 = new ClazzActivityChange();
+        newChange1.setClazzActivityChangeTitle("Increased group work");
+        newChange1.setClazzActivityUnitOfMeasure(ClazzActivityChange.UOM_FREQUENCY);
+        newChange1.setClazzActivityChangeActive(true);
+        newChange1.setClazzActivityChangeUid(clazzActivityChangeDao.insert(newChange1));
+
+
+        ClazzActivityChange newChange2 = new ClazzActivityChange();
+        newChange2.setClazzActivityChangeTitle("Call students by name");
+        newChange2.setClazzActivityUnitOfMeasure(ClazzActivityChange.UOM_FREQUENCY);
+        newChange2.setClazzActivityChangeActive(true);
+        newChange2.setClazzActivityChangeUid(clazzActivityChangeDao.insert(newChange2));
+
+        ClazzActivityChange newChange3 = new ClazzActivityChange();
+        newChange3.setClazzActivityChangeTitle("One to one interaction");
+        newChange3.setClazzActivityUnitOfMeasure(ClazzActivityChange.UOM_FREQUENCY);
+        newChange3.setClazzActivityChangeActive(true);
+        newChange3.setClazzActivityChangeUid(clazzActivityChangeDao.insert(newChange3));
+
+        //Adding some Activities
+        ClazzActivityDao activityDao = repository.getClazzActivityDao();
+
+        for(i = 0; i<34; i++){
+            boolean thisBoolean = false;
+            long quantity = 1L;
+
+            if (i % 2 == 0){
+                thisBoolean=true;
+                quantity = 3L;
+
+                ClazzActivity activity4 = new ClazzActivity();
+                activity4.setClazzActivityClazzActivityChangeUid(newChange1.getClazzActivityChangeUid());
+                activity4.setClazzActivityGoodFeedback(thisBoolean);
+                activity4.setClazzActivityLogDate(UMCalendarUtil.getDateInMilliPlusDays(-i));
+                activity4.setClazzActivityQuantity(quantity);
+                activity4.setClazzActivityDone(true);
+                activity4.setClazzActivityClazzUid(clazz1.getClazzUid());
+                activityDao.insert(activity4);
+
+                ClazzActivity activity5 = new ClazzActivity();
+                activity5.setClazzActivityClazzActivityChangeUid(newChange1.getClazzActivityChangeUid());
+                activity5.setClazzActivityGoodFeedback(thisBoolean);
+                activity5.setClazzActivityLogDate(UMCalendarUtil.getDateInMilliPlusDays(-i));
+                activity5.setClazzActivityQuantity(quantity);
+                activity5.setClazzActivityDone(true);
+                activity5.setClazzActivityClazzUid(clazz1.getClazzUid());
+                activityDao.insert(activity5);
+            }
+
+            ClazzActivity activity1 = new ClazzActivity();
+            activity1.setClazzActivityClazzActivityChangeUid(newChange1.getClazzActivityChangeUid());
+            activity1.setClazzActivityGoodFeedback(thisBoolean);
+            activity1.setClazzActivityLogDate(UMCalendarUtil.getDateInMilliPlusDays(-i));
+            activity1.setClazzActivityQuantity(quantity);
+            activity1.setClazzActivityDone(true);
+            activity1.setClazzActivityClazzUid(clazz1.getClazzUid());
+
+            activityDao.insert(activity1);
+
+            ClazzActivity activity2 = new ClazzActivity();
+
+            activity2.setClazzActivityClazzActivityChangeUid(newChange2.getClazzActivityChangeUid());
+            activity2.setClazzActivityGoodFeedback(thisBoolean);
+            activity2.setClazzActivityLogDate(UMCalendarUtil.getDateInMilliPlusDays(-i));
+            activity2.setClazzActivityQuantity(quantity);
+            activity2.setClazzActivityDone(true);
+            activity2.setClazzActivityClazzUid(clazz1.getClazzUid());
+
+            activityDao.insert(activity2);
+
+            ClazzActivity activity3 = new ClazzActivity();
+
+            activity3.setClazzActivityClazzActivityChangeUid(newChange3.getClazzActivityChangeUid());
+            activity3.setClazzActivityGoodFeedback(thisBoolean);
+            activity3.setClazzActivityLogDate(UMCalendarUtil.getDateInMilliPlusDays(-i));
+            activity3.setClazzActivityQuantity(quantity);
+            activity3.setClazzActivityDone(true);
+            activity3.setClazzActivityClazzUid(clazz1.getClazzUid());
+
+            activityDao.insert(activity3);
+
+
+        }
     }
 
 }
