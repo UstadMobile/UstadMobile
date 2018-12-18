@@ -465,7 +465,6 @@ dependencies {
     androidTestImplementation project(":sharedse-tests")
     androidTestImplementation project(":lib-core-fs-tests")
 
-    api 'com.ustadmobile.qrcodelibomrfork:qrcode-core:1.0.3'
 
     /*
      * If this needs to be made compatible as a library for something using older appcompat libs -
