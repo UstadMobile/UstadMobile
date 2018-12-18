@@ -616,6 +616,14 @@ public abstract class AbstractDbProcessor {
 
         Element lastChangedFieldElement = findElementWithAnnotation(entityTypeEl,
                 UmSyncLastChangedBy.class, processingEnv);
+        if(lastChangedFieldElement == null) {
+            messager.printMessage(Diagnostic.Kind.ERROR,
+                    formatMethodForErrorMessage(daoMethod, daoType) + " attempting " +
+                            "generate findAllChanges method: entity " +
+                            entityTypeEl.getQualifiedName() + " does not have int field annotated " +
+                            "UmSyncLastChangedBy");
+            return "";
+        }
 
 
         return String.format("SELECT * FROM %s WHERE %s BETWEEN :%s AND :%s " +
