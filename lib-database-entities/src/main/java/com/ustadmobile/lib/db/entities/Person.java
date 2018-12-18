@@ -42,6 +42,8 @@ public class Person  {
 
     private boolean active;
 
+    private boolean admin;
+
     @UmSyncMasterChangeSeqNum
     private long personMasterChangeSeqNum;
 
@@ -208,5 +210,13 @@ public class Person  {
 
     public void setActive(boolean active) {
         this.active = active;
+    }
+
+    public boolean isAdmin() {
+        return admin;
+    }
+
+    public void setAdmin(boolean admin) {
+        this.admin = admin;
     }
 }
