@@ -1,13 +1,10 @@
 package com.ustadmobile.port.android.netwokmanager;
 
 import android.app.Service;
-import android.content.ComponentName;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.os.Binder;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
-
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
@@ -15,10 +12,6 @@ import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
-import edu.rit.se.wifibuddy.WifiDirectHandler;
-
-import static com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroid.PREF_KEY_SUPERNODE;
 
 
 /**
@@ -33,32 +26,9 @@ import static com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroid.P
  */
 public class NetworkServiceAndroid extends Service {
 
-    private WifiDirectHandler wifiDirectHandler;
     private final IBinder mBinder = new LocalServiceBinder();
     private NetworkManagerAndroid networkManagerAndroid;
 
-    private boolean isSyncHappening = false;
-
-    private ExecutorService syncExecutor;
-
-    private Runnable syncRunnable = () -> {
-        UmAppDatabase repo = UmAccountManager.getRepositoryForActiveAccount(getApplicationContext());
-        //UmAppDatabase.getInstance(getApplicationContext()).syncWith(repo, 0);
-        System.out.print("syncWith completed");
-        try {
-            Thread.sleep(60 * 1000);
-        }catch(InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        requestSync();
-    };
-
-
-    private void requestSync() {
-        if(!syncExecutor.isShutdown())
-            syncExecutor.execute(syncRunnable);
-    }
     /**
      * Default time interval for Wi-Fi Direct service rebroadcasting.
      */
@@ -74,26 +44,12 @@ public class NetworkServiceAndroid extends Service {
                 UstadMobileSystemImplAndroid.getInstanceAndroid().getNetworkManager();
         networkManagerAndroid.init(NetworkServiceAndroid.this);
 
-        //Bind WifiService
-        Intent wifiServiceIntent = new Intent(this, WifiDirectHandler.class);
-        bindService(wifiServiceIntent, wifiP2PServiceConnection, BIND_AUTO_CREATE);
-        syncExecutor = Executors.newSingleThreadExecutor();
-        syncExecutor.execute(syncRunnable);
     }
 
     @Override
     public void onDestroy() {
         networkManagerAndroid.onDestroy();
-        syncExecutor.shutdownNow();
 
-        if (wifiDirectHandler != null) {
-            wifiDirectHandler.removeGroup();
-            wifiDirectHandler.stopServiceDiscovery();
-            wifiDirectHandler.removeService();
-            UstadMobileSystemImpl.getInstance().setAppPref("devices",
-                    "", getApplicationContext());
-        }
-        unbindService(wifiP2PServiceConnection);
 
         super.onDestroy();
     }
@@ -116,34 +72,6 @@ public class NetworkServiceAndroid extends Service {
         return mBinder;
     }
 
-    /**
-     * This is an interface for monitoring the state of an application service.
-     * it defines callbacks for service binding, passed to bindService().
-     * Either of the two methods will be invoked:
-     * <p>
-     * <b>onServiceConnected</b>: Invoked when service successfully connected
-     * <b>onServiceDisconnected</b>: Invoked when service connection failed.
-     * </p>
-     */
-    ServiceConnection wifiP2PServiceConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-            wifiDirectHandler = ((WifiDirectHandler.WifiTesterBinder) iBinder).getService();
-            wifiDirectHandler.setStopDiscoveryAfterGroupFormed(false);
-            wifiDirectHandler.setPeerDiscoveryInterval(SERVICE_REBROADCASTING_TIMER);
-            wifiDirectHandler.setLocalServicePeerDiscoveryKickEnabled(false);
-
-            boolean isSuperNodeEnabled = Boolean.parseBoolean(UstadMobileSystemImpl.getInstance().getAppPref(
-                    PREF_KEY_SUPERNODE, "false", NetworkServiceAndroid.this.getApplicationContext()));
-            networkManagerAndroid.setSuperNodeEnabled(NetworkServiceAndroid.this.getApplicationContext(),
-                    isSuperNodeEnabled);
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName componentName) {
-            wifiDirectHandler = null;
-        }
-    };
 
     /**
      * Class used for the client Binder.  Because we know this service always
@@ -156,11 +84,5 @@ public class NetworkServiceAndroid extends Service {
 
     }
 
-    /**
-     * @return WifiDirectHandler: Instance of the WifiDirectHandler from Wi-Fi buddy API
-     */
-    public WifiDirectHandler getWifiDirectHandlerAPI() {
-        return wifiDirectHandler;
-    }
 
 }

@@ -33,7 +33,7 @@ group = "com.ustadmobile.app"
 
 ext {
     ustadVersion = project.version
-    ustadVersionCode = 150
+    ustadVersionCode = 151
 
     version_junit = "4.12"
     version_nanohttpd = "2.3.1"
