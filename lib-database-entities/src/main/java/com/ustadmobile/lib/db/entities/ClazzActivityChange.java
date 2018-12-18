@@ -24,6 +24,19 @@ public class ClazzActivityChange{
 
     private boolean clazzActivityChangeActive;
 
+    public int getClazzActivityChangeLastChangedBy() {
+        return clazzActivityChangeLastChangedBy;
+    }
+
+    public void setClazzActivityChangeLastChangedBy(int clazzActivityChangeLastChangedBy) {
+        this.clazzActivityChangeLastChangedBy = clazzActivityChangeLastChangedBy;
+    }
+
+    @UmSyncLastChangedBy
+    private int clazzActivityChangeLastChangedBy;
+
+
+
     public boolean isClazzActivityChangeActive() {
         return clazzActivityChangeActive;
     }

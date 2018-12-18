@@ -41,6 +41,7 @@ public class SocialNominationQuestion {
     @UmSyncLastChangedBy
     private int scheduleNominationQuestionLastChangedBy;
 
+
     public boolean isAssignToAllClasses() {
         return assignToAllClasses;
     }

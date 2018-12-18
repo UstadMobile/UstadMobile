@@ -37,8 +37,10 @@ public class SocialNominationQuestionSetRecognition {
     @UmSyncLocalChangeSeqNum
     private long scheduleNominationQuestionSetRecognitionLocalChangeSeqNum;
 
+
     @UmSyncLastChangedBy
-    private int scheduleNominationQuestionSetRecognitionLastChangedBy;
+    private int socialNominationQuestionSetRecognitionLastChangedBy;
+
 
     public long getSocialNominationQuestionSetRecognitionUid() {
         return socialNominationQuestionSetRecognitionUid;
@@ -88,11 +90,11 @@ public class SocialNominationQuestionSetRecognition {
         this.scheduleNominationQuestionSetRecognitionLocalChangeSeqNum = scheduleNominationQuestionSetRecognitionLocalChangeSeqNum;
     }
 
-    public int getScheduleNominationQuestionSetRecognitionLastChangedBy() {
-        return scheduleNominationQuestionSetRecognitionLastChangedBy;
+    public int getSocialNominationQuestionSetRecognitionLastChangedBy() {
+        return socialNominationQuestionSetRecognitionLastChangedBy;
     }
 
-    public void setScheduleNominationQuestionSetRecognitionLastChangedBy(int scheduleNominationQuestionSetRecognitionLastChangedBy) {
-        this.scheduleNominationQuestionSetRecognitionLastChangedBy = scheduleNominationQuestionSetRecognitionLastChangedBy;
+    public void setSocialNominationQuestionSetRecognitionLastChangedBy(int socialNominationQuestionSetRecognitionLastChangedBy) {
+        this.socialNominationQuestionSetRecognitionLastChangedBy = socialNominationQuestionSetRecognitionLastChangedBy;
     }
 }

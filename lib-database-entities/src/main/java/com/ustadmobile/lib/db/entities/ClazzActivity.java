@@ -42,7 +42,6 @@ public class ClazzActivity {
     @UmSyncLastChangedBy
     private int clazzActivityLastChangedBy;
 
-
     public long getClazzActivityMasterChangeSeqNum() {
         return clazzActivityMasterChangeSeqNum;
     }

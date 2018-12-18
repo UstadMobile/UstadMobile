@@ -11,6 +11,7 @@ import com.ustadmobile.core.view.ClassDetailView;
 import com.ustadmobile.core.view.ClassLogDetailView;
 import com.ustadmobile.core.view.ClazzEditView;
 import com.ustadmobile.core.view.ClazzListView;
+import com.ustadmobile.lib.database.annotation.UmRestAccessible;
 import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.ClazzWithNumStudents;
 
@@ -66,12 +67,21 @@ public class ClazzListPresenter extends UstadBaseController<ClazzListView> {
     public void onCreate(Hashtable savedState) {
         super.onCreate(savedState);
 
-        clazzListProvider = repository.getClazzDao().findAllActiveClazzes();
-        updateProviderToView();
+        //clazzListProvider = repository.getClazzDao().findAllActiveClazzes();
+        Long personUid = UmAccountManager.getActiveAccount(context).getPersonUid();
 
-        idToOrderInteger = new Hashtable<>();
+        if(personUid != null){
 
-        updateSortSpinnerPreset();
+            clazzListProvider =
+                    repository.getClazzDao().findAllClazzesByPersonUid(
+                            UmAccountManager.getActiveAccount(context).getPersonUid());
+            updateProviderToView();
+
+            idToOrderInteger = new Hashtable<>();
+
+            updateSortSpinnerPreset();
+        }
+
     }
 
     private void updateProviderToView(){

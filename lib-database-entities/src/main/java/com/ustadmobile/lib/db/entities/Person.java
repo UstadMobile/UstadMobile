@@ -53,6 +53,7 @@ public class Person  {
     @UmSyncLastChangedBy
     private int personLastChangedBy;
 
+
     private String fatherName;
 
     private String fatherNumber;
@@ -122,7 +123,6 @@ public class Person  {
     public void setDateOfBirth(long dateOfBirth) {
         this.dateOfBirth = dateOfBirth;
     }
-
 
     public long getPersonUid() {
         return personUid;

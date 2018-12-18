@@ -37,7 +37,6 @@ public class FeedEntry {
     @UmSyncLastChangedBy
     private int feedEntryLastChangedBy;
 
-
     public long getFeedEntryLocalChangeSeqNum() {
         return feedEntryLocalChangeSeqNum;
     }

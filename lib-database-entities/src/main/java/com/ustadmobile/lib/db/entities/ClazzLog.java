@@ -36,6 +36,14 @@ public class ClazzLog{
     @UmSyncLocalChangeSeqNum
     private long clazzLogChangeLocalChangeSeqNum;
 
+    public int getClazzLogLastChangedBy() {
+        return clazzLogLastChangedBy;
+    }
+
+    public void setClazzLogLastChangedBy(int clazzLogLastChangedBy) {
+        this.clazzLogLastChangedBy = clazzLogLastChangedBy;
+    }
+
     @UmSyncLastChangedBy
     private int clazzLogLastChangedBy;
 
@@ -153,13 +161,5 @@ public class ClazzLog{
 
     public void setClazzLogChangeLocalChangeSeqNum(long clazzLogChangeLocalChangeSeqNum) {
         this.clazzLogChangeLocalChangeSeqNum = clazzLogChangeLocalChangeSeqNum;
-    }
-
-    public int getClazzLogLastChangedBy() {
-        return clazzLogLastChangedBy;
-    }
-
-    public void setClazzLogLastChangedBy(int clazzLogLastChangedBy) {
-        this.clazzLogLastChangedBy = clazzLogLastChangedBy;
     }
 }

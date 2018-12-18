@@ -297,7 +297,6 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         viewNameToAndroidImplMap.put(ContentEntryView.VIEW_NAME, ContentEntryListActivity.class);
         viewNameToAndroidImplMap.put(ContentEntryDetailView.VIEW_NAME, ContentEntryDetailActivity.class);
         viewNameToAndroidImplMap.put(DummyView.VIEW_NAME, DummyActivity.class);
-
         viewNameToAndroidImplMap.put(BulkUploadMasterView.VIEW_NAME, BulkUploadMasterActivity.class);
         viewNameToAndroidImplMap.put(Register2View.VIEW_NAME, Register2Activity.class);
     }

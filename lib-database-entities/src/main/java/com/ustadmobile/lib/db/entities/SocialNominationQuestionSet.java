@@ -26,7 +26,15 @@ public class SocialNominationQuestionSet  {
     private long scheduleNominationQuestionSetLocalChangeSeqNum;
 
     @UmSyncLastChangedBy
-    private int scheduleNominationQuestionSetLocalLastChangedBy;
+    private int socialNominationQuestionSetLastChangedBy;
+
+    public int getSocialNominationQuestionSetLastChangedBy() {
+        return socialNominationQuestionSetLastChangedBy;
+    }
+
+    public void setSocialNominationQuestionSetLastChangedBy(int socialNominationQuestionSetLastChangedBy) {
+        this.socialNominationQuestionSetLastChangedBy = socialNominationQuestionSetLastChangedBy;
+    }
 
     public long getSocialNominationQuestionSetUid() {
         return socialNominationQuestionSetUid;
@@ -58,13 +66,5 @@ public class SocialNominationQuestionSet  {
 
     public void setScheduleNominationQuestionSetLocalChangeSeqNum(long scheduleNominationQuestionSetLocalChangeSeqNum) {
         this.scheduleNominationQuestionSetLocalChangeSeqNum = scheduleNominationQuestionSetLocalChangeSeqNum;
-    }
-
-    public int getScheduleNominationQuestionSetLocalLastChangedBy() {
-        return scheduleNominationQuestionSetLocalLastChangedBy;
-    }
-
-    public void setScheduleNominationQuestionSetLocalLastChangedBy(int scheduleNominationQuestionSetLocalLastChangedBy) {
-        this.scheduleNominationQuestionSetLocalLastChangedBy = scheduleNominationQuestionSetLocalLastChangedBy;
     }
 }

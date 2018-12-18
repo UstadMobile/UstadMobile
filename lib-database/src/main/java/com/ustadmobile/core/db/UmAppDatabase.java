@@ -1,8 +1,8 @@
 package com.ustadmobile.core.db;
 
+import com.ustadmobile.core.db.dao.AccessTokenDao;
 import com.ustadmobile.core.db.dao.ClazzActivityChangeDao;
 import com.ustadmobile.core.db.dao.ClazzActivityDao;
-import com.ustadmobile.core.db.dao.AccessTokenDao;
 import com.ustadmobile.core.db.dao.ClazzDao;
 import com.ustadmobile.core.db.dao.ClazzLogAttendanceRecordDao;
 import com.ustadmobile.core.db.dao.ClazzLogDao;
