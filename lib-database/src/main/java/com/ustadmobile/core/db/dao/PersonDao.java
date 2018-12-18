@@ -92,6 +92,21 @@ public abstract class PersonDao implements SyncableDao<Person, PersonDao> {
         }
     }
 
+    protected boolean checkUserAuth(String passwordProvided, String passwordHash) {
+        if (passwordHash == null) {
+            return false;
+        } else if (passwordHash.startsWith(PersonAuthDao.PLAIN_PASS_PREFIX)
+                && passwordHash.substring(2).equals(passwordProvided)) {
+            return true;
+        }else if(passwordHash.startsWith(PersonAuthDao.ENCRYPTED_PASS_PREFIX)) {
+            return PersonAuthDao.authenticateEncryptedPassword(passwordProvided,
+                    passwordHash.substring(2));
+        }else {
+            return PersonAuthDao.authenticateEncryptedPassword(passwordProvided,
+                    passwordHash);
+        }
+    }
+
     @UmRestAccessible
     @UmRepository(delegateType = UmRepository.UmRepositoryMethodType.DELEGATE_TO_WEBSERVICE)
     public void login(String username, String password, UmCallback<UmAccount> callback) {
@@ -152,6 +167,7 @@ public abstract class PersonDao implements SyncableDao<Person, PersonDao> {
         Person adminPerson = findByUsername("admin");
         if(adminPerson == null) {
             adminPerson = new Person();
+            adminPerson.setAdmin(true);
             adminPerson.setUsername("admin");
             adminPerson.setPersonUid(getAndIncrementPrimaryKey());
             adminPerson.setFirstNames("Admin");
@@ -160,13 +176,51 @@ public abstract class PersonDao implements SyncableDao<Person, PersonDao> {
             insert(adminPerson);
 
             PersonAuth adminPersonAuth = new PersonAuth(adminPerson.getPersonUid(),
-                    PersonAuthDao.encryptPassword("irZahle2"));
+                    PersonAuthDao.ENCRYPTED_PASS_PREFIX +
+                            PersonAuthDao.encryptPassword("irZahle2"));
             insertPersonAuth(adminPersonAuth);
 
             return "Created";
         }else {
             return "Already created";
         }
+    }
+
+    @UmRestAccessible
+    protected void setUserPassword(String adminUsername, String adminPassword, String userUsername,
+                                     String userPassword, UmCallback<String> callback) {
+        //validate the admin
+        Person adminPerson = findByUsername(adminUsername);
+        if(adminPerson == null || !adminPerson.isAdmin()) {
+            callback.onFailure(new IllegalArgumentException("Admin user not found or not admin"));
+            return;
+        }
+
+        findUidAndPasswordHash(adminUsername, new UmCallback<PersonUidAndPasswordHash>() {
+            @Override
+            public void onSuccess(PersonUidAndPasswordHash result) {
+                if(result == null) {
+                    callback.onFailure(new IllegalArgumentException("no auth object found for admin"));
+                }else if(checkUserAuth(adminPassword, result.getPasswordHash())){
+                    Person userPerson = findByUsername(userUsername);
+                    if(userPerson == null) {
+                        callback.onFailure(new IllegalArgumentException("Username not found"));
+                    }else {
+                        replacePersonAuth(new PersonAuth(userPerson.getPersonUid(),
+                                PersonAuthDao.ENCRYPTED_PASS_PREFIX +
+                                        PersonAuthDao.encryptPassword(userPassword)));
+                        callback.onSuccess("Changed password for user: " + userUsername);
+                    }
+                }else {
+                    callback.onFailure(new IllegalArgumentException("Invalid authentication for user"));
+                }
+            }
+
+            @Override
+            public void onFailure(Throwable exception) {
+                callback.onFailure(exception);
+            }
+        });
     }
 
 
@@ -228,6 +282,9 @@ public abstract class PersonDao implements SyncableDao<Person, PersonDao> {
                                                 UmCallback<PersonUidAndPasswordHash> callback);
     @UmInsert
     public abstract void insertPersonAuth(PersonAuth personAuth);
+
+    @UmInsert(onConflict = UmOnConflictStrategy.REPLACE)
+    public abstract void replacePersonAuth(PersonAuth personAuth);
 
 
 }
