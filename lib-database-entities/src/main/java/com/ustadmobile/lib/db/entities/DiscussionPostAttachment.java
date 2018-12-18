@@ -2,6 +2,7 @@ package com.ustadmobile.lib.db.entities;
 
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
+import com.ustadmobile.lib.database.annotation.UmSyncLastChangedBy;
 import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
 import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 
@@ -20,6 +21,9 @@ public class DiscussionPostAttachment {
 
     @UmSyncMasterChangeSeqNum
     private long attachmentMasterChangeSeqNum;
+
+    @UmSyncLastChangedBy
+    private int attachmentLastChangedBy;
 
     public long getAttachmentUid() {
         return attachmentUid;
@@ -59,5 +63,13 @@ public class DiscussionPostAttachment {
 
     public void setAttachmentMasterChangeSeqNum(long attachmentMasterChangeSeqNum) {
         this.attachmentMasterChangeSeqNum = attachmentMasterChangeSeqNum;
+    }
+
+    public int getAttachmentLastChangedBy() {
+        return attachmentLastChangedBy;
+    }
+
+    public void setAttachmentLastChangedBy(int attachmentLastChangedBy) {
+        this.attachmentLastChangedBy = attachmentLastChangedBy;
     }
 }

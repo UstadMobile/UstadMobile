@@ -2,6 +2,7 @@ package com.ustadmobile.lib.db.entities;
 
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
+import com.ustadmobile.lib.database.annotation.UmSyncLastChangedBy;
 import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
 import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 
@@ -24,6 +25,9 @@ public class WamdaPerson {
 
     @UmSyncMasterChangeSeqNum
     private long wamdaPersonMasterChangeSeqNum;
+
+    @UmSyncLastChangedBy
+    private int wamdaPersonLastChangedBy;
 
     public long getWamdaPersonUid() {
         return wamdaPersonUid;
@@ -79,5 +83,13 @@ public class WamdaPerson {
 
     public void setWamdaPersonMasterChangeSeqNum(long wamdaPersonMasterChangeSeqNum) {
         this.wamdaPersonMasterChangeSeqNum = wamdaPersonMasterChangeSeqNum;
+    }
+
+    public int getWamdaPersonLastChangedBy() {
+        return wamdaPersonLastChangedBy;
+    }
+
+    public void setWamdaPersonLastChangedBy(int wamdaPersonLastChangedBy) {
+        this.wamdaPersonLastChangedBy = wamdaPersonLastChangedBy;
     }
 }
