@@ -2,6 +2,7 @@ package com.ustadmobile.lib.db.entities;
 
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
+import com.ustadmobile.lib.database.annotation.UmSyncLastChangedBy;
 import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
 import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 
@@ -43,11 +44,16 @@ public class Person  {
 
     private boolean socialAccount;
 
+    private boolean admin;
+
     @UmSyncMasterChangeSeqNum
     private long personMasterChangeSeqNum;
 
     @UmSyncLocalChangeSeqNum
     private long personLocalChangeSeqNum;
+
+    @UmSyncLastChangedBy
+    private int personLastChangedBy;
 
     public long getPersonUid() {
         return personUid;
@@ -113,6 +119,14 @@ public class Person  {
         this.personLocalChangeSeqNum = personLocalChangeSeqNum;
     }
 
+    public int getPersonLastChangedBy() {
+        return personLastChangedBy;
+    }
+
+    public void setPersonLastChangedBy(int personLastChangedBy) {
+        this.personLastChangedBy = personLastChangedBy;
+    }
+
     public int getGender() {
         return gender;
     }
@@ -169,5 +183,13 @@ public class Person  {
         result = 31 * result + gender;
         result = 31 * result + (active ? 1 : 0);
         return result;
+    }
+
+    public boolean isAdmin() {
+        return admin;
+    }
+
+    public void setAdmin(boolean admin) {
+        this.admin = admin;
     }
 }

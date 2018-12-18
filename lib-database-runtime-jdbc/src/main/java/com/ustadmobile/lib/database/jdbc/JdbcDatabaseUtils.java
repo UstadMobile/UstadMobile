@@ -122,7 +122,8 @@ public class JdbcDatabaseUtils {
             if(closeable != null)
                 closeable.close();
         }catch(Exception e) {
-            e.printStackTrace();
+            //whatever it was, it was already closed (or something underlyign was closed).
+            // This method is called closeQuietly
         }
     }
 

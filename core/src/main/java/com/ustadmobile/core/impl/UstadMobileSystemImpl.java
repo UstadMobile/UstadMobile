@@ -44,7 +44,7 @@ import com.ustadmobile.core.tincan.TinCanResultListener;
 import com.ustadmobile.core.util.MessagesHashtable;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
-import com.ustadmobile.core.view.LoginView2;
+import com.ustadmobile.core.view.Login2View;
 import com.ustadmobile.lib.db.entities.UmAccount;
 import com.ustadmobile.lib.util.UMUtil;
 import com.ustadmobile.core.view.AppView;
@@ -367,7 +367,7 @@ public abstract class UstadMobileSystemImpl {
         UmAccount activeAccount = UmAccountManager.getActiveAccount(context);
         if(getAppConfigBoolean(AppConfig.KEY_FIRST_DEST_LOGIN_REQUIRED, context)
                 && activeAccount == null) {
-            go(LoginView2.VIEW_NAME, null, context);
+            go(Login2View.VIEW_NAME, null, context);
         }else {
             go(getAppConfigString(AppConfig.KEY_FIRST_DEST, null, context), context);
         }

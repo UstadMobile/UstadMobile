@@ -2,6 +2,7 @@ package com.ustadmobile.lib.db.entities;
 
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
+import com.ustadmobile.lib.database.annotation.UmSyncLastChangedBy;
 import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
 import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 
@@ -28,6 +29,9 @@ public class ContentEntryContentCategoryJoin {
 
     @UmSyncMasterChangeSeqNum
     private long ceccjMasterChangeSeqNum;
+
+    @UmSyncLastChangedBy
+    private int ceccjLastChangedBy;
 
     public long getCeccjUid() {
         return ceccjUid;
@@ -67,6 +71,14 @@ public class ContentEntryContentCategoryJoin {
 
     public void setCeccjMasterChangeSeqNum(long ceccjMasterChangeSeqNum) {
         this.ceccjMasterChangeSeqNum = ceccjMasterChangeSeqNum;
+    }
+
+    public int getCeccjLastChangedBy() {
+        return ceccjLastChangedBy;
+    }
+
+    public void setCeccjLastChangedBy(int ceccjLastChangedBy) {
+        this.ceccjLastChangedBy = ceccjLastChangedBy;
     }
 
     @Override

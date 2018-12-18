@@ -3,7 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="#fff">
 
 
     <android.support.design.widget.AppBarLayout
@@ -15,8 +16,8 @@
         <include
             layout="@layout/toolbar_with_progress"/>
 
-
     </android.support.design.widget.AppBarLayout>
+
 
     <EditText
         android:layout_marginTop="@dimen/dimen_16dp"
@@ -52,6 +53,7 @@
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/activity_login_appbar"
+        app:layout_constraintVertical_bias="0.120000005"
         app:layout_constraintVertical_chainStyle="packed" />
 
     <Button
@@ -81,6 +83,7 @@
         android:text="@string/forgot_password"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
         android:textColor="@color/primary"
+        android:visibility="invisible"
         app:layout_constraintBottom_toTopOf="@+id/activity_login_button_login"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
@@ -94,7 +97,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="8dp"
-        android:text="@string/error"
+        android:text=""
         app:layout_constraintBottom_toTopOf="@+id/activity_login_forgot_password"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"

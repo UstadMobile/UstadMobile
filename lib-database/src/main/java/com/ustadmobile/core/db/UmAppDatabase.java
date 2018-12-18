@@ -281,7 +281,7 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
     public abstract UmAppDatabase getRepository(String baseUrl, String auth);
 
     @UmSyncOutgoing
-    public abstract void syncWith(UmAppDatabase otherDb, long accountUid);
+    public abstract void syncWith(UmAppDatabase otherDb, long accountUid, int sendLimit, int receiveLimit);
 
 
     @Override
@@ -292,4 +292,8 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
         return getAccessTokenDao().isValidToken(personUid, auth);
     }
 
+    @Override
+    public int getDeviceBits() {
+        return getSyncablePrimaryKeyDao().getDeviceBits();
+    }
 }
