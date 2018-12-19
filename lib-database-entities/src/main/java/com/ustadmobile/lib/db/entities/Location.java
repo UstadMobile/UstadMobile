@@ -14,7 +14,7 @@ public class Location {
 
     private String title;
 
-    private String desc;
+    private String locationDesc;
 
     private String lng;
 
@@ -55,12 +55,12 @@ public class Location {
         this.title = title;
     }
 
-    public String getDesc() {
-        return desc;
+    public String getLocationDesc() {
+        return locationDesc;
     }
 
-    public void setDesc(String desc) {
-        this.desc = desc;
+    public void setLocationDesc(String locationDesc) {
+        this.locationDesc = locationDesc;
     }
 
     public String getLat() {
