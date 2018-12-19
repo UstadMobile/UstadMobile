@@ -136,7 +136,7 @@ public abstract class PersonDao implements SyncableDao<Person, PersonDao> {
     @UmQuery("UPDATE SyncablePrimaryKey SET sequenceNumber = sequenceNumber + 1 WHERE tableId = " + Person.TABLE_ID)
     protected abstract void incrementPrimaryKey();
 
-    @UmQuery("SELECT (((SELECT deviceBits FROM SyncDeviceBits WHERE id = " + SyncDeviceBits.PRIMARY_KEY + ") << 32) \n" +
+    @UmQuery("SELECT (((SELECT cast(deviceBits as bigint) FROM SyncDeviceBits WHERE id = " + SyncDeviceBits.PRIMARY_KEY + ") << 32) \n" +
             "           | (SELECT sequenceNumber FROM SyncablePrimaryKey WHERE tableId = " + Person.TABLE_ID +" )) AS newPrimaryKey")
     protected abstract long getPrimaryKey();
 
@@ -171,6 +171,9 @@ public abstract class PersonDao implements SyncableDao<Person, PersonDao> {
     @UmInsert
     @Override
     public abstract void insertAsync(Person entity, UmCallback<Long> result);
+
+    @UmInsert(onConflict = UmOnConflictStrategy.REPLACE)
+    public abstract void replaceAsync(Person entity, UmCallback<Long> result);
 
     @Override
     @UmQuery("SELECT * From Person WHERE personUid = :uid")
