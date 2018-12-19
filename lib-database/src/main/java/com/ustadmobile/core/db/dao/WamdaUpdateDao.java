@@ -21,6 +21,7 @@ public abstract class WamdaUpdateDao implements SyncableDao<WamdaUpdate, WamdaUp
             " FROM WamdaUpdate \n" +
             " LEFT JOIN Person on WamdaUpdate.wamdaUpdatePersonUid = Person.personUid\n" +
             " WHERE WamdaUpdate.wamdaUpdatePersonUid IN (SELECT WamdaFollower.wamdaFollowingPersonUid" +
-            " FROM WamdaFollower WHERE wamdaFollowerPersonUid = :personUid)")
+            " FROM WamdaFollower WHERE wamdaFollowerPersonUid = :personUid)" +
+            " ORDER BY timestamp DESC ")
     public abstract UmProvider<WamdaUpdateWithPerson> findByPersonUid(long personUid);
 }

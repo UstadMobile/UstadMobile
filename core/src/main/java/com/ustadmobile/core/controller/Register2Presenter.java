@@ -1,6 +1,7 @@
 package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.db.UmAppDatabase;
+import com.ustadmobile.core.db.dao.WamdaPersonDao;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.AppConfig;
 import com.ustadmobile.core.impl.UmAccountManager;
@@ -9,6 +10,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.Register2View;
 import com.ustadmobile.lib.db.entities.Person;
 import com.ustadmobile.lib.db.entities.UmAccount;
+import com.ustadmobile.lib.db.entities.WamdaPerson;
 
 import java.util.Hashtable;
 
@@ -88,6 +90,13 @@ public class Register2Presenter extends UstadBaseController<Register2View> {
                             result.setEndpointUrl(serverUrl);
                             view.runOnUiThread(() -> view.setInProgress(false));
                             UmAccountManager.setActiveAccount(result, getContext());
+
+                            WamdaPerson newWamdaPerson = WamdaPersonDao.makeWamdaPersonForNewUser(result.getPersonUid(),
+                                    UstadMobileSystemImpl.getInstance().getString(MessageID.wamda_default_profile_status, getContext()),
+                                    getContext());
+                            UmAccountManager.getRepositoryForActiveAccount(context).getWamdaPersonDao()
+                                    .insertAsync(newWamdaPerson, null);
+
                             systemImpl.go(mNextDest, getContext());
                         }
 
