@@ -163,7 +163,7 @@ public abstract class PersonDao implements SyncableDao<Person, PersonDao> {
     }
 
     @UmRestAccessible
-    protected String createAdmin() {
+    public String createAdmin() {
         Person adminPerson = findByUsername("admin");
         if(adminPerson == null) {
             adminPerson = new Person();

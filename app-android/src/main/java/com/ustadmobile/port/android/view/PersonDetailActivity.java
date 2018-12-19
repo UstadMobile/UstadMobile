@@ -4,20 +4,16 @@ import android.arch.lifecycle.LiveData;
 import android.arch.paging.DataSource;
 import android.arch.paging.LivePagedListBuilder;
 import android.arch.paging.PagedList;
-import android.arch.paging.PagedListAdapter;
 import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -38,12 +34,12 @@ import java.util.Objects;
 
 import ru.dimorinny.floatingtextbutton.FloatingTextButton;
 
-import static com.ustadmobile.core.view.PersonDetailViewField.FIELD_TYPE_DATE;
-import static com.ustadmobile.core.view.PersonDetailViewField.FIELD_TYPE_DROPDOWN;
-import static com.ustadmobile.core.view.PersonDetailViewField.FIELD_TYPE_FIELD;
-import static com.ustadmobile.core.view.PersonDetailViewField.FIELD_TYPE_HEADER;
-import static com.ustadmobile.core.view.PersonDetailViewField.FIELD_TYPE_PHONE_NUMBER;
-import static com.ustadmobile.core.view.PersonDetailViewField.FIELD_TYPE_TEXT;
+import static com.ustadmobile.lib.db.entities.PersonField.FIELD_TYPE_DATE;
+import static com.ustadmobile.lib.db.entities.PersonField.FIELD_TYPE_DROPDOWN;
+import static com.ustadmobile.lib.db.entities.PersonField.FIELD_TYPE_FIELD;
+import static com.ustadmobile.lib.db.entities.PersonField.FIELD_TYPE_HEADER;
+import static com.ustadmobile.lib.db.entities.PersonField.FIELD_TYPE_PHONE_NUMBER;
+import static com.ustadmobile.lib.db.entities.PersonField.FIELD_TYPE_TEXT;
 import static com.ustadmobile.port.android.view.PersonEditActivity.ADD_PERSON_ICON;
 
 /**

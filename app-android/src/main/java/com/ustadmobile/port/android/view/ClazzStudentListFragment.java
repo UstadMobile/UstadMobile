@@ -282,7 +282,7 @@ public class ClazzStudentListFragment extends UstadBaseFragment implements Clazz
         if (role == ClazzMember.ROLE_STUDENT) {
             addClazzMemberTextView.setText(getText(R.string.add_student));
             clazzMemberRoleHeadingTextView.setText(getText(R.string.students_literal));
-            addCl.setOnClickListener( v -> mPresenter.handleCommonPressed(-1L));
+            addCl.setOnClickListener( v -> mPresenter.handleCommonPressed(0L));
 
             //Storing in separate variables so we can remove them.
             addCMCLS = addCMCL;

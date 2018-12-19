@@ -25,6 +25,13 @@ import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 @UmEntity(tableId = 20)
 public class PersonField {
 
+    public static final int FIELD_TYPE_HEADER = 1;
+    public static final int FIELD_TYPE_FIELD = 2;
+    public static final int FIELD_TYPE_TEXT = 3;
+    public static final int FIELD_TYPE_DROPDOWN = 4;
+    public static final int FIELD_TYPE_PHONE_NUMBER = 5;
+    public static final int FIELD_TYPE_DATE = 6;
+
     @UmPrimaryKey(autoGenerateSyncable = true)
     private long personCustomFieldUid;
 

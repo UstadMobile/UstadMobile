@@ -27,8 +27,8 @@ import java.util.List;
 import java.util.Map;
 
 import static com.ustadmobile.core.view.PersonDetailView.ARG_PERSON_UID;
-import static com.ustadmobile.core.view.PersonDetailViewField.FIELD_TYPE_HEADER;
-import static com.ustadmobile.core.view.PersonDetailViewField.FIELD_TYPE_TEXT;
+import static com.ustadmobile.lib.db.entities.PersonField.FIELD_TYPE_HEADER;
+import static com.ustadmobile.lib.db.entities.PersonField.FIELD_TYPE_TEXT;
 import static com.ustadmobile.lib.db.entities.PersonDetailPresenterField.PERSON_FIELD_UID_ADDRESS;
 import static com.ustadmobile.lib.db.entities.PersonDetailPresenterField.PERSON_FIELD_UID_ATTENDANCE;
 import static com.ustadmobile.lib.db.entities.PersonDetailPresenterField.PERSON_FIELD_UID_BIRTHDAY;
@@ -206,6 +206,10 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
 
         view.clearAllFields();
 
+        if(person == null){
+            return;
+        }
+
         for(PersonDetailPresenterField field : presenterFields) {
 
             String thisValue = "";
@@ -217,7 +221,10 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
             }
 
             if (field.getFieldUid() == PERSON_FIELD_UID_FULL_NAME){
+                if(person.getFirstNames() != null && person.getLastName() != null)
                 thisValue = person.getFirstNames() + " " + person.getLastName();
+                else
+                    thisValue = "";
                 view.setField(field.getFieldIndex(), new PersonDetailViewField(FIELD_TYPE_TEXT,
                         field.getLabelMessageId(),field.getFieldIcon()), thisValue);
 

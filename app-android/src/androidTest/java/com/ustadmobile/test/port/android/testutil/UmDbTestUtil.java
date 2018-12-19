@@ -4,7 +4,6 @@ import com.ustadmobile.core.db.dao.ClazzActivityChangeDao;
 import com.ustadmobile.core.db.dao.SocialNominationQuestionDao;
 import com.ustadmobile.core.db.dao.SocialNominationQuestionSetDao;
 import com.ustadmobile.core.view.ClazzListView;
-import com.ustadmobile.core.view.PersonDetailViewField;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.ClazzDao;
 import com.ustadmobile.core.db.dao.ClazzLogAttendanceRecordDao;
@@ -36,7 +35,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import static com.ustadmobile.core.view.PersonDetailViewField.FIELD_TYPE_HEADER;
+import static com.ustadmobile.lib.db.entities.PersonField.FIELD_TYPE_HEADER;
 import static com.ustadmobile.lib.db.entities.PersonDetailPresenterField.CUSTOM_FIELD_MIN_UID;
 
 /**
@@ -77,7 +76,7 @@ public class UmDbTestUtil {
                MessageID.field_fullname,
                PersonDetailPresenterField.PERSON_FIELD_UID_FULL_NAME,
                2,
-               PersonDetailViewField.FIELD_TYPE_TEXT,
+               PersonField.FIELD_TYPE_TEXT,
                0,
                 false,
                 true,
@@ -91,7 +90,7 @@ public class UmDbTestUtil {
                 MessageID.first_names,
                 PersonDetailPresenterField.PERSON_FIELD_UID_FIRST_NAMES,
                 3,
-                PersonDetailViewField.FIELD_TYPE_TEXT,
+                PersonField.FIELD_TYPE_TEXT,
                 0,
                 false,
                 false,
@@ -103,7 +102,7 @@ public class UmDbTestUtil {
                 MessageID.last_name,
                 PersonDetailPresenterField.PERSON_FIELD_UID_LAST_NAME,
                 4,
-                PersonDetailViewField.FIELD_TYPE_TEXT,
+                PersonField.FIELD_TYPE_TEXT,
                 0,
                 false,
                 false,
@@ -117,7 +116,7 @@ public class UmDbTestUtil {
                 MessageID.birthday,
                 PersonDetailPresenterField.PERSON_FIELD_UID_BIRTHDAY,
                 5,
-                PersonDetailViewField.FIELD_TYPE_DATE,
+                PersonField.FIELD_TYPE_DATE,
                 0,
                 false,
                 true,
@@ -130,7 +129,7 @@ public class UmDbTestUtil {
                 MessageID.home_address,
                 PersonDetailPresenterField.PERSON_FIELD_UID_ADDRESS,
                 6,
-                PersonDetailViewField.FIELD_TYPE_TEXT,
+                PersonField.FIELD_TYPE_TEXT,
                 0,
                 false,
                 true,
@@ -156,7 +155,7 @@ public class UmDbTestUtil {
                 MessageID.attendance,
                 PersonDetailPresenterField.PERSON_FIELD_UID_ATTENDANCE,
                 8,
-                PersonDetailViewField.FIELD_TYPE_TEXT,
+                PersonField.FIELD_TYPE_TEXT,
                 0,
                 false,
                 true,
@@ -170,7 +169,7 @@ public class UmDbTestUtil {
                 MessageID.father,
                 PersonDetailPresenterField.PERSON_FIELD_UID_FATHER_NAME_AND_PHONE_NUMBER,
                 11,
-                PersonDetailViewField.FIELD_TYPE_PHONE_NUMBER,
+                PersonField.FIELD_TYPE_PHONE_NUMBER,
                 0,
                 false,
                 true,
@@ -182,7 +181,7 @@ public class UmDbTestUtil {
                 MessageID.fathers_name,
                 PersonDetailPresenterField.PERSON_FIELD_UID_FATHER_NAME,
                 12,
-                PersonDetailViewField.FIELD_TYPE_TEXT,
+                PersonField.FIELD_TYPE_TEXT,
                 0,
                 false,
                 false,
@@ -194,7 +193,7 @@ public class UmDbTestUtil {
                 MessageID.fathers_number,
                 PersonDetailPresenterField.PERSON_FIELD_UID_FATHER_NUMBER,
                 13,
-                PersonDetailViewField.FIELD_TYPE_PHONE_NUMBER,
+                PersonField.FIELD_TYPE_PHONE_NUMBER,
                 0,
                 false,
                 false,
@@ -206,7 +205,7 @@ public class UmDbTestUtil {
                 MessageID.mothers_name,
                 PersonDetailPresenterField.PERSON_FIELD_UID_MOTHER_NAME,
                 14,
-                PersonDetailViewField.FIELD_TYPE_TEXT,
+                PersonField.FIELD_TYPE_TEXT,
                 0,
                 false,
                 false,
@@ -218,7 +217,7 @@ public class UmDbTestUtil {
                 MessageID.mothers_number,
                 PersonDetailPresenterField.PERSON_FIELD_UID_MOTHER_NUMBER,
                 15,
-                PersonDetailViewField.FIELD_TYPE_PHONE_NUMBER,
+                PersonField.FIELD_TYPE_PHONE_NUMBER,
                 0,
                 false,
                 false,
@@ -230,7 +229,7 @@ public class UmDbTestUtil {
                 MessageID.mother,
                 PersonDetailPresenterField.PERSON_FIELD_UID_MOTHER_NAME_AND_PHONE_NUMBER,
                 16,
-                PersonDetailViewField.FIELD_TYPE_TEXT,
+                PersonField.FIELD_TYPE_TEXT,
                 0,
                 false,
                 true,
@@ -284,7 +283,7 @@ public class UmDbTestUtil {
                 MessageID.aser_test_result,
                 0,
                 20,
-                PersonDetailViewField.FIELD_TYPE_TEXT,
+                PersonField.FIELD_TYPE_TEXT,
                 0,
                 false,
                 true,
@@ -298,7 +297,7 @@ public class UmDbTestUtil {
                 MessageID.current_formal_school,
                 0,
                 21,
-                PersonDetailViewField.FIELD_TYPE_TEXT,
+                PersonField.FIELD_TYPE_TEXT,
                 0,
                 false,
                 true,

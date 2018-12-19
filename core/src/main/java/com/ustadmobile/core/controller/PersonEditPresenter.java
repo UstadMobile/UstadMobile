@@ -31,7 +31,7 @@ import static com.ustadmobile.core.view.ClazzDetailEnrollStudentView.ARG_NEW_PER
 import static com.ustadmobile.core.view.ClazzDetailEnrollStudentView.ARG_NEW_PERSON_TYPE;
 import static com.ustadmobile.core.view.ClazzListView.ARG_CLAZZ_UID;
 import static com.ustadmobile.core.view.PersonDetailView.ARG_PERSON_UID;
-import static com.ustadmobile.core.view.PersonDetailViewField.FIELD_TYPE_HEADER;
+import static com.ustadmobile.lib.db.entities.PersonField.FIELD_TYPE_HEADER;
 import static com.ustadmobile.lib.db.entities.PersonDetailPresenterField.PERSON_FIELD_UID_ADDRESS;
 import static com.ustadmobile.lib.db.entities.PersonDetailPresenterField.PERSON_FIELD_UID_ATTENDANCE;
 import static com.ustadmobile.lib.db.entities.PersonDetailPresenterField.PERSON_FIELD_UID_BIRTHDAY;

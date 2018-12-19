@@ -208,8 +208,10 @@ public class PersonWithEnrollmentRecyclerAdapter
                 holder.itemView.findViewById(R.id.item_studentlist_student_simple_attendance_percentage);
 
         ConstraintLayout cl = holder.itemView.findViewById(R.id.item_studentlist_student_cl);
-        cl.setOnClickListener(v ->
-                mPresenter.handleCommonPressed(personUid));
+//        cl.setOnClickListener(v ->
+//                mPresenter.handleCommonPressed(personUid));
+
+        studentNameTextView.setOnClickListener(v -> mPresenter.handleCommonPressed(personUid));
 
         //Remove previous add clazz member views
         removeAllAddClazzMemberView(cl, holder);
@@ -412,7 +414,7 @@ public class PersonWithEnrollmentRecyclerAdapter
         if (role == ClazzMember.ROLE_STUDENT) {
             addClazzMemberTextView.setText(getText(R.string.add_student));
             clazzMemberRoleHeadingTextView.setText(getText(R.string.students_literal));
-            addCl.setOnClickListener( v -> mPresenter.handleCommonPressed(-1L));
+            addCl.setOnClickListener( v -> mPresenter.handleCommonPressed(0L));
 
             //Storing in separate variables so we can remove them.
             addCMCLS = addCMCL;

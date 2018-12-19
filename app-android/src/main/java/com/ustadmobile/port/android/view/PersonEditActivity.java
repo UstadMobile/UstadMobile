@@ -58,12 +58,12 @@ import java.util.Objects;
 
 import id.zelory.compressor.Compressor;
 
-import static com.ustadmobile.core.view.PersonDetailViewField.FIELD_TYPE_DATE;
-import static com.ustadmobile.core.view.PersonDetailViewField.FIELD_TYPE_DROPDOWN;
-import static com.ustadmobile.core.view.PersonDetailViewField.FIELD_TYPE_FIELD;
-import static com.ustadmobile.core.view.PersonDetailViewField.FIELD_TYPE_HEADER;
-import static com.ustadmobile.core.view.PersonDetailViewField.FIELD_TYPE_PHONE_NUMBER;
-import static com.ustadmobile.core.view.PersonDetailViewField.FIELD_TYPE_TEXT;
+import static com.ustadmobile.lib.db.entities.PersonField.FIELD_TYPE_DATE;
+import static com.ustadmobile.lib.db.entities.PersonField.FIELD_TYPE_DROPDOWN;
+import static com.ustadmobile.lib.db.entities.PersonField.FIELD_TYPE_FIELD;
+import static com.ustadmobile.lib.db.entities.PersonField.FIELD_TYPE_HEADER;
+import static com.ustadmobile.lib.db.entities.PersonField.FIELD_TYPE_PHONE_NUMBER;
+import static com.ustadmobile.lib.db.entities.PersonField.FIELD_TYPE_TEXT;
 
 /**
  * This activity is responsible for showing the edit page for a person. Used for editing a new

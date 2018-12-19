@@ -23,5 +23,10 @@
     </servlet-mapping>
 
 
+    <listener>
+        <listener-class>com.ustadmobile.port.rest.ServletContextClass</listener-class>
+    </listener>
+
+
 
 </web-app>
