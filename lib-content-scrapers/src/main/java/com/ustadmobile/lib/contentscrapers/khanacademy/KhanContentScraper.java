@@ -3,17 +3,14 @@ package com.ustadmobile.lib.contentscrapers.khanacademy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
+import com.ustadmobile.lib.contentscrapers.ScraperConstants;
 import com.ustadmobile.lib.contentscrapers.ck12.plix.PlixIndex;
 import com.ustadmobile.lib.contentscrapers.ck12.plix.PlixLog;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
 import org.openqa.selenium.By;
-import org.openqa.selenium.Cookie;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.logging.LogEntries;
 import org.openqa.selenium.logging.LogEntry;
@@ -69,25 +66,33 @@ public class KhanContentScraper {
 
     String exercisePostUrl = "/assessment_item";
 
+    private boolean isContentUpdated = true;
+
     public KhanContentScraper(File destinationDirectory) {
         this.destinationDirectory = destinationDirectory;
+    }
+
+    public boolean isContentUpdated() {
+        return isContentUpdated;
     }
 
     public void scrapeVideoContent(String url) throws IOException {
 
         URL scrapUrl = new URL(url);
 
+        File folder = new File(destinationDirectory, destinationDirectory.getName());
+        folder.mkdirs();
 
-        destinationDirectory.mkdirs();
 
-        File file = new File(destinationDirectory, destinationDirectory.getName() + ".mp4");
+        File content = new File(folder, FilenameUtils.getName(scrapUrl.getPath()));
         URLConnection conn = scrapUrl.openConnection();
-
-        if (!ContentScraperUtil.isFileModified(conn, destinationDirectory, destinationDirectory.getName())) {
+        if (!ContentScraperUtil.isFileModified(conn, folder, FilenameUtils.getBaseName(url))) {
+            isContentUpdated = false;
             return;
         }
 
-        FileUtils.copyURLToFile(scrapUrl, file);
+        FileUtils.copyURLToFile(scrapUrl, content);
+        ContentScraperUtil.zipDirectory(folder, destinationDirectory.getName(), destinationDirectory);
 
     }
 
@@ -107,23 +112,41 @@ public class KhanContentScraper {
         SubjectListResponse response = gson.fromJson(initialJson, SubjectListResponse.class);
         String exerciseId = "0";
         List<SubjectListResponse.ComponentData.Card.UserExercise.Model.AssessmentItem> exerciseList = null;
+        long dateModified = 0;
 
         List<SubjectListResponse.ComponentData.Card.UserExercise> contentModel = response.componentProps.initialCards.userExercises;
-        for(SubjectListResponse.ComponentData.Card.UserExercise content: contentModel){
+        for (SubjectListResponse.ComponentData.Card.UserExercise content : contentModel) {
 
-            if(content.exerciseModel == null){
+            if (content.exerciseModel == null) {
                 continue;
             }
 
-            if(content.exerciseModel.allAssessmentItems == null){
+            if (content.exerciseModel.allAssessmentItems == null) {
                 continue;
             }
 
             exerciseList = content.exerciseModel.allAssessmentItems;
             exerciseId = content.exerciseModel.id;
+            dateModified = ContentScraperUtil.parseServerDate(content.exerciseModel.dateModified);
 
             break;
 
+        }
+
+        boolean isUpdated = true;
+        File modifiedFile = new File(khanDirectory, FilenameUtils.getBaseName(exerciseId) + ScraperConstants.LAST_MODIFIED_TXT);
+        String text;
+
+        if (ContentScraperUtil.fileHasContent(modifiedFile)) {
+            text = FileUtils.readFileToString(modifiedFile, UTF_ENCODING);
+            isUpdated = !String.valueOf(dateModified).equalsIgnoreCase(text);
+        } else {
+            FileUtils.writeStringToFile(modifiedFile, String.valueOf(dateModified), ScraperConstants.UTF_ENCODING);
+        }
+
+        if(!isUpdated){
+            isContentUpdated = false;
+            return;
         }
 
         driver.get(scrapUrl);
@@ -187,9 +210,14 @@ public class KhanContentScraper {
 
         }
 
+        if (exerciseList == null) {
+            System.err.println("Did not get exercise list for url " + scrapUrl);
+            return;
+        }
+
 
         int exerciseCount = 1;
-        for (SubjectListResponse.ComponentData.Card.UserExercise.Model.AssessmentItem exercise: exerciseList) {
+        for (SubjectListResponse.ComponentData.Card.UserExercise.Model.AssessmentItem exercise : exerciseList) {
             URL practiceUrl = new URL(secondExerciseUrl + exerciseId + exerciseMidleUrl + exercise.id + exercisePostUrl);
 
             File urlFile = new File(khanDirectory, practiceUrl.getAuthority().replaceAll("[^a-zA-Z0-9\\.\\-]", "_"));
@@ -267,7 +295,7 @@ public class KhanContentScraper {
                     khanImages.path = imageFile.getName() + "/" + imageContent.getName();
 
                     index.add(khanImages);
-                }catch (Exception e){
+                } catch (Exception e) {
                 }
 
             }
@@ -308,6 +336,8 @@ public class KhanContentScraper {
 
     public void scrapeArticleContent(String scrapUrl) throws IOException {
 
+        // TODO get last modified
+
         ContentScraperUtil.setChromeDriverLocation();
 
         Gson gson = new GsonBuilder().disableHtmlEscaping().create();
@@ -324,19 +354,16 @@ public class KhanContentScraper {
         File khanDirectory = new File(destinationDirectory, FilenameUtils.getBaseName(scrapUrl));
         khanDirectory.mkdirs();
 
-        String initialJson = IndexKhanContentScraper.getJsonStringFromScript(scrapUrl);
-
-
         driver.get(scrapUrl);
         WebDriverWait waitDriver = new WebDriverWait(driver, 10000);
         ContentScraperUtil.waitForJSandJQueryToLoad(waitDriver);
         try {
             waitDriver.until(ExpectedConditions.visibilityOfElementLocated(
                     By.cssSelector("ul[class*=listWrapper]")));
+            Thread.sleep(5000);
         } catch (Exception e) {
             e.printStackTrace();
         }
-
 
         LogEntries les = driver.manage().logs().get(LogType.PERFORMANCE);
         driver.close();

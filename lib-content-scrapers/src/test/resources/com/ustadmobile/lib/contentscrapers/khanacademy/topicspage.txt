@@ -432,7 +432,7 @@ $LAB.queueWait(function() {
                   "subjectMasteryEnabled": true,
                   "title": "Counting",
                   "topicId": "x310ffe65",
-                  "url": "/math/early-math/cc-early-math-counting-topic"
+                  "url": "/json/com/ustadmobile/lib/contentscrapers/khanacademy/subjectpage.txt"
                 },
                 {
                   "kind": "SubjectChallenge",
@@ -7094,7 +7094,7 @@ $LAB.queueWait(function() {
                         "id": "x310ffe65",
                         "slug": "cc-early-math-counting-topic",
                         "title": "Counting",
-                        "url": "/math/early-math/cc-early-math-counting-topic"
+                        "url": "/json/com/ustadmobile/lib/contentscrapers/khanacademy/subjectpage.txt"
                       },
                       {
                         "contentItems": [
@@ -12647,7 +12647,7 @@ $LAB.queueWait(function() {
                         "id": "xd0ae8a03",
                         "slug": "cc-early-math-add-sub-basics",
                         "title": "Addition and subtraction intro",
-                        "url": "/math/early-math/cc-early-math-add-sub-basics"
+                        "url": "/json/com/ustadmobile/lib/contentscrapers/khanacademy/subjectpage.txt"
                       },
                       {
                         "contentItems": [
@@ -17953,7 +17953,7 @@ $LAB.queueWait(function() {
                         "id": "x314bd06e",
                         "slug": "cc-early-math-place-value-topic",
                         "title": "Place value (tens and hundreds)",
-                        "url": "/math/early-math/cc-early-math-place-value-topic"
+                        "url": "/json/com/ustadmobile/lib/contentscrapers/khanacademy/subjectpage.txt"
                       },
                       {
                         "contentItems": [
@@ -24071,7 +24071,7 @@ $LAB.queueWait(function() {
                         "id": "xa2993d94",
                         "slug": "cc-early-math-add-sub-20",
                         "title": "Addition and subtraction within 20",
-                        "url": "/math/early-math/cc-early-math-add-sub-20"
+                        "url": "/json/com/ustadmobile/lib/contentscrapers/khanacademy/subjectpage.txt"
                       },
                       {
                         "contentItems": [
@@ -36544,7 +36544,7 @@ $LAB.queueWait(function() {
                         "id": "x2a262576",
                         "slug": "cc-early-math-add-sub-100",
                         "title": "Addition and subtraction within 100",
-                        "url": "/math/early-math/cc-early-math-add-sub-100"
+                        "url": "/json/com/ustadmobile/lib/contentscrapers/khanacademy/subjectpage.txt"
                       },
                       {
                         "contentItems": [
@@ -40022,7 +40022,7 @@ $LAB.queueWait(function() {
                         "id": "x4f9f5221",
                         "slug": "cc-early-math-add-sub-1000",
                         "title": "Addition and subtraction within 1000",
-                        "url": "/math/early-math/cc-early-math-add-sub-1000"
+                        "url": "/json/com/ustadmobile/lib/contentscrapers/khanacademy/subjectpage.txt"
                       },
                       {
                         "contentItems": [
@@ -49286,7 +49286,7 @@ $LAB.queueWait(function() {
                         "id": "x853bca69",
                         "slug": "cc-early-math-measure-data-topic",
                         "title": "Measurement and data",
-                        "url": "/math/early-math/cc-early-math-measure-data-topic"
+                        "url": "/json/com/ustadmobile/lib/contentscrapers/khanacademy/subjectpage.txt"
                       },
                       {
                         "contentItems": [
@@ -54469,7 +54469,7 @@ $LAB.queueWait(function() {
                         "id": "x54b9a662",
                         "slug": "cc-early-math-geometry-topic",
                         "title": "Geometry",
-                        "url": "/math/early-math/cc-early-math-geometry-topic"
+                        "url": "/json/com/ustadmobile/lib/contentscrapers/khanacademy/subjectpage.txt"
                       }
                     ],
                     "type": "subject-challenge"

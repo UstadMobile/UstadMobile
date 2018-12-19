@@ -409,12 +409,12 @@ $LAB.queueWait(function() {
                                            {
                                              "children": [
                                                {
-                                                 "href": "/math/early-math",
+                                                 "href": "/json/com/ustadmobile/lib/contentscrapers/khanacademy/topicspage.txt",
                                                  "identifier": "early-math",
                                                  "translatedTitle": "Early math"
                                                }
                                              ],
-                                             "href": "/math",
+                                             "href": "/json/com/ustadmobile/lib/contentscrapers/khanacademy/topicspage.txt",
                                              "icon": "https://cdn.kastatic.org/genfiles/topic-icons/icons/arithmetic.png-af7472-128c.png",
                                              "identifier": "math",
                                              "numUntranslatedChildren": 0,

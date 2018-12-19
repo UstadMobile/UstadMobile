@@ -430,9 +430,9 @@ $LAB.queueWait(function() {
               "subjectMasteryEnabled": false,
               "title": "Early math",
               "topicId": "xb5feb28c",
-              "url": "/math/early-math"
+              "url": "/json/com/ustadmobile/lib/contentscrapers/khanacademy/coursespage.txt"
             },
-
+            {
               "description": "",
               "icon": "https://cdn.kastatic.org/genfiles/topic-icons/icons/arithmetic.png-af7472-128c.png",
               "kind": "TableOfContentsRow",
@@ -471,9 +471,8 @@ $LAB.queueWait(function() {
               "subjectMasteryEnabled": false,
               "title": "Calculus 2",
               "topicId": "x7ce0cef779e40821",
-              "url": "/math/calculus-2"
-            },
-
+              "url": "/json/com/ustadmobile/lib/contentscrapers/khanacademy/coursespage.txt"
+            }, {
               "description": "Learn arithmetic\u2014addition & subtraction, multiplication & division, fractions, decimals, and more.",
               "icon": "https://cdn.kastatic.org/genfiles/topic-icons/icons/arithmetic.png-af7472-128c.png",
               "kind": "TableOfContentsRow",
@@ -512,8 +511,8 @@ $LAB.queueWait(function() {
               "subjectMasteryEnabled": false,
               "title": "Arithmetic (all content)",
               "topicId": "xb3517320",
-              "url": "/math/arithmetic-home"
-
+              "url": "/json/com/ustadmobile/lib/contentscrapers/khanacademy/coursespage.txt"
+                },{
               "description": "\"Math is like ice cream, with more flavors than you can imagine\u2014and if all your children ever do is textbook math, that's like feeding them broccoli-flavored ice cream.\" \u2014Denise Gaskins",
               "icon": "https://cdn.kastatic.org/genfiles/topic-icons/icons/arithmetic.png-af7472-128c.png",
               "kind": "TableOfContentsRow",
@@ -548,7 +547,7 @@ $LAB.queueWait(function() {
               "subjectMasteryEnabled": false,
               "title": "Math for fun and glory",
               "topicId": "xe7bbd8fa",
-              "url": "/math/math-for-fun-and-glory"
+              "url": "/json/com/ustadmobile/lib/contentscrapers/khanacademy/coursespage.txt"
             },
             {
               "contentItems": [

@@ -455,7 +455,7 @@ $LAB.queueWait(function() {
                       "downloadUrls": {
                         "m3u8": "https://cdn.kastatic.org/KA-youtube-converted/y2-uaPiyoxc.m3u8/y2-uaPiyoxc.m3u8",
                         "mp4": "https://cdn.kastatic.org/KA-youtube-converted/y2-uaPiyoxc.mp4/y2-uaPiyoxc.mp4",
-                        "mp4-low": "https://cdn.kastatic.org/KA-youtube-converted/y2-uaPiyoxc.mp4-low/y2-uaPiyoxc-low.mp4",
+                        "mp4-low": "/content/com/ustadmobile/lib/contentscrapers/files/video.mp4",
                         "mp4-low-ios": "https://cdn.kastatic.org/KA-youtube-converted/y2-uaPiyoxc.mp4-low-ios/y2-uaPiyoxc-low-ios.mp4",
                         "png": "https://cdn.kastatic.org/KA-youtube-converted/y2-uaPiyoxc.mp4/y2-uaPiyoxc.png"
                       },
@@ -472,52 +472,7 @@ $LAB.queueWait(function() {
                       "youtubeId": "y2-uaPiyoxc"
                     },
 
-                    {
-                      "bigBingoLinkConversions": [
-                        "topic_page_click_exercise"
-                      ],
-                      "contentId": "x91a89d47",
-                      "description": "Practice finding one more or one less than a number.",
-                      "expectedDoNCount": 7,
-                      "isSkillCheck": false,
-                      "kind": "Exercise",
-                      "masteryEnabled": true,
-                      "nodeUrl": "/math/early-math/cc-early-math-counting-topic/cc-early-math-counting/e/one-more--one-less",
-                      "progressKey": "ex91a89d47",
-                      "relatedVideos": [
-                        {
-                          "contentId": "x9b4a5e7a",
-                          "description": "Sal counts squirrels and horses.",
-                          "duration": 56,
-                          "imageUrl": "https://cdn.kastatic.org/googleusercontent/NIWZLag0UtSxht8SlBeunPR6SxVmfNhkDCHoEobwSAqb3QAFMYTYvuna3yUiSYMoS_k4N10H6orz6hYJu7JzNeJ0Aw",
-                          "kind": "Video",
-                          "nodeUrl": "/math/early-math/cc-early-math-counting-topic/cc-early-math-counting/v/counting-with-small-numbers",
-                          "slug": "counting-with-small-numbers",
-                          "title": "Counting with small numbers",
-                          "translatedYoutubeId": "y2-uaPiyoxc",
-                          "translatedYoutubeLang": "en",
-                          "youtubeId": "y2-uaPiyoxc"
-                        },
-                        {
-                          "contentId": "x1a52b63e",
-                          "description": "Learn how to count without making mistakes.",
-                          "duration": 118,
-                          "imageUrl": "https://cdn.kastatic.org/googleusercontent/d2Usz9tqAc-yJYcJaTBiU7I9Fa2wNTeHPX5Y5dIFDJVQ2GxI6bZ-_3EoT6DlpLFUixkxiMQH23N0HXzEhWDIO-pm",
-                          "kind": "Video",
-                          "nodeUrl": "/math/early-math/cc-early-math-counting-topic/cc-early-math-counting/v/counting-in-order",
-                          "slug": "counting-in-order",
-                          "title": "Counting in order",
-                          "translatedYoutubeId": "PEeUTQ0Gri8",
-                          "translatedYoutubeLang": "en",
-                          "youtubeId": "PEeUTQ0Gri8"
-                        }
-                      ],
-                      "slug": "one-more--one-less",
-                      "sponsored": false,
-                      "subjectMasteryEnabled": true,
-                      "thumbnailUrl": "https://cdn.kastatic.org/googleusercontent/NKFcPLCkYUAtC_QzUOeJxjFxe__ZVLrzhdWXYALwvDnlQe7UKRW8zy9ygpxU0Mla8cWgumNHMdLUV1L1LLzYOzg",
-                      "title": "Find 1 more or 1 less than a number"
-                    }
+
                   ],
                   "description": "Learn to count from 0 to 20.",
                   "id": "x3f2a1471",

@@ -39,6 +39,8 @@ class SubjectListResponse {
 
                     public String name;
 
+                    public String dateModified;
+
                     public List<AssessmentItem> allAssessmentItems;
 
                     public class AssessmentItem {

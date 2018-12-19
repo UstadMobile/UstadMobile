@@ -10,9 +10,11 @@ import com.ustadmobile.core.db.dao.ContentEntryFileStatusDao;
 import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
 import com.ustadmobile.core.db.dao.LanguageDao;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
+import com.ustadmobile.lib.contentscrapers.ScraperConstants;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.Language;
 
+import org.apache.commons.io.FilenameUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.DataNode;
 import org.jsoup.nodes.Document;
@@ -177,92 +179,93 @@ public class IndexKhanContentScraper {
 
         List<SubjectListResponse.ComponentData.Curation.Tab> tabList = response.componentProps.curation.tabs;
 
-
         for (SubjectListResponse.ComponentData.Curation.Tab tab : tabList) {
 
-            if (tab.modules != null && !tab.modules.isEmpty()) {
+            if (tab.modules == null || tab.modules.isEmpty()) {
+                continue;
+            }
 
-                List<ModuleResponse> moduleList = tab.modules;
+            List<ModuleResponse> moduleList = tab.modules;
 
-                int subjectCount = 0;
-                for (ModuleResponse module : moduleList) {
+            int subjectCount = 0;
+            for (ModuleResponse module : moduleList) {
 
-                    if (SUBJECT_PROGRESS.equals(module.kind)) {
+                if (SUBJECT_PROGRESS.equals(module.kind)) {
 
-                        List<ModuleResponse> moduleItems = module.modules;
+                    List<ModuleResponse> moduleItems = module.modules;
 
-                        if (moduleItems != null && !moduleItems.isEmpty()) {
+                    if (module.modules == null || module.modules.isEmpty()) {
+                        continue;
+                    }
 
-                            for (ModuleResponse moduleItem : moduleItems) {
+                    for (ModuleResponse moduleItem : moduleItems) {
 
-                                if (SUBJECT_PAGE_TOPIC_CARD.equals(moduleItem.kind)) {
+                        if (SUBJECT_PAGE_TOPIC_CARD.equals(moduleItem.kind)) {
 
-                                    URL subjectUrl = new URL(topicUrl, moduleItem.url);
-                                    File subjectFolder = new File(topicFolder, moduleItem.slug);
-                                    subjectFolder.mkdirs();
-
-                                    ContentEntry subjectEntry = ContentScraperUtil.createOrUpdateContentEntry(moduleItem.slug, moduleItem.title, subjectUrl.toString(),
-                                            KHAN, LICENSE_TYPE_CC_BY_NC, englishLang.getLangUid(), null,
-                                            moduleItem.description, false, EMPTY_STRING, moduleItem.icon, EMPTY_STRING
-                                            , EMPTY_STRING, contentEntryDao);
-
-                                    ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, topicEntry, subjectEntry, subjectCount++);
-
-                                    browseSubjects(subjectEntry, subjectUrl, subjectFolder);
-
-                                }
-
-
-                            }
-
-
-                        }
-
-
-                    } else if (TABLE_OF_CONTENTS_ROW.equals(module.kind)) {
-
-                        URL subjectUrl = new URL(topicUrl, module.url);
-                        File subjectFolder = new File(topicFolder, module.slug);
-                        subjectFolder.mkdirs();
-
-                        ContentEntry subjectEntry = ContentScraperUtil.createOrUpdateContentEntry(module.slug, module.title, subjectUrl.toString(),
-                                KHAN, LICENSE_TYPE_CC_BY_NC, englishLang.getLangUid(), null,
-                                module.description, false, EMPTY_STRING, module.icon, EMPTY_STRING
-                                , EMPTY_STRING, contentEntryDao);
-
-                        ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, topicEntry, subjectEntry, subjectCount++);
-
-                        browseSubjects(subjectEntry, subjectUrl, subjectFolder);
-
-                    } else if (SUBJECT_CHALLENGE.equals(module.kind)) {
-
-                        // TODO
-
-                    } else if (module.tutorials != null && !module.tutorials.isEmpty()) {
-
-                        List<ModuleResponse.Tutorial> tutorialList = module.tutorials;
-
-                        int tutorialCount = 0;
-                        for (ModuleResponse.Tutorial tutorial : tutorialList) {
-
-                            URL tutorialUrl = new URL(topicUrl, tutorial.url);
-                            File subjectFolder = new File(topicFolder, tutorial.slug);
+                            URL subjectUrl = new URL(topicUrl, moduleItem.url);
+                            File subjectFolder = new File(topicFolder, moduleItem.slug);
                             subjectFolder.mkdirs();
 
-                            ContentEntry tutorialEntry = ContentScraperUtil.createOrUpdateContentEntry(tutorial.slug, tutorial.title,
-                                    tutorialUrl.toString(), KHAN, LICENSE_TYPE_CC_BY_NC, englishLang.getLangUid(),
-                                    null, tutorial.description, false, EMPTY_STRING, EMPTY_STRING,
-                                    EMPTY_STRING, EMPTY_STRING, contentEntryDao);
+                            ContentEntry subjectEntry = ContentScraperUtil.createOrUpdateContentEntry(moduleItem.slug, moduleItem.title,
+                                    subjectUrl.toString(), KHAN, LICENSE_TYPE_CC_BY_NC, englishLang.getLangUid(), null,
+                                    moduleItem.description, false, EMPTY_STRING, moduleItem.icon, EMPTY_STRING
+                                    , EMPTY_STRING, contentEntryDao);
 
-                            ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, topicEntry,
-                                    tutorialEntry, tutorialCount++);
+                            ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, topicEntry, subjectEntry, subjectCount++);
 
-                            List<ModuleResponse.Tutorial.ContentItem> contentList = tutorial.contentItems;
-
-                            browseContent(contentList, tutorialEntry, tutorialUrl, subjectFolder);
-
+                            browseSubjects(subjectEntry, subjectUrl, subjectFolder);
 
                         }
+
+
+                    }
+
+
+                } else if (TABLE_OF_CONTENTS_ROW.equals(module.kind)) {
+
+                    URL subjectUrl = new URL(topicUrl, module.url);
+                    File subjectFolder = new File(topicFolder, module.slug);
+                    subjectFolder.mkdirs();
+
+                    ContentEntry subjectEntry = ContentScraperUtil.createOrUpdateContentEntry(module.slug, module.title, subjectUrl.toString(),
+                            KHAN, LICENSE_TYPE_CC_BY_NC, englishLang.getLangUid(), null,
+                            module.description, false, EMPTY_STRING, module.icon, EMPTY_STRING
+                            , EMPTY_STRING, contentEntryDao);
+
+                    ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, topicEntry, subjectEntry, subjectCount++);
+
+                    browseSubjects(subjectEntry, subjectUrl, subjectFolder);
+
+                } else if (SUBJECT_CHALLENGE.equals(module.kind)) {
+
+                    // TODO
+
+                } else if (module.tutorials != null && !module.tutorials.isEmpty()) {
+
+                    List<ModuleResponse.Tutorial> tutorialList = module.tutorials;
+
+                    int tutorialCount = 0;
+                    for (ModuleResponse.Tutorial tutorial : tutorialList) {
+
+                        if(tutorial == null){
+                            continue;
+                        }
+
+                        URL tutorialUrl = new URL(topicUrl, tutorial.url);
+                        File subjectFolder = new File(topicFolder, tutorial.slug);
+                        subjectFolder.mkdirs();
+
+                        ContentEntry tutorialEntry = ContentScraperUtil.createOrUpdateContentEntry(tutorial.slug, tutorial.title,
+                                tutorialUrl.toString(), KHAN, LICENSE_TYPE_CC_BY_NC, englishLang.getLangUid(),
+                                null, tutorial.description, false, EMPTY_STRING, EMPTY_STRING,
+                                EMPTY_STRING, EMPTY_STRING, contentEntryDao);
+
+                        ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, topicEntry,
+                                tutorialEntry, tutorialCount++);
+
+                        List<ModuleResponse.Tutorial.ContentItem> contentList = tutorial.contentItems;
+
+                        browseContent(contentList, tutorialEntry, tutorialUrl, subjectFolder);
 
 
                     }
@@ -313,48 +316,75 @@ public class IndexKhanContentScraper {
 
     }
 
-    private void browseContent(List<ModuleResponse.Tutorial.ContentItem> contentList, ContentEntry tutorialEntry, URL tutorialUrl, File subjectFolder) throws MalformedURLException {
+    private void browseContent(List<ModuleResponse.Tutorial.ContentItem> contentList, ContentEntry tutorialEntry, URL tutorialUrl, File subjectFolder) throws IOException {
 
-        if (contentList != null && !contentList.isEmpty()) {
+        if (contentList == null) {
+            System.out.println("no content list inside url " + tutorialUrl.toString());
+            return;
+        }
 
-            int contentCount = 0;
-            for (ModuleResponse.Tutorial.ContentItem contentItem : contentList) {
+        if (contentList.isEmpty()) {
+            System.out.println("empty content list inside url " + tutorialUrl.toString());
+            return;
+        }
 
+        int contentCount = 0;
+        for (ModuleResponse.Tutorial.ContentItem contentItem : contentList) {
 
-                URL url = new URL(tutorialUrl, contentItem.nodeUrl);
-                File contentFolder = new File(subjectFolder, contentItem.slug);
-                contentFolder.mkdirs();
+            if (contentItem == null) {
+                continue;
+            }
 
-                ContentEntry entry = ContentScraperUtil.createOrUpdateContentEntry(contentItem.slug, contentItem.title,
-                        url.toString(), KHAN, LICENSE_TYPE_CC_BY_NC, englishLang.getLangUid(),
-                        null, contentItem.description, true, EMPTY_STRING, contentItem.thumbnailUrl,
-                        EMPTY_STRING, EMPTY_STRING, contentEntryDao);
+            URL url = new URL(tutorialUrl, contentItem.nodeUrl);
+            File contentFolder = new File(subjectFolder, contentItem.slug);
+            contentFolder.mkdirs();
 
-                ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, tutorialEntry, entry
-                        , contentCount++);
+            ContentEntry entry = ContentScraperUtil.createOrUpdateContentEntry(contentItem.slug, contentItem.title,
+                    url.toString(), KHAN, LICENSE_TYPE_CC_BY_NC, englishLang.getLangUid(),
+                    null, contentItem.description, true, EMPTY_STRING, contentItem.thumbnailUrl,
+                    EMPTY_STRING, EMPTY_STRING, contentEntryDao);
 
-                KhanContentScraper scraper = new KhanContentScraper(contentFolder);
-                try {
-                    switch (contentItem.kind) {
+            ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, tutorialEntry, entry
+                    , contentCount++);
 
-                        case "Video":
-                            //scraper.scrapeVideoContent(contentItem.downloadUrls.mp4Low);
-                            break;
-                        case "Exercise":
-                            // scraper.scrapeExerciseContent(new URL(url, contentItem.nodeUrl).toString());
-                            break;
-                        default:
-                            System.err.println("unsupported kind = " + contentItem.kind + " at url = " + url);
-                            break;
+            KhanContentScraper scraper = new KhanContentScraper(contentFolder);
+            try {
+                switch (contentItem.kind) {
 
-                    }
-                } catch (Exception e) {
-                    System.err.println("Unable to scrape content from " + contentItem.title + " at url " + url);
-                    e.printStackTrace();
+                    case "Video":
+                        scraper.scrapeVideoContent(new URL(url, contentItem.downloadUrls.mp4Low).toString());
+                        break;
+                    case "Exercise":
+                        scraper.scrapeExerciseContent(url.toString());
+                        break;
+                    case "Article":
+                        scraper.scrapeArticleContent(url.toString());
+                        break;
+                    default:
+                        System.err.println("unsupported kind = " + contentItem.kind + " at url = " + url);
+                        break;
+
                 }
+            } catch (Exception e) {
+                System.err.println("Unable to scrape content from " + contentItem.title + " at url " + url);
+                e.printStackTrace();
+            }
 
+            File content = new File(contentFolder, FilenameUtils.getBaseName(url.getPath()) + ScraperConstants.ZIP_EXT);
+
+            if (scraper.isContentUpdated()) {
+                ContentScraperUtil.insertContentEntryFile(content, contentEntryFileDao, contentFileStatusDao,
+                        entry, ContentScraperUtil.getMd5(content), contentEntryFileJoin, true,
+                        ScraperConstants.MIMETYPE_ZIP);
+
+            } else {
+
+                ContentScraperUtil.checkAndUpdateDatabaseIfFileDownloadedButNoDataFound(content, entry, contentEntryFileDao,
+                        contentEntryFileJoin, contentFileStatusDao, ScraperConstants.MIMETYPE_ZIP, true);
 
             }
+
+
         }
 
 
