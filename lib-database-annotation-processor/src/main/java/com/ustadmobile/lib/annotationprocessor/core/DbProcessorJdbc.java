@@ -729,7 +729,9 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
 
         String postgresReplaceSuffxVarName = null;
         if(replaceEnabled){
-            String postgresReplaceSuffx = " ON CONFLICT UPDATE SET ";
+            Element primaryKeyEl = findPrimaryKey(entityTypeElement);
+            String postgresReplaceSuffx = String.format(" ON CONFLICT(%s) DO UPDATE SET ",
+                    primaryKeyEl != null  ? primaryKeyEl.getSimpleName() : "unsupported-multikey");
             boolean commaRequired = false;
             for(VariableElement field : entityFields) {
                 if(field.getAnnotation(UmPrimaryKey.class) != null)
