@@ -38,6 +38,7 @@ public class IndexKhanContentScraper {
     public static final String TABLE_OF_CONTENTS_ROW = "TableOfContentsRow";
     public static final String SUBJECT_PAGE_TOPIC_CARD = "SubjectPageTopicCard";
     public static final String SUBJECT_CHALLENGE = "SubjectChallenge";
+    public static final String SUBJECT_PROGRESS = "SubjectProgress";
     private URL url;
     private File destinationDirectory;
     private ContentEntryDao contentEntryDao;
@@ -168,7 +169,14 @@ public class IndexKhanContentScraper {
 
         SubjectListResponse response = gson.fromJson(subjectJson, SubjectListResponse.class);
 
+        // one page on the website doesn't follow standard code
+        if (response.componentProps == null) {
+            browseHourOfCode(topicEntry, topicUrl, topicFolder);
+            return;
+        }
+
         List<SubjectListResponse.ComponentData.Curation.Tab> tabList = response.componentProps.curation.tabs;
+
 
         for (SubjectListResponse.ComponentData.Curation.Tab tab : tabList) {
 
@@ -179,7 +187,39 @@ public class IndexKhanContentScraper {
                 int subjectCount = 0;
                 for (ModuleResponse module : moduleList) {
 
-                    if (TABLE_OF_CONTENTS_ROW.equals(module.kind) || SUBJECT_PAGE_TOPIC_CARD.equals(module.kind)) {
+                    if (SUBJECT_PROGRESS.equals(module.kind)) {
+
+                        List<ModuleResponse> moduleItems = module.modules;
+
+                        if (moduleItems != null && !moduleItems.isEmpty()) {
+
+                            for (ModuleResponse moduleItem : moduleItems) {
+
+                                if (SUBJECT_PAGE_TOPIC_CARD.equals(moduleItem.kind)) {
+
+                                    URL subjectUrl = new URL(topicUrl, moduleItem.url);
+                                    File subjectFolder = new File(topicFolder, moduleItem.slug);
+                                    subjectFolder.mkdirs();
+
+                                    ContentEntry subjectEntry = ContentScraperUtil.createOrUpdateContentEntry(moduleItem.slug, moduleItem.title, subjectUrl.toString(),
+                                            KHAN, LICENSE_TYPE_CC_BY_NC, englishLang.getLangUid(), null,
+                                            moduleItem.description, false, EMPTY_STRING, moduleItem.icon, EMPTY_STRING
+                                            , EMPTY_STRING, contentEntryDao);
+
+                                    ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, topicEntry, subjectEntry, subjectCount++);
+
+                                    browseSubjects(subjectEntry, subjectUrl, subjectFolder);
+
+                                }
+
+
+                            }
+
+
+                        }
+
+
+                    } else if (TABLE_OF_CONTENTS_ROW.equals(module.kind)) {
 
                         URL subjectUrl = new URL(topicUrl, module.url);
                         File subjectFolder = new File(topicFolder, module.slug);
@@ -239,6 +279,40 @@ public class IndexKhanContentScraper {
 
     }
 
+    private void browseHourOfCode(ContentEntry topicEntry, URL topicUrl, File topicFolder) throws IOException {
+
+        Document document = Jsoup.connect(topicUrl.toString()).get();
+
+        Elements subjectList = document.select("div.hoc-box-white");
+
+        int hourOfCode = 0;
+        for (Element subject : subjectList) {
+
+            String imageSrc = subject.selectFirst("img").attr("src");
+            String title = subject.selectFirst("h3").text();
+            String description = subject.selectFirst("p").text();
+            String hrefLink = subject.selectFirst("a").attr("href");
+
+            hrefLink = hrefLink.substring(0, hrefLink.indexOf("/v/"));
+
+            URL subjectUrl = new URL(topicUrl, hrefLink);
+            File subjectFolder = new File(topicFolder, hrefLink);
+            subjectFolder.mkdirs();
+
+            ContentEntry subjectEntry = ContentScraperUtil.createOrUpdateContentEntry(hrefLink, title,
+                    subjectUrl.toString(), KHAN, LICENSE_TYPE_CC_BY_NC, englishLang.getLangUid(),
+                    null, description, false, EMPTY_STRING, new URL(topicUrl, imageSrc).toString(),
+                    EMPTY_STRING, EMPTY_STRING, contentEntryDao);
+
+            ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, topicEntry,
+                    subjectEntry, hourOfCode++);
+
+            browseSubjects(subjectEntry, subjectUrl, subjectFolder);
+
+        }
+
+    }
+
     private void browseContent(List<ModuleResponse.Tutorial.ContentItem> contentList, ContentEntry tutorialEntry, URL tutorialUrl, File subjectFolder) throws MalformedURLException {
 
         if (contentList != null && !contentList.isEmpty()) {
@@ -264,10 +338,13 @@ public class IndexKhanContentScraper {
                     switch (contentItem.kind) {
 
                         case "Video":
-                            scraper.scrapeVideoContent(contentItem.downloadUrl.mp4Low);
+                            //scraper.scrapeVideoContent(contentItem.downloadUrls.mp4Low);
                             break;
                         case "Exercise":
-                            scraper.scrapeExerciseContent(new URL(url,contentItem.nodeUrl).toString());
+                            // scraper.scrapeExerciseContent(new URL(url, contentItem.nodeUrl).toString());
+                            break;
+                        default:
+                            System.err.println("unsupported kind = " + contentItem.kind + " at url = " + url);
                             break;
 
                     }

@@ -83,7 +83,7 @@ public class KhanContentScraper {
         File file = new File(destinationDirectory, destinationDirectory.getName() + ".mp4");
         URLConnection conn = scrapUrl.openConnection();
 
-        if (!ContentScraperUtil.isFileModified(conn, file, destinationDirectory.getName())) {
+        if (!ContentScraperUtil.isFileModified(conn, destinationDirectory, destinationDirectory.getName())) {
             return;
         }
 
@@ -303,6 +303,94 @@ public class KhanContentScraper {
 
         FileUtils.writeStringToFile(new File(khanDirectory, "index.json"), gson.toJson(index), UTF_ENCODING);
         ContentScraperUtil.zipDirectory(khanDirectory, khanDirectory.getName(), destinationDirectory);
+
+    }
+
+    public void scrapeArticleContent(String scrapUrl) throws IOException {
+
+        ContentScraperUtil.setChromeDriverLocation();
+
+        Gson gson = new GsonBuilder().disableHtmlEscaping().create();
+
+        DesiredCapabilities d = DesiredCapabilities.chrome();
+        d.setCapability("opera.arguments", "-screenwidth 1024 -screenheight 768");
+        // d.merge(capabilities);
+        LoggingPreferences logPrefs = new LoggingPreferences();
+        logPrefs.enable(LogType.PERFORMANCE, Level.ALL);
+        d.setCapability(CapabilityType.LOGGING_PREFS, logPrefs);
+
+        ChromeDriver driver = new ChromeDriver(d);
+
+        File khanDirectory = new File(destinationDirectory, FilenameUtils.getBaseName(scrapUrl));
+        khanDirectory.mkdirs();
+
+        String initialJson = IndexKhanContentScraper.getJsonStringFromScript(scrapUrl);
+
+
+        driver.get(scrapUrl);
+        WebDriverWait waitDriver = new WebDriverWait(driver, 10000);
+        ContentScraperUtil.waitForJSandJQueryToLoad(waitDriver);
+        try {
+            waitDriver.until(ExpectedConditions.visibilityOfElementLocated(
+                    By.cssSelector("ul[class*=listWrapper]")));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
+        LogEntries les = driver.manage().logs().get(LogType.PERFORMANCE);
+        driver.close();
+
+        List<PlixIndex> index = new ArrayList<>();
+
+        for (LogEntry le : les) {
+
+            PlixLog log = gson.fromJson(le.getMessage(), PlixLog.class);
+            if (RESPONSE_RECEIVED.equalsIgnoreCase(log.message.method)) {
+                String mimeType = log.message.params.response.mimeType;
+                String urlString = log.message.params.response.url;
+
+                try {
+                    URL url = new URL(urlString);
+                    File urlFile = new File(khanDirectory, url.getAuthority().replaceAll("[^a-zA-Z0-9\\.\\-]", "_"));
+                    urlFile.mkdirs();
+                    String fileName = ContentScraperUtil.getFileNameFromUrl(url);
+                    File file = new File(urlFile, fileName);
+                    if (log.message.params.response.requestHeaders != null) {
+                        URLConnection conn = url.openConnection();
+                        for (Map.Entry<String, String> e : log.message.params.response.requestHeaders.entrySet()) {
+                            if (e.getKey().equalsIgnoreCase("Accept-Encoding")) {
+                                continue;
+                            }
+                            conn.addRequestProperty(e.getKey().replaceAll(":", ""), e.getValue());
+                        }
+                        FileUtils.copyInputStreamToFile(conn.getInputStream(), file);
+                    } else {
+                        FileUtils.copyURLToFile(url, file);
+                    }
+
+                    PlixIndex plixIndex = new PlixIndex();
+                    plixIndex.url = urlString;
+                    plixIndex.mimeType = mimeType;
+                    plixIndex.path = urlFile.getName() + "/" + file.getName();
+                    plixIndex.headers = log.message.params.response.headers;
+
+                    index.add(plixIndex);
+
+                } catch (Exception e) {
+                    System.err.println(urlString);
+                    System.err.println(le.getMessage());
+                    e.printStackTrace();
+
+                }
+
+
+            }
+
+        }
+        FileUtils.writeStringToFile(new File(khanDirectory, "index.json"), gson.toJson(index), UTF_ENCODING);
+        ContentScraperUtil.zipDirectory(khanDirectory, khanDirectory.getName(), destinationDirectory);
+
 
     }
 }

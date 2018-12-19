@@ -1,11 +1,11 @@
 package com.ustadmobile.lib.contentscrapers.khanacademy;
 
 import com.google.gson.annotations.SerializedName;
+import com.sun.org.apache.xpath.internal.operations.Mod;
 
 import java.util.List;
 
 public class ModuleResponse {
-
 
     public String description;
 
@@ -22,6 +22,8 @@ public class ModuleResponse {
     public String url;
 
     public List<Tutorial> tutorials;
+
+    public List<ModuleResponse> modules;
 
     public class Tutorial {
 
@@ -55,7 +57,7 @@ public class ModuleResponse {
 
             public int expectedDoNCount;
 
-            public DownloadUrl downloadUrl;
+            public DownloadUrl downloadUrls;
 
             public class DownloadUrl {
 
