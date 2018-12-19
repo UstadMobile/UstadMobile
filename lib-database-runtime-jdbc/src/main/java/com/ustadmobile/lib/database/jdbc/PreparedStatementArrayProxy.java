@@ -192,10 +192,10 @@ public class PreparedStatementArrayProxy implements PreparedStatement {
                     paramTypes.put(paramPos, arrayProxy.getBaseType());
                 }
 
-                arrayOffset += objects.length;
+                arrayOffset += (objects.length - 1);
             }else {
-                paramValues.put(paramIndex, value);
-                paramTypes.put(paramIndex, queryTypes.get(paramIndex));
+                paramValues.put(paramIndex + arrayOffset, value);
+                paramTypes.put(paramIndex + arrayOffset, queryTypes.get(paramIndex));
             }
         }
 
@@ -386,7 +386,7 @@ public class PreparedStatementArrayProxy implements PreparedStatement {
     @Override
     public boolean execute() throws SQLException {
         try (
-            PreparedStatement stmt = prepareStatement();
+                PreparedStatement stmt = prepareStatement();
         ) {
             return stmt.execute();
         }catch(SQLException e) {

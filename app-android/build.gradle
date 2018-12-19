@@ -465,7 +465,6 @@ dependencies {
     androidTestImplementation project(":sharedse-tests")
     androidTestImplementation project(":lib-core-fs-tests")
 
-    api 'com.ustadmobile.qrcodelibomrfork:qrcode-core:1.0.3'
 
     /*
      * If this needs to be made compatible as a library for something using older appcompat libs -
@@ -485,10 +484,6 @@ dependencies {
 
     //Floating action button with support for popup choices
     implementation 'com.github.clans:fab:1.6.4'
-
-    //Wifi direct library
-    implementation 'com.ustadmobile.wifibuddy:wifibuddy:1.1.45-SNAPSHOT'
-
 
     implementation 'de.hdodenhof:circleimageview:2.1.0'
 
