@@ -1,8 +1,8 @@
-package com.ustadmobile.lib.contentscrapers.ck12.plix;
+package com.ustadmobile.lib.contentscrapers;
 
 import java.util.Map;
 
-public class PlixIndex {
+public class LogIndex {
 
     public String url;
 

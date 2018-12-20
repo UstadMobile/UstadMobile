@@ -17,7 +17,6 @@ import com.ustadmobile.core.db.dao.ContentEntryRelatedEntryJoinDao;
 import com.ustadmobile.core.db.dao.LanguageDao;
 import com.ustadmobile.core.db.dao.LanguageVariantDao;
 import com.ustadmobile.lib.contentscrapers.buildconfig.ScraperBuildConfig;
-import com.ustadmobile.lib.contentscrapers.ck12.plix.PlixIndex;
 import com.ustadmobile.lib.db.entities.ContentCategory;
 import com.ustadmobile.lib.db.entities.ContentCategorySchema;
 import com.ustadmobile.lib.db.entities.ContentEntry;
@@ -83,8 +82,6 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-
-import sun.rmi.runtime.Log;
 
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING;
 
@@ -865,7 +862,7 @@ public class ContentScraperUtil {
         return contentEntry;
     }
 
-    public static PlixIndex createIndexWithResourceFiles(String url, File directory, String mimeType, InputStream filePath, String fileName) throws IOException {
+    public static LogIndex createIndexWithResourceFiles(String url, File directory, String mimeType, InputStream filePath, String fileName) throws IOException {
 
         URL imageUrl = new URL(url);
         File imageFile = new File(directory, imageUrl.getAuthority().replaceAll("[^a-zA-Z0-9\\.\\-]", "_"));
@@ -874,7 +871,7 @@ public class ContentScraperUtil {
         File correctImageFile = new File(imageFile, fileName);
         FileUtils.copyToFile(filePath, correctImageFile);
 
-        PlixIndex khanImages = new PlixIndex();
+        LogIndex khanImages = new LogIndex();
         khanImages.url = imageUrl.toString();
         khanImages.mimeType = mimeType;
         khanImages.path = imageFile.getName() + "/" + correctImageFile.getName();

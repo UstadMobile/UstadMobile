@@ -4,7 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.ScraperConstants;
-import com.ustadmobile.lib.contentscrapers.ck12.plix.PlixIndex;
+import com.ustadmobile.lib.contentscrapers.LogIndex;
 import com.ustadmobile.lib.contentscrapers.ck12.plix.PlixLog;
 
 import org.apache.commons.io.FileUtils;
@@ -162,7 +162,7 @@ public class KhanContentScraper {
         LogEntries les = driver.manage().logs().get(LogType.PERFORMANCE);
         driver.close();
 
-        List<PlixIndex> index = new ArrayList<>();
+        List<LogIndex> index = new ArrayList<>();
 
         for (LogEntry le : les) {
 
@@ -190,13 +190,13 @@ public class KhanContentScraper {
                         FileUtils.copyURLToFile(url, file);
                     }
 
-                    PlixIndex plixIndex = new PlixIndex();
-                    plixIndex.url = urlString;
-                    plixIndex.mimeType = mimeType;
-                    plixIndex.path = urlFile.getName() + "/" + file.getName();
-                    plixIndex.headers = log.message.params.response.headers;
+                    LogIndex logIndex = new LogIndex();
+                    logIndex.url = urlString;
+                    logIndex.mimeType = mimeType;
+                    logIndex.path = urlFile.getName() + "/" + file.getName();
+                    logIndex.headers = log.message.params.response.headers;
 
-                    index.add(plixIndex);
+                    index.add(logIndex);
 
                 } catch (Exception e) {
                     System.err.println(urlString);
@@ -229,7 +229,7 @@ public class KhanContentScraper {
             FileUtils.writeStringToFile(file, itemData, UTF_ENCODING);
             ItemResponse itemResponse = gson.fromJson(itemData, ItemResponse.class);
 
-            PlixIndex exerciseIndex = new PlixIndex();
+            LogIndex exerciseIndex = new LogIndex();
             exerciseIndex.url = practiceUrl.toString();
             exerciseIndex.mimeType = MIMETYPE_JSON;
             exerciseIndex.path = urlFile.getName() + "/" + file.getName();
@@ -289,7 +289,7 @@ public class KhanContentScraper {
                     File imageContent = new File(imageFile, FilenameUtils.getName(imageUrl.getPath()));
                     FileUtils.copyURLToFile(imageUrl, imageContent);
 
-                    PlixIndex khanImages = new PlixIndex();
+                    LogIndex khanImages = new LogIndex();
                     khanImages.url = imageUrl.toString();
                     khanImages.mimeType = MIMETYPE_JPG;
                     khanImages.path = imageFile.getName() + "/" + imageContent.getName();
@@ -304,27 +304,27 @@ public class KhanContentScraper {
 
         }
 
-        PlixIndex hintIndex = ContentScraperUtil.createIndexWithResourceFiles("https://www.khanacademy.org/hint",
+        LogIndex hintIndex = ContentScraperUtil.createIndexWithResourceFiles("https://www.khanacademy.org/hint",
                 khanDirectory, MIMETYPE_JSON, getClass().getResourceAsStream(HINT_JSON_LINK), HINT_JSON_FILE);
         index.add(hintIndex);
 
-        PlixIndex attemptIndex = ContentScraperUtil.createIndexWithResourceFiles("https://www.khanacademy.org/attempt",
+        LogIndex attemptIndex = ContentScraperUtil.createIndexWithResourceFiles("https://www.khanacademy.org/attempt",
                 khanDirectory, MIMETYPE_JSON, getClass().getResourceAsStream(ATTEMPT_JSON_LINK), ATTEMPT_JSON_FILE);
         index.add(attemptIndex);
 
-        PlixIndex correctIndex = ContentScraperUtil.createIndexWithResourceFiles("https://cdn.kastatic.org/images/exercise-correct.svg",
+        LogIndex correctIndex = ContentScraperUtil.createIndexWithResourceFiles("https://cdn.kastatic.org/images/exercise-correct.svg",
                 khanDirectory, MIMETYPE_SVG, getClass().getResourceAsStream(CORRECT_KHAN_LINK), CORRECT_FILE);
         index.add(correctIndex);
 
-        PlixIndex tryAgainIndex = ContentScraperUtil.createIndexWithResourceFiles("https://cdn.kastatic.org/images/exercise-try-again.svg",
+        LogIndex tryAgainIndex = ContentScraperUtil.createIndexWithResourceFiles("https://cdn.kastatic.org/images/exercise-try-again.svg",
                 khanDirectory, MIMETYPE_SVG, getClass().getResourceAsStream(TRY_AGAIN_KHAN_LINK), TRY_AGAIN_FILE);
         index.add(tryAgainIndex);
 
-        PlixIndex attmeptIndex = ContentScraperUtil.createIndexWithResourceFiles("https://cdn.kastatic.org/images/end-of-task-card/star-attempted.svg",
+        LogIndex attmeptIndex = ContentScraperUtil.createIndexWithResourceFiles("https://cdn.kastatic.org/images/end-of-task-card/star-attempted.svg",
                 khanDirectory, MIMETYPE_SVG, getClass().getResourceAsStream(ATTEMPT_KHAN_LINK), ATTEMPT_FILE);
         index.add(attmeptIndex);
 
-        PlixIndex completeIndex = ContentScraperUtil.createIndexWithResourceFiles("https://cdn.kastatic.org/images/end-of-task-card/star-complete.svg",
+        LogIndex completeIndex = ContentScraperUtil.createIndexWithResourceFiles("https://cdn.kastatic.org/images/end-of-task-card/star-complete.svg",
                 khanDirectory, MIMETYPE_SVG, getClass().getResourceAsStream(COMPLETE_KHAN_LINK), COMPLETE_FILE);
         index.add(completeIndex);
 
@@ -368,7 +368,7 @@ public class KhanContentScraper {
         LogEntries les = driver.manage().logs().get(LogType.PERFORMANCE);
         driver.close();
 
-        List<PlixIndex> index = new ArrayList<>();
+        List<LogIndex> index = new ArrayList<>();
 
         for (LogEntry le : les) {
 
@@ -396,13 +396,13 @@ public class KhanContentScraper {
                         FileUtils.copyURLToFile(url, file);
                     }
 
-                    PlixIndex plixIndex = new PlixIndex();
-                    plixIndex.url = urlString;
-                    plixIndex.mimeType = mimeType;
-                    plixIndex.path = urlFile.getName() + "/" + file.getName();
-                    plixIndex.headers = log.message.params.response.headers;
+                    LogIndex logIndex = new LogIndex();
+                    logIndex.url = urlString;
+                    logIndex.mimeType = mimeType;
+                    logIndex.path = urlFile.getName() + "/" + file.getName();
+                    logIndex.headers = log.message.params.response.headers;
 
-                    index.add(plixIndex);
+                    index.add(logIndex);
 
                 } catch (Exception e) {
                     System.err.println(urlString);

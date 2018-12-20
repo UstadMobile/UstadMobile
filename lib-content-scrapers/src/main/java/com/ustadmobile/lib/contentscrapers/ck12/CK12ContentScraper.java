@@ -4,7 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.ScraperConstants;
-import com.ustadmobile.lib.contentscrapers.ck12.plix.PlixIndex;
+import com.ustadmobile.lib.contentscrapers.LogIndex;
 import com.ustadmobile.lib.contentscrapers.ck12.plix.PlixLog;
 import com.ustadmobile.lib.contentscrapers.ck12.plix.PlixResponse;
 import com.ustadmobile.lib.contentscrapers.ck12.practice.AnswerResponse;
@@ -266,7 +266,7 @@ public class CK12ContentScraper {
         LogEntries les = driver.manage().logs().get(LogType.PERFORMANCE);
         driver.close();
 
-        List<PlixIndex> index = new ArrayList<>();
+        List<LogIndex> index = new ArrayList<>();
 
         for (LogEntry le : les) {
 
@@ -345,13 +345,13 @@ public class CK12ContentScraper {
                     }
 
 
-                    PlixIndex plixIndex = new PlixIndex();
-                    plixIndex.url = urlString;
-                    plixIndex.mimeType = mimeType;
-                    plixIndex.path = urlFile.getName() + "/" + file.getName();
-                    plixIndex.headers = log.message.params.response.headers;
+                    LogIndex logIndex = new LogIndex();
+                    logIndex.url = urlString;
+                    logIndex.mimeType = mimeType;
+                    logIndex.path = urlFile.getName() + "/" + file.getName();
+                    logIndex.headers = log.message.params.response.headers;
 
-                    index.add(plixIndex);
+                    index.add(logIndex);
 
                 } catch (IOException e) {
                     System.err.println(urlString);
