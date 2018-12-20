@@ -10,6 +10,7 @@ import com.ustadmobile.core.db.dao.ContentEntryFileStatusDao;
 import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
 import com.ustadmobile.core.db.dao.LanguageDao;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
+import com.ustadmobile.lib.contentscrapers.LanguageList;
 import com.ustadmobile.lib.contentscrapers.ScraperConstants;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.Language;
@@ -34,6 +35,26 @@ import static com.ustadmobile.lib.contentscrapers.ScraperConstants.USTAD_MOBILE;
 import static com.ustadmobile.lib.db.entities.ContentEntry.LICENSE_TYPE_CC_BY;
 import static com.ustadmobile.lib.db.entities.ContentEntry.LICENSE_TYPE_CC_BY_NC;
 
+/**
+ * The Khan Academy website has a list of topics that they teach about at https://www.khanacademy.org/
+ * Each topic have multiple sections eg grade 1 or algebra
+ * Each section have different courses which have tutorial content in the from of videos, exercises, articles, quizzes, challenges.
+ * <p>
+ * Every page in khan academy have json content in a script that loads the information of the page.
+ * Extract the json and put into the pojo object - TopicListResponse
+ * TopicResponse has a list of domains which have all the topics in khan academy
+ * Each domain has an href for the link to the next page - subjects
+ *
+ * For the subject, extract the json from the script and load into SubjectListResponse
+ * SubjectResponse has a list of modules which can be categorized with variable kind
+ * TableOfContents - has another list of sub-subjects
+ * SubjectProgress - has another list of sub-subjects which is found in list of modules with kind SubjectPageTopicCard
+ * SubjectChallenge - quizzes for the subjects
+ *
+ * Once we reach to the courses Page, extract the json from the script and load into SubjectListResponse
+ * SubjectResponse has a list of tutorials which each have a list of content items
+ * Every content item is a course categorized by Video, Exercise or Article.
+ */
 public class IndexKhanContentScraper {
 
 
@@ -78,7 +99,7 @@ public class IndexKhanContentScraper {
 
         gson = new GsonBuilder().disableHtmlEscaping().create();
 
-        // new LanguageList().addAllLanguages();
+        new LanguageList().addAllLanguages();
 
         englishLang = ContentScraperUtil.insertOrUpdateLanguage(languageDao, "English");
 
@@ -138,29 +159,31 @@ public class IndexKhanContentScraper {
 
         for (TopicListResponse.ComponentData.Modules module : modulesList) {
 
-            if (module.domains != null && !module.domains.isEmpty()) {
+            if (module.domains == null || module.domains.isEmpty()) {
+                continue;
+            }
 
-                List<TopicListResponse.ComponentData.Modules.Domains> domainList = module.domains;
+            List<TopicListResponse.ComponentData.Modules.Domains> domainList = module.domains;
 
-                int topicCount = 0;
-                for (TopicListResponse.ComponentData.Modules.Domains domain : domainList) {
+            int topicCount = 0;
+            for (TopicListResponse.ComponentData.Modules.Domains domain : domainList) {
 
-                    URL topicUrl = new URL(url, domain.href);
-                    File topicFolder = new File(fileLocation, domain.identifier);
-                    topicFolder.mkdirs();
-                    ContentEntry topicEntry = ContentScraperUtil.createOrUpdateContentEntry(domain.identifier,
-                            domain.translatedTitle, topicUrl.toString(), KHAN,
-                            LICENSE_TYPE_CC_BY_NC, englishLang.getLangUid(), null, EMPTY_STRING, false,
-                            EMPTY_STRING, domain.icon, EMPTY_STRING, EMPTY_STRING, contentEntryDao);
+                URL topicUrl = new URL(url, domain.href);
+                File topicFolder = new File(fileLocation, domain.identifier);
+                topicFolder.mkdirs();
 
-                    ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, parent, topicEntry,
-                            topicCount++);
+                ContentEntry topicEntry = ContentScraperUtil.createOrUpdateContentEntry(domain.identifier,
+                        domain.translatedTitle, topicUrl.toString(), KHAN,
+                        LICENSE_TYPE_CC_BY_NC, englishLang.getLangUid(), null, EMPTY_STRING, false,
+                        EMPTY_STRING, domain.icon, EMPTY_STRING, EMPTY_STRING, contentEntryDao);
 
-                    browseSubjects(topicEntry, topicUrl, topicFolder);
+                ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, parent, topicEntry,
+                        topicCount++);
 
-                }
+                browseSubjects(topicEntry, topicUrl, topicFolder);
 
             }
+
 
         }
     }
@@ -247,7 +270,7 @@ public class IndexKhanContentScraper {
                     int tutorialCount = 0;
                     for (ModuleResponse.Tutorial tutorial : tutorialList) {
 
-                        if(tutorial == null){
+                        if (tutorial == null) {
                             continue;
                         }
 

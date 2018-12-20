@@ -50,6 +50,46 @@ import static com.ustadmobile.lib.contentscrapers.ScraperConstants.TRY_AGAIN_KHA
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING;
 import static com.ustadmobile.lib.contentscrapers.ck12.CK12ContentScraper.RESPONSE_RECEIVED;
 
+
+/**
+ * Every khan academy content is categorized into several types - video, exercise, article
+ * <p>
+ * For Video Content, the index has the url of video in their json.
+ * The Scraper checks if this was downloaded before by checking the etag from the header of the url
+ * Downloads the content and saves it into the zip
+ * <p>
+ * For Exercise Content, first it is required to be logged in for the exercise.
+ * Then, get the json of the exercise from the source code of the website
+ * This is needed to get the all the list of exercises in the exercise, the exericse id and the last modified date
+ * If already downloaded this content, it checks if the date is the same
+ * Load the website using Selenium and wait for the page to load fully to get all its content.
+ * Setup Selenium and Chrome
+ * Run selenium and wait for everything to load on the screen by waiting for the element div[data-test-id=tutorial-page]
+ * Once that is done, get the logs for the network and store in a list
+ * Filter the responses based on the message RESPONSE RECEIVED
+ * Store the mimeType and url of each response.
+ * Copy and Save the content of each url and use request headers if required.
+ * <p>
+ * Once all the logs have been saved, download all the exercises belonging to that exercise using the list from earlier
+ * to get all the item id to call the url
+ * https://www.khanacademy.org/api/internal/user/exercises/{exericse-id}/items/{item-id}/assessment_item
+ * Extract all the images from the url so those images can be used offline
+ * <p>
+ * Create a content directory for all the url and their location into a json so it can be played back.
+ * Zip all files with the course as the name
+ * <p>
+ * For Article Content, extract the json from the page, load it into ArticleResponse
+ * This is used to check when the article was last updated
+ * If updated, Setup Selenium and Chrome
+ * Run selenium and wait for everything to load on the screen by waiting for the element ul[class*=listWrapper]
+ * Once that is done, get the logs for the network and store in a list
+ * Filter the responses based on the message RESPONSE RECEIVED
+ * Store the mimeType and url of each response.
+ * Copy and Save the content of each url and use request headers if required.
+ * <p>
+ * Create a content directory for all the url and their location into a json so it can be played back.
+ * Zip all files with the course as the name
+ */
 public class KhanContentScraper {
 
     private final File destinationDirectory;
@@ -144,7 +184,7 @@ public class KhanContentScraper {
             FileUtils.writeStringToFile(modifiedFile, String.valueOf(dateModified), ScraperConstants.UTF_ENCODING);
         }
 
-        if(!isUpdated){
+        if (!isUpdated) {
             isContentUpdated = false;
             return;
         }
@@ -347,9 +387,9 @@ public class KhanContentScraper {
         SubjectListResponse data = gson.fromJson(initialJson, SubjectListResponse.class);
         List<SubjectListResponse.ComponentData.NavData.ContentModel> contentList = data.componentProps.tutorialNavData.contentModels;
 
-        for(SubjectListResponse.ComponentData.NavData.ContentModel content: contentList){
+        for (SubjectListResponse.ComponentData.NavData.ContentModel content : contentList) {
 
-            if(content.relativeUrl.contains(scrapUrl)){
+            if (content.relativeUrl.contains(scrapUrl)) {
 
                 String articleId = content.id;
                 String articleUrl = generateArtcleUrl(articleId);
@@ -367,7 +407,7 @@ public class KhanContentScraper {
                     FileUtils.writeStringToFile(modifiedFile, String.valueOf(dateModified), ScraperConstants.UTF_ENCODING);
                 }
 
-                if(!isUpdated){
+                if (!isUpdated) {
                     isContentUpdated = false;
                     return;
                 }
