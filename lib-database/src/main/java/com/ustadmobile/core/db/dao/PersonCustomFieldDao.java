@@ -35,4 +35,7 @@ public abstract class PersonCustomFieldDao
     @UmQuery("SELECT * FROM PersonField WHERE personCustomFieldUid > :minCustomFieldUid")
     public abstract void findAllCustomFields(int minCustomFieldUid,
                                              UmCallback<List<PersonField>> resultObject);
+
+    @UmQuery("SELECT * FROM PersonField WHERE fieldName = :name")
+    public abstract void findByFieldNameAsync(String name, UmCallback<List<PersonField>> resultList);
 }

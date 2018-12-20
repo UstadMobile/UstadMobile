@@ -15,4 +15,6 @@ public interface BulkUploadMasterView extends UstadView{
 
     void showMessage(String message);
 
+    void setInProgress(boolean inProgress);
+
 }

@@ -39,4 +39,12 @@ public abstract class PersonDetailPresenterFieldDao implements
     public abstract void findAllPersonDetailPresenterFieldsEditMode(
             UmCallback<List<PersonDetailPresenterField>> callback);
 
+    @UmQuery("SELECT * FROM PersonDetailPresenterField WHERE fieldUid = :uid")
+    public abstract void findAllByFieldUid(long uid, UmCallback<List<PersonDetailPresenterField>> resultList);
+
+    @UmQuery("SELECT * FROM PersonDetailPresenterField WHERE labelMessageId = :id")
+    public abstract void findAllByLabelMessageId(int id, UmCallback<List<PersonDetailPresenterField>> resultList);
+
+    @UmQuery("SELECT * FROM PersonDetailPresenterField WHERE fieldIndex = :id")
+    public abstract void findAllByFieldIndex(int id, UmCallback<List<PersonDetailPresenterField>> resultList);
 }

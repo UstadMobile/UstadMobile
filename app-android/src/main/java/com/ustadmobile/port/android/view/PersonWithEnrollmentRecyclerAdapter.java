@@ -275,6 +275,7 @@ public class PersonWithEnrollmentRecyclerAdapter
             checkBox.setSystemUiVisibility(View.VISIBLE);
             checkBox.setCursorVisible(true);
 
+
             //Get current person's enrollment w.r.t. this class. (Its either set or null (not enrolled)
             boolean personWithEnrollmentBoolean = false;
             if (personWithEnrollment.getEnrolled() != null){

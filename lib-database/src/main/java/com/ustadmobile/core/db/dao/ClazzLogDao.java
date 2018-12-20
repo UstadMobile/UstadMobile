@@ -70,8 +70,6 @@ public abstract class ClazzLogDao implements SyncableDao<ClazzLog, ClazzLogDao> 
                                                            int numAbsent, int numPartial,
                                                            UmCallback<Void> callback);
 
-   
-
     @UmQuery ("SELECT COUNT(Clazz.clazzName) as number, clazzLog.logDate as date from ClazzLog " +
             " LEFT JOIN Clazz ON ClazzLog.clazzClazzUid = Clazz.clazzUid" +
             "   WHERE ClazzLog.logDate > :fromDate and ClazzLog.logDate < :toDate " +

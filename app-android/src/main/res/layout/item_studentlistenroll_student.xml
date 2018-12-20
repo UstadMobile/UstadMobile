@@ -11,15 +11,13 @@
     <TextView
         android:id="@+id/item_studentlist_student_simple_student_title"
         android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="14dp"
-        android:layout_marginEnd="8dp"
+        android:layout_marginTop="8dp"
         android:text="TextView"
         android:textAppearance="@android:style/TextAppearance.Material.Headline"
         android:textColor="@color/text_primary"
         android:textSize="16sp"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/item_studentlist_student_simple_student_checkbox"
         app:layout_constraintStart_toEndOf="@+id/item_studentlist_student_simple_student_image"
         app:layout_constraintTop_toTopOf="parent" />

@@ -150,29 +150,6 @@ public abstract class ClazzLogAttendanceRecordDao implements
         }
     }
 
-
-//    @UmQuery("select " +
-//            " count(DISTINCT Person.personUid) as total," +
-//            " Person.gender," +
-//            " cast((:datetimeNow - Person.dateOfBirth) / (365.25 * 24 * 60 * 60 * 1000) as int) as age," +
-//            " CASE " +
-//            " WHEN numSessionsTbl.attendancePercentage < :lowAttendanceThreshold THEN \"LOW\"" +
-//            " WHEN numSessionsTbl.attendancePercentage < :midAttendanceThreshold THEN \"MEDIUM\" " +
-//            " ELSE \"HIGH\" " +
-//            " END thresholdGroup/*, " +
-//            " Person.firstNames*/ " +
-//            " FROM " +
-//            " (SELECT cast( " +
-//            " SUM(CASE WHEN attendanceStatus = " + ClazzLogAttendanceRecord.STATUS_ATTENDED + " THEN 1 ELSE 0 END) as float) / COUNT(*) as attendancePercentage, " +
-//            " clazzLogAttendanceRecordClazzMemberUid " +
-//            " FROM ClazzLogAttendanceRecord as numSessions GROUP BY clazzLogAttendanceRecordClazzMemberUid) numSessionsTbl " +
-//            " LEFT JOIN ClazzLogAttendanceRecord ON numSessionsTbl.clazzLogAttendanceRecordClazzMemberUid = ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzMemberUid " +
-//            " LEFT JOIN ClazzMember on ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzMemberUid = ClazzMember.clazzMemberUid" +
-//            " LEFT JOIN Person on ClazzMember.clazzMemberPersonUid = Person.personUid" +
-//            " GROUP BY Person.gender, age, thresholdGroup ")
-
-
-
     @UmQuery("select  " +
             " count(DISTINCT Person.personUid) as total, " +
             " Person.gender, " +

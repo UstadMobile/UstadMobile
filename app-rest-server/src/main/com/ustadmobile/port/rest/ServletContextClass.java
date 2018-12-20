@@ -5,6 +5,7 @@ import com.ustadmobile.core.db.dao.PersonCustomFieldDao;
 import com.ustadmobile.core.db.dao.PersonDao;
 import com.ustadmobile.core.db.dao.PersonDetailPresenterFieldDao;
 import com.ustadmobile.core.generated.locale.MessageID;
+import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField;
 import com.ustadmobile.lib.db.entities.PersonField;
 
@@ -20,6 +21,15 @@ public class ServletContextClass implements ServletContextListener
     {
 
         public String dummyBaseUrl = "http://localhost/dummy/address/";
+        public String dummyAuth = "dummy";
+        UmAppDatabase repository;
+        PersonCustomFieldDao personCustomFieldDao;
+        PersonDetailPresenterFieldDao personDetailPresenterFieldDao;
+        PersonDao personDao;
+
+        private int fieldIndex = 0;
+        List<HeadersAndFields> allFields;
+
         @Override
         public void contextDestroyed(ServletContextEvent arg0) {
             System.out.println("ServletContextListener destroyed");
@@ -30,106 +40,169 @@ public class ServletContextClass implements ServletContextListener
         public void contextInitialized(ServletContextEvent arg0) {
             System.out.println("ServletContextListener started");
 
+            repository = UmAppDatabase.getInstance(arg0.getServletContext());
+
+            personCustomFieldDao =
+                    repository.getRepository(dummyBaseUrl, dummyAuth).getPersonCustomFieldDao();
+            personDetailPresenterFieldDao =
+                    repository.getRepository(dummyBaseUrl, dummyAuth).getPersonDetailPresenterFieldDao();
+            personDao = repository.getRepository(dummyBaseUrl, dummyAuth).getPersonDao();
+
             //Creating admin
-            UmAppDatabase repository = UmAppDatabase.getInstance(arg0.getServletContext());
-            PersonDao dao =
-                    repository.getRepository(dummyBaseUrl, "dummy")
-                            .getPersonDao();
-            dao.createAdmin();
+            personDao.createAdmin();
 
             //Adding stuff
-            addFieldData(arg0);
-
-            System.out.println("done setup");
+            addFieldData();
 
         }
+
+        public void addNextField(){
+
+            if(fieldIndex == allFields.size()){
+                return;
+            }
+
+            HeadersAndFields field = allFields.get(fieldIndex);
+
+            boolean isHeader = false;
+            if(field.fieldType == PersonField.FIELD_TYPE_HEADER){
+                isHeader = true;
+            }
+
+            boolean finalIsHeader = isHeader;
+            personCustomFieldDao.findByFieldNameAsync(field.fieldName,
+            new UmCallback<List<PersonField>>() {
+                @Override
+                public void onSuccess(List<PersonField> resultList) {
+
+                    //Create the custom fields - basically label & icon .
+                    PersonField personField = new PersonField();
+
+                    if (resultList.isEmpty()) {
+
+                        //Create the field only if it is a field (ie not a header)
+                        if (!finalIsHeader) {
+                            personField.setFieldIcon(field.fieldIcon); //Icon
+                            personField.setFieldName(field.fieldName); //Internal name
+                            personField.setLabelMessageId(field.fieldLabel);    //Label
+
+                            //Set PersonFields' Uid (PersonCustomFieldUid) (No auto generation)
+                            //If field not set ie its a Custom Field
+                            if(field.fieldUid == 0){
+                                //It is a custom field
+                                int lastPersonCustomFieldUidUsed = personCustomFieldDao.findLatestUid();
+                                int newCustomPersonCustomFieldUid = lastPersonCustomFieldUidUsed + 1;
+                                if(lastPersonCustomFieldUidUsed < CUSTOM_FIELD_MIN_UID){
+                                    //first Custom field
+                                    newCustomPersonCustomFieldUid =
+                                            CUSTOM_FIELD_MIN_UID + 1;
+                                }
+                                personField.setPersonCustomFieldUid(newCustomPersonCustomFieldUid);
+                                field.fieldUid = newCustomPersonCustomFieldUid;
+
+                            }else {
+                                //Not a custom field.
+                                personField.setPersonCustomFieldUid(field.fieldUid);   //Field's uid
+                            }
+
+                            System.out.println("Field: " + field.fieldName +
+                                    " Field uid: " + field.fieldUid);
+
+                            //Persist
+                            personCustomFieldDao.insert(personField);
+
+                        }
+
+                        //Persist 2
+                        createPersonDetailPresenterField(field, finalIsHeader, personField,
+                                personDetailPresenterFieldDao, true);
+
+
+
+                    } else {
+
+                        System.out.println("Already created 1 (" + field.fieldName + "). skipping..");
+                    }
+                }
+
+                @Override
+                public void onFailure(Throwable exception) {
+                    exception.printStackTrace();
+                }
+            });
+
+        }
+
 
         /**
          * Adds dummy data in the start of the application here. It also sets a key so that we don't
          * add the dummy data every time. This will get replaced with real data that will sync with
          * the server.
          */
-        public void addFieldData(ServletContextEvent arg0){
+        public void addFieldData(){
+            allFields = getAllFields();
 
-            UmAppDatabase repository = UmAppDatabase.getInstance(arg0.getServletContext());
+            addNextField();
+        }
 
-            List<HeadersAndFields> allFields = getAllFields();
-
-            //Create Custom Fields:
-            PersonCustomFieldDao personCustomFieldDao =
-                    repository.getRepository(dummyBaseUrl, "dmmy")
-                            .getPersonCustomFieldDao();
-            PersonDetailPresenterFieldDao personDetailPresenterFieldDao =
-                    repository.getRepository(dummyBaseUrl,"dmmy")
-                            .getPersonDetailPresenterFieldDao();
-
-            System.out.println("STARTING PERSIST");
+        public void createPersonDetailPresenterField (HeadersAndFields field, boolean isHeader,
+                                      PersonField pcf,
+                                      PersonDetailPresenterFieldDao personDetailPresenterFieldDao,
+                                                      Boolean gotoNext){
 
 
-            for (HeadersAndFields field: allFields){
-                boolean isHeader = false;
-                if(field.fieldType == PersonField.FIELD_TYPE_HEADER){
-                    isHeader = true;
-                }
+            personDetailPresenterFieldDao.findAllByFieldIndex(field.fieldIndex,
+                new UmCallback<List<PersonDetailPresenterField>>() {
+                @Override
+                public void onSuccess(List<PersonDetailPresenterField> resultList2) {
 
-                //Create the custom fields - basically label & icon .
-                PersonField pcf1 = new PersonField();
+                    if (resultList2.isEmpty()) {
 
-                //Create the field only if it is a field (ie not a header)
-                if (!isHeader) {
-                    pcf1.setFieldIcon(field.fieldIcon); //Icon
-                    pcf1.setFieldName(field.fieldName); //Internal name
-                    pcf1.setLabelMessageId(field.fieldLabel);    //Label
-                    //If field not set ie its a Custom Field
-                    if(field.fieldUid == 0){
-                        int lastPersonCustomFieldUidUsed = personCustomFieldDao.findLatestUid();
-                        int newCustomPersonCustomFieldUid = lastPersonCustomFieldUidUsed + 1;
-                        if(lastPersonCustomFieldUidUsed < CUSTOM_FIELD_MIN_UID){
-                            //first Custom field
-                            newCustomPersonCustomFieldUid =
-                                    CUSTOM_FIELD_MIN_UID + 1;
+                        //Create the Mapping between the fields and extra information like :
+                        //  type(header / field)
+                        //  index (for ordering)
+                        //  Header String Id (if header)
+                        //
+                        PersonDetailPresenterField pdpf1 = new PersonDetailPresenterField();
+                        pdpf1.setFieldType(field.fieldType);
+                        pdpf1.setFieldIndex(field.fieldIndex);
+
+                        pdpf1.setFieldIcon(field.fieldIcon);
+                        pdpf1.setLabelMessageId(field.fieldLabel);
+
+                        //Set Visibility
+                        pdpf1.setReadyOnly(field.readOnly);
+                        pdpf1.setViewModeVisible(field.viewMode);
+                        pdpf1.setEditModeVisible(field.editMode);
+
+                        //If not a header set the field. If is header, set the header label.
+                        if(!isHeader) {
+                            Long pcfUid = pcf.getPersonCustomFieldUid();
+                            System.out.println("Putting field uid : " + pcfUid);
+                            pdpf1.setFieldUid(pcfUid);
+                        }else {
+                            pdpf1.setHeaderMessageId(field.headerMessageId);
                         }
-                        pcf1.setPersonCustomFieldUid(newCustomPersonCustomFieldUid);
-                        field.fieldUid = newCustomPersonCustomFieldUid;
-                    }else {
-                        pcf1.setPersonCustomFieldUid(field.fieldUid);   //Field's uid
+
+                        //persist:
+                        System.out.println(field.fieldName);
+                        personDetailPresenterFieldDao.insert(pdpf1);
+                    } else {
+                        System.out.println("Already created 2 (" + field.fieldIndex + "). skipping..");
                     }
 
-                    personCustomFieldDao.insert(pcf1);  //Persist
+                    if(gotoNext){
+                        fieldIndex++;
+                        addNextField();
+                    }
+
                 }
 
-                //Create the Mapping between the fields and extra information like :
-                //  type(header / field)
-                //  index (for ordering)
-                //  Header String Id (if header)
-                //
-                PersonDetailPresenterField pdpf1 = new PersonDetailPresenterField();
-                pdpf1.setFieldType(field.fieldType);
-                pdpf1.setFieldIndex(field.fieldIndex);
-
-                pdpf1.setFieldIcon(field.fieldIcon);
-                pdpf1.setLabelMessageId(field.fieldLabel);
-
-                //Set Visibility
-                pdpf1.setReadyOnly(field.readOnly);
-                pdpf1.setViewModeVisible(field.viewMode);
-                pdpf1.setEditModeVisible(field.editMode);
-
-                //If not a header set the field. If is header, set the header label.
-                if(!isHeader) {
-                    pdpf1.setFieldUid(pcf1.getPersonCustomFieldUid());
-                }else {
-                    pdpf1.setHeaderMessageId(field.headerMessageId);
+                @Override
+                public void onFailure(Throwable exception) {
+                    exception.printStackTrace();
                 }
-
-                //persist:
-                Long pdpf1Uid = personDetailPresenterFieldDao.insert(pdpf1);
-                pdpf1.setPersonDetailPresenterFieldUid(pdpf1Uid);
-            }
-
-            //Set that we have created dummy data so that check for this and don't create it again.
-
-
+            });
 
         }
 
@@ -182,11 +255,10 @@ public class ServletContextClass implements ServletContextListener
 
         public List<HeadersAndFields> getAllFields(){
 
-            List<HeadersAndFields> allFields = new ArrayList<>();
+            List<HeadersAndFields> allTheFields = new ArrayList<>();
 
 
-
-            allFields.add(new HeadersAndFields(
+            allTheFields.add(new HeadersAndFields(
                     "",
                     "",
                     0,
@@ -198,7 +270,7 @@ public class ServletContextClass implements ServletContextListener
                     true,
                     true
             ));
-            allFields.add(new HeadersAndFields(
+            allTheFields.add(new HeadersAndFields(
                     "",
                     "Full Name",
                     MessageID.field_fullname,
@@ -212,7 +284,7 @@ public class ServletContextClass implements ServletContextListener
             ));
 
             ///FIRST NAME LAST NAME
-            allFields.add(new HeadersAndFields(
+            allTheFields.add(new HeadersAndFields(
                     "ic_person_black_24dp",
                     "First Names",
                     MessageID.first_names,
@@ -224,7 +296,7 @@ public class ServletContextClass implements ServletContextListener
                     false,
                     true
             ));
-            allFields.add(new HeadersAndFields(
+            allTheFields.add(new HeadersAndFields(
                     "",
                     "Last Name",
                     MessageID.last_name,
@@ -238,7 +310,7 @@ public class ServletContextClass implements ServletContextListener
             ));
 
             //BIRTHDAY
-            allFields.add(new HeadersAndFields(
+            allTheFields.add(new HeadersAndFields(
                     "ic_perm_contact_calendar_black_24dp",
                     "Date of Birth",
                     MessageID.birthday,
@@ -251,7 +323,7 @@ public class ServletContextClass implements ServletContextListener
                     true
             ));
             //ADDRESS
-            allFields.add(new HeadersAndFields(
+            allTheFields.add(new HeadersAndFields(
                     "",
                     "Home Address",
                     MessageID.home_address,
@@ -265,7 +337,7 @@ public class ServletContextClass implements ServletContextListener
             ));
 
             //ATTENDANCE
-            allFields.add(new HeadersAndFields(
+            allTheFields.add(new HeadersAndFields(
                     "",
                     "",
                     0,
@@ -277,7 +349,7 @@ public class ServletContextClass implements ServletContextListener
                     true,
                     false
             ));
-            allFields.add(new HeadersAndFields(
+            allTheFields.add(new HeadersAndFields(
                     "ic_lens_black_24dp",
                     "Total Attendance for student and days",
                     MessageID.attendance,
@@ -291,7 +363,7 @@ public class ServletContextClass implements ServletContextListener
             ));
 
             //PARENTS
-            allFields.add(new HeadersAndFields(
+            allTheFields.add(new HeadersAndFields(
                     "ic_person_black_24dp",
                     "Father with number",
                     MessageID.father,
@@ -303,7 +375,7 @@ public class ServletContextClass implements ServletContextListener
                     true,
                     false
             ));
-            allFields.add(new HeadersAndFields(
+            allTheFields.add(new HeadersAndFields(
                     "ic_person_black_24dp",
                     "Father name",
                     MessageID.fathers_name,
@@ -315,7 +387,7 @@ public class ServletContextClass implements ServletContextListener
                     false,
                     true
             ));
-            allFields.add(new HeadersAndFields(
+            allTheFields.add(new HeadersAndFields(
                     "ic_person_black_24dp",
                     "Father  number",
                     MessageID.fathers_number,
@@ -327,7 +399,7 @@ public class ServletContextClass implements ServletContextListener
                     false,
                     true
             ));
-            allFields.add(new HeadersAndFields(
+            allTheFields.add(new HeadersAndFields(
                     "ic_person_black_24dp",
                     "Mother name",
                     MessageID.mothers_name,
@@ -339,7 +411,7 @@ public class ServletContextClass implements ServletContextListener
                     false,
                     true
             ));
-            allFields.add(new HeadersAndFields(
+            allTheFields.add(new HeadersAndFields(
                     "ic_person_black_24dp",
                     "Mother number",
                     MessageID.mothers_number,
@@ -351,7 +423,7 @@ public class ServletContextClass implements ServletContextListener
                     false,
                     true
             ));
-            allFields.add(new HeadersAndFields(
+            allTheFields.add(new HeadersAndFields(
                     "ic_person_black_24dp",
                     "Mother with number",
                     MessageID.mother,
@@ -365,7 +437,7 @@ public class ServletContextClass implements ServletContextListener
             ));
 
             //CLASSES
-            allFields.add(new HeadersAndFields(
+            allTheFields.add(new HeadersAndFields(
                     "",
                     "",
                     0,
@@ -379,7 +451,7 @@ public class ServletContextClass implements ServletContextListener
             ));
 
             //Custom fields:
-            allFields.add(new HeadersAndFields(
+            allTheFields.add(new HeadersAndFields(
                     "",
                     "",
                     0,
@@ -405,7 +477,7 @@ public class ServletContextClass implements ServletContextListener
                     true
             );
 
-            allFields.add(cf1);
+            allTheFields.add(cf1);
             HeadersAndFields cf2 = new HeadersAndFields(
                     "ic_account_balance_black_24dp",
                     "Schooling",
@@ -418,8 +490,8 @@ public class ServletContextClass implements ServletContextListener
                     true,
                     true
             );
-            allFields.add(cf2);
+            allTheFields.add(cf2);
 
-            return allFields;
+            return allTheFields;
         }
 }

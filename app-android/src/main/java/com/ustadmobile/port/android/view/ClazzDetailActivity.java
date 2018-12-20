@@ -135,6 +135,10 @@ public class ClazzDetailActivity extends UstadBaseActivity implements
         if (i == R.id.menu_clazzdetail_gear) {
             mPresenter.handleClickClazzEdit();
             return super.onOptionsItemSelected(item);
+        }
+        else if(i == android.R.id.home) {
+            onBackPressed();
+            return true;
         } else {
             return super.onOptionsItemSelected(item);
         }

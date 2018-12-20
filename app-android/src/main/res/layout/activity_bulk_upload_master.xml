@@ -13,6 +13,8 @@
         android:elevation="4dp"
         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
+
+
         <android.support.v7.widget.Toolbar
             android:id="@+id/activity_bulk_upload_master_toolbar"
             android:layout_width="match_parent"
@@ -21,6 +23,15 @@
             android:layout_height="?android:attr/actionBarSize"
             android:background="@color/primary"
             app:layout_scrollFlags="scroll|enterAlways" />
+
+        <ProgressBar
+            android:visibility="gone"
+            android:progressDrawable="@drawable/progress_bar_drawable"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:id="@+id/activity_bulk_upload_master_progressbar"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/dimen_4dp" />
+
     </android.support.design.widget.AppBarLayout>
 
     <TextView
