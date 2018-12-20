@@ -14,6 +14,8 @@ class SubjectListResponse {
 
         public Card initialCards;
 
+        public NavData tutorialNavData;
+
         public class Curation {
 
             public List<Tab> tabs;
@@ -55,6 +57,29 @@ class SubjectListResponse {
 
                 }
 
+
+            }
+        }
+
+        public class NavData {
+
+            public List<ContentModel> contentModels;
+
+            public class ContentModel {
+
+                public String id;
+
+                public String nodeSlug;
+
+                public String relativeUrl;
+
+                public String slug;
+
+                public String title;
+
+                public String contentKind;
+
+                public String kind;
 
             }
         }

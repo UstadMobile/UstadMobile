@@ -27,7 +27,9 @@ import okio.Buffer;
 import okio.BufferedSource;
 import okio.Okio;
 
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.CONTENT_JSON;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.ZIP_EXT;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.brainGenieLink;
 
 public class TestIndexKhanAcademy {
@@ -54,7 +56,7 @@ public class TestIndexKhanAcademy {
                     Buffer buffer = new Buffer();
                     source.readAll(buffer);
 
-                    return new MockResponse().setResponseCode(200).setBody(buffer);
+                    return new MockResponse().setResponseCode(200).setHeader("ETag", "ABC").setBody(buffer);
                 }
 
             } catch (IOException e) {
@@ -63,15 +65,6 @@ public class TestIndexKhanAcademy {
             return new MockResponse().setResponseCode(404);
         }
     };
-
-    @Test
-    public void scrapeIndex() throws IOException {
-
-        File tmpDir = Files.createTempDirectory("testIndexKhancontentscraper").toFile();
-        IndexKhanContentScraper indexScraper = new IndexKhanContentScraper();
-        indexScraper.findContent("https://www.khanacademy.org/", tmpDir);
-
-    }
 
 
     @Test
@@ -132,25 +125,28 @@ public class TestIndexKhanAcademy {
     }
 
     @Test
-    public void testPractice() throws IOException {
+    public void givenServerOnline_whenKhanVideoContentScrapedAGAIN_thenShouldNotDownloadFilesAgain() throws IOException {
 
-        File tmpDir = Files.createTempDirectory("testKhanExercisecontentscraper").toFile();
-
-        KhanContentScraper scraper = new KhanContentScraper(tmpDir);
-        scraper.scrapeExerciseContent("https://www.khanacademy.org/math/early-math/cc-early-math-counting-topic/cc-early-math-counting/e/counting-out-1-20-objects");
-        //   scraper.scrapeExerciseContent("https://www.khanacademy.org/math/early-math/cc-early-math-counting-topic/cc-early-math-counting/e/counting-objects");
-    }
-
-    @Test
-    public void testArticleContent() throws IOException {
-
-        File tmpDir = Files.createTempDirectory("testKhanArticleContentScraper").toFile();
+        MockWebServer mockWebServer = new MockWebServer();
+        mockWebServer.setDispatcher(dispatcher);
+        File tmpDir = Files.createTempDirectory("testIndexKhancontentscraper").toFile();
 
         KhanContentScraper scraper = new KhanContentScraper(tmpDir);
-        scraper.scrapeArticleContent("https://www.khanacademy.org/math/early-math/cc-early-math-place-value-topic/cc-early-math-two-digit-compare/a/comparison-symbols-review");
-        //
+        scraper.scrapeVideoContent(mockWebServer.url("/content/com/ustadmobile/lib/contentscrapers/files/video.mp4").toString());
+
+        long firstDownloadTime = new File(tmpDir, tmpDir.getName() + ZIP_EXT).lastModified();
+        //now run scrapeContent again...
+
+        scraper.scrapeVideoContent(mockWebServer.url("/content/com/ustadmobile/lib/contentscrapers/files/video.mp4").toString());
+
+        long lastModified = new File(tmpDir, tmpDir.getName() + ZIP_EXT).lastModified();
+        //Assert that last modified dates are lower than firstDownloadCompleteTime
+        Assert.assertTrue(lastModified == firstDownloadTime);
 
 
     }
+
+
+
 
 }

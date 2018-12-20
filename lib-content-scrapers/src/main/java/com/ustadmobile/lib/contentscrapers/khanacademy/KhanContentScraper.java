@@ -336,11 +336,47 @@ public class KhanContentScraper {
 
     public void scrapeArticleContent(String scrapUrl) throws IOException {
 
-        // TODO get last modified
-
         ContentScraperUtil.setChromeDriverLocation();
 
         Gson gson = new GsonBuilder().disableHtmlEscaping().create();
+
+        File khanDirectory = new File(destinationDirectory, FilenameUtils.getBaseName(scrapUrl));
+        khanDirectory.mkdirs();
+
+        String initialJson = IndexKhanContentScraper.getJsonStringFromScript(scrapUrl);
+        SubjectListResponse data = gson.fromJson(initialJson, SubjectListResponse.class);
+        List<SubjectListResponse.ComponentData.NavData.ContentModel> contentList = data.componentProps.tutorialNavData.contentModels;
+
+        for(SubjectListResponse.ComponentData.NavData.ContentModel content: contentList){
+
+            if(content.relativeUrl.contains(scrapUrl)){
+
+                String articleId = content.id;
+                String articleUrl = generateArtcleUrl(articleId);
+                ArticleResponse response = gson.fromJson(IOUtils.toString(new URL(articleUrl), UTF_ENCODING), ArticleResponse.class);
+                long dateModified = ContentScraperUtil.parseServerDate(response.date_modified);
+
+                File modifiedFile = new File(khanDirectory, articleId + ScraperConstants.LAST_MODIFIED_TXT);
+                String text;
+
+                boolean isUpdated = true;
+                if (ContentScraperUtil.fileHasContent(modifiedFile)) {
+                    text = FileUtils.readFileToString(modifiedFile, UTF_ENCODING);
+                    isUpdated = !String.valueOf(dateModified).equalsIgnoreCase(text);
+                } else {
+                    FileUtils.writeStringToFile(modifiedFile, String.valueOf(dateModified), ScraperConstants.UTF_ENCODING);
+                }
+
+                if(!isUpdated){
+                    isContentUpdated = false;
+                    return;
+                }
+
+                break;
+
+            }
+        }
+
 
         DesiredCapabilities d = DesiredCapabilities.chrome();
         d.setCapability("opera.arguments", "-screenwidth 1024 -screenheight 768");
@@ -351,8 +387,6 @@ public class KhanContentScraper {
 
         ChromeDriver driver = new ChromeDriver(d);
 
-        File khanDirectory = new File(destinationDirectory, FilenameUtils.getBaseName(scrapUrl));
-        khanDirectory.mkdirs();
 
         driver.get(scrapUrl);
         WebDriverWait waitDriver = new WebDriverWait(driver, 10000);
@@ -419,5 +453,9 @@ public class KhanContentScraper {
         ContentScraperUtil.zipDirectory(khanDirectory, khanDirectory.getName(), destinationDirectory);
 
 
+    }
+
+    private String generateArtcleUrl(String articleId) {
+        return "http://www.khanacademy.org/api/v1/articles/" + articleId;
     }
 }
