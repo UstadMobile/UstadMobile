@@ -40,11 +40,11 @@ public abstract class ExampleSyncableDao implements SyncableDao<ExampleSyncableE
     @UmRestAccessible
     public abstract void getTitleByUidAsync(long uid, UmCallback<String> callback);
 
-    @UmQuery("UPDATE ExampleSyncableEntity SET title = :title WHERE uid = :uid")
+    @UmQuery("UPDATE ExampleSyncableEntity SET title = :title WHERE exampleSyncableUid = :uid")
     @UmRestAccessible
     public abstract void updateTitle(long uid, String title);
 
-    @UmQuery("UPDATE ExampleSyncableEntity SET title = :title WHERE uid = :uid")
+    @UmQuery("UPDATE ExampleSyncableEntity SET title = :title WHERE exampleSyncableUid = :uid")
     @UmRestAccessible
     public abstract void updateTitleAsync(long uid, String title, UmCallback<Void> callback);
 
