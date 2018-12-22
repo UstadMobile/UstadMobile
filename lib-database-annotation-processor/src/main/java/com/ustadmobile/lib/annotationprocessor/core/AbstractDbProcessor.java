@@ -1199,8 +1199,8 @@ public abstract class AbstractDbProcessor {
     }
 
     protected CodeBlock generateSetLastChangedBy(ExecutableElement daoMethod,
-                                                    TypeElement daoType,
-                                                    String syncableDbVariableName) {
+                                                 TypeElement daoType,
+                                                 String syncableDbVariableName) {
         CodeBlock.Builder codeBlock = CodeBlock.builder();
         DaoMethodInfo methodInfo = new DaoMethodInfo(daoMethod, daoType, processingEnv);
         TypeMirror entityTypeMirror = methodInfo.resolveEntityParameterComponentType();
@@ -1511,6 +1511,8 @@ public abstract class AbstractDbProcessor {
                     UmSyncLocalChangeSeqNum.class, processingEnv);
             Element masterChangeSeqNumEl = DbProcessorUtils.findElementWithAnnotation(entityType,
                     UmSyncMasterChangeSeqNum.class, processingEnv);
+            Element lastChangeByEl = DbProcessorUtils.findElementWithAnnotation(entityType,
+                    UmSyncLastChangedBy.class, processingEnv);
 
             Map<String, String> triggerSqlArgs = new HashMap<>();
             triggerSqlArgs.put("tableNameLower",
@@ -1522,61 +1524,60 @@ public abstract class AbstractDbProcessor {
                     UmPrimaryKey.class, processingEnv).getSimpleName().toString());
             triggerSqlArgs.put("tableId", ""+entityType.getAnnotation(UmEntity.class).tableId());
             triggerSqlArgs.put("execSqlMethod", execSqlMethod);
+            triggerSqlArgs.put("lastChangeFieldName", lastChangeByEl.getSimpleName().toString());
 
             codeBlock.addNamed("String _tableColName_$tableName:L = isMaster() ? " +
                     "$masterCsnName:S : $localCsnName:S;\n", triggerSqlArgs);
+            triggerSqlArgs.put("concatTableCsnCol", "\" + _tableColName_" +
+                    entityType.getSimpleName() + " + \"");
+
             codeBlock.add("String _syncStatusColName_$L = isMaster() ? $S: $S;\n",
                     entityType.getSimpleName(), "masterChangeSeqNum", "localChangeSeqNum");
+            triggerSqlArgs.put("concatSyncStatusColName", "\" + _syncStatusColName_" +
+                    entityType.getSimpleName() + " + \"");
 
             Map<String, String> triggerTemplateArgs = new HashMap<>(triggerSqlArgs);
             triggerTemplateArgs.put("triggerOn", "update");
-            String triggerTemplate =
-                    "CREATE TRIGGER $triggerOn:L_csn_$tableNameLower:L " +
-                            "AFTER $triggerOn:L ON $tableName:L FOR EACH ROW ";
-            codeBlock.addNamed("String _createUpdateTriggerStmt_$tableName:L = \""
-                            + triggerTemplate + " WHEN (NEW.\" + _tableColName_$tableName:L + \" = 0" + //
-                            " OR OLD.\" + _tableColName_$tableName:L + \" " +
-                            "= NEW.\" + _tableColName_$tableName:L  + \") \";\n",
-                    triggerTemplateArgs);
 
-            triggerTemplateArgs.put("triggerOn", "insert");
-            codeBlock.addNamed("String _createInsertTriggerStmt_$tableName:L = \"" +
-                            triggerTemplate + "\";\n",
-                    triggerTemplateArgs);
-
-
-            codeBlock.addNamed("String _triggerSql_$tableNameLower:L = \"" +
-                            "UPDATE $tableName:L " +
-                            "SET \" + _tableColName_$tableName:L + \" = " +
-                            "(SELECT \" + _syncStatusColName_$tableName:L + \" FROM SyncStatus WHERE tableId = $tableId:L) " +
-                            "WHERE $pkName:L = NEW.$pkName:L; " +
-                            "UPDATE SyncStatus SET \" + " +
-                            "_syncStatusColName_$tableName:L + \" = \" + _syncStatusColName_$tableName:L + \" + 1 " +
-                            " WHERE tableId = $tableId:L; " +
-                            "\";\n"
-                    , triggerSqlArgs);
             codeBlock.addNamed("$execSqlMethod:L(\"INSERT INTO SyncStatus(tableId, " +
                         "localChangeSeqNum, masterChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) " +
                             "VALUES($tableId:L, 1, 1, 0, 0)\");\n",
                     triggerSqlArgs);
 
             if(sqlProductName.equals(PRODUCT_NAME_SQLITE)) {
-                codeBlock.addNamed("$execSqlMethod:L(_createUpdateTriggerStmt_$tableName:L " +
-                                " + \" BEGIN \" + _triggerSql_$tableNameLower:L + \" END\");\n",
-                        triggerSqlArgs);
-                codeBlock.addNamed("$execSqlMethod:L(_createInsertTriggerStmt_$tableName:L " +
-                                " + \" BEGIN \" + _triggerSql_$tableNameLower:L + \" END\");\n",
-                        triggerSqlArgs);
+                codeBlock.addNamed("$execSqlMethod:L(\"CREATE TRIGGER update_csn_$tableNameLower:L " +
+                        "AFTER update ON ExampleSyncableEntity FOR EACH ROW WHEN " +
+                        "(NEW.$concatTableCsnCol:L = 0 " +
+                            "OR OLD.$concatTableCsnCol:L = NEW.$concatTableCsnCol:L) " +
+                        "BEGIN " +
+                            "UPDATE $tableName:L SET $concatTableCsnCol:L = " +
+                                "(SELECT $concatSyncStatusColName:L FROM SyncStatus WHERE tableId = $tableId:L) " +
+                                "WHERE $pkName:L = NEW.$pkName:L; " +
+                            "UPDATE SyncStatus SET " +
+                                "$concatSyncStatusColName:L = $concatSyncStatusColName:L + 1;" +
+                        "END\");\n", triggerSqlArgs);
+                codeBlock.addNamed("$execSqlMethod:L(\"CREATE TRIGGER insert_csn_$tableNameLower:L " +
+                        "AFTER insert ON ExampleSyncableEntity FOR EACH ROW WHEN " +
+                        "(NEW.$concatTableCsnCol:L = 0) " +
+                        "BEGIN " +
+                            "UPDATE $tableName:L SET $concatTableCsnCol:L = " +
+                                "(SELECT $concatSyncStatusColName:L FROM SyncStatus WHERE tableId = $tableId:L) " +
+                            "WHERE $pkName:L = NEW.$pkName:L;" +
+                            "UPDATE SyncStatus SET " +
+                                "$concatSyncStatusColName:L = $concatSyncStatusColName:L + 1;" +
+                        "END\");\n", triggerSqlArgs);
+
             }else if(sqlProductName.equals(PRODUCT_NAME_POSTGRES)) {
-                codeBlock.addNamed("$execSqlMethod:L(\"CREATE OR REPLACE FUNCTION " +
-                                " increment_csn_$tableNameLower:L_fn() RETURNS trigger AS $$$$ BEGIN \"" +
-                                " + _triggerSql_$tableNameLower:L + \" RETURN null; END $$$$ " +
-                                "LANGUAGE plpgsql\");\n",
-                        triggerSqlArgs);
-                codeBlock.addNamed("$execSqlMethod:L(\"CREATE TRIGGER " +
-                        "increment_csn_$tableNameLower:L_trigger AFTER UPDATE OR INSERT ON " +
-                        "$tableName:L FOR EACH ROW WHEN (pg_trigger_depth() = 0) " +
-                        "EXECUTE PROCEDURE increment_csn_$tableNameLower:L_fn()\");\n", triggerSqlArgs);
+//TODO: Udpate this
+                //                codeBlock.addNamed("$execSqlMethod:L(\"CREATE OR REPLACE FUNCTION " +
+//                                " increment_csn_$tableNameLower:L_fn() RETURNS trigger AS $$$$ BEGIN \"" +
+//                                " + _triggerSql_$tableNameLower:L + \" RETURN null; END $$$$ " +
+//                                "LANGUAGE plpgsql\");\n",
+//                        triggerSqlArgs);
+//                codeBlock.addNamed("$execSqlMethod:L(\"CREATE TRIGGER " +
+//                        "increment_csn_$tableNameLower:L_trigger AFTER UPDATE OR INSERT ON " +
+//                        "$tableName:L FOR EACH ROW WHEN (pg_trigger_depth() = 0) " +
+//                        "EXECUTE PROCEDURE increment_csn_$tableNameLower:L_fn()\");\n", triggerSqlArgs);
             }
 
 

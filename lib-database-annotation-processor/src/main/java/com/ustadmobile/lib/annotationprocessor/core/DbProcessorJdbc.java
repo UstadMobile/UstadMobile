@@ -39,7 +39,7 @@ import com.ustadmobile.lib.database.jdbc.UmJdbcDatabase;
 import com.ustadmobile.lib.database.jdbc.UmLiveDataJdbc;
 import com.ustadmobile.lib.db.UmDbWithExecutor;
 import com.ustadmobile.lib.db.sync.UmRepositoryDb;
-import com.ustadmobile.lib.db.sync.UmRepositoryUtils;
+import com.ustadmobile.lib.db.sync.entities.SyncDeviceBits;
 import com.ustadmobile.lib.db.sync.entities.SyncStatus;
 
 import net.sf.jsqlparser.JSQLParserException;
@@ -70,6 +70,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -411,12 +412,14 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                 .add("$T connection = getConnection();\n", Connection.class)
                 .add("$T stmt = connection.createStatement();\n", Statement.class)
                 .unindent().beginControlFlow(") ");
-        TypeElement syncStatusTypeEL = processingEnv.getElementUtils().getTypeElement(
+        TypeElement syncStatusTypeEl = processingEnv.getElementUtils().getTypeElement(
                 SyncStatus.class.getName());
+        TypeElement syncDeviceBitsEl = processingEnv.getElementUtils().getTypeElement(
+                SyncDeviceBits.class.getName());
 
 
         for(TypeElement entityType : findEntityTypes(dbType)) {
-            if(!entityType.equals(syncStatusTypeEL))
+            if(!entityType.equals(syncStatusTypeEl))
                 codeBlock.add("stmt.executeUpdate(\"DELETE FROM $1L$2L$1L\");\n",
                     identifierQuoteStr, entityType.getSimpleName().toString());
             else
@@ -424,6 +427,10 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                         "localChangeSeqNum = 1, " +
                         "syncedToMasterChangeNum = 0, " +
                         "syncedToLocalChangeSeqNum = 0\");\n");
+
+            if(entityType.equals(syncDeviceBitsEl))
+                codeBlock.add("stmt.executeUpdate(\"INSERT INTO SyncDeviceBits VALUES (1, \"" +
+                    " + new $T().nextInt() + \")\");\n", Random.class);
         }
 
         codeBlock.nextControlFlow("catch($T e)", SQLException.class)
