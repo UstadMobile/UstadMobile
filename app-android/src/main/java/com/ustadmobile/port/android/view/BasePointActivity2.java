@@ -14,6 +14,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Button;
 
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
@@ -44,6 +45,9 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
     private AlertDialog shareAppDialog;
 
     private BasePointActivity2Presenter mPresenter;
+
+    private Menu mOptionsMenu;
+
     /**
      * ViewPager set up in its own method for clarity.
      */
@@ -77,11 +81,9 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
         toolbar.setTitle("Ustad Mobile");
         setSupportActionBar(toolbar);
 
-
         mPresenter = new BasePointActivity2Presenter(this,
                 UMAndroidUtil.bundleToHashtable(getIntent().getExtras()), this);
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
-
 
         //Get the bottom navigation component.
         AHBottomNavigation bottomNavigation = findViewById(R.id.bottom_navigation);
@@ -92,7 +94,6 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
         bottomNavigation.setInactiveColor(fetchColor(R.color.bottom_nav_yourInactiveColor));
         bottomNavigation.setBehaviorTranslationEnabled(false);
         bottomNavigation.setUseElevation(true, 2L);
-
 
         //Create the items to be added
         AHBottomNavigationItem feed_item =
@@ -143,9 +144,9 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
             return true;
         });
 
-
-
     }
+
+
 
     @Override
     public void shareAppSetupFile(String filePath) {
@@ -163,6 +164,20 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
         }
 
         dismissShareAppDialog();
+    }
+
+    @Override
+    public void showBulkUploadForAdmin(boolean show) {
+        MenuItem bulkUploadMenuItem = mOptionsMenu.findItem(R.id.menu_basepoint_bulk_upload_master);
+        if(bulkUploadMenuItem != null){
+            bulkUploadMenuItem.setVisible(show);
+        }
+    }
+
+
+    @Override
+    protected void onResume() {
+        super.onResume();
     }
 
     /**
@@ -195,11 +210,13 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_share, menu);
+        mOptionsMenu = menu;
+        mPresenter.getLoggedInPerson();
         return true;
     }
 
     /**
-     *  Updates the toolbar's title
+     * Updates the toolbar's title
      * @param title The string of the title to be set to the toolbar
      */
     public void updateTitle(String title){
@@ -223,9 +240,9 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
 
 
 
+
     @Override
     public void dismissShareAppDialog() {
-
         shareAppDialog.dismiss();
         shareAppDialog=null;
     }

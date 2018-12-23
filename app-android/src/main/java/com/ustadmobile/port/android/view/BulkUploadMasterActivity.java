@@ -73,7 +73,7 @@ public class BulkUploadMasterActivity extends UstadBaseActivity implements BulkU
 
         //Progress bar
         mProgressBar = findViewById(R.id.activity_bulk_upload_master_progressbar);
-        mProgressBar.setIndeterminate(true);
+        mProgressBar.setIndeterminate(false);
         mProgressBar.setScaleY(3f);
 
         //FAB
@@ -89,6 +89,14 @@ public class BulkUploadMasterActivity extends UstadBaseActivity implements BulkU
         //fab.getBackground().setAlpha(inProgress ? 128 : 255);
         selectFileButton.setEnabled(!inProgress);
         selectFileButton.getBackground().setAlpha(inProgress ? 128 : 255 );
+    }
+
+    @Override
+    public void updateProgressValue(int line, int nlines) {
+        runOnUiThread(() -> {
+            int value = (line*100/nlines);
+            mProgressBar.setProgress(value);
+        });
     }
 
     @Override
@@ -143,7 +151,6 @@ public class BulkUploadMasterActivity extends UstadBaseActivity implements BulkU
         if(filePath == null || filePath.isEmpty()){
             showMessage(getText(R.string.select_file).toString());
         }else {
-            showMessage(getText(R.string.loading).toString());
             File sourceFile = new File(filePath);
             readFile(sourceFile);
         }

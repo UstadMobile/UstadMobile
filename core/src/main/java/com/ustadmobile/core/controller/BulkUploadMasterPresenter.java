@@ -47,6 +47,9 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
     public void processNextLine(){
         currentPosition ++;
         System.out.println("BULK UPLOAD LINE : " + currentPosition);
+
+        view.updateProgressValue(currentPosition, lines.size());
+
         if(currentPosition >= lines.size()){
             view.finish();
         }else {

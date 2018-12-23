@@ -10,5 +10,6 @@
     <item android:id="@+id/menu_basepoint_bulk_upload_master"
         android:icon="@drawable/ic_file_upload_white_24dp"
         android:title="@string/settings"
+        android:visible="false"
         app:showAsAction="always"/>
 </menu>

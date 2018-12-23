@@ -44,8 +44,8 @@ public class ServletContextClass implements ServletContextListener
 
             personCustomFieldDao =
                     repository.getRepository(dummyBaseUrl, dummyAuth).getPersonCustomFieldDao();
-            personDetailPresenterFieldDao =
-                    repository.getRepository(dummyBaseUrl, dummyAuth).getPersonDetailPresenterFieldDao();
+            personDetailPresenterFieldDao = repository.getRepository(dummyBaseUrl, dummyAuth)
+                    .getPersonDetailPresenterFieldDao();
             personDao = repository.getRepository(dummyBaseUrl, dummyAuth).getPersonDao();
 
             //Creating admin
@@ -90,8 +90,10 @@ public class ServletContextClass implements ServletContextListener
                             //If field not set ie its a Custom Field
                             if(field.fieldUid == 0){
                                 //It is a custom field
-                                int lastPersonCustomFieldUidUsed = personCustomFieldDao.findLatestUid();
-                                int newCustomPersonCustomFieldUid = lastPersonCustomFieldUidUsed + 1;
+                                int lastPersonCustomFieldUidUsed =
+                                        personCustomFieldDao.findLatestUid();
+                                int newCustomPersonCustomFieldUid =
+                                        lastPersonCustomFieldUidUsed + 1;
                                 if(lastPersonCustomFieldUidUsed < CUSTOM_FIELD_MIN_UID){
                                     //first Custom field
                                     newCustomPersonCustomFieldUid =
@@ -188,7 +190,8 @@ public class ServletContextClass implements ServletContextListener
                         System.out.println(field.fieldName);
                         personDetailPresenterFieldDao.insert(pdpf1);
                     } else {
-                        System.out.println("Already created 2 (" + field.fieldIndex + "). skipping..");
+                        System.out.println("Already created 2 (" + field.fieldIndex + ":" +
+                                field.fieldLabel + "). skipping..");
                     }
 
                     if(gotoNext){
@@ -212,8 +215,8 @@ public class ServletContextClass implements ServletContextListener
         class HeadersAndFields {
 
             public HeadersAndFields(String fieldIcon, String fieldName, int fieldLabel, int fieldUid,
-                                    int fieldIndex, int fieldType, int headerMessageId, boolean readOnly,
-                                    boolean viewMode, boolean editMode){
+                                    int fieldIndex, int fieldType, int headerMessageId,
+                                    boolean readOnly, boolean viewMode, boolean editMode){
 
                 this.fieldIcon = fieldIcon;
                 this.fieldName = fieldName;
