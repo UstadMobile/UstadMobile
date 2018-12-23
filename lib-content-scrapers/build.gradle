@@ -60,6 +60,11 @@ task scrapeContent(type: JavaExec) {
         args  project.getProperties().get("ddlUrl"), project.getProperties().get("ddlDir")
     }
 
+    if(project.hasProperty("findKhanUrl") && project.hasProperty("findKhanDir")) {
+        main "com.ustadmobile.lib.contentscrapers.khanacademy.IndexKhanContentScraper"
+        args  project.getProperties().get("findKhanUrl"), project.getProperties().get("findKhanDir")
+    }
+
 
     systemProperties["java.naming.factory.initial"] = "org.osjava.sj.SimpleContextFactory"
     systemProperties["java.naming.factory.object"] = "org.apache.commons.dbcp2.BasicDataSourceFactory"

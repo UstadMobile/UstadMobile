@@ -12,6 +12,7 @@ import com.ustadmobile.core.db.dao.LanguageDao;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.LanguageList;
 import com.ustadmobile.lib.contentscrapers.ScraperConstants;
+import com.ustadmobile.lib.contentscrapers.ck12.IndexCategoryCK12Content;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.Language;
 
@@ -74,6 +75,18 @@ public class IndexKhanContentScraper {
 
     String KHAN = "Khan Academy";
     private Gson gson;
+
+    public static void main(String[] args) throws IOException {
+        if (args.length != 2) {
+            System.err.println("Usage: <khan url> <file destination>");
+            System.exit(1);
+        }
+
+        System.out.println(args[0]);
+        System.out.println(args[1]);
+        new IndexKhanContentScraper().findContent(args[0], new File(args[1]));
+    }
+
 
     public void findContent(String urlString, File destinationDir) throws IOException {
 
