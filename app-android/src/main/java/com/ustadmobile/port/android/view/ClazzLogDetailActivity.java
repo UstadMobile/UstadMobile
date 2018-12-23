@@ -5,6 +5,8 @@ import android.arch.paging.DataSource;
 import android.arch.paging.LivePagedListBuilder;
 import android.arch.paging.PagedList;
 import android.os.Bundle;
+import android.support.v4.text.TextUtilsCompat;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -24,6 +26,7 @@ import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord;
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecordWithPerson;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
+import java.util.Locale;
 import java.util.Objects;
 
 import ru.dimorinny.floatingtextbutton.FloatingTextButton;
@@ -49,6 +52,7 @@ public class ClazzLogDetailActivity extends UstadBaseActivity
     public long clazzUid;
     public long logDate;
     private TextView dateHeading;
+    private ImageView backDate, forwardDate;
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -111,6 +115,19 @@ public class ClazzLogDetailActivity extends UstadBaseActivity
             }
         }
 
+        backDate = findViewById(R.id.activity_class_log_detail_date_go_back);
+        forwardDate = findViewById(R.id.activity_class_log_detail_date_go_forward);
+
+        int isLeftToRight = TextUtilsCompat.getLayoutDirectionFromLocale(Locale.getDefault());
+
+        switch (isLeftToRight){
+            case ViewCompat
+                    .LAYOUT_DIRECTION_RTL:
+
+                backDate.setImageDrawable(getDrawable(R.drawable.ic_chevron_right_black_24dp));
+                forwardDate.setImageDrawable(getDrawable(R.drawable.ic_chevron_left_black_24dp));
+
+        }
         //FAB
         FloatingTextButton fab = findViewById(R.id.class_log_detail__done_fab);
         fab.setOnClickListener(v -> mPresenter.handleClickDone());
