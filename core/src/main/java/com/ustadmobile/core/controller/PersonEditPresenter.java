@@ -4,6 +4,7 @@ import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.db.dao.ClazzDao;
+import com.ustadmobile.core.db.dao.PersonCustomFieldDao;
 import com.ustadmobile.core.db.dao.PersonCustomFieldValueDao;
 import com.ustadmobile.core.db.dao.PersonDao;
 import com.ustadmobile.core.db.dao.PersonDetailPresenterFieldDao;
@@ -20,6 +21,7 @@ import com.ustadmobile.lib.db.entities.Person;
 import com.ustadmobile.lib.db.entities.PersonCustomFieldValue;
 import com.ustadmobile.lib.db.entities.PersonCustomFieldWithPersonCustomFieldValue;
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField;
+import com.ustadmobile.lib.db.entities.PersonField;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,6 +33,7 @@ import static com.ustadmobile.core.view.ClazzDetailEnrollStudentView.ARG_NEW_PER
 import static com.ustadmobile.core.view.ClazzDetailEnrollStudentView.ARG_NEW_PERSON_TYPE;
 import static com.ustadmobile.core.view.ClazzListView.ARG_CLAZZ_UID;
 import static com.ustadmobile.core.view.PersonDetailView.ARG_PERSON_UID;
+import static com.ustadmobile.lib.db.entities.PersonDetailPresenterField.CUSTOM_FIELD_MIN_UID;
 import static com.ustadmobile.lib.db.entities.PersonField.FIELD_TYPE_HEADER;
 import static com.ustadmobile.lib.db.entities.PersonDetailPresenterField.PERSON_FIELD_UID_ADDRESS;
 import static com.ustadmobile.lib.db.entities.PersonDetailPresenterField.PERSON_FIELD_UID_ATTENDANCE;
@@ -126,10 +129,10 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
     public void onCreate(Hashtable savedState){
         super.onCreate(savedState);
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        PersonCustomFieldValueDao personCustomFieldValueDao =
-                repository.getPersonCustomFieldValueDao();
+        PersonCustomFieldValueDao personCustomFieldValueDao = repository.getPersonCustomFieldValueDao();
         PersonDetailPresenterFieldDao personDetailPresenterFieldDao =
                 repository.getPersonDetailPresenterFieldDao();
+        PersonCustomFieldDao personCustomFieldDao = repository.getPersonCustomFieldDao();
 
 
         if(newPersonString.equals("true")){
@@ -145,31 +148,68 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
 
                 headersAndFields = result;
 
-                //Get all the custom fields and their values (if applicable)
-                personCustomFieldValueDao.findByPersonUidAsync2(personUid,
-                    new UmCallback<List<PersonCustomFieldWithPersonCustomFieldValue>>() {
-                        @Override
-                        public void onSuccess(List<PersonCustomFieldWithPersonCustomFieldValue> result) {
+                //Get all custom fields (if any)
+                personCustomFieldDao.findAllCustomFields(CUSTOM_FIELD_MIN_UID, new UmCallback<List<PersonField>>() {
+                    @Override
+                    public void onSuccess(List<PersonField> customFields) {
+                        //Create a list of every custom fields supposed to be and fill them with
+                        //blank values that will be used to display empty fields. If those fields
+                        //exists, then they will get replaced in the next Dao call.
+                        customFieldWithFieldValueMap = new HashMap<>();
+                        for(PersonField customField:customFields){
 
-                            //Store the values and fields in this Map
-                            customFieldWithFieldValueMap = new HashMap<>();
-                            for( PersonCustomFieldWithPersonCustomFieldValue fieldWithFieldValue: result){
-                                customFieldWithFieldValueMap.put(
-                                        fieldWithFieldValue.getPersonCustomFieldUid(), fieldWithFieldValue);
-                            }
+                            //the blank custom field value.
+                            PersonCustomFieldValue blankCustomValue = new PersonCustomFieldValue();
+                            blankCustomValue.setFieldValue("");
 
-                            //Get person live data and observe
-                            personLiveData = personDao.findByUidLive(personUid);
-                            //Observe the live data
-                            personLiveData.observe(PersonEditPresenter.this,
-                                    PersonEditPresenter.this::handlePersonValueChanged);
+                            //Create a (custom field + custom value) map object
+                            PersonCustomFieldWithPersonCustomFieldValue blankCustomMap =
+                                    new PersonCustomFieldWithPersonCustomFieldValue();
+                            blankCustomMap.setFieldName(customField.getFieldName());
+                            blankCustomMap.setLabelMessageId(customField.getLabelMessageId());
+                            blankCustomMap.setFieldIcon(customField.getFieldIcon());
+                            blankCustomMap.setCustomFieldValue(blankCustomValue);
+
+                            //Set the custom field and the field+value object to the map.
+                            customFieldWithFieldValueMap.put(customField.getPersonCustomFieldUid(),
+                                    blankCustomMap);
                         }
 
-                        @Override
-                        public void onFailure(Throwable exception) {
+                        //Get all the custom fields and their values for this person (if applicable)
+                        personCustomFieldValueDao.findByPersonUidAsync2(personUid,
+                            new UmCallback<List<PersonCustomFieldWithPersonCustomFieldValue>>() {
+                                @Override
+                                public void onSuccess(List<PersonCustomFieldWithPersonCustomFieldValue> result) {
 
-                        }
-                    });
+                                    //Store the values and fields in this Map
+
+                                    for (PersonCustomFieldWithPersonCustomFieldValue fieldWithFieldValue : result) {
+                                        customFieldWithFieldValueMap.put(
+                                                fieldWithFieldValue.getPersonCustomFieldUid(), fieldWithFieldValue);
+                                    }
+
+                                    //Get person live data and observe
+                                    personLiveData = personDao.findByUidLive(personUid);
+                                    //Observe the live data
+                                    personLiveData.observe(PersonEditPresenter.this,
+                                            PersonEditPresenter.this::handlePersonValueChanged);
+                                }
+
+                                @Override
+                                public void onFailure(Throwable exception) {
+
+                                }
+                        });
+
+                    }
+
+                    @Override
+                    public void onFailure(Throwable exception) {
+                        exception.printStackTrace();
+                    }
+                });
+
+
             }
 
             @Override
@@ -420,6 +460,14 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
                     if(result != null) {
                         result.setFieldValue(value.toString());
                         customFieldsToUpdate.add(result);
+                    }else{
+                        //Create the custom field
+                        PersonCustomFieldValue newCustomValue = new PersonCustomFieldValue();
+                        newCustomValue.setPersonCustomFieldValuePersonUid(updateThisPerson.getPersonUid());
+                        newCustomValue.setPersonCustomFieldValuePersonCustomFieldUid(fieldcode);
+                        personCustomFieldValueDao.insert(newCustomValue);
+                        newCustomValue.setFieldValue(value.toString());
+                        customFieldsToUpdate.add(newCustomValue);
                     }
                 }
 

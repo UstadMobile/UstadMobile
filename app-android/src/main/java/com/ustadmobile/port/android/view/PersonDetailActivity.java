@@ -221,6 +221,9 @@ public class PersonDetailActivity extends UstadBaseActivity implements PersonDet
                 vll.setPadding(16,0,0,0);
 
                 TextView fieldValue = new TextView(this);
+                if(value.toString() == ""){
+                    value = "-";
+                }
                 fieldValue.setText(value.toString());
                 fieldValue.setPadding(16,4,4,0);
                 vll.addView(fieldValue);
