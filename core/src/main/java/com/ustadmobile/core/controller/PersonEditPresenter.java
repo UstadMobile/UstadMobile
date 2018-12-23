@@ -406,9 +406,7 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
 
                 );
             }
-
         }
-
     }
 
     /**

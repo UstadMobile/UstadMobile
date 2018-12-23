@@ -4,10 +4,14 @@ import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.PersonCustomFieldDao;
 import com.ustadmobile.core.db.dao.PersonDao;
 import com.ustadmobile.core.db.dao.PersonDetailPresenterFieldDao;
+import com.ustadmobile.core.db.dao.SocialNominationQuestionDao;
+import com.ustadmobile.core.db.dao.SocialNominationQuestionSetDao;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField;
 import com.ustadmobile.lib.db.entities.PersonField;
+import com.ustadmobile.lib.db.entities.SocialNominationQuestion;
+import com.ustadmobile.lib.db.entities.SocialNominationQuestionSet;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,6 +58,152 @@ public class ServletContextClass implements ServletContextListener
             //Adding stuff
             addFieldData();
 
+            //Add SEL questions - TODO: Remove after testing
+            addSELQuestions();
+
+        }
+
+        public void addSELQuestions(){
+
+            String question1Text = "Who sits next to you?";
+            String question2Text = "Who participates a lot in class?";
+            String question3Text = "Who is disruptive during class?";
+            String question4Text = "Who are your friends in class?";
+            String question5Text = "Who are the kids you spend time with outside of class?";
+
+            //Create SEL questions :
+            SocialNominationQuestionSetDao questionSetDao =
+                    repository.getRepository(dummyBaseUrl, dummyAuth).getSocialNominationQuestionSetDao();
+
+            SocialNominationQuestionSet questionSet = new SocialNominationQuestionSet();
+            questionSet.setTitle("Default set");
+            Long questionSetUid = questionSetDao.insert(questionSet);
+            questionSet.setSocialNominationQuestionSetUid(questionSetUid);
+            System.out.println("Question set uid: " + questionSetUid);
+
+            SocialNominationQuestionDao questionDao = repository.getRepository(dummyBaseUrl, dummyAuth)
+                    .getSocialNominationQuestionDao();
+
+            SocialNominationQuestion question1 = new SocialNominationQuestion();
+            question1.setSocialNominationQuestionSocialNominationQuestionSetUid(
+                    questionSetUid);
+            question1.setQuestionIndex(1);
+            question1.setQuestionText(question1Text);
+            question1.setMultiNominations(true);
+            question1.setAssignToAllClasses(true);
+            questionDao.findByQuestionStringAsync(question1Text, new UmCallback<List<SocialNominationQuestion>>() {
+                @Override
+                public void onSuccess(List<SocialNominationQuestion> result) {
+                    if(result != null && result.size() == 1){
+                        //skip
+                    }else if(result == null || result.size() == 0){
+                        System.out.println("Persisting 1:  ");
+                        questionDao.insert(question1);
+                    }
+                }
+
+                @Override
+                public void onFailure(Throwable exception) {
+
+                }
+            });
+
+
+            SocialNominationQuestion question2 = new SocialNominationQuestion();
+            question2.setSocialNominationQuestionSocialNominationQuestionSetUid(
+                    questionSetUid);
+            question2.setQuestionIndex(2);
+            question2.setQuestionText(question2Text);
+            question2.setMultiNominations(true);
+            question2.setAssignToAllClasses(true);
+            questionDao.findByQuestionStringAsync(question2Text, new UmCallback<List<SocialNominationQuestion>>() {
+                @Override
+                public void onSuccess(List<SocialNominationQuestion> result) {
+                    if(result != null && result.size() == 1){
+                        //skip
+                    }else if(result == null || result.size() == 0){
+                        System.out.println("Persisting 2:  ");
+                        questionDao.insert(question2);
+                    }
+                }
+
+                @Override
+                public void onFailure(Throwable exception) {
+
+                }
+            });
+
+            SocialNominationQuestion question3 = new SocialNominationQuestion();
+            question3.setSocialNominationQuestionSocialNominationQuestionSetUid(
+                    questionSetUid);
+            question3.setQuestionIndex(3);
+            question3.setQuestionText(question3Text);
+            question3.setMultiNominations(true);
+            question3.setAssignToAllClasses(true);
+            questionDao.findByQuestionStringAsync(question3Text, new UmCallback<List<SocialNominationQuestion>>() {
+                @Override
+                public void onSuccess(List<SocialNominationQuestion> result) {
+                    if(result != null && result.size() == 1){
+                        //skip
+                    }else if(result == null || result.size() == 0){
+                        System.out.println("Persisting 3:  ");
+                        questionDao.insert(question3);
+                    }
+                }
+
+                @Override
+                public void onFailure(Throwable exception) {
+
+                }
+            });
+
+            SocialNominationQuestion question4 = new SocialNominationQuestion();
+            question4.setSocialNominationQuestionSocialNominationQuestionSetUid(
+                    questionSetUid);
+            question4.setQuestionIndex(4);
+            question4.setQuestionText(question4Text);
+            question4.setMultiNominations(true);
+            question4.setAssignToAllClasses(true);
+            questionDao.findByQuestionStringAsync(question4Text, new UmCallback<List<SocialNominationQuestion>>() {
+                @Override
+                public void onSuccess(List<SocialNominationQuestion> result) {
+                    if(result != null && result.size() == 1){
+                        //skip
+                    }else if(result == null || result.size() == 0){
+                        System.out.println("Persisting 4:  ");
+                        questionDao.insert(question4);
+                    }
+                }
+
+                @Override
+                public void onFailure(Throwable exception) {
+
+                }
+            });
+
+            SocialNominationQuestion question5 = new SocialNominationQuestion();
+            question5.setSocialNominationQuestionSocialNominationQuestionSetUid(
+                    questionSetUid);
+            question5.setQuestionIndex(5);
+            question5.setQuestionText(question5Text);
+            question5.setMultiNominations(true);
+            question5.setAssignToAllClasses(true);
+            questionDao.findByQuestionStringAsync(question5Text, new UmCallback<List<SocialNominationQuestion>>() {
+                @Override
+                public void onSuccess(List<SocialNominationQuestion> result) {
+                    if(result != null && result.size() == 1){
+                        //skip
+                    }else if(result == null || result.size() == 0){
+                        System.out.println("Persisting 5:  ");
+                        questionDao.insert(question5);
+                    }
+                }
+
+                @Override
+                public void onFailure(Throwable exception) {
+
+                }
+            });
         }
 
         public void addNextField(){
@@ -180,14 +330,12 @@ public class ServletContextClass implements ServletContextListener
                         //If not a header set the field. If is header, set the header label.
                         if(!isHeader) {
                             Long pcfUid = pcf.getPersonCustomFieldUid();
-                            System.out.println("Putting field uid : " + pcfUid);
                             pdpf1.setFieldUid(pcfUid);
                         }else {
                             pdpf1.setHeaderMessageId(field.headerMessageId);
                         }
 
                         //persist:
-                        System.out.println(field.fieldName);
                         personDetailPresenterFieldDao.insert(pdpf1);
                     } else {
                         System.out.println("Already created 2 (" + field.fieldIndex + ":" +

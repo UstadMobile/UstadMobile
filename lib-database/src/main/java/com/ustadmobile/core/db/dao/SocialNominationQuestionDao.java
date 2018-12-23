@@ -55,6 +55,10 @@ public abstract class SocialNominationQuestionDao implements
     @UmQuery("SELECT COUNT(*) FROM SocialNominationQuestion")
     public abstract int findTotalNumberOfQuestions();
 
+    @UmQuery("SELECT * FROM SocialNominationQuestion WHERE questionText = :question")
+    public abstract void findByQuestionStringAsync(String question,
+                                           UmCallback<List<SocialNominationQuestion>> resultList);
+
 
 
 }
