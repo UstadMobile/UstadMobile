@@ -1509,40 +1509,44 @@ public abstract class AbstractDbProcessor {
 
             if(sqlProductName.equals(PRODUCT_NAME_SQLITE)) {
                 codeBlock.addNamed("$execSqlMethod:L(\"CREATE TRIGGER update_csn_$tableNameLower:L " +
-                        "AFTER update ON ExampleSyncableEntity FOR EACH ROW WHEN " +
-                        "(NEW.$concatTableCsnCol:L = 0 " +
-                            "OR OLD.$concatTableCsnCol:L = NEW.$concatTableCsnCol:L) " +
-                        "BEGIN " +
-                            "UPDATE $tableName:L SET $concatTableCsnCol:L = " +
-                                "(SELECT $concatSyncStatusColName:L FROM SyncStatus WHERE tableId = $tableId:L) " +
-                                "WHERE $pkName:L = NEW.$pkName:L; " +
-                            "UPDATE SyncStatus SET " +
-                                "$concatSyncStatusColName:L = $concatSyncStatusColName:L + 1;" +
-                        "END\");\n", triggerSqlArgs);
-                codeBlock.addNamed("$execSqlMethod:L(\"CREATE TRIGGER insert_csn_$tableNameLower:L " +
-                        "AFTER insert ON ExampleSyncableEntity FOR EACH ROW WHEN " +
-                        "(NEW.$concatTableCsnCol:L = 0) " +
-                        "BEGIN " +
-                            "UPDATE $tableName:L SET $concatTableCsnCol:L = " +
-                                "(SELECT $concatSyncStatusColName:L FROM SyncStatus WHERE tableId = $tableId:L) " +
-                            "WHERE $pkName:L = NEW.$pkName:L;" +
-                            "UPDATE SyncStatus SET " +
-                                "$concatSyncStatusColName:L = $concatSyncStatusColName:L + 1;" +
-                        "END\");\n", triggerSqlArgs);
+                            "AFTER update ON ExampleSyncableEntity FOR EACH ROW WHEN " +
+                            "(NEW.$concatTableCsnCol:L = 0 " +
+                                "OR OLD.$concatTableCsnCol:L = NEW.$concatTableCsnCol:L) " +
+                            "BEGIN " +
+                                "UPDATE $tableName:L SET $concatTableCsnCol:L = " +
+                                    "(SELECT $concatSyncStatusColName:L FROM SyncStatus WHERE tableId = $tableId:L) " +
+                                    "WHERE $pkName:L = NEW.$pkName:L; " +
+                                "UPDATE SyncStatus SET " +
+                                    "$concatSyncStatusColName:L = $concatSyncStatusColName:L + 1;" +
+                            "END\");\n", triggerSqlArgs)
+                        .addNamed("$execSqlMethod:L(\"CREATE TRIGGER insert_csn_$tableNameLower:L " +
+                            "AFTER insert ON ExampleSyncableEntity FOR EACH ROW WHEN " +
+                            "(NEW.$concatTableCsnCol:L = 0) " +
+                            "BEGIN " +
+                                "UPDATE $tableName:L SET $concatTableCsnCol:L = " +
+                                    "(SELECT $concatSyncStatusColName:L FROM SyncStatus WHERE tableId = $tableId:L) " +
+                                "WHERE $pkName:L = NEW.$pkName:L;" +
+                                "UPDATE SyncStatus SET " +
+                                    "$concatSyncStatusColName:L = $concatSyncStatusColName:L + 1;" +
+                            "END\");\n", triggerSqlArgs);
 
             }else if(sqlProductName.equals(PRODUCT_NAME_POSTGRES)) {
-//TODO: Udpate this
-                //                codeBlock.addNamed("$execSqlMethod:L(\"CREATE OR REPLACE FUNCTION " +
-//                                " increment_csn_$tableNameLower:L_fn() RETURNS trigger AS $$$$ BEGIN \"" +
-//                                " + _triggerSql_$tableNameLower:L + \" RETURN null; END $$$$ " +
-//                                "LANGUAGE plpgsql\");\n",
-//                        triggerSqlArgs);
-//                codeBlock.addNamed("$execSqlMethod:L(\"CREATE TRIGGER " +
-//                        "increment_csn_$tableNameLower:L_trigger AFTER UPDATE OR INSERT ON " +
-//                        "$tableName:L FOR EACH ROW WHEN (pg_trigger_depth() = 0) " +
-//                        "EXECUTE PROCEDURE increment_csn_$tableNameLower:L_fn()\");\n", triggerSqlArgs);
+                codeBlock.addNamed("$execSqlMethod:L(\"CREATE OR REPLACE FUNCTION " +
+                            "increment_csn_$tableNameLower:L_fn() RETURNS trigger AS $$$$ " +
+                            "BEGIN " +
+                                "UPDATE $tableName:L SET $concatTableCsnCol:L = " +
+                                    "(SELECT $concatSyncStatusColName:L FROM SyncStatus WHERE tableId = $tableId:L) " +
+                                    "WHERE $pkName:L = NEW.$pkName:L; " +
+                                "UPDATE SyncStatus SET " +
+                                    "$concatSyncStatusColName:L = $concatSyncStatusColName:L + 1;  " +
+                                "RETURN null; " +
+                            "END $$$$" +
+                            "LANGUAGE plpgsql\");\n", triggerSqlArgs)
+                        .addNamed("$execSqlMethod:L(\"CREATE TRIGGER " +
+                            "increment_csn_$tableNameLower:L_trigger AFTER UPDATE OR INSERT ON " +
+                            "$tableName:L FOR EACH ROW WHEN (pg_trigger_depth() = 0) " +
+                            "EXECUTE PROCEDURE increment_csn_$tableNameLower:L_fn()\");\n", triggerSqlArgs);
             }
-
 
             isFirst = false;
         }
