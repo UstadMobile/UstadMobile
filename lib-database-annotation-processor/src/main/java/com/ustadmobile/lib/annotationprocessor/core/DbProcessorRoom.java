@@ -240,7 +240,7 @@ public class DbProcessorRoom extends AbstractDbProcessor{
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC);
         CodeBlock.Builder codeBlock = CodeBlock.builder();
-        for(TypeElement entityType : findEntityTypes(dbType)) {
+        for(TypeElement entityType : DbProcessorUtils.findEntityTypes(dbType, processingEnv)) {
             if(DbProcessorUtils.entityHasChangeSequenceNumbers(entityType, processingEnv)) {
                 codeBlock.add("createSeqNumTriggers($T.class, _db);\n", entityType);
             }

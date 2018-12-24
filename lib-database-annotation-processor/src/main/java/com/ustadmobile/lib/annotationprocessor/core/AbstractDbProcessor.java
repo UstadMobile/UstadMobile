@@ -37,20 +37,20 @@ import com.ustadmobile.lib.db.sync.entities.SyncStatus;
 import java.io.File;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.Messager;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
@@ -67,7 +67,6 @@ import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import static com.ustadmobile.lib.annotationprocessor.core.DbProcessorUtils.capitalize;
@@ -94,6 +93,10 @@ public abstract class AbstractDbProcessor {
 
     protected TypeElement umCallbackTypeElement;
 
+    /**
+     * When we have an @UmQuery that runs an update, and
+     */
+    protected static final String QUERY_PARAM_LAST_CHANGED_BY_NAME = "_lastChangedBy";
 
     public synchronized void init(ProcessingEnvironment processingEnvironment) {
         this.processingEnv = processingEnvironment;
@@ -114,7 +117,8 @@ public abstract class AbstractDbProcessor {
             try {
                 TypeElement dbTypeEl = (TypeElement)dbClassElement;
                 HashMap<Integer, TypeElement> tableIdMap = new HashMap<>();
-                for(TypeElement entityType : findEntityTypes((TypeElement)dbClassElement)) {
+                for(TypeElement entityType : DbProcessorUtils.findEntityTypes(
+                        (TypeElement)dbClassElement, processingEnv)) {
                     if(entityType.getAnnotation(UmEntity.class) == null) {
                         messager.printMessage(Diagnostic.Kind.ERROR, "Entity " +
                                 entityType.getQualifiedName() + "referenced " +
@@ -937,10 +941,6 @@ public abstract class AbstractDbProcessor {
                             "_attemptSyncStatus.getSyncedToMasterChangeNum() : " +
                             "_remoteChangedEntities.get(_remoteChangedEntities.size()-1)" +
                             ".get$L();\n", capitalize(masterChangeSeqNumFieldName))
-                        //TODO: Add code to handle if any changes happened whilst this sync was ongoing
-                        //TODO: e.g. before replace, check if there was any change to the local change
-                        // sequence number, then bump the change numbers for these entities so they get
-                        //picked up by the next sync round
                         .beginControlFlow("if(_syncCompleteMasterChangeSeqNum == -1)")
                             .add("_syncCompleteMasterChangeSeqNum  = _remoteChanges." +
                                     "getCurrentMasterChangeSeqNum();\n")
@@ -949,9 +949,6 @@ public abstract class AbstractDbProcessor {
                         .add("_syncableDb.getSyncStatusDao().updateSyncedToChangeSeqNums(" +
                                 "$1L, _syncedToLocalSeqNum, _syncedToMasterSeqNum);\n",
                                 umEntityAnnotation.tableId())
-                        //TODO: just in case we wasted some sequence numbers: check if both are empty
-                        //When we have put entries into the server, but no one else has, there won't
-                        //be any new entries coming down the pipe.
                         .add("_syncComplete = (_syncedToMasterSeqNum >= _syncCompleteMasterChangeSeqNum || _remoteChanges.getRemoteChangedEntities().isEmpty()) " +
                                 " && (_syncedToLocalSeqNum >= _initialSyncStatus.getLocalChangeSeqNum() - 1 || _locallyChangedEntities.isEmpty());\n")
                     .nextControlFlow("else")
@@ -1450,35 +1447,6 @@ public abstract class AbstractDbProcessor {
     }
 
 
-    /**
-     * Get the TypeElements that correspond to the entities on the @UmDatabase annotation of the given
-     * TypeElement
-     *
-     * TODO: make sure that we check each annotation, this currently **ASSUMES** the first annotation is @UmDatabase
-     *
-     * @param dbTypeElement TypeElement representing the class with the @UmDatabase annotation
-     * @return List of TypeElement that represents the values found on entities
-     */
-    protected List<TypeElement> findEntityTypes(TypeElement dbTypeElement){
-        List<TypeElement> entityTypeElements = new ArrayList<>();
-        Map<? extends ExecutableElement, ? extends AnnotationValue> annotationEntryMap =
-                dbTypeElement.getAnnotationMirrors().get(0).getElementValues();
-        for(Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entry :
-                annotationEntryMap.entrySet()) {
-            String key = entry.getKey().getSimpleName().toString();
-            Object value = entry.getValue().getValue();
-            if (key.equals("entities")) {
-                List<? extends AnnotationValue> typeMirrors =
-                        (List<? extends AnnotationValue>) value;
-                for(AnnotationValue entityValue : typeMirrors) {
-                    entityTypeElements.add((TypeElement) processingEnv.getTypeUtils()
-                            .asElement((TypeMirror) entityValue.getValue()));
-                }
-            }
-        }
-
-        return entityTypeElements;
-    }
 
 
     /**
@@ -1494,7 +1462,7 @@ public abstract class AbstractDbProcessor {
                                                         String execSqlMethod,
                                                         TypeElement dbType,
                                                         CodeBlock.Builder codeBlock) {
-        List<TypeElement> entityTypes = findEntityTypes(dbType);
+        List<TypeElement> entityTypes = DbProcessorUtils.findEntityTypes(dbType, processingEnv);
         boolean isFirst = true;
         String ifStmtStr = "if(_entityClass.equals($T.class))";
         for(TypeElement entityType : entityTypes) {
@@ -1587,6 +1555,42 @@ public abstract class AbstractDbProcessor {
         if(!isFirst)
             codeBlock.endControlFlow();//end the if statement only if there was one
 
+    }
+
+    /**
+     * Modify the given SQL UPDATE statement to set the lastModifiedBy field.
+     * e.g. this will change
+     *
+     * UPDATE EntityTableName SET title = :title where x &gt; :numParam
+     *
+     * to:
+     *
+     * UPDATE EntityTableName SET lastModifiedBy = :_lastModifiedBy, title = :title where x &gt; :numParam
+     *
+     *
+     * @param sql SQL string to modify
+     * @param methodEl the DAO method that this SQL is being used for
+     * @param daoType DAO TypeElement
+     * @param dbType Database TypeElement (used to resolve the tablename to an entity class)
+     * @return
+     */
+    protected String addSetLastModifiedByToUpdateSql(String sql, ExecutableElement methodEl,
+                                                     TypeElement daoType, TypeElement dbType) {
+        DaoMethodInfo methodInfo = new DaoMethodInfo(methodEl, daoType, processingEnv);
+        TypeElement entityTypeEl = methodInfo.getUpdateQueryEntityTypeElement(dbType);
+
+        Element lastChangedByFieldEl = DbProcessorUtils.findElementWithAnnotation(
+                entityTypeEl, UmSyncLastChangedBy.class, processingEnv);
+
+        Pattern pattern = Pattern.compile("\\sSET\\s", Pattern.CASE_INSENSITIVE);
+        Matcher matcher = pattern.matcher(sql);
+        if(!matcher.find())
+            return sql;
+
+        sql = sql.substring(0, matcher.end()) + " " + lastChangedByFieldEl.getSimpleName() +
+                " = :" + QUERY_PARAM_LAST_CHANGED_BY_NAME + ", " + sql.substring(matcher.end());
+
+        return sql;
     }
 
 }

@@ -1,24 +1,20 @@
 package com.ustadmobile.lib.annotationprocessor.core;
 
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
-import com.squareup.javapoet.TypeSpec;
+import com.ustadmobile.lib.database.annotation.UmDatabase;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
 import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.annotation.processing.ProcessingEnvironment;
+import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
@@ -387,6 +383,44 @@ public class DbProcessorUtils {
         else
             return entityHasChangeSequenceNumbers((TypeElement)processingEnv.getTypeUtils()
                     .asElement(entityTypeMirror), processingEnv);
+    }
+
+
+    /**
+     * Get the TypeElements that correspond to the entities on the @UmDatabase annotation of the given
+     * TypeElement
+     **
+     * @param dbTypeElement TypeElement representing the class with the @UmDatabase annotation
+     * @return List of TypeElement that represents the values found on entities
+     */
+    public static List<TypeElement> findEntityTypes(TypeElement dbTypeElement,
+                                                    ProcessingEnvironment processingEnv){
+        List<TypeElement> entityTypeElements = new ArrayList<>();
+        for(AnnotationMirror annotationMirror : dbTypeElement.getAnnotationMirrors()) {
+            TypeElement annotationTypeEl = (TypeElement)processingEnv.getTypeUtils()
+                    .asElement(annotationMirror.getAnnotationType());
+            if(!annotationTypeEl.getQualifiedName().toString().equals(UmDatabase.class.getName()))
+                continue;
+
+            Map<? extends ExecutableElement, ? extends AnnotationValue> annotationEntryMap =
+                    dbTypeElement.getAnnotationMirrors().get(0).getElementValues();
+            for(Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entry :
+                    annotationEntryMap.entrySet()) {
+                String key = entry.getKey().getSimpleName().toString();
+                Object value = entry.getValue().getValue();
+                if (key.equals("entities")) {
+                    List<? extends AnnotationValue> typeMirrors =
+                            (List<? extends AnnotationValue>) value;
+                    for(AnnotationValue entityValue : typeMirrors) {
+                        entityTypeElements.add((TypeElement) processingEnv.getTypeUtils()
+                                .asElement((TypeMirror) entityValue.getValue()));
+                    }
+                }
+            }
+        }
+
+
+        return entityTypeElements;
     }
 }
 

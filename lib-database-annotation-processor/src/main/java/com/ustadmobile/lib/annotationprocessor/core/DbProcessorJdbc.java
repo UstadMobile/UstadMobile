@@ -28,8 +28,6 @@ import com.ustadmobile.lib.database.annotation.UmSyncFindAllChanges;
 import com.ustadmobile.lib.database.annotation.UmSyncFindLocalChanges;
 import com.ustadmobile.lib.database.annotation.UmSyncFindUpdateable;
 import com.ustadmobile.lib.database.annotation.UmSyncIncoming;
-import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
-import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 import com.ustadmobile.lib.database.annotation.UmSyncOutgoing;
 import com.ustadmobile.lib.database.annotation.UmUpdate;
 import com.ustadmobile.lib.database.jdbc.DbChangeListener;
@@ -39,6 +37,7 @@ import com.ustadmobile.lib.database.jdbc.UmJdbcDatabase;
 import com.ustadmobile.lib.database.jdbc.UmLiveDataJdbc;
 import com.ustadmobile.lib.db.UmDbWithExecutor;
 import com.ustadmobile.lib.db.sync.UmRepositoryDb;
+import com.ustadmobile.lib.db.sync.UmSyncableDatabase;
 import com.ustadmobile.lib.db.sync.entities.SyncDeviceBits;
 import com.ustadmobile.lib.db.sync.entities.SyncStatus;
 
@@ -74,7 +73,6 @@ import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
@@ -303,7 +301,7 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
             Statement stmt = connection.createStatement();
         ) {
             nameToDataSourceMap.put(dbType.getQualifiedName().toString(), dataSource);
-            for(TypeElement entityType : findEntityTypes(dbType)){
+            for(TypeElement entityType : DbProcessorUtils.findEntityTypes(dbType, processingEnv)){
                 createSql = makeCreateTableStatement(entityType, SQL_IDENTIFIER_CHAR,
                         PRODUCT_NAME_SQLITE);
                 stmt.execute(createSql);
@@ -339,7 +337,7 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
         for(String sqlProductName : SUPPORTED_DB_PRODUCT_NAMES) {
             createCb.beginControlFlow("if($S.equals(_metaData.getDatabaseProductName()))",
                     sqlProductName);
-            List<TypeElement> entityTypes = findEntityTypes(dbType);
+            List<TypeElement> entityTypes = DbProcessorUtils.findEntityTypes(dbType, processingEnv);
 
             //Make sure that the SyncStatus is teh first table
             TypeElement syncStatusTypeEl = processingEnv.getElementUtils().getTypeElement(
@@ -418,7 +416,7 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                 SyncDeviceBits.class.getName());
 
 
-        for(TypeElement entityType : findEntityTypes(dbType)) {
+        for(TypeElement entityType : DbProcessorUtils.findEntityTypes(dbType, processingEnv)) {
             if(!entityType.equals(syncStatusTypeEl))
                 codeBlock.add("stmt.executeUpdate(\"DELETE FROM $1L$2L$1L\");\n",
                     identifierQuoteStr, entityType.getSimpleName().toString());
@@ -1213,6 +1211,8 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
             isUpdateOrDelete = true;
         }
 
+
+
         TypeElement umCallbackTypeElement = processingEnv.getElementUtils().getTypeElement(
                 UmCallback.class.getName());
         List<Element> variableTypeElements = getMethodParametersAsElements(daoMethod);
@@ -1225,6 +1225,14 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
         }
 
         TypeMirror resultType = daoMethodInfo.resolveResultType();
+
+        //If this is a query that operates an update statement, we need to check if it has a
+        // lastModifiedBy field. If so, we need to modify the SQL so this is set.
+        if(daoMethodInfo.isQueryUpdateWithLastChangedByField(dbType)) {
+            codeBlock.add("int _lastChangedBy = (($T)_db).getDeviceBits();\n",
+                    UmSyncableDatabase.class);
+            querySql = addSetLastModifiedByToUpdateSql(querySql, daoMethod, daoType, dbType);
+        }
 
         List<String> namedParams = getNamedParameters(querySql);
         String preparedStmtSql = replaceNamedParameters(namedParams, querySql, "?");
@@ -1344,26 +1352,35 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
         codeBlock.unindent().beginControlFlow(")");
 
 
+        //Set the named query parameters here
         for(int i = 0; i < namedParams.size(); i++) {
+            TypeMirror paramVariableType = null;
+            String paramVariableName = null;
             VariableElement paramVariableElement = null;
+
             for(VariableElement variableElement : daoMethod.getParameters()) {
                 if(variableElement.getSimpleName().toString().equals(namedParams.get(i))) {
                     paramVariableElement = variableElement;
+                    paramVariableType = variableElement.asType();
+                    paramVariableName = variableElement.getSimpleName().toString();
                     break;
                 }
             }
 
-            if(paramVariableElement == null) {
+            if(namedParams.get(i).equalsIgnoreCase(
+                    AbstractDbProcessor.QUERY_PARAM_LAST_CHANGED_BY_NAME)) {
+                paramVariableName = AbstractDbProcessor.QUERY_PARAM_LAST_CHANGED_BY_NAME;
+                paramVariableType = processingEnv.getTypeUtils().getPrimitiveType(TypeKind.INT);
+            }
+
+            if(paramVariableType == null) {
                 messager.printMessage(Diagnostic.Kind.ERROR, formatMethodForErrorMessage(daoMethod)
                         + " has no parameter named " + namedParams.get(i));
                 return;
             }
 
-            String paramVariableName = paramVariableElement.getSimpleName().toString();
-
-            TypeMirror sqlVariableType = paramVariableElement.asType();
-            if(arrayParameters.containsKey(paramVariableElement.getSimpleName().toString())) {
-                boolean isArray = paramVariableElement.asType().getKind().equals(TypeKind.ARRAY);
+            if(arrayParameters.containsKey(paramVariableName)) {
+                boolean isArray = paramVariableType.getKind().equals(TypeKind.ARRAY);
                 boolean isList = !isArray;//otherwise it would not be in the arrayParameters hashtable
                 TypeMirror arrayElementType;
                 String arrayVariableName;
@@ -1384,13 +1401,13 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                         " connection.createArrayOf($2S, $3L) : $4T.createArrayOf($2S, $3L);\n",
                         paramVariableName, makeSqlTypeDeclaration(arrayElementType),
                         arrayVariableName, PreparedStatementArrayProxy.class);
-                sqlVariableType = processingEnv.getElementUtils().getTypeElement(Array.class.getName())
+                paramVariableType = processingEnv.getElementUtils().getTypeElement(Array.class.getName())
                         .asType();
                 paramVariableName = "_" + paramVariableName + "_sqlArr";
             }
 
             codeBlock.add("stmt.$L($L, $L);\n",
-                    getPreparedStatementSetterMethodName(sqlVariableType),  i + 1,
+                    getPreparedStatementSetterMethodName(paramVariableType),  i + 1,
                     paramVariableName);
         }
 
@@ -1707,7 +1724,7 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
             if(!insideQuote && !insideDoubleQuote) {
                 if(c == ':'){
                     startNamedParam = i;
-                }else if(!Character.isLetterOrDigit(c) && startNamedParam != -1){
+                }else if(!(Character.isLetterOrDigit(c) || c == '_') && startNamedParam != -1){
                     //process the parameter
                     namedParams.add(querySql.substring(startNamedParam + 1, i ));
                     startNamedParam = -1;
