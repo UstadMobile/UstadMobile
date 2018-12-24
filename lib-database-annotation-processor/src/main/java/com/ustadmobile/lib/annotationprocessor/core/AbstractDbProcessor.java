@@ -93,11 +93,6 @@ public abstract class AbstractDbProcessor {
 
     protected TypeElement umCallbackTypeElement;
 
-    /**
-     * When we have an @UmQuery that runs an update, and
-     */
-    protected static final String QUERY_PARAM_LAST_CHANGED_BY_NAME = "_lastChangedBy";
-
     public synchronized void init(ProcessingEnvironment processingEnvironment) {
         this.processingEnv = processingEnvironment;
         filer = processingEnvironment.getFiler();
@@ -1588,7 +1583,7 @@ public abstract class AbstractDbProcessor {
             return sql;
 
         sql = sql.substring(0, matcher.end()) + " " + lastChangedByFieldEl.getSimpleName() +
-                " = :" + QUERY_PARAM_LAST_CHANGED_BY_NAME + ", " + sql.substring(matcher.end());
+                " = (SELECT deviceBits FROM SyncDeviceBits LIMIT 1), " + sql.substring(matcher.end());
 
         return sql;
     }

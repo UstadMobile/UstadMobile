@@ -435,6 +435,13 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                 .add("e.printStackTrace();\n")
                 .endControlFlow();
 
+        TypeMirror syncableDbType = processingEnv.getElementUtils().getTypeElement(
+                UmSyncableDatabase.class.getName()).asType();
+
+        if(processingEnv.getTypeUtils().isAssignable(dbType.asType(), syncableDbType)) {
+            codeBlock.add("invalidateDeviceBits();\n");
+        }
+
         builder.addCode(codeBlock.build());
     }
 
@@ -1229,8 +1236,6 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
         //If this is a query that operates an update statement, we need to check if it has a
         // lastModifiedBy field. If so, we need to modify the SQL so this is set.
         if(daoMethodInfo.isQueryUpdateWithLastChangedByField(dbType)) {
-            codeBlock.add("int _lastChangedBy = (($T)_db).getDeviceBits();\n",
-                    UmSyncableDatabase.class);
             querySql = addSetLastModifiedByToUpdateSql(querySql, daoMethod, daoType, dbType);
         }
 
@@ -1365,12 +1370,6 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                     paramVariableName = variableElement.getSimpleName().toString();
                     break;
                 }
-            }
-
-            if(namedParams.get(i).equalsIgnoreCase(
-                    AbstractDbProcessor.QUERY_PARAM_LAST_CHANGED_BY_NAME)) {
-                paramVariableName = AbstractDbProcessor.QUERY_PARAM_LAST_CHANGED_BY_NAME;
-                paramVariableType = processingEnv.getTypeUtils().getPrimitiveType(TypeKind.INT);
             }
 
             if(paramVariableType == null) {
