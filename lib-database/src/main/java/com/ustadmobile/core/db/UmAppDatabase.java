@@ -253,4 +253,9 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
     public int getDeviceBits() {
         return getSyncablePrimaryKeyDao().getDeviceBits();
     }
+
+    @Override
+    public void invalidateDeviceBits() {
+        getSyncablePrimaryKeyDao().invalidateDeviceBits();
+    }
 }

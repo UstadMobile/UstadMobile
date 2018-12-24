@@ -329,24 +329,24 @@ public class DbProcessorRoom extends AbstractDbProcessor{
                         roomDaoClassSpec);
             }else if(daoMethod.getAnnotation(UmQuery.class) != null) {
                 methodBuilder = generateQueryMethod(daoMethod.getAnnotation(UmQuery.class).value(),
-                        daoMethod, daoClass, roomDaoClassSpec);
+                        daoMethod, daoClass, dbType, roomDaoClassSpec);
             }else if(daoMethod.getAnnotation(UmQueryFindByPrimaryKey.class) != null) {
                 methodBuilder = generateQueryMethod(
                         generateFindByPrimaryKeySql(daoClass, daoMethod, processingEnv, '`'),
-                        daoMethod, daoClass, roomDaoClassSpec);
+                        daoMethod, daoClass, dbType, roomDaoClassSpec);
             }else if(daoMethod.getAnnotation(UmSyncIncoming.class) != null) {
                 addSyncHandleIncomingMethod(daoMethod, daoClass, roomDaoClassSpec, "_dbManager");
             }else if(daoMethod.getAnnotation(UmSyncOutgoing.class) != null) {
                 addSyncOutgoing(daoMethod, daoClass, roomDaoClassSpec, "_dbManager");
             }else if(daoMethod.getAnnotation(UmSyncFindLocalChanges.class) != null) {
                 methodBuilder = generateQueryMethod(generateFindLocalChangesSql(daoClass, daoMethod,
-                        processingEnv), daoMethod, daoClass, roomDaoClassSpec);
+                        processingEnv), daoMethod, daoClass, dbType, roomDaoClassSpec);
             }else if(daoMethod.getAnnotation(UmSyncFindAllChanges.class) != null) {
                 methodBuilder = generateQueryMethod(generateSyncFindAllChanges(daoClass, daoMethod,
-                        processingEnv), daoMethod, daoClass, roomDaoClassSpec);
+                        processingEnv), daoMethod, daoClass, dbType, roomDaoClassSpec);
             }else if(daoMethod.getAnnotation(UmSyncFindUpdateable.class) != null) {
                 methodBuilder = generateQueryMethod(generateSyncFindUpdatable(daoClass, daoMethod,
-                        processingEnv), daoMethod, daoClass, roomDaoClassSpec);
+                        processingEnv), daoMethod, daoClass, dbType, roomDaoClassSpec);
             }
 
             if(methodBuilder != null){
@@ -503,6 +503,7 @@ public class DbProcessorRoom extends AbstractDbProcessor{
     private MethodSpec.Builder generateQueryMethod(String querySql,
                                                    ExecutableElement daoMethod,
                                                    TypeElement daoType,
+                                                   TypeElement dbType,
                                                    TypeSpec.Builder daoClassBuilder) {
         //check for livedata return types
         //Class returnType = daoMethod.getReturnType();
@@ -510,12 +511,17 @@ public class DbProcessorRoom extends AbstractDbProcessor{
         Element returnTypeElement = processingEnv.getTypeUtils().asElement(returnType);
         TypeElement umLiveDataTypeElement = processingEnv.getElementUtils().getTypeElement(
                 UMDB_CORE_PKG_NAME + ".UmLiveData");
+        DaoMethodInfo daoMethodInfo = new DaoMethodInfo(daoMethod, daoType, processingEnv);
+
+        if(daoMethodInfo.isQueryUpdateWithLastChangedByField(dbType)) {
+            querySql = addSetLastModifiedByToUpdateSql(querySql, daoMethod, daoType, dbType);
+        }
 
         ClassName queryClassName = ClassName.get(ROOM_PKG_NAME, "Query");
         AnnotationSpec.Builder querySpec = AnnotationSpec.builder(queryClassName)
                 .addMember("value", CodeBlock.builder().add("$S", querySql).build());
 
-        DaoMethodInfo daoMethodInfo = new DaoMethodInfo(daoMethod, daoType, processingEnv);
+
 
         MethodSpec.Builder retMethod = MethodSpec.methodBuilder(daoMethod.getSimpleName().toString())
                 .returns(TypeName.get(daoMethodInfo.resolveReturnType()));
