@@ -894,10 +894,24 @@ public abstract class AbstractDbProcessor {
         VariableElement accountPersonUidParam = daoMethod.getParameters().get(1);
         VariableElement sendLimitParam = daoMethod.getParameters().get(2);
         VariableElement receiveLimitParam = daoMethod.getParameters().get(3);
-        String localChangeSeqNumFieldName = findElementWithAnnotation(entityTypeElement,
-                UmSyncLocalChangeSeqNum.class, processingEnv).getSimpleName().toString();
-        String masterChangeSeqNumFieldName = findElementWithAnnotation(entityTypeElement,
-                UmSyncMasterChangeSeqNum.class, processingEnv).getSimpleName().toString();
+
+        Element localChangeSeqNumEl = findElementWithAnnotation(entityTypeElement,
+                UmSyncLocalChangeSeqNum.class, processingEnv);
+
+        Element masterChangeNumFieldEl = findElementWithAnnotation(entityTypeElement,
+                UmSyncMasterChangeSeqNum.class, processingEnv);
+        if(localChangeSeqNumEl == null || masterChangeNumFieldEl == null) {
+            messager.printMessage(Diagnostic.Kind.ERROR,
+                    formatMethodForErrorMessage(daoMethod, daoType) +
+                        " method is annotated with UmSyncOutgoing but entity" +
+                        entityTypeElement.getQualifiedName() +  " is missing local/master change" +
+                            "sequence numbers", daoType);
+            return methodBuilder;
+        }
+
+
+        String masterChangeSeqNumFieldName = masterChangeNumFieldEl.getSimpleName().toString();
+        String localChangeSeqNumFieldName = localChangeSeqNumEl.getSimpleName().toString();
 
 
         CodeBlock.Builder codeBlock = CodeBlock.builder()
