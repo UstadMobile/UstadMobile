@@ -2,6 +2,7 @@ package com.ustadmobile.lib.db.sync.dao;
 
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmInsert;
+import com.ustadmobile.lib.database.annotation.UmOnConflictStrategy;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.db.sync.entities.SyncDeviceBits;
 import com.ustadmobile.lib.db.sync.entities.SyncablePrimaryKey;
@@ -68,7 +69,7 @@ public abstract class SyncablePrimaryKeyDao  {
     @UmQuery("SELECT deviceBits FROM SyncDeviceBits WHERE id = " + SyncDeviceBits.PRIMARY_KEY)
     protected abstract int selectDeviceBits();
 
-    @UmInsert
+    @UmInsert(onConflict = UmOnConflictStrategy.REPLACE)
     public abstract void insertDeviceBits(SyncDeviceBits deviceBits);
 
 }

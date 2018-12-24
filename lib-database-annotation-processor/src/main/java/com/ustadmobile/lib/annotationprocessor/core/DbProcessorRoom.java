@@ -14,6 +14,7 @@ import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmDatabase;
 import com.ustadmobile.lib.database.annotation.UmDbContext;
 import com.ustadmobile.lib.database.annotation.UmDelete;
+import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.database.annotation.UmQueryFindByPrimaryKey;
@@ -27,6 +28,9 @@ import com.ustadmobile.lib.database.annotation.UmUpdate;
 import com.ustadmobile.lib.database.jdbc.JdbcDatabaseUtils;
 import com.ustadmobile.lib.db.UmDbWithExecutor;
 import com.ustadmobile.lib.db.sync.UmRepositoryDb;
+import com.ustadmobile.lib.db.sync.UmSyncableDatabase;
+import com.ustadmobile.lib.db.sync.entities.SyncDeviceBits;
+import com.ustadmobile.lib.db.sync.entities.SyncStatus;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -188,7 +192,7 @@ public class DbProcessorRoom extends AbstractDbProcessor{
 
                 dbManagerImplSpec.addMethod(contextMethodBuilder.build());
             }else if(daoMethod.getAnnotation(UmClearAll.class) != null) {
-                dbManagerImplSpec.addMethod(generateClearAllMethod(daoMethod).build());
+                dbManagerImplSpec.addMethod(generateClearAllMethod(daoMethod, dbType).build());
             }else if(daoMethod.getAnnotation(UmRepository.class) != null) {
                 MethodSpec.Builder repoMethodBuilder = MethodSpec.overriding(daoMethod);
                 addGetRepositoryMethod(dbType, daoMethod, repoMethodBuilder,
@@ -632,8 +636,26 @@ public class DbProcessorRoom extends AbstractDbProcessor{
 
     }
 
-    private MethodSpec.Builder generateClearAllMethod(ExecutableElement daoMethod) {
-        return MethodSpec.overriding(daoMethod).addCode("_roomDb.clearAllTables();\n");
+    private MethodSpec.Builder generateClearAllMethod(ExecutableElement daoMethod, TypeElement dbType) {
+        MethodSpec.Builder methodSpec = MethodSpec.overriding(daoMethod);
+        CodeBlock.Builder codeBlock = CodeBlock.builder().add("_roomDb.clearAllTables();\n");
+        for(TypeElement entityTypeEl : DbProcessorUtils.findEntityTypes(dbType, processingEnv)) {
+            if(DbProcessorUtils.entityHasChangeSequenceNumbers(entityTypeEl, processingEnv)) {
+                codeBlock.add("getSyncStatusDao().insert(new $T($L));\n", SyncStatus.class,
+                        entityTypeEl.getAnnotation(UmEntity.class).tableId());
+            }
+        }
+
+        TypeMirror syncableDbType = processingEnv.getElementUtils().getTypeElement(
+                UmSyncableDatabase.class.getName()).asType();
+        if(processingEnv.getTypeUtils().isAssignable(dbType.asType(), syncableDbType)) {
+            codeBlock.add("getSyncablePrimaryKeyDao().insertDeviceBits($T.newRandomInstance());\n",
+                    SyncDeviceBits.class);
+            codeBlock.add("invalidateDeviceBits();\n");
+        }
+
+        methodSpec.addCode(codeBlock.build());
+        return methodSpec;
     }
 
 
