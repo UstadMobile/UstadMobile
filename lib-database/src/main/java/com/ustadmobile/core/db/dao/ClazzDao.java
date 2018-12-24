@@ -1,5 +1,6 @@
 package com.ustadmobile.core.db.dao;
 
+import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.lib.database.annotation.UmDao;
@@ -32,5 +33,11 @@ public abstract class ClazzDao implements SyncableDao<Clazz, ClazzDao> {
             " FROM Clazz WHERE :personUid in " +
             " (SELECT ClazzMember.clazzMemberPersonUid FROM ClazzMember WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid)")
     public abstract UmProvider<ClazzWithNumStudents> findAllClazzesByPersonUid(long personUid);
+
+
+    public void personHasPermission(long personUid, long clazzUid, long permission,
+                                             UmCallback<Boolean> callback) {
+        callback.onSuccess(Boolean.TRUE);
+    }
 
 }
