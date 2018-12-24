@@ -29,6 +29,22 @@ public class EntityRole {
 
     private long erRoleUid;
 
+    //bit flags made of up PERMISSION_ constants
+    private long erPermissions;
+
+    public static final long PERMISSION_SELECT = 1;
+
+    public static final long PERMISSION_INSERT = 2;
+
+    public static final long PERMISSION_UPDATE = 4;
+
+    public static final long PERMISSION_CLAZZ_RECORD_ATTENDANCE = 8;
+
+    public static final long PERMISSION_CLAZZ_RECORD_ACTIVITY = 16;
+
+    public static final long PERMISSION_CLAZZ_RECORD_SEL = 32;
+
+
     public long getErUid() {
         return erUid;
     }
@@ -67,5 +83,37 @@ public class EntityRole {
 
     public void setErRoleUid(long erRoleUid) {
         this.erRoleUid = erRoleUid;
+    }
+
+    public long getErMasterCsn() {
+        return erMasterCsn;
+    }
+
+    public void setErMasterCsn(long erMasterCsn) {
+        this.erMasterCsn = erMasterCsn;
+    }
+
+    public long getErLocalCsn() {
+        return erLocalCsn;
+    }
+
+    public void setErLocalCsn(long erLocalCsn) {
+        this.erLocalCsn = erLocalCsn;
+    }
+
+    public int getErLastChangedBy() {
+        return erLastChangedBy;
+    }
+
+    public void setErLastChangedBy(int erLastChangedBy) {
+        this.erLastChangedBy = erLastChangedBy;
+    }
+
+    public long getErPermissions() {
+        return erPermissions;
+    }
+
+    public void setErPermissions(long erPermissions) {
+        this.erPermissions = erPermissions;
     }
 }
