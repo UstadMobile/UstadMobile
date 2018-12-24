@@ -140,7 +140,7 @@ import java.util.Hashtable;
         Location.class, ContentEntryFileStatus.class, ContentCategorySchema.class,
         ContentCategory.class, Language.class, LanguageVariant.class,
         SyncStatus.class, SyncablePrimaryKey.class, SyncDeviceBits.class,
-        AccessToken.class, PersonAuth.class
+        AccessToken.class, PersonAuth.class,
 })
 public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthenticator {
 

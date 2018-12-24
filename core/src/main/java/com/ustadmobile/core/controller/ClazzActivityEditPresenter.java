@@ -415,9 +415,9 @@ public class ClazzActivityEditPresenter
     public void handleClickGoBackDate(){
         long newDate = UMCalendarUtil.getDateInMilliPlusDaysRelativeTo(currentLogDate, -1);
         System.out.println("Go back: " + newDate);
-
         reloadLogDetailForDate(newDate);
     }
+
 
     public void handleClickGoForwardDate(){
         Date currentLogDateDate = new Date(currentLogDate);
