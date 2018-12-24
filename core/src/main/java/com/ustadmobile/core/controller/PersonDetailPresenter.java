@@ -27,6 +27,7 @@ import com.ustadmobile.lib.db.entities.PersonField;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import static com.ustadmobile.core.view.PersonDetailView.ARG_PERSON_UID;
@@ -249,6 +250,9 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
      */
     private void handlePersonDataChanged(Person person) {
 
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        Locale currentLocale = new Locale(impl.getLocale(context));
+
         view.clearAllFields();
 
         if(person == null){
@@ -355,7 +359,8 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
                         field.getLabelMessageId(),field.getFieldIcon()), thisValue);
             }
             else if(field.getFieldUid() == PERSON_FIELD_UID_BIRTHDAY){
-                thisValue = UMCalendarUtil.getPrettyDateFromLong(person.getDateOfBirth());
+                thisValue = UMCalendarUtil.getPrettyDateFromLong(
+                        person.getDateOfBirth(), currentLocale);
                 view.setField(field.getFieldIndex(), new PersonDetailViewField(FIELD_TYPE_TEXT,
                         field.getLabelMessageId(),field.getFieldIcon()), thisValue);
             }else  {//this is actually a custom field

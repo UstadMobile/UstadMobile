@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import static com.ustadmobile.core.view.ClazzDetailEnrollStudentView.ARG_NEW_PERSON;
@@ -281,6 +282,7 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
                                  PersonEditView thisView,
                                  Map<Long, PersonCustomFieldWithPersonCustomFieldValue> valueMap){
 
+        Locale currnetLocale = Locale.getDefault();
 
         if(thisPerson.getImagePath() != null){
             view.updateImageOnView(thisPerson.getImagePath());
@@ -375,7 +377,8 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
                         field.getLabelMessageId(),field.getFieldIcon()), thisValue);
             }
             else if(field.getFieldUid() == PERSON_FIELD_UID_BIRTHDAY){
-                thisValue = UMCalendarUtil.getPrettyDateFromLong(thisPerson.getDateOfBirth());
+                thisValue = UMCalendarUtil.getPrettyDateFromLong(
+                        thisPerson.getDateOfBirth(), currnetLocale);
                 thisView.setField(field.getFieldIndex(), field.getFieldUid(),
                         new PersonDetailViewField(field.getFieldType(),
                         field.getLabelMessageId(),field.getFieldIcon()), thisValue);

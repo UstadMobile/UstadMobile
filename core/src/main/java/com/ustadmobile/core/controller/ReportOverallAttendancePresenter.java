@@ -13,6 +13,7 @@ import java.util.Calendar;
 import java.util.Hashtable;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 
 import static com.ustadmobile.core.view.ReportEditView.ARG_CLAZZ_LIST;
 import static com.ustadmobile.core.view.ReportEditView.ARG_FROM_DATE;
@@ -103,6 +104,8 @@ public class ReportOverallAttendancePresenter
     }
 
     public void getAttendanceDataAndUpdateCharts(){
+
+
         LinkedHashMap<Float, Float> lineDataMap = new LinkedHashMap<>();
         LinkedHashMap<Float, Float> lineDataMapMale = new LinkedHashMap<>();
         LinkedHashMap<Float, Float> lineDataMapFemale = new LinkedHashMap<>();
@@ -142,11 +145,14 @@ public class ReportOverallAttendancePresenter
                             lineDataMapFemale.put(d.floatValue() / 1000,
                                     everyDayAttendance.getFemaleAttendance());
 
-                            tableDataAverage.put(UMCalendarUtil.getPrettyDateSuperSimpleFromLong(d),
+                            tableDataAverage.put(
+                                    UMCalendarUtil.getPrettyDateSuperSimpleFromLong(d, Locale.US),
                                     everyDayAttendance.getAttendancePercentage() * 100);
-                            tableDataMale.put(UMCalendarUtil.getPrettyDateSuperSimpleFromLong(d),
+                            tableDataMale.put(
+                                    UMCalendarUtil.getPrettyDateSuperSimpleFromLong(d, Locale.US),
                                     everyDayAttendance.getMaleAttendance() * 100);
-                            tableDataFemale.put(UMCalendarUtil.getPrettyDateSuperSimpleFromLong(d),
+                            tableDataFemale.put(
+                                    UMCalendarUtil.getPrettyDateSuperSimpleFromLong(d, Locale.US),
                                     everyDayAttendance.getFemaleAttendance() * 100);
 
                         }

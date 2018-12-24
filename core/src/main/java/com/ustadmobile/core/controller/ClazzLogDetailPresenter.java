@@ -24,6 +24,7 @@ import com.ustadmobile.lib.db.entities.UMCalendar;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Hashtable;
+import java.util.Locale;
 
 import static com.ustadmobile.core.view.ClazzListView.ARG_CLAZZ_UID;
 import static com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.STATUS_ABSENT;
@@ -147,12 +148,15 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
     }
 
     public void updateViewDateHeading(){
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         Date currentLogDateDate = new Date(currentLogDate);
         String prettyDate="";
         if(UMCalendarUtil.isToday(currentLogDateDate)){
-            prettyDate = "Today";
+            prettyDate = impl.getString(MessageID.today, context);
         }
-        prettyDate += "(" + UMCalendarUtil.getPrettyDateFromLong(currentLogDate) + ")";
+        Locale currentLocale = Locale.getDefault();
+        prettyDate += " (" +
+                UMCalendarUtil.getPrettyDateFromLong(currentLogDate, currentLocale) + ")";
 
         view.updateDateHeading(prettyDate);
     }

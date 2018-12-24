@@ -27,6 +27,7 @@ import com.ustadmobile.port.android.util.UMAndroidUtil;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import ru.dimorinny.floatingtextbutton.FloatingTextButton;
@@ -155,6 +156,9 @@ public class ReportOverallAttendanceActivity extends UstadBaseActivity
     }
 
     public void setUpCharts() {
+
+        Locale currentLocale = getResources().getConfiguration().locale;
+
         //Get the chart view
         lineChart = findViewById(R.id.activity_report_overall_attendance_line_chart);
         lineChart.setMinimumHeight(dpToPx(ATTENDANCE_LINE_CHART_HEIGHT));
@@ -169,7 +173,8 @@ public class ReportOverallAttendanceActivity extends UstadBaseActivity
         lineChart.getXAxis().setLabelCount(4, true);
 
         lineChart.getXAxis().setValueFormatter((value, axis) ->
-                UMCalendarUtil.getPrettyDateSuperSimpleFromLong((long) value * 1000));
+                UMCalendarUtil.getPrettyDateSuperSimpleFromLong((long) value * 1000,
+                        currentLocale));
     }
 
     public List<View> generateAllViewRowsForTable(String valueIdentifier,

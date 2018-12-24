@@ -64,7 +64,8 @@ public class ClazzLogListPresenter extends UstadBaseController<ClassLogListView>
     public void onCreate(Hashtable savedState){
         super.onCreate(savedState);
 
-        clazzLogListProvider = repository.getClazzLogDao().findByClazzUidThatAreDone(currentClazzUid);
+        clazzLogListProvider =
+                repository.getClazzLogDao().findByClazzUidThatAreDone(currentClazzUid);
         setProviderToView();
 
         generateAttendanceBarChartDataTest();
@@ -239,7 +240,6 @@ public class ClazzLogListPresenter extends UstadBaseController<ClassLogListView>
         lineData.put(5f, 0.2f);
         lineData.put(6f, 0.4f);
         lineData.put(7f, 0.2f);
-
 
         view.updateAttendanceLineChart(lineData);
     }

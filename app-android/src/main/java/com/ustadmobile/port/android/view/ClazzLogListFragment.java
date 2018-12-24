@@ -288,7 +288,6 @@ public class ClazzLogListFragment extends UstadBaseFragment implements ClassLogL
         lastYearButton =rootContainer.findViewById(
                 R.id.fragment_clazz_log_list_line_chart_selector_button_lastyear);
 
-
         lastWeekButton.setOnClickListener(
                 v -> {
                     mPresenter.getAttendanceDataAndUpdateCharts(CHART_DURATION_LAST_WEEK);

@@ -4,6 +4,7 @@ import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.LocationDao;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.core.view.BulkUploadMasterView;
 import com.ustadmobile.lib.db.entities.Clazz;
@@ -14,6 +15,7 @@ import com.ustadmobile.lib.db.entities.PersonAuth;
 
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Locale;
 
 public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMasterView> {
 
@@ -303,7 +305,9 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
     }
 
     public long getDOBFromString(String dateString){
-        return UMCalendarUtil.getLongDateFromStringAndFormat(dateString,"dd/MM/yyyy");
+        Locale currentLocale = Locale.getDefault();
+        return UMCalendarUtil.getLongDateFromStringAndFormat(
+                dateString,"dd/MM/yyyy", currentLocale);
     }
 
 

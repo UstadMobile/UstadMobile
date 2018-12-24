@@ -3,6 +3,8 @@ package com.ustadmobile.port.android.view;
 
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.v4.text.TextUtilsCompat;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.AppCompatSpinner;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
@@ -25,6 +27,7 @@ import com.ustadmobile.lib.db.entities.ClazzActivityChange;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.Objects;
 
 import ru.dimorinny.floatingtextbutton.FloatingTextButton;
@@ -65,6 +68,9 @@ public class ClazzActivityEditActivity extends UstadBaseActivity implements Claz
 
     //Date heading
     TextView dateHeading;
+
+    //Back and Forward date
+    ImageView backDate, forwardDate;
 
     /**
      * Handles option selected from the toolbar. Here it is handling back button pressed.
@@ -114,13 +120,26 @@ public class ClazzActivityEditActivity extends UstadBaseActivity implements Claz
         unitOfMeasureTitle = findViewById(R.id.activity_clazz_activity_edit_change_uom_title);
         unitOfMeasureEditText = findViewById(R.id.activity_clazz_activity_edit_change_spinner2);
         dateHeading = findViewById(R.id.activity_class_activity_date_heading3);
-        ImageButton goOneDayBackImageView = findViewById(R.id.activity_class_activity_date_go_back3);
-        ImageButton goOneDayForwardImageView = findViewById(R.id.activity_class_activity_date_go_forward3);
+        backDate = findViewById(R.id.activity_class_activity_date_go_back3);
+        forwardDate = findViewById(R.id.activity_class_activity_date_go_forward3);
 
         //Call the Presenter
         mPresenter = new ClazzActivityEditPresenter(this,
                 UMAndroidUtil.bundleToHashtable(getIntent().getExtras()), this);
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
+
+
+        //Change icon based on rtl in current language (eg: arabic)
+        backDate = findViewById(R.id.activity_class_activity_date_go_back3);
+        forwardDate = findViewById(R.id.activity_class_activity_date_go_forward3);
+
+        //Change icon based on rtl in current language (eg: arabic)
+        int isLeftToRight = TextUtilsCompat.getLayoutDirectionFromLocale(Locale.getDefault());
+        switch (isLeftToRight){
+            case ViewCompat.LAYOUT_DIRECTION_RTL:
+                backDate.setImageDrawable(getDrawable(R.drawable.ic_chevron_right_black_24dp));
+                forwardDate.setImageDrawable(getDrawable(R.drawable.ic_chevron_left_black_24dp));
+        }
 
         //FAB and its listener
         FloatingTextButton fab = findViewById(R.id.activity_clazz_activity_edit_fab);
@@ -195,8 +214,8 @@ public class ClazzActivityEditActivity extends UstadBaseActivity implements Claz
         });
 
         //Date switching
-        goOneDayBackImageView.setOnClickListener(v -> mPresenter.handleClickGoBackDate());
-        goOneDayForwardImageView.setOnClickListener(v -> mPresenter.handleClickGoForwardDate());
+        backDate.setOnClickListener(v -> mPresenter.handleClickGoBackDate());
+        forwardDate.setOnClickListener(v -> mPresenter.handleClickGoForwardDate());
     }
 
 

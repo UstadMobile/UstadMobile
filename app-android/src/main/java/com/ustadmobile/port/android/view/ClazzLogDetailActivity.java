@@ -118,16 +118,14 @@ public class ClazzLogDetailActivity extends UstadBaseActivity
         backDate = findViewById(R.id.activity_class_log_detail_date_go_back);
         forwardDate = findViewById(R.id.activity_class_log_detail_date_go_forward);
 
+        //Change icon based on rtl in current language (eg: arabic)
         int isLeftToRight = TextUtilsCompat.getLayoutDirectionFromLocale(Locale.getDefault());
-
         switch (isLeftToRight){
-            case ViewCompat
-                    .LAYOUT_DIRECTION_RTL:
-
+            case ViewCompat.LAYOUT_DIRECTION_RTL:
                 backDate.setImageDrawable(getDrawable(R.drawable.ic_chevron_right_black_24dp));
                 forwardDate.setImageDrawable(getDrawable(R.drawable.ic_chevron_left_black_24dp));
-
         }
+
         //FAB
         FloatingTextButton fab = findViewById(R.id.class_log_detail__done_fab);
         fab.setOnClickListener(v -> mPresenter.handleClickDone());
@@ -152,8 +150,6 @@ public class ClazzLogDetailActivity extends UstadBaseActivity
         goOneDayForwardImageView.setOnClickListener(v -> mPresenter.handleClickGoForwardDate());
 
     }
-
-
 
     // Diff callback.
     public static final DiffUtil.ItemCallback<ClazzLogAttendanceRecordWithPerson> DIFF_CALLBACK =

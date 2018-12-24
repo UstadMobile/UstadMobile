@@ -26,6 +26,7 @@ import com.ustadmobile.port.android.view.ClazzLogDetailActivity;
 import com.ustadmobile.test.port.android.testutil.UmDbTestUtil;
 
 import java.util.Hashtable;
+import java.util.Locale;
 
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.action.ViewActions.click;
@@ -73,15 +74,15 @@ public class ClassLogListFragmentEspressoTest {
     public static long TEST_LOG_DATE2 = UMCalendarUtil.getDateInMilliPlusDays(-1);
     public static long TEST_LOG_DATE3 = UMCalendarUtil.getDateInMilliPlusDays(-2);
     public static long TEST_LOG_DATE4 = UMCalendarUtil.getDateInMilliPlusDays(-3);
-    public static String TEST_PRETTY_DATE1 = UMCalendarUtil.getPrettyDateFromLong(TEST_LOG_DATE1);
-    public static String TEST_PRETTY_DATE2 = UMCalendarUtil.getPrettyDateFromLong(TEST_LOG_DATE2);
-    public static String TEST_PRETTY_DATE3 = UMCalendarUtil.getPrettyDateFromLong(TEST_LOG_DATE3);
-    public static String TEST_PRETTY_DATE4 = UMCalendarUtil.getPrettyDateFromLong(TEST_LOG_DATE4);
+    public static String TEST_PRETTY_DATE1 =
+            UMCalendarUtil.getPrettyDateFromLong(TEST_LOG_DATE1, Locale.US);
+    public static String TEST_PRETTY_DATE2 =
+            UMCalendarUtil.getPrettyDateFromLong(TEST_LOG_DATE2, Locale.US);
+    public static String TEST_PRETTY_DATE3 =
+            UMCalendarUtil.getPrettyDateFromLong(TEST_LOG_DATE3, Locale.US);
+    public static String TEST_PRETTY_DATE4 =
+            UMCalendarUtil.getPrettyDateFromLong(TEST_LOG_DATE4, Locale.US);
 
-    public static String TEST_PRETTY_DAY1 = UMCalendarUtil.getSimpleDayFromLongDate(TEST_LOG_DATE1);
-    public static String TEST_PRETTY_DAY2 = UMCalendarUtil.getSimpleDayFromLongDate(TEST_LOG_DATE2);
-    public static String TEST_PRETTY_DAY3 = UMCalendarUtil.getSimpleDayFromLongDate(TEST_LOG_DATE3);
-    public static String TEST_PRETTY_DAY4 = UMCalendarUtil.getSimpleDayFromLongDate(TEST_LOG_DATE4);
 
     public static Long TEST_FEED1_LOGDATE = UMCalendarUtil.getDateInMilliPlusDays(1);
     public static Long TEST_FEED2_LOGDATE = UMCalendarUtil.getDateInMilliPlusDays(-1);

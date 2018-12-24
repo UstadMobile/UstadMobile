@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 import static com.ustadmobile.lib.db.entities.PersonField.FIELD_TYPE_HEADER;
@@ -531,7 +532,8 @@ public class UmDbTestUtil {
         newPerson.setGender(Person.GENDER_FEMALE);
         newPerson.setUsername("rainarawazi");
         newPerson.setActive(true);
-        newPerson.setDateOfBirth(UMCalendarUtil.getLongDateFromPrettyString("12-Jan-2001"));
+        newPerson.setDateOfBirth(UMCalendarUtil.getLongDateFromPrettyString(
+                "12-Jan-2001", Locale.US));
         newPerson.setFatherName("Addulla Rawazi");
         newPerson.setMotherName("Aysha Rawazi");
         newPerson.setFatherNumber("+96212345678");

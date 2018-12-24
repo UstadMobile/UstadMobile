@@ -54,6 +54,7 @@ import com.ustadmobile.port.android.util.UMAndroidUtil;
 import java.io.File;
 import java.io.IOException;
 import java.util.Calendar;
+import java.util.Locale;
 import java.util.Objects;
 
 import id.zelory.compressor.Compressor;
@@ -176,6 +177,7 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
                              int labelId, String iconName, boolean editMode,
                              LinearLayout thisLinearLayout, Object thisValue){
 
+        Locale currentLocale = getResources().getConfiguration().locale;
 
         //Set icon if not present (for margins to align ok)
         if(iconName == null || iconName.length() == 0) iconName = ADD_PERSON_ICON;
@@ -308,7 +310,8 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
                         myCalendar.set(Calendar.MONTH, month);
                         myCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
 
-                        et.setText(UMCalendarUtil.getPrettyDateFromLong(myCalendar.getTimeInMillis()));
+                        et.setText(UMCalendarUtil.getPrettyDateFromLong(
+                                myCalendar.getTimeInMillis(), currentLocale));
 
                     };
 

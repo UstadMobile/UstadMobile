@@ -9,6 +9,7 @@ import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.util.LocaleUtil;
 import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.core.view.AddActivityChangeDialogView;
 import com.ustadmobile.core.view.ClazzActivityEditView;
@@ -22,6 +23,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -41,9 +43,9 @@ public class ClazzActivityEditPresenter
         extends UstadBaseController<ClazzActivityEditView> {
 
     //Any arguments stored as variables here
-    private long currentClazzUid = -1L;
-    private long currentLogDate = -1L;
-    private long currentClazzActivityUid = -1L;
+    private long currentClazzUid = 0L;
+    private long currentLogDate = 0L;
+    private long currentClazzActivityUid = 0L;
 
     private static final long CHANGEUIDMAPSTART = 2;
     private static final long ADD_NEW_ACTIVITY_DROPDOWN_ID = 1;
@@ -54,7 +56,7 @@ public class ClazzActivityEditPresenter
     private boolean changeSelected = false;
     private boolean measurementEntered = false;
 
-    private long currentClazzActivityChangeUid = -1L;
+    private long currentClazzActivityChangeUid = 0L;
 
 
     //The current clazz activity being edited.
@@ -125,7 +127,7 @@ public class ClazzActivityEditPresenter
         //Find Activity first by activity id. If it is not valid, find by clazz uid and log date.
 
         //If activity uid given , find the ClazzActivity:
-        if(currentClazzActivityUid > 0)
+        if(currentClazzActivityUid != 0)
             clazzActivityDao.findByUidAsync(currentClazzActivityUid,
                     new UmCallback<ClazzActivity>() {
                         //success doesn't mean it exists
@@ -175,7 +177,6 @@ public class ClazzActivityEditPresenter
         //Update Activity Change options
         updateChangeOptions();
 
-
         //Update any toolbar title
         Clazz currentClazz = clazzDao.findByUid(currentClazzUid);
         view.updateToolbarTitle(currentClazz.getClazzName() + " "
@@ -200,12 +201,8 @@ public class ClazzActivityEditPresenter
         //Set up presenter and start filling the UI with its elements
         else{
 
-            //Bug fix 101220181732
-//            currentLogDate = currentClazzActivity.getClazzActivityLogDate();
-//
             currentClazzActivity = result;
 
-            //updateActivityChangeChoosenOption(currentClazzActivity.getClazzActivityClazzActivityChangeUid());
             //set current clazz activity change
             currentClazzActivityChangeUid = currentClazzActivity.getClazzActivityClazzActivityChangeUid();
             currentLogDate = currentClazzActivity.getClazzActivityLogDate();
@@ -276,7 +273,6 @@ public class ClazzActivityEditPresenter
                 public void onSuccess(ClazzActivityChange result) {
                     if(result != null) {
                         //Set the unit of measure for this ClazzActivityChange
-                        //handleChangeUnitOfMeasure(result.getClazzActivityUnitOfMeasure());
                         view.setUnitOfMeasureType(result.getClazzActivityUnitOfMeasure());
                         changeSelected = true;
                     }
@@ -369,7 +365,7 @@ public class ClazzActivityEditPresenter
         //set the presets to the view's activity change drop down (spinner)
         view.setClazzActivityChangesDropdownPresets(presetAL.toArray(new String[presetAL.size()]));
 
-        if(currentClazzActivityChangeUid > 0){
+        if(currentClazzActivityChangeUid != 0){
             view.setActivityChangeOption(idToChangeMap.get(currentClazzActivityChangeUid));
         }
 
@@ -430,7 +426,6 @@ public class ClazzActivityEditPresenter
             if(currentLogDate < System.currentTimeMillis()){
                 //Go to next day's
                 long newDate = UMCalendarUtil.getDateInMilliPlusDaysRelativeTo(currentLogDate, 1);
-                System.out.println("go forawrd: " + newDate);
                 reloadLogDetailForDate(newDate);
 
             }
@@ -438,12 +433,16 @@ public class ClazzActivityEditPresenter
     }
 
     public void updateViewDateHeading(){
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         Date currentLogDateDate = new Date(currentLogDate);
         String prettyDate="";
         if(UMCalendarUtil.isToday(currentLogDateDate)){
-            prettyDate = "Today";
+            prettyDate = impl.getString(MessageID.today, context);
         }
-        prettyDate += "(" + UMCalendarUtil.getPrettyDateFromLong(currentLogDate) + ")";
+
+        Locale currentLocale = Locale.getDefault();
+
+        prettyDate += " (" + UMCalendarUtil.getPrettyDateFromLong(currentLogDate, currentLocale) + ")";
 
         view.updateDateHeading(prettyDate);
     }

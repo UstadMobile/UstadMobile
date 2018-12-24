@@ -171,10 +171,11 @@ public class ClazzActivityListPresenter
 
     }
 
-    public void goToNewClazzActivityEditActivity(long clazzLog){
+    public void goToNewClazzActivityEditActivity(long clazzActivityUid){
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         Hashtable<String, Long> args = new Hashtable<>();
-        args.put(ARG_CLAZZACTIVITY_UID, clazzLog);
+        args.put(ARG_CLAZZACTIVITY_UID, clazzActivityUid);
+        args.put(ARG_CLAZZ_UID, currentClazzUid);
 
         impl.go(ClazzActivityEditView.VIEW_NAME, args, view.getContext());
 
