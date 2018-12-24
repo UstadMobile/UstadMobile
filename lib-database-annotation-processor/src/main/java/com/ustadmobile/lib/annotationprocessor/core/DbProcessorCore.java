@@ -166,7 +166,8 @@ public class DbProcessorCore extends AbstractProcessor{
             TypeElement dbClassTypeEl = (TypeElement)dbClassElement;
             validateDatabase(dbClassTypeEl);
 
-            for(TypeElement entityTypeEl : dbProcessorRoom.findEntityTypes(dbClassTypeEl)) {
+            for(TypeElement entityTypeEl : DbProcessorUtils.findEntityTypes(dbClassTypeEl,
+                    processingEnv)) {
                 validateEntity(entityTypeEl);
             }
         }
