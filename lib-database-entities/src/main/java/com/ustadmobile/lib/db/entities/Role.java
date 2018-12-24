@@ -20,7 +20,45 @@ public class Role {
     private long roleLocalCsn;
 
     @UmSyncLastChangedBy
-    private long roleLastChangedBy;
+    private int roleLastChangedBy;
 
+    public long getRoleUid() {
+        return roleUid;
+    }
 
+    public void setRoleUid(long roleUid) {
+        this.roleUid = roleUid;
+    }
+
+    public String getRoleName() {
+        return roleName;
+    }
+
+    public void setRoleName(String roleName) {
+        this.roleName = roleName;
+    }
+
+    public long getRoleMasterCsn() {
+        return roleMasterCsn;
+    }
+
+    public void setRoleMasterCsn(long roleMasterCsn) {
+        this.roleMasterCsn = roleMasterCsn;
+    }
+
+    public long getRoleLocalCsn() {
+        return roleLocalCsn;
+    }
+
+    public void setRoleLocalCsn(long roleLocalCsn) {
+        this.roleLocalCsn = roleLocalCsn;
+    }
+
+    public int getRoleLastChangedBy() {
+        return roleLastChangedBy;
+    }
+
+    public void setRoleLastChangedBy(int roleLastChangedBy) {
+        this.roleLastChangedBy = roleLastChangedBy;
+    }
 }

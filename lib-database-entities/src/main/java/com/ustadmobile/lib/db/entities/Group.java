@@ -19,7 +19,7 @@ public class Group {
     private long groupLocalCsn;
 
     @UmSyncLastChangedBy
-    private long groupLastChangedBy;
+    private int groupLastChangedBy;
 
     private String groupName;
 
@@ -47,11 +47,11 @@ public class Group {
         this.groupLocalCsn = groupLocalCsn;
     }
 
-    public long getGroupLastChangedBy() {
+    public int getGroupLastChangedBy() {
         return groupLastChangedBy;
     }
 
-    public void setGroupLastChangedBy(long groupLastChangedBy) {
+    public void setGroupLastChangedBy(int groupLastChangedBy) {
         this.groupLastChangedBy = groupLastChangedBy;
     }
 

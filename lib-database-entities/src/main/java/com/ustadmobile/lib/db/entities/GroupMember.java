@@ -2,6 +2,7 @@ package com.ustadmobile.lib.db.entities;
 
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
+import com.ustadmobile.lib.database.annotation.UmSyncLastChangedBy;
 import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
 import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 
@@ -20,6 +21,9 @@ public class GroupMember {
 
     @UmSyncLocalChangeSeqNum
     private long groupMemberLocalCsn;
+
+    @UmSyncLastChangedBy
+    private int groupMemberLastChangedBy;
 
     public long getGroupMemberUid() {
         return groupMemberUid;
@@ -59,5 +63,13 @@ public class GroupMember {
 
     public void setGroupMemberLocalCsn(long groupMemberLocalCsn) {
         this.groupMemberLocalCsn = groupMemberLocalCsn;
+    }
+
+    public int getGroupMemberLastChangedBy() {
+        return groupMemberLastChangedBy;
+    }
+
+    public void setGroupMemberLastChangedBy(int groupMemberLastChangedBy) {
+        this.groupMemberLastChangedBy = groupMemberLastChangedBy;
     }
 }
