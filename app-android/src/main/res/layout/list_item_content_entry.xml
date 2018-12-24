@@ -35,6 +35,7 @@
         android:layout_margin="@dimen/dimen_4dp"
         android:textSize="12sp"
         app:layout_constraintStart_toEndOf="@id/entry_thumbnail"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/entry_title"
         tools:text="Content Description" />
 
@@ -59,6 +60,7 @@
         android:tint="@color/text_secondary"
         app:layout_constraintStart_toEndOf="@id/entry_imageview"
         app:layout_constraintEnd_toStartOf="@id/entry_download"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/entry_description" />
 
     <com.ustadmobile.port.android.view.DownloadStatusButton

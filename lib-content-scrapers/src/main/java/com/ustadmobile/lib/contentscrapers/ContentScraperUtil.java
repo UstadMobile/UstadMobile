@@ -68,6 +68,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
@@ -84,6 +85,7 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.slideShareLink;
 
 
 public class ContentScraperUtil {
@@ -862,25 +864,95 @@ public class ContentScraperUtil {
         return contentEntry;
     }
 
+    /**
+     * Save files that are in android directory into the log index folder
+     * @param url url of the resource
+     * @param directory directory it will be saved
+     * @param mimeType mimeType of resource
+     * @param filePath filePath of resource
+     * @param fileName
+     * @return
+     * @throws IOException
+     */
     public static LogIndex createIndexWithResourceFiles(String url, File directory, String mimeType, InputStream filePath, String fileName) throws IOException {
 
         URL imageUrl = new URL(url);
-        File imageFile = new File(directory, imageUrl.getAuthority().replaceAll("[^a-zA-Z0-9\\.\\-]", "_"));
-        imageFile.mkdirs();
+        File imageFolder = ContentScraperUtil.createDirectoryFromUrl(directory, imageUrl);
 
-        File correctImageFile = new File(imageFile, fileName);
-        FileUtils.copyToFile(filePath, correctImageFile);
+        File imageFile = new File(imageFolder, fileName);
+        FileUtils.copyToFile(filePath, imageFile);
 
-        LogIndex khanImages = new LogIndex();
-        khanImages.url = imageUrl.toString();
-        khanImages.mimeType = mimeType;
-        khanImages.path = imageFile.getName() + "/" + correctImageFile.getName();
-
-        return khanImages;
+        return ContentScraperUtil.createIndexFromLog(imageUrl.toString(), mimeType,
+                imageFolder, imageFile, null);
     }
 
-    public static ChromeDriver getCookieForKhan(String url) {
 
+    /**
+     * Download a file from the log entry, check if it has headers, add them to url if available
+     * @param url url file to download
+     * @param destination destination of file
+     * @param log log details (has request headers info)
+     * @return the file that was download
+     * @throws IOException
+     */
+    public static File downloadFileFromLogIndex(URL url, File destination, LogResponse log) throws IOException {
+
+        String fileName = ContentScraperUtil.getFileNameFromUrl(url);
+        File file = new File(destination, fileName);
+        if (log != null && log.message.params.response.requestHeaders != null) {
+            URLConnection conn = url.openConnection();
+            for (Map.Entry<String, String> e : log.message.params.response.requestHeaders.entrySet()) {
+                if (e.getKey().equalsIgnoreCase("Accept-Encoding")) {
+                    continue;
+                }
+                conn.addRequestProperty(e.getKey().replaceAll(":", ""), e.getValue());
+            }
+            FileUtils.copyInputStreamToFile(conn.getInputStream(), file);
+        } else {
+            FileUtils.copyURLToFile(url, file);
+        }
+
+        return file;
+
+    }
+
+    /**
+     * Create a folder based on the url name eg. www.khanacademy.com/video/10 = folder name khanacademy
+     * @param destination destination of folder
+     * @param url url
+     * @return
+     */
+    public static File createDirectoryFromUrl(File destination, URL url) {
+        File urlFolder = new File(destination, url.getAuthority().replaceAll("[^a-zA-Z0-9\\.\\-]", "_"));
+        urlFolder.mkdirs();
+        return urlFolder;
+    }
+
+    /**
+     *
+     * @param urlString url for the log index
+     * @param mimeType mimeType of file download
+     * @param urlDirectory directory of url
+     * @param file file downloaded
+     * @param log log response of index
+     * @return
+     */
+    public static LogIndex createIndexFromLog(String urlString, String mimeType, File urlDirectory, File file, LogResponse log) {
+        LogIndex logIndex = new LogIndex();
+        logIndex.url = urlString;
+        logIndex.mimeType = mimeType;
+        logIndex.path = urlDirectory.getName() + "/" + file.getName();
+        if(log != null){
+            logIndex.headers = log.message.params.response.headers;
+        }
+        return logIndex;
+    }
+
+    /**
+     * Create a chrome driver that saves a log of all the files that was downloaded via settings
+     * @return Chrome Driver with Log enabled
+     */
+    public static ChromeDriver setupLogIndexChromeDriver() {
         DesiredCapabilities d = DesiredCapabilities.chrome();
         d.setCapability("opera.arguments", "-screenwidth 1024 -screenheight 768");
         // d.merge(capabilities);
@@ -888,36 +960,6 @@ public class ContentScraperUtil {
         logPrefs.enable(LogType.PERFORMANCE, Level.ALL);
         d.setCapability(CapabilityType.LOGGING_PREFS, logPrefs);
 
-        ChromeDriver driver = new ChromeDriver(d);
-
-        driver.get(url);
-        WebDriverWait waitDriver = new WebDriverWait(driver, 10000);
-        ContentScraperUtil.waitForJSandJQueryToLoad(waitDriver);
-        waitDriver.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("div#login-signup-root")));
-
-        driver.findElement(By.cssSelector("div#login-signup-root input[id*=email-or-username]")).sendKeys("samih.mustafa@gmail.com");
-        driver.findElement(By.cssSelector("div#login-signup-root input[id*=text-field-1-password]")).sendKeys("ustad123");
-
-        List<WebElement> elements = driver.findElements(By.cssSelector("div#login-signup-root div[class*=inner]"));
-        for(WebElement element: elements){
-            if(element.getText().contains("Log in")){
-                element.click();
-                break;
-            }
-        }
-
-        waitDriver.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("h2[class*=moduleTitle]")));
-
-
-        JavascriptExecutor js = (JavascriptExecutor)driver;
-        js.executeScript("console.clear()");
-
-        while (driver.manage().logs().get(LogType.PERFORMANCE).getAll().size() != 0){
-            driver.manage().timeouts().implicitlyWait(120, TimeUnit.SECONDS);
-        }
-
-
-        return driver;
+        return new ChromeDriver(d);
     }
-
 }

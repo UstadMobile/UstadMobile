@@ -5,12 +5,14 @@ import com.google.gson.GsonBuilder;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.ScraperConstants;
 import com.ustadmobile.lib.contentscrapers.LogIndex;
-import com.ustadmobile.lib.contentscrapers.ck12.plix.PlixLog;
+import com.ustadmobile.lib.contentscrapers.LogResponse;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.logging.LogEntries;
 import org.openqa.selenium.logging.LogEntry;
@@ -28,6 +30,7 @@ import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -141,7 +144,7 @@ public class KhanContentScraper {
 
         ContentScraperUtil.setChromeDriverLocation();
 
-        ChromeDriver driver = ContentScraperUtil.getCookieForKhan("https://www.khanacademy.org/login");
+        ChromeDriver driver = LoginKhanAcademy("https://www.khanacademy.org/login");
 
         Gson gson = new GsonBuilder().disableHtmlEscaping().create();
 
@@ -186,6 +189,7 @@ public class KhanContentScraper {
 
         if (!isUpdated) {
             isContentUpdated = false;
+            driver.close();
             return;
         }
 
@@ -206,36 +210,18 @@ public class KhanContentScraper {
 
         for (LogEntry le : les) {
 
-            PlixLog log = gson.fromJson(le.getMessage(), PlixLog.class);
+            LogResponse log = gson.fromJson(le.getMessage(), LogResponse.class);
             if (RESPONSE_RECEIVED.equalsIgnoreCase(log.message.method)) {
                 String mimeType = log.message.params.response.mimeType;
                 String urlString = log.message.params.response.url;
 
                 try {
+
                     URL url = new URL(urlString);
-                    File urlFile = new File(khanDirectory, url.getAuthority().replaceAll("[^a-zA-Z0-9\\.\\-]", "_"));
-                    urlFile.mkdirs();
-                    String fileName = ContentScraperUtil.getFileNameFromUrl(url);
-                    File file = new File(urlFile, fileName);
-                    if (log.message.params.response.requestHeaders != null) {
-                        URLConnection conn = url.openConnection();
-                        for (Map.Entry<String, String> e : log.message.params.response.requestHeaders.entrySet()) {
-                            if (e.getKey().equalsIgnoreCase("Accept-Encoding")) {
-                                continue;
-                            }
-                            conn.addRequestProperty(e.getKey().replaceAll(":", ""), e.getValue());
-                        }
-                        FileUtils.copyInputStreamToFile(conn.getInputStream(), file);
-                    } else {
-                        FileUtils.copyURLToFile(url, file);
-                    }
+                    File urlDirectory = ContentScraperUtil.createDirectoryFromUrl(khanDirectory, url);
+                    File file = ContentScraperUtil.downloadFileFromLogIndex(url, urlDirectory, log);
 
-                    LogIndex logIndex = new LogIndex();
-                    logIndex.url = urlString;
-                    logIndex.mimeType = mimeType;
-                    logIndex.path = urlFile.getName() + "/" + file.getName();
-                    logIndex.headers = log.message.params.response.headers;
-
+                    LogIndex logIndex = ContentScraperUtil.createIndexFromLog(urlString, mimeType, urlDirectory, file, log);
                     index.add(logIndex);
 
                 } catch (Exception e) {
@@ -244,7 +230,6 @@ public class KhanContentScraper {
                     e.printStackTrace();
 
                 }
-
 
             }
 
@@ -260,20 +245,15 @@ public class KhanContentScraper {
         for (SubjectListResponse.ComponentData.Card.UserExercise.Model.AssessmentItem exercise : exerciseList) {
             URL practiceUrl = new URL(secondExerciseUrl + exerciseId + exerciseMidleUrl + exercise.id + exercisePostUrl);
 
-            File urlFile = new File(khanDirectory, practiceUrl.getAuthority().replaceAll("[^a-zA-Z0-9\\.\\-]", "_"));
-            urlFile.mkdirs();
-
+            File urlFile = ContentScraperUtil.createDirectoryFromUrl(khanDirectory, practiceUrl);
             File file = new File(urlFile, exerciseCount + " question");
 
             String itemData = IOUtils.toString(practiceUrl, UTF_ENCODING);
             FileUtils.writeStringToFile(file, itemData, UTF_ENCODING);
             ItemResponse itemResponse = gson.fromJson(itemData, ItemResponse.class);
 
-            LogIndex exerciseIndex = new LogIndex();
-            exerciseIndex.url = practiceUrl.toString();
-            exerciseIndex.mimeType = MIMETYPE_JSON;
-            exerciseIndex.path = urlFile.getName() + "/" + file.getName();
-
+            LogIndex exerciseIndex = ContentScraperUtil.createIndexFromLog(practiceUrl.toString(), MIMETYPE_JSON,
+                    urlFile, file, null);
             index.add(exerciseIndex);
 
             ItemData itemContent = gson.fromJson(itemResponse.itemData, ItemData.class);
@@ -323,18 +303,14 @@ public class KhanContentScraper {
                 try {
                     image = image.replaceAll(" ", "");
                     URL imageUrl = new URL(image);
-                    File imageFile = new File(khanDirectory, imageUrl.getAuthority().replaceAll("[^a-zA-Z0-9\\.\\-]", "_"));
-                    imageFile.mkdirs();
+                    File imageFile = ContentScraperUtil.createDirectoryFromUrl(khanDirectory, imageUrl);
 
                     File imageContent = new File(imageFile, FilenameUtils.getName(imageUrl.getPath()));
                     FileUtils.copyURLToFile(imageUrl, imageContent);
 
-                    LogIndex khanImages = new LogIndex();
-                    khanImages.url = imageUrl.toString();
-                    khanImages.mimeType = MIMETYPE_JPG;
-                    khanImages.path = imageFile.getName() + "/" + imageContent.getName();
-
-                    index.add(khanImages);
+                    LogIndex logIndex = ContentScraperUtil.createIndexFromLog(imageUrl.toString(), MIMETYPE_JPG,
+                            imageFile, imageContent, null);
+                    index.add(logIndex);
                 } catch (Exception e) {
                 }
 
@@ -417,16 +393,7 @@ public class KhanContentScraper {
             }
         }
 
-
-        DesiredCapabilities d = DesiredCapabilities.chrome();
-        d.setCapability("opera.arguments", "-screenwidth 1024 -screenheight 768");
-        // d.merge(capabilities);
-        LoggingPreferences logPrefs = new LoggingPreferences();
-        logPrefs.enable(LogType.PERFORMANCE, Level.ALL);
-        d.setCapability(CapabilityType.LOGGING_PREFS, logPrefs);
-
-        ChromeDriver driver = new ChromeDriver(d);
-
+        ChromeDriver driver = ContentScraperUtil.setupLogIndexChromeDriver();
 
         driver.get(scrapUrl);
         WebDriverWait waitDriver = new WebDriverWait(driver, 10000);
@@ -446,36 +413,17 @@ public class KhanContentScraper {
 
         for (LogEntry le : les) {
 
-            PlixLog log = gson.fromJson(le.getMessage(), PlixLog.class);
+            LogResponse log = gson.fromJson(le.getMessage(), LogResponse.class);
             if (RESPONSE_RECEIVED.equalsIgnoreCase(log.message.method)) {
                 String mimeType = log.message.params.response.mimeType;
                 String urlString = log.message.params.response.url;
 
                 try {
                     URL url = new URL(urlString);
-                    File urlFile = new File(khanDirectory, url.getAuthority().replaceAll("[^a-zA-Z0-9\\.\\-]", "_"));
-                    urlFile.mkdirs();
-                    String fileName = ContentScraperUtil.getFileNameFromUrl(url);
-                    File file = new File(urlFile, fileName);
-                    if (log.message.params.response.requestHeaders != null) {
-                        URLConnection conn = url.openConnection();
-                        for (Map.Entry<String, String> e : log.message.params.response.requestHeaders.entrySet()) {
-                            if (e.getKey().equalsIgnoreCase("Accept-Encoding")) {
-                                continue;
-                            }
-                            conn.addRequestProperty(e.getKey().replaceAll(":", ""), e.getValue());
-                        }
-                        FileUtils.copyInputStreamToFile(conn.getInputStream(), file);
-                    } else {
-                        FileUtils.copyURLToFile(url, file);
-                    }
+                    File urlDirectory = ContentScraperUtil.createDirectoryFromUrl(khanDirectory, url);
+                    File file = ContentScraperUtil.downloadFileFromLogIndex(url, urlDirectory, log);
 
-                    LogIndex logIndex = new LogIndex();
-                    logIndex.url = urlString;
-                    logIndex.mimeType = mimeType;
-                    logIndex.path = urlFile.getName() + "/" + file.getName();
-                    logIndex.headers = log.message.params.response.headers;
-
+                    LogIndex logIndex = ContentScraperUtil.createIndexFromLog(urlString, mimeType, urlDirectory, file, log);
                     index.add(logIndex);
 
                 } catch (Exception e) {
@@ -492,7 +440,40 @@ public class KhanContentScraper {
         FileUtils.writeStringToFile(new File(khanDirectory, "index.json"), gson.toJson(index), UTF_ENCODING);
         ContentScraperUtil.zipDirectory(khanDirectory, khanDirectory.getName(), destinationDirectory);
 
+    }
 
+    public static ChromeDriver LoginKhanAcademy(String url) {
+
+        ChromeDriver driver = ContentScraperUtil.setupLogIndexChromeDriver();
+
+        driver.get(url);
+        WebDriverWait waitDriver = new WebDriverWait(driver, 10000);
+        ContentScraperUtil.waitForJSandJQueryToLoad(waitDriver);
+        waitDriver.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("div#login-signup-root")));
+
+        driver.findElement(By.cssSelector("div#login-signup-root input[id*=email-or-username]")).sendKeys("samih.mustafa@gmail.com");
+        driver.findElement(By.cssSelector("div#login-signup-root input[id*=text-field-1-password]")).sendKeys("ustad123");
+
+        List<WebElement> elements = driver.findElements(By.cssSelector("div#login-signup-root div[class*=inner]"));
+        for(WebElement element: elements){
+            if(element.getText().contains("Log in")){
+                element.click();
+                break;
+            }
+        }
+
+        waitDriver.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("h2[class*=moduleTitle]")));
+
+
+        JavascriptExecutor js = (JavascriptExecutor)driver;
+        js.executeScript("console.clear()");
+
+        while (driver.manage().logs().get(LogType.PERFORMANCE).getAll().size() != 0){
+            driver.manage().timeouts().implicitlyWait(120, TimeUnit.SECONDS);
+        }
+
+
+        return driver;
     }
 
     private String generateArtcleUrl(String articleId) {

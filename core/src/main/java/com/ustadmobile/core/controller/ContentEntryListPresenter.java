@@ -32,12 +32,16 @@ public class ContentEntryListPresenter extends UstadBaseController<ContentEntryV
         contentEntryDao.getContentByUuid(parentUid, new UmCallback<ContentEntry>() {
             @Override
             public void onSuccess(ContentEntry result) {
+                if (result == null) {
+                    viewContract.runOnUiThread(viewContract::showError);
+                    return;
+                }
                 viewContract.setToolbarTitle(result.getTitle());
             }
 
             @Override
             public void onFailure(Throwable exception) {
-
+                viewContract.runOnUiThread(viewContract::showError);
             }
         });
 
@@ -58,7 +62,7 @@ public class ContentEntryListPresenter extends UstadBaseController<ContentEntryV
             @Override
             public void onSuccess(ContentEntry result) {
                 if (result == null) {
-                    viewContract.showError();
+                    viewContract.runOnUiThread(viewContract::showError);
                     return;
                 }
 
@@ -73,7 +77,7 @@ public class ContentEntryListPresenter extends UstadBaseController<ContentEntryV
 
             @Override
             public void onFailure(Throwable exception) {
-                viewContract.showError();
+                viewContract.runOnUiThread(viewContract::showError);
             }
         });
     }

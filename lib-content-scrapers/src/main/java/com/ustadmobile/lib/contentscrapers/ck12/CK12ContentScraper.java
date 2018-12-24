@@ -5,7 +5,7 @@ import com.google.gson.GsonBuilder;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.ScraperConstants;
 import com.ustadmobile.lib.contentscrapers.LogIndex;
-import com.ustadmobile.lib.contentscrapers.ck12.plix.PlixLog;
+import com.ustadmobile.lib.contentscrapers.LogResponse;
 import com.ustadmobile.lib.contentscrapers.ck12.plix.PlixResponse;
 import com.ustadmobile.lib.contentscrapers.ck12.practice.AnswerResponse;
 import com.ustadmobile.lib.contentscrapers.ck12.practice.PracticeResponse;
@@ -246,14 +246,7 @@ public class CK12ContentScraper {
 
         ContentScraperUtil.setChromeDriverLocation();
 
-        DesiredCapabilities d = DesiredCapabilities.chrome();
-        d.setCapability("opera.arguments", "-screenwidth 1024 -screenheight 768");
-        // d.merge(capabilities);
-        LoggingPreferences logPrefs = new LoggingPreferences();
-        logPrefs.enable(LogType.PERFORMANCE, Level.ALL);
-        d.setCapability(CapabilityType.LOGGING_PREFS, logPrefs);
-
-        driver = new ChromeDriver(d);
+        driver = ContentScraperUtil.setupLogIndexChromeDriver();
 
         driver.get(urlString);
         waitDriver = new WebDriverWait(driver, 10000);
@@ -270,29 +263,16 @@ public class CK12ContentScraper {
 
         for (LogEntry le : les) {
 
-            PlixLog log = gson.fromJson(le.getMessage(), PlixLog.class);
+            LogResponse log = gson.fromJson(le.getMessage(), LogResponse.class);
             if (RESPONSE_RECEIVED.equalsIgnoreCase(log.message.method)) {
                 String mimeType = log.message.params.response.mimeType;
                 String urlString = log.message.params.response.url;
 
                 try {
+
                     URL url = new URL(urlString);
-                    File urlFile = new File(plixDirectory, url.getAuthority().replaceAll("[^a-zA-Z0-9\\.\\-]", "_"));
-                    urlFile.mkdirs();
-                    String fileName = ContentScraperUtil.getFileNameFromUrl(url);
-                    File file = new File(urlFile, fileName);
-                    if (log.message.params.response.requestHeaders != null) {
-                        URLConnection conn = url.openConnection();
-                        for (Map.Entry<String, String> e : log.message.params.response.requestHeaders.entrySet()) {
-                            if (e.getKey().equalsIgnoreCase("Accept-Encoding")) {
-                                continue;
-                            }
-                            conn.addRequestProperty(e.getKey().replaceAll(":", ""), e.getValue());
-                        }
-                        FileUtils.copyInputStreamToFile(conn.getInputStream(), file);
-                    } else {
-                        FileUtils.copyURLToFile(url, file);
-                    }
+                    File urlDirectory = ContentScraperUtil.createDirectoryFromUrl(plixDirectory, url);
+                    File file = ContentScraperUtil.downloadFileFromLogIndex(url, urlDirectory, log);
 
                     if (file.getName().contains("plix.js")) {
                         String plixJs = FileUtils.readFileToString(file, UTF_ENCODING);
@@ -345,12 +325,7 @@ public class CK12ContentScraper {
                     }
 
 
-                    LogIndex logIndex = new LogIndex();
-                    logIndex.url = urlString;
-                    logIndex.mimeType = mimeType;
-                    logIndex.path = urlFile.getName() + "/" + file.getName();
-                    logIndex.headers = log.message.params.response.headers;
-
+                    LogIndex logIndex = ContentScraperUtil.createIndexFromLog(urlString, mimeType, urlDirectory, file, log);
                     index.add(logIndex);
 
                 } catch (IOException e) {

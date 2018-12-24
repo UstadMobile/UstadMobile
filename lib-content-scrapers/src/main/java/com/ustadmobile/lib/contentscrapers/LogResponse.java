@@ -1,8 +1,8 @@
-package com.ustadmobile.lib.contentscrapers.ck12.plix;
+package com.ustadmobile.lib.contentscrapers;
 
 import java.util.Map;
 
-public class PlixLog {
+public class LogResponse {
 
     public Message message;
 
