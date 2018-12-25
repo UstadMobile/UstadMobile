@@ -145,4 +145,29 @@ public class WebChunkEspressoTest {
         // This is only available once plix has fully loaded and displayed to the use
     }
 
+    @Test
+    public void givenServerOffline_whenVoaZippedIsOpened_WebviewLoads() throws IOException {
+        Intent launchActivityIntent = new Intent();
+
+     //   UmAndroidTestUtil.setAirplaneModeEnabled(true);
+        Bundle b = new Bundle();
+        String testScrapedPlixPath = "/com/ustadmobile/app/android/3111026.zip";
+        InputStream inputStream = getClass().getResourceAsStream(testScrapedPlixPath);
+        File path = Environment.getExternalStorageDirectory();
+        File targetFile = new File(path, "3111026.zip");
+        OutputStream outStream = new FileOutputStream(targetFile);
+        byte[] buffer = new byte[1024];
+        int read;
+        while((read = inputStream.read(buffer)) != -1){
+            outStream.write(buffer, 0, read);
+        }
+
+        b.putString(WebChunkView.ARG_CHUNK_PATH, targetFile.getPath());
+        launchActivityIntent.putExtras(b);
+        mActivityRule.launchActivity(launchActivityIntent);
+
+        // the webview looks for an element "questionController" which is the start button of plix.
+        // This is only available once plix has fully loaded and displayed to the use
+    }
+
 }
