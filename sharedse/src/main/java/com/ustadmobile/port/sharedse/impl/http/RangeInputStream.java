@@ -53,6 +53,44 @@ public class RangeInputStream extends FilterInputStream {
 
     private long end;
 
+    /**
+     * Parse a range header, and determine the bytes that should be sent to answer a request.
+     *
+     * @param header Value of the "range" header (if any). This can be null if there is no such header.
+     *
+     * @param totalLength The total length of the response in it's entirety (e.g. the file size).
+     *                    This method will use it to determine the end position.
+     *
+     * @return a two value long array of the first byte (inclusive) and last byte (TODO: check this)
+     */
+    public static long[] parseRangeRequest(String header, long totalLength) {
+        long[] range = null;
+        if(header != null  && header.startsWith("bytes=")) {
+            range = new long[] {0, -1};
+            header = header.substring("bytes=".length());
+            int dashPos = header.indexOf('-');
+            try {
+                if(dashPos > 0) {
+                    range[0] = Integer.parseInt(header.substring(0,dashPos));
+                }
+
+                if(dashPos == header.length()-1) {
+                    range[1] = totalLength-1;
+                }else if(dashPos > 0) {
+                    range[1] = Integer.parseInt(header.substring(dashPos+1));
+
+                }
+            }catch(NumberFormatException nfe) {
+
+            }
+            if(range[0] < 0 || range[1] > totalLength) {
+                range[0] = -1;//Error flag
+            }
+        }
+
+        return range;
+    }
+
 
     /**
      * Create a RangeInputStream that bounds the given source input streamL this is useful for
