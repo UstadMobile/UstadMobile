@@ -59,12 +59,6 @@
 
         <service android:name="com.ustadmobile.port.android.netwokmanager.NetworkServiceAndroid" />
 
-        <!-- TODO: replicate and try this fix.
-        <activity
-            android:name="com.ustadmobile.port.android.view.SplashScreenActivity"
-            android:noHistory="true" />
-        -->
-
         <activity
             android:name="com.ustadmobile.port.android.view.ContainerActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
