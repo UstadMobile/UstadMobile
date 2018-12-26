@@ -7,16 +7,12 @@ import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
 import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 
 @UmEntity(tableId = 6)
-public class Clazz implements SyncableEntity{
+public class Clazz {
 
     @UmPrimaryKey(autoIncrement = true)
     private long clazzUid;
 
     private String clazzName;
-
-    private long masterChangeSeqNum;
-
-    private long localChangeSeqNum;
 
     private float attendanceAverage;
 
@@ -51,26 +47,6 @@ public class Clazz implements SyncableEntity{
 
     public void setClazzName(String clazzName) {
         this.clazzName = clazzName;
-    }
-
-    @Override
-    public long getMasterChangeSeqNum() {
-        return masterChangeSeqNum;
-    }
-
-    @Override
-    public void setMasterChangeSeqNum(long masterChangeSeqNum) {
-        this.masterChangeSeqNum = masterChangeSeqNum;
-    }
-
-    @Override
-    public long getLocalChangeSeqNum() {
-        return localChangeSeqNum;
-    }
-
-    @Override
-    public void setLocalChangeSeqNum(long localChangeSeqNum) {
-        this.localChangeSeqNum = localChangeSeqNum;
     }
 
     public long getClazzMasterChangeSeqNum() {
