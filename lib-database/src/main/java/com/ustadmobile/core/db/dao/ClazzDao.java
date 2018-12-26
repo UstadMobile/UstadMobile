@@ -1,6 +1,5 @@
 package com.ustadmobile.core.db.dao;
 
-import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.lib.database.annotation.UmDao;
@@ -9,10 +8,16 @@ import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.database.annotation.UmRepository;
 import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.ClazzWithNumStudents;
-import com.ustadmobile.lib.db.sync.dao.BaseDao;
+import com.ustadmobile.lib.db.entities.Role;
 import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
-@UmDao(readPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
+@UmDao(readPermissionCondition = "EXISTS(SELECT PersonGroupMember.groupMemberPersonUid FROM PersonGroupMember " +
+        "JOIN EntityRole ON EntityRole.erGroupUid = PersonGroupMember.groupMemberGroupUid " +
+        "JOIN Role ON EntityRole.erRoleUid = Role.roleUid " +
+        "WHERE PersonGroupMember.groupMemberPersonUid = :accountPersonUid " +
+        " AND EntityRole.ertableId = " + Clazz.TABLE_ID +
+        " AND EntityRole.erEntityUid = Clazz.clazzUid " +
+        " AND (Role.rolePermissions & " + Role.PERMISSION_SELECT + ") > 0)")
 @UmRepository
 public abstract class ClazzDao implements SyncableDao<Clazz, ClazzDao> {
 
@@ -37,6 +42,10 @@ public abstract class ClazzDao implements SyncableDao<Clazz, ClazzDao> {
 
     public void personHasPermission(long personUid, long clazzUid, long permission,
                                              UmCallback<Boolean> callback) {
+        callback.onSuccess(Boolean.TRUE);
+    }
+
+    public void personHasPermission(long personUid, long permission, UmCallback<Boolean> callback) {
         callback.onSuccess(Boolean.TRUE);
     }
 

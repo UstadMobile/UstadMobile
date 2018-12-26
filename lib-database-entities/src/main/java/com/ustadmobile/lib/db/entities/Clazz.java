@@ -6,8 +6,12 @@ import com.ustadmobile.lib.database.annotation.UmSyncLastChangedBy;
 import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
 import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 
-@UmEntity(tableId = 6)
+import static com.ustadmobile.lib.db.entities.Clazz.TABLE_ID;
+
+@UmEntity(tableId = TABLE_ID)
 public class Clazz implements SyncableEntity{
+
+    public static final int TABLE_ID = 6;
 
     @UmPrimaryKey(autoIncrement = true)
     private long clazzUid;

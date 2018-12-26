@@ -1268,10 +1268,11 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                 tableList = tablesNamesFinder.getTableList(select);
                 codeBlock.add("// Table names = " + Arrays.toString(tableList.toArray()))
                         .add("\n");
-            }catch(JSQLParserException e) {
-                messager.printMessage(Diagnostic.Kind.ERROR, formatMethodForErrorMessage(daoMethod) +
-                        " exception parsing query 2 \"" + preparedStmtSql + "\" to determine tables: " + e.getMessage());
-                return;
+            }catch(Exception e) {
+                messager.printMessage(Diagnostic.Kind.WARNING, formatMethodForErrorMessage(daoMethod) +
+                        " exception parsing query \"" + preparedStmtSql + "\" to determine tables: "
+                        + e.toString() + " LiveData on this query may not update as expected.");
+                tableList = new ArrayList<>();
             }
 
             returnsLiveData = true;
@@ -1603,8 +1604,9 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
 
         } catch(SQLException e) {
             messager.printMessage(Diagnostic.Kind.ERROR,
-                    "Exception generating query method for: " +
-                            formatMethodForErrorMessage(daoMethod) + ": " + e.getMessage());
+                    "Exception generating query method for to run \" " +
+                           querySql + "\" " + formatMethodForErrorMessage(daoMethod) +
+                            ": " + e.getMessage());
             e.printStackTrace();
         }
     }

@@ -7,7 +7,7 @@ import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
 import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 
 @UmEntity(tableId = 44)
-public class GroupMember {
+public class PersonGroupMember {
 
     @UmPrimaryKey(autoGenerateSyncable = true)
     private long groupMemberUid;
