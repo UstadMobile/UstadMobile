@@ -1523,7 +1523,7 @@ public abstract class AbstractDbProcessor {
 
             if(sqlProductName.equals(PRODUCT_NAME_SQLITE)) {
                 codeBlock.addNamed("$execSqlMethod:L(\"CREATE TRIGGER update_csn_$tableNameLower:L " +
-                            "AFTER update ON ExampleSyncableEntity FOR EACH ROW WHEN " +
+                            "AFTER update ON $tableName:L FOR EACH ROW WHEN " +
                             "(NEW.$concatTableCsnCol:L = 0 " +
                                 "OR OLD.$concatTableCsnCol:L = NEW.$concatTableCsnCol:L) " +
                             "BEGIN " +
@@ -1534,7 +1534,7 @@ public abstract class AbstractDbProcessor {
                                     "$concatSyncStatusColName:L = $concatSyncStatusColName:L + 1;" +
                             "END\");\n", triggerSqlArgs)
                         .addNamed("$execSqlMethod:L(\"CREATE TRIGGER insert_csn_$tableNameLower:L " +
-                            "AFTER insert ON ExampleSyncableEntity FOR EACH ROW WHEN " +
+                            "AFTER insert ON $tableName:L FOR EACH ROW WHEN " +
                             "(NEW.$concatTableCsnCol:L = 0) " +
                             "BEGIN " +
                                 "UPDATE $tableName:L SET $concatTableCsnCol:L = " +
