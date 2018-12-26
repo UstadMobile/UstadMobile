@@ -75,6 +75,10 @@ public class ClazzListRecyclerAdapter extends
         }else{
             subTitle = numStudentsText;
         }
+
+        //Get lastRecordedAttendance
+        //TODO
+
         String attendancePercentageText =
                 attendancePercentage + "% " + theFragment.getText(R.string.attendance)
                         + " (" + theFragment.getText(R.string.last_recorded)
