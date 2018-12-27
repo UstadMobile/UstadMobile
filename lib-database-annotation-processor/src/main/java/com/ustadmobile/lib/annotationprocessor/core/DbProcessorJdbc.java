@@ -1607,7 +1607,6 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                     "Exception generating query method for to run \" " +
                            querySql + "\" " + formatMethodForErrorMessage(daoMethod) +
                             ": " + e.getMessage());
-            e.printStackTrace();
         }
     }
 

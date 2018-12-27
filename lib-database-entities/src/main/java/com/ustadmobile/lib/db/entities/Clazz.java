@@ -33,6 +33,8 @@ public class Clazz implements SyncableEntity{
     @UmSyncLastChangedBy
     private int clazzLastChangedBy;
 
+    private long clazzLocationUid;
+
     public float getAttendanceAverage() {
         return attendanceAverage;
     }
@@ -99,5 +101,13 @@ public class Clazz implements SyncableEntity{
 
     public void setClazzLastChangedBy(int clazzLastChangedBy) {
         this.clazzLastChangedBy = clazzLastChangedBy;
+    }
+
+    public long getClazzLocationUid() {
+        return clazzLocationUid;
+    }
+
+    public void setClazzLocationUid(long clazzLocationUid) {
+        this.clazzLocationUid = clazzLocationUid;
     }
 }

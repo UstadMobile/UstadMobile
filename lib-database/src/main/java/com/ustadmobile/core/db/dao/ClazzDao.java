@@ -8,16 +8,22 @@ import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.database.annotation.UmRepository;
 import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.ClazzWithNumStudents;
+import com.ustadmobile.lib.db.entities.Location;
 import com.ustadmobile.lib.db.entities.Role;
 import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
-@UmDao(readPermissionCondition = "EXISTS(SELECT PersonGroupMember.groupMemberPersonUid FROM PersonGroupMember " +
+@UmDao(readPermissionCondition = " (SELECT admin FROM Person WHERE personUid = :accountPersonUid) = 1 OR " +
+        "EXISTS(SELECT PersonGroupMember.groupMemberPersonUid FROM PersonGroupMember " +
         "JOIN EntityRole ON EntityRole.erGroupUid = PersonGroupMember.groupMemberGroupUid " +
         "JOIN Role ON EntityRole.erRoleUid = Role.roleUid " +
         "WHERE PersonGroupMember.groupMemberPersonUid = :accountPersonUid " +
-        " AND EntityRole.ertableId = " + Clazz.TABLE_ID +
-        " AND EntityRole.erEntityUid = Clazz.clazzUid " +
-        " AND (Role.rolePermissions & " + Role.PERMISSION_SELECT + ") > 0)")
+        " AND (" +
+            "(EntityRole.ertableId = " + Clazz.TABLE_ID +
+            " AND EntityRole.erEntityUid = Clazz.clazzUid) " +
+            "OR" +
+            "(EntityRole.ertableId = " + Location.TABLE_ID +
+            " AND EntityRole.erEntityUid IN (SELECT locationAncestorId FROM LocationAncestorJoin WHERE locationAncestorChildLocationUid = Clazz.clazzLocationUid))" +
+        ") AND (Role.rolePermissions & " + Role.PERMISSION_SELECT + ") > 0)")
 @UmRepository
 public abstract class ClazzDao implements SyncableDao<Clazz, ClazzDao> {
 
@@ -40,6 +46,7 @@ public abstract class ClazzDao implements SyncableDao<Clazz, ClazzDao> {
     public abstract UmProvider<ClazzWithNumStudents> findAllClazzesByPersonUid(long personUid);
 
 
+    /** Check if a permission is present on a specific entity e.g. update/modify etc*/
     public void personHasPermission(long personUid, long clazzUid, long permission,
                                              UmCallback<Boolean> callback) {
         callback.onSuccess(Boolean.TRUE);
