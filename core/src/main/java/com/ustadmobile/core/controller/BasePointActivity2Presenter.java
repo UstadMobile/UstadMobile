@@ -44,12 +44,14 @@ public class BasePointActivity2Presenter extends UstadBaseController<BasePointVi
      * @param loggedInPerson    The person changed.
      */
     public void handlePersonValueChanged(Person loggedInPerson){
-        if(loggedInPerson.isAdmin()){
-            view.showBulkUploadForAdmin(true);
-            view.showSettings(true);
-        }else{
-            view.showBulkUploadForAdmin(false);
-            view.showSettings(false);
+        if(loggedInPerson != null) {
+            if (loggedInPerson.isAdmin()) {
+                view.showBulkUploadForAdmin(true);
+                view.showSettings(true);
+            } else {
+                view.showBulkUploadForAdmin(false);
+                view.showSettings(false);
+            }
         }
     }
 

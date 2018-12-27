@@ -7,6 +7,4 @@ import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 public abstract class EntityRoleDao implements SyncableDao<EntityRole, EntityRoleDao> {
 
 
-
-
 }

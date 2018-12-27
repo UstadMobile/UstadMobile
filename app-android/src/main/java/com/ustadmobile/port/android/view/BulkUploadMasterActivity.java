@@ -86,8 +86,10 @@ public class BulkUploadMasterActivity extends UstadBaseActivity implements BulkU
     public void setInProgress(boolean inProgress) {
         mProgressBar.setVisibility(inProgress ? View.VISIBLE : View.GONE);
         fab.setEnabled(!inProgress);
+        fab.setVisibility(inProgress?View.INVISIBLE:View.VISIBLE);
         //fab.getBackground().setAlpha(inProgress ? 128 : 255);
-        selectFileButton.setEnabled(!inProgress);
+        selectFileButton.setEnabled(inProgress);
+        selectFileButton.setVisibility(inProgress?View.INVISIBLE:View.VISIBLE);
         selectFileButton.getBackground().setAlpha(inProgress ? 128 : 255 );
     }
 

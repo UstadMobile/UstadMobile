@@ -56,6 +56,8 @@ public class PersonDetailActivity extends UstadBaseActivity implements PersonDet
     private PersonDetailPresenter mPresenter;
     ImageView personEditImage;
 
+    private FloatingTextButton fab;
+
     public static final String CALL_ICON_NAME = "ic_call_bcd4_24dp";
     public static final String TEXT_ICON_NAME = "ic_textsms_bcd4_24dp";
 
@@ -82,6 +84,9 @@ public class PersonDetailActivity extends UstadBaseActivity implements PersonDet
 
         mLinearLayout = findViewById(R.id.activity_person_detail_fields_linear_layout);
 
+        //FAB
+        fab = findViewById(R.id.activity_person_detail_fab_edit);
+
         //Load the Image
         personEditImage = findViewById(R.id.activity_person_detail_student_image);
 
@@ -90,8 +95,6 @@ public class PersonDetailActivity extends UstadBaseActivity implements PersonDet
                 UMAndroidUtil.bundleToHashtable(getIntent().getExtras()), this);
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
 
-        //FAB
-        FloatingTextButton fab = findViewById(R.id.activity_person_detail_fab_edit);
         fab.setOnClickListener(v -> mPresenter.handleClickEdit());
 
         TextView callParentTextView = findViewById(R.id.activity_person_detail_action_call_parent_text);
@@ -129,6 +132,15 @@ public class PersonDetailActivity extends UstadBaseActivity implements PersonDet
     @Override
     public void clearAllFields() {
         mLinearLayout.removeAllViews();
+    }
+
+    @Override
+    public void showFAB(boolean show) {
+        runOnUiThread(() -> {
+            fab.setEnabled(show);
+            fab.setVisibility(show?View.VISIBLE:View.INVISIBLE);
+        });
+
     }
 
     @Override

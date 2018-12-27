@@ -11,6 +11,7 @@ import com.ustadmobile.core.db.dao.PersonDao;
 import com.ustadmobile.core.db.dao.PersonDetailPresenterFieldDao;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
+import com.ustadmobile.core.impl.UmCallbackWithDefaultValue;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.core.view.PersonDetailEnrollClazzView;
@@ -23,6 +24,7 @@ import com.ustadmobile.lib.db.entities.PersonCustomFieldValue;
 import com.ustadmobile.lib.db.entities.PersonCustomFieldWithPersonCustomFieldValue;
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField;
 import com.ustadmobile.lib.db.entities.PersonField;
+import com.ustadmobile.lib.db.entities.Role;
 
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -70,6 +72,8 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
 
     private String oneParentNumber = "";
 
+    private long loggedInPersonUid = 0L;
+
     private UmProvider<ClazzWithNumStudents> assignedClazzes;
 
     UmAppDatabase repository = UmAccountManager.getRepositoryForActiveAccount(context);
@@ -85,6 +89,8 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
         super(context, arguments, view);
 
         personUid = Long.parseLong(arguments.get(ARG_PERSON_UID).toString());
+
+        loggedInPersonUid = UmAccountManager.getActiveAccount(context).getPersonUid();
     }
 
     /**
@@ -206,7 +212,6 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
                                 exception.printStackTrace();
                             }
                         });
-
                     }
 
                     @Override
@@ -214,9 +219,6 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
                         exception.printStackTrace();
                     }
                 });
-
-
-
             }
 
             @Override
@@ -224,6 +226,24 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
                 exception.printStackTrace();
             }
         });
+
+        checkPermissions();
+    }
+
+    public void checkPermissions(){
+        ClazzDao clazzDao = repository.getClazzDao();
+        clazzDao.personHasPermission(loggedInPersonUid, Role.PERMISSION_INSERT,
+            new UmCallbackWithDefaultValue<>(false, new UmCallback<Boolean>() {
+                @Override
+                public void onSuccess(Boolean result) {
+                    view.showFAB(result);
+                }
+
+                @Override
+                public void onFailure(Throwable exception) {
+
+                }
+            }));
     }
 
     /**

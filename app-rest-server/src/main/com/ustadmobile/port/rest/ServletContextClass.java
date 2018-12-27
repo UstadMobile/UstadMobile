@@ -1,6 +1,7 @@
 package com.ustadmobile.port.rest;
 
 import com.ustadmobile.core.db.UmAppDatabase;
+import com.ustadmobile.core.db.dao.PersonAuthDao;
 import com.ustadmobile.core.db.dao.PersonCustomFieldDao;
 import com.ustadmobile.core.db.dao.PersonDao;
 import com.ustadmobile.core.db.dao.PersonDetailPresenterFieldDao;
@@ -8,6 +9,8 @@ import com.ustadmobile.core.db.dao.SocialNominationQuestionDao;
 import com.ustadmobile.core.db.dao.SocialNominationQuestionSetDao;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UmCallback;
+import com.ustadmobile.lib.db.entities.Person;
+import com.ustadmobile.lib.db.entities.PersonAuth;
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField;
 import com.ustadmobile.lib.db.entities.PersonField;
 import com.ustadmobile.lib.db.entities.SocialNominationQuestion;
@@ -67,6 +70,27 @@ public class ServletContextClass implements ServletContextListener
         }
 
         public void addRolesAndPermissions(){
+
+            PersonAuthDao personAuthDao = repository.getPersonAuthDao();
+
+            //Adding Teacher
+            Person teacherPerson = new Person();
+            teacherPerson.setFirstNames("Teacher Test");
+            teacherPerson.setLastName("Permission");
+            teacherPerson.setActive(true);
+            teacherPerson.setGender(Person.GENDER_MALE);
+            teacherPerson.setUsername("teachertest");
+            teacherPerson.setAdmin(false);
+            long teacherPersonUid = personDao.insert(teacherPerson);
+            teacherPerson.setPersonUid(teacherPersonUid);
+
+            PersonAuth teacherAuth = new PersonAuth();
+            teacherAuth.setPersonAuthUid(teacherPersonUid);
+            teacherAuth.setPasswordHash("p:teacherpass");
+            personAuthDao.insert(teacherAuth);
+
+
+
 
         }
 
