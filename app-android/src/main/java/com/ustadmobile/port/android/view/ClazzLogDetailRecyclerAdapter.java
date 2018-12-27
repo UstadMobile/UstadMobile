@@ -133,8 +133,12 @@ public class ClazzLogDetailRecyclerAdapter
         //Loop through every attendance button
         for(Map.Entry<Integer, ImageView> entry : attendanceButtons.entrySet()) {
             boolean selectedOption = attendanceRecord.getAttendanceStatus() == entry.getKey();
-            entry.getValue().setOnClickListener((view) -> thePresenter.handleMarkStudent(
-                    clazzLogAttendanceRecordUid, entry.getKey()));
+
+            if(thePresenter.isHasEditPermissions()) {
+                entry.getValue().setOnClickListener((view) -> thePresenter.handleMarkStudent(
+                        clazzLogAttendanceRecordUid, entry.getKey()));
+            }
+
             entry.getValue().setColorFilter(
                     selectedOption ?
                             ContextCompat.getColor(theContext,

@@ -18,6 +18,7 @@ import com.ustadmobile.core.view.ClazzListView;
 import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.ClazzLog;
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecordWithPerson;
+import com.ustadmobile.lib.db.entities.EntityRole;
 import com.ustadmobile.lib.db.entities.FeedEntry;
 import com.ustadmobile.lib.db.entities.UMCalendar;
 
@@ -42,6 +43,16 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
 
     private long currentClazzUid = -1L;
     private long currentLogDate = -1L;
+    private boolean hasEditPermissions = false;
+    private long loggedInPersonUid = 0L;
+
+    public boolean isHasEditPermissions() {
+        return hasEditPermissions;
+    }
+
+    public void setHasEditPermissions(boolean hasEditPermissions) {
+        this.hasEditPermissions = hasEditPermissions;
+    }
 
     private UmProvider<ClazzLogAttendanceRecordWithPerson> clazzLogAttendanceRecordUmProvider;
 
@@ -66,6 +77,28 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
             String thisLogDate = arguments.get(ClazzListView.ARG_LOGDATE).toString();
             currentLogDate = Long.parseLong(thisLogDate);
         }
+
+        loggedInPersonUid = UmAccountManager.getActiveAccount(context).getPersonUid();
+
+        checkPermissions();
+    }
+
+    public void checkPermissions(){
+        ClazzDao clazzDao = repository.getClazzDao();
+
+        clazzDao.personHasPermission(loggedInPersonUid, currentClazzUid,
+                EntityRole.PERMISSION_CLAZZ_RECORD_ATTENDANCE, new UmCallback<Boolean>() {
+            @Override
+            public void onSuccess(Boolean result) {
+                setHasEditPermissions(result);
+                view.showMarkAllButtons(result);
+            }
+
+            @Override
+            public void onFailure(Throwable exception) {
+                exception.printStackTrace();
+            }
+        });
     }
 
     /**

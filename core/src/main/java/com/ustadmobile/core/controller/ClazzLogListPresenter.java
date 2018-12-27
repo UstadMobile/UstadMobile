@@ -2,6 +2,7 @@ package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmProvider;
+import com.ustadmobile.core.db.dao.ClazzDao;
 import com.ustadmobile.core.db.dao.ClazzLogAttendanceRecordDao;
 import com.ustadmobile.core.db.dao.ClazzMemberDao;
 import com.ustadmobile.core.impl.UmAccountManager;
@@ -12,6 +13,7 @@ import com.ustadmobile.core.view.ClassLogDetailView;
 import com.ustadmobile.core.view.ClassLogListView;
 import com.ustadmobile.lib.db.entities.ClazzLog;
 import com.ustadmobile.lib.db.entities.DailyAttendanceNumbers;
+import com.ustadmobile.lib.db.entities.EntityRole;
 
 import java.util.Calendar;
 import java.util.Hashtable;
@@ -38,6 +40,16 @@ public class ClazzLogListPresenter extends UstadBaseController<ClassLogListView>
     private UmProvider<ClazzLog> clazzLogListProvider;
 
     UmAppDatabase repository = UmAccountManager.getRepositoryForActiveAccount(context);
+    private Long loggedInPersonUid = 0L;
+    private Boolean hasEditPermissions = false;
+
+    public Boolean getHasEditPermissions() {
+        return hasEditPermissions;
+    }
+
+    public void setHasEditPermissions(Boolean hasEditPermissions) {
+        this.hasEditPermissions = hasEditPermissions;
+    }
 
     public ClazzLogListPresenter(Object context, Hashtable arguments, ClassLogListView view) {
         super(context, arguments, view);
@@ -46,8 +58,29 @@ public class ClazzLogListPresenter extends UstadBaseController<ClassLogListView>
         if(arguments.containsKey(ARG_CLAZZ_UID)){
             currentClazzUid = (long) arguments.get(ARG_CLAZZ_UID);
         }
+
+        loggedInPersonUid = UmAccountManager.getActiveAccount(context).getPersonUid();
+
+        //Permissions
+        checkPermissions();
     }
 
+    public void checkPermissions(){
+        ClazzDao clazzDao = repository.getClazzDao();
+        clazzDao.personHasPermission(loggedInPersonUid, currentClazzUid,
+                EntityRole.PERMISSION_CLAZZ_RECORD_ATTENDANCE, new UmCallback<Boolean>() {
+            @Override
+            public void onSuccess(Boolean result) {
+                setHasEditPermissions(result);
+                view.setFABVisibility(result);
+            }
+
+            @Override
+            public void onFailure(Throwable exception) {
+                exception.printStackTrace();
+            }
+        });
+    }
 
     /**
      * In Order:

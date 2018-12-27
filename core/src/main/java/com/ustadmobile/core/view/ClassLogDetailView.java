@@ -40,4 +40,6 @@ public interface ClassLogDetailView extends UstadView {
      */
     void updateDateHeading(String dateString);
 
+    void showMarkAllButtons(boolean show);
+
 }

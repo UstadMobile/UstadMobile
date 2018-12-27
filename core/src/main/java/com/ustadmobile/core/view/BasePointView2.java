@@ -22,4 +22,6 @@ public interface BasePointView2 extends UstadView {
      *              hide it.
      */
     void showBulkUploadForAdmin(boolean show);
+
+    void showSettings(boolean show);
 }

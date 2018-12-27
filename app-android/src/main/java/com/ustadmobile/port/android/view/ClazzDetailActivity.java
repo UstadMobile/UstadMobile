@@ -191,11 +191,7 @@ public class ClazzDetailActivity extends UstadBaseActivity implements
     public void setSettingsVisibility(boolean visible) {
         if(menu != null) {
             MenuItem menuItem = menu.findItem(R.menu.menu_clazzdetail);
-            if(visible){
-                menuItem.setVisible(true);
-            }else {
-                menuItem.setVisible(false);
-            }
+            menuItem.setVisible(visible);
         }
     }
 

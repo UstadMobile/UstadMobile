@@ -8,6 +8,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.ClassDetailView;
 import com.ustadmobile.core.view.ClazzEditView;
 import com.ustadmobile.lib.db.entities.Clazz;
+import com.ustadmobile.lib.db.entities.EntityRole;
 
 import java.util.Hashtable;
 
@@ -27,6 +28,7 @@ public class ClazzDetailPresenter
     UmAppDatabase repository = UmAccountManager.getRepositoryForActiveAccount(context);
     private ClazzDao clazzDao = repository.getClazzDao();
 
+    private Long loggedInPersonUid = 0L;
 
     public ClazzDetailPresenter(Object context, Hashtable arguments, ClassDetailView view) {
         super(context, arguments, view);
@@ -36,6 +38,7 @@ public class ClazzDetailPresenter
             currentClazzUid = (long) arguments.get(ARG_CLAZZ_UID);
         }
 
+        loggedInPersonUid = UmAccountManager.getActiveAccount(context).getPersonUid();
     }
 
     /**
@@ -50,11 +53,63 @@ public class ClazzDetailPresenter
 
         updateToolbarTitle();
 
-        view.setActivityVisibility(true);
-        view.setAttendanceVisibility(true);
-        view.setSELVisibility(true);
+        checkPermissions();
 
+    }
 
+    public void checkPermissions(){
+
+        clazzDao.personHasPermission(loggedInPersonUid, currentClazzUid,
+                EntityRole.PERMISSION_UPDATE, new UmCallback<Boolean>() {
+            @Override
+            public void onSuccess(Boolean result) {
+                view.setSettingsVisibility(result);
+            }
+
+            @Override
+            public void onFailure(Throwable exception) {
+                exception.printStackTrace();
+            }
+        });
+
+        clazzDao.personHasPermission(loggedInPersonUid, currentClazzUid,
+                EntityRole.PERMISSION_CLAZZ_VIEW_ATTENDANCE, new UmCallback<Boolean>() {
+                    @Override
+                    public void onSuccess(Boolean result) {
+                        view.setAttendanceVisibility(true);
+                    }
+
+                    @Override
+                    public void onFailure(Throwable exception) {
+                        exception.printStackTrace();
+                    }
+                });
+
+        clazzDao.personHasPermission(loggedInPersonUid, currentClazzUid,
+                EntityRole.PERMISSION_CLAZZ_VIEW_SEL, new UmCallback<Boolean>() {
+                    @Override
+                    public void onSuccess(Boolean result) {
+                        view.setSELVisibility(result);
+                    }
+
+                    @Override
+                    public void onFailure(Throwable exception) {
+                        exception.printStackTrace();
+                    }
+                });
+
+        clazzDao.personHasPermission(loggedInPersonUid, currentClazzUid,
+                EntityRole.PERMISSION_CLAZZ_VIEW_ACTIVITY, new UmCallback<Boolean>() {
+                    @Override
+                    public void onSuccess(Boolean result) {
+                        view.setActivityVisibility(result);
+                    }
+
+                    @Override
+                    public void onFailure(Throwable exception) {
+                        exception.printStackTrace();
+                    }
+                });
     }
 
     /**

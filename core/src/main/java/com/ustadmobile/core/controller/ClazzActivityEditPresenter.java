@@ -17,6 +17,7 @@ import com.ustadmobile.core.view.ClazzListView;
 import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.ClazzActivity;
 import com.ustadmobile.lib.db.entities.ClazzActivityChange;
+import com.ustadmobile.lib.db.entities.EntityRole;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -57,7 +58,8 @@ public class ClazzActivityEditPresenter
     private boolean measurementEntered = false;
 
     private long currentClazzActivityChangeUid = 0L;
-
+    private boolean activityEditable = false;
+    private long loggedInPersonUid = 0L;
 
     //The current clazz activity being edited.
     private ClazzActivity currentClazzActivity;
@@ -73,6 +75,7 @@ public class ClazzActivityEditPresenter
 
     private ClazzActivityDao clazzActivityDao  = repository.getClazzActivityDao();
     private ClazzActivityChangeDao activityChangeDao = repository.getClazzActivityChangeDao();
+    private ClazzDao clazzdao = repository.getClazzDao();
 
     /**
      * Constructor that gets Clazz Uid, Log Date and Activity Uid (to be edited)\
@@ -100,6 +103,8 @@ public class ClazzActivityEditPresenter
                     Long.parseLong(arguments.get(ARG_CLAZZACTIVITY_UID).toString());
         }
 
+        loggedInPersonUid = UmAccountManager.getActiveAccount(context).getPersonUid();
+
     }
 
     /**
@@ -118,6 +123,25 @@ public class ClazzActivityEditPresenter
         super.onCreate(savedState);
 
         fillClazzActivity();
+
+        //Check permissions
+        checkPermissions();
+    }
+
+    public void checkPermissions(){
+        clazzdao.personHasPermission(loggedInPersonUid, currentClazzUid,
+                EntityRole.PERMISSION_CLAZZ_RECORD_ACTIVITY, new UmCallback<Boolean>() {
+            @Override
+            public void onSuccess(Boolean result) {
+                setActivityEditable(result);
+            }
+
+            @Override
+            public void onFailure(Throwable exception) {
+
+            }
+        });
+
     }
 
     /**
@@ -468,6 +492,14 @@ public class ClazzActivityEditPresenter
         updateViewDateHeading();
 
 
+    }
+
+    public boolean isActivityEditable() {
+        return activityEditable;
+    }
+
+    public void setActivityEditable(boolean activityEditable) {
+        this.activityEditable = activityEditable;
     }
 
     @Override

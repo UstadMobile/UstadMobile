@@ -25,7 +25,6 @@ public class BasePointActivity2Presenter extends UstadBaseController<BasePointVi
     public void onCreate(Hashtable savedState) {
         super.onCreate(savedState);
 
-        //getLoggedInPerson();
     }
 
     /**
@@ -47,8 +46,10 @@ public class BasePointActivity2Presenter extends UstadBaseController<BasePointVi
     public void handlePersonValueChanged(Person loggedInPerson){
         if(loggedInPerson.isAdmin()){
             view.showBulkUploadForAdmin(true);
+            view.showSettings(true);
         }else{
             view.showBulkUploadForAdmin(false);
+            view.showSettings(false);
         }
     }
 

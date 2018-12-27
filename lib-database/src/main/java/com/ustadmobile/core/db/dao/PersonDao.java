@@ -286,5 +286,9 @@ public abstract class PersonDao implements SyncableDao<Person, PersonDao> {
     @UmInsert(onConflict = UmOnConflictStrategy.REPLACE)
     public abstract void replacePersonAuth(PersonAuth personAuth);
 
+    public void personHasPermission(long personUid, long clazzUid, long permission,
+                                    UmCallback<Boolean> callback) {
+        callback.onSuccess(Boolean.TRUE);
+    }
 
 }

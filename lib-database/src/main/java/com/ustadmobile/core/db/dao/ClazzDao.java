@@ -136,5 +136,13 @@ public abstract class ClazzDao implements SyncableDao<Clazz, ClazzDao> {
             "Where Clazz.clazzUid = :clazzUid")
     public abstract void updateAttendancePercentage(long clazzUid);
 
+    public void personHasPermission(long personUid, long clazzUid, long permission,
+                                             UmCallback<Boolean> callback) {
+        callback.onSuccess(Boolean.TRUE);
+    }
+
+    public void personHasPermission(long personUid, long permission, UmCallback<Boolean> callback){
+        callback.onSuccess(Boolean.TRUE);
+    }
 
 }

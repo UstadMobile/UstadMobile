@@ -29,6 +29,7 @@ public class PeopleListFragment extends UstadBaseFragment implements PeopleListV
     View rootContainer;
     private RecyclerView mRecyclerView;
     private PeopleListPresenter mPresenter;
+    private FloatingTextButton fab;
 
     /**
      * Generates a new Fragment for a page fragment
@@ -68,12 +69,14 @@ public class PeopleListFragment extends UstadBaseFragment implements PeopleListV
         RecyclerView.LayoutManager mRecyclerLayoutManager = new LinearLayoutManager(getContext());
         mRecyclerView.setLayoutManager(mRecyclerLayoutManager);
 
+        fab = rootContainer.findViewById(R.id.fragment_people_list_fab);
+
         //set up Presenter
         mPresenter = new PeopleListPresenter(this,
                 UMAndroidUtil.bundleToHashtable(getArguments()), this);
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
 
-        FloatingTextButton fab = rootContainer.findViewById(R.id.fragment_people_list_fab);
+
         fab.setOnClickListener(v -> mPresenter.handleClickPrimaryActionButton());
 
         return rootContainer;
@@ -112,5 +115,11 @@ public class PeopleListFragment extends UstadBaseFragment implements PeopleListV
 
         mRecyclerView.setAdapter(recyclerAdapter);
 
+    }
+
+    @Override
+    public void showFAB(boolean show) {
+        fab.setVisibility(show?View.VISIBLE:View.INVISIBLE);
+        fab.setEnabled(show);
     }
 }

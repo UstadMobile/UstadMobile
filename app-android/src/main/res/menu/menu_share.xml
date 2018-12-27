@@ -5,11 +5,20 @@
     <item android:id="@+id/menu_basepoint_share"
         android:icon="@drawable/ic_share_white_24dp"
         android:title="@string/share_application"
+        android:iconTint="@color/icons"
         app:showAsAction="always"/>
 
     <item android:id="@+id/menu_basepoint_bulk_upload_master"
         android:icon="@drawable/ic_file_upload_white_24dp"
         android:title="@string/settings"
         android:visible="false"
+        android:iconTint="@color/icons"
+        app:showAsAction="always"/>
+
+    <item android:id="@+id/menu_settings_gear"
+        android:icon="@drawable/ic_settings_white_24dp"
+        android:title="@string/done"
+        android:visible="false"
+        android:iconTint="@color/icons"
         app:showAsAction="always"/>
 </menu>

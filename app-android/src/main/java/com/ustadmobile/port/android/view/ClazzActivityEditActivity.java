@@ -72,6 +72,9 @@ public class ClazzActivityEditActivity extends UstadBaseActivity implements Claz
     //Back and Forward date
     ImageView backDate, forwardDate;
 
+    //FAB
+    FloatingTextButton fab;
+
     /**
      * Handles option selected from the toolbar. Here it is handling back button pressed.
      *
@@ -122,16 +125,16 @@ public class ClazzActivityEditActivity extends UstadBaseActivity implements Claz
         dateHeading = findViewById(R.id.activity_class_activity_date_heading3);
         backDate = findViewById(R.id.activity_class_activity_date_go_back3);
         forwardDate = findViewById(R.id.activity_class_activity_date_go_forward3);
+        backDate = findViewById(R.id.activity_class_activity_date_go_back3);
+        forwardDate = findViewById(R.id.activity_class_activity_date_go_forward3);
+        fab = findViewById(R.id.activity_clazz_activity_edit_fab);
+        trueFalseSpinner = findViewById(R.id.activity_clazz_activity_edit_change_measurement_spinner);
+        activityChangeSpinner = findViewById(R.id.activity_clazz_activity_edit_change_spinner);
 
         //Call the Presenter
         mPresenter = new ClazzActivityEditPresenter(this,
                 UMAndroidUtil.bundleToHashtable(getIntent().getExtras()), this);
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
-
-
-        //Change icon based on rtl in current language (eg: arabic)
-        backDate = findViewById(R.id.activity_class_activity_date_go_back3);
-        forwardDate = findViewById(R.id.activity_class_activity_date_go_forward3);
 
         //Change icon based on rtl in current language (eg: arabic)
         int isLeftToRight = TextUtilsCompat.getLayoutDirectionFromLocale(Locale.getDefault());
@@ -142,10 +145,7 @@ public class ClazzActivityEditActivity extends UstadBaseActivity implements Claz
         }
 
         //FAB and its listener
-        FloatingTextButton fab = findViewById(R.id.activity_clazz_activity_edit_fab);
         fab.setOnClickListener(v -> mPresenter.handleClickPrimaryActionButton());
-
-        activityChangeSpinner = findViewById(R.id.activity_clazz_activity_edit_change_spinner);
 
         activityChangeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -158,7 +158,6 @@ public class ClazzActivityEditActivity extends UstadBaseActivity implements Claz
             public void onNothingSelected(AdapterView<?> parent) {}
         });
 
-        trueFalseSpinner = findViewById(R.id.activity_clazz_activity_edit_change_measurement_spinner);
         setTrueFalseDropdownPresets();
         trueFalseSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -172,8 +171,6 @@ public class ClazzActivityEditActivity extends UstadBaseActivity implements Claz
 
             }
         });
-
-
 
         //Thumbs listener
         thumbsUp.setOnClickListener(v -> mPresenter.handleChangeFeedback(true));
@@ -366,5 +363,29 @@ public class ClazzActivityEditActivity extends UstadBaseActivity implements Claz
     public void updateDateHeading(String dateString) {
         //Since its called from the presenter, need to run on ui thread.
         runOnUiThread(() -> dateHeading.setText(dateString));
+    }
+
+    @Override
+    public void showFAB(boolean show) {
+        if(show){
+            fab.setVisibility(View.VISIBLE);
+        }else{
+            fab.setVisibility(View.INVISIBLE);
+        }
+    }
+
+    @Override
+    public void setEditable(boolean editable) {
+
+        activityChangeSpinner.setEnabled(editable);
+        notesET.setEnabled(editable);
+        unitOfMeasureEditText.setEnabled(editable);
+        thumbsUp.setEnabled(editable);
+        thumbsDown.setEnabled(editable);
+        unitOfMeasureEditText.setEnabled(editable);
+        trueFalseSpinner.setEnabled(editable);
+
+        showFAB(editable);
+
     }
 }

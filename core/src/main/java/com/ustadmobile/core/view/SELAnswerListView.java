@@ -22,4 +22,5 @@ public interface SELAnswerListView extends UstadView {
      */
     void setSELAnswerListProvider(UmProvider<Person> selAnswersProvider);
 
+    void showFAB(boolean show);
 }

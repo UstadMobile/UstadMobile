@@ -89,8 +89,8 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
         AHBottomNavigation bottomNavigation = findViewById(R.id.bottom_navigation);
 
         //Style
-        bottomNavigation.setDefaultBackgroundColor(fetchColor(R.color.default_background_color_2));
-        bottomNavigation.setAccentColor(fetchColor(R.color.bottom_nav_yourAccentColor));
+        bottomNavigation.setDefaultBackgroundColor(fetchColor(R.color.primary));
+        bottomNavigation.setAccentColor(fetchColor(R.color.just_black));
         bottomNavigation.setInactiveColor(fetchColor(R.color.bottom_nav_yourInactiveColor));
         bottomNavigation.setBehaviorTranslationEnabled(false);
         bottomNavigation.setUseElevation(true, 2L);
@@ -174,6 +174,14 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
         }
     }
 
+    @Override
+    public void showSettings(boolean show) {
+        MenuItem allClazzSettingsMenuItem = mOptionsMenu.findItem(R.id.menu_settings_gear);
+        if(allClazzSettingsMenuItem != null){
+            allClazzSettingsMenuItem.setVisible(show);
+        }
+    }
+
 
     @Override
     protected void onResume() {
@@ -192,14 +200,16 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
         //If this activity started from other activity
         if (i == R.id.menu_basepoint_share) {
             mPresenter.handleClickShareIcon();
-            //shareAppSetupFile();
             return super.onOptionsItemSelected(item);
         } else if (i == R.id.menu_basepoint_bulk_upload_master){
             mPresenter.handleClickBulkUpload();
             return super.onOptionsItemSelected(item);
-        }else {
+        }else if ( i == R.id.menu_settings_gear){
+            //TODO: Sprint 5 : Settings
+        } else {
             return super.onOptionsItemSelected(item);
         }
+        return super.onOptionsItemSelected(item);
     }
 
     /**
@@ -237,9 +247,6 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
         });
         shareAppDialog.show();
     }
-
-
-
 
     @Override
     public void dismissShareAppDialog() {
