@@ -60,7 +60,9 @@ public abstract class ClazzDao implements SyncableDao<Clazz, ClazzDao> {
                                              UmCallback<Boolean> callback);
 
 
-    @UmQuery("SELECT EXISTS(SELECT EntityRole.erUid FROM EntityRole " +
+    @UmQuery("SELECT " +
+            "(SELECT admin FROM Person WHERE personUid = :accountPersonUid) OR " +
+            "EXISTS(SELECT EntityRole.erUid FROM EntityRole " +
             " LEFT JOIN Role ON EntityRole.erRoleUid = Role.roleUid " +
             " LEFT JOIN PersonGroupMember ON EntityRole.erGroupUid = PersonGroupMember.groupMemberGroupUid " +
             " WHERE PersonGroupMember.groupMemberPersonUid = :accountPersonUid " +
