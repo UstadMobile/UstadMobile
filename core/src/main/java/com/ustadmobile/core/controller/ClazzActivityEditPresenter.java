@@ -18,6 +18,7 @@ import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.ClazzActivity;
 import com.ustadmobile.lib.db.entities.ClazzActivityChange;
 import com.ustadmobile.lib.db.entities.EntityRole;
+import com.ustadmobile.lib.db.entities.Role;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -130,7 +131,7 @@ public class ClazzActivityEditPresenter
 
     public void checkPermissions(){
         clazzdao.personHasPermission(loggedInPersonUid, currentClazzUid,
-                EntityRole.PERMISSION_CLAZZ_RECORD_ACTIVITY, new UmCallback<Boolean>() {
+                Role.PERMISSION_CLAZZ_RECORD_ACTIVITY, new UmCallback<Boolean>() {
             @Override
             public void onSuccess(Boolean result) {
                 setActivityEditable(result);

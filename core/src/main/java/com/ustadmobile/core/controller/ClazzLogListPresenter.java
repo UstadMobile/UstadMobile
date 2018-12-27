@@ -14,6 +14,7 @@ import com.ustadmobile.core.view.ClassLogListView;
 import com.ustadmobile.lib.db.entities.ClazzLog;
 import com.ustadmobile.lib.db.entities.DailyAttendanceNumbers;
 import com.ustadmobile.lib.db.entities.EntityRole;
+import com.ustadmobile.lib.db.entities.Role;
 
 import java.util.Calendar;
 import java.util.Hashtable;
@@ -68,7 +69,7 @@ public class ClazzLogListPresenter extends UstadBaseController<ClassLogListView>
     public void checkPermissions(){
         ClazzDao clazzDao = repository.getClazzDao();
         clazzDao.personHasPermission(loggedInPersonUid, currentClazzUid,
-                EntityRole.PERMISSION_CLAZZ_RECORD_ATTENDANCE, new UmCallback<Boolean>() {
+                Role.PERMISSION_CLAZZ_RECORD_ATTENDANCE, new UmCallback<Boolean>() {
             @Override
             public void onSuccess(Boolean result) {
                 setHasEditPermissions(result);

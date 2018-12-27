@@ -29,14 +29,6 @@ public class EntityRole {
 
     private long erRoleUid;
 
-
-
-    public static final long PERMISSION_CLAZZ_VIEW_ATTENDANCE = 64;
-
-    public static final long PERMISSION_CLAZZ_VIEW_ACTIVITY = 128;
-
-    public static final long PERMISSION_CLAZZ_VIEW_SEL = 256;
-
     public long getErUid() {
         return erUid;
     }

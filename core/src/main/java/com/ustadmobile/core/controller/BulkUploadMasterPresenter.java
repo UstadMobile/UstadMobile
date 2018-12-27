@@ -225,9 +225,9 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
                                                     if (result.size() == 1) {
                                                         //Location exists and is unique
                                                         Location clazzLocation = result.get(0);
-                                                        thisClazz.setLocationUid(clazzLocation.getLocationUid());
+                                                        thisClazz.setClazzLocationUid(clazzLocation.getLocationUid());
                                                         thisClazz.setClazzActive(true);
-                                                        thisClazz.setLocationUid(locationLeaf.getLocationUid());
+                                                        thisClazz.setClazzLocationUid(locationLeaf.getLocationUid());
                                                         move = true;
 
                                                         repository.getClazzDao().updateAsync(thisClazz, new UmCallback<Integer>() {

@@ -15,6 +15,7 @@ import com.ustadmobile.lib.database.annotation.UmRestAccessible;
 import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.ClazzWithNumStudents;
 import com.ustadmobile.lib.db.entities.EntityRole;
+import com.ustadmobile.lib.db.entities.Role;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -103,13 +104,15 @@ public class ClazzListPresenter extends UstadBaseController<ClazzListView> {
     }
 
     public void checkPermissions(){
-        clazzDao.personHasPermission(loggedInPersonUid, EntityRole.PERMISSION_INSERT,
+        clazzDao.personHasPermission(loggedInPersonUid, Role.PERMISSION_INSERT,
                 new UmCallback<Boolean>() {
             @Override
             public void onSuccess(Boolean result) {
-                view.showAddClassButton(result);
-                view.showAllClazzSettingsButton(true);
-                setRecordAttendanceVisibility(true);
+                if(result!=null) {
+                    view.showAddClassButton(result);
+                    view.showAllClazzSettingsButton(true);
+                    setRecordAttendanceVisibility(true);
+                }
             }
 
             @Override

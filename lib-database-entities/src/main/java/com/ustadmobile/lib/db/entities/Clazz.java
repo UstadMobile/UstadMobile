@@ -10,7 +10,7 @@ import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 import static com.ustadmobile.lib.db.entities.Clazz.TABLE_ID;
 
 @UmEntity(tableId = TABLE_ID)
-public class Clazz implements SyncableEntity{
+public class Clazz {
 
     public static final int TABLE_ID = 6;
 
@@ -28,8 +28,6 @@ public class Clazz implements SyncableEntity{
 
     //Gives the schedule calendar ui
     private long clazzScheuleUMCalendarUid;
-
-    private long locationUid;
 
     //Active
     private boolean clazzActive;
@@ -75,14 +73,6 @@ public class Clazz implements SyncableEntity{
         this.clazzScheuleUMCalendarUid = clazzScheuleUMCalendarUid;
     }
 
-    public long getLocationUid() {
-        return locationUid;
-    }
-
-    public void setLocationUid(long locationUid) {
-        this.locationUid = locationUid;
-    }
-
     private long clazzLocationUid;
 
     public float getAttendanceAverage() {
@@ -108,8 +98,6 @@ public class Clazz implements SyncableEntity{
     public void setClazzName(String clazzName) {
         this.clazzName = clazzName;
     }
-
-
     public long getClazzMasterChangeSeqNum() {
         return clazzMasterChangeSeqNum;
     }

@@ -20,6 +20,7 @@ import com.ustadmobile.lib.db.entities.ClazzLog;
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecordWithPerson;
 import com.ustadmobile.lib.db.entities.EntityRole;
 import com.ustadmobile.lib.db.entities.FeedEntry;
+import com.ustadmobile.lib.db.entities.Role;
 import com.ustadmobile.lib.db.entities.UMCalendar;
 
 import java.util.Calendar;
@@ -87,7 +88,7 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
         ClazzDao clazzDao = repository.getClazzDao();
 
         clazzDao.personHasPermission(loggedInPersonUid, currentClazzUid,
-                EntityRole.PERMISSION_CLAZZ_RECORD_ATTENDANCE, new UmCallback<Boolean>() {
+                Role.PERMISSION_CLAZZ_RECORD_ATTENDANCE, new UmCallback<Boolean>() {
             @Override
             public void onSuccess(Boolean result) {
                 setHasEditPermissions(result);

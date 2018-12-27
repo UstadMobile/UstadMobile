@@ -31,11 +31,7 @@ import com.ustadmobile.core.db.dao.HolidayDao;
 import com.ustadmobile.core.db.dao.HttpCachedEntryDao;
 import com.ustadmobile.core.db.dao.LanguageDao;
 import com.ustadmobile.core.db.dao.LanguageVariantDao;
-<<<<<<< HEAD
 import com.ustadmobile.core.db.dao.LocationDao;
-=======
-import com.ustadmobile.lib.db.entities.LocationAncestorJoin;
->>>>>>> dev-permissions
 import com.ustadmobile.core.db.dao.NetworkNodeDao;
 import com.ustadmobile.core.db.dao.OpdsEntryDao;
 import com.ustadmobile.core.db.dao.OpdsEntryParentToChildJoinDao;
@@ -63,20 +59,6 @@ import com.ustadmobile.lib.database.annotation.UmRepository;
 import com.ustadmobile.lib.database.annotation.UmSyncOutgoing;
 import com.ustadmobile.lib.db.UmDbWithAuthenticator;
 import com.ustadmobile.lib.db.entities.AccessToken;
-<<<<<<< HEAD
-=======
-import com.ustadmobile.lib.db.entities.EntityRole;
-import com.ustadmobile.lib.db.entities.Location;
-import com.ustadmobile.lib.db.entities.PersonGroup;
-import com.ustadmobile.lib.db.entities.PersonGroupMember;
-import com.ustadmobile.lib.db.entities.PersonAuth;
-import com.ustadmobile.lib.db.entities.Role;
-import com.ustadmobile.lib.db.sync.UmSyncableDatabase;
-import com.ustadmobile.lib.db.sync.dao.SyncStatusDao;
-import com.ustadmobile.lib.db.sync.dao.SyncablePrimaryKeyDao;
-import com.ustadmobile.lib.db.sync.entities.SyncDeviceBits;
-import com.ustadmobile.lib.db.sync.entities.SyncStatus;
->>>>>>> dev-permissions
 import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.ClazzActivity;
 import com.ustadmobile.lib.db.entities.ClazzActivityChange;
@@ -101,6 +83,7 @@ import com.ustadmobile.lib.db.entities.DownloadJobItem;
 import com.ustadmobile.lib.db.entities.DownloadJobItemHistory;
 import com.ustadmobile.lib.db.entities.DownloadSet;
 import com.ustadmobile.lib.db.entities.DownloadSetItem;
+import com.ustadmobile.lib.db.entities.EntityRole;
 import com.ustadmobile.lib.db.entities.EntryStatusResponse;
 import com.ustadmobile.lib.db.entities.FeedEntry;
 import com.ustadmobile.lib.db.entities.Holiday;
@@ -108,6 +91,7 @@ import com.ustadmobile.lib.db.entities.HttpCachedEntry;
 import com.ustadmobile.lib.db.entities.Language;
 import com.ustadmobile.lib.db.entities.LanguageVariant;
 import com.ustadmobile.lib.db.entities.Location;
+import com.ustadmobile.lib.db.entities.LocationAncestorJoin;
 import com.ustadmobile.lib.db.entities.NetworkNode;
 import com.ustadmobile.lib.db.entities.OpdsEntry;
 import com.ustadmobile.lib.db.entities.OpdsEntryParentToChildJoin;
@@ -119,6 +103,9 @@ import com.ustadmobile.lib.db.entities.PersonAuth;
 import com.ustadmobile.lib.db.entities.PersonCustomFieldValue;
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField;
 import com.ustadmobile.lib.db.entities.PersonField;
+import com.ustadmobile.lib.db.entities.PersonGroup;
+import com.ustadmobile.lib.db.entities.PersonGroupMember;
+import com.ustadmobile.lib.db.entities.Role;
 import com.ustadmobile.lib.db.entities.Schedule;
 import com.ustadmobile.lib.db.entities.SocialNominationQuestion;
 import com.ustadmobile.lib.db.entities.SocialNominationQuestionResponse;
@@ -158,12 +145,8 @@ import java.util.Hashtable;
         Location.class, ContentEntryFileStatus.class, ContentCategorySchema.class,
         ContentCategory.class, Language.class, LanguageVariant.class,
         SyncStatus.class, SyncablePrimaryKey.class, SyncDeviceBits.class,
-<<<<<<< HEAD
-        AccessToken.class, PersonAuth.class,
-=======
         AccessToken.class, PersonAuth.class, Role.class, EntityRole.class,
-        PersonGroup.class, PersonGroupMember.class, Location.class, LocationAncestorJoin.class
->>>>>>> dev-permissions
+        PersonGroup.class, PersonGroupMember.class, LocationAncestorJoin.class
 })
 public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthenticator {
 

@@ -37,6 +37,12 @@ public class Role {
 
     public static final long PERMISSION_CLAZZ_RECORD_SEL = 32;
 
+    public static final long PERMISSION_CLAZZ_VIEW_ATTENDANCE = 64;
+
+    public static final long PERMISSION_CLAZZ_VIEW_ACTIVITY = 128;
+
+    public static final long PERMISSION_CLAZZ_VIEW_SEL = 256;
+    
     public long getRoleUid() {
         return roleUid;
     }

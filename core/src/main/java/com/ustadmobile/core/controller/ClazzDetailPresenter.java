@@ -9,6 +9,7 @@ import com.ustadmobile.core.view.ClassDetailView;
 import com.ustadmobile.core.view.ClazzEditView;
 import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.EntityRole;
+import com.ustadmobile.lib.db.entities.Role;
 
 import java.util.Hashtable;
 
@@ -60,7 +61,7 @@ public class ClazzDetailPresenter
     public void checkPermissions(){
 
         clazzDao.personHasPermission(loggedInPersonUid, currentClazzUid,
-                EntityRole.PERMISSION_UPDATE, new UmCallback<Boolean>() {
+                Role.PERMISSION_UPDATE, new UmCallback<Boolean>() {
             @Override
             public void onSuccess(Boolean result) {
                 view.setSettingsVisibility(result);
@@ -73,7 +74,7 @@ public class ClazzDetailPresenter
         });
 
         clazzDao.personHasPermission(loggedInPersonUid, currentClazzUid,
-                EntityRole.PERMISSION_CLAZZ_VIEW_ATTENDANCE, new UmCallback<Boolean>() {
+                Role.PERMISSION_CLAZZ_VIEW_ATTENDANCE, new UmCallback<Boolean>() {
                     @Override
                     public void onSuccess(Boolean result) {
                         view.setAttendanceVisibility(true);
@@ -86,7 +87,7 @@ public class ClazzDetailPresenter
                 });
 
         clazzDao.personHasPermission(loggedInPersonUid, currentClazzUid,
-                EntityRole.PERMISSION_CLAZZ_VIEW_SEL, new UmCallback<Boolean>() {
+                Role.PERMISSION_CLAZZ_VIEW_SEL, new UmCallback<Boolean>() {
                     @Override
                     public void onSuccess(Boolean result) {
                         view.setSELVisibility(result);
@@ -99,7 +100,7 @@ public class ClazzDetailPresenter
                 });
 
         clazzDao.personHasPermission(loggedInPersonUid, currentClazzUid,
-                EntityRole.PERMISSION_CLAZZ_VIEW_ACTIVITY, new UmCallback<Boolean>() {
+                Role.PERMISSION_CLAZZ_VIEW_ACTIVITY, new UmCallback<Boolean>() {
                     @Override
                     public void onSuccess(Boolean result) {
                         view.setActivityVisibility(result);
