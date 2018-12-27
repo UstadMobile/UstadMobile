@@ -6,11 +6,15 @@ import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.database.annotation.UmRepository;
+import com.ustadmobile.lib.database.annotation.UmSyncFindUpdateable;
 import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.ClazzWithNumStudents;
 import com.ustadmobile.lib.db.entities.Location;
 import com.ustadmobile.lib.db.entities.Role;
+import com.ustadmobile.lib.db.sync.UmSyncExistingEntity;
 import com.ustadmobile.lib.db.sync.dao.SyncableDao;
+
+import java.util.List;
 
 import static com.ustadmobile.core.db.dao.ClazzDao.PERMISSION_CONDITION1;
 import static com.ustadmobile.core.db.dao.ClazzDao.PERMISSION_CONDITION2;
@@ -59,7 +63,6 @@ public abstract class ClazzDao implements SyncableDao<Clazz, ClazzDao> {
     public abstract void personHasPermission(long accountPersonUid, long clazzUid, long permission,
                                              UmCallback<Boolean> callback);
 
-
     @UmQuery("SELECT " +
             "(SELECT admin FROM Person WHERE personUid = :accountPersonUid) OR " +
             "EXISTS(SELECT EntityRole.erUid FROM EntityRole " +
@@ -70,6 +73,14 @@ public abstract class ClazzDao implements SyncableDao<Clazz, ClazzDao> {
             " EntityRole.erTableId = " + Clazz.TABLE_ID +
             " AND " +
             " (Role.rolePermissions & :permission) > 0)")
-    public abstract void personHasPermission(long accountPersonUid, long permission, UmCallback<Boolean> callback);
+    public abstract void personHasPermission(long accountPersonUid, long permission,
+                                             UmCallback<Boolean> callback);
 
+    @UmQuery("SELECT Clazz.clazzUid as primaryKey, " +
+            "(" + PERMISSION_CONDITION1 + Role.PERMISSION_UPDATE + PERMISSION_CONDITION2 + ") " +
+                " AS userCanUpdate " +
+            " FROM Clazz WHERE Clazz.clazzUid in (:primaryKeys)")
+    @UmSyncFindUpdateable
+    public abstract List<UmSyncExistingEntity> syncFindExistingEntities(List<Long> primaryKeys,
+                                                                        long accountPersonUid);
 }

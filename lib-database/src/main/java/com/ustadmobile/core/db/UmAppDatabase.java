@@ -21,10 +21,14 @@ import com.ustadmobile.core.db.dao.DownloadJobItemDao;
 import com.ustadmobile.core.db.dao.DownloadJobItemHistoryDao;
 import com.ustadmobile.core.db.dao.DownloadSetDao;
 import com.ustadmobile.core.db.dao.DownloadSetItemDao;
+import com.ustadmobile.core.db.dao.EntityRoleDao;
 import com.ustadmobile.core.db.dao.EntryStatusResponseDao;
 import com.ustadmobile.core.db.dao.HttpCachedEntryDao;
 import com.ustadmobile.core.db.dao.LanguageDao;
 import com.ustadmobile.core.db.dao.LanguageVariantDao;
+import com.ustadmobile.core.db.dao.PersonGroupDao;
+import com.ustadmobile.core.db.dao.PersonGroupMemberDao;
+import com.ustadmobile.core.db.dao.RoleDao;
 import com.ustadmobile.lib.db.entities.LocationAncestorJoin;
 import com.ustadmobile.core.db.dao.NetworkNodeDao;
 import com.ustadmobile.core.db.dao.OpdsEntryDao;
@@ -224,6 +228,14 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
 
     public abstract AccessTokenDao getAccessTokenDao();
 
+    public abstract RoleDao getRoleDao();
+
+    public abstract PersonGroupDao getPersonGroupDao();
+
+    public abstract PersonGroupMemberDao getPersonGroupMemberDao();
+
+    public abstract EntityRoleDao getEntityRoleDao();
+
     @UmDbContext
     public abstract Object getContext();
 
@@ -267,4 +279,6 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
     public void invalidateDeviceBits() {
         getSyncablePrimaryKeyDao().invalidateDeviceBits();
     }
+
+
 }
