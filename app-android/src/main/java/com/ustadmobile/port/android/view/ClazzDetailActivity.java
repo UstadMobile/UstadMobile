@@ -1,5 +1,7 @@
 package com.ustadmobile.port.android.view;
 
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -10,7 +12,6 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.ClazzDetailPresenter;
@@ -36,8 +37,8 @@ public class ClazzDetailActivity extends UstadBaseActivity implements
     private Toolbar toolbar;
     private TabLayout mTabLayout;
     private ClazzDetailPresenter mPresenter;
-    Long clazzUid;
-    private boolean attendanceVisibility, activityVisibility, selVisibility;
+    Long currentClazzUid;
+    private boolean attendanceVisibility, activityVisibility, selVisibility, settingsVisibility;
     Menu menu;
 
     private Map<Integer, Class> fragPosMap = new HashMap<>();
@@ -45,29 +46,39 @@ public class ClazzDetailActivity extends UstadBaseActivity implements
     /**
      * Separated out view pager setup for clarity.
      */
-    private void setupViewPager() {
-        mPager = (ViewPager) findViewById(R.id.class_detail_view_pager_container);
-        mPagerAdapter = new ClassDetailViewPagerAdapter(getSupportFragmentManager());
-        int fragCount = 0;
-        mPagerAdapter.addFragments(fragCount, ClazzStudentListFragment.newInstance(this.clazzUid));
-        fragPosMap.put(fragCount++, ClazzStudentListFragment.class);
+    @Override
+    public void setupViewPager() {
 
-        if(attendanceVisibility) {
-            mPagerAdapter.addFragments(fragCount, ClazzLogListFragment.newInstance(this.clazzUid));
-            fragPosMap.put(fragCount++, ClazzLogListFragment.class);
-        }
+        runOnUiThread(() -> {
+            mPager = findViewById(R.id.class_detail_view_pager_container);
+            mPagerAdapter = new ClassDetailViewPagerAdapter(getSupportFragmentManager());
+            int fragCount = 0;
+            mPagerAdapter.addFragments(fragCount, ClazzStudentListFragment.newInstance(currentClazzUid));
+            fragPosMap.put(fragCount++, ClazzStudentListFragment.class);
 
-        if(activityVisibility) {
-            mPagerAdapter.addFragments(fragCount, ClazzActivityListFragment.newInstance(this.clazzUid));
-            fragPosMap.put(fragCount++, ClazzActivityListFragment.class);
-        }
+            if(attendanceVisibility) {
+                mPagerAdapter.addFragments(fragCount, ClazzLogListFragment.newInstance(currentClazzUid));
+                fragPosMap.put(fragCount++, ClazzLogListFragment.class);
+            }
 
-        if(selVisibility) {
-            mPagerAdapter.addFragments(fragCount, SELAnswerListFragment.newInstance(this.clazzUid));
-            fragPosMap.put(fragCount++, SELAnswerListFragment.class);
-        }
+            if(activityVisibility) {
+                mPagerAdapter.addFragments(fragCount, ClazzActivityListFragment.newInstance(currentClazzUid));
+                fragPosMap.put(fragCount++, ClazzActivityListFragment.class);
+            }
 
-        mPager.setAdapter(mPagerAdapter);
+            if(selVisibility) {
+                mPagerAdapter.addFragments(fragCount, SELAnswerListFragment.newInstance(currentClazzUid));
+                fragPosMap.put(fragCount++, SELAnswerListFragment.class);
+            }
+
+            mPager.setAdapter(mPagerAdapter);
+
+            mTabLayout= findViewById(R.id.activity_class_detail_tablayout);
+            mTabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
+            mTabLayout.setupWithViewPager(mPager);
+
+        });
+
     }
 
     /**
@@ -81,7 +92,7 @@ public class ClazzDetailActivity extends UstadBaseActivity implements
         //Setting layout:
         setContentView(R.layout.activity_clazz_detail);
 
-        clazzUid = getIntent().getLongExtra(ARG_CLAZZ_UID, 0L);
+        currentClazzUid = getIntent().getLongExtra(ARG_CLAZZ_UID, 0L);
 
         toolbar = findViewById(R.id.class_detail_toolbar);
         //Set title as Class name
@@ -95,11 +106,7 @@ public class ClazzDetailActivity extends UstadBaseActivity implements
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
 
         //set up view pager
-        setupViewPager();
-
-        mTabLayout= findViewById(R.id.activity_class_detail_tablayout);
-        mTabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
-        mTabLayout.setupWithViewPager(mPager);
+        //setupViewPager();
     }
 
     @Override
@@ -119,6 +126,17 @@ public class ClazzDetailActivity extends UstadBaseActivity implements
         this.menu = menu;
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_clazzdetail, menu);
+
+        MenuItem settingsGearMenuItem = menu.findItem(R.id.menu_clazzdetail_gear);
+        Drawable gearIcon = getResources().getDrawable(R.drawable.ic_settings_white_24dp);
+        gearIcon.setColorFilter(getResources().getColor(R.color.icons), PorterDuff.Mode.SRC_IN);
+        settingsGearMenuItem.setIcon(gearIcon);
+
+        if(menu != null) {
+            if(settingsGearMenuItem != null)
+                settingsGearMenuItem.setVisible(settingsVisibility);
+        }
+
         return true;
     }
 
@@ -189,10 +207,7 @@ public class ClazzDetailActivity extends UstadBaseActivity implements
 
     @Override
     public void setSettingsVisibility(boolean visible) {
-        if(menu != null) {
-            MenuItem menuItem = menu.findItem(R.menu.menu_clazzdetail);
-            menuItem.setVisible(visible);
-        }
+        settingsVisibility = visible;
     }
 
     /**
@@ -227,13 +242,13 @@ public class ClazzDetailActivity extends UstadBaseActivity implements
             } else {
                 Class fragClass = fragPosMap.get(position);
                 if(fragClass.equals(ClazzStudentListFragment.class)) {
-                    return ClazzStudentListFragment.newInstance(clazzUid);
+                    return ClazzStudentListFragment.newInstance(currentClazzUid);
                 }else if(fragClass.equals(ClazzLogListFragment.class)) {
-                    return ClazzLogListFragment.newInstance(clazzUid);
+                    return ClazzLogListFragment.newInstance(currentClazzUid);
                 }else if(fragClass.equals(ClazzActivityListFragment.class)) {
-                    return ClazzActivityListFragment.newInstance(clazzUid);
+                    return ClazzActivityListFragment.newInstance(currentClazzUid);
                 }else if(fragClass.equals(SELAnswerListFragment.class)) {
-                    return SELAnswerListFragment.newInstance(clazzUid);
+                    return SELAnswerListFragment.newInstance(currentClazzUid);
                 }else{
                     return null;
                 }

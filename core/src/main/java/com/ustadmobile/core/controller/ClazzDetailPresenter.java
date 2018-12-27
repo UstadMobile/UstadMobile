@@ -9,7 +9,6 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.ClassDetailView;
 import com.ustadmobile.core.view.ClazzEditView;
 import com.ustadmobile.lib.db.entities.Clazz;
-import com.ustadmobile.lib.db.entities.EntityRole;
 import com.ustadmobile.lib.db.entities.Role;
 
 import java.util.Hashtable;
@@ -53,8 +52,10 @@ public class ClazzDetailPresenter
     public void onCreate(Hashtable savedState) {
         super.onCreate(savedState);
 
+        //Update toolbar title
         updateToolbarTitle();
 
+        //Permission check
         checkPermissions();
 
     }
@@ -62,58 +63,62 @@ public class ClazzDetailPresenter
     public void checkPermissions(){
 
         clazzDao.personHasPermission(loggedInPersonUid, currentClazzUid,
-                Role.PERMISSION_UPDATE,
-                new UmCallbackWithDefaultValue<>(false,
+            Role.PERMISSION_UPDATE,
+            new UmCallbackWithDefaultValue<>(false, new UmCallback<Boolean>() {
+                @Override
+                public void onSuccess(Boolean result) {
+                    view.setSettingsVisibility(result);
+                    clazzDao.personHasPermission(loggedInPersonUid, currentClazzUid,
+                        Role.PERMISSION_CLAZZ_VIEW_ATTENDANCE, new UmCallbackWithDefaultValue<>(false,
                         new UmCallback<Boolean>() {
-                    @Override
-                    public void onSuccess(Boolean result) {
-                        view.setSettingsVisibility(result);
-                    }
+                            @Override
+                            public void onSuccess(Boolean result) {
+                                view.setAttendanceVisibility(true);
+                                clazzDao.personHasPermission(loggedInPersonUid, currentClazzUid,
+                                    Role.PERMISSION_CLAZZ_VIEW_SEL, new UmCallbackWithDefaultValue<>(false,
+                                    new UmCallback<Boolean>() {
+                                        @Override
+                                        public void onSuccess(Boolean result) {
+                                            view.setSELVisibility(result);
+                                            clazzDao.personHasPermission(loggedInPersonUid, currentClazzUid,
+                                                Role.PERMISSION_CLAZZ_VIEW_ACTIVITY, new UmCallbackWithDefaultValue<>(false,
+                                                new UmCallback<Boolean>() {
+                                                    @Override
+                                                    public void onSuccess(Boolean result) {
+                                                        view.setActivityVisibility(result);
+                                                        //Setup view pager after all permissions
+                                                        view.setupViewPager();
+                                                    }
+                                                    @Override
+                                                    public void onFailure(Throwable exception) {
+                                                        exception.printStackTrace();
+                                                    }
+                                                }));
+                                        }
+                                        @Override
+                                        public void onFailure(Throwable exception) {
+                                            exception.printStackTrace();
+                                        }
+                                    }));
+                            }
+                            @Override
+                            public void onFailure(Throwable exception) {
+                                exception.printStackTrace();
+                            }
+                        }));
+                }
 
-                    @Override
-                    public void onFailure(Throwable exception) {
+                @Override
+                public void onFailure(Throwable exception) {
+                    exception.printStackTrace();
+                }
+            }));
 
-                    }
-                }));
 
-        clazzDao.personHasPermission(loggedInPersonUid, currentClazzUid,
-                Role.PERMISSION_CLAZZ_VIEW_ATTENDANCE, new UmCallback<Boolean>() {
-                    @Override
-                    public void onSuccess(Boolean result) {
-                        view.setAttendanceVisibility(true);
-                    }
 
-                    @Override
-                    public void onFailure(Throwable exception) {
-                        exception.printStackTrace();
-                    }
-                });
 
-        clazzDao.personHasPermission(loggedInPersonUid, currentClazzUid,
-                Role.PERMISSION_CLAZZ_VIEW_SEL, new UmCallback<Boolean>() {
-                    @Override
-                    public void onSuccess(Boolean result) {
-                        view.setSELVisibility(result);
-                    }
 
-                    @Override
-                    public void onFailure(Throwable exception) {
-                        exception.printStackTrace();
-                    }
-                });
 
-        clazzDao.personHasPermission(loggedInPersonUid, currentClazzUid,
-                Role.PERMISSION_CLAZZ_VIEW_ACTIVITY, new UmCallback<Boolean>() {
-                    @Override
-                    public void onSuccess(Boolean result) {
-                        view.setActivityVisibility(result);
-                    }
-
-                    @Override
-                    public void onFailure(Throwable exception) {
-                        exception.printStackTrace();
-                    }
-                });
     }
 
     /**

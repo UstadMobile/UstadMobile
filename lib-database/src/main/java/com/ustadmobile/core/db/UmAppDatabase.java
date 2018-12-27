@@ -105,6 +105,7 @@ import com.ustadmobile.lib.db.entities.PersonDetailPresenterField;
 import com.ustadmobile.lib.db.entities.PersonField;
 import com.ustadmobile.lib.db.entities.PersonGroup;
 import com.ustadmobile.lib.db.entities.PersonGroupMember;
+import com.ustadmobile.lib.db.entities.PersonLocationJoin;
 import com.ustadmobile.lib.db.entities.Role;
 import com.ustadmobile.lib.db.entities.Schedule;
 import com.ustadmobile.lib.db.entities.SocialNominationQuestion;
@@ -146,7 +147,9 @@ import java.util.Hashtable;
         ContentCategory.class, Language.class, LanguageVariant.class,
         SyncStatus.class, SyncablePrimaryKey.class, SyncDeviceBits.class,
         AccessToken.class, PersonAuth.class, Role.class, EntityRole.class,
-        PersonGroup.class, PersonGroupMember.class, LocationAncestorJoin.class
+        PersonGroup.class, PersonGroupMember.class, LocationAncestorJoin.class,
+        PersonLocationJoin.class
+
 })
 public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthenticator {
 
