@@ -6,6 +6,7 @@ import com.ustadmobile.core.db.dao.ClazzDao;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
+import com.ustadmobile.core.impl.UmCallbackWithDefaultValue;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.ClassDetailView;
 import com.ustadmobile.core.view.ClassLogDetailView;
@@ -98,28 +99,24 @@ public class ClazzListPresenter extends UstadBaseController<ClazzListView> {
             //Check permissions
             checkPermissions();
         }
-
-
-
     }
 
-    public void checkPermissions(){
+    public void checkPermissions() {
         clazzDao.personHasPermission(loggedInPersonUid, Role.PERMISSION_INSERT,
-                new UmCallback<Boolean>() {
-            @Override
-            public void onSuccess(Boolean result) {
-                if(result!=null) {
+            new UmCallbackWithDefaultValue<>(false, new UmCallback<Boolean>() {
+                @Override
+                public void onSuccess(Boolean result) {
                     view.showAddClassButton(result);
                     view.showAllClazzSettingsButton(true);
                     setRecordAttendanceVisibility(true);
                 }
-            }
 
-            @Override
-            public void onFailure(Throwable exception) {
-                exception.printStackTrace();
-            }
-        });
+                @Override
+                public void onFailure(Throwable exception) {
+
+                }
+            })
+        );
     }
 
     private void updateProviderToView(){

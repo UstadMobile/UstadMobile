@@ -2,13 +2,17 @@ package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmProvider;
+import com.ustadmobile.core.db.dao.ClazzDao;
+import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
+import com.ustadmobile.core.impl.UmCallbackWithDefaultValue;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.FeedListView;
 import com.ustadmobile.core.view.ReportEditView;
 import com.ustadmobile.core.view.ReportSelectionView;
 import com.ustadmobile.lib.db.entities.ClazzAverage;
 import com.ustadmobile.lib.db.entities.FeedEntry;
+import com.ustadmobile.lib.db.entities.Role;
 
 import java.util.Hashtable;
 
@@ -23,13 +27,15 @@ import static com.ustadmobile.core.view.ReportEditView.ARG_REPORT_NAME;
  */
 public class FeedListPresenter extends UstadBaseController<FeedListView>{
 
-    static long TEST_DEFAULT_PERSON_UID = 1L;
+    private long loggedInPersonUid = 0L;
 
     public FeedListPresenter(Object context, Hashtable arguments, FeedListView view) {
         super(context, arguments, view);
     }
 
     private UmProvider<FeedEntry> feedEntryUmProvider;
+
+    private UmAppDatabase repository;
 
     /**
      * Overridden onCreate in order:
@@ -41,11 +47,12 @@ public class FeedListPresenter extends UstadBaseController<FeedListView>{
     public void onCreate(Hashtable savedState){
         super.onCreate(savedState);
 
-        //Testing: TODO: Remove when User integrated
-        long personUid = TEST_DEFAULT_PERSON_UID;
+        loggedInPersonUid = UmAccountManager.getActiveAccount(context).getPersonUid();
 
-        feedEntryUmProvider = UmAppDatabase.getInstance(view.getContext()).getFeedEntryDao()
-                .findByPersonUid(personUid);
+        repository = UmAppDatabase.getInstance(view.getContext());
+
+        feedEntryUmProvider = repository.getFeedEntryDao()
+                .findByPersonUid(loggedInPersonUid);
         updateFeedProviderToView();
 
         //Get numbers
@@ -68,6 +75,25 @@ public class FeedListPresenter extends UstadBaseController<FeedListView>{
             }
         });
 
+        //Check permissions
+        checkPermissions();
+    }
+
+    public void checkPermissions(){
+        ClazzDao clazzDao = repository.getClazzDao();
+        clazzDao.personHasPermission(loggedInPersonUid, Role.PERMISSION_CLAZZ_VIEW_REPORTS,
+            new UmCallbackWithDefaultValue<>(false, new UmCallback<Boolean>() {
+                @Override
+                public void onSuccess(Boolean result) {
+                    view.showReportOptionsOnSummaryCard(result);
+                }
+
+                @Override
+                public void onFailure(Throwable exception) {
+                    exception.printStackTrace();
+                }
+            })
+        );
     }
 
     /**

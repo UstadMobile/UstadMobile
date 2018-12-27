@@ -42,6 +42,9 @@ public class Role {
     public static final long PERMISSION_CLAZZ_VIEW_ACTIVITY = 128;
 
     public static final long PERMISSION_CLAZZ_VIEW_SEL = 256;
+
+    public static final long PERMISSION_CLAZZ_VIEW_REPORTS = 512;
+
     
     public long getRoleUid() {
         return roleUid;

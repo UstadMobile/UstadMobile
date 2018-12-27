@@ -114,7 +114,7 @@
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="8dp"
                 android:src="@drawable/ic_person_black_24dp"
-                android:tint="#9C27B0"
+                android:tint="@color/accent"
                 app:layout_constraintStart_toEndOf="@+id/textView11"
                 app:layout_constraintTop_toBottomOf="@+id/fragment_feed_list_report_card_title" />
 
@@ -135,7 +135,7 @@
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="8dp"
                 android:src="@drawable/ic_assignment_turned_in_grey_24dp"
-                android:tint="#4CAF50"
+                android:tint="@color/secondary_text"
                 app:layout_constraintStart_toEndOf="@+id/textView12"
                 app:layout_constraintTop_toBottomOf="@+id/fragment_feed_list_report_card_title" />
 

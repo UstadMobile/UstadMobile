@@ -4,6 +4,7 @@ import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.ClazzDao;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
+import com.ustadmobile.core.impl.UmCallbackWithDefaultValue;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.ClassDetailView;
 import com.ustadmobile.core.view.ClazzEditView;
@@ -61,17 +62,19 @@ public class ClazzDetailPresenter
     public void checkPermissions(){
 
         clazzDao.personHasPermission(loggedInPersonUid, currentClazzUid,
-                Role.PERMISSION_UPDATE, new UmCallback<Boolean>() {
-            @Override
-            public void onSuccess(Boolean result) {
-                view.setSettingsVisibility(result);
-            }
+                Role.PERMISSION_UPDATE,
+                new UmCallbackWithDefaultValue<>(false,
+                        new UmCallback<Boolean>() {
+                    @Override
+                    public void onSuccess(Boolean result) {
+                        view.setSettingsVisibility(result);
+                    }
 
-            @Override
-            public void onFailure(Throwable exception) {
-                exception.printStackTrace();
-            }
-        });
+                    @Override
+                    public void onFailure(Throwable exception) {
+
+                    }
+                }));
 
         clazzDao.personHasPermission(loggedInPersonUid, currentClazzUid,
                 Role.PERMISSION_CLAZZ_VIEW_ATTENDANCE, new UmCallback<Boolean>() {

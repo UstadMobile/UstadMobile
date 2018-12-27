@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.util.DiffUtil;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -43,6 +44,7 @@ public class FeedListFragment extends UstadBaseFragment implements FeedListView 
     private FeedListPresenter mPresenter;
     private Button reportButton;
     private ImageView reportImageView;
+    private CardView summaryCard;
 
     /**
      * The Recycler Adapter for Feed Entries.
@@ -122,19 +124,19 @@ public class FeedListFragment extends UstadBaseFragment implements FeedListView 
      * The Diff callback
      */
     public static final DiffUtil.ItemCallback<FeedEntry> DIFF_CALLBACK =
-            new DiffUtil.ItemCallback<FeedEntry>() {
-                @Override
-                public boolean areItemsTheSame(FeedEntry oldItem,
-                                               FeedEntry newItem) {
-                    return oldItem.getFeedEntryHash() == newItem.getFeedEntryHash();
-                }
+        new DiffUtil.ItemCallback<FeedEntry>() {
+            @Override
+            public boolean areItemsTheSame(FeedEntry oldItem,
+                                           FeedEntry newItem) {
+                return oldItem.getFeedEntryHash() == newItem.getFeedEntryHash();
+            }
 
-                @Override
-                public boolean areContentsTheSame(FeedEntry oldItem,
-                                                  FeedEntry newItem) {
-                    return oldItem.equals(newItem);
-                }
-            };
+            @Override
+            public boolean areContentsTheSame(FeedEntry oldItem,
+                                              FeedEntry newItem) {
+                return oldItem.equals(newItem);
+            }
+        };
 
     /**
      * Generates a new Fragment for a page fragment
@@ -177,6 +179,8 @@ public class FeedListFragment extends UstadBaseFragment implements FeedListView 
                 rootContainer.findViewById(R.id.fragment_feed_list_report_card_view_report);
         reportImageView =
                 rootContainer.findViewById(R.id.fragment_feed_list_report_card_report_icon);
+
+        summaryCard = rootContainer.findViewById(R.id.fragment_feed_list_report_card);
 
         //Create presenter and call its onCreate()
         mPresenter = new FeedListPresenter(this, UMAndroidUtil.bundleToHashtable(
@@ -260,14 +264,25 @@ public class FeedListFragment extends UstadBaseFragment implements FeedListView 
     }
 
     @Override
-    public void hideReportOptionsOnSummaryCard(boolean visible) {
-        if(visible) {
-            reportImageView.setVisibility(View.VISIBLE);
-            reportButton.setVisibility(View.VISIBLE);
-        }else{
-            reportImageView.setVisibility(View.INVISIBLE);
-            reportButton.setVisibility(View.INVISIBLE);
-        }
+    public void showReportOptionsOnSummaryCard(boolean visible) {
+        runOnUiThread(() -> {
+            if(visible) {
+                reportImageView.setVisibility(View.VISIBLE);
+                reportButton.setVisibility(View.VISIBLE);
+            }else{
+                reportImageView.setVisibility(View.INVISIBLE);
+                reportButton.setVisibility(View.INVISIBLE);
+            }
+        });
+
+    }
+
+    @Override
+    public void showSummaryCard(boolean visible) {
+        runOnUiThread(() -> {
+            summaryCard.setVisibility(visible?View.VISIBLE:View.INVISIBLE);
+            summaryCard.setEnabled(visible);
+        });
     }
 
     @Override

@@ -86,19 +86,19 @@ public class PeopleListFragment extends UstadBaseFragment implements PeopleListV
      * The DIFF CALLBACK
      */
     public static final DiffUtil.ItemCallback<PersonWithEnrollment> DIFF_CALLBACK2 =
-            new DiffUtil.ItemCallback<PersonWithEnrollment>() {
-                @Override
-                public boolean areItemsTheSame(PersonWithEnrollment oldItem,
-                                               PersonWithEnrollment newItem) {
-                    return oldItem.getPersonUid() == newItem.getPersonUid();
-                }
+        new DiffUtil.ItemCallback<PersonWithEnrollment>() {
+            @Override
+            public boolean areItemsTheSame(PersonWithEnrollment oldItem,
+                                           PersonWithEnrollment newItem) {
+                return oldItem.getPersonUid() == newItem.getPersonUid();
+            }
 
-                @Override
-                public boolean areContentsTheSame(PersonWithEnrollment oldItem,
-                                                  PersonWithEnrollment newItem) {
-                    return oldItem.equals(newItem);
-                }
-            };
+            @Override
+            public boolean areContentsTheSame(PersonWithEnrollment oldItem,
+                                              PersonWithEnrollment newItem) {
+                return oldItem.equals(newItem);
+            }
+        };
 
     @Override
     public void setPeopleListProvider(UmProvider<PersonWithEnrollment> listProvider) {
@@ -119,7 +119,10 @@ public class PeopleListFragment extends UstadBaseFragment implements PeopleListV
 
     @Override
     public void showFAB(boolean show) {
-        fab.setVisibility(show?View.VISIBLE:View.INVISIBLE);
-        fab.setEnabled(show);
+        runOnUiThread(() -> {
+            fab.setVisibility(show?View.VISIBLE:View.INVISIBLE);
+            fab.setEnabled(show);
+        });
+
     }
 }

@@ -307,7 +307,7 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
                         ClazzListView.ARG_CLAZZ_UID + "=" + currentClazzUid +
                         "&" + ClazzListView.ARG_LOGDATE + "=" + currentLogDate;
                 FeedEntry parentFeed =
-                        feedEntryDao.findByLink(FeedListPresenter.TEST_DEFAULT_PERSON_UID, possibleFeedLink);
+                        feedEntryDao.findByLink(loggedInPersonUid, possibleFeedLink);
                 if(parentFeed != null){
                     parentFeed.setFeedEntryDone(false);
                     feedEntryDao.updateDoneTrue(parentFeed.getFeedEntryUid());

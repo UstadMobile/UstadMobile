@@ -90,8 +90,6 @@ public class ClazzListFragment extends UstadBaseFragment implements ClazzListVie
                 UMAndroidUtil.bundleToHashtable(getArguments()), this);
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
 
-
-
         sortSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -161,11 +159,14 @@ public class ClazzListFragment extends UstadBaseFragment implements ClazzListVie
 
     @Override
     public void showAddClassButton(boolean show) {
-        if(show){
-            fab.setVisibility(View.VISIBLE);
-        }else{
-            fab.setVisibility(View.INVISIBLE);
-        }
+        runOnUiThread(() -> {
+            if(show){
+                fab.setVisibility(View.VISIBLE);
+            }else{
+                fab.setVisibility(View.INVISIBLE);
+            }
+        });
+
     }
 
     @Override
@@ -174,10 +175,11 @@ public class ClazzListFragment extends UstadBaseFragment implements ClazzListVie
     }
 
     public void showSettings(){
-        MenuItem allClazzSettingsMenuItem = mOptionsMenu.findItem(R.id.menu_settings_gear);
-        if(allClazzSettingsMenuItem != null){
-            allClazzSettingsMenuItem.setVisible(showAllClazzSettingsButton);
-        }
+        // TODO: Sprint 5
+//        MenuItem allClazzSettingsMenuItem = mOptionsMenu.findItem(R.id.menu_settings_gear);
+//        if(allClazzSettingsMenuItem != null){
+//            allClazzSettingsMenuItem.setVisible(showAllClazzSettingsButton);
+//        }
     }
 
     @Override

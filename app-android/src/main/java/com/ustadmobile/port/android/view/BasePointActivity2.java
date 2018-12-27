@@ -1,6 +1,8 @@
 package com.ustadmobile.port.android.view;
 
 import android.content.Intent;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -14,7 +16,6 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.Button;
 
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
@@ -176,10 +177,12 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
 
     @Override
     public void showSettings(boolean show) {
-        MenuItem allClazzSettingsMenuItem = mOptionsMenu.findItem(R.id.menu_settings_gear);
-        if(allClazzSettingsMenuItem != null){
-            allClazzSettingsMenuItem.setVisible(show);
-        }
+
+        /* TODO: Sprint 5 */
+//        MenuItem allClazzSettingsMenuItem = mOptionsMenu.findItem(R.id.menu_settings_gear);
+//        if(allClazzSettingsMenuItem != null){
+//            allClazzSettingsMenuItem.setVisible(show);
+//        }
     }
 
 
@@ -204,12 +207,14 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
         } else if (i == R.id.menu_basepoint_bulk_upload_master){
             mPresenter.handleClickBulkUpload();
             return super.onOptionsItemSelected(item);
-        }else if ( i == R.id.menu_settings_gear){
-            //TODO: Sprint 5 : Settings
-        } else {
+        }
+//        else if ( i == R.id.menu_settings_gear){
+//            //TODO: Sprint 5 : Settings
+//        }
+        else {
             return super.onOptionsItemSelected(item);
         }
-        return super.onOptionsItemSelected(item);
+        
     }
 
     /**
@@ -220,6 +225,24 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_share, menu);
+
+        //tint
+        MenuItem shareMenuItem = menu.findItem(R.id.menu_basepoint_share);
+        MenuItem bulkUploadMenuItem = menu.findItem(R.id.menu_basepoint_bulk_upload_master);
+        //MenuItem settingsMenuItem = menu.findItem(R.id.menu_settings_gear);
+
+        Drawable shareMenuIcon = getResources().getDrawable(R.drawable.ic_share_white_24dp);
+        Drawable bulkUploadMenuIcon = getResources().getDrawable(R.drawable.ic_file_upload_white_24dp);
+        Drawable settingsMenuIcon = getResources().getDrawable(R.drawable.ic_settings_white_24dp);
+
+        shareMenuIcon.setColorFilter(getResources().getColor(R.color.icons), PorterDuff.Mode.SRC_IN);
+        bulkUploadMenuIcon.setColorFilter(getResources().getColor(R.color.icons), PorterDuff.Mode.SRC_IN);
+        settingsMenuIcon.setColorFilter(getResources().getColor(R.color.icons), PorterDuff.Mode.SRC_IN);
+
+        shareMenuItem.setIcon(shareMenuIcon);
+        bulkUploadMenuItem.setIcon(bulkUploadMenuIcon);
+        //settingsMenuItem.setIcon(settingsMenuIcon);
+
         mOptionsMenu = menu;
         mPresenter.getLoggedInPerson();
         return true;

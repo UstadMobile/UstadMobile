@@ -32,17 +32,6 @@
 
     </LinearLayout>
 
-    <!-- <android.support.design.widget.FloatingActionButton
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/class_management_new_student_fab"
-        android:src="@drawable/ic_add_circle_outline_white_24dp"
-
-        app:borderWidth="2dp"
-        app:fabSize="normal"
-        app:rippleColor="@color/accent_material_dark"/>
-        -->
-
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">

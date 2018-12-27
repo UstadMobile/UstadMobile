@@ -28,7 +28,6 @@ import static com.ustadmobile.core.db.dao.PersonAuthDao.ENCRYPTED_PASS_PREFIX;
 @UmRepository
 public abstract class PersonDao implements SyncableDao<Person, PersonDao> {
 
-
     @Override
     @UmInsert
     public abstract long insert(Person entity);
