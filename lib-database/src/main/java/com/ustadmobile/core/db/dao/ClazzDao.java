@@ -60,8 +60,14 @@ public abstract class ClazzDao implements SyncableDao<Clazz, ClazzDao> {
                                              UmCallback<Boolean> callback);
 
 
-    @UmQuery("SELECT 1 FROM Clazz WHERE Clazz.clazzUid = 0 AND (" + PERMISSION_CONDITION1 +
-            " :permission" + PERMISSION_CONDITION2 + ")")
+    @UmQuery("SELECT EXISTS(SELECT EntityRole.erUid FROM EntityRole " +
+            " LEFT JOIN Role ON EntityRole.erRoleUid = Role.roleUid " +
+            " LEFT JOIN PersonGroupMember ON EntityRole.erGroupUid = PersonGroupMember.groupMemberGroupUid " +
+            " WHERE PersonGroupMember.groupMemberPersonUid = :accountPersonUid " +
+            " AND " +
+            " EntityRole.erTableId = " + Clazz.TABLE_ID +
+            " AND " +
+            " (Role.rolePermissions & :permission) > 0)")
     public abstract void personHasPermission(long accountPersonUid, long permission, UmCallback<Boolean> callback);
 
 }
