@@ -76,4 +76,12 @@ public class Role {
     public void setRoleLastChangedBy(int roleLastChangedBy) {
         this.roleLastChangedBy = roleLastChangedBy;
     }
+
+    public long getRolePermissions() {
+        return rolePermissions;
+    }
+
+    public void setRolePermissions(long rolePermissions) {
+        this.rolePermissions = rolePermissions;
+    }
 }

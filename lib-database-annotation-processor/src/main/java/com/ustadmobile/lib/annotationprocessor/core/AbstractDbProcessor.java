@@ -61,6 +61,7 @@ import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
+
 import javax.tools.Diagnostic;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -526,6 +527,7 @@ public abstract class AbstractDbProcessor {
 
         String readPermissionCondition = daoType.getAnnotation(UmDao.class) != null ?
                                 daoType.getAnnotation(UmDao.class).readPermissionCondition() : "";
+        readPermissionCondition = readPermissionCondition.replace(":_permission", "1");
         if(readPermissionCondition.equals("")) {
             messager.printMessage(Diagnostic.Kind.ERROR,
                     formatMethodForErrorMessage(daoMethod, daoType) + " Attempting to generate " +

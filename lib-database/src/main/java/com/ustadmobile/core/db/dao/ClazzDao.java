@@ -12,20 +12,27 @@ import com.ustadmobile.lib.db.entities.Location;
 import com.ustadmobile.lib.db.entities.Role;
 import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
-@UmDao(readPermissionCondition = " (SELECT admin FROM Person WHERE personUid = :accountPersonUid) = 1 OR " +
-        "EXISTS(SELECT PersonGroupMember.groupMemberPersonUid FROM PersonGroupMember " +
-        "JOIN EntityRole ON EntityRole.erGroupUid = PersonGroupMember.groupMemberGroupUid " +
-        "JOIN Role ON EntityRole.erRoleUid = Role.roleUid " +
-        "WHERE PersonGroupMember.groupMemberPersonUid = :accountPersonUid " +
-        " AND (" +
+import static com.ustadmobile.core.db.dao.ClazzDao.PERMISSION_CONDITION1;
+import static com.ustadmobile.core.db.dao.ClazzDao.PERMISSION_CONDITION2;
+
+@UmDao(readPermissionCondition = PERMISSION_CONDITION1 + Role.PERMISSION_SELECT + PERMISSION_CONDITION2)
+@UmRepository
+public abstract class ClazzDao implements SyncableDao<Clazz, ClazzDao> {
+
+    protected static final String PERMISSION_CONDITION1 = " (SELECT admin FROM Person WHERE personUid = :accountPersonUid) = 1 OR " +
+            "EXISTS(SELECT PersonGroupMember.groupMemberPersonUid FROM PersonGroupMember " +
+            "JOIN EntityRole ON EntityRole.erGroupUid = PersonGroupMember.groupMemberGroupUid " +
+            "JOIN Role ON EntityRole.erRoleUid = Role.roleUid " +
+            "WHERE PersonGroupMember.groupMemberPersonUid = :accountPersonUid " +
+            " AND (" +
             "(EntityRole.ertableId = " + Clazz.TABLE_ID +
             " AND EntityRole.erEntityUid = Clazz.clazzUid) " +
             "OR" +
             "(EntityRole.ertableId = " + Location.TABLE_ID +
             " AND EntityRole.erEntityUid IN (SELECT locationAncestorId FROM LocationAncestorJoin WHERE locationAncestorChildLocationUid = Clazz.clazzLocationUid))" +
-        ") AND (Role.rolePermissions & " + Role.PERMISSION_SELECT + ") > 0)")
-@UmRepository
-public abstract class ClazzDao implements SyncableDao<Clazz, ClazzDao> {
+            ") AND (Role.rolePermissions & ";
+
+    protected static final String PERMISSION_CONDITION2 = ") > 0)";
 
     @Override
     @UmInsert
@@ -47,13 +54,14 @@ public abstract class ClazzDao implements SyncableDao<Clazz, ClazzDao> {
 
 
     /** Check if a permission is present on a specific entity e.g. update/modify etc*/
-    public void personHasPermission(long personUid, long clazzUid, long permission,
-                                             UmCallback<Boolean> callback) {
-        callback.onSuccess(Boolean.TRUE);
-    }
+    @UmQuery("SELECT 1 FROM Clazz WHERE Clazz.clazzUid = :clazzUid AND (" + PERMISSION_CONDITION1 +
+            " :permission" + PERMISSION_CONDITION2 + ")")
+    public abstract void personHasPermission(long accountPersonUid, long clazzUid, long permission,
+                                             UmCallback<Boolean> callback);
 
-    public void personHasPermission(long personUid, long permission, UmCallback<Boolean> callback) {
-        callback.onSuccess(Boolean.TRUE);
-    }
+
+    @UmQuery("SELECT 1 FROM Clazz WHERE Clazz.clazzUid = 0 AND (" + PERMISSION_CONDITION1 +
+            " :permission" + PERMISSION_CONDITION2 + ")")
+    public abstract void personHasPermission(long accountPersonUid, long permission, UmCallback<Boolean> callback);
 
 }
