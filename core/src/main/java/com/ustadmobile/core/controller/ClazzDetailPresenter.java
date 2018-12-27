@@ -114,11 +114,6 @@ public class ClazzDetailPresenter
                 }
             }));
 
-
-
-
-
-
     }
 
     /**
