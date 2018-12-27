@@ -6,10 +6,15 @@ import com.ustadmobile.lib.database.annotation.UmSyncLastChangedBy;
 import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
 import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 
-@UmEntity(tableId = 6)
-public class Clazz {
 
-    @UmPrimaryKey(autoGenerateSyncable = true)
+import static com.ustadmobile.lib.db.entities.Clazz.TABLE_ID;
+
+@UmEntity(tableId = TABLE_ID)
+public class Clazz implements SyncableEntity{
+
+    public static final int TABLE_ID = 6;
+
+    @UmPrimaryKey(autoIncrement = true)
     private long clazzUid;
 
     private String clazzName;
@@ -78,6 +83,8 @@ public class Clazz {
         this.locationUid = locationUid;
     }
 
+    private long clazzLocationUid;
+
     public float getAttendanceAverage() {
         return attendanceAverage;
     }
@@ -125,5 +132,13 @@ public class Clazz {
 
     public void setClazzLastChangedBy(int clazzLastChangedBy) {
         this.clazzLastChangedBy = clazzLastChangedBy;
+    }
+
+    public long getClazzLocationUid() {
+        return clazzLocationUid;
+    }
+
+    public void setClazzLocationUid(long clazzLocationUid) {
+        this.clazzLocationUid = clazzLocationUid;
     }
 }

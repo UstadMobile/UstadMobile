@@ -6,15 +6,29 @@ import com.ustadmobile.lib.database.annotation.UmSyncLastChangedBy;
 import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
 import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 
+<<<<<<< HEAD
 @UmEntity(tableId = 29)
 public class Location {
 
+=======
+import static com.ustadmobile.lib.db.entities.Location.TABLE_ID;
+
+@UmEntity(tableId = TABLE_ID)
+public class Location {
+
+    public static final int TABLE_ID = 29;
+
+>>>>>>> dev-permissions
     @UmPrimaryKey(autoGenerateSyncable = true)
     private long locationUid;
 
     private String title;
 
+<<<<<<< HEAD
     private String locationDesc;
+=======
+    private String description;
+>>>>>>> dev-permissions
 
     private String lng;
 
@@ -55,12 +69,21 @@ public class Location {
         this.title = title;
     }
 
+<<<<<<< HEAD
     public String getLocationDesc() {
         return locationDesc;
     }
 
     public void setLocationDesc(String locationDesc) {
         this.locationDesc = locationDesc;
+=======
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+>>>>>>> dev-permissions
     }
 
     public String getLat() {

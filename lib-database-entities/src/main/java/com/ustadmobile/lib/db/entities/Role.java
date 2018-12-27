@@ -22,6 +22,21 @@ public class Role {
     @UmSyncLastChangedBy
     private int roleLastChangedBy;
 
+    //bit flags made of up PERMISSION_ constants
+    private long rolePermissions;
+
+    public static final long PERMISSION_SELECT = 1;
+
+    public static final long PERMISSION_INSERT = 2;
+
+    public static final long PERMISSION_UPDATE = 4;
+
+    public static final long PERMISSION_CLAZZ_RECORD_ATTENDANCE = 8;
+
+    public static final long PERMISSION_CLAZZ_RECORD_ACTIVITY = 16;
+
+    public static final long PERMISSION_CLAZZ_RECORD_SEL = 32;
+
     public long getRoleUid() {
         return roleUid;
     }
@@ -60,5 +75,13 @@ public class Role {
 
     public void setRoleLastChangedBy(int roleLastChangedBy) {
         this.roleLastChangedBy = roleLastChangedBy;
+    }
+
+    public long getRolePermissions() {
+        return rolePermissions;
+    }
+
+    public void setRolePermissions(long rolePermissions) {
+        this.rolePermissions = rolePermissions;
     }
 }

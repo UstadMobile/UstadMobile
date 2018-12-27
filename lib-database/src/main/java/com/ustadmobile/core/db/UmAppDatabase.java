@@ -31,7 +31,11 @@ import com.ustadmobile.core.db.dao.HolidayDao;
 import com.ustadmobile.core.db.dao.HttpCachedEntryDao;
 import com.ustadmobile.core.db.dao.LanguageDao;
 import com.ustadmobile.core.db.dao.LanguageVariantDao;
+<<<<<<< HEAD
 import com.ustadmobile.core.db.dao.LocationDao;
+=======
+import com.ustadmobile.lib.db.entities.LocationAncestorJoin;
+>>>>>>> dev-permissions
 import com.ustadmobile.core.db.dao.NetworkNodeDao;
 import com.ustadmobile.core.db.dao.OpdsEntryDao;
 import com.ustadmobile.core.db.dao.OpdsEntryParentToChildJoinDao;
@@ -59,6 +63,20 @@ import com.ustadmobile.lib.database.annotation.UmRepository;
 import com.ustadmobile.lib.database.annotation.UmSyncOutgoing;
 import com.ustadmobile.lib.db.UmDbWithAuthenticator;
 import com.ustadmobile.lib.db.entities.AccessToken;
+<<<<<<< HEAD
+=======
+import com.ustadmobile.lib.db.entities.EntityRole;
+import com.ustadmobile.lib.db.entities.Location;
+import com.ustadmobile.lib.db.entities.PersonGroup;
+import com.ustadmobile.lib.db.entities.PersonGroupMember;
+import com.ustadmobile.lib.db.entities.PersonAuth;
+import com.ustadmobile.lib.db.entities.Role;
+import com.ustadmobile.lib.db.sync.UmSyncableDatabase;
+import com.ustadmobile.lib.db.sync.dao.SyncStatusDao;
+import com.ustadmobile.lib.db.sync.dao.SyncablePrimaryKeyDao;
+import com.ustadmobile.lib.db.sync.entities.SyncDeviceBits;
+import com.ustadmobile.lib.db.sync.entities.SyncStatus;
+>>>>>>> dev-permissions
 import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.ClazzActivity;
 import com.ustadmobile.lib.db.entities.ClazzActivityChange;
@@ -140,7 +158,12 @@ import java.util.Hashtable;
         Location.class, ContentEntryFileStatus.class, ContentCategorySchema.class,
         ContentCategory.class, Language.class, LanguageVariant.class,
         SyncStatus.class, SyncablePrimaryKey.class, SyncDeviceBits.class,
+<<<<<<< HEAD
         AccessToken.class, PersonAuth.class,
+=======
+        AccessToken.class, PersonAuth.class, Role.class, EntityRole.class,
+        PersonGroup.class, PersonGroupMember.class, Location.class, LocationAncestorJoin.class
+>>>>>>> dev-permissions
 })
 public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthenticator {
 
