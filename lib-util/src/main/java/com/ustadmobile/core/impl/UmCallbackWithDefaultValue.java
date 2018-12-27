@@ -8,6 +8,7 @@ public class UmCallbackWithDefaultValue<T> implements UmCallback<T>{
 
     public UmCallbackWithDefaultValue(T defaultVal, UmCallback callback) {
         this.defaultVal = defaultVal;
+        this.callback = callback;
     }
 
     @Override
