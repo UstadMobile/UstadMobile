@@ -81,7 +81,12 @@ public interface SyncableDao<T, D> extends BaseDao<T> {
                                long fromMasterChangeSeqNum, long toMasterChangeSeqNum,
                                @UmRestAuthorizedUidParam long accountPersonUid,
                                int deviceId, int limit);
+
     @UmSyncCheckIncomingCanUpdate
     List<UmSyncExistingEntity> syncFindExistingEntities(List<Long> primaryKeys, long accountPersonUid);
+
+    @UmSyncCheckIncomingCanInsert
+    boolean syncAccountCanInsert(long accountPersonUid);
+
 
 }

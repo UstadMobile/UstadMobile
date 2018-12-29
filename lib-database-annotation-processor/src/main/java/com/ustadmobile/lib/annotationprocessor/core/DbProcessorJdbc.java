@@ -99,7 +99,7 @@ import static com.ustadmobile.lib.database.jdbc.JdbcDatabaseUtils.SUPPORTED_DB_P
  * Generates a JDBC based implementation of database classes annotated with @UmDatabase and their
  * associated DAOs.
  */
-public class DbProcessorJdbc extends AbstractDbProcessor {
+public class DbProcessorJdbc extends AbstractDbProcessor implements QueryMethodGenerator {
 
     private static String SUFFIX_JDBC_DBMANAGER = "_Jdbc";
 
@@ -643,7 +643,14 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
             }else if(daoMethod.getAnnotation(UmDelete.class) != null) {
                 addDeleteMethod(daoMethod, jdbcDaoClassSpec, SQL_IDENTIFIER_CHAR);
             }else if(daoMethod.getAnnotation(UmSyncIncoming.class) != null) {
-                addSyncHandleIncomingMethod(daoMethod, daoType, jdbcDaoClassSpec, "_db");
+                jdbcDaoClassSpec.addMethod(generateSyncIncomingMethod(daoMethod, daoType,
+                        jdbcDaoClassSpec, "_db"));
+                DaoMethodInfo methodInfo = new DaoMethodInfo(daoMethod, daoType, processingEnv);
+                TypeElement entityTypeEl = (TypeElement)processingEnv.getTypeUtils().asElement(
+                        methodInfo.resolveEntityParameterComponentType());
+                jdbcDaoClassSpec.addMethod(generateCheckIncomingEntitiesMethod("_checkIncoming",
+                        Modifier.PUBLIC, entityTypeEl, daoType, dbType, daoMethod,
+                        this, jdbcDaoClassSpec));
             }else if(daoMethod.getAnnotation(UmSyncOutgoing.class) != null) {
                 addSyncOutgoing(daoMethod, daoType, jdbcDaoClassSpec, "_db");
             }else if(daoMethod.getAnnotation(UmSyncFindLocalChanges.class) != null) {
@@ -656,7 +663,7 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                         daoMethod, daoType, dbType, jdbcDaoClassSpec));
             }else if(daoMethod.getAnnotation(UmSyncCheckIncomingCanUpdate.class) != null) {
                 jdbcDaoClassSpec.addMethod(generateQueryMethod(
-                        generateSyncFindUpdatable(daoType, daoMethod, processingEnv),
+                        generateSyncFindUpdatableSql(daoType, daoMethod, processingEnv),
                         daoMethod, daoType, dbType, jdbcDaoClassSpec));
             }else if(daoMethod.getAnnotation(UmSyncCheckIncomingCanInsert.class) != null) {
                 jdbcDaoClassSpec.addMethod(generateQueryMethod(
@@ -1225,6 +1232,7 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
         return generateQueryMethod(query.value(), daoMethod, daoType, dbType, daoBuilder);
     }
 
+    @Override
     public MethodSpec generateQueryMethod(String querySql,
                                           ExecutableElement daoMethod,
                                           TypeElement daoType,
@@ -1252,7 +1260,7 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
         boolean asyncMethod = asyncParamIndex != -1;
 
 
-        if(asyncMethod) {
+        if(daoMethodInfo.isAsyncMethod()) {
             codeBlock.beginControlFlow("_db.getExecutor().execute(() -> ");
         }
 
@@ -1278,7 +1286,6 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
             .getElementUtils().getTypeElement(UmProvider.class.getName()))) {
             codeBlock.add("return null;\n");
             methodBuilder.addCode(codeBlock.build());
-//            daoBuilder.addMethod(methodBuilder.build());
             return methodBuilder.build();
         }
 

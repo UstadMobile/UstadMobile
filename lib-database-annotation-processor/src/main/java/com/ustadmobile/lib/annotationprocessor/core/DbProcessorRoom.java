@@ -62,7 +62,7 @@ import static com.ustadmobile.lib.annotationprocessor.core.DbProcessorCore.OPT_R
  *
  */
 @SupportedOptions({OPT_ROOM_OUTPUT})
-public class DbProcessorRoom extends AbstractDbProcessor{
+public class DbProcessorRoom extends AbstractDbProcessor implements QueryMethodGenerator{
 
     public static final String SUFFIX_ROOM_DAO = "_RoomDao";
 
@@ -340,7 +340,9 @@ public class DbProcessorRoom extends AbstractDbProcessor{
                         generateFindByPrimaryKeySql(daoClass, daoMethod, processingEnv, '`'),
                         daoMethod, daoClass, dbType, roomDaoClassSpec));
             }else if(daoMethod.getAnnotation(UmSyncIncoming.class) != null) {
-                addSyncHandleIncomingMethod(daoMethod, daoClass, roomDaoClassSpec, "_dbManager");
+                roomDaoClassSpec.addMethod(
+                        generateSyncIncomingMethod(daoMethod, daoClass, roomDaoClassSpec,
+                                "_dbManager"));
             }else if(daoMethod.getAnnotation(UmSyncOutgoing.class) != null) {
                 addSyncOutgoing(daoMethod, daoClass, roomDaoClassSpec, "_dbManager");
             }else if(daoMethod.getAnnotation(UmSyncFindLocalChanges.class) != null) {
@@ -352,7 +354,7 @@ public class DbProcessorRoom extends AbstractDbProcessor{
                         generateSyncFindAllChanges(daoClass, daoMethod,
                         processingEnv), daoMethod, daoClass, dbType, roomDaoClassSpec));
             }else if(daoMethod.getAnnotation(UmSyncCheckIncomingCanUpdate.class) != null) {
-                roomDaoClassSpec.addMethod(generateQueryMethod(generateSyncFindUpdatable(daoClass,
+                roomDaoClassSpec.addMethod(generateQueryMethod(generateSyncFindUpdatableSql(daoClass,
                         daoMethod, processingEnv), daoMethod, daoClass, dbType, roomDaoClassSpec));
             }
 
@@ -507,7 +509,8 @@ public class DbProcessorRoom extends AbstractDbProcessor{
      *
      * @return MethodSpec.Builder for the implementation of this DAO method.
      */
-    private MethodSpec generateQueryMethod(String querySql,
+    @Override
+    public MethodSpec generateQueryMethod(String querySql,
                                                    ExecutableElement daoMethod,
                                                    TypeElement daoType,
                                                    TypeElement dbType,
