@@ -4,6 +4,6 @@ import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.db.entities.PersonGroupMember;
 import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
-@UmDao(readPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
+@UmDao(selectPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
 public abstract class PersonGroupMemberDao implements SyncableDao<PersonGroupMember, PersonGroupMemberDao> {
 }

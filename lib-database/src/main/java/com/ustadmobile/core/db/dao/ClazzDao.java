@@ -6,7 +6,7 @@ import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.database.annotation.UmRepository;
-import com.ustadmobile.lib.database.annotation.UmSyncFindUpdateable;
+import com.ustadmobile.lib.database.annotation.UmSyncCheckIncomingCanUpdate;
 import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.ClazzWithNumStudents;
 import com.ustadmobile.lib.db.entities.Location;
@@ -19,7 +19,16 @@ import java.util.List;
 import static com.ustadmobile.core.db.dao.ClazzDao.PERMISSION_CONDITION1;
 import static com.ustadmobile.core.db.dao.ClazzDao.PERMISSION_CONDITION2;
 
-@UmDao(readPermissionCondition = PERMISSION_CONDITION1 + Role.PERMISSION_SELECT + PERMISSION_CONDITION2)
+@UmDao(selectPermissionCondition = PERMISSION_CONDITION1 + Role.PERMISSION_SELECT + PERMISSION_CONDITION2,
+insertPermissionCondition = "(SELECT admin FROM Person WHERE personUid = :accountPersonUid) " +
+        "OR " +
+        "EXISTS(  PersonGroupMember.groupMemberPersonUid FROM PersonGroupMember " +
+        " JOIN EntityRole ON EntityRole.erGroupUid = PersonGroupMember.groupMemberGroupUid " +
+        " JOIN Role ON EntityRole.erRoleUid = Role.roleUid " +
+        " WHERE " +
+        " PersonGroupMember.groupMemberPersonUid = :accountPersonUid " +
+        " AND EntityRole.erTableId = " + Clazz.TABLE_ID +
+        " AND Role.rolePermissions & " + Role.PERMISSION_INSERT + " > 0)")
 @UmRepository
 public abstract class ClazzDao implements SyncableDao<Clazz, ClazzDao> {
 
@@ -80,7 +89,7 @@ public abstract class ClazzDao implements SyncableDao<Clazz, ClazzDao> {
             "(" + PERMISSION_CONDITION1 + Role.PERMISSION_UPDATE + PERMISSION_CONDITION2 + ") " +
                 " AS userCanUpdate " +
             " FROM Clazz WHERE Clazz.clazzUid in (:primaryKeys)")
-    @UmSyncFindUpdateable
+    @UmSyncCheckIncomingCanUpdate
     public abstract List<UmSyncExistingEntity> syncFindExistingEntities(List<Long> primaryKeys,
                                                                         long accountPersonUid);
 }

@@ -21,7 +21,7 @@ import com.ustadmobile.lib.database.annotation.UmQueryFindByPrimaryKey;
 import com.ustadmobile.lib.database.annotation.UmRepository;
 import com.ustadmobile.lib.database.annotation.UmSyncFindAllChanges;
 import com.ustadmobile.lib.database.annotation.UmSyncFindLocalChanges;
-import com.ustadmobile.lib.database.annotation.UmSyncFindUpdateable;
+import com.ustadmobile.lib.database.annotation.UmSyncCheckIncomingCanUpdate;
 import com.ustadmobile.lib.database.annotation.UmSyncIncoming;
 import com.ustadmobile.lib.database.annotation.UmSyncOutgoing;
 import com.ustadmobile.lib.database.annotation.UmUpdate;
@@ -332,25 +332,28 @@ public class DbProcessorRoom extends AbstractDbProcessor{
                         AnnotationSpec.builder(ClassName.get(ROOM_PKG_NAME, "Update")).build(),
                         roomDaoClassSpec);
             }else if(daoMethod.getAnnotation(UmQuery.class) != null) {
-                methodBuilder = generateQueryMethod(daoMethod.getAnnotation(UmQuery.class).value(),
-                        daoMethod, daoClass, dbType, roomDaoClassSpec);
+                roomDaoClassSpec.addMethod(
+                        generateQueryMethod(daoMethod.getAnnotation(UmQuery.class).value(),
+                        daoMethod, daoClass, dbType, roomDaoClassSpec));
             }else if(daoMethod.getAnnotation(UmQueryFindByPrimaryKey.class) != null) {
-                methodBuilder = generateQueryMethod(
+                roomDaoClassSpec.addMethod(generateQueryMethod(
                         generateFindByPrimaryKeySql(daoClass, daoMethod, processingEnv, '`'),
-                        daoMethod, daoClass, dbType, roomDaoClassSpec);
+                        daoMethod, daoClass, dbType, roomDaoClassSpec));
             }else if(daoMethod.getAnnotation(UmSyncIncoming.class) != null) {
                 addSyncHandleIncomingMethod(daoMethod, daoClass, roomDaoClassSpec, "_dbManager");
             }else if(daoMethod.getAnnotation(UmSyncOutgoing.class) != null) {
                 addSyncOutgoing(daoMethod, daoClass, roomDaoClassSpec, "_dbManager");
             }else if(daoMethod.getAnnotation(UmSyncFindLocalChanges.class) != null) {
-                methodBuilder = generateQueryMethod(generateFindLocalChangesSql(daoClass, daoMethod,
-                        processingEnv), daoMethod, daoClass, dbType, roomDaoClassSpec);
+                roomDaoClassSpec.addMethod(
+                        generateQueryMethod(generateFindLocalChangesSql(daoClass, daoMethod,
+                        processingEnv), daoMethod, daoClass, dbType, roomDaoClassSpec));
             }else if(daoMethod.getAnnotation(UmSyncFindAllChanges.class) != null) {
-                methodBuilder = generateQueryMethod(generateSyncFindAllChanges(daoClass, daoMethod,
-                        processingEnv), daoMethod, daoClass, dbType, roomDaoClassSpec);
-            }else if(daoMethod.getAnnotation(UmSyncFindUpdateable.class) != null) {
-                methodBuilder = generateQueryMethod(generateSyncFindUpdatable(daoClass, daoMethod,
-                        processingEnv), daoMethod, daoClass, dbType, roomDaoClassSpec);
+                roomDaoClassSpec.addMethod(generateQueryMethod(
+                        generateSyncFindAllChanges(daoClass, daoMethod,
+                        processingEnv), daoMethod, daoClass, dbType, roomDaoClassSpec));
+            }else if(daoMethod.getAnnotation(UmSyncCheckIncomingCanUpdate.class) != null) {
+                roomDaoClassSpec.addMethod(generateQueryMethod(generateSyncFindUpdatable(daoClass,
+                        daoMethod, processingEnv), daoMethod, daoClass, dbType, roomDaoClassSpec));
             }
 
             if(methodBuilder != null){
@@ -504,7 +507,7 @@ public class DbProcessorRoom extends AbstractDbProcessor{
      *
      * @return MethodSpec.Builder for the implementation of this DAO method.
      */
-    private MethodSpec.Builder generateQueryMethod(String querySql,
+    private MethodSpec generateQueryMethod(String querySql,
                                                    ExecutableElement daoMethod,
                                                    TypeElement daoType,
                                                    TypeElement dbType,
@@ -632,7 +635,7 @@ public class DbProcessorRoom extends AbstractDbProcessor{
                     .addModifiers(Modifier.ABSTRACT);
         }
 
-        return retMethod;
+        return retMethod.build();
 
     }
 

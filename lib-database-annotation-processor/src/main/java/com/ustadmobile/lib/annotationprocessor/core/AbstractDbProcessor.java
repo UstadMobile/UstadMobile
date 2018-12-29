@@ -18,9 +18,9 @@ import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 import com.ustadmobile.lib.database.annotation.UmRestAccessible;
 import com.ustadmobile.lib.database.annotation.UmRestAuthorizedUidParam;
+import com.ustadmobile.lib.database.annotation.UmSyncCheckIncomingCanUpdate;
 import com.ustadmobile.lib.database.annotation.UmSyncFindAllChanges;
 import com.ustadmobile.lib.database.annotation.UmSyncFindLocalChanges;
-import com.ustadmobile.lib.database.annotation.UmSyncFindUpdateable;
 import com.ustadmobile.lib.database.annotation.UmSyncIncoming;
 import com.ustadmobile.lib.database.annotation.UmSyncLastChangedBy;
 import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
@@ -525,13 +525,13 @@ public abstract class AbstractDbProcessor {
             return "";
         }
 
-        String readPermissionCondition = daoType.getAnnotation(UmDao.class) != null ?
-                                daoType.getAnnotation(UmDao.class).readPermissionCondition() : "";
-        readPermissionCondition = readPermissionCondition.replace(":_permission", "1");
-        if(readPermissionCondition.equals("")) {
+        String updatePermissionCondition = daoType.getAnnotation(UmDao.class) != null ?
+                                daoType.getAnnotation(UmDao.class).updatePermissionCondition() : "";
+        updatePermissionCondition = updatePermissionCondition.replace(":_permission", "1");
+        if(updatePermissionCondition.equals("")) {
             messager.printMessage(Diagnostic.Kind.ERROR,
                     formatMethodForErrorMessage(daoMethod, daoType) + " Attempting to generate " +
-                            "findLocalchangeSeq method: UmDao does not have a readPermissionCondition" +
+                            "findLocalchangeSeq method: UmDao does not have a selectPermissionCondition" +
                             " set to use for the where clause. It needs to be added");
             return "";
         }
@@ -561,7 +561,7 @@ public abstract class AbstractDbProcessor {
                 toLocalChangeSeqNumParam.getSimpleName().toString(),
                 lastChangedByField.getSimpleName(),
                 localDeviceId.getSimpleName(),
-                readPermissionCondition, limitParam.getSimpleName());
+                updatePermissionCondition, limitParam.getSimpleName());
     }
 
     protected String generateSyncFindAllChanges(TypeElement daoType, ExecutableElement daoMethod,
@@ -589,11 +589,11 @@ public abstract class AbstractDbProcessor {
         }
 
         String readPermissionCondition = daoType.getAnnotation(UmDao.class) != null ?
-                daoType.getAnnotation(UmDao.class).readPermissionCondition() : "";
+                daoType.getAnnotation(UmDao.class).selectPermissionCondition() : "";
         if(readPermissionCondition.equals("")) {
             messager.printMessage(Diagnostic.Kind.ERROR,
                     formatMethodForErrorMessage(daoMethod, daoType) + " attempting to" +
-                            "generate findAllChanges method: Dao has no readPermissionCondition",
+                            "generate findAllChanges method: Dao has no selectPermissionCondition",
                     daoType);
             return "";
         }
@@ -655,7 +655,7 @@ public abstract class AbstractDbProcessor {
         if(entityTypeMirror == null) {
             messager.printMessage(Diagnostic.Kind.ERROR,
                     formatMethodForErrorMessage(daoMethod, daoType) + " attempting to" +
-                            "generate syncFindUpdateable: DAO class must extend a BaseDao with an " +
+                            "generate SyncCheckIncomingCanUpdate: DAO class must extend a BaseDao with an " +
                             "entity type variable argument.");
             return "";
         }
@@ -663,11 +663,11 @@ public abstract class AbstractDbProcessor {
         TypeElement entityTypeEl = (TypeElement)processingEnv.getTypeUtils().asElement(entityTypeMirror);
         Element primaryKeyEl = findPrimaryKey(entityTypeEl);
         String readPermissionCondition = daoType.getAnnotation(UmDao.class) != null ?
-                daoType.getAnnotation(UmDao.class).readPermissionCondition() : "";
+                daoType.getAnnotation(UmDao.class).selectPermissionCondition() : "";
         if(readPermissionCondition.equals("")) {
             messager.printMessage(Diagnostic.Kind.ERROR,
                     formatMethodForErrorMessage(daoMethod, daoType) + " attempting to" +
-                    "generate syncFindUpdateable: DAO class must have readPermissionCondition.");
+                    "generate SyncCheckIncomingCanUpdate: DAO class must have selectPermissionCondition.");
             return "";
         }
 
@@ -681,6 +681,21 @@ public abstract class AbstractDbProcessor {
                 primaryKeyEl.getSimpleName(),
                 daoMethod.getParameters().get(0).getSimpleName(),
                 readPermissionCondition);
+    }
+
+
+    protected String generateSyncCheckCanInsertSql(TypeElement daoType, ExecutableElement daoMethod,
+                                                ProcessingEnvironment processingEnv) {
+        String canInsertCondition = daoType.getAnnotation(UmDao.class) != null ?
+                daoType.getAnnotation(UmDao.class).insertPermissionCondition() : null;
+        if(canInsertCondition == null) {
+            messager.printMessage(Diagnostic.Kind.ERROR,
+                    formatMethodForErrorMessage(daoMethod, daoType) + ": Attempting to" +
+                            "generate SyncCheckCanInsertSql: DAO class must have a insertPermissionCondition");
+            return "";
+        }
+
+        return "SELECT " + canInsertCondition;
     }
 
     protected VariableElement findPrimaryKey(TypeElement entityType) {
@@ -771,10 +786,10 @@ public abstract class AbstractDbProcessor {
         }
 
         Element findUpdateableEntitiesMethod = DbProcessorUtils.findElementWithAnnotation(
-                daoType, UmSyncFindUpdateable.class, processingEnv);
+                daoType, UmSyncCheckIncomingCanUpdate.class, processingEnv);
         if(findUpdateableEntitiesMethod == null){
             messager.printMessage(Diagnostic.Kind.ERROR, formatMethodForErrorMessage(daoMethod) +
-                ": Method Method annotated @UmSyncIncoming requires a method annotated with @UmSyncFindUpdateable");
+                ": Method Method annotated @UmSyncIncoming requires a method annotated with @UmSyncCheckIncomingCanUpdate");
             return methodBuilder;
         }
 

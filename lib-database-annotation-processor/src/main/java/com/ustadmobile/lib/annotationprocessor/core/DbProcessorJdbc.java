@@ -24,9 +24,10 @@ import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.database.annotation.UmQueryFindByPrimaryKey;
 import com.ustadmobile.lib.database.annotation.UmRepository;
+import com.ustadmobile.lib.database.annotation.UmSyncCheckIncomingCanInsert;
 import com.ustadmobile.lib.database.annotation.UmSyncFindAllChanges;
 import com.ustadmobile.lib.database.annotation.UmSyncFindLocalChanges;
-import com.ustadmobile.lib.database.annotation.UmSyncFindUpdateable;
+import com.ustadmobile.lib.database.annotation.UmSyncCheckIncomingCanUpdate;
 import com.ustadmobile.lib.database.annotation.UmSyncIncoming;
 import com.ustadmobile.lib.database.annotation.UmSyncOutgoing;
 import com.ustadmobile.lib.database.annotation.UmUpdate;
@@ -41,7 +42,6 @@ import com.ustadmobile.lib.db.sync.UmSyncableDatabase;
 import com.ustadmobile.lib.db.sync.entities.SyncDeviceBits;
 import com.ustadmobile.lib.db.sync.entities.SyncStatus;
 
-import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.statement.delete.Delete;
 import net.sf.jsqlparser.statement.select.Select;
@@ -65,7 +65,6 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -633,11 +632,12 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
             if(daoMethod.getAnnotation(UmInsert.class) != null) {
                 addInsertMethod(daoMethod, daoType, jdbcDaoClassSpec, SQL_IDENTIFIER_CHAR);
             }else if(daoMethod.getAnnotation(UmQuery.class) != null){
-                addQueryMethod(daoMethod, daoType, dbType, jdbcDaoClassSpec, SQL_IDENTIFIER_CHAR,
-                        daoMethod.getAnnotation(UmQuery.class).value());
+                jdbcDaoClassSpec.addMethod(generateQueryMethod(daoMethod, daoType, dbType,
+                        jdbcDaoClassSpec));
             }else if(daoMethod.getAnnotation(UmQueryFindByPrimaryKey.class) != null) {
-                addQueryMethod(daoMethod, daoType, dbType, jdbcDaoClassSpec, SQL_IDENTIFIER_CHAR,
-                        generateFindByPrimaryKeySql(daoType, daoMethod, processingEnv, SQL_IDENTIFIER_CHAR));
+                jdbcDaoClassSpec.addMethod(generateQueryMethod(
+                        generateFindByPrimaryKeySql(daoType, daoMethod, processingEnv,
+                                SQL_IDENTIFIER_CHAR), daoMethod, daoType, dbType, jdbcDaoClassSpec));
             }else if(daoMethod.getAnnotation(UmUpdate.class) != null) {
                 addUpdateMethod(daoMethod, daoType, dbType, jdbcDaoClassSpec, SQL_IDENTIFIER_CHAR);
             }else if(daoMethod.getAnnotation(UmDelete.class) != null) {
@@ -647,14 +647,21 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
             }else if(daoMethod.getAnnotation(UmSyncOutgoing.class) != null) {
                 addSyncOutgoing(daoMethod, daoType, jdbcDaoClassSpec, "_db");
             }else if(daoMethod.getAnnotation(UmSyncFindLocalChanges.class) != null) {
-                addQueryMethod(daoMethod, daoType, dbType, jdbcDaoClassSpec, SQL_IDENTIFIER_CHAR,
-                        generateFindLocalChangesSql(daoType, daoMethod, processingEnv));
+                jdbcDaoClassSpec.addMethod(generateQueryMethod(
+                        generateFindLocalChangesSql(daoType, daoMethod, processingEnv),
+                            daoMethod, daoType, dbType, jdbcDaoClassSpec));
             }else if(daoMethod.getAnnotation(UmSyncFindAllChanges.class) != null) {
-                addQueryMethod(daoMethod, daoType, dbType, jdbcDaoClassSpec, SQL_IDENTIFIER_CHAR,
-                        generateSyncFindAllChanges(daoType, daoMethod, processingEnv));
-            }else if(daoMethod.getAnnotation(UmSyncFindUpdateable.class) != null) {
-                addQueryMethod(daoMethod, daoType, dbType, jdbcDaoClassSpec, SQL_IDENTIFIER_CHAR,
-                        generateSyncFindUpdatable(daoType, daoMethod, processingEnv));
+                jdbcDaoClassSpec.addMethod(generateQueryMethod(
+                        generateSyncFindAllChanges(daoType, daoMethod, processingEnv),
+                        daoMethod, daoType, dbType, jdbcDaoClassSpec));
+            }else if(daoMethod.getAnnotation(UmSyncCheckIncomingCanUpdate.class) != null) {
+                jdbcDaoClassSpec.addMethod(generateQueryMethod(
+                        generateSyncFindUpdatable(daoType, daoMethod, processingEnv),
+                        daoMethod, daoType, dbType, jdbcDaoClassSpec));
+            }else if(daoMethod.getAnnotation(UmSyncCheckIncomingCanInsert.class) != null) {
+                jdbcDaoClassSpec.addMethod(generateQueryMethod(
+                        generateSyncCheckCanInsertSql(daoType, daoMethod, processingEnv),
+                        daoMethod, daoType, dbType, jdbcDaoClassSpec));
             }
         }
 
@@ -1202,9 +1209,27 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
     }
 
 
-    public void addQueryMethod(ExecutableElement daoMethod, TypeElement daoType, TypeElement dbType,
-                               TypeSpec.Builder daoBuilder,
-                               char identifierQuote, String querySql) {
+    public MethodSpec generateQueryMethod(ExecutableElement daoMethod,
+                                          TypeElement daoType,
+                                          TypeElement dbType,
+                                          TypeSpec.Builder daoBuilder) {
+        UmQuery query = daoMethod.getAnnotation(UmQuery.class);
+        if(query == null) {
+            messager.printMessage(Diagnostic.Kind.ERROR,
+                    formatMethodForErrorMessage(daoMethod, daoType) + ":" +
+                    "generateQueryMethod: no UmQuery annotation");
+            AbstractDbProcessor.overrideAndResolve(daoMethod, daoType,
+                    processingEnv).build();
+        }
+
+        return generateQueryMethod(query.value(), daoMethod, daoType, dbType, daoBuilder);
+    }
+
+    public MethodSpec generateQueryMethod(String querySql,
+                                          ExecutableElement daoMethod,
+                                          TypeElement daoType,
+                                          TypeElement dbType,
+                                          TypeSpec.Builder daoBuilder) {
         //we need to run the query, find the columns, and then determine the appropriate setter methods to run
         DaoMethodInfo daoMethodInfo = new DaoMethodInfo(daoMethod, daoType, processingEnv);
         CodeBlock.Builder codeBlock = CodeBlock.builder();
@@ -1253,8 +1278,8 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
             .getElementUtils().getTypeElement(UmProvider.class.getName()))) {
             codeBlock.add("return null;\n");
             methodBuilder.addCode(codeBlock.build());
-            daoBuilder.addMethod(methodBuilder.build());
-            return;
+//            daoBuilder.addMethod(methodBuilder.build());
+            return methodBuilder.build();
         }
 
 
@@ -1376,7 +1401,7 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
             if(paramVariableType == null) {
                 messager.printMessage(Diagnostic.Kind.ERROR, formatMethodForErrorMessage(daoMethod)
                         + " has no parameter named " + namedParams.get(i));
-                return;
+                return methodBuilder.build();
             }
 
             if(arrayParameters.containsKey(paramVariableName)) {
@@ -1513,8 +1538,8 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
 
 
         methodBuilder.addCode(codeBlock.build());
-        daoBuilder.addMethod(methodBuilder.build());
-
+//        daoBuilder.addMethod(methodBuilder.build());
+        return methodBuilder.build();
     }
 
     /**

@@ -11,6 +11,10 @@ public @interface UmDao {
 
     int syncType() default UmSyncType.SYNC_NONE;
 
-    String readPermissionCondition() default "";
+    String selectPermissionCondition() default "TRUE";
+
+    String insertPermissionCondition() default "TRUE";
+
+    String updatePermissionCondition() default "TRUE";
 
 }
