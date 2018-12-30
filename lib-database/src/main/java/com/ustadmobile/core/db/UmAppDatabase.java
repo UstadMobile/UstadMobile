@@ -136,6 +136,18 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
         UmAppDatabase.instance = instance;
     }
 
+    /**
+     * For use by other projects using this app as a library. By calling setInstance before
+     * any other usage (e.g. in the Android Application class) a child class of this database (eg.
+     * with additional entities) can be used.
+
+     * @param instance
+     * @param dbName
+     */
+    public static synchronized void setInstance(UmAppDatabase instance, String dbName) {
+        namedInstances.put(dbName, instance);
+    }
+
     public static synchronized UmAppDatabase getInstance(Object context) {
         if(instance == null){
             instance = UmDbBuilder.makeDatabase(UmAppDatabase.class, context);
