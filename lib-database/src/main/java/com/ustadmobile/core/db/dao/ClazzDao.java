@@ -19,7 +19,7 @@ import java.util.List;
 import static com.ustadmobile.core.db.dao.ClazzDao.PERMISSION_CONDITION1;
 import static com.ustadmobile.core.db.dao.ClazzDao.PERMISSION_CONDITION2;
 
-@UmDao(selectPermissionCondition = PERMISSION_CONDITION1 + Role.PERMISSION_SELECT + PERMISSION_CONDITION2,
+@UmDao(selectPermissionCondition = PERMISSION_CONDITION1 + Role.PERMISSION_CLAZZ_SELECT + PERMISSION_CONDITION2,
 insertPermissionCondition = "(SELECT admin FROM Person WHERE personUid = :accountPersonUid) " +
         "OR " +
         "EXISTS(SELECT PersonGroupMember.groupMemberPersonUid FROM PersonGroupMember " +
@@ -28,7 +28,7 @@ insertPermissionCondition = "(SELECT admin FROM Person WHERE personUid = :accoun
         " WHERE " +
         " PersonGroupMember.groupMemberPersonUid = :accountPersonUid " +
         " AND EntityRole.erTableId = " + Clazz.TABLE_ID +
-        " AND Role.rolePermissions & " + Role.PERMISSION_INSERT + " > 0)")
+        " AND Role.rolePermissions & " + Role.PERMISSION_CLAZZ_INSERT + " > 0)")
 @UmRepository
 public abstract class ClazzDao implements SyncableDao<Clazz, ClazzDao> {
 
@@ -86,7 +86,7 @@ public abstract class ClazzDao implements SyncableDao<Clazz, ClazzDao> {
                                              UmCallback<Boolean> callback);
 
     @UmQuery("SELECT Clazz.clazzUid as primaryKey, " +
-            "(" + PERMISSION_CONDITION1 + Role.PERMISSION_UPDATE + PERMISSION_CONDITION2 + ") " +
+            "(" + PERMISSION_CONDITION1 + Role.PERMISSION_CLAZZ_UPDATE + PERMISSION_CONDITION2 + ") " +
                 " AS userCanUpdate " +
             " FROM Clazz WHERE Clazz.clazzUid in (:primaryKeys)")
     @UmSyncCheckIncomingCanUpdate

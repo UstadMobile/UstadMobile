@@ -25,7 +25,7 @@ import static com.ustadmobile.core.db.dao.PersonDao.PERMISSION_CONDITION1;
 import static com.ustadmobile.core.db.dao.PersonDao.PERMISSION_CONDITION2;
 
 
-@UmDao(selectPermissionCondition = PERMISSION_CONDITION1 + Role.PERMISSION_SELECT + PERMISSION_CONDITION2)
+@UmDao(selectPermissionCondition = PERMISSION_CONDITION1 + Role.PERMISSION_PERSON_SELECT + PERMISSION_CONDITION2)
 @UmRepository
 public abstract class PersonDao implements SyncableDao<Person, PersonDao> {
 

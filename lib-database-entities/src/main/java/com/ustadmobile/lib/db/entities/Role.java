@@ -26,17 +26,28 @@ public class Role {
     //bit flags made of up PERMISSION_ constants
     private long rolePermissions;
 
-    public static final long PERMISSION_SELECT = 1;
+    public static final long PERMISSION_CLAZZ_SELECT = 1;
 
-    public static final long PERMISSION_INSERT = 2;
+    public static final long PERMISSION_CLAZZ_INSERT = 2;
 
-    public static final long PERMISSION_UPDATE = 4;
+    public static final long PERMISSION_CLAZZ_UPDATE = 4;
 
     public static final long PERMISSION_CLAZZ_RECORD_ATTENDANCE = 8;
 
     public static final long PERMISSION_CLAZZ_RECORD_ACTIVITY = 16;
 
     public static final long PERMISSION_CLAZZ_RECORD_SEL = 32;
+
+    public static final long PERMISSION_PERSON_SELECT = 64;
+
+    public static final long PERMISSION_PERSON_INSERT = 128;
+
+    public static final long PERMISSION_PERSON_UPDATE = 256;
+
+    public static final long PERMISSION_CLAZZ_ADD_TEACHER = 512;
+
+    public static final long PERMISSION_CLAZZ_ADD_STUDENT = 1024;
+
 
     public long getRoleUid() {
         return roleUid;

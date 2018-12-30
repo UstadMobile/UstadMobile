@@ -22,7 +22,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.lang.annotation.Target;
 import java.net.URI;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -140,7 +139,7 @@ public class TestClazzDao {
         Role teacherRole = new Role();
         teacherRole.setRoleName("teacher");
         teacherRole.setRolePermissions(Role.PERMISSION_CLAZZ_RECORD_ACTIVITY
-                | Role.PERMISSION_SELECT);
+                | Role.PERMISSION_CLAZZ_SELECT);
         teacherRole.setRoleUid(serverDummyRepo.getRoleDao().insert(teacherRole));
 
         Clazz myClazz = new Clazz();
