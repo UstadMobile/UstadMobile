@@ -51,7 +51,7 @@ public class ClazzStudentListFragment extends UstadBaseFragment implements Clazz
     private Spinner sortSpinner;
     String[] sortSpinnerPresets;
     private ConstraintLayout cl;
-    private boolean addClazzMemberEmptyAdded = false;
+    private boolean addClazzMemberEmptyAdded;
 
     /**
      * Generates a new Fragment for a page fragment
