@@ -14,7 +14,7 @@ public class Clazz {
 
     public static final int TABLE_ID = 6;
 
-    @UmPrimaryKey(autoIncrement = true)
+    @UmPrimaryKey(autoGenerateSyncable = true)
     private long clazzUid;
 
     private String clazzName;

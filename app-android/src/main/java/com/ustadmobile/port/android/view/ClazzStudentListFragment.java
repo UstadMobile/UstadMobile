@@ -51,7 +51,7 @@ public class ClazzStudentListFragment extends UstadBaseFragment implements Clazz
     private Spinner sortSpinner;
     String[] sortSpinnerPresets;
     private ConstraintLayout cl;
-    private boolean addClazzMemberEmptyAdded;
+    private boolean addClazzMemberEmptyAdded = false;
 
     /**
      * Generates a new Fragment for a page fragment
@@ -98,6 +98,9 @@ public class ClazzStudentListFragment extends UstadBaseFragment implements Clazz
 
         //Sort Fragment:
         sortSpinner = rootContainer.findViewById(R.id.fragment_class_student_list_sort_spinner);
+
+        //Reset created flags
+        addClazzMemberEmptyAdded = false;
 
         //Create the presenter and call its onCreate method. This will populate the provider data
         // and call setProvider to set it

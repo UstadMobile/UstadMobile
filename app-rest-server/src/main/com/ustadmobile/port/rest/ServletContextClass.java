@@ -1,18 +1,30 @@
 package com.ustadmobile.port.rest;
 
 import com.ustadmobile.core.db.UmAppDatabase;
+import com.ustadmobile.core.db.dao.ClazzDao;
+import com.ustadmobile.core.db.dao.ClazzMemberDao;
+import com.ustadmobile.core.db.dao.EntityRoleDao;
 import com.ustadmobile.core.db.dao.PersonAuthDao;
 import com.ustadmobile.core.db.dao.PersonCustomFieldDao;
 import com.ustadmobile.core.db.dao.PersonDao;
 import com.ustadmobile.core.db.dao.PersonDetailPresenterFieldDao;
+import com.ustadmobile.core.db.dao.PersonGroupDao;
+import com.ustadmobile.core.db.dao.PersonGroupMemberDao;
+import com.ustadmobile.core.db.dao.RoleDao;
 import com.ustadmobile.core.db.dao.SocialNominationQuestionDao;
 import com.ustadmobile.core.db.dao.SocialNominationQuestionSetDao;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UmCallback;
+import com.ustadmobile.lib.db.entities.Clazz;
+import com.ustadmobile.lib.db.entities.ClazzMember;
+import com.ustadmobile.lib.db.entities.EntityRole;
 import com.ustadmobile.lib.db.entities.Person;
 import com.ustadmobile.lib.db.entities.PersonAuth;
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField;
 import com.ustadmobile.lib.db.entities.PersonField;
+import com.ustadmobile.lib.db.entities.PersonGroup;
+import com.ustadmobile.lib.db.entities.PersonGroupMember;
+import com.ustadmobile.lib.db.entities.Role;
 import com.ustadmobile.lib.db.entities.SocialNominationQuestion;
 import com.ustadmobile.lib.db.entities.SocialNominationQuestionSet;
 
@@ -29,7 +41,9 @@ public class ServletContextClass implements ServletContextListener
 
         public String dummyBaseUrl = "http://localhost/dummy/address/";
         public String dummyAuth = "dummy";
-        UmAppDatabase repository;
+        UmAppDatabase appDb;
+        UmAppDatabase appDbRepository;
+
         PersonCustomFieldDao personCustomFieldDao;
         PersonDetailPresenterFieldDao personDetailPresenterFieldDao;
         PersonDao personDao;
@@ -47,13 +61,14 @@ public class ServletContextClass implements ServletContextListener
         public void contextInitialized(ServletContextEvent arg0) {
             System.out.println("ServletContextListener started");
 
-            repository = UmAppDatabase.getInstance(arg0.getServletContext());
+            appDb = UmAppDatabase.getInstance(arg0.getServletContext());
+            appDbRepository = appDb.getRepository(dummyBaseUrl, dummyAuth);
 
             personCustomFieldDao =
-                    repository.getRepository(dummyBaseUrl, dummyAuth).getPersonCustomFieldDao();
-            personDetailPresenterFieldDao = repository.getRepository(dummyBaseUrl, dummyAuth)
+                    appDbRepository.getPersonCustomFieldDao();
+            personDetailPresenterFieldDao = appDb.getRepository(dummyBaseUrl, dummyAuth)
                     .getPersonDetailPresenterFieldDao();
-            personDao = repository.getRepository(dummyBaseUrl, dummyAuth).getPersonDao();
+            personDao = appDb.getRepository(dummyBaseUrl, dummyAuth).getPersonDao();
 
             //Creating admin
             personDao.createAdmin();
@@ -69,25 +84,120 @@ public class ServletContextClass implements ServletContextListener
 
         }
 
+        public class TestRole{
+            String username;
+            String password;
+
+            TestRole(String username, String password){
+                this.username = username;
+                this.password = password;
+            }
+        }
+
+
+
         public void addRolesAndPermissions(){
 
-            PersonAuthDao personAuthDao = repository.getPersonAuthDao();
+            PersonAuthDao personAuthDao =
+                    appDb.getRepository(dummyBaseUrl, dummyAuth).getPersonAuthDao();
+            EntityRoleDao entityRoleDao = appDb.getEntityRoleDao();
+            RoleDao roleDao = appDb.getRepository(dummyBaseUrl, dummyAuth).getRoleDao();
+            PersonGroupDao personGroupDao =
+                    appDb.getRepository(dummyBaseUrl, dummyAuth).getPersonGroupDao();
+            PersonGroupMemberDao personGroupMemberDao =
+                    appDb.getRepository(dummyBaseUrl, dummyAuth).getPersonGroupMemberDao();
+            ClazzDao clazzDao = appDb.getRepository(dummyBaseUrl, dummyAuth).getClazzDao();
+            ClazzMemberDao clazzMemberDao =
+                    appDb.getRepository(dummyBaseUrl, dummyAuth).getClazzMemberDao();
 
-            //Adding Teacher
-            Person teacherPerson = new Person();
-            teacherPerson.setFirstNames("Teacher Test");
-            teacherPerson.setLastName("Permission");
-            teacherPerson.setActive(true);
-            teacherPerson.setGender(Person.GENDER_MALE);
-            teacherPerson.setUsername("teachertest");
-            teacherPerson.setAdmin(false);
-            long teacherPersonUid = personDao.insert(teacherPerson);
-            teacherPerson.setPersonUid(teacherPersonUid);
+            String teacherUsername = "teachertest";
+            String officerUsername = "officertest";
+            String mneUsername = "mnetest";
+            String selUsername = "seltest";
 
-            PersonAuth teacherAuth = new PersonAuth();
-            teacherAuth.setPersonAuthUid(teacherPersonUid);
-            teacherAuth.setPasswordHash("p:teacherpass");
-            personAuthDao.insert(teacherAuth);
+            List<TestRole> usersToMake = new ArrayList<>();
+            usersToMake.add(new TestRole(teacherUsername, "teacherpass"));
+            usersToMake.add(new TestRole(officerUsername, "officerpass"));
+            usersToMake.add(new TestRole(mneUsername, "mnepass"));
+            usersToMake.add(new TestRole(selUsername, "selpass"));
+
+
+            for(TestRole every_role: usersToMake){
+                Person newTestPerson = new Person();
+                newTestPerson.setFirstNames(every_role.username);
+                newTestPerson.setLastName("Permission");
+                newTestPerson.setUsername(every_role.username);
+                newTestPerson.setActive(true);
+                newTestPerson.setAdmin(false);
+                newTestPerson.setGender(Person.GENDER_FEMALE);
+                Long newTestPersonUid = personDao.insert(newTestPerson);
+                newTestPerson.setPersonUid(newTestPersonUid);
+
+                PersonAuth newTestPersonAuth = new PersonAuth();
+                newTestPersonAuth.setPersonAuthUid(newTestPersonUid);
+                newTestPersonAuth.setPasswordHash("p:" + every_role.password);
+                personAuthDao.insert(newTestPersonAuth);
+
+                PersonGroup newTestPersonGroup = new PersonGroup();
+                newTestPersonGroup.setGroupName(every_role.username + "'s group");
+                Long newTestPersonGroupUid = personGroupDao.insert(newTestPersonGroup);
+                newTestPersonGroup.setGroupUid(newTestPersonGroupUid);
+
+                PersonGroupMember newTestPersonGroupMember = new PersonGroupMember();
+                newTestPersonGroupMember.setGroupMemberPersonUid(newTestPersonUid);
+                newTestPersonGroupMember.setGroupMemberGroupUid(newTestPersonGroupUid);
+                Long newTestPersonGroupMemberUid =
+                        personGroupMemberDao.insert(newTestPersonGroupMember);
+
+                //Create a clazz
+                Clazz testClazz = new Clazz();
+                testClazz.setClazzActive(true);
+                testClazz.setClazzName(every_role.username + "'s Class");
+                Long testClazzUid = clazzDao.insert(testClazz);
+                testClazz.setClazzUid(testClazzUid);
+
+                ClazzMember newClazzMember = new ClazzMember();
+                newClazzMember.setClazzMemberPersonUid(newTestPersonUid);
+
+                Role newRole = new Role();
+                EntityRole newEntityRole = new EntityRole();
+
+                if(every_role.username.equals(teacherUsername)){
+
+                    newClazzMember.setRole(ClazzMember.ROLE_TEACHER);
+                    newClazzMember.setDateJoined(System.currentTimeMillis());
+                    newClazzMember.setClazzMemberClazzUid(testClazzUid);
+                    newClazzMember.setClazzMemberActive(true);
+                    Long newClazzMemberUid = clazzMemberDao.insert(newClazzMember);
+                    newClazzMember.setClazzMemberUid(newClazzMemberUid);
+
+                    //Role - Just Name and Permissions
+                    //EntityRole - Specific to peron group, Clazz (AND/OR particular Clazz) and Role
+
+                    //Whole Clazz Entity Role Specific:
+                    newRole.setRoleName("teacher");
+                    long teacherPermissions = Role.PERMISSION_CLAZZ_VIEW_ATTENDANCE |
+                            Role.PERMISSION_SELECT | Role.PERMISSION_CLAZZ_RECORD_ACTIVITY |
+                            Role.PERMISSION_CLAZZ_VIEW_REPORTS;
+                    newRole.setRolePermissions(teacherPermissions);
+                    Long newRoleUid = roleDao.insert(newRole);
+
+                    //Assign that teacher role (for whole Clazz Table) to the person group
+                    newEntityRole.setErGroupUid(newTestPersonGroupUid);
+                    newEntityRole.setErRoleUid(newRoleUid);
+                    newEntityRole.setErTableId(Clazz.TABLE_ID);
+                    //newEntityRole.setErEntityUid();   //Not for a particular Clazz but for whole.
+
+                    entityRoleDao.insert(newEntityRole);
+
+
+
+                }
+            }
+
+
+
+
 
 
 
@@ -104,7 +214,7 @@ public class ServletContextClass implements ServletContextListener
 
             //Create SEL questions :
             SocialNominationQuestionSetDao questionSetDao =
-                    repository.getRepository(dummyBaseUrl, dummyAuth).getSocialNominationQuestionSetDao();
+                    appDb.getRepository(dummyBaseUrl, dummyAuth).getSocialNominationQuestionSetDao();
 
             SocialNominationQuestionSet questionSet = new SocialNominationQuestionSet();
             questionSet.setTitle("Default set");
@@ -112,7 +222,7 @@ public class ServletContextClass implements ServletContextListener
             questionSet.setSocialNominationQuestionSetUid(questionSetUid);
             System.out.println("Question set uid: " + questionSetUid);
 
-            SocialNominationQuestionDao questionDao = repository.getRepository(dummyBaseUrl, dummyAuth)
+            SocialNominationQuestionDao questionDao = appDb.getRepository(dummyBaseUrl, dummyAuth)
                     .getSocialNominationQuestionDao();
 
             SocialNominationQuestion question1 = new SocialNominationQuestion();

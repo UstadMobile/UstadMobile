@@ -25,6 +25,7 @@ import com.ustadmobile.core.db.dao.DownloadJobItemDao;
 import com.ustadmobile.core.db.dao.DownloadJobItemHistoryDao;
 import com.ustadmobile.core.db.dao.DownloadSetDao;
 import com.ustadmobile.core.db.dao.DownloadSetItemDao;
+import com.ustadmobile.core.db.dao.EntityRoleDao;
 import com.ustadmobile.core.db.dao.EntryStatusResponseDao;
 import com.ustadmobile.core.db.dao.FeedEntryDao;
 import com.ustadmobile.core.db.dao.HolidayDao;
@@ -44,6 +45,9 @@ import com.ustadmobile.core.db.dao.PersonCustomFieldDao;
 import com.ustadmobile.core.db.dao.PersonCustomFieldValueDao;
 import com.ustadmobile.core.db.dao.PersonDao;
 import com.ustadmobile.core.db.dao.PersonDetailPresenterFieldDao;
+import com.ustadmobile.core.db.dao.PersonGroupDao;
+import com.ustadmobile.core.db.dao.PersonGroupMemberDao;
+import com.ustadmobile.core.db.dao.RoleDao;
 import com.ustadmobile.core.db.dao.ScheduleDao;
 import com.ustadmobile.core.db.dao.SocialNominationQuestionDao;
 import com.ustadmobile.core.db.dao.SocialNominationQuestionResponseDao;
@@ -291,6 +295,14 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
 
     public abstract AccessTokenDao getAccessTokenDao();
 
+    public abstract RoleDao getRoleDao();
+
+    public abstract PersonGroupDao getPersonGroupDao();
+
+    public abstract PersonGroupMemberDao getPersonGroupMemberDao();
+
+    public abstract EntityRoleDao getEntityRoleDao();
+
     @UmDbContext
     public abstract Object getContext();
 
@@ -334,4 +346,6 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
     public void invalidateDeviceBits() {
         getSyncablePrimaryKeyDao().invalidateDeviceBits();
     }
+
+
 }

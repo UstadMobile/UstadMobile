@@ -84,7 +84,8 @@ public class PeopleListPresenter
      * @param loggedInPerson    The person changed.
      */
     public void handlePersonValueChanged(Person loggedInPerson){
-        view.showFAB(loggedInPerson.isAdmin());
+        if(loggedInPerson!=null)
+            view.showFAB(loggedInPerson.isAdmin());
     }
 
     public void checkPermissions(){
