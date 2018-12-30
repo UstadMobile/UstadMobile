@@ -7,6 +7,7 @@ import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.BasePointView2;
 import com.ustadmobile.core.view.BulkUploadMasterView;
+import com.ustadmobile.core.view.Login2View;
 import com.ustadmobile.lib.db.entities.Person;
 import com.ustadmobile.lib.db.entities.UmAccount;
 
@@ -63,6 +64,13 @@ public class BasePointActivity2Presenter extends UstadBaseController<BasePointVi
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         Hashtable args = new Hashtable();
         impl.go(BulkUploadMasterView.VIEW_NAME, args, context);
+    }
+
+    public void handleLogOut(){
+        UmAccountManager.setActiveAccount(null, context);
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        Hashtable args = new Hashtable();
+        impl.go(Login2View.VIEW_NAME, args, context);
     }
 
 

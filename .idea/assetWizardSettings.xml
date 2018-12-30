@@ -105,8 +105,12 @@
                         </option>
                         <option name="values">
                           <map>
-                            <entry key="outputName" value="ic_file_upload_black_24dp" />
-                            <entry key="sourceFile" value="C:\Users\Varuna" />
+                            <entry key="assetSourceType" value="FILE" />
+                            <entry key="height" value="633" />
+                            <entry key="outputName" value="ic_classbook_icon_en_ar" />
+                            <entry key="overrideSize" value="true" />
+                            <entry key="sourceFile" value="C:\Users\Varuna\Ustadmobile\IRC\PostPilot\LOGO\ClassBook icon+EN+AR.svg" />
+                            <entry key="width" value="900" />
                           </map>
                         </option>
                       </PersistentState>

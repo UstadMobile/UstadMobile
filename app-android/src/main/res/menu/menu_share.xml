@@ -15,6 +15,13 @@
         android:iconTint="@color/icons"
         app:showAsAction="always"/>
 
+    <item android:id="@+id/menu_basepoint_logout"
+        android:icon="@drawable/ic_dropout_bcd4_24dp"
+        android:title="@string/logout"
+        android:visible="true"
+        android:iconTint="@color/just_black"
+        app:showAsAction="always"/>
+
     <!-- TODO: Sprint 5 -->
     <!--<item android:id="@+id/menu_settings_gear"-->
         <!--android:icon="@drawable/ic_settings_white_24dp"-->

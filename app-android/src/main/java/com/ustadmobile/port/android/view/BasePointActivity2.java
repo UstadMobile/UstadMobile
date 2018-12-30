@@ -208,6 +208,11 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
             mPresenter.handleClickBulkUpload();
             return super.onOptionsItemSelected(item);
         }
+        else if(i==R.id.menu_basepoint_logout){
+            finishAffinity();
+            mPresenter.handleLogOut();
+            return super.onOptionsItemSelected(item);
+        }
 //        else if ( i == R.id.menu_settings_gear){
 //            //TODO: Sprint 5 : Settings
 //        }
@@ -230,18 +235,22 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
         MenuItem shareMenuItem = menu.findItem(R.id.menu_basepoint_share);
         MenuItem bulkUploadMenuItem = menu.findItem(R.id.menu_basepoint_bulk_upload_master);
         //MenuItem settingsMenuItem = menu.findItem(R.id.menu_settings_gear);
+        MenuItem logoutMenuItem = menu.findItem(R.id.menu_basepoint_logout);
 
         Drawable shareMenuIcon = getResources().getDrawable(R.drawable.ic_share_white_24dp);
         Drawable bulkUploadMenuIcon = getResources().getDrawable(R.drawable.ic_file_upload_white_24dp);
         Drawable settingsMenuIcon = getResources().getDrawable(R.drawable.ic_settings_white_24dp);
+        Drawable logoutMenuIcon = getResources().getDrawable(R.drawable.ic_dropout_bcd4_24dp);
 
         shareMenuIcon.setColorFilter(getResources().getColor(R.color.icons), PorterDuff.Mode.SRC_IN);
         bulkUploadMenuIcon.setColorFilter(getResources().getColor(R.color.icons), PorterDuff.Mode.SRC_IN);
         settingsMenuIcon.setColorFilter(getResources().getColor(R.color.icons), PorterDuff.Mode.SRC_IN);
+        logoutMenuIcon.setColorFilter(getResources().getColor(R.color.icons), PorterDuff.Mode.SRC_IN);
 
         shareMenuItem.setIcon(shareMenuIcon);
         bulkUploadMenuItem.setIcon(bulkUploadMenuIcon);
         //settingsMenuItem.setIcon(settingsMenuIcon);
+        logoutMenuItem.setIcon(logoutMenuIcon);
 
         mOptionsMenu = menu;
         mPresenter.getLoggedInPerson();

@@ -76,4 +76,9 @@ public class Login2Activity extends UstadBaseActivity implements Login2View {
     public void setPassword(String password) {
         mPasswordTextView.setText(password);
     }
+
+    @Override
+    public void setFinishAfficinityOnView() {
+        runOnUiThread(() -> finishAffinity());
+    }
 }
