@@ -19,6 +19,7 @@ import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.database.annotation.UmQueryFindByPrimaryKey;
 import com.ustadmobile.lib.database.annotation.UmRepository;
+import com.ustadmobile.lib.database.annotation.UmSyncCheckIncomingCanInsert;
 import com.ustadmobile.lib.database.annotation.UmSyncFindAllChanges;
 import com.ustadmobile.lib.database.annotation.UmSyncFindLocalChanges;
 import com.ustadmobile.lib.database.annotation.UmSyncCheckIncomingCanUpdate;
@@ -355,6 +356,9 @@ public class DbProcessorRoom extends AbstractDbProcessor implements QueryMethodG
                         processingEnv), daoMethod, daoClass, dbType, roomDaoClassSpec));
             }else if(daoMethod.getAnnotation(UmSyncCheckIncomingCanUpdate.class) != null) {
                 roomDaoClassSpec.addMethod(generateQueryMethod(generateSyncFindUpdatableSql(daoClass,
+                        daoMethod, processingEnv), daoMethod, daoClass, dbType, roomDaoClassSpec));
+            }else if(daoMethod.getAnnotation(UmSyncCheckIncomingCanInsert.class) != null) {
+                roomDaoClassSpec.addMethod(generateQueryMethod(generateSyncCheckCanInsertSql(daoClass,
                         daoMethod, processingEnv), daoMethod, daoClass, dbType, roomDaoClassSpec));
             }
 

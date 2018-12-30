@@ -11,10 +11,10 @@ public @interface UmDao {
 
     int syncType() default UmSyncType.SYNC_NONE;
 
-    String selectPermissionCondition() default "TRUE";
+    String selectPermissionCondition() default "(:accountPersonUid = :accountPersonUid)";
 
-    String insertPermissionCondition() default "TRUE";
+    String insertPermissionCondition() default "(:accountPersonUid = :accountPersonUid)";
 
-    String updatePermissionCondition() default "TRUE";
+    String updatePermissionCondition() default "(:accountPersonUid = :accountPersonUid)";
 
 }
