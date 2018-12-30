@@ -22,7 +22,7 @@ import static com.ustadmobile.core.db.dao.ClazzDao.PERMISSION_CONDITION2;
 @UmDao(selectPermissionCondition = PERMISSION_CONDITION1 + Role.PERMISSION_SELECT + PERMISSION_CONDITION2,
 insertPermissionCondition = "(SELECT admin FROM Person WHERE personUid = :accountPersonUid) " +
         "OR " +
-        "EXISTS(  PersonGroupMember.groupMemberPersonUid FROM PersonGroupMember " +
+        "EXISTS(SELECT PersonGroupMember.groupMemberPersonUid FROM PersonGroupMember " +
         " JOIN EntityRole ON EntityRole.erGroupUid = PersonGroupMember.groupMemberGroupUid " +
         " JOIN Role ON EntityRole.erRoleUid = Role.roleUid " +
         " WHERE " +

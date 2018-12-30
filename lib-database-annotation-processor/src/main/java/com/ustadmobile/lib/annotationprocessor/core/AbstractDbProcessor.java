@@ -865,6 +865,15 @@ public abstract class AbstractDbProcessor {
 
         methodBuilder.addCode(codeBlock.build());
 
+        //now add the _checkIncoming method
+        DaoMethodInfo methodInfo = new DaoMethodInfo(daoMethod, daoType, processingEnv);
+        TypeElement entityTypeEl = (TypeElement)processingEnv.getTypeUtils().asElement(
+                methodInfo.resolveEntityParameterComponentType());
+        daoBuilder.addMethod(generateCheckIncomingEntitiesMethod("_checkIncoming",
+                Modifier.PUBLIC, entityTypeEl, daoType, daoMethod,
+                (QueryMethodGenerator)this, daoBuilder));
+
+
         return methodBuilder.build();
     }
 
@@ -877,7 +886,6 @@ public abstract class AbstractDbProcessor {
      * @param methodModifier Access modifier to apply to the method e.g. Modifier.PUBLIC
      * @param entityType TypeElement representing the type of entity
      * @param daoType TypeElement representing the DAO currently being generated
-     * @param dbType TypeElement representing the database currently being generated
      * @param queryMethodGenerator Query method generator (e.g. subclass of AbstractDbProcessor)
      *                             which can, if required, add extra query methods to the DAO.
      *
@@ -887,7 +895,6 @@ public abstract class AbstractDbProcessor {
                                                           Modifier methodModifier,
                                                           TypeElement entityType,
                                                           TypeElement daoType,
-                                                          TypeElement dbType,
                                                           ExecutableElement methodBeingGenerated,
                                                           QueryMethodGenerator queryMethodGenerator,
                                                           TypeSpec.Builder daoTypeBuilder) {

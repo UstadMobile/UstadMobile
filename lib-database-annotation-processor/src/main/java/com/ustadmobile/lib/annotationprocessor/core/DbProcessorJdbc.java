@@ -645,12 +645,6 @@ public class DbProcessorJdbc extends AbstractDbProcessor implements QueryMethodG
             }else if(daoMethod.getAnnotation(UmSyncIncoming.class) != null) {
                 jdbcDaoClassSpec.addMethod(generateSyncIncomingMethod(daoMethod, daoType,
                         jdbcDaoClassSpec, "_db"));
-                DaoMethodInfo methodInfo = new DaoMethodInfo(daoMethod, daoType, processingEnv);
-                TypeElement entityTypeEl = (TypeElement)processingEnv.getTypeUtils().asElement(
-                        methodInfo.resolveEntityParameterComponentType());
-                jdbcDaoClassSpec.addMethod(generateCheckIncomingEntitiesMethod("_checkIncoming",
-                        Modifier.PUBLIC, entityTypeEl, daoType, dbType, daoMethod,
-                        this, jdbcDaoClassSpec));
             }else if(daoMethod.getAnnotation(UmSyncOutgoing.class) != null) {
                 addSyncOutgoing(daoMethod, daoType, jdbcDaoClassSpec, "_db");
             }else if(daoMethod.getAnnotation(UmSyncFindLocalChanges.class) != null) {
