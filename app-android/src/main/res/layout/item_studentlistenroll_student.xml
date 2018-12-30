@@ -19,7 +19,7 @@
         android:textAppearance="@android:style/TextAppearance.Material.Headline"
         android:textColor="@color/text_primary"
         android:textSize="16sp"
-        android:inputType="textMultiLine"
+        android:inputType="textMultiLine|textNoSuggestions"
         android:singleLine="false"
         android:maxLines="2"
         app:layout_constraintEnd_toStartOf="@+id/item_studentlist_student_simple_student_checkbox"

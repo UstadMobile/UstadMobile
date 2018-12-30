@@ -42,6 +42,7 @@
                 android:id="@+id/activity_person_edit_student_image"
                 android:layout_width="match_parent"
                 android:layout_height="120dp"
+                android:background="@color/background_light"
                 android:contentDescription="@string/student_image"
                 android:src="@drawable/ic_person_black_24dp"
                 app:layout_constraintEnd_toEndOf="parent"

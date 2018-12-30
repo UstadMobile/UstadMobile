@@ -194,6 +194,10 @@ public class PersonWithEnrollmentRecyclerAdapter
         PersonWithEnrollment personWithEnrollment = getItem(position);
 
         assert personWithEnrollment != null;
+        if(personWithEnrollment == null){
+            return;
+        }
+
         String studentName = personWithEnrollment.getFirstNames() + " " +
                 personWithEnrollment.getLastName();
         Long personUid = personWithEnrollment.getPersonUid();
@@ -208,8 +212,9 @@ public class PersonWithEnrollmentRecyclerAdapter
                 holder.itemView.findViewById(R.id.item_studentlist_student_simple_attendance_percentage);
 
         ConstraintLayout cl = holder.itemView.findViewById(R.id.item_studentlist_student_cl);
-//        cl.setOnClickListener(v ->
-//                mPresenter.handleCommonPressed(personUid));
+        //If you want the whole CL to be clickable
+        //cl.setOnClickListener(v ->
+        //        mPresenter.handleCommonPressed(personUid));
 
         studentNameTextView.setOnClickListener(v -> mPresenter.handleCommonPressed(personUid));
 
@@ -262,6 +267,9 @@ public class PersonWithEnrollmentRecyclerAdapter
                     ConstraintSet.TOP, R.id.item_studentlist_student_simple_student_title,
                     ConstraintSet.BOTTOM, 0);
             constraintSet.applyTo(cl);
+
+            //or just leave the spaces in hopes of better performance ?
+            //Update it doesnt really make it quicker
 
         }
 

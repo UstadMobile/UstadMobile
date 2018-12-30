@@ -18,12 +18,23 @@
                                 <PersistentState>
                                   <option name="children">
                                     <map>
+                                      <entry key="backgroundImage">
+                                        <value>
+                                          <PersistentState>
+                                            <option name="values">
+                                              <map>
+                                                <entry key="scalingPercent" value="101" />
+                                              </map>
+                                            </option>
+                                          </PersistentState>
+                                        </value>
+                                      </entry>
                                       <entry key="foregroundImage">
                                         <value>
                                           <PersistentState>
                                             <option name="values">
                                               <map>
-                                                <entry key="scalingPercent" value="58" />
+                                                <entry key="scalingPercent" value="60" />
                                               </map>
                                             </option>
                                           </PersistentState>
@@ -33,12 +44,27 @@
                                   </option>
                                   <option name="values">
                                     <map>
-                                      <entry key="backgroundColor" value="ffffff" />
-                                      <entry key="backgroundLayerName" value="ic_launcher_background" />
+                                      <entry key="backgroundColor" value="000000" />
+                                      <entry key="backgroundImage" value="C:\repo\UstadMobileAgain\app-android\src\main\res\drawable\ic_launcher_background_empty.xml" />
+                                      <entry key="backgroundLayerName" value="ic_launcher_background_transparent" />
                                       <entry key="foregroundImage" value="C:\repo\UstadMobileAgain\app-android-launcher\src\main\res\drawable\ic_logo_classbook_1.xml" />
-                                      <entry key="foregroundLayerName" value="ic_launcher_foreground" />
-                                      <entry key="outputName" value="ic_launcher_classbook" />
+                                      <entry key="foregroundLayerName" value="ic_launcher_foreground_transparent" />
+                                      <entry key="legacyIconShape" value="CIRCLE" />
+                                      <entry key="outputName" value="ic_launcher_classbook_transparent" />
                                       <entry key="previewDensity" value="MEDIUM" />
+                                      <entry key="webIconShape" value="CIRCLE" />
+                                    </map>
+                                  </option>
+                                </PersistentState>
+                              </value>
+                            </entry>
+                            <entry key="launcherLegacy">
+                              <value>
+                                <PersistentState>
+                                  <option name="values">
+                                    <map>
+                                      <entry key="assetType" value="IMAGE" />
+                                      <entry key="imageAsset" value="C:\repo\UstadMobileAgain\app-android\src\main\res\drawable\ic_logo_classbook_with_text_eng_ar.xml" />
                                     </map>
                                   </option>
                                 </PersistentState>
