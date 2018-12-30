@@ -51,43 +51,45 @@ public class WebChunkWebViewClient extends WebViewClient {
         }
     }
 
+
+
     @Nullable
     @Override
     public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
-        String requestUrl = request.getUrl().toString();
+        StringBuilder requestUrl = new StringBuilder(request.getUrl().toString());
         System.out.println("request url = " + requestUrl);
-        IndexLog log = indexMap.get(requestUrl);
+        IndexLog log = indexMap.get(requestUrl.toString());
         if (log == null) {
             for (Map.Entry<String, IndexLog> e : indexMap.entrySet()) {
 
-                if (e.getKey().contains("plixbrowse") && requestUrl.contains("plixbrowse")) {
+                if (e.getKey().contains("plixbrowse") && requestUrl.toString().contains("plixbrowse")) {
                     log = indexMap.get(e.getKey());
                     break;
                 }
                 if (e.getKey().contains("https://www.ck12.org/assessment/api/render/questionInstance?qID") &&
-                        requestUrl.contains("https://www.ck12.org/assessment/api/render/questionInstance?qID")) {
+                        requestUrl.toString().contains("https://www.ck12.org/assessment/api/render/questionInstance?qID")) {
                     log = indexMap.get(e.getKey());
                     break;
                 }
                 if (e.getKey().contains("https://www.ck12.org/assessment/api/get/info/test/plix%20practice/plixID/") &&
-                        requestUrl.contains("https://www.ck12.org/assessment/api/get/info/test/plix%20practice/plixID/")) {
+                        requestUrl.toString().contains("https://www.ck12.org/assessment/api/get/info/test/plix%20practice/plixID/")) {
                     log = indexMap.get(e.getKey());
                     break;
                 }
                 if (e.getKey().contains("https://www.ck12.org/assessment/api/start/tests/") &&
-                        requestUrl.contains("https://www.ck12.org/assessment/api/start/tests/")) {
+                        requestUrl.toString().contains("https://www.ck12.org/assessment/api/start/tests/")) {
                     log = indexMap.get(e.getKey());
                     break;
                 }
-                if (e.getKey().contains("hint") && requestUrl.contains("hint")) {
+                if (e.getKey().contains("hint") && requestUrl.toString().contains("hint")) {
                     log = indexMap.get(e.getKey());
                     break;
                 }
-                if (e.getKey().contains("attempt") && requestUrl.contains("attempt")) {
+                if (e.getKey().contains("attempt") && requestUrl.toString().contains("attempt")) {
                     log = indexMap.get(e.getKey());
                     break;
                 }
-                if (e.getKey().contains("/assessment_item") && requestUrl.contains("/assessment_item")) {
+                if (e.getKey().contains("/assessment_item") && requestUrl.toString().contains("/assessment_item")) {
                     int langIndex = requestUrl.indexOf("?lang");
 
                     String newRequestUrl = requestUrl.substring(0, langIndex);
@@ -95,6 +97,21 @@ public class WebChunkWebViewClient extends WebViewClient {
                     if(log != null){
                         break;
                     }
+                }
+                if(e.getKey().contains("/Quiz/Answer") && requestUrl.toString().contains("/Quiz/Answer")){
+
+                    Map<String, String> headers = request.getRequestHeaders();
+                    String pageIndex = headers.get("PageIndex");
+                    String answerId = headers.get("AnswerId");
+
+                    requestUrl.append("?page=").append(pageIndex);
+                    if(answerId != null && answerId.isEmpty()){
+                        requestUrl.append("&answer=").append(answerId);
+                    }
+
+                    log = indexMap.get(requestUrl.toString());
+                    break;
+
                 }
             }
         }

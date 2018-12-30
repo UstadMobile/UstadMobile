@@ -12,4 +12,6 @@ public class LogIndex {
 
     public Map<String, String> headers;
 
+    public Map<String, String> requestHeaders;
+
 }

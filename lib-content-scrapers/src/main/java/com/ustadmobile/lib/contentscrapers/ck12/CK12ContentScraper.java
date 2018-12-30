@@ -808,11 +808,7 @@ public class CK12ContentScraper {
 
         Document doc = Jsoup.parse(html);
 
-        Elements elements = doc.select("[href]");
-
-        for (Element element : elements) {
-            element.removeAttr("href");
-        }
+        doc.select("[href]").removeAttr("href");
 
         return doc.body().html();
     }

@@ -41,6 +41,15 @@ public class ScraperConstants {
     public static final String TRY_AGAIN_KHAN_LINK = "/com/ustadmobile/lib/contentscrapers/khan/exercise-try-again.svg";
     public static final String TRY_AGAIN_FILE = "exercise-try-again.svg";
 
+    public static final String QUIZ_HTML_LINK = "/com/ustadmobile/lib/contentscrapers/voa/quiz.html";
+    public static final String QUIZ_HTML_FILE = "quiz.html";
+
+    public static final String IFRAME_RESIZE_LINK = "/com/ustadmobile/lib/contentscrapers/voa/iframeResizer.min.js";
+    public static final String IFRAME_RESIZE_FILE = "iframeResizer.min.js";
+
+    public static final String IFRAME_RESIZE_WINDOW_LINK = "/com/ustadmobile/lib/contentscrapers/voa/iframeResizer.contentWindow.min.js";
+    public static final String IFRAME_RESIZE_WINDOW_FILE = "iframeResizer.contentWindow.min.js";
+
     // math jax links
     public static final String MATH_JAX_LINK = "/com/ustadmobile/lib/contentscrapers/ck12/mathjax/MathJax.js";
     public static final String MATH_JAX_FILE = "MathJax.js";

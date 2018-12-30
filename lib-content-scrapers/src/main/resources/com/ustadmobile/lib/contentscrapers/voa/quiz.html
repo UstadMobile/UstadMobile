@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Login Ustad Mobile Cloud Django</title>
+    <meta charset="utf-8" name="viewport"
+          content="width=device-width, initial-scale=1, shrink-to-fit=no,user-scalable=no">
+
+    <!-- Compiled and minified CSS -->
+    <link rel="stylesheet" href="asset/materialize.min.css">
+    <style type="text/css">
+        #exercise table {
+            display: block !important;
+            overflow-x: auto !important;
+        }
+
+        img {
+            width: 100%;
+            height: auto;
+        }
+
+        video{
+            width: 100%;
+            height: auto;
+        }
+
+    </style>
+
+</head>
+
+<body onload="readJson();">
+<script type="text/javascript">
+
+    var jsonQuestions = null;
+    var questionsCounter = 0;
+    var correctAnswers = 0;
+
+    function readJson() {
+        var request = new XMLHttpRequest();
+        request.open("GET", "questions.json", false);
+        request.send(null);
+        jsonQuestions = JSON.parse(request.responseText);
+
+        displayQuestion(questionsCounter);
+    }
+
+    function displayQuestion(counter) {
+
+        var submit = document.getElementById("correctAnswer");
+        submit.setAttribute("class", "waves-effect waves-light btn");
+
+        if(counter > jsonQuestions.questions.length){
+            displayResults(correctAnswers);
+        }
+
+        document.getElementById("question").innerHTML = jsonQuestions.questions[counter].questionText;
+
+        var container = document.getElementById("choices");
+        var next = document.getElementById("nextquestion");
+        var explain = document.getElementById("explaination");
+        var video = document.getElementById("video");
+        var image = document.getElementById("imageQuiz");
+        next.style.display = "none";
+        explain.innerHTML = "";
+        container.innerHTML = "";
+        video.innerHTML = "";
+        image.style.display = "none";
+
+        var mediaUrl = jsonQuestions.questions[counter].videoHref;
+        if(checkIsImage(mediaUrl)){
+            image.style.display = "block";
+            video.style.display = "none";
+            image.setAttribute("src", mediaUrl);
+        }else{
+            var source = document.createElement('source');
+            source.setAttribute("src", mediaUrl);
+            source.setAttribute("type", "video/mp4");
+
+            video.appendChild(source);
+            video.load();
+        }
+
+        var form = document.createElement("form");
+        form.setAttribute("action", "#");
+
+        for (var i = 0; i < jsonQuestions.questions[counter].choices.length; i++) {
+
+            var para = document.createElement("p");
+
+            var input = document.createElement("input");
+            input.setAttribute("type", "radio");
+            input.setAttribute("class", "with-gap");
+            input.setAttribute("name", "choice");
+            input.setAttribute("id", jsonQuestions.questions[counter].choices[i].id);
+
+            var label = document.createElement("label");
+            label.setAttribute("for", jsonQuestions.questions[counter].choices[i].id);
+            label.setAttribute("display", "inline-block");
+            label.innerHTML = jsonQuestions.questions[counter].choices[i].answerText;
+
+            para.appendChild(input);
+            para.appendChild(label);
+            form.appendChild(para);
+        }
+        container.appendChild(form);
+
+
+    }
+
+    function checkIsImage(url) {
+        return(url.match(/\.(jpeg|jpg|gif|png)$/) != null);
+    }
+
+    function displayResults(correctAnswers) {
+
+        var container = document.getElementById("choices");
+        var next = document.getElementById("nextquestion");
+        var explain = document.getElementById("explaination");
+        var video = document.getElementById("video");
+        var submit = document.getElementById("correctAnswer");
+        next.style.display = "none";
+        explain.innerHTML = "";
+        container.innerHTML = "";
+        video.innerHTML = "";
+        video.style.display = "none";
+        submit.style.display = "none";
+
+        var questionCount = jsonQuestions.questions.length;
+
+        var perctange = (correctAnswers / questionCount) * 100;
+
+        var resultText = "Thank you for taking our quiz. Your score is " + perctange
+            + "% meaning you have answered " + correctAnswers + " correct answers from total "
+            + questionCount + " questions.";
+
+        var progress = document.createElement("div");
+        progress.setAttribute("class", "progress");
+
+        var determinate = document.createElement("div");
+        determinate.setAttribute("class", "determinate");
+        determinate.setAttribute("style","width: " + perctange + "%");
+
+        progress.appendChild(determinate);
+
+        var result = document.createElement("h2");
+        result.textContent = correctAnswers + "/" + questionCount;
+
+        var questionText = document.getElementById("question");
+        questionText.innerText = resultText;
+
+        questionText.insertBefore(progress, questionText.firstChild);
+        questionText.insertBefore(result, questionText.firstChild);
+
+    }
+
+    function correctAnswer(isCorrect, radio, answerId) {
+
+        var submit = document.getElementById("correctAnswer");
+        submit.setAttribute("class", "btn disabled");
+
+        var next = document.getElementById("nextquestion");
+        next.style.display = "inline-block";
+
+        var explainationDiv = document.getElementById("explaination");
+
+        if (explainationDiv.hasChildNodes()) {
+            while (explainationDiv.hasChildNodes()) {
+                explainationDiv.removeChild(explainationDiv.lastChild);
+            }
+        }
+
+        var isCorrectMessage = document.createElement("h5");
+        if (isCorrect) {
+            radio.style.backgroundColor = "green";
+            correctAnswers++;
+
+            isCorrectMessage.setAttribute("class", "left-align green-text");
+            isCorrectMessage.textContent = "Correct !";
+
+
+        } else {
+
+            isCorrectMessage.setAttribute("class", "left-align red-text");
+            isCorrectMessage.textContent = "Wrong !";
+
+            radio.style.backgroundColor = 'red';
+            var correctRadio = document.getElementById(answerId);
+            correctRadio.style.backgroundColor = "green";
+        }
+
+        explainationDiv.appendChild(isCorrectMessage);
+
+        var message = document.createElement("p");
+        message.innerHTML = jsonQuestions.questions[questionsCounter].answer;
+        explainationDiv.appendChild(message);
+
+    }
+
+    function submitAnswer() {
+
+        var radios = document.getElementsByName("choice");
+
+        var answerId = jsonQuestions.questions[questionsCounter].answerId;
+        for (var i = 0; i < jsonQuestions.questions[questionsCounter].choices.length; i++) {
+
+            if (radios[i].checked) {
+                if (answerId == radios[i].getAttribute("id")) {
+                    correctAnswer(true, radios[i], answerId);
+                } else {
+                    correctAnswer(false, radios[i], answerId);
+                }
+
+                break;
+            }
+        }
+    }
+
+
+</script>
+<script type="text/javascript" src="asset/iframeResizer.min.js"></script>
+<script type="text/javascript">
+    iFrameResize({log:true});
+</script>
+
+<div id="header">
+    <p></p>
+</div>
+<div id="page" role="main" class="container" style="align-content:center;">
+
+    <video id="video" width="100%" height="auto" controls>
+    </video>
+    <img id="imageQuiz" style="display: none"/>
+
+    <div id="exercise">
+        <h4 id="question"></h4>
+        <div id="choices"></div>
+        <div class="row" id="explaination"></div>
+        <div class="row">
+            <button class="waves-effect waves-light btn" id="correctAnswer" onclick=submitAnswer();>
+                Submit Answer
+            </button>
+            <button class="waves-effect waves-light btn" id="nextquestion" style=display:none
+                    onclick="displayQuestion(++questionsCounter)">Next Question
+            </button>
+        </div>
+    </div>
+</div>
+
+<script src="asset/jquery-3.3.1.min.js"></script>
+<script type="text/javascript" src="asset/materialize.min.js"></script>
+<script type="text/javascript" src="asset/iframeResizer.contentWindow.min.js"></script>
+</body>
+</html>

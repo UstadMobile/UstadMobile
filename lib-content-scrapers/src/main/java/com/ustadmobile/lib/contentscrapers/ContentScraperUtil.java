@@ -54,8 +54,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -67,6 +69,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -961,5 +964,17 @@ public class ContentScraperUtil {
         d.setCapability(CapabilityType.LOGGING_PREFS, logPrefs);
 
         return new ChromeDriver(d);
+    }
+
+    public static StringBuffer convertMapToStringBuffer(Map<String, String> params) throws IOException {
+        StringBuffer requestParams = new StringBuffer();
+        for (String key : params.keySet()) {
+            String value = params.get(key);
+            requestParams.append(URLEncoder.encode(key, "UTF-8"));
+            requestParams.append("=").append(
+                    URLEncoder.encode(value, "UTF-8"));
+            requestParams.append("&");
+        }
+        return requestParams;
     }
 }

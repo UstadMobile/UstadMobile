@@ -15,7 +15,7 @@ public class TestVoaScraper {
 
         File tmpDir = Files.createTempDirectory("testVoaScraper").toFile();
 
-        VoaScraper scraper = new VoaScraper("https://learningenglish.voanews.com/a/lets-learn-english-lesson-one/3111026.html",
+        VoaScraper scraper = new VoaScraper("https://learningenglish.voanews.com/a/lets-learn-english-lesson-16-where-are-you-from/3355849.html",
                 tmpDir);
         scraper.scrapeContent();
 
