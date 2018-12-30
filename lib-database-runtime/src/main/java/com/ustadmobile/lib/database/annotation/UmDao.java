@@ -11,6 +11,10 @@ public @interface UmDao {
 
     int syncType() default UmSyncType.SYNC_NONE;
 
-    String readPermissionCondition() default "";
+    String selectPermissionCondition() default "(:accountPersonUid = :accountPersonUid)";
+
+    String insertPermissionCondition() default "(:accountPersonUid = :accountPersonUid)";
+
+    String updatePermissionCondition() default "(:accountPersonUid = :accountPersonUid)";
 
 }

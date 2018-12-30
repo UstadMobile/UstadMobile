@@ -10,7 +10,7 @@ import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
 import java.util.List;
 
-@UmDao(readPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
+@UmDao(selectPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
 @UmRepository
 public abstract class PersonDetailPresenterFieldDao implements
         SyncableDao<PersonDetailPresenterField, PersonDetailPresenterFieldDao> {

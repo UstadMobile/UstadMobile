@@ -7,6 +7,7 @@ import com.ustadmobile.core.db.dao.ClazzLogAttendanceRecordDao;
 import com.ustadmobile.core.db.dao.ClazzMemberDao;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
+import com.ustadmobile.core.impl.UmCallbackWithDefaultValue;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.core.view.ClassLogDetailView;
@@ -69,7 +70,8 @@ public class ClazzLogListPresenter extends UstadBaseController<ClassLogListView>
     public void checkPermissions(){
         ClazzDao clazzDao = repository.getClazzDao();
         clazzDao.personHasPermission(loggedInPersonUid, currentClazzUid,
-                Role.PERMISSION_CLAZZ_RECORD_ATTENDANCE, new UmCallback<Boolean>() {
+                Role.PERMISSION_CLAZZ_RECORD_ATTENDANCE,
+                new UmCallbackWithDefaultValue<>(false, new UmCallback<Boolean>() {
             @Override
             public void onSuccess(Boolean result) {
                 setHasEditPermissions(result);
@@ -80,7 +82,7 @@ public class ClazzLogListPresenter extends UstadBaseController<ClassLogListView>
             public void onFailure(Throwable exception) {
                 exception.printStackTrace();
             }
-        });
+        }));
     }
 
     /**

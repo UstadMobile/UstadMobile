@@ -10,7 +10,7 @@ import com.ustadmobile.lib.database.annotation.UmUpdate;
 import com.ustadmobile.lib.db.entities.SocialNominationQuestionResponse;
 import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
-@UmDao(readPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
+@UmDao(selectPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
 @UmRepository
 public abstract class SocialNominationQuestionResponseDao implements
         SyncableDao<SocialNominationQuestionResponse, SocialNominationQuestionResponseDao> {

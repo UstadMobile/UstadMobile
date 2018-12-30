@@ -8,9 +8,7 @@ import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.database.annotation.UmRepository;
 import com.ustadmobile.lib.database.annotation.UmRestAccessible;
 import com.ustadmobile.lib.database.annotation.UmRestAuthorizedUidParam;
-import com.ustadmobile.lib.database.annotation.UmSyncFindAllChanges;
-import com.ustadmobile.lib.database.annotation.UmSyncFindLocalChanges;
-import com.ustadmobile.lib.database.annotation.UmSyncFindUpdateable;
+import com.ustadmobile.lib.database.annotation.UmSyncCheckIncomingCanUpdate;
 import com.ustadmobile.lib.database.annotation.UmSyncType;
 import com.ustadmobile.lib.database.annotation.UmUpdate;
 import com.ustadmobile.lib.db.sync.UmSyncExistingEntity;
@@ -18,11 +16,14 @@ import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
 import java.util.List;
 
-@UmDao(syncType = UmSyncType.SYNC_PROACTIVE, readPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
+@UmDao(syncType = UmSyncType.SYNC_PROACTIVE,
+        selectPermissionCondition = "(:accountPersonUid = :accountPersonUid)",
+        updatePermissionCondition = "(:accountPersonUid = :accountPersonUid)",
+        insertPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
 @UmRepository
 public abstract class ExampleSyncableDao implements SyncableDao<ExampleSyncableEntity, ExampleSyncableDao>  {
 
-    @UmSyncFindUpdateable
+    @UmSyncCheckIncomingCanUpdate
     @UmQuery("SELECT ExampleSyncableEntity.exampleSyncableUid AS primaryKey, 1 as userCanUpdate " +
             "FROM ExampleSyncableEntity " +
             "WHERE ExampleSyncableEntity.exampleSyncableUid IN (:primaryKeys)")
