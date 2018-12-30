@@ -589,9 +589,9 @@ public abstract class AbstractDbProcessor {
             return "";
         }
 
-        String readPermissionCondition = daoType.getAnnotation(UmDao.class) != null ?
+        String selectPermissionCondition = daoType.getAnnotation(UmDao.class) != null ?
                 daoType.getAnnotation(UmDao.class).selectPermissionCondition() : "";
-        if(readPermissionCondition.equals("")) {
+        if(selectPermissionCondition.equals("")) {
             messager.printMessage(Diagnostic.Kind.ERROR,
                     formatMethodForErrorMessage(daoMethod, daoType) + " attempting to" +
                             "generate findAllChanges method: Dao has no selectPermissionCondition",
@@ -629,7 +629,7 @@ public abstract class AbstractDbProcessor {
 
 
         return String.format("SELECT * FROM %s WHERE %s BETWEEN :%s AND :%s " +
-                "AND %s BETWEEN :%s AND :%s AND %s != :%s  AND %s ORDER BY %s, %s LIMIT :%s",
+                "AND %s BETWEEN :%s AND :%s AND %s != :%s  AND (%s) ORDER BY %s, %s LIMIT :%s",
                 entityTypeEl.getSimpleName(),
                 localChangeSeqNumEl.getSimpleName(),
                 fromLocalChangeSeqNumParam.getSimpleName(),
@@ -639,7 +639,7 @@ public abstract class AbstractDbProcessor {
                 toMasterChangeSeqNumParam.getSimpleName(),
                 lastChangedFieldElement.getSimpleName(),
                 notLastChangedByParam.getSimpleName(),
-                readPermissionCondition,
+                selectPermissionCondition,
                 masterChangeSeqNumEl.getSimpleName(),
                 localChangeSeqNumEl.getSimpleName(),
                 limitParam.getSimpleName());

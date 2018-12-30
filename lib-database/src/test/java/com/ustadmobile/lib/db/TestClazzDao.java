@@ -5,8 +5,13 @@ import com.ustadmobile.core.db.UmAppDatabase_Jdbc;
 import com.ustadmobile.core.db.dao.ClazzDao;
 import com.ustadmobile.core.db.dao.PersonAuthDao;
 import com.ustadmobile.core.impl.UmCallback;
+import com.ustadmobile.lib.db.entities.Clazz;
+import com.ustadmobile.lib.db.entities.EntityRole;
 import com.ustadmobile.lib.db.entities.Person;
 import com.ustadmobile.lib.db.entities.PersonAuth;
+import com.ustadmobile.lib.db.entities.PersonGroup;
+import com.ustadmobile.lib.db.entities.PersonGroupMember;
+import com.ustadmobile.lib.db.entities.Role;
 import com.ustadmobile.lib.db.entities.UmAccount;
 
 import org.glassfish.grizzly.http.server.HttpServer;
@@ -39,6 +44,8 @@ public class TestClazzDao {
 
     private Person accountPerson;
 
+    private PersonGroup accountPersonGroup;
+
     private static final String TEST_USERNAME = "testuser";
 
     private static final String TEST_PASSWORD = "secret";
@@ -59,17 +66,29 @@ public class TestClazzDao {
 
         startServer();
 
+
+        UmAppDatabase serverDummyRepo = serverDb.getRepository("http://localhost/dummy/",
+                "");
         accountPerson = new Person();
         accountPerson.setFirstNames("Test");
         accountPerson.setLastName("Account");
         accountPerson.setUsername(TEST_USERNAME);
-        accountPerson.setPersonUid(serverDb.getRepository("http://localhost/dummy/", "")
-                .getPersonDao().insert(accountPerson));
+        accountPerson.setPersonUid(serverDummyRepo.getPersonDao().insert(accountPerson));
         PersonAuth personAuth = new PersonAuth(accountPerson.getPersonUid(),
                 PersonAuthDao.ENCRYPTED_PASS_PREFIX +
                         PersonAuthDao.encryptPassword(TEST_PASSWORD));
         serverDb.getRepository("http://localhost/dummy/", "").getPersonDao()
                 .insertPersonAuth(personAuth);
+
+        accountPersonGroup = new PersonGroup();
+        accountPersonGroup.setGroupName("Test account group");
+        accountPersonGroup.setGroupUid(serverDummyRepo.getPersonGroupDao()
+                .insert(accountPersonGroup));
+
+        PersonGroupMember accountGroupMember = new PersonGroupMember();
+        accountGroupMember.setGroupMemberGroupUid(accountPersonGroup.getGroupUid());
+        accountGroupMember.setGroupMemberPersonUid(accountPerson.getPersonUid());
+        serverDummyRepo.getPersonGroupMemberDao().insert(accountGroupMember);
 
         AtomicReference<UmAccount> accountRef = new AtomicReference<>();
         CountDownLatch latch = new CountDownLatch(1);
@@ -94,10 +113,7 @@ public class TestClazzDao {
         }
 
         accessToken = accountRef.get().getAuth();
-
         clientRepo = clientDb.getRepository(TEST_URI, accessToken);
-
-
     }
 
     private void startServer() throws IOException {
@@ -113,16 +129,47 @@ public class TestClazzDao {
 
 
     @Test
-    public void givenAccountWithDirectClazzPermission_whenSynced_thenShouldBePresentOnLocalDb() {
+    public void givenAccountWithDirectClazzPermission_whenSynced_thenEntitiesWithPermissionShouldBeOnClientDb() {
         ClazzDao dao = UmAppDatabase.getInstance(null).getClazzDao();
         Assert.assertNotNull(dao);
+
+        UmAppDatabase serverDummyRepo = serverDb.getRepository("http://localhost/dummy/",
+                "");
+
+
+        Role teacherRole = new Role();
+        teacherRole.setRoleName("teacher");
+        teacherRole.setRolePermissions(Role.PERMISSION_CLAZZ_RECORD_ACTIVITY
+                | Role.PERMISSION_SELECT);
+        teacherRole.setRoleUid(serverDummyRepo.getRoleDao().insert(teacherRole));
+
+        Clazz myClazz = new Clazz();
+        myClazz.setClazzName("Test Clazz");
+        myClazz.setClazzUid(serverDummyRepo.getClazzDao().insert(myClazz));
+
+        Clazz otherClazz = new Clazz();
+        otherClazz.setClazzName("Other clazz");
+        otherClazz.setClazzUid(serverDummyRepo.getClazzDao().insert(otherClazz));
+
+
+        EntityRole entityRole = new EntityRole();
+        entityRole.setErEntityUid(myClazz.getClazzUid());
+        entityRole.setErTableId(Clazz.TABLE_ID);
+        entityRole.setErGroupUid(accountPersonGroup.getGroupUid());
+        entityRole.setErRoleUid(teacherRole.getRoleUid());
+        serverDummyRepo.getEntityRoleDao().insert(entityRole);
+
+        clientDb.syncWith(clientRepo, accountPerson.getPersonUid(),
+                100, 100);
+
+        Assert.assertNotNull("Clazz synced to client when permission present",
+                clientDb.getClazzDao().findByUid(myClazz.getClazzUid()));
+        Assert.assertNull("Other clazz that account does not have permission to view is not present",
+                clientDb.getClazzDao().findByUid(otherClazz.getClazzUid()));
     }
 
-    public void givenAccountWithoutClazzPermission_whenSynced_thenShouldNotBePresentOnLocalDb() {
 
-    }
-
-    public void givenAccountWithLocationPermission_whenSynced_thenShouldBePresentInLocalDb() {
+    public void givenClazzUpdatedLocallyByAccountWithPermission_whenSynced_thenShouldBeUpdatedOnServer() {
 
     }
 
