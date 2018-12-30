@@ -55,7 +55,6 @@ public class PersonDetailActivity extends UstadBaseActivity implements PersonDet
 
     private PersonDetailPresenter mPresenter;
     ImageView personEditImage;
-
     private FloatingTextButton fab;
 
     public static final String CALL_ICON_NAME = "ic_call_bcd4_24dp";
