@@ -777,6 +777,7 @@ public abstract class AbstractDbProcessor {
         String incomingChangesParamName = daoMethod.getParameters().get(0).getSimpleName().toString();
         Element masterChangeSeqFieldEl = DbProcessorUtils.findElementWithAnnotation(
                 entityTypeElement, UmSyncMasterChangeSeqNum.class, processingEnv);
+        String checkIncomingEntitiesMethodName = "_checkIncoming";
 
         if(masterChangeSeqFieldEl == null){
             messager.printMessage(Diagnostic.Kind.ERROR, formatMethodForErrorMessage(daoMethod) +
@@ -832,29 +833,22 @@ public abstract class AbstractDbProcessor {
                     ArrayList.class)
             .add("$T<$T> _insertList = new $T<>();\n", List.class, entityTypeElement,
                     ArrayList.class)
-            .add("$T<$T> _primaryKeyList = new $T<>();\n", List.class, Long.class, ArrayList.class)
-            .beginControlFlow("for($T _entry : $L)", entityTypeElement,
-                    incomingChangesParam.getSimpleName())
-                .add("_primaryKeyList.add(_entry.get$L());\n",
-                        capitalize(entityPrimaryKeyFieldName))
-            .endControlFlow()
-            .add("$T<$T> _updateableEntities = $L(_primaryKeyList, $L);\n", List.class,
-                    UmSyncExistingEntity.class, findUpdateableEntitiesMethod.getSimpleName(),
+            .add("$T<$T, Integer> _entityActions = $L($L, $L);\n", Map.class, entityType,
+                    checkIncomingEntitiesMethodName, incomingChangesParamName,
                     accountPersonUidParam.getSimpleName())
-            .add("$T<$T, $T> _updateableMap = new $T<>();\n", Map.class, Long.class,
-                    UmSyncExistingEntity.class, HashMap.class)
-            .beginControlFlow("for($T _entity: _updateableEntities)", UmSyncExistingEntity.class)
-                .add("_updateableMap.put(_entity.getPrimaryKey(), _entity);\n")
-            .endControlFlow()
-            .beginControlFlow("for($T _entity : $L)", entityType, incomingChangesParamName)
-                .beginControlFlow("if(_updateableMap.containsKey(_entity.get$L()))",
-                        capitalize(entityPrimaryKeyFieldName))
-                    .beginControlFlow("if(_updateableMap.get(_entity.get$L()).isUserCanUpdate())",
-                            capitalize(entityPrimaryKeyFieldName))
-                        .add("_updateList.add(_entity);\n")
-                    .endControlFlow()
-                .nextControlFlow("else")
-                    .add("_insertList.add(_entity);\n")
+            .beginControlFlow("for($T.Entry<$T, Integer> _entityAction : _entityActions.entrySet())",
+                    Map.class, entityType)
+                .beginControlFlow("switch(_entityAction.getValue())")
+                    .add("case $T.ACTION_UPDATE:\n", UmSyncIncoming.class)
+                    .indent()
+                        .add("_updateList.add(_entityAction.getKey());\n")
+                        .add("break;\n")
+                    .unindent()
+                    .add("case $T.ACTION_INSERT:\n", UmSyncIncoming.class)
+                    .indent()
+                        .add("_insertList.add(_entityAction.getKey());\n")
+                        .add("break;\n")
+                    .unindent()
                 .endControlFlow()
             .endControlFlow()
             .add("insertList(_insertList);\n")
@@ -876,15 +870,18 @@ public abstract class AbstractDbProcessor {
 
     /**
      * Generate a method to check incoming entities on sync. This will use the UmDao
-     * updatePermissionCondition and insertPermissionCondition to determine which entities can be
-     * inserted or updated.
+     * updatePermissionCondition and insertPermissionCondition to determine whether the incoming
+     * change should be inserted, updated, or dropped.
      *
-     * @param methodName
-     * @param methodModifier
-     * @param entityType
-     * @param daoType
-     * @param queryMethodGenerator
-     * @return
+     * @param methodName The name of the method to generate
+     * @param methodModifier Access modifier to apply to the method e.g. Modifier.PUBLIC
+     * @param entityType TypeElement representing the type of entity
+     * @param daoType TypeElement representing the DAO currently being generated
+     * @param dbType TypeElement representing the database currently being generated
+     * @param queryMethodGenerator Query method generator (e.g. subclass of AbstractDbProcessor)
+     *                             which can, if required, add extra query methods to the DAO.
+     *
+     * @return MethodSpec for a method that will check incoming entities+
      */
     public MethodSpec generateCheckIncomingEntitiesMethod(String methodName,
                                                           Modifier methodModifier,
@@ -960,14 +957,12 @@ public abstract class AbstractDbProcessor {
                 .endControlFlow()
                 .add("boolean _userCanInsert = $L($L);\n",
                         findCanInsertElementMethod.getSimpleName(), accountPersonUidParamName)
-                .beginControlFlow("for($T _entity : $L)", entityType,
-                        entitiesListParamName)
+                .beginControlFlow("for($T _entity : _pkToEntityMap.values())", entityType)
                     .add("_result.put(_entity, _userCanInsert ? " +
                                 "$1T.ACTION_INSERT : $1T.ACTION_REJECT);\n", UmSyncIncoming.class)
                 .endControlFlow()
                 .add("return _result;\n");
         methodBuilder.addCode(codeBlock.build());
-
 
         return methodBuilder.build();
     }
