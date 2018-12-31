@@ -43,6 +43,15 @@ public class ClazzMember implements SyncableEntity {
     @UmSyncLastChangedBy
     private int clazzMemberLastChangedBy;
 
+    public ClazzMember() {
+
+    }
+
+    public ClazzMember(long clazzUid, long personUid) {
+        this.clazzMemberClazzUid = clazzUid;
+        this.clazzMemberPersonUid = personUid;
+    }
+
     public long getClazzMemberUid() {
         return clazzMemberUid;
     }
