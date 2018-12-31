@@ -31,6 +31,17 @@ public class EntityRole {
 
 
 
+    public EntityRole() {
+
+    }
+
+    public EntityRole(int erTableId, long erEntityUid, long erGroupUid, long erRoleUid) {
+        this.erTableId = erTableId;
+        this.erEntityUid = erEntityUid;
+        this.erGroupUid = erGroupUid;
+        this.erRoleUid = erRoleUid;
+    }
+
 
     public long getErUid() {
         return erUid;

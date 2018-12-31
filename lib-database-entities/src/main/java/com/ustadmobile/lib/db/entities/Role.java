@@ -49,6 +49,15 @@ public class Role {
     public static final long PERMISSION_CLAZZ_ADD_STUDENT = 1024;
 
 
+    public Role() {
+
+    }
+
+    public Role(String roleName, long rolePermissions) {
+        this.roleName = roleName;
+        this.rolePermissions = rolePermissions;
+    }
+
     public long getRoleUid() {
         return roleUid;
     }

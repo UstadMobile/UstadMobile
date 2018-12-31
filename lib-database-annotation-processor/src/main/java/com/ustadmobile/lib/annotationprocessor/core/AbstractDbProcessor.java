@@ -537,6 +537,8 @@ public abstract class AbstractDbProcessor {
             return "";
         }
 
+        String insertCondition = daoType.getAnnotation(UmDao.class).insertPermissionCondition();
+
 
 
         VariableElement fromLocalChangeSeqNumParam = daoMethod.getParameters().get(0);
@@ -555,8 +557,11 @@ public abstract class AbstractDbProcessor {
             return "";
         }
 
-        return String.format("SELECT * FROM %s WHERE %s BETWEEN :%s AND :%s AND %s = :%s AND %s LIMIT :%s",
+        return String.format("SELECT %s.* FROM %s, (SELECT (%s) AS canInsertCol) AS canInsertTbl " +
+                        "WHERE %s BETWEEN :%s AND :%s AND %s = :%s AND (canInsertTbl.canInsertCol OR (%s)) LIMIT :%s",
                 entityTypeEl.getSimpleName().toString(),
+                entityTypeEl.getSimpleName().toString(),
+                insertCondition,
                 localChangeSeqNumEl.getSimpleName().toString(),
                 fromLocalChangeSeqNumParam.getSimpleName().toString(),
                 toLocalChangeSeqNumParam.getSimpleName().toString(),
@@ -665,9 +670,9 @@ public abstract class AbstractDbProcessor {
 
         TypeElement entityTypeEl = (TypeElement)processingEnv.getTypeUtils().asElement(entityTypeMirror);
         Element primaryKeyEl = findPrimaryKey(entityTypeEl);
-        String readPermissionCondition = daoType.getAnnotation(UmDao.class) != null ?
-                daoType.getAnnotation(UmDao.class).selectPermissionCondition() : "";
-        if(readPermissionCondition.equals("")) {
+        String updatePermissionCondition = daoType.getAnnotation(UmDao.class) != null ?
+                daoType.getAnnotation(UmDao.class).updatePermissionCondition() : "";
+        if(updatePermissionCondition.equals("")) {
             messager.printMessage(Diagnostic.Kind.ERROR,
                     formatMethodForErrorMessage(methodBeingGenerated, daoType) + " attempting to" +
                             "generate SyncCheckIncomingCanUpdate: DAO class must have selectPermissionCondition.");
@@ -675,15 +680,15 @@ public abstract class AbstractDbProcessor {
         }
 
 
-        return String.format("SELECT %s.%s as primaryKey, 1 as userCanUpdate FROM %s " +
-                        "WHERE %s.%s in (:%s) AND %s",
+        return String.format("SELECT %s.%s as primaryKey, (%s) as userCanUpdate FROM %s " +
+                        "WHERE %s.%s in (:%s)",
                 entityTypeEl.getSimpleName(),
                 primaryKeyEl.getSimpleName(),
+                updatePermissionCondition,
                 entityTypeEl.getSimpleName(),
                 entityTypeEl.getSimpleName(),
                 primaryKeyEl.getSimpleName(),
-                primaryKeyArrayParamName,
-                readPermissionCondition);
+                primaryKeyArrayParamName);
     }
 
     protected String generateSyncFindUpdatableSql(TypeElement daoType, ExecutableElement daoMethod,

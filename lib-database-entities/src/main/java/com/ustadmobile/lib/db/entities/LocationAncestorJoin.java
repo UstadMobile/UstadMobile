@@ -13,6 +13,16 @@ public class LocationAncestorJoin {
 
     private long locationAncestorAncestorLocationUid;
 
+    public LocationAncestorJoin() {
+
+    }
+
+    public LocationAncestorJoin(long locationAncestorChildLocationUid, long locationAncestorAncestorLocationUid) {
+        this.locationAncestorChildLocationUid = locationAncestorChildLocationUid;
+        this.locationAncestorAncestorLocationUid = locationAncestorAncestorLocationUid;
+    }
+
+
     public long getLocationAncestorId() {
         return locationAncestorId;
     }

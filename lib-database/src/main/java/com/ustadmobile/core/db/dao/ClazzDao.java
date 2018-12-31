@@ -20,6 +20,7 @@ import static com.ustadmobile.core.db.dao.ClazzDao.PERMISSION_CONDITION1;
 import static com.ustadmobile.core.db.dao.ClazzDao.PERMISSION_CONDITION2;
 
 @UmDao(selectPermissionCondition = PERMISSION_CONDITION1 + Role.PERMISSION_CLAZZ_SELECT + PERMISSION_CONDITION2,
+updatePermissionCondition = PERMISSION_CONDITION1 + Role.PERMISSION_CLAZZ_UPDATE + PERMISSION_CONDITION2,
 insertPermissionCondition = "(SELECT admin FROM Person WHERE personUid = :accountPersonUid) " +
         "OR " +
         "EXISTS(SELECT PersonGroupMember.groupMemberPersonUid FROM PersonGroupMember " +
@@ -42,7 +43,7 @@ public abstract class ClazzDao implements SyncableDao<Clazz, ClazzDao> {
             " AND EntityRole.erEntityUid = Clazz.clazzUid) " +
             "OR" +
             "(EntityRole.ertableId = " + Location.TABLE_ID +
-            " AND EntityRole.erEntityUid IN (SELECT locationAncestorId FROM LocationAncestorJoin WHERE locationAncestorChildLocationUid = Clazz.clazzLocationUid))" +
+            " AND EntityRole.erEntityUid IN (SELECT locationAncestorAncestorLocationUid FROM LocationAncestorJoin WHERE locationAncestorChildLocationUid = Clazz.clazzLocationUid))" +
             ") AND (Role.rolePermissions & ";
 
     protected static final String PERMISSION_CONDITION2 = ") > 0)";

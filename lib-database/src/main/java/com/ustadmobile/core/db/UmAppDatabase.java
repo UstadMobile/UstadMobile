@@ -26,6 +26,8 @@ import com.ustadmobile.core.db.dao.EntryStatusResponseDao;
 import com.ustadmobile.core.db.dao.HttpCachedEntryDao;
 import com.ustadmobile.core.db.dao.LanguageDao;
 import com.ustadmobile.core.db.dao.LanguageVariantDao;
+import com.ustadmobile.core.db.dao.LocationAncestorJoinDao;
+import com.ustadmobile.core.db.dao.LocationDao;
 import com.ustadmobile.core.db.dao.PersonGroupDao;
 import com.ustadmobile.core.db.dao.PersonGroupMemberDao;
 import com.ustadmobile.core.db.dao.RoleDao;
@@ -247,6 +249,10 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
     public abstract PersonGroupMemberDao getPersonGroupMemberDao();
 
     public abstract EntityRoleDao getEntityRoleDao();
+
+    public abstract LocationDao getLocationDao();
+
+    public abstract LocationAncestorJoinDao getLocationAncestorJoinDao();
 
     @UmDbContext
     public abstract Object getContext();

@@ -13,7 +13,7 @@ public class Clazz {
 
     public static final int TABLE_ID = 6;
 
-    @UmPrimaryKey(autoIncrement = true)
+    @UmPrimaryKey(autoGenerateSyncable = true)
     private long clazzUid;
 
     private String clazzName;
@@ -30,6 +30,19 @@ public class Clazz {
     private int clazzLastChangedBy;
 
     private long clazzLocationUid;
+
+    public Clazz() {
+
+    }
+
+    public Clazz(String clazzName){
+        this.clazzName = clazzName;
+    }
+
+    public Clazz(String clazzName, long clazzLocationUid) {
+        this.clazzName = clazzName;
+        this.clazzLocationUid = clazzLocationUid;
+    }
 
     public float getAttendanceAverage() {
         return attendanceAverage;
