@@ -1,10 +1,14 @@
 package com.ustadmobile.lib.db;
 
 import com.ustadmobile.core.db.UmAppDatabase;
+import com.ustadmobile.core.db.dao.PersonDao;
 import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.ClazzMember;
 import com.ustadmobile.lib.db.entities.EntityRole;
+import com.ustadmobile.lib.db.entities.Location;
+import com.ustadmobile.lib.db.entities.LocationAncestorJoin;
 import com.ustadmobile.lib.db.entities.Person;
+import com.ustadmobile.lib.db.entities.PersonLocationJoin;
 import com.ustadmobile.lib.db.entities.Role;
 
 import org.junit.Assert;
@@ -13,10 +17,64 @@ import org.junit.Test;
 
 public class TestPersonDao extends AbstractDaoTest{
 
+    private Person myStudent;
+
+    private Person otherStudent;
+
+    private Location myLocation;
+
     @Before
     public void setup() {
         initDb();
     }
+
+    private void initAddStudentToMyClazzAndGrantPermission(long permission) {
+        UmAppDatabase serverDummyRepo = serverDb.getRepository("http://localhost/dummy/", "");
+        myStudent = new Person("somebody", "bob", "jones");
+        myStudent.setPersonUid(serverDummyRepo.getPersonDao().insert(myStudent));
+
+        otherStudent = new Person("someoneelse", "another", "stranger");
+        otherStudent.setPersonUid(serverDummyRepo.getPersonDao().insert(otherStudent));
+
+        ClazzMember studentClazzMember = new ClazzMember(myClazz.getClazzUid(),
+                myStudent.getPersonUid());
+        serverDummyRepo.getClazzMemberDao().insert(studentClazzMember);
+
+        Role teacherRole = new Role("Teacher", permission);
+        teacherRole.setRoleUid(serverDummyRepo.getRoleDao().insert(teacherRole));
+
+        EntityRole clazzTeacherRole = new EntityRole(Clazz.TABLE_ID, myClazz.getClazzUid(),
+                accountPersonGroup.getGroupUid(), teacherRole.getRoleUid());
+        serverDummyRepo.getEntityRoleDao().insert(clazzTeacherRole);
+    }
+
+    private void initAddPersonToLocationAndGrantPermission(long permission) {
+        UmAppDatabase serverDummyRepo = serverDb.getRepository("http://localhost/dummy/", "");
+
+        myStudent = new Person("somebody", "bob", "jones");
+        myStudent.setPersonUid(serverDummyRepo.getPersonDao().insert(myStudent));
+
+        otherStudent = new Person("someoneelse", "another", "stranger");
+        otherStudent.setPersonUid(serverDummyRepo.getPersonDao().insert(otherStudent));
+
+        myLocation = new Location("No Mans Land", "Dont come here");
+        myLocation.setLocationUid(serverDummyRepo.getLocationDao().insert(myLocation));
+
+        LocationAncestorJoin locationAncestorJoin = new LocationAncestorJoin(
+                myLocation.getLocationUid(), myLocation.getLocationUid());
+        serverDb.getLocationAncestorJoinDao().insert(locationAncestorJoin);
+
+        PersonLocationJoin personLocation = new PersonLocationJoin(myStudent, myLocation);
+        serverDummyRepo.getPersonLocationJoinDao().insert(personLocation);
+
+        Role testRole= new Role("Test", permission);
+        testRole.setRoleUid(serverDummyRepo.getRoleDao().insert(testRole));
+
+        EntityRole entityRole = new EntityRole(Location.TABLE_ID, myLocation.getLocationUid(),
+                accountPersonGroup.getGroupUid(), testRole.getRoleUid());
+        serverDummyRepo.getEntityRoleDao().insert(entityRole);
+    }
+
 
     @Test
     public void givenAccountWithDirectPersonSelectPermission_whenSynced_thenEntitiesBeInClientDb() {
@@ -49,35 +107,69 @@ public class TestPersonDao extends AbstractDaoTest{
     public void givenAccountWithPersonSelectPermissionOverClazz_whenSynced_thenPersonEntitiesAreInClientDb() {
         UmAppDatabase serverDummyRepo = serverDb.getRepository("http://localhost/dummy/", "");
 
-        Person studentPerson = new Person("somebody", "bob", "jones");
-        studentPerson.setPersonUid(serverDummyRepo.getPersonDao().insert(studentPerson));
-
-        Person otherPerson = new Person("someoneelse", "another", "stranger");
-        otherPerson.setPersonUid(serverDummyRepo.getPersonDao().insert(otherPerson));
-
-        ClazzMember studentClazzMember = new ClazzMember(myClazz.getClazzUid(),
-                studentPerson.getPersonUid());
-        serverDummyRepo.getClazzMemberDao().insert(studentClazzMember);
-
-        Role teacherRole = new Role("Teacher", Role.PERMISSION_PERSON_SELECT |
+        initAddStudentToMyClazzAndGrantPermission(Role.PERMISSION_PERSON_SELECT |
             Role.PERMISSION_CLAZZ_SELECT | Role.PERMISSION_CLAZZ_UPDATE);
-        teacherRole.setRoleUid(serverDummyRepo.getRoleDao().insert(teacherRole));
-
-        EntityRole clazzTeacherRole = new EntityRole(Clazz.TABLE_ID, myClazz.getClazzUid(),
-                accountPersonGroup.getGroupUid(), teacherRole.getRoleUid());
-        serverDummyRepo.getEntityRoleDao().insert(clazzTeacherRole);
 
         clientDb.syncWith(clientRepo, accountPerson.getPersonUid(), 100, 100);
 
         Assert.assertNotNull("When user is granted PERSON_SELECT permission over class " +
                 " the Person object for a person in that class is synced.",
-                clientDb.getPersonDao().findByUid(studentPerson.getPersonUid()));
+                clientDb.getPersonDao().findByUid(myStudent.getPersonUid()));
         Assert.assertNull("When a user is granted PERSON_SELECT permission over a class " +
                 "a Person not in that class is not synced",
-                clientDb.getPersonDao().findByUid(otherPerson.getPersonUid()));
+                clientDb.getPersonDao().findByUid(otherStudent.getPersonUid()));
 
     }
 
+    @Test
+    public void givenPersonUpdatedByAccountWithUpdatePermissionOverClazz_whenSynced_thenShouldBeUpdatedOnServer() {
+        initAddStudentToMyClazzAndGrantPermission(Role.PERMISSION_CLAZZ_SELECT |
+                Role.PERMISSION_PERSON_SELECT | Role.PERMISSION_PERSON_UPDATE);
+
+        clientDb.syncWith(clientRepo, accountPerson.getPersonUid(), 100, 100);
+
+        String newFirstname = myStudent.getFirstNames() + System.currentTimeMillis();
+        myStudent.setFirstNames(newFirstname);
+        clientRepo.getPersonDao().update(myStudent);
+
+        clientDb.syncWith(clientRepo, accountPerson.getPersonUid(), 100, 100);
+
+        Assert.assertEquals("After local update by account with update permission granted" +
+                        " by clazz, person name is updated on server", newFirstname,
+                serverDb.getPersonDao().findByUid(myStudent.getPersonUid()).getFirstNames());
+    }
+
+    @Test
+    public void givenPersonUpdatedByAccountWithoutUpdatePermissionOverClazz_whenSynced_thenShouldNotBeChangedOnServer(){
+        initAddStudentToMyClazzAndGrantPermission(Role.PERMISSION_CLAZZ_SELECT |
+                Role.PERMISSION_PERSON_SELECT);
+
+        clientDb.syncWith(clientRepo, accountPerson.getPersonUid(), 100, 100);
+
+        String oldFirstname = myStudent.getFirstNames();
+        String newFirstname = myStudent.getFirstNames() + System.currentTimeMillis();
+        myStudent.setFirstNames(newFirstname);
+        clientRepo.getPersonDao().update(myStudent);
+
+        clientDb.syncWith(clientRepo, accountPerson.getPersonUid(), 100, 100);
+
+        Assert.assertEquals("After local update by account with update permission granted" +
+                        " by clazz, person name is updated on server", oldFirstname,
+                serverDb.getPersonDao().findByUid(myStudent.getPersonUid()).getFirstNames());
+    }
+
+    @Test
+    public void givenAccountWithSelectionPermissionOverLocation_whenSynced_thenRelatedEntitiesShouldBeInClientDb() {
+        initAddPersonToLocationAndGrantPermission(Role.PERMISSION_PERSON_SELECT);
+
+        clientDb.syncWith(clientRepo, accountPerson.getPersonUid(), 100, 100);
+
+        Assert.assertNotNull("When account is granted select permission over location, " +
+                "person data is synced", clientDb.getPersonDao().findByUid(accountPerson.getPersonUid()));
+        Assert.assertNull("When account is granted select permission over location, " +
+                "person data not in that location is not synced to client",
+                clientDb.getPersonDao().findByUid(otherStudent.getPersonUid()));
+    }
 
 
 }

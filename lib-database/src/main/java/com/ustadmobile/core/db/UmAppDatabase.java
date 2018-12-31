@@ -30,6 +30,7 @@ import com.ustadmobile.core.db.dao.LocationAncestorJoinDao;
 import com.ustadmobile.core.db.dao.LocationDao;
 import com.ustadmobile.core.db.dao.PersonGroupDao;
 import com.ustadmobile.core.db.dao.PersonGroupMemberDao;
+import com.ustadmobile.core.db.dao.PersonLocationJoinDao;
 import com.ustadmobile.core.db.dao.RoleDao;
 import com.ustadmobile.lib.db.entities.LocationAncestorJoin;
 import com.ustadmobile.core.db.dao.NetworkNodeDao;
@@ -253,6 +254,9 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
     public abstract LocationDao getLocationDao();
 
     public abstract LocationAncestorJoinDao getLocationAncestorJoinDao();
+
+    public abstract PersonLocationJoinDao getPersonLocationJoinDao();
+
 
     @UmDbContext
     public abstract Object getContext();
