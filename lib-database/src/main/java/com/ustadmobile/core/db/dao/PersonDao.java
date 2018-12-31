@@ -14,6 +14,8 @@ import com.ustadmobile.lib.db.entities.AccessToken;
 import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.Location;
 import com.ustadmobile.lib.db.entities.Person;
+import com.ustadmobile.lib.db.entities.PersonGroup;
+import com.ustadmobile.lib.db.entities.PersonGroupMember;
 import com.ustadmobile.lib.db.entities.PersonWithEnrollment;
 import com.ustadmobile.lib.db.entities.PersonAuth;
 import com.ustadmobile.lib.db.entities.Role;
@@ -29,7 +31,7 @@ import static com.ustadmobile.core.db.dao.PersonDao.PERMISSION_CONDITION1;
 import static com.ustadmobile.core.db.dao.PersonDao.PERMISSION_CONDITION2;
 
 
-@UmDao(selectPermissionCondition = PERMISSION_CONDITION1 + Role.PERMISSION_SELECT + PERMISSION_CONDITION2)
+@UmDao(selectPermissionCondition = PERMISSION_CONDITION1 + Role.PERMISSION_PERSON_SELECT + PERMISSION_CONDITION2)
 @UmRepository
 public abstract class PersonDao implements SyncableDao<Person, PersonDao> {
 
@@ -316,4 +318,144 @@ public abstract class PersonDao implements SyncableDao<Person, PersonDao> {
         callback.onSuccess(Boolean.TRUE);
     }
 
+    @UmInsert
+    public abstract void insertPersonGroup(PersonGroup personGroup, UmCallback<Long> callback);
+
+    @UmInsert
+    public abstract void insertPersonGroupMember(PersonGroupMember personGroupMember,
+                                                 UmCallback<Long> callback);
+
+
+    /**
+     * Creates actual person and assigns it to a group for permissions' sake. Use this
+     * instead of direct insert.
+     *
+     * @param person    The person entity
+     * @param callback  The callback.
+     */
+    public void createPersonAsync(Person person, UmCallback<Long> callback){
+        insertAsync(person, new UmCallback<Long>() {
+            @Override
+            public void onSuccess(Long personUid) {
+                person.setPersonUid(personUid);
+
+                PersonGroup personGroup = new PersonGroup();
+                personGroup.setGroupName(person.getFirstNames()!= null?person.getFirstNames():""
+                                + "'s group");
+                insertPersonGroup(personGroup, new UmCallback<Long>() {
+                    @Override
+                    public void onSuccess(Long personGroupUid) {
+                        personGroup.setGroupUid(personGroupUid);
+
+                        PersonGroupMember personGroupMember = new PersonGroupMember();
+                        personGroupMember.setGroupMemberPersonUid(personUid);
+                        personGroupMember.setGroupMemberGroupUid(personGroupUid);
+                        insertPersonGroupMember(personGroupMember, new UmCallback<Long>() {
+                            @Override
+                            public void onSuccess(Long personGroupMemberUid) {
+                                personGroupMember.setGroupMemberUid(personGroupMemberUid);
+                                callback.onSuccess(personUid);
+                            }
+
+                            @Override
+                            public void onFailure(Throwable exception) {
+                                callback.onFailure(exception);
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onFailure(Throwable exception) {
+                        callback.onFailure(exception);
+                    }
+                });
+            }
+
+            @Override
+            public void onFailure(Throwable exception) {
+                exception.printStackTrace();
+            }
+        });
+    }
+
+    public class PersonWithGroup{
+        long personUid;
+        long personGroupUid;
+
+        PersonWithGroup(long personid, long groupid){
+            this.personUid = personid;
+            this.personGroupUid = groupid;
+        }
+
+        public long getPersonUid() {
+            return personUid;
+        }
+
+        public void setPersonUid(long personUid) {
+            this.personUid = personUid;
+        }
+
+        public long getPersonGroupUid() {
+            return personGroupUid;
+        }
+
+        public void setPersonGroupUid(long personGroupUid) {
+            this.personGroupUid = personGroupUid;
+        }
+    }
+
+    /**
+     * Crate person
+     *
+     * @param person
+     * @param callback
+     */
+    public void createPersonWithGroupAsync(Person person, UmCallback<PersonWithGroup> callback){
+        insertAsync(person, new UmCallback<Long>() {
+            @Override
+            public void onSuccess(Long personUid) {
+                person.setPersonUid(personUid);
+
+                PersonGroup personGroup = new PersonGroup();
+                personGroup.setGroupName(person.getFirstNames()!= null?person.getFirstNames():""
+                        + "'s group");
+                insertPersonGroup(personGroup, new UmCallback<Long>() {
+                    @Override
+                    public void onSuccess(Long personGroupUid) {
+                        personGroup.setGroupUid(personGroupUid);
+
+                        PersonGroupMember personGroupMember = new PersonGroupMember();
+                        personGroupMember.setGroupMemberPersonUid(personUid);
+                        personGroupMember.setGroupMemberGroupUid(personGroupUid);
+                        insertPersonGroupMember(personGroupMember, new UmCallback<Long>() {
+                            @Override
+                            public void onSuccess(Long personGroupMemberUid) {
+                                personGroupMember.setGroupMemberUid(personGroupMemberUid);
+                                PersonWithGroup personWithGroup =
+                                        new PersonWithGroup(personUid, personGroupUid);
+                                callback.onSuccess(personWithGroup);
+                            }
+
+                            @Override
+                            public void onFailure(Throwable exception) {
+                                callback.onFailure(exception);
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onFailure(Throwable exception) {
+                        callback.onFailure(exception);
+                    }
+                });
+            }
+
+            @Override
+            public void onFailure(Throwable exception) {
+                exception.printStackTrace();
+            }
+        });
+    }
+
 }
+

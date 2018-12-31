@@ -115,7 +115,7 @@ public class PeopleListPresenter
         PersonCustomFieldValueDao customFieldValueDao =
                 repository.getPersonCustomFieldValueDao();
 
-        personDao.insertAsync(newPerson, new UmCallback<Long>() {
+        personDao.createPersonAsync(newPerson, new UmCallback<Long>() {
 
             @Override
             public void onSuccess(Long result) {

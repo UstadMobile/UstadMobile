@@ -102,7 +102,7 @@ public class ClazzListPresenter extends UstadBaseController<ClazzListView> {
     }
 
     public void checkPermissions() {
-        clazzDao.personHasPermission(loggedInPersonUid, Role.PERMISSION_INSERT,
+        clazzDao.personHasPermission(loggedInPersonUid, Role.PERMISSION_CLAZZ_INSERT,
             new UmCallbackWithDefaultValue<>(false, new UmCallback<Boolean>() {
                 @Override
                 public void onSuccess(Boolean result) {

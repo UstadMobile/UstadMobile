@@ -75,6 +75,19 @@ public class Clazz {
 
     private long clazzLocationUid;
 
+    public Clazz() {
+
+    }
+
+    public Clazz(String clazzName){
+        this.clazzName = clazzName;
+    }
+
+    public Clazz(String clazzName, long clazzLocationUid) {
+        this.clazzName = clazzName;
+        this.clazzLocationUid = clazzLocationUid;
+    }
+
     public float getAttendanceAverage() {
         return attendanceAverage;
     }

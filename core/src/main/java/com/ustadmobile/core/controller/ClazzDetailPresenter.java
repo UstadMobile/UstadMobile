@@ -63,7 +63,7 @@ public class ClazzDetailPresenter
     public void checkPermissions(){
 
         clazzDao.personHasPermission(loggedInPersonUid, currentClazzUid,
-            Role.PERMISSION_UPDATE,
+            Role.PERMISSION_CLAZZ_UPDATE,
             new UmCallbackWithDefaultValue<>(false, new UmCallback<Boolean>() {
                 @Override
                 public void onSuccess(Boolean result) {

@@ -35,6 +35,16 @@ public class Location {
     @UmSyncLastChangedBy
     private int locationLastChangedBy;
 
+    public Location() {
+
+    }
+
+    public Location(String title, String description) {
+        this.title = title;
+        this.locationDesc = description;
+    }
+
+
     public String getLng() {
         return lng;
     }

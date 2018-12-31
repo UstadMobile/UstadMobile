@@ -82,7 +82,7 @@ public class Register2Presenter extends UstadBaseController<Register2View> {
             public void onSuccess(UmAccount result) {
                 if(result != null) {
                     person.setPersonUid(result.getPersonUid());
-                    umAppDatabase.getPersonDao().insertAsync(person, new UmCallback<Long>() {
+                    umAppDatabase.getPersonDao().createPersonAsync(person, new UmCallback<Long>() {
                         @Override
                         public void onSuccess(Long personUid) {
                             result.setEndpointUrl(serverUrl);

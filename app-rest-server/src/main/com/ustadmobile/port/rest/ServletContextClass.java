@@ -35,6 +35,7 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
 import static com.ustadmobile.lib.db.entities.PersonDetailPresenterField.CUSTOM_FIELD_MIN_UID;
+import static com.ustadmobile.lib.db.entities.Role.ROLE_NAME_TEACHER;
 
 public class ServletContextClass implements ServletContextListener
     {
@@ -95,12 +96,31 @@ public class ServletContextClass implements ServletContextListener
         }
 
 
-
         public void addRolesAndPermissions(){
+            RoleDao roleDao = appDb.getRepository(dummyBaseUrl, dummyAuth).getRoleDao();
+
+            //Add teacher role
+            Role newRole = new Role();
+
+            newRole.setRoleName(ROLE_NAME_TEACHER);
+            long teacherPermissions =
+                    Role.PERMISSION_CLAZZ_SELECT | Role.PERMISSION_CLAZZ_RECORD_ACTIVITY |
+                            Role.PERMISSION_CLAZZ_VIEW_REPORTS | Role.PERMISSION_CLAZZ_UPDATE |
+                            Role.PERMISSION_CLAZZ_VIEW_ACTIVITY | Role.PERMISSION_CLAZZ_RECORD_ACTIVITY |
+                            Role.PERMISSION_CLAZZ_VIEW_ATTENDANCE | Role.PERMISSION_CLAZZ_RECORD_ATTENDANCE |
+                            Role.PERMISSION_PERSON_UPDATE | Role.PERMISSION_PERSON_SELECT;
+            newRole.setRolePermissions(teacherPermissions);
+            Long newRoleUid = roleDao.insert(newRole);
+
+        }
+
+
+        public void addRolesAndPermissions2(){
 
             PersonAuthDao personAuthDao =
                     appDb.getRepository(dummyBaseUrl, dummyAuth).getPersonAuthDao();
-            EntityRoleDao entityRoleDao = appDb.getEntityRoleDao();
+            EntityRoleDao entityRoleDao =
+                    appDb.getRepository(dummyBaseUrl, dummyAuth).getEntityRoleDao();
             RoleDao roleDao = appDb.getRepository(dummyBaseUrl, dummyAuth).getRoleDao();
             PersonGroupDao personGroupDao =
                     appDb.getRepository(dummyBaseUrl, dummyAuth).getPersonGroupDao();
@@ -120,7 +140,6 @@ public class ServletContextClass implements ServletContextListener
             usersToMake.add(new TestRole(officerUsername, "officerpass"));
             usersToMake.add(new TestRole(mneUsername, "mnepass"));
             usersToMake.add(new TestRole(selUsername, "selpass"));
-
 
             for(TestRole every_role: usersToMake){
                 Person newTestPerson = new Person();
@@ -176,9 +195,12 @@ public class ServletContextClass implements ServletContextListener
 
                     //Whole Clazz Entity Role Specific:
                     newRole.setRoleName("teacher");
-                    long teacherPermissions = Role.PERMISSION_CLAZZ_VIEW_ATTENDANCE |
-                            Role.PERMISSION_SELECT | Role.PERMISSION_CLAZZ_RECORD_ACTIVITY |
-                            Role.PERMISSION_CLAZZ_VIEW_REPORTS;
+                    long teacherPermissions =
+                            Role.PERMISSION_CLAZZ_SELECT | Role.PERMISSION_CLAZZ_RECORD_ACTIVITY |
+                            Role.PERMISSION_CLAZZ_VIEW_REPORTS | Role.PERMISSION_CLAZZ_UPDATE |
+                            Role.PERMISSION_CLAZZ_VIEW_ACTIVITY | Role.PERMISSION_CLAZZ_RECORD_ACTIVITY |
+                            Role.PERMISSION_CLAZZ_VIEW_ATTENDANCE | Role.PERMISSION_CLAZZ_RECORD_ATTENDANCE |
+                            Role.PERMISSION_PERSON_UPDATE | Role.PERMISSION_PERSON_SELECT;
                     newRole.setRolePermissions(teacherPermissions);
                     Long newRoleUid = roleDao.insert(newRole);
 
@@ -188,7 +210,18 @@ public class ServletContextClass implements ServletContextListener
                     newEntityRole.setErTableId(Clazz.TABLE_ID);
                     //newEntityRole.setErEntityUid();   //Not for a particular Clazz but for whole.
 
-                    entityRoleDao.insert(newEntityRole);
+                    Long newEntityRoleUid = entityRoleDao.insert(newEntityRole);
+                    newEntityRole.setErUid(newEntityRoleUid);
+
+                    //For a specific clazz
+                    EntityRole newEntityClazzSpecific = new EntityRole();
+                    newEntityClazzSpecific.setErGroupUid(newTestPersonGroupUid);
+                    newEntityClazzSpecific.setErRoleUid(newRoleUid);
+                    newEntityClazzSpecific.setErTableId(Clazz.TABLE_ID);
+                    newEntityClazzSpecific.setErEntityUid(testClazzUid);
+                    Long newEntityClazzSpecificUid =
+                            entityRoleDao.insert(newEntityClazzSpecific);
+                    newEntityClazzSpecific.setErUid(newEntityClazzSpecificUid);
 
 
 

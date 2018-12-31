@@ -514,16 +514,6 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
         mUpdatedPerson = updateSansPersistPersonField(mUpdatedPerson, fieldCode, value);
     }
 
-//    /**
-//     * Handle discarding the edits done so far when leaving the activity / clicking discard.
-//     */
-//    public void handleClickDiscardChanges(){
-//        //TODO:  Make use of this method?
-//        //Update dao with mOriginalValuePerson
-//        personDao.insert(mOriginalValuePerson);
-//
-//    }
-
     /**
      * Click handler when Add new Class clicked on Classes section
      */

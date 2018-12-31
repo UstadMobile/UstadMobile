@@ -232,7 +232,7 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
 
     public void checkPermissions(){
         ClazzDao clazzDao = repository.getClazzDao();
-        clazzDao.personHasPermission(loggedInPersonUid, Role.PERMISSION_INSERT,
+        clazzDao.personHasPermission(loggedInPersonUid, Role.PERMISSION_PERSON_UPDATE,
             new UmCallbackWithDefaultValue<>(false, new UmCallback<Boolean>() {
                 @Override
                 public void onSuccess(Boolean result) {

@@ -32,6 +32,7 @@ import com.ustadmobile.core.db.dao.HolidayDao;
 import com.ustadmobile.core.db.dao.HttpCachedEntryDao;
 import com.ustadmobile.core.db.dao.LanguageDao;
 import com.ustadmobile.core.db.dao.LanguageVariantDao;
+import com.ustadmobile.core.db.dao.LocationAncestorJoinDao;
 import com.ustadmobile.core.db.dao.LocationDao;
 import com.ustadmobile.core.db.dao.NetworkNodeDao;
 import com.ustadmobile.core.db.dao.OpdsEntryDao;
@@ -292,7 +293,6 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
 
     public abstract SyncStatusDao getSyncStatusDao();
 
-    public abstract LocationDao getLocationDao();
     public abstract ContentEntryFileStatusDao getContentEntryFileStatusDao();
 
     public abstract ContentCategorySchemaDao getContentCategorySchemaDao();
@@ -314,6 +314,10 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
     public abstract PersonGroupMemberDao getPersonGroupMemberDao();
 
     public abstract EntityRoleDao getEntityRoleDao();
+
+    public abstract LocationDao getLocationDao();
+
+    public abstract LocationAncestorJoinDao getLocationAncestorJoinDao();
 
     @UmDbContext
     public abstract Object getContext();

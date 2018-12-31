@@ -9,6 +9,8 @@ import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 @UmEntity(tableId = 45)
 public class Role {
 
+    public static final String ROLE_NAME_TEACHER = "teacher";
+
     @UmPrimaryKey(autoGenerateSyncable = true)
     private long roleUid;
 
@@ -26,11 +28,11 @@ public class Role {
     //bit flags made of up PERMISSION_ constants
     private long rolePermissions;
 
-    public static final long PERMISSION_SELECT = 1;
+    public static final long PERMISSION_CLAZZ_SELECT = 1;
 
-    public static final long PERMISSION_INSERT = 2;
+    public static final long PERMISSION_CLAZZ_INSERT = 2;
 
-    public static final long PERMISSION_UPDATE = 4;
+    public static final long PERMISSION_CLAZZ_UPDATE = 4;
 
     public static final long PERMISSION_CLAZZ_RECORD_ATTENDANCE = 8;
 
@@ -38,15 +40,34 @@ public class Role {
 
     public static final long PERMISSION_CLAZZ_RECORD_SEL = 32;
 
-    public static final long PERMISSION_CLAZZ_VIEW_ATTENDANCE = 64;
+    public static final long PERMISSION_PERSON_SELECT = 64;
 
-    public static final long PERMISSION_CLAZZ_VIEW_ACTIVITY = 128;
+    public static final long PERMISSION_PERSON_INSERT = 128;
 
-    public static final long PERMISSION_CLAZZ_VIEW_SEL = 256;
+    public static final long PERMISSION_PERSON_UPDATE = 256;
 
-    public static final long PERMISSION_CLAZZ_VIEW_REPORTS = 512;
+    public static final long PERMISSION_CLAZZ_ADD_TEACHER = 512;
 
-    
+    public static final long PERMISSION_CLAZZ_ADD_STUDENT = 1024;
+
+    public static final long PERMISSION_CLAZZ_VIEW_ATTENDANCE = 2048;
+
+    public static final long PERMISSION_CLAZZ_VIEW_ACTIVITY = 4096;
+
+    public static final long PERMISSION_CLAZZ_VIEW_SEL = 8192;
+
+    public static final long PERMISSION_CLAZZ_VIEW_REPORTS = 16384;
+
+
+    public Role() {
+
+    }
+
+    public Role(String roleName, long rolePermissions) {
+        this.roleName = roleName;
+        this.rolePermissions = rolePermissions;
+    }
+
     public long getRoleUid() {
         return roleUid;
     }

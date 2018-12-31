@@ -50,6 +50,7 @@ public class PersonWithEnrollmentRecyclerAdapter
     private boolean showAttendance;
     private boolean showEnrollment;
     private boolean isEmpty = false;
+    private boolean addStudentLast = false;
 
     private int currentTop = -1;
     private boolean teacherAdded = false;
@@ -198,6 +199,8 @@ public class PersonWithEnrollmentRecyclerAdapter
             return;
         }
 
+        addStudentLast = false;
+
         String studentName = personWithEnrollment.getFirstNames() + " " +
                 personWithEnrollment.getLastName();
         Long personUid = personWithEnrollment.getPersonUid();
@@ -314,7 +317,14 @@ public class PersonWithEnrollmentRecyclerAdapter
                 addHeadingAndNew(cl, ClazzMember.ROLE_TEACHER);
 
                 if(personWithEnrollment.getClazzMemberRole() == ClazzMember.ROLE_STUDENT){
+
                     addHeadingAndNew(cl, ClazzMember.ROLE_STUDENT);
+                }
+
+                int nextPos = position + 1;
+                if(personWithEnrollment.getClazzMemberRole() == ClazzMember.ROLE_TEACHER &&
+                        getItemCount() == nextPos){
+                    addStudentLast = true;
                 }
 
             } else {
@@ -323,9 +333,11 @@ public class PersonWithEnrollmentRecyclerAdapter
                 if (previousPerson.getClazzMemberRole() == ClazzMember.ROLE_TEACHER &&
                         personWithEnrollment.getClazzMemberRole() == ClazzMember.ROLE_STUDENT) {
 
+
                     //Add student
                     addHeadingAndNew(cl, ClazzMember.ROLE_STUDENT);
                 }
+
             }
         }
 
@@ -348,6 +360,13 @@ public class PersonWithEnrollmentRecyclerAdapter
                     ConstraintSet.TOP, R.id.item_studentlist_student_simple_student_title,
                     ConstraintSet.BOTTOM, 0);
             constraintSet.applyTo(cl);
+
+        }
+
+        if(getItemCount() == position+1) {
+            if (addStudentLast) {
+                addHeadingAndNew(cl, ClazzMember.ROLE_STUDENT);
+            }
         }
     }
 
