@@ -23,6 +23,9 @@ public class PersonGroup {
 
     private String groupName;
 
+
+    private long groupPersonUid;
+
     public long getGroupUid() {
         return groupUid;
     }
@@ -61,5 +64,19 @@ public class PersonGroup {
 
     public void setGroupName(String groupName) {
         this.groupName = groupName;
+    }
+
+    /**
+     * If this was created as a group for one person, this is the uid for that Person object.
+     * Single member groups are used to avoid queries having to look things up from another table.
+     *
+     * @return person UID if this group is created for one user only, otherwise 0
+     */
+    public long getGroupPersonUid() {
+        return groupPersonUid;
+    }
+
+    public void setGroupPersonUid(long groupPersonUid) {
+        this.groupPersonUid = groupPersonUid;
     }
 }
