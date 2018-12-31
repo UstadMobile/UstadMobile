@@ -16,24 +16,22 @@ import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
 import java.util.List;
 
-import static com.ustadmobile.core.db.dao.ClazzDao.PERMISSION_CONDITION1;
-import static com.ustadmobile.core.db.dao.ClazzDao.PERMISSION_CONDITION2;
+import static com.ustadmobile.core.db.dao.ClazzDao.ENTITY_LEVEL_PERMISSION_CONDITION1;
+import static com.ustadmobile.core.db.dao.ClazzDao.ENTITY_LEVEL_PERMISSION_CONDITION2;
+import static com.ustadmobile.core.db.dao.ClazzDao.TABLE_LEVEL_PERMISSION_CONDITION1;
+import static com.ustadmobile.core.db.dao.ClazzDao.TABLE_LEVEL_PERMISSION_CONDITION2;
 
-@UmDao(selectPermissionCondition = PERMISSION_CONDITION1 + Role.PERMISSION_CLAZZ_SELECT + PERMISSION_CONDITION2,
-updatePermissionCondition = PERMISSION_CONDITION1 + Role.PERMISSION_CLAZZ_UPDATE + PERMISSION_CONDITION2,
-insertPermissionCondition = "(SELECT admin FROM Person WHERE personUid = :accountPersonUid) " +
-        "OR " +
-        "EXISTS(SELECT PersonGroupMember.groupMemberPersonUid FROM PersonGroupMember " +
-        " JOIN EntityRole ON EntityRole.erGroupUid = PersonGroupMember.groupMemberGroupUid " +
-        " JOIN Role ON EntityRole.erRoleUid = Role.roleUid " +
-        " WHERE " +
-        " PersonGroupMember.groupMemberPersonUid = :accountPersonUid " +
-        " AND EntityRole.erTableId = " + Clazz.TABLE_ID +
-        " AND Role.rolePermissions & " + Role.PERMISSION_CLAZZ_INSERT + " > 0)")
+@UmDao(
+selectPermissionCondition = ENTITY_LEVEL_PERMISSION_CONDITION1 + Role.PERMISSION_CLAZZ_SELECT +
+        ENTITY_LEVEL_PERMISSION_CONDITION2,
+updatePermissionCondition = ENTITY_LEVEL_PERMISSION_CONDITION1 + Role.PERMISSION_CLAZZ_UPDATE +
+        ENTITY_LEVEL_PERMISSION_CONDITION2,
+insertPermissionCondition = TABLE_LEVEL_PERMISSION_CONDITION1 + Role.PERMISSION_CLAZZ_INSERT +
+        TABLE_LEVEL_PERMISSION_CONDITION2)
 @UmRepository
 public abstract class ClazzDao implements SyncableDao<Clazz, ClazzDao> {
 
-    protected static final String PERMISSION_CONDITION1 = " (SELECT admin FROM Person WHERE personUid = :accountPersonUid) = 1 OR " +
+    protected static final String ENTITY_LEVEL_PERMISSION_CONDITION1 = " (SELECT admin FROM Person WHERE personUid = :accountPersonUid) = 1 OR " +
             "EXISTS(SELECT PersonGroupMember.groupMemberPersonUid FROM PersonGroupMember " +
             "JOIN EntityRole ON EntityRole.erGroupUid = PersonGroupMember.groupMemberGroupUid " +
             "JOIN Role ON EntityRole.erRoleUid = Role.roleUid " +
@@ -46,7 +44,19 @@ public abstract class ClazzDao implements SyncableDao<Clazz, ClazzDao> {
             " AND EntityRole.erEntityUid IN (SELECT locationAncestorAncestorLocationUid FROM LocationAncestorJoin WHERE locationAncestorChildLocationUid = Clazz.clazzLocationUid))" +
             ") AND (Role.rolePermissions & ";
 
-    protected static final String PERMISSION_CONDITION2 = ") > 0)";
+    protected static final String ENTITY_LEVEL_PERMISSION_CONDITION2 = ") > 0)";
+
+    protected static final String TABLE_LEVEL_PERMISSION_CONDITION1 = "(SELECT admin FROM Person WHERE personUid = :accountPersonUid) " +
+            "OR " +
+            "EXISTS(SELECT PersonGroupMember.groupMemberPersonUid FROM PersonGroupMember " +
+            " JOIN EntityRole ON EntityRole.erGroupUid = PersonGroupMember.groupMemberGroupUid " +
+            " JOIN Role ON EntityRole.erRoleUid = Role.roleUid " +
+            " WHERE " +
+            " PersonGroupMember.groupMemberPersonUid = :accountPersonUid " +
+            " AND EntityRole.erTableId = " + Clazz.TABLE_ID +
+            " AND Role.rolePermissions & ";
+
+    protected static final String TABLE_LEVEL_PERMISSION_CONDITION2 = " > 0)";
 
     @Override
     @UmInsert
@@ -68,26 +78,18 @@ public abstract class ClazzDao implements SyncableDao<Clazz, ClazzDao> {
 
 
     /** Check if a permission is present on a specific entity e.g. update/modify etc*/
-    @UmQuery("SELECT 1 FROM Clazz WHERE Clazz.clazzUid = :clazzUid AND (" + PERMISSION_CONDITION1 +
-            " :permission" + PERMISSION_CONDITION2 + ")")
+    @UmQuery("SELECT 1 FROM Clazz WHERE Clazz.clazzUid = :clazzUid AND (" + ENTITY_LEVEL_PERMISSION_CONDITION1 +
+            " :permission" + ENTITY_LEVEL_PERMISSION_CONDITION2 + ")")
     public abstract void personHasPermission(long accountPersonUid, long clazzUid, long permission,
                                              UmCallback<Boolean> callback);
 
-    @UmQuery("SELECT " +
-            "(SELECT admin FROM Person WHERE personUid = :accountPersonUid) OR " +
-            "EXISTS(SELECT EntityRole.erUid FROM EntityRole " +
-            " LEFT JOIN Role ON EntityRole.erRoleUid = Role.roleUid " +
-            " LEFT JOIN PersonGroupMember ON EntityRole.erGroupUid = PersonGroupMember.groupMemberGroupUid " +
-            " WHERE PersonGroupMember.groupMemberPersonUid = :accountPersonUid " +
-            " AND " +
-            " EntityRole.erTableId = " + Clazz.TABLE_ID +
-            " AND " +
-            " (Role.rolePermissions & :permission) > 0)")
+    @UmQuery("SELECT " + TABLE_LEVEL_PERMISSION_CONDITION1 + " :permission "
+            + TABLE_LEVEL_PERMISSION_CONDITION2 + " AS hasPermission")
     public abstract void personHasPermission(long accountPersonUid, long permission,
                                              UmCallback<Boolean> callback);
 
     @UmQuery("SELECT Clazz.clazzUid as primaryKey, " +
-            "(" + PERMISSION_CONDITION1 + Role.PERMISSION_CLAZZ_UPDATE + PERMISSION_CONDITION2 + ") " +
+            "(" + ENTITY_LEVEL_PERMISSION_CONDITION1 + Role.PERMISSION_CLAZZ_UPDATE + ENTITY_LEVEL_PERMISSION_CONDITION2 + ") " +
                 " AS userCanUpdate " +
             " FROM Clazz WHERE Clazz.clazzUid in (:primaryKeys)")
     @UmSyncCheckIncomingCanUpdate
