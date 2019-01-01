@@ -526,9 +526,28 @@ public abstract class AbstractDbProcessor {
             return "";
         }
 
-        String updatePermissionCondition = daoType.getAnnotation(UmDao.class) != null ?
-                                daoType.getAnnotation(UmDao.class).updatePermissionCondition() : "";
-        updatePermissionCondition = updatePermissionCondition.replace(":_permission", "1");
+        String updatePermissionCondition;
+        String joinClause;
+        TypeMirror inheritPermissionFromTypeMirror = DbProcessorUtils
+                .findDaoToInheritPermissionFrom(daoType);
+        String insertCondition;
+        if(inheritPermissionFromTypeMirror != null) {
+            joinClause = generateInheritPermissionJoinClause(inheritPermissionFromTypeMirror,
+                    entityTypeEl, daoType.getAnnotation(UmDao.class));
+            Element inheritPermissionFromTypeEl = processingEnv.getTypeUtils().asElement(
+                    inheritPermissionFromTypeMirror);
+            updatePermissionCondition = inheritPermissionFromTypeEl.getAnnotation(UmDao.class)
+                    .updatePermissionCondition();
+            insertCondition = inheritPermissionFromTypeEl.getAnnotation(UmDao.class)
+                    .insertPermissionCondition();
+        }else {
+            updatePermissionCondition = daoType.getAnnotation(UmDao.class) != null ?
+                    daoType.getAnnotation(UmDao.class).updatePermissionCondition() : "";
+            insertCondition = daoType.getAnnotation(UmDao.class).insertPermissionCondition();
+            joinClause = "";
+        }
+
+
         if(updatePermissionCondition.equals("")) {
             messager.printMessage(Diagnostic.Kind.ERROR,
                     formatMethodForErrorMessage(daoMethod, daoType) + " Attempting to generate " +
@@ -537,7 +556,7 @@ public abstract class AbstractDbProcessor {
             return "";
         }
 
-        String insertCondition = daoType.getAnnotation(UmDao.class).insertPermissionCondition();
+
 
 
 
@@ -557,10 +576,11 @@ public abstract class AbstractDbProcessor {
             return "";
         }
 
-        return String.format("SELECT %s.* FROM %s, (SELECT (%s) AS canInsertCol) AS canInsertTbl " +
+        return String.format("SELECT %s.* FROM %s %s, (SELECT (%s) AS canInsertCol) AS canInsertTbl " +
                         "WHERE %s BETWEEN :%s AND :%s AND %s = :%s AND (canInsertTbl.canInsertCol OR (%s)) LIMIT :%s",
                 entityTypeEl.getSimpleName().toString(),
                 entityTypeEl.getSimpleName().toString(),
+                joinClause,
                 insertCondition,
                 localChangeSeqNumEl.getSimpleName().toString(),
                 fromLocalChangeSeqNumParam.getSimpleName().toString(),
@@ -568,6 +588,31 @@ public abstract class AbstractDbProcessor {
                 lastChangedByField.getSimpleName(),
                 localDeviceId.getSimpleName(),
                 updatePermissionCondition, limitParam.getSimpleName());
+    }
+
+    /**
+     * Generate a JOIN clause for use with inherited permissions in the form of
+     *   LEFT JOIN InheritedPermissionEntity ON Entity.foreignKey = InheritedPermissionEntity.primaryKey
+     *
+     * @param inheritPermissionFromTypeMirror The TypeMirror representing the DAO from which
+     *                                        permissions are to be inherited
+     * @param entityTypeEl The type of entity for this DAO (which is inheriting permissions)
+     * @param umDao The @UmDao annotation for this DAO (which is inheriting permissions)
+     *
+     * @return A LEFT JOIN clause using the given parameters
+     */
+    protected String generateInheritPermissionJoinClause(TypeMirror inheritPermissionFromTypeMirror,
+                                                         TypeElement entityTypeEl,
+                                                         UmDao umDao) {
+        TypeMirror joinEntityTypeMirror = DbProcessorUtils.resolveDaoEntityType(
+                inheritPermissionFromTypeMirror, processingEnv);
+        TypeElement joinEntityTypeEl = (TypeElement)processingEnv.getTypeUtils().asElement(
+                joinEntityTypeMirror);
+
+        return String.format("LEFT JOIN %s ON %s.%s = %s.%s ",
+                joinEntityTypeEl.getSimpleName(), entityTypeEl.getSimpleName(),
+                umDao.inheritPermissionForeignKey(), joinEntityTypeEl.getSimpleName(),
+                umDao.inheritPermissionJoinedPrimaryKey());
     }
 
     protected String generateSyncFindAllChanges(TypeElement daoType, ExecutableElement daoMethod,
@@ -579,6 +624,8 @@ public abstract class AbstractDbProcessor {
                 UmSyncLocalChangeSeqNum.class, processingEnv);
         Element masterChangeSeqNumEl = DbProcessorUtils.findElementWithAnnotation(entityTypeEl,
                 UmSyncMasterChangeSeqNum.class, processingEnv);
+        UmDao umDao = daoType.getAnnotation(UmDao.class);
+
         if(localChangeSeqNumEl == null) {
             messager.printMessage(Diagnostic.Kind.ERROR,
                     formatMethodForErrorMessage(daoMethod, daoType) + "Attempting to generate a " +
@@ -594,8 +641,21 @@ public abstract class AbstractDbProcessor {
             return "";
         }
 
-        String selectPermissionCondition = daoType.getAnnotation(UmDao.class) != null ?
-                daoType.getAnnotation(UmDao.class).selectPermissionCondition() : "";
+        TypeMirror inheritPermissionFromTypeMirror = DbProcessorUtils.
+                findDaoToInheritPermissionFrom(daoType);
+        String joinClause = "";
+        String selectPermissionCondition;
+        if(inheritPermissionFromTypeMirror != null) {
+            joinClause = generateInheritPermissionJoinClause(inheritPermissionFromTypeMirror,
+                    entityTypeEl, umDao);
+            selectPermissionCondition = processingEnv.getTypeUtils().asElement(
+                    inheritPermissionFromTypeMirror).getAnnotation(UmDao.class)
+                    .selectPermissionCondition();
+        }else {
+            selectPermissionCondition = daoType.getAnnotation(UmDao.class).selectPermissionCondition();
+        }
+
+
         if(selectPermissionCondition.equals("")) {
             messager.printMessage(Diagnostic.Kind.ERROR,
                     formatMethodForErrorMessage(daoMethod, daoType) + " attempting to" +
@@ -633,9 +693,11 @@ public abstract class AbstractDbProcessor {
         }
 
 
-        return String.format("SELECT * FROM %s WHERE %s BETWEEN :%s AND :%s " +
+        return String.format("SELECT %s.* FROM %s %s WHERE %s BETWEEN :%s AND :%s " +
                 "AND %s BETWEEN :%s AND :%s AND %s != :%s  AND (%s) ORDER BY %s, %s LIMIT :%s",
                 entityTypeEl.getSimpleName(),
+                entityTypeEl.getSimpleName(),
+                joinClause,
                 localChangeSeqNumEl.getSimpleName(),
                 fromLocalChangeSeqNumParam.getSimpleName(),
                 toLocalChangeSeqNumParam.getSimpleName(),
@@ -670,8 +732,23 @@ public abstract class AbstractDbProcessor {
 
         TypeElement entityTypeEl = (TypeElement)processingEnv.getTypeUtils().asElement(entityTypeMirror);
         Element primaryKeyEl = findPrimaryKey(entityTypeEl);
-        String updatePermissionCondition = daoType.getAnnotation(UmDao.class) != null ?
-                daoType.getAnnotation(UmDao.class).updatePermissionCondition() : "";
+        TypeMirror inheritFromDaoTypeMirror = DbProcessorUtils.findDaoToInheritPermissionFrom(daoType);
+
+
+        String updatePermissionCondition;
+        String joinClause;
+        if(inheritFromDaoTypeMirror != null) {
+            joinClause = generateInheritPermissionJoinClause(inheritFromDaoTypeMirror, entityTypeEl,
+                    daoType.getAnnotation(UmDao.class));
+            updatePermissionCondition = processingEnv.getTypeUtils()
+                    .asElement(inheritFromDaoTypeMirror).getAnnotation(UmDao.class)
+                    .updatePermissionCondition();
+        }else {
+            joinClause = "";
+            updatePermissionCondition = daoType.getAnnotation(UmDao.class) != null ?
+                    daoType.getAnnotation(UmDao.class).updatePermissionCondition() : "";
+        }
+
         if(updatePermissionCondition.equals("")) {
             messager.printMessage(Diagnostic.Kind.ERROR,
                     formatMethodForErrorMessage(methodBeingGenerated, daoType) + " attempting to" +
@@ -680,12 +757,13 @@ public abstract class AbstractDbProcessor {
         }
 
 
-        return String.format("SELECT %s.%s as primaryKey, (%s) as userCanUpdate FROM %s " +
+        return String.format("SELECT %s.%s as primaryKey, (%s) as userCanUpdate FROM %s %s " +
                         "WHERE %s.%s in (:%s)",
                 entityTypeEl.getSimpleName(),
                 primaryKeyEl.getSimpleName(),
                 updatePermissionCondition,
                 entityTypeEl.getSimpleName(),
+                joinClause,
                 entityTypeEl.getSimpleName(),
                 primaryKeyEl.getSimpleName(),
                 primaryKeyArrayParamName);
@@ -700,8 +778,19 @@ public abstract class AbstractDbProcessor {
 
     protected String generateSyncCheckCanInsertSql(TypeElement daoType, ExecutableElement daoMethod,
                                                 ProcessingEnvironment processingEnv) {
-        String canInsertCondition = daoType.getAnnotation(UmDao.class) != null ?
-                daoType.getAnnotation(UmDao.class).insertPermissionCondition() : null;
+
+        TypeMirror inheritPermissionFromTypeMirror = DbProcessorUtils.findDaoToInheritPermissionFrom(
+                daoType);
+        String canInsertCondition;
+        if(inheritPermissionFromTypeMirror != null) {
+            canInsertCondition = processingEnv.getTypeUtils()
+                    .asElement(inheritPermissionFromTypeMirror).getAnnotation(UmDao.class)
+                    .insertPermissionCondition();
+        }else {
+            canInsertCondition = daoType.getAnnotation(UmDao.class) != null ?
+                    daoType.getAnnotation(UmDao.class).insertPermissionCondition() : null;
+        }
+
         if(canInsertCondition == null) {
             messager.printMessage(Diagnostic.Kind.ERROR,
                     formatMethodForErrorMessage(daoMethod, daoType) + ": Attempting to" +

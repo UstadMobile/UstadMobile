@@ -1,6 +1,7 @@
 package com.ustadmobile.lib.db.entities;
 
 import com.ustadmobile.lib.database.annotation.UmEntity;
+import com.ustadmobile.lib.database.annotation.UmIndexField;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 import com.ustadmobile.lib.database.annotation.UmSyncLastChangedBy;
 import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
@@ -20,8 +21,10 @@ public class ClazzMember implements SyncableEntity {
     @UmPrimaryKey(autoIncrement = true)
     private long clazzMemberUid;
 
+    @UmIndexField
     private long clazzMemberPersonUid;
 
+    @UmIndexField
     private long clazzMemberClazzUid;
 
     private long dateJoined;

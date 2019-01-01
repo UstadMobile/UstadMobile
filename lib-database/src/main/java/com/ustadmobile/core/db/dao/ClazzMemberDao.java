@@ -8,7 +8,11 @@ import com.ustadmobile.lib.database.annotation.UmRepository;
 import com.ustadmobile.lib.db.entities.ClazzMember;
 import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
-@UmDao(selectPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
+@UmDao(
+        inheritPermissionFrom = ClazzDao.class,
+        inheritPermissionForeignKey = "clazzMemberClazzUid",
+        inheritPermissionJoinedPrimaryKey = "clazzUid"
+)
 @UmRepository
 public abstract class ClazzMemberDao implements SyncableDao<ClazzMember, ClazzMemberDao> {
 

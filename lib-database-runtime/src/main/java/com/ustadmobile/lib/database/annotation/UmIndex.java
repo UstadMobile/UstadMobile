@@ -1,9 +1,8 @@
 package com.ustadmobile.lib.database.annotation;
 
 /**
- * Created by mike on 1/24/18.
+ * Used to define a table level index with multiple fields
  */
-
 public @interface UmIndex {
 
     String name() default "";
