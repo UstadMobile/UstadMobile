@@ -50,7 +50,7 @@ public class IndexVoaScraper {
 
     public static void main(String[] args) {
         if (args.length != 2) {
-            System.err.println("Usage: <file destination>");
+            System.err.println("Usage: <voa html url> <file destination>");
             System.exit(1);
         }
 
@@ -137,7 +137,7 @@ public class IndexVoaScraper {
         ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, parentVoa, advancedLevel, 2);
         ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, parentVoa, usHistory, 3);
 
-       // findContentInCategories(beginningLevel, beginningUrl);
+        findContentInCategories(beginningLevel, beginningUrl);
         findContentInCategories(intermediateLevel, intermediateUrl);
         findContentInCategories(advancedLevel, advancedUrl);
         findContentInCategories(usHistory, historyUrl);

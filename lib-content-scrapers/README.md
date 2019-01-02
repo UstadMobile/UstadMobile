@@ -145,4 +145,9 @@ Download all ddl content for all 3 languages
 
 Download all content from Khan Academy 
 
->$ gradlew scrapeContent -PfindKhanUrl="https://www.khanacademy.org/" -PfindKhanDir="C:\khan\""
+>$ gradlew scrapeContent -PfindKhanUrl="https://www.khanacademy.org/" -PfindKhanDir="C:\khan\"
+
+
+#### Find All VOA Content
+
+>$ gradlew scrapeContent -PfindVoaUrl="https://learningenglish.voanews.com/" -PfindVoaDir="C:\voa\"

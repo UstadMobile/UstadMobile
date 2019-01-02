@@ -969,6 +969,12 @@ public class ContentScraperUtil {
         return new ChromeDriver(d);
     }
 
+    /**
+     * Given a map of params, convert into a stringbuffer for post requests
+     * @param params params to include in post request
+     * @return map converted to string
+     * @throws IOException
+     */
     public static StringBuffer convertMapToStringBuffer(Map<String, String> params) throws IOException {
         StringBuffer requestParams = new StringBuffer();
         for (String key : params.keySet()) {
