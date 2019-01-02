@@ -4,14 +4,12 @@ import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.database.annotation.UmRepository;
 import com.ustadmobile.lib.database.annotation.UmUpdate;
-import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin;
-import com.ustadmobile.lib.db.sync.dao.BaseDao;
 import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
 import java.util.List;
 
-@UmDao(readPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
+@UmDao(selectPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
 @UmRepository
 public abstract class ContentEntryParentChildJoinDao
         implements SyncableDao<ContentEntryParentChildJoin, ContentEntryParentChildJoinDao> {

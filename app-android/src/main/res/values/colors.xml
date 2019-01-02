@@ -4,12 +4,19 @@
     Helped by using:
     http://www.materialpalette.com/blue-grey/light-blue
     -->
-    <color name="primary">#00BCD4</color>
-    <color name="primary_dark">#00BCD4</color>
-    <color name="primary_light">#CCFFFF</color>
-    <color name="accent">#FF6600</color>
-    <color name="primary_text">#FFFFFF</color>
-    <color name="secondary_text">#727272</color>
+    <!--<color name="primary">#00BCD4</color>-->
+    <color name="primary">#FDC82F</color>
+    <!--<color name="primary_dark">#00BCD4</color>-->
+
+    <!--<color name="primary_dark">#CC6600</color>-->
+    <color name="primary_dark">#C69800</color>
+    <!--<color name="primary_light">#CCFFFF</color>-->
+    <color name="primary_light">#000</color>
+    <!--<color name="accent">#FF6600</color>-->
+    <color name="accent">#CC6600</color>
+    <!--<color name="primary_text">#FFFFFF</color>-->
+    <color name="primary_text">#000</color>
+    <color name="secondary_text">#666666</color>
 
     <color name="just_black">#000000</color>
 
@@ -21,7 +28,8 @@
 
     <color name="text_primary">#212121</color>
     <color name="text_secondary">#757575</color>
-    <color name="icons">#FFFFFF</color>
+    <!--<color name="icons">#FFFFFF</color>-->
+    <color name="icons">#000000</color>
     <color name="divider">#BDBDBD</color>
 
     <color name="background_light">#E8EAED</color>
@@ -44,8 +52,6 @@
     <item name="catalog_entry_display_mode_normal_background" type="color">#FFFFFF</item>
     <item name="catalog_entry_display_mode_banner_background" type="color">@color/background_light</item>
 
-
-
     <!--
     Text only button background color: Used when we want something that looks like hyperlink
     text but actually uses a button for accessibility purposes
@@ -60,8 +66,7 @@
 
     <color name="entry_learner_progress_passed">#6bb865</color>
 
-    <color name="default_background_color_2">#00BCD4</color>
     <color name="bottom_nav_yourAccentColor">#FFFFFF</color>
-    <color name="bottom_nav_yourInactiveColor">#006666</color>
+    <color name="bottom_nav_yourInactiveColor">#C69800</color>
 
 </resources>

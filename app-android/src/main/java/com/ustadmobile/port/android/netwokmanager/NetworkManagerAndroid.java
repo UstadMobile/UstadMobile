@@ -21,12 +21,6 @@ import android.net.wifi.SupplicantState;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
-import android.net.wifi.p2p.WifiP2pDevice;
-import android.net.wifi.p2p.WifiP2pDeviceList;
-import android.net.wifi.p2p.WifiP2pGroup;
-import android.net.wifi.p2p.WifiP2pInfo;
-import android.net.wifi.p2p.WifiP2pManager;
-import android.net.wifi.p2p.nsd.WifiP2pDnsSdServiceRequest;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -85,11 +79,6 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import javax.net.SocketFactory;
 
-import edu.rit.se.wifibuddy.DnsSdTxtRecord;
-import edu.rit.se.wifibuddy.FailureReason;
-import edu.rit.se.wifibuddy.ServiceData;
-import edu.rit.se.wifibuddy.ServiceType;
-import edu.rit.se.wifibuddy.WifiDirectHandler;
 import fi.iki.elonen.NanoHTTPD;
 
 import static com.ustadmobile.core.buildconfig.CoreBuildConfig.WIFI_P2P_INSTANCE_NAME;
@@ -302,19 +291,6 @@ public class NetworkManagerAndroid extends NetworkManager implements EmbeddedHTT
         wifiManager= (WifiManager) networkService.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         connectivityManager= (ConnectivityManager) networkService.getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
 
-        /*Register all network listeners*/
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(WifiDirectHandler.Action.SERVICE_CONNECTED);
-        filter.addAction(WifiDirectHandler.Action.DEVICE_CHANGED);
-        filter.addAction(WifiDirectHandler.Action.WIFI_STATE_CHANGED);
-        filter.addAction(WifiDirectHandler.Action.DNS_SD_TXT_RECORD_AVAILABLE);
-        filter.addAction(WifiDirectHandler.Action.GROUP_INFO_AVAILABLE);//WAS GROUP CREATION
-        filter.addAction(WifiDirectHandler.Action.PEERS_CHANGED);
-        filter.addAction(WifiDirectHandler.Action.WIFI_DIRECT_CONNECTION_CHANGED);
-        filter.addAction(WifiDirectHandler.Action.CONNECTION_INFO_AVAILABLE);
-        filter.addAction(WifiDirectHandler.Action.CONNECT_TO_NORMAL_WIFI_DIRECT_RESULT);
-        LocalBroadcastManager.getInstance(networkService).registerReceiver(mBroadcastReceiver, filter);
-
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
         intentFilter.addAction(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION);
@@ -347,91 +323,6 @@ public class NetworkManagerAndroid extends NetworkManager implements EmbeddedHTT
             return ssid.replace("\"", "");
     }
 
-
-    /**
-     * Broadcast receiver that simply receives broadcasts and passes to the SharedSE network manager
-     */
-    private BroadcastReceiver mBroadcastReceiver=new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            switch (intent.getAction()){
-                case WifiDirectHandler.Action.DNS_SD_TXT_RECORD_AVAILABLE:
-                    String deviceMac = intent.getStringExtra(WifiDirectHandler.TXT_MAP_KEY);
-                    DnsSdTxtRecord txtRecord = networkService.getWifiDirectHandlerAPI().
-                            getDnsSdTxtRecordMap().get(deviceMac);
-                    handleWifiDirectSdTxtRecordsAvailable(txtRecord.getFullDomain(),deviceMac, (HashMap<String, String>) txtRecord.getRecord());
-
-                    break;
-                case WifiDirectHandler.Action.GROUP_INFO_AVAILABLE:
-                    boolean informationAvailable=networkService.getWifiDirectHandlerAPI().getWifiP2pGroup().isGroupOwner();
-                    if(informationAvailable){
-                        currentWifiDirectGroupStatus=WIFI_DIRECT_GROUP_STATUS_ACTIVE;
-                        WifiP2pGroup wifiP2pGroup=networkService.getWifiDirectHandlerAPI().getWifiP2pGroup();
-                        WiFiDirectGroup group = new WifiDirectGroupAndroid(wifiP2pGroup);
-                        group.setOwner(wifiP2pGroup.isGroupOwner());
-                        handleWifiDirectGroupCreated(group);
-                    }
-                    break;
-
-//                case WifiDirectHandler.Action.GROUP_REMOVED
-
-                case WifiDirectHandler.Action.PEERS_CHANGED:
-                    WifiP2pDeviceList devices = intent.getParcelableExtra(WifiDirectHandler.Extra.PEERS);
-                    Collection<WifiP2pDevice> deviceCollection = devices.getDeviceList();
-                    ArrayList<NetworkNode> list = new ArrayList();
-                    for(WifiP2pDevice device: deviceCollection) {
-                        if(device.deviceAddress == null) {
-                            //This should NEVER happen, but this is local networking on Android
-                            continue;
-                        }
-
-                        UstadMobileSystemImpl.l(UMLog.DEBUG, 670, "Peers changed: found: "
-                                + device.deviceAddress + " (" + device.deviceName + ") Status: "
-                                + networkService.getWifiDirectHandlerAPI().deviceStatusToString(
-                                device.status) + " device type " + device.primaryDeviceType);
-
-                        //filter out devices we aren't interested in eg. printers
-                        String primaryDeviceType = device.primaryDeviceType;
-                        String category = primaryDeviceType.contains("-")
-                                ? primaryDeviceType.substring(0, primaryDeviceType.indexOf('-'))
-                                : null;
-                        if(category != null && HIDDEN_WIFI_P2P_DEVICE_TYPES.contains(category))
-                            continue;
-
-                        NetworkNode node = new NetworkNode(device.deviceAddress, null);
-                        list.add(node);
-                        node.setDeviceWifiDirectName(device.deviceName);
-                        node.setWifiDirectDeviceStatus(device.status);
-                    }
-                    handleWifiDirectPeersChanged(list);
-
-                    break;
-
-                case WifiDirectHandler.Action.WIFI_DIRECT_CONNECTION_CHANGED:
-                    boolean isConnected = intent.getBooleanExtra(
-                            WifiDirectHandler.EXTRA_WIFIDIRECT_CONNECTION_SUCCEEDED, false);
-                    if(!isConnected) {
-                        fireWifiP2pConnectionChanged(false);
-                    }
-                    break;
-
-                case WifiDirectHandler.Action.CONNECTION_INFO_AVAILABLE:
-                    //the device should have connected
-                    fireWifiP2pConnectionChanged(true);
-                    break;
-
-                case WifiDirectHandler.Action.CONNECT_TO_NORMAL_WIFI_DIRECT_RESULT:
-                    String macAddr = intent.getStringExtra(
-                            WifiDirectHandler.EXTRA_CONNECT_TO_NORMAL_WIFI_DIRECT_MAC_ADDR);
-                    boolean succeeded = intent.getBooleanExtra(
-                            WifiDirectHandler.EXTRA_WIFIDIRECT_CONNECTION_SUCCEEDED, false);
-                    fireWifiP2pConnectionResult(macAddr, succeeded);
-                    break;
-
-            }
-
-        }
-    };
 
     private BroadcastReceiver mWifiBroadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -572,17 +463,6 @@ public class NetworkManagerAndroid extends NetworkManager implements EmbeddedHTT
 
 
     public synchronized void updateClientServices() {
-        WifiDirectHandler wifiDirectHandler = networkService.getWifiDirectHandlerAPI();
-        boolean discoveryEnabled = isDiscoveryEnabled();
-
-        boolean shouldRunWifiP2pDiscovery = discoveryEnabled && wifiDirectHandler != null && isWiFiEnabled();
-        if(shouldRunWifiP2pDiscovery) {
-            wifiDirectHandler.continuouslyDiscoverServices(WifiP2pDnsSdServiceRequest.newInstance(
-                    CoreBuildConfig.WIFI_P2P_INSTANCE_NAME, ServiceType.PRESENCE_TCP.toString()));
-        }else if(wifiDirectHandler != null) {
-            wifiDirectHandler.stopServiceDiscovery();
-        }
-
         //starting and stopping NSD when the wifi is enabled or disabled was causing issues on 4.4.
         // For now run discovery as long as client mode is enabled
 //        boolean shouldRunNsdDiscovery = discoveryEnabled;
@@ -593,29 +473,13 @@ public class NetworkManagerAndroid extends NetworkManager implements EmbeddedHTT
         }else if(!shouldRunNsdDiscovery && nsdHelperAndroid.isDiscoveringNetworkService()) {
             nsdHelperAndroid.stopNSDiscovery();
         }
-
-        //if we are looking to send a file - enable wifi direct peer discovery
-        if(getSharedFeed() != null && wifiDirectHandler != null) {
-            wifiDirectHandler.continuouslyDiscoverPeers();
-        }else if(getSharedFeed() == null && wifiDirectHandler != null){
-            wifiDirectHandler.stopPeerDiscovery();
-        }
     }
 
     public synchronized void updateSupernodeServices() {
         boolean broadcastEnabled = isBroadcastEnabled();
 
         //TODO: If bluetooth is required to complete the transaction, we should check that is also enabled.
-        boolean shouldHaveLocalP2PService = broadcastEnabled && isWiFiEnabled() && networkService.getWifiDirectHandlerAPI() != null;
-        WifiDirectHandler wifiDirectHandler = networkService.getWifiDirectHandlerAPI();
-        if(shouldHaveLocalP2PService && wifiDirectHandler != null && p2pLocalServiceStatus == LOCAL_SERVICE_STATUS_INACTIVE ) {
-            wifiDirectHandler.setStopDiscoveryAfterGroupFormed(false);
-            wifiDirectHandler.addLocalService(WIFI_P2P_INSTANCE_NAME, localService());
-            p2pLocalServiceStatus = LOCAL_SERVICE_STATUS_ADDED;//TODO: This should only really be changed when the request to add service succeeds
-        }else if(!shouldHaveLocalP2PService && p2pLocalServiceStatus != LOCAL_SERVICE_STATUS_INACTIVE && wifiDirectHandler != null) {
-            networkService.getWifiDirectHandlerAPI().removeService();
-            p2pLocalServiceStatus = LOCAL_SERVICE_STATUS_INACTIVE;
-        }
+//        boolean shouldHaveLocalP2PService = broadcastEnabled && isWiFiEnabled() && networkService.getWifiDirectHandlerAPI() != null;
 
         //Starting/stopping NSD when wifi was enabled or disabled was causing issues for connecting
         //to networks on Android 4.4.
@@ -822,21 +686,20 @@ public class NetworkManagerAndroid extends NetworkManager implements EmbeddedHTT
             try {
                 ContentResolver mContentResolver = networkService.getApplicationContext().getContentResolver();
                 address = Settings.Secure.getString(mContentResolver, DEVICE_BLUETOOTH_ADDRESS);
-                Log.d(WifiDirectHandler.TAG,"Bluetooth Address - Resolved: " + address);
+                Log.d(NetworkManagerAndroid.TAG,"Bluetooth Address - Resolved: " + address);
 
             } catch (Exception e) {
                 e.printStackTrace();
             }
 
         } else {
-            Log.d(WifiDirectHandler.TAG,"Bluetooth Address-No resolution: " + address);
+            Log.d(NetworkManagerAndroid.TAG,"Bluetooth Address-No resolution: " + address);
         }
         return address;
     }
 
     @Override
     public void onDestroy() {
-        LocalBroadcastManager.getInstance(networkService).unregisterReceiver(mBroadcastReceiver);
         if(bluetoothServerAndroid !=null){
             bluetoothServerAndroid.stop();
         }
@@ -980,10 +843,7 @@ public class NetworkManagerAndroid extends NetworkManager implements EmbeddedHTT
          * Our workaround is to programmatically disable and then re-enable the wifi on Android
          * versions that could be affected.
          */
-        if(Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT && networkService.getWifiDirectHandlerAPI() != null){
-            //TODO: check that this is re-enabled
-            networkService.getWifiDirectHandlerAPI().stopServiceDiscovery();
-
+        if(Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT/* && networkService.getWifiDirectHandlerAPI() != null*/){
             wifiManager.setWifiEnabled(false);
             try { Thread.sleep(100); }
             catch(InterruptedException e) {}
@@ -1069,30 +929,21 @@ public class NetworkManagerAndroid extends NetworkManager implements EmbeddedHTT
          * being the group client. If there is a persistent group, it might remember the previous
          * roles and use those instead.
          */
-        networkService.getWifiDirectHandlerAPI().removePersistentGroups();
-        networkService.getWifiDirectHandlerAPI().connectToNormalWifiDirect(deviceAddress, 15);
     }
 
     @Override
     public void setReceivingOn(boolean receivingOn) {
         super.setReceivingOn(receivingOn);
-        WifiDirectHandler handler = networkService != null
-                ? networkService.getWifiDirectHandlerAPI() : null;
         /*
          * Our wifi direct send/receive relies on the sender being the group owner, and the receiver
          * being the group client. If there is a persistent group, it might remember the previous
          * roles and use those instead.
          */
-        if(handler != null) {
-            networkService.getWifiDirectHandlerAPI().setAutoAccept(receivingOn);
-            if(receivingOn)
-                networkService.getWifiDirectHandlerAPI().removePersistentGroups();
-        }
     }
 
     @Override
     public void cancelWifiDirectConnection() {
-        networkService.getWifiDirectHandlerAPI().cancelConnectToNormalWifiDirect();
+
     }
 
     private void deleteTemporaryWifiDirectSsids() {
@@ -1166,24 +1017,6 @@ public class NetworkManagerAndroid extends NetworkManager implements EmbeddedHTT
     public synchronized void createWifiDirectGroup() {
         if(currentWifiDirectGroupStatus == WIFI_DIRECT_GROUP_STATUS_INACTIVE) {
             currentWifiDirectGroupStatus = WIFI_DIRECT_GROUP_STATUS_UNDER_CREATION;
-
-            networkService.getWifiDirectHandlerAPI().setAddLocalServiceAfterGroupCreation(false);
-            ServiceData serviceData= new ServiceData(WIFI_P2P_INSTANCE_NAME, getHttpListeningPort(),
-                    new HashMap<String,String>() ,ServiceType.PRESENCE_TCP);
-            networkService.getWifiDirectHandlerAPI().startAddingNoPromptService(serviceData, new WifiP2pManager.ActionListener() {
-                @Override
-                public void onSuccess() {
-                    currentWifiDirectGroupStatus=WIFI_DIRECT_GROUP_STATUS_ACTIVE;
-                    UstadMobileSystemImpl.l(UMLog.INFO, 360, "wifi direct group: reported on success");
-                }
-
-                @Override
-                public void onFailure(int reason) {
-                    currentWifiDirectGroupStatus=WIFI_DIRECT_GROUP_STATUS_INACTIVE;
-                    UstadMobileSystemImpl.l(UMLog.INFO, 362, "wifi direct group: reported on failure: "
-                        + FailureReason.fromInteger(reason));
-                }
-            });
         }
     }
 
@@ -1191,39 +1024,18 @@ public class NetworkManagerAndroid extends NetworkManager implements EmbeddedHTT
     //TODO: Add a status flag for removal requested
     @Override
     public synchronized void removeWiFiDirectGroup() {
-        networkService.getWifiDirectHandlerAPI().removeGroup(new WifiP2pManager.ActionListener() {
-            @Override
-            public void onSuccess() {
-                currentWifiDirectGroupStatus=WIFI_DIRECT_GROUP_STATUS_INACTIVE;
-                handleWifiDirectGroupRemoved(true);
-            }
 
-            @Override
-            public void onFailure(int reason) {
-                handleWifiDirectGroupRemoved(false);
-            }
-        });
     }
 
     @Override
     public WiFiDirectGroup getWifiDirectGroup() {
-        WifiP2pGroup groupInfo=networkService.getWifiDirectHandlerAPI().getWifiP2pGroup();
-        WiFiDirectGroup group = null;
-        if(groupInfo!=null){
-            String groupSsid = groupInfo.getNetworkName();
-            if(isMangleWifiDirectGroup())
-                groupSsid += "-mangle";
 
-            group = new WiFiDirectGroup(groupSsid, groupInfo.getPassphrase());
-        }
-
-        return group;
+        return null;
     }
 
     @Override
     public String getWifiDirectIpAddress() {
-        WifiP2pInfo wifiP2pInfo=networkService.getWifiDirectHandlerAPI().getWifiP2pInfo();
-        return String.valueOf(wifiP2pInfo.groupOwnerAddress);
+        return null;
     }
 
     @Override
@@ -1248,51 +1060,17 @@ public class NetworkManagerAndroid extends NetworkManager implements EmbeddedHTT
 
     @Override
     public NetworkNode getThisWifiDirectDevice() {
-        if(networkService.getWifiDirectHandlerAPI() == null)
-            return null;
-
-        WifiP2pDevice thisDevice = networkService.getWifiDirectHandlerAPI().getThisDevice();
-        if(thisDevice == null)
-            return null;
-
-        NetworkNode thisNode = new NetworkNode(thisDevice.deviceAddress, null);
-        thisNode.setDeviceWifiDirectName(thisDevice.deviceName);
-
-        return thisNode;
+        return null;
     }
 
 
     @Override
     public String getWifiDirectGroupOwnerIp() {
-        if(networkService.getWifiDirectHandlerAPI() == null
-                || networkService.getWifiDirectHandlerAPI().getWifiP2pInfo() == null
-                || networkService.getWifiDirectHandlerAPI().getWifiP2pInfo().groupOwnerAddress == null)
-            return null;
-
-        return networkService.getWifiDirectHandlerAPI().getWifiP2pInfo().groupOwnerAddress.getHostAddress();
+        return null;
     }
 
     @Override
     public boolean isWifiDirectConnectionEstablished(String otherDevice) {
-        if(networkService.getWifiDirectHandlerAPI() == null)
-            return false;
-
-        WifiP2pGroup activeGroup = networkService.getWifiDirectHandlerAPI().getWifiP2pGroup();
-        if(activeGroup == null)
-            return false;
-
-        WifiP2pDevice ownerDevice = activeGroup.getOwner();
-        if(ownerDevice != null && otherDevice.equalsIgnoreCase(ownerDevice.deviceAddress))
-            return true;
-
-        Collection<WifiP2pDevice> groupMembers = activeGroup.getClientList();
-        if(groupMembers == null)
-            return false;
-
-        for(WifiP2pDevice device : groupMembers) {
-            if(otherDevice.equalsIgnoreCase(device.deviceAddress))
-                return true;
-        }
 
         return false;
     }

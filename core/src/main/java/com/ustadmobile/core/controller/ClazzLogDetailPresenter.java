@@ -18,12 +18,15 @@ import com.ustadmobile.core.view.ClazzListView;
 import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.ClazzLog;
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecordWithPerson;
+import com.ustadmobile.lib.db.entities.EntityRole;
 import com.ustadmobile.lib.db.entities.FeedEntry;
+import com.ustadmobile.lib.db.entities.Role;
 import com.ustadmobile.lib.db.entities.UMCalendar;
 
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Hashtable;
+import java.util.Locale;
 
 import static com.ustadmobile.core.view.ClazzListView.ARG_CLAZZ_UID;
 import static com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.STATUS_ABSENT;
@@ -41,6 +44,16 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
 
     private long currentClazzUid = -1L;
     private long currentLogDate = -1L;
+    private boolean hasEditPermissions = false;
+    private long loggedInPersonUid = 0L;
+
+    public boolean isHasEditPermissions() {
+        return hasEditPermissions;
+    }
+
+    public void setHasEditPermissions(boolean hasEditPermissions) {
+        this.hasEditPermissions = hasEditPermissions;
+    }
 
     private UmProvider<ClazzLogAttendanceRecordWithPerson> clazzLogAttendanceRecordUmProvider;
 
@@ -65,6 +78,28 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
             String thisLogDate = arguments.get(ClazzListView.ARG_LOGDATE).toString();
             currentLogDate = Long.parseLong(thisLogDate);
         }
+
+        loggedInPersonUid = UmAccountManager.getActiveAccount(context).getPersonUid();
+
+        checkPermissions();
+    }
+
+    public void checkPermissions(){
+        ClazzDao clazzDao = repository.getClazzDao();
+
+        clazzDao.personHasPermission(loggedInPersonUid, currentClazzUid,
+                Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_INSERT, new UmCallback<Boolean>() {
+            @Override
+            public void onSuccess(Boolean result) {
+                setHasEditPermissions(result);
+                view.showMarkAllButtons(result);
+            }
+
+            @Override
+            public void onFailure(Throwable exception) {
+                exception.printStackTrace();
+            }
+        });
     }
 
     /**
@@ -147,12 +182,15 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
     }
 
     public void updateViewDateHeading(){
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         Date currentLogDateDate = new Date(currentLogDate);
         String prettyDate="";
         if(UMCalendarUtil.isToday(currentLogDateDate)){
-            prettyDate = "Today";
+            prettyDate = impl.getString(MessageID.today, context);
         }
-        prettyDate += "(" + UMCalendarUtil.getPrettyDateFromLong(currentLogDate) + ")";
+        Locale currentLocale = Locale.getDefault();
+        prettyDate += " (" +
+                UMCalendarUtil.getPrettyDateFromLong(currentLogDate, currentLocale) + ")";
 
         view.updateDateHeading(prettyDate);
     }
@@ -269,7 +307,7 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
                         ClazzListView.ARG_CLAZZ_UID + "=" + currentClazzUid +
                         "&" + ClazzListView.ARG_LOGDATE + "=" + currentLogDate;
                 FeedEntry parentFeed =
-                        feedEntryDao.findByLink(FeedListPresenter.TEST_DEFAULT_PERSON_UID, possibleFeedLink);
+                        feedEntryDao.findByLink(loggedInPersonUid, possibleFeedLink);
                 if(parentFeed != null){
                     parentFeed.setFeedEntryDone(false);
                     feedEntryDao.updateDoneTrue(parentFeed.getFeedEntryUid());

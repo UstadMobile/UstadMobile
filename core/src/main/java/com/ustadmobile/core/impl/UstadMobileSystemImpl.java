@@ -293,6 +293,7 @@ public abstract class UstadMobileSystemImpl {
         initRan = true;
     }
 
+
     /**
      * Go to a new view : This is simply a convenience wrapper for go(viewName, args, context):
      * it will parse the a destination into the viewname and arguments, and then build a hashtable
@@ -302,7 +303,6 @@ public abstract class UstadMobileSystemImpl {
      * @param context System context object
      */
     public void go(String destination, Object context) {
-        Hashtable argsTable = null;
         int destinationQueryPos = destination.indexOf('?');
         if(destinationQueryPos == -1) {
             go(destination, null, context);

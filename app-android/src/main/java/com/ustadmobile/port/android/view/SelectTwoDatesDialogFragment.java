@@ -19,6 +19,7 @@ import com.ustadmobile.core.view.SelectTwoDatesDialogView;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.util.Calendar;
+import java.util.Locale;
 import java.util.Objects;
 
 import io.reactivex.annotations.NonNull;
@@ -81,6 +82,8 @@ public class SelectTwoDatesDialogFragment extends UstadDialogFragment
     public Dialog onCreateDialog(Bundle savedInstanceState) {
 
 
+        Locale currentLocale = getResources().getConfiguration().locale;
+
         LayoutInflater inflater =
                 (LayoutInflater) Objects.requireNonNull(getContext()).getSystemService(
                         Context.LAYOUT_INFLATER_SERVICE);
@@ -107,7 +110,8 @@ public class SelectTwoDatesDialogFragment extends UstadDialogFragment
             myCalendar.set(Calendar.MONTH, month);
             myCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
             setToDate(myCalendar.getTimeInMillis());
-            toET.setText(UMCalendarUtil.getPrettyDateFromLong(myCalendar.getTimeInMillis()));
+            toET.setText(UMCalendarUtil.getPrettyDateFromLong(myCalendar.getTimeInMillis(),
+                    currentLocale));
         };
 
         //date listener - opens a new date picker.
@@ -125,7 +129,8 @@ public class SelectTwoDatesDialogFragment extends UstadDialogFragment
             myCalendar.set(Calendar.MONTH, month);
             myCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
             setFromDate(myCalendar.getTimeInMillis());
-            fromET.setText(UMCalendarUtil.getPrettyDateFromLong(myCalendar.getTimeInMillis()));
+            fromET.setText(UMCalendarUtil.getPrettyDateFromLong(myCalendar.getTimeInMillis(),
+                    currentLocale));
 
         };
         //date listener - opens a new date picker.

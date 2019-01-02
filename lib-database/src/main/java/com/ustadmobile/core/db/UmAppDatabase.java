@@ -25,12 +25,14 @@ import com.ustadmobile.core.db.dao.DownloadJobItemDao;
 import com.ustadmobile.core.db.dao.DownloadJobItemHistoryDao;
 import com.ustadmobile.core.db.dao.DownloadSetDao;
 import com.ustadmobile.core.db.dao.DownloadSetItemDao;
+import com.ustadmobile.core.db.dao.EntityRoleDao;
 import com.ustadmobile.core.db.dao.EntryStatusResponseDao;
 import com.ustadmobile.core.db.dao.FeedEntryDao;
 import com.ustadmobile.core.db.dao.HolidayDao;
 import com.ustadmobile.core.db.dao.HttpCachedEntryDao;
 import com.ustadmobile.core.db.dao.LanguageDao;
 import com.ustadmobile.core.db.dao.LanguageVariantDao;
+import com.ustadmobile.core.db.dao.LocationAncestorJoinDao;
 import com.ustadmobile.core.db.dao.LocationDao;
 import com.ustadmobile.core.db.dao.NetworkNodeDao;
 import com.ustadmobile.core.db.dao.OpdsEntryDao;
@@ -44,6 +46,10 @@ import com.ustadmobile.core.db.dao.PersonCustomFieldDao;
 import com.ustadmobile.core.db.dao.PersonCustomFieldValueDao;
 import com.ustadmobile.core.db.dao.PersonDao;
 import com.ustadmobile.core.db.dao.PersonDetailPresenterFieldDao;
+import com.ustadmobile.core.db.dao.PersonGroupDao;
+import com.ustadmobile.core.db.dao.PersonGroupMemberDao;
+import com.ustadmobile.core.db.dao.PersonLocationJoinDao;
+import com.ustadmobile.core.db.dao.RoleDao;
 import com.ustadmobile.core.db.dao.ScheduleDao;
 import com.ustadmobile.core.db.dao.SocialNominationQuestionDao;
 import com.ustadmobile.core.db.dao.SocialNominationQuestionResponseDao;
@@ -83,6 +89,7 @@ import com.ustadmobile.lib.db.entities.DownloadJobItem;
 import com.ustadmobile.lib.db.entities.DownloadJobItemHistory;
 import com.ustadmobile.lib.db.entities.DownloadSet;
 import com.ustadmobile.lib.db.entities.DownloadSetItem;
+import com.ustadmobile.lib.db.entities.EntityRole;
 import com.ustadmobile.lib.db.entities.EntryStatusResponse;
 import com.ustadmobile.lib.db.entities.FeedEntry;
 import com.ustadmobile.lib.db.entities.Holiday;
@@ -90,6 +97,7 @@ import com.ustadmobile.lib.db.entities.HttpCachedEntry;
 import com.ustadmobile.lib.db.entities.Language;
 import com.ustadmobile.lib.db.entities.LanguageVariant;
 import com.ustadmobile.lib.db.entities.Location;
+import com.ustadmobile.lib.db.entities.LocationAncestorJoin;
 import com.ustadmobile.lib.db.entities.NetworkNode;
 import com.ustadmobile.lib.db.entities.OpdsEntry;
 import com.ustadmobile.lib.db.entities.OpdsEntryParentToChildJoin;
@@ -101,6 +109,10 @@ import com.ustadmobile.lib.db.entities.PersonAuth;
 import com.ustadmobile.lib.db.entities.PersonCustomFieldValue;
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField;
 import com.ustadmobile.lib.db.entities.PersonField;
+import com.ustadmobile.lib.db.entities.PersonGroup;
+import com.ustadmobile.lib.db.entities.PersonGroupMember;
+import com.ustadmobile.lib.db.entities.PersonLocationJoin;
+import com.ustadmobile.lib.db.entities.Role;
 import com.ustadmobile.lib.db.entities.Schedule;
 import com.ustadmobile.lib.db.entities.SocialNominationQuestion;
 import com.ustadmobile.lib.db.entities.SocialNominationQuestionResponse;
@@ -140,7 +152,10 @@ import java.util.Hashtable;
         Location.class, ContentEntryFileStatus.class, ContentCategorySchema.class,
         ContentCategory.class, Language.class, LanguageVariant.class,
         SyncStatus.class, SyncablePrimaryKey.class, SyncDeviceBits.class,
-        AccessToken.class, PersonAuth.class
+        AccessToken.class, PersonAuth.class, Role.class, EntityRole.class,
+        PersonGroup.class, PersonGroupMember.class, LocationAncestorJoin.class,
+        PersonLocationJoin.class
+
 })
 public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthenticator {
 
@@ -159,6 +174,18 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
      */
     public static synchronized void setInstance(UmAppDatabase instance) {
         UmAppDatabase.instance = instance;
+    }
+
+    /**
+     * For use by other projects using this app as a library. By calling setInstance before
+     * any other usage (e.g. in the Android Application class) a child class of this database (eg.
+     * with additional entities) can be used.
+
+     * @param instance
+     * @param dbName
+     */
+    public static synchronized void setInstance(UmAppDatabase instance, String dbName) {
+        namedInstances.put(dbName, instance);
     }
 
     public static synchronized UmAppDatabase getInstance(Object context) {
@@ -267,7 +294,6 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
 
     public abstract SyncStatusDao getSyncStatusDao();
 
-    public abstract LocationDao getLocationDao();
     public abstract ContentEntryFileStatusDao getContentEntryFileStatusDao();
 
     public abstract ContentCategorySchemaDao getContentCategorySchemaDao();
@@ -281,6 +307,21 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
     public abstract PersonAuthDao getPersonAuthDao();
 
     public abstract AccessTokenDao getAccessTokenDao();
+
+    public abstract RoleDao getRoleDao();
+
+    public abstract PersonGroupDao getPersonGroupDao();
+
+    public abstract PersonGroupMemberDao getPersonGroupMemberDao();
+
+    public abstract EntityRoleDao getEntityRoleDao();
+
+    public abstract LocationDao getLocationDao();
+
+    public abstract LocationAncestorJoinDao getLocationAncestorJoinDao();
+
+    public abstract PersonLocationJoinDao getPersonLocationJoinDao();
+
 
     @UmDbContext
     public abstract Object getContext();
@@ -320,4 +361,11 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
     public int getDeviceBits() {
         return getSyncablePrimaryKeyDao().getDeviceBits();
     }
+
+    @Override
+    public void invalidateDeviceBits() {
+        getSyncablePrimaryKeyDao().invalidateDeviceBits();
+    }
+
+
 }

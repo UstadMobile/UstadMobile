@@ -144,8 +144,46 @@ public class UMCalendarUtil {
      * @param dateString in format dd-MM-yyyy is 23-01-1989
      * @return the long date representation
      */
+    public static long getLongDateFromPrettyString(String dateString, Locale locale){
+        SimpleDateFormat formatter;
+        if(locale != null){
+            formatter = new SimpleDateFormat("dd-MMM-yyyy", locale);
+        }else{
+            formatter = new SimpleDateFormat("dd-MMM-yyyy");
+        }
+        Date date;
+        try {
+            date = formatter.parse(dateString);
+            return date.getTime();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return -1;
+
+    }
+
     public static long getLongDateFromPrettyString(String dateString){
-        SimpleDateFormat formatter = new SimpleDateFormat("dd-MMM-yyyy", Locale.US);
+        return getLongDateFromPrettyString(dateString, null);
+    }
+
+
+    /**
+     *
+     * @param dateString
+     * @param format
+     * @param locale
+     * @return
+     */
+    public static long getLongDateFromStringAndFormat(String dateString,
+                                                      String format,
+                                                      Locale locale){
+        SimpleDateFormat formatter;
+        if(locale != null) {
+             formatter = new SimpleDateFormat(format, locale);
+        }else{
+            formatter = new SimpleDateFormat(format);
+        }
+
         Date date;
         try {
             date = formatter.parse(dateString);
@@ -158,17 +196,10 @@ public class UMCalendarUtil {
     }
 
     public static long getLongDateFromStringAndFormat(String dateString, String format){
-        SimpleDateFormat formatter = new SimpleDateFormat(format, Locale.US);
-        Date date;
-        try {
-            date = formatter.parse(dateString);
-            return date.getTime();
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        return -1;
-
+        return getLongDateFromStringAndFormat(dateString, format, null);
     }
+
+
 
     /**
      * Gets date in long plus/minus the days specified from today.
@@ -206,6 +237,25 @@ public class UMCalendarUtil {
 
     }
 
+
+    /**
+     * Gets pretty looking date (eg: Mon, 23/Jan/1989) from a long date specified.
+     *
+     * @param thisDate The date in long for which we want a pretty date
+     * @return  The pretty date for the long date specified as string.
+     */
+    public static String getPrettyDateFromLong(long thisDate, Locale locale){
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(thisDate);
+        SimpleDateFormat format;
+        if(locale != null) {
+            format = new SimpleDateFormat("EEEE, dd/MMMM/yyyy", locale);
+        }else {
+            format = new SimpleDateFormat("EEEE, dd/MMMM/yyyy");
+        }
+        return format.format(calendar.getTime());
+    }
+
     /**
      * Gets pretty looking date (eg: Mon, 23/Jan/1989) from a long date specified.
      *
@@ -213,11 +263,9 @@ public class UMCalendarUtil {
      * @return  The pretty date for the long date specified as string.
      */
     public static String getPrettyDateFromLong(long thisDate){
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(thisDate);
-        SimpleDateFormat format = new SimpleDateFormat("EEEE, dd/MMMM/yyyy", Locale.US);
-        return format.format(calendar.getTime());
+        return getPrettyDateFromLong(thisDate, null);
     }
+
 
     /**
      * Gets simple pretty looking date (eg; 23/Jan/89) from a long date specified.
@@ -225,12 +273,22 @@ public class UMCalendarUtil {
      * @param thisDate  The date in long for which we want a pretty simple date.
      * @return  The pretty simple date for the long date specified as string.
      */
-    public static String getPrettyDateSuperSimpleFromLong(long thisDate){
+    public static String getPrettyDateSuperSimpleFromLong(long thisDate, Locale locale){
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(thisDate);
-        SimpleDateFormat format = new SimpleDateFormat("dd/MMM/yy", Locale.US);
+        SimpleDateFormat format;
+        if(locale != null) {
+            format = new SimpleDateFormat("dd/MMM/yy", locale);
+        }else{
+            format = new SimpleDateFormat("dd/MMM/yy");
+        }
         return format.format(calendar.getTime());
     }
+
+    public static String getPrettyDateSuperSimpleFromLong(long thisDate){
+        return getPrettyDateSuperSimpleFromLong(thisDate, null);
+    }
+
 
     /**
      * Gets simple day only (eg: Mon) from a long date specified.
@@ -238,12 +296,22 @@ public class UMCalendarUtil {
      * @param thisDate  The date in long for which we want the day for.
      * @return  The day for the long date specified as string.
      */
-    public static String getSimpleDayFromLongDate(long thisDate){
+    public static String getSimpleDayFromLongDate(long thisDate, Locale locale){
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(thisDate);
-        SimpleDateFormat formatShortDay = new SimpleDateFormat("EEE", Locale.US);
+        SimpleDateFormat formatShortDay;
+        if(locale != null) {
+            formatShortDay = new SimpleDateFormat("EEE", locale);
+        }else{
+            formatShortDay = new SimpleDateFormat("EEE");
+        }
         return formatShortDay.format(calendar.getTime());
     }
+
+    public static String getSimpleDayFromLongDate(long thisDate){
+        return getSimpleDayFromLongDate(thisDate, null);
+    }
+
 
     /**
      * Checks if a given long date is today or not.

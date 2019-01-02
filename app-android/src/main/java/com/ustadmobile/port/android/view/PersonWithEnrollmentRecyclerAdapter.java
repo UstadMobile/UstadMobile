@@ -50,6 +50,7 @@ public class PersonWithEnrollmentRecyclerAdapter
     private boolean showAttendance;
     private boolean showEnrollment;
     private boolean isEmpty = false;
+    private boolean addStudentLast = false;
 
     private int currentTop = -1;
     private boolean teacherAdded = false;
@@ -194,6 +195,12 @@ public class PersonWithEnrollmentRecyclerAdapter
         PersonWithEnrollment personWithEnrollment = getItem(position);
 
         assert personWithEnrollment != null;
+        if(personWithEnrollment == null){
+            return;
+        }
+
+        addStudentLast = false;
+
         String studentName = personWithEnrollment.getFirstNames() + " " +
                 personWithEnrollment.getLastName();
         Long personUid = personWithEnrollment.getPersonUid();
@@ -208,8 +215,11 @@ public class PersonWithEnrollmentRecyclerAdapter
                 holder.itemView.findViewById(R.id.item_studentlist_student_simple_attendance_percentage);
 
         ConstraintLayout cl = holder.itemView.findViewById(R.id.item_studentlist_student_cl);
-        cl.setOnClickListener(v ->
-                mPresenter.handleCommonPressed(personUid));
+        //If you want the whole CL to be clickable
+        //cl.setOnClickListener(v ->
+        //        mPresenter.handleCommonPressed(personUid));
+
+        studentNameTextView.setOnClickListener(v -> mPresenter.handleCommonPressed(personUid));
 
         //Remove previous add clazz member views
         removeAllAddClazzMemberView(cl, holder);
@@ -261,6 +271,9 @@ public class PersonWithEnrollmentRecyclerAdapter
                     ConstraintSet.BOTTOM, 0);
             constraintSet.applyTo(cl);
 
+            //or just leave the spaces in hopes of better performance ?
+            //Update it doesnt really make it quicker
+
         }
 
         if(showEnrollment){
@@ -272,6 +285,7 @@ public class PersonWithEnrollmentRecyclerAdapter
             checkBox.setTextColor(Color.BLACK);
             checkBox.setSystemUiVisibility(View.VISIBLE);
             checkBox.setCursorVisible(true);
+
 
             //Get current person's enrollment w.r.t. this class. (Its either set or null (not enrolled)
             boolean personWithEnrollmentBoolean = false;
@@ -303,7 +317,14 @@ public class PersonWithEnrollmentRecyclerAdapter
                 addHeadingAndNew(cl, ClazzMember.ROLE_TEACHER);
 
                 if(personWithEnrollment.getClazzMemberRole() == ClazzMember.ROLE_STUDENT){
+
                     addHeadingAndNew(cl, ClazzMember.ROLE_STUDENT);
+                }
+
+                int nextPos = position + 1;
+                if(personWithEnrollment.getClazzMemberRole() == ClazzMember.ROLE_TEACHER &&
+                        getItemCount() == nextPos){
+                    addStudentLast = true;
                 }
 
             } else {
@@ -312,9 +333,11 @@ public class PersonWithEnrollmentRecyclerAdapter
                 if (previousPerson.getClazzMemberRole() == ClazzMember.ROLE_TEACHER &&
                         personWithEnrollment.getClazzMemberRole() == ClazzMember.ROLE_STUDENT) {
 
+
                     //Add student
                     addHeadingAndNew(cl, ClazzMember.ROLE_STUDENT);
                 }
+
             }
         }
 
@@ -337,6 +360,13 @@ public class PersonWithEnrollmentRecyclerAdapter
                     ConstraintSet.TOP, R.id.item_studentlist_student_simple_student_title,
                     ConstraintSet.BOTTOM, 0);
             constraintSet.applyTo(cl);
+
+        }
+
+        if(getItemCount() == position+1) {
+            if (addStudentLast) {
+                addHeadingAndNew(cl, ClazzMember.ROLE_STUDENT);
+            }
         }
     }
 
@@ -412,7 +442,7 @@ public class PersonWithEnrollmentRecyclerAdapter
         if (role == ClazzMember.ROLE_STUDENT) {
             addClazzMemberTextView.setText(getText(R.string.add_student));
             clazzMemberRoleHeadingTextView.setText(getText(R.string.students_literal));
-            addCl.setOnClickListener( v -> mPresenter.handleCommonPressed(-1L));
+            addCl.setOnClickListener( v -> mPresenter.handleCommonPressed(0L));
 
             //Storing in separate variables so we can remove them.
             addCMCLS = addCMCL;

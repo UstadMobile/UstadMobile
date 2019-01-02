@@ -6,8 +6,13 @@ import com.ustadmobile.lib.database.annotation.UmSyncLastChangedBy;
 import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
 import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 
-@UmEntity(tableId = 6)
+
+import static com.ustadmobile.lib.db.entities.Clazz.TABLE_ID;
+
+@UmEntity(tableId = TABLE_ID)
 public class Clazz {
+
+    public static final int TABLE_ID = 6;
 
     @UmPrimaryKey(autoGenerateSyncable = true)
     private long clazzUid;
@@ -23,8 +28,6 @@ public class Clazz {
 
     //Gives the schedule calendar ui
     private long clazzScheuleUMCalendarUid;
-
-    private long locationUid;
 
     //Active
     private boolean clazzActive;
@@ -70,12 +73,19 @@ public class Clazz {
         this.clazzScheuleUMCalendarUid = clazzScheuleUMCalendarUid;
     }
 
-    public long getLocationUid() {
-        return locationUid;
+    private long clazzLocationUid;
+
+    public Clazz() {
+
     }
 
-    public void setLocationUid(long locationUid) {
-        this.locationUid = locationUid;
+    public Clazz(String clazzName){
+        this.clazzName = clazzName;
+    }
+
+    public Clazz(String clazzName, long clazzLocationUid) {
+        this.clazzName = clazzName;
+        this.clazzLocationUid = clazzLocationUid;
     }
 
     public float getAttendanceAverage() {
@@ -101,8 +111,6 @@ public class Clazz {
     public void setClazzName(String clazzName) {
         this.clazzName = clazzName;
     }
-
-
     public long getClazzMasterChangeSeqNum() {
         return clazzMasterChangeSeqNum;
     }
@@ -125,5 +133,13 @@ public class Clazz {
 
     public void setClazzLastChangedBy(int clazzLastChangedBy) {
         this.clazzLastChangedBy = clazzLastChangedBy;
+    }
+
+    public long getClazzLocationUid() {
+        return clazzLocationUid;
+    }
+
+    public void setClazzLocationUid(long clazzLocationUid) {
+        this.clazzLocationUid = clazzLocationUid;
     }
 }

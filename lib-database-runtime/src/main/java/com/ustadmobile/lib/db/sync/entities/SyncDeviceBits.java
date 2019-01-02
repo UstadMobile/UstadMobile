@@ -6,6 +6,8 @@ import android.arch.persistence.room.PrimaryKey;
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 
+import java.util.Random;
+
 @UmEntity
 @Entity
 public class SyncDeviceBits {
@@ -20,6 +22,10 @@ public class SyncDeviceBits {
 
     public SyncDeviceBits() {
 
+    }
+
+    public static SyncDeviceBits newRandomInstance() {
+        return new SyncDeviceBits(new Random().nextInt());
     }
 
     public SyncDeviceBits(int deviceBits) {

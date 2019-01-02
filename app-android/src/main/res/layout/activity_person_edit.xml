@@ -13,9 +13,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:elevation="4dp"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-        tools:layout_editor_absoluteX="320dp"
-        tools:layout_editor_absoluteY="0dp">
+        android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
         <android.support.v7.widget.Toolbar
             android:id="@+id/activity_person_edit_toolbar"
@@ -42,7 +42,7 @@
                 android:id="@+id/activity_person_edit_student_image"
                 android:layout_width="match_parent"
                 android:layout_height="120dp"
-                android:background="@color/primary_light"
+                android:background="@color/background_light"
                 android:contentDescription="@string/student_image"
                 android:src="@drawable/ic_person_black_24dp"
                 app:layout_constraintEnd_toEndOf="parent"

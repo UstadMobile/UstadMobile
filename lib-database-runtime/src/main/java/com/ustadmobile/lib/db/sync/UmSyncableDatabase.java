@@ -16,4 +16,6 @@ public interface UmSyncableDatabase {
 
     int getDeviceBits();
 
+    void invalidateDeviceBits();
+
 }

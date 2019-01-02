@@ -19,4 +19,5 @@ public interface PeopleListView extends UstadView {
      */
     void setPeopleListProvider(UmProvider<PersonWithEnrollment> listProvider);
 
+    void showFAB(boolean show);
 }

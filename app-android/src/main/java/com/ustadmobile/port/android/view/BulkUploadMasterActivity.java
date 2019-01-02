@@ -9,7 +9,9 @@ import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.Toolbar;
+import android.view.View;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -35,6 +37,9 @@ public class BulkUploadMasterActivity extends UstadBaseActivity implements BulkU
     private Toolbar toolbar;
     private String filePathFromFilePicker;
     private BulkUploadMasterPresenter mPresenter;
+    private ProgressBar mProgressBar;
+    private FloatingTextButton fab;
+    private Button selectFileButton;
 
     private static final int FILE_PERMISSION_REQUEST = 400;
     private static final int FILE_CAPUTURE_REQUEST = 401;
@@ -60,16 +65,40 @@ public class BulkUploadMasterActivity extends UstadBaseActivity implements BulkU
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
 
         //Button
-        Button selectFileButton = findViewById(R.id.activity_bulk_upload_master_upload_button);
+        selectFileButton = findViewById(R.id.activity_bulk_upload_master_upload_button);
         selectFileButton.setOnClickListener(v -> chooseFileFromDevice());
 
         //Heading TextView
         heading = findViewById(R.id.activity_bulk_upload_select_file_text);
 
+        //Progress bar
+        mProgressBar = findViewById(R.id.activity_bulk_upload_master_progressbar);
+        mProgressBar.setIndeterminate(false);
+        mProgressBar.setScaleY(3f);
+
         //FAB
-        FloatingTextButton fab = findViewById(R.id.activity_bulk_upload_master_fab);
+        fab = findViewById(R.id.activity_bulk_upload_master_fab);
         //fab.setOnClickListener(v -> mPresenter.startBulkUpload(filePathFromFilePicker));
         fab.setOnClickListener(v -> parseFile(filePathFromFilePicker));
+    }
+
+    @Override
+    public void setInProgress(boolean inProgress) {
+        mProgressBar.setVisibility(inProgress ? View.VISIBLE : View.GONE);
+        fab.setEnabled(!inProgress);
+        fab.setVisibility(inProgress?View.INVISIBLE:View.VISIBLE);
+        //fab.getBackground().setAlpha(inProgress ? 128 : 255);
+        selectFileButton.setEnabled(inProgress);
+        selectFileButton.setVisibility(inProgress?View.INVISIBLE:View.VISIBLE);
+        selectFileButton.getBackground().setAlpha(inProgress ? 128 : 255 );
+    }
+
+    @Override
+    public void updateProgressValue(int line, int nlines) {
+        runOnUiThread(() -> {
+            int value = (line*100/nlines);
+            mProgressBar.setProgress(value);
+        });
     }
 
     @Override
@@ -120,10 +149,10 @@ public class BulkUploadMasterActivity extends UstadBaseActivity implements BulkU
 
     @Override
     public void parseFile(String filePath) {
+        setInProgress(true);
         if(filePath == null || filePath.isEmpty()){
             showMessage(getText(R.string.select_file).toString());
         }else {
-            showMessage(getText(R.string.loading).toString());
             File sourceFile = new File(filePath);
             readFile(sourceFile);
         }
@@ -159,8 +188,6 @@ public class BulkUploadMasterActivity extends UstadBaseActivity implements BulkU
                 Toast.LENGTH_SHORT
         ).show();
     }
-
-
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {

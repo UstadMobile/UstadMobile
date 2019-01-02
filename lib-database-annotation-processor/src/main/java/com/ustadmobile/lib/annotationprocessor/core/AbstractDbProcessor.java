@@ -18,9 +18,10 @@ import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 import com.ustadmobile.lib.database.annotation.UmRestAccessible;
 import com.ustadmobile.lib.database.annotation.UmRestAuthorizedUidParam;
+import com.ustadmobile.lib.database.annotation.UmSyncCheckIncomingCanInsert;
+import com.ustadmobile.lib.database.annotation.UmSyncCheckIncomingCanUpdate;
 import com.ustadmobile.lib.database.annotation.UmSyncFindAllChanges;
 import com.ustadmobile.lib.database.annotation.UmSyncFindLocalChanges;
-import com.ustadmobile.lib.database.annotation.UmSyncFindUpdateable;
 import com.ustadmobile.lib.database.annotation.UmSyncIncoming;
 import com.ustadmobile.lib.database.annotation.UmSyncLastChangedBy;
 import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
@@ -37,20 +38,20 @@ import com.ustadmobile.lib.db.sync.entities.SyncStatus;
 import java.io.File;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.Messager;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
@@ -61,13 +62,13 @@ import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
+
 import javax.tools.Diagnostic;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import static com.ustadmobile.lib.annotationprocessor.core.DbProcessorUtils.capitalize;
@@ -94,7 +95,6 @@ public abstract class AbstractDbProcessor {
 
     protected TypeElement umCallbackTypeElement;
 
-
     public synchronized void init(ProcessingEnvironment processingEnvironment) {
         this.processingEnv = processingEnvironment;
         filer = processingEnvironment.getFiler();
@@ -114,7 +114,8 @@ public abstract class AbstractDbProcessor {
             try {
                 TypeElement dbTypeEl = (TypeElement)dbClassElement;
                 HashMap<Integer, TypeElement> tableIdMap = new HashMap<>();
-                for(TypeElement entityType : findEntityTypes((TypeElement)dbClassElement)) {
+                for(TypeElement entityType : DbProcessorUtils.findEntityTypes(
+                        (TypeElement)dbClassElement, processingEnv)) {
                     if(entityType.getAnnotation(UmEntity.class) == null) {
                         messager.printMessage(Diagnostic.Kind.ERROR, "Entity " +
                                 entityType.getQualifiedName() + "referenced " +
@@ -525,15 +526,37 @@ public abstract class AbstractDbProcessor {
             return "";
         }
 
-        String readPermissionCondition = daoType.getAnnotation(UmDao.class) != null ?
-                                daoType.getAnnotation(UmDao.class).readPermissionCondition() : "";
-        if(readPermissionCondition.equals("")) {
+        String updatePermissionCondition;
+        String joinClause;
+        TypeMirror inheritPermissionFromTypeMirror = DbProcessorUtils
+                .findDaoToInheritPermissionFrom(daoType);
+        String insertCondition;
+        if(inheritPermissionFromTypeMirror != null) {
+            joinClause = generateInheritPermissionJoinClause(inheritPermissionFromTypeMirror,
+                    entityTypeEl, daoType.getAnnotation(UmDao.class));
+            Element inheritPermissionFromTypeEl = processingEnv.getTypeUtils().asElement(
+                    inheritPermissionFromTypeMirror);
+            updatePermissionCondition = inheritPermissionFromTypeEl.getAnnotation(UmDao.class)
+                    .updatePermissionCondition();
+            insertCondition = inheritPermissionFromTypeEl.getAnnotation(UmDao.class)
+                    .insertPermissionCondition();
+        }else {
+            updatePermissionCondition = daoType.getAnnotation(UmDao.class) != null ?
+                    daoType.getAnnotation(UmDao.class).updatePermissionCondition() : "";
+            insertCondition = daoType.getAnnotation(UmDao.class).insertPermissionCondition();
+            joinClause = "";
+        }
+
+
+        if(updatePermissionCondition.equals("")) {
             messager.printMessage(Diagnostic.Kind.ERROR,
                     formatMethodForErrorMessage(daoMethod, daoType) + " Attempting to generate " +
-                            "findLocalchangeSeq method: UmDao does not have a readPermissionCondition" +
+                            "findLocalchangeSeq method: UmDao does not have a selectPermissionCondition" +
                             " set to use for the where clause. It needs to be added");
             return "";
         }
+
+
 
 
 
@@ -553,14 +576,43 @@ public abstract class AbstractDbProcessor {
             return "";
         }
 
-        return String.format("SELECT * FROM %s WHERE %s BETWEEN :%s AND :%s AND %s = :%s AND %s LIMIT :%s",
+        return String.format("SELECT %s.* FROM %s %s, (SELECT (%s) AS canInsertCol) AS canInsertTbl " +
+                        "WHERE %s BETWEEN :%s AND :%s AND %s = :%s AND (canInsertTbl.canInsertCol OR (%s)) LIMIT :%s",
                 entityTypeEl.getSimpleName().toString(),
+                entityTypeEl.getSimpleName().toString(),
+                joinClause,
+                insertCondition,
                 localChangeSeqNumEl.getSimpleName().toString(),
                 fromLocalChangeSeqNumParam.getSimpleName().toString(),
                 toLocalChangeSeqNumParam.getSimpleName().toString(),
                 lastChangedByField.getSimpleName(),
                 localDeviceId.getSimpleName(),
-                readPermissionCondition, limitParam.getSimpleName());
+                updatePermissionCondition, limitParam.getSimpleName());
+    }
+
+    /**
+     * Generate a JOIN clause for use with inherited permissions in the form of
+     *   LEFT JOIN InheritedPermissionEntity ON Entity.foreignKey = InheritedPermissionEntity.primaryKey
+     *
+     * @param inheritPermissionFromTypeMirror The TypeMirror representing the DAO from which
+     *                                        permissions are to be inherited
+     * @param entityTypeEl The type of entity for this DAO (which is inheriting permissions)
+     * @param umDao The @UmDao annotation for this DAO (which is inheriting permissions)
+     *
+     * @return A LEFT JOIN clause using the given parameters
+     */
+    protected String generateInheritPermissionJoinClause(TypeMirror inheritPermissionFromTypeMirror,
+                                                         TypeElement entityTypeEl,
+                                                         UmDao umDao) {
+        TypeMirror joinEntityTypeMirror = DbProcessorUtils.resolveDaoEntityType(
+                inheritPermissionFromTypeMirror, processingEnv);
+        TypeElement joinEntityTypeEl = (TypeElement)processingEnv.getTypeUtils().asElement(
+                joinEntityTypeMirror);
+
+        return String.format("LEFT JOIN %s ON %s.%s = %s.%s ",
+                joinEntityTypeEl.getSimpleName(), entityTypeEl.getSimpleName(),
+                umDao.inheritPermissionForeignKey(), joinEntityTypeEl.getSimpleName(),
+                umDao.inheritPermissionJoinedPrimaryKey());
     }
 
     protected String generateSyncFindAllChanges(TypeElement daoType, ExecutableElement daoMethod,
@@ -572,6 +624,8 @@ public abstract class AbstractDbProcessor {
                 UmSyncLocalChangeSeqNum.class, processingEnv);
         Element masterChangeSeqNumEl = DbProcessorUtils.findElementWithAnnotation(entityTypeEl,
                 UmSyncMasterChangeSeqNum.class, processingEnv);
+        UmDao umDao = daoType.getAnnotation(UmDao.class);
+
         if(localChangeSeqNumEl == null) {
             messager.printMessage(Diagnostic.Kind.ERROR,
                     formatMethodForErrorMessage(daoMethod, daoType) + "Attempting to generate a " +
@@ -587,12 +641,25 @@ public abstract class AbstractDbProcessor {
             return "";
         }
 
-        String readPermissionCondition = daoType.getAnnotation(UmDao.class) != null ?
-                daoType.getAnnotation(UmDao.class).readPermissionCondition() : "";
-        if(readPermissionCondition.equals("")) {
+        TypeMirror inheritPermissionFromTypeMirror = DbProcessorUtils.
+                findDaoToInheritPermissionFrom(daoType);
+        String joinClause = "";
+        String selectPermissionCondition;
+        if(inheritPermissionFromTypeMirror != null) {
+            joinClause = generateInheritPermissionJoinClause(inheritPermissionFromTypeMirror,
+                    entityTypeEl, umDao);
+            selectPermissionCondition = processingEnv.getTypeUtils().asElement(
+                    inheritPermissionFromTypeMirror).getAnnotation(UmDao.class)
+                    .selectPermissionCondition();
+        }else {
+            selectPermissionCondition = daoType.getAnnotation(UmDao.class).selectPermissionCondition();
+        }
+
+
+        if(selectPermissionCondition.equals("")) {
             messager.printMessage(Diagnostic.Kind.ERROR,
                     formatMethodForErrorMessage(daoMethod, daoType) + " attempting to" +
-                            "generate findAllChanges method: Dao has no readPermissionCondition",
+                            "generate findAllChanges method: Dao has no selectPermissionCondition",
                     daoType);
             return "";
         }
@@ -616,11 +683,21 @@ public abstract class AbstractDbProcessor {
 
         Element lastChangedFieldElement = findElementWithAnnotation(entityTypeEl,
                 UmSyncLastChangedBy.class, processingEnv);
+        if(lastChangedFieldElement == null) {
+            messager.printMessage(Diagnostic.Kind.ERROR,
+                    formatMethodForErrorMessage(daoMethod, daoType) + " attempting " +
+                            "generate findAllChanges method: entity " +
+                            entityTypeEl.getQualifiedName() + " does not have int field annotated " +
+                            "UmSyncLastChangedBy");
+            return "";
+        }
 
 
-        return String.format("SELECT * FROM %s WHERE %s BETWEEN :%s AND :%s " +
-                "AND %s BETWEEN :%s AND :%s AND %s != :%s  AND %s ORDER BY %s, %s LIMIT :%s",
+        return String.format("SELECT %s.* FROM %s %s WHERE %s BETWEEN :%s AND :%s " +
+                "AND %s BETWEEN :%s AND :%s AND %s != :%s  AND (%s) ORDER BY %s, %s LIMIT :%s",
                 entityTypeEl.getSimpleName(),
+                entityTypeEl.getSimpleName(),
+                joinClause,
                 localChangeSeqNumEl.getSimpleName(),
                 fromLocalChangeSeqNumParam.getSimpleName(),
                 toLocalChangeSeqNumParam.getSimpleName(),
@@ -629,15 +706,17 @@ public abstract class AbstractDbProcessor {
                 toMasterChangeSeqNumParam.getSimpleName(),
                 lastChangedFieldElement.getSimpleName(),
                 notLastChangedByParam.getSimpleName(),
-                readPermissionCondition,
+                selectPermissionCondition,
                 masterChangeSeqNumEl.getSimpleName(),
                 localChangeSeqNumEl.getSimpleName(),
                 limitParam.getSimpleName());
 
     }
 
-    protected String generateSyncFindUpdatable(TypeElement daoType, ExecutableElement daoMethod,
-                                               ProcessingEnvironment processingEnv) {
+    protected String generateSyncFindUpdatableSql(TypeElement daoType,
+                                                  ExecutableElement methodBeingGenerated,
+                                                  String primaryKeyArrayParamName,
+                                                  ProcessingEnvironment processingEnv) {
         TypeElement baseDaoTypeEl = processingEnv.getElementUtils().getTypeElement(
                 BaseDao.class.getName());
         TypeMirror entityTypeMirror = daoType.asType().accept(
@@ -645,33 +724,81 @@ public abstract class AbstractDbProcessor {
 
         if(entityTypeMirror == null) {
             messager.printMessage(Diagnostic.Kind.ERROR,
-                    formatMethodForErrorMessage(daoMethod, daoType) + " attempting to" +
-                            "generate syncFindUpdateable: DAO class must extend a BaseDao with an " +
+                    formatMethodForErrorMessage(methodBeingGenerated, daoType) + " attempting to" +
+                            "generate SyncCheckIncomingCanUpdate: DAO class must extend a BaseDao with an " +
                             "entity type variable argument.");
             return "";
         }
 
         TypeElement entityTypeEl = (TypeElement)processingEnv.getTypeUtils().asElement(entityTypeMirror);
         Element primaryKeyEl = findPrimaryKey(entityTypeEl);
-        String readPermissionCondition = daoType.getAnnotation(UmDao.class) != null ?
-                daoType.getAnnotation(UmDao.class).readPermissionCondition() : "";
-        if(readPermissionCondition.equals("")) {
+        TypeMirror inheritFromDaoTypeMirror = DbProcessorUtils.findDaoToInheritPermissionFrom(daoType);
+
+
+        String updatePermissionCondition;
+        String joinClause;
+        if(inheritFromDaoTypeMirror != null) {
+            joinClause = generateInheritPermissionJoinClause(inheritFromDaoTypeMirror, entityTypeEl,
+                    daoType.getAnnotation(UmDao.class));
+            updatePermissionCondition = processingEnv.getTypeUtils()
+                    .asElement(inheritFromDaoTypeMirror).getAnnotation(UmDao.class)
+                    .updatePermissionCondition();
+        }else {
+            joinClause = "";
+            updatePermissionCondition = daoType.getAnnotation(UmDao.class) != null ?
+                    daoType.getAnnotation(UmDao.class).updatePermissionCondition() : "";
+        }
+
+        if(updatePermissionCondition.equals("")) {
             messager.printMessage(Diagnostic.Kind.ERROR,
-                    formatMethodForErrorMessage(daoMethod, daoType) + " attempting to" +
-                    "generate syncFindUpdateable: DAO class must have readPermissionCondition.");
+                    formatMethodForErrorMessage(methodBeingGenerated, daoType) + " attempting to" +
+                            "generate SyncCheckIncomingCanUpdate: DAO class must have selectPermissionCondition.");
             return "";
         }
 
 
-        return String.format("SELECT %s.%s as primaryKey, 1 as userCanUpdate FROM %s " +
-                "WHERE %s.%s in (:%s) AND %s",
+        return String.format("SELECT %s.%s as primaryKey, (%s) as userCanUpdate FROM %s %s " +
+                        "WHERE %s.%s in (:%s)",
                 entityTypeEl.getSimpleName(),
                 primaryKeyEl.getSimpleName(),
+                updatePermissionCondition,
                 entityTypeEl.getSimpleName(),
+                joinClause,
                 entityTypeEl.getSimpleName(),
                 primaryKeyEl.getSimpleName(),
-                daoMethod.getParameters().get(0).getSimpleName(),
-                readPermissionCondition);
+                primaryKeyArrayParamName);
+    }
+
+    protected String generateSyncFindUpdatableSql(TypeElement daoType, ExecutableElement daoMethod,
+                                                  ProcessingEnvironment processingEnv) {
+        return generateSyncFindUpdatableSql(daoType, daoMethod,
+                daoMethod.getParameters().get(0).getSimpleName().toString(),
+                processingEnv);
+    }
+
+    protected String generateSyncCheckCanInsertSql(TypeElement daoType, ExecutableElement daoMethod,
+                                                ProcessingEnvironment processingEnv) {
+
+        TypeMirror inheritPermissionFromTypeMirror = DbProcessorUtils.findDaoToInheritPermissionFrom(
+                daoType);
+        String canInsertCondition;
+        if(inheritPermissionFromTypeMirror != null) {
+            canInsertCondition = processingEnv.getTypeUtils()
+                    .asElement(inheritPermissionFromTypeMirror).getAnnotation(UmDao.class)
+                    .insertPermissionCondition();
+        }else {
+            canInsertCondition = daoType.getAnnotation(UmDao.class) != null ?
+                    daoType.getAnnotation(UmDao.class).insertPermissionCondition() : null;
+        }
+
+        if(canInsertCondition == null) {
+            messager.printMessage(Diagnostic.Kind.ERROR,
+                    formatMethodForErrorMessage(daoMethod, daoType) + ": Attempting to" +
+                            "generate SyncCheckCanInsertSql: DAO class must have a insertPermissionCondition");
+            return "";
+        }
+
+        return String.format("SELECT %s AS canInsert", canInsertCondition);
     }
 
     protected VariableElement findPrimaryKey(TypeElement entityType) {
@@ -709,10 +836,10 @@ public abstract class AbstractDbProcessor {
      *
      * @return MethodSpec.Builder object for a generated handle incoming sync method
      */
-    public MethodSpec.Builder addSyncHandleIncomingMethod(ExecutableElement daoMethod,
-                                                          TypeElement daoType,
-                                                          TypeSpec.Builder daoBuilder,
-                                                          String dbName) {
+    public MethodSpec generateSyncIncomingMethod(ExecutableElement daoMethod,
+                                                         TypeElement daoType,
+                                                         TypeSpec.Builder daoBuilder,
+                                                         String dbName) {
         MethodSpec.Builder methodBuilder = overrideAndResolve(daoMethod, daoType, processingEnv);
 
         if(daoMethod.getParameters().size() != 6) {
@@ -724,7 +851,7 @@ public abstract class AbstractDbProcessor {
                             "int receiveLimit. " +
                             "Actually has : " + daoMethod.getParameters().size() + " parameters.",
                     daoType);
-            return methodBuilder;
+            return methodBuilder.build();
         }
 
         CodeBlock.Builder codeBlock = CodeBlock.builder();
@@ -744,12 +871,13 @@ public abstract class AbstractDbProcessor {
         String incomingChangesParamName = daoMethod.getParameters().get(0).getSimpleName().toString();
         Element masterChangeSeqFieldEl = DbProcessorUtils.findElementWithAnnotation(
                 entityTypeElement, UmSyncMasterChangeSeqNum.class, processingEnv);
+        String checkIncomingEntitiesMethodName = "_checkIncoming";
 
         if(masterChangeSeqFieldEl == null){
             messager.printMessage(Diagnostic.Kind.ERROR, formatMethodForErrorMessage(daoMethod) +
                     ": Method annotated @UmSyncIncoming entity type must have one field " +
                             "annotated with @UmSyncMasterChangeSeqNum", daoMethod);
-            return methodBuilder;
+            return methodBuilder.build();
         }
 
         Element localChangeSeqFieldEl = DbProcessorUtils.findElementWithAnnotation(
@@ -758,15 +886,15 @@ public abstract class AbstractDbProcessor {
             messager.printMessage(Diagnostic.Kind.ERROR, formatMethodForErrorMessage(daoMethod) +
                     ": Method annotated @UmSyncIncoming entity type must have one field " +
                     "annotated with @UmSyncLocalChangeSeqNum", daoMethod);
-            return methodBuilder;
+            return methodBuilder.build();
         }
 
         Element findUpdateableEntitiesMethod = DbProcessorUtils.findElementWithAnnotation(
-                daoType, UmSyncFindUpdateable.class, processingEnv);
+                daoType, UmSyncCheckIncomingCanUpdate.class, processingEnv);
         if(findUpdateableEntitiesMethod == null){
             messager.printMessage(Diagnostic.Kind.ERROR, formatMethodForErrorMessage(daoMethod) +
-                ": Method Method annotated @UmSyncIncoming requires a method annotated with @UmSyncFindUpdateable");
-            return methodBuilder;
+                ": Method Method annotated @UmSyncIncoming requires a method annotated with @UmSyncCheckIncomingCanUpdate");
+            return methodBuilder.build();
         }
 
         Element findChangedEntitiesMethod = DbProcessorUtils.findElementWithAnnotation(daoType,
@@ -775,7 +903,7 @@ public abstract class AbstractDbProcessor {
             messager.printMessage(Diagnostic.Kind.ERROR,
                     formatMethodForErrorMessage(daoMethod, daoType) +" method annotated " +
                             "@UmSyncIncoming requires a method anotated with @UmSincFindAllChanges");
-            return methodBuilder;
+            return methodBuilder.build();
         }
 
         codeBlock.add("$1T _syncableDb = ($1T)$2L;\n", UmSyncableDatabase.class, dbName)
@@ -799,29 +927,22 @@ public abstract class AbstractDbProcessor {
                     ArrayList.class)
             .add("$T<$T> _insertList = new $T<>();\n", List.class, entityTypeElement,
                     ArrayList.class)
-            .add("$T<$T> _primaryKeyList = new $T<>();\n", List.class, Long.class, ArrayList.class)
-            .beginControlFlow("for($T _entry : $L)", entityTypeElement,
-                    incomingChangesParam.getSimpleName())
-                .add("_primaryKeyList.add(_entry.get$L());\n",
-                        capitalize(entityPrimaryKeyFieldName))
-            .endControlFlow()
-            .add("$T<$T> _updateableEntities = $L(_primaryKeyList, $L);\n", List.class,
-                    UmSyncExistingEntity.class, findUpdateableEntitiesMethod.getSimpleName(),
+            .add("$T<$T, Integer> _entityActions = $L($L, $L);\n", Map.class, entityType,
+                    checkIncomingEntitiesMethodName, incomingChangesParamName,
                     accountPersonUidParam.getSimpleName())
-            .add("$T<$T, $T> _updateableMap = new $T<>();\n", Map.class, Long.class,
-                    UmSyncExistingEntity.class, HashMap.class)
-            .beginControlFlow("for($T _entity: _updateableEntities)", UmSyncExistingEntity.class)
-                .add("_updateableMap.put(_entity.getPrimaryKey(), _entity);\n")
-            .endControlFlow()
-            .beginControlFlow("for($T _entity : $L)", entityType, incomingChangesParamName)
-                .beginControlFlow("if(_updateableMap.containsKey(_entity.get$L()))",
-                        capitalize(entityPrimaryKeyFieldName))
-                    .beginControlFlow("if(_updateableMap.get(_entity.get$L()).isUserCanUpdate())",
-                            capitalize(entityPrimaryKeyFieldName))
-                        .add("_updateList.add(_entity);\n")
-                    .endControlFlow()
-                .nextControlFlow("else")
-                    .add("_insertList.add(_entity);\n")
+            .beginControlFlow("for($T.Entry<$T, Integer> _entityAction : _entityActions.entrySet())",
+                    Map.class, entityType)
+                .beginControlFlow("switch(_entityAction.getValue())")
+                    .add("case $T.ACTION_UPDATE:\n", UmSyncIncoming.class)
+                    .indent()
+                        .add("_updateList.add(_entityAction.getKey());\n")
+                        .add("break;\n")
+                    .unindent()
+                    .add("case $T.ACTION_INSERT:\n", UmSyncIncoming.class)
+                    .indent()
+                        .add("_insertList.add(_entityAction.getKey());\n")
+                        .add("break;\n")
+                    .unindent()
                 .endControlFlow()
             .endControlFlow()
             .add("insertList(_insertList);\n")
@@ -837,10 +958,116 @@ public abstract class AbstractDbProcessor {
 
 
         methodBuilder.addCode(codeBlock.build());
-        daoBuilder.addMethod(methodBuilder.build());
 
-        return methodBuilder;
+        //now add the _checkIncoming method
+        DaoMethodInfo methodInfo = new DaoMethodInfo(daoMethod, daoType, processingEnv);
+        TypeElement entityTypeEl = (TypeElement)processingEnv.getTypeUtils().asElement(
+                methodInfo.resolveEntityParameterComponentType());
+        daoBuilder.addMethod(generateCheckIncomingEntitiesMethod("_checkIncoming",
+                Modifier.PUBLIC, entityTypeEl, daoType, daoMethod,
+                (QueryMethodGenerator)this, daoBuilder));
+
+
+        return methodBuilder.build();
     }
+
+    /**
+     * Generate a method to check incoming entities on sync. This will use the UmDao
+     * updatePermissionCondition and insertPermissionCondition to determine whether the incoming
+     * change should be inserted, updated, or dropped.
+     *
+     * @param methodName The name of the method to generate
+     * @param methodModifier Access modifier to apply to the method e.g. Modifier.PUBLIC
+     * @param entityType TypeElement representing the type of entity
+     * @param daoType TypeElement representing the DAO currently being generated
+     * @param queryMethodGenerator Query method generator (e.g. subclass of AbstractDbProcessor)
+     *                             which can, if required, add extra query methods to the DAO.
+     *
+     * @return MethodSpec for a method that will check incoming entities+
+     */
+    public MethodSpec generateCheckIncomingEntitiesMethod(String methodName,
+                                                          Modifier methodModifier,
+                                                          TypeElement entityType,
+                                                          TypeElement daoType,
+                                                          ExecutableElement methodBeingGenerated,
+                                                          QueryMethodGenerator queryMethodGenerator,
+                                                          TypeSpec.Builder daoTypeBuilder) {
+        CodeBlock.Builder codeBlock = CodeBlock.builder();
+        String accountPersonUidParamName = "accountPersonUid";
+        String entitiesListParamName = "_entities";
+        VariableElement pkElement = findPrimaryKey(entityType);
+        String entityPrimaryKeyFieldName = pkElement.getSimpleName().toString();
+
+        TypeName retTypeName = ParameterizedTypeName.get(ClassName.get(Map.class),
+                ClassName.get(entityType), ClassName.get(Integer.class));
+        MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(methodName)
+                .addParameter(ParameterizedTypeName.get(ClassName.get(List.class),
+                        ClassName.get(entityType)), entitiesListParamName)
+                .addParameter(TypeName.LONG, accountPersonUidParamName)
+                .addModifiers(methodModifier)
+                .returns(retTypeName);
+
+        String findUpdatableMethodName = null;
+        Element findUpdateableMethod = DbProcessorUtils.findElementWithAnnotation(daoType,
+                UmSyncCheckIncomingCanUpdate.class, processingEnv);
+        Element findCanInsertElementMethod = DbProcessorUtils.findElementWithAnnotation(daoType,
+                UmSyncCheckIncomingCanInsert.class, processingEnv);
+
+
+        if(findUpdateableMethod != null) {
+            findUpdatableMethodName = findUpdateableMethod.getSimpleName().toString();
+        }else {
+            //TODO: if the method does not exist, generate it. Requires refactor of DaoMethodInfo
+            messager.printMessage(Diagnostic.Kind.ERROR, formatMethodForErrorMessage(
+                    methodBeingGenerated, daoType) + ": " + " cannot find " +
+                    "UmSyncCheckingIncomingCanUpdate method");
+            return methodBuilder.build();
+        }
+
+        if(findCanInsertElementMethod == null) {
+            //TODO: if the method does not exist, generate it. Requires refactor of DaoMethodInfo
+            messager.printMessage(Diagnostic.Kind.ERROR, formatMethodForErrorMessage(
+                    methodBeingGenerated, daoType) + ": cannot find UmSyncCheckIncomingCanInsert",
+                    daoType);
+            return methodBuilder.build();
+        }
+
+        codeBlock
+                .add("$T<$T, $T> _result = new $T<>();\n",
+                        Map.class, entityType, Integer.class, HashMap.class)
+                .add("$T<$T, $T> _pkToEntityMap = new $T<>();\n",
+                    Map.class, DbProcessorUtils.boxIfPrimitive(pkElement.asType(), processingEnv),
+                    entityType, HashMap.class)
+                .beginControlFlow("for($T _entry : $L)", entityType,
+                        entitiesListParamName)
+                    .add("_pkToEntityMap.put(_entry.get$L(), _entry);\n",
+                            capitalize(entityPrimaryKeyFieldName))
+                .endControlFlow()
+                .add("$T<$T> _primaryKeyList = new $T<>(_pkToEntityMap.size());\n",
+                        List.class, Long.class, ArrayList.class)
+                .add("_primaryKeyList.addAll(_pkToEntityMap.keySet());\n")
+                .add("$T<$T> _updatableEntities = $L(_primaryKeyList, $L);\n", List.class,
+                        UmSyncExistingEntity.class, findUpdatableMethodName,
+                        accountPersonUidParamName)
+                .beginControlFlow("for($T _existingEntity: _updatableEntities)",
+                        UmSyncExistingEntity.class)
+                    .add("_result.put(_pkToEntityMap.get(_existingEntity.getPrimaryKey()), " +
+                            "_existingEntity.isUserCanUpdate() ? " +
+                            "$1T.ACTION_UPDATE : $1T.ACTION_REJECT);\n", UmSyncIncoming.class)
+                    .add("_pkToEntityMap.remove(_existingEntity.getPrimaryKey());\n")
+                .endControlFlow()
+                .add("boolean _userCanInsert = $L($L);\n",
+                        findCanInsertElementMethod.getSimpleName(), accountPersonUidParamName)
+                .beginControlFlow("for($T _entity : _pkToEntityMap.values())", entityType)
+                    .add("_result.put(_entity, _userCanInsert ? " +
+                                "$1T.ACTION_INSERT : $1T.ACTION_REJECT);\n", UmSyncIncoming.class)
+                .endControlFlow()
+                .add("return _result;\n");
+        methodBuilder.addCode(codeBlock.build());
+
+        return methodBuilder.build();
+    }
+
 
 
     /**
@@ -887,10 +1114,24 @@ public abstract class AbstractDbProcessor {
         VariableElement accountPersonUidParam = daoMethod.getParameters().get(1);
         VariableElement sendLimitParam = daoMethod.getParameters().get(2);
         VariableElement receiveLimitParam = daoMethod.getParameters().get(3);
-        String localChangeSeqNumFieldName = findElementWithAnnotation(entityTypeElement,
-                UmSyncLocalChangeSeqNum.class, processingEnv).getSimpleName().toString();
-        String masterChangeSeqNumFieldName = findElementWithAnnotation(entityTypeElement,
-                UmSyncMasterChangeSeqNum.class, processingEnv).getSimpleName().toString();
+
+        Element localChangeSeqNumEl = findElementWithAnnotation(entityTypeElement,
+                UmSyncLocalChangeSeqNum.class, processingEnv);
+
+        Element masterChangeNumFieldEl = findElementWithAnnotation(entityTypeElement,
+                UmSyncMasterChangeSeqNum.class, processingEnv);
+        if(localChangeSeqNumEl == null || masterChangeNumFieldEl == null) {
+            messager.printMessage(Diagnostic.Kind.ERROR,
+                    formatMethodForErrorMessage(daoMethod, daoType) +
+                        " method is annotated with UmSyncOutgoing but entity" +
+                        entityTypeElement.getQualifiedName() +  " is missing local/master change" +
+                            "sequence numbers", daoType);
+            return methodBuilder;
+        }
+
+
+        String masterChangeSeqNumFieldName = masterChangeNumFieldEl.getSimpleName().toString();
+        String localChangeSeqNumFieldName = localChangeSeqNumEl.getSimpleName().toString();
 
 
         CodeBlock.Builder codeBlock = CodeBlock.builder()
@@ -929,10 +1170,6 @@ public abstract class AbstractDbProcessor {
                             "_attemptSyncStatus.getSyncedToMasterChangeNum() : " +
                             "_remoteChangedEntities.get(_remoteChangedEntities.size()-1)" +
                             ".get$L();\n", capitalize(masterChangeSeqNumFieldName))
-                        //TODO: Add code to handle if any changes happened whilst this sync was ongoing
-                        //TODO: e.g. before replace, check if there was any change to the local change
-                        // sequence number, then bump the change numbers for these entities so they get
-                        //picked up by the next sync round
                         .beginControlFlow("if(_syncCompleteMasterChangeSeqNum == -1)")
                             .add("_syncCompleteMasterChangeSeqNum  = _remoteChanges." +
                                     "getCurrentMasterChangeSeqNum();\n")
@@ -941,9 +1178,6 @@ public abstract class AbstractDbProcessor {
                         .add("_syncableDb.getSyncStatusDao().updateSyncedToChangeSeqNums(" +
                                 "$1L, _syncedToLocalSeqNum, _syncedToMasterSeqNum);\n",
                                 umEntityAnnotation.tableId())
-                        //TODO: just in case we wasted some sequence numbers: check if both are empty
-                        //When we have put entries into the server, but no one else has, there won't
-                        //be any new entries coming down the pipe.
                         .add("_syncComplete = (_syncedToMasterSeqNum >= _syncCompleteMasterChangeSeqNum || _remoteChanges.getRemoteChangedEntities().isEmpty()) " +
                                 " && (_syncedToLocalSeqNum >= _initialSyncStatus.getLocalChangeSeqNum() - 1 || _locallyChangedEntities.isEmpty());\n")
                     .nextControlFlow("else")
@@ -1191,8 +1425,8 @@ public abstract class AbstractDbProcessor {
     }
 
     protected CodeBlock generateSetLastChangedBy(ExecutableElement daoMethod,
-                                                    TypeElement daoType,
-                                                    String syncableDbVariableName) {
+                                                 TypeElement daoType,
+                                                 String syncableDbVariableName) {
         CodeBlock.Builder codeBlock = CodeBlock.builder();
         DaoMethodInfo methodInfo = new DaoMethodInfo(daoMethod, daoType, processingEnv);
         TypeMirror entityTypeMirror = methodInfo.resolveEntityParameterComponentType();
@@ -1442,35 +1676,6 @@ public abstract class AbstractDbProcessor {
     }
 
 
-    /**
-     * Get the TypeElements that correspond to the entities on the @UmDatabase annotation of the given
-     * TypeElement
-     *
-     * TODO: make sure that we check each annotation, this currently **ASSUMES** the first annotation is @UmDatabase
-     *
-     * @param dbTypeElement TypeElement representing the class with the @UmDatabase annotation
-     * @return List of TypeElement that represents the values found on entities
-     */
-    protected List<TypeElement> findEntityTypes(TypeElement dbTypeElement){
-        List<TypeElement> entityTypeElements = new ArrayList<>();
-        Map<? extends ExecutableElement, ? extends AnnotationValue> annotationEntryMap =
-                dbTypeElement.getAnnotationMirrors().get(0).getElementValues();
-        for(Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entry :
-                annotationEntryMap.entrySet()) {
-            String key = entry.getKey().getSimpleName().toString();
-            Object value = entry.getValue().getValue();
-            if (key.equals("entities")) {
-                List<? extends AnnotationValue> typeMirrors =
-                        (List<? extends AnnotationValue>) value;
-                for(AnnotationValue entityValue : typeMirrors) {
-                    entityTypeElements.add((TypeElement) processingEnv.getTypeUtils()
-                            .asElement((TypeMirror) entityValue.getValue()));
-                }
-            }
-        }
-
-        return entityTypeElements;
-    }
 
 
     /**
@@ -1486,7 +1691,7 @@ public abstract class AbstractDbProcessor {
                                                         String execSqlMethod,
                                                         TypeElement dbType,
                                                         CodeBlock.Builder codeBlock) {
-        List<TypeElement> entityTypes = findEntityTypes(dbType);
+        List<TypeElement> entityTypes = DbProcessorUtils.findEntityTypes(dbType, processingEnv);
         boolean isFirst = true;
         String ifStmtStr = "if(_entityClass.equals($T.class))";
         for(TypeElement entityType : entityTypes) {
@@ -1503,6 +1708,8 @@ public abstract class AbstractDbProcessor {
                     UmSyncLocalChangeSeqNum.class, processingEnv);
             Element masterChangeSeqNumEl = DbProcessorUtils.findElementWithAnnotation(entityType,
                     UmSyncMasterChangeSeqNum.class, processingEnv);
+            Element lastChangeByEl = DbProcessorUtils.findElementWithAnnotation(entityType,
+                    UmSyncLastChangedBy.class, processingEnv);
 
             Map<String, String> triggerSqlArgs = new HashMap<>();
             triggerSqlArgs.put("tableNameLower",
@@ -1514,63 +1721,66 @@ public abstract class AbstractDbProcessor {
                     UmPrimaryKey.class, processingEnv).getSimpleName().toString());
             triggerSqlArgs.put("tableId", ""+entityType.getAnnotation(UmEntity.class).tableId());
             triggerSqlArgs.put("execSqlMethod", execSqlMethod);
+            triggerSqlArgs.put("lastChangeFieldName", lastChangeByEl.getSimpleName().toString());
 
             codeBlock.addNamed("String _tableColName_$tableName:L = isMaster() ? " +
                     "$masterCsnName:S : $localCsnName:S;\n", triggerSqlArgs);
+            triggerSqlArgs.put("concatTableCsnCol", "\" + _tableColName_" +
+                    entityType.getSimpleName() + " + \"");
+
             codeBlock.add("String _syncStatusColName_$L = isMaster() ? $S: $S;\n",
                     entityType.getSimpleName(), "masterChangeSeqNum", "localChangeSeqNum");
+            triggerSqlArgs.put("concatSyncStatusColName", "\" + _syncStatusColName_" +
+                    entityType.getSimpleName() + " + \"");
 
             Map<String, String> triggerTemplateArgs = new HashMap<>(triggerSqlArgs);
             triggerTemplateArgs.put("triggerOn", "update");
-            String triggerTemplate =
-                    "CREATE TRIGGER $triggerOn:L_csn_$tableNameLower:L " +
-                            "AFTER $triggerOn:L ON $tableName:L FOR EACH ROW ";
-            codeBlock.addNamed("String _createUpdateTriggerStmt_$tableName:L = \""
-                            + triggerTemplate + " WHEN (NEW.\" + _tableColName_$tableName:L + \" = 0" + //
-                            " OR OLD.\" + _tableColName_$tableName:L + \" " +
-                            "= NEW.\" + _tableColName_$tableName:L  + \") \";\n",
-                    triggerTemplateArgs);
 
-            triggerTemplateArgs.put("triggerOn", "insert");
-            codeBlock.addNamed("String _createInsertTriggerStmt_$tableName:L = \"" +
-                            triggerTemplate + "\";\n",
-                    triggerTemplateArgs);
-
-
-            codeBlock.addNamed("String _triggerSql_$tableNameLower:L = \"" +
-                            "UPDATE $tableName:L " +
-                            "SET \" + _tableColName_$tableName:L + \" = " +
-                            "(SELECT \" + _syncStatusColName_$tableName:L + \" FROM SyncStatus WHERE tableId = $tableId:L) " +
-                            "WHERE $pkName:L = NEW.$pkName:L; " +
-                            "UPDATE SyncStatus SET \" + " +
-                            "_syncStatusColName_$tableName:L + \" = \" + _syncStatusColName_$tableName:L + \" + 1 " +
-                            " WHERE tableId = $tableId:L; " +
-                            "\";\n"
-                    , triggerSqlArgs);
             codeBlock.addNamed("$execSqlMethod:L(\"INSERT INTO SyncStatus(tableId, " +
                         "localChangeSeqNum, masterChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) " +
                             "VALUES($tableId:L, 1, 1, 0, 0)\");\n",
                     triggerSqlArgs);
 
             if(sqlProductName.equals(PRODUCT_NAME_SQLITE)) {
-                codeBlock.addNamed("$execSqlMethod:L(_createUpdateTriggerStmt_$tableName:L " +
-                                " + \" BEGIN \" + _triggerSql_$tableNameLower:L + \" END\");\n",
-                        triggerSqlArgs);
-                codeBlock.addNamed("$execSqlMethod:L(_createInsertTriggerStmt_$tableName:L " +
-                                " + \" BEGIN \" + _triggerSql_$tableNameLower:L + \" END\");\n",
-                        triggerSqlArgs);
+                codeBlock.addNamed("$execSqlMethod:L(\"CREATE TRIGGER update_csn_$tableNameLower:L " +
+                            "AFTER update ON $tableName:L FOR EACH ROW WHEN " +
+                            "(NEW.$concatTableCsnCol:L = 0 " +
+                                "OR OLD.$concatTableCsnCol:L = NEW.$concatTableCsnCol:L) " +
+                            "BEGIN " +
+                                "UPDATE $tableName:L SET $concatTableCsnCol:L = " +
+                                    "(SELECT $concatSyncStatusColName:L FROM SyncStatus WHERE tableId = $tableId:L) " +
+                                    "WHERE $pkName:L = NEW.$pkName:L; " +
+                                "UPDATE SyncStatus SET " +
+                                    "$concatSyncStatusColName:L = $concatSyncStatusColName:L + 1;" +
+                            "END\");\n", triggerSqlArgs)
+                        .addNamed("$execSqlMethod:L(\"CREATE TRIGGER insert_csn_$tableNameLower:L " +
+                            "AFTER insert ON $tableName:L FOR EACH ROW WHEN " +
+                            "(NEW.$concatTableCsnCol:L = 0) " +
+                            "BEGIN " +
+                                "UPDATE $tableName:L SET $concatTableCsnCol:L = " +
+                                    "(SELECT $concatSyncStatusColName:L FROM SyncStatus WHERE tableId = $tableId:L) " +
+                                "WHERE $pkName:L = NEW.$pkName:L;" +
+                                "UPDATE SyncStatus SET " +
+                                    "$concatSyncStatusColName:L = $concatSyncStatusColName:L + 1;" +
+                            "END\");\n", triggerSqlArgs);
+
             }else if(sqlProductName.equals(PRODUCT_NAME_POSTGRES)) {
                 codeBlock.addNamed("$execSqlMethod:L(\"CREATE OR REPLACE FUNCTION " +
-                                " increment_csn_$tableNameLower:L_fn() RETURNS trigger AS $$$$ BEGIN \"" +
-                                " + _triggerSql_$tableNameLower:L + \" RETURN null; END $$$$ " +
-                                "LANGUAGE plpgsql\");\n",
-                        triggerSqlArgs);
-                codeBlock.addNamed("$execSqlMethod:L(\"CREATE TRIGGER " +
-                        "increment_csn_$tableNameLower:L_trigger AFTER UPDATE OR INSERT ON " +
-                        "$tableName:L FOR EACH ROW WHEN (pg_trigger_depth() = 0) " +
-                        "EXECUTE PROCEDURE increment_csn_$tableNameLower:L_fn()\");\n", triggerSqlArgs);
+                            "increment_csn_$tableNameLower:L_fn() RETURNS trigger AS $$$$ " +
+                            "BEGIN " +
+                                "UPDATE $tableName:L SET $concatTableCsnCol:L = " +
+                                    "(SELECT $concatSyncStatusColName:L FROM SyncStatus WHERE tableId = $tableId:L) " +
+                                    "WHERE $pkName:L = NEW.$pkName:L; " +
+                                "UPDATE SyncStatus SET " +
+                                    "$concatSyncStatusColName:L = $concatSyncStatusColName:L + 1;  " +
+                                "RETURN null; " +
+                            "END $$$$" +
+                            "LANGUAGE plpgsql\");\n", triggerSqlArgs)
+                        .addNamed("$execSqlMethod:L(\"CREATE TRIGGER " +
+                            "increment_csn_$tableNameLower:L_trigger AFTER UPDATE OR INSERT ON " +
+                            "$tableName:L FOR EACH ROW WHEN (pg_trigger_depth() = 0) " +
+                            "EXECUTE PROCEDURE increment_csn_$tableNameLower:L_fn()\");\n", triggerSqlArgs);
             }
-
 
             isFirst = false;
         }
@@ -1578,6 +1788,42 @@ public abstract class AbstractDbProcessor {
         if(!isFirst)
             codeBlock.endControlFlow();//end the if statement only if there was one
 
+    }
+
+    /**
+     * Modify the given SQL UPDATE statement to set the lastModifiedBy field.
+     * e.g. this will change
+     *
+     * UPDATE EntityTableName SET title = :title where x &gt; :numParam
+     *
+     * to:
+     *
+     * UPDATE EntityTableName SET lastModifiedBy = :_lastModifiedBy, title = :title where x &gt; :numParam
+     *
+     *
+     * @param sql SQL string to modify
+     * @param methodEl the DAO method that this SQL is being used for
+     * @param daoType DAO TypeElement
+     * @param dbType Database TypeElement (used to resolve the tablename to an entity class)
+     * @return
+     */
+    protected String addSetLastModifiedByToUpdateSql(String sql, ExecutableElement methodEl,
+                                                     TypeElement daoType, TypeElement dbType) {
+        DaoMethodInfo methodInfo = new DaoMethodInfo(methodEl, daoType, processingEnv);
+        TypeElement entityTypeEl = methodInfo.getUpdateQueryEntityTypeElement(dbType);
+
+        Element lastChangedByFieldEl = DbProcessorUtils.findElementWithAnnotation(
+                entityTypeEl, UmSyncLastChangedBy.class, processingEnv);
+
+        Pattern pattern = Pattern.compile("\\sSET\\s", Pattern.CASE_INSENSITIVE);
+        Matcher matcher = pattern.matcher(sql);
+        if(!matcher.find())
+            return sql;
+
+        sql = sql.substring(0, matcher.end()) + " " + lastChangedByFieldEl.getSimpleName() +
+                " = (SELECT deviceBits FROM SyncDeviceBits LIMIT 1), " + sql.substring(matcher.end());
+
+        return sql;
     }
 
 }

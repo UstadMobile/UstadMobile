@@ -5,12 +5,15 @@ import android.arch.paging.DataSource;
 import android.arch.paging.LivePagedListBuilder;
 import android.arch.paging.PagedList;
 import android.os.Bundle;
+import android.support.v4.text.TextUtilsCompat;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -24,6 +27,7 @@ import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord;
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecordWithPerson;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
+import java.util.Locale;
 import java.util.Objects;
 
 import ru.dimorinny.floatingtextbutton.FloatingTextButton;
@@ -49,6 +53,8 @@ public class ClazzLogDetailActivity extends UstadBaseActivity
     public long clazzUid;
     public long logDate;
     private TextView dateHeading;
+    private ImageView backDate, forwardDate;
+    private Button markAllPresent, markAllAbsent;
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -94,11 +100,20 @@ public class ClazzLogDetailActivity extends UstadBaseActivity
             logDate = getIntent().getLongExtra(ARG_LOGDATE, -1L);
         }
 
-
         mRecyclerView = findViewById(R.id.class_log_detail_container_recyclerview);
         RecyclerView.LayoutManager mRecyclerLayoutManager = new LinearLayoutManager(getApplicationContext());
         mRecyclerView.setLayoutManager(mRecyclerLayoutManager);
 
+        backDate = findViewById(R.id.activity_class_log_detail_date_go_back);
+        forwardDate = findViewById(R.id.activity_class_log_detail_date_go_forward);
+
+        markAllPresent = findViewById(R.id.activity_class_log_detail_mark_all_present_text);
+        markAllAbsent = findViewById(R.id.activity_class_log_detail_mark_all_absent_text);
+
+        FloatingTextButton fab = findViewById(R.id.class_log_detail__done_fab);
+
+        //Date heading
+        dateHeading = findViewById(R.id.activity_class_log_detail_date_heading);
 
         mPresenter = new ClazzLogDetailPresenter(this,
                 UMAndroidUtil.bundleToHashtable(getIntent().getExtras()), this);
@@ -111,49 +126,47 @@ public class ClazzLogDetailActivity extends UstadBaseActivity
             }
         }
 
+        //Change icon based on rtl in current language (eg: arabic)
+        int isLeftToRight = TextUtilsCompat.getLayoutDirectionFromLocale(Locale.getDefault());
+        switch (isLeftToRight){
+            case ViewCompat.LAYOUT_DIRECTION_RTL:
+                backDate.setImageDrawable(getDrawable(R.drawable.ic_chevron_right_black_24dp));
+                forwardDate.setImageDrawable(getDrawable(R.drawable.ic_chevron_left_black_24dp));
+        }
+
         //FAB
-        FloatingTextButton fab = findViewById(R.id.class_log_detail__done_fab);
         fab.setOnClickListener(v -> mPresenter.handleClickDone());
 
         //Mark all present
-        findViewById(R.id.activity_class_log_detail_mark_all_present_text)
-            .setOnClickListener((view) ->
+        markAllPresent.setOnClickListener((view) ->
                     mPresenter.handleMarkAll(ClazzLogAttendanceRecord.STATUS_ATTENDED));
 
         //Mark all absent
-        findViewById(R.id.activity_class_log_detail_mark_all_absent_text)
-            .setOnClickListener((view) ->
+        markAllAbsent.setOnClickListener((view) ->
                     mPresenter.handleMarkAll(ClazzLogAttendanceRecord.STATUS_ABSENT));
 
-        //Date heading
-        dateHeading = findViewById(R.id.activity_class_log_detail_date_heading);
+        backDate.setOnClickListener(v -> mPresenter.handleClickGoBackDate());
 
-        ImageButton goOneDayBackImageView = findViewById(R.id.activity_class_log_detail_date_go_back);
-        goOneDayBackImageView.setOnClickListener(v -> mPresenter.handleClickGoBackDate());
-
-        ImageButton goOneDayForwardImageView = findViewById(R.id.activity_class_log_detail_date_go_forward);
-        goOneDayForwardImageView.setOnClickListener(v -> mPresenter.handleClickGoForwardDate());
+        forwardDate.setOnClickListener(v -> mPresenter.handleClickGoForwardDate());
 
     }
 
-
-
     // Diff callback.
     public static final DiffUtil.ItemCallback<ClazzLogAttendanceRecordWithPerson> DIFF_CALLBACK =
-            new DiffUtil.ItemCallback<ClazzLogAttendanceRecordWithPerson>() {
-                @Override
-                public boolean areItemsTheSame(ClazzLogAttendanceRecordWithPerson oldItem,
-                                               ClazzLogAttendanceRecordWithPerson newItem) {
-                    return oldItem.getClazzLogAttendanceRecordUid() ==
-                            newItem.getClazzLogAttendanceRecordUid();
-                }
+        new DiffUtil.ItemCallback<ClazzLogAttendanceRecordWithPerson>() {
+            @Override
+            public boolean areItemsTheSame(ClazzLogAttendanceRecordWithPerson oldItem,
+                                           ClazzLogAttendanceRecordWithPerson newItem) {
+                return oldItem.getClazzLogAttendanceRecordUid() ==
+                        newItem.getClazzLogAttendanceRecordUid();
+            }
 
-                @Override
-                public boolean areContentsTheSame(ClazzLogAttendanceRecordWithPerson oldItem,
-                                                  ClazzLogAttendanceRecordWithPerson newItem) {
-                    return oldItem.equals(newItem);
-                }
-            };
+            @Override
+            public boolean areContentsTheSame(ClazzLogAttendanceRecordWithPerson oldItem,
+                                              ClazzLogAttendanceRecordWithPerson newItem) {
+                return oldItem.equals(newItem);
+            }
+        };
 
     @Override
     public void setClazzLogAttendanceRecordProvider(
@@ -193,6 +206,17 @@ public class ClazzLogDetailActivity extends UstadBaseActivity
         //Since its called from the presenter, need to run on ui thread.
 
         runOnUiThread(() -> dateHeading.setText(dateString));
+    }
+
+    @Override
+    public void showMarkAllButtons(boolean show) {
+        if(show) {
+            markAllAbsent.setVisibility(View.VISIBLE);
+            markAllPresent.setVisibility(View.VISIBLE);
+        }else{
+            markAllAbsent.setVisibility(View.INVISIBLE);
+            markAllPresent.setVisibility(View.INVISIBLE);
+        }
     }
 
 

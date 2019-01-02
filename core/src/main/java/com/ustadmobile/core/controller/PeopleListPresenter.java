@@ -3,6 +3,8 @@ package com.ustadmobile.core.controller;
 import java.util.Hashtable;
 import java.util.List;
 
+import com.ustadmobile.core.db.UmLiveData;
+import com.ustadmobile.core.db.dao.ClazzDao;
 import com.ustadmobile.core.db.dao.PersonCustomFieldDao;
 import com.ustadmobile.core.db.dao.PersonCustomFieldValueDao;
 import com.ustadmobile.core.db.dao.PersonDao;
@@ -19,6 +21,7 @@ import com.ustadmobile.lib.db.entities.Person;
 import com.ustadmobile.lib.db.entities.PersonCustomFieldValue;
 import com.ustadmobile.lib.db.entities.PersonField;
 import com.ustadmobile.lib.db.entities.PersonWithEnrollment;
+import com.ustadmobile.lib.db.entities.UmAccount;
 
 import static com.ustadmobile.core.view.ClazzDetailEnrollStudentView.ARG_NEW_PERSON;
 import static com.ustadmobile.core.view.PersonDetailView.ARG_PERSON_UID;
@@ -36,8 +39,9 @@ public class PeopleListPresenter
     //Provider 
     private UmProvider<PersonWithEnrollment> personWithEnrollmentUmProvider;
 
-
     UmAppDatabase repository = UmAccountManager.getRepositoryForActiveAccount(context);
+
+    private Long loggedInPersonUid = 0L;
 
     public PeopleListPresenter(Object context, Hashtable arguments, PeopleListView view) {
         super(context, arguments, view);
@@ -57,6 +61,34 @@ public class PeopleListPresenter
         personWithEnrollmentUmProvider = repository.getPersonDao()
                 .findAllPeopleWithEnrollment();
         setPeopleProviderToView();
+
+        loggedInPersonUid = UmAccountManager.getActiveAccount(context).getPersonUid();
+
+        getLoggedInPerson();
+    }
+
+    /**
+     * Gets logged in person and observes it.
+     */
+    public void getLoggedInPerson(){
+        repository = UmAccountManager.getRepositoryForActiveAccount(context);
+        Long loggedInPersonUid = UmAccountManager.getActiveAccount(context).getPersonUid();
+        UmLiveData<Person> personLive = repository.getPersonDao().findByUidLive(loggedInPersonUid);
+        personLive.observe(PeopleListPresenter.this,
+                PeopleListPresenter.this::handlePersonValueChanged);
+    }
+
+    /**
+     * Called on logged in person changed.
+     *
+     * @param loggedInPerson    The person changed.
+     */
+    public void handlePersonValueChanged(Person loggedInPerson){
+        if(loggedInPerson!=null)
+            view.showFAB(loggedInPerson.isAdmin());
+    }
+
+    public void checkPermissions(){
 
     }
 
@@ -83,7 +115,7 @@ public class PeopleListPresenter
         PersonCustomFieldValueDao customFieldValueDao =
                 repository.getPersonCustomFieldValueDao();
 
-        personDao.insertAsync(newPerson, new UmCallback<Long>() {
+        personDao.createPersonAsync(newPerson, new UmCallback<Long>() {
 
             @Override
             public void onSuccess(Long result) {

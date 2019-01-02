@@ -10,6 +10,8 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -26,6 +28,7 @@ public class ClazzListRecyclerAdapter extends
     Context theContext;
     private Fragment theFragment;
     private ClazzListPresenter thePresenter;
+    private boolean recordAttendanceVisible = false;
 
     class ClazzViewHolder extends RecyclerView.ViewHolder {
 
@@ -40,6 +43,7 @@ public class ClazzListRecyclerAdapter extends
         theContext = context;
         theFragment = fragment;
         thePresenter = mPresenter;
+        recordAttendanceVisible = mPresenter.getRecordAttendanceVisibility();
     }
 
     @NonNull
@@ -75,6 +79,10 @@ public class ClazzListRecyclerAdapter extends
         }else{
             subTitle = numStudentsText;
         }
+
+        //Get lastRecordedAttendance
+        //TODO
+
         String attendancePercentageText =
                 attendancePercentage + "% " + theFragment.getText(R.string.attendance)
                         + " (" + theFragment.getText(R.string.last_recorded)
@@ -84,8 +92,21 @@ public class ClazzListRecyclerAdapter extends
         ((TextView)holder.itemView.findViewById(R.id.item_clazzlist_attendance_percentage))
                 .setText(attendancePercentageText);
         holder.itemView.setOnClickListener((view) -> thePresenter.handleClickClazz(clazz));
-        holder.itemView.findViewById(R.id.item_clazzlist_attendance_record_attendance_button)
-                .setOnClickListener((view)-> thePresenter.handleClickClazzRecordAttendance(clazz));
+
+        Button recordAttendanceButton =
+                holder.itemView.findViewById(R.id.item_clazzlist_attendance_record_attendance_button);
+        ImageButton recordAttendanceImageButton =
+                holder.itemView.findViewById(R.id.item_clazzlist_attendance_record_attendance_icon);
+        recordAttendanceButton.setOnClickListener(
+                (view)-> thePresenter.handleClickClazzRecordAttendance(clazz));
+
+        if(recordAttendanceVisible){
+            recordAttendanceImageButton.setVisibility(View.VISIBLE);
+            recordAttendanceButton.setVisibility(View.VISIBLE);
+        }else{
+            recordAttendanceImageButton.setVisibility(View.INVISIBLE);
+            recordAttendanceButton.setVisibility(View.INVISIBLE);
+        }
 
         ImageView trafficLight =
                 holder.itemView.findViewById(R.id.item_clazzlist_attendance_trafficlight);

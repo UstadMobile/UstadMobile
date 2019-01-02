@@ -6,6 +6,7 @@ import com.ustadmobile.core.db.dao.ClazzDao;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
+import com.ustadmobile.core.impl.UmCallbackWithDefaultValue;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.ClassDetailView;
 import com.ustadmobile.core.view.ClassLogDetailView;
@@ -14,6 +15,8 @@ import com.ustadmobile.core.view.ClazzListView;
 import com.ustadmobile.lib.database.annotation.UmRestAccessible;
 import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.ClazzWithNumStudents;
+import com.ustadmobile.lib.db.entities.EntityRole;
+import com.ustadmobile.lib.db.entities.Role;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -40,6 +43,20 @@ public class ClazzListPresenter extends UstadBaseController<ClazzListView> {
     private Hashtable<Long, Integer> idToOrderInteger;
 
     UmAppDatabase repository = UmAccountManager.getRepositoryForActiveAccount(context);
+
+    ClazzDao clazzDao = repository.getClazzDao();
+
+    Long loggedInPersonUid = 0L;
+
+    private Boolean recordAttendanceVisibility = false;
+
+    public Boolean getRecordAttendanceVisibility() {
+        return recordAttendanceVisibility;
+    }
+
+    public void setRecordAttendanceVisibility(Boolean recordAttendanceVisibility) {
+        this.recordAttendanceVisibility = recordAttendanceVisibility;
+    }
 
     /**
      * Common method to convert Array List to String Array
@@ -68,20 +85,38 @@ public class ClazzListPresenter extends UstadBaseController<ClazzListView> {
         super.onCreate(savedState);
 
         //clazzListProvider = repository.getClazzDao().findAllActiveClazzes();
-        Long personUid = UmAccountManager.getActiveAccount(context).getPersonUid();
+        loggedInPersonUid = UmAccountManager.getActiveAccount(context).getPersonUid();
 
-        if(personUid != null){
+        if(loggedInPersonUid != null){
 
-            clazzListProvider =
-                    repository.getClazzDao().findAllClazzesByPersonUid(
-                            UmAccountManager.getActiveAccount(context).getPersonUid());
+            clazzListProvider = clazzDao.findAllClazzesByPersonUid(loggedInPersonUid);
             updateProviderToView();
 
             idToOrderInteger = new Hashtable<>();
 
             updateSortSpinnerPreset();
-        }
 
+            //Check permissions
+            checkPermissions();
+        }
+    }
+
+    public void checkPermissions() {
+        clazzDao.personHasPermission(loggedInPersonUid, Role.PERMISSION_CLAZZ_INSERT,
+            new UmCallbackWithDefaultValue<>(false, new UmCallback<Boolean>() {
+                @Override
+                public void onSuccess(Boolean result) {
+                    view.showAddClassButton(result);
+                    view.showAllClazzSettingsButton(true);
+                    setRecordAttendanceVisibility(true);
+                }
+
+                @Override
+                public void onFailure(Throwable exception) {
+
+                }
+            })
+        );
     }
 
     private void updateProviderToView(){

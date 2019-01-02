@@ -5,19 +5,24 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:id="@+id/item_studentlist_student_cl"
+    android:scrollHorizontally="false"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
 
     <TextView
         android:id="@+id/item_studentlist_student_simple_student_title"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="14dp"
+        android:layout_marginTop="8dp"
         android:text="TextView"
         android:textAppearance="@android:style/TextAppearance.Material.Headline"
         android:textColor="@color/text_primary"
         android:textSize="16sp"
+        android:inputType="textMultiLine|textNoSuggestions"
+        android:singleLine="false"
+        android:maxLines="2"
+        app:layout_constraintEnd_toStartOf="@+id/item_studentlist_student_simple_student_checkbox"
         app:layout_constraintStart_toEndOf="@+id/item_studentlist_student_simple_student_image"
         app:layout_constraintTop_toTopOf="parent" />
 

@@ -5,11 +5,13 @@ import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.db.dao.ClazzDao;
 import com.ustadmobile.core.db.dao.ClazzMemberDao;
+import com.ustadmobile.core.db.dao.PersonCustomFieldDao;
 import com.ustadmobile.core.db.dao.PersonCustomFieldValueDao;
 import com.ustadmobile.core.db.dao.PersonDao;
 import com.ustadmobile.core.db.dao.PersonDetailPresenterFieldDao;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
+import com.ustadmobile.core.impl.UmCallbackWithDefaultValue;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.core.view.PersonDetailEnrollClazzView;
@@ -18,17 +20,22 @@ import com.ustadmobile.core.view.PersonDetailViewField;
 import com.ustadmobile.core.view.PersonEditView;
 import com.ustadmobile.lib.db.entities.ClazzWithNumStudents;
 import com.ustadmobile.lib.db.entities.Person;
+import com.ustadmobile.lib.db.entities.PersonCustomFieldValue;
 import com.ustadmobile.lib.db.entities.PersonCustomFieldWithPersonCustomFieldValue;
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField;
+import com.ustadmobile.lib.db.entities.PersonField;
+import com.ustadmobile.lib.db.entities.Role;
 
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import static com.ustadmobile.core.view.PersonDetailView.ARG_PERSON_UID;
-import static com.ustadmobile.core.view.PersonDetailViewField.FIELD_TYPE_HEADER;
-import static com.ustadmobile.core.view.PersonDetailViewField.FIELD_TYPE_TEXT;
+import static com.ustadmobile.lib.db.entities.PersonDetailPresenterField.CUSTOM_FIELD_MIN_UID;
+import static com.ustadmobile.lib.db.entities.PersonField.FIELD_TYPE_HEADER;
+import static com.ustadmobile.lib.db.entities.PersonField.FIELD_TYPE_TEXT;
 import static com.ustadmobile.lib.db.entities.PersonDetailPresenterField.PERSON_FIELD_UID_ADDRESS;
 import static com.ustadmobile.lib.db.entities.PersonDetailPresenterField.PERSON_FIELD_UID_ATTENDANCE;
 import static com.ustadmobile.lib.db.entities.PersonDetailPresenterField.PERSON_FIELD_UID_BIRTHDAY;
@@ -65,6 +72,8 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
 
     private String oneParentNumber = "";
 
+    private long loggedInPersonUid = 0L;
+
     private UmProvider<ClazzWithNumStudents> assignedClazzes;
 
     UmAppDatabase repository = UmAccountManager.getRepositoryForActiveAccount(context);
@@ -80,6 +89,8 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
         super(context, arguments, view);
 
         personUid = Long.parseLong(arguments.get(ARG_PERSON_UID).toString());
+
+        loggedInPersonUid = UmAccountManager.getActiveAccount(context).getPersonUid();
     }
 
     /**
@@ -98,6 +109,8 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
                 repository.getPersonDetailPresenterFieldDao();
         ClazzMemberDao clazzMemberDao =
                 repository.getClazzMemberDao();
+        PersonCustomFieldDao personCustomFieldDao =
+                repository.getPersonCustomFieldDao();
 
         personDao.findByUidAsync(personUid, new UmCallback<Person>() {
             @Override
@@ -130,33 +143,68 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
             public void onSuccess(List<PersonDetailPresenterField> fields) {
                 presenterFields = fields;
 
-                //Get all the custom fields and their values (if applicable)
-                personCustomFieldValueDao.findByPersonUidAsync2(personUid,
-                        new UmCallback<List<PersonCustomFieldWithPersonCustomFieldValue>>() {
+                personCustomFieldDao.findAllCustomFields(CUSTOM_FIELD_MIN_UID,
+                        new UmCallback<List<PersonField>>() {
                     @Override
-                    public void onSuccess(List<PersonCustomFieldWithPersonCustomFieldValue> result) {
-                        //Store the values and fields in this Map
+                    public void onSuccess(List<PersonField> customFields) {
+
+                        //Create a list of every custom fields supposed to be and fill them with
+                        //blank values that will be used to display empty fields. If those fields
+                        //exists, then they will get replaced in the next Dao call.
                         customFieldWithFieldValueMap = new HashMap<>();
-                        for( PersonCustomFieldWithPersonCustomFieldValue fieldWithFieldValue: result){
-                            customFieldWithFieldValueMap.put(
-                                    fieldWithFieldValue.getPersonCustomFieldUid(), fieldWithFieldValue);
+                        for(PersonField customField:customFields){
+
+                            //the blank custom field value.
+                            PersonCustomFieldValue blankCustomValue = new PersonCustomFieldValue();
+                            blankCustomValue.setFieldValue("");
+
+                            //Create a (custom field + custom value) map object
+                            PersonCustomFieldWithPersonCustomFieldValue blankCustomMap =
+                                    new PersonCustomFieldWithPersonCustomFieldValue();
+                            blankCustomMap.setFieldName(customField.getFieldName());
+                            blankCustomMap.setLabelMessageId(customField.getLabelMessageId());
+                            blankCustomMap.setFieldIcon(customField.getFieldIcon());
+                            blankCustomMap.setCustomFieldValue(blankCustomValue);
+
+                            //Set the custom field and the field+value object to the map.
+                            customFieldWithFieldValueMap.put(customField.getPersonCustomFieldUid(),
+                                    blankCustomMap);
                         }
 
-                        //Get the attendance average for this person.
-                        clazzMemberDao.getAverageAttendancePercentageByPersonUidAsync(personUid,
-                                new UmCallback<Float>() {
+                        //Get all the custom fields and their values (if applicable)
+                        personCustomFieldValueDao.findByPersonUidAsync2(personUid,
+                          new UmCallback<List<PersonCustomFieldWithPersonCustomFieldValue>>() {
                             @Override
-                            public void onSuccess(Float result) {
-                                if (result == null){
-                                    attendanceAverage = "N/A";
-                                }else {
-                                    attendanceAverage = result * 100 + "%";
+                            public void onSuccess(List<PersonCustomFieldWithPersonCustomFieldValue> result) {
+                                //Store the values and fields in this Map
+
+                                for( PersonCustomFieldWithPersonCustomFieldValue fieldWithFieldValue: result){
+                                    customFieldWithFieldValueMap.put(
+                                            fieldWithFieldValue.getPersonCustomFieldUid(), fieldWithFieldValue);
                                 }
 
-                                //Get person live data and observe
-                                mPerson = personDao.findByUidLive(personUid);
-                                mPerson.observe(PersonDetailPresenter.this,
-                                        PersonDetailPresenter.this::handlePersonDataChanged);
+                                //Get the attendance average for this person.
+                                clazzMemberDao.getAverageAttendancePercentageByPersonUidAsync(personUid,
+                                  new UmCallback<Float>() {
+                                    @Override
+                                    public void onSuccess(Float result) {
+                                        if (result == null){
+                                            attendanceAverage = "N/A";
+                                        }else {
+                                            attendanceAverage = result * 100 + "%";
+                                        }
+
+                                        //Get person live data and observe
+                                        mPerson = personDao.findByUidLive(personUid);
+                                        mPerson.observe(PersonDetailPresenter.this,
+                                                PersonDetailPresenter.this::handlePersonDataChanged);
+                                    }
+
+                                    @Override
+                                    public void onFailure(Throwable exception) {
+                                        exception.printStackTrace();
+                                    }
+                                });
                             }
 
                             @Override
@@ -178,6 +226,24 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
                 exception.printStackTrace();
             }
         });
+
+        checkPermissions();
+    }
+
+    public void checkPermissions(){
+        ClazzDao clazzDao = repository.getClazzDao();
+        clazzDao.personHasPermission(loggedInPersonUid, Role.PERMISSION_PERSON_UPDATE,
+            new UmCallbackWithDefaultValue<>(false, new UmCallback<Boolean>() {
+                @Override
+                public void onSuccess(Boolean result) {
+                    view.showFAB(result);
+                }
+
+                @Override
+                public void onFailure(Throwable exception) {
+
+                }
+            }));
     }
 
     /**
@@ -204,7 +270,14 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
      */
     private void handlePersonDataChanged(Person person) {
 
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        Locale currentLocale = new Locale(impl.getLocale(context));
+
         view.clearAllFields();
+
+        if(person == null){
+            return;
+        }
 
         for(PersonDetailPresenterField field : presenterFields) {
 
@@ -217,7 +290,10 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
             }
 
             if (field.getFieldUid() == PERSON_FIELD_UID_FULL_NAME){
+                if(person.getFirstNames() != null && person.getLastName() != null)
                 thisValue = person.getFirstNames() + " " + person.getLastName();
+                else
+                    thisValue = "";
                 view.setField(field.getFieldIndex(), new PersonDetailViewField(FIELD_TYPE_TEXT,
                         field.getLabelMessageId(),field.getFieldIcon()), thisValue);
 
@@ -244,8 +320,11 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
                         field.getLabelMessageId(),field.getFieldIcon()), thisValue);
 
             } else if (field.getFieldUid() == PERSON_FIELD_UID_FATHER_NAME_AND_PHONE_NUMBER) {
-
-                thisValue = person.getFatherName() + " (" + person.getFatherNumber() +")";
+                if(person.getFatherNumber() == null){
+                    thisValue = person.getFatherName();
+                }else {
+                    thisValue = person.getFatherName() + " (" + person.getFatherNumber() + ")";
+                }
                 //Also tell the view that we need to add call and text buttons for the number
 
                 view.setField(field.getFieldIndex(), new PersonDetailViewField(FIELD_TYPE_TEXT,
@@ -253,7 +332,11 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
                         thisValue);
 
             } else if(field.getFieldUid() == PERSON_FIELD_UID_MOTHER_NAME_AND_PHONE_NUMBER){
-                thisValue = person.getMotherName() + " (" + person.getMotherNum() + ")";
+                if(person.getMotherNum() == null){
+                    thisValue = person.getMotherName();
+                }else {
+                    thisValue = person.getMotherName() + " (" + person.getMotherNum() + ")";
+                }
 
                 view.setField(field.getFieldIndex(), new PersonDetailViewField(FIELD_TYPE_TEXT,
                         field.getLabelMessageId(), person.getMotherNum(), field.getFieldIcon()),
@@ -296,7 +379,8 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
                         field.getLabelMessageId(),field.getFieldIcon()), thisValue);
             }
             else if(field.getFieldUid() == PERSON_FIELD_UID_BIRTHDAY){
-                thisValue = UMCalendarUtil.getPrettyDateFromLong(person.getDateOfBirth());
+                thisValue = UMCalendarUtil.getPrettyDateFromLong(
+                        person.getDateOfBirth(), currentLocale);
                 view.setField(field.getFieldIndex(), new PersonDetailViewField(FIELD_TYPE_TEXT,
                         field.getLabelMessageId(),field.getFieldIcon()), thisValue);
             }else  {//this is actually a custom field

@@ -16,7 +16,7 @@ import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 import java.util.ArrayList;
 import java.util.List;
 
-@UmDao(readPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
+@UmDao(selectPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
 @UmRepository
 public abstract class ClazzLogAttendanceRecordDao implements
         SyncableDao<ClazzLogAttendanceRecord, ClazzLogAttendanceRecordDao> {
@@ -150,29 +150,6 @@ public abstract class ClazzLogAttendanceRecordDao implements
         }
     }
 
-
-//    @UmQuery("select " +
-//            " count(DISTINCT Person.personUid) as total," +
-//            " Person.gender," +
-//            " cast((:datetimeNow - Person.dateOfBirth) / (365.25 * 24 * 60 * 60 * 1000) as int) as age," +
-//            " CASE " +
-//            " WHEN numSessionsTbl.attendancePercentage < :lowAttendanceThreshold THEN \"LOW\"" +
-//            " WHEN numSessionsTbl.attendancePercentage < :midAttendanceThreshold THEN \"MEDIUM\" " +
-//            " ELSE \"HIGH\" " +
-//            " END thresholdGroup/*, " +
-//            " Person.firstNames*/ " +
-//            " FROM " +
-//            " (SELECT cast( " +
-//            " SUM(CASE WHEN attendanceStatus = " + ClazzLogAttendanceRecord.STATUS_ATTENDED + " THEN 1 ELSE 0 END) as float) / COUNT(*) as attendancePercentage, " +
-//            " clazzLogAttendanceRecordClazzMemberUid " +
-//            " FROM ClazzLogAttendanceRecord as numSessions GROUP BY clazzLogAttendanceRecordClazzMemberUid) numSessionsTbl " +
-//            " LEFT JOIN ClazzLogAttendanceRecord ON numSessionsTbl.clazzLogAttendanceRecordClazzMemberUid = ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzMemberUid " +
-//            " LEFT JOIN ClazzMember on ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzMemberUid = ClazzMember.clazzMemberUid" +
-//            " LEFT JOIN Person on ClazzMember.clazzMemberPersonUid = Person.personUid" +
-//            " GROUP BY Person.gender, age, thresholdGroup ")
-
-
-
     @UmQuery("select  " +
             " count(DISTINCT Person.personUid) as total, " +
             " Person.gender, " +
@@ -189,7 +166,8 @@ public abstract class ClazzLogAttendanceRecordDao implements
             "FROM  " +
             " ( " +
             "  SELECT  " +
-            "   cast( SUM(CASE WHEN attendanceStatus = " + ClazzLogAttendanceRecord.STATUS_ATTENDED + " THEN 1 ELSE 0 END) as float) / COUNT(*) as attendancePercentage, " +
+            "   cast( SUM(CASE WHEN attendanceStatus = " + ClazzLogAttendanceRecord.STATUS_ATTENDED +
+            " THEN 1 ELSE 0 END) as float) / COUNT(*) as attendancePercentage, " +
             "   ClazzLogAttendanceRecordClazzLogUid, " +
             "   clazzLogAttendanceRecordClazzMemberUid " +
             "   FROM ClazzLogAttendanceRecord as numSessions  " +
@@ -204,26 +182,32 @@ public abstract class ClazzLogAttendanceRecordDao implements
             " " +
             " " +
             " " +
-            "LEFT JOIN ClazzLog ON numSessionsTbl.ClazzLogAttendanceRecordClazzLogUid = ClazzLog.clazzLogUid " +
-            "LEFT JOIN ClazzLogAttendanceRecord ON numSessionsTbl.clazzLogAttendanceRecordClazzMemberUid = ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzMemberUid " +
-            "LEFT JOIN ClazzMember on ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzMemberUid = ClazzMember.clazzMemberUid " +
+            "LEFT JOIN ClazzLog ON " +
+            " numSessionsTbl.ClazzLogAttendanceRecordClazzLogUid = ClazzLog.clazzLogUid " +
+            "LEFT JOIN ClazzLogAttendanceRecord ON " +
+            " numSessionsTbl.clazzLogAttendanceRecordClazzMemberUid = " +
+            " ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzMemberUid " +
+            "LEFT JOIN ClazzMember on " +
+            " ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzMemberUid = " +
+            " ClazzMember.clazzMemberUid " +
             "LEFT JOIN Person on ClazzMember.clazzMemberPersonUid = Person.personUid " +
-            " " +
             "GROUP BY Person.gender, age, thresholdGroup " +
             " ORDER BY age, thresholdGroup ")
     public abstract void getAttendanceGroupedByThresholds(long datetimeNow, long fromTime,
-                                                          long toTime, float lowAttendanceThreshold,
-                                                          float midAttendanceThreshold,
-                                                          UmCallback<List<AttendanceResultGroupedByAgeAndThreshold>> resultList);
+                          long toTime, float lowAttendanceThreshold,
+                          float midAttendanceThreshold,
+                          UmCallback<List<AttendanceResultGroupedByAgeAndThreshold>> resultList);
 
     @UmQuery("SELECT ClazzLogAttendanceRecord.* , Person.* " +
             " FROM ClazzLogAttendanceRecord " +
             " LEFT JOIN ClazzMember " +
-            " on ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzMemberUid = ClazzMember.clazzMemberUid " +
+            " on ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzMemberUid = " +
+            " ClazzMember.clazzMemberUid " +
             " LEFT JOIN Person on ClazzMember.clazzMemberPersonUid = Person.personUid " +
             " WHERE ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid = :clazzLogUid " +
             "AND ClazzMember.role = 1")
-    public abstract UmProvider<ClazzLogAttendanceRecordWithPerson> findAttendanceRecordsWithPersonByClassLogId (long clazzLogUid);
+    public abstract UmProvider<ClazzLogAttendanceRecordWithPerson>
+                                    findAttendanceRecordsWithPersonByClassLogId (long clazzLogUid);
 
     @UmQuery("SELECT ClazzMember.clazzMemberUid FROM ClazzMember WHERE " +
             " ClazzMember.clazzMemberClazzUid = :clazzId " +
@@ -327,13 +311,15 @@ public abstract class ClazzLogAttendanceRecordDao implements
     }
 
     @UmQuery("UPDATE ClazzLogAttendanceRecord SET attendanceStatus = :attendanceStatus " +
-            "WHERE clazzLogAttendanceRecordClazzLogUid = :clazzLogUid")
+            "WHERE clazzLogAttendanceRecordClazzLogUid = :clazzLogUid AND " +
+            "attendanceStatus != :attendanceStatus")
     public abstract void updateAllByClazzLogUid(long clazzLogUid, int attendanceStatus,
                                                 UmCallback<Integer> callback);
 
 
     @UmQuery("UPDATE ClazzLogAttendanceRecord SET attendanceStatus = :attendanceStatus " +
-            "WHERE clazzLogAttendanceRecordUid = :clazzLogAttendanceRecordUid")
+            "WHERE clazzLogAttendanceRecordUid = :clazzLogAttendanceRecordUid AND " +
+            " attendanceStatus != :attendanceStatus")
     public abstract void updateAttendanceStatus(long clazzLogAttendanceRecordUid,
                                                 int attendanceStatus,
                                                 UmCallback<Integer> callback);

@@ -12,7 +12,7 @@ import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
 import java.util.List;
 
-@UmDao(readPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
+@UmDao(selectPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
 @UmRepository
 public abstract class SocialNominationQuestionDao implements
         SyncableDao<SocialNominationQuestion, SocialNominationQuestionDao> {
@@ -54,6 +54,10 @@ public abstract class SocialNominationQuestionDao implements
 
     @UmQuery("SELECT COUNT(*) FROM SocialNominationQuestion")
     public abstract int findTotalNumberOfQuestions();
+
+    @UmQuery("SELECT * FROM SocialNominationQuestion WHERE questionText = :question")
+    public abstract void findByQuestionStringAsync(String question,
+                                           UmCallback<List<SocialNominationQuestion>> resultList);
 
 
 

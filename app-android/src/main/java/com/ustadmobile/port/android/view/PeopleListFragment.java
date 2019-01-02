@@ -29,6 +29,7 @@ public class PeopleListFragment extends UstadBaseFragment implements PeopleListV
     View rootContainer;
     private RecyclerView mRecyclerView;
     private PeopleListPresenter mPresenter;
+    private FloatingTextButton fab;
 
     /**
      * Generates a new Fragment for a page fragment
@@ -68,12 +69,14 @@ public class PeopleListFragment extends UstadBaseFragment implements PeopleListV
         RecyclerView.LayoutManager mRecyclerLayoutManager = new LinearLayoutManager(getContext());
         mRecyclerView.setLayoutManager(mRecyclerLayoutManager);
 
+        fab = rootContainer.findViewById(R.id.fragment_people_list_fab);
+
         //set up Presenter
         mPresenter = new PeopleListPresenter(this,
                 UMAndroidUtil.bundleToHashtable(getArguments()), this);
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
 
-        FloatingTextButton fab = rootContainer.findViewById(R.id.fragment_people_list_fab);
+
         fab.setOnClickListener(v -> mPresenter.handleClickPrimaryActionButton());
 
         return rootContainer;
@@ -83,19 +86,19 @@ public class PeopleListFragment extends UstadBaseFragment implements PeopleListV
      * The DIFF CALLBACK
      */
     public static final DiffUtil.ItemCallback<PersonWithEnrollment> DIFF_CALLBACK2 =
-            new DiffUtil.ItemCallback<PersonWithEnrollment>() {
-                @Override
-                public boolean areItemsTheSame(PersonWithEnrollment oldItem,
-                                               PersonWithEnrollment newItem) {
-                    return oldItem.getPersonUid() == newItem.getPersonUid();
-                }
+        new DiffUtil.ItemCallback<PersonWithEnrollment>() {
+            @Override
+            public boolean areItemsTheSame(PersonWithEnrollment oldItem,
+                                           PersonWithEnrollment newItem) {
+                return oldItem.getPersonUid() == newItem.getPersonUid();
+            }
 
-                @Override
-                public boolean areContentsTheSame(PersonWithEnrollment oldItem,
-                                                  PersonWithEnrollment newItem) {
-                    return oldItem.equals(newItem);
-                }
-            };
+            @Override
+            public boolean areContentsTheSame(PersonWithEnrollment oldItem,
+                                              PersonWithEnrollment newItem) {
+                return oldItem.equals(newItem);
+            }
+        };
 
     @Override
     public void setPeopleListProvider(UmProvider<PersonWithEnrollment> listProvider) {
@@ -111,6 +114,15 @@ public class PeopleListFragment extends UstadBaseFragment implements PeopleListV
         data.observe(this, recyclerAdapter::submitList);
 
         mRecyclerView.setAdapter(recyclerAdapter);
+
+    }
+
+    @Override
+    public void showFAB(boolean show) {
+        runOnUiThread(() -> {
+            fab.setVisibility(show?View.VISIBLE:View.INVISIBLE);
+            fab.setEnabled(show);
+        });
 
     }
 }

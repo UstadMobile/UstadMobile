@@ -23,6 +23,8 @@ import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.lib.db.entities.ClazzActivity;
 import com.ustadmobile.lib.db.entities.ClazzActivityChange;
 
+import java.util.Locale;
+
 /**
  * The ClazzActivityList's recycler adapter.
  */
@@ -87,10 +89,14 @@ public class ClazzActivityListRecyclerAdapter extends
         boolean wasItGood = clazzActivity.isClazzActivityGoodFeedback();
 
 
+        Locale currentLocale = theFragment.getResources().getConfiguration().locale;
+
         String prettyDate =
-                UMCalendarUtil.getPrettyDateFromLong(clazzActivity.getClazzActivityLogDate());
+                UMCalendarUtil.getPrettyDateFromLong(
+                        clazzActivity.getClazzActivityLogDate(), currentLocale);
         String prettyShortDay =
-                UMCalendarUtil.getSimpleDayFromLongDate(clazzActivity.getClazzActivityLogDate());
+                UMCalendarUtil.getSimpleDayFromLongDate(
+                        clazzActivity.getClazzActivityLogDate(), currentLocale);
 
         TextView statusTextView = holder.itemView
                 .findViewById(R.id.item_clazzlog_log_status_text);
@@ -109,8 +115,6 @@ public class ClazzActivityListRecyclerAdapter extends
         String desc = verb + clazzActivity.getClazzActivityQuantity()
                 + " times";
         statusTextView.setText(desc);
-
-
 
         ((TextView)holder.itemView
                 .findViewById(R.id.item_clazzlog_log_date))

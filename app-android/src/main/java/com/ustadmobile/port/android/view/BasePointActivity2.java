@@ -1,6 +1,8 @@
 package com.ustadmobile.port.android.view;
 
 import android.content.Intent;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -44,6 +46,9 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
     private AlertDialog shareAppDialog;
 
     private BasePointActivity2Presenter mPresenter;
+
+    private Menu mOptionsMenu;
+
     /**
      * ViewPager set up in its own method for clarity.
      */
@@ -77,22 +82,19 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
         toolbar.setTitle("Ustad Mobile");
         setSupportActionBar(toolbar);
 
-
         mPresenter = new BasePointActivity2Presenter(this,
                 UMAndroidUtil.bundleToHashtable(getIntent().getExtras()), this);
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
-
 
         //Get the bottom navigation component.
         AHBottomNavigation bottomNavigation = findViewById(R.id.bottom_navigation);
 
         //Style
-        bottomNavigation.setDefaultBackgroundColor(fetchColor(R.color.default_background_color_2));
-        bottomNavigation.setAccentColor(fetchColor(R.color.bottom_nav_yourAccentColor));
+        bottomNavigation.setDefaultBackgroundColor(fetchColor(R.color.primary));
+        bottomNavigation.setAccentColor(fetchColor(R.color.just_black));
         bottomNavigation.setInactiveColor(fetchColor(R.color.bottom_nav_yourInactiveColor));
         bottomNavigation.setBehaviorTranslationEnabled(false);
         bottomNavigation.setUseElevation(true, 2L);
-
 
         //Create the items to be added
         AHBottomNavigationItem feed_item =
@@ -143,9 +145,9 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
             return true;
         });
 
-
-
     }
+
+
 
     @Override
     public void shareAppSetupFile(String filePath) {
@@ -165,6 +167,30 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
         dismissShareAppDialog();
     }
 
+    @Override
+    public void showBulkUploadForAdmin(boolean show) {
+        MenuItem bulkUploadMenuItem = mOptionsMenu.findItem(R.id.menu_basepoint_bulk_upload_master);
+        if(bulkUploadMenuItem != null){
+            bulkUploadMenuItem.setVisible(show);
+        }
+    }
+
+    @Override
+    public void showSettings(boolean show) {
+
+        /* TODO: Sprint 5 */
+//        MenuItem allClazzSettingsMenuItem = mOptionsMenu.findItem(R.id.menu_settings_gear);
+//        if(allClazzSettingsMenuItem != null){
+//            allClazzSettingsMenuItem.setVisible(show);
+//        }
+    }
+
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+    }
+
     /**
      * Handles Action Bar menu button click.
      * @param item  The MenuItem clicked.
@@ -177,14 +203,23 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
         //If this activity started from other activity
         if (i == R.id.menu_basepoint_share) {
             mPresenter.handleClickShareIcon();
-            //shareAppSetupFile();
             return super.onOptionsItemSelected(item);
         } else if (i == R.id.menu_basepoint_bulk_upload_master){
             mPresenter.handleClickBulkUpload();
             return super.onOptionsItemSelected(item);
-        }else {
+        }
+        else if(i==R.id.menu_basepoint_logout){
+            finishAffinity();
+            mPresenter.handleLogOut();
             return super.onOptionsItemSelected(item);
         }
+//        else if ( i == R.id.menu_settings_gear){
+//            //TODO: Sprint 5 : Settings
+//        }
+        else {
+            return super.onOptionsItemSelected(item);
+        }
+
     }
 
     /**
@@ -195,11 +230,35 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_share, menu);
+
+        //tint
+        MenuItem shareMenuItem = menu.findItem(R.id.menu_basepoint_share);
+        MenuItem bulkUploadMenuItem = menu.findItem(R.id.menu_basepoint_bulk_upload_master);
+        //MenuItem settingsMenuItem = menu.findItem(R.id.menu_settings_gear);
+        MenuItem logoutMenuItem = menu.findItem(R.id.menu_basepoint_logout);
+
+        Drawable shareMenuIcon = getResources().getDrawable(R.drawable.ic_share_white_24dp);
+        Drawable bulkUploadMenuIcon = getResources().getDrawable(R.drawable.ic_file_upload_white_24dp);
+        Drawable settingsMenuIcon = getResources().getDrawable(R.drawable.ic_settings_white_24dp);
+        Drawable logoutMenuIcon = getResources().getDrawable(R.drawable.ic_dropout_bcd4_24dp);
+
+        shareMenuIcon.setColorFilter(getResources().getColor(R.color.icons), PorterDuff.Mode.SRC_IN);
+        bulkUploadMenuIcon.setColorFilter(getResources().getColor(R.color.icons), PorterDuff.Mode.SRC_IN);
+        settingsMenuIcon.setColorFilter(getResources().getColor(R.color.icons), PorterDuff.Mode.SRC_IN);
+        logoutMenuIcon.setColorFilter(getResources().getColor(R.color.icons), PorterDuff.Mode.SRC_IN);
+
+        shareMenuItem.setIcon(shareMenuIcon);
+        bulkUploadMenuItem.setIcon(bulkUploadMenuIcon);
+        //settingsMenuItem.setIcon(settingsMenuIcon);
+        logoutMenuItem.setIcon(logoutMenuIcon);
+
+        mOptionsMenu = menu;
+        mPresenter.getLoggedInPerson();
         return true;
     }
 
     /**
-     *  Updates the toolbar's title
+     * Updates the toolbar's title
      * @param title The string of the title to be set to the toolbar
      */
     public void updateTitle(String title){
@@ -221,11 +280,8 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
         shareAppDialog.show();
     }
 
-
-
     @Override
     public void dismissShareAppDialog() {
-
         shareAppDialog.dismiss();
         shareAppDialog=null;
     }

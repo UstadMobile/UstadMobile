@@ -15,4 +15,13 @@ public interface BasePointView2 extends UstadView {
     void dismissShareAppDialog();
 
     void shareAppSetupFile(String filePath);
+
+    /**
+     * Shows the bulk upload button if logged-in person is admin or not depending on the parameter.
+     * @param show  boolean argument. if true, the bulk master button will show up. if false it will
+     *              hide it.
+     */
+    void showBulkUploadForAdmin(boolean show);
+
+    void showSettings(boolean show);
 }

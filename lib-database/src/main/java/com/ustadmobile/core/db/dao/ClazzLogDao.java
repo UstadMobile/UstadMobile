@@ -11,7 +11,7 @@ import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
 import java.util.List;
 
-@UmDao(readPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
+@UmDao(selectPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
 @UmRepository
 public abstract class ClazzLogDao implements SyncableDao<ClazzLog, ClazzLogDao> {
 
@@ -69,8 +69,6 @@ public abstract class ClazzLogDao implements SyncableDao<ClazzLog, ClazzLogDao> 
     public abstract void updateClazzAttendanceNumbersAsync(long clazzLogUid, int numPresent,
                                                            int numAbsent, int numPartial,
                                                            UmCallback<Void> callback);
-
-   
 
     @UmQuery ("SELECT COUNT(Clazz.clazzName) as number, clazzLog.logDate as date from ClazzLog " +
             " LEFT JOIN Clazz ON ClazzLog.clazzClazzUid = Clazz.clazzUid" +

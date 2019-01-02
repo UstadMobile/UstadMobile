@@ -14,4 +14,6 @@ public interface Login2View extends UstadView{
 
     void setPassword(String password);
 
+    void setFinishAfficinityOnView();
+
 }

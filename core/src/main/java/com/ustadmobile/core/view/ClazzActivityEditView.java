@@ -87,4 +87,8 @@ public interface ClazzActivityEditView extends UstadView {
      */
     void updateDateHeading(String dateString);
 
+    void showFAB(boolean show);
+
+    void setEditable(boolean editable);
+
 }

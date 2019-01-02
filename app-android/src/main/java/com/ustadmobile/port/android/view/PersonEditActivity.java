@@ -54,16 +54,17 @@ import com.ustadmobile.port.android.util.UMAndroidUtil;
 import java.io.File;
 import java.io.IOException;
 import java.util.Calendar;
+import java.util.Locale;
 import java.util.Objects;
 
 import id.zelory.compressor.Compressor;
 
-import static com.ustadmobile.core.view.PersonDetailViewField.FIELD_TYPE_DATE;
-import static com.ustadmobile.core.view.PersonDetailViewField.FIELD_TYPE_DROPDOWN;
-import static com.ustadmobile.core.view.PersonDetailViewField.FIELD_TYPE_FIELD;
-import static com.ustadmobile.core.view.PersonDetailViewField.FIELD_TYPE_HEADER;
-import static com.ustadmobile.core.view.PersonDetailViewField.FIELD_TYPE_PHONE_NUMBER;
-import static com.ustadmobile.core.view.PersonDetailViewField.FIELD_TYPE_TEXT;
+import static com.ustadmobile.lib.db.entities.PersonField.FIELD_TYPE_DATE;
+import static com.ustadmobile.lib.db.entities.PersonField.FIELD_TYPE_DROPDOWN;
+import static com.ustadmobile.lib.db.entities.PersonField.FIELD_TYPE_FIELD;
+import static com.ustadmobile.lib.db.entities.PersonField.FIELD_TYPE_HEADER;
+import static com.ustadmobile.lib.db.entities.PersonField.FIELD_TYPE_PHONE_NUMBER;
+import static com.ustadmobile.lib.db.entities.PersonField.FIELD_TYPE_TEXT;
 
 /**
  * This activity is responsible for showing the edit page for a person. Used for editing a new
@@ -176,6 +177,7 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
                              int labelId, String iconName, boolean editMode,
                              LinearLayout thisLinearLayout, Object thisValue){
 
+        Locale currentLocale = getResources().getConfiguration().locale;
 
         //Set icon if not present (for margins to align ok)
         if(iconName == null || iconName.length() == 0) iconName = ADD_PERSON_ICON;
@@ -308,7 +310,8 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
                         myCalendar.set(Calendar.MONTH, month);
                         myCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
 
-                        et.setText(UMCalendarUtil.getPrettyDateFromLong(myCalendar.getTimeInMillis()));
+                        et.setText(UMCalendarUtil.getPrettyDateFromLong(
+                                myCalendar.getTimeInMillis(), currentLocale));
 
                     };
 

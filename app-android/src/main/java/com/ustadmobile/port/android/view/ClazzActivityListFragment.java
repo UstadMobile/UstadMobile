@@ -208,7 +208,6 @@ public class ClazzActivityListFragment extends UstadBaseFragment implements Claz
         //Separated out Chart initialisation
         setUpCharts();
 
-
         //Record attendance FAB
         fab = rootContainer.findViewById(R.id.fragment_clazz_log_record_attendance_fab);
         fab.setOnClickListener(v -> mPresenter.goToNewClazzActivityEditActivity());

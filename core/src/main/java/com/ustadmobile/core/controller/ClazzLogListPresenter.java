@@ -2,16 +2,20 @@ package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmProvider;
+import com.ustadmobile.core.db.dao.ClazzDao;
 import com.ustadmobile.core.db.dao.ClazzLogAttendanceRecordDao;
 import com.ustadmobile.core.db.dao.ClazzMemberDao;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
+import com.ustadmobile.core.impl.UmCallbackWithDefaultValue;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.core.view.ClassLogDetailView;
 import com.ustadmobile.core.view.ClassLogListView;
 import com.ustadmobile.lib.db.entities.ClazzLog;
 import com.ustadmobile.lib.db.entities.DailyAttendanceNumbers;
+import com.ustadmobile.lib.db.entities.EntityRole;
+import com.ustadmobile.lib.db.entities.Role;
 
 import java.util.Calendar;
 import java.util.Hashtable;
@@ -38,6 +42,16 @@ public class ClazzLogListPresenter extends UstadBaseController<ClassLogListView>
     private UmProvider<ClazzLog> clazzLogListProvider;
 
     UmAppDatabase repository = UmAccountManager.getRepositoryForActiveAccount(context);
+    private Long loggedInPersonUid = 0L;
+    private Boolean hasEditPermissions = false;
+
+    public Boolean getHasEditPermissions() {
+        return hasEditPermissions;
+    }
+
+    public void setHasEditPermissions(Boolean hasEditPermissions) {
+        this.hasEditPermissions = hasEditPermissions;
+    }
 
     public ClazzLogListPresenter(Object context, Hashtable arguments, ClassLogListView view) {
         super(context, arguments, view);
@@ -46,8 +60,30 @@ public class ClazzLogListPresenter extends UstadBaseController<ClassLogListView>
         if(arguments.containsKey(ARG_CLAZZ_UID)){
             currentClazzUid = (long) arguments.get(ARG_CLAZZ_UID);
         }
+
+        loggedInPersonUid = UmAccountManager.getActiveAccount(context).getPersonUid();
+
+        //Permissions
+        checkPermissions();
     }
 
+    public void checkPermissions(){
+        ClazzDao clazzDao = repository.getClazzDao();
+        clazzDao.personHasPermission(loggedInPersonUid, currentClazzUid,
+                Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_INSERT,
+                new UmCallbackWithDefaultValue<>(false, new UmCallback<Boolean>() {
+            @Override
+            public void onSuccess(Boolean result) {
+                setHasEditPermissions(result);
+                view.setFABVisibility(result);
+            }
+
+            @Override
+            public void onFailure(Throwable exception) {
+                exception.printStackTrace();
+            }
+        }));
+    }
 
     /**
      * In Order:
@@ -64,7 +100,8 @@ public class ClazzLogListPresenter extends UstadBaseController<ClassLogListView>
     public void onCreate(Hashtable savedState){
         super.onCreate(savedState);
 
-        clazzLogListProvider = repository.getClazzLogDao().findByClazzUidThatAreDone(currentClazzUid);
+        clazzLogListProvider =
+                repository.getClazzLogDao().findByClazzUidThatAreDone(currentClazzUid);
         setProviderToView();
 
         generateAttendanceBarChartDataTest();
@@ -239,7 +276,6 @@ public class ClazzLogListPresenter extends UstadBaseController<ClassLogListView>
         lineData.put(5f, 0.2f);
         lineData.put(6f, 0.4f);
         lineData.put(7f, 0.2f);
-
 
         view.updateAttendanceLineChart(lineData);
     }

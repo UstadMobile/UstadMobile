@@ -11,7 +11,7 @@ import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 import java.util.List;
 
 
-@UmDao(readPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
+@UmDao(selectPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
 @UmRepository
 public abstract class PersonCustomFieldDao
         implements SyncableDao<PersonField, PersonCustomFieldDao> {
@@ -35,4 +35,7 @@ public abstract class PersonCustomFieldDao
     @UmQuery("SELECT * FROM PersonField WHERE personCustomFieldUid > :minCustomFieldUid")
     public abstract void findAllCustomFields(int minCustomFieldUid,
                                              UmCallback<List<PersonField>> resultObject);
+
+    @UmQuery("SELECT * FROM PersonField WHERE fieldName = :name")
+    public abstract void findByFieldNameAsync(String name, UmCallback<List<PersonField>> resultList);
 }

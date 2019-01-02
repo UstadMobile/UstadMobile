@@ -2,6 +2,7 @@ package com.ustadmobile.lib.db.sync.dao;
 
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmInsert;
+import com.ustadmobile.lib.database.annotation.UmOnConflictStrategy;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.db.sync.entities.SyncDeviceBits;
 import com.ustadmobile.lib.db.sync.entities.SyncablePrimaryKey;
@@ -16,12 +17,12 @@ import java.util.Random;
 @UmDao
 public abstract class SyncablePrimaryKeyDao  {
 
-    private int deviceBits = -1;
+    private volatile int deviceBits = -1;
 
     private long deviceMask = -1L;
 
 
-    public long getAndIncrement(int tableId, int increment) {
+    public synchronized long getAndIncrement(int tableId, int increment) {
         if(deviceMask== -1) {
             deviceBits = getDeviceBits();
             deviceMask = ((long)deviceBits << 32);
@@ -48,7 +49,7 @@ public abstract class SyncablePrimaryKeyDao  {
     public abstract void updateNextSequenceNumber(int tableId, int increment);
 
 
-    public int getDeviceBits() {
+    public synchronized int getDeviceBits() {
         if(deviceBits == -1) {
             deviceBits = selectDeviceBits();
             if(deviceBits == 0) {
@@ -60,10 +61,15 @@ public abstract class SyncablePrimaryKeyDao  {
         return deviceBits;
     }
 
+    public synchronized void invalidateDeviceBits() {
+        deviceBits = -1;
+        deviceMask = -1L;
+    }
+
     @UmQuery("SELECT deviceBits FROM SyncDeviceBits WHERE id = " + SyncDeviceBits.PRIMARY_KEY)
     protected abstract int selectDeviceBits();
 
-    @UmInsert
+    @UmInsert(onConflict = UmOnConflictStrategy.REPLACE)
     public abstract void insertDeviceBits(SyncDeviceBits deviceBits);
 
 }

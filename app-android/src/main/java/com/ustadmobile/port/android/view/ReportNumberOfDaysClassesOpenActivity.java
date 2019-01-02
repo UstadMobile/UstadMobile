@@ -27,6 +27,7 @@ import com.ustadmobile.port.android.util.UMAndroidUtil;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import ru.dimorinny.floatingtextbutton.FloatingTextButton;
@@ -77,6 +78,9 @@ public class ReportNumberOfDaysClassesOpenActivity extends UstadBaseActivity
     }
 
     public void setUpChart(){
+
+        Locale currentLocale = getResources().getConfiguration().locale;
+
         toolbar.setTitle(R.string.number_of_days_classes_open);
 
         barChart = findViewById(R.id.activity_report_number_of_days_classes_open_bar_chart);
@@ -92,7 +96,7 @@ public class ReportNumberOfDaysClassesOpenActivity extends UstadBaseActivity
 
         barChart.getXAxis().setValueFormatter((value, axis) -> {
             String prettyDate = UMCalendarUtil.getPrettyDateSuperSimpleFromLong(
-                    mPresenter.barChartTimestamps.get((int) value)
+                    mPresenter.barChartTimestamps.get((int) value), currentLocale
             );
             return prettyDate;
         });
@@ -184,6 +188,8 @@ public class ReportNumberOfDaysClassesOpenActivity extends UstadBaseActivity
 
     public List<View> generateAllViewRowsForTable(LinkedHashMap<Float, Float> dataTableMaps ){
 
+        Locale currentLocale = getResources().getConfiguration().locale;
+
         List<View> addThese = new ArrayList<>();
 
 
@@ -223,7 +229,7 @@ public class ReportNumberOfDaysClassesOpenActivity extends UstadBaseActivity
         for(float everyDate: dates){
             String everyDateString =
                     UMCalendarUtil.getPrettyDateSuperSimpleFromLong(
-                            (long)everyDate * 1000);
+                            (long)everyDate * 1000, currentLocale);
 
             TableRow everyDateRow = new TableRow(getApplicationContext());
             everyDateRow.setLayoutParams(rowParams);

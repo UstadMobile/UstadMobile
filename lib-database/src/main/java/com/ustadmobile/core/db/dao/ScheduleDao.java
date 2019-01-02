@@ -10,7 +10,7 @@ import com.ustadmobile.lib.database.annotation.UmUpdate;
 import com.ustadmobile.lib.db.entities.Schedule;
 import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
-@UmDao(readPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
+@UmDao(selectPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
 @UmRepository
 public abstract class ScheduleDao implements SyncableDao<Schedule, ScheduleDao> {
 

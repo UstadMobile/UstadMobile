@@ -38,21 +38,22 @@ public class SELAnswerListFragment extends UstadBaseFragment implements SELAnswe
     //RecyclerView
     private RecyclerView mRecyclerView;
     private SELAnswerListPresenter mPresenter;
+    private FloatingTextButton fab;
 
     public static final DiffUtil.ItemCallback<Person> DIFF_CALLBACK =
-            new DiffUtil.ItemCallback<Person>() {
-                @Override
-                public boolean areItemsTheSame(Person oldItem,
-                                               Person newItem) {
-                    return oldItem == newItem;
-                }
+        new DiffUtil.ItemCallback<Person>() {
+            @Override
+            public boolean areItemsTheSame(Person oldItem,
+                                           Person newItem) {
+                return oldItem == newItem;
+            }
 
-                @Override
-                public boolean areContentsTheSame(Person oldItem,
-                                                  Person newItem) {
-                    return oldItem.equals(newItem);
-                }
-            };
+            @Override
+            public boolean areContentsTheSame(Person oldItem,
+                                              Person newItem) {
+                return oldItem.equals(newItem);
+            }
+        };
 
     /**
      * Generates a new Fragment for a page fragment
@@ -89,6 +90,12 @@ public class SELAnswerListFragment extends UstadBaseFragment implements SELAnswe
     }
 
     @Override
+    public void showFAB(boolean show) {
+        fab.setEnabled(show);
+        fab.setVisibility(show?View.VISIBLE:View.INVISIBLE);
+    }
+
+    @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
@@ -107,6 +114,8 @@ public class SELAnswerListFragment extends UstadBaseFragment implements SELAnswe
                 mRecyclerView.getContext(), LinearLayoutManager.VERTICAL);
         mRecyclerView.addItemDecoration(dividerItemDecoration);
 
+        fab = rootContainer.findViewById(R.id.fragment_sel_answer_list_record_sel_fab);
+
         // Set the presenter
         mPresenter = new SELAnswerListPresenter(this,
                 UMAndroidUtil.bundleToHashtable(getArguments()),this);
@@ -114,9 +123,6 @@ public class SELAnswerListFragment extends UstadBaseFragment implements SELAnswe
         // Call Presenter's onCreate:
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
 
-        //FAB:
-        FloatingTextButton fab =
-                rootContainer.findViewById(R.id.fragment_sel_answer_list_record_sel_fab);
         //FAB's onClickListener:
         fab.setOnClickListener(v -> mPresenter.handleClickRecordSEL());
 

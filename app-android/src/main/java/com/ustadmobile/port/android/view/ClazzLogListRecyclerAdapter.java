@@ -19,6 +19,8 @@ import com.ustadmobile.core.controller.ClazzLogListPresenter;
 import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.lib.db.entities.ClazzLog;
 
+import java.util.Locale;
+
 /**
  * The ClazzLogList's recycler adapter.
  */
@@ -66,10 +68,13 @@ public class ClazzLogListRecyclerAdapter extends
     @Override
     public void onBindViewHolder(@NonNull ClazzLogViewHolder holder, int position){
         ClazzLog clazzLog = getItem(position);
-
         assert clazzLog != null;
-        String prettyDate = UMCalendarUtil.getPrettyDateFromLong(clazzLog.getLogDate());
-        String prettyShortDay = UMCalendarUtil.getSimpleDayFromLongDate(clazzLog.getLogDate());
+
+        Locale currentLocale = theFragment.getResources().getConfiguration().locale;
+        String prettyDate =
+                UMCalendarUtil.getPrettyDateFromLong(clazzLog.getLogDate(), currentLocale);
+        String prettyShortDay =
+                UMCalendarUtil.getSimpleDayFromLongDate(clazzLog.getLogDate(), currentLocale);
 
         ImageView secondaryTextImageView =
                 holder.itemView.findViewById(R.id.item_clazzlog_log_status_text_imageview);

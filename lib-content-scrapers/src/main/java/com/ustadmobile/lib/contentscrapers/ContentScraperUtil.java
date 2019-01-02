@@ -618,7 +618,6 @@ public class ContentScraperUtil {
                 if(!changedLang.getIso_639_2_standard().equals(langObj.getIso_639_2_standard())){
                     isChanged = true;
                 }
-
             }
 
             if(isChanged){
@@ -665,7 +664,8 @@ public class ContentScraperUtil {
         ContentEntryFileStatus fileStatus = new ContentEntryFileStatus();
         fileStatus.setCefsContentEntryFileUid(contentEntryFile.getContentEntryFileUid());
         fileStatus.setFilePath(ePubFile.getAbsolutePath());
-        fileStatus.setCefsUid(contentEntryFileStatusDao.insert(fileStatus));
+        fileStatus.setCefsUid((int)contentEntryFileStatusDao.insert(fileStatus));
+
 
         return contentEntryFile;
     }

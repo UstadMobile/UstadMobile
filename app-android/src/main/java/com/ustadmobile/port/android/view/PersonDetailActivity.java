@@ -4,20 +4,16 @@ import android.arch.lifecycle.LiveData;
 import android.arch.paging.DataSource;
 import android.arch.paging.LivePagedListBuilder;
 import android.arch.paging.PagedList;
-import android.arch.paging.PagedListAdapter;
 import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -38,12 +34,12 @@ import java.util.Objects;
 
 import ru.dimorinny.floatingtextbutton.FloatingTextButton;
 
-import static com.ustadmobile.core.view.PersonDetailViewField.FIELD_TYPE_DATE;
-import static com.ustadmobile.core.view.PersonDetailViewField.FIELD_TYPE_DROPDOWN;
-import static com.ustadmobile.core.view.PersonDetailViewField.FIELD_TYPE_FIELD;
-import static com.ustadmobile.core.view.PersonDetailViewField.FIELD_TYPE_HEADER;
-import static com.ustadmobile.core.view.PersonDetailViewField.FIELD_TYPE_PHONE_NUMBER;
-import static com.ustadmobile.core.view.PersonDetailViewField.FIELD_TYPE_TEXT;
+import static com.ustadmobile.lib.db.entities.PersonField.FIELD_TYPE_DATE;
+import static com.ustadmobile.lib.db.entities.PersonField.FIELD_TYPE_DROPDOWN;
+import static com.ustadmobile.lib.db.entities.PersonField.FIELD_TYPE_FIELD;
+import static com.ustadmobile.lib.db.entities.PersonField.FIELD_TYPE_HEADER;
+import static com.ustadmobile.lib.db.entities.PersonField.FIELD_TYPE_PHONE_NUMBER;
+import static com.ustadmobile.lib.db.entities.PersonField.FIELD_TYPE_TEXT;
 import static com.ustadmobile.port.android.view.PersonEditActivity.ADD_PERSON_ICON;
 
 /**
@@ -59,6 +55,7 @@ public class PersonDetailActivity extends UstadBaseActivity implements PersonDet
 
     private PersonDetailPresenter mPresenter;
     ImageView personEditImage;
+    private FloatingTextButton fab;
 
     public static final String CALL_ICON_NAME = "ic_call_bcd4_24dp";
     public static final String TEXT_ICON_NAME = "ic_textsms_bcd4_24dp";
@@ -86,6 +83,9 @@ public class PersonDetailActivity extends UstadBaseActivity implements PersonDet
 
         mLinearLayout = findViewById(R.id.activity_person_detail_fields_linear_layout);
 
+        //FAB
+        fab = findViewById(R.id.activity_person_detail_fab_edit);
+
         //Load the Image
         personEditImage = findViewById(R.id.activity_person_detail_student_image);
 
@@ -94,8 +94,6 @@ public class PersonDetailActivity extends UstadBaseActivity implements PersonDet
                 UMAndroidUtil.bundleToHashtable(getIntent().getExtras()), this);
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
 
-        //FAB
-        FloatingTextButton fab = findViewById(R.id.activity_person_detail_fab_edit);
         fab.setOnClickListener(v -> mPresenter.handleClickEdit());
 
         TextView callParentTextView = findViewById(R.id.activity_person_detail_action_call_parent_text);
@@ -133,6 +131,15 @@ public class PersonDetailActivity extends UstadBaseActivity implements PersonDet
     @Override
     public void clearAllFields() {
         mLinearLayout.removeAllViews();
+    }
+
+    @Override
+    public void showFAB(boolean show) {
+        runOnUiThread(() -> {
+            fab.setEnabled(show);
+            fab.setVisibility(show?View.VISIBLE:View.INVISIBLE);
+        });
+
     }
 
     @Override
@@ -225,6 +232,9 @@ public class PersonDetailActivity extends UstadBaseActivity implements PersonDet
                 vll.setPadding(16,0,0,0);
 
                 TextView fieldValue = new TextView(this);
+                if(value.toString() == ""){
+                    value = "-";
+                }
                 fieldValue.setText(value.toString());
                 fieldValue.setPadding(16,4,4,0);
                 vll.addView(fieldValue);

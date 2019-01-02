@@ -10,6 +10,9 @@ import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -39,6 +42,10 @@ public class ClazzListFragment extends UstadBaseFragment implements ClazzListVie
     Spinner sortSpinner;
     String[] sortSpinnerPresets;
     FloatingTextButton fab;
+
+    private Menu mOptionsMenu;
+
+    private boolean showAllClazzSettingsButton = false;
 
     /**
      * Generates a new Fragment for a page fragment
@@ -75,13 +82,13 @@ public class ClazzListFragment extends UstadBaseFragment implements ClazzListVie
 
         sortSpinner = rootContainer.findViewById(R.id.fragment_clazz_list_sort_spinner);
 
+        fab = rootContainer.findViewById(R.id.fragment_clazz_list_fab);
+        fab.setOnClickListener(v -> mPresenter.handleClickPrimaryActionButton());
+
         //set up Presenter
         mPresenter = new ClazzListPresenter(getContext(),
                 UMAndroidUtil.bundleToHashtable(getArguments()), this);
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
-
-        fab = rootContainer.findViewById(R.id.fragment_clazz_list_fab);
-        fab.setOnClickListener(v -> mPresenter.handleClickPrimaryActionButton());
 
         sortSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -102,19 +109,19 @@ public class ClazzListFragment extends UstadBaseFragment implements ClazzListVie
      * The DIFF Callback.
      */
     public static final DiffUtil.ItemCallback<ClazzWithNumStudents> DIFF_CALLBACK =
-            new DiffUtil.ItemCallback<ClazzWithNumStudents>() {
-                @Override
-                public boolean areItemsTheSame(ClazzWithNumStudents oldItem,
-                                               ClazzWithNumStudents newItem) {
-                    return oldItem.getClazzUid() == newItem.getClazzUid();
-                }
+        new DiffUtil.ItemCallback<ClazzWithNumStudents>() {
+            @Override
+            public boolean areItemsTheSame(ClazzWithNumStudents oldItem,
+                                           ClazzWithNumStudents newItem) {
+                return oldItem.getClazzUid() == newItem.getClazzUid();
+            }
 
-                @Override
-                public boolean areContentsTheSame(ClazzWithNumStudents oldItem,
-                                                  ClazzWithNumStudents newItem) {
-                    return oldItem.equals(newItem);
-                }
-            };
+            @Override
+            public boolean areContentsTheSame(ClazzWithNumStudents oldItem,
+                                              ClazzWithNumStudents newItem) {
+                return oldItem.equals(newItem);
+            }
+        };
 
     /**
      * Sets the provider to the view.
@@ -152,11 +159,35 @@ public class ClazzListFragment extends UstadBaseFragment implements ClazzListVie
 
     @Override
     public void showAddClassButton(boolean show) {
-        if(true){
-            fab.setVisibility(View.VISIBLE);
-        }else{
-            fab.setVisibility(View.INVISIBLE);
-        }
+        runOnUiThread(() -> {
+            if(show){
+                fab.setVisibility(View.VISIBLE);
+            }else{
+                fab.setVisibility(View.INVISIBLE);
+            }
+        });
+
     }
+
+    @Override
+    public void showAllClazzSettingsButton(boolean show) {
+        showAllClazzSettingsButton = show;
+    }
+
+    public void showSettings(){
+        // TODO: Sprint 5
+//        MenuItem allClazzSettingsMenuItem = mOptionsMenu.findItem(R.id.menu_settings_gear);
+//        if(allClazzSettingsMenuItem != null){
+//            allClazzSettingsMenuItem.setVisible(showAllClazzSettingsButton);
+//        }
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        mOptionsMenu = menu;
+        showSettings();
+    }
+
 
 }

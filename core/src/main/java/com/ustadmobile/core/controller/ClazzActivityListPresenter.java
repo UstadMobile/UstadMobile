@@ -4,6 +4,7 @@ import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.db.dao.ClazzActivityChangeDao;
 import com.ustadmobile.core.db.dao.ClazzActivityDao;
+import com.ustadmobile.core.db.dao.ClazzDao;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
@@ -13,6 +14,8 @@ import com.ustadmobile.core.view.ClazzActivityListView;
 import com.ustadmobile.lib.db.entities.ClazzActivity;
 import com.ustadmobile.lib.db.entities.ClazzActivityChange;
 import com.ustadmobile.lib.db.entities.DailyActivityNumbers;
+import com.ustadmobile.lib.db.entities.EntityRole;
+import com.ustadmobile.lib.db.entities.Role;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -48,6 +51,17 @@ public class ClazzActivityListPresenter
     //Provider 
     private UmProvider<ClazzActivity> providerList;
 
+    private boolean canEdit;
+    private long loggedInPersonUid = 0L;
+
+    public boolean isCanEdit() {
+        return canEdit;
+    }
+
+    public void setCanEdit(boolean canEdit) {
+        this.canEdit = canEdit;
+    }
+
     UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
     UmAppDatabase repository = UmAccountManager.getRepositoryForActiveAccount(context);
     private ClazzActivityDao clazzActivityDao =repository.getClazzActivityDao();
@@ -61,6 +75,8 @@ public class ClazzActivityListPresenter
         if(arguments.containsKey(ARG_CLAZZ_UID)){
             currentClazzUid = (long) arguments.get(ARG_CLAZZ_UID);
         }
+
+        loggedInPersonUid = UmAccountManager.getActiveAccount(context).getPersonUid();
 
     }
 
@@ -119,9 +135,26 @@ public class ClazzActivityListPresenter
         //Update Change options
         updateChangeOptions();
 
-        //Load test data for now TODO: remove in production.
-        generateActivityBarChartDataTest();
+        //Permissions update
+        checkPermissions();
 
+    }
+
+    public void checkPermissions(){
+        ClazzDao clazzDao = repository.getClazzDao();
+        clazzDao.personHasPermission(loggedInPersonUid, currentClazzUid,
+                Role.PERMISSION_CLAZZ_LOG_ACTIVITY_INSERT, new UmCallback<Boolean>() {
+            @Override
+            public void onSuccess(Boolean result) {
+                setCanEdit(result);
+                view.setFABVisibility(result);
+            }
+
+            @Override
+            public void onFailure(Throwable exception) {
+
+            }
+        });
     }
 
     private void setProviderOnView(){
@@ -171,10 +204,11 @@ public class ClazzActivityListPresenter
 
     }
 
-    public void goToNewClazzActivityEditActivity(long clazzLog){
+    public void goToNewClazzActivityEditActivity(long clazzActivityUid){
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         Hashtable<String, Long> args = new Hashtable<>();
-        args.put(ARG_CLAZZACTIVITY_UID, clazzLog);
+        args.put(ARG_CLAZZACTIVITY_UID, clazzActivityUid);
+        args.put(ARG_CLAZZ_UID, currentClazzUid);
 
         impl.go(ClazzActivityEditView.VIEW_NAME, args, view.getContext());
 
