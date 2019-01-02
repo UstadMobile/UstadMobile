@@ -547,6 +547,8 @@ public abstract class AbstractDbProcessor {
             joinClause = "";
         }
 
+        joinClause += daoType.getAnnotation(UmDao.class).permissionJoin();
+
 
         if(updatePermissionCondition.equals("")) {
             messager.printMessage(Diagnostic.Kind.ERROR,
@@ -655,6 +657,8 @@ public abstract class AbstractDbProcessor {
             selectPermissionCondition = daoType.getAnnotation(UmDao.class).selectPermissionCondition();
         }
 
+        joinClause += daoType.getAnnotation(UmDao.class).permissionJoin();
+
 
         if(selectPermissionCondition.equals("")) {
             messager.printMessage(Diagnostic.Kind.ERROR,
@@ -748,6 +752,8 @@ public abstract class AbstractDbProcessor {
             updatePermissionCondition = daoType.getAnnotation(UmDao.class) != null ?
                     daoType.getAnnotation(UmDao.class).updatePermissionCondition() : "";
         }
+
+        joinClause += daoType.getAnnotation(UmDao.class).permissionJoin();
 
         if(updatePermissionCondition.equals("")) {
             messager.printMessage(Diagnostic.Kind.ERROR,
