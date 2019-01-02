@@ -16,6 +16,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -36,14 +37,32 @@ import javax.xml.transform.TransformerException;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.JQUERY_JS;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.MATERIAL_CSS;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.ZIP_EXT;
 
-
+/**
+ * The Voice of America Website is an html website with content for learning english.
+ * In a single page, you have access a lession with lots of images, videos and a quiz.
+ * <p>
+ * By using jsoup, you can extract all the data that is required.
+ * A script inside the page has details about the lesson and its last modified date.
+ * <p>
+ * Start the page by checking if there is quiz in the lesson - store the link to the quiz
+ * Remove all the tags that are not required for us - comments, share, links to other pages.
+ * <p>
+ * All the quiz information is accessed at https://learningenglish.voanews.com/Quiz/Answer with a post request
+ * Need to build a json of the quiz based on the data. The questions, choices, images and videos in the quiz.
+ * <p>
+ * Once you have all the data, download all the src in the page.
+ * <p>
+ * Store the quiz data, store the page data, add some css and tags to existing page to make it more mobile friendly
+ * Write a tin can file for the html content and zip everything in the directory.
+ */
 public class VoaScraper {
 
     private final URL scrapUrl;
     private final File voaDirectory;
     private final File destinationDir;
-    public boolean isContentUpdated = true;
+    private boolean isContentUpdated = true;
 
     public String answerUrl = "https://learningenglish.voanews.com/Quiz/Answer";
 
@@ -60,44 +79,64 @@ public class VoaScraper {
 
         ContentScraperUtil.setChromeDriverLocation();
 
-        ChromeDriver driver = ContentScraperUtil.setupLogIndexChromeDriver();
+        ChromeDriver driver = ContentScraperUtil.setupChrome(false);
 
         driver.get(scrapUrl.toString());
         WebDriverWait waitDriver = new WebDriverWait(driver, 10000);
         ContentScraperUtil.waitForJSandJQueryToLoad(waitDriver);
-
-        WebElement element = driver.findElementByCssSelector("script[type*=json]");
-        JavascriptExecutor js = driver;
-        String scriptText = (String) js.executeScript("return arguments[0].innerText;", element);
-
-        VoaResponse response = gson.fromJson(scriptText, VoaResponse.class);
 
         String lessonId = FilenameUtils.getBaseName(scrapUrl.getPath());
 
         File voaDirectory = new File(destinationDir, lessonId);
         voaDirectory.mkdirs();
 
-        long dateModified = ContentScraperUtil.parseServerDate(response.dateModified.replace("Z", "").replace(" ", "T"));
+        try {
+            WebElement element = driver.findElementByCssSelector("script[type*=json]");
+            JavascriptExecutor js = driver;
+            String scriptText = (String) js.executeScript("return arguments[0].innerText;", element);
 
-        File modifiedFile = new File(voaDirectory, voaDirectory.getName() + ScraperConstants.LAST_MODIFIED_TXT);
-        String text;
+            VoaResponse response = gson.fromJson(scriptText, VoaResponse.class);
 
-        boolean isUpdated = true;
-        if (ContentScraperUtil.fileHasContent(modifiedFile)) {
-            text = FileUtils.readFileToString(modifiedFile, UTF_ENCODING);
-            isUpdated = !String.valueOf(dateModified).equalsIgnoreCase(text);
-        } else {
-            FileUtils.writeStringToFile(modifiedFile, String.valueOf(dateModified), ScraperConstants.UTF_ENCODING);
+            long dateModified = ContentScraperUtil.parseServerDate(response.dateModified.replace("Z", "").replace(" ", "T"));
+
+            File modifiedFile = new File(voaDirectory, voaDirectory.getName() + ScraperConstants.LAST_MODIFIED_TXT);
+            String text;
+
+            boolean isUpdated = true;
+            if (ContentScraperUtil.fileHasContent(modifiedFile)) {
+                text = FileUtils.readFileToString(modifiedFile, UTF_ENCODING);
+                isUpdated = !String.valueOf(dateModified).equalsIgnoreCase(text);
+            } else {
+                FileUtils.writeStringToFile(modifiedFile, String.valueOf(dateModified), ScraperConstants.UTF_ENCODING);
+            }
+
+            if (!isUpdated) {
+                isContentUpdated = false;
+                driver.close();
+                return;
+            }
+
+        } catch (NoSuchElementException ignored) {
+
+            File file = new File(destinationDir,FilenameUtils.getBaseName(scrapUrl.getPath()) + ZIP_EXT);
+            if(file.exists()){
+                 long modified = ContentScraperUtil.parseServerDate(driver.findElementByCssSelector("time").getAttribute("datetime"));
+                 isContentUpdated = modified > file.lastModified();
+                 driver.close();
+                 return;
+            }
+
         }
+        String quizHref = null;
+        String quizAjaxUrl = null;
 
-        if (!isUpdated) {
-            isContentUpdated = false;
-            return;
+        try {
+            WebElement quizElement = driver.findElement(By.cssSelector("a[data-ajax-url*=Quiz]"));
+            quizHref = quizElement.getAttribute("href");
+            quizAjaxUrl = quizElement.getAttribute("data-ajax-url");
+        } catch (NoSuchElementException ignored) {
+
         }
-
-        WebElement quizElement = driver.findElement(By.cssSelector("a[data-ajax-url*=Quiz]"));
-        String quizHref = quizElement.getAttribute("href");
-        String quizAjaxUrl = quizElement.getAttribute("data-ajax-url");
 
         Document document = Jsoup.connect(scrapUrl.toString()).get();
         removeAllAttributesFromVideoAudio(document);
@@ -147,7 +186,12 @@ public class VoaScraper {
 
                 VoaQuiz.Questions question = new VoaQuiz.Questions();
                 question.questionText = questionDoc.selectFirst("h2.ta-l").text();
-                question.videoHref = videoDoc.selectFirst("div.quiz__answers-img video,div.quiz__answers-img img").attr("src");
+                try {
+                    Element mediaSource = videoDoc.selectFirst("div.quiz__answers-img video,div.quiz__answers-img img");
+                    question.videoHref = mediaSource.attr("src");
+                }catch (NoSuchElementException | NullPointerException ignored){
+
+                }
 
                 List<VoaQuiz.Questions.Choices> choiceList = new ArrayList<>();
                 Elements answerTextList = questionDoc.select("label.quiz__answers-label");
@@ -204,9 +248,10 @@ public class VoaScraper {
         finalDoc.body().append(" <script type=\"text/javascript\">\n" +
                 "   iFrameResize({log:true});\n" +
                 "  </script>");
-        finalDoc.body().attr("style","padding:2%");
-        finalDoc.selectFirst("div.quiz__body").after("<div class=\"iframe-container\"><iframe src=\"quiz.html\" frameborder=\"0\" scrolling=\"no\" width=\"100%\"></frame></div>");
-
+        finalDoc.body().attr("style", "padding:2%");
+        if (quizHref != null) {
+            finalDoc.selectFirst("div.quiz__body").after("<div class=\"iframe-container\"><iframe src=\"quiz.html\" frameborder=\"0\" scrolling=\"no\" width=\"100%\"></frame></div>");
+        }
         FileUtils.copyToFile(getClass().getResourceAsStream(ScraperConstants.QUIZ_HTML_LINK),
                 new File(voaDirectory, ScraperConstants.QUIZ_HTML_FILE));
         FileUtils.copyToFile(getClass().getResourceAsStream(ScraperConstants.IFRAME_RESIZE_LINK),
@@ -219,7 +264,6 @@ public class VoaScraper {
                 new File(assetDirectory, MATERIAL_CSS));
         FileUtils.copyToFile(getClass().getResourceAsStream(ScraperConstants.MATERIAL_JS_LINK),
                 new File(assetDirectory, ScraperConstants.MATERIAL_JS));
-
 
 
         FileUtils.writeStringToFile(new File(voaDirectory, "index.html"), finalDoc.html(), ScraperConstants.UTF_ENCODING);
@@ -236,7 +280,7 @@ public class VoaScraper {
 
     private Map<String, String> createParams(String quizId, int count, String selectedAnswer, String voted) {
         Map<String, String> selectedParams = new HashMap<>();
-        if(selectedAnswer != null){
+        if (selectedAnswer != null) {
             selectedParams.put("SelectedAnswerId", selectedAnswer);
         }
         selectedParams.put("QuestionVoted", voted);
@@ -275,6 +319,9 @@ public class VoaScraper {
         document.select("div.design-top-offset").remove();
         document.select("div.quiz__main-img").remove();
         document.select("div.quiz__intro").remove();
+        document.select("div.media-block-wrap").remove();
+        document.select("aside.js-share--horizontal").remove();
+        document.select("div.nav-tabs__inner").remove();
         document.select("[href]").removeAttr("href");
         Elements linkElements = document.select("video,audio");
         for (Element link : linkElements) {
@@ -292,4 +339,7 @@ public class VoaScraper {
         }
     }
 
+    public boolean isContentUpdated() {
+        return isContentUpdated;
+    }
 }

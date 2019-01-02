@@ -48,7 +48,7 @@
         var submit = document.getElementById("correctAnswer");
         submit.setAttribute("class", "waves-effect waves-light btn");
 
-        if(counter > jsonQuestions.questions.length){
+        if(counter >= jsonQuestions.questions.length){
             displayResults(correctAnswers);
         }
 

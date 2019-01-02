@@ -88,6 +88,7 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.ZIP_EXT;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.slideShareLink;
 
 
@@ -260,7 +261,7 @@ public class ContentScraperUtil {
      */
     public static void zipDirectory(File directoryToZip, String filename, File locationToSave) throws IOException {
 
-        File zippedFile = new File(locationToSave, filename + ".zip");
+        File zippedFile = new File(locationToSave, filename + ZIP_EXT);
         try (ZipOutputStream out = new ZipOutputStream(Files.newOutputStream(zippedFile.toPath()), StandardCharsets.UTF_8)) {
             Path sourceDirPath = Paths.get(directoryToZip.toURI());
             Files.walk(sourceDirPath).filter(path -> !Files.isDirectory(path))
@@ -314,11 +315,10 @@ public class ContentScraperUtil {
 
         // wait for jQuery to load
         ExpectedCondition<Boolean> jQueryLoad = driver ->
-            ((JavascriptExecutor) driver).executeScript("console.clear()").toString().equals("complete");
+                ((JavascriptExecutor) driver).executeScript("console.clear()").toString().equals("complete");
 
         return waitDriver.until(jQueryLoad);
     }
-
 
 
     /**
@@ -694,7 +694,7 @@ public class ContentScraperUtil {
         ContentEntryFileStatus fileStatus = new ContentEntryFileStatus();
         fileStatus.setCefsContentEntryFileUid(contentEntryFile.getContentEntryFileUid());
         fileStatus.setFilePath(ePubFile.getAbsolutePath());
-        fileStatus.setCefsUid((int)contentEntryFileStatusDao.insert(fileStatus));
+        fileStatus.setCefsUid((int) contentEntryFileStatusDao.insert(fileStatus));
 
         return contentEntryFile;
     }
@@ -869,10 +869,11 @@ public class ContentScraperUtil {
 
     /**
      * Save files that are in android directory into the log index folder
-     * @param url url of the resource
+     *
+     * @param url       url of the resource
      * @param directory directory it will be saved
-     * @param mimeType mimeType of resource
-     * @param filePath filePath of resource
+     * @param mimeType  mimeType of resource
+     * @param filePath  filePath of resource
      * @param fileName
      * @return
      * @throws IOException
@@ -892,9 +893,10 @@ public class ContentScraperUtil {
 
     /**
      * Download a file from the log entry, check if it has headers, add them to url if available
-     * @param url url file to download
+     *
+     * @param url         url file to download
      * @param destination destination of file
-     * @param log log details (has request headers info)
+     * @param log         log details (has request headers info)
      * @return the file that was download
      * @throws IOException
      */
@@ -921,8 +923,9 @@ public class ContentScraperUtil {
 
     /**
      * Create a folder based on the url name eg. www.khanacademy.com/video/10 = folder name khanacademy
+     *
      * @param destination destination of folder
-     * @param url url
+     * @param url         url
      * @return
      */
     public static File createDirectoryFromUrl(File destination, URL url) {
@@ -932,12 +935,11 @@ public class ContentScraperUtil {
     }
 
     /**
-     *
-     * @param urlString url for the log index
-     * @param mimeType mimeType of file download
+     * @param urlString    url for the log index
+     * @param mimeType     mimeType of file download
      * @param urlDirectory directory of url
-     * @param file file downloaded
-     * @param log log response of index
+     * @param file         file downloaded
+     * @param log          log response of index
      * @return
      */
     public static LogIndex createIndexFromLog(String urlString, String mimeType, File urlDirectory, File file, LogResponse log) {
@@ -945,7 +947,7 @@ public class ContentScraperUtil {
         logIndex.url = urlString;
         logIndex.mimeType = mimeType;
         logIndex.path = urlDirectory.getName() + "/" + file.getName();
-        if(log != null){
+        if (log != null) {
             logIndex.headers = log.message.params.response.headers;
         }
         return logIndex;
@@ -953,6 +955,7 @@ public class ContentScraperUtil {
 
     /**
      * Create a chrome driver that saves a log of all the files that was downloaded via settings
+     *
      * @return Chrome Driver with Log enabled
      */
     public static ChromeDriver setupLogIndexChromeDriver() {

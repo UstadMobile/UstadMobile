@@ -32,6 +32,8 @@ public class ContentEntry {
 
     public static final int LICESNE_TYPE_CC_BY_NC_SA = 6;
 
+    public static final int PUBLIC_DOMAIN = 7;
+
     @UmPrimaryKey(autoGenerateSyncable = true)
     private long contentEntryUid;
 
