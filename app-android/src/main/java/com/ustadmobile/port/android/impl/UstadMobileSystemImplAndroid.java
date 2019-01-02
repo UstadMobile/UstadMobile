@@ -109,6 +109,7 @@ import com.ustadmobile.core.view.ReportSelectionView;
 import com.ustadmobile.core.view.SELEditView;
 import com.ustadmobile.core.view.SELQuestionDetailView;
 import com.ustadmobile.core.view.SELQuestionEditView;
+import com.ustadmobile.core.view.SELQuestionSetsView;
 import com.ustadmobile.core.view.SELQuestionView;
 import com.ustadmobile.core.view.SELRecognitionView;
 import com.ustadmobile.core.view.SELSelectConsentView;
@@ -120,6 +121,7 @@ import com.ustadmobile.core.view.SelectMultipleTreeDialogView;
 import com.ustadmobile.core.view.SelectTwoDatesDialogView;
 import com.ustadmobile.core.view.SettingsDataSyncListView;
 import com.ustadmobile.core.view.SettingsDataUsageView;
+import com.ustadmobile.core.view.SettingsView;
 import com.ustadmobile.core.view.UserSettingsView;
 import com.ustadmobile.core.view.UserSettingsView2;
 import com.ustadmobile.core.view.WelcomeView;
@@ -167,6 +169,7 @@ import com.ustadmobile.port.android.view.SELEditActivity;
 import com.ustadmobile.port.android.view.SELQuestionActivity;
 import com.ustadmobile.port.android.view.SELQuestionDetailActivity;
 import com.ustadmobile.port.android.view.SELQuestionEditActivity;
+import com.ustadmobile.port.android.view.SELQuestionSetsActivity;
 import com.ustadmobile.port.android.view.SELRecognitionActivity;
 import com.ustadmobile.port.android.view.SELSelectConsentActivity;
 import com.ustadmobile.port.android.view.SELSelectStudentActivity;
@@ -176,6 +179,7 @@ import com.ustadmobile.port.android.view.SelectClazzesDialogFragment;
 import com.ustadmobile.port.android.view.SelectMultipleTreeDialogFragment;
 import com.ustadmobile.port.android.view.SelectTwoDatesDialogFragment;
 import com.ustadmobile.port.android.view.SendCourseDialogFragment;
+import com.ustadmobile.port.android.view.SettingsActivity;
 import com.ustadmobile.port.android.view.SettingsDataSyncListActivity;
 import com.ustadmobile.port.android.view.SettingsDataUsageActivity;
 import com.ustadmobile.port.android.view.UserSettingsActivity;
@@ -299,6 +303,8 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         viewNameToAndroidImplMap.put(DummyView.VIEW_NAME, DummyActivity.class);
         viewNameToAndroidImplMap.put(BulkUploadMasterView.VIEW_NAME, BulkUploadMasterActivity.class);
         viewNameToAndroidImplMap.put(Register2View.VIEW_NAME, Register2Activity.class);
+        viewNameToAndroidImplMap.put(SettingsView.VIEW_NAME, SettingsActivity.class);
+        viewNameToAndroidImplMap.put(SELQuestionSetsView.VIEW_NAME, SELQuestionSetsActivity.class);
     }
 
     /**

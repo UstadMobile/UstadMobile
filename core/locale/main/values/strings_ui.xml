@@ -478,12 +478,21 @@ This is the one you should be editing. The one in /core/locale/main/values/strin
     <string name="apply">Apply</string>
     <string name="file_selected">File selected:</string>
 
-
     <string name="content_entry_not_found">ContentEntry Not Found</string>
-
 
     <string name="confirm_password">Confirm password</string>
     <string name="first_name">First name</string>
     <string name="create_new_account">Register Now</string>
+
+    <string name="holiday_calendars">Holiday calendars</string>
+    <string name="holiday_calendars_desc">Add, remove and modify holiday calendars</string>
+    <string name="sel_question_set">SEL Question sets</string>
+    <string name="sel_question_set_desc">Manage SEL questions</string>
+    <string name="users_desc">Add and remove users. Modify permissions</string>
+    <string name="users">Users</string>
+    <string name="question_set">Question set</string>
+
+
+
 
 </resources>

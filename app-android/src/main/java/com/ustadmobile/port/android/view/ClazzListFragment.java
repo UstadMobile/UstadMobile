@@ -175,11 +175,11 @@ public class ClazzListFragment extends UstadBaseFragment implements ClazzListVie
     }
 
     public void showSettings(){
-        // TODO: Sprint 5
-//        MenuItem allClazzSettingsMenuItem = mOptionsMenu.findItem(R.id.menu_settings_gear);
-//        if(allClazzSettingsMenuItem != null){
-//            allClazzSettingsMenuItem.setVisible(showAllClazzSettingsButton);
-//        }
+
+        MenuItem allClazzSettingsMenuItem = mOptionsMenu.findItem(R.id.menu_settings_gear);
+        if(allClazzSettingsMenuItem != null){
+            allClazzSettingsMenuItem.setVisible(showAllClazzSettingsButton);
+        }
     }
 
     @Override

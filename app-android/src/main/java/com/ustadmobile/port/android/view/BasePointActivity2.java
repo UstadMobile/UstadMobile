@@ -178,11 +178,10 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
     @Override
     public void showSettings(boolean show) {
 
-        /* TODO: Sprint 5 */
-//        MenuItem allClazzSettingsMenuItem = mOptionsMenu.findItem(R.id.menu_settings_gear);
-//        if(allClazzSettingsMenuItem != null){
-//            allClazzSettingsMenuItem.setVisible(show);
-//        }
+        MenuItem allClazzSettingsMenuItem = mOptionsMenu.findItem(R.id.menu_settings_gear);
+        if(allClazzSettingsMenuItem != null){
+            allClazzSettingsMenuItem.setVisible(show);
+        }
     }
 
 
@@ -213,9 +212,10 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
             mPresenter.handleLogOut();
             return super.onOptionsItemSelected(item);
         }
-//        else if ( i == R.id.menu_settings_gear){
-//            //TODO: Sprint 5 : Settings
-//        }
+        else if ( i == R.id.menu_settings_gear){
+            mPresenter.handleClickSettingsIcon();
+            return super.onOptionsItemSelected(item);
+        }
         else {
             return super.onOptionsItemSelected(item);
         }
@@ -234,7 +234,7 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
         //tint
         MenuItem shareMenuItem = menu.findItem(R.id.menu_basepoint_share);
         MenuItem bulkUploadMenuItem = menu.findItem(R.id.menu_basepoint_bulk_upload_master);
-        //MenuItem settingsMenuItem = menu.findItem(R.id.menu_settings_gear);
+        MenuItem settingsMenuItem = menu.findItem(R.id.menu_settings_gear);
         MenuItem logoutMenuItem = menu.findItem(R.id.menu_basepoint_logout);
 
         Drawable shareMenuIcon = getResources().getDrawable(R.drawable.ic_share_white_24dp);
@@ -249,7 +249,7 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
 
         shareMenuItem.setIcon(shareMenuIcon);
         bulkUploadMenuItem.setIcon(bulkUploadMenuIcon);
-        //settingsMenuItem.setIcon(settingsMenuIcon);
+        settingsMenuItem.setIcon(settingsMenuIcon);
         logoutMenuItem.setIcon(logoutMenuIcon);
 
         mOptionsMenu = menu;
