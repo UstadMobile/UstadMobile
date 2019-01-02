@@ -79,7 +79,7 @@ public class VoaScraper {
 
         ContentScraperUtil.setChromeDriverLocation();
 
-        ChromeDriver driver = ContentScraperUtil.setupChrome(false);
+        ChromeDriver driver = ContentScraperUtil.setupChrome(true);
 
         driver.get(scrapUrl.toString());
         WebDriverWait waitDriver = new WebDriverWait(driver, 10000);
