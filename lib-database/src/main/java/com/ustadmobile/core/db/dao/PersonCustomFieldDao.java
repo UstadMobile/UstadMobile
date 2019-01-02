@@ -11,7 +11,8 @@ import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 import java.util.List;
 
 
-@UmDao(selectPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
+@UmDao(insertPermissionCondition = RoleDao.SELECT_ACCOUNT_IS_ADMIN,
+        updatePermissionCondition = RoleDao.SELECT_ACCOUNT_IS_ADMIN)
 @UmRepository
 public abstract class PersonCustomFieldDao
         implements SyncableDao<PersonField, PersonCustomFieldDao> {

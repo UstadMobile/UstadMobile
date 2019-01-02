@@ -30,7 +30,7 @@ public class TestClazzDao extends AbstractDaoTest{
                 "");
 
         Role teacherRole = new Role("teacher",
-                Role.PERMISSION_CLAZZ_RECORD_ACTIVITY
+                Role.PERMISSION_CLAZZ_LOG_ACTIVITY_INSERT
                 | Role.PERMISSION_CLAZZ_SELECT);
         teacherRole.setRoleUid(serverDummyRepo.getRoleDao().insert(teacherRole));
 
@@ -66,7 +66,7 @@ public class TestClazzDao extends AbstractDaoTest{
         UmAppDatabase serverDummyRepo = serverDb.getRepository("http://localhost/dummy/",
                 "");
         Role teacherRole = new Role("teacher",
-                Role.PERMISSION_CLAZZ_RECORD_ACTIVITY
+                Role.PERMISSION_CLAZZ_LOG_ACTIVITY_INSERT
                         | Role.PERMISSION_CLAZZ_SELECT | Role.PERMISSION_CLAZZ_UPDATE);
         teacherRole.setRoleUid(serverDummyRepo.getRoleDao().insert(teacherRole));
 
