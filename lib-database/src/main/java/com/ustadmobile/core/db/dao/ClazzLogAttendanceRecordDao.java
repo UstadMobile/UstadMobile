@@ -17,8 +17,8 @@ import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 import java.util.ArrayList;
 import java.util.List;
 
-@UmDao(permissionJoin = "INNER JOIN ClazzLog ON ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid = ClazzLog.clazzLogUid " +
-        "INNER JOIN Clazz ON ClazzLog.clazzLogUid = Clazz.clazzUid ",
+@UmDao(permissionJoin = "LEFT JOIN ClazzLog ON ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid = ClazzLog.clazzLogUid " +
+        "LEFT JOIN Clazz ON ClazzLog.clazzLogClazzUid = Clazz.clazzUid ",
 selectPermissionCondition = ClazzDao.ENTITY_LEVEL_PERMISSION_CONDITION1 +
          Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT + ClazzDao.ENTITY_LEVEL_PERMISSION_CONDITION2,
 updatePermissionCondition = ClazzDao.ENTITY_LEVEL_PERMISSION_CONDITION1 +

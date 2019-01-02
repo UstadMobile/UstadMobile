@@ -111,6 +111,7 @@ public class ServletContextClass implements ServletContextListener
 
                         newRole.setRoleName(ROLE_NAME_TEACHER);
                         long teacherPermissions =
+                            Role.PERMISSION_CLAZZ_ADD_STUDENT |
                             Role.PERMISSION_CLAZZ_SELECT |                  //See Clazzes
                             Role.PERMISSION_CLAZZ_UPDATE |                  //Update Clazz
                             Role.PERMISSION_CLAZZ_VIEW_REPORTS |            //See reports
@@ -119,8 +120,10 @@ public class ServletContextClass implements ServletContextListener
                             Role.PERMISSION_CLAZZ_LOG_ACTIVITY_INSERT |     //Add/Take Clazz Activities
                             Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT |   //See Attendance
                             Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_INSERT |   //Take attendance
+                            Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_UPDATE |   //Update attendance
                             Role.PERMISSION_PERSON_SELECT  |                //See People
-                            Role.PERMISSION_PERSON_UPDATE;                  //Update people
+                            Role.PERMISSION_PERSON_UPDATE |                 //Update people
+                            Role.PERMISSION_PERSON_INSERT;                  //Add person
                         newRole.setRolePermissions(teacherPermissions);
                         Long newRoleUid = roleDao.insert(newRole);
                     }else{
