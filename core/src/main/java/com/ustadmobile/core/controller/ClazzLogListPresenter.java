@@ -70,7 +70,7 @@ public class ClazzLogListPresenter extends UstadBaseController<ClassLogListView>
     public void checkPermissions(){
         ClazzDao clazzDao = repository.getClazzDao();
         clazzDao.personHasPermission(loggedInPersonUid, currentClazzUid,
-                Role.PERMISSION_CLAZZ_RECORD_ATTENDANCE,
+                Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_INSERT,
                 new UmCallbackWithDefaultValue<>(false, new UmCallback<Boolean>() {
             @Override
             public void onSuccess(Boolean result) {

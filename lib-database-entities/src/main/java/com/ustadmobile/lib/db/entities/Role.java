@@ -34,11 +34,11 @@ public class Role {
 
     public static final long PERMISSION_CLAZZ_UPDATE = 4;
 
-    public static final long PERMISSION_CLAZZ_RECORD_ATTENDANCE = 8;
+    public static final long PERMISSION_CLAZZ_LOG_ATTENDANCE_INSERT = 8;
 
-    public static final long PERMISSION_CLAZZ_RECORD_ACTIVITY = 16;
+    public static final long PERMISSION_CLAZZ_LOG_ACTIVITY_INSERT = 16;
 
-    public static final long PERMISSION_CLAZZ_RECORD_SEL = 32;
+    public static final long PERMISSION_SEL_QUESTION_RESPONSE_INSERT = 32;
 
     public static final long PERMISSION_PERSON_SELECT = 64;
 
@@ -50,14 +50,26 @@ public class Role {
 
     public static final long PERMISSION_CLAZZ_ADD_STUDENT = 1024;
 
-    public static final long PERMISSION_CLAZZ_VIEW_ATTENDANCE = 2048;
+    public static final long PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT = 2048;
 
-    public static final long PERMISSION_CLAZZ_VIEW_ACTIVITY = 4096;
+    public static final long PERMISSION_CLAZZ_LOG_ATTENDANCE_UPDATE = 4096;
 
-    public static final long PERMISSION_CLAZZ_VIEW_SEL = 8192;
+    public static final long PERMISSION_CLAZZ_LOG_ACTIVITY_UPDATE = 8192;
 
-    public static final long PERMISSION_CLAZZ_VIEW_REPORTS = 16384;
+    public static final long PERMISSION_CLAZZ_LOG_ACTIVITY_SELECT = 16384;
 
+    public static final long PERMISSION_SEL_QUESTION_RESPONSE_SELECT = 32768;
+
+    public static final long PERMISSION_SEL_QUESTION_RESPONSE_UPDATE = 65536;
+
+    public static final long PERMISSION_SEL_QUESTION_SELECT = 131072;
+
+    public static final long PERMISSION_SEL_QUESTION_INSERT = 262144;
+
+    public static final long PERMISSION_SEL_QUESTION_UPDATE = 524288;
+
+    //Added
+    public static final long PERMISSION_CLAZZ_VIEW_REPORTS = 1048576;
 
     public Role() {
 

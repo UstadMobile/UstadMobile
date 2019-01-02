@@ -69,19 +69,19 @@ public class ClazzDetailPresenter
                 public void onSuccess(Boolean result) {
                     view.setSettingsVisibility(result);
                     clazzDao.personHasPermission(loggedInPersonUid, currentClazzUid,
-                        Role.PERMISSION_CLAZZ_VIEW_ATTENDANCE, new UmCallbackWithDefaultValue<>(false,
+                        Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT, new UmCallbackWithDefaultValue<>(false,
                         new UmCallback<Boolean>() {
                             @Override
                             public void onSuccess(Boolean result) {
                                 view.setAttendanceVisibility(true);
                                 clazzDao.personHasPermission(loggedInPersonUid, currentClazzUid,
-                                    Role.PERMISSION_CLAZZ_VIEW_SEL, new UmCallbackWithDefaultValue<>(false,
+                                    Role.PERMISSION_SEL_QUESTION_RESPONSE_SELECT, new UmCallbackWithDefaultValue<>(false,
                                     new UmCallback<Boolean>() {
                                         @Override
                                         public void onSuccess(Boolean result) {
                                             view.setSELVisibility(result);
                                             clazzDao.personHasPermission(loggedInPersonUid, currentClazzUid,
-                                                Role.PERMISSION_CLAZZ_VIEW_ACTIVITY, new UmCallbackWithDefaultValue<>(false,
+                                                Role.PERMISSION_CLAZZ_LOG_ACTIVITY_SELECT, new UmCallbackWithDefaultValue<>(false,
                                                 new UmCallback<Boolean>() {
                                                     @Override
                                                     public void onSuccess(Boolean result) {

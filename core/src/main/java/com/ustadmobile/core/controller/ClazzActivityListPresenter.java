@@ -143,7 +143,7 @@ public class ClazzActivityListPresenter
     public void checkPermissions(){
         ClazzDao clazzDao = repository.getClazzDao();
         clazzDao.personHasPermission(loggedInPersonUid, currentClazzUid,
-                Role.PERMISSION_CLAZZ_RECORD_ACTIVITY, new UmCallback<Boolean>() {
+                Role.PERMISSION_CLAZZ_LOG_ACTIVITY_INSERT, new UmCallback<Boolean>() {
             @Override
             public void onSuccess(Boolean result) {
                 setCanEdit(result);

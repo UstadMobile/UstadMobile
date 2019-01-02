@@ -101,7 +101,7 @@ public class ServletContextClass implements ServletContextListener
 
 
 
-            //TODO: Check if role already created. If created, don't create it again.
+            //TODOone: Check if role already created. If created, don't create it again.
             roleDao.findByName(ROLE_NAME_TEACHER, new UmCallback<Role>() {
                 @Override
                 public void onSuccess(Role result) {
@@ -111,11 +111,16 @@ public class ServletContextClass implements ServletContextListener
 
                         newRole.setRoleName(ROLE_NAME_TEACHER);
                         long teacherPermissions =
-                                Role.PERMISSION_CLAZZ_SELECT | Role.PERMISSION_CLAZZ_RECORD_ACTIVITY |
-                                        Role.PERMISSION_CLAZZ_VIEW_REPORTS | Role.PERMISSION_CLAZZ_UPDATE |
-                                        Role.PERMISSION_CLAZZ_VIEW_ACTIVITY | Role.PERMISSION_CLAZZ_RECORD_ACTIVITY |
-                                        Role.PERMISSION_CLAZZ_VIEW_ATTENDANCE | Role.PERMISSION_CLAZZ_RECORD_ATTENDANCE |
-                                        Role.PERMISSION_PERSON_UPDATE | Role.PERMISSION_PERSON_SELECT;
+                            Role.PERMISSION_CLAZZ_SELECT |                  //See Clazzes
+                            Role.PERMISSION_CLAZZ_UPDATE |                  //Update Clazz
+                            Role.PERMISSION_CLAZZ_VIEW_REPORTS |            //See reports
+                            Role.PERMISSION_CLAZZ_LOG_ACTIVITY_SELECT |     //See Clazz Activity
+                            Role.PERMISSION_CLAZZ_LOG_ACTIVITY_UPDATE |     //Update Clazz Activity
+                            Role.PERMISSION_CLAZZ_LOG_ACTIVITY_INSERT |     //Add/Take Clazz Activities
+                            Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT |   //See Attendance
+                            Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_INSERT |   //Take attendance
+                            Role.PERMISSION_PERSON_SELECT  |                //See People
+                            Role.PERMISSION_PERSON_UPDATE;                  //Update people
                         newRole.setRolePermissions(teacherPermissions);
                         Long newRoleUid = roleDao.insert(newRole);
                     }else{
@@ -131,128 +136,6 @@ public class ServletContextClass implements ServletContextListener
 
         }
 
-
-        public void addRolesAndPermissions2(){
-
-            PersonAuthDao personAuthDao =
-                    appDb.getRepository(dummyBaseUrl, dummyAuth).getPersonAuthDao();
-            EntityRoleDao entityRoleDao =
-                    appDb.getRepository(dummyBaseUrl, dummyAuth).getEntityRoleDao();
-            RoleDao roleDao = appDb.getRepository(dummyBaseUrl, dummyAuth).getRoleDao();
-            PersonGroupDao personGroupDao =
-                    appDb.getRepository(dummyBaseUrl, dummyAuth).getPersonGroupDao();
-            PersonGroupMemberDao personGroupMemberDao =
-                    appDb.getRepository(dummyBaseUrl, dummyAuth).getPersonGroupMemberDao();
-            ClazzDao clazzDao = appDb.getRepository(dummyBaseUrl, dummyAuth).getClazzDao();
-            ClazzMemberDao clazzMemberDao =
-                    appDb.getRepository(dummyBaseUrl, dummyAuth).getClazzMemberDao();
-
-            String teacherUsername = "teachertest";
-            String officerUsername = "officertest";
-            String mneUsername = "mnetest";
-            String selUsername = "seltest";
-
-            List<TestRole> usersToMake = new ArrayList<>();
-            usersToMake.add(new TestRole(teacherUsername, "teacherpass"));
-            usersToMake.add(new TestRole(officerUsername, "officerpass"));
-            usersToMake.add(new TestRole(mneUsername, "mnepass"));
-            usersToMake.add(new TestRole(selUsername, "selpass"));
-
-            for(TestRole every_role: usersToMake){
-                Person newTestPerson = new Person();
-                newTestPerson.setFirstNames(every_role.username);
-                newTestPerson.setLastName("Permission");
-                newTestPerson.setUsername(every_role.username);
-                newTestPerson.setActive(true);
-                newTestPerson.setAdmin(false);
-                newTestPerson.setGender(Person.GENDER_FEMALE);
-                Long newTestPersonUid = personDao.insert(newTestPerson);
-                newTestPerson.setPersonUid(newTestPersonUid);
-
-                PersonAuth newTestPersonAuth = new PersonAuth();
-                newTestPersonAuth.setPersonAuthUid(newTestPersonUid);
-                newTestPersonAuth.setPasswordHash("p:" + every_role.password);
-                personAuthDao.insert(newTestPersonAuth);
-
-                PersonGroup newTestPersonGroup = new PersonGroup();
-                newTestPersonGroup.setGroupName(every_role.username + "'s group");
-                Long newTestPersonGroupUid = personGroupDao.insert(newTestPersonGroup);
-                newTestPersonGroup.setGroupUid(newTestPersonGroupUid);
-
-                PersonGroupMember newTestPersonGroupMember = new PersonGroupMember();
-                newTestPersonGroupMember.setGroupMemberPersonUid(newTestPersonUid);
-                newTestPersonGroupMember.setGroupMemberGroupUid(newTestPersonGroupUid);
-                Long newTestPersonGroupMemberUid =
-                        personGroupMemberDao.insert(newTestPersonGroupMember);
-
-                //Create a clazz
-                Clazz testClazz = new Clazz();
-                testClazz.setClazzActive(true);
-                testClazz.setClazzName(every_role.username + "'s Class");
-                Long testClazzUid = clazzDao.insert(testClazz);
-                testClazz.setClazzUid(testClazzUid);
-
-                ClazzMember newClazzMember = new ClazzMember();
-                newClazzMember.setClazzMemberPersonUid(newTestPersonUid);
-
-                Role newRole = new Role();
-                EntityRole newEntityRole = new EntityRole();
-
-                if(every_role.username.equals(teacherUsername)){
-
-                    newClazzMember.setRole(ClazzMember.ROLE_TEACHER);
-                    newClazzMember.setDateJoined(System.currentTimeMillis());
-                    newClazzMember.setClazzMemberClazzUid(testClazzUid);
-                    newClazzMember.setClazzMemberActive(true);
-                    Long newClazzMemberUid = clazzMemberDao.insert(newClazzMember);
-                    newClazzMember.setClazzMemberUid(newClazzMemberUid);
-
-                    //Role - Just Name and Permissions
-                    //EntityRole - Specific to peron group, Clazz (AND/OR particular Clazz) and Role
-
-                    //Whole Clazz Entity Role Specific:
-                    newRole.setRoleName("teacher");
-                    long teacherPermissions =
-                            Role.PERMISSION_CLAZZ_SELECT | Role.PERMISSION_CLAZZ_RECORD_ACTIVITY |
-                            Role.PERMISSION_CLAZZ_VIEW_REPORTS | Role.PERMISSION_CLAZZ_UPDATE |
-                            Role.PERMISSION_CLAZZ_VIEW_ACTIVITY | Role.PERMISSION_CLAZZ_RECORD_ACTIVITY |
-                            Role.PERMISSION_CLAZZ_VIEW_ATTENDANCE | Role.PERMISSION_CLAZZ_RECORD_ATTENDANCE |
-                            Role.PERMISSION_PERSON_UPDATE | Role.PERMISSION_PERSON_SELECT;
-                    newRole.setRolePermissions(teacherPermissions);
-                    Long newRoleUid = roleDao.insert(newRole);
-
-                    //Assign that teacher role (for whole Clazz Table) to the person group
-                    newEntityRole.setErGroupUid(newTestPersonGroupUid);
-                    newEntityRole.setErRoleUid(newRoleUid);
-                    newEntityRole.setErTableId(Clazz.TABLE_ID);
-                    //newEntityRole.setErEntityUid();   //Not for a particular Clazz but for whole.
-
-                    Long newEntityRoleUid = entityRoleDao.insert(newEntityRole);
-                    newEntityRole.setErUid(newEntityRoleUid);
-
-                    //For a specific clazz
-                    EntityRole newEntityClazzSpecific = new EntityRole();
-                    newEntityClazzSpecific.setErGroupUid(newTestPersonGroupUid);
-                    newEntityClazzSpecific.setErRoleUid(newRoleUid);
-                    newEntityClazzSpecific.setErTableId(Clazz.TABLE_ID);
-                    newEntityClazzSpecific.setErEntityUid(testClazzUid);
-                    Long newEntityClazzSpecificUid =
-                            entityRoleDao.insert(newEntityClazzSpecific);
-                    newEntityClazzSpecific.setErUid(newEntityClazzSpecificUid);
-
-
-
-                }
-            }
-
-
-
-
-
-
-
-
-        }
 
         public void addSELQuestions(){
 

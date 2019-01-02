@@ -131,7 +131,7 @@ public class ClazzActivityEditPresenter
 
     public void checkPermissions(){
         clazzdao.personHasPermission(loggedInPersonUid, currentClazzUid,
-                Role.PERMISSION_CLAZZ_RECORD_ACTIVITY, new UmCallback<Boolean>() {
+                Role.PERMISSION_CLAZZ_LOG_ACTIVITY_INSERT, new UmCallback<Boolean>() {
             @Override
             public void onSuccess(Boolean result) {
                 setActivityEditable(result);

@@ -88,7 +88,7 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
         ClazzDao clazzDao = repository.getClazzDao();
 
         clazzDao.personHasPermission(loggedInPersonUid, currentClazzUid,
-                Role.PERMISSION_CLAZZ_RECORD_ATTENDANCE, new UmCallback<Boolean>() {
+                Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_INSERT, new UmCallback<Boolean>() {
             @Override
             public void onSuccess(Boolean result) {
                 setHasEditPermissions(result);
