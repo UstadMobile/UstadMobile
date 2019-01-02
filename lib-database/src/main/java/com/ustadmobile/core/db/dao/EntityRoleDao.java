@@ -7,7 +7,11 @@ import com.ustadmobile.lib.database.annotation.UmRepository;
 import com.ustadmobile.lib.db.entities.EntityRole;
 import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
-@UmDao(selectPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
+import static com.ustadmobile.core.db.dao.RoleDao.SELECT_ACCOUNT_IS_ADMIN;
+
+@UmDao(selectPermissionCondition = "(:accountPersonUid = :accountPersonUid)",
+updatePermissionCondition = SELECT_ACCOUNT_IS_ADMIN ,
+insertPermissionCondition = SELECT_ACCOUNT_IS_ADMIN)
 @UmRepository
 public abstract class EntityRoleDao implements SyncableDao<EntityRole, EntityRoleDao> {
 
