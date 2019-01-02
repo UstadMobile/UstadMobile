@@ -14,7 +14,6 @@ import com.ustadmobile.core.view.ClassLogDetailView;
 import com.ustadmobile.core.view.ClassLogListView;
 import com.ustadmobile.lib.db.entities.ClazzLog;
 import com.ustadmobile.lib.db.entities.DailyAttendanceNumbers;
-import com.ustadmobile.lib.db.entities.EntityRole;
 import com.ustadmobile.lib.db.entities.Role;
 
 import java.util.Calendar;
@@ -127,7 +126,7 @@ public class ClazzLogListPresenter extends UstadBaseController<ClassLogListView>
 
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         Hashtable<String, Object> args = new Hashtable<>();
-        args.put(ARG_CLAZZ_UID, clazzLog.getClazzClazzUid());
+        args.put(ARG_CLAZZ_UID, clazzLog.getClazzLogClazzUid());
         args.put(ARG_LOGDATE, clazzLog.getLogDate());
         impl.go(ClassLogDetailView.VIEW_NAME, args, view.getContext());
     }

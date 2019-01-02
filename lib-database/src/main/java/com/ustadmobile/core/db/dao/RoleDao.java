@@ -7,9 +7,14 @@ import com.ustadmobile.lib.database.annotation.UmRepository;
 import com.ustadmobile.lib.db.entities.Role;
 import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
-@UmDao(selectPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
+import static com.ustadmobile.core.db.dao.RoleDao.SELECT_ACCOUNT_IS_ADMIN;
+
+@UmDao(updatePermissionCondition = SELECT_ACCOUNT_IS_ADMIN,
+insertPermissionCondition = SELECT_ACCOUNT_IS_ADMIN)
 @UmRepository
 public abstract class RoleDao implements SyncableDao<Role, RoleDao> {
+
+    public static final String SELECT_ACCOUNT_IS_ADMIN = "(SELECT admin FROM Person WHERE personUid = :accountPersonUid)";
 
     @UmQuery("SELECT * FROM Role WHERE roleName=:roleName")
     public abstract void findByName(String roleName, UmCallback<Role> callback);

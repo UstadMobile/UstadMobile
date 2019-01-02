@@ -104,7 +104,7 @@ public class ClazzActivityListPresenter
                 for(int j = 0 ; j < objectArr.length ; j ++){
                     strArr[j] = (String) objectArr[j];
                 }
-                view.setClazzActivityChangesDropdownPresets(strArr);
+                view.runOnUiThread(() ->view.setClazzActivityChangesDropdownPresets(strArr));
             }
 
             @Override

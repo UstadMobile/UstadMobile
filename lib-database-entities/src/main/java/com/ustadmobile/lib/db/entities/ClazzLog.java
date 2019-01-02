@@ -16,7 +16,7 @@ public class ClazzLog{
     @UmPrimaryKey(autoGenerateSyncable = true)
     private long clazzLogUid;
 
-    private long clazzClazzUid;
+    private long clazzLogClazzUid;
 
     private long logDate;
 
@@ -122,12 +122,12 @@ public class ClazzLog{
         this.clazzLogUid = clazzLogUid;
     }
 
-    public long getClazzClazzUid() {
-        return clazzClazzUid;
+    public long getClazzLogClazzUid() {
+        return clazzLogClazzUid;
     }
 
-    public void setClazzClazzUid(long clazzClazzUid) {
-        this.clazzClazzUid = clazzClazzUid;
+    public void setClazzLogClazzUid(long clazzLogClazzUid) {
+        this.clazzLogClazzUid = clazzLogClazzUid;
     }
 
     public long getLogDate() {

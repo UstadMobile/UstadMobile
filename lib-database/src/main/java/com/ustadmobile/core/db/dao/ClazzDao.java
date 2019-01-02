@@ -174,14 +174,14 @@ public abstract class ClazzDao implements SyncableDao<Clazz, ClazzDao> {
             " LEFT JOIN ClazzLog " +
             " ON ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid = ClazzLog.clazzLogUid " +
             " WHERE ClazzLog.done = 1 " +
-            " AND ClazzLog.clazzClazzUid = :clazzUid " +
+            " AND ClazzLog.clazzLogClazzUid = :clazzUid " +
             " AND ClazzLogAttendanceRecord.attendanceStatus = 1) * 1.0 " +
             " /  " +
             "MAX(1, (SELECT COUNT(*) FROM ClazzLogAttendanceRecord  " +
             "LEFT JOIN ClazzLog " +
             " ON ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid = ClazzLog.clazzLogUid " +
             "WHERE ClazzLog.done = 1 " +
-            " AND ClazzLog.clazzClazzUid = :clazzUid " +
+            " AND ClazzLog.clazzLogClazzUid = :clazzUid " +
             ")) * 1.0 " +
             "Where Clazz.clazzUid = :clazzUid")
     public abstract void updateAttendancePercentage(long clazzUid);

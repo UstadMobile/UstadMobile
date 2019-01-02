@@ -11,12 +11,21 @@ import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord;
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecordWithPerson;
 import com.ustadmobile.lib.db.entities.DailyAttendanceNumbers;
 import com.ustadmobile.lib.db.entities.Person;
+import com.ustadmobile.lib.db.entities.Role;
 import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@UmDao(selectPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
+@UmDao(permissionJoin = "INNER JOIN ClazzLog ON ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid = ClazzLog.clazzLogUid " +
+        "INNER JOIN Clazz ON ClazzLog.clazzLogUid = Clazz.clazzUid ",
+selectPermissionCondition = ClazzDao.ENTITY_LEVEL_PERMISSION_CONDITION1 +
+         Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT + ClazzDao.ENTITY_LEVEL_PERMISSION_CONDITION2,
+updatePermissionCondition = ClazzDao.ENTITY_LEVEL_PERMISSION_CONDITION1 +
+        Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_UPDATE + ClazzDao.ENTITY_LEVEL_PERMISSION_CONDITION2,
+insertPermissionCondition = ClazzDao.TABLE_LEVEL_PERMISSION_CONDITION1 +
+        Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_INSERT + ClazzDao.TABLE_LEVEL_PERMISSION_CONDITION2
+)
 @UmRepository
 public abstract class ClazzLogAttendanceRecordDao implements
         SyncableDao<ClazzLogAttendanceRecord, ClazzLogAttendanceRecordDao> {
@@ -241,7 +250,7 @@ public abstract class ClazzLogAttendanceRecordDao implements
             " WHERE ClazzLog.done = 1 " +
             " AND ClazzLog.logDate > :fromDate " +
             " AND ClazzLog.logDate < :toDate " +
-            " AND ClazzLog.clazzClazzUid = :clazzUid " +
+            " AND ClazzLog.clazzLogClazzUid = :clazzUid " +
             "group by (ClazzLog.logDate)")
     public abstract void findDailyAttendanceByClazzUidAndDateAsync( long clazzUid, long fromDate,
                             long toDate, UmCallback<List<DailyAttendanceNumbers>> resultObject);
@@ -255,7 +264,7 @@ public abstract class ClazzLogAttendanceRecordDao implements
             " then 1 else 0 end) * 1.0 / COUNT(*) as absentPercentage, " +
             " sum(case when attendanceStatus = " + ClazzLogAttendanceRecord.STATUS_PARTIAL +
             " then 1 else 0 end) * 1.0 / COUNT(*) as partialPercentage, " +
-            " ClazzLog.clazzClazzUid as clazzUid, " +
+            " ClazzLog.clazzLogClazzUid as clazzUid, " +
             " sum(case when attendanceStatus = 1 and Person.gender = " + Person.GENDER_FEMALE +
             " then 1 else 0 end) * 1.0 / COUNT(*) as femaleAttendance, " +
             " sum(case when attendanceStatus = 1 and Person.gender =  " + Person.GENDER_MALE +
