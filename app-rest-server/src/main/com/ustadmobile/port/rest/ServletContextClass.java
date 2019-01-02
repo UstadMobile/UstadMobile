@@ -99,18 +99,35 @@ public class ServletContextClass implements ServletContextListener
         public void addRolesAndPermissions(){
             RoleDao roleDao = appDb.getRepository(dummyBaseUrl, dummyAuth).getRoleDao();
 
-            //Add teacher role
-            Role newRole = new Role();
 
-            newRole.setRoleName(ROLE_NAME_TEACHER);
-            long teacherPermissions =
-                    Role.PERMISSION_CLAZZ_SELECT | Role.PERMISSION_CLAZZ_RECORD_ACTIVITY |
-                            Role.PERMISSION_CLAZZ_VIEW_REPORTS | Role.PERMISSION_CLAZZ_UPDATE |
-                            Role.PERMISSION_CLAZZ_VIEW_ACTIVITY | Role.PERMISSION_CLAZZ_RECORD_ACTIVITY |
-                            Role.PERMISSION_CLAZZ_VIEW_ATTENDANCE | Role.PERMISSION_CLAZZ_RECORD_ATTENDANCE |
-                            Role.PERMISSION_PERSON_UPDATE | Role.PERMISSION_PERSON_SELECT;
-            newRole.setRolePermissions(teacherPermissions);
-            Long newRoleUid = roleDao.insert(newRole);
+
+            //TODO: Check if role already created. If created, don't create it again.
+            roleDao.findByName(ROLE_NAME_TEACHER, new UmCallback<Role>() {
+                @Override
+                public void onSuccess(Role result) {
+                    if(result == null){
+                        //Add teacher role
+                        Role newRole = new Role();
+
+                        newRole.setRoleName(ROLE_NAME_TEACHER);
+                        long teacherPermissions =
+                                Role.PERMISSION_CLAZZ_SELECT | Role.PERMISSION_CLAZZ_RECORD_ACTIVITY |
+                                        Role.PERMISSION_CLAZZ_VIEW_REPORTS | Role.PERMISSION_CLAZZ_UPDATE |
+                                        Role.PERMISSION_CLAZZ_VIEW_ACTIVITY | Role.PERMISSION_CLAZZ_RECORD_ACTIVITY |
+                                        Role.PERMISSION_CLAZZ_VIEW_ATTENDANCE | Role.PERMISSION_CLAZZ_RECORD_ATTENDANCE |
+                                        Role.PERMISSION_PERSON_UPDATE | Role.PERMISSION_PERSON_SELECT;
+                        newRole.setRolePermissions(teacherPermissions);
+                        Long newRoleUid = roleDao.insert(newRole);
+                    }else{
+                        System.out.println("Role already created for teacher");
+                    }
+                }
+
+                @Override
+                public void onFailure(Throwable exception) {
+                    exception.printStackTrace();
+                }
+            });
 
         }
 

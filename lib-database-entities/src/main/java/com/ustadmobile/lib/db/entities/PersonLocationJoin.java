@@ -25,6 +25,15 @@ public class PersonLocationJoin {
     @UmSyncLastChangedBy
     private int plLastChangedBy;
 
+    public PersonLocationJoin() {
+
+    }
+
+    public PersonLocationJoin(Person person, Location location) {
+        this.personLocationPersonUid = person.getPersonUid();
+        this.personLocationLocationUid = location.getLocationUid();
+    }
+
     public long getPersonLocationUid() {
         return personLocationUid;
     }

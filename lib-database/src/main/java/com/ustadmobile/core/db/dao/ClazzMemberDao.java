@@ -15,7 +15,11 @@ import com.ustadmobile.lib.db.entities.PersonWithEnrollment;
 import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 import java.util.List;
 
-@UmDao(selectPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
+@UmDao(
+        inheritPermissionFrom = ClazzDao.class,
+        inheritPermissionForeignKey = "clazzMemberClazzUid",
+        inheritPermissionJoinedPrimaryKey = "clazzUid"
+)
 @UmRepository
 public abstract class ClazzMemberDao implements SyncableDao<ClazzMember, ClazzMemberDao> {
 

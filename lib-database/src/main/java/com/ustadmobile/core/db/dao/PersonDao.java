@@ -14,10 +14,10 @@ import com.ustadmobile.lib.db.entities.AccessToken;
 import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.Location;
 import com.ustadmobile.lib.db.entities.Person;
+import com.ustadmobile.lib.db.entities.PersonAuth;
 import com.ustadmobile.lib.db.entities.PersonGroup;
 import com.ustadmobile.lib.db.entities.PersonGroupMember;
 import com.ustadmobile.lib.db.entities.PersonWithEnrollment;
-import com.ustadmobile.lib.db.entities.PersonAuth;
 import com.ustadmobile.lib.db.entities.Role;
 import com.ustadmobile.lib.db.entities.UmAccount;
 import com.ustadmobile.lib.db.sync.dao.SyncableDao;
@@ -27,11 +27,15 @@ import com.ustadmobile.lib.db.sync.entities.SyncablePrimaryKey;
 import java.util.Random;
 
 import static com.ustadmobile.core.db.dao.PersonAuthDao.ENCRYPTED_PASS_PREFIX;
-import static com.ustadmobile.core.db.dao.PersonDao.PERMISSION_CONDITION1;
-import static com.ustadmobile.core.db.dao.PersonDao.PERMISSION_CONDITION2;
+import static com.ustadmobile.core.db.dao.PersonDao.ENTITY_LEVEL_PERMISSION_CONDITION1;
+import static com.ustadmobile.core.db.dao.PersonDao.ENTITY_LEVEL_PERMISSION_CONDITION2;
 
 
-@UmDao(selectPermissionCondition = PERMISSION_CONDITION1 + Role.PERMISSION_PERSON_SELECT + PERMISSION_CONDITION2)
+@UmDao(
+selectPermissionCondition = ENTITY_LEVEL_PERMISSION_CONDITION1 + Role.PERMISSION_PERSON_SELECT
+        + ENTITY_LEVEL_PERMISSION_CONDITION2,
+updatePermissionCondition = ENTITY_LEVEL_PERMISSION_CONDITION1 + Role.PERMISSION_PERSON_UPDATE
+        + ENTITY_LEVEL_PERMISSION_CONDITION2)
 @UmRepository
 public abstract class PersonDao implements SyncableDao<Person, PersonDao> {
 
@@ -74,7 +78,8 @@ public abstract class PersonDao implements SyncableDao<Person, PersonDao> {
             " (0) AS enrolled FROM Person WHERE Person.active = 1 ")
     public abstract UmProvider<PersonWithEnrollment> findAllPeopleWithEnrollment();
 
-    protected static final String PERMISSION_CONDITION1 = " Person.personUid = :accountPersonUid OR" +
+    protected static final String ENTITY_LEVEL_PERMISSION_CONDITION1 = " Person.personUid = :accountPersonUid OR" +
+
             "(SELECT admin FROM Person WHERE personUid = :accountPersonUid) = 1 OR " +
             "EXISTS(SELECT PersonGroupMember.groupMemberPersonUid FROM PersonGroupMember " +
             "JOIN EntityRole ON EntityRole.erGroupUid = PersonGroupMember.groupMemberGroupUid " +
@@ -89,11 +94,11 @@ public abstract class PersonDao implements SyncableDao<Person, PersonDao> {
             "OR" +
             "(EntityRole.ertableId = " + Location.TABLE_ID +
             " AND EntityRole.erEntityUid IN " +
-                "(SELECT locationAncestorId FROM LocationAncestorJoin WHERE locationAncestorChildLocationUid " +
+                "(SELECT locationAncestorAncestorLocationUid FROM LocationAncestorJoin WHERE locationAncestorChildLocationUid " +
                 "IN (SELECT personLocationLocationUid FROM PersonLocationJoin WHERE personLocationPersonUid = Person.personUid)))" +
             ") AND (Role.rolePermissions & ";
 
-    protected static final String PERMISSION_CONDITION2 = ") > 0)";
+    protected static final String ENTITY_LEVEL_PERMISSION_CONDITION2 = ") > 0)";
 
     public static final long SESSION_LENGTH = 28L * 24L * 60L * 60L * 1000L;// 28 days
 

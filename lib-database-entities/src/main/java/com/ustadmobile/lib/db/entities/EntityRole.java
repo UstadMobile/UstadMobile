@@ -1,6 +1,7 @@
 package com.ustadmobile.lib.db.entities;
 
 import com.ustadmobile.lib.database.annotation.UmEntity;
+import com.ustadmobile.lib.database.annotation.UmIndexField;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 import com.ustadmobile.lib.database.annotation.UmSyncLastChangedBy;
 import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
@@ -21,12 +22,16 @@ public class EntityRole {
     @UmSyncLastChangedBy
     private int erLastChangedBy;
 
+    @UmIndexField
     private int erTableId;
 
+    @UmIndexField
     private long erEntityUid;
 
+    @UmIndexField
     private long erGroupUid;
 
+    @UmIndexField
     private long erRoleUid;
 
     public EntityRole() {
