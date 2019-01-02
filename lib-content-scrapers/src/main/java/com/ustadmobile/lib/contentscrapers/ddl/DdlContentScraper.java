@@ -76,7 +76,7 @@ public class DdlContentScraper {
         contentEntryDao = repository.getContentEntryDao();
         contentEntryFileDao = repository.getContentEntryFileDao();
         contentEntryFileJoinDao = repository.getContentEntryContentEntryFileJoinDao();
-        contentFileStatusDao = repository.getContentEntryFileStatusDao();
+        contentFileStatusDao = db.getContentEntryFileStatusDao();
         categorySchemaDao = repository.getContentCategorySchemaDao();
         contentCategoryDao = repository.getContentCategoryDao();
         languageDao = repository.getLanguageDao();

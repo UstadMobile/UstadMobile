@@ -119,7 +119,7 @@ public class IndexCategoryCK12Content {
         contentParentChildJoinDao = repository.getContentEntryParentChildJoinDao();
         contentEntryFileDao = repository.getContentEntryFileDao();
         contentEntryFileJoinDao = repository.getContentEntryContentEntryFileJoinDao();
-        contentFileStatusDao = repository.getContentEntryFileStatusDao();
+        contentFileStatusDao = db.getContentEntryFileStatusDao();
         languageDao = repository.getLanguageDao();
 
         new LanguageList().addAllLanguages();

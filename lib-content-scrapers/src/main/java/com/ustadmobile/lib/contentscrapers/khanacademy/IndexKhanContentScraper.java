@@ -107,7 +107,7 @@ public class IndexKhanContentScraper {
         contentParentChildJoinDao = repository.getContentEntryParentChildJoinDao();
         contentEntryFileDao = repository.getContentEntryFileDao();
         contentEntryFileJoin = repository.getContentEntryContentEntryFileJoinDao();
-        contentFileStatusDao = repository.getContentEntryFileStatusDao();
+        contentFileStatusDao = db.getContentEntryFileStatusDao();
         languageDao = repository.getLanguageDao();
 
         gson = new GsonBuilder().disableHtmlEscaping().create();
@@ -129,7 +129,7 @@ public class IndexKhanContentScraper {
                 "https://cdn.kastatic.org/images/khan-logo-dark-background.new.png",
                 EMPTY_STRING, EMPTY_STRING, contentEntryDao);
 
-        ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, masterRootParent, khanAcademyEntry, 3);
+        ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, masterRootParent, khanAcademyEntry, 6);
 
         File englishFolder = new File(destinationDirectory, "en");
         englishFolder.mkdirs();

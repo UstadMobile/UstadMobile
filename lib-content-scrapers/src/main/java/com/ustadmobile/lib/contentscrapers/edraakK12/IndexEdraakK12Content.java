@@ -107,7 +107,7 @@ public class IndexEdraakK12Content {
         contentParentChildJoinDao = repository.getContentEntryParentChildJoinDao();
         contentEntryFileDao = repository.getContentEntryFileDao();
         contentEntryFileJoin = repository.getContentEntryContentEntryFileJoinDao();
-        contentFileStatusDao = repository.getContentEntryFileStatusDao();
+        contentFileStatusDao = db.getContentEntryFileStatusDao();
         languageDao = repository.getLanguageDao();
 
         new LanguageList().addAllLanguages();

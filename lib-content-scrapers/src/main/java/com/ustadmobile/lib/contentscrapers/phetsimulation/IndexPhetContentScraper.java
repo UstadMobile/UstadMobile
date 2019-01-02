@@ -107,7 +107,7 @@ public class IndexPhetContentScraper {
         contentEntryFileJoin = repository.getContentEntryContentEntryFileJoinDao();
         contentEntryCategoryJoinDao = repository.getContentEntryContentCategoryJoinDao();
         contentEntryRelatedJoinDao = repository.getContentEntryRelatedEntryJoinDao();
-        contentFileStatusDao = repository.getContentEntryFileStatusDao();
+        contentFileStatusDao = db.getContentEntryFileStatusDao();
         languageDao = repository.getLanguageDao();
         languageVariantDao = repository.getLanguageVariantDao();
 

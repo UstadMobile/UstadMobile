@@ -114,7 +114,7 @@ public class AsbScraper {
         ContentEntryParentChildJoinDao contentParentChildJoinDao = repository.getContentEntryParentChildJoinDao();
         ContentEntryFileDao contentEntryFileDao = repository.getContentEntryFileDao();
         ContentEntryContentEntryFileJoinDao contentEntryFileJoinDao = repository.getContentEntryContentEntryFileJoinDao();
-        ContentEntryFileStatusDao contentFileStatusDao = repository.getContentEntryFileStatusDao();
+        ContentEntryFileStatusDao contentFileStatusDao = db.getContentEntryFileStatusDao();
         ContentCategorySchemaDao categorySchemeDao = repository.getContentCategorySchemaDao();
         ContentCategoryDao categoryDao = repository.getContentCategoryDao();
         ContentEntryContentCategoryJoinDao contentCategoryJoinDao = repository.getContentEntryContentCategoryJoinDao();

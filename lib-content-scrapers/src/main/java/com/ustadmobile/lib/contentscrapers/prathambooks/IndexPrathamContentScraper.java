@@ -2,7 +2,6 @@ package com.ustadmobile.lib.contentscrapers.prathambooks;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.neovisionaries.i18n.LanguageAlpha3Code;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.ContentEntryContentEntryFileJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryDao;
@@ -14,12 +13,8 @@ import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.LanguageList;
 import com.ustadmobile.lib.contentscrapers.ScraperConstants;
 import com.ustadmobile.lib.db.entities.ContentEntry;
-import com.ustadmobile.lib.db.entities.ContentEntryContentEntryFileJoin;
-import com.ustadmobile.lib.db.entities.ContentEntryFile;
-import com.ustadmobile.lib.db.entities.ContentEntryFileStatus;
 import com.ustadmobile.lib.db.entities.Language;
 
-import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.openqa.selenium.By;
@@ -28,13 +23,11 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.List;
 
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.EMPTY_STRING;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.ROOT;
@@ -102,7 +95,7 @@ public class IndexPrathamContentScraper {
         contentParentChildJoinDao = repository.getContentEntryParentChildJoinDao();
         contentEntryFileDao = repository.getContentEntryFileDao();
         contentEntryFileJoinDao = repository.getContentEntryContentEntryFileJoinDao();
-        contentFileStatusDao = repository.getContentEntryFileStatusDao();
+        contentFileStatusDao = db.getContentEntryFileStatusDao();
         languageDao = repository.getLanguageDao();
 
         new LanguageList().addAllLanguages();
