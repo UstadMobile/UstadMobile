@@ -100,7 +100,10 @@ public class TestIndexKhanAcademy {
         File videoCourseFolder = new File(coursesFolder, "counting-with-small-numbers");
         Assert.assertEquals(true, videoCourseFolder.isDirectory());
 
-        File videoFile = new File(videoCourseFolder, "counting-with-small-numbers.mp4");
+        File courseFolder = new File(videoCourseFolder, "counting-with-small-numbers");
+        Assert.assertEquals(true, courseFolder.isDirectory());
+
+        File videoFile = new File(courseFolder, "video.mp4");
         Assert.assertEquals(true, videoFile.isFile());
 
         ContentEntryDao contentEntryDao = repo.getContentEntryDao();
