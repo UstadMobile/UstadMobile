@@ -9,11 +9,19 @@ import com.ustadmobile.lib.database.annotation.UmRepository;
 import com.ustadmobile.lib.database.annotation.UmUpdate;
 import com.ustadmobile.lib.db.entities.ClazzActivity;
 import com.ustadmobile.lib.db.entities.DailyActivityNumbers;
+import com.ustadmobile.lib.db.entities.Role;
 import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
 import java.util.List;
 
-@UmDao(selectPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
+@UmDao(permissionJoin = " JOIN Clazz ON ClazzActivity.clazzActivityClazzUid = Clazz.clazzUid ",
+selectPermissionCondition = ClazzDao.ENTITY_LEVEL_PERMISSION_CONDITION1 +
+            Role.PERMISSION_CLAZZ_LOG_ACTIVITY_SELECT + ClazzDao.ENTITY_LEVEL_PERMISSION_CONDITION2,
+updatePermissionCondition = ClazzDao.ENTITY_LEVEL_PERMISSION_CONDITION1 +
+        Role.PERMISSION_CLAZZ_LOG_ACTIVITY_UPDATE + ClazzDao.ENTITY_LEVEL_PERMISSION_CONDITION2,
+insertPermissionCondition = ClazzDao.TABLE_LEVEL_PERMISSION_CONDITION1 +
+        Role.PERMISSION_CLAZZ_LOG_ACTIVITY_INSERT + ClazzDao.TABLE_LEVEL_PERMISSION_CONDITION2
+)
 @UmRepository
 public abstract class ClazzActivityDao implements SyncableDao<ClazzActivity, ClazzActivityDao> {
 
