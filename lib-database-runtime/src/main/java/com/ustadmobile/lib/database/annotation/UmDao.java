@@ -42,4 +42,12 @@ public @interface UmDao {
      */
     String inheritPermissionJoinedPrimaryKey() default "";
 
+    /**
+     * Sometimes permission clauses may require multiple joins to another table, including when
+     * permission is not actually inherited from any other entity.
+     *
+     * @return
+     */
+    String permissionJoin() default "";
+
 }
