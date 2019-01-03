@@ -8,7 +8,6 @@ import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UmCallbackWithDefaultValue;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.FeedListView;
-import com.ustadmobile.core.view.ReportEditView;
 import com.ustadmobile.core.view.ReportSelectionView;
 import com.ustadmobile.lib.db.entities.ClazzAverage;
 import com.ustadmobile.lib.db.entities.FeedEntry;
@@ -16,7 +15,6 @@ import com.ustadmobile.lib.db.entities.Role;
 
 import java.util.Hashtable;
 
-import static com.ustadmobile.core.view.ReportEditView.ARG_REPORT_LINK;
 import static com.ustadmobile.core.view.ReportEditView.ARG_REPORT_NAME;
 
 /**
@@ -81,7 +79,7 @@ public class FeedListPresenter extends UstadBaseController<FeedListView>{
 
     public void checkPermissions(){
         ClazzDao clazzDao = repository.getClazzDao();
-        clazzDao.personHasPermission(loggedInPersonUid, Role.PERMISSION_CLAZZ_VIEW_REPORTS,
+        clazzDao.personHasPermission(loggedInPersonUid, Role.PERMISSION_REPORTS_VIEW,
             new UmCallbackWithDefaultValue<>(false, new UmCallback<Boolean>() {
                 @Override
                 public void onSuccess(Boolean result) {

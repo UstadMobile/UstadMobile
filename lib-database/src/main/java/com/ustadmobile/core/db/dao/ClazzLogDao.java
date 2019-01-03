@@ -7,13 +7,20 @@ import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.database.annotation.UmRepository;
 import com.ustadmobile.lib.db.entities.ClazzLog;
+import com.ustadmobile.lib.db.entities.Role;
 import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
 import java.util.List;
 
-@UmDao(inheritPermissionFrom = ClazzDao.class,
-inheritPermissionForeignKey = "clazzLogClazzUid",
-inheritPermissionJoinedPrimaryKey = "clazzUid")
+@UmDao(
+permissionJoin = "INNER JOIN Clazz ON ClazzLog.clazzLogClazzUid = Clazz.clazzUid",
+selectPermissionCondition = ClazzDao.ENTITY_LEVEL_PERMISSION_CONDITION1 +
+        Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT + ClazzDao.ENTITY_LEVEL_PERMISSION_CONDITION2,
+updatePermissionCondition = ClazzDao.ENTITY_LEVEL_PERMISSION_CONDITION1 +
+        Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_UPDATE + ClazzDao.ENTITY_LEVEL_PERMISSION_CONDITION2,
+insertPermissionCondition = ClazzDao.TABLE_LEVEL_PERMISSION_CONDITION1 +
+        Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_INSERT + ClazzDao.TABLE_LEVEL_PERMISSION_CONDITION2
+)
 @UmRepository
 public abstract class ClazzLogDao implements SyncableDao<ClazzLog, ClazzLogDao> {
 
@@ -57,7 +64,7 @@ public abstract class ClazzLogDao implements SyncableDao<ClazzLog, ClazzLogDao> 
     @UmQuery("SELECT * FROM ClazzLog")
     public abstract List<ClazzLog> findAll();
 
-    @UmQuery("UPDATE ClazzLog SET done = 1 where clazzLogClazzUid = :clazzLogUid ")
+    @UmQuery("UPDATE ClazzLog SET done = 1 where clazzLogUid = :clazzLogUid ")
     public abstract void updateDoneForClazzLogAsync(long clazzLogUid, UmCallback<Integer> callback);
 
     @UmQuery("SELECT * FROM ClazzLog where clazzLogClazzUid = :clazzUid")

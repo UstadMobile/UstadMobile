@@ -9,6 +9,7 @@ import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.database.annotation.UmRepository;
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord;
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecordWithPerson;
+import com.ustadmobile.lib.db.entities.ClazzMember;
 import com.ustadmobile.lib.db.entities.DailyAttendanceNumbers;
 import com.ustadmobile.lib.db.entities.Person;
 import com.ustadmobile.lib.db.entities.Role;
@@ -17,8 +18,8 @@ import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 import java.util.ArrayList;
 import java.util.List;
 
-@UmDao(permissionJoin = "INNER JOIN ClazzLog ON ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid = ClazzLog.clazzLogUid " +
-        "INNER JOIN Clazz ON ClazzLog.clazzLogUid = Clazz.clazzUid ",
+@UmDao(permissionJoin = "LEFT JOIN ClazzLog ON ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid = ClazzLog.clazzLogUid " +
+        "LEFT JOIN Clazz ON ClazzLog.clazzLogClazzUid = Clazz.clazzUid ",
 selectPermissionCondition = ClazzDao.ENTITY_LEVEL_PERMISSION_CONDITION1 +
          Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT + ClazzDao.ENTITY_LEVEL_PERMISSION_CONDITION2,
 updatePermissionCondition = ClazzDao.ENTITY_LEVEL_PERMISSION_CONDITION1 +
@@ -221,6 +222,7 @@ public abstract class ClazzLogAttendanceRecordDao implements
     @UmQuery("SELECT ClazzMember.clazzMemberUid FROM ClazzMember WHERE " +
             " ClazzMember.clazzMemberClazzUid = :clazzId " +
             " AND ClazzMember.clazzMemberActive = 1 " +
+            " AND ClazzMember.role = " + ClazzMember.ROLE_STUDENT +
             " AND ClazzMember.clazzMemberClazzUid " +
             " EXCEPT " +
             "SELECT clazzLogAttendanceRecordClazzMemberUid FROM ClazzLogAttendanceRecord " +

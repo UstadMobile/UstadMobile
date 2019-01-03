@@ -68,8 +68,11 @@ public class Role {
 
     public static final long PERMISSION_SEL_QUESTION_UPDATE = 524288;
 
-    //Added
-    public static final long PERMISSION_CLAZZ_VIEW_REPORTS = 1048576;
+    /**
+     * Permission to view reports. In reality, this is really just a UI permission, and does not
+     * affect access to the underlying data.
+     */
+    public static final long PERMISSION_REPORTS_VIEW = 1048576;
 
     public Role() {
 

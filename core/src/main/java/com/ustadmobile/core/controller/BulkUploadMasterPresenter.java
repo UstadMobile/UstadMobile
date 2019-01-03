@@ -423,11 +423,10 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
         String studentFatherName = bulkLine.father_name;
         String studentDateOfBirth = bulkLine.dob;
 
-        PersonCustomFieldDao personCustomFieldDao = repository.getPersonCustomFieldDao();
-        PersonCustomFieldValueDao personCustomFieldValueDao
-                = repository.getPersonCustomFieldValueDao();
-
         PersonCustomFieldDao personFieldDao = repository.getPersonCustomFieldDao();
+        PersonCustomFieldValueDao personCustomFieldValueDao =
+                repository.getPersonCustomFieldValueDao();
+
 
 
         String username;
@@ -436,7 +435,9 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
         }else{
             username = studentUsername;
         }
+
         repository.getPersonDao().findByUsernameAsync(username, new UmCallback<Person>() {
+
             @Override
             public void onSuccess(Person thePerson) {
                 if(thePerson != null){
@@ -473,10 +474,8 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
                             person.setGender(Person.GENDER_MALE);
                         }
 
-
                         //TODO: Set student Id
                         //TODO: Set student authentication
-
 
                     }
 
@@ -489,9 +488,11 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
                             Long personPersonUid = personWithGroup.getPersonUid();
                             Long personGroupUid = personWithGroup.getPersonGroupUid();
 
+                            System.out.println("hey");
+
                             //TODO: Set student's custom field : school
                             if(role == ClazzMember.ROLE_STUDENT) {
-                                personFieldDao.findByfieldName(
+                                personFieldDao.findByLabelMessageId(
                                     String.valueOf(MessageID.current_formal_school),
                                     new UmCallback<PersonField>() {
                                     @Override
@@ -502,7 +503,7 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
                                             personCustomFieldValue.setFieldValue(studentSchool);
                                             personCustomFieldValue
                                                     .setPersonCustomFieldValuePersonUid(personPersonUid);
-                                            personCustomFieldValue
+                                              personCustomFieldValue
                                                     .setPersonCustomFieldValuePersonCustomFieldUid(
                                                             customField.getPersonCustomFieldUid());
 
@@ -544,22 +545,22 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
                                                     newEntityClazzSpecific.setErTableId(Clazz.TABLE_ID);
                                                     newEntityClazzSpecific.setErEntityUid(thisClazz.getClazzUid());
                                                     repository.getEntityRoleDao()
-                                                            .insertAsync(newEntityClazzSpecific, new UmCallback<Long>() {
-                                                                @Override
-                                                                public void onSuccess(Long entityRoleDaoUid) {
-                                                                    if(entityRoleDaoUid != null){
-                                                                        checkClazzMember(thisClazz, bulkLine,
-                                                                                personPersonUid, role);
-                                                                    }else{
-                                                                        view.showMessage("Something went wrong in clazz entity roles");
-                                                                    }
+                                                        .insertAsync(newEntityClazzSpecific, new UmCallback<Long>() {
+                                                            @Override
+                                                            public void onSuccess(Long entityRoleDaoUid) {
+                                                                if(entityRoleDaoUid != null){
+                                                                    checkClazzMember(thisClazz, bulkLine,
+                                                                            personPersonUid, role);
+                                                                }else{
+                                                                    view.showMessage("Something went wrong in clazz entity roles");
                                                                 }
+                                                            }
 
-                                                                @Override
-                                                                public void onFailure(Throwable exception) {
-                                                                    exception.printStackTrace();
-                                                                }
-                                                            });
+                                                            @Override
+                                                            public void onFailure(Throwable exception) {
+                                                                exception.printStackTrace();
+                                                            }
+                                                        });
 
                                                 }else{
                                                     view.showMessage("Something went wrong");
@@ -579,7 +580,7 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
 
 
                             }else{
-                                System.out.println("ERROR: UNABLE TO PERSIST TEACHER!");
+                                System.out.println("ERROR: UNABLE TO PERSIST PERSON!");
                             }
                         }
 
@@ -594,7 +595,7 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
 
             @Override
             public void onFailure(Throwable exception) {
-
+                exception.printStackTrace();
             }
         });
     }
