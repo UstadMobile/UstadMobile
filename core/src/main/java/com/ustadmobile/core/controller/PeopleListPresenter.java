@@ -10,6 +10,7 @@ import com.ustadmobile.core.db.dao.PersonCustomFieldValueDao;
 import com.ustadmobile.core.db.dao.PersonDao;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
+import com.ustadmobile.core.impl.UmCallbackWithDefaultValue;
 import com.ustadmobile.core.view.PeopleListView;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 
@@ -26,6 +27,7 @@ import com.ustadmobile.lib.db.entities.UmAccount;
 import static com.ustadmobile.core.view.ClazzDetailEnrollStudentView.ARG_NEW_PERSON;
 import static com.ustadmobile.core.view.PersonDetailView.ARG_PERSON_UID;
 import static com.ustadmobile.lib.db.entities.PersonDetailPresenterField.CUSTOM_FIELD_MIN_UID;
+import static com.ustadmobile.lib.db.entities.Role.PERMISSION_PERSON_INSERT;
 
 
 /**
@@ -65,6 +67,8 @@ public class PeopleListPresenter
         loggedInPersonUid = UmAccountManager.getActiveAccount(context).getPersonUid();
 
         getLoggedInPerson();
+
+        checkPermissions();
     }
 
     /**
@@ -89,7 +93,19 @@ public class PeopleListPresenter
     }
 
     public void checkPermissions(){
+        ClazzDao clazzDao = repository.getClazzDao();
+        clazzDao.personHasPermission(loggedInPersonUid, PERMISSION_PERSON_INSERT,
+                new UmCallbackWithDefaultValue<>(false, new UmCallback<Boolean>() {
+            @Override
+            public void onSuccess(Boolean result) {
+                view.showFAB(result);
+            }
 
+            @Override
+            public void onFailure(Throwable exception) {
+
+            }
+        }));
     }
 
     /**
@@ -142,7 +158,7 @@ public class PeopleListPresenter
 
                     @Override
                     public void onFailure(Throwable exception) {
-
+                        exception.printStackTrace();
                     }
                 });
 

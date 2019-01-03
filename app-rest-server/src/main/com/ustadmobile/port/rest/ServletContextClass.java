@@ -80,7 +80,7 @@ public class ServletContextClass implements ServletContextListener
             //Add SEL questions - TODO: Remove after testing
             addSELQuestions();
 
-            //Add Permissions and Role - TODO: Remove after testing
+            //Add Permissions and Role
             addRolesAndPermissions();
 
         }

@@ -24,6 +24,7 @@ import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 import com.ustadmobile.lib.db.sync.entities.SyncDeviceBits;
 import com.ustadmobile.lib.db.sync.entities.SyncablePrimaryKey;
 
+import java.util.List;
 import java.util.Random;
 
 import static com.ustadmobile.core.db.dao.PersonAuthDao.ENCRYPTED_PASS_PREFIX;
@@ -38,6 +39,11 @@ updatePermissionCondition = ENTITY_LEVEL_PERMISSION_CONDITION1 + Role.PERMISSION
         + ENTITY_LEVEL_PERMISSION_CONDITION2)
 @UmRepository
 public abstract class PersonDao implements SyncableDao<Person, PersonDao> {
+
+
+    //For debugging
+    @UmQuery("SELECT * FROM Person")
+    public abstract List<Person> findAll();
 
     @Override
     @UmInsert
