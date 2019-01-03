@@ -112,6 +112,5 @@ public class SELQuestionSetsActivity extends UstadBaseActivity implements SELQue
 
         //set the adapter
         mRecyclerView.setAdapter(recyclerAdapter);
-
     }
 }

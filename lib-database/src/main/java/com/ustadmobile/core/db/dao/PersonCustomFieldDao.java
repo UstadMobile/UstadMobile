@@ -39,4 +39,7 @@ public abstract class PersonCustomFieldDao
 
     @UmQuery("SELECT * FROM PersonField WHERE fieldName = :name")
     public abstract void findByFieldNameAsync(String name, UmCallback<List<PersonField>> resultList);
+
+    @UmQuery("SELECT * FROM PersonField WHERE fieldName = :fieldName")
+    public abstract void findByfieldName(String fieldName, UmCallback<PersonField> resultList);
 }

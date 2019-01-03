@@ -491,7 +491,7 @@ This is the one you should be editing. The one in /core/locale/main/values/strin
     <string name="users_desc">Add and remove users. Modify permissions</string>
     <string name="users">Users</string>
     <string name="question_set">Question set</string>
-
+    <string name="new_question_set">New question set</string>
 
 
 
