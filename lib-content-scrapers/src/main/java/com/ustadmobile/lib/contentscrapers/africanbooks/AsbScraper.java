@@ -152,7 +152,7 @@ public class AsbScraper {
                             langValue = value.substring(0, value.indexOf("(")).trim();
                         }
                         langMap.put(id, langValue);
-                        Language langEntity = ContentScraperUtil.insertOrUpdateLanguage(languageDao, langValue);
+                        Language langEntity = ContentScraperUtil.insertOrUpdateLanguageByName(languageDao, langValue);
 
                         if (!variant.isEmpty()) {
                             ContentScraperUtil.insertOrUpdateLanguageVariant(variantDao, variant, langEntity);
@@ -222,7 +222,7 @@ public class AsbScraper {
 
                 LanguageVariant languageVariant = null;
                 if (!variant.isEmpty()) {
-                    languageVariant = ContentScraperUtil.insertOrUpdateLanguageVariant(variantDao, variant, language);
+                    languageVariant = ContentScraperUtil. insertOrUpdateLanguageVariant(variantDao, variant, language);
                 }
                 String sourceUrl = epubUrl.getPath() + "?" + epubUrl.getQuery();
 
@@ -260,7 +260,7 @@ public class AsbScraper {
 
                         Language relatedLanguage = languageDao.findByName(relatedLangValue);
                         if (relatedLanguage == null) {
-                            relatedLanguage = ContentScraperUtil.insertOrUpdateLanguage(languageDao, lang);
+                            relatedLanguage = ContentScraperUtil.insertOrUpdateLanguageByName(languageDao, lang);
                         }
                         LanguageVariant relatedLanguageVariant = null;
                         if (!variant.isEmpty()) {

@@ -12,7 +12,6 @@ import com.ustadmobile.core.db.dao.LanguageDao;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.LanguageList;
 import com.ustadmobile.lib.contentscrapers.ScraperConstants;
-import com.ustadmobile.lib.contentscrapers.ck12.IndexCategoryCK12Content;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.Language;
 
@@ -26,7 +25,6 @@ import org.jsoup.select.Elements;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.List;
 
@@ -114,7 +112,7 @@ public class IndexKhanContentScraper {
 
         new LanguageList().addAllLanguages();
 
-        englishLang = ContentScraperUtil.insertOrUpdateLanguage(languageDao, "English");
+        englishLang = ContentScraperUtil.insertOrUpdateLanguageByName(languageDao, "English");
 
 
         ContentEntry masterRootParent = ContentScraperUtil.createOrUpdateContentEntry(ROOT, USTAD_MOBILE,

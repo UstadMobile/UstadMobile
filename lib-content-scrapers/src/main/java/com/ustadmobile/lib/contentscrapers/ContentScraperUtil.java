@@ -87,6 +87,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.EMPTY_STRING;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.ZIP_EXT;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.slideShareLink;
@@ -605,23 +606,27 @@ public class ContentScraperUtil {
         return relatedTranslationJoin;
     }
 
-    public static Language insertOrUpdateLanguage(LanguageDao languageDao, String langValue) {
+    /**
+     *  Given a language name, check if this language exists in db before adding it
+     * @param languageDao dao to query and insert
+     * @param langName name of the language
+     * @return the entity language
+     */
+    public static Language insertOrUpdateLanguageByName(LanguageDao languageDao, String langName) {
         String threeLetterCode = "";
         String twoLetterCode = "";
 
-        List<LanguageAlpha3Code> langAlpha3List = LanguageAlpha3Code.findByName(langValue);
+        List<LanguageAlpha3Code> langAlpha3List = LanguageAlpha3Code.findByName(langName);
         if (!langAlpha3List.isEmpty()) {
             threeLetterCode = langAlpha3List.get(0).name();
             LanguageCode code = LanguageCode.getByCode(threeLetterCode);
-            if (code != null) {
-                twoLetterCode = LanguageCode.getByCode(threeLetterCode).name();
-            }
+            twoLetterCode = code != null ? LanguageCode.getByCode(threeLetterCode).name() : EMPTY_STRING;
         }
 
-        Language langObj = languageDao.findByName(langValue);
+        Language langObj = languageDao.findByName(langName);
         if (langObj == null) {
             langObj = new Language();
-            langObj.setName(langValue);
+            langObj.setName(langName);
             if (!threeLetterCode.isEmpty()) {
                 langObj.setIso_639_1_standard(twoLetterCode);
                 langObj.setIso_639_2_standard(threeLetterCode);
@@ -630,7 +635,7 @@ public class ContentScraperUtil {
         } else {
             Language changedLang = new Language();
             changedLang.setLangUid(langObj.getLangUid());
-            changedLang.setName(langValue);
+            changedLang.setName(langName);
             boolean isChanged = false;
 
             if (!changedLang.getName().equals(langObj.getName())) {
@@ -658,6 +663,41 @@ public class ContentScraperUtil {
 
         }
         return langObj;
+    }
+
+    /**
+     *  Given a language with 2 digit code, check if this language exists in db before adding it
+     * @param languageDao dao to query and insert
+     * @param langTwoCode two digit code of language
+     * @return the entity language
+     */
+    public static Language insertOrUpdateLanguageByTwoCode(LanguageDao languageDao, String langTwoCode) {
+
+        Language language = languageDao.findByTwoCode(langTwoCode);
+        if (language == null) {
+            language = new Language();
+            language.setIso_639_1_standard(langTwoCode);
+            language.setName(LanguageCode.getByCode(langTwoCode).getName());
+            language.setLangUid(languageDao.insert(language));
+        } else {
+            Language changedLang = new Language();
+            changedLang.setLangUid(language.getLangUid());
+            changedLang.setIso_639_1_standard(langTwoCode);
+            changedLang.setName(LanguageCode.getByCode(langTwoCode).getName());
+
+            boolean isChanged = false;
+            if (!language.getIso_639_1_standard().equals(changedLang.getIso_639_1_standard())) {
+                isChanged = true;
+            }
+            if (!language.getName().equals(changedLang.getName())) {
+                isChanged = true;
+            }
+            if (isChanged) {
+                languageDao.update(changedLang);
+            }
+            language = changedLang;
+        }
+        return language;
     }
 
 
@@ -748,6 +788,29 @@ public class ContentScraperUtil {
 
     }
 
+    /**
+     * Check if file entry exists in the db, get the last modified date of the file otherwise return -1
+     * @param contentFile current file that will be used to saved into db
+     * @param contentEntry the content entry that is linked to finding the list of files it contains
+     * @param contentEntryFileDao dao to query the db
+     * @return last modified of the file stored in the db or -1 if file not found
+     * @throws IOException
+     */
+    public static long getLastModifiedOfFileFromContentEntry(File contentFile, ContentEntry contentEntry,
+                                                             ContentEntryFileDao contentEntryFileDao) throws IOException {
+        String md5EpubFile = ContentScraperUtil.getMd5(contentFile);
+
+        List<ContentEntryFile> listOfFiles = contentEntryFileDao.findFilesByContentEntryUid(contentEntry.getContentEntryUid());
+        if (listOfFiles != null && !listOfFiles.isEmpty()) {
+            for (ContentEntryFile file : listOfFiles) {
+                if (file.getMd5sum().equals(md5EpubFile)) {
+                    return file.getLastModified();
+                }
+            }
+        }
+        return -1;
+    }
+
     public static LanguageVariant insertOrUpdateLanguageVariant(LanguageVariantDao variantDao, String variant, Language language) {
         LanguageVariant languageVariant = null;
         if (!variant.isEmpty()) {
@@ -784,7 +847,7 @@ public class ContentScraperUtil {
         return languageVariant;
     }
 
-    public static ContentEntry checkContentEntryChanges(ContentEntry changedEntry, ContentEntry oldEntry, ContentEntryDao contentEntryDao) {
+    private static ContentEntry checkContentEntryChanges(ContentEntry changedEntry, ContentEntry oldEntry, ContentEntryDao contentEntryDao) {
         changedEntry.setContentEntryUid(oldEntry.getContentEntryUid());
         if (!changedEntry.equals(oldEntry)) {
             changedEntry.setLastModified(System.currentTimeMillis());
@@ -971,6 +1034,7 @@ public class ContentScraperUtil {
 
     /**
      * Given a map of params, convert into a stringbuffer for post requests
+     *
      * @param params params to include in post request
      * @return map converted to string
      * @throws IOException

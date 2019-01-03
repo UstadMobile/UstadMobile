@@ -100,7 +100,7 @@ public class IndexPrathamContentScraper {
 
         new LanguageList().addAllLanguages();
 
-        englishLang = ContentScraperUtil.insertOrUpdateLanguage(languageDao, "English");
+        englishLang = ContentScraperUtil.insertOrUpdateLanguageByName(languageDao, "English");
 
 
 
@@ -146,7 +146,7 @@ public class IndexPrathamContentScraper {
                 connection.setRequestProperty("Cookie", cookie);
 
                 String lang = getLangCode(data.language);
-                Language langEntity = ContentScraperUtil.insertOrUpdateLanguage(languageDao, lang);
+                Language langEntity = ContentScraperUtil.insertOrUpdateLanguageByName(languageDao, lang);
                 File resourceFolder = new File(destinationDir, String.valueOf(data.id));
                 resourceFolder.mkdirs();
                 String resourceFileName = data.slug + ePubExt;

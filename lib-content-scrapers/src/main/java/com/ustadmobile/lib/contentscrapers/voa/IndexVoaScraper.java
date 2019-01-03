@@ -90,7 +90,7 @@ public class IndexVoaScraper {
 
         new LanguageList().addAllLanguages();
 
-        englishLang = ContentScraperUtil.insertOrUpdateLanguage(languageDao, "English");
+        englishLang = ContentScraperUtil.insertOrUpdateLanguageByName(languageDao, "English");
 
         ContentEntry masterRootParent = ContentScraperUtil.createOrUpdateContentEntry(ROOT, USTAD_MOBILE,
                 ROOT, USTAD_MOBILE, LICENSE_TYPE_CC_BY, englishLang.getLangUid(), null,

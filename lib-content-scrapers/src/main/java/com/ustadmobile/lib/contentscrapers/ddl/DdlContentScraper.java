@@ -10,16 +10,11 @@ import com.ustadmobile.core.db.dao.ContentEntryFileDao;
 import com.ustadmobile.core.db.dao.ContentEntryFileStatusDao;
 import com.ustadmobile.core.db.dao.LanguageDao;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
-import com.ustadmobile.lib.contentscrapers.ScraperConstants;
 import com.ustadmobile.lib.db.entities.ContentCategory;
 import com.ustadmobile.lib.db.entities.ContentCategorySchema;
 import com.ustadmobile.lib.db.entities.ContentEntry;
-import com.ustadmobile.lib.db.entities.ContentEntryContentEntryFileJoin;
-import com.ustadmobile.lib.db.entities.ContentEntryFile;
-import com.ustadmobile.lib.db.entities.ContentEntryFileStatus;
 import com.ustadmobile.lib.db.entities.Language;
 
-import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.jsoup.Jsoup;
@@ -28,7 +23,6 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -123,7 +117,7 @@ public class DdlContentScraper {
             String thumbnail = doc.selectFirst("aside img").attr("src");
 
             String lang = doc.select("html").attr("lang");
-            Language langEntity = ContentScraperUtil.insertOrUpdateLanguage(languageDao, LanguageCode.getByCode(lang).getName());
+            Language langEntity = ContentScraperUtil.insertOrUpdateLanguageByName(languageDao, LanguageCode.getByCode(lang).getName());
             String description = doc.selectFirst("meta[name=description]").attr("content");
             Element authorTag = doc.selectFirst("article.resource-view-details h3:contains(Author) ~ p");
             String author = authorTag != null ? authorTag.text() : "";
@@ -174,7 +168,7 @@ public class DdlContentScraper {
             String href = subject.attr("href");
 
             String lang = doc.select("html").attr("lang");
-            Language langEntity = ContentScraperUtil.insertOrUpdateLanguage(languageDao, LanguageCode.getByCode(lang).getName());
+            Language langEntity = ContentScraperUtil.insertOrUpdateLanguageByName(languageDao, LanguageCode.getByCode(lang).getName());
 
 
             ContentEntry contentEntry = ContentScraperUtil.createOrUpdateContentEntry(href, title, href,

@@ -271,31 +271,7 @@ public class PhetContentScraper {
                                 String lang = country[0];
                                 String variant = country.length > 1 ? country[1] : "";
 
-                                Language language = languageDao.findByTwoCode(lang);
-                                if(language ==  null){
-                                    language = new Language();
-                                    language.setIso_639_1_standard(lang);
-                                    language.setName(LanguageCode.getByCode(lang).getName());
-                                    language.setLangUid(languageDao.insert(language));
-                                }else{
-                                    Language changedLang = new Language();
-                                    changedLang.setLangUid(language.getLangUid());
-                                    changedLang.setIso_639_1_standard(lang);
-                                    changedLang.setName(LanguageCode.getByCode(lang).getName());
-
-                                    boolean isChanged = false;
-                                    if(!language.getIso_639_1_standard().equals(changedLang.getIso_639_1_standard())){
-                                        isChanged = true;
-                                    }
-                                    if(!language.getName().equals(changedLang.getName())){
-                                        isChanged = true;
-                                    }
-                                    if(isChanged){
-                                        languageDao.update(changedLang);
-                                    }
-                                    language = changedLang;
-                                }
-
+                                Language language = ContentScraperUtil.insertOrUpdateLanguageByTwoCode(languageDao, lang);
                                 LanguageVariant languageVariant = ContentScraperUtil.insertOrUpdateLanguageVariant(languageVariantDao, variant, language);
 
 

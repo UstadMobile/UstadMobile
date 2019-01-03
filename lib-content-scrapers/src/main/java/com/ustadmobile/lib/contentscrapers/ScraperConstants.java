@@ -28,6 +28,7 @@ public class ScraperConstants {
     public static final String TROPHY_NAME = "trophy.svg";
     public static final String CHECK_PATH = "/com/ustadmobile/lib/contentscrapers/ck12/check.svg";
     public static final String CHECK_NAME = "check.svg";
+    public static final String XML_NAMESPACE = "http://purl.org/dc/elements/1.1/";
 
     public static final String CORRECT_KHAN_LINK = "/com/ustadmobile/lib/contentscrapers/khan/exercise-correct.svg";
     public static final String CORRECT_FILE = "exercise-correct.svg";

@@ -7,7 +7,6 @@ import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
 import com.ustadmobile.core.db.dao.LanguageDao;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.LanguageList;
-import com.ustadmobile.lib.contentscrapers.ScraperConstants;
 import com.ustadmobile.lib.db.entities.ContentCategory;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.Language;
@@ -28,7 +27,6 @@ import static com.ustadmobile.lib.contentscrapers.ScraperConstants.EMPTY_STRING;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.ROOT;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.USTAD_MOBILE;
 import static com.ustadmobile.lib.db.entities.ContentEntry.LICENSE_TYPE_CC_BY;
-import static com.ustadmobile.lib.db.entities.ContentEntry.LICENSE_TYPE_CC_BY_NC;
 
 
 /**
@@ -92,9 +90,9 @@ public class IndexDdlContent {
 
         new LanguageList().addAllLanguages();
 
-        Language englishLang = ContentScraperUtil.insertOrUpdateLanguage(languageDao, "English");
-        Language farsiLang = ContentScraperUtil.insertOrUpdateLanguage(languageDao, "Persian");
-        Language pashtoLang = ContentScraperUtil.insertOrUpdateLanguage(languageDao, "Pashto");
+        Language englishLang = ContentScraperUtil.insertOrUpdateLanguageByName(languageDao, "English");
+        Language farsiLang = ContentScraperUtil.insertOrUpdateLanguageByName(languageDao, "Persian");
+        Language pashtoLang = ContentScraperUtil.insertOrUpdateLanguageByName(languageDao, "Pashto");
 
 
         ContentEntry masterRootParent = ContentScraperUtil.createOrUpdateContentEntry(ROOT, USTAD_MOBILE,

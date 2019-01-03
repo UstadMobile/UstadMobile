@@ -13,16 +13,11 @@ import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.LanguageList;
 import com.ustadmobile.lib.contentscrapers.ScraperConstants;
 import com.ustadmobile.lib.db.entities.ContentEntry;
-import com.ustadmobile.lib.db.entities.ContentEntryContentEntryFileJoin;
-import com.ustadmobile.lib.db.entities.ContentEntryFile;
-import com.ustadmobile.lib.db.entities.ContentEntryFileStatus;
 import com.ustadmobile.lib.db.entities.Language;
 
-import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -112,7 +107,7 @@ public class IndexEdraakK12Content {
 
         new LanguageList().addAllLanguages();
 
-        arabicLang = ContentScraperUtil.insertOrUpdateLanguage(languageDao, "Arabic");
+        arabicLang = ContentScraperUtil.insertOrUpdateLanguageByName(languageDao, "Arabic");
 
         try {
             URLConnection connection = url.openConnection();

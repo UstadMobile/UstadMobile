@@ -14,20 +14,15 @@ import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.LanguageList;
 import com.ustadmobile.lib.contentscrapers.ScraperConstants;
 import com.ustadmobile.lib.db.entities.ContentEntry;
-import com.ustadmobile.lib.db.entities.ContentEntryContentEntryFileJoin;
-import com.ustadmobile.lib.db.entities.ContentEntryFile;
-import com.ustadmobile.lib.db.entities.ContentEntryFileStatus;
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoin;
 import com.ustadmobile.lib.db.entities.Language;
 
-import org.apache.commons.codec.digest.DigestUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -36,7 +31,6 @@ import java.util.ArrayList;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.EMPTY_STRING;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.ROOT;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.USTAD_MOBILE;
-import static com.ustadmobile.lib.db.entities.ContentEntry.ALL_RIGHTS_RESERVED;
 import static com.ustadmobile.lib.db.entities.ContentEntry.LICENSE_TYPE_CC_BY;
 
 /**
@@ -124,7 +118,7 @@ public class IndexPhetContentScraper {
 
         Elements simulationList = document.select("td.simulation-list-item span.sim-badge-html");
 
-        englishLang = ContentScraperUtil.insertOrUpdateLanguage(languageDao, "English");
+        englishLang = ContentScraperUtil.insertOrUpdateLanguageByName(languageDao, "English");
 
         ContentEntry masterRootParent = ContentScraperUtil.createOrUpdateContentEntry(ROOT, USTAD_MOBILE,
                 ROOT, USTAD_MOBILE, LICENSE_TYPE_CC_BY, englishLang.getLangUid(), null,
