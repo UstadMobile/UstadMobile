@@ -37,7 +37,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.toughra.ustadmobile.launcher"
+        applicationId "org.rescue.classbook"
         minSdkVersion 16
         targetSdkVersion rootProject.ext.version_android_target_sdk
         versionCode 1

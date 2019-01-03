@@ -114,7 +114,6 @@ public class ServletContextClass implements ServletContextListener
                             Role.PERMISSION_CLAZZ_ADD_STUDENT |
                             Role.PERMISSION_CLAZZ_SELECT |                  //See Clazzes
                             Role.PERMISSION_CLAZZ_UPDATE |                  //Update Clazz
-                            Role.PERMISSION_CLAZZ_VIEW_REPORTS |            //See reports
                             Role.PERMISSION_CLAZZ_LOG_ACTIVITY_SELECT |     //See Clazz Activity
                             Role.PERMISSION_CLAZZ_LOG_ACTIVITY_UPDATE |     //Update Clazz Activity
                             Role.PERMISSION_CLAZZ_LOG_ACTIVITY_INSERT |     //Add/Take Clazz Activities
