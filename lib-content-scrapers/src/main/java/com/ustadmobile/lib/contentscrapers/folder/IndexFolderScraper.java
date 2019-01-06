@@ -15,7 +15,6 @@ import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.Language;
 import com.ustadmobile.lib.db.entities.LanguageVariant;
 
-import org.jsoup.nodes.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -36,7 +35,6 @@ import static com.ustadmobile.lib.db.entities.ContentEntry.LICENSE_TYPE_CC_BY;
 import static com.ustadmobile.lib.db.entities.ContentEntry.PUBLIC_DOMAIN;
 
 public class IndexFolderScraper {
-
 
     private ContentEntryDao contentEntryDao;
     private ContentEntryParentChildJoinDao contentParentChildJoinDao;

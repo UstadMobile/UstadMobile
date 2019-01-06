@@ -70,6 +70,11 @@ task scrapeContent(type: JavaExec) {
         args project.getProperties().get("findVoaUrl"), project.getProperties().get("findVoaDir")
     }
 
+    if(project.hasProperty("findEtekUrl") && project.hasProperty("findEtekDir")){
+        main "com.ustadmobile.lib.contentscrapers.etekkatho.IndexEtekkathoScraper"
+        args project.getProperties().get("findEtekUrl"), project.getProperties().get("findEtekDir")
+    }
+
 
     systemProperties["java.naming.factory.initial"] = "org.osjava.sj.SimpleContextFactory"
     systemProperties["java.naming.factory.object"] = "org.apache.commons.dbcp2.BasicDataSourceFactory"

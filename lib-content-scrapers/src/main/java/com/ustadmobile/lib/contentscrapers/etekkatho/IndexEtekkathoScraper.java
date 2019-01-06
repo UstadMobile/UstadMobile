@@ -30,27 +30,40 @@ import static com.ustadmobile.lib.db.entities.ContentEntry.LICENSE_TYPE_CC_BY;
 
 
 /**
+ * Etekkatho website can be scraped by accessing the page via Jsoup at http://www.etekkatho.org/subjects/
+ * This page has all the list of subjects available in the website with their subheading and description
  *
+ * The content is placed in a table format and you get all the content via css selector: tr th[scope=row], tr td
+ * The heading, subheading and description cant be identified by the html tags so its required to loop through all the elements
+ * If the element has an attribute called scope then its the main heading and the next 2 elements are its subheading and the description
+ * If the element has a class called span3 then its the subheading of the previous heading and the next element is its description
+ * Since we create a content entry, save it into a hashMap of subheading title and content entry to be used later on
  *
+ * Once all content entry is made from the table. Loop through again with css selector th.span3 a 
+ * This will give the href link of the heading.
+ * This page contains all the subheadings.
+ * Use Css selector again to get the href link of all the subheadings
+ * Each subheading has a list of subjects that contain title, desc, author, publisher and link
+ * Loop through all the subjects dl.results-item to get the information and scrape the url
+ * Need to go to the next page to get more content for the same subheading.
+ * This can be found by taking href link of css selector li.next a
  */
 public class IndexEtekkathoScraper {
 
     private static final String ETEKKATHO = "Etekkatho";
     private URL url;
-    private File destinationDirectory;
     private ContentEntryDao contentEntryDao;
     private ContentEntryParentChildJoinDao contentParentChildJoinDao;
     private ContentEntryFileDao contentEntryFileDao;
     private ContentEntryContentEntryFileJoinDao contentEntryFileJoin;
     private ContentEntryFileStatusDao contentFileStatusDao;
-    private LanguageDao languageDao;
     private HashMap<String, ContentEntry> headingHashMap;
     private Language englishLang;
     private int subjectCount = 0;
 
     public static void main(String[] args) {
         if (args.length != 2) {
-            System.err.println("Usage: <voa html url> <file destination>");
+            System.err.println("Usage: <etekkatho html url> <file destination>");
             System.exit(1);
         }
 
@@ -74,7 +87,6 @@ public class IndexEtekkathoScraper {
         }
 
         destinationDir.mkdirs();
-        destinationDirectory = destinationDir;
 
         UmAppDatabase db = UmAppDatabase.getInstance(null);
         db.setMaster(true);
@@ -84,7 +96,7 @@ public class IndexEtekkathoScraper {
         contentEntryFileDao = repository.getContentEntryFileDao();
         contentEntryFileJoin = repository.getContentEntryContentEntryFileJoinDao();
         contentFileStatusDao = db.getContentEntryFileStatusDao();
-        languageDao = repository.getLanguageDao();
+        LanguageDao languageDao = repository.getLanguageDao();
         headingHashMap = new HashMap<>();
 
         new LanguageList().addAllLanguages();

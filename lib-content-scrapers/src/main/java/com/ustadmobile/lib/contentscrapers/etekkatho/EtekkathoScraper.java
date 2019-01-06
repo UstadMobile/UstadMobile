@@ -12,6 +12,12 @@ import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
 
+/**
+ * The etekkatho website has a single url link for download
+ * This can be found by using Jsoup css selector query with th:contains(Download) ~td a[href].btn and getting the attribute value of href
+ *
+ * The url requires a request property header with user agent for the download to be successful
+ */
 public class EtekkathoScraper {
 
     private final URL scrapUrl;

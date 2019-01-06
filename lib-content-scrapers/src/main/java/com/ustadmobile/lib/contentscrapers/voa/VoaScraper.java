@@ -41,7 +41,7 @@ import static com.ustadmobile.lib.contentscrapers.ScraperConstants.ZIP_EXT;
 
 /**
  * The Voice of America Website is an html website with content for learning english.
- * In a single page, you have access a lession with lots of images, videos and a quiz.
+ * In a single page, you have access a lesson with lots of images, videos and a quiz.
  * <p>
  * By using jsoup, you can extract all the data that is required.
  * A script inside the page has details about the lesson and its last modified date.
