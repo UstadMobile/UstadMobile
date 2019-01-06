@@ -8,13 +8,6 @@
     <meta itemprop="telephone" content="(650) 494-1302">
     <meta charset="utf-8">
     <meta http-equiv="x-dns-prefetch-control" content="on">
-    <link rel="dns-prefetch" href="//st1.ck12.org">
-    <link rel="dns-prefetch" href="//st2.ck12.org">
-    <link rel="dns-prefetch" href="//st3.ck12.org">
-    <link rel="dns-prefetch" href="//img1.ck12.org">
-    <link rel="dns-prefetch" href="//img2.ck12.org">
-    <link rel="dns-prefetch" href="//img3.ck12.org">
-    <link rel="dns-prefetch" href="//api-prod.ck12.org">
     <meta name="viewport" content="width=device-width">
     <meta name="google-site-verification" content="wHx0f-Udlfd7ZNYNrIXpJVpjjO8nSH5RE0jIX8V-jIM">
     <meta name="google-translate-customization" content="">
@@ -22,52 +15,14 @@
     <meta name="msapplication-TileColor" content="#003300">
     <meta name="msapplication-TileImage"
           content="//img1.ck12.org/media/build-20181015164501/images/ck12-logo-livetile.png">
-    <link rel="apple-touch-icon" href="//img1.ck12.org/media/build-20181015164501/images/ck12-logo-livetile-57x57.png">
-    <link rel="apple-touch-icon" sizes="72x72"
-          href="//img1.ck12.org/media/build-20181015164501/images/ck12-logo-livetile-72x72.png">
-    <link rel="apple-touch-icon" sizes="114x114"
-          href="//img3.ck12.org/media/build-20181015164501/images/ck12-logo-livetile-114x114.png">
-    <link rel="shortcut icon" href="//img2.ck12.org/media/build-20181015164501/images/favicon.ico" type="image/x-icon">
-    <link rel="search" type="application/opensearchdescription+xml" href="/opensearch.xml" title="CK-12 Foundation">
-    <link rel="stylesheet" type="text/css" media="all"
-          href="//st1.ck12.org/media/build-20181015164501/lib/jquery-ui/css/smoothness/jquery-ui-1.8.17.custom.css">
-    <link rel="stylesheet" type="text/css" media="all"
-          href="//st2.ck12.org/media/build-20181015164501/common/css/master.css">
-    <link rel="stylesheet" type="text/css" media="all"
-          href="//st2.ck12.org/media/build-20181015164501/common/css/tangerine-ui.css">
-    <link href="https://fonts.googleapis.com/css?family=Pacifico" rel="stylesheet" type="text/css">
-    <link rel="stylesheet" type="text/css" media="all"
-          href="//st3.ck12.org/media/build-20181015164501/duplicateUsernames/css/content.css">
-    <script async="" src="//www.googletagmanager.com/gtm.js?id=GTM-NFJ3V2"></script>
-    <script src="/media/buildnumber.js"></script>
-    <link rel="stylesheet" type="text/css" href="/media/css/browse.css" data-react-helmet="true">
-    <link rel="stylesheet" type="text/css" href="/media/css/browse-toggle.css" data-react-helmet="true">
-    <link rel="stylesheet" type="text/css" href="/media/common/css/3d-book.css" data-react-helmet="true">
-    <link rel="stylesheet" type="text/css" href="/media/common/css/subjects.css" data-react-helmet="true">
-    <link rel="stylesheet" type="text/css" href="/media/collections/css/collections.css" data-react-helmet="true">
-    <script type="text/javascript" charset="utf-8" async=""
-            src="//st2.ck12.org/media/build-20181015164501/ck12MediaBuild/0.0-bundle.js"></script>
-    <link rel="stylesheet" type="text/css" href="/media/common/css/shareplane.css" data-react-helmet="true">
+
     <meta name="title" content="Arithmetic">
     <meta property="og:title" content="Arithmetic">
     <meta name="description"
           content="Arithmetic is the study of the calculations you perform in everyday life. These include addition, subtraction, multiplication, and division operations, percents, fractions, decimals, exponents (powers), and roots.">
-    <script id="googleClassroomScript" type="text/javascript" src="https://apis.google.com/js/platform.js"
-            gapi_processed="true"></script>
+
     <style type="text/css"></style>
-    <script type="text/javascript" charset="utf-8" async=""
-            src="//st2.ck12.org/media/build-20181015164501/ck12MediaBuild/70.70-bundle.js"></script>
-    <link rel="stylesheet" type="text/css" href="/media/common/css/shareplane.css">
-    <script type="text/javascript" charset="utf-8" async=""
-            src="//st2.ck12.org/media/build-20181015164501/ck12MediaBuild/72.72-bundle.js"></script>
-    <script type="text/javascript" charset="UTF-8"
-            src="https://maps.googleapis.com/maps-api-v3/api/js/34/14/intl/en_au/common.js"></script>
-    <script type="text/javascript" charset="UTF-8"
-            src="https://maps.googleapis.com/maps-api-v3/api/js/34/14/intl/en_au/util.js"></script>
-    <script type="text/javascript" charset="UTF-8"
-            src="https://maps.googleapis.com/maps-api-v3/api/js/34/14/intl/en_au/stats.js"></script>
-    <script type="text/javascript" charset="UTF-8"
-            src="https://maps.googleapis.com/maps/api/js/AuthenticationService.Authenticate?1shttps%3A%2F%2Fwww.ck12.org%2Fc%2Farithmetic%2F&amp;4sAIzaSyDVTA7d25Puy-_W52IfMDdflx93pWYDJB8&amp;callback=_xdc_._pz6apn&amp;key=AIzaSyDVTA7d25Puy-_W52IfMDdflx93pWYDJB8&amp;token=34206"></script>
+
 </head>
 <body class="" style="height: auto;">
 <script type="text/javascript"></script>

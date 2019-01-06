@@ -78,7 +78,7 @@ var pageType = "Browse";
 
 
     <!-- CDN invalidation script -->
-    <script src="/media/buildnumber.js"> </script>
+
     <!-- End CDN invalidation script -->
 </head>
 <body class="">
@@ -190,7 +190,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 		<a>Dismiss</a>
 	</div>
 
-	<a id="skip-navigation" href="#anchor-content"><img src="//img2.ck12.org/media/build-20181015164501/common/images/1x1.gif" width="1" height="1" alt="Skip Navigation" /></a>
+	<a id="skip-navigation" href="#anchor-content"><img src="" width="1" height="1" alt="Skip Navigation" /></a>
 	<nav class="hide-small top-bar-section top-nav">
 		<section class="top-bar row user-settings">
 
@@ -447,7 +447,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
 
 							<li class="small-12 columns">
-								<a id="browse-arithmetic" class="subject-link" href="/json/com/ustadmobile/lib/contentscrapers/ck12/index/topics.txt" title="Arithmetic">
 									<span>
 										<span class="subject-icon">
 											<span class="arithmetic"></span>
@@ -778,12 +777,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 </div>
 
 
-
-
-<script type="text/javascript" src="//maps.googleapis.com/maps/api/js?libraries=places&key=AIzaSyDVTA7d25Puy-_W52IfMDdflx93pWYDJB8"></script>
-<script src="//st2.ck12.org/media/build-20181015164501/dexterjs/dexterjs.min.js"></script>
-
-<script src="//st1.ck12.org/media/build-20181015164501/common/js/utils/globals.js"></script>
 
 
 
