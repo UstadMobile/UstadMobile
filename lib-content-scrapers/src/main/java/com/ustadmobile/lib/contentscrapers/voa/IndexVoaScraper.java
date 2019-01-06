@@ -31,6 +31,16 @@ import static com.ustadmobile.lib.contentscrapers.ScraperConstants.USTAD_MOBILE;
 import static com.ustadmobile.lib.db.entities.ContentEntry.LICENSE_TYPE_CC_BY;
 import static com.ustadmobile.lib.db.entities.ContentEntry.PUBLIC_DOMAIN;
 
+/**
+ * The VOA website can be scraped at https://learningenglish.voanews.com/
+ * They are 4 categories in the website we are interested in:
+ * beginning level, intermediate level, advanced level and us history
+ *
+ * Each of these categories have sub categories to scrape
+ * The subcategory can be found using css selector h2.section-head a to find the href link
+ * Each subcategory has a list of lessons that can have multiple video and audio.
+ * These lessons can be found using css selector: div.container div.media-block-wrap div.media-block a.img-wrap
+ */
 public class IndexVoaScraper {
 
     private static final String VOA = "VOA";

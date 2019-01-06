@@ -39,7 +39,7 @@ import static com.ustadmobile.lib.db.entities.ContentEntry.LICENSE_TYPE_CC_BY;
  * If the element has a class called span3 then its the subheading of the previous heading and the next element is its description
  * Since we create a content entry, save it into a hashMap of subheading title and content entry to be used later on
  *
- * Once all content entry is made from the table. Loop through again with css selector th.span3 a 
+ * Once all content entry is made from the table. Loop through again with css selector th.span3 a
  * This will give the href link of the heading.
  * This page contains all the subheadings.
  * Use Css selector again to get the href link of all the subheadings

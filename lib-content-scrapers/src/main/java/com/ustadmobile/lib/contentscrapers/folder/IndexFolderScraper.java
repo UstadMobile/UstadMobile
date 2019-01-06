@@ -34,6 +34,13 @@ import static com.ustadmobile.lib.contentscrapers.ScraperConstants.XML_NAMESPACE
 import static com.ustadmobile.lib.db.entities.ContentEntry.LICENSE_TYPE_CC_BY;
 import static com.ustadmobile.lib.db.entities.ContentEntry.PUBLIC_DOMAIN;
 
+
+/**
+ * Given a directory, create parent and child joins for each subdirectories in them.
+ * If an epub is found, open the epub using Zipfile and find the container xml with path: META-INF/container.xml
+ * This will contain the path to the rootfile which contains all the content inside the epub.
+ * Open the rootfile using the path and extract the id, author etc to create the content entry
+ */
 public class IndexFolderScraper {
 
     private ContentEntryDao contentEntryDao;
@@ -97,7 +104,7 @@ public class IndexFolderScraper {
 
     }
 
-    private void browseSubFolders(File destinationDir, ContentEntry parentEntry) throws IOException {
+    private void browseSubFolders(File destinationDir, ContentEntry parentEntry) {
 
         File[] fileList = destinationDir.listFiles();
 
@@ -159,12 +166,12 @@ public class IndexFolderScraper {
 
                         NodeList metaList = dataElement.getElementsByTagName("meta");
                         long date = folder.lastModified();
-                        for(int i = 0; i < metaList.getLength();i++){
+                        for (int i = 0; i < metaList.getLength(); i++) {
                             Node meta = metaList.item(i);
                             NamedNodeMap attrs = meta.getAttributes();
                             Node property = attrs.getNamedItem("property");
                             boolean isAvailable = property != null && property.getNodeValue().contains("dcterms:modified");
-                            if(isAvailable){
+                            if (isAvailable) {
                                 date = ContentScraperUtil.parseServerDate(meta.getTextContent());
                             }
 
