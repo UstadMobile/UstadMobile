@@ -204,24 +204,25 @@ public class IndexVoaScraper {
             VoaScraper scraper = new VoaScraper(lesson.toString(), categoryFolder);
             try {
                 scraper.scrapeContent();
+
+                File content = new File(categoryFolder, FilenameUtils.getBaseName(lesson.getPath()) + ScraperConstants.ZIP_EXT);
+
+                if (scraper.isContentUpdated()) {
+                    ContentScraperUtil.insertContentEntryFile(content, contentEntryFileDao, contentFileStatusDao,
+                            lessonEntry, ContentScraperUtil.getMd5(content), contentEntryFileJoin, true,
+                            ScraperConstants.MIMETYPE_ZIP);
+
+                } else {
+
+                    ContentScraperUtil.checkAndUpdateDatabaseIfFileDownloadedButNoDataFound(content, lessonEntry, contentEntryFileDao,
+                            contentEntryFileJoin, contentFileStatusDao, ScraperConstants.MIMETYPE_ZIP, true);
+
+                }
             } catch (Exception e) {
                 System.err.println("Unable to scrape content from " + title + " at url " + lesson.toString());
                 e.printStackTrace();
             }
 
-            File content = new File(categoryFolder, FilenameUtils.getBaseName(lesson.getPath()) + ScraperConstants.ZIP_EXT);
-
-            if (scraper.isContentUpdated()) {
-                ContentScraperUtil.insertContentEntryFile(content, contentEntryFileDao, contentFileStatusDao,
-                        lessonEntry, ContentScraperUtil.getMd5(content), contentEntryFileJoin, true,
-                        ScraperConstants.MIMETYPE_ZIP);
-
-            } else {
-
-                ContentScraperUtil.checkAndUpdateDatabaseIfFileDownloadedButNoDataFound(content, lessonEntry, contentEntryFileDao,
-                        contentEntryFileJoin, contentFileStatusDao, ScraperConstants.MIMETYPE_ZIP, true);
-
-            }
 
         }
 
