@@ -151,3 +151,12 @@ Download all content from Khan Academy
 #### Find All VOA Content
 
 >$ gradlew scrapeContent -PfindVoaUrl="https://learningenglish.voanews.com/" -PfindVoaDir="C:\voa\"
+
+#### Find All Etekkato Content
+
+>$ gradlew scrapeContent -PfindEtekUrl="http://www.etekkatho.org/subjects/" -PfindEtekDir="C:\etek\"
+
+
+### Find All Epub in Folder 
+
+>$ gradlew scrapeContent -PfindFolderName="Asafeer" -PfindFolderDir="C:\asafeer\"
