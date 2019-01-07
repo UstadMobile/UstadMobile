@@ -107,7 +107,7 @@ public class IndexEtekkathoScraper {
                 EMPTY_STRING, false, EMPTY_STRING, EMPTY_STRING,
                 EMPTY_STRING, EMPTY_STRING, contentEntryDao);
 
-        ContentEntry parentEtek = ContentScraperUtil.createOrUpdateContentEntry("http://www.etekkatho.org/subjects/", "Voice of America - Learning English",
+        ContentEntry parentEtek = ContentScraperUtil.createOrUpdateContentEntry("http://www.etekkatho.org/subjects/", "eTekkatho",
                 "http://www.etekkatho.org/", ETEKKATHO, LICENSE_TYPE_CC_BY, englishLang.getLangUid(), null,
                 "Educational resources for the Myanmar academic community", false, EMPTY_STRING,
                 "http://www.etekkatho.org/img/logos/etekkatho-myanmar-lang.png",

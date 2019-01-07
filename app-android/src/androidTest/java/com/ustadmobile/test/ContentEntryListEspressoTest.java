@@ -95,30 +95,176 @@ public class ContentEntryListEspressoTest {
         entry.setTitle("Ustad Mobile");
         contentDao.insert(entry);
 
-        ContentEntry ck12 = new ContentEntry();
-        ck12.setContentEntryUid(2);
-        ck12.setTitle("Ck-12 Foundation");
-        ck12.setDescription("All content");
-        ck12.setThumbnailUrl("https://www.edraak.org/static/images/logo-dark-ar.fa1399e8d134.png");
-        ck12.setLeaf(false);
-        contentDao.insert(ck12);
+        ContentEntry khanParent = new ContentEntry();
+        khanParent.setContentEntryUid(2);
+        khanParent.setTitle("Khan Academy");
+        khanParent.setDescription("You can learn anything.\n" +
+                "For free. For everyone. Forever.");
+        khanParent.setThumbnailUrl("https://cdn.kastatic.org/images/khan-logo-dark-background.new.png");
+        khanParent.setLeaf(false);
+        contentDao.insert(khanParent);
 
-        ContentEntryParentChildJoin parentChildJoin = new ContentEntryParentChildJoin();
-        parentChildJoin.setCepcjParentContentEntryUid(entry.getContentEntryUid());
-        parentChildJoin.setCepcjChildContentEntryUid(ck12.getContentEntryUid());
-        parentChildJoin.setChildIndex(0);
-        parentChildJoin.setCepcjUid(1);
-        pcjdao.insert(parentChildJoin);
+        ContentEntry edraak = new ContentEntry();
+        edraak.setContentEntryUid(20);
+        edraak.setTitle("Edraak K12");
+        edraak.setDescription("تعليم مجاني\nّ" +
+                "إلكترونيّ باللغة العربيّة!" +
+                "\nFree Online\n" +
+                "Education, In Arabic!");
+        edraak.setThumbnailUrl("https://www.edraak.org/static/images/logo-dark-ar.fa1399e8d134.png");
+        edraak.setLeaf(false);
+        contentDao.insert(edraak);
+
+        ContentEntry prathamParent = new ContentEntry();
+        prathamParent.setContentEntryUid(21);
+        prathamParent.setTitle("Pratham Books");
+        prathamParent.setDescription("Every Child in School & Learning Well");
+        prathamParent.setThumbnailUrl("https://prathambooks.org/wp-content/uploads/2018/04/Logo-black.png");
+        prathamParent.setLeaf(false);
+        contentDao.insert(prathamParent);
+
+        ContentEntry phetParent = new ContentEntry();
+        phetParent.setContentEntryUid(22);
+        phetParent.setTitle("Phet Interactive Simulations");
+        phetParent.setDescription("INTERACTIVE SIMULATIONS\nFOR SCIENCE AND MATH");
+        phetParent.setThumbnailUrl("https://phet.colorado.edu/images/phet-social-media-logo.png");
+        phetParent.setLeaf(false);
+        contentDao.insert(phetParent);
+
+
+        ContentEntry voaParent = new ContentEntry();
+        voaParent.setContentEntryUid(23);
+        voaParent.setTitle("Voice of America - Learning English");
+        voaParent.setDescription("Learn American English with English language lessons from Voice of America. " +
+                "VOA Learning English helps you learn English with vocabulary, listening and " +
+                "comprehension lessons through daily news and interactive English learning activities.");
+        voaParent.setThumbnailUrl("https://learningenglish.voanews.com/Content/responsive/VOA/img/top_logo_news.png");
+        voaParent.setLeaf(false);
+        contentDao.insert(voaParent);
+
+
+        ContentEntry folderParent = new ContentEntry();
+        folderParent.setContentEntryUid(24);
+        folderParent.setTitle("3asafeer");
+        folderParent.setLeaf(false);
+        contentDao.insert(folderParent);
+
+        ContentEntry etekParent = new ContentEntry();
+        etekParent.setContentEntryUid(25);
+        etekParent.setTitle("eTekkatho");
+        etekParent.setDescription("Educational resources for the Myanmar academic community");
+        etekParent.setThumbnailUrl("http://www.etekkatho.org/img/logos/etekkatho-myanmar-lang.png");
+        etekParent.setLeaf(false);
+        contentDao.insert(etekParent);
+
+        ContentEntry ddlParent = new ContentEntry();
+        ddlParent.setContentEntryUid(26);
+        ddlParent.setTitle("Darakht-e Danesh");
+        ddlParent.setDescription("Free and open educational resources for Afghanistan");
+        ddlParent.setThumbnailUrl("https://www.ddl.af/storage/files/logo-dd.png");
+        ddlParent.setLeaf(false);
+        contentDao.insert(ddlParent);
+
+        ContentEntry ck12Parent = new ContentEntry();
+        ck12Parent.setContentEntryUid(27);
+        ck12Parent.setTitle("CK-12 Foundation");
+        ck12Parent.setDescription("100% Free, Personalized Learning for Every Student");
+        ck12Parent.setThumbnailUrl("https://img1.ck12.org/media/build-20181015164501/images/ck12-logo-livetile.png");
+        ck12Parent.setLeaf(false);
+        contentDao.insert(ck12Parent);
+
+        ContentEntry asbParent = new ContentEntry();
+        asbParent.setContentEntryUid(28);
+        asbParent.setTitle("African Story Books");
+        asbParent.setDescription("Open access to picture storybooks in the languages of Africa\nFor children’s literacy, enjoyment and imagination.");
+        asbParent.setThumbnailUrl("https://www.africanstorybook.org/img/asb120.png");
+        asbParent.setLeaf(false);
+        contentDao.insert(asbParent);
+
+        ContentEntryParentChildJoin parentKhanJoin = new ContentEntryParentChildJoin();
+        parentKhanJoin.setCepcjParentContentEntryUid(entry.getContentEntryUid());
+        parentKhanJoin.setCepcjChildContentEntryUid(khanParent.getContentEntryUid());
+        parentKhanJoin.setChildIndex(0);
+        parentKhanJoin.setCepcjUid(1);
+        pcjdao.insert(parentKhanJoin);
+
+        ContentEntryParentChildJoin parentEdraakJoin = new ContentEntryParentChildJoin();
+        parentEdraakJoin.setCepcjParentContentEntryUid(entry.getContentEntryUid());
+        parentEdraakJoin.setCepcjChildContentEntryUid(edraak.getContentEntryUid());
+        parentEdraakJoin.setChildIndex(1);
+        parentEdraakJoin.setCepcjUid(29);
+        pcjdao.insert(parentEdraakJoin);
+
+        ContentEntryParentChildJoin parentPhetJoin = new ContentEntryParentChildJoin();
+        parentPhetJoin.setCepcjParentContentEntryUid(entry.getContentEntryUid());
+        parentPhetJoin.setCepcjChildContentEntryUid(phetParent.getContentEntryUid());
+        parentPhetJoin.setChildIndex(2);
+        parentPhetJoin.setCepcjUid(30);
+        pcjdao.insert(parentPhetJoin);
+
+
+        ContentEntryParentChildJoin parentAsbJoin = new ContentEntryParentChildJoin();
+        parentAsbJoin.setCepcjParentContentEntryUid(entry.getContentEntryUid());
+        parentAsbJoin.setCepcjChildContentEntryUid(asbParent.getContentEntryUid());
+        parentAsbJoin.setChildIndex(3);
+        parentAsbJoin.setCepcjUid(31);
+        pcjdao.insert(parentAsbJoin);
+
+
+        ContentEntryParentChildJoin parentCk12Join = new ContentEntryParentChildJoin();
+        parentCk12Join.setCepcjParentContentEntryUid(entry.getContentEntryUid());
+        parentCk12Join.setCepcjChildContentEntryUid(ck12Parent.getContentEntryUid());
+        parentCk12Join.setChildIndex(4);
+        parentCk12Join.setCepcjUid(32);
+        pcjdao.insert(parentCk12Join);
+
+
+        ContentEntryParentChildJoin parentDdlJoin = new ContentEntryParentChildJoin();
+        parentDdlJoin.setCepcjParentContentEntryUid(entry.getContentEntryUid());
+        parentDdlJoin.setCepcjChildContentEntryUid(ddlParent.getContentEntryUid());
+        parentDdlJoin.setChildIndex(5);
+        parentDdlJoin.setCepcjUid(33);
+        pcjdao.insert(parentDdlJoin);
+
+
+        ContentEntryParentChildJoin parentEtekJoin = new ContentEntryParentChildJoin();
+        parentEtekJoin.setCepcjParentContentEntryUid(entry.getContentEntryUid());
+        parentEtekJoin.setCepcjChildContentEntryUid(etekParent.getContentEntryUid());
+        parentEtekJoin.setChildIndex(6);
+        parentEtekJoin.setCepcjUid(34);
+        pcjdao.insert(parentEtekJoin);
+
+        ContentEntryParentChildJoin parentFolderJoin = new ContentEntryParentChildJoin();
+        parentFolderJoin.setCepcjParentContentEntryUid(entry.getContentEntryUid());
+        parentFolderJoin.setCepcjChildContentEntryUid(folderParent.getContentEntryUid());
+        parentFolderJoin.setChildIndex(7);
+        parentFolderJoin.setCepcjUid(35);
+        pcjdao.insert(parentFolderJoin);
+
+        ContentEntryParentChildJoin parentPrathamJoin = new ContentEntryParentChildJoin();
+        parentPrathamJoin.setCepcjParentContentEntryUid(entry.getContentEntryUid());
+        parentPrathamJoin.setCepcjChildContentEntryUid(prathamParent.getContentEntryUid());
+        parentPrathamJoin.setChildIndex(8);
+        parentPrathamJoin.setCepcjUid(36);
+        pcjdao.insert(parentPrathamJoin);
+
+        ContentEntryParentChildJoin parentVoaJoin = new ContentEntryParentChildJoin();
+        parentVoaJoin.setCepcjParentContentEntryUid(entry.getContentEntryUid());
+        parentVoaJoin.setCepcjChildContentEntryUid(voaParent.getContentEntryUid());
+        parentVoaJoin.setChildIndex(9);
+        parentVoaJoin.setCepcjUid(37);
+        pcjdao.insert(parentVoaJoin);
+
 
         ContentEntry grade5parent = new ContentEntry();
         grade5parent.setContentEntryUid(3);
-        grade5parent.setTitle("Grade 1-5");
-        grade5parent.setThumbnailUrl("https://phet.colorado.edu/images/phet-social-media-logo.png");
+        grade5parent.setTitle("Math");
+        grade5parent.setThumbnailUrl("https://cdn.kastatic.org/genfiles/topic-icons/icons/arithmetic.png-af7472-128c.png");
         grade5parent.setLeaf(false);
         contentDao.insert(grade5parent);
 
         ContentEntryParentChildJoin subjectgradejoin = new ContentEntryParentChildJoin();
-        subjectgradejoin.setCepcjParentContentEntryUid(ck12.getContentEntryUid());
+        subjectgradejoin.setCepcjParentContentEntryUid(khanParent.getContentEntryUid());
         subjectgradejoin.setCepcjChildContentEntryUid(grade5parent.getContentEntryUid());
         subjectgradejoin.setChildIndex(0);
         subjectgradejoin.setCepcjUid(2);
@@ -126,8 +272,8 @@ public class ContentEntryListEspressoTest {
 
         ContentEntry grade1child = new ContentEntry();
         grade1child.setContentEntryUid(4);
-        grade1child.setTitle("Grade 1");
-        grade1child.setThumbnailUrl("https://img1.ck12.org/media/build-20181015164501/images/ck12-logo-livetile.png");
+        grade1child.setTitle("Early Math");
+        grade1child.setThumbnailUrl("https://cdn.kastatic.org/genfiles/topic-icons/icons/early_math.png-314b80-128c.png");
         grade1child.setLeaf(false);
         contentDao.insert(grade1child);
 
@@ -140,8 +286,8 @@ public class ContentEntryListEspressoTest {
 
         ContentEntry wholenumbers = new ContentEntry();
         wholenumbers.setContentEntryUid(5);
-        wholenumbers.setTitle("Whole Numbers");
-        wholenumbers.setThumbnailUrl("https://prathambooks.org/wp-content/uploads/2018/04/Logo-black.png");
+        wholenumbers.setTitle("Counting");
+        wholenumbers.setThumbnailUrl("https://cdn.kastatic.org/genfiles/topic-icons/icons/counting.png-377815-128c.png");
         wholenumbers.setLeaf(false);
         contentDao.insert(wholenumbers);
 
@@ -154,11 +300,9 @@ public class ContentEntryListEspressoTest {
 
         ContentEntry quiz = new ContentEntry();
         quiz.setContentEntryUid(6);
-        quiz.setTitle("Quiz Time");
-        quiz.setThumbnailUrl("https://www.africanstorybook.org/img/asb120.png");
-        quiz.setDescription("All content");
-        quiz.setPublisher("CK12");
-        quiz.setAuthor("Binge");
+        quiz.setTitle("Counting with small numbers");
+        quiz.setDescription("Sal counts squirrels and horses.");
+        quiz.setThumbnailUrl("https://cdn.kastatic.org/googleusercontent/NIWZLag0UtSxht8SlBeunPR6SxVmfNhkDCHoEobwSAqb3QAFMYTYvuna3yUiSYMoS_k4N10H6orz6hYJu7JzNeJ0Aw");
         quiz.setLeaf(true);
         contentDao.insert(quiz);
 
@@ -171,7 +315,7 @@ public class ContentEntryListEspressoTest {
 
         ContentEntryFile contentEntryFile = new ContentEntryFile();
         contentEntryFile.setMimeType("application/zip");
-        contentEntryFile.setFileSize(10);
+        contentEntryFile.setFileSize(10000);
         contentEntryFile.setLastModified(1540728217);
         contentEntryFile.setContentEntryFileUid(8);
         contentFileDao.insert(contentEntryFile);
@@ -231,7 +375,7 @@ public class ContentEntryListEspressoTest {
 
         ContentEntryFile spanishFile = new ContentEntryFile();
         spanishFile.setMimeType("application/zip");
-        spanishFile.setFileSize(10);
+        spanishFile.setFileSize(10000);
         spanishFile.setLastModified(1540728218);
         spanishFile.setContentEntryFileUid(15);
         contentFileDao.insert(spanishFile);
