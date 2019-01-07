@@ -84,7 +84,7 @@ import static com.ustadmobile.lib.contentscrapers.ScraperConstants.EMPTY_STRING;
  */
 public class AsbScraper {
 
-    public static final String AFRICAN_STORY_BOOKS = "African Story Books";
+    private static final String AFRICAN_STORY_BOOKS = "African Story Books";
     private final String COVER_URL = "https://www.africanstorybook.org/illustrations/covers/";
 
     public static void main(String[] args) {
@@ -108,7 +108,6 @@ public class AsbScraper {
         URL africanBooksUrl = generateURL();
 
         UmAppDatabase db = UmAppDatabase.getInstance(null);
-        db.setMaster(true);
         UmAppDatabase repository = db.getRepository("https://localhost", EMPTY_STRING);
         ContentEntryDao contentEntryDao = repository.getContentEntryDao();
         ContentEntryParentChildJoinDao contentParentChildJoinDao = repository.getContentEntryParentChildJoinDao();

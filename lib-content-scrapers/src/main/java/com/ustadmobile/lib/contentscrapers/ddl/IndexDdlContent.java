@@ -41,8 +41,7 @@ import static com.ustadmobile.lib.db.entities.ContentEntry.LICENSE_TYPE_CC_BY;
 public class IndexDdlContent {
 
 
-    public static final String DDL = "DDL";
-    private URL url;
+    static final String DDL = "DDL";
     private File destinationDirectory;
 
     private int maxNumber;
@@ -71,7 +70,7 @@ public class IndexDdlContent {
     public void findContent(String urlString, File destinationDir) throws IOException {
 
         try {
-            url = new URL(urlString);
+            URL url = new URL(urlString);
         } catch (MalformedURLException e) {
             System.out.println("Index Malformed url" + urlString);
             throw new IllegalArgumentException("Malformed url" + urlString, e);
@@ -81,7 +80,6 @@ public class IndexDdlContent {
         destinationDirectory = destinationDir;
 
         UmAppDatabase db = UmAppDatabase.getInstance(null);
-        db.setMaster(true);
         UmAppDatabase repository = db.getRepository("https://localhost", "");
         contentEntryDao = repository.getContentEntryDao();
         contentParentChildJoinDao = repository.getContentEntryParentChildJoinDao();

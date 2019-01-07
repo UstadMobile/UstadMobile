@@ -140,6 +140,7 @@ public class ScraperConstants {
 
     public static final String ZIP_EXT = ".zip";
     public static final String PNG_EXT = ".png";
+    public static final String EPUB_EXT = ".epub";
 
     public static final String ARABIC_LANG_CODE = "ar";
     public static final String ENGLISH_LANG_CODE = "en";

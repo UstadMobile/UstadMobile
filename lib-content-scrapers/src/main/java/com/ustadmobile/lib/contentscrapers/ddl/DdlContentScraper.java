@@ -65,7 +65,6 @@ public class DdlContentScraper {
         this.url = new URL(url);
         destinationDirectory.mkdirs();
         UmAppDatabase db = UmAppDatabase.getInstance(null);
-        db.setMaster(true);
         UmAppDatabase repository = db.getRepository("https://localhost", "");
         contentEntryDao = repository.getContentEntryDao();
         contentEntryFileDao = repository.getContentEntryFileDao();

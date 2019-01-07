@@ -30,6 +30,7 @@ import java.net.URL;
 import java.net.URLConnection;
 
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.EMPTY_STRING;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.EPUB_EXT;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.ROOT;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.USTAD_MOBILE;
 import static com.ustadmobile.lib.db.entities.ContentEntry.LICENSE_TYPE_CC_BY;
@@ -49,11 +50,12 @@ import static com.ustadmobile.lib.db.entities.ContentEntry.LICENSE_TYPE_CC_BY;
  */
 public class IndexPrathamContentScraper {
 
-    public static final String PRATHAM = "Pratham";
+    private static final String PRATHAM = "Pratham";
+    private static final String GMAIL = "samihmustafa@gmail.com";
+    private static final String PASS = "reading123";
     String prefixUrl = "https://storyweaver.org.in/api/v1/books-search?page=";
 
     String prefixEPub = "https://storyweaver.org.in/v0/stories/download-story/";
-    String ePubExt = ".epub";
 
     String signIn = "https://storyweaver.org.in/users/sign_in";
 
@@ -64,7 +66,6 @@ public class IndexPrathamContentScraper {
     private ContentEntryContentEntryFileJoinDao contentEntryFileJoinDao;
     private ContentEntryFileStatusDao contentFileStatusDao;
     private ContentEntry prathamParentEntry;
-    private Language englishLang;
     private LanguageDao languageDao;
 
     public static void main(String[] args) {
@@ -89,7 +90,6 @@ public class IndexPrathamContentScraper {
         String cookie = loginPratham();
 
         UmAppDatabase db = UmAppDatabase.getInstance(null);
-        db.setMaster(true);
         UmAppDatabase repository = db.getRepository("https://localhost", "");
         contentEntryDao = repository.getContentEntryDao();
         contentParentChildJoinDao = repository.getContentEntryParentChildJoinDao();
@@ -100,7 +100,7 @@ public class IndexPrathamContentScraper {
 
         new LanguageList().addAllLanguages();
 
-        englishLang = ContentScraperUtil.insertOrUpdateLanguageByName(languageDao, "English");
+        Language englishLang = ContentScraperUtil.insertOrUpdateLanguageByName(languageDao, "English");
 
 
 
@@ -149,7 +149,7 @@ public class IndexPrathamContentScraper {
                 Language langEntity = ContentScraperUtil.insertOrUpdateLanguageByName(languageDao, lang);
                 File resourceFolder = new File(destinationDir, String.valueOf(data.id));
                 resourceFolder.mkdirs();
-                String resourceFileName = data.slug + ePubExt;
+                String resourceFileName = data.slug + EPUB_EXT;
 
                 ContentEntry contentEntry = ContentScraperUtil.createOrUpdateContentEntry(data.slug, data.title,
                         epubUrl.getPath(), PRATHAM, LICENSE_TYPE_CC_BY, langEntity.getLangUid(), null,
@@ -204,7 +204,7 @@ public class IndexPrathamContentScraper {
     }
 
     public URL generatePrathamEPubFileUrl(String resourceId) throws MalformedURLException {
-        return new URL(prefixEPub + resourceId + ePubExt);
+        return new URL(prefixEPub + resourceId + EPUB_EXT);
     }
 
     public URL generatePrathamUrl(String number) throws MalformedURLException {
@@ -219,8 +219,8 @@ public class IndexPrathamContentScraper {
         WebDriverWait waitDriver = new WebDriverWait(driver, 10000);
         ContentScraperUtil.waitForJSandJQueryToLoad(waitDriver);
 
-        driver.findElement(By.id("user_email")).sendKeys("samihmustafa@gmail.com");
-        driver.findElement(By.id("user_password")).sendKeys("reading123");
+        driver.findElement(By.id("user_email")).sendKeys(GMAIL);
+        driver.findElement(By.id("user_password")).sendKeys(PASS);
         driver.findElement(By.name("commit")).click();
 
         for (Cookie ck : driver.manage().getCookies()) {

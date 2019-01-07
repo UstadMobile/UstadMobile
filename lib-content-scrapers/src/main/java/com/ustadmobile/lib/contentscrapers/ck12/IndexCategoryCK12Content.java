@@ -75,7 +75,7 @@ import static com.ustadmobile.lib.db.entities.ContentEntry.LICENSE_TYPE_CC_BY_NC
  */
 public class IndexCategoryCK12Content {
 
-    public static final String CK_12 = "CK12";
+    private static final String CK_12 = "CK12";
     private final ContentEntryDao contentEntryDao;
     private final ContentEntryParentChildJoinDao contentParentChildJoinDao;
     private final ContentEntryFileDao contentEntryFileDao;
@@ -113,7 +113,6 @@ public class IndexCategoryCK12Content {
 
 
         UmAppDatabase db = UmAppDatabase.getInstance(null);
-        db.setMaster(true);
         UmAppDatabase repository = db.getRepository("https://localhost", "");
         contentEntryDao = repository.getContentEntryDao();
         contentParentChildJoinDao = repository.getContentEntryParentChildJoinDao();

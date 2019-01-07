@@ -89,7 +89,6 @@ public class IndexEtekkathoScraper {
         destinationDir.mkdirs();
 
         UmAppDatabase db = UmAppDatabase.getInstance(null);
-        db.setMaster(true);
         UmAppDatabase repository = db.getRepository("https://localhost", "");
         contentEntryDao = repository.getContentEntryDao();
         contentParentChildJoinDao = repository.getContentEntryParentChildJoinDao();
@@ -235,7 +234,7 @@ public class IndexEtekkathoScraper {
             String author = authorElement != null ? authorElement.text() : EMPTY_STRING;
 
             Element publisherElement = subject.selectFirst("dd.publisher");
-            String publisher = publisherElement != null ? publisherElement.text() : EMPTY_STRING;
+            String publisher = publisherElement != null ? publisherElement.text() : ETEKKATHO;
 
             String hrefLink = subject.selectFirst("a").attr("href");
 

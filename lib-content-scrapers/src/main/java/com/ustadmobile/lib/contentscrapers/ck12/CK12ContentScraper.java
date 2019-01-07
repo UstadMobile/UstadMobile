@@ -151,9 +151,9 @@ public class CK12ContentScraper {
     public final String css = "<style> .read-more-container { display: none; } #plixIFrameContainer { float: left !important; margin-top: 15px; } #plixLeftWrapper { float: left !important; width: 49%; min-width: 200px; padding-left: 15px !important; padding-right: 15px !important; margin-right: 15px; } @media (max-width: 1070px) { #plixLeftWrapper { width: 98% !important; } } .plixQestionPlayer, .plixLeftMiddlequestionContainer { margin-bottom: 5px !important; } .leftTopFixedBar { padding-top: 20px !important; } #next-container { margin-top: 0 !important; } .overflow-container { background: transparent !important; width: 0px !important; } .overflow-indicator { left: 50% !important; padding: 12px !important; } .plixWrapper { width: 95% !important; max-width: inherit !important; } body.plix-modal { overflow: auto !important; padding: 0; width: 95% !important; height: inherit !important; } .show-description, .show-challenge { position: static !important; padding-top: 0 !important; } #hintModal { width: 90% !important; margin-left: -45% !important; } @media only screen and (max-device-width: 605px), only screen and (max-device-height: 605px) { #landscapeView { display: block !important; } } </style>";
 
 
-    public final String postfix = "?hints=true&evalData=true";
-    public final String POLICIES = "?policies=[{\"name\":\"shuffle\",\"value\":false},{\"name\":\"shuffle_question_options\",\"value\":false},{\"name\":\"max_questions\",\"value\":15},{\"name\":\"adaptive\",\"value\":false}]";
-    public final String practicePost = "?nextPractice=true&adaptive=true&checkUserLogin=false";
+    private final String postfix = "?hints=true&evalData=true";
+    private final String POLICIES = "?policies=[{\"name\":\"shuffle\",\"value\":false},{\"name\":\"shuffle_question_options\",\"value\":false},{\"name\":\"max_questions\",\"value\":15},{\"name\":\"adaptive\",\"value\":false}]";
+    private final String practicePost = "?nextPractice=true&adaptive=true&checkUserLogin=false";
 
     String practiceIdLink = "https://www.ck12.org/assessment/api/get/info/test/practice/";
     String startTestLink = "https://www.ck12.org/assessment/api/start/test/";
@@ -164,9 +164,6 @@ public class CK12ContentScraper {
 
 
     public ScriptEngineReader scriptEngineReader = new ScriptEngineReader();
-
-    private ChromeDriver driver;
-    private WebDriverWait waitDriver;
 
     public static final String RESPONSE_RECEIVED = "Network.responseReceived";
     private boolean isContentUpdated = true;
@@ -246,10 +243,10 @@ public class CK12ContentScraper {
 
         ContentScraperUtil.setChromeDriverLocation();
 
-        driver = ContentScraperUtil.setupLogIndexChromeDriver();
+        ChromeDriver driver = ContentScraperUtil.setupLogIndexChromeDriver();
 
         driver.get(urlString);
-        waitDriver = new WebDriverWait(driver, 10000);
+        WebDriverWait waitDriver = new WebDriverWait(driver, 10000);
         ContentScraperUtil.waitForJSandJQueryToLoad(waitDriver);
         try {
             waitDriver.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("div#questionController"))).click();

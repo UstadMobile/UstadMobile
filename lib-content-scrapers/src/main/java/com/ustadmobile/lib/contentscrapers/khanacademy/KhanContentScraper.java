@@ -95,19 +95,15 @@ import static com.ustadmobile.lib.contentscrapers.ck12.CK12ContentScraper.RESPON
  */
 public class KhanContentScraper {
 
+    private static final String GMAIL = "samih.mustafa@gmail.com";
+    private static final String PASS = "ustad123";
     private final File destinationDirectory;
 
-    String exerciseUrl = "https://www.khanacademy.org/api/internal/user/exercises/";
+    private String secondExerciseUrl = "https://www.khanacademy.org/api/internal/user/exercises/";
 
-    String exerciseNameUrl = "/problems/";
+    private String exerciseMidleUrl = "/items/";
 
-    String postFixUrl = "/assessment_item?last_seen_problem_sha=";
-
-    String secondExerciseUrl = "https://www.khanacademy.org/api/internal/user/exercises/";
-
-    String exerciseMidleUrl = "/items/";
-
-    String exercisePostUrl = "/assessment_item";
+    private String exercisePostUrl = "/assessment_item";
 
     private boolean isContentUpdated = true;
 
@@ -451,8 +447,8 @@ public class KhanContentScraper {
         ContentScraperUtil.waitForJSandJQueryToLoad(waitDriver);
         waitDriver.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("div#login-signup-root")));
 
-        driver.findElement(By.cssSelector("div#login-signup-root input[id*=email-or-username]")).sendKeys("samih.mustafa@gmail.com");
-        driver.findElement(By.cssSelector("div#login-signup-root input[id*=text-field-1-password]")).sendKeys("ustad123");
+        driver.findElement(By.cssSelector("div#login-signup-root input[id*=email-or-username]")).sendKeys(GMAIL);
+        driver.findElement(By.cssSelector("div#login-signup-root input[id*=text-field-1-password]")).sendKeys(PASS);
 
         List<WebElement> elements = driver.findElements(By.cssSelector("div#login-signup-root div[class*=inner]"));
         for(WebElement element: elements){
