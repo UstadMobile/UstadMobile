@@ -891,6 +891,7 @@ public class ContentScraperUtil {
         contentEntry.setThumbnailUrl(thumbnailUrl);
         contentEntry.setLicenseName(licenseName);
         contentEntry.setLicenseUrl(licenseUrl);
+        contentEntry.setPublik(true);
         return contentEntry;
     }
 
