@@ -43,13 +43,13 @@ import static com.ustadmobile.lib.db.entities.ContentEntry.LICENSE_TYPE_CC_BY_NC
  * Extract the json and put into the pojo object - TopicListResponse
  * TopicResponse has a list of domains which have all the topics in khan academy
  * Each domain has an href for the link to the next page - subjects
- *
+ * <p>
  * For the subject, extract the json from the script and load into SubjectListResponse
  * SubjectResponse has a list of modules which can be categorized with variable kind
  * TableOfContents - has another list of sub-subjects
  * SubjectProgress - has another list of sub-subjects which is found in list of modules with kind SubjectPageTopicCard
  * SubjectChallenge - quizzes for the subjects
- *
+ * <p>
  * Once we reach to the courses Page, extract the json from the script and load into SubjectListResponse
  * SubjectResponse has a list of tutorials which each have a list of content items
  * Every content item is a course categorized by Video, Exercise or Article.
@@ -399,23 +399,24 @@ public class IndexKhanContentScraper {
                         break;
 
                 }
+
+                File content = new File(contentFolder, FilenameUtils.getBaseName(url.getPath()) + ScraperConstants.ZIP_EXT);
+
+                if (scraper.isContentUpdated()) {
+                    ContentScraperUtil.insertContentEntryFile(content, contentEntryFileDao, contentFileStatusDao,
+                            entry, ContentScraperUtil.getMd5(content), contentEntryFileJoin, true,
+                            ScraperConstants.MIMETYPE_ZIP);
+
+                } else {
+
+                    ContentScraperUtil.checkAndUpdateDatabaseIfFileDownloadedButNoDataFound(content, entry, contentEntryFileDao,
+                            contentEntryFileJoin, contentFileStatusDao, ScraperConstants.MIMETYPE_ZIP, true);
+
+                }
+
             } catch (Exception e) {
                 System.err.println("Unable to scrape content from " + contentItem.title + " at url " + url);
                 e.printStackTrace();
-            }
-
-            File content = new File(contentFolder, FilenameUtils.getBaseName(url.getPath()) + ScraperConstants.ZIP_EXT);
-
-            if (scraper.isContentUpdated()) {
-                ContentScraperUtil.insertContentEntryFile(content, contentEntryFileDao, contentFileStatusDao,
-                        entry, ContentScraperUtil.getMd5(content), contentEntryFileJoin, true,
-                        ScraperConstants.MIMETYPE_ZIP);
-
-            } else {
-
-                ContentScraperUtil.checkAndUpdateDatabaseIfFileDownloadedButNoDataFound(content, entry, contentEntryFileDao,
-                        contentEntryFileJoin, contentFileStatusDao, ScraperConstants.MIMETYPE_ZIP, true);
-
             }
 
 

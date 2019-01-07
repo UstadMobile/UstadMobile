@@ -452,24 +452,25 @@ public class IndexCategoryCK12Content {
                     default:
                         System.out.println("found a group type not supported " + groupType);
                 }
+
+
+                File content = new File(topicDestination, FilenameUtils.getBaseName(url.getPath()) + ScraperConstants.ZIP_EXT);
+
+                if (scraper.isContentUpdated()) {
+                    ContentScraperUtil.insertContentEntryFile(content, contentEntryFileDao, contentFileStatusDao,
+                            topicEntry, ContentScraperUtil.getMd5(content), contentEntryFileJoinDao, true,
+                            ScraperConstants.MIMETYPE_ZIP);
+
+                } else {
+
+                    ContentScraperUtil.checkAndUpdateDatabaseIfFileDownloadedButNoDataFound(content, topicEntry, contentEntryFileDao,
+                            contentEntryFileJoinDao, contentFileStatusDao, ScraperConstants.MIMETYPE_ZIP, true);
+
+                }
+
             } catch (Exception e) {
                 System.err.println("Unable to scrape content from " + groupType + " at url " + url);
                 e.printStackTrace();
-                continue;
-            }
-
-            File content = new File(topicDestination, FilenameUtils.getBaseName(url.getPath()) + ScraperConstants.ZIP_EXT);
-
-            if (scraper.isContentUpdated()) {
-                ContentScraperUtil.insertContentEntryFile(content, contentEntryFileDao, contentFileStatusDao,
-                        topicEntry, ContentScraperUtil.getMd5(content), contentEntryFileJoinDao, true,
-                        ScraperConstants.MIMETYPE_ZIP);
-
-            } else {
-
-                ContentScraperUtil.checkAndUpdateDatabaseIfFileDownloadedButNoDataFound(content, topicEntry, contentEntryFileDao,
-                        contentEntryFileJoinDao, contentFileStatusDao, ScraperConstants.MIMETYPE_ZIP, true);
-
             }
 
         }
