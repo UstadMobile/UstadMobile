@@ -307,22 +307,6 @@ public class ContentScraperUtil {
     }
 
     /**
-     * Once Selenium is setup and you load a page, use this method to wait for the page to load completely
-     *
-     * @param waitDriver driver used to wait for conditions on webpage
-     * @return true once wait is complete
-     */
-    public static boolean waitForJSToClearConsole(WebDriverWait waitDriver) {
-
-        // wait for jQuery to load
-        ExpectedCondition<Boolean> jQueryLoad = driver ->
-                ((JavascriptExecutor) driver).executeScript("console.clear()").toString().equals("complete");
-
-        return waitDriver.until(jQueryLoad);
-    }
-
-
-    /**
      * Generate tincan xml file
      *
      * @param destinationDirectory directory it will be saved
@@ -401,6 +385,9 @@ public class ContentScraperUtil {
         return new ChromeDriver(option);
     }
 
+    /**
+     * Set the system property of the driver in your machine
+     */
     public static void setChromeDriverLocation() {
         System.setProperty("webdriver.chrome.driver", ScraperBuildConfig.CHROME_DRIVER_PATH);
     }
@@ -455,7 +442,7 @@ public class ContentScraperUtil {
     /**
      * Insert or Update the database for those parentChild Joins where the child have 1 parent
      *
-     * @param dao
+     * @param dao dao to insert/update
      * @param parentEntry
      * @param childEntry
      * @param index
@@ -542,6 +529,13 @@ public class ContentScraperUtil {
         return categoryToSimulationJoin;
     }
 
+    /**
+     * Insert or update the database with a new/updated Schema
+     * @param categorySchemeDao dao to insert/update
+     * @param schemaName schema Name
+     * @param schemaUrl schema Url
+     * @return the entry that was created/updated
+     */
     public static ContentCategorySchema insertOrUpdateSchema(ContentCategorySchemaDao categorySchemeDao, String schemaName, String schemaUrl) {
         ContentCategorySchema schema = categorySchemeDao.findBySchemaUrl(schemaUrl);
         if (schema == null) {
@@ -562,6 +556,13 @@ public class ContentScraperUtil {
         return schema;
     }
 
+    /**
+     *  Insert or update the category that belongs in a schema
+     * @param categoryDao dao to insert/update
+     * @param schema schema the category belongs in
+     * @param categoryName name of category
+     * @return the new/updated category entry
+     */
     public static ContentCategory insertOrUpdateCategoryContent(ContentCategoryDao categoryDao, ContentCategorySchema schema, String categoryName) {
         ContentCategory category = categoryDao.findCategoryBySchemaIdAndName(schema.getContentCategorySchemaUid(), categoryName);
         if (category == null) {
@@ -582,6 +583,14 @@ public class ContentScraperUtil {
         return category;
     }
 
+    /**
+     *  Insert or update the relation between 2 content entry
+     * @param contentEntryRelatedJoinDao dao to insert/update
+     * @param relatedEntry related entry of parent contententry
+     * @param parentEntry  parent content entry
+     * @param relatedType type of relation (Translation, related content)
+     * @return
+     */
     public static ContentEntryRelatedEntryJoin insertOrUpdateRelatedContentJoin(ContentEntryRelatedEntryJoinDao contentEntryRelatedJoinDao, ContentEntry relatedEntry, ContentEntry parentEntry, int relatedType) {
         ContentEntryRelatedEntryJoin relatedTranslationJoin = contentEntryRelatedJoinDao.findPrimaryByTranslation(relatedEntry.getContentEntryUid());
         if (relatedTranslationJoin == null) {
@@ -811,6 +820,13 @@ public class ContentScraperUtil {
         return -1;
     }
 
+    /**
+     * Insert or update language variant
+     * @param variantDao variant dao to insert/update
+     * @param variant variant of the language
+     * @param language the language the variant belongs to
+     * @return the language variant entry that was created/updated
+     */
     public static LanguageVariant insertOrUpdateLanguageVariant(LanguageVariantDao variantDao, String variant, Language language) {
         LanguageVariant languageVariant = null;
         if (!variant.isEmpty()) {
