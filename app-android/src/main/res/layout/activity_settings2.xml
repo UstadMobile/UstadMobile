@@ -43,7 +43,7 @@
             android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp"
             android:tint="@color/icons"
-            app:layout_constraintBottom_toTopOf="@+id/textView8"
+            app:layout_constraintBottom_toTopOf="@+id/item_sel_question_title"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@drawable/ic_people_black_24dp" />

@@ -44,6 +44,10 @@ public abstract class SocialNominationQuestionDao implements
                                           UmCallback<List<SocialNominationQuestion>> resultObject);
 
     @UmQuery("SELECT * FROM SocialNominationQuestion WHERE " +
+            "socialNominationQuestionSocialNominationQuestionSetUid = :questionUid")
+    public abstract UmProvider<SocialNominationQuestion> findAllQuestionsInSet(long questionUid);
+
+    @UmQuery("SELECT * FROM SocialNominationQuestion WHERE " +
             " socialNominationQuestionSocialNominationQuestionSetUid = :questionSetUid " +
             " AND questionIndex > :previousIndex ORDER BY questionIndex ASC LIMIT 1    " )
     public abstract void findNextQuestionByQuestionSetUidAsync(long questionSetUid,

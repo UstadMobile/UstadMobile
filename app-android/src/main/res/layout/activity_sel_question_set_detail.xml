@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -8,18 +7,17 @@
 
 
     <android.support.design.widget.AppBarLayout
-        android:id="@+id/activity_sel_question_sets_appbar"
+        android:id="@+id/activity_sel_question_set_detail_appbar"
         android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:elevation="4dp">
 
         <android.support.v7.widget.Toolbar
-            android:id="@+id/activity_sel_question_sets_toolbar"
+            android:id="@+id/activity_sel_question_set_detail_toolbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@color/primary"
-            app:title="@string/sel_question_set"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_scrollFlags="scroll|enterAlways"
             tools:layout_editor_absoluteY="0dp"
@@ -28,7 +26,7 @@
 
 
     <android.support.v7.widget.RecyclerView
-        android:id="@+id/activity_sel_question_sets_recyclerview"
+        android:id="@+id/activity_sel_question_set_detail_recyclerview"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_alignParentBottom="true"
@@ -38,12 +36,12 @@
         android:scrollbars="vertical"
         android:visibility="visible"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        app:layout_constraintBottom_toTopOf="@+id/activity_sel_question_sets_fab"
+        app:layout_constraintBottom_toTopOf="@+id/activity_sel_question_set_detail_fab"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/activity_sel_question_sets_appbar" />
+        app:layout_constraintTop_toBottomOf="@+id/activity_sel_question_set_detail_appbar" />
 
     <ru.dimorinny.floatingtextbutton.FloatingTextButton
-        android:id="@+id/activity_sel_question_sets_fab"
+        android:id="@+id/activity_sel_question_set_detail_fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|center"
@@ -52,10 +50,9 @@
         android:layout_marginStart="8dp"
         app:floating_background_color="@color/accent"
         app:floating_left_icon="@drawable/fab_add"
-        app:floating_title="@string/question_set"
+        app:floating_title="@string/question"
         app:floating_title_color="@android:color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
-
 </android.support.constraint.ConstraintLayout>

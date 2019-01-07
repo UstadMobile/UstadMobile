@@ -110,6 +110,7 @@ import com.ustadmobile.core.view.ReportSelectionView;
 import com.ustadmobile.core.view.SELEditView;
 import com.ustadmobile.core.view.SELQuestionDetailView;
 import com.ustadmobile.core.view.SELQuestionEditView;
+import com.ustadmobile.core.view.SELQuestionSetDetailView;
 import com.ustadmobile.core.view.SELQuestionSetsView;
 import com.ustadmobile.core.view.SELQuestionView;
 import com.ustadmobile.core.view.SELRecognitionView;
@@ -171,6 +172,7 @@ import com.ustadmobile.port.android.view.SELEditActivity;
 import com.ustadmobile.port.android.view.SELQuestionActivity;
 import com.ustadmobile.port.android.view.SELQuestionDetailActivity;
 import com.ustadmobile.port.android.view.SELQuestionEditActivity;
+import com.ustadmobile.port.android.view.SELQuestionSetDetailActivity;
 import com.ustadmobile.port.android.view.SELQuestionSetsActivity;
 import com.ustadmobile.port.android.view.SELRecognitionActivity;
 import com.ustadmobile.port.android.view.SELSelectConsentActivity;
@@ -308,6 +310,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         viewNameToAndroidImplMap.put(SettingsView.VIEW_NAME, SettingsActivity.class);
         viewNameToAndroidImplMap.put(SELQuestionSetsView.VIEW_NAME, SELQuestionSetsActivity.class);
         viewNameToAndroidImplMap.put(AddQuestionSetDialogView.VIEW_NAME, AddQuestionSetDialogFragment.class);
+        viewNameToAndroidImplMap.put(SELQuestionSetDetailView.VIEW_NAME, SELQuestionSetDetailActivity.class);
     }
 
     /**

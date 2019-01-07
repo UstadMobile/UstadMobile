@@ -6,6 +6,7 @@ import com.ustadmobile.core.db.dao.SocialNominationQuestionSetDao;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.AddQuestionSetDialogView;
+import com.ustadmobile.core.view.SELQuestionSetDetailView;
 import com.ustadmobile.core.view.SELQuestionSetsView;
 import com.ustadmobile.lib.db.entities.SocialNominationQuestionSet;
 
@@ -30,7 +31,16 @@ public class SELQuestionSetsPresenter extends UstadBaseController<SELQuestionSet
         super.onCreate(savedState);
 
         questionSetUmProvider = socialNominationQuestionSetDao.findAllQuestions();
+        view.setListProvider(questionSetUmProvider);
 
+    }
+
+    public void handleGoToQuestionSet(long questionSetUid, String questionSetName){
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        Hashtable args = new Hashtable();
+        args.put(SELQuestionSetDetailView.ARG_SEL_QUESTION_SET_UID, questionSetUid);
+        args.put(SELQuestionSetDetailView.ARG_SEL_QUESTION_SET_NAME, questionSetName);
+        impl.go(SELQuestionSetDetailView.VIEW_NAME, args, context);
     }
 
     public void handleClickPrimaryActionButton(){
