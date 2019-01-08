@@ -226,7 +226,7 @@ public class AsbScraper {
                 String sourceUrl = epubUrl.getPath() + "?" + epubUrl.getQuery();
 
                 ContentEntry childEntry = ContentScraperUtil.createOrUpdateContentEntry(sourceUrl, bookObj.title, sourceUrl, AFRICAN_STORY_BOOKS, ContentEntry.LICENSE_TYPE_CC_BY,
-                        language.getLangUid(), languageVariant  == null ? null : languageVariant.getLangVariantUid(), bookObj.summary, true, bookObj.author, getCoverUrl(bookId),
+                        language != null ? language.getLangUid() : 0L, languageVariant  == null ? null : languageVariant.getLangVariantUid(), bookObj.summary, true, bookObj.author, getCoverUrl(bookId),
                         EMPTY_STRING, EMPTY_STRING, contentEntryDao);
 
                 Document readerDoc = Jsoup.connect(generateReaderUrl(africanBooksUrl, bookId)).get();
