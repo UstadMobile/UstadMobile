@@ -63,6 +63,8 @@ public class ContentEntry {
 
     private boolean leaf;
 
+    private boolean publik;
+
     @UmSyncLocalChangeSeqNum
     private long contentEntryLocalChangeSeqNum;
 
@@ -238,6 +240,23 @@ public class ContentEntry {
 
     public void setContentEntryLastChangedBy(int contentEntryLastChangedBy) {
         this.contentEntryLastChangedBy = contentEntryLastChangedBy;
+    }
+
+    /**
+     * Represents if this content entry is public for anyone to use
+     *
+     * @return true if this content entry is public for anyone to use, false otherwise
+     */
+    public boolean isPublik() {
+        return publik;
+    }
+
+    /**
+     * Set if this content entry is public for anyone to use
+     * @param publik true if this content entry is public for anyone to use, false otherwise
+     */
+    public void setPublik(boolean publik) {
+        this.publik = publik;
     }
 
     @Override

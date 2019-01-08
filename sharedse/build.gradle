@@ -33,7 +33,6 @@ dependencies {
     //compile fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
     implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
-    implementation "com.ustadmobile.qrcodelibomrfork:qrcode-core:$version_qrcodelibfork"
     implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
     implementation "net.sf.kxml:kxml2:$version_kxml";
     implementation "com.google.code.gson:gson:$version_gson"
