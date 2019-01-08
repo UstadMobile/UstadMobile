@@ -18,6 +18,7 @@ import org.jsoup.select.Elements;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
@@ -61,16 +62,18 @@ public class PhetContentScraper {
     private String aboutText;
     private ArrayList<String> langugageList;
     private Map<String, Boolean> languageMapUpdate;
+    private Map<String, String> languageUrlMap;
     private Map<Long, String> langIdMap;
 
     private String aboutDescription;
-    private boolean contentUpdated;
+    private URL simulationUrl;
 
     public PhetContentScraper(String url, File destinationDir) {
         this.url = url;
         this.destinationDirectory = destinationDir;
         langugageList = new ArrayList<>();
         languageMapUpdate = new HashMap<>();
+        languageUrlMap = new HashMap<>();
         this.title = url.substring(url.lastIndexOf("/") + 1, url.length());
     }
 
@@ -94,7 +97,7 @@ public class PhetContentScraper {
 
     public void scrapeContent() throws IOException {
 
-        URL simulationUrl = new URL(url);
+        simulationUrl = new URL(url);
         destinationDirectory.mkdirs();
 
         simulationDoc = Jsoup.connect(url).get();
@@ -106,7 +109,7 @@ public class PhetContentScraper {
         aboutText = simulationDoc.getElementById("about").html();
         aboutDescription = Jsoup.parse(aboutText).select("p.simulation-panel-indent").text();
 
-        boolean contentUpdated = false;
+        boolean contentUpdated;
         for (Element englishLink : simulationDoc.select("div.simulation-main-image-panel a.phet-button[href]")) {
 
             String hrefLink = englishLink.attr("href");
@@ -117,6 +120,7 @@ public class PhetContentScraper {
             if (hrefLink.contains("download")) {
                 contentUpdated = downloadContent(simulationUrl, hrefLink, englishLocation);
                 languageMapUpdate.put(englishLocation.getName(), contentUpdated);
+                languageUrlMap.put(englishLocation.getName(), hrefLink);
                 break;
             }
         }
@@ -131,7 +135,6 @@ public class PhetContentScraper {
                 if (hrefLink.contains("translated")) {
 
                     String langCode = hrefLink.substring(hrefLink.lastIndexOf("/") + 1, hrefLink.length());
-                    System.out.println(langCode);
                     langugageList.add(langCode);
                     languageLocation = new File(destinationDirectory, langCode);
                     languageLocation.mkdirs();
@@ -146,27 +149,25 @@ public class PhetContentScraper {
                 if (hrefLink.contains("download")) {
                     boolean isLanguageUpdated = downloadContent(simulationUrl, hrefLink, languageLocation);
                     languageMapUpdate.put(languageLocation.getName(), isLanguageUpdated);
-                    contentUpdated |= isLanguageUpdated;
+                    languageUrlMap.put(languageLocation.getName(), hrefLink);
                     break;
                 }
 
             }
 
         }
-
-        this.contentUpdated = contentUpdated;
     }
 
     public Map<String, Boolean> getLanguageUpdatedMap() {
         return languageMapUpdate;
     }
 
-    public boolean isAnyContentUpdated() {
-        return contentUpdated;
+    public String getAboutDescription() {
+        return aboutDescription;
     }
 
-    public String getAboutDescription(){
-        return aboutDescription;
+    public Map<String, String> getLanguageUrlMap() {
+        return languageUrlMap;
     }
 
     /**
@@ -187,14 +188,17 @@ public class PhetContentScraper {
                 String categoryName = category.text(); // category name
                 String path = category.parent().attr("href"); // url path to category
 
+                try {
+                    ContentEntry categoryContentEntry = ContentScraperUtil.createOrUpdateContentEntry(path, categoryName,
+                            new URL(simulationUrl, path).toString(), PHET, LICENSE_TYPE_CC_BY, language.getLangUid(), null,
+                            EMPTY_STRING, false, EMPTY_STRING, EMPTY_STRING,
+                            EMPTY_STRING, EMPTY_STRING, contentEntryDao);
 
-                ContentEntry categoryContentEntry = ContentScraperUtil.createOrUpdateContentEntry(path, categoryName,
-                        path, PHET, LICENSE_TYPE_CC_BY, language.getLangUid(), null,
-                        EMPTY_STRING, false, EMPTY_STRING, EMPTY_STRING,
-                        EMPTY_STRING, EMPTY_STRING, contentEntryDao);
 
-                categoryRelations.add(categoryContentEntry);
-                System.out.println(categoryName);
+                    categoryRelations.add(categoryContentEntry);
+                } catch (IOException ie) {
+                    System.err.println("Error creating category entry" + path);
+                }
             }
         }
 
@@ -263,9 +267,9 @@ public class PhetContentScraper {
                         for (File file : contentDirectory.listFiles()) {
 
                             if (file.getName().endsWith(".html")) {
-                                String langTitle = Jsoup.parse(file, ScraperConstants.UTF_ENCODING).title();
+                                String langTitle = simulationDoc.selectFirst("td a[href*=_" + langCode + "] span").text();
 
-                                String path = langCode + "/" + this.title;
+                                String path = simulationUrl.toString().replace("/en/", "/" + langCode + "/");
                                 String[] country = langCode.replaceAll("_", "-").split("-");
 
                                 String lang = country[0];
@@ -273,7 +277,6 @@ public class PhetContentScraper {
 
                                 Language language = ContentScraperUtil.insertOrUpdateLanguageByTwoCode(languageDao, lang);
                                 LanguageVariant languageVariant = ContentScraperUtil.insertOrUpdateLanguageVariant(languageVariantDao, variant, language);
-
 
                                 ContentEntry languageContentEntry = ContentScraperUtil.createOrUpdateContentEntry(path, langTitle,
                                         path, PHET, LICENSE_TYPE_CC_BY, language.getLangUid(), languageVariant != null ? languageVariant.getLangVariantUid() : null,
@@ -294,7 +297,7 @@ public class PhetContentScraper {
         return translationsEntry;
     }
 
-    public Map<Long, String> getContentEntryLangMap(){
+    public Map<Long, String> getContentEntryLangMap() {
         return langIdMap;
     }
 

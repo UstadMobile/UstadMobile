@@ -142,64 +142,60 @@ public class IndexPhetContentScraper {
             PhetContentScraper scraper = new PhetContentScraper(simulationUrl, destinationDirectory);
             try {
                 scraper.scrapeContent();
-
                 ContentEntry englishSimContentEntry = ContentScraperUtil.createOrUpdateContentEntry(path, title,
-                        path, PHET, LICENSE_TYPE_CC_BY, englishLang.getLangUid(), null,
+                        simulationUrl, PHET, LICENSE_TYPE_CC_BY, englishLang.getLangUid(), null,
                         scraper.getAboutDescription(), true, EMPTY_STRING,
                         thumbnail, EMPTY_STRING, EMPTY_STRING, contentEntryDao);
 
-                if (scraper.isAnyContentUpdated()) {
+                boolean isEnglishUpdated = scraper.getLanguageUpdatedMap().get("en");
+                File enLangLocation = new File(destinationDirectory, "en");
+                File englishContentFile = new File(enLangLocation, title + ScraperConstants.ZIP_EXT);
+                if (isEnglishUpdated) {
 
-                    boolean isEnglishUpdated = scraper.getLanguageUpdatedMap().get("en");
-                    File enLangLocation = new File(destinationDirectory, "en");
-                    File englishContentFile = new File(enLangLocation, title + ScraperConstants.ZIP_EXT);
-                    if (isEnglishUpdated) {
-
-                        ContentScraperUtil.insertContentEntryFile(englishContentFile, contentEntryFileDao, contentFileStatusDao, englishSimContentEntry,
-                                ContentScraperUtil.getMd5(englishContentFile), contentEntryFileJoin, true, ScraperConstants.MIMETYPE_ZIP);
+                    ContentScraperUtil.insertContentEntryFile(englishContentFile, contentEntryFileDao, contentFileStatusDao, englishSimContentEntry,
+                            ContentScraperUtil.getMd5(englishContentFile), contentEntryFileJoin, true, ScraperConstants.MIMETYPE_ZIP);
 
 
-                    } else {
-                        ContentScraperUtil.checkAndUpdateDatabaseIfFileDownloadedButNoDataFound(englishContentFile, englishSimContentEntry, contentEntryFileDao,
-                                contentEntryFileJoin, contentFileStatusDao, ScraperConstants.MIMETYPE_ZIP, true);
+                } else {
+                    ContentScraperUtil.checkAndUpdateDatabaseIfFileDownloadedButNoDataFound(englishContentFile, englishSimContentEntry, contentEntryFileDao,
+                            contentEntryFileJoin, contentFileStatusDao, ScraperConstants.MIMETYPE_ZIP, true);
 
-                    }
+                }
 
-                    ArrayList<ContentEntry> categoryList = scraper.getCategoryRelations(contentEntryDao, englishLang);
-                    ArrayList<ContentEntry> translationList = scraper.getTranslations(destinationDirectory, contentEntryDao, thumbnail, languageDao, languageVariantDao);
+                ArrayList<ContentEntry> categoryList = scraper.getCategoryRelations(contentEntryDao, englishLang);
+                ArrayList<ContentEntry> translationList = scraper.getTranslations(destinationDirectory, contentEntryDao, thumbnail, languageDao, languageVariantDao);
 
-                    // TODO remove all categories that no longer exist
-                    // TODO remove all categories that dont belong in a phet simulation anymore
+                // TODO remove all categories that no longer exist
+                // TODO remove all categories that dont belong in a phet simulation anymore
 
-                    int categoryCount = 0;
-                    for (ContentEntry category : categoryList) {
+                int categoryCount = 0;
+                for (ContentEntry category : categoryList) {
 
-                        ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, phetParentEntry, category, categoryCount++);
-                        ContentScraperUtil.insertOrUpdateChildWithMultipleParentsJoin(contentParentChildJoinDao, category, englishSimContentEntry, 0);
+                    ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, phetParentEntry, category, categoryCount++);
+                    ContentScraperUtil.insertOrUpdateChildWithMultipleParentsJoin(contentParentChildJoinDao, category, englishSimContentEntry, 0);
 
-                        int translationsCount = 1;
-                        for (ContentEntry translation : translationList) {
+                    int translationsCount = 1;
+                    for (ContentEntry translation : translationList) {
 
-                            ContentScraperUtil.insertOrUpdateRelatedContentJoin(contentEntryRelatedJoinDao, translation, englishSimContentEntry, ContentEntryRelatedEntryJoin.REL_TYPE_TRANSLATED_VERSION);
+                        ContentScraperUtil.insertOrUpdateRelatedContentJoin(contentEntryRelatedJoinDao, translation, englishSimContentEntry, ContentEntryRelatedEntryJoin.REL_TYPE_TRANSLATED_VERSION);
 
-                            String langCode = scraper.getContentEntryLangMap().get(translation.getContentEntryUid());
+                        String langCode = scraper.getContentEntryLangMap().get(translation.getContentEntryUid());
 
-                            File langLocation = new File(destinationDirectory, langCode);
-                            File content = new File(langLocation, title + ScraperConstants.ZIP_EXT);
-                            if (scraper.getLanguageUpdatedMap().get(langCode)) {
+                        File langLocation = new File(destinationDirectory, langCode);
+                        File content = new File(langLocation, title + ScraperConstants.ZIP_EXT);
+                        if (scraper.getLanguageUpdatedMap().get(langCode)) {
 
-                                ContentScraperUtil.insertContentEntryFile(content, contentEntryFileDao, contentFileStatusDao, translation,
-                                        ContentScraperUtil.getMd5(content), contentEntryFileJoin, true, ScraperConstants.MIMETYPE_ZIP);
+                            ContentScraperUtil.insertContentEntryFile(content, contentEntryFileDao, contentFileStatusDao, translation,
+                                    ContentScraperUtil.getMd5(content), contentEntryFileJoin, true, ScraperConstants.MIMETYPE_ZIP);
 
 
-                            } else {
-                                ContentScraperUtil.checkAndUpdateDatabaseIfFileDownloadedButNoDataFound(content, translation, contentEntryFileDao,
-                                        contentEntryFileJoin, contentFileStatusDao, ScraperConstants.MIMETYPE_ZIP, true);
+                        } else {
+                            ContentScraperUtil.checkAndUpdateDatabaseIfFileDownloadedButNoDataFound(content, translation, contentEntryFileDao,
+                                    contentEntryFileJoin, contentFileStatusDao, ScraperConstants.MIMETYPE_ZIP, true);
 
-                            }
-
-                            ContentScraperUtil.insertOrUpdateChildWithMultipleParentsJoin(contentParentChildJoinDao, category, translation, translationsCount++);
                         }
+
+                        ContentScraperUtil.insertOrUpdateChildWithMultipleParentsJoin(contentParentChildJoinDao, category, translation, translationsCount++);
                     }
                 }
 
