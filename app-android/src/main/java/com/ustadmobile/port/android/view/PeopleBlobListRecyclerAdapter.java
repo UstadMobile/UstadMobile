@@ -107,7 +107,8 @@ public class PeopleBlobListRecyclerAdapter extends
     private void updateImageOnView(String imagePath, ImageView personImageView){
         Uri profileImage = Uri.fromFile(new File(imagePath));
 
-        Picasso.with(theContext)
+        //Picasso.with(theContext)
+        Picasso.get()
                 .load(profileImage)
                 .transform(new CropSquareTransformation())
                 .resize(90,90)
@@ -115,7 +116,8 @@ public class PeopleBlobListRecyclerAdapter extends
                 .into(personImageView);
 
         File profilePic = new File(imagePath);
-        Picasso.with(theContext)
+        //Picasso.with(theContext)
+        Picasso.get()
                 .load(profilePic)
                 .transform(new CropSquareTransformation())
                 .resize(90,90)

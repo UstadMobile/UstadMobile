@@ -146,7 +146,9 @@ public class PersonDetailActivity extends UstadBaseActivity implements PersonDet
     public void updateImageOnView(String imagePath){
         Uri profileImage = Uri.fromFile(new File(imagePath));
 
-        Picasso.with(getApplicationContext())
+        Picasso
+                //.with(getApplicationContext())
+                .get()
                 .load(profileImage)
                 .fit()
                 .centerCrop()

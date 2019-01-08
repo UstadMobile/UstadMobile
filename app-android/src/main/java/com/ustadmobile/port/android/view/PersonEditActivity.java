@@ -503,7 +503,8 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
     public void updateImageOnView(String imagePath){
         Uri profileImage = Uri.fromFile(new File(imagePath));
 
-        Picasso.with(getApplicationContext()).load(profileImage).into(personEditImage);
+        //Picasso.with(getApplicationContext()).load(profileImage).into(personEditImage);
+        Picasso.get().load(profileImage).into(personEditImage);
 
     }
 

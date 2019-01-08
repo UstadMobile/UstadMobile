@@ -252,7 +252,8 @@ public class OPDSEntryCard extends ConstraintLayout {
         if(UmAndroidImageUtil.isSvg(mimeType)) {
             UmAndroidImageUtil.loadSvgIntoImageView(url, thumbImageView);
         }else {
-            Picasso.with(getContext()).load("um-"+url).fit().centerInside().into(thumbImageView);
+            //Picasso.with(getContext()).load("um-"+url).fit().centerInside().into(thumbImageView);
+            Picasso.get().load("um-"+url).fit().centerInside().into(thumbImageView);
         }
     }
 

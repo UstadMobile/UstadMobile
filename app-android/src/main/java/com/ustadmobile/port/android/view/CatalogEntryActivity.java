@@ -360,11 +360,13 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
         ImageView coverImageView = (ImageView)findViewById(getThumbnailImageViewId());
 
         if(iconFileUri == null){
-            Picasso.with(this).load(R.drawable.cover).fit().centerInside().into(coverImageView);
+            //Picasso.with(this).load(R.drawable.cover).fit().centerInside().into(coverImageView);
+            Picasso.get().load(R.drawable.cover).fit().centerInside().into(coverImageView);
         }else if(UmAndroidImageUtil.isSvg(mimeType)) {
             UmAndroidImageUtil.loadSvgIntoImageView(iconFileUri, coverImageView);
         }else {
-            Picasso.with(this).load("um-"+ iconFileUri).fit().centerInside().into(coverImageView);
+            //Picasso.with(this).load("um-"+ iconFileUri).fit().centerInside().into(coverImageView);
+            Picasso.get().load("um-"+ iconFileUri).fit().centerInside().into(coverImageView);
         }
     }
 

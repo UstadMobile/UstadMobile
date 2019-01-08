@@ -33,6 +33,7 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Objects;
 
+import static com.ustadmobile.core.view.PersonEditView.IMAGE_MAX_WIDTH;
 import static com.ustadmobile.port.android.view.PersonEditActivity.DEFAULT_PADDING;
 
 /**
@@ -61,7 +62,7 @@ public class PersonWithEnrollmentRecyclerAdapter
 
     private int addCMCLT, addCMCLS;
 
-    public static final int IMAGE_PERSON_THUMBNAIL_WIDTH = 16;
+    public static final int IMAGE_PERSON_THUMBNAIL_WIDTH = 24;
 
     @SuppressLint("UseSparseArrays")
     private HashMap<Long, Boolean> checkBoxHM = new HashMap<>();
@@ -394,18 +395,24 @@ public class PersonWithEnrollmentRecyclerAdapter
     public void setPictureOnView(String imagePath, ImageView theImage) {
 
         Uri imageUri = Uri.fromFile(new File(imagePath));
+        //theImage.setImageURI(imageUri);
+
+        //File imageFile = new File(imagePath);
 
         Picasso
-                .with(theContext)
+                .get()
                 .load(imageUri)
-                .fit()
-                .centerCrop()
-                .error(R.drawable.ic_person_black_24dp)
+                .resize(dpToPx(IMAGE_PERSON_THUMBNAIL_WIDTH), dpToPx(IMAGE_PERSON_THUMBNAIL_WIDTH))
+                //.fit()
+                //.centerCrop()
                 .noFade()
                 .into(theImage);
-
     }
 
+
+    public static int dpToPx(int dp) {
+        return (int) (dp * Resources.getSystem().getDisplayMetrics().density);
+    }
 
     /**
      * Removes old Add ClazzMember views

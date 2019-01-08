@@ -116,7 +116,8 @@ public class PersonPictureDialogFragment extends UstadDialogFragment implements
         Uri profileImage = Uri.fromFile(new File(imagePath));
 
         Picasso
-                .with(getContext())
+                //.with(getContext())
+                .get()
                 .load(profileImage)
                 .fit()
                 .centerCrop()
