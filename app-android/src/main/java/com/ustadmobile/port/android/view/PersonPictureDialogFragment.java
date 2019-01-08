@@ -5,15 +5,14 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 
 import com.squareup.picasso.Picasso;
 import com.toughra.ustadmobile.R;
@@ -38,10 +37,10 @@ public class PersonPictureDialogFragment extends UstadDialogFragment implements
     String imagePath = "";
 
 
-    @android.support.annotation.NonNull
-    @NonNull
     @Override
-    public Dialog onCreateDialog(Bundle savedInstanceState){
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
         LayoutInflater inflater =
                 (LayoutInflater)Objects.requireNonNull(getContext()).getSystemService(
                         Context.LAYOUT_INFLATER_SERVICE);
@@ -51,17 +50,24 @@ public class PersonPictureDialogFragment extends UstadDialogFragment implements
         updateImageButton =
                 rootView.findViewById(R.id.fragment_person_picture_dialog_update_picture_button);
 
+        theImage = rootView.findViewById(R.id.fragment_person_picture_dialog_imageview);
+        theImage.setOnClickListener(view -> dialog.cancel());
+
         if(getArguments().containsKey(ARG_PERSON_IMAGE_PATH)){
             imagePath = getArguments().getString(ARG_PERSON_IMAGE_PATH);
             //Update image on Dialog
             setPictureOnView(imagePath);
 
         }
+    }
+
+    @android.support.annotation.NonNull
+    @NonNull
+    @Override
+    public Dialog onCreateDialog(Bundle savedInstanceState){
 
         android.support.v7.app.AlertDialog.Builder builder =
                 new android.support.v7.app.AlertDialog.Builder(Objects.requireNonNull(getContext()));
-        //builder.setTitle(R.string.person_picture);
-
 
         builder.setView(rootView);
         dialog = builder.create();
@@ -109,7 +115,12 @@ public class PersonPictureDialogFragment extends UstadDialogFragment implements
 
         Uri profileImage = Uri.fromFile(new File(imagePath));
 
-        Picasso.with(getContext()).load(profileImage).into(theImage);
+        Picasso
+                .with(getContext())
+                .load(profileImage)
+                .fit()
+                .centerCrop()
+                .into(theImage);
 
     }
 }

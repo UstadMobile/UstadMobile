@@ -231,7 +231,15 @@ public class PersonWithEnrollmentRecyclerAdapter
         studentNameTextView.setOnClickListener(v -> mPresenter.handleCommonPressed(personUid));
 
         //Remove previous add clazz member views
-        removeAllAddClazzMemberView(cl, holder);
+        if(addCMCLS != 0 || addCMCLT != 0)
+            removeAllAddClazzMemberView(cl, holder);
+
+        //Add picture to person
+        String imagePath = personWithEnrollment.getImagePath();
+        if(imagePath != null && !imagePath.isEmpty() && imagePath.length() > 0)
+            setPictureOnView(imagePath, personPicture);
+        else
+            personPicture.setImageResource(R.drawable.ic_person_black_new_24dp);
 
         if(showAttendance){
             long attendancePercentage =
@@ -270,7 +278,7 @@ public class PersonWithEnrollmentRecyclerAdapter
 
             //connect divider's top to image's bottom
             constraintSet.connect(R.id.item_studentlist_student_simple_horizontal_divider,
-                    ConstraintSet.TOP, R.id.item_studentlist_student_simple_student_image,
+                    ConstraintSet.TOP, R.id.item_studentlist_student_simple_student_title,
                     ConstraintSet.BOTTOM, 16);
             constraintSet.connect(R.id.item_studentlist_student_simple_attendance_percentage,
                     ConstraintSet.TOP, R.id.item_studentlist_student_simple_student_title,
@@ -342,7 +350,6 @@ public class PersonWithEnrollmentRecyclerAdapter
                 if (previousPerson.getClazzMemberRole() == ClazzMember.ROLE_TEACHER &&
                         personWithEnrollment.getClazzMemberRole() == ClazzMember.ROLE_STUDENT) {
 
-
                     //Add student
                     addHeadingAndNew(cl, ClazzMember.ROLE_STUDENT);
                 }
@@ -362,6 +369,9 @@ public class PersonWithEnrollmentRecyclerAdapter
             constraintSet.connect(R.id.item_studentlist_student_simple_horizontal_divider,
                     ConstraintSet.TOP, R.id.item_studentlist_student_simple_student_image,
                     ConstraintSet.BOTTOM, 16);
+
+            //If text is below student image
+
             constraintSet.connect(R.id.item_studentlist_student_simple_attendance_percentage,
                     ConstraintSet.TOP, R.id.item_studentlist_student_simple_student_title,
                     ConstraintSet.BOTTOM, 0);
@@ -378,25 +388,20 @@ public class PersonWithEnrollmentRecyclerAdapter
             }
         }
 
-        //Add picture to person
-        String imagePath = personWithEnrollment.getImagePath();
-        if(imagePath != null && !imagePath.isEmpty() && imagePath.length() > 0)
-            setPictureOnView(imagePath, personPicture);
-        else
-            personPicture.setImageResource(R.drawable.ic_person_black_new_24dp);
-
     }
 
 
     public void setPictureOnView(String imagePath, ImageView theImage) {
 
-        Uri profileImage = Uri.fromFile(new File(imagePath));
+        Uri imageUri = Uri.fromFile(new File(imagePath));
 
         Picasso
                 .with(theContext)
-                .load(profileImage)
+                .load(imageUri)
                 .fit()
                 .centerCrop()
+                .error(R.drawable.ic_person_black_24dp)
+                .noFade()
                 .into(theImage);
 
     }
