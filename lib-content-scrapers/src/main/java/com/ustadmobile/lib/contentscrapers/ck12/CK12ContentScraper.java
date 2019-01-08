@@ -281,7 +281,7 @@ public class CK12ContentScraper {
 
                     if (file.getName().contains("plix.css")) {
                         String plixJs = FileUtils.readFileToString(file, UTF_ENCODING);
-                        int startIndex = plixJs.indexOf("@media only screen and (max-device-width:605px)");
+                        int startIndex = plixJs.indexOf("@media only screen and (max-device-width:");
                         int endIndex = plixJs.indexOf(".plix{");
                         plixJs = new StringBuilder(plixJs).insert(endIndex, "*/").insert(startIndex, "/*").toString();
                         FileUtils.writeStringToFile(file, plixJs, UTF_ENCODING);
@@ -325,7 +325,7 @@ public class CK12ContentScraper {
                     LogIndex logIndex = ContentScraperUtil.createIndexFromLog(urlString, mimeType, urlDirectory, file, log);
                     index.add(logIndex);
 
-                } catch (IOException e) {
+                } catch (Exception e) {
                     System.err.println(urlString);
                     System.err.println(le.getMessage());
                     e.printStackTrace();
