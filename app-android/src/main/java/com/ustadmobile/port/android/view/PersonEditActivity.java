@@ -350,6 +350,7 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
                     });
                 }
 
+                
                 til.addView(et, tilp);
 
                 editView = til;

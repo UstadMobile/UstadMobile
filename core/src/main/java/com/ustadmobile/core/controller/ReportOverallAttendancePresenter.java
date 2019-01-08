@@ -187,7 +187,7 @@ public class ReportOverallAttendancePresenter
     }
 
     public void dataToCSV(){
-
+        view.generateCSVReport();
     }
 
     public void dataToXLS(){

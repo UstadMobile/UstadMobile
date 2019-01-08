@@ -62,7 +62,7 @@ public class PersonWithEnrollmentRecyclerAdapter
 
     private int addCMCLT, addCMCLS;
 
-    public static final int IMAGE_PERSON_THUMBNAIL_WIDTH = 24;
+    public static final int IMAGE_PERSON_THUMBNAIL_WIDTH = 26;
 
     @SuppressLint("UseSparseArrays")
     private HashMap<Long, Boolean> checkBoxHM = new HashMap<>();
