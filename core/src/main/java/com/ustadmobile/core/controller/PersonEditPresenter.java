@@ -91,6 +91,14 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
 
     private long enrollToClazz = -1L;
 
+    public long getPersonUid() {
+        return personUid;
+    }
+
+    public void setPersonUid(long personUid) {
+        this.personUid = personUid;
+    }
+
     /**
      * Presenter's constructor where we are getting arguments and setting the newly/editable
      * personUid

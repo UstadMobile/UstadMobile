@@ -146,10 +146,15 @@ public class PersonDetailActivity extends UstadBaseActivity implements PersonDet
     public void updateImageOnView(String imagePath){
         Uri profileImage = Uri.fromFile(new File(imagePath));
 
-        Picasso.with(getApplicationContext()).load(profileImage).into(personEditImage);
+        Picasso.with(getApplicationContext())
+                .load(profileImage)
+                .fit()
+                .centerCrop()
+                .into(personEditImage);
 
-        File profilePic = new File(imagePath);
-        Picasso.with(getApplicationContext()).load(profilePic).into(personEditImage);
+        //Click on image - open dialog to show bigger picture
+        personEditImage.setOnClickListener(view ->
+                mPresenter.openPictureDialog(imagePath));
     }
 
     @Override

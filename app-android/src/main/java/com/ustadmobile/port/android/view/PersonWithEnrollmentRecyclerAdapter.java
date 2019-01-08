@@ -5,7 +5,9 @@ import android.app.Activity;
 import android.arch.paging.PagedList;
 import android.arch.paging.PagedListAdapter;
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Color;
+import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
 import android.support.constraint.ConstraintSet;
@@ -21,11 +23,13 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.squareup.picasso.Picasso;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.CommonHandlerPresenter;
 import com.ustadmobile.lib.db.entities.ClazzMember;
 import com.ustadmobile.lib.db.entities.PersonWithEnrollment;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Objects;
 
@@ -56,6 +60,8 @@ public class PersonWithEnrollmentRecyclerAdapter
     private boolean teacherAdded = false;
 
     private int addCMCLT, addCMCLS;
+
+    public static final int IMAGE_PERSON_THUMBNAIL_WIDTH = 16;
 
     @SuppressLint("UseSparseArrays")
     private HashMap<Long, Boolean> checkBoxHM = new HashMap<>();
@@ -208,6 +214,9 @@ public class PersonWithEnrollmentRecyclerAdapter
         TextView studentNameTextView =
                 holder.itemView.findViewById(R.id.item_studentlist_student_simple_student_title);
         studentNameTextView.setText(studentName);
+
+        ImageView personPicture =
+                holder.itemView.findViewById(R.id.item_studentlist_student_simple_student_image);
 
         ImageView trafficLight = holder.itemView
                 .findViewById(R.id.item_studentlist_student_simple_attendance_trafficlight);
@@ -368,6 +377,28 @@ public class PersonWithEnrollmentRecyclerAdapter
                 addHeadingAndNew(cl, ClazzMember.ROLE_STUDENT);
             }
         }
+
+        //Add picture to person
+        String imagePath = personWithEnrollment.getImagePath();
+        if(imagePath != null && !imagePath.isEmpty() && imagePath.length() > 0)
+            setPictureOnView(imagePath, personPicture);
+        else
+            personPicture.setImageResource(R.drawable.ic_person_black_new_24dp);
+
+    }
+
+
+    public void setPictureOnView(String imagePath, ImageView theImage) {
+
+        Uri profileImage = Uri.fromFile(new File(imagePath));
+
+        Picasso
+                .with(theContext)
+                .load(profileImage)
+                .fit()
+                .centerCrop()
+                .into(theImage);
+
     }
 
 

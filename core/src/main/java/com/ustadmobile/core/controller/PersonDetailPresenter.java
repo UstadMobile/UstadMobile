@@ -18,6 +18,7 @@ import com.ustadmobile.core.view.PersonDetailEnrollClazzView;
 import com.ustadmobile.core.view.PersonDetailView;
 import com.ustadmobile.core.view.PersonDetailViewField;
 import com.ustadmobile.core.view.PersonEditView;
+import com.ustadmobile.core.view.PersonPictureDialogView;
 import com.ustadmobile.lib.db.entities.ClazzWithNumStudents;
 import com.ustadmobile.lib.db.entities.Person;
 import com.ustadmobile.lib.db.entities.PersonCustomFieldValue;
@@ -33,6 +34,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import static com.ustadmobile.core.view.PersonDetailView.ARG_PERSON_UID;
+import static com.ustadmobile.core.view.PersonPictureDialogView.ARG_PERSON_IMAGE_PATH;
 import static com.ustadmobile.lib.db.entities.PersonDetailPresenterField.CUSTOM_FIELD_MIN_UID;
 import static com.ustadmobile.lib.db.entities.PersonField.FIELD_TYPE_HEADER;
 import static com.ustadmobile.lib.db.entities.PersonField.FIELD_TYPE_TEXT;
@@ -449,6 +451,14 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
         if(!oneParentNumber.isEmpty()) {
             handleClickText(oneParentNumber);
         }
+    }
+
+    public void openPictureDialog(String imagePath){
+        //Open Dialog
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        Hashtable args = new Hashtable();
+        args.put(ARG_PERSON_IMAGE_PATH, imagePath);
+        impl.go(PersonPictureDialogView.VIEW_NAME, args, context);
     }
 
     /**
