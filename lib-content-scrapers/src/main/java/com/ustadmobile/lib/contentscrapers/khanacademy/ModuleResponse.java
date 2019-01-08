@@ -1,7 +1,6 @@
 package com.ustadmobile.lib.contentscrapers.khanacademy;
 
 import com.google.gson.annotations.SerializedName;
-import com.sun.org.apache.xpath.internal.operations.Mod;
 
 import java.util.List;
 

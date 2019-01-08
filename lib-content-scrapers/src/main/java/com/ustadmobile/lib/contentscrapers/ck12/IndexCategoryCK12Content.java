@@ -175,7 +175,7 @@ public class IndexCategoryCK12Content {
                 URL subjectUrl = new URL(url, hrefLink);
                 String title = subject.attr("title");
 
-                ContentEntry subjectEntry = ContentScraperUtil.createOrUpdateContentEntry(hrefLink, title, hrefLink, CK_12,
+                ContentEntry subjectEntry = ContentScraperUtil.createOrUpdateContentEntry(hrefLink, title, subjectUrl.toString(), CK_12,
                         LICENSE_TYPE_CC_BY_NC, englishLang.getLangUid(), null, EMPTY_STRING, false,
                         EMPTY_STRING, EMPTY_STRING, EMPTY_STRING, EMPTY_STRING, contentEntryDao);
 
@@ -222,7 +222,7 @@ public class IndexCategoryCK12Content {
                 File gradeFolder = new File(destinationDirectory, title);
                 gradeFolder.mkdirs();
 
-                ContentEntry gradeEntry = ContentScraperUtil.createOrUpdateContentEntry(hrefLink, title, hrefLink, CK_12, LICENSE_TYPE_CC_BY_NC,
+                ContentEntry gradeEntry = ContentScraperUtil.createOrUpdateContentEntry(hrefLink, title, subCategoryUrl.toString(), CK_12, LICENSE_TYPE_CC_BY_NC,
                         englishLang.getLangUid(), null, EMPTY_STRING, false, EMPTY_STRING, EMPTY_STRING,
                         EMPTY_STRING, EMPTY_STRING, contentEntryDao);
 
@@ -237,7 +237,7 @@ public class IndexCategoryCK12Content {
         for (Element category : categoryList) {
 
             String level1CategoryTitle = category.select("span.concept-name").attr("title");
-            String fakePath = url.getPath() + "/" + level1CategoryTitle;
+            String fakePath = url.toString() + "/" + level1CategoryTitle;
 
             ContentEntry topicEntry = ContentScraperUtil.createOrUpdateContentEntry(fakePath, level1CategoryTitle, fakePath, CK_12,
                     LICENSE_TYPE_CC_BY_NC, englishLang.getLangUid(), null, EMPTY_STRING, false,
@@ -274,7 +274,7 @@ public class IndexCategoryCK12Content {
 
                 URL contentUrl = new URL(url, hrefLink);
 
-                ContentEntry lastTopicEntry = ContentScraperUtil.createOrUpdateContentEntry(hrefLink, title, hrefLink, CK_12,
+                ContentEntry lastTopicEntry = ContentScraperUtil.createOrUpdateContentEntry(hrefLink, title, contentUrl.toString(), CK_12,
                         LICENSE_TYPE_CC_BY_NC, englishLang.getLangUid(), null, EMPTY_STRING, false,
                         EMPTY_STRING, EMPTY_STRING, EMPTY_STRING, EMPTY_STRING, contentEntryDao);
 
@@ -328,7 +328,7 @@ public class IndexCategoryCK12Content {
 
             String headingTitle = header.select("div.topic-header span").attr("title");
 
-            String fakePathTopic = subCategoryUrl.getPath() + "/" + headingTitle;
+            String fakePathTopic = subCategoryUrl.toString() + "/" + headingTitle;
 
             String thumbnailUrl = doc.selectFirst("div.topic-wrapper[title*=" + headingTitle + "] img").attr("src");
 
@@ -366,7 +366,7 @@ public class IndexCategoryCK12Content {
                     topicDestination.mkdirs();
                     URL contentUrl = new URL(subCategoryUrl, hrefLink);
 
-                    ContentEntry subTopicEntry = ContentScraperUtil.createOrUpdateContentEntry(hrefLink, subTitle, hrefLink, CK_12,
+                    ContentEntry subTopicEntry = ContentScraperUtil.createOrUpdateContentEntry(hrefLink, subTitle, contentUrl.toString(), CK_12,
                             LICENSE_TYPE_CC_BY_NC, englishLang.getLangUid(), null, EMPTY_STRING, false,
                             EMPTY_STRING, EMPTY_STRING, EMPTY_STRING, EMPTY_STRING, contentEntryDao);
 
@@ -422,7 +422,7 @@ public class IndexCategoryCK12Content {
 
             URL url = new URL(contentUrl, hrefLink);
 
-            ContentEntry topicEntry = ContentScraperUtil.createOrUpdateContentEntry(url.getPath(), title, url.getPath(), CK_12,
+            ContentEntry topicEntry = ContentScraperUtil.createOrUpdateContentEntry(url.getPath(), title, url.toString().substring(0, url.toString().indexOf(("?"))), CK_12,
                     LICENSE_TYPE_CC_BY_NC, englishLang.getLangUid(), null, summary, true,
                     EMPTY_STRING, imageLink, EMPTY_STRING, EMPTY_STRING, contentEntryDao);
 

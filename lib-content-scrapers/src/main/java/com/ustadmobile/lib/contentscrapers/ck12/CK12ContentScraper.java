@@ -221,8 +221,9 @@ public class CK12ContentScraper {
         Gson gson = new GsonBuilder().disableHtmlEscaping().create();
 
         String plixId = urlString.substring(urlString.lastIndexOf("-") + 1, urlString.lastIndexOf("?"));
+        String plixName = FilenameUtils.getBaseName(scrapUrl.getPath());
 
-        File plixDirectory = new File(destinationDirectory, plixId);
+        File plixDirectory = new File(destinationDirectory, plixName);
         plixDirectory.mkdirs();
 
         assetDirectory = new File(plixDirectory, "asset");
@@ -367,29 +368,21 @@ public class CK12ContentScraper {
         }
 
         Elements videoElement = getIframefromHtml(videoContent);
-        String link = videoElement.attr("src");
 
-        String imageThumnail = fullSite.select("meta[property=og:image]").attr("content");
+        String imageThumbnail = fullSite.select("meta[property=og:image]").attr("content");
 
-        if (imageThumnail == null || imageThumnail.isEmpty()) {
-            throw new IllegalArgumentException("Did not receive image content from meta tag");
-        }
+        if (imageThumbnail != null && imageThumbnail.isEmpty()) {
+            try {
+                File thumbnail = new File(assetDirectory, videoContentName + "-" + "video-thumbnail.jpg");
+                if (!ContentScraperUtil.fileHasContent(thumbnail)) {
+                    FileUtils.copyURLToFile(new URL(imageThumbnail), thumbnail);
+                }
 
-        try {
-            File thumbnail = new File(assetDirectory, videoContentName + "-" + "video-thumbnail.jpg");
-            if (!ContentScraperUtil.fileHasContent(thumbnail)) {
-                FileUtils.copyURLToFile(new URL(imageThumnail), thumbnail);
+            } catch (IOException ignored) {
             }
-
-        } catch (MalformedURLException e) {
-            imageThumnail = "";
         }
 
         String videoSource = ContentScraperUtil.downloadAllResources(videoElement.outerHtml(), assetDirectory, scrapUrl);
-
-        if (link == null || link.isEmpty()) {
-            throw new IllegalArgumentException("Have not finished support of video type link for url " + urlString);
-        }
 
         String videoTitleHtml = getTitleHtml(fullSite);
 
