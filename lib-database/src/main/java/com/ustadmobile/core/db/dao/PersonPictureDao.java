@@ -6,6 +6,7 @@ import com.ustadmobile.lib.database.annotation.UmDbSetAttachment;
 import com.ustadmobile.lib.db.entities.PersonPicture;
 import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -20,5 +21,8 @@ public abstract class PersonPictureDao implements SyncableDao<PersonPicture, Per
 
     @UmDbGetAttachment
     public abstract InputStream getAttachmentStream(long uid) throws IOException;
+
+    @UmDbSetAttachment
+    public abstract void setAttachmentFromTmpFile(long uid, File tmpFile);
 
 }
