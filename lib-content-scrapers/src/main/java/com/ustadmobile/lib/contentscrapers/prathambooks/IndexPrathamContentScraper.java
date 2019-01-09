@@ -160,12 +160,10 @@ public class IndexPrathamContentScraper {
                         prathamParentEntry, contentEntry, contentCount);
 
                 File content = new File(resourceFolder, resourceFileName);
-                if (!ContentScraperUtil.isFileModified(connection, resourceFolder, String.valueOf(data.id))) {
+                if (!ContentScraperUtil.isFileModified(connection, resourceFolder, String.valueOf(data.id)) && ContentScraperUtil.fileHasContent(content)) {
 
                     ContentScraperUtil.checkAndUpdateDatabaseIfFileDownloadedButNoDataFound(content, contentEntry, contentEntryFileDao,
                             contentEntryFileJoinDao, contentFileStatusDao, ScraperConstants.MIMETYPE_EPUB, true);
-
-
                     continue;
                 }
                 try {

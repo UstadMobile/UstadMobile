@@ -135,7 +135,7 @@ public class DdlContentScraper {
             File resourceFile = new File(resourceFolder, FilenameUtils.getName(href));
             String mimeType = Files.probeContentType(resourceFile.toPath());
 
-            if (!ContentScraperUtil.isFileModified(conn, resourceFolder, FilenameUtils.getName(href))) {
+            if (!ContentScraperUtil.isFileModified(conn, resourceFolder, FilenameUtils.getName(href)) && ContentScraperUtil.fileHasContent(resourceFile)) {
 
                 ContentScraperUtil.checkAndUpdateDatabaseIfFileDownloadedButNoDataFound(resourceFile, contentEntry, contentEntryFileDao,
                         contentEntryFileJoinDao, contentFileStatusDao, mimeType, true);

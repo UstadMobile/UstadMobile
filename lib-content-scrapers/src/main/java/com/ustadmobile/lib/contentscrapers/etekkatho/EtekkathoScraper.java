@@ -44,13 +44,15 @@ public class EtekkathoScraper {
         URLConnection conn = contentUrl.openConnection();
         conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Linux; Android 8.0.0; Pixel 2 XL Build/OPD1.170816.004) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Mobile Safari/537.36");
 
+        File content = new File(etekDirectory, etekDirectory.getName());
+
         isUpdated = ContentScraperUtil.isFileModified(conn, etekDirectory, FilenameUtils.getBaseName(contentUrl.getPath()));
-        if (!isUpdated) {
+        if (!isUpdated && ContentScraperUtil.fileHasContent(content)) {
             return;
         }
 
         mimeType = conn.getContentType();
-        File content = new File(etekDirectory, etekDirectory.getName());
+
 
         FileUtils.copyInputStreamToFile(conn.getInputStream(), content);
 

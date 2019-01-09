@@ -125,7 +125,7 @@ public class KhanContentScraper {
 
         File content = new File(folder, FilenameUtils.getName(scrapUrl.getPath()));
         URLConnection conn = scrapUrl.openConnection();
-        if (!ContentScraperUtil.isFileModified(conn, folder, FilenameUtils.getBaseName(url))) {
+        if (!ContentScraperUtil.isFileModified(conn, folder, FilenameUtils.getBaseName(url)) && ContentScraperUtil.fileHasContent(content)) {
             isContentUpdated = false;
             return;
         }

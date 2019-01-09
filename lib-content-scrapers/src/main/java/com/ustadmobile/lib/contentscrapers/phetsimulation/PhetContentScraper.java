@@ -218,7 +218,7 @@ public class PhetContentScraper {
         String fileName = hrefLink.substring(hrefLink.lastIndexOf("/") + 1, hrefLink.lastIndexOf("?"));
         File simulationFile = new File(simulationLocation, fileName);
 
-        if (!ContentScraperUtil.isFileModified(conn, simulationLocation, fileName)) {
+        if (!ContentScraperUtil.isFileModified(conn, simulationLocation, fileName) && ContentScraperUtil.fileHasContent(simulationFile)) {
             return false;
         }
 

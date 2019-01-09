@@ -128,9 +128,10 @@ public class IndexEtekkathoScraper {
 
             if (!element.attr("scope").isEmpty()) {
 
+                URL headingUrl = new URL(url, element.selectFirst("a").attr("href"));
                 // found Main Content
                 subjectEntry = ContentScraperUtil.createOrUpdateContentEntry(element.text(),
-                        element.text(), element.selectFirst("a").attr("href"),
+                        element.text(), headingUrl.toString(),
                         ETEKKATHO, LICENSE_TYPE_CC_BY, englishLang.getLangUid(), null,
                         "", false, EMPTY_STRING, EMPTY_STRING,
                         EMPTY_STRING, EMPTY_STRING, contentEntryDao);
@@ -145,9 +146,8 @@ public class IndexEtekkathoScraper {
                     title = title.replace("*", "").trim();
                 }
 
-                ContentEntry subHeadingEntry = ContentScraperUtil.createOrUpdateContentEntry(subHeadingElement.text(),
-                        title, element.text() + "/" + subHeadingElement.text(),
-                        ETEKKATHO, LICENSE_TYPE_CC_BY, englishLang.getLangUid(), null,
+                ContentEntry subHeadingEntry = ContentScraperUtil.createOrUpdateContentEntry(title,
+                        title, element.text() + "/" + title, ETEKKATHO, LICENSE_TYPE_CC_BY, englishLang.getLangUid(), null,
                         descriptionElement.text(), false, EMPTY_STRING, EMPTY_STRING,
                         EMPTY_STRING, EMPTY_STRING, contentEntryDao);
 
@@ -165,7 +165,7 @@ public class IndexEtekkathoScraper {
                 }
 
                 ContentEntry subHeadingEntry = ContentScraperUtil.createOrUpdateContentEntry(element.text(),
-                        title, subjectEntry.getTitle() + "/" + element.text(),
+                        title, subjectEntry.getTitle() + "/" + title,
                         ETEKKATHO, LICENSE_TYPE_CC_BY, englishLang.getLangUid(), null,
                         descriptionElement.text(), false, EMPTY_STRING, EMPTY_STRING,
                         EMPTY_STRING, EMPTY_STRING, contentEntryDao);
@@ -246,7 +246,7 @@ public class IndexEtekkathoScraper {
                     null, description, true, author, EMPTY_STRING,
                     EMPTY_STRING, EMPTY_STRING, contentEntryDao);
 
-            ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, contentEntry, lessonEntry, subjectCount++);
+            ContentScraperUtil.insertOrUpdateChildWithMultipleParentsJoin(contentParentChildJoinDao, contentEntry, lessonEntry, subjectCount++);
 
             EtekkathoScraper scraper = new EtekkathoScraper(subjectUrlString, subHeadingFolder);
             try {

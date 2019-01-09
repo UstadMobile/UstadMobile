@@ -160,7 +160,7 @@ public class ContentScraperUtil {
                 File contentFile = new File(destinationDir, fileName);
                 content.attr("src", destinationDir.getName() + "/" + contentFile.getName());
 
-                if (!ContentScraperUtil.isFileModified(conn, destinationDir, fileName)) {
+                if (!ContentScraperUtil.isFileModified(conn, destinationDir, fileName) && fileHasContent(contentFile)) {
                     continue;
                 }
 
@@ -418,7 +418,6 @@ public class ContentScraperUtil {
                 FileUtils.writeStringToFile(eTagFile, eTag, ScraperConstants.UTF_ENCODING);
                 return true;
             }
-
         }
 
         String lastModified = conn.getHeaderField("Last-Modified");
