@@ -52,6 +52,7 @@ public class IndexFolderScraper {
     private Language englishLang;
     private String publisher;
     private LanguageVariantDao languageVariantDao;
+    private String filePrefix = "file://";
 
     public static void main(String[] args) {
         if (args.length != 2) {
@@ -93,7 +94,7 @@ public class IndexFolderScraper {
 
 
         ContentEntry parentFolder = ContentScraperUtil.createOrUpdateContentEntry(name, name,
-                name, name, PUBLIC_DOMAIN, englishLang.getLangUid(), null,
+                filePrefix + destinationDir.getPath(), name, PUBLIC_DOMAIN, englishLang.getLangUid(), null,
                 EMPTY_STRING, false, EMPTY_STRING, EMPTY_STRING, EMPTY_STRING,
                 EMPTY_STRING, contentEntryDao);
 
@@ -120,7 +121,7 @@ public class IndexFolderScraper {
                 String name = folder.getName();
 
                 ContentEntry childEntry = ContentScraperUtil.createOrUpdateContentEntry(name, name,
-                        name, name, PUBLIC_DOMAIN, englishLang.getLangUid(), null,
+                        filePrefix + folder.getPath(), name, PUBLIC_DOMAIN, englishLang.getLangUid(), null,
                         EMPTY_STRING, false, EMPTY_STRING, EMPTY_STRING, EMPTY_STRING,
                         EMPTY_STRING, contentEntryDao);
 
@@ -185,7 +186,7 @@ public class IndexFolderScraper {
 
 
                         ContentEntry childEntry = ContentScraperUtil.createOrUpdateContentEntry(id, title,
-                                id, publisher, PUBLIC_DOMAIN, language.getLangUid(), languageVariant != null ? languageVariant.getLangVariantUid() : null,
+                                filePrefix + folder.getPath(), publisher, PUBLIC_DOMAIN, language.getLangUid(), languageVariant != null ? languageVariant.getLangVariantUid() : null,
                                 EMPTY_STRING, true, author, EMPTY_STRING, EMPTY_STRING,
                                 EMPTY_STRING, contentEntryDao);
 
