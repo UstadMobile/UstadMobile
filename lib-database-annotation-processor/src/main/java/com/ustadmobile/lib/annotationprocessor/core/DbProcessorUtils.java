@@ -376,6 +376,8 @@ public class DbProcessorUtils {
                                             ProcessingEnvironment processingEnv) {
         if(typeMirror.getKind().isPrimitive()) {
             return processingEnv.getTypeUtils().boxedClass((PrimitiveType)typeMirror).asType();
+        }else if(typeMirror.getKind().equals(TypeKind.VOID)) {
+            return  processingEnv.getElementUtils().getTypeElement(Void.class.getName()).asType();
         }else{
             return typeMirror;
         }

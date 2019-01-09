@@ -1218,12 +1218,15 @@ public abstract class AbstractDbProcessor {
      * for the method void doSomething(String str1, int number, UmCallback&lt;Long&gt;) it will
      * generate (str1, number)
      *
-     * @param parameters The parameters from which to generate the callback. Normally from ExecutableElement.getParameters
+     * @param parameters The parameters from which to generate the callback. Normally from
+     *                   ExecutableElement.getParameters
+     * @param substitutions if not null, the map will be used to substitute variable names
      * @param excludedElements Elements that should be excluded e.g. callback parameters as above
      *
      * @return CodeBlock with the generated source as above
      */
     protected CodeBlock makeNamedParameterMethodCall(List<? extends VariableElement> parameters,
+                                                     Map<String, String> substitutions,
                                                      Element... excludedElements) {
         List<Element> excludedElementList = Arrays.asList(excludedElements);
         CodeBlock.Builder block = CodeBlock.builder().add("(");
@@ -1234,12 +1237,21 @@ public abstract class AbstractDbProcessor {
             if(excludedElementList.contains(variableTypeElement))
                 continue;
 
-            paramNames.add(variable.getSimpleName().toString());
+            String variableName = variable.getSimpleName().toString();
+            if(substitutions != null && substitutions.containsKey(variableName))
+                variableName = substitutions.get(variableName);
+
+            paramNames.add(variableName);
         }
 
         block.add(String.join(", ", paramNames));
 
         return block.add(")").build();
+    }
+
+    protected CodeBlock makeNamedParameterMethodCall(List<? extends VariableElement> parameters,
+                                                     Element... excludedElements) {
+        return makeNamedParameterMethodCall(parameters, null, excludedElements);
     }
 
     /**
@@ -1504,7 +1516,10 @@ public abstract class AbstractDbProcessor {
      * @param queryParamAnnotation Annotation to add for a parameter that can be passed as query
      *                             parameters (primitives and list/arrays of primitives)
      * @param requestBodyAnnotation Annotation to add for a parameter that should be the request body
-     *                              (if any).
+     *                              (if any). This is used for JSON objects
+     * @param formDataAnnotation Annotation to add for multipart form upload data. This is used for
+     *                           binary attachment data.
+     * @param typeSubstitutions Substitute parameters (from value typemirror to key typemirror).
      * @param addAuthHeaderParamToMethod if true, if we find a parameter annotated
      *                                   UmRestAuthorizedUidParam, then an additional parameter will
      *                                   be added to the end to get the auth token.
@@ -1514,6 +1529,7 @@ public abstract class AbstractDbProcessor {
                                       Class<? extends Annotation> queryParamAnnotation,
                                       Class<? extends Annotation> requestBodyAnnotation,
                                       Class<? extends Annotation> formDataAnnotation,
+                                      Map<TypeMirror, TypeMirror> typeSubstitutions,
                                       boolean addAuthHeaderParamToMethod) {
 
         DaoMethodInfo methodInfo = new DaoMethodInfo(method, daoType, processingEnv);
@@ -1523,8 +1539,15 @@ public abstract class AbstractDbProcessor {
             if(umCallbackTypeElement.equals(processingEnv.getTypeUtils().asElement(param.asType())))
                 continue;
 
+            TypeMirror paramTypeMirror = DbProcessorUtils.resolveType(param.asType(), daoType,
+                    processingEnv);
+
+            if(typeSubstitutions != null && typeSubstitutions.containsKey(paramTypeMirror)) {
+                paramTypeMirror = typeSubstitutions.get(paramTypeMirror);
+            }
+
             ParameterSpec.Builder paramSpec = ParameterSpec.builder(TypeName.get(
-                    DbProcessorUtils.resolveType(param.asType(), daoType, processingEnv)),
+                    paramTypeMirror),
                     param.getSimpleName().toString());
 
             if(DbProcessorUtils.isQueryParam(param.asType(), processingEnv)) {
@@ -1551,6 +1574,17 @@ public abstract class AbstractDbProcessor {
         }
     }
 
+    protected void addJaxWsParameters(ExecutableElement method, TypeElement daoType,
+                                      MethodSpec.Builder methodBuilder,
+                                      Class<? extends Annotation> queryParamAnnotation,
+                                      Class<? extends Annotation> requestBodyAnnotation,
+                                      Class<? extends Annotation> formDataAnnotation,
+                                      boolean addAuthHeaderParamToMethod) {
+        addJaxWsParameters(method, daoType, methodBuilder, queryParamAnnotation,
+                requestBodyAnnotation, formDataAnnotation, null,
+                addAuthHeaderParamToMethod);
+    }
+
     /**
      * Add web service parameter annotation to a given methodBuilder, to match a given dao method.
      * This is used for generation of Jersey Resource methods and Retrofit interface methods.
@@ -1572,7 +1606,8 @@ public abstract class AbstractDbProcessor {
                                       Class<? extends Annotation> requestBodyAnnotation,
                                       Class<? extends Annotation> formDataAnnotation) {
         addJaxWsParameters(method, daoType, methodBuilder, queryParamAnnotation,
-                requestBodyAnnotation,formDataAnnotation, false);
+                requestBodyAnnotation,formDataAnnotation, null,
+                false);
     }
 
 
@@ -1890,7 +1925,7 @@ public abstract class AbstractDbProcessor {
         codeBlock.add("$1T _dbWithAttachments = ($1T)$2L;\n", UmDbWithAttachmentsDir.class,
                 dbVarName)
                 .add("$1T _daoOutDir = new $1T(_dbWithAttachments.getAttachmentsDir(), " +
-                        "getClass().getSimpleName());\n", File.class)
+                        "$2S);\n", File.class, daoType.getSimpleName())
                 .beginControlFlow("if(!_daoOutDir.exists())")
                     .add("_daoOutDir.mkdirs();\n")
                 .endControlFlow()
@@ -1960,7 +1995,7 @@ public abstract class AbstractDbProcessor {
         codeBlock.add("$1T _dbWithAttachments = ($1T)$2L;\n", UmDbWithAttachmentsDir.class,
                 dbVarName)
                 .add("$1T _daoDir = new $1T(_dbWithAttachments.getAttachmentsDir(), " +
-                        "getClass().getSimpleName());\n", File.class)
+                        "$2S);\n", File.class, daoType.getSimpleName())
                 .add("$1T _attachmentFile = new $1T(_daoDir, String.valueOf($2L));\n",
                         File.class, pkVariableElement.getSimpleName());
         if(isStringUri) {
