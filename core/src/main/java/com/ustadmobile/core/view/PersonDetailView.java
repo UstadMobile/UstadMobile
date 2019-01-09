@@ -70,4 +70,6 @@ public interface PersonDetailView extends UstadView {
 
     void showUpdateImageButton(boolean show);
 
+    void addImageFromCamera();
+
 }

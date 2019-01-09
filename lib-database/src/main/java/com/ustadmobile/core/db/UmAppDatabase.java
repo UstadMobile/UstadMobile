@@ -157,7 +157,7 @@ import java.util.Hashtable;
         SyncStatus.class, SyncablePrimaryKey.class, SyncDeviceBits.class,
         AccessToken.class, PersonAuth.class, Role.class, EntityRole.class,
         PersonGroup.class, PersonGroupMember.class, LocationAncestorJoin.class,
-        PersonLocationJoin.class, PersonLocationJoin.class, PersonPicture.class
+        PersonLocationJoin.class, PersonPicture.class
 })
 public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthenticator,
         UmDbWithAttachmentsDir {

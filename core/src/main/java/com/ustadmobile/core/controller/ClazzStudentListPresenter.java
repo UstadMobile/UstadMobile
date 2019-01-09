@@ -2,14 +2,19 @@ package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmProvider;
+import com.ustadmobile.core.db.dao.ClazzDao;
+import com.ustadmobile.core.db.dao.PersonDao;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UmAccountManager;
+import com.ustadmobile.core.impl.UmCallback;
+import com.ustadmobile.core.impl.UmCallbackWithDefaultValue;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.ClazzDetailEnrollStudentView;
 import com.ustadmobile.core.view.ClazzStudentListView;
 import com.ustadmobile.core.view.PersonDetailView;
 import com.ustadmobile.lib.db.entities.ClazzMember;
 import com.ustadmobile.lib.db.entities.PersonWithEnrollment;
+import com.ustadmobile.lib.db.entities.Role;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -39,6 +44,27 @@ public class ClazzStudentListPresenter extends
 
     private boolean teachersEditable = false;
 
+    private boolean canAddTeachers = false;
+    private boolean canAddStudents = false;
+
+    public boolean isCanAddTeachers() {
+        return canAddTeachers;
+    }
+
+    public void setCanAddTeachers(boolean canAddTeachers) {
+        this.canAddTeachers = canAddTeachers;
+    }
+
+    public boolean isCanAddStudents() {
+        return canAddStudents;
+    }
+
+    public void setCanAddStudents(boolean canAddStudents) {
+        this.canAddStudents = canAddStudents;
+    }
+
+    private long loggedInPerson = 0L;
+
     public boolean isTeachersEditable() {
         return teachersEditable;
     }
@@ -58,6 +84,8 @@ public class ClazzStudentListPresenter extends
         if(arguments.containsKey(ARG_CLAZZ_UID)){
             currentClazzId = (long) arguments.get(ARG_CLAZZ_UID);
         }
+
+        loggedInPerson = UmAccountManager.getActiveAccount(context).getPersonUid();
     }
 
 
@@ -84,6 +112,26 @@ public class ClazzStudentListPresenter extends
         //Initialise sort spinner data:
         idToOrderInteger = new Hashtable<>();
         updateSortSpinnerPreset();
+
+        checkPermissions();
+    }
+
+    public void checkPermissions(){
+        PersonDao personDao = repository.getPersonDao();
+        ClazzDao clazzDao = repository.getClazzDao();
+        clazzDao.personHasPermission(loggedInPerson, Role.PERMISSION_PERSON_INSERT,
+            new UmCallbackWithDefaultValue<>(false, new UmCallback<Boolean>() {
+                @Override
+                public void onSuccess(Boolean result) {
+                    canAddStudents = result;
+                    canAddTeachers = result;
+                }
+
+                @Override
+                public void onFailure(Throwable exception) {
+
+                }
+            }));
     }
 
     /**

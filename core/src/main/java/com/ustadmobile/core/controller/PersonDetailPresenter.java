@@ -9,6 +9,7 @@ import com.ustadmobile.core.db.dao.PersonCustomFieldDao;
 import com.ustadmobile.core.db.dao.PersonCustomFieldValueDao;
 import com.ustadmobile.core.db.dao.PersonDao;
 import com.ustadmobile.core.db.dao.PersonDetailPresenterFieldDao;
+import com.ustadmobile.core.db.dao.PersonPictureDao;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UmCallbackWithDefaultValue;
@@ -25,8 +26,10 @@ import com.ustadmobile.lib.db.entities.PersonCustomFieldValue;
 import com.ustadmobile.lib.db.entities.PersonCustomFieldWithPersonCustomFieldValue;
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField;
 import com.ustadmobile.lib.db.entities.PersonField;
+import com.ustadmobile.lib.db.entities.PersonPicture;
 import com.ustadmobile.lib.db.entities.Role;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
@@ -69,6 +72,14 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
     private Map<Long, PersonCustomFieldWithPersonCustomFieldValue> customFieldWithFieldValueMap;
 
     private long personUid;
+
+    public long getPersonUid() {
+        return personUid;
+    }
+
+    public void setPersonUid(long personUid) {
+        this.personUid = personUid;
+    }
 
     private String attendanceAverage;
 
@@ -243,18 +254,45 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
 
                 @Override
                 public void onFailure(Throwable exception) {
-
+                    exception.printStackTrace();
                 }
             }));
 
         PersonDao personDao = repository.getPersonDao();
-        //personDao.personHasPermission(loggedInPersonUid, Role.PERMISSION_PERSON_PICTURE_UPDATE, );
+        personDao.personHasPermission(loggedInPersonUid, personUid,
+            Role.PERMISSION_PERSON_PICTURE_UPDATE,
+            new UmCallbackWithDefaultValue<>(false,
+                new UmCallback<Boolean>() {
+                    @Override
+                    public void onSuccess(Boolean result) {
+                        view.showUpdateImageButton(result);
+                    }
+
+                    @Override
+                    public void onFailure(Throwable exception) {
+                        exception.printStackTrace();
+                    }
+                }
+            ));
     }
+
+
+    public void handleCompressedImage(File imageFile){
+        PersonPictureDao personPictureDao = repository.getPersonPictureDao();
+        PersonPicture personPicture = new PersonPicture();
+        personPicture.setPersonPicturePersonUid(personUid);
+
+
+        long personPictureUid = personPictureDao.insert(personPicture);
+        personPictureDao.setAttachmentFromTmpFile(personPictureUid, imageFile);
+    }
+
+
 
     /**
      * Generates the all class list with assignation for the person being displayed.
      */
-    public void generateAssignedClazzesLiveData(){IU
+    public void generateAssignedClazzesLiveData(){
         ClazzDao clazzDao = repository.getClazzDao();
 
         assignedClazzes = clazzDao.findAllClazzesByPersonUid(personUid);

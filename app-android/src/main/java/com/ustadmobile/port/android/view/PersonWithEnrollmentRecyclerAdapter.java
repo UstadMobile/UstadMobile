@@ -57,6 +57,9 @@ public class PersonWithEnrollmentRecyclerAdapter
     private boolean isEmpty = false;
     private boolean addStudentLast = false;
 
+    private boolean showAddStudent = false;
+    private boolean showAddTeacher = false;
+
     private int currentTop = -1;
     private boolean teacherAdded = false;
 
@@ -103,6 +106,22 @@ public class PersonWithEnrollmentRecyclerAdapter
         mPresenter = presenter;
         showAttendance = attendance;
         showEnrollment = enrollment;
+    }
+
+    public boolean isShowAddStudent() {
+        return showAddStudent;
+    }
+
+    public void setShowAddStudent(boolean showAddStudent) {
+        this.showAddStudent = showAddStudent;
+    }
+
+    public boolean isShowAddTeacher() {
+        return showAddTeacher;
+    }
+
+    public void setShowAddTeacher(boolean showAddTeacher) {
+        this.showAddTeacher = showAddTeacher;
     }
 
     @NonNull
@@ -515,9 +534,17 @@ public class PersonWithEnrollmentRecyclerAdapter
 
         //Add these components to the new "add" Constraint Layout
         addCl.addView(clazzMemberRoleHeadingTextView);
-        addCl.addView(addPersonImageView);
-        addCl.addView(addClazzMemberTextView);
-        addCl.addView(horizontalLine);
+        if(role == ClazzMember.ROLE_STUDENT && showAddStudent) {
+            addCl.addView(addPersonImageView);
+            addCl.addView(addClazzMemberTextView);
+            addCl.addView(horizontalLine);
+        }
+        if(role == ClazzMember.ROLE_TEACHER && showAddTeacher) {
+            addCl.addView(addPersonImageView);
+            addCl.addView(addClazzMemberTextView);
+            addCl.addView(horizontalLine);
+        }
+
 
         ConstraintSet constraintSetForHeader2 = new ConstraintSet();
         constraintSetForHeader2.clone(addCl);
