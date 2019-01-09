@@ -103,7 +103,24 @@ public class DdlContentScraper {
 
         Elements downloadList = doc.select("span.download-item a[href]");
 
-        contentEntries = new ArrayList<>();;
+        String thumbnail = doc.selectFirst("aside img").attr("src");
+
+        String lang = doc.select("html").attr("lang");
+        Language langEntity = ContentScraperUtil.insertOrUpdateLanguageByName(languageDao, LanguageCode.getByCode(lang).getName());
+        String description = doc.selectFirst("meta[name=description]").attr("content");
+        Element authorTag = doc.selectFirst("article.resource-view-details h3:contains(Author) ~ p");
+        String author = authorTag != null ? authorTag.text() : "";
+        Element publisherTag = doc.selectFirst("article.resource-view-details h3:contains(Publisher) ~ p");
+        String publisher = publisherTag != null ? publisherTag.text() : "";
+
+
+        ContentEntry contentEntry = ContentScraperUtil.createOrUpdateContentEntry(urlString, doc.title(),
+                urlString, (publisher != null && !publisher.isEmpty() ? publisher : DDL),
+                LICENSE_TYPE_CC_BY, langEntity.getLangUid(), null, description, true, author,
+                thumbnail, EMPTY_STRING, EMPTY_STRING, contentEntryDao);
+
+
+        contentEntries = new ArrayList<>();
         for (int downloadCount = 0; downloadCount < downloadList.size(); downloadCount++) {
 
             Element downloadItem = downloadList.get(downloadCount);
@@ -112,22 +129,6 @@ public class DdlContentScraper {
             URL fileUrl = new URL(url, href);
             // this was done to encode url that had empty spaces in the name or other illegal characters
             URI uri = new URI(fileUrl.getProtocol(), fileUrl.getUserInfo(), fileUrl.getHost(), fileUrl.getPort(), fileUrl.getPath(), fileUrl.getQuery(), fileUrl.getRef());
-
-            String thumbnail = doc.selectFirst("aside img").attr("src");
-
-            String lang = doc.select("html").attr("lang");
-            Language langEntity = ContentScraperUtil.insertOrUpdateLanguageByName(languageDao, LanguageCode.getByCode(lang).getName());
-            String description = doc.selectFirst("meta[name=description]").attr("content");
-            Element authorTag = doc.selectFirst("article.resource-view-details h3:contains(Author) ~ p");
-            String author = authorTag != null ? authorTag.text() : "";
-            Element publisherTag = doc.selectFirst("article.resource-view-details h3:contains(Publisher) ~ p");
-            String publisher = publisherTag != null ? publisherTag.text() : "";
-
-
-            ContentEntry contentEntry = ContentScraperUtil.createOrUpdateContentEntry(uri.toString(), doc.title(),
-                    uri.toURL().getPath(), (publisher != null && !publisher.isEmpty() ? publisher : DDL),
-                    LICENSE_TYPE_CC_BY, langEntity.getLangUid(), null, description, true, author,
-                    thumbnail, EMPTY_STRING, EMPTY_STRING, contentEntryDao);
 
 
             URLConnection conn = uri.toURL().openConnection();
@@ -142,7 +143,6 @@ public class DdlContentScraper {
             }
 
             FileUtils.copyURLToFile(uri.toURL(), resourceFile);
-
 
             ContentScraperUtil.insertContentEntryFile(resourceFile, contentEntryFileDao, contentFileStatusDao, contentEntry,
                     ContentScraperUtil.getMd5(resourceFile), contentEntryFileJoinDao, true, mimeType);

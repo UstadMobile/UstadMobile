@@ -121,7 +121,7 @@ public class IndexDdlContent {
         Elements pageList = document.select("a.page-link");
 
         langEntry = ContentScraperUtil.createOrUpdateContentEntry(lang + "/resources/list", lang,
-                lang + "/resources/list", DDL, LICENSE_TYPE_CC_BY, langEntity.getLangUid(), null,
+                "https://www.ddl.af/" + lang + "/resources/list", DDL, LICENSE_TYPE_CC_BY, langEntity.getLangUid(), null,
                 EMPTY_STRING, false, EMPTY_STRING, EMPTY_STRING,
                 EMPTY_STRING, EMPTY_STRING, contentEntryDao);
 
@@ -136,7 +136,7 @@ public class IndexDdlContent {
                 if (number > maxNumber) {
                     maxNumber = number;
                 }
-            } catch (NumberFormatException e) {
+            } catch (NumberFormatException ignored) {
             }
         }
 
