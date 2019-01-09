@@ -24,6 +24,7 @@ public abstract class ExampleSyncableEntityWithAttachmentDao implements
     @UmDbGetAttachment
     public abstract String getAttachmentUri(long uid);
 
+    @UmRestAccessible
     @UmDbGetAttachment
     public abstract InputStream getAttachmentStream(long uid) throws IOException;
 

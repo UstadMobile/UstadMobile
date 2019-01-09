@@ -1615,7 +1615,7 @@ public abstract class AbstractDbProcessor {
                 String.class.getName());
         String producesFormat;
 
-        if(!isVoid(resultType)) {
+        if(!isVoid(resultType) && !resultTypeName.equals(ClassName.get(InputStream.class))) {
             if (resultTypeName.isPrimitive() || resultTypeName.isBoxedPrimitive()
                     || stringTypeEl.equals(processingEnv.getTypeUtils().asElement(resultType))) {
                 producesFormat = "$T.TEXT_PLAIN";
