@@ -246,6 +246,9 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
 
                 }
             }));
+
+        PersonDao personDao = repository.getPersonDao();
+        //personDao.personHasPermission(loggedInPersonUid, Role.PERMISSION_PERSON_PICTURE_UPDATE, );
     }
 
     /**

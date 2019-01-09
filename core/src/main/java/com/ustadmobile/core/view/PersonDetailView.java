@@ -68,4 +68,6 @@ public interface PersonDetailView extends UstadView {
 
     void showFAB(boolean show);
 
+    void showUpdateImageButton(boolean show);
+
 }

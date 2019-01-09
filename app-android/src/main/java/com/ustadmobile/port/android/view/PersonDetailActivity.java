@@ -14,6 +14,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -56,6 +57,7 @@ public class PersonDetailActivity extends UstadBaseActivity implements PersonDet
     private PersonDetailPresenter mPresenter;
     ImageView personEditImage;
     private FloatingTextButton fab;
+    Button updateImageButton;
 
     public static final String CALL_ICON_NAME = "ic_call_bcd4_24dp";
     public static final String TEXT_ICON_NAME = "ic_textsms_bcd4_24dp";
@@ -88,6 +90,9 @@ public class PersonDetailActivity extends UstadBaseActivity implements PersonDet
 
         //Load the Image
         personEditImage = findViewById(R.id.activity_person_detail_student_image);
+
+        //Update image button
+        updateImageButton = findViewById(R.id.activity_person_detail_student_image_button2);
 
         //Call the Presenter
         mPresenter = new PersonDetailPresenter(this,
@@ -140,6 +145,14 @@ public class PersonDetailActivity extends UstadBaseActivity implements PersonDet
             fab.setVisibility(show?View.VISIBLE:View.INVISIBLE);
         });
 
+    }
+
+    @Override
+    public void showUpdateImageButton(boolean show) {
+        runOnUiThread(() -> {
+            updateImageButton.setEnabled(show);
+            updateImageButton.setVisibility(show?View.VISIBLE:View.INVISIBLE);
+        });
     }
 
     @Override
