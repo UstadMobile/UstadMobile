@@ -3,6 +3,7 @@ package com.ustadmobile.core.db.dao;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmDbGetAttachment;
 import com.ustadmobile.lib.database.annotation.UmDbSetAttachment;
+import com.ustadmobile.lib.database.annotation.UmRepository;
 import com.ustadmobile.lib.db.entities.PersonPicture;
 import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
@@ -11,6 +12,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 @UmDao(hasAttachment = true)
+@UmRepository
 public abstract class PersonPictureDao implements SyncableDao<PersonPicture, PersonPictureDao> {
 
     @UmDbSetAttachment
