@@ -630,8 +630,7 @@ public class ContentScraperUtil {
             LanguageCode code = LanguageCode.getByCode(threeLetterCode);
             twoLetterCode = code != null ? LanguageCode.getByCode(threeLetterCode).name() : EMPTY_STRING;
         }
-
-        Language langObj = languageDao.findByName(langName);
+        Language langObj = getLanguageFromDao(langName, twoLetterCode, languageDao);
         if (langObj == null) {
             langObj = new Language();
             langObj.setName(langName);
@@ -671,6 +670,16 @@ public class ContentScraperUtil {
 
         }
         return langObj;
+    }
+
+    private static Language getLanguageFromDao(String langName, String twoLetterCode, LanguageDao dao) {
+        if(!langName.isEmpty()){
+            return dao.findByName(langName);
+        }
+        if(!twoLetterCode.isEmpty()){
+            return dao.findByTwoCode(twoLetterCode);
+        }
+        return null;
     }
 
     /**

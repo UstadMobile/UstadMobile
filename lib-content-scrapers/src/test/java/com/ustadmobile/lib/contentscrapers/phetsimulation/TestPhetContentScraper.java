@@ -274,6 +274,7 @@ public class TestPhetContentScraper {
     public void givenDirectoryOfTranslationsIsCreated_findAllTranslationRelations() throws IOException {
 
         UmAppDatabase db = UmAppDatabase.getInstance(null);
+        UmAppDatabase repo = db.getRepository("https://localhost", "");
         db.clearAllTables();
 
         File tmpDir = Files.createTempDirectory("testphetcontentscraper").toFile();
@@ -284,7 +285,7 @@ public class TestPhetContentScraper {
         PhetContentScraper scraper = new PhetContentScraper(mockWebServer.url("/en/api/simulation/equality-explorer-two-variables").toString(), tmpDir);
         scraper.scrapeContent();
 
-        ArrayList<ContentEntry> translationList = scraper.getTranslations(tmpDir, db.getContentEntryDao(), "", db.getLanguageDao(), db.getLanguageVariantDao());
+        ArrayList<ContentEntry> translationList = scraper.getTranslations(tmpDir, repo.getContentEntryDao(), "", repo.getLanguageDao(), db.getLanguageVariantDao());
 
     }
 

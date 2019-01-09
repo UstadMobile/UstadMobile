@@ -55,6 +55,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.EMPTY_STRING;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING;
 
 
 /**
@@ -171,8 +172,7 @@ public class AsbScraper {
 
         ContentEntry asbParentEntry = ContentScraperUtil.createOrUpdateContentEntry("https://www.africanstorybook.org/", AFRICAN_STORY_BOOKS,
                 "https://www.africanstorybook.org/", AFRICAN_STORY_BOOKS, ContentEntry.LICENSE_TYPE_CC_BY,
-                englishLang.getLangUid(), null, "Open access to picture storybooks in the languages of Africa. \n " +
-                        "For children’s literacy, enjoyment and imagination.", false, EMPTY_STRING,
+                englishLang.getLangUid(), null, new String("Open access to picture storybooks in the languages of Africa. \n For children's literacy, enjoyment and imagination.".getBytes(), UTF_ENCODING), false, EMPTY_STRING,
                 "https://www.africanstorybook.org/img/asb120.png", EMPTY_STRING, EMPTY_STRING, contentEntryDao);
 
 
@@ -267,7 +267,7 @@ public class AsbScraper {
                         }
 
                         URL content = generateEPubUrl(africanBooksUrl, id);
-                        String relatedSourceUrl = content.getPath() + "?" + content.getQuery();
+                        String relatedSourceUrl = content.getPath() + ((content.getQuery() != null && !content.getQuery().isEmpty()) ? "?" + content.getQuery() : EMPTY_STRING);
                         ContentEntry contentEntry = contentEntryDao.findBySourceUrl(relatedSourceUrl);
                         if (contentEntry == null) {
                             contentEntry = new ContentEntry();

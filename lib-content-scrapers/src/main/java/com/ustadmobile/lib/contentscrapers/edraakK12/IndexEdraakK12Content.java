@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
 
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.EMPTY_STRING;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.ROOT;
@@ -122,13 +123,16 @@ public class IndexEdraakK12Content {
                 EMPTY_STRING, false, EMPTY_STRING, EMPTY_STRING,
                 EMPTY_STRING, EMPTY_STRING, contentEntryDao);
 
+        String description = "تعليم مجانيّ\n" +
+                "إلكترونيّ باللغة العربيّة!" +
+                "\n Free Online \n" +
+                "Education, In Arabic!";
+
+        description = new String(description.getBytes(), UTF_ENCODING);
 
         ContentEntry edraakParentEntry = ContentScraperUtil.createOrUpdateContentEntry("https://www.edraak.org/k12/", "Edraak K12",
                 "https://www.edraak.org/k12/", EDRAAK, ALL_RIGHTS_RESERVED, arabicLang.getLangUid(), null,
-                "تعليم مجانيّ\n" +
-                        "إلكترونيّ باللغة العربيّة!" +
-                        "\n Free Online \n" +
-                        "Education, In Arabic!", false, EMPTY_STRING, "https://www.edraak.org/static/images/logo-dark-ar.fa1399e8d134.png",
+                description, false, EMPTY_STRING, "https://www.edraak.org/static/images/logo-dark-ar.fa1399e8d134.png",
                 EMPTY_STRING, EMPTY_STRING, contentEntryDao);
 
 
