@@ -16,6 +16,8 @@ import com.ustadmobile.lib.database.annotation.UmUpdate;
 import com.ustadmobile.lib.db.UmDbWithAuthenticator;
 import com.ustadmobile.lib.db.sync.UmSyncableDatabase;
 
+import org.glassfish.jersey.media.multipart.FormDataParam;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -93,7 +95,7 @@ public class DbProcessorJerseyResource extends AbstractDbProcessor {
                             "\"/$L\"", methodElement.getSimpleName().toString()).build());
 
             addJaxWsParameters(methodElement, daoType, methodBuilder, QueryParam.class, null,
-                    true);
+                    FormDataParam.class, true);
             addJaxWsMethodAnnotations(methodElement, daoType, methodBuilder);
 
             ExecutableElement daoGetter = DbProcessorUtils.findDaoGetter(daoType, dbType,
@@ -233,6 +235,11 @@ public class DbProcessorJerseyResource extends AbstractDbProcessor {
                 if(primitiveToStringResult)
                     codeBlock.add("String.valueOf(");
 
+                boolean daoMethodThrowsException = !methodElement.getThrownTypes().isEmpty();
+                if(daoMethodThrowsException) {
+                    codeBlock.beginControlFlow("try");
+                }
+
                 codeBlock.add("_dao.$L", methodElement.getSimpleName());
                 codeBlock.add(makeNamedParameterMethodCall(methodElement.getParameters()));
 
@@ -240,6 +247,15 @@ public class DbProcessorJerseyResource extends AbstractDbProcessor {
                     codeBlock.add(")");
 
                 codeBlock.add(";\n");
+
+                if(daoMethodThrowsException) {
+                    codeBlock.nextControlFlow("catch($T _t)", Throwable.class)
+                            .add("_t.printStackTrace();\n")
+                            .add("throw new $T(_t.toString(), 500);\n",
+                                    WebApplicationException.class)
+                            .endControlFlow();
+                }
+
 
                 if(!isVoidResult && isAutoSyncInsert) {
                     codeBlock.add("return _syncablePkResult;\n");

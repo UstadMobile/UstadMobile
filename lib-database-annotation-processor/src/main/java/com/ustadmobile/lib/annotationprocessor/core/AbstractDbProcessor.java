@@ -1513,9 +1513,12 @@ public abstract class AbstractDbProcessor {
                                       MethodSpec.Builder methodBuilder,
                                       Class<? extends Annotation> queryParamAnnotation,
                                       Class<? extends Annotation> requestBodyAnnotation,
+                                      Class<? extends Annotation> formDataAnnotation,
                                       boolean addAuthHeaderParamToMethod) {
 
         DaoMethodInfo methodInfo = new DaoMethodInfo(method, daoType, processingEnv);
+        TypeMirror inputStreamTypeEl = processingEnv.getElementUtils().getTypeElement(
+                InputStream.class.getName()).asType();
         for(VariableElement param : method.getParameters()) {
             if(umCallbackTypeElement.equals(processingEnv.getTypeUtils().asElement(param.asType())))
                 continue;
@@ -1527,6 +1530,9 @@ public abstract class AbstractDbProcessor {
             if(DbProcessorUtils.isQueryParam(param.asType(), processingEnv)) {
                 paramSpec.addAnnotation(AnnotationSpec.builder(queryParamAnnotation)
                         .addMember("value", "$S", param.getSimpleName().toString()).build());
+            }else if(param.asType().equals(inputStreamTypeEl)) {
+                paramSpec.addAnnotation(AnnotationSpec.builder(formDataAnnotation)
+                        .addMember("value", "$S", param.getSimpleName()).build());
             }else if(requestBodyAnnotation != null) {
                 paramSpec.addAnnotation(requestBodyAnnotation);
             }
@@ -1563,9 +1569,10 @@ public abstract class AbstractDbProcessor {
     protected void addJaxWsParameters(ExecutableElement method, TypeElement daoType,
                                       MethodSpec.Builder methodBuilder,
                                       Class<? extends Annotation> queryParamAnnotation,
-                                      Class<? extends Annotation> requestBodyAnnotation) {
+                                      Class<? extends Annotation> requestBodyAnnotation,
+                                      Class<? extends Annotation> formDataAnnotation) {
         addJaxWsParameters(method, daoType, methodBuilder, queryParamAnnotation,
-                requestBodyAnnotation, false);
+                requestBodyAnnotation,formDataAnnotation, false);
     }
 
 
@@ -1581,7 +1588,14 @@ public abstract class AbstractDbProcessor {
         int numNonQueryParams = DbProcessorUtils.getNonQueryParamCount(method, processingEnv,
                 processingEnv.getElementUtils().getTypeElement(UmCallback.class.getName()));
 
-        if(numNonQueryParams == 1) {
+        boolean isFormDataUpload = DbProcessorUtils.isFormDataUpload(method, processingEnv);
+
+
+        if(isFormDataUpload) {
+            methodBuilder.addAnnotation(AnnotationSpec.builder(Consumes.class)
+                .addMember("value", "$T.MULTIPART_FORM_DATA", MediaType.class).build())
+                .addAnnotation(POST.class);
+        }else if(numNonQueryParams == 1) {
             methodBuilder.addAnnotation(AnnotationSpec.builder(Consumes.class)
                     .addMember("value", "$T.APPLICATION_JSON", MediaType.class).build())
                     .addAnnotation(POST.class);
@@ -1868,6 +1882,11 @@ public abstract class AbstractDbProcessor {
         VariableElement pkElement = daoMethod.getParameters().get(0);
         VariableElement attachmentSrcEl = daoMethod.getParameters().get(1);
 
+        TypeMirror inputStreamType = processingEnv.getElementUtils().getTypeElement(
+                InputStream.class.getName()).asType();
+        TypeMirror fileType = processingEnv.getElementUtils().getTypeElement(File.class.getName())
+                .asType();
+
         codeBlock.add("$1T _dbWithAttachments = ($1T)$2L;\n", UmDbWithAttachmentsDir.class,
                 dbVarName)
                 .add("$1T _daoOutDir = new $1T(_dbWithAttachments.getAttachmentsDir(), " +
@@ -1876,21 +1895,29 @@ public abstract class AbstractDbProcessor {
                     .add("_daoOutDir.mkdirs();\n")
                 .endControlFlow()
                 .add("$1T _attachmentFile = new $1T(_daoOutDir, String.valueOf($2L));\n",
-                        File.class, pkElement.getSimpleName())
-                .add("try(")
-                .indent()
+                    File.class, pkElement.getSimpleName());
+
+        if(attachmentSrcEl.asType().equals(inputStreamType)) {
+            codeBlock.add("try(")
+                    .indent()
                     .add("$1T _daoFileOut = new $1T(_attachmentFile);\n", FileOutputStream.class)
-                .unindent()
-                .beginControlFlow(")")
+                    .unindent()
+                    .beginControlFlow(")")
                     .add("byte[] _buf = new byte[1024];\n")
                     .add("int _bytesRead = -1;\n")
                     .beginControlFlow("while((_bytesRead = $L.read(_buf)) != -1)",
                             attachmentSrcEl.getSimpleName())
-                        .add("_daoFileOut.write(_buf, 0, _bytesRead);\n")
+                    .add("_daoFileOut.write(_buf, 0, _bytesRead);\n")
                     .endControlFlow()
-                .nextControlFlow("catch($T _ioe)", IOException.class)
+                    .nextControlFlow("catch($T _ioe)", IOException.class)
                     .add("_ioe.printStackTrace();\n")
-                .endControlFlow();
+                    .endControlFlow();
+        }else {
+            codeBlock.beginControlFlow("if(_attachmentFile.exists())")
+                    .add("_attachmentFile.delete();\n")
+                .endControlFlow()
+                .add("$L.renameTo(_attachmentFile);\n", attachmentSrcEl.getSimpleName());
+        }
 
         methodBuilder.addCode(codeBlock.build());
         return methodBuilder.build();
@@ -1935,16 +1962,12 @@ public abstract class AbstractDbProcessor {
                 .add("$1T _daoDir = new $1T(_dbWithAttachments.getAttachmentsDir(), " +
                         "getClass().getSimpleName());\n", File.class)
                 .add("$1T _attachmentFile = new $1T(_daoDir, String.valueOf($2L));\n",
-                        File.class, pkVariableElement.getSimpleName())
-                .beginControlFlow("if(_attachmentFile.exists())");
+                        File.class, pkVariableElement.getSimpleName());
         if(isStringUri) {
             codeBlock.add("return _attachmentFile.getAbsolutePath();\n");
         }else {
             codeBlock.add("return new $T(_attachmentFile);\n\n", FileInputStream.class);
         }
-        codeBlock.nextControlFlow("else")
-                .add("return null;\n")
-                .endControlFlow();
 
         return methodBuilder.addCode(codeBlock.build()).build();
     }
