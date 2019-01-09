@@ -371,11 +371,11 @@ public class CK12ContentScraper {
 
         String imageThumbnail = fullSite.select("meta[property=og:image]").attr("content");
 
-        if (imageThumbnail != null && imageThumbnail.isEmpty()) {
+        if (imageThumbnail != null && !imageThumbnail.isEmpty()) {
             try {
                 File thumbnail = new File(assetDirectory, videoContentName + "-" + "video-thumbnail.jpg");
                 if (!ContentScraperUtil.fileHasContent(thumbnail)) {
-                    FileUtils.copyURLToFile(new URL(imageThumbnail), thumbnail);
+                    FileUtils.copyURLToFile(new URL(scrapUrl,imageThumbnail), thumbnail);
                 }
 
             } catch (IOException ignored) {

@@ -31,7 +31,7 @@ Observations and Experiments ( Video ) | Earth Science
   <meta property="ck12:content_div_id" content="modality_content">
   <meta property="og:title" content="Observations and Experiments">
   <meta property="og:type" content="website">
-  <meta property="og:image" content="http://image.slidesharecdn.com/inference-and-observation-week-2-1220472826419249-9/95/slide-1-728.jpg?1314673489">
+  <meta property="og:image" content="/media/test1picture.png">
   <meta property="og:url" content="https://www.ck12.org/c/earth-science/observations-and-experiments/lecture/Inference-and-Observation-Activity/">
   <meta property="og:description" content="This clever presentation demonstrates how to create an inference based off of an observation. There is fun practice to do included in the presentation.">
   <meta name="viewport" content="width=device-width">

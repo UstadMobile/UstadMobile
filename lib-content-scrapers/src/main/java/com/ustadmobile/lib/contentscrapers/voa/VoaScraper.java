@@ -118,12 +118,12 @@ public class VoaScraper {
 
         } catch (NoSuchElementException ignored) {
 
-            File file = new File(destinationDir,FilenameUtils.getBaseName(scrapUrl.getPath()) + ZIP_EXT);
-            if(file.exists()){
-                 long modified = ContentScraperUtil.parseServerDate(driver.findElementByCssSelector("time").getAttribute("datetime"));
-                 isContentUpdated = modified > file.lastModified();
-                 driver.close();
-                 return;
+            File file = new File(destinationDir, FilenameUtils.getBaseName(scrapUrl.getPath()) + ZIP_EXT);
+            if (file.exists()) {
+                long modified = ContentScraperUtil.parseServerDate(driver.findElementByCssSelector("time").getAttribute("datetime"));
+                isContentUpdated = modified > file.lastModified();
+                driver.close();
+                return;
             }
 
         }
@@ -189,7 +189,7 @@ public class VoaScraper {
                 try {
                     Element mediaSource = videoDoc.selectFirst("div.quiz__answers-img video,div.quiz__answers-img img");
                     question.videoHref = mediaSource.attr("src");
-                }catch (NoSuchElementException | NullPointerException ignored){
+                } catch (NoSuchElementException | NullPointerException ignored) {
 
                 }
 

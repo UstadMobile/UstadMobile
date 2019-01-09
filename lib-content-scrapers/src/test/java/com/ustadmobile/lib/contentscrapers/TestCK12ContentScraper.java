@@ -157,7 +157,7 @@ public class TestCK12ContentScraper {
     }
 
     @Test
-    public void givenServerOnline_whenSlideShareVideoContentScraped_thenShouldConvertAndDownload() throws IOException {
+    public void givenServerOnline_whenSlideShareVideoContentScraped_thenMp4FileShouldNotExist() throws IOException {
 
         File tmpDir = Files.createTempDirectory("testCK12contentscraper").toFile();
         MockWebServer mockWebServer = new MockWebServer();
@@ -184,7 +184,7 @@ public class TestCK12ContentScraper {
     }
 
     @Test
-    public void givenServerOnline_whenYoutubeVideoContentScraped_thenShouldThrowIllegalException() throws IOException {
+    public void givenServerOnline_whenYoutubeVideoContentScraped_thenMp4FileShouldNotExist() throws IOException {
 
         File tmpDir = Files.createTempDirectory("testCK12contentscraper").toFile();
         MockWebServer mockWebServer = new MockWebServer();
@@ -294,7 +294,7 @@ public class TestCK12ContentScraper {
         doReturn(mockWebServer.url("/c/" + LAST_MODIFIED_FILE).toString()).when(scraper).generatePlixLink(Mockito.anyString());
         scraper.scrapePlixContent();
 
-        File plixFolder = new File(tmpDir, "53d147578e0e0876d4df82f1");
+        File plixFolder = new File(tmpDir, "plix");
         Assert.assertEquals("directory for plix exists", true, plixFolder.isDirectory());
 
         File indexJson = new File(plixFolder, "index.json");
@@ -304,5 +304,6 @@ public class TestCK12ContentScraper {
         Assert.assertEquals("zipped file exists", true, ContentScraperUtil.fileHasContent(zip));
 
     }
+
 
 }

@@ -166,18 +166,24 @@ public class IndexVoaScraper {
             if (Arrays.stream(CATEGORY).parallel().noneMatch(title::contains)) {
 
                 String hrefLink = category.attr("href");
+                try {
 
-                File categoryFolder = new File(destinationDirectory, title);
-                categoryFolder.mkdirs();
+                    File categoryFolder = new File(destinationDirectory, title);
+                    categoryFolder.mkdirs();
 
-                ContentEntry categoryEntry = ContentScraperUtil.createOrUpdateContentEntry(FilenameUtils.getBaseName(hrefLink),
-                        title, hrefLink, VOA, PUBLIC_DOMAIN, englishLang.getLangUid(),
-                        null, "", false, EMPTY_STRING, EMPTY_STRING,
-                        EMPTY_STRING, EMPTY_STRING, contentEntryDao);
+                    URL lessonListUrl = new URL(url, hrefLink);
 
-                ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, parentEntry, categoryEntry, categoryCount++);
+                    ContentEntry categoryEntry = ContentScraperUtil.createOrUpdateContentEntry(FilenameUtils.getBaseName(hrefLink),
+                            title, lessonListUrl.toString(), VOA, PUBLIC_DOMAIN, englishLang.getLangUid(),
+                            null, "", false, EMPTY_STRING, EMPTY_STRING,
+                            EMPTY_STRING, EMPTY_STRING, contentEntryDao);
 
-                findLessons(categoryEntry, categoryFolder, hrefLink);
+                    ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, parentEntry, categoryEntry, categoryCount++);
+
+                    findLessons(categoryEntry, categoryFolder, lessonListUrl.toString());
+                }catch (IOException e){
+                    System.err.print("Error with voa category = " + hrefLink + " with title " + title);
+                }
 
             }
 
@@ -187,11 +193,9 @@ public class IndexVoaScraper {
 
     }
 
-    private void findLessons(ContentEntry categoryEntry, File categoryFolder, String hrefLink) throws IOException {
+    private void findLessons(ContentEntry categoryEntry, File categoryFolder, String lessonUrl) throws IOException {
 
-        URL lessonListUrl = new URL(url, hrefLink);
-
-        Document lessonListDoc = Jsoup.connect(lessonListUrl.toString()).get();
+        Document lessonListDoc = Jsoup.connect(lessonUrl).get();
 
         Elements elementList = lessonListDoc.select("div.container div.media-block-wrap div.media-block a.img-wrap");
 

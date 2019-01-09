@@ -270,6 +270,7 @@ public class PhetContentScraper {
                                 String langTitle = simulationDoc.selectFirst("td a[href*=_" + langCode + "] span").text();
 
                                 String path = simulationUrl.toString().replace("/en/", "/" + langCode + "/");
+                                URL translationUrl = new URL(path);
                                 String[] country = langCode.replaceAll("_", "-").split("-");
 
                                 String lang = country[0];
@@ -278,8 +279,8 @@ public class PhetContentScraper {
                                 Language language = ContentScraperUtil.insertOrUpdateLanguageByTwoCode(languageDao, lang);
                                 LanguageVariant languageVariant = ContentScraperUtil.insertOrUpdateLanguageVariant(languageVariantDao, variant, language);
 
-                                ContentEntry languageContentEntry = ContentScraperUtil.createOrUpdateContentEntry(path, langTitle,
-                                        path, PHET, LICENSE_TYPE_CC_BY, language.getLangUid(), languageVariant != null ? languageVariant.getLangVariantUid() : null,
+                                ContentEntry languageContentEntry = ContentScraperUtil.createOrUpdateContentEntry(translationUrl.getPath(), langTitle,
+                                        translationUrl.toString(), PHET, LICENSE_TYPE_CC_BY, language.getLangUid(), languageVariant != null ? languageVariant.getLangVariantUid() : null,
                                         getAboutDescription(), true, EMPTY_STRING, thumbnailUrl,
                                         EMPTY_STRING, EMPTY_STRING, contentEntryDao);
 

@@ -152,7 +152,7 @@ public class IndexPrathamContentScraper {
                 String resourceFileName = data.slug + EPUB_EXT;
 
                 ContentEntry contentEntry = ContentScraperUtil.createOrUpdateContentEntry(data.slug, data.title,
-                        epubUrl.getPath(), PRATHAM, LICENSE_TYPE_CC_BY, langEntity.getLangUid(), null,
+                        epubUrl.toString(), PRATHAM, LICENSE_TYPE_CC_BY, langEntity.getLangUid(), null,
                         data.description, true, EMPTY_STRING, data.coverImage.sizes.get(0).url,
                         EMPTY_STRING, EMPTY_STRING, contentEntryDao);
 
