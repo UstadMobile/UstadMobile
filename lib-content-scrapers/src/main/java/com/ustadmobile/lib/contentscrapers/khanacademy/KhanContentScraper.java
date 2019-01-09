@@ -140,8 +140,6 @@ public class KhanContentScraper {
 
         ContentScraperUtil.setChromeDriverLocation();
 
-        ChromeDriver driver = LoginKhanAcademy("https://www.khanacademy.org/login");
-
         Gson gson = new GsonBuilder().disableHtmlEscaping().create();
 
         File khanDirectory = new File(destinationDirectory, FilenameUtils.getBaseName(scrapUrl));
@@ -185,9 +183,10 @@ public class KhanContentScraper {
 
         if (!isUpdated) {
             isContentUpdated = false;
-            driver.close();
             return;
         }
+
+        ChromeDriver driver = LoginKhanAcademy("https://www.khanacademy.org/login");
 
         driver.get(scrapUrl);
         WebDriverWait waitDriver = new WebDriverWait(driver, 10000);

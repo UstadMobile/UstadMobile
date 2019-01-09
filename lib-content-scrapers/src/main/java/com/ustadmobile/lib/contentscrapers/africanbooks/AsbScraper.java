@@ -223,7 +223,7 @@ public class AsbScraper {
                 if (!variant.isEmpty()) {
                     languageVariant = ContentScraperUtil. insertOrUpdateLanguageVariant(variantDao, variant, language);
                 }
-                String sourceUrl = epubUrl.getPath() + "?" + epubUrl.getQuery();
+                String sourceUrl = epubUrl.getPath() + ((epubUrl.getQuery() != null && !epubUrl.getQuery().isEmpty()) ? "?" + epubUrl.getQuery() : EMPTY_STRING);
 
                 ContentEntry childEntry = ContentScraperUtil.createOrUpdateContentEntry(sourceUrl, bookObj.title, sourceUrl, AFRICAN_STORY_BOOKS, ContentEntry.LICENSE_TYPE_CC_BY,
                         language != null ? language.getLangUid() : 0L, languageVariant  == null ? null : languageVariant.getLangVariantUid(), bookObj.summary, true, bookObj.author, getCoverUrl(bookId),
