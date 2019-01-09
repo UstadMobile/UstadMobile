@@ -1757,7 +1757,8 @@ public abstract class AbstractDbProcessor {
                                     "(SELECT $concatSyncStatusColName:L FROM SyncStatus WHERE tableId = $tableId:L) " +
                                     "WHERE $pkName:L = NEW.$pkName:L; " +
                                 "UPDATE SyncStatus SET " +
-                                    "$concatSyncStatusColName:L = $concatSyncStatusColName:L + 1;" +
+                                    "$concatSyncStatusColName:L = $concatSyncStatusColName:L + 1 " +
+                                "WHERE tableId = $tableId:L; " +
                             "END\");\n", triggerSqlArgs)
                         .addNamed("$execSqlMethod:L(\"CREATE TRIGGER insert_csn_$tableNameLower:L " +
                             "AFTER insert ON $tableName:L FOR EACH ROW WHEN " +
@@ -1767,7 +1768,8 @@ public abstract class AbstractDbProcessor {
                                     "(SELECT $concatSyncStatusColName:L FROM SyncStatus WHERE tableId = $tableId:L) " +
                                 "WHERE $pkName:L = NEW.$pkName:L;" +
                                 "UPDATE SyncStatus SET " +
-                                    "$concatSyncStatusColName:L = $concatSyncStatusColName:L + 1;" +
+                                    "$concatSyncStatusColName:L = $concatSyncStatusColName:L + 1 " +
+                                "WHERE tableId = $tableId:L; " +
                             "END\");\n", triggerSqlArgs);
 
             }else if(sqlProductName.equals(PRODUCT_NAME_POSTGRES)) {
@@ -1778,7 +1780,8 @@ public abstract class AbstractDbProcessor {
                                     "(SELECT $concatSyncStatusColName:L FROM SyncStatus WHERE tableId = $tableId:L) " +
                                     "WHERE $pkName:L = NEW.$pkName:L; " +
                                 "UPDATE SyncStatus SET " +
-                                    "$concatSyncStatusColName:L = $concatSyncStatusColName:L + 1;  " +
+                                    "$concatSyncStatusColName:L = $concatSyncStatusColName:L + 1  " +
+                                    "WHERE tableId = $tableId:L; " +
                                 "RETURN null; " +
                             "END $$$$" +
                             "LANGUAGE plpgsql\");\n", triggerSqlArgs)

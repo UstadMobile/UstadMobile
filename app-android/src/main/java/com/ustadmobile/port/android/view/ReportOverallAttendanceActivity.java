@@ -417,7 +417,7 @@ public class ReportOverallAttendanceActivity extends UstadBaseActivity
 
         try {
             FileWriter fileWriter = new FileWriter(csvReportFilePath);
-
+role.
             Iterator<String[]> tableTextdataIterator = tableTextData.iterator();
 
             while(tableTextdataIterator.hasNext()){
