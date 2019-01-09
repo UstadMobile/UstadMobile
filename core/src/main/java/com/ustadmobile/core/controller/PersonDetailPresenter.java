@@ -295,6 +295,7 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
         PersonPictureDao personPictureDao = repository.getPersonPictureDao();
         PersonPicture personPicture = new PersonPicture();
         personPicture.setPersonPicturePersonUid(personUid);
+        personPicture.setPicTimestamp(System.currentTimeMillis());
 
         personPictureDao.insertAsync(personPicture, new UmCallback<Long>() {
             @Override

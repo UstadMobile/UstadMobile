@@ -29,7 +29,8 @@ public abstract class PersonPictureDao implements SyncableDao<PersonPicture, Per
     @UmDbSetAttachment
     public abstract void setAttachmentFromTmpFile(long uid, File tmpFile);
 
-    @UmQuery("SELECT * FROM PersonPicture where personPicturePersonUid = :personUid")
+    @UmQuery("SELECT * FROM PersonPicture where personPicturePersonUid = :personUid ORDER BY " +
+            " picTimestamp DESC LIMIT 1")
     public abstract void findByPersonUidAsync(long personUid, UmCallback<PersonPicture> resultObject);
 
 }

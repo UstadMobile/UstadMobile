@@ -29,10 +29,18 @@ public class PersonPicture {
 
     private int fileSize;
 
-    private int picTimestamp;
+    private long picTimestamp;
 
     private String mimeType;
 
+
+    public long getPicTimestamp() {
+        return picTimestamp;
+    }
+
+    public void setPicTimestamp(long picTimestamp) {
+        this.picTimestamp = picTimestamp;
+    }
 
     public long getPersonPictureUid() {
         return personPictureUid;
@@ -82,13 +90,6 @@ public class PersonPicture {
         this.fileSize = fileSize;
     }
 
-    public int getPicTimestamp() {
-        return picTimestamp;
-    }
-
-    public void setPicTimestamp(int picTimestamp) {
-        this.picTimestamp = picTimestamp;
-    }
 
     public String getMimeType() {
         return mimeType;
