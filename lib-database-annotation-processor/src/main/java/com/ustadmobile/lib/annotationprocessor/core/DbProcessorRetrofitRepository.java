@@ -12,6 +12,8 @@ import com.ustadmobile.core.impl.UmCallbackResultOverrider;
 import com.ustadmobile.lib.database.annotation.UmClearAll;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmDbContext;
+import com.ustadmobile.lib.database.annotation.UmDbGetAttachment;
+import com.ustadmobile.lib.database.annotation.UmDbSetAttachment;
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.database.annotation.UmQueryFindByPrimaryKey;
@@ -313,6 +315,10 @@ public class DbProcessorRetrofitRepository extends AbstractDbProcessor {
                 }else if(repoMethod.getAnnotation(UmSyncCheckIncomingCanUpdate.class) != null) {
                     repoMethodMode = UmRepository.UmRepositoryMethodType.DELEGATE_TO_DAO;
                 }else if(repoMethod.getAnnotation(UmSyncCheckIncomingCanInsert.class) != null) {
+                    repoMethodMode = UmRepository.UmRepositoryMethodType.DELEGATE_TO_DAO;
+                }else if(repoMethod.getAnnotation(UmDbGetAttachment.class) != null) {
+                    repoMethodMode = UmRepository.UmRepositoryMethodType.DELEGATE_TO_DAO;
+                }else if(repoMethod.getAnnotation(UmDbSetAttachment.class) != null) {
                     repoMethodMode = UmRepository.UmRepositoryMethodType.DELEGATE_TO_DAO;
                 }
             }
