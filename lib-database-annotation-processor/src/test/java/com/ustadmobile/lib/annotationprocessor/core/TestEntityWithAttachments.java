@@ -75,7 +75,7 @@ public class TestEntityWithAttachments {
         fout.flush();
         fout.close();
 
-        db.getExampleSyncableEntityWithAttachmentDao().setAttachment(1, tmpFile);
+        db.getExampleSyncableEntityWithAttachmentDao().setAttachmentFile(1, tmpFile);
 
         InputStream attachmentIn = db.getExampleSyncableEntityWithAttachmentDao().
                 getAttachmentStream(1);

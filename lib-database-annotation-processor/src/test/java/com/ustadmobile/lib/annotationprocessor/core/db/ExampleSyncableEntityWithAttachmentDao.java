@@ -19,7 +19,7 @@ public abstract class ExampleSyncableEntityWithAttachmentDao implements
     public abstract void setAttachment(long uid, InputStream attachment) throws IOException;
 
     @UmDbSetAttachment
-    public abstract void setAttachment(long uid, File file);
+    public abstract void setAttachmentFile(long uid, File file);
 
     @UmDbGetAttachment
     public abstract String getAttachmentUri(long uid);
