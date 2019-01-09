@@ -27,6 +27,7 @@ import com.ustadmobile.lib.database.annotation.UmSyncLastChangedBy;
 import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
 import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 import com.ustadmobile.lib.database.annotation.UmSyncOutgoing;
+import com.ustadmobile.lib.db.UmDbWithAttachmentsDir;
 import com.ustadmobile.lib.db.sync.SyncResponse;
 import com.ustadmobile.lib.db.sync.UmRepositoryDb;
 import com.ustadmobile.lib.db.sync.UmRepositoryUtils;
@@ -36,7 +37,11 @@ import com.ustadmobile.lib.db.sync.dao.BaseDao;
 import com.ustadmobile.lib.db.sync.entities.SyncStatus;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -448,6 +453,10 @@ public abstract class AbstractDbProcessor {
         else if(method.getModifiers().contains(Modifier.PROTECTED))
             methodBuilder.addModifiers(Modifier.PROTECTED);
 
+
+        for(TypeMirror thrown : method.getThrownTypes()) {
+            methodBuilder.addException(TypeName.get(thrown));
+        }
 
         for(VariableElement variableElement : method.getParameters()) {
             TypeMirror varTypeMirror = variableElement.asType();
@@ -1504,9 +1513,12 @@ public abstract class AbstractDbProcessor {
                                       MethodSpec.Builder methodBuilder,
                                       Class<? extends Annotation> queryParamAnnotation,
                                       Class<? extends Annotation> requestBodyAnnotation,
+                                      Class<? extends Annotation> formDataAnnotation,
                                       boolean addAuthHeaderParamToMethod) {
 
         DaoMethodInfo methodInfo = new DaoMethodInfo(method, daoType, processingEnv);
+        TypeMirror inputStreamTypeEl = processingEnv.getElementUtils().getTypeElement(
+                InputStream.class.getName()).asType();
         for(VariableElement param : method.getParameters()) {
             if(umCallbackTypeElement.equals(processingEnv.getTypeUtils().asElement(param.asType())))
                 continue;
@@ -1518,6 +1530,9 @@ public abstract class AbstractDbProcessor {
             if(DbProcessorUtils.isQueryParam(param.asType(), processingEnv)) {
                 paramSpec.addAnnotation(AnnotationSpec.builder(queryParamAnnotation)
                         .addMember("value", "$S", param.getSimpleName().toString()).build());
+            }else if(param.asType().equals(inputStreamTypeEl)) {
+                paramSpec.addAnnotation(AnnotationSpec.builder(formDataAnnotation)
+                        .addMember("value", "$S", param.getSimpleName()).build());
             }else if(requestBodyAnnotation != null) {
                 paramSpec.addAnnotation(requestBodyAnnotation);
             }
@@ -1554,9 +1569,10 @@ public abstract class AbstractDbProcessor {
     protected void addJaxWsParameters(ExecutableElement method, TypeElement daoType,
                                       MethodSpec.Builder methodBuilder,
                                       Class<? extends Annotation> queryParamAnnotation,
-                                      Class<? extends Annotation> requestBodyAnnotation) {
+                                      Class<? extends Annotation> requestBodyAnnotation,
+                                      Class<? extends Annotation> formDataAnnotation) {
         addJaxWsParameters(method, daoType, methodBuilder, queryParamAnnotation,
-                requestBodyAnnotation, false);
+                requestBodyAnnotation,formDataAnnotation, false);
     }
 
 
@@ -1572,7 +1588,14 @@ public abstract class AbstractDbProcessor {
         int numNonQueryParams = DbProcessorUtils.getNonQueryParamCount(method, processingEnv,
                 processingEnv.getElementUtils().getTypeElement(UmCallback.class.getName()));
 
-        if(numNonQueryParams == 1) {
+        boolean isFormDataUpload = DbProcessorUtils.isFormDataUpload(method, processingEnv);
+
+
+        if(isFormDataUpload) {
+            methodBuilder.addAnnotation(AnnotationSpec.builder(Consumes.class)
+                .addMember("value", "$T.MULTIPART_FORM_DATA", MediaType.class).build())
+                .addAnnotation(POST.class);
+        }else if(numNonQueryParams == 1) {
             methodBuilder.addAnnotation(AnnotationSpec.builder(Consumes.class)
                     .addMember("value", "$T.APPLICATION_JSON", MediaType.class).build())
                     .addAnnotation(POST.class);
@@ -1834,5 +1857,120 @@ public abstract class AbstractDbProcessor {
 
         return sql;
     }
+
+    /**
+     * Generates the setAttachment method.
+     *
+     * @param daoType TypeElement representing the DAO
+     * @param daoMethod ExecutableElement representing the abstract method whose implementation is
+     *                  being generated
+     * @param dbVarName Variable name for the database
+     * @return MethodSpec implementing the setAttachment method
+     */
+    protected MethodSpec generateSetAttachmentMethod(TypeElement daoType, ExecutableElement daoMethod,
+                                                  String dbVarName) {
+        MethodSpec.Builder methodBuilder = overrideAndResolve(daoMethod, daoType, processingEnv);
+        CodeBlock.Builder codeBlock = CodeBlock.builder();
+
+        if(daoMethod.getParameters().size() != 2) {
+            messager.printMessage(Diagnostic.Kind.ERROR,
+                    formatMethodForErrorMessage(daoMethod, daoType) + " setAttachment " +
+                            "must have two parameters: the primary key and an InputStream", daoType);
+            return methodBuilder.build();
+        }
+
+        VariableElement pkElement = daoMethod.getParameters().get(0);
+        VariableElement attachmentSrcEl = daoMethod.getParameters().get(1);
+
+        TypeMirror inputStreamType = processingEnv.getElementUtils().getTypeElement(
+                InputStream.class.getName()).asType();
+        TypeMirror fileType = processingEnv.getElementUtils().getTypeElement(File.class.getName())
+                .asType();
+
+        codeBlock.add("$1T _dbWithAttachments = ($1T)$2L;\n", UmDbWithAttachmentsDir.class,
+                dbVarName)
+                .add("$1T _daoOutDir = new $1T(_dbWithAttachments.getAttachmentsDir(), " +
+                        "getClass().getSimpleName());\n", File.class)
+                .beginControlFlow("if(!_daoOutDir.exists())")
+                    .add("_daoOutDir.mkdirs();\n")
+                .endControlFlow()
+                .add("$1T _attachmentFile = new $1T(_daoOutDir, String.valueOf($2L));\n",
+                    File.class, pkElement.getSimpleName());
+
+        if(attachmentSrcEl.asType().equals(inputStreamType)) {
+            codeBlock.add("try(")
+                    .indent()
+                    .add("$1T _daoFileOut = new $1T(_attachmentFile);\n", FileOutputStream.class)
+                    .unindent()
+                    .beginControlFlow(")")
+                    .add("byte[] _buf = new byte[1024];\n")
+                    .add("int _bytesRead = -1;\n")
+                    .beginControlFlow("while((_bytesRead = $L.read(_buf)) != -1)",
+                            attachmentSrcEl.getSimpleName())
+                    .add("_daoFileOut.write(_buf, 0, _bytesRead);\n")
+                    .endControlFlow()
+                    .nextControlFlow("catch($T _ioe)", IOException.class)
+                    .add("_ioe.printStackTrace();\n")
+                    .endControlFlow();
+        }else {
+            codeBlock.beginControlFlow("if(_attachmentFile.exists())")
+                    .add("_attachmentFile.delete();\n")
+                .endControlFlow()
+                .add("$L.renameTo(_attachmentFile);\n", attachmentSrcEl.getSimpleName());
+        }
+
+        methodBuilder.addCode(codeBlock.build());
+        return methodBuilder.build();
+    }
+
+    /**
+     * Generate a getAttachment method
+     *
+     * @param daoType The DAO we are generating this for
+     * @param daoMethod The method to generate an implementation of
+     * @param dbVarName Variable name of the database
+     *
+     * @return MethodSpec with an implementation of getAttachment
+     */
+    public MethodSpec generateGetAttachmentMethod(TypeElement daoType, ExecutableElement daoMethod,
+                                            String dbVarName) {
+        MethodSpec.Builder methodBuilder = overrideAndResolve(daoMethod, daoType, processingEnv);
+        CodeBlock.Builder codeBlock = CodeBlock.builder();
+        TypeMirror stringType = processingEnv.getElementUtils()
+                .getTypeElement(String.class.getName()).asType();
+        TypeMirror inputStreamType = processingEnv.getElementUtils()
+                .getTypeElement(InputStream.class.getName()).asType();
+
+        if(daoMethod.getParameters().size() != 1) {
+            messager.printMessage(Diagnostic.Kind.ERROR,
+                    formatMethodForErrorMessage(daoMethod, daoType) + "GetAttachment " +
+                            "method must have one parameter: the primary key");
+            return methodBuilder.build();
+        }
+
+        if(!Arrays.asList(inputStreamType, stringType).contains(daoMethod.getReturnType())) {
+            messager.printMessage(Diagnostic.Kind.ERROR,
+                    formatMethodForErrorMessage(daoMethod, daoType) + " GetAttachment " +
+                            "method return type must be String (representing a URI) or InputStream");
+        }
+
+        VariableElement pkVariableElement = daoMethod.getParameters().get(0);
+
+        boolean isStringUri = daoMethod.getReturnType().equals(stringType);
+        codeBlock.add("$1T _dbWithAttachments = ($1T)$2L;\n", UmDbWithAttachmentsDir.class,
+                dbVarName)
+                .add("$1T _daoDir = new $1T(_dbWithAttachments.getAttachmentsDir(), " +
+                        "getClass().getSimpleName());\n", File.class)
+                .add("$1T _attachmentFile = new $1T(_daoDir, String.valueOf($2L));\n",
+                        File.class, pkVariableElement.getSimpleName());
+        if(isStringUri) {
+            codeBlock.add("return _attachmentFile.getAbsolutePath();\n");
+        }else {
+            codeBlock.add("return new $T(_attachmentFile);\n\n", FileInputStream.class);
+        }
+
+        return methodBuilder.addCode(codeBlock.build()).build();
+    }
+
 
 }

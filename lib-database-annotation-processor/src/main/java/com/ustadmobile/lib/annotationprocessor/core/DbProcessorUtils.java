@@ -8,6 +8,7 @@ import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
 import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 import com.ustadmobile.lib.db.sync.dao.BaseDao;
 
+import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -203,6 +204,27 @@ public class DbProcessorUtils {
 
         return nonQueryParamCount;
     }
+
+    /**
+     * Determine if the given method would be a form data upload when being processed on the server
+     *
+     * @param method method to check
+     * @param processingEnv processing environment
+     * @return true if the parameters contain an inputstream, false otherwise
+     */
+    public static boolean isFormDataUpload(ExecutableElement method,
+                                            ProcessingEnvironment processingEnv) {
+        TypeMirror inputTypeEl = processingEnv.getElementUtils().getTypeElement(
+                InputStream.class.getName()).asType();
+
+        for(VariableElement param : method.getParameters()) {
+            if(param.asType().equals(inputTypeEl))
+                return true;
+        }
+
+        return false;
+    }
+
 
     /**
      * Given a database class TypeElement and the DAO TypeElement, find the method on the

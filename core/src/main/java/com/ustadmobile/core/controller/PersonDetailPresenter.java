@@ -254,7 +254,7 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
     /**
      * Generates the all class list with assignation for the person being displayed.
      */
-    public void generateAssignedClazzesLiveData(){
+    public void generateAssignedClazzesLiveData(){IU
         ClazzDao clazzDao = repository.getClazzDao();
 
         assignedClazzes = clazzDao.findAllClazzesByPersonUid(personUid);

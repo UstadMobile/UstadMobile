@@ -220,7 +220,8 @@ public class DbProcessorRetrofitRepository extends AbstractDbProcessor {
                     .addAnnotation(AnnotationSpec.builder(methodAnnotation)
                             .addMember("value", "\"$L/$L\"", daoType.getSimpleName(),
                                     method.getSimpleName()).build());
-            addJaxWsParameters(method, daoType, methodBuilder, Query.class, Body.class);
+            //TODO: Annotation for formdata file upload params
+            addJaxWsParameters(method, daoType, methodBuilder, Query.class, Body.class, null);
             TypeName resultTypeName = TypeName.get(methodInfo.resolveResultEntityType());
             if(resultTypeName.isPrimitive()) {
                 resultTypeName = resultTypeName.box();

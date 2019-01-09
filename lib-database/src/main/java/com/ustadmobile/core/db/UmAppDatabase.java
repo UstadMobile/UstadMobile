@@ -49,6 +49,7 @@ import com.ustadmobile.core.db.dao.PersonDetailPresenterFieldDao;
 import com.ustadmobile.core.db.dao.PersonGroupDao;
 import com.ustadmobile.core.db.dao.PersonGroupMemberDao;
 import com.ustadmobile.core.db.dao.PersonLocationJoinDao;
+import com.ustadmobile.core.db.dao.PersonPictureDao;
 import com.ustadmobile.core.db.dao.RoleDao;
 import com.ustadmobile.core.db.dao.ScheduleDao;
 import com.ustadmobile.core.db.dao.SocialNominationQuestionDao;
@@ -63,6 +64,7 @@ import com.ustadmobile.lib.database.annotation.UmDatabase;
 import com.ustadmobile.lib.database.annotation.UmDbContext;
 import com.ustadmobile.lib.database.annotation.UmRepository;
 import com.ustadmobile.lib.database.annotation.UmSyncOutgoing;
+import com.ustadmobile.lib.db.UmDbWithAttachmentsDir;
 import com.ustadmobile.lib.db.UmDbWithAuthenticator;
 import com.ustadmobile.lib.db.entities.AccessToken;
 import com.ustadmobile.lib.db.entities.Clazz;
@@ -112,6 +114,7 @@ import com.ustadmobile.lib.db.entities.PersonField;
 import com.ustadmobile.lib.db.entities.PersonGroup;
 import com.ustadmobile.lib.db.entities.PersonGroupMember;
 import com.ustadmobile.lib.db.entities.PersonLocationJoin;
+import com.ustadmobile.lib.db.entities.PersonPicture;
 import com.ustadmobile.lib.db.entities.Role;
 import com.ustadmobile.lib.db.entities.Schedule;
 import com.ustadmobile.lib.db.entities.SocialNominationQuestion;
@@ -154,16 +157,18 @@ import java.util.Hashtable;
         SyncStatus.class, SyncablePrimaryKey.class, SyncDeviceBits.class,
         AccessToken.class, PersonAuth.class, Role.class, EntityRole.class,
         PersonGroup.class, PersonGroupMember.class, LocationAncestorJoin.class,
-        PersonLocationJoin.class
-
+        PersonLocationJoin.class, PersonLocationJoin.class, PersonPicture.class
 })
-public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthenticator {
+public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthenticator,
+        UmDbWithAttachmentsDir {
 
     private static volatile UmAppDatabase instance;
 
     private static volatile Hashtable<String, UmAppDatabase> namedInstances = new Hashtable<>();
 
     private boolean master;
+
+    private String attachmentsDir;
 
     /**
      * For use by other projects using this app as a library. By calling setInstance before
@@ -322,6 +327,7 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
 
     public abstract PersonLocationJoinDao getPersonLocationJoinDao();
 
+    public abstract PersonPictureDao getPersonPictureDao();
 
     @UmDbContext
     public abstract Object getContext();
@@ -367,5 +373,12 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
         getSyncablePrimaryKeyDao().invalidateDeviceBits();
     }
 
+    @Override
+    public String getAttachmentsDir() {
+        return attachmentsDir;
+    }
 
+    public void setAttachmentsDir(String attachmentsDir) {
+        this.attachmentsDir = attachmentsDir;
+    }
 }
