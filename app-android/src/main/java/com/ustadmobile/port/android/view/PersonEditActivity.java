@@ -8,6 +8,7 @@ import android.arch.paging.LivePagedListBuilder;
 import android.arch.paging.PagedList;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
@@ -487,6 +488,7 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
                     .setMaxWidth(IMAGE_MAX_WIDTH)
                     .setMaxHeight(IMAGE_MAX_HEIGHT)
                     .setQuality(IMAGE_QUALITY)
+                    .setCompressFormat(Bitmap.CompressFormat.JPEG)
                     .setDestinationDirectoryPath(imageFile.getPath() + "_" + imageFile.getName());
 
             File compressedImageFile = c.compressToFile(imageFile);
@@ -502,10 +504,13 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
 
     @Override
     public void updateImageOnView(String imagePath){
-        Uri profileImage = Uri.fromFile(new File(imagePath));
+        runOnUiThread(() -> {
+            Uri profileImage = Uri.fromFile(new File(imagePath));
 
-        //Picasso.with(getApplicationContext()).load(profileImage).into(personEditImage);
-        Picasso.get().load(profileImage).into(personEditImage);
+            //Picasso.with(getApplicationContext()).load(profileImage).into(personEditImage);
+            Picasso.get().load(profileImage).into(personEditImage);
+        });
+
 
     }
 

@@ -89,6 +89,8 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
 
     private UmProvider<ClazzWithNumStudents> assignedClazzes;
 
+    private PersonPictureDao personPictureDao;
+
     UmAppDatabase repository = UmAccountManager.getRepositoryForActiveAccount(context);
 
     /**
@@ -134,9 +136,21 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
                     }else if(thisPerson.getMotherNum() != null && !thisPerson.getMotherNum().isEmpty()){
                         oneParentNumber = thisPerson.getMotherNum();
                     }
-                    if(thisPerson.getImagePath() != null){
-                        view.runOnUiThread(() -> view.updateImageOnView(thisPerson.getImagePath()));
-                    }
+
+                    personPictureDao = repository.getPersonPictureDao();
+                    personPictureDao.findByPersonUidAsync(thisPerson.getPersonUid(), new UmCallback<PersonPicture>() {
+                        @Override
+                        public void onSuccess(PersonPicture personPicture) {
+                            if(personPicture!=null)
+                                view.updateImageOnView(personPictureDao.getAttachmentPath(personPicture.getPersonPictureUid()));
+                        }
+
+                        @Override
+                        public void onFailure(Throwable exception) {
+
+                        }
+                    });
+
                 }else {
                     //Todo: show this entity has not loaded yet
                 }
@@ -282,9 +296,20 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
         PersonPicture personPicture = new PersonPicture();
         personPicture.setPersonPicturePersonUid(personUid);
 
+        personPictureDao.insertAsync(personPicture, new UmCallback<Long>() {
+            @Override
+            public void onSuccess(Long personPictureUid) {
+                personPictureDao.setAttachmentFromTmpFile(personPictureUid, imageFile);
 
-        long personPictureUid = personPictureDao.insert(personPicture);
-        personPictureDao.setAttachmentFromTmpFile(personPictureUid, imageFile);
+                view.updateImageOnView(personPictureDao.getAttachmentPath(personPictureUid));
+            }
+
+            @Override
+            public void onFailure(Throwable exception) {
+                exception.printStackTrace();
+            }
+        });
+
     }
 
 
@@ -499,6 +524,7 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         Hashtable args = new Hashtable();
         args.put(ARG_PERSON_IMAGE_PATH, imagePath);
+        args.put(ARG_PERSON_UID, personUid);
         impl.go(PersonPictureDialogView.VIEW_NAME, args, context);
     }
 

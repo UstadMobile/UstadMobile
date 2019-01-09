@@ -22,16 +22,6 @@ import java.io.File;
  */
 public class App extends UmBaseApplication {
 
-    public static final String ATTACHMENTS_DIR = "attachments";
-
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        Context appContext = getApplicationContext();
-        UmAppDatabase.getInstance(appContext).setAttachmentsDir(new File(appContext.getFilesDir(),
-                ATTACHMENTS_DIR).getAbsolutePath());
-    }
-
 
 	@Override
 	protected void attachBaseContext(Context base) {

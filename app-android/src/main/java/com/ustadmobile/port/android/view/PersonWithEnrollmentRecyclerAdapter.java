@@ -26,6 +26,7 @@ import android.widget.TextView;
 import com.squareup.picasso.Picasso;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.CommonHandlerPresenter;
+import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.lib.db.entities.ClazzMember;
 import com.ustadmobile.lib.db.entities.PersonWithEnrollment;
 
@@ -255,7 +256,13 @@ public class PersonWithEnrollmentRecyclerAdapter
             removeAllAddClazzMemberView(cl, holder);
 
         //Add picture to person
-        String imagePath = personWithEnrollment.getImagePath();
+        String imagePath = "";
+        Long personPictureUid = personWithEnrollment.getPersonPictureUid();
+        if (personPictureUid != 0) {
+            imagePath = UmAppDatabase.getInstance(theContext).getPersonPictureDao()
+                    .getAttachmentPath(personPictureUid);
+        }
+
         if(imagePath != null && !imagePath.isEmpty() && imagePath.length() > 0)
             setPictureOnView(imagePath, personPicture);
         else

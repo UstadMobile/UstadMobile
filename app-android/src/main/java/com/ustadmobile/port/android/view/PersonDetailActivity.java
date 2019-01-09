@@ -1,14 +1,20 @@
 package com.ustadmobile.port.android.view;
 
+import android.Manifest;
 import android.arch.lifecycle.LiveData;
 import android.arch.paging.DataSource;
 import android.arch.paging.LivePagedListBuilder;
 import android.arch.paging.PagedList;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.LinearLayoutManager;
@@ -57,6 +63,7 @@ import static com.ustadmobile.port.android.view.PersonEditActivity.ADD_PERSON_IC
  */
 public class PersonDetailActivity extends UstadBaseActivity implements PersonDetailView {
 
+    private static final int CAMERA_PERMISSION_REQUEST = 104;
     private LinearLayout mLinearLayout;
 
     private RecyclerView mRecyclerView;
@@ -159,8 +166,31 @@ public class PersonDetailActivity extends UstadBaseActivity implements PersonDet
 
     @Override
     public void addImageFromCamera() {
+        if (ContextCompat.checkSelfPermission(getApplicationContext(),
+                Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(PersonDetailActivity.this,
+                    new String[]{Manifest.permission.CAMERA},
+                    CAMERA_PERMISSION_REQUEST);
+            return;
+        }
         startCameraIntent();
     }
+
+
+    //this is how you check permission grant task result.
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[],
+                                           @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case CAMERA_PERMISSION_REQUEST:
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    startCameraIntent();
+                }
+                break;
+        }
+    }
+
 
     /**
      * Starts the camera intent.
@@ -211,10 +241,11 @@ public class PersonDetailActivity extends UstadBaseActivity implements PersonDet
         File imageFile = new File(imagePathFromCamera);
         try {
             Compressor c = new Compressor(this)
-                    .setMaxWidth(IMAGE_MAX_WIDTH)
-                    .setMaxHeight(IMAGE_MAX_HEIGHT)
-                    .setQuality(IMAGE_QUALITY)
-                    .setDestinationDirectoryPath(imageFile.getPath() + "_" + imageFile.getName());
+                .setMaxWidth(IMAGE_MAX_WIDTH)
+                .setMaxHeight(IMAGE_MAX_HEIGHT)
+                .setQuality(IMAGE_QUALITY)
+                .setCompressFormat(Bitmap.CompressFormat.JPEG)
+                .setDestinationDirectoryPath(imageFile.getPath() + "_" + imageFile.getName());
 
             File compressedImageFile = c.compressToFile(imageFile);
             if(!imageFile.delete()){
@@ -237,19 +268,25 @@ public class PersonDetailActivity extends UstadBaseActivity implements PersonDet
 
     @Override
     public void updateImageOnView(String imagePath){
-        Uri profileImage = Uri.fromFile(new File(imagePath));
+        File output = new File(imagePath);
 
-        Picasso
-                //.with(getApplicationContext())
-                .get()
-                .load(profileImage)
-                .fit()
-                .centerCrop()
-                .into(personEditImage);
+        if (output.exists()) {
+            Uri profileImage = Uri.fromFile(output);
 
-        //Click on image - open dialog to show bigger picture
-        personEditImage.setOnClickListener(view ->
-                mPresenter.openPictureDialog(imagePath));
+            runOnUiThread(() -> {
+                Picasso
+                        .get()
+                        .load(profileImage)
+                        .fit()
+                        .centerCrop()
+                        .into(personEditImage);
+
+                //Click on image - open dialog to show bigger picture
+                personEditImage.setOnClickListener(view ->
+                        mPresenter.openPictureDialog(imagePath));
+            });
+
+        }
     }
 
     @Override
@@ -287,7 +324,8 @@ public class PersonDetailActivity extends UstadBaseActivity implements PersonDet
                     //Add a recyclerview of classes
                     mRecyclerView = new RecyclerView(this);
 
-                    RecyclerView.LayoutManager mRecyclerLayoutManager = new LinearLayoutManager(getApplicationContext());
+                    RecyclerView.LayoutManager mRecyclerLayoutManager =
+                            new LinearLayoutManager(getApplicationContext());
                     mRecyclerView.setLayoutManager(mRecyclerLayoutManager);
 
                     //Add the layout

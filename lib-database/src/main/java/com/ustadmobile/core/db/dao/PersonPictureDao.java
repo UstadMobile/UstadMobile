@@ -1,8 +1,10 @@
 package com.ustadmobile.core.db.dao;
 
+import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmDbGetAttachment;
 import com.ustadmobile.lib.database.annotation.UmDbSetAttachment;
+import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.database.annotation.UmRepository;
 import com.ustadmobile.lib.db.entities.PersonPicture;
 import com.ustadmobile.lib.db.sync.dao.SyncableDao;
@@ -26,5 +28,8 @@ public abstract class PersonPictureDao implements SyncableDao<PersonPicture, Per
 
     @UmDbSetAttachment
     public abstract void setAttachmentFromTmpFile(long uid, File tmpFile);
+
+    @UmQuery("SELECT * FROM PersonPicture where personPicturePersonUid = :personUid")
+    public abstract void findByPersonUidAsync(long personUid, UmCallback<PersonPicture> resultObject);
 
 }

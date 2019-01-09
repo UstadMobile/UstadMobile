@@ -8,6 +8,7 @@ import com.ustadmobile.core.db.dao.PersonCustomFieldDao;
 import com.ustadmobile.core.db.dao.PersonCustomFieldValueDao;
 import com.ustadmobile.core.db.dao.PersonDao;
 import com.ustadmobile.core.db.dao.PersonDetailPresenterFieldDao;
+import com.ustadmobile.core.db.dao.PersonPictureDao;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
@@ -22,7 +23,9 @@ import com.ustadmobile.lib.db.entities.PersonCustomFieldValue;
 import com.ustadmobile.lib.db.entities.PersonCustomFieldWithPersonCustomFieldValue;
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField;
 import com.ustadmobile.lib.db.entities.PersonField;
+import com.ustadmobile.lib.db.entities.PersonPicture;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -238,7 +241,24 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
         personDao.findByUidAsync(personUid, new UmCallback<Person>() {
             @Override
             public void onSuccess(Person personWithPic) {
-                personWithPic.setImagePath(picPath);
+
+                PersonPictureDao personPictureDao = repository.getPersonPictureDao();
+                personPictureDao.findByPersonUidAsync(personWithPic.getPersonUid(), new UmCallback<PersonPicture>() {
+                    @Override
+                    public void onSuccess(PersonPicture personPicture) {
+                        if(personPicture != null){
+                            File picFile = new File(picPath);
+                            personPictureDao.setAttachmentFromTmpFile(
+                                    personPicture.getPersonPictureUid(), picFile);
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Throwable exception) {
+
+                    }
+                });
+                //personWithPic.setImagePath(picPath);
                 personDao.updateAsync(personWithPic, new UmCallback<Integer>(){
 
                     @Override
@@ -277,6 +297,23 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
         view.setClazzListProvider(assignedClazzes);
     }
 
+    public void updatePersonPic(Person thisPerson){
+        PersonPictureDao personPictureDao = repository.getPersonPictureDao();
+        personPictureDao.findByPersonUidAsync(thisPerson.getPersonUid(), new UmCallback<PersonPicture>() {
+            @Override
+            public void onSuccess(PersonPicture personPicture) {
+                if(personPicture != null){
+                    view.updateImageOnView(personPictureDao.getAttachmentPath(
+                            personPicture.getPersonPictureUid()));
+                }
+            }
+
+            @Override
+            public void onFailure(Throwable exception) {
+
+            }
+        });
+    }
 
     /**
      * Common method to set edit fields up for the current Person Editing.
@@ -292,9 +329,11 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
 
         Locale currnetLocale = Locale.getDefault();
 
-        if(thisPerson.getImagePath() != null){
-            view.updateImageOnView(thisPerson.getImagePath());
-        }
+//        if(thisPerson.getImagePath() != null){
+//            view.updateImageOnView(thisPerson.getImagePath());
+//        }
+
+        updatePersonPic(thisPerson);
 
         //Clear all view before setting fields ?
         view.clearAllFields();

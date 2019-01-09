@@ -16,7 +16,7 @@ import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.SELRecognitionPresenter;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.view.SELRecognitionView;
-import com.ustadmobile.lib.db.entities.Person;
+import com.ustadmobile.lib.db.entities.PersonWithPersonPicture;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.util.Objects;
@@ -38,17 +38,17 @@ public class SELRecognitionActivity extends UstadBaseActivity implements SELReco
     /**
      * The DIFF callback
      */
-    public static final DiffUtil.ItemCallback<Person> DIFF_CALLBACK =
-            new DiffUtil.ItemCallback<Person>() {
+    public static final DiffUtil.ItemCallback<PersonWithPersonPicture> DIFF_CALLBACK =
+            new DiffUtil.ItemCallback<PersonWithPersonPicture>() {
                 @Override
-                public boolean areItemsTheSame(Person oldItem,
-                                               Person newItem) {
+                public boolean areItemsTheSame(PersonWithPersonPicture oldItem,
+                                               PersonWithPersonPicture newItem) {
                     return oldItem == newItem;
                 }
 
                 @Override
-                public boolean areContentsTheSame(Person oldItem,
-                                                  Person newItem) {
+                public boolean areContentsTheSame(PersonWithPersonPicture oldItem,
+                                                  PersonWithPersonPicture newItem) {
                     return oldItem.equals(newItem);
                 }
             };
@@ -76,7 +76,7 @@ public class SELRecognitionActivity extends UstadBaseActivity implements SELReco
      * @param listProvider The provider data
      */
     @Override
-    public void setListProvider(UmProvider<Person> listProvider) {
+    public void setListProvider(UmProvider<PersonWithPersonPicture> listProvider) {
 
         // Specify the mAdapter
         PeopleBlobListRecyclerAdapter recyclerAdapter =
@@ -85,10 +85,10 @@ public class SELRecognitionActivity extends UstadBaseActivity implements SELReco
 
         // get the provider, set , observe, etc.
         // A warning is expected.
-        DataSource.Factory<Integer, Person> factory =
-                (DataSource.Factory<Integer, Person>)
+        DataSource.Factory<Integer, PersonWithPersonPicture> factory =
+                (DataSource.Factory<Integer, PersonWithPersonPicture>)
                         listProvider.getProvider();
-        LiveData<PagedList<Person>> data =
+        LiveData<PagedList<PersonWithPersonPicture>> data =
                 new LivePagedListBuilder<>(factory, 20).build();
         //Observe the data:
         data.observe(this, recyclerAdapter::submitList);

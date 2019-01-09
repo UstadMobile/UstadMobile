@@ -16,8 +16,10 @@ import android.widget.ImageView;
 
 import com.squareup.picasso.Picasso;
 import com.toughra.ustadmobile.R;
+import com.ustadmobile.core.controller.PersonPictureDialogPresenter;
 import com.ustadmobile.core.view.DismissableDialog;
 import com.ustadmobile.core.view.PersonPictureDialogView;
+import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.io.File;
 import java.util.Objects;
@@ -36,6 +38,8 @@ public class PersonPictureDialogFragment extends UstadDialogFragment implements
     Button updateImageButton;
     String imagePath = "";
 
+    PersonPictureDialogPresenter mPresenter;
+
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -49,9 +53,16 @@ public class PersonPictureDialogFragment extends UstadDialogFragment implements
         theImage = rootView.findViewById(R.id.fragment_person_picture_dialog_imageview);
         updateImageButton =
                 rootView.findViewById(R.id.fragment_person_picture_dialog_update_picture_button);
+        updateImageButton.setOnClickListener(view -> {
+            //TODO: Figure how to get permission and do Activity stuff here in a Dialog
+        });
 
         theImage = rootView.findViewById(R.id.fragment_person_picture_dialog_imageview);
         theImage.setOnClickListener(view -> dialog.cancel());
+
+        mPresenter = new PersonPictureDialogPresenter(getContext(),
+                UMAndroidUtil.bundleToHashtable(getArguments()), this);
+        mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(getArguments()));
 
         if(getArguments().containsKey(ARG_PERSON_IMAGE_PATH)){
             imagePath = getArguments().getString(ARG_PERSON_IMAGE_PATH);
@@ -60,6 +71,8 @@ public class PersonPictureDialogFragment extends UstadDialogFragment implements
 
         }
     }
+
+
 
     @android.support.annotation.NonNull
     @NonNull
@@ -116,12 +129,19 @@ public class PersonPictureDialogFragment extends UstadDialogFragment implements
         Uri profileImage = Uri.fromFile(new File(imagePath));
 
         Picasso
-                //.with(getContext())
-                .get()
-                .load(profileImage)
-                .fit()
-                .centerCrop()
-                .into(theImage);
+            .get()
+            .load(profileImage)
+            .fit()
+            .centerCrop()
+            .into(theImage);
 
+    }
+
+    @Override
+    public void showUpdateImageButton(boolean show) {
+        runOnUiThread(() -> {
+            //updateImageButton.setActivated(show);
+            //updateImageButton.setVisibility(show?View.VISIBLE:View.INVISIBLE);
+        });
     }
 }
