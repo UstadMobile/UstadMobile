@@ -1,20 +1,24 @@
 package com.ustadmobile.lib.annotationprocessor.core.db;
 
 import com.ustadmobile.lib.database.annotation.UmDao;
-import com.ustadmobile.lib.database.annotation.UmRestAccessible;
-import com.ustadmobile.lib.database.annotation.UmRestAuthorizedUidParam;
+import com.ustadmobile.lib.database.annotation.UmDbGetAttachment;
+import com.ustadmobile.lib.database.annotation.UmDbSetAttachment;
+import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
+import java.io.IOException;
 import java.io.InputStream;
 
 @UmDao(hasAttachment = true)
-public abstract class ExampleSyncableEntityWithAttachmentDao {
+public abstract class ExampleSyncableEntityWithAttachmentDao implements
+        SyncableDao<ExampleSyncableEntityWithAttachment, ExampleSyncableEntityWithAttachmentDao> {
 
-    public abstract void setAttachment(long uid, InputStream attachment);
+    @UmDbSetAttachment
+    public abstract void setAttachment(long uid, InputStream attachment) throws IOException;
 
+    @UmDbGetAttachment
     public abstract String getAttachmentUri(long uid);
 
-    @UmRestAccessible
-    public abstract InputStream serveAttachment(long uid,
-                                                @UmRestAuthorizedUidParam long accountUid);
+    @UmDbGetAttachment
+    public abstract InputStream getAttachmentStream(long uid) throws IOException;
 
 }
