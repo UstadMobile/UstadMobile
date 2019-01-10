@@ -14,8 +14,11 @@ import com.ustadmobile.lib.database.annotation.UmClearAll;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmDatabase;
 import com.ustadmobile.lib.database.annotation.UmDbContext;
+import com.ustadmobile.lib.database.annotation.UmDbGetAttachment;
+import com.ustadmobile.lib.database.annotation.UmDbSetAttachment;
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
+import com.ustadmobile.lib.database.annotation.UmRepository;
 import com.ustadmobile.lib.database.annotation.UmRestAccessible;
 import com.ustadmobile.lib.database.annotation.UmRestAuthorizedUidParam;
 import com.ustadmobile.lib.database.annotation.UmSyncCheckIncomingCanInsert;
@@ -78,6 +81,7 @@ import javax.ws.rs.core.MediaType;
 
 import static com.ustadmobile.lib.annotationprocessor.core.DbProcessorUtils.capitalize;
 import static com.ustadmobile.lib.annotationprocessor.core.DbProcessorUtils.findElementWithAnnotation;
+import static com.ustadmobile.lib.annotationprocessor.core.DbProcessorUtils.findElementsWithAnnotation;
 import static com.ustadmobile.lib.database.jdbc.JdbcDatabaseUtils.PRODUCT_NAME_POSTGRES;
 import static com.ustadmobile.lib.database.jdbc.JdbcDatabaseUtils.PRODUCT_NAME_SQLITE;
 
@@ -1102,6 +1106,7 @@ public abstract class AbstractDbProcessor {
         MethodSpec.Builder methodBuilder = overrideAndResolve(daoMethod, daoType, processingEnv);
         Element syncIncomingMethod = DbProcessorUtils.findElementWithAnnotation(daoType,
                 UmSyncIncoming.class, processingEnv);
+        boolean daoHasAttachments = daoType.getAnnotation(UmDao.class).hasAttachment();
 
         if(syncIncomingMethod == null) {
             messager.printMessage(Diagnostic.Kind.ERROR,
@@ -1129,6 +1134,7 @@ public abstract class AbstractDbProcessor {
         VariableElement accountPersonUidParam = daoMethod.getParameters().get(1);
         VariableElement sendLimitParam = daoMethod.getParameters().get(2);
         VariableElement receiveLimitParam = daoMethod.getParameters().get(3);
+        VariableElement entityPrimaryKeyEl = findPrimaryKey(entityTypeElement);
 
         Element localChangeSeqNumEl = findElementWithAnnotation(entityTypeElement,
                 UmSyncLocalChangeSeqNum.class, processingEnv);
@@ -1155,9 +1161,34 @@ public abstract class AbstractDbProcessor {
                         SyncStatus.class, umEntityAnnotation.tableId())
                 .add("boolean _syncComplete = false;\n")
                 .add("int _retryCount = 0;\n")
-                .add("long _syncCompleteMasterChangeSeqNum = -1L;\n")
-                .beginControlFlow("do")
-                    .add("$T _attemptSyncStatus = _syncableDb.getSyncStatusDao().getByUid($L);\n",
+                .add("long _syncCompleteMasterChangeSeqNum = -1L;\n");
+
+        ExecutableElement uploadAttachmentMethod = null;
+        ExecutableElement downloadAttachmentMethod = null;
+
+        if(daoHasAttachments) {
+            codeBlock.add("//DAO has attachments: must do one at a time\n")
+                    .add("$L = 1;\n", sendLimitParam.getSimpleName())
+                    .add("$L = 1;\n", receiveLimitParam.getSimpleName());
+
+            uploadAttachmentMethod =  findRepoDelegatedToWebServiceMethod(daoType,
+                    UmDbSetAttachment.class);
+            downloadAttachmentMethod = findRepoDelegatedToWebServiceMethod(daoType,
+                    UmDbGetAttachment.class);
+
+            if(uploadAttachmentMethod == null || downloadAttachmentMethod == null) {
+                messager.printMessage(Diagnostic.Kind.ERROR, formatMethodForErrorMessage(daoMethod,
+                        daoType) + ": DAO is marked as having attachments, but does not have set/get " +
+                        "attachment methods annotated as delegate to webservice (required for sync" +
+                        "to upload and download attachments)");
+            }
+        }
+        codeBlock.beginControlFlow("do");
+        if(daoHasAttachments) {
+            codeBlock.beginControlFlow("try");
+        }
+
+        codeBlock.add("$T _attemptSyncStatus = _syncableDb.getSyncStatusDao().getByUid($L);\n",
                             SyncStatus.class, umEntityAnnotation.tableId())
                     .add("$T<$T> _locallyChangedEntities = $L(" +
                                     "_attemptSyncStatus.getSyncedToLocalChangeSeqNum() + 1, " +
@@ -1169,8 +1200,20 @@ public abstract class AbstractDbProcessor {
                     .add("long _syncedToLocalSeqNum = _locallyChangedEntities.isEmpty() ? " +
                         "_attemptSyncStatus.getSyncedToLocalChangeSeqNum() : " +
                         "_locallyChangedEntities.get(_locallyChangedEntities.size()-1)" +
-                        ".get$L();\n", capitalize(localChangeSeqNumFieldName))
-                    .add("$T<$T> _remoteChanges = $L.$L(_locallyChangedEntities, 0, " +
+                        ".get$L();\n", capitalize(localChangeSeqNumFieldName));
+        if(daoHasAttachments) {
+            codeBlock.beginControlFlow("if(!_locallyChangedEntities.isEmpty())")
+                    .add("$T _changedPk = _locallyChangedEntities.get(0).get$L();\n",
+                            entityPrimaryKeyEl.asType(),
+                            capitalize(entityPrimaryKeyEl.getSimpleName()))
+                    .add("$L.$L(_changedPk, $L(_changedPk));\n", otherDaoParam.getSimpleName(),
+                            uploadAttachmentMethod.getSimpleName(),
+                            downloadAttachmentMethod.getSimpleName())
+                    .add("$L = 0;\n", receiveLimitParam.getSimpleName())
+                    .endControlFlow();
+        }
+
+        codeBlock.add("$T<$T> _remoteChanges = $L.$L(_locallyChangedEntities, 0, " +
                         "_attemptSyncStatus.getSyncedToMasterChangeNum() + 1, $L, " +
                                     "_syncableDb.getDeviceBits(), $L);\n",
                         SyncResponse.class, entityType, otherDaoParam.getSimpleName(),
@@ -1188,8 +1231,19 @@ public abstract class AbstractDbProcessor {
                         .beginControlFlow("if(_syncCompleteMasterChangeSeqNum == -1)")
                             .add("_syncCompleteMasterChangeSeqNum  = _remoteChanges." +
                                     "getCurrentMasterChangeSeqNum();\n")
-                        .endControlFlow()
-                        .add("replaceList(_remoteChanges.getRemoteChangedEntities());\n")
+                        .endControlFlow();
+
+        if(daoHasAttachments) {
+            codeBlock.beginControlFlow("if(!_remoteChangedEntities.isEmpty())")
+                    .add("$T _attachmentToDownloadId = _remoteChangedEntities.get(0).get$L();\n",
+                            entityPrimaryKeyEl.asType(), capitalize(entityPrimaryKeyEl.getSimpleName()))
+                    .add("$L(_attachmentToDownloadId, $L.$L(_attachmentToDownloadId));\n",
+                            uploadAttachmentMethod.getSimpleName(), otherDaoParam.getSimpleName(),
+                            downloadAttachmentMethod.getSimpleName())
+                    .endControlFlow();
+        }
+
+        codeBlock.add("replaceList(_remoteChanges.getRemoteChangedEntities());\n")
                         .add("_syncableDb.getSyncStatusDao().updateSyncedToChangeSeqNums(" +
                                 "$1L, _syncedToLocalSeqNum, _syncedToMasterSeqNum);\n",
                                 umEntityAnnotation.tableId())
@@ -1197,12 +1251,33 @@ public abstract class AbstractDbProcessor {
                                 " && (_syncedToLocalSeqNum >= _initialSyncStatus.getLocalChangeSeqNum() - 1 || _locallyChangedEntities.isEmpty());\n")
                     .nextControlFlow("else")
                         .add("_retryCount++;\n")
-                    .endControlFlow()
-                .endControlFlow("while(!_syncComplete && _retryCount < 3)");
+                    .endControlFlow();
+        if(daoHasAttachments) {
+            codeBlock.nextControlFlow("catch(Exception e)")
+                    .add("e.printStackTrace();\n")
+                    .endControlFlow();
+        }
+
+        codeBlock.endControlFlow("while(!_syncComplete && _retryCount < 3)");
 
         methodBuilder.addCode(codeBlock.build());
         daoBuilder.addMethod(methodBuilder.build());
         return methodBuilder;
+    }
+
+    private ExecutableElement findRepoDelegatedToWebServiceMethod(TypeElement daoType,
+                                                        Class<? extends Annotation> annotation) {
+        List<Element> candidates = findElementsWithAnnotation(daoType, annotation,
+                new ArrayList<>(), 0, processingEnv);
+        for(Element candidate : candidates) {
+            if(candidate.getAnnotation(UmRepository.class) != null
+                    && candidate.getAnnotation(UmRepository.class).delegateType()
+                    == UmRepository.UmRepositoryMethodType.DELEGATE_TO_WEBSERVICE) {
+                return (ExecutableElement)candidate;
+            }
+        }
+
+        return null;
     }
 
     /**

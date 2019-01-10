@@ -1,6 +1,8 @@
 package com.ustadmobile.lib.annotationprocessor.core;
 
 import com.ustadmobile.lib.annotationprocessor.core.db.ExampleDatabase;
+import com.ustadmobile.lib.annotationprocessor.core.db.ExampleSyncableEntityWithAttachment;
+import com.ustadmobile.lib.annotationprocessor.core.db.ExampleSyncableEntityWithAttachmentDao;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -21,7 +23,6 @@ import java.io.InputStream;
 import java.net.URI;
 import java.util.Arrays;
 
-import okhttp3.ResponseBody;
 
 
 public class TestEntityWithAttachments {
@@ -34,6 +35,16 @@ public class TestEntityWithAttachments {
 
     public static final String TEST_URI = "http://localhost:8089/api/";
 
+    ExampleDatabase serverDb = ExampleDatabase.getInstance(null);
+    ExampleDatabase clientDb = ExampleDatabase.getInstance(null, "db1");
+    ExampleDatabase clientRepo = clientDb.getRepository(TEST_URI,
+            ExampleDatabase.VALID_AUTH_TOKEN);
+
+    ExampleSyncableEntityWithAttachmentDao clientDao = clientDb
+            .getExampleSyncableEntityWithAttachmentDao();
+    ExampleSyncableEntityWithAttachmentDao clientRepoDao = clientRepo
+            .getExampleSyncableEntityWithAttachmentDao();
+
     @Before
     public void before() throws IOException{
         serverAttachmentsDir = File.createTempFile("ExampleDatabase", "attachments");
@@ -45,6 +56,20 @@ public class TestEntityWithAttachments {
         clientAttachmentsDir.mkdir();
 
         httpServer = startServer();
+
+        serverDb = ExampleDatabase.getInstance(null);
+        clientDb = ExampleDatabase.getInstance(null, "db1");
+        clientRepo = clientDb.getRepository(TEST_URI,
+                ExampleDatabase.VALID_AUTH_TOKEN);
+
+        clientDao = clientDb.getExampleSyncableEntityWithAttachmentDao();
+        clientRepoDao = clientRepo.getExampleSyncableEntityWithAttachmentDao();
+
+        serverDb.clearAll();
+        clientDb.clearAll();
+
+        serverDb.setAttachmentsDir(serverAttachmentsDir.getAbsolutePath());
+        clientDb.setAttachmentsDir(clientAttachmentsDir.getAbsolutePath());
     }
 
     public static HttpServer startServer() {
@@ -135,6 +160,42 @@ public class TestEntityWithAttachments {
 
     }
 
+    @Test
+    public void givenAttachmentSentLocally_whenSynced_thenShouldBeOnServer() throws IOException{
+        byte[] buf = new byte[]{1,2,3,4,5};
+        ExampleSyncableEntityWithAttachment entity = new ExampleSyncableEntityWithAttachment();
+        entity.setFilename("test");
+        long insertedUid = clientRepo.getExampleSyncableEntityWithAttachmentDao().insert(entity);
+        clientRepoDao.setAttachment(insertedUid, new ByteArrayInputStream(buf));
 
+        clientDao.syncWith(clientRepoDao, ExampleDatabase.VALID_AUTH_TOKEN_USER_UID,
+                10, 10);
+
+        InputStream serverAttachmentIn = serverDb.getExampleSyncableEntityWithAttachmentDao()
+                .getAttachmentStream(insertedUid);
+        byte[] bufFromServer = IOUtils.readFully(serverAttachmentIn, buf.length);
+        Assert.assertTrue(Arrays.equals(buf, bufFromServer));
+    }
+
+    @Test
+    public void givenAttachmentOnServer_whenSynced_thenShouldBeOnClient() throws IOException{
+        byte[] buf = new byte[]{1,2,3,4,5};
+
+        ExampleSyncableEntityWithAttachment entity = new ExampleSyncableEntityWithAttachment();
+        entity.setFilename("test");
+        ExampleDatabase serverDummyRepo = serverDb.getRepository("http://localhost/",
+                "");
+        long insertedUid = serverDummyRepo.getExampleSyncableEntityWithAttachmentDao()
+                .insert(entity);
+        serverDummyRepo.getExampleSyncableEntityWithAttachmentDao().setAttachment(insertedUid,
+                new ByteArrayInputStream(buf));
+
+        clientDao.syncWith(clientRepoDao, ExampleDatabase.VALID_AUTH_TOKEN_USER_UID,
+                10, 10);
+
+        InputStream clientAttachmentIn = clientDao.getAttachmentStream(insertedUid);
+        byte[] bufFromClient = IOUtils.readFully(clientAttachmentIn, buf.length);
+        Assert.assertTrue(Arrays.equals(buf, bufFromClient));
+    }
 
 }
