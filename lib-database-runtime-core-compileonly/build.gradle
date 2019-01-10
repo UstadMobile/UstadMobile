@@ -4,6 +4,8 @@ apply plugin: 'maven-publish'
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
+    //Required so that retrofit annotation processor can use getTypeElement for ResponseBody.class
+    api "com.squareup.okhttp3:okhttp:$version_okhttp"
 }
 
 
