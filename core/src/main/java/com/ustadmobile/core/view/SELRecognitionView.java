@@ -2,6 +2,7 @@ package com.ustadmobile.core.view;
 
 import com.ustadmobile.lib.db.entities.Person;
 import com.ustadmobile.core.db.UmProvider;
+import com.ustadmobile.lib.db.entities.PersonWithPersonPicture;
 
 /**
  * View responsible for recognising other students.
@@ -23,7 +24,7 @@ public interface SELRecognitionView extends UstadView {
      *
      * @param listProvider The provider data
      */
-    void setListProvider(UmProvider<Person> listProvider);
+    void setListProvider(UmProvider<PersonWithPersonPicture> listProvider);
 
 
     /**

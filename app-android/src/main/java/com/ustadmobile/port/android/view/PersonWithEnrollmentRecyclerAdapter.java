@@ -5,7 +5,9 @@ import android.app.Activity;
 import android.arch.paging.PagedList;
 import android.arch.paging.PagedListAdapter;
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Color;
+import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
 import android.support.constraint.ConstraintSet;
@@ -21,14 +23,18 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.squareup.picasso.Picasso;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.CommonHandlerPresenter;
+import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.lib.db.entities.ClazzMember;
 import com.ustadmobile.lib.db.entities.PersonWithEnrollment;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Objects;
 
+import static com.ustadmobile.core.view.PersonEditView.IMAGE_MAX_WIDTH;
 import static com.ustadmobile.port.android.view.PersonEditActivity.DEFAULT_PADDING;
 
 /**
@@ -52,10 +58,15 @@ public class PersonWithEnrollmentRecyclerAdapter
     private boolean isEmpty = false;
     private boolean addStudentLast = false;
 
+    private boolean showAddStudent = false;
+    private boolean showAddTeacher = false;
+
     private int currentTop = -1;
     private boolean teacherAdded = false;
 
     private int addCMCLT, addCMCLS;
+
+    public static final int IMAGE_PERSON_THUMBNAIL_WIDTH = 26;
 
     @SuppressLint("UseSparseArrays")
     private HashMap<Long, Boolean> checkBoxHM = new HashMap<>();
@@ -96,6 +107,22 @@ public class PersonWithEnrollmentRecyclerAdapter
         mPresenter = presenter;
         showAttendance = attendance;
         showEnrollment = enrollment;
+    }
+
+    public boolean isShowAddStudent() {
+        return showAddStudent;
+    }
+
+    public void setShowAddStudent(boolean showAddStudent) {
+        this.showAddStudent = showAddStudent;
+    }
+
+    public boolean isShowAddTeacher() {
+        return showAddTeacher;
+    }
+
+    public void setShowAddTeacher(boolean showAddTeacher) {
+        this.showAddTeacher = showAddTeacher;
     }
 
     @NonNull
@@ -209,6 +236,9 @@ public class PersonWithEnrollmentRecyclerAdapter
                 holder.itemView.findViewById(R.id.item_studentlist_student_simple_student_title);
         studentNameTextView.setText(studentName);
 
+        ImageView personPicture =
+                holder.itemView.findViewById(R.id.item_studentlist_student_simple_student_image);
+
         ImageView trafficLight = holder.itemView
                 .findViewById(R.id.item_studentlist_student_simple_attendance_trafficlight);
         TextView attendanceTextView =
@@ -222,7 +252,21 @@ public class PersonWithEnrollmentRecyclerAdapter
         studentNameTextView.setOnClickListener(v -> mPresenter.handleCommonPressed(personUid));
 
         //Remove previous add clazz member views
-        removeAllAddClazzMemberView(cl, holder);
+        if(addCMCLS != 0 || addCMCLT != 0)
+            removeAllAddClazzMemberView(cl, holder);
+
+        //Add picture to person
+        String imagePath = "";
+        Long personPictureUid = personWithEnrollment.getPersonPictureUid();
+        if (personPictureUid != 0) {
+            imagePath = UmAppDatabase.getInstance(theContext).getPersonPictureDao()
+                    .getAttachmentPath(personPictureUid);
+        }
+
+        if(imagePath != null && !imagePath.isEmpty() && imagePath.length() > 0)
+            setPictureOnView(imagePath, personPicture);
+        else
+            personPicture.setImageResource(R.drawable.ic_person_black_new_24dp);
 
         if(showAttendance){
             long attendancePercentage =
@@ -261,7 +305,7 @@ public class PersonWithEnrollmentRecyclerAdapter
 
             //connect divider's top to image's bottom
             constraintSet.connect(R.id.item_studentlist_student_simple_horizontal_divider,
-                    ConstraintSet.TOP, R.id.item_studentlist_student_simple_student_image,
+                    ConstraintSet.TOP, R.id.item_studentlist_student_simple_student_title,
                     ConstraintSet.BOTTOM, 16);
             constraintSet.connect(R.id.item_studentlist_student_simple_attendance_percentage,
                     ConstraintSet.TOP, R.id.item_studentlist_student_simple_student_title,
@@ -333,7 +377,6 @@ public class PersonWithEnrollmentRecyclerAdapter
                 if (previousPerson.getClazzMemberRole() == ClazzMember.ROLE_TEACHER &&
                         personWithEnrollment.getClazzMemberRole() == ClazzMember.ROLE_STUDENT) {
 
-
                     //Add student
                     addHeadingAndNew(cl, ClazzMember.ROLE_STUDENT);
                 }
@@ -353,6 +396,9 @@ public class PersonWithEnrollmentRecyclerAdapter
             constraintSet.connect(R.id.item_studentlist_student_simple_horizontal_divider,
                     ConstraintSet.TOP, R.id.item_studentlist_student_simple_student_image,
                     ConstraintSet.BOTTOM, 16);
+
+            //If text is below student image
+
             constraintSet.connect(R.id.item_studentlist_student_simple_attendance_percentage,
                     ConstraintSet.TOP, R.id.item_studentlist_student_simple_student_title,
                     ConstraintSet.BOTTOM, 0);
@@ -368,8 +414,31 @@ public class PersonWithEnrollmentRecyclerAdapter
                 addHeadingAndNew(cl, ClazzMember.ROLE_STUDENT);
             }
         }
+
     }
 
+
+    public void setPictureOnView(String imagePath, ImageView theImage) {
+
+        Uri imageUri = Uri.fromFile(new File(imagePath));
+        //theImage.setImageURI(imageUri);
+
+        //File imageFile = new File(imagePath);
+
+        Picasso
+                .get()
+                .load(imageUri)
+                .resize(dpToPx(IMAGE_PERSON_THUMBNAIL_WIDTH), dpToPx(IMAGE_PERSON_THUMBNAIL_WIDTH))
+                //.fit()
+                //.centerCrop()
+                .noFade()
+                .into(theImage);
+    }
+
+
+    public static int dpToPx(int dp) {
+        return (int) (dp * Resources.getSystem().getDisplayMetrics().density);
+    }
 
     /**
      * Removes old Add ClazzMember views
@@ -472,9 +541,17 @@ public class PersonWithEnrollmentRecyclerAdapter
 
         //Add these components to the new "add" Constraint Layout
         addCl.addView(clazzMemberRoleHeadingTextView);
-        addCl.addView(addPersonImageView);
-        addCl.addView(addClazzMemberTextView);
-        addCl.addView(horizontalLine);
+        if(role == ClazzMember.ROLE_STUDENT && showAddStudent) {
+            addCl.addView(addPersonImageView);
+            addCl.addView(addClazzMemberTextView);
+            addCl.addView(horizontalLine);
+        }
+        if(role == ClazzMember.ROLE_TEACHER && showAddTeacher) {
+            addCl.addView(addPersonImageView);
+            addCl.addView(addClazzMemberTextView);
+            addCl.addView(horizontalLine);
+        }
+
 
         ConstraintSet constraintSetForHeader2 = new ConstraintSet();
         constraintSetForHeader2.clone(addCl);

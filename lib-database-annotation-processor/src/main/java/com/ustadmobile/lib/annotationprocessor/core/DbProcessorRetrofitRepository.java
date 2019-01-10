@@ -12,6 +12,8 @@ import com.ustadmobile.core.impl.UmCallbackResultOverrider;
 import com.ustadmobile.lib.database.annotation.UmClearAll;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmDbContext;
+import com.ustadmobile.lib.database.annotation.UmDbGetAttachment;
+import com.ustadmobile.lib.database.annotation.UmDbSetAttachment;
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.database.annotation.UmQueryFindByPrimaryKey;
@@ -220,7 +222,8 @@ public class DbProcessorRetrofitRepository extends AbstractDbProcessor {
                     .addAnnotation(AnnotationSpec.builder(methodAnnotation)
                             .addMember("value", "\"$L/$L\"", daoType.getSimpleName(),
                                     method.getSimpleName()).build());
-            addJaxWsParameters(method, daoType, methodBuilder, Query.class, Body.class);
+            //TODO: Annotation for formdata file upload params
+            addJaxWsParameters(method, daoType, methodBuilder, Query.class, Body.class, null);
             TypeName resultTypeName = TypeName.get(methodInfo.resolveResultEntityType());
             if(resultTypeName.isPrimitive()) {
                 resultTypeName = resultTypeName.box();
@@ -312,6 +315,10 @@ public class DbProcessorRetrofitRepository extends AbstractDbProcessor {
                 }else if(repoMethod.getAnnotation(UmSyncCheckIncomingCanUpdate.class) != null) {
                     repoMethodMode = UmRepository.UmRepositoryMethodType.DELEGATE_TO_DAO;
                 }else if(repoMethod.getAnnotation(UmSyncCheckIncomingCanInsert.class) != null) {
+                    repoMethodMode = UmRepository.UmRepositoryMethodType.DELEGATE_TO_DAO;
+                }else if(repoMethod.getAnnotation(UmDbGetAttachment.class) != null) {
+                    repoMethodMode = UmRepository.UmRepositoryMethodType.DELEGATE_TO_DAO;
+                }else if(repoMethod.getAnnotation(UmDbSetAttachment.class) != null) {
                     repoMethodMode = UmRepository.UmRepositoryMethodType.DELEGATE_TO_DAO;
                 }
             }

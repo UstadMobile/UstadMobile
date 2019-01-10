@@ -148,6 +148,9 @@ public class ClazzStudentListFragment extends UstadBaseFragment implements Clazz
                 new PersonWithEnrollmentRecyclerAdapter(DIFF_CALLBACK2, getContext(),
                         this, mPresenter, true, false);
 
+        recyclerAdapter.setShowAddStudent(mPresenter.isCanAddStudents());
+        recyclerAdapter.setShowAddTeacher(mPresenter.isCanAddTeachers());
+
         //A warning is expected
         DataSource.Factory<Integer, PersonWithEnrollment> factory =
                 (DataSource.Factory<Integer, PersonWithEnrollment>)

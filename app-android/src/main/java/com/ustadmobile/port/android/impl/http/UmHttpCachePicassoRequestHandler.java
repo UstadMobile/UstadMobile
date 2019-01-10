@@ -59,6 +59,9 @@ public class UmHttpCachePicassoRequestHandler extends RequestHandler{
 
         InputStream inputStream = response.getResponseAsStream();
 
-        return new Result(inputStream, loadedFrom);
+        //return new Result(inputStream, loadedFrom);
+        //TODO: Fix this. With picasso 2.6 it needs to return a bitmap instead of an input stream.
+        //TODO: Check and fix (if this method is used anywhere else. - Varuna
+        return null;
     }
 }

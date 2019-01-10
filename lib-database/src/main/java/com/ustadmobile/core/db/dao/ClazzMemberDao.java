@@ -12,6 +12,7 @@ import com.ustadmobile.lib.db.entities.ClazzMember;
 import com.ustadmobile.lib.db.entities.ClazzMemberWithPerson;
 import com.ustadmobile.lib.db.entities.Person;
 import com.ustadmobile.lib.db.entities.PersonWithEnrollment;
+import com.ustadmobile.lib.db.entities.PersonWithPersonPicture;
 import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 import java.util.List;
 
@@ -79,6 +80,18 @@ public abstract class ClazzMemberDao implements SyncableDao<ClazzMember, ClazzMe
     public abstract UmProvider<Person> findAllPeopleInClassUid(long clazzUid);
 
 
+    @UmQuery("SELECT Person.*, " +
+            " (SELECT PersonPicture.personPictureUid FROM PersonPicture WHERE " +
+            "   PersonPicture.personPicturePersonUid = Person.personUid ORDER BY " +
+            "   picTimestamp DESC LIMIT 1) AS personPictureUid " +
+            " FROM Person where personUid IN ( " +
+            "  SELECT Person.personUid FROM ClazzMember  " +
+            " LEFT  JOIN Person On ClazzMember.clazzMemberPersonUid = Person.personUid " +
+            " WHERE ClazzMember.clazzMemberClazzUid = :clazzUid " +
+            "AND ClazzMember.clazzMemberActive = 1 " +
+            " AND ClazzMember.role = 1) AND Person.active = 1 ")
+    public abstract UmProvider<PersonWithPersonPicture> findAllPeopleWithPersonPictureInClassUid(long clazzUid);
+
     @UmQuery("SELECT * FROM Person where personUid IN ( " +
             " SELECT Person.personUid FROM ClazzMember " +
             " LEFT  JOIN Person On ClazzMember.clazzMemberPersonUid = Person.personUid " +
@@ -98,6 +111,9 @@ public abstract class ClazzMemberDao implements SyncableDao<ClazzMember, ClazzMe
 
 
     @UmQuery("SELECT Person.* , (:clazzUid) AS clazzUid, " +
+            " (SELECT PersonPicture.personPictureUid FROM PersonPicture WHERE " +
+            "   PersonPicture.personPicturePersonUid = Person.personUid ORDER BY " +
+            "   picTimestamp DESC LIMIT 1) AS personPictureUid , " +
             " (SELECT attendancePercentage FROM ClazzMember " +
             "WHERE clazzMemberPersonUid = Person.personUid " +
             " AND clazzMemberClazzUid = :clazzUid) AS attendancePercentage, " +
@@ -110,6 +126,9 @@ public abstract class ClazzMemberDao implements SyncableDao<ClazzMember, ClazzMe
 
 
     @UmQuery("SELECT Person.* , (:clazzUid) AS clazzUid, " +
+            " (SELECT PersonPicture.personPictureUid FROM PersonPicture WHERE " +
+            "   PersonPicture.personPicturePersonUid = Person.personUid ORDER BY " +
+            "   picTimestamp DESC LIMIT 1) AS personPictureUid , " +
             " (SELECT attendancePercentage FROM ClazzMember " +
             "WHERE clazzMemberPersonUid = Person.personUid AND " +
             " clazzMemberClazzUid = :clazzUid) AS attendancePercentage, " +
@@ -127,6 +146,9 @@ public abstract class ClazzMemberDao implements SyncableDao<ClazzMember, ClazzMe
 
 
     @UmQuery("SELECT Person.* , (:clazzUid) AS clazzUid, " +
+            " (SELECT PersonPicture.personPictureUid FROM PersonPicture WHERE " +
+            "   PersonPicture.personPicturePersonUid = Person.personUid ORDER BY " +
+            "   picTimestamp DESC LIMIT 1) AS personPictureUid , " +
             " (SELECT attendancePercentage FROM ClazzMember " +
             "WHERE clazzMemberPersonUid = Person.personUid " +
             "AND clazzMemberClazzUid = :clazzUid) AS attendancePercentage, " +
@@ -145,6 +167,9 @@ public abstract class ClazzMemberDao implements SyncableDao<ClazzMember, ClazzMe
 
 
     @UmQuery("SELECT Person.* , (:clazzUid) AS clazzUid, " +
+            " (SELECT PersonPicture.personPictureUid FROM PersonPicture WHERE " +
+            "   PersonPicture.personPicturePersonUid = Person.personUid ORDER BY " +
+            "   picTimestamp DESC LIMIT 1) AS personPictureUid , " +
             " (SELECT attendancePercentage FROM ClazzMember " +
             "WHERE clazzMemberPersonUid = Person.personUid " +
             "AND clazzMemberClazzUid = :clazzUid) AS attendancePercentage, " +
@@ -162,6 +187,9 @@ public abstract class ClazzMemberDao implements SyncableDao<ClazzMember, ClazzMe
     public abstract UmProvider<PersonWithEnrollment> findAllPersonWithEnrollmentInClazzByClazzUidSortByNameAsc(long clazzUid);
 
     @UmQuery("SELECT Person.* , (:clazzUid) AS clazzUid, " +
+            " (SELECT PersonPicture.personPictureUid FROM PersonPicture WHERE " +
+            "   PersonPicture.personPicturePersonUid = Person.personUid ORDER BY " +
+            "   picTimestamp DESC LIMIT 1) AS personPictureUid , " +
             " (SELECT attendancePercentage FROM ClazzMember " +
             "WHERE clazzMemberPersonUid = Person.personUid " +
             "AND clazzMemberClazzUid = :clazzUid) AS attendancePercentage, " +
@@ -179,6 +207,9 @@ public abstract class ClazzMemberDao implements SyncableDao<ClazzMember, ClazzMe
     public abstract UmProvider<PersonWithEnrollment> findAllPersonWithEnrollmentInClazzByClazzUidSortByAttendanceAsc(long clazzUid);
 
     @UmQuery("SELECT Person.* , (:clazzUid) AS clazzUid, " +
+            " (SELECT PersonPicture.personPictureUid FROM PersonPicture WHERE " +
+            "   PersonPicture.personPicturePersonUid = Person.personUid ORDER BY " +
+            "   picTimestamp DESC LIMIT 1) AS personPictureUid , " +
             " (SELECT attendancePercentage FROM ClazzMember " +
             "WHERE clazzMemberPersonUid = Person.personUid " +
             "AND clazzMemberClazzUid = :clazzUid) AS attendancePercentage, " +
@@ -197,6 +228,9 @@ public abstract class ClazzMemberDao implements SyncableDao<ClazzMember, ClazzMe
 
 
     @UmQuery("SELECT Person.* , (:clazzUid) AS clazzUid, " +
+            " (SELECT PersonPicture.personPictureUid FROM PersonPicture WHERE " +
+            "   PersonPicture.personPicturePersonUid = Person.personUid ORDER BY " +
+            "   picTimestamp DESC LIMIT 1) AS personPictureUid , " +
             " (SELECT attendancePercentage FROM ClazzMember " +
             "WHERE clazzMemberPersonUid = Person.personUid " +
             "AND clazzMemberClazzUid = :clazzUid) AS attendancePercentage, " +

@@ -12,6 +12,10 @@ public interface PersonEditView extends UstadView {
 
     String VIEW_NAME = "PersonEdit";
 
+    int IMAGE_MAX_HEIGHT = 1024;
+    int IMAGE_MAX_WIDTH = 1024;
+    int IMAGE_QUALITY = 75;
+
     /**
      * Sets every field to the view (mostly a Linear Layout) based on the index and the
      * PersonDetailViewField object.

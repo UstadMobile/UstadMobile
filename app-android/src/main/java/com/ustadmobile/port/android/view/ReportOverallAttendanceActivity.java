@@ -1,9 +1,12 @@
 package com.ustadmobile.port.android.view;
 
 
+import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.content.FileProvider;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -24,7 +27,11 @@ import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.core.view.ReportOverallAttendanceView;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -47,6 +54,8 @@ public class ReportOverallAttendanceActivity extends UstadBaseActivity
     private ReportOverallAttendancePresenter mPresenter;
     LineChart lineChart;
     TableLayout tableLayout;
+
+    List<String[]> tableTextData;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -80,6 +89,8 @@ public class ReportOverallAttendanceActivity extends UstadBaseActivity
         PopupMenu popup = new PopupMenu(this, v);
         MenuInflater inflater = popup.getMenuInflater();
         inflater.inflate(R.menu.menu_export, popup.getMenu());
+
+        popup.setOnMenuItemClickListener(this::onMenuItemClick);
         popup.show();
     }
 
@@ -182,6 +193,9 @@ public class ReportOverallAttendanceActivity extends UstadBaseActivity
                                                           LinkedHashMap<String,
                                                                   Float>> dataTableMaps ){
 
+        //Build a string array of the data
+        tableTextData = new ArrayList<>();
+
         //RETURN THIS LIST OF VIEWS
         List<View> addThese = new ArrayList<>();
 
@@ -193,7 +207,6 @@ public class ReportOverallAttendanceActivity extends UstadBaseActivity
                 TableRow.LayoutParams.WRAP_CONTENT, TableRow.LayoutParams.WRAP_CONTENT);
         everyItemParam.setMargins(dpToPx(4), dpToPx(4), dpToPx(4), dpToPx(4));
 
-
         //HEADING
         TableRow headingRow = new TableRow(getApplicationContext());
         headingRow.setLayoutParams(rowParams);
@@ -202,7 +215,6 @@ public class ReportOverallAttendanceActivity extends UstadBaseActivity
         dateHeading.setTextColor(Color.BLACK);
         dateHeading.setLayoutParams(everyItemParam);
         dateHeading.setText(R.string.date);
-
 
         TextView averageHeading = new TextView(getApplicationContext());
         averageHeading.setTextColor(Color.BLACK);
@@ -230,6 +242,13 @@ public class ReportOverallAttendanceActivity extends UstadBaseActivity
         }
 
         addThese.add(headingRow);
+
+        //MAKE TABLE TEXT DATA:
+        String[] headingItems = new String[headingRow.getChildCount()];
+        for(int i = 0; i < headingRow.getChildCount(); i++){
+            headingItems[i] = ((TextView) headingRow.getChildAt(i)).getText().toString();
+        }
+        tableTextData.add(headingItems);
 
 
         //DATA ROWS
@@ -284,6 +303,13 @@ public class ReportOverallAttendanceActivity extends UstadBaseActivity
             }
 
             addThese.add(iRow);
+
+            //BUILD TABLE TEXT DATA
+            String[] rowItems = new String[iRow.getChildCount()];
+            for(int i = 0; i < iRow.getChildCount(); i++){
+                rowItems[i] = ((TextView)iRow.getChildAt(i)).getText().toString();
+            }
+            tableTextData.add(rowItems);
         }
 
         //RETURN LIST OF ROW VIEWS
@@ -305,8 +331,6 @@ public class ReportOverallAttendanceActivity extends UstadBaseActivity
         if(mPresenter.getShowPercentages()){
             valueIdentifier = "%";
         }
-
-
 
         //Generate and draw lines for line chart
         for(Map.Entry<String, LinkedHashMap<Float, Float>> everyLineDataMap : dataMaps.entrySet()){
@@ -377,6 +401,56 @@ public class ReportOverallAttendanceActivity extends UstadBaseActivity
 
         });
 
+
+    }
+
+    @Override
+    public void generateCSVReport() {
+
+        String csvReportFilePath = "";
+        //Create the file.
+
+        File dir = getFilesDir();
+        File output = new File(dir, "overall_attendance_activity_" +
+                System.currentTimeMillis() + ".csv");
+        csvReportFilePath = output.getAbsolutePath();
+
+        try {
+            FileWriter fileWriter = new FileWriter(csvReportFilePath);
+            Iterator<String[]> tableTextdataIterator = tableTextData.iterator();
+
+            while(tableTextdataIterator.hasNext()){
+                boolean firstDone = false;
+                String[] lineArray = tableTextdataIterator.next();
+                for(int i=0;i<lineArray.length;i++){
+                    if(firstDone){
+                        fileWriter.append(",");
+                    }
+                    firstDone = true;
+                    fileWriter.append(lineArray[i]);
+                }
+                fileWriter.append("\n");
+            }
+            fileWriter.close();
+
+
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        String applicationId = getPackageName();
+        Uri sharedUri = FileProvider.getUriForFile(this,
+                applicationId+".fileprovider",
+                new File(csvReportFilePath));
+        Intent shareIntent = new Intent(Intent.ACTION_SEND);
+        shareIntent.setType("*/*");
+        shareIntent.putExtra(Intent.EXTRA_STREAM, sharedUri);
+        shareIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+        if(shareIntent.resolveActivity(getPackageManager()) != null) {
+            startActivity(shareIntent);
+        }
 
     }
 }

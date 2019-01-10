@@ -10,6 +10,7 @@ public class PersonWithEnrollment extends Person {
 
     private int clazzMemberRole;
 
+    private long personPictureUid;
 
     public int getClazzMemberRole() {
         return clazzMemberRole;
@@ -41,5 +42,13 @@ public class PersonWithEnrollment extends Person {
 
     public void setAttendancePercentage(float attendancePercentage) {
         this.attendancePercentage = attendancePercentage;
+    }
+
+    public long getPersonPictureUid() {
+        return personPictureUid;
+    }
+
+    public void setPersonPictureUid(long personPictureUid) {
+        this.personPictureUid = personPictureUid;
     }
 }

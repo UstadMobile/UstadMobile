@@ -9,6 +9,7 @@ import com.ustadmobile.core.db.dao.PersonCustomFieldDao;
 import com.ustadmobile.core.db.dao.PersonCustomFieldValueDao;
 import com.ustadmobile.core.db.dao.PersonDao;
 import com.ustadmobile.core.db.dao.PersonDetailPresenterFieldDao;
+import com.ustadmobile.core.db.dao.PersonPictureDao;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UmCallbackWithDefaultValue;
@@ -18,14 +19,17 @@ import com.ustadmobile.core.view.PersonDetailEnrollClazzView;
 import com.ustadmobile.core.view.PersonDetailView;
 import com.ustadmobile.core.view.PersonDetailViewField;
 import com.ustadmobile.core.view.PersonEditView;
+import com.ustadmobile.core.view.PersonPictureDialogView;
 import com.ustadmobile.lib.db.entities.ClazzWithNumStudents;
 import com.ustadmobile.lib.db.entities.Person;
 import com.ustadmobile.lib.db.entities.PersonCustomFieldValue;
 import com.ustadmobile.lib.db.entities.PersonCustomFieldWithPersonCustomFieldValue;
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField;
 import com.ustadmobile.lib.db.entities.PersonField;
+import com.ustadmobile.lib.db.entities.PersonPicture;
 import com.ustadmobile.lib.db.entities.Role;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
@@ -33,6 +37,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import static com.ustadmobile.core.view.PersonDetailView.ARG_PERSON_UID;
+import static com.ustadmobile.core.view.PersonPictureDialogView.ARG_PERSON_IMAGE_PATH;
 import static com.ustadmobile.lib.db.entities.PersonDetailPresenterField.CUSTOM_FIELD_MIN_UID;
 import static com.ustadmobile.lib.db.entities.PersonField.FIELD_TYPE_HEADER;
 import static com.ustadmobile.lib.db.entities.PersonField.FIELD_TYPE_TEXT;
@@ -68,6 +73,14 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
 
     private long personUid;
 
+    public long getPersonUid() {
+        return personUid;
+    }
+
+    public void setPersonUid(long personUid) {
+        this.personUid = personUid;
+    }
+
     private String attendanceAverage;
 
     private String oneParentNumber = "";
@@ -75,6 +88,8 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
     private long loggedInPersonUid = 0L;
 
     private UmProvider<ClazzWithNumStudents> assignedClazzes;
+
+    private PersonPictureDao personPictureDao;
 
     UmAppDatabase repository = UmAccountManager.getRepositoryForActiveAccount(context);
 
@@ -121,9 +136,21 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
                     }else if(thisPerson.getMotherNum() != null && !thisPerson.getMotherNum().isEmpty()){
                         oneParentNumber = thisPerson.getMotherNum();
                     }
-                    if(thisPerson.getImagePath() != null){
-                        view.runOnUiThread(() -> view.updateImageOnView(thisPerson.getImagePath()));
-                    }
+
+                    personPictureDao = repository.getPersonPictureDao();
+                    personPictureDao.findByPersonUidAsync(thisPerson.getPersonUid(), new UmCallback<PersonPicture>() {
+                        @Override
+                        public void onSuccess(PersonPicture personPicture) {
+                            if(personPicture!=null)
+                                view.updateImageOnView(personPictureDao.getAttachmentPath(personPicture.getPersonPictureUid()));
+                        }
+
+                        @Override
+                        public void onFailure(Throwable exception) {
+
+                        }
+                    });
+
                 }else {
                     //Todo: show this entity has not loaded yet
                 }
@@ -241,10 +268,52 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
 
                 @Override
                 public void onFailure(Throwable exception) {
-
+                    exception.printStackTrace();
                 }
             }));
+
+        PersonDao personDao = repository.getPersonDao();
+        personDao.personHasPermission(loggedInPersonUid, personUid,
+            Role.PERMISSION_PERSON_PICTURE_UPDATE,
+            new UmCallbackWithDefaultValue<>(false,
+                new UmCallback<Boolean>() {
+                    @Override
+                    public void onSuccess(Boolean result) {
+                        view.showUpdateImageButton(result);
+                    }
+
+                    @Override
+                    public void onFailure(Throwable exception) {
+                        exception.printStackTrace();
+                    }
+                }
+            ));
     }
+
+
+    public void handleCompressedImage(File imageFile){
+        PersonPictureDao personPictureDao = repository.getPersonPictureDao();
+        PersonPicture personPicture = new PersonPicture();
+        personPicture.setPersonPicturePersonUid(personUid);
+        personPicture.setPicTimestamp(System.currentTimeMillis());
+
+        personPictureDao.insertAsync(personPicture, new UmCallback<Long>() {
+            @Override
+            public void onSuccess(Long personPictureUid) {
+                personPictureDao.setAttachmentFromTmpFile(personPictureUid, imageFile);
+
+                view.updateImageOnView(personPictureDao.getAttachmentPath(personPictureUid));
+            }
+
+            @Override
+            public void onFailure(Throwable exception) {
+                exception.printStackTrace();
+            }
+        });
+
+    }
+
+
 
     /**
      * Generates the all class list with assignation for the person being displayed.
@@ -449,6 +518,15 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
         if(!oneParentNumber.isEmpty()) {
             handleClickText(oneParentNumber);
         }
+    }
+
+    public void openPictureDialog(String imagePath){
+        //Open Dialog
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        Hashtable args = new Hashtable();
+        args.put(ARG_PERSON_IMAGE_PATH, imagePath);
+        args.put(ARG_PERSON_UID, personUid);
+        impl.go(PersonPictureDialogView.VIEW_NAME, args, context);
     }
 
     /**

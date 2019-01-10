@@ -7,6 +7,7 @@ import com.ustadmobile.lib.annotationprocessor.core.db.ExampleSyncableEntity;
 
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
+import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.junit.After;
 import org.junit.Assert;
@@ -36,7 +37,8 @@ public class TestRetrofitInterface {
 
     public static HttpServer startServer() {
         final ResourceConfig resourceConfig = new ResourceConfig()
-                .packages("com.ustadmobile.lib.annotationprocessor.core.db");
+                .packages("com.ustadmobile.lib.annotationprocessor.core.db")
+                .register(MultiPartFeature.class);
         return GrizzlyHttpServerFactory.createHttpServer(URI.create(TEST_URI), resourceConfig);
     }
 

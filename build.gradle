@@ -95,6 +95,8 @@ ext {
     version_mpandroidchart = "v3.0.3"
     version_tellh_recyclertreeview = "1.2.0"
     version_work_manager = "1.0.0-alpha02"
+
+    version_picasso = "2.71828"
 }
 
 ext.buildConfigProperties = new Properties()

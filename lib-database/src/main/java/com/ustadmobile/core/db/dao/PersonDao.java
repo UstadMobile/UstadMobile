@@ -81,6 +81,10 @@ public abstract class PersonDao implements SyncableDao<Person, PersonDao> {
     @UmQuery("SELECT Person.* , (0) AS clazzUid, " +
             " (0) AS attendancePercentage, " +
             " (0) AS clazzMemberRole, " +
+            " (SELECT PersonPicture.personPictureUid FROM PersonPicture WHERE " +
+            " PersonPicture.personPicturePersonUid = Person.personUid ORDER BY picTimestamp " +
+            " DESC LIMIT 1) AS personPictureUid, " +
+            //" (0) AS personPictureUid, " +
             " (0) AS enrolled FROM Person WHERE Person.active = 1 ")
     public abstract UmProvider<PersonWithEnrollment> findAllPeopleWithEnrollment();
 
@@ -324,10 +328,18 @@ public abstract class PersonDao implements SyncableDao<Person, PersonDao> {
     @UmInsert(onConflict = UmOnConflictStrategy.REPLACE)
     public abstract void replacePersonAuth(PersonAuth personAuth);
 
-    public void personHasPermission(long personUid, long clazzUid, long permission,
-                                    UmCallback<Boolean> callback) {
-        callback.onSuccess(Boolean.TRUE);
-    }
+    /**
+     * Checks if a user has the given permission over a given person in the database
+     *
+     * @param accountPersonUid the personUid of the person who wants to perform the operation
+     * @param personUid the personUid of the person object in the database to perform the operation on
+     * @param permission permission to check for
+     * @param callback result callback
+     */
+    @UmQuery("SELECT 1 FROM Person WHERE Person.personUid = :personUid AND (" +
+            ENTITY_LEVEL_PERMISSION_CONDITION1 + " :permission " + ENTITY_LEVEL_PERMISSION_CONDITION2 + ") ")
+    public abstract void personHasPermission(long accountPersonUid, long personUid, long permission,
+                                    UmCallback<Boolean> callback);
 
     @UmInsert
     public abstract void insertPersonGroup(PersonGroup personGroup, UmCallback<Long> callback);

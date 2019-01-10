@@ -13,6 +13,8 @@ import com.ustadmobile.lib.database.annotation.UmClearAll;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmDatabase;
 import com.ustadmobile.lib.database.annotation.UmDbContext;
+import com.ustadmobile.lib.database.annotation.UmDbGetAttachment;
+import com.ustadmobile.lib.database.annotation.UmDbSetAttachment;
 import com.ustadmobile.lib.database.annotation.UmDelete;
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmInsert;
@@ -360,6 +362,12 @@ public class DbProcessorRoom extends AbstractDbProcessor implements QueryMethodG
             }else if(daoMethod.getAnnotation(UmSyncCheckIncomingCanInsert.class) != null) {
                 roomDaoClassSpec.addMethod(generateQueryMethod(generateSyncCheckCanInsertSql(daoClass,
                         daoMethod, processingEnv), daoMethod, daoClass, dbType, roomDaoClassSpec));
+            }else if(daoMethod.getAnnotation(UmDbGetAttachment.class) != null) {
+                roomDaoClassSpec.addMethod(generateGetAttachmentMethod(daoClass, daoMethod,
+                        "_dbManager"));
+            }else if(daoMethod.getAnnotation(UmDbSetAttachment.class) != null) {
+                roomDaoClassSpec.addMethod(generateSetAttachmentMethod(daoClass, daoMethod,
+                        "_dbManager"));
             }
 
             if(methodBuilder != null){

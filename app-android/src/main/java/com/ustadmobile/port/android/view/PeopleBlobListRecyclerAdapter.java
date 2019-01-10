@@ -19,7 +19,10 @@ import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Transformation;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.CommonHandlerPresenter;
+import com.ustadmobile.core.db.UmAppDatabase;
+import com.ustadmobile.core.db.dao.PersonPictureDao;
 import com.ustadmobile.lib.db.entities.Person;
+import com.ustadmobile.lib.db.entities.PersonWithPersonPicture;
 
 import java.io.File;
 import java.util.Hashtable;
@@ -31,7 +34,7 @@ import java.util.Hashtable;
  *
  */
 public class PeopleBlobListRecyclerAdapter extends
-        PagedListAdapter<Person, PeopleBlobListRecyclerAdapter.PeopleViewHolder> {
+        PagedListAdapter<PersonWithPersonPicture, PeopleBlobListRecyclerAdapter.PeopleViewHolder> {
 
     Context theContext;
     CommonHandlerPresenter mPresenter;
@@ -46,14 +49,14 @@ public class PeopleBlobListRecyclerAdapter extends
         }
     }
 
-    PeopleBlobListRecyclerAdapter(@NonNull DiffUtil.ItemCallback<Person> diffCallback,
+    PeopleBlobListRecyclerAdapter(@NonNull DiffUtil.ItemCallback<PersonWithPersonPicture> diffCallback,
                                               Context context, CommonHandlerPresenter presenter) {
         super(diffCallback);
         theContext = context;
         mPresenter = presenter;
     }
 
-    PeopleBlobListRecyclerAdapter(@NonNull DiffUtil.ItemCallback<Person> diffCallback,
+    PeopleBlobListRecyclerAdapter(@NonNull DiffUtil.ItemCallback<PersonWithPersonPicture> diffCallback,
                                             Context context, CommonHandlerPresenter presenter,
                                             boolean namesHidden) {
         super(diffCallback);
@@ -107,7 +110,8 @@ public class PeopleBlobListRecyclerAdapter extends
     private void updateImageOnView(String imagePath, ImageView personImageView){
         Uri profileImage = Uri.fromFile(new File(imagePath));
 
-        Picasso.with(theContext)
+        //Picasso.with(theContext)
+        Picasso.get()
                 .load(profileImage)
                 .transform(new CropSquareTransformation())
                 .resize(90,90)
@@ -115,7 +119,8 @@ public class PeopleBlobListRecyclerAdapter extends
                 .into(personImageView);
 
         File profilePic = new File(imagePath);
-        Picasso.with(theContext)
+        //Picasso.with(theContext)
+        Picasso.get()
                 .load(profilePic)
                 .transform(new CropSquareTransformation())
                 .resize(90,90)
@@ -138,8 +143,8 @@ public class PeopleBlobListRecyclerAdapter extends
     public void onBindViewHolder(
             @NonNull PeopleBlobListRecyclerAdapter.PeopleViewHolder holder, int position) {
 
+        PersonWithPersonPicture thisPerson = getItem(position);
 
-        Person thisPerson = getItem(position);
         String studentName;
         if (thisPerson == null) {
             studentName = "Student";
@@ -152,8 +157,12 @@ public class PeopleBlobListRecyclerAdapter extends
                 .findViewById(R.id.item_peopleblob_image);
 
         assert thisPerson != null;
-        if(thisPerson.getImagePath() != null && !thisPerson.getImagePath().isEmpty()){
-            updateImageOnView(thisPerson.getImagePath(), studentImage);
+
+        long personPictureUid = thisPerson.getPersonPictureUid();
+        if(personPictureUid != 0L) {
+            String imgPath = UmAppDatabase.getInstance(theContext).getPersonPictureDao()
+                    .getAttachmentPath(personPictureUid);
+            updateImageOnView(imgPath, studentImage);
         }
 
         TextView studentEntry = holder.itemView

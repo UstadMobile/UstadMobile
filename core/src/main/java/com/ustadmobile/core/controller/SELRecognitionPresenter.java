@@ -15,6 +15,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.lib.db.entities.Person;
+import com.ustadmobile.lib.db.entities.PersonWithPersonPicture;
 import com.ustadmobile.lib.db.entities.SocialNominationQuestion;
 import com.ustadmobile.lib.db.entities.SocialNominationQuestionSet;
 import com.ustadmobile.lib.db.entities.SocialNominationQuestionSetResponse;
@@ -48,7 +49,7 @@ public class SELRecognitionPresenter
     private String doneClazzMemberUids ="";
 
     //Provider 
-    private UmProvider<Person> providerList;
+    private UmProvider<PersonWithPersonPicture> providerList;
 
     UmAppDatabase repository = UmAccountManager.getRepositoryForActiveAccount(context);
 
@@ -92,7 +93,7 @@ public class SELRecognitionPresenter
 
         //Populate the provider
         providerList = repository.getClazzMemberDao()
-                .findAllPeopleInClassUid(currentClazzUid);
+                .findAllPeopleWithPersonPictureInClassUid(currentClazzUid);
         setListProviderToView();
 
     }
