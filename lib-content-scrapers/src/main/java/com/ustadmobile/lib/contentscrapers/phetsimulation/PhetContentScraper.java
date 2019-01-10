@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
@@ -185,19 +186,18 @@ public class PhetContentScraper {
 
             if (Arrays.stream(CATEGORY).parallel().noneMatch(category.text()::contains)) {
 
-                String categoryName = category.text(); // category name
-                String path = category.parent().attr("href"); // url path to category
-
                 try {
+                    String categoryName = category.text(); // category name
+                    String path = category.parent().attr("href"); // url path to category
+
                     ContentEntry categoryContentEntry = ContentScraperUtil.createOrUpdateContentEntry(path, categoryName,
                             new URL(simulationUrl, path).toString(), PHET, LICENSE_TYPE_CC_BY, language.getLangUid(), null,
                             EMPTY_STRING, false, EMPTY_STRING, EMPTY_STRING,
                             EMPTY_STRING, EMPTY_STRING, contentEntryDao);
 
-
                     categoryRelations.add(categoryContentEntry);
                 } catch (IOException ie) {
-                    System.err.println("Error creating category entry" + path + " for url" + simulationUrl.toString());
+                    System.err.println("Error creating category entry" + category.text() + " for url" + simulationUrl.toString());
                 }
             }
         }
@@ -225,6 +225,7 @@ public class PhetContentScraper {
         FileUtils.writeStringToFile(new File(simulationLocation, ScraperConstants.ABOUT_HTML), aboutText, ScraperConstants.UTF_ENCODING);
 
         FileUtils.copyURLToFile(link, simulationFile);
+
         String simulationTitle = Jsoup.parse(simulationFile, ScraperConstants.UTF_ENCODING).title();
         try {
             ContentScraperUtil.generateTinCanXMLFile(simulationLocation, simulationTitle,
@@ -233,6 +234,7 @@ public class PhetContentScraper {
                     aboutDescription, "en");
         } catch (ParserConfigurationException | TransformerException e) {
             e.printStackTrace();
+            System.err.println("Tin can file not created for " + link.toString());
         }
         ContentScraperUtil.zipDirectory(simulationLocation, title, languageLocation);
 
@@ -267,27 +269,33 @@ public class PhetContentScraper {
                         for (File file : contentDirectory.listFiles()) {
 
                             if (file.getName().endsWith(".html")) {
-                                String langTitle = simulationDoc.selectFirst("td a[href*=_" + langCode + "] span").text();
 
-                                String path = simulationUrl.toString().replace("/en/", "/" + langCode + "/");
-                                URL translationUrl = new URL(path);
-                                String[] country = langCode.replaceAll("_", "-").split("-");
+                                try {
+                                    String langTitle = simulationDoc.selectFirst("td a[href*=_" + langCode + "] span").text();
 
-                                String lang = country[0];
-                                String variant = country.length > 1 ? country[1] : "";
+                                    String path = simulationUrl.toString().replace("/en/", "/" + langCode + "/");
+                                    URL translationUrl = new URL(path);
+                                    String[] country = langCode.replaceAll("_", "-").split("-");
 
-                                Language language = ContentScraperUtil.insertOrUpdateLanguageByTwoCode(languageDao, lang);
-                                LanguageVariant languageVariant = ContentScraperUtil.insertOrUpdateLanguageVariant(languageVariantDao, variant, language);
+                                    String lang = country[0];
+                                    String variant = country.length > 1 ? country[1] : "";
 
-                                ContentEntry languageContentEntry = ContentScraperUtil.createOrUpdateContentEntry(translationUrl.getPath(), langTitle,
-                                        translationUrl.toString(), PHET, LICENSE_TYPE_CC_BY, language.getLangUid(), languageVariant != null ? languageVariant.getLangVariantUid() : null,
-                                        getAboutDescription(), true, EMPTY_STRING, thumbnailUrl,
-                                        EMPTY_STRING, EMPTY_STRING, contentEntryDao);
+                                    Language language = ContentScraperUtil.insertOrUpdateLanguageByTwoCode(languageDao, lang);
+                                    LanguageVariant languageVariant = ContentScraperUtil.insertOrUpdateLanguageVariant(languageVariantDao, variant, language);
 
-                                langIdMap.put(languageContentEntry.getContentEntryUid(), langCode);
+                                    ContentEntry languageContentEntry = ContentScraperUtil.createOrUpdateContentEntry(translationUrl.getPath(), langTitle,
+                                            translationUrl.toString(), PHET, LICENSE_TYPE_CC_BY, language.getLangUid(), languageVariant != null ? languageVariant.getLangVariantUid() : null,
+                                            getAboutDescription(), true, EMPTY_STRING, thumbnailUrl,
+                                            EMPTY_STRING, EMPTY_STRING, contentEntryDao);
 
-                                translationsEntry.add(languageContentEntry);
-                                break;
+                                    langIdMap.put(languageContentEntry.getContentEntryUid(), langCode);
+
+                                    translationsEntry.add(languageContentEntry);
+                                    break;
+                                } catch (Exception e) {
+                                    System.err.println("Error while creating a entry for translated " +
+                                            "content lang code " + langCode + " in phet url " + url);
+                                }
                             }
                         }
                     }
