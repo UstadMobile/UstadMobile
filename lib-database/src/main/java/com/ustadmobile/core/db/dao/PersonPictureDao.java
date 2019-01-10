@@ -16,7 +16,11 @@ import java.io.IOException;
 import java.io.InputStream;
 
 @UmDao(hasAttachment = true,
-permissionJoin = " LEFT JOIN Person ON PersonPicture.personPicturePersonUid = Person.personUid ")
+permissionJoin = " LEFT JOIN Person ON PersonPicture.personPicturePersonUid = Person.personUid ",
+selectPermissionCondition = PersonDao.ENTITY_LEVEL_PERMISSION_CONDITION1 +
+Role.PERMISSION_PERSON_PICTURE_SELECT + PersonDao.ENTITY_LEVEL_PERMISSION_CONDITION2,
+updatePermissionCondition = PersonDao.ENTITY_LEVEL_PERMISSION_CONDITION1 +
+Role.PERMISSION_PERSON_PICTURE_UPDATE + PersonDao.ENTITY_LEVEL_PERMISSION_CONDITION2)
 @UmRepository
 public abstract class PersonPictureDao implements SyncableDao<PersonPicture, PersonPictureDao> {
 
@@ -52,12 +56,12 @@ public abstract class PersonPictureDao implements SyncableDao<PersonPicture, Per
     @UmDbSetAttachment
     @UmRestAccessible
     @UmRepository(delegateType = UmRepository.UmRepositoryMethodType.DELEGATE_TO_WEBSERVICE)
-    public abstract void uploadAttachment(long uid, InputStream attachment);
+    public abstract void uploadAttachment(long uid, InputStream attachment) throws IOException;
 
     @UmDbGetAttachment
     @UmRestAccessible
     @UmRepository(delegateType = UmRepository.UmRepositoryMethodType.DELEGATE_TO_WEBSERVICE)
-    public abstract InputStream downloadAttachment(long uid);
+    public abstract InputStream downloadAttachment(long uid) throws IOException;
 
 
 
