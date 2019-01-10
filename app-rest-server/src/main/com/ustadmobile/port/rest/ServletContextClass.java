@@ -59,10 +59,13 @@ public class ServletContextClass implements ServletContextListener
 
         //Run this before web application is started
         @Override
-        public void contextInitialized(ServletContextEvent arg0) {
+        public void contextInitialized(ServletContextEvent evt) {
             System.out.println("ServletContextListener started");
 
-            appDb = UmAppDatabase.getInstance(arg0.getServletContext());
+            appDb = UmAppDatabase.getInstance(evt.getServletContext());
+            appDb.setAttachmentsDir(evt.getServletContext().getRealPath("attachments"));
+            System.out.println("Set db attachments path to: " + appDb.getAttachmentsDir());
+
             appDbRepository = appDb.getRepository(dummyBaseUrl, dummyAuth);
 
             personCustomFieldDao =
