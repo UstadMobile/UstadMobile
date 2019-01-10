@@ -163,10 +163,10 @@ public class EdraakK12ContentScraper {
             System.err.println("Failed to download the necessary files for response id " + response.id);
         }
         // nothing changed, keep same files
-        if (anyContentUpdated) {
-            // add these files into the directory
-            ContentScraperUtil.zipDirectory(courseDirectory, response.id, destinationDirectory);
-        }
+
+        // add these files into the directory
+        ContentScraperUtil.zipDirectory(courseDirectory, response.id, destinationDirectory);
+
         contentUpdated = anyContentUpdated;
     }
 
@@ -205,9 +205,8 @@ public class EdraakK12ContentScraper {
     }
 
     private void checkBeforeCopyToFile(String fileToDownload, File locationToSave) throws IOException {
-        if (!ContentScraperUtil.fileHasContent(locationToSave)) {
-            FileUtils.copyToFile(getClass().getResourceAsStream(fileToDownload), locationToSave);
-        }
+        FileUtils.copyToFile(getClass().getResourceAsStream(fileToDownload), locationToSave);
+
     }
 
     /**
