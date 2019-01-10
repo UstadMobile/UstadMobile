@@ -316,7 +316,6 @@ public class ClazzActivityEditActivity extends UstadBaseActivity implements Claz
                     break;
             }
         });
-
     }
 
     @Override
