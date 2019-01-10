@@ -14,6 +14,7 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -23,6 +24,9 @@ import java.io.InputStream;
 import java.net.URI;
 import java.util.Arrays;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 
 
 public class TestEntityWithAttachments {
@@ -197,5 +201,40 @@ public class TestEntityWithAttachments {
         byte[] bufFromClient = IOUtils.readFully(clientAttachmentIn, buf.length);
         Assert.assertTrue(Arrays.equals(buf, bufFromClient));
     }
+
+    @Test
+    public void givenMoreAttachmentsOnClient_whenSynced_thenShouldBeOnServerAndNotUploadedAgain()
+            throws IOException{
+        int numEntities = 3;
+        byte[][] clientBuf = new byte[numEntities][];
+        long[] insertedEntitUids = new long[numEntities];
+        for(int i = 0; i < numEntities; i++) {
+            clientBuf[i] = new byte[]{(byte)i, (byte)(i + 1), (byte)(i + 2), (byte)(i + 3),
+                    (byte)(i + 4)};
+            ExampleSyncableEntityWithAttachment entity = new ExampleSyncableEntityWithAttachment();
+            entity.setFilename("entity " + i);
+            insertedEntitUids[i] = clientRepoDao.insert(entity);
+            clientRepoDao.setAttachment(insertedEntitUids[i], new ByteArrayInputStream(clientBuf[i]));
+        }
+
+        ExampleSyncableEntityWithAttachmentDao clientRepoDaoSpy = Mockito.spy(clientRepoDao);
+        clientDao.syncWith(clientRepoDaoSpy, ExampleDatabase.VALID_AUTH_TOKEN_USER_UID,
+                100, 100);
+
+        //Sync again when there is no new data to ensure that the sync system does not run too many times
+        clientDao.syncWith(clientRepoDaoSpy, ExampleDatabase.VALID_AUTH_TOKEN_USER_UID,
+                100, 100);
+
+        Mockito.verify(clientRepoDaoSpy, Mockito.times(numEntities + 1))
+                .handleIncomingSync(any(), anyLong(), anyLong(), anyLong(), anyInt(), anyInt());
+
+        for(int i = 0; i < numEntities; i++) {
+            InputStream serverIn = serverDb.getExampleSyncableEntityWithAttachmentDao()
+                    .getAttachmentStream(insertedEntitUids[i]);
+            Assert.assertTrue("Entity attachment # " + i + " equal on server",
+                    Arrays.equals(clientBuf[i], IOUtils.readFully(serverIn, clientBuf[i].length)));
+        }
+    }
+
 
 }
