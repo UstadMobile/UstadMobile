@@ -17,6 +17,7 @@ import com.ustadmobile.lib.db.entities.Person;
 import com.ustadmobile.lib.db.entities.PersonAuth;
 import com.ustadmobile.lib.db.entities.PersonGroup;
 import com.ustadmobile.lib.db.entities.PersonGroupMember;
+import com.ustadmobile.lib.db.entities.PersonPicture;
 import com.ustadmobile.lib.db.entities.PersonWithEnrollment;
 import com.ustadmobile.lib.db.entities.Role;
 import com.ustadmobile.lib.db.entities.UmAccount;
@@ -39,7 +40,6 @@ updatePermissionCondition = ENTITY_LEVEL_PERMISSION_CONDITION1 + Role.PERMISSION
         + ENTITY_LEVEL_PERMISSION_CONDITION2)
 @UmRepository
 public abstract class PersonDao implements SyncableDao<Person, PersonDao> {
-
 
     //For debugging
     @UmQuery("SELECT * FROM Person")
