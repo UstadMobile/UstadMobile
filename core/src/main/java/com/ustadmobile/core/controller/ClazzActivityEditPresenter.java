@@ -484,7 +484,7 @@ public class ClazzActivityEditPresenter
         currentLogDate = newDate;
 
         //2. Reset the current ClazzActivity uid
-        currentClazzActivityUid = -1;
+        currentClazzActivityUid = 0L;
 
         //3. Re load view and recycler
         fillClazzActivity();
