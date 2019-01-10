@@ -263,6 +263,7 @@ public class DbProcessorJerseyResource extends AbstractDbProcessor {
                 if(primitiveToStringResult)
                     codeBlock.add("String.valueOf(");
 
+                //TODO: Set content type and size headers for attachment responses
                 if(isStreamResponse) {
                     codeBlock.add("$T.ok(new $T(", Response.class,
                             InputStreamStreamingResponse.class);
