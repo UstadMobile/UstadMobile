@@ -307,6 +307,8 @@ public class KhanContentScraper {
                             imageFile, imageContent, null);
                     index.add(logIndex);
                 } catch (Exception e) {
+                    e.printStackTrace();
+                    System.err.println("Error downloading an image for index log" + image);
                 }
 
             }

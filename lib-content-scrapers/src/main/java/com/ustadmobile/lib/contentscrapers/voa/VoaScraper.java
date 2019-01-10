@@ -273,6 +273,7 @@ public class VoaScraper {
                     ScraperConstants.VIDEO_TIN_CAN_FILE, scrapUrl.getPath(), "", "");
         } catch (TransformerException | ParserConfigurationException e) {
             e.printStackTrace();
+            System.err.println("VOA failed to create tin can file for url " + scrapUrl.toString());
         }
 
         ContentScraperUtil.zipDirectory(voaDirectory, FilenameUtils.getBaseName(scrapUrl.getPath()), destinationDir);

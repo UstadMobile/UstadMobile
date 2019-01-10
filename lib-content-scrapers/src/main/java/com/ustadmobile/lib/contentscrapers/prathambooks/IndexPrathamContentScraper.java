@@ -186,8 +186,8 @@ public class IndexPrathamContentScraper {
                         ContentScraperUtil.getMd5(content), contentEntryFileJoinDao, true, ScraperConstants.MIMETYPE_EPUB);
 
             } catch (Exception e) {
-                System.err.println("Error saving book " + contentBooksList.data.get(contentCount).slug);
                 e.printStackTrace();
+                System.err.println("Error saving book " + contentBooksList.data.get(contentCount).slug);
             }
 
         }

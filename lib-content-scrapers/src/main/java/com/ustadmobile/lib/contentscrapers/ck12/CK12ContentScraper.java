@@ -397,6 +397,7 @@ public class CK12ContentScraper {
                     ScraperConstants.VIDEO_TIN_CAN_FILE, scrapUrl.getPath(), "", "");
         } catch (TransformerException | ParserConfigurationException e) {
             e.printStackTrace();
+            System.err.println("Video Tin can file unable to create for url" +  urlString);
         }
 
         ContentScraperUtil.zipDirectory(videoHtmlLocation, videoContentName, destinationDirectory);
@@ -527,6 +528,7 @@ public class CK12ContentScraper {
                     ScraperConstants.ARTICLE_TIN_CAN_FILE, scrapUrl.getPath(), "", "");
         } catch (TransformerException | ParserConfigurationException e) {
             e.printStackTrace();
+            System.err.println("Read Tin can file unable to create for url" +  urlString);
         }
 
         ContentScraperUtil.zipDirectory(readHtmlLocation, readContentName, destinationDirectory);
@@ -734,6 +736,7 @@ public class CK12ContentScraper {
                     ScraperConstants.ASSESMENT_TIN_CAN_FILE, scrapUrl.getPath(), "", "");
         } catch (TransformerException | ParserConfigurationException e) {
             e.printStackTrace();
+            System.err.println("Practice Tin can file unable to create for url" +  urlString);
         }
 
         ContentScraperUtil.saveListAsJson(practiceDirectory, questionList, ScraperConstants.QUESTIONS_JSON);

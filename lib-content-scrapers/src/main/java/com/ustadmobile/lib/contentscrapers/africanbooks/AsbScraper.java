@@ -321,7 +321,7 @@ public class AsbScraper {
                     retry++;
                     if (retry == 3) {
                         retry = 0;
-                        System.out.println(ePubFile.getName() + " size 0 bytes: failed! for title " + bookObj.title);
+                        System.out.println(ePubFile.getName() + " size 0 bytes after 3rd try: failed! for title " + bookObj.title);
                         continue;
                     }
                     i--;
@@ -342,13 +342,12 @@ public class AsbScraper {
                 retry++;
                 if (retry == 3) {
                     retry = 0;
-                    System.err.println("Exception downloading/checking : " + ePubFile.getName() + " with title " + bookObj.title);
+                    System.err.println("Exception downloading/checking after 3rd try : " + ePubFile.getName() + " with title " + bookObj.title);
                     System.out.println(ePubFile.getName() + " size 0 bytes: failed! for title " + bookObj.title);
                     continue;
                 }
                 i--;
                 driver.manage().deleteAllCookies();
-                e.printStackTrace();
             }
         }
         driver.quit();

@@ -189,8 +189,8 @@ public class IndexDdlContent {
                     }
 
                 } catch (IOException | URISyntaxException e) {
-                    System.out.println("Error downloading resource at " + url);
                     e.printStackTrace();
+                    System.out.println("Error downloading resource at " + url);
                 }
 
             }

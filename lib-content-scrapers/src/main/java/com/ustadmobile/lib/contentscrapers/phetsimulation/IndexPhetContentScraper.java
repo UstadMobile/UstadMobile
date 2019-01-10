@@ -200,7 +200,8 @@ public class IndexPhetContentScraper {
                 }
 
             } catch (Exception e) {
-                System.out.println(e.getCause());
+                e.printStackTrace();
+                System.out.println("Failed to scrape Phet Content for url" + simulationUrl);
             }
         }
     }

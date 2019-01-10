@@ -103,7 +103,7 @@ public class PhetContentScraper {
         simulationDoc = Jsoup.connect(url).get();
 
         if (!simulationDoc.select("div.simulation-main-image-panel a span").hasClass("html-badge")) {
-            throw new IllegalArgumentException("File Type not supported");
+            throw new IllegalArgumentException("File Type not supported for url " + simulationUrl.toString());
         }
 
         aboutText = simulationDoc.getElementById("about").html();
@@ -197,7 +197,7 @@ public class PhetContentScraper {
 
                     categoryRelations.add(categoryContentEntry);
                 } catch (IOException ie) {
-                    System.err.println("Error creating category entry" + path);
+                    System.err.println("Error creating category entry" + path + " for url" + simulationUrl.toString());
                 }
             }
         }

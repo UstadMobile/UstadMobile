@@ -206,6 +206,7 @@ public class IndexFolderScraper {
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
+                        System.err.println("Error while parsing a file " + folder.getName());
                     }
 
                 }

@@ -414,8 +414,8 @@ public class IndexKhanContentScraper {
                 }
 
             } catch (Exception e) {
-                System.err.println("Unable to scrape content from " + contentItem.title + " at url " + url);
                 e.printStackTrace();
+                System.err.println("Unable to scrape content from " + contentItem.title + " at url " + url);
             }
 
 

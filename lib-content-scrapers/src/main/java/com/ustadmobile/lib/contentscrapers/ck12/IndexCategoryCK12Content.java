@@ -255,7 +255,7 @@ public class IndexCategoryCK12Content {
         }
 
         if (count == 0) {
-            System.err.println("No Topics were found to browse");
+            System.err.println("No Topics were found to browse for url " + url.toString());
         }
 
     }
@@ -449,7 +449,7 @@ public class IndexCategoryCK12Content {
                         scraper.scrapeReadContent();
                         break;
                     default:
-                        System.out.println("found a group type not supported " + groupType);
+                        System.out.println("found a group type not supported " + groupType + " for url " + url.toString());
                 }
 
 

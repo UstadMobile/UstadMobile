@@ -269,8 +269,8 @@ public class IndexEtekkathoScraper {
                 }
 
             } catch (Exception e) {
-                System.err.println("Unable to scrape content from " + title + " at url " + subjectUrlString);
                 e.printStackTrace();
+                System.err.println("Unable to scrape content from " + title + " at url " + subjectUrlString);
             }
 
 

@@ -182,6 +182,7 @@ public class IndexVoaScraper {
 
                     findLessons(categoryEntry, categoryFolder, lessonListUrl.toString());
                 }catch (IOException e){
+                    e.printStackTrace();
                     System.err.print("Error with voa category = " + hrefLink + " with title " + title);
                 }
 
@@ -232,8 +233,8 @@ public class IndexVoaScraper {
 
                 }
             } catch (Exception e) {
-                System.err.println("Unable to scrape content from " + title + " at url " + lesson.toString());
                 e.printStackTrace();
+                System.err.println("Unable to scrape content from " + title + " at url " + lesson.toString());
             }
 
 
