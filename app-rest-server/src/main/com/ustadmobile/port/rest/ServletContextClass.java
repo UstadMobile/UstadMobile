@@ -63,7 +63,7 @@ public class ServletContextClass implements ServletContextListener
             System.out.println("ServletContextListener started");
 
             appDb = UmAppDatabase.getInstance(evt.getServletContext());
-            appDb.setAttachmentsDir(evt.getServletContext().getRealPath("attachments"));
+            appDb.setAttachmentsDir(evt.getServletContext().getRealPath("/WEB-INF/attachments/"));
             System.out.println("Set db attachments path to: " + appDb.getAttachmentsDir());
 
             appDbRepository = appDb.getRepository(dummyBaseUrl, dummyAuth);
