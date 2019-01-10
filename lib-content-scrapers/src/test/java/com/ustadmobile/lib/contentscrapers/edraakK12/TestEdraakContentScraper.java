@@ -175,7 +175,7 @@ public class TestEdraakContentScraper {
 
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void givenEncodedVideoListIsEmpty_whenEdraakContentScraped_thenShouldThrowIllegalArgumentException() throws IOException {
 
         File tmpDir = Files.createTempDirectory("testedxcontentscraper").toFile();
@@ -186,9 +186,13 @@ public class TestEdraakContentScraper {
         EdraakK12ContentScraper scraper = new EdraakK12ContentScraper(url, tmpDir);
         scraper.scrapeContent();
 
+        File folder = new File(tmpDir, "5a60ac073d99e104fb62ce12");
+        File video = new File(folder, "video.mp4");
+        Assert.assertEquals(false, video.exists());
+
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void givenEmptyQuestionSet_whenEdraakContentScraped_thenShouldThrowIOException() throws IOException {
 
         File tmpDir = Files.createTempDirectory("testedxcontentscraper").toFile();
@@ -198,6 +202,10 @@ public class TestEdraakContentScraper {
         String url = EdraakK12ContentScraper.generateUrl(mockWebServer.url("/api/").toString(), MAIN_DETAIL_NO_QUESTIONS_FOUND, 41);
         EdraakK12ContentScraper scraper = new EdraakK12ContentScraper(url, tmpDir);
         scraper.scrapeContent();
+
+        File folder = new File(tmpDir, "5a60ac073d99e104fb62ce12");
+        File questions = new File(folder, "questions.json");
+        Assert.assertEquals(false, questions.exists());
 
 
     }
