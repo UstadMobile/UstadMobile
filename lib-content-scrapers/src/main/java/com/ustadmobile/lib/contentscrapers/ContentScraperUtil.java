@@ -673,13 +673,14 @@ public class ContentScraperUtil {
     }
 
     private static Language getLanguageFromDao(String langName, String twoLetterCode, LanguageDao dao) {
+        Language lang = null;
         if(!langName.isEmpty()){
-            return dao.findByName(langName);
+            lang = dao.findByName(langName);
         }
-        if(!twoLetterCode.isEmpty()){
+        if(!twoLetterCode.isEmpty() && lang == null){
             return dao.findByTwoCode(twoLetterCode);
         }
-        return null;
+        return lang;
     }
 
     /**
@@ -694,14 +695,19 @@ public class ContentScraperUtil {
         if (language == null) {
             language = new Language();
             language.setIso_639_1_standard(langTwoCode);
-            language.setName(LanguageCode.getByCode(langTwoCode).getName());
+            LanguageCode nameOfLang = LanguageCode.getByCode(langTwoCode);
+            if(nameOfLang != null){
+                language.setName(nameOfLang.getName());
+            }
             language.setLangUid(languageDao.insert(language));
         } else {
             Language changedLang = new Language();
             changedLang.setLangUid(language.getLangUid());
             changedLang.setIso_639_1_standard(langTwoCode);
-            changedLang.setName(LanguageCode.getByCode(langTwoCode).getName());
-
+            LanguageCode nameOfLang = LanguageCode.getByCode(langTwoCode);
+            if(nameOfLang != null){
+                changedLang.setName(nameOfLang.getName());
+            }
             boolean isChanged = false;
             if (!language.getIso_639_1_standard().equals(changedLang.getIso_639_1_standard())) {
                 isChanged = true;
