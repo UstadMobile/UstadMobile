@@ -72,8 +72,8 @@ public class IndexEdraakK12Content {
             System.exit(1);
         }
 
-        System.out.println(args[0]);
-        System.out.println(args[1]);
+        System.out.println("main args url = " + args[0]);
+        System.out.println("main args destination = " + args[1]);
         new IndexEdraakK12Content().findContent(args[0], new File(args[1]));
     }
 
@@ -89,7 +89,7 @@ public class IndexEdraakK12Content {
         try {
             url = new URL(urlString);
         } catch (MalformedURLException e) {
-            System.out.println("Index Malformed url" + urlString);
+            System.out.println("url from main is Malformed = " + urlString);
             throw new IllegalArgumentException("Malformed url" + urlString, e);
         }
 
@@ -168,8 +168,7 @@ public class IndexEdraakK12Content {
 
 
             } catch (Exception e) {
-                System.err.println(e.getCause());
-                return;
+                System.err.println("Unable to scrape content" + parentContent.id);
             }
 
         } else {
