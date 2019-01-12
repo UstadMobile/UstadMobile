@@ -218,5 +218,23 @@ public class UMIOUtils {
             throw e;
         }
     }
-    
+
+    public static String sanitizeIDForFilename(String id) {
+        char c;
+        int len = id.length();
+        StringBuffer retVal = new StringBuffer();
+        for(int i = 0; i < len; i++) {
+            c = id.charAt(i);
+            if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '.' || c == '-' || c == '*' || c == '_') {
+                retVal.append(c);
+            }else if(c == ' ' || c == '\t' || c == '\n'){
+                retVal.append('_');
+            }else {
+                retVal.append("_").append(Integer.toHexString((int)c));
+            }
+        }
+        return retVal.toString();
+    }
+
+
 }

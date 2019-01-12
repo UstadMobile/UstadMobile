@@ -57,7 +57,6 @@ import android.widget.Toast;
 import com.squareup.picasso.Picasso;
 import com.ustadmobile.core.buildconfig.CoreBuildConfig;
 import com.ustadmobile.core.catalog.contenttype.*;
-import com.ustadmobile.core.controller.CatalogPresenter;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.OpdsEntryStatusCacheDao;
 import com.ustadmobile.core.fs.contenttype.EpubTypePluginFs;
@@ -75,8 +74,6 @@ import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.view.AboutView;
 import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.core.view.BasePointView;
-import com.ustadmobile.core.view.CatalogEntryView;
-import com.ustadmobile.core.view.CatalogView;
 import com.ustadmobile.core.view.ContainerView;
 import com.ustadmobile.core.view.ContentEntryDetailView;
 import com.ustadmobile.core.view.ContentEntryView;
@@ -157,12 +154,10 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
     static {
         viewNameToAndroidImplMap.put(Login2View.VIEW_NAME, Login2Activity.class);
         viewNameToAndroidImplMap.put(ContainerView.VIEW_NAME, ContainerActivity.class);
-        viewNameToAndroidImplMap.put(CatalogView.VIEW_NAME, CatalogActivity.class);
         //Account settings:
         //viewNameToAndroidImplMap.put(AccountSettingsView.VIEW_NAME, AccountSettingsActivity.class);
         viewNameToAndroidImplMap.put(BasePointView.VIEW_NAME, BasePointActivity.class);
         viewNameToAndroidImplMap.put(AboutView.VIEW_NAME, AboutActivity.class);
-        viewNameToAndroidImplMap.put(CatalogEntryView.VIEW_NAME, CatalogEntryActivity.class);
         viewNameToAndroidImplMap.put(SendCourseView.VIEW_NAME, SendCourseDialogFragment.class);
         viewNameToAndroidImplMap.put(ReceiveCourseView.VIEW_NAME, ReceiveCourseDialogFragment.class);
         viewNameToAndroidImplMap.put(XapiPackageView.VIEW_NAME, XapiPackageActivity.class);
@@ -547,7 +542,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
     public String getCacheDir(int mode, Object context) {
         Context ctx = (Context)context;
         File cacheDir = ctx.getCacheDir();
-        if(mode == CatalogPresenter.SHARED_RESOURCE) {
+        if(mode == SHARED_RESOURCE) {
             return cacheDir.getAbsolutePath();
         }else {
             return new File(cacheDir, "user-" + getActiveUser(context)).getAbsolutePath();

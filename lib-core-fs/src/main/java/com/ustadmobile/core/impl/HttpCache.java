@@ -1,6 +1,5 @@
 package com.ustadmobile.core.impl;
 
-import com.ustadmobile.core.controller.CatalogPresenter;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.impl.http.UmHttpCall;
 import com.ustadmobile.core.impl.http.UmHttpRequest;
@@ -489,7 +488,7 @@ public class HttpCache implements HttpCacheResponse.ResponseCompleteListener{
                                               String dir) {
         File dirFile = new File(dir);
         File entryFile;
-        String filename = CatalogPresenter.sanitizeIDForFilename(
+        String filename = UMIOUtils.sanitizeIDForFilename(
                 UMFileUtil.getFilename(request.getUrl()));
 
         String[] filenameParts = UMFileUtil.splitFilename(filename);

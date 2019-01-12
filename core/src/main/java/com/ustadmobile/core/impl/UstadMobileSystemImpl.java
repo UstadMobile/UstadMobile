@@ -32,7 +32,6 @@
 package com.ustadmobile.core.impl;
 
 import com.ustadmobile.core.catalog.contenttype.ContentTypePlugin;
-import com.ustadmobile.core.controller.CatalogPresenter;
 import com.ustadmobile.core.db.dao.OpdsAtomFeedRepository;
 import com.ustadmobile.core.impl.http.UmHttpCall;
 import com.ustadmobile.core.impl.http.UmHttpRequest;
@@ -208,6 +207,30 @@ public abstract class UstadMobileSystemImpl {
     protected static Hashtable MIME_TYPES = new Hashtable();
 
     protected static Hashtable MIME_TYPES_REVERSE = new Hashtable();
+
+    /**
+     * Ported from old CatalogPresenter
+     *
+     * Save/retrieve resource from user specific directory
+     */
+    public static final int USER_RESOURCE = 2;
+
+
+    /**
+     * Ported from old CatalogPresenter
+     *
+     * Save/retrieve resource from shared directory
+     */
+    public static final int SHARED_RESOURCE = 4;
+
+    public static final int STATUS_ACQUIRED = 0;
+
+    public static final int STATUS_ACQUISITION_IN_PROGRESS = 1;
+
+    public static final int STATUS_NOT_ACQUIRED = 2;
+
+    public static final int STATUS_AVAILABLE_LOCALLY = 3;
+
 
 
     static {
@@ -424,8 +447,6 @@ public abstract class UstadMobileSystemImpl {
      * cache contents / shared cache contents
      *
      * @param mode USER_RESOURCE or SHARED_RESOURCE
-     * @see CatalogPresenter#USER_RESOURCE
-     * @see CatalogPresenter#SHARED_RESOURCE
      * @return String filepath to the cache dir for that mode
      */
     public abstract String getCacheDir(int mode, Object context);
@@ -589,7 +610,7 @@ public abstract class UstadMobileSystemImpl {
         //Make sure there is a valid directory for this user
         getLogger().l(UMLog.INFO, 306, username);
         if(username != null) {
-            String userCachePath = getCacheDir(CatalogPresenter.USER_RESOURCE,
+            String userCachePath = getCacheDir(UstadMobileSystemImpl.USER_RESOURCE,
                     context);
             String userCacheParent = UMFileUtil.getParentFilename(userCachePath);
             try {

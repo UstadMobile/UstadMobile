@@ -5,7 +5,6 @@
  */
 package com.ustadmobile.port.sharedse.impl;
 
-import com.ustadmobile.core.controller.CatalogPresenter;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.OpdsAtomFeedRepository;
 import com.ustadmobile.core.fs.db.repository.OpdsAtomFeedRepositoryImpl;
@@ -103,7 +102,7 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
         super.init(context);
 
         if(httpCache == null)
-            httpCache = new HttpCache(getCacheDir(CatalogPresenter.SHARED_RESOURCE, context));
+            httpCache = new HttpCache(getCacheDir(SHARED_RESOURCE, context));
     }
 
     /**
@@ -136,7 +135,7 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
     @Override
     public String getCacheDir(int mode, Object context) {
         String systemBaseDir = getSystemBaseDir(context);
-        if(mode == CatalogPresenter.SHARED_RESOURCE) {
+        if(mode == SHARED_RESOURCE) {
             return UMFileUtil.joinPaths(new String[]{systemBaseDir, UstadMobileConstants.CACHEDIR});
         }else {
             return UMFileUtil.joinPaths(new String[]{systemBaseDir, "user-" + getActiveUser(context),
@@ -151,7 +150,7 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         final String contentDirName = getContentDirName(context);
 
-        if((mode & CatalogPresenter.SHARED_RESOURCE) == CatalogPresenter.SHARED_RESOURCE) {
+        if((mode & SHARED_RESOURCE) == SHARED_RESOURCE) {
             dirList.add(new UMStorageDir(systemBaseDir, getString(MessageID.device, context),
                     false, true, false));
 
@@ -166,7 +165,7 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
         }
 
         if(impl.getActiveUser(context) != null
-                && ((mode & CatalogPresenter.USER_RESOURCE) == CatalogPresenter.USER_RESOURCE)) {
+                && ((mode & UstadMobileSystemImpl.USER_RESOURCE) == UstadMobileSystemImpl.USER_RESOURCE)) {
             String userBase = UMFileUtil.joinPaths(new String[]{systemBaseDir, "user-"
                     + getActiveUser(context)});
             dirList.add(new UMStorageDir(userBase, getString(MessageID.device, context),
@@ -486,7 +485,7 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
     @Override
     public HttpCache getHttpCache(Object context) {
         if(httpCache == null)
-            httpCache = new HttpCache(getCacheDir(CatalogPresenter.SHARED_RESOURCE, context));
+            httpCache = new HttpCache(getCacheDir(SHARED_RESOURCE, context));
 
         return httpCache;
     }
