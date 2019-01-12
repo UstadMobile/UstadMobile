@@ -61,14 +61,6 @@
             android:label=""
             android:theme="@style/Theme.UstadTheme" />
         <activity
-            android:name="com.ustadmobile.port.android.view.UserSettingsActivity"
-            android:label="@string/settings"
-            android:theme="@style/Theme.UstadTheme" />
-        <activity
-            android:name="com.ustadmobile.port.android.view.SettingsDataSyncListActivity"
-            android:label="Sync History"
-            android:theme="@style/Theme.UstadTheme" />
-        <activity
             android:name="com.ustadmobile.port.android.view.BasePointActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
             android:theme="@style/Theme.UstadTheme" />
@@ -78,14 +70,6 @@
         <activity
             android:name="com.ustadmobile.port.android.view.CatalogEntryActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
-        <activity
-            android:name="com.ustadmobile.port.android.view.SettingsDataUsageActivity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
-        <activity
-            android:name="com.ustadmobile.port.android.view.UserSettingsActivity2"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
-            android:label="@string/settings"
-            android:theme="@style/Theme.UstadTheme" />
         <activity
             android:name="com.ustadmobile.port.android.view.ScormPackageActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"

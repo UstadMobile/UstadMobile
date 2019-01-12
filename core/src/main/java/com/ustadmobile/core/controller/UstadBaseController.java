@@ -35,7 +35,6 @@ import com.ustadmobile.core.impl.UmLifecycleListener;
 import com.ustadmobile.core.impl.UmLifecycleOwner;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.AboutView;
-import com.ustadmobile.core.view.UserSettingsView2;
 import com.ustadmobile.core.view.UstadView;
 
 import java.util.Hashtable;
@@ -213,9 +212,6 @@ public abstract class UstadBaseController<V extends UstadView> implements UstadC
         switch(cmdId) {
             case CMD_ABOUT:
                 UstadMobileSystemImpl.getInstance().go(AboutView.VIEW_NAME, new Hashtable(), context);
-                return true;
-            case CMD_SETTINGS:
-                UstadMobileSystemImpl.getInstance().go(UserSettingsView2.VIEW_NAME,null, context);
                 return true;
         }
         

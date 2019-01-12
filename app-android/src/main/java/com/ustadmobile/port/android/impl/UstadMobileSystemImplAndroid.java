@@ -58,7 +58,6 @@ import com.squareup.picasso.Picasso;
 import com.ustadmobile.core.buildconfig.CoreBuildConfig;
 import com.ustadmobile.core.catalog.contenttype.*;
 import com.ustadmobile.core.controller.CatalogPresenter;
-import com.ustadmobile.core.controller.UserSettingsController;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.OpdsEntryStatusCacheDao;
 import com.ustadmobile.core.fs.contenttype.EpubTypePluginFs;
@@ -86,11 +85,6 @@ import com.ustadmobile.core.view.H5PContentView;
 import com.ustadmobile.core.view.Login2View;
 import com.ustadmobile.core.view.Register2View;
 import com.ustadmobile.core.view.ScormPackageView;
-import com.ustadmobile.core.view.SettingsDataSyncListView;
-import com.ustadmobile.core.view.SettingsDataUsageView;
-import com.ustadmobile.core.view.UserSettingsView;
-import com.ustadmobile.core.view.UserSettingsView2;
-import com.ustadmobile.core.view.WelcomeView;
 import com.ustadmobile.core.view.XapiPackageView;
 import com.ustadmobile.port.android.generated.MessageIDMap;
 import com.ustadmobile.port.android.impl.http.UmHttpCachePicassoRequestHandler;
@@ -149,6 +143,8 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
 
     public static final String ACTION_LOCALE_CHANGE = "com.ustadmobile.locale_change";
 
+    public static final String PREFKEY_LANG = "lang";
+
     /**
      * Map of view names to the activity class that is implementing them on Android
      *
@@ -162,16 +158,11 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         viewNameToAndroidImplMap.put(Login2View.VIEW_NAME, Login2Activity.class);
         viewNameToAndroidImplMap.put(ContainerView.VIEW_NAME, ContainerActivity.class);
         viewNameToAndroidImplMap.put(CatalogView.VIEW_NAME, CatalogActivity.class);
-        viewNameToAndroidImplMap.put(UserSettingsView.VIEW_NAME, UserSettingsActivity.class);
-        viewNameToAndroidImplMap.put(SettingsDataUsageView.VIEW_NAME, SettingsDataUsageActivity.class);
-        viewNameToAndroidImplMap.put(SettingsDataSyncListView.VIEW_NAME, SettingsDataSyncListActivity.class);
         //Account settings:
         //viewNameToAndroidImplMap.put(AccountSettingsView.VIEW_NAME, AccountSettingsActivity.class);
         viewNameToAndroidImplMap.put(BasePointView.VIEW_NAME, BasePointActivity.class);
         viewNameToAndroidImplMap.put(AboutView.VIEW_NAME, AboutActivity.class);
         viewNameToAndroidImplMap.put(CatalogEntryView.VIEW_NAME, CatalogEntryActivity.class);
-        viewNameToAndroidImplMap.put(UserSettingsView2.VIEW_NAME, UserSettingsActivity2.class);
-        viewNameToAndroidImplMap.put(WelcomeView.VIEW_NAME, WelcomeDialogFragment.class);
         viewNameToAndroidImplMap.put(SendCourseView.VIEW_NAME, SendCourseDialogFragment.class);
         viewNameToAndroidImplMap.put(ReceiveCourseView.VIEW_NAME, ReceiveCourseDialogFragment.class);
         viewNameToAndroidImplMap.put(XapiPackageView.VIEW_NAME, XapiPackageActivity.class);
@@ -423,7 +414,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
     public void setLocale(String locale, Object context) {
         super.setLocale(locale, context);
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences((Context)context);
-        prefs.edit().putString(UserSettingsController.PREFKEY_LANG, locale).apply();
+        prefs.edit().putString(PREFKEY_LANG, locale).apply();
     }
 
     @Override
@@ -431,7 +422,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         String locale = super.getLocale(context);
         if(locale == null) {
             locale = PreferenceManager.getDefaultSharedPreferences((Context)context).getString(
-                    UserSettingsController.PREFKEY_LANG, "");
+                    PREFKEY_LANG, "");
             super.setLocale(locale, context);
         }
 

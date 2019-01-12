@@ -6,28 +6,18 @@
 package com.ustadmobile.core.controller;
 
 
-import com.ustadmobile.core.buildconfig.CoreBuildConfig;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.AppConfig;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMFileUtil;
-import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.core.view.BasePointMenuItem;
 import com.ustadmobile.core.view.BasePointView;
-import com.ustadmobile.core.view.DialogResultListener;
-import com.ustadmobile.core.view.DismissableDialog;
 import com.ustadmobile.core.view.UstadView;
-import com.ustadmobile.core.view.WelcomeView;
 
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
-
-/* $if umplatform == 2  $
-    import org.json.me.*;
- $else$ */
-/* $endif$ */
 
 /**
  *
@@ -180,12 +170,7 @@ public class BasePointController extends UstadBaseController {
     }
 
     public void onResume() {
-        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        if(CoreBuildConfig.WELCOME_DIALOG_ENABLED && !welcomeScreenDisplayed
-                && impl.getAppPref(WelcomeController.PREF_KEY_WELCOME_DONT_SHOW, "false",getContext()).equals("false")) {
-            setWelcomeScreenDisplayed(true);
-            UstadMobileSystemImpl.getInstance().go(WelcomeView.VIEW_NAME, getContext());
-        }
+
     }
 
     public boolean isWelcomeScreenDisplayed() {
