@@ -279,15 +279,16 @@ public class HttpCache implements HttpCacheResponse.ResponseCompleteListener{
     protected void initCache() {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         InputStream fileIndexIn = null;
-        try {
-            if(!impl.fileExists(sharedDir)) {
-                impl.makeDirectoryRecursive(sharedDir);
-            }
-        }catch(IOException e) {
-            UstadMobileSystemImpl.l(UMLog.CRITICAL, 4, sharedDir, e);
-        }finally {
-            UMIOUtils.closeInputStream(fileIndexIn);
-        }
+//        This class is going to be removed anyway and replaced with using the image library caching mechanisms
+//        try {
+//            if(!new File(sharedDir).exists()) {
+//                impl.makeDirectoryRecursive(sharedDir);
+//            }
+//        }catch(IOException e) {
+//            UstadMobileSystemImpl.l(UMLog.CRITICAL, 4, sharedDir, e);
+//        }finally {
+//            UMIOUtils.closeInputStream(fileIndexIn);
+//        }
     }
 
     public UmHttpCall get(UmHttpRequest request, UmHttpResponseCallback callback) {

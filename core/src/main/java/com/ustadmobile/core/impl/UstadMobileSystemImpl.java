@@ -37,9 +37,7 @@ import com.ustadmobile.core.impl.http.UmHttpCall;
 import com.ustadmobile.core.impl.http.UmHttpRequest;
 import com.ustadmobile.core.impl.http.UmHttpResponse;
 import com.ustadmobile.core.impl.http.UmHttpResponseCallback;
-import com.ustadmobile.core.model.CourseProgress;
 import com.ustadmobile.core.networkmanager.NetworkManagerCore;
-import com.ustadmobile.core.tincan.TinCanResultListener;
 import com.ustadmobile.core.util.MessagesHashtable;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.view.Login2View;
@@ -53,20 +51,13 @@ import org.xmlpull.v1.XmlSerializer;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.Hashtable;
 import java.util.List;
-
-/* $if umplatform == 2  $
-    import org.json.me.*;
- $else$ */
-/* $endif$ */
 
 
 /**
  * SystemImpl provides system methods for tasks such as copying files, reading
- * http streams etc. independently of the underlying system (e.g. Android,
- * J2ME, etc)
+ * http streams etc. independently of the underlying system.
  *
  *
  * @author mike
@@ -74,28 +65,6 @@ import java.util.List;
 public abstract class UstadMobileSystemImpl {
 
     protected static UstadMobileSystemImpl mainInstance;
-
-    /**
-     * Default behaviour - any existing content is overwritten
-     */
-    public static final int FILE_OVERWRITE = 1;
-
-    /**
-     * Flag to use with openFileOutputStream
-     * 
-     * @see UstadMobileSystemImpl#openFileOutputStream(java.lang.String, int)
-     */
-    public static final int FILE_APPEND = 2;
-
-    /**
-     * Due to the nature of mobile app permission systems permission could be
-     * denied anytime IO takes place almost.  Therefor the IO methods of the
-     * implementation should throw an IOException wrapper around any
-     * SecurityException that happens so it can be handled and presented to the
-     * user as an error gracefully.
-     */
-    public static final String PREFIX_SECURITY_EXCEPTION = "SecurityException:";
-
 
     /**
      * Suggested name to create for content on Devices
@@ -117,12 +86,6 @@ public abstract class UstadMobileSystemImpl {
     private String locale;
 
     /**
-     * The App Preference Key for the XAPIServer e.g. to get the active xAPI
-     * server use getAppPref(UstadMobileSystemImpl.PREFKEY_XAPISERVER)
-     */
-    public static final String PREFKEY_XAPISERVER = "xapiserver";
-
-    /**
      * Get an instance of the system implementation - relies on the platform
      * specific factory method
      * Indicates the number of bytes downloaded so far in a download
@@ -138,12 +101,6 @@ public abstract class UstadMobileSystemImpl {
      * Indicates the status of a download (e.g. complete, failed, queued, etc)
      */
     public static final int IDX_STATUS = 2;
-
-    /**
-     * Schedule delay: The time since the logMananger initiates tincan queue
-     * and the time between its occurrence
-     */
-    public static long SCHEDULE_DELAY= 2*60*1000;
 
 
     /**
@@ -191,11 +148,6 @@ public abstract class UstadMobileSystemImpl {
      */
     public static final int DLSTATUS_NOT_STARTED = 0;
 
-    /**
-     * The maximum number of sessions to show for the user to be able to resume
-     * This is limited both for usability and performance.
-     */
-    public static final int RESUME_MAX_CHOICES = 5;
 
     /**
      * The return value from getLocale when the user has said to use the system's locale
@@ -303,8 +255,6 @@ public abstract class UstadMobileSystemImpl {
             return;
         }
 
-        loadActiveUserInfo(context);
-
         initRan = true;
     }
 
@@ -369,9 +319,6 @@ public abstract class UstadMobileSystemImpl {
         this.locale = locale;
     }
 
-
-    public abstract boolean loadActiveUserInfo(Object context);
-
     /**
      * Check on whether or not the locale string pack has been loaded or not
      * @return
@@ -428,21 +375,6 @@ public abstract class UstadMobileSystemImpl {
     public abstract String getImplementationName();
 
     /**
-     * Answer whether or not Javascript is supported (e.g. in WebViews) on this
-     * platform
-     *
-     * @return true if supported (eg. Android) false otherwise (e.g. J2ME)
-     */
-    public abstract boolean isJavascriptSupported();
-
-    /**
-     * Answer whether or not this platform supports https
-     *
-     * @return True if the platform supports HTTPS , false otherwise (Temporarily - J2ME)
-     */
-    public abstract boolean isHttpsSupported();
-
-    /**
      * Gets the cache directory for the platform for either user specific
      * cache contents / shared cache contents
      *
@@ -487,206 +419,10 @@ public abstract class UstadMobileSystemImpl {
 
 
     /**
-     * Get an output stream to the given file.  If the FILE_APPEND flag is set
-     * then output will be appended to the end of the file, otherwise the file
-     * will be overwritten if it exists already.
-     *
-     * FILE_APPEND can be specified in the flags to append to the end of the file
-     *
-     * @param fileURI URI to the file we want an output stream for
-     * @param flags can set FILE_APPEND and FILE_AUTOCREATE
-     */
-    public abstract OutputStream openFileOutputStream(String fileURI, int flags) throws IOException, SecurityException;
-
-    /**
-     * Get an input stream from a given file
-     *
-     * @param fileURI URI to the file for which we want an input stream
-     */
-    public abstract InputStream openFileInputStream(String fileURI) throws IOException, SecurityException;
-
-    /**
      * Get an asset (from files that are in core/src/flavorName/assets)
      *
      */
     public abstract void getAsset(Object context, String path, UmCallback<InputStream> callback);
-
-
-
-    /**
-     * Check to see if the given file exists
-     *
-     * @param fileURI URI of the file to check
-     * @return true if exists and is a file or directory, false otherwise
-     *
-     * @throws IOException
-     */
-    public abstract boolean fileExists(String fileURI) throws IOException;
-
-    /**
-     * Check to see if the given URI exists and is a directory
-     *
-     * @param dirURI URI to check if existing
-     * @return true if exists and is a directory, false otherwise
-     * @throws IOException
-     */
-    public abstract boolean dirExists(String dirURI) throws IOException;
-
-    /**
-     * Remove the given file.  If the file does not exist, this method simply
-     * returns false (also returns false if the file does exist but for some
-     * other reason... e.g. permissions cannot be deleted).
-     *
-     * @param fileURI URI to be removed
-     * @return true if the file was successfully deleted, false otherwise
-     */
-    public abstract boolean removeFile(String fileURI);
-
-    /**
-     * List of files and directories within a directory as an array of Strings.
-     * Should give only the relative path of the name within the directory
-     *
-     * @param dirURI
-     * @return
-     * @throws IOException
-     */
-    public abstract String[] listDirectory(String dirURI) throws IOException;
-
-    public abstract int[] getFileDownloadStatus(String downloadID, Object context);
-
-    /**
-     * Rename file from/to
-     *
-     * @param fromFileURI current path / uri
-     * @param toFileURI new path / uri
-     * @return true if successful, false otherwise
-     *
-     */
-    public abstract boolean renameFile(String fromFileURI, String toFileURI);
-
-    /**
-     * Get the size of a file in bytes
-     *
-     * @param fileURI File URI / Path
-     *
-     * @return length in bytes
-     */
-    public abstract long fileSize(String fileURI);
-
-    /**
-     * Get the amount of free space available on a given file URI: This is of
-     * course determined by the underlying filesystem
-     *
-     * @param fileURI URI to the filesystem
-     *
-     * @return The number of bytes available on the given filesystem : -1 for unknown
-     */
-    public abstract long fileAvailableSize(String fileURI) throws IOException;
-
-
-    public abstract boolean makeDirectory(String dirURI) throws IOException;
-
-    public abstract boolean removeRecursively(String dirURI);
-
-    /**
-     * Make the given directory as per the dirURI parameter recursively creating
-     * any new parent directories needed.  If the directory already exists this
-     * method must simply return false and not throw an exception.
-     *
-     * @param dirURI Directory to be created
-     *
-     * @return true if successful, false otherwise
-     * @throws IOException if an IOException occurs during the process
-     */
-    public abstract boolean makeDirectoryRecursive(String dirURI) throws IOException;
-
-    /**
-     * Set the currently active user: the one that we need to know about for
-     * preferences etc. currently
-     *
-     * @param username username as a string, or null for no active user
-     */
-    public void setActiveUser(String username, Object context) {
-        //Make sure there is a valid directory for this user
-        getLogger().l(UMLog.INFO, 306, username);
-        if(username != null) {
-            String userCachePath = getCacheDir(UstadMobileSystemImpl.USER_RESOURCE,
-                    context);
-            String userCacheParent = UMFileUtil.getParentFilename(userCachePath);
-            try {
-                boolean dirOK = makeDirectory(userCacheParent) && makeDirectory(userCachePath);
-                getLogger().l(UMLog.VERBOSE, 404, username + ":" + userCachePath
-                    + ":" + dirOK);
-            }catch(IOException e) {
-                getLogger().l(UMLog.CRITICAL, 3, username + ":" + userCachePath);
-            }
-        }
-    }
-
-    /**
-     * Get the currently active user
-     *
-     * @return Currently active username
-     */
-    public abstract String getActiveUser(Object context);
-
-    /**
-     * Set the authentication (e.g. password) of the currently active user
-     * Used for communicating with server, download catalogs, etc.
-     *
-     * @param password
-     */
-    public abstract void setActiveUserAuth(String password, Object context);
-
-    /**
-     * Get the authentication (e.g. password) of the currently active user
-     *
-     * @return The authentication (e.g. password) of the current user
-     */
-    public abstract String getActiveUserAuth(Object context);
-
-    /**
-     * Set a preference for the currently active user
-     *
-     * @param key preference key as a string
-     * @param value preference value as a string
-     */
-    public abstract void setUserPref(String key, String value, Object context);
-
-    /**
-     * Get a preference for the currently active user
-     *
-     * @param key preference key as a string
-     * @return value of that preference
-     */
-    public abstract String getUserPref(String key, Object context);
-
-
-    /**
-     * Get a preference for the currently active user
-     *
-     * @param key preference key as a string
-     * @param defaultVal default value to return in case this is not set for this user
-     * @return Value of preference for this user if set, otherwise defaultVal
-     */
-    public String getUserPref(String key, String defaultVal, Object context) {
-        String valFound = getUserPref(key, context);
-        return valFound != null ? valFound : defaultVal;
-    }
-
-    /**
-     * Get a list of preference keys for currently active user
-     *
-     * @return String array list of keys
-     */
-    public abstract String[] getUserPrefKeyList(Object context);
-
-    /**
-     * Trigger persisting the currently active user preferences.  This does NOT
-     * need to be called each time when setting a preference, only when a user
-     * logs out, program ends, etc.
-     */
-    public abstract void saveUserPrefs(Object context);
 
     /**
      * Get a preference for the app
@@ -723,21 +459,6 @@ public abstract class UstadMobileSystemImpl {
      */
     public abstract void setAppPref(String key, String value, Object context);
 
-    /**
-     * Convenience method: setPref will use setUserPref if
-     * isUser is true, setAppPref otherwise
-     *
-     * @param isUserSpecific true if this is a user specific preference
-     * @param key Preference key
-     * @param value Value of preference to store
-     */
-    public void setPref(boolean isUserSpecific, String key, String value, Object context) {
-        if(isUserSpecific) {
-            setUserPref(key, value, context);
-        }else {
-            setAppPref(key, value, context);
-        }
-    }
 
     /**
      * Make an asynchronous http request. This can (on platforms with a filesystem) rely on the
@@ -849,16 +570,6 @@ public abstract class UstadMobileSystemImpl {
     public abstract UMLog getLogger();
 
     /**
-     * Open the given Zip file and return a ZipFileHandle for it.  This normally
-     * means the underlying system will read through the entries in the zip
-     *
-     * @param name Filename of the zip file
-     *
-     * @return ZipFileHandle representing the zip opened
-     */
-    public abstract ZipFileHandle openZip(String name) throws IOException;
-
-    /**
      * When selecting a link to download we can use the mime type parameter
      * x-umprofile to determine the type of device the link is intended for
      * e.g. x-umprofile=micro for files with reduced size images and 3gp
@@ -898,16 +609,6 @@ public abstract class UstadMobileSystemImpl {
 
         return null;
     }
-
-
-    /**
-     * Should a list of resumable registrations for the given activity id.  On
-     * smartphone / desktop platforms this can be done talking to the local LRS.
-     * On limited platforms this will need to be done differently.
-     *
-     * @param activityId The activity ID we are looking for registrations for
-     */
-    public abstract void getResumableRegistrations(String activityId, Object context, TinCanResultListener listener);
 
     /**
      * Gives a string with the version number
@@ -969,13 +670,6 @@ public abstract class UstadMobileSystemImpl {
     public abstract void getAppSetupFile(Object context, boolean zip, UmCallback callback);
 
 
-    /**
-     * Retrieve the progress for a given course entry id.
-     *
-     * @param entryIds
-     * @return
-     */
-    public abstract CourseProgress getCourseProgress(String[] entryIds, Object context);
 
     /**
      * Provides a list of the content types which are supported on this platform.

@@ -136,28 +136,6 @@ public class BasePointController extends UstadBaseController {
 
 
     /**
-     * Determines if the current user is a teacher (e.g. would see
-     * class list management)
-     *
-     * TODO: Implement this
-     *
-     * @return true if user is teacher, false otherwise
-     */
-    public boolean isUserTeacher() {
-        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        if(impl.getActiveUser(getContext()) == null)
-            return false;
-
-        String classListJSON = impl.getUserPref("teacherclasslist", context);
-
-        if(classListJSON == null) {
-            return false;//not a teacher or no classes assigned
-        }else {
-            return true;
-        }
-    }
-
-    /**
      * Handle when the user clicks one of the base point menu items.
      *
      * This is configured via the buildconfig system : see buildconfig.default.properties for
