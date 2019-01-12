@@ -90,7 +90,7 @@ public abstract class PersonDao implements SyncableDao<Person, PersonDao> {
 
     protected static final String ENTITY_LEVEL_PERMISSION_CONDITION1 = " Person.personUid = :accountPersonUid OR" +
 
-            "(SELECT admin FROM Person WHERE personUid = :accountPersonUid) = 1 OR " +
+            "(SELECT admin FROM Person WHERE personUid = :accountPersonUid) OR " +
             "EXISTS(SELECT PersonGroupMember.groupMemberPersonUid FROM PersonGroupMember " +
             "JOIN EntityRole ON EntityRole.erGroupUid = PersonGroupMember.groupMemberGroupUid " +
             "JOIN Role ON EntityRole.erRoleUid = Role.roleUid " +
