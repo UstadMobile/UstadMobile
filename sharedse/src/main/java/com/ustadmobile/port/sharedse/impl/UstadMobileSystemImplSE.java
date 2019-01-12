@@ -199,13 +199,7 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
     public String getSystemLocale(Object context) {
         return Locale.getDefault().toString();
     }
-
-
-    @Override
-    public long fileLastModified(String fileURI) {
-        return new File(fileURI).lastModified();
-    }
-
+    
     @Override
     public OutputStream openFileOutputStream(String fileURI, int flags) throws IOException {
         fileURI = UMFileUtil.stripPrefixIfPresent("file://", fileURI);

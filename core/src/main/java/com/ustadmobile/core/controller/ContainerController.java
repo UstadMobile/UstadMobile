@@ -326,7 +326,8 @@ public class ContainerController extends UstadBaseController {
 
         return "?actor=" +
             URLTextUtil.urlEncodeUTF8(UMTinCanUtil.makeActorFromActiveUser(getContext()).toString()) +
-            "&auth=" + URLTextUtil.urlEncodeUTF8(LoginController.encodeBasicAuth(username, password)) +
+                //This file itself will be deleted
+            //"&auth=" + URLTextUtil.urlEncodeUTF8(LoginController.encodeBasicAuth(username, password)) +
             "&endpoint=" + URLTextUtil.urlEncodeUTF8(xapiEndpoint) +
             "&registration=" + registrationUUID;
     }

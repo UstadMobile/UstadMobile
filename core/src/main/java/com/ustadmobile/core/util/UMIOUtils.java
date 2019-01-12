@@ -219,29 +219,4 @@ public class UMIOUtils {
         }
     }
     
-    /**
-     * Tests to see if it is possible to make a child file in the given directory
-     * by creating a small text file called umtestfile.txt with the content "OK"
-     * 
-     * This might be needed when fileconnection.canWrite returns an incorrect 
-     * value for whether or not the directory itself is writable for files.
-     * 
-     * @param dirURI Directory to test
-     * @return true if possible to create child files, false otherwise
-     */
-    public static boolean canWriteChildFile(String dirURI) {
-        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        boolean canWriteChild = false;
-        try {
-            String childFileURI = UMFileUtil.joinPaths(new String[] {dirURI,
-                "umtestfile.txt"});
-            impl.writeStringToFile("OK", childFileURI, UstadMobileConstants.UTF8);
-            canWriteChild = true;
-            impl.removeFile(childFileURI);
-        }catch(Exception e) {
-            UstadMobileSystemImpl.l(UMLog.INFO, 353, dirURI);
-        }
-        return canWriteChild;
-    }
-    
 }

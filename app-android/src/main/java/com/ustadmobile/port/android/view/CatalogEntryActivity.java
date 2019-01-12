@@ -1,7 +1,6 @@
 package com.ustadmobile.port.android.view;
 
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Bundle;
@@ -26,7 +25,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.squareup.picasso.Picasso;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.CatalogEntryPresenter;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
@@ -34,10 +32,8 @@ import com.ustadmobile.core.model.CourseProgress;
 import com.ustadmobile.core.view.CatalogEntryView;
 import com.ustadmobile.core.view.DialogResultListener;
 import com.ustadmobile.core.view.DismissableDialog;
-import com.ustadmobile.core.fs.view.ImageLoader;
 import com.ustadmobile.lib.db.entities.OpdsEntry;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
-import com.ustadmobile.port.android.util.UmAndroidImageUtil;
 
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -62,10 +58,6 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
     private Vector<String> seeAlsoIcons = new Vector<>();
 
     private SeeAlsoViewAdapter seeAlsoViewAdapter;
-
-    private ImageViewLoadTarget headerLoadTarget;
-
-    private ImageViewLoadTarget iconLoadTarget;
 
     private HashMap<View, Integer> seeAlsoViewToIndexMap = new HashMap<>();
 
@@ -100,8 +92,6 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
 
         private TextView titleView;
 
-        private ImageViewLoadTarget imageLoadTarget;
-
         private int currentIndex;
 
         private View itemView;
@@ -111,7 +101,6 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
             this.itemView = itemView;
             iconView = (ImageView)itemView.findViewById(R.id.item_catalog_entry_see_also_imageview);
             titleView = (TextView)itemView.findViewById(R.id.item_catalog_entry_see_also_title);
-            imageLoadTarget = new ImageViewLoadTarget(CatalogEntryActivity.this, iconView);
         }
     }
 
@@ -163,12 +152,6 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
         seeAlsoViewAdapter = new SeeAlsoViewAdapter();
         seeAlsoRecyclerView.setAdapter(seeAlsoViewAdapter);
         seeAlsoRecyclerView.setNestedScrollingEnabled(false);
-
-        headerLoadTarget = new ImageViewLoadTarget(this,
-                (ImageView)findViewById(R.id.activity_catalog_entry_header_img));
-
-        iconLoadTarget = new ImageViewLoadTarget(this,
-                (ImageView)findViewById(R.id.activity_catalog_entry_icon_img));
 
         mDownloadProgressView = (DownloadProgressView)findViewById(R.id.activity_catalog_entry_download_progress);
         mDownloadProgressView.setOnStopDownloadListener(this);
@@ -351,21 +334,21 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
 
     @Override
     public void setHeader(String headerUrl) {
-        if(currentDisplayMode == DISPLAY_MODE_BANNER)
-            ImageLoader.getInstance().loadImage(headerUrl, headerLoadTarget, mPresenter);
+
     }
 
     @Override
     public void setThumbnail(String iconFileUri, String mimeType) {
-        ImageView coverImageView = (ImageView)findViewById(getThumbnailImageViewId());
-
-        if(iconFileUri == null){
-            Picasso.with(this).load(R.drawable.cover).fit().centerInside().into(coverImageView);
-        }else if(UmAndroidImageUtil.isSvg(mimeType)) {
-            UmAndroidImageUtil.loadSvgIntoImageView(iconFileUri, coverImageView);
-        }else {
-            Picasso.with(this).load("um-"+ iconFileUri).fit().centerInside().into(coverImageView);
-        }
+//        This will be deleted anyway soon
+//        ImageView coverImageView = (ImageView)findViewById(getThumbnailImageViewId());
+//
+//        if(iconFileUri == null){
+//            Picasso.with(this).load(R.drawable.cover).fit().centerInside().into(coverImageView);
+//        }else if(UmAndroidImageUtil.isSvg(mimeType)) {
+//            UmAndroidImageUtil.loadSvgIntoImageView(iconFileUri, coverImageView);
+//        }else {
+//            Picasso.with(this).load("um-"+ iconFileUri).fit().centerInside().into(coverImageView);
+//        }
     }
 
     @Override

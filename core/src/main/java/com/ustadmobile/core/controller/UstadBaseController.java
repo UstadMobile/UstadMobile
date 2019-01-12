@@ -55,8 +55,6 @@ public abstract class UstadBaseController<V extends UstadView> implements UstadC
     
     protected Object context;
 
-    protected Vector controllerLifecycleListeners;
-
     protected final Vector<UmLifecycleListener> lifecycleListeners = new Vector<>();
 
     public static final int CMD_ABOUT = 1001;
@@ -173,13 +171,6 @@ public abstract class UstadBaseController<V extends UstadView> implements UstadC
                 listener.onLifecycleDestroy(this);
             }
         }
-
-        if(controllerLifecycleListeners == null)
-            return;
-
-        for(int i = 0; i < controllerLifecycleListeners.size(); i++) {
-            ((ControllerLifecycleListener)controllerLifecycleListeners.elementAt(i)).onDestroyed(this);
-        }
     }
 
 
@@ -226,9 +217,6 @@ public abstract class UstadBaseController<V extends UstadView> implements UstadC
             case CMD_SETTINGS:
                 UstadMobileSystemImpl.getInstance().go(UserSettingsView2.VIEW_NAME,null, context);
                 return true;
-            case CMD_LOGOUT:
-                LoginController.handleLogout(context);
-                return true;
         }
         
         return false;
@@ -259,18 +247,6 @@ public abstract class UstadBaseController<V extends UstadView> implements UstadC
         fillStandardMenuOptions(new int[labels.length], labels, 0);
         view.setAppMenuCommands(labels, STANDARD_APPEMNU_CMDS);
     }
-
-    public void addLifecycleListener(ControllerLifecycleListener listener) {
-        if(controllerLifecycleListeners == null)
-            controllerLifecycleListeners = new Vector();
-
-        controllerLifecycleListeners.addElement(listener);
-    }
-
-    public void removeLifecycleListener(ControllerLifecycleListener listener) {
-        controllerLifecycleListeners.removeElement(listener);
-    }
-
 
     @Override
     public void addLifecycleListener(UmLifecycleListener listener) {

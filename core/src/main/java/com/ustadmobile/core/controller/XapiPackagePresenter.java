@@ -15,6 +15,7 @@ import com.ustadmobile.core.util.UMTinCanUtil;
 import com.ustadmobile.core.util.UMUUID;
 import com.ustadmobile.core.util.URLTextUtil;
 import com.ustadmobile.core.view.XapiPackageView;
+import com.ustadmobile.lib.util.UMUtil;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -153,7 +154,7 @@ public class XapiPackagePresenter extends UstadBaseController {
 
         return "?actor=" +
                 URLTextUtil.urlEncodeUTF8(UMTinCanUtil.makeActorFromActiveUser(getContext()).toString()) +
-                "&auth=" + URLTextUtil.urlEncodeUTF8(LoginController.encodeBasicAuth(username, password)) +
+                "&auth=" + URLTextUtil.urlEncodeUTF8(UMUtil.encodeBasicAuth(username, password)) +
                 "&endpoint=" + URLTextUtil.urlEncodeUTF8(xapiEndpoint) +
                 "&registration=" + registrationUUID +
                 activityArgs;

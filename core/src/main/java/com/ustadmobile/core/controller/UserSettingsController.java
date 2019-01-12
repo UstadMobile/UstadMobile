@@ -156,7 +156,7 @@ public class UserSettingsController extends UstadBaseController implements Ustad
      * Handle when the user selects to logout
      */
     public void handleClickLogout() {
-        LoginController.handleLogout(getContext(), BasePointView.VIEW_NAME);
+
     }
     
     

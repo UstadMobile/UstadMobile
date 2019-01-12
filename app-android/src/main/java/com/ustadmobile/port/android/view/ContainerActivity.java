@@ -31,7 +31,6 @@ import com.ustadmobile.core.tincan.TinCanResultListener;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.view.AppViewChoiceListener;
 import com.ustadmobile.core.view.ContainerView;
-import com.ustadmobile.core.fs.view.ImageLoader;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 import com.ustadmobile.port.android.netwokmanager.NetworkServiceAndroid;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
@@ -93,8 +92,6 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
 
     private ImageView coverImageView;
 
-    private ImageViewLoadTarget coverImageLoadTarget;
-
 
     @Override
     protected void onCreate(Bundle saved) {
@@ -151,7 +148,6 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
         mPager = (ViewPager) findViewById(R.id.container_epubrunner_pager);
         tocList = (TocListView)findViewById(R.id.activity_container_epubpager_toclist);
         coverImageView = (ImageView)findViewById(R.id.item_basepoint_cover_img);
-        coverImageLoadTarget = new ImageViewLoadTarget(this, coverImageView);
     }
 
     @Override
@@ -338,7 +334,8 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
 
     @Override
     public void setCoverImage(String imageUrl) {
-        ImageLoader.getInstance().loadImage(imageUrl, coverImageLoadTarget, mContainerController);
+        //ContainerActivity will be deleted in favor of ContentEntry anyway
+        //ImageLoader.getInstance().loadImage(imageUrl, coverImageLoadTarget, mContainerController);
     }
 
     @Override

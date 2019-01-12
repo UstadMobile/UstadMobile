@@ -41,7 +41,7 @@ import java.util.WeakHashMap;
 
 
 public class BasePointActivity extends UstadBaseActivity implements BasePointView,
-        NavigationView.OnNavigationItemSelectedListener, DialogResultListener,
+        NavigationView.OnNavigationItemSelectedListener,
         View.OnClickListener, TabLayout.OnTabSelectedListener,
         CatalogOPDSFragment.CatalogOPDSFragmentListener{
 
@@ -224,11 +224,6 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
         menu.add(Menu.NONE, BasePointController.CMD_SHARE_APP, 0, R.string.share_application);
         menu.add(Menu.NONE, BasePointController.CMD_RECEIVE_ENTRY, 1, R.string.receive);
         return super.onCreateOptionsMenu(menu);
-    }
-
-    @Override
-    public void onDialogResult(int commandId, DismissableDialog dialog, Hashtable args) {
-        mBasePointController.onDialogResult(commandId, dialog, args);
     }
 
     @Override

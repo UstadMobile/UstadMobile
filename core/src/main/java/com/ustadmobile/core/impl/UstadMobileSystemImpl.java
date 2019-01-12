@@ -31,10 +31,8 @@
 
 package com.ustadmobile.core.impl;
 
-import com.ustadmobile.core.buildconfig.CoreBuildConfig;
 import com.ustadmobile.core.catalog.contenttype.ContentTypePlugin;
 import com.ustadmobile.core.controller.CatalogPresenter;
-import com.ustadmobile.core.db.UmObserver;
 import com.ustadmobile.core.db.dao.OpdsAtomFeedRepository;
 import com.ustadmobile.core.impl.http.UmHttpCall;
 import com.ustadmobile.core.impl.http.UmHttpRequest;
@@ -42,28 +40,22 @@ import com.ustadmobile.core.impl.http.UmHttpResponse;
 import com.ustadmobile.core.impl.http.UmHttpResponseCallback;
 import com.ustadmobile.core.model.CourseProgress;
 import com.ustadmobile.core.networkmanager.NetworkManagerCore;
-import com.ustadmobile.core.opds.db.UmOpdsDbManager;
 import com.ustadmobile.core.tincan.TinCanResultListener;
 import com.ustadmobile.core.util.MessagesHashtable;
 import com.ustadmobile.core.util.UMFileUtil;
-import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.view.Login2View;
 import com.ustadmobile.lib.db.entities.UmAccount;
 import com.ustadmobile.lib.util.UMUtil;
 import com.ustadmobile.core.view.AppView;
-import com.ustadmobile.core.view.LoginView;
 
-import org.json.JSONObject;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Hashtable;
-import java.util.LinkedHashMap;
 import java.util.List;
 
 /* $if umplatform == 2  $
@@ -472,60 +464,6 @@ public abstract class UstadMobileSystemImpl {
      */
     public abstract String getSystemLocale(Object context);
 
-    /**
-     * Provide information about the platform as key value pairs in a hashtable
-     *
-     * @return
-     */
-    public abstract Hashtable getSystemInfo();
-
-    /**
-     * Read the given fileURI as a string and return it
-     *
-     * @param fileURI URI to the required file
-     * @param encoding encoding e.g. UTF-8
-     *
-     * @return File contents as a string
-     */
-    public  String readFileAsText(String fileURI, String encoding) throws IOException{
-        getLogger().l(UMLog.DEBUG, 508, fileURI + " (" + encoding + ")");
-        InputStream in = null;
-        String result = null;
-        IOException ioe = null;
-        try {
-            in = openFileInputStream(fileURI);
-            ByteArrayOutputStream bout = new ByteArrayOutputStream();
-            UMIOUtils.readFully(in, bout, 1024);
-            result = new String(bout.toByteArray());
-        }catch(IOException e) {
-            getLogger().l(UMLog.ERROR, 108, fileURI, e);
-            ioe = e;
-        }finally {
-            UMIOUtils.closeInputStream(in);
-        }
-
-        UMIOUtils.throwIfNotNullIO(ioe);
-        return result;
-    }
-
-    /**
-     * Read the given fileURI as a string and return it - assume UTF-8 encoding
-     * @param fileURI URI to the required file
-     * @return Content of the file as a string with UTF-8 encoding
-     */
-    public String readFileAsText(String fileURI) throws IOException{
-        return this.readFileAsText(fileURI, "UTF-8");
-    }
-
-    /**
-     * Return the last file modification time of the given file
-     *
-     * @param fileURI
-     *
-     * @return The time the given file was last modified; or -1 in the event of an error
-     */
-    public abstract long fileLastModified(String fileURI);
-
 
     /**
      * Get an output stream to the given file.  If the FILE_APPEND flag is set
@@ -553,31 +491,6 @@ public abstract class UstadMobileSystemImpl {
     public abstract void getAsset(Object context, String path, UmCallback<InputStream> callback);
 
 
-    /**
-     * Write the given string to the given file URI.  Create the file if it does
-     * not already exist.
-     *
-     * @param str Content to write to the file
-     * @param fileURI URI to the required file
-     * @param encoding Encoding to use for string e.g. UTF-8
-     */
-    public void writeStringToFile(String str, String fileURI, String encoding) throws IOException {
-        OutputStream out = null;
-        IOException ioe = null;
-        getLogger().l(UMLog.DEBUG, 500, fileURI + " enc " + encoding);
-        try {
-            out = openFileOutputStream(fileURI, FILE_OVERWRITE);
-            out.write(str.getBytes(encoding));
-            out.flush();
-            getLogger().l(UMLog.DEBUG, 501, fileURI);
-        }catch(IOException e) {
-            getLogger().l(UMLog.ERROR, 106, fileURI + " enc:" + encoding, e);
-            ioe = e;
-        }finally {
-            UMIOUtils.closeOutputStream(out);
-            UMIOUtils.throwIfNotNullIO(ioe);
-        }
-    }
 
     /**
      * Check to see if the given file exists

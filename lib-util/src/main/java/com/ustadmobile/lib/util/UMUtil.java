@@ -571,6 +571,16 @@ public class UMUtil {
     }
 
 
+    /**
+     * Encode a username and password as a basic auth header
+     * @param username
+     * @param password
+     * @return
+     */
+    public static String encodeBasicAuth(String username, String password) {
+        return "Basic " + Base64Coder.encodeString(username +
+                ':' + password);
+    }
 
 
 

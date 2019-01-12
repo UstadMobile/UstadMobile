@@ -43,14 +43,6 @@
         </provider>
 
         <activity
-            android:name=".UstadMobileActivity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
-            android:label="@string/app_name" />
-        <activity
-            android:name="com.ustadmobile.port.android.view.LoginActivity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
-            android:label="@string/login" />
-        <activity
             android:name="com.ustadmobile.port.android.view.CatalogActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
             android:label="@string/catalog"

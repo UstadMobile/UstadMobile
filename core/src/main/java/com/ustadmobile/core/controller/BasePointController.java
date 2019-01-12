@@ -36,7 +36,7 @@ import java.util.Vector;
  * 
  * @author mike
  */
-public class BasePointController extends UstadBaseController implements DialogResultListener{
+public class BasePointController extends UstadBaseController {
 
     private BasePointView basePointView;
     
@@ -177,25 +177,6 @@ public class BasePointController extends UstadBaseController implements DialogRe
      */
     public void handleClickBasePointMenuItem(BasePointMenuItem item) {
         UstadMobileSystemImpl.getInstance().go(item.getDestination(), getContext());
-    }
-
-    public void onDialogResult(int commandId, DismissableDialog dialog, Hashtable args) {
-        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        switch(commandId) {
-            case LoginController.RESULT_LOGIN_SUCCESSFUL:
-                dialog.dismiss();
-                impl.getAppView(getContext()).showNotification(
-                        impl.getString(MessageID.login_successful, getContext()),
-                        AppView.LENGTH_LONG);
-                break;
-
-            case RegistrationPresenter.RESULT_REGISTRATION_SUCCESS:
-                dialog.dismiss();
-                impl.getAppView(getContext()).showNotification(
-                        impl.getString(MessageID.registration_successful, getContext()),
-                        AppView.LENGTH_LONG);
-                break;
-        }
     }
 
     public void onResume() {

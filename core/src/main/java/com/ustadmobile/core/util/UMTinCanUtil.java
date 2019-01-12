@@ -31,10 +31,10 @@
 package com.ustadmobile.core.util;
 
 import com.ustadmobile.core.buildconfig.CoreBuildConfig;
-import com.ustadmobile.core.controller.LoginController;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.tincan.TinCanStatement;
+import com.ustadmobile.lib.util.UMUtil;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -277,7 +277,7 @@ public class UMTinCanUtil {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         Hashtable ht = new Hashtable();
         ht.put("X-Experience-API-Version", "1.0.1");
-        ht.put("Authorization", LoginController.encodeBasicAuth(
+        ht.put("Authorization", UMUtil.encodeBasicAuth(
             impl.getActiveUser(context), impl.getActiveUserAuth(context)));
         return ht;
     }

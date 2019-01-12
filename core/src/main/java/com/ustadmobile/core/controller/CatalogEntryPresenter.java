@@ -428,12 +428,5 @@ public class CatalogEntryPresenter extends BaseCatalogPresenter implements Netwo
     @Override
     public void onDialogResult(int commandId, DismissableDialog dialog, Hashtable args) {
         dialog.dismiss();
-
-        if((commandId == LoginController.RESULT_LOGIN_SUCCESSFUL
-            || commandId == RegistrationPresenter.RESULT_REGISTRATION_SUCCESS)
-            && openAfterLoginOrRegister) {
-            openAfterLoginOrRegister = false;
-            handleOpenEntry();
-        }
     }
 }

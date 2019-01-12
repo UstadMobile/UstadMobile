@@ -364,9 +364,7 @@ public class CatalogPresenter extends BaseCatalogPresenter  {
     }
 
     public void handleClickAdd() {
-        Hashtable args = new Hashtable();
-        args.put(AddFeedDialogPresenter.ARG_UUID, feedLiveData.getValue().getUuid());
-        UstadMobileSystemImpl.getInstance().go(AddFeedDialogView.VIEW_NAME, args, getContext());
+        //Removed: this class itself will be removed soon anyway.
     }
 
     protected void handleCatalogSelected(String url) {

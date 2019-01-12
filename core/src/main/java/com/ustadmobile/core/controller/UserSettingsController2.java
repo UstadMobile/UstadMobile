@@ -4,10 +4,7 @@ import com.ustadmobile.core.buildconfig.CoreBuildConfig;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.lib.util.UMUtil;
 import com.ustadmobile.core.view.AppViewChoiceListener;
-import com.ustadmobile.core.view.BasePointView;
-import com.ustadmobile.core.view.RegistrationView;
 import com.ustadmobile.core.view.SettingsDataUsageView;
 import com.ustadmobile.core.view.UserSettingsView2;
 
@@ -46,7 +43,7 @@ public class UserSettingsController2 extends  UstadBaseController implements App
     }
     public void handleClickAccount() {
         //UstadMobileSystemImpl.getInstance().go(AccountSettingsView.VIEW_NAME, getContext());
-        UstadMobileSystemImpl.getInstance().go(RegistrationView.VIEW_NAME, getContext());
+//        UstadMobileSystemImpl.getInstance().go(RegistrationView.VIEW_NAME, getContext());
     }
 
     public void handleClickLanguage() {
@@ -68,7 +65,6 @@ public class UserSettingsController2 extends  UstadBaseController implements App
     }
 
     public void handleClickLogout() {
-        LoginController.handleLogout(getContext(), BasePointView.VIEW_NAME);
     }
 
     public void setUIStrings() {
