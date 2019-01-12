@@ -32,9 +32,7 @@
 package com.ustadmobile.core.util;
 
 import com.ustadmobile.core.impl.UMLog;
-import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.core.impl.ZipFileHandle;
 
 import org.xmlpull.v1.XmlPullParserException;
 
