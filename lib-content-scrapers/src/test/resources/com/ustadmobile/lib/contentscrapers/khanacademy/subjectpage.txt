@@ -657,8 +657,7 @@ $LAB.queueWait(function() {
       "title": "Math"
     }
   },
-  "loggedIn": false
-})
+  "loggedIn": false})
     }), document.getElementById("app-shell-root"));
 })
 </script>

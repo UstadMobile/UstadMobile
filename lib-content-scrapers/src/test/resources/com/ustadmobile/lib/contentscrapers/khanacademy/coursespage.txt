@@ -1227,8 +1227,7 @@ $LAB.queueWait(function() {
       ]
     }
   },
-  "loggedIn": false
-})
+  "loggedIn": false})
     }), document.getElementById("app-shell-root"));
 })
 </script>
