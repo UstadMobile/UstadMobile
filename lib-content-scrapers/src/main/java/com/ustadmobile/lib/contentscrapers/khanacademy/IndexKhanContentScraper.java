@@ -147,10 +147,13 @@ public class IndexKhanContentScraper {
                 if (node.getWholeData().contains("ReactComponent(")) {
 
                     String data = node.getWholeData();
-
-                    int index = data.indexOf("ReactComponent(") + 15;
-                    int end = data.indexOf("})") + 1;
-                    return data.substring(index, end);
+                    try {
+                        int index = data.indexOf("ReactComponent(") + 15;
+                        int end = data.indexOf("loggedIn\": false})") + 17;
+                        return data.substring(index, end);
+                    }catch (IndexOutOfBoundsException e){
+                        throw new IOException("Could not get json from the script for url " + url);
+                    }
                 }
             }
         }
