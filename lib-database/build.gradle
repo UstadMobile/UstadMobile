@@ -31,6 +31,26 @@ dependencies {
     implementation project(":lib-util")
 
     annotationProcessor project(':lib-database-annotation-processor')
+
+    testImplementation "junit:junit:$version_junit"
+    testImplementation "javax.ws.rs:javax.ws.rs-api:2.1"
+    testRuntimeOnly "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
+    testRuntimeOnly "com.github.h-thurow:simple-jndi:$version_simple_jndi"
+    testRuntimeOnly "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
+
+    testImplementation project(":lib-database-jdbc")
+    testImplementation project(":lib-database-entities")
+    testImplementation project(":lib-database-runtime")
+    testImplementation project(':lib-database-runtime-jdbc')
+    testImplementation project(':app-rest-server')
+
+    //Jersey dependencies - used to run the test server
+    testImplementation "org.glassfish.jersey.core:jersey-server:$version_jersey"
+    testImplementation "org.glassfish.jersey.containers:jersey-container-servlet:$version_jersey"
+    testImplementation "org.glassfish.jersey.core:jersey-client:$version_jersey"
+    testImplementation "org.glassfish.jersey.inject:jersey-hk2:$version_jersey"
+    testImplementation "org.glassfish.jersey.media:jersey-media-json-jackson:$version_jersey"
+    testImplementation "org.glassfish.jersey.containers:jersey-container-grizzly2-http:$version_jersey"
 }
 
 task sourceJar(type: Jar) {

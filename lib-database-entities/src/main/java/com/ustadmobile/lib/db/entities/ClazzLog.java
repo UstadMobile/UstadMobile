@@ -13,7 +13,7 @@ public class ClazzLog implements SyncableEntity{
     @UmPrimaryKey(autoIncrement = true)
     private long clazzLogUid;
 
-    private long clazzClazzUid;
+    private long clazzLogClazzUid;
 
     private long logDate;
 
@@ -31,12 +31,12 @@ public class ClazzLog implements SyncableEntity{
         this.clazzLogUid = clazzLogUid;
     }
 
-    public long getClazzClazzUid() {
-        return clazzClazzUid;
+    public long getClazzLogClazzUid() {
+        return clazzLogClazzUid;
     }
 
-    public void setClazzClazzUid(long clazzClazzUid) {
-        this.clazzClazzUid = clazzClazzUid;
+    public void setClazzLogClazzUid(long clazzLogClazzUid) {
+        this.clazzLogClazzUid = clazzLogClazzUid;
     }
 
     public long getLogDate() {

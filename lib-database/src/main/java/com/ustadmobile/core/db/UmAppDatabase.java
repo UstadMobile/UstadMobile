@@ -21,10 +21,18 @@ import com.ustadmobile.core.db.dao.DownloadJobItemDao;
 import com.ustadmobile.core.db.dao.DownloadJobItemHistoryDao;
 import com.ustadmobile.core.db.dao.DownloadSetDao;
 import com.ustadmobile.core.db.dao.DownloadSetItemDao;
+import com.ustadmobile.core.db.dao.EntityRoleDao;
 import com.ustadmobile.core.db.dao.EntryStatusResponseDao;
 import com.ustadmobile.core.db.dao.HttpCachedEntryDao;
 import com.ustadmobile.core.db.dao.LanguageDao;
 import com.ustadmobile.core.db.dao.LanguageVariantDao;
+import com.ustadmobile.core.db.dao.LocationAncestorJoinDao;
+import com.ustadmobile.core.db.dao.LocationDao;
+import com.ustadmobile.core.db.dao.PersonGroupDao;
+import com.ustadmobile.core.db.dao.PersonGroupMemberDao;
+import com.ustadmobile.core.db.dao.PersonLocationJoinDao;
+import com.ustadmobile.core.db.dao.RoleDao;
+import com.ustadmobile.lib.db.entities.LocationAncestorJoin;
 import com.ustadmobile.core.db.dao.NetworkNodeDao;
 import com.ustadmobile.core.db.dao.OpdsEntryDao;
 import com.ustadmobile.core.db.dao.OpdsEntryParentToChildJoinDao;
@@ -44,7 +52,13 @@ import com.ustadmobile.lib.database.annotation.UmRepository;
 import com.ustadmobile.lib.database.annotation.UmSyncOutgoing;
 import com.ustadmobile.lib.db.UmDbWithAuthenticator;
 import com.ustadmobile.lib.db.entities.AccessToken;
+import com.ustadmobile.lib.db.entities.EntityRole;
+import com.ustadmobile.lib.db.entities.Location;
+import com.ustadmobile.lib.db.entities.PersonGroup;
+import com.ustadmobile.lib.db.entities.PersonGroupMember;
 import com.ustadmobile.lib.db.entities.PersonAuth;
+import com.ustadmobile.lib.db.entities.PersonLocationJoin;
+import com.ustadmobile.lib.db.entities.Role;
 import com.ustadmobile.lib.db.sync.UmSyncableDatabase;
 import com.ustadmobile.lib.db.sync.dao.SyncStatusDao;
 import com.ustadmobile.lib.db.sync.dao.SyncablePrimaryKeyDao;
@@ -102,7 +116,9 @@ import java.util.Hashtable;
         ContentEntryFileStatus.class, ContentCategorySchema.class,
         ContentCategory.class, Language.class, LanguageVariant.class,
         SyncStatus.class, SyncablePrimaryKey.class, SyncDeviceBits.class,
-        AccessToken.class, PersonAuth.class
+        AccessToken.class, PersonAuth.class, Role.class, EntityRole.class,
+        PersonGroup.class, PersonGroupMember.class, Location.class, LocationAncestorJoin.class,
+        PersonLocationJoin.class
 })
 public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthenticator {
 
@@ -121,6 +137,18 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
      */
     public static synchronized void setInstance(UmAppDatabase instance) {
         UmAppDatabase.instance = instance;
+    }
+
+    /**
+     * For use by other projects using this app as a library. By calling setInstance before
+     * any other usage (e.g. in the Android Application class) a child class of this database (eg.
+     * with additional entities) can be used.
+
+     * @param instance
+     * @param dbName
+     */
+    public static synchronized void setInstance(UmAppDatabase instance, String dbName) {
+        namedInstances.put(dbName, instance);
     }
 
     public static synchronized UmAppDatabase getInstance(Object context) {
@@ -215,6 +243,21 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
 
     public abstract AccessTokenDao getAccessTokenDao();
 
+    public abstract RoleDao getRoleDao();
+
+    public abstract PersonGroupDao getPersonGroupDao();
+
+    public abstract PersonGroupMemberDao getPersonGroupMemberDao();
+
+    public abstract EntityRoleDao getEntityRoleDao();
+
+    public abstract LocationDao getLocationDao();
+
+    public abstract LocationAncestorJoinDao getLocationAncestorJoinDao();
+
+    public abstract PersonLocationJoinDao getPersonLocationJoinDao();
+
+
     @UmDbContext
     public abstract Object getContext();
 
@@ -258,4 +301,6 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
     public void invalidateDeviceBits() {
         getSyncablePrimaryKeyDao().invalidateDeviceBits();
     }
+
+
 }

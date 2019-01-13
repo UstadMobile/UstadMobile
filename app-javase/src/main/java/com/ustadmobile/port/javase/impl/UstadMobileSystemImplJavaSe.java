@@ -88,16 +88,6 @@ public class UstadMobileSystemImplJavaSe extends UstadMobileSystemImplSE {
     }
 
     @Override
-    public Hashtable getSystemInfo() {
-        return null;
-    }
-
-    @Override
-    public int[] getFileDownloadStatus(String downloadID, Object context) {
-        return new int[0];
-    }
-
-    @Override
     public String getActiveUser(Object context) {
         return null;
     }
@@ -160,11 +150,6 @@ public class UstadMobileSystemImplJavaSe extends UstadMobileSystemImplSE {
     @Override
     public String getUMProfileName() {
         return null;
-    }
-
-    @Override
-    public void getResumableRegistrations(String activityId, Object context, TinCanResultListener listener) {
-
     }
 
     @Override

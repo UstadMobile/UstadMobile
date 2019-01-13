@@ -8,8 +8,11 @@ import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.database.annotation.UmRepository;
 import com.ustadmobile.lib.database.annotation.UmRestAccessible;
 import com.ustadmobile.lib.db.entities.AccessToken;
+import com.ustadmobile.lib.db.entities.Clazz;
+import com.ustadmobile.lib.db.entities.Location;
 import com.ustadmobile.lib.db.entities.Person;
 import com.ustadmobile.lib.db.entities.PersonAuth;
+import com.ustadmobile.lib.db.entities.Role;
 import com.ustadmobile.lib.db.entities.UmAccount;
 import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 import com.ustadmobile.lib.db.sync.entities.SyncDeviceBits;
@@ -18,11 +21,38 @@ import com.ustadmobile.lib.db.sync.entities.SyncablePrimaryKey;
 import java.util.Random;
 
 import static com.ustadmobile.core.db.dao.PersonAuthDao.ENCRYPTED_PASS_PREFIX;
+import static com.ustadmobile.core.db.dao.PersonDao.ENTITY_LEVEL_PERMISSION_CONDITION1;
+import static com.ustadmobile.core.db.dao.PersonDao.ENTITY_LEVEL_PERMISSION_CONDITION2;
 
 
-@UmDao(readPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
+@UmDao(
+selectPermissionCondition = ENTITY_LEVEL_PERMISSION_CONDITION1 + Role.PERMISSION_PERSON_SELECT
+        + ENTITY_LEVEL_PERMISSION_CONDITION2,
+updatePermissionCondition = ENTITY_LEVEL_PERMISSION_CONDITION1 + Role.PERMISSION_PERSON_UPDATE
+        + ENTITY_LEVEL_PERMISSION_CONDITION2)
 @UmRepository
 public abstract class PersonDao implements SyncableDao<Person, PersonDao> {
+
+    protected static final String ENTITY_LEVEL_PERMISSION_CONDITION1 = " Person.personUid = :accountPersonUid OR" +
+            "(SELECT admin FROM Person WHERE personUid = :accountPersonUid) = 1 OR " +
+            "EXISTS(SELECT PersonGroupMember.groupMemberPersonUid FROM PersonGroupMember " +
+            "JOIN EntityRole ON EntityRole.erGroupUid = PersonGroupMember.groupMemberGroupUid " +
+            "JOIN Role ON EntityRole.erRoleUid = Role.roleUid " +
+            "WHERE PersonGroupMember.groupMemberPersonUid = :accountPersonUid " +
+            " AND (" +
+            "(EntityRole.ertableId = " + Person.TABLE_ID +
+            " AND EntityRole.erEntityUid = Person.personUid) " +
+            "OR " +
+            "(EntityRole.ertableId = " + Clazz.TABLE_ID +
+            " AND EntityRole.erEntityUid IN (SELECT DISTINCT clazzMemberClazzUid FROM ClazzMember WHERE clazzMemberPersonUid = Person.personUid))" +
+            "OR" +
+            "(EntityRole.ertableId = " + Location.TABLE_ID +
+            " AND EntityRole.erEntityUid IN " +
+                "(SELECT locationAncestorAncestorLocationUid FROM LocationAncestorJoin WHERE locationAncestorChildLocationUid " +
+                "IN (SELECT personLocationLocationUid FROM PersonLocationJoin WHERE personLocationPersonUid = Person.personUid)))" +
+            ") AND (Role.rolePermissions & ";
+
+    protected static final String ENTITY_LEVEL_PERMISSION_CONDITION2 = ") > 0)";
 
     public static final long SESSION_LENGTH = 28L * 24L * 60L * 60L * 1000L;// 28 days
 
@@ -161,5 +191,11 @@ public abstract class PersonDao implements SyncableDao<Person, PersonDao> {
 
     @UmInsert
     public abstract void insertPersonAuth(PersonAuth personAuth);
+
+
+    public void personHasPermission(long personUid, long clazzUid, long permission,
+                                    UmCallback<Boolean> callback) {
+        callback.onSuccess(Boolean.TRUE);
+    }
 
 }

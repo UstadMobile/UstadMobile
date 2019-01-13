@@ -1,7 +1,6 @@
 package com.ustadmobile.port.android.view;
 
 import android.content.ComponentName;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -16,13 +15,10 @@ import com.ustadmobile.core.controller.XapiPackagePresenter;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.core.impl.ZipFileHandle;
-import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.view.XapiPackageView;
 import com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroid;
 import com.ustadmobile.port.android.netwokmanager.NetworkServiceAndroid;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
-import com.ustadmobile.port.sharedse.impl.zip.ZipFileHandleSharedSE;
 
 /**
  * Created by mike on 9/14/17.
@@ -99,11 +95,6 @@ public class XapiPackageActivity extends ZippedContentActivity implements XapiPa
     @Override
     public XapiPackagePresenter getPresenter() {
         return mPresenter;
-    }
-
-    @Override
-    public ZipFileHandle getMountedZipHandle() {
-        return new ZipFileHandleSharedSE(networkManagerAndroid.getHttpMountedZip(mMountedPath));
     }
 
     @Override

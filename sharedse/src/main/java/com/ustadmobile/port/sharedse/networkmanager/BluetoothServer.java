@@ -1,8 +1,6 @@
 package com.ustadmobile.port.sharedse.networkmanager;
 
 import com.google.gson.Gson;
-import com.ustadmobile.core.controller.CatalogEntryInfo;
-import com.ustadmobile.core.controller.CatalogPresenter;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.lib.db.entities.ContainerFileEntry;
@@ -12,7 +10,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.net.URLDecoder;
 import java.util.List;
 import java.util.UUID;
 

@@ -1,10 +1,9 @@
 package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.impl.UMLog;
+import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.core.impl.ZipEntryHandle;
-import com.ustadmobile.core.impl.ZipFileHandle;
 import com.ustadmobile.core.impl.http.UmHttpCall;
 import com.ustadmobile.core.impl.http.UmHttpRequest;
 import com.ustadmobile.core.impl.http.UmHttpResponse;
@@ -15,14 +14,14 @@ import com.ustadmobile.core.util.UMTinCanUtil;
 import com.ustadmobile.core.util.UMUUID;
 import com.ustadmobile.core.util.URLTextUtil;
 import com.ustadmobile.core.view.XapiPackageView;
+import com.ustadmobile.lib.db.entities.UmAccount;
+import com.ustadmobile.lib.util.UMUtil;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.Enumeration;
 import java.util.Hashtable;
 
 /**
@@ -145,15 +144,16 @@ public class XapiPackagePresenter extends UstadBaseController {
      * @return Query string as above
      */
     public String getXAPIQuery() {
-        String username = UstadMobileSystemImpl.getInstance().getActiveUser(getContext());
-        String password = UstadMobileSystemImpl.getInstance().getActiveUserAuth(getContext());
+        UmAccount activeAccount = UmAccountManager.getActiveAccount(getContext());
+        String username = activeAccount.getUsername();
+        String password = activeAccount.getAuth();
         String xapiEndpoint = UMFileUtil.resolveLink(mountedPath, "/xapi/");
         String activityArgs = tinCanXml != null && tinCanXml.getLaunchActivity() != null ?
                 "&activity_id=" + URLTextUtil.urlEncodeUTF8(tinCanXml.getLaunchActivity().getId()) : "";
 
         return "?actor=" +
                 URLTextUtil.urlEncodeUTF8(UMTinCanUtil.makeActorFromActiveUser(getContext()).toString()) +
-                "&auth=" + URLTextUtil.urlEncodeUTF8(LoginController.encodeBasicAuth(username, password)) +
+                "&auth=" + URLTextUtil.urlEncodeUTF8(UMUtil.encodeBasicAuth(username, password)) +
                 "&endpoint=" + URLTextUtil.urlEncodeUTF8(xapiEndpoint) +
                 "&registration=" + registrationUUID +
                 activityArgs;

@@ -1,6 +1,5 @@
 package com.ustadmobile.port.sharedse.controller;
 
-import com.ustadmobile.core.controller.CatalogPresenter;
 import com.ustadmobile.core.controller.UstadBaseController;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmLiveData;
@@ -181,7 +180,7 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
 
         DownloadSet downloadSet = new DownloadSet();
         UMStorageDir[] storageDirs = UstadMobileSystemImpl.getInstance().getStorageDirs(
-                CatalogPresenter.SHARED_RESOURCE, getContext());
+                UstadMobileSystemImpl.SHARED_RESOURCE, getContext());
         downloadSet.setDestinationDir(storageDirs[0].getDirURI());
 
         UstadMobileSystemImpl.getInstance().getNetworkManager().prepareDownloadAsync(downloadSet,

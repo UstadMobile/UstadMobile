@@ -53,6 +53,17 @@ public class Person  {
     @UmSyncLastChangedBy
     private int personLastChangedBy;
 
+    public Person() {
+
+    }
+
+    public Person(String username, String firstNames, String lastName){
+        this.username = username;
+        this.firstNames = firstNames;
+        this.lastName = lastName;
+    }
+
+
     public long getPersonUid() {
         return personUid;
     }
