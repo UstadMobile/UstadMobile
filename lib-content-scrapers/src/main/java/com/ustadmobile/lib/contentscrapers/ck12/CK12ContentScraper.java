@@ -328,9 +328,8 @@ public class CK12ContentScraper {
                     index.add(logIndex);
 
                 } catch (Exception e) {
-                    System.err.println(urlString);
+                    System.err.println("Index url failed at " + urlString);
                     System.err.println(le.getMessage());
-                    e.printStackTrace();
                 }
             }
         }
