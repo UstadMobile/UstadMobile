@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -48,6 +49,7 @@ import static com.ustadmobile.lib.contentscrapers.ScraperConstants.HINT_JSON_LIN
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_JPG;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_JSON;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_SVG;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.SVG_EXT;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.TRY_AGAIN_FILE;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.TRY_AGAIN_KHAN_LINK;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING;
@@ -225,8 +227,6 @@ public class KhanContentScraper {
                 } catch (Exception e) {
                     System.err.println(urlString);
                     System.err.println(le.getMessage());
-                    e.printStackTrace();
-
                 }
 
             }
@@ -257,7 +257,13 @@ public class KhanContentScraper {
             ItemData itemContent = gson.fromJson(itemResponse.itemData, ItemData.class);
 
             Map<String, ItemData.Content.Image> images = itemContent.question.images;
+            if(images == null){
+                images = new HashMap<>();
+            }
             for (ItemData.Content content : itemContent.hints) {
+                if(content.images == null){
+                    continue;
+                }
                 images.putAll(content.images);
             }
 
@@ -300,18 +306,22 @@ public class KhanContentScraper {
 
                 try {
                     image = image.replaceAll(" ", "");
-                    URL imageUrl = new URL(image);
+                    String imageUrlString = image;
+                    if(image.contains("+graphie")){
+                        imageUrlString = "https://cdn.kastatic.org/ka-perseus-graphie/" + image.substring(image.lastIndexOf("/") + 1) + SVG_EXT;
+                    }
+                    URL imageUrl = new URL(imageUrlString);
                     File imageFile = ContentScraperUtil.createDirectoryFromUrl(khanDirectory, imageUrl);
 
                     File imageContent = new File(imageFile, FilenameUtils.getName(imageUrl.getPath()));
                     FileUtils.copyURLToFile(imageUrl, imageContent);
 
-                    LogIndex logIndex = ContentScraperUtil.createIndexFromLog(imageUrl.toString(), MIMETYPE_JPG,
+                    LogIndex logIndex = ContentScraperUtil.createIndexFromLog(image, MIMETYPE_JPG,
                             imageFile, imageContent, null);
                     index.add(logIndex);
                 } catch (Exception e) {
                     e.printStackTrace();
-                    System.err.println("Error downloading an image for index log" + image);
+                    System.err.println("Error downloading an image for index log" + image + " with url " + scrapUrl);
                 }
 
             }
@@ -359,6 +369,8 @@ public class KhanContentScraper {
         File khanDirectory = new File(destinationDirectory, FilenameUtils.getBaseName(scrapUrl));
         khanDirectory.mkdirs();
 
+        File indexJsonFile = new File(khanDirectory, "index.json");
+
         String initialJson = IndexKhanContentScraper.getJsonStringFromScript(scrapUrl);
         SubjectListResponse data = gson.fromJson(initialJson, SubjectListResponse.class);
         List<SubjectListResponse.ComponentData.NavData.ContentModel> contentList = data.componentProps.tutorialNavData.contentModels;
@@ -383,7 +395,7 @@ public class KhanContentScraper {
                     FileUtils.writeStringToFile(modifiedFile, String.valueOf(dateModified), ScraperConstants.UTF_ENCODING);
                 }
 
-                if (!isUpdated) {
+                if (!isUpdated && ContentScraperUtil.fileHasContent(indexJsonFile)) {
                     isContentUpdated = false;
                     return;
                 }
@@ -436,7 +448,7 @@ public class KhanContentScraper {
             }
 
         }
-        FileUtils.writeStringToFile(new File(khanDirectory, "index.json"), gson.toJson(index), UTF_ENCODING);
+        FileUtils.writeStringToFile(indexJsonFile, gson.toJson(index), UTF_ENCODING);
         ContentScraperUtil.zipDirectory(khanDirectory, khanDirectory.getName(), destinationDirectory);
 
     }
