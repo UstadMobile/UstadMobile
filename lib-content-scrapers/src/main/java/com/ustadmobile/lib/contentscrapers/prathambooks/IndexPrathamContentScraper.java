@@ -230,6 +230,7 @@ public class IndexPrathamContentScraper {
         }
 
         driver.close();
+        driver.quit();
 
         return cookie;
     }

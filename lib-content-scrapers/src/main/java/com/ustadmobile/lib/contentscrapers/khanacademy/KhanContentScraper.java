@@ -181,7 +181,9 @@ public class KhanContentScraper {
             FileUtils.writeStringToFile(modifiedFile, String.valueOf(dateModified), ScraperConstants.UTF_ENCODING);
         }
 
-        if (!isUpdated) {
+        File indexJsonFile = new File(khanDirectory, "index.json");
+
+        if (!isUpdated && ContentScraperUtil.fileHasContent(indexJsonFile)) {
             isContentUpdated = false;
             return;
         }
@@ -200,6 +202,7 @@ public class KhanContentScraper {
 
         LogEntries les = driver.manage().logs().get(LogType.PERFORMANCE);
         driver.close();
+        driver.quit();
 
         List<LogIndex> index = new ArrayList<>();
 
@@ -342,7 +345,7 @@ public class KhanContentScraper {
         index.add(completeIndex);
 
 
-        FileUtils.writeStringToFile(new File(khanDirectory, "index.json"), gson.toJson(index), UTF_ENCODING);
+        FileUtils.writeStringToFile(indexJsonFile, gson.toJson(index), UTF_ENCODING);
         ContentScraperUtil.zipDirectory(khanDirectory, khanDirectory.getName(), destinationDirectory);
 
     }
@@ -405,6 +408,7 @@ public class KhanContentScraper {
 
         LogEntries les = driver.manage().logs().get(LogType.PERFORMANCE);
         driver.close();
+        driver.quit();
 
         List<LogIndex> index = new ArrayList<>();
 

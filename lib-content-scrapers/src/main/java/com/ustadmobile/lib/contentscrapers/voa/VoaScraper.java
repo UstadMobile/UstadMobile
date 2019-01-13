@@ -113,6 +113,7 @@ public class VoaScraper {
             if (!isUpdated) {
                 isContentUpdated = false;
                 driver.close();
+                driver.quit();
                 return;
             }
 
@@ -123,6 +124,7 @@ public class VoaScraper {
                 long modified = ContentScraperUtil.parseServerDate(driver.findElementByCssSelector("time").getAttribute("datetime"));
                 isContentUpdated = modified > file.lastModified();
                 driver.close();
+                driver.quit();
                 return;
             }
 
@@ -145,6 +147,7 @@ public class VoaScraper {
         assetDirectory.mkdirs();
 
         driver.close();
+        driver.quit();
 
         if (quizHref != null && !quizHref.isEmpty()) {
 

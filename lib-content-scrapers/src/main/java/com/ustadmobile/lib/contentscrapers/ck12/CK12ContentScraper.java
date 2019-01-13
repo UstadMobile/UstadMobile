@@ -256,6 +256,7 @@ public class CK12ContentScraper {
         }
         LogEntries les = driver.manage().logs().get(LogType.PERFORMANCE);
         driver.close();
+        driver.quit();
 
         List<LogIndex> index = new ArrayList<>();
 

@@ -350,6 +350,7 @@ public class AsbScraper {
                 driver.manage().deleteAllCookies();
             }
         }
+        driver.close();
         driver.quit();
     }
 
