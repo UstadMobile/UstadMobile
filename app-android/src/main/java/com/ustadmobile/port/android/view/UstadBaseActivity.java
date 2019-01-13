@@ -20,6 +20,7 @@ import android.view.MenuItem;
 
 import com.ustadmobile.core.buildconfig.CoreBuildConfig;
 import com.ustadmobile.core.controller.UstadBaseController;
+import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.impl.AppConfig;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileConstants;
@@ -30,6 +31,7 @@ import com.ustadmobile.port.android.netwokmanager.NetworkServiceAndroid;
 import com.ustadmobile.port.android.netwokmanager.UmAppDatabaseSyncService;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
+import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
@@ -64,6 +66,8 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
 
     private boolean isStarted = false;
 
+    public static final String ATTACHMENTS_DIR = "attachments";
+
     private ServiceConnection mSyncServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
@@ -81,6 +85,9 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         //bind to the LRS forwarding service
+        UmAppDatabase.getInstance(this).setAttachmentsDir(new File(getFilesDir(),
+                ATTACHMENTS_DIR).getAbsolutePath());
+
         UstadMobileSystemImplAndroid.getInstanceAndroid().handleActivityCreate(this, savedInstanceState);
         fragmentList = new ArrayList<>();
         IntentFilter intentFilter = new IntentFilter();

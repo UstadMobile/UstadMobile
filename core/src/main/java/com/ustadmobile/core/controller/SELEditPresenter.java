@@ -1,7 +1,7 @@
 package com.ustadmobile.core.controller;
 
-import java.util.Hashtable;
-
+import com.ustadmobile.core.db.UmAppDatabase;
+import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.db.dao.ClazzMemberDao;
 import com.ustadmobile.core.db.dao.SocialNominationQuestionDao;
 import com.ustadmobile.core.db.dao.SocialNominationQuestionResponseDao;
@@ -9,19 +9,18 @@ import com.ustadmobile.core.db.dao.SocialNominationQuestionResponseNominationDao
 import com.ustadmobile.core.db.dao.SocialNominationQuestionSetResponseDao;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
-import com.ustadmobile.core.view.SELEditView;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-
-import com.ustadmobile.core.db.UmAppDatabase;
-import com.ustadmobile.core.db.UmProvider;
+import com.ustadmobile.core.view.SELEditView;
 import com.ustadmobile.core.view.SELQuestionView;
 import com.ustadmobile.core.view.SELSelectStudentView;
 import com.ustadmobile.lib.db.entities.ClazzMember;
-import com.ustadmobile.lib.db.entities.Person;
+import com.ustadmobile.lib.db.entities.PersonWithPersonPicture;
 import com.ustadmobile.lib.db.entities.SocialNominationQuestion;
 import com.ustadmobile.lib.db.entities.SocialNominationQuestionResponse;
 import com.ustadmobile.lib.db.entities.SocialNominationQuestionResponseNomination;
 import com.ustadmobile.lib.db.entities.SocialNominationQuestionSetResponse;
+
+import java.util.Hashtable;
 
 import static com.ustadmobile.core.view.ClazzListView.ARG_CLAZZ_UID;
 import static com.ustadmobile.core.view.PersonDetailView.ARG_PERSON_UID;
@@ -59,7 +58,7 @@ public class SELEditPresenter
     UmAppDatabase repository = UmAccountManager.getRepositoryForActiveAccount(context);
 
     //Provider 
-    private UmProvider<Person> providerList;
+    private UmProvider<PersonWithPersonPicture> providerList;
 
     /**
      * Gets arguments needed to conduct SEL activity and progression and update heading accordingly.
@@ -133,7 +132,7 @@ public class SELEditPresenter
 
         //Populate the provider
         providerList = repository.getClazzMemberDao()
-                .findAllPeopleInClassUid(currentClazzUid);
+                .findAllPeopleWithPersonPictureInClassUid(currentClazzUid);
 
         //set Provider.
         setPeopleProviderToView();

@@ -2,10 +2,11 @@ package com.ustadmobile.lib.db.entities;
 
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
+import com.ustadmobile.lib.database.annotation.UmSyncLastChangedBy;
 import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
 import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 
-@UmEntity(tableId = 29)
+@UmEntity(tableId = 52)
 public class SocialNominationQuestionOption {
 
     @UmPrimaryKey(autoGenerateSyncable = true)
@@ -21,6 +22,27 @@ public class SocialNominationQuestionOption {
     @UmSyncLocalChangeSeqNum
     private long socialNominationQuestionOptionLocalChangeSeqNum;
 
+    @UmSyncLastChangedBy
+    private int socialNominationQuestionOptionLastChangedBy;
+
+    private boolean optionActive;
+
+
+    public int getSocialNominationQuestionOptionLastChangedBy() {
+        return socialNominationQuestionOptionLastChangedBy;
+    }
+
+    public void setSocialNominationQuestionOptionLastChangedBy(int socialNominationQuestionOptionLastChangedBy) {
+        this.socialNominationQuestionOptionLastChangedBy = socialNominationQuestionOptionLastChangedBy;
+    }
+
+    public boolean isOptionActive() {
+        return optionActive;
+    }
+
+    public void setOptionActive(boolean optionActive) {
+        this.optionActive = optionActive;
+    }
 
     public long getSocialNominationQuestionOptionUid() {
         return socialNominationQuestionOptionUid;

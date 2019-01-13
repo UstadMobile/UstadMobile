@@ -45,12 +45,25 @@
             <ImageView
                 android:id="@+id/activity_person_detail_student_image"
                 android:layout_width="match_parent"
-                android:layout_height="120dp"
+                android:layout_height="200dp"
                 android:contentDescription="@string/student_image"
                 android:src="@drawable/ic_person_black_24dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/activity_person_detail_appbar" />
+
+            <Button
+                android:id="@+id/activity_person_detail_student_image_button2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="8dp"
+                android:background="@android:color/transparent"
+                android:text="@string/update_picture"
+                android:visibility="invisible"
+                android:textAppearance="@style/TextAppearance.AppCompat.Button"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/activity_person_detail_student_image" />
 
             <TextView
                 android:id="@+id/activity_person_detail_student_name"
@@ -243,6 +256,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|center"
         android:layout_marginBottom="8dp"
+        android:visibility="invisible"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
         app:floating_background_color="@color/accent"

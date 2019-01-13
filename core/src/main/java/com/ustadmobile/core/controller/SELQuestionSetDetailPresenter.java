@@ -5,7 +5,9 @@ import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.db.dao.SocialNominationQuestionDao;
 import com.ustadmobile.core.db.dao.SocialNominationQuestionSetDao;
 import com.ustadmobile.core.impl.UmAccountManager;
+import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.view.SELQuestionDetail2View;
 import com.ustadmobile.core.view.SELQuestionSetDetailView;
 import com.ustadmobile.lib.db.entities.SocialNominationQuestion;
 
@@ -40,20 +42,48 @@ public class SELQuestionSetDetailPresenter extends
     }
 
     public void handleQuestionEdit(long selQuestionUid){
-
-        //TODO
+        goToQuestionDetail(selQuestionUid);
     }
 
     public void handleQuestionDelete(long selQuestionUid){
+        selQuestionDao.findByUidAsync(selQuestionUid, new UmCallback<SocialNominationQuestion>() {
+            @Override
+            public void onSuccess(SocialNominationQuestion selQuestionObj) {
+                if(selQuestionObj != null){
+                    selQuestionObj.setQuestionActive(false);
+                    selQuestionDao.updateAsync(selQuestionObj, new UmCallback<Integer>() {
+                        @Override
+                        public void onSuccess(Integer result) {
+                            //ola
+                        }
 
-        //TODO
+                        @Override
+                        public void onFailure(Throwable exception) {
+                            exception.printStackTrace();
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onFailure(Throwable exception) {
+
+            }
+        });
+    }
+
+    public void goToQuestionDetail(long questionUid){
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        Hashtable args = new Hashtable();
+        args.put(SELQuestionDetail2View.ARG_QUESTION_UID_QUESTION_DETAIL, questionUid);
+        impl.go(SELQuestionDetail2View.VIEW_NAME, args, context);
     }
 
     public void handleClickPrimaryActionButton(){
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         Hashtable args = new Hashtable();
-        //TODO:
-        //impl.go(SELQuestionDetail2View.VIEW_NAMe, args, context);
+        args.put(ARG_SEL_QUESTION_SET_UID, questionSetUid);
+        impl.go(SELQuestionDetail2View.VIEW_NAME, args, context);
     }
 
     @Override
@@ -66,7 +96,5 @@ public class SELQuestionSetDetailPresenter extends
     }
 
     @Override
-    public void setUIStrings() {
-
-    }
+    public void setUIStrings() {}
 }

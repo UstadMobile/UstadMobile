@@ -1,7 +1,7 @@
 package com.ustadmobile.core.view;
 
 import com.ustadmobile.core.db.UmProvider;
-import com.ustadmobile.lib.db.entities.Person;
+import com.ustadmobile.lib.db.entities.PersonWithPersonPicture;
 
 /**
  * View for editing an SEL nomination. SELEdit Core View extends Core UstadView. Will be implemented
@@ -26,7 +26,7 @@ public interface SELEditView extends UstadView {
      *
      * @param listProvider The provider data
      */
-    void setListProvider(UmProvider<Person> listProvider);
+    void setListProvider(UmProvider<PersonWithPersonPicture> listProvider);
 
     /**
      * Updates the heading on the SEL Edit page. Usually the question text.

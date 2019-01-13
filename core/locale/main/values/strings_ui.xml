@@ -477,6 +477,7 @@ This is the one you should be editing. The one in /core/locale/main/values/strin
     <string name="bulk_upload_master">Bulk Upload Master</string>
     <string name="apply">Apply</string>
     <string name="file_selected">File selected:</string>
+    <string name="person_picture">Person picture</string>
 
     <string name="content_entry_not_found">ContentEntry Not Found</string>
 
@@ -493,13 +494,16 @@ This is the one you should be editing. The one in /core/locale/main/values/strin
     <string name="question_set">Question set</string>
     <string name="new_question_set">New question set</string>
     <string name="add_edit_question">Add \/Edit Question</string>
+    <string name="edit_question">Edit Question</string>
     <string name="question_text">Question text</string>
     <string name="question_type">Question type</string>
     <string name="sel_question_type_nomination">Nomination</string>
     <string name="sel_question_type_multiple_choise">Multiple choice</string>
     <string name="sel_question_type_free_text">Free text</string>
     <string name="add_option">Add option</string>
-
+    <string name="nomination">Nomination</string>
+    <string name="multiple_choice">Multiple choice</string>
+    <string name="free_text">Free text</string>
 
 
 

@@ -8,6 +8,7 @@ import android.arch.paging.LivePagedListBuilder;
 import android.arch.paging.PagedList;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
@@ -350,6 +351,7 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
                     });
                 }
 
+                
                 til.addView(et, tilp);
 
                 editView = til;
@@ -450,11 +452,11 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
      * Starts the camera intent.
      */
     private void startCameraIntent(){
-        String imageId = String.valueOf(System.currentTimeMillis());
         Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-        File dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
-        File output = new File(dir,imageId+"_image.png");
+        File dir = getFilesDir();
+        File output = new File(dir, mPresenter.getPersonUid() + "_image.png");
         imagePathFromCamera = output.getAbsolutePath();
+
         Uri cameraImage = FileProvider.getUriForFile(this,
                 getPackageName() + ".fileprovider", output);
         cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT,cameraImage);
@@ -482,8 +484,12 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
     public void compressImage() {
         File imageFile = new File(imagePathFromCamera);
         try {
-            Compressor c = new Compressor(this);
-            c.setDestinationDirectoryPath(imageFile.getPath() + "_" + imageFile.getName() );
+            Compressor c = new Compressor(this)
+                    .setMaxWidth(IMAGE_MAX_WIDTH)
+                    .setMaxHeight(IMAGE_MAX_HEIGHT)
+                    .setQuality(IMAGE_QUALITY)
+                    .setCompressFormat(Bitmap.CompressFormat.JPEG)
+                    .setDestinationDirectoryPath(imageFile.getPath() + "_" + imageFile.getName());
 
             File compressedImageFile = c.compressToFile(imageFile);
             if(!imageFile.delete()){
@@ -498,12 +504,14 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
 
     @Override
     public void updateImageOnView(String imagePath){
-        Uri profileImage = Uri.fromFile(new File(imagePath));
+        runOnUiThread(() -> {
+            Uri profileImage = Uri.fromFile(new File(imagePath));
 
-        Picasso.with(getApplicationContext()).load(profileImage).into(personEditImage);
+            //Picasso.with(getApplicationContext()).load(profileImage).into(personEditImage);
+            Picasso.get().load(profileImage).into(personEditImage);
+        });
 
-        File profilePic = new File(imagePath);
-        Picasso.with(getApplicationContext()).load(profilePic).into(personEditImage);
+
     }
 
     @Override

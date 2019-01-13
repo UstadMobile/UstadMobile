@@ -61,32 +61,48 @@
         app:layout_constraintTop_toBottomOf="@+id/activity_sel_question_detail2_question_type_heading" />
 
     <android.support.constraint.ConstraintLayout
+        android:id="@+id/activity_sel_question_detail2_options_cl"
+        android:visibility="invisible"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginTop="8dp"
         app:layout_constraintTop_toBottomOf="@+id/activity_sel_question_detail2_question_type_spinner">
 
 
-        <ImageView
-            android:id="@+id/imageView11"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="8dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/ic_add_circle_outline_black_24dp" />
-
-        <TextView
-            android:id="@+id/textView8"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+        <android.support.constraint.ConstraintLayout
+            android:id="@+id/activity_sel_question_detail2_add_question_cl"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
             android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
-            android:text="@string/add_option"
-            android:textColor="@color/text_primary"
-            app:layout_constraintStart_toEndOf="@+id/imageView11"
-            app:layout_constraintTop_toTopOf="parent" />
+            android:layout_marginEnd="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+
+            <ImageView
+                android:id="@+id/activity_sel_question_detail2_add_question_cl_add_image"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/ic_add_circle_outline_black_24dp" />
+
+            <TextView
+                android:id="@+id/activity_sel_question_detail2_add_question_cl_add_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:text="@string/add_option"
+                android:textColor="@color/text_primary"
+                app:layout_constraintStart_toEndOf="@+id/activity_sel_question_detail2_add_question_cl_add_image"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </android.support.constraint.ConstraintLayout>
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/activity_sel_question_detail2_type_multi_choice_options_recyclerview"
@@ -94,16 +110,14 @@
             android:layout_height="0dp"
             android:layout_alignParentBottom="true"
             android:layout_marginStart="16dp"
-            android:layout_marginTop="24dp"
+            android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
             android:scrollbars="vertical"
             android:visibility="visible"
             app:layout_behavior="@string/appbar_scrolling_view_behavior"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textView8" />
-
-
+            app:layout_constraintTop_toBottomOf="@+id/activity_sel_question_detail2_add_question_cl" />
     </android.support.constraint.ConstraintLayout>
 
 

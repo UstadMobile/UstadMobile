@@ -40,7 +40,8 @@ public abstract class ClazzActivityDao implements SyncableDao<ClazzActivity, Cla
     @UmUpdate
     public abstract void updateAsync(ClazzActivity entity, UmCallback<Integer> resultObject);
 
-    @UmQuery("SELECT * FROM ClazzActivity where clazzActivityClazzUid = :clazzUid ORDER BY clazzActivityLogDate DESC")
+    @UmQuery("SELECT * FROM ClazzActivity where clazzActivityClazzUid = :clazzUid AND " +
+            "clazzActivityDone = 1 ORDER BY clazzActivityLogDate DESC")
     public abstract UmProvider<ClazzActivity> findByClazzUid(long clazzUid);
 
     @UmQuery("SELECT * FROM ClazzActivity WHERE clazzActivityUid = :uid")

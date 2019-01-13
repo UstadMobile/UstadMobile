@@ -67,10 +67,10 @@ public abstract class ClazzLogDao implements SyncableDao<ClazzLog, ClazzLogDao> 
     @UmQuery("UPDATE ClazzLog SET done = 1 where clazzLogUid = :clazzLogUid ")
     public abstract void updateDoneForClazzLogAsync(long clazzLogUid, UmCallback<Integer> callback);
 
-    @UmQuery("SELECT * FROM ClazzLog where clazzLogClazzUid = :clazzUid")
+    @UmQuery("SELECT * FROM ClazzLog where clazzLogClazzUid = :clazzUid ORDER BY logDate DESC")
     public abstract UmProvider<ClazzLog> findByClazzUid(long clazzUid);
 
-    @UmQuery("SELECT * FROM ClazzLog where clazzLogClazzUid = :clazzUid AND done = 1")
+    @UmQuery("SELECT * FROM ClazzLog where clazzLogClazzUid = :clazzUid AND done = 1 ORDER BY logDate DESC")
     public abstract UmProvider<ClazzLog> findByClazzUidThatAreDone(long clazzUid);
 
     @UmQuery("UPDATE ClazzLog SET numPresent = :numPresent,  numAbsent = :numAbsent, " +

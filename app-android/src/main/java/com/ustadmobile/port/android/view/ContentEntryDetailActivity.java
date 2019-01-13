@@ -51,9 +51,13 @@ public class ContentEntryDetailActivity extends UstadBaseActivity implements Con
         TextView desc = findViewById(R.id.entry_detail_description);
         desc.setText(contentEntry.getDescription());
 
-        new Handler(Looper.getMainLooper()).post(() -> Picasso.with(ContentEntryDetailActivity.this)
-                .load(contentEntry.getThumbnailUrl())
-                .into((ImageView) findViewById(R.id.entry_detail_thumbnail)));
+        new Handler(Looper.getMainLooper()).post(() -> {
+
+            //Picasso.with(ContentEntryDetailActivity.this)
+            Picasso.get()
+                    .load(contentEntry.getThumbnailUrl())
+                    .into((ImageView) findViewById(R.id.entry_detail_thumbnail));
+        });
 
 
         getSupportActionBar().setTitle(contentEntry.getTitle());

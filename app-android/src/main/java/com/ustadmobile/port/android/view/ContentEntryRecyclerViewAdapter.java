@@ -40,7 +40,8 @@ public class ContentEntryRecyclerViewAdapter extends PagedListAdapter<ContentEnt
         ContentEntry entry = getItem(position);
         holder.getEntryTitle().setText(entry.getTitle());
         holder.getEntryDescription().setText(entry.getDescription());
-        Picasso.with(holder.getThumbnailView().getContext())
+        //Picasso.with(holder.getThumbnailView().getContext())
+        Picasso.get()
                 .load(entry.getThumbnailUrl())
                 .into(holder.getThumbnailView());
         holder.getView().setOnClickListener(view -> listener.contentEntryClicked(entry));

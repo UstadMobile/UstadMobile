@@ -100,6 +100,7 @@ import com.ustadmobile.core.view.LoginView;
 import com.ustadmobile.core.view.PersonDetailEnrollClazzView;
 import com.ustadmobile.core.view.PersonDetailView;
 import com.ustadmobile.core.view.PersonEditView;
+import com.ustadmobile.core.view.PersonPictureDialogView;
 import com.ustadmobile.core.view.Register2View;
 import com.ustadmobile.core.view.RegistrationView;
 import com.ustadmobile.core.view.ReportAttendanceGroupedByThresholdsView;
@@ -108,6 +109,7 @@ import com.ustadmobile.core.view.ReportNumberOfDaysClassesOpenView;
 import com.ustadmobile.core.view.ReportOverallAttendanceView;
 import com.ustadmobile.core.view.ReportSelectionView;
 import com.ustadmobile.core.view.SELEditView;
+import com.ustadmobile.core.view.SELQuestionDetail2View;
 import com.ustadmobile.core.view.SELQuestionDetailView;
 import com.ustadmobile.core.view.SELQuestionEditView;
 import com.ustadmobile.core.view.SELQuestionSetDetailView;
@@ -160,6 +162,7 @@ import com.ustadmobile.port.android.view.LoginDialogFragment;
 import com.ustadmobile.port.android.view.PersonDetailActivity;
 import com.ustadmobile.port.android.view.PersonDetailEnrollClazzActivity;
 import com.ustadmobile.port.android.view.PersonEditActivity;
+import com.ustadmobile.port.android.view.PersonPictureDialogFragment;
 import com.ustadmobile.port.android.view.ReceiveCourseDialogFragment;
 import com.ustadmobile.port.android.view.Register2Activity;
 import com.ustadmobile.port.android.view.RegistrationDialogFragment;
@@ -170,6 +173,7 @@ import com.ustadmobile.port.android.view.ReportOverallAttendanceActivity;
 import com.ustadmobile.port.android.view.ReportSelectionActivity;
 import com.ustadmobile.port.android.view.SELEditActivity;
 import com.ustadmobile.port.android.view.SELQuestionActivity;
+import com.ustadmobile.port.android.view.SELQuestionDetail2Activity;
 import com.ustadmobile.port.android.view.SELQuestionDetailActivity;
 import com.ustadmobile.port.android.view.SELQuestionEditActivity;
 import com.ustadmobile.port.android.view.SELQuestionSetDetailActivity;
@@ -311,6 +315,8 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         viewNameToAndroidImplMap.put(SELQuestionSetsView.VIEW_NAME, SELQuestionSetsActivity.class);
         viewNameToAndroidImplMap.put(AddQuestionSetDialogView.VIEW_NAME, AddQuestionSetDialogFragment.class);
         viewNameToAndroidImplMap.put(SELQuestionSetDetailView.VIEW_NAME, SELQuestionSetDetailActivity.class);
+        viewNameToAndroidImplMap.put(PersonPictureDialogView.VIEW_NAME, PersonPictureDialogFragment.class);
+        viewNameToAndroidImplMap.put(SELQuestionDetail2View.VIEW_NAME, SELQuestionDetail2Activity.class);
     }
 
     /**

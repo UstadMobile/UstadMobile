@@ -68,11 +68,18 @@ public class Role {
 
     public static final long PERMISSION_SEL_QUESTION_UPDATE = 524288;
 
+    public static final long PERMISSION_PERSON_PICTURE_SELECT = 1048576;
+
+    public static final long PERMISSION_PERSON_PICTURE_INSERT = 2097152;
+
+    public static final long PERMISSION_PERSON_PICTURE_UPDATE = 4194304;
+
     /**
      * Permission to view reports. In reality, this is really just a UI permission, and does not
      * affect access to the underlying data.
      */
-    public static final long PERMISSION_REPORTS_VIEW = 1048576;
+    public static final long PERMISSION_REPORTS_VIEW = 8388608;
+
 
     public Role() {
 

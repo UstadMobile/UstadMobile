@@ -31,6 +31,25 @@ public class SocialNominationQuestion {
     //If this question allows for multiple nominations.
     boolean multiNominations;
 
+    private int questionType;
+
+    boolean questionActive;
+
+    public boolean isQuestionActive() {
+        return questionActive;
+    }
+
+    public void setQuestionActive(boolean questionActive) {
+        this.questionActive = questionActive;
+    }
+
+    public int getQuestionType() {
+        return questionType;
+    }
+
+    public void setQuestionType(int questionType) {
+        this.questionType = questionType;
+    }
 
     @UmSyncMasterChangeSeqNum
     private long scheduleNominationQuestionMasterChangeSeqNum;

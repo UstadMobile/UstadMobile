@@ -1,19 +1,28 @@
 package com.ustadmobile.port.android.view;
 
+import android.Manifest;
 import android.arch.lifecycle.LiveData;
 import android.arch.paging.DataSource;
 import android.arch.paging.LivePagedListBuilder;
 import android.arch.paging.PagedList;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.content.FileProvider;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -30,10 +39,15 @@ import com.ustadmobile.lib.db.entities.ClazzWithNumStudents;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Objects;
 
+import id.zelory.compressor.Compressor;
 import ru.dimorinny.floatingtextbutton.FloatingTextButton;
 
+import static com.ustadmobile.core.view.PersonEditView.IMAGE_MAX_HEIGHT;
+import static com.ustadmobile.core.view.PersonEditView.IMAGE_MAX_WIDTH;
+import static com.ustadmobile.core.view.PersonEditView.IMAGE_QUALITY;
 import static com.ustadmobile.lib.db.entities.PersonField.FIELD_TYPE_DATE;
 import static com.ustadmobile.lib.db.entities.PersonField.FIELD_TYPE_DROPDOWN;
 import static com.ustadmobile.lib.db.entities.PersonField.FIELD_TYPE_FIELD;
@@ -49,6 +63,7 @@ import static com.ustadmobile.port.android.view.PersonEditActivity.ADD_PERSON_IC
  */
 public class PersonDetailActivity extends UstadBaseActivity implements PersonDetailView {
 
+    private static final int CAMERA_PERMISSION_REQUEST = 104;
     private LinearLayout mLinearLayout;
 
     private RecyclerView mRecyclerView;
@@ -56,6 +71,9 @@ public class PersonDetailActivity extends UstadBaseActivity implements PersonDet
     private PersonDetailPresenter mPresenter;
     ImageView personEditImage;
     private FloatingTextButton fab;
+    Button updateImageButton;
+    private String imagePathFromCamera;
+    private static final int CAMERA_IMAGE_CAPTURE_REQUEST = 103 ;
 
     public static final String CALL_ICON_NAME = "ic_call_bcd4_24dp";
     public static final String TEXT_ICON_NAME = "ic_textsms_bcd4_24dp";
@@ -88,6 +106,11 @@ public class PersonDetailActivity extends UstadBaseActivity implements PersonDet
 
         //Load the Image
         personEditImage = findViewById(R.id.activity_person_detail_student_image);
+
+        //Update image button
+        updateImageButton = findViewById(R.id.activity_person_detail_student_image_button2);
+
+        updateImageButton.setOnClickListener(view -> addImageFromCamera());
 
         //Call the Presenter
         mPresenter = new PersonDetailPresenter(this,
@@ -139,17 +162,131 @@ public class PersonDetailActivity extends UstadBaseActivity implements PersonDet
             fab.setEnabled(show);
             fab.setVisibility(show?View.VISIBLE:View.INVISIBLE);
         });
+    }
 
+    @Override
+    public void addImageFromCamera() {
+        if (ContextCompat.checkSelfPermission(getApplicationContext(),
+                Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(PersonDetailActivity.this,
+                    new String[]{Manifest.permission.CAMERA},
+                    CAMERA_PERMISSION_REQUEST);
+            return;
+        }
+        startCameraIntent();
+    }
+
+
+    //this is how you check permission grant task result.
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[],
+                                           @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case CAMERA_PERMISSION_REQUEST:
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    startCameraIntent();
+                }
+                break;
+        }
+    }
+
+
+    /**
+     * Starts the camera intent.
+     */
+    private void startCameraIntent(){
+        Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+        File dir = getFilesDir();
+        File output = new File(dir, mPresenter.getPersonUid() + "_image.png");
+        imagePathFromCamera = output.getAbsolutePath();
+
+        Uri cameraImage = FileProvider.getUriForFile(this,
+                getPackageName() + ".fileprovider", output);
+        cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT,cameraImage);
+        startActivityForResult(cameraIntent, CAMERA_IMAGE_CAPTURE_REQUEST);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(resultCode == RESULT_OK){
+            switch (requestCode){
+                case CAMERA_IMAGE_CAPTURE_REQUEST:
+
+                    //Compress the image:
+                    compressImage();
+
+                    //1. Send Pic to PersonPictureDao , etc
+                    File imageFile = new File(imagePathFromCamera);
+                    mPresenter.handleCompressedImage(imageFile);
+
+                    //2. persist it
+                    //3. Update Image on View
+
+
+                    //set imagePathFromCamera to Person (persist)
+                    //updateImageOnView(imagePathFromCamera);
+
+                    break;
+            }
+        }
+    }
+
+    /**
+     * Compress the image set using Compressor.
+     *
+     */
+    public void compressImage() {
+        File imageFile = new File(imagePathFromCamera);
+        try {
+            Compressor c = new Compressor(this)
+                .setMaxWidth(IMAGE_MAX_WIDTH)
+                .setMaxHeight(IMAGE_MAX_HEIGHT)
+                .setQuality(IMAGE_QUALITY)
+                .setCompressFormat(Bitmap.CompressFormat.JPEG)
+                .setDestinationDirectoryPath(imageFile.getPath() + "_" + imageFile.getName());
+
+            File compressedImageFile = c.compressToFile(imageFile);
+            if(!imageFile.delete()){
+                System.out.print("Could not delete " + imagePathFromCamera);
+            }
+            imagePathFromCamera = compressedImageFile.getAbsolutePath();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void showUpdateImageButton(boolean show) {
+        runOnUiThread(() -> {
+            updateImageButton.setEnabled(show);
+            updateImageButton.setVisibility(show?View.VISIBLE:View.INVISIBLE);
+        });
     }
 
     @Override
     public void updateImageOnView(String imagePath){
-        Uri profileImage = Uri.fromFile(new File(imagePath));
+        File output = new File(imagePath);
 
-        Picasso.with(getApplicationContext()).load(profileImage).into(personEditImage);
+        if (output.exists()) {
+            Uri profileImage = Uri.fromFile(output);
 
-        File profilePic = new File(imagePath);
-        Picasso.with(getApplicationContext()).load(profilePic).into(personEditImage);
+            runOnUiThread(() -> {
+                Picasso
+                        .get()
+                        .load(profileImage)
+                        .fit()
+                        .centerCrop()
+                        .into(personEditImage);
+
+                //Click on image - open dialog to show bigger picture
+                personEditImage.setOnClickListener(view ->
+                        mPresenter.openPictureDialog(imagePath));
+            });
+
+        }
     }
 
     @Override
@@ -187,7 +324,8 @@ public class PersonDetailActivity extends UstadBaseActivity implements PersonDet
                     //Add a recyclerview of classes
                     mRecyclerView = new RecyclerView(this);
 
-                    RecyclerView.LayoutManager mRecyclerLayoutManager = new LinearLayoutManager(getApplicationContext());
+                    RecyclerView.LayoutManager mRecyclerLayoutManager =
+                            new LinearLayoutManager(getApplicationContext());
                     mRecyclerView.setLayoutManager(mRecyclerLayoutManager);
 
                     //Add the layout

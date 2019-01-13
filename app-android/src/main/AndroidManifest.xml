@@ -192,6 +192,11 @@
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
             android:theme="@style/Theme.UstadTheme"
             android:windowSoftInputMode="stateHidden"/>
+        <activity
+            android:name="com.ustadmobile.port.android.view.SELQuestionDetail2Activity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
+            android:theme="@style/Theme.UstadTheme"
+            android:windowSoftInputMode="stateHidden"/>
 
         <activity
             android:name="com.ustadmobile.port.android.view.AboutActivity"

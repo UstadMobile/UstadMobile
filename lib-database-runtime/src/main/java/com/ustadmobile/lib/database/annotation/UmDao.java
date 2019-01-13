@@ -50,4 +50,12 @@ public @interface UmDao {
      */
     String permissionJoin() default "";
 
+    /**
+     * If true, this DAO will have a binary (input stream) attachment. This is stored in a directory
+     * that must be supplied
+     *
+     * @return
+     */
+    boolean hasAttachment() default false;
+
 }

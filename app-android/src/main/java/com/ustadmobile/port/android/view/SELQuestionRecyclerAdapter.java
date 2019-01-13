@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.arch.paging.PagedListAdapter;
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.constraint.ConstraintLayout;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -16,6 +17,7 @@ import android.widget.TextView;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.CommonHandlerPresenter;
 import com.ustadmobile.core.controller.SELQuestionSetDetailPresenter;
+import com.ustadmobile.core.db.dao.SocialNominationQuestionDao;
 import com.ustadmobile.lib.db.entities.SocialNominationQuestion;
 
 public class SELQuestionRecyclerAdapter  extends PagedListAdapter<SocialNominationQuestion,
@@ -46,9 +48,24 @@ public class SELQuestionRecyclerAdapter  extends PagedListAdapter<SocialNominati
 
         questionTitle.setText(theQuestion.getQuestionText());
 
-        //TODO: Get question type
-        questionType.setText(" ");
+        switch(theQuestion.getQuestionType()){
+            case SocialNominationQuestionDao
+                    .SEL_QUESTION_TYPE_NOMINATION:
+                questionType.setText(theActivity.getText(R.string.sel_question_type_nomination));
+                break;
+            case SocialNominationQuestionDao.SEL_QUESTION_TYPE_MULTI_CHOICE:
+                questionType.setText(theActivity.getText(R.string.sel_question_type_multiple_choise));
+                break;
+            case SocialNominationQuestionDao.SEL_QUESTION_TYPE_FREE_TEXT:
+                questionType.setText(theActivity.getText(R.string.sel_question_type_free_text));
+                break;
+            default:
+                break;
+        }
 
+        ConstraintLayout theWholeThang = holder.itemView.findViewById(R.id.item_sel_question_cl);
+        theWholeThang.setOnClickListener(view ->
+                mPresenter.goToQuestionDetail(theQuestion.getSocialNominationQuestionUid()));
 
         //Options to Edit/Delete every schedule in the list
         ImageView optionsImageView =

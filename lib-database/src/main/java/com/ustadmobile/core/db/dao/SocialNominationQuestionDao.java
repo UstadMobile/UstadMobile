@@ -1,5 +1,6 @@
 package com.ustadmobile.core.db.dao;
 
+import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.lib.database.annotation.UmDao;
@@ -16,6 +17,10 @@ import java.util.List;
 @UmRepository
 public abstract class SocialNominationQuestionDao implements
         SyncableDao<SocialNominationQuestion, SocialNominationQuestionDao> {
+
+    public static final int SEL_QUESTION_TYPE_NOMINATION = 1;
+    public static final int SEL_QUESTION_TYPE_MULTI_CHOICE = 2;
+    public static final int SEL_QUESTION_TYPE_FREE_TEXT = 3;
 
     @UmInsert
     public abstract long insert(SocialNominationQuestion entity);
@@ -34,6 +39,12 @@ public abstract class SocialNominationQuestionDao implements
 
     @UmQuery("SELECT * FROM SocialNominationQuestion WHERE socialNominationQuestionUid = :uid")
     public abstract SocialNominationQuestion findByUid(long uid);
+
+    @UmQuery("SELECT * FROM SocialNominationQuestion WHERE socialNominationQuestionUid = :uid")
+    public abstract void findByUidAsync(long uid, UmCallback<SocialNominationQuestion> resultObject);
+
+    @UmQuery("SELECT * FROM SocialNominationQuestion WHERE socialNominationQuestionUid = :uid")
+    public abstract UmLiveData<SocialNominationQuestion> findByUidLive(long uid);
 
     @UmQuery("SELECT MAX(questionIndex) FROM SocialNominationQuestion")
     public abstract void getMaxIndexAsync(UmCallback<Integer> resultObject);

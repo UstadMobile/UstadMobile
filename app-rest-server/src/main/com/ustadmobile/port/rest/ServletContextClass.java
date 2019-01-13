@@ -59,10 +59,13 @@ public class ServletContextClass implements ServletContextListener
 
         //Run this before web application is started
         @Override
-        public void contextInitialized(ServletContextEvent arg0) {
+        public void contextInitialized(ServletContextEvent evt) {
             System.out.println("ServletContextListener started");
 
-            appDb = UmAppDatabase.getInstance(arg0.getServletContext());
+            appDb = UmAppDatabase.getInstance(evt.getServletContext());
+            appDb.setAttachmentsDir(evt.getServletContext().getRealPath("/WEB-INF/attachments/"));
+            System.out.println("Set db attachments path to: " + appDb.getAttachmentsDir());
+
             appDbRepository = appDb.getRepository(dummyBaseUrl, dummyAuth);
 
             personCustomFieldDao =
@@ -121,8 +124,12 @@ public class ServletContextClass implements ServletContextListener
                             Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_INSERT |   //Take attendance
                             Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_UPDATE |   //Update attendance
                             Role.PERMISSION_PERSON_SELECT  |                //See People
-                            Role.PERMISSION_PERSON_UPDATE |                 //Update people
-                            Role.PERMISSION_PERSON_INSERT;                  //Add person
+                            //Role.PERMISSION_PERSON_UPDATE |                 //Update people
+                            Role.PERMISSION_PERSON_PICTURE_INSERT |         //Insert Person Picture
+                            Role.PERMISSION_PERSON_PICTURE_SELECT |         //See Person Picture
+                            Role.PERMISSION_PERSON_PICTURE_UPDATE           //Update Person picture
+                            //Role.PERMISSION_PERSON_INSERT                   //Add person
+                            ;
                         newRole.setRolePermissions(teacherPermissions);
                         Long newRoleUid = roleDao.insert(newRole);
                     }else{

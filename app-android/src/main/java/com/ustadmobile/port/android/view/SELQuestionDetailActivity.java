@@ -38,19 +38,19 @@ public class SELQuestionDetailActivity extends UstadBaseActivity implements SELQ
      * The DIFF CALLBACK
      */
     public static final DiffUtil.ItemCallback<SocialNominationQuestion> DIFF_CALLBACK =
-            new DiffUtil.ItemCallback<SocialNominationQuestion>() {
-                @Override
-                public boolean areItemsTheSame(SocialNominationQuestion oldItem,
-                                               SocialNominationQuestion newItem) {
-                    return oldItem == newItem;
-                }
+        new DiffUtil.ItemCallback<SocialNominationQuestion>() {
+            @Override
+            public boolean areItemsTheSame(SocialNominationQuestion oldItem,
+                                           SocialNominationQuestion newItem) {
+                return oldItem == newItem;
+            }
 
-                @Override
-                public boolean areContentsTheSame(SocialNominationQuestion oldItem,
-                                                  SocialNominationQuestion newItem) {
-                    return oldItem.equals(newItem);
-                }
-            };
+            @Override
+            public boolean areContentsTheSame(SocialNominationQuestion oldItem,
+                                              SocialNominationQuestion newItem) {
+                return oldItem.equals(newItem);
+            }
+        };
 
     /**
      * Sets questions list provider to the recycler adapter.

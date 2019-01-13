@@ -31,6 +31,7 @@ import java.util.stream.Collectors;
 
 import static com.ustadmobile.core.view.ClazzActivityEditView.THUMB_BAD;
 import static com.ustadmobile.core.view.ClazzActivityEditView.THUMB_GOOD;
+import static com.ustadmobile.core.view.ClazzActivityEditView.THUMB_OFF;
 import static com.ustadmobile.core.view.ClazzListView.ARG_CLAZZ_UID;
 import static com.ustadmobile.core.view.ClazzActivityEditView.ARG_CLAZZACTIVITY_UID;
 
@@ -215,6 +216,7 @@ public class ClazzActivityEditPresenter
                         public void onSuccess(Long result) {
                             currentClazzActivityUid = result;
                             currentClazzActivity = clazzActivityDao.findByUid(result);
+                            view.setThumbs(THUMB_OFF);
                         }
 
                         @Override
@@ -484,7 +486,7 @@ public class ClazzActivityEditPresenter
         currentLogDate = newDate;
 
         //2. Reset the current ClazzActivity uid
-        currentClazzActivityUid = -1;
+        currentClazzActivityUid = 0L;
 
         //3. Re load view and recycler
         fillClazzActivity();
