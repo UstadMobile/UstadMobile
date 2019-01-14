@@ -58,7 +58,7 @@ public class AddQuestionOptionDialogFragment extends UstadDialogFragment impleme
                 (dialog, which) -> mPresenter.handleCancelQuestionOption();
 
         AlertDialog.Builder builder = new AlertDialog.Builder(Objects.requireNonNull(getContext()));
-        builder.setTitle(R.string.add_activity_literal);
+        builder.setTitle(R.string.add_option);
         builder.setView(rootView);
         builder.setPositiveButton(R.string.add, positiveOCL);
         builder.setNegativeButton(R.string.cancel, negativeOCL);
@@ -108,6 +108,6 @@ public class AddQuestionOptionDialogFragment extends UstadDialogFragment impleme
 
     @Override
     public void setOptionText(String text) {
-
+        runOnUiThread(() -> optionText.setText(text));
     }
 }

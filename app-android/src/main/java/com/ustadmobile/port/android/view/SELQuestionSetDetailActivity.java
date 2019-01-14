@@ -100,7 +100,8 @@ public class SELQuestionSetDetailActivity extends
     public void setListProvider(UmProvider<SocialNominationQuestion> listProvider) {
 
         SELQuestionRecyclerAdapter recyclerAdapter =
-                new SELQuestionRecyclerAdapter(DIFF_CALLBACK, getApplicationContext());
+                new SELQuestionRecyclerAdapter(DIFF_CALLBACK, getApplicationContext(),
+                        this, mPresenter);
 
         // get the provider, set , observe, etc.
         // A warning is expected

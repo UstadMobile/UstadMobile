@@ -10,6 +10,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.SELQuestionDetail2View;
 import com.ustadmobile.core.view.SELQuestionSetDetailView;
 import com.ustadmobile.lib.db.entities.SocialNominationQuestion;
+import com.ustadmobile.lib.db.entities.SocialNominationQuestionOption;
 
 import java.util.Hashtable;
 
@@ -41,8 +42,9 @@ public class SELQuestionSetDetailPresenter extends
         }
     }
 
-    public void handleQuestionEdit(long selQuestionUid){
-        goToQuestionDetail(selQuestionUid);
+    public void handleQuestionEdit(SocialNominationQuestion question){
+
+        goToQuestionDetail(question);
     }
 
     public void handleQuestionDelete(long selQuestionUid){
@@ -72,10 +74,12 @@ public class SELQuestionSetDetailPresenter extends
         });
     }
 
-    public void goToQuestionDetail(long questionUid){
+    public void goToQuestionDetail(SocialNominationQuestion question){
+        long questionUid = question.getSocialNominationQuestionUid();
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         Hashtable args = new Hashtable();
         args.put(SELQuestionDetail2View.ARG_QUESTION_UID_QUESTION_DETAIL, questionUid);
+        args.put(ARG_SEL_QUESTION_SET_UID, question.getSocialNominationQuestionSocialNominationQuestionSetUid());
         impl.go(SELQuestionDetail2View.VIEW_NAME, args, context);
     }
 
@@ -90,7 +94,7 @@ public class SELQuestionSetDetailPresenter extends
     public void onCreate(Hashtable savedState){
         super.onCreate(savedState);
 
-        questionUmProvider = selQuestionDao.findAllQuestionsInSet(questionSetUid);
+        questionUmProvider = selQuestionDao.findAllActivrQuestionsInSet(questionSetUid);
         view.setListProvider(questionUmProvider);
         view.updateToolbarTitle(questionSetName);
     }

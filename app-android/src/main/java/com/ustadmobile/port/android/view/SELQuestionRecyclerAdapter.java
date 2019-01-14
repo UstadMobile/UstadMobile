@@ -67,7 +67,7 @@ public class SELQuestionRecyclerAdapter  extends PagedListAdapter<SocialNominati
         theWholeThang.setOnClickListener(view ->
         {
             if(theQuestion != null)
-                mPresenter.goToQuestionDetail(theQuestion.getSocialNominationQuestionUid());
+                mPresenter.goToQuestionDetail(theQuestion);
         });
 
         //Options to Edit/Delete every schedule in the list
@@ -80,7 +80,7 @@ public class SELQuestionRecyclerAdapter  extends PagedListAdapter<SocialNominati
             popup.setOnMenuItemClickListener(item -> {
                 int i = item.getItemId();
                 if (i == R.id.edit) {
-                    mPresenter.handleQuestionEdit(theQuestion.getSocialNominationQuestionUid());
+                    mPresenter.handleQuestionEdit(theQuestion);
                     return true;
                 } else if (i == R.id.delete) {
                     mPresenter.handleQuestionDelete(theQuestion.getSocialNominationQuestionUid());
@@ -104,8 +104,10 @@ public class SELQuestionRecyclerAdapter  extends PagedListAdapter<SocialNominati
 
     protected SELQuestionRecyclerAdapter(
             @NonNull DiffUtil.ItemCallback<SocialNominationQuestion> diffCallback,
-            Context context) {
+            Context context, Activity activity, SELQuestionSetDetailPresenter presenter) {
         super(diffCallback);
         theContext = context;
+        theActivity = activity;
+        mPresenter = presenter;
     }
 }

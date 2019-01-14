@@ -18,9 +18,9 @@ import java.util.List;
 public abstract class SocialNominationQuestionDao implements
         SyncableDao<SocialNominationQuestion, SocialNominationQuestionDao> {
 
-    public static final int SEL_QUESTION_TYPE_NOMINATION = 1;
-    public static final int SEL_QUESTION_TYPE_MULTI_CHOICE = 2;
-    public static final int SEL_QUESTION_TYPE_FREE_TEXT = 3;
+    public static final int SEL_QUESTION_TYPE_NOMINATION = 0;
+    public static final int SEL_QUESTION_TYPE_MULTI_CHOICE = 1;
+    public static final int SEL_QUESTION_TYPE_FREE_TEXT = 2;
 
     @UmInsert
     public abstract long insert(SocialNominationQuestion entity);
@@ -57,6 +57,11 @@ public abstract class SocialNominationQuestionDao implements
     @UmQuery("SELECT * FROM SocialNominationQuestion WHERE " +
             "socialNominationQuestionSocialNominationQuestionSetUid = :questionUid")
     public abstract UmProvider<SocialNominationQuestion> findAllQuestionsInSet(long questionUid);
+
+    @UmQuery("SELECT * FROM SocialNominationQuestion WHERE " +
+            "socialNominationQuestionSocialNominationQuestionSetUid = :questionUid AND " +
+            "questionActive = 1")
+    public abstract UmProvider<SocialNominationQuestion> findAllActivrQuestionsInSet(long questionUid);
 
     @UmQuery("SELECT * FROM SocialNominationQuestion WHERE " +
             " socialNominationQuestionSocialNominationQuestionSetUid = :questionSetUid " +

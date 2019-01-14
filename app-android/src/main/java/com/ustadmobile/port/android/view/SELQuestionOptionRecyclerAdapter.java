@@ -63,11 +63,11 @@ public class SELQuestionOptionRecyclerAdapter extends
                 int i = item.getItemId();
                 if (i == R.id.edit) {
                     mPresenter.handleQuestionOptionEdit(
-                            questionOption.getSelQuestionOptionQuestionUid());
+                            questionOption.getSocialNominationQuestionOptionUid());
                     return true;
                 } else if (i == R.id.delete) {
                     mPresenter.handleQuestionOptionDelete(
-                            questionOption.getSelQuestionOptionQuestionUid());
+                            questionOption.getSocialNominationQuestionOptionUid());
                     return true;
                 } else {
                     return false;

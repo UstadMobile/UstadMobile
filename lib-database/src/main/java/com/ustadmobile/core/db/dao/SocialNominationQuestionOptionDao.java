@@ -45,9 +45,13 @@ public abstract class SocialNominationQuestionOptionDao  implements
     public abstract void findAllOptionsByQuestionUid(long questionUid,
                                      UmCallback<List<SocialNominationQuestionOption>> resultList);
 
-
     @UmQuery("SELECT * FROM SocialNominationQuestionOption " +
             " WHERE selQuestionOptionQuestionUid = :questionUid")
     public abstract UmProvider<SocialNominationQuestionOption>
                                             findAllOptionsByQuestionUidProvider(long questionUid);
+
+    @UmQuery("SELECT * FROM SocialNominationQuestionOption " +
+            " WHERE selQuestionOptionQuestionUid = :questionUid AND optionActive = 1")
+    public abstract UmProvider<SocialNominationQuestionOption>
+                                        findAllActiveOptionsByQuestionUidProvider(long questionUid);
 }

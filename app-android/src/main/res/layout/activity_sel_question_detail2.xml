@@ -49,7 +49,7 @@
 
     <Spinner
         android:id="@+id/activity_sel_question_detail2_question_type_spinner"
-        android:layout_width="368dp"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"

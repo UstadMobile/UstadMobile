@@ -61,7 +61,7 @@ public class SELQuestionDetail2Presenter extends
         questionOptionDao = repository.getSELQuestionOptionDao();
 
         providerList = repository.getSELQuestionOptionDao()
-                .findAllOptionsByQuestionUidProvider(currentQuestionUid);
+                .findAllActiveOptionsByQuestionUidProvider(currentQuestionUid);
 
 
 
@@ -137,6 +137,10 @@ public class SELQuestionDetail2Presenter extends
             mUpdatedQuestion.setQuestionType(type);
     }
 
+    public void updateQuestionTitle(String title){
+        mUpdatedQuestion.setQuestionText(title);
+    }
+
     public void handleSELQuestionValueChanged(SocialNominationQuestion question){
         //set the og person value
         if(mOriginalQuestion == null)
@@ -164,18 +168,43 @@ public class SELQuestionDetail2Presenter extends
     public void handleClickDone(){
 
         mUpdatedQuestion.setQuestionActive(true);
-        questionDao.updateAsync(mUpdatedQuestion, new UmCallback<Integer>() {
+        mUpdatedQuestion.setSocialNominationQuestionSocialNominationQuestionSetUid(currentQuestionSetUid);
+        questionDao.findByUidAsync(mUpdatedQuestion.getSocialNominationQuestionUid(), new UmCallback<SocialNominationQuestion>() {
             @Override
-            public void onSuccess(Integer result) {
-                //Close the activity
-                view.finish();
+            public void onSuccess(SocialNominationQuestion questionInDB) {
+                if(questionInDB != null){
+                    questionDao.updateAsync(mUpdatedQuestion, new UmCallback<Integer>() {
+                        @Override
+                        public void onSuccess(Integer result) {
+                            view.finish();
+                        }
+
+                        @Override
+                        public void onFailure(Throwable exception) {
+                            exception.printStackTrace();
+                        }
+                    });
+                }else{
+                    questionDao.insertAsync(mUpdatedQuestion, new UmCallback<Long>() {
+                        @Override
+                        public void onSuccess(Long result) {
+                            view.finish();
+                        }
+
+                        @Override
+                        public void onFailure(Throwable exception) {
+
+                        }
+                    });
+                }
             }
 
             @Override
             public void onFailure(Throwable exception) {
-                exception.printStackTrace();
+
             }
         });
+
     }
 
     public void handleQuestionOptionEdit(long questionOptionUid){
@@ -183,12 +212,11 @@ public class SELQuestionDetail2Presenter extends
             @Override
             public void onSuccess(SocialNominationQuestionOption result) {
                 if(result != null){
-                    //TODO: Go to dialog
                     UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
                     Hashtable args = new Hashtable();
-                    args.put(ARG_QUESTION_UID_QUESTION_DETAIL, currentQuestionUid);
-                    args.put(ARG_QUESTION_OPTION_UID, result.getOptionText());
-                    //impl.go(AddQuestionOptionDialogView.VIEW_NAME, args, getContext());
+                    args.put(ARG_QUESTION_UID_QUESTION_DETAIL, result.getSelQuestionOptionQuestionUid());
+                    args.put(ARG_QUESTION_OPTION_UID, result.getSocialNominationQuestionOptionUid());
+                    impl.go(AddQuestionOptionDialogView.VIEW_NAME, args, getContext());
 
                 }
             }
@@ -209,7 +237,7 @@ public class SELQuestionDetail2Presenter extends
                     questionOptionDao.updateAsync(result, new UmCallback<Integer>() {
                         @Override
                         public void onSuccess(Integer result) {
-                            view.finish();
+
                         }
 
                         @Override
@@ -222,7 +250,7 @@ public class SELQuestionDetail2Presenter extends
 
             @Override
             public void onFailure(Throwable exception) {
-
+                exception.printStackTrace();
             }
         });
     }

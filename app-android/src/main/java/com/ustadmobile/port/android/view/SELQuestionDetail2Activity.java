@@ -10,6 +10,8 @@ import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -97,6 +99,19 @@ public class SELQuestionDetail2Activity extends UstadBaseActivity implements SEL
         mPresenter = new SELQuestionDetail2Presenter(this,
                 UMAndroidUtil.bundleToHashtable(getIntent().getExtras()), this);
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
+
+        questionText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                mPresenter.updateQuestionTitle(editable.toString());
+            }
+        });
 
     }
 
@@ -237,7 +252,7 @@ public class SELQuestionDetail2Activity extends UstadBaseActivity implements SEL
                 questionType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                handleQuestionTypeChange(i+1);
+                handleQuestionTypeChange(i);
             }
 
             @Override

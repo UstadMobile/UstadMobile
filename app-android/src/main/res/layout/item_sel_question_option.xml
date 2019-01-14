@@ -14,7 +14,8 @@
         android:layout_marginEnd="8dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/ic_more_vert_black_24dp" />
+        app:srcCompat="@drawable/ic_more_vert_black_24dp"
+        android:src="@drawable/ic_more_vert_black_24dp"/>
 
     <TextView
         android:id="@+id/item_sel_question_option_text"

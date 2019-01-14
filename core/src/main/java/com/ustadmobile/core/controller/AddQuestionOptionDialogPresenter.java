@@ -33,7 +33,7 @@ public class AddQuestionOptionDialogPresenter extends UstadBaseController<AddQue
             currentQuestionUid = (long) arguments.get(ARG_QUESTION_UID_QUESTION_DETAIL);
         }
         if(arguments.containsKey(ARG_QUESTION_OPTION_UID)){
-            currnetQuestonOptionUid = (long) arguments.get(ARG_QUESTION_UID_QUESTION_DETAIL);
+            currnetQuestonOptionUid = (long) arguments.get(ARG_QUESTION_OPTION_UID);
         }
     }
 
@@ -72,10 +72,37 @@ public class AddQuestionOptionDialogPresenter extends UstadBaseController<AddQue
     public void handleAddQuestionOption(String newTitle){
         currentOption.setOptionText(newTitle);
         currentOption.setOptionActive(true);
-        questionOptionDao.insertAsync(currentOption, new UmCallback<Long>() {
+        questionOptionDao.findByUidAsync(currentOption.getSocialNominationQuestionOptionUid(),
+                new UmCallback<SocialNominationQuestionOption>() {
             @Override
-            public void onSuccess(Long result) {
-                view.finish();
+            public void onSuccess(SocialNominationQuestionOption result) {
+                if(result != null){
+                    //exists. update
+                    questionOptionDao.updateAsync(currentOption, new UmCallback<Integer>() {
+                        @Override
+                        public void onSuccess(Integer result) {
+                            view.finish();
+                        }
+
+                        @Override
+                        public void onFailure(Throwable exception) {
+                            exception.printStackTrace();
+                        }
+                    });
+                }else{
+                    //new. insert
+                    questionOptionDao.insertAsync(currentOption, new UmCallback<Long>() {
+                        @Override
+                        public void onSuccess(Long result) {
+                            view.finish();
+                        }
+
+                        @Override
+                        public void onFailure(Throwable exception) {
+
+                        }
+                    });
+                }
             }
 
             @Override
