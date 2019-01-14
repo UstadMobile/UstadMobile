@@ -35,7 +35,6 @@ import com.ustadmobile.core.impl.UmLifecycleListener;
 import com.ustadmobile.core.impl.UmLifecycleOwner;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.AboutView;
-import com.ustadmobile.core.view.UserSettingsView2;
 import com.ustadmobile.core.view.UstadView;
 
 import java.util.Hashtable;
@@ -54,8 +53,6 @@ public abstract class UstadBaseController<V extends UstadView> implements UstadC
     protected V view;
     
     protected Object context;
-
-    protected Vector controllerLifecycleListeners;
 
     protected final Vector<UmLifecycleListener> lifecycleListeners = new Vector<>();
 
@@ -173,13 +170,6 @@ public abstract class UstadBaseController<V extends UstadView> implements UstadC
                 listener.onLifecycleDestroy(this);
             }
         }
-
-        if(controllerLifecycleListeners == null)
-            return;
-
-        for(int i = 0; i < controllerLifecycleListeners.size(); i++) {
-            ((ControllerLifecycleListener)controllerLifecycleListeners.elementAt(i)).onDestroyed(this);
-        }
     }
 
 
@@ -223,12 +213,6 @@ public abstract class UstadBaseController<V extends UstadView> implements UstadC
             case CMD_ABOUT:
                 UstadMobileSystemImpl.getInstance().go(AboutView.VIEW_NAME, new Hashtable(), context);
                 return true;
-            case CMD_SETTINGS:
-                UstadMobileSystemImpl.getInstance().go(UserSettingsView2.VIEW_NAME,null, context);
-                return true;
-            case CMD_LOGOUT:
-                LoginController.handleLogout(context);
-                return true;
         }
         
         return false;
@@ -259,18 +243,6 @@ public abstract class UstadBaseController<V extends UstadView> implements UstadC
         fillStandardMenuOptions(new int[labels.length], labels, 0);
         view.setAppMenuCommands(labels, STANDARD_APPEMNU_CMDS);
     }
-
-    public void addLifecycleListener(ControllerLifecycleListener listener) {
-        if(controllerLifecycleListeners == null)
-            controllerLifecycleListeners = new Vector();
-
-        controllerLifecycleListeners.addElement(listener);
-    }
-
-    public void removeLifecycleListener(ControllerLifecycleListener listener) {
-        controllerLifecycleListeners.removeElement(listener);
-    }
-
 
     @Override
     public void addLifecycleListener(UmLifecycleListener listener) {

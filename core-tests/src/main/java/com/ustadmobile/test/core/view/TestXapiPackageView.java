@@ -1,13 +1,6 @@
 package com.ustadmobile.test.core.view;
 
-import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.view.XapiPackageView;
-import com.ustadmobile.test.core.impl.AsyncTestHelper;
-
-import junit.framework.TestCase;
-
-import org.junit.Assert;
-import org.junit.Test;
 
 /**
  * Created by mike on 12/25/17.

@@ -9,14 +9,13 @@ import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.AboutController;
-import com.ustadmobile.core.controller.ControllerReadyListener;
 import com.ustadmobile.core.controller.UstadController;
 import com.ustadmobile.core.view.AboutView;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.util.Hashtable;
 
-public class AboutActivity extends UstadBaseActivity implements AboutView, ControllerReadyListener {
+public class AboutActivity extends UstadBaseActivity implements AboutView {
 
     private AboutController mAboutController;
 
@@ -28,16 +27,6 @@ public class AboutActivity extends UstadBaseActivity implements AboutView, Contr
         setTitle(R.string.about);
         mAboutController = new AboutController(this, this);
         mAboutController.onCreate(UMAndroidUtil.bundleToHashtable(getIntent().getExtras()), null);
-    }
-
-    @Override
-    public void controllerReady(UstadController controller, int flags) {
-        mAboutController = (AboutController)controller;
-        runOnUiThread(new Runnable() {
-            public void run() {
-                mAboutController.setUIStrings();
-            }
-        });
     }
 
     @Override

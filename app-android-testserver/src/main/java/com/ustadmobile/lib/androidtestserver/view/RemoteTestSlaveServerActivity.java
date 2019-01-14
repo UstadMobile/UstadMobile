@@ -12,7 +12,6 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.widget.Toast;
 
-import com.ustadmobile.core.controller.CatalogPresenter;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.port.android.netwokmanager.NetworkServiceAndroid;
 import com.ustadmobile.port.android.view.UstadBaseActivity;
@@ -22,7 +21,6 @@ import com.ustadmobile.test.sharedse.http.RemoteTestServerHttpd;
 import com.ustadmobile.umtestserver.R;
 
 import java.io.IOException;
-import java.util.Arrays;
 
 import static com.ustadmobile.port.android.view.SplashScreenActivity.REQUIRED_PERMISSIONS;
 
@@ -56,7 +54,7 @@ public class RemoteTestSlaveServerActivity extends UstadBaseActivity implements 
     }
 
     protected void scanFeed() {
-        String contentDir = UstadMobileSystemImpl.getInstance().getStorageDirs(CatalogPresenter.SHARED_RESOURCE,
+        String contentDir = UstadMobileSystemImpl.getInstance().getStorageDirs(UstadMobileSystemImpl.SHARED_RESOURCE,
                 this)[0].getDirURI();
 
 //        TODO: Reenable this if this test server is going to be used

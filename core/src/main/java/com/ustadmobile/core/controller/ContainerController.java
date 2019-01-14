@@ -321,12 +321,10 @@ public class ContainerController extends UstadBaseController {
      * @return Query string as above
      */
     public String getXAPIQuery(String xapiEndpoint) {
-        String username = UstadMobileSystemImpl.getInstance().getActiveUser(getContext());
-        String password = UstadMobileSystemImpl.getInstance().getActiveUserAuth(getContext());
-
         return "?actor=" +
             URLTextUtil.urlEncodeUTF8(UMTinCanUtil.makeActorFromActiveUser(getContext()).toString()) +
-            "&auth=" + URLTextUtil.urlEncodeUTF8(LoginController.encodeBasicAuth(username, password)) +
+                //This file itself will be deleted
+            //"&auth=" + URLTextUtil.urlEncodeUTF8(LoginController.encodeBasicAuth(username, password)) +
             "&endpoint=" + URLTextUtil.urlEncodeUTF8(xapiEndpoint) +
             "&registration=" + registrationUUID;
     }
@@ -396,18 +394,6 @@ public class ContainerController extends UstadBaseController {
         return makeTinCanContext(this.registrationUUID);
     }
 
-    /**
-     * Get the time (in miliseconds since 1/1/1970 as per system.currenTimeMillis)
-     * 
-     * @param id Container ID to find the last time opened
-     * @param context Context object for retrieving preferences
-     * 
-     * @return 
-     */
-    public static long getContainerLastOpenedTime(String id, Object context) {
-        return Long.parseLong(UstadMobileSystemImpl.getInstance().getUserPref(
-            PREFKEY_PREFIX_LASTOPENED + id, "0", context));
-    }
 
     public void setUIStrings() {
         int[] cmds = new int[STANDARD_APPEMNU_CMDS.length + 1];
