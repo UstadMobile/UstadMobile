@@ -2,9 +2,10 @@
         android:width="108dp"
         android:height="108dp"
         android:viewportWidth="106.930695"
-        android:viewportHeight="106.930695">
+        android:viewportHeight="106.930695"
+    >
     <group android:translateX="-0.5346535"
-            android:translateY="-0.5346535">>
-        
+
+            android:translateY="-0.5346535">
     </group>
 </vector>
