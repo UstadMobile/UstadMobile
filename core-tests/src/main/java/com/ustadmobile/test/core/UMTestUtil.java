@@ -1,6 +1,5 @@
 package com.ustadmobile.test.core;
 
-import com.ustadmobile.core.controller.CatalogPresenter;
 import com.ustadmobile.core.impl.UMStorageDir;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMFileUtil;
@@ -8,6 +7,8 @@ import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.test.core.impl.PlatformTestUtil;
 
 import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -34,17 +35,17 @@ public class UMTestUtil {
             entryIn = UMTestUtil.class.getResourceAsStream(resourcePath);
 
             Object context = PlatformTestUtil.getTargetContext();
-            UMStorageDir[] storageDirs = impl.getStorageDirs(CatalogPresenter.SHARED_RESOURCE,
+            UMStorageDir[] storageDirs = impl.getStorageDirs(UstadMobileSystemImpl.SHARED_RESOURCE,
                     context);
             String outDir = storageDirs[0].getDirURI();
-            if(!impl.dirExists(outDir)) {
-                impl.makeDirectoryRecursive(outDir);
+            if(new File(outDir).isDirectory()) {
+                new File(outDir).mkdirs();
             }
 
             outPath = UMFileUtil.joinPaths(new String[]{outDir,
                     UMFileUtil.getFilename(resourcePath)});
 
-            fileOut = UstadMobileSystemImpl.getInstance().openFileOutputStream(outPath, 0);
+            fileOut = new FileOutputStream(new File(outPath));
             UMIOUtils.readFully(entryIn, fileOut, 8*1024);
         }catch(IOException e) {
             ioe = e;

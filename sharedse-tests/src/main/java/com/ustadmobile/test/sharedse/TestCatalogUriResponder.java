@@ -1,7 +1,5 @@
 package com.ustadmobile.test.sharedse;
 
-import com.ustadmobile.core.controller.CatalogPresenter;
-import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.fs.db.ContainerFileHelper;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMIOUtils;
@@ -50,7 +48,7 @@ public class TestCatalogUriResponder {
         OutputStream entryOut = null;
         IOException ioe = null;
 
-        File sharedStorageDir = new File(impl.getStorageDirs(CatalogPresenter.SHARED_RESOURCE,
+        File sharedStorageDir = new File(impl.getStorageDirs(UstadMobileSystemImpl.SHARED_RESOURCE,
                 context)[0].getDirURI());
         if(!sharedStorageDir.exists())
             sharedStorageDir.mkdirs();
@@ -85,8 +83,8 @@ public class TestCatalogUriResponder {
 
     @After
     public void removeEntry() {
-        CatalogPresenter.removeEntry(TestEntryStatusTask.ENTRY_ID, CatalogPresenter.SHARED_RESOURCE,
-                PlatformTestUtil.getTargetContext());
+//        CatalogPresenter.removeEntry(TestEntryStatusTask.ENTRY_ID, UstadMobileSystemImpl.SHARED_RESOURCE,
+//                PlatformTestUtil.getTargetContext());
     }
 
     @Test

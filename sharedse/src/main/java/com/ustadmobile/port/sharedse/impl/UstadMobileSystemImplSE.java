@@ -5,7 +5,6 @@
  */
 package com.ustadmobile.port.sharedse.impl;
 
-import com.ustadmobile.core.controller.CatalogPresenter;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.OpdsAtomFeedRepository;
 import com.ustadmobile.core.fs.db.repository.OpdsAtomFeedRepositoryImpl;
@@ -13,21 +12,20 @@ import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.HttpCache;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UMStorageDir;
+import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.impl.UstadMobileSystemImplFs;
-import com.ustadmobile.core.impl.ZipFileHandle;
 import com.ustadmobile.core.impl.http.UmHttpCall;
 import com.ustadmobile.core.impl.http.UmHttpRequest;
 import com.ustadmobile.core.impl.http.UmHttpResponse;
 import com.ustadmobile.core.impl.http.UmHttpResponseCallback;
-import com.ustadmobile.core.model.CourseProgress;
+import com.ustadmobile.lib.db.entities.UmAccount;
 import com.ustadmobile.lib.util.Base64Coder;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.port.sharedse.impl.http.UmHttpCallSe;
 import com.ustadmobile.port.sharedse.impl.http.UmHttpResponseSe;
-import com.ustadmobile.port.sharedse.impl.zip.ZipFileHandleSharedSE;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -57,8 +55,6 @@ import java.util.Properties;
 import java.util.Vector;
 import java.util.concurrent.Executors;
 
-import com.ustadmobile.core.listener.ActiveSyncListener;
-import com.ustadmobile.core.listener.ActiveUserListener;
 
 
 import okhttp3.Call;
@@ -75,15 +71,9 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
 
     private XmlPullParserFactory xmlPullParserFactory;
 
-    Vector activeUserListener = new Vector();
-    Vector activeSyncListener = new Vector();
-    //ActiveSyncListener activeSyncListener;
-
     private HttpCache httpCache;
 
     private final OkHttpClient client = new OkHttpClient();
-
-    public static String DEFAULT_MAIN_SERVER_HOST_NAME = "umcloud1svlt";
 
     private Properties appConfig;
 
@@ -103,7 +93,7 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
         super.init(context);
 
         if(httpCache == null)
-            httpCache = new HttpCache(getCacheDir(CatalogPresenter.SHARED_RESOURCE, context));
+            httpCache = new HttpCache(getCacheDir(SHARED_RESOURCE, context));
     }
 
     /**
@@ -114,16 +104,6 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
      * @return
      */
     public abstract URLConnection openConnection(URL url) throws IOException;
-
-    @Override
-    public boolean isJavascriptSupported() {
-        return true;
-    }
-
-    @Override
-    public boolean isHttpsSupported() {
-        return true;
-    }
 
     /**
      * Returns the system base directory to work from
@@ -136,12 +116,7 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
     @Override
     public String getCacheDir(int mode, Object context) {
         String systemBaseDir = getSystemBaseDir(context);
-        if(mode == CatalogPresenter.SHARED_RESOURCE) {
-            return UMFileUtil.joinPaths(new String[]{systemBaseDir, UstadMobileConstants.CACHEDIR});
-        }else {
-            return UMFileUtil.joinPaths(new String[]{systemBaseDir, "user-" + getActiveUser(context),
-                    UstadMobileConstants.CACHEDIR});
-        }
+        return UMFileUtil.joinPaths(new String[]{systemBaseDir, UstadMobileConstants.CACHEDIR});
     }
 
     @Override
@@ -151,7 +126,7 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         final String contentDirName = getContentDirName(context);
 
-        if((mode & CatalogPresenter.SHARED_RESOURCE) == CatalogPresenter.SHARED_RESOURCE) {
+        if((mode & SHARED_RESOURCE) == SHARED_RESOURCE) {
             dirList.add(new UMStorageDir(systemBaseDir, getString(MessageID.device, context),
                     false, true, false));
 
@@ -165,10 +140,11 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
             }
         }
 
-        if(impl.getActiveUser(context) != null
-                && ((mode & CatalogPresenter.USER_RESOURCE) == CatalogPresenter.USER_RESOURCE)) {
-            String userBase = UMFileUtil.joinPaths(new String[]{systemBaseDir, "user-"
-                    + getActiveUser(context)});
+        UmAccount account = UmAccountManager.getActiveAccount(context);
+        if(account != null
+                && ((mode & UstadMobileSystemImpl.USER_RESOURCE) == UstadMobileSystemImpl.USER_RESOURCE)) {
+            String userBase = UMFileUtil.joinPaths(new String[]{systemBaseDir, "user-",
+                    account.getUsername()});
             dirList.add(new UMStorageDir(userBase, getString(MessageID.device, context),
                     false, true, true));
         }
@@ -201,99 +177,6 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
     }
 
 
-    @Override
-    public long fileLastModified(String fileURI) {
-        return new File(fileURI).lastModified();
-    }
-
-    @Override
-    public OutputStream openFileOutputStream(String fileURI, int flags) throws IOException {
-        fileURI = UMFileUtil.stripPrefixIfPresent("file://", fileURI);
-        return new FileOutputStream(fileURI, (flags & FILE_APPEND) == FILE_APPEND);
-    }
-
-    @Override
-    public InputStream openFileInputStream(String fileURI) throws IOException {
-        fileURI = UMFileUtil.stripPrefixIfPresent("file://", fileURI);
-        return new FileInputStream(fileURI);
-    }
-
-
-    @Override
-    public boolean fileExists(String fileURI) throws IOException {
-        fileURI = UMFileUtil.stripPrefixIfPresent("file://", fileURI);
-        return new File(fileURI).exists();
-    }
-
-    @Override
-    public boolean dirExists(String dirURI) throws IOException {
-        dirURI = UMFileUtil.stripPrefixIfPresent("file://", dirURI);
-        File dir = new File(dirURI);
-        return dir.exists() && dir.isDirectory();
-    }
-
-    @Override
-    public boolean removeFile(String fileURI)  {
-        fileURI = UMFileUtil.stripPrefixIfPresent("file://", fileURI);
-        File f = new File(fileURI);
-        return f.delete();
-    }
-
-    @Override
-    public String[] listDirectory(String dirURI) throws IOException {
-        dirURI = UMFileUtil.stripPrefixIfPresent("file://", dirURI);
-        File dir = new File(dirURI);
-        return dir.list();
-    }
-
-
-    @Override
-    public boolean renameFile(String path1, String path2) {
-        File file1 = new File(path1);
-        File file2 = new File(path2);
-        return file1.renameTo(file2);
-    }
-
-    @Override
-    public long fileSize(String path) {
-        File file = new File(path);
-        return file.length();
-    }
-
-    @Override
-    public long fileAvailableSize(String fileURI) throws IOException {
-        return new File(fileURI).getFreeSpace();
-    }
-
-    @Override
-    public boolean makeDirectory(String dirPath) throws IOException {
-        File newDir = new File(dirPath);
-        return newDir.mkdir();
-    }
-
-    @Override
-    public boolean makeDirectoryRecursive(String dirURI) throws IOException {
-        return new File(dirURI).mkdirs();
-    }
-
-    @Override
-    public boolean removeRecursively(String path) {
-        return removeRecursively(new File(path));
-    }
-
-    public boolean removeRecursively(File f) {
-        if(f.isDirectory()) {
-            File[] dirContents = f.listFiles();
-            for(int i = 0; i < dirContents.length; i++) {
-                if(dirContents[i].isDirectory()) {
-                    removeRecursively(dirContents[i]);
-                }
-                dirContents[i].delete();
-            }
-        }
-        return f.delete();
-    }
-
     public XmlPullParser newPullParser() throws XmlPullParserException {
         XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
         XmlPullParser parser = factory.newPullParser();
@@ -313,14 +196,6 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
         }
 
         return serializer;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    @Override
-    public ZipFileHandle openZip(String name) throws IOException{
-        return new ZipFileHandleSharedSE(name);
     }
 
     /**
@@ -346,97 +221,7 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
      */
     public abstract NetworkManager getNetworkManager();
 
-    @Override
-    public void setActiveUser(String username, Object context) {
-        super.setActiveUser(username, context);
-//        TODO: handle
-//        xapiAgent = username != null ? XapiAgentEndpoint.createOrUpdate(context, null, username,
-//                UMTinCanUtil.getXapiServer(context)) : null;
 
-        fireActiveUserChangedEvent(username, context);
-    }
-
-    @Override
-    public CourseProgress getCourseProgress(String[] entryIds, Object context) {
-        if(getActiveUser(context) == null)
-            return null;
-
-        return null;
-
-//        XapiStatementManager stmtManager = PersistenceManager.getInstance().getManager(XapiStatementManager.class);
-//
-//        String[] entryIdsPrefixed = new String[entryIds.length];
-//        for(int i = 0; i < entryIdsPrefixed.length; i++) {
-//            entryIdsPrefixed[i] = "epub:" + entryIds[i];
-//        }
-//
-//        List<? extends XapiStatement> progressStmts = stmtManager.findByProgress(context,
-//                entryIdsPrefixed, getCurrentAgent(), null, new String[]{
-//                    UMTinCanUtil.VERB_ANSWERED, UMTinCanUtil.VERB_PASSED, UMTinCanUtil.VERB_FAILED
-//                }, 1);
-//
-//        if(progressStmts.size() == 0) {
-//            return new CourseProgress(CourseProgress.STATUS_NOT_STARTED, 0, 0);
-//        }else {
-//            XapiStatement stmt = progressStmts.get(0);
-//            String stmtVerb = stmt.getVerb().getVerbId();
-//            CourseProgress courseProgress = new CourseProgress();
-//            if(stmtVerb.equals(UMTinCanUtil.VERB_ANSWERED))
-//                courseProgress.setStatus(MessageID.in_progress);
-//            else if(stmtVerb.equals(UMTinCanUtil.VERB_PASSED))
-//                courseProgress.setStatus(MessageID.passed);
-//            else if(stmtVerb.equals(UMTinCanUtil.VERB_FAILED))
-//                courseProgress.setStatus(MessageID.failed_message);
-//
-//            courseProgress.setProgress(stmt.getResultProgress());
-//            courseProgress.setScore(Math.round(stmt.getResultScoreScaled()));
-//
-//            return courseProgress;
-//        }
-    }
-
-
-    public void addActiveUserListener(ActiveUserListener listener) {
-        activeUserListener.addElement(listener);
-    }
-
-    public void removeActiveUserListener(ActiveUserListener listener) {
-        activeUserListener.removeElement(listener);
-    }
-
-    protected void fireActiveUserChangedEvent(String username, Object context) {
-        for(int i = 0; i < activeUserListener.size(); i++) {
-            ((ActiveUserListener)activeUserListener
-                    .elementAt(i)).userChanged(username, context);
-        }
-    }
-
-    protected void fireActiveUserCredChangedEvent(String cred, Object context) {
-        for(int i = 0; i < activeUserListener.size(); i++) {
-            ((ActiveUserListener)activeUserListener
-                    .elementAt(i)).credChanged(cred, context);
-        }
-    }
-
-    //ActiveSyncListener:
-    //TODO: Check if gotta remove this.
-
-    public void addActiveSyncListener(ActiveSyncListener listener){
-        activeSyncListener.addElement(listener);
-    }
-
-    public void removeActiveSyncListener(ActiveSyncListener listener){
-        activeSyncListener.removeElement(listener);
-    }
-
-    public void fireSetSyncHappeningEvent(boolean happening, Object context){
-        for(int i = 0; i < activeSyncListener.size(); i++) {
-            ( (ActiveSyncListener)
-                    activeSyncListener.elementAt(i)
-            ).setSyncHappening(happening, context);
-        }
-
-    }
 
     @Override
     public String formatInteger(int integer) {
@@ -492,7 +277,7 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
     @Override
     public HttpCache getHttpCache(Object context) {
         if(httpCache == null)
-            httpCache = new HttpCache(getCacheDir(CatalogPresenter.SHARED_RESOURCE, context));
+            httpCache = new HttpCache(getCacheDir(SHARED_RESOURCE, context));
 
         return httpCache;
     }

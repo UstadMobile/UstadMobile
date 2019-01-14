@@ -30,6 +30,7 @@
  */
 package com.ustadmobile.core.controller;
 
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.URLTextUtil;
 
@@ -64,7 +65,7 @@ public class CatalogEntryInfo {
         sb.append(':');
         sb.append(URLTextUtil.urlEncodeUTF8(fileURI)).append(':');
         sb.append(mimeType);
-        if(acquisitionStatus == CatalogPresenter.STATUS_ACQUISITION_IN_PROGRESS) {
+        if(acquisitionStatus == UstadMobileSystemImpl.STATUS_ACQUISITION_IN_PROGRESS) {
             sb.append(':').append(String.valueOf(downloadID)).append(':').append(
                     downloadTotalSize);
         }
