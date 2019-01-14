@@ -29,6 +29,8 @@ import com.ustadmobile.lib.database.annotation.UmSyncFindAllChanges;
 import com.ustadmobile.lib.database.annotation.UmSyncFindLocalChanges;
 import com.ustadmobile.lib.database.annotation.UmSyncCheckIncomingCanUpdate;
 import com.ustadmobile.lib.database.annotation.UmSyncIncoming;
+import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
+import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 import com.ustadmobile.lib.database.annotation.UmSyncOutgoing;
 import com.ustadmobile.lib.database.annotation.UmUpdate;
 import com.ustadmobile.lib.database.jdbc.DbChangeListener;
@@ -466,6 +468,9 @@ public class DbProcessorJdbc extends AbstractDbProcessor implements QueryMethodG
                                                  String sqlProductName) {
 
         Map<String, List<String>> indexes = new HashMap<>();
+        Element pkElement = findPrimaryKey(entitySpec);
+        boolean autoSyncablePrimaryKey = pkElement.getAnnotation(UmPrimaryKey.class).autoGenerateSyncable();
+
         for(VariableElement fieldVariable : DbProcessorUtils.getEntityFieldElements(entitySpec,
                 processingEnv)) {
             if(fieldVariable.getAnnotation(UmIndexField.class) != null) {
@@ -484,6 +489,57 @@ public class DbProcessorJdbc extends AbstractDbProcessor implements QueryMethodG
         if(DbProcessorUtils.entityHasChangeSequenceNumbers(entitySpec, processingEnv)) {
             //we need to add a trigger to handle change sequence numbers
             codeBlock.add("createSeqNumTriggers($T.class);\n", entitySpec);
+        }
+
+
+        if(PRODUCT_NAME_SQLITE.equals(sqlProductName) && autoSyncablePrimaryKey) {
+            codeBlock.add("$L.executeUpdate(\"CREATE VIEW IF NOT EXISTS $L_spk_view AS SELECT ",
+                    stmtVariableName, entitySpec.getSimpleName());
+            boolean commaRequired = false;
+            for(VariableElement fieldVariable : DbProcessorUtils.getEntityFieldElements(entitySpec,
+                    processingEnv)) {
+                if(commaRequired)
+                    codeBlock.add(", ");
+
+                codeBlock.add(fieldVariable.getSimpleName().toString());
+                commaRequired = true;
+            }
+
+            codeBlock.add(" FROM $L\");\n", entitySpec.getSimpleName());
+
+            CodeBlock.Builder colNameBlock = CodeBlock.builder();
+            CodeBlock.Builder valuesCodeBlock = CodeBlock.builder();
+
+            Map<String, String> triggerArgs = new HashMap<>();
+            triggerArgs.put("tableId",
+                    String.valueOf(entitySpec.getAnnotation(UmEntity.class).tableId()));
+            triggerArgs.put("real_table", entitySpec.getSimpleName().toString());
+
+            boolean isFirstEl = true;
+            for(VariableElement fieldVariable : DbProcessorUtils.getEntityFieldElements(entitySpec,
+                    processingEnv)) {
+                if(!isFirstEl)
+                    colNameBlock.add(", ");
+
+                colNameBlock.add("$L", fieldVariable.getSimpleName());
+
+                if(fieldVariable.getAnnotation(UmPrimaryKey.class) != null) {
+                    valuesCodeBlock.add("");
+                }else if(fieldVariable.getAnnotation(UmSyncLocalChangeSeqNum.class) != null
+                        || fieldVariable.getAnnotation(UmSyncMasterChangeSeqNum.class) != null){
+
+                }else {
+                    valuesCodeBlock.add("NEW.$L", fieldVariable.getSimpleName());
+                }
+
+                isFirstEl = false;
+            }
+
+            codeBlock.add("$L.executeUpdate(\"CREATE TRIGGER spk_$L (");
+
+            //TODO: Add an instead-of insert trigger here
+//            codeBlock.add("$L.executeUpdate(")
+
         }
 
 
