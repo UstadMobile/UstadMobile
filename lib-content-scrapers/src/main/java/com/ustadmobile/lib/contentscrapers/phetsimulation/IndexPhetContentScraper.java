@@ -13,10 +13,12 @@ import com.ustadmobile.core.db.dao.LanguageVariantDao;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.LanguageList;
 import com.ustadmobile.lib.contentscrapers.ScraperConstants;
+import com.ustadmobile.lib.contentscrapers.UMLogUtil;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoin;
 import com.ustadmobile.lib.db.entities.Language;
 
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -58,18 +60,18 @@ public class IndexPhetContentScraper {
 
 
     public static void main(String[] args) {
-        if (args.length != 2) {
-            System.err.println("Usage: <phet html url> <file destination>");
+        if (args.length < 2) {
+            System.err.println("Usage: <phet html url> <file destination><optional log{trace, debug, info, warn, error, fatal}>");
             System.exit(1);
         }
-
-        System.out.println(args[0]);
-        System.out.println(args[1]);
+        UMLogUtil.setLevel(args.length == 3 ? args[2] : "");
+        UMLogUtil.logInfo(args[0]);
+        UMLogUtil.logInfo(args[1]);
         try {
             new IndexPhetContentScraper().findContent(args[0], new File(args[1]));
         } catch (IOException e) {
-            System.err.println("Exception running findContent");
-            e.printStackTrace();
+            UMLogUtil.logInfo("Exception running findContent");
+            UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
         }
     }
 
@@ -85,7 +87,7 @@ public class IndexPhetContentScraper {
         try {
             url = new URL(urlString);
         } catch (MalformedURLException e) {
-            System.out.println("Index Malformed url" + urlString);
+            UMLogUtil.logError("Index Malformed url" + urlString);
             throw new IllegalArgumentException("Malformed url" + urlString, e);
         }
 
@@ -200,8 +202,8 @@ public class IndexPhetContentScraper {
                 }
 
             } catch (Exception e) {
-                e.printStackTrace();
-                System.out.println("Failed to scrape Phet Content for url" + simulationUrl);
+                UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
+                UMLogUtil.logError("Failed to scrape Phet Content for url" + simulationUrl);
             }
         }
     }

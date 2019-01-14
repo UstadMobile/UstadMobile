@@ -17,6 +17,7 @@ import com.ustadmobile.core.db.dao.LanguageVariantDao;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.LanguageList;
 import com.ustadmobile.lib.contentscrapers.ScraperConstants;
+import com.ustadmobile.lib.contentscrapers.UMLogUtil;
 import com.ustadmobile.lib.db.entities.ContentCategory;
 import com.ustadmobile.lib.db.entities.ContentCategorySchema;
 import com.ustadmobile.lib.db.entities.ContentEntry;
@@ -25,6 +26,7 @@ import com.ustadmobile.lib.db.entities.Language;
 import com.ustadmobile.lib.db.entities.LanguageVariant;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
@@ -89,17 +91,18 @@ public class AsbScraper {
     private final String COVER_URL = "https://www.africanstorybook.org/illustrations/covers/";
 
     public static void main(String[] args) {
-        if (args.length != 1) {
-            System.err.println("Usage: <file destination>");
+        if (args.length < 1) {
+            System.err.println("Usage: <file destination><optional log{trace, debug, info, warn, error, fatal}>");
             System.exit(1);
         }
+        UMLogUtil.setLevel(args.length == 2 ? args[1] : "");
 
-        System.out.println(args[0]);
+        UMLogUtil.logInfo(args[0]);
         try {
             new AsbScraper().findContent(new File(args[0]));
         } catch (IOException e) {
-            System.err.println("Exception running findContent");
-            e.printStackTrace();
+            UMLogUtil.logFatal("Exception running findContent AsbScraper");
+            UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
         }
     }
 
@@ -285,7 +288,7 @@ public class AsbScraper {
                             originalEntry = contentEntry;
                         }
                     } catch (NullPointerException e) {
-                        System.err.println("A translated book could not be parsed " + lang + "for book " + bookObj.title);
+                        UMLogUtil.logError("A translated book could not be parsed " + lang + "for book " + bookObj.title);
                     }
 
                 }
@@ -321,7 +324,7 @@ public class AsbScraper {
                     retry++;
                     if (retry == 3) {
                         retry = 0;
-                        System.out.println(ePubFile.getName() + " size 0 bytes after 3rd try: failed! for title " + bookObj.title);
+                        UMLogUtil.logError(ePubFile.getName() + " size 0 bytes after 3rd try: failed! for title " + bookObj.title);
                         continue;
                     }
                     i--;
@@ -342,8 +345,7 @@ public class AsbScraper {
                 retry++;
                 if (retry == 3) {
                     retry = 0;
-                    System.err.println("Exception downloading/checking after 3rd try : " + ePubFile.getName() + " with title " + bookObj.title);
-                    System.out.println(ePubFile.getName() + " size 0 bytes: failed! for title " + bookObj.title);
+                    UMLogUtil.logError("Exception downloading/checking after 3rd try : " + ePubFile.getName() + " with title " + bookObj.title);
                     continue;
                 }
                 i--;
@@ -416,14 +418,14 @@ public class AsbScraper {
                     retVal.add(currentObj);
                     parsedCounter++;
                 } catch (Exception e) {
-                    System.out.println("Failed to parse: " + line);
-                    e.printStackTrace();
+                    UMLogUtil.logError("Failed to parse: " + line);
+                    UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
                     failCounter++;
                 }
             }
         }
 
-        System.out.println("Parsed " + parsedCounter + " / failed " + failCounter + " items from booklist.php");
+        UMLogUtil.logInfo("Parsed " + parsedCounter + " / failed " + failCounter + " items from booklist.php");
 
         reader.close();
         booklistIn.close();
@@ -483,13 +485,13 @@ public class AsbScraper {
             Files.copy(epubCssResPath, zipFs.getPath("epub.css"), StandardCopyOption.REPLACE_EXISTING);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
         } finally {
             if (opfReader != null) {
                 try {
                     opfReader.close();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
                 }
             }
 
@@ -497,7 +499,7 @@ public class AsbScraper {
                 try {
                     zipFs.close();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
                 }
             }
         }

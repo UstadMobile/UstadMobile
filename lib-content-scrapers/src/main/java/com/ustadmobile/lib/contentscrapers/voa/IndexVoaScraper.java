@@ -10,10 +10,12 @@ import com.ustadmobile.core.db.dao.LanguageDao;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.LanguageList;
 import com.ustadmobile.lib.contentscrapers.ScraperConstants;
+import com.ustadmobile.lib.contentscrapers.UMLogUtil;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.Language;
 
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -59,18 +61,18 @@ public class IndexVoaScraper {
     private Language englishLang;
 
     public static void main(String[] args) {
-        if (args.length != 2) {
-            System.err.println("Usage: <voa html url> <file destination>");
+        if (args.length < 2) {
+            System.err.println("Usage: <voa html url> <file destination><optional log{trace, debug, info, warn, error, fatal}>");
             System.exit(1);
         }
-
-        System.out.println(args[0]);
-        System.out.println(args[1]);
+        UMLogUtil.setLevel(args.length == 3 ? args[2] : "");
+        UMLogUtil.logInfo(args[0]);
+        UMLogUtil.logInfo(args[1]);
         try {
             new IndexVoaScraper().findContent(args[0], new File(args[1]));
         } catch (IOException e) {
-            System.err.println("Exception running findContent");
-            e.printStackTrace();
+            UMLogUtil.logError("Exception running findContent");
+            UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
         }
     }
 
@@ -81,7 +83,7 @@ public class IndexVoaScraper {
         try {
             url = new URL(urlString);
         } catch (MalformedURLException e) {
-            System.out.println("Index Malformed url" + urlString);
+            UMLogUtil.logError("Index Malformed url" + urlString);
             throw new IllegalArgumentException("Malformed url" + urlString, e);
         }
 
@@ -182,8 +184,8 @@ public class IndexVoaScraper {
 
                     findLessons(categoryEntry, categoryFolder, lessonListUrl.toString());
                 }catch (IOException e){
-                    e.printStackTrace();
-                    System.err.print("Error with voa category = " + hrefLink + " with title " + title);
+                    UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
+                    UMLogUtil.logError("Error with voa category = " + hrefLink + " with title " + title);
                 }
 
             }
@@ -233,8 +235,8 @@ public class IndexVoaScraper {
 
                 }
             } catch (Exception e) {
-                e.printStackTrace();
-                System.err.println("Unable to scrape content from " + title + " at url " + lesson.toString());
+                UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
+                UMLogUtil.logError("Unable to scrape content from " + title + " at url " + lesson.toString());
             }
 
 

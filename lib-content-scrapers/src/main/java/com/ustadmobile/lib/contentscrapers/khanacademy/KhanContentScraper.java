@@ -6,10 +6,12 @@ import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.ScraperConstants;
 import com.ustadmobile.lib.contentscrapers.LogIndex;
 import com.ustadmobile.lib.contentscrapers.LogResponse;
+import com.ustadmobile.lib.contentscrapers.UMLogUtil;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebElement;
@@ -199,7 +201,7 @@ public class KhanContentScraper {
             waitDriver.until(ExpectedConditions.visibilityOfElementLocated(
                     By.cssSelector("div[data-test-id=tutorial-page]")));
         } catch (Exception e) {
-            e.printStackTrace();
+            UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
         }
 
         LogEntries les = driver.manage().logs().get(LogType.PERFORMANCE);
@@ -225,8 +227,8 @@ public class KhanContentScraper {
                     index.add(logIndex);
 
                 } catch (Exception e) {
-                    System.err.println(urlString);
-                    System.err.println(le.getMessage());
+                    UMLogUtil.logError(urlString);
+                    UMLogUtil.logInfo(le.getMessage());
                 }
 
             }
@@ -234,7 +236,7 @@ public class KhanContentScraper {
         }
 
         if (exerciseList == null) {
-            System.err.println("Did not get exercise list for url " + scrapUrl);
+            UMLogUtil.logInfo("Did not get exercise list for url " + scrapUrl);
             return;
         }
 
@@ -320,8 +322,8 @@ public class KhanContentScraper {
                             imageFile, imageContent, null);
                     index.add(logIndex);
                 } catch (Exception e) {
-                    e.printStackTrace();
-                    System.err.println("Error downloading an image for index log" + image + " with url " + scrapUrl);
+                    UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
+                    UMLogUtil.logError("Error downloading an image for index log" + image + " with url " + scrapUrl);
                 }
 
             }
@@ -415,7 +417,7 @@ public class KhanContentScraper {
                     By.cssSelector("ul[class*=listWrapper]")));
             Thread.sleep(5000);
         } catch (Exception e) {
-            e.printStackTrace();
+            UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
         }
 
         LogEntries les = driver.manage().logs().get(LogType.PERFORMANCE);
@@ -440,8 +442,8 @@ public class KhanContentScraper {
                     index.add(logIndex);
 
                 } catch (Exception e) {
-                    System.err.println("Index url failed at " + urlString);
-                    System.err.println(le.getMessage());
+                    UMLogUtil.logError("Index url failed at " + urlString);
+                    UMLogUtil.logInfo(le.getMessage());
                 }
 
 

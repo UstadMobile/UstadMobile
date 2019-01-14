@@ -12,6 +12,7 @@ import com.ustadmobile.core.db.dao.LanguageDao;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.LanguageList;
 import com.ustadmobile.lib.contentscrapers.ScraperConstants;
+import com.ustadmobile.lib.contentscrapers.UMLogUtil;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.Language;
 
@@ -67,13 +68,13 @@ public class IndexEdraakK12Content {
 
 
     public static void main(String[] args) throws IOException {
-        if (args.length != 2) {
-            System.err.println("Usage: <edraak k12 json url> <file destination>");
+        if (args.length < 2) {
+            System.err.println("Usage: <edraak k12 json url> <file destination><optional log{trace, debug, info, warn, error, fatal}>");
             System.exit(1);
         }
-
-        System.out.println("main args url = " + args[0]);
-        System.out.println("main args destination = " + args[1]);
+        UMLogUtil.setLevel(args.length == 3 ? args[2] : "");
+        UMLogUtil.logInfo("main args url = " + args[0]);
+        UMLogUtil.logInfo("main args destination = " + args[1]);
         new IndexEdraakK12Content().findContent(args[0], new File(args[1]));
     }
 
@@ -89,7 +90,7 @@ public class IndexEdraakK12Content {
         try {
             url = new URL(urlString);
         } catch (MalformedURLException e) {
-            System.out.println("url from main is Malformed = " + urlString);
+            UMLogUtil.logError("url from main is Malformed = " + urlString);
             throw new IllegalArgumentException("Malformed url" + urlString, e);
         }
 
@@ -168,7 +169,7 @@ public class IndexEdraakK12Content {
 
 
             } catch (Exception e) {
-                System.err.println("Unable to scrape content" + parentContent.id);
+                UMLogUtil.logError("Unable to scrape content" + parentContent.id);
             }
 
         } else {
@@ -199,7 +200,7 @@ public class IndexEdraakK12Content {
         } else if (license.toLowerCase().contains("all_rights_reserved")) {
             return ALL_RIGHTS_RESERVED;
         } else {
-            System.err.println("License type not matched for license: " + license);
+            UMLogUtil.logError("License type not matched for license: " + license);
             return ALL_RIGHTS_RESERVED;
         }
     }

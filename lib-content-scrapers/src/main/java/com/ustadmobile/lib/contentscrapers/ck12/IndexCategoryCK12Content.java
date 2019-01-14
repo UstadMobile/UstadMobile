@@ -10,10 +10,12 @@ import com.ustadmobile.core.db.dao.LanguageDao;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.LanguageList;
 import com.ustadmobile.lib.contentscrapers.ScraperConstants;
+import com.ustadmobile.lib.contentscrapers.UMLogUtil;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.Language;
 
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -88,13 +90,15 @@ public class IndexCategoryCK12Content {
     private ContentEntryFileStatusDao contentFileStatusDao;
 
     public static void main(String[] args) throws IOException {
-        if (args.length != 2) {
-            System.err.println("Usage: <ck12 url> <file destination>");
+        if (args.length < 2) {
+            System.err.println("Usage: <ck12 url> <file destination><optional log{trace, debug, info, warn, error, fatal}>");
             System.exit(1);
         }
 
-        System.out.println(args[0]);
-        System.out.println(args[1]);
+        UMLogUtil.setLevel(args.length == 3 ? args[2] : "");
+
+        UMLogUtil.logInfo(args[0]);
+        UMLogUtil.logInfo(args[1]);
         new IndexCategoryCK12Content(args[0], new File(args[1])).findContent();
     }
 
@@ -104,7 +108,7 @@ public class IndexCategoryCK12Content {
         try {
             url = new URL(urlString);
         } catch (MalformedURLException e) {
-            System.out.println("Index Malformed url" + urlString);
+            UMLogUtil.logError("Index Malformed url" + urlString);
             throw new IllegalArgumentException("Malformed url" + urlString, e);
         }
 
@@ -200,7 +204,7 @@ public class IndexCategoryCK12Content {
             WebDriverWait waitDriver = new WebDriverWait(driver, 10000);
             ContentScraperUtil.waitForJSandJQueryToLoad(waitDriver);
         } catch (TimeoutException e) {
-            e.printStackTrace();
+            UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
         }
 
         Document doc = Jsoup.parse(driver.getPageSource());
@@ -255,7 +259,7 @@ public class IndexCategoryCK12Content {
         }
 
         if (count == 0) {
-            System.err.println("No Topics were found to browse for url " + url.toString());
+            UMLogUtil.logInfo("No Topics were found to browse for url " + url.toString());
         }
 
     }
@@ -316,7 +320,7 @@ public class IndexCategoryCK12Content {
             WebDriverWait waitDriver = new WebDriverWait(driver, 10000);
             ContentScraperUtil.waitForJSandJQueryToLoad(waitDriver);
         } catch (TimeoutException e) {
-            e.printStackTrace();
+            UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
         }
 
         Document doc = Jsoup.parse(driver.getPageSource());
@@ -392,7 +396,7 @@ public class IndexCategoryCK12Content {
             ContentScraperUtil.waitForJSandJQueryToLoad(waitDriver);
             waitDriver.until(ExpectedConditions.elementToBeClickable(By.cssSelector("i.icon-expand"))).click();
         } catch (TimeoutException | NoSuchElementException e) {
-            e.printStackTrace();
+            UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
         }
 
         List<WebElement> courseList = driver.findElements(By.cssSelector("div[class*=js-components-newspaper-Cards-Cards__cardsRow]"));
@@ -449,7 +453,7 @@ public class IndexCategoryCK12Content {
                         scraper.scrapeReadContent();
                         break;
                     default:
-                        System.out.println("found a group type not supported " + groupType + " for url " + url.toString());
+                        UMLogUtil.logError("found a group type not supported " + groupType + " for url " + url.toString());
                 }
 
 
@@ -468,8 +472,8 @@ public class IndexCategoryCK12Content {
                 }
 
             } catch (Exception e) {
-                System.err.println("Unable to scrape content from " + groupType + " at url " + url);
-                e.printStackTrace();
+                UMLogUtil.logError("Unable to scrape content from " + groupType + " at url " + url);
+                UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
             }
 
         }

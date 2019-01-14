@@ -5,12 +5,15 @@ import com.ustadmobile.core.db.dao.ContentEntryContentCategoryJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryDao;
 import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
 import com.ustadmobile.core.db.dao.LanguageDao;
+import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.LanguageList;
+import com.ustadmobile.lib.contentscrapers.UMLogUtil;
 import com.ustadmobile.lib.db.entities.ContentCategory;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.Language;
 
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -55,13 +58,16 @@ public class IndexDdlContent {
 
 
     public static void main(String[] args) throws IOException {
-        if (args.length != 2) {
-            System.err.println("Usage: <ddl website url> <file destination>");
+
+        if (args.length < 2) {
+            System.err.println("Usage: <ddl website url> <file destination><optional log{trace, debug, info, warn, error, fatal}>");
             System.exit(1);
         }
 
-        System.out.println(args[0]);
-        System.out.println(args[1]);
+        UMLogUtil.setLevel(args.length == 3 ? args[2] : "");
+
+        UMLogUtil.logError(args[0]);
+        UMLogUtil.logError(args[1]);
         new IndexDdlContent().findContent(args[0], new File(args[1]));
     }
 
@@ -72,7 +78,7 @@ public class IndexDdlContent {
         try {
             URL url = new URL(urlString);
         } catch (MalformedURLException e) {
-            System.out.println("Index Malformed url" + urlString);
+            UMLogUtil.logError("Index Malformed url" + urlString);
             throw new IllegalArgumentException("Malformed url" + urlString, e);
         }
 
@@ -189,8 +195,8 @@ public class IndexDdlContent {
                     }
 
                 } catch (IOException | URISyntaxException e) {
-                    e.printStackTrace();
-                    System.out.println("Error downloading resource at " + url);
+                    UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
+                    UMLogUtil.logError("Error downloading resource at " + url);
                 }
 
             }

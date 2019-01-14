@@ -6,6 +6,7 @@ import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.ScraperConstants;
 import com.ustadmobile.lib.contentscrapers.LogIndex;
 import com.ustadmobile.lib.contentscrapers.LogResponse;
+import com.ustadmobile.lib.contentscrapers.UMLogUtil;
 import com.ustadmobile.lib.contentscrapers.ck12.plix.PlixResponse;
 import com.ustadmobile.lib.contentscrapers.ck12.practice.AnswerResponse;
 import com.ustadmobile.lib.contentscrapers.ck12.practice.PracticeResponse;
@@ -17,6 +18,7 @@ import com.ustadmobile.lib.contentscrapers.ck12.practice.TestResponse;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -176,14 +178,19 @@ public class CK12ContentScraper {
     }
 
     public static void main(String[] args) {
-        if (args.length != 3) {
-            System.err.println("Usage: <ck12 json url> <file destination><type READ or PRACTICE or VIDEO or plix");
+        if (args.length < 3) {
+            System.err.println("Usage: <ck12 json url> <file destination><type READ or PRACTICE or VIDEO or plix><optional log{trace, debug, info, warn, error, fatal}>");
             System.exit(1);
         }
+        UMLogUtil.setLevel(args.length == 4 ? args[3] : "");
 
-        System.out.println(args[0]);
-        System.out.println(args[1]);
-        System.out.println(args[2]);
+
+        UMLogUtil.logInfo(args[0]);
+        UMLogUtil.logInfo(args[1]);
+        UMLogUtil.logInfo(args[2]);
+
+
+
         try {
             CK12ContentScraper scraper = new CK12ContentScraper(args[0], new File(args[1]));
             String type = args[2];
@@ -206,12 +213,12 @@ public class CK12ContentScraper {
                     scraper.scrapeReadContent();
                     break;
                 default:
-                    System.out.println("found a group type not supported " + type);
+                    UMLogUtil.logError("found a group type not supported " + type);
             }
 
         } catch (IOException e) {
-            System.err.println("Exception running scrapeContent");
-            e.printStackTrace();
+            UMLogUtil.logError("Exception running scrapeContent");
+            UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
         }
 
     }
@@ -252,7 +259,7 @@ public class CK12ContentScraper {
         try {
             waitDriver.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("div#questionController"))).click();
         } catch (Exception e) {
-            e.printStackTrace();
+            UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
         }
         LogEntries les = driver.manage().logs().get(LogType.PERFORMANCE);
         driver.close();
@@ -328,8 +335,8 @@ public class CK12ContentScraper {
                     index.add(logIndex);
 
                 } catch (Exception e) {
-                    System.err.println("Index url failed at " + urlString);
-                    System.err.println(le.getMessage());
+                    UMLogUtil.logError("Index url failed at " + urlString);
+                    UMLogUtil.logDebug(le.getMessage());
                 }
             }
         }
@@ -362,7 +369,7 @@ public class CK12ContentScraper {
         if (videoContent == null) {
             videoContent = getMainContent(fullSite, "iframe[src]", "src");
             if (videoContent == null) {
-                System.err.println("Unsupported video content" + urlString);
+                UMLogUtil.logError("Unsupported video content" + urlString);
                 throw new IOException("Did not find video content" + urlString);
             }
         }
@@ -396,8 +403,8 @@ public class CK12ContentScraper {
             ContentScraperUtil.generateTinCanXMLFile(videoHtmlLocation, videoContentName, "en", "index.html",
                     ScraperConstants.VIDEO_TIN_CAN_FILE, scrapUrl.getPath(), "", "");
         } catch (TransformerException | ParserConfigurationException e) {
-            e.printStackTrace();
-            System.err.println("Video Tin can file unable to create for url" +  urlString);
+            UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
+            UMLogUtil.logError("Video Tin can file unable to create for url" +  urlString);
         }
 
         ContentScraperUtil.zipDirectory(videoHtmlLocation, videoContentName, destinationDirectory);
@@ -482,7 +489,7 @@ public class CK12ContentScraper {
         Document content = getMainContent(html, "div.modality_content[data-loadurl]", "data-loadurl");
 
         if (content == null) {
-            System.err.println("Unsupported read content" + urlString);
+            UMLogUtil.logError("Unsupported read content" + urlString);
             throw new IllegalArgumentException("Did not find read content" + urlString);
         }
         String readHtml = content.html();
@@ -527,8 +534,8 @@ public class CK12ContentScraper {
             ContentScraperUtil.generateTinCanXMLFile(readHtmlLocation, readContentName, "en", "index.html",
                     ScraperConstants.ARTICLE_TIN_CAN_FILE, scrapUrl.getPath(), "", "");
         } catch (TransformerException | ParserConfigurationException e) {
-            e.printStackTrace();
-            System.err.println("Read Tin can file unable to create for url" +  urlString);
+            UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
+            UMLogUtil.logError("Read Tin can file unable to create for url" +  urlString);
         }
 
         ContentScraperUtil.zipDirectory(readHtmlLocation, readContentName, destinationDirectory);
@@ -735,8 +742,8 @@ public class CK12ContentScraper {
             ContentScraperUtil.generateTinCanXMLFile(practiceDirectory, practiceUrl, "en", "index.html",
                     ScraperConstants.ASSESMENT_TIN_CAN_FILE, scrapUrl.getPath(), "", "");
         } catch (TransformerException | ParserConfigurationException e) {
-            e.printStackTrace();
-            System.err.println("Practice Tin can file unable to create for url" +  urlString);
+            UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
+            UMLogUtil.logError("Practice Tin can file unable to create for url" +  urlString);
         }
 
         ContentScraperUtil.saveListAsJson(practiceDirectory, questionList, ScraperConstants.QUESTIONS_JSON);

@@ -12,10 +12,12 @@ import com.ustadmobile.core.db.dao.LanguageDao;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.LanguageList;
 import com.ustadmobile.lib.contentscrapers.ScraperConstants;
+import com.ustadmobile.lib.contentscrapers.UMLogUtil;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.Language;
 
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.DataNode;
 import org.jsoup.nodes.Document;
@@ -75,13 +77,16 @@ public class IndexKhanContentScraper {
     private Gson gson;
 
     public static void main(String[] args) throws IOException {
-        if (args.length != 2) {
-            System.err.println("Usage: <khan url> <file destination>");
+        if (args.length < 2) {
+            System.err.println("Usage: <khan url> <file destination><optional log{trace, debug, info, warn, error, fatal}>");
             System.exit(1);
         }
 
-        System.out.println(args[0]);
-        System.out.println(args[1]);
+        UMLogUtil.setLevel(args.length == 3 ? args[2] : "");
+
+        UMLogUtil.logDebug(args[0]);
+        UMLogUtil.logError(args[1]);
+
         new IndexKhanContentScraper().findContent(args[0], new File(args[1]));
     }
 
@@ -91,7 +96,7 @@ public class IndexKhanContentScraper {
         try {
             url = new URL(urlString);
         } catch (MalformedURLException e) {
-            System.out.println("Index Malformed url" + urlString);
+            UMLogUtil.logFatal("Index Malformed url" + urlString);
             throw new IllegalArgumentException("Malformed url" + urlString, e);
         }
 
@@ -151,7 +156,7 @@ public class IndexKhanContentScraper {
                         int index = data.indexOf("ReactComponent(") + 15;
                         int end = data.indexOf("loggedIn\": false})") + 17;
                         return data.substring(index, end);
-                    }catch (IndexOutOfBoundsException e){
+                    } catch (IndexOutOfBoundsException e) {
                         throw new IOException("Could not get json from the script for url " + url);
                     }
                 }
@@ -355,12 +360,12 @@ public class IndexKhanContentScraper {
     private void browseContent(List<ModuleResponse.Tutorial.ContentItem> contentList, ContentEntry tutorialEntry, URL tutorialUrl, File subjectFolder) throws IOException {
 
         if (contentList == null) {
-            System.out.println("no content list inside url " + tutorialUrl.toString());
+            UMLogUtil.logError("no content list inside url " + tutorialUrl.toString());
             return;
         }
 
         if (contentList.isEmpty()) {
-            System.out.println("empty content list inside url " + tutorialUrl.toString());
+            UMLogUtil.logError("empty content list inside url " + tutorialUrl.toString());
             return;
         }
 
@@ -397,7 +402,7 @@ public class IndexKhanContentScraper {
                         scraper.scrapeArticleContent(url.toString());
                         break;
                     default:
-                        System.err.println("unsupported kind = " + contentItem.kind + " at url = " + url);
+                        UMLogUtil.logError("unsupported kind = " + contentItem.kind + " at url = " + url);
                         break;
 
                 }
@@ -417,8 +422,8 @@ public class IndexKhanContentScraper {
                 }
 
             } catch (Exception e) {
-                e.printStackTrace();
-                System.err.println("Unable to scrape content from " + contentItem.title + " at url " + url);
+                UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
+                UMLogUtil.logError("Unable to scrape content from " + contentItem.title + " at url " + url);
             }
 
 

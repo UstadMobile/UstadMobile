@@ -4,10 +4,12 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.ScraperConstants;
+import com.ustadmobile.lib.contentscrapers.UMLogUtil;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Attribute;
 import org.jsoup.nodes.Attributes;
@@ -275,8 +277,8 @@ public class VoaScraper {
             ContentScraperUtil.generateTinCanXMLFile(voaDirectory, FilenameUtils.getBaseName(scrapUrl.toString()), "en", "index.html",
                     ScraperConstants.VIDEO_TIN_CAN_FILE, scrapUrl.getPath(), "", "");
         } catch (TransformerException | ParserConfigurationException e) {
-            e.printStackTrace();
-            System.err.println("VOA failed to create tin can file for url " + scrapUrl.toString());
+            UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
+            UMLogUtil.logError("VOA failed to create tin can file for url " + scrapUrl.toString());
         }
 
         ContentScraperUtil.zipDirectory(voaDirectory, FilenameUtils.getBaseName(scrapUrl.getPath()), destinationDir);

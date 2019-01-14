@@ -9,9 +9,11 @@ import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
 import com.ustadmobile.core.db.dao.LanguageDao;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.LanguageList;
+import com.ustadmobile.lib.contentscrapers.UMLogUtil;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.Language;
 
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -62,18 +64,19 @@ public class IndexEtekkathoScraper {
     private int subjectCount = 0;
 
     public static void main(String[] args) {
-        if (args.length != 2) {
-            System.err.println("Usage: <etekkatho html url> <file destination>");
+        if (args.length < 2) {
+            System.err.println("Usage: <etekkatho html url> <file destination><optional log{trace, debug, info, warn, error, fatal}>");
             System.exit(1);
         }
 
-        System.out.println(args[0]);
-        System.out.println(args[1]);
+        UMLogUtil.setLevel(args.length == 3 ? args[2] : "");
+        UMLogUtil.logInfo(args[0]);
+        UMLogUtil.logInfo(args[1]);
         try {
             new IndexEtekkathoScraper().findContent(args[0], new File(args[1]));
         } catch (IOException e) {
-            System.err.println("Exception running findContent");
-            e.printStackTrace();
+            UMLogUtil.logError("Exception running findContent");
+            UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
         }
     }
 
@@ -82,7 +85,7 @@ public class IndexEtekkathoScraper {
         try {
             url = new URL(urlString);
         } catch (MalformedURLException e) {
-            System.out.println("Index Malformed url" + urlString);
+            UMLogUtil.logError("Index Malformed url" + urlString);
             throw new IllegalArgumentException("Malformed url" + urlString, e);
         }
 
@@ -176,7 +179,7 @@ public class IndexEtekkathoScraper {
 
             } else if (element.hasClass("span6")) {
 
-                System.err.println("Should not come here" + element.text());
+                UMLogUtil.logError("Should not come here" + element.text());
 
             }
 
@@ -269,8 +272,8 @@ public class IndexEtekkathoScraper {
                 }
 
             } catch (Exception e) {
-                e.printStackTrace();
-                System.err.println("Unable to scrape content from " + title + " at url " + subjectUrlString);
+                UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
+                UMLogUtil.logError("Unable to scrape content from " + title + " at url " + subjectUrlString);
             }
 
 

@@ -12,11 +12,13 @@ import com.ustadmobile.core.db.dao.LanguageDao;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.LanguageList;
 import com.ustadmobile.lib.contentscrapers.ScraperConstants;
+import com.ustadmobile.lib.contentscrapers.UMLogUtil;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.Language;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Cookie;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -69,17 +71,17 @@ public class IndexPrathamContentScraper {
     private LanguageDao languageDao;
 
     public static void main(String[] args) {
-        if (args.length != 1) {
-            System.err.println("Usage: <file destination>");
+        if (args.length < 1) {
+            System.err.println("Usage: <file destination><optional log{trace, debug, info, warn, error, fatal}>");
             System.exit(1);
         }
-
+        UMLogUtil.setLevel(args.length == 2 ? args[1] : "");
         System.out.println(args[0]);
         try {
             new IndexPrathamContentScraper().findContent(new File(args[0]));
         } catch (IOException | URISyntaxException e) {
             System.err.println("Exception running findContent");
-            e.printStackTrace();
+            UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
         }
     }
 
@@ -172,7 +174,7 @@ public class IndexPrathamContentScraper {
                     cookie = loginPratham();
                     retry++;
                     io.printStackTrace();
-                    System.err.println("Error for book " + data.title + " with id " + data.slug);
+                    UMLogUtil.logError("Error for book " + data.title + " with id " + data.slug);
                     if (retry == 2) {
                         retry = 0;
                         continue;
@@ -186,8 +188,8 @@ public class IndexPrathamContentScraper {
                         ContentScraperUtil.getMd5(content), contentEntryFileJoinDao, true, ScraperConstants.MIMETYPE_EPUB);
 
             } catch (Exception e) {
-                e.printStackTrace();
-                System.err.println("Error saving book " + contentBooksList.data.get(contentCount).slug);
+                UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
+                UMLogUtil.logError("Error saving book " + contentBooksList.data.get(contentCount).slug);
             }
 
         }
@@ -225,7 +227,7 @@ public class IndexPrathamContentScraper {
 
             if (ck.getName().equalsIgnoreCase("_session_id")) {
                 cookie = ck.getName() + "=" + ck.getValue();
-                System.out.println(cookie);
+                UMLogUtil.logDebug(cookie);
             }
         }
 

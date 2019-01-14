@@ -11,10 +11,12 @@ import com.ustadmobile.core.db.dao.LanguageVariantDao;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.LanguageList;
 import com.ustadmobile.lib.contentscrapers.ScraperConstants;
+import com.ustadmobile.lib.contentscrapers.UMLogUtil;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.Language;
 import com.ustadmobile.lib.db.entities.LanguageVariant;
 
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -55,17 +57,17 @@ public class IndexFolderScraper {
     private String filePrefix = "file://";
 
     public static void main(String[] args) {
-        if (args.length != 2) {
-            System.err.println("Usage: <folder parent name> <file destination>");
+        if (args.length < 2) {
+            System.err.println("Usage: <folder parent name> <file destination><optional log{trace, debug, info, warn, error, fatal}>");
             System.exit(1);
         }
-
-        System.out.println(args[0]);
-        System.out.println(args[1]);
+        UMLogUtil.setLevel(args.length == 3 ? args[3] : "");
+        UMLogUtil.logInfo(args[0]);
+        UMLogUtil.logInfo(args[1]);
         try {
             new IndexFolderScraper().findContent(args[0], new File(args[1]));
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
         }
 
     }
@@ -205,8 +207,8 @@ public class IndexFolderScraper {
 
                         }
                     } catch (Exception e) {
-                        e.printStackTrace();
-                        System.err.println("Error while parsing a file " + folder.getName());
+                        UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
+                        UMLogUtil.logError("Error while parsing a file " + folder.getName());
                     }
 
                 }

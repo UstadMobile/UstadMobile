@@ -5,9 +5,11 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.ScraperConstants;
+import com.ustadmobile.lib.contentscrapers.UMLogUtil;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.exception.ExceptionUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -43,18 +45,18 @@ public class EdraakK12ContentScraper {
     private File courseDirectory;
 
     public static void main(String[] args) {
-        if (args.length != 2) {
-            System.err.println("Usage: <edraak k12 json url> <file destination>");
+        if (args.length < 2) {
+            System.err.println("Usage: <edraak k12 json url> <file destination><optional log{trace, debug, info, warn, error, fatal}>");
             System.exit(1);
         }
-
-        System.out.println("main url for edraak = " + args[0]);
-        System.out.println("main file destination = " + args[1]);
+        UMLogUtil.setLevel(args.length == 3 ? args[2] : "");
+        UMLogUtil.logInfo("main url for edraak = " + args[0]);
+        UMLogUtil.logInfo("main file destination = " + args[1]);
         try {
             new EdraakK12ContentScraper(args[0], new File(args[1])).scrapeContent();
         } catch (IOException e) {
-            System.err.println("Exception running scrapeContent");
-            e.printStackTrace();
+            UMLogUtil.logError("Exception running scrapeContent");
+            UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
         }
     }
 
@@ -77,7 +79,7 @@ public class EdraakK12ContentScraper {
         try {
             scrapUrl = new URL(url);
         } catch (MalformedURLException e) {
-            System.out.println("Scrap Malformed url" + url);
+            UMLogUtil.logError("Scrap Malformed url" + url);
             throw new IllegalArgumentException("Malformed url" + url, e);
         }
 
@@ -108,8 +110,8 @@ public class EdraakK12ContentScraper {
         try {
             anyContentUpdated = downloadQuestions(questionsList, courseDirectory, scrapUrl);
         } catch (IllegalArgumentException e) {
-            e.printStackTrace();
-            System.err.println("The question set was not available for response id " + response.id);
+            UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
+            UMLogUtil.logError("The question set was not available for response id " + response.id);
         }
 
         if (ComponentType.ONLINE.getType().equalsIgnoreCase(response.target_component.component_type)) {
@@ -122,8 +124,8 @@ public class EdraakK12ContentScraper {
                     try {
                         anyContentUpdated = downloadVideo(children);
                     } catch (IllegalArgumentException e) {
-                        e.printStackTrace();
-                        System.err.println("Video was unable to download or had no video for response id" + response.id);
+                        UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
+                        UMLogUtil.logError("Video was unable to download or had no video for response id" + response.id);
                     }
                 }
 
@@ -147,7 +149,7 @@ public class EdraakK12ContentScraper {
                         url.substring(0, url.indexOf("component/")) + response.id,
                         "", "en");
             } catch (ParserConfigurationException | TransformerException e) {
-                System.err.println("Failed to created tin can file for response" + response.id);
+                UMLogUtil.logError("Failed to created tin can file for response" + response.id);
             }
             anyContentUpdated = true;
         }
@@ -160,7 +162,7 @@ public class EdraakK12ContentScraper {
             checkBeforeCopyToFile(ScraperConstants.REGULAR_ARABIC_FONT_LINK, new File(courseDirectory, ARABIC_FONT_REGULAR));
             checkBeforeCopyToFile(ScraperConstants.BOLD_ARABIC_FONT_LINK, new File(courseDirectory, ARABIC_FONT_BOLD));
         } catch (IOException ie) {
-            System.err.println("Failed to download the necessary files for response id " + response.id);
+            UMLogUtil.logError("Failed to download the necessary files for response id " + response.id);
         }
         // nothing changed, keep same files
         if (anyContentUpdated) {

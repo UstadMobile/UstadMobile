@@ -10,6 +10,7 @@ import com.ustadmobile.core.db.dao.ContentEntryFileDao;
 import com.ustadmobile.core.db.dao.ContentEntryFileStatusDao;
 import com.ustadmobile.core.db.dao.LanguageDao;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
+import com.ustadmobile.lib.contentscrapers.UMLogUtil;
 import com.ustadmobile.lib.db.entities.ContentCategory;
 import com.ustadmobile.lib.db.entities.ContentCategorySchema;
 import com.ustadmobile.lib.db.entities.ContentEntry;
@@ -17,6 +18,7 @@ import com.ustadmobile.lib.db.entities.Language;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -77,18 +79,18 @@ public class DdlContentScraper {
 
 
     public static void main(String[] args) throws URISyntaxException {
-        if (args.length != 2) {
-            System.err.println("Usage: <ddl website url> <file destination>");
+        if (args.length < 2) {
+            System.err.println("Usage: <ddl website url> <file destination><optional log{trace, debug, info, warn, error, fatal}>");
             System.exit(1);
         }
-
-        System.out.println(args[0]);
-        System.out.println(args[1]);
+        UMLogUtil.setLevel(args.length == 3 ? args[2] : "");
+        UMLogUtil.logError(args[0]);
+        UMLogUtil.logError(args[1]);
         try {
             new DdlContentScraper(args[0], new File(args[1])).scrapeContent();
         } catch (IOException e) {
-            System.err.println("Exception running scrapeContent");
-            e.printStackTrace();
+            UMLogUtil.logError("Exception running scrapeContent");
+            UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
         }
 
     }

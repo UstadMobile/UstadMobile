@@ -6,11 +6,13 @@ import com.ustadmobile.core.db.dao.LanguageDao;
 import com.ustadmobile.core.db.dao.LanguageVariantDao;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.ScraperConstants;
+import com.ustadmobile.lib.contentscrapers.UMLogUtil;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.Language;
 import com.ustadmobile.lib.db.entities.LanguageVariant;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -79,18 +81,18 @@ public class PhetContentScraper {
     }
 
     public static void main(String[] args) {
-        if (args.length != 2) {
-            System.err.println("Usage: <phet html url> <file destination>");
+        if (args.length < 2) {
+            System.err.println("Usage: <phet html url> <file destination><optional log{trace, debug, info, warn, error, fatal}>");
             System.exit(1);
         }
-
-        System.out.println(args[0]);
-        System.out.println(args[1]);
+        UMLogUtil.setLevel(args.length == 3 ? args[2] : "");
+        UMLogUtil.logInfo(args[0]);
+        UMLogUtil.logInfo(args[1]);
         try {
             new PhetContentScraper(args[0], new File(args[1])).scrapeContent();
         } catch (IOException e) {
-            System.err.println("Exception running scrapeContent");
-            e.printStackTrace();
+            UMLogUtil.logError("Exception running scrapeContent");
+            UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
         }
 
     }
@@ -197,7 +199,7 @@ public class PhetContentScraper {
 
                     categoryRelations.add(categoryContentEntry);
                 } catch (IOException ie) {
-                    System.err.println("Error creating category entry" + category.text() + " for url" + simulationUrl.toString());
+                    UMLogUtil.logError("Error creating category entry" + category.text() + " for url" + simulationUrl.toString());
                 }
             }
         }
@@ -233,8 +235,8 @@ public class PhetContentScraper {
                     languageLocation.getName() + "\\" + this.title,
                     aboutDescription, "en");
         } catch (ParserConfigurationException | TransformerException e) {
-            e.printStackTrace();
-            System.err.println("Tin can file not created for " + link.toString());
+            UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
+            UMLogUtil.logError("Tin can file not created for " + link.toString());
         }
         ContentScraperUtil.zipDirectory(simulationLocation, title, languageLocation);
 
@@ -293,7 +295,7 @@ public class PhetContentScraper {
                                     translationsEntry.add(languageContentEntry);
                                     break;
                                 } catch (Exception e) {
-                                    System.err.println("Error while creating a entry for translated " +
+                                    UMLogUtil.logError("Error while creating a entry for translated " +
                                             "content lang code " + langCode + " in phet url " + url);
                                 }
                             }
