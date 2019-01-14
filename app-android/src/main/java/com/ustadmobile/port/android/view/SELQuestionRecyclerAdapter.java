@@ -65,7 +65,10 @@ public class SELQuestionRecyclerAdapter  extends PagedListAdapter<SocialNominati
 
         ConstraintLayout theWholeThang = holder.itemView.findViewById(R.id.item_sel_question_cl);
         theWholeThang.setOnClickListener(view ->
-                mPresenter.goToQuestionDetail(theQuestion.getSocialNominationQuestionUid()));
+        {
+            if(theQuestion != null)
+                mPresenter.goToQuestionDetail(theQuestion.getSocialNominationQuestionUid());
+        });
 
         //Options to Edit/Delete every schedule in the list
         ImageView optionsImageView =

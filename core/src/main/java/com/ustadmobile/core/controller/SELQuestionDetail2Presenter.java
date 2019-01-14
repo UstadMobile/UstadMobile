@@ -9,6 +9,7 @@ import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.view.AddQuestionOptionDialogView;
 import com.ustadmobile.core.view.SELQuestionDetail2View;
 import com.ustadmobile.lib.db.entities.SocialNominationQuestion;
 import com.ustadmobile.lib.db.entities.SocialNominationQuestionOption;
@@ -62,6 +63,18 @@ public class SELQuestionDetail2Presenter extends
         providerList = repository.getSELQuestionOptionDao()
                 .findAllOptionsByQuestionUidProvider(currentQuestionUid);
 
+
+
+        //Set questionType preset
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        questionTypePresets = new String[]{
+                impl.getString(MessageID.sel_question_type_nomination, context),
+                impl.getString(MessageID.sel_question_type_multiple_choise, context),
+                impl.getString(MessageID.sel_question_type_free_text, context)};
+
+        //Set to view
+        view.setQuestionTypePresets(questionTypePresets);
+
         //Create / Get question
         questionUmLiveData =
                 repository.getSocialNominationQuestionDao().findByUidLive(currentQuestionUid);
@@ -76,18 +89,22 @@ public class SELQuestionDetail2Presenter extends
             public void onSuccess(SocialNominationQuestion selQuestion) {
                 if(selQuestion != null){
                     mUpdatedQuestion = selQuestion;
-                    view.setQuestionText(selQuestion.getQuestionText());
-                    view.setQuestionType(selQuestion.getQuestionType());
-                    view.setQuestionTypePresets(questionTypePresets,selQuestion.getQuestionType());
 
                 }else{
+
                     //Create a new one
                     selQuestion = new SocialNominationQuestion();
-                    selQuestion.setSocialNominationQuestionSocialNominationQuestionSetUid(currentQuestionSetUid);
+                    selQuestion.setSocialNominationQuestionSocialNominationQuestionSetUid(
+                            currentQuestionSetUid);
                     mUpdatedQuestion = selQuestion;
-                    view.setQuestionTypePresets(questionTypePresets,0);
-                    view.setQuestionText("");
+                    if(mOriginalQuestion == null){
+                        mOriginalQuestion = mUpdatedQuestion;
+                    }
                 }
+
+                view.setQuestionOnView(mUpdatedQuestion);
+
+
             }
 
             @Override
@@ -95,14 +112,6 @@ public class SELQuestionDetail2Presenter extends
                 exception.printStackTrace();
             }
         });
-
-
-        //Set questionType preset
-        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        questionTypePresets = new String[]{
-                impl.getString(MessageID.sel_question_type_nomination, context),
-                impl.getString(MessageID.sel_question_type_multiple_choise, context),
-                impl.getString(MessageID.sel_question_type_free_text, context)};
 
         //Set provider
         view.setQuestionOptionsProvider(providerList);
@@ -114,19 +123,18 @@ public class SELQuestionDetail2Presenter extends
         switch (type){
             case SocialNominationQuestionDao.SEL_QUESTION_TYPE_NOMINATION:
                 view.showQuestionOptions(false);
-                mUpdatedQuestion.setQuestionType(type);
                 break;
             case SocialNominationQuestionDao.SEL_QUESTION_TYPE_MULTI_CHOICE:
                 view.showQuestionOptions(true);
-                mUpdatedQuestion.setQuestionType(type);
                 break;
             case SocialNominationQuestionDao.SEL_QUESTION_TYPE_FREE_TEXT:
                 view.showQuestionOptions(false);
-                mUpdatedQuestion.setQuestionType(type);
                 break;
             default:
                 break;
         }
+        if(mUpdatedQuestion!=null)
+            mUpdatedQuestion.setQuestionType(type);
     }
 
     public void handleSELQuestionValueChanged(SocialNominationQuestion question){
@@ -136,22 +144,21 @@ public class SELQuestionDetail2Presenter extends
 
         if(mUpdatedQuestion == null || !mUpdatedQuestion.equals(question)) {
 
-            //update class edit views
-            view.setQuestionText("");
-            view.setQuestionType(0);
+            if(question != null) {
+                //Update the currently editing class object
+                mUpdatedQuestion = question;
 
-            //Update the currently editing class object
-            mUpdatedQuestion = question;
+                view.setQuestionOnView(question);
+            }
         }
     }
 
     public void handleClickAddOption(){
-        //TODO: Open Dialog Fragment for result
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         Hashtable args = new Hashtable();
         args.put(ARG_QUESTION_UID_QUESTION_DETAIL, currentQuestionUid);
 
-        //impl.go(AddQuestionOptionDialogView.VIEW_NAME, args, getContext());
+        impl.go(AddQuestionOptionDialogView.VIEW_NAME, args, getContext());
     }
 
     public void handleClickDone(){

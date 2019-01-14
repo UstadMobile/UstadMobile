@@ -77,6 +77,7 @@ import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.view.AboutView;
 import com.ustadmobile.core.view.AddActivityChangeDialogView;
 import com.ustadmobile.core.view.AddFeedDialogView;
+import com.ustadmobile.core.view.AddQuestionOptionDialogView;
 import com.ustadmobile.core.view.AddQuestionSetDialogView;
 import com.ustadmobile.core.view.AddScheduleDialogView;
 import com.ustadmobile.core.view.AppView;
@@ -138,6 +139,7 @@ import com.ustadmobile.port.android.util.UMAndroidUtil;
 import com.ustadmobile.port.android.view.AboutActivity;
 import com.ustadmobile.port.android.view.AddActivityChangeDialogFragment;
 import com.ustadmobile.port.android.view.AddFeedDialogFragment;
+import com.ustadmobile.port.android.view.AddQuestionOptionDialogFragment;
 import com.ustadmobile.port.android.view.AddQuestionSetDialogFragment;
 import com.ustadmobile.port.android.view.AddScheduleDialogFragment;
 import com.ustadmobile.port.android.view.AppViewAndroid;
@@ -317,6 +319,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         viewNameToAndroidImplMap.put(SELQuestionSetDetailView.VIEW_NAME, SELQuestionSetDetailActivity.class);
         viewNameToAndroidImplMap.put(PersonPictureDialogView.VIEW_NAME, PersonPictureDialogFragment.class);
         viewNameToAndroidImplMap.put(SELQuestionDetail2View.VIEW_NAME, SELQuestionDetail2Activity.class);
+        viewNameToAndroidImplMap.put(AddQuestionOptionDialogView.VIEW_NAME, AddQuestionOptionDialogFragment.class);
     }
 
     /**
