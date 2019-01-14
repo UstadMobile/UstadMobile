@@ -6,28 +6,18 @@
 package com.ustadmobile.core.controller;
 
 
-import com.ustadmobile.core.buildconfig.CoreBuildConfig;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.AppConfig;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMFileUtil;
-import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.core.view.BasePointMenuItem;
 import com.ustadmobile.core.view.BasePointView;
-import com.ustadmobile.core.view.DialogResultListener;
-import com.ustadmobile.core.view.DismissableDialog;
 import com.ustadmobile.core.view.UstadView;
-import com.ustadmobile.core.view.WelcomeView;
 
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
-
-/* $if umplatform == 2  $
-    import org.json.me.*;
- $else$ */
-/* $endif$ */
 
 /**
  *
@@ -36,7 +26,7 @@ import java.util.Vector;
  * 
  * @author mike
  */
-public class BasePointController extends UstadBaseController implements DialogResultListener{
+public class BasePointController extends UstadBaseController {
 
     private BasePointView basePointView;
     
@@ -146,28 +136,6 @@ public class BasePointController extends UstadBaseController implements DialogRe
 
 
     /**
-     * Determines if the current user is a teacher (e.g. would see
-     * class list management)
-     *
-     * TODO: Implement this
-     *
-     * @return true if user is teacher, false otherwise
-     */
-    public boolean isUserTeacher() {
-        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        if(impl.getActiveUser(getContext()) == null)
-            return false;
-
-        String classListJSON = impl.getUserPref("teacherclasslist", context);
-
-        if(classListJSON == null) {
-            return false;//not a teacher or no classes assigned
-        }else {
-            return true;
-        }
-    }
-
-    /**
      * Handle when the user clicks one of the base point menu items.
      *
      * This is configured via the buildconfig system : see buildconfig.default.properties for
@@ -179,32 +147,8 @@ public class BasePointController extends UstadBaseController implements DialogRe
         UstadMobileSystemImpl.getInstance().go(item.getDestination(), getContext());
     }
 
-    public void onDialogResult(int commandId, DismissableDialog dialog, Hashtable args) {
-        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        switch(commandId) {
-            case LoginController.RESULT_LOGIN_SUCCESSFUL:
-                dialog.dismiss();
-                impl.getAppView(getContext()).showNotification(
-                        impl.getString(MessageID.login_successful, getContext()),
-                        AppView.LENGTH_LONG);
-                break;
-
-            case RegistrationPresenter.RESULT_REGISTRATION_SUCCESS:
-                dialog.dismiss();
-                impl.getAppView(getContext()).showNotification(
-                        impl.getString(MessageID.registration_successful, getContext()),
-                        AppView.LENGTH_LONG);
-                break;
-        }
-    }
-
     public void onResume() {
-        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        if(CoreBuildConfig.WELCOME_DIALOG_ENABLED && !welcomeScreenDisplayed
-                && impl.getAppPref(WelcomeController.PREF_KEY_WELCOME_DONT_SHOW, "false",getContext()).equals("false")) {
-            setWelcomeScreenDisplayed(true);
-            UstadMobileSystemImpl.getInstance().go(WelcomeView.VIEW_NAME, getContext());
-        }
+
     }
 
     public boolean isWelcomeScreenDisplayed() {

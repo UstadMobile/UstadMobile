@@ -1,7 +1,6 @@
  package com.ustadmobile.test.sharedse.network;
 
 
-import com.ustadmobile.core.controller.CatalogPresenter;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.UmObserver;
@@ -89,7 +88,7 @@ public class TestDownloadTaskStandalone extends TestWithNetworkService {
                                        boolean allowMeteredNetworks, long crawlTimeout,
                                        boolean queueDownloadJobOnDone) {
         String storageDir = UstadMobileSystemImpl.getInstance().getStorageDirs(
-                CatalogPresenter.SHARED_RESOURCE, PlatformTestUtil.getTargetContext())[0].getDirURI();
+                UstadMobileSystemImpl.SHARED_RESOURCE, PlatformTestUtil.getTargetContext())[0].getDirURI();
         UmAppDatabase dbManager = UmAppDatabase.getInstance(PlatformTestUtil.getTargetContext());
 
         List<String> childEntries = dbManager.getOpdsEntryWithRelationsDao()
