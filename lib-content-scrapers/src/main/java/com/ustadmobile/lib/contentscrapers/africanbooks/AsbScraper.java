@@ -101,8 +101,8 @@ public class AsbScraper {
         try {
             new AsbScraper().findContent(new File(args[0]));
         } catch (IOException e) {
+            UMLogUtil.logFatal(ExceptionUtils.getStackTrace(e));
             UMLogUtil.logFatal("Exception running findContent AsbScraper");
-            UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
         }
     }
 

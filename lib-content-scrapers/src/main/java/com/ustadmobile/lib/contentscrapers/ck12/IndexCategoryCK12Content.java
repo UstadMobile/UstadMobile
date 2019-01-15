@@ -99,7 +99,12 @@ public class IndexCategoryCK12Content {
 
         UMLogUtil.logInfo(args[0]);
         UMLogUtil.logInfo(args[1]);
-        new IndexCategoryCK12Content(args[0], new File(args[1])).findContent();
+        try {
+            new IndexCategoryCK12Content(args[0], new File(args[1])).findContent();
+        }catch (Exception e){
+            UMLogUtil.logFatal(ExceptionUtils.getStackTrace(e));
+            UMLogUtil.logFatal("Exception running findContent CK12 Index Scraper");
+        }
     }
 
 

@@ -75,8 +75,8 @@ public class IndexEtekkathoScraper {
         try {
             new IndexEtekkathoScraper().findContent(args[0], new File(args[1]));
         } catch (IOException e) {
-            UMLogUtil.logError("Exception running findContent");
-            UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
+            UMLogUtil.logFatal(ExceptionUtils.getStackTrace(e));
+            UMLogUtil.logFatal("Exception running findContent Etek");
         }
     }
 

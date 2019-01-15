@@ -68,7 +68,12 @@ public class IndexDdlContent {
 
         UMLogUtil.logError(args[0]);
         UMLogUtil.logError(args[1]);
-        new IndexDdlContent().findContent(args[0], new File(args[1]));
+        try {
+            new IndexDdlContent().findContent(args[0], new File(args[1]));
+        }catch (Exception e){
+            UMLogUtil.logFatal(ExceptionUtils.getStackTrace(e));
+            UMLogUtil.logFatal("Exception running findContent DDL Scraper");
+        }
     }
 
 

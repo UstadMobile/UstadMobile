@@ -84,13 +84,13 @@ public class DdlContentScraper {
             System.exit(1);
         }
         UMLogUtil.setLevel(args.length == 3 ? args[2] : "");
-        UMLogUtil.logError(args[0]);
-        UMLogUtil.logError(args[1]);
+        UMLogUtil.logInfo(args[0]);
+        UMLogUtil.logInfo(args[1]);
         try {
             new DdlContentScraper(args[0], new File(args[1])).scrapeContent();
         } catch (IOException e) {
-            UMLogUtil.logError("Exception running scrapeContent");
             UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
+            UMLogUtil.logError("Exception running scrapeContent ddl");
         }
 
     }

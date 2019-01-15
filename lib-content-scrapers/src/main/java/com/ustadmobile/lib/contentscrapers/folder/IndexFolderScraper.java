@@ -67,7 +67,8 @@ public class IndexFolderScraper {
         try {
             new IndexFolderScraper().findContent(args[0], new File(args[1]));
         } catch (Exception e) {
-            UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
+            UMLogUtil.logFatal(ExceptionUtils.getStackTrace(e));
+            UMLogUtil.logFatal("Exception running findContent Folder");
         }
 
     }

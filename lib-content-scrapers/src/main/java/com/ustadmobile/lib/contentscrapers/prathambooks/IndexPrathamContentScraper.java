@@ -76,12 +76,11 @@ public class IndexPrathamContentScraper {
             System.exit(1);
         }
         UMLogUtil.setLevel(args.length == 2 ? args[1] : "");
-        System.out.println(args[0]);
         try {
             new IndexPrathamContentScraper().findContent(new File(args[0]));
         } catch (IOException | URISyntaxException e) {
-            System.err.println("Exception running findContent");
-            UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
+            UMLogUtil.logFatal(ExceptionUtils.getStackTrace(e));
+            UMLogUtil.logFatal("Exception running findContent pratham");
         }
     }
 

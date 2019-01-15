@@ -217,8 +217,8 @@ public class CK12ContentScraper {
             }
 
         } catch (IOException e) {
-            UMLogUtil.logError("Exception running scrapeContent");
             UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
+            UMLogUtil.logError("Exception running scrapeContent ck12");
         }
 
     }

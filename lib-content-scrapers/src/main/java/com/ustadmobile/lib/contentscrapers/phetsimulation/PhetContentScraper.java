@@ -91,8 +91,8 @@ public class PhetContentScraper {
         try {
             new PhetContentScraper(args[0], new File(args[1])).scrapeContent();
         } catch (IOException e) {
-            UMLogUtil.logError("Exception running scrapeContent");
             UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
+            UMLogUtil.logError("Exception running scrapeContent phet");
         }
 
     }

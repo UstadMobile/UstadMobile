@@ -76,7 +76,7 @@ public class IndexKhanContentScraper {
     String KHAN = "Khan Academy";
     private Gson gson;
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
         if (args.length < 2) {
             System.err.println("Usage: <khan url> <file destination><optional log{trace, debug, info, warn, error, fatal}>");
             System.exit(1);
@@ -87,7 +87,12 @@ public class IndexKhanContentScraper {
         UMLogUtil.logDebug(args[0]);
         UMLogUtil.logError(args[1]);
 
-        new IndexKhanContentScraper().findContent(args[0], new File(args[1]));
+        try {
+            new IndexKhanContentScraper().findContent(args[0], new File(args[1]));
+        }catch (Exception e){
+            UMLogUtil.logFatal(ExceptionUtils.getStackTrace(e));
+            UMLogUtil.logError("Main method exception catch khan");
+        }
     }
 
 

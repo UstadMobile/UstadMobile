@@ -17,6 +17,7 @@ import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.Language;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.exception.ExceptionUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -75,7 +76,13 @@ public class IndexEdraakK12Content {
         UMLogUtil.setLevel(args.length == 3 ? args[2] : "");
         UMLogUtil.logInfo("main args url = " + args[0]);
         UMLogUtil.logInfo("main args destination = " + args[1]);
-        new IndexEdraakK12Content().findContent(args[0], new File(args[1]));
+        try{
+            new IndexEdraakK12Content().findContent(args[0], new File(args[1]));
+        }catch (Exception e){
+            UMLogUtil.logFatal(ExceptionUtils.getStackTrace(e));
+            UMLogUtil.logFatal("Exception running findContent Edraak");
+        }
+
     }
 
 
