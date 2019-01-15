@@ -9,7 +9,6 @@ import com.ustadmobile.core.db.dao.ContentEntryContentCategoryJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryContentEntryFileJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryDao;
 import com.ustadmobile.core.db.dao.ContentEntryFileDao;
-import com.ustadmobile.core.db.dao.ContentEntryFileStatusDao;
 import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryRelatedEntryJoinDao;
 import com.ustadmobile.core.db.dao.LanguageDao;
@@ -95,15 +94,29 @@ public class ExportData {
         List<ContentEntryParentChildJoin> parentChildJoinList = contentParentChildJoinDao.getPublicContentEntryParentChildJoins();
         List<ContentEntryRelatedEntryJoin> relatedJoinList = relatedDao.getPublicContentEntryRelatedEntryJoins();
 
+        UMLogUtil.logDebug("size of contentEntryList" + contentEntryList.size());
+        UMLogUtil.logDebug("size of parentChildJoinList" + parentChildJoinList.size());
+        UMLogUtil.logDebug("size of relatedJoinList" + relatedJoinList.size());
+
         List<ContentCategorySchema> schemaList = schemaDao.getPublicContentCategorySchemas();
         List<ContentCategory> categoryList = categoryDao.getPublicContentCategories();
         List<ContentEntryContentCategoryJoin> categoryJoinList = categoryJoinDao.getPublicContentEntryContentCategoryJoins();
 
+        UMLogUtil.logDebug("size of schemaList" + schemaList.size());
+        UMLogUtil.logDebug("size of categoryList" + categoryList.size());
+        UMLogUtil.logDebug("size of categoryJoinList" + categoryJoinList.size());
+
         List<Language> langList = languageDao.getPublicLanguages();
         List<LanguageVariant> langVariantList = variantDao.getPublicLanguageVariants();
 
+        UMLogUtil.logDebug("size of langList" + langList.size());
+        UMLogUtil.logDebug("size of langVariantList" + langVariantList.size());
+
         List<ContentEntryFile> fileList = contentEntryFileDao.getPublicContentEntryFiles();
         List<ContentEntryContentEntryFileJoin> fileJoinList = contentEntryFileJoin.getPublicContentEntryContentEntryFileJoins();
+
+        UMLogUtil.logDebug("size of fileList" + fileList.size());
+        UMLogUtil.logDebug("size of fileJoinList" + fileJoinList.size());
 
         saveListToJson(split(contentEntryList, size), "contentEntry", destinationDirectory);
         saveListToJson(split(parentChildJoinList, size), "contentEntryParentChildJoin", destinationDirectory);
@@ -126,7 +139,7 @@ public class ExportData {
     private <T> Collection<List<T>> saveListToJson(Collection<List<T>> listOfLists, String nameOfFile, File destinationDirectory) {
 
         Iterator<List<T>> iterator = listOfLists.iterator();
-
+        UMLogUtil.logDebug(nameOfFile + " was split into " + listOfLists.size());
         int count = 0;
         while (iterator.hasNext()) {
 
@@ -139,6 +152,7 @@ public class ExportData {
                 UMLogUtil.logError("Error saving file " + nameOfFile + count);
             }
         }
+        UMLogUtil.logDebug(nameOfFile + " saved into file " + count);
         return listOfLists;
     }
 
