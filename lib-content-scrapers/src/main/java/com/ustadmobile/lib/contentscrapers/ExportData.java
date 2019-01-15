@@ -13,7 +13,6 @@ import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryRelatedEntryJoinDao;
 import com.ustadmobile.core.db.dao.LanguageDao;
 import com.ustadmobile.core.db.dao.LanguageVariantDao;
-import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.lib.db.entities.ContentCategory;
 import com.ustadmobile.lib.db.entities.ContentCategorySchema;
 import com.ustadmobile.lib.db.entities.ContentEntry;
@@ -57,7 +56,7 @@ public class ExportData {
         int size = args.length == 2 ? Integer.parseInt(args[1]) : 1000;
 
         try {
-            new ExportData().export(new File(args[1]), size);
+            new ExportData().export(new File(args[0]), size);
         } catch (IOException e) {
             UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
         }
