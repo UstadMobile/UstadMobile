@@ -230,7 +230,17 @@ public class ServletContextClass implements ServletContextListener
                                                             entityRole.setErTableId(Clazz.TABLE_ID);
                                                             entityRole.setErGroupUid(selGroupUid);
                                                             entityRole.setErEntityUid(thisClazz.getClazzUid());
-                                                            entityRoleDao.insert(entityRole);
+                                                            entityRoleDao.insertAsync(entityRole, new UmCallback<Long>() {
+                                                                @Override
+                                                                public void onSuccess(Long result) {
+
+                                                                }
+
+                                                                @Override
+                                                                public void onFailure(Throwable exception) {
+
+                                                                }
+                                                            });
                                                         }
                                                     }
 
