@@ -81,11 +81,11 @@ public class ReportSelectionActivity extends UstadBaseActivity implements Report
             ).show();
 
 
-                    mPresenter.goToReport(expandableListDataReportsHashMap
-                            .get(expandableListTitle.get(groupPosition)).children
-                                .get(childPosition).name, expandableListDataReportsHashMap
-                            .get(expandableListTitle.get(groupPosition)).children
-                            .get(childPosition).reportLink );
+            mPresenter.goToReport(expandableListDataReportsHashMap
+                    .get(expandableListTitle.get(groupPosition)).children
+                        .get(childPosition).name, expandableListDataReportsHashMap
+                    .get(expandableListTitle.get(groupPosition)).children
+                    .get(childPosition).reportLink );
             return false;
         });
 

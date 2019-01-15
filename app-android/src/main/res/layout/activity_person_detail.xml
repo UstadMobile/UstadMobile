@@ -113,9 +113,11 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp"
                 android:text="@string/call_parent"
                 android:textColor="@color/icons"
                 android:textSize="14sp"
+                app:layout_constraintBottom_toBottomOf="@+id/activity_person_detail_action_text_parent_text"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/activity_person_detail_action_call_parent_icon" />
 
@@ -139,9 +141,11 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp"
                 android:text="@string/text_parent"
                 android:textColor="@color/icons"
                 android:textSize="14sp"
+                app:layout_constraintBottom_toBottomOf="@+id/activity_person_detail_action_enroll_in_class_text"
                 app:layout_constraintStart_toEndOf="@+id/activity_person_detail_action_call_parent_text"
                 app:layout_constraintTop_toBottomOf="@+id/activity_person_detail_action_text_parent_icon" />
 
@@ -165,9 +169,11 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp"
                 android:text="@string/enroll_in_class"
                 android:textColor="@color/icons"
                 android:textSize="14sp"
+                app:layout_constraintBottom_toBottomOf="@+id/activity_person_detail_action_attendance_report_text"
                 app:layout_constraintStart_toEndOf="@+id/activity_person_detail_action_text_parent_text"
                 app:layout_constraintTop_toBottomOf="@+id/activity_person_detail_action_enroll_in_class_icon" />
 
@@ -191,9 +197,11 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp"
                 android:text="@string/attendance_report"
                 android:textColor="@color/icons"
                 android:textSize="14sp"
+                app:layout_constraintBottom_toBottomOf="@+id/activity_person_detail_action_record_dropout_text"
                 app:layout_constraintStart_toEndOf="@+id/activity_person_detail_action_enroll_in_class_text"
                 app:layout_constraintTop_toBottomOf="@+id/activity_person_detail_action_attendance_report_icon" />
 
@@ -203,11 +211,13 @@
                 android:layout_height="30dp"
                 android:layout_marginStart="40dp"
                 android:layout_marginTop="8dp"
+                android:layout_marginEnd="16dp"
                 android:adjustViewBounds="false"
                 android:contentDescription="@string/record_dropout"
                 android:cropToPadding="false"
                 android:src="@drawable/ic_dropout_bcd4_24dp"
                 android:tint="@color/icons"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/activity_person_detail_action_attendance_report_icon"
                 app:layout_constraintTop_toBottomOf="@+id/activity_person_detail_divider1" />
 
@@ -217,9 +227,11 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="8dp"
+                android:layout_marginEnd="8dp"
                 android:text="@string/record_dropout"
                 android:textColor="@color/icons"
                 android:textSize="14sp"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/activity_person_detail_action_attendance_report_text"
                 app:layout_constraintTop_toBottomOf="@+id/activity_person_detail_action_record_dropout_icon" />
 

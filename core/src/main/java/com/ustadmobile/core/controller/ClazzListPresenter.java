@@ -171,7 +171,7 @@ public class ClazzListPresenter extends UstadBaseController<ClazzListView> {
                 break;
             case SORT_ORDER_TEACHER_ASC:
                 clazzListProvider = repository.getClazzDao()
-                        .findAllActiveClazzesSortByAttendanceDesc();
+                        .findAllActiveClazzesSortByTeacherAsc();
                 break;
             default:
                 //SORT_ORDER_NAME_ASC

@@ -12,6 +12,7 @@ import com.ustadmobile.lib.database.annotation.UmRestAccessible;
 import com.ustadmobile.lib.database.annotation.UmUpdate;
 import com.ustadmobile.lib.db.entities.AccessToken;
 import com.ustadmobile.lib.db.entities.Clazz;
+import com.ustadmobile.lib.db.entities.EntityRole;
 import com.ustadmobile.lib.db.entities.Location;
 import com.ustadmobile.lib.db.entities.Person;
 import com.ustadmobile.lib.db.entities.PersonAuth;
@@ -224,6 +225,38 @@ public abstract class PersonDao implements SyncableDao<Person, PersonDao> {
 
             return "Created";
         }else {
+            return "Already created";
+        }
+    }
+
+    @UmQuery("SELECT * FROM Clazz")
+    public abstract List<Clazz> findAllClazzes();
+
+    @UmQuery("SELECT * FROM Role WHERE roleName=:roleName")
+    public abstract Role findRoleByName(String roleName);
+
+    @UmInsert
+    public abstract long insertEntityRole(EntityRole entityRole);
+
+    public String createSEL(){
+        Person selPerson = findByUsername("sel");
+        if(selPerson == null){
+            selPerson = new Person();
+            selPerson.setActive(true);
+            selPerson.setUsername("sel");
+            selPerson.setPersonUid(getAndIncrementPrimaryKey());
+            selPerson.setFirstNames("SEL");
+            selPerson.setLastName("SEL");
+
+            insert(selPerson);
+
+            PersonAuth selPersonAuth = new PersonAuth(selPerson.getPersonUid(),
+                    PersonAuthDao.ENCRYPTED_PASS_PREFIX +
+                            PersonAuthDao.encryptPassword("irZahle4"));
+            insertPersonAuth(selPersonAuth);
+
+            return "created";
+        }else{
             return "Already created";
         }
     }

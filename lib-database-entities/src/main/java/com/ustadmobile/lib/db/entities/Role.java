@@ -10,6 +10,11 @@ import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 public class Role {
 
     public static final String ROLE_NAME_TEACHER = "teacher";
+    public static final String ROLE_NAME_OFFICER = "officer";
+    public static final String ROLE_NAME_MNE = "mne";
+    public static final String ROLE_NAME_SEL = "sel";
+    public static final String ROLE_NAME_SITE_STAFF = "sitestaff";
+
 
     @UmPrimaryKey(autoGenerateSyncable = true)
     private long roleUid;

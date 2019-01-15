@@ -35,6 +35,10 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
 import static com.ustadmobile.lib.db.entities.PersonDetailPresenterField.CUSTOM_FIELD_MIN_UID;
+import static com.ustadmobile.lib.db.entities.Role.ROLE_NAME_MNE;
+import static com.ustadmobile.lib.db.entities.Role.ROLE_NAME_OFFICER;
+import static com.ustadmobile.lib.db.entities.Role.ROLE_NAME_SEL;
+import static com.ustadmobile.lib.db.entities.Role.ROLE_NAME_SITE_STAFF;
 import static com.ustadmobile.lib.db.entities.Role.ROLE_NAME_TEACHER;
 
 public class ServletContextClass implements ServletContextListener
@@ -48,6 +52,13 @@ public class ServletContextClass implements ServletContextListener
         PersonCustomFieldDao personCustomFieldDao;
         PersonDetailPresenterFieldDao personDetailPresenterFieldDao;
         PersonDao personDao;
+        RoleDao roleDao;
+        EntityRoleDao entityRoleDao;
+        PersonAuthDao personAuthDao;
+        PersonGroupDao personGroupDao;
+        PersonGroupMemberDao personGroupMemberDao;
+
+        Role officerRole, selRole;
 
         private int fieldIndex = 0;
         List<HeadersAndFields> allFields;
@@ -73,6 +84,11 @@ public class ServletContextClass implements ServletContextListener
             personDetailPresenterFieldDao = appDb.getRepository(dummyBaseUrl, dummyAuth)
                     .getPersonDetailPresenterFieldDao();
             personDao = appDb.getRepository(dummyBaseUrl, dummyAuth).getPersonDao();
+            roleDao = appDb.getRepository(dummyBaseUrl, dummyAuth).getRoleDao();
+            entityRoleDao = appDb.getRepository(dummyBaseUrl, dummyAuth).getEntityRoleDao();
+            personAuthDao = appDb.getRepository(dummyBaseUrl, dummyAuth).getPersonAuthDao();
+            personGroupDao = appDb.getRepository(dummyBaseUrl,dummyAuth).getPersonGroupDao();
+            personGroupMemberDao = appDb.getRepository(dummyBaseUrl, dummyAuth).getPersonGroupMemberDao();
 
             //Creating admin
             personDao.createAdmin();
@@ -80,12 +96,115 @@ public class ServletContextClass implements ServletContextListener
             //Adding stuff
             addFieldData();
 
-            //Add SEL questions - TODO: Remove after testing
+            //Add SEL questions - TODO: Remove in sprint 5
             addSELQuestions();
 
             //Add Permissions and Role
             addRolesAndPermissions();
 
+            //Create officer
+            createOfficer();
+
+        }
+
+        public String createOfficer(){
+
+
+            Person officerPerson = personDao.findByUsername("officer");
+            if(officerPerson == null){
+                officerPerson = new Person();
+                officerPerson.setActive(true);
+                officerPerson.setUsername("officer");
+                officerPerson.setFirstNames("Officer");
+                officerPerson.setLastName("Officer");
+
+                officerPerson.setPersonUid(personDao.insert(officerPerson));
+
+                Person finalOfficerPerson = officerPerson;
+                personDao.createPersonWithGroupAsync(officerPerson,
+                        new UmCallback<PersonDao.PersonWithGroup>() {
+                    @Override
+                    public void onSuccess(PersonDao.PersonWithGroup personWithGroup) {
+                        System.out.println("1");
+                        if(personWithGroup != null){
+                            System.out.println("2");
+                            //Create password
+                            PersonAuth officerPersonAuth = new PersonAuth(finalOfficerPerson.getPersonUid(),
+                                    PersonAuthDao.ENCRYPTED_PASS_PREFIX +
+                                            PersonAuthDao.encryptPassword("irZahle3"));
+                            personAuthDao.insert(officerPersonAuth);
+
+                            System.out.println("4");
+
+                            //Create entity roles for all clazzes
+                            //Assign Role for all clazzes
+
+                            System.out.println("Looping over classes..");
+                            List<Clazz> allClazzes = personDao.findAllClazzes();
+                            for(Clazz thisClazz:allClazzes){
+                                System.out.println("5");
+                                EntityRole entityRole = new EntityRole();
+                                entityRole.setErRoleUid(officerRole.getRoleUid());
+                                entityRole.setErTableId(Clazz.TABLE_ID);
+                                entityRole.setErGroupUid(personWithGroup.getPersonGroupUid());
+                                entityRole.setErEntityUid(thisClazz.getClazzUid());
+                                entityRoleDao.insert(entityRole);
+                            }
+
+                            System.out.println("6");
+                        }else{
+                            System.out.println("3");
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Throwable exception) {
+                        exception.printStackTrace();
+                    }
+                });
+
+                return "created";
+            }else{
+                System.out.println("Officer already created. Updating permissions over all classes");
+                personGroupMemberDao.findAllGroupWherePersonIsIn(officerPerson.getPersonUid(), new UmCallback<List<PersonGroupMember>>() {
+                    @Override
+                    public void onSuccess(List<PersonGroupMember> result) {
+                        Long officerGroupUid = result.get(0).getGroupMemberGroupUid();
+
+                        List<Clazz> allClazzes = personDao.findAllClazzes();
+                        for(Clazz thisClazz:allClazzes){
+
+                            entityRoleDao.findByEntitiyAndPersonGroup(Clazz.TABLE_ID, thisClazz.getClazzUid(),
+                                officerGroupUid, new UmCallback<List<EntityRole>>() {
+                                    @Override
+                                    public void onSuccess(List<EntityRole> existingER) {
+                                        if(existingER.isEmpty()){
+                                            EntityRole entityRole = new EntityRole();
+                                            entityRole.setErRoleUid(officerRole.getRoleUid());
+                                            entityRole.setErTableId(Clazz.TABLE_ID);
+                                            entityRole.setErGroupUid(officerGroupUid);
+                                            entityRole.setErEntityUid(thisClazz.getClazzUid());
+                                            entityRoleDao.insert(entityRole);
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onFailure(Throwable exception) {
+                                        //exception.printStackTrace();
+                                        //TODO: release
+                                    }
+                                });
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Throwable exception) {
+                        exception.printStackTrace();
+                        //TODO: release
+                    }
+                });
+                return "Already created";
+            }
         }
 
         public class TestRole{
@@ -100,11 +219,12 @@ public class ServletContextClass implements ServletContextListener
 
 
         public void addRolesAndPermissions(){
+
+            System.out.println("Adding roles and permissions");
+
             RoleDao roleDao = appDb.getRepository(dummyBaseUrl, dummyAuth).getRoleDao();
 
-
-
-            //TODOone: Check if role already created. If created, don't create it again.
+            //TEACHER
             roleDao.findByName(ROLE_NAME_TEACHER, new UmCallback<Role>() {
                 @Override
                 public void onSuccess(Role result) {
@@ -124,16 +244,143 @@ public class ServletContextClass implements ServletContextListener
                             Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_INSERT |   //Take attendance
                             Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_UPDATE |   //Update attendance
                             Role.PERMISSION_PERSON_SELECT  |                //See People
-                            //Role.PERMISSION_PERSON_UPDATE |                 //Update people
                             Role.PERMISSION_PERSON_PICTURE_INSERT |         //Insert Person Picture
                             Role.PERMISSION_PERSON_PICTURE_SELECT |         //See Person Picture
                             Role.PERMISSION_PERSON_PICTURE_UPDATE           //Update Person picture
-                            //Role.PERMISSION_PERSON_INSERT                   //Add person
                             ;
                         newRole.setRolePermissions(teacherPermissions);
                         Long newRoleUid = roleDao.insert(newRole);
                     }else{
                         System.out.println("Role already created for teacher");
+                    }
+                }
+
+                @Override
+                public void onFailure(Throwable exception) {
+                    exception.printStackTrace();
+                }
+            });
+
+            //Officer
+            roleDao.findByName(ROLE_NAME_OFFICER, new UmCallback<Role>() {
+                @Override
+                public void onSuccess(Role result) {
+                    if(result == null){
+                        Role newRole = new Role();
+                        newRole.setRoleName(ROLE_NAME_OFFICER);
+                        long officerPermissions =
+                            Role.PERMISSION_CLAZZ_ADD_STUDENT |
+                            Role.PERMISSION_CLAZZ_LOG_ACTIVITY_SELECT |
+                            Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT |
+                            Role.PERMISSION_CLAZZ_SELECT |
+                            Role.PERMISSION_CLAZZ_UPDATE |
+                            Role.PERMISSION_PERSON_SELECT |
+                            Role.PERMISSION_PERSON_UPDATE |
+                            Role.PERMISSION_PERSON_INSERT |
+                            Role.PERMISSION_PERSON_PICTURE_INSERT |
+                            Role.PERMISSION_PERSON_PICTURE_SELECT |
+                            Role.PERMISSION_PERSON_PICTURE_UPDATE
+
+                            ;
+                        newRole.setRolePermissions(officerPermissions);
+                        newRole.setRoleUid(roleDao.insert(newRole));
+
+                        officerRole = newRole;
+
+
+                    }else{
+                        System.out.println("Role already created for officer");
+                    }
+                }
+
+                @Override
+                public void onFailure(Throwable exception) {
+                    exception.printStackTrace();
+                }
+            });
+
+            //SEL
+            roleDao.findByName(ROLE_NAME_SEL, new UmCallback<Role>() {
+                @Override
+                public void onSuccess(Role result) {
+                    if(result == null){
+                        Role newRole = new Role();
+                        newRole.setRoleName(ROLE_NAME_SEL);
+                        long selPermissions =
+                            Role.PERMISSION_CLAZZ_SELECT |
+                            Role.PERMISSION_PERSON_SELECT |
+                            Role.PERMISSION_PERSON_PICTURE_SELECT |
+                            Role.PERMISSION_SEL_QUESTION_SELECT |
+                            Role.PERMISSION_SEL_QUESTION_RESPONSE_SELECT |
+                            Role.PERMISSION_SEL_QUESTION_RESPONSE_INSERT |
+                            Role.PERMISSION_SEL_QUESTION_RESPONSE_UPDATE
+                            ;
+                        newRole.setRolePermissions(selPermissions);
+                        roleDao.insert(newRole);
+                    }else{
+                        System.out.println("Role already created for SEL");
+                    }
+                }
+
+                @Override
+                public void onFailure(Throwable exception) {
+                    exception.printStackTrace();
+                }
+            });
+
+            //MNE
+            roleDao.findByName(ROLE_NAME_MNE, new UmCallback<Role>() {
+                @Override
+                public void onSuccess(Role result) {
+                    if(result == null){
+                        Role newRole = new Role();
+                        newRole.setRoleName(ROLE_NAME_MNE);
+                        long mnePermissions =
+                                Role.PERMISSION_CLAZZ_ADD_STUDENT |
+                                Role.PERMISSION_CLAZZ_LOG_ACTIVITY_SELECT |
+                                Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT |
+                                Role.PERMISSION_CLAZZ_SELECT |
+                                Role.PERMISSION_CLAZZ_UPDATE |
+                                Role.PERMISSION_PERSON_SELECT |
+                                Role.PERMISSION_PERSON_UPDATE |
+                                Role.PERMISSION_PERSON_INSERT |
+                                Role.PERMISSION_PERSON_PICTURE_INSERT |
+                                Role.PERMISSION_PERSON_PICTURE_SELECT |
+                                Role.PERMISSION_PERSON_PICTURE_UPDATE |
+                                Role.PERMISSION_SEL_QUESTION_INSERT |
+                                Role.PERMISSION_SEL_QUESTION_UPDATE |
+                                Role.PERMISSION_SEL_QUESTION_SELECT |
+                                Role.PERMISSION_SEL_QUESTION_RESPONSE_SELECT |
+                                Role.PERMISSION_REPORTS_VIEW
+                                ;
+                        newRole.setRolePermissions(mnePermissions);
+                        roleDao.insert(newRole);
+                    }else{
+                        System.out.println("Role already created for MNE");
+                    }
+                }
+
+                @Override
+                public void onFailure(Throwable exception) {
+                    exception.printStackTrace();
+                }
+            });
+
+            //SITE STAFF
+            roleDao.findByName(ROLE_NAME_SITE_STAFF, new UmCallback<Role>() {
+                @Override
+                public void onSuccess(Role result) {
+                    if(result == null){
+                        Role newRole = new Role();
+                        newRole.setRoleName(ROLE_NAME_SITE_STAFF);
+                        long siteStaffPermissions =
+                            Role.PERMISSION_PERSON_SELECT |
+                            Role.PERMISSION_PERSON_PICTURE_SELECT
+                        ;
+                        newRole.setRolePermissions(siteStaffPermissions);
+                        roleDao.insert(newRole);
+                    }else{
+                        System.out.println("Role already created for Site Staff");
                     }
                 }
 
