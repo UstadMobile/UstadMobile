@@ -107,8 +107,8 @@ public class ClazzListPresenter extends UstadBaseController<ClazzListView> {
                 @Override
                 public void onSuccess(Boolean result) {
                     view.showAddClassButton(result);
-                    view.showAllClazzSettingsButton(true);
-                    setRecordAttendanceVisibility(true);
+                    view.showAllClazzSettingsButton(result);
+                    setRecordAttendanceVisibility(result);
                 }
 
                 @Override
