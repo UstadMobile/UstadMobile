@@ -30,6 +30,9 @@ public class ScraperConstants {
     public static final String CHECK_NAME = "check.svg";
     public static final String XML_NAMESPACE = "http://purl.org/dc/elements/1.1/";
 
+    public static final String GMAIL = "samih.mustafa@gmail.com";
+    public static final String PASS = "ustad123";
+
     public static final String CORRECT_KHAN_LINK = "/com/ustadmobile/lib/contentscrapers/khan/exercise-correct.svg";
     public static final String CORRECT_FILE = "exercise-correct.svg";
 

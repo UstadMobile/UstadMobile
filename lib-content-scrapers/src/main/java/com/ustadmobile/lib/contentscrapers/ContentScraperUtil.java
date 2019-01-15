@@ -88,6 +88,8 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.EMPTY_STRING;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.GMAIL;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.PASS;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.ZIP_EXT;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.slideShareLink;
@@ -1081,4 +1083,46 @@ public class ContentScraperUtil {
         }
         return requestParams;
     }
+
+
+    /**
+     * Clear the console log in chrome, wait for it to finish clearing
+     * @param driver
+     */
+    public static void clearChromeConsoleLog(ChromeDriver driver) {
+        JavascriptExecutor js = (JavascriptExecutor)driver;
+        js.executeScript("console.clear()");
+
+        while (driver.manage().logs().get(LogType.PERFORMANCE).getAll().size() != 0){
+            driver.manage().timeouts().implicitlyWait(120, TimeUnit.SECONDS);
+        }
+    }
+
+    public static ChromeDriver loginKhanAcademy(String scrapeContentUrl) {
+
+        ChromeDriver driver = ContentScraperUtil.setupLogIndexChromeDriver();
+
+        driver.get(scrapeContentUrl);
+        WebDriverWait waitDriver = new WebDriverWait(driver, 10000);
+        ContentScraperUtil.waitForJSandJQueryToLoad(waitDriver);
+        waitDriver.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("div#login-signup-root")));
+
+        driver.findElement(By.cssSelector("div#login-signup-root input[id*=email-or-username]")).sendKeys(GMAIL);
+        driver.findElement(By.cssSelector("div#login-signup-root input[id*=text-field-1-password]")).sendKeys(PASS);
+
+        List<WebElement> elements = driver.findElements(By.cssSelector("div#login-signup-root div[class*=inner]"));
+        for(WebElement element: elements){
+            if(element.getText().contains("Log in")){
+                element.click();
+                break;
+            }
+        }
+
+        waitDriver.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("h2[class*=moduleTitle]")));
+
+        ContentScraperUtil.clearChromeConsoleLog(driver);
+
+        return driver;
+    }
+
 }

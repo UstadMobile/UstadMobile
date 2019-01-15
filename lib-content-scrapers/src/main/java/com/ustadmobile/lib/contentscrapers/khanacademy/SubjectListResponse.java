@@ -16,6 +16,8 @@ class SubjectListResponse {
 
         public NavData tutorialNavData;
 
+        public NavData tutorialPageData;
+
         public class Curation {
 
             public List<Tab> tabs;
@@ -64,6 +66,8 @@ class SubjectListResponse {
         public class NavData {
 
             public List<ContentModel> contentModels;
+
+            public ContentModel contentModel;
 
             public class ContentModel {
 

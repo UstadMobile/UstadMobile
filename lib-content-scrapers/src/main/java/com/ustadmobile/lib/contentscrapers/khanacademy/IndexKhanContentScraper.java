@@ -23,6 +23,7 @@ import org.jsoup.nodes.DataNode;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.openqa.selenium.chrome.ChromeDriver;
 
 import java.io.File;
 import java.io.IOException;
@@ -58,7 +59,6 @@ import static com.ustadmobile.lib.db.entities.ContentEntry.LICENSE_TYPE_CC_BY_NC
  */
 public class IndexKhanContentScraper {
 
-
     public static final String TABLE_OF_CONTENTS_ROW = "TableOfContentsRow";
     public static final String SUBJECT_PAGE_TOPIC_CARD = "SubjectPageTopicCard";
     public static final String SUBJECT_CHALLENGE = "SubjectChallenge";
@@ -75,6 +75,7 @@ public class IndexKhanContentScraper {
 
     String KHAN = "Khan Academy";
     private Gson gson;
+    private ChromeDriver driver;
 
     public static void main(String[] args) {
         if (args.length < 2) {
@@ -89,7 +90,7 @@ public class IndexKhanContentScraper {
 
         try {
             new IndexKhanContentScraper().findContent(args[0], new File(args[1]));
-        }catch (Exception e){
+        } catch (Exception e) {
             UMLogUtil.logFatal(ExceptionUtils.getStackTrace(e));
             UMLogUtil.logError("Main method exception catch khan");
         }
@@ -107,6 +108,9 @@ public class IndexKhanContentScraper {
 
         destinationDir.mkdirs();
         destinationDirectory = destinationDir;
+
+        ContentScraperUtil.setChromeDriverLocation();
+        driver = ContentScraperUtil.loginKhanAcademy("https://www.khanacademy.org/login");
 
         UmAppDatabase db = UmAppDatabase.getInstance(null);
         UmAppDatabase repository = db.getRepository("https://localhost", "");
@@ -142,6 +146,9 @@ public class IndexKhanContentScraper {
         englishFolder.mkdirs();
 
         browseTopics(khanAcademyEntry, url, englishFolder);
+
+        driver.close();
+        driver.quit();
 
     }
 
@@ -393,7 +400,7 @@ public class IndexKhanContentScraper {
             ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, tutorialEntry, entry
                     , contentCount++);
 
-            KhanContentScraper scraper = new KhanContentScraper(contentFolder);
+            KhanContentScraper scraper = new KhanContentScraper(contentFolder, driver);
             try {
                 switch (contentItem.kind) {
 
@@ -436,5 +443,4 @@ public class IndexKhanContentScraper {
 
 
     }
-
 }

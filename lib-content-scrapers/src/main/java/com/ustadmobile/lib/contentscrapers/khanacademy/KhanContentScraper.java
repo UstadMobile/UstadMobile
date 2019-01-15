@@ -13,15 +13,11 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.logging.LogEntries;
 import org.openqa.selenium.logging.LogEntry;
 import org.openqa.selenium.logging.LogType;
-import org.openqa.selenium.logging.LoggingPreferences;
-import org.openqa.selenium.remote.CapabilityType;
-import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
@@ -33,8 +29,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -99,9 +93,8 @@ import static com.ustadmobile.lib.contentscrapers.ck12.CK12ContentScraper.RESPON
  */
 public class KhanContentScraper {
 
-    private static final String GMAIL = "samih.mustafa@gmail.com";
-    private static final String PASS = "ustad123";
     private final File destinationDirectory;
+    private ChromeDriver driver;
 
     private String secondExerciseUrl = "https://www.khanacademy.org/api/internal/user/exercises/";
 
@@ -113,6 +106,12 @@ public class KhanContentScraper {
 
     public KhanContentScraper(File destinationDirectory) {
         this.destinationDirectory = destinationDirectory;
+        this.driver = null;
+    }
+
+    public KhanContentScraper(File destinationDirectory, ChromeDriver driver){
+        this.destinationDirectory = destinationDirectory;
+        this.driver = driver;
     }
 
     public boolean isContentUpdated() {
@@ -141,8 +140,6 @@ public class KhanContentScraper {
 
 
     public void scrapeExerciseContent(String scrapUrl) throws IOException {
-
-        ContentScraperUtil.setChromeDriverLocation();
 
         Gson gson = new GsonBuilder().disableHtmlEscaping().create();
 
@@ -192,7 +189,12 @@ public class KhanContentScraper {
             return;
         }
 
-        ChromeDriver driver = LoginKhanAcademy("https://www.khanacademy.org/login");
+        if(driver == null){
+            ContentScraperUtil.setChromeDriverLocation();
+            driver = ContentScraperUtil.loginKhanAcademy("https://www.khanacademy.org/login");
+        }else{
+            ContentScraperUtil.clearChromeConsoleLog(driver);
+        }
 
         driver.get(scrapUrl);
         WebDriverWait waitDriver = new WebDriverWait(driver, 10000);
@@ -205,8 +207,6 @@ public class KhanContentScraper {
         }
 
         LogEntries les = driver.manage().logs().get(LogType.PERFORMANCE);
-        driver.close();
-        driver.quit();
 
         List<LogIndex> index = new ArrayList<>();
 
@@ -364,8 +364,6 @@ public class KhanContentScraper {
 
     public void scrapeArticleContent(String scrapUrl) throws IOException {
 
-        ContentScraperUtil.setChromeDriverLocation();
-
         Gson gson = new GsonBuilder().disableHtmlEscaping().create();
 
         File khanDirectory = new File(destinationDirectory, FilenameUtils.getBaseName(scrapUrl));
@@ -375,7 +373,20 @@ public class KhanContentScraper {
 
         String initialJson = IndexKhanContentScraper.getJsonStringFromScript(scrapUrl);
         SubjectListResponse data = gson.fromJson(initialJson, SubjectListResponse.class);
-        List<SubjectListResponse.ComponentData.NavData.ContentModel> contentList = data.componentProps.tutorialNavData.contentModels;
+        SubjectListResponse.ComponentData compProps = data.componentProps;
+        SubjectListResponse.ComponentData.NavData navData = compProps.tutorialNavData;
+        if(navData == null){
+            navData = compProps.tutorialPageData;
+        }
+        List<SubjectListResponse.ComponentData.NavData.ContentModel> contentList = navData.contentModels;
+        if(contentList == null || contentList.isEmpty()){
+            contentList = new ArrayList<>();
+            contentList.add(navData.contentModel);
+        }
+
+        if(contentList.isEmpty()){
+            throw new IllegalArgumentException("Does not have the article data id which we need to scrape the page for url " + scrapUrl);
+        }
 
         for (SubjectListResponse.ComponentData.NavData.ContentModel content : contentList) {
 
@@ -407,7 +418,12 @@ public class KhanContentScraper {
             }
         }
 
-        ChromeDriver driver = ContentScraperUtil.setupLogIndexChromeDriver();
+        if(driver == null){
+            ContentScraperUtil.setChromeDriverLocation();
+            driver = ContentScraperUtil.setupLogIndexChromeDriver();
+        }else{
+            ContentScraperUtil.clearChromeConsoleLog(driver);
+        }
 
         driver.get(scrapUrl);
         WebDriverWait waitDriver = new WebDriverWait(driver, 10000);
@@ -421,8 +437,6 @@ public class KhanContentScraper {
         }
 
         LogEntries les = driver.manage().logs().get(LogType.PERFORMANCE);
-        driver.close();
-        driver.quit();
 
         List<LogIndex> index = new ArrayList<>();
 
@@ -453,40 +467,6 @@ public class KhanContentScraper {
         FileUtils.writeStringToFile(indexJsonFile, gson.toJson(index), UTF_ENCODING);
         ContentScraperUtil.zipDirectory(khanDirectory, khanDirectory.getName(), destinationDirectory);
 
-    }
-
-    public static ChromeDriver LoginKhanAcademy(String url) {
-
-        ChromeDriver driver = ContentScraperUtil.setupLogIndexChromeDriver();
-
-        driver.get(url);
-        WebDriverWait waitDriver = new WebDriverWait(driver, 10000);
-        ContentScraperUtil.waitForJSandJQueryToLoad(waitDriver);
-        waitDriver.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("div#login-signup-root")));
-
-        driver.findElement(By.cssSelector("div#login-signup-root input[id*=email-or-username]")).sendKeys(GMAIL);
-        driver.findElement(By.cssSelector("div#login-signup-root input[id*=text-field-1-password]")).sendKeys(PASS);
-
-        List<WebElement> elements = driver.findElements(By.cssSelector("div#login-signup-root div[class*=inner]"));
-        for(WebElement element: elements){
-            if(element.getText().contains("Log in")){
-                element.click();
-                break;
-            }
-        }
-
-        waitDriver.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("h2[class*=moduleTitle]")));
-
-
-        JavascriptExecutor js = (JavascriptExecutor)driver;
-        js.executeScript("console.clear()");
-
-        while (driver.manage().logs().get(LogType.PERFORMANCE).getAll().size() != 0){
-            driver.manage().timeouts().implicitlyWait(120, TimeUnit.SECONDS);
-        }
-
-
-        return driver;
     }
 
     private String generateArtcleUrl(String articleId) {
