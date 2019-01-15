@@ -19,22 +19,22 @@ public abstract class ContentEntryDao implements SyncableDao<ContentEntry, Conte
     @UmQuery("SELECT * FROM ContentEntry WHERE sourceUrl = :sourceUrl")
     public abstract ContentEntry findBySourceUrl(String sourceUrl);
 
-    @UmQuery("Select ContentEntry.* FROM ContentEntry LEFT Join ContentEntryParentChildJoin " +
+    @UmQuery("SELECT ContentEntry.* FROM ContentEntry LEFT Join ContentEntryParentChildJoin " +
             "ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid " +
             "WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = :parentUid")
     public abstract UmProvider<ContentEntry> getChildrenByParentUid(long parentUid);
 
-    @UmQuery("Select COUNT(*) FROM ContentEntry LEFT Join ContentEntryParentChildJoin " +
+    @UmQuery("SELECT COUNT(*) FROM ContentEntry LEFT Join ContentEntryParentChildJoin " +
             "ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid " +
             "WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = :parentUid")
     public abstract void getCountNumberOfChildrenByParentUUid(long parentUid, UmCallback<Integer> callback);
 
 
-    @UmQuery("Select * FROM ContentEntry where contentEntryUid = :parentUid")
+    @UmQuery("SELECT * FROM ContentEntry where contentEntryUid = :parentUid")
     public abstract void getContentByUuid(long parentUid, UmCallback<ContentEntry> callback);
 
 
-    @UmQuery("Select ContentEntry.* FROM ContentEntry LEFT JOIN ContentEntryRelatedEntryJoin " +
+    @UmQuery("SELECT ContentEntry.* FROM ContentEntry LEFT JOIN ContentEntryRelatedEntryJoin " +
             "ON ContentEntryRelatedEntryJoin.cerejRelatedEntryUid = ContentEntry.contentEntryUid " +
             "WHERE ContentEntryRelatedEntryJoin.relType = 1 AND ContentEntryRelatedEntryJoin.cerejRelatedEntryUid != :entryUuid")
     public abstract void findAllLanguageRelatedEntries(long entryUuid, UmCallback<List<ContentEntry>> umCallback);
@@ -45,4 +45,7 @@ public abstract class ContentEntryDao implements SyncableDao<ContentEntry, Conte
 
     @UmQueryFindByPrimaryKey
     public abstract void findByUid(Long entryUid, UmCallback<ContentEntry> umCallback);
+
+    @UmQuery("SELECT * FROM ContentEntry WHERE publik = TRUE")
+    public abstract List<ContentEntry> getPublicContentEntries();
 }

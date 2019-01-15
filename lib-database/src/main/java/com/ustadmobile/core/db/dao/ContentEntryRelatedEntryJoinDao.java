@@ -18,7 +18,7 @@ import static com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoin.REL_T
 public abstract class ContentEntryRelatedEntryJoinDao
         implements SyncableDao<ContentEntryRelatedEntryJoin, ContentEntryRelatedEntryJoinDao> {
 
-    @UmQuery("SELECT * from ContentEntryRelatedEntryJoin WHERE " +
+    @UmQuery("SELECT * FROM ContentEntryRelatedEntryJoin WHERE " +
             "cerejRelatedEntryUid = :contentEntryUid")
     public abstract ContentEntryRelatedEntryJoin findPrimaryByTranslation(long contentEntryUid);
 
@@ -40,5 +40,10 @@ public abstract class ContentEntryRelatedEntryJoinDao
 
     @UmUpdate
     public abstract void update(ContentEntryRelatedEntryJoin entity);
+
+    @UmQuery("SELECT ContentEntryRelatedEntryJoin.* FROM ContentEntryRelatedEntryJoin " +
+            "LEFT JOIN ContentEntry ON ContentEntryRelatedEntryJoin.cerejRelatedEntryUid = ContentEntry.contentEntryUid " +
+            "WHERE ContentEntry.publik = TRUE")
+    public abstract List<ContentEntryRelatedEntryJoin> getPublicContentEntryRelatedEntryJoins();
 
 }
