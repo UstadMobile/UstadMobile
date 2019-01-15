@@ -23,7 +23,6 @@ public class PersonGroup {
 
     private String groupName;
 
-
     private long groupPersonUid;
 
     public long getGroupUid() {

@@ -5,6 +5,8 @@ import com.ustadmobile.core.db.dao.LocationDao;
 import com.ustadmobile.core.db.dao.PersonCustomFieldDao;
 import com.ustadmobile.core.db.dao.PersonCustomFieldValueDao;
 import com.ustadmobile.core.db.dao.PersonDao;
+import com.ustadmobile.core.db.dao.PersonGroupDao;
+import com.ustadmobile.core.db.dao.PersonGroupMemberDao;
 import com.ustadmobile.core.db.dao.RoleDao;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UmAccountManager;
@@ -20,6 +22,7 @@ import com.ustadmobile.lib.db.entities.Person;
 import com.ustadmobile.lib.db.entities.PersonAuth;
 import com.ustadmobile.lib.db.entities.PersonCustomFieldValue;
 import com.ustadmobile.lib.db.entities.PersonField;
+import com.ustadmobile.lib.db.entities.PersonGroupMember;
 import com.ustadmobile.lib.db.entities.Role;
 
 import java.util.Hashtable;
@@ -255,17 +258,13 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
                                                         public void onFailure(Throwable exception) {
 
                                                         }
-
                                                 });
-
-
 
                                                 }else{
                                                     //Location does not exist.
                                                     System.out.println("FAIL: LOCATION : " + clazzLocation
                                                             + " DOESN'T EXIST");
                                                 }
-
 
                                             }
 
@@ -403,6 +402,84 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
         );
     }
 
+    public void createEntityRoleForTeacherAndClazz(int role, Clazz thisClazz, long personPersonUid,
+                                                   BulkUploadLine bulkLine){
+        if(role == ClazzMember.ROLE_TEACHER){
+
+            PersonDao personDao = repository.getPersonDao();
+            PersonGroupDao personGroupDao = repository.getPersonGroupDao();
+            PersonGroupMemberDao personGroupMemberDao = repository.getPersonGroupMemberDao();
+            personGroupMemberDao.findAllGroupWherePersonIsIn(personPersonUid, new UmCallback<List<PersonGroupMember>>() {
+                @Override
+                public void onSuccess(List<PersonGroupMember> result) {
+
+                    long personGroupUid;
+                    if(result != null && result.size() > 0){
+                        //Get parent group :  ASSUMING ITS THE FIRST ONE>>TODO>>ADD DATE TO PersonGroup
+                        personGroupUid = result.get(0).getGroupMemberGroupUid();
+
+                        //Create EntityRole
+                        EntityRole entityRole = new EntityRole();
+                        entityRole.setErTableId(Clazz.TABLE_ID);
+                        entityRole.setErEntityUid(thisClazz.getClazzUid());
+                        entityRole.setErRoleUid(teacherRoleUid);
+
+                        repository.getEntityRoleDao().insertAsync(entityRole,
+                            new UmCallback<Long>() {
+                                @Override
+                                public void onSuccess(Long result) {
+                                    if(result != null){
+
+                                        //For a specific clazz
+                                        EntityRole newEntityClazzSpecific = new EntityRole();
+                                        newEntityClazzSpecific.setErGroupUid(personGroupUid);
+                                        newEntityClazzSpecific.setErRoleUid(teacherRoleUid);
+                                        newEntityClazzSpecific.setErTableId(Clazz.TABLE_ID);
+                                        newEntityClazzSpecific.setErEntityUid(thisClazz.getClazzUid());
+                                        repository.getEntityRoleDao()
+                                                .insertAsync(newEntityClazzSpecific, new UmCallback<Long>() {
+                                                    @Override
+                                                    public void onSuccess(Long entityRoleDaoUid) {
+                                                        if(entityRoleDaoUid != null){
+                                                            checkClazzMember(thisClazz, bulkLine,
+                                                                    personPersonUid, role);
+                                                        }else{
+                                                            view.showMessage("Something went wrong in clazz entity roles");
+                                                        }
+                                                    }
+
+                                                    @Override
+                                                    public void onFailure(Throwable exception) {
+                                                        exception.printStackTrace();
+                                                    }
+                                                });
+
+                                    }else{
+                                        view.showMessage("Something went wrong");
+                                    }
+                                }
+
+                                @Override
+                                public void onFailure(Throwable exception) {
+                                    exception.printStackTrace();
+                                }
+                            });
+                    }
+                }
+
+                @Override
+                public void onFailure(Throwable exception) {
+                    exception.printStackTrace();
+                }
+            });
+
+        }else{
+            checkClazzMember(thisClazz, bulkLine, personPersonUid, role);
+        }
+
+
+    }
+
     public void checkPerson(Clazz thisClazz, BulkUploadLine bulkLine, int role){
         String teacherUsername = bulkLine.teacher_username;
         String teacherFirstName = bulkLine.teacher_first_name;
@@ -427,8 +504,6 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
         PersonCustomFieldValueDao personCustomFieldValueDao =
                 repository.getPersonCustomFieldValueDao();
 
-
-
         String username;
         if(role == ClazzMember.ROLE_TEACHER){
             username = teacherUsername;
@@ -443,8 +518,13 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
                 if(thePerson != null){
                     //person object exists
 
-                    //Check for ClazzMember then  directly
-                    checkClazzMember(thisClazz, bulkLine, thePerson.getPersonUid(), role);
+                    //Still create Entity Role for this different Clazz
+                    // and //Check for ClazzMember then  directly
+                    createEntityRoleForTeacherAndClazz(role,thisClazz, thePerson.getPersonUid(),
+                            bulkLine);
+
+
+
 
                 }else{
                     //Create new person
@@ -476,7 +556,6 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
 
                         //TODO: Set student Id
                         //TODO: Set student authentication
-
                     }
 
                     person.setActive(true);
