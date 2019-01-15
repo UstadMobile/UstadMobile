@@ -17,6 +17,7 @@ import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.database.annotation.UmQueryFindByPrimaryKey;
 import com.ustadmobile.lib.database.annotation.UmRepository;
 import com.ustadmobile.lib.database.annotation.UmSyncCheckIncomingCanInsert;
+import com.ustadmobile.lib.database.annotation.UmSyncCountLocalPendingChanges;
 import com.ustadmobile.lib.database.annotation.UmSyncFindAllChanges;
 import com.ustadmobile.lib.database.annotation.UmSyncFindLocalChanges;
 import com.ustadmobile.lib.database.annotation.UmSyncCheckIncomingCanUpdate;
@@ -312,6 +313,8 @@ public class DbProcessorRetrofitRepository extends AbstractDbProcessor {
                 }else if(repoMethod.getAnnotation(UmSyncCheckIncomingCanUpdate.class) != null) {
                     repoMethodMode = UmRepository.UmRepositoryMethodType.DELEGATE_TO_DAO;
                 }else if(repoMethod.getAnnotation(UmSyncCheckIncomingCanInsert.class) != null) {
+                    repoMethodMode = UmRepository.UmRepositoryMethodType.DELEGATE_TO_DAO;
+                }else if(repoMethod.getAnnotation(UmSyncCountLocalPendingChanges.class) != null) {
                     repoMethodMode = UmRepository.UmRepositoryMethodType.DELEGATE_TO_DAO;
                 }
             }

@@ -459,5 +459,26 @@ public class TestRepository {
 
 
 
+    @Test
+    public void givenSyncedDatabase_whenLocalChangeMade_thenPendingLocalChangesCountShouldBe1() {
+        ExampleDatabase clientDb = ExampleDatabase.getInstance(null, "db1");
+        ExampleDatabase masterDb = ExampleDatabase.getInstance(null);
+
+        clientDb.clearAll();
+        masterDb.clearAll();
+
+        ExampleDatabase clientRepo = clientDb.getRepository(TEST_URI, ExampleDatabase.VALID_AUTH_TOKEN);
+        int numChangesBefore = clientDb.getExampleSyncableDao().countPendingLocalChanges(
+                ExampleDatabase.VALID_AUTH_TOKEN_USER_UID, clientDb.getDeviceBits());
+
+        ExampleSyncableEntity e = new ExampleSyncableEntity("title");
+        clientRepo.getExampleSyncableDao().insert(e);
+        int numChangesAfter = clientDb.getExampleSyncableDao().countPendingLocalChanges(
+                ExampleDatabase.VALID_AUTH_TOKEN_USER_UID, clientDb.getDeviceBits());
+
+        Assert.assertEquals(numChangesBefore, 0);
+        Assert.assertEquals(numChangesAfter, 1);
+
+    }
 
 }

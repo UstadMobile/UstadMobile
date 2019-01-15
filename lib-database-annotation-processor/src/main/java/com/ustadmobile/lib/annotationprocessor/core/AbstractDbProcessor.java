@@ -501,23 +501,20 @@ public abstract class AbstractDbProcessor {
                 daoMethod.getParameters().get(0).getSimpleName();
     }
 
-    protected String generateFindLocalChangesSql(TypeElement daoType, ExecutableElement daoMethod,
+    protected String generateFindLocalChangesSql(TypeElement daoType,
+                                                 ExecutableElement daoMethod,
+                                                 String selectClause,
+                                                 String localCsnCondition,
+                                                 String limitParamName,
+                                                 String lastChangedByFieldParamName,
                                                  ProcessingEnvironment processingEnv) {
-        DaoMethodInfo methodInfo = new DaoMethodInfo(daoMethod, daoType, processingEnv);
+        TypeMirror entityTypeMirror = DbProcessorUtils.resolveDaoEntityType(daoType.asType(),
+                processingEnv);
         TypeElement entityTypeEl = (TypeElement)processingEnv.getTypeUtils().asElement(
-                methodInfo.resolveResultEntityComponentType());
+                entityTypeMirror);
+
         Element localChangeSeqNumEl = DbProcessorUtils.findElementWithAnnotation(entityTypeEl,
                 UmSyncLocalChangeSeqNum.class, processingEnv);
-
-        if(daoMethod.getParameters().size() != 5) {
-            messager.printMessage(Diagnostic.Kind.ERROR, "Method "
-                            + daoMethod.toString() + " has " + daoMethod.getParameters().size() +
-                            " parameters. FindLocalChanges method " +
-                    "must have 5 parameters: long fromLocalChangeSeqNum, long toLocalChangeSeqNum," +
-                    "long accountPersonUid, int deviceId, " +
-                    "int limit", daoType);
-            return "";
-        }
 
         if(localChangeSeqNumEl == null) {
             messager.printMessage(Diagnostic.Kind.ERROR,
@@ -558,14 +555,6 @@ public abstract class AbstractDbProcessor {
             return "";
         }
 
-
-
-
-
-        VariableElement fromLocalChangeSeqNumParam = daoMethod.getParameters().get(0);
-        VariableElement toLocalChangeSeqNumParam = daoMethod.getParameters().get(1);
-        VariableElement localDeviceId = daoMethod.getParameters().get(3);
-        VariableElement limitParam = daoMethod.getParameters().get(4);
         Element lastChangedByField = findElementWithAnnotation(entityTypeEl,
                 UmSyncLastChangedBy.class, processingEnv);
 
@@ -578,18 +567,85 @@ public abstract class AbstractDbProcessor {
             return "";
         }
 
-        return String.format("SELECT %s.* FROM %s %s, (SELECT (%s) AS canInsertCol) AS canInsertTbl " +
-                        "WHERE %s BETWEEN :%s AND :%s AND %s = :%s AND (canInsertTbl.canInsertCol OR (%s)) LIMIT :%s",
-                entityTypeEl.getSimpleName().toString(),
+        String querySql = String.format("SELECT %s FROM %s %s" +
+                        "WHERE %s AND %s = :%s " +
+                        "AND ((%s) OR (%s))",
+                selectClause,
                 entityTypeEl.getSimpleName().toString(),
                 joinClause,
-                insertCondition,
-                localChangeSeqNumEl.getSimpleName().toString(),
-                fromLocalChangeSeqNumParam.getSimpleName().toString(),
-                toLocalChangeSeqNumParam.getSimpleName().toString(),
+                localCsnCondition,
                 lastChangedByField.getSimpleName(),
-                localDeviceId.getSimpleName(),
-                updatePermissionCondition, limitParam.getSimpleName());
+                lastChangedByFieldParamName,
+                insertCondition,
+                updatePermissionCondition);
+        if(limitParamName != null)
+            querySql += " LIMIT :" + limitParamName;
+
+        return querySql;
+    }
+
+    protected String generateFindLocalChangesSql(TypeElement daoType,
+                                                 ExecutableElement daoMethod,
+                                                 ProcessingEnvironment processingEnv) {
+
+        if(daoMethod.getParameters().size() != 5) {
+            messager.printMessage(Diagnostic.Kind.ERROR, "Method "
+                    + daoMethod.toString() + " has " + daoMethod.getParameters().size() +
+                    " parameters. FindLocalChanges method " +
+                    "must have 5 parameters: long fromLocalChangeSeqNum, long toLocalChangeSeqNum," +
+                    "long accountPersonUid, int deviceId, " +
+                    "int limit", daoType);
+            return "";
+        }
+
+        DaoMethodInfo methodInfo = new DaoMethodInfo(daoMethod, daoType, processingEnv);
+        TypeElement entityCompTypeEl = (TypeElement)processingEnv.getTypeUtils().asElement(
+                methodInfo.resolveResultEntityComponentType());
+        Element localChangeSeqNumEl = DbProcessorUtils.findElementWithAnnotation(entityCompTypeEl,
+                UmSyncLocalChangeSeqNum.class, processingEnv);
+        VariableElement fromLocalChangeSeqNumParam = daoMethod.getParameters().get(0);
+        VariableElement toLocalChangeSeqNumParam = daoMethod.getParameters().get(1);
+        //method param #2 is accountPersonUid, which is used by referring to :accountPersonUid in query
+        VariableElement localDeviceIdParam = daoMethod.getParameters().get(3);
+        VariableElement limitParam = daoMethod.getParameters().get(4);
+
+        String selectCols = String.format("%s.*", entityCompTypeEl.getSimpleName());
+        String localCsnCondition = String.format("%s BETWEEN :%s AND :%s",
+            localChangeSeqNumEl.getSimpleName(),
+            fromLocalChangeSeqNumParam.getSimpleName(),
+            toLocalChangeSeqNumParam.getSimpleName());
+
+
+        return generateFindLocalChangesSql(daoType, daoMethod, selectCols, localCsnCondition,
+                limitParam.getSimpleName().toString(), localDeviceIdParam.getSimpleName().toString(),
+                processingEnv);
+    }
+
+    /**
+     *
+     * @param daoType
+     * @param daoMethod
+     * @param processingEnv
+     * @return
+     */
+    protected String generateSyncCountPendingLocalChangesSql(TypeElement daoType,
+                                                             ExecutableElement daoMethod,
+                                                             ProcessingEnvironment processingEnv) {
+        TypeElement entityTypeEl = (TypeElement)processingEnv.getTypeUtils().asElement(
+                DbProcessorUtils.resolveDaoEntityType(daoType.asType(), processingEnv));
+        Element localCsnFieldEl = DbProcessorUtils.findElementWithAnnotation(entityTypeEl,
+                UmSyncLocalChangeSeqNum.class, processingEnv);
+
+        VariableElement lastChangedByEl = daoMethod.getParameters().get(1);
+        int tableId = entityTypeEl.getAnnotation(UmEntity.class).tableId();
+        String csnComparisonWhereClause = String.format(
+                "%s > (SELECT syncedToLocalChangeSeqNum FROM SyncStatus WHERE tableId = %s)",
+                localCsnFieldEl.getSimpleName().toString(), String.valueOf(tableId));
+
+
+        return generateFindLocalChangesSql(daoType, daoMethod, "COUNT(*)",
+                csnComparisonWhereClause, null,
+                lastChangedByEl.getSimpleName().toString(), processingEnv);
     }
 
     /**

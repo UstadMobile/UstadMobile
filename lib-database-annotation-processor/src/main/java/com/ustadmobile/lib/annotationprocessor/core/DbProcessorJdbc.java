@@ -25,6 +25,7 @@ import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.database.annotation.UmQueryFindByPrimaryKey;
 import com.ustadmobile.lib.database.annotation.UmRepository;
 import com.ustadmobile.lib.database.annotation.UmSyncCheckIncomingCanInsert;
+import com.ustadmobile.lib.database.annotation.UmSyncCountLocalPendingChanges;
 import com.ustadmobile.lib.database.annotation.UmSyncFindAllChanges;
 import com.ustadmobile.lib.database.annotation.UmSyncFindLocalChanges;
 import com.ustadmobile.lib.database.annotation.UmSyncCheckIncomingCanUpdate;
@@ -662,6 +663,10 @@ public class DbProcessorJdbc extends AbstractDbProcessor implements QueryMethodG
             }else if(daoMethod.getAnnotation(UmSyncCheckIncomingCanInsert.class) != null) {
                 jdbcDaoClassSpec.addMethod(generateQueryMethod(
                         generateSyncCheckCanInsertSql(daoType, daoMethod, processingEnv),
+                        daoMethod, daoType, dbType, jdbcDaoClassSpec));
+            }else if(daoMethod.getAnnotation(UmSyncCountLocalPendingChanges.class) != null) {
+                jdbcDaoClassSpec.addMethod(generateQueryMethod(
+                        generateSyncCountPendingLocalChangesSql(daoType, daoMethod, processingEnv),
                         daoMethod, daoType, dbType, jdbcDaoClassSpec));
             }
         }
