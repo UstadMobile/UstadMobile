@@ -103,7 +103,7 @@ public class ServletContextClass implements ServletContextListener
             addRolesAndPermissions();
 
             //Create officer
-            createOfficer();
+            //createOfficer();
 
         }
 
