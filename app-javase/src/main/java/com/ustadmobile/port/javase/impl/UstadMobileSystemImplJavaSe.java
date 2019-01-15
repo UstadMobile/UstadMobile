@@ -58,11 +58,6 @@ public class UstadMobileSystemImplJavaSe extends UstadMobileSystemImplSE {
     }
 
     @Override
-    public boolean loadActiveUserInfo(Object context) {
-        return false;
-    }
-
-    @Override
     public String getString(int messageCode, Object context) {
         return ""+messageCode;
     }
@@ -85,41 +80,6 @@ public class UstadMobileSystemImplJavaSe extends UstadMobileSystemImplSE {
     @Override
     public String getUserContentDirectory(Object context, String username) {
         return null;
-    }
-
-    @Override
-    public String getActiveUser(Object context) {
-        return null;
-    }
-
-    @Override
-    public void setActiveUserAuth(String password, Object context) {
-
-    }
-
-    @Override
-    public String getActiveUserAuth(Object context) {
-        return null;
-    }
-
-    @Override
-    public void setUserPref(String key, String value, Object context) {
-
-    }
-
-    @Override
-    public String getUserPref(String key, Object context) {
-        return null;
-    }
-
-    @Override
-    public String[] getUserPrefKeyList(Object context) {
-        return new String[0];
-    }
-
-    @Override
-    public void saveUserPrefs(Object context) {
-
     }
 
     @Override
