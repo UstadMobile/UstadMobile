@@ -104,8 +104,8 @@ public class ClazzListRecyclerAdapter extends
             recordAttendanceImageButton.setVisibility(View.VISIBLE);
             recordAttendanceButton.setVisibility(View.VISIBLE);
         }else{
-            recordAttendanceImageButton.setVisibility(View.INVISIBLE);
-            recordAttendanceButton.setVisibility(View.INVISIBLE);
+            recordAttendanceImageButton.setVisibility(View.GONE);
+            recordAttendanceButton.setVisibility(View.GONE);
         }
 
         ImageView trafficLight =
