@@ -14,6 +14,7 @@ import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryRelatedEntryJoinDao;
 import com.ustadmobile.core.db.dao.LanguageDao;
 import com.ustadmobile.core.db.dao.LanguageVariantDao;
+import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.lib.db.entities.ContentCategory;
 import com.ustadmobile.lib.db.entities.ContentCategorySchema;
 import com.ustadmobile.lib.db.entities.ContentEntry;
@@ -26,9 +27,11 @@ import com.ustadmobile.lib.db.entities.Language;
 import com.ustadmobile.lib.db.entities.LanguageVariant;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.exception.ExceptionUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -42,6 +45,7 @@ public class ExportData {
 
     private File destinationDirectory;
     private Gson gson;
+    private ArrayList<String> pathList;
 
     public static void main(String[] args) {
         if (args.length < 1) {
@@ -53,17 +57,23 @@ public class ExportData {
         UMLogUtil.logInfo(args[0]);
         int size = args.length == 2 ? Integer.parseInt(args[1]) : 1000;
 
-        new ExportData().export(new File(args[1]), size);
+        try {
+            new ExportData().export(new File(args[1]), size);
+        } catch (IOException e) {
+            UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
+        }
 
 
     }
 
-    public void export(File destination, int size) {
+    public void export(File destination, int size) throws IOException {
 
         destination.mkdirs();
         destinationDirectory = destination;
 
         gson = new GsonBuilder().create();
+
+        pathList = new ArrayList<>();
 
         UmAppDatabase db = UmAppDatabase.getInstance(null);
         UmAppDatabase repository = db.getRepository("https://localhost", "");
@@ -109,6 +119,7 @@ public class ExportData {
         saveListToJson(split(fileList, size), "contentEntryFile", destinationDirectory);
         saveListToJson(split(fileJoinList, size), "contentEntryContentEntryFileJoin", destinationDirectory);
 
+        FileUtils.writeStringToFile(new File(destination, "index.json"), gson.toJson(pathList), UTF_ENCODING);
 
     }
 
@@ -119,7 +130,9 @@ public class ExportData {
         int count = 0;
         while (iterator.hasNext()) {
 
-            File file = new File(destinationDirectory, nameOfFile + count++ + JSON_EXT);
+            String fileName = nameOfFile + count++ + JSON_EXT;
+            File file = new File(destinationDirectory, fileName);
+            pathList.add(fileName);
             try {
                 FileUtils.writeStringToFile(file, gson.toJson(iterator.next()), UTF_ENCODING);
             } catch (IOException e) {
