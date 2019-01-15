@@ -238,28 +238,7 @@ public abstract class PersonDao implements SyncableDao<Person, PersonDao> {
     @UmInsert
     public abstract long insertEntityRole(EntityRole entityRole);
 
-    public String createSEL(){
-        Person selPerson = findByUsername("sel");
-        if(selPerson == null){
-            selPerson = new Person();
-            selPerson.setActive(true);
-            selPerson.setUsername("sel");
-            selPerson.setPersonUid(getAndIncrementPrimaryKey());
-            selPerson.setFirstNames("SEL");
-            selPerson.setLastName("SEL");
 
-            insert(selPerson);
-
-            PersonAuth selPersonAuth = new PersonAuth(selPerson.getPersonUid(),
-                    PersonAuthDao.ENCRYPTED_PASS_PREFIX +
-                            PersonAuthDao.encryptPassword("irZahle4"));
-            insertPersonAuth(selPersonAuth);
-
-            return "created";
-        }else{
-            return "Already created";
-        }
-    }
 
     @UmRestAccessible
     protected void setUserPassword(String adminUsername, String adminPassword, String userUsername,
