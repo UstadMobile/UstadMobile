@@ -73,7 +73,7 @@ public class ClazzDetailPresenter
                         new UmCallback<Boolean>() {
                             @Override
                             public void onSuccess(Boolean result) {
-                                view.setAttendanceVisibility(true);
+                                view.setAttendanceVisibility(result);
                                 clazzDao.personHasPermission(loggedInPersonUid, currentClazzUid,
                                     Role.PERMISSION_SEL_QUESTION_RESPONSE_SELECT, new UmCallbackWithDefaultValue<>(false,
                                     new UmCallback<Boolean>() {
