@@ -713,10 +713,12 @@ public class ServletContextClass implements ServletContextListener
 
         private void addNextField(){
 
-            if(fieldIndex == allFields.size()){
+            if(fieldIndex >= allFields.size()){
                 addSELQuestions();
-                //return;
+                return;
             }
+
+            System.out.println("Checking field..");
 
             HeadersAndFields field = allFields.get(fieldIndex);
 
@@ -776,15 +778,25 @@ public class ServletContextClass implements ServletContextListener
 
                                 @Override
                                 public void onFailure(Throwable exception) {
-
+                                    exception.printStackTrace();
                                 }
                             });
+                        }else {
+
+                            //Persist 2
+                            createPersonDetailPresenterField(field, finalIsHeader, personField,
+                                    personDetailPresenterFieldDao, true);
                         }
 
                     } else {
 
                         System.out.println("Already created 1 (" + field.fieldName + "). skipping..");
+                        //Persist 2
+                        createPersonDetailPresenterField(field, finalIsHeader, personField,
+                                personDetailPresenterFieldDao, true);
                     }
+
+                    //addNextField();
                 }
 
                 @Override
@@ -802,7 +814,7 @@ public class ServletContextClass implements ServletContextListener
          * the server.
          */
         private void addFieldData(){
-            System.out.println("ServletContextClass: Adding Field Data");
+            System.out.println("ServletContextClass: Adding Field Data<<<<<<<<<<<<");
             allFields = getAllFields();
 
             //Start with next field (1st field really)
