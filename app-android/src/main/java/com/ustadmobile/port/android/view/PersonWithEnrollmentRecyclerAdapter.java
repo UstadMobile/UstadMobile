@@ -218,14 +218,9 @@ public class PersonWithEnrollmentRecyclerAdapter
             @NonNull PersonWithEnrollmentRecyclerAdapter.ClazzLogDetailViewHolder holder,
             int position){
 
-
         PersonWithEnrollment personWithEnrollment = getItem(position);
 
         assert personWithEnrollment != null;
-        if(personWithEnrollment == null){
-            return;
-        }
-
         addStudentLast = false;
 
         String studentName = personWithEnrollment.getFirstNames() + " " +
@@ -353,6 +348,10 @@ public class PersonWithEnrollmentRecyclerAdapter
                 mPresenter.handleSecondaryPressed(arguments.entrySet().iterator().next());
             });
 
+        }else{
+            //If you want the whole CL to be clickable
+            cl.setOnClickListener(v ->
+                    mPresenter.handleCommonPressed(personUid));
         }
 
         if(!showEnrollment && showAttendance){
@@ -386,8 +385,8 @@ public class PersonWithEnrollmentRecyclerAdapter
 
         if(personWithEnrollment.getClazzMemberRole() == ClazzMember.ROLE_TEACHER){
 
-            trafficLight.setVisibility(View.INVISIBLE);
-            attendanceTextView.setVisibility(View.INVISIBLE);
+            trafficLight.setVisibility(View.GONE);
+            attendanceTextView.setVisibility(View.GONE);
 
             ConstraintSet constraintSet = new ConstraintSet();
             constraintSet.clone(cl);
@@ -421,9 +420,6 @@ public class PersonWithEnrollmentRecyclerAdapter
     public void setPictureOnView(String imagePath, ImageView theImage) {
 
         Uri imageUri = Uri.fromFile(new File(imagePath));
-        //theImage.setImageURI(imageUri);
-
-        //File imageFile = new File(imagePath);
 
         Picasso
                 .get()
@@ -457,12 +453,12 @@ public class PersonWithEnrollmentRecyclerAdapter
         cl.removeView(addCMCLViewS);
         cl.removeView(addCMCLViewT);
 
-        //If view exists, set it to invisible
+        //If view exists, set it to invisible/gone
         if(addCMCLViewS != null){
-            addCMCLViewS.setVisibility(View.INVISIBLE);
+            addCMCLViewS.setVisibility(View.GONE);
         }
         if(addCMCLViewT != null){
-            addCMCLViewT.setVisibility(View.INVISIBLE);
+            addCMCLViewT.setVisibility(View.GONE);
         }
     }
 
