@@ -580,7 +580,7 @@ public abstract class AbstractDbProcessor {
             return "";
         }
 
-        String querySql = String.format("SELECT %s FROM %s %s" +
+        String querySql = String.format("SELECT %s FROM %s %s " +
                         "WHERE %s AND %s = :%s " +
                         "AND ((%s) OR (%s))",
                 selectClause,
