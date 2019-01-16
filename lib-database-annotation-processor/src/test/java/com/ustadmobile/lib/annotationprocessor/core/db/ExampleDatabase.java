@@ -4,6 +4,7 @@ import com.ustadmobile.lib.database.UmDbBuilder;
 import com.ustadmobile.lib.database.annotation.UmClearAll;
 import com.ustadmobile.lib.database.annotation.UmDatabase;
 import com.ustadmobile.lib.database.annotation.UmRepository;
+import com.ustadmobile.lib.database.annotation.UmSyncOutgoing;
 import com.ustadmobile.lib.db.UmDbWithAuthenticator;
 import com.ustadmobile.lib.db.sync.UmSyncableDatabase;
 import com.ustadmobile.lib.db.sync.dao.SyncStatusDao;
@@ -90,9 +91,8 @@ public abstract class ExampleDatabase implements UmSyncableDatabase, UmDbWithAut
             return validAuthTokens.get(userUid).equals(auth);
     }
 
-    public void syncWith(ExampleDatabase otherDb, long personUid, int sendLimit,int receiveLimit) {
-
-    }
+    @UmSyncOutgoing
+    public abstract void syncWith(ExampleDatabase otherDb, long personUid, int sendLimit,int receiveLimit);
 
     @Override
     public int getDeviceBits() {
