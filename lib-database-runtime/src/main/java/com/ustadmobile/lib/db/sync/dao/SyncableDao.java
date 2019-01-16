@@ -5,6 +5,7 @@ import com.ustadmobile.lib.database.annotation.UmOnConflictStrategy;
 import com.ustadmobile.lib.database.annotation.UmRestAccessible;
 import com.ustadmobile.lib.database.annotation.UmRestAuthorizedUidParam;
 import com.ustadmobile.lib.database.annotation.UmSyncCheckIncomingCanInsert;
+import com.ustadmobile.lib.database.annotation.UmSyncCountLocalPendingChanges;
 import com.ustadmobile.lib.database.annotation.UmSyncFindAllChanges;
 import com.ustadmobile.lib.database.annotation.UmSyncFindLocalChanges;
 import com.ustadmobile.lib.database.annotation.UmSyncCheckIncomingCanUpdate;
@@ -87,6 +88,10 @@ public interface SyncableDao<T, D> extends BaseDao<T> {
 
     @UmSyncCheckIncomingCanInsert
     boolean syncAccountCanInsert(long accountPersonUid);
+
+    @UmSyncCountLocalPendingChanges
+    int countPendingLocalChanges(long accountPersonUid, int localDeviceId);
+
 
 
 }
