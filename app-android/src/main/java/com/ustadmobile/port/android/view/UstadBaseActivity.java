@@ -35,6 +35,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import androidx.work.WorkManager;
+
 /**
  * Base activity to handle interacting with UstadMobileSystemImpl
  *
@@ -89,6 +91,8 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
                 intentFilter);
         super.onCreate(savedInstanceState);
         localeOnCreate = UstadMobileSystemImpl.getInstance().getDisplayedLocale(this);
+
+
 
 
         Intent syncServiceIntent = new Intent(this, UmAppDatabaseSyncService.class);

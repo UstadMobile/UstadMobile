@@ -460,6 +460,9 @@ dependencies {
     // Paging
     implementation "android.arch.paging:runtime:$version_android_paging"
 
+    //Work manager
+    implementation "android.arch.work:work-runtime:$version_android_workmanager"
+
 
     androidTestImplementation project(":core-tests")
     androidTestImplementation project(":sharedse-tests")

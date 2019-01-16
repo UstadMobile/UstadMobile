@@ -15,12 +15,17 @@ import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.lib.db.entities.UmAccount;
+import com.ustadmobile.port.android.sync.UmAppDatabaseSyncWorker;
 
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+
+import androidx.work.ExistingWorkPolicy;
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.WorkManager;
 
 /**
  * This service calls the database sync periodically whilst the app is in the foreground, or was
@@ -34,11 +39,11 @@ public class UmAppDatabaseSyncService extends Service implements LifecycleObserv
 
     private int MIN_INTERVAL = 10*1000;
 
-    boolean inForeground = true;
+    private static volatile boolean inForeground = false;
 
-    private long SYNC_AFTER_BACKGROUND_LAG = 5 * 60 * 1000;
+    public static final long SYNC_AFTER_BACKGROUND_LAG = 5 * 60 * 1000;
 
-    private long lastForegroundTime = 0L;
+    private static volatile long lastForegroundTime = 0L;
 
     private final IBinder mBinder = new LocalServiceBinder();
 
@@ -87,9 +92,31 @@ public class UmAppDatabaseSyncService extends Service implements LifecycleObserv
     @Override
     public void onCreate() {
         super.onCreate();
-        syncExecutor = Executors.newSingleThreadScheduledExecutor();
-        syncExecutor.schedule(new SyncTimerTask(), MIN_INTERVAL, TimeUnit.MILLISECONDS);
+        inForeground = true;
+//        WorkManager workManager = WorkManager.getInstance();
+//        workManager.cancelAllWorkByTag("UmAppDbSync");
+//
+//
+//
+//
+////        syncExecutor = Executors.newSingleThreadScheduledExecutor();
+////        syncExecutor.schedule(new SyncTimerTask(), MIN_INTERVAL, TimeUnit.MILLISECONDS);
+//        OneTimeWorkRequest syncWorkRequest = new OneTimeWorkRequest.Builder(UmAppDatabaseSyncWorker.class)
+//                .build();
+//        WorkManager.getInstance().enqueueUniqueWork("UmAppDbSync",
+//                ExistingWorkPolicy.KEEP, syncWorkRequest);
+        UmAppDatabaseSyncWorker.queueSyncWorker(0, TimeUnit.MILLISECONDS);
+
+
         ProcessLifecycleOwner.get().getLifecycle().addObserver(this);
+    }
+
+    public static boolean isInForeground() {
+        return isInForeground();
+    }
+
+    public static long getLastForegroundTime() {
+        return lastForegroundTime;
     }
 
     @Override
