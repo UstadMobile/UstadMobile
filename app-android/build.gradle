@@ -459,11 +459,13 @@ dependencies {
 
     // Paging
     implementation "android.arch.paging:runtime:$version_android_paging"
-
-
+    
     androidTestImplementation project(":core-tests")
     androidTestImplementation project(":sharedse-tests")
     androidTestImplementation project(":lib-core-fs-tests")
+
+    // for work manager
+    implementation "android.arch.work:work-runtime:$version_work_manager"
 
 
     /*
@@ -524,6 +526,7 @@ dependencies {
 
     androidTestImplementation "org.mockito:mockito-android:$version_android_mockito"
     androidTestImplementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
+    androidTestImplementation "android.arch.work:work-testing:$version_work_manager"
 
     //http server
     implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"

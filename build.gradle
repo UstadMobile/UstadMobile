@@ -3,7 +3,7 @@
 buildscript {
     repositories {
         jcenter()
-        google  ()
+        google()
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:3.2.1'
@@ -66,10 +66,11 @@ ext {
     version_retrofit = "2.4.0"
     version_postgres_jdbc = "42.2.5"
     version_log4j = "2.8.2"
+    version_work_manager = "1.0.0-beta02"
 
     version_android_buildtools = "28.0.3"
-    version_android_compile_sdk = 27
-    version_android_target_sdk = 27
+    version_android_compile_sdk = 28
+    version_android_target_sdk = 28
 
     version_android_support_lib = "27.1.1"
     version_android_lifecycle = "1.1.1"

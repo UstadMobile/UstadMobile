@@ -117,19 +117,19 @@ public class ExportData {
         UMLogUtil.logDebug("size of fileList is " + fileList.size());
         UMLogUtil.logDebug("size of fileJoinList is " + fileJoinList.size());
 
-        saveListToJson(split(contentEntryList, size), "contentEntry", destinationDirectory);
-        saveListToJson(split(parentChildJoinList, size), "contentEntryParentChildJoin", destinationDirectory);
-        saveListToJson(split(relatedJoinList, size), "contentEntryRelatedEntryJoin", destinationDirectory);
+        saveListToJson(split(contentEntryList, size), "contentEntry.", destinationDirectory);
+        saveListToJson(split(parentChildJoinList, size), "contentEntryParentChildJoin.", destinationDirectory);
+        saveListToJson(split(relatedJoinList, size), "contentEntryRelatedEntryJoin.", destinationDirectory);
 
-        saveListToJson(split(schemaList, size), "contentCategorySchema", destinationDirectory);
-        saveListToJson(split(categoryList, size), "contentCategory", destinationDirectory);
-        saveListToJson(split(categoryJoinList, size), "contentEntryContentCategoryJoin", destinationDirectory);
+        saveListToJson(split(schemaList, size), "contentCategorySchema.", destinationDirectory);
+        saveListToJson(split(categoryList, size), "contentCategory.", destinationDirectory);
+        saveListToJson(split(categoryJoinList, size), "contentEntryContentCategoryJoin.", destinationDirectory);
 
-        saveListToJson(split(langList, size), "language", destinationDirectory);
-        saveListToJson(split(langVariantList, size), "languageVariant", destinationDirectory);
+        saveListToJson(split(langList, size), "language.", destinationDirectory);
+        saveListToJson(split(langVariantList, size), "languageVariant.", destinationDirectory);
 
-        saveListToJson(split(fileList, size), "contentEntryFile", destinationDirectory);
-        saveListToJson(split(fileJoinList, size), "contentEntryContentEntryFileJoin", destinationDirectory);
+        saveListToJson(split(fileList, size), "contentEntryFile.", destinationDirectory);
+        saveListToJson(split(fileJoinList, size), "contentEntryContentEntryFileJoin.", destinationDirectory);
 
         FileUtils.writeStringToFile(new File(destination, "index.json"), gson.toJson(pathList), UTF_ENCODING);
 
