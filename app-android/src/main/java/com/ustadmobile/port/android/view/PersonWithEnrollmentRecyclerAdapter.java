@@ -367,25 +367,7 @@ public class PersonWithEnrollmentRecyclerAdapter
             //Disable attendance for Teachers
             trafficLight.setVisibility(View.GONE);
             attendanceTextView.setVisibility(View.GONE);
-
-//            ConstraintSet constraintSet = new ConstraintSet();
-//            constraintSet.clone(cl);
-//
-//            //connect divider's top to image's bottom
-//            constraintSet.connect(R.id.item_studentlist_student_simple_horizontal_divider,
-//                    ConstraintSet.TOP, R.id.item_studentlist_student_simple_student_image,
-//                    ConstraintSet.BOTTOM, 16);
-//
-//            //If text is below student image
-//
-//            constraintSet.connect(R.id.item_studentlist_student_simple_attendance_percentage,
-//                    ConstraintSet.TOP, R.id.item_studentlist_student_simple_student_title,
-//                    ConstraintSet.BOTTOM, 0);
-//            constraintSet.connect(R.id.item_studentlist_student_simple_attendance_trafficlight,
-//                    ConstraintSet.TOP, R.id.item_studentlist_student_simple_student_title,
-//                    ConstraintSet.BOTTOM, 0);
-//            constraintSet.applyTo(cl);
-
+            
         }
 
         if(getItemCount() == position+1) {
