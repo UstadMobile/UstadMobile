@@ -391,6 +391,13 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
      */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+
+        switch (item.getItemId()){
+
+            case android.R.id.home:
+                onBackPressed();
+                return true;
+        }
         // Handle item selection
         int i = item.getItemId();
         //If this activity started from other activity
