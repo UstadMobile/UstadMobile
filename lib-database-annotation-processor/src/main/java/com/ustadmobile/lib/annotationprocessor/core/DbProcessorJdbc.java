@@ -14,6 +14,8 @@ import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UmCallbackUtil;
 import com.ustadmobile.lib.database.annotation.UmClearAll;
 import com.ustadmobile.lib.database.annotation.UmDbContext;
+import com.ustadmobile.lib.database.annotation.UmDbGetAttachment;
+import com.ustadmobile.lib.database.annotation.UmDbSetAttachment;
 import com.ustadmobile.lib.database.annotation.UmDelete;
 import com.ustadmobile.lib.database.annotation.UmEmbedded;
 import com.ustadmobile.lib.database.annotation.UmEntity;
@@ -668,6 +670,12 @@ public class DbProcessorJdbc extends AbstractDbProcessor implements QueryMethodG
                 jdbcDaoClassSpec.addMethod(generateQueryMethod(
                         generateSyncCountPendingLocalChangesSql(daoType, daoMethod, processingEnv),
                         daoMethod, daoType, dbType, jdbcDaoClassSpec));
+            }else if(daoMethod.getAnnotation(UmDbSetAttachment.class) != null) {
+                jdbcDaoClassSpec.addMethod(generateSetAttachmentMethod(daoType, daoMethod,
+                        "_db"));
+            }else if(daoMethod.getAnnotation(UmDbGetAttachment.class) != null) {
+                jdbcDaoClassSpec.addMethod(generateGetAttachmentMethod(daoType, daoMethod,
+                        "_db"));
             }
         }
 
