@@ -215,8 +215,8 @@ android {
     buildToolsVersion rootProject.ext.version_android_buildtools
 
     defaultConfig {
-        minSdkVersion 16
-        targetSdkVersion 27
+        minSdkVersion rootProject.ext.version_android_min_sdk
+        targetSdkVersion rootProject.ext.version_android_target_sdk
         vectorDrawables.useSupportLibrary = true
         versionCode rootProject.ext.ustadVersionCode
         versionName rootProject.version
