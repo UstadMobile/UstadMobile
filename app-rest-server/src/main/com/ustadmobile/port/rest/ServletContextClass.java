@@ -1,14 +1,11 @@
 package com.ustadmobile.port.rest;
 
 import com.ustadmobile.core.db.UmAppDatabase;
-import com.ustadmobile.core.db.dao.ClazzDao;
-import com.ustadmobile.core.db.dao.ClazzMemberDao;
 import com.ustadmobile.core.db.dao.EntityRoleDao;
 import com.ustadmobile.core.db.dao.PersonAuthDao;
 import com.ustadmobile.core.db.dao.PersonCustomFieldDao;
 import com.ustadmobile.core.db.dao.PersonDao;
 import com.ustadmobile.core.db.dao.PersonDetailPresenterFieldDao;
-import com.ustadmobile.core.db.dao.PersonGroupDao;
 import com.ustadmobile.core.db.dao.PersonGroupMemberDao;
 import com.ustadmobile.core.db.dao.RoleDao;
 import com.ustadmobile.core.db.dao.SocialNominationQuestionDao;
@@ -16,13 +13,11 @@ import com.ustadmobile.core.db.dao.SocialNominationQuestionSetDao;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.lib.db.entities.Clazz;
-import com.ustadmobile.lib.db.entities.ClazzMember;
 import com.ustadmobile.lib.db.entities.EntityRole;
 import com.ustadmobile.lib.db.entities.Person;
 import com.ustadmobile.lib.db.entities.PersonAuth;
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField;
 import com.ustadmobile.lib.db.entities.PersonField;
-import com.ustadmobile.lib.db.entities.PersonGroup;
 import com.ustadmobile.lib.db.entities.PersonGroupMember;
 import com.ustadmobile.lib.db.entities.Role;
 import com.ustadmobile.lib.db.entities.SocialNominationQuestion;
@@ -44,24 +39,22 @@ import static com.ustadmobile.lib.db.entities.Role.ROLE_NAME_TEACHER;
 public class ServletContextClass implements ServletContextListener
     {
 
-        public String dummyBaseUrl = "http://localhost/dummy/address/";
-        public String dummyAuth = "dummy";
-        UmAppDatabase appDb;
-        UmAppDatabase appDbRepository;
+        private String dummyBaseUrl = "http://localhost/dummy/address/";
+        private String dummyAuth = "dummy";
+        private UmAppDatabase appDb;
 
-        PersonCustomFieldDao personCustomFieldDao;
-        PersonDetailPresenterFieldDao personDetailPresenterFieldDao;
-        PersonDao personDao;
-        RoleDao roleDao;
-        EntityRoleDao entityRoleDao;
-        PersonAuthDao personAuthDao;
-        PersonGroupDao personGroupDao;
-        PersonGroupMemberDao personGroupMemberDao;
+        private PersonCustomFieldDao personCustomFieldDao;
+        private PersonDetailPresenterFieldDao personDetailPresenterFieldDao;
+        private PersonDao personDao;
+        private RoleDao roleDao;
+        private EntityRoleDao entityRoleDao;
+        private PersonAuthDao personAuthDao;
+        private PersonGroupMemberDao personGroupMemberDao;
 
-        Role officerRole, selRole;
+        private Role officerRole, selRole;
 
         private int fieldIndex = 0;
-        List<HeadersAndFields> allFields;
+        private List<HeadersAndFields> allFields;
 
         @Override
         public void contextDestroyed(ServletContextEvent arg0) {
@@ -77,7 +70,7 @@ public class ServletContextClass implements ServletContextListener
             appDb.setAttachmentsDir(evt.getServletContext().getRealPath("/WEB-INF/attachments/"));
             System.out.println("Set db attachments path to: " + appDb.getAttachmentsDir());
 
-            appDbRepository = appDb.getRepository(dummyBaseUrl, dummyAuth);
+            UmAppDatabase appDbRepository = appDb.getRepository(dummyBaseUrl, dummyAuth);
 
             personCustomFieldDao =
                     appDbRepository.getPersonCustomFieldDao();
@@ -87,7 +80,6 @@ public class ServletContextClass implements ServletContextListener
             roleDao = appDb.getRepository(dummyBaseUrl, dummyAuth).getRoleDao();
             entityRoleDao = appDb.getRepository(dummyBaseUrl, dummyAuth).getEntityRoleDao();
             personAuthDao = appDb.getRepository(dummyBaseUrl, dummyAuth).getPersonAuthDao();
-            personGroupDao = appDb.getRepository(dummyBaseUrl,dummyAuth).getPersonGroupDao();
             personGroupMemberDao = appDb.getRepository(dummyBaseUrl, dummyAuth).getPersonGroupMemberDao();
 
 
@@ -97,7 +89,7 @@ public class ServletContextClass implements ServletContextListener
 
         }
 
-        public void loadInitialData(){
+        private void loadInitialData(){
 
             //Create Admin
             Person adminPerson = personDao.findByUsername("admin");
@@ -133,10 +125,15 @@ public class ServletContextClass implements ServletContextListener
             }
 
 
+            addSELQuestions();
+
         }
 
 
-        public void createSELOfficer(){
+        /**
+         * Create the SEL officer.
+         */
+        private void createSELOfficer(){
 
             Person selPerson = personDao.findByUsername("sel");
             if(selPerson == null){
@@ -150,49 +147,44 @@ public class ServletContextClass implements ServletContextListener
                     @Override
                     public void onSuccess(PersonDao.PersonWithGroup personWithGroup) {
                         long selPersonUid = personWithGroup.getPersonUid();
-                        if(personWithGroup != null){
 
-                            //Create password
-                            PersonAuth selPersonAuth = new PersonAuth(selPersonUid,
-                                    PersonAuthDao.ENCRYPTED_PASS_PREFIX +
-                                            PersonAuthDao.encryptPassword("irZahle4"));
-                            personAuthDao.insertAsync(selPersonAuth, new UmCallback<Long>() {
-                                @Override
-                                public void onSuccess(Long result) {
+                        //Create password
+                        PersonAuth selPersonAuth = new PersonAuth(selPersonUid,
+                                PersonAuthDao.ENCRYPTED_PASS_PREFIX +
+                                        PersonAuthDao.encryptPassword("irZahle4"));
+                        personAuthDao.insertAsync(selPersonAuth, new UmCallback<Long>() {
+                            @Override
+                            public void onSuccess(Long result) {
 
-                                    if(result != null) {
+                                if(result != null) {
 
-                                        //Create entity roles for all clazzes
-                                        //Assign Role for all clazzes
+                                    //Create entity roles for all clazzes
+                                    //Assign Role for all clazzes
 
-                                        System.out.println("Looping over classes..");
-                                        List<Clazz> allClazzes = personDao.findAllClazzes();
-                                        for (Clazz thisClazz : allClazzes) {
-                                            EntityRole entityRole = new EntityRole();
-                                            entityRole.setErRoleUid(selRole.getRoleUid());
-                                            entityRole.setErTableId(Clazz.TABLE_ID);
-                                            entityRole.setErGroupUid(personWithGroup.getPersonGroupUid());
-                                            entityRole.setErEntityUid(thisClazz.getClazzUid());
-                                            entityRoleDao.insert(entityRole);
-                                        }
-
-                                    }else{
-                                        System.out.println("ServletContextClass: Unable to set auth");
+                                    System.out.println("Looping over classes..");
+                                    List<Clazz> allClazzes = personDao.findAllClazzes();
+                                    for (Clazz thisClazz : allClazzes) {
+                                        EntityRole entityRole = new EntityRole();
+                                        entityRole.setErRoleUid(selRole.getRoleUid());
+                                        entityRole.setErTableId(Clazz.TABLE_ID);
+                                        entityRole.setErGroupUid(personWithGroup.getPersonGroupUid());
+                                        entityRole.setErEntityUid(thisClazz.getClazzUid());
+                                        entityRoleDao.insert(entityRole);
                                     }
 
-                                    //Adding field data:
-                                    addFieldData();
+                                }else{
+                                    System.out.println("ServletContextClass: Unable to set auth");
                                 }
 
-                                @Override
-                                public void onFailure(Throwable exception) {
-                                    exception.printStackTrace();
-                                }
-                            });
+                                //Adding field data:
+                                addFieldData();
+                            }
 
-                        }else{
-                            System.out.println("ServletContextClass: ERROR createPersonWithGroupAsync could not create Person with Person Group. ERROR");
-                        }
+                            @Override
+                            public void onFailure(Throwable exception) {
+                                exception.printStackTrace();
+                            }
+                        });
 
                         //Adding stuff
                         addFieldData();
@@ -206,72 +198,77 @@ public class ServletContextClass implements ServletContextListener
                 });
 
 
-            }else{
+            }else{  //SEL person has been created.
+
                 System.out.println("SEL already created. Updating permissions over all classes");
                 personGroupMemberDao.findAllGroupWherePersonIsIn(selPerson.getPersonUid(),
-                        new UmCallback<List<PersonGroupMember>>() {
-                            @Override
-                            public void onSuccess(List<PersonGroupMember> result) {
+                    new UmCallback<List<PersonGroupMember>>() {
 
-                                if(!result.isEmpty()) {
+                    @Override
+                    public void onSuccess(List<PersonGroupMember> result) {
 
-                                    Long selGroupUid = result.get(0).getGroupMemberGroupUid();
+                        if(!result.isEmpty()) {
 
-                                    List<Clazz> allClazzes = personDao.findAllClazzes();
-                                    for (Clazz thisClazz : allClazzes) {
+                            Long selGroupUid = result.get(0).getGroupMemberGroupUid();
 
-                                        entityRoleDao.findByEntitiyAndPersonGroup(Clazz.TABLE_ID, thisClazz.getClazzUid(),
-                                                selGroupUid, new UmCallback<List<EntityRole>>() {
-                                                    @Override
-                                                    public void onSuccess(List<EntityRole> existingER) {
-                                                        if (existingER.isEmpty()) {
-                                                            EntityRole entityRole = new EntityRole();
-                                                            entityRole.setErRoleUid(selRole.getRoleUid());
-                                                            entityRole.setErTableId(Clazz.TABLE_ID);
-                                                            entityRole.setErGroupUid(selGroupUid);
-                                                            entityRole.setErEntityUid(thisClazz.getClazzUid());
-                                                            entityRoleDao.insertAsync(entityRole, new UmCallback<Long>() {
-                                                                @Override
-                                                                public void onSuccess(Long result) {
+                            List<Clazz> allClazzes = personDao.findAllClazzes();
+                            for (Clazz thisClazz : allClazzes) {
 
-                                                                }
+                                entityRoleDao.findByEntitiyAndPersonGroup(Clazz.TABLE_ID,
+                                    thisClazz.getClazzUid(), selGroupUid,
+                                    new UmCallback<List<EntityRole>>() {
 
-                                                                @Override
-                                                                public void onFailure(Throwable exception) {
+                                    @Override
+                                    public void onSuccess(List<EntityRole> existingER) {
+                                        if (existingER.isEmpty()) {
+                                            EntityRole entityRole = new EntityRole();
+                                            entityRole.setErRoleUid(selRole.getRoleUid());
+                                            entityRole.setErTableId(Clazz.TABLE_ID);
+                                            entityRole.setErGroupUid(selGroupUid);
+                                            entityRole.setErEntityUid(thisClazz.getClazzUid());
+                                            entityRoleDao.insertAsync(entityRole, new UmCallback<Long>() {
+                                                @Override
+                                                public void onSuccess(Long result) {
 
-                                                                }
-                                                            });
-                                                        }
-                                                    }
+                                                }
 
-                                                    @Override
-                                                    public void onFailure(Throwable exception) {
-                                                        exception.printStackTrace();
-                                                    }
-                                                });
+                                                @Override
+                                                public void onFailure(Throwable exception) {
+
+                                                }
+                                            });
+                                        }
                                     }
-                                }else{
-                                    System.out.println("ServletContxtClass: ERROR Unable to find Person Group. ERROR");
-                                }
 
-
-                                //Adding stuff
-                                addFieldData();
-
-
+                                    @Override
+                                    public void onFailure(Throwable exception) {
+                                        exception.printStackTrace();
+                                    }
+                                });
                             }
+                        }else{
+                            System.out.println("ServletContxtClass: " +
+                                    "ERROR Unable to find Person Group. ERROR");
+                        }
 
-                            @Override
-                            public void onFailure(Throwable exception) {
-                                exception.printStackTrace();
-                            }
-                        });
+
+                        //Adding stuff
+                        addFieldData();
+
+
+                    }
+
+                    @Override
+                    public void onFailure(Throwable exception) {
+                        exception.printStackTrace();
+                    }
+                });
 
             }
         }
 
 
-        public void createOfficer(){
+        private void createOfficer(){
 
             Person officerPerson = personDao.findByUsername("officer");
             if(officerPerson == null){
@@ -281,54 +278,51 @@ public class ServletContextClass implements ServletContextListener
                 officerPerson.setFirstNames("Officer");
                 officerPerson.setLastName("Officer");
 
-                personDao.createPersonWithGroupAsync(officerPerson, new UmCallback<PersonDao.PersonWithGroup>() {
+                personDao.createPersonWithGroupAsync(officerPerson,
+                    new UmCallback<PersonDao.PersonWithGroup>() {
+
                     @Override
                     public void onSuccess(PersonDao.PersonWithGroup personWithGroup) {
                         long officerPersonUid = personWithGroup.getPersonUid();
-                        if(personWithGroup != null){
 
-                            //Create password
-                            PersonAuth officerPersonAuth = new PersonAuth(officerPersonUid,
-                                    PersonAuthDao.ENCRYPTED_PASS_PREFIX +
-                                            PersonAuthDao.encryptPassword("irZahle3"));
-                            personAuthDao.insertAsync(officerPersonAuth, new UmCallback<Long>() {
-                                @Override
-                                public void onSuccess(Long result) {
+                        //Create password
+                        PersonAuth officerPersonAuth = new PersonAuth(officerPersonUid,
+                                PersonAuthDao.ENCRYPTED_PASS_PREFIX +
+                                        PersonAuthDao.encryptPassword("irZahle3"));
+                        personAuthDao.insertAsync(officerPersonAuth, new UmCallback<Long>() {
+                            @Override
+                            public void onSuccess(Long result) {
 
-                                    if(result != null) {
+                                if(result != null) {
 
-                                        //Create entity roles for all clazzes
-                                        //Assign Role for all clazzes
+                                    //Create entity roles for all clazzes
+                                    //Assign Role for all clazzes
 
-                                        System.out.println("Looping over classes..");
-                                        List<Clazz> allClazzes = personDao.findAllClazzes();
-                                        for (Clazz thisClazz : allClazzes) {
-                                            EntityRole entityRole = new EntityRole();
-                                            entityRole.setErRoleUid(officerRole.getRoleUid());
-                                            entityRole.setErTableId(Clazz.TABLE_ID);
-                                            entityRole.setErGroupUid(personWithGroup.getPersonGroupUid());
-                                            entityRole.setErEntityUid(thisClazz.getClazzUid());
-                                            entityRoleDao.insert(entityRole);
-                                        }
-
-                                    }else{
-                                        System.out.println("ServletContextClass: Unable to set auth");
+                                    System.out.println("Looping over classes..");
+                                    List<Clazz> allClazzes = personDao.findAllClazzes();
+                                    for (Clazz thisClazz : allClazzes) {
+                                        EntityRole entityRole = new EntityRole();
+                                        entityRole.setErRoleUid(officerRole.getRoleUid());
+                                        entityRole.setErTableId(Clazz.TABLE_ID);
+                                        entityRole.setErGroupUid(personWithGroup.getPersonGroupUid());
+                                        entityRole.setErEntityUid(thisClazz.getClazzUid());
+                                        entityRoleDao.insert(entityRole);
                                     }
 
-
-                                    //Adding SEL data:
-                                    createSELOfficer();
+                                }else{
+                                    System.out.println("ServletContextClass: Unable to set auth");
                                 }
 
-                                @Override
-                                public void onFailure(Throwable exception) {
-                                    exception.printStackTrace();
-                                }
-                            });
 
-                        }else{
-                            System.out.println("ServletContextClass: ERROR createPersonWithGroupAsync could not create Person with Person Group. ERROR");
-                        }
+                                //Adding SEL data:
+                                createSELOfficer();
+                            }
+
+                            @Override
+                            public void onFailure(Throwable exception) {
+                                exception.printStackTrace();
+                            }
+                        });
 
                         createSELOfficer();
 
@@ -355,8 +349,10 @@ public class ServletContextClass implements ServletContextListener
                             List<Clazz> allClazzes = personDao.findAllClazzes();
                             for (Clazz thisClazz : allClazzes) {
 
-                                entityRoleDao.findByEntitiyAndPersonGroup(Clazz.TABLE_ID, thisClazz.getClazzUid(),
-                                    officerGroupUid, new UmCallback<List<EntityRole>>() {
+                                entityRoleDao.findByEntitiyAndPersonGroup(Clazz.TABLE_ID,
+                                    thisClazz.getClazzUid(), officerGroupUid,
+                                        new UmCallback<List<EntityRole>>() {
+
                                     @Override
                                     public void onSuccess(List<EntityRole> existingER) {
                                         if (existingER.isEmpty()) {
@@ -376,7 +372,8 @@ public class ServletContextClass implements ServletContextListener
                                 });
                             }
                         }else{
-                            System.out.println("ServletContxtClass: ERROR Unable to find Person Group. ERROR");
+                            System.out.println("ServletContxtClass: " +
+                                    "ERROR Unable to find Person Group. ERROR");
                         }
 
                         //Go next to SEL
@@ -394,18 +391,8 @@ public class ServletContextClass implements ServletContextListener
             }
         }
 
-        public class TestRole{
-            String username;
-            String password;
 
-            TestRole(String username, String password){
-                this.username = username;
-                this.password = password;
-            }
-        }
-
-
-        public void addRolesAndPermissions(){
+        private void addRolesAndPermissions(){
 
             System.out.println("Adding roles and permissions");
 
@@ -435,7 +422,7 @@ public class ServletContextClass implements ServletContextListener
                             Role.PERMISSION_PERSON_PICTURE_UPDATE           //Update Person picture
                             ;
                         newRole.setRolePermissions(teacherPermissions);
-                        Long newRoleUid = roleDao.insert(newRole);
+                        newRole.setRoleUid(roleDao.insert(newRole));
                     }else{
                         System.out.println("Role already created for teacher");
                     }
@@ -545,7 +532,8 @@ public class ServletContextClass implements ServletContextListener
                                                         System.out.println("Role already created for Site Staff");
                                                     }
 
-                                                    System.out.println("ServletContextClass: Checked all Rols and Permissions. Continuing..");
+                                                    System.out.println("ServletContextClass: " +
+                                                            "Checked all Rols and Permissions. Continuing..");
                                                     createOfficer();
                                                 }
 
@@ -587,7 +575,7 @@ public class ServletContextClass implements ServletContextListener
         }
 
 
-        public void addSELQuestions(){
+        private void addSELQuestions(){
 
             System.out.println("ServletContextClass: Adding SEL Questions: TODO: REMOVE ME");
 
@@ -619,18 +607,16 @@ public class ServletContextClass implements ServletContextListener
             question1.setAssignToAllClasses(true);
             questionDao.findByQuestionStringAsync(question1Text, new UmCallback<List<SocialNominationQuestion>>() {
                 @Override
-                public void onSuccess(List<SocialNominationQuestion> result) {
-                    if(result != null && result.size() == 1){
-                        //skip
-                    }else if(result == null || result.size() == 0){
-                        System.out.println("Persisting 1:  ");
+                public void onSuccess(List<SocialNominationQuestion> questionList) {
+                    if(questionList.isEmpty()){
+                        System.out.println("Peristing 1: ");
                         questionDao.insert(question1);
                     }
                 }
 
                 @Override
                 public void onFailure(Throwable exception) {
-
+                    exception.printStackTrace();
                 }
             });
 
@@ -644,10 +630,8 @@ public class ServletContextClass implements ServletContextListener
             question2.setAssignToAllClasses(true);
             questionDao.findByQuestionStringAsync(question2Text, new UmCallback<List<SocialNominationQuestion>>() {
                 @Override
-                public void onSuccess(List<SocialNominationQuestion> result) {
-                    if(result != null && result.size() == 1){
-                        //skip
-                    }else if(result == null || result.size() == 0){
+                public void onSuccess(List<SocialNominationQuestion> questionList) {
+                    if(questionList.isEmpty()){
                         System.out.println("Persisting 2:  ");
                         questionDao.insert(question2);
                     }
@@ -655,7 +639,7 @@ public class ServletContextClass implements ServletContextListener
 
                 @Override
                 public void onFailure(Throwable exception) {
-
+                    exception.printStackTrace();
                 }
             });
 
@@ -668,13 +652,12 @@ public class ServletContextClass implements ServletContextListener
             question3.setAssignToAllClasses(true);
             questionDao.findByQuestionStringAsync(question3Text, new UmCallback<List<SocialNominationQuestion>>() {
                 @Override
-                public void onSuccess(List<SocialNominationQuestion> result) {
-                    if(result != null && result.size() == 1){
-                        //skip
-                    }else if(result == null || result.size() == 0){
+                public void onSuccess(List<SocialNominationQuestion> questionList) {
+                    if(questionList.isEmpty()){
                         System.out.println("Persisting 3:  ");
                         questionDao.insert(question3);
                     }
+
                 }
 
                 @Override
@@ -692,10 +675,8 @@ public class ServletContextClass implements ServletContextListener
             question4.setAssignToAllClasses(true);
             questionDao.findByQuestionStringAsync(question4Text, new UmCallback<List<SocialNominationQuestion>>() {
                 @Override
-                public void onSuccess(List<SocialNominationQuestion> result) {
-                    if(result != null && result.size() == 1){
-                        //skip
-                    }else if(result == null || result.size() == 0){
+                public void onSuccess(List<SocialNominationQuestion> questionList) {
+                    if(questionList.isEmpty()){
                         System.out.println("Persisting 4:  ");
                         questionDao.insert(question4);
                     }
@@ -716,10 +697,8 @@ public class ServletContextClass implements ServletContextListener
             question5.setAssignToAllClasses(true);
             questionDao.findByQuestionStringAsync(question5Text, new UmCallback<List<SocialNominationQuestion>>() {
                 @Override
-                public void onSuccess(List<SocialNominationQuestion> result) {
-                    if(result != null && result.size() == 1){
-                        //skip
-                    }else if(result == null || result.size() == 0){
+                public void onSuccess(List<SocialNominationQuestion> questionList) {
+                    if(questionList.isEmpty()){
                         System.out.println("Persisting 5:  ");
                         questionDao.insert(question5);
                     }
@@ -732,10 +711,11 @@ public class ServletContextClass implements ServletContextListener
             });
         }
 
-        public void addNextField(){
+        private void addNextField(){
 
             if(fieldIndex == allFields.size()){
-                return;
+                addSELQuestions();
+                //return;
             }
 
             HeadersAndFields field = allFields.get(fieldIndex);
@@ -799,12 +779,7 @@ public class ServletContextClass implements ServletContextListener
 
                                 }
                             });
-
                         }
-
-
-
-
 
                     } else {
 
@@ -826,7 +801,7 @@ public class ServletContextClass implements ServletContextListener
          * add the dummy data every time. This will get replaced with real data that will sync with
          * the server.
          */
-        public void addFieldData(){
+        private void addFieldData(){
             System.out.println("ServletContextClass: Adding Field Data");
             allFields = getAllFields();
 
@@ -835,9 +810,8 @@ public class ServletContextClass implements ServletContextListener
 
         }
 
-        public void createPersonDetailPresenterField (HeadersAndFields field, boolean isHeader,
-                                      PersonField pcf,
-                                      PersonDetailPresenterFieldDao personDetailPresenterFieldDao,
+        private void createPersonDetailPresenterField(HeadersAndFields field, boolean isHeader,
+              PersonField pcf,PersonDetailPresenterFieldDao personDetailPresenterFieldDao,
                                                       Boolean gotoNext){
 
 
@@ -900,9 +874,9 @@ public class ServletContextClass implements ServletContextListener
          */
         class HeadersAndFields {
 
-            public HeadersAndFields(String fieldIcon, String fieldName, int fieldLabel, int fieldUid,
-                                    int fieldIndex, int fieldType, int headerMessageId,
-                                    boolean readOnly, boolean viewMode, boolean editMode){
+            HeadersAndFields(String fieldIcon, String fieldName, int fieldLabel, int fieldUid,
+                             int fieldIndex, int fieldType, int headerMessageId,
+                             boolean readOnly, boolean viewMode, boolean editMode){
 
                 this.fieldIcon = fieldIcon;
                 this.fieldName = fieldName;
@@ -924,7 +898,7 @@ public class ServletContextClass implements ServletContextListener
             //random name
             public String fieldName;
             //label
-            public int fieldLabel;
+            int fieldLabel;
             //type (field/header)
             public int fieldType;
             //index (order)
@@ -934,15 +908,15 @@ public class ServletContextClass implements ServletContextListener
 
             public boolean readOnly;
 
-            public boolean viewMode;
+            boolean viewMode;
 
-            public boolean editMode;
+            boolean editMode;
 
 
         }
 
 
-        public List<HeadersAndFields> getAllFields(){
+        private List<HeadersAndFields> getAllFields(){
 
             List<HeadersAndFields> allTheFields = new ArrayList<>();
 
