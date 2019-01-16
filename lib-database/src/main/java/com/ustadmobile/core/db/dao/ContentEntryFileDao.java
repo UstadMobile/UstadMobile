@@ -26,7 +26,7 @@ public abstract class ContentEntryFileDao implements SyncableDao<ContentEntryFil
     @UmQuery("SELECT ContentEntryFile.* FROM ContentEntryFile " +
             "LEFT JOIN ContentEntryContentEntryFileJoin ON ContentEntryContentEntryFileJoin.cecefjContentEntryFileUid = ContentEntryFile.contentEntryFileUid " +
             "LEFT JOIN ContentEntry ON ContentEntryContentEntryFileJoin.cecefjContentEntryUid = ContentEntry.contentEntryUid " +
-            "WHERE ContentEntry.publik = TRUE")
+            "WHERE ContentEntry.publik")
     public abstract List<ContentEntryFile> getPublicContentEntryFiles();
 
 }

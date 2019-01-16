@@ -43,7 +43,7 @@ public abstract class ContentEntryRelatedEntryJoinDao
 
     @UmQuery("SELECT ContentEntryRelatedEntryJoin.* FROM ContentEntryRelatedEntryJoin " +
             "LEFT JOIN ContentEntry ON ContentEntryRelatedEntryJoin.cerejRelatedEntryUid = ContentEntry.contentEntryUid " +
-            "WHERE ContentEntry.publik = TRUE")
+            "WHERE ContentEntry.publik")
     public abstract List<ContentEntryRelatedEntryJoin> getPublicContentEntryRelatedEntryJoins();
 
 }

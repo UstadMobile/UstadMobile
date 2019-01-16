@@ -33,6 +33,6 @@ public abstract class ContentEntryParentChildJoinDao
             "ContentEntryParentChildJoin " +
             "LEFT JOIN ContentEntry parentEntry ON ContentEntryParentChildJoin.cepcjParentContentEntryUid = parentEntry.contentEntryUid " +
             "LEFT JOIN ContentEntry childEntry ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = childEntry.contentEntryUid " +
-            "WHERE parentEntry.publik = TRUE AND childEntry.publik = TRUE")
+            "WHERE parentEntry.publik AND childEntry.publik")
     public abstract List<ContentEntryParentChildJoin> getPublicContentEntryParentChildJoins();
 }

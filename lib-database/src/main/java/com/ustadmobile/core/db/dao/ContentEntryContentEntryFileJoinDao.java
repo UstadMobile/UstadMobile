@@ -24,6 +24,6 @@ public abstract class ContentEntryContentEntryFileJoinDao
 
     @UmQuery("SELECT ContentEntryContentEntryFileJoin.* FROM ContentEntryContentEntryFileJoin " +
             "LEFT JOIN ContentEntry ON ContentEntryContentEntryFileJoin.cecefjContentEntryUid = ContentEntry.contentEntryUid " +
-            "WHERE ContentEntry.publik = TRUE")
+            "WHERE ContentEntry.publik")
     public abstract List<ContentEntryContentEntryFileJoin> getPublicContentEntryContentEntryFileJoins();
 }

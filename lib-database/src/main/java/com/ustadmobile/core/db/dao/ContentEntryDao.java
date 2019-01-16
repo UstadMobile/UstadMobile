@@ -46,6 +46,6 @@ public abstract class ContentEntryDao implements SyncableDao<ContentEntry, Conte
     @UmQueryFindByPrimaryKey
     public abstract void findByUid(Long entryUid, UmCallback<ContentEntry> umCallback);
 
-    @UmQuery("SELECT * FROM ContentEntry WHERE publik = TRUE")
+    @UmQuery("SELECT * FROM ContentEntry WHERE publik")
     public abstract List<ContentEntry> getPublicContentEntries();
 }
