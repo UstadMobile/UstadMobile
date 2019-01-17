@@ -34,6 +34,14 @@ import com.ustadmobile.core.db.dao.LanguageDao;
 import com.ustadmobile.core.db.dao.LanguageVariantDao;
 import com.ustadmobile.core.db.dao.LocationAncestorJoinDao;
 import com.ustadmobile.core.db.dao.LocationDao;
+import com.ustadmobile.core.db.dao.PersonGroupDao;
+import com.ustadmobile.core.db.dao.PersonGroupMemberDao;
+import com.ustadmobile.core.db.dao.PersonLocationJoinDao;
+import com.ustadmobile.core.db.dao.PersonPictureDao;
+import com.ustadmobile.core.db.dao.RoleDao;
+import com.ustadmobile.lib.database.annotation.UmSyncCountLocalPendingChanges;
+import com.ustadmobile.lib.db.UmDbWithAttachmentsDir;
+import com.ustadmobile.lib.db.entities.LocationAncestorJoin;
 import com.ustadmobile.core.db.dao.NetworkNodeDao;
 import com.ustadmobile.core.db.dao.OpdsEntryDao;
 import com.ustadmobile.core.db.dao.OpdsEntryParentToChildJoinDao;
@@ -46,11 +54,6 @@ import com.ustadmobile.core.db.dao.PersonCustomFieldDao;
 import com.ustadmobile.core.db.dao.PersonCustomFieldValueDao;
 import com.ustadmobile.core.db.dao.PersonDao;
 import com.ustadmobile.core.db.dao.PersonDetailPresenterFieldDao;
-import com.ustadmobile.core.db.dao.PersonGroupDao;
-import com.ustadmobile.core.db.dao.PersonGroupMemberDao;
-import com.ustadmobile.core.db.dao.PersonLocationJoinDao;
-import com.ustadmobile.core.db.dao.PersonPictureDao;
-import com.ustadmobile.core.db.dao.RoleDao;
 import com.ustadmobile.core.db.dao.ScheduleDao;
 import com.ustadmobile.core.db.dao.SocialNominationQuestionDao;
 import com.ustadmobile.core.db.dao.SocialNominationQuestionResponseDao;
@@ -64,7 +67,6 @@ import com.ustadmobile.lib.database.annotation.UmDatabase;
 import com.ustadmobile.lib.database.annotation.UmDbContext;
 import com.ustadmobile.lib.database.annotation.UmRepository;
 import com.ustadmobile.lib.database.annotation.UmSyncOutgoing;
-import com.ustadmobile.lib.db.UmDbWithAttachmentsDir;
 import com.ustadmobile.lib.db.UmDbWithAuthenticator;
 import com.ustadmobile.lib.db.entities.AccessToken;
 import com.ustadmobile.lib.db.entities.Clazz;
@@ -99,7 +101,6 @@ import com.ustadmobile.lib.db.entities.HttpCachedEntry;
 import com.ustadmobile.lib.db.entities.Language;
 import com.ustadmobile.lib.db.entities.LanguageVariant;
 import com.ustadmobile.lib.db.entities.Location;
-import com.ustadmobile.lib.db.entities.LocationAncestorJoin;
 import com.ustadmobile.lib.db.entities.NetworkNode;
 import com.ustadmobile.lib.db.entities.OpdsEntry;
 import com.ustadmobile.lib.db.entities.OpdsEntryParentToChildJoin;
@@ -381,4 +382,8 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
     public void setAttachmentsDir(String attachmentsDir) {
         this.attachmentsDir = attachmentsDir;
     }
+
+    @UmSyncCountLocalPendingChanges
+    public abstract int countPendingLocalChanges(long accountUid, int deviceId);
+
 }
