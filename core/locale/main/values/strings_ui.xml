@@ -478,6 +478,7 @@ This is the one you should be editing. The one in /core/locale/main/values/strin
     <string name="apply">Apply</string>
     <string name="file_selected">File selected:</string>
     <string name="person_picture">Person picture</string>
+    <string name="all">All</string>
 
 
     <string name="content_entry_not_found">ContentEntry Not Found</string>

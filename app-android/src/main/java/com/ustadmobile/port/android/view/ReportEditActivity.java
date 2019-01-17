@@ -83,6 +83,9 @@ public class ReportEditActivity extends UstadBaseActivity implements ReportEditV
         attendanceThresholdHeadingTextView =
                 findViewById(R.id.activity_report_edit_attendance_thresholds_heading);
 
+        updateClassesIfEmpty();
+        updateLocationIfEmpty();
+
         //Call the Presenter
         mPresenter = new ReportEditPresenter(this,
                 UMAndroidUtil.bundleToHashtable(getIntent().getExtras()), this);
@@ -128,7 +131,16 @@ public class ReportEditActivity extends UstadBaseActivity implements ReportEditV
         FloatingTextButton fab = findViewById(R.id.activity_report_edit_fab);
         fab.setOnClickListener(v -> mPresenter.handleClickPrimaryActionButton());
 
+    }
 
+    public void updateClassesIfEmpty(){
+        updateClazzesSelected(getText(R.string.all).toString());
+        updateLocationsSelected(getText(R.string.all).toString());
+    }
+
+    public void updateLocationIfEmpty(){
+        updateClazzesSelected(getText(R.string.all).toString());
+        updateLocationsSelected(getText(R.string.all).toString());
     }
 
     /**
@@ -161,11 +173,6 @@ public class ReportEditActivity extends UstadBaseActivity implements ReportEditV
     }
 
     @Override
-    public void updateLocationsSelected(String locations) {
-        locationsTextView.setText(locations);
-    }
-
-    @Override
     public void updateGenderDisaggregationSet(boolean byGender) {
         genderDisaggregateCheck.setChecked(byGender);
     }
@@ -185,9 +192,21 @@ public class ReportEditActivity extends UstadBaseActivity implements ReportEditV
         attendanceThresholdsTextView.setText(thresholdString);
     }
 
+
+    @Override
+    public void updateLocationsSelected(String locations) {
+        locationsTextView.setText(locations);
+        if(locations.equals("")){
+            updateLocationIfEmpty();
+        }
+    }
+
     @Override
     public void updateClazzesSelected(String clazzes) {
         classesTextView.setText(clazzes);
+        if(clazzes.equals("")){
+            updateClassesIfEmpty();
+        }
     }
 
     @Override
