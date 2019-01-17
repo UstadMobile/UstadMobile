@@ -1312,6 +1312,7 @@ public abstract class AbstractDbProcessor {
                     .endControlFlow();
         if(daoHasAttachments) {
             codeBlock.nextControlFlow("catch(Exception e)")
+                    .add("_retryCount++;\n")
                     .add("e.printStackTrace();\n")
                     .endControlFlow();
         }
