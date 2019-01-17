@@ -85,25 +85,13 @@ public class TestIndexKhanAcademy {
         File englishFolder = new File(tmpDir, "en");
         Assert.assertEquals(true, englishFolder.isDirectory());
 
-        File topicFolder = new File(englishFolder, "math");
-        Assert.assertEquals(true, topicFolder.isDirectory());
-
-        File subjectFolder = new File(topicFolder, "cc-early-math-counting-topic");
-        Assert.assertEquals(true, subjectFolder.isDirectory());
-
-        File tutorialFolder = new File(subjectFolder, "early-math");
-        Assert.assertEquals(true, tutorialFolder.isDirectory());
-
-        File coursesFolder = new File(tutorialFolder, "cc-early-math-counting");
-        Assert.assertEquals(true, coursesFolder.isDirectory());
-
-        File videoCourseFolder = new File(coursesFolder, "counting-with-small-numbers");
-        Assert.assertEquals(true, videoCourseFolder.isDirectory());
-
-        File courseFolder = new File(videoCourseFolder, "counting-with-small-numbers");
+        File courseFolder = new File(englishFolder, "counting-with-small-numbers");
         Assert.assertEquals(true, courseFolder.isDirectory());
 
-        File videoFile = new File(courseFolder, "video.mp4");
+        File directoryForCourse = new File(courseFolder, "counting-with-small-numbers");
+        Assert.assertEquals(true, courseFolder.isDirectory());
+
+        File videoFile = new File(directoryForCourse, "video.mp4");
         Assert.assertEquals(true, videoFile.isFile());
 
         ContentEntryDao contentEntryDao = repo.getContentEntryDao();

@@ -199,8 +199,6 @@ public class IndexKhanContentScraper {
             for (TopicListResponse.ComponentData.Modules.Domains domain : domainList) {
 
                 URL topicUrl = new URL(url, domain.href);
-                //File topicFolder = new File(fileLocation, domain.identifier);
-               // topicFolder.mkdirs();
 
                 ContentEntry topicEntry = ContentScraperUtil.createOrUpdateContentEntry(domain.identifier,
                         domain.translatedTitle, topicUrl.toString(), KHAN,
@@ -256,8 +254,6 @@ public class IndexKhanContentScraper {
                         if (SUBJECT_PAGE_TOPIC_CARD.equals(moduleItem.kind)) {
 
                             URL subjectUrl = new URL(topicUrl, moduleItem.url);
-                          //  File subjectFolder = new File(topicFolder, moduleItem.slug);
-                           // subjectFolder.mkdirs();
 
                             ContentEntry subjectEntry = ContentScraperUtil.createOrUpdateContentEntry(moduleItem.slug, moduleItem.title,
                                     subjectUrl.toString(), KHAN, LICENSE_TYPE_CC_BY_NC, englishLang.getLangUid(), null,
@@ -277,8 +273,6 @@ public class IndexKhanContentScraper {
                 } else if (TABLE_OF_CONTENTS_ROW.equals(module.kind)) {
 
                     URL subjectUrl = new URL(topicUrl, module.url);
-                   // File subjectFolder = new File(topicFolder, module.slug);
-                   // subjectFolder.mkdirs();
 
                     ContentEntry subjectEntry = ContentScraperUtil.createOrUpdateContentEntry(module.slug, module.title, subjectUrl.toString(),
                             KHAN, LICENSE_TYPE_CC_BY_NC, englishLang.getLangUid(), null,
@@ -305,8 +299,6 @@ public class IndexKhanContentScraper {
                         }
 
                         URL tutorialUrl = new URL(topicUrl, tutorial.url);
-                       // File subjectFolder = new File(topicFolder, tutorial.slug);
-                       // subjectFolder.mkdirs();
 
                         ContentEntry tutorialEntry = ContentScraperUtil.createOrUpdateContentEntry(tutorial.slug, tutorial.title,
                                 tutorialUrl.toString(), KHAN, LICENSE_TYPE_CC_BY_NC, englishLang.getLangUid(),
@@ -352,8 +344,6 @@ public class IndexKhanContentScraper {
             hrefLink = hrefLink.substring(0, hrefLink.indexOf("/v/"));
 
             URL subjectUrl = new URL(topicUrl, hrefLink);
-           // File subjectFolder = new File(topicFolder, hrefLink);
-          //  subjectFolder.mkdirs();
 
             ContentEntry subjectEntry = ContentScraperUtil.createOrUpdateContentEntry(hrefLink, title,
                     subjectUrl.toString(), KHAN, LICENSE_TYPE_CC_BY_NC, englishLang.getLangUid(),
