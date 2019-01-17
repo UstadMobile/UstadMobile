@@ -19,6 +19,9 @@ import static com.ustadmobile.core.view.ReportEditView.ARG_GENDER_DISAGGREGATE;
 import static com.ustadmobile.core.view.ReportEditView.ARG_LOCATIONS_SET;
 import static com.ustadmobile.core.view.ReportEditView.ARG_REPORT_LINK;
 import static com.ustadmobile.core.view.ReportEditView.ARG_REPORT_NAME;
+import static com.ustadmobile.core.view.ReportEditView.ARG_SHOW_GENDER_DISAGGREGATE;
+import static com.ustadmobile.core.view.ReportEditView.ARG_SHOW_RADIO_GROUP;
+import static com.ustadmobile.core.view.ReportEditView.ARG_SHOW_THERSHOLD;
 import static com.ustadmobile.core.view.ReportEditView.ARG_STUDENT_IDENTIFIER_NUMBER;
 import static com.ustadmobile.core.view.ReportEditView.ARG_STUDENT_IDENTIFIER_PERCENTAGE;
 import static com.ustadmobile.core.view.ReportEditView.ARG_THRESHOLD_HIGH;
@@ -51,6 +54,7 @@ public class ReportEditPresenter
     private static final int TIME_PERIOD_LAST_THREE_MONTHS = 4;
     private static final int TIME_PERIOD_CUSTOM = 5;
 
+    private boolean showthreshold, showRadioGroup, showGenderDisaggregate;
     private long fromTime, toTime;
 
     public ReportEditPresenter(Object context, Hashtable arguments, ReportEditView view) {
@@ -63,6 +67,17 @@ public class ReportEditPresenter
         if(arguments.containsKey(ARG_REPORT_LINK)){
             reportLink = (String) arguments.get(ARG_REPORT_LINK);
         }
+
+        if (arguments.containsKey(ARG_SHOW_THERSHOLD)) {
+            showthreshold = (boolean) arguments.get(ARG_SHOW_THERSHOLD);
+        }
+        if(arguments.containsKey(ARG_SHOW_RADIO_GROUP)){
+            showRadioGroup = (boolean) arguments.get(ARG_SHOW_RADIO_GROUP);
+        }
+        if(arguments.containsKey(ARG_SHOW_GENDER_DISAGGREGATE)){
+            showGenderDisaggregate = (boolean) arguments.get(ARG_SHOW_GENDER_DISAGGREGATE);
+        }
+
     }
 
 
@@ -74,6 +89,9 @@ public class ReportEditPresenter
         if(reportName.length()>0) {
             view.updateReportName(reportName);
         }
+        view.showAttendanceThresholdView(showthreshold);
+        view.showShowStudentNumberPercentageView(showRadioGroup);
+        view.showGenderDisaggregate(showGenderDisaggregate);
 
         //Update time period options.
         updateTimePeriod();

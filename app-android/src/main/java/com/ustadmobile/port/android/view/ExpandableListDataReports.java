@@ -18,15 +18,22 @@ public class ExpandableListDataReports {
     String name;
     List<ExpandableListDataReports> children;
     String reportLink;
+    Boolean showThreshold;
+    Boolean showRadioGroup;
+    Boolean showGenderDisaggregate;
 
     ExpandableListDataReports(){
 
     }
 
-    ExpandableListDataReports(String name, Integer icon, String reportLink){
+    ExpandableListDataReports(String name, Integer icon, String reportLink, boolean showThreshold,
+                              boolean showRadioGroup, boolean showGenderDisaggregate){
         this.name = name;
         this.icon = icon;
         this.reportLink = reportLink;
+        this.showThreshold = showThreshold;
+        this.showRadioGroup = showRadioGroup;
+        this.showGenderDisaggregate = showGenderDisaggregate;
     }
 
     public static HashMap<String, ExpandableListDataReports> getDataAll(Context context){
@@ -35,20 +42,20 @@ public class ExpandableListDataReports {
         List<ExpandableListDataReports> attendanceReport = new ArrayList<>();
         attendanceReport.add(new ExpandableListDataReports(
                 context.getText(R.string.overall_attendance).toString(),
-                -1, ReportOverallAttendanceView.VIEW_NAME ));
+                -1, ReportOverallAttendanceView.VIEW_NAME, false, false, true ));
         attendanceReport.add(new ExpandableListDataReports(
                 context.getText(R.string.attendance_grouped_by_threshold).toString(),
-                -1, ReportAttendanceGroupedByThresholdsView.VIEW_NAME));
+                -1, ReportAttendanceGroupedByThresholdsView.VIEW_NAME, true, true, true));
         attendanceReport.add(new ExpandableListDataReports(
                 context.getText(R.string.at_risk_students).toString(),
-                -1, ""));
+                -1, "", false, false, true));
 
 
 
         List<ExpandableListDataReports> operationsReport = new ArrayList<>();
         operationsReport.add(new ExpandableListDataReports(
                 context.getText(R.string.number_of_days_classes_open).toString(),
-                -1, ReportNumberOfDaysClassesOpenView.VIEW_NAME));
+                -1, ReportNumberOfDaysClassesOpenView.VIEW_NAME, false, false, false));
 
         List<ExpandableListDataReports> ircMasterListReport = new ArrayList<>();
 
