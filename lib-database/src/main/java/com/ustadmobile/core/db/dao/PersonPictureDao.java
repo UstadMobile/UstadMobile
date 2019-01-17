@@ -16,11 +16,11 @@ import java.io.IOException;
 import java.io.InputStream;
 
 @UmDao(hasAttachment = true,
-permissionJoin = " LEFT JOIN Person ON PersonPicture.personPicturePersonUid = Person.personUid ",
-selectPermissionCondition = PersonDao.ENTITY_LEVEL_PERMISSION_CONDITION1 +
-Role.PERMISSION_PERSON_PICTURE_SELECT + PersonDao.ENTITY_LEVEL_PERMISSION_CONDITION2,
-updatePermissionCondition = PersonDao.ENTITY_LEVEL_PERMISSION_CONDITION1 +
-Role.PERMISSION_PERSON_PICTURE_UPDATE + PersonDao.ENTITY_LEVEL_PERMISSION_CONDITION2)
+        permissionJoin = " LEFT JOIN Person ON PersonPicture.personPicturePersonUid = Person.personUid ",
+        selectPermissionCondition = PersonDao.ENTITY_LEVEL_PERMISSION_CONDITION1 +
+                Role.PERMISSION_PERSON_PICTURE_SELECT + PersonDao.ENTITY_LEVEL_PERMISSION_CONDITION2,
+        updatePermissionCondition = PersonDao.ENTITY_LEVEL_PERMISSION_CONDITION1 +
+                Role.PERMISSION_PERSON_PICTURE_UPDATE + PersonDao.ENTITY_LEVEL_PERMISSION_CONDITION2)
 @UmRepository
 public abstract class PersonPictureDao implements SyncableDao<PersonPicture, PersonPictureDao> {
 

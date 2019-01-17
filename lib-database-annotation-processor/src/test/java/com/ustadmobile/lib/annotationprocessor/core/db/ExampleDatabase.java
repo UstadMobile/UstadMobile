@@ -4,6 +4,7 @@ import com.ustadmobile.lib.database.UmDbBuilder;
 import com.ustadmobile.lib.database.annotation.UmClearAll;
 import com.ustadmobile.lib.database.annotation.UmDatabase;
 import com.ustadmobile.lib.database.annotation.UmRepository;
+import com.ustadmobile.lib.database.annotation.UmSyncCountLocalPendingChanges;
 import com.ustadmobile.lib.database.annotation.UmSyncOutgoing;
 import com.ustadmobile.lib.db.UmDbWithAttachmentsDir;
 import com.ustadmobile.lib.db.UmDbWithAuthenticator;
@@ -119,4 +120,7 @@ public abstract class ExampleDatabase implements UmSyncableDatabase, UmDbWithAut
     public void setAttachmentsDir(String attachmentsDir) {
         this.attachmentsDir = attachmentsDir;
     }
+
+    @UmSyncCountLocalPendingChanges
+    public abstract int countPendingChanges(long personAccountUid, int deiceId);
 }

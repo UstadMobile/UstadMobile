@@ -160,6 +160,11 @@ public class DbProcessorRetrofitRepository extends AbstractDbProcessor {
                         .addCode("throw new RuntimeException($S);\n",
                                 "Cannot run outgoing sync on repository. Must be outgoing from database")
                         .build());
+            }else if(subElement.getAnnotation(UmSyncCountLocalPendingChanges.class) != null) {
+                dbRepoBuilder.addMethod(MethodSpec.overriding(subElement)
+                        .addCode("throw new RuntimeException($S);\n",
+                                "Cannot check number of pending local changes using repository. Must use database.")
+                        .build());
             }else {
                 TypeMirror retType = subElement.getReturnType();
                 if(!retType.getKind().equals(TypeKind.DECLARED)
