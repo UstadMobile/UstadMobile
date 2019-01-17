@@ -66,6 +66,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
+        android:textColor="@color/just_black"
         android:text="@string/classes"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/activity_report_edit_hline" />
@@ -77,6 +78,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:text="@string/attendance_thresholds"
+        android:textColor="@color/just_black"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/activity_report_edit_hline3" />
 
@@ -85,6 +87,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
+        android:textColor="@color/just_black"
         android:layout_marginTop="8dp"
         android:text="@string/time_period"
         app:layout_constraintStart_toStartOf="parent"
