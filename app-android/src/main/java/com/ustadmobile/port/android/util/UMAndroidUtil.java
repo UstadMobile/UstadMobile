@@ -64,6 +64,8 @@ public class UMAndroidUtil {
                 retVal.put(key, val);
             }else if(val instanceof  Long[]){
                 retVal.put(key, val);
+            }else if(val instanceof  long[]){
+                retVal.put(key, val);
             }
         }
 
@@ -93,7 +95,11 @@ public class UMAndroidUtil {
             }else if(val instanceof  Boolean){
                 bundle.putBoolean(key, (Boolean)val);
             }else if(val instanceof Long[]){
-                bundle.putLongArray(key, (long[]) val);
+                long[] newVal =  new long[((Long[]) val).length];
+                for(int i =0; i<((Long[]) val).length; i++){
+                    newVal[i]= ((Long[])val)[i];
+                }
+                bundle.putLongArray(key, newVal);
             }
         }
         return bundle;

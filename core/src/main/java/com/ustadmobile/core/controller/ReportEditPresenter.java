@@ -14,9 +14,11 @@ import java.util.Hashtable;
 import java.util.LinkedHashMap;
 import java.util.List;
 
+import static com.ustadmobile.core.view.ReportEditView.ARG_CLAZZ_LIST;
 import static com.ustadmobile.core.view.ReportEditView.ARG_FROM_DATE;
 import static com.ustadmobile.core.view.ReportEditView.ARG_GENDER_DISAGGREGATE;
 import static com.ustadmobile.core.view.ReportEditView.ARG_LOCATIONS_SET;
+import static com.ustadmobile.core.view.ReportEditView.ARG_LOCATION_LIST;
 import static com.ustadmobile.core.view.ReportEditView.ARG_REPORT_LINK;
 import static com.ustadmobile.core.view.ReportEditView.ARG_REPORT_NAME;
 import static com.ustadmobile.core.view.ReportEditView.ARG_SHOW_GENDER_DISAGGREGATE;
@@ -233,11 +235,18 @@ public class ReportEditPresenter
         args.put(ARG_FROM_DATE, fromTime);
         args.put(ARG_TO_DATE, toTime);
 
-        //TODO: Add location to argument
+        if(selectedClasses != null && !selectedClasses.isEmpty()){
+            Long[] classesArray = new Long[selectedClasses.size()];
+            selectedClasses.toArray(classesArray);
+            args.put(ARG_CLAZZ_LIST, classesArray);
+        }
 
-        //TODO: Add Clazzes
+        if(selectedLocations != null && !selectedLocations.isEmpty()){
+            Long[] locationsArray = new Long[selectedLocations.size()];
+            selectedLocations.toArray(locationsArray);
+            args.put(ARG_LOCATION_LIST, locationsArray);
+        }
 
-        //TODO: Add Thresholds
         if(thresholdValues != null) {
             args.put(ARG_THRESHOLD_LOW, thresholdValues.low);
             args.put(ARG_THRESHOLD_MID, thresholdValues.med);

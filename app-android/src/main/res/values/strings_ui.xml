@@ -403,9 +403,9 @@ This is the one you should be editing. The one in /core/locale/main/values/strin
     <string name="sort_by_attendance_asc">Sort by attendance(high to low)</string>
     <string name="sort_by_attendance_desc">Sort by attendance(low to high)</string>
     <string name="sort_by_text">Sort by</string>
-    <string name="namesb">name</string>
-    <string name="attendance_high_to_low">attendance (high to low)</string>
-    <string name="attendance_low_to_high">attendance (low to high)</string>
+    <string name="namesb">Name</string>
+    <string name="attendance_high_to_low">Attendance (high to low)</string>
+    <string name="attendance_low_to_high">Attendance (low to high)</string>
     <string name="teacher">Teacher</string>
     <string name="partial">Partial</string>
     <string name="teachers_literal">Teachers</string>

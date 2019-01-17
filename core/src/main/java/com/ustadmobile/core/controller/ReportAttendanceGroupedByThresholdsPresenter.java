@@ -29,8 +29,8 @@ public class ReportAttendanceGroupedByThresholdsPresenter
 
     private long fromDate;
     private long toDate;
-    private Long[] locations;
-    private Long[] clazzes;
+    private long[] locations;
+    private long[] clazzes;
     private ThresholdValues thresholdValues;
 
     public static class ThresholdValues{
@@ -59,11 +59,12 @@ public class ReportAttendanceGroupedByThresholdsPresenter
         if(arguments.containsKey(ARG_TO_DATE)){
             toDate = (long) arguments.get(ARG_TO_DATE);
         }
+
         if(arguments.containsKey(ARG_LOCATION_LIST)){
-            locations = (Long[]) arguments.get(ARG_LOCATION_LIST);
+            locations = (long[]) arguments.get(ARG_LOCATION_LIST);
         }
         if(arguments.containsKey(ARG_CLAZZ_LIST)){
-            clazzes = (Long[]) arguments.get(ARG_CLAZZ_LIST);
+            clazzes = (long[]) arguments.get(ARG_CLAZZ_LIST);
         }
 
         if(arguments.containsKey(ARG_THRESHOLD_LOW)){

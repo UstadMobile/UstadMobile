@@ -585,130 +585,48 @@ public class ServletContextClass implements ServletContextListener
             String question4Text = "Who are your friends in class?";
             String question5Text = "Who are the kids you spend time with outside of class?";
 
-            //Create SEL questions :
+            String[] selQuestions = new String[]{question1Text, question2Text, question3Text,
+                    question3Text,question4Text, question5Text};
+
             SocialNominationQuestionSetDao questionSetDao =
                     appDb.getRepository(dummyBaseUrl, dummyAuth).getSocialNominationQuestionSetDao();
 
+            //Create SEL Question Set
             SocialNominationQuestionSet questionSet = new SocialNominationQuestionSet();
             questionSet.setTitle("Default set");
             Long questionSetUid = questionSetDao.insert(questionSet);
             questionSet.setSocialNominationQuestionSetUid(questionSetUid);
-            System.out.println("Question set uid: " + questionSetUid);
+            System.out.println("Default Question set uid: " + questionSetUid);
 
             SocialNominationQuestionDao questionDao = appDb.getRepository(dummyBaseUrl, dummyAuth)
                     .getSocialNominationQuestionDao();
 
-            SocialNominationQuestion question1 = new SocialNominationQuestion();
-            question1.setSocialNominationQuestionSocialNominationQuestionSetUid(
-                    questionSetUid);
-            question1.setQuestionIndex(1);
-            question1.setQuestionText(question1Text);
-            question1.setMultiNominations(true);
-            question1.setAssignToAllClasses(true);
-            questionDao.findByQuestionStringAsync(question1Text, new UmCallback<List<SocialNominationQuestion>>() {
-                @Override
-                public void onSuccess(List<SocialNominationQuestion> questionList) {
-                    if(questionList.isEmpty()){
-                        System.out.println("Peristing 1: ");
-                        questionDao.insert(question1);
-                    }
-                }
-
-                @Override
-                public void onFailure(Throwable exception) {
-                    exception.printStackTrace();
-                }
-            });
-
-
-            SocialNominationQuestion question2 = new SocialNominationQuestion();
-            question2.setSocialNominationQuestionSocialNominationQuestionSetUid(
-                    questionSetUid);
-            question2.setQuestionIndex(2);
-            question2.setQuestionText(question2Text);
-            question2.setMultiNominations(true);
-            question2.setAssignToAllClasses(true);
-            questionDao.findByQuestionStringAsync(question2Text, new UmCallback<List<SocialNominationQuestion>>() {
-                @Override
-                public void onSuccess(List<SocialNominationQuestion> questionList) {
-                    if(questionList.isEmpty()){
-                        System.out.println("Persisting 2:  ");
-                        questionDao.insert(question2);
-                    }
-                }
-
-                @Override
-                public void onFailure(Throwable exception) {
-                    exception.printStackTrace();
-                }
-            });
-
-            SocialNominationQuestion question3 = new SocialNominationQuestion();
-            question3.setSocialNominationQuestionSocialNominationQuestionSetUid(
-                    questionSetUid);
-            question3.setQuestionIndex(3);
-            question3.setQuestionText(question3Text);
-            question3.setMultiNominations(true);
-            question3.setAssignToAllClasses(true);
-            questionDao.findByQuestionStringAsync(question3Text, new UmCallback<List<SocialNominationQuestion>>() {
-                @Override
-                public void onSuccess(List<SocialNominationQuestion> questionList) {
-                    if(questionList.isEmpty()){
-                        System.out.println("Persisting 3:  ");
-                        questionDao.insert(question3);
+            //Create SEL Questions
+            for(int i=0; i < selQuestions.length; i++){
+                SocialNominationQuestion question = new SocialNominationQuestion();
+                question.setSocialNominationQuestionSocialNominationQuestionSetUid(
+                        questionSetUid);
+                question.setQuestionIndex(i+1);
+                question.setQuestionText(selQuestions[i]);
+                question.setMultiNominations(true);
+                question.setAssignToAllClasses(true);
+                questionDao.findByQuestionStringAsync(selQuestions[i],
+                        new UmCallback<List<SocialNominationQuestion>>() {
+                    @Override
+                    public void onSuccess(List<SocialNominationQuestion> questionList) {
+                        if(questionList.isEmpty()){
+                            System.out.println("Peristing i: ");
+                            questionDao.insert(question);
+                        }
                     }
 
-                }
-
-                @Override
-                public void onFailure(Throwable exception) {
-
-                }
-            });
-
-            SocialNominationQuestion question4 = new SocialNominationQuestion();
-            question4.setSocialNominationQuestionSocialNominationQuestionSetUid(
-                    questionSetUid);
-            question4.setQuestionIndex(4);
-            question4.setQuestionText(question4Text);
-            question4.setMultiNominations(true);
-            question4.setAssignToAllClasses(true);
-            questionDao.findByQuestionStringAsync(question4Text, new UmCallback<List<SocialNominationQuestion>>() {
-                @Override
-                public void onSuccess(List<SocialNominationQuestion> questionList) {
-                    if(questionList.isEmpty()){
-                        System.out.println("Persisting 4:  ");
-                        questionDao.insert(question4);
+                    @Override
+                    public void onFailure(Throwable exception) {
+                        //exception.printStackTrace();
                     }
-                }
+                });
+            }
 
-                @Override
-                public void onFailure(Throwable exception) {
-
-                }
-            });
-
-            SocialNominationQuestion question5 = new SocialNominationQuestion();
-            question5.setSocialNominationQuestionSocialNominationQuestionSetUid(
-                    questionSetUid);
-            question5.setQuestionIndex(5);
-            question5.setQuestionText(question5Text);
-            question5.setMultiNominations(true);
-            question5.setAssignToAllClasses(true);
-            questionDao.findByQuestionStringAsync(question5Text, new UmCallback<List<SocialNominationQuestion>>() {
-                @Override
-                public void onSuccess(List<SocialNominationQuestion> questionList) {
-                    if(questionList.isEmpty()){
-                        System.out.println("Persisting 5:  ");
-                        questionDao.insert(question5);
-                    }
-                }
-
-                @Override
-                public void onFailure(Throwable exception) {
-                    exception.printStackTrace();
-                }
-            });
         }
 
         private void addNextField(){
@@ -796,7 +714,6 @@ public class ServletContextClass implements ServletContextListener
                                 personDetailPresenterFieldDao, true);
                     }
 
-                    //addNextField();
                 }
 
                 @Override
