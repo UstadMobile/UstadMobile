@@ -172,9 +172,9 @@ public class IndexPrathamContentScraper {
                 } catch (IOException io) {
                     cookie = loginPratham();
                     retry++;
-                    io.printStackTrace();
-                    UMLogUtil.logError("Error for book " + data.title + " with id " + data.slug);
                     if (retry == 2) {
+                        UMLogUtil.logInfo(ExceptionUtils.getStackTrace(io));
+                        UMLogUtil.logError("Error for book " + data.title + " with id " + data.slug);
                         retry = 0;
                         continue;
                     }
@@ -207,7 +207,7 @@ public class IndexPrathamContentScraper {
     }
 
     public URL generatePrathamUrl(String number) throws MalformedURLException {
-        return new URL(prefixUrl + number);
+        return new URL(prefixUrl + number + "&per_page=24");
     }
 
     public String loginPratham() {
