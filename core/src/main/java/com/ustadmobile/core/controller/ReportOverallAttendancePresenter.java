@@ -58,6 +58,13 @@ public class ReportOverallAttendancePresenter
         this.genderDisaggregate = genderDisaggregate;
     }
 
+    public static ArrayList<Long> convertLongArray(long[] array) {
+        ArrayList<Long> result = new ArrayList<Long>(array.length);
+        for (long item : array)
+            result.add(item);
+        return result;
+    }
+
     public ReportOverallAttendancePresenter(Object context, Hashtable arguments,
                                             ReportOverallAttendanceView view) {
         super(context, arguments, view);
@@ -73,9 +80,11 @@ public class ReportOverallAttendancePresenter
         }
         if(arguments.containsKey(ARG_LOCATION_LIST)){
             locations = (long[]) arguments.get(ARG_LOCATION_LIST);
+            locationList = convertLongArray(locations);
         }
         if(arguments.containsKey(ARG_CLAZZ_LIST)){
             clazzes = (long[]) arguments.get(ARG_CLAZZ_LIST);
+            clazzesList = convertLongArray(clazzes);
         }
         if(arguments.containsKey(ARG_GENDER_DISAGGREGATE)){
             genderDisaggregate = (Boolean) arguments.get(ARG_GENDER_DISAGGREGATE);
@@ -108,9 +117,7 @@ public class ReportOverallAttendancePresenter
         this.showPercentages = showPercentages;
     }
 
-    public void getAttendanceDataAndUpdateCharts(){
-
-
+    private void processDailyAttendanceNumbers(List<DailyAttendanceNumbers> result){
         LinkedHashMap<Float, Float> lineDataMap = new LinkedHashMap<>();
         LinkedHashMap<Float, Float> lineDataMapMale = new LinkedHashMap<>();
         LinkedHashMap<Float, Float> lineDataMapFemale = new LinkedHashMap<>();
@@ -121,72 +128,77 @@ public class ReportOverallAttendancePresenter
         LinkedHashMap<String, Float> tableDataMale = new LinkedHashMap<>();
         LinkedHashMap<String, Float> tableDataFemale = new LinkedHashMap<>();
 
+        for(DailyAttendanceNumbers everyDayAttendance: result){
+
+            //Get date and time.
+            Long dd =everyDayAttendance.getLogDate();
+
+            //Remove time and just get date
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTimeInMillis(dd);
+            calendar.set(Calendar.HOUR_OF_DAY, 0);
+            calendar.set(Calendar.MINUTE, 0);
+            calendar.set(Calendar.SECOND, 0);
+            calendar.set(Calendar.MILLISECOND, 0);
+            Long d = calendar.getTimeInMillis();
+
+            //Put just date and attendance value
+            lineDataMap.put(d.floatValue() / 1000,
+                    everyDayAttendance.getAttendancePercentage());
+            lineDataMapMale.put(d.floatValue() / 1000,
+                    everyDayAttendance.getMaleAttendance());
+            lineDataMapFemale.put(d.floatValue() / 1000,
+                    everyDayAttendance.getFemaleAttendance());
+
+            tableDataAverage.put(
+                    UMCalendarUtil.getPrettyDateSuperSimpleFromLong(d, Locale.US),
+                    everyDayAttendance.getAttendancePercentage() * 100);
+            tableDataMale.put(
+                    UMCalendarUtil.getPrettyDateSuperSimpleFromLong(d, Locale.US),
+                    everyDayAttendance.getMaleAttendance() * 100);
+            tableDataFemale.put(
+                    UMCalendarUtil.getPrettyDateSuperSimpleFromLong(d, Locale.US),
+                    everyDayAttendance.getFemaleAttendance() * 100);
+
+        }
+
+        tableData.put(ATTENDANCE_LINE_AVERAGE_LABEL_DESC, tableDataAverage);
+        tableData.put(ATTENDANCE_LINE_MALE_LABEL_DESC, tableDataMale);
+        tableData.put(ATTENDANCE_LINE_FEMALE_LABEL_DESC, tableDataFemale);
+
+
+        dataMaps = new LinkedHashMap<>();
+
+        if(genderDisaggregate) {
+            dataMaps.put(ATTENDANCE_LINE_MALE_LABEL_DESC, lineDataMapMale);
+            dataMaps.put(ATTENDANCE_LINE_FEMALE_LABEL_DESC, lineDataMapFemale);
+            dataMaps.put(ATTENDANCE_LINE_AVERAGE_LABEL_DESC, lineDataMap);
+        }else{
+            dataMaps.put(ATTENDANCE_LINE_AVERAGE_LABEL_DESC, lineDataMap);
+        }
+
+        view.updateAttendanceMultiLineChart(dataMaps, tableData);
+    }
+    public void getAttendanceDataAndUpdateCharts(){
+
+
         ClazzLogAttendanceRecordDao attendanceRecordDao =
                 repository.getClazzLogAttendanceRecordDao();
-        //TODO: Add Location and Classes
+
         attendanceRecordDao.findOverallDailyAttendanceNumbersByDateAndStuff(fromDate, toDate,
-                new UmCallback<List<DailyAttendanceNumbers>>() {
-            @Override
-            public void onSuccess(List<DailyAttendanceNumbers> result) {
+            clazzesList, locationList, new UmCallback<List<DailyAttendanceNumbers>>() {
 
-                for(DailyAttendanceNumbers everyDayAttendance: result){
-
-                    //Get date and time.
-                    Long dd =everyDayAttendance.getLogDate();
-
-                    //Remove time and just get date
-                    Calendar calendar = Calendar.getInstance();
-                    calendar.setTimeInMillis(dd);
-                    calendar.set(Calendar.HOUR_OF_DAY, 0);
-                    calendar.set(Calendar.MINUTE, 0);
-                    calendar.set(Calendar.SECOND, 0);
-                    calendar.set(Calendar.MILLISECOND, 0);
-                    Long d = calendar.getTimeInMillis();
-
-                    //Put just date and attendance value
-                    lineDataMap.put(d.floatValue() / 1000,
-                            everyDayAttendance.getAttendancePercentage());
-                    lineDataMapMale.put(d.floatValue() / 1000,
-                            everyDayAttendance.getMaleAttendance());
-                    lineDataMapFemale.put(d.floatValue() / 1000,
-                            everyDayAttendance.getFemaleAttendance());
-
-                    tableDataAverage.put(
-                            UMCalendarUtil.getPrettyDateSuperSimpleFromLong(d, Locale.US),
-                            everyDayAttendance.getAttendancePercentage() * 100);
-                    tableDataMale.put(
-                            UMCalendarUtil.getPrettyDateSuperSimpleFromLong(d, Locale.US),
-                            everyDayAttendance.getMaleAttendance() * 100);
-                    tableDataFemale.put(
-                            UMCalendarUtil.getPrettyDateSuperSimpleFromLong(d, Locale.US),
-                            everyDayAttendance.getFemaleAttendance() * 100);
-
+                @Override
+                public void onSuccess(List<DailyAttendanceNumbers> result) {
+                    processDailyAttendanceNumbers(result);
                 }
 
-                tableData.put(ATTENDANCE_LINE_AVERAGE_LABEL_DESC, tableDataAverage);
-                tableData.put(ATTENDANCE_LINE_MALE_LABEL_DESC, tableDataMale);
-                tableData.put(ATTENDANCE_LINE_FEMALE_LABEL_DESC, tableDataFemale);
-
-
-                dataMaps = new LinkedHashMap<>();
-
-                if(genderDisaggregate) {
-                    dataMaps.put(ATTENDANCE_LINE_MALE_LABEL_DESC, lineDataMapMale);
-                    dataMaps.put(ATTENDANCE_LINE_FEMALE_LABEL_DESC, lineDataMapFemale);
-                    dataMaps.put(ATTENDANCE_LINE_AVERAGE_LABEL_DESC, lineDataMap);
-                }else{
-                    dataMaps.put(ATTENDANCE_LINE_AVERAGE_LABEL_DESC, lineDataMap);
+                @Override
+                public void onFailure(Throwable exception) {
+                    exception.printStackTrace();
                 }
+            });
 
-                view.updateAttendanceMultiLineChart(dataMaps, tableData);
-
-            }
-
-            @Override
-            public void onFailure(Throwable exception) {
-                exception.printStackTrace();
-            }
-        });
     }
 
     public void dataToCSV(){

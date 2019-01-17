@@ -152,19 +152,19 @@ public class SelectClazzesDialogFragment extends UstadDialogFragment implements
      * The DIFF CALLBACK
      */
     public static final DiffUtil.ItemCallback<ClazzWithNumStudents> DIFF_CALLBACK =
-            new DiffUtil.ItemCallback<ClazzWithNumStudents>() {
-                @Override
-                public boolean areItemsTheSame(ClazzWithNumStudents oldItem,
-                                               ClazzWithNumStudents newItem) {
-                    return oldItem.getClazzUid() == newItem.getClazzUid();
-                }
+        new DiffUtil.ItemCallback<ClazzWithNumStudents>() {
+            @Override
+            public boolean areItemsTheSame(ClazzWithNumStudents oldItem,
+                                           ClazzWithNumStudents newItem) {
+                return oldItem.getClazzUid() == newItem.getClazzUid();
+            }
 
-                @Override
-                public boolean areContentsTheSame(ClazzWithNumStudents oldItem,
-                                                  ClazzWithNumStudents newItem) {
-                    return oldItem.equals(newItem);
-                }
-            };
+            @Override
+            public boolean areContentsTheSame(ClazzWithNumStudents oldItem,
+                                              ClazzWithNumStudents newItem) {
+                return oldItem.equals(newItem);
+            }
+        };
 
     @Override
     public void setClazzListProvider(UmProvider<ClazzWithNumStudents> clazzListProvider) {

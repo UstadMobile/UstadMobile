@@ -208,6 +208,57 @@ public abstract class ClazzLogAttendanceRecordDao implements
                           float midAttendanceThreshold,
                           UmCallback<List<AttendanceResultGroupedByAgeAndThreshold>> resultList);
 
+    @UmQuery("select  " +
+            " count(DISTINCT Person.personUid) as total, " +
+            " Person.gender, " +
+            " cast((:datetimeNow - Person.dateOfBirth) / (365.25 * 24 * 60 * 60 * 1000) as int) as age, " +
+            " CASE  " +
+            "  WHEN numSessionsTbl.attendancePercentage < :lowAttendanceThreshold THEN \"LOW\" " +
+            "  WHEN numSessionsTbl.attendancePercentage < :midAttendanceThreshold THEN \"MEDIUM\" " +
+            "  ELSE \"HIGH\" " +
+            " END thresholdGroup " +
+            "FROM  " +
+            " ( " +
+            "  SELECT  " +
+            "   cast( SUM(CASE WHEN attendanceStatus = " + ClazzLogAttendanceRecord.STATUS_ATTENDED +
+            " THEN 1 ELSE 0 END) as float) / COUNT(*) as attendancePercentage, " +
+            "   ClazzLogAttendanceRecordClazzLogUid, " +
+            "   clazzLogAttendanceRecordClazzMemberUid " +
+            "   FROM ClazzLogAttendanceRecord as numSessions  " +
+            "   LEFT JOIN ClazzLog on ClazzLogAttendanceRecordClazzLogUid = ClazzLog.clazzLogUid " +
+            "   WHERE ClazzLog.logDate > :fromTime AND ClazzLog.logDate < :toTime " +
+            "    AND ClazzLog.clazzLogClazzUid IN (:clazzes) " +
+            "   GROUP BY clazzLogAttendanceRecordClazzMemberUid " +
+            " ) numSessionsTbl " +
+            "LEFT JOIN ClazzLog ON " +
+            " numSessionsTbl.ClazzLogAttendanceRecordClazzLogUid = ClazzLog.clazzLogUid " +
+            "LEFT JOIN ClazzLogAttendanceRecord ON " +
+            " numSessionsTbl.clazzLogAttendanceRecordClazzMemberUid = " +
+            " ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzMemberUid " +
+            "LEFT JOIN ClazzMember on " +
+            " ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzMemberUid = " +
+            " ClazzMember.clazzMemberUid " +
+            "LEFT JOIN Person on ClazzMember.clazzMemberPersonUid = Person.personUid " +
+            "GROUP BY Person.gender, age, thresholdGroup " +
+            " ORDER BY age, thresholdGroup ")
+    public abstract void getAttendanceGroupedByThresholds(long datetimeNow, long fromTime,
+                          long toTime, float lowAttendanceThreshold,
+                          float midAttendanceThreshold, List<Long> clazzes,
+                          UmCallback<List<AttendanceResultGroupedByAgeAndThreshold>> resultList);
+
+    public void getAttendanceGroupedByThresholds(long datetimeNow, long fromTime,
+                 long toTime, float lowAttendanceThreshold, float midAttendanceThreshold,
+                 List<Long> clazzes, List<Long> locations,
+                 UmCallback<List<AttendanceResultGroupedByAgeAndThreshold>> resultList ){
+        if(clazzes.isEmpty()){
+            getAttendanceGroupedByThresholds(datetimeNow, fromTime, toTime, lowAttendanceThreshold,
+                    midAttendanceThreshold, resultList);
+        }else{
+            getAttendanceGroupedByThresholds(datetimeNow, fromTime, toTime, lowAttendanceThreshold,
+                    midAttendanceThreshold, clazzes, resultList);
+        }
+    }
+
     @UmQuery("SELECT ClazzLogAttendanceRecord.* , Person.* " +
             " FROM ClazzLogAttendanceRecord " +
             " LEFT JOIN ClazzMember " +
@@ -280,11 +331,52 @@ public abstract class ClazzLogAttendanceRecordDao implements
             " ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzMemberUid = ClazzMember.clazzMemberUid " +
             " LEFT JOIN Person ON ClazzMember.clazzMemberPersonUid = Person.personUid " +
             " WHERE ClazzLog.done = 1 " +
+            " AND ClazzLog.clazzLogClazzUid IN (:clazzes) " +
             " AND ClazzLog.logDate > :fromDate " +
             " AND ClazzLog.logDate < :toDate " +
             "group by (ClazzLog.logDate)")
     public abstract void findOverallDailyAttendanceNumbersByDateAndStuff(long fromDate,
-                            long toDate, UmCallback<List<DailyAttendanceNumbers>> resultObject);
+            long toDate, List<Long> clazzes, UmCallback<List<DailyAttendanceNumbers>> resultObject);
+
+
+    @UmQuery("select ClazzLogAttendanceRecordClazzLogUid as clazzLogUid, " +
+            " ClazzLog.logDate, " +
+            " sum(case when attendanceStatus = " + ClazzLogAttendanceRecord.STATUS_ATTENDED +
+            " then 1 else 0 end) * 1.0 / COUNT(*) as attendancePercentage, " +
+            " sum(case when attendanceStatus = " + ClazzLogAttendanceRecord.STATUS_ABSENT +
+            " then 1 else 0 end) * 1.0 / COUNT(*) as absentPercentage, " +
+            " sum(case when attendanceStatus = " + ClazzLogAttendanceRecord.STATUS_PARTIAL +
+            " then 1 else 0 end) * 1.0 / COUNT(*) as partialPercentage, " +
+            " ClazzLog.clazzLogClazzUid as clazzUid, " +
+            " sum(case when attendanceStatus = 1 and Person.gender = " + Person.GENDER_FEMALE +
+            " then 1 else 0 end) * 1.0 / COUNT(*) as femaleAttendance, " +
+            " sum(case when attendanceStatus = 1 and Person.gender =  " + Person.GENDER_MALE +
+            " then 1 else 0 end) * 1.0/COUNT(*) as maleAttendance, " +
+            " ClazzLog.clazzLogUid as clazzLogUid " +
+            " from ClazzLogAttendanceRecord " +
+            " LEFT JOIN ClazzLog ON " +
+            " ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid = ClazzLog.clazzLogUid " +
+
+            " LEFT JOIN ClazzMember ON " +
+            " ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzMemberUid = ClazzMember.clazzMemberUid " +
+            " LEFT JOIN Person ON ClazzMember.clazzMemberPersonUid = Person.personUid " +
+            " WHERE ClazzLog.done = 1 " +
+            " AND ClazzLog.logDate > :fromDate " +
+            " AND ClazzLog.logDate < :toDate " +
+            "group by (ClazzLog.logDate)")
+    public abstract void findOverallDailyAttendanceNumbersByDateAndStuff(long fromDate,
+             long toDate, UmCallback<List<DailyAttendanceNumbers>> resultObject);
+
+
+    public void findOverallDailyAttendanceNumbersByDateAndStuff(long fromDate, long toDate,
+                List<Long> clazzes, List<Long> locations,
+                UmCallback<List<DailyAttendanceNumbers>> resultObject){
+        if(clazzes.isEmpty()){
+            findOverallDailyAttendanceNumbersByDateAndStuff(fromDate, toDate, resultObject);
+        }else{
+            findOverallDailyAttendanceNumbersByDateAndStuff(fromDate, toDate,clazzes,resultObject);
+        }
+    }
 
     /**
      * Checks for ClazzMembers not in a particular Clazz that are not part of the
