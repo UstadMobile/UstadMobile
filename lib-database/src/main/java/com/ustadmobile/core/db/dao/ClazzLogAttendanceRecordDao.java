@@ -246,6 +246,99 @@ public abstract class ClazzLogAttendanceRecordDao implements
                           float midAttendanceThreshold, List<Long> clazzes,
                           UmCallback<List<AttendanceResultGroupedByAgeAndThreshold>> resultList);
 
+    @UmQuery("select  " +
+            " count(DISTINCT Person.personUid) as total, " +
+            " Person.gender, " +
+            " cast((:datetimeNow - Person.dateOfBirth) / (365.25 * 24 * 60 * 60 * 1000) as int) as age, " +
+            " CASE  " +
+            "  WHEN numSessionsTbl.attendancePercentage < :lowAttendanceThreshold THEN \"LOW\" " +
+            "  WHEN numSessionsTbl.attendancePercentage < :midAttendanceThreshold THEN \"MEDIUM\" " +
+            "  ELSE \"HIGH\" " +
+            " END thresholdGroup " +
+            "FROM  " +
+            " ( " +
+            "  SELECT  " +
+            "   cast( SUM(CASE WHEN attendanceStatus = " + ClazzLogAttendanceRecord.STATUS_ATTENDED +
+            " THEN 1 ELSE 0 END) as float) / COUNT(*) as attendancePercentage, " +
+            "   ClazzLogAttendanceRecordClazzLogUid, " +
+            "   clazzLogAttendanceRecordClazzMemberUid, " +
+
+            "   locationUid " +         //added
+
+            "   FROM ClazzLogAttendanceRecord as numSessions  " +
+            "   LEFT JOIN ClazzLog on ClazzLogAttendanceRecordClazzLogUid = ClazzLog.clazzLogUid " +
+
+            "   LEFT JOIN Clazz ON Clazz.clazzUid = ClazzLog.clazzLogClazzUid " +       //added
+            "   LEFT JOIN Location ON Location.locationUid = Clazz.clazzLocationUid " + //added
+
+            "   WHERE ClazzLog.logDate > :fromTime AND ClazzLog.logDate < :toTime " +
+            "    AND ClazzLog.clazzLogClazzUid IN (:clazzes) " +
+            "   GROUP BY clazzLogAttendanceRecordClazzMemberUid " +
+            " ) numSessionsTbl " +
+            "LEFT JOIN ClazzLog ON " +
+            " numSessionsTbl.ClazzLogAttendanceRecordClazzLogUid = ClazzLog.clazzLogUid " +
+            "LEFT JOIN ClazzLogAttendanceRecord ON " +
+            " numSessionsTbl.clazzLogAttendanceRecordClazzMemberUid = " +
+            " ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzMemberUid " +
+            "LEFT JOIN ClazzMember on " +
+            " ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzMemberUid = " +
+            " ClazzMember.clazzMemberUid " +
+            "LEFT JOIN Person on ClazzMember.clazzMemberPersonUid = Person.personUid " +
+            " WHERE numSessionsTbl.locationUid = :locationUid " +
+            "GROUP BY Person.gender, age, thresholdGroup " +
+            " ORDER BY age, thresholdGroup ")
+    public abstract void getAttendanceGroupedByThresholds(long datetimeNow, long fromTime,
+                          long toTime, float lowAttendanceThreshold,
+                          float midAttendanceThreshold, List<Long> clazzes,
+                          long locationUid,
+                          UmCallback<List<AttendanceResultGroupedByAgeAndThreshold>> resultList);
+
+    @UmQuery("select  " +
+            " count(DISTINCT Person.personUid) as total, " +
+            " Person.gender, " +
+            " cast((:datetimeNow - Person.dateOfBirth) / (365.25 * 24 * 60 * 60 * 1000) as int) as age, " +
+            " CASE  " +
+            "  WHEN numSessionsTbl.attendancePercentage < :lowAttendanceThreshold THEN \"LOW\" " +
+            "  WHEN numSessionsTbl.attendancePercentage < :midAttendanceThreshold THEN \"MEDIUM\" " +
+            "  ELSE \"HIGH\" " +
+            " END thresholdGroup " +
+            "FROM  " +
+            " ( " +
+            "  SELECT  " +
+            "   cast( SUM(CASE WHEN attendanceStatus = " + ClazzLogAttendanceRecord.STATUS_ATTENDED +
+            " THEN 1 ELSE 0 END) as float) / COUNT(*) as attendancePercentage, " +
+            "   ClazzLogAttendanceRecordClazzLogUid, " +
+            "   clazzLogAttendanceRecordClazzMemberUid, " +
+
+            "   locationUid " +         //added
+
+            "   FROM ClazzLogAttendanceRecord as numSessions  " +
+            "   LEFT JOIN ClazzLog on ClazzLogAttendanceRecordClazzLogUid = ClazzLog.clazzLogUid " +
+
+            "   LEFT JOIN Clazz ON Clazz.clazzUid = ClazzLog.clazzLogClazzUid " +       //added
+            "   LEFT JOIN Location ON Location.locationUid = Clazz.clazzLocationUid " + //added
+
+            "   WHERE ClazzLog.logDate > :fromTime AND ClazzLog.logDate < :toTime " +
+            "   GROUP BY clazzLogAttendanceRecordClazzMemberUid " +
+            " ) numSessionsTbl " +
+            "LEFT JOIN ClazzLog ON " +
+            " numSessionsTbl.ClazzLogAttendanceRecordClazzLogUid = ClazzLog.clazzLogUid " +
+            "LEFT JOIN ClazzLogAttendanceRecord ON " +
+            " numSessionsTbl.clazzLogAttendanceRecordClazzMemberUid = " +
+            " ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzMemberUid " +
+            "LEFT JOIN ClazzMember on " +
+            " ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzMemberUid = " +
+            " ClazzMember.clazzMemberUid " +
+            "LEFT JOIN Person on ClazzMember.clazzMemberPersonUid = Person.personUid " +
+            " WHERE numSessionsTbl.locationUid = :locationUid " +
+            "GROUP BY Person.gender, age, thresholdGroup " +
+            " ORDER BY age, thresholdGroup ")
+    public abstract void getAttendanceGroupedByThresholds(long datetimeNow, long fromTime,
+                          long toTime, float lowAttendanceThreshold,
+                          float midAttendanceThreshold,
+                          long locationUid,
+                          UmCallback<List<AttendanceResultGroupedByAgeAndThreshold>> resultList);
+
     public void getAttendanceGroupedByThresholds(long datetimeNow, long fromTime,
                  long toTime, float lowAttendanceThreshold, float midAttendanceThreshold,
                  List<Long> clazzes, List<Long> locations,

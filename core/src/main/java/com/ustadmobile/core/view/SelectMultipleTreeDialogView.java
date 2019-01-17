@@ -13,7 +13,7 @@ public interface SelectMultipleTreeDialogView extends UstadView {
 
     String VIEW_NAME = "SelectMultipleTreeDialog";
 
-    void populateTopLocation(List<Location> locations, Object treeNode, Object parentNode);
+    void populateTopLocation(List<Location> locations);
 
     /**
      * For Android: closes the activity.

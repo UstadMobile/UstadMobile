@@ -2,6 +2,7 @@ package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.ClazzLogAttendanceRecordDao;
+import com.ustadmobile.core.db.dao.LocationDao;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.view.ReportAttendanceGroupedByThresholdsView;
@@ -12,6 +13,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 import com.ustadmobile.core.db.dao.ClazzLogAttendanceRecordDao.AttendanceResultGroupedByAgeAndThreshold;
+import com.ustadmobile.lib.db.entities.Location;
 
 import static com.ustadmobile.core.view.ReportEditView.ARG_CLAZZ_LIST;
 import static com.ustadmobile.core.view.ReportEditView.ARG_FROM_DATE;
@@ -30,17 +32,17 @@ public class ReportAttendanceGroupedByThresholdsPresenter
 
     private long fromDate;
     private long toDate;
-    private long[] locations;
-    private long[] clazzes;
-    List<Long> clazzList, locationList;
+    private List<Long> clazzList, locationList;
     private ThresholdValues thresholdValues;
+    private int index;
+
+    LinkedHashMap<String, List<AttendanceResultGroupedByAgeAndThreshold>> dataMapsMap;
 
     UmAppDatabase repository;
 
     public static class ThresholdValues{
         public int low, med, high;
     }
-
 
     public ThresholdValues getThresholdValues() {
         return thresholdValues;
@@ -50,7 +52,7 @@ public class ReportAttendanceGroupedByThresholdsPresenter
         this.thresholdValues = thresholdValues;
     }
 
-    public static ArrayList<Long> convertLongArray(long[] array) {
+    private static ArrayList<Long> convertLongArray(long[] array) {
         ArrayList<Long> result = new ArrayList<Long>(array.length);
         for (long item : array)
             result.add(item);
@@ -58,10 +60,13 @@ public class ReportAttendanceGroupedByThresholdsPresenter
     }
 
     public ReportAttendanceGroupedByThresholdsPresenter(Object context, Hashtable arguments,
-                                                        ReportAttendanceGroupedByThresholdsView view) {
+                                                ReportAttendanceGroupedByThresholdsView view) {
         super(context, arguments, view);
 
         repository = UmAccountManager.getRepositoryForActiveAccount(context);
+
+        dataMapsMap = new LinkedHashMap<>();
+        index = 0;
 
         thresholdValues = new ThresholdValues();
         clazzList = new ArrayList<>();
@@ -75,11 +80,11 @@ public class ReportAttendanceGroupedByThresholdsPresenter
         }
 
         if(arguments.containsKey(ARG_LOCATION_LIST)){
-            locations = (long[]) arguments.get(ARG_LOCATION_LIST);
+            long[] locations = (long[]) arguments.get(ARG_LOCATION_LIST);
             locationList = convertLongArray(locations);
         }
         if(arguments.containsKey(ARG_CLAZZ_LIST)){
-            clazzes = (long[]) arguments.get(ARG_CLAZZ_LIST);
+            long[] clazzes = (long[]) arguments.get(ARG_CLAZZ_LIST);
             clazzList = convertLongArray(clazzes);
         }
 
@@ -102,40 +107,100 @@ public class ReportAttendanceGroupedByThresholdsPresenter
         getDataAndUpdateTable();
     }
 
+    private void buildMapAndUpdateView(String theLocationName,
+                                       List<AttendanceResultGroupedByAgeAndThreshold> result){
+        dataMapsMap.put(theLocationName, result);
+        if(index >= locationList.size()){
+            view.updateTables(dataMapsMap);
+        }
+    }
+
     /**
      * Separated out method that queries the database and updates the report upon getting and
      * ordering the result.
      */
     private void getDataAndUpdateTable(){
 
-        LinkedHashMap<Float, Float> dataMap = new LinkedHashMap<>();
+        long currentTime = System.currentTimeMillis();
+        ClazzLogAttendanceRecordDao recordDao = repository.getClazzLogAttendanceRecordDao();
+        LocationDao locationdao = repository.getLocationDao();
 
-        //TODO: Account for location and clazzes.
-        //TODO: Loop through locations
+        //Loop over locations
+        if(!locationList.isEmpty()){
+            for(Long locationUid : locationList){
 
-        LinkedHashMap<String, List<AttendanceResultGroupedByAgeAndThreshold>> dataMapsMap =
-                new LinkedHashMap<>();
 
-        String locationSet = "Overall";
+                locationdao.findByUidAsync(locationUid, new UmCallback<Location>() {
+                    @Override
+                    public void onSuccess(Location theLocation) {
+                        String theLocationName = theLocation.getTitle();
 
-        repository.getClazzLogAttendanceRecordDao().getAttendanceGroupedByThresholds(
-            System.currentTimeMillis(),fromDate, toDate, thresholdValues.low, thresholdValues.med,
-            clazzList, locationList,
-            new UmCallback<List<AttendanceResultGroupedByAgeAndThreshold>>() {
+                        if(!clazzList.isEmpty()){
+                            recordDao.getAttendanceGroupedByThresholds(currentTime, fromDate, toDate,
+                                    thresholdValues.low, thresholdValues.med,
+                                    clazzList, locationUid,
+                                    new UmCallback<List<AttendanceResultGroupedByAgeAndThreshold>>() {
+                                        @Override
+                                        public void onSuccess(List<AttendanceResultGroupedByAgeAndThreshold> result) {
+                                            index++;
+                                            buildMapAndUpdateView(theLocationName, result);
+                                        }
 
-                @Override
-                public void onSuccess(List<AttendanceResultGroupedByAgeAndThreshold> result) {
+                                        @Override
+                                        public void onFailure(Throwable exception) {
+                                            exception.printStackTrace();
+                                        }
+                                    });
+                        }else{
+                            recordDao.getAttendanceGroupedByThresholds(currentTime, fromDate, toDate,
+                                    thresholdValues.low, thresholdValues.med,
+                                    locationUid,
+                                    new UmCallback<List<AttendanceResultGroupedByAgeAndThreshold>>() {
+                                        @Override
+                                        public void onSuccess(List<AttendanceResultGroupedByAgeAndThreshold> result) {
+                                            index++;
+                                            buildMapAndUpdateView(theLocationName, result);
+                                        }
 
-                    dataMapsMap.put(locationSet, result);
+                                        @Override
+                                        public void onFailure(Throwable exception) {
+                                            exception.printStackTrace();
+                                        }
+                                    });
+                        }
+                    }
 
-                    view.updateTables(dataMapsMap);
-                }
+                    @Override
+                    public void onFailure(Throwable exception) {
+                        exception.printStackTrace();
+                    }
+                });
 
-                @Override
-                public void onFailure(Throwable exception) {
+            }
 
-                }
-            });
+        }else {
+
+            String overallLocation = "Overall";
+            recordDao.getAttendanceGroupedByThresholds(
+                    currentTime, fromDate, toDate, thresholdValues.low, thresholdValues.med,
+                    clazzList, locationList,
+                    new UmCallback<List<AttendanceResultGroupedByAgeAndThreshold>>() {
+
+                        @Override
+                        public void onSuccess(List<AttendanceResultGroupedByAgeAndThreshold> result) {
+
+                            dataMapsMap.put(overallLocation, result);
+
+                            view.updateTables(dataMapsMap);
+
+                        }
+
+                        @Override
+                        public void onFailure(Throwable exception) {
+
+                        }
+                    });
+        }
 
     }
 

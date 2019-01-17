@@ -41,7 +41,7 @@ public class SelectMultipleTreeDialogPresenter
         locationDao.findTopLocationsAsync(new UmCallback<List<Location>>() {
             @Override
             public void onSuccess(List<Location> result) {
-                view.populateTopLocation(result, null, null);
+                view.populateTopLocation(result);
             }
 
             @Override

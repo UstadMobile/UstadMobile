@@ -452,7 +452,7 @@ This is the one you should be editing. The one in /core/locale/main/values/strin
     <string name="mid">Mid</string>
     <string name="high">High</string>
     <string name="overall_attendance">Overall attendance</string>
-    <string name="attendance_grouped_by_threshold">Attendance grouped by threshold</string>
+    <string name="attendance_grouped_by_threshold">Attendance by threshold</string>
     <string name="at_risk_students">At risk students</string>
     <string name="operations_report">Operations report</string>
     <string name="number_of_days_classes_open">Number of days classes open</string>

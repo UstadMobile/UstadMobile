@@ -107,13 +107,17 @@ public class ReportAttendanceGroupedByThresholdsActivity extends UstadBaseActivi
         if (i == R.id.menu_export_csv) {
             mPresenter.dataToCSV();
             return true;
-        } else if (i == R.id.menu_export_xls) {
-            mPresenter.dataToXLS();
-            return true;
-        } else if (i == R.id.menu_export_json) {
-            mPresenter.dataToJSON();
-            return true;
-        } else {
+
+        }
+        //TODO: Sprint 5
+//        else if (i == R.id.menu_export_xls) {
+//            mPresenter.dataToXLS();
+//            return true;
+//        } else if (i == R.id.menu_export_json) {
+//            mPresenter.dataToJSON();
+//            return true;
+//        }
+        else {
             return false;
         }
     }
@@ -157,15 +161,19 @@ public class ReportAttendanceGroupedByThresholdsActivity extends UstadBaseActivi
 
                     }
 
-                    scrollView.addView(tableLayout);
+                    //scrollView.addView(tableLayout);
                     reportLinearLayout.addView(heading);
-                    reportLinearLayout.addView(scrollView);
+                    reportLinearLayout.addView(tableLayout);
+                    //reportLinearLayout.addView(scrollView);
 
                 });
 
             }
 
         }
+
+
+
 
     }
 
@@ -198,7 +206,7 @@ public class ReportAttendanceGroupedByThresholdsActivity extends UstadBaseActivi
             }
             fileWriter.close();
 
-            
+
         } catch (IOException e) {
             e.printStackTrace();
         }

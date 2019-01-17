@@ -213,6 +213,8 @@ public class ReportEditActivity extends UstadBaseActivity implements ReportEditV
     public void showAttendanceThresholdView(boolean show) {
         attendanceThresholdHeadingTextView.setVisibility(show?View.VISIBLE:View.GONE);
         attendanceThresholdsTextView.setVisibility(show?View.VISIBLE:View.GONE);
+        findViewById(R.id.activity_report_edit_hline2).setVisibility(show?View.VISIBLE:View.GONE);
+
     }
 
     @Override
@@ -254,6 +256,8 @@ public class ReportEditActivity extends UstadBaseActivity implements ReportEditV
                 locationsSelectedString += ", ";
             }
         }
+        List<Long> selectedLocationList = new ArrayList<>(this.selectedLocations.values());
+        mPresenter.setSelectedLocations(selectedLocationList);
 
         updateLocationsSelected(locationsSelectedString);
     }

@@ -129,15 +129,20 @@ public class ReportNumberOfDaysClassesOpenActivity extends UstadBaseActivity
         if (i == R.id.menu_export_csv) {
             mPresenter.dataToCSV();
             return true;
-        } else if (i == R.id.menu_export_xls) {
-            mPresenter.dataToXLS();
-            return true;
-        } else if (i == R.id.menu_export_json) {
-            mPresenter.dataToJSON();
-            return true;
-        } else {
-            return false;
         }
+        return false;
+
+        //TODO: Sprint 5
+//        else if (i == R.id.menu_export_xls) {
+//            mPresenter.dataToXLS();
+//            return true;
+//        } else if (i == R.id.menu_export_json) {
+//            mPresenter.dataToJSON();
+//            return true;
+//        }
+//        else {
+//            return false;
+//        }
     }
 
     @Override
