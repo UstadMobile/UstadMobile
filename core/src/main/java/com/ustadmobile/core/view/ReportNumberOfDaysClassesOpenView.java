@@ -34,4 +34,9 @@ public interface ReportNumberOfDaysClassesOpenView extends UstadView {
      */
     void finish();
 
+    /**
+     * Generate csv report from the View which has the table data
+     */
+    void generateCSVReport();
+
 }

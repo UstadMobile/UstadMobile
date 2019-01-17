@@ -55,6 +55,9 @@ public class ReportOverallAttendanceActivity extends UstadBaseActivity
     LineChart lineChart;
     TableLayout tableLayout;
 
+    /**
+     * Used to construct the export report (has line by line information)
+     */
     List<String[]> tableTextData;
 
     @Override
@@ -192,7 +195,6 @@ public class ReportOverallAttendanceActivity extends UstadBaseActivity
                                                   LinkedHashMap<String,
                                                           LinkedHashMap<String,
                                                                   Float>> dataTableMaps ){
-
         //Build a string array of the data
         tableTextData = new ArrayList<>();
 

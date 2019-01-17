@@ -102,18 +102,17 @@ public class ReportNumberOfDaysClassesOpenPresenter
         });
     }
 
-    //TODO: Export
 
     public void dataToCSV(){
-
+        view.generateCSVReport();
     }
 
     public void dataToXLS(){
-
+        //TODO
     }
 
     public void dataToJSON(){
-
+        //TODO
     }
 
     @Override

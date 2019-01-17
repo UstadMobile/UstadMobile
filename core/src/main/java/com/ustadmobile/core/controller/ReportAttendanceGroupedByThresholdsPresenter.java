@@ -142,7 +142,7 @@ public class ReportAttendanceGroupedByThresholdsPresenter
     //TODO: Export
 
     public void dataToCSV(){
-
+        view.generateCSVReport();
     }
 
     public void dataToXLS(){

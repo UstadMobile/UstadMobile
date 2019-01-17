@@ -1,10 +1,13 @@
 package com.ustadmobile.port.android.view;
 
 
+import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.content.FileProvider;
 import android.support.v7.widget.Toolbar;
 import android.view.Gravity;
 import android.view.MenuInflater;
@@ -25,6 +28,9 @@ import com.ustadmobile.core.view.ReportAttendanceGroupedByThresholdsView;
 import com.ustadmobile.lib.db.entities.Person;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -50,6 +56,11 @@ public class ReportAttendanceGroupedByThresholdsActivity extends UstadBaseActivi
     private Toolbar toolbar;
     private LinearLayout reportLinearLayout;
     private ReportAttendanceGroupedByThresholdsPresenter mPresenter;
+
+    /**
+     * Used to construct the export report (has line by line information)
+     */
+    List<String[]> tableTextData;
 
 
     @Override
@@ -86,6 +97,7 @@ public class ReportAttendanceGroupedByThresholdsActivity extends UstadBaseActivi
         PopupMenu popup = new PopupMenu(this, v);
         MenuInflater inflater = popup.getMenuInflater();
         inflater.inflate(R.menu.menu_export, popup.getMenu());
+        popup.setOnMenuItemClickListener(this::onMenuItemClick);
         popup.show();
     }
 
@@ -112,13 +124,22 @@ public class ReportAttendanceGroupedByThresholdsActivity extends UstadBaseActivi
             List<AttendanceResultGroupedByAgeAndThreshold>> dataMaps) {
 
 
+        //Build a string array of the data
+        tableTextData = new ArrayList<>();
+
+
         Iterator<String> iterator = dataMaps.keySet().iterator();
         while(iterator.hasNext()){
             String locationName = iterator.next();
             List<AttendanceResultGroupedByAgeAndThreshold> dataMapList = dataMaps.get(locationName);
             if(!dataMapList.isEmpty()){
 
+                //Add title to tableTextData
+                String[] titleItems = new String[]{locationName};
+                tableTextData.add(titleItems);
+
                 List<View> addThese = generateAllViewRowsForTable(dataMapList);
+
                 ScrollView scrollView = new ScrollView(getApplicationContext());
                 //heading
                 TextView heading = new TextView(getApplicationContext());
@@ -130,10 +151,11 @@ public class ReportAttendanceGroupedByThresholdsActivity extends UstadBaseActivi
 
                 runOnUiThread(() -> {
 
+
                     for (View everyRow : addThese) {
                         tableLayout.addView(everyRow);
-                    }
 
+                    }
 
                     scrollView.addView(tableLayout);
                     reportLinearLayout.addView(heading);
@@ -143,6 +165,55 @@ public class ReportAttendanceGroupedByThresholdsActivity extends UstadBaseActivi
 
             }
 
+        }
+
+    }
+
+    @Override
+    public void generateCSVReport() {
+
+        String csvReportFilePath = "";
+        //Create the file.
+
+        File dir = getFilesDir();
+        File output = new File(dir, "overall_attendance_activity_" +
+                System.currentTimeMillis() + ".csv");
+        csvReportFilePath = output.getAbsolutePath();
+
+        try {
+            FileWriter fileWriter = new FileWriter(csvReportFilePath);
+            Iterator<String[]> tableTextdataIterator = tableTextData.iterator();
+
+            while(tableTextdataIterator.hasNext()){
+                boolean firstDone = false;
+                String[] lineArray = tableTextdataIterator.next();
+                for(int i=0;i<lineArray.length;i++){
+                    if(firstDone){
+                        fileWriter.append(",");
+                    }
+                    firstDone = true;
+                    fileWriter.append(lineArray[i]);
+                }
+                fileWriter.append("\n");
+            }
+            fileWriter.close();
+
+            
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        String applicationId = getPackageName();
+        Uri sharedUri = FileProvider.getUriForFile(this,
+                applicationId+".fileprovider",
+                new File(csvReportFilePath));
+        Intent shareIntent = new Intent(Intent.ACTION_SEND);
+        shareIntent.setType("*/*");
+        shareIntent.putExtra(Intent.EXTRA_STREAM, sharedUri);
+        shareIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+        if(shareIntent.resolveActivity(getPackageManager()) != null) {
+            startActivity(shareIntent);
         }
 
     }
@@ -160,7 +231,6 @@ public class ReportAttendanceGroupedByThresholdsActivity extends UstadBaseActivi
     public List<View> generateAllViewRowsForTable(List<AttendanceResultGroupedByAgeAndThreshold> dataMapList ){
 
         List<View> addThese = new ArrayList<>();
-
 
         //LAYOUT
         TableRow.LayoutParams rowParams = new TableRow.LayoutParams(
@@ -210,6 +280,12 @@ public class ReportAttendanceGroupedByThresholdsActivity extends UstadBaseActivi
 
         addThese.add(superHeadingRow);
 
+        //Super heading row to tableTextData
+        String[] superHeadingItems = new String[superHeadingRow.getChildCount()];
+        for(int i = 0; i < superHeadingRow.getChildCount(); i++){
+            superHeadingItems[i] = ((TextView) superHeadingRow.getChildAt(i)).getText().toString();
+        }
+        tableTextData.add(superHeadingItems);
 
         TableRow headingRow = new TableRow(getApplicationContext());
         headingRow.setLayoutParams(rowParams);
@@ -261,6 +337,13 @@ public class ReportAttendanceGroupedByThresholdsActivity extends UstadBaseActivi
 
         //ADD HEADING ROW to the View to return
         addThese.add(headingRow);
+
+        //heading row to tableTextData
+        String[] headingItems = new String[headingRow.getChildCount()];
+        for(int i = 0; i < headingRow.getChildCount(); i++){
+            headingItems[i] = ((TextView) headingRow.getChildAt(i)).getText().toString();
+        }
+        tableTextData.add(headingItems);
 
         //Horizontal line
         View v = new View(this);
@@ -383,6 +466,13 @@ public class ReportAttendanceGroupedByThresholdsActivity extends UstadBaseActivi
             everyAgeRow.addView(femaleHighView);
 
             addThese.add(everyAgeRow);
+
+            //heading row to tableTextData
+            String[] everyAgeRowSA = new String[everyAgeRow.getChildCount()];
+            for(int i = 0; i < everyAgeRow.getChildCount(); i++){
+                everyAgeRowSA[i] = ((TextView) everyAgeRow.getChildAt(i)).getText().toString();
+            }
+            tableTextData.add(everyAgeRowSA);
 
         }
 

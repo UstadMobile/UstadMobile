@@ -22,4 +22,9 @@ public interface ReportAttendanceGroupedByThresholdsView extends UstadView {
      */
     void finish();
 
+    /**
+     * Reporting : to export to CSV
+     */
+    void generateCSVReport();
+
 }
