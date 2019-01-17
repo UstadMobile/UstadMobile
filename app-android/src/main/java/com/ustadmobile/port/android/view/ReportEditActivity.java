@@ -46,6 +46,7 @@ public class ReportEditActivity extends UstadBaseActivity implements ReportEditV
     private CheckBox genderDisaggregateCheck;
     private ReportEditPresenter mPresenter;
     private TextView classesTextView;
+    private TextView attendanceThresholdHeadingTextView;
     private TextView attendanceThresholdsTextView;
 
     private HashMap<String, Long> selectedClasses;
@@ -78,6 +79,9 @@ public class ReportEditActivity extends UstadBaseActivity implements ReportEditV
         classesTextView = findViewById(R.id.activity_report_classes_textview);
         attendanceThresholdsTextView =
                 findViewById(R.id.activity_report_edit_attendance_threshold_selector);
+
+        attendanceThresholdHeadingTextView =
+                findViewById(R.id.activity_report_edit_attendance_thresholds_heading);
 
         //Call the Presenter
         mPresenter = new ReportEditPresenter(this,
@@ -188,16 +192,18 @@ public class ReportEditActivity extends UstadBaseActivity implements ReportEditV
 
     @Override
     public void showAttendanceThresholdView(boolean show) {
-        //TODO
-        //1: Show/Hide
-        //2. Update Constraint Layout
+        attendanceThresholdHeadingTextView.setVisibility(show?View.VISIBLE:View.GONE);
+        attendanceThresholdsTextView.setVisibility(show?View.VISIBLE:View.GONE);
     }
 
     @Override
     public void showShowStudentNumberPercentageView(boolean show) {
-        //TODO:
-        //1. Show/Hide
-        //2. Update Constraint Layout
+        studentNumberOrPercentageRadioGroup.setVisibility(show?View.VISIBLE:View.GONE);
+    }
+
+    @Override
+    public void showGenderDisaggregate(boolean show) {
+        genderDisaggregateCheck.setVisibility(show?View.VISIBLE:View.GONE);
     }
 
 
