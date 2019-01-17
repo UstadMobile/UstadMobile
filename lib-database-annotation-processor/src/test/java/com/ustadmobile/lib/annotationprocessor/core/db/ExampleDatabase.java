@@ -4,6 +4,7 @@ import com.ustadmobile.lib.database.UmDbBuilder;
 import com.ustadmobile.lib.database.annotation.UmClearAll;
 import com.ustadmobile.lib.database.annotation.UmDatabase;
 import com.ustadmobile.lib.database.annotation.UmRepository;
+import com.ustadmobile.lib.db.UmDbWithAttachmentsDir;
 import com.ustadmobile.lib.db.UmDbWithAuthenticator;
 import com.ustadmobile.lib.db.sync.UmSyncableDatabase;
 import com.ustadmobile.lib.db.sync.dao.SyncStatusDao;
@@ -18,13 +19,17 @@ import java.util.Map;
 
 
 @UmDatabase(version = 1, entities = {ExampleEntity.class, ExampleLocation.class,
-        ExampleSyncableEntity.class, SyncStatus.class, SyncablePrimaryKey.class,
+        ExampleSyncableEntity.class, ExampleSyncableEntityWithAttachment.class,
+        SyncStatus.class, SyncablePrimaryKey.class,
         SyncDeviceBits.class})
-public abstract class ExampleDatabase implements UmSyncableDatabase, UmDbWithAuthenticator {
+public abstract class ExampleDatabase implements UmSyncableDatabase, UmDbWithAuthenticator,
+        UmDbWithAttachmentsDir {
 
     private static volatile ExampleDatabase instance;
 
     private boolean master;
+
+    private String attachmentsDir;
 
     private static volatile Hashtable<String, ExampleDatabase> namedInstances = new Hashtable<>();
 
@@ -60,6 +65,8 @@ public abstract class ExampleDatabase implements UmSyncableDatabase, UmDbWithAut
     public abstract ExampleDao getExampleDao();
 
     public abstract ExampleSyncableDao getExampleSyncableDao();
+
+    public abstract ExampleSyncableEntityWithAttachmentDao getExampleSyncableEntityWithAttachmentDao();
 
     @UmClearAll
     public abstract void clearAll();
@@ -102,5 +109,14 @@ public abstract class ExampleDatabase implements UmSyncableDatabase, UmDbWithAut
     @Override
     public void invalidateDeviceBits() {
         getSyncablePrimaryKeyDao().invalidateDeviceBits();
+    }
+
+    @Override
+    public String getAttachmentsDir() {
+        return attachmentsDir;
+    }
+
+    public void setAttachmentsDir(String attachmentsDir) {
+        this.attachmentsDir = attachmentsDir;
     }
 }
