@@ -243,26 +243,30 @@ public class DbProcessorJdbc extends AbstractDbProcessor implements QueryMethodG
             if (subElement.getKind() != ElementKind.METHOD)
                 continue;
 
-            ExecutableElement dbMethod = (ExecutableElement)subElement;
-            if(dbMethod.getModifiers().contains(Modifier.STATIC))
+            ExecutableElement dbMethod = (ExecutableElement) subElement;
+            if (dbMethod.getModifiers().contains(Modifier.STATIC))
                 continue;
 
-            if(!dbMethod.getModifiers().contains(Modifier.ABSTRACT))
+            if (!dbMethod.getModifiers().contains(Modifier.ABSTRACT))
                 continue;
 
 
-            MethodSpec.Builder overrideSpec =  MethodSpec.overriding(dbMethod);
-            TypeElement returnTypeElement = (TypeElement)processingEnv.getTypeUtils().asElement(
+            MethodSpec.Builder overrideSpec = MethodSpec.overriding(dbMethod);
+            TypeElement returnTypeElement = (TypeElement) processingEnv.getTypeUtils().asElement(
                     dbMethod.getReturnType());
 
-            if(dbMethod.getAnnotation(UmDbContext.class) != null) {
+            if (dbMethod.getAnnotation(UmDbContext.class) != null) {
                 overrideSpec.addCode("return _context;\n");
-            }else if(dbMethod.getAnnotation(UmClearAll.class) != null) {
+            } else if (dbMethod.getAnnotation(UmClearAll.class) != null) {
                 addClearAllTablesCodeToMethod(dbType, overrideSpec, SQL_IDENTIFIER_CHAR);
-            }else if(dbMethod.getAnnotation(UmRepository.class) != null) {
+            } else if (dbMethod.getAnnotation(UmRepository.class) != null) {
                 addGetRepositoryMethod(dbType, dbMethod, overrideSpec, "_repositories");
-            }else if(dbMethod.getAnnotation(UmSyncOutgoing.class) != null) {
+            } else if (dbMethod.getAnnotation(UmSyncOutgoing.class) != null) {
                 overrideSpec = generateDbSyncOutgoingMethod(dbType, dbMethod);
+            } else if (dbMethod.getAnnotation(UmSyncCountLocalPendingChanges.class) != null){
+                jdbcDbTypeSpec.addMethod(generateDbSyncCountLocalPendingChangesMethod(dbType,
+                        dbMethod));
+                overrideSpec = null;
             }else {
                 String daoFieldName = "_" + returnTypeElement.getSimpleName();
                 jdbcDbTypeSpec.addField(TypeName.get(dbMethod.getReturnType()), daoFieldName, Modifier.PRIVATE);
@@ -276,8 +280,9 @@ public class DbProcessorJdbc extends AbstractDbProcessor implements QueryMethodG
                     .addCode("return $L;\n", daoFieldName);
             }
 
-
-            jdbcDbTypeSpec.addMethod(overrideSpec.build());
+            //TODO: tidy these methods to return methods instead of builders
+            if(overrideSpec != null)
+                jdbcDbTypeSpec.addMethod(overrideSpec.build());
 
         }
 

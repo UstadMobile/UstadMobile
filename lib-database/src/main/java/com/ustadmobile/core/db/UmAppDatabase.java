@@ -33,6 +33,7 @@ import com.ustadmobile.core.db.dao.PersonGroupMemberDao;
 import com.ustadmobile.core.db.dao.PersonLocationJoinDao;
 import com.ustadmobile.core.db.dao.PersonPictureDao;
 import com.ustadmobile.core.db.dao.RoleDao;
+import com.ustadmobile.lib.database.annotation.UmSyncCountLocalPendingChanges;
 import com.ustadmobile.lib.db.UmDbWithAttachmentsDir;
 import com.ustadmobile.lib.db.entities.LocationAncestorJoin;
 import com.ustadmobile.core.db.dao.NetworkNodeDao;
@@ -317,4 +318,8 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
     public void setAttachmentsDir(String attachmentsDir) {
         this.attachmentsDir = attachmentsDir;
     }
+
+    @UmSyncCountLocalPendingChanges
+    public abstract int countPendingLocalChanges(long accountUid, int deviceId);
+
 }

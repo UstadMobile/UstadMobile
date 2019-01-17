@@ -23,6 +23,7 @@ import com.ustadmobile.lib.database.annotation.UmRestAccessible;
 import com.ustadmobile.lib.database.annotation.UmRestAuthorizedUidParam;
 import com.ustadmobile.lib.database.annotation.UmSyncCheckIncomingCanInsert;
 import com.ustadmobile.lib.database.annotation.UmSyncCheckIncomingCanUpdate;
+import com.ustadmobile.lib.database.annotation.UmSyncCountLocalPendingChanges;
 import com.ustadmobile.lib.database.annotation.UmSyncFindAllChanges;
 import com.ustadmobile.lib.database.annotation.UmSyncFindLocalChanges;
 import com.ustadmobile.lib.database.annotation.UmSyncIncoming;
@@ -158,7 +159,8 @@ public abstract class AbstractDbProcessor {
 
                     if(dbMethod.getAnnotation(UmDbContext.class) != null
                             || dbMethod.getAnnotation(UmClearAll.class) != null
-                            || dbMethod.getAnnotation(UmSyncOutgoing.class) != null)
+                            || dbMethod.getAnnotation(UmSyncOutgoing.class) != null
+                            || dbMethod.getAnnotation(UmSyncCountLocalPendingChanges.class) != null)
                         continue;
 
 
@@ -1823,9 +1825,9 @@ public abstract class AbstractDbProcessor {
                 .add("return ($T)_repo;\n", dbType).build());
     }
 
-    protected MethodSpec.Builder generateDbSyncOutgoingMethod(TypeElement dbType, ExecutableElement dbMethod) {
-        List<ExecutableElement> daoGettersToSync = new ArrayList<>();
 
+    protected List<ExecutableElement> findDaoGetterMethods(TypeElement dbType){
+        List<ExecutableElement> daoGetterMethods = new ArrayList<>();
         for(ExecutableElement subMethod : findMethodsToImplement(dbType)) {
             TypeMirror returnType = subMethod.getReturnType();
             if(!returnType.getKind().equals(TypeKind.DECLARED))
@@ -1836,12 +1838,72 @@ public abstract class AbstractDbProcessor {
             if(returnTypeEl.getAnnotation(UmDao.class) == null)
                 continue;
 
-            Element outgoingSyncMethod = findElementWithAnnotation(returnTypeEl,
+            daoGetterMethods.add(subMethod);
+        }
+
+        return daoGetterMethods;
+    }
+
+    protected List<ExecutableElement> findSyncableDaoGetterMethods(TypeElement dbType) {
+        List<ExecutableElement> daoGettersToSync = new ArrayList<>();
+
+        for(ExecutableElement subMethod: findDaoGetterMethods(dbType)) {
+            Element outgoingSyncMethod = findElementWithAnnotation((TypeElement)processingEnv
+                            .getTypeUtils().asElement(subMethod.getReturnType()),
                     UmSyncOutgoing.class, processingEnv);
             if(outgoingSyncMethod != null){
-                daoGettersToSync.add((ExecutableElement)subMethod);
+                daoGettersToSync.add(subMethod);
             }
         }
+
+        return daoGettersToSync;
+    }
+
+
+    protected MethodSpec generateDbSyncCountLocalPendingChangesMethod(TypeElement dbType,
+                                                                      ExecutableElement dbMethod) {
+        List<ExecutableElement> syncableDaoGetters = findSyncableDaoGetterMethods(dbType);
+        MethodSpec.Builder methodBuilder = overrideAndResolve(dbMethod, dbType, processingEnv);
+        CodeBlock.Builder codeBlock = CodeBlock.builder();
+
+        if(dbMethod.getParameters().size() != 2) {
+            messager.printMessage(Diagnostic.Kind.ERROR, formatMethodForErrorMessage(dbMethod, dbType) +
+                    " @UmSyncCountLocalPendingChanges must have two arguments: the accountUid and the deviceId");
+            return methodBuilder.build();
+        }
+
+        VariableElement accountUidParamEl = dbMethod.getParameters().get(0);
+        VariableElement deviceIdParamEl = dbMethod.getParameters().get(1);
+
+        boolean firstEl = true;
+        for(ExecutableElement daoGetter : syncableDaoGetters) {
+            TypeElement daoTypeEl = (TypeElement)processingEnv.getTypeUtils()
+                    .asElement(daoGetter.getReturnType());
+            Element countPendingChangesEl = DbProcessorUtils.findElementWithAnnotation(
+                    daoTypeEl, UmSyncCountLocalPendingChanges.class, processingEnv);
+            if(countPendingChangesEl == null)
+                continue;
+
+            if(firstEl) {
+                codeBlock.add("int _pendingChangeCount = ");
+            }else {
+                codeBlock.add("_pendingChangeCount += ");
+            }
+
+            codeBlock.add("$L().$L($L, $L);\n",
+                    daoGetter.getSimpleName(), countPendingChangesEl.getSimpleName(),
+                    accountUidParamEl.getSimpleName(), deviceIdParamEl.getSimpleName());
+
+            firstEl = false;
+        }
+
+        codeBlock.add("return _pendingChangeCount;\n");
+
+        return methodBuilder.addCode(codeBlock.build()).build();
+    }
+
+    protected MethodSpec.Builder generateDbSyncOutgoingMethod(TypeElement dbType, ExecutableElement dbMethod) {
+        List<ExecutableElement> daoGettersToSync = findSyncableDaoGetterMethods(dbType);
 
         MethodSpec.Builder methodBuilder = MethodSpec.overriding(dbMethod);
         CodeBlock.Builder codeBlock = CodeBlock.builder();
