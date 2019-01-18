@@ -28,17 +28,14 @@ import android.os.Handler;
 import android.provider.Settings;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.net.ConnectivityManagerCompat;
 import android.util.Log;
 import android.widget.Toast;
 
 import com.toughra.ustadmobile.R;
-import com.ustadmobile.core.buildconfig.CoreBuildConfig;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.core.networkmanager.NetworkManagerCore;
 import com.ustadmobile.core.networkmanager.NetworkTask;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
@@ -64,7 +61,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -80,8 +76,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import javax.net.SocketFactory;
 
 import fi.iki.elonen.NanoHTTPD;
-
-import static com.ustadmobile.core.buildconfig.CoreBuildConfig.WIFI_P2P_INSTANCE_NAME;
 
 /**
  * <h1>NetworkManagerAndroid</h1>

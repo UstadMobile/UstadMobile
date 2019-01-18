@@ -6,7 +6,8 @@ import android.net.nsd.NsdManager;
 import android.net.nsd.NsdServiceInfo;
 import android.util.Log;
 
-import com.ustadmobile.core.buildconfig.CoreBuildConfig;
+import com.ustadmobile.core.impl.AppConfig;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.port.android.impl.UMLogAndroid;
 
 import java.util.Vector;
@@ -45,6 +46,7 @@ public class NSDHelperAndroid implements INsdHelperAndroid {
     private NsdManager.DiscoveryListener networkDiscoveryListener;
     private NsdManager.RegistrationListener networkRegistrationListener;
 
+    private String networkServiceType;
 
     private class NSDHelperResolveQueueEntry {
 
@@ -60,6 +62,8 @@ public class NSDHelperAndroid implements INsdHelperAndroid {
 
     public NSDHelperAndroid(NetworkManagerAndroid managerAndroid){
         this.managerAndroid=managerAndroid;
+        networkServiceType = UstadMobileSystemImpl.getInstance().getAppConfigString(
+                AppConfig.KEY_NETWORK_SERVICE_TYPE, "_ustad", managerAndroid.getContext());
     }
 
     private void lookupNsdManager() {
@@ -248,11 +252,11 @@ public class NSDHelperAndroid implements INsdHelperAndroid {
 
         String networkServiceName = BluetoothAdapter.getDefaultAdapter() != null
                     ? BluetoothAdapter.getDefaultAdapter().getName()
-                    : CoreBuildConfig.NETWORK_SERVICE_TYPE + (int)(Math.random() * 5000);
+                    : networkServiceType + (int)(Math.random() * 5000);
         initializeServiceRegistrationListener();
         final NsdServiceInfo serviceInfo  = new NsdServiceInfo();
         serviceInfo.setServiceName(networkServiceName);
-        serviceInfo.setServiceType(CoreBuildConfig.NETWORK_SERVICE_TYPE + "._tcp");
+        serviceInfo.setServiceType(networkServiceType + "._tcp");
         serviceInfo.setPort(managerAndroid.getHttpListeningPort());
         lookupNsdManager();
         mNsdManager.registerService(serviceInfo, NsdManager.PROTOCOL_DNS_SD,networkRegistrationListener);

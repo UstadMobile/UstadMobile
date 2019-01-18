@@ -71,7 +71,7 @@ android {
             dimension "config"
             applicationId project.ext.buildConfigProperties['android.applicationId']
             testApplicationId = project.ext.buildConfigProperties['android.applicationId'] + ".test"
-            versionCode rootProject.ext.ustadVersionCode + Integer.parseInt(rootProject.ext.buildConfigProperties['localVersionCode'])
+            versionCode rootProject.ext.ustadVersionCode
         }
 
         /*
