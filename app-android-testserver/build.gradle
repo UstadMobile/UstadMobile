@@ -47,7 +47,7 @@ android {
             dimension "config"
             applicationId project.ext.buildConfigProperties['android.applicationId'] + "testserver"
             testApplicationId = project.ext.buildConfigProperties['android.applicationId'] + ".testserver.test"
-            versionCode rootProject.ext.ustadVersionCode + Integer.parseInt(rootProject.ext.buildConfigProperties['localVersionCode'])
+            versionCode rootProject.ext.ustadVersionCode
             manifestPlaceholders = ["appName": rootProject.ext.buildConfigProperties['appName'] + " Test Server"]
         }
 

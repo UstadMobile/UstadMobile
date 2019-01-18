@@ -55,7 +55,6 @@ import android.webkit.WebView;
 import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
-import com.ustadmobile.core.buildconfig.CoreBuildConfig;
 import com.ustadmobile.core.catalog.contenttype.*;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.OpdsEntryStatusCacheDao;
@@ -64,11 +63,11 @@ import com.ustadmobile.core.fs.contenttype.H5PContentTypeFs;
 import com.ustadmobile.core.fs.contenttype.ScormTypePluginFs;
 import com.ustadmobile.core.fs.contenttype.XapiPackageTypePluginFs;
 import com.ustadmobile.core.fs.db.ContainerFileHelper;
+import com.ustadmobile.core.impl.AppConfig;
 import com.ustadmobile.core.impl.ContainerMountRequest;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.core.tincan.TinCanResultListener;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.view.AboutView;
@@ -292,8 +291,14 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
 
         @Override
         protected String doInBackground(Boolean... booleans) {
-            File apkFile = new File(((Context)context).getApplicationInfo().sourceDir);
-            String baseName = CoreBuildConfig.BASE_NAME + "-" + CoreBuildConfig.VERSION;
+            File apkFile = new File(context.getApplicationInfo().sourceDir);
+            //TODO: replace this with something from appconfig.properties
+            UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+
+            String baseName = impl.getAppConfigString(AppConfig.KEY_APP_BASE_NAME, "", context)+ "-" +
+                    impl.getVersion(context);
+
+
             FileInputStream apkFileIn = null;
             Context ctx = (Context)context;
             File outDir = new File(ctx.getFilesDir(), "shared");

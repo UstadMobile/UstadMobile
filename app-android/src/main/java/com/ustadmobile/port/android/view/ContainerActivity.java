@@ -23,10 +23,11 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
-import com.ustadmobile.core.buildconfig.CoreBuildConfig;
 import com.ustadmobile.core.controller.ContainerController;
 import com.ustadmobile.core.epubnav.EPUBNavDocument;
 import com.ustadmobile.core.epubnav.EPUBNavItem;
+import com.ustadmobile.core.impl.AppConfig;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.tincan.TinCanResultListener;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.view.AppViewChoiceListener;
@@ -138,7 +139,9 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
             }
         };
 
-        if(!CoreBuildConfig.EPUB_TOC_ENABLED) {
+
+        if(!UstadMobileSystemImpl.getInstance().getAppConfigBoolean(AppConfig.KEY_EPUB_TOC_ENABLED,
+                getContext())) {
             drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
             mDrawerToggle.setDrawerIndicatorEnabled(false);
         }
