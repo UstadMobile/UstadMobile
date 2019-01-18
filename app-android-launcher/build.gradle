@@ -65,16 +65,6 @@ android {
 
     productFlavors {
         /*
-         * The localconfig flavor is created based on the buildconfig.local.properties settings
-         */
-        localconfig {
-            dimension "config"
-            applicationId project.ext.buildConfigProperties['android.applicationId']
-            testApplicationId = project.ext.buildConfigProperties['android.applicationId'] + ".test"
-            versionCode rootProject.ext.ustadVersionCode
-        }
-
-        /*
          * The vanilla config flavor is here for convenience : it's the same as having no
          * buildconfig.local.properties and relying on what's in buildconfig.default.properties
          *
