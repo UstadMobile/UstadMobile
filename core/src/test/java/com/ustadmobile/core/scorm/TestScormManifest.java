@@ -1,4 +1,4 @@
-package com.ustadmobile.test.core.scorm;
+package com.ustadmobile.core.scorm;
 
 import com.ustadmobile.core.scorm.ScormManifest;
 import com.ustadmobile.test.core.ResourcesHttpdTestServer;

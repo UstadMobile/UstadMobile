@@ -32,8 +32,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import androidx.work.WorkManager;
-
 /**
  * Base activity to handle interacting with UstadMobileSystemImpl
  *
@@ -156,10 +154,6 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
         setDirection(UstadMobileSystemImpl.getInstance().getDirection());
     }
 
-    public void setUIStrings() {
-
-    }
-
     public void setDirection(int dir) {
         if(dir != mUIDirection) {
             UMAndroidUtil.setDirectionIfSupported(findViewById(android.R.id.content),
@@ -224,7 +218,6 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        UstadMobileSystemImpl.getInstance().handleSave();
     }
 
     @Override
@@ -237,7 +230,6 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
     public void onStop() {
         isStarted = false;
         super.onStop();
-        UstadMobileSystemImpl.getInstance().handleSave();
         UstadMobileSystemImplAndroid.getInstanceAndroid().handleActivityStop(this);
     }
 

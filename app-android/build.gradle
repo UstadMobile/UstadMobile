@@ -100,16 +100,6 @@ android {
         testInstrumentationRunnerArgument "notAnnotation", "com.ustadmobile.test.core.annotation.PeerServerRequiredTest,com.ustadmobile.test.core.annotation.ImplementationRequiredTest"
     }
 
-    variantFilter { variant ->
-        def names = variant.flavors*.name
-        System.out.println("Name = " + variant.name)
-        // To check for a certain build type, use variant.buildType.name == "<buildType>"
-//        if (names.contains("vanilla") && names.contains("demo")) {
-//            // Gradle ignores any variants that satisfy the conditions above.
-//            setIgnore(true)
-//        }
-    }
-
     flavorDimensions "config"
 
     productFlavors {

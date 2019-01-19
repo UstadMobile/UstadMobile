@@ -1,4 +1,4 @@
-package com.ustadmobile.test;
+package com.ustadmobile.test.port.android.view;
 
 import android.content.ComponentName;
 import android.content.Context;

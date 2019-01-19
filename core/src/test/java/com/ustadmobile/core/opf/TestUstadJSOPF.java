@@ -1,4 +1,4 @@
-package com.ustadmobile.test.core.impl;
+package com.ustadmobile.core.opf;
 
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.opf.UstadJSOPF;

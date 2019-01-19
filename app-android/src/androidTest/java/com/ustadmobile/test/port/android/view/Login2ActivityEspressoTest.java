@@ -1,4 +1,4 @@
-package com.ustadmobile.test.sharedse.view;
+package com.ustadmobile.test.port.android.view;
 
 import android.content.Intent;
 import android.support.test.espresso.intent.rule.IntentsTestRule;

@@ -1,4 +1,4 @@
-package com.ustadmobile.test.core;
+package com.ustadmobile.core.util;
 
 import com.ustadmobile.core.util.UMCalendarUtil;
 

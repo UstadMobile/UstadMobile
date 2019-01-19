@@ -53,8 +53,4 @@ public class UstadDialogFragment extends android.support.v4.app.DialogFragment i
 
     }
 
-    public void setUIStrings() {
-
-    }
-
 }

@@ -236,13 +236,6 @@ public abstract class UstadBaseController<V extends UstadView> implements UstadC
             labels[i] = impl.getString(STANDARD_APPMENU_STRIDS[i - offset], getContext());
         }
     }
-    
-    public void setStandardAppMenuOptions() {
-        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        String[] labels = new String[STANDARD_APPEMNU_CMDS.length];
-        fillStandardMenuOptions(new int[labels.length], labels, 0);
-        view.setAppMenuCommands(labels, STANDARD_APPEMNU_CMDS);
-    }
 
     @Override
     public void addLifecycleListener(UmLifecycleListener listener) {
