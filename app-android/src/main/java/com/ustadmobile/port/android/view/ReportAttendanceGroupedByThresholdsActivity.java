@@ -334,6 +334,16 @@ public class ReportAttendanceGroupedByThresholdsActivity extends UstadBaseActivi
         femaleHighHeading.setText(R.string.female);
 
 
+        if(!mPresenter.isGenderDisaggregate()){
+            maleLowHeading.setText(R.string.average);
+            maleMidHeading.setText(R.string.average);
+            maleHighHeading.setText(R.string.average);
+
+            femaleLowHeading.setText("");
+            femaleMidHeading.setText("");
+            femaleHighHeading.setText("");
+        }
+
         //Add all individual headings to the heading row.
         headingRow.addView(ageHeading);
         headingRow.addView(maleLowHeading);
@@ -420,6 +430,7 @@ public class ReportAttendanceGroupedByThresholdsActivity extends UstadBaseActivi
             TextView maleLowView, femaleLowView, maleMidView, femaleMidView, maleHighView,
                     femaleHighView;
 
+
             maleLowView = new TextView(getApplicationContext());
             maleLowView.setTextColor(Color.BLACK);
             maleLowView.setLayoutParams(everyItemParam);
@@ -465,6 +476,43 @@ public class ReportAttendanceGroupedByThresholdsActivity extends UstadBaseActivi
             else femaleHighView.setText("0");
 
 
+            if(!mPresenter.isGenderDisaggregate()){
+
+                int maleLow =0, maleMid=0, maleHigh=0, femaleLow=0, femaleMid=0, femaleHigh=0;
+                if(maleLowMap.containsKey(age)){
+                    maleLow = maleLowMap.get(age);
+                }
+                if(maleMidMap.containsKey(age)){
+                    maleMid = maleMidMap.get(age);
+                }
+                if(maleHighMap.containsKey(age)){
+                    maleHigh = maleHighMap.get(age);
+                }
+
+                if(femaleLowMap.containsKey(age)){
+                    femaleLow = femaleLowMap.get(age);
+                }
+                if(femaleMidMap.containsKey(age)){
+                    femaleMid = femaleMidMap.get(age);
+                }
+                if(femaleHighMap.containsKey(age)){
+                    femaleHigh = femaleHighMap.get(age);
+                }
+
+                float currentAverageLowValue = (maleLow + femaleLow) / 2;
+                maleLowView.setText(String.valueOf(currentAverageLowValue));
+                float currentAverageMidValue = (maleMid + femaleMid) / 2;
+                maleMidView.setText(String.valueOf(currentAverageMidValue));
+                float currentAverageHighValue = (maleHigh + femaleHigh) / 2;
+                maleHighView.setText(String.valueOf(currentAverageHighValue));
+
+                femaleLowView.setText("");
+                femaleMidView.setText("");
+                femaleHighView.setText("");
+
+
+            }
+
             everyAgeRow.addView(ageView);
             everyAgeRow.addView(maleLowView);
             everyAgeRow.addView(femaleLowView);
@@ -472,6 +520,7 @@ public class ReportAttendanceGroupedByThresholdsActivity extends UstadBaseActivi
             everyAgeRow.addView(femaleMidView);
             everyAgeRow.addView(maleHighView);
             everyAgeRow.addView(femaleHighView);
+
 
             addThese.add(everyAgeRow);
 

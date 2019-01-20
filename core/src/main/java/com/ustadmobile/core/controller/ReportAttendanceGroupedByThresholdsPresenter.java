@@ -17,7 +17,10 @@ import com.ustadmobile.lib.db.entities.Location;
 
 import static com.ustadmobile.core.view.ReportEditView.ARG_CLAZZ_LIST;
 import static com.ustadmobile.core.view.ReportEditView.ARG_FROM_DATE;
+import static com.ustadmobile.core.view.ReportEditView.ARG_GENDER_DISAGGREGATE;
 import static com.ustadmobile.core.view.ReportEditView.ARG_LOCATION_LIST;
+import static com.ustadmobile.core.view.ReportEditView.ARG_STUDENT_IDENTIFIER_NUMBER;
+import static com.ustadmobile.core.view.ReportEditView.ARG_STUDENT_IDENTIFIER_PERCENTAGE;
 import static com.ustadmobile.core.view.ReportEditView.ARG_THRESHOLD_HIGH;
 import static com.ustadmobile.core.view.ReportEditView.ARG_THRESHOLD_LOW;
 import static com.ustadmobile.core.view.ReportEditView.ARG_THRESHOLD_MID;
@@ -36,9 +39,20 @@ public class ReportAttendanceGroupedByThresholdsPresenter
     private ThresholdValues thresholdValues;
     private int index;
 
+    private boolean genderDisaggregate = true;
+    private Boolean showPercentages = false;
+
     LinkedHashMap<String, List<AttendanceResultGroupedByAgeAndThreshold>> dataMapsMap;
 
     UmAppDatabase repository;
+
+    public boolean isGenderDisaggregate() {
+        return genderDisaggregate;
+    }
+
+    public Boolean getShowPercentages() {
+        return showPercentages;
+    }
 
     public static class ThresholdValues{
         public int low, med, high;
@@ -98,6 +112,28 @@ public class ReportAttendanceGroupedByThresholdsPresenter
             thresholdValues.high = (int) arguments.get(ARG_THRESHOLD_HIGH);
         }
 
+        if(arguments.containsKey(ARG_GENDER_DISAGGREGATE)){
+            genderDisaggregate = (Boolean) arguments.get(ARG_GENDER_DISAGGREGATE);
+        }
+
+        if(arguments.containsKey(ARG_STUDENT_IDENTIFIER_NUMBER)){
+            Boolean numberIdentifier = (Boolean) arguments.get(ARG_STUDENT_IDENTIFIER_NUMBER);
+            if (numberIdentifier){
+                setShowPercentages(false);
+            }else{
+                setShowPercentages(true);
+            }
+        }
+
+        if(arguments.containsKey(ARG_STUDENT_IDENTIFIER_PERCENTAGE)){
+            Boolean percentageIdentifier = (Boolean) arguments.get(ARG_STUDENT_IDENTIFIER_PERCENTAGE);
+            if(percentageIdentifier){
+                showPercentages = true;
+            }else{
+                showPercentages = false;
+            }
+        }
+
     }
 
     @Override
@@ -129,7 +165,6 @@ public class ReportAttendanceGroupedByThresholdsPresenter
         if(!locationList.isEmpty()){
             for(Long locationUid : locationList){
 
-
                 locationdao.findByUidAsync(locationUid, new UmCallback<Location>() {
                     @Override
                     public void onSuccess(Location theLocation) {
@@ -137,36 +172,38 @@ public class ReportAttendanceGroupedByThresholdsPresenter
 
                         if(!clazzList.isEmpty()){
                             recordDao.getAttendanceGroupedByThresholds(currentTime, fromDate, toDate,
-                                    thresholdValues.low, thresholdValues.med,
-                                    clazzList, locationUid,
-                                    new UmCallback<List<AttendanceResultGroupedByAgeAndThreshold>>() {
-                                        @Override
-                                        public void onSuccess(List<AttendanceResultGroupedByAgeAndThreshold> result) {
-                                            index++;
-                                            buildMapAndUpdateView(theLocationName, result);
-                                        }
+                                    (float)thresholdValues.low/100,
+                                    (float)thresholdValues.med/100,
+                                clazzList, locationUid,
+                                new UmCallback<List<AttendanceResultGroupedByAgeAndThreshold>>() {
+                                    @Override
+                                    public void onSuccess(List<AttendanceResultGroupedByAgeAndThreshold> result) {
+                                        index++;
+                                        buildMapAndUpdateView(theLocationName, result);
+                                    }
 
-                                        @Override
-                                        public void onFailure(Throwable exception) {
-                                            exception.printStackTrace();
-                                        }
-                                    });
+                                    @Override
+                                    public void onFailure(Throwable exception) {
+                                        exception.printStackTrace();
+                                    }
+                                });
                         }else{
                             recordDao.getAttendanceGroupedByThresholds(currentTime, fromDate, toDate,
-                                    thresholdValues.low, thresholdValues.med,
-                                    locationUid,
-                                    new UmCallback<List<AttendanceResultGroupedByAgeAndThreshold>>() {
-                                        @Override
-                                        public void onSuccess(List<AttendanceResultGroupedByAgeAndThreshold> result) {
-                                            index++;
-                                            buildMapAndUpdateView(theLocationName, result);
-                                        }
+                                    (float)thresholdValues.low/100,
+                                    (float)thresholdValues.med/100,
+                                locationUid,
+                                new UmCallback<List<AttendanceResultGroupedByAgeAndThreshold>>() {
+                                    @Override
+                                    public void onSuccess(List<AttendanceResultGroupedByAgeAndThreshold> result) {
+                                        index++;
+                                        buildMapAndUpdateView(theLocationName, result);
+                                    }
 
-                                        @Override
-                                        public void onFailure(Throwable exception) {
-                                            exception.printStackTrace();
-                                        }
-                                    });
+                                    @Override
+                                    public void onFailure(Throwable exception) {
+                                        exception.printStackTrace();
+                                    }
+                                });
                         }
                     }
 
@@ -182,38 +219,43 @@ public class ReportAttendanceGroupedByThresholdsPresenter
 
             String overallLocation = "Overall";
             recordDao.getAttendanceGroupedByThresholds(
-                    currentTime, fromDate, toDate, thresholdValues.low, thresholdValues.med,
-                    clazzList, locationList,
-                    new UmCallback<List<AttendanceResultGroupedByAgeAndThreshold>>() {
+                currentTime, fromDate, toDate, (float)thresholdValues.low/100,
+                    (float)thresholdValues.med/100,
+                clazzList, locationList,
+                new UmCallback<List<AttendanceResultGroupedByAgeAndThreshold>>() {
 
-                        @Override
-                        public void onSuccess(List<AttendanceResultGroupedByAgeAndThreshold> result) {
+                    @Override
+                    public void onSuccess(List<AttendanceResultGroupedByAgeAndThreshold> result) {
 
-                            dataMapsMap.put(overallLocation, result);
+                        dataMapsMap.put(overallLocation, result);
 
-                            view.updateTables(dataMapsMap);
+                        view.updateTables(dataMapsMap);
 
-                        }
+                    }
 
-                        @Override
-                        public void onFailure(Throwable exception) {
+                    @Override
+                    public void onFailure(Throwable exception) {
 
-                        }
-                    });
+                    }
+                });
         }
 
     }
 
-    //TODO: Export
+    public void setShowPercentages(Boolean showPercentages) {
+        this.showPercentages = showPercentages;
+    }
+
 
     public void dataToCSV(){
         view.generateCSVReport();
     }
 
+    //TODO: Export other formats
     public void dataToXLS(){
 
     }
-
+    //TODO: Export other formats
     public void dataToJSON(){
 
     }
