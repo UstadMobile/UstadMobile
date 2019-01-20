@@ -160,7 +160,7 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
 
     public static synchronized UmAppDatabase getInstance(Object context) {
         if(instance == null){
-            instance = UmDbBuilder.makeDatabase(UmAppDatabase.class, context);
+            instance = UmDbBuilder.builder(UmAppDatabase.class, context).build();
         }
 
         return instance;
@@ -169,7 +169,7 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
     public static synchronized UmAppDatabase getInstance(Object context, String dbName) {
         UmAppDatabase db = namedInstances.get(dbName);
         if(db == null){
-            db = UmDbBuilder.makeDatabase(UmAppDatabase.class, context, dbName);
+            db = UmDbBuilder.builder(UmAppDatabase.class, context, dbName).build();
             namedInstances.put(dbName, db);
         }
 

@@ -47,7 +47,7 @@ public abstract class ExampleDatabase implements UmSyncableDatabase, UmDbWithAut
 
     public static synchronized ExampleDatabase getInstance(Object context) {
         if(instance == null){
-            instance = UmDbBuilder.makeDatabase(ExampleDatabase.class, context);
+            instance = UmDbBuilder.builder(ExampleDatabase.class, context).build();
         }
 
         return instance;
@@ -56,7 +56,7 @@ public abstract class ExampleDatabase implements UmSyncableDatabase, UmDbWithAut
     public static synchronized ExampleDatabase getInstance(Object context, String dbName) {
         ExampleDatabase db = namedInstances.get(dbName);
         if(db == null) {
-            db = UmDbBuilder.makeDatabase(ExampleDatabase.class, context, dbName);
+            db = UmDbBuilder.builder(ExampleDatabase.class, context, dbName).build();
             namedInstances.put(dbName, db);
         }
 
