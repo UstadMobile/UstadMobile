@@ -419,6 +419,9 @@ public class ReportAttendanceGroupedByThresholdsActivity extends UstadBaseActivi
 
 
         for(int age: ages){
+            int totalMaleStudentsAtThisAge = 0;
+            int totalFemaleStudentsAtThisAge = 0;
+            int totalStudentsAtThisAge = 0;
             TableRow everyAgeRow = new TableRow(getApplicationContext());
             everyAgeRow.setLayoutParams(rowParams);
 
@@ -430,55 +433,108 @@ public class ReportAttendanceGroupedByThresholdsActivity extends UstadBaseActivi
             TextView maleLowView, femaleLowView, maleMidView, femaleMidView, maleHighView,
                     femaleHighView;
 
+            float maleLow =0, maleMid=0, maleHigh=0, femaleLow=0, femaleMid=0, femaleHigh=0;
 
             maleLowView = new TextView(getApplicationContext());
             maleLowView.setTextColor(Color.BLACK);
             maleLowView.setLayoutParams(everyItemParam);
-            if(maleLowMap.containsKey(age))
-            maleLowView.setText(String.valueOf(maleLowMap.get(age)));
-            else
+            if(maleLowMap.containsKey(age)) {
+                maleLowView.setText(String.valueOf(maleLowMap.get(age)));
+                totalMaleStudentsAtThisAge += maleLowMap.get(age);
+                maleLow = maleLowMap.get(age);
+            } else
                 maleLowView.setText("0");
 
             femaleLowView = new TextView(getApplicationContext());
             femaleLowView.setTextColor(Color.BLACK);
             femaleLowView.setLayoutParams(everyItemParam);
-            if(femaleLowMap.containsKey(age))
-            femaleLowView.setText(String.valueOf(femaleLowMap.get(age)));
-            else
+            if(femaleLowMap.containsKey(age)) {
+                femaleLowView.setText(String.valueOf(femaleLowMap.get(age)));
+                totalFemaleStudentsAtThisAge += femaleLowMap.get(age);
+                femaleLow = femaleLowMap.get(age);
+            } else
                 femaleLowView.setText("0");
 
             maleMidView = new TextView(getApplicationContext());
             maleMidView.setTextColor(Color.BLACK);
             maleMidView.setLayoutParams(everyItemParam);
-            if(maleMidMap.containsKey(age))
-            maleMidView.setText(String.valueOf(maleMidMap.get(age)));
-            else maleMidView.setText("0");
+            if(maleMidMap.containsKey(age)) {
+                maleMidView.setText(String.valueOf(maleMidMap.get(age)));
+                totalMaleStudentsAtThisAge += maleMidMap.get(age);
+                maleMid = maleMidMap.get(age);
+            } else maleMidView.setText("0");
 
             femaleMidView = new TextView(getApplicationContext());
             femaleMidView.setTextColor(Color.BLACK);
             femaleMidView.setLayoutParams(everyItemParam);
-            if(femaleMidMap.containsKey(age))
-            femaleMidView.setText(String.valueOf(femaleMidMap.get(age)));
-            else femaleMidView.setText("0");
+            if(femaleMidMap.containsKey(age)) {
+                femaleMidView.setText(String.valueOf(femaleMidMap.get(age)));
+                totalFemaleStudentsAtThisAge += femaleMidMap.get(age);
+                femaleMid = femaleMidMap.get(age);
+            } else femaleMidView.setText("0");
 
             maleHighView = new TextView(getApplicationContext());
             maleHighView.setTextColor(Color.BLACK);
             maleHighView.setLayoutParams(everyItemParam);
-            if(maleHighMap.containsKey(age))
-            maleHighView.setText(String.valueOf(maleHighMap.get(age)));
-            else maleHighView.setText("0");
+            if(maleHighMap.containsKey(age)) {
+                maleHighView.setText(String.valueOf(maleHighMap.get(age)));
+                totalMaleStudentsAtThisAge += maleHighMap.get(age);
+                maleHigh = maleHighMap.get(age);
+            } else maleHighView.setText("0");
 
             femaleHighView = new TextView(getApplicationContext());
             femaleHighView.setTextColor(Color.BLACK);
             femaleHighView.setLayoutParams(everyItemParam);
-            if(femaleHighMap.containsKey(age))
-            femaleHighView.setText(String.valueOf(femaleHighMap.get(age)));
-            else femaleHighView.setText("0");
+            if(femaleHighMap.containsKey(age)) {
+                femaleHighView.setText(String.valueOf(femaleHighMap.get(age)));
+                totalFemaleStudentsAtThisAge += femaleHighMap.get(age);
+                femaleHigh = femaleHighMap.get(age);
+            } else femaleHighView.setText("0");
 
 
-            if(!mPresenter.isGenderDisaggregate()){
+            String identifier = "";
 
-                int maleLow =0, maleMid=0, maleHigh=0, femaleLow=0, femaleMid=0, femaleHigh=0;
+
+
+            totalStudentsAtThisAge = totalMaleStudentsAtThisAge + totalFemaleStudentsAtThisAge;
+
+
+            if(mPresenter.getShowPercentages()){
+                identifier = "%";
+                if(mPresenter.isGenderDisaggregate()){
+                    maleLow = ((float)((float)maleLow / totalMaleStudentsAtThisAge) * 100);
+                    maleMid = ((float)((float)maleMid / totalMaleStudentsAtThisAge) * 100);
+                    maleHigh = ((float)((float)maleHigh / totalMaleStudentsAtThisAge) * 100);
+                    femaleLow = ((float)((float)femaleLow / totalFemaleStudentsAtThisAge) * 100);
+                    femaleMid = ((float)((float)femaleMid / totalFemaleStudentsAtThisAge) * 100);
+                    femaleHigh = ((float)((float)femaleHigh / totalFemaleStudentsAtThisAge) * 100);
+                }else{
+                    maleLow = ((float)((float)((maleLow + femaleLow) / totalStudentsAtThisAge))*100);
+                    maleMid = ((float)((float)(maleMid + femaleMid) / totalStudentsAtThisAge)*100);
+                    maleHigh = ((float)((float)(maleHigh + femaleHigh) / totalStudentsAtThisAge)*100);
+
+                    maleLowView.setText(String.valueOf(maleLow)+identifier);
+                    maleMidView.setText(String.valueOf(maleMid)+identifier);
+                    maleHighView.setText(String.valueOf(maleHigh)+identifier);
+
+                    femaleLowView.setText("");
+                    femaleMidView.setText("");
+                    femaleHighView.setText("");
+                }
+            }else {
+
+                maleLowView.setText(String.valueOf(maleLow) + identifier);
+                maleMidView.setText(String.valueOf(maleMid) + identifier);
+                maleHighView.setText(String.valueOf(maleHigh) + identifier);
+
+                femaleLowView.setText(String.valueOf(femaleLow) + identifier);
+                femaleMidView.setText(String.valueOf(femaleMid) + identifier);
+                femaleHighView.setText(String.valueOf(femaleHigh) + identifier);
+            }
+
+            if(!mPresenter.getShowPercentages() && !mPresenter.isGenderDisaggregate()){
+
+
                 if(maleLowMap.containsKey(age)){
                     maleLow = maleLowMap.get(age);
                 }
