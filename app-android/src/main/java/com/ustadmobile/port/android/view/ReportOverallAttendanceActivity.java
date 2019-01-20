@@ -229,7 +229,6 @@ public class ReportOverallAttendanceActivity extends UstadBaseActivity
         headingRow.addView(dateHeading);
         headingRow.addView(averageHeading);
 
-
         if(mPresenter.isGenderDisaggregate()){
 
             TextView maleHeading = new TextView(getApplicationContext());
