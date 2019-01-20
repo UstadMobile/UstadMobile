@@ -7,6 +7,8 @@ import tellh.com.recyclertreeview_lib.LayoutItemType;
 public class LocationLayoutType implements LayoutItemType {
     public String name;
     public long uid;
+    public boolean selected;
+    public boolean leaf;
 
     public String getName() {
         return name;
@@ -28,9 +30,11 @@ public class LocationLayoutType implements LayoutItemType {
         this.name = name;
     }
 
-    public LocationLayoutType(String name, Long uid){
+    public LocationLayoutType(String name, Long uid, boolean selected, boolean leaf){
         this.name = name;
         this.uid = uid;
+        this.selected = selected;
+        this.leaf = leaf;
     }
 
     @Override

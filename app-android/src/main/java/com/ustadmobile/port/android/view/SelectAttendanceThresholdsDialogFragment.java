@@ -21,6 +21,13 @@ import java.util.Objects;
 
 import io.reactivex.annotations.NonNull;
 
+import static com.ustadmobile.core.view.ReportEditView.ARG_THRESHOLD_HIGH;
+import static com.ustadmobile.core.view.ReportEditView.ARG_THRESHOLD_LOW;
+import static com.ustadmobile.core.view.ReportEditView.ARG_THRESHOLD_MID;
+import static com.ustadmobile.core.view.ReportEditView.THRESHOLD_HIGH_DEFAULT;
+import static com.ustadmobile.core.view.ReportEditView.THRESHOLD_LOW_DEFAULT;
+import static com.ustadmobile.core.view.ReportEditView.THRESHOLD_MED_DEFAULT;
+
 /**
  * SelectAttendanceThresholdsDialogFragment Android fragment extends UstadBaseFragment
  */
@@ -69,7 +76,6 @@ public class SelectAttendanceThresholdsDialogFragment extends UstadDialogFragmen
         for(int i=1; i<nums.length; i++)
             nums[i] = Integer.toString(i);
 
-        //np.setDisplayedValues(nums);
         np.setValue(setVal);
     }
 
@@ -90,9 +96,22 @@ public class SelectAttendanceThresholdsDialogFragment extends UstadDialogFragmen
         midNumberPicker = rootView.findViewById(R.id.fragment_select_attendance_thresholds_dialog_number_picker_medium);
         highNumberPicker = rootView.findViewById(R.id.fragment_select_attendance_thresholds_dialog_number_picker_high);
 
-        setUpNP(lowNumberPicker, 60);
-        setUpNP(midNumberPicker, 70);
-        setUpNP(highNumberPicker, 80);
+        if(getArguments().containsKey(ARG_THRESHOLD_LOW)){
+            setUpNP(lowNumberPicker, (Integer) getArguments().get(ARG_THRESHOLD_LOW));
+        }else{
+            setUpNP(lowNumberPicker, THRESHOLD_LOW_DEFAULT);
+        }
+        if(getArguments().containsKey(ARG_THRESHOLD_MID)){
+            setUpNP(midNumberPicker, (Integer) getArguments().get(ARG_THRESHOLD_MID));
+        }else{
+            setUpNP(midNumberPicker, THRESHOLD_MED_DEFAULT);
+        }
+        if(getArguments().containsKey(ARG_THRESHOLD_HIGH)){
+            setUpNP(highNumberPicker, (Integer) getArguments().get(ARG_THRESHOLD_HIGH));
+        }else{
+            setUpNP(highNumberPicker, THRESHOLD_HIGH_DEFAULT);
+        }
+
 
 
         mPresenter = new SelectAttendanceThresholdsDialogPresenter(getContext(),

@@ -65,6 +65,16 @@ public class ReportOverallAttendancePresenter
         return result;
     }
 
+    public static Long[] convertLongList(List<Long> list){
+        Long[] array = new Long[list.size()];
+        int i=0;
+        for(Long everyList:list){
+            array[i] = everyList;
+            i++;
+        }
+        return array;
+    }
+
     public ReportOverallAttendancePresenter(Object context, Hashtable arguments,
                                             ReportOverallAttendanceView view) {
         super(context, arguments, view);

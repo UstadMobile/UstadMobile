@@ -18,12 +18,16 @@ import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.SelectClazzesDialogPresenter;
 import com.ustadmobile.lib.db.entities.ClazzWithNumStudents;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class ClazzListReturnSelectedRecyclerAdapter extends PagedListAdapter<ClazzWithNumStudents,
         ClazzListReturnSelectedRecyclerAdapter.ClazzViewHolder> {
 
     Context theContext;
     private Fragment theFragment;
     private SelectClazzesDialogPresenter thePresenter;
+    private List<Long> selectedClazzes;
 
     class ClazzViewHolder extends RecyclerView.ViewHolder {
         ClazzViewHolder(View itemView){super(itemView);}
@@ -37,6 +41,10 @@ public class ClazzListReturnSelectedRecyclerAdapter extends PagedListAdapter<Cla
         theContext = context;
         theFragment = fragment;
         thePresenter = mPresenter;
+        selectedClazzes = mPresenter.getSelectedClazzesList();
+        if(selectedClazzes == null){
+            selectedClazzes = new ArrayList<>();
+        }
     }
 
 
@@ -78,6 +86,12 @@ public class ClazzListReturnSelectedRecyclerAdapter extends PagedListAdapter<Cla
                 thePresenter.removeFromClazzes(clazz);
             }
         });
+
+        if(selectedClazzes.contains(clazz.getClazzUid())){
+            theCheckbox.setChecked(true);
+        }else{
+            theCheckbox.setChecked(false);
+        }
 
     }
 

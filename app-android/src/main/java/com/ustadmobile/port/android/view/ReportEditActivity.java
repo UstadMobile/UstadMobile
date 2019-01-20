@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 
 import ru.dimorinny.floatingtextbutton.FloatingTextButton;
 
@@ -37,8 +38,6 @@ public class ReportEditActivity extends UstadBaseActivity implements ReportEditV
         SelectMultipleTreeDialogFragment.MultiSelectTreeDialogListener,
         SelectAttendanceThresholdsDialogFragment.ThresholdsSelectedDialogListener,
         SelectTwoDatesDialogFragment.CustomTimePeriodDialogListener {
-
-    private Toolbar toolbar;
 
     private TextView locationsTextView;
     private Spinner timePeriodSpinner;
@@ -55,7 +54,6 @@ public class ReportEditActivity extends UstadBaseActivity implements ReportEditV
 
     private RadioGroup studentNumberOrPercentageRadioGroup;
 
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -64,10 +62,10 @@ public class ReportEditActivity extends UstadBaseActivity implements ReportEditV
         setContentView(R.layout.activity_report_edit);
 
         //Toolbar:
-        toolbar = findViewById(R.id.activity_report_edit_toolbar);
+        Toolbar toolbar = findViewById(R.id.activity_report_edit_toolbar);
         toolbar.setTitle(R.string.choose_report_options);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
         locationsTextView = findViewById(R.id.activity_report_edit_location_detail);
         timePeriodSpinner = findViewById(R.id.activity_report_edittime_period_spinner);
@@ -90,6 +88,9 @@ public class ReportEditActivity extends UstadBaseActivity implements ReportEditV
         mPresenter = new ReportEditPresenter(this,
                 UMAndroidUtil.bundleToHashtable(getIntent().getExtras()), this);
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
+
+        //Set Default threshold value
+        setDefaultThresholdValues();
 
         studentNumberOrPercentageRadioGroup.setOnCheckedChangeListener((group, checkedId) -> {
             if (checkedId == R.id.activity_report_edit_show_student_number_option) {
@@ -121,8 +122,7 @@ public class ReportEditActivity extends UstadBaseActivity implements ReportEditV
         locationsTextView.setOnClickListener(v -> mPresenter.goToLocationDialog());
 
         genderDisaggregateCheck.setOnCheckedChangeListener(
-                (buttonView, isChecked) -> mPresenter.setGenderDisaggregate(isChecked));
-
+                (buttonView, isChecked) -> mPresenter.setGenderDisaggregated(isChecked));
 
         attendanceThresholdsTextView.setOnClickListener(v ->
                 mPresenter.goToSelectAttendanceThresholdsDialog());
@@ -239,8 +239,8 @@ public class ReportEditActivity extends UstadBaseActivity implements ReportEditV
                 classesSelectedString += ", ";
             }
         }
-        List<Long> selectedClasses = new ArrayList<>(selectedClazzes.values());
-        mPresenter.setSelectedClasses(selectedClasses);
+        List<Long> selectedClassesList = new ArrayList<>(selectedClazzes.values());
+        mPresenter.setSelectedClasses(selectedClassesList);
 
         updateClazzesSelected(classesSelectedString);
     }
@@ -260,6 +260,19 @@ public class ReportEditActivity extends UstadBaseActivity implements ReportEditV
         mPresenter.setSelectedLocations(selectedLocationList);
 
         updateLocationsSelected(locationsSelectedString);
+    }
+
+    /**
+     * Sets default value at start only
+     */
+    public void setDefaultThresholdValues(){
+        ReportAttendanceGroupedByThresholdsPresenter.ThresholdValues defaultValue =
+                new ReportAttendanceGroupedByThresholdsPresenter.ThresholdValues();
+        defaultValue.low = THRESHOLD_LOW_DEFAULT;
+        defaultValue.med = THRESHOLD_MED_DEFAULT;
+        defaultValue.high = THRESHOLD_HIGH_DEFAULT;
+
+        onThresholdResult(defaultValue);
     }
 
     @Override
