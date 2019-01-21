@@ -109,7 +109,7 @@ public class KhanContentScraper {
         this.driver = null;
     }
 
-    public KhanContentScraper(File destinationDirectory, ChromeDriver driver){
+    public KhanContentScraper(File destinationDirectory, ChromeDriver driver) {
         this.destinationDirectory = destinationDirectory;
         this.driver = driver;
     }
@@ -143,7 +143,7 @@ public class KhanContentScraper {
 
         Gson gson = new GsonBuilder().disableHtmlEscaping().create();
 
-        File khanDirectory = new File(destinationDirectory, FilenameUtils.getBaseName(scrapUrl));
+        File khanDirectory = new File(destinationDirectory, destinationDirectory.getName());
         khanDirectory.mkdirs();
 
         String initialJson = IndexKhanContentScraper.getJsonStringFromScript(scrapUrl);
@@ -189,10 +189,10 @@ public class KhanContentScraper {
             return;
         }
 
-        if(driver == null){
+        if (driver == null) {
             ContentScraperUtil.setChromeDriverLocation();
             driver = ContentScraperUtil.loginKhanAcademy("https://www.khanacademy.org/login");
-        }else{
+        } else {
             ContentScraperUtil.clearChromeConsoleLog(driver);
         }
 
@@ -223,8 +223,8 @@ public class KhanContentScraper {
                     File urlDirectory = ContentScraperUtil.createDirectoryFromUrl(khanDirectory, url);
                     File file = ContentScraperUtil.downloadFileFromLogIndex(url, urlDirectory, log);
 
-                    if(log.message.params.response.headers != null) {
-                        if(log.message.params.response.headers.containsKey("set-cookie")){
+                    if (log.message.params.response.headers != null) {
+                        if (log.message.params.response.headers.containsKey("set-cookie")) {
                             String cookie = log.message.params.response.headers.get("set-cookie");
                             cookie += " fkey=abcdef;";
                             log.message.params.response.headers.replace("set-cookie", cookie);
@@ -267,11 +267,11 @@ public class KhanContentScraper {
             ItemData itemContent = gson.fromJson(itemResponse.itemData, ItemData.class);
 
             Map<String, ItemData.Content.Image> images = itemContent.question.images;
-            if(images == null){
+            if (images == null) {
                 images = new HashMap<>();
             }
             for (ItemData.Content content : itemContent.hints) {
-                if(content.images == null){
+                if (content.images == null) {
                     continue;
                 }
                 images.putAll(content.images);
@@ -317,7 +317,7 @@ public class KhanContentScraper {
                 try {
                     image = image.replaceAll(" ", "");
                     String imageUrlString = image;
-                    if(image.contains("+graphie")){
+                    if (image.contains("+graphie")) {
                         imageUrlString = "https://cdn.kastatic.org/ka-perseus-graphie/" + image.substring(image.lastIndexOf("/") + 1) + SVG_EXT;
                     }
                     URL imageUrl = new URL(imageUrlString);
@@ -374,7 +374,7 @@ public class KhanContentScraper {
 
         Gson gson = new GsonBuilder().disableHtmlEscaping().create();
 
-        File khanDirectory = new File(destinationDirectory, FilenameUtils.getBaseName(scrapUrl));
+        File khanDirectory = new File(destinationDirectory, destinationDirectory.getName());
         khanDirectory.mkdirs();
 
         File indexJsonFile = new File(khanDirectory, "index.json");
@@ -383,16 +383,16 @@ public class KhanContentScraper {
         SubjectListResponse data = gson.fromJson(initialJson, SubjectListResponse.class);
         SubjectListResponse.ComponentData compProps = data.componentProps;
         SubjectListResponse.ComponentData.NavData navData = compProps.tutorialNavData;
-        if(navData == null){
+        if (navData == null) {
             navData = compProps.tutorialPageData;
         }
         List<SubjectListResponse.ComponentData.NavData.ContentModel> contentList = navData.contentModels;
-        if(contentList == null || contentList.isEmpty()){
+        if (contentList == null || contentList.isEmpty()) {
             contentList = new ArrayList<>();
             contentList.add(navData.contentModel);
         }
 
-        if(contentList.isEmpty()){
+        if (contentList.isEmpty()) {
             throw new IllegalArgumentException("Does not have the article data id which we need to scrape the page for url " + scrapUrl);
         }
 
@@ -426,10 +426,10 @@ public class KhanContentScraper {
             }
         }
 
-        if(driver == null){
+        if (driver == null) {
             ContentScraperUtil.setChromeDriverLocation();
             driver = ContentScraperUtil.setupLogIndexChromeDriver();
-        }else{
+        } else {
             ContentScraperUtil.clearChromeConsoleLog(driver);
         }
 

@@ -85,10 +85,10 @@ public class TestIndexKhanAcademy {
         File englishFolder = new File(tmpDir, "en");
         Assert.assertEquals(true, englishFolder.isDirectory());
 
-        File courseFolder = new File(englishFolder, "counting-with-small-numbers");
+        File courseFolder = new File(englishFolder, "x9b4a5e7a");
         Assert.assertEquals(true, courseFolder.isDirectory());
 
-        File directoryForCourse = new File(courseFolder, "counting-with-small-numbers");
+        File directoryForCourse = new File(courseFolder, "x9b4a5e7a");
         Assert.assertEquals(true, courseFolder.isDirectory());
 
         File videoFile = new File(directoryForCourse, "video.mp4");

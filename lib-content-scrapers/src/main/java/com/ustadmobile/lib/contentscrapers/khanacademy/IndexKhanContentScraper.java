@@ -379,18 +379,19 @@ public class IndexKhanContentScraper {
             }
 
             URL url = new URL(tutorialUrl, contentItem.nodeUrl);
-            File contentFolder = new File(subjectFolder, contentItem.slug);
-            contentFolder.mkdirs();
+            File newContentFolder = new File(subjectFolder, contentItem.contentId);
+            newContentFolder.mkdirs();
+
 
             ContentEntry entry = ContentScraperUtil.createOrUpdateContentEntry(contentItem.slug, contentItem.title,
-                    url.toString(), KHAN, LICENSE_TYPE_CC_BY_NC, englishLang.getLangUid(),
+                    contentItem.contentId, KHAN, LICENSE_TYPE_CC_BY_NC, englishLang.getLangUid(),
                     null, contentItem.description, true, EMPTY_STRING, contentItem.thumbnailUrl,
                     EMPTY_STRING, EMPTY_STRING, contentEntryDao);
 
-            ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, tutorialEntry, entry
+            ContentScraperUtil.insertOrUpdateChildWithMultipleParentsJoin(contentParentChildJoinDao, tutorialEntry, entry
                     , contentCount++);
 
-            KhanContentScraper scraper = new KhanContentScraper(contentFolder, driver);
+            KhanContentScraper scraper = new KhanContentScraper(newContentFolder, driver);
             try {
                 switch (contentItem.kind) {
 
@@ -414,7 +415,7 @@ public class IndexKhanContentScraper {
 
                 }
 
-                File content = new File(contentFolder, FilenameUtils.getBaseName(url.getPath()) + ScraperConstants.ZIP_EXT);
+                File content = new File(newContentFolder, newContentFolder.getName() + ScraperConstants.ZIP_EXT);
 
                 if (scraper.isContentUpdated()) {
                     ContentScraperUtil.insertContentEntryFile(content, contentEntryFileDao, contentFileStatusDao,
