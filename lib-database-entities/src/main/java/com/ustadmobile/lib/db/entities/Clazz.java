@@ -32,6 +32,9 @@ public class Clazz {
     //Active
     private boolean clazzActive;
 
+    //Location
+    private long clazzLocationUid;
+
     @UmSyncMasterChangeSeqNum
     private long clazzMasterChangeSeqNum;
 
@@ -72,8 +75,6 @@ public class Clazz {
     public void setClazzScheuleUMCalendarUid(long clazzScheuleUMCalendarUid) {
         this.clazzScheuleUMCalendarUid = clazzScheuleUMCalendarUid;
     }
-
-    private long clazzLocationUid;
 
     public Clazz() {
 

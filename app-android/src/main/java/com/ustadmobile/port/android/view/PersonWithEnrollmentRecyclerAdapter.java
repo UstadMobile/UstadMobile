@@ -60,6 +60,8 @@ public class PersonWithEnrollmentRecyclerAdapter
     private int currentTop = -1;
     private boolean teacherAdded = false;
 
+    private boolean reportMode = false;
+
     private int addCMCLT, addCMCLS;
 
     private static final int IMAGE_PERSON_THUMBNAIL_WIDTH = 26;
@@ -95,6 +97,19 @@ public class PersonWithEnrollmentRecyclerAdapter
         mPresenter = presenter;
         showAttendance = attendance;
         showEnrollment = enrollment;
+    }
+
+    PersonWithEnrollmentRecyclerAdapter(
+            @NonNull DiffUtil.ItemCallback<PersonWithEnrollment> diffCallback, Context context,
+            Activity activity, CommonHandlerPresenter presenter, boolean attendance,
+            boolean enrollment, boolean rmode){
+        super(diffCallback);
+        theContext = context;
+        theActivity = activity;
+        mPresenter = presenter;
+        showAttendance = attendance;
+        showEnrollment = enrollment;
+        reportMode = rmode;
     }
 
 
@@ -214,6 +229,10 @@ public class PersonWithEnrollmentRecyclerAdapter
                 holder.itemView.findViewById(R.id.item_studentlist_student_simple_attendance_percentage);
         ConstraintLayout cl = holder.itemView.findViewById(R.id.item_studentlist_student_cl);
 
+        CheckBox checkBox =
+                holder.itemView.findViewById(R.id.item_studentlist_student_simple_student_checkbox);
+        ImageView callImageView =
+                holder.itemView.findViewById(R.id.item_studentlist_student_simple_call_iv);
 
         //NAME:
         String studentName = personWithEnrollment.getFirstNames() + " " +
@@ -243,9 +262,7 @@ public class PersonWithEnrollmentRecyclerAdapter
         //ENROLLMENT
         if(showEnrollment){
 
-            //Get checkbox and set it to visible.
-            CheckBox checkBox =
-                    holder.itemView.findViewById(R.id.item_studentlist_student_simple_student_checkbox);
+
             checkBox.setVisibility(View.VISIBLE);
             checkBox.setTextColor(Color.BLACK);
             checkBox.setSystemUiVisibility(View.VISIBLE);
@@ -331,34 +348,46 @@ public class PersonWithEnrollmentRecyclerAdapter
             //Update it doesn't really make it quicker
 
         }
+        if(reportMode){
+            checkBox.setVisibility(View.GONE);
+
+            callImageView.setVisibility(View.VISIBLE);
+            callImageView.setOnClickListener(v ->
+                    mPresenter.handleSecondaryPressed(personWithEnrollment.getPersonUid()));
+        }else{
+            callImageView.setVisibility(View.GONE);
+        }
+
 
         //IF IN STUDENTS LIST IN CLASS DETAIL:
         if(!showEnrollment && showAttendance){
 
-            if (position == 0) {//First Entry. Add Teacher and Add Teacher item
-                addHeadingAndNew(cl, ClazzMember.ROLE_TEACHER);
+            if(showAddStudent && showAddTeacher) {
+                if (position == 0) {//First Entry. Add Teacher and Add Teacher item
+                    addHeadingAndNew(cl, ClazzMember.ROLE_TEACHER);
 
-                if(personWithEnrollment.getClazzMemberRole() == ClazzMember.ROLE_STUDENT){
+                    if (personWithEnrollment.getClazzMemberRole() == ClazzMember.ROLE_STUDENT) {
 
-                    addHeadingAndNew(cl, ClazzMember.ROLE_STUDENT);
+                        addHeadingAndNew(cl, ClazzMember.ROLE_STUDENT);
+                    }
+
+                    int nextPos = position + 1;
+                    if (personWithEnrollment.getClazzMemberRole() == ClazzMember.ROLE_TEACHER &&
+                            getItemCount() == nextPos) {
+                        addStudentLast = true;
+                    }
+
+                } else {
+                    PersonWithEnrollment previousPerson = getItem(position - 1);
+                    assert previousPerson != null;
+                    if (previousPerson.getClazzMemberRole() == ClazzMember.ROLE_TEACHER &&
+                            personWithEnrollment.getClazzMemberRole() == ClazzMember.ROLE_STUDENT) {
+
+                        //Add student
+                        addHeadingAndNew(cl, ClazzMember.ROLE_STUDENT);
+                    }
+
                 }
-
-                int nextPos = position + 1;
-                if(personWithEnrollment.getClazzMemberRole() == ClazzMember.ROLE_TEACHER &&
-                        getItemCount() == nextPos){
-                    addStudentLast = true;
-                }
-
-            } else {
-                PersonWithEnrollment previousPerson = getItem(position - 1);
-                assert previousPerson != null;
-                if (previousPerson.getClazzMemberRole() == ClazzMember.ROLE_TEACHER &&
-                        personWithEnrollment.getClazzMemberRole() == ClazzMember.ROLE_STUDENT) {
-
-                    //Add student
-                    addHeadingAndNew(cl, ClazzMember.ROLE_STUDENT);
-                }
-
             }
         }
 

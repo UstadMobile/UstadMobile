@@ -96,6 +96,7 @@ import com.ustadmobile.core.view.PersonDetailView;
 import com.ustadmobile.core.view.PersonEditView;
 import com.ustadmobile.core.view.PersonPictureDialogView;
 import com.ustadmobile.core.view.Register2View;
+import com.ustadmobile.core.view.ReportAtRiskStudentsView;
 import com.ustadmobile.core.view.ReportAttendanceGroupedByThresholdsView;
 import com.ustadmobile.core.view.ReportEditView;
 import com.ustadmobile.core.view.ReportNumberOfDaysClassesOpenView;
@@ -144,6 +145,7 @@ import com.ustadmobile.port.android.view.PersonEditActivity;
 import com.ustadmobile.port.android.view.PersonPictureDialogFragment;
 import com.ustadmobile.port.android.view.ReceiveCourseDialogFragment;
 import com.ustadmobile.port.android.view.Register2Activity;
+import com.ustadmobile.port.android.view.ReportAtRiskStudentsActivity;
 import com.ustadmobile.port.android.view.ReportAttendanceGroupedByThresholdsActivity;
 import com.ustadmobile.port.android.view.ReportEditActivity;
 import com.ustadmobile.port.android.view.ReportNumberOfDaysClassesOpenActivity;
@@ -272,6 +274,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         viewNameToAndroidImplMap.put(BulkUploadMasterView.VIEW_NAME, BulkUploadMasterActivity.class);
         viewNameToAndroidImplMap.put(Register2View.VIEW_NAME, Register2Activity.class);
         viewNameToAndroidImplMap.put(PersonPictureDialogView.VIEW_NAME, PersonPictureDialogFragment.class);
+        viewNameToAndroidImplMap.put(ReportAtRiskStudentsView.VIEW_NAME, ReportAtRiskStudentsActivity.class);
     }
 
     /**

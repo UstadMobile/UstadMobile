@@ -247,16 +247,8 @@ public class ReportEditPresenter
 
     }
 
-    public boolean isStudentNumbers() {
-        return studentNumbers;
-    }
-
     public void setStudentNumbers(boolean studentNumbers) {
         this.studentNumbers = studentNumbers;
-    }
-
-    public boolean isStudentPercentages() {
-        return studentPercentages;
     }
 
     public void setStudentPercentages(boolean studentPercentages) {

@@ -38,6 +38,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import ru.dimorinny.floatingtextbutton.FloatingTextButton;
@@ -74,8 +75,7 @@ public class ReportAttendanceGroupedByThresholdsActivity extends UstadBaseActivi
         toolbar = findViewById(R.id.activity_report_attendance_grouped_by_thresholds_toolbar);
         toolbar.setTitle(R.string.attendance_grouped_by_threshold);
         setSupportActionBar(toolbar);
-        toolbar.setTitle(R.string.attendance_grouped_by_threshold);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
         reportLinearLayout = findViewById(R.id.actvity_report_attendance_grouped_by_thresholds_ll);
 
@@ -184,7 +184,7 @@ public class ReportAttendanceGroupedByThresholdsActivity extends UstadBaseActivi
         //Create the file.
 
         File dir = getFilesDir();
-        File output = new File(dir, "overall_attendance_activity_" +
+        File output = new File(dir, "report_overall_attendance_activity_" +
                 System.currentTimeMillis() + ".csv");
         csvReportFilePath = output.getAbsolutePath();
 
@@ -502,16 +502,16 @@ public class ReportAttendanceGroupedByThresholdsActivity extends UstadBaseActivi
             if(mPresenter.getShowPercentages()){
                 identifier = "%";
                 if(mPresenter.isGenderDisaggregate()){
-                    maleLow = ((float)((float)maleLow / totalMaleStudentsAtThisAge) * 100);
-                    maleMid = ((float)((float)maleMid / totalMaleStudentsAtThisAge) * 100);
-                    maleHigh = ((float)((float)maleHigh / totalMaleStudentsAtThisAge) * 100);
-                    femaleLow = ((float)((float)femaleLow / totalFemaleStudentsAtThisAge) * 100);
-                    femaleMid = ((float)((float)femaleMid / totalFemaleStudentsAtThisAge) * 100);
-                    femaleHigh = ((float)((float)femaleHigh / totalFemaleStudentsAtThisAge) * 100);
+                    maleLow = (float)((maleLow / totalMaleStudentsAtThisAge) * 100);
+                    maleMid = (float)((maleMid / totalMaleStudentsAtThisAge) * 100);
+                    maleHigh = (float)((maleHigh / totalMaleStudentsAtThisAge) * 100);
+                    femaleLow = (float)((femaleLow / totalFemaleStudentsAtThisAge) * 100);
+                    femaleMid = (float)((femaleMid / totalFemaleStudentsAtThisAge) * 100);
+                    femaleHigh = (float)((femaleHigh / totalFemaleStudentsAtThisAge) * 100);
                 }else{
-                    maleLow = ((float)((float)((maleLow + femaleLow) / totalStudentsAtThisAge))*100);
-                    maleMid = ((float)((float)(maleMid + femaleMid) / totalStudentsAtThisAge)*100);
-                    maleHigh = ((float)((float)(maleHigh + femaleHigh) / totalStudentsAtThisAge)*100);
+                    maleLow = (float)((maleLow + femaleLow) / totalStudentsAtThisAge) *100;
+                    maleMid = (((maleMid + femaleMid) / totalStudentsAtThisAge) *100);
+                    maleHigh = (((maleHigh + femaleHigh) / totalStudentsAtThisAge) *100);
 
                     maleLowView.setText(String.valueOf(maleLow)+identifier);
                     maleMidView.setText(String.valueOf(maleMid)+identifier);

@@ -115,6 +115,43 @@ public abstract class ClazzDao implements SyncableDao<Clazz, ClazzDao> {
     public abstract UmProvider<ClazzWithNumStudents> findAllClazzes();
 
 
+    @UmQuery("SELECT * FROM Clazz WHERE clazzUid in (:clazzUidList) AND clazzActive = 1")
+    public abstract void findClazzesByUidListAsync(List<Long> clazzUidList, UmCallback<List<Clazz>> resultList);
+
+    @UmQuery("SELECT * FROM Clazz WHERE clazzActive = 1")
+    public abstract void findAllActiveClazzesAsync(UmCallback<List<Clazz>> resultList);
+
+    @UmQuery("SELECT * FROM Clazz WHERE clazzLocationUid IN (:allLocations) " +
+            " OR clazzUid in (:allClasses) AND clazzActive = 1")
+    public abstract void findAllClazzesInUidAndLocationAsync(List<Long> allLocations,
+                                                         List<Long> allClasses,
+                                                         UmCallback<List<Clazz>> resultList);
+
+    @UmQuery("SELECT * FROM Clazz WHERE  clazzUid in (:allClasses) AND clazzActive = 1")
+    public abstract void findAllClazzesInUidAsync(List<Long> allClasses,
+                                                             UmCallback<List<Clazz>> resultList);
+
+    @UmQuery("SELECT * FROM Clazz WHERE clazzLocationUid IN (:allLocations) " +
+            " AND clazzActive = 1")
+    public abstract void findAllClazzesInLocationAsync(List<Long> allLocations,
+                                                             UmCallback<List<Clazz>> resultList);
+
+    public void findAllClazzesByLocationAndUidList(List<Long> allLocations,
+                                                   List<Long> allClazzes,
+                                                   UmCallback<List<Clazz>> resultList){
+        if(allLocations.isEmpty() && allClazzes.isEmpty()){
+            findAllActiveClazzesAsync(resultList);
+        }else{
+            if(allLocations.isEmpty() && !allClazzes.isEmpty()){
+                findAllClazzesInUidAsync(allClazzes, resultList);
+            }else if(!allLocations.isEmpty() && allClazzes.isEmpty()){
+                findAllClazzesInLocationAsync(allLocations, resultList);
+            }else{
+                findAllClazzesInUidAndLocationAsync(allLocations, allClazzes, resultList);
+            }
+        }
+    }
+
     @UmQuery(CLAZZ_WHERE +
             " FROM Clazz WHERE Clazz.clazzActive = 1 ")
     public abstract UmProvider<ClazzWithNumStudents> findAllActiveClazzes();

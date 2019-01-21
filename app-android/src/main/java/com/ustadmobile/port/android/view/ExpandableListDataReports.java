@@ -3,6 +3,7 @@ package com.ustadmobile.port.android.view;
 import android.content.Context;
 
 import com.toughra.ustadmobile.R;
+import com.ustadmobile.core.view.ReportAtRiskStudentsView;
 import com.ustadmobile.core.view.ReportAttendanceGroupedByThresholdsView;
 import com.ustadmobile.core.view.ReportNumberOfDaysClassesOpenView;
 import com.ustadmobile.core.view.ReportOverallAttendanceView;
@@ -48,7 +49,7 @@ public class ExpandableListDataReports {
                 -1, ReportAttendanceGroupedByThresholdsView.VIEW_NAME, true, true, true));
         attendanceReport.add(new ExpandableListDataReports(
                 context.getText(R.string.at_risk_students).toString(),
-                -1, "", false, false, true));
+                -1, ReportAtRiskStudentsView.VIEW_NAME, false, false, true));
 
 
 

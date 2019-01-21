@@ -126,19 +126,19 @@ public class ClazzStudentListFragment extends UstadBaseFragment implements Clazz
     }
 
     public static final DiffUtil.ItemCallback<PersonWithEnrollment> DIFF_CALLBACK2 =
-            new DiffUtil.ItemCallback<PersonWithEnrollment>() {
-                @Override
-                public boolean areItemsTheSame(PersonWithEnrollment oldItem,
-                                               PersonWithEnrollment newItem) {
-                    return oldItem.getPersonUid() == newItem.getPersonUid();
-                }
+        new DiffUtil.ItemCallback<PersonWithEnrollment>() {
+            @Override
+            public boolean areItemsTheSame(PersonWithEnrollment oldItem,
+                                           PersonWithEnrollment newItem) {
+                return oldItem.getPersonUid() == newItem.getPersonUid();
+            }
 
-                @Override
-                public boolean areContentsTheSame(PersonWithEnrollment oldItem,
-                                                  PersonWithEnrollment newItem) {
-                    return oldItem.equals(newItem);
-                }
-            };
+            @Override
+            public boolean areContentsTheSame(PersonWithEnrollment oldItem,
+                                              PersonWithEnrollment newItem) {
+                return oldItem.equals(newItem);
+            }
+        };
 
     @Override
     public void setPersonWithEnrollmentProvider(

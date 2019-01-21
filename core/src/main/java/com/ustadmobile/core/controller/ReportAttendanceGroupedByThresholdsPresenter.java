@@ -42,7 +42,7 @@ public class ReportAttendanceGroupedByThresholdsPresenter
     private boolean genderDisaggregate = true;
     private Boolean showPercentages = false;
 
-    LinkedHashMap<String, List<AttendanceResultGroupedByAgeAndThreshold>> dataMapsMap;
+    private LinkedHashMap<String, List<AttendanceResultGroupedByAgeAndThreshold>> dataMapsMap;
 
     UmAppDatabase repository;
 
@@ -245,7 +245,6 @@ public class ReportAttendanceGroupedByThresholdsPresenter
     public void setShowPercentages(Boolean showPercentages) {
         this.showPercentages = showPercentages;
     }
-
 
     public void dataToCSV(){
         view.generateCSVReport();
