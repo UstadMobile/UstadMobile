@@ -7,6 +7,7 @@ import com.ustadmobile.core.db.dao.ContentEntryFileDao;
 import com.ustadmobile.core.db.dao.ContentEntryFileStatusDao;
 import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
 import com.ustadmobile.core.db.dao.LanguageDao;
+import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.LanguageList;
 import com.ustadmobile.lib.contentscrapers.UMLogUtil;
@@ -34,13 +35,13 @@ import static com.ustadmobile.lib.db.entities.ContentEntry.LICENSE_TYPE_CC_BY;
 /**
  * Etekkatho website can be scraped by accessing the page via Jsoup at http://www.etekkatho.org/subjects/
  * This page has all the list of subjects available in the website with their subheading and description
- *
+ * <p>
  * The content is placed in a table format and you get all the content via css selector: tr th[scope=row], tr td
  * The heading, subheading and description cant be identified by the html tags so its required to loop through all the elements
  * If the element has an attribute called scope then its the main heading and the next 2 elements are its subheading and the description
  * If the element has a class called span3 then its the subheading of the previous heading and the next element is its description
  * Since we create a content entry, save it into a hashMap of subheading title and content entry to be used later on
- *
+ * <p>
  * Once all content entry is made from the table. Loop through again with css selector th.span3 a
  * This will give the href link of the heading.
  * This page contains all the subheadings.
@@ -212,7 +213,15 @@ public class IndexEtekkathoScraper {
             File subHeadingFolder = new File(folder, title);
             subHeadingFolder.mkdirs();
 
-            browseSubjects(headingHashMap.get(title), subHrefLink, subHeadingFolder);
+            ContentEntry subject = headingHashMap.get(title);
+            if (subject == null) {
+                UMLogUtil.logError("Subheading title was not found " + title);
+                if (title.equals("Agriculture, aquaculture and the environment")) {
+                    subject = headingHashMap.get("Agriculture and the environment");
+                }
+            }
+
+            browseSubjects(subject, subHrefLink, subHeadingFolder);
 
         }
 
