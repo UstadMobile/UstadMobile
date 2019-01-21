@@ -29,6 +29,15 @@ public class UmAccountManager {
         return activeAccount;
     }
 
+    public static synchronized long getActivePersonUid(Object context, UstadMobileSystemImpl impl) {
+        UmAccount activeAccount = getActiveAccount(context, impl);
+        return activeAccount != null ? activeAccount.getPersonUid() : 0L;
+    }
+
+    public static synchronized long getActivePersonUid(Object context) {
+        return getActivePersonUid(context, UstadMobileSystemImpl.getInstance());
+    }
+
     public static UmAccount getActiveAccount(Object context) {
         return getActiveAccount(context, UstadMobileSystemImpl.getInstance());
     }

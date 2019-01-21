@@ -51,6 +51,7 @@ dependencies {
     testImplementation "org.glassfish.jersey.inject:jersey-hk2:$version_jersey"
     testImplementation "org.glassfish.jersey.media:jersey-media-json-jackson:$version_jersey"
     testImplementation "org.glassfish.jersey.containers:jersey-container-grizzly2-http:$version_jersey"
+    testImplementation "org.glassfish.jersey.media:jersey-media-multipart:$version_jersey"
 }
 
 task sourceJar(type: Jar) {

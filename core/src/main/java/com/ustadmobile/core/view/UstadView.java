@@ -52,27 +52,12 @@ public interface UstadView {
     int getDirection();
     
     /**
-     * Sets the direction of this view (if supported).  Will have no effect on platforms that don't support RTL e.g. Android < 4.2
+     * Sets the direction of this view (if supported).  Will have no effect on platforms that don't
+     * support RTL e.g. Android < 4.2
      * 
      * @param dir UstadMobileConstants.DIR_RTL or UstadMobileConstants.DIR_LTR
      */
     void setDirection(int dir);
-    
-    /**
-     * Sets commands / buttons that should be available to the user to select.
-     * 
-     * These are normally put in the Command menus on J2ME and in the 
-     * top right menu (with three dots) in Android
-     * 
-     * @param labels
-     * @param ids 
-     */
-    void setAppMenuCommands(String[] labels, int[] ids);
-
-    /**
-     * Tells the view to refresh UI Strings : e.g. when the locale has been changed.
-     */
-    void setUIStrings();
 
     /**
      * Most UI platforms require that all UI changes are done in a particular thread. This method

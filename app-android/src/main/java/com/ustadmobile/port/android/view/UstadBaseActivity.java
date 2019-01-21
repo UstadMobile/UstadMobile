@@ -18,15 +18,12 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.ustadmobile.core.buildconfig.CoreBuildConfig;
 import com.ustadmobile.core.controller.UstadBaseController;
 import com.ustadmobile.core.impl.AppConfig;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.lib.util.UMUtil;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
-import com.ustadmobile.port.android.netwokmanager.NetworkServiceAndroid;
 import com.ustadmobile.port.android.netwokmanager.UmAppDatabaseSyncService;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
@@ -89,6 +86,8 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
                 intentFilter);
         super.onCreate(savedInstanceState);
         localeOnCreate = UstadMobileSystemImpl.getInstance().getDisplayedLocale(this);
+
+
 
 
         Intent syncServiceIntent = new Intent(this, UmAppDatabaseSyncService.class);
@@ -155,10 +154,6 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
         setDirection(UstadMobileSystemImpl.getInstance().getDirection());
     }
 
-    public void setUIStrings() {
-
-    }
-
     public void setDirection(int dir) {
         if(dir != mUIDirection) {
             UMAndroidUtil.setDirectionIfSupported(findViewById(android.R.id.content),
@@ -223,7 +218,6 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        UstadMobileSystemImpl.getInstance().handleSave();
     }
 
     @Override
@@ -236,7 +230,6 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
     public void onStop() {
         isStarted = false;
         super.onStop();
-        UstadMobileSystemImpl.getInstance().handleSave();
         UstadMobileSystemImplAndroid.getInstanceAndroid().handleActivityStop(this);
     }
 

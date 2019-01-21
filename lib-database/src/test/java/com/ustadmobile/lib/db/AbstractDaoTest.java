@@ -15,6 +15,7 @@ import com.ustadmobile.lib.db.entities.UmAccount;
 
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
+import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -126,7 +127,8 @@ public class AbstractDaoTest {
     @BeforeClass
     public static void startServer() throws IOException {
         final ResourceConfig resourceConfig = new ResourceConfig()
-                .packages("com.ustadmobile.core.db.dao");
+                .packages("com.ustadmobile.core.db.dao")
+                .register(MultiPartFeature.class);
         server = GrizzlyHttpServerFactory.createHttpServer(URI.create(TEST_URI), resourceConfig);
         server.start();
     }
