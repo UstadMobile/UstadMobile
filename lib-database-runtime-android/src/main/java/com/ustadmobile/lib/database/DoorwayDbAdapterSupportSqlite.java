@@ -2,13 +2,13 @@ package com.ustadmobile.lib.database;
 
 import android.arch.persistence.db.SupportSQLiteDatabase;
 
-import com.ustadmobile.lib.db.DoorwayDbHelper;
+import com.ustadmobile.lib.db.DoorwayDbAdapter;
 
-public class SupportSqliteDoorwayDbAdapter implements DoorwayDbHelper {
+public class DoorwayDbAdapterSupportSqlite implements DoorwayDbAdapter {
 
     private SupportSQLiteDatabase db;
 
-    public SupportSqliteDoorwayDbAdapter(SupportSQLiteDatabase db) {
+    public DoorwayDbAdapterSupportSqlite(SupportSQLiteDatabase db) {
         this.db = db;
     }
 
