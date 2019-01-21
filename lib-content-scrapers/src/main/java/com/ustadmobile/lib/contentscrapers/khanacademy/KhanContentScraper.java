@@ -223,6 +223,14 @@ public class KhanContentScraper {
                     File urlDirectory = ContentScraperUtil.createDirectoryFromUrl(khanDirectory, url);
                     File file = ContentScraperUtil.downloadFileFromLogIndex(url, urlDirectory, log);
 
+                    if(log.message.params.response.headers != null) {
+                        if(log.message.params.response.headers.containsKey("set-cookie")){
+                            String cookie = log.message.params.response.headers.get("set-cookie");
+                            cookie += " fkey=abcdef;";
+                            log.message.params.response.headers.replace("set-cookie", cookie);
+                        }
+                    }
+
                     LogIndex logIndex = ContentScraperUtil.createIndexFromLog(urlString, mimeType, urlDirectory, file, log);
                     index.add(logIndex);
 
