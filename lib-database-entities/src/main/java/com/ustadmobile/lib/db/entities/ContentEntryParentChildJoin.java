@@ -36,6 +36,17 @@ public class ContentEntryParentChildJoin {
     @UmSyncLastChangedBy
     private int cepcjLastChangedBy;
 
+    public ContentEntryParentChildJoin() {
+
+    }
+
+    public ContentEntryParentChildJoin(ContentEntry parentEntry, ContentEntry childEntry,
+                                       int childIndex) {
+        this.cepcjParentContentEntryUid = parentEntry.getContentEntryUid();
+        this.cepcjChildContentEntryUid = childEntry.getContentEntryUid();
+        this.childIndex = childIndex;
+    }
+
     public long getCepcjUid() {
         return cepcjUid;
     }

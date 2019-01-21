@@ -42,6 +42,13 @@ public class ContentEntryFile {
     @UmSyncLastChangedBy
     private int contentEntryFileLastChangedBy;
 
+    public ContentEntryFile(){
+
+    }
+
+    public ContentEntryFile(long fileSize) {
+        this.fileSize = fileSize;
+    }
 
     public long getContentEntryFileUid() {
         return contentEntryFileUid;
