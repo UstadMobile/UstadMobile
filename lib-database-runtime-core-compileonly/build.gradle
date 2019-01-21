@@ -6,6 +6,7 @@ dependencies {
 
     //Required so that retrofit annotation processor can use getTypeElement for ResponseBody.class
     api "com.squareup.okhttp3:okhttp:$version_okhttp"
+    compile project(path: ':lib-database-runtime')
 }
 
 

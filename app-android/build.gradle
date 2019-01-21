@@ -32,6 +32,14 @@ if (project.file("buildconfig.local.properties").exists()) {
 }
 
 
+/*
+  TODO: Refactor to use another task to trigger these tasks
+
+  WARNING: API 'variant.getJavaCompiler()' is obsolete and has been replaced with 'variant.getJavaCompileProvider()'.
+  It will be removed at the end of 2019.
+  For more information, see https://d.android.com/r/tools/task-configuration-avoidance.
+  REASON: Called from: /home/mike/src/UstadMobile/app-android/build.gradle:37
+ */
 afterEvaluate {
     android.libraryVariants.all { variant ->
         variant.javaCompiler.dependsOn(copyMainXmlLocaleFilesFromCore)
