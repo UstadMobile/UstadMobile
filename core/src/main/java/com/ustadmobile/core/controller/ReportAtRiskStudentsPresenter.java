@@ -8,6 +8,7 @@ import com.ustadmobile.core.db.dao.LocationDao;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.view.CallPersonRelatedDialogView;
 import com.ustadmobile.core.view.PersonDetailView;
 import com.ustadmobile.core.view.ReportAtRiskStudentsView;
 import com.ustadmobile.lib.db.entities.Clazz;
@@ -173,7 +174,6 @@ public class ReportAtRiskStudentsPresenter extends CommonHandlerPresenter<Report
 
     @Override
     public void handleCommonPressed(Object arg) {
-        //TODO: Go to selected student.
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         Hashtable<String, Object> args = new Hashtable<>();
         args.put(ARG_PERSON_UID, (long)arg);
@@ -183,6 +183,11 @@ public class ReportAtRiskStudentsPresenter extends CommonHandlerPresenter<Report
 
     @Override
     public void handleSecondaryPressed(Object arg) {
-        //TODO: Open call dialog options
+        PersonWithEnrollment personWithEnrollment = (PersonWithEnrollment)arg;
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        Hashtable args = new Hashtable();
+        args.put(ARG_PERSON_UID, (long) personWithEnrollment.getPersonUid());
+        args.put(ARG_CLAZZ_UID, (long) personWithEnrollment.getClazzUid());
+        impl.go(CallPersonRelatedDialogView.VIEW_NAME, args, view.getContext());
     }
 }

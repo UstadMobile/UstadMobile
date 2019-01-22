@@ -353,7 +353,7 @@ public class PersonWithEnrollmentRecyclerAdapter
 
             callImageView.setVisibility(View.VISIBLE);
             callImageView.setOnClickListener(v ->
-                    mPresenter.handleSecondaryPressed(personWithEnrollment.getPersonUid()));
+                    mPresenter.handleSecondaryPressed(personWithEnrollment));
         }else{
             callImageView.setVisibility(View.GONE);
         }

@@ -45,6 +45,13 @@ public abstract class ClazzMemberDao implements SyncableDao<ClazzMember, ClazzMe
             "AND ClazzMember.role = 1")
     public abstract UmProvider<ClazzMemberWithPerson> findClazzMembersByClazzId(long uid);
 
+    @UmQuery("SELECT ClazzMember.*, Person.* FROM ClazzMember " +
+            " LEFT JOIN Person ON ClazzMember.clazzMemberPersonUid = Person.personUid" +
+            " WHERE ClazzMember.clazzMemberClazzUid = :uid AND ClazzMember.clazzMemberActive = 1 " +
+            "AND ClazzMember.role = :role")
+    public abstract void findClazzMemberWithPersonByRoleForClazzUid(long uid, int role,
+                                                  UmCallback<List<ClazzMemberWithPerson>> resultList);
+
     @UmQuery("SELECT * FROM ClazzMember WHERE clazzMemberPersonUid = :personUid " +
             "AND clazzMemberClazzUid = :clazzUid")
     public abstract ClazzMember findByPersonUidAndClazzUid(long personUid, long clazzUid);
