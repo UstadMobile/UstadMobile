@@ -4,6 +4,9 @@ import com.ustadmobile.lib.database.UmDbBuilder;
 import com.ustadmobile.lib.database.annotation.UmClearAll;
 import com.ustadmobile.lib.database.annotation.UmDatabase;
 import com.ustadmobile.lib.database.annotation.UmRepository;
+import com.ustadmobile.lib.database.annotation.UmSyncCountLocalPendingChanges;
+import com.ustadmobile.lib.database.annotation.UmSyncOutgoing;
+import com.ustadmobile.lib.db.UmDbWithAttachmentsDir;
 import com.ustadmobile.lib.db.UmDbWithAuthenticator;
 import com.ustadmobile.lib.db.sync.UmSyncableDatabase;
 import com.ustadmobile.lib.db.sync.dao.SyncStatusDao;
@@ -18,13 +21,17 @@ import java.util.Map;
 
 
 @UmDatabase(version = 1, entities = {ExampleEntity.class, ExampleLocation.class,
-        ExampleSyncableEntity.class, SyncStatus.class, SyncablePrimaryKey.class,
+        ExampleSyncableEntity.class, ExampleSyncableEntityWithAttachment.class,
+        SyncStatus.class, SyncablePrimaryKey.class,
         SyncDeviceBits.class})
-public abstract class ExampleDatabase implements UmSyncableDatabase, UmDbWithAuthenticator {
+public abstract class ExampleDatabase implements UmSyncableDatabase, UmDbWithAuthenticator,
+        UmDbWithAttachmentsDir {
 
     private static volatile ExampleDatabase instance;
 
     private boolean master;
+
+    private String attachmentsDir;
 
     private static volatile Hashtable<String, ExampleDatabase> namedInstances = new Hashtable<>();
 
@@ -40,7 +47,7 @@ public abstract class ExampleDatabase implements UmSyncableDatabase, UmDbWithAut
 
     public static synchronized ExampleDatabase getInstance(Object context) {
         if(instance == null){
-            instance = UmDbBuilder.makeDatabase(ExampleDatabase.class, context);
+            instance = UmDbBuilder.builder(ExampleDatabase.class, context).build();
         }
 
         return instance;
@@ -49,7 +56,7 @@ public abstract class ExampleDatabase implements UmSyncableDatabase, UmDbWithAut
     public static synchronized ExampleDatabase getInstance(Object context, String dbName) {
         ExampleDatabase db = namedInstances.get(dbName);
         if(db == null) {
-            db = UmDbBuilder.makeDatabase(ExampleDatabase.class, context, dbName);
+            db = UmDbBuilder.builder(ExampleDatabase.class, context, dbName).build();
             namedInstances.put(dbName, db);
         }
 
@@ -60,6 +67,8 @@ public abstract class ExampleDatabase implements UmSyncableDatabase, UmDbWithAut
     public abstract ExampleDao getExampleDao();
 
     public abstract ExampleSyncableDao getExampleSyncableDao();
+
+    public abstract ExampleSyncableEntityWithAttachmentDao getExampleSyncableEntityWithAttachmentDao();
 
     @UmClearAll
     public abstract void clearAll();
@@ -90,9 +99,8 @@ public abstract class ExampleDatabase implements UmSyncableDatabase, UmDbWithAut
             return validAuthTokens.get(userUid).equals(auth);
     }
 
-    public void syncWith(ExampleDatabase otherDb, long personUid, int sendLimit,int receiveLimit) {
-
-    }
+    @UmSyncOutgoing
+    public abstract void syncWith(ExampleDatabase otherDb, long personUid, int sendLimit,int receiveLimit);
 
     @Override
     public int getDeviceBits() {
@@ -103,4 +111,16 @@ public abstract class ExampleDatabase implements UmSyncableDatabase, UmDbWithAut
     public void invalidateDeviceBits() {
         getSyncablePrimaryKeyDao().invalidateDeviceBits();
     }
+
+    @Override
+    public String getAttachmentsDir() {
+        return attachmentsDir;
+    }
+
+    public void setAttachmentsDir(String attachmentsDir) {
+        this.attachmentsDir = attachmentsDir;
+    }
+
+    @UmSyncCountLocalPendingChanges
+    public abstract int countPendingChanges(long personAccountUid, int deiceId);
 }

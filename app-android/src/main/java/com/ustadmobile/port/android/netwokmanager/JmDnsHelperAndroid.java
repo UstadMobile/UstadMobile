@@ -11,7 +11,8 @@ import android.os.AsyncTask;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.ustadmobile.core.buildconfig.CoreBuildConfig;
+import com.ustadmobile.core.impl.AppConfig;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -50,6 +51,8 @@ public class JmDnsHelperAndroid implements ServiceListener, INsdHelperAndroid{
     private static final String SERVICE_TYPE_SUFFIX = "._tcp.local.";
 
     private ServiceInfo localServiceInfo;
+
+    private String networkServiceType;
 
     private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -95,7 +98,7 @@ public class JmDnsHelperAndroid implements ServiceListener, INsdHelperAndroid{
 
                 }else if(!connected && jmDns != null) {
                     try {
-                        jmDns.removeServiceListener(CoreBuildConfig.NETWORK_SERVICE_TYPE + SERVICE_TYPE_SUFFIX,
+                        jmDns.removeServiceListener(networkServiceType + SERVICE_TYPE_SUFFIX,
                                 JmDnsHelperAndroid.this);
                         jmDns.unregisterAllServices();
                         jmDns.close();
@@ -114,7 +117,10 @@ public class JmDnsHelperAndroid implements ServiceListener, INsdHelperAndroid{
     public JmDnsHelperAndroid(Context context, NetworkManagerAndroid networkManager) {
         this.context = context;
         this.networkManager = networkManager;
-        wifiManager = (WifiManager)context.getSystemService(Context.WIFI_SERVICE);
+        wifiManager = (WifiManager)context.getApplicationContext()
+                .getSystemService(Context.WIFI_SERVICE);
+        networkServiceType = UstadMobileSystemImpl.getInstance().getAppConfigString(
+                AppConfig.KEY_NETWORK_SERVICE_TYPE, "_ustad", context);
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
@@ -127,7 +133,7 @@ public class JmDnsHelperAndroid implements ServiceListener, INsdHelperAndroid{
         if(!discoveryActive && jmDns != null) {
             this.discoveryActive = true;
             checkLock();
-            jmDns.addServiceListener(CoreBuildConfig.NETWORK_SERVICE_TYPE + SERVICE_TYPE_SUFFIX,
+            jmDns.addServiceListener(networkServiceType+ SERVICE_TYPE_SUFFIX,
                     this);
             Log.i(NetworkManagerAndroid.TAG, "JmDnsHelperAndroid: added service listener");
         }
@@ -137,7 +143,7 @@ public class JmDnsHelperAndroid implements ServiceListener, INsdHelperAndroid{
     public synchronized void stopNSDiscovery() {
         discoveryEnabled = false;
         if(discoveryActive) {
-            jmDns.removeServiceListener(CoreBuildConfig.NETWORK_SERVICE_TYPE + SERVICE_TYPE_SUFFIX,
+            jmDns.removeServiceListener(networkServiceType + SERVICE_TYPE_SUFFIX,
                     this);
             discoveryActive = false;
             checkLock();
@@ -175,9 +181,9 @@ public class JmDnsHelperAndroid implements ServiceListener, INsdHelperAndroid{
             String networkServiceName =
                     (btAdapter != null && btAdapter.getName() != null)
                     ? BluetoothAdapter.getDefaultAdapter().getName()
-                            : CoreBuildConfig.NETWORK_SERVICE_TYPE + (int)(Math.random() * 5000);
+                            : networkServiceType + (int)(Math.random() * 5000);
             localServiceInfo = ServiceInfo.create(
-                    CoreBuildConfig.NETWORK_SERVICE_TYPE + SERVICE_TYPE_SUFFIX, networkServiceName,
+                    networkServiceType + SERVICE_TYPE_SUFFIX, networkServiceName,
                     networkManager.getHttpListeningPort(), "path=/");
             try {
                 jmDns.registerService(localServiceInfo );

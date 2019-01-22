@@ -6,6 +6,7 @@ import com.ustadmobile.core.db.dao.DownloadJobDao;
 import com.ustadmobile.core.db.dao.DownloadSetDao;
 import com.ustadmobile.core.db.dao.NetworkNodeDao;
 import com.ustadmobile.core.fs.db.ContainerFileHelper;
+import com.ustadmobile.core.impl.AppConfig;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UmResultCallback;
@@ -73,8 +74,6 @@ import javax.net.SocketFactory;
 
 import fi.iki.elonen.NanoHTTPD;
 import fi.iki.elonen.router.RouterNanoHTTPD;
-
-import static com.ustadmobile.core.buildconfig.CoreBuildConfig.WIFI_P2P_INSTANCE_NAME;
 
 /**
  * <h1>NetworkManager</h1>
@@ -856,7 +855,10 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
      */
     public void handleWifiDirectSdTxtRecordsAvailable(String serviceFullDomain,String senderMacAddr, HashMap<String, String> txtRecords) {
         dbExecutorService.execute(() -> {
-            if(serviceFullDomain.contains(WIFI_P2P_INSTANCE_NAME)){
+            String wifiP2pServiceName = UstadMobileSystemImpl.getInstance()
+                    .getAppConfigString(AppConfig.KEY_WIFI_P2P_INSTANCE_NAME, "ustadmobile",
+                            getContext());
+            if(serviceFullDomain.contains(wifiP2pServiceName)){
                 String ipAddr = txtRecords.get(SD_TXT_KEY_IP_ADDR);
                 String btAddr = txtRecords.get(SD_TXT_KEY_BT_MAC);
                 int port=Integer.parseInt(txtRecords.get(SD_TXT_KEY_PORT));

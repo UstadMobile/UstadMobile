@@ -14,12 +14,16 @@ import com.ustadmobile.lib.database.annotation.UmClearAll;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmDatabase;
 import com.ustadmobile.lib.database.annotation.UmDbContext;
+import com.ustadmobile.lib.database.annotation.UmDbGetAttachment;
+import com.ustadmobile.lib.database.annotation.UmDbSetAttachment;
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
+import com.ustadmobile.lib.database.annotation.UmRepository;
 import com.ustadmobile.lib.database.annotation.UmRestAccessible;
 import com.ustadmobile.lib.database.annotation.UmRestAuthorizedUidParam;
 import com.ustadmobile.lib.database.annotation.UmSyncCheckIncomingCanInsert;
 import com.ustadmobile.lib.database.annotation.UmSyncCheckIncomingCanUpdate;
+import com.ustadmobile.lib.database.annotation.UmSyncCountLocalPendingChanges;
 import com.ustadmobile.lib.database.annotation.UmSyncFindAllChanges;
 import com.ustadmobile.lib.database.annotation.UmSyncFindLocalChanges;
 import com.ustadmobile.lib.database.annotation.UmSyncIncoming;
@@ -27,6 +31,7 @@ import com.ustadmobile.lib.database.annotation.UmSyncLastChangedBy;
 import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
 import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 import com.ustadmobile.lib.database.annotation.UmSyncOutgoing;
+import com.ustadmobile.lib.db.UmDbWithAttachmentsDir;
 import com.ustadmobile.lib.db.sync.SyncResponse;
 import com.ustadmobile.lib.db.sync.UmRepositoryDb;
 import com.ustadmobile.lib.db.sync.UmRepositoryUtils;
@@ -36,7 +41,11 @@ import com.ustadmobile.lib.db.sync.dao.BaseDao;
 import com.ustadmobile.lib.db.sync.entities.SyncStatus;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -73,6 +82,7 @@ import javax.ws.rs.core.MediaType;
 
 import static com.ustadmobile.lib.annotationprocessor.core.DbProcessorUtils.capitalize;
 import static com.ustadmobile.lib.annotationprocessor.core.DbProcessorUtils.findElementWithAnnotation;
+import static com.ustadmobile.lib.annotationprocessor.core.DbProcessorUtils.findElementsWithAnnotation;
 import static com.ustadmobile.lib.database.jdbc.JdbcDatabaseUtils.PRODUCT_NAME_POSTGRES;
 import static com.ustadmobile.lib.database.jdbc.JdbcDatabaseUtils.PRODUCT_NAME_SQLITE;
 
@@ -149,7 +159,8 @@ public abstract class AbstractDbProcessor {
 
                     if(dbMethod.getAnnotation(UmDbContext.class) != null
                             || dbMethod.getAnnotation(UmClearAll.class) != null
-                            || dbMethod.getAnnotation(UmSyncOutgoing.class) != null)
+                            || dbMethod.getAnnotation(UmSyncOutgoing.class) != null
+                            || dbMethod.getAnnotation(UmSyncCountLocalPendingChanges.class) != null)
                         continue;
 
 
@@ -449,6 +460,10 @@ public abstract class AbstractDbProcessor {
             methodBuilder.addModifiers(Modifier.PROTECTED);
 
 
+        for(TypeMirror thrown : method.getThrownTypes()) {
+            methodBuilder.addException(TypeName.get(thrown));
+        }
+
         for(VariableElement variableElement : method.getParameters()) {
             TypeMirror varTypeMirror = variableElement.asType();
             varTypeMirror = DbProcessorUtils.resolveType(varTypeMirror, childClass, processingEnv);
@@ -501,23 +516,20 @@ public abstract class AbstractDbProcessor {
                 daoMethod.getParameters().get(0).getSimpleName();
     }
 
-    protected String generateFindLocalChangesSql(TypeElement daoType, ExecutableElement daoMethod,
+    protected String generateFindLocalChangesSql(TypeElement daoType,
+                                                 ExecutableElement daoMethod,
+                                                 String selectClause,
+                                                 String localCsnCondition,
+                                                 String limitParamName,
+                                                 String lastChangedByFieldParamName,
                                                  ProcessingEnvironment processingEnv) {
-        DaoMethodInfo methodInfo = new DaoMethodInfo(daoMethod, daoType, processingEnv);
+        TypeMirror entityTypeMirror = DbProcessorUtils.resolveDaoEntityType(daoType.asType(),
+                processingEnv);
         TypeElement entityTypeEl = (TypeElement)processingEnv.getTypeUtils().asElement(
-                methodInfo.resolveResultEntityComponentType());
+                entityTypeMirror);
+
         Element localChangeSeqNumEl = DbProcessorUtils.findElementWithAnnotation(entityTypeEl,
                 UmSyncLocalChangeSeqNum.class, processingEnv);
-
-        if(daoMethod.getParameters().size() != 5) {
-            messager.printMessage(Diagnostic.Kind.ERROR, "Method "
-                            + daoMethod.toString() + " has " + daoMethod.getParameters().size() +
-                            " parameters. FindLocalChanges method " +
-                    "must have 5 parameters: long fromLocalChangeSeqNum, long toLocalChangeSeqNum," +
-                    "long accountPersonUid, int deviceId, " +
-                    "int limit", daoType);
-            return "";
-        }
 
         if(localChangeSeqNumEl == null) {
             messager.printMessage(Diagnostic.Kind.ERROR,
@@ -558,14 +570,6 @@ public abstract class AbstractDbProcessor {
             return "";
         }
 
-
-
-
-
-        VariableElement fromLocalChangeSeqNumParam = daoMethod.getParameters().get(0);
-        VariableElement toLocalChangeSeqNumParam = daoMethod.getParameters().get(1);
-        VariableElement localDeviceId = daoMethod.getParameters().get(3);
-        VariableElement limitParam = daoMethod.getParameters().get(4);
         Element lastChangedByField = findElementWithAnnotation(entityTypeEl,
                 UmSyncLastChangedBy.class, processingEnv);
 
@@ -578,18 +582,85 @@ public abstract class AbstractDbProcessor {
             return "";
         }
 
-        return String.format("SELECT %s.* FROM %s %s, (SELECT (%s) AS canInsertCol) AS canInsertTbl " +
-                        "WHERE %s BETWEEN :%s AND :%s AND %s = :%s AND (canInsertTbl.canInsertCol OR (%s)) LIMIT :%s",
-                entityTypeEl.getSimpleName().toString(),
+        String querySql = String.format("SELECT %s FROM %s %s " +
+                        "WHERE %s AND %s = :%s " +
+                        "AND ((%s) OR (%s))",
+                selectClause,
                 entityTypeEl.getSimpleName().toString(),
                 joinClause,
-                insertCondition,
-                localChangeSeqNumEl.getSimpleName().toString(),
-                fromLocalChangeSeqNumParam.getSimpleName().toString(),
-                toLocalChangeSeqNumParam.getSimpleName().toString(),
+                localCsnCondition,
                 lastChangedByField.getSimpleName(),
-                localDeviceId.getSimpleName(),
-                updatePermissionCondition, limitParam.getSimpleName());
+                lastChangedByFieldParamName,
+                insertCondition,
+                updatePermissionCondition);
+        if(limitParamName != null)
+            querySql += " LIMIT :" + limitParamName;
+
+        return querySql;
+    }
+
+    protected String generateFindLocalChangesSql(TypeElement daoType,
+                                                 ExecutableElement daoMethod,
+                                                 ProcessingEnvironment processingEnv) {
+
+        if(daoMethod.getParameters().size() != 5) {
+            messager.printMessage(Diagnostic.Kind.ERROR, "Method "
+                    + daoMethod.toString() + " has " + daoMethod.getParameters().size() +
+                    " parameters. FindLocalChanges method " +
+                    "must have 5 parameters: long fromLocalChangeSeqNum, long toLocalChangeSeqNum," +
+                    "long accountPersonUid, int deviceId, " +
+                    "int limit", daoType);
+            return "";
+        }
+
+        DaoMethodInfo methodInfo = new DaoMethodInfo(daoMethod, daoType, processingEnv);
+        TypeElement entityCompTypeEl = (TypeElement)processingEnv.getTypeUtils().asElement(
+                methodInfo.resolveResultEntityComponentType());
+        Element localChangeSeqNumEl = DbProcessorUtils.findElementWithAnnotation(entityCompTypeEl,
+                UmSyncLocalChangeSeqNum.class, processingEnv);
+        VariableElement fromLocalChangeSeqNumParam = daoMethod.getParameters().get(0);
+        VariableElement toLocalChangeSeqNumParam = daoMethod.getParameters().get(1);
+        //method param #2 is accountPersonUid, which is used by referring to :accountPersonUid in query
+        VariableElement localDeviceIdParam = daoMethod.getParameters().get(3);
+        VariableElement limitParam = daoMethod.getParameters().get(4);
+
+        String selectCols = String.format("%s.*", entityCompTypeEl.getSimpleName());
+        String localCsnCondition = String.format("%s BETWEEN :%s AND :%s",
+            localChangeSeqNumEl.getSimpleName(),
+            fromLocalChangeSeqNumParam.getSimpleName(),
+            toLocalChangeSeqNumParam.getSimpleName());
+
+
+        return generateFindLocalChangesSql(daoType, daoMethod, selectCols, localCsnCondition,
+                limitParam.getSimpleName().toString(), localDeviceIdParam.getSimpleName().toString(),
+                processingEnv);
+    }
+
+    /**
+     *
+     * @param daoType
+     * @param daoMethod
+     * @param processingEnv
+     * @return
+     */
+    protected String generateSyncCountPendingLocalChangesSql(TypeElement daoType,
+                                                             ExecutableElement daoMethod,
+                                                             ProcessingEnvironment processingEnv) {
+        TypeElement entityTypeEl = (TypeElement)processingEnv.getTypeUtils().asElement(
+                DbProcessorUtils.resolveDaoEntityType(daoType.asType(), processingEnv));
+        Element localCsnFieldEl = DbProcessorUtils.findElementWithAnnotation(entityTypeEl,
+                UmSyncLocalChangeSeqNum.class, processingEnv);
+
+        VariableElement lastChangedByEl = daoMethod.getParameters().get(1);
+        int tableId = entityTypeEl.getAnnotation(UmEntity.class).tableId();
+        String csnComparisonWhereClause = String.format(
+                "%s > (SELECT syncedToLocalChangeSeqNum FROM SyncStatus WHERE tableId = %s)",
+                localCsnFieldEl.getSimpleName().toString(), String.valueOf(tableId));
+
+
+        return generateFindLocalChangesSql(daoType, daoMethod, "COUNT(*)",
+                csnComparisonWhereClause, null,
+                lastChangedByEl.getSimpleName().toString(), processingEnv);
     }
 
     /**
@@ -1093,6 +1164,7 @@ public abstract class AbstractDbProcessor {
         MethodSpec.Builder methodBuilder = overrideAndResolve(daoMethod, daoType, processingEnv);
         Element syncIncomingMethod = DbProcessorUtils.findElementWithAnnotation(daoType,
                 UmSyncIncoming.class, processingEnv);
+        boolean daoHasAttachments = daoType.getAnnotation(UmDao.class).hasAttachment();
 
         if(syncIncomingMethod == null) {
             messager.printMessage(Diagnostic.Kind.ERROR,
@@ -1120,6 +1192,7 @@ public abstract class AbstractDbProcessor {
         VariableElement accountPersonUidParam = daoMethod.getParameters().get(1);
         VariableElement sendLimitParam = daoMethod.getParameters().get(2);
         VariableElement receiveLimitParam = daoMethod.getParameters().get(3);
+        VariableElement entityPrimaryKeyEl = findPrimaryKey(entityTypeElement);
 
         Element localChangeSeqNumEl = findElementWithAnnotation(entityTypeElement,
                 UmSyncLocalChangeSeqNum.class, processingEnv);
@@ -1146,9 +1219,34 @@ public abstract class AbstractDbProcessor {
                         SyncStatus.class, umEntityAnnotation.tableId())
                 .add("boolean _syncComplete = false;\n")
                 .add("int _retryCount = 0;\n")
-                .add("long _syncCompleteMasterChangeSeqNum = -1L;\n")
-                .beginControlFlow("do")
-                    .add("$T _attemptSyncStatus = _syncableDb.getSyncStatusDao().getByUid($L);\n",
+                .add("long _syncCompleteMasterChangeSeqNum = -1L;\n");
+
+        ExecutableElement uploadAttachmentMethod = null;
+        ExecutableElement downloadAttachmentMethod = null;
+
+        if(daoHasAttachments) {
+            codeBlock.add("//DAO has attachments: must do one at a time\n")
+                    .add("$L = 1;\n", sendLimitParam.getSimpleName())
+                    .add("$L = 1;\n", receiveLimitParam.getSimpleName());
+
+            uploadAttachmentMethod =  findRepoDelegatedToWebServiceMethod(daoType,
+                    UmDbSetAttachment.class);
+            downloadAttachmentMethod = findRepoDelegatedToWebServiceMethod(daoType,
+                    UmDbGetAttachment.class);
+
+            if(uploadAttachmentMethod == null || downloadAttachmentMethod == null) {
+                messager.printMessage(Diagnostic.Kind.ERROR, formatMethodForErrorMessage(daoMethod,
+                        daoType) + ": DAO is marked as having attachments, but does not have set/get " +
+                        "attachment methods annotated as delegate to webservice (required for sync" +
+                        "to upload and download attachments)");
+            }
+        }
+        codeBlock.beginControlFlow("do");
+        if(daoHasAttachments) {
+            codeBlock.beginControlFlow("try");
+        }
+
+        codeBlock.add("$T _attemptSyncStatus = _syncableDb.getSyncStatusDao().getByUid($L);\n",
                             SyncStatus.class, umEntityAnnotation.tableId())
                     .add("$T<$T> _locallyChangedEntities = $L(" +
                                     "_attemptSyncStatus.getSyncedToLocalChangeSeqNum() + 1, " +
@@ -1160,8 +1258,20 @@ public abstract class AbstractDbProcessor {
                     .add("long _syncedToLocalSeqNum = _locallyChangedEntities.isEmpty() ? " +
                         "_attemptSyncStatus.getSyncedToLocalChangeSeqNum() : " +
                         "_locallyChangedEntities.get(_locallyChangedEntities.size()-1)" +
-                        ".get$L();\n", capitalize(localChangeSeqNumFieldName))
-                    .add("$T<$T> _remoteChanges = $L.$L(_locallyChangedEntities, 0, " +
+                        ".get$L();\n", capitalize(localChangeSeqNumFieldName));
+        if(daoHasAttachments) {
+            codeBlock.beginControlFlow("if(!_locallyChangedEntities.isEmpty())")
+                    .add("$T _changedPk = _locallyChangedEntities.get(0).get$L();\n",
+                            entityPrimaryKeyEl.asType(),
+                            capitalize(entityPrimaryKeyEl.getSimpleName()))
+                    .add("$L.$L(_changedPk, $L(_changedPk));\n", otherDaoParam.getSimpleName(),
+                            uploadAttachmentMethod.getSimpleName(),
+                            downloadAttachmentMethod.getSimpleName())
+                    .add("$L = 0;\n", receiveLimitParam.getSimpleName())
+                    .endControlFlow();
+        }
+
+        codeBlock.add("$T<$T> _remoteChanges = $L.$L(_locallyChangedEntities, 0, " +
                         "_attemptSyncStatus.getSyncedToMasterChangeNum() + 1, $L, " +
                                     "_syncableDb.getDeviceBits(), $L);\n",
                         SyncResponse.class, entityType, otherDaoParam.getSimpleName(),
@@ -1179,8 +1289,19 @@ public abstract class AbstractDbProcessor {
                         .beginControlFlow("if(_syncCompleteMasterChangeSeqNum == -1)")
                             .add("_syncCompleteMasterChangeSeqNum  = _remoteChanges." +
                                     "getCurrentMasterChangeSeqNum();\n")
-                        .endControlFlow()
-                        .add("replaceList(_remoteChanges.getRemoteChangedEntities());\n")
+                        .endControlFlow();
+
+        if(daoHasAttachments) {
+            codeBlock.beginControlFlow("if(!_remoteChangedEntities.isEmpty())")
+                    .add("$T _attachmentToDownloadId = _remoteChangedEntities.get(0).get$L();\n",
+                            entityPrimaryKeyEl.asType(), capitalize(entityPrimaryKeyEl.getSimpleName()))
+                    .add("$L(_attachmentToDownloadId, $L.$L(_attachmentToDownloadId));\n",
+                            uploadAttachmentMethod.getSimpleName(), otherDaoParam.getSimpleName(),
+                            downloadAttachmentMethod.getSimpleName())
+                    .endControlFlow();
+        }
+
+        codeBlock.add("replaceList(_remoteChanges.getRemoteChangedEntities());\n")
                         .add("_syncableDb.getSyncStatusDao().updateSyncedToChangeSeqNums(" +
                                 "$1L, _syncedToLocalSeqNum, _syncedToMasterSeqNum);\n",
                                 umEntityAnnotation.tableId())
@@ -1188,12 +1309,34 @@ public abstract class AbstractDbProcessor {
                                 " && (_syncedToLocalSeqNum >= _initialSyncStatus.getLocalChangeSeqNum() - 1 || _locallyChangedEntities.isEmpty());\n")
                     .nextControlFlow("else")
                         .add("_retryCount++;\n")
-                    .endControlFlow()
-                .endControlFlow("while(!_syncComplete && _retryCount < 3)");
+                    .endControlFlow();
+        if(daoHasAttachments) {
+            codeBlock.nextControlFlow("catch(Exception e)")
+                    .add("_retryCount++;\n")
+                    .add("e.printStackTrace();\n")
+                    .endControlFlow();
+        }
+
+        codeBlock.endControlFlow("while(!_syncComplete && _retryCount < 3)");
 
         methodBuilder.addCode(codeBlock.build());
         daoBuilder.addMethod(methodBuilder.build());
         return methodBuilder;
+    }
+
+    private ExecutableElement findRepoDelegatedToWebServiceMethod(TypeElement daoType,
+                                                        Class<? extends Annotation> annotation) {
+        List<Element> candidates = findElementsWithAnnotation(daoType, annotation,
+                new ArrayList<>(), 0, processingEnv);
+        for(Element candidate : candidates) {
+            if(candidate.getAnnotation(UmRepository.class) != null
+                    && candidate.getAnnotation(UmRepository.class).delegateType()
+                    == UmRepository.UmRepositoryMethodType.DELEGATE_TO_WEBSERVICE) {
+                return (ExecutableElement)candidate;
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -1209,12 +1352,15 @@ public abstract class AbstractDbProcessor {
      * for the method void doSomething(String str1, int number, UmCallback&lt;Long&gt;) it will
      * generate (str1, number)
      *
-     * @param parameters The parameters from which to generate the callback. Normally from ExecutableElement.getParameters
+     * @param parameters The parameters from which to generate the callback. Normally from
+     *                   ExecutableElement.getParameters
+     * @param substitutions if not null, the map will be used to substitute variable names
      * @param excludedElements Elements that should be excluded e.g. callback parameters as above
      *
      * @return CodeBlock with the generated source as above
      */
     protected CodeBlock makeNamedParameterMethodCall(List<? extends VariableElement> parameters,
+                                                     Map<String, String> substitutions,
                                                      Element... excludedElements) {
         List<Element> excludedElementList = Arrays.asList(excludedElements);
         CodeBlock.Builder block = CodeBlock.builder().add("(");
@@ -1225,12 +1371,21 @@ public abstract class AbstractDbProcessor {
             if(excludedElementList.contains(variableTypeElement))
                 continue;
 
-            paramNames.add(variable.getSimpleName().toString());
+            String variableName = variable.getSimpleName().toString();
+            if(substitutions != null && substitutions.containsKey(variableName))
+                variableName = substitutions.get(variableName);
+
+            paramNames.add(variableName);
         }
 
         block.add(String.join(", ", paramNames));
 
         return block.add(")").build();
+    }
+
+    protected CodeBlock makeNamedParameterMethodCall(List<? extends VariableElement> parameters,
+                                                     Element... excludedElements) {
+        return makeNamedParameterMethodCall(parameters, null, excludedElements);
     }
 
     /**
@@ -1495,7 +1650,10 @@ public abstract class AbstractDbProcessor {
      * @param queryParamAnnotation Annotation to add for a parameter that can be passed as query
      *                             parameters (primitives and list/arrays of primitives)
      * @param requestBodyAnnotation Annotation to add for a parameter that should be the request body
-     *                              (if any).
+     *                              (if any). This is used for JSON objects
+     * @param formDataAnnotation Annotation to add for multipart form upload data. This is used for
+     *                           binary attachment data.
+     * @param typeSubstitutions Substitute parameters (from value typemirror to key typemirror).
      * @param addAuthHeaderParamToMethod if true, if we find a parameter annotated
      *                                   UmRestAuthorizedUidParam, then an additional parameter will
      *                                   be added to the end to get the auth token.
@@ -1504,20 +1662,34 @@ public abstract class AbstractDbProcessor {
                                       MethodSpec.Builder methodBuilder,
                                       Class<? extends Annotation> queryParamAnnotation,
                                       Class<? extends Annotation> requestBodyAnnotation,
+                                      Class<? extends Annotation> formDataAnnotation,
+                                      Map<TypeMirror, TypeMirror> typeSubstitutions,
                                       boolean addAuthHeaderParamToMethod) {
 
         DaoMethodInfo methodInfo = new DaoMethodInfo(method, daoType, processingEnv);
+        TypeMirror inputStreamTypeEl = processingEnv.getElementUtils().getTypeElement(
+                InputStream.class.getName()).asType();
         for(VariableElement param : method.getParameters()) {
             if(umCallbackTypeElement.equals(processingEnv.getTypeUtils().asElement(param.asType())))
                 continue;
 
+            TypeMirror paramTypeMirror = DbProcessorUtils.resolveType(param.asType(), daoType,
+                    processingEnv);
+
+            if(typeSubstitutions != null && typeSubstitutions.containsKey(paramTypeMirror)) {
+                paramTypeMirror = typeSubstitutions.get(paramTypeMirror);
+            }
+
             ParameterSpec.Builder paramSpec = ParameterSpec.builder(TypeName.get(
-                    DbProcessorUtils.resolveType(param.asType(), daoType, processingEnv)),
+                    paramTypeMirror),
                     param.getSimpleName().toString());
 
             if(DbProcessorUtils.isQueryParam(param.asType(), processingEnv)) {
                 paramSpec.addAnnotation(AnnotationSpec.builder(queryParamAnnotation)
                         .addMember("value", "$S", param.getSimpleName().toString()).build());
+            }else if(param.asType().equals(inputStreamTypeEl)) {
+                paramSpec.addAnnotation(AnnotationSpec.builder(formDataAnnotation)
+                        .addMember("value", "$S", param.getSimpleName()).build());
             }else if(requestBodyAnnotation != null) {
                 paramSpec.addAnnotation(requestBodyAnnotation);
             }
@@ -1534,6 +1706,17 @@ public abstract class AbstractDbProcessor {
                                 .getAnnotation(UmRestAuthorizedUidParam.class).headerName()).build())
                     .build());
         }
+    }
+
+    protected void addJaxWsParameters(ExecutableElement method, TypeElement daoType,
+                                      MethodSpec.Builder methodBuilder,
+                                      Class<? extends Annotation> queryParamAnnotation,
+                                      Class<? extends Annotation> requestBodyAnnotation,
+                                      Class<? extends Annotation> formDataAnnotation,
+                                      boolean addAuthHeaderParamToMethod) {
+        addJaxWsParameters(method, daoType, methodBuilder, queryParamAnnotation,
+                requestBodyAnnotation, formDataAnnotation, null,
+                addAuthHeaderParamToMethod);
     }
 
     /**
@@ -1554,9 +1737,11 @@ public abstract class AbstractDbProcessor {
     protected void addJaxWsParameters(ExecutableElement method, TypeElement daoType,
                                       MethodSpec.Builder methodBuilder,
                                       Class<? extends Annotation> queryParamAnnotation,
-                                      Class<? extends Annotation> requestBodyAnnotation) {
+                                      Class<? extends Annotation> requestBodyAnnotation,
+                                      Class<? extends Annotation> formDataAnnotation) {
         addJaxWsParameters(method, daoType, methodBuilder, queryParamAnnotation,
-                requestBodyAnnotation, false);
+                requestBodyAnnotation,formDataAnnotation, null,
+                false);
     }
 
 
@@ -1572,7 +1757,14 @@ public abstract class AbstractDbProcessor {
         int numNonQueryParams = DbProcessorUtils.getNonQueryParamCount(method, processingEnv,
                 processingEnv.getElementUtils().getTypeElement(UmCallback.class.getName()));
 
-        if(numNonQueryParams == 1) {
+        boolean isFormDataUpload = DbProcessorUtils.isFormDataUpload(method, processingEnv);
+
+
+        if(isFormDataUpload) {
+            methodBuilder.addAnnotation(AnnotationSpec.builder(Consumes.class)
+                .addMember("value", "$T.MULTIPART_FORM_DATA", MediaType.class).build())
+                .addAnnotation(POST.class);
+        }else if(numNonQueryParams == 1) {
             methodBuilder.addAnnotation(AnnotationSpec.builder(Consumes.class)
                     .addMember("value", "$T.APPLICATION_JSON", MediaType.class).build())
                     .addAnnotation(POST.class);
@@ -1592,7 +1784,7 @@ public abstract class AbstractDbProcessor {
                 String.class.getName());
         String producesFormat;
 
-        if(!isVoid(resultType)) {
+        if(!isVoid(resultType) && !resultTypeName.equals(ClassName.get(InputStream.class))) {
             if (resultTypeName.isPrimitive() || resultTypeName.isBoxedPrimitive()
                     || stringTypeEl.equals(processingEnv.getTypeUtils().asElement(resultType))) {
                 producesFormat = "$T.TEXT_PLAIN";
@@ -1634,9 +1826,9 @@ public abstract class AbstractDbProcessor {
                 .add("return ($T)_repo;\n", dbType).build());
     }
 
-    protected MethodSpec.Builder generateDbSyncOutgoingMethod(TypeElement dbType, ExecutableElement dbMethod) {
-        List<ExecutableElement> daoGettersToSync = new ArrayList<>();
 
+    protected List<ExecutableElement> findDaoGetterMethods(TypeElement dbType){
+        List<ExecutableElement> daoGetterMethods = new ArrayList<>();
         for(ExecutableElement subMethod : findMethodsToImplement(dbType)) {
             TypeMirror returnType = subMethod.getReturnType();
             if(!returnType.getKind().equals(TypeKind.DECLARED))
@@ -1647,12 +1839,72 @@ public abstract class AbstractDbProcessor {
             if(returnTypeEl.getAnnotation(UmDao.class) == null)
                 continue;
 
-            Element outgoingSyncMethod = findElementWithAnnotation(returnTypeEl,
+            daoGetterMethods.add(subMethod);
+        }
+
+        return daoGetterMethods;
+    }
+
+    protected List<ExecutableElement> findSyncableDaoGetterMethods(TypeElement dbType) {
+        List<ExecutableElement> daoGettersToSync = new ArrayList<>();
+
+        for(ExecutableElement subMethod: findDaoGetterMethods(dbType)) {
+            Element outgoingSyncMethod = findElementWithAnnotation((TypeElement)processingEnv
+                            .getTypeUtils().asElement(subMethod.getReturnType()),
                     UmSyncOutgoing.class, processingEnv);
             if(outgoingSyncMethod != null){
-                daoGettersToSync.add((ExecutableElement)subMethod);
+                daoGettersToSync.add(subMethod);
             }
         }
+
+        return daoGettersToSync;
+    }
+
+
+    protected MethodSpec generateDbSyncCountLocalPendingChangesMethod(TypeElement dbType,
+                                                                      ExecutableElement dbMethod) {
+        List<ExecutableElement> syncableDaoGetters = findSyncableDaoGetterMethods(dbType);
+        MethodSpec.Builder methodBuilder = overrideAndResolve(dbMethod, dbType, processingEnv);
+        CodeBlock.Builder codeBlock = CodeBlock.builder();
+
+        if(dbMethod.getParameters().size() != 2) {
+            messager.printMessage(Diagnostic.Kind.ERROR, formatMethodForErrorMessage(dbMethod, dbType) +
+                    " @UmSyncCountLocalPendingChanges must have two arguments: the accountUid and the deviceId");
+            return methodBuilder.build();
+        }
+
+        VariableElement accountUidParamEl = dbMethod.getParameters().get(0);
+        VariableElement deviceIdParamEl = dbMethod.getParameters().get(1);
+
+        boolean firstEl = true;
+        for(ExecutableElement daoGetter : syncableDaoGetters) {
+            TypeElement daoTypeEl = (TypeElement)processingEnv.getTypeUtils()
+                    .asElement(daoGetter.getReturnType());
+            Element countPendingChangesEl = DbProcessorUtils.findElementWithAnnotation(
+                    daoTypeEl, UmSyncCountLocalPendingChanges.class, processingEnv);
+            if(countPendingChangesEl == null)
+                continue;
+
+            if(firstEl) {
+                codeBlock.add("int _pendingChangeCount = ");
+            }else {
+                codeBlock.add("_pendingChangeCount += ");
+            }
+
+            codeBlock.add("$L().$L($L, $L);\n",
+                    daoGetter.getSimpleName(), countPendingChangesEl.getSimpleName(),
+                    accountUidParamEl.getSimpleName(), deviceIdParamEl.getSimpleName());
+
+            firstEl = false;
+        }
+
+        codeBlock.add("return _pendingChangeCount;\n");
+
+        return methodBuilder.addCode(codeBlock.build()).build();
+    }
+
+    protected MethodSpec.Builder generateDbSyncOutgoingMethod(TypeElement dbType, ExecutableElement dbMethod) {
+        List<ExecutableElement> daoGettersToSync = findSyncableDaoGetterMethods(dbType);
 
         MethodSpec.Builder methodBuilder = MethodSpec.overriding(dbMethod);
         CodeBlock.Builder codeBlock = CodeBlock.builder();
@@ -1834,5 +2086,120 @@ public abstract class AbstractDbProcessor {
 
         return sql;
     }
+
+    /**
+     * Generates the setAttachment method.
+     *
+     * @param daoType TypeElement representing the DAO
+     * @param daoMethod ExecutableElement representing the abstract method whose implementation is
+     *                  being generated
+     * @param dbVarName Variable name for the database
+     * @return MethodSpec implementing the setAttachment method
+     */
+    protected MethodSpec generateSetAttachmentMethod(TypeElement daoType, ExecutableElement daoMethod,
+                                                  String dbVarName) {
+        MethodSpec.Builder methodBuilder = overrideAndResolve(daoMethod, daoType, processingEnv);
+        CodeBlock.Builder codeBlock = CodeBlock.builder();
+
+        if(daoMethod.getParameters().size() != 2) {
+            messager.printMessage(Diagnostic.Kind.ERROR,
+                    formatMethodForErrorMessage(daoMethod, daoType) + " setAttachment " +
+                            "must have two parameters: the primary key and an InputStream", daoType);
+            return methodBuilder.build();
+        }
+
+        VariableElement pkElement = daoMethod.getParameters().get(0);
+        VariableElement attachmentSrcEl = daoMethod.getParameters().get(1);
+
+        TypeMirror inputStreamType = processingEnv.getElementUtils().getTypeElement(
+                InputStream.class.getName()).asType();
+        TypeMirror fileType = processingEnv.getElementUtils().getTypeElement(File.class.getName())
+                .asType();
+
+        codeBlock.add("$1T _dbWithAttachments = ($1T)$2L;\n", UmDbWithAttachmentsDir.class,
+                dbVarName)
+                .add("$1T _daoOutDir = new $1T(_dbWithAttachments.getAttachmentsDir(), " +
+                        "$2S);\n", File.class, daoType.getSimpleName())
+                .beginControlFlow("if(!_daoOutDir.exists())")
+                    .add("_daoOutDir.mkdirs();\n")
+                .endControlFlow()
+                .add("$1T _attachmentFile = new $1T(_daoOutDir, String.valueOf($2L));\n",
+                    File.class, pkElement.getSimpleName());
+
+        if(attachmentSrcEl.asType().equals(inputStreamType)) {
+            codeBlock.add("try(")
+                    .indent()
+                    .add("$1T _daoFileOut = new $1T(_attachmentFile);\n", FileOutputStream.class)
+                    .unindent()
+                    .beginControlFlow(")")
+                    .add("byte[] _buf = new byte[1024];\n")
+                    .add("int _bytesRead = -1;\n")
+                    .beginControlFlow("while((_bytesRead = $L.read(_buf)) != -1)",
+                            attachmentSrcEl.getSimpleName())
+                    .add("_daoFileOut.write(_buf, 0, _bytesRead);\n")
+                    .endControlFlow()
+                    .nextControlFlow("catch($T _ioe)", IOException.class)
+                    .add("_ioe.printStackTrace();\n")
+                    .endControlFlow();
+        }else {
+            codeBlock.beginControlFlow("if(_attachmentFile.exists())")
+                    .add("_attachmentFile.delete();\n")
+                .endControlFlow()
+                .add("$L.renameTo(_attachmentFile);\n", attachmentSrcEl.getSimpleName());
+        }
+
+        methodBuilder.addCode(codeBlock.build());
+        return methodBuilder.build();
+    }
+
+    /**
+     * Generate a getAttachment method
+     *
+     * @param daoType The DAO we are generating this for
+     * @param daoMethod The method to generate an implementation of
+     * @param dbVarName Variable name of the database
+     *
+     * @return MethodSpec with an implementation of getAttachment
+     */
+    public MethodSpec generateGetAttachmentMethod(TypeElement daoType, ExecutableElement daoMethod,
+                                            String dbVarName) {
+        MethodSpec.Builder methodBuilder = overrideAndResolve(daoMethod, daoType, processingEnv);
+        CodeBlock.Builder codeBlock = CodeBlock.builder();
+        TypeMirror stringType = processingEnv.getElementUtils()
+                .getTypeElement(String.class.getName()).asType();
+        TypeMirror inputStreamType = processingEnv.getElementUtils()
+                .getTypeElement(InputStream.class.getName()).asType();
+
+        if(daoMethod.getParameters().size() != 1) {
+            messager.printMessage(Diagnostic.Kind.ERROR,
+                    formatMethodForErrorMessage(daoMethod, daoType) + "GetAttachment " +
+                            "method must have one parameter: the primary key");
+            return methodBuilder.build();
+        }
+
+        if(!Arrays.asList(inputStreamType, stringType).contains(daoMethod.getReturnType())) {
+            messager.printMessage(Diagnostic.Kind.ERROR,
+                    formatMethodForErrorMessage(daoMethod, daoType) + " GetAttachment " +
+                            "method return type must be String (representing a URI) or InputStream");
+        }
+
+        VariableElement pkVariableElement = daoMethod.getParameters().get(0);
+
+        boolean isStringUri = daoMethod.getReturnType().equals(stringType);
+        codeBlock.add("$1T _dbWithAttachments = ($1T)$2L;\n", UmDbWithAttachmentsDir.class,
+                dbVarName)
+                .add("$1T _daoDir = new $1T(_dbWithAttachments.getAttachmentsDir(), " +
+                        "$2S);\n", File.class, daoType.getSimpleName())
+                .add("$1T _attachmentFile = new $1T(_daoDir, String.valueOf($2L));\n",
+                        File.class, pkVariableElement.getSimpleName());
+        if(isStringUri) {
+            codeBlock.add("return _attachmentFile.getAbsolutePath();\n");
+        }else {
+            codeBlock.add("return new $T(_attachmentFile);\n\n", FileInputStream.class);
+        }
+
+        return methodBuilder.addCode(codeBlock.build()).build();
+    }
+
 
 }

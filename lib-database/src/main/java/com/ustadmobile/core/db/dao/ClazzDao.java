@@ -95,4 +95,15 @@ public abstract class ClazzDao implements SyncableDao<Clazz, ClazzDao> {
     @UmSyncCheckIncomingCanUpdate
     public abstract List<UmSyncExistingEntity> syncFindExistingEntities(List<Long> primaryKeys,
                                                                         long accountPersonUid);
+
+    @UmQuery("SELECT COUNT(*) FROM Clazz " +
+            "WHERE " +
+            "clazzLocalChangeSeqNum > (SELECT syncedToLocalChangeSeqNum FROM SyncStatus WHERE tableId = 6) " +
+            "AND clazzLastChangedBy = (SELECT deviceBits FROM SyncDeviceBits LIMIT 1) " +
+            "AND ((" + ENTITY_LEVEL_PERMISSION_CONDITION1 + Role.PERMISSION_CLAZZ_UPDATE + //can update it
+                ENTITY_LEVEL_PERMISSION_CONDITION2 + ") " +
+            " OR (" + TABLE_LEVEL_PERMISSION_CONDITION1 + Role.PERMISSION_CLAZZ_INSERT + //can insert on table
+                TABLE_LEVEL_PERMISSION_CONDITION2 + "))")
+    public abstract int countPendingLocalChanges(long accountPersonUid);
+
 }

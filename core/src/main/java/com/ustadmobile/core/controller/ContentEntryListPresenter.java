@@ -32,7 +32,8 @@ public class ContentEntryListPresenter extends UstadBaseController<ContentEntryV
         contentEntryDao.getContentByUuid(parentUid, new UmCallback<ContentEntry>() {
             @Override
             public void onSuccess(ContentEntry result) {
-                viewContract.setToolbarTitle(result.getTitle());
+                if(result != null)
+                    viewContract.setToolbarTitle(result.getTitle());
             }
 
             @Override

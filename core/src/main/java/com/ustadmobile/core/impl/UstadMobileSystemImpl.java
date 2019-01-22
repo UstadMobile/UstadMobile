@@ -71,8 +71,6 @@ public abstract class UstadMobileSystemImpl {
      */
     public static final String DEFAULT_CONTENT_DIR_NAME = "ustadmobileContent";
 
-    private MessagesHashtable messages;
-
     /**
      * The direction - either 0 for LTR or 1 for RTL
      */
@@ -85,30 +83,6 @@ public abstract class UstadMobileSystemImpl {
      */
     private String locale;
 
-    /**
-     * Get an instance of the system implementation - relies on the platform
-     * specific factory method
-     * Indicates the number of bytes downloaded so far in a download
-     */
-    public static final int IDX_DOWNLOADED_SO_FAR = 0;
-
-    /**
-     * Indicates the total number of bytes in a download
-     */
-    public static final int IDX_BYTES_TOTAL = 1;
-
-    /**
-     * Indicates the status of a download (e.g. complete, failed, queued, etc)
-     */
-    public static final int IDX_STATUS = 2;
-
-
-    /**
-     * Flag to indicate a download requested was successful.
-     *
-     * Same value as android.app.DownloadManager.STATUS_SUCCESSFUL
-     */
-    public static final int DLSTATUS_SUCCESSFUL = 8;
 
     /**
      * Flag to indicate a download requested has failed
@@ -117,31 +91,6 @@ public abstract class UstadMobileSystemImpl {
      */
     public static final int DLSTATUS_FAILED = 16;
 
-    /**
-     * Flag to indicate a download requested is retrying
-     */
-    public static final int DLSTATUS_RETRYING = 20;
-
-    /**
-     * Flag to indicate download is pending
-     *
-     * Same value as android.app.DownloadManager.STATUS_PENDING
-     */
-    public static final int DLSTATUS_PENDING = 1;
-
-    /**
-     * Flag to indicate download is running now
-     *
-     * Same value as android.app.DownloadManager.STATUS_RUNNING
-     */
-    public static final int DLSTATUS_RUNNING = 2;
-
-    /**
-     * Flag to indicate download is paused (e.g. waiting to retry etc)
-     *
-     * Same value as android.app.DownloadManager.STATUS_PENDING
-     */
-    public static final int DLSTATUS_PAUSED = 4;
 
     /**
      * Indicates that a download has not actually started yet
@@ -320,14 +269,6 @@ public abstract class UstadMobileSystemImpl {
     }
 
     /**
-     * Check on whether or not the locale string pack has been loaded or not
-     * @return
-     */
-    public boolean isLocaleLoaded() {
-        return messages != null;
-    }
-
-    /**
      * Starts the user interface for the app
      */
     public void startUI(Object context) {
@@ -340,13 +281,6 @@ public abstract class UstadMobileSystemImpl {
         }else {
             go(getAppConfigString(AppConfig.KEY_FIRST_DEST, null, context), context);
         }
-    }
-
-    /**
-     * Save anything that should be written to disk
-     */
-    public synchronized void handleSave() {
-
     }
 
     /**
@@ -815,5 +749,3 @@ public abstract class UstadMobileSystemImpl {
     public abstract OpdsAtomFeedRepository getOpdsAtomFeedRepository(Object context);
 
 }
-
-

@@ -31,7 +31,10 @@ import com.ustadmobile.core.db.dao.LocationDao;
 import com.ustadmobile.core.db.dao.PersonGroupDao;
 import com.ustadmobile.core.db.dao.PersonGroupMemberDao;
 import com.ustadmobile.core.db.dao.PersonLocationJoinDao;
+import com.ustadmobile.core.db.dao.PersonPictureDao;
 import com.ustadmobile.core.db.dao.RoleDao;
+import com.ustadmobile.lib.database.annotation.UmSyncCountLocalPendingChanges;
+import com.ustadmobile.lib.db.UmDbWithAttachmentsDir;
 import com.ustadmobile.lib.db.entities.LocationAncestorJoin;
 import com.ustadmobile.core.db.dao.NetworkNodeDao;
 import com.ustadmobile.core.db.dao.OpdsEntryDao;
@@ -58,6 +61,7 @@ import com.ustadmobile.lib.db.entities.PersonGroup;
 import com.ustadmobile.lib.db.entities.PersonGroupMember;
 import com.ustadmobile.lib.db.entities.PersonAuth;
 import com.ustadmobile.lib.db.entities.PersonLocationJoin;
+import com.ustadmobile.lib.db.entities.PersonPicture;
 import com.ustadmobile.lib.db.entities.Role;
 import com.ustadmobile.lib.db.sync.UmSyncableDatabase;
 import com.ustadmobile.lib.db.sync.dao.SyncStatusDao;
@@ -118,15 +122,18 @@ import java.util.Hashtable;
         SyncStatus.class, SyncablePrimaryKey.class, SyncDeviceBits.class,
         AccessToken.class, PersonAuth.class, Role.class, EntityRole.class,
         PersonGroup.class, PersonGroupMember.class, Location.class, LocationAncestorJoin.class,
-        PersonLocationJoin.class
+        PersonLocationJoin.class, PersonPicture.class
 })
-public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthenticator {
+public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthenticator,
+        UmDbWithAttachmentsDir {
 
     private static volatile UmAppDatabase instance;
 
     private static volatile Hashtable<String, UmAppDatabase> namedInstances = new Hashtable<>();
 
     private boolean master;
+
+    private String attachmentsDir;
 
     /**
      * For use by other projects using this app as a library. By calling setInstance before
@@ -153,7 +160,7 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
 
     public static synchronized UmAppDatabase getInstance(Object context) {
         if(instance == null){
-            instance = UmDbBuilder.makeDatabase(UmAppDatabase.class, context);
+            instance = UmDbBuilder.builder(UmAppDatabase.class, context).build();
         }
 
         return instance;
@@ -162,7 +169,7 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
     public static synchronized UmAppDatabase getInstance(Object context, String dbName) {
         UmAppDatabase db = namedInstances.get(dbName);
         if(db == null){
-            db = UmDbBuilder.makeDatabase(UmAppDatabase.class, context, dbName);
+            db = UmDbBuilder.builder(UmAppDatabase.class, context, dbName).build();
             namedInstances.put(dbName, db);
         }
 
@@ -257,6 +264,7 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
 
     public abstract PersonLocationJoinDao getPersonLocationJoinDao();
 
+    public abstract PersonPictureDao getPersonPictureDao();
 
     @UmDbContext
     public abstract Object getContext();
@@ -302,5 +310,16 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
         getSyncablePrimaryKeyDao().invalidateDeviceBits();
     }
 
+    @Override
+    public String getAttachmentsDir() {
+        return attachmentsDir;
+    }
+
+    public void setAttachmentsDir(String attachmentsDir) {
+        this.attachmentsDir = attachmentsDir;
+    }
+
+    @UmSyncCountLocalPendingChanges
+    public abstract int countPendingLocalChanges(long accountUid, int deviceId);
 
 }

@@ -1,9 +1,8 @@
 package com.ustadmobile.core.impl;
 
 /**
- * Created by mike on 10/16/17.
+ * Constants that represent keys used in appconfig.properties
  */
-
 public class AppConfig {
 
     public static final String KEY_CONTENT_DIR_NAME = "content_dir";
@@ -17,5 +16,13 @@ public class AppConfig {
     public static final String KEY_FIRST_DEST_LOGIN_REQUIRED = "first_dest_login_required";
 
     public static final String KEY_API_URL = "apiUrl";
+
+    public static final String KEY_APP_BASE_NAME = "appBaseName";
+
+    public static final String KEY_EPUB_TOC_ENABLED = "epubTocEnabled";
+
+    public static final String KEY_NETWORK_SERVICE_TYPE = "networkServiceType";
+
+    public static final String KEY_WIFI_P2P_INSTANCE_NAME = "wifiP2pInstanceName";
 
 }

@@ -35,6 +35,15 @@ public class ContentEntryContentEntryFileJoin {
     @UmSyncLastChangedBy
     private int cecefjLastChangedBy;
 
+    public ContentEntryContentEntryFileJoin() {
+
+    }
+
+    public ContentEntryContentEntryFileJoin(ContentEntry entry, ContentEntryFile contentEntryFile) {
+        this.cecefjContentEntryUid = entry.getContentEntryUid();
+        this.cecefjContentEntryFileUid = contentEntryFile.getContentEntryFileUid();
+    }
+
     public long getCecefjUid() {
         return cecefjUid;
     }

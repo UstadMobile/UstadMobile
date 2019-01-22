@@ -13,6 +13,8 @@ import com.ustadmobile.lib.database.annotation.UmClearAll;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmDatabase;
 import com.ustadmobile.lib.database.annotation.UmDbContext;
+import com.ustadmobile.lib.database.annotation.UmDbGetAttachment;
+import com.ustadmobile.lib.database.annotation.UmDbSetAttachment;
 import com.ustadmobile.lib.database.annotation.UmDelete;
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmInsert;
@@ -20,6 +22,7 @@ import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.database.annotation.UmQueryFindByPrimaryKey;
 import com.ustadmobile.lib.database.annotation.UmRepository;
 import com.ustadmobile.lib.database.annotation.UmSyncCheckIncomingCanInsert;
+import com.ustadmobile.lib.database.annotation.UmSyncCountLocalPendingChanges;
 import com.ustadmobile.lib.database.annotation.UmSyncFindAllChanges;
 import com.ustadmobile.lib.database.annotation.UmSyncFindLocalChanges;
 import com.ustadmobile.lib.database.annotation.UmSyncCheckIncomingCanUpdate;
@@ -178,43 +181,46 @@ public class DbProcessorRoom extends AbstractDbProcessor implements QueryMethodG
             if(subElement.getKind() != ElementKind.METHOD)
                 continue;
 
-            ExecutableElement daoMethod = (ExecutableElement)subElement;
-            if(daoMethod.getAnnotation(UmDbContext.class) != null) {
+            ExecutableElement dbMethod = (ExecutableElement)subElement;
+            if(dbMethod.getAnnotation(UmDbContext.class) != null) {
                 MethodSpec.Builder contextMethodBuilder =
-                        MethodSpec.methodBuilder(daoMethod.getSimpleName().toString())
+                        MethodSpec.methodBuilder(dbMethod.getSimpleName().toString())
                         .returns(ClassName.get(Object.class))
                         .addCode("return this.context;\n")
                         .addAnnotation(Override.class);
 
-                if(daoMethod.getModifiers().contains(Modifier.PROTECTED))
+                if(dbMethod.getModifiers().contains(Modifier.PROTECTED))
                     contextMethodBuilder.addModifiers(Modifier.PROTECTED);
-                else if(daoMethod.getModifiers().contains(Modifier.PUBLIC))
+                else if(dbMethod.getModifiers().contains(Modifier.PUBLIC))
                     contextMethodBuilder.addModifiers(Modifier.PUBLIC);
 
                 dbManagerImplSpec.addMethod(contextMethodBuilder.build());
-            }else if(daoMethod.getAnnotation(UmClearAll.class) != null) {
-                dbManagerImplSpec.addMethod(generateClearAllMethod(daoMethod, dbType).build());
-            }else if(daoMethod.getAnnotation(UmRepository.class) != null) {
-                MethodSpec.Builder repoMethodBuilder = MethodSpec.overriding(daoMethod);
-                addGetRepositoryMethod(dbType, daoMethod, repoMethodBuilder,
+            }else if(dbMethod.getAnnotation(UmClearAll.class) != null) {
+                dbManagerImplSpec.addMethod(generateClearAllMethod(dbMethod, dbType).build());
+            }else if(dbMethod.getAnnotation(UmRepository.class) != null) {
+                MethodSpec.Builder repoMethodBuilder = MethodSpec.overriding(dbMethod);
+                addGetRepositoryMethod(dbType, dbMethod, repoMethodBuilder,
                         "_repositories");
                 dbManagerImplSpec.addMethod(repoMethodBuilder.build());
-            }else if(daoMethod.getAnnotation(UmSyncOutgoing.class) != null) {
-                dbManagerImplSpec.addMethod(generateDbSyncOutgoingMethod(dbType, daoMethod).build());
+            }else if(dbMethod.getAnnotation(UmSyncOutgoing.class) != null) {
+                dbManagerImplSpec.addMethod(generateDbSyncOutgoingMethod(dbType, dbMethod).build());
+            }else if(dbMethod.getAnnotation(UmSyncCountLocalPendingChanges.class) != null) {
+                dbManagerImplSpec.addMethod(generateDbSyncCountLocalPendingChangesMethod(dbType,
+                        dbMethod));
             }
 
             //Lookup using processingEnv.getElementUtils.getTypeElement
-            if(daoMethod.getReturnType() == null)
+            if(dbMethod.getReturnType() == null)
                 continue;
 
-            if(daoMethod.getReturnType().getKind() != TypeKind.DECLARED)
+            if(dbMethod.getReturnType().getKind() != TypeKind.DECLARED)
                 continue;
 
-            DeclaredType returnType = (DeclaredType)daoMethod.getReturnType();
+            DeclaredType returnType = (DeclaredType)dbMethod.getReturnType();
             if(returnType.asElement().getAnnotation(UmDao.class) == null)
                 continue;
 
-            addDaoMethod(roomDbTypeSpec, dbManagerImplSpec, daoMethod);
+            addDaoMethod(roomDbTypeSpec, dbManagerImplSpec, dbMethod);
         }
 
 
@@ -360,6 +366,16 @@ public class DbProcessorRoom extends AbstractDbProcessor implements QueryMethodG
             }else if(daoMethod.getAnnotation(UmSyncCheckIncomingCanInsert.class) != null) {
                 roomDaoClassSpec.addMethod(generateQueryMethod(generateSyncCheckCanInsertSql(daoClass,
                         daoMethod, processingEnv), daoMethod, daoClass, dbType, roomDaoClassSpec));
+            }else if(daoMethod.getAnnotation(UmSyncCountLocalPendingChanges.class) != null) {
+                roomDaoClassSpec.addMethod(generateQueryMethod(
+                        generateSyncCountPendingLocalChangesSql(daoClass, daoMethod, processingEnv),
+                        daoMethod, daoClass, dbType, roomDaoClassSpec));
+            }else if(daoMethod.getAnnotation(UmDbGetAttachment.class) != null) {
+                roomDaoClassSpec.addMethod(generateGetAttachmentMethod(daoClass, daoMethod,
+                        "_dbManager"));
+            }else if(daoMethod.getAnnotation(UmDbSetAttachment.class) != null) {
+                roomDaoClassSpec.addMethod(generateSetAttachmentMethod(daoClass, daoMethod,
+                        "_dbManager"));
             }
 
             if(methodBuilder != null){

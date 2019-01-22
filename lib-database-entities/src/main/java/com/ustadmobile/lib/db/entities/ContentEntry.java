@@ -74,6 +74,17 @@ public class ContentEntry {
     @UmSyncLastChangedBy
     private int contentEntryLastChangedBy;
 
+    public ContentEntry(){
+
+    }
+
+    public ContentEntry(String title, String description, boolean leaf, boolean publik) {
+        this.title = title;;
+        this.description = description;
+        this.leaf = leaf;
+        this.publik = publik;
+    }
+
     public long getLanguageVariantUid() {
         return languageVariantUid;
     }

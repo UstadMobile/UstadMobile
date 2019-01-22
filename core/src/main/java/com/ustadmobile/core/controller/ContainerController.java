@@ -396,13 +396,7 @@ public class ContainerController extends UstadBaseController {
 
 
     public void setUIStrings() {
-        int[] cmds = new int[STANDARD_APPEMNU_CMDS.length + 1];
-        String[] labels = new String[STANDARD_APPEMNU_CMDS.length + 1];
-        cmds[0] = CMD_RESUME_SESSION;
-        labels[0] = "Resume";
-        
-        super.fillStandardMenuOptions(cmds, labels, 1);
-        getView().setAppMenuCommands(labels, cmds);
+
     }
     
     /**
