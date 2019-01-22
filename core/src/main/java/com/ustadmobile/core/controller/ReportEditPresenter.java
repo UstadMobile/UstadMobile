@@ -181,8 +181,12 @@ public class ReportEditPresenter
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         Hashtable args = new Hashtable();
 
-        //TODO: put locations set in the args to show only the classes in that location
-        args.put(ARG_LOCATIONS_SET, new ArrayList<>());
+
+        if(selectedLocations != null && !selectedLocations.isEmpty()){
+            Long[] selectedLocationsArray =
+                    ReportOverallAttendancePresenter.convertLongList(selectedLocations);
+            args.put(ARG_LOCATIONS_SET, selectedLocationsArray);
+        }
 
         if(selectedClasses != null && !selectedClasses.isEmpty()) {
             Long[] selectedClassesArray =

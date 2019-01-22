@@ -15,6 +15,7 @@ import java.util.Hashtable;
 import java.util.List;
 
 import static com.ustadmobile.core.view.ReportEditView.ARG_CLASSES_SET;
+import static com.ustadmobile.core.view.ReportEditView.ARG_LOCATIONS_SET;
 
 
 /**
@@ -36,8 +37,11 @@ public class SelectClazzesDialogPresenter
         super(context, arguments, view);
 
         System.out.println("hey hey");
-        if(arguments.containsKey(ReportEditView.ARG_LOCATIONS_SET)){
-            locations = (ArrayList<Long>) arguments.get(ReportEditView.ARG_LOCATIONS_SET);
+
+        if(arguments.containsKey(ARG_LOCATIONS_SET)){
+            long[] locationsArray = (long[]) arguments.get(ARG_LOCATIONS_SET);
+            locations =
+                    ReportOverallAttendancePresenter.convertLongArray(locationsArray);
         }
 
         System.out.println("Hey 2");
@@ -79,8 +83,13 @@ public class SelectClazzesDialogPresenter
         clazzes = new HashMap<>();
 
         //Find the provider
-        clazzWithEnrollmentUmProvider = repository.getClazzDao()
-                .findAllClazzes();
+        if(locations != null && !locations.isEmpty()){
+            clazzWithEnrollmentUmProvider = repository.getClazzDao()
+                    .findAllClazzesInLocationList(locations);
+        }else {
+            clazzWithEnrollmentUmProvider = repository.getClazzDao()
+                    .findAllClazzes();
+        }
         view.setClazzListProvider(clazzWithEnrollmentUmProvider);
 
     }
