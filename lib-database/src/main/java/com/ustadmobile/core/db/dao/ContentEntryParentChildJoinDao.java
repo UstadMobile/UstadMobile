@@ -15,7 +15,7 @@ public abstract class ContentEntryParentChildJoinDao
         implements SyncableDao<ContentEntryParentChildJoin, ContentEntryParentChildJoinDao> {
 
     @UmQuery("SELECT * FROM ContentEntryParentChildJoin WHERE " +
-           "cepcjChildContentEntryUid = :childEntryContentUid")
+           "cepcjChildContentEntryUid = :childEntryContentUid LIMIT 1")
     public abstract ContentEntryParentChildJoin findParentByChildUuids(long childEntryContentUid);
 
     @UmQuery("SELECT * FROM ContentEntryParentChildJoin WHERE " +
@@ -23,7 +23,7 @@ public abstract class ContentEntryParentChildJoinDao
     public abstract List<ContentEntryParentChildJoin> findListOfParentsByChildUuid(long childEntryContentUid);
 
     @UmQuery("SELECT * FROM ContentEntryParentChildJoin WHERE " +
-            "cepcjParentContentEntryUid = :parentUid AND cepcjChildContentEntryUid = :childUid")
+            "cepcjParentContentEntryUid = :parentUid AND cepcjChildContentEntryUid = :childUid LIMIT 1")
     public abstract ContentEntryParentChildJoin findJoinByParentChildUuids(long parentUid, long childUid);
 
     @UmUpdate

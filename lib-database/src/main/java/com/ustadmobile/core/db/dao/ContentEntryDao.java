@@ -16,7 +16,7 @@ import java.util.List;
 @UmRepository
 public abstract class ContentEntryDao implements SyncableDao<ContentEntry, ContentEntryDao> {
 
-    @UmQuery("SELECT * FROM ContentEntry WHERE sourceUrl = :sourceUrl")
+    @UmQuery("SELECT * FROM ContentEntry WHERE sourceUrl = :sourceUrl LIMIT 1")
     public abstract ContentEntry findBySourceUrl(String sourceUrl);
 
     @UmQuery("SELECT ContentEntry.* FROM ContentEntry LEFT Join ContentEntryParentChildJoin " +
@@ -30,7 +30,7 @@ public abstract class ContentEntryDao implements SyncableDao<ContentEntry, Conte
     public abstract void getCountNumberOfChildrenByParentUUid(long parentUid, UmCallback<Integer> callback);
 
 
-    @UmQuery("SELECT * FROM ContentEntry where contentEntryUid = :parentUid")
+    @UmQuery("SELECT * FROM ContentEntry where contentEntryUid = :parentUid LIMIT 1")
     public abstract void getContentByUuid(long parentUid, UmCallback<ContentEntry> callback);
 
 

@@ -2,18 +2,29 @@ package com.ustadmobile.lib.contentscrapers.khanacademy;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.ustadmobile.core.db.UmAppDatabase;
+import com.ustadmobile.core.db.dao.ContentEntryContentEntryFileJoinDao;
+import com.ustadmobile.core.db.dao.ContentEntryDao;
+import com.ustadmobile.core.db.dao.ContentEntryFileDao;
+import com.ustadmobile.core.db.dao.ContentEntryFileStatusDao;
+import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
+import com.ustadmobile.core.db.dao.ScrapeQueueItemDao;
+import com.ustadmobile.core.db.dao.ScrapeRunDao;
+import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.ScraperConstants;
 import com.ustadmobile.lib.contentscrapers.LogIndex;
 import com.ustadmobile.lib.contentscrapers.LogResponse;
 import com.ustadmobile.lib.contentscrapers.UMLogUtil;
+import com.ustadmobile.lib.db.entities.ContentEntry;
+import com.ustadmobile.lib.db.entities.ScrapeRun;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.logging.LogEntries;
 import org.openqa.selenium.logging.LogEntry;
@@ -91,9 +102,15 @@ import static com.ustadmobile.lib.contentscrapers.ck12.CK12ContentScraper.RESPON
  * Create a content directory for all the url and their location into a json so it can be played back.
  * Zip all files with the course as the name
  */
-public class KhanContentScraper {
+public class KhanContentScraper implements Runnable {
 
-    private final File destinationDirectory;
+    private static int runId;
+    private GenericObjectPool<ChromeDriver> factory;
+    private int sqiUid;
+    private String contentType;
+    private ContentEntry parentEntry;
+    private File destinationDirectory;
+    private URL url;
     private ChromeDriver driver;
 
     private String secondExerciseUrl = "https://www.khanacademy.org/api/internal/user/exercises/";
@@ -104,14 +121,75 @@ public class KhanContentScraper {
 
     private boolean isContentUpdated = true;
 
+
+    public KhanContentScraper(URL scrapeUrl, File destinationDirectory, ContentEntry parent, String contentType, int sqiUid, GenericObjectPool<ChromeDriver> factory) {
+
+        this.destinationDirectory = destinationDirectory;
+        this.url = scrapeUrl;
+        this.parentEntry = parent;
+        this.contentType = contentType;
+        this.sqiUid = sqiUid;
+        this.factory = factory;
+
+    }
+
     public KhanContentScraper(File destinationDirectory) {
         this.destinationDirectory = destinationDirectory;
         this.driver = null;
     }
 
-    public KhanContentScraper(File destinationDirectory, ChromeDriver driver) {
-        this.destinationDirectory = destinationDirectory;
-        this.driver = driver;
+    @Override
+    public void run() {
+        UmAppDatabase db = UmAppDatabase.getInstance(null);
+        UmAppDatabase repository = db.getRepository("https://localhost", "");
+        ContentEntryFileDao contentEntryFileDao = repository.getContentEntryFileDao();
+        ContentEntryContentEntryFileJoinDao contentEntryFileJoin = repository.getContentEntryContentEntryFileJoinDao();
+        ContentEntryFileStatusDao contentFileStatusDao = db.getContentEntryFileStatusDao();
+        ScrapeQueueItemDao queueDao = db.getScrapeQueueItemDao();
+
+        boolean successful = false;
+        try {
+            driver = factory.borrowObject();
+            if (ScraperConstants.KhanContentType.VIDEO.getType().equals(contentType)) {//all calls to scraper... replaced with insert
+                scrapeVideoContent(url.toString());
+                successful = true;
+            } else if (ScraperConstants.KhanContentType.EXERCISE.getType().equals(contentType)) {
+                scrapeExerciseContent(url.toString());
+                successful = true;
+            } else if (ScraperConstants.KhanContentType.ARTICLE.getType().equals(contentType)) {
+                scrapeArticleContent(url.toString());
+                successful = true;
+            } else {
+                UMLogUtil.logError("unsupported kind = " + contentType + " at url = " + url);
+            }
+
+            File content = new File(destinationDirectory, destinationDirectory.getName() + ScraperConstants.ZIP_EXT);
+
+            if (isContentUpdated()) {
+                ContentScraperUtil.insertContentEntryFile(content, contentEntryFileDao, contentFileStatusDao,
+                        parentEntry, ContentScraperUtil.getMd5(content), contentEntryFileJoin, true,
+                        ScraperConstants.MIMETYPE_ZIP);
+
+            } else {
+
+                ContentScraperUtil.checkAndUpdateDatabaseIfFileDownloadedButNoDataFound(content, parentEntry, contentEntryFileDao,
+                        contentEntryFileJoin, contentFileStatusDao, ScraperConstants.MIMETYPE_ZIP, true);
+
+            }
+
+            if (factory != null) {
+                factory.returnObject(driver);
+            }
+
+            queueDao.updateSetStatusById(sqiUid, successful ? ScrapeQueueItemDao.STATUS_DONE : ScrapeQueueItemDao.STATUS_FAILED);
+
+
+        } catch (Exception e) {
+            UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
+            UMLogUtil.logError("Unable to scrape content from url " + url);
+        }
+
+
     }
 
     public boolean isContentUpdated() {
@@ -124,7 +202,6 @@ public class KhanContentScraper {
 
         File folder = new File(destinationDirectory, destinationDirectory.getName());
         folder.mkdirs();
-
 
         File content = new File(folder, FilenameUtils.getName(scrapUrl.getPath()));
         URLConnection conn = scrapUrl.openConnection();
@@ -146,7 +223,7 @@ public class KhanContentScraper {
         File khanDirectory = new File(destinationDirectory, destinationDirectory.getName());
         khanDirectory.mkdirs();
 
-        String initialJson = IndexKhanContentScraper.getJsonStringFromScript(scrapUrl);
+        String initialJson = KhanContentIndexer.getJsonStringFromScript(scrapUrl);
         SubjectListResponse response = gson.fromJson(initialJson, SubjectListResponse.class);
         String exerciseId = "0";
         List<SubjectListResponse.ComponentData.Card.UserExercise.Model.AssessmentItem> exerciseList = null;
@@ -191,7 +268,7 @@ public class KhanContentScraper {
 
         if (driver == null) {
             ContentScraperUtil.setChromeDriverLocation();
-            driver = ContentScraperUtil.loginKhanAcademy("https://www.khanacademy.org/login");
+            driver = ContentScraperUtil.loginKhanAcademy();
         } else {
             ContentScraperUtil.clearChromeConsoleLog(driver);
         }
@@ -379,7 +456,7 @@ public class KhanContentScraper {
 
         File indexJsonFile = new File(khanDirectory, "index.json");
 
-        String initialJson = IndexKhanContentScraper.getJsonStringFromScript(scrapUrl);
+        String initialJson = KhanContentIndexer.getJsonStringFromScript(scrapUrl);
         SubjectListResponse data = gson.fromJson(initialJson, SubjectListResponse.class);
         SubjectListResponse.ComponentData compProps = data.componentProps;
         SubjectListResponse.ComponentData.NavData navData = compProps.tutorialNavData;
@@ -396,10 +473,12 @@ public class KhanContentScraper {
             throw new IllegalArgumentException("Does not have the article data id which we need to scrape the page for url " + scrapUrl);
         }
 
+        boolean foundRelative = false;
         for (SubjectListResponse.ComponentData.NavData.ContentModel content : contentList) {
 
-            if (content.relativeUrl.contains(scrapUrl)) {
+            if (destinationDirectory.getName().equals(content.id)) {
 
+                foundRelative = true;
                 String articleId = content.id;
                 String articleUrl = generateArtcleUrl(articleId);
                 ArticleResponse response = gson.fromJson(IOUtils.toString(new URL(articleUrl), UTF_ENCODING), ArticleResponse.class);
@@ -425,6 +504,12 @@ public class KhanContentScraper {
 
             }
         }
+        if(foundRelative){
+            UMLogUtil.logDebug("found the id at url " + scrapUrl);
+        }else{
+            UMLogUtil.logError("did not find the id at url " + scrapUrl);
+        }
+
 
         if (driver == null) {
             ContentScraperUtil.setChromeDriverLocation();
@@ -439,7 +524,6 @@ public class KhanContentScraper {
         try {
             waitDriver.until(ExpectedConditions.visibilityOfElementLocated(
                     By.cssSelector("ul[class*=listWrapper]")));
-            Thread.sleep(5000);
         } catch (Exception e) {
             UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
         }
@@ -480,4 +564,6 @@ public class KhanContentScraper {
     private String generateArtcleUrl(String articleId) {
         return "http://www.khanacademy.org/api/v1/articles/" + articleId;
     }
+
+
 }

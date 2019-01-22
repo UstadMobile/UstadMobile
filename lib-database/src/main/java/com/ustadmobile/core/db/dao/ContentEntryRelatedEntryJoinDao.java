@@ -19,7 +19,7 @@ public abstract class ContentEntryRelatedEntryJoinDao
         implements SyncableDao<ContentEntryRelatedEntryJoin, ContentEntryRelatedEntryJoinDao> {
 
     @UmQuery("SELECT * FROM ContentEntryRelatedEntryJoin WHERE " +
-            "cerejRelatedEntryUid = :contentEntryUid")
+            "cerejRelatedEntryUid = :contentEntryUid LIMIT 1")
     public abstract ContentEntryRelatedEntryJoin findPrimaryByTranslation(long contentEntryUid);
 
 

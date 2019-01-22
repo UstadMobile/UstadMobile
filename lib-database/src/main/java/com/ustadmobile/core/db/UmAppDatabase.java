@@ -33,6 +33,8 @@ import com.ustadmobile.core.db.dao.PersonGroupMemberDao;
 import com.ustadmobile.core.db.dao.PersonLocationJoinDao;
 import com.ustadmobile.core.db.dao.PersonPictureDao;
 import com.ustadmobile.core.db.dao.RoleDao;
+import com.ustadmobile.core.db.dao.ScrapeQueueItemDao;
+import com.ustadmobile.core.db.dao.ScrapeRunDao;
 import com.ustadmobile.lib.database.annotation.UmSyncCountLocalPendingChanges;
 import com.ustadmobile.lib.db.UmDbWithAttachmentsDir;
 import com.ustadmobile.lib.db.entities.LocationAncestorJoin;
@@ -63,6 +65,8 @@ import com.ustadmobile.lib.db.entities.PersonAuth;
 import com.ustadmobile.lib.db.entities.PersonLocationJoin;
 import com.ustadmobile.lib.db.entities.PersonPicture;
 import com.ustadmobile.lib.db.entities.Role;
+import com.ustadmobile.lib.db.entities.ScrapeQueueItem;
+import com.ustadmobile.lib.db.entities.ScrapeRun;
 import com.ustadmobile.lib.db.sync.UmSyncableDatabase;
 import com.ustadmobile.lib.db.sync.dao.SyncStatusDao;
 import com.ustadmobile.lib.db.sync.dao.SyncablePrimaryKeyDao;
@@ -122,7 +126,7 @@ import java.util.Hashtable;
         SyncStatus.class, SyncablePrimaryKey.class, SyncDeviceBits.class,
         AccessToken.class, PersonAuth.class, Role.class, EntityRole.class,
         PersonGroup.class, PersonGroupMember.class, Location.class, LocationAncestorJoin.class,
-        PersonLocationJoin.class, PersonPicture.class
+        PersonLocationJoin.class, PersonPicture.class, ScrapeQueueItem.class, ScrapeRun.class
 })
 public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthenticator,
         UmDbWithAttachmentsDir {
@@ -246,6 +250,8 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
 
     public abstract LanguageVariantDao getLanguageVariantDao();
 
+    public abstract ScrapeQueueItemDao getScrapeQueueItemDao();
+
     public abstract PersonAuthDao getPersonAuthDao();
 
     public abstract AccessTokenDao getAccessTokenDao();
@@ -265,6 +271,8 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
     public abstract PersonLocationJoinDao getPersonLocationJoinDao();
 
     public abstract PersonPictureDao getPersonPictureDao();
+
+    public abstract ScrapeRunDao getScrapeRunDao();
 
     @UmDbContext
     public abstract Object getContext();

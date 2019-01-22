@@ -1,14 +1,13 @@
 package com.ustadmobile.lib.contentscrapers.khanacademy;
 
 import com.ustadmobile.core.db.UmAppDatabase;
-import com.ustadmobile.core.db.dao.ContentEntryContentCategoryJoinDao;
-import com.ustadmobile.core.db.dao.ContentEntryContentEntryFileJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryDao;
-import com.ustadmobile.core.db.dao.ContentEntryFileDao;
 import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
-import com.ustadmobile.core.db.dao.ContentEntryRelatedEntryJoinDao;
+import com.ustadmobile.core.db.dao.ScrapeQueueItemDao;
+import com.ustadmobile.core.db.dao.ScrapeRunDao;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin;
+import com.ustadmobile.lib.db.entities.ScrapeRun;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
@@ -27,10 +26,8 @@ import okio.Buffer;
 import okio.BufferedSource;
 import okio.Okio;
 
-import static com.ustadmobile.lib.contentscrapers.ScraperConstants.CONTENT_JSON;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.ZIP_EXT;
-import static com.ustadmobile.lib.contentscrapers.ScraperConstants.brainGenieLink;
 
 public class TestIndexKhanAcademy {
 
@@ -42,15 +39,15 @@ public class TestIndexKhanAcademy {
 
                 if (request.getPath().contains("json")) {
 
-                    String fileName = request.getPath().substring(5,
-                            request.getPath().length());
+                    String fileName = request.getPath().substring(5
+                    );
                     String body = IOUtils.toString(getClass().getResourceAsStream(fileName), UTF_ENCODING);
                     return new MockResponse().setBody(body);
 
                 } else if (request.getPath().contains("content")) {
 
-                    String fileLocation = request.getPath().substring(8,
-                            request.getPath().length());
+                    String fileLocation = request.getPath().substring(8
+                    );
                     InputStream videoIn = getClass().getResourceAsStream(fileLocation);
                     BufferedSource source = Okio.buffer(Okio.source(videoIn));
                     Buffer buffer = new Buffer();
@@ -73,14 +70,20 @@ public class TestIndexKhanAcademy {
         MockWebServer mockWebServer = new MockWebServer();
         mockWebServer.setDispatcher(dispatcher);
 
-
         UmAppDatabase db = UmAppDatabase.getInstance(null);
         UmAppDatabase repo = db.getRepository("https://localhost", "");
+        ScrapeRunDao runDao = db.getScrapeRunDao();
+        ScrapeRun run = new ScrapeRun();
+        run.setScrapeRunUid(999);
+        run.setScrapeType("Khan-Test");
+        run.setStatus(ScrapeQueueItemDao.STATUS_PENDING);
+        runDao.insert(run);
 
         File tmpDir = Files.createTempDirectory("testIndexKhancontentscraper").toFile();
 
-        IndexKhanContentScraper indexScraper = new IndexKhanContentScraper();
-        indexScraper.findContent(mockWebServer.url("/json/com/ustadmobile/lib/contentscrapers/khanacademy/mainpage.txt").toString(), tmpDir);
+        KhanContentIndexer.startScrape(mockWebServer.
+                url("/json/com/ustadmobile/lib/contentscrapers/khanacademy/mainpage.txt").toString(),
+                tmpDir, run.getScrapeRunUid());
 
         File englishFolder = new File(tmpDir, "en");
         Assert.assertEquals(true, englishFolder.isDirectory());

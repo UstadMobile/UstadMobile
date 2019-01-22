@@ -16,6 +16,7 @@ import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryRelatedEntryJoinDao;
 import com.ustadmobile.core.db.dao.LanguageDao;
 import com.ustadmobile.core.db.dao.LanguageVariantDao;
+import com.ustadmobile.core.db.dao.ScrapeQueueItemDao;
 import com.ustadmobile.lib.contentscrapers.buildconfig.ScraperBuildConfig;
 import com.ustadmobile.lib.db.entities.ContentCategory;
 import com.ustadmobile.lib.db.entities.ContentCategorySchema;
@@ -28,6 +29,7 @@ import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin;
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoin;
 import com.ustadmobile.lib.db.entities.Language;
 import com.ustadmobile.lib.db.entities.LanguageVariant;
+import com.ustadmobile.lib.db.entities.ScrapeQueueItem;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
@@ -54,7 +56,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
@@ -69,7 +70,6 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -92,7 +92,6 @@ import static com.ustadmobile.lib.contentscrapers.ScraperConstants.GMAIL;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.PASS;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.ZIP_EXT;
-import static com.ustadmobile.lib.contentscrapers.ScraperConstants.slideShareLink;
 
 
 public class ContentScraperUtil {
@@ -443,7 +442,7 @@ public class ContentScraperUtil {
     /**
      * Insert or Update the database for those parentChild Joins where the child have 1 parent
      *
-     * @param dao dao to insert/update
+     * @param dao         dao to insert/update
      * @param parentEntry
      * @param childEntry
      * @param index
@@ -532,9 +531,10 @@ public class ContentScraperUtil {
 
     /**
      * Insert or update the database with a new/updated Schema
+     *
      * @param categorySchemeDao dao to insert/update
-     * @param schemaName schema Name
-     * @param schemaUrl schema Url
+     * @param schemaName        schema Name
+     * @param schemaUrl         schema Url
      * @return the entry that was created/updated
      */
     public static ContentCategorySchema insertOrUpdateSchema(ContentCategorySchemaDao categorySchemeDao, String schemaName, String schemaUrl) {
@@ -558,9 +558,10 @@ public class ContentScraperUtil {
     }
 
     /**
-     *  Insert or update the category that belongs in a schema
-     * @param categoryDao dao to insert/update
-     * @param schema schema the category belongs in
+     * Insert or update the category that belongs in a schema
+     *
+     * @param categoryDao  dao to insert/update
+     * @param schema       schema the category belongs in
      * @param categoryName name of category
      * @return the new/updated category entry
      */
@@ -585,11 +586,12 @@ public class ContentScraperUtil {
     }
 
     /**
-     *  Insert or update the relation between 2 content entry
+     * Insert or update the relation between 2 content entry
+     *
      * @param contentEntryRelatedJoinDao dao to insert/update
-     * @param relatedEntry related entry of parent contententry
-     * @param parentEntry  parent content entry
-     * @param relatedType type of relation (Translation, related content)
+     * @param relatedEntry               related entry of parent contententry
+     * @param parentEntry                parent content entry
+     * @param relatedType                type of relation (Translation, related content)
      * @return
      */
     public static ContentEntryRelatedEntryJoin insertOrUpdateRelatedContentJoin(ContentEntryRelatedEntryJoinDao contentEntryRelatedJoinDao, ContentEntry relatedEntry, ContentEntry parentEntry, int relatedType) {
@@ -617,9 +619,10 @@ public class ContentScraperUtil {
     }
 
     /**
-     *  Given a language name, check if this language exists in db before adding it
+     * Given a language name, check if this language exists in db before adding it
+     *
      * @param languageDao dao to query and insert
-     * @param langName name of the language
+     * @param langName    name of the language
      * @return the entity language
      */
     public static Language insertOrUpdateLanguageByName(LanguageDao languageDao, String langName) {
@@ -676,17 +679,18 @@ public class ContentScraperUtil {
 
     private static Language getLanguageFromDao(String langName, String twoLetterCode, LanguageDao dao) {
         Language lang = null;
-        if(!langName.isEmpty()){
+        if (!langName.isEmpty()) {
             lang = dao.findByName(langName);
         }
-        if(!twoLetterCode.isEmpty() && lang == null){
+        if (!twoLetterCode.isEmpty() && lang == null) {
             return dao.findByTwoCode(twoLetterCode);
         }
         return lang;
     }
 
     /**
-     *  Given a language with 2 digit code, check if this language exists in db before adding it
+     * Given a language with 2 digit code, check if this language exists in db before adding it
+     *
      * @param languageDao dao to query and insert
      * @param langTwoCode two digit code of language
      * @return the entity language
@@ -698,7 +702,7 @@ public class ContentScraperUtil {
             language = new Language();
             language.setIso_639_1_standard(langTwoCode);
             LanguageCode nameOfLang = LanguageCode.getByCode(langTwoCode);
-            if(nameOfLang != null){
+            if (nameOfLang != null) {
                 language.setName(nameOfLang.getName());
             }
             language.setLangUid(languageDao.insert(language));
@@ -707,7 +711,7 @@ public class ContentScraperUtil {
             changedLang.setLangUid(language.getLangUid());
             changedLang.setIso_639_1_standard(langTwoCode);
             LanguageCode nameOfLang = LanguageCode.getByCode(langTwoCode);
-            if(nameOfLang != null){
+            if (nameOfLang != null) {
                 changedLang.setName(nameOfLang.getName());
             }
             boolean isChanged = false;
@@ -815,8 +819,9 @@ public class ContentScraperUtil {
 
     /**
      * Check if file entry exists in the db, get the last modified date of the file otherwise return -1
-     * @param contentFile current file that will be used to saved into db
-     * @param contentEntry the content entry that is linked to finding the list of files it contains
+     *
+     * @param contentFile         current file that will be used to saved into db
+     * @param contentEntry        the content entry that is linked to finding the list of files it contains
      * @param contentEntryFileDao dao to query the db
      * @return last modified of the file stored in the db or -1 if file not found
      * @throws IOException
@@ -838,9 +843,10 @@ public class ContentScraperUtil {
 
     /**
      * Insert or update language variant
+     *
      * @param variantDao variant dao to insert/update
-     * @param variant variant of the language
-     * @param language the language the variant belongs to
+     * @param variant    variant of the language
+     * @param language   the language the variant belongs to
      * @return the language variant entry that was created/updated
      */
     public static LanguageVariant insertOrUpdateLanguageVariant(LanguageVariantDao variantDao, String variant, Language language) {
@@ -961,6 +967,28 @@ public class ContentScraperUtil {
             contentEntry = ContentScraperUtil.checkContentEntryChanges(changedEntry, contentEntry, contentEntryDao);
         }
         return contentEntry;
+    }
+
+
+    public static ScrapeQueueItem createQueueItem(ScrapeQueueItemDao queueDao, URL subjectUrl,
+                                                  ContentEntry subjectEntry, File destination,
+                                                  String type, int runId, int itemType) {
+
+        ScrapeQueueItem item = queueDao.getExistingQueueItem(runId, subjectUrl.toString());
+        if (item == null) {
+            item = new ScrapeQueueItem();
+            item.setDestDir(destination.getPath());
+            item.setScrapeUrl(subjectUrl.toString());
+            item.setSqiContentEntryParentUid(subjectEntry.getContentEntryUid());
+            item.setStatus(ScrapeQueueItemDao.STATUS_PENDING);
+            item.setContentType(type);
+            item.setRunId(runId);
+            item.setItemType(itemType);
+            queueDao.insert(item);
+        }
+
+
+        return null;
     }
 
     /**
@@ -1087,22 +1115,23 @@ public class ContentScraperUtil {
 
     /**
      * Clear the console log in chrome, wait for it to finish clearing
+     *
      * @param driver
      */
     public static void clearChromeConsoleLog(ChromeDriver driver) {
-        JavascriptExecutor js = (JavascriptExecutor)driver;
+        JavascriptExecutor js = (JavascriptExecutor) driver;
         js.executeScript("console.clear()");
 
-        while (driver.manage().logs().get(LogType.PERFORMANCE).getAll().size() != 0){
+        while (driver.manage().logs().get(LogType.PERFORMANCE).getAll().size() != 0) {
             driver.manage().timeouts().implicitlyWait(120, TimeUnit.SECONDS);
         }
     }
 
-    public static ChromeDriver loginKhanAcademy(String scrapeContentUrl) {
+    public static ChromeDriver loginKhanAcademy() {
 
         ChromeDriver driver = ContentScraperUtil.setupLogIndexChromeDriver();
 
-        driver.get(scrapeContentUrl);
+        driver.get("https://www.khanacademy.org/login");
         WebDriverWait waitDriver = new WebDriverWait(driver, 10000);
         ContentScraperUtil.waitForJSandJQueryToLoad(waitDriver);
         waitDriver.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("div#login-signup-root")));
@@ -1111,8 +1140,8 @@ public class ContentScraperUtil {
         driver.findElement(By.cssSelector("div#login-signup-root input[id*=text-field-1-password]")).sendKeys(PASS);
 
         List<WebElement> elements = driver.findElements(By.cssSelector("div#login-signup-root div[class*=inner]"));
-        for(WebElement element: elements){
-            if(element.getText().contains("Log in")){
+        for (WebElement element : elements) {
+            if (element.getText().contains("Log in")) {
                 element.click();
                 break;
             }

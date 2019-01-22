@@ -13,7 +13,7 @@ import java.util.List;
 @UmRepository
 public abstract class LanguageVariantDao implements SyncableDao<LanguageVariant, LanguageVariantDao> {
 
-    @UmQuery("SELECT * FROM LanguageVariant WHERE countryCode = :countryCode")
+    @UmQuery("SELECT * FROM LanguageVariant WHERE countryCode = :countryCode LIMIT 1")
     public abstract LanguageVariant findByCode(String countryCode);
 
     @UmUpdate

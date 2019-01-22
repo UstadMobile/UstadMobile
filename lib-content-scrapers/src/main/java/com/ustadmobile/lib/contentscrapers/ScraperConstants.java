@@ -216,4 +216,23 @@ public class ScraperConstants {
 
     }
 
+    public enum KhanContentType{
+        TOPICS("Topics"),
+        SUBJECT("Subjects"),
+        VIDEO("Video"),
+        EXERCISE("Exercise"),
+        ARTICLE("Article");
+
+        private String type;
+
+        KhanContentType(String compType) {
+            this.type = compType;
+        }
+
+        public String getType() {
+            return type;
+        }
+    }
+
+
 }

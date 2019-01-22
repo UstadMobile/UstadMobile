@@ -9,15 +9,20 @@ import com.ustadmobile.core.db.dao.ContentEntryFileDao;
 import com.ustadmobile.core.db.dao.ContentEntryFileStatusDao;
 import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
 import com.ustadmobile.core.db.dao.LanguageDao;
+import com.ustadmobile.core.db.dao.ScrapeQueueItemDao;
+import com.ustadmobile.core.db.dao.ScrapeRunDao;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.LanguageList;
 import com.ustadmobile.lib.contentscrapers.ScraperConstants;
 import com.ustadmobile.lib.contentscrapers.UMLogUtil;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.Language;
+import com.ustadmobile.lib.db.entities.ScrapeQueueItem;
+import com.ustadmobile.lib.db.entities.ScrapeRun;
+import com.ustadmobile.port.sharedse.util.WorkQueue;
 
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.DataNode;
 import org.jsoup.nodes.Document;
@@ -30,6 +35,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.EMPTY_STRING;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.ROOT;
@@ -57,28 +63,42 @@ import static com.ustadmobile.lib.db.entities.ContentEntry.LICENSE_TYPE_CC_BY_NC
  * SubjectResponse has a list of tutorials which each have a list of content items
  * Every content item is a course categorized by Video, Exercise or Article.
  */
-public class IndexKhanContentScraper {
+public class KhanContentIndexer implements Runnable {
+
+    public static final String ROOT_URL = "https://www.khanacademy.org/";
 
     public static final String TABLE_OF_CONTENTS_ROW = "TableOfContentsRow";
     public static final String SUBJECT_PAGE_TOPIC_CARD = "SubjectPageTopicCard";
     public static final String SUBJECT_CHALLENGE = "SubjectChallenge";
     public static final String SUBJECT_PROGRESS = "SubjectProgress";
-    private URL url;
-    private File destinationDirectory;
-    private ContentEntryDao contentEntryDao;
-    private ContentEntryParentChildJoinDao contentParentChildJoinDao;
-    private ContentEntryFileDao contentEntryFileDao;
-    private ContentEntryContentEntryFileJoinDao contentEntryFileJoin;
-    private ContentEntryFileStatusDao contentFileStatusDao;
-    private LanguageDao languageDao;
-    private Language englishLang;
+    private static URL url;
+    private static File destinationDirectory;
+    private static ContentEntryDao contentEntryDao;
+    private static ContentEntryParentChildJoinDao contentParentChildJoinDao;
+    private static ContentEntryFileDao contentEntryFileDao;
+    private static ContentEntryContentEntryFileJoinDao contentEntryFileJoin;
+    private static ContentEntryFileStatusDao contentFileStatusDao;
+    private static LanguageDao languageDao;
+    private static Language englishLang;
 
-    String KHAN = "Khan Academy";
-    private Gson gson;
-    private ChromeDriver driver;
+    static String KHAN = "Khan Academy";
+    private static Gson gson;
+    private static ScrapeQueueItemDao queueDao;
+    private int runId;
+    private static WorkQueue queueIndexer;
+    private static WorkQueue scrapeIndex;
+    private static GenericObjectPool<ChromeDriver> factory;
+
+    private ContentEntry parentEntry;
+    private URL indexerUrl;
+    private String contentType;
+    private File indexLocation;
+
+    private int scrapeQueueItemUid;
+
 
     public static void main(String[] args) {
-        if (args.length < 2) {
+        if (args.length < 1) {
             System.err.println("Usage: <khan url> <file destination><optional log{trace, debug, info, warn, error, fatal}>");
             System.exit(1);
         }
@@ -86,47 +106,52 @@ public class IndexKhanContentScraper {
         UMLogUtil.setLevel(args.length == 3 ? args[2] : "");
 
         UMLogUtil.logDebug(args[0]);
-        UMLogUtil.logError(args[1]);
+        // UMLogUtil.logError(args[1]);
 
         try {
-            new IndexKhanContentScraper().findContent(args[0], new File(args[1]));
+            ScrapeRunDao runDao = UmAppDatabase.getInstance(null).getScrapeRunDao();
+
+            int runId = runDao.findPendingRunIdByScraperType(ScrapeRunDao.SCRAPE_TYPE_KHAN);
+            if (runId == 0) {
+                runId = (int) runDao.insert(new ScrapeRun(ScrapeRunDao.SCRAPE_TYPE_KHAN,
+                        ScrapeQueueItemDao.STATUS_PENDING));
+            }
+
+            scrapeFromRoot(new File(args[0]), runId);
         } catch (Exception e) {
             UMLogUtil.logFatal(ExceptionUtils.getStackTrace(e));
             UMLogUtil.logError("Main method exception catch khan");
         }
     }
 
-
-    public void findContent(String urlString, File destinationDir) throws IOException {
-
+    public static void startScrape(String startUrl, File destDir, int runId) throws IOException {
+        //setup the database
         try {
-            url = new URL(urlString);
+            url = new URL(startUrl);
         } catch (MalformedURLException e) {
-            UMLogUtil.logFatal("Index Malformed url" + urlString);
-            throw new IllegalArgumentException("Malformed url" + urlString, e);
+            UMLogUtil.logFatal("Index Malformed url" + startUrl);
+            throw new IllegalArgumentException("Malformed url" + startUrl, e);
         }
-
-        destinationDir.mkdirs();
-        destinationDirectory = destinationDir;
-
-        ContentScraperUtil.setChromeDriverLocation();
-        driver = ContentScraperUtil.loginKhanAcademy("https://www.khanacademy.org/login");
 
         UmAppDatabase db = UmAppDatabase.getInstance(null);
         UmAppDatabase repository = db.getRepository("https://localhost", "");
+
+        destDir.mkdirs();
+        destinationDirectory = destDir;
+
         contentEntryDao = repository.getContentEntryDao();
         contentParentChildJoinDao = repository.getContentEntryParentChildJoinDao();
         contentEntryFileDao = repository.getContentEntryFileDao();
         contentEntryFileJoin = repository.getContentEntryContentEntryFileJoinDao();
         contentFileStatusDao = db.getContentEntryFileStatusDao();
         languageDao = repository.getLanguageDao();
+        queueDao = db.getScrapeQueueItemDao();
 
         gson = new GsonBuilder().disableHtmlEscaping().create();
 
         new LanguageList().addAllLanguages();
 
         englishLang = ContentScraperUtil.insertOrUpdateLanguageByName(languageDao, "English");
-
 
         ContentEntry masterRootParent = ContentScraperUtil.createOrUpdateContentEntry(ROOT, USTAD_MOBILE,
                 ROOT, USTAD_MOBILE, LICENSE_TYPE_CC_BY, englishLang.getLangUid(), null,
@@ -145,10 +170,106 @@ public class IndexKhanContentScraper {
         File englishFolder = new File(destinationDirectory, "en");
         englishFolder.mkdirs();
 
-        browseTopics(khanAcademyEntry, url, englishFolder);
+        ContentScraperUtil.createQueueItem(queueDao, url, khanAcademyEntry, englishFolder, ScraperConstants.KhanContentType.TOPICS.getType(), runId, ScrapeQueueItem.ITEM_TYPE_INDEX);
 
-        driver.close();
-        driver.quit();
+        //create to work queues - one for indexing, one for content scrape
+        WorkQueue.WorkQueueSource indexerSource = () -> {
+            ScrapeQueueItem item = queueDao.getNextItemAndSetStatus(runId, ScrapeQueueItem.ITEM_TYPE_INDEX);
+            if (item == null)
+                return null;
+
+            ContentEntry parent = contentEntryDao.findByUid(item.getSqiContentEntryParentUid());
+            URL queueUrl;
+            try {
+                queueUrl = new URL(item.getScrapeUrl());
+                return new KhanContentIndexer(queueUrl, parent, new File(item.getDestDir()),
+                        item.getContentType(), item.getSqiUid(), runId);
+            } catch (IOException ignored) {
+                //Must never happen
+                throw new RuntimeException("SEVERE: invalid URL to index: should not be in queue:" +
+                        item.getScrapeUrl());
+            }
+        };
+
+        WorkQueue.WorkQueueSource scraperSource = () -> {
+
+            ScrapeQueueItem item = queueDao.getNextItemAndSetStatus(runId,
+                    ScrapeQueueItem.ITEM_TYPE_SCRAPE);
+            if(item == null){
+                return null;
+            }
+
+            ContentEntry parent = contentEntryDao.findByUid(item.getSqiContentEntryParentUid());
+
+            URL scrapeUrl;
+            try{
+                scrapeUrl = new URL(item.getScrapeUrl());
+                return new KhanContentScraper(scrapeUrl, new File(item.getDestDir()), parent,
+                        item.getContentType(), item.getSqiUid(), factory);
+            }catch(IOException ignored){
+                throw new RuntimeException("SEVERE: invalid URL to scrape: should not be in queue:" +
+                        item.getScrapeUrl());
+            }
+        };
+
+        factory = new GenericObjectPool<>(new KhanDriverFactory());
+        //start the indexing work queue
+        CountDownLatch latch = new CountDownLatch(1);
+        queueIndexer = new WorkQueue(indexerSource, 1);
+        queueIndexer.addEmptyWorkQueueListener((srcQueu) ->
+                latch.countDown());
+        queueIndexer.start();
+        CountDownLatch scraperLatch = new CountDownLatch(1);
+        scrapeIndex = new WorkQueue(scraperSource, 1);
+        scrapeIndex.addEmptyWorkQueueListener((scrapeQueu) ->
+                scraperLatch.countDown());
+        scrapeIndex.start();
+
+        try {
+            latch.await();
+            scraperLatch.await();
+        } catch (InterruptedException e) {
+        }
+
+
+    }
+
+    public static void scrapeFromRoot(File destDir, int runId) throws IOException {
+        startScrape(ROOT_URL, destDir, runId);
+    }
+
+
+    KhanContentIndexer(URL indexerUrl, ContentEntry parentEntry, File indexLocation,
+                       String contentType, int scrapeQueueItemUid, int runId) {
+        this.indexerUrl = indexerUrl;
+        this.parentEntry = parentEntry;
+        this.contentType = contentType;
+        this.indexLocation = indexLocation;
+        this.scrapeQueueItemUid = scrapeQueueItemUid;
+        this.runId = runId;
+    }
+
+
+    public void run() {
+
+        boolean successful = false;
+        if (ScraperConstants.KhanContentType.TOPICS.getType().equals(contentType)) {
+            try {
+                browseTopics(parentEntry, indexerUrl, indexLocation);
+                successful = true;
+            } catch (Exception e) {
+                UMLogUtil.logError("Error creating topics for url " + indexerUrl);
+            }
+        } else if (ScraperConstants.KhanContentType.SUBJECT.getType().equals(contentType)) {
+            try {
+                browseSubjects(parentEntry, indexerUrl, indexLocation);
+                successful = true;
+            } catch (Exception e) {
+                UMLogUtil.logError("Error creating subjects for url " + indexerUrl);
+            }
+        }
+
+        queueDao.updateSetStatusById(scrapeQueueItemUid, successful ? ScrapeQueueItemDao.STATUS_DONE : ScrapeQueueItemDao.STATUS_FAILED);
 
     }
 
@@ -208,7 +329,8 @@ public class IndexKhanContentScraper {
                 ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, parent, topicEntry,
                         topicCount++);
 
-                browseSubjects(topicEntry, topicUrl, fileLocation);
+                ContentScraperUtil.createQueueItem(queueDao, topicUrl, topicEntry, fileLocation,
+                        ScraperConstants.KhanContentType.SUBJECT.getType(), runId, ScrapeQueueItem.ITEM_TYPE_INDEX);
 
             }
 
@@ -262,7 +384,8 @@ public class IndexKhanContentScraper {
 
                             ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, topicEntry, subjectEntry, subjectCount++);
 
-                            browseSubjects(subjectEntry, subjectUrl, topicFolder);
+                            ContentScraperUtil.createQueueItem(queueDao, subjectUrl, subjectEntry, topicFolder,
+                                    ScraperConstants.KhanContentType.SUBJECT.getType(), runId, ScrapeQueueItem.ITEM_TYPE_INDEX);
 
                         }
 
@@ -281,7 +404,8 @@ public class IndexKhanContentScraper {
 
                     ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, topicEntry, subjectEntry, subjectCount++);
 
-                    browseSubjects(subjectEntry, subjectUrl, topicFolder);
+                    ContentScraperUtil.createQueueItem(queueDao, subjectUrl, subjectEntry, topicFolder,
+                            ScraperConstants.KhanContentType.SUBJECT.getType(), runId, ScrapeQueueItem.ITEM_TYPE_INDEX);
 
                 } else if (SUBJECT_CHALLENGE.equals(module.kind)) {
 
@@ -329,7 +453,7 @@ public class IndexKhanContentScraper {
 
     private void browseHourOfCode(ContentEntry topicEntry, URL topicUrl, File topicFolder) throws IOException {
 
-        Document document = Jsoup.connect(topicUrl.toString()).get();
+        Document document = Jsoup.connect(topicUrl.toString()).followRedirects(true).get();
 
         Elements subjectList = document.select("div.hoc-box-white");
 
@@ -353,7 +477,9 @@ public class IndexKhanContentScraper {
             ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, topicEntry,
                     subjectEntry, hourOfCode++);
 
-            browseSubjects(subjectEntry, subjectUrl, topicFolder);
+            ContentScraperUtil.createQueueItem(queueDao, subjectUrl, subjectEntry, topicFolder,
+                    ScraperConstants.KhanContentType.SUBJECT.getType(), runId,
+                    ScrapeQueueItem.ITEM_TYPE_INDEX);
 
         }
 
@@ -382,7 +508,6 @@ public class IndexKhanContentScraper {
             File newContentFolder = new File(subjectFolder, contentItem.contentId);
             newContentFolder.mkdirs();
 
-
             ContentEntry entry = ContentScraperUtil.createOrUpdateContentEntry(contentItem.slug, contentItem.title,
                     contentItem.contentId, KHAN, LICENSE_TYPE_CC_BY_NC, englishLang.getLangUid(),
                     null, contentItem.description, true, EMPTY_STRING, contentItem.thumbnailUrl,
@@ -391,52 +516,25 @@ public class IndexKhanContentScraper {
             ContentScraperUtil.insertOrUpdateChildWithMultipleParentsJoin(contentParentChildJoinDao, tutorialEntry, entry
                     , contentCount++);
 
-            KhanContentScraper scraper = new KhanContentScraper(newContentFolder, driver);
-            try {
-                switch (contentItem.kind) {
-
-                    case "Video":
-                        String videoUrl = contentItem.downloadUrls.mp4Low;
-                        if(videoUrl == null || videoUrl.isEmpty()){
-                            UMLogUtil.logInfo("Video was not available in mp4-low, found in mp4 at " + url);
-                            videoUrl = contentItem.downloadUrls.mp4;
-                        }
-                        scraper.scrapeVideoContent(new URL(url, videoUrl).toString());
-                        break;
-                    case "Exercise":
-                        scraper.scrapeExerciseContent(url.toString());
-                        break;
-                    case "Article":
-                        scraper.scrapeArticleContent(url.toString());
-                        break;
-                    default:
-                        UMLogUtil.logError("unsupported kind = " + contentItem.kind + " at url = " + url);
-                        break;
-
+            if (ScraperConstants.KhanContentType.VIDEO.getType().equals(contentItem.kind)) {
+                String videoUrl = contentItem.downloadUrls.mp4Low;
+                if (videoUrl == null || videoUrl.isEmpty()) {
+                    UMLogUtil.logInfo("Video was not available in mp4-low, found in mp4 at " + url);
+                    videoUrl = contentItem.downloadUrls.mp4;
                 }
-
-                File content = new File(newContentFolder, newContentFolder.getName() + ScraperConstants.ZIP_EXT);
-
-                if (scraper.isContentUpdated()) {
-                    ContentScraperUtil.insertContentEntryFile(content, contentEntryFileDao, contentFileStatusDao,
-                            entry, ContentScraperUtil.getMd5(content), contentEntryFileJoin, true,
-                            ScraperConstants.MIMETYPE_ZIP);
-
-                } else {
-
-                    ContentScraperUtil.checkAndUpdateDatabaseIfFileDownloadedButNoDataFound(content, entry, contentEntryFileDao,
-                            contentEntryFileJoin, contentFileStatusDao, ScraperConstants.MIMETYPE_ZIP, true);
-
-                }
-
-            } catch (Exception e) {
-                UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
-                UMLogUtil.logError("Unable to scrape content from " + contentItem.title + " at url " + url);
+                url = new URL(url, videoUrl);
             }
+
+            ContentScraperUtil.createQueueItem(queueDao, url, entry, newContentFolder,
+                    contentItem.kind, runId, ScrapeQueueItem.ITEM_TYPE_SCRAPE);
+            scrapeIndex.checkQueue();
+
+
 
 
         }
 
 
     }
+
 }

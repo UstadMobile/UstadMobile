@@ -14,10 +14,10 @@ import java.util.List;
 public abstract class LanguageDao implements SyncableDao<Language, LanguageDao> {
 
 
-    @UmQuery("SELECT * FROM Language WHERE name = :name")
+    @UmQuery("SELECT * FROM Language WHERE name = :name LIMIT 1")
     public abstract Language findByName(String name);
 
-    @UmQuery("SELECT * FROM Language WHERE iso_639_1_standard = :langCode")
+    @UmQuery("SELECT * FROM Language WHERE iso_639_1_standard = :langCode LIMIT 1")
     public abstract Language findByTwoCode(String langCode);
 
     @UmQuery("SELECT COUNT(*) FROM LANGUAGE")
