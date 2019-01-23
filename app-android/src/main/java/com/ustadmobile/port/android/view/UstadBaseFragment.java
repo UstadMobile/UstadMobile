@@ -4,7 +4,6 @@ import android.content.Context;
 import android.support.v4.app.Fragment;
 
 import com.ustadmobile.core.controller.UstadBaseController;
-import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
@@ -15,7 +14,7 @@ import java.util.Vector;
 /**
  * Created by mike on 10/15/15.
  */
-public class UstadBaseFragment  extends Fragment{
+public class UstadBaseFragment extends Fragment{
 
     private String mUILocale;
 
@@ -63,29 +62,6 @@ public class UstadBaseFragment  extends Fragment{
         if(baseController != null)
             baseController.handleViewDestroy();
         super.onDestroy();
-    }
-
-    //TODO: add stop, pause handling here
-
-    public int getDirection() {
-        if(getActivity() instanceof UstadBaseActivity) {
-            return ((UstadBaseActivity)getActivity()).getDirection();
-        }else {
-            return UstadMobileConstants.DIR_LTR;
-        }
-    }
-
-
-    public void setDirection(int dir) {
-        if(getActivity() instanceof UstadBaseActivity) {
-            ((UstadBaseActivity)getActivity()).setDirection(dir);
-        }
-    }
-
-    public void setAppMenuCommands(String[] labels, int[] ids) {
-        if(getActivity() instanceof UstadBaseActivity) {
-            ((UstadBaseActivity)getActivity()).setAppMenuCommands(labels, ids);
-        }
     }
 
     /**
