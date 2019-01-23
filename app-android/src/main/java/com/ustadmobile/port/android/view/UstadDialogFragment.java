@@ -41,16 +41,4 @@ public class UstadDialogFragment extends android.support.v4.app.DialogFragment i
         }
     }
 
-    public int getDirection() {
-        return 0;
-    }
-
-    public void setDirection(int dir) {
-
-    }
-
-    public void setAppMenuCommands(String[] labels, int[] ids) {
-
-    }
-
 }
