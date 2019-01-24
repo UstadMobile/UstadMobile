@@ -349,7 +349,7 @@ public class DbProcessorJdbc extends AbstractDbProcessor implements QueryMethodG
                             .add("$T _connection = getConnection();\n", Connection.class)
                             .add("$T _stmt = _connection.createStatement();\n", Statement.class)
                         .unindent().beginControlFlow(")")
-                            .add("_stmt.executeUpdate(\"CREATE TABLE _lastsyncablepk(" +
+                            .add("_stmt.executeUpdate(\"CREATE TABLE IF NOT EXISTS _lastsyncablepk(" +
                                 "id INTEGER PRIMARY KEY AUTOINCREMENT, lastpk BIGINT)\");\n")
                         .nextControlFlow("catch($T _sqle)", SQLException.class)
                             .add("throw new RuntimeException(_sqle);\n")
@@ -948,10 +948,17 @@ public class DbProcessorJdbc extends AbstractDbProcessor implements QueryMethodG
          * Handle getting generated primary keys (if any)
          */
         if(!isVoid(resultType) && hasAutoIncrementKey) {
-            codeBlock.add("try (\n").indent()
-                    .add("$T generatedKeys = $L.getGeneratedKeys();\n", ResultSet.class,
-                            autoIncPreparedStmtVarName)
-                .unindent().beginControlFlow(")");
+            codeBlock.add("try (\n").indent();
+            if(hasSyncablePrimaryKey) {
+                codeBlock.add("$T generatedKeys = _db.getDbType() == $T.TYPE_SQLITE ? " +
+                        " _connection.prepareStatement(\"SELECT lastPk FROM _lastsyncablepk\").executeQuery() " +
+                        ": $L.getGeneratedKeys();\n",
+                        ResultSet.class, UmDbType.class, autoIncPreparedStmtVarName);
+            }else {
+                codeBlock.add("$T generatedKeys = $L.getGeneratedKeys();\n", ResultSet.class,
+                        autoIncPreparedStmtVarName);
+            }
+            codeBlock.unindent().beginControlFlow(")");
 
             boolean resultIsList = DbProcessorUtils.isList(resultType, processingEnv);
             boolean resultIsArray = resultType.getKind().equals(TypeKind.ARRAY);
@@ -987,6 +994,15 @@ public class DbProcessorJdbc extends AbstractDbProcessor implements QueryMethodG
 
             codeBlock.nextControlFlow("catch($T pkE)", SQLException.class)
                     .add("pkE.printStackTrace();\n")
+                    .endControlFlow();
+        }
+
+
+        if(hasSyncablePrimaryKey) {
+            codeBlock.beginControlFlow("if(_db.getDbType() == $T.TYPE_SQLITE)",
+                        UmDbType.class)
+                    .add("_connection.prepareStatement(\"DELETE FROM _lastsyncablepk\")" +
+                            ".executeUpdate();\n")
                     .endControlFlow();
         }
 
