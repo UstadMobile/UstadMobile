@@ -10,6 +10,10 @@ import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 @Entity
 public class SyncStatus {
 
+    public static final String COLNAME_LOCAL_CSN = "localChangeSeqNum";
+
+    public static final String COLNAME_MASTER_CSN = "masterChangeSeqNum";
+
     @UmPrimaryKey
     @PrimaryKey
     private int tableId;

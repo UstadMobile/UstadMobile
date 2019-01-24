@@ -32,8 +32,6 @@ import com.ustadmobile.lib.database.annotation.UmSyncFindAllChanges;
 import com.ustadmobile.lib.database.annotation.UmSyncFindLocalChanges;
 import com.ustadmobile.lib.database.annotation.UmSyncCheckIncomingCanUpdate;
 import com.ustadmobile.lib.database.annotation.UmSyncIncoming;
-import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
-import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 import com.ustadmobile.lib.database.annotation.UmSyncOutgoing;
 import com.ustadmobile.lib.database.annotation.UmUpdate;
 import com.ustadmobile.lib.database.jdbc.DbChangeListener;
@@ -41,11 +39,13 @@ import com.ustadmobile.lib.database.jdbc.JdbcDatabaseUtils;
 import com.ustadmobile.lib.database.jdbc.PreparedStatementArrayProxy;
 import com.ustadmobile.lib.database.jdbc.UmJdbcDatabase;
 import com.ustadmobile.lib.database.jdbc.UmLiveDataJdbc;
+import com.ustadmobile.lib.db.UmDbType;
 import com.ustadmobile.lib.db.UmDbWithExecutor;
 import com.ustadmobile.lib.db.sync.UmRepositoryDb;
 import com.ustadmobile.lib.db.sync.UmSyncableDatabase;
 import com.ustadmobile.lib.db.sync.entities.SyncDeviceBits;
 import com.ustadmobile.lib.db.sync.entities.SyncStatus;
+import com.ustadmobile.lib.db.sync.entities.SyncablePrimaryKey;
 
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.statement.delete.Delete;
@@ -144,6 +144,7 @@ public class DbProcessorJdbc extends AbstractDbProcessor implements QueryMethodG
                 .addField(ParameterizedTypeName.get(List.class, UmRepositoryDb.class), "_repositories",
                         Modifier.PRIVATE)
                 .addField(String.class, "_jdbcProductName", Modifier.PRIVATE)
+                .addField(TypeName.INT, "_dbType", Modifier.PRIVATE)
                 .addMethod(MethodSpec.constructorBuilder()
                     .addModifiers(Modifier.PUBLIC)
                     .addParameter(TypeName.get(Object.class), "context")
@@ -167,6 +168,7 @@ public class DbProcessorJdbc extends AbstractDbProcessor implements QueryMethodG
                         .endControlFlow()
                         .build())
                 .build())
+                .addMethod(generateCreateLastSyncablePkTableMethod())
                 .addMethod(MethodSpec.methodBuilder("getExecutor")
                         .addAnnotation(Override.class)
                         .addModifiers(Modifier.PUBLIC)
@@ -236,7 +238,22 @@ public class DbProcessorJdbc extends AbstractDbProcessor implements QueryMethodG
                                         .add("_sqlE.printStackTrace();\n")
                                     .endControlFlow()
                                 .endControlFlow()
-                                .add("return _jdbcProductName;\n").build()).build());
+                                .add("return _jdbcProductName;\n").build()).build())
+                .addMethod(MethodSpec.methodBuilder("getDbType")
+                    .addAnnotation(Override.class)
+                    .returns(TypeName.INT)
+                    .addModifiers(Modifier.PUBLIC)
+                    .addCode(CodeBlock.builder().beginControlFlow("if(_dbType == 0)")
+                            .add("_dbType = $T.typeByProductName(getJdbcProductName());\n",
+                                    UmDbType.class)
+                        .endControlFlow()
+                        .add("return _dbType;\n")
+                        .build())
+                .build());
+
+
+
+
 
         jdbcDbTypeSpec.addMethod(generateCreateTablesMethod(dbType));
         jdbcDbTypeSpec.addMethod(generateCreateSeqNumTriggersMethod(dbType));
@@ -324,6 +341,23 @@ public class DbProcessorJdbc extends AbstractDbProcessor implements QueryMethodG
 
     }
 
+    private MethodSpec generateCreateLastSyncablePkTableMethod() {
+        return MethodSpec.methodBuilder("_createLastSyncablePkTbl")
+                .addModifiers(Modifier.PRIVATE)
+                .addCode(CodeBlock.builder()
+                        .add("try(\n").indent()
+                            .add("$T _connection = getConnection();\n", Connection.class)
+                            .add("$T _stmt = _connection.createStatement();\n", Statement.class)
+                        .unindent().beginControlFlow(")")
+                            .add("_stmt.executeUpdate(\"CREATE TABLE _lastsyncablepk(" +
+                                "id INTEGER PRIMARY KEY AUTOINCREMENT, lastpk BIGINT)\");\n")
+                        .nextControlFlow("catch($T _sqle)", SQLException.class)
+                            .add("throw new RuntimeException(_sqle);\n")
+                        .endControlFlow().build())
+                .build();
+    }
+
+
     /**
      * Generate a createAllTables method that will run the SQL required to generate all tables for
      * all entities on the given database type.
@@ -334,6 +368,15 @@ public class DbProcessorJdbc extends AbstractDbProcessor implements QueryMethodG
     protected MethodSpec generateCreateTablesMethod(TypeElement dbType) {
         MethodSpec.Builder createMethod = MethodSpec.methodBuilder("createAllTables");
         CodeBlock.Builder createCb = CodeBlock.builder();
+        if(processingEnv.getTypeUtils().isAssignable(dbType.asType(),
+                processingEnv.getElementUtils().getTypeElement(UmSyncableDatabase.class.getName())
+                        .asType())) {
+            createCb.beginControlFlow("if(getDbType() == $T.TYPE_SQLITE)", UmDbType.class)
+                    .add("_createLastSyncablePkTbl();\n")
+                .endControlFlow();
+        }
+
+
         createCb.add("try (\n").indent()
                 .add("$T _connection = getConnection();\n", Connection.class)
                 .add("$T _stmt = _connection.createStatement();\n", ClassName.get(Statement.class))
@@ -348,12 +391,19 @@ public class DbProcessorJdbc extends AbstractDbProcessor implements QueryMethodG
                     sqlProductName);
             List<TypeElement> entityTypes = DbProcessorUtils.findEntityTypes(dbType, processingEnv);
 
-            //Make sure that the SyncStatus is teh first table
+            //Make sure that the SyncStatus and SyncablePrimaryKey are created before other tables
             TypeElement syncStatusTypeEl = processingEnv.getElementUtils().getTypeElement(
                     SyncStatus.class.getName());
+            TypeElement syncablePrimaryKeyTypeEl = processingEnv.getElementUtils().getTypeElement(
+                    SyncablePrimaryKey.class.getName());
             if(entityTypes.contains(syncStatusTypeEl)) {
                 entityTypes.remove(syncStatusTypeEl);
                 entityTypes.add(0, syncStatusTypeEl);
+            }
+
+            if(entityTypes.contains(syncablePrimaryKeyTypeEl)) {
+                entityTypes.remove(syncablePrimaryKeyTypeEl);
+                entityTypes.add(0, syncablePrimaryKeyTypeEl);
             }
 
             for(TypeElement entityTypeElement : entityTypes) {
@@ -423,17 +473,23 @@ public class DbProcessorJdbc extends AbstractDbProcessor implements QueryMethodG
                 SyncStatus.class.getName());
         TypeElement syncDeviceBitsEl = processingEnv.getElementUtils().getTypeElement(
                 SyncDeviceBits.class.getName());
+        TypeElement syncablePkEl = processingEnv.getElementUtils().getTypeElement(
+                SyncablePrimaryKey.class.getName());
 
 
         for(TypeElement entityType : DbProcessorUtils.findEntityTypes(dbType, processingEnv)) {
-            if(!entityType.equals(syncStatusTypeEl))
-                codeBlock.add("stmt.executeUpdate(\"DELETE FROM $1L$2L$1L\");\n",
-                    identifierQuoteStr, entityType.getSimpleName().toString());
-            else
+            if(entityType.equals(syncStatusTypeEl)) {
                 codeBlock.add("stmt.executeUpdate(\"UPDATE SyncStatus SET masterChangeSeqNum = 1, " +
                         "localChangeSeqNum = 1, " +
                         "syncedToMasterChangeNum = 0, " +
                         "syncedToLocalChangeSeqNum = 0\");\n");
+            }else if(entityType.equals(syncablePkEl)) {
+                codeBlock.add("stmt.executeUpdate(\"UPDATE SyncablePrimaryKey " +
+                        "SET sequenceNumber = 1\");\n");
+            }else {
+                codeBlock.add("stmt.executeUpdate(\"DELETE FROM $1L$2L$1L\");\n",
+                        identifierQuoteStr, entityType.getSimpleName().toString());
+            }
 
             if(entityType.equals(syncDeviceBitsEl))
                 codeBlock.add("stmt.executeUpdate(\"INSERT INTO SyncDeviceBits VALUES (1, \"" +
@@ -476,8 +532,6 @@ public class DbProcessorJdbc extends AbstractDbProcessor implements QueryMethodG
                                                  String sqlProductName) {
 
         Map<String, List<String>> indexes = new HashMap<>();
-        Element pkElement = findPrimaryKey(entitySpec);
-        boolean autoSyncablePrimaryKey = pkElement.getAnnotation(UmPrimaryKey.class).autoGenerateSyncable();
 
         for(VariableElement fieldVariable : DbProcessorUtils.getEntityFieldElements(entitySpec,
                 processingEnv)) {
@@ -499,56 +553,6 @@ public class DbProcessorJdbc extends AbstractDbProcessor implements QueryMethodG
             codeBlock.add("createSeqNumTriggers($T.class);\n", entitySpec);
         }
 
-
-        if(PRODUCT_NAME_SQLITE.equals(sqlProductName) && autoSyncablePrimaryKey) {
-            codeBlock.add("$L.executeUpdate(\"CREATE VIEW IF NOT EXISTS $L_spk_view AS SELECT ",
-                    stmtVariableName, entitySpec.getSimpleName());
-            boolean commaRequired = false;
-            for(VariableElement fieldVariable : DbProcessorUtils.getEntityFieldElements(entitySpec,
-                    processingEnv)) {
-                if(commaRequired)
-                    codeBlock.add(", ");
-
-                codeBlock.add(fieldVariable.getSimpleName().toString());
-                commaRequired = true;
-            }
-
-            codeBlock.add(" FROM $L\");\n", entitySpec.getSimpleName());
-
-            CodeBlock.Builder colNameBlock = CodeBlock.builder();
-            CodeBlock.Builder valuesCodeBlock = CodeBlock.builder();
-
-            Map<String, String> triggerArgs = new HashMap<>();
-            triggerArgs.put("tableId",
-                    String.valueOf(entitySpec.getAnnotation(UmEntity.class).tableId()));
-            triggerArgs.put("real_table", entitySpec.getSimpleName().toString());
-
-            boolean isFirstEl = true;
-            for(VariableElement fieldVariable : DbProcessorUtils.getEntityFieldElements(entitySpec,
-                    processingEnv)) {
-                if(!isFirstEl)
-                    colNameBlock.add(", ");
-
-                colNameBlock.add("$L", fieldVariable.getSimpleName());
-
-                if(fieldVariable.getAnnotation(UmPrimaryKey.class) != null) {
-                    valuesCodeBlock.add("");
-                }else if(fieldVariable.getAnnotation(UmSyncLocalChangeSeqNum.class) != null
-                        || fieldVariable.getAnnotation(UmSyncMasterChangeSeqNum.class) != null){
-
-                }else {
-                    valuesCodeBlock.add("NEW.$L", fieldVariable.getSimpleName());
-                }
-
-                isFirstEl = false;
-            }
-
-            codeBlock.add("$L.executeUpdate(\"CREATE TRIGGER spk_$L (");
-
-            //TODO: Add an instead-of insert trigger here
-//            codeBlock.add("$L.executeUpdate(")
-
-        }
 
 
         for(Map.Entry<String, List<String>> index : indexes.entrySet()) {
@@ -617,7 +621,9 @@ public class DbProcessorJdbc extends AbstractDbProcessor implements QueryMethodG
                 sbuf.append(" PRIMARY KEY ");
                 if(primaryKeyAnnotation.autoIncrement() && !PRODUCT_NAME_POSTGRES.equals(sqlProductName))
                     sbuf.append(" AUTOINCREMENT ");
-                sbuf.append(" NOT NULL ");
+
+                if(!primaryKeyAnnotation.autoGenerateSyncable())
+                    sbuf.append(" NOT NULL ");
             }
 
             fieldVariablesStarted = true;
@@ -758,6 +764,13 @@ public class DbProcessorJdbc extends AbstractDbProcessor implements QueryMethodG
         DaoMethodInfo methodInfo = new DaoMethodInfo(daoMethod, daoType, processingEnv);
         boolean replaceEnabled =
                 daoMethod.getAnnotation(UmInsert.class).onConflict() == UmOnConflictStrategy.REPLACE;
+        boolean hasSyncablePrimaryKey = methodInfo.isInsertWithAutoSyncPrimaryKey();
+        TypeElement entityTypeElement = (TypeElement)processingEnv.getTypeUtils().asElement(
+                methodInfo.resolveEntityParameterComponentType());
+        boolean hasAutoIncrementKey = DbProcessorUtils.entityHasAutoIncrementPrimaryKey(
+                entityTypeElement, processingEnv);
+        hasAutoIncrementKey = hasAutoIncrementKey | hasSyncablePrimaryKey;
+
 
         TypeElement umCallbackTypeElement = processingEnv.getElementUtils().getTypeElement(
                 UmCallback.class.getName());
@@ -790,10 +803,6 @@ public class DbProcessorJdbc extends AbstractDbProcessor implements QueryMethodG
                     new TypeVariableResolutionVisitor((TypeVariable)insertParameter), new ArrayList<>());
         }
 
-
-
-        TypeElement entityTypeElement = (TypeElement)processingEnv.getTypeUtils().asElement(
-                methodInfo.resolveEntityParameterComponentType());
 
         if(entityTypeElement.getAnnotation(UmEntity.class) == null) {
             messager.printMessage(Diagnostic.Kind.ERROR, daoMethod.getEnclosingElement().getSimpleName() +
@@ -843,18 +852,32 @@ public class DbProcessorJdbc extends AbstractDbProcessor implements QueryMethodG
                     postgresReplaceSuffx);
         }
 
+        VariableElement pkElement = findPrimaryKey(entityTypeElement);
+        UmPrimaryKey primaryKey = pkElement != null ? pkElement.getAnnotation(UmPrimaryKey.class)
+                : null;
+        String sqliteSyncableInsertViewName = null;
+        if(primaryKey != null && primaryKey.autoGenerateSyncable()) {
+            codeBlock.add("$T _insertTblName = " +
+                            "_db.getDbType() == $T.TYPE_SQLITE ? " +
+                            "$S : $S;\n", String.class, UmDbType.class,
+                    entityTypeElement.getSimpleName() +
+                            SQLITE_SYNCABLE_PRIMARY_KEY_INSERT_VIEW_POSTFIX,
+                    entityTypeElement.getSimpleName());
+            sqliteSyncableInsertViewName = "_insertTblName";
+        }
 
 
         codeBlock.add(generateInsertSqlStatementCodeBlock(entityTypeElement,
                 preparedStmtVarName + "_querySql",
                 false,  identifierQuoteStr, replaceEnabled,
-                postgresReplaceSuffxVarName));
-        boolean hasAutoIncrementKey = DbProcessorUtils.entityHasAutoIncrementPrimaryKey(
-                entityTypeElement, processingEnv);
+                postgresReplaceSuffxVarName, sqliteSyncableInsertViewName));
+
+
         if(hasAutoIncrementKey)
             codeBlock.add(generateInsertSqlStatementCodeBlock(entityTypeElement,
                     autoIncPreparedStmtVarName + "_querySql",true,
-                    identifierQuoteStr, replaceEnabled, postgresReplaceSuffxVarName));
+                    identifierQuoteStr, replaceEnabled, postgresReplaceSuffxVarName,
+                    sqliteSyncableInsertViewName));
 
         codeBlock.add("try (\n").indent()
                     .add("$T _connection = _db.getConnection();\n", Connection.class)
@@ -863,6 +886,7 @@ public class DbProcessorJdbc extends AbstractDbProcessor implements QueryMethodG
         if(hasAutoIncrementKey) {
             codeBlock.add("$1T $2L = _connection.prepareStatement($2L_querySql",
                     PreparedStatement.class, autoIncPreparedStmtVarName);
+
             if(!isVoid(resultType))
                 codeBlock.add(", $T.RETURN_GENERATED_KEYS", Statement.class);
             codeBlock.add(");\n");
@@ -993,12 +1017,21 @@ public class DbProcessorJdbc extends AbstractDbProcessor implements QueryMethodG
                                                           boolean isAutoIncrementInsert,
                                                           String identifierQuoteStr,
                                                           boolean replaceEnabled,
-                                                          String postgresReplaceSuffixVarName) {
+                                                          String postgresReplaceSuffixVarName,
+                                                          String sqliteSyncableInsertVarName) {
 
-        CodeBlock.Builder codeBlock = CodeBlock.builder()
-                .add("$1T $2L = \"INSERT INTO $3L$4L$3L (",
+
+        CodeBlock.Builder codeBlock = CodeBlock.builder();
+        if(sqliteSyncableInsertVarName != null) {
+            codeBlock.add("$1T $2L = \"INSERT INTO \" + $3L + \" (",
+                        String.class, querySqlVarName, sqliteSyncableInsertVarName);
+        }else {
+            codeBlock.add("$1T $2L = \"INSERT INTO $3L$4L$3L (",
                     String.class, querySqlVarName, identifierQuoteStr,
-                        entityTypeElement.getSimpleName());
+                    entityTypeElement.getSimpleName());
+        }
+
+
 
         List<VariableElement> entityFields = DbProcessorUtils.getEntityFieldElements(
                 entityTypeElement, processingEnv, true);
@@ -1006,9 +1039,7 @@ public class DbProcessorJdbc extends AbstractDbProcessor implements QueryMethodG
         int numFields = 0;
 
         for(VariableElement fieldElement : entityFields) {
-            if(isAutoIncrementInsert
-                    && fieldElement.getAnnotation(UmPrimaryKey.class) != null
-                    && fieldElement.getAnnotation(UmPrimaryKey.class).autoIncrement())
+            if(isAutoIncrementInsert && fieldElement.getAnnotation(UmPrimaryKey.class) != null)
                 continue;
 
             if(commaRequired)

@@ -1,8 +1,9 @@
 package com.ustadmobile.lib.database.jdbc;
 
+import com.ustadmobile.lib.db.UmDbType;
+
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 
 /**
@@ -60,6 +61,15 @@ public interface UmJdbcDatabase {
      * @return Product name as per JDBC Metadata getProductName()
      */
     String getJdbcProductName();
+
+    /**
+     * Return the type database as an integer constant
+     *
+     * @see UmDbType
+     *
+     * @return UmDbType constant flag for the type of database being used
+     */
+    int getDbType();
 
 
 }

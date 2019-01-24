@@ -407,53 +407,18 @@ public class DbProcessorRetrofitRepository extends AbstractDbProcessor {
 
 
 
-            if(methodInfo.isInsertWithAutoSyncPrimaryKey()) {
-                codeBlock.add(generateSetSyncablePrimaryKey(repoMethod, daoType, processingEnv,
-                        "_db", "_syncableDb", "_syncablePkResult"));
-            }
-
             if(repoMethodMode == UmRepository.UmRepositoryMethodType
                     .INCREMENT_CHANGE_SEQ_NUMS_THEN_DELEGATE_TO_DAO
                     || repoMethodMode == UmRepository.UmRepositoryMethodType.DELEGATE_TO_DAO) {
 
-                //if this is an insert method, with an autosync primary key, and we return the
-                // result, we need to substitute the callback parameter with a wrapper so it returns
-                // the syncable primary key just created.
-                if(methodInfo.isAsyncMethod()
-                        && methodInfo.isInsertWithAutoSyncPrimaryKey()
-                        && !isVoid(methodInfo.resolveResultType())) {
-                    codeBlock.add("_dao.$L(", repoMethod.getSimpleName());
-                    boolean commaRequired = false;
-                    for(VariableElement varEl : repoMethod.getParameters()) {
-                        if(commaRequired)
-                            codeBlock.add(", ");
-                        if(!umCallbackTypeElement.equals(processingEnv.getTypeUtils()
-                                .asElement(varEl.asType()))){
-                            codeBlock.add(varEl.getSimpleName().toString());
-                        }else {
-                            codeBlock.add("new $T<>($L, _syncablePkResult)",
-                                    UmCallbackResultOverrider.class,
-                                    varEl.getSimpleName());
-                        }
 
-                        commaRequired = true;
-                    }
-                    codeBlock.add(");\n");
-
-                }else {
-                    if(!methodInfo.isInsertWithAutoSyncPrimaryKey()
-                            && !repoMethod.getReturnType().getKind().equals(TypeKind.VOID)) {
-                        codeBlock.add("return ");
-                    }
-
-                    codeBlock.add("_dao.$L$L;\n", repoMethod.getSimpleName(),
-                            makeNamedParameterMethodCall(repoMethod.getParameters()));
-
-                    if(methodInfo.isInsertWithAutoSyncPrimaryKey()
-                            && !repoMethod.getReturnType().getKind().equals(TypeKind.VOID)){
-                        codeBlock.add("return _syncablePkResult;\n");
-                    }
+                if(!repoMethod.getReturnType().getKind().equals(TypeKind.VOID)) {
+                    codeBlock.add("return ");
                 }
+
+                codeBlock.add("_dao.$L$L;\n", repoMethod.getSimpleName(),
+                        makeNamedParameterMethodCall(repoMethod.getParameters()));
+
             }else if(repoMethodMode == UmRepository.UmRepositoryMethodType
                     .DELEGATE_TO_WEBSERVICE) {
 
