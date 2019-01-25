@@ -38,6 +38,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Map;
 import java.util.Vector;
 
 /* $if umplatform == 2  $
@@ -515,17 +516,12 @@ public class UMUtil {
      *
      * @return Flip hashtable
      */
-    public static Hashtable flipHashtable(Hashtable table) {
-        Hashtable out = new Hashtable();
-        Object key;
-
-        Enumeration keys = table.keys();
-        while(keys.hasMoreElements()) {
-            key = keys.nextElement();
-            out.put(table.get(key), key);
+    public static <V, K> Map<V, K>  flipMap(Map<K, V> source, Map<V, K> dest) {
+        for(Map.Entry<K, V> entry : source.entrySet()) {
+            dest.put(entry.getValue(), entry.getKey());
         }
 
-        return out;
+        return dest;
     }
 
     /**

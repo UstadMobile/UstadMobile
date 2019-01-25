@@ -88,11 +88,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Hashtable;
 
-/* $if umplatform == 2  $
-    import org.json.me.*;
- $else$ */
-    import org.json.*;
-/* $endif$ */
+import org.json.*;
 
 
 /**
@@ -160,7 +156,7 @@ public class ContainerController extends UstadBaseController {
         @Override
         public void onSuccess(Object result) {
             mountedUrl = (String) result;
-            String containerUri = UMFileUtil.joinPaths(new String[]{mountedUrl, OCF_CONTAINER_PATH});
+            String containerUri = UMFileUtil.joinPaths(mountedUrl, OCF_CONTAINER_PATH);
             containerXmlCall = UstadMobileSystemImpl.getInstance().makeRequestAsync(
                     new UmHttpRequest(getContext(), containerUri), containerHttpCallbackHandler);
         }
@@ -395,10 +391,6 @@ public class ContainerController extends UstadBaseController {
     }
 
 
-    public void setUIStrings() {
-
-    }
-    
     /**
      * Gets the current registration UUID that is being used for the container.
      * 

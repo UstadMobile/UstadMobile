@@ -78,11 +78,6 @@ public class ContentEntryDetailPresenter extends UstadBaseController<ContentEntr
 
     }
 
-    @Override
-    public void setUIStrings() {
-
-    }
-
     public void handleClickTranslatedEntry(long uid) {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         Hashtable args = new Hashtable();

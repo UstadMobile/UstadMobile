@@ -309,9 +309,7 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if(handleClickAppMenuItem(item, mContainerController)) {
-            return true;
-        } else if(item.getItemId() == R.id.action_leavecontainer) {
+        if(item.getItemId() == R.id.action_leavecontainer) {
             finish();
             return true;
         }

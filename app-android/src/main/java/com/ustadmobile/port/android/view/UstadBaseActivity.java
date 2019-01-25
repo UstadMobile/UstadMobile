@@ -132,18 +132,10 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
 
     }
 
-
-
-
     protected void setUMToolbar(int toolbarID) {
         umToolbar = (Toolbar)findViewById(toolbarID);
         setSupportActionBar(umToolbar);
         getSupportActionBar().setHomeButtonEnabled(true);
-    }
-
-
-    public boolean handleClickAppMenuItem(MenuItem item, UstadBaseController controller) {
-        return UstadBaseController.handleClickAppMenuItem(item.getItemId(), getContext());
     }
 
     /**
@@ -211,10 +203,6 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
                 return true;
 
 
-        }
-
-        if(handleClickAppMenuItem(item, baseController)) {
-            return true;
         }
 
         return super.onOptionsItemSelected(item);

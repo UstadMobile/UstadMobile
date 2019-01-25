@@ -38,7 +38,6 @@ import com.ustadmobile.core.impl.http.UmHttpRequest;
 import com.ustadmobile.core.impl.http.UmHttpResponse;
 import com.ustadmobile.core.impl.http.UmHttpResponseCallback;
 import com.ustadmobile.core.networkmanager.NetworkManagerCore;
-import com.ustadmobile.core.util.MessagesHashtable;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.view.Login2View;
 import com.ustadmobile.lib.db.entities.UmAccount;
@@ -53,6 +52,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -70,11 +70,6 @@ public abstract class UstadMobileSystemImpl {
      * Suggested name to create for content on Devices
      */
     public static final String DEFAULT_CONTENT_DIR_NAME = "ustadmobileContent";
-
-    /**
-     * The direction - either 0 for LTR or 1 for RTL
-     */
-    private int direction;
 
     private boolean initRan;
 
@@ -103,11 +98,9 @@ public abstract class UstadMobileSystemImpl {
      */
     public static final String LOCALE_USE_SYSTEM = "";
 
+    private static Map<String, String> MIME_TYPES = new Hashtable<>();
 
-
-    protected static Hashtable MIME_TYPES = new Hashtable();
-
-    protected static Hashtable MIME_TYPES_REVERSE = new Hashtable();
+    private static Map<String, String> MIME_TYPES_REVERSE = new Hashtable<>();
 
     /**
      * Ported from old CatalogPresenter
@@ -128,11 +121,6 @@ public abstract class UstadMobileSystemImpl {
 
     public static final int STATUS_ACQUISITION_IN_PROGRESS = 1;
 
-    public static final int STATUS_NOT_ACQUIRED = 2;
-
-    public static final int STATUS_AVAILABLE_LOCALLY = 3;
-
-
 
     static {
         MIME_TYPES.put("image/jpg", "jpg");
@@ -142,7 +130,7 @@ public abstract class UstadMobileSystemImpl {
         MIME_TYPES.put("image/svg", "svg");
         MIME_TYPES.put("application/epub+zip", "epub");
 
-        MIME_TYPES_REVERSE = UMUtil.flipHashtable(MIME_TYPES);
+        MIME_TYPES_REVERSE = UMUtil.flipMap(MIME_TYPES, MIME_TYPES_REVERSE);
     }
 
     /**
@@ -216,7 +204,6 @@ public abstract class UstadMobileSystemImpl {
      * @param context System context object
      */
     public void go(String destination, Object context) {
-        Hashtable argsTable = null;
         int destinationQueryPos = destination.indexOf('?');
         if(destinationQueryPos == -1) {
             go(destination, null, context);
@@ -288,26 +275,6 @@ public abstract class UstadMobileSystemImpl {
      */
     public abstract String getString(int messageCode, Object context);
 
-
-    /**
-     * Gets the direction of the UI
-     *
-     * @see UstadMobileConstants#DIR_LTR
-     * @see UstadMobileConstants#DIR_RTL
-     *
-     * @return Direction int flag - 0 for LTR or 1 for RTL
-     */
-    public int getDirection() {
-        return direction;
-    }
-
-    /**
-     * Get the name of the platform implementation being used
-     *
-     * @return the name of the platform (used constructing views etc) e.g. "J2ME", "Android", etc
-     */
-    public abstract String getImplementationName();
-
     /**
      * Gets the cache directory for the platform for either user specific
      * cache contents / shared cache contents
@@ -336,7 +303,7 @@ public abstract class UstadMobileSystemImpl {
     /**
      * Provides the path to content directory for a given user
      *
-     * @param username
+     * @param username username to get content dir for
      * @deprecated use getStorageDirs and getCacheDir instead
      *
      * @return URI of the given users content directory
@@ -367,19 +334,13 @@ public abstract class UstadMobileSystemImpl {
     public abstract String getAppPref(String key, Object context);
 
     /**
-     * Get a list of preferences currently set for the app itself
-     *
-     * @return String array list of app preference keys
-     */
-    public abstract String[] getAppPrefKeyList(Object context);
-
-    /**
      * Get a preference for the app.  If not set, return the provided defaultVal
      *
      * @param key preference key as string
      * @param defaultVal default value to return if not set
      * @return value of the preference if set, defaultVal otherwise
      */
+    @SuppressWarnings("WeakerAccess")
     public String getAppPref(String key, String defaultVal, Object context) {
         String valFound = getAppPref(key, context);
         return valFound != null ? valFound : defaultVal;
@@ -409,9 +370,9 @@ public abstract class UstadMobileSystemImpl {
      * Directly send an asynchronous http request. This must *NOT* rely on the httpcachedir, as it
      * will be used by HttpCacheDir as the underlying implementation to retrieve data from the network.
      *
-     * @param request
-     * @param responseListener
-     * @return
+     * @param request request to make
+     * @param responseListener response listener
+     * @return call
      */
     public abstract UmHttpCall sendRequestAsync(UmHttpRequest request,
                                                    UmHttpResponseCallback responseListener);
@@ -423,8 +384,8 @@ public abstract class UstadMobileSystemImpl {
      *
      * It must *NOT* be used directly by presenters etc.
      *
-     * @param request
-     * @return
+     * @param request request to make
+     * @return response
      */
     protected abstract UmHttpResponse sendRequestSync(UmHttpRequest request) throws IOException;
 
@@ -482,7 +443,7 @@ public abstract class UstadMobileSystemImpl {
      * Make a new XmlPullParser from a given inputstream assuming UTF-8 encoding
      * @param in InputStream to read from
      * @return a new XmlPullParser with set with the given inputstream
-     * @throws XmlPullParserException
+     * @throws XmlPullParserException If there is a pull parser exception in the underlying implementation
      */
     public XmlPullParser newPullParser(InputStream in) throws XmlPullParserException {
         return newPullParser(in, UstadMobileConstants.UTF8);
@@ -504,18 +465,6 @@ public abstract class UstadMobileSystemImpl {
     public abstract UMLog getLogger();
 
     /**
-     * When selecting a link to download we can use the mime type parameter
-     * x-umprofile to determine the type of device the link is intended for
-     * e.g. x-umprofile=micro for files with reduced size images and 3gp
-     * video
-     *
-     * Currently supports only null (no specific profile) or micro
-     *
-     * @return profile name for this system e.g. null or "micro"
-     */
-    public abstract String getUMProfileName();
-
-    /**
      * Return the mime type for the given extension
      *
      * @param extension the extension without the leading .
@@ -524,7 +473,7 @@ public abstract class UstadMobileSystemImpl {
      */
     public String getMimeTypeFromExtension(String extension) {
         if(MIME_TYPES_REVERSE.containsKey(extension))
-            return (String)MIME_TYPES_REVERSE.get(extension);
+            return MIME_TYPES_REVERSE.get(extension);
 
         return null;
     }
@@ -538,7 +487,7 @@ public abstract class UstadMobileSystemImpl {
      */
     public String getExtensionFromMimeType(String mimeType) {
         if(MIME_TYPES.containsKey(mimeType)) {
-            return (String)MIME_TYPES.get(mimeType);
+            return MIME_TYPES.get(mimeType);
         }
 
         return null;
@@ -559,15 +508,6 @@ public abstract class UstadMobileSystemImpl {
      * @return Build timestamp in ms since epoch
      */
     public abstract long getBuildTimestamp(Object context);
-
-    /**
-     * Perform a one way hash of an authentication parameter
-     *
-     * @param context System context
-     * @param auth Authentication secret to be hashed
-     * @return The authentication secret hashed
-     */
-    public abstract String hashAuth(Object context, String auth);
 
     /**
      * Indicates whether or not this platform/device supports WiFi Direct (aka P2P WiFi)
@@ -599,7 +539,6 @@ public abstract class UstadMobileSystemImpl {
      * @param context System context
      * @param zip if true, the app setup file should be delivered within a zip.
      * @param callback callback to call when complete or if any error occurs.
-     * @return String: file absolute path
      */
     public abstract void getAppSetupFile(Object context, boolean zip, UmCallback callback);
 
@@ -678,6 +617,7 @@ public abstract class UstadMobileSystemImpl {
      * @param context System context object
      * @return The boolean value of the given preference key if found, otherwise the default value
      */
+    @SuppressWarnings("WeakerAccess")
     public boolean getAppConfigBoolean(String key, boolean defaultVal, Object context) {
         String strVal = getAppConfigString(key, null, context);
         if(strVal == null)
@@ -709,8 +649,6 @@ public abstract class UstadMobileSystemImpl {
     public int getAppConfigInt(String key, int defaultVal, Object context) {
         return Integer.parseInt(getAppConfigString(key, ""+defaultVal, context));
     }
-
-    public abstract String convertTimeToReadableTime(long time);
 
     /**
      * Determine if the two given locales are the same as far as what the user will see.

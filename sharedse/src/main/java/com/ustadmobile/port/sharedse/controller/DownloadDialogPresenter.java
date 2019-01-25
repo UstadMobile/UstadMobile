@@ -215,11 +215,6 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
     }
 
 
-    @Override
-    public void setUIStrings() {
-
-    }
-
     public void handleClickConfirm() {
         switch(selectedOption) {
             case OPTION_START_DOWNLOAD:
