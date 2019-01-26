@@ -35,6 +35,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlSerializer;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -48,6 +49,10 @@ import java.util.Vector;
  * @author varuna
  */
 public class OpfDocument {
+
+    private static final String NAMESPACE_OPF = "http://www.idpf.org/2007/opf";
+
+    private static final String NAMESPACE_DC ="http://purl.org/dc/elements/1.1/";
 
     private List<OpfItem> spine;
 
@@ -66,6 +71,12 @@ public class OpfDocument {
     public String id;
 
     public String description;
+
+    /*
+     * the dc:identifier attribute as per
+     * http://www.idpf.org/epub/30/spec/epub30-publications.html#sec-opf-metadata-identifiers-uid
+     */
+    private String uniqueIdentifier;
 
     private List<LinkElement> links;
 
@@ -178,12 +189,6 @@ public class OpfDocument {
         String idref=null;
         boolean isLinear = true;
         String isLinearStrVal = null;
-        
-        /*
-         * the dc:identifier attribute as per 
-         * http://www.idpf.org/epub/30/spec/epub30-publications.html#sec-opf-metadata-identifiers-uid
-         */
-        String uniqueIdentifier = null;
 
         
         boolean inMetadata = false;
@@ -311,6 +316,59 @@ public class OpfDocument {
             
         }while(evtType != XmlPullParser.END_DOCUMENT);
     }
+
+    /**
+     * Serialize this document to the given XmlSerializer
+     *
+     * @param xs XmlSerializer
+     *
+     * @throws IOException if an IOException occurs in the underlying IO
+     */
+    public void serialize(XmlSerializer xs) throws IOException {
+        xs.startDocument("UTF-8", false);
+        xs.setPrefix("", NAMESPACE_OPF);
+        xs.startTag(null, "package");
+        xs.attribute(null,"version", "3.0");
+        xs.attribute(null, "unique-identifier", uniqueIdentifier);
+        xs.setPrefix("dc", NAMESPACE_DC);
+        xs.startTag(null, "metadata");
+
+
+        xs.startTag(NAMESPACE_DC, "identifier");
+        xs.attribute(null, "id", uniqueIdentifier);
+        xs.text(id);
+        xs.endTag(NAMESPACE_DC, "identifier");
+
+        xs.startTag(NAMESPACE_DC, "title");
+        xs.text(title);
+        xs.endTag(NAMESPACE_DC, "title");
+
+        xs.endTag(null, "metadata");
+
+        xs.startTag(null, "manifest");
+        for(OpfItem item : manifestItems.values()) {
+            xs.startTag(null, "item");
+            xs.attribute(null, "id", item.getId());
+            xs.attribute(null, "href", item.getHref());
+            xs.attribute(null, "media-type", item.getMimeType());
+            if(item.getProperties() != null)
+                xs.attribute(null, "properties", item.getProperties());
+            xs.endTag(null, "item");
+        }
+        xs.endTag(null, "manifest");
+
+        xs.startTag(null, "spine");
+        for(OpfItem item : spine) {
+            xs.startTag(null, "itemref");
+            xs.attribute(null, "idref", item.getId());
+            xs.endTag(null, "itemref");
+        }
+        xs.endTag(null, "spine");
+
+        xs.endTag(null, "package");
+        xs.endDocument();
+    }
+
     
     public String getMimeType(String filename) {
         OpfItem item = findItemByHref(filename);

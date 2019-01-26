@@ -6,7 +6,9 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlSerializer;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -36,6 +38,23 @@ public class TestOpfDocument {
                 opf.getCreator(1).getCreator());
         Assert.assertEquals("Loaded mime type as expected for page", "application/xhtml+xml",
                 opf.getMimeType("Page_1.xhtml"));
+    }
+
+    @Test
+    public void givenValidOpf_whenLoaded_thenCanSerialize() throws IOException, XmlPullParserException {
+        InputStream opfIn = getClass().getResourceAsStream("TestOpfDocument-valid.opf");
+        XmlPullParser parser = UstadMobileSystemImpl.getInstance().newPullParser();
+        parser.setInput(opfIn, "UTF-8");
+        OpfDocument opf = new OpfDocument();
+        opf.loadFromOPF(parser);
+
+        ByteArrayOutputStream bout = new ByteArrayOutputStream();
+        XmlSerializer serializer = UstadMobileSystemImpl.getInstance().newXMLSerializer();
+        serializer.setOutput(bout, "UTF-8");
+        opf.serialize(serializer);
+        bout.flush();
+        String xmlStr = new String(bout.toByteArray(), "UTF-8");
+        Assert.assertNotNull(xmlStr);
     }
 
 }

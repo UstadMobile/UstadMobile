@@ -46,11 +46,6 @@ public class EpubNavItem {
 
     private String navElEpubTypeAttr;
 
-    /**
-     * If this represents a nav node,
-     */
-    //public String[] epubNavType;
-        
     public EpubNavItem(String title, String href, EpubNavItem parent, int depth) {
         this.title = title;
         this.href = href;
@@ -58,6 +53,7 @@ public class EpubNavItem {
         if(parent != null) {
             parent.addChild(this);
         }
+
         this.depth = depth;
     }
     
