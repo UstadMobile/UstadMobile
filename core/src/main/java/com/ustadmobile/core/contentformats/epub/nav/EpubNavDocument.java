@@ -28,17 +28,16 @@
     GNU General Public License for more details.
 
  */
-package com.ustadmobile.core.epubnav;
-
-import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.lib.util.UMUtil;
+package com.ustadmobile.core.contentformats.epub.nav;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
-import java.io.InputStream;
+import java.util.Arrays;
 import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 
 /**
@@ -46,36 +45,33 @@ import java.util.Vector;
  * 
  * @author mike
  */
-public class EPUBNavDocument {
+public class EpubNavDocument {
     
     /**
      * Table of nav tags
      */
-    private Hashtable navItems;
+    private Map<String, EpubNavItem> navItems;
 
     /**
      * Vector of all navigation elements found
      */
-    private Vector navElements;
+    private List<EpubNavItem> navElements;
 
-    public static final String EPUB_NAV_DOCUMENT_TYPE_TOC = "toc";
+    private static final String EPUB_NAV_DOCUMENT_TYPE_TOC = "toc";
+
+    private static final String DOCTYPE_OPS_NAMESPACE = "http://www.idpf.org/2007/ops";
     
-    public EPUBNavDocument() {
-        navItems = new Hashtable();
-        navElements = new Vector();
-    }
-    
-    public void load(InputStream in) throws XmlPullParserException, IOException {
-        XmlPullParser xpp = UstadMobileSystemImpl.getInstance().newPullParser();
-        xpp.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, true);
-        xpp.setInput(in, "UTF-8");
-        load(xpp);
+    public EpubNavDocument() {
+        navItems = new Hashtable<>();
+        navElements = new Vector<>();
     }
     
     public void load(XmlPullParser xpp) throws XmlPullParserException, IOException{
+        xpp.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, true);
+
         int evtType;
-        EPUBNavItem currentNav = null;//represents the current nav tag
-        EPUBNavItem currentItem = null;
+        EpubNavItem currentNav = null;//represents the current nav tag
+        EpubNavItem currentItem = null;
         int itemDepth = 0;
         String tagName;
         
@@ -84,21 +80,28 @@ public class EPUBNavDocument {
                 case XmlPullParser.START_TAG:
                     tagName = xpp.getName();
                     if(tagName.equals("nav")) {
-                        currentNav = new EPUBNavItem(null, null, null, 0);
-                        String navTypeAttr = xpp.getAttributeValue("http://www.idpf.org/2007/ops",
+                        currentNav = new EpubNavItem(null, null, null, 0);
+                        String navTypeAttr = xpp.getAttributeValue(DOCTYPE_OPS_NAMESPACE,
                                 "type");
-                        if(navTypeAttr != null)
-                            currentNav.setEpubNavType(navTypeAttr);
+                        String idAttrVal = xpp.getAttributeValue(null, "id");
 
-                        navElements.addElement(currentNav);
+                        if(navTypeAttr != null)
+                            currentNav.setNavElEpubTypeAttr(navTypeAttr);
+
+                        if(idAttrVal != null) {
+                            currentNav.setId(idAttrVal);
+                            navItems.put(idAttrVal, currentNav);
+                        }
+
+                        navElements.add(currentNav);
                     }else if(tagName.equals("li")) {
-                        currentItem = new EPUBNavItem(currentItem != null ? 
+                        currentItem = new EpubNavItem(currentItem != null ?
                             currentItem : currentNav, itemDepth);
                         itemDepth++;
                     }else if(tagName.equals("a")) {
-                        currentItem.href = xpp.getAttributeValue(null, "href");
+                        currentItem.setHref(xpp.getAttributeValue(null, "href"));
                         if(xpp.next() == XmlPullParser.TEXT) {
-                            currentItem.title = xpp.getText();
+                            currentItem.setTitle(xpp.getText());
                         }
                     }
                     break;
@@ -107,7 +110,7 @@ public class EPUBNavDocument {
                     if(xpp.getName().equals("nav")) {
                         currentNav = null;
                     }else if(xpp.getName().equals("li")) {
-                        currentItem = currentItem.parent;
+                        currentItem = currentItem.getParent();
                         itemDepth--;
                     }
                     
@@ -118,16 +121,18 @@ public class EPUBNavDocument {
 
     /**
      * As per the EPUB navigation xhtml spec there can be multiple nav elements each with an epub:type
-     * attribute. This method will attempt to get the EPUBNavItem that has epub:type="toc".
+     * attribute. This method will attempt to get the EpubNavItem that has epub:type="toc".
      *
      * @return
      */
-    public EPUBNavItem getToc() {
-        EPUBNavItem navItem;
-        for(int i = 0; i < navElements.size(); i++) {
-            navItem = (EPUBNavItem)navElements.elementAt(i);
-            if(UMUtil.indexInArray(navItem.epubNavType, EPUB_NAV_DOCUMENT_TYPE_TOC) != -1)
-                return navItem;
+    public EpubNavItem getToc() {
+        for(EpubNavItem item : navElements) {
+            if(item.getNavElEpubTypeAttr() == null)
+                continue;
+
+            if(Arrays.asList(item.getNavElEpubTypeAttr().split("\\s+"))
+                    .contains(EPUB_NAV_DOCUMENT_TYPE_TOC))
+                return item;
         }
 
         return null;
@@ -136,9 +141,9 @@ public class EPUBNavDocument {
 
 
     
-    public EPUBNavItem getNavById(String id) {
+    public EpubNavItem getNavById(String id) {
         if(navItems.containsKey(id)) {
-            return (EPUBNavItem)navItems.get(id);
+            return navItems.get(id);
         }else {
             return null;
         }

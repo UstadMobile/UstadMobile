@@ -28,13 +28,13 @@
     GNU General Public License for more details.
 
  */
-package com.ustadmobile.core.opf;
+package com.ustadmobile.core.contentformats.epub.opf;
 
 /**
  *
  * @author varuna
  */
-public class UstadJSOPFItem {
+public class OpfItem {
     public String href;
 
     public String mimeType;
@@ -45,7 +45,7 @@ public class UstadJSOPFItem {
 
     public String id;
     
-    public UstadJSOPFItem(){
+    public OpfItem(){
         this.linear = true;
     }
 

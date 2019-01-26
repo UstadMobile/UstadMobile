@@ -1,7 +1,6 @@
-package com.ustadmobile.core.opf;
+package com.ustadmobile.core.contentformats.epub.opf;
 
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.core.opf.UstadJSOPF;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -15,14 +14,14 @@ import java.io.InputStream;
  * Created by mike on 10/17/17.
  */
 
-public class TestUstadJSOPF {
+public class TestOpfDocument {
 
     @Test
     public void givenValidOpf_whenLoaded_thenShouldHavePropertiesFromOpfFile() throws IOException, XmlPullParserException{
-        InputStream opfIn = getClass().getResourceAsStream("TestUstadJSOPF-valid.opf");
+        InputStream opfIn = getClass().getResourceAsStream("TestOpfDocument-valid.opf");
         XmlPullParser parser = UstadMobileSystemImpl.getInstance().newPullParser();
         parser.setInput(opfIn, "UTF-8");
-        UstadJSOPF opf = new UstadJSOPF();
+        OpfDocument opf = new OpfDocument();
         opf.loadFromOPF(parser);
         Assert.assertEquals("Title as expected", "The Little Chicks", opf.title);
         Assert.assertEquals("Id as expected", "202b10fe-b028-4b84-9b84-852aa766607d", opf.id);
