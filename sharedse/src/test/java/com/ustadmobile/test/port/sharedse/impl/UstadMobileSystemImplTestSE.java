@@ -1,6 +1,5 @@
 package com.ustadmobile.test.port.sharedse.impl;
 
-import com.ustadmobile.core.controller.CatalogEntryInfo;
 import com.ustadmobile.core.impl.UMStorageDir;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMIOUtils;
@@ -76,9 +75,6 @@ public class UstadMobileSystemImplTestSE extends UstadMobileSystemImplTest {
             }
 
 
-            CatalogEntryInfo testEntryInfo = new CatalogEntryInfo();
-            testEntryInfo.acquisitionStatus = UstadMobileSystemImpl.STATUS_ACQUIRED;
-            testEntryInfo.srcURLs = new String[]{"http://foo.com/bar.epub"};
 
             File sharedStorageDir = new File(getStorageDirs(UstadMobileSystemImpl.SHARED_RESOURCE,
                 testDriver.getContext())[0].getDirURI());
@@ -101,9 +97,7 @@ public class UstadMobileSystemImplTestSE extends UstadMobileSystemImplTest {
                 }
             }
 
-            testEntryInfo.fileURI = testDriverEntryFile.getAbsolutePath();
-            testEntryInfo.mimeType = "application/zip+epub";
-//            CatalogPresenter.setEntryInfo(TestEntryStatusTask.ENTRY_ID, testEntryInfo,
+            //  CatalogPresenter.setEntryInfo(TestEntryStatusTask.ENTRY_ID, testEntryInfo,
 //                    CatalogPresenter.SHARED_RESOURCE, testDriver.getContext());
 
             //Setup the default mock wifi

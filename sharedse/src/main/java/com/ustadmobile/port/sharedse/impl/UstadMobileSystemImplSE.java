@@ -21,7 +21,6 @@ import com.ustadmobile.core.impl.http.UmHttpRequest;
 import com.ustadmobile.core.impl.http.UmHttpResponse;
 import com.ustadmobile.core.impl.http.UmHttpResponseCallback;
 import com.ustadmobile.lib.db.entities.UmAccount;
-import com.ustadmobile.lib.util.Base64Coder;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.port.sharedse.impl.http.UmHttpCallSe;
@@ -33,26 +32,16 @@ import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 import org.xmlpull.v1.XmlSerializer;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.text.Format;
 import java.text.NumberFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
-import java.util.Vector;
 import java.util.concurrent.Executors;
 
 
@@ -116,7 +105,7 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
     @Override
     public String getCacheDir(int mode, Object context) {
         String systemBaseDir = getSystemBaseDir(context);
-        return UMFileUtil.joinPaths(new String[]{systemBaseDir, UstadMobileConstants.CACHEDIR});
+        return UMFileUtil.joinPaths(systemBaseDir, UstadMobileConstants.CACHEDIR);
     }
 
     @Override
@@ -199,22 +188,6 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
     }
 
     /**
-     * @{inheritDoc}
-     */
-    public String hashAuth(Object context, String auth) {
-        try {
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            md.update(auth.getBytes());
-            byte[] digest = md.digest();
-            return new String(Base64Coder.encode(digest));
-        }catch(NoSuchAlgorithmException e) {
-            l(UMLog.ERROR, 86, null, e);
-        }
-
-        return null;
-    }
-
-    /**
      * Return the network manager for this platform
      *
      * @return
@@ -282,14 +255,6 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
         return httpCache;
     }
 
-
-
-    @Override
-    public String convertTimeToReadableTime(long time) {
-        Date date = new Date(time);
-        Format format = new SimpleDateFormat("yyyy MM dd HH:mm:ss");
-        return format.format(date);
-    }
 
     public abstract InputStream getAssetSync(Object context, String path) throws IOException;
 

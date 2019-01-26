@@ -78,8 +78,4 @@ public class Login2Presenter extends UstadBaseController<Login2View> {
     }
 
 
-    @Override
-    public void setUIStrings() {
-
-    }
 }

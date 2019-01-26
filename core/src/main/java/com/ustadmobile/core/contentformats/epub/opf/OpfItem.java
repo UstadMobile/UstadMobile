@@ -28,19 +28,64 @@
     GNU General Public License for more details.
 
  */
-package com.ustadmobile.core.ocf;
+package com.ustadmobile.core.contentformats.epub.opf;
 
 /**
  *
- * @author mike
+ * @author varuna
  */
- public class UstadOCFRootFile {
-    public String fullPath;
+public class OpfItem {
+    public String href;
 
-    public String mediaType;
+    public String mimeType;
 
-    public UstadOCFRootFile(String fullPath, String mediaType) {
-        this.fullPath = fullPath;
-        this.mediaType = mediaType;
+    public String properties;
+
+    public boolean linear;
+
+    public String id;
+    
+    public OpfItem(){
+        this.linear = true;
+    }
+
+    public String getHref() {
+        return href;
+    }
+
+    public void setHref(String href) {
+        this.href = href;
+    }
+
+    public String getMimeType() {
+        return mimeType;
+    }
+
+    public void setMimeType(String mimeType) {
+        this.mimeType = mimeType;
+    }
+
+    public String getProperties() {
+        return properties;
+    }
+
+    public void setProperties(String properties) {
+        this.properties = properties;
+    }
+
+    public boolean isLinear() {
+        return linear;
+    }
+
+    public void setLinear(boolean linear) {
+        this.linear = linear;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 }

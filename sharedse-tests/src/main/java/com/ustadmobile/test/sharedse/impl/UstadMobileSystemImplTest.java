@@ -5,8 +5,6 @@ import com.ustadmobile.core.catalog.contenttype.EPUBTypePlugin;
 import com.ustadmobile.core.impl.ContainerMountRequest;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UmCallback;
-import com.ustadmobile.core.opds.db.UmOpdsDbManager;
-import com.ustadmobile.core.tincan.TinCanResultListener;
 import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
@@ -24,8 +22,6 @@ import java.net.URLConnection;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.Properties;
-import java.util.Set;
 
 /**
  * Created by mike on 4/25/17.
@@ -116,11 +112,6 @@ public class UstadMobileSystemImplTest extends UstadMobileSystemImplSE {
     }
 
     @Override
-    public String getImplementationName() {
-        return "Test";
-    }
-
-    @Override
     public String getSharedContentDir(Object context) {
         return testSystemBaseDir.getAbsolutePath();
     }
@@ -135,16 +126,6 @@ public class UstadMobileSystemImplTest extends UstadMobileSystemImplSE {
     @Override
     public String getAppPref(String key, Object context) {
         return ((TestContext)context).getAppProps().getProperty(key);
-    }
-
-    @Override
-    public String[] getAppPrefKeyList(Object context) {
-        Properties appProps = ((TestContext)context).getAppProps();
-        Set keySet = appProps.keySet();
-        String[] propNames = new String[keySet.size()];
-        keySet.toArray(propNames);
-
-         return propNames;
     }
 
     @Override
@@ -166,11 +147,6 @@ public class UstadMobileSystemImplTest extends UstadMobileSystemImplSE {
     @Override
     public UMLog getLogger() {
         return testLogger;
-    }
-
-    @Override
-    public String getUMProfileName() {
-        return null;
     }
 
     @Override

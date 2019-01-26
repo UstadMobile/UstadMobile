@@ -11,23 +11,19 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Hashtable;
 
-
 /**
  * Created by mike on 12/27/16.
  */
 
-public class AboutController extends UstadBaseController  {
-
-    AboutView aboutView;
+public class AboutController extends UstadBaseController<AboutView>  {
 
     private String aboutHTMLStr;
 
-    public AboutController(Object context, AboutView view){
-        super(context);
-        this.aboutView = view;
+    public AboutController(Object context, Hashtable args, AboutView view){
+        super(context, args, view);
     }
 
-    public void onCreate(Hashtable args, Hashtable savedState) {
+    public void onCreate(Hashtable savedState) {
         final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
 
         impl.getAsset(context, "com/ustadmobile/core/about.html", new UmCallback<InputStream>() {
@@ -35,7 +31,7 @@ public class AboutController extends UstadBaseController  {
             public void onSuccess(InputStream result) {
                 try {
                     aboutHTMLStr = UMIOUtils.readStreamToString(result);
-                    aboutView.setAboutHTML(aboutHTMLStr);
+                    view.setAboutHTML(aboutHTMLStr);
                 }catch(IOException e) {
                     e.printStackTrace();
                 }
@@ -48,23 +44,12 @@ public class AboutController extends UstadBaseController  {
         });
 
 
-        aboutView.setVersionInfo(impl.getVersion(context) + " - " +
+        view.setVersionInfo(impl.getVersion(context) + " - " +
                 UMCalendarUtil.makeHTTPDate(impl.getBuildTimestamp(context)));
 
-        aboutView.setVersionInfo(impl.getVersion(context) + " - " +
+        view.setVersionInfo(impl.getVersion(context) + " - " +
                 UMCalendarUtil.makeHTTPDate(impl.getBuildTimestamp(context)));
-        aboutView.setAboutHTML(aboutHTMLStr);
+        view.setAboutHTML(aboutHTMLStr);
     }
-
-    public void setUIStrings() {
-
-    }
-
-    public void setView(UstadView view) {
-        super.setView(view);
-        aboutView = (AboutView)view;
-    }
-
-
 
 }

@@ -72,11 +72,6 @@ public class SendCoursePresenter extends UstadBaseController implements WifiP2pL
     }
 
     @Override
-    public void setUIStrings() {
-
-    }
-
-    @Override
     public void peersChanged(List<NetworkNode> peers) {
         ArrayList<String> ids = new ArrayList<>();
         ArrayList<String> names = new ArrayList<>();

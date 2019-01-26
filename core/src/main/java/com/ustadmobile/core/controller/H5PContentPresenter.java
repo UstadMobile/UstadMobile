@@ -117,8 +117,4 @@ public class H5PContentPresenter extends UstadBaseController {
         h5PContentView.mountH5PDist(mH5PDistMountedCallback);
     }
 
-    @Override
-    public void setUIStrings() {
-
-    }
 }

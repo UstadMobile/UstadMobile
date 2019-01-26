@@ -7,7 +7,6 @@ import com.ustadmobile.core.catalog.contenttype.XapiPackageTypePlugin;
 import com.ustadmobile.core.impl.ContainerMountRequest;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UmCallback;
-import com.ustadmobile.core.tincan.TinCanResultListener;
 import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
@@ -63,11 +62,6 @@ public class UstadMobileSystemImplJavaSe extends UstadMobileSystemImplSE {
     }
 
     @Override
-    public String getImplementationName() {
-        return null;
-    }
-
-    @Override
     public NetworkManager getNetworkManager() {
         return null;
     }
@@ -88,11 +82,6 @@ public class UstadMobileSystemImplJavaSe extends UstadMobileSystemImplSE {
     }
 
     @Override
-    public String[] getAppPrefKeyList(Object context) {
-        return new String[0];
-    }
-
-    @Override
     public void setAppPref(String key, String value, Object context) {
 
     }
@@ -105,11 +94,6 @@ public class UstadMobileSystemImplJavaSe extends UstadMobileSystemImplSE {
     @Override
     public UMLog getLogger() {
         return logJavaSe;
-    }
-
-    @Override
-    public String getUMProfileName() {
-        return null;
     }
 
     @Override

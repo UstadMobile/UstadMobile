@@ -28,20 +28,35 @@
     GNU General Public License for more details.
 
  */
-package com.ustadmobile.core.opf;
+package com.ustadmobile.core.contentformats.epub.ocf;
 
 /**
  *
- * @author varuna
+ * @author mike
  */
-public class UstadJSOPFItem {
-    public String href;
-    public String mimeType;
-    public String properties;
-    public boolean linear;
-    public String id;
-    
-    public UstadJSOPFItem(){
-        this.linear = true;
+ public class OcfRootFile {
+    private String fullPath;
+
+    private String mediaType;
+
+    public OcfRootFile(String fullPath, String mediaType) {
+        this.fullPath = fullPath;
+        this.mediaType = mediaType;
+    }
+
+    public String getFullPath() {
+        return fullPath;
+    }
+
+    public void setFullPath(String fullPath) {
+        this.fullPath = fullPath;
+    }
+
+    public String getMediaType() {
+        return mediaType;
+    }
+
+    public void setMediaType(String mediaType) {
+        this.mediaType = mediaType;
     }
 }

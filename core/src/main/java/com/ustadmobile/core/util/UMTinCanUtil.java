@@ -341,42 +341,4 @@ public class UMTinCanUtil {
         return null;
     }
     
-    /**
-     * Filters a list of registrations 
-     * 
-     * @param registrations List of registrations to filter 
-     * @param keep If true all matching registrations are including, otherwise they are excluded
-     * @param srcArr Array of registrations to go through
-     * 
-     * @return JSONObject array representing statements filtered according to params
-     */
-    public static JSONObject[] filterByRegistration(String[] registrations, boolean keep, JSONObject[] srcArr) {
-        Vector results = new Vector();
-        String stmtRegistration;
-        int j;
-        for(int i = 0; i < srcArr.length; i++) {
-            stmtRegistration = getStatementRegistration(srcArr[i]);
-            boolean match = false;
-            if(stmtRegistration != null) {
-                for(j = 0; j < registrations.length && !match; j++) {
-                    match = registrations[i].equals(stmtRegistration);
-                }
-            }
-            
-            if(match && keep) {
-                results.addElement(srcArr[i]);
-            }else if(!match && !keep) {
-                results.addElement(srcArr[i]);
-            }
-            
-        }
-        
-        JSONObject[] resultStmts = new JSONObject[results.size()];
-        results.copyInto(resultStmts);
-        return resultStmts;
-    }
-    
-
-    
-    
 }
