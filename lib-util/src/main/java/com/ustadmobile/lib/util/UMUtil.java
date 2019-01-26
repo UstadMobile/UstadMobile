@@ -545,6 +545,20 @@ public class UMUtil {
         return buffer.toString();
     }
 
+    public static String joinStrings(Iterable<?> strings, String joiner) {
+        boolean isFirst = true;
+        StringBuilder sb = new StringBuilder();
+        for(Object o : strings) {
+            if(!isFirst)
+                sb.append(joiner);
+
+            sb.append(o.toString());
+            isFirst = false;
+        }
+
+        return sb.toString();
+    }
+
     /**
      * Joins strings e.g. from an array generate a single string with "Bob", "Anand", "Kate" etc.
      *
