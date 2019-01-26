@@ -506,4 +506,13 @@ public class OpfDocument {
         return spine;
     }
 
+    /**
+     * Get map of manifest items. Mapped id to item
+     *
+     * @return map of manifest items
+     */
+    public Map<String, OpfItem> getManifestItems() {
+        return manifestItems;
+    }
+
 }
