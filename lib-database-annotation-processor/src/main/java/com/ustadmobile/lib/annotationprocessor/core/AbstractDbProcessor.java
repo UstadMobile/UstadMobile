@@ -3,6 +3,7 @@ package com.ustadmobile.lib.annotationprocessor.core;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
+import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
@@ -32,6 +33,7 @@ import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
 import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 import com.ustadmobile.lib.database.annotation.UmSyncOutgoing;
 import com.ustadmobile.lib.db.UmDbWithAttachmentsDir;
+import com.ustadmobile.lib.db.UmDbWithSyncableInsertLock;
 import com.ustadmobile.lib.db.sync.SyncResponse;
 import com.ustadmobile.lib.db.sync.UmRepositoryDb;
 import com.ustadmobile.lib.db.sync.UmRepositoryUtils;
@@ -53,6 +55,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -2289,6 +2292,28 @@ public abstract class AbstractDbProcessor {
         }
 
         return methodBuilder.addCode(codeBlock.build()).build();
+    }
+
+    /**
+     * Add a method and field for implementation of a syncable primary key insert lock object
+     *
+     * @param dbTypeSpec TypeSpec.Builder representing the database class being generated
+     */
+    protected void addDbWithSyncableInsertLockImplementation(TypeSpec.Builder dbTypeSpec) {
+        dbTypeSpec.addSuperinterface(UmDbWithSyncableInsertLock.class)
+                .addField(FieldSpec.builder(ReentrantLock.class, "_syncableInsertLock",
+                        Modifier.PRIVATE)
+                        .initializer("new $T();\n", ReentrantLock.class).build())
+                .addMethod(MethodSpec.methodBuilder("lockSyncableInserts")
+                        .addModifiers(Modifier.PUBLIC)
+                        .addAnnotation(Override.class)
+                        .addCode("_syncableInsertLock.lock();\n")
+                        .build())
+                .addMethod(MethodSpec.methodBuilder("unlockSyncableInserts")
+                        .addModifiers(Modifier.PUBLIC)
+                        .addAnnotation(Override.class)
+                        .addCode("_syncableInsertLock.unlock();\n")
+                        .build());
     }
 
 

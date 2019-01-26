@@ -252,11 +252,15 @@ public class DbProcessorJdbc extends AbstractDbProcessor implements QueryMethodG
                 .build());
 
 
-
-
-
         jdbcDbTypeSpec.addMethod(generateCreateTablesMethod(dbType));
         jdbcDbTypeSpec.addMethod(generateCreateSeqNumTriggersMethod(dbType));
+
+        if(processingEnv.getTypeUtils().isAssignable(dbType.asType(),
+                processingEnv.getElementUtils()
+                        .getTypeElement(UmSyncableDatabase.class.getName()).asType())) {
+
+            addDbWithSyncableInsertLockImplementation(jdbcDbTypeSpec);
+        }
 
         for(Element subElement : dbType.getEnclosedElements()) {
             if (subElement.getKind() != ElementKind.METHOD)
@@ -879,6 +883,9 @@ public class DbProcessorJdbc extends AbstractDbProcessor implements QueryMethodG
                     identifierQuoteStr, replaceEnabled, postgresReplaceSuffxVarName,
                     sqliteSyncableInsertViewName));
 
+        if(hasSyncablePrimaryKey) {
+            codeBlock.add("$T.lockSyncableInsertsIfSqlite(_db);\n", JdbcDatabaseUtils.class);
+        }
         codeBlock.add("try (\n").indent()
                     .add("$T _connection = _db.getConnection();\n", Connection.class)
                     .add("$1T $2L = _connection.prepareStatement($2L_querySql);\n", PreparedStatement.class,
@@ -1010,7 +1017,12 @@ public class DbProcessorJdbc extends AbstractDbProcessor implements QueryMethodG
 
 
         codeBlock.nextControlFlow("catch($T e)", SQLException.class)
-                .add("e.printStackTrace();\n").endControlFlow();
+                .add("e.printStackTrace();\n");
+        if(hasSyncablePrimaryKey) {
+            codeBlock.nextControlFlow("finally")
+                    .add("$T.unlockSyncableInsertsIfSqlite(_db);\n", JdbcDatabaseUtils.class);
+        }
+        codeBlock.endControlFlow();
 
         if(!isVoid(resultType) && !asyncMethod) {
             codeBlock.add("return _result;\n");
