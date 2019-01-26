@@ -4,9 +4,11 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -30,7 +32,7 @@ public class TestEpubNavDocument {
 
 
     @Test
-    public void givenDocLoaded_whenSerialized_thenWeCanSeeIt() throws XmlPullParserException,
+    public void givenDocLoaded_whenSerializedAndReloaded_thenShouldBeTheSame() throws XmlPullParserException,
             IOException{
         EpubNavDocument navDoc = new EpubNavDocument();
         InputStream docIn = getClass().getResourceAsStream("TestEPUBNavDocument-valid.xhtml");
@@ -42,9 +44,17 @@ public class TestEpubNavDocument {
         serializer.setOutput(bout, "UTF-8");
         navDoc.serialize(serializer);
         bout.flush();
-        String str = new String(bout.toByteArray(), StandardCharsets.UTF_8);
-        Assert.assertNotNull(str);
 
+
+        EpubNavDocument loadedDoc = new EpubNavDocument();
+        XmlPullParser loadedXpp = UstadMobileSystemImpl.getInstance().newPullParser(
+                new ByteArrayInputStream(bout.toByteArray()), "UTF-8");
+        loadedDoc.load(loadedXpp);
+
+        Assert.assertEquals("Loaded and reserialized docs have same toc id",
+                navDoc.getToc().getId(), loadedDoc.getToc().getId());
+        Assert.assertEquals("Loaded and reserialized tocs have same number of child entries",
+                navDoc.getToc().size(), loadedDoc.getToc().size());
     }
 
 }

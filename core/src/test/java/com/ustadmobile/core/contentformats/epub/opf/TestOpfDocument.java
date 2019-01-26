@@ -8,6 +8,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -41,7 +42,7 @@ public class TestOpfDocument {
     }
 
     @Test
-    public void givenValidOpf_whenLoaded_thenCanSerialize() throws IOException, XmlPullParserException {
+    public void givenOpfLoaded_whenSerializedThenLoaded_shouldBeEqual() throws IOException, XmlPullParserException {
         InputStream opfIn = getClass().getResourceAsStream("TestOpfDocument-valid.opf");
         XmlPullParser parser = UstadMobileSystemImpl.getInstance().newPullParser();
         parser.setInput(opfIn, "UTF-8");
@@ -53,8 +54,31 @@ public class TestOpfDocument {
         serializer.setOutput(bout, "UTF-8");
         opf.serialize(serializer);
         bout.flush();
-        String xmlStr = new String(bout.toByteArray(), "UTF-8");
-        Assert.assertNotNull(xmlStr);
+
+        OpfDocument loadedOpf = new OpfDocument();
+        XmlPullParser xpp = UstadMobileSystemImpl.getInstance().newPullParser(
+                new ByteArrayInputStream(bout.toByteArray()), "UTF-8");
+        loadedOpf.loadFromOPF(xpp);
+
+        Assert.assertEquals("Original and reserialized title is the same", opf.getTitle(),
+                loadedOpf.getTitle());
+        Assert.assertEquals("Original and reserialized id is the same", opf.getId(),
+                loadedOpf.getId());
+        Assert.assertEquals("Original and reserialized opf has same number of manifest entries",
+                opf.getManifestItems().size(), loadedOpf.getManifestItems().size());
+        for(OpfItem item : opf.getManifestItems().values()) {
+            OpfItem loadedItem = loadedOpf.getManifestItems().get(item.getId());
+            Assert.assertNotNull("Manifest item id #" + item.getId() +
+                    " present in reserialized manifest", loadedItem);
+            Assert.assertEquals("Item id # " + item.getId() + " same href",
+                    item.getHref(), loadedItem.getHref());
+            Assert.assertEquals("Item id #" + item.getId() + " same mime type",
+                    item.getMimeType(), loadedItem.getMimeType());
+        }
+
+        Assert.assertEquals("Original and reserialized TOC has same navitem",
+                opf.getNavItem().getId(), loadedOpf.getNavItem().getId());
+
     }
 
 }
