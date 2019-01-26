@@ -32,6 +32,7 @@ package com.ustadmobile.core.contentformats.epub.nav;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlSerializer;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -60,6 +61,8 @@ public class EpubNavDocument {
     private static final String EPUB_NAV_DOCUMENT_TYPE_TOC = "toc";
 
     private static final String DOCTYPE_OPS_NAMESPACE = "http://www.idpf.org/2007/ops";
+
+    public static final String DOCTYPE_XHTML_NAMESPACE = "http://www.w3.org/1999/xhtml";
     
     public EpubNavDocument() {
         navItems = new Hashtable<>();
@@ -118,6 +121,60 @@ public class EpubNavDocument {
             }
         }
     }
+
+    public void serialize(XmlSerializer xs) throws IOException{
+        xs.startDocument("UTF-8", false);
+        xs.setPrefix(null, DOCTYPE_XHTML_NAMESPACE);
+        xs.setPrefix("epub", DOCTYPE_OPS_NAMESPACE);
+
+        xs.startTag(null, "html")
+            .startTag(null, "head")
+                .startTag(null, "meta")
+                    .attribute(null, "charset", "UTF-8")
+                .endTag(null, "meta")
+            .endTag(null, "head")
+            .startTag(null, "body");
+
+        for(EpubNavItem navItem : navElements) {
+            xs.startTag(null, "nav");
+            if(navItem.getId() != null)
+                xs.attribute(null, "id", navItem.getId());
+
+            if(navItem.getNavElEpubTypeAttr() != null)
+                xs.attribute(DOCTYPE_OPS_NAMESPACE, "type",
+                        navItem.getNavElEpubTypeAttr());
+
+            xs.startTag(null, "ol");
+            for(EpubNavItem childItem : navItem.getChildren()){
+                writeNavItem(childItem, xs);
+            }
+            xs.endTag(null, "ol")
+                .endTag(null, "nav");
+        }
+
+        xs.endTag(null, "body");
+        xs.endTag(null, "html");
+        xs.endDocument();
+    }
+
+    private void writeNavItem(EpubNavItem item, XmlSerializer xs) throws IOException {
+        xs.startTag(null, "li")
+            .startTag(null, "a")
+                .attribute(null, "href", item.getHref())
+                .text(item.getTitle())
+            .endTag(null, "a");
+
+        if(item.hasChildren()) {
+            xs.startTag(null, "ol");
+            for(EpubNavItem child : item.getChildren()){
+                writeNavItem(child, xs);
+            }
+            xs.endTag(null, "ol");
+        }
+
+        xs.endTag(null, "li");
+    }
+
 
     /**
      * As per the EPUB navigation xhtml spec there can be multiple nav elements each with an epub:type
