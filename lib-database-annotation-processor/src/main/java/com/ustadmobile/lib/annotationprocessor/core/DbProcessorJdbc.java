@@ -112,6 +112,8 @@ public class DbProcessorJdbc extends AbstractDbProcessor implements QueryMethodG
 
     private static final char SQL_IDENTIFIER_CHAR = ' ';
 
+    private static final String POSTGRES_SYNCABLE_PK_PREFIX = "spk_seq_";
+
     private File dbTmpFile;
 
     //Map of fully qualified database class name to a connection that has that database
@@ -400,6 +402,9 @@ public class DbProcessorJdbc extends AbstractDbProcessor implements QueryMethodG
                     SyncStatus.class.getName());
             TypeElement syncablePrimaryKeyTypeEl = processingEnv.getElementUtils().getTypeElement(
                     SyncablePrimaryKey.class.getName());
+            TypeElement syncDeviceBitsTypeEl = processingEnv.getElementUtils().getTypeElement(
+                    SyncDeviceBits.class.getName());
+
             if(entityTypes.contains(syncStatusTypeEl)) {
                 entityTypes.remove(syncStatusTypeEl);
                 entityTypes.add(0, syncStatusTypeEl);
@@ -409,6 +414,18 @@ public class DbProcessorJdbc extends AbstractDbProcessor implements QueryMethodG
                 entityTypes.remove(syncablePrimaryKeyTypeEl);
                 entityTypes.add(0, syncablePrimaryKeyTypeEl);
             }
+
+            if(entityTypes.contains(syncDeviceBitsTypeEl)) {
+                entityTypes.remove(syncDeviceBitsTypeEl);
+                entityTypes.add(0, syncDeviceBitsTypeEl);
+            }
+
+            if(processingEnv.getTypeUtils().isAssignable(dbType.asType(),
+                    processingEnv.getElementUtils()
+                            .getTypeElement(UmSyncableDatabase.class.getName()).asType())) {
+                createCb.add("int _deviceBits = -1;\n");
+            }
+
 
             for(TypeElement entityTypeElement : entityTypes) {
                 addCreateTableStatements(createCb, "_stmt", entityTypeElement,
@@ -535,6 +552,8 @@ public class DbProcessorJdbc extends AbstractDbProcessor implements QueryMethodG
                                                  TypeElement entitySpec, char quoteChar,
                                                  String sqlProductName) {
 
+        TypeElement deviceBitsTypeEl = processingEnv.getElementUtils().getTypeElement(
+                SyncDeviceBits.class.getName());
         Map<String, List<String>> indexes = new HashMap<>();
 
         for(VariableElement fieldVariable : DbProcessorUtils.getEntityFieldElements(entitySpec,
@@ -548,9 +567,29 @@ public class DbProcessorJdbc extends AbstractDbProcessor implements QueryMethodG
 
         codeBlock.beginControlFlow("if(!$T.listContainsStringIgnoreCase(_existingTableNames, $S))",
                 JdbcDatabaseUtils.class,
-                entitySpec.getSimpleName().toString())
-                .add("$L.executeUpdate($S);\n", stmtVariableName,
+                entitySpec.getSimpleName().toString());
+        if(PRODUCT_NAME_POSTGRES.equals(sqlProductName)) {
+            VariableElement pkElement = findPrimaryKey(entitySpec);
+            UmEntity entityAnnotation = entitySpec.getAnnotation(UmEntity.class);
+            if(pkElement != null
+                    && pkElement.getAnnotation(UmPrimaryKey.class) != null
+                    && pkElement.getAnnotation(UmPrimaryKey.class).autoGenerateSyncable()
+                    && entityAnnotation != null) {
+                codeBlock.add("$L.executeUpdate(\"CREATE SEQUENCE $L$L " +
+                                " INCREMENT BY \" + (_deviceBits > 0 ? 1 : -1) + \"" +
+                                " START WITH \" + _deviceBits);\n",
+                        stmtVariableName, POSTGRES_SYNCABLE_PK_PREFIX, entityAnnotation.tableId());
+            }
+        }
+
+        codeBlock.add("$L.executeUpdate($S);\n", stmtVariableName,
                         makeCreateTableStatement(entitySpec, quoteChar, sqlProductName));
+
+        if(entitySpec.equals(deviceBitsTypeEl)) {
+            codeBlock.add("_deviceBits = new $T().nextInt();\n", Random.class)
+                    .add("$L.executeUpdate(\"INSERT INTO SyncDeviceBits(id, deviceBits) " +
+                    "VALUES (1, \" + _deviceBits + \")\");\n", stmtVariableName);
+        }
 
         if(DbProcessorUtils.entityHasChangeSequenceNumbers(entitySpec, processingEnv)) {
             //we need to add a trigger to handle change sequence numbers
@@ -578,6 +617,11 @@ public class DbProcessorJdbc extends AbstractDbProcessor implements QueryMethodG
             formatArgs.put("index_fields", indexFieldBuffer.toString());
             codeBlock.addNamed("$stmt:L.executeUpdate(\"CREATE INDEX $quot:L$index_name:L$quot:L ON $quot:L$table_name:L$quot:L ($index_fields:L)\");\n",
                     formatArgs);
+        }
+
+        if(entitySpec.equals(deviceBitsTypeEl)) {
+            codeBlock.nextControlFlow("else")
+                    .add("_deviceBits = getDeviceBits();\n");
         }
 
         codeBlock.endControlFlow();
@@ -628,6 +672,13 @@ public class DbProcessorJdbc extends AbstractDbProcessor implements QueryMethodG
 
                 if(!primaryKeyAnnotation.autoGenerateSyncable())
                     sbuf.append(" NOT NULL ");
+
+                if(primaryKeyAnnotation.autoGenerateSyncable()
+                        && PRODUCT_NAME_POSTGRES.equals(sqlProductName))
+                    sbuf.append(" DEFAULT NEXTVAL('")
+                            .append(POSTGRES_SYNCABLE_PK_PREFIX)
+                            .append(entitySpec.getAnnotation(UmEntity.class).tableId())
+                            .append("') ");
             }
 
             fieldVariablesStarted = true;
