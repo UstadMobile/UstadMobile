@@ -10,8 +10,12 @@ import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin;
 import com.ustadmobile.lib.db.entities.ScrapeRun;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.pool2.impl.GenericObjectPool;
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
+import org.openqa.selenium.chrome.ChromeDriver;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,7 +37,7 @@ public class TestIndexKhanAcademy {
 
     final Dispatcher dispatcher = new Dispatcher() {
         @Override
-        public MockResponse dispatch(RecordedRequest request) throws InterruptedException {
+        public MockResponse dispatch(RecordedRequest request) {
 
             try {
 
@@ -62,13 +66,29 @@ public class TestIndexKhanAcademy {
             return new MockResponse().setResponseCode(404);
         }
     };
+    private MockWebServer mockWebServer;
+    private ChromeDriver driver;
+    private GenericObjectPool<ChromeDriver> factory;
+
+    @Before
+    public void setUpDriver() throws Exception {
+        mockWebServer = new MockWebServer();
+        mockWebServer.setDispatcher(dispatcher);
+
+        factory = new GenericObjectPool<>(new KhanDriverFactory());
+        driver = factory.borrowObject();
+    }
+
+    @After
+    public void closeDriver() {
+        driver.close();
+        driver.quit();
+        factory.close();
+    }
 
 
     @Test
     public void givenServerOnline_whenKhanContentScraped_thenShouldConvertAndDownloadAllFiles() throws IOException {
-
-        MockWebServer mockWebServer = new MockWebServer();
-        mockWebServer.setDispatcher(dispatcher);
 
         UmAppDatabase db = UmAppDatabase.getInstance(null);
         UmAppDatabase repo = db.getRepository("https://localhost", "");
@@ -119,13 +139,11 @@ public class TestIndexKhanAcademy {
     }
 
     @Test
-    public void givenServerOnline_whenKhanVideoContentScrapedAGAIN_thenShouldNotDownloadFilesAgain() throws IOException {
+    public void givenServerOnline_whenKhanVideoContentScrapedAGAIN_thenShouldNotDownloadFilesAgain() throws Exception {
 
-        MockWebServer mockWebServer = new MockWebServer();
-        mockWebServer.setDispatcher(dispatcher);
         File tmpDir = Files.createTempDirectory("testIndexKhancontentscraper").toFile();
 
-        KhanContentScraper scraper = new KhanContentScraper(tmpDir);
+        KhanContentScraper scraper = new KhanContentScraper(tmpDir, driver);
         scraper.scrapeVideoContent(mockWebServer.url("/content/com/ustadmobile/lib/contentscrapers/files/video.mp4").toString());
 
         long firstDownloadTime = new File(tmpDir, tmpDir.getName() + ZIP_EXT).lastModified();
@@ -136,7 +154,6 @@ public class TestIndexKhanAcademy {
         long lastModified = new File(tmpDir, tmpDir.getName() + ZIP_EXT).lastModified();
         //Assert that last modified dates are lower than firstDownloadCompleteTime
         Assert.assertTrue(lastModified == firstDownloadTime);
-
 
     }
 

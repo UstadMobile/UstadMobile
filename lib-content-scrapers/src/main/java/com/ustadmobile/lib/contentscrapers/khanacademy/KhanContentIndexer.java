@@ -225,6 +225,7 @@ public class KhanContentIndexer implements Runnable {
         }catch (InterruptedException ignored){
 
         }
+        factory.close();
 
     }
 

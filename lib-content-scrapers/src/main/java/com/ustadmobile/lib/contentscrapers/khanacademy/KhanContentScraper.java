@@ -146,9 +146,9 @@ public class KhanContentScraper implements Runnable {
 
     }
 
-    public KhanContentScraper(File destinationDirectory) {
+    public KhanContentScraper(File destinationDirectory, ChromeDriver driver) throws Exception {
         this.destinationDirectory = destinationDirectory;
-        this.driver = null;
+        this.driver = driver;
     }
 
     @Override
