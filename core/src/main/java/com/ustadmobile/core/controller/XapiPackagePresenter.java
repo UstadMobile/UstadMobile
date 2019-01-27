@@ -159,11 +159,6 @@ public class XapiPackagePresenter extends UstadBaseController {
                 activityArgs;
     }
 
-    @Override
-    public void setUIStrings() {
-
-    }
-
     public UmCallback getOnLoadListener() {
         return loadListener;
     }

@@ -43,21 +43,6 @@ public interface UstadView {
      * @return 
      */
     Object getContext();
-    
-    /**
-     * Sets whether this view is left to right or right to left
-     * 
-     * @return UstadMobileConstants.DIR_RTL or UstadMobileConstants.DIR_LTR
-     */
-    int getDirection();
-    
-    /**
-     * Sets the direction of this view (if supported).  Will have no effect on platforms that don't
-     * support RTL e.g. Android < 4.2
-     * 
-     * @param dir UstadMobileConstants.DIR_RTL or UstadMobileConstants.DIR_LTR
-     */
-    void setDirection(int dir);
 
     /**
      * Most UI platforms require that all UI changes are done in a particular thread. This method

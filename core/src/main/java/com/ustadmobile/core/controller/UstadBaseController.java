@@ -30,11 +30,8 @@
  */
 package com.ustadmobile.core.controller;
 
-import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UmLifecycleListener;
 import com.ustadmobile.core.impl.UmLifecycleOwner;
-import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.core.view.AboutView;
 import com.ustadmobile.core.view.UstadView;
 
 import java.util.Hashtable;
@@ -55,20 +52,6 @@ public abstract class UstadBaseController<V extends UstadView> implements UstadC
     protected Object context;
 
     protected final Vector<UmLifecycleListener> lifecycleListeners = new Vector<>();
-
-    public static final int CMD_ABOUT = 1001;
-    
-    public static final int CMD_SETTINGS = 1002;
-    
-    public static final int CMD_LOGOUT = 1003;
-    
-    public static final int CMD_HOME = 1004;
-
-    public static final int[] STANDARD_APPEMNU_CMDS = new int[]{CMD_HOME, 
-        CMD_ABOUT, CMD_SETTINGS, CMD_LOGOUT};
-    
-    public static final int[] STANDARD_APPMENU_STRIDS = new int[]{MessageID.home,
-        MessageID.about, MessageID.settings,MessageID.logout};
 
     private Hashtable arguments;
 
@@ -173,68 +156,12 @@ public abstract class UstadBaseController<V extends UstadView> implements UstadC
     }
 
 
-
-    /**
-     * Must call all view methods that set UI strings - e.g.  when the
-     * locale is changed
-     */
-    public abstract void setUIStrings();
-    
-    /**
-     * This should be called by the view when it is being destroyed: this is
-     * irreversible and it is time to stop background activities 
-     */
-    public void handleViewDestroy() {
-
-    }
-    
-
     public Hashtable getArguments() {
         return arguments;
     }
 
     protected void setArguments(Hashtable arguments) {
         this.arguments = arguments;
-    }
-
-
-    /**
-     * Handle when users have clicked a standard option from the menu
-     * 
-     * Note: This method is static so it can be used without a controller object
-     * (e.g. in the event a controller failed to load)
-     * 
-     * @param cmdId - Command ID - CMD_ABOUT, CMD_SETTINGS or CMD_LOGOUT
-     * @param context - Platform context object
-     * @return true if the command id matches something we know about and it was handled, false otherwise
-     */
-    public static boolean handleClickAppMenuItem(int cmdId, Object context) {
-        switch(cmdId) {
-            case CMD_ABOUT:
-                UstadMobileSystemImpl.getInstance().go(AboutView.VIEW_NAME, new Hashtable(), context);
-                return true;
-        }
-        
-        return false;
-    }
-    
-    public boolean handleClickAppMenuItem(int cmdId) {
-        return handleClickAppMenuItem(cmdId, getContext());
-    }
-    
-    /**
-     * Fills in the standard menu options into the given arrays
-     * 
-     * @param cmds Array to be filled with the commands as per STANDARD_APPEMNU_CMDS
-     * @param labels Array of be filled with the labels for each command
-     * @param offset Offset in array to start filling from
-     */
-    protected void fillStandardMenuOptions(int[] cmds, String[] labels, int offset) {
-        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        for(int i = offset; i < STANDARD_APPEMNU_CMDS.length + offset; i++) {
-            cmds[i] = STANDARD_APPEMNU_CMDS[i - offset];
-            labels[i] = impl.getString(STANDARD_APPMENU_STRIDS[i - offset], getContext());
-        }
     }
 
     @Override

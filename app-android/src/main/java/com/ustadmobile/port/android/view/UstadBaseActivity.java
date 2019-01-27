@@ -39,19 +39,9 @@ import java.util.Locale;
  */
 public abstract class UstadBaseActivity extends AppCompatActivity implements ServiceConnection {
 
-    private int mUIDirection = UstadMobileConstants.DIR_LTR;
-
     private UstadBaseController baseController;
 
-    private boolean handleUIStringsOnResume = true;
-
     protected Toolbar umToolbar;
-
-    private int[] appMenuCommands;
-
-    private String[] appMenuLabels;
-
-    private String displayName;
 
     private List<WeakReference<Fragment>> fragmentList;
 
@@ -142,62 +132,10 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
 
     }
 
-
-
-
-
-    public int getDirection() {
-        return mUIDirection;
-    }
-
-    protected void setDirectionFromSystem() {
-        setDirection(UstadMobileSystemImpl.getInstance().getDirection());
-    }
-
-    public void setDirection(int dir) {
-        if(dir != mUIDirection) {
-            UMAndroidUtil.setDirectionIfSupported(findViewById(android.R.id.content),
-                    UstadMobileSystemImpl.getInstance().getDirection());
-            mUIDirection = dir;
-        }
-    }
-
-    public void setHandleUIStringsOnResume(boolean handleUIStringsOnResume) {
-        this.handleUIStringsOnResume = handleUIStringsOnResume;
-    }
-
-    public boolean isHandleUIStringsOnResume() {
-        return this.handleUIStringsOnResume;
-    }
-
     protected void setUMToolbar(int toolbarID) {
         umToolbar = (Toolbar)findViewById(toolbarID);
         setSupportActionBar(umToolbar);
         getSupportActionBar().setHomeButtonEnabled(true);
-    }
-
-
-    public void setAppMenuCommands(String[] labels, int[] ids) {
-        this.appMenuLabels = labels;
-        this.appMenuCommands = ids;
-        supportInvalidateOptionsMenu();
-    }
-
-    //TODO: Fully disable this properly
-    public boolean onCreateOptionsMenu(Menu menu) {
-//        if(appMenuCommands != null && appMenuLabels != null) {
-//            for(int i = 0; i < appMenuLabels.length; i++) {
-//                menu.add(Menu.NONE, appMenuCommands[i], i + 10, appMenuLabels[i]);
-//            }
-//            return true;
-//        }else {
-//            return super.onCreateOptionsMenu(menu);
-//        }
-        return super.onCreateOptionsMenu(menu);
-    }
-
-    public boolean handleClickAppMenuItem(MenuItem item, UstadBaseController controller) {
-        return UstadBaseController.handleClickAppMenuItem(item.getItemId(), getContext());
     }
 
     /**
@@ -267,16 +205,7 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
 
         }
 
-        if(handleClickAppMenuItem(item, baseController)) {
-            return true;
-        }
-
         return super.onOptionsItemSelected(item);
-    }
-
-    public void setDisplayName(String displayName) {
-        this.displayName = displayName;
-        supportInvalidateOptionsMenu();
     }
 
     @Override

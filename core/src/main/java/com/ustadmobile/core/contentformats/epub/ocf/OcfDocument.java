@@ -29,12 +29,14 @@
 
  */
 
-package com.ustadmobile.core.ocf;
+package com.ustadmobile.core.contentformats.epub.ocf;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Vector;
 
 
@@ -44,62 +46,34 @@ import java.util.Vector;
  * 
  * @author mike
  */
-public class UstadOCF {
-    
-    public UstadOCF(UstadOCFRootFile[] rootFiles) {
-        this.rootFiles = rootFiles;
-    }
+public class OcfDocument {
 
-    public UstadOCF() {
-
+    public OcfDocument() {
+        rootFiles = new ArrayList<>();
     }
     
-    public UstadOCFRootFile[] rootFiles;
+    private List<OcfRootFile> rootFiles;
     
     public static final String ROOTFILETAG = "rootfile";
-    
-    public static UstadOCF loadFromXML(XmlPullParser xpp) throws XmlPullParserException, IOException{
-        int evtType = 0;
-        
-        Vector rootsFound = new Vector();
-        do {
-            evtType = xpp.next();
-            if(evtType == XmlPullParser.START_TAG) {
-                if(ROOTFILETAG.equals(xpp.getName())) {
-                    String fullPath = xpp.getAttributeValue(null, "full-path");
-                    String mediaType = xpp.getAttributeValue(null, "media-type");
-                    rootsFound.addElement(new UstadOCFRootFile(fullPath, 
-                        mediaType));
-                }
-            }
-        }while(evtType != XmlPullParser.END_DOCUMENT);
-        
-        UstadOCFRootFile[] rootFiles = new UstadOCFRootFile[rootsFound.size()];
-        rootsFound.copyInto(rootFiles);
-        
-        UstadOCF retVal = new UstadOCF(rootFiles);
-        return retVal;
-    }
 
 
     public void loadFromParser(XmlPullParser xpp) throws XmlPullParserException, IOException{
-        int evtType = 0;
+        int evtType;
 
-        Vector rootsFound = new Vector();
         do {
             evtType = xpp.next();
             if(evtType == XmlPullParser.START_TAG) {
                 if(ROOTFILETAG.equals(xpp.getName())) {
                     String fullPath = xpp.getAttributeValue(null, "full-path");
                     String mediaType = xpp.getAttributeValue(null, "media-type");
-                    rootsFound.addElement(new UstadOCFRootFile(fullPath,
-                            mediaType));
+                    rootFiles.add(new OcfRootFile(fullPath, mediaType));
                 }
             }
         }while(evtType != XmlPullParser.END_DOCUMENT);
+    }
 
-        rootFiles = new UstadOCFRootFile[rootsFound.size()];
-        rootsFound.copyInto(rootFiles);
+    public List<OcfRootFile> getRootFiles() {
+        return rootFiles;
     }
 }
 

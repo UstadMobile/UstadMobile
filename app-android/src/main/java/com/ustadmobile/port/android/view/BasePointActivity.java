@@ -75,7 +75,9 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
                 "recreate-" + BasePointController.ARG_WELCOME_SCREEN_DISPLAYED, this);
 
         /*
-         * When recreate is manually called (e.g. in-app locale change) onSaveInstanceState is not
+         * When
+    private Timer sendStatementsTimer;
+recreate is manually called (e.g. in-app locale change) onSaveInstanceState is not
          * called by Android. Thus we look for a manually saved state.
          */
         if(recreateWelcomeVal != null) {

@@ -43,11 +43,6 @@ public class Register2Presenter extends UstadBaseController<Register2View> {
         }
     }
 
-    @Override
-    public void setUIStrings() {
-
-    }
-
     //only for testing
     public void setClientDb(UmAppDatabase database){
         this.umAppDatabase = database;

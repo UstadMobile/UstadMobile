@@ -1,21 +1,21 @@
-package com.ustadmobile.core.opf;
+package com.ustadmobile.core.contentformats.epub.opf;
 
 /**
  * Created by mike on 12/12/17.
  */
 
-public class UstadJSOPFCreator {
+public class OpfCreator {
 
     private String creator;
 
     private String id;
 
-    public UstadJSOPFCreator(String creator, String id) {
+    public OpfCreator(String creator, String id) {
         this.creator = creator;
         this.id = id;
     }
 
-    public UstadJSOPFCreator() {
+    public OpfCreator() {
 
     }
 
