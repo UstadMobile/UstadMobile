@@ -302,6 +302,21 @@ public class DbProcessorUtils {
         return pkElement.getAnnotation(UmPrimaryKey.class).autoIncrement();
     }
 
+    public static boolean entityHasAutoIncrementOrSyncablePrimaryKey(TypeElement typeElement,
+                                                                     ProcessingEnvironment processingEnv) {
+        Element pkElement = findElementWithAnnotation(typeElement, UmPrimaryKey.class, processingEnv);
+        if(pkElement == null)
+            return false;
+
+        UmPrimaryKey primaryKey = pkElement.getAnnotation(UmPrimaryKey.class);
+        if(primaryKey == null)
+            return false;
+
+        return primaryKey.autoGenerateSyncable() || primaryKey.autoIncrement();
+
+    }
+
+
     public static VariableElement findPrimaryKey(TypeElement entityType,
                                                  ProcessingEnvironment processingEnv) {
         for(Element subElement : getEntityFieldElements(entityType, processingEnv)) {
@@ -350,7 +365,8 @@ public class DbProcessorUtils {
 
             if(getAutoIncLast
                     && subElement.getAnnotation(UmPrimaryKey.class) != null
-                    && subElement.getAnnotation(UmPrimaryKey.class).autoIncrement()) {
+                    && (subElement.getAnnotation(UmPrimaryKey.class).autoIncrement()
+                        || subElement.getAnnotation(UmPrimaryKey.class).autoGenerateSyncable())) {
                 pkAutoIncField = (VariableElement) subElement;
             }else {
                 entityFieldsList.add((VariableElement) subElement);

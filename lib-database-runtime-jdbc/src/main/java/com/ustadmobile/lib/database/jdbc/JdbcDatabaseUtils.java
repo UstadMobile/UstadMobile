@@ -1,5 +1,7 @@
 package com.ustadmobile.lib.database.jdbc;
 
+import com.ustadmobile.lib.db.UmDbType;
+import com.ustadmobile.lib.db.UmDbWithSyncableInsertLock;
 import com.ustadmobile.lib.db.sync.UmSyncableDatabase;
 
 import java.sql.Array;
@@ -270,6 +272,31 @@ public class JdbcDatabaseUtils {
             }
         }
     }
+
+    /**
+     * Lock the database for syncable entity insert if this is an SQLite database. This is called by
+     * generated code.
+     *
+     * @param db database being used
+     */
+    @SuppressWarnings("unused")
+    public static void lockSyncableInsertsIfSqlite(UmJdbcDatabase db) {
+        if(db.getDbType() == UmDbType.TYPE_SQLITE)
+            ((UmDbWithSyncableInsertLock)db).lockSyncableInserts();
+    }
+
+    /**
+     * Unlock the database for syncable entity insert if this is an SQLite database. This is called
+     * by generated code
+     *
+     * @param db database being used
+     */
+    @SuppressWarnings("unused")
+    public static void unlockSyncableInsertsIfSqlite(UmJdbcDatabase db) {
+        if(db.getDbType() == UmDbType.TYPE_SQLITE)
+            ((UmDbWithSyncableInsertLock)db).unlockSyncableInserts();
+    }
+
 
 
 }
