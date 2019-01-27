@@ -39,7 +39,7 @@ import static com.ustadmobile.lib.db.entities.Role.ROLE_NAME_TEACHER;
 public class ServletContextClass implements ServletContextListener
 {
 
-    //TODO: Sprint 5: Remove SEL Questions Since SEL Question editor exists.
+    //TODOne: Sprint 5: Remove SEL Questions Since SEL Question editor exists.
 
     private String dummyBaseUrl = "http://localhost/dummy/address/";
     private String dummyAuth = "dummy";
@@ -127,7 +127,7 @@ public class ServletContextClass implements ServletContextListener
         }
 
 
-        addSELQuestions();
+        //addSELQuestions();
 
     }
 
@@ -579,7 +579,7 @@ public class ServletContextClass implements ServletContextListener
 
     private void addSELQuestions(){
 
-        System.out.println("ServletContextClass: Adding SEL Questions: TODO: REMOVE ME");
+        System.out.println("ServletContextClass: Adding SEL Questions: TODOne: REMOVE ME");
 
         String question1Text = "Who sits next to you?";
         String question2Text = "Who participates a lot in class?";
@@ -634,7 +634,7 @@ public class ServletContextClass implements ServletContextListener
     private void addNextField(){
 
         if(fieldIndex >= allFields.size()){
-            addSELQuestions();
+            //addSELQuestions();
             return;
         }
 

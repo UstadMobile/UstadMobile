@@ -148,8 +148,6 @@ public class ReportMasterActivity extends UstadBaseActivity implements
             startActivity(shareIntent);
         }
 
-
-
     }
 
     /**
