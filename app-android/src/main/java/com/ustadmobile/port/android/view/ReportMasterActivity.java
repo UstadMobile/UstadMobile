@@ -345,6 +345,7 @@ public class ReportMasterActivity extends UstadBaseActivity implements
                 genderTV.setLayoutParams(everyItemParam);
                 genderTV.setTextColor(Color.BLACK);
                 String theGender = "";
+                theGender = (String) getText(R.string.not_set);
                 switch (everyItem.getGender()){
                     case Person.GENDER_FEMALE:
                         theGender = (String) getText(R.string.female);
@@ -357,6 +358,8 @@ public class ReportMasterActivity extends UstadBaseActivity implements
                         break;
                     case Person.GENDER_UNSET:
                         break;
+                    default:
+                        theGender = (String) getText(R.string.not_set);
                 }
                 genderTV.setText(theGender);
 
