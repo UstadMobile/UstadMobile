@@ -159,7 +159,8 @@ public class ReportAtRiskStudentsPresenter extends CommonHandlerPresenter<Report
                                        List result){
         dataMapsMap.put(theClassName, result);
         if(index >= totalClazzList.size()){
-            view.updateTables(dataMapsMap);
+            view.runOnUiThread(() -> view.updateTables(dataMapsMap));
+            //view.updateTables(dataMapsMap);
         }
     }
 

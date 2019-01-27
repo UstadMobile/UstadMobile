@@ -195,6 +195,7 @@ public class ReportOverallAttendancePresenter
         ClazzLogAttendanceRecordDao attendanceRecordDao =
                 repository.getClazzLogAttendanceRecordDao();
 
+        //TODO: Account for locations in the Dao.
         attendanceRecordDao.findOverallDailyAttendanceNumbersByDateAndStuff(fromDate, toDate,
             clazzesList, locationList, new UmCallback<List<DailyAttendanceNumbers>>() {
 

@@ -12,6 +12,7 @@ public interface ReportEditView extends UstadView {
     String VIEW_NAME = "ReportEdit";
 
     String ARG_REPORT_NAME = "ReportName";
+    String ARG_REPORT_DESC = "ReportDesc";
     String ARG_REPORT_LINK = "ReportLink";
     String ARG_LOCATIONS_SET = "LocationsSelected";
     String ARG_CLASSES_SET = "ClassesSelected";

@@ -9,7 +9,6 @@ import com.ustadmobile.core.view.SelectClazzesDialogView;
 import com.ustadmobile.core.view.SelectMultipleTreeDialogView;
 import com.ustadmobile.core.view.SelectTwoDatesDialogView;
 
-import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -20,6 +19,7 @@ import static com.ustadmobile.core.view.ReportEditView.ARG_FROM_DATE;
 import static com.ustadmobile.core.view.ReportEditView.ARG_GENDER_DISAGGREGATE;
 import static com.ustadmobile.core.view.ReportEditView.ARG_LOCATIONS_SET;
 import static com.ustadmobile.core.view.ReportEditView.ARG_LOCATION_LIST;
+import static com.ustadmobile.core.view.ReportEditView.ARG_REPORT_DESC;
 import static com.ustadmobile.core.view.ReportEditView.ARG_REPORT_LINK;
 import static com.ustadmobile.core.view.ReportEditView.ARG_REPORT_NAME;
 import static com.ustadmobile.core.view.ReportEditView.ARG_SHOW_GENDER_DISAGGREGATE;
@@ -40,6 +40,7 @@ public class ReportEditPresenter
         extends UstadBaseController<ReportEditView> {
 
     private String reportName = "";
+    private String reportDesc = "";
     private String reportLink;
     private LinkedHashMap<Integer, String> timePeriodOptions;
     private boolean genderDisaggregated = false;
@@ -63,6 +64,10 @@ public class ReportEditPresenter
 
         if(arguments.containsKey(ARG_REPORT_NAME)){
             reportName = (String) arguments.get(ARG_REPORT_NAME);
+        }
+
+        if(arguments.containsKey(ARG_REPORT_DESC)){
+            reportDesc = (String) arguments.get(ARG_REPORT_DESC);
         }
 
         if(arguments.containsKey(ARG_REPORT_LINK)){
@@ -89,6 +94,9 @@ public class ReportEditPresenter
         //Update report name on top
         if(reportName.length()>0) {
             view.updateReportName(reportName);
+            if(reportDesc.length() > 0){
+                view.updateReportName(reportDesc);
+            }
         }
         view.showAttendanceThresholdView(showThreshold);
         view.showShowStudentNumberPercentageView(showRadioGroup);

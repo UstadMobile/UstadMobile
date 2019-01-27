@@ -461,6 +461,14 @@ public abstract class ClazzLogAttendanceRecordDao implements
              long toDate, UmCallback<List<DailyAttendanceNumbers>> resultObject);
 
 
+    /**
+     * TODO: Account for Locations,.
+     * @param fromDate
+     * @param toDate
+     * @param clazzes
+     * @param locations
+     * @param resultObject
+     */
     public void findOverallDailyAttendanceNumbersByDateAndStuff(long fromDate, long toDate,
                 List<Long> clazzes, List<Long> locations,
                 UmCallback<List<DailyAttendanceNumbers>> resultObject){

@@ -251,7 +251,8 @@ public class ReportAtRiskStudentsActivity extends UstadBaseActivity
     public void setReportProvider(UmProvider<PersonWithEnrollment> provider) {
         PersonWithEnrollmentRecyclerAdapter recyclerAdapter =
                 new PersonWithEnrollmentRecyclerAdapter(DIFF_CALLBACK2, getApplicationContext(),
-                        this, mPresenter, true, false, true);
+                        this, mPresenter, true, false, true,
+                        true);
 
         recyclerAdapter.setShowAddStudent(false);
         recyclerAdapter.setShowAddTeacher(false);

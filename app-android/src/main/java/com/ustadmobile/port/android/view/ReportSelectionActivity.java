@@ -74,7 +74,9 @@ public class ReportSelectionActivity extends UstadBaseActivity implements Report
 
             mPresenter.goToReport(expandableListDataReportsHashMap
                     .get(expandableListTitle.get(groupPosition)).children
-                        .get(childPosition).name, expandableListDataReportsHashMap
+                        .get(childPosition).name,expandableListDataReportsHashMap
+                            .get(expandableListTitle.get(groupPosition)).children
+                            .get(childPosition).desc, expandableListDataReportsHashMap
                     .get(expandableListTitle.get(groupPosition)).children
                     .get(childPosition).reportLink,
                     expandableListDataReportsHashMap

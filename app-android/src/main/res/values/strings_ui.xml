@@ -480,6 +480,9 @@ This is the one you should be editing. The one in /core/locale/main/values/strin
     <string name="person_picture">Person picture</string>
     <string name="all">All</string>
     <string name="retention_officer">Retention officer</string>
+    <string name="at_risk_report_desc">At risk students report: shows all students deemed at risk (due to low attendance)</string>
+    <string name="sel_report_desc">SEL answers report</string>
+    <string name="master_report_desc">IRC Lebanon monthly report: lists all classes with attendnace, enrollment, and level information</string>
 
     <string name="content_entry_not_found">ContentEntry Not Found</string>
 

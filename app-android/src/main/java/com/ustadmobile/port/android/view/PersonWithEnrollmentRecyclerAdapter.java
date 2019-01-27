@@ -62,6 +62,13 @@ public class PersonWithEnrollmentRecyclerAdapter
 
     private boolean reportMode = false;
 
+    private boolean groupByClass = false;
+
+    private int headingCLId;
+
+    private boolean classChange = true;
+    private long currentClazz = 0L;
+
     private int addCMCLT, addCMCLS;
 
     private static final int IMAGE_PERSON_THUMBNAIL_WIDTH = 26;
@@ -110,6 +117,20 @@ public class PersonWithEnrollmentRecyclerAdapter
         showAttendance = attendance;
         showEnrollment = enrollment;
         reportMode = rmode;
+    }
+
+    PersonWithEnrollmentRecyclerAdapter(
+            @NonNull DiffUtil.ItemCallback<PersonWithEnrollment> diffCallback, Context context,
+            Activity activity, CommonHandlerPresenter presenter, boolean attendance,
+            boolean enrollment, boolean rmode, boolean classGrouped){
+        super(diffCallback);
+        theContext = context;
+        theActivity = activity;
+        mPresenter = presenter;
+        showAttendance = attendance;
+        showEnrollment = enrollment;
+        reportMode = rmode;
+        groupByClass = classGrouped;
     }
 
 
@@ -235,8 +256,16 @@ public class PersonWithEnrollmentRecyclerAdapter
                 holder.itemView.findViewById(R.id.item_studentlist_student_simple_call_iv);
 
         //NAME:
-        String studentName = personWithEnrollment.getFirstNames() + " " +
-                personWithEnrollment.getLastName();
+        String firstName = "";
+        String lastName = "";
+        if(personWithEnrollment.getFirstNames() != null){
+            firstName = personWithEnrollment.getFirstNames();
+        }
+        if(personWithEnrollment.getLastName() != null){
+            lastName = personWithEnrollment.getLastName();
+        }
+
+        String studentName = firstName + " " + lastName;
         studentNameTextView.setText(studentName);
         Long personUid = personWithEnrollment.getPersonUid();
         studentNameTextView.setOnClickListener(v -> mPresenter.handleCommonPressed(personUid));
@@ -354,10 +383,34 @@ public class PersonWithEnrollmentRecyclerAdapter
             callImageView.setVisibility(View.VISIBLE);
             callImageView.setOnClickListener(v ->
                     mPresenter.handleSecondaryPressed(personWithEnrollment));
+
+
         }else{
             callImageView.setVisibility(View.GONE);
         }
 
+
+        if(groupByClass){
+
+            long thisClazzUid = personWithEnrollment.getClazzUid();
+            removeHeading(cl, headingCLId, holder);
+
+            if(position == 0){
+                addHeading(cl, personWithEnrollment.getClazzName(), holder);
+            }else{
+                PersonWithEnrollment previousPersonWithEnrollment = getItem(position - 1);
+                long previousClazzUid = previousPersonWithEnrollment.getClazzUid();
+
+                if(thisClazzUid != previousClazzUid){
+                    addHeading(cl, personWithEnrollment.getClazzName(), holder);
+                }else{
+                    addHeading(cl, "", holder);
+                }
+
+            }
+        }else{
+            removeHeading(cl, headingCLId, holder);
+        }
 
         //IF IN STUDENTS LIST IN CLASS DETAIL:
         if(!showEnrollment && showAttendance){
@@ -407,6 +460,9 @@ public class PersonWithEnrollmentRecyclerAdapter
 
     }
 
+    private void addClassHeading(ConstraintLayout cl, long uid){
+
+    }
 
     private void setPictureOnView(String imagePath, ImageView theImage) {
 
@@ -416,8 +472,6 @@ public class PersonWithEnrollmentRecyclerAdapter
                 .get()
                 .load(imageUri)
                 .resize(dpToPxImagePerson(), dpToPxImagePerson())
-                //.fit()
-                //.centerCrop()
                 .noFade()
                 .into(theImage);
     }
@@ -452,6 +506,91 @@ public class PersonWithEnrollmentRecyclerAdapter
         if(addCMCLViewT != null){
             addCMCLViewT.setVisibility(View.GONE);
         }
+    }
+
+    private void removeHeading(ConstraintLayout cl, int headingId,
+                   @NonNull PersonWithEnrollmentRecyclerAdapter.ClazzLogDetailViewHolder holder){
+        View removeMe = holder.itemView.findViewById(headingId);
+
+        if(removeMe!=null)
+            removeMe.setVisibility(View.GONE);
+
+        cl.removeView(removeMe);
+
+    }
+
+    /**
+     * Adds a heading
+     * @param mainCL    The Constraint layout where the list will be in.
+     * @param heading  The heading
+     */
+    private void addHeading(ConstraintLayout mainCL, String heading,
+                            @NonNull PersonWithEnrollmentRecyclerAdapter.ClazzLogDetailViewHolder holder){
+
+
+        removeHeading(mainCL, headingCLId, holder);
+
+
+        if(heading.isEmpty()){
+            return;
+        }
+
+        ConstraintLayout headingCL = new ConstraintLayout(theContext);
+        int defaultPaddingBy2 = getDp(DEFAULT_PADDING/2);
+
+        //The Heading TextView
+        TextView headingTV = new TextView(theContext);
+        headingTV.setTextColor(Color.BLACK);
+        headingTV.setTextSize(16);
+        headingTV.setLeft(8);
+
+        //Set ids for all components.
+        headingCLId = View.generateViewId();
+        headingTV.setId(View.generateViewId());
+        headingCL.setId(headingCLId);
+
+        //Set heading text
+        headingTV.setText(heading);
+
+        //Add these components to the new "add" Constraint Layout
+        headingCL.addView(headingTV);
+
+        ConstraintSet constraintSetForHeader2 = new ConstraintSet();
+        constraintSetForHeader2.clone(headingCL);
+
+        //Heading constraint to parent of the headingCL mainCL it is in.
+        constraintSetForHeader2.connect(
+                headingTV.getId(), ConstraintSet.TOP,
+                headingCL.getId(), ConstraintSet.TOP,
+                defaultPaddingBy2);
+
+        constraintSetForHeader2.connect(
+                headingTV.getId(), ConstraintSet.START,
+                headingCL.getId(), ConstraintSet.START,
+                defaultPaddingBy2);
+
+        constraintSetForHeader2.applyTo(headingCL);
+
+        //Add the heading CL to the main CL
+        mainCL.addView(headingCL);
+
+        ConstraintSet constraintSetForHeader = new ConstraintSet();
+        constraintSetForHeader.clone(mainCL);
+
+        //Current Person image TOP to BOTTOM of [ Heading CL ] (always)
+        constraintSetForHeader.connect(
+                R.id.item_studentlist_student_simple_student_image,ConstraintSet.TOP,
+                headingCL.getId(), ConstraintSet.BOTTOM, defaultPaddingBy2);
+
+        //Current Person title TOP to BOTTOM of [ Add CL ] (always)
+        constraintSetForHeader.connect(
+                R.id.item_studentlist_student_simple_student_title, ConstraintSet.TOP,
+                headingCL.getId(), ConstraintSet.BOTTOM, defaultPaddingBy2);
+
+        constraintSetForHeader.applyTo(mainCL);
+
+
+
     }
 
     /**
@@ -650,4 +789,5 @@ public class PersonWithEnrollmentRecyclerAdapter
         }
 
     }
+
 }

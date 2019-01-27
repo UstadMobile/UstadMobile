@@ -118,6 +118,11 @@ public abstract class ClazzDao implements SyncableDao<Clazz, ClazzDao> {
             " FROM Clazz WHERE clazzLocationUid in (:locations)")
     public abstract UmProvider<ClazzWithNumStudents> findAllClazzesInLocationList(List<Long> locations);
 
+    @UmQuery(CLAZZ_WHERE +
+            " FROM Clazz WHERE clazzLocationUid in (:locations)")
+    public abstract void findAllClazzesInLocationListAsync(List<Long> locations,
+                                                   UmCallback<List<ClazzWithNumStudents>> resultList);
+
 
     @UmQuery("SELECT * FROM Clazz WHERE clazzUid in (:clazzUidList) AND clazzActive = 1")
     public abstract void findClazzesByUidListAsync(List<Long> clazzUidList, UmCallback<List<Clazz>> resultList);

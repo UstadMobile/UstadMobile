@@ -226,6 +226,7 @@ public abstract class ClazzMemberDao implements SyncableDao<ClazzMember, ClazzMe
             "   Person.* , " +
             "" +
             "   (Clazz.clazzUid) AS clazzUid, " +
+            "   (Clazz.clazzName) AS clazzName, " +
             "" +
             "   (SELECT PersonPicture.personPictureUid FROM PersonPicture WHERE " +
             "   PersonPicture.personPicturePersonUid = Person.personUid ORDER BY " +

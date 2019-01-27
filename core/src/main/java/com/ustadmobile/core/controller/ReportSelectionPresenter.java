@@ -25,11 +25,12 @@ public class ReportSelectionPresenter
 
     }
 
-    public void goToReport(String reportName, String reportLink, boolean showThreshold,
+    public void goToReport(String reportName, String reportDesc, String reportLink, boolean showThreshold,
                            boolean showRadioGroup, boolean showGenderDisaggregate){
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         Hashtable args = new Hashtable();
         args.put(ReportEditView.ARG_REPORT_NAME, reportName);
+        args.put(ReportEditView.ARG_REPORT_DESC, reportDesc);
         args.put(ReportEditView.ARG_REPORT_LINK, reportLink);
         args.put(ReportEditView.ARG_SHOW_THERSHOLD, showThreshold);
         args.put(ReportEditView.ARG_SHOW_RADIO_GROUP, showRadioGroup);
