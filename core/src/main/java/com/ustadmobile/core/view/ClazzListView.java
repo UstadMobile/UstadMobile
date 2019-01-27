@@ -41,4 +41,6 @@ public interface ClazzListView extends UstadView {
     void showAllClazzSettingsButton(boolean show);
 
 
+    void forceCheckPermissions();
+
 }

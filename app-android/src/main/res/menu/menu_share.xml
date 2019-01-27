@@ -25,7 +25,7 @@
     <item android:id="@+id/menu_settings_gear"
         android:icon="@drawable/ic_settings_white_24dp"
         android:title="@string/done"
-        android:visible="true"
+        android:visible="false"
         android:iconTint="@color/icons"
         app:showAsAction="always"/>
 </menu>

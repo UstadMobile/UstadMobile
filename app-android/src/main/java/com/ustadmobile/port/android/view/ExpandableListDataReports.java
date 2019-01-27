@@ -5,8 +5,10 @@ import android.content.Context;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.view.ReportAtRiskStudentsView;
 import com.ustadmobile.core.view.ReportAttendanceGroupedByThresholdsView;
+import com.ustadmobile.core.view.ReportMasterView;
 import com.ustadmobile.core.view.ReportNumberOfDaysClassesOpenView;
 import com.ustadmobile.core.view.ReportOverallAttendanceView;
+import com.ustadmobile.core.view.ReportSELView;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -101,8 +103,7 @@ public class ExpandableListDataReports {
         ircMasterObj.name = context.getText(R.string.irc_master_list_report).toString();
         ircMasterObj.children = ircMasterListReport;
         ircMasterObj.desc = ircMasterObj.name;
-        //TODO: Sprint 5
-        //ircMasterObj.reportLink = ReportMasterView.VIEW_NAME;
+        ircMasterObj.reportLink = ReportMasterView.VIEW_NAME;
         ircMasterObj.showGenderDisaggregate = false;
         ircMasterObj.showRadioGroup = false;
         ircMasterObj.showThreshold = false;
@@ -110,8 +111,7 @@ public class ExpandableListDataReports {
         ExpandableListDataReports selObj = new ExpandableListDataReports();
         selObj.icon = R.drawable.ic_tag_faces_cyan_24dp;
         selObj.name = context.getText(R.string.sel_report).toString();
-        //TODO: Sprint 5
-        //selObj.reportLink = ReportSELReportView.VIEW_NAME;
+        selObj.reportLink = ReportSELView.VIEW_NAME;
         selObj.showGenderDisaggregate = false;
         selObj.showRadioGroup = false;
         selObj.showThreshold = false;

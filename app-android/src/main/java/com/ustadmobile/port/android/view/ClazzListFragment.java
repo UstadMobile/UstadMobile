@@ -174,6 +174,11 @@ public class ClazzListFragment extends UstadBaseFragment implements ClazzListVie
         showAllClazzSettingsButton = show;
     }
 
+    @Override
+    public void forceCheckPermissions() {
+        mPresenter.checkPermissions();
+    }
+
     public void showSettings(){
 
         MenuItem allClazzSettingsMenuItem = mOptionsMenu.findItem(R.id.menu_settings_gear);

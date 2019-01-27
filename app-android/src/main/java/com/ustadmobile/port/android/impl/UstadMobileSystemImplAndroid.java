@@ -99,8 +99,10 @@ import com.ustadmobile.core.view.Register2View;
 import com.ustadmobile.core.view.ReportAtRiskStudentsView;
 import com.ustadmobile.core.view.ReportAttendanceGroupedByThresholdsView;
 import com.ustadmobile.core.view.ReportEditView;
+import com.ustadmobile.core.view.ReportMasterView;
 import com.ustadmobile.core.view.ReportNumberOfDaysClassesOpenView;
 import com.ustadmobile.core.view.ReportOverallAttendanceView;
+import com.ustadmobile.core.view.ReportSELView;
 import com.ustadmobile.core.view.ReportSelectionView;
 import com.ustadmobile.core.view.SELEditView;
 import com.ustadmobile.core.view.SELQuestionDetail2View;
@@ -155,8 +157,10 @@ import com.ustadmobile.port.android.view.Register2Activity;
 import com.ustadmobile.port.android.view.ReportAtRiskStudentsActivity;
 import com.ustadmobile.port.android.view.ReportAttendanceGroupedByThresholdsActivity;
 import com.ustadmobile.port.android.view.ReportEditActivity;
+import com.ustadmobile.port.android.view.ReportMasterActivity;
 import com.ustadmobile.port.android.view.ReportNumberOfDaysClassesOpenActivity;
 import com.ustadmobile.port.android.view.ReportOverallAttendanceActivity;
+import com.ustadmobile.port.android.view.ReportSELActivity;
 import com.ustadmobile.port.android.view.ReportSelectionActivity;
 import com.ustadmobile.port.android.view.SELEditActivity;
 import com.ustadmobile.port.android.view.SELQuestionActivity;
@@ -293,6 +297,8 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         viewNameToAndroidImplMap.put(AddQuestionOptionDialogView.VIEW_NAME, AddQuestionOptionDialogFragment.class);
         viewNameToAndroidImplMap.put(ReportAtRiskStudentsView.VIEW_NAME, ReportAtRiskStudentsActivity.class);
         viewNameToAndroidImplMap.put(CallPersonRelatedDialogView.VIEW_NAME, CallPersonRelatedDialogFragment.class);
+        viewNameToAndroidImplMap.put(ReportMasterView.VIEW_NAME, ReportMasterActivity.class);
+        viewNameToAndroidImplMap.put(ReportSELView.VIEW_NAME, ReportSELActivity.class);
     }
 
     /**

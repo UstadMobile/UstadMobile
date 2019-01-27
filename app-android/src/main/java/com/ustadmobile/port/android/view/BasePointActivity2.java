@@ -49,6 +49,8 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
 
     private Menu mOptionsMenu;
 
+    private ClazzListFragment classesFragment;
+
     /**
      * ViewPager set up in its own method for clarity.
      */
@@ -184,6 +186,11 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
         }
     }
 
+    @Override
+    public void updatePermissionCheck() {
+        classesFragment.forceCheckPermissions();
+    }
+
 
     @Override
     protected void onResume() {
@@ -289,7 +296,7 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
     /**
      * Feed view pager's Adapter
      */
-    private static class BasePointViewPagerAdapter extends FragmentStatePagerAdapter{
+    private class BasePointViewPagerAdapter extends FragmentStatePagerAdapter{
 
         //Map of position and fragment
         WeakHashMap<Integer, UstadBaseFragment> positionMap;
@@ -319,7 +326,7 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
                         this.positionMap.put(position, newFrag);
                         return newFrag;
                     case 1:
-                        UstadBaseFragment classesFragment =
+                        classesFragment =
                                 ClazzListFragment.newInstance();
                         this.positionMap.put(position, classesFragment);
                         return classesFragment;

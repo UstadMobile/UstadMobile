@@ -6,6 +6,7 @@ import com.ustadmobile.core.db.dao.ClazzDao;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UmCallbackWithDefaultValue;
+import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.FeedListView;
 import com.ustadmobile.core.view.ReportSelectionView;
@@ -35,11 +36,13 @@ public class FeedListPresenter extends UstadBaseController<FeedListView>{
 
     private UmAppDatabase repository;
 
+    private UmLiveData<ClazzAverage> averageUmLiveData;
+
     /**
      * Overridden onCreate in order:
      *      1. Gets the UmProvider types FeedEntry list and sets it as a provider to the view.
      *
-     * @param savedState    tHE SAVED STATE
+     * @param savedState    THE SAVED STATE
      */
     @Override
     public void onCreate(Hashtable savedState){
@@ -53,27 +56,27 @@ public class FeedListPresenter extends UstadBaseController<FeedListView>{
                 .findByPersonUid(loggedInPersonUid);
         updateFeedProviderToView();
 
-        //Get numbers
-        UmAppDatabase.getInstance(view.getContext()).getClazzDao().getClazzSummaryAsync(
-                new UmCallback<ClazzAverage>() {
-            @Override
-            public void onSuccess(ClazzAverage result) {
-                int attendanceaverage = Math.round(result.getAttendanceAverage() * 100);
-                view.updateAttendancePercentage(attendanceaverage);
-                view.updateNumClasses(result.getNumClazzes());
-                view.updateNumStudents(result.getNumStudents());
-                //TODO: Sprint 4
-                view.updateAttendanceTrend(0, 0);
-
-            }
-
-            @Override
-            public void onFailure(Throwable exception) {
-
-            }
-        });
+        //All clazz's average live data
+        averageUmLiveData = repository.getClazzDao().getClazzSummaryLiveData();
+        averageUmLiveData.observe(FeedListPresenter.this,
+                FeedListPresenter.this::handleAveragesChanged);
 
         //Check permissions
+        checkPermissions();
+    }
+
+    /**
+     * Handles what happens when averages changes. Usually called on live data's onObserve.
+     * @param average   The ClazzAverage POJO that changed.
+     */
+    private void handleAveragesChanged(ClazzAverage average){
+        int attendanceAverage = Math.round(average.getAttendanceAverage() * 100);
+        view.updateAttendancePercentage(attendanceAverage);
+        view.updateNumClasses(average.getNumClazzes());
+        view.updateNumStudents(average.getNumStudents());
+        //TODO: Update with attendance trend.
+        view.updateAttendanceTrend(0, 0);
+
         checkPermissions();
     }
 

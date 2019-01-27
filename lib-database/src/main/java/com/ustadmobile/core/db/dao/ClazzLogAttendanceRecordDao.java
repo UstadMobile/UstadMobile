@@ -12,6 +12,7 @@ import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecordWithPerson;
 import com.ustadmobile.lib.db.entities.ClazzMember;
 import com.ustadmobile.lib.db.entities.DailyAttendanceNumbers;
 import com.ustadmobile.lib.db.entities.Person;
+import com.ustadmobile.lib.db.entities.ReportMasterItem;
 import com.ustadmobile.lib.db.entities.Role;
 import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
@@ -513,6 +514,30 @@ public abstract class ClazzLogAttendanceRecordDao implements
             }
         });
     }
+
+    @UmQuery("SELECT " +
+            " Clazz.clazzName, Clazz.clazzUid as clazzUid, Person.firstNames, Person.lastName, Person.personUid, " +
+            " SUM(CASE WHEN attendanceStatus = " + ClazzLogAttendanceRecord.STATUS_ATTENDED + " THEN 1 ELSE 0 END) as daysPresent, " +
+            " SUM(CASE WHEN attendanceStatus = " + ClazzLogAttendanceRecord.STATUS_ABSENT + " THEN 1 ELSE 0 END) as daysAbsent, " +
+            " SUM(CASE WHEN attendanceStatus = " + ClazzLogAttendanceRecord.STATUS_PARTIAL + " THEN 1 ELSE 0 END) as daysPartial, " +
+            " COUNT(*) as clazzDays, " +
+            " ClazzMember.dateLeft, " +
+            " ClazzMember.clazzMemberActive,  " +
+            " Person.gender, " +
+            " Person.dateOfBirth " +
+            " FROM ClazzLogAttendanceRecord " +
+            " LEFT JOIN ClazzMember ON ClazzMember.clazzMemberUid = clazzLogAttendanceRecordClazzMemberUid " +
+            " LEFT JOIN Person ON Person.personUid = ClazzMember.clazzMemberPersonUid " +
+            " LEFT JOIN ClazzLog ON ClazzLog.clazzLogUid = clazzLogAttendanceRecordClazzLogUid " +
+            " LEFT JOIN Clazz ON Clazz.clazzUid = ClazzLog.clazzLogClazzUid " +
+            " WHERE " +
+            " ClazzLog.done = 1 " +
+            " AND ClazzLog.logDate > :fromDate " +
+            " AND ClazzLog.logDate < :toDate " +
+            " GROUP BY clazzMemberUid " +
+            " ORDER BY clazzName ")
+    public abstract void findMasterReportDataForAllAsync(long fromDate, long toDate,
+        UmCallback<List<ReportMasterItem>> resultList);
 
     @UmQuery("UPDATE ClazzLogAttendanceRecord SET attendanceStatus = :attendanceStatus " +
             "WHERE clazzLogAttendanceRecordClazzLogUid = :clazzLogUid AND " +

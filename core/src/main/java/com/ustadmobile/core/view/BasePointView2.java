@@ -24,4 +24,6 @@ public interface BasePointView2 extends UstadView {
     void showBulkUploadForAdmin(boolean show);
 
     void showSettings(boolean show);
+
+    void updatePermissionCheck();
 }

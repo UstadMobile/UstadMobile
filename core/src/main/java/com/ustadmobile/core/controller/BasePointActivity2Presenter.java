@@ -10,7 +10,6 @@ import com.ustadmobile.core.view.BulkUploadMasterView;
 import com.ustadmobile.core.view.Login2View;
 import com.ustadmobile.core.view.SettingsView;
 import com.ustadmobile.lib.db.entities.Person;
-import com.ustadmobile.lib.db.entities.UmAccount;
 
 import java.util.Hashtable;
 
@@ -47,9 +46,11 @@ public class BasePointActivity2Presenter extends UstadBaseController<BasePointVi
      */
     public void handlePersonValueChanged(Person loggedInPerson){
         if(loggedInPerson != null) {
+            view.updatePermissionCheck();
             if (loggedInPerson.isAdmin()) {
                 view.showBulkUploadForAdmin(true);
                 view.showSettings(true);
+
             } else {
                 view.showBulkUploadForAdmin(false);
                 view.showSettings(false);

@@ -3,6 +3,7 @@ package com.ustadmobile.port.android.view;
 
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.view.View;
 import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
 import android.widget.Toast;
@@ -69,6 +70,22 @@ public class ReportSelectionActivity extends UstadBaseActivity implements Report
 
         expandableListView.setOnGroupCollapseListener(groupPosition -> {});
 
+        //If Groups have no children, go to their link (default: expand)
+        expandableListView.setOnGroupClickListener((parent, v, groupPosition, id) -> {
+
+            ExpandableListDataReports groupItem = expandableListDataReportsHashMap
+                    .get(expandableListTitle.get(groupPosition));
+            if(groupItem.children.size() == 0 && !groupItem.reportLink.isEmpty()){
+
+                mPresenter.goToReport(groupItem.name, groupItem.desc, groupItem.reportLink,
+                        groupItem.showThreshold, groupItem.showRadioGroup,
+                        groupItem.showGenderDisaggregate);
+            }
+
+            return false;
+        });
+
+        //Go to child's link
         expandableListView.setOnChildClickListener((parent, v, groupPosition, childPosition, id) -> {
 
 

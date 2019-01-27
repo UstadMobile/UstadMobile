@@ -181,6 +181,16 @@
             android:theme="@style/Theme.UstadTheme"
             android:windowSoftInputMode="stateHidden"/>
         <activity
+            android:name="com.ustadmobile.port.android.view.ReportMasterActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
+            android:theme="@style/Theme.UstadTheme"
+            android:windowSoftInputMode="stateHidden"/>
+        <activity
+            android:name="com.ustadmobile.port.android.view.ReportSELActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
+            android:theme="@style/Theme.UstadTheme"
+            android:windowSoftInputMode="stateHidden"/>
+        <activity
             android:name="com.ustadmobile.port.android.view.AboutActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
         <activity

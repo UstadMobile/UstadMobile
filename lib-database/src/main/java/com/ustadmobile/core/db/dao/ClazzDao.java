@@ -202,6 +202,16 @@ public abstract class ClazzDao implements SyncableDao<Clazz, ClazzDao> {
             " (SELECT COUNT(*) FROM Clazz Where Clazz.clazzActive = 1)) as attendanceAverage ")
     public abstract void getClazzSummaryAsync(UmCallback<ClazzAverage> resultObject);
 
+    @UmQuery("SELECT " +
+            " (SELECT COUNT(*) FROM Clazz Where Clazz.clazzActive = 1) as numClazzes, " +
+            " (SELECT COUNT(*) FROM ClazzMember WHERE ClazzMember.clazzMemberActive = 1 " +
+            " AND ClazzMember.role = " + ClazzMember.ROLE_STUDENT + ") as numStudents, " +
+            " (SELECT COUNT(*) FROM ClazzMember WHERE ClazzMember.clazzMemberActive = 1 " +
+            " AND ClazzMember.role = " + ClazzMember.ROLE_TEACHER + ") as numTeachers, " +
+            " ((SELECT SUM(Clazz.attendanceAverage) FROM Clazz WHERE Clazz.clazzActive = 1 ) / " +
+            " (SELECT COUNT(*) FROM Clazz Where Clazz.clazzActive = 1)) as attendanceAverage ")
+    public abstract UmLiveData<ClazzAverage> getClazzSummaryLiveData();
+
     @UmQuery(
         "SELECT Clazz.*, (:personUid) AS personUid, " +
             "(SELECT COUNT(*) FROM ClazzMember " +
