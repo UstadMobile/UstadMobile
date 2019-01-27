@@ -3,8 +3,8 @@ package com.ustadmobile.lib.db.entities;
 public class ReportMasterItem  {
 
     private String clazzName;
-    private String clazzId;
-    private String firstName, lastName;
+    private String clazzUid;
+    private String firstNames, lastName;
     private long personUid;
     private int daysPresent, daysAbsent, daysPartial, clazzDays;
     private long dateLeft;
@@ -21,20 +21,20 @@ public class ReportMasterItem  {
           this.clazzName = clazzName;
      }
 
-     public String getClazzId() {
-          return clazzId;
+     public String getClazzUid() {
+          return clazzUid;
      }
 
-     public void setClazzId(String clazzId) {
-          this.clazzId = clazzId;
+     public void setClazzUid(String clazzId) {
+          this.clazzUid = clazzId;
      }
 
-     public String getFirstName() {
-          return firstName;
+     public String getFirstNames() {
+          return firstNames;
      }
 
-     public void setFirstName(String firstName) {
-          this.firstName = firstName;
+     public void setFirstNames(String firstName) {
+          this.firstNames = firstName;
      }
 
      public String getLastName() {

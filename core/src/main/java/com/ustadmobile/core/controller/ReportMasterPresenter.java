@@ -82,7 +82,7 @@ public class ReportMasterPresenter extends UstadBaseController<ReportMasterView>
                 new UmCallback<List<ReportMasterItem>>() {
             @Override
             public void onSuccess(List<ReportMasterItem> result) {
-                view.updateTables(result);
+                view.runOnUiThread(() -> view.updateTables(result));
             }
 
             @Override
@@ -90,8 +90,6 @@ public class ReportMasterPresenter extends UstadBaseController<ReportMasterView>
 
             }
         });
-        //when done:
-        //view.updateTables(dataMap);
 
 
 

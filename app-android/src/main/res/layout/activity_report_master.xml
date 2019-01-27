@@ -25,22 +25,35 @@
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="0dp"
         android:layout_marginBottom="8dp"
+        android:scrollbars="horizontal|vertical"
+        android:scrollbarStyle="outsideInset"
+        android:fillViewport="true"
         app:layout_constraintBottom_toTopOf="@+id/activity_report_master_fab"
         app:layout_constraintTop_toBottomOf="@+id/activity_report_master_appbar">
 
-        <LinearLayout
-            android:id="@+id/activity_report_master_ll"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_marginBottom="8dp"
-            android:orientation="vertical"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/activity_report_master_appbar">
+
+        <HorizontalScrollView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:scrollbars="horizontal|vertical"
+            android:scrollbarAlwaysDrawHorizontalTrack="true"
+            android:overScrollMode="ifContentScrolls"
+            >
+
+            <TableLayout
+                android:id="@+id/activity_report_master_table"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="8dp"
+                android:isScrollContainer="true" />
+
+        </HorizontalScrollView>
 
 
-        </LinearLayout>
 
     </ScrollView>
 

@@ -509,6 +509,19 @@ This is the one you should be editing. The one in /core/locale/main/values/strin
     <string name="multiple_choice">Multiple choice</string>
     <string name="free_text">Free text</string>
 
+    <string name="active">Active</string>
+    <string name="date_left">Date left</string>
+    <string name="class_days">Total Class days</string>
+    <string name="count_present_days">Count of days present</string>
+    <string name="count_absent_days">Count of days absent</string>
+    <string name="count_partial_days">Count of days partial</string>
+    <string name="student_id">Student ID</string>
+    <string name="class_id">Class ID</string>
+    <string name="other_not_set">Other</string>
+    <string name="gender_literal">Gender</string>
+    <string name="yes_literal">Yes</string>
+    <string name="no_literal">No</string>
+
 
 
 </resources>

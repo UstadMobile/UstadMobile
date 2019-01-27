@@ -127,10 +127,8 @@ public class ReportAttendanceGroupedByThresholdsActivity extends UstadBaseActivi
     public void updateTables(LinkedHashMap<String,
             List<AttendanceResultGroupedByAgeAndThreshold>> dataMaps) {
 
-
         //Build a string array of the data
         tableTextData = new ArrayList<>();
-
 
         Iterator<String> iterator = dataMaps.keySet().iterator();
         while(iterator.hasNext()){
