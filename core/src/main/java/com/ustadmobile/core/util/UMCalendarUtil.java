@@ -245,6 +245,9 @@ public class UMCalendarUtil {
      * @return  The pretty date for the long date specified as string.
      */
     public static String getPrettyDateFromLong(long thisDate, Locale locale){
+        if(thisDate <= 0){
+            return "-";
+        }
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(thisDate);
         SimpleDateFormat format;

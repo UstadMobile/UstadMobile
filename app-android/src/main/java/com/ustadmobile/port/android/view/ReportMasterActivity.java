@@ -19,6 +19,7 @@ import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.ReportMasterPresenter;
+import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.core.view.ReportMasterView;
 import com.ustadmobile.lib.db.entities.Person;
 import com.ustadmobile.lib.db.entities.ReportMasterItem;
@@ -281,13 +282,13 @@ public class ReportMasterActivity extends UstadBaseActivity implements
 
 
         if(!items.isEmpty()){
+            TextView classNameTV, firstNameTV, lastNameTV, studentIDTV, daysPresentTV,daysAbsentTV,
+                    daysPartialTV, totalClazzDaysTV, dateLeftTV, activeStatusTV, genderTV, dobTV;
+
             for(ReportMasterItem everyItem: items){
                 TableRow iRow = new TableRow(getApplicationContext());
                 iRow.setLayoutParams(rowParams);
 
-
-                TextView classNameTV, firstNameTV, lastNameTV, studentIDTV, daysPresentTV,daysAbsentTV,
-                        daysPartialTV, totalClazzDaysTV, dateLeftTV, activeStatusTV, genderTV, dobTV;
 
                 classNameTV = new TextView(getApplicationContext());
                 classNameTV.setLayoutParams(everyItemParam);
@@ -332,8 +333,7 @@ public class ReportMasterActivity extends UstadBaseActivity implements
                 dateLeftTV = new TextView(getApplicationContext());
                 dateLeftTV.setLayoutParams(everyItemParam);
                 dateLeftTV.setTextColor(Color.BLACK);
-                //TODO: Prettify date
-                dateLeftTV.setText(String.valueOf(everyItem.getDateLeft()));
+                dateLeftTV.setText(UMCalendarUtil.getPrettyDateFromLong((everyItem.getDateLeft())));
 
                 activeStatusTV = new TextView(getApplicationContext());
                 activeStatusTV.setLayoutParams(everyItemParam);
@@ -363,8 +363,8 @@ public class ReportMasterActivity extends UstadBaseActivity implements
                 dobTV = new TextView(getApplicationContext());
                 dobTV.setLayoutParams(everyItemParam);
                 dobTV.setTextColor(Color.BLACK);
-                //TODO: Prettify this
-                dobTV.setText(String.valueOf(everyItem.getDateOfBirth()));
+
+                dobTV.setText(UMCalendarUtil.getPrettyDateFromLong(everyItem.getDateOfBirth()));
 
                 iRow.addView(classNameTV);
                 iRow.addView(firstNameTV);
