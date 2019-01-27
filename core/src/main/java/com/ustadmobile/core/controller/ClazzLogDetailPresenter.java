@@ -11,6 +11,7 @@ import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UmCallbackUtil;
+import com.ustadmobile.core.impl.UmCallbackWithDefaultValue;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.core.view.ClassLogDetailView;
@@ -88,7 +89,8 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
         ClazzDao clazzDao = repository.getClazzDao();
 
         clazzDao.personHasPermission(loggedInPersonUid, currentClazzUid,
-                Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_INSERT, new UmCallback<Boolean>() {
+                Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_INSERT,
+                new UmCallbackWithDefaultValue<>(false, new UmCallback<Boolean>() {
             @Override
             public void onSuccess(Boolean result) {
                 setHasEditPermissions(result);
@@ -99,7 +101,7 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
             public void onFailure(Throwable exception) {
                 exception.printStackTrace();
             }
-        });
+        }));
     }
 
     /**

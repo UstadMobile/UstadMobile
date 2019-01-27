@@ -8,6 +8,7 @@ import com.ustadmobile.core.db.dao.ClazzDao;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
+import com.ustadmobile.core.impl.UmCallbackWithDefaultValue;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.LocaleUtil;
 import com.ustadmobile.core.util.UMCalendarUtil;
@@ -132,7 +133,8 @@ public class ClazzActivityEditPresenter
 
     public void checkPermissions(){
         clazzdao.personHasPermission(loggedInPersonUid, currentClazzUid,
-                Role.PERMISSION_CLAZZ_LOG_ACTIVITY_INSERT, new UmCallback<Boolean>() {
+                Role.PERMISSION_CLAZZ_LOG_ACTIVITY_INSERT,
+                new UmCallbackWithDefaultValue<>(false,new UmCallback<Boolean>() {
             @Override
             public void onSuccess(Boolean result) {
                 setActivityEditable(result);
@@ -142,7 +144,7 @@ public class ClazzActivityEditPresenter
             public void onFailure(Throwable exception) {
 
             }
-        });
+        }));
 
     }
 

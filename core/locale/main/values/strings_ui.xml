@@ -403,9 +403,9 @@ This is the one you should be editing. The one in /core/locale/main/values/strin
     <string name="sort_by_attendance_asc">Sort by attendance(high to low)</string>
     <string name="sort_by_attendance_desc">Sort by attendance(low to high)</string>
     <string name="sort_by_text">Sort by</string>
-    <string name="namesb">name</string>
-    <string name="attendance_high_to_low">attendance (high to low)</string>
-    <string name="attendance_low_to_high">attendance (low to high)</string>
+    <string name="namesb">Name</string>
+    <string name="attendance_high_to_low">Attendance (high to low)</string>
+    <string name="attendance_low_to_high">Attendance (low to high)</string>
     <string name="teacher">Teacher</string>
     <string name="partial">Partial</string>
     <string name="teachers_literal">Teachers</string>
@@ -452,7 +452,7 @@ This is the one you should be editing. The one in /core/locale/main/values/strin
     <string name="mid">Mid</string>
     <string name="high">High</string>
     <string name="overall_attendance">Overall attendance</string>
-    <string name="attendance_grouped_by_threshold">Attendance grouped by threshold</string>
+    <string name="attendance_grouped_by_threshold">Attendance by threshold</string>
     <string name="at_risk_students">At risk students</string>
     <string name="operations_report">Operations report</string>
     <string name="number_of_days_classes_open">Number of days classes open</string>
@@ -478,7 +478,11 @@ This is the one you should be editing. The one in /core/locale/main/values/strin
     <string name="apply">Apply</string>
     <string name="file_selected">File selected:</string>
     <string name="person_picture">Person picture</string>
-
+    <string name="all">All</string>
+    <string name="retention_officer">Retention officer</string>
+    <string name="at_risk_report_desc">At risk students report: shows all students deemed at risk (due to low attendance)</string>
+    <string name="sel_report_desc">SEL answers report</string>
+    <string name="master_report_desc">IRC Lebanon monthly report: lists all classes with attendnace, enrollment, and level information</string>
     <string name="content_entry_not_found">ContentEntry Not Found</string>
 
     <string name="confirm_password">Confirm password</string>

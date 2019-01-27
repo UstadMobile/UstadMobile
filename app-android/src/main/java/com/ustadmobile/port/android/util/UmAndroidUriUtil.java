@@ -11,6 +11,7 @@ import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.text.TextUtils;
 import android.webkit.MimeTypeMap;
 import android.widget.Toast;
 
@@ -54,9 +55,15 @@ public class UmAndroidUriUtil {
             } else if (isDownloadsDocument(uri)) {
 
                 final String id = DocumentsContract.getDocumentId(uri);
+                if (id.startsWith("raw:")) {
+                    return id.replaceFirst("raw:", "");
+                }
                 final Uri contentUri = ContentUris.withAppendedId(
                         Uri.parse("content://downloads/public_downloads"),
                         Long.valueOf(id));
+
+
+
 
                 return getDataColumn(context, contentUri, null, null);
             }else if (isMediaDocument(uri)) {

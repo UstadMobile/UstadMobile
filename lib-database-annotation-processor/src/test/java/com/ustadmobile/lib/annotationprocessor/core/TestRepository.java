@@ -435,7 +435,7 @@ public class TestRepository {
                 serverDao.findByUid(e2.getExampleSyncableUid()));
     }
 
-//    @Test
+    @Test
     public void givenEntitiesNotSynced_whenDbSyncWithCalled_thenEntitiesAreSynced(){
         ExampleDatabase clientDb = ExampleDatabase.getInstance(null, "db1");
         ExampleDatabase serverDb = ExampleDatabase.getInstance(null);
@@ -457,8 +457,78 @@ public class TestRepository {
                 serverDb.getExampleSyncableDao().findAll().size());
     }
 
+    @Test
+    public void givenSyncedDatabase_whenLocalChangeMade_thenPendingLocalChangesCountShouldBe1() {
+        ExampleDatabase clientDb = ExampleDatabase.getInstance(null, "db1");
+        ExampleDatabase masterDb = ExampleDatabase.getInstance(null);
 
+        clientDb.clearAll();
+        masterDb.clearAll();
 
+        ExampleDatabase clientRepo = clientDb.getRepository(TEST_URI, ExampleDatabase.VALID_AUTH_TOKEN);
+        int numChangesBefore = clientDb.getExampleSyncableDao().countPendingLocalChanges(
+                ExampleDatabase.VALID_AUTH_TOKEN_USER_UID, clientDb.getDeviceBits());
+
+        ExampleSyncableEntity e = new ExampleSyncableEntity("title");
+        clientRepo.getExampleSyncableDao().insert(e);
+        int numChangesAfter = clientDb.getExampleSyncableDao().countPendingLocalChanges(
+                ExampleDatabase.VALID_AUTH_TOKEN_USER_UID, clientDb.getDeviceBits());
+
+        Assert.assertEquals("Before any changes made, number of pending changes = 0",
+                0, numChangesBefore);
+        Assert.assertEquals("After local changes made, number pending changes = 1",
+                1, numChangesAfter);
+    }
+
+    @Test
+    public void givenDatabaseWithLocalChanges_whenSyncCompleted_thenPendingLocalChangesCountShouldBe0() {
+        ExampleDatabase clientDb = ExampleDatabase.getInstance(null, "db1");
+        ExampleDatabase masterDb = ExampleDatabase.getInstance(null);
+
+        clientDb.clearAll();
+        masterDb.clearAll();
+
+        ExampleDatabase clientRepo = clientDb.getRepository(TEST_URI, ExampleDatabase.VALID_AUTH_TOKEN);
+        clientRepo.getExampleSyncableDao().insert(new ExampleSyncableEntity("test entity"));
+
+        int numChangesBefore = clientDb.getExampleSyncableDao().countPendingLocalChanges(
+                ExampleDatabase.VALID_AUTH_TOKEN_USER_UID, clientDb.getDeviceBits());
+
+        clientDb.syncWith(clientRepo, ExampleDatabase.VALID_AUTH_TOKEN_USER_UID, 100, 100);
+
+        Assert.assertEquals("After sync completes successfully, number of local changes pending = 0",
+                0, clientRepo.getExampleSyncableDao()
+                        .countPendingLocalChanges(ExampleDatabase.VALID_AUTH_TOKEN_USER_UID,
+                                clientDb.getDeviceBits()));
+        Assert.assertEquals("Before sync 1 change was pending", 1, numChangesBefore);
+    }
+
+    @Test
+    public void givenDatabaseWithLocalChanges_whenSyncFailed_thenPendingLocalChangesCountShouldStillBe1() {
+        ExampleDatabase clientDb = ExampleDatabase.getInstance(null, "db1");
+        ExampleDatabase masterDb = ExampleDatabase.getInstance(null);
+
+        clientDb.clearAll();
+        masterDb.clearAll();
+
+        ExampleDatabase clientRepo = clientDb.getRepository(TEST_URI, ExampleDatabase.VALID_AUTH_TOKEN);
+        clientRepo.getExampleSyncableDao().insert(new ExampleSyncableEntity("test entity"));
+
+        int numChangesBefore = clientDb.getExampleSyncableDao().countPendingLocalChanges(
+                ExampleDatabase.VALID_AUTH_TOKEN_USER_UID, clientDb.getDeviceBits());
+
+        server.shutdownNow();
+
+        clientDb.syncWith(clientRepo, ExampleDatabase.VALID_AUTH_TOKEN_USER_UID, 100,
+                100);
+
+        Assert.assertEquals("After sync fails to complete, number of local changes still = 1",
+                1, clientRepo.getExampleSyncableDao()
+                        .countPendingLocalChanges(ExampleDatabase.VALID_AUTH_TOKEN_USER_UID,
+                                clientDb.getDeviceBits()));
+        Assert.assertEquals("Before sync, 1 change was pending", 1, numChangesBefore);
+
+    }
 
 
 

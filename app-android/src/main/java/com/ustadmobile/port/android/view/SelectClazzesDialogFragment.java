@@ -7,6 +7,7 @@ import android.arch.paging.LivePagedListBuilder;
 import android.arch.paging.PagedList;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.util.DiffUtil;
@@ -92,8 +93,16 @@ public class SelectClazzesDialogFragment extends UstadDialogFragment implements
         //Toolbar:
         toolbar = rootView.findViewById(R.id.fragment_select_clazzes_dialog_toolbar);
         toolbar.setTitle(R.string.select_classes);
-        toolbar.setNavigationIcon(R.drawable.ic_arrow_back_white_24dp);
+
+        //toolbar.setNavigationIcon(R.drawable.ic_arrow_back_white_24dp);
+
+        Drawable upIcon = getResources().getDrawable(R.drawable.ic_arrow_back_white_24dp);
+        upIcon.setTint(getResources().getColor(R.color.icons));
+
+        toolbar.setNavigationIcon(upIcon);
         toolbar.setNavigationOnClickListener(v -> dialog.dismiss());
+
+
         toolbar.inflateMenu(R.menu.menu_done);
         //Click the tick button on the toolbar:
         toolbar.setOnMenuItemClickListener(item -> {
@@ -152,19 +161,19 @@ public class SelectClazzesDialogFragment extends UstadDialogFragment implements
      * The DIFF CALLBACK
      */
     public static final DiffUtil.ItemCallback<ClazzWithNumStudents> DIFF_CALLBACK =
-            new DiffUtil.ItemCallback<ClazzWithNumStudents>() {
-                @Override
-                public boolean areItemsTheSame(ClazzWithNumStudents oldItem,
-                                               ClazzWithNumStudents newItem) {
-                    return oldItem.getClazzUid() == newItem.getClazzUid();
-                }
+        new DiffUtil.ItemCallback<ClazzWithNumStudents>() {
+            @Override
+            public boolean areItemsTheSame(ClazzWithNumStudents oldItem,
+                                           ClazzWithNumStudents newItem) {
+                return oldItem.getClazzUid() == newItem.getClazzUid();
+            }
 
-                @Override
-                public boolean areContentsTheSame(ClazzWithNumStudents oldItem,
-                                                  ClazzWithNumStudents newItem) {
-                    return oldItem.equals(newItem);
-                }
-            };
+            @Override
+            public boolean areContentsTheSame(ClazzWithNumStudents oldItem,
+                                              ClazzWithNumStudents newItem) {
+                return oldItem.equals(newItem);
+            }
+        };
 
     @Override
     public void setClazzListProvider(UmProvider<ClazzWithNumStudents> clazzListProvider) {

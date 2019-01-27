@@ -107,15 +107,29 @@ public class ClazzListPresenter extends UstadBaseController<ClazzListView> {
                 @Override
                 public void onSuccess(Boolean result) {
                     view.showAddClassButton(result);
-                    view.showAllClazzSettingsButton(true);
-                    setRecordAttendanceVisibility(true);
+                    view.showAllClazzSettingsButton(result);
+
                 }
 
                 @Override
                 public void onFailure(Throwable exception) {
-
+                    exception.printStackTrace();
                 }
             })
+        );
+
+        clazzDao.personHasPermission(loggedInPersonUid, Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_INSERT,
+                new UmCallbackWithDefaultValue<>(false, new UmCallback<Boolean>() {
+                    @Override
+                    public void onSuccess(Boolean result) {
+                        setRecordAttendanceVisibility(result);
+                    }
+
+                    @Override
+                    public void onFailure(Throwable exception) {
+                        exception.printStackTrace();
+                    }
+                })
         );
     }
 

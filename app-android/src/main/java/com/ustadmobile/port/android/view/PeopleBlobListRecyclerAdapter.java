@@ -108,15 +108,6 @@ public class PeopleBlobListRecyclerAdapter extends
      * @param personImageView   The View where to set the image.
      */
     private void updateImageOnView(String imagePath, ImageView personImageView){
-        Uri profileImage = Uri.fromFile(new File(imagePath));
-
-        //Picasso.with(theContext)
-        Picasso.get()
-                .load(profileImage)
-                .transform(new CropSquareTransformation())
-                .resize(90,90)
-                .centerCrop()
-                .into(personImageView);
 
         File profilePic = new File(imagePath);
         //Picasso.with(theContext)
@@ -163,6 +154,8 @@ public class PeopleBlobListRecyclerAdapter extends
             String imgPath = UmAppDatabase.getInstance(theContext).getPersonPictureDao()
                     .getAttachmentPath(personPictureUid);
             updateImageOnView(imgPath, studentImage);
+        }else{
+            studentImage.setImageResource(R.drawable.ic_people_black_24dp);
         }
 
         TextView studentEntry = holder.itemView
@@ -170,9 +163,27 @@ public class PeopleBlobListRecyclerAdapter extends
 
         if (!hideNames) {
             studentEntry.setText(studentName);
+        }else{
+            studentEntry.setText("");
         }
 
         CardView personCard = holder.itemView.findViewById(R.id.item_peoplblob_card);
+
+        if (colorMap != null && !colorMap.isEmpty() &&
+                colorMap.containsKey(position) && colorMap.get(position).equals("selected")) {
+            if(hideNames){
+                studentEntry.setText(studentName);
+            }else{
+                personCard.setBackgroundColor(Color.parseColor("#FF6666"));
+            }
+
+        }else{
+            if(hideNames) {
+                studentEntry.setText("");
+            }else{
+                personCard.setBackgroundColor(Color.parseColor("#FFFFFF"));
+            }
+        }
 
         personCard.setOnClickListener(v -> {
 

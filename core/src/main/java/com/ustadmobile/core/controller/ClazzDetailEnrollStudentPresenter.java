@@ -76,7 +76,7 @@ public class ClazzDetailEnrollStudentPresenter extends
                     .findAllEligibleTeachersWithEnrollmentForClassUid(currentClazzUid);
         }else{
             personWithEnrollmentUmProvider = repository.getClazzMemberDao()
-                    .findAllPeopleWithEnrollmentForClassUid(currentClazzUid);
+                    .findAllStudentsWithEnrollmentForClassUid(currentClazzUid);
         }
 
         setProviderToView();

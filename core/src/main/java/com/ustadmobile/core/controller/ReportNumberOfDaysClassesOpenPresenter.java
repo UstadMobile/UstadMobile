@@ -6,6 +6,7 @@ import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.view.ReportNumberOfDaysClassesOpenView;
 
+import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -24,15 +25,27 @@ public class ReportNumberOfDaysClassesOpenPresenter
 
     private long fromDate;
     private long toDate;
-    private Long[] locations;
-    private Long[] clazzes;
+    private long[] locations;
+    private long[] clazzes;
+    private List<Long> clazzList;
+    private List<Long> locationList;
     public List<Long> barChartTimestamps;
 
     UmAppDatabase repository = UmAccountManager.getRepositoryForActiveAccount(context);
 
+    public static ArrayList<Long> convertLongArray(long[] array) {
+        ArrayList<Long> result = new ArrayList<Long>(array.length);
+        for (long item : array)
+            result.add(item);
+        return result;
+    }
+
     public ReportNumberOfDaysClassesOpenPresenter(Object context, Hashtable arguments,
                                                   ReportNumberOfDaysClassesOpenView view) {
         super(context, arguments, view);
+
+        clazzList = new ArrayList<>();
+        locationList = new ArrayList<>();
 
         if(arguments.containsKey(ARG_FROM_DATE)){
             fromDate = (long) arguments.get(ARG_FROM_DATE);
@@ -41,10 +54,12 @@ public class ReportNumberOfDaysClassesOpenPresenter
             toDate = (long) arguments.get(ARG_TO_DATE);
         }
         if(arguments.containsKey(ARG_LOCATION_LIST)){
-            locations = (Long[]) arguments.get(ARG_LOCATION_LIST);
+            locations = (long[]) arguments.get(ARG_LOCATION_LIST);
+            locationList = convertLongArray(locations);
         }
         if(arguments.containsKey(ARG_CLAZZ_LIST)){
-            clazzes = (Long[]) arguments.get(ARG_CLAZZ_LIST);
+            clazzes = (long[]) arguments.get(ARG_CLAZZ_LIST);
+            clazzList = convertLongArray(clazzes);
         }
 
     }
@@ -67,6 +82,7 @@ public class ReportNumberOfDaysClassesOpenPresenter
         //TODO: Account for location and clazzes.
 
         repository.getClazzLogDao().getNumberOfClassesOpenForDateLocationClazzes(fromDate, toDate,
+                clazzList, locationList,
                 new UmCallback<List<ClazzLogDao.NumberOfDaysClazzesOpen>>() {
             @Override
             public void onSuccess(List<ClazzLogDao.NumberOfDaysClazzesOpen> resultList) {
@@ -86,18 +102,17 @@ public class ReportNumberOfDaysClassesOpenPresenter
         });
     }
 
-    //TODO: Export
 
     public void dataToCSV(){
-
+        view.generateCSVReport();
     }
 
     public void dataToXLS(){
-
+        //TODO
     }
 
     public void dataToJSON(){
-
+        //TODO
     }
 
     @Override

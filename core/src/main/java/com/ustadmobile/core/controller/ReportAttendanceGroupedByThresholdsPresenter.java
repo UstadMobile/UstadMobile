@@ -2,19 +2,25 @@ package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.ClazzLogAttendanceRecordDao;
+import com.ustadmobile.core.db.dao.LocationDao;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.view.ReportAttendanceGroupedByThresholdsView;
 
+import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.LinkedHashMap;
 import java.util.List;
 
 import com.ustadmobile.core.db.dao.ClazzLogAttendanceRecordDao.AttendanceResultGroupedByAgeAndThreshold;
+import com.ustadmobile.lib.db.entities.Location;
 
 import static com.ustadmobile.core.view.ReportEditView.ARG_CLAZZ_LIST;
 import static com.ustadmobile.core.view.ReportEditView.ARG_FROM_DATE;
+import static com.ustadmobile.core.view.ReportEditView.ARG_GENDER_DISAGGREGATE;
 import static com.ustadmobile.core.view.ReportEditView.ARG_LOCATION_LIST;
+import static com.ustadmobile.core.view.ReportEditView.ARG_STUDENT_IDENTIFIER_NUMBER;
+import static com.ustadmobile.core.view.ReportEditView.ARG_STUDENT_IDENTIFIER_PERCENTAGE;
 import static com.ustadmobile.core.view.ReportEditView.ARG_THRESHOLD_HIGH;
 import static com.ustadmobile.core.view.ReportEditView.ARG_THRESHOLD_LOW;
 import static com.ustadmobile.core.view.ReportEditView.ARG_THRESHOLD_MID;
@@ -29,14 +35,28 @@ public class ReportAttendanceGroupedByThresholdsPresenter
 
     private long fromDate;
     private long toDate;
-    private Long[] locations;
-    private Long[] clazzes;
+    private List<Long> clazzList, locationList;
     private ThresholdValues thresholdValues;
+    private int index;
+
+    private boolean genderDisaggregate = true;
+    private Boolean showPercentages = false;
+
+    private LinkedHashMap<String, List<AttendanceResultGroupedByAgeAndThreshold>> dataMapsMap;
+
+    UmAppDatabase repository;
+
+    public boolean isGenderDisaggregate() {
+        return genderDisaggregate;
+    }
+
+    public Boolean getShowPercentages() {
+        return showPercentages;
+    }
 
     public static class ThresholdValues{
         public int low, med, high;
     }
-
 
     public ThresholdValues getThresholdValues() {
         return thresholdValues;
@@ -45,13 +65,26 @@ public class ReportAttendanceGroupedByThresholdsPresenter
     public void setThresholdValues(ThresholdValues thresholdValues) {
         this.thresholdValues = thresholdValues;
     }
-    UmAppDatabase repository = UmAccountManager.getRepositoryForActiveAccount(context);
+
+    private static ArrayList<Long> convertLongArray(long[] array) {
+        ArrayList<Long> result = new ArrayList<Long>(array.length);
+        for (long item : array)
+            result.add(item);
+        return result;
+    }
 
     public ReportAttendanceGroupedByThresholdsPresenter(Object context, Hashtable arguments,
-                                                        ReportAttendanceGroupedByThresholdsView view) {
+                                                ReportAttendanceGroupedByThresholdsView view) {
         super(context, arguments, view);
 
+        repository = UmAccountManager.getRepositoryForActiveAccount(context);
+
+        dataMapsMap = new LinkedHashMap<>();
+        index = 0;
+
         thresholdValues = new ThresholdValues();
+        clazzList = new ArrayList<>();
+        locationList = new ArrayList<>();
 
         if(arguments.containsKey(ARG_FROM_DATE)){
             fromDate = (long) arguments.get(ARG_FROM_DATE);
@@ -59,11 +92,14 @@ public class ReportAttendanceGroupedByThresholdsPresenter
         if(arguments.containsKey(ARG_TO_DATE)){
             toDate = (long) arguments.get(ARG_TO_DATE);
         }
+
         if(arguments.containsKey(ARG_LOCATION_LIST)){
-            locations = (Long[]) arguments.get(ARG_LOCATION_LIST);
+            long[] locations = (long[]) arguments.get(ARG_LOCATION_LIST);
+            locationList = convertLongArray(locations);
         }
         if(arguments.containsKey(ARG_CLAZZ_LIST)){
-            clazzes = (Long[]) arguments.get(ARG_CLAZZ_LIST);
+            long[] clazzes = (long[]) arguments.get(ARG_CLAZZ_LIST);
+            clazzList = convertLongArray(clazzes);
         }
 
         if(arguments.containsKey(ARG_THRESHOLD_LOW)){
@@ -76,6 +112,28 @@ public class ReportAttendanceGroupedByThresholdsPresenter
             thresholdValues.high = (int) arguments.get(ARG_THRESHOLD_HIGH);
         }
 
+        if(arguments.containsKey(ARG_GENDER_DISAGGREGATE)){
+            genderDisaggregate = (Boolean) arguments.get(ARG_GENDER_DISAGGREGATE);
+        }
+
+        if(arguments.containsKey(ARG_STUDENT_IDENTIFIER_NUMBER)){
+            Boolean numberIdentifier = (Boolean) arguments.get(ARG_STUDENT_IDENTIFIER_NUMBER);
+            if (numberIdentifier){
+                setShowPercentages(false);
+            }else{
+                setShowPercentages(true);
+            }
+        }
+
+        if(arguments.containsKey(ARG_STUDENT_IDENTIFIER_PERCENTAGE)){
+            Boolean percentageIdentifier = (Boolean) arguments.get(ARG_STUDENT_IDENTIFIER_PERCENTAGE);
+            if(percentageIdentifier){
+                showPercentages = true;
+            }else{
+                showPercentages = false;
+            }
+        }
+
     }
 
     @Override
@@ -85,52 +143,118 @@ public class ReportAttendanceGroupedByThresholdsPresenter
         getDataAndUpdateTable();
     }
 
+    private void buildMapAndUpdateView(String theLocationName,
+                                       List<AttendanceResultGroupedByAgeAndThreshold> result){
+        dataMapsMap.put(theLocationName, result);
+        if(index >= locationList.size()){
+            view.updateTables(dataMapsMap);
+        }
+    }
+
     /**
      * Separated out method that queries the database and updates the report upon getting and
      * ordering the result.
      */
     private void getDataAndUpdateTable(){
 
-        LinkedHashMap<Float, Float> dataMap = new LinkedHashMap<>();
+        long currentTime = System.currentTimeMillis();
+        ClazzLogAttendanceRecordDao recordDao = repository.getClazzLogAttendanceRecordDao();
+        LocationDao locationdao = repository.getLocationDao();
 
-        //TODO: Account for location and clazzes.
+        //Loop over locations
+        if(!locationList.isEmpty()){
+            for(Long locationUid : locationList){
 
-        //TODO: Loop through locations
+                locationdao.findByUidAsync(locationUid, new UmCallback<Location>() {
+                    @Override
+                    public void onSuccess(Location theLocation) {
+                        String theLocationName = theLocation.getTitle();
 
-        LinkedHashMap<String, List<AttendanceResultGroupedByAgeAndThreshold>> dataMapsMap =
-                new LinkedHashMap<>();
+                        if(!clazzList.isEmpty()){
+                            recordDao.getAttendanceGroupedByThresholds(currentTime, fromDate, toDate,
+                                    (float)thresholdValues.low/100,
+                                    (float)thresholdValues.med/100,
+                                clazzList, locationUid,
+                                new UmCallback<List<AttendanceResultGroupedByAgeAndThreshold>>() {
+                                    @Override
+                                    public void onSuccess(List<AttendanceResultGroupedByAgeAndThreshold> result) {
+                                        index++;
+                                        buildMapAndUpdateView(theLocationName, result);
+                                    }
 
-        String locationSet = "Overall";
-        repository.getClazzLogAttendanceRecordDao()
-                .getAttendanceGroupedByThresholds(System.currentTimeMillis(),
-                        fromDate, toDate, thresholdValues.low, thresholdValues.med,
-                        new UmCallback<List<AttendanceResultGroupedByAgeAndThreshold>>() {
-                            @Override
-                            public void onSuccess(List<AttendanceResultGroupedByAgeAndThreshold> result) {
+                                    @Override
+                                    public void onFailure(Throwable exception) {
+                                        exception.printStackTrace();
+                                    }
+                                });
+                        }else{
+                            recordDao.getAttendanceGroupedByThresholds(currentTime, fromDate, toDate,
+                                    (float)thresholdValues.low/100,
+                                    (float)thresholdValues.med/100,
+                                locationUid,
+                                new UmCallback<List<AttendanceResultGroupedByAgeAndThreshold>>() {
+                                    @Override
+                                    public void onSuccess(List<AttendanceResultGroupedByAgeAndThreshold> result) {
+                                        index++;
+                                        buildMapAndUpdateView(theLocationName, result);
+                                    }
 
-                                dataMapsMap.put(locationSet, result);
+                                    @Override
+                                    public void onFailure(Throwable exception) {
+                                        exception.printStackTrace();
+                                    }
+                                });
+                        }
+                    }
 
-                                view.updateTables(dataMapsMap);
-                            }
+                    @Override
+                    public void onFailure(Throwable exception) {
+                        exception.printStackTrace();
+                    }
+                });
 
-                            @Override
-                            public void onFailure(Throwable exception) {
+            }
 
-                            }
-                        });
+        }else {
+
+            String overallLocation = "Overall";
+            recordDao.getAttendanceGroupedByThresholds(
+                currentTime, fromDate, toDate, (float)thresholdValues.low/100,
+                    (float)thresholdValues.med/100,
+                clazzList, locationList,
+                new UmCallback<List<AttendanceResultGroupedByAgeAndThreshold>>() {
+
+                    @Override
+                    public void onSuccess(List<AttendanceResultGroupedByAgeAndThreshold> result) {
+
+                        dataMapsMap.put(overallLocation, result);
+
+                        view.updateTables(dataMapsMap);
+
+                    }
+
+                    @Override
+                    public void onFailure(Throwable exception) {
+
+                    }
+                });
+        }
 
     }
 
-    //TODO: Export
+    public void setShowPercentages(Boolean showPercentages) {
+        this.showPercentages = showPercentages;
+    }
 
     public void dataToCSV(){
-
+        view.generateCSVReport();
     }
 
+    //TODO: Export other formats
     public void dataToXLS(){
 
     }
-
+    //TODO: Export other formats
     public void dataToJSON(){
 
     }

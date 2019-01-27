@@ -10,6 +10,8 @@ public class PersonWithEnrollment extends Person {
 
     private int clazzMemberRole;
 
+    private String clazzName;
+
     private long personPictureUid;
 
     public int getClazzMemberRole() {
@@ -50,5 +52,13 @@ public class PersonWithEnrollment extends Person {
 
     public void setPersonPictureUid(long personPictureUid) {
         this.personPictureUid = personPictureUid;
+    }
+
+    public String getClazzName() {
+        return clazzName;
+    }
+
+    public void setClazzName(String clazzName) {
+        this.clazzName = clazzName;
     }
 }

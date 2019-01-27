@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 
 import ru.dimorinny.floatingtextbutton.FloatingTextButton;
 
@@ -38,14 +39,13 @@ public class ReportEditActivity extends UstadBaseActivity implements ReportEditV
         SelectAttendanceThresholdsDialogFragment.ThresholdsSelectedDialogListener,
         SelectTwoDatesDialogFragment.CustomTimePeriodDialogListener {
 
-    private Toolbar toolbar;
-
     private TextView locationsTextView;
     private Spinner timePeriodSpinner;
     private TextView heading;
     private CheckBox genderDisaggregateCheck;
     private ReportEditPresenter mPresenter;
     private TextView classesTextView;
+    private TextView attendanceThresholdHeadingTextView;
     private TextView attendanceThresholdsTextView;
 
     private HashMap<String, Long> selectedClasses;
@@ -53,7 +53,6 @@ public class ReportEditActivity extends UstadBaseActivity implements ReportEditV
     private ReportAttendanceGroupedByThresholdsPresenter.ThresholdValues thresholdValues;
 
     private RadioGroup studentNumberOrPercentageRadioGroup;
-
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -63,10 +62,10 @@ public class ReportEditActivity extends UstadBaseActivity implements ReportEditV
         setContentView(R.layout.activity_report_edit);
 
         //Toolbar:
-        toolbar = findViewById(R.id.activity_report_edit_toolbar);
+        Toolbar toolbar = findViewById(R.id.activity_report_edit_toolbar);
         toolbar.setTitle(R.string.choose_report_options);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
         locationsTextView = findViewById(R.id.activity_report_edit_location_detail);
         timePeriodSpinner = findViewById(R.id.activity_report_edittime_period_spinner);
@@ -79,10 +78,19 @@ public class ReportEditActivity extends UstadBaseActivity implements ReportEditV
         attendanceThresholdsTextView =
                 findViewById(R.id.activity_report_edit_attendance_threshold_selector);
 
+        attendanceThresholdHeadingTextView =
+                findViewById(R.id.activity_report_edit_attendance_thresholds_heading);
+
+        updateClassesIfEmpty();
+        updateLocationIfEmpty();
+
         //Call the Presenter
         mPresenter = new ReportEditPresenter(this,
                 UMAndroidUtil.bundleToHashtable(getIntent().getExtras()), this);
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
+
+        //Set Default threshold value
+        setDefaultThresholdValues();
 
         studentNumberOrPercentageRadioGroup.setOnCheckedChangeListener((group, checkedId) -> {
             if (checkedId == R.id.activity_report_edit_show_student_number_option) {
@@ -114,8 +122,7 @@ public class ReportEditActivity extends UstadBaseActivity implements ReportEditV
         locationsTextView.setOnClickListener(v -> mPresenter.goToLocationDialog());
 
         genderDisaggregateCheck.setOnCheckedChangeListener(
-                (buttonView, isChecked) -> mPresenter.setGenderDisaggregate(isChecked));
-
+                (buttonView, isChecked) -> mPresenter.setGenderDisaggregated(isChecked));
 
         attendanceThresholdsTextView.setOnClickListener(v ->
                 mPresenter.goToSelectAttendanceThresholdsDialog());
@@ -124,7 +131,16 @@ public class ReportEditActivity extends UstadBaseActivity implements ReportEditV
         FloatingTextButton fab = findViewById(R.id.activity_report_edit_fab);
         fab.setOnClickListener(v -> mPresenter.handleClickPrimaryActionButton());
 
+    }
 
+    public void updateClassesIfEmpty(){
+        updateClazzesSelected(getText(R.string.all).toString());
+        updateLocationsSelected(getText(R.string.all).toString());
+    }
+
+    public void updateLocationIfEmpty(){
+        updateClazzesSelected(getText(R.string.all).toString());
+        updateLocationsSelected(getText(R.string.all).toString());
     }
 
     /**
@@ -157,11 +173,6 @@ public class ReportEditActivity extends UstadBaseActivity implements ReportEditV
     }
 
     @Override
-    public void updateLocationsSelected(String locations) {
-        locationsTextView.setText(locations);
-    }
-
-    @Override
     public void updateGenderDisaggregationSet(boolean byGender) {
         genderDisaggregateCheck.setChecked(byGender);
     }
@@ -181,23 +192,39 @@ public class ReportEditActivity extends UstadBaseActivity implements ReportEditV
         attendanceThresholdsTextView.setText(thresholdString);
     }
 
+
+    @Override
+    public void updateLocationsSelected(String locations) {
+        locationsTextView.setText(locations);
+        if(locations.equals("")){
+            updateLocationIfEmpty();
+        }
+    }
+
     @Override
     public void updateClazzesSelected(String clazzes) {
         classesTextView.setText(clazzes);
+        if(clazzes.equals("")){
+            updateClassesIfEmpty();
+        }
     }
 
     @Override
     public void showAttendanceThresholdView(boolean show) {
-        //TODO
-        //1: Show/Hide
-        //2. Update Constraint Layout
+        attendanceThresholdHeadingTextView.setVisibility(show?View.VISIBLE:View.GONE);
+        attendanceThresholdsTextView.setVisibility(show?View.VISIBLE:View.GONE);
+        findViewById(R.id.activity_report_edit_hline2).setVisibility(show?View.VISIBLE:View.GONE);
+
     }
 
     @Override
     public void showShowStudentNumberPercentageView(boolean show) {
-        //TODO:
-        //1. Show/Hide
-        //2. Update Constraint Layout
+        studentNumberOrPercentageRadioGroup.setVisibility(show?View.VISIBLE:View.GONE);
+    }
+
+    @Override
+    public void showGenderDisaggregate(boolean show) {
+        genderDisaggregateCheck.setVisibility(show?View.VISIBLE:View.GONE);
     }
 
 
@@ -212,8 +239,8 @@ public class ReportEditActivity extends UstadBaseActivity implements ReportEditV
                 classesSelectedString += ", ";
             }
         }
-        List<Long> selectedClasses = new ArrayList<>(selectedClazzes.values());
-        mPresenter.setSelectedClasses(selectedClasses);
+        List<Long> selectedClassesList = new ArrayList<>(selectedClazzes.values());
+        mPresenter.setSelectedClasses(selectedClassesList);
 
         updateClazzesSelected(classesSelectedString);
     }
@@ -229,8 +256,23 @@ public class ReportEditActivity extends UstadBaseActivity implements ReportEditV
                 locationsSelectedString += ", ";
             }
         }
+        List<Long> selectedLocationList = new ArrayList<>(this.selectedLocations.values());
+        mPresenter.setSelectedLocations(selectedLocationList);
 
         updateLocationsSelected(locationsSelectedString);
+    }
+
+    /**
+     * Sets default value at start only
+     */
+    public void setDefaultThresholdValues(){
+        ReportAttendanceGroupedByThresholdsPresenter.ThresholdValues defaultValue =
+                new ReportAttendanceGroupedByThresholdsPresenter.ThresholdValues();
+        defaultValue.low = THRESHOLD_LOW_DEFAULT;
+        defaultValue.med = THRESHOLD_MED_DEFAULT;
+        defaultValue.high = THRESHOLD_HIGH_DEFAULT;
+
+        onThresholdResult(defaultValue);
     }
 
     @Override

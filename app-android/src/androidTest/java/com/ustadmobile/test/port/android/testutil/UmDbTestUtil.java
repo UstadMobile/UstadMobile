@@ -730,7 +730,7 @@ public class UmDbTestUtil {
             ClazzLog newClazzLog = new ClazzLog();
             newClazzLog.setLogDate(thisDate);
             newClazzLog.setDone(false);
-            newClazzLog.setClazzClazzUid(thisClazz.getClazzUid());
+            newClazzLog.setClazzLogClazzUid(thisClazz.getClazzUid());
             newClazzLog.setClazzLogUid(clazzLogDao.insert(newClazzLog));
 
             clazzLogAttendanceRecordDao.insertAllAttendanceRecords(thisClazz.getClazzUid(),

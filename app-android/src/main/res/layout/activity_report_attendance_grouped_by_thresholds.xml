@@ -10,7 +10,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:elevation="4dp"
-        android:theme="@style/ThemeOverlay.AppCompat.ActionBar">
+        android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
         <android.support.v7.widget.Toolbar
             android:id="@+id/activity_report_attendance_grouped_by_thresholds_toolbar"
@@ -21,20 +23,27 @@
 
     </android.support.design.widget.AppBarLayout>
 
-    <LinearLayout
-        android:id="@+id/actvity_report_attendance_grouped_by_thresholds_ll"
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:layout_marginTop="8dp"
         android:layout_marginBottom="8dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/activity_report_attendance_grouped_by_thresholds_appbar"
-        android:orientation="vertical">
+        app:layout_constraintBottom_toTopOf="@+id/activity_report_attendance_grouped_by_thresholds_fab"
+        app:layout_constraintTop_toBottomOf="@+id/activity_report_attendance_grouped_by_thresholds_appbar">
+
+        <LinearLayout
+            android:id="@+id/actvity_report_attendance_grouped_by_thresholds_ll"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginBottom="8dp"
+            android:orientation="vertical"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/activity_report_attendance_grouped_by_thresholds_appbar">
 
 
+        </LinearLayout>
 
-    </LinearLayout>
-
-
+    </ScrollView>
 
     <ru.dimorinny.floatingtextbutton.FloatingTextButton
         android:id="@+id/activity_report_attendance_grouped_by_thresholds_fab"

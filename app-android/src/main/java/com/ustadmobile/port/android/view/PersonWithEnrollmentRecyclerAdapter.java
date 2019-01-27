@@ -2,7 +2,6 @@ package com.ustadmobile.port.android.view;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.arch.paging.PagedList;
 import android.arch.paging.PagedListAdapter;
 import android.content.Context;
 import android.content.res.Resources;
@@ -34,7 +33,6 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Objects;
 
-import static com.ustadmobile.core.view.PersonEditView.IMAGE_MAX_WIDTH;
 import static com.ustadmobile.port.android.view.PersonEditActivity.DEFAULT_PADDING;
 
 /**
@@ -55,8 +53,6 @@ public class PersonWithEnrollmentRecyclerAdapter
     private CommonHandlerPresenter mPresenter;
     private boolean showAttendance;
     private boolean showEnrollment;
-    private boolean isEmpty = false;
-    private boolean addStudentLast = false;
 
     private boolean showAddStudent = false;
     private boolean showAddTeacher = false;
@@ -64,20 +60,21 @@ public class PersonWithEnrollmentRecyclerAdapter
     private int currentTop = -1;
     private boolean teacherAdded = false;
 
+    private boolean reportMode = false;
+
+    private boolean groupByClass = false;
+
+    private int headingCLId;
+
+    private boolean classChange = true;
+    private long currentClazz = 0L;
+
     private int addCMCLT, addCMCLS;
 
-    public static final int IMAGE_PERSON_THUMBNAIL_WIDTH = 26;
+    private static final int IMAGE_PERSON_THUMBNAIL_WIDTH = 26;
 
     @SuppressLint("UseSparseArrays")
     private HashMap<Long, Boolean> checkBoxHM = new HashMap<>();
-
-    void submitListCustom(PagedList<PersonWithEnrollment> personWithEnrollments) {
-        super.submitList(personWithEnrollments);
-
-        if (personWithEnrollments.size() == 0 ){
-            isEmpty = true;
-        }
-    }
 
     class ClazzLogDetailViewHolder extends RecyclerView.ViewHolder{
         ClazzLogDetailViewHolder(View itemView){
@@ -109,19 +106,39 @@ public class PersonWithEnrollmentRecyclerAdapter
         showEnrollment = enrollment;
     }
 
-    public boolean isShowAddStudent() {
-        return showAddStudent;
+    PersonWithEnrollmentRecyclerAdapter(
+            @NonNull DiffUtil.ItemCallback<PersonWithEnrollment> diffCallback, Context context,
+            Activity activity, CommonHandlerPresenter presenter, boolean attendance,
+            boolean enrollment, boolean rmode){
+        super(diffCallback);
+        theContext = context;
+        theActivity = activity;
+        mPresenter = presenter;
+        showAttendance = attendance;
+        showEnrollment = enrollment;
+        reportMode = rmode;
     }
 
-    public void setShowAddStudent(boolean showAddStudent) {
+    PersonWithEnrollmentRecyclerAdapter(
+            @NonNull DiffUtil.ItemCallback<PersonWithEnrollment> diffCallback, Context context,
+            Activity activity, CommonHandlerPresenter presenter, boolean attendance,
+            boolean enrollment, boolean rmode, boolean classGrouped){
+        super(diffCallback);
+        theContext = context;
+        theActivity = activity;
+        mPresenter = presenter;
+        showAttendance = attendance;
+        showEnrollment = enrollment;
+        reportMode = rmode;
+        groupByClass = classGrouped;
+    }
+
+
+    void setShowAddStudent(boolean showAddStudent) {
         this.showAddStudent = showAddStudent;
     }
 
-    public boolean isShowAddTeacher() {
-        return showAddTeacher;
-    }
-
-    public void setShowAddTeacher(boolean showAddTeacher) {
+    void setShowAddTeacher(boolean showAddTeacher) {
         this.showAddTeacher = showAddTeacher;
     }
 
@@ -218,44 +235,47 @@ public class PersonWithEnrollmentRecyclerAdapter
             @NonNull PersonWithEnrollmentRecyclerAdapter.ClazzLogDetailViewHolder holder,
             int position){
 
-
+        //Get person with enrollment and other info
         PersonWithEnrollment personWithEnrollment = getItem(position);
-
         assert personWithEnrollment != null;
-        if(personWithEnrollment == null){
-            return;
-        }
-
-        addStudentLast = false;
-
-        String studentName = personWithEnrollment.getFirstNames() + " " +
-                personWithEnrollment.getLastName();
-        Long personUid = personWithEnrollment.getPersonUid();
+        boolean addStudentLast = false;
 
         TextView studentNameTextView =
                 holder.itemView.findViewById(R.id.item_studentlist_student_simple_student_title);
-        studentNameTextView.setText(studentName);
-
         ImageView personPicture =
                 holder.itemView.findViewById(R.id.item_studentlist_student_simple_student_image);
-
         ImageView trafficLight = holder.itemView
                 .findViewById(R.id.item_studentlist_student_simple_attendance_trafficlight);
         TextView attendanceTextView =
                 holder.itemView.findViewById(R.id.item_studentlist_student_simple_attendance_percentage);
-
         ConstraintLayout cl = holder.itemView.findViewById(R.id.item_studentlist_student_cl);
-        //If you want the whole CL to be clickable
-        //cl.setOnClickListener(v ->
-        //        mPresenter.handleCommonPressed(personUid));
 
+        CheckBox checkBox =
+                holder.itemView.findViewById(R.id.item_studentlist_student_simple_student_checkbox);
+        ImageView callImageView =
+                holder.itemView.findViewById(R.id.item_studentlist_student_simple_call_iv);
+
+        //NAME:
+        String firstName = "";
+        String lastName = "";
+        if(personWithEnrollment.getFirstNames() != null){
+            firstName = personWithEnrollment.getFirstNames();
+        }
+        if(personWithEnrollment.getLastName() != null){
+            lastName = personWithEnrollment.getLastName();
+        }
+
+        String studentName = firstName + " " + lastName;
+        studentNameTextView.setText(studentName);
+        Long personUid = personWithEnrollment.getPersonUid();
         studentNameTextView.setOnClickListener(v -> mPresenter.handleCommonPressed(personUid));
 
+        //HEADING:
         //Remove previous add clazz member views
         if(addCMCLS != 0 || addCMCLT != 0)
             removeAllAddClazzMemberView(cl, holder);
 
-        //Add picture to person
+        //PICTURE : Add picture to person
         String imagePath = "";
         Long personPictureUid = personWithEnrollment.getPersonPictureUid();
         if (personPictureUid != 0) {
@@ -263,10 +283,48 @@ public class PersonWithEnrollmentRecyclerAdapter
                     .getAttachmentPath(personPictureUid);
         }
 
-        if(imagePath != null && !imagePath.isEmpty() && imagePath.length() > 0)
+        if(imagePath != null && !imagePath.isEmpty())
             setPictureOnView(imagePath, personPicture);
         else
             personPicture.setImageResource(R.drawable.ic_person_black_new_24dp);
+
+        //ENROLLMENT
+        if(showEnrollment){
+
+
+            checkBox.setVisibility(View.VISIBLE);
+            checkBox.setTextColor(Color.BLACK);
+            checkBox.setSystemUiVisibility(View.VISIBLE);
+            checkBox.setCursorVisible(true);
+
+            //Get current person's enrollment w.r.t. this class.
+            // (Its either set or null (not enrolled))
+            boolean personWithEnrollmentBoolean = false;
+            if (personWithEnrollment.getEnrolled() != null){
+                personWithEnrollmentBoolean = personWithEnrollment.getEnrolled();
+            }
+
+            //To preserve checkboxes, add this enrollment to the Map.
+            checkBoxHM.put(personWithEnrollment.getPersonUid(), personWithEnrollmentBoolean);
+            //set the value of the check according to the value..
+            checkBox.setChecked(checkBoxHM.get(personWithEnrollment.getPersonUid()));
+
+            //Add a change listener to the checkbox
+            checkBox.setOnCheckedChangeListener((buttonView, isChecked) ->
+                    checkBox.setChecked(isChecked));
+
+            checkBox.setOnClickListener(v -> {
+                final boolean isChecked = checkBox.isChecked();
+                HashMap<PersonWithEnrollment, Boolean> arguments = new HashMap<>();
+                arguments.put(personWithEnrollment, isChecked);
+                mPresenter.handleSecondaryPressed(arguments.entrySet().iterator().next());
+            });
+
+        }else{
+            //If you want the whole CL to be clickable
+            cl.setOnClickListener(v ->
+                    mPresenter.handleCommonPressed(personUid));
+        }
 
         if(showAttendance){
             long attendancePercentage =
@@ -316,97 +374,82 @@ public class PersonWithEnrollmentRecyclerAdapter
             constraintSet.applyTo(cl);
 
             //or just leave the spaces in hopes of better performance ?
-            //Update it doesnt really make it quicker
+            //Update it doesn't really make it quicker
 
         }
+        if(reportMode){
+            checkBox.setVisibility(View.GONE);
 
-        if(showEnrollment){
-
-            //Get checkbox and set it to visible.
-            CheckBox checkBox =
-                    holder.itemView.findViewById(R.id.item_studentlist_student_simple_student_checkbox);
-            checkBox.setVisibility(View.VISIBLE);
-            checkBox.setTextColor(Color.BLACK);
-            checkBox.setSystemUiVisibility(View.VISIBLE);
-            checkBox.setCursorVisible(true);
+            callImageView.setVisibility(View.VISIBLE);
+            callImageView.setOnClickListener(v ->
+                    mPresenter.handleSecondaryPressed(personWithEnrollment));
 
 
-            //Get current person's enrollment w.r.t. this class. (Its either set or null (not enrolled)
-            boolean personWithEnrollmentBoolean = false;
-            if (personWithEnrollment.getEnrolled() != null){
-                personWithEnrollmentBoolean = personWithEnrollment.getEnrolled();
+        }else{
+            callImageView.setVisibility(View.GONE);
+        }
+
+
+        if(groupByClass){
+
+            long thisClazzUid = personWithEnrollment.getClazzUid();
+            removeHeading(cl, headingCLId, holder);
+
+            if(position == 0){
+                addHeading(cl, personWithEnrollment.getClazzName(), holder);
+            }else{
+                PersonWithEnrollment previousPersonWithEnrollment = getItem(position - 1);
+                long previousClazzUid = previousPersonWithEnrollment.getClazzUid();
+
+                if(thisClazzUid != previousClazzUid){
+                    addHeading(cl, personWithEnrollment.getClazzName(), holder);
+                }else{
+                    addHeading(cl, "", holder);
+                }
+
             }
-
-            //To preserve checkboxes, add this enrollment to the Map.
-            checkBoxHM.put(personWithEnrollment.getPersonUid(), personWithEnrollmentBoolean);
-            //set the value of the check according to the value..
-            checkBox.setChecked(checkBoxHM.get(personWithEnrollment.getPersonUid()));
-
-            //Add a change listener to the checkbox
-            checkBox.setOnCheckedChangeListener((buttonView, isChecked) ->
-                    checkBox.setChecked(isChecked));
-
-            checkBox.setOnClickListener(v -> {
-                final boolean isChecked = checkBox.isChecked();
-                HashMap<PersonWithEnrollment, Boolean> arguments = new HashMap<>();
-                arguments.put(personWithEnrollment, isChecked);
-                mPresenter.handleSecondaryPressed(arguments.entrySet().iterator().next());
-            });
-
+        }else{
+            removeHeading(cl, headingCLId, holder);
         }
 
+        //IF IN STUDENTS LIST IN CLASS DETAIL:
         if(!showEnrollment && showAttendance){
 
-            if (position == 0) {//First Entry. Add Teacher and Add Teacher item
-                addHeadingAndNew(cl, ClazzMember.ROLE_TEACHER);
+            if(showAddStudent && showAddTeacher) {
+                if (position == 0) {//First Entry. Add Teacher and Add Teacher item
+                    addHeadingAndNew(cl, ClazzMember.ROLE_TEACHER);
 
-                if(personWithEnrollment.getClazzMemberRole() == ClazzMember.ROLE_STUDENT){
+                    if (personWithEnrollment.getClazzMemberRole() == ClazzMember.ROLE_STUDENT) {
 
-                    addHeadingAndNew(cl, ClazzMember.ROLE_STUDENT);
+                        addHeadingAndNew(cl, ClazzMember.ROLE_STUDENT);
+                    }
+
+                    int nextPos = position + 1;
+                    if (personWithEnrollment.getClazzMemberRole() == ClazzMember.ROLE_TEACHER &&
+                            getItemCount() == nextPos) {
+                        addStudentLast = true;
+                    }
+
+                } else {
+                    PersonWithEnrollment previousPerson = getItem(position - 1);
+                    assert previousPerson != null;
+                    if (previousPerson.getClazzMemberRole() == ClazzMember.ROLE_TEACHER &&
+                            personWithEnrollment.getClazzMemberRole() == ClazzMember.ROLE_STUDENT) {
+
+                        //Add student
+                        addHeadingAndNew(cl, ClazzMember.ROLE_STUDENT);
+                    }
+
                 }
-
-                int nextPos = position + 1;
-                if(personWithEnrollment.getClazzMemberRole() == ClazzMember.ROLE_TEACHER &&
-                        getItemCount() == nextPos){
-                    addStudentLast = true;
-                }
-
-            } else {
-                PersonWithEnrollment previousPerson = getItem(position - 1);
-                assert previousPerson != null;
-                if (previousPerson.getClazzMemberRole() == ClazzMember.ROLE_TEACHER &&
-                        personWithEnrollment.getClazzMemberRole() == ClazzMember.ROLE_STUDENT) {
-
-                    //Add student
-                    addHeadingAndNew(cl, ClazzMember.ROLE_STUDENT);
-                }
-
             }
         }
 
         if(personWithEnrollment.getClazzMemberRole() == ClazzMember.ROLE_TEACHER){
 
-            trafficLight.setVisibility(View.INVISIBLE);
-            attendanceTextView.setVisibility(View.INVISIBLE);
-
-            ConstraintSet constraintSet = new ConstraintSet();
-            constraintSet.clone(cl);
-
-            //connect divider's top to image's bottom
-            constraintSet.connect(R.id.item_studentlist_student_simple_horizontal_divider,
-                    ConstraintSet.TOP, R.id.item_studentlist_student_simple_student_image,
-                    ConstraintSet.BOTTOM, 16);
-
-            //If text is below student image
-
-            constraintSet.connect(R.id.item_studentlist_student_simple_attendance_percentage,
-                    ConstraintSet.TOP, R.id.item_studentlist_student_simple_student_title,
-                    ConstraintSet.BOTTOM, 0);
-            constraintSet.connect(R.id.item_studentlist_student_simple_attendance_trafficlight,
-                    ConstraintSet.TOP, R.id.item_studentlist_student_simple_student_title,
-                    ConstraintSet.BOTTOM, 0);
-            constraintSet.applyTo(cl);
-
+            //Disable attendance for Teachers
+            trafficLight.setVisibility(View.GONE);
+            attendanceTextView.setVisibility(View.GONE);
+            
         }
 
         if(getItemCount() == position+1) {
@@ -417,27 +460,26 @@ public class PersonWithEnrollmentRecyclerAdapter
 
     }
 
+    private void addClassHeading(ConstraintLayout cl, long uid){
 
-    public void setPictureOnView(String imagePath, ImageView theImage) {
+    }
+
+    private void setPictureOnView(String imagePath, ImageView theImage) {
 
         Uri imageUri = Uri.fromFile(new File(imagePath));
-        //theImage.setImageURI(imageUri);
-
-        //File imageFile = new File(imagePath);
 
         Picasso
                 .get()
                 .load(imageUri)
-                .resize(dpToPx(IMAGE_PERSON_THUMBNAIL_WIDTH), dpToPx(IMAGE_PERSON_THUMBNAIL_WIDTH))
-                //.fit()
-                //.centerCrop()
+                .resize(dpToPxImagePerson(), dpToPxImagePerson())
                 .noFade()
                 .into(theImage);
     }
 
 
-    public static int dpToPx(int dp) {
-        return (int) (dp * Resources.getSystem().getDisplayMetrics().density);
+    private static int dpToPxImagePerson() {
+        return (int) (PersonWithEnrollmentRecyclerAdapter.IMAGE_PERSON_THUMBNAIL_WIDTH
+                * Resources.getSystem().getDisplayMetrics().density);
     }
 
     /**
@@ -457,13 +499,98 @@ public class PersonWithEnrollmentRecyclerAdapter
         cl.removeView(addCMCLViewS);
         cl.removeView(addCMCLViewT);
 
-        //If view exists, set it to invisible
+        //If view exists, set it to invisible/gone
         if(addCMCLViewS != null){
-            addCMCLViewS.setVisibility(View.INVISIBLE);
+            addCMCLViewS.setVisibility(View.GONE);
         }
         if(addCMCLViewT != null){
-            addCMCLViewT.setVisibility(View.INVISIBLE);
+            addCMCLViewT.setVisibility(View.GONE);
         }
+    }
+
+    private void removeHeading(ConstraintLayout cl, int headingId,
+                   @NonNull PersonWithEnrollmentRecyclerAdapter.ClazzLogDetailViewHolder holder){
+        View removeMe = holder.itemView.findViewById(headingId);
+
+        if(removeMe!=null)
+            removeMe.setVisibility(View.GONE);
+
+        cl.removeView(removeMe);
+
+    }
+
+    /**
+     * Adds a heading
+     * @param mainCL    The Constraint layout where the list will be in.
+     * @param heading  The heading
+     */
+    private void addHeading(ConstraintLayout mainCL, String heading,
+                            @NonNull PersonWithEnrollmentRecyclerAdapter.ClazzLogDetailViewHolder holder){
+
+
+        removeHeading(mainCL, headingCLId, holder);
+
+
+        if(heading.isEmpty()){
+            return;
+        }
+
+        ConstraintLayout headingCL = new ConstraintLayout(theContext);
+        int defaultPaddingBy2 = getDp(DEFAULT_PADDING/2);
+
+        //The Heading TextView
+        TextView headingTV = new TextView(theContext);
+        headingTV.setTextColor(Color.BLACK);
+        headingTV.setTextSize(16);
+        headingTV.setLeft(8);
+
+        //Set ids for all components.
+        headingCLId = View.generateViewId();
+        headingTV.setId(View.generateViewId());
+        headingCL.setId(headingCLId);
+
+        //Set heading text
+        headingTV.setText(heading);
+
+        //Add these components to the new "add" Constraint Layout
+        headingCL.addView(headingTV);
+
+        ConstraintSet constraintSetForHeader2 = new ConstraintSet();
+        constraintSetForHeader2.clone(headingCL);
+
+        //Heading constraint to parent of the headingCL mainCL it is in.
+        constraintSetForHeader2.connect(
+                headingTV.getId(), ConstraintSet.TOP,
+                headingCL.getId(), ConstraintSet.TOP,
+                defaultPaddingBy2);
+
+        constraintSetForHeader2.connect(
+                headingTV.getId(), ConstraintSet.START,
+                headingCL.getId(), ConstraintSet.START,
+                defaultPaddingBy2);
+
+        constraintSetForHeader2.applyTo(headingCL);
+
+        //Add the heading CL to the main CL
+        mainCL.addView(headingCL);
+
+        ConstraintSet constraintSetForHeader = new ConstraintSet();
+        constraintSetForHeader.clone(mainCL);
+
+        //Current Person image TOP to BOTTOM of [ Heading CL ] (always)
+        constraintSetForHeader.connect(
+                R.id.item_studentlist_student_simple_student_image,ConstraintSet.TOP,
+                headingCL.getId(), ConstraintSet.BOTTOM, defaultPaddingBy2);
+
+        //Current Person title TOP to BOTTOM of [ Add CL ] (always)
+        constraintSetForHeader.connect(
+                R.id.item_studentlist_student_simple_student_title, ConstraintSet.TOP,
+                headingCL.getId(), ConstraintSet.BOTTOM, defaultPaddingBy2);
+
+        constraintSetForHeader.applyTo(mainCL);
+
+
+
     }
 
     /**
@@ -662,4 +789,5 @@ public class PersonWithEnrollmentRecyclerAdapter
         }
 
     }
+
 }

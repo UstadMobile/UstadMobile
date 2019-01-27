@@ -3,19 +3,25 @@ package com.ustadmobile.port.android.view;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.CheckBox;
 import android.widget.ImageView;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.SelectMultipleTreeDialogPresenter;
 import com.ustadmobile.core.db.UmAppDatabase;
+import com.ustadmobile.core.db.dao.LocationDao;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.view.DismissableDialog;
@@ -26,12 +32,14 @@ import com.ustadmobile.port.android.util.UMAndroidUtil;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 
 import io.reactivex.annotations.NonNull;
 import tellh.com.recyclertreeview_lib.TreeNode;
 import tellh.com.recyclertreeview_lib.TreeViewAdapter;
+import tellh.com.recyclertreeview_lib.TreeViewBinder;
 
 /**
  * The activity that is a full screen dialog that selects items from a tree structure.
@@ -49,15 +57,20 @@ public class SelectMultipleTreeDialogFragment extends UstadDialogFragment implem
 
     //Recycler view for the tree
     private RecyclerView recyclerView;
-    //Adater for tree
+    //Adapter for tree
     private TreeViewAdapter adapter;
 
     //Context (activity calling this)
     private Context mAttachedContext;
 
     Toolbar toolbar;
+    LocationDao locationDao;
 
     HashMap<String, Long> selectedOptions;
+
+    SelectMultipleTreeDialogPresenter mPresenter;
+
+    List<Long> selectedLocationList;
 
     public interface MultiSelectTreeDialogListener {
 
@@ -65,14 +78,67 @@ public class SelectMultipleTreeDialogFragment extends UstadDialogFragment implem
 
     }
 
-    //Presenter?
-    SelectMultipleTreeDialogPresenter mPresenter;
+    private class PopulateTreeNodeCallback implements UmCallback<List<Location>> {
+
+        private TreeNode node;
+
+        private PopulateTreeNodeCallback(TreeNode node) {
+            this.node = node;
+        }
+
+        @Override
+        public void onSuccess(List<Location> result) {
+            runOnUiThread(() -> {
+                for(Location childLocations : result) {
+                    long childLocationUid = childLocations.getLocationUid();
+                    boolean selected = false;
+                    if(selectedLocationList.contains(childLocationUid)){
+                        selected = true;
+                    }
+
+                    node.addChild(new TreeNode<>(
+                            new LocationLayoutType(childLocations.getTitle(),
+                                    childLocationUid, selected, false)));
+                }
+                if(!result.isEmpty()){
+                    ((LocationLayoutType)node.getContent()).leaf = false;
+                }else{
+                    ((LocationLayoutType)node.getContent()).leaf = true;
+                }
+
+            });
+
+            if(!result.isEmpty()){
+                ((LocationLayoutType)node.getContent()).leaf = false;
+            }else{
+                ((LocationLayoutType)node.getContent()).leaf = true;
+            }
+        }
+
+        @Override
+        public void onFailure(Throwable exception) {
+
+        }
+    }
+
+    @Override
+    public void onPrepareOptionsMenu(Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+
+        MenuItem item =  menu.findItem(R.id.menu_catalog_entry_presenter_share);
+
+        //Get the icon itself.
+        Drawable itemIcon = getResources().getDrawable(R.drawable.ic_check_white_24dp);
+        itemIcon.setTint(getResources().getColor(R.color.icons));
+        itemIcon.setColorFilter(getResources().getColor(R.color.icons), PorterDuff.Mode.SRC_IN);
+        item.setIcon(itemIcon);
+
+    }
 
     @android.support.annotation.NonNull
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-
         LayoutInflater inflater =
                 (LayoutInflater) Objects.requireNonNull(getContext()).getSystemService(
                         Context.LAYOUT_INFLATER_SERVICE);
@@ -88,26 +154,29 @@ public class SelectMultipleTreeDialogFragment extends UstadDialogFragment implem
 
         toolbar = rootView.findViewById(R.id.fragment_select_multiple_tree_dialog_toolbar);
         toolbar.setTitle(R.string.select_locations);
-        toolbar.setNavigationIcon(R.drawable.ic_arrow_back_white_24dp);
+
+        Drawable upIcon = getResources().getDrawable(R.drawable.ic_arrow_back_white_24dp);
+        upIcon.setTint(getResources().getColor(R.color.icons));
+        toolbar.setNavigationIcon(upIcon);
         toolbar.setNavigationOnClickListener(v -> dialog.dismiss());
+
         toolbar.inflateMenu(R.menu.menu_done);
         toolbar.setOnMenuItemClickListener(item -> {
             int i = item.getItemId();
             if (i == R.id.menu_catalog_entry_presenter_share) {
-                System.out.println("DONE");
                 mPresenter.handleClickPrimaryActionButton();
             }
             return false;
         });
 
-        //Set presenter.
-        //Call it's onCreate()
+        UmAppDatabase repository = UmAccountManager.getRepositoryForActiveAccount(getContext());
+        locationDao = repository.getLocationDao();
 
         mPresenter = new SelectMultipleTreeDialogPresenter(getContext(),
                 UMAndroidUtil.bundleToHashtable(getArguments()), this);
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
 
-        //Set any view components and its listener (post presenter work)
+        selectedLocationList = mPresenter.getSelectedLocationsList();
 
         dialog = new AlertDialog.Builder(getContext(), R.style.FullScreenDialogStyle)
                 .setView(rootView)
@@ -117,6 +186,54 @@ public class SelectMultipleTreeDialogFragment extends UstadDialogFragment implem
 
     }
 
+
+    /**
+     * Custom TreeView Adapter written so that we can work with onBindView and manipulate the
+     * view on every tree node.
+     *
+     */
+    public class TreeViewAdapterWithBind extends TreeViewAdapter{
+
+        public TreeViewAdapterWithBind(List<TreeNode> nodes, List<? extends TreeViewBinder> viewBinders) {
+            super(nodes, viewBinders);
+        }
+
+
+        @Override
+        public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+            super.onBindViewHolder(holder, position);
+
+            CheckBox locationCB = holder.itemView.findViewById(
+                    R.id.item_select_multiple_tree_dialog_checkbox);
+            ImageView arrowIV = holder.itemView.findViewById(
+                    R.id.item_select_multiple_tree_dialog_arrow);
+
+            Iterator<TreeNode> displayNodesIterator = getDisplayNodesIterator();
+            TreeNode displayNode = null;
+            int i=0;
+             while(displayNodesIterator.hasNext()){
+                  displayNode = displayNodesIterator.next();
+                  if(i>=position){
+                      break;
+                  }else{
+                      i++;
+                  }
+             }
+
+            LocationLayoutType displayNodeContent = (LocationLayoutType) displayNode.getContent();
+            long locationUid = displayNodeContent.uid;
+
+            if (selectedLocationList != null && selectedLocationList.contains(locationUid)){
+                locationCB.setChecked(true);
+            }else{
+                locationCB.setChecked(false);
+            }
+
+            arrowIV.setVisibility(displayNodeContent.leaf?View.INVISIBLE:View.VISIBLE);
+
+        }
+    }
+
     private void initView(){
         //Set recycler view
         recyclerView = rootView.findViewById(R.id.fragment_select_multiple_tree_dialog_recyclerview);
@@ -124,103 +241,56 @@ public class SelectMultipleTreeDialogFragment extends UstadDialogFragment implem
     }
 
     @Override
-    public void populateTopLocation(List<Location> locations, Object treeNode, Object parentNode) {
+    public void populateTopLocation(List<Location> locations) {
         List<TreeNode> nodes = new ArrayList<>();
-        TreeNode thisTreeNode = null;
-        TreeNode thisParentNode = null;
-
-        if(treeNode != null){
-            thisTreeNode = (TreeNode) treeNode;
-            thisTreeNode.getContent().getLayoutId();
-        }
-        if(parentNode != null){
-            thisParentNode = (TreeNode) parentNode;
-        }
 
         for(Location every_location : locations){
+            long childLocationUid = every_location.getLocationUid();
+            boolean selected = false;
+            if(selectedLocationList.contains(childLocationUid)){
+                selected = true;
+            }
             TreeNode<LocationLayoutType> app = new TreeNode<>(
                     new LocationLayoutType(
-                            every_location.getTitle(), every_location.getLocationUid()
+                            every_location.getTitle(), every_location.getLocationUid(),
+                            selected, false
                     )
             );
-
-            if(thisParentNode != null){
-                thisParentNode.addChild(app);
-
-            }else if(thisTreeNode != null) {
-                thisTreeNode.addChild(app);
-
-            }else{
-                nodes.add(app);
-            }
-
-
+            nodes.add(app);
         }
-        if(parentNode != null) {
-            nodes.add(thisParentNode);
-        }else if(treeNode != null){
 
-            nodes.add(thisTreeNode);
-
+        for(TreeNode childNode : nodes) {
+            long childLocationUid = ((LocationLayoutType) childNode.getContent()).getUid();
+            locationDao.findAllChildLocationsForUidAsync(childLocationUid,
+                    new PopulateTreeNodeCallback(childNode));
         }
 
         //Init adapter with the location node binder as types of data to accept
-        adapter = new TreeViewAdapter(nodes, Arrays.asList(new LocationNodeBinder(mPresenter)));
+        adapter = new TreeViewAdapterWithBind(nodes, Arrays.asList(new LocationNodeBinder(mPresenter)));
 
         //Set adapter to Recycler view.
         runOnUiThread(() -> recyclerView.setAdapter(adapter));
+
 
         //Set adapter listener
         adapter.setOnTreeNodeListener(new TreeViewAdapter.OnTreeNodeListener() {
 
             @Override
             public boolean onClick(TreeNode treeNode, RecyclerView.ViewHolder viewHolder) {
-
-                //get the location object associated with this node (using treeNodegetContent)
-                // would be something like getContent().isSite() or isLeaf()
-
-                if(treeNode.isLeaf()) {
-                    //now run the query async, get the result, and add children to treeNode
-                    UmAppDatabase repository = UmAccountManager.getRepositoryForActiveAccount(getContext());
-                    repository.getLocationDao().findAllChildLocationsForUidAsync(
-                            ((LocationLayoutType) treeNode.getContent()).getUid(),
-                            new UmCallback<List<Location>>() {
-                                @Override
-                                public void onSuccess(List<Location> result) {
-
-                                    for(Location every_location : result) {
-                                        treeNode.addChild(new TreeNode<>(
-                                                new LocationLayoutType(
-                                                        every_location.getTitle(), every_location.getLocationUid()
-                                                )
-                                        ));
-                                    }
-
-                                    //TODO: Replace this; doeesnt work. Need to find a working way
-                                    // of toggling the node. 
-                                    if(result.size() > 0){
-                                        runOnUiThread(() -> {
-                                            treeNode.expand();
-                                            adapter.notifyDataSetChanged();
-                                            treeNode.expand();
-                                            onClick(treeNode, viewHolder);
-                                        });
-
-                                    }
-                                }
-
-                                @Override
-                                public void onFailure(Throwable exception) {
-                                    exception.printStackTrace();
-                                }
-                            });
-
-                }
-
                 if(!treeNode.isLeaf()){
-                    //Update and toggle the node.
-                    onToggle(!treeNode.isExpand(), viewHolder);
+                    List<TreeNode> nodeList = treeNode.getChildList();
+                    for(TreeNode childNode : nodeList) {
+                        if(childNode.isLeaf()) {
+                            //Find all child's children and add then to the node
+                            // (via PopulateTreeNodeCallback class)
+                            long childLocationUid = ((LocationLayoutType) childNode.getContent()).getUid();
+                            locationDao.findAllChildLocationsForUidAsync(childLocationUid,
+                                    new PopulateTreeNodeCallback(childNode));
+                        }
+                    }
+                    onToggle(treeNode.isExpand(), viewHolder);
                 }
+
                 return false;
             }
 
@@ -233,12 +303,32 @@ public class SelectMultipleTreeDialogFragment extends UstadDialogFragment implem
                 ImageView arrowImage = locationViewHolder.getIvArrow();
                 int rotateDegree = b ? 90 : -90;
                 arrowImage.animate().rotationBy(rotateDegree).start();
+
             }
         });
+    }
 
+    @Override
+    public void finish() {
+        selectedOptions = mPresenter.getSelectedOptions();
+        if(mAttachedContext instanceof MultiSelectTreeDialogListener) {
+            ((MultiSelectTreeDialogListener)mAttachedContext).onLocationResult(selectedOptions);
+        }
+        dialog.dismiss();
+    }
 
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        this.mAttachedContext = context;
+        this.selectedOptions = new HashMap<>();
+    }
 
-
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        this.mAttachedContext = null;
+        this.selectedOptions = null;
     }
 
     @Override
@@ -264,30 +354,5 @@ public class SelectMultipleTreeDialogFragment extends UstadDialogFragment implem
     @Override
     public void onNothingSelected(AdapterView<?> parent) {
 
-    }
-
-
-
-    @Override
-    public void finish() {
-        selectedOptions = mPresenter.getSelectedOptions();
-        if(mAttachedContext instanceof MultiSelectTreeDialogListener) {
-            ((MultiSelectTreeDialogListener)mAttachedContext).onLocationResult(selectedOptions);
-        }
-        dialog.dismiss();
-    }
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        this.mAttachedContext = context;
-        this.selectedOptions = new HashMap<>();
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        this.mAttachedContext = null;
-        this.selectedOptions = null;
     }
 }

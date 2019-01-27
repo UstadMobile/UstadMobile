@@ -71,21 +71,23 @@ public class ReportSelectionActivity extends UstadBaseActivity implements Report
 
         expandableListView.setOnChildClickListener((parent, v, groupPosition, childPosition, id) -> {
 
-            Toast.makeText(
-                    getApplicationContext(),
-                    expandableListTitle.get(groupPosition)
-                        + " -> "
-                        + expandableListDataReportsHashMap.get(expandableListTitle
-                            .get(groupPosition)).children.get(childPosition).name,
-                    Toast.LENGTH_SHORT
-            ).show();
 
-
-                    mPresenter.goToReport(expandableListDataReportsHashMap
+            mPresenter.goToReport(expandableListDataReportsHashMap
+                    .get(expandableListTitle.get(groupPosition)).children
+                        .get(childPosition).name,expandableListDataReportsHashMap
                             .get(expandableListTitle.get(groupPosition)).children
-                                .get(childPosition).name, expandableListDataReportsHashMap
+                            .get(childPosition).desc, expandableListDataReportsHashMap
+                    .get(expandableListTitle.get(groupPosition)).children
+                    .get(childPosition).reportLink,
+                    expandableListDataReportsHashMap
                             .get(expandableListTitle.get(groupPosition)).children
-                            .get(childPosition).reportLink );
+                            .get(childPosition).showThreshold,
+                    expandableListDataReportsHashMap
+                            .get(expandableListTitle.get(groupPosition)).children
+                            .get(childPosition).showRadioGroup,
+                    expandableListDataReportsHashMap
+                            .get(expandableListTitle.get(groupPosition)).children
+                            .get(childPosition).showGenderDisaggregate);
             return false;
         });
 

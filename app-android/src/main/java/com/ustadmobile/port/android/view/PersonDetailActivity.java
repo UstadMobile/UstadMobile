@@ -456,8 +456,6 @@ public class PersonDetailActivity extends UstadBaseActivity implements PersonDet
                 number, null)));
     }
 
-
-
     /**
      * The DIFF CALLBACK
      */

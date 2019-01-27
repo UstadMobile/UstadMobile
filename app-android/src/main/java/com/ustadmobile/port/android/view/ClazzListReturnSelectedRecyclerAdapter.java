@@ -3,6 +3,7 @@ package com.ustadmobile.port.android.view;
 import android.arch.paging.PagedListAdapter;
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.Fragment;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.RecyclerView;
@@ -17,12 +18,16 @@ import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.SelectClazzesDialogPresenter;
 import com.ustadmobile.lib.db.entities.ClazzWithNumStudents;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class ClazzListReturnSelectedRecyclerAdapter extends PagedListAdapter<ClazzWithNumStudents,
         ClazzListReturnSelectedRecyclerAdapter.ClazzViewHolder> {
 
     Context theContext;
     private Fragment theFragment;
     private SelectClazzesDialogPresenter thePresenter;
+    private List<Long> selectedClazzes;
 
     class ClazzViewHolder extends RecyclerView.ViewHolder {
         ClazzViewHolder(View itemView){super(itemView);}
@@ -36,6 +41,10 @@ public class ClazzListReturnSelectedRecyclerAdapter extends PagedListAdapter<Cla
         theContext = context;
         theFragment = fragment;
         thePresenter = mPresenter;
+        selectedClazzes = mPresenter.getSelectedClazzesList();
+        if(selectedClazzes == null){
+            selectedClazzes = new ArrayList<>();
+        }
     }
 
 
@@ -52,6 +61,9 @@ public class ClazzListReturnSelectedRecyclerAdapter extends PagedListAdapter<Cla
     public void onBindViewHolder  (@NonNull ClazzViewHolder holder, int position) {
         ClazzWithNumStudents clazz = getItem(position);
         assert clazz != null;
+        ConstraintLayout cl = holder.itemView.findViewById(R.id.item_clazz_list_enroll_person_cl);
+        CheckBox theCheckbox = holder.itemView.findViewById(R.id.item_clazz_list_enroll_person_checkbox);
+
         String numStudentsText = clazz.getNumStudents() + " " + theFragment.getResources()
                 .getText(R.string.students_literal).toString();
         ((TextView)holder.itemView.findViewById(R.id.item_clazz_list_enroll_person_title))
@@ -59,19 +71,27 @@ public class ClazzListReturnSelectedRecyclerAdapter extends PagedListAdapter<Cla
         ((TextView)holder.itemView.findViewById(R.id.item_clazz_list_enroll_person_numstudents_text))
                 .setText(numStudentsText);
 
-        ((CheckBox)holder.itemView.findViewById(R.id.item_clazz_list_enroll_person_checkbox)).setText("");
+        theCheckbox.setText("");
 
-        CheckBox theCheckbox = holder.itemView.findViewById(R.id.item_clazz_list_enroll_person_checkbox);
-        theCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if(isChecked){
-                    thePresenter.addToClazzes(clazz);
-                }else{
-                    thePresenter.removeFromClazzes(clazz);
-                }
+        cl.setOnClickListener(view -> {
+            theCheckbox.setChecked(!theCheckbox.isChecked());
+            theCheckbox.callOnClick();
+        });
+
+
+        theCheckbox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if(isChecked){
+                thePresenter.addToClazzes(clazz);
+            }else{
+                thePresenter.removeFromClazzes(clazz);
             }
         });
+
+        if(selectedClazzes.contains(clazz.getClazzUid())){
+            theCheckbox.setChecked(true);
+        }else{
+            theCheckbox.setChecked(false);
+        }
 
     }
 

@@ -86,6 +86,24 @@ public abstract class ClazzLogDao implements SyncableDao<ClazzLog, ClazzLogDao> 
     public abstract void getNumberOfClassesOpenForDateLocationClazzes(long fromDate, long toDate,
             UmCallback<List<NumberOfDaysClazzesOpen>> resultList);
 
+    @UmQuery ("SELECT COUNT(Clazz.clazzName) as number, clazzLog.logDate as date from ClazzLog " +
+            " LEFT JOIN Clazz ON ClazzLog.clazzLogClazzUid = Clazz.clazzUid" +
+            "   WHERE ClazzLog.logDate > :fromDate and ClazzLog.logDate < :toDate " +
+            "       AND ClazzLog.clazzLogClazzUid in (:clazzes) " +
+            " GROUP BY ClazzLog.logDate")
+    public abstract void getNumberOfClassesOpenForDateLocationClazzes(long fromDate, long toDate,
+              List<Long> clazzes, UmCallback<List<NumberOfDaysClazzesOpen>> resultList);
+
+    public void getNumberOfClassesOpenForDateLocationClazzes(long fromDate, long toDate,
+         List<Long> clazzes, List<Long> locations,
+         UmCallback<List<NumberOfDaysClazzesOpen>> resultList){
+        if(clazzes.isEmpty()){
+            getNumberOfClassesOpenForDateLocationClazzes(fromDate,toDate,resultList);
+        }else{
+            getNumberOfClassesOpenForDateLocationClazzes(fromDate,toDate,clazzes, resultList);
+        }
+    }
+
     public void createClazzLogForDate(long currentClazzUid, long currentLogDate,
                                       UmCallback<Long> callback){
 

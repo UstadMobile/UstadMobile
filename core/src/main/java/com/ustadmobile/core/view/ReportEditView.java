@@ -12,8 +12,14 @@ public interface ReportEditView extends UstadView {
     String VIEW_NAME = "ReportEdit";
 
     String ARG_REPORT_NAME = "ReportName";
+    String ARG_REPORT_DESC = "ReportDesc";
     String ARG_REPORT_LINK = "ReportLink";
-    String ARG_LOCATIONS_SET = "Locations";
+    String ARG_LOCATIONS_SET = "LocationsSelected";
+    String ARG_CLASSES_SET = "ClassesSelected";
+
+    String ARG_SHOW_THERSHOLD = "ArgShowthreshold";
+    String ARG_SHOW_RADIO_GROUP = "ArgShowRadioGroup";
+    String ARG_SHOW_GENDER_DISAGGREGATE = "ArgShowGenderDisaggregate";
 
     String ARG_FROM_DATE = "fromDate";
     String ARG_TO_DATE = "toDate";
@@ -25,6 +31,10 @@ public interface ReportEditView extends UstadView {
     String ARG_THRESHOLD_LOW = "thesholdLow";
     String ARG_THRESHOLD_MID = "thresholdMid";
     String ARG_THRESHOLD_HIGH = "thresholdHigh";
+
+    int THRESHOLD_LOW_DEFAULT = 60;
+    int THRESHOLD_MED_DEFAULT = 70;
+    int THRESHOLD_HIGH_DEFAULT = 80;
 
 
     /**
@@ -90,4 +100,6 @@ public interface ReportEditView extends UstadView {
      * @param show  true is yes, false if no
      */
     void showShowStudentNumberPercentageView(boolean show);
+
+    void showGenderDisaggregate(boolean show);
 }

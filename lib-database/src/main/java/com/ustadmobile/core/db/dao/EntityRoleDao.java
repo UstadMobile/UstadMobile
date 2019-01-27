@@ -7,6 +7,8 @@ import com.ustadmobile.lib.database.annotation.UmRepository;
 import com.ustadmobile.lib.db.entities.EntityRole;
 import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
+import java.util.List;
+
 import static com.ustadmobile.core.db.dao.RoleDao.SELECT_ACCOUNT_IS_ADMIN;
 
 @UmDao(selectPermissionCondition = "(:accountPersonUid = :accountPersonUid)",
@@ -25,5 +27,11 @@ public abstract class EntityRoleDao implements SyncableDao<EntityRole, EntityRol
             " AND (Role.rolePermissions & :permission) > 0) AS hasPermission")
     public abstract void userHasTableLevelPermission(long accountPersonUid, int tableId, long permission,
                                               UmCallback<Boolean> callback);
+
+
+    @UmQuery("SELECT * FROM EntityRole WHERE erTableId = :tableId AND erEntityUid = :entityUid " +
+            "AND erGroupUid = :groupUid")
+    public abstract void findByEntitiyAndPersonGroup(int tableId, long entityUid, long groupUid,
+                                                     UmCallback<List<EntityRole>> resultList);
 
 }

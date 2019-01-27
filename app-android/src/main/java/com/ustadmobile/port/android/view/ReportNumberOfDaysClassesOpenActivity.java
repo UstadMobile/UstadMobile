@@ -1,9 +1,12 @@
 package com.ustadmobile.port.android.view;
 
 
+import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.content.FileProvider;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -24,7 +27,11 @@ import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.core.view.ReportNumberOfDaysClassesOpenView;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -47,6 +54,8 @@ public class ReportNumberOfDaysClassesOpenActivity extends UstadBaseActivity
     BarChart barChart;
     TableLayout tableLayout;
 
+    //Used for exporting
+    List<String[]> tableTextData;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -110,6 +119,7 @@ public class ReportNumberOfDaysClassesOpenActivity extends UstadBaseActivity
         PopupMenu popup = new PopupMenu(this, v);
         MenuInflater inflater = popup.getMenuInflater();
         inflater.inflate(R.menu.menu_export, popup.getMenu());
+        popup.setOnMenuItemClickListener(this::onMenuItemClick);
         popup.show();
     }
 
@@ -119,15 +129,20 @@ public class ReportNumberOfDaysClassesOpenActivity extends UstadBaseActivity
         if (i == R.id.menu_export_csv) {
             mPresenter.dataToCSV();
             return true;
-        } else if (i == R.id.menu_export_xls) {
-            mPresenter.dataToXLS();
-            return true;
-        } else if (i == R.id.menu_export_json) {
-            mPresenter.dataToJSON();
-            return true;
-        } else {
-            return false;
         }
+        return false;
+
+        //TODO: Sprint 5
+//        else if (i == R.id.menu_export_xls) {
+//            mPresenter.dataToXLS();
+//            return true;
+//        } else if (i == R.id.menu_export_json) {
+//            mPresenter.dataToJSON();
+//            return true;
+//        }
+//        else {
+//            return false;
+//        }
     }
 
     @Override
@@ -176,6 +191,54 @@ public class ReportNumberOfDaysClassesOpenActivity extends UstadBaseActivity
         });
     }
 
+    @Override
+    public void generateCSVReport() {
+        String csvReportFilePath = "";
+        //Create the file.
+
+        File dir = getFilesDir();
+        File output = new File(dir, "number_of_days_classes_open_report_" +
+                System.currentTimeMillis() + ".csv");
+        csvReportFilePath = output.getAbsolutePath();
+
+        try {
+            FileWriter fileWriter = new FileWriter(csvReportFilePath);
+            Iterator<String[]> tableTextdataIterator = tableTextData.iterator();
+
+            while(tableTextdataIterator.hasNext()){
+                boolean firstDone = false;
+                String[] lineArray = tableTextdataIterator.next();
+                for(int i=0;i<lineArray.length;i++){
+                    if(firstDone){
+                        fileWriter.append(",");
+                    }
+                    firstDone = true;
+                    fileWriter.append(lineArray[i]);
+                }
+                fileWriter.append("\n");
+            }
+            fileWriter.close();
+
+
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        String applicationId = getPackageName();
+        Uri sharedUri = FileProvider.getUriForFile(this,
+                applicationId+".fileprovider",
+                new File(csvReportFilePath));
+        Intent shareIntent = new Intent(Intent.ACTION_SEND);
+        shareIntent.setType("*/*");
+        shareIntent.putExtra(Intent.EXTRA_STREAM, sharedUri);
+        shareIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+        if(shareIntent.resolveActivity(getPackageManager()) != null) {
+            startActivity(shareIntent);
+        }
+    }
+
     /**
      * Converts dp to pixels (used in MPAndroid charts)
      *
@@ -192,6 +255,8 @@ public class ReportNumberOfDaysClassesOpenActivity extends UstadBaseActivity
 
         List<View> addThese = new ArrayList<>();
 
+        //Build a string array of the data
+        tableTextData = new ArrayList<>();
 
         //LAYOUT
         TableRow.LayoutParams rowParams = new TableRow.LayoutParams(
@@ -222,6 +287,13 @@ public class ReportNumberOfDaysClassesOpenActivity extends UstadBaseActivity
         //ADD HEADING
         addThese.add(headingRow);
 
+        //MAKE TABLE TEXT DATA:
+        String[] headingItems = new String[headingRow.getChildCount()];
+        for(int i = 0; i < headingRow.getChildCount(); i++){
+            headingItems[i] = ((TextView) headingRow.getChildAt(i)).getText().toString();
+        }
+        tableTextData.add(headingItems);
+
 
         List<Float> dates = new ArrayList<>();
         dates.addAll(dataTableMaps.keySet());
@@ -248,6 +320,13 @@ public class ReportNumberOfDaysClassesOpenActivity extends UstadBaseActivity
             everyDateRow.addView(valueView);
 
             addThese.add(everyDateRow);
+
+            //BUILD TABLE TEXT DATA
+            String[] rowItems = new String[everyDateRow.getChildCount()];
+            for(int i = 0; i < everyDateRow.getChildCount(); i++){
+                rowItems[i] = ((TextView)everyDateRow.getChildAt(i)).getText().toString();
+            }
+            tableTextData.add(rowItems);
         }
 
         return addThese;

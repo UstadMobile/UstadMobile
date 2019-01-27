@@ -23,7 +23,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="10dp"
         android:text="@string/node_title_list"
-        android:textColor="@color/primary"
+        android:textColor="@color/primary_dark"
         app:layout_constraintStart_toEndOf="@+id/expandable_list_item_with_image_image"
         app:layout_constraintTop_toTopOf="parent" />
 

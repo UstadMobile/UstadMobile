@@ -9,7 +9,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:elevation="4dp"
-        android:theme="@style/ThemeOverlay.AppCompat.ActionBar">
+        android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
+        app:layout_constraintTop_toTopOf="parent">
 
         <android.support.v7.widget.Toolbar
             android:id="@+id/activity_report_overall_attendance_toolbar"
@@ -21,41 +22,54 @@
     </android.support.design.widget.AppBarLayout>
 
 
-    <com.github.mikephil.charting.charts.LineChart
-        android:id="@+id/activity_report_overall_attendance_line_chart"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/activity_report_overall_attendance_appbar" />
-
-
     <ScrollView
-        android:layout_width="wrap_content"
-        android:layout_height="220dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginBottom="8dp"
-        app:layout_constraintBottom_toTopOf="@+id/activity_report_overall_attendance_fab"
+        android:id="@+id/activity_report_overall_attendance_main_sv"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginEnd="4dp"
+        app:layout_constraintBottom_toTopOf="@id/activity_report_overall_attendance_fab"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/activity_report_overall_attendance_appbar">
+
+        <LinearLayout
+            android:id="@+id/activity_report_overall_attendance_report_cl"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="8dp"
+            android:gravity="center"
+            android:orientation="vertical">
 
 
-        <TableLayout
-            android:id="@+id/activity_report_overall_attendance_table"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="8dp"
-            android:isScrollContainer="true"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/activity_report_overall_attendance_line_chart">
+            <com.github.mikephil.charting.charts.LineChart
+                android:id="@+id/activity_report_overall_attendance_line_chart"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp" />
 
-        </TableLayout>
 
+            <!--<ScrollView-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="match_parent">-->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TableLayout
+                    android:id="@+id/activity_report_overall_attendance_table"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="32dp"
+                    android:layout_marginEnd="8dp"
+                    android:isScrollContainer="true" />
+            </LinearLayout>
+            <!--</ScrollView>-->
+
+        </LinearLayout>
     </ScrollView>
+
 
     <ru.dimorinny.floatingtextbutton.FloatingTextButton
         android:id="@+id/activity_report_overall_attendance_fab"

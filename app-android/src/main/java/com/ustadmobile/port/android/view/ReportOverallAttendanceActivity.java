@@ -55,6 +55,9 @@ public class ReportOverallAttendanceActivity extends UstadBaseActivity
     LineChart lineChart;
     TableLayout tableLayout;
 
+    /**
+     * Used to construct the export report (has line by line information)
+     */
     List<String[]> tableTextData;
 
     @Override
@@ -100,13 +103,16 @@ public class ReportOverallAttendanceActivity extends UstadBaseActivity
         if (i == R.id.menu_export_csv) {
             mPresenter.dataToCSV();
             return true;
-        } else if (i == R.id.menu_export_xls) {
-            mPresenter.dataToXLS();
-            return true;
-        } else if (i == R.id.menu_export_json) {
-            mPresenter.dataToJSON();
-            return true;
-        } else {
+        }
+        //TODO: Sprint 5
+//        else if (i == R.id.menu_export_xls) {
+//            mPresenter.dataToXLS();
+//            return true;
+//        } else if (i == R.id.menu_export_json) {
+//            mPresenter.dataToJSON();
+//            return true;
+//        }
+        else {
             return false;
         }
     }
@@ -192,7 +198,6 @@ public class ReportOverallAttendanceActivity extends UstadBaseActivity
                                                   LinkedHashMap<String,
                                                           LinkedHashMap<String,
                                                                   Float>> dataTableMaps ){
-
         //Build a string array of the data
         tableTextData = new ArrayList<>();
 
@@ -224,7 +229,6 @@ public class ReportOverallAttendanceActivity extends UstadBaseActivity
         headingRow.addView(dateHeading);
         headingRow.addView(averageHeading);
 
-
         if(mPresenter.isGenderDisaggregate()){
 
             TextView maleHeading = new TextView(getApplicationContext());
@@ -241,7 +245,12 @@ public class ReportOverallAttendanceActivity extends UstadBaseActivity
             headingRow.addView(femaleHeading);
         }
 
-        addThese.add(headingRow);
+        LinkedHashMap<String, Float> tableDataAverage;
+        tableDataAverage = dataTableMaps.get(ATTENDANCE_LINE_AVERAGE_LABEL_DESC);
+
+        if(tableDataAverage.size() > 0) {   //ie: if there is any data
+            addThese.add(headingRow);
+        }
 
         //MAKE TABLE TEXT DATA:
         String[] headingItems = new String[headingRow.getChildCount()];
@@ -252,12 +261,10 @@ public class ReportOverallAttendanceActivity extends UstadBaseActivity
 
 
         //DATA ROWS
-
-        LinkedHashMap<String, Float> tableDataAverage;
         LinkedHashMap<String, Float> tableDataMale = new LinkedHashMap<>();
         LinkedHashMap<String, Float> tableDataFemale = new LinkedHashMap<>();
 
-        tableDataAverage = dataTableMaps.get(ATTENDANCE_LINE_AVERAGE_LABEL_DESC);
+
         if(mPresenter.isGenderDisaggregate()){
             tableDataMale = dataTableMaps.get(ATTENDANCE_LINE_MALE_LABEL_DESC);
             tableDataFemale = dataTableMaps.get(ATTENDANCE_LINE_FEMALE_LABEL_DESC);

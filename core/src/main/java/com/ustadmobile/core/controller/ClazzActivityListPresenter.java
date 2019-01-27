@@ -7,6 +7,7 @@ import com.ustadmobile.core.db.dao.ClazzActivityDao;
 import com.ustadmobile.core.db.dao.ClazzDao;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
+import com.ustadmobile.core.impl.UmCallbackWithDefaultValue;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.core.view.ClazzActivityEditView;
@@ -143,7 +144,8 @@ public class ClazzActivityListPresenter
     public void checkPermissions(){
         ClazzDao clazzDao = repository.getClazzDao();
         clazzDao.personHasPermission(loggedInPersonUid, currentClazzUid,
-                Role.PERMISSION_CLAZZ_LOG_ACTIVITY_INSERT, new UmCallback<Boolean>() {
+                Role.PERMISSION_CLAZZ_LOG_ACTIVITY_INSERT,
+                new UmCallbackWithDefaultValue<>(false,new UmCallback<Boolean>() {
             @Override
             public void onSuccess(Boolean result) {
                 setCanEdit(result);
@@ -154,7 +156,7 @@ public class ClazzActivityListPresenter
             public void onFailure(Throwable exception) {
 
             }
-        });
+        }));
     }
 
     private void setProviderOnView(){

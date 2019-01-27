@@ -12,6 +12,7 @@ import com.ustadmobile.lib.database.annotation.UmRestAccessible;
 import com.ustadmobile.lib.database.annotation.UmUpdate;
 import com.ustadmobile.lib.db.entities.AccessToken;
 import com.ustadmobile.lib.db.entities.Clazz;
+import com.ustadmobile.lib.db.entities.EntityRole;
 import com.ustadmobile.lib.db.entities.Location;
 import com.ustadmobile.lib.db.entities.Person;
 import com.ustadmobile.lib.db.entities.PersonAuth;
@@ -90,7 +91,7 @@ public abstract class PersonDao implements SyncableDao<Person, PersonDao> {
 
     protected static final String ENTITY_LEVEL_PERMISSION_CONDITION1 = " Person.personUid = :accountPersonUid OR" +
 
-            "(SELECT admin FROM Person WHERE personUid = :accountPersonUid) = 1 OR " +
+            "(SELECT admin FROM Person WHERE personUid = :accountPersonUid) OR " +
             "EXISTS(SELECT PersonGroupMember.groupMemberPersonUid FROM PersonGroupMember " +
             "JOIN EntityRole ON EntityRole.erGroupUid = PersonGroupMember.groupMemberGroupUid " +
             "JOIN Role ON EntityRole.erRoleUid = Role.roleUid " +
@@ -227,6 +228,17 @@ public abstract class PersonDao implements SyncableDao<Person, PersonDao> {
             return "Already created";
         }
     }
+
+    @UmQuery("SELECT * FROM Clazz")
+    public abstract List<Clazz> findAllClazzes();
+
+    @UmQuery("SELECT * FROM Role WHERE roleName=:roleName")
+    public abstract Role findRoleByName(String roleName);
+
+    @UmInsert
+    public abstract long insertEntityRole(EntityRole entityRole);
+
+
 
     @UmRestAccessible
     protected void setUserPassword(String adminUsername, String adminPassword, String userUsername,

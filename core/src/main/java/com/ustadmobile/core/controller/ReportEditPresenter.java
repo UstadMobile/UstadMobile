@@ -9,16 +9,22 @@ import com.ustadmobile.core.view.SelectClazzesDialogView;
 import com.ustadmobile.core.view.SelectMultipleTreeDialogView;
 import com.ustadmobile.core.view.SelectTwoDatesDialogView;
 
-import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.LinkedHashMap;
 import java.util.List;
 
+import static com.ustadmobile.core.view.ReportEditView.ARG_CLASSES_SET;
+import static com.ustadmobile.core.view.ReportEditView.ARG_CLAZZ_LIST;
 import static com.ustadmobile.core.view.ReportEditView.ARG_FROM_DATE;
 import static com.ustadmobile.core.view.ReportEditView.ARG_GENDER_DISAGGREGATE;
 import static com.ustadmobile.core.view.ReportEditView.ARG_LOCATIONS_SET;
+import static com.ustadmobile.core.view.ReportEditView.ARG_LOCATION_LIST;
+import static com.ustadmobile.core.view.ReportEditView.ARG_REPORT_DESC;
 import static com.ustadmobile.core.view.ReportEditView.ARG_REPORT_LINK;
 import static com.ustadmobile.core.view.ReportEditView.ARG_REPORT_NAME;
+import static com.ustadmobile.core.view.ReportEditView.ARG_SHOW_GENDER_DISAGGREGATE;
+import static com.ustadmobile.core.view.ReportEditView.ARG_SHOW_RADIO_GROUP;
+import static com.ustadmobile.core.view.ReportEditView.ARG_SHOW_THERSHOLD;
 import static com.ustadmobile.core.view.ReportEditView.ARG_STUDENT_IDENTIFIER_NUMBER;
 import static com.ustadmobile.core.view.ReportEditView.ARG_STUDENT_IDENTIFIER_PERCENTAGE;
 import static com.ustadmobile.core.view.ReportEditView.ARG_THRESHOLD_HIGH;
@@ -33,12 +39,11 @@ import static com.ustadmobile.core.view.ReportEditView.ARG_TO_DATE;
 public class ReportEditPresenter
         extends UstadBaseController<ReportEditView> {
 
-    //Any arguments stored as variables here
-    //eg: private long clazzUid = -1;
     private String reportName = "";
+    private String reportDesc = "";
     private String reportLink;
     private LinkedHashMap<Integer, String> timePeriodOptions;
-    private boolean genderDisaggregate = false;
+    private boolean genderDisaggregated = false;
     private boolean studentNumbers = false;
     private boolean studentPercentages = false;
     private List<Long> selectedClasses;
@@ -51,6 +56,7 @@ public class ReportEditPresenter
     private static final int TIME_PERIOD_LAST_THREE_MONTHS = 4;
     private static final int TIME_PERIOD_CUSTOM = 5;
 
+    private boolean showThreshold, showRadioGroup, showGenderDisaggregated;
     private long fromTime, toTime;
 
     public ReportEditPresenter(Object context, Hashtable arguments, ReportEditView view) {
@@ -60,9 +66,24 @@ public class ReportEditPresenter
             reportName = (String) arguments.get(ARG_REPORT_NAME);
         }
 
+        if(arguments.containsKey(ARG_REPORT_DESC)){
+            reportDesc = (String) arguments.get(ARG_REPORT_DESC);
+        }
+
         if(arguments.containsKey(ARG_REPORT_LINK)){
             reportLink = (String) arguments.get(ARG_REPORT_LINK);
         }
+
+        if (arguments.containsKey(ARG_SHOW_THERSHOLD)) {
+            showThreshold = (boolean) arguments.get(ARG_SHOW_THERSHOLD);
+        }
+        if(arguments.containsKey(ARG_SHOW_RADIO_GROUP)){
+            showRadioGroup = (boolean) arguments.get(ARG_SHOW_RADIO_GROUP);
+        }
+        if(arguments.containsKey(ARG_SHOW_GENDER_DISAGGREGATE)){
+            showGenderDisaggregated = (boolean) arguments.get(ARG_SHOW_GENDER_DISAGGREGATE);
+        }
+
     }
 
 
@@ -73,7 +94,13 @@ public class ReportEditPresenter
         //Update report name on top
         if(reportName.length()>0) {
             view.updateReportName(reportName);
+            if(reportDesc.length() > 0){
+                view.updateReportName(reportDesc);
+            }
         }
+        view.showAttendanceThresholdView(showThreshold);
+        view.showShowStudentNumberPercentageView(showRadioGroup);
+        view.showGenderDisaggregate(showGenderDisaggregated);
 
         //Update time period options.
         updateTimePeriod();
@@ -100,7 +127,6 @@ public class ReportEditPresenter
         view.populateTimePeriod(timePeriodOptions);
 
     }
-
 
     /**
      * Hanlde the time period drop down selector in the drop-down/list/spinner. This should set the
@@ -142,37 +168,6 @@ public class ReportEditPresenter
         impl.go(SelectTwoDatesDialogView.VIEW_NAME, args, context);
     }
 
-    /**
-     * Hanlde the classes selected . TODO
-     * @param selected  position of whats selected.
-     */
-    public void handleClassesSelected(int selected){
-        //TODO:
-    }
-
-    public List<Long> getSelectedClasses() {
-        return selectedClasses;
-    }
-
-    public void setSelectedClasses(List<Long> selectedClasses) {
-        this.selectedClasses = selectedClasses;
-    }
-
-    public List<Long> getSelectedLocations() {
-        return selectedLocations;
-    }
-
-    public void setSelectedLocations(List<Long> selectedLocations) {
-        this.selectedLocations = selectedLocations;
-    }
-
-    public ReportAttendanceGroupedByThresholdsPresenter.ThresholdValues getThresholdValues() {
-        return thresholdValues;
-    }
-
-    public void setThresholdValues(ReportAttendanceGroupedByThresholdsPresenter.ThresholdValues thresholdValues) {
-        this.thresholdValues = thresholdValues;
-    }
 
     /**
      * Goes and opens up the Location dialog
@@ -181,6 +176,12 @@ public class ReportEditPresenter
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         Hashtable args = new Hashtable();
 
+        if(selectedLocations != null && !selectedLocations.isEmpty()){
+            Long[] selectedLocationsArray =
+                    ReportOverallAttendancePresenter.convertLongList(selectedLocations);
+            args.put(ARG_LOCATIONS_SET, selectedLocationsArray);
+        }
+
         impl.go(SelectMultipleTreeDialogView.VIEW_NAME, args, context);
     }
 
@@ -188,15 +189,29 @@ public class ReportEditPresenter
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         Hashtable args = new Hashtable();
 
-        //TODO: put locations set in the args to show only the classes in that location
-        args.put(ARG_LOCATIONS_SET, new ArrayList<>());
 
+        if(selectedLocations != null && !selectedLocations.isEmpty()){
+            Long[] selectedLocationsArray =
+                    ReportOverallAttendancePresenter.convertLongList(selectedLocations);
+            args.put(ARG_LOCATIONS_SET, selectedLocationsArray);
+        }
+
+        if(selectedClasses != null && !selectedClasses.isEmpty()) {
+            Long[] selectedClassesArray =
+                    ReportOverallAttendancePresenter.convertLongList(selectedClasses);
+            args.put(ARG_CLASSES_SET, selectedClassesArray);
+        }
         impl.go(SelectClazzesDialogView.VIEW_NAME, args, context);
     }
 
     public void goToSelectAttendanceThresholdsDialog(){
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         Hashtable args = new Hashtable();
+        if(thresholdValues != null){
+            args.put(ARG_THRESHOLD_LOW, thresholdValues.low);
+            args.put(ARG_THRESHOLD_MID, thresholdValues.med);
+            args.put(ARG_THRESHOLD_HIGH, thresholdValues.high);
+        }
         impl.go(SelectAttendanceThresholdsDialogView.VIEW_NAME, args, context);
     }
 
@@ -215,18 +230,25 @@ public class ReportEditPresenter
         args.put(ARG_FROM_DATE, fromTime);
         args.put(ARG_TO_DATE, toTime);
 
-        //TODO: Add location to argument
+        if(selectedClasses != null && !selectedClasses.isEmpty()){
+            Long[] classesArray = new Long[selectedClasses.size()];
+            selectedClasses.toArray(classesArray);
+            args.put(ARG_CLAZZ_LIST, classesArray);
+        }
 
-        //TODO: Add Clazzes
+        if(selectedLocations != null && !selectedLocations.isEmpty()){
+            Long[] locationsArray = new Long[selectedLocations.size()];
+            selectedLocations.toArray(locationsArray);
+            args.put(ARG_LOCATION_LIST, locationsArray);
+        }
 
-        //TODO: Add Thresholds
         if(thresholdValues != null) {
             args.put(ARG_THRESHOLD_LOW, thresholdValues.low);
             args.put(ARG_THRESHOLD_MID, thresholdValues.med);
             args.put(ARG_THRESHOLD_HIGH, thresholdValues.high);
         }
 
-        args.put(ARG_GENDER_DISAGGREGATE, genderDisaggregate);
+        args.put(ARG_GENDER_DISAGGREGATE, genderDisaggregated);
 
         args.put(ARG_STUDENT_IDENTIFIER_NUMBER, studentNumbers);
         args.put(ARG_STUDENT_IDENTIFIER_PERCENTAGE, studentPercentages);
@@ -237,16 +259,8 @@ public class ReportEditPresenter
 
     }
 
-    public boolean isStudentNumbers() {
-        return studentNumbers;
-    }
-
     public void setStudentNumbers(boolean studentNumbers) {
         this.studentNumbers = studentNumbers;
-    }
-
-    public boolean isStudentPercentages() {
-        return studentPercentages;
     }
 
     public void setStudentPercentages(boolean studentPercentages) {
@@ -291,18 +305,42 @@ public class ReportEditPresenter
      *
      * @return  true if set (ticked/checked), false if not.
      */
-    public boolean isGenderDisaggregate() {
-        return genderDisaggregate;
+    public boolean isGenderDisaggregated() {
+        return genderDisaggregated;
     }
 
     /**
      * Sets gender disaggregate. Also updates the view.
      *
-     * @param genderDisaggregate    true if to set as ticked/checked. false if not.
+     * @param genderDisaggregated    true if to set as ticked/checked. false if not.
      */
-    public void setGenderDisaggregate(boolean genderDisaggregate) {
-        this.genderDisaggregate = genderDisaggregate;
-        view.updateGenderDisaggregationSet(genderDisaggregate);
+    public void setGenderDisaggregated(boolean genderDisaggregated) {
+        this.genderDisaggregated = genderDisaggregated;
+        view.updateGenderDisaggregationSet(genderDisaggregated);
+    }
+
+    public List<Long> getSelectedClasses() {
+        return selectedClasses;
+    }
+
+    public void setSelectedClasses(List<Long> selectedClasses) {
+        this.selectedClasses = selectedClasses;
+    }
+
+    public List<Long> getSelectedLocations() {
+        return selectedLocations;
+    }
+
+    public void setSelectedLocations(List<Long> selectedLocations) {
+        this.selectedLocations = selectedLocations;
+    }
+
+    public ReportAttendanceGroupedByThresholdsPresenter.ThresholdValues getThresholdValues() {
+        return thresholdValues;
+    }
+
+    public void setThresholdValues(ReportAttendanceGroupedByThresholdsPresenter.ThresholdValues thresholdValues) {
+        this.thresholdValues = thresholdValues;
     }
 
     @Override

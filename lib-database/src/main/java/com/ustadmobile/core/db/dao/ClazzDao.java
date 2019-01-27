@@ -37,7 +37,7 @@ insertPermissionCondition = TABLE_LEVEL_PERMISSION_CONDITION1 + Role.PERMISSION_
 public abstract class ClazzDao implements SyncableDao<Clazz, ClazzDao> {
 
     protected static final String ENTITY_LEVEL_PERMISSION_CONDITION1 =
-            " (SELECT admin FROM Person WHERE personUid = :accountPersonUid) = 1 OR " +
+            " (SELECT admin FROM Person WHERE personUid = :accountPersonUid) OR " +
             "EXISTS(SELECT PersonGroupMember.groupMemberPersonUid FROM PersonGroupMember " +
             "JOIN EntityRole ON EntityRole.erGroupUid = PersonGroupMember.groupMemberGroupUid " +
             "JOIN Role ON EntityRole.erRoleUid = Role.roleUid " +
@@ -114,6 +114,52 @@ public abstract class ClazzDao implements SyncableDao<Clazz, ClazzDao> {
             " FROM Clazz ")
     public abstract UmProvider<ClazzWithNumStudents> findAllClazzes();
 
+    @UmQuery(CLAZZ_WHERE +
+            " FROM Clazz WHERE clazzLocationUid in (:locations)")
+    public abstract UmProvider<ClazzWithNumStudents> findAllClazzesInLocationList(List<Long> locations);
+
+    @UmQuery(CLAZZ_WHERE +
+            " FROM Clazz WHERE clazzLocationUid in (:locations)")
+    public abstract void findAllClazzesInLocationListAsync(List<Long> locations,
+                                                   UmCallback<List<ClazzWithNumStudents>> resultList);
+
+
+    @UmQuery("SELECT * FROM Clazz WHERE clazzUid in (:clazzUidList) AND clazzActive = 1")
+    public abstract void findClazzesByUidListAsync(List<Long> clazzUidList, UmCallback<List<Clazz>> resultList);
+
+    @UmQuery("SELECT * FROM Clazz WHERE clazzActive = 1")
+    public abstract void findAllActiveClazzesAsync(UmCallback<List<Clazz>> resultList);
+
+    @UmQuery("SELECT * FROM Clazz WHERE clazzLocationUid IN (:allLocations) " +
+            " OR clazzUid in (:allClasses) AND clazzActive = 1")
+    public abstract void findAllClazzesInUidAndLocationAsync(List<Long> allLocations,
+                                                         List<Long> allClasses,
+                                                         UmCallback<List<Clazz>> resultList);
+
+    @UmQuery("SELECT * FROM Clazz WHERE  clazzUid in (:allClasses) AND clazzActive = 1")
+    public abstract void findAllClazzesInUidAsync(List<Long> allClasses,
+                                                             UmCallback<List<Clazz>> resultList);
+
+    @UmQuery("SELECT * FROM Clazz WHERE clazzLocationUid IN (:allLocations) " +
+            " AND clazzActive = 1")
+    public abstract void findAllClazzesInLocationAsync(List<Long> allLocations,
+                                                             UmCallback<List<Clazz>> resultList);
+
+    public void findAllClazzesByLocationAndUidList(List<Long> allLocations,
+                                                   List<Long> allClazzes,
+                                                   UmCallback<List<Clazz>> resultList){
+        if(allLocations.isEmpty() && allClazzes.isEmpty()){
+            findAllActiveClazzesAsync(resultList);
+        }else{
+            if(allLocations.isEmpty() && !allClazzes.isEmpty()){
+                findAllClazzesInUidAsync(allClazzes, resultList);
+            }else if(!allLocations.isEmpty() && allClazzes.isEmpty()){
+                findAllClazzesInLocationAsync(allLocations, resultList);
+            }else{
+                findAllClazzesInUidAndLocationAsync(allLocations, allClazzes, resultList);
+            }
+        }
+    }
 
     @UmQuery(CLAZZ_WHERE +
             " FROM Clazz WHERE Clazz.clazzActive = 1 ")
@@ -209,5 +255,15 @@ public abstract class ClazzDao implements SyncableDao<Clazz, ClazzDao> {
     @UmSyncCheckIncomingCanUpdate
     public abstract List<UmSyncExistingEntity> syncFindExistingEntities(List<Long> primaryKeys,
                                                                         long accountPersonUid);
+
+    @UmQuery("SELECT COUNT(*) FROM Clazz " +
+            "WHERE " +
+            "clazzLocalChangeSeqNum > (SELECT syncedToLocalChangeSeqNum FROM SyncStatus WHERE tableId = 6) " +
+            "AND clazzLastChangedBy = (SELECT deviceBits FROM SyncDeviceBits LIMIT 1) " +
+            "AND ((" + ENTITY_LEVEL_PERMISSION_CONDITION1 + Role.PERMISSION_CLAZZ_UPDATE + //can update it
+                ENTITY_LEVEL_PERMISSION_CONDITION2 + ") " +
+            " OR (" + TABLE_LEVEL_PERMISSION_CONDITION1 + Role.PERMISSION_CLAZZ_INSERT + //can insert on table
+                TABLE_LEVEL_PERMISSION_CONDITION2 + "))")
+    public abstract int countPendingLocalChanges(long accountPersonUid);
 
 }

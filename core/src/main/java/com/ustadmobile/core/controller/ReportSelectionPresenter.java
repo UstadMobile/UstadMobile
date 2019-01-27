@@ -14,9 +14,6 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 public class ReportSelectionPresenter
         extends UstadBaseController<ReportSelectionView> {
 
-    //Any arguments stored as variables here
-    //eg: private long clazzUid = -1;
-
 
     public ReportSelectionPresenter(Object context, Hashtable arguments, ReportSelectionView view) {
         super(context, arguments, view);
@@ -26,36 +23,18 @@ public class ReportSelectionPresenter
     public void onCreate(Hashtable savedState) {
         super.onCreate(savedState);
 
-
     }
 
-    public void handleClickPrimaryActionButton(long selectedObjectUid) {
-
-    }
-
-    public void goToOverallAttendanceReport(){
-
-    }
-
-    public void goToAttendanceGroupedByThresholdReport(){
-
-    }
-
-    public void goToAtRiskStudentsReport(){
-
-    }
-
-    public void goToNumberOfDaysClassesOpenReport(){
-
-    }
-
-
-    public void goToReport(String reportName, String reportLink){
+    public void goToReport(String reportName, String reportDesc, String reportLink, boolean showThreshold,
+                           boolean showRadioGroup, boolean showGenderDisaggregate){
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         Hashtable args = new Hashtable();
         args.put(ReportEditView.ARG_REPORT_NAME, reportName);
-
+        args.put(ReportEditView.ARG_REPORT_DESC, reportDesc);
         args.put(ReportEditView.ARG_REPORT_LINK, reportLink);
+        args.put(ReportEditView.ARG_SHOW_THERSHOLD, showThreshold);
+        args.put(ReportEditView.ARG_SHOW_RADIO_GROUP, showRadioGroup);
+        args.put(ReportEditView.ARG_SHOW_GENDER_DISAGGREGATE, showGenderDisaggregate);
         impl.go(ReportEditView.VIEW_NAME, args, context);
     }
 
