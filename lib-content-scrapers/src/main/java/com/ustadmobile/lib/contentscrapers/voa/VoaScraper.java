@@ -38,6 +38,7 @@ import javax.xml.transform.TransformerException;
 
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.JQUERY_JS;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.MATERIAL_CSS;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.TIME_OUT_SELENIUM;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.ZIP_EXT;
 
@@ -84,7 +85,7 @@ public class VoaScraper {
         ChromeDriver driver = ContentScraperUtil.setupChrome(true);
 
         driver.get(scrapUrl.toString());
-        WebDriverWait waitDriver = new WebDriverWait(driver, 10000);
+        WebDriverWait waitDriver = new WebDriverWait(driver, TIME_OUT_SELENIUM);
         ContentScraperUtil.waitForJSandJQueryToLoad(waitDriver);
 
         String lessonId = FilenameUtils.getBaseName(scrapUrl.getPath());

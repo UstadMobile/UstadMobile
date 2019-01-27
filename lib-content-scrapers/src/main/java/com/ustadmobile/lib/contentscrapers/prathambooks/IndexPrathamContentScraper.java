@@ -34,6 +34,7 @@ import java.net.URLConnection;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.EMPTY_STRING;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.EPUB_EXT;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.ROOT;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.TIME_OUT_SELENIUM;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.USTAD_MOBILE;
 import static com.ustadmobile.lib.db.entities.ContentEntry.LICENSE_TYPE_CC_BY;
 
@@ -215,7 +216,7 @@ public class IndexPrathamContentScraper {
 
         String cookie = "";
         driver.get(signIn);
-        WebDriverWait waitDriver = new WebDriverWait(driver, 10000);
+        WebDriverWait waitDriver = new WebDriverWait(driver, TIME_OUT_SELENIUM);
         ContentScraperUtil.waitForJSandJQueryToLoad(waitDriver);
 
         driver.findElement(By.id("user_email")).sendKeys(GMAIL);

@@ -1,17 +1,28 @@
 package com.ustadmobile.lib.contentscrapers;
 
+import java.util.List;
 import java.util.Map;
 
 public class LogIndex {
 
-    public String url;
+    public String title;
 
-    public String mimeType;
+    public List<IndexEntry> entries;
 
-    public String path;
+    public static class IndexEntry {
 
-    public Map<String, String> headers;
+        public String url;
 
-    public Map<String, String> requestHeaders;
+        public String mimeType;
+
+        public String path;
+
+        public Map<String, String> headers;
+
+        public Map<String, String> requestHeaders;
+
+    }
+
+    public Map<String, String> links;
 
 }

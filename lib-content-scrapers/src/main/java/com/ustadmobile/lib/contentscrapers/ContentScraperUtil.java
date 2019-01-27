@@ -1,5 +1,6 @@
 package com.ustadmobile.lib.contentscrapers;
 
+import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.neovisionaries.i18n.CountryCode;
@@ -18,6 +19,7 @@ import com.ustadmobile.core.db.dao.LanguageDao;
 import com.ustadmobile.core.db.dao.LanguageVariantDao;
 import com.ustadmobile.core.db.dao.ScrapeQueueItemDao;
 import com.ustadmobile.lib.contentscrapers.buildconfig.ScraperBuildConfig;
+import com.ustadmobile.lib.contentscrapers.khanacademy.ItemData;
 import com.ustadmobile.lib.db.entities.ContentCategory;
 import com.ustadmobile.lib.db.entities.ContentCategorySchema;
 import com.ustadmobile.lib.db.entities.ContentEntry;
@@ -34,6 +36,7 @@ import com.ustadmobile.lib.db.entities.ScrapeQueueItem;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -43,6 +46,7 @@ import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.logging.LogEntry;
 import org.openqa.selenium.logging.LogType;
 import org.openqa.selenium.logging.LoggingPreferences;
 import org.openqa.selenium.remote.CapabilityType;
@@ -70,6 +74,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -89,7 +94,10 @@ import javax.xml.transform.stream.StreamResult;
 
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.EMPTY_STRING;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.GMAIL;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_JPG;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.PASS;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.SVG_EXT;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.TIME_OUT_SELENIUM;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.ZIP_EXT;
 
@@ -1002,7 +1010,7 @@ public class ContentScraperUtil {
      * @return
      * @throws IOException
      */
-    public static LogIndex createIndexWithResourceFiles(String url, File directory, String mimeType, InputStream filePath, String fileName) throws IOException {
+    public static LogIndex.IndexEntry createIndexWithResourceFiles(String url, File directory, String mimeType, InputStream filePath, String fileName) throws IOException {
 
         URL imageUrl = new URL(url);
         File imageFolder = ContentScraperUtil.createDirectoryFromUrl(directory, imageUrl);
@@ -1066,8 +1074,8 @@ public class ContentScraperUtil {
      * @param log          log response of index
      * @return
      */
-    public static LogIndex createIndexFromLog(String urlString, String mimeType, File urlDirectory, File file, LogResponse log) {
-        LogIndex logIndex = new LogIndex();
+    public static LogIndex.IndexEntry createIndexFromLog(String urlString, String mimeType, File urlDirectory, File file, LogResponse log) {
+        LogIndex.IndexEntry logIndex = new LogIndex.IndexEntry();
         logIndex.url = urlString;
         logIndex.mimeType = mimeType;
         logIndex.path = urlDirectory.getName() + "/" + file.getName();
@@ -1132,7 +1140,7 @@ public class ContentScraperUtil {
         ChromeDriver driver = ContentScraperUtil.setupLogIndexChromeDriver();
 
         driver.get("https://www.khanacademy.org/login");
-        WebDriverWait waitDriver = new WebDriverWait(driver, 10000);
+        WebDriverWait waitDriver = new WebDriverWait(driver, TIME_OUT_SELENIUM);
         ContentScraperUtil.waitForJSandJQueryToLoad(waitDriver);
         waitDriver.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("div#login-signup-root")));
 
@@ -1154,4 +1162,46 @@ public class ContentScraperUtil {
         return driver;
     }
 
+    public static void downloadImagesFromJsonContent(Map<String, ItemData.Content.Image> images, File destDir, String scrapeUrl, List<LogIndex.IndexEntry> indexList) {
+        for (String image : images.keySet()) {
+
+            try {
+                image = image.replaceAll(" ", "");
+                String imageUrlString = image;
+                if (image.contains("+graphie")) {
+                    imageUrlString = "https://cdn.kastatic.org/ka-perseus-graphie/" + image.substring(image.lastIndexOf("/") + 1) + SVG_EXT;
+                }
+                URL imageUrl = new URL(imageUrlString);
+                File imageFile = ContentScraperUtil.createDirectoryFromUrl(destDir, imageUrl);
+
+                File imageContent = new File(imageFile, FilenameUtils.getName(imageUrl.getPath()));
+                FileUtils.copyURLToFile(imageUrl, imageContent);
+
+                LogIndex.IndexEntry logIndex = ContentScraperUtil.createIndexFromLog(image, MIMETYPE_JPG,
+                        imageFile, imageContent, null);
+                indexList.add(logIndex);
+            } catch (Exception e) {
+                UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
+                UMLogUtil.logError("Error downloading an image for index log" + image + " with url " + scrapeUrl);
+            }
+
+        }
+
+    }
+
+    public static List<LogEntry> waitForNewFiles(ChromeDriver driver) {
+        List<LogEntry> logs = Lists.newArrayList(driver.manage().logs().get(LogType.PERFORMANCE).getAll());
+        boolean hasMore;
+        do {
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException ignored) {
+            }
+            List<LogEntry> newLogs =  Lists.newArrayList(driver.manage().logs().get(LogType.PERFORMANCE).getAll());
+            hasMore = newLogs.size() > 0;
+            UMLogUtil.logTrace("size of new logs from driver is" + newLogs.size());
+            logs.addAll(newLogs);
+        } while (hasMore);
+        return logs;
+    }
 }

@@ -90,21 +90,23 @@ public class WebChunkEspressoTest {
         launchActivityIntent.putExtras(b);
         mActivityRule.launchActivity(launchActivityIntent);
 
+
+
         // the webview looks for an element "questionController" which is the start button of plix.
         // This is only available once plix has fully loaded and displayed to the use
     }
 
 
     @Test
-    public void givenServerOffline_whenNewKhanExerciseZippedIsOpened_WebviewLoads() throws IOException {
+    public void givenServerOffline_whenNewKhanExerciseZippedIsOpened_WebviewLoads() throws IOException, InterruptedException {
         Intent launchActivityIntent = new Intent();
 
         UmAndroidTestUtil.setAirplaneModeEnabled(true);
         Bundle b = new Bundle();
-        String testScrapedPlixPath = "/com/ustadmobile/app/android/counting-objects.zip";
+        String testScrapedPlixPath = "/com/ustadmobile/app/android/test-maths-plots.zip";
         InputStream inputStream = getClass().getResourceAsStream(testScrapedPlixPath);
         File path = Environment.getExternalStorageDirectory();
-        File targetFile = new File(path, "counting-objects.zip");
+        File targetFile = new File(path, "test-maths-plots.zip");
         OutputStream outStream = new FileOutputStream(targetFile);
         byte[] buffer = new byte[1024];
         int read;

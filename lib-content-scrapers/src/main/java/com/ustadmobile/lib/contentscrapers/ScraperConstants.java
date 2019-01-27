@@ -42,6 +42,9 @@ public class ScraperConstants {
     public static final String COMPLETE_KHAN_LINK = "/com/ustadmobile/lib/contentscrapers/khan/star-complete.svg";
     public static final String COMPLETE_FILE = "star-complete.svg";
 
+    public static final String KHAN_CSS_LINK = "/com/ustadmobile/lib/contentscrapers/khan/khanscraper.css";
+    public static final String KHAN_CSS_FILE = "khanscraper.css";
+
     public static final String TRY_AGAIN_KHAN_LINK = "/com/ustadmobile/lib/contentscrapers/khan/exercise-try-again.svg";
     public static final String TRY_AGAIN_FILE = "exercise-try-again.svg";
 
@@ -112,6 +115,9 @@ public class ScraperConstants {
     public static final String ATTEMPT_JSON_LINK = "/com/ustadmobile/lib/contentscrapers/khan/attempt.json";
     public static final String ATTEMPT_JSON_FILE = "/attempt.json";
 
+    public static final String INTERNAL_JSON_LINK = "/com/ustadmobile/lib/contentscrapers/khan/internal-practice.json";
+    public static final String INTERNAL_FILE = "internal-practice.json";
+
     public static final String MATERIAL_JS = "materialize.min.js";
     public static final String MATERIAL_CSS = "materialize.min.css";
 
@@ -140,6 +146,7 @@ public class ScraperConstants {
     public static final String MIMETYPE_JSON = "application/json";
     public static final String MIMETYPE_SVG = "image/svg+xml";
     public static final String MIMETYPE_JPG = "image/jpg";
+    public static final String MIMETYPE_CSS = "text/css";
 
     public static final String ZIP_EXT = ".zip";
     public static final String PNG_EXT = ".png";
@@ -152,6 +159,9 @@ public class ScraperConstants {
     public static final String USTAD_MOBILE = "Ustad Mobile";
     public static final String ROOT = "root";
     public static final String EMPTY_STRING = "";
+    public static final String KHAN = "Khan Academy";
+
+    public static final int TIME_OUT_SELENIUM = 500;
 
 
     public enum QUESTION_TYPE{
@@ -226,6 +236,21 @@ public class ScraperConstants {
         private String type;
 
         KhanContentType(String compType) {
+            this.type = compType;
+        }
+
+        public String getType() {
+            return type;
+        }
+    }
+
+    public enum CK12ContentType{
+        SUBJECTS("Subjects");
+
+
+        private String type;
+
+        CK12ContentType(String compType) {
             this.type = compType;
         }
 

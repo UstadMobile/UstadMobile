@@ -57,6 +57,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.EMPTY_STRING;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.TIME_OUT_SELENIUM;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING;
 
 
@@ -187,7 +188,7 @@ public class AsbScraper {
         AfricanBooksResponse bookObj;
         ContentScraperUtil.setChromeDriverLocation();
         ChromeDriver driver = ContentScraperUtil.setupChrome(true);
-        WebDriverWait waitDriver = new WebDriverWait(driver, 10000);
+        WebDriverWait waitDriver = new WebDriverWait(driver, TIME_OUT_SELENIUM);
         int retry = 0;
 
         for (int i = 0; i < africanBooksList.size(); i++) {

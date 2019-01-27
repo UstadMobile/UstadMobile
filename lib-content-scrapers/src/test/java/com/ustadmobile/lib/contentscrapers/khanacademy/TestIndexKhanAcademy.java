@@ -82,7 +82,7 @@ public class TestIndexKhanAcademy {
         File tmpDir = Files.createTempDirectory("testIndexKhancontentscraper").toFile();
 
         KhanContentIndexer.startScrape(mockWebServer.
-                url("/json/com/ustadmobile/lib/contentscrapers/khanacademy/mainpage.txt").toString(),
+                        url("/json/com/ustadmobile/lib/contentscrapers/khanacademy/mainpage.txt").toString(),
                 tmpDir, run.getScrapeRunUid());
 
         File englishFolder = new File(tmpDir, "en");

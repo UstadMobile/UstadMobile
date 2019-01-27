@@ -86,6 +86,7 @@ import static com.ustadmobile.lib.contentscrapers.ScraperConstants.TEX_CANCEL_LI
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.TEX_COLOR_FILE;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.TEX_COLOR_LINK;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.TIMER_NAME;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.TIME_OUT_SELENIUM;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.TROPHY_NAME;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING;
 
@@ -254,7 +255,7 @@ public class CK12ContentScraper {
         ChromeDriver driver = ContentScraperUtil.setupLogIndexChromeDriver();
 
         driver.get(urlString);
-        WebDriverWait waitDriver = new WebDriverWait(driver, 10000);
+        WebDriverWait waitDriver = new WebDriverWait(driver, TIME_OUT_SELENIUM);
         ContentScraperUtil.waitForJSandJQueryToLoad(waitDriver);
         try {
             waitDriver.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("div#questionController"))).click();
@@ -265,7 +266,7 @@ public class CK12ContentScraper {
         driver.close();
         driver.quit();
 
-        List<LogIndex> index = new ArrayList<>();
+        List<LogIndex.IndexEntry> indexList = new ArrayList<>();
 
         for (LogEntry le : les) {
 
@@ -331,8 +332,8 @@ public class CK12ContentScraper {
                     }
 
 
-                    LogIndex logIndex = ContentScraperUtil.createIndexFromLog(urlString, mimeType, urlDirectory, file, log);
-                    index.add(logIndex);
+                    LogIndex.IndexEntry logIndex = ContentScraperUtil.createIndexFromLog(urlString, mimeType, urlDirectory, file, log);
+                    indexList.add(logIndex);
 
                 } catch (Exception e) {
                     UMLogUtil.logError("Index url failed at " + urlString);
@@ -341,7 +342,7 @@ public class CK12ContentScraper {
             }
         }
 
-        FileUtils.writeStringToFile(new File(plixDirectory, "index.json"), gson.toJson(index), UTF_ENCODING);
+        FileUtils.writeStringToFile(new File(plixDirectory, "index.json"), gson.toJson(indexList), UTF_ENCODING);
         ContentScraperUtil.zipDirectory(plixDirectory, FilenameUtils.getBaseName(scrapUrl.getPath()), destinationDirectory);
     }
 

@@ -35,10 +35,12 @@ import java.net.URL;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
 
 import javax.swing.text.AbstractDocument;
 
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.EMPTY_STRING;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.TIME_OUT_SELENIUM;
 import static com.ustadmobile.lib.db.entities.ContentEntry.LICENSE_TYPE_CC_BY;
 import static com.ustadmobile.lib.db.entities.ContentEntry.LICENSE_TYPE_CC_BY_NC;
 
@@ -206,7 +208,7 @@ public class IndexCategoryCK12Content {
         ChromeDriver driver = ContentScraperUtil.setupChrome(true);
         try {
             driver.get(url.toString());
-            WebDriverWait waitDriver = new WebDriverWait(driver, 10000);
+            WebDriverWait waitDriver = new WebDriverWait(driver, TIME_OUT_SELENIUM);
             ContentScraperUtil.waitForJSandJQueryToLoad(waitDriver);
         } catch (TimeoutException e) {
             UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
@@ -322,7 +324,7 @@ public class IndexCategoryCK12Content {
         ChromeDriver driver = ContentScraperUtil.setupChrome(true);
         try {
             driver.get(subCategoryUrl.toString());
-            WebDriverWait waitDriver = new WebDriverWait(driver, 10000);
+            WebDriverWait waitDriver = new WebDriverWait(driver, TIME_OUT_SELENIUM);
             ContentScraperUtil.waitForJSandJQueryToLoad(waitDriver);
         } catch (TimeoutException e) {
             UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
@@ -397,7 +399,7 @@ public class IndexCategoryCK12Content {
         ChromeDriver driver = ContentScraperUtil.setupChrome(true);
         try {
             driver.get(contentUrl.toString());
-            WebDriverWait waitDriver = new WebDriverWait(driver, 10000);
+            WebDriverWait waitDriver = new WebDriverWait(driver, TIME_OUT_SELENIUM);
             ContentScraperUtil.waitForJSandJQueryToLoad(waitDriver);
             waitDriver.until(ExpectedConditions.elementToBeClickable(By.cssSelector("i.icon-expand"))).click();
         } catch (TimeoutException | NoSuchElementException e) {

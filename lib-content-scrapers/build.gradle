@@ -12,7 +12,7 @@ buildscript {
 
 apply plugin: 'java-library'
 apply plugin: 'com.github.johnrengelman.shadow'
-
+apply plugin: "jacoco"
 
 task scrapeContent(type: JavaExec) {
     classpath sourceSets.main.runtimeClasspath

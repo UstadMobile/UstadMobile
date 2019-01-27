@@ -3,10 +3,7 @@ package com.ustadmobile.lib.contentscrapers.khanacademy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.ustadmobile.core.db.UmAppDatabase;
-import com.ustadmobile.core.db.dao.ContentEntryContentEntryFileJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryDao;
-import com.ustadmobile.core.db.dao.ContentEntryFileDao;
-import com.ustadmobile.core.db.dao.ContentEntryFileStatusDao;
 import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
 import com.ustadmobile.core.db.dao.LanguageDao;
 import com.ustadmobile.core.db.dao.ScrapeQueueItemDao;
@@ -38,6 +35,7 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.EMPTY_STRING;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.KHAN;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.ROOT;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.USTAD_MOBILE;
 import static com.ustadmobile.lib.db.entities.ContentEntry.LICENSE_TYPE_CC_BY;
@@ -71,22 +69,16 @@ public class KhanContentIndexer implements Runnable {
     public static final String SUBJECT_PAGE_TOPIC_CARD = "SubjectPageTopicCard";
     public static final String SUBJECT_CHALLENGE = "SubjectChallenge";
     public static final String SUBJECT_PROGRESS = "SubjectProgress";
-    private static URL url;
-    private static File destinationDirectory;
+    private static final String KHAN_PREFIX = "khan-id://";
     private static ContentEntryDao contentEntryDao;
     private static ContentEntryParentChildJoinDao contentParentChildJoinDao;
-    private static ContentEntryFileDao contentEntryFileDao;
-    private static ContentEntryContentEntryFileJoinDao contentEntryFileJoin;
-    private static ContentEntryFileStatusDao contentFileStatusDao;
-    private static LanguageDao languageDao;
     private static Language englishLang;
 
-    static String KHAN = "Khan Academy";
+
     private static Gson gson;
     private static ScrapeQueueItemDao queueDao;
     private int runId;
-    private static WorkQueue queueIndexer;
-    private static WorkQueue scrapeIndex;
+    private static WorkQueue scrapeWorkQueue;
     private static GenericObjectPool<ChromeDriver> factory;
 
     private ContentEntry parentEntry;
@@ -126,6 +118,7 @@ public class KhanContentIndexer implements Runnable {
 
     public static void startScrape(String startUrl, File destDir, int runId) throws IOException {
         //setup the database
+        URL url;
         try {
             url = new URL(startUrl);
         } catch (MalformedURLException e) {
@@ -137,14 +130,11 @@ public class KhanContentIndexer implements Runnable {
         UmAppDatabase repository = db.getRepository("https://localhost", "");
 
         destDir.mkdirs();
-        destinationDirectory = destDir;
+        File destinationDirectory = destDir;
 
         contentEntryDao = repository.getContentEntryDao();
         contentParentChildJoinDao = repository.getContentEntryParentChildJoinDao();
-        contentEntryFileDao = repository.getContentEntryFileDao();
-        contentEntryFileJoin = repository.getContentEntryContentEntryFileJoinDao();
-        contentFileStatusDao = db.getContentEntryFileStatusDao();
-        languageDao = repository.getLanguageDao();
+        LanguageDao languageDao = repository.getLanguageDao();
         queueDao = db.getScrapeQueueItemDao();
 
         gson = new GsonBuilder().disableHtmlEscaping().create();
@@ -214,23 +204,27 @@ public class KhanContentIndexer implements Runnable {
 
         factory = new GenericObjectPool<>(new KhanDriverFactory());
         //start the indexing work queue
-        CountDownLatch latch = new CountDownLatch(1);
-        queueIndexer = new WorkQueue(indexerSource, 1);
-        queueIndexer.addEmptyWorkQueueListener((srcQueu) ->
-                latch.countDown());
-        queueIndexer.start();
+        CountDownLatch indexerLatch = new CountDownLatch(1);
+        WorkQueue indexWorkQueue = new WorkQueue(indexerSource, 1);
+        indexWorkQueue.addEmptyWorkQueueListener((srcQueu) ->
+                indexerLatch.countDown());
+        indexWorkQueue.start();
         CountDownLatch scraperLatch = new CountDownLatch(1);
-        scrapeIndex = new WorkQueue(scraperSource, 1);
-        scrapeIndex.addEmptyWorkQueueListener((scrapeQueu) ->
-                scraperLatch.countDown());
-        scrapeIndex.start();
+        scrapeWorkQueue = new WorkQueue(scraperSource, 1);
+        scrapeWorkQueue.start();
 
         try {
-            latch.await();
-            scraperLatch.await();
-        } catch (InterruptedException e) {
+            indexerLatch.await();
+        } catch (InterruptedException ignored) {
         }
 
+        scrapeWorkQueue.addEmptyWorkQueueListener((scrapeQueu) ->
+                scraperLatch.countDown());
+        try{
+            scraperLatch.await();
+        }catch (InterruptedException ignored){
+
+        }
 
     }
 
@@ -509,7 +503,7 @@ public class KhanContentIndexer implements Runnable {
             newContentFolder.mkdirs();
 
             ContentEntry entry = ContentScraperUtil.createOrUpdateContentEntry(contentItem.slug, contentItem.title,
-                    contentItem.contentId, KHAN, LICENSE_TYPE_CC_BY_NC, englishLang.getLangUid(),
+                    KHAN_PREFIX + contentItem.contentId, KHAN, LICENSE_TYPE_CC_BY_NC, englishLang.getLangUid(),
                     null, contentItem.description, true, EMPTY_STRING, contentItem.thumbnailUrl,
                     EMPTY_STRING, EMPTY_STRING, contentEntryDao);
 
@@ -527,10 +521,7 @@ public class KhanContentIndexer implements Runnable {
 
             ContentScraperUtil.createQueueItem(queueDao, url, entry, newContentFolder,
                     contentItem.kind, runId, ScrapeQueueItem.ITEM_TYPE_SCRAPE);
-            scrapeIndex.checkQueue();
-
-
-
+            scrapeWorkQueue.checkQueue();
 
         }
 

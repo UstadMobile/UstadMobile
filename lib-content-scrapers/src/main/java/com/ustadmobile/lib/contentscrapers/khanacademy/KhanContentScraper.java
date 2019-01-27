@@ -2,28 +2,27 @@ package com.ustadmobile.lib.contentscrapers.khanacademy;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
+import com.google.gson.reflect.TypeToken;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.ContentEntryContentEntryFileJoinDao;
-import com.ustadmobile.core.db.dao.ContentEntryDao;
 import com.ustadmobile.core.db.dao.ContentEntryFileDao;
 import com.ustadmobile.core.db.dao.ContentEntryFileStatusDao;
-import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
 import com.ustadmobile.core.db.dao.ScrapeQueueItemDao;
-import com.ustadmobile.core.db.dao.ScrapeRunDao;
-import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.ScraperConstants;
 import com.ustadmobile.lib.contentscrapers.LogIndex;
 import com.ustadmobile.lib.contentscrapers.LogResponse;
 import com.ustadmobile.lib.contentscrapers.UMLogUtil;
 import com.ustadmobile.lib.db.entities.ContentEntry;
-import com.ustadmobile.lib.db.entities.ScrapeRun;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.pool2.impl.GenericObjectPool;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import org.openqa.selenium.By;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.logging.LogEntries;
@@ -34,6 +33,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
@@ -53,10 +53,17 @@ import static com.ustadmobile.lib.contentscrapers.ScraperConstants.CORRECT_FILE;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.CORRECT_KHAN_LINK;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.HINT_JSON_FILE;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.HINT_JSON_LINK;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.INTERNAL_FILE;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.INTERNAL_JSON_LINK;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.KHAN;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.KHAN_CSS_FILE;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.KHAN_CSS_LINK;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_CSS;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_JPG;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_JSON;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_SVG;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.SVG_EXT;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.TIME_OUT_SELENIUM;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.TRY_AGAIN_FILE;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.TRY_AGAIN_KHAN_LINK;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING;
@@ -104,7 +111,10 @@ import static com.ustadmobile.lib.contentscrapers.ck12.CK12ContentScraper.RESPON
  */
 public class KhanContentScraper implements Runnable {
 
-    private static int runId;
+    private static final String KHAN_CSS = "<link rel='stylesheet' href='/khanscraper.css' type='text/css'/>";
+    private static final String KHAN_COOKIE = "<script> document.cookie = \"fkey=abcde;\" </script>";
+    public static final String CONTENT_DETAIL_SOURCE_URL_KHAN_ID = "content-detail?sourceUrl=khan-id://";
+
     private GenericObjectPool<ChromeDriver> factory;
     private int sqiUid;
     private String contentType;
@@ -113,6 +123,8 @@ public class KhanContentScraper implements Runnable {
     private URL url;
     private ChromeDriver driver;
 
+    private String regexUrlPrefix = "https://(www.khanacademy.org|cdn.kastatic.org)/(.*)";
+
     private String secondExerciseUrl = "https://www.khanacademy.org/api/internal/user/exercises/";
 
     private String exerciseMidleUrl = "/items/";
@@ -120,6 +132,7 @@ public class KhanContentScraper implements Runnable {
     private String exercisePostUrl = "/assessment_item";
 
     private boolean isContentUpdated = true;
+    private String nodeSlug;
 
 
     public KhanContentScraper(URL scrapeUrl, File destinationDirectory, ContentEntry parent, String contentType, int sqiUid, GenericObjectPool<ChromeDriver> factory) {
@@ -181,13 +194,13 @@ public class KhanContentScraper implements Runnable {
                 factory.returnObject(driver);
             }
 
-            queueDao.updateSetStatusById(sqiUid, successful ? ScrapeQueueItemDao.STATUS_DONE : ScrapeQueueItemDao.STATUS_FAILED);
-
 
         } catch (Exception e) {
             UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
             UMLogUtil.logError("Unable to scrape content from url " + url);
         }
+
+        queueDao.updateSetStatusById(sqiUid, successful ? ScrapeQueueItemDao.STATUS_DONE : ScrapeQueueItemDao.STATUS_FAILED);
 
 
     }
@@ -229,6 +242,8 @@ public class KhanContentScraper implements Runnable {
         List<SubjectListResponse.ComponentData.Card.UserExercise.Model.AssessmentItem> exerciseList = null;
         long dateModified = 0;
 
+        Map<String, String> linksMap = new HashMap<>();
+
         List<SubjectListResponse.ComponentData.Card.UserExercise> contentModel = response.componentProps.initialCards.userExercises;
         for (SubjectListResponse.ComponentData.Card.UserExercise content : contentModel) {
 
@@ -242,7 +257,25 @@ public class KhanContentScraper implements Runnable {
 
             exerciseList = content.exerciseModel.allAssessmentItems;
             exerciseId = content.exerciseModel.id;
+            nodeSlug = content.exerciseModel.nodeSlug;
             dateModified = ContentScraperUtil.parseServerDate(content.exerciseModel.dateModified);
+
+            List<SubjectListResponse.ComponentData.Card.UserExercise.Model> relatedList = content.exerciseModel.relatedContent;
+
+            if (relatedList != null) {
+
+                for (SubjectListResponse.ComponentData.Card.UserExercise.Model relatedLink : relatedList) {
+                    linksMap.put(relatedLink.kaUrl, "content-detail?sourceUrl=khan-id://" + relatedLink.id);
+                }
+            }
+            List<SubjectListResponse.ComponentData.Card.UserExercise.Model> relatedVideos = content.exerciseModel.relatedVideos;
+
+            if (relatedVideos != null) {
+
+                for (SubjectListResponse.ComponentData.Card.UserExercise.Model relatedLink : relatedVideos) {
+                    linksMap.put(relatedLink.kaUrl, "content-detail?sourceUrl=khan-id://" + relatedLink.id);
+                }
+            }
 
             break;
 
@@ -274,18 +307,18 @@ public class KhanContentScraper implements Runnable {
         }
 
         driver.get(scrapUrl);
-        WebDriverWait waitDriver = new WebDriverWait(driver, 10000);
+        WebDriverWait waitDriver = new WebDriverWait(driver, TIME_OUT_SELENIUM);
         ContentScraperUtil.waitForJSandJQueryToLoad(waitDriver);
+        List<LogEntry> les = new ArrayList<>();
         try {
             waitDriver.until(ExpectedConditions.visibilityOfElementLocated(
                     By.cssSelector("div[data-test-id=tutorial-page]")));
+            les = ContentScraperUtil.waitForNewFiles(driver);
         } catch (Exception e) {
             UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
         }
 
-        LogEntries les = driver.manage().logs().get(LogType.PERFORMANCE);
-
-        List<LogIndex> index = new ArrayList<>();
+        List<LogIndex.IndexEntry> indexList = new ArrayList<>();
 
         for (LogEntry le : les) {
 
@@ -300,16 +333,19 @@ public class KhanContentScraper implements Runnable {
                     File urlDirectory = ContentScraperUtil.createDirectoryFromUrl(khanDirectory, url);
                     File file = ContentScraperUtil.downloadFileFromLogIndex(url, urlDirectory, log);
 
-                    if (log.message.params.response.headers != null) {
-                        if (log.message.params.response.headers.containsKey("set-cookie")) {
-                            String cookie = log.message.params.response.headers.get("set-cookie");
-                            cookie += " fkey=abcdef;";
-                            log.message.params.response.headers.replace("set-cookie", cookie);
-                        }
+                    if (urlString.equals(scrapUrl)) {
+
+                        String khanContent = FileUtils.readFileToString(file, UTF_ENCODING);
+                        Document doc = Jsoup.parse(khanContent);
+                        doc.head().append(KHAN_CSS);
+                        doc.head().append(KHAN_COOKIE);
+
+                        FileUtils.writeStringToFile(file, doc.html(), UTF_ENCODING);
+
                     }
 
-                    LogIndex logIndex = ContentScraperUtil.createIndexFromLog(urlString, mimeType, urlDirectory, file, log);
-                    index.add(logIndex);
+                    LogIndex.IndexEntry logIndex = ContentScraperUtil.createIndexFromLog(urlString, mimeType, urlDirectory, file, log);
+                    indexList.add(logIndex);
 
                 } catch (Exception e) {
                     UMLogUtil.logError(urlString);
@@ -337,9 +373,9 @@ public class KhanContentScraper implements Runnable {
             FileUtils.writeStringToFile(file, itemData, UTF_ENCODING);
             ItemResponse itemResponse = gson.fromJson(itemData, ItemResponse.class);
 
-            LogIndex exerciseIndex = ContentScraperUtil.createIndexFromLog(practiceUrl.toString(), MIMETYPE_JSON,
+            LogIndex.IndexEntry exerciseIndex = ContentScraperUtil.createIndexFromLog(practiceUrl.toString(), MIMETYPE_JSON,
                     urlFile, file, null);
-            index.add(exerciseIndex);
+            indexList.add(exerciseIndex);
 
             ItemData itemContent = gson.fromJson(itemResponse.itemData, ItemData.class);
 
@@ -388,64 +424,71 @@ public class KhanContentScraper implements Runnable {
 
             }
 
-
-            for (String image : images.keySet()) {
-
-                try {
-                    image = image.replaceAll(" ", "");
-                    String imageUrlString = image;
-                    if (image.contains("+graphie")) {
-                        imageUrlString = "https://cdn.kastatic.org/ka-perseus-graphie/" + image.substring(image.lastIndexOf("/") + 1) + SVG_EXT;
-                    }
-                    URL imageUrl = new URL(imageUrlString);
-                    File imageFile = ContentScraperUtil.createDirectoryFromUrl(khanDirectory, imageUrl);
-
-                    File imageContent = new File(imageFile, FilenameUtils.getName(imageUrl.getPath()));
-                    FileUtils.copyURLToFile(imageUrl, imageContent);
-
-                    LogIndex logIndex = ContentScraperUtil.createIndexFromLog(image, MIMETYPE_JPG,
-                            imageFile, imageContent, null);
-                    index.add(logIndex);
-                } catch (Exception e) {
-                    UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
-                    UMLogUtil.logError("Error downloading an image for index log" + image + " with url " + scrapUrl);
-                }
-
-            }
+            ContentScraperUtil.downloadImagesFromJsonContent(images, khanDirectory, scrapUrl, indexList);
 
             exerciseCount++;
 
         }
 
-        LogIndex hintIndex = ContentScraperUtil.createIndexWithResourceFiles("https://www.khanacademy.org/hint",
+        SubjectListResponse.ComponentData.NavData navData = response.componentProps.tutorialPageData;
+        if (navData == null) {
+            navData = response.componentProps.tutorialNavData;
+        }
+
+        List<SubjectListResponse.ComponentData.NavData.ContentModel> navList = navData.navItems;
+        if (navList != null) {
+
+            for (SubjectListResponse.ComponentData.NavData.ContentModel navItem : navList) {
+                if(navItem.nodeSlug.equals(nodeSlug)){
+                    continue;
+                }
+                linksMap.put(regexUrlPrefix + navItem.nodeSlug, CONTENT_DETAIL_SOURCE_URL_KHAN_ID + navItem.id);
+            }
+
+        }
+
+        LogIndex.IndexEntry hintIndex = ContentScraperUtil.createIndexWithResourceFiles("https://www.khanacademy.org/hint",
                 khanDirectory, MIMETYPE_JSON, getClass().getResourceAsStream(HINT_JSON_LINK), HINT_JSON_FILE);
-        index.add(hintIndex);
+        indexList.add(hintIndex);
 
-        LogIndex attemptIndex = ContentScraperUtil.createIndexWithResourceFiles("https://www.khanacademy.org/attempt",
+        LogIndex.IndexEntry attemptIndex = ContentScraperUtil.createIndexWithResourceFiles("https://www.khanacademy.org/attempt",
                 khanDirectory, MIMETYPE_JSON, getClass().getResourceAsStream(ATTEMPT_JSON_LINK), ATTEMPT_JSON_FILE);
-        index.add(attemptIndex);
+        indexList.add(attemptIndex);
 
-        LogIndex correctIndex = ContentScraperUtil.createIndexWithResourceFiles("https://cdn.kastatic.org/images/exercise-correct.svg",
+        LogIndex.IndexEntry correctIndex = ContentScraperUtil.createIndexWithResourceFiles("https://cdn.kastatic.org/images/exercise-correct.svg",
                 khanDirectory, MIMETYPE_SVG, getClass().getResourceAsStream(CORRECT_KHAN_LINK), CORRECT_FILE);
-        index.add(correctIndex);
+        indexList.add(correctIndex);
 
-        LogIndex tryAgainIndex = ContentScraperUtil.createIndexWithResourceFiles("https://cdn.kastatic.org/images/exercise-try-again.svg",
+        LogIndex.IndexEntry tryAgainIndex = ContentScraperUtil.createIndexWithResourceFiles("https://cdn.kastatic.org/images/exercise-try-again.svg",
                 khanDirectory, MIMETYPE_SVG, getClass().getResourceAsStream(TRY_AGAIN_KHAN_LINK), TRY_AGAIN_FILE);
-        index.add(tryAgainIndex);
+        indexList.add(tryAgainIndex);
 
-        LogIndex attmeptIndex = ContentScraperUtil.createIndexWithResourceFiles("https://cdn.kastatic.org/images/end-of-task-card/star-attempted.svg",
+        LogIndex.IndexEntry attmeptIndex = ContentScraperUtil.createIndexWithResourceFiles("https://cdn.kastatic.org/images/end-of-task-card/star-attempted.svg",
                 khanDirectory, MIMETYPE_SVG, getClass().getResourceAsStream(ATTEMPT_KHAN_LINK), ATTEMPT_FILE);
-        index.add(attmeptIndex);
+        indexList.add(attmeptIndex);
 
-        LogIndex completeIndex = ContentScraperUtil.createIndexWithResourceFiles("https://cdn.kastatic.org/images/end-of-task-card/star-complete.svg",
+        LogIndex.IndexEntry completeIndex = ContentScraperUtil.createIndexWithResourceFiles("https://cdn.kastatic.org/images/end-of-task-card/star-complete.svg",
                 khanDirectory, MIMETYPE_SVG, getClass().getResourceAsStream(COMPLETE_KHAN_LINK), COMPLETE_FILE);
-        index.add(completeIndex);
+        indexList.add(completeIndex);
 
+        LogIndex.IndexEntry khanCssFile = ContentScraperUtil.createIndexWithResourceFiles("https://www.khanacademy.org/khanscraper.css",
+                khanDirectory, MIMETYPE_CSS, getClass().getResourceAsStream(KHAN_CSS_LINK), KHAN_CSS_FILE);
+        indexList.add(khanCssFile);
+
+        LogIndex.IndexEntry internalPractice = ContentScraperUtil.createIndexWithResourceFiles("https://www.khanacademy.org/api/internal/user/task/practice/",
+                khanDirectory, MIMETYPE_JSON, getClass().getResourceAsStream(INTERNAL_JSON_LINK), INTERNAL_FILE);
+        indexList.add(internalPractice);
+
+        LogIndex index = new LogIndex();
+        index.title = KHAN;
+        index.entries = indexList;
+        index.links = linksMap;
 
         FileUtils.writeStringToFile(indexJsonFile, gson.toJson(index), UTF_ENCODING);
         ContentScraperUtil.zipDirectory(khanDirectory, khanDirectory.getName(), destinationDirectory);
 
     }
+
 
     public void scrapeArticleContent(String scrapUrl) throws IOException {
 
@@ -473,13 +516,15 @@ public class KhanContentScraper implements Runnable {
             throw new IllegalArgumentException("Does not have the article data id which we need to scrape the page for url " + scrapUrl);
         }
 
+
         boolean foundRelative = false;
         for (SubjectListResponse.ComponentData.NavData.ContentModel content : contentList) {
 
-            if (destinationDirectory.getName().equals(content.id)) {
+            if (destinationDirectory.getName().equals(content.id) || scrapUrl.contains(content.relativeUrl)) {
 
                 foundRelative = true;
                 String articleId = content.id;
+                nodeSlug = content.nodeSlug;
                 String articleUrl = generateArtcleUrl(articleId);
                 ArticleResponse response = gson.fromJson(IOUtils.toString(new URL(articleUrl), UTF_ENCODING), ArticleResponse.class);
                 long dateModified = ContentScraperUtil.parseServerDate(response.date_modified);
@@ -504,10 +549,10 @@ public class KhanContentScraper implements Runnable {
 
             }
         }
-        if(foundRelative){
+        if (foundRelative) {
             UMLogUtil.logDebug("found the id at url " + scrapUrl);
-        }else{
-            UMLogUtil.logError("did not find the id at url " + scrapUrl);
+        } else {
+            throw new IllegalArgumentException("did not find id at url " + scrapUrl);
         }
 
 
@@ -519,18 +564,18 @@ public class KhanContentScraper implements Runnable {
         }
 
         driver.get(scrapUrl);
-        WebDriverWait waitDriver = new WebDriverWait(driver, 10000);
+        WebDriverWait waitDriver = new WebDriverWait(driver, TIME_OUT_SELENIUM);
         ContentScraperUtil.waitForJSandJQueryToLoad(waitDriver);
+        List<LogEntry> les = new ArrayList<>();
         try {
             waitDriver.until(ExpectedConditions.visibilityOfElementLocated(
-                    By.cssSelector("ul[class*=listWrapper]")));
+                    By.cssSelector("ul[class*=listWrapper], div[class*=listWrapper")));
+            les = ContentScraperUtil.waitForNewFiles(driver);
         } catch (Exception e) {
             UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
         }
 
-        LogEntries les = driver.manage().logs().get(LogType.PERFORMANCE);
-
-        List<LogIndex> index = new ArrayList<>();
+        List<LogIndex.IndexEntry> index = new ArrayList<>();
 
         for (LogEntry le : les) {
 
@@ -544,19 +589,56 @@ public class KhanContentScraper implements Runnable {
                     File urlDirectory = ContentScraperUtil.createDirectoryFromUrl(khanDirectory, url);
                     File file = ContentScraperUtil.downloadFileFromLogIndex(url, urlDirectory, log);
 
-                    LogIndex logIndex = ContentScraperUtil.createIndexFromLog(urlString, mimeType, urlDirectory, file, log);
+
+                    if (urlString.equals(scrapUrl)) {
+
+                        String khanContent = FileUtils.readFileToString(file, UTF_ENCODING);
+                        Document doc = Jsoup.parse(khanContent);
+                        doc.head().append(KHAN_CSS);
+                        doc.head().append(KHAN_COOKIE);
+
+                        FileUtils.writeStringToFile(file, doc.html(), UTF_ENCODING);
+
+                    }
+
+                    LogIndex.IndexEntry logIndex = ContentScraperUtil.createIndexFromLog(urlString, mimeType, urlDirectory, file, log);
                     index.add(logIndex);
+
 
                 } catch (Exception e) {
                     UMLogUtil.logError("Index url failed at " + urlString);
                     UMLogUtil.logInfo(le.getMessage());
                 }
 
-
             }
 
         }
-        FileUtils.writeStringToFile(indexJsonFile, gson.toJson(index), UTF_ENCODING);
+
+        Map<String, String> linkMap = new HashMap<>();
+        List<SubjectListResponse.ComponentData.NavData.ContentModel> navList = navData.navItems;
+        if (navList != null) {
+            for (SubjectListResponse.ComponentData.NavData.ContentModel navItem : navList) {
+                if(navItem.nodeSlug.equals(nodeSlug)){
+                    continue;
+                }
+                linkMap.put(regexUrlPrefix + navItem.nodeSlug, CONTENT_DETAIL_SOURCE_URL_KHAN_ID + navItem.id);
+            }
+        } else {
+            UMLogUtil.logError("Your related items are in another json for url " + scrapUrl);
+        }
+
+
+        LogIndex.IndexEntry khanCssFile = ContentScraperUtil.createIndexWithResourceFiles("https://www.khanacademy.org/khanscraper.css",
+                khanDirectory, MIMETYPE_CSS, getClass().getResourceAsStream(KHAN_CSS_LINK), KHAN_CSS_FILE);
+        index.add(khanCssFile);
+
+        LogIndex logIndex = new LogIndex();
+        logIndex.title = KHAN;
+        logIndex.entries = index;
+        logIndex.links = linkMap;
+
+
+        FileUtils.writeStringToFile(indexJsonFile, gson.toJson(logIndex), UTF_ENCODING);
         ContentScraperUtil.zipDirectory(khanDirectory, khanDirectory.getName(), destinationDirectory);
 
     }

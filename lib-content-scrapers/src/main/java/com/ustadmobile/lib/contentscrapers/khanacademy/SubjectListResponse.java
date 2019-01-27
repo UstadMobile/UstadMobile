@@ -45,6 +45,14 @@ class SubjectListResponse {
 
                     public String dateModified;
 
+                    public String kaUrl;
+
+                    public String nodeSlug;
+
+                    public List<Model> relatedContent;
+
+                    public List<Model> relatedVideos;
+
                     public List<AssessmentItem> allAssessmentItems;
 
                     public class AssessmentItem {
@@ -69,6 +77,8 @@ class SubjectListResponse {
 
             public ContentModel contentModel;
 
+            public List<ContentModel> navItems;
+
             public class ContentModel {
 
                 public String id;
@@ -84,6 +94,8 @@ class SubjectListResponse {
                 public String contentKind;
 
                 public String kind;
+
+                public String perseusContent;
 
             }
         }
