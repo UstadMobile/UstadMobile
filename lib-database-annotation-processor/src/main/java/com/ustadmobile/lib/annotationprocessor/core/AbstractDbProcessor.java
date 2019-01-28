@@ -1394,143 +1394,6 @@ public abstract class AbstractDbProcessor {
     }
 
     /**
-     * Generate a code block that will set syncable primary keys. This is for use on entities
-     * that are using the syncable primary key system.
-     *
-     * This will generate code along the lines of this for a single entity insert:
-     * <code>
-     * if(entityVarName.getPrimaryKey() == 0L) {
-     *     long _baseSyncablePrimaryKey = _syncableDb.getSyncablePrimaryKeyDao().getAndIncrement(
-     *          tableId, 1)
-     *     entityVarName.setPrimaryKey(_baseSyncablePrimaryKey);
-     * }
-     * </code>
-     * ... and this for an array or list insert:
-     *
-     * <code>
-     * List&lt;EntityType&gt; _syncablePksRequired = new ArrayList&gt;&lt;();
-     * for(EntityType _element : entityVarName) {
-     *     if(_element.getPrimaryKey() == 0L)
-     *          _syncablePksRequired.add(_element);
-     * }
-     * if(!_syncablePksRequired.isEmpty()) {
-     *      long _baseSyncablePrimaryKey = _syncableDb.getSyncablePrimaryKeyDao().getAndIncrement(
-     *          tableId, _syncablePksRequired.size());
-     *      for(EntityType _element : _syncablePksRequired) {
-     *          _element.setPrimaryKey(_baseSyncablePrimaryKey++);
-     *      }
-     * }
-     * </code>
-     *
-     *
-     *
-     * @param daoMethod ExecutableElement representing the method that we are generating
-     * @param daoClass The DAO class itself (used to resolve type variables etc)
-     * @param processingEnv Processing Environment
-     * @param dbVarName Variable name of the database class
-     * @param syncableDbVarName Variable name of the database class, casted to UmSyncableDatabase (
-     *                          or null if no such variable exists)
-     * @return A CodeBlock that will set a syncable primary key on the entity parameter arguments
-     */
-    protected CodeBlock generateSetSyncablePrimaryKey(ExecutableElement daoMethod,
-                                                      TypeElement daoClass,
-                                                      ProcessingEnvironment processingEnv,
-                                                      String dbVarName, String syncableDbVarName,
-                                                      String resultVarName) {
-        CodeBlock.Builder codeBlock = CodeBlock.builder();
-        DaoMethodInfo methodInfo = new DaoMethodInfo(daoMethod, daoClass, processingEnv);
-        TypeElement entityTypeElement = (TypeElement)processingEnv.getTypeUtils().asElement(
-                methodInfo.resolveEntityParameterComponentType());
-        String paramVarName = methodInfo.getEntityParameterElement().getSimpleName().toString();
-        TypeMirror resultType = methodInfo.resolveResultType();
-
-        String resultVarNameActive = resultVarName;
-
-        boolean isVoid = isVoid(resultType);
-        if(!isVoid) {
-            if(methodInfo.hasListResultType()) {
-                codeBlock.add("$T $L = new $T<>();\n", resultType, resultVarName, ArrayList.class);
-            }else if(methodInfo.hasArrayResultType()) {
-                TypeMirror componentType = ((ArrayType)methodInfo.resolveResultType())
-                        .getComponentType();
-                if(componentType.getKind().isPrimitive()) {
-                    componentType = processingEnv.getTypeUtils()
-                            .boxedClass((PrimitiveType) componentType).asType();
-                }
-
-                codeBlock.add("$T<$T> $L_list = new $T<>();\n", List.class,
-                        componentType, resultVarName, ArrayList.class);
-                resultVarNameActive = resultVarName + "_list";
-            }else {
-                codeBlock.add("$T $L = $L;\n", resultType, resultVarName, defaultValue(resultType));
-            }
-        }
-
-        int tableId = entityTypeElement.getAnnotation(UmEntity.class).tableId();
-        if(syncableDbVarName == null) {
-            syncableDbVarName = "_syncableDbPk";
-            codeBlock.add("$1T $2L = ($1T)$3L;\n", UmSyncableDatabase.class, syncableDbVarName,
-                    dbVarName);
-        }
-
-        boolean isListOrArray =methodInfo.hasEntityListParam() || methodInfo.hasEntityArrayParam();
-        VariableElement pkElement = findPrimaryKey(entityTypeElement);
-        String ifStmtStr = "if($L.get$L() == $L)";
-        Object[] ifStmtArgs = new Object[]{isListOrArray ? "_element" : paramVarName,
-                capitalize(pkElement.getSimpleName()), defaultValue(pkElement.asType())};
-
-        if(isListOrArray) {
-            String addKeyToListStr = "";
-            Object[] addKeyToListArgs = new Object[0];
-            if(!isVoid) {
-                addKeyToListStr = "$L.add(_baseSyncablePk);\n";
-                addKeyToListArgs = new Object[]{resultVarNameActive};
-            }
-
-            codeBlock.add("$T<$T> _syncablePksRequired = new $T<>();\n", List.class,
-                    methodInfo.resolveEntityParameterComponentType(), ArrayList.class)
-                    .beginControlFlow("for($T _element : $L)", entityTypeElement,
-                            paramVarName)
-                        .beginControlFlow(ifStmtStr, ifStmtArgs)
-                            .add("_syncablePksRequired.add(_element);\n")
-                        .endControlFlow()
-                    .endControlFlow()
-                    .beginControlFlow("if(!_syncablePksRequired.isEmpty())")
-                        .add("long _baseSyncablePk = $L.getSyncablePrimaryKeyDao()" +
-                                        ".getAndIncrement($L, _syncablePksRequired.size());\n",
-                            syncableDbVarName, tableId)
-                        .beginControlFlow("for($T _element : _syncablePksRequired)",
-                                entityTypeElement)
-                            .add(addKeyToListStr, addKeyToListArgs)
-                            .add("_element.set$L(_baseSyncablePk++);\n",
-                                capitalize(pkElement.getSimpleName()))
-                        .endControlFlow()
-                    .endControlFlow();
-        }else {
-            codeBlock.beginControlFlow(ifStmtStr, ifStmtArgs)
-                    .add("$L.set$L($L.getSyncablePrimaryKeyDao().getAndIncrement($L, 1));\n",
-                            methodInfo.getEntityParameterElement().getSimpleName(),
-                            capitalize(pkElement.getSimpleName()),
-                            syncableDbVarName,
-                            tableId);
-            if(!isVoid) {
-                codeBlock.add("$L = $L.get$L();\n", resultVarNameActive, paramVarName,
-                        capitalize(pkElement.getSimpleName()));
-            }
-            codeBlock.endControlFlow();
-        }
-
-        if(!isVoid && methodInfo.hasArrayResultType()){
-            codeBlock.add("$1T $2L = $2L_list.toArray(new $3T[$2L_list.size()]);\n",
-                    resultType,
-                    resultVarName,
-                    ((ArrayType)resultType).getComponentType());
-        }
-
-        return codeBlock.build();
-    }
-
-    /**
      * Note: When an update is run, we need to make sure the database triggers runs once, and only once.
      * Query methods that run an update query don't touch the sync sequence numbers, and the trigger
      * will when the change sequence number is unchanged after an update. With the Update method, all
@@ -1940,124 +1803,93 @@ public abstract class AbstractDbProcessor {
 
 
 
+    public CodeBlock generateChangeSequenceTriggersCodeBlock(String sqlProductName, String execSqlMethod,
+                                                     TypeElement entityType) {
+        CodeBlock.Builder codeBlock = CodeBlock.builder();
 
-    /**
-     * Add the required statements to the codeblock for code that will add the needed triggers
-     * for change sequence numbers to be updated on insert or update of an entity.
-     *
-     * @param sqlProductName SQLite or Postgres as per JdbcDatabaseUtils.PRODUCT_NAME_ constants
-     * @param execSqlMethod a method, accessible in this codeblock, that will run SQL e.g. 'statement.executeUpdate'
-     * @param dbType TypeElement representing the database
-     * @param codeBlock CodeBlock to add to
-     */
-    public void addCreateTriggersForEntitiesToCodeBlock(String sqlProductName,
-                                                        String execSqlMethod,
-                                                        TypeElement dbType,
-                                                        CodeBlock.Builder codeBlock) {
-        List<TypeElement> entityTypes = DbProcessorUtils.findEntityTypes(dbType, processingEnv);
-        boolean isFirst = true;
-        String ifStmtStr = "if(_entityClass.equals($T.class))";
-        for(TypeElement entityType : entityTypes) {
-            if(!DbProcessorUtils.entityHasChangeSequenceNumbers(entityType, processingEnv))
-                continue;
+        VariableElement pkElement = findPrimaryKey(entityType);
+        boolean autoSyncablePrimaryKey = pkElement.getAnnotation(UmPrimaryKey.class)
+                .autoGenerateSyncable();
+        Element localChangeSeqnumEl = DbProcessorUtils.findElementWithAnnotation(entityType,
+                UmSyncLocalChangeSeqNum.class, processingEnv);
+        Element masterChangeSeqNumEl = DbProcessorUtils.findElementWithAnnotation(entityType,
+                UmSyncMasterChangeSeqNum.class, processingEnv);
+        Element lastChangeByEl = DbProcessorUtils.findElementWithAnnotation(entityType,
+                UmSyncLastChangedBy.class, processingEnv);
 
-            if(isFirst)
-                codeBlock.beginControlFlow(ifStmtStr, entityType);
-            else
-                codeBlock.nextControlFlow("else " + ifStmtStr, entityType);
+        Map<String, String> triggerSqlArgs = new HashMap<>();
+        triggerSqlArgs.put("tableNameLower",
+                entityType.getSimpleName().toString().toLowerCase());
+        triggerSqlArgs.put("tableName", entityType.getSimpleName().toString());
+        triggerSqlArgs.put("localCsnFieldName", localChangeSeqnumEl.getSimpleName().toString());
+        triggerSqlArgs.put("masterCsnFieldName", masterChangeSeqNumEl.getSimpleName().toString());
+        triggerSqlArgs.put("pkName", pkElement.getSimpleName().toString());
+        triggerSqlArgs.put("tableId", ""+entityType.getAnnotation(UmEntity.class).tableId());
+        triggerSqlArgs.put("execSqlMethod", execSqlMethod);
+        triggerSqlArgs.put("lastChangeFieldName", lastChangeByEl.getSimpleName().toString());
 
-            VariableElement pkElement = findPrimaryKey(entityType);
-            boolean autoSyncablePrimaryKey = pkElement.getAnnotation(UmPrimaryKey.class)
-                    .autoGenerateSyncable();
-            Element localChangeSeqnumEl = DbProcessorUtils.findElementWithAnnotation(entityType,
-                    UmSyncLocalChangeSeqNum.class, processingEnv);
-            Element masterChangeSeqNumEl = DbProcessorUtils.findElementWithAnnotation(entityType,
-                    UmSyncMasterChangeSeqNum.class, processingEnv);
-            Element lastChangeByEl = DbProcessorUtils.findElementWithAnnotation(entityType,
-                    UmSyncLastChangedBy.class, processingEnv);
+        codeBlock.addNamed("$execSqlMethod:L(\"INSERT INTO SyncStatus" +
+                "(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) " +
+                "VALUES ($tableId:L, 1, 0, 0)\");\n", triggerSqlArgs);
 
-            Map<String, String> triggerSqlArgs = new HashMap<>();
-            triggerSqlArgs.put("tableNameLower",
-                    entityType.getSimpleName().toString().toLowerCase());
-            triggerSqlArgs.put("tableName", entityType.getSimpleName().toString());
-            triggerSqlArgs.put("localCsnName", localChangeSeqnumEl.getSimpleName().toString());
-            triggerSqlArgs.put("masterCsnName", masterChangeSeqNumEl.getSimpleName().toString());
-            triggerSqlArgs.put("pkName", pkElement.getSimpleName().toString());
-            triggerSqlArgs.put("tableId", ""+entityType.getAnnotation(UmEntity.class).tableId());
-            triggerSqlArgs.put("execSqlMethod", execSqlMethod);
-            triggerSqlArgs.put("lastChangeFieldName", lastChangeByEl.getSimpleName().toString());
-
-            codeBlock.addNamed("String _tableColName_$tableName:L = isMaster() ? " +
-                    "$masterCsnName:S : $localCsnName:S;\n", triggerSqlArgs);
-            triggerSqlArgs.put("concatTableCsnCol", "\" + _tableColName_" +
-                    entityType.getSimpleName() + " + \"");
-
-            codeBlock.add("String _syncStatusColName_$L = isMaster() ? $S: $S;\n",
-                    entityType.getSimpleName(), "masterChangeSeqNum", "localChangeSeqNum");
-            triggerSqlArgs.put("concatSyncStatusColName", "\" + _syncStatusColName_" +
-                    entityType.getSimpleName() + " + \"");
-
-            codeBlock.addNamed("$execSqlMethod:L(\"INSERT INTO SyncStatus(tableId, " +
-                        "localChangeSeqNum, masterChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) " +
-                            "VALUES($tableId:L, 1, 1, 0, 0)\");\n",
-                    triggerSqlArgs);
-
-            if(sqlProductName.equals(PRODUCT_NAME_SQLITE)) {
-                if(autoSyncablePrimaryKey) {
-                    codeBlock.add(generateSqliteSyncablePrimaryKeyInsertOnViewTrigger(triggerSqlArgs,
-                            entityType, pkElement));
-                }
-
-                codeBlock.addNamed("$execSqlMethod:L(\"CREATE TRIGGER update_csn_$tableNameLower:L " +
-                            "AFTER update ON $tableName:L FOR EACH ROW WHEN " +
-                            "(NEW.$concatTableCsnCol:L = 0 " +
-                                "OR OLD.$concatTableCsnCol:L = NEW.$concatTableCsnCol:L) " +
-                            "BEGIN " +
-                                "UPDATE $tableName:L SET $concatTableCsnCol:L = " +
-                                    "(SELECT $concatSyncStatusColName:L FROM SyncStatus WHERE tableId = $tableId:L) " +
-                                    "WHERE $pkName:L = NEW.$pkName:L; " +
-                                "UPDATE SyncStatus SET " +
-                                    "$concatSyncStatusColName:L = $concatSyncStatusColName:L + 1 " +
-                                "WHERE tableId = $tableId:L; " +
-                            "END\");\n", triggerSqlArgs)
-                        .addNamed("$execSqlMethod:L(\"CREATE TRIGGER insert_csn_$tableNameLower:L " +
-                            "AFTER insert ON $tableName:L FOR EACH ROW WHEN " +
-                            "(NEW.$concatTableCsnCol:L = 0) " +
-                            "BEGIN " +
-                                "UPDATE $tableName:L SET $concatTableCsnCol:L = " +
-                                    "(SELECT $concatSyncStatusColName:L FROM SyncStatus WHERE tableId = $tableId:L) " +
-                                "WHERE $pkName:L = NEW.$pkName:L;" +
-                                "UPDATE SyncStatus SET " +
-                                    "$concatSyncStatusColName:L = $concatSyncStatusColName:L + 1 " +
-                                "WHERE tableId = $tableId:L; " +
-                            "END\");\n", triggerSqlArgs);
-
-            }else if(sqlProductName.equals(PRODUCT_NAME_POSTGRES)) {
-                codeBlock.addNamed("$execSqlMethod:L(\"CREATE OR REPLACE FUNCTION " +
-                            "increment_csn_$tableNameLower:L_fn() RETURNS trigger AS $$$$ " +
-                            "BEGIN " +
-                                "UPDATE $tableName:L SET $concatTableCsnCol:L = " +
-                                    "(SELECT $concatSyncStatusColName:L FROM SyncStatus WHERE tableId = $tableId:L) " +
-                                    "WHERE $pkName:L = NEW.$pkName:L; " +
-                                "UPDATE SyncStatus SET " +
-                                    "$concatSyncStatusColName:L = $concatSyncStatusColName:L + 1  " +
-                                    "WHERE tableId = $tableId:L; " +
-                                "RETURN null; " +
-                            "END $$$$" +
-                            "LANGUAGE plpgsql\");\n", triggerSqlArgs)
-                        .addNamed("$execSqlMethod:L(\"CREATE TRIGGER " +
-                            "increment_csn_$tableNameLower:L_trigger AFTER UPDATE OR INSERT ON " +
-                            "$tableName:L FOR EACH ROW WHEN (pg_trigger_depth() = 0) " +
-                            "EXECUTE PROCEDURE increment_csn_$tableNameLower:L_fn()\");\n", triggerSqlArgs);
+        if(PRODUCT_NAME_SQLITE.equals(sqlProductName)) {
+            codeBlock.addNamed("$execSqlMethod:L(\"INSERT INTO SyncablePrimaryKey " +
+                    "(tableId, sequenceNumber) " +
+                    "VALUES ($tableId:L, 1)\");\n", triggerSqlArgs);
+            codeBlock.addNamed("$execSqlMethod:L(\"CREATE TRIGGER upd_$tableId:L " +
+                    "AFTER update ON $tableName:L FOR EACH ROW WHEN " +
+                        "(NEW.$localCsnFieldName:L = 0 " +
+                        "OR OLD.$localCsnFieldName:L = NEW.$localCsnFieldName:L " +
+                        "OR OLD.$masterCsnFieldName:L = 0 " +
+                        "OR OLD.$masterCsnFieldName:L = NEW.$masterCsnFieldName:L) " +
+                    "BEGIN " +
+                    "UPDATE $tableName:L SET $localCsnFieldName:L = " +
+                        "(SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.$localCsnFieldName:L " +
+                        "ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = $tableId:L) " +
+                        "END)," +
+                    "$masterCsnFieldName:L = " +
+                        "(SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) " +
+                        "THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = $tableId:L) " +
+                        "ELSE NEW.$masterCsnFieldName:L END) " +
+                    "WHERE $pkName:L = NEW.$pkName:L; " +
+                    "UPDATE SyncStatus SET " +
+                        "nextChangeSeqNum = nextChangeSeqNum + 1 " +
+                    "WHERE tableId = $tableId:L; " +
+                    "END\");\n", triggerSqlArgs);
+            if(autoSyncablePrimaryKey) {
+                codeBlock.add(generateSqliteSyncablePrimaryKeyInsertOnViewTrigger(triggerSqlArgs,
+                        entityType, pkElement));
             }
 
-            isFirst = false;
+        }else if(PRODUCT_NAME_POSTGRES.equals(sqlProductName)) {
+            codeBlock.addNamed("$execSqlMethod:L(\"CREATE OR REPLACE FUNCTION " +
+                    "inc_csn_$tableId:L_fn() RETURNS trigger AS $$$$ " +
+                    "BEGIN " +
+                    "UPDATE $tableName:L SET $localCsnFieldName:L = " +
+                            "(SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.$localCsnFieldName:L " +
+                            "ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = $tableId:L) " +
+                            "END)," +
+                    "$masterCsnFieldName:L = " +
+                        "(SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) " +
+                        "THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = $tableId:L) " +
+                        "ELSE NEW.$masterCsnFieldName:L END) " +
+                    "WHERE $pkName:L = NEW.$pkName:L; " +
+                    "UPDATE SyncStatus SET " +
+                    "nextChangeSeqNum = nextChangeSeqNum + 1  " +
+                    "WHERE tableId = $tableId:L; " +
+                    "RETURN null; " +
+                    "END $$$$" +
+                    "LANGUAGE plpgsql\");\n", triggerSqlArgs)
+            .addNamed("$execSqlMethod:L(\"CREATE TRIGGER " +
+                            "inc_csn_$tableId:L_trig AFTER UPDATE OR INSERT ON " +
+                            "$tableName:L FOR EACH ROW WHEN (pg_trigger_depth() = 0) " +
+                            "EXECUTE PROCEDURE inc_csn_$tableId:L_fn()\");\n", triggerSqlArgs);
         }
 
-        if(!isFirst)
-            codeBlock.endControlFlow();//end the if statement only if there was one
 
+        return codeBlock.build();
     }
+
 
     private CodeBlock generateSqliteSyncablePrimaryKeyInsertOnViewTrigger(
             Map<String, String> triggerSqlArgs, TypeElement entityType, Element pkElement) {
@@ -2066,15 +1898,14 @@ public abstract class AbstractDbProcessor {
          * When using a syncable primary key on SQLite - we need to create a VIEW, so
          * that we can use an instead of trigger on INSERT
          */
-        codeBlock.addNamed("$execSqlMethod:L(\"INSERT INTO " +
-                "SyncablePrimaryKey (tableId, sequenceNumber) " +
-                "VALUES ($tableId:L, 1)\");\n", triggerSqlArgs);
         codeBlock.addNamed("$execSqlMethod:L(\"CREATE VIEW IF NOT EXISTS " +
                 "$tableName:L_spk_view AS SELECT ", triggerSqlArgs);
         boolean commaRequired = false;
 
         CodeBlock.Builder colNameBlock = CodeBlock.builder();
         CodeBlock.Builder valuesCodeBlock = CodeBlock.builder();
+
+        int tableId = entityType.getAnnotation(UmEntity.class).tableId();
 
         for (VariableElement fieldVariable : DbProcessorUtils.getEntityFieldElements(
                 entityType, processingEnv)) {
@@ -2098,30 +1929,25 @@ public abstract class AbstractDbProcessor {
             if (fieldVariable.getAnnotation(UmPrimaryKey.class) != null) {
                 valuesCodeBlock.add("(SELECT lastPk FROM _lastsyncablepk " +
                         "ORDER BY id DESC LIMIT 1)");
-            } else if (fieldVariable.getAnnotation(UmSyncLocalChangeSeqNum.class) != null
-                    || fieldVariable.getAnnotation(UmSyncMasterChangeSeqNum.class) != null) {
-
-                String masterPrefix = "";
-                boolean isLocal = fieldVariable.getAnnotation(UmSyncLocalChangeSeqNum.class) != null;
-                if (isLocal)
-                    masterPrefix = "!";
-
-                String syncStatusColName = isLocal ? SyncStatus.COLNAME_LOCAL_CSN
-                        : SyncStatus.COLNAME_MASTER_CSN;
-
-                valuesCodeBlock.add("\" + (" + masterPrefix + "isMaster() ? " +
-                                "\"(SELECT $L FROM SyncStatus WHERE tableId = $L)\" : \"NEW.$L\") + \"",
-                        syncStatusColName,
-                        entityType.getAnnotation(UmEntity.class).tableId(),
-                        fieldVariable.getSimpleName());
-            } else {
+            }else if(fieldVariable.getAnnotation(UmSyncLocalChangeSeqNum.class) != null) {
+                valuesCodeBlock.add("(SELECT CASE WHEN " +
+                        "(SELECT master FROM SyncDeviceBits) THEN NEW.$L " +
+                        "ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = $L) END)",
+                        fieldVariable.getSimpleName(), tableId);
+            }else if(fieldVariable.getAnnotation(UmSyncMasterChangeSeqNum.class) != null) {
+                valuesCodeBlock.add("(SELECT CASE WHEN  " +
+                        "(SELECT master FROM SyncDeviceBits) " +
+                        "THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = $L) " +
+                        "ELSE NEW.$L END)",
+                        tableId, fieldVariable.getSimpleName());
+            }else {
                 valuesCodeBlock.add("NEW.$L", fieldVariable.getSimpleName());
             }
 
             isFirstEl = false;
         }
 
-        codeBlock.addNamed("$execSqlMethod:L(\"CREATE TRIGGER spk_trigger_$tableName:L " +
+        codeBlock.addNamed("$execSqlMethod:L(\"CREATE TRIGGER ins_$tableId:L " +
                 "INSTEAD OF INSERT ON $tableName:L_spk_view " +
                 "BEGIN ", triggerSqlArgs)
                 .add("INSERT INTO _lastsyncablepk (lastpk) SELECT CASE WHEN NEW.$1L = 0 OR NEW.$1L IS NULL THEN (" +
@@ -2137,7 +1963,7 @@ public abstract class AbstractDbProcessor {
                         "WHERE (NEW.$pkName:L = 0 OR NEW.$pkName:L IS NULL) " +
                         "AND tableId = $tableId:L; ", triggerSqlArgs)
                 .addNamed("UPDATE SyncStatus SET " +
-                        "$concatSyncStatusColName:L = $concatSyncStatusColName:L + 1 " +
+                        "nextChangeSeqNum = nextChangeSeqNum + 1 " +
                         " WHERE tableId = $tableId:L; ", triggerSqlArgs)
                 .add("END\");\n");
 

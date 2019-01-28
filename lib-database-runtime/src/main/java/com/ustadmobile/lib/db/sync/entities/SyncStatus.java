@@ -19,6 +19,12 @@ public class SyncStatus {
     private int tableId;
 
     /**
+     * Represents the next change sequence number
+     */
+    private long nextChangeSeqNum;
+
+
+    /**
      * Represents the next master change sequence number that will be used.
      */
     private long masterChangeSeqNum;
@@ -87,5 +93,13 @@ public class SyncStatus {
 
     public void setSyncedToLocalChangeSeqNum(long syncedToLocalChangeSeqNum) {
         this.syncedToLocalChangeSeqNum = syncedToLocalChangeSeqNum;
+    }
+
+    public long getNextChangeSeqNum() {
+        return nextChangeSeqNum;
+    }
+
+    public void setNextChangeSeqNum(long nextChangeSeqNum) {
+        this.nextChangeSeqNum = nextChangeSeqNum;
     }
 }

@@ -20,6 +20,8 @@ public class SyncDeviceBits {
 
     private int deviceBits;
 
+    private boolean master;
+
     public SyncDeviceBits() {
 
     }
@@ -47,5 +49,14 @@ public class SyncDeviceBits {
 
     public void setDeviceBits(int deviceBits) {
         this.deviceBits = deviceBits;
+    }
+
+
+    public boolean isMaster() {
+        return master;
+    }
+
+    public void setMaster(boolean master) {
+        this.master = master;
     }
 }

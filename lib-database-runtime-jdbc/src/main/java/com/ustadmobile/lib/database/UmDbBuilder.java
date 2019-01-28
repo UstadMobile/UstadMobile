@@ -84,7 +84,8 @@ public class UmDbBuilder {
                     //create the table
                     dbAdapter.execSql("CREATE TABLE " + DBINFO_TABLENAME +
                             " (dbVersion int primary key, dbHash varchar(255))");
-                    dbAdapter.execSql("INSERT INTO _doorwayinfo (dbVersion, dbHash) VALUES (");
+                    dbAdapter.execSql("INSERT INTO _doorwayinfo (dbVersion, dbHash) VALUES (" +
+                            db.getVersion() +", '')");
 
                     for(DbCallback callback : callbackList){
                         callback.onCreate(dbAdapter);
