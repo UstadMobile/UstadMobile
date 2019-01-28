@@ -19,6 +19,6 @@ public abstract class UmDbMigration {
         return toVersion;
     }
 
-    public abstract void migrate();
+    public abstract void migrate(DoorwayDbAdapter db);
 
 }
