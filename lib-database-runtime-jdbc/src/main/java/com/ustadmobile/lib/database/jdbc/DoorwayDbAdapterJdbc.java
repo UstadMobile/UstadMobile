@@ -33,6 +33,11 @@ public class DoorwayDbAdapterJdbc implements DoorwayDbAdapter, AutoCloseable {
         }
     }
 
+    @Override
+    public int getDbType() {
+        return db.getDbType();
+    }
+
     public void close() {
         JdbcDatabaseUtils.closeQuietly(statement);
         JdbcDatabaseUtils.closeQuietly(connection);

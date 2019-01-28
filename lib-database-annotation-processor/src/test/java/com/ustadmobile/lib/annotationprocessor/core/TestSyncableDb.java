@@ -162,8 +162,8 @@ public class TestSyncableDb  {
             eDao.insertAsync(new ExampleSyncableEntity("title " + i), new UmCallback<Long>() {
                 @Override
                 public void onSuccess(Long result) {
-                    countDown.countDown();
                     insertCount.incrementAndGet();
+                    countDown.countDown();
                 }
 
                 @Override
@@ -173,7 +173,7 @@ public class TestSyncableDb  {
             });
         }
 
-        try { countDown.await(10, TimeUnit.SECONDS); }
+        try { countDown.await(10, TimeUnit.MINUTES); }
         catch(InterruptedException e) {}
 
         Assert.assertEquals("Successful insert count equals target num of items to insert",

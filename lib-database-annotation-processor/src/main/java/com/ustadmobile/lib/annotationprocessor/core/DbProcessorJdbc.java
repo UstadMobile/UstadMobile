@@ -112,7 +112,7 @@ public class DbProcessorJdbc extends AbstractDbProcessor implements QueryMethodG
 
     private static final char SQL_IDENTIFIER_CHAR = ' ';
 
-    private static final String POSTGRES_SYNCABLE_PK_PREFIX = "spk_seq_";
+    public static final String POSTGRES_SYNCABLE_PK_PREFIX = "spk_seq_";
 
     private File dbTmpFile;
 
@@ -497,6 +497,13 @@ public class DbProcessorJdbc extends AbstractDbProcessor implements QueryMethodG
         TypeElement syncablePkEl = processingEnv.getElementUtils().getTypeElement(
                 SyncablePrimaryKey.class.getName());
 
+        boolean isSyncableDb = processingEnv.getTypeUtils().isAssignable(dbType.asType(),
+                        processingEnv.getElementUtils()
+                        .getTypeElement(UmSyncableDatabase.class.getName()).asType());
+
+        if(isSyncableDb) {
+            codeBlock.add("int _newDeviceBits = new $T().nextInt();\n", Random.class);
+        }
 
         for(TypeElement entityType : DbProcessorUtils.findEntityTypes(dbType, processingEnv)) {
             if(entityType.equals(syncStatusTypeEl)) {
@@ -510,11 +517,25 @@ public class DbProcessorJdbc extends AbstractDbProcessor implements QueryMethodG
             }else {
                 codeBlock.add("stmt.executeUpdate(\"DELETE FROM $1L$2L$1L\");\n",
                         identifierQuoteStr, entityType.getSimpleName().toString());
+
+                Element pkElement = findPrimaryKey(entityType);
+                if(pkElement != null
+                        && pkElement.getAnnotation(UmPrimaryKey.class) != null
+                        && pkElement.getAnnotation(UmPrimaryKey.class).autoGenerateSyncable()
+                        && entityType.getAnnotation(UmEntity.class) != null) {
+                    codeBlock.beginControlFlow("if(getDbType() == $T.TYPE_POSTGRES)",
+                            UmDbType.class)
+                            .add("$T.updatePostgresSyncablePrimaryKeySequence($L, _newDeviceBits, " +
+                                    "stmt);\n", JdbcDatabaseUtils.class,
+                                    entityType.getAnnotation(UmEntity.class).tableId())
+                            .endControlFlow();
+                }
+
             }
 
             if(entityType.equals(syncDeviceBitsEl))
                 codeBlock.add("stmt.executeUpdate(\"INSERT INTO SyncDeviceBits VALUES (1, \"" +
-                    " + new $T().nextInt() + \")\");\n", Random.class);
+                    " + _newDeviceBits + \")\");\n", Random.class);
         }
 
         codeBlock.nextControlFlow("catch($T e)", SQLException.class)
@@ -575,10 +596,10 @@ public class DbProcessorJdbc extends AbstractDbProcessor implements QueryMethodG
                     && pkElement.getAnnotation(UmPrimaryKey.class) != null
                     && pkElement.getAnnotation(UmPrimaryKey.class).autoGenerateSyncable()
                     && entityAnnotation != null) {
-                codeBlock.add("$L.executeUpdate(\"CREATE SEQUENCE $L$L " +
-                                " INCREMENT BY \" + (_deviceBits > 0 ? 1 : -1) + \"" +
-                                " START WITH \" + _deviceBits);\n",
-                        stmtVariableName, POSTGRES_SYNCABLE_PK_PREFIX, entityAnnotation.tableId());
+                codeBlock.add("$L.executeUpdate(\"CREATE SEQUENCE $L$L \" + " +
+                                " $T.generatePostgresSyncablePrimaryKeySequenceParameters(_deviceBits));\n",
+                        stmtVariableName, POSTGRES_SYNCABLE_PK_PREFIX, entityAnnotation.tableId(),
+                        JdbcDatabaseUtils.class);
             }
         }
 

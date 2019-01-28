@@ -6,9 +6,9 @@ import com.ustadmobile.lib.db.sync.UmSyncableDatabase;
 
 import java.sql.Array;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -295,6 +295,43 @@ public class JdbcDatabaseUtils {
     public static void unlockSyncableInsertsIfSqlite(UmJdbcDatabase db) {
         if(db.getDbType() == UmDbType.TYPE_SQLITE)
             ((UmDbWithSyncableInsertLock)db).unlockSyncableInserts();
+    }
+
+
+    /**
+     * Update the sequence that is used on Postgres for generating syncable primary keys. This
+     * method is called from generated code (specifically, the clearAll method). This should be
+     * done whenever the syncDeviceBits are changed.
+     *
+     * @param tableId table id for the entity to alter the sequence for
+     * @param syncDeviceBits the new value for syncdevicebits
+     * @param stmt JDBC statement object
+     * @throws SQLException if there is an SQLException when running the SQL
+     */
+    @SuppressWarnings("unused")
+    public static void updatePostgresSyncablePrimaryKeySequence(int tableId,
+                                                                int syncDeviceBits,
+                                                                Statement stmt) throws SQLException{
+        stmt.execute("ALTER SEQUENCE spk_seq_" +
+                tableId + generatePostgresSyncablePrimaryKeySequenceParameters(syncDeviceBits));
+    }
+
+    /**
+     * Generate the parameters used on Postgres for creation of a sequence based on a set sync
+     * device bits prefix
+     *
+     * @param syncDeviceBits Sync device bits prefix
+     *
+     * @return String that can be used with postgres ALTER SEQUENCE or CREATE SEQUENCE to set
+     * sequence min, max, start and restart parameters
+     */
+    public static String generatePostgresSyncablePrimaryKeySequenceParameters(int syncDeviceBits) {
+        long syncDeviceBitsShifted = ((long)syncDeviceBits) << 32;
+        return " INCREMENT BY 1 " +
+                    " MINVALUE " + syncDeviceBitsShifted +
+                    " MAXVALUE " + (syncDeviceBitsShifted + 0xFFFFFFFFL) +
+                    " RESTART WITH " + (syncDeviceBitsShifted + 1) +
+                    " START WITH " + (syncDeviceBitsShifted + 1);
     }
 
 
