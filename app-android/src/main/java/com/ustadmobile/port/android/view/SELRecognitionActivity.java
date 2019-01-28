@@ -11,6 +11,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.widget.CheckBox;
+import android.widget.Toast;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.SELRecognitionPresenter;
@@ -95,6 +96,15 @@ public class SELRecognitionActivity extends UstadBaseActivity implements SELReco
 
         //set the adapter
         mRecyclerView.setAdapter(recyclerAdapter);
+    }
+
+    @Override
+    public void showMessage(String message) {
+        Toast.makeText(
+                getApplicationContext(),
+                message,
+                Toast.LENGTH_SHORT
+        ).show();
     }
 
     /**

@@ -4,8 +4,10 @@ import java.util.Hashtable;
 import java.util.List;
 
 import com.ustadmobile.core.db.dao.SocialNominationQuestionDao;
+import com.ustadmobile.core.db.dao.SocialNominationQuestionResponseDao;
 import com.ustadmobile.core.db.dao.SocialNominationQuestionSetDao;
 import com.ustadmobile.core.db.dao.SocialNominationQuestionSetResponseDao;
+import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.view.SELQuestionView;
@@ -17,6 +19,7 @@ import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.lib.db.entities.Person;
 import com.ustadmobile.lib.db.entities.PersonWithPersonPicture;
 import com.ustadmobile.lib.db.entities.SocialNominationQuestion;
+import com.ustadmobile.lib.db.entities.SocialNominationQuestionResponse;
 import com.ustadmobile.lib.db.entities.SocialNominationQuestionSet;
 import com.ustadmobile.lib.db.entities.SocialNominationQuestionSetResponse;
 
@@ -24,6 +27,7 @@ import static com.ustadmobile.core.view.ClazzListView.ARG_CLAZZ_UID;
 import static com.ustadmobile.core.view.PersonDetailView.ARG_PERSON_UID;
 import static com.ustadmobile.core.view.SELEditView.ARG_CLAZZMEMBER_UID;
 import static com.ustadmobile.core.view.SELEditView.ARG_QUESTION_INDEX_ID;
+import static com.ustadmobile.core.view.SELEditView.ARG_QUESTION_RESPONSE_UID;
 import static com.ustadmobile.core.view.SELEditView.ARG_QUESTION_SET_RESPONSE_UID;
 import static com.ustadmobile.core.view.SELEditView.ARG_QUESTION_SET_UID;
 import static com.ustadmobile.core.view.SELEditView.ARG_QUESTION_UID;
@@ -126,11 +130,15 @@ public class SELRecognitionPresenter
             @Override
             public void onSuccess(List<SocialNominationQuestionSet> questionSets) {
 
-                //TODO: Change this when we add more Question Sets to findNextQuestionSet like we did for findNextQuestion
+                //Update: Question Set selection moved to SELSelectStudentView screen in Sprint 5
+                //TODOne: Change this when we add more Question Sets to findNextQuestionSet
+                // like we did for findNextQuestion
                 for(SocialNominationQuestionSet questionSet : questionSets){
 
                     //Find total number of questions as well.
-                    int totalSELQuestions = questionDao.findTotalNumberOfQuestions();
+                    int totalSELQuestions =
+                            questionDao.findTotalNumberOfActiveQuestionsInAQuestionSet
+                                    (questionSet.getSocialNominationQuestionSetUid());
 
                     questionDao.findNextQuestionByQuestionSetUidAsync(questionSet.getSocialNominationQuestionSetUid(),
                         0, new UmCallback<SocialNominationQuestion>() {
@@ -150,6 +158,22 @@ public class SELRecognitionPresenter
 
                                         view.finish();
 
+                                        //Make a question response for the next Question for
+                                        // this Response-Set instance.
+                                        SocialNominationQuestionResponseDao questionResponseDao =
+                                                repository.getSocialNominationQuestionResponseDao();
+                                        SocialNominationQuestionResponse questionResponse =
+                                                new SocialNominationQuestionResponse();
+                                        questionResponse
+                                                .setSocialNominationQuestionResponseSocialNominationQuestionSetResponseUid(
+                                                        newResponse.getSocialNominationQuestionSetResposeUid());
+                                        questionResponse
+                                                .setSocialNominationQuestionResponseSocialNominationQuestionUid(
+                                                        nextQuestion.getSocialNominationQuestionUid());
+                                        questionResponse
+                                                .setSocialNominationQuestionResponseUid(
+                                                        questionResponseDao.insert(questionResponse));
+
                                         //Create arguments
                                         Hashtable<String, Object> args = new Hashtable<>();
                                         args.put(ARG_CLAZZ_UID, currentClazzUid);
@@ -162,6 +186,8 @@ public class SELRecognitionPresenter
                                         args.put(ARG_QUESTION_TEXT, nextQuestion.getQuestionText());
                                         args.put(ARG_QUESTION_INDEX, nextQuestion.getQuestionIndex());
                                         args.put(ARG_QUESTION_TOTAL, totalSELQuestions);
+                                        args.put(ARG_QUESTION_RESPONSE_UID, questionResponse.getSocialNominationQuestionResponseUid());
+
                                         args.put(ARG_DONE_CLAZZMEMBER_UIDS, doneClazzMemberUids);
 
                                         impl.go(SELQuestionView.VIEW_NAME, args, view.getContext());
@@ -210,36 +236,37 @@ public class SELRecognitionPresenter
         if(recognitionDone){
 
             questionResponseNominationDao.findByUidAsync(currentRecognitionQuestionNominationResponse,
-                    new UmCallback<SocialNominationQuestionSetResponse>() {
-                        @Override
-                        public void onSuccess(SocialNominationQuestionSetResponse responseNomination) {
+                new UmCallback<SocialNominationQuestionSetResponse>() {
+                    @Override
+                    public void onSuccess(SocialNominationQuestionSetResponse responseNomination) {
 
-                            responseNomination.setSocialNominationQuestionSetResponseFinishTime(System.currentTimeMillis());
-                            questionResponseNominationDao.updateAsync(responseNomination,
-                                    new UmCallback<Integer>() {
-                                @Override
-                                public void onSuccess(Integer result) {
-                                    goToNextQuestion();
-                                }
+                        responseNomination.setSocialNominationQuestionSetResponseFinishTime(
+                                System.currentTimeMillis());
+                        questionResponseNominationDao.updateAsync(responseNomination,
+                                new UmCallback<Integer>() {
+                            @Override
+                            public void onSuccess(Integer result) {
+                                goToNextQuestion();
+                            }
 
-                                @Override
-                                public void onFailure(Throwable exception) {
-                                    exception.printStackTrace();
-                                }
-                            });
-                        }
+                            @Override
+                            public void onFailure(Throwable exception) {
+                                exception.printStackTrace();
+                            }
+                        });
+                    }
 
-                        @Override
-                        public void onFailure(Throwable exception) {
-                            exception.printStackTrace();
-                        }
-                    });
-
-
+                    @Override
+                    public void onFailure(Throwable exception) {
+                        exception.printStackTrace();
+                    }
+                });
 
         }else{
-            System.out.println("SELRecognitionPresenter - Student recognized not checked.");
             // UI : Maybe a toast ?
+            UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+            view.showMessage(impl.getString(MessageID.recognition_not_selected, context));
+
         }
 
     }

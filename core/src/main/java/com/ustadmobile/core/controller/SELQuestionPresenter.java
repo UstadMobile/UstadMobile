@@ -32,14 +32,14 @@ public class SELQuestionPresenter
 
     //Any arguments stored as variables here
     private String doneClazzMemberUids = "";
-    private long currentClazzUid = -1;
-    private long currentPersonUid = -1;
-    private long currentQuestionSetUid = -1;
-    private long currentClazzMemberUid = -1;
-    private long currentQuestionUid = -1;
+    private long currentClazzUid = 0;
+    private long currentPersonUid = 0;
+    private long currentQuestionSetUid = 0;
+    private long currentClazzMemberUid = 0;
+    private long currentQuestionUid = 0;
     private int currentQuestionIndexId = 0;
-    private long currentQuestionSetResponseUid = -1;
-    private long currentQuestionResponseUid = -1;
+    private long currentQuestionSetResponseUid = 0;
+    private long currentQuestionResponseUid = 0;
     private String questionText = "";
 
     private Hashtable gottenArguments;

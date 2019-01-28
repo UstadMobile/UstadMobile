@@ -32,4 +32,7 @@ public interface SELRecognitionView extends UstadView {
      */
     void finish();
 
+    /** Send message to view **/
+    void showMessage(String message);
+
 }

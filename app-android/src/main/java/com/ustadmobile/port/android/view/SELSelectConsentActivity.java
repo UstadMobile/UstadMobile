@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.widget.CheckBox;
+import android.widget.Toast;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.SELSelectConsentPresenter;
@@ -67,4 +68,12 @@ public class SELSelectConsentActivity extends UstadBaseActivity implements SELSe
 
     }
 
+    @Override
+    public void toastMessage(String message) {
+        Toast.makeText(
+                getApplicationContext(),
+                message,
+                Toast.LENGTH_SHORT
+        ).show();
+    }
 }

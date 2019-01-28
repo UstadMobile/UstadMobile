@@ -51,7 +51,7 @@ public class SELAnswerListPresenter extends
         UmAppDatabase repository = UmAccountManager.getRepositoryForActiveAccount(context);
 
         selAnswersProvider = repository.getSocialNominationQuestionSetResponseDao()
-                .findAllDoneSN();
+                .findAllDoneSNByClazzUid(currentClazzUid);
         setSELAnswerProviderToView();
 
     }
@@ -91,18 +91,19 @@ public class SELAnswerListPresenter extends
 
     /**
      * Handles what happens when the primary button of every item on the SEL Answer list recycler
-     * adapter is clicked - It should go to the SEL Answers. TODO: Finish this.
+     * adapter is clicked - It should go to the SEL Answers. TODOne: Finish this.
      *
      * @param arg   The argument to be passed to the presenter for primary action pressed.
      */
     @Override
     public void handleCommonPressed(Object arg) {
+        //Update: Not meant to go anywhere.
 //        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
 //        Hashtable<String, Object> args = new Hashtable<>();
 //        args.put(ARG_CLAZZ_UID, currentClazzUid);
 //        args.put(ARG_PERSON_UID, arg);
 //        //Go somewhere ? To SELEdit maybe?
-//        //TODO: this
+//        //TODOne: this
 
     }
 

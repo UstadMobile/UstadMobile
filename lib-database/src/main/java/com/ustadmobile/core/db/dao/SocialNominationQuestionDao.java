@@ -49,6 +49,12 @@ public abstract class SocialNominationQuestionDao implements
     @UmQuery("SELECT MAX(questionIndex) FROM SocialNominationQuestion")
     public abstract void getMaxIndexAsync(UmCallback<Integer> resultObject);
 
+    @UmQuery("SELECT MAX(questionIndex) FROM SocialNominationQuestion WHERE " +
+            "socialNominationQuestionSocialNominationQuestionSetUid = :questionSetUid " +
+            " AND questionActive = 1")
+    public abstract void getMaxIndexByQuestionSetAsync(long questionSetUid,
+                                                       UmCallback<Integer> resultObject);
+
     @UmQuery("SELECT * FROM SocialNominationQuestion where " +
             "socialNominationQuestionSocialNominationQuestionSetUid = :questionSetUid")
     public abstract void findAllByQuestionSetUidAsync(long questionSetUid,
@@ -74,6 +80,11 @@ public abstract class SocialNominationQuestionDao implements
 
     @UmQuery("SELECT COUNT(*) FROM SocialNominationQuestion")
     public abstract int findTotalNumberOfQuestions();
+
+    @UmQuery("SELECT COUNT(*) FROM SocialNominationQuestion WHERE" +
+            " socialNominationQuestionSocialNominationQuestionSetUid = :questionSetUid AND " +
+            " questionActive = 1")
+    public abstract int findTotalNumberOfActiveQuestionsInAQuestionSet(long questionSetUid);
 
     @UmQuery("SELECT * FROM SocialNominationQuestion WHERE questionText = :question")
     public abstract void findByQuestionStringAsync(String question,

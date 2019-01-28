@@ -18,6 +18,9 @@ public class SocialNominationQuestionResponse {
     // -> SocialNominationQuestionSetResponse
     private long socialNominationQuestionResponseSocialNominationQuestionSetResponseUid;
 
+    //Added the actual Question UID (28012019): TODO: Note for Migrations
+    private long socialNominationQuestionResponseSocialNominationQuestionUid;
+
     @UmSyncMasterChangeSeqNum
     private long scheduleNominationQuestionResponseMasterChangeSeqNum;
 
@@ -65,5 +68,13 @@ public class SocialNominationQuestionResponse {
 
     public void setScheduleNominationQuestionResponseLastChangedBy(int scheduleNominationQuestionResponseLastChangedBy) {
         this.scheduleNominationQuestionResponseLastChangedBy = scheduleNominationQuestionResponseLastChangedBy;
+    }
+
+    public long getSocialNominationQuestionResponseSocialNominationQuestionUid() {
+        return socialNominationQuestionResponseSocialNominationQuestionUid;
+    }
+
+    public void setSocialNominationQuestionResponseSocialNominationQuestionUid(long socialNominationQuestionResponseSocialNominationQuestionUid) {
+        this.socialNominationQuestionResponseSocialNominationQuestionUid = socialNominationQuestionResponseSocialNominationQuestionUid;
     }
 }

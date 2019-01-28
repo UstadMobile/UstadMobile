@@ -52,7 +52,7 @@ public abstract class SocialNominationQuestionSetResponseDao implements
 
     @UmQuery("SELECT Person.*   from " +
             "ClazzMember INNER JOIN PERSON ON " +
-            "ClazzMember.clazzMemberUid  = Person.personUid INNER join " +
+            "ClazzMember.clazzMemberPersonUid  = Person.personUid INNER join " +
             "SocialNominationQuestionSetResponse ON  " +
             "ClazzMember.clazzMemberUid = " +
             "SocialNominationQuestionSetResponse.socialNominationQuestionSetResponseClazzMemberUid " +
@@ -60,4 +60,22 @@ public abstract class SocialNominationQuestionSetResponseDao implements
             "SocialNominationQuestionSetResponse.socialNominationQuestionSetResponseFinishTime > 0 " +
             "AND SocialNominationQuestionSetResponse.socialNominationQuestionSetResponseSocialNominationQuestionSetUid != 0")
     public abstract UmProvider<Person> findAllDoneSN();
+
+    @UmQuery("SELECT  " +
+            "   Person.* " +
+            " FROM " +
+            "   ClazzMember " +
+            " INNER JOIN " +
+            "   PERSON ON " +
+            "   ClazzMember.clazzMemberPersonUid  = Person.personUid " +
+            " INNER JOIN " +
+            "   SocialNominationQuestionSetResponse ON " +
+            "   ClazzMember.clazzMemberUid = " +
+            "   SocialNominationQuestionSetResponse.socialNominationQuestionSetResponseClazzMemberUid " +
+            " WHERE" +
+            "   SocialNominationQuestionSetResponse.socialNominationQuestionSetResponseFinishTime > 0 " +
+            "   AND SocialNominationQuestionSetResponse.socialNominationQuestionSetResponseSocialNominationQuestionSetUid != 0 " +
+            "   AND ClazzMember.clazzMemberClazzUid = :clazzUid")
+    public abstract UmProvider<Person> findAllDoneSNByClazzUid(long clazzUid);
+
 }

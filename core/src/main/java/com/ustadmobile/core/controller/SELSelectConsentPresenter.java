@@ -6,6 +6,7 @@ import java.util.List;
 import com.ustadmobile.core.db.dao.SocialNominationQuestionDao;
 import com.ustadmobile.core.db.dao.SocialNominationQuestionSetDao;
 import com.ustadmobile.core.db.dao.SocialNominationQuestionSetResponseDao;
+import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.view.SELQuestionView;
@@ -46,6 +47,7 @@ public class SELSelectConsentPresenter
     private long currentClazzMemberUid = -1;
     private int MIN_RECOGNITION_SUCCESSES = 0;
     private String doneClazzMemberUids = "";
+    public static final int BASE_INDEX_SEL_QUESTION = 0;
 
     UmAppDatabase repository = UmAccountManager.getRepositoryForActiveAccount(context);
 
@@ -89,7 +91,10 @@ public class SELSelectConsentPresenter
         //Check selectedObject for consent given.
         if(consentGiven){
 
-            //TODO: Check: Decide when to show recognition and when to show the SEL questions themselves.
+            //Update: Recognition is always checked before the question run through and the
+            // question set is always selected as per Sprint 5.
+            //TODOne: Check: Decide when to show recognition and when to show the
+            // SEL questions themselves
             socialNominationQuestionSetResponseDao.findAllPassedRecognitionByPersonUid(
                     currentClazzMemberUid,
                     new UmCallback<List<SocialNominationQuestionSetResponse>>() {
@@ -130,12 +135,10 @@ public class SELSelectConsentPresenter
                 }
             });
         }else {
-            //TODO: Handle and think about what happens if the consent is NOT given.
-            System.out.println("SELSelectConsentPresenter - No Consent - " +
-                    "What to do ? Not doing anything.");
+            //TODOne: Handle and think about what happens if the consent is NOT given.
             //UI: Maybe some toast?
+            view.toastMessage(impl.getString(MessageID.consent_not_selected, context));
         }
-
     }
 
     /**
@@ -157,64 +160,70 @@ public class SELSelectConsentPresenter
             @Override
             public void onSuccess(List<SocialNominationQuestionSet> questionSets) {
 
-                //TODO: Change this when we add more Question Sets to findNextQuestionSet like we did for findNextQuestion
+                //Update: Sprint 5: Question Set will be selectable at the
+                // SELSelectStudentView screen.
+                //TODOne: Change this when we add more Question Sets to
+                // findNextQuestionSet like we did for findNextQuestion
                 for(SocialNominationQuestionSet questionSet : questionSets){
 
                     //Find total number of questions as well.
-                    int totalSELQuestions = questionDao.findTotalNumberOfQuestions();
+                    int totalSELQuestions =
+                        questionDao.findTotalNumberOfActiveQuestionsInAQuestionSet(
+                                questionSet.getSocialNominationQuestionSetUid()
+                        );
 
                     questionDao.findNextQuestionByQuestionSetUidAsync(questionSet.getSocialNominationQuestionSetUid(),
-                            0, new UmCallback<SocialNominationQuestion>() {
-                                @Override
-                                public void onSuccess(SocialNominationQuestion nextQuestion) {
-                                    if(nextQuestion != null) {
+                            BASE_INDEX_SEL_QUESTION, new UmCallback<SocialNominationQuestion>() {
+                        @Override
+                        public void onSuccess(SocialNominationQuestion nextQuestion) {
+                            if(nextQuestion != null) {
 
-                                        SocialNominationQuestionSetResponse newResponse = new SocialNominationQuestionSetResponse();
-                                        newResponse.setSocialNominationQuestionSetResponseStartTime(System.currentTimeMillis());
-                                        newResponse.setSocialNominationQuestionSetResponseSocialNominationQuestionSetUid(
-                                                questionSet.getSocialNominationQuestionSetUid());
-                                        newResponse.setSocialNominationQuestionSetResponseClazzMemberUid(currentClazzMemberUid);
+                                SocialNominationQuestionSetResponse newResponse = new SocialNominationQuestionSetResponse();
+                                newResponse.setSocialNominationQuestionSetResponseStartTime(System.currentTimeMillis());
+                                newResponse.setSocialNominationQuestionSetResponseSocialNominationQuestionSetUid(
+                                        questionSet.getSocialNominationQuestionSetUid());
+                                newResponse.setSocialNominationQuestionSetResponseClazzMemberUid(currentClazzMemberUid);
 
-                                        socialNominationQuestionSetResponseDao.insertAsync(newResponse, new UmCallback<Long>() {
-                                            @Override
-                                            public void onSuccess(Long questionSetResponseUid) {
+                                socialNominationQuestionSetResponseDao.insertAsync(newResponse, new UmCallback<Long>() {
+                                    @Override
+                                    public void onSuccess(Long questionSetResponseUid) {
 
-                                                view.finish();
-
-                                                //Create arguments
-                                                Hashtable<String, Object> args = new Hashtable<>();
-                                                args.put(ARG_CLAZZ_UID, currentClazzUid);
-                                                args.put(ARG_PERSON_UID, currentPersonUid);
-                                                args.put(ARG_QUESTION_SET_UID, questionSet.getSocialNominationQuestionSetUid());
-                                                args.put(ARG_CLAZZMEMBER_UID, currentClazzMemberUid);
-                                                args.put(ARG_QUESTION_UID, nextQuestion.getSocialNominationQuestionUid());
-                                                args.put(ARG_QUESTION_INDEX_ID, nextQuestion.getQuestionIndex());
-                                                args.put(ARG_QUESTION_SET_RESPONSE_UID, questionSetResponseUid);
-                                                args.put(ARG_QUESTION_TEXT, nextQuestion.getQuestionText());
-                                                args.put(ARG_QUESTION_INDEX, nextQuestion.getQuestionIndex());
-                                                args.put(ARG_QUESTION_TOTAL, totalSELQuestions);
-
-                                                impl.go(SELQuestionView.VIEW_NAME, args, view.getContext());
-
-                                            }
-
-                                            @Override
-                                            public void onFailure(Throwable exception) {
-                                                exception.printStackTrace();
-                                            }
-                                        });
-
-                                    }else{
-                                        //End the SEL activities properly.
                                         view.finish();
-                                    }
-                                }
 
-                                @Override
-                                public void onFailure(Throwable exception) {
-                                    exception.printStackTrace();
-                                }
-                            });
+                                        //Create arguments
+                                        Hashtable<String, Object> args = new Hashtable<>();
+                                        args.put(ARG_CLAZZ_UID, currentClazzUid);
+                                        args.put(ARG_PERSON_UID, currentPersonUid);
+                                        args.put(ARG_QUESTION_SET_UID, questionSet.getSocialNominationQuestionSetUid());
+                                        args.put(ARG_CLAZZMEMBER_UID, currentClazzMemberUid);
+                                        args.put(ARG_QUESTION_UID, nextQuestion.getSocialNominationQuestionUid());
+                                        args.put(ARG_QUESTION_INDEX_ID, nextQuestion.getQuestionIndex());
+                                        args.put(ARG_QUESTION_SET_RESPONSE_UID, questionSetResponseUid);
+                                        args.put(ARG_QUESTION_TEXT, nextQuestion.getQuestionText());
+                                        args.put(ARG_QUESTION_INDEX, nextQuestion.getQuestionIndex());
+                                        args.put(ARG_QUESTION_TOTAL, totalSELQuestions);
+
+                                        impl.go(SELQuestionView.VIEW_NAME, args, view.getContext());
+
+                                    }
+
+                                    @Override
+                                    public void onFailure(Throwable exception) {
+                                        exception.printStackTrace();
+                                    }
+                                });
+
+                            }else{
+                                //End the SEL activities properly.
+                                view.finish();
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Throwable exception) {
+                            exception.printStackTrace();
+                        }
+                    });
                 }
 
             }

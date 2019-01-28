@@ -15,5 +15,7 @@ public interface SELSelectConsentView extends UstadView {
      */
     void finish();
 
+    /** Notify a message **/
+    void toastMessage(String message);
 
 }

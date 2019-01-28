@@ -83,28 +83,42 @@ public class SELQuestionDetail2Presenter extends
         questionUmLiveData.observe(SELQuestionDetail2Presenter.this,
                 SELQuestionDetail2Presenter.this::handleSELQuestionValueChanged);
 
-        repository.getSocialNominationQuestionDao().findByUidAsync(currentQuestionUid,
+        SocialNominationQuestionDao socialNominationQuestionDao =
+                repository.getSocialNominationQuestionDao();
+        socialNominationQuestionDao.findByUidAsync(currentQuestionUid,
                 new UmCallback<SocialNominationQuestion>() {
             @Override
             public void onSuccess(SocialNominationQuestion selQuestion) {
                 if(selQuestion != null){
                     mUpdatedQuestion = selQuestion;
-
+                    view.setQuestionOnView(mUpdatedQuestion);
                 }else{
 
-                    //Create a new one
-                    selQuestion = new SocialNominationQuestion();
-                    selQuestion.setSocialNominationQuestionSocialNominationQuestionSetUid(
-                            currentQuestionSetUid);
-                    mUpdatedQuestion = selQuestion;
-                    if(mOriginalQuestion == null){
-                        mOriginalQuestion = mUpdatedQuestion;
-                    }
+                    //Set index
+                    socialNominationQuestionDao.getMaxIndexByQuestionSetAsync(currentQuestionSetUid,
+                        new UmCallback<Integer>() {
+                            @Override
+                            public void onSuccess(Integer result) {
+                                //Create a new one
+                                SocialNominationQuestion newSELQuestion = new SocialNominationQuestion();
+                                newSELQuestion.setSocialNominationQuestionSocialNominationQuestionSetUid(
+                                        currentQuestionSetUid);
+                                newSELQuestion.setQuestionIndex(result+1);
+                                mUpdatedQuestion = newSELQuestion;
+
+                                if(mOriginalQuestion == null){
+                                    mOriginalQuestion = mUpdatedQuestion;
+                                }
+
+                                view.setQuestionOnView(mUpdatedQuestion);
+                            }
+
+                            @Override
+                            public void onFailure(Throwable exception) {
+                                exception.printStackTrace();
+                            }
+                        });
                 }
-
-                view.setQuestionOnView(mUpdatedQuestion);
-
-
             }
 
             @Override
