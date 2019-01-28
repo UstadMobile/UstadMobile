@@ -30,8 +30,14 @@ public class ScraperConstants {
     public static final String CHECK_NAME = "check.svg";
     public static final String XML_NAMESPACE = "http://purl.org/dc/elements/1.1/";
 
-    public static final String GMAIL = "samih.mustafa@gmail.com";
-    public static final String PASS = "ustad123";
+    public static final String KHAN_USERNAME = "samih@ustadmobile.com";
+    public static final String KHAN_PASS = "ustadscraper";
+    public static final String KHAN_LOGIN_LINK = "https://www.khanacademy.org/login";
+    public static final String ANDROID_USER_AGENT = "user-agent=Mozilla/5.0 (Linux; Android 4.4; Nexus 5 Build/_BuildID_) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/30.0.0.0 Mobile Safari/537.36";
+
+    public static final String GRAPHIE = "+graphie";
+    public static final String KHAN_GRAPHIE_PREFIX = "https://cdn.kastatic.org/ka-perseus-graphie/";
+
 
     public static final String CORRECT_KHAN_LINK = "/com/ustadmobile/lib/contentscrapers/khan/exercise-correct.svg";
     public static final String CORRECT_FILE = "exercise-correct.svg";
@@ -159,6 +165,8 @@ public class ScraperConstants {
     public static final String USTAD_MOBILE = "Ustad Mobile";
     public static final String ROOT = "root";
     public static final String EMPTY_STRING = "";
+    public static final String EMPTY_SPACE = " ";
+    public static final String FORWARD_SLASH = "/";
     public static final String KHAN = "Khan Academy";
 
     public static final int TIME_OUT_SELENIUM = 500;

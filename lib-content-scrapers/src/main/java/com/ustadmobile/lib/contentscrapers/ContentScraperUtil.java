@@ -43,6 +43,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.Platform;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -74,7 +75,6 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -92,10 +92,15 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.ANDROID_USER_AGENT;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.EMPTY_SPACE;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.EMPTY_STRING;
-import static com.ustadmobile.lib.contentscrapers.ScraperConstants.GMAIL;
-import static com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_JPG;
-import static com.ustadmobile.lib.contentscrapers.ScraperConstants.PASS;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.FORWARD_SLASH;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.GRAPHIE;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.KHAN_GRAPHIE_PREFIX;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.KHAN_LOGIN_LINK;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.KHAN_USERNAME;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.KHAN_PASS;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.SVG_EXT;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.TIME_OUT_SELENIUM;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING;
@@ -105,6 +110,7 @@ import static com.ustadmobile.lib.contentscrapers.ScraperConstants.ZIP_EXT;
 public class ContentScraperUtil {
 
     private static final DateTimeFormatter LOOSE_ISO_DATE_TIME_ZONE_PARSER = DateTimeFormatter.ofPattern("[yyyyMMdd][yyyy-MM-dd][yyyy-DDD]['T'[HHmmss][HHmm][HH:mm:ss][HH:mm][.SSSSSSSSS][.SSSSSS][.SSS][.SS][.S]][OOOO][O][z][XXXXX][XXXX]['['VV']']");
+
 
     /**
      * Is the given componentType "Imported Component"
@@ -154,11 +160,11 @@ public class ContentScraperUtil {
                 continue;
             } else if (url.contains("youtube")) {
                 // content.parent().html("We cannot download youtube content, please watch using the link below <p></p><a href=" + url + "\"><img src=\"video-thumbnail.jpg\"/></a>");
-                content.parent().html("");
+                content.parent().html(EMPTY_STRING);
                 continue;
             } else if (url.contains(ScraperConstants.slideShareLink)) {
                 // content.html("We cannot download slideshare content, please watch using the link below <p></p><img href=" + url + "\" src=\"video-thumbnail.jpg\"/>");
-                content.parent().html("");
+                content.parent().html(EMPTY_STRING);
                 continue;
             }
             try {
@@ -416,7 +422,7 @@ public class ContentScraperUtil {
         String eTag = conn.getHeaderField("ETag");
         if (eTag != null) {
             String text;
-            eTag = eTag.replaceAll("\"", "");
+            eTag = eTag.replaceAll("\"", EMPTY_STRING);
             File eTagFile = new File(destinationDir, FilenameUtils.getBaseName(fileName) + ScraperConstants.ETAG_TXT);
 
             if (ContentScraperUtil.fileHasContent(eTagFile)) {
@@ -1042,7 +1048,7 @@ public class ContentScraperUtil {
                 if (e.getKey().equalsIgnoreCase("Accept-Encoding")) {
                     continue;
                 }
-                conn.addRequestProperty(e.getKey().replaceAll(":", ""), e.getValue());
+                conn.addRequestProperty(e.getKey().replaceAll(":", EMPTY_STRING), e.getValue());
             }
             FileUtils.copyInputStreamToFile(conn.getInputStream(), file);
         } else {
@@ -1078,7 +1084,7 @@ public class ContentScraperUtil {
         LogIndex.IndexEntry logIndex = new LogIndex.IndexEntry();
         logIndex.url = urlString;
         logIndex.mimeType = mimeType;
-        logIndex.path = urlDirectory.getName() + "/" + file.getName();
+        logIndex.path = urlDirectory.getName() + FORWARD_SLASH + file.getName();
         if (log != null) {
             logIndex.headers = log.message.params.response.headers;
         }
@@ -1092,11 +1098,16 @@ public class ContentScraperUtil {
      */
     public static ChromeDriver setupLogIndexChromeDriver() {
         DesiredCapabilities d = DesiredCapabilities.chrome();
-        d.setCapability("opera.arguments", "-screenwidth 1024 -screenheight 768");
-        // d.merge(capabilities);
+        d.setCapability("opera.arguments", "-screenwidth 411 -screenheight 731");
+        d.setPlatform(Platform.ANDROID);
+
+        ChromeOptions options = new ChromeOptions();
+        options.addArguments(ANDROID_USER_AGENT);
+
         LoggingPreferences logPrefs = new LoggingPreferences();
         logPrefs.enable(LogType.PERFORMANCE, Level.ALL);
         d.setCapability(CapabilityType.LOGGING_PREFS, logPrefs);
+        d.setCapability(ChromeOptions.CAPABILITY, options);
 
         return new ChromeDriver(d);
     }
@@ -1112,9 +1123,9 @@ public class ContentScraperUtil {
         StringBuffer requestParams = new StringBuffer();
         for (String key : params.keySet()) {
             String value = params.get(key);
-            requestParams.append(URLEncoder.encode(key, "UTF-8"));
+            requestParams.append(URLEncoder.encode(key, UTF_ENCODING));
             requestParams.append("=").append(
-                    URLEncoder.encode(value, "UTF-8"));
+                    URLEncoder.encode(value, UTF_ENCODING));
             requestParams.append("&");
         }
         return requestParams;
@@ -1139,13 +1150,13 @@ public class ContentScraperUtil {
 
         ChromeDriver driver = ContentScraperUtil.setupLogIndexChromeDriver();
 
-        driver.get("https://www.khanacademy.org/login");
+        driver.get(KHAN_LOGIN_LINK);
         WebDriverWait waitDriver = new WebDriverWait(driver, TIME_OUT_SELENIUM);
         ContentScraperUtil.waitForJSandJQueryToLoad(waitDriver);
         waitDriver.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("div#login-signup-root")));
 
-        driver.findElement(By.cssSelector("div#login-signup-root input[id*=email-or-username]")).sendKeys(GMAIL);
-        driver.findElement(By.cssSelector("div#login-signup-root input[id*=text-field-1-password]")).sendKeys(PASS);
+        driver.findElement(By.cssSelector("div#login-signup-root input[id*=email-or-username]")).sendKeys(KHAN_USERNAME);
+        driver.findElement(By.cssSelector("div#login-signup-root input[id*=text-field-1-password]")).sendKeys(KHAN_PASS);
 
         List<WebElement> elements = driver.findElements(By.cssSelector("div#login-signup-root div[class*=inner]"));
         for (WebElement element : elements) {
@@ -1166,18 +1177,19 @@ public class ContentScraperUtil {
         for (String image : images.keySet()) {
 
             try {
-                image = image.replaceAll(" ", "");
+                image = image.replaceAll(EMPTY_SPACE, EMPTY_STRING);
                 String imageUrlString = image;
-                if (image.contains("+graphie")) {
-                    imageUrlString = "https://cdn.kastatic.org/ka-perseus-graphie/" + image.substring(image.lastIndexOf("/") + 1) + SVG_EXT;
+                if (image.contains(GRAPHIE)) {
+                    imageUrlString = KHAN_GRAPHIE_PREFIX + image.substring(image.lastIndexOf("/") + 1) + SVG_EXT;
                 }
                 URL imageUrl = new URL(imageUrlString);
+                URLConnection conn = imageUrl.openConnection();
                 File imageFile = ContentScraperUtil.createDirectoryFromUrl(destDir, imageUrl);
 
                 File imageContent = new File(imageFile, FilenameUtils.getName(imageUrl.getPath()));
                 FileUtils.copyURLToFile(imageUrl, imageContent);
 
-                LogIndex.IndexEntry logIndex = ContentScraperUtil.createIndexFromLog(image, MIMETYPE_JPG,
+                LogIndex.IndexEntry logIndex = ContentScraperUtil.createIndexFromLog(imageUrlString, conn.getContentType(),
                         imageFile, imageContent, null);
                 indexList.add(logIndex);
             } catch (Exception e) {
@@ -1197,7 +1209,7 @@ public class ContentScraperUtil {
                 Thread.sleep(2000);
             } catch (InterruptedException ignored) {
             }
-            List<LogEntry> newLogs =  Lists.newArrayList(driver.manage().logs().get(LogType.PERFORMANCE).getAll());
+            List<LogEntry> newLogs = Lists.newArrayList(driver.manage().logs().get(LogType.PERFORMANCE).getAll());
             hasMore = newLogs.size() > 0;
             UMLogUtil.logTrace("size of new logs from driver is" + newLogs.size());
             logs.addAll(newLogs);

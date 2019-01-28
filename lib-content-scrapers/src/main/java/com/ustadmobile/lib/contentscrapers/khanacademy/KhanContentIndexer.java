@@ -8,6 +8,7 @@ import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
 import com.ustadmobile.core.db.dao.LanguageDao;
 import com.ustadmobile.core.db.dao.ScrapeQueueItemDao;
 import com.ustadmobile.core.db.dao.ScrapeRunDao;
+import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.LanguageList;
 import com.ustadmobile.lib.contentscrapers.ScraperConstants;
@@ -91,7 +92,7 @@ public class KhanContentIndexer implements Runnable {
 
     public static void main(String[] args) {
         if (args.length < 1) {
-            System.err.println("Usage: <khan url> <file destination><optional log{trace, debug, info, warn, error, fatal}>");
+            System.err.println("Usage:<file destination><optional log{trace, debug, info, warn, error, fatal}>");
             System.exit(1);
         }
 
@@ -253,6 +254,7 @@ public class KhanContentIndexer implements Runnable {
                 browseTopics(parentEntry, indexerUrl, indexLocation);
                 successful = true;
             } catch (Exception e) {
+                UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
                 UMLogUtil.logError("Error creating topics for url " + indexerUrl);
             }
         } else if (ScraperConstants.KhanContentType.SUBJECT.getType().equals(contentType)) {
@@ -260,6 +262,7 @@ public class KhanContentIndexer implements Runnable {
                 browseSubjects(parentEntry, indexerUrl, indexLocation);
                 successful = true;
             } catch (Exception e) {
+                UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
                 UMLogUtil.logError("Error creating subjects for url " + indexerUrl);
             }
         }
@@ -285,7 +288,8 @@ public class KhanContentIndexer implements Runnable {
                         int end = data.indexOf("loggedIn\": false})") + 17;
                         return data.substring(index, end);
                     } catch (IndexOutOfBoundsException e) {
-                        throw new IOException("Could not get json from the script for url " + url);
+                        UMLogUtil.logError("Could not get json from the script for url " + url);
+                        return EMPTY_STRING;
                     }
                 }
             }
@@ -340,7 +344,7 @@ public class KhanContentIndexer implements Runnable {
         SubjectListResponse response = gson.fromJson(subjectJson, SubjectListResponse.class);
 
         // one page on the website doesn't follow standard code
-        if (response.componentProps == null) {
+        if (response == null) {
             browseHourOfCode(topicEntry, topicUrl, topicFolder);
             return;
         }
@@ -448,7 +452,7 @@ public class KhanContentIndexer implements Runnable {
 
     private void browseHourOfCode(ContentEntry topicEntry, URL topicUrl, File topicFolder) throws IOException {
 
-        Document document = Jsoup.connect(topicUrl.toString()).followRedirects(true).get();
+        Document document = Jsoup.connect(topicUrl.toString()).get();
 
         Elements subjectList = document.select("div.hoc-box-white");
 

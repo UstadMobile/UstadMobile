@@ -75,10 +75,10 @@ public class WebChunkEspressoTest {
 
         UmAndroidTestUtil.setAirplaneModeEnabled(true);
         Bundle b = new Bundle();
-        String testScrapedPlixPath = "/com/ustadmobile/app/android/counting-out-1-20-objects.zip";
+        String testScrapedPlixPath = "/com/ustadmobile/app/android/counting-objects.zip";
         InputStream inputStream = getClass().getResourceAsStream(testScrapedPlixPath);
         File path = Environment.getExternalStorageDirectory();
-        File targetFile = new File(path, "counting-out-1-20-objects.zip");
+        File targetFile = new File(path, "counting-objects.zip");
         OutputStream outStream = new FileOutputStream(targetFile);
         byte[] buffer = new byte[1024];
         int read;
@@ -103,10 +103,10 @@ public class WebChunkEspressoTest {
 
         UmAndroidTestUtil.setAirplaneModeEnabled(true);
         Bundle b = new Bundle();
-        String testScrapedPlixPath = "/com/ustadmobile/app/android/test-maths-plots.zip";
+        String testScrapedPlixPath = "/com/ustadmobile/app/android/comparison-symbols-review.zip";
         InputStream inputStream = getClass().getResourceAsStream(testScrapedPlixPath);
         File path = Environment.getExternalStorageDirectory();
-        File targetFile = new File(path, "test-maths-plots.zip");
+        File targetFile = new File(path, "comparison-symbols-review.zip");
         OutputStream outStream = new FileOutputStream(targetFile);
         byte[] buffer = new byte[1024];
         int read;
@@ -128,10 +128,10 @@ public class WebChunkEspressoTest {
 
         UmAndroidTestUtil.setAirplaneModeEnabled(true);
         Bundle b = new Bundle();
-        String testScrapedPlixPath = "/com/ustadmobile/app/android/comparison-symbols-review.zip";
+        String testScrapedPlixPath = "/com/ustadmobile/app/android/counting-out-1-20-objects.zip";
         InputStream inputStream = getClass().getResourceAsStream(testScrapedPlixPath);
         File path = Environment.getExternalStorageDirectory();
-        File targetFile = new File(path, "comparison-symbols-review.zip");
+        File targetFile = new File(path, "counting-out-1-20-objects.zip");
         OutputStream outStream = new FileOutputStream(targetFile);
         byte[] buffer = new byte[1024];
         int read;

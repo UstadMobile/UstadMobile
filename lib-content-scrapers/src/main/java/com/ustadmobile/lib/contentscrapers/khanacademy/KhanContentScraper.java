@@ -24,6 +24,7 @@ import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.logging.LogEntries;
 import org.openqa.selenium.logging.LogEntry;
@@ -190,14 +191,13 @@ public class KhanContentScraper implements Runnable {
 
             }
 
-            if (factory != null) {
-                factory.returnObject(driver);
-            }
-
-
         } catch (Exception e) {
             UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
             UMLogUtil.logError("Unable to scrape content from url " + url);
+        }
+
+        if (factory != null) {
+            factory.returnObject(driver);
         }
 
         queueDao.updateSetStatusById(sqiUid, successful ? ScrapeQueueItemDao.STATUS_DONE : ScrapeQueueItemDao.STATUS_FAILED);
@@ -265,6 +265,9 @@ public class KhanContentScraper implements Runnable {
             if (relatedList != null) {
 
                 for (SubjectListResponse.ComponentData.Card.UserExercise.Model relatedLink : relatedList) {
+                    if (relatedLink == null) {
+                        continue;
+                    }
                     linksMap.put(relatedLink.kaUrl, "content-detail?sourceUrl=khan-id://" + relatedLink.id);
                 }
             }
@@ -273,6 +276,9 @@ public class KhanContentScraper implements Runnable {
             if (relatedVideos != null) {
 
                 for (SubjectListResponse.ComponentData.Card.UserExercise.Model relatedLink : relatedVideos) {
+                    if (relatedLink == null) {
+                        continue;
+                    }
                     linksMap.put(relatedLink.kaUrl, "content-detail?sourceUrl=khan-id://" + relatedLink.id);
                 }
             }
@@ -309,14 +315,15 @@ public class KhanContentScraper implements Runnable {
         driver.get(scrapUrl);
         WebDriverWait waitDriver = new WebDriverWait(driver, TIME_OUT_SELENIUM);
         ContentScraperUtil.waitForJSandJQueryToLoad(waitDriver);
-        List<LogEntry> les = new ArrayList<>();
         try {
             waitDriver.until(ExpectedConditions.visibilityOfElementLocated(
                     By.cssSelector("div[data-test-id=tutorial-page]")));
-            les = ContentScraperUtil.waitForNewFiles(driver);
+            driver.findElement(By.cssSelector("div[class*=calculatorButton")).click();
         } catch (Exception e) {
-            UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
+            UMLogUtil.logDebug(ExceptionUtils.getStackTrace(e));
         }
+
+        List<LogEntry> les = ContentScraperUtil.waitForNewFiles(driver);
 
         List<LogIndex.IndexEntry> indexList = new ArrayList<>();
 
@@ -439,7 +446,7 @@ public class KhanContentScraper implements Runnable {
         if (navList != null) {
 
             for (SubjectListResponse.ComponentData.NavData.ContentModel navItem : navList) {
-                if(navItem.nodeSlug.equals(nodeSlug)){
+                if (navItem.nodeSlug.equals(nodeSlug)) {
                     continue;
                 }
                 linksMap.put(regexUrlPrefix + navItem.nodeSlug, CONTENT_DETAIL_SOURCE_URL_KHAN_ID + navItem.id);
@@ -520,7 +527,7 @@ public class KhanContentScraper implements Runnable {
         boolean foundRelative = false;
         for (SubjectListResponse.ComponentData.NavData.ContentModel content : contentList) {
 
-            if (destinationDirectory.getName().equals(content.id) || scrapUrl.contains(content.relativeUrl)) {
+            if (destinationDirectory.getName().contains(content.id) || scrapUrl.contains(content.relativeUrl)) {
 
                 foundRelative = true;
                 String articleId = content.id;
@@ -566,14 +573,15 @@ public class KhanContentScraper implements Runnable {
         driver.get(scrapUrl);
         WebDriverWait waitDriver = new WebDriverWait(driver, TIME_OUT_SELENIUM);
         ContentScraperUtil.waitForJSandJQueryToLoad(waitDriver);
-        List<LogEntry> les = new ArrayList<>();
         try {
             waitDriver.until(ExpectedConditions.visibilityOfElementLocated(
                     By.cssSelector("ul[class*=listWrapper], div[class*=listWrapper")));
-            les = ContentScraperUtil.waitForNewFiles(driver);
+            driver.findElement(By.cssSelector("div[class*=calculatorButton")).click();
         } catch (Exception e) {
-            UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
+            UMLogUtil.logDebug(ExceptionUtils.getStackTrace(e));
         }
+
+        List<LogEntry> les = ContentScraperUtil.waitForNewFiles(driver);
 
         List<LogIndex.IndexEntry> index = new ArrayList<>();
 
@@ -618,7 +626,7 @@ public class KhanContentScraper implements Runnable {
         List<SubjectListResponse.ComponentData.NavData.ContentModel> navList = navData.navItems;
         if (navList != null) {
             for (SubjectListResponse.ComponentData.NavData.ContentModel navItem : navList) {
-                if(navItem.nodeSlug.equals(nodeSlug)){
+                if (navItem.nodeSlug.equals(nodeSlug)) {
                     continue;
                 }
                 linkMap.put(regexUrlPrefix + navItem.nodeSlug, CONTENT_DETAIL_SOURCE_URL_KHAN_ID + navItem.id);
