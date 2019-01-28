@@ -997,7 +997,7 @@ public abstract class AbstractDbProcessor {
             .add("boolean _isMaster = _syncableDb.isMaster();\n")
             .beginControlFlow("if(_isMaster)")
             .add("_response.setCurrentMasterChangeSeqNum(_syncableDb.getSyncStatusDao()" +
-                    ".getMasterChangeSeqNum($L) - 1);\n", umEntityAnnotation.tableId())
+                    ".getNextChangeSeqNum($L) - 1);\n", umEntityAnnotation.tableId())
             .endControlFlow()
                 .beginControlFlow("if(_isMaster)")
                 .beginControlFlow("for($T _changed : $L)",
@@ -1255,7 +1255,7 @@ public abstract class AbstractDbProcessor {
                             SyncStatus.class, umEntityAnnotation.tableId())
                     .add("$T<$T> _locallyChangedEntities = $L(" +
                                     "_attemptSyncStatus.getSyncedToLocalChangeSeqNum() + 1, " +
-                                    "_initialSyncStatus.getLocalChangeSeqNum() - 1, " +
+                                    "_initialSyncStatus.getNextChangeSeqNum() - 1, " +
                                     "$L, _syncableDb.getDeviceBits(), $L);\n",
                         List.class, entityType, findLocalChangesMethod.getSimpleName(),
                         accountPersonUidParam.getSimpleName(),
@@ -1311,7 +1311,7 @@ public abstract class AbstractDbProcessor {
                                 "$1L, _syncedToLocalSeqNum, _syncedToMasterSeqNum);\n",
                                 umEntityAnnotation.tableId())
                         .add("_syncComplete = (_syncedToMasterSeqNum >= _syncCompleteMasterChangeSeqNum || _remoteChanges.getRemoteChangedEntities().isEmpty()) " +
-                                " && (_syncedToLocalSeqNum >= _initialSyncStatus.getLocalChangeSeqNum() - 1 || _locallyChangedEntities.isEmpty());\n")
+                                " && (_syncedToLocalSeqNum >= _initialSyncStatus.getNextChangeSeqNum() - 1 || _locallyChangedEntities.isEmpty());\n")
                     .nextControlFlow("else")
                         .add("_retryCount++;\n")
                     .endControlFlow();

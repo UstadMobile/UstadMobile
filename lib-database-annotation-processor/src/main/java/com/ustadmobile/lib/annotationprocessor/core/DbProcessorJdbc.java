@@ -486,8 +486,7 @@ public class DbProcessorJdbc extends AbstractDbProcessor implements QueryMethodG
 
         for(TypeElement entityType : DbProcessorUtils.findEntityTypes(dbType, processingEnv)) {
             if(entityType.equals(syncStatusTypeEl)) {
-                codeBlock.add("stmt.executeUpdate(\"UPDATE SyncStatus SET masterChangeSeqNum = 1, " +
-                        "localChangeSeqNum = 1, " +
+                codeBlock.add("stmt.executeUpdate(\"UPDATE SyncStatus SET nextChangeSeqNum = 1, " +
                         "syncedToMasterChangeNum = 0, " +
                         "syncedToLocalChangeSeqNum = 0\");\n");
             }else if(entityType.equals(syncablePkEl)) {
