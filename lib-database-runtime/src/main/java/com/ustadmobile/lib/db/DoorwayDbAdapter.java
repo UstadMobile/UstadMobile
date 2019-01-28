@@ -9,8 +9,17 @@ public interface DoorwayDbAdapter {
     /**
      * Execute the given SQL string (not returning results)
      *
-     * @param sql
+     * @param sql SQL to run
      */
     void execSql(String sql);
+
+    /**
+     * Get the type of underlying database (SQLite or Postgres)
+     *
+     * @see UmDbType
+     * @return UmDbType constant representing the database type
+     */
+    int getDbType();
+
 
 }
