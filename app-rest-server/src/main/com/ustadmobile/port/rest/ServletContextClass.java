@@ -324,7 +324,7 @@ public class ServletContextClass implements ServletContextListener
                             }
                         });
 
-                        createSELOfficer();
+                        //createSELOfficer();
 
                     }
 
