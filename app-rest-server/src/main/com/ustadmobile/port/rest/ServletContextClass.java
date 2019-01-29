@@ -86,7 +86,6 @@ public class ServletContextClass implements ServletContextListener
             //Load initial data
             loadInitialData();
 
-
         }
 
         private void loadInitialData(){
@@ -123,7 +122,6 @@ public class ServletContextClass implements ServletContextListener
                 System.out.println("ServletContextClass: Admin Already created. Continuing..");
                 addRolesAndPermissions();
             }
-
 
             addSELQuestions();
 
@@ -185,9 +183,6 @@ public class ServletContextClass implements ServletContextListener
                                 exception.printStackTrace();
                             }
                         });
-
-                        //Adding stuff
-                        //addFieldData();
 
                     }
 
@@ -324,8 +319,6 @@ public class ServletContextClass implements ServletContextListener
                             }
                         });
 
-                        //createSELOfficer();
-
                     }
 
                     @Override
@@ -378,7 +371,6 @@ public class ServletContextClass implements ServletContextListener
 
                         //Go next to SEL
                         createSELOfficer();
-
 
                     }
 
@@ -437,16 +429,16 @@ public class ServletContextClass implements ServletContextListener
                                 newRole.setRoleName(ROLE_NAME_OFFICER);
                                 long officerPermissions =
                                     Role.PERMISSION_CLAZZ_ADD_STUDENT |
-                                            Role.PERMISSION_CLAZZ_LOG_ACTIVITY_SELECT |
-                                            Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT |
-                                            Role.PERMISSION_CLAZZ_SELECT |
-                                            Role.PERMISSION_CLAZZ_UPDATE |
-                                            Role.PERMISSION_PERSON_SELECT |
-                                            Role.PERMISSION_PERSON_UPDATE |
-                                            Role.PERMISSION_PERSON_INSERT |
-                                            Role.PERMISSION_PERSON_PICTURE_INSERT |
-                                            Role.PERMISSION_PERSON_PICTURE_SELECT |
-                                            Role.PERMISSION_PERSON_PICTURE_UPDATE
+                                    Role.PERMISSION_CLAZZ_LOG_ACTIVITY_SELECT |
+                                    Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT |
+                                    Role.PERMISSION_CLAZZ_SELECT |
+                                    Role.PERMISSION_CLAZZ_UPDATE |
+                                    Role.PERMISSION_PERSON_SELECT |
+                                    Role.PERMISSION_PERSON_UPDATE |
+                                    Role.PERMISSION_PERSON_INSERT |
+                                    Role.PERMISSION_PERSON_PICTURE_INSERT |
+                                    Role.PERMISSION_PERSON_PICTURE_SELECT |
+                                    Role.PERMISSION_PERSON_PICTURE_UPDATE
 
                                     ;
                                 newRole.setRolePermissions(officerPermissions);
@@ -469,12 +461,12 @@ public class ServletContextClass implements ServletContextListener
                                         newRole.setRoleName(ROLE_NAME_SEL);
                                         long selPermissions =
                                                 Role.PERMISSION_CLAZZ_SELECT |
-                                                        Role.PERMISSION_PERSON_SELECT |
-                                                        Role.PERMISSION_PERSON_PICTURE_SELECT |
-                                                        Role.PERMISSION_SEL_QUESTION_SELECT |
-                                                        Role.PERMISSION_SEL_QUESTION_RESPONSE_SELECT |
-                                                        Role.PERMISSION_SEL_QUESTION_RESPONSE_INSERT |
-                                                        Role.PERMISSION_SEL_QUESTION_RESPONSE_UPDATE
+                                                Role.PERMISSION_PERSON_SELECT |
+                                                Role.PERMISSION_PERSON_PICTURE_SELECT |
+                                                Role.PERMISSION_SEL_QUESTION_SELECT |
+                                                Role.PERMISSION_SEL_QUESTION_RESPONSE_SELECT |
+                                                Role.PERMISSION_SEL_QUESTION_RESPONSE_INSERT |
+                                                Role.PERMISSION_SEL_QUESTION_RESPONSE_UPDATE
                                                 ;
                                         newRole.setRolePermissions(selPermissions);
                                         roleDao.insert(newRole);
@@ -493,21 +485,21 @@ public class ServletContextClass implements ServletContextListener
                                                 newRole.setRoleName(ROLE_NAME_MNE);
                                                 long mnePermissions =
                                                         Role.PERMISSION_CLAZZ_ADD_STUDENT |
-                                                                Role.PERMISSION_CLAZZ_LOG_ACTIVITY_SELECT |
-                                                                Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT |
-                                                                Role.PERMISSION_CLAZZ_SELECT |
-                                                                Role.PERMISSION_CLAZZ_UPDATE |
-                                                                Role.PERMISSION_PERSON_SELECT |
-                                                                Role.PERMISSION_PERSON_UPDATE |
-                                                                Role.PERMISSION_PERSON_INSERT |
-                                                                Role.PERMISSION_PERSON_PICTURE_INSERT |
-                                                                Role.PERMISSION_PERSON_PICTURE_SELECT |
-                                                                Role.PERMISSION_PERSON_PICTURE_UPDATE |
-                                                                Role.PERMISSION_SEL_QUESTION_INSERT |
-                                                                Role.PERMISSION_SEL_QUESTION_UPDATE |
-                                                                Role.PERMISSION_SEL_QUESTION_SELECT |
-                                                                Role.PERMISSION_SEL_QUESTION_RESPONSE_SELECT |
-                                                                Role.PERMISSION_REPORTS_VIEW
+                                                        Role.PERMISSION_CLAZZ_LOG_ACTIVITY_SELECT |
+                                                        Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT |
+                                                        Role.PERMISSION_CLAZZ_SELECT |
+                                                        Role.PERMISSION_CLAZZ_UPDATE |
+                                                        Role.PERMISSION_PERSON_SELECT |
+                                                        Role.PERMISSION_PERSON_UPDATE |
+                                                        Role.PERMISSION_PERSON_INSERT |
+                                                        Role.PERMISSION_PERSON_PICTURE_INSERT |
+                                                        Role.PERMISSION_PERSON_PICTURE_SELECT |
+                                                        Role.PERMISSION_PERSON_PICTURE_UPDATE |
+                                                        Role.PERMISSION_SEL_QUESTION_INSERT |
+                                                        Role.PERMISSION_SEL_QUESTION_UPDATE |
+                                                        Role.PERMISSION_SEL_QUESTION_SELECT |
+                                                        Role.PERMISSION_SEL_QUESTION_RESPONSE_SELECT |
+                                                        Role.PERMISSION_REPORTS_VIEW
                                                         ;
                                                 newRole.setRolePermissions(mnePermissions);
                                                 roleDao.insert(newRole);
