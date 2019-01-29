@@ -109,7 +109,6 @@ public class SELEditPresenter
                 view.updateHeading(arguments.get(ARG_QUESTION_INDEX).toString(),
                         arguments.get(ARG_QUESTION_TOTAL).toString());
             }
-
         }
 
         //Add on any SEL things done
@@ -162,10 +161,6 @@ public class SELEditPresenter
                 repository.getSocialNominationQuestionResponseDao();
 
 
-        //Update: End the set. The Set is choosen from the SELSelectStudentView screen as per Sprint 5
-        //TODOne:Check: Go to Next SEL question part of this set. Or End. (ie: get back to SELAnswerFragment
-        // ie: go to SELQuestionActivity or SELAnswerFragment.
-
         //Before we go to the next one. We need to end the current one.
         questionSetResponseDao.findByUidAsync(currentQuestionSetResponseUid,
                 new UmCallback<SocialNominationQuestionSetResponse>() {
@@ -189,7 +184,6 @@ public class SELEditPresenter
                             currentQuestionIndexId, new UmCallback<SocialNominationQuestion>() {
                                 @Override
                                 public void onSuccess(SocialNominationQuestion nextQuestion) {
-
 
                                     if(nextQuestion != null) {
 

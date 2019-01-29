@@ -1,8 +1,12 @@
 package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.db.UmAppDatabase;
+import com.ustadmobile.core.db.dao.SocialNominationQuestionResponseNominationDao;
 import com.ustadmobile.core.impl.UmAccountManager;
+import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.view.ReportSELView;
+import com.ustadmobile.lib.db.entities.SELNominationItem;
+import com.ustadmobile.lib.db.entities.SocialNominationQuestionResponse;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -70,7 +74,27 @@ public class ReportSELPresenter extends UstadBaseController<ReportSELView> {
 
         long currentTime = System.currentTimeMillis();
 
-        //TODO: This
+        //TODOing: This
+
+        SocialNominationQuestionResponseNominationDao nominationDao =
+                repository.getSocialNominationQuestionResponseNominationDao();
+        nominationDao.getAllNominationsReport(new UmCallback<List<SELNominationItem>>() {
+            @Override
+            public void onSuccess(List<SELNominationItem> allNominations) {
+                int size = allNominations.size();
+                System.out.println(size);
+                for(SELNominationItem everyNomination: allNominations){
+
+                }
+
+            }
+
+            @Override
+            public void onFailure(Throwable exception) {
+
+            }
+        });
+
 
         //when done:
         //view.updateTables(dataMap);
