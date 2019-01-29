@@ -389,6 +389,48 @@ public class PersonWithEnrollmentRecyclerAdapter
             callImageView.setVisibility(View.GONE);
         }
 
+        //IF IN STUDENTS LIST IN CLASS DETAIL:
+        if(!showEnrollment){
+            System.out.println("WHAT");
+            if(showAttendance){
+                System.out.println("WHY");
+            }
+        }
+
+        if(showEnrollment == false && showAttendance == true){
+
+
+            //if(showAddStudent && showAddTeacher) {
+                if (position == 0) {//First Entry. Add Teacher and Add Teacher item
+                    if(!reportMode)
+                    addHeadingAndNew(cl, ClazzMember.ROLE_TEACHER, showAddTeacher);
+
+                    if (personWithEnrollment.getClazzMemberRole() == ClazzMember.ROLE_STUDENT) {
+
+                        if(!reportMode)
+                        addHeadingAndNew(cl, ClazzMember.ROLE_STUDENT, showAddStudent);
+                    }
+
+                    int nextPos = position + 1;
+                    if (personWithEnrollment.getClazzMemberRole() == ClazzMember.ROLE_TEACHER &&
+                            getItemCount() == nextPos) {
+                        addStudentLast = true;
+                    }
+
+                } else {
+                    PersonWithEnrollment previousPerson = getItem(position - 1);
+                    assert previousPerson != null;
+                    if (previousPerson.getClazzMemberRole() == ClazzMember.ROLE_TEACHER &&
+                            personWithEnrollment.getClazzMemberRole() == ClazzMember.ROLE_STUDENT) {
+
+                        //Add student
+                        if(!reportMode)
+                        addHeadingAndNew(cl, ClazzMember.ROLE_STUDENT, showAddStudent);
+                    }
+
+                }
+            //}
+        }
 
         if(groupByClass){
 
@@ -412,37 +454,7 @@ public class PersonWithEnrollmentRecyclerAdapter
             removeHeading(cl, headingCLId, holder);
         }
 
-        //IF IN STUDENTS LIST IN CLASS DETAIL:
-        if(!showEnrollment && showAttendance){
 
-            if(showAddStudent && showAddTeacher) {
-                if (position == 0) {//First Entry. Add Teacher and Add Teacher item
-                    addHeadingAndNew(cl, ClazzMember.ROLE_TEACHER);
-
-                    if (personWithEnrollment.getClazzMemberRole() == ClazzMember.ROLE_STUDENT) {
-
-                        addHeadingAndNew(cl, ClazzMember.ROLE_STUDENT);
-                    }
-
-                    int nextPos = position + 1;
-                    if (personWithEnrollment.getClazzMemberRole() == ClazzMember.ROLE_TEACHER &&
-                            getItemCount() == nextPos) {
-                        addStudentLast = true;
-                    }
-
-                } else {
-                    PersonWithEnrollment previousPerson = getItem(position - 1);
-                    assert previousPerson != null;
-                    if (previousPerson.getClazzMemberRole() == ClazzMember.ROLE_TEACHER &&
-                            personWithEnrollment.getClazzMemberRole() == ClazzMember.ROLE_STUDENT) {
-
-                        //Add student
-                        addHeadingAndNew(cl, ClazzMember.ROLE_STUDENT);
-                    }
-
-                }
-            }
-        }
 
         if(personWithEnrollment.getClazzMemberRole() == ClazzMember.ROLE_TEACHER){
 
@@ -454,7 +466,7 @@ public class PersonWithEnrollmentRecyclerAdapter
 
         if(getItemCount() == position+1) {
             if (addStudentLast) {
-                addHeadingAndNew(cl, ClazzMember.ROLE_STUDENT);
+                addHeadingAndNew(cl, ClazzMember.ROLE_STUDENT, showAddStudent);
             }
         }
 
@@ -598,7 +610,7 @@ public class PersonWithEnrollmentRecyclerAdapter
      * @param cl    The Constraint layout where the list will be in.
      * @param role  The role (Teacher or Student) as per ClazzMember.ROLE_*
      */
-    private void addHeadingAndNew(ConstraintLayout cl, int role){
+    private void addHeadingAndNew(ConstraintLayout cl, int role, boolean showAdd){
 
         ConstraintLayout addCl = new ConstraintLayout(theContext);
         int defaultPadding = getDp(DEFAULT_PADDING);
@@ -670,12 +682,14 @@ public class PersonWithEnrollmentRecyclerAdapter
         addCl.addView(clazzMemberRoleHeadingTextView);
         if(role == ClazzMember.ROLE_STUDENT && showAddStudent) {
             addCl.addView(addPersonImageView);
-            addCl.addView(addClazzMemberTextView);
+            if(showAdd)
+                addCl.addView(addClazzMemberTextView);
             addCl.addView(horizontalLine);
         }
         if(role == ClazzMember.ROLE_TEACHER && showAddTeacher) {
             addCl.addView(addPersonImageView);
-            addCl.addView(addClazzMemberTextView);
+            if(showAdd)
+                addCl.addView(addClazzMemberTextView);
             addCl.addView(horizontalLine);
         }
 
