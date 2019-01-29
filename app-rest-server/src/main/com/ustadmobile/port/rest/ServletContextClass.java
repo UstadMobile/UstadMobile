@@ -187,7 +187,7 @@ public class ServletContextClass implements ServletContextListener
                         });
 
                         //Adding stuff
-                        addFieldData();
+                        //addFieldData();
 
                     }
 
