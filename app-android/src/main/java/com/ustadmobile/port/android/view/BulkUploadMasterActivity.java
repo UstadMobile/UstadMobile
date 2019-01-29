@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.Toolbar;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
@@ -80,6 +81,16 @@ public class BulkUploadMasterActivity extends UstadBaseActivity implements BulkU
         fab = findViewById(R.id.activity_bulk_upload_master_fab);
         //fab.setOnClickListener(v -> mPresenter.startBulkUpload(filePathFromFilePicker));
         fab.setOnClickListener(v -> parseFile(filePathFromFilePicker));
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case android.R.id.home:
+                onBackPressed();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
