@@ -113,6 +113,7 @@ import com.ustadmobile.lib.db.sync.entities.SyncStatus;
 import com.ustadmobile.lib.db.sync.entities.SyncablePrimaryKey;
 
 import java.util.Hashtable;
+import java.util.Random;
 
 @UmDatabase(version = 2, entities = {
         OpdsEntry.class, OpdsLink.class, OpdsEntryParentToChildJoin.class,
@@ -198,8 +199,12 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
                         throw new RuntimeException("Not supported on SQLite");
 
                     case UmDbType.TYPE_POSTGRES:
-                        int deviceBits = Integer.parseInt(
-                                db.selectSingleValue("SELECT deviceBits from SyncDeviceBits"));
+                        //Must use new device bits, otherwise 
+                        int deviceBits = new Random().nextInt();
+
+                        db.execSql("ALTER TABLE SyncDeviceBits ADD COLUMN master BOOL");
+                        db.execSql("UPDATE SyncDeviceBits SET deviceBits = " + deviceBits +
+                                ", master = TRUE");
 
                         db.execSql("CREATE TABLE IF NOT EXISTS  " +
                                 "ScrapeRun  ( scrapeRunUid  SERIAL PRIMARY KEY  NOT NULL ,  " +
@@ -209,7 +214,7 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
                                 "destDir  TEXT,  scrapeUrl  TEXT,  status  INTEGER,  runId  INTEGER,  time  TEXT, " +
                                 " itemType  INTEGER,  contentType  TEXT)");
 
-                        db.execSql("ALTER TABLE SyncDeviceBits ADD COLUMN master BOOL");
+
 
                         db.execSql("ALTER TABLE SyncStatus ADD COLUMN nextChangeSeqNum BIGINT");
                         db.execSql("ALTER TABLE SyncStatus DROP COLUMN masterchangeseqnum");
