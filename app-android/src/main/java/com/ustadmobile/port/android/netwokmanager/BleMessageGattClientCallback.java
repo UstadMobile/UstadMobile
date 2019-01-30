@@ -15,6 +15,7 @@ import com.ustadmobile.port.sharedse.networkmanager.BleMessage;
 import com.ustadmobile.port.sharedse.networkmanager.BleMessageResponseListener;
 
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.DEFAULT_MTU_SIZE;
@@ -56,8 +57,7 @@ public class BleMessageGattClientCallback extends  BluetoothGattCallback{
 
     private int defaultMtuSize = DEFAULT_MTU_SIZE;
 
-    private final  Object mtuChangeMonitor = new Object();
-
+    private final CountDownLatch mLatch = new CountDownLatch(1);
 
 
     /**
@@ -85,9 +85,7 @@ public class BleMessageGattClientCallback extends  BluetoothGattCallback{
         super.onMtuChanged(gatt, mtu, status);
         //Successfully changed the MTU, update message and notify to start discovering service
         this.defaultMtuSize = mtu;
-        synchronized (mtuChangeMonitor){
-           mtuChangeMonitor.notify();
-        }
+        mLatch.countDown();
     }
 
     /**
@@ -110,13 +108,11 @@ public class BleMessageGattClientCallback extends  BluetoothGattCallback{
             MTU change is not supported on lower android version devices*/
             if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
                 if(gatt.requestMtu(MAXIMUM_MTU_SIZE)){
-                    synchronized (mtuChangeMonitor){
-                        try {
-                            mtuChangeMonitor.wait(TimeUnit.SECONDS.toMillis(2));
-                        } catch (InterruptedException e) {
-                            mtuChangeMonitor.notify();
-                            e.printStackTrace();
-                        }
+                    try {
+                        mLatch.wait(TimeUnit.SECONDS.toMillis(2));
+                    } catch (InterruptedException e) {
+                        mLatch.countDown();
+                        e.printStackTrace();
                     }
                 }
             }
