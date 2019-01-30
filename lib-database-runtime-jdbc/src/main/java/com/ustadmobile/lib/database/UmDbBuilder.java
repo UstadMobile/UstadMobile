@@ -63,20 +63,7 @@ public class UmDbBuilder {
                         }
 
                         int dbVersion = versionResult.getInt(1);
-                        while(dbVersion < db.getVersion()) {
-                            UmDbMigration migration = JdbcDatabaseUtils.pickNextMigration(dbVersion,
-                                    migrationList);
-
-                            if(migration == null){
-                                throw new RuntimeException("No migration found to upgrade from: "
-                                        + dbVersion);
-                            }
-
-                            migration.migrate(dbAdapter);
-                            dbVersion = migration.getToVersion();
-                            dbAdapter.execSql("UPDATE _doorwayinfo SET dbVersion = " +
-                                    dbVersion);
-                        }
+                        runMigrations(dbVersion, db.getVersion(), dbAdapter);
                     }catch(SQLException e) {
                         throw new RuntimeException("UmDb: exception running migration ", e);
                     }
@@ -103,6 +90,24 @@ public class UmDbBuilder {
             }finally {
                 JdbcDatabaseUtils.closeQuietly(dbAdapter);
                 JdbcDatabaseUtils.closeQuietly(dbConnection);
+            }
+        }
+
+        protected void runMigrations(int currentVersion, int targetVersion,
+                                     DoorDbAdapterJdbc dbAdapter) {
+            while(currentVersion < targetVersion) {
+                UmDbMigration migration = JdbcDatabaseUtils.pickNextMigration(currentVersion,
+                        migrationList);
+
+                if(migration == null){
+                    throw new RuntimeException("No migration found to upgrade from: "
+                            + currentVersion);
+                }
+
+                migration.migrate(dbAdapter);
+                currentVersion = migration.getToVersion();
+                dbAdapter.execSql("UPDATE _doorwayinfo SET dbVersion = " +
+                        currentVersion);
             }
         }
     }
