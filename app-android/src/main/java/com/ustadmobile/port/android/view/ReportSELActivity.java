@@ -12,6 +12,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -38,6 +39,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 import ru.dimorinny.floatingtextbutton.FloatingTextButton;
 
@@ -60,6 +62,8 @@ public class ReportSELActivity extends UstadBaseActivity implements
     LinearLayout.LayoutParams imageLP =
             new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
                     LinearLayout.LayoutParams.WRAP_CONTENT);
+
+    LinkedHashMap<String, LinkedHashMap<String, Map<Long, List<Long>>>> clazzMap;
 
     @Override
     public void onCreate(Bundle savedInstanceState){
@@ -180,6 +184,8 @@ public class ReportSELActivity extends UstadBaseActivity implements
         //Build a string array of the data
         tableTextData = new ArrayList<>();
 
+        this.clazzMap = clazzMap;
+
         //Work with: reportLinearLayout linear layout
         //LAYOUT
         TableRow.LayoutParams rowParams = new TableRow.LayoutParams(
@@ -218,20 +224,9 @@ public class ReportSELActivity extends UstadBaseActivity implements
 
             TableLayout tableLayout = generateTableLayoutForClazz(clazzMembers);
 
-//            //testing processtabl - 1st question only
-//            String testFirstQuestionTitle = clazzNominationData.keySet().iterator().next();
-//            Map<Long, List<Long>> testFirstQuestionData = clazzNominationData.get(testFirstQuestionTitle);
-//            Iterator<Long> qIterator = testFirstQuestionData.keySet().iterator();
-//            while(qIterator.hasNext()){
-//                Long nominatorUid = qIterator.next();
-//                List<Long> nomineeList = testFirstQuestionData.get(nominatorUid);
-//
-//                processTable(nominatorUid, nomineeList, tableLayout);
-//            }
-
             //Default look up first question
             String firstQuestionTitle = clazzNominationData.keySet().iterator().next();
-            updateTableBasedOnQuestionSelected(firstQuestionTitle, clazzNominationData, tableLayout);
+            updateTableBasedOnQuestionSelected(currentClazzName, firstQuestionTitle, tableLayout);
 
             HorizontalScrollView horizontalScrollView = new HorizontalScrollView(this);
             horizontalScrollView.addView(tableLayout);
@@ -239,13 +234,31 @@ public class ReportSELActivity extends UstadBaseActivity implements
             reportLinearLayout.addView(clazzHeading);
             reportLinearLayout.addView(horizontalScrollView);
 
+            LinearLayout hLL = new LinearLayout(this);
+            hLL.setOrientation(LinearLayout.HORIZONTAL);
+
+            Set<String> questions = clazzNominationData.keySet();
+            for(String everyQuestion:questions){
+                Button questionButton = new Button(this);
+                questionButton.setText(everyQuestion);
+                questionButton.setOnClickListener(v ->
+                        updateTableBasedOnQuestionSelected(currentClazzName, everyQuestion,
+                        tableLayout));
+
+                hLL.addView(questionButton);
+            }
+            reportLinearLayout.addView(hLL);
+
 
         }
     }
 
-    private void updateTableBasedOnQuestionSelected(String questionTitle,
-                                LinkedHashMap<String, Map<Long, List<Long>>> clazzNominationData,
+    private void updateTableBasedOnQuestionSelected(String clazzName, String questionTitle,
                                                 TableLayout tableLayout){
+
+
+
+        LinkedHashMap<String, Map<Long, List<Long>>> clazzNominationData = clazzMap.get(clazzName);
         Map<Long, List<Long>> testFirstQuestionData = clazzNominationData.get(questionTitle);
         Iterator<Long> qIterator = testFirstQuestionData.keySet().iterator();
         while(qIterator.hasNext()){
@@ -269,7 +282,7 @@ public class ReportSELActivity extends UstadBaseActivity implements
                         //Bingo
                         nominatorRow = (TableRow) child;
                         break;
-                    }//else continue
+                    }
                 }
             }
         }
@@ -283,6 +296,9 @@ public class ReportSELActivity extends UstadBaseActivity implements
                         if(nomineeList.contains(rowChildNomineeUid)){
                             ImageView nomineeImageView = (ImageView) rowChild;
                             nomineeImageView.setImageResource(R.drawable.ic_check_black_24dp);
+                        }else{
+                            ImageView nomineImageView = (ImageView) rowChild;
+                            nomineImageView.setImageResource(R.drawable.ic_clear_black_24dp);
                         }
                     }
 
