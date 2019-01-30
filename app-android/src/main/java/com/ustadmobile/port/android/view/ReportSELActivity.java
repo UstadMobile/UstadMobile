@@ -52,6 +52,7 @@ public class ReportSELActivity extends UstadBaseActivity implements
 
     public static final int TAG_NOMINEE_CLAZZMEMBER_UID = R.string.nomination;
     public static final int TAG_NOMINATOR_CLAZZMEMBER_UID = R.string.nominating;
+    public static final int TAG_NOMINATOR_NAME = R.string.name;
 
     //For export line by line data.
     List<String[]> tableTextData;
@@ -217,15 +218,20 @@ public class ReportSELActivity extends UstadBaseActivity implements
 
             TableLayout tableLayout = generateTableLayoutForClazz(clazzMembers);
 
-            String testFirstQuestionTitle = clazzNominationData.keySet().iterator().next();
-            Map<Long, List<Long>> testFirstQuestionData = clazzNominationData.get(testFirstQuestionTitle);
-            Iterator<Long> qIterator = testFirstQuestionData.keySet().iterator();
-            while(qIterator.hasNext()){
-                Long nominatorUid = qIterator.next();
-                List<Long> nomineeList = testFirstQuestionData.get(nominatorUid);
+//            //testing processtabl - 1st question only
+//            String testFirstQuestionTitle = clazzNominationData.keySet().iterator().next();
+//            Map<Long, List<Long>> testFirstQuestionData = clazzNominationData.get(testFirstQuestionTitle);
+//            Iterator<Long> qIterator = testFirstQuestionData.keySet().iterator();
+//            while(qIterator.hasNext()){
+//                Long nominatorUid = qIterator.next();
+//                List<Long> nomineeList = testFirstQuestionData.get(nominatorUid);
+//
+//                processTable(nominatorUid, nomineeList, tableLayout);
+//            }
 
-                processTable(nominatorUid, nomineeList, tableLayout);
-            }
+            //Default look up first question
+            String firstQuestionTitle = clazzNominationData.keySet().iterator().next();
+            updateTableBasedOnQuestionSelected(firstQuestionTitle, clazzNominationData, tableLayout);
 
             HorizontalScrollView horizontalScrollView = new HorizontalScrollView(this);
             horizontalScrollView.addView(tableLayout);
@@ -234,6 +240,19 @@ public class ReportSELActivity extends UstadBaseActivity implements
             reportLinearLayout.addView(horizontalScrollView);
 
 
+        }
+    }
+
+    private void updateTableBasedOnQuestionSelected(String questionTitle,
+                                LinkedHashMap<String, Map<Long, List<Long>>> clazzNominationData,
+                                                TableLayout tableLayout){
+        Map<Long, List<Long>> testFirstQuestionData = clazzNominationData.get(questionTitle);
+        Iterator<Long> qIterator = testFirstQuestionData.keySet().iterator();
+        while(qIterator.hasNext()){
+            Long nominatorUid = qIterator.next();
+            List<Long> nomineeList = testFirstQuestionData.get(nominatorUid);
+
+            processTable(nominatorUid, nomineeList, tableLayout);
         }
     }
 
@@ -343,6 +362,8 @@ public class ReportSELActivity extends UstadBaseActivity implements
             nominationRow.addView(getVerticalLine());
             nominationRow.addView(nominationRowStudentTV);
             nominationRow.setTag(TAG_NOMINATOR_CLAZZMEMBER_UID, everyClazzMember.getClazzMemberUid());
+            nominationRow.setTag(TAG_NOMINATOR_NAME, everyClazzMember.getPerson().getFirstNames()
+                    + " " + everyClazzMember.getPerson().getLastName());
             nominationRow.addView(getVerticalLine());
             for(ClazzMemberWithPerson againClazzMember: clazzMembers){
                 View crossView = getCross();

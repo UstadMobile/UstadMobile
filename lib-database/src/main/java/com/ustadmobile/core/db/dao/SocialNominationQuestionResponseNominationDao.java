@@ -47,8 +47,8 @@ public abstract class SocialNominationQuestionResponseNominationDao
             "    Person.firstNames || ' ' || Person.lastName AS nominatorName , " +
             "    PersonNominated.firstNames || ' ' || PersonNominated.lastName AS nomineeName, " +
             "    SocialNominationQuestion.questionText, " +
-            "    PersonNominated.personUid AS nomineeUid, " +
-            "    Person.personUid AS nominatorUid, " +
+            "    ClazzMemberNominated.clazzMemberUid AS nomineeUid, " +
+            "    ClazzMember.clazzMemberUid AS nominatorUid, " +
             "    Clazz.clazzUid AS clazzUid, " +
             "    SocialNominationQuestion.socialNominationQuestionUid " +
             " FROM " +
