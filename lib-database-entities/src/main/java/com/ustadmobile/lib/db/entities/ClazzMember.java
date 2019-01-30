@@ -18,7 +18,7 @@ public class ClazzMember implements SyncableEntity {
 
     public static final int ROLE_TEACHER = 2;
 
-    @UmPrimaryKey(autoIncrement = true)
+    @UmPrimaryKey(autoGenerateSyncable= true)
     private long clazzMemberUid;
 
     @UmIndexField
