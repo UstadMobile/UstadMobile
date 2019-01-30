@@ -153,16 +153,13 @@ public class ReportAttendanceGroupedByThresholdsActivity extends UstadBaseActivi
 
                 runOnUiThread(() -> {
 
-
                     for (View everyRow : addThese) {
                         tableLayout.addView(everyRow);
 
                     }
 
-                    //scrollView.addView(tableLayout);
                     reportLinearLayout.addView(heading);
                     reportLinearLayout.addView(tableLayout);
-                    //reportLinearLayout.addView(scrollView);
 
                 });
 

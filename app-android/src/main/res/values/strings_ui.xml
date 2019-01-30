@@ -525,6 +525,8 @@ This is the one you should be editing. The one in /core/locale/main/values/strin
     <string name="consent_not_selected">Consent not given. Please check if consent has been given.</string>
     <string name="recognition_not_selected">Recognition confirmation not given. Please check. </string>
     <string name="sel_question_set_to_use">SEL question set to use</string>
+    <string name="nominating">Nominating</string>
+    
 
 
 
