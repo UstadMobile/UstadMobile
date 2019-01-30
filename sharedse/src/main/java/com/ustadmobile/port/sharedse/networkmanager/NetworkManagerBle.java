@@ -399,6 +399,7 @@ public abstract class NetworkManagerBle {
      * @param context Platform specific mContext
      * @param message Message to be sent to the peer device
      * @param peerToSendMessageTo Peer device to send message to.
+     * @param responseListener Message response listener object
      * @return Created BleEntryStatusTask
      *
      * @see BleEntryStatusTask
@@ -412,6 +413,7 @@ public abstract class NetworkManagerBle {
      * @param context Platform specific context
      * @param message Message to be send
      * @param peerToSendMessageTo Peer device to receive the message
+     * @param responseListener Message response listener object
      */
     public void sendMessage(Object context, BleMessage message, NetworkNode peerToSendMessageTo,
                             BleMessageResponseListener responseListener){

@@ -75,6 +75,7 @@ public class    BleEntryStatusTaskAndroid extends BleEntryStatusTask {
      * @param context Platform specific application context.
      * @param message Message to be sent
      * @param peerToSendMessageTo peer to send message to
+     * @param responseListener Message response listener object
      */
     public BleEntryStatusTaskAndroid(Context context , BleMessage message,
                                      NetworkNode peerToSendMessageTo,

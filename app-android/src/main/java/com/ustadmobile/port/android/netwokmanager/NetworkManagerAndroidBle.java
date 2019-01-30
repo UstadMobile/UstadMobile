@@ -411,6 +411,9 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
         return null;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public BleEntryStatusTask makeEntryStatusTask(Object context, BleMessage message,
                                                   NetworkNode peerToSendMessageTo, BleMessageResponseListener responseListener) {

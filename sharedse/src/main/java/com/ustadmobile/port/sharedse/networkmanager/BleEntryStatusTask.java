@@ -62,6 +62,7 @@ public abstract class BleEntryStatusTask implements Runnable,BleMessageResponseL
      * @param context Application context
      * @param message Message to be sent to the peer device (Carried WiFi group creation request)
      * @param peerToSendMessageTo Peer to send message to
+     * @param responseListener Message response listener object
      */
     public BleEntryStatusTask(Object context , BleMessage message, NetworkNode peerToSendMessageTo,
                               BleMessageResponseListener responseListener){
