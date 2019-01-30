@@ -11,9 +11,16 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import com.ustadmobile.core.db.UmObserver;
 import com.ustadmobile.core.impl.UmCallback;
+import com.ustadmobile.lib.database.InputStreamStreamingResponse;
+import com.ustadmobile.lib.database.annotation.UmRestAuthorizedUidParam;
+import com.ustadmobile.lib.database.annotation.UmUpdate;
+import com.ustadmobile.lib.db.UmDbWithAuthenticator;
 import com.ustadmobile.lib.db.sync.UmSyncableDatabase;
 
+import org.glassfish.jersey.media.multipart.FormDataParam;
+
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -28,7 +35,11 @@ import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.TypeMirror;
 import javax.tools.Diagnostic;
 import javax.ws.rs.Path;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
 
 import static com.ustadmobile.lib.annotationprocessor.core.DbProcessorCore.OPT_JERSEY_RESOURCE_OUT;
 
@@ -62,6 +73,10 @@ public class DbProcessorJerseyResource extends AbstractDbProcessor {
                 .addField(FieldSpec.builder(ClassName.get("javax.servlet","ServletContext"),
                         FIELDNAME_SERVLET_CONTEXT).addAnnotation(Context.class).build());
 
+        TypeMirror inputStreamType = processingEnv.getElementUtils().getTypeElement(
+                InputStream.class.getName()).asType();
+
+
         for(Element annotatedElement : annotatedElementList) {
             ExecutableElement methodElement = (ExecutableElement) annotatedElement;
             DaoMethodInfo methodInfo = new DaoMethodInfo(methodElement, daoType, processingEnv);
@@ -69,6 +84,7 @@ public class DbProcessorJerseyResource extends AbstractDbProcessor {
             boolean primitiveToStringResult = false;
             boolean isVoidResult = isVoid(methodInfo.resolveResultType());
             boolean isAutoSyncInsert = methodInfo.isInsertWithAutoSyncPrimaryKey();
+            boolean isStreamResponse = false;
 
             if (resultTypeName.isPrimitive() || resultTypeName.isBoxedPrimitive()) {
                 resultTypeName = ClassName.get(String.class);
@@ -79,6 +95,10 @@ public class DbProcessorJerseyResource extends AbstractDbProcessor {
                 resultTypeName = TypeName.VOID;
             }
 
+            if(resultTypeName.equals(ClassName.get(InputStream.class))) {
+                resultTypeName = ClassName.get(Response.class);
+                isStreamResponse = true;
+            }
 
             MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(
                     methodElement.getSimpleName().toString())
@@ -87,7 +107,8 @@ public class DbProcessorJerseyResource extends AbstractDbProcessor {
                     .addAnnotation(AnnotationSpec.builder(Path.class).addMember("value",
                             "\"/$L\"", methodElement.getSimpleName().toString()).build());
 
-            addJaxWsParameters(methodElement, daoType, methodBuilder);
+            addJaxWsParameters(methodElement, daoType, methodBuilder, QueryParam.class, null,
+                    FormDataParam.class, true);
             addJaxWsMethodAnnotations(methodElement, daoType, methodBuilder);
 
             ExecutableElement daoGetter = DbProcessorUtils.findDaoGetter(daoType, dbType,
@@ -103,6 +124,17 @@ public class DbProcessorJerseyResource extends AbstractDbProcessor {
                     .add("$T _dao = _db.$L();\n", daoType,
                             daoGetter.getSimpleName());
 
+            //TODO: check at compile time that this database implements UmDbWithAuthenticator
+
+            if(methodInfo.getAuthorizedUidParam() != null) {
+                VariableElement uidParamEl = methodInfo.getAuthorizedUidParam();
+                codeBlock.beginControlFlow("if(!(($T)_db).validateAuth($L, _authHeader))",
+                            UmDbWithAuthenticator.class, uidParamEl.getSimpleName())
+                            .add("throw new $T($S, 403);\n", WebApplicationException.class,
+                                    "Invalid authorization")
+                        .endControlFlow();
+            }
+
             String syncableDbVariableName = null;
             if(methodInfo.isUpdateOrInsert() || isAutoSyncInsert) {
                 syncableDbVariableName = "_syncableDb";
@@ -110,11 +142,11 @@ public class DbProcessorJerseyResource extends AbstractDbProcessor {
                         syncableDbVariableName);
             }
 
-
-            if(methodInfo.isUpdateOrInsert()) {
-                codeBlock.add(generateIncrementChangeSeqNumsCodeBlock(methodInfo.getEntityParameterElement().asType(),
-                        methodInfo.getEntityParameterElement().getSimpleName().toString(), "_db",
-                        syncableDbVariableName, methodElement, daoType));
+            if(methodElement.getAnnotation(UmUpdate.class) != null
+                    && DbProcessorUtils.entityHasChangeSequenceNumbers(
+                            methodInfo.resolveEntityParameterComponentType(), processingEnv)) {
+                codeBlock.add(generateUpdateSetChangeSeqNumSection(methodElement, daoType,
+                        syncableDbVariableName).build());
             }
 
             if(isAutoSyncInsert) {
@@ -210,19 +242,41 @@ public class DbProcessorJerseyResource extends AbstractDbProcessor {
             }else {
                 boolean returnDaoResult = !isVoidResult && !isAutoSyncInsert;
 
+                boolean daoMethodThrowsException = !methodElement.getThrownTypes().isEmpty();
+                if(daoMethodThrowsException) {
+                    codeBlock.beginControlFlow("try");
+                }
+
                 if(returnDaoResult)
                     codeBlock.add("return ");
 
                 if(primitiveToStringResult)
                     codeBlock.add("String.valueOf(");
 
+                //TODO: Set content type and size headers for attachment responses
+                if(isStreamResponse) {
+                    codeBlock.add("$T.ok(new $T(", Response.class,
+                            InputStreamStreamingResponse.class);
+                }
+
                 codeBlock.add("_dao.$L", methodElement.getSimpleName());
                 codeBlock.add(makeNamedParameterMethodCall(methodElement.getParameters()));
 
                 if(primitiveToStringResult)
                     codeBlock.add(")");
+                else if(isStreamResponse)
+                    codeBlock.add(")).build()");
 
                 codeBlock.add(";\n");
+
+                if(daoMethodThrowsException) {
+                    codeBlock.nextControlFlow("catch($T _t)", Throwable.class)
+                            .add("_t.printStackTrace();\n")
+                            .add("throw new $T(_t.toString(), 500);\n",
+                                    WebApplicationException.class)
+                            .endControlFlow();
+                }
+
 
                 if(!isVoidResult && isAutoSyncInsert) {
                     codeBlock.add("return _syncablePkResult;\n");

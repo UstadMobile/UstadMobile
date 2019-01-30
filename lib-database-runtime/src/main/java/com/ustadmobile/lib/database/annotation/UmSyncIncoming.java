@@ -18,4 +18,11 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface UmSyncIncoming {
+
+    int ACTION_UPDATE = 1;
+
+    int ACTION_INSERT = 2;
+
+    int ACTION_REJECT = 3;
+
 }

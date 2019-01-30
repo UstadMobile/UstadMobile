@@ -5,7 +5,14 @@ import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
+import com.ustadmobile.lib.database.annotation.UmQuery;
+import com.ustadmobile.lib.database.annotation.UmRestAuthorizedUidParam;
+import com.ustadmobile.lib.database.annotation.UmSyncLastChangedBy;
 import com.ustadmobile.lib.database.annotation.UmUpdate;
+
+import net.sf.jsqlparser.JSQLParserException;
+import net.sf.jsqlparser.parser.CCJSqlParserUtil;
+import net.sf.jsqlparser.statement.update.Update;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +26,8 @@ import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
+
+import static com.ustadmobile.lib.annotationprocessor.core.DbProcessorUtils.findElementWithAnnotation;
 
 /**
  * DaoMethodInfo is a convenience wrapper class that can work out information we frequently need
@@ -293,6 +302,69 @@ public class DaoMethodInfo {
                 processingEnv);
 
         return primaryKeyEl.getAnnotation(UmPrimaryKey.class).autoGenerateSyncable();
+    }
+
+    /**
+     * Find the parameter annotated with UmRestAuthorizedUidParam
+     *
+     * @return VariableElement representing the parameter annotated with UmRestAuthorizedUidParam
+     *  if present, otherwise null
+     */
+    public VariableElement getAuthorizedUidParam(){
+        for(VariableElement param : method.getParameters()) {
+            if(param.getAnnotation(UmRestAuthorizedUidParam.class) != null)
+                return param;
+        }
+
+        return null;
+    }
+
+
+    /**
+     * For methods that are annotated @UmQuery that run an update statement: this method will return
+     * the TypeElement for the entity corresponding to the table that the statement is updating.
+     *
+     * @return TypeElement corresponding to the table that an SQL query specified by @UmQuery is updating,
+     * or null if not applicable
+     */
+    public TypeElement getUpdateQueryEntityTypeElement(TypeElement dbType) {
+        UmQuery queryAnnotation = method.getAnnotation(UmQuery.class);
+        if(queryAnnotation == null)
+            return null;
+
+        if(!queryAnnotation.value().toLowerCase().trim().startsWith("update"))
+            return null;
+
+        try {
+            Update updateStmt = (Update) CCJSqlParserUtil.parse(queryAnnotation.value());
+            String tableName = updateStmt.getTable().getName();
+
+            for (TypeElement entity : DbProcessorUtils.findEntityTypes(dbType, processingEnv)) {
+                if (entity.getSimpleName().toString().equalsIgnoreCase(tableName)) {
+                    return entity;
+                }
+            }
+
+        }catch(JSQLParserException e) {
+            System.err.println("WARNING: could not parse query for getUpdateQueryEntityTypeElement");
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+
+    /**
+     * Indicates that this method is annotated @UmQuery, and the table being updated
+     * @return
+     */
+    public boolean isQueryUpdateWithLastChangedByField(TypeElement dbType) {
+        TypeElement entityTypeEl = getUpdateQueryEntityTypeElement(dbType);
+        UmQuery query = method.getAnnotation(UmQuery.class);
+        return entityTypeEl != null
+                && DbProcessorUtils.findElementWithAnnotation(entityTypeEl,
+                    UmSyncLastChangedBy.class, processingEnv) != null
+                && !(query != null && query.noAutoUpdateSetLastModified());
     }
 
 

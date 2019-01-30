@@ -2,15 +2,20 @@ package com.ustadmobile.lib.db.entities;
 
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
+import com.ustadmobile.lib.database.annotation.UmSyncLastChangedBy;
 import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
 import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
+
+import static com.ustadmobile.lib.db.entities.Person.TABLE_ID;
 
 /**
  * Created by mike on 3/8/18.
  */
 
-@UmEntity(tableId = 9)
+@UmEntity(tableId = TABLE_ID)
 public class Person  {
+
+    public static final int TABLE_ID = 9;
 
     public static final int GENDER_UNSET = 0;
 
@@ -25,8 +30,6 @@ public class Person  {
 
     private String username;
 
-    private String passwordHash;
-
     private String firstNames;
 
     private String lastName;
@@ -39,11 +42,27 @@ public class Person  {
 
     private boolean active;
 
+    private boolean admin;
+
     @UmSyncMasterChangeSeqNum
     private long personMasterChangeSeqNum;
 
     @UmSyncLocalChangeSeqNum
     private long personLocalChangeSeqNum;
+
+    @UmSyncLastChangedBy
+    private int personLastChangedBy;
+
+    public Person() {
+
+    }
+
+    public Person(String username, String firstNames, String lastName){
+        this.username = username;
+        this.firstNames = firstNames;
+        this.lastName = lastName;
+    }
+
 
     public long getPersonUid() {
         return personUid;
@@ -59,14 +78,6 @@ public class Person  {
 
     public void setUsername(String username) {
         this.username = username;
-    }
-
-    public String getPasswordHash() {
-        return passwordHash;
-    }
-
-    public void setPasswordHash(String passwordHash) {
-        this.passwordHash = passwordHash;
     }
 
     public String getFirstNames() {
@@ -117,6 +128,14 @@ public class Person  {
         this.personLocalChangeSeqNum = personLocalChangeSeqNum;
     }
 
+    public int getPersonLastChangedBy() {
+        return personLastChangedBy;
+    }
+
+    public void setPersonLastChangedBy(int personLastChangedBy) {
+        this.personLastChangedBy = personLastChangedBy;
+    }
+
     public int getGender() {
         return gender;
     }
@@ -131,5 +150,13 @@ public class Person  {
 
     public void setActive(boolean active) {
         this.active = active;
+    }
+
+    public boolean isAdmin() {
+        return admin;
+    }
+
+    public void setAdmin(boolean admin) {
+        this.admin = admin;
     }
 }

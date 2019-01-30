@@ -1,7 +1,9 @@
 package com.ustadmobile.lib.db.entities;
 
 import com.ustadmobile.lib.database.annotation.UmEntity;
+import com.ustadmobile.lib.database.annotation.UmIndexField;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
+import com.ustadmobile.lib.database.annotation.UmSyncLastChangedBy;
 import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
 import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 
@@ -9,7 +11,7 @@ import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
  * This class mediates the relationship between a person and a clazz. A member can be a teacher,
  * or a student. Each member has a joining date, and a leaving date.
  */
-@UmEntity(tableId = 7)
+@UmEntity(tableId = 11)
 public class ClazzMember implements SyncableEntity {
 
     public static final int ROLE_STUDENT = 1;
@@ -19,8 +21,10 @@ public class ClazzMember implements SyncableEntity {
     @UmPrimaryKey(autoIncrement = true)
     private long clazzMemberUid;
 
+    @UmIndexField
     private long clazzMemberPersonUid;
 
+    @UmIndexField
     private long clazzMemberClazzUid;
 
     private long dateJoined;
@@ -38,6 +42,18 @@ public class ClazzMember implements SyncableEntity {
 
     @UmSyncMasterChangeSeqNum
     private long clazzMemberMasterChangeSeqNum;
+
+    @UmSyncLastChangedBy
+    private int clazzMemberLastChangedBy;
+
+    public ClazzMember() {
+
+    }
+
+    public ClazzMember(long clazzUid, long personUid) {
+        this.clazzMemberClazzUid = clazzUid;
+        this.clazzMemberPersonUid = personUid;
+    }
 
     public long getClazzMemberUid() {
         return clazzMemberUid;
@@ -110,6 +126,14 @@ public class ClazzMember implements SyncableEntity {
     @Override
     public void setLocalChangeSeqNum(long localChangeSeqNum) {
         this.localChangeSeqNum = localChangeSeqNum;
+    }
+
+    public int getClazzMemberLastChangedBy() {
+        return clazzMemberLastChangedBy;
+    }
+
+    public void setClazzMemberLastChangedBy(int clazzMemberLastChangedBy) {
+        this.clazzMemberLastChangedBy = clazzMemberLastChangedBy;
     }
 
     public long getClazzMemberLocalChangeSeqNum() {

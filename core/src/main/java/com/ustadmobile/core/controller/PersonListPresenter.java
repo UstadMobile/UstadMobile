@@ -12,11 +12,6 @@ public class PersonListPresenter extends UstadBaseController {
         super(context);
     }
 
-    @Override
-    public void setUIStrings() {
-
-    }
-
     public void handleClickNew() {
 
     }

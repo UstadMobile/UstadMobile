@@ -1,6 +1,5 @@
 package com.ustadmobile.test.sharedse.network;
 
-import com.ustadmobile.core.controller.CatalogPresenter;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.UmObserver;
@@ -194,7 +193,7 @@ public class TestDownloadTask {
                 "com/ustadmobile/test/sharedse/test-acquisition-task-feed.opds");
 
         String storageDir = UstadMobileSystemImpl.getInstance().getStorageDirs(
-                CatalogPresenter.SHARED_RESOURCE, PlatformTestUtil.getTargetContext())[0].getDirURI();
+                UstadMobileSystemImpl.SHARED_RESOURCE, PlatformTestUtil.getTargetContext())[0].getDirURI();
 
         CrawlJob crawlJob = new CrawlJob();
         crawlJob.setRootEntryUri(catalogUrl);

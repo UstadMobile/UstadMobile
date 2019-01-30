@@ -33,6 +33,8 @@ dependencies {
     testImplementation "junit:junit:$version_junit"
     testImplementation "org.mockito:mockito-core:$version_core_mockito"
 
+    implementation "javax.ws.rs:javax.ws.rs-api:2.1"
+
     compile project(path: ':lib-util')
 }
 

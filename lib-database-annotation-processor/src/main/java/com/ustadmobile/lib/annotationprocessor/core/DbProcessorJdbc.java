@@ -14,6 +14,8 @@ import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UmCallbackUtil;
 import com.ustadmobile.lib.database.annotation.UmClearAll;
 import com.ustadmobile.lib.database.annotation.UmDbContext;
+import com.ustadmobile.lib.database.annotation.UmDbGetAttachment;
+import com.ustadmobile.lib.database.annotation.UmDbSetAttachment;
 import com.ustadmobile.lib.database.annotation.UmDelete;
 import com.ustadmobile.lib.database.annotation.UmEmbedded;
 import com.ustadmobile.lib.database.annotation.UmEntity;
@@ -24,12 +26,12 @@ import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.database.annotation.UmQueryFindByPrimaryKey;
 import com.ustadmobile.lib.database.annotation.UmRepository;
+import com.ustadmobile.lib.database.annotation.UmSyncCheckIncomingCanInsert;
+import com.ustadmobile.lib.database.annotation.UmSyncCountLocalPendingChanges;
 import com.ustadmobile.lib.database.annotation.UmSyncFindAllChanges;
 import com.ustadmobile.lib.database.annotation.UmSyncFindLocalChanges;
-import com.ustadmobile.lib.database.annotation.UmSyncFindUpdateable;
+import com.ustadmobile.lib.database.annotation.UmSyncCheckIncomingCanUpdate;
 import com.ustadmobile.lib.database.annotation.UmSyncIncoming;
-import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
-import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 import com.ustadmobile.lib.database.annotation.UmSyncOutgoing;
 import com.ustadmobile.lib.database.annotation.UmUpdate;
 import com.ustadmobile.lib.database.jdbc.DbChangeListener;
@@ -39,10 +41,10 @@ import com.ustadmobile.lib.database.jdbc.UmJdbcDatabase;
 import com.ustadmobile.lib.database.jdbc.UmLiveDataJdbc;
 import com.ustadmobile.lib.db.UmDbWithExecutor;
 import com.ustadmobile.lib.db.sync.UmRepositoryDb;
-import com.ustadmobile.lib.db.sync.UmRepositoryUtils;
+import com.ustadmobile.lib.db.sync.UmSyncableDatabase;
+import com.ustadmobile.lib.db.sync.entities.SyncDeviceBits;
 import com.ustadmobile.lib.db.sync.entities.SyncStatus;
 
-import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.statement.delete.Delete;
 import net.sf.jsqlparser.statement.select.Select;
@@ -66,14 +68,13 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
@@ -101,7 +102,7 @@ import static com.ustadmobile.lib.database.jdbc.JdbcDatabaseUtils.SUPPORTED_DB_P
  * Generates a JDBC based implementation of database classes annotated with @UmDatabase and their
  * associated DAOs.
  */
-public class DbProcessorJdbc extends AbstractDbProcessor {
+public class DbProcessorJdbc extends AbstractDbProcessor implements QueryMethodGenerator {
 
     private static String SUFFIX_JDBC_DBMANAGER = "_Jdbc";
 
@@ -242,26 +243,30 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
             if (subElement.getKind() != ElementKind.METHOD)
                 continue;
 
-            ExecutableElement dbMethod = (ExecutableElement)subElement;
-            if(dbMethod.getModifiers().contains(Modifier.STATIC))
+            ExecutableElement dbMethod = (ExecutableElement) subElement;
+            if (dbMethod.getModifiers().contains(Modifier.STATIC))
                 continue;
 
-            if(!dbMethod.getModifiers().contains(Modifier.ABSTRACT))
+            if (!dbMethod.getModifiers().contains(Modifier.ABSTRACT))
                 continue;
 
 
-            MethodSpec.Builder overrideSpec =  MethodSpec.overriding(dbMethod);
-            TypeElement returnTypeElement = (TypeElement)processingEnv.getTypeUtils().asElement(
+            MethodSpec.Builder overrideSpec = MethodSpec.overriding(dbMethod);
+            TypeElement returnTypeElement = (TypeElement) processingEnv.getTypeUtils().asElement(
                     dbMethod.getReturnType());
 
-            if(dbMethod.getAnnotation(UmDbContext.class) != null) {
+            if (dbMethod.getAnnotation(UmDbContext.class) != null) {
                 overrideSpec.addCode("return _context;\n");
-            }else if(dbMethod.getAnnotation(UmClearAll.class) != null) {
+            } else if (dbMethod.getAnnotation(UmClearAll.class) != null) {
                 addClearAllTablesCodeToMethod(dbType, overrideSpec, SQL_IDENTIFIER_CHAR);
-            }else if(dbMethod.getAnnotation(UmRepository.class) != null) {
+            } else if (dbMethod.getAnnotation(UmRepository.class) != null) {
                 addGetRepositoryMethod(dbType, dbMethod, overrideSpec, "_repositories");
-            }else if(dbMethod.getAnnotation(UmSyncOutgoing.class) != null) {
+            } else if (dbMethod.getAnnotation(UmSyncOutgoing.class) != null) {
                 overrideSpec = generateDbSyncOutgoingMethod(dbType, dbMethod);
+            } else if (dbMethod.getAnnotation(UmSyncCountLocalPendingChanges.class) != null){
+                jdbcDbTypeSpec.addMethod(generateDbSyncCountLocalPendingChangesMethod(dbType,
+                        dbMethod));
+                overrideSpec = null;
             }else {
                 String daoFieldName = "_" + returnTypeElement.getSimpleName();
                 jdbcDbTypeSpec.addField(TypeName.get(dbMethod.getReturnType()), daoFieldName, Modifier.PRIVATE);
@@ -275,8 +280,9 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                     .addCode("return $L;\n", daoFieldName);
             }
 
-
-            jdbcDbTypeSpec.addMethod(overrideSpec.build());
+            //TODO: tidy these methods to return methods instead of builders
+            if(overrideSpec != null)
+                jdbcDbTypeSpec.addMethod(overrideSpec.build());
 
         }
 
@@ -302,7 +308,7 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
             Statement stmt = connection.createStatement();
         ) {
             nameToDataSourceMap.put(dbType.getQualifiedName().toString(), dataSource);
-            for(TypeElement entityType : findEntityTypes(dbType)){
+            for(TypeElement entityType : DbProcessorUtils.findEntityTypes(dbType, processingEnv)){
                 createSql = makeCreateTableStatement(entityType, SQL_IDENTIFIER_CHAR,
                         PRODUCT_NAME_SQLITE);
                 stmt.execute(createSql);
@@ -338,7 +344,7 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
         for(String sqlProductName : SUPPORTED_DB_PRODUCT_NAMES) {
             createCb.beginControlFlow("if($S.equals(_metaData.getDatabaseProductName()))",
                     sqlProductName);
-            List<TypeElement> entityTypes = findEntityTypes(dbType);
+            List<TypeElement> entityTypes = DbProcessorUtils.findEntityTypes(dbType, processingEnv);
 
             //Make sure that the SyncStatus is teh first table
             TypeElement syncStatusTypeEl = processingEnv.getElementUtils().getTypeElement(
@@ -411,12 +417,14 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                 .add("$T connection = getConnection();\n", Connection.class)
                 .add("$T stmt = connection.createStatement();\n", Statement.class)
                 .unindent().beginControlFlow(") ");
-        TypeElement syncStatusTypeEL = processingEnv.getElementUtils().getTypeElement(
+        TypeElement syncStatusTypeEl = processingEnv.getElementUtils().getTypeElement(
                 SyncStatus.class.getName());
+        TypeElement syncDeviceBitsEl = processingEnv.getElementUtils().getTypeElement(
+                SyncDeviceBits.class.getName());
 
 
-        for(TypeElement entityType : findEntityTypes(dbType)) {
-            if(!entityType.equals(syncStatusTypeEL))
+        for(TypeElement entityType : DbProcessorUtils.findEntityTypes(dbType, processingEnv)) {
+            if(!entityType.equals(syncStatusTypeEl))
                 codeBlock.add("stmt.executeUpdate(\"DELETE FROM $1L$2L$1L\");\n",
                     identifierQuoteStr, entityType.getSimpleName().toString());
             else
@@ -424,11 +432,22 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                         "localChangeSeqNum = 1, " +
                         "syncedToMasterChangeNum = 0, " +
                         "syncedToLocalChangeSeqNum = 0\");\n");
+
+            if(entityType.equals(syncDeviceBitsEl))
+                codeBlock.add("stmt.executeUpdate(\"INSERT INTO SyncDeviceBits VALUES (1, \"" +
+                    " + new $T().nextInt() + \")\");\n", Random.class);
         }
 
         codeBlock.nextControlFlow("catch($T e)", SQLException.class)
                 .add("e.printStackTrace();\n")
                 .endControlFlow();
+
+        TypeMirror syncableDbType = processingEnv.getElementUtils().getTypeElement(
+                UmSyncableDatabase.class.getName()).asType();
+
+        if(processingEnv.getTypeUtils().isAssignable(dbType.asType(), syncableDbType)) {
+            codeBlock.add("invalidateDeviceBits();\n");
+        }
 
         builder.addCode(codeBlock.build());
     }
@@ -621,28 +640,47 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
             if(daoMethod.getAnnotation(UmInsert.class) != null) {
                 addInsertMethod(daoMethod, daoType, jdbcDaoClassSpec, SQL_IDENTIFIER_CHAR);
             }else if(daoMethod.getAnnotation(UmQuery.class) != null){
-                addQueryMethod(daoMethod, daoType, dbType, jdbcDaoClassSpec, SQL_IDENTIFIER_CHAR,
-                        daoMethod.getAnnotation(UmQuery.class).value());
+                jdbcDaoClassSpec.addMethod(generateQueryMethod(daoMethod, daoType, dbType,
+                        jdbcDaoClassSpec));
             }else if(daoMethod.getAnnotation(UmQueryFindByPrimaryKey.class) != null) {
-                addQueryMethod(daoMethod, daoType, dbType, jdbcDaoClassSpec, SQL_IDENTIFIER_CHAR,
-                        generateFindByPrimaryKeySql(daoType, daoMethod, processingEnv, SQL_IDENTIFIER_CHAR));
+                jdbcDaoClassSpec.addMethod(generateQueryMethod(
+                        generateFindByPrimaryKeySql(daoType, daoMethod, processingEnv,
+                                SQL_IDENTIFIER_CHAR), daoMethod, daoType, dbType, jdbcDaoClassSpec));
             }else if(daoMethod.getAnnotation(UmUpdate.class) != null) {
                 addUpdateMethod(daoMethod, daoType, dbType, jdbcDaoClassSpec, SQL_IDENTIFIER_CHAR);
             }else if(daoMethod.getAnnotation(UmDelete.class) != null) {
                 addDeleteMethod(daoMethod, jdbcDaoClassSpec, SQL_IDENTIFIER_CHAR);
             }else if(daoMethod.getAnnotation(UmSyncIncoming.class) != null) {
-                addSyncHandleIncomingMethod(daoMethod, daoType, jdbcDaoClassSpec, "_db");
+                jdbcDaoClassSpec.addMethod(generateSyncIncomingMethod(daoMethod, daoType,
+                        jdbcDaoClassSpec, "_db"));
             }else if(daoMethod.getAnnotation(UmSyncOutgoing.class) != null) {
                 addSyncOutgoing(daoMethod, daoType, jdbcDaoClassSpec, "_db");
             }else if(daoMethod.getAnnotation(UmSyncFindLocalChanges.class) != null) {
-                addQueryMethod(daoMethod, daoType, dbType, jdbcDaoClassSpec, SQL_IDENTIFIER_CHAR,
-                        generateFindLocalChangesSql(daoType, daoMethod, processingEnv));
+                jdbcDaoClassSpec.addMethod(generateQueryMethod(
+                        generateFindLocalChangesSql(daoType, daoMethod, processingEnv),
+                            daoMethod, daoType, dbType, jdbcDaoClassSpec));
             }else if(daoMethod.getAnnotation(UmSyncFindAllChanges.class) != null) {
-                addQueryMethod(daoMethod, daoType, dbType, jdbcDaoClassSpec, SQL_IDENTIFIER_CHAR,
-                        generateSyncFindAllChanges(daoType, daoMethod, processingEnv));
-            }else if(daoMethod.getAnnotation(UmSyncFindUpdateable.class) != null) {
-                addQueryMethod(daoMethod, daoType, dbType, jdbcDaoClassSpec, SQL_IDENTIFIER_CHAR,
-                        generateSyncFindUpdatable(daoType, daoMethod, processingEnv));
+                jdbcDaoClassSpec.addMethod(generateQueryMethod(
+                        generateSyncFindAllChanges(daoType, daoMethod, processingEnv),
+                        daoMethod, daoType, dbType, jdbcDaoClassSpec));
+            }else if(daoMethod.getAnnotation(UmSyncCheckIncomingCanUpdate.class) != null) {
+                jdbcDaoClassSpec.addMethod(generateQueryMethod(
+                        generateSyncFindUpdatableSql(daoType, daoMethod, processingEnv),
+                        daoMethod, daoType, dbType, jdbcDaoClassSpec));
+            }else if(daoMethod.getAnnotation(UmSyncCheckIncomingCanInsert.class) != null) {
+                jdbcDaoClassSpec.addMethod(generateQueryMethod(
+                        generateSyncCheckCanInsertSql(daoType, daoMethod, processingEnv),
+                        daoMethod, daoType, dbType, jdbcDaoClassSpec));
+            }else if(daoMethod.getAnnotation(UmSyncCountLocalPendingChanges.class) != null) {
+                jdbcDaoClassSpec.addMethod(generateQueryMethod(
+                        generateSyncCountPendingLocalChangesSql(daoType, daoMethod, processingEnv),
+                        daoMethod, daoType, dbType, jdbcDaoClassSpec));
+            }else if(daoMethod.getAnnotation(UmDbSetAttachment.class) != null) {
+                jdbcDaoClassSpec.addMethod(generateSetAttachmentMethod(daoType, daoMethod,
+                        "_db"));
+            }else if(daoMethod.getAnnotation(UmDbGetAttachment.class) != null) {
+                jdbcDaoClassSpec.addMethod(generateGetAttachmentMethod(daoType, daoMethod,
+                        "_db"));
             }
         }
 
@@ -729,7 +767,9 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
 
         String postgresReplaceSuffxVarName = null;
         if(replaceEnabled){
-            String postgresReplaceSuffx = " ON CONFLICT UPDATE SET ";
+            Element primaryKeyEl = findPrimaryKey(entityTypeElement);
+            String postgresReplaceSuffx = String.format(" ON CONFLICT(%s) DO UPDATE SET ",
+                    primaryKeyEl != null  ? primaryKeyEl.getSimpleName() : "unsupported-multikey");
             boolean commaRequired = false;
             for(VariableElement field : entityFields) {
                 if(field.getAnnotation(UmPrimaryKey.class) != null)
@@ -778,8 +818,9 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
 
 
         if(isList || isArray) {
-            codeBlock.beginControlFlow("for($T _element : $L)", entityTypeElement,
-                    daoMethod.getParameters().get(0).getSimpleName().toString());
+            codeBlock.add("_connection.setAutoCommit(false);\n")
+                    .beginControlFlow("for($T _element : $L)", entityTypeElement,
+                        daoMethod.getParameters().get(0).getSimpleName().toString());
         }
 
         String preparedStmtToUseVarName = hasAutoIncrementKey ? "_stmtToUse" : preparedStmtVarName;
@@ -817,6 +858,8 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
             if(hasAutoIncrementKey)
                 codeBlock.add("$L.executeBatch();\n", autoIncPreparedStmtVarName);
 
+            codeBlock.add("_connection.commit();\n")
+                    .add("_connection.setAutoCommit(true);\n");
         }else {
             codeBlock.add("$L.execute();\n", preparedStmtToUseVarName);
         }
@@ -1022,7 +1065,8 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                 daoMethod.getParameters().get(0).getSimpleName().toString();
 
         if(isListOrArray) {
-            codeBlock.beginControlFlow("for($T _element : $L)",
+            codeBlock.add("_connection.setAutoCommit(false);\n")
+                .beginControlFlow("for($T _element : $L)",
                     entityTypeElement, daoMethod.getParameters().get(0).getSimpleName().toString());
         }
 
@@ -1048,7 +1092,9 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
             codeBlock.add("_stmt.addBatch();\n")
                     .endControlFlow()
                     .add("numUpdates = $T.sumUpdateTotals(_stmt.executeBatch());\n",
-                            JdbcDatabaseUtils.class);
+                            JdbcDatabaseUtils.class)
+                    .add("_connection.commit();\n")
+                    .add("_connection.setAutoCommit(true);\n");
         }else {
             codeBlock.add("numUpdates = _stmt.executeUpdate();\n");
         }
@@ -1182,9 +1228,28 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
     }
 
 
-    public void addQueryMethod(ExecutableElement daoMethod, TypeElement daoType, TypeElement dbType,
-                               TypeSpec.Builder daoBuilder,
-                               char identifierQuote, String querySql) {
+    public MethodSpec generateQueryMethod(ExecutableElement daoMethod,
+                                          TypeElement daoType,
+                                          TypeElement dbType,
+                                          TypeSpec.Builder daoBuilder) {
+        UmQuery query = daoMethod.getAnnotation(UmQuery.class);
+        if(query == null) {
+            messager.printMessage(Diagnostic.Kind.ERROR,
+                    formatMethodForErrorMessage(daoMethod, daoType) + ":" +
+                    "generateQueryMethod: no UmQuery annotation");
+            AbstractDbProcessor.overrideAndResolve(daoMethod, daoType,
+                    processingEnv).build();
+        }
+
+        return generateQueryMethod(query.value(), daoMethod, daoType, dbType, daoBuilder);
+    }
+
+    @Override
+    public MethodSpec generateQueryMethod(String querySql,
+                                          ExecutableElement daoMethod,
+                                          TypeElement daoType,
+                                          TypeElement dbType,
+                                          TypeSpec.Builder daoBuilder) {
         //we need to run the query, find the columns, and then determine the appropriate setter methods to run
         DaoMethodInfo daoMethodInfo = new DaoMethodInfo(daoMethod, daoType, processingEnv);
         CodeBlock.Builder codeBlock = CodeBlock.builder();
@@ -1198,6 +1263,8 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
             isUpdateOrDelete = true;
         }
 
+
+
         TypeElement umCallbackTypeElement = processingEnv.getElementUtils().getTypeElement(
                 UmCallback.class.getName());
         List<Element> variableTypeElements = getMethodParametersAsElements(daoMethod);
@@ -1205,17 +1272,20 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
         boolean asyncMethod = asyncParamIndex != -1;
 
 
-        if(asyncMethod) {
+        if(daoMethodInfo.isAsyncMethod()) {
             codeBlock.beginControlFlow("_db.getExecutor().execute(() -> ");
         }
 
         TypeMirror resultType = daoMethodInfo.resolveResultType();
 
-        List<String> namedParams = getNamedParameters(querySql);
-        String preparedStmtSql = querySql;
-        for(String paramName : namedParams) {
-            preparedStmtSql = preparedStmtSql.replace(":" + paramName, "?");
+        //If this is a query that operates an update statement, we need to check if it has a
+        // lastModifiedBy field. If so, we need to modify the SQL so this is set.
+        if(daoMethodInfo.isQueryUpdateWithLastChangedByField(dbType)) {
+            querySql = addSetLastModifiedByToUpdateSql(querySql, daoMethod, daoType, dbType);
         }
+
+        List<String> namedParams = getNamedParameters(querySql);
+        String preparedStmtSql = replaceNamedParameters(namedParams, querySql, "?");
 
         boolean returnsList = false;
         boolean returnsArray = false;
@@ -1228,8 +1298,7 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
             .getElementUtils().getTypeElement(UmProvider.class.getName()))) {
             codeBlock.add("return null;\n");
             methodBuilder.addCode(codeBlock.build());
-            daoBuilder.addMethod(methodBuilder.build());
-            return;
+            return methodBuilder.build();
         }
 
 
@@ -1243,10 +1312,11 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                 tableList = tablesNamesFinder.getTableList(select);
                 codeBlock.add("// Table names = " + Arrays.toString(tableList.toArray()))
                         .add("\n");
-            }catch(JSQLParserException e) {
-                messager.printMessage(Diagnostic.Kind.ERROR, formatMethodForErrorMessage(daoMethod) +
-                        " exception parsing query 2 \"" + preparedStmtSql + "\" to determine tables: " + e.getMessage());
-                return;
+            }catch(Exception e) {
+                messager.printMessage(Diagnostic.Kind.WARNING, formatMethodForErrorMessage(daoMethod) +
+                        " exception parsing query \"" + preparedStmtSql + "\" to determine tables: "
+                        + e.toString() + " LiveData on this query may not update as expected.");
+                tableList = new ArrayList<>();
             }
 
             returnsLiveData = true;
@@ -1332,26 +1402,29 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
         codeBlock.unindent().beginControlFlow(")");
 
 
+        //Set the named query parameters here
         for(int i = 0; i < namedParams.size(); i++) {
+            TypeMirror paramVariableType = null;
+            String paramVariableName = null;
             VariableElement paramVariableElement = null;
+
             for(VariableElement variableElement : daoMethod.getParameters()) {
                 if(variableElement.getSimpleName().toString().equals(namedParams.get(i))) {
                     paramVariableElement = variableElement;
+                    paramVariableType = variableElement.asType();
+                    paramVariableName = variableElement.getSimpleName().toString();
                     break;
                 }
             }
 
-            if(paramVariableElement == null) {
+            if(paramVariableType == null) {
                 messager.printMessage(Diagnostic.Kind.ERROR, formatMethodForErrorMessage(daoMethod)
                         + " has no parameter named " + namedParams.get(i));
-                return;
+                return methodBuilder.build();
             }
 
-            String paramVariableName = paramVariableElement.getSimpleName().toString();
-
-            TypeMirror sqlVariableType = paramVariableElement.asType();
-            if(arrayParameters.containsKey(paramVariableElement.getSimpleName().toString())) {
-                boolean isArray = paramVariableElement.asType().getKind().equals(TypeKind.ARRAY);
+            if(arrayParameters.containsKey(paramVariableName)) {
+                boolean isArray = paramVariableType.getKind().equals(TypeKind.ARRAY);
                 boolean isList = !isArray;//otherwise it would not be in the arrayParameters hashtable
                 TypeMirror arrayElementType;
                 String arrayVariableName;
@@ -1372,13 +1445,13 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
                         " connection.createArrayOf($2S, $3L) : $4T.createArrayOf($2S, $3L);\n",
                         paramVariableName, makeSqlTypeDeclaration(arrayElementType),
                         arrayVariableName, PreparedStatementArrayProxy.class);
-                sqlVariableType = processingEnv.getElementUtils().getTypeElement(Array.class.getName())
+                paramVariableType = processingEnv.getElementUtils().getTypeElement(Array.class.getName())
                         .asType();
                 paramVariableName = "_" + paramVariableName + "_sqlArr";
             }
 
             codeBlock.add("stmt.$L($L, $L);\n",
-                    getPreparedStatementSetterMethodName(sqlVariableType),  i + 1,
+                    getPreparedStatementSetterMethodName(paramVariableType),  i + 1,
                     paramVariableName);
         }
 
@@ -1484,8 +1557,8 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
 
 
         methodBuilder.addCode(codeBlock.build());
-        daoBuilder.addMethod(methodBuilder.build());
-
+//        daoBuilder.addMethod(methodBuilder.build());
+        return methodBuilder.build();
     }
 
     /**
@@ -1515,11 +1588,13 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
         codeBlock.add("resultSet = stmt.executeQuery();\n");
 
 
+        List<String> namedParams = getNamedParameters(querySql);
+        String testQuery = replaceNamedParameters(namedParams, querySql, "1");
         try(
             Connection dbConnection = nameToDataSourceMap.get(dbType.getQualifiedName().toString())
                     .getConnection();
             Statement stmt = dbConnection.createStatement();
-            ResultSet results = stmt.executeQuery(querySql);
+            ResultSet results = stmt.executeQuery(testQuery);
         ) {
             ResultSetMetaData metaData = results.getMetaData();
             if(primitiveOrStringReturn && metaData.getColumnCount() != 1) {
@@ -1573,8 +1648,9 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
 
         } catch(SQLException e) {
             messager.printMessage(Diagnostic.Kind.ERROR,
-                    "Exception generating query method for: " +
-                            formatMethodForErrorMessage(daoMethod) + ": " + e.getMessage());
+                    "Exception generating query method for to run \" " +
+                           querySql + "\" " + formatMethodForErrorMessage(daoMethod) +
+                            ": " + e.getMessage());
         }
     }
 
@@ -1692,7 +1768,7 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
             if(!insideQuote && !insideDoubleQuote) {
                 if(c == ':'){
                     startNamedParam = i;
-                }else if(!Character.isLetterOrDigit(c) && startNamedParam != -1){
+                }else if(!(Character.isLetterOrDigit(c) || c == '_') && startNamedParam != -1){
                     //process the parameter
                     namedParams.add(querySql.substring(startNamedParam + 1, i ));
                     startNamedParam = -1;
@@ -1707,6 +1783,15 @@ public class DbProcessorJdbc extends AbstractDbProcessor {
         }
 
         return namedParams;
+    }
+
+    private String replaceNamedParameters(List<String> namedParams, String querySql, String replacement) {
+        String preparedStmtSql = querySql;
+        for(String paramName : namedParams) {
+            preparedStmtSql = preparedStmtSql.replace(":" + paramName, replacement);
+        }
+
+        return preparedStmtSql;
     }
 
     private Map<String, String> findArrayParameters(List<? extends VariableElement> paramList) {

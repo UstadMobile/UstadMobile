@@ -42,20 +42,6 @@
                 android:resource="@xml/file_provider_path" />
         </provider>
 
-        <activity
-            android:name=".UstadMobileActivity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
-            android:label="@string/app_name" />
-        <activity
-            android:name="com.ustadmobile.port.android.view.LoginActivity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
-            android:label="@string/login" />
-        <activity
-            android:name="com.ustadmobile.port.android.view.CatalogActivity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
-            android:label="@string/catalog"
-            android:theme="@style/Theme.UstadTheme" />
-
         <service android:name="com.ustadmobile.port.android.netwokmanager.NetworkServiceAndroid" />
 
         <activity
@@ -69,31 +55,12 @@
             android:label=""
             android:theme="@style/Theme.UstadTheme" />
         <activity
-            android:name="com.ustadmobile.port.android.view.UserSettingsActivity"
-            android:label="@string/settings"
-            android:theme="@style/Theme.UstadTheme" />
-        <activity
-            android:name="com.ustadmobile.port.android.view.SettingsDataSyncListActivity"
-            android:label="Sync History"
-            android:theme="@style/Theme.UstadTheme" />
-        <activity
             android:name="com.ustadmobile.port.android.view.BasePointActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
             android:theme="@style/Theme.UstadTheme" />
         <activity
             android:name="com.ustadmobile.port.android.view.AboutActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
-        <activity
-            android:name="com.ustadmobile.port.android.view.CatalogEntryActivity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
-        <activity
-            android:name="com.ustadmobile.port.android.view.SettingsDataUsageActivity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
-        <activity
-            android:name="com.ustadmobile.port.android.view.UserSettingsActivity2"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
-            android:label="@string/settings"
-            android:theme="@style/Theme.UstadTheme" />
         <activity
             android:name="com.ustadmobile.port.android.view.ScormPackageActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
@@ -102,24 +69,44 @@
             android:name="com.ustadmobile.port.android.view.H5PContentActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
             android:label="" />
-        <activity android:name="com.ustadmobile.port.android.view.WebChunkActivity"
+        <activity
+            android:name="com.ustadmobile.port.android.view.WebChunkActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
-            android:theme="@style/Theme.UstadTheme"
             android:label=""
-           />
-        <activity android:name="com.ustadmobile.port.android.view.DummyActivity"
+            android:theme="@style/Theme.UstadTheme" />
+        <activity
+            android:name="com.ustadmobile.port.android.view.DummyActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
-            android:theme="@style/Theme.UstadTheme"
-            android:label="" />
-        <activity android:name="com.ustadmobile.port.android.view.ContentEntryListActivity"
+            android:label=""
+            android:theme="@style/Theme.UstadTheme" />
+        <activity
+            android:name="com.ustadmobile.port.android.view.ContentEntryListActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
-            android:theme="@style/Theme.UstadTheme"
-            android:label="" />
+            android:label=""
+            android:theme="@style/Theme.UstadTheme" />
+        <activity
+            android:name="com.ustadmobile.port.android.view.ContentEntryDetailActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
+            android:label=""
+            android:theme="@style/Theme.UstadTheme" />
+        <activity
+            android:name="com.ustadmobile.port.android.view.Login2Activity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
+            android:label="@string/login"
+            android:theme="@style/Theme.UstadTheme" />
 
-        <activity android:name="com.ustadmobile.port.android.view.ContentEntryDetailActivity"
+        <activity android:name="com.ustadmobile.port.android.view.Register2Activity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
+            android:label="@string/register"
             android:theme="@style/Theme.UstadTheme"
-            android:label="" />
+            />
+
+
+        <service
+            android:name="com.ustadmobile.port.android.netwokmanager.UmAppDatabaseSyncService"
+            android:enabled="true"
+            android:exported="true"/>
+
     </application>
 
 </manifest>

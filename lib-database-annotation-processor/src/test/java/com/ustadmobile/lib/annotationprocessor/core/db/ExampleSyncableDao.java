@@ -7,9 +7,8 @@ import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.database.annotation.UmRepository;
 import com.ustadmobile.lib.database.annotation.UmRestAccessible;
-import com.ustadmobile.lib.database.annotation.UmSyncFindAllChanges;
-import com.ustadmobile.lib.database.annotation.UmSyncFindLocalChanges;
-import com.ustadmobile.lib.database.annotation.UmSyncFindUpdateable;
+import com.ustadmobile.lib.database.annotation.UmRestAuthorizedUidParam;
+import com.ustadmobile.lib.database.annotation.UmSyncCheckIncomingCanUpdate;
 import com.ustadmobile.lib.database.annotation.UmSyncType;
 import com.ustadmobile.lib.database.annotation.UmUpdate;
 import com.ustadmobile.lib.db.sync.UmSyncExistingEntity;
@@ -17,11 +16,14 @@ import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
 import java.util.List;
 
-@UmDao(syncType = UmSyncType.SYNC_PROACTIVE, readPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
+@UmDao(syncType = UmSyncType.SYNC_PROACTIVE,
+        selectPermissionCondition = "(:accountPersonUid = :accountPersonUid)",
+        updatePermissionCondition = "(:accountPersonUid = :accountPersonUid)",
+        insertPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
 @UmRepository
 public abstract class ExampleSyncableDao implements SyncableDao<ExampleSyncableEntity, ExampleSyncableDao>  {
 
-    @UmSyncFindUpdateable
+    @UmSyncCheckIncomingCanUpdate
     @UmQuery("SELECT ExampleSyncableEntity.exampleSyncableUid AS primaryKey, 1 as userCanUpdate " +
             "FROM ExampleSyncableEntity " +
             "WHERE ExampleSyncableEntity.exampleSyncableUid IN (:primaryKeys)")
@@ -39,11 +41,11 @@ public abstract class ExampleSyncableDao implements SyncableDao<ExampleSyncableE
     @UmRestAccessible
     public abstract void getTitleByUidAsync(long uid, UmCallback<String> callback);
 
-    @UmQuery("UPDATE ExampleSyncableEntity SET title = :title WHERE uid = :uid")
+    @UmQuery("UPDATE ExampleSyncableEntity SET title = :title WHERE exampleSyncableUid = :uid")
     @UmRestAccessible
     public abstract void updateTitle(long uid, String title);
 
-    @UmQuery("UPDATE ExampleSyncableEntity SET title = :title WHERE uid = :uid")
+    @UmQuery("UPDATE ExampleSyncableEntity SET title = :title WHERE exampleSyncableUid = :uid")
     @UmRestAccessible
     public abstract void updateTitleAsync(long uid, String title, UmCallback<Void> callback);
 
@@ -83,5 +85,11 @@ public abstract class ExampleSyncableDao implements SyncableDao<ExampleSyncableE
     @UmInsert
     public abstract void insertListAsyncArr(List<ExampleSyncableEntity> entityList,
                                             UmCallback<Long[]> insertedKeys);
+
+
+    @UmQuery("SELECT title FROM ExampleSyncableEntity WHERE exampleSyncableUid = :uid AND (:personUid = :personUid)")
+    @UmRestAccessible
+    public abstract String getTitleByUidAuthenticated(long uid, @UmRestAuthorizedUidParam long personUid);
+
 
 }

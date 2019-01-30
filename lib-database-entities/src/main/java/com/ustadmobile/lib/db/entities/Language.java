@@ -2,6 +2,7 @@ package com.ustadmobile.lib.db.entities;
 
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
+import com.ustadmobile.lib.database.annotation.UmSyncLastChangedBy;
 import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
 import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 
@@ -11,7 +12,7 @@ import static com.ustadmobile.lib.db.entities.Language.TABLE_ID;
 @UmEntity(tableId = TABLE_ID)
 public class Language {
 
-    public static final int TABLE_ID = 9;
+    public static final int TABLE_ID = 13;
 
     @UmPrimaryKey(autoGenerateSyncable = true)
     private long langUid;
@@ -32,6 +33,9 @@ public class Language {
 
     @UmSyncMasterChangeSeqNum
     private long langMasterChangeSeqNum;
+
+    @UmSyncLastChangedBy
+    private int langLastChangedBy;
 
     public long getLangUid() {
         return langUid;
@@ -87,6 +91,14 @@ public class Language {
 
     public void setLangMasterChangeSeqNum(long langMasterChangeSeqNum) {
         this.langMasterChangeSeqNum = langMasterChangeSeqNum;
+    }
+
+    public int getLangLastChangedBy() {
+        return langLastChangedBy;
+    }
+
+    public void setLangLastChangedBy(int langLastChangedBy) {
+        this.langLastChangedBy = langLastChangedBy;
     }
 
     @Override

@@ -12,7 +12,6 @@ public class ContentEntryListActivity extends UstadBaseActivity implements Conte
         setContentView(R.layout.activity_entry_list);
 
         setUMToolbar(R.id.entry_toolbar);
-        setDirectionFromSystem();
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 

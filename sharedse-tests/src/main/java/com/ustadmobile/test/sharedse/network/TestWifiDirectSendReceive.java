@@ -1,33 +1,15 @@
 package com.ustadmobile.test.sharedse.network;
 
-import com.ustadmobile.core.controller.CatalogPresenter;
-import com.ustadmobile.core.db.UmLiveData;
-import com.ustadmobile.core.db.UmObserver;
-import com.ustadmobile.core.fs.db.ContainerFileHelper;
-import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.core.networkmanager.NetworkTask;
-import com.ustadmobile.core.util.UMFileUtil;
-import com.ustadmobile.lib.db.entities.DownloadJobWithDownloadSet;
-import com.ustadmobile.lib.db.entities.DownloadSet;
 import com.ustadmobile.lib.db.entities.NetworkNode;
-import com.ustadmobile.lib.db.entities.OpdsEntry;
-import com.ustadmobile.lib.db.entities.OpdsEntryWithChildEntries;
-import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
-import com.ustadmobile.lib.db.entities.OpdsLink;
 import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
 import com.ustadmobile.port.sharedse.networkmanager.WifiP2pListener;
 import com.ustadmobile.test.core.annotation.PeerServerRequiredTest;
 import com.ustadmobile.test.core.buildconfig.TestConstants;
-import com.ustadmobile.test.core.impl.PlatformTestUtil;
-import com.ustadmobile.test.sharedse.TestUtilsSE;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.xmlpull.v1.XmlPullParserException;
 
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 /**

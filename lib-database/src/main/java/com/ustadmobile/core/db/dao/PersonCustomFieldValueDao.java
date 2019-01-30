@@ -9,7 +9,9 @@ import com.ustadmobile.lib.db.sync.dao.BaseDao;
 
 import java.util.List;
 
-@UmDao
+@UmDao(inheritPermissionFrom = PersonDao.class,
+inheritPermissionForeignKey = "personCustomFieldValuePersonUid",
+inheritPermissionJoinedPrimaryKey = "personUid")
 public abstract class PersonCustomFieldValueDao implements BaseDao<PersonCustomFieldValue> {
 
     @Override

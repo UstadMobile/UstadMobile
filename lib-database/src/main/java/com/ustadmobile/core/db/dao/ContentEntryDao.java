@@ -8,12 +8,12 @@ import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.database.annotation.UmQueryFindByPrimaryKey;
 import com.ustadmobile.lib.database.annotation.UmRepository;
 import com.ustadmobile.lib.database.annotation.UmUpdate;
-import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.sync.dao.SyncableDao;
+import com.ustadmobile.lib.db.entities.ContentEntry;
 
 import java.util.List;
 
-@UmDao(readPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
+@UmDao(selectPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
 @UmRepository
 public abstract class ContentEntryDao implements SyncableDao<ContentEntry, ContentEntryDao> {
 

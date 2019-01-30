@@ -12,13 +12,13 @@ buildscript {
 }
 
 android {
-    compileSdkVersion 27
+    compileSdkVersion rootProject.ext.version_android_compile_sdk
 
 
 
     defaultConfig {
         minSdkVersion 15
-        targetSdkVersion 27
+        targetSdkVersion rootProject.ext.version_android_target_sdk
         versionCode 1
         versionName "1.0"
 
@@ -37,6 +37,9 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    implementation project(":lib-database-runtime")
+    implementation "android.arch.persistence.room:runtime:$version_android_room"
 
     implementation "com.android.support:appcompat-v7:$version_android_support_lib"
     testImplementation 'junit:junit:4.12'

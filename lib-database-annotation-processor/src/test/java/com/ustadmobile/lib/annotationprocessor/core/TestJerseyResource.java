@@ -7,6 +7,7 @@ import com.ustadmobile.lib.db.sync.SyncResponse;
 
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
+import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.junit.After;
 import org.junit.Assert;
@@ -18,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
@@ -34,7 +36,8 @@ public class TestJerseyResource {
 
     public static HttpServer startServer() {
         final ResourceConfig resourceConfig = new ResourceConfig()
-                .packages("com.ustadmobile.lib.annotationprocessor.core.db");
+                .packages("com.ustadmobile.lib.annotationprocessor.core.db")
+                .register(MultiPartFeature.class);
         return GrizzlyHttpServerFactory.createHttpServer(URI.create(TEST_URI), resourceConfig);
     }
 
@@ -48,7 +51,7 @@ public class TestJerseyResource {
 
     @After
     public void tearDown() {
-        server.stop();
+        server.shutdownNow();
     }
 
     @Test
@@ -56,7 +59,9 @@ public class TestJerseyResource {
         ArrayList<ExampleSyncableEntity> localChangeList = new ArrayList<>();
 
         SyncResponse<ExampleSyncableEntity> response = target
-                .path("ExampleSyncableDao/handlingIncomingSync").request()
+                .path("ExampleSyncableDao/handleIncomingSync")
+                .queryParam("userId", ExampleDatabase.VALID_AUTH_TOKEN_USER_UID).request()
+                .header("X-Auth-Token", ExampleDatabase.VALID_AUTH_TOKEN)
                 .post(Entity.entity(localChangeList, MediaType.APPLICATION_JSON),
                         new GenericType<SyncResponse<ExampleSyncableEntity>>() {});
 
@@ -175,5 +180,40 @@ public class TestJerseyResource {
         Assert.assertNotNull("Entity e1 was inserted", dao.findByUid(response.get(0)));
     }
 
+
+    @Test
+    public void givenValidAuth_whenMethodWithAuthenticatedUserCalled_thenShouldProvideValue() {
+        ExampleDatabase.getInstance(null).clearAll();
+        ExampleSyncableEntity e1 = new ExampleSyncableEntity();
+        e1.setTitle("Entity 1");
+        Long response = target.path("ExampleSyncableDao/insertRest")
+                .request().post(Entity.entity(e1, MediaType.APPLICATION_JSON),
+                        new GenericType<Long>() {});
+
+        String title = target.path("ExampleSyncableDao/getTitleByUidAuthenticated")
+                .queryParam("uid", response).queryParam("personUid",
+                        ExampleDatabase.VALID_AUTH_TOKEN_USER_UID)
+                .request().header("X-Auth-Token", ExampleDatabase.VALID_AUTH_TOKEN)
+                .get(String.class);
+
+        Assert.assertEquals("Given valid authentication, authenticated method answers",
+                "Entity 1", title);
+    }
+
+    @Test(expected = ForbiddenException.class)
+    public void givenInvalidAuth_whenMethodWithAutehtnicatedUserCalled_thenShouldReturn403Status(){
+        ExampleDatabase.getInstance(null).clearAll();
+        ExampleSyncableEntity e1 = new ExampleSyncableEntity();
+        e1.setTitle("Entity 1");
+        Long response = target.path("ExampleSyncableDao/insertRest")
+                .request().post(Entity.entity(e1, MediaType.APPLICATION_JSON),
+                        new GenericType<Long>() {});
+
+        target.path("ExampleSyncableDao/getTitleByUidAuthenticated")
+                .queryParam("uid", response).queryParam("personUid",
+                    ExampleDatabase.VALID_AUTH_TOKEN_USER_UID)
+                .request().header("X-Auth-Token", "invalid")
+                .get(String.class);
+    }
 
 }

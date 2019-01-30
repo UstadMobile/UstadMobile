@@ -1,6 +1,5 @@
 package com.ustadmobile.port.sharedse.controller;
 
-import com.ustadmobile.core.controller.CatalogPresenter;
 import com.ustadmobile.core.controller.UstadBaseController;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.generated.locale.MessageID;
@@ -122,11 +121,6 @@ public class ReceiveCoursePresenter extends UstadBaseController implements WifiP
 
 
     @Override
-    public void setUIStrings() {
-
-    }
-
-    @Override
     public void peersChanged(List<NetworkNode> peers) {
 
     }
@@ -144,7 +138,7 @@ public class ReceiveCoursePresenter extends UstadBaseController implements WifiP
 
     public void handleClickAccept() {
         String destinationDir= UstadMobileSystemImpl.getInstance().getStorageDirs(
-                CatalogPresenter.SHARED_RESOURCE, getContext())[0].getDirURI();
+                UstadMobileSystemImpl.SHARED_RESOURCE, getContext())[0].getDirURI();
         List<OpdsLink> baseLinks =sharedFeed.getLinks(OpdsEntry.LINK_REL_P2P_SELF, null, null,
                 false, false, false ,1);
         if(baseLinks == null || baseLinks.isEmpty()) {

@@ -7,6 +7,8 @@ import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.lib.db.entities.HttpCachedEntry;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -185,8 +187,7 @@ public class HttpCacheResponse extends AbstractCacheResponse implements Runnable
 
         markBodyReturned();
         if(networkResponse == null) {
-            return UMIOUtils.readStreamToByteArray(UstadMobileSystemImpl.getInstance().openFileInputStream(
-                    entry.getFileUri()));
+            return UMIOUtils.readStreamToByteArray(new FileInputStream(new File(entry.getFileUri())));
         }else if(byteBuf != null) {
             return byteBuf;
         }else {
@@ -201,7 +202,7 @@ public class HttpCacheResponse extends AbstractCacheResponse implements Runnable
 
         markBodyReturned();
         if(networkResponse == null) {
-            return UstadMobileSystemImpl.getInstance().openFileInputStream(entry.getFileUri());
+            return new FileInputStream(new File(entry.getFileUri()));
         }else if(byteBuf != null){
             return new ByteArrayInputStream(byteBuf);
         }else {

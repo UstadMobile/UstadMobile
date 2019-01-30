@@ -14,4 +14,8 @@ public interface UmSyncableDatabase {
 
     void setMaster(boolean master);
 
+    int getDeviceBits();
+
+    void invalidateDeviceBits();
+
 }

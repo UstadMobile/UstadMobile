@@ -1,0 +1,10 @@
+<package xmlns="http://www.idpf.org/2007/opf" version="3.0" unique-identifier="pub-id">
+        <metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+                <dc:identifier id="pub-id"></dc:identifier>
+                <meta property="dcterms:modified"></meta>
+                <dc:title></dc:title>
+        </metadata>
+        <spine>
+                <itemref idref="page.xhtml" />
+        </spine>
+</package>

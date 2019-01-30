@@ -5,7 +5,6 @@
       <module fileurl="file://$PROJECT_DIR$/UstadMobile.iml" filepath="$PROJECT_DIR$/UstadMobile.iml" />
       <module fileurl="file://$PROJECT_DIR$/app-android/app-android.iml" filepath="$PROJECT_DIR$/app-android/app-android.iml" />
       <module fileurl="file://$PROJECT_DIR$/app-android-launcher/app-android-launcher.iml" filepath="$PROJECT_DIR$/app-android-launcher/app-android-launcher.iml" />
-      <module fileurl="file://$PROJECT_DIR$/app-android-testserver/app-android-testserver.iml" filepath="$PROJECT_DIR$/app-android-testserver/app-android-testserver.iml" />
       <module fileurl="file://$PROJECT_DIR$/app-javase/app-javase.iml" filepath="$PROJECT_DIR$/app-javase/app-javase.iml" />
       <module fileurl="file://$PROJECT_DIR$/app-rest-server/app-rest-server.iml" filepath="$PROJECT_DIR$/app-rest-server/app-rest-server.iml" />
       <module fileurl="file://$PROJECT_DIR$/core/core.iml" filepath="$PROJECT_DIR$/core/core.iml" />
@@ -21,6 +20,8 @@
       <module fileurl="file://$PROJECT_DIR$/lib-database-jdbc/lib-database-jdbc.iml" filepath="$PROJECT_DIR$/lib-database-jdbc/lib-database-jdbc.iml" />
       <module fileurl="file://$PROJECT_DIR$/lib-database-retrofitrepository/lib-database-retrofitrepository.iml" filepath="$PROJECT_DIR$/lib-database-retrofitrepository/lib-database-retrofitrepository.iml" />
       <module fileurl="file://$PROJECT_DIR$/lib-database-runtime/lib-database-runtime.iml" filepath="$PROJECT_DIR$/lib-database-runtime/lib-database-runtime.iml" />
+      <module fileurl="file://$PROJECT_DIR$/lib-database-runtime-android/lib-database-runtime-android.iml" filepath="$PROJECT_DIR$/lib-database-runtime-android/lib-database-runtime-android.iml" />
+      <module fileurl="file://$PROJECT_DIR$/lib-database-runtime-core-compileonly/lib-database-runtime-core-compileonly.iml" filepath="$PROJECT_DIR$/lib-database-runtime-core-compileonly/lib-database-runtime-core-compileonly.iml" />
       <module fileurl="file://$PROJECT_DIR$/lib-database-runtime-jdbc/lib-database-runtime-jdbc.iml" filepath="$PROJECT_DIR$/lib-database-runtime-jdbc/lib-database-runtime-jdbc.iml" />
       <module fileurl="file://$PROJECT_DIR$/lib-http-testserver/lib-http-testserver.iml" filepath="$PROJECT_DIR$/lib-http-testserver/lib-http-testserver.iml" />
       <module fileurl="file://$PROJECT_DIR$/lib-room-annotations/lib-room-annotations.iml" filepath="$PROJECT_DIR$/lib-room-annotations/lib-room-annotations.iml" />

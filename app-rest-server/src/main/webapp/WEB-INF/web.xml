@@ -7,7 +7,7 @@
 
         <init-param>
             <param-name>jersey.config.server.provider.packages</param-name>
-            <param-value>com.ustadmobile.port.web.resource</param-value>
+            <param-value>com.ustadmobile.core.db.dao</param-value>
         </init-param>
 
         <init-param>

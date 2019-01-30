@@ -1,0 +1,60 @@
+<package xmlns="http://www.idpf.org/2007/opf" version="3.0" unique-identifier="pub-id">
+        <metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dc:identifier id="pub-id">202b10fe-b028-4b84-9b84-852aa766607d</dc:identifier>
+<meta property="dcterms:modified">2015-12-26T18:32:12Z</meta>
+<dc:title>The Little Chicks</dc:title>
+<dc:creator id="author1">Benita Rowe</dc:creator>
+<dc:creator id="author2">Mike Dawson</dc:creator>
+<dc:language>en-US</dc:language>
+</metadata>
+<manifest>
+<item id="nav" href="nav.xhtml" properties="nav" media-type="application/xhtml+xml"/>
+<item id="cover_img" href="cover.png" properties="cover-image" media-type="image/png"/>
+<item id="my_nav_arrow_gif" href="my_nav_arrow.gif" media-type="image/gif"/>
+<item id="icon_assignment_gif" href="icon_assignment.gif" media-type="image/gif"/>
+<item id="icon_experiment_gif" href="icon_experiment.gif" media-type="image/gif"/>
+<item id="icon_present_gif" href="icon_present.gif" media-type="image/gif"/>
+<item id="icon_reading_gif" href="icon_reading.gif" media-type="image/gif"/>
+<item id="icon_e_journal_gif" href="icon_e_journal.gif" media-type="image/gif"/>
+<item id="icon_gallery_gif" href="icon_gallery.gif" media-type="image/gif"/>
+<item id="icon_summary_gif" href="icon_summary.gif" media-type="image/gif"/>
+<item id="my_js_js" href="my_js.js" media-type="application/javascript"/>
+<item id="icon_preknowledge_gif" href="icon_preknowledge.gif" media-type="image/gif"/>
+<item id="icon_question_gif" href="icon_question.gif" media-type="image/gif"/>
+<item id="common_js" href="common.js" media-type="application/javascript"/>
+<item id="icon_generic_gif" href="icon_generic.gif" media-type="image/gif"/>
+<item id="cover" href="cover.xhtml" media-type="application/xhtml+xml"/>
+<item id="icon_inter_gif" href="icon_inter.gif" media-type="image/gif"/>
+<item id="icon_define_gif" href="icon_define.gif" media-type="image/gif"/>
+<item id="icon_time_gif" href="icon_time.gif" media-type="image/gif"/>
+<item id="icon_synthesis_gif" href="icon_synthesis.gif" media-type="image/gif"/>
+<item id="icon_assess_gif" href="icon_assess.gif" media-type="image/gif"/>
+<item id="icon_key_points_gif" href="icon_key_points.gif" media-type="image/gif"/>
+<item id="exe_jquery_js" href="exe_jquery.js" media-type="application/javascript"/>
+<item id="my_list_gif" href="my_list.gif" media-type="image/gif"/>
+<item id="icon_multimedia_gif" href="icon_multimedia.gif" media-type="image/gif"/>
+<item id="icon_reflection_gif" href="icon_reflection.gif" media-type="image/gif"/>
+<item id="content_css" href="content.css" media-type="text/css"/>
+<item id="icon_calc_gif" href="icon_calc.gif" media-type="image/gif"/>
+<item id="icon_casestudy_gif" href="icon_casestudy.gif" media-type="image/gif"/>
+<item id="Page_1.xhtml" href="Page_1.xhtml" media-type="application/xhtml+xml" properties="scripted"/>
+<item id="icon_diagnosis_gif" href="icon_diagnosis.gif" media-type="image/gif"/>
+<item id="my_logo_jpg" href="my_logo.jpg" media-type="image/jpeg"/>
+<item id="icon_discussion_gif" href="icon_discussion.gif" media-type="image/gif"/>
+<item id="my_header_jpg" href="my_header.jpg" media-type="image/jpeg"/>
+<item id="icon_attention_gif" href="icon_attention.gif" media-type="image/gif"/>
+<item id="icon_technology_gif" href="icon_technology.gif" media-type="image/gif"/>
+<item id="icon_objectives_gif" href="icon_objectives.gif" media-type="image/gif"/>
+<item id="icon_e_gloss_gif" href="icon_e_gloss.gif" media-type="image/gif"/>
+<item id="my_hide_show_png" href="my_hide_show.png" media-type="image/png"/>
+<item id="my_ims_header_jpg" href="my_ims_header.jpg" media-type="image/jpeg"/>
+<item id="base_css" href="base.css" media-type="text/css"/>
+<item id="popup_bg_gif" href="popup_bg.gif" media-type="image/gif"/>
+<item id="icon_activity_gif" href="icon_activity.gif" media-type="image/gif"/>
+<item id="icon_web_resource_gif" href="icon_web_resource.gif" media-type="image/gif"/>
+<item id="icon_review_gif" href="icon_review.gif" media-type="image/gif"/>
+<item id="my_header_fullscreen_jpg" href="my_header_fullscreen.jpg" media-type="image/jpeg"/>
+<item href="exe-files/common/tinymce/skins/lightgray/skin.ie7.min.css" id="exe-files/common/tinymce/skins/lightgray/skin.ie7.min.css" media-type="text/css"/><item href="exe-files/common/tinymce/skins/lightgray/content.min.css" id="exe-files/common/tinymce/skins/lightgray/content.min.css" media-type="text/css"/><item href="exe-files/common/tinymce/skins/lightgray/skin.min.css" id="exe-files/common/tinymce/skins/lightgray/skin.min.css" media-type="text/css"/><item href="exe-files/common/tinymce/skins/lightgray/content.inline.min.css" id="exe-files/common/tinymce/skins/lightgray/content.inline.min.css" media-type="text/css"/><item href="exe-files/common/tinymce/plugins/visualblocks/css/visualblocks.css" id="exe-files/common/tinymce/plugins/visualblocks/css/visualblocks.css" media-type="text/css"/><item href="exe-files/common/exe_jquery.js" id="exe-files/common/exe_jquery.js" media-type="application/javascript"/><item href="exe-files/common/tinymce/tinymce.full.min.js" id="exe-files/common/tinymce/tinymce.full.min.js" media-type="application/javascript"/><item href="exe-files/common/tinymce4-exe-settings.js" id="exe-files/common/tinymce4-exe-settings.js" media-type="application/javascript"/><item href="exe-files/common/tinymce/skins/lightgray/fonts/tinymce.ttf" id="exe-files/common/tinymce/skins/lightgray/fonts/tinymce.ttf" media-type="application/font-sfnt"/><item href="exe-files/common/tinymce/skins/lightgray/fonts/tinymce.woff" id="exe-files/common/tinymce/skins/lightgray/fonts/tinymce.woff" media-type="application/font-woff"/><item href="exe-files/idevices/net.exelearning.text/freetext-idevice.js" id="exe-files/idevices/net.exelearning.text/freetext-idevice.js" media-type="application/javascript"/><item href="page.xhtml" id="page.xhtml" media-type="application/xhtml+xml"/><item href="exe-files/common/test-common-file.css" id="exe-files/common/test-common-file.css" media-type="text/css"/><item href="exe-files/common/exe-epub-common.js" id="exe-files/common/exe-epub-common.js" media-type="application/javascript"/><item href="exe-files/common/tincan.js" id="exe-files/common/tincan.js" media-type="application/javascript"/><item href="exe-files/common/exe_tincan.js" id="exe-files/common/exe_tincan.js" media-type="application/javascript"/><item href="exe-files/idevices/net.exelearning.mcq/mcq-idevice.css" id="exe-files/idevices/net.exelearning.mcq/mcq-idevice.css" media-type="text/css"/><item href="exe-files/idevices/net.exelearning.mcq/mcq-idevice.js" id="exe-files/idevices/net.exelearning.mcq/mcq-idevice.js" media-type="application/javascript"/><item href="exe-files/idevices/net.exelearning.textentry/textentry-idevice.js" id="exe-files/idevices/net.exelearning.textentry/textentry-idevice.js" media-type="application/javascript"/><item href="exe-files/idevices/net.exelearning.scorefeedback/scorefeedback-idevice.js" id="exe-files/idevices/net.exelearning.scorefeedback/scorefeedback-idevice.js" media-type="application/javascript"/><item href="exe-files/user-added/1.jpg" id="exe-files/user-added/1.jpg" media-type="image/jpeg"/><item href="Page_2.xhtml" id="Page_2.xhtml" media-type="application/xhtml+xml"/><item href="exe-files/user-added/2.jpg" id="exe-files/user-added/2.jpg" media-type="image/jpeg"/><item href="exe-files/user-added/2.jpg" id="exe-files/user-added/2.jpg" media-type="image/jpeg"/><item href="Page_3.xhtml" id="Page_3.xhtml" media-type="application/xhtml+xml"/><item href="exe-files/user-added/3.jpg" id="exe-files/user-added/3.jpg" media-type="image/jpeg"/><item href="Page_4.xhtml" id="Page_4.xhtml" media-type="application/xhtml+xml"/><item href="exe-files/user-added/4.jpg" id="exe-files/user-added/4.jpg" media-type="image/jpeg"/><item href="Page_5.xhtml" id="Page_5.xhtml" media-type="application/xhtml+xml"/><item href="Page_6.xhtml" id="Page_6.xhtml" media-type="application/xhtml+xml"/><item href="Acknowledgements.xhtml" id="Acknowledgements.xhtml" media-type="application/xhtml+xml"/><item href="exe-files/user-added/5.jpg" id="exe-files/user-added/5.jpg" media-type="image/jpeg"/></manifest>
+<spine>
+<itemref idref="Page_1.xhtml"/><itemref idref="Page_2.xhtml"/><itemref idref="Page_3.xhtml"/><itemref idref="Page_4.xhtml"/><itemref idref="Page_5.xhtml"/><itemref idref="Page_6.xhtml"/><itemref idref="Acknowledgements.xhtml"/></spine>
+</package>

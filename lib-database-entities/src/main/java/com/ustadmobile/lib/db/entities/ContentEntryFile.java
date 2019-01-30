@@ -2,6 +2,7 @@ package com.ustadmobile.lib.db.entities;
 
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
+import com.ustadmobile.lib.database.annotation.UmSyncLastChangedBy;
 import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
 import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 
@@ -38,6 +39,16 @@ public class ContentEntryFile {
     @UmSyncMasterChangeSeqNum
     private long contentEntryFileMasterChangeSeqNum;
 
+    @UmSyncLastChangedBy
+    private int contentEntryFileLastChangedBy;
+
+    public ContentEntryFile(){
+
+    }
+
+    public ContentEntryFile(long fileSize) {
+        this.fileSize = fileSize;
+    }
 
     public long getContentEntryFileUid() {
         return contentEntryFileUid;
@@ -109,6 +120,14 @@ public class ContentEntryFile {
 
     public void setContentEntryFileMasterChangeSeqNum(long contentEntryFileMasterChangeSeqNum) {
         this.contentEntryFileMasterChangeSeqNum = contentEntryFileMasterChangeSeqNum;
+    }
+
+    public int getContentEntryFileLastChangedBy() {
+        return contentEntryFileLastChangedBy;
+    }
+
+    public void setContentEntryFileLastChangedBy(int contentEntryFileLastChangedBy) {
+        this.contentEntryFileLastChangedBy = contentEntryFileLastChangedBy;
     }
 
     @Override
