@@ -217,16 +217,8 @@ public class PersonDetailActivity extends UstadBaseActivity implements PersonDet
                     //Compress the image:
                     compressImage();
 
-                    //1. Send Pic to PersonPictureDao , etc
                     File imageFile = new File(imagePathFromCamera);
                     mPresenter.handleCompressedImage(imageFile);
-
-                    //2. persist it
-                    //3. Update Image on View
-
-
-                    //set imagePathFromCamera to Person (persist)
-                    //updateImageOnView(imagePathFromCamera);
 
                     break;
             }

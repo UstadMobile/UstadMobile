@@ -39,8 +39,6 @@ import static com.ustadmobile.lib.db.entities.Role.ROLE_NAME_TEACHER;
 public class ServletContextClass implements ServletContextListener
 {
 
-    //TODOne: Sprint 5: Remove SEL Questions Since SEL Question editor exists.
-
     private String dummyBaseUrl = "http://localhost/dummy/address/";
     private String dummyAuth = "dummy";
     private UmAppDatabase appDb;
@@ -88,7 +86,6 @@ public class ServletContextClass implements ServletContextListener
         //Load initial data
         loadInitialData();
 
-
     }
 
     private void loadInitialData(){
@@ -125,7 +122,6 @@ public class ServletContextClass implements ServletContextListener
             System.out.println("ServletContextClass: Admin Already created. Continuing..");
             addRolesAndPermissions();
         }
-
 
         //addSELQuestions();
 
@@ -187,9 +183,6 @@ public class ServletContextClass implements ServletContextListener
                             exception.printStackTrace();
                         }
                     });
-
-                    //Adding stuff
-                    addFieldData();
 
                 }
 
@@ -326,8 +319,6 @@ public class ServletContextClass implements ServletContextListener
                                 }
                             });
 
-                            createSELOfficer();
-
                         }
 
                         @Override
@@ -380,7 +371,6 @@ public class ServletContextClass implements ServletContextListener
 
                             //Go next to SEL
                             createSELOfficer();
-
 
                         }
 
@@ -575,7 +565,6 @@ public class ServletContextClass implements ServletContextListener
 
 
     }
-
 
     private void addSELQuestions(){
 

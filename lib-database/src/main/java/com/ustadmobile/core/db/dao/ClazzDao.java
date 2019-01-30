@@ -76,7 +76,7 @@ public abstract class ClazzDao implements SyncableDao<Clazz, ClazzDao> {
             " WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid " +
             " AND ClazzMember.role = " + ClazzMember.ROLE_TEACHER +
             " AND ClazzMember.clazzMemberActive = 1 ) AS numTeachers, " +
-            " (SELECT GROUP_CONCAT(Person.firstNames ||  Person.lastName ) as teacherName " +
+            " (SELECT GROUP_CONCAT(Person.firstNames || ' ' ||  Person.lastName ) as teacherName " +
             " FROM Person where Person.personUid in (SELECT ClazzMember.clazzMemberPersonUid " +
             " FROM ClazzMember WHERE ClazzMember.role = " + ClazzMember.ROLE_TEACHER  +
             " AND ClazzMember.clazzMemberClazzUid = Clazz.clazzUid" +
