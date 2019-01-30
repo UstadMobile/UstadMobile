@@ -248,5 +248,6 @@
     <string name="also_available_in">Also available in</string>
 
     <string name="content_entry_not_found">ContentEntry Not Found</string>
+    <string name="onboaring_activity">Get Started</string>
 
 </resources>

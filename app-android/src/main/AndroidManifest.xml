@@ -16,11 +16,8 @@
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-
-    <!-- To obtain wifi lock -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" /> <!-- To obtain wifi lock -->
     <uses-permission android:name="android.permission.WAKE_LOCK" />
-
     <!--
     Multicast lock required for use of JmDns to subsitute for 'normal' service discovery on
     older devices where built-in service discovery is buggy.
@@ -32,6 +29,8 @@
         android:required="false" />
 
     <application android:supportsRtl="true">
+        <activity android:name="com.ustadmobile.port.android.view.OnBoardingActivity"></activity>
+
         <provider
             android:name="android.support.v4.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"
@@ -131,7 +130,7 @@
         <service
             android:name="com.ustadmobile.port.android.netwokmanager.UmAppDatabaseSyncService"
             android:enabled="true"
-            android:exported="true"></service>
+            android:exported="true" />
     </application>
 
 </manifest>
