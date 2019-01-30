@@ -206,12 +206,12 @@ public class KhanContentIndexer implements Runnable {
         factory = new GenericObjectPool<>(new KhanDriverFactory());
         //start the indexing work queue
         CountDownLatch indexerLatch = new CountDownLatch(1);
-        WorkQueue indexWorkQueue = new WorkQueue(indexerSource, 1);
+        WorkQueue indexWorkQueue = new WorkQueue(indexerSource, 4);
         indexWorkQueue.addEmptyWorkQueueListener((srcQueu) ->
                 indexerLatch.countDown());
         indexWorkQueue.start();
         CountDownLatch scraperLatch = new CountDownLatch(1);
-        scrapeWorkQueue = new WorkQueue(scraperSource, 1);
+        scrapeWorkQueue = new WorkQueue(scraperSource, 4);
         scrapeWorkQueue.start();
 
         try {
