@@ -25,6 +25,8 @@ import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.lib.db.entities.NetworkNode;
 import com.ustadmobile.port.sharedse.networkmanager.BleEntryStatusTask;
+import com.ustadmobile.port.sharedse.networkmanager.BleMessage;
+import com.ustadmobile.port.sharedse.networkmanager.BleMessageResponseListener;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle;
 import com.ustadmobile.port.sharedse.networkmanager.WiFiDirectGroupBle;
 
@@ -380,7 +382,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
     public void connectToWiFi(String ssid, String passphrase) {
         WifiConfiguration wifiConfig = new WifiConfiguration();
         wifiConfig.SSID = "\""+ ssid +"\"";
-        wifiConfig.priority=(getMaxWiFiConfigurationPriority(wifiManager)+1);
+        wifiConfig.priority = (getMaxWiFiConfigurationPriority(wifiManager)+1);
         wifiConfig.preSharedKey = "\""+ passphrase +"\"";
         wifiConfig.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
         wifiConfig.priority = getMaxWiFiConfigurationPriority(wifiManager);
@@ -403,10 +405,26 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
             BleEntryStatusTaskAndroid entryStatusTask =
                     new BleEntryStatusTaskAndroid((Context)context,entryUidsToCheck,peerToCheck);
             entryStatusTask.setBluetoothManager((BluetoothManager)bluetoothManager);
+            entryStatusTask.setNetworkManagerBle(this);
             return entryStatusTask;
         }
         return null;
     }
+
+    @Override
+    public BleEntryStatusTask makeEntryStatusTask(Object context, BleMessage message,
+                                                  NetworkNode peerToSendMessageTo, BleMessageResponseListener responseListener) {
+        if(isBleDeviceSDKVersion()){
+            BleEntryStatusTaskAndroid task =
+                    new BleEntryStatusTaskAndroid((Context)context,message,
+                            peerToSendMessageTo, responseListener);
+            task.setBluetoothManager((BluetoothManager)bluetoothManager);
+            task.setNetworkManagerBle(this);
+            return task;
+        }
+        return null;
+    }
+
 
     /**
      * Responsible for setting up the right services connection

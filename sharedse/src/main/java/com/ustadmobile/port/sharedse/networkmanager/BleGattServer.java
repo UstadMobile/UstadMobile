@@ -41,7 +41,7 @@ public abstract class BleGattServer implements WiFiDirectGroupListenerBle{
 
     private Object context;
 
-    public static final int GROUP_CREATION_TIMEOUT = 5;
+    static final int GROUP_CREATION_TIMEOUT = 5;
 
     public BleGattServer (Object context){
         this.context = context;
@@ -88,8 +88,8 @@ public abstract class BleGattServer implements WiFiDirectGroupListenerBle{
                 networkManager.createWifiDirectGroup();
                 try { mLatch.await(GROUP_CREATION_TIMEOUT, TimeUnit.SECONDS); }
                 catch(InterruptedException e) {
-                    e.printStackTrace();
                     mLatch.countDown();
+                    e.printStackTrace();
                 }
                 return new BleMessage(WIFI_GROUP_CREATION_RESPONSE,message.getBytes());
                 default: return null;
@@ -98,7 +98,7 @@ public abstract class BleGattServer implements WiFiDirectGroupListenerBle{
 
     @Override
     public void groupCreated(WiFiDirectGroupBle group, Exception err) {
-        this.message = group.getSsid()+WIFI_GROUP_INFO_SEPARATOR+group.getPassphrase();
+        this.message = group.getSsid() + WIFI_GROUP_INFO_SEPARATOR + group.getPassphrase();
         mLatch.countDown();
     }
 

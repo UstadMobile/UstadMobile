@@ -12,6 +12,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.lib.db.entities.NetworkNode;
 import com.ustadmobile.port.sharedse.networkmanager.BleEntryStatusTask;
 import com.ustadmobile.port.sharedse.networkmanager.BleMessage;
+import com.ustadmobile.port.sharedse.networkmanager.BleMessageResponseListener;
 import com.ustadmobile.port.sharedse.networkmanager.BleMessageUtil;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle;
 
@@ -59,7 +60,7 @@ public class    BleEntryStatusTaskAndroid extends BleEntryStatusTask {
      * @param entryUidsToCheck List of Id's to be checked for availability from a peer device.
      * @param peerToCheck Peer device for those entries to be checked from.
      */
-    BleEntryStatusTaskAndroid(Context context, List<Long> entryUidsToCheck,
+    public BleEntryStatusTaskAndroid(Context context, List<Long> entryUidsToCheck,
                               NetworkNode peerToCheck) {
         super(context,entryUidsToCheck,peerToCheck);
         this.context = context;
@@ -67,6 +68,20 @@ public class    BleEntryStatusTaskAndroid extends BleEntryStatusTask {
         byte [] messagePayload = BleMessageUtil.bleMessageLongToBytes(entryUidsToCheck);
         this.message = new BleMessage(ENTRY_STATUS_REQUEST,messagePayload);
     }
+
+    /**
+     * Constructor to be used when creating platform specific instance of BleEntryStatusTask
+     * responsible for sending custom messages apart from entry status check.
+     * @param context Platform specific application context.
+     * @param message Message to be sent
+     * @param peerToSendMessageTo peer to send message to
+     */
+    public BleEntryStatusTaskAndroid(Context context , BleMessage message,
+                                     NetworkNode peerToSendMessageTo,
+                                     BleMessageResponseListener responseListener){
+        super(context,message,peerToSendMessageTo, responseListener);
+    }
+
 
     /**
      * Set bluetooth manager for BLE GATT communication
@@ -100,7 +115,6 @@ public class    BleEntryStatusTaskAndroid extends BleEntryStatusTask {
        }
     }
 
-
     /**
      * Get BleMessageGattClientCallback instance
      * @return Instance of a BleMessageGattClientCallback
@@ -108,6 +122,4 @@ public class    BleEntryStatusTaskAndroid extends BleEntryStatusTask {
     BleMessageGattClientCallback getGattClientCallback() {
         return mCallback;
     }
-
-
 }

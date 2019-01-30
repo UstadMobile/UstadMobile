@@ -260,7 +260,7 @@ public abstract class NetworkManagerBle {
      * Get Wifi direct group change status
      * @return Current status
      */
-    protected int getWifiDirectGroupChangeStatus() {
+    int getWifiDirectGroupChangeStatus() {
         return wifiDirectGroupChangeStatus;
     }
 
@@ -268,7 +268,7 @@ public abstract class NetworkManagerBle {
      * Set Wifi direct group change status
      * @param wifiDirectGroupChangeStatus Status to be changed to
      */
-    protected void setWifiDirectGroupChangeStatus(int wifiDirectGroupChangeStatus) {
+    void setWifiDirectGroupChangeStatus(int wifiDirectGroupChangeStatus) {
         this.wifiDirectGroupChangeStatus = wifiDirectGroupChangeStatus;
     }
 
@@ -278,7 +278,7 @@ public abstract class NetworkManagerBle {
      *
      * @see WiFiDirectGroupListenerBle
      */
-    public void handleWiFiDirectGroupChangeRequest(WiFiDirectGroupListenerBle groupListenerBle){
+    void handleWiFiDirectGroupChangeRequest(WiFiDirectGroupListenerBle groupListenerBle){
         if(!wiFiDirectGroupListeners.contains(groupListenerBle)){
             wiFiDirectGroupListeners.add(groupListenerBle);
         }
@@ -353,7 +353,7 @@ public abstract class NetworkManagerBle {
      * Get all unique entry UUID's to be monitored
      * @return Set of all unique UUID's
      */
-    protected SortedSet<Long> getAllUidsToBeMonitored() {
+    private SortedSet<Long> getAllUidsToBeMonitored() {
         SortedSet uidsToBeMonitoredSet = new TreeSet();
         for(List<Long> uidList : availabilityMonitoringRequests.values()) {
             uidsToBeMonitoredSet.addAll(uidList);
@@ -366,7 +366,7 @@ public abstract class NetworkManagerBle {
      * @param networkNodes Known NetworkNode
      * @return List of all known nodes
      */
-    protected List<Integer> getAllKnownNetworkNodeIds(List<NetworkNode> networkNodes){
+    private List<Integer> getAllKnownNetworkNodeIds(List<NetworkNode> networkNodes){
         List<Integer> nodeIdList = new ArrayList<>();
         for(NetworkNode networkNode: networkNodes){
             nodeIdList.add(networkNode.getNodeId());
@@ -393,6 +393,31 @@ public abstract class NetworkManagerBle {
      */
     public abstract BleEntryStatusTask makeEntryStatusTask(Object context,List<Long> entryUidsToCheck, NetworkNode peerToCheck);
 
+    /**
+     * Create entry status task for a specific peer device,
+     * it will request status of the provided entries from the provided peer device
+     * @param context Platform specific mContext
+     * @param message Message to be sent to the peer device
+     * @param peerToSendMessageTo Peer device to send message to.
+     * @return Created BleEntryStatusTask
+     *
+     * @see BleEntryStatusTask
+     */
+    public abstract BleEntryStatusTask makeEntryStatusTask(Object context,BleMessage message,
+                                                           NetworkNode peerToSendMessageTo,
+                                                           BleMessageResponseListener responseListener);
+
+    /**
+     * Send message to a specific device
+     * @param context Platform specific context
+     * @param message Message to be send
+     * @param peerToSendMessageTo Peer device to receive the message
+     */
+    public void sendMessage(Object context, BleMessage message, NetworkNode peerToSendMessageTo,
+                            BleMessageResponseListener responseListener){
+        BleEntryStatusTask task = makeEntryStatusTask(context,message,peerToSendMessageTo, responseListener);
+        task.run();
+    }
     /**
      * Clean up the network manager for shutdown
      */

@@ -91,7 +91,7 @@ class BleGattServerAndroid extends BleGattServer{
                 boolean packetsReceived = receivedMessage.onPackageReceived(value);
                 UstadMobileSystemImpl.l(UMLog.DEBUG,691,
                         "Received all packets from "+device.getAddress()+" "
-                                +packetsReceived);
+                                + packetsReceived);
                 if(packetsReceived){
                     int currentMtuSize = receivedMessage.getMtu();
                     //Send back response
@@ -107,7 +107,7 @@ class BleGattServerAndroid extends BleGattServer{
                         byte[][] packets = messageToSend.getPackets(currentMtuSize);
                         for (byte[] packet : packets) {
                             characteristic.setValue(packet);
-                             boolean notified= gattServer.notifyCharacteristicChanged(device,
+                             boolean notified = gattServer.notifyCharacteristicChanged(device,
                                      characteristic, false);
                              if(notified){
                                  UstadMobileSystemImpl.l(UMLog.DEBUG,691,
