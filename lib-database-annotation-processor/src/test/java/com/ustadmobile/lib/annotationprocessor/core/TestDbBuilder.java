@@ -3,7 +3,7 @@ package com.ustadmobile.lib.annotationprocessor.core;
 import com.ustadmobile.lib.annotationprocessor.core.db.ExampleDatabase;
 import com.ustadmobile.lib.database.UmDbBuilder;
 import com.ustadmobile.lib.db.DbCallback;
-import com.ustadmobile.lib.db.DoorwayDbAdapter;
+import com.ustadmobile.lib.db.DoorDbAdapter;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -25,12 +25,12 @@ public class TestDbBuilder {
 
         DbCallback createExampleEntityCallback = new DbCallback() {
             @Override
-            public void onCreate(DoorwayDbAdapter dbHelper) {
+            public void onCreate(DoorDbAdapter dbHelper) {
                 dbHelper.execSql("INSERT INTO ExampleEntity (uid, name, locationPk) VALUES (42, 'onCreate', 0)");
             }
 
             @Override
-            public void onOpen(DoorwayDbAdapter dbHelper) {
+            public void onOpen(DoorDbAdapter dbHelper) {
                 dbHelper.execSql("INSERT INTO ExampleEntity (uid, name, locationPk) VALUES (43, 'onOpen', 0)");
             }
         };
@@ -63,7 +63,7 @@ public class TestDbBuilder {
 
         DbCallback openExampleEntityCallback = new DbCallback() {
             @Override
-            public void onOpen(DoorwayDbAdapter dbHelper) {
+            public void onOpen(DoorDbAdapter dbHelper) {
                 dbHelper.execSql("INSERT INTO ExampleEntity (uid, name, locationPk) VALUES (43, 'onOpen', 0)");
             }
         };

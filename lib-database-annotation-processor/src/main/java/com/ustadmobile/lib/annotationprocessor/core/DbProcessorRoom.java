@@ -29,7 +29,6 @@ import com.ustadmobile.lib.database.annotation.UmSyncCheckIncomingCanUpdate;
 import com.ustadmobile.lib.database.annotation.UmSyncIncoming;
 import com.ustadmobile.lib.database.annotation.UmSyncOutgoing;
 import com.ustadmobile.lib.database.annotation.UmUpdate;
-import com.ustadmobile.lib.database.jdbc.JdbcDatabaseUtils;
 import com.ustadmobile.lib.db.UmDbWithExecutor;
 import com.ustadmobile.lib.db.sync.UmRepositoryDb;
 import com.ustadmobile.lib.db.sync.UmSyncableDatabase;
@@ -237,11 +236,11 @@ public class DbProcessorRoom extends AbstractDbProcessor implements QueryMethodG
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC);
         CodeBlock.Builder codeBlock = CodeBlock.builder();
-        for(TypeElement entityType : DbProcessorUtils.findEntityTypes(dbType, processingEnv)) {
-            if(DbProcessorUtils.entityHasChangeSequenceNumbers(entityType, processingEnv)) {
-                codeBlock.add("createSeqNumTriggers($T.class, _db);\n", entityType);
-            }
-        }
+//        for(TypeElement entityType : DbProcessorUtils.findEntityTypes(dbType, processingEnv)) {
+//            if(DbProcessorUtils.entityHasChangeSequenceNumbers(entityType, processingEnv)) {
+//                codeBlock.add("createSeqNumTriggers($T.class, _db);\n", entityType);
+//            }
+//        }
 
         builder.addCode(codeBlock.build());
         return builder.build();
@@ -307,11 +306,26 @@ public class DbProcessorRoom extends AbstractDbProcessor implements QueryMethodG
                 .addModifiers(Modifier.PUBLIC)
                 .addCode("this._dbManager = _dbManager;\n").build());
 
+        ClassName roomDatabaseClassName = ClassName.get(ROOM_PKG_NAME, "RoomDatabase");
+        roomDaoClassSpec.addField(roomDatabaseClassName, "_roomDb");
+        MethodSpec.Builder setRoomDbMethodBuilder = MethodSpec.methodBuilder("setRoomDatabase")
+                .addParameter(roomDatabaseClassName, "roomDb")
+                .addModifiers(Modifier.PUBLIC);
+        CodeBlock.Builder setRoomDbCodeBlock = CodeBlock.builder()
+                .add("this._roomDb = roomDb;\n");
+
+
         //now generate methods for all query, insert, and delete methods
+
         for(ExecutableElement daoMethod : findMethodsToImplement(daoClass)) {
             MethodSpec.Builder methodBuilder = null;
+            DaoMethodInfo methodInfo = new DaoMethodInfo(daoMethod, daoClass, processingEnv);
 
-            if(daoMethod.getAnnotation(UmInsert.class) != null) {
+
+            if(methodInfo.isInsertWithAutoSyncPrimaryKey()) {
+                roomDaoClassSpec.addMethod(generateRoomSyncableInsertMethod(daoMethod, daoClass,
+                        roomDaoClassSpec, setRoomDbCodeBlock, "_roomDb"));
+            }else if(daoMethod.getAnnotation(UmInsert.class) != null) {
                 UmInsert umInsert = daoMethod.getAnnotation(UmInsert.class);
                 AnnotationSpec annotation = AnnotationSpec.builder(ClassName.get(ROOM_PKG_NAME, "Insert"))
                         .addMember("onConflict", ""+umInsert.onConflict()).build();
@@ -369,9 +383,63 @@ public class DbProcessorRoom extends AbstractDbProcessor implements QueryMethodG
             }
         }
 
+        setRoomDbMethodBuilder.addCode(setRoomDbCodeBlock.build());
+        roomDaoClassSpec.addMethod(setRoomDbMethodBuilder.build());
+
         writeJavaFileToDestination(
                 JavaFile.builder(processingEnv.getElementUtils().getPackageOf(daoClass).toString(),
                 roomDaoClassSpec.build()).build(), destination);
+    }
+
+    private MethodSpec generateRoomSyncableInsertMethod(ExecutableElement daoMethod,
+                                                        TypeElement daoType,
+                                                        TypeSpec.Builder daoTypeBuilder,
+                                                        CodeBlock.Builder constructorCodeBlock,
+                                                        String roomDbVarName) {
+        MethodSpec.Builder methodBuilder = overrideAndResolve(daoMethod, daoType, processingEnv);
+        CodeBlock.Builder codeBlock = CodeBlock.builder();
+        DaoMethodInfo methodInfo = new DaoMethodInfo(daoMethod, daoType, processingEnv);
+        TypeMirror entityComponentType = methodInfo.resolveEntityParameterComponentType();
+        TypeName entityInsertionAdapterTypeName = ParameterizedTypeName.get(
+                ClassName.get("android.arch.persistence.room", "EntityInsertionAdapter"),
+                ClassName.get(entityComponentType));
+        String entityInsertionAdapterVarName = daoMethod.getSimpleName() + "_insertionAdapter";
+
+        TypeSpec.Builder anonymousClassSpec = TypeSpec.anonymousClassBuilder(roomDbVarName)
+                .addSuperinterface(entityInsertionAdapterTypeName)
+                .addMethod(MethodSpec.methodBuilder("createQuery")
+                    .addModifiers(Modifier.PUBLIC)
+                    .returns(String.class)
+                    .addAnnotation(Override.class)
+                    .addCode("return null;\n")
+                        .build())
+                .addMethod(MethodSpec.methodBuilder("bind")
+                        .addAnnotation(Override.class)
+                        .addModifiers(Modifier.PUBLIC)
+                        .addParameter(ClassName.get("android.arch.persistence.db",
+                                "SupportSQLiteStatement"), "stmt")
+                        .addParameter(ClassName.get(methodInfo.resolveEntityParameterComponentType()),
+                                "value")
+                        .build());
+
+        constructorCodeBlock.add("$L = $L;\n", entityInsertionAdapterVarName,
+                anonymousClassSpec.build());
+        daoTypeBuilder.addField(entityInsertionAdapterTypeName, entityInsertionAdapterVarName);
+
+        codeBlock.add("$L.beginTransaction();\n", roomDbVarName)
+                .beginControlFlow("try")
+                .add("$L.insert($L);\n", entityInsertionAdapterVarName,
+                        methodInfo.getEntityParameterElement().getSimpleName())
+                .add("$L.setTransactionSuccessful();\n", roomDbVarName);
+        if(!isVoid(methodInfo.resolveResultType())){
+            codeBlock.add("return $L;\n", defaultValue(methodInfo.resolveResultType()));
+        }
+        codeBlock.nextControlFlow("finally")
+                .add("$L.endTransaction();\n", roomDbVarName)
+                .endControlFlow();
+
+        methodBuilder.addCode(codeBlock.build());
+        return methodBuilder.build();
     }
 
     /**

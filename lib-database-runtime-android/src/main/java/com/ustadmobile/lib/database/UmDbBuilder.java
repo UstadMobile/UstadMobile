@@ -62,12 +62,12 @@ public class UmDbBuilder {
 
         @Override
         public void onCreate(@NonNull SupportSQLiteDatabase db) {
-            callback.onCreate(new DoorwayDbAdapterSupportSqlite(db));
+            callback.onCreate(new DoorDbAdapterSupportSqlite(db));
         }
 
         @Override
         public void onOpen(@NonNull SupportSQLiteDatabase db) {
-            callback.onCreate(new DoorwayDbAdapterSupportSqlite(db));
+            callback.onCreate(new DoorDbAdapterSupportSqlite(db));
         }
     }
 
