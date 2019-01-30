@@ -59,6 +59,8 @@ dependencies {
     testImplementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
     testImplementation "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
     testImplementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
+
+    testImplementation project(":app-javase")
 }
 
 publishing {

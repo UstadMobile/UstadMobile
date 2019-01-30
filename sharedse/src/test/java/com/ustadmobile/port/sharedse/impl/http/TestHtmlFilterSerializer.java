@@ -1,4 +1,4 @@
-package com.ustadmobile.test.port.sharedse.impl.http;
+package com.ustadmobile.port.sharedse.impl.http;
 
 import com.ustadmobile.port.sharedse.impl.http.EpubHtmlFilterSerializer;
 
