@@ -10,23 +10,14 @@ import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 @Entity
 public class SyncStatus {
 
-    public static final String COLNAME_LOCAL_CSN = "localChangeSeqNum";
-
-    public static final String COLNAME_MASTER_CSN = "masterChangeSeqNum";
-
     @UmPrimaryKey
     @PrimaryKey
     private int tableId;
 
     /**
-     * Represents the next master change sequence number that will be used.
+     * Represents the next change sequence number
      */
-    private long masterChangeSeqNum;
-
-    /**
-     * Represents the next local change sequence number that will be used.
-     */
-    private long localChangeSeqNum;
+    private long nextChangeSeqNum;
 
     /**
      * The master change sequence number that we have sync'd up to (inclusive).
@@ -44,8 +35,6 @@ public class SyncStatus {
 
     public SyncStatus(int tableId) {
         this.tableId = tableId;
-        this.masterChangeSeqNum = 1;
-        this.localChangeSeqNum = 1;
     }
 
 
@@ -55,22 +44,6 @@ public class SyncStatus {
 
     public void setTableId(int tableId) {
         this.tableId = tableId;
-    }
-
-    public long getMasterChangeSeqNum() {
-        return masterChangeSeqNum;
-    }
-
-    public void setMasterChangeSeqNum(long masterChangeSeqNum) {
-        this.masterChangeSeqNum = masterChangeSeqNum;
-    }
-
-    public long getLocalChangeSeqNum() {
-        return localChangeSeqNum;
-    }
-
-    public void setLocalChangeSeqNum(long localChangeSeqNum) {
-        this.localChangeSeqNum = localChangeSeqNum;
     }
 
     public long getSyncedToMasterChangeNum() {
@@ -87,5 +60,13 @@ public class SyncStatus {
 
     public void setSyncedToLocalChangeSeqNum(long syncedToLocalChangeSeqNum) {
         this.syncedToLocalChangeSeqNum = syncedToLocalChangeSeqNum;
+    }
+
+    public long getNextChangeSeqNum() {
+        return nextChangeSeqNum;
+    }
+
+    public void setNextChangeSeqNum(long nextChangeSeqNum) {
+        this.nextChangeSeqNum = nextChangeSeqNum;
     }
 }

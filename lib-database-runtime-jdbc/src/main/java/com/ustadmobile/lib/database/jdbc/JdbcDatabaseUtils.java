@@ -1,5 +1,6 @@
 package com.ustadmobile.lib.database.jdbc;
 
+import com.ustadmobile.lib.db.UmDbMigration;
 import com.ustadmobile.lib.db.UmDbType;
 import com.ustadmobile.lib.db.UmDbWithSyncableInsertLock;
 import com.ustadmobile.lib.db.sync.UmSyncableDatabase;
@@ -12,6 +13,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -333,6 +335,23 @@ public class JdbcDatabaseUtils {
                     " RESTART WITH " + (syncDeviceBitsShifted + 1) +
                     " START WITH " + (syncDeviceBitsShifted + 1);
     }
+
+    public static UmDbMigration pickNextMigration(int currentVersion, List<UmDbMigration> migrations) {
+        List<UmDbMigration> candidateMigrations = new ArrayList<>();
+        for(UmDbMigration migration : migrations){
+            if(migration.getFromVersion() == currentVersion)
+                candidateMigrations.add(migration);
+        }
+
+        UmDbMigration bestMigration = null;
+        for(UmDbMigration migration : candidateMigrations){
+            if(bestMigration == null || migration.getToVersion() > bestMigration.getToVersion())
+                bestMigration = migration;
+        }
+
+        return bestMigration;
+    }
+
 
 
 

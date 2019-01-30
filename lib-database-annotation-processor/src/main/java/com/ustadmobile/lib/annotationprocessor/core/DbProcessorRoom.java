@@ -142,8 +142,7 @@ public class DbProcessorRoom extends AbstractDbProcessor implements QueryMethodG
             .addType(TypeSpec.classBuilder("DbManagerCallback")
                     .superclass(ClassName.get(ROOM_PKG_NAME, "RoomDatabase")
                             .nestedClass("Callback"))
-                    .addMethod(generateOnCreateMethod(dbType)).build())
-            .addMethod(generateCreateSeqNumTriggersMethod(dbType));
+                    .addMethod(generateOnCreateMethod(dbType)).build());
 
         UmDatabase db = dbType.getAnnotation(UmDatabase.class);
 
@@ -230,19 +229,6 @@ public class DbProcessorRoom extends AbstractDbProcessor implements QueryMethodG
             destination);
     }
 
-    private MethodSpec generateCreateSeqNumTriggersMethod(TypeElement dbType) {
-        MethodSpec.Builder builder = MethodSpec.methodBuilder("createSeqNumTriggers")
-                .addParameter(Class.class, "_entityClass")
-                .addParameter(ClassName.get("android.arch.persistence.db",
-                                "SupportSQLiteDatabase"), "_db");
-
-        CodeBlock.Builder codeBlock = CodeBlock.builder();
-        addCreateTriggersForEntitiesToCodeBlock(JdbcDatabaseUtils.PRODUCT_NAME_SQLITE,
-                "_db.execSQL", dbType, codeBlock);
-
-        builder.addCode(codeBlock.build());
-        return builder.build();
-    }
 
     private MethodSpec generateOnCreateMethod(TypeElement dbType) {
         MethodSpec.Builder builder = MethodSpec.methodBuilder("onCreate")

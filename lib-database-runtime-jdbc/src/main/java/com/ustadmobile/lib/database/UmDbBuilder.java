@@ -5,9 +5,13 @@ import com.ustadmobile.lib.database.jdbc.JdbcDatabaseUtils;
 import com.ustadmobile.lib.database.jdbc.UmJdbcDatabase;
 import com.ustadmobile.lib.db.AbstractDoorwayDbBuilder;
 import com.ustadmobile.lib.db.DbCallback;
+import com.ustadmobile.lib.db.UmDbMigration;
 
 import java.lang.reflect.Constructor;
 import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.List;
 
 public class UmDbBuilder {
@@ -48,11 +52,40 @@ public class UmDbBuilder {
                 List<String> existingTableNames = JdbcDatabaseUtils.getTableNames(dbConnection);
                 if(JdbcDatabaseUtils.listContainsStringIgnoreCase(existingTableNames,
                         DBINFO_TABLENAME)) {
-                    //TODO: run migrations
+                    try (
+                        Connection dbCon = db.getConnection();
+                        Statement stmt = dbCon.createStatement();
+                        ResultSet versionResult = stmt.executeQuery(
+                                "SELECT dbVersion from _doorwayinfo");
+                    ) {
+                        if(!versionResult.next()) {
+                            throw new RuntimeException("Almost impossible: there is a _doorwayinfo table but no dbVersion column");
+                        }
+
+                        int dbVersion = versionResult.getInt(1);
+                        while(dbVersion < db.getVersion()) {
+                            UmDbMigration migration = JdbcDatabaseUtils.pickNextMigration(dbVersion,
+                                    migrationList);
+
+                            if(migration == null){
+                                throw new RuntimeException("No migration found to upgrade from: "
+                                        + dbVersion);
+                            }
+
+                            migration.migrate(dbAdapter);
+                            dbVersion = migration.getToVersion();
+                            dbAdapter.execSql("UPDATE _doorwayinfo SET dbVersion = " +
+                                    dbVersion);
+                        }
+                    }catch(SQLException e) {
+                        throw new RuntimeException("UmDb: exception running migration ", e);
+                    }
                 }else {
                     //create the table
                     dbAdapter.execSql("CREATE TABLE " + DBINFO_TABLENAME +
                             " (dbVersion int primary key, dbHash varchar(255))");
+                    dbAdapter.execSql("INSERT INTO _doorwayinfo (dbVersion, dbHash) VALUES (" +
+                            db.getVersion() +", '')");
 
                     for(DbCallback callback : callbackList){
                         callback.onCreate(dbAdapter);

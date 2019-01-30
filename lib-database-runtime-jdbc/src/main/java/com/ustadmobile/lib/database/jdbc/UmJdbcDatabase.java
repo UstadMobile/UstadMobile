@@ -71,5 +71,11 @@ public interface UmJdbcDatabase {
      */
     int getDbType();
 
+    /**
+     * Return the version of this database
+     * @return
+     */
+    int getVersion();
+
 
 }

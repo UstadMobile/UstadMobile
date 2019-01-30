@@ -13,6 +13,7 @@ import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UmCallbackUtil;
 import com.ustadmobile.lib.database.annotation.UmClearAll;
+import com.ustadmobile.lib.database.annotation.UmDatabase;
 import com.ustadmobile.lib.database.annotation.UmDbContext;
 import com.ustadmobile.lib.database.annotation.UmDbGetAttachment;
 import com.ustadmobile.lib.database.annotation.UmDbSetAttachment;
@@ -125,6 +126,7 @@ public class DbProcessorJdbc extends AbstractDbProcessor implements QueryMethodG
 
     public void processDbClass(TypeElement dbType, String destination) throws IOException {
         String jdbcDbClassName = dbType.getSimpleName() + SUFFIX_JDBC_DBMANAGER;
+        UmDatabase dbAnnotation = dbType.getAnnotation(UmDatabase.class);
         PackageElement packageElement = processingEnv.getElementUtils().getPackageOf(dbType);
         ParameterizedTypeName dbChangeListenersMapType = ParameterizedTypeName.get(
                 ClassName.get(Map.class),
@@ -251,11 +253,16 @@ public class DbProcessorJdbc extends AbstractDbProcessor implements QueryMethodG
                         .endControlFlow()
                         .add("return _dbType;\n")
                         .build())
-                .build());
+                    .build())
+                .addMethod(MethodSpec.methodBuilder("getVersion")
+                    .addModifiers(Modifier.PUBLIC)
+                    .addAnnotation(Override.class)
+                    .returns(TypeName.INT)
+                    .addCode("return $L;\n", dbAnnotation.version()).build());
 
 
         jdbcDbTypeSpec.addMethod(generateCreateTablesMethod(dbType));
-        jdbcDbTypeSpec.addMethod(generateCreateSeqNumTriggersMethod(dbType));
+        //jdbcDbTypeSpec.addMethod(generateCreateSeqNumTriggersMethod(dbType));
 
         if(processingEnv.getTypeUtils().isAssignable(dbType.asType(),
                 processingEnv.getElementUtils()
@@ -392,6 +399,12 @@ public class DbProcessorJdbc extends AbstractDbProcessor implements QueryMethodG
                         ParameterizedTypeName.get(ClassName.get(List.class), ClassName.get(String.class)),
                         ClassName.get(JdbcDatabaseUtils.class));
 
+        createCb.beginControlFlow("if($T.listContainsStringIgnoreCase(" +
+                        "_existingTableNames, \"_doorwayinfo\"))",
+                    JdbcDatabaseUtils.class)
+                .add("return;\n")
+                .endControlFlow();
+
         for(String sqlProductName : SUPPORTED_DB_PRODUCT_NAMES) {
             createCb.beginControlFlow("if($S.equals(_metaData.getDatabaseProductName()))",
                     sqlProductName);
@@ -447,40 +460,6 @@ public class DbProcessorJdbc extends AbstractDbProcessor implements QueryMethodG
         return createMethod.build();
     }
 
-    /**
-     * Generate a method to create sequence number triggers on tables. The generated method takes a
-     * single class object as an argument. This is designed so it can one day be used for migration
-     * purposes etc.
-     *
-     * @param dbType The TypeElement representing the database class
-     * @return MethodSpec with a generated implementation
-     */
-    protected MethodSpec generateCreateSeqNumTriggersMethod(TypeElement dbType) {
-        MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("createSeqNumTriggers")
-                .addModifiers(Modifier.PROTECTED)
-                .addParameter(Class.class, "_entityClass");
-        CodeBlock.Builder codeBlock = CodeBlock.builder();
-
-        codeBlock.add("try (").indent()
-                .add("$T _connection = getConnection();\n", Connection.class)
-                .add("$T _stmt = _connection.createStatement();\n", Statement.class)
-            .unindent().beginControlFlow(")");
-
-        for(String sqlProductName : SUPPORTED_DB_PRODUCT_NAMES) {
-            codeBlock.beginControlFlow("if($S.equals(getJdbcProductName()))",
-                    sqlProductName);
-            addCreateTriggersForEntitiesToCodeBlock(sqlProductName,
-                    "_stmt.executeUpdate", dbType, codeBlock);
-            codeBlock.endControlFlow();
-        }
-
-        codeBlock.nextControlFlow("catch($T _sqlE)", SQLException.class)
-                .add("_sqlE.printStackTrace();\n")
-                .endControlFlow();
-
-        methodBuilder.addCode(codeBlock.build());
-        return methodBuilder.build();
-    }
 
     protected void addClearAllTablesCodeToMethod(TypeElement dbType, MethodSpec.Builder builder,
                                                  char identifierQuoteChar) {
@@ -507,13 +486,15 @@ public class DbProcessorJdbc extends AbstractDbProcessor implements QueryMethodG
 
         for(TypeElement entityType : DbProcessorUtils.findEntityTypes(dbType, processingEnv)) {
             if(entityType.equals(syncStatusTypeEl)) {
-                codeBlock.add("stmt.executeUpdate(\"UPDATE SyncStatus SET masterChangeSeqNum = 1, " +
-                        "localChangeSeqNum = 1, " +
+                codeBlock.add("stmt.executeUpdate(\"UPDATE SyncStatus SET nextChangeSeqNum = 1, " +
                         "syncedToMasterChangeNum = 0, " +
                         "syncedToLocalChangeSeqNum = 0\");\n");
             }else if(entityType.equals(syncablePkEl)) {
                 codeBlock.add("stmt.executeUpdate(\"UPDATE SyncablePrimaryKey " +
                         "SET sequenceNumber = 1\");\n");
+            }else if(entityType.equals(syncDeviceBitsEl)) {
+                codeBlock.add("stmt.executeUpdate(\"UPDATE SyncDeviceBits SET deviceBits = \" +" +
+                    "_newDeviceBits);\n");
             }else {
                 codeBlock.add("stmt.executeUpdate(\"DELETE FROM $1L$2L$1L\");\n",
                         identifierQuoteStr, entityType.getSimpleName().toString());
@@ -533,9 +514,6 @@ public class DbProcessorJdbc extends AbstractDbProcessor implements QueryMethodG
 
             }
 
-            if(entityType.equals(syncDeviceBitsEl))
-                codeBlock.add("stmt.executeUpdate(\"INSERT INTO SyncDeviceBits VALUES (1, \"" +
-                    " + _newDeviceBits + \")\");\n", Random.class);
         }
 
         codeBlock.nextControlFlow("catch($T e)", SQLException.class)
@@ -586,9 +564,7 @@ public class DbProcessorJdbc extends AbstractDbProcessor implements QueryMethodG
 
         }
 
-        codeBlock.beginControlFlow("if(!$T.listContainsStringIgnoreCase(_existingTableNames, $S))",
-                JdbcDatabaseUtils.class,
-                entitySpec.getSimpleName().toString());
+        codeBlock.add("//BEGIN Create $L ($L) \n", entitySpec.getSimpleName(), sqlProductName);
         if(PRODUCT_NAME_POSTGRES.equals(sqlProductName)) {
             VariableElement pkElement = findPrimaryKey(entitySpec);
             UmEntity entityAnnotation = entitySpec.getAnnotation(UmEntity.class);
@@ -605,18 +581,25 @@ public class DbProcessorJdbc extends AbstractDbProcessor implements QueryMethodG
 
         codeBlock.add("$L.executeUpdate($S);\n", stmtVariableName,
                         makeCreateTableStatement(entitySpec, quoteChar, sqlProductName));
+        if(DbProcessorUtils.entityHasChangeSequenceNumbers(entitySpec, processingEnv)) {
+            codeBlock.add(generateChangeSequenceTriggersCodeBlock(sqlProductName,
+                    stmtVariableName + ".executeUpdate", entitySpec));
+        }
 
         if(entitySpec.equals(deviceBitsTypeEl)) {
+            String masterVal = "isMaster() ? ";
+            if(PRODUCT_NAME_POSTGRES.equals(sqlProductName)) {
+                masterVal += "true : false";
+            }else {
+                masterVal += "1 : 0";
+            }
+
+
             codeBlock.add("_deviceBits = new $T().nextInt();\n", Random.class)
-                    .add("$L.executeUpdate(\"INSERT INTO SyncDeviceBits(id, deviceBits) " +
-                    "VALUES (1, \" + _deviceBits + \")\");\n", stmtVariableName);
+                    .add("$L.executeUpdate(\"INSERT INTO SyncDeviceBits(id, deviceBits, master) " +
+                    "VALUES (1, \" + _deviceBits + \", \" + ($L) + \")\");\n", stmtVariableName,
+                            masterVal);
         }
-
-        if(DbProcessorUtils.entityHasChangeSequenceNumbers(entitySpec, processingEnv)) {
-            //we need to add a trigger to handle change sequence numbers
-            codeBlock.add("createSeqNumTriggers($T.class);\n", entitySpec);
-        }
-
 
 
         for(Map.Entry<String, List<String>> index : indexes.entrySet()) {
@@ -640,12 +623,7 @@ public class DbProcessorJdbc extends AbstractDbProcessor implements QueryMethodG
                     formatArgs);
         }
 
-        if(entitySpec.equals(deviceBitsTypeEl)) {
-            codeBlock.nextControlFlow("else")
-                    .add("_deviceBits = getDeviceBits();\n");
-        }
-
-        codeBlock.endControlFlow();
+        codeBlock.add("//END Create $L ($L) \n\n", entitySpec.getSimpleName(), sqlProductName);
     }
 
     /**
