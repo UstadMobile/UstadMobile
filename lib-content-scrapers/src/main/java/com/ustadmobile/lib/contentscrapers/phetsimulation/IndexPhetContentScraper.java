@@ -138,7 +138,7 @@ public class IndexPhetContentScraper {
 
             String path = simulation.parent().attr("href");
             String simulationUrl = new URL(url, path).toString();
-            String title = simulationUrl.substring(simulationUrl.lastIndexOf("/") + 1, simulationUrl.length());
+            String title = simulationUrl.substring(simulationUrl.lastIndexOf("/") + 1);
             String thumbnail = simulation.parent().selectFirst("img").attr("src");
 
             PhetContentScraper scraper = new PhetContentScraper(simulationUrl, destinationDirectory);

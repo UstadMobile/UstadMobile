@@ -7,6 +7,8 @@ import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.database.annotation.UmQueryFindByPrimaryKey;
 import com.ustadmobile.lib.database.annotation.UmUpdate;
 import com.ustadmobile.lib.database.annotation.UmRepository;
+import com.ustadmobile.lib.db.entities.DistinctCategorySchema;
+import com.ustadmobile.lib.db.entities.Language;
 import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 
@@ -40,6 +42,23 @@ public abstract class ContentEntryDao implements SyncableDao<ContentEntry, Conte
     public abstract void findAllLanguageRelatedEntries(long entryUuid, UmCallback<List<ContentEntry>> umCallback);
 
 
+    @UmQuery("SELECT DISTINCT ContentCategory.contentCategoryUid, ContentCategory.name AS categoryName, " +
+            "ContentCategorySchema.contentCategorySchemaUid, ContentCategorySchema.schemaName FROM ContentEntry " +
+            "LEFT JOIN ContentEntryContentCategoryJoin ON ContentEntryContentCategoryJoin.ceccjContentEntryUid = ContentEntry.contentEntryUid " +
+            "LEFT JOIN ContentCategory ON ContentCategory.contentCategoryUid = ContentEntryContentCategoryJoin.ceccjContentCategoryUid " +
+            "LEFT JOIN ContentCategorySchema ON ContentCategorySchema.contentCategorySchemaUid = ContentCategory.ctnCatContentCategorySchemaUid " +
+            "LEFT JOIN ContentEntryParentChildJoin ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid " +
+            "WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = :parentUid " +
+            "AND ContentCategory.contentCategoryUid != 0 ORDER BY ContentCategory.name")
+    public abstract void findListOfCategories(long parentUid, UmCallback<List<DistinctCategorySchema>> umCallback);
+
+
+    @UmQuery("SELECT DISTINCT Language.* from Language " +
+            "LEFT JOIN ContentEntry ON ContentEntry.primaryLanguageUid = Language.langUid " +
+            "LEFT JOIN ContentEntryParentChildJoin ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid " +
+            "WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = :parentUid ORDER BY Language.name")
+    public abstract void findUniqueLanguagesInList(long parentUid, UmCallback<List<Language>> umCallback);
+
     @UmUpdate
     public abstract void update(ContentEntry entity);
 
@@ -48,4 +67,16 @@ public abstract class ContentEntryDao implements SyncableDao<ContentEntry, Conte
 
     @UmQuery("SELECT * FROM ContentEntry WHERE publik")
     public abstract List<ContentEntry> getPublicContentEntries();
+
+    @UmQuery("SELECT ContentEntry.* FROM ContentEntry " +
+            "LEFT JOIN ContentEntryParentChildJoin ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid " +
+            "WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = :parentUid " +
+            "AND " +
+            "(:langParam = 0 OR ContentEntry.primaryLanguageUid = :langParam) " +
+            "AND " +
+            "(:categoryParam0 = 0 OR :categoryParam0 IN (SELECT ceccjContentCategoryUid FROM ContentEntryContentCategoryJoin " +
+            "WHERE ceccjContentEntryUid = ContentEntry.contentEntryUid))")
+    public abstract UmProvider<ContentEntry> getChildrenByParentUidWithCategoryFilter(long parentUid, long langParam, long categoryParam0);
+
+
 }

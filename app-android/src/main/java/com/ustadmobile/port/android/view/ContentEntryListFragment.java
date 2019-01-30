@@ -19,7 +19,12 @@ import com.ustadmobile.core.controller.ContentEntryListPresenter;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.view.ContentEntryView;
 import com.ustadmobile.lib.db.entities.ContentEntry;
+import com.ustadmobile.lib.db.entities.DistinctCategorySchema;
+import com.ustadmobile.lib.db.entities.Language;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * A fragment representing a list of Items.
@@ -41,9 +46,20 @@ public class ContentEntryListFragment extends UstadBaseFragment implements Conte
     public ContentEntryListFragment() {
     }
 
+    public void filterByLang(long langUid) {
+        entryListPresenter.handleClickFilterByLanguage(langUid);
+    }
+
+    public void filterBySchemaCategory(long contentCategoryUid, long contentCategorySchemaUid) {
+        entryListPresenter.handleClickFilterByCategory(contentCategoryUid);
+    }
 
     public interface ContentEntryListener {
         void setTitle(String title);
+
+        void setFilterSpinner(Map<Long, List<DistinctCategorySchema>> idToValuesMap);
+
+        void setLanguageFilterSpinner(List<Language> result);
     }
 
 
@@ -67,7 +83,7 @@ public class ContentEntryListFragment extends UstadBaseFragment implements Conte
 
         // Set the adapter
         Context context = rootContainer.getContext();
-        recyclerView =  rootContainer.findViewById(R.id.content_entry_list);
+        recyclerView = rootContainer.findViewById(R.id.content_entry_list);
         recyclerView.setLayoutManager(new LinearLayoutManager(context));
         DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(context,
                 LinearLayoutManager.VERTICAL);
@@ -83,10 +99,11 @@ public class ContentEntryListFragment extends UstadBaseFragment implements Conte
 
     @Override
     public void onAttach(Context context) {
-        super.onAttach(context);
-        if(context instanceof ContentEntryListener) {
+        if (context instanceof ContentEntryListener) {
             this.contentEntryListener = (ContentEntryListener) context;
         }
+
+        super.onAttach(context);
     }
 
     @Override
@@ -109,13 +126,34 @@ public class ContentEntryListFragment extends UstadBaseFragment implements Conte
 
     @Override
     public void setToolbarTitle(String title) {
-        if(contentEntryListener != null)
-            contentEntryListener.setTitle(title);
+        runOnUiThread(() -> {
+            if (contentEntryListener != null)
+                contentEntryListener.setTitle(title);
+        });
     }
 
     @Override
     public void showError() {
         Toast.makeText(getContext(), R.string.content_entry_not_found, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void setCategorySchemaSpinner(Map<Long, List<DistinctCategorySchema>> spinnerData) {
+        runOnUiThread(() -> {
+            if (contentEntryListener != null) {
+                // TODO tell activiity to create the spinners
+                contentEntryListener.setFilterSpinner(spinnerData);
+            }
+        });
+    }
+
+    @Override
+    public void setLanguageOptions(List<Language> result) {
+        runOnUiThread(() -> {
+            if (contentEntryListener != null) {
+                contentEntryListener.setLanguageFilterSpinner(result);
+            }
+        });
     }
 
     @Override

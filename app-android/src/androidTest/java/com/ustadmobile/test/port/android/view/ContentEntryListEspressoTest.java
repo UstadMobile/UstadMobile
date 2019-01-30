@@ -12,6 +12,9 @@ import android.support.test.runner.AndroidJUnit4;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.ContentEntryListPresenter;
 import com.ustadmobile.core.db.UmAppDatabase;
+import com.ustadmobile.core.db.dao.ContentCategoryDao;
+import com.ustadmobile.core.db.dao.ContentCategorySchemaDao;
+import com.ustadmobile.core.db.dao.ContentEntryContentCategoryJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryContentEntryFileJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryDao;
 import com.ustadmobile.core.db.dao.ContentEntryFileDao;
@@ -19,7 +22,10 @@ import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryRelatedEntryJoinDao;
 import com.ustadmobile.core.db.dao.LanguageDao;
 import com.ustadmobile.core.view.ContentEntryView;
+import com.ustadmobile.lib.db.entities.ContentCategory;
+import com.ustadmobile.lib.db.entities.ContentCategorySchema;
 import com.ustadmobile.lib.db.entities.ContentEntry;
+import com.ustadmobile.lib.db.entities.ContentEntryContentCategoryJoin;
 import com.ustadmobile.lib.db.entities.ContentEntryContentEntryFileJoin;
 import com.ustadmobile.lib.db.entities.ContentEntryFile;
 import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin;
@@ -78,7 +84,7 @@ public class ContentEntryListEspressoTest {
         mActivityRule.launchActivity(launchActivityIntent);
     }
 
-    public void initDb(){
+    public void initDb() {
         Context context = InstrumentationRegistry.getTargetContext();
         UmAppDatabase db = UmAppDatabase.getInstance(context);
         db.clearAllTables();
@@ -89,6 +95,10 @@ public class ContentEntryListEspressoTest {
         ContentEntryFileDao contentFileDao = repo.getContentEntryFileDao();
         ContentEntryContentEntryFileJoinDao contentEntryFileJoinDao = repo.getContentEntryContentEntryFileJoinDao();
         ContentEntryRelatedEntryJoinDao contentEntryRelatedEntryJoinDao = repo.getContentEntryRelatedEntryJoinDao();
+        LanguageDao langDao = repo.getLanguageDao();
+        ContentCategorySchemaDao schemaDao = repo.getContentCategorySchemaDao();
+        ContentCategoryDao categoryDao = repo.getContentCategoryDao();
+        ContentEntryContentCategoryJoinDao categoryJoinDao = repo.getContentEntryContentCategoryJoinDao();
 
         ContentEntry entry = new ContentEntry();
         entry.setContentEntryUid(ROOT_CONTENT_ENTRY_UID);
@@ -255,7 +265,6 @@ public class ContentEntryListEspressoTest {
         parentVoaJoin.setCepcjUid(37);
         pcjdao.insert(parentVoaJoin);
 
-
         ContentEntry grade5parent = new ContentEntry();
         grade5parent.setContentEntryUid(3);
         grade5parent.setTitle("Math");
@@ -393,6 +402,125 @@ public class ContentEntryListEspressoTest {
         spanishEnglishJoin.setRelType(ContentEntryRelatedEntryJoin.REL_TYPE_TRANSLATED_VERSION);
         contentEntryRelatedEntryJoinDao.insert(spanishEnglishJoin);
 
+        Language arabLang = new Language();
+        arabLang.setName("Arabic");
+        arabLang.setLangUid(14254);
+        langDao.insert(arabLang);
+
+        ContentEntry child2 = new ContentEntry();
+        child2.setContentEntryUid(22542);
+        child2.setTitle("Math Arabic");
+        child2.setPrimaryLanguageUid(arabLang.getLangUid());
+        child2.setThumbnailUrl("https://cdn.kastatic.org/genfiles/topic-icons/icons/arithmetic.png-af7472-128c.png");
+        child2.setLeaf(false);
+        contentDao.insert(child2);
+
+        Language spanishLang = new Language();
+        spanishLang.setName("Spanish");
+        spanishLang.setLangUid(14253);
+        langDao.insert(spanishLang);
+
+        ContentEntryParentChildJoin child2join = new ContentEntryParentChildJoin();
+        child2join.setCepcjParentContentEntryUid(khanParent.getContentEntryUid());
+        child2join.setCepcjChildContentEntryUid(child2.getContentEntryUid());
+        child2join.setChildIndex(0);
+        child2join.setCepcjUid(754);
+        pcjdao.insert(child2join);
+
+        ContentEntry child3 = new ContentEntry();
+        child3.setContentEntryUid(324424);
+        child3.setTitle("Math Spanish");
+        child3.setPrimaryLanguageUid(spanishLang.getLangUid());
+        child3.setThumbnailUrl("https://cdn.kastatic.org/genfiles/topic-icons/icons/arithmetic.png-af7472-128c.png");
+        child3.setLeaf(false);
+        contentDao.insert(child3);
+
+        ContentEntryParentChildJoin child3join = new ContentEntryParentChildJoin();
+        child3join.setCepcjParentContentEntryUid(khanParent.getContentEntryUid());
+        child3join.setCepcjChildContentEntryUid(child3.getContentEntryUid());
+        child3join.setChildIndex(0);
+        child3join.setCepcjUid(3537);
+        pcjdao.insert(child3join);
+
+        ContentEntry child4 = new ContentEntry();
+        child4.setContentEntryUid(3535);
+        child4.setTitle("Math");
+        child4.setPrimaryLanguageUid(arabLang.getLangUid());
+        child4.setThumbnailUrl("https://cdn.kastatic.org/genfiles/topic-icons/icons/arithmetic.png-af7472-128c.png");
+        child4.setLeaf(false);
+        contentDao.insert(child4);
+
+        ContentEntryParentChildJoin child4join = new ContentEntryParentChildJoin();
+        child4join.setCepcjParentContentEntryUid(khanParent.getContentEntryUid());
+        child4join.setCepcjChildContentEntryUid(child4.getContentEntryUid());
+        child4join.setChildIndex(0);
+        child4join.setCepcjUid(3532);
+        pcjdao.insert(child4join);
+
+        ContentEntry child5 = new ContentEntry();
+        child5.setContentEntryUid(5353);
+        child5.setTitle("Math");
+        child5.setPrimaryLanguageUid(arabLang.getLangUid());
+        child5.setThumbnailUrl("https://cdn.kastatic.org/genfiles/topic-icons/icons/arithmetic.png-af7472-128c.png");
+        child5.setLeaf(false);
+        contentDao.insert(child5);
+
+        ContentEntryParentChildJoin child5join = new ContentEntryParentChildJoin();
+        child5join.setCepcjParentContentEntryUid(khanParent.getContentEntryUid());
+        child5join.setCepcjChildContentEntryUid(child5.getContentEntryUid());
+        child5join.setChildIndex(0);
+        child5join.setCepcjUid(464646);
+        pcjdao.insert(child5join);
+
+        ContentCategorySchema schema = new ContentCategorySchema();
+        schema.setSchemaName("Reading Level");
+        schema.setContentCategorySchemaUid(24353);
+        schema.setSchemaUrl("/usb/test/reading");
+        schemaDao.insert(schema);
+
+        ContentCategory category = new ContentCategory();
+        category.setContentCategoryUid(35464);
+        category.setName("Reading Level 1");
+        category.setCtnCatContentCategorySchemaUid(schema.getContentCategorySchemaUid());
+        categoryDao.insert(category);
+
+        ContentCategory category2 = new ContentCategory();
+        category2.setContentCategoryUid(354242);
+        category2.setName("Reading Level 2");
+        category2.setCtnCatContentCategorySchemaUid(schema.getContentCategorySchemaUid());
+        categoryDao.insert(category2);
+
+        ContentCategory category3 = new ContentCategory();
+        category3.setContentCategoryUid(352422);
+        category3.setName("Reading Level 3");
+        category3.setCtnCatContentCategorySchemaUid(schema.getContentCategorySchemaUid());
+        categoryDao.insert(category3);
+
+        ContentEntryContentCategoryJoin category1join = new ContentEntryContentCategoryJoin();
+        category1join.setCeccjContentCategoryUid(category.getContentCategoryUid());
+        category1join.setCeccjContentEntryUid(child2.getContentEntryUid());
+        category1join.setCeccjUid(35364674);
+        categoryJoinDao.insert(category1join);
+
+        ContentEntryContentCategoryJoin category2join = new ContentEntryContentCategoryJoin();
+        category2join.setCeccjContentCategoryUid(category.getContentCategoryUid());
+        category2join.setCeccjContentEntryUid(child3.getContentEntryUid());
+        category2join.setCeccjUid(547337);
+        categoryJoinDao.insert(category2join);
+
+        ContentEntryContentCategoryJoin category3join = new ContentEntryContentCategoryJoin();
+        category3join.setCeccjContentCategoryUid(category2.getContentCategoryUid());
+        category3join.setCeccjContentEntryUid(child4.getContentEntryUid());
+        category3join.setCeccjUid(454353);
+        categoryJoinDao.insert(category3join);
+
+        ContentEntryContentCategoryJoin category4join = new ContentEntryContentCategoryJoin();
+        category4join.setCeccjContentCategoryUid(category3.getContentCategoryUid());
+        category4join.setCeccjContentEntryUid(child5.getContentEntryUid());
+        category4join.setCeccjUid(2457534);
+        categoryJoinDao.insert(category4join);
+
+
 
 
     }
@@ -400,7 +528,7 @@ public class ContentEntryListEspressoTest {
     @Test
     public void givenContentEntryPresent_whenOpened_entryIsDisplayed() {
 
-        onView(allOf(withId(R.id.content_entry_list),isDisplayed()))
+        onView(allOf(withId(R.id.content_entry_list), isDisplayed()))
                 .check(matches(hasDescendant(withText("Ck-12 Foundation"))));
 
     }
@@ -409,31 +537,31 @@ public class ContentEntryListEspressoTest {
     @Test
     public void givenContentEntryWithChildrenPresent_whenEntryClicked_intentToViewListIsFired() {
         onView(Matchers.allOf(isDisplayed(), withId(R.id.content_entry_list)))
-                .perform(RecyclerViewActions.actionOnItemAtPosition(0,click()));
+                .perform(RecyclerViewActions.actionOnItemAtPosition(0, click()));
 
         intended(allOf(
                 hasComponent(ContentEntryListActivity.class.getCanonicalName()),
                 hasExtra(equalTo(ARG_CONTENT_ENTRY_UID),
                         equalTo(2l)
-        )));
+                )));
     }
 
     @Test
     public void givenContentEntryLeafPresent_whenEntryClicked_intentToViewDetailIsFired() {
         onView(Matchers.allOf(isDisplayed(), withId(R.id.content_entry_list)))
-                .perform(RecyclerViewActions.actionOnItemAtPosition(0,click()));
+                .perform(RecyclerViewActions.actionOnItemAtPosition(0, click()));
 
         onView(Matchers.allOf(isDisplayed(), withId(R.id.content_entry_list)))
-                .perform(RecyclerViewActions.actionOnItemAtPosition(0,click()));
+                .perform(RecyclerViewActions.actionOnItemAtPosition(0, click()));
 
         onView(Matchers.allOf(isDisplayed(), withId(R.id.content_entry_list)))
-                .perform(RecyclerViewActions.actionOnItemAtPosition(0,click()));
+                .perform(RecyclerViewActions.actionOnItemAtPosition(0, click()));
 
         onView(Matchers.allOf(isDisplayed(), withId(R.id.content_entry_list)))
-                .perform(RecyclerViewActions.actionOnItemAtPosition(0,click()));
+                .perform(RecyclerViewActions.actionOnItemAtPosition(0, click()));
 
         onView(Matchers.allOf(isDisplayed(), withId(R.id.content_entry_list)))
-                .perform(RecyclerViewActions.actionOnItemAtPosition(0,click()));
+                .perform(RecyclerViewActions.actionOnItemAtPosition(0, click()));
 
         intended(allOf(
                 hasComponent(ContentEntryDetailActivity.class.getCanonicalName()),

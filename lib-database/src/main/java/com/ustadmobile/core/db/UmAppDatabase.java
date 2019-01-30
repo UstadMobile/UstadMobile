@@ -36,6 +36,10 @@ import com.ustadmobile.core.db.dao.RoleDao;
 import com.ustadmobile.core.db.dao.ScrapeQueueItemDao;
 import com.ustadmobile.core.db.dao.ScrapeRunDao;
 import com.ustadmobile.lib.database.annotation.UmSyncCountLocalPendingChanges;
+import com.ustadmobile.lib.db.AbstractDoorwayDbBuilder;
+import com.ustadmobile.lib.db.DoorwayDbAdapter;
+import com.ustadmobile.lib.db.UmDbMigration;
+import com.ustadmobile.lib.db.UmDbType;
 import com.ustadmobile.lib.db.UmDbWithAttachmentsDir;
 import com.ustadmobile.lib.db.entities.LocationAncestorJoin;
 import com.ustadmobile.core.db.dao.NetworkNodeDao;
@@ -154,7 +158,7 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
      * For use by other projects using this app as a library. By calling setInstance before
      * any other usage (e.g. in the Android Application class) a child class of this database (eg.
      * with additional entities) can be used.
-
+     *
      * @param instance
      * @param dbName
      */
@@ -163,8 +167,10 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
     }
 
     public static synchronized UmAppDatabase getInstance(Object context) {
-        if(instance == null){
-            instance = UmDbBuilder.builder(UmAppDatabase.class, context).build();
+        if (instance == null) {
+            AbstractDoorwayDbBuilder<UmAppDatabase> builder = UmDbBuilder
+                    .builder(UmAppDatabase.class, context);
+            instance = addMigrations(builder).build();
         }
 
         return instance;
@@ -172,13 +178,41 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
 
     public static synchronized UmAppDatabase getInstance(Object context, String dbName) {
         UmAppDatabase db = namedInstances.get(dbName);
-        if(db == null){
-            db = UmDbBuilder.builder(UmAppDatabase.class, context, dbName).build();
+        if (db == null) {
+            AbstractDoorwayDbBuilder<UmAppDatabase> builder = UmDbBuilder.builder(
+                    UmAppDatabase.class, context, dbName);
+            db = addMigrations(builder).build();
             namedInstances.put(dbName, db);
         }
-
         return db;
     }
+
+    private static AbstractDoorwayDbBuilder<UmAppDatabase> addMigrations(
+            AbstractDoorwayDbBuilder<UmAppDatabase> builder) {
+        builder.addMigration(new UmDbMigration(1, 2) {
+            @Override
+            public void migrate(DoorwayDbAdapter db) {
+                switch (db.getDbType()) {
+                    case UmDbType.TYPE_SQLITE:
+                        throw new RuntimeException("Not supported on SQLite");
+
+                    case UmDbType.TYPE_POSTGRES:
+                        db.execSql("CREATE TABLE IF NOT EXISTS  " +
+                                "ScrapeRun  ( scrapeRunUid  SERIAL PRIMARY KEY  NOT NULL ,  " +
+                                "scrapeType  TEXT,  status  INTEGER)");
+                        db.execSql("CREATE TABLE IF NOT EXISTS  ScrapeQueueItem  " +
+                                "( sqiUid  SERIAL PRIMARY KEY  NOT NULL ,  sqiContentEntryParentUid  BIGINT,  " +
+                                "destDir  TEXT,  scrapeUrl  TEXT,  status  INTEGER,  runId  INTEGER,  time  TEXT, " +
+                                " itemType  INTEGER,  contentType  TEXT)");
+
+
+                }
+            }
+        });
+
+        return builder;
+    }
+
 
     public abstract OpdsEntryDao getOpdsEntryDao();
 
@@ -302,7 +336,7 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
 
     @Override
     public boolean validateAuth(long personUid, String auth) {
-        if(personUid == 0)
+        if (personUid == 0)
             return true;//Anonymous or guest access
 
         return getAccessTokenDao().isValidToken(personUid, auth);
