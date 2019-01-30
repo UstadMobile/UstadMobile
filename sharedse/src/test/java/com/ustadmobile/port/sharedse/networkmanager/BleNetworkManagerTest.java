@@ -55,18 +55,27 @@ public class BleNetworkManagerTest {
 
     private BleEntryStatusTask mockedEntryStatusTask;
 
+    private BleMessage messageToBeSent = new BleMessage((byte)0, new byte[]{});
+
+    private BleMessageResponseListener mockedResponseListener;
+
     private Object context;
 
     @Before
     public void setUp(){
         context =  PlatformTestUtil.getTargetContext();
         mockedEntryStatusTask = mock(BleEntryStatusTask.class);
-        Collections.sort(contentEntryUids);
         networkNode = new NetworkNode();
         mockedNetworkManager = spy(NetworkManagerBle.class);
+        mockedResponseListener = mock(BleMessageResponseListener.class);
         mockedNetworkManager.init(context);
         when(mockedNetworkManager
                 .makeEntryStatusTask(eq(context),eq(contentEntryUids),any()))
+                .thenReturn(mockedEntryStatusTask);
+
+        when(mockedNetworkManager
+                .makeEntryStatusTask(eq(context),eq(messageToBeSent),
+                        eq(networkNode),eq(mockedResponseListener)))
                 .thenReturn(mockedEntryStatusTask);
 
         UmAppDatabase.getInstance(context).clearAllTables();
@@ -80,6 +89,7 @@ public class BleNetworkManagerTest {
             contentEntry.setTitle("Content entry title");
             contentEntryList.add(contentEntry);
         }
+        Collections.sort(contentEntryUids);
 
         UmAppDatabase repository = UmAccountManager.getRepositoryForActiveAccount(context);
         Long [] contentEntryUids = repository.getContentEntryDao().insert(contentEntryList);
@@ -112,6 +122,21 @@ public class BleNetworkManagerTest {
         //Verify that entry status task was created
         verify(mockedNetworkManager,timeout(testCaseVerifyTimeOut))
                 .makeEntryStatusTask(eq(context),eq(contentEntryUids),any());
+
+        //Verify that the run() method was called
+        verify(mockedEntryStatusTask,timeout(testCaseVerifyTimeOut)).run();
+    }
+
+    @Test
+    public void givenNewMessageToBeSent_whenSendMessageCalled_thenShouldCreateEntryStatusTaskAndExecuteIt() {
+        networkNode.setBluetoothMacAddress("00:3F:2F:64:C6:4B");
+
+        mockedNetworkManager.sendMessage(context,messageToBeSent,networkNode,mockedResponseListener);
+
+        //Verify that entry status task was created
+        //Verify that entry status task was created
+        verify(mockedNetworkManager,timeout(testCaseVerifyTimeOut))
+                .makeEntryStatusTask(eq(context),eq(messageToBeSent),any(),eq(mockedResponseListener));
 
         //Verify that the run() method was called
         verify(mockedEntryStatusTask,timeout(testCaseVerifyTimeOut)).run();
