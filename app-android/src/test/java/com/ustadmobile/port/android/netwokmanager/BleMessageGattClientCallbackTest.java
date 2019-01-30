@@ -109,7 +109,6 @@ public class BleMessageGattClientCallbackTest {
         verify(mockedGattClient).discoverServices();
     }
 
-    //TODO: Add test case for when onMtuChanged is not called (eg device does not support it)
 
     @Test
     public void givenServiceIsDiscovered_whenMatchingCharacteristicsFound_thenShouldRequestPermissionToWrite(){

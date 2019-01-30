@@ -65,8 +65,8 @@ public class BleMessageTest {
         BleMessage sentMessage = new BleMessage((byte)0, payload);
         BleMessage receivedMessage = new BleMessage(sentMessage.getPackets(20));
 
-        assertTrue("Uncompressed payload should have same length",
-                payload.length == receivedMessage.getLength());
+       assertEquals("Uncompressed payload should have same length",
+               payload.length, receivedMessage.getLength());
     }
 
     @Test
@@ -94,8 +94,8 @@ public class BleMessageTest {
                 messageToSend.getPayload().length > 0);
         messageToSend.reset();
 
-        assertTrue("Message was reset",
-                messageToSend.getPayload().length == 0);
+        assertEquals("Message was reset", 0,
+                messageToSend.getPayload().length);
     }
 
 }

@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static com.ustadmobile.port.sharedse.networkmanager.BleMessageUtil.bleMessageLongToBytes;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -34,8 +35,8 @@ public class BleMessageUtilTest {
         byte[] entriesInBytes = bleMessageLongToBytes(entryList);
         List<Long> entriesInListOfLong =  BleMessageUtil.bleMessageBytesToLong(entriesInBytes);
 
-        assertTrue("Entry lists before and after conversions are equal",
-                entryList.equals(entriesInListOfLong));
+        assertEquals("Entry lists before and after conversions are equal", entryList,
+                entriesInListOfLong);
     }
 
 }

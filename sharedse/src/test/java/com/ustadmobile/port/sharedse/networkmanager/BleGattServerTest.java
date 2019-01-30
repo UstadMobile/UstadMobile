@@ -53,7 +53,7 @@ public class BleGattServerTest {
 
     private CountDownLatch mLatch = new CountDownLatch(1);
 
-    public static final int MAX_ENTITIES_NUMBER = 4;
+    static final int MAX_ENTITIES_NUMBER = 4;
 
     private UmAppDatabase umAppDatabase;
 
