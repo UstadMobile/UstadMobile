@@ -1,6 +1,6 @@
 package com.ustadmobile.lib.database;
 
-import com.ustadmobile.lib.database.jdbc.DoorwayDbAdapterJdbc;
+import com.ustadmobile.lib.database.jdbc.DoorDbAdapterJdbc;
 import com.ustadmobile.lib.database.jdbc.JdbcDatabaseUtils;
 import com.ustadmobile.lib.database.jdbc.UmJdbcDatabase;
 import com.ustadmobile.lib.db.AbstractDoorwayDbBuilder;
@@ -33,7 +33,7 @@ public class UmDbBuilder {
 
         @Override
         public T build() {
-            DoorwayDbAdapterJdbc dbAdapter = null;
+            DoorDbAdapterJdbc dbAdapter = null;
             Connection dbConnection = null;
             try {
                 Class jdbcClass = Class.forName(dbClass.getName() + "_Jdbc");
@@ -47,7 +47,7 @@ public class UmDbBuilder {
 
                 UmJdbcDatabase db = (UmJdbcDatabase)dbResult;
                 dbConnection = db.getConnection();
-                dbAdapter = new DoorwayDbAdapterJdbc(db);
+                dbAdapter = new DoorDbAdapterJdbc(db);
 
                 List<String> existingTableNames = JdbcDatabaseUtils.getTableNames(dbConnection);
                 if(JdbcDatabaseUtils.listContainsStringIgnoreCase(existingTableNames,

@@ -40,6 +40,7 @@ import com.ustadmobile.lib.database.jdbc.JdbcDatabaseUtils;
 import com.ustadmobile.lib.database.jdbc.PreparedStatementArrayProxy;
 import com.ustadmobile.lib.database.jdbc.UmJdbcDatabase;
 import com.ustadmobile.lib.database.jdbc.UmLiveDataJdbc;
+import com.ustadmobile.lib.db.DoorUtils;
 import com.ustadmobile.lib.db.UmDbType;
 import com.ustadmobile.lib.db.UmDbWithExecutor;
 import com.ustadmobile.lib.db.sync.UmRepositoryDb;
@@ -575,7 +576,7 @@ public class DbProcessorJdbc extends AbstractDbProcessor implements QueryMethodG
                 codeBlock.add("$L.executeUpdate(\"CREATE SEQUENCE $L$L \" + " +
                                 " $T.generatePostgresSyncablePrimaryKeySequenceParameters(_deviceBits));\n",
                         stmtVariableName, POSTGRES_SYNCABLE_PK_PREFIX, entityAnnotation.tableId(),
-                        JdbcDatabaseUtils.class);
+                        DoorUtils.class);
             }
         }
 
