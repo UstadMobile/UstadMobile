@@ -44,7 +44,7 @@ public class DoorDbAdapterJdbc implements DoorDbAdapter, AutoCloseable {
         try (
             ResultSet result = statement.executeQuery(sql);
         ) {
-            if(result.first())
+            if(result.next())
                 return result.getString(1);
         }catch(SQLException e) {
             throw new RuntimeException("Select single value query threw exception: ", e);
