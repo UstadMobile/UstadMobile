@@ -50,8 +50,15 @@ public class ReportSELActivity extends UstadBaseActivity implements
     private LinearLayout reportLinearLayout;
     private ReportSELPresenter mPresenter;
 
+    public static final int TAG_NOMINEE_CLAZZMEMBER_UID = R.string.nomination;
+    public static final int TAG_NOMINATOR_CLAZZMEMBER_UID = R.string.nominating;
+
     //For export line by line data.
     List<String[]> tableTextData;
+
+    LinearLayout.LayoutParams imageLP =
+            new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT);
 
     @Override
     public void onCreate(Bundle savedInstanceState){
@@ -205,17 +212,65 @@ public class ReportSELActivity extends UstadBaseActivity implements
             String[] titleItems = new String[]{currentClazzName};
             tableTextData.add(titleItems);
 
+
+            LinkedHashMap<String, Map<Long, List<Long>>> clazzNominationData = clazzMap.get(currentClazzName);
+
             TableLayout tableLayout = generateTableLayoutForClazz(clazzMembers);
+
+            String testFirstQuestionTitle = clazzNominationData.keySet().iterator().next();
+            Map<Long, List<Long>> testFirstQuestionData = clazzNominationData.get(testFirstQuestionTitle);
+            Iterator<Long> qIterator = testFirstQuestionData.keySet().iterator();
+            while(qIterator.hasNext()){
+                Long nominatorUid = qIterator.next();
+                List<Long> nomineeList = testFirstQuestionData.get(nominatorUid);
+
+                processTable(nominatorUid, nomineeList, tableLayout);
+            }
 
             HorizontalScrollView horizontalScrollView = new HorizontalScrollView(this);
             horizontalScrollView.addView(tableLayout);
 
             reportLinearLayout.addView(clazzHeading);
-            //reportLinearLayout.addView(tableLayout);
             reportLinearLayout.addView(horizontalScrollView);
 
 
         }
+    }
+
+    private void processTable(Long nominatorUid, List<Long> nomineeList, TableLayout tableLayout) {
+
+        TableRow nominatorRow = null;
+        for(int i=0; i<tableLayout.getChildCount(); i++){
+            View child = tableLayout.getChildAt(i);
+            if(child instanceof  TableRow){
+                System.out.println("table Row");
+                Long childNominatorUid = (Long) child.getTag(TAG_NOMINATOR_CLAZZMEMBER_UID);
+                if(childNominatorUid != null){
+                    if(childNominatorUid.longValue() == nominatorUid.longValue()) {
+                        //Bingo
+                        nominatorRow = (TableRow) child;
+                        break;
+                    }//else continue
+                }
+            }
+        }
+
+        if(nominatorRow != null){
+            for(int j=0;j<nominatorRow.getChildCount();j++){
+                View rowChild = nominatorRow.getChildAt(j);
+                if(rowChild instanceof ImageView){
+                    Long rowChildNomineeUid = (Long) rowChild.getTag(TAG_NOMINEE_CLAZZMEMBER_UID);
+                    if(rowChildNomineeUid != null){
+                        if(nomineeList.contains(rowChildNomineeUid)){
+                            ImageView nomineeImageView = (ImageView) rowChild;
+                            nomineeImageView.setImageResource(R.drawable.ic_check_black_24dp);
+                        }
+                    }
+
+                }
+            }
+        }
+
     }
 
     public TableLayout generateTableLayoutForClazz(List<ClazzMemberWithPerson> clazzMembers){
@@ -277,18 +332,24 @@ public class ReportSELActivity extends UstadBaseActivity implements
             nominationRow.setLayoutParams(rowParams);
 
 
-
             TextView nominationRowStudentTV = new TextView(this);
             nominationRowStudentTV.setLayoutParams(everyItemParam);
             nominationRowStudentTV.setTextSize(12);
             nominationRowStudentTV.setTextColor(Color.BLACK);
             nominationRowStudentTV.setText(personName);
+            nominationRowStudentTV.setTag(TAG_NOMINATOR_CLAZZMEMBER_UID, everyClazzMember.getClazzMemberUid());
+
 
             nominationRow.addView(getVerticalLine());
             nominationRow.addView(nominationRowStudentTV);
+            nominationRow.setTag(TAG_NOMINATOR_CLAZZMEMBER_UID, everyClazzMember.getClazzMemberUid());
             nominationRow.addView(getVerticalLine());
             for(ClazzMemberWithPerson againClazzMember: clazzMembers){
-                nominationRow.addView(getCross());
+                View crossView = getCross();
+                crossView.setTag(TAG_NOMINATOR_CLAZZMEMBER_UID, everyClazzMember.getClazzMemberUid());
+                crossView.setTag(TAG_NOMINEE_CLAZZMEMBER_UID, againClazzMember.getClazzMemberUid());
+                nominationRow.addView(crossView);
+
                 nominationRow.addView(getVerticalLine());
             }
 
@@ -310,8 +371,7 @@ public class ReportSELActivity extends UstadBaseActivity implements
     }
 
     public View getVerticalLine(){
-        //V line
-        //Vertical line params
+        //Vertical line
         TableRow.LayoutParams vLineParams =
                 new TableRow.LayoutParams(1, TableRow.LayoutParams.MATCH_PARENT);
         View vla = new View(this);
@@ -321,7 +381,7 @@ public class ReportSELActivity extends UstadBaseActivity implements
     }
 
     public View getHorizontalLine(){
-        //Horizontal line params
+        //Horizontal line
         TableRow.LayoutParams hlineParams = new TableRow.LayoutParams(
                 TableRow.LayoutParams.WRAP_CONTENT, 1);
         View hl = new View(this);
@@ -331,19 +391,14 @@ public class ReportSELActivity extends UstadBaseActivity implements
     }
 
     public View getTick(){
-
         ImageView tickIV = new ImageView(this);
         tickIV.setImageResource(R.drawable.ic_check_black_24dp);
         tickIV.setColorFilter(Color.GRAY);
+        //tickIV.setLayoutParams(imageLP);
         return tickIV;
     }
 
     public View getCross(){
-
-        LinearLayout.LayoutParams imageLP =
-                new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT);
-
         imageLP.setMargins(dpToPx(8), dpToPx(8), dpToPx(8), dpToPx(8));
         ImageView crossIV = new ImageView(this);
         //crossIV.setLayoutParams(imageLP);
@@ -356,6 +411,7 @@ public class ReportSELActivity extends UstadBaseActivity implements
         ImageView naIV = new ImageView(this);
         naIV.setImageResource(R.drawable.ic_remove_black_24dp);
         naIV.setColorFilter(Color.GRAY);
+        //naIV.setLayoutParams(imageLP);
         return naIV;
     }
 
