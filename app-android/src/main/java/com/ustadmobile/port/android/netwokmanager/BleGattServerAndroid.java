@@ -39,7 +39,7 @@ import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.UST
  *  @author kileha3
  */
 @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
-public class BleGattServerAndroid extends BleGattServer{
+class BleGattServerAndroid extends BleGattServer{
 
     private BluetoothGattServer gattServer;
 
@@ -139,7 +139,7 @@ public class BleGattServerAndroid extends BleGattServer{
     }
 
     @VisibleForTesting
-    protected BluetoothGattServerCallback getGattServerCallback() {
+    BluetoothGattServerCallback getGattServerCallback() {
         return mCallback;
     }
 
@@ -147,7 +147,7 @@ public class BleGattServerAndroid extends BleGattServer{
      * Get instance of a BluetoothGattServer
      * @return Instance of BluetoothGattServer
      */
-    public BluetoothGattServer getGattServer() {
+    BluetoothGattServer getGattServer() {
         return gattServer;
     }
 }

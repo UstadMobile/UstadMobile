@@ -455,7 +455,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
      * @return Instance of a BluetoothManager
      */
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
-    public BluetoothManager getBluetoothManager(){
+    BluetoothManager getBluetoothManager(){
         return  ((BluetoothManager)bluetoothManager);
     }
 

@@ -72,7 +72,7 @@ public class    BleEntryStatusTaskAndroid extends BleEntryStatusTask {
      * Set bluetooth manager for BLE GATT communication
      * @param bluetoothManager BluetoothManager instance
      */
-    public void setBluetoothManager(BluetoothManager bluetoothManager){
+    void setBluetoothManager(BluetoothManager bluetoothManager){
         this.bluetoothManager = bluetoothManager;
     }
 
@@ -105,7 +105,7 @@ public class    BleEntryStatusTaskAndroid extends BleEntryStatusTask {
      * Get BleMessageGattClientCallback instance
      * @return Instance of a BleMessageGattClientCallback
      */
-    public BleMessageGattClientCallback getGattClientCallback() {
+    BleMessageGattClientCallback getGattClientCallback() {
         return mCallback;
     }
 

@@ -8,7 +8,6 @@ import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothProfile;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
-import android.support.annotation.VisibleForTesting;
 
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
@@ -74,7 +73,7 @@ public class BleMessageGattClientCallback extends  BluetoothGattCallback{
      * Set listener to report back results on the listening part.
      * @param responseListener BleMessageResponseListener listener
      */
-    public void setOnResponseReceived(BleMessageResponseListener responseListener){
+    void setOnResponseReceived(BleMessageResponseListener responseListener){
         this.responseListener = responseListener;
     }
 
@@ -231,6 +230,4 @@ public class BleMessageGattClientCallback extends  BluetoothGattCallback{
         }
         return false;
     }
-
-
 }

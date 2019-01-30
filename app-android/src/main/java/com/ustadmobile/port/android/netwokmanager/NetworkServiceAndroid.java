@@ -43,6 +43,7 @@ public class NetworkServiceAndroid extends Service {
         managerAndroidBle = (NetworkManagerAndroidBle)
                 UstadMobileSystemImplAndroid.getInstanceAndroid().getNetworkManagerBle();
         managerAndroidBle.init(NetworkServiceAndroid.this);
+        managerAndroidBle.startScanning();
 
     }
 
