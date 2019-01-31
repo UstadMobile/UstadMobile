@@ -17,7 +17,7 @@
         android:paddingStart="@dimen/dimen_16dp"
         android:paddingEnd="@dimen/dimen_16dp"
         android:id="@+id/get_started_btn"
-        android:text="@string/onboaring_activity"
+        android:text="@string/get_started_label"
         android:layout_marginBottom="@dimen/dimen_24dp"
         android:layout_centerHorizontal="true"
         android:layout_above="@+id/pageIndicatorView"
