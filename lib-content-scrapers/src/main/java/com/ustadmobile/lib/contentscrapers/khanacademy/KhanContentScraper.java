@@ -2,18 +2,15 @@ package com.ustadmobile.lib.contentscrapers.khanacademy;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonSyntaxException;
-import com.google.gson.reflect.TypeToken;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.ContentEntryContentEntryFileJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryFileDao;
 import com.ustadmobile.core.db.dao.ContentEntryFileStatusDao;
 import com.ustadmobile.core.db.dao.ScrapeQueueItemDao;
-import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
-import com.ustadmobile.lib.contentscrapers.ScraperConstants;
 import com.ustadmobile.lib.contentscrapers.LogIndex;
 import com.ustadmobile.lib.contentscrapers.LogResponse;
+import com.ustadmobile.lib.contentscrapers.ScraperConstants;
 import com.ustadmobile.lib.contentscrapers.UMLogUtil;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 
@@ -25,19 +22,15 @@ import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.logging.LogEntries;
 import org.openqa.selenium.logging.LogEntry;
-import org.openqa.selenium.logging.LogType;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Type;
+import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -61,10 +54,8 @@ import static com.ustadmobile.lib.contentscrapers.ScraperConstants.KHAN;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.KHAN_CSS_FILE;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.KHAN_CSS_LINK;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_CSS;
-import static com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_JPG;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_JSON;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_SVG;
-import static com.ustadmobile.lib.contentscrapers.ScraperConstants.SVG_EXT;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.TIME_OUT_SELENIUM;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.TRY_AGAIN_FILE;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.TRY_AGAIN_KHAN_LINK;
@@ -225,14 +216,25 @@ public class KhanContentScraper implements Runnable {
         folder.mkdirs();
 
         File content = new File(folder, FilenameUtils.getName(scrapUrl.getPath()));
-        URLConnection conn = scrapUrl.openConnection();
-        if (!ContentScraperUtil.isFileModified(conn, folder, FilenameUtils.getBaseName(url)) && ContentScraperUtil.fileHasContent(content)) {
-            isContentUpdated = false;
-            return;
-        }
 
-        FileUtils.copyURLToFile(scrapUrl, content);
-        ContentScraperUtil.zipDirectory(folder, destinationDirectory.getName(), destinationDirectory);
+        HttpURLConnection conn = null;
+        try {
+            conn = (HttpURLConnection)scrapUrl.openConnection();
+            if (!ContentScraperUtil.isFileModified(conn, folder, FilenameUtils.getBaseName(url)) && ContentScraperUtil.fileHasContent(content)) {
+                isContentUpdated = false;
+                return;
+            }
+
+            FileUtils.copyURLToFile(scrapUrl, content);
+            ContentScraperUtil.zipDirectory(folder, destinationDirectory.getName(), destinationDirectory);
+        }catch(IOException e) {
+            throw e;
+        }finally {
+            if(conn != null) {
+                conn.disconnect();
+                conn = null;
+            }
+        }
 
     }
 
