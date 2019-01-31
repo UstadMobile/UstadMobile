@@ -8,7 +8,6 @@ import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
 import com.ustadmobile.core.db.dao.LanguageDao;
 import com.ustadmobile.core.db.dao.ScrapeQueueItemDao;
 import com.ustadmobile.core.db.dao.ScrapeRunDao;
-import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.LanguageList;
 import com.ustadmobile.lib.contentscrapers.ScraperConstants;
@@ -211,7 +210,7 @@ public class KhanContentIndexer implements Runnable {
                 indexerLatch.countDown());
         indexWorkQueue.start();
         CountDownLatch scraperLatch = new CountDownLatch(1);
-        scrapeWorkQueue = new WorkQueue(scraperSource, 4);
+        scrapeWorkQueue = new WorkQueue(scraperSource, 6);
         scrapeWorkQueue.start();
 
         try {
@@ -247,7 +246,7 @@ public class KhanContentIndexer implements Runnable {
 
 
     public void run() {
-
+        queueDao.setTimeStarted(scrapeQueueItemUid, System.currentTimeMillis());
         boolean successful = false;
         if (ScraperConstants.KhanContentType.TOPICS.getType().equals(contentType)) {
             try {
@@ -268,7 +267,7 @@ public class KhanContentIndexer implements Runnable {
         }
 
         queueDao.updateSetStatusById(scrapeQueueItemUid, successful ? ScrapeQueueItemDao.STATUS_DONE : ScrapeQueueItemDao.STATUS_FAILED);
-
+        queueDao.setTimeFinished(scrapeQueueItemUid, System.currentTimeMillis());
     }
 
     public static String getJsonStringFromScript(String url) throws IOException {

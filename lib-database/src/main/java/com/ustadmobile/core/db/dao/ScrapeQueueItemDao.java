@@ -19,8 +19,8 @@ public abstract class ScrapeQueueItemDao implements BaseDao<ScrapeQueueItem> {
     public static final int STATUS_FAILED = 4;
 
     public ScrapeQueueItem getNextItemAndSetStatus(int runId, int itemType) {
-        ScrapeQueueItem nextItem  = findNextItem(STATUS_PENDING, runId, itemType);
-        if(nextItem != null) {
+        ScrapeQueueItem nextItem = findNextItem(STATUS_PENDING, runId, itemType);
+        if (nextItem != null) {
             updateSetStatusById(nextItem.getSqiUid(), STATUS_RUNNING);
         }
 
@@ -39,5 +39,11 @@ public abstract class ScrapeQueueItemDao implements BaseDao<ScrapeQueueItem> {
 
     @UmQuery("SELECT * from ScrapeQueueItem WHERE runId = :runId AND scrapeUrl = :indexUrl LIMIT 1")
     public abstract ScrapeQueueItem getExistingQueueItem(int runId, String indexUrl);
+
+    @UmQuery("UPDATE ScrapeQueueItem SET timeStarted = :timeStarted WHERE sqiUid = :uid")
+    public abstract void setTimeStarted(int uid, long timeStarted);
+
+    @UmQuery("UPDATE ScrapeQueueItem SET timeFinished = :timeFinished WHERE sqiUid = :uid")
+    public abstract void setTimeFinished(int uid, long timeFinished);
 
 }

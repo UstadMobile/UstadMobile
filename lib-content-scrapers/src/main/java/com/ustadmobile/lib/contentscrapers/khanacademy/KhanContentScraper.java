@@ -147,7 +147,7 @@ public class KhanContentScraper implements Runnable {
 
     }
 
-    public KhanContentScraper(File destinationDirectory, ChromeDriver driver) throws Exception {
+    public KhanContentScraper(File destinationDirectory, ChromeDriver driver) {
         this.destinationDirectory = destinationDirectory;
         this.driver = driver;
     }
@@ -160,6 +160,8 @@ public class KhanContentScraper implements Runnable {
         ContentEntryContentEntryFileJoinDao contentEntryFileJoin = repository.getContentEntryContentEntryFileJoinDao();
         ContentEntryFileStatusDao contentFileStatusDao = db.getContentEntryFileStatusDao();
         ScrapeQueueItemDao queueDao = db.getScrapeQueueItemDao();
+
+        queueDao.setTimeStarted(sqiUid, System.currentTimeMillis());
 
         boolean successful = false;
         try {
@@ -201,7 +203,7 @@ public class KhanContentScraper implements Runnable {
         }
 
         queueDao.updateSetStatusById(sqiUid, successful ? ScrapeQueueItemDao.STATUS_DONE : ScrapeQueueItemDao.STATUS_FAILED);
-
+        queueDao.setTimeFinished(sqiUid, System.currentTimeMillis());
 
     }
 
@@ -356,7 +358,7 @@ public class KhanContentScraper implements Runnable {
 
                 } catch (Exception e) {
                     UMLogUtil.logError(urlString);
-                    UMLogUtil.logInfo(le.getMessage());
+                    UMLogUtil.logDebug(le.getMessage());
                 }
 
             }
@@ -614,7 +616,7 @@ public class KhanContentScraper implements Runnable {
 
 
                 } catch (Exception e) {
-                    UMLogUtil.logError("Index url failed at " + urlString);
+                    UMLogUtil.logDebug("Index url failed at " + urlString);
                     UMLogUtil.logInfo(le.getMessage());
                 }
 

@@ -23,11 +23,15 @@ public class ScrapeQueueItem {
 
     private int runId;
 
-    private String time;
-
     private int itemType;
 
     private String contentType;
+
+    private long timeAdded;
+
+    private long timeStarted;
+
+    private long timeFinished;
 
     public int getSqiUid() {
         return sqiUid;
@@ -85,19 +89,35 @@ public class ScrapeQueueItem {
         this.runId = runId;
     }
 
-    public String getTime() {
-        return time;
-    }
-
-    public void setTime(String time) {
-        this.time = time;
-    }
-
     public int getItemType() {
         return itemType;
     }
 
     public void setItemType(int itemType) {
         this.itemType = itemType;
+    }
+
+    public long getTimeAdded() {
+        return timeAdded;
+    }
+
+    public void setTimeAdded(long timeAdded) {
+        this.timeAdded = timeAdded;
+    }
+
+    public long getTimeStarted() {
+        return timeStarted;
+    }
+
+    public void setTimeStarted(long timeStarted) {
+        this.timeStarted = timeStarted;
+    }
+
+    public long getTimeFinished() {
+        return timeFinished;
+    }
+
+    public void setTimeFinished(long timeFinished) {
+        this.timeFinished = timeFinished;
     }
 }

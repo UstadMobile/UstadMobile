@@ -998,6 +998,7 @@ public class ContentScraperUtil {
             item.setContentType(type);
             item.setRunId(runId);
             item.setItemType(itemType);
+            item.setTimeAdded(System.currentTimeMillis());
             queueDao.insert(item);
         }
 

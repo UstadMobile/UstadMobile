@@ -115,7 +115,7 @@ import com.ustadmobile.lib.db.sync.entities.SyncablePrimaryKey;
 import java.util.Hashtable;
 import java.util.Random;
 
-@UmDatabase(version = 2, entities = {
+@UmDatabase(version = 4, entities = {
         OpdsEntry.class, OpdsLink.class, OpdsEntryParentToChildJoin.class,
         ContainerFile.class, ContainerFileEntry.class, DownloadSet.class,
         DownloadSetItem.class, NetworkNode.class, EntryStatusResponse.class,
@@ -199,7 +199,7 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
                         throw new RuntimeException("Not supported on SQLite");
 
                     case UmDbType.TYPE_POSTGRES:
-                        //Must use new device bits, otherwise 
+                        //Must use new device bits, otherwise
                         int deviceBits = new Random().nextInt();
 
                         db.execSql("ALTER TABLE SyncDeviceBits ADD COLUMN master BOOL");
@@ -213,7 +213,6 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
                                 "( sqiUid  SERIAL PRIMARY KEY  NOT NULL ,  sqiContentEntryParentUid  BIGINT,  " +
                                 "destDir  TEXT,  scrapeUrl  TEXT,  status  INTEGER,  runId  INTEGER,  time  TEXT, " +
                                 " itemType  INTEGER,  contentType  TEXT)");
-
 
 
                         db.execSql("ALTER TABLE SyncStatus ADD COLUMN nextChangeSeqNum BIGINT");
@@ -448,6 +447,25 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
                         db.execSql("CREATE OR REPLACE FUNCTION inc_csn_50_fn() RETURNS trigger AS $$ BEGIN UPDATE PersonPicture SET personPictureLocalCsn = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.personPictureLocalCsn ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 50) END),personPictureMasterCsn = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 50) ELSE NEW.personPictureMasterCsn END) WHERE personPictureUid = NEW.personPictureUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 50; RETURN null; END $$LANGUAGE plpgsql");
                         db.execSql("CREATE TRIGGER inc_csn_50_trig AFTER UPDATE OR INSERT ON PersonPicture FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_50_fn()");
                         //END Create PersonPicture (PostgreSQL)
+
+                }
+            }
+        });
+        builder.addMigration(new UmDbMigration(2, 4) {
+            @Override
+            public void migrate(DoorDbAdapter db) {
+                switch (db.getDbType()) {
+                    case UmDbType.TYPE_SQLITE:
+                        throw new RuntimeException("Not supported on SQLite");
+
+                    case UmDbType.TYPE_POSTGRES:
+                        //Must use new device bits, otherwise
+                        db.execSql("ALTER TABLE ScrapeQueueItem " +
+                                "ADD COLUMN timeAdded BIGINT, " +
+                                "ADD COLUMN timeStarted BIGINT, " +
+                                "ADD COLUMN timeFinished BIGINT, " +
+                                "DROP COLUMN time "
+                        );
 
                 }
             }
