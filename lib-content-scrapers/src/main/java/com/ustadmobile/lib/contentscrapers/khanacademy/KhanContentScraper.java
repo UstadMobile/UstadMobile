@@ -9,6 +9,7 @@ import com.ustadmobile.core.db.dao.ContentEntryContentEntryFileJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryFileDao;
 import com.ustadmobile.core.db.dao.ContentEntryFileStatusDao;
 import com.ustadmobile.core.db.dao.ScrapeQueueItemDao;
+import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.ScraperConstants;
 import com.ustadmobile.lib.contentscrapers.LogIndex;
@@ -161,7 +162,10 @@ public class KhanContentScraper implements Runnable {
         ContentEntryFileStatusDao contentFileStatusDao = db.getContentEntryFileStatusDao();
         ScrapeQueueItemDao queueDao = db.getScrapeQueueItemDao();
 
-        queueDao.setTimeStarted(sqiUid, System.currentTimeMillis());
+
+        long startTime = System.currentTimeMillis();
+        UMLogUtil.logInfo("Started scraper url " + url + " at start time: " + startTime);
+        queueDao.setTimeStarted(sqiUid, startTime);
 
         boolean successful = false;
         try {
@@ -204,6 +208,8 @@ public class KhanContentScraper implements Runnable {
 
         queueDao.updateSetStatusById(sqiUid, successful ? ScrapeQueueItemDao.STATUS_DONE : ScrapeQueueItemDao.STATUS_FAILED);
         queueDao.setTimeFinished(sqiUid, System.currentTimeMillis());
+        long duration = System.currentTimeMillis() - startTime;
+        UMLogUtil.logInfo("Ended scrape for url " + url + " in duration: " + duration);
 
     }
 

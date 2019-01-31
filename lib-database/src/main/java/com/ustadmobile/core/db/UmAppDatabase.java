@@ -461,9 +461,9 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
                     case UmDbType.TYPE_POSTGRES:
                         //Must use new device bits, otherwise
                         db.execSql("ALTER TABLE ScrapeQueueItem " +
-                                "ADD COLUMN timeAdded BIGINT, " +
-                                "ADD COLUMN timeStarted BIGINT, " +
-                                "ADD COLUMN timeFinished BIGINT, " +
+                                "ADD COLUMN timeAdded BIGINT DEFAULT 0, " +
+                                "ADD COLUMN timeStarted BIGINT DEFAULT 0, " +
+                                "ADD COLUMN timeFinished BIGINT DEFAULT 0, " +
                                 "DROP COLUMN time "
                         );
 
