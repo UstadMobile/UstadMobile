@@ -29,7 +29,7 @@
         android:required="false" />
 
     <application android:supportsRtl="true">
-        <activity android:name="com.ustadmobile.port.android.view.OnBoardingActivity"></activity>
+        <activity android:name="com.ustadmobile.port.android.view.OnBoardingActivity"/>
 
         <provider
             android:name="android.support.v4.content.FileProvider"

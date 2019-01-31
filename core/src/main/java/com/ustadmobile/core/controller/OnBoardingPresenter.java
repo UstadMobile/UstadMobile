@@ -11,6 +11,12 @@ public class OnBoardingPresenter extends UstadBaseController<OnBoardingView> {
     }
 
     @Override
+    public void onCreate(Hashtable savedState) {
+        super.onCreate(savedState);
+        view.runOnUiThread(() -> view.setScreenList());
+    }
+
+    @Override
     public void setUIStrings() {
 
     }

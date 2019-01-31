@@ -25,6 +25,11 @@ public class OnBoardingActivity extends AppCompatActivity implements OnBoardingV
 
     private OnBoardingPresenter presenter;
 
+    private  ViewPager viewPager;
+
+    /**
+     * Model for the onboarding screen
+     */
     private enum OnBoardScreen {
 
         SCREEN_1(R.string.about,R.string.about,R.layout.onboard_screen_view),
@@ -57,6 +62,9 @@ public class OnBoardingActivity extends AppCompatActivity implements OnBoardingV
     }
 
 
+    /**
+     * Custom pager adapter for the screen
+     */
     private class OnBoardingPagerAdapter extends PagerAdapter{
 
         private Context context;
@@ -65,6 +73,7 @@ public class OnBoardingActivity extends AppCompatActivity implements OnBoardingV
             this.context = context;
         }
 
+        @NonNull
         @Override
         public Object instantiateItem(@NonNull ViewGroup collection, int position) {
             OnBoardScreen onBoardScreen = OnBoardScreen.values()[position];
@@ -100,32 +109,37 @@ public class OnBoardingActivity extends AppCompatActivity implements OnBoardingV
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_on_boarding);
-        ViewPager viewPager = findViewById(R.id.onBoardPagerView);
+        viewPager = findViewById(R.id.onBoardPagerView);
         Button getStartedBtn = findViewById(R.id.get_started_btn);
         pageIndicatorView = findViewById(R.id.pageIndicatorView);
 
         presenter = new OnBoardingPresenter(this,
                 UMAndroidUtil.bundleToHashtable(getIntent().getExtras()),this);
+        presenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
         pageIndicatorView.setAnimationType(AnimationType.WORM);
 
         getStartedBtn.setOnClickListener(v -> presenter.handleGetStarted());
 
+    }
+
+    @Override
+    public void setScreenList() {
         viewPager.setAdapter(new OnBoardingPagerAdapter(this));
+        if(pageIndicatorView != null){
+            viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+                @Override
+                public void onPageScrolled(int position, float positionOffset,
+                                           int positionOffsetPixels) { }
 
-        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-            @Override
-            public void onPageScrolled(int position, float positionOffset,
-                                       int positionOffsetPixels) { }
+                @Override
+                public void onPageSelected(int position) {
+                    pageIndicatorView.setSelected(position);
+                }
 
-            @Override
-            public void onPageSelected(int position) {
-                pageIndicatorView.setSelected(position);
-            }
-
-            @Override
-            public void onPageScrollStateChanged(int state) { }
-        });
-
+                @Override
+                public void onPageScrollStateChanged(int state) { }
+            });
+        }
     }
 
     @Override

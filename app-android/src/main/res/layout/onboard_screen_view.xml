@@ -5,19 +5,17 @@
     android:layout_height="match_parent">
 
     <TextView
-        android:textColor="@color/text_primary"
+        android:textColor="@color/icons"
         android:gravity="center"
         android:layout_above="@+id/sub_heading"
         android:id="@+id/heading"
         android:textSize="24sp"
         android:layout_marginBottom="@dimen/dimen_10dp"
-        android:text="Share offline"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
     <TextView
-        android:textColor="@color/text_secondary"
+        android:textColor="@color/icons_light"
         android:gravity="center"
-        android:text="Hello there"
         android:id="@+id/sub_heading"
         android:layout_marginBottom="150dp"
         android:layout_alignParentBottom="true"
