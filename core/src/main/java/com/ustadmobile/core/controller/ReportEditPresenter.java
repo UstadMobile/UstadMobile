@@ -22,7 +22,9 @@ import static com.ustadmobile.core.view.ReportEditView.ARG_LOCATION_LIST;
 import static com.ustadmobile.core.view.ReportEditView.ARG_REPORT_DESC;
 import static com.ustadmobile.core.view.ReportEditView.ARG_REPORT_LINK;
 import static com.ustadmobile.core.view.ReportEditView.ARG_REPORT_NAME;
+import static com.ustadmobile.core.view.ReportEditView.ARG_SHOW_CLAZZES;
 import static com.ustadmobile.core.view.ReportEditView.ARG_SHOW_GENDER_DISAGGREGATE;
+import static com.ustadmobile.core.view.ReportEditView.ARG_SHOW_LOCATIONS;
 import static com.ustadmobile.core.view.ReportEditView.ARG_SHOW_RADIO_GROUP;
 import static com.ustadmobile.core.view.ReportEditView.ARG_SHOW_THERSHOLD;
 import static com.ustadmobile.core.view.ReportEditView.ARG_STUDENT_IDENTIFIER_NUMBER;
@@ -57,6 +59,7 @@ public class ReportEditPresenter
     private static final int TIME_PERIOD_CUSTOM = 5;
 
     private boolean showThreshold, showRadioGroup, showGenderDisaggregated;
+    private boolean showClazzes, showLocations;
     private long fromTime, toTime;
 
     public ReportEditPresenter(Object context, Hashtable arguments, ReportEditView view) {
@@ -83,6 +86,12 @@ public class ReportEditPresenter
         if(arguments.containsKey(ARG_SHOW_GENDER_DISAGGREGATE)){
             showGenderDisaggregated = (boolean) arguments.get(ARG_SHOW_GENDER_DISAGGREGATE);
         }
+        if(arguments.containsKey(ARG_SHOW_CLAZZES)){
+            showClazzes = (boolean) arguments.get(ARG_SHOW_CLAZZES);
+        }
+        if(arguments.containsKey(ARG_SHOW_LOCATIONS)){
+            showLocations = (boolean) arguments.get(ARG_SHOW_LOCATIONS);
+        }
 
     }
 
@@ -101,6 +110,8 @@ public class ReportEditPresenter
         view.showAttendanceThresholdView(showThreshold);
         view.showShowStudentNumberPercentageView(showRadioGroup);
         view.showGenderDisaggregate(showGenderDisaggregated);
+        view.showClazzes(showClazzes);
+        view.showLocations(showLocations);
 
         //Update time period options.
         updateTimePeriod();

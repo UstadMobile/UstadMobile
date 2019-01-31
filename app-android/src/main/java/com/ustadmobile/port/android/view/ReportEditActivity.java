@@ -40,11 +40,13 @@ public class ReportEditActivity extends UstadBaseActivity implements ReportEditV
         SelectTwoDatesDialogFragment.CustomTimePeriodDialogListener {
 
     private TextView locationsTextView;
+    private TextView locationsHeadingTextView;
     private Spinner timePeriodSpinner;
     private TextView heading;
     private CheckBox genderDisaggregateCheck;
     private ReportEditPresenter mPresenter;
     private TextView classesTextView;
+    private TextView classesHeadingTextView;
     private TextView attendanceThresholdHeadingTextView;
     private TextView attendanceThresholdsTextView;
 
@@ -69,6 +71,10 @@ public class ReportEditActivity extends UstadBaseActivity implements ReportEditV
 
         locationsTextView = findViewById(R.id.activity_report_edit_location_detail);
         timePeriodSpinner = findViewById(R.id.activity_report_edittime_period_spinner);
+        locationsHeadingTextView =
+                findViewById(R.id.activity_report_edit_location_heading);
+        classesHeadingTextView =
+                findViewById(R.id.activity_report_edit_classes_heading);
 
         heading = findViewById(R.id.activity_report_edit_report_title);
         genderDisaggregateCheck = findViewById(R.id.activity_report_edit_gender);
@@ -225,6 +231,18 @@ public class ReportEditActivity extends UstadBaseActivity implements ReportEditV
     @Override
     public void showGenderDisaggregate(boolean show) {
         genderDisaggregateCheck.setVisibility(show?View.VISIBLE:View.GONE);
+    }
+
+    @Override
+    public void showClazzes(boolean show) {
+        classesTextView.setVisibility(show?View.VISIBLE:View.GONE);
+        classesHeadingTextView.setVisibility(show?View.VISIBLE:View.GONE);
+    }
+
+    @Override
+    public void showLocations(boolean show) {
+        locationsTextView.setVisibility(show?View.VISIBLE:View.GONE);
+        locationsHeadingTextView.setVisibility(show?View.VISIBLE:View.GONE);
     }
 
 

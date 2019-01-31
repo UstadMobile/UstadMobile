@@ -20,6 +20,8 @@ public interface ReportEditView extends UstadView {
     String ARG_SHOW_THERSHOLD = "ArgShowthreshold";
     String ARG_SHOW_RADIO_GROUP = "ArgShowRadioGroup";
     String ARG_SHOW_GENDER_DISAGGREGATE = "ArgShowGenderDisaggregate";
+    String ARG_SHOW_CLAZZES = "ArgShowClazzes";
+    String ARG_SHOW_LOCATIONS = "ArgShowLocations";
 
     String ARG_FROM_DATE = "fromDate";
     String ARG_TO_DATE = "toDate";
@@ -101,5 +103,21 @@ public interface ReportEditView extends UstadView {
      */
     void showShowStudentNumberPercentageView(boolean show);
 
+    /**
+     * Show gender disaggregated checkbox
+     * @param show  if true will show it
+     */
     void showGenderDisaggregate(boolean show);
+
+    /**
+     * Shows the clazz list selector option or not
+     * @param show  if true will show it
+     */
+    void showClazzes(boolean show);
+
+    /**
+     * Shows the locations list selector option or not
+     * @param show  if true, will show it
+     */
+    void showLocations(boolean show);
 }

@@ -19,29 +19,7 @@ public abstract class SocialNominationQuestionResponseNominationDao
         implements SyncableDao<SocialNominationQuestionResponseNomination,
         SocialNominationQuestionResponseNominationDao> {
 
-    @UmInsert
-    public abstract long insert(SocialNominationQuestionResponseNomination entity);
-
-    @UmUpdate
-    public abstract void update(SocialNominationQuestionResponseNomination entity);
-
-    @UmInsert
-    public abstract void insertAsync(SocialNominationQuestionResponseNomination entity,
-                                     UmCallback<Long> result);
-
-    @UmQuery("SELECT * FROM SocialNominationQuestionResponseNomination")
-    public abstract UmProvider<SocialNominationQuestionResponseNomination> findAllQuestions();
-
-    @UmUpdate
-    public abstract void updateAsync(SocialNominationQuestionResponseNomination entity,
-                                     UmCallback<Integer> result);
-
-
-    @UmQuery("SELECT * FROM SocialNominationQuestionResponseNomination " +
-            "WHERE socialNominationQuestionResponseNominationUid = :uid")
-    public abstract SocialNominationQuestionResponseNomination findByUid(long uid);
-
-    @UmQuery("SELECT " +
+    public static final String SEL_REPORT_SELECT = "SELECT " +
             "    Clazz.clazzName, " +
             "    SocialNominationQuestionSet.title AS questionSetTitle,  " +
             "    Person.firstNames || ' ' || Person.lastName AS nominatorName , " +
@@ -85,11 +63,58 @@ public abstract class SocialNominationQuestionResponseNominationDao
             "   SocialNominationQuestionResponseNomination.socialNominationQuestionResponseNominationClazzMemberUid " +
 
             " LEFT JOIN Person as PersonNominated ON " +
-            "   PersonNominated.personUid = ClazzMemberNominated.clazzMemberPersonUid " +
+            "   PersonNominated.personUid = ClazzMemberNominated.clazzMemberPersonUid " ;
+
+    @UmInsert
+    public abstract long insert(SocialNominationQuestionResponseNomination entity);
+
+    @UmUpdate
+    public abstract void update(SocialNominationQuestionResponseNomination entity);
+
+    @UmInsert
+    public abstract void insertAsync(SocialNominationQuestionResponseNomination entity,
+                                     UmCallback<Long> result);
+
+    @UmQuery("SELECT * FROM SocialNominationQuestionResponseNomination")
+    public abstract UmProvider<SocialNominationQuestionResponseNomination> findAllQuestions();
+
+    @UmUpdate
+    public abstract void updateAsync(SocialNominationQuestionResponseNomination entity,
+                                     UmCallback<Integer> result);
+
+
+    @UmQuery("SELECT * FROM SocialNominationQuestionResponseNomination " +
+            "WHERE socialNominationQuestionResponseNominationUid = :uid")
+    public abstract SocialNominationQuestionResponseNomination findByUid(long uid);
+
+    @UmQuery(SEL_REPORT_SELECT +
             " WHERE " +
             "   socialNominationQuestionResponseNominationSocialNominationQuestionResponseUid != 0 " +
+            "   AND SocialNominationQuestionSetResponse.socialNominationQuestionSetResponseStartTime > :fromTime " +
+            "   AND SocialNominationQuestionSetResponse.socialNominationQuestionSetResponseFinishTime < :toTime " +
+
             " ORDER BY clazzName")
-    public abstract void getAllNominationsReport(UmCallback<List<SELNominationItem>> resultList);
+    public abstract void getAllNominationsReportAllClazzesAsync(long fromTime, long toTime,
+                                                 UmCallback<List<SELNominationItem>> resultList);
+
+    @UmQuery(SEL_REPORT_SELECT +
+            " WHERE " +
+            "   socialNominationQuestionResponseNominationSocialNominationQuestionResponseUid != 0 " +
+            "   AND SocialNominationQuestionSetResponse.socialNominationQuestionSetResponseStartTime > :fromTime " +
+            "   AND SocialNominationQuestionSetResponse.socialNominationQuestionSetResponseFinishTime < :toTime " +
+            "   AND Clazz.clazzUid IN (:clazzList) " +
+            " ORDER BY clazzName")
+    public abstract void getAllNominationsReportInClazzAsync(long fromTime, long toTime, List<Long> clazzList,
+                                                        UmCallback<List<SELNominationItem>> resultList);
+
+    public void getAllNominationReportAsync(long fromTime, long toTime, List<Long> clazzes,
+                                            UmCallback<List<SELNominationItem>> resultList){
+        if(clazzes != null && !clazzes.isEmpty()){
+            getAllNominationsReportInClazzAsync(fromTime, toTime, clazzes, resultList);
+        }else{
+            getAllNominationsReportAllClazzesAsync(fromTime, toTime, resultList);
+        }
+    }
 
 
 }

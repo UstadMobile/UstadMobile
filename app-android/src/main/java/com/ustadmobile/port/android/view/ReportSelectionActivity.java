@@ -79,7 +79,8 @@ public class ReportSelectionActivity extends UstadBaseActivity implements Report
 
                 mPresenter.goToReport(groupItem.name, groupItem.desc, groupItem.reportLink,
                         groupItem.showThreshold, groupItem.showRadioGroup,
-                        groupItem.showGenderDisaggregate);
+                        groupItem.showGenderDisaggregate, groupItem.showClazzes,
+                        groupItem.showLocations);
             }
 
             return false;
@@ -104,7 +105,13 @@ public class ReportSelectionActivity extends UstadBaseActivity implements Report
                             .get(childPosition).showRadioGroup,
                     expandableListDataReportsHashMap
                             .get(expandableListTitle.get(groupPosition)).children
-                            .get(childPosition).showGenderDisaggregate);
+                            .get(childPosition).showGenderDisaggregate,
+                    expandableListDataReportsHashMap
+                            .get(expandableListTitle.get(groupPosition)).children
+                            .get(childPosition).showClazzes,
+                    expandableListDataReportsHashMap
+                            .get(expandableListTitle.get(groupPosition)).children
+                            .get(childPosition).showLocations);
             return false;
         });
 

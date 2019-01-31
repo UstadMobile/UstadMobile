@@ -83,10 +83,6 @@ public class ReportSELPresenter extends UstadBaseController<ReportSELView> {
 
         long currentTime = System.currentTimeMillis();
 
-        //TODOing: This
-
-
-        ClazzDao clazzDao = repository.getClazzDao();
         ClazzMemberDao clazzMemberDao = repository.getClazzMemberDao();
 
         HashMap<String, List<ClazzMemberWithPerson>> clazzToStudents = new HashMap<>();
@@ -96,11 +92,12 @@ public class ReportSELPresenter extends UstadBaseController<ReportSELView> {
 
         SocialNominationQuestionResponseNominationDao nominationDao =
                 repository.getSocialNominationQuestionResponseNominationDao();
-        nominationDao.getAllNominationsReport(new UmCallback<List<SELNominationItem>>() {
+        nominationDao.getAllNominationReportAsync(fromDate, toDate, clazzList,
+                new UmCallback<List<SELNominationItem>>() {
             @Override
             public void onSuccess(List<SELNominationItem> allNominations) {
 
-                //TODO: Handle QuestionSet grouping ?
+                //TODO: Handle QuestionSet grouping ? (Not implemented in Prototypes)
                 int size = allNominations.size();
                 System.out.println(size);
                 int index = 0;
@@ -169,10 +166,6 @@ public class ReportSELPresenter extends UstadBaseController<ReportSELView> {
                         }
                     }
                 }
-
-
-
-
             }
 
             @Override

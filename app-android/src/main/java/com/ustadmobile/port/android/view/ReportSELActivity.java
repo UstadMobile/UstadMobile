@@ -187,10 +187,6 @@ public class ReportSELActivity extends UstadBaseActivity implements
         this.clazzMap = clazzMap;
 
         //Work with: reportLinearLayout linear layout
-        //LAYOUT
-        TableRow.LayoutParams rowParams = new TableRow.LayoutParams(
-                TableRow.LayoutParams.WRAP_CONTENT, TableRow.LayoutParams.WRAP_CONTENT);
-
         TableRow.LayoutParams headingParams = new TableRow.LayoutParams(
                 TableRow.LayoutParams.WRAP_CONTENT, TableRow.LayoutParams.WRAP_CONTENT);
         headingParams.setMargins(dpToPx(8),dpToPx(32),dpToPx(8),dpToPx(16));
@@ -200,12 +196,8 @@ public class ReportSELActivity extends UstadBaseActivity implements
         everyItemParam.setMargins(dpToPx(4), dpToPx(4), dpToPx(4), dpToPx(4));
         everyItemParam.gravity = Gravity.CENTER_VERTICAL;
 
-        Iterator<String> mapIterator = clazzMap.keySet().iterator();
-
         //For every clazz:
-        while(mapIterator.hasNext()){
-            String currentClazzName = mapIterator.next();
-
+        for (String currentClazzName : clazzMap.keySet()) {
             List<ClazzMemberWithPerson> clazzMembers = clazzToStudents.get(currentClazzName);
 
             //Class Name heading
@@ -225,6 +217,7 @@ public class ReportSELActivity extends UstadBaseActivity implements
             TableLayout tableLayout = generateTableLayoutForClazz(clazzMembers);
 
             //Default look up first question
+            assert clazzNominationData != null;
             String firstQuestionTitle = clazzNominationData.keySet().iterator().next();
             updateTableBasedOnQuestionSelected(currentClazzName, firstQuestionTitle, tableLayout);
 
@@ -238,12 +231,12 @@ public class ReportSELActivity extends UstadBaseActivity implements
             hLL.setOrientation(LinearLayout.HORIZONTAL);
 
             Set<String> questions = clazzNominationData.keySet();
-            for(String everyQuestion:questions){
+            for (String everyQuestion : questions) {
                 Button questionButton = new Button(this);
                 questionButton.setText(everyQuestion);
                 questionButton.setOnClickListener(v ->
                         updateTableBasedOnQuestionSelected(currentClazzName, everyQuestion,
-                        tableLayout));
+                                tableLayout));
 
                 hLL.addView(questionButton);
             }
@@ -253,33 +246,48 @@ public class ReportSELActivity extends UstadBaseActivity implements
         }
     }
 
+    /**
+     * Updates the current Clazz SEL table and updates its sel result nomination markings based
+     * on the question uid selected from the raw rel report data
+     * @param clazzName         The clazzName of the table we want to update (used to get raw data)
+     * @param questionTitle     The question title we want the table to reflect
+     * @param tableLayout       The table it self that needs updating.
+     */
     private void updateTableBasedOnQuestionSelected(String clazzName, String questionTitle,
                                                 TableLayout tableLayout){
 
-
-
         LinkedHashMap<String, Map<Long, List<Long>>> clazzNominationData = clazzMap.get(clazzName);
+        assert clazzNominationData != null;
         Map<Long, List<Long>> testFirstQuestionData = clazzNominationData.get(questionTitle);
-        Iterator<Long> qIterator = testFirstQuestionData.keySet().iterator();
-        while(qIterator.hasNext()){
-            Long nominatorUid = qIterator.next();
+        assert testFirstQuestionData != null;
+        //For every nominations in that question ..
+        for (Long nominatorUid : testFirstQuestionData.keySet()) {
             List<Long> nomineeList = testFirstQuestionData.get(nominatorUid);
-
+            // ..update the markings on the TableLayout
             processTable(nominatorUid, nomineeList, tableLayout);
         }
     }
 
+    /**
+     * Update the sel nomination ticks to the table provided for the given nominator.
+     *
+     * @param nominatorUid  The Nominator's ClazzMember Uid
+     * @param nomineeList   The Nominations (nominee List) nominated by the nominatorUid
+     *                      in a list of ClazzMember Uids
+     * @param tableLayout   The table to update the ticks/crosses for the given Nominator and
+     *                      its nominations.
+     */
     private void processTable(Long nominatorUid, List<Long> nomineeList, TableLayout tableLayout) {
 
         TableRow nominatorRow = null;
+        //Find the table Row that is marked with the Nominator Uid we want.
         for(int i=0; i<tableLayout.getChildCount(); i++){
             View child = tableLayout.getChildAt(i);
             if(child instanceof  TableRow){
-                System.out.println("table Row");
                 Long childNominatorUid = (Long) child.getTag(TAG_NOMINATOR_CLAZZMEMBER_UID);
                 if(childNominatorUid != null){
                     if(childNominatorUid.longValue() == nominatorUid.longValue()) {
-                        //Bingo
+                        //Save it for the next loop
                         nominatorRow = (TableRow) child;
                         break;
                     }
@@ -288,29 +296,52 @@ public class ReportSELActivity extends UstadBaseActivity implements
         }
 
         if(nominatorRow != null){
+            //Find all views within that nominator Row that have an id in the NomineeList
             for(int j=0;j<nominatorRow.getChildCount();j++){
                 View rowChild = nominatorRow.getChildAt(j);
                 if(rowChild instanceof ImageView){
                     Long rowChildNomineeUid = (Long) rowChild.getTag(TAG_NOMINEE_CLAZZMEMBER_UID);
                     if(rowChildNomineeUid != null){
                         if(nomineeList.contains(rowChildNomineeUid)){
+                            //If this cell is in the nominee list , change the view to be a tick!
                             ImageView nomineeImageView = (ImageView) rowChild;
                             nomineeImageView.setImageResource(R.drawable.ic_check_black_24dp);
                         }else{
+                            //if not, its a cross
                             ImageView nomineImageView = (ImageView) rowChild;
                             nomineImageView.setImageResource(R.drawable.ic_clear_black_24dp);
                         }
                     }
-
                 }
             }
         }
 
     }
 
+    /**
+     * Generates an SEL table layout view for the given Clazz Members.
+     *  ____________________________________________
+     * |SEL Heading Row ... |         |         |   |
+     * |  Nominating:       |Student 1|Student 2|...|
+     * |____________________|_________|_________|___|
+     * |Nomination Row 1..  |         |         |   |
+     * |  Student 1         |   -     |    ✓    |   |
+     * |____________________|_________|_________|___|
+     * |Nomination Row 2..  |         |         |   |
+     * |  Student 2         |   ✖     |   -     |   |
+     * |____________________|_________|_________|___|
+     * |  ...               |         |         |   |
+     * |____________________|_________|_________|___|
+     *
+     *
+     * @param clazzMembers  A list of type ClazzMemberWithPerson of all the clazz members
+     *
+     * @return  The TabLayout View with the SEL report.
+     *
+     */
     public TableLayout generateTableLayoutForClazz(List<ClazzMemberWithPerson> clazzMembers){
 
-        //LAYOUT
+        //LAYOUT Parameters
         TableRow.LayoutParams rowParams = new TableRow.LayoutParams(
                 TableRow.LayoutParams.WRAP_CONTENT, TableRow.LayoutParams.WRAP_CONTENT);
 
@@ -323,15 +354,16 @@ public class ReportSELActivity extends UstadBaseActivity implements
                 TableLayout.LayoutParams.WRAP_CONTENT, TableLayout.LayoutParams.WRAP_CONTENT);
         tableParams.setMargins(dpToPx(8), dpToPx(8), dpToPx(8), dpToPx(8));
 
+        //Create a new table layout
         TableLayout selTableLayout  = new TableLayout(getApplicationContext());
         selTableLayout.setLayoutParams(tableParams);
 
-        //SEL Table's heading
+        //SEL Table's heading row
         TableRow selTableTopRow = new TableRow(getApplicationContext());
         selTableTopRow.setLayoutParams(rowParams);
 
+        //SEL Table's nomination rows
         List<TableRow> nominationRows = new ArrayList<>();
-
 
         //SEL Table's heading's 1st item: Nominating.
         selTableTopRow.addView(getVerticalLine());
@@ -343,13 +375,13 @@ public class ReportSELActivity extends UstadBaseActivity implements
         nominatingHeading.setText(nominatingString);
 
         selTableTopRow.addView(nominatingHeading);
-
+        //Add vertical line after every item in the rows
         selTableTopRow.addView(getVerticalLine());
 
-        // Loop through every student in this Clazz and add to clazzSELTableHeading view
-        int index = 0;
+        // Loop through every student in this Clazz and add to Nominee names in the heading row.
         for(ClazzMemberWithPerson everyClazzMember:clazzMembers){
-            index++;
+
+            //Add this textview to the heading row (nominees)
             TextView aStudentTopRowTV = new TextView(getApplicationContext());
             aStudentTopRowTV.setLayoutParams(everyItemParam);
             aStudentTopRowTV.setTextSize(12);
@@ -359,54 +391,72 @@ public class ReportSELActivity extends UstadBaseActivity implements
             aStudentTopRowTV.setText(personName);
 
             selTableTopRow.addView(aStudentTopRowTV);
+            //Add vertical line every time in the rows
             selTableTopRow.addView(getVerticalLine());
 
 
-            //Create Nomination Rows:
+            //Create Nomination Rows for every clazz member (students here)
             TableRow nominationRow = new TableRow(getApplicationContext());
             nominationRow.setLayoutParams(rowParams);
 
-
+            //Add this textView as the first cell in the nomination rows
             TextView nominationRowStudentTV = new TextView(this);
             nominationRowStudentTV.setLayoutParams(everyItemParam);
             nominationRowStudentTV.setTextSize(12);
             nominationRowStudentTV.setTextColor(Color.BLACK);
             nominationRowStudentTV.setText(personName);
-            nominationRowStudentTV.setTag(TAG_NOMINATOR_CLAZZMEMBER_UID, everyClazzMember.getClazzMemberUid());
+            nominationRowStudentTV.setTag(TAG_NOMINATOR_CLAZZMEMBER_UID,
+                    everyClazzMember.getClazzMemberUid());
 
-
+            //Add vertical line between cells in the row:
             nominationRow.addView(getVerticalLine());
+            //Add the nominator name to the nominator Row.
             nominationRow.addView(nominationRowStudentTV);
+
+            //Set tags on the rows so we can find these rows when populating the sel results
             nominationRow.setTag(TAG_NOMINATOR_CLAZZMEMBER_UID, everyClazzMember.getClazzMemberUid());
             nominationRow.setTag(TAG_NOMINATOR_NAME, everyClazzMember.getPerson().getFirstNames()
                     + " " + everyClazzMember.getPerson().getLastName());
+            //vertical line after nominator name
             nominationRow.addView(getVerticalLine());
+            //Loop through All Students again to addd the default tick/cross/dash image views and
+            // assign them nominee and nominator tags (so we can alter then later)
             for(ClazzMemberWithPerson againClazzMember: clazzMembers){
                 View crossView = getCross();
                 crossView.setTag(TAG_NOMINATOR_CLAZZMEMBER_UID, everyClazzMember.getClazzMemberUid());
                 crossView.setTag(TAG_NOMINEE_CLAZZMEMBER_UID, againClazzMember.getClazzMemberUid());
                 nominationRow.addView(crossView);
-
+                //need that vertical line
                 nominationRow.addView(getVerticalLine());
             }
-
+            //All all Nominee imageview and vertical line views to the nomination rows
             nominationRows.add(nominationRow);
         }
 
+        //Table layout top horizontal line
         selTableLayout.addView(getHorizontalLine());
+        //Table layout top row
         selTableLayout.addView(selTableTopRow);
+        //another horizontal line
         selTableLayout.addView(getHorizontalLine());
 
-        //Create every nomination rows
+        //Get every nomination rows
         for(TableRow everyRow : nominationRows){
+            //..and add it to the table layout
             selTableLayout.addView(everyRow);
+            //can't forget the horizontal line
             selTableLayout.addView(getHorizontalLine());
         }
 
+        //Make it scrollable
         selTableLayout.setScrollContainer(true);
         return selTableLayout;
     }
 
+    /**
+     * Creates a new Vertical line for a table's row
+     * @return  The vertical line view.
+     */
     public View getVerticalLine(){
         //Vertical line
         TableRow.LayoutParams vLineParams =
@@ -417,6 +467,10 @@ public class ReportSELActivity extends UstadBaseActivity implements
         return vla;
     }
 
+    /**
+     * Creates a new Horizontal line for a table's row.
+     * @return  The horizontal line view.
+     */
     public View getHorizontalLine(){
         //Horizontal line
         TableRow.LayoutParams hlineParams = new TableRow.LayoutParams(
@@ -427,6 +481,10 @@ public class ReportSELActivity extends UstadBaseActivity implements
         return hl;
     }
 
+    /**
+     * Creates and returns a new tick Image View.
+     * @return  The imageview view
+     */
     public View getTick(){
         ImageView tickIV = new ImageView(this);
         tickIV.setImageResource(R.drawable.ic_check_black_24dp);
@@ -435,6 +493,10 @@ public class ReportSELActivity extends UstadBaseActivity implements
         return tickIV;
     }
 
+    /**
+     * Creates and returns a new cross/cancel/remove Image View
+     * @return  The imageview view
+     */
     public View getCross(){
         imageLP.setMargins(dpToPx(8), dpToPx(8), dpToPx(8), dpToPx(8));
         ImageView crossIV = new ImageView(this);
@@ -444,6 +506,10 @@ public class ReportSELActivity extends UstadBaseActivity implements
         return crossIV;
     }
 
+    /**
+     * Create and returns a new - (dash) ImageView
+     * @return  The imageview view
+     */
     public View getNA(){
         ImageView naIV = new ImageView(this);
         naIV.setImageResource(R.drawable.ic_remove_black_24dp);
