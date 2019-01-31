@@ -38,7 +38,7 @@ android {
 
     defaultConfig {
         applicationId "com.toughra.ustadmobile.launcher"
-        minSdkVersion 16
+        minSdkVersion rootProject.ext.version_android_min_sdk
         targetSdkVersion rootProject.ext.version_android_target_sdk
         versionCode 1
         versionName "1.0"
@@ -64,16 +64,6 @@ android {
     flavorDimensions "config"
 
     productFlavors {
-        /*
-         * The localconfig flavor is created based on the buildconfig.local.properties settings
-         */
-        localconfig {
-            dimension "config"
-            applicationId project.ext.buildConfigProperties['android.applicationId']
-            testApplicationId = project.ext.buildConfigProperties['android.applicationId'] + ".test"
-            versionCode rootProject.ext.ustadVersionCode + Integer.parseInt(rootProject.ext.buildConfigProperties['localVersionCode'])
-        }
-
         /*
          * The vanilla config flavor is here for convenience : it's the same as having no
          * buildconfig.local.properties and relying on what's in buildconfig.default.properties

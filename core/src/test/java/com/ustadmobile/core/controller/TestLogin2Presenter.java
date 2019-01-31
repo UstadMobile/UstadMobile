@@ -12,17 +12,16 @@ import com.ustadmobile.lib.db.entities.UmAccount;
 import com.ustadmobile.test.core.impl.PlatformTestUtil;
 
 import org.glassfish.grizzly.http.server.HttpServer;
-import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
-import org.glassfish.jersey.server.ResourceConfig;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import java.net.URI;
 import java.util.Hashtable;
 
+import static com.ustadmobile.test.core.util.CoreTestUtil.TEST_URI;
+import static com.ustadmobile.test.core.util.CoreTestUtil.startServer;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.timeout;
@@ -30,12 +29,9 @@ import static org.mockito.Mockito.verify;
 
 public class TestLogin2Presenter {
 
-
     UstadMobileSystemImpl mainImpl;
 
     UstadMobileSystemImpl systemImplSpy;
-
-    public static final String TEST_URI = "http://localhost:8089/api/";
 
     private HttpServer server;
 
@@ -49,11 +45,6 @@ public class TestLogin2Presenter {
 
     private Login2View mockView;
 
-    public static HttpServer startServer() {
-        final ResourceConfig resourceConfig = new ResourceConfig()
-                .packages("com.ustadmobile.core.db.dao");
-        return GrizzlyHttpServerFactory.createHttpServer(URI.create(TEST_URI), resourceConfig);
-    }
 
     @Before
     public void setUp() {

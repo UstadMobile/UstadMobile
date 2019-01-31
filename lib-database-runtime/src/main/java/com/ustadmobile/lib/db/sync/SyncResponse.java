@@ -9,7 +9,7 @@ public class SyncResponse<T> {
 
     private List<T> remoteChangedEntities;
 
-    private long syncedUpToMasterChangeSeqNum;
+    private long currentMasterChangeSeqNum;
 
     public SyncResponse() {
         assignedMasterSequenceIds = new HashMap<>();
@@ -31,11 +31,11 @@ public class SyncResponse<T> {
         this.remoteChangedEntities = remoteChangedEntities;
     }
 
-    public long getSyncedUpToMasterChangeSeqNum() {
-        return syncedUpToMasterChangeSeqNum;
+    public long getCurrentMasterChangeSeqNum() {
+        return currentMasterChangeSeqNum;
     }
 
-    public void setSyncedUpToMasterChangeSeqNum(long syncedUpToMasterChangeSeqNum) {
-        this.syncedUpToMasterChangeSeqNum = syncedUpToMasterChangeSeqNum;
+    public void setCurrentMasterChangeSeqNum(long currentMasterChangeSeqNum) {
+        this.currentMasterChangeSeqNum = currentMasterChangeSeqNum;
     }
 }

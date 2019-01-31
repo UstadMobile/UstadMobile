@@ -9,4 +9,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 
 public @interface UmUpdate {
+
+    boolean preserveLastChangedBy() default false;
+
 }

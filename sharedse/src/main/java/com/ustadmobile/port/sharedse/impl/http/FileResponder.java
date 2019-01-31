@@ -266,32 +266,7 @@ public abstract class FileResponder {
     }
 
     private static long[] parseRangeRequest(NanoHTTPD.IHTTPSession session, long totalLength) {
-        long[] range = null;
-        String header = session.getHeaders().get("range");
-        if(header != null  && header.startsWith("bytes=")) {
-            range = new long[] {0, -1};
-            header = header.substring("bytes=".length());
-            int dashPos = header.indexOf('-');
-            try {
-                if(dashPos > 0) {
-                    range[0] = Integer.parseInt(header.substring(0,dashPos));
-                }
-
-                if(dashPos == header.length()-1) {
-                    range[1] = totalLength-1;
-                }else if(dashPos > 0) {
-                    range[1] = Integer.parseInt(header.substring(dashPos+1));
-
-                }
-            }catch(NumberFormatException nfe) {
-
-            }
-            if(range[0] < 0 || range[1] > totalLength) {
-                range[0] = -1;//Error flag
-            }
-        }
-
-        return range;
+        return RangeInputStream.parseRangeRequest(session.getHeaders().get("range"), totalLength);
     }
 
 

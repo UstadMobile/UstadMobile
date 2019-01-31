@@ -31,7 +31,8 @@ public class JdbcDatabaseUtils {
     public static final String[] SUPPORTED_DB_PRODUCT_NAMES = new String[]{PRODUCT_NAME_POSTGRES,
             PRODUCT_NAME_SQLITE};
 
-    private static final Pattern POSTGRES_SELECT_IN_PATTERN = Pattern.compile("IN(\\s*)\\((\\s*)\\?(\\s*)\\)");
+    private static final Pattern POSTGRES_SELECT_IN_PATTERN = Pattern.compile("IN(\\s*)\\((\\s*)\\?(\\s*)\\)",
+            Pattern.CASE_INSENSITIVE);
 
     private static final String POSTGRES_SELECT_IN_REPLACEMENT = "IN (SELECT UNNEST(?))";
 
@@ -122,7 +123,8 @@ public class JdbcDatabaseUtils {
             if(closeable != null)
                 closeable.close();
         }catch(Exception e) {
-            e.printStackTrace();
+            //whatever it was, it was already closed (or something underlyign was closed).
+            // This method is called closeQuietly
         }
     }
 

@@ -41,3 +41,4 @@ not portable.
 Any module using lib-database must either depend on
 lib-database-entities or include a processed
 version of those classes with identical public classes and methods.
+

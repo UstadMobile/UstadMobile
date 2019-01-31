@@ -3,10 +3,10 @@ package com.ustadmobile.core.fs.contenttype;
 import com.ustadmobile.core.catalog.contenttype.EPUBTypePlugin;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.core.ocf.UstadOCF;
-import com.ustadmobile.core.ocf.UstadOCFRootFile;
-import com.ustadmobile.core.opf.UstadJSOPF;
-import com.ustadmobile.core.opf.UstadJSOPFItem;
+import com.ustadmobile.core.contentformats.epub.ocf.OcfDocument;
+import com.ustadmobile.core.contentformats.epub.ocf.OcfRootFile;
+import com.ustadmobile.core.contentformats.epub.opf.OpfDocument;
+import com.ustadmobile.core.contentformats.epub.opf.OpfItem;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.lib.db.entities.OpdsEntry;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
@@ -41,7 +41,7 @@ public class EpubTypePluginFs extends EPUBTypePlugin implements ContentTypePlugi
         try {
             ZipFile epubZip = new ZipFile(file);
 
-            UstadOCF ocf = new UstadOCF();
+            OcfDocument ocf = new OcfDocument();
             FileHeader ocfEntry = epubZip.getFileHeader(OCF_CONTAINER_PATH);
 
             if(ocfEntry == null)
@@ -53,8 +53,9 @@ public class EpubTypePluginFs extends EPUBTypePlugin implements ContentTypePlugi
             ocf.loadFromParser(xpp);
             ocfIn.close();
 
-            for(UstadOCFRootFile root : ocf.rootFiles) {
-                String url = UMFileUtil.PROTOCOL_FILE + file.getAbsolutePath() + "!" + root.fullPath;
+            for(OcfRootFile root : ocf.getRootFiles()) {
+                String url = UMFileUtil.PROTOCOL_FILE + file.getAbsolutePath() + "!" +
+                        root.getFullPath();
 
                 OpdsEntryWithRelations entry = UmAppDatabase.getInstance(context)
                         .getOpdsEntryWithRelationsDao().getEntryByUrlStatic(url);
@@ -65,10 +66,10 @@ public class EpubTypePluginFs extends EPUBTypePlugin implements ContentTypePlugi
                     entry.setUrl(url);
                 }
 
-                FileHeader opfEntry = epubZip.getFileHeader(root.fullPath);
+                FileHeader opfEntry = epubZip.getFileHeader(root.getFullPath());
                 ocfIn = epubZip.getInputStream(opfEntry);
                 xpp = UstadMobileSystemImpl.getInstance().newPullParser(ocfIn, "UTF-8");
-                UstadJSOPF opf = new UstadJSOPF();
+                OpfDocument opf = new OpfDocument();
                 opf.loadFromOPF(xpp);
                 ocfIn.close();
 
@@ -77,10 +78,10 @@ public class EpubTypePluginFs extends EPUBTypePlugin implements ContentTypePlugi
                 entry.setContent(opf.description);
                 entry.setContentType(OpdsEntry.CONTENT_TYPE_TEXT);
 
-                UstadJSOPFItem coverImageItem = opf.getCoverImage(null);
+                OpfItem coverImageItem = opf.getCoverImage(null);
                 if(coverImageItem != null) {
                     String coverImgHref = UMFileUtil.PROTOCOL_FILE + file.getAbsolutePath() + "!" +
-                            UMFileUtil.resolveLink(root.fullPath, coverImageItem.href);
+                            UMFileUtil.resolveLink(root.getFullPath(), coverImageItem.href);
                     OpdsLink coverImgLink = new OpdsLink(entry.getUuid(),
                             coverImageItem.mimeType, coverImgHref, OpdsEntry.LINK_REL_THUMBNAIL);
                     if(entry.getLinks() == null)

@@ -32,7 +32,7 @@ public class TestResumableHttpDownload {
     private static String httpRoot;
 
     private static final String TEST_RESOURCE_PATH =
-            "/com/ustadmobile/test/sharedse/thelittlechicks.epub";
+            "/com/ustadmobile/port/sharedse/networkmanager/thelittlechicks.epub";
 
     private class TestResourceInfo {
 

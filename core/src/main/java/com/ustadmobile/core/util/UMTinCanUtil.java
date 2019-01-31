@@ -30,17 +30,16 @@
  */
 package com.ustadmobile.core.util;
 
-import com.ustadmobile.core.buildconfig.CoreBuildConfig;
-import com.ustadmobile.core.controller.LoginController;
 import com.ustadmobile.core.impl.UMLog;
+import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.tincan.TinCanStatement;
+import com.ustadmobile.lib.db.entities.UmAccount;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.Hashtable;
 import java.util.Vector;
 
 /* $if umplatform == 2  $
@@ -71,8 +70,6 @@ public class UMTinCanUtil {
      * 
      * Statement ID will be the EPUB ID/pageName
      * 
-     * @param tcParent TinCan ID URL prefix e.g. http://www.ustadmobile.com/xapi/pkgid
-     * @param pageName Name of the page - e.g. intro (without .xml etc)
      * @param pageTitle Title of the page
      * @param pageLang language of the page for tincan purposes (e.g. en-US)
      * @param duration Duration viewed in ms
@@ -227,16 +224,11 @@ public class UMTinCanUtil {
      * @return JSON Object representing the currently logged in user.
      */
     public static JSONObject makeActorFromActiveUser(Object context) {
-        return UMTinCanUtil.makeActorFromUserAccount(
-                UstadMobileSystemImpl.getInstance().getActiveUser(context), 
-                getXapiServer(context));
+        UmAccount account = UmAccountManager.getActiveAccount(context);
+        return UMTinCanUtil.makeActorFromUserAccount(account.getUsername(),
+                account.getEndpointUrl());
     }
 
-    public static String getXapiServer(Object context) {
-        return UstadMobileSystemImpl.getInstance().getAppPref(
-                UstadMobileSystemImpl.PREFKEY_XAPISERVER,
-                CoreBuildConfig.DEFAULT_XAPI_SERVER, context);
-    }
 
 
     
@@ -265,23 +257,7 @@ public class UMTinCanUtil {
         
         return obj;
     }
-    
-    /**
-     * Make a hashtable with X-Experience-API-Version and Authorization HTTP
-     * header
-     * 
-     * @param context
-     * @return 
-     */
-    public static Hashtable makeXAPIHeaders(Object context) {
-        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        Hashtable ht = new Hashtable();
-        ht.put("X-Experience-API-Version", "1.0.1");
-        ht.put("Authorization", LoginController.encodeBasicAuth(
-            impl.getActiveUser(context), impl.getActiveUserAuth(context)));
-        return ht;
-    }
-    
+
     /**
      * 
      */
@@ -364,43 +340,5 @@ public class UMTinCanUtil {
         
         return null;
     }
-    
-    /**
-     * Filters a list of registrations 
-     * 
-     * @param registrations List of registrations to filter 
-     * @param keep If true all matching registrations are including, otherwise they are excluded
-     * @param srcArr Array of registrations to go through
-     * 
-     * @return JSONObject array representing statements filtered according to params
-     */
-    public static JSONObject[] filterByRegistration(String[] registrations, boolean keep, JSONObject[] srcArr) {
-        Vector results = new Vector();
-        String stmtRegistration;
-        int j;
-        for(int i = 0; i < srcArr.length; i++) {
-            stmtRegistration = getStatementRegistration(srcArr[i]);
-            boolean match = false;
-            if(stmtRegistration != null) {
-                for(j = 0; j < registrations.length && !match; j++) {
-                    match = registrations[i].equals(stmtRegistration);
-                }
-            }
-            
-            if(match && keep) {
-                results.addElement(srcArr[i]);
-            }else if(!match && !keep) {
-                results.addElement(srcArr[i]);
-            }
-            
-        }
-        
-        JSONObject[] resultStmts = new JSONObject[results.size()];
-        results.copyInto(resultStmts);
-        return resultStmts;
-    }
-    
-
-    
     
 }

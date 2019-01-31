@@ -5,8 +5,6 @@ import com.ustadmobile.core.catalog.contenttype.EPUBTypePlugin;
 import com.ustadmobile.core.impl.ContainerMountRequest;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UmCallback;
-import com.ustadmobile.core.opds.db.UmOpdsDbManager;
-import com.ustadmobile.core.tincan.TinCanResultListener;
 import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
@@ -24,8 +22,6 @@ import java.net.URLConnection;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.Properties;
-import java.util.Set;
 
 /**
  * Created by mike on 4/25/17.
@@ -116,16 +112,6 @@ public class UstadMobileSystemImplTest extends UstadMobileSystemImplSE {
     }
 
     @Override
-    public boolean loadActiveUserInfo(Object context) {
-        return false;
-    }
-
-    @Override
-    public String getImplementationName() {
-        return "Test";
-    }
-
-    @Override
     public String getSharedContentDir(Object context) {
         return testSystemBaseDir.getAbsolutePath();
     }
@@ -135,65 +121,11 @@ public class UstadMobileSystemImplTest extends UstadMobileSystemImplSE {
         return null;
     }
 
-    @Override
-    public Hashtable getSystemInfo() {
-        return null;
-    }
 
-    @Override
-    public int[] getFileDownloadStatus(String downloadID, Object context) {
-        return new int[0];
-    }
-
-
-    @Override
-    public String getActiveUser(Object context) {
-        return null;
-    }
-
-    @Override
-    public void setActiveUserAuth(String password, Object context) {
-
-    }
-
-    @Override
-    public String getActiveUserAuth(Object context) {
-        return null;
-    }
-
-    @Override
-    public void setUserPref(String key, String value, Object context) {
-
-    }
-
-    @Override
-    public String getUserPref(String key, Object context) {
-        return null;
-    }
-
-    @Override
-    public String[] getUserPrefKeyList(Object context) {
-        return new String[0];
-    }
-
-    @Override
-    public void saveUserPrefs(Object context) {
-
-    }
 
     @Override
     public String getAppPref(String key, Object context) {
         return ((TestContext)context).getAppProps().getProperty(key);
-    }
-
-    @Override
-    public String[] getAppPrefKeyList(Object context) {
-        Properties appProps = ((TestContext)context).getAppProps();
-        Set keySet = appProps.keySet();
-        String[] propNames = new String[keySet.size()];
-        keySet.toArray(propNames);
-
-         return propNames;
     }
 
     @Override
@@ -218,18 +150,8 @@ public class UstadMobileSystemImplTest extends UstadMobileSystemImplSE {
     }
 
     @Override
-    public String getUMProfileName() {
-        return null;
-    }
-
-    @Override
     public String getMimeTypeFromExtension(String extension) {
         return null;
-    }
-
-    @Override
-    public void getResumableRegistrations(String activityId, Object context, TinCanResultListener listener) {
-
     }
 
     @Override
@@ -256,12 +178,17 @@ public class UstadMobileSystemImplTest extends UstadMobileSystemImplSE {
 
     @Override
     public void getAsset(Object context, String path, UmCallback<InputStream> callback) {
-
+        InputStream inputStream = getClass().getResourceAsStream(path);
+        if(inputStream != null){
+            callback.onSuccess(inputStream);
+        }else{
+            callback.onFailure(new NullPointerException("Input stream is null, probably "+path+" doesn't exist"));
+        }
     }
 
     @Override
     public InputStream getAssetSync(Object context, String path) throws IOException {
-        return null;
+        return getClass().getResourceAsStream(path);
     }
 
     @Override
