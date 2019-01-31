@@ -88,8 +88,4 @@ public class ScormPackagePresenter extends UstadBaseController {
                 zipMountedCallback);
     }
 
-    @Override
-    public void setUIStrings() {
-
-    }
 }

@@ -5,7 +5,6 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -23,14 +22,10 @@ import android.widget.Button;
 import android.widget.CheckBox;
 
 import com.toughra.ustadmobile.R;
-import com.ustadmobile.core.controller.BaseCatalogPresenter;
 import com.ustadmobile.core.controller.BasePointController;
-import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.BasePointMenuItem;
 import com.ustadmobile.core.view.BasePointView;
-import com.ustadmobile.core.view.DialogResultListener;
-import com.ustadmobile.core.view.DismissableDialog;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.util.ArrayList;
@@ -39,9 +34,8 @@ import java.util.WeakHashMap;
 
 
 public class BasePointActivity extends UstadBaseActivity implements BasePointView,
-        NavigationView.OnNavigationItemSelectedListener, DialogResultListener,
-        View.OnClickListener, TabLayout.OnTabSelectedListener,
-        CatalogOPDSFragment.CatalogOPDSFragmentListener{
+        NavigationView.OnNavigationItemSelectedListener,
+        View.OnClickListener, TabLayout.OnTabSelectedListener {
 
     protected BasePointController mBasePointController;
 
@@ -81,7 +75,9 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
                 "recreate-" + BasePointController.ARG_WELCOME_SCREEN_DISPLAYED, this);
 
         /*
-         * When recreate is manually called (e.g. in-app locale change) onSaveInstanceState is not
+         * When
+    private Timer sendStatementsTimer;
+recreate is manually called (e.g. in-app locale change) onSaveInstanceState is not
          * called by Android. Thus we look for a manually saved state.
          */
         if(recreateWelcomeVal != null) {
@@ -225,11 +221,6 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
     }
 
     @Override
-    public void onDialogResult(int commandId, DismissableDialog dialog, Hashtable args) {
-        mBasePointController.onDialogResult(commandId, dialog, args);
-    }
-
-    @Override
     public void setClassListVisible(boolean visible) {
         this.classListVisible= visible;
     }
@@ -257,40 +248,10 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
 
     @Override
     public void onTabSelected(TabLayout.Tab tab) {
-        Fragment selectedFragment = mPagerAdapter.getItem(tab.getPosition());
 
-        if(selectedFragment instanceof CatalogOPDSFragment) {
-            //set the filter options
-            filterOptionsUpdated((CatalogOPDSFragment)selectedFragment);
-            updateAddFabVisibility((CatalogOPDSFragment)selectedFragment);
-        }
     }
 
-    @Override
-    public void filterOptionsUpdated(CatalogOPDSFragment catalogFragment) {
-        Fragment selectedFragment = mPagerAdapter.getItem(mTabLayout.getSelectedTabPosition());
-        Fragment fromFragment = catalogFragment;
-        boolean sameFrag = selectedFragment.equals(fromFragment);
-        if(catalogFragment.equals(mPagerAdapter.getItem(mTabLayout.getSelectedTabPosition()))) {
-            //this is an update to the currently selected tab - show it.
-            ((OpdsFilterBar)findViewById(R.id.activity_basepoint_filterbar)).setFilterOptions(
-                    catalogFragment.getFilterOptions());
-        }
-    }
 
-    @Override
-    public void updateAddFabVisibility(CatalogOPDSFragment catalogFragment) {
-        Fragment currentFragment = mPagerAdapter.getItem(mTabLayout.getSelectedTabPosition());
-        if(catalogFragment.equals(currentFragment)) {
-            FloatingActionButton fab = (FloatingActionButton)findViewById(R.id.activity_basepoint_fab);
-            boolean showFab = catalogFragment.isAddOptionAvailable();
-            if(fab.isShown() && !showFab) {
-                fab.hide();
-            }else if(!fab.isShown() && showFab) {
-                fab.show();
-            }
-        }
-    }
 
     @Override
     public void onTabUnselected(TabLayout.Tab tab) {
@@ -322,12 +283,13 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
         @Override
         public Fragment getItem(int position) {
             Fragment fragment = fragmentMap.get(position);
-            if(fragment == null) {
-                fragment = CatalogOPDSFragment.newInstance(UMAndroidUtil.hashtableToBundle(
-                        tabArgumentsList.get(position)));
-
-                fragmentMap.put(position, fragment);
-            }
+//            this basepoint itself will be removed
+//            if(fragment == null) {
+//                fragment = CatalogOPDSFragment.newInstance(UMAndroidUtil.hashtableToBundle(
+//                        tabArgumentsList.get(position)));
+//
+//                fragmentMap.put(position, fragment);
+//            }
 
             return fragment;
         }
@@ -339,16 +301,6 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
 
         @Override
         public CharSequence getPageTitle(int position) {
-            Object titleObj = tabArgumentsList.get(position).get(BaseCatalogPresenter.ARG_TITLE);
-            if(titleObj != null) {
-                try {
-                    int messageCode = Integer.parseInt((String)titleObj);
-                    return UstadMobileSystemImpl.getInstance().getString(messageCode,
-                            BasePointActivity.this);
-                }catch(NumberFormatException e) {
-                    UstadMobileSystemImpl.l(UMLog.ERROR, 681, titleObj.toString(), e);
-                }
-            }
 
             return "Tab " + position;
         }
@@ -376,12 +328,7 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
 
     @Override
     public void onClick(View view) {
-        if(view.getId() == R.id.activity_basepoint_fab) {
-            Fragment currentFrag = mPagerAdapter.getItem(mTabLayout.getSelectedTabPosition());
-            if(currentFrag instanceof CatalogOPDSFragment) {
-                ((CatalogOPDSFragment)currentFrag).onClick(view);
-            }
-        }else {
+        if(view.getId() != R.id.activity_basepoint_fab) {
             CheckBox zipCheckbox = shareAppDialog.findViewById(R.id.fragment_share_app_zip_checkbox);
             mBasePointController.handleClickConfirmShareApp(zipCheckbox.isChecked());
         }

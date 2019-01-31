@@ -16,10 +16,6 @@ public class OnBoardingPresenter extends UstadBaseController<OnBoardingView> {
         view.runOnUiThread(() -> view.setScreenList());
     }
 
-    @Override
-    public void setUIStrings() {
-
-    }
 
     public void handleGetStarted(){
 

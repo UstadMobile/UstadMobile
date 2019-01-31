@@ -28,13 +28,14 @@ public class OnBoardingActivity extends AppCompatActivity implements OnBoardingV
     private  ViewPager viewPager;
 
     /**
-     * Model for the onboarding screen
+     * Model for the the onboarding screen
      */
     private enum OnBoardScreen {
 
-        SCREEN_1(R.string.about,R.string.about,R.layout.onboard_screen_view),
-        SCREEN_2(R.string.about,R.string.about,R.layout.onboard_screen_view),
-        SCREEN_3(R.string.about,R.string.about,R.layout.onboard_screen_view);
+        SCREEN_1(R.string.onboarding_no_internet_headline,R.string.onboarding_no_internet_subheadline
+                ,R.layout.onboard_screen_view),
+        SCREEN_2(R.string.onboarding_offline_sharing,R.string.onboarding_offline_sharing_subheading,
+                R.layout.onboard_screen_view);
 
         private int headlineStringResId;
 
@@ -145,25 +146,5 @@ public class OnBoardingActivity extends AppCompatActivity implements OnBoardingV
     @Override
     public Object getContext() {
         return this;
-    }
-
-    @Override
-    public int getDirection() {
-        return 0;
-    }
-
-    @Override
-    public void setDirection(int dir) {
-
-    }
-
-    @Override
-    public void setAppMenuCommands(String[] labels, int[] ids) {
-
-    }
-
-    @Override
-    public void setUIStrings() {
-
     }
 }

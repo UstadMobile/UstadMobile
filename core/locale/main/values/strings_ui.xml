@@ -6,6 +6,9 @@
     <string name='error'>Error</string>
     <string name='err_registering_new_user'>Error registering new user:</string>
     <string name='registering'>Registering</string>
+    <string name="register_empty_fields">Please fill out all required fields</string>
+    <string name="register_incorrect_email">Wrong email address</string>
+
     <string name='wrong_user_pass_combo'>Wrong username/password: try again.</string>
     <string name='login_network_error'>Network error: please check you are online.</string>
     <string name='authenticating'>Authenticating</string>
@@ -228,6 +231,8 @@
     <!-- Registration dialog feedback -->
     <string name="field_required_prompt">This field is required</string>
     <string name="field_password_min">Minimum 5 characters</string>
+    <string name="field_password_error_min">Password should be at least 5 characters</string>
+    <string name="filed_password_no_match">Password doesn\'t match, try again</string>
 
     <!-- Update student details action button -->
     <string name="update">Update</string>
@@ -248,6 +253,10 @@
     <string name="also_available_in">Also available in</string>
 
     <string name="content_entry_not_found">ContentEntry Not Found</string>
-    <string name="get_started_label">Get Started</string>
+    <string name="onboarding_get_started_label">Get Started</string>
+    <string name="onboarding_no_internet_headline">No Internet? No problem.</string>
+    <string name="onboarding_no_internet_subheadline">Download educational videos, articles and interactive exercises for later use. </string>
+    <string name="onboarding_offline_sharing">Share offline</string>
+    <string name="onboarding_offline_sharing_subheading">Share content at high speed with any other user nearby.</string>
 
 </resources>

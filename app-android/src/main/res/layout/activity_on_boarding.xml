@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/primary"
+    android:background="@color/icons"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:attrs="http://schemas.android.com/apk/res-auto"
     tools:context="com.ustadmobile.port.android.view.OnBoardingActivity">
@@ -13,11 +13,22 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 
+    <ImageView
+        android:src="@drawable/launcher_icon"
+        android:layout_alignParentEnd="true"
+        android:layout_margin="@dimen/dimen_20dp"
+        android:layout_width="50dp"
+        android:layout_height="50dp" />
+
     <Button
-        android:paddingStart="@dimen/dimen_16dp"
-        android:paddingEnd="@dimen/dimen_16dp"
+        android:elevation="@dimen/dimen_2dp"
+        android:background="@android:color/white"
+        android:paddingStart="@dimen/dimen_20dp"
+        android:paddingEnd="@dimen/dimen_20dp"
+        android:textSize="@dimen/text_body"
+        android:textColor="@color/primary_dark"
         android:id="@+id/get_started_btn"
-        android:text="@string/get_started_label"
+        android:text="@string/onboarding_get_started_label"
         android:layout_marginBottom="@dimen/dimen_24dp"
         android:layout_centerHorizontal="true"
         android:layout_above="@+id/pageIndicatorView"
@@ -34,7 +45,7 @@
         app:piv_animationType="scale"
         app:piv_dynamicCount="true"
         app:piv_interactiveAnimation="true"
-        app:piv_selectedColor="@color/accent"
+        app:piv_selectedColor="@color/primary_dark"
         app:piv_unselectedColor="@color/primary_light"
         app:piv_viewPager="@id/onBoardPagerView"
         attrs:piv_padding="12dp"

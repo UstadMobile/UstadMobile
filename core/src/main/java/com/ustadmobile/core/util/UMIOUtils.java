@@ -32,9 +32,7 @@
 package com.ustadmobile.core.util;
 
 import com.ustadmobile.core.impl.UMLog;
-import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.core.impl.ZipFileHandle;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -218,30 +216,23 @@ public class UMIOUtils {
             throw e;
         }
     }
-    
-    /**
-     * Tests to see if it is possible to make a child file in the given directory
-     * by creating a small text file called umtestfile.txt with the content "OK"
-     * 
-     * This might be needed when fileconnection.canWrite returns an incorrect 
-     * value for whether or not the directory itself is writable for files.
-     * 
-     * @param dirURI Directory to test
-     * @return true if possible to create child files, false otherwise
-     */
-    public static boolean canWriteChildFile(String dirURI) {
-        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        boolean canWriteChild = false;
-        try {
-            String childFileURI = UMFileUtil.joinPaths(new String[] {dirURI,
-                "umtestfile.txt"});
-            impl.writeStringToFile("OK", childFileURI, UstadMobileConstants.UTF8);
-            canWriteChild = true;
-            impl.removeFile(childFileURI);
-        }catch(Exception e) {
-            UstadMobileSystemImpl.l(UMLog.INFO, 353, dirURI);
+
+    public static String sanitizeIDForFilename(String id) {
+        char c;
+        int len = id.length();
+        StringBuffer retVal = new StringBuffer();
+        for(int i = 0; i < len; i++) {
+            c = id.charAt(i);
+            if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '.' || c == '-' || c == '*' || c == '_') {
+                retVal.append(c);
+            }else if(c == ' ' || c == '\t' || c == '\n'){
+                retVal.append('_');
+            }else {
+                retVal.append("_").append(Integer.toHexString((int)c));
+            }
         }
-        return canWriteChild;
+        return retVal.toString();
     }
-    
+
+
 }

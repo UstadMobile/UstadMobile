@@ -32,7 +32,6 @@
 package com.ustadmobile.port.android.impl;
 
 import android.app.Activity;
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -56,10 +55,7 @@ import android.webkit.WebView;
 import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
-import com.ustadmobile.core.buildconfig.CoreBuildConfig;
 import com.ustadmobile.core.catalog.contenttype.*;
-import com.ustadmobile.core.controller.CatalogPresenter;
-import com.ustadmobile.core.controller.UserSettingsController;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.OpdsEntryStatusCacheDao;
 import com.ustadmobile.core.fs.contenttype.EpubTypePluginFs;
@@ -67,33 +63,25 @@ import com.ustadmobile.core.fs.contenttype.H5PContentTypeFs;
 import com.ustadmobile.core.fs.contenttype.ScormTypePluginFs;
 import com.ustadmobile.core.fs.contenttype.XapiPackageTypePluginFs;
 import com.ustadmobile.core.fs.db.ContainerFileHelper;
+import com.ustadmobile.core.impl.AppConfig;
 import com.ustadmobile.core.impl.ContainerMountRequest;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.core.tincan.TinCanResultListener;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.view.AboutView;
-import com.ustadmobile.core.view.AddFeedDialogView;
 import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.core.view.BasePointView;
-import com.ustadmobile.core.view.CatalogEntryView;
-import com.ustadmobile.core.view.CatalogView;
 import com.ustadmobile.core.view.ContainerView;
 import com.ustadmobile.core.view.ContentEntryDetailView;
 import com.ustadmobile.core.view.ContentEntryView;
 import com.ustadmobile.core.view.DummyView;
 import com.ustadmobile.core.view.H5PContentView;
-import com.ustadmobile.core.view.LoginView;
 import com.ustadmobile.core.view.OnBoardingView;
-import com.ustadmobile.core.view.RegistrationView;
+import com.ustadmobile.core.view.Login2View;
+import com.ustadmobile.core.view.Register2View;
 import com.ustadmobile.core.view.ScormPackageView;
-import com.ustadmobile.core.view.SettingsDataSyncListView;
-import com.ustadmobile.core.view.SettingsDataUsageView;
-import com.ustadmobile.core.view.UserSettingsView;
-import com.ustadmobile.core.view.UserSettingsView2;
-import com.ustadmobile.core.view.WelcomeView;
 import com.ustadmobile.core.view.XapiPackageView;
 import com.ustadmobile.port.android.generated.MessageIDMap;
 import com.ustadmobile.port.android.impl.http.UmHttpCachePicassoRequestHandler;
@@ -114,16 +102,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
-import java.text.Format;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Timer;
 import java.util.WeakHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -138,19 +122,13 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
 
     public static final String TAG = "UstadMobileImplAndroid";
 
-    public static final String PREFS_NAME = "ustadmobilePreferences";
-
     public static final String APP_PREFERENCES_NAME = "UMAPP-PREFERENCES";
-
-    public static final String USER_PREFERENCES_NAME  = "user-";
-
-    public static final String KEY_CURRENTUSER = "app-currentuser";
-
-    public static final String KEY_CURRENTAUTH = "app-currentauth";
 
     public static final String TAG_DIALOG_FRAGMENT = "UMDialogFrag";
 
     public static final String ACTION_LOCALE_CHANGE = "com.ustadmobile.locale_change";
+
+    public static final String PREFKEY_LANG = "lang";
 
     /**
      * Map of view names to the activity class that is implementing them on Android
@@ -162,25 +140,13 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
     private boolean initRan = false;
 
     static {
-
-        viewNameToAndroidImplMap.put(LoginView.VIEW_NAME, LoginDialogFragment.class);
+        viewNameToAndroidImplMap.put(Login2View.VIEW_NAME, Login2Activity.class);
         viewNameToAndroidImplMap.put(ContainerView.VIEW_NAME, ContainerActivity.class);
-        viewNameToAndroidImplMap.put(CatalogView.VIEW_NAME, CatalogActivity.class);
-        viewNameToAndroidImplMap.put(UserSettingsView.VIEW_NAME, UserSettingsActivity.class);
-        viewNameToAndroidImplMap.put(SettingsDataUsageView.VIEW_NAME, SettingsDataUsageActivity.class);
-        viewNameToAndroidImplMap.put(SettingsDataSyncListView.VIEW_NAME, SettingsDataSyncListActivity.class);
-        //Account settings:
-        //viewNameToAndroidImplMap.put(AccountSettingsView.VIEW_NAME, AccountSettingsActivity.class);
         viewNameToAndroidImplMap.put(BasePointView.VIEW_NAME, BasePointActivity.class);
         viewNameToAndroidImplMap.put(AboutView.VIEW_NAME, AboutActivity.class);
-        viewNameToAndroidImplMap.put(CatalogEntryView.VIEW_NAME, CatalogEntryActivity.class);
-        viewNameToAndroidImplMap.put(UserSettingsView2.VIEW_NAME, UserSettingsActivity2.class);
-        viewNameToAndroidImplMap.put(WelcomeView.VIEW_NAME, WelcomeDialogFragment.class);
-        viewNameToAndroidImplMap.put(RegistrationView.VIEW_NAME, RegistrationDialogFragment.class);
         viewNameToAndroidImplMap.put(SendCourseView.VIEW_NAME, SendCourseDialogFragment.class);
         viewNameToAndroidImplMap.put(ReceiveCourseView.VIEW_NAME, ReceiveCourseDialogFragment.class);
         viewNameToAndroidImplMap.put(XapiPackageView.VIEW_NAME, XapiPackageActivity.class);
-        viewNameToAndroidImplMap.put(AddFeedDialogView.VIEW_NAME, AddFeedDialogFragment.class);
         viewNameToAndroidImplMap.put(ScormPackageView.VIEW_NAME, ScormPackageActivity.class);
         viewNameToAndroidImplMap.put(H5PContentView.VIEW_NAME, H5PContentActivity.class);
         viewNameToAndroidImplMap.put(DownloadDialogView.VIEW_NAME, DownloadDialogFragment.class);
@@ -188,6 +154,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         viewNameToAndroidImplMap.put(ContentEntryDetailView.VIEW_NAME, ContentEntryDetailActivity.class);
         viewNameToAndroidImplMap.put(DummyView.VIEW_NAME, DummyActivity.class);
         viewNameToAndroidImplMap.put(OnBoardingView.VIEW_NAME, OnBoardingActivity.class);
+        viewNameToAndroidImplMap.put(Register2View.VIEW_NAME, Register2Activity.class);
     }
 
     /**
@@ -197,30 +164,16 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
      * @param viewName A unique name e.g. as per the view interface VIEW_NAME
      * @param implementingClass The Activity or Fragment class that implements this view on Android
      */
+    @SuppressWarnings("unused")
     public static void mapView(String viewName, Class implementingClass) {
         viewNameToAndroidImplMap.put(viewName, implementingClass);
     }
 
-
-    private String currentUsername;
-
-    private String currentAuth;
-
     private SharedPreferences appPreferences;
-
-    private SharedPreferences userPreferences;
-
-    private SharedPreferences.Editor userPreferencesEditor;
 
     private UMLogAndroid logger;
 
-    public static final String START_USERNAME = "START_USERNAME";
-
-    public static final String START_AUTH = "START_AUTH";
-
     private WeakHashMap<Context, AppViewAndroid> appViews;
-
-    private Timer sendStatementsTimer;
 
     private static final ContentTypePlugin[] SUPPORTED_CONTENT_TYPES = new ContentTypePlugin[] {
             new EpubTypePluginFs(), new ScormTypePluginFs(), new XapiPackageTypePluginFs(),
@@ -323,8 +276,14 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
 
         @Override
         protected String doInBackground(Boolean... booleans) {
-            File apkFile = new File(((Context)context).getApplicationInfo().sourceDir);
-            String baseName = CoreBuildConfig.BASE_NAME + "-" + CoreBuildConfig.VERSION;
+            File apkFile = new File(context.getApplicationInfo().sourceDir);
+            //TODO: replace this with something from appconfig.properties
+            UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+
+            String baseName = impl.getAppConfigString(AppConfig.KEY_APP_BASE_NAME, "", context)+ "-" +
+                    impl.getVersion(context);
+
+
             FileInputStream apkFileIn = null;
             Context ctx = (Context)context;
             File outDir = new File(ctx.getFilesDir(), "shared");
@@ -373,7 +332,6 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
     protected NetworkManagerAndroid networkManagerAndroid;
 
     /**
-     @deprecated
      */
     public UstadMobileSystemImplAndroid() {
         logger = new UMLogAndroid();
@@ -429,7 +387,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
     public void setLocale(String locale, Object context) {
         super.setLocale(locale, context);
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences((Context)context);
-        prefs.edit().putString(UserSettingsController.PREFKEY_LANG, locale).apply();
+        prefs.edit().putString(PREFKEY_LANG, locale).apply();
     }
 
     @Override
@@ -437,7 +395,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         String locale = super.getLocale(context);
         if(locale == null) {
             locale = PreferenceManager.getDefaultSharedPreferences((Context)context).getString(
-                    UserSettingsController.PREFKEY_LANG, "");
+                    PREFKEY_LANG, "");
             super.setLocale(locale, context);
         }
 
@@ -452,25 +410,6 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         }else {
             return null;
         }
-    }
-
-    @Override
-    public boolean loadActiveUserInfo(Object context) {
-        SharedPreferences appPrefs = getAppSharedPreferences((Context)context);
-        currentUsername = appPrefs.getString(KEY_CURRENTUSER, null);
-        currentAuth = appPrefs.getString(KEY_CURRENTAUTH, null);
-        if(currentUsername != null) {
-//            TODO: Handle users ROOM ORM style
-//            xapiAgent = XapiAgentEndpoint.createOrUpdate(context, null, currentUsername,
-//                    UMTinCanUtil.getXapiServer(context));
-        }
-        this.userPreferences = null;
-        return true;
-    }
-
-    @Override
-    public String getImplementationName() {
-        return null;
     }
 
 
@@ -562,11 +501,8 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
     public String getCacheDir(int mode, Object context) {
         Context ctx = (Context)context;
         File cacheDir = ctx.getCacheDir();
-        if(mode == CatalogPresenter.SHARED_RESOURCE) {
-            return cacheDir.getAbsolutePath();
-        }else {
-            return new File(cacheDir, "user-" + getActiveUser(context)).getAbsolutePath();
-        }
+        return cacheDir.getAbsolutePath();
+
     }
 
     /**
@@ -610,15 +546,6 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
     }
 
 
-
-    @Override
-    public Hashtable getSystemInfo() {
-        Hashtable ht = new Hashtable();
-        ht.put("os", "Android");
-        ht.put("osversion", Build.VERSION.RELEASE);
-
-        return ht;
-    }
 
 
     public URLConnection openConnection(URL url) throws IOException{
@@ -668,11 +595,6 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         return ((Context)context).getAssets().open(path);
     }
 
-    @Override
-    public int[] getFileDownloadStatus(String downloadID, Object context) {
-        return new int[3];
-    }
-
 
     private SharedPreferences getAppSharedPreferences(Context context) {
         if(appPreferences == null) {
@@ -680,111 +602,6 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
                     Context.MODE_PRIVATE);
         }
         return appPreferences;
-    }
-
-    private SharedPreferences getUserPreferences(Context context) {
-        if(currentUsername != null) {
-            if(userPreferences == null) {
-                userPreferences = context.getSharedPreferences(USER_PREFERENCES_NAME +
-                        currentUsername, Context.MODE_PRIVATE);
-                Log.d(TAG, "Opening preferences for user: " + currentUsername);
-            }
-            return userPreferences;
-        }else {
-            return null;
-        }
-    }
-
-    @Override
-    public void setActiveUser(String username, Object context) {
-        this.currentUsername = username;
-
-        super.setActiveUser(username, context);
-        saveUserPrefs(context);
-        SharedPreferences appPreferences = getAppSharedPreferences((Context)context);
-        SharedPreferences.Editor editor = appPreferences.edit();
-        if(username != null) {
-            editor.putString(KEY_CURRENTUSER, username);
-        }else {
-            editor.remove(KEY_CURRENTUSER);
-        }
-        editor.commit();
-
-
-        this.userPreferences = null;
-
-    }
-
-    @Override
-    public String getActiveUser(Object context) {
-        return currentUsername;
-    }
-
-    @Override
-    public void setActiveUserAuth(String auth, Object context) {
-        setAppPref(KEY_CURRENTAUTH, auth, context);
-        this.currentAuth = auth;
-    }
-
-    @Override
-    public String getActiveUserAuth(Object context) {
-        return this.currentAuth;
-    }
-
-    @Override
-    public void setUserPref(String key, String value, Object context) {
-        if(userPreferencesEditor == null) {
-            userPreferencesEditor = getUserPreferences((Context)context).edit();
-        }
-        if(value != null) {
-            userPreferencesEditor.putString(key, value);
-        }else {
-            userPreferencesEditor.remove(key);
-        }
-
-        userPreferencesEditor.commit();
-    }
-
-    @Override
-    public String getUserPref(String key, Object context) {
-        return currentUsername != null ? getUserPreferences((Context)context).getString(key, null) : null;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    @Override
-    public String[] getAppPrefKeyList(Object context) {
-        return getKeysFromSharedPreferences(getAppSharedPreferences((Context) context));
-    }
-
-
-    /**
-     * @inheritDoc
-     */
-    @Override
-    public String[] getUserPrefKeyList(Object context) {
-        return getKeysFromSharedPreferences(getUserPreferences((Context) context));
-    }
-
-    /**
-     * Private utility function to get a String array of keys from a SharedPreferences object
-     * @param prefs
-     * @return
-     */
-    private String[] getKeysFromSharedPreferences(SharedPreferences prefs) {
-        Set keySet = prefs.getAll().keySet();
-        String[] retVal = new String[keySet.size()];
-        keySet.toArray(retVal);
-        return retVal;
-    }
-
-    @Override
-    public void saveUserPrefs(Object context) {
-        if(userPreferencesEditor != null) {
-            userPreferencesEditor.commit();
-            userPreferencesEditor = null;
-        }
     }
 
     @Override
@@ -828,17 +645,6 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
     }
 
 
-    /**
-     * Running on Android we will take the "full fat" version of any files... eg. files without
-     * a x-umprofile tag
-     *
-     * @return
-     */
-    @Override
-    public String getUMProfileName() {
-        return null;
-    }
-
     @Override
     public String getMimeTypeFromExtension(String extension) {
         String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
@@ -859,11 +665,6 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         }
     }
 
-    @Override
-    public void getResumableRegistrations(final String activityId, final Object context, final TinCanResultListener listener)  {
-        //removed
-        listener.resultReady(null);
-    }
 
     @Override
     public String getVersion(Object ctx) {
@@ -951,13 +752,6 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
                 callback.onSuccess(mountedPath);
             }
         }.execute();
-    }
-
-    @Override
-    public String convertTimeToReadableTime(long time) {
-        Date date = new Date(time);
-        Format format = new SimpleDateFormat("yyyy MM dd HH:mm:ss");
-        return format.format(date);
     }
 
     @Override

@@ -5,7 +5,6 @@
       <module fileurl="file://$PROJECT_DIR$/UstadMobile.iml" filepath="$PROJECT_DIR$/UstadMobile.iml" />
       <module fileurl="file://$PROJECT_DIR$/app-android/app-android.iml" filepath="$PROJECT_DIR$/app-android/app-android.iml" />
       <module fileurl="file://$PROJECT_DIR$/app-android-launcher/app-android-launcher.iml" filepath="$PROJECT_DIR$/app-android-launcher/app-android-launcher.iml" />
-      <module fileurl="file://$PROJECT_DIR$/app-android-testserver/app-android-testserver.iml" filepath="$PROJECT_DIR$/app-android-testserver/app-android-testserver.iml" />
       <module fileurl="file://$PROJECT_DIR$/app-javase/app-javase.iml" filepath="$PROJECT_DIR$/app-javase/app-javase.iml" />
       <module fileurl="file://$PROJECT_DIR$/app-rest-server/app-rest-server.iml" filepath="$PROJECT_DIR$/app-rest-server/app-rest-server.iml" />
       <module fileurl="file://$PROJECT_DIR$/core/core.iml" filepath="$PROJECT_DIR$/core/core.iml" />

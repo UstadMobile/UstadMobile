@@ -7,7 +7,8 @@ import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.db.entities.PersonCustomField;
 import com.ustadmobile.lib.db.sync.dao.BaseDao;
 
-@UmDao
+@UmDao(insertPermissionCondition = RoleDao.SELECT_ACCOUNT_IS_ADMIN,
+updatePermissionCondition = RoleDao.SELECT_ACCOUNT_IS_ADMIN)
 public abstract class PersonCustomFieldDao implements BaseDao<PersonCustomField> {
 
     @UmInsert

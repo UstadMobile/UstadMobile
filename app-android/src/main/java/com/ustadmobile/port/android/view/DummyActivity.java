@@ -14,7 +14,6 @@ public class DummyActivity extends UstadBaseActivity implements DummyView {
         setContentView(R.layout.activity_entry_list);
 
         setUMToolbar(R.id.entry_toolbar);
-        setDirectionFromSystem();
 
         ContentLibraryViewPagerFragment currentFrag = new ContentLibraryViewPagerFragment();
         if (savedInstanceState == null) {

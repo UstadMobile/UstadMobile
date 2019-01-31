@@ -31,154 +31,34 @@ if (project.file("buildconfig.local.properties").exists()) {
     ext.buildConfigProperties.load(new FileInputStream(project.file("buildconfig.local.properties")))
 }
 
-task startTestSlaveServer(type: Exec) {
-    def adb = android.getAdbExe().getAbsolutePath()
-    doFirst {
-        //Install test slave variant app on the device with the test slave serial
-        exec {
-            commandLine "$adb", '-s', (String) project.ext.buildConfigProperties['test.remote_slave_server_serial'], 'install', '-r', "$projectDir/build/outputs/apk/app-android-remotetestslave-debug.apk"
-        }
-        //Copy the epub expected to be presetned on the test slave device for testing with p2p transfers
-        exec {
-            commandLine "$adb", '-s', (String) project.ext.buildConfigProperties['test.remote_slave_server_serial'], 'push', "$projectDir/../sharedse-tests/src/main/resources/com/ustadmobile/test/sharedse/thelittlechicks.epub", "/sdcard/ustadMobileContent/"
-        }
-
-        //Get the bluetooth address of the remote test slave server
-        def btAddrStdOut = new ByteArrayOutputStream()
-        exec {
-            commandLine "$adb", '-s', (String) project.ext.buildConfigProperties['test.remote_slave_server_serial'], "shell", "settings", "get", "secure", "bluetooth_address"
-            standardOutput = btAddrStdOut
-        }
-
-        //Get the ip address of teh remote test slave server
-        def ipAddrStdOut = new ByteArrayOutputStream()
-        exec {
-            commandLine "$adb", "-s", (String) project.ext.buildConfigProperties['test.remote_slave_server_serial'], "shell", "ip", "route"
-            standardOutput = ipAddrStdOut
-        }
-
-        //Get the wifi direct mac address
-        def macAddrStdOut = new ByteArrayOutputStream()
-        exec {
-            commandLine "$adb", "-s", (String) project.ext.buildConfigProperties['test.remote_slave_server_serial'], "shell", "ip", "addr", "show"
-            standardOutput = macAddrStdOut
-        }
-
-        String ipAddr = null
-        String[] ipAddrLines = ipAddrStdOut.toString().split("\n")
-        for (int i = 0; i < ipAddrLines.length; i++) {
-            String[] ipAddrParts = ipAddrLines[i].split()
-            if (ipAddrParts.length >= 9) {
-                ipAddr = ipAddrParts[8]
-            }
-        }
-
-        /*
-         * Try and get the WiFi mac address - normally there is an interface called p2p0. If this isn't
-         * found (as per the Yoga Tablet 2 Pro), fall back to using the main wlan mac address.
-         */
-        String wlanMacAddr = null
-        String p2pMacAddr = null
-        String[] macAddrLines = macAddrStdOut.toString().split("\n")
-        boolean lastLineWasDummy = false
-        boolean lastLineWasP2p = false
-        for (int i = 0; i < macAddrLines.length; i++) {
-            if (wlanMacAddr == null && macAddrLines[i].contains("link/ether") && !lastLineWasDummy) {
-                wlanMacAddr = macAddrLines[i].split()[1].toUpperCase()
-            }
-
-            if (macAddrLines[i].contains("link/ether") && lastLineWasP2p) {
-                p2pMacAddr = macAddrLines[i].split()[1].toUpperCase()
-            }
-
-            lastLineWasP2p = macAddrLines[i].contains("p2p")
-            lastLineWasDummy = macAddrLines[i].contains("dummy")
-        }
-        String macAddr = (p2pMacAddr != null) ? p2pMacAddr : wlanMacAddr
-
-        //Write those values to the buildconfig.local.properties
-        File mainLocalPropertiesFile = rootProject.file("buildconfig.local.properties")
-        String propertiesStr = mainLocalPropertiesFile.getText("UTF-8")
-        propertiesStr = propertiesStr.replaceAll("test.remote_bluetooth_device=([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})", "test.remote_bluetooth_device=" + btAddrStdOut.toString())
-        println("Remote test slave bluetooth address: " + btAddrStdOut.toString())
-        println("Remote test slave P2P mac address: " + p2pMacAddr)
-        println("Remote test slave IP address: " + ipAddr)
-
-        if (ipAddr != null) {
-            propertiesStr = propertiesStr.replaceAll("test.remote_slave_server=(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})", "test.remote_slave_server=" + ipAddr)
-        }
-
-        if (p2pMacAddr != null) {
-            propertiesStr = propertiesStr.replaceAll("test.remote_wlan_mac_addr=([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})", "test.remote_wlan_mac_addr=" + p2pMacAddr)
-        }
-
-        FileOutputStream propertiesOut = new FileOutputStream(mainLocalPropertiesFile)
-        propertiesOut.write(propertiesStr.getBytes("UTF-8"))
-        propertiesOut.flush()
-        propertiesOut.close()
-    }
-
-    commandLine "$adb", '-s', (String) project.ext.buildConfigProperties['test.remote_slave_server_serial'], 'shell', 'am', 'start', '-n', 'com.ustadmobile.testslave/com.ustadmobile.port.android.view.RemoteTestSlaveServerActivity', '-a', 'android.intent.action.MAIN', '-c', 'android.intent.category.LAUNCHER'
-}
 
 /*
- * Android emulators do not have bluetooth or wifi. Therefor when testing on an emulator we can
- * only run tests that do not depend on the network.
+  TODO: Refactor to use another task to trigger these tasks
+
+  WARNING: API 'variant.getJavaCompiler()' is obsolete and has been replaced with 'variant.getJavaCompileProvider()'.
+  It will be removed at the end of 2019.
+  For more information, see https://d.android.com/r/tools/task-configuration-avoidance.
+  REASON: Called from: /home/mike/src/UstadMobile/app-android/build.gradle:37
  */
-task testEmulatorLocalconfigDebug(type: Exec) {
-    def adb = android.getAdbExe().getAbsolutePath()
-    commandLine "$adb", "shell", "am", "instrument", "-w", "-e", "class", "com.ustadmobile.test.port.android.CoreTestSuiteRunAndroid,com.ustadmobile.test.port.android.SharedSeTestSuiteRunAndroid", project.ext.buildConfigProperties['android.applicationId'] + ".test" + "/android.support.test.runner.AndroidJUnitRunner"
-}
-
-task grantTestPermissionsLocalconfigDebug(type: Exec) {
-    def adb = android.getAdbExe().getAbsolutePath()
-    doFirst {
-        exec {
-
-        }
-    }
-}
-
 afterEvaluate {
     android.libraryVariants.all { variant ->
         variant.javaCompiler.dependsOn(copyMainXmlLocaleFilesFromCore)
-        variant.javaCompiler.dependsOn(copyLocalconfigXmlLocaleFilesFromCore)
         variant.javaCompiler.dependsOn(generateCoreStringToAndroidResMap)
         variant.javaCompiler.dependsOn(checkBuildConfig)
     }
 }
 
-/*
- * Anything under the localconfig variant is not stored in Git. The class UmBaseApplication.java
- * exists in each variant, and controls whether the Application class does or does not extend
- * MultidexApplication. When the source is first checked out, to ensure that all variants build
- * successfully, we must copy UmBaseApplication.java into the localconfig source directory.
- */
-task copyLocalconfigUmBaseApplication(type: Copy) {
-    inputs.file("src/vanilla/java/com/ustadmobile/port/android/UmBaseApplication.java")
-
-    from("src/vanilla/java/com/ustadmobile/port/android/UmBaseApplication.java")
-    into("src/localconfig/java/com/ustadmobile/port/android/")
-}
-
-
-
 tasks.whenTaskAdded { task ->
-    if (task.name == "assembleRemotetestslaveDebug") {
-        startTestSlaveServer.dependsOn task
-    } else if (task.name == "installLocalconfigDebugAndroidTest") {
+ if (task.name == "installLocalconfigDebugAndroidTest") {
         testEmulatorLocalconfigDebug.dependsOn task
     } else if (task.name == "installLocalconfigDebug") {
         testEmulatorLocalconfigDebug.dependsOn task
-    } else if (task.name == "assembleLocalconfigDebug" || task.name == "assembleLocalconfigRelease") {
-        task.dependsOn(copyLocalconfigUmBaseApplication)
     }
 }
 
 android {
     sourceSets {
         main.assets.srcDirs += "../core/src/main/assets/"
-        localconfig.assets.srcDirs += "../core/src/localconfig/assets/"
     }
 
     compileOptions {
@@ -195,8 +75,6 @@ android {
     dexOptions {
         javaMaxHeapSize "2g"
     }
-
-    publishNonDefault true
 
     signingConfigs {
         release {
@@ -215,8 +93,8 @@ android {
     buildToolsVersion rootProject.ext.version_android_buildtools
 
     defaultConfig {
-        minSdkVersion 16
-        targetSdkVersion 27
+        minSdkVersion rootProject.ext.version_android_min_sdk
+        targetSdkVersion rootProject.ext.version_android_target_sdk
         vectorDrawables.useSupportLibrary = true
         versionCode rootProject.ext.ustadVersionCode
         versionName rootProject.version
@@ -234,31 +112,24 @@ android {
 
     productFlavors {
         /*
-         * The localconfig flavor is created based on the buildconfig.local.properties settings
-         */
-        localconfig {
-            dimension "config"
-            testApplicationId = project.ext.buildConfigProperties['android.applicationId'] + ".test"
-            versionCode rootProject.ext.ustadVersionCode + Integer.parseInt(rootProject.ext.buildConfigProperties['localVersionCode'])
-            manifestPlaceholders = ["appName": rootProject.ext.buildConfigProperties['appName']]
-        }
-
-        /*
-         * The vanilla config flavor is here for convenience : it's the same as having no
-         * buildconfig.local.properties and relying on what's in buildconfig.default.properties
-         *
-         * It's just here to make life easier so you can switch flavors in Android studio without
-         * having to remove the local config files themselves
+         * The main flavor
          */
         vanilla {
             dimension "config"
             testApplicationId "com.toughra.ustadmobile.test"
             versionCode rootProject.ext.ustadVersionCode
-            manifestPlaceholders = ["appName": "Ustad Mobile"]
+        }
 
-
-            manifestPlaceholders = [appName: "Ustad Mobile", applicationClass: "android.support.multidex.MultiDexApplication"]
-
+        /*
+         * Our main application does not exceed 64K methods, but it does exceed this limit with
+         * test libraries. Therefor testing on < Android 4.4 requires multidex to be enabled
+         */
+        vanillamultidex {
+            dimension "config"
+            multiDexEnabled true
+            packagingOptions { //Required: otherwise we get complaints on assembling
+                merge "META-INF/INDEX.LIST"
+            }
         }
 
         devMinApi21 {
@@ -269,15 +140,6 @@ android {
                 merge "META-INF/INDEX.LIST"
             }
         }
-
-        vanillamultidex {
-            dimension "config"
-            multiDexEnabled true
-            packagingOptions { //Required: otherwise we get complaints on assembling
-                merge "META-INF/INDEX.LIST"
-            }
-        }
-
     }
 
     buildTypes {
@@ -296,7 +158,19 @@ android {
     }
 }
 
+/*
+ * Disable running tests of the vanilla build (this requires multidex, so we use vanillamultidex instead)
+ */
+gradle.taskGraph.useFilter { task ->
+    if(task.name.equals("connectedVanillaDebugAndroidTest")
+        || task.name.equals("createVanillaDebugCoverageReport")
+        || task.name.equals("testVanillaDebugUnitTest")
+        || task.name.equals("testVanillaReleaseUnitTest")) {
+        return false;
+    }
 
+    return true;
+}
 
 task checkBuildConfig {
     inputs.files("buildconfig.*.properties")
@@ -305,62 +179,35 @@ assemble.dependsOn(checkBuildConfig)
 
 task copyMainXmlLocaleFilesFromCore(type: Copy) {
     inputs.files(fileTree(dir: rootProject.file("core/locale")).matching { include '**/*.xml' })
-
     from("../core/locale/main")
     exclude "**/*.properties"
     into "src/main/res"
 }
 assemble.dependsOn(copyMainXmlLocaleFilesFromCore)
 
-task copyLocalconfigXmlLocaleFilesFromCore(type: Copy) {
-    inputs.files(fileTree(dir: rootProject.file("core/locale")).matching { include '**/*.xml' })
-
-    from("../core/locale/localconfig")
-    exclude "**/*.properties"
-    into "src/localconfig/res"
-}
-assemble.dependsOn(copyLocalconfigXmlLocaleFilesFromCore)
-
-
 task generateCoreStringToAndroidResMap {
-    inputs.files("core/locale/*/*.xml")
+    inputs.files("core/locale/main/*.xml")
     onlyIf {
         /*
          Only run this task if the input files have been updated since the task was last run.
          upToDateWhen was not having the expected effect.
          */
         long inputLastModified = 0L
-        String[] inDirNames = new String[2]
-        inDirNames[0] = "main"
-        inDirNames[1] = "localconfig"
 
-        for (int i = 0; i < inDirNames.length; i++) {
-            rootProject.fileTree(dir: "core/locale/" + inDirNames[i], include: "**/*.xml").each() { File file ->
-                if (file.lastModified() > inputLastModified)
-                    inputLastModified = file.lastModified()
-            }
+        rootProject.fileTree(dir: "core/locale/main", include: "**/*.xml").each() { File file ->
+            if (file.lastModified() > inputLastModified)
+                inputLastModified = file.lastModified()
         }
 
-        File outputFile = project.file("src/vanilla/java/com/ustadmobile/port/android/generated/MessageIDMap.java")
+        File outputFile = project.file("src/main/java/com/ustadmobile/port/android/generated/MessageIDMap.java")
         return outputFile.lastModified() < inputLastModified;
     }
 
     doLast {
-        int MAIN = 0, LOCALCONFIG = 1, VANILLAMULTIDEX = 2, DEVMINAPI21 = 3
-        String[] dirNames = new String[2]
-        dirNames[MAIN] = "vanilla"
-        dirNames[LOCALCONFIG] = "localconfig"
-
-        String[] inDirNames = new String[2]
-        inDirNames[MAIN] = "main"
-        inDirNames[LOCALCONFIG] = "localconfig"
-
-        Map<String, String>[] messageIds = new Map[2]
-        messageIds[MAIN] = new HashMap<>()
-        messageIds[LOCALCONFIG] = new HashMap<>()
+        Map<String, String> messageIds = new HashMap<>()
 
         String genSrcHeader, genSrcFooter
-        String[] genSrcBody = new String[2]
+        String genSrcBody = ""
 
         genSrcHeader = "package com.ustadmobile.port.android.generated;\n"
         genSrcHeader += "import com.ustadmobile.core.generated.locale.MessageID;\n"
@@ -370,30 +217,22 @@ task generateCoreStringToAndroidResMap {
         genSrcHeader += "\tpublic static final HashMap<Integer, Integer> ID_MAP = new HashMap<>();\n"
         genSrcHeader += "\tstatic{\n"
 
-        for (int i = 0; i < dirNames.length; i++) {
-            System.out.println("Looking in: core/locale/" + inDirNames[i])
-            rootProject.fileTree(dir: "core/locale/" + inDirNames[i], include: "**/*.xml").each() { File file ->
-                System.out.println("Found: " + file.getAbsolutePath())
-                def xmlDoc = new XmlSlurper().parseText(file.getText("UTF-8"))
-                xmlDoc.string.each() { str ->
-                    String msgName = str.@name
-                    if (!messageIds[i].containsKey(msgName)) {
-                        messageIds[i].put(msgName, msgName)
-                    }
+        System.out.println("Looking in: core/locale/main")
+        rootProject.fileTree(dir: "core/locale/main", include: "**/*.xml").each() { File file ->
+            System.out.println("Found: " + file.getAbsolutePath())
+            def xmlDoc = new XmlSlurper().parseText(file.getText("UTF-8"))
+            xmlDoc.string.each() { str ->
+                String msgName = str.@name
+                if (!messageIds.containsKey(msgName)) {
+                    messageIds.put(msgName, msgName)
                 }
             }
         }
 
-        //Localconfig version will have both core and localconfig items
-        messageIds[LOCALCONFIG].putAll(messageIds[MAIN])
-
-        for (int i = 0; i < dirNames.length; i++) {
-            genSrcBody[i] = ""
-            Iterator<String> nameIterator = messageIds[i].keySet().iterator();
-            while (nameIterator.hasNext()) {
-                String strName = nameIterator.next()
-                genSrcBody[i] += "\t\tID_MAP.put(MessageID." + strName + ", R.string." + strName + ");\n"
-            }
+        Iterator<String> nameIterator = messageIds.keySet().iterator();
+        while (nameIterator.hasNext()) {
+            String strName = nameIterator.next()
+            genSrcBody += "\t\tID_MAP.put(MessageID." + strName + ", R.string." + strName + ");\n"
         }
 
         genSrcFooter = "\t}\n"
@@ -404,26 +243,13 @@ task generateCoreStringToAndroidResMap {
             oldMessageIdFile.delete()
         }
 
-        String[] outDirNames = new String[4]
-        outDirNames[MAIN] = "vanilla"
-        outDirNames[LOCALCONFIG] = "localconfig"
-        outDirNames[VANILLAMULTIDEX] = "vanillamultidex"
-        outDirNames[DEVMINAPI21] = "devMinApi21"
-
-
-
-        for (int i = 0; i < outDirNames.length; i++) {
-            File outDir = project.file("src/" + outDirNames[i] + "/java/com/ustadmobile/port/android/generated")
-            if (!outDir.isDirectory()) {
-                outDir.mkdirs()
-            }
-
-            File outFile = new File(outDir, "MessageIDMap.java")
-            int idMapIndex = i < LOCALCONFIG ? i : MAIN;
-            outFile.setText(genSrcHeader + genSrcBody[idMapIndex] + genSrcFooter, "UTF-8")
+        File outDir = project.file("src/main/java/com/ustadmobile/port/android/generated")
+        if (!outDir.isDirectory()) {
+            outDir.mkdirs()
         }
 
-
+        File outFile = new File(outDir, "MessageIDMap.java")
+        outFile.setText(genSrcHeader + genSrcBody + genSrcFooter, "UTF-8")
     }
 }
 assemble.dependsOn(generateCoreStringToAndroidResMap)
@@ -460,12 +286,14 @@ dependencies {
     // Paging
     implementation "android.arch.paging:runtime:$version_android_paging"
 
+    //Work manager
+    implementation "android.arch.work:work-runtime:$version_android_workmanager"
+
 
     androidTestImplementation project(":core-tests")
     androidTestImplementation project(":sharedse-tests")
     androidTestImplementation project(":lib-core-fs-tests")
 
-    api 'com.ustadmobile.qrcodelibomrfork:qrcode-core:1.0.3'
 
     /*
      * If this needs to be made compatible as a library for something using older appcompat libs -
@@ -485,9 +313,6 @@ dependencies {
 
     //Floating action button with support for popup choices
     implementation 'com.github.clans:fab:1.6.4'
-
-    //Wifi direct library
-    implementation 'com.ustadmobile.wifibuddy:wifibuddy:1.1.45-SNAPSHOT'
 
     //Page indicator
     implementation 'com.romandanylyk:pageindicatorview:1.0.0@aar'
@@ -546,10 +371,10 @@ task sourceJar(type: Jar) {
 
 publishing {
     publications {
-        //For the moment - publish only localconfig debug variant. Can publish others as per:
+        //For the moment - publish only vanilla debug variant. Can publish others as per:
         // https://github.com/wupdigital/android-maven-publish
         mavenLocalconfigAar(MavenPublication) {
-            from components.findByName("androidLocalconfigDebug")
+            from components.findByName("androidVanillaDebug")
             groupId rootProject.group
             artifactId project.name
             version rootProject.version

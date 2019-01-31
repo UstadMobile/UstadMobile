@@ -7,7 +7,6 @@ import com.ustadmobile.core.catalog.contenttype.XapiPackageTypePlugin;
 import com.ustadmobile.core.impl.ContainerMountRequest;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UmCallback;
-import com.ustadmobile.core.tincan.TinCanResultListener;
 import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
@@ -58,18 +57,8 @@ public class UstadMobileSystemImplJavaSe extends UstadMobileSystemImplSE {
     }
 
     @Override
-    public boolean loadActiveUserInfo(Object context) {
-        return false;
-    }
-
-    @Override
     public String getString(int messageCode, Object context) {
         return ""+messageCode;
-    }
-
-    @Override
-    public String getImplementationName() {
-        return null;
     }
 
     @Override
@@ -88,58 +77,8 @@ public class UstadMobileSystemImplJavaSe extends UstadMobileSystemImplSE {
     }
 
     @Override
-    public Hashtable getSystemInfo() {
-        return null;
-    }
-
-    @Override
-    public int[] getFileDownloadStatus(String downloadID, Object context) {
-        return new int[0];
-    }
-
-    @Override
-    public String getActiveUser(Object context) {
-        return null;
-    }
-
-    @Override
-    public void setActiveUserAuth(String password, Object context) {
-
-    }
-
-    @Override
-    public String getActiveUserAuth(Object context) {
-        return null;
-    }
-
-    @Override
-    public void setUserPref(String key, String value, Object context) {
-
-    }
-
-    @Override
-    public String getUserPref(String key, Object context) {
-        return null;
-    }
-
-    @Override
-    public String[] getUserPrefKeyList(Object context) {
-        return new String[0];
-    }
-
-    @Override
-    public void saveUserPrefs(Object context) {
-
-    }
-
-    @Override
     public String getAppPref(String key, Object context) {
         return null;
-    }
-
-    @Override
-    public String[] getAppPrefKeyList(Object context) {
-        return new String[0];
     }
 
     @Override
@@ -155,16 +94,6 @@ public class UstadMobileSystemImplJavaSe extends UstadMobileSystemImplSE {
     @Override
     public UMLog getLogger() {
         return logJavaSe;
-    }
-
-    @Override
-    public String getUMProfileName() {
-        return null;
-    }
-
-    @Override
-    public void getResumableRegistrations(String activityId, Object context, TinCanResultListener listener) {
-
     }
 
     @Override
