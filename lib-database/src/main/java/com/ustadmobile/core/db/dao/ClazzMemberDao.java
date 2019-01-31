@@ -99,6 +99,21 @@ public abstract class ClazzMemberDao implements SyncableDao<ClazzMember, ClazzMe
             " AND ClazzMember.role = 1) AND Person.active = 1 ")
     public abstract UmProvider<PersonWithPersonPicture> findAllPeopleWithPersonPictureInClassUid(long clazzUid);
 
+
+    @UmQuery("SELECT Person.*, " +
+            " (SELECT PersonPicture.personPictureUid FROM PersonPicture WHERE " +
+            "   PersonPicture.personPicturePersonUid = Person.personUid ORDER BY " +
+            "   picTimestamp DESC LIMIT 1) AS personPictureUid " +
+            " FROM Person where personUid IN ( " +
+            "  SELECT Person.personUid FROM ClazzMember  " +
+            " LEFT  JOIN Person On ClazzMember.clazzMemberPersonUid = Person.personUid " +
+            " WHERE ClazzMember.clazzMemberClazzUid = :clazzUid " +
+            "AND ClazzMember.clazzMemberActive = 1 " +
+            " AND ClazzMember.role = 1 AND ClazzMember.clazzMemberUid != :currentClazzMemberUid)" +
+            " AND Person.active = 1 " )
+    public abstract UmProvider<PersonWithPersonPicture> findAllPeopleWithPersonPictureInClassUid(
+            long clazzUid, long currentClazzMemberUid);
+
     @UmQuery("SELECT * FROM Person where personUid IN ( " +
             " SELECT Person.personUid FROM ClazzMember " +
             " LEFT  JOIN Person On ClazzMember.clazzMemberPersonUid = Person.personUid " +

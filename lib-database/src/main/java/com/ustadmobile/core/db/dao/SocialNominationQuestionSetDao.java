@@ -8,6 +8,7 @@ import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.database.annotation.UmRepository;
 import com.ustadmobile.lib.database.annotation.UmUpdate;
+import com.ustadmobile.lib.db.entities.SELQuestionSetWithNumQuestions;
 import com.ustadmobile.lib.db.entities.SocialNominationQuestionSet;
 import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
@@ -38,6 +39,14 @@ public abstract class SocialNominationQuestionSetDao implements
 
     @UmQuery("SELECT * FROM SocialNominationQuestionSet")
     public abstract UmProvider<SocialNominationQuestionSet> findAllQuestions();
+
+    @UmQuery("SELECT " +
+            " (SELECT COUNT(*) FROM SocialNominationQuestion " +
+            "       WHERE socialNominationQuestionSocialNominationQuestionSetUid = " +
+            "       SocialNominationQuestionSet.socialNominationQuestionSetUid) AS numQuestions, " +
+            " SocialNominationQuestionSet.* " +
+            "FROM SocialNominationQuestionSet ")
+    public abstract UmProvider<SELQuestionSetWithNumQuestions> findAllQuestionSetsWithNumQuestions();
 
     @UmQuery("SELECT * FROM SocialNominationQuestionSet")
     public abstract UmLiveData<List<SocialNominationQuestionSet>> findAllQuestionSetsLiveData();

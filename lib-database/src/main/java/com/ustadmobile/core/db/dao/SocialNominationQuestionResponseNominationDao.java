@@ -68,6 +68,13 @@ public abstract class SocialNominationQuestionResponseNominationDao
     @UmInsert
     public abstract long insert(SocialNominationQuestionResponseNomination entity);
 
+    @UmQuery("SELECT * FROM SocialNominationQuestionResponseNomination " +
+            "WHERE " +
+            "socialNominationQuestionResponseNominationClazzMemberUid = :clazzMemberUid " +
+            "AND socialNominationQuestionResponseNominationSocialNominationQuestionResponseUId = :questionResponseUid")
+    public abstract void findExistingNomination(long clazzMemberUid, long questionResponseUid,
+                            UmCallback<List<SocialNominationQuestionResponseNomination>> resultList);
+
     @UmUpdate
     public abstract void update(SocialNominationQuestionResponseNomination entity);
 

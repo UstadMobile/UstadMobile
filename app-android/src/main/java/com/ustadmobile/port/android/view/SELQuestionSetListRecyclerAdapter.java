@@ -14,10 +14,11 @@ import android.widget.TextView;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.SELQuestionSetsPresenter;
 import com.ustadmobile.core.tincan.Activity;
+import com.ustadmobile.lib.db.entities.SELQuestionSetWithNumQuestions;
 import com.ustadmobile.lib.db.entities.SocialNominationQuestionSet;
 
 public class SELQuestionSetListRecyclerAdapter extends
-        PagedListAdapter<SocialNominationQuestionSet,
+        PagedListAdapter<SELQuestionSetWithNumQuestions,
                 SELQuestionSetListRecyclerAdapter.SELQuestionSetsViewHolder> {
 
     Context theContext;
@@ -37,7 +38,7 @@ public class SELQuestionSetListRecyclerAdapter extends
     @Override
     public void onBindViewHolder(@NonNull SELQuestionSetsViewHolder holder, int position) {
 
-        SocialNominationQuestionSet theQuestionSet = getItem(position);
+        SELQuestionSetWithNumQuestions theQuestionSet = getItem(position);
         TextView questionTitle =
                 holder.itemView.findViewById(R.id.item_sel_question_set_question);
         TextView questionAmount =
@@ -50,8 +51,9 @@ public class SELQuestionSetListRecyclerAdapter extends
                         theQuestionSet.getTitle()));
 
 
-        //TODO: Get number of questions
-        questionAmount.setText(" " + theContext.getText(R.string.questions).toString());
+        String numQuestionString = theQuestionSet.getNumQuestions() + " " +
+                theContext.getText(R.string.questions).toString();
+        questionAmount.setText(numQuestionString);
     }
 
     protected class SELQuestionSetsViewHolder extends RecyclerView.ViewHolder {
@@ -59,7 +61,7 @@ public class SELQuestionSetListRecyclerAdapter extends
     }
 
     protected SELQuestionSetListRecyclerAdapter(
-            @NonNull DiffUtil.ItemCallback<SocialNominationQuestionSet> diffCallback,
+            @NonNull DiffUtil.ItemCallback<SELQuestionSetWithNumQuestions> diffCallback,
             SELQuestionSetsPresenter thePresenter,
             Context context) {
         super(diffCallback);

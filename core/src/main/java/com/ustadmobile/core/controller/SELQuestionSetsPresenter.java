@@ -8,13 +8,14 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.AddQuestionSetDialogView;
 import com.ustadmobile.core.view.SELQuestionSetDetailView;
 import com.ustadmobile.core.view.SELQuestionSetsView;
+import com.ustadmobile.lib.db.entities.SELQuestionSetWithNumQuestions;
 import com.ustadmobile.lib.db.entities.SocialNominationQuestionSet;
 
 import java.util.Hashtable;
 
 public class SELQuestionSetsPresenter extends UstadBaseController<SELQuestionSetsView> {
 
-    private UmProvider<SocialNominationQuestionSet> questionSetUmProvider;
+    private UmProvider<SELQuestionSetWithNumQuestions> questionSetWithNumQuestionsUmProvider;
     UmAppDatabase repository;
     private SocialNominationQuestionSetDao socialNominationQuestionSetDao;
 
@@ -30,8 +31,9 @@ public class SELQuestionSetsPresenter extends UstadBaseController<SELQuestionSet
     public void onCreate(Hashtable savedState) {
         super.onCreate(savedState);
 
-        questionSetUmProvider = socialNominationQuestionSetDao.findAllQuestions();
-        view.setListProvider(questionSetUmProvider);
+        questionSetWithNumQuestionsUmProvider = socialNominationQuestionSetDao
+                .findAllQuestionSetsWithNumQuestions();
+        view.setListProvider(questionSetWithNumQuestionsUmProvider);
 
     }
 

@@ -188,7 +188,9 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
 
     @Override
     public void updatePermissionCheck() {
-        classesFragment.forceCheckPermissions();
+        if(classesFragment != null) {
+            classesFragment.forceCheckPermissions();
+        }
     }
 
 

@@ -73,8 +73,7 @@ public class ReportSELActivity extends UstadBaseActivity implements
         setSupportActionBar(toolbar);
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
-        reportLinearLayout =
-                findViewById(R.id.activity_report_sel_ll);
+        reportLinearLayout = findViewById(R.id.activity_report_sel_ll);
 
         //Call the Presenter
         ReportSELPresenter mPresenter = new ReportSELPresenter(this,
@@ -82,9 +81,7 @@ public class ReportSELActivity extends UstadBaseActivity implements
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
 
         //FAB and its listener
-        //eg:
-        FloatingTextButton fab =
-                findViewById(R.id.activity_report_sel_fab);
+        FloatingTextButton fab = findViewById(R.id.activity_report_sel_fab);
         fab.setOnClickListener(this::showPopup);
     }
 

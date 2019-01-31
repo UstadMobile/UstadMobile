@@ -21,6 +21,7 @@ import com.ustadmobile.lib.db.entities.SocialNominationQuestionResponseNominatio
 import com.ustadmobile.lib.db.entities.SocialNominationQuestionSetResponse;
 
 import java.util.Hashtable;
+import java.util.List;
 
 import static com.ustadmobile.core.view.ClazzListView.ARG_CLAZZ_UID;
 import static com.ustadmobile.core.view.PersonDetailView.ARG_PERSON_UID;
@@ -131,7 +132,7 @@ public class SELEditPresenter
 
         //Populate the provider
         providerList = repository.getClazzMemberDao()
-                .findAllPeopleWithPersonPictureInClassUid(currentClazzUid);
+                .findAllPeopleWithPersonPictureInClassUid(currentClazzUid, currentClazzMemberUid);
 
         //set Provider.
         setPeopleProviderToView();
@@ -296,16 +297,38 @@ public class SELEditPresenter
             @Override
             public void onSuccess(ClazzMember result) {
 
-                SocialNominationQuestionResponseNomination responseNomination =
-                        new SocialNominationQuestionResponseNomination();
-                responseNomination
-                        .setSocialNominationQuestionResponseNominationSocialNominationQuestionResponseUId(
-                                currentQuestionResponseUid);
-                responseNomination
-                        .setSocialNominationQuestionResponseNominationClazzMemberUid(
-                                result.getClazzMemberUid());
+                questionResponseNominationDao.findExistingNomination(result.getClazzMemberUid(),
+                    currentQuestionResponseUid, new UmCallback<List<SocialNominationQuestionResponseNomination>>() {
+                        @Override
+                        public void onSuccess(List<SocialNominationQuestionResponseNomination> existingNominations) {
+                            if(existingNominations != null && !existingNominations.isEmpty()){
+                                if(existingNominations.size() == 1){
+                                    SocialNominationQuestionResponseNomination
+                                            thisNomination = existingNominations.get(0);
 
-                questionResponseNominationDao.insert(responseNomination);
+                                    thisNomination.setNominationActive(!thisNomination.isNominationActive());
+                                }
+                            }else{
+                                //Create a new one.
+                                SocialNominationQuestionResponseNomination responseNomination =
+                                        new SocialNominationQuestionResponseNomination();
+                                responseNomination
+                                        .setSocialNominationQuestionResponseNominationSocialNominationQuestionResponseUId(
+                                                currentQuestionResponseUid);
+                                responseNomination
+                                        .setSocialNominationQuestionResponseNominationClazzMemberUid(
+                                                result.getClazzMemberUid());
+
+                                questionResponseNominationDao.insert(responseNomination);
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Throwable exception) {
+                            exception.printStackTrace();
+                        }
+                    });
+
             }
 
             @Override

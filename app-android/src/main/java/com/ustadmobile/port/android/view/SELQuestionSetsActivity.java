@@ -16,6 +16,7 @@ import com.ustadmobile.core.controller.SELQuestionPresenter;
 import com.ustadmobile.core.controller.SELQuestionSetsPresenter;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.view.SELQuestionSetsView;
+import com.ustadmobile.lib.db.entities.SELQuestionSetWithNumQuestions;
 import com.ustadmobile.lib.db.entities.SocialNominationQuestionSet;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
@@ -80,33 +81,33 @@ public class SELQuestionSetsActivity extends UstadBaseActivity implements SELQue
     /**
      * The DIFF CALLBACK
      */
-    public static final DiffUtil.ItemCallback<SocialNominationQuestionSet> DIFF_CALLBACK =
-            new DiffUtil.ItemCallback<SocialNominationQuestionSet>() {
-                @Override
-                public boolean areItemsTheSame(SocialNominationQuestionSet oldItem,
-                                               SocialNominationQuestionSet newItem) {
-                    return oldItem == newItem;
-                }
+    public static final DiffUtil.ItemCallback<SELQuestionSetWithNumQuestions> DIFF_CALLBACK =
+        new DiffUtil.ItemCallback<SELQuestionSetWithNumQuestions>() {
+            @Override
+            public boolean areItemsTheSame(SELQuestionSetWithNumQuestions oldItem,
+                                           SELQuestionSetWithNumQuestions newItem) {
+                return oldItem == newItem;
+            }
 
-                @Override
-                public boolean areContentsTheSame(SocialNominationQuestionSet oldItem,
-                                                  SocialNominationQuestionSet newItem) {
-                    return oldItem.equals(newItem);
-                }
-            };
+            @Override
+            public boolean areContentsTheSame(SELQuestionSetWithNumQuestions oldItem,
+                                              SELQuestionSetWithNumQuestions newItem) {
+                return oldItem.equals(newItem);
+            }
+        };
 
     @Override
-    public void setListProvider(UmProvider<SocialNominationQuestionSet> listProvider) {
+    public void setListProvider(UmProvider<SELQuestionSetWithNumQuestions> listProvider) {
         SELQuestionSetListRecyclerAdapter recyclerAdapter =
                 new SELQuestionSetListRecyclerAdapter(DIFF_CALLBACK, mPresenter,
                         getApplicationContext());
 
         // get the provider, set , observe, etc.
         // A warning is expected
-        DataSource.Factory<Integer, SocialNominationQuestionSet> factory =
-                (DataSource.Factory<Integer, SocialNominationQuestionSet>)
+        DataSource.Factory<Integer, SELQuestionSetWithNumQuestions> factory =
+                (DataSource.Factory<Integer, SELQuestionSetWithNumQuestions>)
                         listProvider.getProvider();
-        LiveData<PagedList<SocialNominationQuestionSet>> data =
+        LiveData<PagedList<SELQuestionSetWithNumQuestions>> data =
                 new LivePagedListBuilder<>(factory, 20).build();
         //Observe the data:
         data.observe(this, recyclerAdapter::submitList);

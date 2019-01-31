@@ -20,6 +20,9 @@ public class SocialNominationQuestionResponseNomination {
     //<-> SocialNominationQuestionResponse entity.
     private long socialNominationQuestionResponseNominationSocialNominationQuestionResponseUId;
 
+    //Added 31012019 sel TODO add to Migrations
+    private boolean nominationActive;
+
     @UmSyncLastChangedBy
     private int scheduleNominationQuestionResponseNominationLastChangedBy;
 
@@ -86,5 +89,13 @@ public class SocialNominationQuestionResponseNomination {
 
     public void setScheduleNominationQuestionResponseNominationLastChangedBy(int scheduleNominationQuestionResponseNominationLastChangedBy) {
         this.scheduleNominationQuestionResponseNominationLastChangedBy = scheduleNominationQuestionResponseNominationLastChangedBy;
+    }
+
+    public boolean isNominationActive() {
+        return nominationActive;
+    }
+
+    public void setNominationActive(boolean nominationActive) {
+        this.nominationActive = nominationActive;
     }
 }
