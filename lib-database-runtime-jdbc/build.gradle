@@ -30,6 +30,7 @@ dependencies {
     testAnnotationProcessor project(':lib-database-annotation-processor')
     testImplementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
     testImplementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
+    testImplementation "org.apache.commons:commons-dbcp2:$version_apache_commons_dbcp2"
     testImplementation "junit:junit:$version_junit"
     testImplementation "org.mockito:mockito-core:$version_core_mockito"
 
