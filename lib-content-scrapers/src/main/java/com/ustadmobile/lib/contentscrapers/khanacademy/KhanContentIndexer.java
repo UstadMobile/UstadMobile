@@ -95,9 +95,9 @@ public class KhanContentIndexer implements Runnable {
             System.exit(1);
         }
 
-        UMLogUtil.setLevel(args.length == 3 ? args[2] : "");
-
         UMLogUtil.logDebug(args[0]);
+        UMLogUtil.setLevel(args.length == 2 ? args[1] : "");
+
         // UMLogUtil.logError(args[1]);
 
         try {
