@@ -221,6 +221,7 @@ public class KhanContentScraper implements Runnable {
         HttpURLConnection conn = null;
         try {
             conn = (HttpURLConnection)scrapUrl.openConnection();
+            conn.setRequestMethod("HEAD");
             if (!ContentScraperUtil.isFileModified(conn, folder, FilenameUtils.getBaseName(url)) && ContentScraperUtil.fileHasContent(content)) {
                 isContentUpdated = false;
                 return;
@@ -233,7 +234,6 @@ public class KhanContentScraper implements Runnable {
         }finally {
             if(conn != null) {
                 conn.disconnect();
-                conn = null;
             }
         }
 
