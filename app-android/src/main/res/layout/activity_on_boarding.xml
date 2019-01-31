@@ -14,11 +14,12 @@
         android:layout_height="match_parent"/>
 
     <ImageView
-        android:src="@drawable/launcher_icon"
+        android:layout_marginTop="@dimen/dimen_20dp"
+        android:layout_width="90dp"
+        android:layout_height="90dp"
         android:layout_alignParentEnd="true"
-        android:layout_margin="@dimen/dimen_20dp"
-        android:layout_width="50dp"
-        android:layout_height="50dp" />
+        android:layout_marginEnd="5dp"
+        android:src="@drawable/expo2020_logo" />
 
     <Button
         android:elevation="@dimen/dimen_2dp"

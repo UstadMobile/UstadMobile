@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.rd.PageIndicatorView;
@@ -33,9 +34,9 @@ public class OnBoardingActivity extends AppCompatActivity implements OnBoardingV
     private enum OnBoardScreen {
 
         SCREEN_1(R.string.onboarding_no_internet_headline,R.string.onboarding_no_internet_subheadline
-                ,R.layout.onboard_screen_view),
+                ,R.layout.onboard_screen_view, R.drawable.downloading_data),
         SCREEN_2(R.string.onboarding_offline_sharing,R.string.onboarding_offline_sharing_subheading,
-                R.layout.onboard_screen_view);
+                R.layout.onboard_screen_view, R.drawable.sharing_data);
 
         private int headlineStringResId;
 
@@ -43,10 +44,14 @@ public class OnBoardingActivity extends AppCompatActivity implements OnBoardingV
 
         private int layoutResId;
 
-        OnBoardScreen(int headlineStringResId, int subHeadlineStringResId,int layoutResId){
+        private int drawableResId;
+
+        OnBoardScreen(int headlineStringResId, int subHeadlineStringResId,
+                      int layoutResId, int drawableResId){
             this.headlineStringResId= headlineStringResId;
             this.subHeadlineStringResId = subHeadlineStringResId;
             this.layoutResId = layoutResId;
+            this.drawableResId = drawableResId;
         }
 
         public int getHeadlineStringResId() {
@@ -59,6 +64,10 @@ public class OnBoardingActivity extends AppCompatActivity implements OnBoardingV
 
         public int getLayoutResId() {
             return layoutResId;
+        }
+
+        public int getDrawableResId() {
+            return drawableResId;
         }
     }
 
@@ -85,6 +94,8 @@ public class OnBoardingActivity extends AppCompatActivity implements OnBoardingV
                     .setText(context.getString(onBoardScreen.getHeadlineStringResId()));
             ((TextView)layout.findViewById(R.id.sub_heading))
                     .setText(context.getString(onBoardScreen.getSubHeadlineStringResId()));
+            ((ImageView)layout.findViewById(R.id.drawable_res))
+                    .setImageResource(onBoardScreen.getDrawableResId());
             collection.addView(layout);
             return layout;
         }
