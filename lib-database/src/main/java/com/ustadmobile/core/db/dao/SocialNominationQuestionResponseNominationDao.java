@@ -97,7 +97,7 @@ public abstract class SocialNominationQuestionResponseNominationDao
     @UmQuery(SEL_REPORT_SELECT +
             " WHERE " +
             "   socialNominationQuestionResponseNominationSocialNominationQuestionResponseUid != 0 " +
-            "   nominationActive = 1 " +
+            "   AND nominationActive = 1 " +
             "   AND SocialNominationQuestionSetResponse.socialNominationQuestionSetResponseStartTime > :fromTime " +
             "   AND SocialNominationQuestionSetResponse.socialNominationQuestionSetResponseFinishTime < :toTime " +
 
@@ -108,7 +108,7 @@ public abstract class SocialNominationQuestionResponseNominationDao
     @UmQuery(SEL_REPORT_SELECT +
             " WHERE " +
             "   socialNominationQuestionResponseNominationSocialNominationQuestionResponseUid != 0 " +
-            "   nominationActive = 1 " +
+            "   AND nominationActive = 1 " +
             "   AND SocialNominationQuestionSetResponse.socialNominationQuestionSetResponseStartTime > :fromTime " +
             "   AND SocialNominationQuestionSetResponse.socialNominationQuestionSetResponseFinishTime < :toTime " +
             "   AND Clazz.clazzUid IN (:clazzList) " +

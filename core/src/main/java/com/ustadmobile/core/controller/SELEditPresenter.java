@@ -307,6 +307,7 @@ public class SELEditPresenter
                                             thisNomination = existingNominations.get(0);
 
                                     thisNomination.setNominationActive(!thisNomination.isNominationActive());
+                                    questionResponseNominationDao.update(thisNomination);
                                 }
                             }else{
                                 //Create a new one.
@@ -318,6 +319,7 @@ public class SELEditPresenter
                                 responseNomination
                                         .setSocialNominationQuestionResponseNominationClazzMemberUid(
                                                 result.getClazzMemberUid());
+                                responseNomination.setNominationActive(true);
 
                                 questionResponseNominationDao.insert(responseNomination);
                             }
