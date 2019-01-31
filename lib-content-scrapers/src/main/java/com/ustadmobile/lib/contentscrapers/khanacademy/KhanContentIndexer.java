@@ -247,6 +247,7 @@ public class KhanContentIndexer implements Runnable {
 
 
     public void run() {
+        System.gc();
         queueDao.setTimeStarted(scrapeQueueItemUid, System.currentTimeMillis());
         boolean successful = false;
         if (ScraperConstants.KhanContentType.TOPICS.getType().equals(contentType)) {

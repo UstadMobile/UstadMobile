@@ -146,6 +146,7 @@ public class KhanContentScraper implements Runnable {
 
     @Override
     public void run() {
+        System.gc();
         UmAppDatabase db = UmAppDatabase.getInstance(null);
         UmAppDatabase repository = db.getRepository("https://localhost", "");
         ContentEntryFileDao contentEntryFileDao = repository.getContentEntryFileDao();
