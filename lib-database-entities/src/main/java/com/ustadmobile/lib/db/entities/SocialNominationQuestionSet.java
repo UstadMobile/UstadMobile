@@ -18,7 +18,6 @@ public class SocialNominationQuestionSet  {
     // The set title.
     private String title;
 
-
     @UmSyncMasterChangeSeqNum
     private long scheduleNominationQuestionSetMasterChangeSeqNum;
 

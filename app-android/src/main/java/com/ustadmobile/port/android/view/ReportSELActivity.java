@@ -11,13 +11,11 @@ import android.view.Gravity;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
-import android.widget.ScrollView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -25,7 +23,6 @@ import android.widget.TextView;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.ReportSELPresenter;
 import com.ustadmobile.core.view.ReportSELView;
-import com.ustadmobile.lib.db.entities.ClazzMember;
 import com.ustadmobile.lib.db.entities.ClazzMemberWithPerson;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
@@ -34,7 +31,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,9 +44,7 @@ import static com.ustadmobile.port.android.view.ReportAttendanceGroupedByThresho
 public class ReportSELActivity extends UstadBaseActivity implements
         ReportSELView, PopupMenu.OnMenuItemClickListener{
 
-    private Toolbar toolbar;
     private LinearLayout reportLinearLayout;
-    private ReportSELPresenter mPresenter;
 
     public static final int TAG_NOMINEE_CLAZZMEMBER_UID = R.string.nomination;
     public static final int TAG_NOMINATOR_CLAZZMEMBER_UID = R.string.nominating;
@@ -63,6 +57,7 @@ public class ReportSELActivity extends UstadBaseActivity implements
             new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
                     LinearLayout.LayoutParams.WRAP_CONTENT);
 
+    //The clazz sel report data
     LinkedHashMap<String, LinkedHashMap<String, Map<Long, List<Long>>>> clazzMap;
 
     @Override
@@ -73,7 +68,7 @@ public class ReportSELActivity extends UstadBaseActivity implements
         setContentView(R.layout.activity_report_sel);
 
         //Toolbar:
-        toolbar = findViewById(R.id.activity_report_sel_toolbar);
+        Toolbar toolbar = findViewById(R.id.activity_report_sel_toolbar);
         toolbar.setTitle(R.string.sel_report);
         setSupportActionBar(toolbar);
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
@@ -82,7 +77,7 @@ public class ReportSELActivity extends UstadBaseActivity implements
                 findViewById(R.id.activity_report_sel_ll);
 
         //Call the Presenter
-        mPresenter = new ReportSELPresenter(this,
+        ReportSELPresenter mPresenter = new ReportSELPresenter(this,
                 UMAndroidUtil.bundleToHashtable(getIntent().getExtras()), this);
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
 
@@ -90,15 +85,32 @@ public class ReportSELActivity extends UstadBaseActivity implements
         //eg:
         FloatingTextButton fab =
                 findViewById(R.id.activity_report_sel_fab);
-        fab.setOnClickListener(v -> showPopup(v));
+        fab.setOnClickListener(this::showPopup);
     }
 
     public void showPopup(View v) {
         PopupMenu popup = new PopupMenu(this, v);
         MenuInflater inflater = popup.getMenuInflater();
         inflater.inflate(R.menu.menu_export, popup.getMenu());
-        popup.setOnMenuItemClickListener(this::onMenuItemClick);
+        popup.setOnMenuItemClickListener(this);
         popup.show();
+    }
+
+    /**
+     * Handles what happens when toolbar menu option selected. Here it is handling what happens when
+     * back button is pressed.
+     *
+     * @param item  The item selected.
+     * @return      true if accounted for.
+     */
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case android.R.id.home:
+                onBackPressed();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -125,7 +137,7 @@ public class ReportSELActivity extends UstadBaseActivity implements
     @Override
     public void generateCSVReport() {
 
-        String csvReportFilePath = "";
+        String csvReportFilePath;
         //Create the file.
 
         File dir = getFilesDir();
@@ -135,17 +147,15 @@ public class ReportSELActivity extends UstadBaseActivity implements
 
         try {
             FileWriter fileWriter = new FileWriter(csvReportFilePath);
-            Iterator<String[]> tableTextdataIterator = tableTextData.iterator();
 
-            while(tableTextdataIterator.hasNext()){
+            for (String[] aTableTextData : tableTextData) {
                 boolean firstDone = false;
-                String[] lineArray = tableTextdataIterator.next();
-                for(int i=0;i<lineArray.length;i++){
-                    if(firstDone){
+                for (String aLineArray : aTableTextData) {
+                    if (firstDone) {
                         fileWriter.append(",");
                     }
                     firstDone = true;
-                    fileWriter.append(lineArray[i]);
+                    fileWriter.append(aLineArray);
                 }
                 fileWriter.append("\n");
             }
@@ -169,12 +179,11 @@ public class ReportSELActivity extends UstadBaseActivity implements
             startActivity(shareIntent);
         }
 
-
     }
 
     @Override
     public void generateXLSReport() {
-
+        //TODO: Excel report ..
     }
 
     @Override
@@ -425,7 +434,11 @@ public class ReportSELActivity extends UstadBaseActivity implements
                 View crossView = getCross();
                 crossView.setTag(TAG_NOMINATOR_CLAZZMEMBER_UID, everyClazzMember.getClazzMemberUid());
                 crossView.setTag(TAG_NOMINEE_CLAZZMEMBER_UID, againClazzMember.getClazzMemberUid());
-                nominationRow.addView(crossView);
+                if(everyClazzMember.getClazzMemberUid() == againClazzMember.getClazzMemberUid()){
+                    nominationRow.addView(getNA());
+                }else {
+                    nominationRow.addView(crossView);
+                }
                 //need that vertical line
                 nominationRow.addView(getVerticalLine());
             }

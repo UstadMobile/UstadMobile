@@ -1,11 +1,10 @@
 package com.ustadmobile.core.controller;
 
-import java.util.Hashtable;
-
-import com.ustadmobile.core.generated.locale.MessageID;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.ReportEditView;
 import com.ustadmobile.core.view.ReportSelectionView;
-import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+
+import java.util.Hashtable;
 
 
 /**
@@ -22,14 +21,24 @@ public class ReportSelectionPresenter
     @Override
     public void onCreate(Hashtable savedState) {
         super.onCreate(savedState);
-
     }
 
+    /**
+     * Goes to report link and sets arguments according to arguments here
+     * @param reportName                The report name literal
+     * @param reportDesc                The report desc literal
+     * @param reportLink                The report link (View.VIEW_NAME)
+     * @param showThreshold             If we want to show thresholds
+     * @param showRadioGroup            If we want to show radio group
+     * @param showGenderDisaggregate    If we want to show gender disaggregated checkbox
+     * @param showClazzes               If we want to show Classes and its picker
+     * @param showLocations             If we want to show Locations and its picker
+     */
     public void goToReport(String reportName, String reportDesc, String reportLink,
                        boolean showThreshold,boolean showRadioGroup, boolean showGenderDisaggregate,
                        boolean showClazzes, boolean showLocations){
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        Hashtable args = new Hashtable();
+        Hashtable<String, Object> args = new Hashtable<>();
         args.put(ReportEditView.ARG_REPORT_NAME, reportName);
         args.put(ReportEditView.ARG_REPORT_DESC, reportDesc);
         args.put(ReportEditView.ARG_REPORT_LINK, reportLink);

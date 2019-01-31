@@ -2,6 +2,7 @@ package com.ustadmobile.core.db.dao;
 
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.impl.UmCallback;
+import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
@@ -32,8 +33,14 @@ public abstract class SocialNominationQuestionSetDao implements
     @UmQuery("SELECT * FROM SocialNominationQuestionSet WHERE socialNominationQuestionSetUid = :uid")
     public abstract SocialNominationQuestionSet findByUid(long uid);
 
+    @UmQuery("SELECT * FROM SocialNominationQuestionSet WHERE socialNominationQuestionSetUid = :uid")
+    public abstract void findByUidAsync(long uid, UmCallback<SocialNominationQuestionSet > resultObject);
+
     @UmQuery("SELECT * FROM SocialNominationQuestionSet")
     public abstract UmProvider<SocialNominationQuestionSet> findAllQuestions();
+
+    @UmQuery("SELECT * FROM SocialNominationQuestionSet")
+    public abstract UmLiveData<List<SocialNominationQuestionSet>> findAllQuestionSetsLiveData();
 
     @UmQuery("SELECT * FROM SocialNominationQuestionSet")
     public abstract void findAllQuestionsAsync(

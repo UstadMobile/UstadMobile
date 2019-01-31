@@ -14,7 +14,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class ExpandableListDataReports {
+/**
+ * A POJO representing a Report item. It is also responsible for returning the default set of
+ * reports and their child reports.
+ */
+class ExpandableListDataReports {
 
 
     Integer icon;
@@ -28,24 +32,13 @@ public class ExpandableListDataReports {
     Boolean showLocations;
     String desc;
 
-    ExpandableListDataReports(){
+    private ExpandableListDataReports(){
 
     }
-
-    ExpandableListDataReports(String name, Integer icon, String reportLink, boolean showThreshold,
-                              boolean showRadioGroup, boolean showGenderDisaggregate){
-        this.name = name;
-        this.icon = icon;
-        this.reportLink = reportLink;
-        this.showThreshold = showThreshold;
-        this.showRadioGroup = showRadioGroup;
-        this.showGenderDisaggregate = showGenderDisaggregate;
-    }
-
-    ExpandableListDataReports(String name, Integer icon, String reportLink, boolean showThreshold,
-                              boolean showRadioGroup, boolean showGenderDisaggregate,
-                              boolean showClazzes, boolean showLocations,
-                              String description){
+    private ExpandableListDataReports(String name, Integer icon, String reportLink, boolean showThreshold,
+                                      boolean showRadioGroup, boolean showGenderDisaggregate,
+                                      boolean showClazzes, boolean showLocations,
+                                      String description){
         this.name = name;
         this.icon = icon;
         this.reportLink = reportLink;
@@ -58,7 +51,13 @@ public class ExpandableListDataReports {
 
     }
 
-    public static HashMap<String, ExpandableListDataReports> getDataAll(Context context){
+    /**
+     * Method that returns all reports as Title and ExapandableListdataReports map.
+     *
+     * @param context   The application context.
+     * @return          The report map list
+     */
+    static HashMap<String, ExpandableListDataReports> getDataAll(Context context){
         HashMap<String,ExpandableListDataReports> expandableListDetail = new HashMap<>();
 
         List<ExpandableListDataReports> attendanceReport = new ArrayList<>();

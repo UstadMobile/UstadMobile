@@ -12,6 +12,10 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.SELSelectStudentPresenter;
@@ -30,21 +34,23 @@ public class SELSelectStudentActivity extends UstadBaseActivity implements SELSe
     private RecyclerView mRecyclerView;
     private SELSelectStudentPresenter mPresenter;
     private Snackbar studentDoneSnackBar;
+    private Spinner selQuestionSetSpinner;
+    String[] questionSetPresets;
 
     public static final DiffUtil.ItemCallback<Person> DIFF_CALLBACK =
-            new DiffUtil.ItemCallback<Person>() {
-                @Override
-                public boolean areItemsTheSame(Person oldItem,
-                                               Person newItem) {
-                    return oldItem == newItem;
-                }
+        new DiffUtil.ItemCallback<Person>() {
+            @Override
+            public boolean areItemsTheSame(Person oldItem,
+                                           Person newItem) {
+                return oldItem == newItem;
+            }
 
-                @Override
-                public boolean areContentsTheSame(Person oldItem,
-                                                  Person newItem) {
-                    return oldItem.equals(newItem);
-                }
-            };
+            @Override
+            public boolean areContentsTheSame(Person oldItem,
+                                              Person newItem) {
+                return oldItem.equals(newItem);
+            }
+        };
 
     @Override
     public void setSELAnswerListProvider(UmProvider<Person> selStudentsProvider) {
@@ -65,6 +71,16 @@ public class SELSelectStudentActivity extends UstadBaseActivity implements SELSe
 
         //set the adapter
         mRecyclerView.setAdapter(recyclerAdapter);
+    }
+
+    @Override
+    public void setQuestionSetDropdownPresets(String[] presets) {
+        this.questionSetPresets = presets;
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
+                android.R.layout.simple_spinner_item, questionSetPresets);
+
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        selQuestionSetSpinner.setAdapter(adapter);
     }
 
 
@@ -103,6 +119,9 @@ public class SELSelectStudentActivity extends UstadBaseActivity implements SELSe
         studentDoneSnackBar = Snackbar
                 .make(cl, getText(R.string.sel_done_select_another_student), Snackbar.LENGTH_LONG);
 
+        selQuestionSetSpinner =
+                findViewById(R.id.activity_sel_select_student_sel_question_set_spinner);
+
         //Recycler View:
         mRecyclerView = findViewById(
                 R.id.activity_sel_select_student_recyclerview);
@@ -119,6 +138,18 @@ public class SELSelectStudentActivity extends UstadBaseActivity implements SELSe
         if (getIntent().hasExtra(ARG_STUDENT_DONE)){
             studentDoneSnackBar.show();
         }
+
+        selQuestionSetSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                mPresenter.handleChangeQuestionSetSelected(id);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
 
     }
 

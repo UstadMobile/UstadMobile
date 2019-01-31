@@ -44,7 +44,6 @@ public class ReportEditPresenter
     private String reportName = "";
     private String reportDesc = "";
     private String reportLink;
-    private LinkedHashMap<Integer, String> timePeriodOptions;
     private boolean genderDisaggregated = false;
     private boolean studentNumbers = false;
     private boolean studentPercentages = false;
@@ -122,7 +121,7 @@ public class ReportEditPresenter
      * Generates the time period options. Generates the hashmap and sends it to the view.
      */
     private void updateTimePeriod(){
-        timePeriodOptions = new LinkedHashMap<>();
+        LinkedHashMap<Integer, String> timePeriodOptions = new LinkedHashMap<>();
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         timePeriodOptions.put(TIME_PERIOD_LAST_WEEK,
                 impl.getString(MessageID.last_week, context));
@@ -173,7 +172,7 @@ public class ReportEditPresenter
         }
     }
 
-    public void goToSelectTwoDatesDialog(){
+    private void goToSelectTwoDatesDialog(){
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         Hashtable args = new Hashtable();
         impl.go(SelectTwoDatesDialogView.VIEW_NAME, args, context);
@@ -185,7 +184,7 @@ public class ReportEditPresenter
      */
     public void goToLocationDialog(){
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        Hashtable args = new Hashtable();
+        Hashtable<String, Object> args = new Hashtable<>();
 
         if(selectedLocations != null && !selectedLocations.isEmpty()){
             Long[] selectedLocationsArray =
@@ -198,7 +197,7 @@ public class ReportEditPresenter
 
     public void goToSelectClassesDialog(){
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        Hashtable args = new Hashtable();
+        Hashtable<String, Object> args = new Hashtable<>();
 
 
         if(selectedLocations != null && !selectedLocations.isEmpty()){
@@ -217,7 +216,7 @@ public class ReportEditPresenter
 
     public void goToSelectAttendanceThresholdsDialog(){
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        Hashtable args = new Hashtable();
+        Hashtable<String, Object> args = new Hashtable<>();
         if(thresholdValues != null){
             args.put(ARG_THRESHOLD_LOW, thresholdValues.low);
             args.put(ARG_THRESHOLD_MID, thresholdValues.med);
@@ -234,10 +233,8 @@ public class ReportEditPresenter
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
 
         //Create arguments
-        Hashtable args = new Hashtable();
+        Hashtable<String, Object> args = new Hashtable<>();
         args.put(ARG_REPORT_NAME, reportName);
-
-        //TODone: Add time period to argument
         args.put(ARG_FROM_DATE, fromTime);
         args.put(ARG_TO_DATE, toTime);
 
@@ -312,15 +309,6 @@ public class ReportEditPresenter
     }
 
     /**
-     * Gets current set gender disaggregate option
-     *
-     * @return  true if set (ticked/checked), false if not.
-     */
-    public boolean isGenderDisaggregated() {
-        return genderDisaggregated;
-    }
-
-    /**
      * Sets gender disaggregate. Also updates the view.
      *
      * @param genderDisaggregated    true if to set as ticked/checked. false if not.
@@ -330,24 +318,12 @@ public class ReportEditPresenter
         view.updateGenderDisaggregationSet(genderDisaggregated);
     }
 
-    public List<Long> getSelectedClasses() {
-        return selectedClasses;
-    }
-
     public void setSelectedClasses(List<Long> selectedClasses) {
         this.selectedClasses = selectedClasses;
     }
 
-    public List<Long> getSelectedLocations() {
-        return selectedLocations;
-    }
-
     public void setSelectedLocations(List<Long> selectedLocations) {
         this.selectedLocations = selectedLocations;
-    }
-
-    public ReportAttendanceGroupedByThresholdsPresenter.ThresholdValues getThresholdValues() {
-        return thresholdValues;
     }
 
     public void setThresholdValues(ReportAttendanceGroupedByThresholdsPresenter.ThresholdValues thresholdValues) {

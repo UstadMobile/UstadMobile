@@ -1,6 +1,7 @@
 package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.db.UmAppDatabase;
+import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.db.dao.ClazzMemberDao;
 import com.ustadmobile.core.impl.UmAccountManager;
@@ -10,9 +11,12 @@ import com.ustadmobile.core.view.SELSelectConsentView;
 import com.ustadmobile.core.view.SELSelectStudentView;
 import com.ustadmobile.lib.db.entities.ClazzMember;
 import com.ustadmobile.lib.db.entities.Person;
+import com.ustadmobile.lib.db.entities.SocialNominationQuestionSet;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -21,6 +25,7 @@ import static com.ustadmobile.core.view.ClazzListView.ARG_CLAZZ_UID;
 import static com.ustadmobile.core.view.PersonDetailView.ARG_PERSON_UID;
 import static com.ustadmobile.core.view.SELEditView.ARG_CLAZZMEMBER_UID;
 import static com.ustadmobile.core.view.SELSelectStudentView.ARG_DONE_CLAZZMEMBER_UIDS;
+import static com.ustadmobile.core.view.SELSelectStudentView.ARG_SELECTED_QUESTION_SET_UID;
 
 /**
  * SELSelectStudent's Presenter - Responsible for showing every Clazz Member that will participate
@@ -29,11 +34,20 @@ import static com.ustadmobile.core.view.SELSelectStudentView.ARG_DONE_CLAZZMEMBE
  */
 public class SELSelectStudentPresenter extends CommonHandlerPresenter<SELSelectStudentView>  {
 
-    private long currentClazzUid = -1;
+    private long currentClazzUid = 0;
 
     private String doneClazzMemberUids = "";
 
+    private long currentQuestionSetUid = 0;
+
+    private static final long FIRST_SELECTION_ID_FROM = 0;
+
     UmAppDatabase repository = UmAccountManager.getRepositoryForActiveAccount(context);
+
+    private UmLiveData<List<SocialNominationQuestionSet>> questionSetUmProvider;
+
+    private HashMap<Long, Long> idToQuestionSetMap;
+    private HashMap<Long, Long> questionSetToIdMap;
 
     public SELSelectStudentPresenter(Object context, Hashtable arguments,
                                      SELSelectStudentView view) {
@@ -47,7 +61,6 @@ public class SELSelectStudentPresenter extends CommonHandlerPresenter<SELSelectS
         if(arguments.containsKey(ARG_DONE_CLAZZMEMBER_UIDS)){
             doneClazzMemberUids = (String) arguments.get(ARG_DONE_CLAZZMEMBER_UIDS);
         }
-
     }
 
     /**
@@ -71,11 +84,37 @@ public class SELSelectStudentPresenter extends CommonHandlerPresenter<SELSelectS
         UmProvider<Person> selStudentsProvider = repository.getClazzMemberDao()
                 .findAllPeopleInClassUidExcept(currentClazzUid, donClazzMemberUidsList);
 
-        //UmProvider<Person> selStudentsProvider = repository.getClazzMemberDao()
-        //        .findAllPeopleInClassUid(currentClazzUid);
-
         view.setSELAnswerListProvider(selStudentsProvider);
+
+        updateSELQuestionSetOptions();
     }
+
+    public void updateSELQuestionSetOptions(){
+        //Get sel question set change list live data
+        questionSetUmProvider = repository
+                .getSocialNominationQuestionSetDao().findAllQuestionSetsLiveData();
+
+        questionSetUmProvider.observe(SELSelectStudentPresenter.this,
+                SELSelectStudentPresenter.this::updateSELQuestionSetOnView);
+    }
+
+    private void updateSELQuestionSetOnView(List<SocialNominationQuestionSet> questionSets){
+        idToQuestionSetMap = new HashMap<>();
+        questionSetToIdMap = new HashMap<>();
+        ArrayList<String> questions = new ArrayList<>();
+        long i=0;
+        for(SocialNominationQuestionSet questionSet : questionSets){
+            questions.add(questionSet.getTitle());
+            idToQuestionSetMap.put(i, questionSet.getSocialNominationQuestionSetUid());
+            questionSetToIdMap.put(questionSet.getSocialNominationQuestionSetUid(), i);
+            i++;
+        }
+
+        String[] questionPresets = questions.toArray(new String[questions.size()]);
+
+        view.setQuestionSetDropdownPresets(questionPresets);
+    }
+
 
     /**
      * Handles primary press on the student list - Selects that student that runs the SEL. Passes
@@ -93,20 +132,35 @@ public class SELSelectStudentPresenter extends CommonHandlerPresenter<SELSelectS
         args.put(ARG_PERSON_UID, currentPersonUid);
 
         clazzMemberDao.findByPersonUidAndClazzUidAsync(currentPersonUid, currentClazzUid,
-                new UmCallback<ClazzMember>() {
-                    @Override
-                    public void onSuccess(ClazzMember clazzMember) {
-                        args.put(ARG_CLAZZMEMBER_UID, clazzMember.getClazzMemberUid());
-                        args.put(ARG_DONE_CLAZZMEMBER_UIDS, doneClazzMemberUids);
-                        impl.go(SELSelectConsentView.VIEW_NAME, args, view.getContext());
-                        view.finish();
-                    }
+            new UmCallback<ClazzMember>() {
+                @Override
+                public void onSuccess(ClazzMember clazzMember) {
+                    args.put(ARG_CLAZZMEMBER_UID, clazzMember.getClazzMemberUid());
+                    args.put(ARG_DONE_CLAZZMEMBER_UIDS, doneClazzMemberUids);
+                    args.put(ARG_SELECTED_QUESTION_SET_UID, currentQuestionSetUid);
+                    impl.go(SELSelectConsentView.VIEW_NAME, args, view.getContext());
+                    view.finish();
+                }
 
-                    @Override
-                    public void onFailure(Throwable exception) {
-                        exception.printStackTrace();
-                    }
-                });
+                @Override
+                public void onFailure(Throwable exception) {
+                    exception.printStackTrace();
+                }
+            });
+    }
+
+    /**
+     * Handle what happens when a different Question Set is selected.
+     * @param questionChangeUid The question set selected
+     */
+    public void handleChangeQuestionSetSelected(long questionChangeUid){
+        if (idToQuestionSetMap != null && idToQuestionSetMap.containsKey(questionChangeUid)) {
+            currentQuestionSetUid = idToQuestionSetMap.get(questionChangeUid);
+        }else{
+            currentQuestionSetUid = 0;
+        }
+
+
     }
 
     /**

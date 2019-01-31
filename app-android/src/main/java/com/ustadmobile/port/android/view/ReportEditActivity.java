@@ -50,10 +50,6 @@ public class ReportEditActivity extends UstadBaseActivity implements ReportEditV
     private TextView attendanceThresholdHeadingTextView;
     private TextView attendanceThresholdsTextView;
 
-    private HashMap<String, Long> selectedClasses;
-    private HashMap<String, Long> selectedLocations;
-    private ReportAttendanceGroupedByThresholdsPresenter.ThresholdValues thresholdValues;
-
     private RadioGroup studentNumberOrPercentageRadioGroup;
 
     @Override
@@ -170,7 +166,7 @@ public class ReportEditActivity extends UstadBaseActivity implements ReportEditV
     @Override
     public void populateTimePeriod(HashMap<Integer, String> options) {
 
-        String[] timePeriodPresets = options.values().toArray(new String[options.size()]);
+        String[] timePeriodPresets = options.values().toArray(new String[0]);
         ArrayAdapter<String> adapter = new ArrayAdapter<>(getApplicationContext(),
                 R.layout.item_simple_spinner, timePeriodPresets);
 
@@ -248,36 +244,34 @@ public class ReportEditActivity extends UstadBaseActivity implements ReportEditV
 
     @Override
     public void onSelectClazzesResult(HashMap<String, Long> selectedClazzes) {
-        this.selectedClasses = selectedClazzes;
-        String classesSelectedString = "";
+        StringBuilder classesSelectedString = new StringBuilder();
         Iterator<String> selectedClazzesNameIterator = selectedClazzes.keySet().iterator();
         while(selectedClazzesNameIterator.hasNext()){
-            classesSelectedString  += selectedClazzesNameIterator.next();
+            classesSelectedString.append(selectedClazzesNameIterator.next());
             if(selectedClazzesNameIterator.hasNext()){
-                classesSelectedString += ", ";
+                classesSelectedString.append(", ");
             }
         }
         List<Long> selectedClassesList = new ArrayList<>(selectedClazzes.values());
         mPresenter.setSelectedClasses(selectedClassesList);
 
-        updateClazzesSelected(classesSelectedString);
+        updateClazzesSelected(classesSelectedString.toString());
     }
 
     @Override
     public void onLocationResult(HashMap<String, Long> selectedLocations) {
-        this.selectedLocations = selectedLocations;
         Iterator<String> selectedLocationsNameIterator = selectedLocations.keySet().iterator();
-        String locationsSelectedString = "";
+        StringBuilder locationsSelectedString = new StringBuilder();
         while(selectedLocationsNameIterator.hasNext()){
-            locationsSelectedString += selectedLocationsNameIterator.next();
+            locationsSelectedString.append(selectedLocationsNameIterator.next());
             if(selectedLocationsNameIterator.hasNext()){
-                locationsSelectedString += ", ";
+                locationsSelectedString.append(", ");
             }
         }
-        List<Long> selectedLocationList = new ArrayList<>(this.selectedLocations.values());
+        List<Long> selectedLocationList = new ArrayList<>(selectedLocations.values());
         mPresenter.setSelectedLocations(selectedLocationList);
 
-        updateLocationsSelected(locationsSelectedString);
+        updateLocationsSelected(locationsSelectedString.toString());
     }
 
     /**
@@ -295,9 +289,8 @@ public class ReportEditActivity extends UstadBaseActivity implements ReportEditV
 
     @Override
     public void onThresholdResult(ReportAttendanceGroupedByThresholdsPresenter.ThresholdValues values) {
-        this.thresholdValues = values;
         String thresholdString = values.low + "%, " + values.med + "%, " + values.high + "%";
-        mPresenter.setThresholdValues(thresholdValues);
+        mPresenter.setThresholdValues(values);
         updateThresholdSelected(thresholdString);
     }
 

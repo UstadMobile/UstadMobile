@@ -16,6 +16,7 @@ public interface SELSelectStudentView extends UstadView {
     //Arguments
     String ARG_STUDENT_DONE = "studentDone";
     String ARG_DONE_CLAZZMEMBER_UIDS = "donePersonUids";
+    String ARG_SELECTED_QUESTION_SET_UID = "questionSetUid";
 
     /**
      * Sets Current SEL answers by students list
@@ -31,6 +32,14 @@ public interface SELSelectStudentView extends UstadView {
      * Finish the view (closes it)
      */
     void finish();
+
+    /**
+     * Set all question sets to the view to be selected.
+     *
+     * @param presets   The string array in order to be populated in the Question Set title
+     *                 change drop down / spinner
+     */
+    void setQuestionSetDropdownPresets(String[] presets);
 
 
 }

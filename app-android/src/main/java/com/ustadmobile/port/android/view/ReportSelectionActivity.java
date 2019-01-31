@@ -3,10 +3,9 @@ package com.ustadmobile.port.android.view;
 
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
-import android.view.View;
+import android.view.MenuItem;
 import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
-import android.widget.Toast;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.ReportSelectionPresenter;
@@ -16,6 +15,7 @@ import com.ustadmobile.port.android.util.UMAndroidUtil;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 
 /**
@@ -24,8 +24,6 @@ import java.util.List;
  * This Activity extends UstadBaseActivity and implements ReportSelectionView
  */
 public class ReportSelectionActivity extends UstadBaseActivity implements ReportSelectionView {
-
-    private Toolbar toolbar;
 
     private ReportSelectionPresenter mPresenter;
 
@@ -43,11 +41,10 @@ public class ReportSelectionActivity extends UstadBaseActivity implements Report
         setContentView(R.layout.activity_report_selection);
 
         //Toolbar:
-        toolbar = findViewById(R.id.activity_report_selection_toolbar);
+        Toolbar toolbar = findViewById(R.id.activity_report_selection_toolbar);
         toolbar.setTitle(getText(R.string.select_report_type));
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
         //Call the Presenter
         mPresenter = new ReportSelectionPresenter(this,
@@ -56,14 +53,12 @@ public class ReportSelectionActivity extends UstadBaseActivity implements Report
 
         expandableListView = findViewById(R.id.activity_report_selection_expandable_report_list);
 
-
         //new:
         expandableListDataReportsHashMap = ExpandableListDataReports.getDataAll(getApplicationContext());
         expandableListTitle = new ArrayList<>(expandableListDataReportsHashMap.keySet());
 
         expandableListAdapter = new CustomExpandableListAdapter(this,
                 expandableListDataReportsHashMap,  expandableListTitle);
-
 
         expandableListView.setAdapter(expandableListAdapter);
         expandableListView.setOnGroupExpandListener(groupPosition -> {});
@@ -75,6 +70,7 @@ public class ReportSelectionActivity extends UstadBaseActivity implements Report
 
             ExpandableListDataReports groupItem = expandableListDataReportsHashMap
                     .get(expandableListTitle.get(groupPosition));
+            assert groupItem != null;
             if(groupItem.children.size() == 0 && !groupItem.reportLink.isEmpty()){
 
                 mPresenter.goToReport(groupItem.name, groupItem.desc, groupItem.reportLink,
@@ -90,31 +86,33 @@ public class ReportSelectionActivity extends UstadBaseActivity implements Report
         expandableListView.setOnChildClickListener((parent, v, groupPosition, childPosition, id) -> {
 
 
-            mPresenter.goToReport(expandableListDataReportsHashMap
-                    .get(expandableListTitle.get(groupPosition)).children
-                        .get(childPosition).name,expandableListDataReportsHashMap
-                            .get(expandableListTitle.get(groupPosition)).children
-                            .get(childPosition).desc, expandableListDataReportsHashMap
-                    .get(expandableListTitle.get(groupPosition)).children
-                    .get(childPosition).reportLink,
-                    expandableListDataReportsHashMap
-                            .get(expandableListTitle.get(groupPosition)).children
-                            .get(childPosition).showThreshold,
-                    expandableListDataReportsHashMap
-                            .get(expandableListTitle.get(groupPosition)).children
-                            .get(childPosition).showRadioGroup,
-                    expandableListDataReportsHashMap
-                            .get(expandableListTitle.get(groupPosition)).children
-                            .get(childPosition).showGenderDisaggregate,
-                    expandableListDataReportsHashMap
-                            .get(expandableListTitle.get(groupPosition)).children
-                            .get(childPosition).showClazzes,
-                    expandableListDataReportsHashMap
-                            .get(expandableListTitle.get(groupPosition)).children
-                            .get(childPosition).showLocations);
+            ExpandableListDataReports report = Objects.requireNonNull(expandableListDataReportsHashMap
+                    .get(expandableListTitle.get(groupPosition))).children
+                    .get(childPosition);
+
+            mPresenter.goToReport(report.name,report.desc, report.reportLink, report.showThreshold,
+                    report.showRadioGroup, report.showGenderDisaggregate, report.showClazzes,
+                    report.showLocations);
             return false;
         });
 
+    }
+
+    /**
+     * Handles what happens when toolbar menu option selected. Here it is handling what happens when
+     * back button is pressed.
+     *
+     * @param item  The item selected.
+     * @return      true if accounted for.
+     */
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case android.R.id.home:
+                onBackPressed();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
 

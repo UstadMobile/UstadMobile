@@ -40,6 +40,6 @@ public interface ReportOverallAttendanceView extends UstadView {
     /**
      * Generate csv report from the View which has the table data
      */
-    public void generateCSVReport();
+    void generateCSVReport();
 
 }

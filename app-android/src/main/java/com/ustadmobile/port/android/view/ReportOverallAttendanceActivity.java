@@ -31,11 +31,11 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 
 import ru.dimorinny.floatingtextbutton.FloatingTextButton;
 
@@ -47,8 +47,6 @@ import ru.dimorinny.floatingtextbutton.FloatingTextButton;
  */
 public class ReportOverallAttendanceActivity extends UstadBaseActivity
         implements ReportOverallAttendanceView, PopupMenu.OnMenuItemClickListener  {
-
-    private Toolbar toolbar;
 
     //RecyclerView
     private ReportOverallAttendancePresenter mPresenter;
@@ -68,10 +66,10 @@ public class ReportOverallAttendanceActivity extends UstadBaseActivity
         setContentView(R.layout.activity_report_overall_attendance);
 
         //Toolbar:
-        toolbar = findViewById(R.id.activity_report_overall_attendance_toolbar);
+        Toolbar toolbar = findViewById(R.id.activity_report_overall_attendance_toolbar);
         toolbar.setTitle(R.string.overall_attendance_report);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
         tableLayout = findViewById(R.id.activity_report_overall_attendance_table);
 
@@ -83,7 +81,7 @@ public class ReportOverallAttendanceActivity extends UstadBaseActivity
         //FAB and its listener
         //eg:
         FloatingTextButton fab = findViewById(R.id.activity_report_overall_attendance_fab);
-        fab.setOnClickListener(v -> showPopup(v));
+        fab.setOnClickListener(this::showPopup);
 
 
     }
@@ -93,7 +91,7 @@ public class ReportOverallAttendanceActivity extends UstadBaseActivity
         MenuInflater inflater = popup.getMenuInflater();
         inflater.inflate(R.menu.menu_export, popup.getMenu());
 
-        popup.setOnMenuItemClickListener(this::onMenuItemClick);
+        popup.setOnMenuItemClickListener(this);
         popup.show();
     }
 
@@ -117,33 +115,6 @@ public class ReportOverallAttendanceActivity extends UstadBaseActivity
         }
     }
 
-
-    /**
-     * Hides elements of MpAndroid Chart that we do not need as part of the Line Chart in the
-     * Attendance Log list fragment. Hides things as per UI intended (axis, labels, etc)
-     *
-     * @param lineChart The line chart
-     * @return  The line chart with elements hidden.
-     */
-    public LineChart hideEverythingInLineChart(LineChart lineChart){
-
-        //We want the Left Axis grid (vertical lines)
-        //lineChart.getAxisLeft().setDrawGridLines(false);
-
-        //We don't want horizontal grid lines:
-        lineChart.getXAxis().setDrawGridLines(false);
-
-        //No need for legend:
-        lineChart.getLegend().setEnabled(false);
-
-        //We don't want the right label
-        lineChart.getAxisRight().setDrawLabels(false);
-
-        //We don't want the description label here
-        lineChart.getDescription().setEnabled(false);
-
-        return lineChart;
-    }
 
     /**
      * Handles what happens when toolbar menu option selected. Here it is handling what happens when
@@ -172,6 +143,9 @@ public class ReportOverallAttendanceActivity extends UstadBaseActivity
         return (int) (dp * Resources.getSystem().getDisplayMetrics().density);
     }
 
+    /**
+     * Sets up charts UI elements on activity start. Sets legend, colors, size and axis look.
+     */
     public void setUpCharts() {
 
         Locale currentLocale = getResources().getConfiguration().locale;
@@ -183,7 +157,6 @@ public class ReportOverallAttendanceActivity extends UstadBaseActivity
         Description description = new Description();
         lineChart.setDescription(description);
 
-        //lineChart = hideEverythingInLineChart(lineChart);
         lineChart.getAxisLeft().setValueFormatter((value, axis) -> (int) value + "%");
         lineChart.getXAxis().setValueFormatter((value, axis) -> (int) value + "");
         lineChart.setTouchEnabled(false);
@@ -194,6 +167,14 @@ public class ReportOverallAttendanceActivity extends UstadBaseActivity
                         currentLocale));
     }
 
+    /**
+     * Generates Views for the report data provided to it
+     * @param valueIdentifier   Depends on if the data is in numbers or in percentage. This will be
+     *                          the '%' character if the raw report data is counted in percentages
+     *                          or blank '' if just in numbers.
+     * @param dataTableMaps     The report's raw data from the presenter
+     * @return                  A list of Views.
+     */
     public List<View> generateAllViewRowsForTable(String valueIdentifier,
                                                   LinkedHashMap<String,
                                                           LinkedHashMap<String,
@@ -248,6 +229,7 @@ public class ReportOverallAttendanceActivity extends UstadBaseActivity
         LinkedHashMap<String, Float> tableDataAverage;
         tableDataAverage = dataTableMaps.get(ATTENDANCE_LINE_AVERAGE_LABEL_DESC);
 
+        assert tableDataAverage != null;
         if(tableDataAverage.size() > 0) {   //ie: if there is any data
             addThese.add(headingRow);
         }
@@ -270,40 +252,43 @@ public class ReportOverallAttendanceActivity extends UstadBaseActivity
             tableDataFemale = dataTableMaps.get(ATTENDANCE_LINE_FEMALE_LABEL_DESC);
         }
 
-        List<String> dates = new ArrayList<>();
-        dates.addAll(tableDataAverage.keySet());
+        List<String> dates = new ArrayList<>(tableDataAverage.keySet());
         for(String every_date: dates){
             TableRow iRow = new TableRow(getApplicationContext());
             iRow.setLayoutParams(rowParams);
 
-            String iDate = every_date;
             TextView dateView = new TextView(getApplicationContext());
             dateView.setTextColor(Color.BLACK);
             dateView.setLayoutParams(everyItemParam);
-            dateView.setText(iDate);
+            dateView.setText(every_date);
 
             Float averageP = tableDataAverage.get(every_date);
             TextView averageView = new TextView(getApplicationContext());
             averageView.setTextColor(Color.BLACK);
             averageView.setLayoutParams(everyItemParam);
-            averageView.setText(String.valueOf(averageP) + valueIdentifier );
+            String averageViewText = String.valueOf(averageP) + valueIdentifier;
+            averageView.setText(averageViewText);
 
             iRow.addView(dateView);
             iRow.addView(averageView);
 
 
             if(mPresenter.isGenderDisaggregate()){
+                assert tableDataMale != null;
                 Float maleP = tableDataMale.get(every_date);
                 TextView maleView = new TextView(getApplicationContext());
                 maleView.setTextColor(Color.BLACK);
                 maleView.setLayoutParams(everyItemParam);
-                maleView.setText(String.valueOf(maleP) + valueIdentifier);
+                String maleViewString = String.valueOf(maleP) + valueIdentifier;
+                maleView.setText(maleViewString);
 
+                assert tableDataFemale != null;
                 Float femaleP = tableDataFemale.get(every_date);
                 TextView femaleView = new TextView(getApplicationContext());
                 femaleView.setTextColor(Color.BLACK);
                 femaleView.setLayoutParams(everyItemParam);
-                femaleView.setText(String.valueOf(femaleP) + valueIdentifier);
+                String femaleViewString = String.valueOf(femaleP) + valueIdentifier;
+                femaleView.setText(femaleViewString);
 
                 iRow.addView(maleView);
                 iRow.addView(femaleView);
@@ -331,7 +316,7 @@ public class ReportOverallAttendanceActivity extends UstadBaseActivity
 
 
         LineData lineData = new LineData();
-        Boolean hasSomething = false;
+        boolean hasSomething = false;
 
         String valueIdentifier = "";
 
@@ -390,7 +375,7 @@ public class ReportOverallAttendanceActivity extends UstadBaseActivity
         List<View> addThese = generateAllViewRowsForTable(valueIdentifier, tableDataMap);
 
         //Update the lineChart on the UI thread (since this method is called via the Presenter)
-        Boolean finalHasSomething = hasSomething;
+        boolean finalHasSomething = hasSomething;
         runOnUiThread(() -> {
             setUpCharts();
             if(finalHasSomething){
@@ -414,7 +399,7 @@ public class ReportOverallAttendanceActivity extends UstadBaseActivity
     @Override
     public void generateCSVReport() {
 
-        String csvReportFilePath = "";
+        String csvReportFilePath;
         //Create the file.
 
         File dir = getFilesDir();
@@ -424,17 +409,15 @@ public class ReportOverallAttendanceActivity extends UstadBaseActivity
 
         try {
             FileWriter fileWriter = new FileWriter(csvReportFilePath);
-            Iterator<String[]> tableTextdataIterator = tableTextData.iterator();
 
-            while(tableTextdataIterator.hasNext()){
+            for (String[] aTableTextData : tableTextData) {
                 boolean firstDone = false;
-                String[] lineArray = tableTextdataIterator.next();
-                for(int i=0;i<lineArray.length;i++){
-                    if(firstDone){
+                for (String aLineArray : aTableTextData) {
+                    if (firstDone) {
                         fileWriter.append(",");
                     }
                     firstDone = true;
-                    fileWriter.append(lineArray[i]);
+                    fileWriter.append(aLineArray);
                 }
                 fileWriter.append("\n");
             }

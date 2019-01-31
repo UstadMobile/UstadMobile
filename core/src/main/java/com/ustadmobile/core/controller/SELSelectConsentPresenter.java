@@ -31,6 +31,7 @@ import static com.ustadmobile.core.view.SELQuestionView.ARG_QUESTION_TEXT;
 import static com.ustadmobile.core.view.SELQuestionView.ARG_QUESTION_TOTAL;
 import static com.ustadmobile.core.view.SELRecognitionView.ARG_RECOGNITION_UID;
 import static com.ustadmobile.core.view.SELSelectStudentView.ARG_DONE_CLAZZMEMBER_UIDS;
+import static com.ustadmobile.core.view.SELSelectStudentView.ARG_SELECTED_QUESTION_SET_UID;
 
 
 /**
@@ -42,11 +43,12 @@ public class SELSelectConsentPresenter
         extends UstadBaseController<SELSelectConsentView> {
 
     //Any arguments stored as variables here
-    private long currentClazzUid = -1;
-    private long currentPersonUid = -1;
-    private long currentClazzMemberUid = -1;
+    private long currentClazzUid = 0;
+    private long currentPersonUid = 0;
+    private long currentClazzMemberUid = 0;
     private int MIN_RECOGNITION_SUCCESSES = 0;
     private String doneClazzMemberUids = "";
+    private long currentQuestionSetUid = 0;
     public static final int BASE_INDEX_SEL_QUESTION = 0;
 
     UmAppDatabase repository = UmAccountManager.getRepositoryForActiveAccount(context);
@@ -68,6 +70,9 @@ public class SELSelectConsentPresenter
         }
         if(arguments.containsKey(ARG_DONE_CLAZZMEMBER_UIDS)){
             doneClazzMemberUids = (String) arguments.get(ARG_DONE_CLAZZMEMBER_UIDS);
+        }
+        if(arguments.containsKey(ARG_SELECTED_QUESTION_SET_UID)){
+            currentQuestionSetUid = (long) arguments.get(ARG_SELECTED_QUESTION_SET_UID);
         }
 
     }
@@ -91,10 +96,6 @@ public class SELSelectConsentPresenter
         //Check selectedObject for consent given.
         if(consentGiven){
 
-            //Update: Recognition is always checked before the question run through and the
-            // question set is always selected as per Sprint 5.
-            //TODOne: Check: Decide when to show recognition and when to show the
-            // SEL questions themselves
             socialNominationQuestionSetResponseDao.findAllPassedRecognitionByPersonUid(
                     currentClazzMemberUid,
                     new UmCallback<List<SocialNominationQuestionSetResponse>>() {
@@ -119,6 +120,7 @@ public class SELSelectConsentPresenter
                         args.put(ARG_CLAZZ_UID, currentClazzUid);
                         args.put(ARG_PERSON_UID, currentPersonUid);
                         args.put(ARG_CLAZZMEMBER_UID, currentClazzMemberUid);
+                        args.put(ARG_SELECTED_QUESTION_SET_UID, currentQuestionSetUid);
                         doneClazzMemberUids += "," + String.valueOf(currentClazzMemberUid);
                         args.put(ARG_DONE_CLAZZMEMBER_UIDS, doneClazzMemberUids);
 
