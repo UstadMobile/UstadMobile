@@ -362,8 +362,7 @@ public class DbProcessorJdbc extends AbstractDbProcessor implements QueryMethodG
                             .add("$T _connection = getConnection();\n", Connection.class)
                             .add("$T _stmt = _connection.createStatement();\n", Statement.class)
                         .unindent().beginControlFlow(")")
-                            .add("_stmt.executeUpdate(\"CREATE TABLE IF NOT EXISTS _lastsyncablepk(" +
-                                "id INTEGER PRIMARY KEY AUTOINCREMENT, lastpk BIGINT)\");\n")
+                            .add("_stmt.executeUpdate($S);\n", SQLITE_CREATE_LAST_SYNCABLE_PK_SQL)
                         .nextControlFlow("catch($T _sqle)", SQLException.class)
                             .add("throw new RuntimeException(_sqle);\n")
                         .endControlFlow().build())
