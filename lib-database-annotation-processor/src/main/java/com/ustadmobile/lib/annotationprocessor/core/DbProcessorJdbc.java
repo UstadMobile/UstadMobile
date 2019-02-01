@@ -165,7 +165,6 @@ public class DbProcessorJdbc extends AbstractDbProcessor implements QueryMethodG
                                     JdbcDatabaseUtils.class)
                             .add("$T.setIsMasterFromJndi(this, dbName, iContext);\n",
                                     JdbcDatabaseUtils.class)
-                            .add("createAllTables();\n")
                         .endControlFlow()
                         .beginControlFlow("catch($T e)",
                                 ClassName.get(NamingException.class))
@@ -380,7 +379,9 @@ public class DbProcessorJdbc extends AbstractDbProcessor implements QueryMethodG
      * @return MethodSpec with a generated implementation to create all tables for this database
      */
     protected MethodSpec generateCreateTablesMethod(TypeElement dbType) {
-        MethodSpec.Builder createMethod = MethodSpec.methodBuilder("createAllTables");
+        MethodSpec.Builder createMethod = MethodSpec.methodBuilder("createAllTables")
+                .addAnnotation(Override.class)
+                .addModifiers(Modifier.PUBLIC);
         CodeBlock.Builder createCb = CodeBlock.builder();
         if(processingEnv.getTypeUtils().isAssignable(dbType.asType(),
                 processingEnv.getElementUtils().getTypeElement(UmSyncableDatabase.class.getName())
@@ -395,16 +396,7 @@ public class DbProcessorJdbc extends AbstractDbProcessor implements QueryMethodG
                 .add("$T _connection = getConnection();\n", Connection.class)
                 .add("$T _stmt = _connection.createStatement();\n", ClassName.get(Statement.class))
             .unindent().beginControlFlow(")")
-                .add("$T _metaData = _connection.getMetaData();\n", DatabaseMetaData.class)
-                .add("$T _existingTableNames = $T.getTableNames(_connection);\n",
-                        ParameterizedTypeName.get(ClassName.get(List.class), ClassName.get(String.class)),
-                        ClassName.get(JdbcDatabaseUtils.class));
-
-        createCb.beginControlFlow("if($T.listContainsStringIgnoreCase(" +
-                        "_existingTableNames, \"_doorwayinfo\"))",
-                    JdbcDatabaseUtils.class)
-                .add("return;\n")
-                .endControlFlow();
+                .add("$T _metaData = _connection.getMetaData();\n", DatabaseMetaData.class);
 
         for(String sqlProductName : SUPPORTED_DB_PRODUCT_NAMES) {
             createCb.beginControlFlow("if($S.equals(_metaData.getDatabaseProductName()))",
