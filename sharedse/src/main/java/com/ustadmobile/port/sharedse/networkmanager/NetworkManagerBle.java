@@ -354,7 +354,7 @@ public abstract class NetworkManagerBle {
      * @return Set of all unique UUID's
      */
     private SortedSet<Long> getAllUidsToBeMonitored() {
-        SortedSet uidsToBeMonitoredSet = new TreeSet();
+        SortedSet<Long> uidsToBeMonitoredSet = new TreeSet<>();
         for(List<Long> uidList : availabilityMonitoringRequests.values()) {
             uidsToBeMonitoredSet.addAll(uidList);
         }
