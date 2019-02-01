@@ -59,15 +59,15 @@ public class OpfDocument {
     private Map<String, OpfItem> manifestItems;
 
     private List<OpfItem> coverImages = new ArrayList<>();
-    
+
     /**
-     * The item from the OPF that contains "nav" in it's properties.  As per the 
+     * The item from the OPF that contains "nav" in it's properties.  As per the
      * EPUB spec there must be exactly one such item
      */
     public OpfItem navItem;
-    
+
     public String title;
-    
+
     public String id;
 
     public String description;
@@ -84,12 +84,12 @@ public class OpfDocument {
 
     //As per the OPF spec a dc:language tag is required
     private List<String> languages = new Vector<>();
-    
+
     /**
      * Flag value to indicate we should parse the metadata (e.g. title, identifier, description)
      */
     public static final int PARSE_METADATA = 1;
-    
+
     /**
      * Flag value to indicate we should parse the manifest
      */
@@ -162,25 +162,25 @@ public class OpfDocument {
             this.refines = refines;
         }
     }
-    
+
     public OpfDocument() {
         spine = new ArrayList<>();
         manifestItems = new HashMap<>();
     }
-    
-    
+
+
     public void loadFromOPF(XmlPullParser xpp) throws XmlPullParserException, IOException {
         loadFromOPF(xpp, PARSE_METADATA | PARSE_MANIFEST);
     }
-    
+
     /*
      * xpp: Parser of the OPF
      */
     public void loadFromOPF(XmlPullParser xpp, int parseFlags) throws XmlPullParserException, IOException {
         boolean parseMetadata = (parseFlags & PARSE_METADATA) == PARSE_METADATA;
         boolean parseManifest = (parseFlags & PARSE_MANIFEST) == PARSE_MANIFEST;
-        
-        
+
+
         int evtType = xpp.getEventType();
         String filename=null;
         String itemMime=null;
@@ -190,7 +190,7 @@ public class OpfDocument {
         boolean isLinear = true;
         String isLinearStrVal = null;
 
-        
+
         boolean inMetadata = false;
         do
         {
@@ -204,9 +204,9 @@ public class OpfDocument {
             String tagName;
             OpfCreator creator;
             String tagVal;
-            
-                        
-            
+
+
+
             //If we are parsing the manifest
             if(parseManifest) {
                 if(evtType == XmlPullParser.START_TAG){
@@ -256,16 +256,16 @@ public class OpfDocument {
                     }
                 }
             }
-            
+
             if(parseMetadata) {
                 if(evtType == XmlPullParser.START_TAG) {
                     if(uniqueIdentifier == null && xpp.getName().equals("package")) {
-                        uniqueIdentifier = xpp.getAttributeValue(null, 
+                        uniqueIdentifier = xpp.getAttributeValue(null,
                                 "unique-identifier");
                     }else if(!inMetadata&& xpp.getName().equals("metadata")) {
                         inMetadata = true;
                     }
-                    
+
                     if(inMetadata) {
                         if(xpp.getName().equals("dc:title")) {
                             title = xpp.nextText();
@@ -310,10 +310,10 @@ public class OpfDocument {
                     }
                 }
             }
-            
-            
+
+
             evtType = xpp.next();
-            
+
         }while(evtType != XmlPullParser.END_DOCUMENT);
     }
 
@@ -325,14 +325,15 @@ public class OpfDocument {
      * @throws IOException if an IOException occurs in the underlying IO
      */
     public void serialize(XmlSerializer xs) throws IOException {
-        xs.startDocument("UTF-8", false);
+        xs.startDocument("UTF-8", Boolean.FALSE);
         xs.setPrefix("", NAMESPACE_OPF);
-        xs.startTag(null, "package");
+
+        xs.startTag(NAMESPACE_OPF, "package");
         xs.attribute(null,"version", "3.0");
         xs.attribute(null, "unique-identifier", uniqueIdentifier);
-        xs.setPrefix("dc", NAMESPACE_DC);
-        xs.startTag(null, "metadata");
 
+        xs.setPrefix("dc", NAMESPACE_DC);
+        xs.startTag(NAMESPACE_OPF, "metadata");
 
         xs.startTag(NAMESPACE_DC, "identifier");
         xs.attribute(null, "id", uniqueIdentifier);
@@ -343,33 +344,33 @@ public class OpfDocument {
         xs.text(title);
         xs.endTag(NAMESPACE_DC, "title");
 
-        xs.endTag(null, "metadata");
+        xs.endTag(NAMESPACE_OPF, "metadata");
 
-        xs.startTag(null, "manifest");
+        xs.startTag(NAMESPACE_OPF, "manifest");
         for(OpfItem item : manifestItems.values()) {
-            xs.startTag(null, "item");
+            xs.startTag(NAMESPACE_OPF, "item");
             xs.attribute(null, "id", item.getId());
             xs.attribute(null, "href", item.getHref());
             xs.attribute(null, "media-type", item.getMimeType());
             if(item.getProperties() != null)
                 xs.attribute(null, "properties", item.getProperties());
-            xs.endTag(null, "item");
+            xs.endTag(NAMESPACE_OPF, "item");
         }
-        xs.endTag(null, "manifest");
+        xs.endTag(NAMESPACE_OPF, "manifest");
 
-        xs.startTag(null, "spine");
+        xs.startTag(NAMESPACE_OPF, "spine");
         for(OpfItem item : spine) {
-            xs.startTag(null, "itemref");
+            xs.startTag(NAMESPACE_OPF, "itemref");
             xs.attribute(null, "idref", item.getId());
-            xs.endTag(null, "itemref");
+            xs.endTag(NAMESPACE_OPF, "itemref");
         }
-        xs.endTag(null, "spine");
+        xs.endTag(NAMESPACE_OPF, "spine");
 
-        xs.endTag(null, "package");
+        xs.endTag(NAMESPACE_OPF, "package");
         xs.endDocument();
     }
 
-    
+
     public String getMimeType(String filename) {
         OpfItem item = findItemByHref(filename);
         if(item != null)
@@ -405,7 +406,7 @@ public class OpfDocument {
 
     /**
      * Gets an array of linear hrefs from the spine
-     * 
+     *
      * @return String array of all the HREFs that are in the linear spine order
      */
     public String[] getLinearSpineHREFs() {
@@ -420,10 +421,10 @@ public class OpfDocument {
 
         return spineHREFs.toArray(new String[0]);
     }
-    
-     /**
+
+    /**
      * Find the position of a particular spine item
-     * 
+     *
      * @param href the href to find the position of in the spine (as it appears in the OPF (relative)
      * @return position of that item in the linear spine or -1 if not found
      */
@@ -434,7 +435,7 @@ public class OpfDocument {
                 return i;
             }
         }
-        
+
         return -1;
     }
 

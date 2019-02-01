@@ -60,9 +60,9 @@ public class EpubNavDocument {
 
     private static final String EPUB_NAV_DOCUMENT_TYPE_TOC = "toc";
 
-    private static final String DOCTYPE_OPS_NAMESPACE = "http://www.idpf.org/2007/ops";
+    private static final String NAMESPACE_OPS = "http://www.idpf.org/2007/ops";
 
-    public static final String DOCTYPE_XHTML_NAMESPACE = "http://www.w3.org/1999/xhtml";
+    public static final String NAMESPACE_XHTML = "http://www.w3.org/1999/xhtml";
     
     public EpubNavDocument() {
         navItems = new Hashtable<>();
@@ -84,7 +84,7 @@ public class EpubNavDocument {
                     tagName = xpp.getName();
                     if(tagName.equals("nav")) {
                         currentNav = new EpubNavItem(null, null, null, 0);
-                        String navTypeAttr = xpp.getAttributeValue(DOCTYPE_OPS_NAMESPACE,
+                        String navTypeAttr = xpp.getAttributeValue(NAMESPACE_OPS,
                                 "type");
                         String idAttrVal = xpp.getAttributeValue(null, "id");
 
@@ -124,55 +124,55 @@ public class EpubNavDocument {
 
     public void serialize(XmlSerializer xs) throws IOException{
         xs.startDocument("UTF-8", false);
-        xs.setPrefix(null, DOCTYPE_XHTML_NAMESPACE);
-        xs.setPrefix("epub", DOCTYPE_OPS_NAMESPACE);
+        xs.setPrefix("", NAMESPACE_XHTML);
+        xs.setPrefix("epub", NAMESPACE_OPS);
 
-        xs.startTag(null, "html")
-            .startTag(null, "head")
-                .startTag(null, "meta")
+        xs.startTag(NAMESPACE_XHTML, "html")
+            .startTag(NAMESPACE_XHTML, "head")
+                .startTag(NAMESPACE_XHTML, "meta")
                     .attribute(null, "charset", "UTF-8")
-                .endTag(null, "meta")
-            .endTag(null, "head")
-            .startTag(null, "body");
+                .endTag(NAMESPACE_XHTML, "meta")
+            .endTag(NAMESPACE_XHTML, "head")
+            .startTag(NAMESPACE_XHTML, "body");
 
         for(EpubNavItem navItem : navElements) {
-            xs.startTag(null, "nav");
+            xs.startTag(NAMESPACE_XHTML, "nav");
             if(navItem.getId() != null)
                 xs.attribute(null, "id", navItem.getId());
 
             if(navItem.getNavElEpubTypeAttr() != null)
-                xs.attribute(DOCTYPE_OPS_NAMESPACE, "type",
+                xs.attribute(NAMESPACE_OPS, "type",
                         navItem.getNavElEpubTypeAttr());
 
-            xs.startTag(null, "ol");
+            xs.startTag(NAMESPACE_XHTML, "ol");
             for(EpubNavItem childItem : navItem.getChildren()){
                 writeNavItem(childItem, xs);
             }
-            xs.endTag(null, "ol")
-                .endTag(null, "nav");
+            xs.endTag(NAMESPACE_XHTML, "ol")
+                .endTag(NAMESPACE_XHTML, "nav");
         }
 
-        xs.endTag(null, "body");
-        xs.endTag(null, "html");
+        xs.endTag(NAMESPACE_XHTML, "body");
+        xs.endTag(NAMESPACE_XHTML, "html");
         xs.endDocument();
     }
 
     private void writeNavItem(EpubNavItem item, XmlSerializer xs) throws IOException {
-        xs.startTag(null, "li")
-            .startTag(null, "a")
+        xs.startTag(NAMESPACE_XHTML, "li")
+            .startTag(NAMESPACE_XHTML, "a")
                 .attribute(null, "href", item.getHref())
                 .text(item.getTitle())
-            .endTag(null, "a");
+            .endTag(NAMESPACE_XHTML, "a");
 
         if(item.hasChildren()) {
-            xs.startTag(null, "ol");
+            xs.startTag(NAMESPACE_XHTML, "ol");
             for(EpubNavItem child : item.getChildren()){
                 writeNavItem(child, xs);
             }
-            xs.endTag(null, "ol");
+            xs.endTag(NAMESPACE_XHTML, "ol");
         }
 
-        xs.endTag(null, "li");
+        xs.endTag(NAMESPACE_XHTML, "li");
     }
 
 
