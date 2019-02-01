@@ -176,6 +176,8 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
         return db;
     }
 
+
+
     public abstract OpdsEntryDao getOpdsEntryDao();
 
     public abstract OpdsEntryWithRelationsDao getOpdsEntryWithRelationsDao();

@@ -19,34 +19,11 @@ public abstract class SyncablePrimaryKeyDao  {
 
     private volatile int deviceBits = -1;
 
-    private long deviceMask = -1L;
-
-
-    public synchronized long getAndIncrement(int tableId, int increment) {
-        if(deviceMask== -1) {
-            deviceBits = getDeviceBits();
-            deviceMask = ((long)deviceBits << 32);
-        }
-
-
-        int nextSequenceNumber = findNextPrimaryKeyByTableId(tableId) + 1;
-        if(nextSequenceNumber == 1) {
-            insert(new SyncablePrimaryKey(tableId, 1));
-        }
-
-        updateNextSequenceNumber(tableId, increment);
-
-        return deviceMask | nextSequenceNumber;
-    }
-
     @UmQuery("SELECT sequenceNumber FROM SyncablePrimaryKey WHERE tableId = :tableId")
     public abstract int findNextPrimaryKeyByTableId(int tableId);
 
     @UmInsert
     public abstract void insert(SyncablePrimaryKey syncablePrimaryKey);
-
-    @UmQuery("UPDATE SyncablePrimaryKey SET sequenceNumber = sequenceNumber + :increment WHERE tableId = :tableId")
-    public abstract void updateNextSequenceNumber(int tableId, int increment);
 
 
     public synchronized int getDeviceBits() {
@@ -63,7 +40,6 @@ public abstract class SyncablePrimaryKeyDao  {
 
     public synchronized void invalidateDeviceBits() {
         deviceBits = -1;
-        deviceMask = -1L;
     }
 
     @UmQuery("SELECT deviceBits FROM SyncDeviceBits WHERE id = " + SyncDeviceBits.PRIMARY_KEY)

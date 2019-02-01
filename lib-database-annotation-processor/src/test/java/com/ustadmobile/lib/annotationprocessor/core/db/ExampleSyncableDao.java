@@ -92,4 +92,7 @@ public abstract class ExampleSyncableDao implements SyncableDao<ExampleSyncableE
     public abstract String getTitleByUidAuthenticated(long uid, @UmRestAuthorizedUidParam long personUid);
 
 
+    @UmQuery("SELECT COUNT(*) FROM ExampleSyncableEntity")
+    public abstract int countNumEntities();
+
 }
