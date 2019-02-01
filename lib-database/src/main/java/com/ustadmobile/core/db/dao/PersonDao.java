@@ -213,4 +213,7 @@ public abstract class PersonDao implements SyncableDao<Person, PersonDao> {
 
     @UmQuery("SELECT Person.* FROM PERSON Where Person.username = :username")
     public abstract Person findByUsername(String username);
+
+    @UmQuery("SELECT Count(*) FROM Person")
+    public abstract long countAll();
 }
