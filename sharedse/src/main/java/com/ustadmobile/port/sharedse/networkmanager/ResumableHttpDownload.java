@@ -16,6 +16,9 @@ import java.net.URL;
 import java.util.Map;
 import java.util.Properties;
 import java.util.TreeMap;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * <h1>ResumableHttpDownload</h1>
@@ -73,7 +76,7 @@ public class ResumableHttpDownload {
 
     private volatile long downloadedSoFar;
 
-    private boolean stopped = false;
+    private AtomicInteger stopped;
 
     /**
      * The timeout to read data. The HttpUrlConnection client on Android by default seems to leave
@@ -104,7 +107,10 @@ public class ResumableHttpDownload {
 
     private int responseCode;
 
+    private final ReentrantLock statusLock = new ReentrantLock();
+
     public ResumableHttpDownload(String httpSrc, String destinationFile){
+        stopped = new AtomicInteger(0);
         this.httpSrc = httpSrc;
         this.destinationFile = destinationFile;
         logPrefix = SUBLOGTAG + "(" + System.identityHashCode(this)+")";
@@ -219,7 +225,9 @@ public class ResumableHttpDownload {
 
             String contentRangeResponse = con.getHeaderField(HTTP_HEADER_CONTENT_RANGE);
 
-            synchronized (this) {
+            try {
+                statusLock.lock();
+
                 if(contentRangeResponse != null && con.getResponseCode() == HttpURLConnection.HTTP_PARTIAL) {
                     contentRangeResponse = contentRangeResponse.substring(contentRangeResponse.indexOf('/')+1).trim();
                     if(!contentRangeResponse.equals("*")) {
@@ -228,7 +236,8 @@ public class ResumableHttpDownload {
                 }else {
                     totalSize = con.getContentLength();
                 }
-
+            }finally {
+                statusLock.unlock();
             }
 
             propertiesOut = new FileOutputStream(dlInfoFile);
@@ -238,7 +247,10 @@ public class ResumableHttpDownload {
 
             responseCode = con.getResponseCode();
             boolean appendToPartFileOutput = responseCode == HttpURLConnection.HTTP_PARTIAL;
-            synchronized (this) {
+
+            try {
+                statusLock.lock();
+
                 if(isStopped()) {
                     UstadMobileSystemImpl.l(UMLog.INFO, 0, mkLogPrefix() + " stopped before output file is to be opened");
                     return false;
@@ -247,6 +259,8 @@ public class ResumableHttpDownload {
                 fileOut = new BufferedOutputStream(new FileOutputStream(dlPartFile, appendToPartFileOutput));
                 downloadedSoFar = appendToPartFileOutput ? dlPartFileSize : 0L;
                 progressHistoryLastRecorded = System.currentTimeMillis();
+            }finally {
+                statusLock.unlock();
             }
 
             synchronized (downloadProgressHistory){
@@ -259,18 +273,25 @@ public class ResumableHttpDownload {
 
             long currentTime;
             while((bytesRead = httpIn.read(buf)) != -1) {
-                synchronized (this) {
+                try {
+                    statusLock.lock();
+
                     if(!isStopped()) {
                         fileOut.write(buf, 0, bytesRead);
                     }else{
                         break;
                     }
+                }finally {
+                    statusLock.unlock();
                 }
 
-
                 currentTime = System.currentTimeMillis();
-                synchronized (this) {
+
+                try{
+                    statusLock.lock();
                     downloadedSoFar += bytesRead;
+                }finally {
+                    statusLock.unlock();
                 }
 
                 synchronized (downloadProgressHistory){
@@ -285,11 +306,14 @@ public class ResumableHttpDownload {
                 }
             }
 
-            synchronized (this){
+            try {
+                statusLock.lock();
                 if(!isStopped()) {
                     fileOut.flush();
                 }
                 completed = downloadedSoFar == totalSize;
+            }finally {
+                statusLock.unlock();
             }
         }catch(IOException e) {
             ioe = e;
@@ -298,9 +322,12 @@ public class ResumableHttpDownload {
             UMIOUtils.closeOutputStream(propertiesOut);
             UMIOUtils.closeInputStream(httpIn);
             httpIn = null;
-            synchronized (this) {
+            try {
+                statusLock.lock();
                 UMIOUtils.closeOutputStream(fileOut);
                 fileOut = null;
+            }finally {
+                statusLock.unlock();
             }
 
             if(con != null) {
@@ -432,34 +459,49 @@ public class ResumableHttpDownload {
      *
      * @return the number of bytes downloaded
      */
-    public synchronized long stop() {
-        stopped = true;
-        UstadMobileSystemImpl.l(UMLog.DEBUG, 0, mkLogPrefix() + " stop() called");
+    public long stop() {
+        try {
+            statusLock.lock();
 
-        //close the file output stream
-        if(fileOut != null) {
-            try {
-                fileOut.flush();
-                UstadMobileSystemImpl.l(UMLog.DEBUG, 0, mkLogPrefix() + "stop: flushed fileout OK");
-            }catch(IOException e) {
-                UstadMobileSystemImpl.l(UMLog.ERROR, 0, mkLogPrefix() + "stop: exception flushing fileOut", e);
-            }
+            stopped.incrementAndGet();
 
-            try {
-                fileOut.close();
-                UstadMobileSystemImpl.l(UMLog.DEBUG, 0, mkLogPrefix() + "stop: closed fileout OK");
-            }catch(IOException e) {
-                UstadMobileSystemImpl.l(UMLog.ERROR, 0, mkLogPrefix() + "stop: exception closing fileout", e);
-            }finally {
-                fileOut = null;
+            //stopped.set(true);
+            UstadMobileSystemImpl.l(UMLog.DEBUG, 0, mkLogPrefix() + " stop() called");
+
+            //close the file output stream
+            if(fileOut != null) {
+                try {
+                    fileOut.flush();
+                    UstadMobileSystemImpl.l(UMLog.DEBUG, 0, mkLogPrefix() + "stop: flushed fileout OK");
+                }catch(IOException e) {
+                    UstadMobileSystemImpl.l(UMLog.ERROR, 0, mkLogPrefix() + "stop: exception flushing fileOut", e);
+                }
+
+                try {
+                    fileOut.close();
+                    UstadMobileSystemImpl.l(UMLog.DEBUG, 0, mkLogPrefix() + "stop: closed fileout OK");
+                }catch(IOException e) {
+                    UstadMobileSystemImpl.l(UMLog.ERROR, 0, mkLogPrefix() + "stop: exception closing fileout", e);
+                }finally {
+                    fileOut = null;
+                }
             }
+        }finally {
+            statusLock.unlock();
         }
 
         return downloadedSoFar;
     }
 
-    protected synchronized boolean isStopped() {
-        return stopped;
+    protected boolean isStopped() {
+        try {
+            statusLock.lock();
+            boolean val = (stopped.get() != 0);
+            return val;
+        }finally{
+            statusLock.unlock();
+        }
+
     }
 
     public URLConnectionOpener getConnectionOpener() {

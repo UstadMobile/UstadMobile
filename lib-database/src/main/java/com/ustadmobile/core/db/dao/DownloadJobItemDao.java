@@ -34,16 +34,16 @@ public abstract class DownloadJobItemDao {
      * Update the main status fields for the given DownloadJobitem
      *
      * @param djiUid DownloadJobItemId to update (primary key)
-     * @param status status property to set
+     * @param djiStatus status property to set
      * @param downloadedSoFar downloadedSoFar property to set
      * @param downloadLength downloadLength property to set
      * @param currentSpeed currentSpeed property to set
      */
     @UmQuery("Update DownloadJobItem SET " +
-            "status = :status, downloadedSoFar = :downloadedSoFar, " +
+            "djiStatus = :djiStatus, downloadedSoFar = :downloadedSoFar, " +
             "downloadLength = :downloadLength, currentSpeed = :currentSpeed " +
             " WHERE djiUid = :djiUid")
-    public abstract void updateDownloadJobItemStatus(int djiUid, int status,
+    public abstract void updateDownloadJobItemStatus(int djiUid, int djiStatus,
                                                      long downloadedSoFar, long downloadLength,
                                                      long currentSpeed);
 

@@ -44,7 +44,8 @@ public class DownloadJobItem {
 
     }
 
-    public DownloadJobItem(DownloadJob downloadJob, DownloadSetItem downloadSetItem) {
+    public DownloadJobItem(DownloadJob downloadJob, DownloadSetItem downloadSetItem,
+                           ContentEntryFile contentEntryFile) {
         this.djiDjUid = downloadJob.getDjUid();
         this.djiDsiUid = downloadSetItem.getDsiUid();
     }
