@@ -14,7 +14,6 @@ import com.ustadmobile.lib.db.entities.DownloadSet;
 import com.ustadmobile.lib.db.entities.OpdsEntryStatusCache;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithStatusCache;
 import com.ustadmobile.port.sharedse.view.DownloadDialogView;
-import com.ustadmobile.port.sharedse.networkmanager.CrawlTask;
 
 import java.util.Arrays;
 import java.util.Hashtable;
@@ -36,8 +35,6 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
     private String[] rootEntryUuid;
 
     private String rootEntryId;
-
-    private CrawlTask task;
 
     private UmLiveData<OpdsEntryWithStatusCache> entryLiveData;
 

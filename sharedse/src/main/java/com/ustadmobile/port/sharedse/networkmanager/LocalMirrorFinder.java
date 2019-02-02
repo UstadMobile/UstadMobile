@@ -9,7 +9,7 @@ import java.util.List;
  * entry. This is normally the NetworkManager itself. However this can be implemented by another
  * class for testing purposes.
  */
-
+@Deprecated
 public interface LocalMirrorFinder {
 
     /**

@@ -10,6 +10,7 @@ import java.io.OutputStream;
  *
  * @author kileha3
  */
+@Deprecated
 public interface BluetoothConnectionHandler {
     /**
      * Method to be invoked when connection is made

@@ -89,7 +89,7 @@ import fi.iki.elonen.router.RouterNanoHTTPD;
  * @see NetworkManagerTaskListener
  * @see com.ustadmobile.core.networkmanager.NetworkManagerCore
  */
-
+@Deprecated
 public abstract class NetworkManager implements NetworkManagerCore, NetworkManagerTaskListener,
         LocalMirrorFinder, DownloadTaskListener, EntryStatusTask.NetworkNodeListProvider, EmbeddedHTTPD.ResponseListener {
 
@@ -489,58 +489,59 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
      */
     public CrawlJob prepareDownload(DownloadSet downloadSet, CrawlJob crawlJob,
                                     boolean allowDownloadOverMeteredNetwork) {
-        UmAppDatabase dbManager = UmAppDatabase.getInstance(getContext());
-        DownloadSetDao setDao = dbManager.getDownloadSetDao();
-        DownloadJobDao jobDao = dbManager.getDownloadJobDao();
-
-        if(crawlJob.getRootEntryUuid() == null && crawlJob.getRootEntryUri() == null)
-            throw new IllegalArgumentException("CrawlJob has no root uuid or uri!");
-
-        //see if this downloadset already exists
-        if(crawlJob.getRootEntryUuid() == null){
-            //we need to load the root item using the OpdsRepository
-            OpdsEntryWithRelations rootEntry = UstadMobileSystemImpl.getInstance()
-                    .getOpdsAtomFeedRepository(getContext())
-                    .getEntryByUrlStatic(crawlJob.getRootEntryUri());
-            crawlJob.setRootEntryUuid(rootEntry.getUuid());
-        }
-
-
-        DownloadSet existingSet = dbManager.getDownloadSetDao().findByRootEntry(
-                crawlJob.getRootEntryUuid());
-        if(existingSet != null) {
-            //TODO: Move downloaded items between folders if needed
-            existingSet.setDestinationDir(downloadSet.getDestinationDir());
-            downloadSet = existingSet;
-        }else{
-            downloadSet.setRootOpdsUuid(crawlJob.getRootEntryUuid());
-        }
-
-        downloadSet.setId((int)setDao.insertOrReplace(downloadSet));
-
-        //Now create a new download job
-        DownloadJob downloadJob = new DownloadJob(downloadSet, System.currentTimeMillis());
-        downloadJob.setAllowMeteredDataUsage(allowDownloadOverMeteredNetwork);
-        downloadJob.setStatus(UstadMobileSystemImpl.DLSTATUS_NOT_STARTED);
-
-
-        downloadJob.setDownloadJobId((int)jobDao.insert(downloadJob));
-
-        CrawlJobDao crawlJobDao = dbManager.getCrawlJobDao();
-        crawlJob.setContainersDownloadJobId(downloadJob.getDownloadJobId());
-        crawlJob.setCrawlJobId((int)crawlJobDao.insert(crawlJob));
-
-
-        //Insert the root crawl item
-        OpdsEntryWithRelations entry = new OpdsEntryWithRelations();
-        entry.setUuid(crawlJob.getRootEntryUuid());
-        UmAppDatabase.getInstance(getContext()).getDownloadJobCrawlItemDao().insert(
-                new CrawlJobItem(crawlJob.getCrawlJobId(), entry, NetworkTask.STATUS_QUEUED, 0));
-
-        CrawlTask task = new CrawlTask(crawlJob, dbManager, this);
-        task.start();
-
-        return crawlJob;
+//        UmAppDatabase dbManager = UmAppDatabase.getInstance(getContext());
+//        DownloadSetDao setDao = dbManager.getDownloadSetDao();
+//        DownloadJobDao jobDao = dbManager.getDownloadJobDao();
+//
+//        if(crawlJob.getRootEntryUuid() == null && crawlJob.getRootEntryUri() == null)
+//            throw new IllegalArgumentException("CrawlJob has no root uuid or uri!");
+//
+//        //see if this downloadset already exists
+//        if(crawlJob.getRootEntryUuid() == null){
+//            //we need to load the root item using the OpdsRepository
+//            OpdsEntryWithRelations rootEntry = UstadMobileSystemImpl.getInstance()
+//                    .getOpdsAtomFeedRepository(getContext())
+//                    .getEntryByUrlStatic(crawlJob.getRootEntryUri());
+//            crawlJob.setRootEntryUuid(rootEntry.getUuid());
+//        }
+//
+//
+//        DownloadSet existingSet = dbManager.getDownloadSetDao().findByRootEntry(
+//                crawlJob.getRootEntryUuid());
+//        if(existingSet != null) {
+//            //TODO: Move downloaded items between folders if needed
+//            existingSet.setDestinationDir(downloadSet.getDestinationDir());
+//            downloadSet = existingSet;
+//        }else{
+//            downloadSet.setRootOpdsUuid(crawlJob.getRootEntryUuid());
+//        }
+//
+//        downloadSet.setId((int)setDao.insertOrReplace(downloadSet));
+//
+//        //Now create a new download job
+//        DownloadJob downloadJob = new DownloadJob(downloadSet, System.currentTimeMillis());
+//        downloadJob.setAllowMeteredDataUsage(allowDownloadOverMeteredNetwork);
+//        downloadJob.setStatus(UstadMobileSystemImpl.DLSTATUS_NOT_STARTED);
+//
+//
+//        downloadJob.setDownloadJobId((int)jobDao.insert(downloadJob));
+//
+//        CrawlJobDao crawlJobDao = dbManager.getCrawlJobDao();
+//        crawlJob.setContainersDownloadJobId(downloadJob.getDownloadJobId());
+//        crawlJob.setCrawlJobId((int)crawlJobDao.insert(crawlJob));
+//
+//
+//        //Insert the root crawl item
+//        OpdsEntryWithRelations entry = new OpdsEntryWithRelations();
+//        entry.setUuid(crawlJob.getRootEntryUuid());
+//        UmAppDatabase.getInstance(getContext()).getDownloadJobCrawlItemDao().insert(
+//                new CrawlJobItem(crawlJob.getCrawlJobId(), entry, NetworkTask.STATUS_QUEUED, 0));
+//
+//        CrawlTask task = new CrawlTask(crawlJob, dbManager, this);
+//        task.start();
+//
+//        return crawlJob;
+        return null;
     }
 
     /**
@@ -558,24 +559,25 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
     public DownloadSet buildDownloadJob(List<OpdsEntryWithRelations> rootEntries, String destintionDir,
                                         boolean recursive, boolean wifiDirectEnabled,
                                         boolean localWifiEnabled) {
-        DownloadSetDao jobDao = UmAppDatabase.getInstance(getContext()).getDownloadSetDao();
-
-        DownloadSet job = new DownloadSet();
-        job.setDestinationDir(destintionDir);
-//        job.setStatus(UstadMobileSystemImpl.DLSTATUS_NOT_STARTED);
-        job.setLanDownloadEnabled(localWifiEnabled);
-        job.setWifiDirectDownloadEnabled(wifiDirectEnabled);
-        job.setId((int)jobDao.insert(job));
-
-
-
-        ArrayList<DownloadSetItem> jobItems = new ArrayList<>();
-        for(OpdsEntryWithRelations entry : rootEntries) {
-            jobItems.add(new DownloadSetItem(entry, job));
-        }
-        UmAppDatabase.getInstance(getContext()).getDownloadSetItemDao().insertList(jobItems);
-
-        return job;
+//        DownloadSetDao jobDao = UmAppDatabase.getInstance(getContext()).getDownloadSetDao();
+//
+//        DownloadSet job = new DownloadSet();
+//        job.setDestinationDir(destintionDir);
+////        job.setStatus(UstadMobileSystemImpl.DLSTATUS_NOT_STARTED);
+//        job.setLanDownloadEnabled(localWifiEnabled);
+//        job.setWifiDirectDownloadEnabled(wifiDirectEnabled);
+//        job.setId((int)jobDao.insert(job));
+//
+//
+//
+//        ArrayList<DownloadSetItem> jobItems = new ArrayList<>();
+//        for(OpdsEntryWithRelations entry : rootEntries) {
+//            jobItems.add(new DownloadSetItem(entry, job));
+//        }
+//        UmAppDatabase.getInstance(getContext()).getDownloadSetItemDao().insertList(jobItems);
+//
+//        return job;
+        return null;
     }
 
     public void buildDownloadJobAsync(List<OpdsEntryWithRelations> rootEntries, String destintionDir,

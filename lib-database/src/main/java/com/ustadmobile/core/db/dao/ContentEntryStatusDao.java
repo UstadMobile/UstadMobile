@@ -17,7 +17,4 @@ public abstract class ContentEntryStatusDao implements BaseDao<ContentEntryStatu
     @UmQuery("SELECT * FROM ContentEntryStatus WHERE invalidated")
     public abstract List<ContentEntryStatus> findAllInvalidated();
 
-    protected abstract void updateEntries(List<Integer> uidsToUpdate);
-
-
 }

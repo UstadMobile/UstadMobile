@@ -3,6 +3,7 @@ package com.ustadmobile.core.db;
 import com.ustadmobile.core.db.dao.AccessTokenDao;
 import com.ustadmobile.core.db.dao.ClazzDao;
 import com.ustadmobile.core.db.dao.ClazzMemberDao;
+import com.ustadmobile.core.db.dao.ConnectivityStatusDao;
 import com.ustadmobile.core.db.dao.ContainerFileDao;
 import com.ustadmobile.core.db.dao.ContainerFileEntryDao;
 import com.ustadmobile.core.db.dao.ContentEntryDao;
@@ -14,6 +15,7 @@ import com.ustadmobile.core.db.dao.ContentEntryFileDao;
 import com.ustadmobile.core.db.dao.ContentEntryFileStatusDao;
 import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryRelatedEntryJoinDao;
+import com.ustadmobile.core.db.dao.ContentEntryStatusDao;
 import com.ustadmobile.core.db.dao.CrawJoblItemDao;
 import com.ustadmobile.core.db.dao.CrawlJobDao;
 import com.ustadmobile.core.db.dao.DownloadJobDao;
@@ -34,7 +36,13 @@ import com.ustadmobile.core.db.dao.PersonLocationJoinDao;
 import com.ustadmobile.core.db.dao.PersonPictureDao;
 import com.ustadmobile.core.db.dao.RoleDao;
 import com.ustadmobile.lib.database.annotation.UmSyncCountLocalPendingChanges;
+import com.ustadmobile.lib.db.AbstractDoorwayDbBuilder;
+import com.ustadmobile.lib.db.DbCallback;
+import com.ustadmobile.lib.db.DoorDbAdapter;
+import com.ustadmobile.lib.db.UmDbType;
 import com.ustadmobile.lib.db.UmDbWithAttachmentsDir;
+import com.ustadmobile.lib.db.entities.ConnectivityStatus;
+import com.ustadmobile.lib.db.entities.ContentEntryStatus;
 import com.ustadmobile.lib.db.entities.LocationAncestorJoin;
 import com.ustadmobile.core.db.dao.NetworkNodeDao;
 import com.ustadmobile.core.db.dao.OpdsEntryDao;
@@ -122,7 +130,8 @@ import java.util.Hashtable;
         SyncStatus.class, SyncablePrimaryKey.class, SyncDeviceBits.class,
         AccessToken.class, PersonAuth.class, Role.class, EntityRole.class,
         PersonGroup.class, PersonGroupMember.class, Location.class, LocationAncestorJoin.class,
-        PersonLocationJoin.class, PersonPicture.class
+        PersonLocationJoin.class, PersonPicture.class, ContentEntryStatus.class,
+        ConnectivityStatus.class
 })
 public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthenticator,
         UmDbWithAttachmentsDir {
@@ -160,7 +169,7 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
 
     public static synchronized UmAppDatabase getInstance(Object context) {
         if(instance == null){
-            instance = UmDbBuilder.builder(UmAppDatabase.class, context).build();
+            instance = addCallbacks(UmDbBuilder.builder(UmAppDatabase.class, context)).build();
         }
 
         return instance;
@@ -169,11 +178,45 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
     public static synchronized UmAppDatabase getInstance(Object context, String dbName) {
         UmAppDatabase db = namedInstances.get(dbName);
         if(db == null){
-            db = UmDbBuilder.builder(UmAppDatabase.class, context, dbName).build();
+            db = addCallbacks(UmDbBuilder.builder(UmAppDatabase.class, context, dbName)).build();
             namedInstances.put(dbName, db);
         }
 
         return db;
+    }
+
+    private static synchronized AbstractDoorwayDbBuilder<UmAppDatabase> addCallbacks(
+            AbstractDoorwayDbBuilder<UmAppDatabase> builder) {
+        builder.addCallback(new DbCallback() {
+            @Override
+            public void onCreate(DoorDbAdapter dbHelper) {
+                if(dbHelper.getDbType() == UmDbType.TYPE_SQLITE) {
+                    dbHelper.execSql("CREATE TRIGGER upd_ce_status AFTER UPDATE ON ContentEntry " +
+                            "WHEN EXISTS(SELECT cesUid FROM ContentEntryStatus WHERE cesContentEntryUid = NEW.contentEntryUid) " +
+                            "BEGIN " +
+                            "UPDATE ContentEntryStatus SET invalidated = 1 WHERE cesContentEntryUid = NEW.contentEntryUid; " +
+                            "END");
+                    String insertNewTriggerBody = "WHEN NOT EXISTS(SELECT cesUid FROM ContentEntryStatus WHERE cesContentEntryUid = NEW.contentEntryUid) " +
+                            "BEGIN " +
+                            "INSERT INTO ContentEntryStatus (cesContentEntryUid, invalidated) VALUES (NEW.contentEntryUid, 1);" +
+                            "END";
+                    dbHelper.execSql("CREATE TRIGGER upd_ce_ins_ces AFTER UPDATE ON ContentEntry " +
+                            insertNewTriggerBody);
+                    dbHelper.execSql("CREATE TRIGGER ins_ce_ins_ces AFTER INSERT ON ContentEntry " +
+                            insertNewTriggerBody);
+
+                }
+            }
+
+            @Override
+            public void onOpen(DoorDbAdapter dbHelper) {
+                if(dbHelper.getDbType() == UmDbType.TYPE_SQLITE) {
+                    dbHelper.execSql("PRAGMA recursive_triggers = ON");
+                }
+            }
+        });
+
+        return builder;
     }
 
 
@@ -268,6 +311,10 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
     public abstract PersonLocationJoinDao getPersonLocationJoinDao();
 
     public abstract PersonPictureDao getPersonPictureDao();
+
+    public abstract ContentEntryStatusDao getContentEntryStatusDao();
+
+    public abstract ConnectivityStatusDao getConnectivityStatusDao();
 
     @UmDbContext
     public abstract Object getContext();

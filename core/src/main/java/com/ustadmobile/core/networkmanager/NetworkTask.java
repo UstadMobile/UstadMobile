@@ -11,7 +11,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  *
  * @author kileha3
  */
-
+@Deprecated
 public abstract class NetworkTask {
 
     private static final AtomicInteger taskIdAtomicInteger = new AtomicInteger();

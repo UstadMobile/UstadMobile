@@ -66,6 +66,7 @@ import static com.ustadmobile.port.sharedse.networkmanager.NetworkManager.NOTIFI
  *
  * @author kileha3
  */
+@Deprecated
 public class DownloadTask extends NetworkTask implements BluetoothConnectionHandler,
         NetworkManagerListener, ConnectivityListener{
 
@@ -420,7 +421,7 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
                         && responseNode.getTimeSinceWifiDirectLastUpdated() < NetworkManager.ALLOWABLE_DISCOVERY_RANGE_LIMIT) {
                     targetNetwork = TARGET_NETWORK_WIFIDIRECT_GROUP;
                     currentDownloadMode = DOWNLOAD_FROM_PEER_ON_DIFFERENT_NETWORK;
-                } else if (wifiAvailable || downloadJob.getDownloadSet().isMobileDataEnabled()) {
+                } else if (wifiAvailable || downloadJob.getDownloadSet().isMeteredNetworkAllowed()) {
                     //download from cloud
                     targetNetwork = wifiAvailable ? TARGET_NETWORK_NORMAL : TARGET_NETWORK_MOBILE_DATA;
                     currentDownloadUrl = feedEntryAcquisitionUrl;

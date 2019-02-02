@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * Created by mike on 8/14/17.
  */
-
+@Deprecated
 public interface WifiP2pListener {
 
     /**

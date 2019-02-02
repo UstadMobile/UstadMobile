@@ -7,7 +7,7 @@ import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 @UmEntity
 public class ContentEntryStatus {
 
-    @UmPrimaryKey
+    @UmPrimaryKey(autoIncrement = true)
     private long cesUid;
 
     @UmIndexField
