@@ -14,4 +14,6 @@ public abstract class ContentEntryFileStatusDao implements BaseDao<ContentEntryF
             "filePath LIKE '%/khan/en/%'")
     public abstract List<ContentEntryFileStatus> findKhan();
 
+    @UmQuery("UPDATE ContentEntryFileStatus SET filePath = :path WHERE cefsUid = :cefsUid")
+    public abstract void updateKhanFilePath(int cefsUid, String path);
 }
