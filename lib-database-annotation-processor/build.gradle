@@ -25,7 +25,6 @@ compileTestJava {
 }
 
 //sourceSets.test.java.srcDirs += ["$projectDir/tmp/java"]
-
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation project(':lib-database-runtime')

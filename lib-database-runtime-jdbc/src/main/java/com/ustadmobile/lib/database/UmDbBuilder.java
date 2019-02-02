@@ -74,6 +74,8 @@ public class UmDbBuilder {
                     dbAdapter.execSql("INSERT INTO _doorwayinfo (dbVersion, dbHash) VALUES (" +
                             db.getVersion() +", '')");
 
+                    db.createAllTables();
+
                     for(DbCallback callback : callbackList){
                         callback.onCreate(dbAdapter);
                     }

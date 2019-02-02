@@ -6,6 +6,7 @@ import com.ustadmobile.lib.database.annotation.UmDatabase;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
 import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
+import com.ustadmobile.lib.db.sync.UmSyncableDatabase;
 import com.ustadmobile.lib.db.sync.dao.BaseDao;
 
 import java.io.InputStream;
@@ -399,6 +400,30 @@ public class DbProcessorUtils {
         }
     }
 
+    private static final List<String> BOXED_CLASS_NAMES = Arrays.asList(Byte.class.getName(),
+            Short.class.getName(), Integer.class.getName(), Long.class.getName(),
+            Float.class.getName(), Double.class.getName(), Boolean.class.getName());
+
+    /**
+     * If the given TypeMirror represents a boxed class, then unbox it and convert it back to primitive
+     *
+     * @param typeMirror TypeMirror to check
+     * @param processingEnv Processing Environment
+     * @return The unboxed (primitive) type mirror if the given input was a boxed class, otherwise the
+     * original typemirror.
+     */
+    public static TypeMirror unboxIfBoxed(TypeMirror typeMirror, ProcessingEnvironment processingEnv) {
+        if(typeMirror.getKind().equals(TypeKind.DECLARED)) {
+            TypeElement typeEl = (TypeElement)processingEnv.getTypeUtils().asElement(typeMirror);
+            if(BOXED_CLASS_NAMES.contains(typeEl.getQualifiedName().toString()))
+                return processingEnv.getTypeUtils().unboxedType(typeMirror);
+            else if(typeEl.getQualifiedName().toString().equals(Void.class.getName()))
+                return processingEnv.getTypeUtils().getPrimitiveType(TypeKind.VOID);
+        }
+
+        return typeMirror;
+    }
+
 
     /**
      * Determine if the given entity has annotated change sequence number member variables
@@ -539,6 +564,19 @@ public class DbProcessorUtils {
 
         return getAnnotationValue(TypeMirror.class, "inheritPermissionFrom",
                 umDaoMirror);
+    }
+
+    /**
+     * Determine if the given database implements UmSyncableDatabase
+     *
+     * @param dbType  TypeMirror representing a database class
+     * @param processingEnv Processing Environment
+     * @return true if the given database implements UmSyncableDatabase, false otherwise
+     */
+    public static boolean isSyncableDatabase(TypeMirror dbType, ProcessingEnvironment processingEnv) {
+        TypeMirror syncableDbTypeMirror = processingEnv.getElementUtils().getTypeElement(
+                UmSyncableDatabase.class.getName()).asType();
+        return processingEnv.getTypeUtils().isAssignable(dbType, syncableDbTypeMirror);
     }
 
 }

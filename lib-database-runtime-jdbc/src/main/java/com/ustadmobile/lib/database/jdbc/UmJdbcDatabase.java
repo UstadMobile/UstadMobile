@@ -27,6 +27,12 @@ public interface UmJdbcDatabase {
      */
     ExecutorService getExecutor();
 
+
+    /**
+     * Create all tables in this database. This is called only by the DbBuilder
+     */
+    void createAllTables();
+
     /**
      * Add a change listener to receive events if particular tables are changed
      *

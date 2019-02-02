@@ -110,6 +110,9 @@ public abstract class AbstractDbProcessor {
 
     public static final String SQLITE_SYNCABLE_PRIMARY_KEY_INSERT_VIEW_POSTFIX = "_spk_view";
 
+    public static final String SQLITE_CREATE_LAST_SYNCABLE_PK_SQL =
+            "CREATE TABLE IF NOT EXISTS _lastsyncablepk(id INTEGER PRIMARY KEY AUTOINCREMENT, lastpk INTEGER)";
+
     public synchronized void init(ProcessingEnvironment processingEnvironment) {
         this.processingEnv = processingEnvironment;
         filer = processingEnvironment.getFiler();
