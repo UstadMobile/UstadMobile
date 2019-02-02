@@ -146,7 +146,6 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         viewNameToAndroidImplMap.put(BasePointView.VIEW_NAME, BasePointActivity.class);
         viewNameToAndroidImplMap.put(AboutView.VIEW_NAME, AboutActivity.class);
         viewNameToAndroidImplMap.put(SendCourseView.VIEW_NAME, SendCourseDialogFragment.class);
-        viewNameToAndroidImplMap.put(ReceiveCourseView.VIEW_NAME, ReceiveCourseDialogFragment.class);
         viewNameToAndroidImplMap.put(XapiPackageView.VIEW_NAME, XapiPackageActivity.class);
         viewNameToAndroidImplMap.put(ScormPackageView.VIEW_NAME, ScormPackageActivity.class);
         viewNameToAndroidImplMap.put(H5PContentView.VIEW_NAME, H5PContentActivity.class);
@@ -764,21 +763,21 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
 
     @Override
     public void deleteEntries(Object context, List<String> entryIds, boolean recursive) {
-        OpdsEntryStatusCacheDao entryStatusCacheDao = UmAppDatabase.getInstance(context).getOpdsEntryStatusCacheDao();
-        List<String> entryIdsToDelete = entryIds;
-        if(recursive) {
-            entryIdsToDelete = new ArrayList<>();
-            for(String entryId : entryIds) {
-                entryIdsToDelete.add(entryId);
-                entryIdsToDelete.addAll(entryStatusCacheDao.findAllKnownDescendantEntryIds(entryId));
-            }
-        }
-
-        for(String descendantEntryId: entryIdsToDelete) {
-            ContainerFileHelper.getInstance().deleteAllContainerFilesByEntryId(context, descendantEntryId);
-        }
-
-
+//        OpdsEntryStatusCacheDao entryStatusCacheDao = UmAppDatabase.getInstance(context).getOpdsEntryStatusCacheDao();
+//        List<String> entryIdsToDelete = entryIds;
+//        if(recursive) {
+//            entryIdsToDelete = new ArrayList<>();
+//            for(String entryId : entryIds) {
+//                entryIdsToDelete.add(entryId);
+//                entryIdsToDelete.addAll(entryStatusCacheDao.findAllKnownDescendantEntryIds(entryId));
+//            }
+//        }
+//
+//        for(String descendantEntryId: entryIdsToDelete) {
+//            ContainerFileHelper.getInstance().deleteAllContainerFilesByEntryId(context, descendantEntryId);
+//        }
+//
+//
     }
 
     @Override

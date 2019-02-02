@@ -48,7 +48,7 @@ public class DownloadJobItemHistory {
             networkNode = node.getNodeId();
 
         if(item != null)
-            downloadJobItemId = item.getId();
+            downloadJobItemId = item.getDsiUid();
 
         this.mode = mode;
         this.startTime= startTime;

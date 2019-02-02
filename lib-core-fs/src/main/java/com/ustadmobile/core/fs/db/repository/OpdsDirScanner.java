@@ -145,8 +145,8 @@ public class OpdsDirScanner implements Runnable{
                 fileEntry.setContainerEntryId(entry.getEntryId());
                 containerFileEntries.add(fileEntry);
 
-                dbManager.getOpdsEntryStatusCacheDao().handleContainerFoundOnDisk(dbManager, entry,
-                        containerFile);
+//                dbManager.getOpdsEntryStatusCacheDao().handleContainerFoundOnDisk(dbManager, entry,
+//                        containerFile);
             }
 
             //now persist everything for this file

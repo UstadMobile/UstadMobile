@@ -26,6 +26,11 @@ public class DownloadSetItem {
 
     }
 
+    public DownloadSetItem(DownloadSet set, ContentEntry contentEntry) {
+        this.dsiDsUid = set.getDsUid();
+        this.dsiContentEntryUid = contentEntry.getContentEntryUid();
+    }
+
     public int getDsiUid() {
         return dsiUid;
     }

@@ -31,7 +31,7 @@ public class DownloadDialogFragment extends UstadDialogFragment implements Downl
 
     private View rootView;
 
-    private DownloadDialogPresenter mPresenter;
+    //private DownloadDialogPresenter mPresenter;
 
     private ProgressBar progressBar;
 
@@ -84,33 +84,33 @@ public class DownloadDialogFragment extends UstadDialogFragment implements Downl
         wifiOnlySwitch.setOnCheckedChangeListener(this::onWifiOnlyCheckChanged);
         radioGroup.setOnCheckedChangeListener(this);
         mDialog = builder.create();
-        mPresenter = new DownloadDialogPresenter(getContext(), this,
-                UMAndroidUtil.bundleToHashtable(getArguments()));
-        mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
+//        mPresenter = new DownloadDialogPresenter(getContext(), this,
+//                UMAndroidUtil.bundleToHashtable(getArguments()));
+//        mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
 
         return mDialog;
     }
 
     @Override
     public void onCheckedChanged(RadioGroup radioGroup, int checkedId) {
-        mPresenter.handleSelectOption(radioButtonIdToOptionIdMap.get(checkedId));
+        //mPresenter.handleSelectOption(radioButtonIdToOptionIdMap.get(checkedId));
     }
 
     public void onWifiOnlyCheckChanged(CompoundButton view, boolean isChecked) {
-        mPresenter.handleSetWifiOnly(isChecked);
+        //mPresenter.handleSetWifiOnly(isChecked);
     }
 
     @Override
     public void onClick(DialogInterface dialogInterface, int which) {
-        switch(which){
-            case DialogInterface.BUTTON_POSITIVE:
-                mPresenter.handleClickConfirm();
-                break;
-
-            case DialogInterface.BUTTON_NEGATIVE:
-                mPresenter.handleClickCancel();
-                break;
-        }
+//        switch(which){
+//            case DialogInterface.BUTTON_POSITIVE:
+//                mPresenter.handleClickConfirm();
+//                break;
+//
+//            case DialogInterface.BUTTON_NEGATIVE:
+//                mPresenter.handleClickCancel();
+//                break;
+//        }
     }
 
     @Override

@@ -14,8 +14,8 @@ import java.util.List;
 public abstract class DownloadSetItemDao {
 
 
-    @UmQuery("SELECT * From DownloadSetItem WHERE id = :id")
-    public abstract DownloadSetItem findById(int id);
+    @UmQuery("SELECT * From DownloadSetItem WHERE dsiUid = :dsiUid")
+    public abstract DownloadSetItem findById(int dsiUid);
 
     /**
      * Insert a list of DownloadSetItem entities
@@ -33,17 +33,6 @@ public abstract class DownloadSetItemDao {
      */
     @UmInsert
     public abstract long insert(DownloadSetItem item);
-
-    /**
-     * Find the DownloadSetItem for the given OPDS entryId
-     *
-     * @param entryId OPDS entryId to search by
-     * @param downloadSetId Primary Key of the DownloadSet to search in
-     * @return DownloadSetItem matching the given arguments, otherwise null
-     */
-    @UmQuery("SELECT * FROM DownloadSetItem WHERE entryId = :entryId AND downloadSetId = :downloadSetId")
-    public abstract DownloadSetItem findByEntryId(String entryId, int downloadSetId);
-
 
 
 

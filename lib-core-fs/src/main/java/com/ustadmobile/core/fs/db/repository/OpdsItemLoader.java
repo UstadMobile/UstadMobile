@@ -122,8 +122,8 @@ public class OpdsItemLoader implements Runnable, OpdsEntry.OpdsItemLoadCallback 
         dbManager.getOpdsEntryParentToChildJoinDao().insert(parentToChild);
         dbManager.getOpdsEntryDao().insert(entry);
 
-        dbManager.getOpdsEntryStatusCacheDao().handleOpdsEntriesLoaded(dbManager,
-                Arrays.asList(entry));
+//        dbManager.getOpdsEntryStatusCacheDao().handleOpdsEntriesLoaded(dbManager,
+//                Arrays.asList(entry));
 
         if(callback != null)
             callback.onEntryAdded(entry, parentFeed, position);
@@ -137,8 +137,8 @@ public class OpdsItemLoader implements Runnable, OpdsEntry.OpdsItemLoadCallback 
 
     private void insertItemToLoad() {
         dbManager.getOpdsEntryDao().insert(itemToLoad);
-        dbManager.getOpdsEntryStatusCacheDao().handleOpdsEntriesLoaded(dbManager,
-                Arrays.asList(itemToLoad));
+//        dbManager.getOpdsEntryStatusCacheDao().handleOpdsEntriesLoaded(dbManager,
+//                Arrays.asList(itemToLoad));
         itemToLoadInserted = true;
     }
 

@@ -48,11 +48,13 @@ public class OpdsAtomFeedRepositoryImpl implements OpdsAtomFeedRepository {
     @Override
     public UmLiveData<OpdsEntryWithStatusCache> getEntryWithStatusCacheByUrl(String url, String uuid,
                                                                              OpdsEntry.OpdsItemLoadCallback callback) {
-        UmLiveData<OpdsEntryWithStatusCache> dbResult = dbManager.getOpdsEntryWithRelationsDao()
-                .getEntryWithStatusCacheByUrl(url);
+//        UmLiveData<OpdsEntryWithStatusCache> dbResult = dbManager.getOpdsEntryWithRelationsDao()
+//                .getEntryWithStatusCacheByUrl(url);
+//
+//        executeItemLoader(url, uuid, callback);
+//        return dbResult;
 
-        executeItemLoader(url, uuid, callback);
-        return dbResult;
+        return null;
     }
 
     private void executeItemLoader(String url, String uuid, OpdsEntry.OpdsItemLoadCallback callback) {

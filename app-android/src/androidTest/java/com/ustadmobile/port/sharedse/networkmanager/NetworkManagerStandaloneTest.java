@@ -8,10 +8,8 @@ import com.ustadmobile.core.networkmanager.NetworkTask;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.lib.db.entities.CrawlJob;
 import com.ustadmobile.lib.db.entities.DownloadJob;
-import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
 import com.ustadmobile.test.core.ResourcesHttpdTestServer;
 import com.ustadmobile.test.core.impl.PlatformTestUtil;
-import com.ustadmobile.test.sharedse.network.TestDownloadTaskStandalone;
 import com.ustadmobile.test.sharedse.network.TestWithNetworkService;
 
 import org.junit.AfterClass;

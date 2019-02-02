@@ -1,7 +1,9 @@
 package com.ustadmobile.lib.db.entities;
 
+import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 
+@UmEntity
 public class ConnectivityStatus {
 
     public static final int STATE_DISCONNECTED = 0;

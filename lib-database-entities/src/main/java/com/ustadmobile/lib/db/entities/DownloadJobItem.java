@@ -44,6 +44,11 @@ public class DownloadJobItem {
 
     }
 
+    public DownloadJobItem(DownloadJob downloadJob, DownloadSetItem downloadSetItem) {
+        this.djiDjUid = downloadJob.getDjUid();
+        this.djiDsiUid = downloadSetItem.getDsiUid();
+    }
+
     public int getDjiUid() {
         return djiUid;
     }
