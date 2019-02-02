@@ -1,9 +1,12 @@
 package com.ustadmobile.port.android.view;
 
 import android.annotation.SuppressLint;
+import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.view.View;
+import android.widget.TextView;
 
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.DefaultRenderersFactory;
@@ -13,15 +16,17 @@ import com.google.android.exoplayer2.source.ExtractorMediaSource;
 import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.ui.PlayerView;
-import com.google.android.exoplayer2.upstream.DataSource;
-import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
 import com.google.android.exoplayer2.upstream.FileDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.VideoPlayerPresenter;
-import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.view.VideoPlayerView;
+import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
+
+import static android.view.View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
+import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
+import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
 
 public class VideoPlayerActivity extends UstadBaseActivity implements VideoPlayerView {
 
@@ -31,17 +36,38 @@ public class VideoPlayerActivity extends UstadBaseActivity implements VideoPlaye
     private int currentWindow = 0;
     private long playbackPosition = 0;
     private VideoPlayerPresenter mPresenter;
+    boolean isPortrait = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_video_player);
+        if (getResources().getConfiguration().orientation ==
+                Configuration.ORIENTATION_PORTRAIT) {
+            isPortrait = true;
+            setContentView(R.layout.activity_portrait_video_player_view);
+        } else {
+            isPortrait = false;
+            setContentView(R.layout.activity_landscape_video_player_view);
+        }
+
 
         playerView = findViewById(R.id.activity_video_player_view);
+
+        if (isPortrait) {
+            setUMToolbar(R.id.activity_video_player_toolbar);
+            getSupportActionBar().setDisplayShowHomeEnabled(true);
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
 
         mPresenter = new VideoPlayerPresenter(getContext(),
                 UMAndroidUtil.bundleToHashtable(getIntent().getExtras()), this);
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+
     }
 
     @Override
@@ -106,18 +132,32 @@ public class VideoPlayerActivity extends UstadBaseActivity implements VideoPlaye
 
     @SuppressLint("InlinedApi")
     private void hideSystemUi() {
-        playerView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE
-                | View.SYSTEM_UI_FLAG_FULLSCREEN
-                | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
+        if (!isPortrait) {
+            playerView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE
+                    | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                    | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                    | SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                    | SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                    | SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                    | SYSTEM_UI_FLAG_HIDE_NAVIGATION);
+        }
+
     }
 
     @Override
     public void loadUrl(String firstUrl) {
 
 
+    }
+
+    @Override
+    public void setVideoInfo(ContentEntry result) {
+        runOnUiThread(() -> {
+            if (isPortrait) {
+                ((Toolbar)findViewById(R.id.activity_video_player_toolbar)).setTitle(result.getTitle());
+                ((TextView)findViewById(R.id.activity_video_player_description)).setText(result.getDescription());
+            }
+        });
     }
 
     private MediaSource buildMediaSource(Uri uri) {
