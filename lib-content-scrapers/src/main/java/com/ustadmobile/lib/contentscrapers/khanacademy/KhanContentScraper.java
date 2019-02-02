@@ -162,20 +162,24 @@ public class KhanContentScraper implements Runnable {
         boolean successful = false;
         try {
             driver = factory.borrowObject();
+            File content;
             if (ScraperConstants.KhanContentType.VIDEO.getType().equals(contentType)) {//all calls to scraper... replaced with insert
                 scrapeVideoContent(url.toString());
+                File parentFolder = new File(destinationDirectory, destinationDirectory.getName());
+                content = new File(parentFolder,  FilenameUtils.getName(url.toString()));
                 successful = true;
             } else if (ScraperConstants.KhanContentType.EXERCISE.getType().equals(contentType)) {
                 scrapeExerciseContent(url.toString());
+                content = new File(destinationDirectory, destinationDirectory.getName() + ScraperConstants.ZIP_EXT);
                 successful = true;
             } else if (ScraperConstants.KhanContentType.ARTICLE.getType().equals(contentType)) {
                 scrapeArticleContent(url.toString());
+                content = new File(destinationDirectory, destinationDirectory.getName() + ScraperConstants.ZIP_EXT);
                 successful = true;
             } else {
                 UMLogUtil.logError("unsupported kind = " + contentType + " at url = " + url);
+                throw new IllegalArgumentException("unsupported kind = " + contentType + " at url = " + url);
             }
-
-            File content = new File(destinationDirectory, destinationDirectory.getName() + ScraperConstants.ZIP_EXT);
 
             if (isContentUpdated()) {
                 ContentScraperUtil.insertContentEntryFile(content, contentEntryFileDao, contentFileStatusDao,
