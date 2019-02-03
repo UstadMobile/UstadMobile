@@ -38,16 +38,23 @@ public class ContentEntryRecyclerViewAdapter extends PagedListAdapter<ContentEnt
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
         ContentEntry entry = getItem(position);
-        holder.getEntryTitle().setText(entry.getTitle());
-        holder.getEntryDescription().setText(entry.getDescription());
-        if (entry.getThumbnailUrl() == null || entry.getThumbnailUrl().isEmpty()) {
+        if(entry == null){
+            holder.getEntryTitle().setText("");
+            holder.getEntryDescription().setText("");
             holder.getThumbnailView().setImageDrawable(null);
-        } else {
-            Picasso.with(holder.getThumbnailView().getContext())
-                    .load(entry.getThumbnailUrl())
-                    .into(holder.getThumbnailView());
+            holder.getView().setOnClickListener(null);
+        }else {
+            holder.getEntryTitle().setText(entry.getTitle());
+            holder.getEntryDescription().setText(entry.getDescription());
+            if (entry.getThumbnailUrl() == null || entry.getThumbnailUrl().isEmpty()) {
+                holder.getThumbnailView().setImageDrawable(null);
+            } else {
+                Picasso.with(holder.getThumbnailView().getContext())
+                        .load(entry.getThumbnailUrl())
+                        .into(holder.getThumbnailView());
+            }
+            holder.getView().setOnClickListener(view -> listener.contentEntryClicked(entry));
         }
-        holder.getView().setOnClickListener(view -> listener.contentEntryClicked(entry));
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {

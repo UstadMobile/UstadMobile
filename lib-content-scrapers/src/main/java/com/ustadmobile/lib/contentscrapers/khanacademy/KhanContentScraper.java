@@ -232,7 +232,6 @@ public class KhanContentScraper implements Runnable {
             }
 
             FileUtils.copyURLToFile(scrapUrl, content);
-            ContentScraperUtil.zipDirectory(folder, destinationDirectory.getName(), destinationDirectory);
         }catch(IOException e) {
             throw e;
         }finally {

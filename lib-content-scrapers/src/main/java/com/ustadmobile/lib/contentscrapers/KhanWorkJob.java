@@ -42,8 +42,7 @@ public class KhanWorkJob {
                         String ext = FilenameUtils.getExtension(file.getPath());
                         if (ext.endsWith("mp4")) {
                             boolean deleted = zipFile.delete();
-                            if(deleted){
-                                statusDao.updateKhanFilePath(khan.getCefsUid(), file.getAbsolutePath());
+                            if (deleted) {
                                 countmp4++;
                             }
                         } else if (!ext.endsWith("txt")) {

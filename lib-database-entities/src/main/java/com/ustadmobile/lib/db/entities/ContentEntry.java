@@ -1,6 +1,7 @@
 package com.ustadmobile.lib.db.entities;
 
 import com.ustadmobile.lib.database.annotation.UmEntity;
+import com.ustadmobile.lib.database.annotation.UmIndexField;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 import com.ustadmobile.lib.database.annotation.UmSyncLastChangedBy;
 import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
@@ -61,6 +62,8 @@ public class ContentEntry {
 
     private long lastModified;
 
+    //TODO: Migration : add to migration
+    @UmIndexField
     private long primaryLanguageUid;
 
     private long languageVariantUid;

@@ -158,8 +158,9 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
      */
     @Override
     public boolean isBleCapable() {
-        return isBleDeviceSDKVersion() &&
-                mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE);
+        return BluetoothAdapter.getDefaultAdapter() != null
+                && isBleDeviceSDKVersion()
+                && mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE);
     }
 
     /**
@@ -247,7 +248,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
      */
     @Override
     public void startScanning() {
-        if(isBleDeviceSDKVersion() && !bluetoothAdapter.isDiscovering()){
+        if(isBleCapable() && isBleDeviceSDKVersion() && !bluetoothAdapter.isDiscovering()){
             bluetoothAdapter.startLeScan(new UUID[] { parcelServiceUuid.getUuid()}, leScanCallback);
         }else{
             UstadMobileSystemImpl.l(UMLog.ERROR,689,

@@ -70,7 +70,7 @@ public class ContentLibraryViewPagerFragment extends UstadBaseFragment {
         @Override
         public Fragment getItem(int position) {
             Bundle bundle = new Bundle();
-            bundle.putLong(ARG_CONTENT_ENTRY_UID, 3648191310516453377L);
+            bundle.putLong(ARG_CONTENT_ENTRY_UID, -4103245208651563007L);
             switch (position) {
                 case 0: // Fragment # 0 - This will show FirstFragment
                     return ContentEntryListFragment.newInstance(bundle);

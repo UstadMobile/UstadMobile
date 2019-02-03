@@ -45,75 +45,84 @@ public class ContentEntryDetailActivity extends UstadBaseActivity implements Con
     @Override
     public void setContentInfo(ContentEntry contentEntry) {
 
-        TextView title = findViewById(R.id.entry_detail_title);
-        title.setText(contentEntry.getTitle());
+        runOnUiThread(() -> {
+            TextView title = findViewById(R.id.entry_detail_title);
+            title.setText(contentEntry.getTitle());
 
-        TextView desc = findViewById(R.id.entry_detail_description);
-        desc.setText(contentEntry.getDescription());
-
-        new Handler(Looper.getMainLooper()).post(() -> Picasso.with(ContentEntryDetailActivity.this)
-                .load(contentEntry.getThumbnailUrl())
-                .into((ImageView) findViewById(R.id.entry_detail_thumbnail)));
+            TextView desc = findViewById(R.id.entry_detail_description);
+            desc.setText(contentEntry.getDescription());
 
 
-        getSupportActionBar().setTitle(contentEntry.getTitle());
+            if (contentEntry.getThumbnailUrl() != null && !contentEntry.getThumbnailUrl().isEmpty()) {
+                new Handler(Looper.getMainLooper()).post(() -> Picasso.with(ContentEntryDetailActivity.this)
+                        .load(contentEntry.getThumbnailUrl())
+                        .into((ImageView) findViewById(R.id.entry_detail_thumbnail)));
+            }
 
-        TextView license = findViewById(R.id.entry_detail_license);
-        license.setText(contentEntry.getLicenseName());
 
-        TextView author = findViewById(R.id.entry_detail_author);
-        author.setText(contentEntry.getAuthor());
+            getSupportActionBar().setTitle(contentEntry.getTitle());
+
+            TextView license = findViewById(R.id.entry_detail_license);
+            license.setText(contentEntry.getLicenseName());
+
+            TextView author = findViewById(R.id.entry_detail_author);
+            author.setText(contentEntry.getAuthor());
+        });
+
 
     }
 
     @Override
     public void setFileInfo(List<ContentEntryFile> contentEntryFileList) {
-        Button button = findViewById(R.id.entry_detail_button);
-        if(contentEntryFileList == null || contentEntryFileList.isEmpty()){
-            button.setEnabled(false);
-            return;
-        }
+        runOnUiThread(() -> {
+            Button button = findViewById(R.id.entry_detail_button);
 
-        button.setEnabled(true);
-        if (contentEntryFileList.size() == 1) {
+            if (contentEntryFileList == null || contentEntryFileList.isEmpty()) {
+                runOnUiThread(() -> button.setEnabled(false));
+                return;
+            }
 
-            ContentEntryFile contentEntryFile = contentEntryFileList.get(0);
+            button.setEnabled(true);
+            if (contentEntryFileList.size() == 1) {
 
-            TextView downloadSize = findViewById(R.id.entry_detail_content_size);
-            downloadSize.setText(UMFileUtil.formatFileSize(contentEntryFile.getFileSize()));
-
-        } else {
-
-            // TODO
-
-            ContentEntryFile contentEntryFile = contentEntryFileList.get(0);
-
-            TextView downloadSize = findViewById(R.id.entry_detail_content_size);
-            downloadSize.setText(UMFileUtil.formatFileSize(contentEntryFile.getFileSize()));
-
-        }
+                ContentEntryFile contentEntryFile = contentEntryFileList.get(0);
 
 
+                TextView downloadSize = findViewById(R.id.entry_detail_content_size);
+                downloadSize.setText(UMFileUtil.formatFileSize(contentEntryFile.getFileSize()));
+
+            } else {
+
+                // TODO
+
+                ContentEntryFile contentEntryFile = contentEntryFileList.get(0);
+
+                TextView downloadSize = findViewById(R.id.entry_detail_content_size);
+                downloadSize.setText(UMFileUtil.formatFileSize(contentEntryFile.getFileSize()));
+
+            }
+        });
     }
 
     @Override
     public void setTranslationsAvailable(List<ContentEntryRelatedEntryJoinWithLanguage> result, long entryUuid) {
 
-        RecyclerView flexBox = findViewById(R.id.entry_detail_flex);
+        runOnUiThread(() -> {
+            RecyclerView flexBox = findViewById(R.id.entry_detail_flex);
 
-        if (result.size() == 0) {
-            flexBox.setVisibility(View.GONE);
-        } else {
-            flexBox.setVisibility(View.VISIBLE);
+            if (result.size() == 0) {
+                flexBox.setVisibility(View.GONE);
+            } else {
+                flexBox.setVisibility(View.VISIBLE);
 
-            FlexboxLayoutManager flexboxLayoutManager = new FlexboxLayoutManager(getApplicationContext());
-            flexboxLayoutManager.setFlexDirection(FlexDirection.ROW);
-            flexBox.setLayoutManager(flexboxLayoutManager);
+                FlexboxLayoutManager flexboxLayoutManager = new FlexboxLayoutManager(getApplicationContext());
+                flexboxLayoutManager.setFlexDirection(FlexDirection.ROW);
+                flexBox.setLayoutManager(flexboxLayoutManager);
 
-            ContentEntryDetailLanguageAdapter adapter = new ContentEntryDetailLanguageAdapter(result, this, entryUuid);
-            flexBox.setAdapter(adapter);
-        }
-
+                ContentEntryDetailLanguageAdapter adapter = new ContentEntryDetailLanguageAdapter(result, this, entryUuid);
+                flexBox.setAdapter(adapter);
+            }
+        });
 
     }
 

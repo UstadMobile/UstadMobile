@@ -46,7 +46,7 @@ import android.view.MenuItem;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.port.android.impl.DbWork;
+import com.ustadmobile.port.android.impl.DbInitialEntriesInserter;
 
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkManager;
@@ -69,7 +69,8 @@ public class SplashScreenActivity extends AppCompatActivity implements DialogInt
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash_screen);
         OneTimeWorkRequest dbWork =
-                new OneTimeWorkRequest.Builder(DbWork.class)
+                new OneTimeWorkRequest.Builder(
+                        DbInitialEntriesInserter.DbInitialEntriesInserterWorker.class)
                         .build();
         WorkManager.getInstance().enqueue(dbWork);
 
