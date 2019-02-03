@@ -25,6 +25,8 @@ public class KhanWorkJob {
         List<ContentEntryFileStatus> khanList = statusDao.findKhan();
         System.out.println("khan list size = " + khanList.size());
         int countmp4 = 0;
+        int count = 0;
+        long size = 0;
         for (ContentEntryFileStatus khan : khanList) {
 
             String path = khan.getFilePath();
@@ -50,12 +52,16 @@ public class KhanWorkJob {
                         }
                     }
 
+                }else{
+                    size += parentFolder.getTotalSpace();
+                    count++;
                 }
 
             }
 
         }
         System.out.println("Changed " + countmp4 + " filePath");
+        System.out.println("Average size of files that are not khan videos are " + (size/count));
 
     }
 
