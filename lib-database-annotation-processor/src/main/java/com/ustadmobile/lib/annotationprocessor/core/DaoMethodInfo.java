@@ -300,8 +300,12 @@ public class DaoMethodInfo {
                 resolveEntityParameterComponentType());
         VariableElement primaryKeyEl = DbProcessorUtils.findPrimaryKey(entityTypeParam,
                 processingEnv);
+        if(primaryKeyEl == null)
+            return false;
 
-        return primaryKeyEl.getAnnotation(UmPrimaryKey.class).autoGenerateSyncable();
+        UmPrimaryKey primaryKeyAnnotation = primaryKeyEl.getAnnotation(UmPrimaryKey.class);
+
+        return primaryKeyAnnotation != null && primaryKeyAnnotation.autoGenerateSyncable();
     }
 
     /**

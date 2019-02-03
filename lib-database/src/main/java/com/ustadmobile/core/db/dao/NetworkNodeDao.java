@@ -1,5 +1,6 @@
 package com.ustadmobile.core.db.dao;
 
+import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmOnConflictStrategy;
@@ -18,6 +19,9 @@ public abstract class NetworkNodeDao {
     @UmQuery("SELECT * From NetworkNode WHERE ipAddress = :ipAddress")
     public abstract NetworkNode findNodeByIpAddress(String ipAddress);
 
+    @UmQuery("SELECT * From NetworkNode WHERE nodeId = :nodeId")
+    public abstract NetworkNode findNodeById(int nodeId);
+
     @UmQuery("Select * From NetworkNode Where ((ipAddress = :ipAddress AND ipAddress IS NOT NULL) OR (wifiDirectMacAddress = :wifiDirectMacAddress AND wifiDirectMacAddress IS NOT NULL))")
     public abstract NetworkNode findNodeByIpOrWifiDirectMacAddress(String ipAddress, String wifiDirectMacAddress);
 
@@ -35,5 +39,7 @@ public abstract class NetworkNodeDao {
     @UmQuery("Select * From NetworkNode")
     public abstract List<NetworkNode> findAllActiveNodes();
 
+    @ UmQuery ("UPDATE NetworkNode set lastUpdateTimeStamp = :lastUpdateTimeStamp WHERE bluetoothMacAddress = :bluetoothAddress")
+    public abstract void updateLastSeen(String bluetoothAddress,long lastUpdateTimeStamp, UmCallback<Integer> numChanged);
 
 }

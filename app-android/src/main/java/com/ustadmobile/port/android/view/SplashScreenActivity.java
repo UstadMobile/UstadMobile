@@ -54,7 +54,8 @@ public class SplashScreenActivity extends AppCompatActivity implements DialogInt
 
     public static final String[] REQUIRED_PERMISSIONS = new String[]{
         Manifest.permission.WRITE_EXTERNAL_STORAGE,
-        Manifest.permission.READ_EXTERNAL_STORAGE
+        Manifest.permission.READ_EXTERNAL_STORAGE,
+        Manifest.permission.ACCESS_COARSE_LOCATION
     };
 
     boolean rationalesShown = false;

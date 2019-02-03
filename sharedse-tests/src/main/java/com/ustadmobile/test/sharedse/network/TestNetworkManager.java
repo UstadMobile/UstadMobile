@@ -101,7 +101,7 @@ public class TestNetworkManager {
         NetworkNode nodeInDb = UmAppDatabase.getInstance(PlatformTestUtil.getTargetContext())
                 .getNetworkNodeDao().findNodeByBluetoothAddress(bluetoothAddr);
 
-        if(nodeInDb == null || (System.currentTimeMillis() - nodeInDb.getWifiDirectLastUpdated()) > timeout ) {
+        if(nodeInDb == null || (System.currentTimeMillis() - nodeInDb.getLastUpdateTimeStamp()) > timeout ) {
             synchronized (nodeDiscoveryLock) {
                 try { nodeDiscoveryLock.wait(timeout ); }
                 catch(InterruptedException e ) {
@@ -244,7 +244,7 @@ public class TestNetworkManager {
                     return;//not ready yet
 
                 if(node.getBluetoothMacAddress().equals(TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE)) {
-                    long wifiDirectUpdated = node.getWifiDirectLastUpdated();
+                    long wifiDirectUpdated = node.getLastUpdateTimeStamp();
                     long nsdUpdated = node.getNetworkServiceLastUpdated();
                     if(wifiDirectUpdated > timeEnabled[0] && nsdUpdated > timeEnabled[0]) {
                         synchronized (nodeUpdateLock) {
@@ -301,7 +301,7 @@ public class TestNetworkManager {
             }
 
             NetworkNode node = manager.getNodeByBluetoothAddr(TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE);
-            boolean wifiDirectUpdatedAfterWifiDisabled = node.getWifiDirectLastUpdated() > timeEnabled[0];
+            boolean wifiDirectUpdatedAfterWifiDisabled = node.getLastUpdateTimeStamp() > timeEnabled[0];
             boolean nsdUpdatedAfterWifiDisabled = node.getNetworkServiceLastUpdated() > timeEnabled[0];
             Assert.assertTrue("Wifi direct last updated after WiFi enabled",
                     wifiDirectUpdatedAfterWifiDisabled);
@@ -346,7 +346,7 @@ public class TestNetworkManager {
                     return;//not ready yet
 
                 if(node.getBluetoothMacAddress().equals(TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE)) {
-                    long wifiDirectUpdated = node.getWifiDirectLastUpdated();
+                    long wifiDirectUpdated = node.getLastUpdateTimeStamp();
                     long nsdUpdated = node.getNetworkServiceLastUpdated();
                     if(wifiDirectUpdated > timeEnabled[0] && nsdUpdated > timeEnabled[0]) {
                         synchronized (nodeUpdateLock) {
@@ -395,7 +395,7 @@ public class TestNetworkManager {
                 catch(InterruptedException e) {}
             }
             NetworkNode node = manager.getNodeByBluetoothAddr(TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE);
-            boolean wifiDirectUpdatedAfterWifiDisabled = node.getWifiDirectLastUpdated() > timeEnabled[0];
+            boolean wifiDirectUpdatedAfterWifiDisabled = node.getLastUpdateTimeStamp() > timeEnabled[0];
             boolean nsdUpdatedAfterWifiDisabled = node.getNetworkServiceLastUpdated() > timeEnabled[0];
             Assert.assertTrue("Wifi direct last updated after WiFi enabled",
                     wifiDirectUpdatedAfterWifiDisabled);

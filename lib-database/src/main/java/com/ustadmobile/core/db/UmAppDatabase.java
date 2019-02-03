@@ -5,11 +5,11 @@ import com.ustadmobile.core.db.dao.ClazzDao;
 import com.ustadmobile.core.db.dao.ClazzMemberDao;
 import com.ustadmobile.core.db.dao.ContainerFileDao;
 import com.ustadmobile.core.db.dao.ContainerFileEntryDao;
+import com.ustadmobile.core.db.dao.ContentEntryDao;
 import com.ustadmobile.core.db.dao.ContentCategoryDao;
 import com.ustadmobile.core.db.dao.ContentCategorySchemaDao;
 import com.ustadmobile.core.db.dao.ContentEntryContentCategoryJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryContentEntryFileJoinDao;
-import com.ustadmobile.core.db.dao.ContentEntryDao;
 import com.ustadmobile.core.db.dao.ContentEntryFileDao;
 import com.ustadmobile.core.db.dao.ContentEntryFileStatusDao;
 import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
@@ -47,7 +47,6 @@ import com.ustadmobile.core.db.dao.PersonAuthDao;
 import com.ustadmobile.core.db.dao.PersonCustomFieldDao;
 import com.ustadmobile.core.db.dao.PersonCustomFieldValueDao;
 import com.ustadmobile.core.db.dao.PersonDao;
-import com.ustadmobile.lib.database.UmDbBuilder;
 import com.ustadmobile.lib.database.annotation.UmClearAll;
 import com.ustadmobile.lib.database.annotation.UmDatabase;
 import com.ustadmobile.lib.database.annotation.UmDbContext;
@@ -102,6 +101,7 @@ import com.ustadmobile.lib.db.entities.Person;
 import com.ustadmobile.lib.db.entities.PersonCustomField;
 import com.ustadmobile.lib.db.entities.PersonCustomFieldValue;
 import com.ustadmobile.lib.db.sync.entities.SyncablePrimaryKey;
+import com.ustadmobile.lib.database.UmDbBuilder;
 
 import java.util.Hashtable;
 
@@ -176,6 +176,8 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
         return db;
     }
 
+
+
     public abstract OpdsEntryDao getOpdsEntryDao();
 
     public abstract OpdsEntryWithRelationsDao getOpdsEntryWithRelationsDao();
@@ -218,11 +220,12 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
 
     public abstract ClazzMemberDao getClazzMemberDao();
 
+    public abstract ContentEntryDao getContentEntryDao();
+
     public abstract PersonCustomFieldDao getPersonCustomFieldDao();
 
     public abstract PersonCustomFieldValueDao getPersonCustomFieldValueDao();
 
-    public abstract ContentEntryDao getContentEntryDao();
 
     public abstract ContentEntryContentCategoryJoinDao getContentEntryContentCategoryJoinDao();
 

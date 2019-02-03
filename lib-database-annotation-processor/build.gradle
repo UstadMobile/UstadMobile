@@ -25,7 +25,6 @@ compileTestJava {
 }
 
 //sourceSets.test.java.srcDirs += ["$projectDir/tmp/java"]
-
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation project(':lib-database-runtime')
@@ -40,6 +39,7 @@ dependencies {
     implementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
     implementation "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
     implementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
+    implementation "org.apache.commons:commons-dbcp2:$version_apache_commons_dbcp2"
 
     implementation "javax.ws.rs:javax.ws.rs-api:2.1"
     implementation "org.glassfish.jersey.media:jersey-media-multipart:$version_jersey"

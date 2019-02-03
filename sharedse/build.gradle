@@ -39,15 +39,27 @@ dependencies {
     implementation "net.lingala.zip4j:zip4j:$version_zip4j"
     implementation "org.json:json:$version_json"
 
+
     implementation project(":core")
-    implementation project(':lib-database')
+    testImplementation project (':lib-database-jdbc')
+    implementation project(":lib-database")
     implementation project(":lib-database-runtime")
     compileOnly project(':lib-database-entities')
     implementation project(':lib-core-fs')
     implementation project(":lib-util")
 
     testImplementation "junit:junit:$version_junit"
+    testImplementation "org.mockito:mockito-core:$version_android_mockito"
+    testImplementation project(":sharedse-tests")
     testImplementation project(":core-tests")
+    testImplementation project (':lib-database-entities')
+
+
+    //SQLite dependencies for running db-driven tests
+    testImplementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
+    testImplementation "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
+    testImplementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
+
     testImplementation project(":app-javase")
 }
 
