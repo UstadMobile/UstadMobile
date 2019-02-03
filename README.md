@@ -44,20 +44,16 @@ To build debug / release versions for any given platform please see the README i
 
 There are two parts to the configuration:
 
-* Build configuration : buildconfig properties that are merged and turned into static constants,
-  and can also be used to control the gradle build process itself.
+* Build configuration : buildconfig.properties contains properties used
+during the build and testing process.
 
 * App config : a .properties file that is contained in the assets. This can be overriden when the
   app is used as a library. By default com/ustadmobile/core/appconfig.properties will be used. This
   can be overriden by setting the com.ustadmobile.core.appconfig manifest property (e.g. meta-data
   in AndroidManifest.xml).
 
-The codebase is designed to make it easy to generate builds with custom content sets, branding, etc. These configuration sets are gitignored and saved to their own separate repository. 
-
 The build configuration system uses .properties files in each module: 
 * **buildconfig.default.properties**: Contains default options
 * **buildconfig.local.properties** : Contains any custom options and is excluded from git. Any option set in buildconfig.local.properties will override what's set in the default properties.
 
-Most core options (e.g. app name, base content catalog, etc) are in the core module (e.g. in [core/buildconfig.default.properties](core/buildconfig.default.properties)). Options specific to a given platform (e.g. the android application id) 
-  are in the module for that platform (e.g. app-android/buildconfig.local.properties).
 

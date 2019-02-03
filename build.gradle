@@ -110,39 +110,3 @@ if(!ext.localProperties.containsKey("javac.9plus")) {
             "JDK9+ javac for use with the database annotation processor in local.properties " +
             "e.g. javac.9plus=/path/to/jvm9/bin/javac")
 }
-
-/**
- * Local configuration management
- *
- * Run gradle with -PconfigDst=path/to/dir to specify where to copy to. This will default to a directory
- * parallel to the source directory called UstadMobile-config-<localConfigId> where localConfigId
- * is the config id in the buildconfig.local.properties
- */
-task copyLocalConfigToRepoDir(type: Copy) {
-    from("./") {
-        include "buildconfig.local.properties"
-        include "app-*/buildconfig.local.properties"
-
-        include "app-android/src/localconfig/**"
-        include "app-j2me/res-local/**"
-        include "core/src/localconfig/**"
-    }
-
-    into project.hasProperty("configDst") ? configDst : "../UstadMobile-config-" + project.ext.buildConfigProperties["localConfigId"]
-}
-
-task copyLocalConfigFromRepoDir(type: Copy) {
-    from(project.ext.has("localConfigDir") ? localConfigDir :  "../UstadMobile-config-" + project.ext.buildConfigProperties["localConfigId"]) {
-        include "buildconfig.local.properties"
-        include "app-*/buildconfig.local.properties"
-
-        include "app-android/src/localconfig/**"
-        include "app-j2me/res-local/**"
-    }
-
-    into "./"
-}
-
-
-
-
