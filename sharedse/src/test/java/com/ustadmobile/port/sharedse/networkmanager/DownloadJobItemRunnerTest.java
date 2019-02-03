@@ -2,6 +2,8 @@ package com.ustadmobile.port.sharedse.networkmanager;
 
 import com.ustadmobile.core.db.JobStatus;
 import com.ustadmobile.core.db.UmAppDatabase;
+import com.ustadmobile.core.db.UmLiveData;
+import com.ustadmobile.core.db.UmObserver;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.lib.db.entities.ConnectivityStatus;
 import com.ustadmobile.lib.db.entities.ContentEntry;
@@ -24,8 +26,11 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 import okhttp3.mockwebserver.Dispatcher;
 import okhttp3.mockwebserver.MockResponse;
@@ -36,7 +41,9 @@ import okio.BufferedSource;
 import okio.Okio;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.spy;
 
 /**
@@ -191,7 +198,6 @@ public class DownloadJobItemRunnerTest {
         DownloadSet downloadSet = new DownloadSet();
         downloadSet.setDestinationDir(downloadTmpDir.getAbsolutePath());
         downloadSet.setDsRootContentEntryUid(0L);
-        downloadSet.setMeteredNetworkAllowed(false);
         downloadSet.setDsUid((int)umAppDatabase.getDownloadSetDao().insert(downloadSet));
 
         DownloadSetItem downloadSetItem = new DownloadSetItem(downloadSet, contentEntry);
@@ -245,12 +251,19 @@ public class DownloadJobItemRunnerTest {
         item = umAppDatabase.getDownloadJobItemDao().findWithDownloadSetItemByUid(
                         (int)testDownloadJobItemUid);
 
-
         assertEquals("File download task completed successfully",
-                item.getDjiStatus(),JobStatus.COMPLETE);
+                item.getDjiStatus(), JobStatus.COMPLETE);
 
         assertEquals("Same file size", webServerTmpContentEntryFile.length(),
                 new File(item.getDestinationFile()).length());
+
+        ContentEntryFileStatus status = umAppDatabase.getContentEntryFileStatusDao()
+                .findByContentEntryFileUid(item.getDjiContentEntryFileUid());
+
+        assertNotNull("File status were updated successfully",status);
+
+        assertEquals("Local file path is the same",
+               item.getDestinationFile(),  status.getFilePath());
     }
 
     @Test
@@ -317,7 +330,19 @@ public class DownloadJobItemRunnerTest {
 
         umAppDatabase.getConnectivityStatusDao().update(ConnectivityStatus.STATE_METERED);
 
-        Thread.sleep(TimeUnit.SECONDS.toMillis(3));
+        CountDownLatch latch = new CountDownLatch(1);
+        UmObserver<Integer> itemStatusObserver = (newStatus) -> {
+            if(newStatus == JobStatus.WAITING_FOR_CONNECTION)
+                latch.countDown();
+        };
+        UmLiveData<Integer> statusLiveData = umAppDatabase.getDownloadJobItemDao().getLiveStatus(
+                item.getDjiUid());
+        statusLiveData.observeForever(itemStatusObserver);
+
+        try { latch.await(3, TimeUnit.SECONDS); }
+        catch(InterruptedException e) {
+            //should not happen
+        }
 
         item = umAppDatabase.getDownloadJobItemDao().findWithDownloadSetItemByUid(
                 (int)testDownloadJobItemUid);
@@ -342,9 +367,21 @@ public class DownloadJobItemRunnerTest {
 
         Thread.sleep(TimeUnit.SECONDS.toMillis(1));
 
-        umAppDatabase.getDownloadJobDao().updateByJobUid(downloadJob.getDjUid(),JobStatus.STOPPING);
+        umAppDatabase.getDownloadJobItemDao().updateStatus(item.getDjiUid(),JobStatus.STOPPING);
 
-        Thread.sleep(TimeUnit.SECONDS.toMillis(2));
+        CountDownLatch latch = new CountDownLatch(1);
+        UmObserver<Integer> itemStatusObserver = (newStatus) -> {
+            if(newStatus == JobStatus.STOPPED)
+                latch.countDown();
+        };
+        UmLiveData<Integer> statusLiveData = umAppDatabase.getDownloadJobItemDao().getLiveStatus(
+                item.getDjiUid());
+        statusLiveData.observeForever(itemStatusObserver);
+
+        try { latch.await(3, TimeUnit.SECONDS); }
+        catch(InterruptedException e) {
+            //should not happen
+        }
 
         item = umAppDatabase.getDownloadJobItemDao().findWithDownloadSetItemByUid(
                 (int)testDownloadJobItemUid);
@@ -354,22 +391,87 @@ public class DownloadJobItemRunnerTest {
     }
 
     @Test
-    public void givenDownloadStarted_whenCompletedSuccessfully_shouldUpdateFileStatus(){
+    public void givenDownloadStartsOnMeteredConnection_whenJobSetChangedToDisableMeteredConnection_shouldStopAndSetStatus() throws InterruptedException {
+        dispatcher.setThrottle(512, 1,TimeUnit.SECONDS);
+
         DownloadJobItemWithDownloadSetItem item =
                 umAppDatabase.getDownloadJobItemDao().findWithDownloadSetItemByUid(
                         (int)testDownloadJobItemUid);
         DownloadJobItemRunner jobItemRunner =
                 new DownloadJobItemRunner(context,item, mockedNetworkManager, umAppDatabase, endPoint);
 
-        jobItemRunner.run();
+        umAppDatabase.getConnectivityStatusDao().update(ConnectivityStatus.STATE_METERED);
+        umAppDatabase.getDownloadSetDao().setMeteredConnectionBySetUid(
+                item.getDownloadSetItem().getDsiDsUid(),true);
 
-        ContentEntryFileStatus status = umAppDatabase.getContentEntryFileStatusDao()
-                .findByContentEntryFileUid(item.getDjiContentEntryFileUid());
+        new Thread(jobItemRunner).start();
 
-        assertNotNull("File status were updated successfully",status);
+        Thread.sleep(TimeUnit.SECONDS.toMillis(1));
 
-        assertEquals("Local file path is the same",
-                status.getFilePath(),item.getDestinationFile());
+        CountDownLatch latch = new CountDownLatch(1);
+        UmObserver<Integer> statusObserver = (status) -> {
+            if(status == JobStatus.WAITING_FOR_CONNECTION)
+                latch.countDown();
+        };
+
+
+        UmLiveData<Integer> statusLiveData = umAppDatabase.getDownloadJobItemDao()
+                .getLiveStatus(item.getDjiUid());
+
+        statusLiveData.observeForever(statusObserver);
+
+        umAppDatabase.getDownloadSetDao().setMeteredConnectionBySetUid(
+                item.getDownloadSetItem().getDsiDsUid(),false);
+
+        try { latch.await(3, TimeUnit.SECONDS); }
+        catch(InterruptedException e) {
+            //should not happen
+        }
+
+        item = umAppDatabase.getDownloadJobItemDao().findWithDownloadSetItemByUid(
+                (int)testDownloadJobItemUid);
+
+        assertEquals("File download job is waiting for network after changing download" +
+                        " set setting to use unmetered connection only",
+                item.getDjiStatus(), JobStatus.WAITING_FOR_CONNECTION);
+
+    }
+
+    @Test
+    public void givenDownloadStarted_whenConnectionGoesOff_shouldStopAndSetStatusToWaiting() throws InterruptedException {
+        dispatcher.setThrottle(512, 1,TimeUnit.SECONDS);
+
+        DownloadJobItemWithDownloadSetItem item =
+                umAppDatabase.getDownloadJobItemDao().findWithDownloadSetItemByUid(
+                        (int)testDownloadJobItemUid);
+        DownloadJobItemRunner jobItemRunner =
+                new DownloadJobItemRunner(context,item, mockedNetworkManager, umAppDatabase, endPoint);
+
+        new Thread(jobItemRunner).start();
+
+        Thread.sleep(TimeUnit.SECONDS.toMillis(1));
+
+        umAppDatabase.getConnectivityStatusDao().update(ConnectivityStatus.STATE_DISCONNECTED);
+
+        CountDownLatch latch = new CountDownLatch(1);
+        UmObserver<Integer> itemStatusObserver = (newStatus) -> {
+            if(newStatus == JobStatus.WAITING_FOR_CONNECTION)
+                latch.countDown();
+        };
+        UmLiveData<Integer> statusLiveData = umAppDatabase.getDownloadJobItemDao().getLiveStatus(
+                item.getDjiUid());
+        statusLiveData.observeForever(itemStatusObserver);
+
+        try { latch.await(3, TimeUnit.SECONDS); }
+        catch(InterruptedException e) {
+            //should not happen
+        }
+
+        item = umAppDatabase.getDownloadJobItemDao().findWithDownloadSetItemByUid(
+                (int)testDownloadJobItemUid);
+
+        assertEquals("File download job is waiting for network after the network goes off",
+                item.getDjiStatus(), JobStatus.WAITING_FOR_CONNECTION);
     }
 
 

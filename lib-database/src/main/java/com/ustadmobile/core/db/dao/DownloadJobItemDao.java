@@ -1,5 +1,6 @@
 package com.ustadmobile.core.db.dao;
 
+import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
@@ -61,5 +62,8 @@ public abstract class DownloadJobItemDao {
             "LEFT JOIN DownloadSetItem ON DownloadJobItem.djiDsiUid = DownloadSetItem.dsiUid " +
             "WHERE DownloadJobItem.djiUid = :djiUid")
     public abstract DownloadJobItemWithDownloadSetItem findWithDownloadSetItemByUid(int djiUid);
+
+    @UmQuery("SELECT djiStatus FROM DownloadJobItem WHERE djiUid = :djiUid")
+    public abstract UmLiveData<Integer> getLiveStatus(int djiUid);
 
 }

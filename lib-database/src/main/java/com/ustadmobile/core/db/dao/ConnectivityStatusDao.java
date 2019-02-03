@@ -18,6 +18,9 @@ public abstract class ConnectivityStatusDao{
     @UmQuery("SELECT ConnectivityStatus.* FROM ConnectivityStatus LIMIT 1")
     public abstract UmLiveData<ConnectivityStatus> getStatusLive();
 
+    @UmQuery("SELECT ConnectivityStatus.* FROM ConnectivityStatus LIMIT 1")
+    public abstract ConnectivityStatus getStatus();
+
 
 
 }

@@ -33,8 +33,10 @@ public abstract class DownloadSetDao {
 
 
     @UmQuery("SELECT meteredNetworkAllowed FROM DownloadSet  WHERE dsUid = :dsUid")
-    public abstract UmLiveData<Boolean> liveMeteredNetworkAllowed(long dsUid);
+    public abstract UmLiveData<Boolean> getLiveMeteredNetworkAllowed(long dsUid);
 
 
+    @UmQuery("UPDATE DownloadSet SET meteredNetworkAllowed = :meteredNetworkAllowed WHERE dsUid = :dsUid")
+    public abstract void setMeteredConnectionBySetUid(long dsUid, boolean meteredNetworkAllowed);
 
 }

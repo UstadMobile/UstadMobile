@@ -48,6 +48,7 @@ public class DownloadJobItem {
                            ContentEntryFile contentEntryFile) {
         this.djiDjUid = downloadJob.getDjUid();
         this.djiDsiUid = downloadSetItem.getDsiUid();
+        this.djiContentEntryFileUid = contentEntryFile.getContentEntryFileUid();
     }
 
     public int getDjiUid() {
