@@ -36,9 +36,6 @@ public abstract class DownloadJobDao {
     @Deprecated
     public abstract void updateJobStatusByRange(int rangeFrom, int rangeTo, int djStatus);
 
-    @UmQuery("UPDATE  DownloadJob SET djStatus = :djStatus WHERE djUid = :djUid")
-    public abstract void updateByJobUid(long djUid, int djStatus);
-
 
     /**
      * Update all fields on the given DownloadJob
