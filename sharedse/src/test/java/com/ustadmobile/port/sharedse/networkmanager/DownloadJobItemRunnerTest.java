@@ -7,6 +7,7 @@ import com.ustadmobile.lib.db.entities.ConnectivityStatus;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.ContentEntryContentEntryFileJoin;
 import com.ustadmobile.lib.db.entities.ContentEntryFile;
+import com.ustadmobile.lib.db.entities.ContentEntryFileStatus;
 import com.ustadmobile.lib.db.entities.DownloadJob;
 import com.ustadmobile.lib.db.entities.DownloadJobItem;
 import com.ustadmobile.lib.db.entities.DownloadJobItemWithDownloadSetItem;
@@ -35,6 +36,7 @@ import okio.BufferedSource;
 import okio.Okio;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.spy;
 
 /**
@@ -68,6 +70,8 @@ public class DownloadJobItemRunnerTest {
             "/com/ustadmobile/port/sharedse/networkmanager/thelittlechicks.epub";
 
     private DownloadJob downloadJob;
+
+    private  Object context;
 
     //Uid of the
     private long testDownloadJobItemUid;
@@ -160,7 +164,7 @@ public class DownloadJobItemRunnerTest {
 
     @Before
     public void setup() throws IOException {
-        Object context = PlatformTestUtil.getTargetContext();
+        context = PlatformTestUtil.getTargetContext();
         mockedNetworkManager = spy(NetworkManagerBle.class);
 
         File downloadTmpDir = File.createTempFile("DownloadJobItemRunnerTest", "dldir");
@@ -234,7 +238,7 @@ public class DownloadJobItemRunnerTest {
                 umAppDatabase.getDownloadJobItemDao().findWithDownloadSetItemByUid(
                         (int)testDownloadJobItemUid);
         DownloadJobItemRunner jobItemRunner =
-                new DownloadJobItemRunner(item, mockedNetworkManager, umAppDatabase, endPoint);
+                new DownloadJobItemRunner(context,item, mockedNetworkManager, umAppDatabase, endPoint);
 
         jobItemRunner.run();
 
@@ -258,7 +262,7 @@ public class DownloadJobItemRunnerTest {
                 umAppDatabase.getDownloadJobItemDao().findWithDownloadSetItemByUid(
                         (int)testDownloadJobItemUid);
         DownloadJobItemRunner jobItemRunner =
-                new DownloadJobItemRunner(item, mockedNetworkManager, umAppDatabase, endPoint);
+                new DownloadJobItemRunner(context,item, mockedNetworkManager, umAppDatabase, endPoint);
 
         jobItemRunner.run();
 
@@ -285,7 +289,7 @@ public class DownloadJobItemRunnerTest {
                 umAppDatabase.getDownloadJobItemDao().findWithDownloadSetItemByUid(
                         (int)testDownloadJobItemUid);
         DownloadJobItemRunner jobItemRunner =
-                new DownloadJobItemRunner(item, mockedNetworkManager, umAppDatabase, endPoint);
+                new DownloadJobItemRunner(context,item, mockedNetworkManager, umAppDatabase, endPoint);
 
         jobItemRunner.run();
 
@@ -305,7 +309,7 @@ public class DownloadJobItemRunnerTest {
                 umAppDatabase.getDownloadJobItemDao().findWithDownloadSetItemByUid(
                         (int)testDownloadJobItemUid);
         DownloadJobItemRunner jobItemRunner =
-                new DownloadJobItemRunner(item, mockedNetworkManager, umAppDatabase, endPoint);
+                new DownloadJobItemRunner(context,item, mockedNetworkManager, umAppDatabase, endPoint);
 
         new Thread(jobItemRunner).start();
 
@@ -313,7 +317,7 @@ public class DownloadJobItemRunnerTest {
 
         umAppDatabase.getConnectivityStatusDao().update(ConnectivityStatus.STATE_METERED);
 
-        Thread.sleep(TimeUnit.SECONDS.toMillis(2));
+        Thread.sleep(TimeUnit.SECONDS.toMillis(3));
 
         item = umAppDatabase.getDownloadJobItemDao().findWithDownloadSetItemByUid(
                 (int)testDownloadJobItemUid);
@@ -332,7 +336,7 @@ public class DownloadJobItemRunnerTest {
                 umAppDatabase.getDownloadJobItemDao().findWithDownloadSetItemByUid(
                         (int)testDownloadJobItemUid);
         DownloadJobItemRunner jobItemRunner =
-                new DownloadJobItemRunner(item, mockedNetworkManager, umAppDatabase, endPoint);
+                new DownloadJobItemRunner(context,item, mockedNetworkManager, umAppDatabase, endPoint);
 
         new Thread(jobItemRunner).start();
 
@@ -347,6 +351,25 @@ public class DownloadJobItemRunnerTest {
 
         assertEquals("File download job was stopped and status was updated",
                 item.getDjiStatus(), JobStatus.STOPPED);
+    }
+
+    @Test
+    public void givenDownloadStarted_whenCompletedSuccessfully_shouldUpdateFileStatus(){
+        DownloadJobItemWithDownloadSetItem item =
+                umAppDatabase.getDownloadJobItemDao().findWithDownloadSetItemByUid(
+                        (int)testDownloadJobItemUid);
+        DownloadJobItemRunner jobItemRunner =
+                new DownloadJobItemRunner(context,item, mockedNetworkManager, umAppDatabase, endPoint);
+
+        jobItemRunner.run();
+
+        ContentEntryFileStatus status = umAppDatabase.getContentEntryFileStatusDao()
+                .findByContentEntryFileUid(item.getDjiContentEntryFileUid());
+
+        assertNotNull("File status were updated successfully",status);
+
+        assertEquals("Local file path is the same",
+                status.getFilePath(),item.getDestinationFile());
     }
 
 
