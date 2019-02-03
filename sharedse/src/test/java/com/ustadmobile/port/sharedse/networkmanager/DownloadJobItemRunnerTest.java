@@ -24,6 +24,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import okhttp3.mockwebserver.Dispatcher;
 import okhttp3.mockwebserver.MockResponse;
@@ -52,11 +53,8 @@ public class DownloadJobItemRunnerTest {
 
     private String endPoint;
 
-    private Object context;
 
-    private int defaultId = 1;
-
-    private Dispatcher dispatcher = null;
+    private ContentEntryFileDispatcher dispatcher = null;
 
     private static File webServerTmpDir;
 
@@ -69,9 +67,7 @@ public class DownloadJobItemRunnerTest {
     private static final String TEST_FILE_RESOURCE_PATH =
             "/com/ustadmobile/port/sharedse/networkmanager/thelittlechicks.epub";
 
-    private File downloadTmpDir;
-
-    private ConnectivityStatus connectivityStatus;
+    private DownloadJob downloadJob;
 
     //Uid of the
     private long testDownloadJobItemUid;
@@ -84,10 +80,16 @@ public class DownloadJobItemRunnerTest {
 
         private long throttlePeriod = 0L;
 
-        private TimeUnit throttleTimeunit;
+        private TimeUnit throttleTimeUnit;
+
+        private AtomicInteger numFileGetRequests = new AtomicInteger();
 
         @Override
-        public MockResponse dispatch(RecordedRequest request) throws InterruptedException {
+        public MockResponse dispatch(RecordedRequest request) {
+            if(request.getMethod().equals("GET")) {
+                numFileGetRequests.incrementAndGet();
+            }
+
             if(numTimesToFail > 0) {
                 numTimesToFail--;
                 return new MockResponse().setResponseCode(500);
@@ -107,7 +109,7 @@ public class DownloadJobItemRunnerTest {
 
                     if(throttleBytesPerPeriod > 0) {
                         response.throttleBody(throttleBytesPerPeriod, throttlePeriod,
-                                throttleTimeunit);
+                                throttleTimeUnit);
                     }
 
                     return response;
@@ -127,8 +129,13 @@ public class DownloadJobItemRunnerTest {
         void setThrottle(long throttleBytesPerPeriod, long throttlePeriod, TimeUnit timeUnit) {
             this.throttleBytesPerPeriod = throttleBytesPerPeriod;
             this.throttlePeriod = throttlePeriod;
-            this.throttleTimeunit = timeUnit;
+            this.throttleTimeUnit = timeUnit;
         }
+
+        int getNumFileGetRequests() {
+            return numFileGetRequests.get();
+        }
+
     }
 
 
@@ -153,10 +160,10 @@ public class DownloadJobItemRunnerTest {
 
     @Before
     public void setup() throws IOException {
-        context =  PlatformTestUtil.getTargetContext();
+        Object context = PlatformTestUtil.getTargetContext();
         mockedNetworkManager = spy(NetworkManagerBle.class);
 
-        downloadTmpDir = File.createTempFile("DownloadJobItemRunnerTest", "dldir");
+        File downloadTmpDir = File.createTempFile("DownloadJobItemRunnerTest", "dldir");
         if(!(downloadTmpDir.delete() && downloadTmpDir.mkdirs())) {
             throw new IOException("Failed to create tmp directory" + downloadTmpDir);
         }
@@ -179,14 +186,14 @@ public class DownloadJobItemRunnerTest {
 
         DownloadSet downloadSet = new DownloadSet();
         downloadSet.setDestinationDir(downloadTmpDir.getAbsolutePath());
-        downloadSet.setDsRootContentEntryUid(defaultId);
+        downloadSet.setDsRootContentEntryUid(0L);
         downloadSet.setMeteredNetworkAllowed(false);
         downloadSet.setDsUid((int)umAppDatabase.getDownloadSetDao().insert(downloadSet));
 
         DownloadSetItem downloadSetItem = new DownloadSetItem(downloadSet, contentEntry);
         downloadSetItem.setDsiUid((int)umAppDatabase.getDownloadSetItemDao().insert(downloadSetItem));
 
-        DownloadJob downloadJob = new DownloadJob(downloadSet);
+        downloadJob = new DownloadJob(downloadSet);
         downloadJob.setTimeCreated(System.currentTimeMillis());
         downloadJob.setTimeRequested(System.currentTimeMillis());
         downloadJob.setDjStatus(JobStatus.QUEUED);
@@ -202,7 +209,7 @@ public class DownloadJobItemRunnerTest {
         testDownloadJobItemUid = umAppDatabase.getDownloadJobItemDao().insert(downloadJobItem);
 
 
-        connectivityStatus = new ConnectivityStatus();
+        ConnectivityStatus connectivityStatus = new ConnectivityStatus();
         connectivityStatus.setConnectedOrConnecting(true);
         connectivityStatus.setConnectivityState(ConnectivityStatus.STATE_UNMETERED);
         umAppDatabase.getConnectivityStatusDao().insert(connectivityStatus);
@@ -245,7 +252,7 @@ public class DownloadJobItemRunnerTest {
     @Test
     public void givenDownloadStarted_whenFailsOnce_shouldRetryAndComplete() {
 
-        ((ContentEntryFileDispatcher) dispatcher).setNumTimesToFail(2);
+        dispatcher.setNumTimesToFail(1);
 
         DownloadJobItemWithDownloadSetItem item =
                 umAppDatabase.getDownloadJobItemDao().findWithDownloadSetItemByUid(
@@ -263,11 +270,16 @@ public class DownloadJobItemRunnerTest {
 
         assertEquals("Same file size", webServerTmpContentEntryFile.length(),
                 new File(item.getDestinationFile()).length());
+
+        assertEquals("Number of attempts = 2", 2, item.getNumAttempts());
+        assertEquals("Number of file get requests = 2", 2,
+                dispatcher.getNumFileGetRequests());
+
     }
 
     @Test
     public void givenDownloadStarted_whenFailsExceedMaxAttempts_shouldStopAndSetStatusToFailed() {
-        ((ContentEntryFileDispatcher) dispatcher).setNumTimesToFail(4);
+        dispatcher.setNumTimesToFail(4);
 
         DownloadJobItemWithDownloadSetItem item =
                 umAppDatabase.getDownloadJobItemDao().findWithDownloadSetItemByUid(
@@ -287,7 +299,7 @@ public class DownloadJobItemRunnerTest {
     @Test
     public void givenDownloadUnmeteredConnectivityOnly_whenConnectivitySwitchesToMetered_shouldStopAndSetStatusToWaiting() throws InterruptedException {
 
-        ((ContentEntryFileDispatcher) dispatcher).setThrottle(512, 1,TimeUnit.SECONDS);
+        dispatcher.setThrottle(512, 1,TimeUnit.SECONDS);
 
         DownloadJobItemWithDownloadSetItem item =
                 umAppDatabase.getDownloadJobItemDao().findWithDownloadSetItemByUid(
@@ -306,14 +318,35 @@ public class DownloadJobItemRunnerTest {
         item = umAppDatabase.getDownloadJobItemDao().findWithDownloadSetItemByUid(
                 (int)testDownloadJobItemUid);
 
-        assertEquals("File download task stopped after network status change",
-                item.getDjiStatus(), JobStatus.WAITING_FOR_CONNECTION);
+        assertEquals("File download task stopped after network status " +
+                        "change and set status to waiting", item.getDjiStatus(),
+                JobStatus.WAITING_FOR_CONNECTION);
 
     }
 
     @Test
-    public void givenDownloadStarted_whenJobIsStopped_shouldStopAndSetStatus() {
+    public void givenDownloadStarted_whenJobIsStopped_shouldStopAndSetStatus() throws InterruptedException {
+        dispatcher.setThrottle(512, 1,TimeUnit.SECONDS);
 
+        DownloadJobItemWithDownloadSetItem item =
+                umAppDatabase.getDownloadJobItemDao().findWithDownloadSetItemByUid(
+                        (int)testDownloadJobItemUid);
+        DownloadJobItemRunner jobItemRunner =
+                new DownloadJobItemRunner(item, mockedNetworkManager, umAppDatabase, endPoint);
+
+        new Thread(jobItemRunner).start();
+
+        Thread.sleep(TimeUnit.SECONDS.toMillis(1));
+
+        umAppDatabase.getDownloadJobDao().updateByJobUid(downloadJob.getDjUid(),JobStatus.STOPPING);
+
+        Thread.sleep(TimeUnit.SECONDS.toMillis(2));
+
+        item = umAppDatabase.getDownloadJobItemDao().findWithDownloadSetItemByUid(
+                (int)testDownloadJobItemUid);
+
+        assertEquals("File download job was stopped and status was updated",
+                item.getDjiStatus(), JobStatus.STOPPED);
     }
 
 

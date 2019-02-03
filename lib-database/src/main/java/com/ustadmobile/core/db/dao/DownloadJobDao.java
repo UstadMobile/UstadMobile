@@ -1,5 +1,6 @@
 package com.ustadmobile.core.db.dao;
 
+import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
@@ -35,6 +36,9 @@ public abstract class DownloadJobDao {
     @Deprecated
     public abstract void updateJobStatusByRange(int rangeFrom, int rangeTo, int djStatus);
 
+    @UmQuery("UPDATE  DownloadJob SET djStatus = :djStatus WHERE djUid = :djUid")
+    public abstract void updateByJobUid(long djUid, int djStatus);
+
 
     /**
      * Update all fields on the given DownloadJob
@@ -63,5 +67,8 @@ public abstract class DownloadJobDao {
      */
     @UmQuery("SELECT * From DownloadJob")
     public abstract List<DownloadJob> findAll();
+
+    @UmQuery("SELECT * FROM DownloadJob WHERE djUid = :djUid")
+    public abstract UmLiveData<DownloadJob>  getJobLive(long djUid);
 
 }

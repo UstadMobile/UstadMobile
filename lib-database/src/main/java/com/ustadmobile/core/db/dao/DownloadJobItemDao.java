@@ -50,6 +50,12 @@ public abstract class DownloadJobItemDao {
     @UmQuery("UPDATE DownloadJobItem SET djiStatus = :status WHERE djiUid = :djiUid")
     public abstract void updateStatus(int djiUid, int status);
 
+    @UmQuery("UPDATE DownloadJobItem SET djiStatus = :djiStatus WHERE djiDjUid = :djiDjUid")
+    public abstract void updateStatusByJobId(long djiDjUid, int djiStatus);
+
+    @UmQuery("UPDATE DownloadJobItem SET numAttempts = numAttempts + 1 WHERE djiUid = :djiUid")
+    public abstract void incrementNumAttempts(long djiUid);
+
     @UmQuery("SELECT DownloadJobItem.*, DownloadSetItem.* FROM " +
             "DownloadJobItem " +
             "LEFT JOIN DownloadSetItem ON DownloadJobItem.djiDsiUid = DownloadSetItem.dsiUid " +

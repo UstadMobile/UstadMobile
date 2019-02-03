@@ -33,7 +33,4 @@ public abstract class DownloadSetItemDao {
      */
     @UmInsert
     public abstract long insert(DownloadSetItem item);
-
-
-
 }

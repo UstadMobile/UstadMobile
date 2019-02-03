@@ -64,8 +64,10 @@ public class JobStatus {
 
     public static final int FAILED = 25;
 
-    public static final int STOPPED = 26;
+    public static final int STOPPING = 26;
 
-    public static final int CANCELED = 27;
+    public static final int STOPPED = 27;
+
+    public static final int CANCELED = 28;
     
 }

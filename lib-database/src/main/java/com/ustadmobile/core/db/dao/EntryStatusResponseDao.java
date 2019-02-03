@@ -26,7 +26,7 @@ public abstract class EntryStatusResponseDao {
     @UmQuery("SELECT * FROM EntryStatusResponse " +
             " LEFT JOIN NetworkNode ON EntryStatusResponse.responderNodeId = NetworkNode.nodeId " +
             "WHERE entryId = :entryId AND available = :available ")
-    public abstract List<EntryStatusResponseWithNode> findByEntryIdAndAvailability(String entryId, boolean available);
+    public abstract List<EntryStatusResponseWithNode> findByEntryIdAndAvailability(long entryId, boolean available);
 
     @UmQuery("SELECT * FROM EntryStatusResponse WHERE entryid=:entryId AND responderNodeId=:nodeId")
     public abstract EntryStatusResponse findByEntryIdAndNetworkNode(long entryId, int nodeId);

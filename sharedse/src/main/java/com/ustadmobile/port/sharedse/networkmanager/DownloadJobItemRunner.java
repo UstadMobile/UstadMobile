@@ -6,6 +6,7 @@ import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.UmObserver;
 import com.ustadmobile.lib.db.entities.ConnectivityStatus;
 import com.ustadmobile.lib.db.entities.ContentEntryFileStatus;
+import com.ustadmobile.lib.db.entities.DownloadJob;
 import com.ustadmobile.lib.db.entities.DownloadJobItemWithDownloadSetItem;
 import com.ustadmobile.lib.db.entities.DownloadSet;
 import com.ustadmobile.lib.db.entities.DownloadSetItem;
@@ -14,9 +15,20 @@ import java.io.IOException;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class DownloadJobItemRunner implements Runnable{
+/**
+ * Class which handles all file downloading tasks, it reacts to different status as changed
+ * in the Db from either UI or Network change.
+ *
+ * i.e Decides where to get the file based on the entry status response,
+ * connecting to the peer device via BLE and WiFiP2P for the actual download
+ * and Change its status based on Network status.
+ *
+ * @author kileha3
+ */
+public class DownloadJobItemRunner implements Runnable, BleMessageResponseListener{
 
     private NetworkManagerBle networkManager;
 
@@ -30,33 +42,52 @@ public class DownloadJobItemRunner implements Runnable{
 
     private UmObserver<ConnectivityStatus> statusObserver;
 
-    private CountDownLatch localConnectLatch;
+    private UmObserver<DownloadJob> downloadJobObserver;
 
-    private static final int MAX_STATUS_CHECK_DELAY_TIME = 500;
+    private UmLiveData<DownloadJob> downloadJobLiveData;
+
+    private UmLiveData<Boolean> downloadSetConnectivityData;
+
+    private UmObserver<Boolean> downloadSetConnectivityObserver;
+
+    private CountDownLatch localConnectLatch;
 
     private volatile ResumableHttpDownload httpDownload;
 
-    private boolean isTaskFinished = false;
-
-    private Timer downloadStatusTimer = new Timer();
+    private Timer statusCheckTimer = new Timer();
 
     private AtomicBoolean stopped = new AtomicBoolean(false);
 
+    private AtomicBoolean completed = new AtomicBoolean(false);
+
+    private DownloadJob downloadJob;
+
+    private AtomicBoolean meteredConnectionAllowed = new AtomicBoolean(false);
 
 
-    private TimerTask downloadStatusTimerTask = new TimerTask() {
+    /**
+     * Timer task to keep track of the download status
+     */
+    private class StatusCheckTask extends TimerTask{
+
         @Override
         public void run() {
-
-            int downloadStatus = httpDownload.getTotalSize() == httpDownload.getDownloadedSoFar()
-                    ? JobStatus.COMPLETE:JobStatus.RUNNING;
-            if(!isTaskFinished){
-                updateStatus(downloadStatus);
+            if(!completed.get() || !stopped.get()){
+                appDb.getDownloadJobItemDao().updateDownloadJobItemStatus(downloadItem.getDjiUid(),
+                        JobStatus.RUNNING,httpDownload.getDownloadedSoFar(),httpDownload.getTotalSize()
+                        ,httpDownload.getCurrentDownloadSpeed());
             }
         }
-    };
+    }
 
 
+    /**
+     * Constructor to be used when creating new instance of the runner.
+     * @param downloadItem Item to be downloaded
+     * @param networkManager BLE network manager for network operation controls.
+     * @param appDb Application database instance
+     * @param endpointUrl Endpoint to get the file from.
+     */
     public DownloadJobItemRunner(DownloadJobItemWithDownloadSetItem downloadItem,
                                  NetworkManagerBle networkManager, UmAppDatabase appDb,
                                  String endpointUrl) {
@@ -64,15 +95,17 @@ public class DownloadJobItemRunner implements Runnable{
         this.downloadItem = downloadItem;
         this.appDb = appDb;
         this.endpointUrl = endpointUrl;
+        this.localConnectLatch = new CountDownLatch(1);
     }
 
-    public void handleConnectivityStatusChanged(ConnectivityStatus newStatus) {
+    /**
+     * Handle changes triggered when connectivity status changes.
+     * @param newStatus changed connectivity status
+     */
+    private void handleConnectivityStatusChanged(ConnectivityStatus newStatus) {
         if(newStatus != null){
-            //if we are waiting for a connection, and the new connection matches latch.countDown
-            DownloadSetItem setItem =  appDb.getDownloadSetItemDao().findById(downloadItem.getDjiDsiUid());
-            DownloadSet downloadSet = appDb.getDownloadSetDao().findByUid(setItem.getDsiDsUid());
 
-            if(!downloadSet.isMeteredNetworkAllowed() &&
+            if(!meteredConnectionAllowed.get() &&
                     newStatus.getConnectivityState() == ConnectivityStatus.STATE_METERED){
                 stop(JobStatus.WAITING_FOR_CONNECTION);
             }else if(newStatus.getConnectivityState() == ConnectivityStatus.STATE_CONNECTED_LOCAL){
@@ -81,12 +114,32 @@ public class DownloadJobItemRunner implements Runnable{
         }
     }
 
+    private void handleDownloadJobItemConnectivityChange(boolean meteredConnection){
+        meteredConnectionAllowed.set(meteredConnection);
+    }
+
+    /**
+     * Handle changes triggered when the download job status changes
+     * @param newDownloadJob changed download job
+     */
+    private void handleDownloadJobStatusChanged(DownloadJob newDownloadJob){
+        this.downloadJob = newDownloadJob;
+        if(newDownloadJob.getDjStatus() == JobStatus.STOPPING){
+            stop(JobStatus.STOPPING);
+        }
+    }
+
+
+    /**
+     * Stop the download task from continuing
+     * @param newStatus new status to be set
+     */
     private void stop(int newStatus) {
         stopped.set(true);
+        completed.set(true);
         if(httpDownload != null){
             httpDownload.stop();
         }
-
         updateItemStatus(newStatus);
     }
 
@@ -96,8 +149,24 @@ public class DownloadJobItemRunner implements Runnable{
     public void run() {
         updateItemStatus(JobStatus.RUNNING);
         statusLiveData = appDb.getConnectivityStatusDao().getStatusLive();
+        downloadJobLiveData = appDb.getDownloadJobDao().getJobLive(downloadItem.getDjiDjUid());
+
+        //get the download set
+
+        DownloadSetItem setItem =
+                appDb.getDownloadSetItemDao().findById(downloadItem.getDjiDsiUid());
+        DownloadSet downloadSet = appDb.getDownloadSetDao().findByUid(setItem.getDsiDsUid());
+
+        downloadSetConnectivityData =
+                appDb.getDownloadSetDao().liveMeteredNetworkAllowed(downloadSet.getDsUid());
+
+        downloadSetConnectivityObserver = this::handleDownloadJobItemConnectivityChange;
         statusObserver = this::handleConnectivityStatusChanged;
+        downloadJobObserver = this::handleDownloadJobStatusChanged;
         statusLiveData.observeForever(statusObserver);
+        downloadJobLiveData.observeForever(downloadJobObserver);
+        downloadSetConnectivityData.observeForever(downloadSetConnectivityObserver);
+
 
         ContentEntryFileStatus entryFileStatus = appDb.getContentEntryFileStatusDao().
                 findByContentEntryFileUid(downloadItem.getDjiContentEntryFileUid());
@@ -105,9 +174,9 @@ public class DownloadJobItemRunner implements Runnable{
             startDownload();
         }else{
             //request connection info from the peer node
+            /*List<EntryStatusResponseWithNode> statusResponseWithNodes =
+                    appDb.getEntryStatusResponseDao().findByEntryIdAndAvailability(entryFileStatus.)*/
             try {
-                ConnectivityStatus conStatus = new ConnectivityStatus();
-                conStatus.setConnectedOrConnecting(true);
                 appDb.getConnectivityStatusDao().update(ConnectivityStatus.STATE_CONNECTING_LOCAL);
                 localConnectLatch.wait();
             } catch (InterruptedException e) {
@@ -123,45 +192,59 @@ public class DownloadJobItemRunner implements Runnable{
 
         int attemptsRemaining = 3;
 
-        boolean completed = false;
+        StatusCheckTask statusCheckTask = null;
+        boolean downloaded = false;
 
         do {
             try {
-                System.out.println("Starting new resumable download for " + fileHref);
+                appDb.getDownloadJobItemDao().incrementNumAttempts(downloadItem.getDjiUid());
+                statusCheckTask = new StatusCheckTask();
+                statusCheckTimer.scheduleAtFixedRate(statusCheckTask,
+                        0, TimeUnit.SECONDS.toMillis(1));
                 httpDownload = new ResumableHttpDownload(fileHref, downloadItem.getDestinationFile());
-                completed = httpDownload.download();
+                downloaded = httpDownload.download();
             }catch(IOException e) {
                 e.printStackTrace();
+                statusCheckTask.cancel();
             }
 
             attemptsRemaining--;
-        }while(!stopped.get() && !completed && attemptsRemaining > 0);
+        }while(!stopped.get() && !downloaded && attemptsRemaining > 0);
 
         if(!stopped.get()) {
-            int downloadStatus = attemptsRemaining >= 0 && !completed ? JobStatus.FAILED :
+            statusCheckTask.cancel();
+            int downloadStatus = attemptsRemaining >= 0 && !downloaded ? JobStatus.FAILED :
                     (httpDownload.isStopped() ? JobStatus.STOPPED : JobStatus.COMPLETE);
             updateItemStatus(downloadStatus);
         }
 
     }
 
+    /**
+     * Update status of the currently downloading job item.
+     * @param itemStatus new status to be set
+     * @see JobStatus
+     */
     private void updateItemStatus(int itemStatus) {
         appDb.getDownloadJobItemDao().updateStatus(downloadItem.getDjiUid(), itemStatus);
+
+        if(itemStatus == JobStatus.STOPPING && downloadJob != null){
+            appDb.getDownloadJobItemDao().updateStatusByJobId(downloadJob.getDjUid()
+                    ,JobStatus.STOPPED);
+        }
+
+        if(itemStatus > JobStatus.RUNNING_MAX){
+            completed.set(true);
+            statusCheckTimer.cancel();
+            statusLiveData.removeObserver(statusObserver);
+            downloadJobLiveData.removeObserver(downloadJobObserver);
+            downloadSetConnectivityData.removeObserver(downloadSetConnectivityObserver);
+        }
     }
 
 
+    @Override
+    public void onResponseReceived(String sourceDeviceAddress, BleMessage response) {
 
-
-
-    private void updateStatus(int downloadStatus){
-//        if(downloadStatus > JobStatus.RUNNING_MAX){
-//            isTaskFinished = true;
-//            downloadStatusTimer.cancel();
-//            //statusLiveData.removeObserver(statusObserver);
-//        }
-//
-//        appDb.getDownloadJobItemDao().updateDownloadJobItemStatus(downloadItem.getDjiUid(),
-//                downloadStatus, httpDownload.getDownloadedSoFar(),
-//                httpDownload.getTotalSize(),httpDownload.getCurrentDownloadSpeed());
     }
 }
