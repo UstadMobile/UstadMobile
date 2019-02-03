@@ -11,12 +11,10 @@ import com.ustadmobile.lib.db.entities.DownloadSet;
 import com.ustadmobile.lib.db.entities.DownloadSetItem;
 
 import java.io.IOException;
-import java.net.URL;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class DownloadJobItemRunner implements Runnable{
 
@@ -42,6 +40,8 @@ public class DownloadJobItemRunner implements Runnable{
 
     private Timer downloadStatusTimer = new Timer();
 
+    private AtomicBoolean stopped = new AtomicBoolean(false);
+
 
 
     private TimerTask downloadStatusTimerTask = new TimerTask() {
@@ -66,8 +66,7 @@ public class DownloadJobItemRunner implements Runnable{
         this.endpointUrl = endpointUrl;
     }
 
-    public void handleConnetivityStatusChanged(ConnectivityStatus newStatus) {
-
+    public void handleConnectivityStatusChanged(ConnectivityStatus newStatus) {
         if(newStatus != null){
             //if we are waiting for a connection, and the new connection matches latch.countDown
             DownloadSetItem setItem =  appDb.getDownloadSetItemDao().findById(downloadItem.getDjiDsiUid());
@@ -75,20 +74,29 @@ public class DownloadJobItemRunner implements Runnable{
 
             if(!downloadSet.isMeteredNetworkAllowed() &&
                     newStatus.getConnectivityState() == ConnectivityStatus.STATE_METERED){
-                httpDownload.stop();
-                boolean isStopped = httpDownload.isStopped();
-                updateStatus(JobStatus.STOPPED);
+                stop(JobStatus.WAITING_FOR_CONNECTION);
             }else if(newStatus.getConnectivityState() == ConnectivityStatus.STATE_CONNECTED_LOCAL){
                 localConnectLatch.countDown();
             }
         }
     }
 
+    private void stop(int newStatus) {
+        stopped.set(true);
+        if(httpDownload != null){
+            httpDownload.stop();
+        }
+
+        updateItemStatus(newStatus);
+    }
+
+
 
     @Override
     public void run() {
+        updateItemStatus(JobStatus.RUNNING);
         statusLiveData = appDb.getConnectivityStatusDao().getStatusLive();
-        statusObserver = this::handleConnetivityStatusChanged;
+        statusObserver = this::handleConnectivityStatusChanged;
         statusLiveData.observeForever(statusObserver);
 
         ContentEntryFileStatus entryFileStatus = appDb.getContentEntryFileStatusDao().
@@ -119,25 +127,26 @@ public class DownloadJobItemRunner implements Runnable{
 
         do {
             try {
+                System.out.println("Starting new resumable download for " + fileHref);
                 httpDownload = new ResumableHttpDownload(fileHref, downloadItem.getDestinationFile());
                 completed = httpDownload.download();
-
-                int downloadStatus = attemptsRemaining < 3 ?
-                        JobStatus.WAIT_FOR_RETRY : JobStatus.RUNNING;
-                updateStatus(downloadStatus);
-//                downloadStatusTimer.scheduleAtFixedRate(downloadStatusTimerTask,0,
-//                        MAX_STATUS_CHECK_DELAY_TIME);
-
             }catch(IOException e) {
                 e.printStackTrace();
             }
 
             attemptsRemaining--;
-        }while(!completed && attemptsRemaining > 0);
+        }while(!stopped.get() && !completed && attemptsRemaining > 0);
 
-        int downloadStatus = attemptsRemaining >= 0 && !completed ? JobStatus.FAILED :
-                (httpDownload.isStopped() ? JobStatus.STOPPED : JobStatus.COMPLETE);
-        updateStatus(downloadStatus);
+        if(!stopped.get()) {
+            int downloadStatus = attemptsRemaining >= 0 && !completed ? JobStatus.FAILED :
+                    (httpDownload.isStopped() ? JobStatus.STOPPED : JobStatus.COMPLETE);
+            updateItemStatus(downloadStatus);
+        }
+
+    }
+
+    private void updateItemStatus(int itemStatus) {
+        appDb.getDownloadJobItemDao().updateStatus(downloadItem.getDjiUid(), itemStatus);
     }
 
 
@@ -145,14 +154,14 @@ public class DownloadJobItemRunner implements Runnable{
 
 
     private void updateStatus(int downloadStatus){
-        if(downloadStatus > JobStatus.RUNNING_MAX){
-            isTaskFinished = true;
-            downloadStatusTimer.cancel();
-            //statusLiveData.removeObserver(statusObserver);
-        }
-
-        appDb.getDownloadJobItemDao().updateDownloadJobItemStatus(downloadItem.getDjiUid(),
-                downloadStatus, httpDownload.getDownloadedSoFar(),
-                httpDownload.getTotalSize(),httpDownload.getCurrentDownloadSpeed());
+//        if(downloadStatus > JobStatus.RUNNING_MAX){
+//            isTaskFinished = true;
+//            downloadStatusTimer.cancel();
+//            //statusLiveData.removeObserver(statusObserver);
+//        }
+//
+//        appDb.getDownloadJobItemDao().updateDownloadJobItemStatus(downloadItem.getDjiUid(),
+//                downloadStatus, httpDownload.getDownloadedSoFar(),
+//                httpDownload.getTotalSize(),httpDownload.getCurrentDownloadSpeed());
     }
 }

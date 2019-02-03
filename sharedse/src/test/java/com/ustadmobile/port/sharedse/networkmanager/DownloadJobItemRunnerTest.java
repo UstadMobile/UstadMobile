@@ -301,13 +301,13 @@ public class DownloadJobItemRunnerTest {
 
         umAppDatabase.getConnectivityStatusDao().update(ConnectivityStatus.STATE_METERED);
 
-        Thread.sleep(TimeUnit.SECONDS.toMillis(90));
+        Thread.sleep(TimeUnit.SECONDS.toMillis(2));
 
         item = umAppDatabase.getDownloadJobItemDao().findWithDownloadSetItemByUid(
                 (int)testDownloadJobItemUid);
 
         assertEquals("File download task stopped after network status change",
-                item.getDjiStatus(),JobStatus.STOPPED);
+                item.getDjiStatus(), JobStatus.WAITING_FOR_CONNECTION);
 
     }
 
