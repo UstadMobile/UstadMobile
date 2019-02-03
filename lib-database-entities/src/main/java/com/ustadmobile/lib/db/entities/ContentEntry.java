@@ -41,6 +41,8 @@ public class ContentEntry {
 
     private String description;
 
+    private long lastUpdateTime;
+
     private String entryId;
 
     private String author;
@@ -127,6 +129,13 @@ public class ContentEntry {
         this.description = description;
     }
 
+    public long getLastUpdateTime() {
+        return lastUpdateTime;
+    }
+
+    public void setLastUpdateTime(long lastUpdateTime) {
+        this.lastUpdateTime = lastUpdateTime;
+    }
     /**
      * Get the embedded unique ID which can be found in the underlying file, if any. For
      * example the EPUB identifier for EPUB files, or the ID attribute of an xAPI zip file.

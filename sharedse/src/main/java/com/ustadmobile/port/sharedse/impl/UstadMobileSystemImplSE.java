@@ -26,6 +26,7 @@ import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.port.sharedse.impl.http.UmHttpCallSe;
 import com.ustadmobile.port.sharedse.impl.http.UmHttpResponseSe;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
+import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -43,9 +44,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
 import java.util.concurrent.Executors;
-
-
-
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.OkHttpClient;
@@ -192,9 +190,15 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
      *
      * @return
      */
+
+    @Deprecated
     public abstract NetworkManager getNetworkManager();
 
-
+    /**
+     * Get NetworkManagerBle instance
+     * @return Instance of NetworkManagerBle
+     */
+    public abstract NetworkManagerBle getNetworkManagerBle();
 
     @Override
     public String formatInteger(int integer) {

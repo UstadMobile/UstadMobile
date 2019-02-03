@@ -11,7 +11,7 @@
 		href="/acquire.opds"
 		type="application/atom+xml;profile=opds-catalog;kind=acquisition"/>
     <title>Crawl Test - Subject 1 - Slow</title>
-    <updated>2015-02-09T21:00:57Z</updated>
+    <entryUpdatedTime>2015-02-09T21:00:57Z</entryUpdatedTime>
     <author>
 	<name>Mike Test4</name> 
 	<uri>/user/6</uri>
@@ -24,7 +24,7 @@
             type="application/epub+zip"/>
             
         <id>http://umcloud1.ustadmobile.com/opds/test-crawl-slow/subject1/1a</id>
-        <updated>2015-02-09T18:58:12Z</updated>
+        <entryUpdatedTime>2015-02-09T18:58:12Z</entryUpdatedTime>
         <author>
             <name>Varuna Singh</name>
             <uri>/user/2</uri>
@@ -39,7 +39,7 @@
             type="application/epub+zip"/>
             
         <id>http://umcloud1.ustadmobile.com/opds/test-crawl-slow/subject1/1b</id>
-        <updated>2015-02-09T18:58:12Z</updated>
+        <entryUpdatedTime>2015-02-09T18:58:12Z</entryUpdatedTime>
         <author>
             <name>Varuna Singh</name>
             <uri>/user/2</uri>

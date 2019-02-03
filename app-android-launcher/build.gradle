@@ -147,6 +147,7 @@ dependencies {
     api fileTree(dir: 'libs', include: ['*.jar'])
     androidTestImplementation "com.android.support.test.espresso:espresso-core:$version_android_espresso"
     androidTestImplementation "com.android.support.test.espresso:espresso-contrib:$version_android_espresso"
+    androidTestImplementation "org.mockito:mockito-android:$version_android_mockito"
 
     testImplementation "junit:junit:$version_junit"
 }

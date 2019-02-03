@@ -14,7 +14,7 @@
         type="application/atom+xml;profile=opds-catalog;kind=acquisition"/>
 
     <title>Acquisition feed test task</title>
-    <updated>2015-02-09T21:00:57Z</updated>
+    <entryUpdatedTime>2015-02-09T21:00:57Z</entryUpdatedTime>
     <author>
         <name>Mike Test4</name>
         <uri>/user/6</uri>
@@ -27,7 +27,7 @@
             type="application/epub+zip"/>
 
         <id>202b10fe-b028-4b84-9b84-852aa766607d</id>
-        <updated>2015-02-09T18:58:12Z</updated>
+        <entryUpdatedTime>2015-02-09T18:58:12Z</entryUpdatedTime>
         <author>
             <name>Varuna Singh</name>
             <uri>/user/2</uri>
@@ -39,7 +39,7 @@
         <title>I come from a cloud</title>
 
         <id>b649852e-2bf9-45ab-839e-ec5bb00ca19d</id>
-        <updated>2015-02-09T18:58:12Z</updated>
+        <entryUpdatedTime>2015-02-09T18:58:12Z</entryUpdatedTime>
         <author>
             <name>Varuna Singh</name>
             <uri>/user/2</uri>

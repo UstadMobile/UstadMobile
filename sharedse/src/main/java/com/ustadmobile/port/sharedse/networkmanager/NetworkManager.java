@@ -18,6 +18,9 @@ import com.ustadmobile.core.networkmanager.EntryCheckResponse;
 import com.ustadmobile.core.networkmanager.NetworkManagerCore;
 import com.ustadmobile.core.networkmanager.NetworkManagerListener;
 import com.ustadmobile.core.networkmanager.NetworkManagerTaskListener;
+import com.ustadmobile.core.networkmanager.NetworkTask;
+import com.ustadmobile.core.util.UMFileUtil;
+import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.lib.db.entities.ContainerFileEntry;
 import com.ustadmobile.lib.db.entities.CrawlJob;
 import com.ustadmobile.lib.db.entities.CrawlJobItem;
@@ -28,9 +31,6 @@ import com.ustadmobile.lib.db.entities.DownloadSet;
 import com.ustadmobile.lib.db.entities.DownloadSetItem;
 import com.ustadmobile.lib.db.entities.EntryStatusResponse;
 import com.ustadmobile.lib.db.entities.NetworkNode;
-import com.ustadmobile.core.networkmanager.NetworkTask;
-import com.ustadmobile.core.util.UMFileUtil;
-import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.lib.db.entities.OpdsEntry;
 import com.ustadmobile.lib.db.entities.OpdsEntryParentToChildJoin;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithChildEntries;
@@ -42,6 +42,8 @@ import com.ustadmobile.port.sharedse.impl.http.CatalogUriResponder;
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD;
 import com.ustadmobile.port.sharedse.impl.http.MountedZipHandler;
 import com.ustadmobile.port.sharedse.impl.http.SharedEntryResponder;
+
+import net.lingala.zip4j.core.ZipFile;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -68,7 +70,6 @@ import java.util.Vector;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
-import net.lingala.zip4j.core.ZipFile;
 
 import javax.net.SocketFactory;
 
@@ -161,9 +162,13 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
      */
     public static final int WIFI_DIRECT_GROUP_STATUS_ACTIVE = 2;
 
+
+
+
     private Object mContext;
 
     private Vector<NetworkNode> knownNetworkNodes=new Vector<>();
+
 
     private final Object knownNodesLock = new Object();
 
@@ -406,12 +411,14 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
 
 
 
-
     /**
      * Method which tells if the file can be downloaded locally or not.
      * @param entryId File Entry ID
      * @return boolean: TRUE, if is available locally otherwise FALSE.
+     *
+     * Deprecated - use startMonitoringAvailability
      */
+    @Deprecated
     public boolean isFileAvailable(String entryId){
         for(EntryCheckResponse response:entryResponses.get(entryId)){
             if(response.isFileAvailable()){
@@ -430,10 +437,12 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
      * @param useBluetooth If true - use bluetooth addresses that were discovered using WiFi direct to ask for availability
      * @param useHttp If true - use HTTP to talk with nodes discovered which are reachable using HTTP (e.g. nodes already connected to the same wifi network)
      *
+     * @Deprecated use startMonitoringAvailability
      * @return
      */
     //TODO: remove mContext parameter
-    public long requestFileStatus(List<String> entryIds,Object mContext,List<NetworkNode> nodeList, boolean useBluetooth, boolean useHttp){
+    @Deprecated
+    public long requestFileStatus(List<String> entryIds, Object mContext, List<NetworkNode> nodeList, boolean useBluetooth, boolean useHttp){
         EntryStatusTask task = new EntryStatusTask(entryIds,this,this);
         task.setTaskType(NetworkManagerCore.QUEUE_ENTRY_STATUS);
         task.setUseBluetooth(useBluetooth);
@@ -447,6 +456,13 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
         return UmAppDatabase.getInstance(getContext()).getNetworkNodeDao().findAllActiveNodes();
     }
 
+    /**
+     *
+     * @param entryIds
+     * @param useBluetooth
+     * @param useHttp
+     * @return
+     */
     public long requestFileStatus(String[] entryIds, boolean useBluetooth, boolean useHttp) {
         return requestFileStatus(Arrays.asList(entryIds), getContext(), getKnownNodes(), useBluetooth, useHttp);
     }
@@ -462,6 +478,7 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
      *
      * @return
      */
+    @Deprecated
     public long requestFileStatus(List<String> entryIds,Object mContext,List<NetworkNode> nodeList) {
         return requestFileStatus(entryIds, mContext, nodeList, true, true);
     }
@@ -744,6 +761,7 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
     }
 
 
+    @Deprecated
     public void startMonitoringAvailability(AvailabilityMonitorRequest request, boolean checkKnownNodes){
         synchronized (availabilityMonitorRequests) {
             availabilityMonitorRequests.addElement(request);
@@ -759,6 +777,7 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
     }
 
 
+    @Deprecated
     public void stopMonitoringAvailability(AvailabilityMonitorRequest request) {
         synchronized (availabilityMonitorRequests) {
             availabilityMonitorRequests.removeElement(request);
@@ -847,12 +866,18 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
     }
 
 
+    public NetworkNode getThisWifiDirectDevice(){
+        return null;
+    }
+
     /**
      * Method which is invoked when new node has been found from Wi-Fi Direct discovery service.
      * @param serviceFullDomain Combination of application service record and protocol used
      * @param senderMacAddr Host device MAC address
      * @param txtRecords Map of DNS-Text records
+     *
      */
+    @Deprecated
     public void handleWifiDirectSdTxtRecordsAvailable(String serviceFullDomain,String senderMacAddr, HashMap<String, String> txtRecords) {
         dbExecutorService.execute(() -> {
             String wifiP2pServiceName = UstadMobileSystemImpl.getInstance()
@@ -880,7 +905,7 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
                     node.setBluetoothMacAddress(btAddr);
                     node.setWifiDirectMacAddress(senderMacAddr);
                     node.setPort(port);
-                    node.setWifiDirectLastUpdated(Calendar.getInstance().getTimeInMillis());
+                    node.setNetworkNodeLastUpdated(Calendar.getInstance().getTimeInMillis());
 
                     if(newNode) {
                         networkNodeDao.insert(node);
@@ -900,6 +925,7 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
         });
 
     }
+
 
     public void handleWifiDirectPeersChanged(List<NetworkNode> peers) {
         synchronized (this.knownPeers) {
@@ -972,7 +998,10 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
      * @param serviceName application service name
      * @param ipAddress Host device IP address (must not be null)
      * @param port Service port on host device
+     *
+     *  We no longer support using NSD for discovery
      */
+    @Deprecated
     public void handleNetworkServerDiscovered(String serviceName,String ipAddress,int port){
         dbExecutorService.execute(() -> {
             NetworkNode node;
@@ -1013,6 +1042,7 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
         });
     }
 
+    @Deprecated
     public void handleNetworkServiceRemoved(String serviceName) {
         synchronized (knownNetworkNodes) {
             String nodeServiceName;
@@ -1025,6 +1055,15 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
                 }
             }
         }
+    }
+
+    /**
+     * This should be called by the platform implementation when BLE discovers a nearby device
+     *
+     * @param node The nearby device discovered
+     */
+    protected void handleNodeDiscovered(NetworkNode node) {
+
     }
 
     /**
@@ -1151,16 +1190,16 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
         ArrayList<EntryStatusResponse> entryStatusResponses = new ArrayList<>();
         long responseTime = System.currentTimeMillis();
 
-        for(ContainerFileEntry availableEntry : availableEntries) {
-            entryStatusResponses.add(new EntryStatusResponse(availableEntry.getContainerEntryId(),
-                    node.getNodeId(), responseTime, 0, true));
-            remainingEntries.remove(availableEntry.getContainerEntryId());
-        }
-
-        for(String unavailableEntryId : remainingEntries) {
-            entryStatusResponses.add(new EntryStatusResponse(unavailableEntryId, node.getNodeId(),
-                    responseTime,0, false));
-        }
+//        for(ContainerFileEntry availableEntry : availableEntries) {
+//            entryStatusResponses.add(new EntryStatusResponse(availableEntry.getContainerEntryId(),
+//                    node.getNodeId(), responseTime, 0, true));
+//            remainingEntries.remove(availableEntry.getContainerEntryId());
+//        }
+//
+//        for(String unavailableEntryId : remainingEntries) {
+//            entryStatusResponses.add(new EntryStatusResponse(unavailableEntryId, node.getNodeId(),
+//                    responseTime,0, false));
+//        }
 
         UmAppDatabase.getInstance(getContext()).getEntryStatusResponseDao().insert(entryStatusResponses);
         fireFileStatusCheckInformationAvailable(entryIds);
@@ -2021,12 +2060,7 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
         updateClientServices();
     }
 
-    /**
-     * Return info about this wifi direct device as a NetworkNode object
-     *
-     * @return
-     */
-    public abstract NetworkNode getThisWifiDirectDevice();
+
 
     public abstract String getWifiDirectGroupOwnerIp();
 

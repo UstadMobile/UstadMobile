@@ -22,14 +22,11 @@ import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 public class NetworkServiceAndroid extends Service {
 
     private final IBinder mBinder = new LocalServiceBinder();
+
     private NetworkManagerAndroid networkManagerAndroid;
 
-    private boolean isSyncHappening = false;
 
-    /**
-     * Default time interval for Wi-Fi Direct service rebroadcasting.
-     */
-    public static final int SERVICE_REBROADCASTING_TIMER = 120000;
+    private NetworkManagerAndroidBle managerAndroidBle;
 
     public NetworkServiceAndroid() {
     }
@@ -37,17 +34,23 @@ public class NetworkServiceAndroid extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+
+        //TODO: This have to go
         networkManagerAndroid = (NetworkManagerAndroid)
                 UstadMobileSystemImplAndroid.getInstanceAndroid().getNetworkManager();
-        networkManagerAndroid.init(NetworkServiceAndroid.this);
+       networkManagerAndroid.init(NetworkServiceAndroid.this);
+
+        managerAndroidBle = (NetworkManagerAndroidBle)
+                UstadMobileSystemImplAndroid.getInstanceAndroid().getNetworkManagerBle();
+        managerAndroidBle.init(NetworkServiceAndroid.this);
+        managerAndroidBle.startScanning();
 
     }
 
     @Override
     public void onDestroy() {
         networkManagerAndroid.onDestroy();
-
-
+        managerAndroidBle.onDestroy();
         super.onDestroy();
     }
 
@@ -56,6 +59,13 @@ public class NetworkServiceAndroid extends Service {
      */
     public NetworkManagerAndroid getNetworkManager() {
         return networkManagerAndroid;
+    }
+
+    /**
+     * @return NetworkManagerAndroidBle class reference
+     */
+    public NetworkManagerAndroidBle getNetworkManagerBle() {
+        return managerAndroidBle;
     }
 
     @Override
@@ -68,7 +78,6 @@ public class NetworkServiceAndroid extends Service {
     public IBinder onBind(Intent intent) {
         return mBinder;
     }
-
 
     /**
      * Class used for the client Binder.  Because we know this service always

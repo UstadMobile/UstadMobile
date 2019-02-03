@@ -70,6 +70,7 @@ android {
     testOptions {
         unitTests {
             includeAndroidResources = true
+            returnDefaultValues = true
         }
     }
 
@@ -355,6 +356,11 @@ dependencies {
     androidTestImplementation "com.android.support.test.uiautomator:uiautomator-v18:$version_android_uiautomator"
 
     androidTestImplementation "org.mockito:mockito-android:$version_android_mockito"
+
+    testImplementation "org.mockito:mockito-core:$version_android_mockito"
+
+    testImplementation "org.robolectric:robolectric:$version_android_roboelectric"
+
     androidTestImplementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
 
     //http server
@@ -362,6 +368,7 @@ dependencies {
     implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
 
     testImplementation "junit:junit:$version_junit"
+    testImplementation "com.squareup.okhttp3:okhttp:$version_okhttp"
 }
 
 task sourceJar(type: Jar) {

@@ -8,6 +8,7 @@ import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
+import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle;
 import com.ustadmobile.test.core.impl.TestContext;
 
 import org.kxml2.io.KXmlParser;
@@ -75,10 +76,15 @@ public class UstadMobileSystemImplTest extends UstadMobileSystemImplSE {
     }
 
     @Override
+    public NetworkManagerBle getNetworkManagerBle() {
+        return null;
+    }
+
+    @Override
     public void getAppSetupFile(Object context, boolean zip, UmCallback callback) {
 
     }
-    
+
     public String getCacheDir(int mode, Object context) {
         File tmpDir = cacheDirs.get(mode);
         if(tmpDir == null) {
@@ -128,7 +134,6 @@ public class UstadMobileSystemImplTest extends UstadMobileSystemImplSE {
         return ((TestContext)context).getAppProps().getProperty(key);
     }
 
-    @Override
     public void setAppPref(String key, String value, Object context) {
         TestContext tContext = (TestContext)context;
         if(value != null) {

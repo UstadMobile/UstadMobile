@@ -42,6 +42,7 @@ import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.lib.db.entities.NetworkNode;
 import com.ustadmobile.port.android.impl.http.AndroidAssetsHandler;
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD;
+import com.ustadmobile.port.sharedse.networkmanager.BleEntryStatusTask;
 import com.ustadmobile.port.sharedse.networkmanager.BluetoothConnectionHandler;
 import com.ustadmobile.port.sharedse.networkmanager.BluetoothServer;
 import com.ustadmobile.port.sharedse.networkmanager.DefaultURLConnectionOpener;
@@ -547,6 +548,8 @@ public class NetworkManagerAndroid extends NetworkManager implements EmbeddedHTT
     public boolean setWifiEnabled(boolean enabled) {
         return wifiManager.setWifiEnabled(enabled);
     }
+
+
 
     /**
      * @exception IOException

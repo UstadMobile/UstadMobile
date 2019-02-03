@@ -41,6 +41,7 @@ import com.ustadmobile.lib.db.sync.entities.SyncablePrimaryKey;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -376,6 +377,7 @@ public class DbProcessorRoom extends AbstractDbProcessor implements QueryMethodG
 
 
         //now generate methods for all query, insert, and delete methods
+        Map<String, Integer> entityInsertionVarNamePostfixMap = new HashMap<>();
 
         for(ExecutableElement daoMethod : findMethodsToImplement(daoClass)) {
             MethodSpec.Builder methodBuilder = null;
@@ -384,7 +386,8 @@ public class DbProcessorRoom extends AbstractDbProcessor implements QueryMethodG
 
             if(methodInfo.isInsertWithAutoSyncPrimaryKey()) {
                 roomDaoClassSpec.addMethod(generateRoomSyncableInsertMethod(daoMethod, daoClass,
-                        roomDaoClassSpec, setRoomDbCodeBlock, "_roomDb"));
+                        roomDaoClassSpec, setRoomDbCodeBlock, "_roomDb",
+                        entityInsertionVarNamePostfixMap));
             }else if(daoMethod.getAnnotation(UmInsert.class) != null) {
                 UmInsert umInsert = daoMethod.getAnnotation(UmInsert.class);
                 AnnotationSpec annotation = AnnotationSpec.builder(ClassName.get(ROOM_PKG_NAME, "Insert"))
@@ -455,7 +458,8 @@ public class DbProcessorRoom extends AbstractDbProcessor implements QueryMethodG
                                                         TypeElement daoType,
                                                         TypeSpec.Builder daoTypeBuilder,
                                                         CodeBlock.Builder constructorCodeBlock,
-                                                        String roomDbVarName) {
+                                                        String roomDbVarName,
+                                                        Map<String, Integer> adapterPostfixMap) {
         MethodSpec.Builder methodBuilder = overrideAndResolve(daoMethod, daoType, processingEnv);
         CodeBlock.Builder codeBlock = CodeBlock.builder();
         DaoMethodInfo methodInfo = new DaoMethodInfo(daoMethod, daoType, processingEnv);
@@ -465,7 +469,9 @@ public class DbProcessorRoom extends AbstractDbProcessor implements QueryMethodG
         TypeName entityInsertionAdapterTypeName = ParameterizedTypeName.get(
                 ClassName.get("android.arch.persistence.room", "EntityInsertionAdapter"),
                 ClassName.get(entityComponentType));
-        String entityInsertionAdapterVarName = daoMethod.getSimpleName() + "_insertionAdapter";
+
+
+
 
         CodeBlock.Builder insertQueryCodeBlock = CodeBlock.builder()
                 .add("return \"INSERT INTO `$L_spk_view` (", entityComponentTypeEl.getSimpleName());
@@ -514,28 +520,37 @@ public class DbProcessorRoom extends AbstractDbProcessor implements QueryMethodG
 
         insertQueryCodeBlock.add(") VALUES ($L)\";\n", paramSection);
 
+        String insertQueryBlockStr = insertQueryCodeBlock.build().toString();
+        Integer insertQueryVariablePostfix = adapterPostfixMap.get(insertQueryBlockStr);
+        String entityInsertionAdapterVarName = "_entityInsertionAdapter" + insertQueryVariablePostfix;
+        if(insertQueryVariablePostfix == null) {
+            entityInsertionAdapterVarName = "_entityInsertionAdapter" + adapterPostfixMap.size();
+            TypeSpec.Builder anonymousClassSpec = TypeSpec.anonymousClassBuilder(roomDbVarName)
+                    .addSuperinterface(entityInsertionAdapterTypeName)
+                    .addMethod(MethodSpec.methodBuilder("createQuery")
+                            .addModifiers(Modifier.PUBLIC)
+                            .returns(String.class)
+                            .addAnnotation(Override.class)
+                            .addCode(insertQueryCodeBlock.build())
+                            .build())
+                    .addMethod(MethodSpec.methodBuilder("bind")
+                            .addAnnotation(Override.class)
+                            .addModifiers(Modifier.PUBLIC)
+                            .addParameter(ClassName.get("android.arch.persistence.db",
+                                    "SupportSQLiteStatement"), "stmt")
+                            .addParameter(ClassName.get(methodInfo.resolveEntityParameterComponentType()),
+                                    "value")
+                            .addCode(bindCodeBlock.build())
+                            .build());
 
-        TypeSpec.Builder anonymousClassSpec = TypeSpec.anonymousClassBuilder(roomDbVarName)
-                .addSuperinterface(entityInsertionAdapterTypeName)
-                .addMethod(MethodSpec.methodBuilder("createQuery")
-                    .addModifiers(Modifier.PUBLIC)
-                    .returns(String.class)
-                    .addAnnotation(Override.class)
-                    .addCode(insertQueryCodeBlock.build())
-                        .build())
-                .addMethod(MethodSpec.methodBuilder("bind")
-                        .addAnnotation(Override.class)
-                        .addModifiers(Modifier.PUBLIC)
-                        .addParameter(ClassName.get("android.arch.persistence.db",
-                                "SupportSQLiteStatement"), "stmt")
-                        .addParameter(ClassName.get(methodInfo.resolveEntityParameterComponentType()),
-                                "value")
-                        .addCode(bindCodeBlock.build())
-                        .build());
+            constructorCodeBlock.add("// code block for $L \n", insertQueryBlockStr);
+            constructorCodeBlock.add("$L = $L;\n", entityInsertionAdapterVarName,
+                    anonymousClassSpec.build());
+            daoTypeBuilder.addField(entityInsertionAdapterTypeName, entityInsertionAdapterVarName,
+                    Modifier.PRIVATE);
+            adapterPostfixMap.put(insertQueryBlockStr, adapterPostfixMap.size());
+        }
 
-        constructorCodeBlock.add("$L = $L;\n", entityInsertionAdapterVarName,
-                anonymousClassSpec.build());
-        daoTypeBuilder.addField(entityInsertionAdapterTypeName, entityInsertionAdapterVarName);
 
         if(methodInfo.isAsyncMethod()) {
             codeBlock.beginControlFlow("dbExecutor.execute(() -> ");

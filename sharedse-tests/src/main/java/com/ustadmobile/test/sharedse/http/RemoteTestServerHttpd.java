@@ -16,6 +16,7 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import fi.iki.elonen.NanoHTTPD;
 
@@ -38,8 +39,6 @@ public class RemoteTestServerHttpd extends NanoHTTPD {
     public static final String CMD_PING = "PING";
 
     public static final String CMD_MANGLE_WIFI_DIRECT_GROUP = "";
-
-    public static final int GROUP_CREATION_TIMEOUT = 60*1000;
 
 
     protected NetworkManager networkManager;

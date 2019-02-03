@@ -1,5 +1,6 @@
 package com.ustadmobile.port.android;
 
+import android.app.Application;
 import android.content.Context;
 
 import com.ustadmobile.core.db.UmAppDatabase;
@@ -19,7 +20,7 @@ import java.io.File;
  * normal android.app.Application on non-multidex variants.
  *
  */
-public class App extends UmBaseApplication {
+public class App extends Application {
 
     public static final String ATTACHMENTS_DIR = "attachments";
 

@@ -5,11 +5,11 @@ import com.ustadmobile.core.db.dao.ClazzDao;
 import com.ustadmobile.core.db.dao.ClazzMemberDao;
 import com.ustadmobile.core.db.dao.ContainerFileDao;
 import com.ustadmobile.core.db.dao.ContainerFileEntryDao;
+import com.ustadmobile.core.db.dao.ContentEntryDao;
 import com.ustadmobile.core.db.dao.ContentCategoryDao;
 import com.ustadmobile.core.db.dao.ContentCategorySchemaDao;
 import com.ustadmobile.core.db.dao.ContentEntryContentCategoryJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryContentEntryFileJoinDao;
-import com.ustadmobile.core.db.dao.ContentEntryDao;
 import com.ustadmobile.core.db.dao.ContentEntryFileDao;
 import com.ustadmobile.core.db.dao.ContentEntryFileStatusDao;
 import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
@@ -111,6 +111,7 @@ import com.ustadmobile.lib.db.sync.dao.SyncablePrimaryKeyDao;
 import com.ustadmobile.lib.db.sync.entities.SyncDeviceBits;
 import com.ustadmobile.lib.db.sync.entities.SyncStatus;
 import com.ustadmobile.lib.db.sync.entities.SyncablePrimaryKey;
+import com.ustadmobile.lib.database.UmDbBuilder;
 
 import java.util.Hashtable;
 import java.util.Random;
@@ -517,11 +518,12 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
 
     public abstract ClazzMemberDao getClazzMemberDao();
 
+    public abstract ContentEntryDao getContentEntryDao();
+
     public abstract PersonCustomFieldDao getPersonCustomFieldDao();
 
     public abstract PersonCustomFieldValueDao getPersonCustomFieldValueDao();
 
-    public abstract ContentEntryDao getContentEntryDao();
 
     public abstract ContentEntryContentCategoryJoinDao getContentEntryContentCategoryJoinDao();
 
