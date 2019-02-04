@@ -7,19 +7,18 @@ import com.ustadmobile.core.db.UmObserver;
 import com.ustadmobile.lib.db.entities.ConnectivityStatus;
 import com.ustadmobile.lib.db.entities.ContentEntryFileStatus;
 import com.ustadmobile.lib.db.entities.DownloadJobItemWithDownloadSetItem;
-import com.ustadmobile.lib.db.entities.NetworkNode;
 
 import java.io.IOException;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static com.ustadmobile.port.sharedse.networkmanager.BleEntryStatusTask.PORT_INFO_INDEX;
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.WIFI_GROUP_CREATION_RESPONSE;
-import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.WIFI_GROUP_REQUEST;
+import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.WIFI_GROUP_INFO_SEPARATOR;
 
 /**
  * Class which handles all file downloading tasks, it reacts to different status as changed
@@ -67,7 +66,8 @@ public class DownloadJobItemRunner implements Runnable, BleMessageResponseListen
 
     private AtomicInteger meteredConnectionAllowed = new AtomicInteger(-1);
 
-    @SuppressWarnings("unused") //will be needed for p2p
+    private int serverPort = 0;
+
     private Object context;
 
 
@@ -295,6 +295,8 @@ public class DownloadJobItemRunner implements Runnable, BleMessageResponseListen
     @Override
     public void onResponseReceived(String sourceDeviceAddress, BleMessage response) {
         if(response.getRequestType() == WIFI_GROUP_CREATION_RESPONSE){
+            serverPort = Integer.parseInt(new String(response.getPayload())
+                    .split(WIFI_GROUP_INFO_SEPARATOR)[PORT_INFO_INDEX]);
             appDb.getConnectivityStatusDao().update(ConnectivityStatus.STATE_CONNECTING_LOCAL);
         }
     }
