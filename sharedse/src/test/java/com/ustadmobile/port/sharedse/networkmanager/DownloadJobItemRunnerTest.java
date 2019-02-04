@@ -762,7 +762,7 @@ public class DownloadJobItemRunnerTest {
         item = umAppDatabase.getDownloadJobItemDao().findWithDownloadSetItemByUid(
                 (int)testDownloadJobItemUid);
 
-        assertEquals("File failed to be downloaded from peer and ",
+        assertEquals("File failed to be downloaded from peer and status was updated",
                 item.getDjiStatus(), JobStatus.WAITING_FOR_CONNECTION);
     }
 
