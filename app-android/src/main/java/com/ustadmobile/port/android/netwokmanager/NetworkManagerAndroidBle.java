@@ -12,7 +12,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiConfiguration;
@@ -32,7 +31,6 @@ import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle;
 import com.ustadmobile.port.sharedse.networkmanager.WiFiDirectGroupBle;
 
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import static android.os.Looper.getMainLooper;
@@ -75,8 +73,6 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
     private BluetoothAdapter bluetoothAdapter;
 
     private Object bleServiceAdvertiser;
-
-    private Map<Context, ServiceConnection> serviceConnectionMap;
 
     private Object gattServerAndroid;
 
@@ -213,7 +209,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
      */
     @Override
     public void startAdvertising() {
-        if(isAdvertiser()){
+        if(canDeviceAdvertise()){
             bleServiceAdvertiser = bluetoothAdapter.getBluetoothLeAdvertiser();
 
             BluetoothGattService service = new BluetoothGattService(parcelServiceUuid.getUuid(),
@@ -467,13 +463,6 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
     }
 
 
-    /**
-     * Responsible for setting up the right services connection
-     * @param serviceConnectionMap Map of all services connection made within the app.
-     */
-    public void setServiceConnectionMap(Map<Context, ServiceConnection> serviceConnectionMap) {
-        this.serviceConnectionMap = serviceConnectionMap;
-    }
 
     /**
      * Check if the device needs runtime-permission
