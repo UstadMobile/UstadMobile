@@ -23,9 +23,11 @@ public interface ReportSELView extends UstadView {
 
     /**
      * Generates an XLS report from the sel report and table data in the view and starts the share
-     * intent on the platform.
+     *      intent on the platform.
+     * @param reportPath    The report file xlsx path
      */
-    void generateXLSReport();
+    void generateXLSReport(String reportPath);
+
 
     /**
      * Updates raw sel data and initiates creating the table sel report on the view.

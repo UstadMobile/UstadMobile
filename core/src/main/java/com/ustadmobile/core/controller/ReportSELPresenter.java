@@ -6,10 +6,15 @@ import com.ustadmobile.core.db.dao.SocialNominationQuestionResponseNominationDao
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.view.ReportSELView;
+import com.ustadmobile.core.xlsx.UmSheet;
+import com.ustadmobile.core.xlsx.UmXLSX;
+import com.ustadmobile.core.xlsx.ZipUtil;
 import com.ustadmobile.lib.db.entities.ClazzMember;
 import com.ustadmobile.lib.db.entities.ClazzMemberWithPerson;
 import com.ustadmobile.lib.db.entities.SELNominationItem;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -172,6 +177,45 @@ public class ReportSELPresenter extends UstadBaseController<ReportSELView> {
     private void sendToView(LinkedHashMap<String, LinkedHashMap<String, Map<Long, List<Long>>>> clazzMap,
                             HashMap<String, List<ClazzMemberWithPerson>> clazzToStudents){
         view.runOnUiThread(() -> view.updateTables(clazzMap, clazzToStudents));
+    }
+
+
+    /**
+     *
+     * @param title
+     * @param xlsxReportPath
+     * @param theWorkingPath
+     */
+    public void dataToXLSX(String title, String xlsxReportPath, String theWorkingPath){
+
+        try {
+            File xlsxFile = ZipUtil.createEmptyZipFile(xlsxReportPath);
+
+            UmXLSX umXLSX = new UmXLSX(title, xlsxReportPath, theWorkingPath);
+
+            UmSheet newSheet = new UmSheet("Test sheet");
+            newSheet.addValueToSheet(0,0, "The");
+            newSheet.addValueToSheet(0,1, "Quick");
+            newSheet.addValueToSheet(0,2, "Brown");
+            newSheet.addValueToSheet(0,3, "Fox");
+            newSheet.addValueToSheet(1,0, "Jumped");
+            newSheet.addValueToSheet(1,1, "Over");
+            newSheet.addValueToSheet(1,2, "The");
+            newSheet.addValueToSheet(1,3, "Lazy");
+            newSheet.addValueToSheet(2,0, "Dog");
+            newSheet.addValueToSheet(2,1, "And");
+            newSheet.addValueToSheet(2,2, "Then");
+            newSheet.addValueToSheet(2,3, "Sleeps");
+
+            umXLSX.addSheet(newSheet);
+
+            umXLSX.createXLSX();
+
+            view.generateXLSReport(xlsxReportPath);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

@@ -103,26 +103,20 @@ configurations.all {
 dependencies {
     api project(':core')
     api project(':sharedse')
-    api project(":app-android")
-    api project(":core-tests")
-    api project(":sharedse-tests")
-
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
-
+    api project(':app-android')
+    api project(':core-tests')
+    api project(':sharedse-tests')
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation "com.android.support:support-core-utils:$version_android_support_lib"
     implementation "com.android.support:appcompat-v7:$version_android_support_lib"
-
     testImplementation "junit:junit:$version_junit"
     androidTestImplementation "com.android.support.test:runner:$version_android_junit_runner"
     androidTestImplementation "com.android.support.test.espresso:espresso-core:$version_android_espresso"
-
     implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
     implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
-
     /*
-     * Included here to avoid build a complaint about different runtime / compile version
-     */
+         * Included here to avoid build a complaint about different runtime / compile version
+         */
     implementation "android.arch.lifecycle:extensions:$version_android_lifecycle"
     annotationProcessor "android.arch.lifecycle:common-java8:$version_android_lifecycle"
-
 }

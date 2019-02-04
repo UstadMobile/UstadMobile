@@ -439,16 +439,14 @@ configurations.all {
 dependencies {
     api project(':core')
     api project(':sharedse')
-    api project(":lib-core-fs")
+    api project(':lib-core-fs')
     implementation project(':lib-database-runtime')
     implementation project(':lib-database')
     implementation project(':lib-database-android')
-    implementation project(":lib-util")
-
+    implementation project(':lib-util')
     implementation 'com.android.support.constraint:constraint-layout:1.1.3'
     vanillamultidexApi "com.android.support:multidex:$version_android_multidex"
-
-    androidTestImplementation project(":core-tests")
+    androidTestImplementation project(':core-tests')
 
     //ViewModel and LiveData
     implementation "android.arch.lifecycle:extensions:$version_android_lifecycle"
@@ -462,18 +460,15 @@ dependencies {
 
     //Work manager
     implementation "android.arch.work:work-runtime:$version_android_workmanager"
-
-
-    androidTestImplementation project(":core-tests")
-    androidTestImplementation project(":sharedse-tests")
-    androidTestImplementation project(":lib-core-fs-tests")
-
+    androidTestImplementation project(':core-tests')
+    androidTestImplementation project(':sharedse-tests')
+    androidTestImplementation project(':lib-core-fs-tests')
 
     /*
-     * If this needs to be made compatible as a library for something using older appcompat libs -
-     * use this format:
-     *  implementation group: 'com.android.support', name: "appcompat-v7", version: "[26+, 27+]"
-     */
+         * If this needs to be made compatible as a library for something using older appcompat libs -
+         * use this format:
+         *  implementation group: 'com.android.support', name: "appcompat-v7", version: "[26+, 27+]"
+         */
     implementation "com.android.support:support-core-utils:$version_android_support_lib"
     implementation "com.android.support:appcompat-v7:$version_android_support_lib"
     implementation "com.android.support:cardview-v7:$version_android_support_lib"
@@ -487,12 +482,10 @@ dependencies {
 
     //Floating action button with support for popup choices
     implementation 'com.github.clans:fab:1.6.4'
-
     implementation 'de.hdodenhof:circleimageview:2.1.0'
 
     //used for learner progress view
     implementation 'com.txusballesteros:FitChart:1.0'
-
     implementation "com.google.android:flexbox:$version_android_flexbox"
 
     //Used for dns local network discovery on Android versions lower than 5.0
@@ -511,7 +504,6 @@ dependencies {
 
     //Gson for JSON serializing and deserializing
     implementation "com.google.code.gson:gson:$version_gson"
-
     androidTestImplementation "junit:junit:$version_junit"
     androidTestImplementation group: "com.android.support", name: "support-annotations", version: "$version_android_support_lib"
 
@@ -523,9 +515,7 @@ dependencies {
     androidTestImplementation "com.android.support.test.espresso:espresso-contrib:$version_android_espresso"
     androidTestImplementation "com.android.support.test.espresso:espresso-intents:$version_android_espresso"
     androidTestImplementation "com.android.support.test.espresso:espresso-web:$version_android_espresso"
-
     androidTestImplementation "com.android.support.test.uiautomator:uiautomator-v18:$version_android_uiautomator"
-
     androidTestImplementation "org.mockito:mockito-android:$version_android_mockito"
     androidTestImplementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
 
@@ -550,8 +540,13 @@ dependencies {
 
     //Work manager
     implementation "android.arch.work:work-runtime:$version_work_manager"
-
     testImplementation "junit:junit:$version_junit"
+    implementation files('lib/sjxlsx-1.0.0.jar')
+
+
+    //XML Stream
+    implementation group: 'javax.xml.stream', name: 'stax-api', version: '1.0-2'
+    implementation group: 'com.fasterxml', name: 'aalto-xml', version: '1.1.1'
 }
 
 task sourceJar(type: Jar) {
