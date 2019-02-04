@@ -153,6 +153,9 @@ public class ScraperConstants {
     public static final String MIMETYPE_SVG = "image/svg+xml";
     public static final String MIMETYPE_JPG = "image/jpg";
     public static final String MIMETYPE_CSS = "text/css";
+    public static final String MIMETYPE_MP4 = "video/mp4";
+    public static final String MIMETYPE_WEB_CHUNK = "application/webchunk+zip";
+    public static final String MIMETYPE_TINCAN = "application/tincan+zip";
 
     public static final String ZIP_EXT = ".zip";
     public static final String PNG_EXT = ".png";

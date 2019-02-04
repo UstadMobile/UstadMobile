@@ -90,7 +90,7 @@
             android:layout_width="@dimen/dimen_16dp"
             android:layout_height="@dimen/dimen_16dp"
             android:layout_marginTop="@dimen/dimen_8dp"
-            android:src="@drawable/download_archive_tray"
+            app:srcCompat="@drawable/download_archive_tray"
             app:layout_constraintEnd_toEndOf="@id/entry_detail_content_size"
             app:layout_constraintStart_toStartOf="@id/entry_detail_content_size"
             app:layout_constraintTop_toBottomOf="@id/library_size_divider" />

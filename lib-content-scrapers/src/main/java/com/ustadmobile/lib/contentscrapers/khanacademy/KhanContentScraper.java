@@ -56,6 +56,8 @@ import static com.ustadmobile.lib.contentscrapers.ScraperConstants.KHAN_CSS_LINK
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_CSS;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_JSON;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_SVG;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_WEB_CHUNK;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_ZIP;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.TIME_OUT_SELENIUM;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.TRY_AGAIN_FILE;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.TRY_AGAIN_KHAN_LINK;
@@ -126,6 +128,7 @@ public class KhanContentScraper implements Runnable {
 
     private boolean isContentUpdated = true;
     private String nodeSlug;
+    private String mimeType;
 
 
     public KhanContentScraper(URL scrapeUrl, File destinationDirectory, ContentEntry parent, String contentType, int sqiUid, GenericObjectPool<ChromeDriver> factory) {
@@ -163,6 +166,7 @@ public class KhanContentScraper implements Runnable {
         try {
             driver = factory.borrowObject();
             File content;
+            String mimetype = MIMETYPE_WEB_CHUNK;
             if (ScraperConstants.KhanContentType.VIDEO.getType().equals(contentType)) {//all calls to scraper... replaced with insert
                 scrapeVideoContent(url.toString());
                 File parentFolder = new File(destinationDirectory, destinationDirectory.getName());
@@ -184,12 +188,12 @@ public class KhanContentScraper implements Runnable {
             if (isContentUpdated()) {
                 ContentScraperUtil.insertContentEntryFile(content, contentEntryFileDao, contentFileStatusDao,
                         parentEntry, ContentScraperUtil.getMd5(content), contentEntryFileJoin, true,
-                        ScraperConstants.MIMETYPE_ZIP);
+                        mimetype);
 
             } else {
 
                 ContentScraperUtil.checkAndUpdateDatabaseIfFileDownloadedButNoDataFound(content, parentEntry, contentEntryFileDao,
-                        contentEntryFileJoin, contentFileStatusDao, ScraperConstants.MIMETYPE_ZIP, true);
+                        contentEntryFileJoin, contentFileStatusDao, mimetype, true);
 
             }
 
@@ -209,6 +213,10 @@ public class KhanContentScraper implements Runnable {
 
     }
 
+    public String getMimeType(){
+        return mimeType;
+    }
+
     public boolean isContentUpdated() {
         return isContentUpdated;
     }
@@ -226,6 +234,7 @@ public class KhanContentScraper implements Runnable {
         try {
             conn = (HttpURLConnection)scrapUrl.openConnection();
             conn.setRequestMethod("HEAD");
+            mimeType = conn.getContentType();
             if (!ContentScraperUtil.isFileModified(conn, folder, FilenameUtils.getBaseName(url)) && ContentScraperUtil.fileHasContent(content)) {
                 isContentUpdated = false;
                 return;
