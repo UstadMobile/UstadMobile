@@ -10,7 +10,7 @@ import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 public class NetworkNode {
 
     @UmPrimaryKey(autoIncrement = true)
-    private int nodeId;
+    private long nodeId;
 
     private String bluetoothMacAddress;
 
@@ -67,11 +67,11 @@ public class NetworkNode {
 
     }
 
-    public int getNodeId() {
+    public long getNodeId() {
         return nodeId;
     }
 
-    public void setNodeId(int nodeId) {
+    public void setNodeId(long nodeId) {
         this.nodeId = nodeId;
     }
 

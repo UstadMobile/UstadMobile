@@ -17,7 +17,7 @@ public class DownloadJobItemHistory {
     private String url;
 
     //Foreign key for the networknode this is connected to
-    private int networkNode;
+    private long networkNode;
 
     private int downloadJobItemId;
 
@@ -35,7 +35,7 @@ public class DownloadJobItemHistory {
 
     }
 
-    public DownloadJobItemHistory(int networkNode, int mode, boolean successful, long startTime, long endTime){
+    public DownloadJobItemHistory(long networkNode, int mode, boolean successful, long startTime, long endTime){
         this.networkNode = networkNode;
         this.mode = mode;
         this.successful = successful;
@@ -71,11 +71,11 @@ public class DownloadJobItemHistory {
         this.url = url;
     }
 
-    public int getNetworkNode() {
+    public long getNetworkNode() {
         return networkNode;
     }
 
-    public void setNetworkNode(int networkNode) {
+    public void setNetworkNode(long networkNode) {
         this.networkNode = networkNode;
     }
 

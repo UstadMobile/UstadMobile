@@ -22,7 +22,7 @@ import com.ustadmobile.core.impl.AppConfig;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
-import com.ustadmobile.port.android.netwokmanager.NetworkManagerBleService;
+import com.ustadmobile.port.android.netwokmanager.BleNetworkService;
 import com.ustadmobile.port.android.netwokmanager.UmAppDatabaseSyncService;
 
 import java.lang.ref.WeakReference;
@@ -98,7 +98,7 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
                 Context.BIND_AUTO_CREATE|Context.BIND_ADJUST_WITH_ACTIVITY);
 
         //bind ble service
-        Intent bleServiceIntent = new Intent(this, NetworkManagerBleService.class);
+        Intent bleServiceIntent = new Intent(this, BleNetworkService.class);
         bindService(bleServiceIntent,bleServiceConnection,
                 Context.BIND_AUTO_CREATE|Context.BIND_ADJUST_WITH_ACTIVITY);
     }

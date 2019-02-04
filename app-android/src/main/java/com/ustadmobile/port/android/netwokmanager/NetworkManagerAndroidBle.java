@@ -28,6 +28,7 @@ import com.ustadmobile.port.sharedse.networkmanager.BleEntryStatusTask;
 import com.ustadmobile.port.sharedse.networkmanager.BleMessage;
 import com.ustadmobile.port.sharedse.networkmanager.BleMessageResponseListener;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle;
+import com.ustadmobile.port.sharedse.networkmanager.WiFiDirectConnectionListener;
 import com.ustadmobile.port.sharedse.networkmanager.WiFiDirectGroupBle;
 
 import java.util.List;
@@ -85,6 +86,8 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
     private WifiP2pManager wifiP2pManager;
 
     private WiFiDirectGroupBle wiFiDirectGroupBle;
+
+    private WiFiDirectConnectionListener wiFiDirectConnectionListener;
 
     /**
      * Listeners for the WiFi-Direct group connections / states,
@@ -413,7 +416,9 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
      * {@inheritDoc}
      */
     @Override
-    public void connectToWiFi(String ssid, String passphrase) {
+    public void connectToWiFi(String ssid, String passphrase,
+                              WiFiDirectConnectionListener connectionListener) {
+        this.wiFiDirectConnectionListener = connectionListener;
         WifiConfiguration wifiConfig = new WifiConfiguration();
         wifiConfig.SSID = "\""+ ssid +"\"";
         wifiConfig.priority = (getMaxWiFiConfigurationPriority(wifiManager)+1);
@@ -439,7 +444,6 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
             BleEntryStatusTaskAndroid entryStatusTask =
                     new BleEntryStatusTaskAndroid((Context)context,entryUidsToCheck,peerToCheck);
             entryStatusTask.setBluetoothManager((BluetoothManager)bluetoothManager);
-            entryStatusTask.setNetworkManagerBle(this);
             return entryStatusTask;
         }
         return null;
@@ -450,13 +454,13 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
      */
     @Override
     public BleEntryStatusTask makeEntryStatusTask(Object context, BleMessage message,
-                                                  NetworkNode peerToSendMessageTo, BleMessageResponseListener responseListener) {
+                                                  NetworkNode peerToSendMessageTo,
+                                                  BleMessageResponseListener responseListener) {
         if(isBleDeviceSDKVersion()){
             BleEntryStatusTaskAndroid task =
                     new BleEntryStatusTaskAndroid((Context)context,message,
                             peerToSendMessageTo, responseListener);
             task.setBluetoothManager((BluetoothManager)bluetoothManager);
-            task.setNetworkManagerBle(this);
             return task;
         }
         return null;

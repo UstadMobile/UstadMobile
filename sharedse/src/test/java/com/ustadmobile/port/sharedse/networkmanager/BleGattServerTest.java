@@ -28,6 +28,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
@@ -62,7 +63,8 @@ public class BleGattServerTest {
     public void setUp(){
         Object context =  PlatformTestUtil.getTargetContext();
         mockedNetworkManager = spy(NetworkManagerBle.class);
-        mockedNetworkManager.init(context);
+        mockedNetworkManager.onCreate();
+        mockedNetworkManager.setContext(context);
 
         umAppDatabase =  UmAppDatabase.getInstance(context);
         umAppDatabase.clearAllTables();

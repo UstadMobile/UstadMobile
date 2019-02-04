@@ -68,7 +68,7 @@ public class BleNetworkManagerTest {
         networkNode = new NetworkNode();
         mockedNetworkManager = spy(NetworkManagerBle.class);
         mockedResponseListener = mock(BleMessageResponseListener.class);
-        mockedNetworkManager.init(context);
+        mockedNetworkManager.setContext(context);
         when(mockedNetworkManager
                 .makeEntryStatusTask(eq(context),eq(contentEntryUids),any()))
                 .thenReturn(mockedEntryStatusTask);
@@ -162,11 +162,10 @@ public class BleNetworkManagerTest {
             long entryId = contentEntryUids.get(i);
             EntryStatusResponse response = new EntryStatusResponse();
             response.setAvailable(true);
-            response.setEntryId(entryId);
-            response.setResponderNodeId((int) nodeId);
-            response.setId(i+1);
+            response.setErContentEntryFileUid(entryId);
+            response.setErNodeId((int) nodeId);
+            response.setErId(i+1);
             response.setResponseTime(10L);
-            response.setEntryUpdatedTime(11L);
             entryStatusResponseList.add(response);
         }
 

@@ -1,5 +1,6 @@
 package com.ustadmobile.port.sharedse.networkmanager;
 
+import com.google.gson.Gson;
 import com.ustadmobile.core.db.dao.ContentEntryDao;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.lib.db.entities.ContentEntry;
@@ -14,7 +15,6 @@ import static com.ustadmobile.port.sharedse.networkmanager.BleMessageUtil.bleMes
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.ENTRY_STATUS_REQUEST;
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.ENTRY_STATUS_RESPONSE;
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.WIFI_GROUP_CREATION_RESPONSE;
-import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.WIFI_GROUP_INFO_SEPARATOR;
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.WIFI_GROUP_REQUEST;
 
 /**
@@ -98,8 +98,12 @@ public abstract class BleGattServer implements WiFiDirectGroupListenerBle{
 
     @Override
     public void groupCreated(WiFiDirectGroupBle group, Exception err) {
-        this.message = group.getSsid() + WIFI_GROUP_INFO_SEPARATOR + group.getPassphrase()
-                + WIFI_GROUP_INFO_SEPARATOR + networkManager.getHttpd().getListeningPort();
+        NetworkManagerBle.WiFiP2PGroupResponse p2PGroupResponse =
+                new NetworkManagerBle.WiFiP2PGroupResponse();
+        p2PGroupResponse.setGroupPassphrase(group.getPassphrase());
+        p2PGroupResponse.setGroupSsid(group.getSsid());
+        p2PGroupResponse.setPort(networkManager.getHttpd().getListeningPort());
+        this.message = new Gson().toJson(p2PGroupResponse);
         mLatch.countDown();
     }
 

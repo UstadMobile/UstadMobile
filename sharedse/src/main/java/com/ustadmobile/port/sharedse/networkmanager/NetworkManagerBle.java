@@ -12,10 +12,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.TreeSet;
 import java.util.UUID;
 import java.util.Vector;
@@ -105,7 +108,7 @@ public abstract class NetworkManagerBle {
 
     private Map<Object, List<Long>> availabilityMonitoringRequests = new HashMap<>();
 
-    private RouterNanoHTTPD httpd = null;
+    private static RouterNanoHTTPD httpd = null;
 
     /**
      * Holds all created entry status tasks
@@ -117,6 +120,56 @@ public abstract class NetworkManagerBle {
      */
     private Vector<WiFiDirectGroupListenerBle> wiFiDirectGroupListeners = new Vector<>();
 
+    private Hashtable<NetworkNode,Long> networkNodeListUpdateTracker = new Hashtable<>();
+
+    /**
+     * Class which represents group creation request response
+     */
+    public static class WiFiP2PGroupResponse{
+
+        private String groupSsid;
+
+        private String groupPassphrase;
+
+        private int port;
+
+        public String getGroupSsid() {
+            return groupSsid;
+        }
+
+        public void setGroupSsid(String groupSsid) {
+            this.groupSsid = groupSsid;
+        }
+
+        public String getGroupPassphrase() {
+            return groupPassphrase;
+        }
+
+        public void setGroupPassphrase(String groupPassphrase) {
+            this.groupPassphrase = groupPassphrase;
+        }
+
+        public int getPort() {
+            return port;
+        }
+
+        public void setPort(int port) {
+            this.port = port;
+        }
+    }
+
+    private Timer networkNodeUpdateTimer = new Timer();
+
+    private class NetworkNodeUpdateTask extends TimerTask{
+        @Override
+        public void run() {
+            NetworkNodeDao networkNodeDao = UmAppDatabase.getInstance(mContext).getNetworkNodeDao();
+            networkNodeDao.insertInTransaction(networkNodeListUpdateTracker);
+            UstadMobileSystemImpl.l(UMLog.DEBUG,694,
+                    "Nodes added to the db and task created", null);
+        }
+    }
+
 
     /**
      * Constructor to be used when creating new instance
@@ -127,12 +180,29 @@ public abstract class NetworkManagerBle {
     }
 
     /**
+     * Constructor to be used for testing purpose (mocks)
+     */
+    public NetworkManagerBle(){ }
+
+    /**
+     * Set context
+     * @param context Platform's context to be set
+     */
+    public void setContext(Object context){
+        this.mContext = context;
+    }
+
+    /**
      * Start web server, advertising and discovery
      */
     public void onCreate() {
+        //start network node update timer task
+        NetworkNodeUpdateTask updateTask = new NetworkNodeUpdateTask();
+        networkNodeUpdateTimer.scheduleAtFixedRate(updateTask, 0 ,TimeUnit.MINUTES.toMillis(1));
 
         startAdvertising();
 
+        //Starting scanning too soon after advertising will cause issues on Droid
         new Thread(() -> {
             try{
                 Thread.sleep(TimeUnit.SECONDS.toMillis(3));
@@ -208,6 +278,8 @@ public abstract class NetworkManagerBle {
 
         synchronized (knownNodesLock){
             long updateTime = Calendar.getInstance().getTimeInMillis();
+            networkNodeListUpdateTracker.put(node,updateTime);
+
             NetworkNodeDao networkNodeDao = UmAppDatabase.getInstance(mContext).getNetworkNodeDao();
             networkNodeDao.updateLastSeen(node.getBluetoothMacAddress(),updateTime,
                     new UmCallback<Integer>() {
@@ -225,9 +297,7 @@ public abstract class NetworkManagerBle {
                                     }
                                     node.setNetworkNodeLastUpdated(updateTime);
                                     networkNodeDao.insert(node);
-                                    UstadMobileSystemImpl.l(UMLog.DEBUG,694,
-                                            "Node added to the db and task created",
-                                            null);
+
                                 }else{
                                     UstadMobileSystemImpl.l(UMLog.DEBUG,694,
                                             "Task couldn't be created, monitoring stopped",
@@ -345,7 +415,7 @@ public abstract class NetworkManagerBle {
                 UmAppDatabase.getInstance(mContext).getEntryStatusResponseDao();
 
         List<Long> uniqueEntryUidsToMonitor = new ArrayList<>(getAllUidsToBeMonitored());
-        List<Integer> knownNetworkNodes =
+        List<Long> knownNetworkNodes =
                 getAllKnownNetworkNodeIds(networkNodeDao.findAllActiveNodes());
 
         List<EntryStatusResponseDao.EntryWithoutRecentResponse> entryWithoutRecentResponses =
@@ -358,7 +428,7 @@ public abstract class NetworkManagerBle {
             if(!nodeToCheckEntryList.containsKey(nodeIdToCheckFrom))
                 nodeToCheckEntryList.put(nodeIdToCheckFrom, new ArrayList<>());
 
-            nodeToCheckEntryList.get(nodeIdToCheckFrom).add(entryResponse.getContentEntryUid());
+            nodeToCheckEntryList.get(nodeIdToCheckFrom).add(entryResponse.getEntryId());
         }
 
         //Make entryStatusTask as per node list and entryUuids found
@@ -397,8 +467,8 @@ public abstract class NetworkManagerBle {
      * @param networkNodes Known NetworkNode
      * @return List of all known nodes
      */
-    private List<Integer> getAllKnownNetworkNodeIds(List<NetworkNode> networkNodes){
-        List<Integer> nodeIdList = new ArrayList<>();
+    private List<Long> getAllKnownNetworkNodeIds(List<NetworkNode> networkNodes){
+        List<Long> nodeIdList = new ArrayList<>();
         for(NetworkNode networkNode: networkNodes){
             nodeIdList.add(networkNode.getNodeId());
         }
@@ -409,8 +479,10 @@ public abstract class NetworkManagerBle {
      * Connecting a client to a group network for content acquisition
      * @param ssid Group network SSID
      * @param passphrase Group network passphrase
+     * @param connectionListener Connection listener instance
      */
-    public abstract void connectToWiFi(String ssid, String passphrase);
+    public abstract void connectToWiFi(String ssid, String passphrase,
+                                       WiFiDirectConnectionListener connectionListener);
 
     /**
      * Create entry status task for a specific peer device,
@@ -452,15 +524,20 @@ public abstract class NetworkManagerBle {
         task.run();
     }
 
-
+    /**
+     * @return Active RouterNanoHTTPD
+     */
     public RouterNanoHTTPD getHttpd(){
         return httpd;
     }
+
+
     /**
      * Clean up the network manager for shutdown
      */
     public void onDestroy(){
         wiFiDirectGroupListeners.clear();
         entryStatusTaskExecutorService.shutdown();
+        httpd.stop();
     }
 }

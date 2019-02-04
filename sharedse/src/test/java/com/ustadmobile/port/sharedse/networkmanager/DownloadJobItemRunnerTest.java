@@ -1,5 +1,6 @@
 package com.ustadmobile.port.sharedse.networkmanager;
 
+import com.google.gson.Gson;
 import com.ustadmobile.core.db.JobStatus;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmLiveData;
@@ -12,9 +13,12 @@ import com.ustadmobile.lib.db.entities.ContentEntryFile;
 import com.ustadmobile.lib.db.entities.ContentEntryFileStatus;
 import com.ustadmobile.lib.db.entities.DownloadJob;
 import com.ustadmobile.lib.db.entities.DownloadJobItem;
+import com.ustadmobile.lib.db.entities.DownloadJobItemHistory;
 import com.ustadmobile.lib.db.entities.DownloadJobItemWithDownloadSetItem;
 import com.ustadmobile.lib.db.entities.DownloadSet;
 import com.ustadmobile.lib.db.entities.DownloadSetItem;
+import com.ustadmobile.lib.db.entities.EntryStatusResponse;
+import com.ustadmobile.lib.db.entities.NetworkNode;
 import com.ustadmobile.test.core.impl.PlatformTestUtil;
 
 import org.junit.After;
@@ -38,9 +42,19 @@ import okio.Buffer;
 import okio.BufferedSource;
 import okio.Okio;
 
+import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.WIFI_DIRECT_GROUP_UNDER_CREATION_STATUS;
+import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.WIFI_GROUP_CREATION_RESPONSE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * Test class which tests {@link DownloadJobItemRunner} behaves as expected when downloading
@@ -58,7 +72,6 @@ public class DownloadJobItemRunnerTest {
 
     private String endPoint;
 
-
     private ContentEntryFileDispatcher dispatcher = null;
 
     private static File webServerTmpDir;
@@ -72,9 +85,20 @@ public class DownloadJobItemRunnerTest {
     private static final String TEST_FILE_RESOURCE_PATH =
             "/com/ustadmobile/port/sharedse/networkmanager/thelittlechicks.epub";
 
-    private DownloadJob downloadJob;
-
     private  Object context;
+
+
+    private EntryStatusResponse entryStatusResponse;
+
+    private DownloadJobItemHistory history;
+
+    private BleEntryStatusTask mockedEntryStatusTask;
+
+    private NetworkNode networkNode;
+
+    private BleMessage message;
+
+    private String ssId = "networkSSID", passphrase = "networkPass123";
 
     //Uid of the
     private long testDownloadJobItemUid;
@@ -170,6 +194,10 @@ public class DownloadJobItemRunnerTest {
         context = PlatformTestUtil.getTargetContext();
         mockedNetworkManager = spy(NetworkManagerBle.class);
 
+        mockedEntryStatusTask = mock(BleEntryStatusTask.class);
+        mockedNetworkManager.setContext(context);
+
+
         File downloadTmpDir = File.createTempFile("DownloadJobItemRunnerTest", "dldir");
         if(!(downloadTmpDir.delete() && downloadTmpDir.mkdirs())) {
             throw new IOException("Failed to create tmp directory" + downloadTmpDir);
@@ -177,6 +205,11 @@ public class DownloadJobItemRunnerTest {
 
         UmAppDatabase.getInstance(context).clearAllTables();
         umAppDatabase = UmAppDatabase.getInstance(context);
+        networkNode = new NetworkNode();
+        networkNode.setBluetoothMacAddress("00:3F:2F:64:C6:4F");
+        networkNode.setIpAddress("198.10.10.56");
+        networkNode.setLastUpdateTimeStamp(System.currentTimeMillis());
+        networkNode.setNodeId(umAppDatabase.getNetworkNodeDao().insert(networkNode));
 
         ContentEntry contentEntry = new ContentEntry();
         contentEntry.setTitle("Test entry");
@@ -199,7 +232,7 @@ public class DownloadJobItemRunnerTest {
         DownloadSetItem downloadSetItem = new DownloadSetItem(downloadSet, contentEntry);
         downloadSetItem.setDsiUid((int)umAppDatabase.getDownloadSetItemDao().insert(downloadSetItem));
 
-        downloadJob = new DownloadJob(downloadSet);
+        DownloadJob downloadJob = new DownloadJob(downloadSet);
         downloadJob.setTimeCreated(System.currentTimeMillis());
         downloadJob.setTimeRequested(System.currentTimeMillis());
         downloadJob.setDjStatus(JobStatus.QUEUED);
@@ -219,6 +252,28 @@ public class DownloadJobItemRunnerTest {
         connectivityStatus.setConnectedOrConnecting(true);
         connectivityStatus.setConnectivityState(ConnectivityStatus.STATE_UNMETERED);
         umAppDatabase.getConnectivityStatusDao().insert(connectivityStatus);
+
+        entryStatusResponse = new EntryStatusResponse();
+        entryStatusResponse.setErContentEntryFileUid(downloadJobItem.getDjiContentEntryFileUid());
+        entryStatusResponse.setErNodeId(networkNode.getNodeId());
+        entryStatusResponse.setAvailable(true);
+        entryStatusResponse.setResponseTime(System.currentTimeMillis());
+
+
+        history = new DownloadJobItemHistory();
+        history.setNetworkNode(networkNode.getNodeId());
+        history.setStartTime(System.currentTimeMillis());
+        history.setSuccessful(true);
+        umAppDatabase.getDownloadJobItemHistoryDao().insert(history);
+
+        NetworkManagerBle.WiFiP2PGroupResponse response =
+                new NetworkManagerBle.WiFiP2PGroupResponse();
+        response.setPort(234);
+        response.setGroupSsid(ssId);
+        response.setGroupPassphrase(passphrase);
+        message = new BleMessage(WIFI_GROUP_CREATION_RESPONSE,
+                new Gson().toJson(response).getBytes());
+
 
         dispatcher =  new ContentEntryFileDispatcher();
         mockWebServer = new MockWebServer();
@@ -470,5 +525,245 @@ public class DownloadJobItemRunnerTest {
                 item.getDjiStatus(), JobStatus.WAITING_FOR_CONNECTION);
     }
 
+
+    @Test
+    public void givenDownloadLocallyAvailable_whenDownloadStarted_shouldDownloadFromLocalNode() {
+
+        when(mockedNetworkManager.makeEntryStatusTask(any(Object.class),
+                any(BleMessage.class),any(NetworkNode.class),
+                any(BleMessageResponseListener.class))).thenReturn(mockedEntryStatusTask);
+
+        entryStatusResponse.setAvailable(true);
+        umAppDatabase.getEntryStatusResponseDao().insert(entryStatusResponse);
+
+        DownloadJobItemWithDownloadSetItem item =
+                umAppDatabase.getDownloadJobItemDao().findWithDownloadSetItemByUid(
+                        (int)testDownloadJobItemUid);
+        DownloadJobItemRunner jobItemRunner =
+                new DownloadJobItemRunner(context,item, mockedNetworkManager, umAppDatabase, endPoint);
+
+        jobItemRunner.run();
+
+        //Verify that network group creation request was sent
+        verify(mockedNetworkManager, times(1))
+                .sendMessage(any(Object.class), any(BleMessage.class),any(NetworkNode.class),
+                        any(BleMessageResponseListener.class));
+    }
+
+    @Test
+    public void givenDownloadStartedWithoutFileAvailable_whenDownloadBecomesLocallyAvailable_shouldSwitchToDownloadLocally() throws InterruptedException {
+        when(mockedNetworkManager.makeEntryStatusTask(any(Object.class),
+                any(BleMessage.class),any(NetworkNode.class),
+                any(BleMessageResponseListener.class))).thenReturn(mockedEntryStatusTask);
+
+        dispatcher.setThrottle(512, 1,TimeUnit.SECONDS);
+
+        entryStatusResponse.setAvailable(false);
+        entryStatusResponse.setErId((int)
+                umAppDatabase.getEntryStatusResponseDao().insert(entryStatusResponse));
+
+        DownloadJobItemWithDownloadSetItem item =
+                umAppDatabase.getDownloadJobItemDao().findWithDownloadSetItemByUid(
+                        (int)testDownloadJobItemUid);
+        DownloadJobItemRunner jobItemRunner =
+                new DownloadJobItemRunner(context,item, mockedNetworkManager, umAppDatabase, endPoint);
+
+        new Thread(jobItemRunner).start();
+
+        CountDownLatch latch = new CountDownLatch(1);
+        UmObserver<Integer> statusObserver = (status) -> {
+            if(status == JobStatus.WAITING_FOR_CONNECTION)
+                latch.countDown();
+        };
+        UmLiveData<Integer> statusLiveData = umAppDatabase.getDownloadJobItemDao().getLiveStatus(
+                item.getDjiUid());
+        statusLiveData.observeForever(statusObserver);
+
+        Thread.sleep(TimeUnit.SECONDS.toMillis(1));
+
+        entryStatusResponse.setAvailable(true);
+        umAppDatabase.getEntryStatusResponseDao().insert(entryStatusResponse);
+
+        latch.await(3, TimeUnit.SECONDS);
+
+        item = umAppDatabase.getDownloadJobItemDao().findWithDownloadSetItemByUid(
+                (int)testDownloadJobItemUid);
+
+        assertEquals("File download job is waiting for network after file status change",
+                item.getDjiStatus(), JobStatus.WAITING_FOR_CONNECTION);
+
+
+        //Verify that network group creation request was sent
+        verify(mockedNetworkManager, times(1))
+                .sendMessage(any(Object.class), any(BleMessage.class),any(NetworkNode.class),
+                        any(BleMessageResponseListener.class));
+
+
+    }
+
+    @Test
+    public void givenDownloadLocallyAvailableFromBadNode_whenDownloadStarted_shouldDownloadFromCloud() {
+
+        when(mockedNetworkManager.makeEntryStatusTask(any(Object.class),
+                any(BleMessage.class),any(NetworkNode.class),
+                any(BleMessageResponseListener.class))).thenReturn(mockedEntryStatusTask);
+
+        entryStatusResponse.setAvailable(true);
+        umAppDatabase.getEntryStatusResponseDao().insert(entryStatusResponse);
+
+        //add failure history (bad not)
+        for(int i = 0; i < 4; i++){
+            history.setSuccessful(false);
+            umAppDatabase.getDownloadJobItemHistoryDao().insert(history);
+        }
+
+
+        DownloadJobItemWithDownloadSetItem item =
+                umAppDatabase.getDownloadJobItemDao().findWithDownloadSetItemByUid(
+                        (int)testDownloadJobItemUid);
+        DownloadJobItemRunner jobItemRunner =
+                new DownloadJobItemRunner(context,item, mockedNetworkManager, umAppDatabase, endPoint);
+
+        jobItemRunner.run();
+
+        //Verify that file was downloaded from cloud
+        verify(mockedNetworkManager, times(0))
+                .sendMessage(any(Object.class), any(BleMessage.class),any(NetworkNode.class),
+                        any(BleMessageResponseListener.class));
+    }
+
+
+    @Test
+    public void givenDownloadLocallyAvailableWhenConnected_whenPeerFailsRepeatedly_shouldDownloadFromCloud()
+            throws InterruptedException {
+
+        entryStatusResponse.setAvailable(true);
+        umAppDatabase.getEntryStatusResponseDao().insert(entryStatusResponse);
+
+        DownloadJobItemWithDownloadSetItem item =
+                umAppDatabase.getDownloadJobItemDao().findWithDownloadSetItemByUid(
+                        (int)testDownloadJobItemUid);
+        DownloadJobItemRunner jobItemRunner =
+                new DownloadJobItemRunner(context,item, mockedNetworkManager, umAppDatabase, endPoint);
+
+        //Handle group connection response
+        doAnswer(invocation -> {
+            Thread.sleep(3);
+            jobItemRunner.onConnected(networkNode.getIpAddress(),ssId);
+            return null;
+        }).when(mockedNetworkManager).connectToWiFi(eq(ssId),eq(passphrase),
+                any(WiFiDirectConnectionListener.class));
+
+
+        //Handle group connection request
+        doAnswer(invocation -> {
+            if(mockedNetworkManager.getWifiDirectGroupChangeStatus() ==
+                    WIFI_DIRECT_GROUP_UNDER_CREATION_STATUS){
+                jobItemRunner.onResponseReceived(networkNode.getBluetoothMacAddress(),message);
+            }
+            return null;
+        }).when(mockedNetworkManager).sendMessage(any(Object.class)
+                ,any(BleMessage.class),any(NetworkNode.class),any(BleMessageResponseListener.class));
+
+
+        mockedNetworkManager.setWifiDirectGroupChangeStatus(WIFI_DIRECT_GROUP_UNDER_CREATION_STATUS);
+
+        new Thread(jobItemRunner).start();
+
+        CountDownLatch latch = new CountDownLatch(1);
+
+        UmObserver<Integer> statusObserver = (status) -> {
+            if(status == JobStatus.COMPLETE)
+                latch.countDown();
+        };
+        UmLiveData<Integer> statusLiveData = umAppDatabase.getDownloadJobItemDao().getLiveStatus(
+                item.getDjiUid());
+        statusLiveData.observeForever(statusObserver);
+
+        Thread.sleep(TimeUnit.SECONDS.toMillis(1));
+
+        entryStatusResponse.setAvailable(true);
+        umAppDatabase.getEntryStatusResponseDao().insert(entryStatusResponse);
+
+        latch.await(20, TimeUnit.SECONDS);
+
+
+        //Verify that connection failed at least once when trying to connect to a peer
+        verify(mockedNetworkManager, times(1))
+                .sendMessage(any(Object.class), any(BleMessage.class),any(NetworkNode.class),
+                        any(BleMessageResponseListener.class));
+
+        item = umAppDatabase.getDownloadJobItemDao().findWithDownloadSetItemByUid(
+                (int)testDownloadJobItemUid);
+
+        assertEquals("File downloaded successfully from cloud",
+                item.getDjiStatus(), JobStatus.COMPLETE);
+
+    }
+
+    @Test
+    public void givenDownloadLocallyAvailableWhenDisconnected_whenPeerFailsRepeatedly_shouldStopAndSetStatus() throws InterruptedException {
+        entryStatusResponse.setAvailable(true);
+        umAppDatabase.getEntryStatusResponseDao().insert(entryStatusResponse);
+
+        DownloadJobItemWithDownloadSetItem item =
+                umAppDatabase.getDownloadJobItemDao().findWithDownloadSetItemByUid(
+                        (int)testDownloadJobItemUid);
+        DownloadJobItemRunner jobItemRunner =
+                new DownloadJobItemRunner(context,item, mockedNetworkManager, umAppDatabase, endPoint);
+
+        //Handle group connection response
+        doAnswer(invocation -> {
+            Thread.sleep(3);
+            jobItemRunner.onFailure(ssId);
+            return null;
+        }).when(mockedNetworkManager).connectToWiFi(eq(ssId),eq(passphrase),
+                any(WiFiDirectConnectionListener.class));
+
+
+        //Handle group connection request
+        doAnswer(invocation -> {
+            if(mockedNetworkManager.getWifiDirectGroupChangeStatus() ==
+                    WIFI_DIRECT_GROUP_UNDER_CREATION_STATUS){
+                jobItemRunner.onResponseReceived(networkNode.getBluetoothMacAddress(),message);
+            }
+            return null;
+        }).when(mockedNetworkManager).sendMessage(any(Object.class)
+                ,any(BleMessage.class),any(NetworkNode.class),any(BleMessageResponseListener.class));
+
+
+        mockedNetworkManager.setWifiDirectGroupChangeStatus(WIFI_DIRECT_GROUP_UNDER_CREATION_STATUS);
+
+        new Thread(jobItemRunner).start();
+
+        CountDownLatch latch = new CountDownLatch(1);
+
+        UmObserver<Integer> statusObserver = (status) -> {
+            if(status == JobStatus.WAITING_FOR_CONNECTION)
+                latch.countDown();
+        };
+        UmLiveData<Integer> statusLiveData = umAppDatabase.getDownloadJobItemDao().getLiveStatus(
+                item.getDjiUid());
+        statusLiveData.observeForever(statusObserver);
+
+        Thread.sleep(TimeUnit.SECONDS.toMillis(1));
+
+        entryStatusResponse.setAvailable(true);
+        umAppDatabase.getEntryStatusResponseDao().insert(entryStatusResponse);
+
+        latch.await(10, TimeUnit.SECONDS);
+
+
+        //Verify that connection failed at least once when trying to connect to a peer
+        verify(mockedNetworkManager, atLeast(2))
+                .sendMessage(any(Object.class), any(BleMessage.class),any(NetworkNode.class),
+                        any(BleMessageResponseListener.class));
+
+        item = umAppDatabase.getDownloadJobItemDao().findWithDownloadSetItemByUid(
+                (int)testDownloadJobItemUid);
+
+        assertEquals("File failed to be downloaded from peer and ",
+                item.getDjiStatus(), JobStatus.WAITING_FOR_CONNECTION);
+    }
 
 }
