@@ -262,7 +262,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
      */
     @Override
     public void stopScanning() {
-        if(isBleDeviceSDKVersion() && bluetoothAdapter.isDiscovering())
+        if(isBleCapable() && isBleDeviceSDKVersion() && bluetoothAdapter.isDiscovering())
         bluetoothAdapter.stopLeScan(leScanCallback);
     }
 
