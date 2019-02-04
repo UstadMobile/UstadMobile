@@ -98,7 +98,8 @@ public abstract class BleGattServer implements WiFiDirectGroupListenerBle{
 
     @Override
     public void groupCreated(WiFiDirectGroupBle group, Exception err) {
-        this.message = group.getSsid() + WIFI_GROUP_INFO_SEPARATOR + group.getPassphrase();
+        this.message = group.getSsid() + WIFI_GROUP_INFO_SEPARATOR + group.getPassphrase()
+                + WIFI_GROUP_INFO_SEPARATOR + networkManager.getHttpd().getListeningPort();
         mLatch.countDown();
     }
 

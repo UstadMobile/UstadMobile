@@ -43,6 +43,8 @@ public abstract class BleEntryStatusTask implements Runnable,BleMessageResponseL
 
     private static final int passphraseInfoIndex = 1;
 
+    public static final int PORT_INFO_INDEX = 2;
+
     private BleMessageResponseListener responseListener;
 
     /**

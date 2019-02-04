@@ -107,6 +107,11 @@
             android:enabled="true"
             android:exported="true"/>
 
+        <service
+            android:name="com.ustadmobile.port.android.netwokmanager.NetworkManagerBleService"
+            android:enabled="true"
+            android:exported="true"/>
+
     </application>
 
 </manifest>
