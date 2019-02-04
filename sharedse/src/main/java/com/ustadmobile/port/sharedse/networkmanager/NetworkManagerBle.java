@@ -8,6 +8,7 @@ import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.lib.db.entities.NetworkNode;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -20,6 +21,9 @@ import java.util.UUID;
 import java.util.Vector;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
+import fi.iki.elonen.router.RouterNanoHTTPD;
 
 /**
  * This is an abstract class which is used to implement platform specific NetworkManager
@@ -101,6 +105,8 @@ public abstract class NetworkManagerBle {
 
     private Map<Object, List<Long>> availabilityMonitoringRequests = new HashMap<>();
 
+    private RouterNanoHTTPD httpd = null;
+
     /**
      * Holds all created entry status tasks
      */
@@ -111,15 +117,40 @@ public abstract class NetworkManagerBle {
      */
     private Vector<WiFiDirectGroupListenerBle> wiFiDirectGroupListeners = new Vector<>();
 
+
     /**
-     * Do the main initialization of the NetworkManagerBle
-     * @param context The mContext to use for the network manager
+     * Constructor to be used when creating new instance
+     * @param context Platform specific application context
      */
-    public synchronized void init(Object context){
-        if(this.mContext == null){
-            this.mContext = context;
-        }
+    public NetworkManagerBle(Object context) {
+        this.mContext = context;
     }
+
+    /**
+     * Start web server, advertising and discovery
+     */
+    public void onCreate() {
+
+        startAdvertising();
+
+        new Thread(() -> {
+            try{
+                Thread.sleep(TimeUnit.SECONDS.toMillis(3));
+                startScanning();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }).start();
+
+        httpd = new RouterNanoHTTPD(0);
+        try{
+            httpd.start();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
 
     /**
      * Check if WiFi is enabled / disabled on the device
@@ -420,14 +451,16 @@ public abstract class NetworkManagerBle {
         BleEntryStatusTask task = makeEntryStatusTask(context,message,peerToSendMessageTo, responseListener);
         task.run();
     }
+
+
+    public RouterNanoHTTPD getHttpd(){
+        return httpd;
+    }
     /**
      * Clean up the network manager for shutdown
      */
     public void onDestroy(){
         wiFiDirectGroupListeners.clear();
         entryStatusTaskExecutorService.shutdown();
-        if(entryStatusTaskExecutorService.isShutdown()){
-            mContext = null;
-        }
     }
 }
