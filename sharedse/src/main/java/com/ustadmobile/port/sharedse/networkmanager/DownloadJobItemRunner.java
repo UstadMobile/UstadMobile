@@ -87,7 +87,9 @@ public class DownloadJobItemRunner implements Runnable, BleMessageResponseListen
 
     private EntryStatusResponse currentContentEntryFileStatus;
 
-    private final int MAX_CONNECTION_FAILURE_RETRY_LIMIT = 3;
+    private static final int MAX_CONNECTION_FAILURE_RETRY_LIMIT = 3;
+
+    private static final int BAD_PEER_FAILURE_THRESHOLD = 3;
 
     private int connectionFailureRetryCount = 1;
 
@@ -266,7 +268,7 @@ public class DownloadJobItemRunner implements Runnable, BleMessageResponseListen
 
         currentNetworkNode = appDb.getNetworkNodeDao()
                 .findNodeWithContentFileEntry(downloadItem.getDjiContentEntryFileUid(),
-                        minLastSeen,3,maxFailureFromTimeStamp);
+                        minLastSeen,BAD_PEER_FAILURE_THRESHOLD,maxFailureFromTimeStamp);
 
         if(currentContentEntryFileStatus == null || currentNetworkNode == null){
             startDownload(true);
