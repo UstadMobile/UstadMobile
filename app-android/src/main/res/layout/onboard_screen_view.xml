@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:paddingEnd="@dimen/dimen_20dp"
+    android:paddingStart="@dimen/dimen_20dp"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:layout_marginTop="90dp"
+        android:id="@+id/drawable_res"
+        android:tint="@color/primary_dark"
+        android:layout_above="@+id/heading"
+        android:layout_marginBottom="@dimen/dimen_40dp"
+        android:src="@drawable/downloading_data"
+        android:layout_width="match_parent"
+        android:layout_height="200dp" />
+
+    <android.support.v7.widget.AppCompatTextView
+        android:textColor="@color/text_primary"
+        android:gravity="center"
+        android:minHeight="@dimen/dimen_30dp"
+        android:layout_above="@+id/sub_heading"
+        android:id="@+id/heading"
+        android:autoSizeTextType="uniform"
+        android:autoSizeMinTextSize="18sp"
+        android:autoSizeMaxTextSize="24sp"
+        android:autoSizeStepGranularity="2sp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <android.support.v7.widget.AppCompatTextView
+        android:layout_marginTop="@dimen/dimen_10dp"
+        android:lineSpacingExtra="@dimen/dimen_10dp"
+        android:textColor="@color/text_secondary"
+        android:gravity="center"
+        android:id="@+id/sub_heading"
+        android:layout_marginBottom="120dp"
+        android:layout_alignParentBottom="true"
+        android:autoSizeTextType="uniform"
+        android:autoSizeMinTextSize="10sp"
+        android:autoSizeMaxTextSize="15sp"
+        android:autoSizeStepGranularity="2sp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+</RelativeLayout>
