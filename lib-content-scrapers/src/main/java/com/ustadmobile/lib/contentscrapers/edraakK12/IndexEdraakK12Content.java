@@ -21,6 +21,7 @@ import org.apache.commons.lang.exception.ExceptionUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -116,13 +117,17 @@ public class IndexEdraakK12Content {
         new LanguageList().addAllLanguages();
 
         arabicLang = ContentScraperUtil.insertOrUpdateLanguageByName(languageDao, "Arabic");
-
+        HttpURLConnection connection = null;
         try {
-            URLConnection connection = url.openConnection();
+            connection = (HttpURLConnection) url.openConnection();
             connection.setRequestProperty("Accept", "application/json, text/javascript, */*; q=0.01");
             response = new GsonBuilder().disableHtmlEscaping().create().fromJson(IOUtils.toString(connection.getInputStream(), UTF_ENCODING), ContentResponse.class);
         } catch (IOException | JsonSyntaxException e) {
             throw new IllegalArgumentException("JSON INVALID", e.getCause());
+        }finally {
+            if (connection != null) {
+                connection.disconnect();
+            }
         }
 
 

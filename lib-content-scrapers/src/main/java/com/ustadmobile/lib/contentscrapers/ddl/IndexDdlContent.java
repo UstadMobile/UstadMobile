@@ -199,7 +199,7 @@ public class IndexDdlContent {
                         }
                     }
 
-                } catch (IOException | URISyntaxException e) {
+                } catch (IOException e) {
                     UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
                     UMLogUtil.logError("Error downloading resource at " + url);
                 }

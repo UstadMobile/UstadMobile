@@ -6,6 +6,7 @@ import com.google.gson.GsonBuilder;
 import com.neovisionaries.i18n.CountryCode;
 import com.neovisionaries.i18n.LanguageAlpha3Code;
 import com.neovisionaries.i18n.LanguageCode;
+import com.sun.jndi.toolkit.url.UrlUtil;
 import com.ustadmobile.core.db.dao.ContentCategoryDao;
 import com.ustadmobile.core.db.dao.ContentCategorySchemaDao;
 import com.ustadmobile.core.db.dao.ContentEntryContentCategoryJoinDao;
@@ -32,6 +33,7 @@ import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoin;
 import com.ustadmobile.lib.db.entities.Language;
 import com.ustadmobile.lib.db.entities.LanguageVariant;
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem;
+import com.ustadmobile.lib.util.UMUtil;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
@@ -61,6 +63,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
@@ -92,6 +96,8 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import sun.net.util.URLUtil;
+
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.ANDROID_USER_AGENT;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.EMPTY_SPACE;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.EMPTY_STRING;
@@ -101,6 +107,7 @@ import static com.ustadmobile.lib.contentscrapers.ScraperConstants.KHAN_GRAPHIE_
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.KHAN_LOGIN_LINK;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.KHAN_USERNAME;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.KHAN_PASS;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.REQUEST_HEAD;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.SVG_EXT;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.TIME_OUT_SELENIUM;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING;
@@ -167,10 +174,13 @@ public class ContentScraperUtil {
                 content.parent().html(EMPTY_STRING);
                 continue;
             }
+
+            HttpURLConnection conn = null;
             try {
                 URL contentUrl = new URL(baseUrl, url);
 
-                URLConnection conn = contentUrl.openConnection();
+                conn = (HttpURLConnection) contentUrl.openConnection();
+                conn.setRequestMethod(REQUEST_HEAD);
                 String fileName = getFileNameFromUrl(contentUrl);
                 File contentFile = new File(destinationDir, fileName);
                 content.attr("src", destinationDir.getName() + "/" + contentFile.getName());
@@ -178,12 +188,15 @@ public class ContentScraperUtil {
                 if (!ContentScraperUtil.isFileModified(conn, destinationDir, fileName) && fileHasContent(contentFile)) {
                     continue;
                 }
-
                 FileUtils.copyURLToFile(contentUrl, contentFile);
 
             } catch (IOException e) {
                 System.out.println("Url path " + url + " failed to download to file with base url " + baseUrl);
                 e.printStackTrace();
+            } finally {
+                if (conn != null) {
+                    conn.disconnect();
+                }
             }
 
         }
@@ -1044,14 +1057,23 @@ public class ContentScraperUtil {
         String fileName = ContentScraperUtil.getFileNameFromUrl(url);
         File file = new File(destination, fileName);
         if (log != null && log.message.params.response.requestHeaders != null) {
-            URLConnection conn = url.openConnection();
-            for (Map.Entry<String, String> e : log.message.params.response.requestHeaders.entrySet()) {
-                if (e.getKey().equalsIgnoreCase("Accept-Encoding")) {
-                    continue;
+            HttpURLConnection conn = null;
+            try {
+                conn = (HttpURLConnection) url.openConnection();
+                for (Map.Entry<String, String> e : log.message.params.response.requestHeaders.entrySet()) {
+                    if (e.getKey().equalsIgnoreCase("Accept-Encoding")) {
+                        continue;
+                    }
+                    conn.addRequestProperty(e.getKey().replaceAll(":", EMPTY_STRING), e.getValue());
                 }
-                conn.addRequestProperty(e.getKey().replaceAll(":", EMPTY_STRING), e.getValue());
+                FileUtils.copyInputStreamToFile(conn.getInputStream(), file);
+            } catch (IOException e) {
+                UMLogUtil.logError("Error downloading file from log index with url " + url.toString());
+            } finally {
+                if (conn != null) {
+                    conn.disconnect();
+                }
             }
-            FileUtils.copyInputStreamToFile(conn.getInputStream(), file);
         } else {
             FileUtils.copyURLToFile(url, file);
         }
@@ -1176,26 +1198,35 @@ public class ContentScraperUtil {
 
     public static void downloadImagesFromJsonContent(Map<String, ItemData.Content.Image> images, File destDir, String scrapeUrl, List<LogIndex.IndexEntry> indexList) {
         for (String image : images.keySet()) {
-
+            HttpURLConnection conn = null;
             try {
                 image = image.replaceAll(EMPTY_SPACE, EMPTY_STRING);
                 String imageUrlString = image;
                 if (image.contains(GRAPHIE)) {
                     imageUrlString = KHAN_GRAPHIE_PREFIX + image.substring(image.lastIndexOf("/") + 1) + SVG_EXT;
                 }
+
                 URL imageUrl = new URL(imageUrlString);
-                URLConnection conn = imageUrl.openConnection();
+                conn = (HttpURLConnection) imageUrl.openConnection();
+                conn.setRequestMethod(REQUEST_HEAD);
+                String mimeType = conn.getContentType();
                 File imageFile = ContentScraperUtil.createDirectoryFromUrl(destDir, imageUrl);
 
                 File imageContent = new File(imageFile, FilenameUtils.getName(imageUrl.getPath()));
                 FileUtils.copyURLToFile(imageUrl, imageContent);
 
-                LogIndex.IndexEntry logIndex = ContentScraperUtil.createIndexFromLog(imageUrlString, conn.getContentType(),
+                LogIndex.IndexEntry logIndex = ContentScraperUtil.createIndexFromLog(imageUrlString, mimeType,
                         imageFile, imageContent, null);
                 indexList.add(logIndex);
+            } catch (MalformedURLException e) {
+                UMLogUtil.logDebug(ExceptionUtils.getStackTrace(e));
             } catch (Exception e) {
                 UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
                 UMLogUtil.logError("Error downloading an image for index log" + image + " with url " + scrapeUrl);
+            } finally {
+                if (conn != null) {
+                    conn.disconnect();
+                }
             }
 
         }

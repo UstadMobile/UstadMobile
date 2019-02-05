@@ -136,6 +136,8 @@ public class ScraperConstants {
     public static final String ARTICLE_TIN_CAN_FILE = "http://activitystrea.ms/schema/1.0/ARTICLE_TIN_CAN_FILE";
     public static final String ASSESMENT_TIN_CAN_FILE = "http://adlnet.gov/expapi/activities/assessment";
 
+    public static final String REQUEST_HEAD = "HEAD";
+
     public static final List<String> QUESTION_SET_HOLDER_TYPES = Arrays.asList(
            ComponentType.EXCERCISE.getType(), ComponentType.ONLINE.getType(),
            ComponentType.TEST.getType());

@@ -26,6 +26,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -137,14 +138,14 @@ public class IndexPrathamContentScraper {
 
         int retry = 0;
         for (int contentCount = 0; contentCount < contentBooksList.data.size(); contentCount++) {
-
+            HttpURLConnection connection = null;
             try {
 
                 BooksResponse.Data data = contentBooksList.data.get(contentCount);
 
                 URL epubUrl = generatePrathamEPubFileUrl(data.slug);
 
-                URLConnection connection = epubUrl.openConnection();
+                connection = (HttpURLConnection) epubUrl.openConnection();
                 connection.setRequestProperty("Cookie", cookie);
 
                 String lang = getLangCode(data.language);
@@ -181,6 +182,8 @@ public class IndexPrathamContentScraper {
                     }
                     contentCount--;
                     continue;
+                }finally {
+                    connection.disconnect();
                 }
                 retry = 0;
 
@@ -190,6 +193,10 @@ public class IndexPrathamContentScraper {
             } catch (Exception e) {
                 UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
                 UMLogUtil.logError("Error saving book " + contentBooksList.data.get(contentCount).slug);
+            }finally {
+                if (connection != null) {
+                    connection.disconnect();
+                }
             }
 
         }

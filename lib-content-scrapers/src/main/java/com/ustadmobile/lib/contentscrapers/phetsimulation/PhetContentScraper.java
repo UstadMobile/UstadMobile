@@ -20,6 +20,7 @@ import org.jsoup.select.Elements;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -33,6 +34,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.EMPTY_STRING;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.REQUEST_HEAD;
 import static com.ustadmobile.lib.contentscrapers.phetsimulation.IndexPhetContentScraper.PHET;
 import static com.ustadmobile.lib.db.entities.ContentEntry.LICENSE_TYPE_CC_BY;
 
@@ -208,37 +210,46 @@ public class PhetContentScraper {
 
     }
 
-    private boolean downloadContent(URL simulationUrl, String hrefLink, File languageLocation) throws IOException {
-
-        URL link = new URL(simulationUrl, hrefLink);
-
-        File simulationLocation = new File(languageLocation, title);
-        simulationLocation.mkdirs();
-
-        URLConnection conn = link.openConnection();
-
-        String fileName = hrefLink.substring(hrefLink.lastIndexOf("/") + 1, hrefLink.lastIndexOf("?"));
-        File simulationFile = new File(simulationLocation, fileName);
-
-        if (!ContentScraperUtil.isFileModified(conn, simulationLocation, fileName) && ContentScraperUtil.fileHasContent(simulationFile)) {
-            return false;
-        }
-
-        FileUtils.writeStringToFile(new File(simulationLocation, ScraperConstants.ABOUT_HTML), aboutText, ScraperConstants.UTF_ENCODING);
-
-        FileUtils.copyURLToFile(link, simulationFile);
-
-        String simulationTitle = Jsoup.parse(simulationFile, ScraperConstants.UTF_ENCODING).title();
+    private boolean downloadContent(URL simulationUrl, String hrefLink, File languageLocation) {
+        HttpURLConnection conn = null;
         try {
-            ContentScraperUtil.generateTinCanXMLFile(simulationLocation, simulationTitle,
-                    languageLocation.getName(), fileName, ScraperConstants.SIMULATION_TIN_CAN_FILE,
-                    languageLocation.getName() + "\\" + this.title,
-                    aboutDescription, "en");
-        } catch (ParserConfigurationException | TransformerException e) {
-            UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
-            UMLogUtil.logError("Tin can file not created for " + link.toString());
+            URL link = new URL(simulationUrl, hrefLink);
+
+            File simulationLocation = new File(languageLocation, title);
+            simulationLocation.mkdirs();
+
+            conn = (HttpURLConnection) link.openConnection();
+            conn.setRequestMethod(REQUEST_HEAD);
+
+            String fileName = hrefLink.substring(hrefLink.lastIndexOf("/") + 1, hrefLink.lastIndexOf("?"));
+            File simulationFile = new File(simulationLocation, fileName);
+
+            if (!ContentScraperUtil.isFileModified(conn, simulationLocation, fileName) && ContentScraperUtil.fileHasContent(simulationFile)) {
+                return false;
+            }
+
+            FileUtils.writeStringToFile(new File(simulationLocation, ScraperConstants.ABOUT_HTML), aboutText, ScraperConstants.UTF_ENCODING);
+
+            FileUtils.copyURLToFile(link, simulationFile);
+
+            String simulationTitle = Jsoup.parse(simulationFile, ScraperConstants.UTF_ENCODING).title();
+            try {
+                ContentScraperUtil.generateTinCanXMLFile(simulationLocation, simulationTitle,
+                        languageLocation.getName(), fileName, ScraperConstants.SIMULATION_TIN_CAN_FILE,
+                        languageLocation.getName() + "\\" + this.title,
+                        aboutDescription, "en");
+            } catch (ParserConfigurationException | TransformerException e) {
+                UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
+                UMLogUtil.logError("Tin can file not created for " + link.toString());
+            }
+            ContentScraperUtil.zipDirectory(simulationLocation, title, languageLocation);
+        } catch (Exception e) {
+            UMLogUtil.logError("Error download content for url " + simulationUrl + " with href " + hrefLink);
+        }finally {
+            if (conn != null) {
+                conn.disconnect();
+            }
         }
-        ContentScraperUtil.zipDirectory(simulationLocation, title, languageLocation);
 
         return true;
     }

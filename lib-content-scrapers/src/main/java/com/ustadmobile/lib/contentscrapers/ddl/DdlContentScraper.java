@@ -26,6 +26,7 @@ import org.jsoup.select.Elements;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -35,6 +36,7 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.EMPTY_STRING;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.REQUEST_HEAD;
 import static com.ustadmobile.lib.contentscrapers.ddl.IndexDdlContent.DDL;
 import static com.ustadmobile.lib.db.entities.ContentEntry.LICENSE_TYPE_CC_BY;
 
@@ -96,7 +98,7 @@ public class DdlContentScraper {
     }
 
 
-    public void scrapeContent() throws IOException, URISyntaxException {
+    public void scrapeContent() throws IOException {
 
         File resourceFolder = new File(destinationDirectory, FilenameUtils.getBaseName(urlString));
         resourceFolder.mkdirs();
@@ -126,30 +128,39 @@ public class DdlContentScraper {
         for (int downloadCount = 0; downloadCount < downloadList.size(); downloadCount++) {
 
             Element downloadItem = downloadList.get(downloadCount);
-
             String href = downloadItem.attr("href");
-            URL fileUrl = new URL(url, href);
-            // this was done to encode url that had empty spaces in the name or other illegal characters
-            URI uri = new URI(fileUrl.getProtocol(), fileUrl.getUserInfo(), fileUrl.getHost(), fileUrl.getPort(), fileUrl.getPath(), fileUrl.getQuery(), fileUrl.getRef());
+            HttpURLConnection conn = null;
+            try {
+                URL fileUrl = new URL(url, href);
 
+                // this was done to encode url that had empty spaces in the name or other illegal characters
+                URI uri = new URI(fileUrl.getProtocol(), fileUrl.getUserInfo(), fileUrl.getHost(), fileUrl.getPort(), fileUrl.getPath(), fileUrl.getQuery(), fileUrl.getRef());
 
-            URLConnection conn = uri.toURL().openConnection();
-            File resourceFile = new File(resourceFolder, FilenameUtils.getName(href));
-            String mimeType = Files.probeContentType(resourceFile.toPath());
+                conn = (HttpURLConnection) uri.toURL().openConnection();
+                conn.setRequestMethod(REQUEST_HEAD);
+                File resourceFile = new File(resourceFolder, FilenameUtils.getName(href));
+                String mimeType = Files.probeContentType(resourceFile.toPath());
 
-            if (!ContentScraperUtil.isFileModified(conn, resourceFolder, FilenameUtils.getName(href)) && ContentScraperUtil.fileHasContent(resourceFile)) {
+                if (!ContentScraperUtil.isFileModified(conn, resourceFolder, FilenameUtils.getName(href)) && ContentScraperUtil.fileHasContent(resourceFile)) {
 
-                ContentScraperUtil.checkAndUpdateDatabaseIfFileDownloadedButNoDataFound(resourceFile, contentEntry, contentEntryFileDao,
-                        contentEntryFileJoinDao, contentFileStatusDao, mimeType, true);
-                continue;
+                    ContentScraperUtil.checkAndUpdateDatabaseIfFileDownloadedButNoDataFound(resourceFile, contentEntry, contentEntryFileDao,
+                            contentEntryFileJoinDao, contentFileStatusDao, mimeType, true);
+                    continue;
+                }
+
+                FileUtils.copyURLToFile(uri.toURL(), resourceFile);
+
+                ContentScraperUtil.insertContentEntryFile(resourceFile, contentEntryFileDao, contentFileStatusDao, contentEntry,
+                        ContentScraperUtil.getMd5(resourceFile), contentEntryFileJoinDao, true, mimeType);
+
+                contentEntries.add(contentEntry);
+            } catch(Exception e){
+                UMLogUtil.logError("Error downloading resource from url " + url + "/" + href);
+            }finally {
+                if (conn != null) {
+                    conn.disconnect();
+                }
             }
-
-            FileUtils.copyURLToFile(uri.toURL(), resourceFile);
-
-            ContentScraperUtil.insertContentEntryFile(resourceFile, contentEntryFileDao, contentFileStatusDao, contentEntry,
-                    ContentScraperUtil.getMd5(resourceFile), contentEntryFileJoinDao, true, mimeType);
-
-            contentEntries.add(contentEntry);
         }
     }
 

@@ -13,6 +13,7 @@ import org.apache.commons.lang.exception.ExceptionUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -86,13 +87,17 @@ public class EdraakK12ContentScraper {
         destinationDirectory.mkdirs();
 
         ContentResponse response;
+        HttpURLConnection urlConnection = null;
         try {
-
-            URLConnection urlConnection = scrapUrl.openConnection();
+            urlConnection = (HttpURLConnection) scrapUrl.openConnection();
             urlConnection.setRequestProperty("Accept", "application/json, text/javascript, */*; q=0.01");
             response = new GsonBuilder().create().fromJson(IOUtils.toString(urlConnection.getInputStream(), UTF_ENCODING), ContentResponse.class);
         } catch (IOException | JsonSyntaxException e) {
             throw new IllegalArgumentException("JSON INVALID for url " + scrapUrl.toString(), e.getCause());
+        }finally {
+            if (urlConnection != null) {
+                urlConnection.disconnect();
+            }
         }
 
         courseDirectory = new File(destinationDirectory, response.id);

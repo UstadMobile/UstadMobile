@@ -1,6 +1,7 @@
 package com.ustadmobile.lib.contentscrapers.etekkatho;
 
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
+import com.ustadmobile.lib.contentscrapers.UMLogUtil;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -9,13 +10,14 @@ import org.jsoup.nodes.Document;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 
 /**
  * The etekkatho website has a single url link for download
  * This can be found by using Jsoup css selector query with th:contains(Download) ~td a[href].btn and getting the attribute value of href
- *
+ * <p>
  * The url requires a request property header with user agent for the download to be successful
  */
 public class EtekkathoScraper {
@@ -33,28 +35,36 @@ public class EtekkathoScraper {
         etekDirectory.mkdirs();
     }
 
-    public void scrapeContent() throws IOException {
+    public void scrapeContent() {
+        HttpURLConnection conn = null;
+        try {
+            Document document = Jsoup.connect(scrapUrl.toString()).get();
 
-        Document document = Jsoup.connect(scrapUrl.toString()).get();
+            String hrefLink = document.selectFirst("th:contains(Download) ~td a[href].btn").attr("href");
+            hrefLink = hrefLink.replaceAll(" ", "_");
 
-        String hrefLink = document.selectFirst("th:contains(Download) ~td a[href].btn").attr("href");
-        hrefLink = hrefLink.replaceAll(" ", "_");
+            URL contentUrl = new URL(scrapUrl, hrefLink);
+            conn = (HttpURLConnection) contentUrl.openConnection();
+            conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Linux; Android 8.0.0; Pixel 2 XL Build/OPD1.170816.004) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Mobile Safari/537.36");
 
-        URL contentUrl = new URL(scrapUrl, hrefLink);
-        URLConnection conn = contentUrl.openConnection();
-        conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Linux; Android 8.0.0; Pixel 2 XL Build/OPD1.170816.004) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Mobile Safari/537.36");
+            File content = new File(etekDirectory, etekDirectory.getName());
 
-        File content = new File(etekDirectory, etekDirectory.getName());
+            isUpdated = ContentScraperUtil.isFileModified(conn, etekDirectory, FilenameUtils.getBaseName(contentUrl.getPath()));
+            if (!isUpdated && ContentScraperUtil.fileHasContent(content)) {
+                return;
+            }
 
-        isUpdated = ContentScraperUtil.isFileModified(conn, etekDirectory, FilenameUtils.getBaseName(contentUrl.getPath()));
-        if (!isUpdated && ContentScraperUtil.fileHasContent(content)) {
-            return;
+            mimeType = conn.getContentType();
+
+
+            FileUtils.copyInputStreamToFile(conn.getInputStream(), content);
+        } catch (IOException e) {
+            UMLogUtil.logError("Unable to download content for etekkatho for url " + scrapUrl);
+        } finally {
+            if (conn != null) {
+                conn.disconnect();
+            }
         }
-
-        mimeType = conn.getContentType();
-
-
-        FileUtils.copyInputStreamToFile(conn.getInputStream(), content);
 
     }
 
@@ -62,7 +72,7 @@ public class EtekkathoScraper {
         return isUpdated;
     }
 
-    public String getMimeType(){
+    public String getMimeType() {
         return mimeType;
     }
 }
