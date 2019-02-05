@@ -1842,7 +1842,7 @@ public abstract class AbstractDbProcessor {
             codeBlock.addNamed("$execSqlMethod:L(\"CREATE TRIGGER upd_$tableId:L " +
                     "AFTER update ON $tableName:L FOR EACH ROW WHEN " +
                         "(SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN " +
-                        "(OLD.$masterCsnFieldName:L = 0 " +
+                        "(NEW.$masterCsnFieldName:L = 0 " +
                         "OR OLD.$masterCsnFieldName:L = NEW.$masterCsnFieldName:L) ELSE " +
                         "(NEW.$localCsnFieldName:L = 0 " +
                         "OR OLD.$localCsnFieldName:L = NEW.$localCsnFieldName:L) END) " +
