@@ -14,7 +14,6 @@
         android:elevation="4dp"
         android:theme="@style/ThemeOverlay.AppCompat.ActionBar">
 
-
         <include layout="@layout/toolbar_with_progress" />
 
     </android.support.design.widget.AppBarLayout>
@@ -70,7 +69,7 @@
                 android:ems="10"
                 android:hint="@string/username"
                 android:digits="1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!#$%()*+,-./:;=>?@[\]^_`{|}~"
-                android:inputType="textCapCharacters"
+                android:inputType="text"
                 android:shadowColor="@color/primary"
                 app:layout_constraintBottom_toTopOf="@+id/activity_login_password"
                 app:layout_constraintEnd_toEndOf="parent"
