@@ -316,6 +316,9 @@ dependencies {
     //Floating action button with support for popup choices
     implementation 'com.github.clans:fab:1.6.4'
 
+    //Page indicator
+    implementation 'com.romandanylyk:pageindicatorview:1.0.0@aar'
+
     implementation 'de.hdodenhof:circleimageview:2.1.0'
 
     implementation "com.google.android.exoplayer:exoplayer:$version_exo_player"

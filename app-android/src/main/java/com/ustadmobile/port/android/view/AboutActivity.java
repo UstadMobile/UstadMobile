@@ -9,11 +9,8 @@ import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.AboutController;
-import com.ustadmobile.core.controller.UstadController;
 import com.ustadmobile.core.view.AboutView;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
-
-import java.util.Hashtable;
 
 public class AboutActivity extends UstadBaseActivity implements AboutView {
 
