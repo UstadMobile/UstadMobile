@@ -36,7 +36,7 @@ public interface ReportSELView extends UstadView {
      * @param clazzToStudents   A map of every clazz and its clazz members for the view to construct
      *                          the report easily.
      */
-    void updateTables(LinkedHashMap<String, LinkedHashMap<String, Map<Long, List<Long>>>> clazzMap,
+    void createTables(LinkedHashMap<String, LinkedHashMap<String, Map<Long, List<Long>>>> clazzMap,
                       HashMap<String, List<ClazzMemberWithPerson>> clazzToStudents);
 
 }

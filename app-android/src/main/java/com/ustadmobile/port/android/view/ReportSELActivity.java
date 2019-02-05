@@ -3,6 +3,7 @@ package com.ustadmobile.port.android.view;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.content.FileProvider;
@@ -163,68 +164,6 @@ public class ReportSELActivity extends UstadBaseActivity implements
 
     }
 
-    /**
-     * Starts the xlsx report process. Here it creates the xlsx file.
-     */
-//    private void startXLSXReportGeneration_FAILED() throws Exception {
-//
-//        String xlsxReportPath;
-//        //Create the file.
-//
-//        File dir = getFilesDir();
-//        File output = new File(dir, "report_sel_" +
-//                System.currentTimeMillis() + ".xlsx");
-//
-//        xlsxReportPath = output.getAbsolutePath();
-//
-//        output.createNewFile();
-//
-//        createZip(xlsxReportPath);
-//
-//        output = new File(xlsxReportPath);
-//
-//        SimpleXLSXWorkbook workbook = new SimpleXLSXWorkbook(output);
-//
-//        Font font2 = workbook.createFont();
-//        font2.setColor("FFFF0000");
-//        Fill fill = workbook.createFill();
-//        fill.setFgColor("FF00FF00");
-//        workbook.createStyle(font2, fill);
-//
-//        Sheet sheet = workbook.createSheet();
-//        sheet.modify(0,0, "The");
-//        sheet.modify(0,1, "Quick");
-//        sheet.modify(0,2, "Brown");
-//        sheet.modify(0,3, "Fox");
-//        sheet.modify(1,0, "Jumped");
-//        sheet.modify(1,1, "Over");
-//        sheet.modify(1,2, "The");
-//        sheet.modify(1,3, "Lazy");
-//        sheet.modify(2,0, "Dog");
-//        sheet.modify(2,1, "And");
-//        sheet.modify(2,2, "Then");
-//        sheet.modify(2,3, "Sleeps");
-//
-//        BufferedOutputStream outputStream = new BufferedOutputStream(new FileOutputStream(output));
-//
-//        workbook.commit(outputStream);
-//        outputStream.close();
-//
-//        String applicationId = getPackageName();
-//        Uri sharedUri = FileProvider.getUriForFile(this,
-//                applicationId+".fileprovider",
-//                new File(xlsxReportPath));
-//        Intent shareIntent = new Intent(Intent.ACTION_SEND);
-//        shareIntent.setType("*/*");
-//        shareIntent.putExtra(Intent.EXTRA_STREAM, sharedUri);
-//        shareIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//
-//        if(shareIntent.resolveActivity(getPackageManager()) != null) {
-//            startActivity(shareIntent);
-//        }
-//
-//    }
-
     @Override
     public void generateCSVReport() {
 
@@ -290,8 +229,16 @@ public class ReportSELActivity extends UstadBaseActivity implements
 
     }
 
+    /**
+     *
+     * Updates the raw data given and starts to construct the tables on the SEL report.
+     *
+     * @param clazzMap          The raw sel report data in a map grouped by clazz, further grouped
+     *                          by questions and further by nominator -> nominee list
+     * @param clazzToStudents   A map of every clazz and its clazz members for the view to construct
+     */
     @Override
-    public void updateTables(LinkedHashMap<String, LinkedHashMap<String, Map<Long, List<Long>>>> clazzMap,
+    public void createTables(LinkedHashMap<String, LinkedHashMap<String, Map<Long, List<Long>>>> clazzMap,
                              HashMap<String, List<ClazzMemberWithPerson>> clazzToStudents) {
 
         //Build a string array of the data
@@ -327,9 +274,10 @@ public class ReportSELActivity extends UstadBaseActivity implements
 
             LinkedHashMap<String, Map<Long, List<Long>>> clazzNominationData = clazzMap.get(currentClazzName);
 
+            //Create a tableLayout for this clazz for all the Students.
             TableLayout tableLayout = generateTableLayoutForClazz(clazzMembers);
 
-            //Default look up first question
+            //Default look up first question when constructing the SEL report tables.
             assert clazzNominationData != null;
             String firstQuestionTitle = clazzNominationData.keySet().iterator().next();
             updateTableBasedOnQuestionSelected(currentClazzName, firstQuestionTitle, tableLayout);
@@ -345,7 +293,20 @@ public class ReportSELActivity extends UstadBaseActivity implements
 
             Set<String> questions = clazzNominationData.keySet();
             for (String everyQuestion : questions) {
+
                 Button questionButton = new Button(this);
+
+                GradientDrawable shape = new GradientDrawable();
+
+                shape.setStroke(3, Color.YELLOW);
+                shape.setCornerRadius(8);
+
+
+                if(firstQuestionTitle.equals(everyQuestion)){
+                    //TODO: highlight this one. Check this
+                    questionButton.setBackgroundColor(getResources().getColor(R.color.accent));
+                }
+                questionButton.setBackground(shape);
                 questionButton.setText(everyQuestion);
                 questionButton.setOnClickListener(v ->
                         updateTableBasedOnQuestionSelected(currentClazzName, everyQuestion,

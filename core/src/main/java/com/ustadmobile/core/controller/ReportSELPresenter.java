@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +33,9 @@ public class ReportSELPresenter extends UstadBaseController<ReportSELView> {
     private long fromDate, toDate;
     private List<Long> clazzList;
     UmAppDatabase repository;
+    LinkedHashMap<String, LinkedHashMap<String, Map<Long, List<Long>>>> clazzMap;
+    HashMap<String, List<ClazzMemberWithPerson>> clazzToStudents;
+    HashMap<String, UmSheet> clazzSheetTemplate;
 
 
     public ReportSELPresenter(Object context, Hashtable arguments, ReportSELView view) {
@@ -56,7 +60,7 @@ public class ReportSELPresenter extends UstadBaseController<ReportSELView> {
     public void onCreate(Hashtable savedState) {
         super.onCreate(savedState);
 
-        getDataAndUpdateTable();
+        getRawData();
     }
 
     /**
@@ -77,16 +81,16 @@ public class ReportSELPresenter extends UstadBaseController<ReportSELView> {
      * ...
      *
      */
-    private void getDataAndUpdateTable() {
+    private void getRawData() {
         ClazzMemberDao clazzMemberDao = repository.getClazzMemberDao();
 
-        HashMap<String, List<ClazzMemberWithPerson>> clazzToStudents = new HashMap<>();
-
-        LinkedHashMap<String, LinkedHashMap<String, Map<Long, List<Long>>>> clazzMap =
-                new LinkedHashMap<>();
+        clazzToStudents = new HashMap<>();
+        clazzMap = new LinkedHashMap<>();
 
         SocialNominationQuestionResponseNominationDao nominationDao =
                 repository.getSocialNominationQuestionResponseNominationDao();
+
+        //Get all nominations
         nominationDao.getAllNominationReportAsync(fromDate, toDate, clazzList,
                 new UmCallback<List<SELNominationItem>>() {
             @Override
@@ -134,7 +138,7 @@ public class ReportSELPresenter extends UstadBaseController<ReportSELView> {
 
                     clazzMap.put(thisClazzName, questionMap);
 
-                    //Build students map
+                    //Build students map - Add students
                     if(!clazzToStudents.containsKey(thisClazzName)) {
 
                         int finalIndex = index;
@@ -143,8 +147,11 @@ public class ReportSELPresenter extends UstadBaseController<ReportSELView> {
                                 @Override
                                 public void onSuccess(List<ClazzMemberWithPerson> result) {
                                     clazzToStudents.put(thisClazzName, result);
+
+                                    //If end of the loop
                                     if(finalIndex >= allNominations.size()){
-                                        sendToView(clazzMap, clazzToStudents);
+                                        createTablesOnView();
+                                        createClassSheetTemplates();
                                     }
                                 }
 
@@ -154,8 +161,10 @@ public class ReportSELPresenter extends UstadBaseController<ReportSELView> {
                                 }
                             });
                     }else{
+                        //If end of the loop
                         if(index >= allNominations.size()){
-                            sendToView(clazzMap, clazzToStudents);
+                            createTablesOnView();
+                            createClassSheetTemplates();
                         }
                     }
                 }
@@ -170,21 +179,49 @@ public class ReportSELPresenter extends UstadBaseController<ReportSELView> {
 
     /**
      * Send sel raw data to view for table updating.
-     *
-     * @param clazzMap          Every clazz's selected sel report data
-     * @param clazzToStudents   Every clazz selected students (ClazzMemberWithPerson type)
      */
-    private void sendToView(LinkedHashMap<String, LinkedHashMap<String, Map<Long, List<Long>>>> clazzMap,
-                            HashMap<String, List<ClazzMemberWithPerson>> clazzToStudents){
-        view.runOnUiThread(() -> view.updateTables(clazzMap, clazzToStudents));
+    private void createTablesOnView(){
+        view.runOnUiThread(() -> view.createTables(clazzMap, clazzToStudents));
+    }
+
+    private void createClassSheetTemplates(){
+        clazzSheetTemplate = new HashMap<>();
+        for (String clazzName : clazzToStudents.keySet()) {
+            List<ClazzMemberWithPerson> students = clazzToStudents.get(clazzName);
+
+            UmSheet clazzSheet = new UmSheet(clazzName);
+            int r = 0;
+            int c = 0;
+            String nominating = "Nominating";
+            clazzSheet.addValueToSheet(0, 0, nominating);
+            for (ClazzMemberWithPerson everyStudent : students) {
+
+                String studentName = everyStudent.getPerson().getFirstNames() + " " +
+                        everyStudent.getPerson().getLastName();
+
+                if(c > 0) {
+                    clazzSheet.addValueToSheet(0, c, studentName);
+                }
+
+                if (c == 0) {
+                    r = 1;
+                    for (ClazzMemberWithPerson es : students) {
+                        clazzSheet.addValueToSheet(r, c, studentName);
+                        r++;
+                    }
+                }
+                c++;
+            }
+            clazzSheetTemplate.put(clazzName, clazzSheet);
+        }
     }
 
 
     /**
-     *
-     * @param title
-     * @param xlsxReportPath
-     * @param theWorkingPath
+     * Generates the excel file with th ecurrently set data.
+     * @param title             The title of the excel file
+     * @param xlsxReportPath    The .xlsx file path (to be created)
+     * @param theWorkingPath    The working directory where the xlsx file will be worked on.
      */
     public void dataToXLSX(String title, String xlsxReportPath, String theWorkingPath){
 
@@ -192,6 +229,26 @@ public class ReportSELPresenter extends UstadBaseController<ReportSELView> {
             File xlsxFile = ZipUtil.createEmptyZipFile(xlsxReportPath);
 
             UmXLSX umXLSX = new UmXLSX(title, xlsxReportPath, theWorkingPath);
+
+
+
+            //TODO: Generate sheets from the SEL Report data
+            Iterator<String> clazzIterator = clazzMap.keySet().iterator();
+            while(clazzIterator.hasNext()){
+
+                String clazzName = clazzIterator.next();
+                LinkedHashMap<String, Map<Long, List<Long>>> clazzData = clazzMap.get(clazzName);
+                Iterator<String> questionIterator = clazzData.keySet().iterator();
+                while(questionIterator.hasNext()){
+                    String question = questionIterator.next();
+                    Map<Long, List<Long>> questionData = clazzData.get(question);
+
+                }
+            }
+
+
+
+            //Testing XLSX:
 
             UmSheet newSheet = new UmSheet("Test sheet");
             newSheet.addValueToSheet(0,0, "The");
@@ -218,8 +275,9 @@ public class ReportSELPresenter extends UstadBaseController<ReportSELView> {
 
             umXLSX.addSheet(newSheet2);
 
-            umXLSX.createXLSX();
 
+            //Generate the xlsx report from the xlsx object.
+            umXLSX.createXLSX();
             view.generateXLSReport(xlsxReportPath);
 
         } catch (IOException e) {
