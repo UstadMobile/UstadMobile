@@ -152,7 +152,6 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
         }
 
         //Get all the currently set headers and fields:
-        //personDetailPresenterFieldDao.findAllPersonDetailPresenterFields(
         personDetailPresenterFieldDao.findAllPersonDetailPresenterFieldsEditMode(
                 new UmCallback<List<PersonDetailPresenterField>>() {
             @Override
@@ -161,7 +160,8 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
                 headersAndFields = result;
 
                 //Get all custom fields (if any)
-                personCustomFieldDao.findAllCustomFields(CUSTOM_FIELD_MIN_UID, new UmCallback<List<PersonField>>() {
+                personCustomFieldDao.findAllCustomFields(CUSTOM_FIELD_MIN_UID,
+                        new UmCallback<List<PersonField>>() {
                     @Override
                     public void onSuccess(List<PersonField> customFields) {
                         //Create a list of every custom fields supposed to be and fill them with
@@ -221,7 +221,6 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
                     }
                 });
 
-
             }
 
             @Override
@@ -238,12 +237,14 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
      * @param picPath    The whole path of the picture.
      */
     public void updatePersonPic(String picPath){
+        //Find the person
         personDao.findByUidAsync(personUid, new UmCallback<Person>() {
             @Override
             public void onSuccess(Person personWithPic) {
 
                 PersonPictureDao personPictureDao = repository.getPersonPictureDao();
-                personPictureDao.findByPersonUidAsync(personWithPic.getPersonUid(), new UmCallback<PersonPicture>() {
+                personPictureDao.findByPersonUidAsync(personWithPic.getPersonUid(),
+                        new UmCallback<PersonPicture>() {
                     @Override
                     public void onSuccess(PersonPicture personPicture) {
                         if(personPicture != null){
@@ -258,13 +259,12 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
 
                     }
                 });
-                //personWithPic.setImagePath(picPath);
+
+                //Update personWithpic
                 personDao.updateAsync(personWithPic, new UmCallback<Integer>(){
 
                     @Override
-                    public void onSuccess(Integer result) {
-                        System.out.println("Success updating person with Pic..");
-                    }
+                    public void onSuccess(Integer result) {}
 
                     @Override
                     public void onFailure(Throwable exception) {
@@ -297,9 +297,10 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
         view.setClazzListProvider(assignedClazzes);
     }
 
-    public void updatePersonPic(Person thisPerson){
+    private void updatePersonPic(Person thisPerson){
         PersonPictureDao personPictureDao = repository.getPersonPictureDao();
-        personPictureDao.findByPersonUidAsync(thisPerson.getPersonUid(), new UmCallback<PersonPicture>() {
+        personPictureDao.findByPersonUidAsync(thisPerson.getPersonUid(),
+                new UmCallback<PersonPicture>() {
             @Override
             public void onSuccess(PersonPicture personPicture) {
                 if(personPicture != null){
@@ -328,10 +329,6 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
                                  Map<Long, PersonCustomFieldWithPersonCustomFieldValue> valueMap){
 
         Locale currnetLocale = Locale.getDefault();
-
-//        if(thisPerson.getImagePath() != null){
-//            view.updateImageOnView(thisPerson.getImagePath());
-//        }
 
         updatePersonPic(thisPerson);
 

@@ -36,7 +36,7 @@ insertPermissionCondition = TABLE_LEVEL_PERMISSION_CONDITION1 + Role.PERMISSION_
 @UmRepository
 public abstract class ClazzDao implements SyncableDao<Clazz, ClazzDao> {
 
-    protected static final String ENTITY_LEVEL_PERMISSION_CONDITION1 =
+    static final String ENTITY_LEVEL_PERMISSION_CONDITION1 =
             " (SELECT admin FROM Person WHERE personUid = :accountPersonUid) OR " +
             "EXISTS(SELECT PersonGroupMember.groupMemberPersonUid FROM PersonGroupMember " +
             "JOIN EntityRole ON EntityRole.erGroupUid = PersonGroupMember.groupMemberGroupUid " +
@@ -52,9 +52,9 @@ public abstract class ClazzDao implements SyncableDao<Clazz, ClazzDao> {
                     " Clazz.clazzLocationUid))" +
             ") AND (Role.rolePermissions & ";
 
-    protected static final String ENTITY_LEVEL_PERMISSION_CONDITION2 = ") > 0)";
+    static final String ENTITY_LEVEL_PERMISSION_CONDITION2 = ") > 0)";
 
-    protected static final String TABLE_LEVEL_PERMISSION_CONDITION1 =
+    static final String TABLE_LEVEL_PERMISSION_CONDITION1 =
             "(SELECT admin FROM Person WHERE personUid = :accountPersonUid) " +
             "OR " +
             "EXISTS(SELECT PersonGroupMember.groupMemberPersonUid FROM PersonGroupMember " +
@@ -65,9 +65,9 @@ public abstract class ClazzDao implements SyncableDao<Clazz, ClazzDao> {
             " AND EntityRole.erTableId = " + Clazz.TABLE_ID +
             " AND Role.rolePermissions & ";
 
-    protected static final String TABLE_LEVEL_PERMISSION_CONDITION2 = " > 0)";
+    static final String TABLE_LEVEL_PERMISSION_CONDITION2 = " > 0)";
 
-    public static final String CLAZZ_WHERE = " SELECT Clazz.*, (SELECT COUNT(*) " +
+    private static final String CLAZZ_WHERE = " SELECT Clazz.*, (SELECT COUNT(*) " +
             " FROM ClazzMember WHERE " +
             " ClazzMember.clazzMemberClazzUid = Clazz.clazzUid " +
             " AND ClazzMember.role = " + ClazzMember.ROLE_STUDENT +
@@ -151,9 +151,9 @@ public abstract class ClazzDao implements SyncableDao<Clazz, ClazzDao> {
         if(allLocations.isEmpty() && allClazzes.isEmpty()){
             findAllActiveClazzesAsync(resultList);
         }else{
-            if(allLocations.isEmpty() && !allClazzes.isEmpty()){
+            if(allLocations.isEmpty()){
                 findAllClazzesInUidAsync(allClazzes, resultList);
-            }else if(!allLocations.isEmpty() && allClazzes.isEmpty()){
+            }else if(allClazzes.isEmpty()){
                 findAllClazzesInLocationAsync(allLocations, resultList);
             }else{
                 findAllClazzesInUidAndLocationAsync(allLocations, allClazzes, resultList);

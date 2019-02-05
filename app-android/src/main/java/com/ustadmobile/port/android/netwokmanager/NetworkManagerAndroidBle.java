@@ -137,7 +137,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
         intentFilter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
         mContext.registerReceiver(p2pBroadcastReceiver, intentFilter);
 
-        if(isBleDeviceSDKVersion() && isBleCapable()){
+        if(isBleCapable()){
             bluetoothManager =  mContext.getSystemService(Context.BLUETOOTH_SERVICE);
             bluetoothAdapter = ((BluetoothManager)bluetoothManager).getAdapter();
             gattServerAndroid = new BleGattServerAndroid(((Context) context),this);
@@ -158,7 +158,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
      */
     @Override
     public boolean isBleCapable() {
-        return isBleDeviceSDKVersion() &&
+        return BluetoothAdapter.getDefaultAdapter() !=null && isBleDeviceSDKVersion() &&
                 mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE);
     }
 
@@ -234,7 +234,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
     @Override
     public void stopAdvertising() {
         if(bleServiceAdvertiser == null) return;
-        if (isBleDeviceSDKVersion() &&
+        if (isBleCapable() &&
                 ((BleGattServerAndroid)gattServerAndroid).getGattServer() != null) {
             ((BleGattServerAndroid)gattServerAndroid).getGattServer().clearServices();
             ((BleGattServerAndroid)gattServerAndroid).getGattServer().close();
@@ -247,7 +247,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
      */
     @Override
     public void startScanning() {
-        if(isBleDeviceSDKVersion() && !bluetoothAdapter.isDiscovering()){
+        if(isBleCapable() && !bluetoothAdapter.isDiscovering()){
             bluetoothAdapter.startLeScan(new UUID[] { parcelServiceUuid.getUuid()}, leScanCallback);
         }else{
             UstadMobileSystemImpl.l(UMLog.ERROR,689,
@@ -261,7 +261,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
      */
     @Override
     public void stopScanning() {
-        if(isBleDeviceSDKVersion() && bluetoothAdapter.isDiscovering())
+        if(isBleCapable() && bluetoothAdapter.isDiscovering())
         bluetoothAdapter.stopLeScan(leScanCallback);
     }
 
@@ -401,7 +401,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
     @Override
     public BleEntryStatusTask makeEntryStatusTask(Object context, List<Long> entryUidsToCheck,
                                                      NetworkNode peerToCheck) {
-        if(isBleDeviceSDKVersion()){
+        if(isBleCapable()){
             BleEntryStatusTaskAndroid entryStatusTask =
                     new BleEntryStatusTaskAndroid((Context)context,entryUidsToCheck,peerToCheck);
             entryStatusTask.setBluetoothManager((BluetoothManager)bluetoothManager);
@@ -417,7 +417,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
     @Override
     public BleEntryStatusTask makeEntryStatusTask(Object context, BleMessage message,
                                                   NetworkNode peerToSendMessageTo, BleMessageResponseListener responseListener) {
-        if(isBleDeviceSDKVersion()){
+        if(isBleCapable()){
             BleEntryStatusTaskAndroid task =
                     new BleEntryStatusTaskAndroid((Context)context,message,
                             peerToSendMessageTo, responseListener);

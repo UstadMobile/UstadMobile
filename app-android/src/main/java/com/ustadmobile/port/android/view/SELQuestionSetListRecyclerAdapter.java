@@ -51,8 +51,14 @@ public class SELQuestionSetListRecyclerAdapter extends
                         theQuestionSet.getTitle()));
 
 
-        String numQuestionString = theQuestionSet.getNumQuestions() + " " +
-                theContext.getText(R.string.questions).toString();
+        int numQuestions = theQuestionSet.getNumQuestions();
+        String quetionText;
+        if(numQuestions > 1){
+            quetionText = theContext.getText(R.string.question).toString();
+        }else{
+            quetionText = theContext.getText(R.string.questions).toString();
+        }
+        String numQuestionString =  numQuestions + " " + quetionText;
         questionAmount.setText(numQuestionString);
     }
 
