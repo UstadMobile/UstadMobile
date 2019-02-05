@@ -7,11 +7,9 @@ import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 @UmEntity
 public class ContentEntryStatus {
 
-    @UmPrimaryKey(autoIncrement = true)
+    //Always equals contentEntryUid
+    @UmPrimaryKey
     private long cesUid;
-
-    @UmIndexField
-    private long cesContentEntryUid;
 
     private long entryBytesDownloadedSoFar;
 
@@ -45,20 +43,14 @@ public class ContentEntryStatus {
 
     private boolean invalidated = false;
 
+    private boolean leaf;
+
     public long getCesUid() {
         return cesUid;
     }
 
     public void setCesUid(long cesUid) {
         this.cesUid = cesUid;
-    }
-
-    public long getCesContentEntryUid() {
-        return cesContentEntryUid;
-    }
-
-    public void setCesContentEntryUid(long cesContentEntryUid) {
-        this.cesContentEntryUid = cesContentEntryUid;
     }
 
     public long getEntryBytesDownloadedSoFar() {
@@ -187,5 +179,13 @@ public class ContentEntryStatus {
 
     public void setInvalidated(boolean invalidated) {
         this.invalidated = invalidated;
+    }
+
+    public boolean isLeaf() {
+        return leaf;
+    }
+
+    public void setLeaf(boolean leaf) {
+        this.leaf = leaf;
     }
 }

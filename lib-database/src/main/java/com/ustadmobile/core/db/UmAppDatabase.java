@@ -194,11 +194,11 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
                     dbHelper.execSql("CREATE TRIGGER upd_ce_status AFTER UPDATE ON ContentEntry " +
                             "WHEN EXISTS(SELECT cesUid FROM ContentEntryStatus WHERE cesContentEntryUid = NEW.contentEntryUid) " +
                             "BEGIN " +
-                            "UPDATE ContentEntryStatus SET invalidated = 1 WHERE cesContentEntryUid = NEW.contentEntryUid; " +
+                            "UPDATE ContentEntryStatus SET invalidated = 1 WHERE cesUid = NEW.contentEntryUid; " +
                             "END");
-                    String insertNewTriggerBody = "WHEN NOT EXISTS(SELECT cesUid FROM ContentEntryStatus WHERE cesContentEntryUid = NEW.contentEntryUid) " +
+                    String insertNewTriggerBody = "WHEN NOT EXISTS(SELECT cesUid FROM ContentEntryStatus WHERE cesUid = NEW.contentEntryUid) " +
                             "BEGIN " +
-                            "INSERT INTO ContentEntryStatus (cesContentEntryUid, invalidated) VALUES (NEW.contentEntryUid, 1);" +
+                            "INSERT INTO ContentEntryStatus (cesUid, invalidated, leaf) VALUES (NEW.contentEntryUid, 1, NEW.leaf);" +
                             "END";
                     dbHelper.execSql("CREATE TRIGGER upd_ce_ins_ces AFTER UPDATE ON ContentEntry " +
                             insertNewTriggerBody);
