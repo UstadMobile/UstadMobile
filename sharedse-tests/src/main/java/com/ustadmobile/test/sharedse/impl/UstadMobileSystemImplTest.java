@@ -66,7 +66,7 @@ public class UstadMobileSystemImplTest extends UstadMobileSystemImplSE {
     }
 
     @Override
-    public void go(String viewName, Hashtable args, Object context) {
+    public void go(String viewName, Hashtable args, Object context, int flags) {
 
     }
 

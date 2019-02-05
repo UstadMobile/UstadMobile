@@ -778,6 +778,27 @@ public class UMFileUtil {
             return false;
     }
 
-    
-    
+
+    /**
+     * Given a referrer path e.g. /View1?arg=1/View2?arg=2/View2?arg=3/View3?arg=3 this will provide
+     * the argument portion for the most recent (e.g. rightmost) instance of that view name.
+     *
+     * E.g. if viewname = View2, then "arg=3". If View1, then "arg=1".
+     *
+     * @param viewname The viewname to look for in the referrer path
+     * @param referrerPath The referrer path in the form of /Viewname?argname=argvalue
+     *
+     * @return String with the arguments for the last instance of this viewname, or null if not found
+     */
+    public static String getLastReferrerArgsByViewname(String viewname, String referrerPath) {
+        int lastIndex = referrerPath.lastIndexOf("/" + viewname);
+        if(lastIndex != -1) {
+            int nextSlash = referrerPath.indexOf("/", lastIndex + 1);
+            int qPos = referrerPath.indexOf("?", lastIndex + 1);
+            return  (qPos != -1 && qPos < nextSlash) ?
+                    referrerPath.substring(qPos + 1, nextSlash) : "";
+        }else {
+            return null;
+        }
+    }
 }
