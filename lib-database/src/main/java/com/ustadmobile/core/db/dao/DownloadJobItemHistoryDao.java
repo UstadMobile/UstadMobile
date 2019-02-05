@@ -5,7 +5,6 @@ import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.database.annotation.UmUpdate;
 import com.ustadmobile.lib.db.entities.DownloadJobItemHistory;
-import com.ustadmobile.lib.db.entities.EntryStatusResponse;
 
 import java.util.List;
 

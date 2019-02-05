@@ -422,10 +422,8 @@ public abstract class NetworkManagerBle {
      * Connecting a client to a group network for content acquisition
      * @param ssid Group network SSID
      * @param passphrase Group network passphrase
-     * @param connectionListener Connection listener instance
      */
-    public abstract void connectToWiFi(String ssid, String passphrase,
-                                       WiFiDirectConnectionListener connectionListener);
+    public abstract void connectToWiFi(String ssid, String passphrase);
 
     /**
      * Create entry status task for a specific peer device,

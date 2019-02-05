@@ -11,6 +11,10 @@ import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 @UmEntity
 public class DownloadJobItemHistory {
 
+    public static final int MODE_CLOUD = 1;
+
+    public static final int MODE_LOCAL = 2;
+
     @UmPrimaryKey(autoIncrement = true)
     private int id;
 

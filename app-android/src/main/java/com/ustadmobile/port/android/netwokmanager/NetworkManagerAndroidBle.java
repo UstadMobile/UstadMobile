@@ -87,8 +87,6 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
 
     private WiFiDirectGroupBle wiFiDirectGroupBle;
 
-    private WiFiDirectConnectionListener wiFiDirectConnectionListener;
-
     /**
      * Listeners for the WiFi-Direct group connections / states,
      * invoked when WiFi Direct state/connection has changed
@@ -416,9 +414,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
      * {@inheritDoc}
      */
     @Override
-    public void connectToWiFi(String ssid, String passphrase,
-                              WiFiDirectConnectionListener connectionListener) {
-        this.wiFiDirectConnectionListener = connectionListener;
+    public void connectToWiFi(String ssid, String passphrase) {
         WifiConfiguration wifiConfig = new WifiConfiguration();
         wifiConfig.SSID = "\""+ ssid +"\"";
         wifiConfig.priority = (getMaxWiFiConfigurationPriority(wifiManager)+1);
