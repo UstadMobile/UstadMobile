@@ -12,13 +12,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.TreeSet;
 import java.util.UUID;
 import java.util.Vector;
@@ -72,10 +69,6 @@ public abstract class NetworkManagerBle {
      */
     public static final byte WIFI_GROUP_CREATION_RESPONSE = (byte) 114;
 
-    /**
-     * Separator between Wifi direct network SSID and Passphrase
-     */
-    public static final String WIFI_GROUP_INFO_SEPARATOR = ",";
 
     /**
      * Commonly used MTU for android devices
@@ -120,55 +113,6 @@ public abstract class NetworkManagerBle {
      */
     private Vector<WiFiDirectGroupListenerBle> wiFiDirectGroupListeners = new Vector<>();
 
-    private Hashtable<NetworkNode,Long> networkNodeListUpdateTracker = new Hashtable<>();
-
-    /**
-     * Class which represents group creation request response
-     */
-    public static class WiFiP2PGroupResponse{
-
-        private String groupSsid;
-
-        private String groupPassphrase;
-
-        private int port;
-
-        public String getGroupSsid() {
-            return groupSsid;
-        }
-
-        public void setGroupSsid(String groupSsid) {
-            this.groupSsid = groupSsid;
-        }
-
-        public String getGroupPassphrase() {
-            return groupPassphrase;
-        }
-
-        public void setGroupPassphrase(String groupPassphrase) {
-            this.groupPassphrase = groupPassphrase;
-        }
-
-        public int getPort() {
-            return port;
-        }
-
-        public void setPort(int port) {
-            this.port = port;
-        }
-    }
-
-    private Timer networkNodeUpdateTimer = new Timer();
-
-    private class NetworkNodeUpdateTask extends TimerTask{
-        @Override
-        public void run() {
-            NetworkNodeDao networkNodeDao = UmAppDatabase.getInstance(mContext).getNetworkNodeDao();
-            networkNodeDao.insertInTransaction(networkNodeListUpdateTracker);
-            UstadMobileSystemImpl.l(UMLog.DEBUG,694,
-                    "Nodes added to the db and task created", null);
-        }
-    }
 
 
     /**
@@ -196,9 +140,6 @@ public abstract class NetworkManagerBle {
      * Start web server, advertising and discovery
      */
     public void onCreate() {
-        //start network node update timer task
-        NetworkNodeUpdateTask updateTask = new NetworkNodeUpdateTask();
-        networkNodeUpdateTimer.scheduleAtFixedRate(updateTask, 0 ,TimeUnit.MINUTES.toMillis(1));
 
         startAdvertising();
 
@@ -278,7 +219,6 @@ public abstract class NetworkManagerBle {
 
         synchronized (knownNodesLock){
             long updateTime = Calendar.getInstance().getTimeInMillis();
-            networkNodeListUpdateTracker.put(node,updateTime);
 
             NetworkNodeDao networkNodeDao = UmAppDatabase.getInstance(mContext).getNetworkNodeDao();
             networkNodeDao.updateLastSeen(node.getBluetoothMacAddress(),updateTime,
@@ -297,6 +237,9 @@ public abstract class NetworkManagerBle {
                                     }
                                     node.setNetworkNodeLastUpdated(updateTime);
                                     networkNodeDao.insert(node);
+                                    UstadMobileSystemImpl.l(UMLog.DEBUG,694,
+                                            "Node added to the db and task created",
+                                            null);
 
                                 }else{
                                     UstadMobileSystemImpl.l(UMLog.DEBUG,694,
@@ -428,7 +371,7 @@ public abstract class NetworkManagerBle {
             if(!nodeToCheckEntryList.containsKey(nodeIdToCheckFrom))
                 nodeToCheckEntryList.put(nodeIdToCheckFrom, new ArrayList<>());
 
-            nodeToCheckEntryList.get(nodeIdToCheckFrom).add(entryResponse.getEntryId());
+            nodeToCheckEntryList.get(nodeIdToCheckFrom).add(entryResponse.getContentEntryFileUid());
         }
 
         //Make entryStatusTask as per node list and entryUuids found

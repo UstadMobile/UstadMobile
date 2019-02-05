@@ -40,7 +40,7 @@ public abstract class EntryStatusResponseDao {
 
 
     public static class EntryWithoutRecentResponse {
-        private long entryId;
+        private long contentEntryFileUid;
 
         private int nodeId;
 
@@ -48,12 +48,12 @@ public abstract class EntryStatusResponseDao {
             return nodeId;
         }
 
-        public long getEntryId() {
-            return entryId;
+        public long getContentEntryFileUid() {
+            return contentEntryFileUid;
         }
 
-        public void setEntryId(long entryId) {
-            this.entryId = entryId;
+        public void setContentEntryFileUid(long contentEntryFileUid) {
+            this.contentEntryFileUid = contentEntryFileUid;
         }
 
         public void setNodeId(int nodeId) {
@@ -61,10 +61,10 @@ public abstract class EntryStatusResponseDao {
         }
     }
 
-    @UmQuery("SELECT ContentEntry.entryId, NetworkNode.nodeId FROM ContentEntry, NetworkNode " +
-            " WHERE ContentEntry.contentEntryUid IN (:contentUids) " +
+    @UmQuery("SELECT ContentEntryFile.contentEntryFileUid, NetworkNode.nodeId FROM ContentEntryFile, NetworkNode " +
+            " WHERE ContentEntryFile.contentEntryFileUid IN (:contentUids) " +
             " AND NetworkNode.nodeId IN (:nodeIds)  " +
-            " AND NOT EXISTS(Select erId FROM EntryStatusResponse WHERE erContentEntryFileUid = ContentEntry.contentEntryUid" +
+            " AND NOT EXISTS(Select erId FROM EntryStatusResponse WHERE erContentEntryFileUid = ContentEntryFile.contentEntryFileUid" +
             " AND erNodeId = NetworkNode.nodeId) ORDER BY NetworkNode.nodeId")
     public abstract List<EntryWithoutRecentResponse> findEntriesWithoutRecentResponse(List<Long> contentUids, List<Long> nodeIds);
 }

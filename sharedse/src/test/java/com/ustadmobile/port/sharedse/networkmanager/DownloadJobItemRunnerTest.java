@@ -266,14 +266,15 @@ public class DownloadJobItemRunnerTest {
         history.setSuccessful(true);
         umAppDatabase.getDownloadJobItemHistoryDao().insert(history);
 
-        NetworkManagerBle.WiFiP2PGroupResponse response =
-                new NetworkManagerBle.WiFiP2PGroupResponse();
-        response.setPort(234);
-        response.setGroupSsid(ssId);
-        response.setGroupPassphrase(passphrase);
+        WiFiDirectGroupBle groupBle =
+                new WiFiDirectGroupBle(ssId,passphrase);
+        groupBle.setPort(234);
         message = new BleMessage(WIFI_GROUP_CREATION_RESPONSE,
-                new Gson().toJson(response).getBytes());
+                new Gson().toJson(groupBle).getBytes());
 
+
+        when(mockedNetworkManager.makeEntryStatusTask(any(Object.class),
+                any(),any(NetworkNode.class))).thenReturn(mockedEntryStatusTask);
 
         dispatcher =  new ContentEntryFileDispatcher();
         mockWebServer = new MockWebServer();

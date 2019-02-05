@@ -79,7 +79,7 @@ public class DownloadJobItemRunner implements Runnable, BleMessageResponseListen
 
     private Object context;
 
-    private NetworkManagerBle.WiFiP2PGroupResponse p2PGroupResponse;
+    private WiFiDirectGroupBle wiFiDirectGroupBle;
 
     private NetworkNode currentNetworkNode;
 
@@ -282,7 +282,7 @@ public class DownloadJobItemRunner implements Runnable, BleMessageResponseListen
            return endpointUrl + "ContentEntryFileServer/" + downloadItem
                     .getDjiContentEntryFileUid();
         }else{
-            return serverIpAddress + ":" + p2PGroupResponse.getPort()+"/"
+            return serverIpAddress + ":" + wiFiDirectGroupBle.getPort()+"/"
                     + downloadItem.getDjiContentEntryFileUid();
         }
     }
@@ -337,7 +337,7 @@ public class DownloadJobItemRunner implements Runnable, BleMessageResponseListen
             appDb.getContentEntryFileStatusDao().insert(fileStatus);
         }
 
-        if(p2PGroupResponse != null && !downloaded){
+        if(wiFiDirectGroupBle != null && !downloaded){
             startDownload(true);
         }else{
             stop(downloaded ? JobStatus.COMPLETE : JobStatus.FAILED);
@@ -355,7 +355,7 @@ public class DownloadJobItemRunner implements Runnable, BleMessageResponseListen
 
     @Override
     public void onConnected(String ipAddress, String groupSSID) {
-        if(p2PGroupResponse.getGroupSsid().equals(groupSSID)){
+        if(wiFiDirectGroupBle.getSsid().equals(groupSSID)){
             this.serverIpAddress = ipAddress;
             appDb.getConnectivityStatusDao().update(STATE_CONNECTED_LOCAL);
         }
@@ -363,7 +363,7 @@ public class DownloadJobItemRunner implements Runnable, BleMessageResponseListen
 
     @Override
     public void onFailure(String groupSSID) {
-        if(p2PGroupResponse.getGroupSsid().equals(groupSSID)){
+        if(wiFiDirectGroupBle.getSsid().equals(groupSSID)){
             if(connectionFailureRetryCount < MAX_CONNECTION_FAILURE_RETRY_LIMIT){
                 connectionFailureRetryCount++;
                 startLocalConnectionHandShake();
@@ -378,11 +378,11 @@ public class DownloadJobItemRunner implements Runnable, BleMessageResponseListen
     @Override
     public void onResponseReceived(String sourceDeviceAddress, BleMessage response) {
         if(response.getRequestType() == WIFI_GROUP_CREATION_RESPONSE){
-            this.p2PGroupResponse = new Gson().fromJson(new String(response.getPayload()),
-                            NetworkManagerBle.WiFiP2PGroupResponse.class);
+            this.wiFiDirectGroupBle = new Gson().fromJson(new String(response.getPayload()),
+                            WiFiDirectGroupBle.class);
 
-            networkManager.connectToWiFi(p2PGroupResponse.getGroupSsid(),
-                    p2PGroupResponse.getGroupPassphrase(),this);
+            networkManager.connectToWiFi(wiFiDirectGroupBle.getSsid(),
+                    wiFiDirectGroupBle.getPassphrase(),this);
 
             appDb.getConnectivityStatusDao().update(ConnectivityStatus.STATE_CONNECTING_LOCAL);
         }
