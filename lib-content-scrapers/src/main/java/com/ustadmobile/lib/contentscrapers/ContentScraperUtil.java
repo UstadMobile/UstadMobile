@@ -6,7 +6,6 @@ import com.google.gson.GsonBuilder;
 import com.neovisionaries.i18n.CountryCode;
 import com.neovisionaries.i18n.LanguageAlpha3Code;
 import com.neovisionaries.i18n.LanguageCode;
-import com.sun.jndi.toolkit.url.UrlUtil;
 import com.ustadmobile.core.db.dao.ContentCategoryDao;
 import com.ustadmobile.core.db.dao.ContentCategorySchemaDao;
 import com.ustadmobile.core.db.dao.ContentEntryContentCategoryJoinDao;
@@ -33,7 +32,6 @@ import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoin;
 import com.ustadmobile.lib.db.entities.Language;
 import com.ustadmobile.lib.db.entities.LanguageVariant;
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem;
-import com.ustadmobile.lib.util.UMUtil;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
@@ -96,8 +94,6 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-import sun.net.util.URLUtil;
-
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.ANDROID_USER_AGENT;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.EMPTY_SPACE;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.EMPTY_STRING;
@@ -105,8 +101,8 @@ import static com.ustadmobile.lib.contentscrapers.ScraperConstants.FORWARD_SLASH
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.GRAPHIE;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.KHAN_GRAPHIE_PREFIX;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.KHAN_LOGIN_LINK;
-import static com.ustadmobile.lib.contentscrapers.ScraperConstants.KHAN_USERNAME;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.KHAN_PASS;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.KHAN_USERNAME;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.REQUEST_HEAD;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.SVG_EXT;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.TIME_OUT_SELENIUM;
