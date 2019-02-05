@@ -184,7 +184,7 @@ public class IndexEdraakK12Content {
             for (ContentResponse children : parentContent.children) {
 
                 String sourceUrl = children.id;
-                boolean isLeaf = ContentScraperUtil.isImportedComponent(parentContent.component_type);
+                boolean isLeaf = ContentScraperUtil.isImportedComponent(children.component_type);
 
                 ContentEntry childEntry = ContentScraperUtil.createOrUpdateContentEntry(children.id, children.title,
                         sourceUrl, EDRAAK, getLicenseType(children.license), arabicLang.getLangUid(), null,
