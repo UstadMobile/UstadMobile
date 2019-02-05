@@ -456,7 +456,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
     }
 
 
-    public void go(String viewName, Hashtable args, Object context) {
+    public void go(String viewName, Hashtable args, Object context, int flags) {
         Class androidImplClass = viewNameToAndroidImplMap.get(viewName);
         Context ctx = (Context)context;
         Bundle argsBundle = UMAndroidUtil.hashtableToBundle(args);
@@ -489,6 +489,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
             }
         }else {
             Intent startIntent = new Intent(ctx, androidImplClass);
+            startIntent.setFlags(flags);
             if(args != null)
                 startIntent.putExtras(argsBundle);
 
