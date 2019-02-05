@@ -9,6 +9,7 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
+import com.ustadmobile.core.impl.UmCallbackUtil;
 import com.ustadmobile.lib.database.annotation.UmClearAll;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmDatabase;
@@ -29,18 +30,21 @@ import com.ustadmobile.lib.database.annotation.UmSyncCheckIncomingCanUpdate;
 import com.ustadmobile.lib.database.annotation.UmSyncIncoming;
 import com.ustadmobile.lib.database.annotation.UmSyncOutgoing;
 import com.ustadmobile.lib.database.annotation.UmUpdate;
-import com.ustadmobile.lib.database.jdbc.JdbcDatabaseUtils;
 import com.ustadmobile.lib.db.UmDbWithExecutor;
+import com.ustadmobile.lib.db.UmDbWithSyncableInsertLock;
 import com.ustadmobile.lib.db.sync.UmRepositoryDb;
 import com.ustadmobile.lib.db.sync.UmSyncableDatabase;
 import com.ustadmobile.lib.db.sync.entities.SyncDeviceBits;
 import com.ustadmobile.lib.db.sync.entities.SyncStatus;
+import com.ustadmobile.lib.db.sync.entities.SyncablePrimaryKey;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Vector;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -53,6 +57,7 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
@@ -75,6 +80,12 @@ public class DbProcessorRoom extends AbstractDbProcessor implements QueryMethodG
     private static final String ROOM_PKG_NAME =  "android.arch.persistence.room";
 
     private static final String UMDB_CORE_PKG_NAME = "com.ustadmobile.core.db";
+
+    private static final List<TypeKind> INSERT_BIND_LONG = Arrays.asList(TypeKind.INT,
+            TypeKind.SHORT, TypeKind.LONG, TypeKind.BYTE);
+
+    private static final List<TypeKind> INSERT_BIND_DOUBLE = Arrays.asList(TypeKind.FLOAT,
+            TypeKind.DOUBLE);
 
     public DbProcessorRoom() {
         setOutputDirOpt(OPT_ROOM_OUTPUT);
@@ -142,8 +153,44 @@ public class DbProcessorRoom extends AbstractDbProcessor implements QueryMethodG
             .addType(TypeSpec.classBuilder("DbManagerCallback")
                     .superclass(ClassName.get(ROOM_PKG_NAME, "RoomDatabase")
                             .nestedClass("Callback"))
-                    .addMethod(generateOnCreateMethod(dbType)).build())
-            .addMethod(generateCreateSeqNumTriggersMethod(dbType));
+                    .addMethod(generateOnCreateMethod(dbType, dbManagerImplSpec)).build());
+
+        if(DbProcessorUtils.isSyncableDatabase(dbType.asType(), processingEnv)) {
+            addDbWithSyncableInsertLockImplementation(dbManagerImplSpec);
+            dbManagerImplSpec.addSuperinterface(ClassName.get("com.ustadmobile.lib.database",
+                    "UmRoomDbManagerWithSyncablePk"))
+                    .addField(ClassName.get("android.arch.persistence.db",
+                            "SupportSQLiteQuery"), "_lastPksQuery")
+                    .addField(ClassName.get("android.arch.persistence.db",
+                            "SupportSQLiteStatement"), "_deleteLastPksStatement")
+                    .addMethod(MethodSpec.methodBuilder("getLastPksQuery")
+                        .addAnnotation(Override.class)
+                        .addModifiers(Modifier.PUBLIC)
+                        .returns(ClassName.get("android.arch.persistence.db",
+                                "SupportSQLiteQuery"))
+                        .addCode(CodeBlock.builder()
+                                .beginControlFlow("if(_lastPksQuery == null)")
+                                    .add("_lastPksQuery = new $T();\n",
+                                            ClassName.get("com.ustadmobile.lib.database",
+                                                    "SyncablePkUtilsAndroid",
+                                                    "GetLastSyncablePkQuery"))
+                                    .endControlFlow()
+                                    .add("return _lastPksQuery;\n").build())
+                            .build())
+                    .addMethod(MethodSpec.methodBuilder("getDeleteLastPksStatement")
+                        .addAnnotation(Override.class)
+                        .addModifiers(Modifier.PUBLIC)
+                        .returns(ClassName.get("android.arch.persistence.db",
+                                "SupportSQLiteStatement"))
+                        .addCode(CodeBlock.builder()
+                            .beginControlFlow("if(_deleteLastPksStatement == null)")
+                                .add("_deleteLastPksStatement = _roomDb.compileStatement($S);\n",
+                                        "DELETE FROM _lastsyncablepk")
+                                .endControlFlow()
+                                .add("return _deleteLastPksStatement;\n").build())
+                            .build());
+
+        }
 
         UmDatabase db = dbType.getAnnotation(UmDatabase.class);
 
@@ -230,30 +277,28 @@ public class DbProcessorRoom extends AbstractDbProcessor implements QueryMethodG
             destination);
     }
 
-    private MethodSpec generateCreateSeqNumTriggersMethod(TypeElement dbType) {
-        MethodSpec.Builder builder = MethodSpec.methodBuilder("createSeqNumTriggers")
-                .addParameter(Class.class, "_entityClass")
-                .addParameter(ClassName.get("android.arch.persistence.db",
-                                "SupportSQLiteDatabase"), "_db");
 
-        CodeBlock.Builder codeBlock = CodeBlock.builder();
-        addCreateTriggersForEntitiesToCodeBlock(JdbcDatabaseUtils.PRODUCT_NAME_SQLITE,
-                "_db.execSQL", dbType, codeBlock);
-
-        builder.addCode(codeBlock.build());
-        return builder.build();
-    }
-
-    private MethodSpec generateOnCreateMethod(TypeElement dbType) {
+    private MethodSpec generateOnCreateMethod(TypeElement dbType, TypeSpec.Builder dbManagerBuilder) {
         MethodSpec.Builder builder = MethodSpec.methodBuilder("onCreate")
                 .addParameter(ClassName.get("android.arch.persistence.db",
                         "SupportSQLiteDatabase"), "_db")
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC);
         CodeBlock.Builder codeBlock = CodeBlock.builder();
+
+        if(DbProcessorUtils.isSyncableDatabase(dbType.asType(), processingEnv)) {
+            codeBlock.add("_db.execSQL($S);\n", SQLITE_CREATE_LAST_SYNCABLE_PK_SQL);
+            codeBlock.add("int _deviceBits = new $T().nextInt();\n", Random.class);
+            codeBlock.add("_db.execSQL(\"INSERT INTO SyncDeviceBits (id, deviceBits, master) " +
+                    "VALUES (1, \" + _deviceBits + \", 0)\");\n");
+        }
+
         for(TypeElement entityType : DbProcessorUtils.findEntityTypes(dbType, processingEnv)) {
             if(DbProcessorUtils.entityHasChangeSequenceNumbers(entityType, processingEnv)) {
-                codeBlock.add("createSeqNumTriggers($T.class, _db);\n", entityType);
+                codeBlock.add("// Begin: $L - create triggers\n", entityType.getSimpleName());
+                codeBlock.add(generateChangeSequenceTriggersCodeBlock("SQLite",
+                        "_db.execSQL", entityType));
+                codeBlock.add("// END: $L - create triggers\n\n", entityType.getSimpleName());
             }
         }
 
@@ -288,6 +333,7 @@ public class DbProcessorRoom extends AbstractDbProcessor implements QueryMethodG
                             .add("$L = _roomDb.$L();\n", daoFieldName, daoMethodName)
                             .add("$L.setExecutor(dbExecutor);\n", daoFieldName)
                             .add("$L.setDbManager(this);\n", daoFieldName)
+                            .add("$L.setRoomDatabase(_roomDb);\n", daoFieldName)
                         .endControlFlow()
                         .add("return $L;\n", daoFieldName).build()).build());
 
@@ -321,11 +367,28 @@ public class DbProcessorRoom extends AbstractDbProcessor implements QueryMethodG
                 .addModifiers(Modifier.PUBLIC)
                 .addCode("this._dbManager = _dbManager;\n").build());
 
+        ClassName roomDatabaseClassName = ClassName.get(ROOM_PKG_NAME, "RoomDatabase");
+        roomDaoClassSpec.addField(roomDatabaseClassName, "_roomDb");
+        MethodSpec.Builder setRoomDbMethodBuilder = MethodSpec.methodBuilder("setRoomDatabase")
+                .addParameter(roomDatabaseClassName, "roomDb")
+                .addModifiers(Modifier.PUBLIC);
+        CodeBlock.Builder setRoomDbCodeBlock = CodeBlock.builder()
+                .add("this._roomDb = roomDb;\n");
+
+
         //now generate methods for all query, insert, and delete methods
+        Map<String, Integer> entityInsertionVarNamePostfixMap = new HashMap<>();
+
         for(ExecutableElement daoMethod : findMethodsToImplement(daoClass)) {
             MethodSpec.Builder methodBuilder = null;
+            DaoMethodInfo methodInfo = new DaoMethodInfo(daoMethod, daoClass, processingEnv);
 
-            if(daoMethod.getAnnotation(UmInsert.class) != null) {
+
+            if(methodInfo.isInsertWithAutoSyncPrimaryKey()) {
+                roomDaoClassSpec.addMethod(generateRoomSyncableInsertMethod(daoMethod, daoClass,
+                        roomDaoClassSpec, setRoomDbCodeBlock, "_roomDb",
+                        entityInsertionVarNamePostfixMap));
+            }else if(daoMethod.getAnnotation(UmInsert.class) != null) {
                 UmInsert umInsert = daoMethod.getAnnotation(UmInsert.class);
                 AnnotationSpec annotation = AnnotationSpec.builder(ClassName.get(ROOM_PKG_NAME, "Insert"))
                         .addMember("onConflict", ""+umInsert.onConflict()).build();
@@ -383,9 +446,184 @@ public class DbProcessorRoom extends AbstractDbProcessor implements QueryMethodG
             }
         }
 
+        setRoomDbMethodBuilder.addCode(setRoomDbCodeBlock.build());
+        roomDaoClassSpec.addMethod(setRoomDbMethodBuilder.build());
+
         writeJavaFileToDestination(
                 JavaFile.builder(processingEnv.getElementUtils().getPackageOf(daoClass).toString(),
                 roomDaoClassSpec.build()).build(), destination);
+    }
+
+    private MethodSpec generateRoomSyncableInsertMethod(ExecutableElement daoMethod,
+                                                        TypeElement daoType,
+                                                        TypeSpec.Builder daoTypeBuilder,
+                                                        CodeBlock.Builder constructorCodeBlock,
+                                                        String roomDbVarName,
+                                                        Map<String, Integer> adapterPostfixMap) {
+        MethodSpec.Builder methodBuilder = overrideAndResolve(daoMethod, daoType, processingEnv);
+        CodeBlock.Builder codeBlock = CodeBlock.builder();
+        DaoMethodInfo methodInfo = new DaoMethodInfo(daoMethod, daoType, processingEnv);
+        TypeMirror entityComponentType = methodInfo.resolveEntityParameterComponentType();
+        TypeElement entityComponentTypeEl = (TypeElement)processingEnv.getTypeUtils().asElement(
+                entityComponentType);
+        TypeName entityInsertionAdapterTypeName = ParameterizedTypeName.get(
+                ClassName.get("android.arch.persistence.room", "EntityInsertionAdapter"),
+                ClassName.get(entityComponentType));
+
+
+
+
+        CodeBlock.Builder insertQueryCodeBlock = CodeBlock.builder()
+                .add("return \"INSERT INTO `$L_spk_view` (", entityComponentTypeEl.getSimpleName());
+        CodeBlock.Builder bindCodeBlock = CodeBlock.builder();
+        StringBuilder paramSection = new StringBuilder();
+        int fieldCount = 0;
+        List<VariableElement> fieldList = DbProcessorUtils.getEntityFieldElements(
+                entityComponentTypeEl, processingEnv);
+        for(VariableElement field : fieldList) {
+            if(fieldCount > 0) {
+                insertQueryCodeBlock.add(", ");
+                paramSection.append(", ");
+            }
+
+            insertQueryCodeBlock.add("`$L`", field.getSimpleName());
+            paramSection.append("?");
+
+            TypeMirror fieldType = DbProcessorUtils.unboxIfBoxed(field.asType(), processingEnv);
+
+            if(fieldType.getKind().equals(TypeKind.DECLARED)) {
+                TypeElement fieldTypeEl = (TypeElement)processingEnv.getTypeUtils()
+                        .asElement(field.asType());
+                if(fieldTypeEl.getQualifiedName().toString().equals(String.class.getName())) {
+                    bindCodeBlock.beginControlFlow("if(value.get$L() != null)",
+                            DbProcessorUtils.capitalize(field.getSimpleName()))
+                                .add("stmt.bindString($L, value.get$L());\n",
+                                    fieldCount + 1,
+                                    DbProcessorUtils.capitalize(field.getSimpleName()))
+                            .nextControlFlow("else")
+                                .add("stmt.bindNull($L);\n", fieldCount+1)
+                            .endControlFlow();
+                }
+            }else if(INSERT_BIND_LONG.contains(fieldType.getKind())) {
+                bindCodeBlock.add("stmt.bindLong($L, value.get$L());\n",
+                        fieldCount + 1, DbProcessorUtils.capitalize(field.getSimpleName()));
+            }else if(fieldType.getKind().equals(TypeKind.BOOLEAN)) {
+                bindCodeBlock.add("stmt.bindLong($L, value.is$L() ? 1: 0);\n",
+                        fieldCount + 1, DbProcessorUtils.capitalize(field.getSimpleName()));
+            }else if(INSERT_BIND_DOUBLE.contains(fieldType.getKind())) {
+                bindCodeBlock.add("stmt.bindDouble($L, value.get$L());\n",
+                        fieldCount + 1, DbProcessorUtils.capitalize(field.getSimpleName()));
+            }
+
+            fieldCount++;
+        }
+
+        insertQueryCodeBlock.add(") VALUES ($L)\";\n", paramSection);
+
+        String insertQueryBlockStr = insertQueryCodeBlock.build().toString();
+        Integer insertQueryVariablePostfix = adapterPostfixMap.get(insertQueryBlockStr);
+        String entityInsertionAdapterVarName = "_entityInsertionAdapter" + insertQueryVariablePostfix;
+        if(insertQueryVariablePostfix == null) {
+            entityInsertionAdapterVarName = "_entityInsertionAdapter" + adapterPostfixMap.size();
+            TypeSpec.Builder anonymousClassSpec = TypeSpec.anonymousClassBuilder(roomDbVarName)
+                    .addSuperinterface(entityInsertionAdapterTypeName)
+                    .addMethod(MethodSpec.methodBuilder("createQuery")
+                            .addModifiers(Modifier.PUBLIC)
+                            .returns(String.class)
+                            .addAnnotation(Override.class)
+                            .addCode(insertQueryCodeBlock.build())
+                            .build())
+                    .addMethod(MethodSpec.methodBuilder("bind")
+                            .addAnnotation(Override.class)
+                            .addModifiers(Modifier.PUBLIC)
+                            .addParameter(ClassName.get("android.arch.persistence.db",
+                                    "SupportSQLiteStatement"), "stmt")
+                            .addParameter(ClassName.get(methodInfo.resolveEntityParameterComponentType()),
+                                    "value")
+                            .addCode(bindCodeBlock.build())
+                            .build());
+
+            constructorCodeBlock.add("// code block for $L \n", insertQueryBlockStr);
+            constructorCodeBlock.add("$L = $L;\n", entityInsertionAdapterVarName,
+                    anonymousClassSpec.build());
+            daoTypeBuilder.addField(entityInsertionAdapterTypeName, entityInsertionAdapterVarName,
+                    Modifier.PRIVATE);
+            adapterPostfixMap.put(insertQueryBlockStr, adapterPostfixMap.size());
+        }
+
+
+        if(methodInfo.isAsyncMethod()) {
+            codeBlock.beginControlFlow("dbExecutor.execute(() -> ");
+        }
+
+        if(!isVoid(methodInfo.resolveResultType())) {
+            codeBlock.add("$T _result = $L;\n", methodInfo.resolveResultType(),
+                    defaultValue(methodInfo.resolveResultType()));
+        }
+
+        codeBlock.add("$L.beginTransaction();\n", roomDbVarName)
+                .add("$1T _dbWithSyncableInsertLock = ($1T)_dbManager;\n",
+                        UmDbWithSyncableInsertLock.class)
+                .beginControlFlow("try")
+                .add("_dbWithSyncableInsertLock.lockSyncableInserts();\n")
+                .add("$L.insert($L);\n", entityInsertionAdapterVarName,
+                        methodInfo.getEntityParameterElement().getSimpleName());
+
+        ClassName syncablePkUtilsClsName = ClassName.get("com.ustadmobile.lib.database",
+                "SyncablePkUtilsAndroid");
+        codeBlock.add("$1T _syncablePkDbMgr = ($1T)_dbManager;\n", ClassName.get(
+                "com.ustadmobile.lib.database", "UmRoomDbManagerWithSyncablePk"));
+
+        if(!isVoid(methodInfo.resolveResultType())) {
+            codeBlock.add("_result = ");
+            if(methodInfo.hasListResultType()) {
+                codeBlock.add("$T.getGeneratedKeysAsList(_roomDb, _syncablePkDbMgr);\n",
+                        syncablePkUtilsClsName);
+            }else if(methodInfo.hasArrayResultType()) {
+                TypeMirror compType = ((ArrayType)methodInfo.resolveResultType()).getComponentType();
+                if(compType.getKind().equals(TypeKind.LONG)) {
+                    codeBlock.add("$T.getGeneratedKeysAsArray(_roomDb, _syncablePkDbMgr);\n",
+                            syncablePkUtilsClsName);
+                }else {
+                    codeBlock.add("$T.getGeneratedKeysAsBoxedArray(_roomDb, _syncablePkDbMgr);\n",
+                            syncablePkUtilsClsName);
+                }
+            }else {
+                codeBlock.add("$T.getGeneratedKey(_roomDb, _syncablePkDbMgr);\n",
+                        syncablePkUtilsClsName);
+            }
+        }else {
+            codeBlock.add("$T.deleteLastGeneratedPks(_syncablePkDbMgr);\n",
+                    syncablePkUtilsClsName);
+        }
+
+        codeBlock.add("$L.setTransactionSuccessful();\n", roomDbVarName);
+
+        codeBlock.nextControlFlow("finally")
+                .add("_dbWithSyncableInsertLock.unlockSyncableInserts();\n")
+                .add("$L.endTransaction();\n", roomDbVarName)
+                .endControlFlow();
+
+        if(!isVoid(daoMethod.getReturnType())){
+            codeBlock.add("return _result;\n");
+        }else if(methodInfo.isAsyncMethod()) {
+            String asyncParamName = daoMethod.getParameters().get(methodInfo.getAsyncParamIndex())
+                    .getSimpleName().toString();
+            if(isVoid(methodInfo.resolveResultType())) {
+                codeBlock.add("$T.onSuccessIfNotNull($L, null);\n",
+                        UmCallbackUtil.class, asyncParamName);
+            }else {
+                codeBlock.add("$T.onSuccessIfNotNull($L, _result);\n",
+                        UmCallbackUtil.class, asyncParamName);
+            }
+        }
+
+        if(methodInfo.isAsyncMethod()) {
+            codeBlock.endControlFlow(")");
+        }
+
+        methodBuilder.addCode(codeBlock.build());
+        return methodBuilder.build();
     }
 
     /**
@@ -667,9 +905,13 @@ public class DbProcessorRoom extends AbstractDbProcessor implements QueryMethodG
         CodeBlock.Builder codeBlock = CodeBlock.builder().add("_roomDb.clearAllTables();\n");
         for(TypeElement entityTypeEl : DbProcessorUtils.findEntityTypes(dbType, processingEnv)) {
             if(DbProcessorUtils.entityHasChangeSequenceNumbers(entityTypeEl, processingEnv)) {
+                int tableId = entityTypeEl.getAnnotation(UmEntity.class).tableId();
                 codeBlock.add("getSyncStatusDao().insert(new $T($L));\n", SyncStatus.class,
-                        entityTypeEl.getAnnotation(UmEntity.class).tableId());
+                        tableId);
+                codeBlock.add("getSyncablePrimaryKeyDao().insert(new $T($L, 1));\n",
+                        SyncablePrimaryKey.class, tableId);
             }
+
         }
 
         TypeMirror syncableDbType = processingEnv.getElementUtils().getTypeElement(

@@ -144,12 +144,5 @@ public class FeedListPresenter extends UstadBaseController<FeedListView>{
 
     }
 
-    /**
-     * Overriding here. Does nothing.
-     */
-    @Override
-    public void setUIStrings() {
-
-    }
 
 }

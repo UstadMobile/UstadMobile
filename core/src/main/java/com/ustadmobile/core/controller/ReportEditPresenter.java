@@ -330,9 +330,4 @@ public class ReportEditPresenter
         this.thresholdValues = thresholdValues;
     }
 
-    @Override
-    public void setUIStrings() {
-
-    }
-
 }

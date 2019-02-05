@@ -173,11 +173,4 @@ public class SELSelectStudentPresenter extends CommonHandlerPresenter<SELSelectS
         // No secondary button for this here.
     }
 
-    /**
-     * Overridden. Does nothing.
-     */
-    @Override
-    public void setUIStrings() {
-
-    }
 }

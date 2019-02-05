@@ -83,7 +83,6 @@ public class DbProcessorJerseyResource extends AbstractDbProcessor {
             TypeName resultTypeName = TypeName.get(methodInfo.resolveResultEntityType());
             boolean primitiveToStringResult = false;
             boolean isVoidResult = isVoid(methodInfo.resolveResultType());
-            boolean isAutoSyncInsert = methodInfo.isInsertWithAutoSyncPrimaryKey();
             boolean isStreamResponse = false;
 
             if (resultTypeName.isPrimitive() || resultTypeName.isBoxedPrimitive()) {
@@ -136,7 +135,7 @@ public class DbProcessorJerseyResource extends AbstractDbProcessor {
             }
 
             String syncableDbVariableName = null;
-            if(methodInfo.isUpdateOrInsert() || isAutoSyncInsert) {
+            if(methodInfo.isUpdateOrInsert()) {
                 syncableDbVariableName = "_syncableDb";
                 codeBlock.add("$1T $2L = ($1T)_db;", UmSyncableDatabase.class,
                         syncableDbVariableName);
@@ -149,11 +148,6 @@ public class DbProcessorJerseyResource extends AbstractDbProcessor {
                         syncableDbVariableName).build());
             }
 
-            if(isAutoSyncInsert) {
-                codeBlock.add(generateSetSyncablePrimaryKey(methodElement, daoType, processingEnv,
-                        "_db", syncableDbVariableName,"_syncablePkResult"));
-            }
-
 
             if (methodInfo.isAsyncMethod()) {
                 codeBlock.add("$1T _latch = new $1T(1);\n", CountDownLatch.class);
@@ -161,8 +155,8 @@ public class DbProcessorJerseyResource extends AbstractDbProcessor {
                         AtomicReference.class);
 
                 if (!isVoidResult)
-                    codeBlock.add("$1T<$2T> _resultRef = new $1T<>($3L);\n", AtomicReference.class,
-                            methodInfo.resolveResultType(),isAutoSyncInsert ? "_syncablePkResult" : "");
+                    codeBlock.add("$1T<$2T> _resultRef = new $1T<>();\n", AtomicReference.class,
+                            methodInfo.resolveResultType()/*,isAutoSyncInsert ? "_syncablePkResult" : ""*/);
 
 
                 codeBlock.add("_dao.$L(", methodElement.getSimpleName());
@@ -175,7 +169,7 @@ public class DbProcessorJerseyResource extends AbstractDbProcessor {
                         codeBlock.add(param.getSimpleName().toString());
                     } else {
                         CodeBlock.Builder onSuccessCode = CodeBlock.builder();
-                        if (!isVoidResult && !isAutoSyncInsert) {
+                        if (!isVoidResult) {
                             onSuccessCode.add("_resultRef.set(_result);\n");
                         }
 
@@ -250,7 +244,7 @@ public class DbProcessorJerseyResource extends AbstractDbProcessor {
                     .add("_liveData.removeObserver(_observer);\n")
                     .add("return _resultRef.get();\n");
             }else {
-                boolean returnDaoResult = !isVoidResult && !isAutoSyncInsert;
+                boolean returnDaoResult = !isVoidResult;
 
                 boolean daoMethodThrowsException = !methodElement.getThrownTypes().isEmpty();
                 if(daoMethodThrowsException) {
@@ -287,10 +281,6 @@ public class DbProcessorJerseyResource extends AbstractDbProcessor {
                             .endControlFlow();
                 }
 
-
-                if(!isVoidResult && isAutoSyncInsert) {
-                    codeBlock.add("return _syncablePkResult;\n");
-                }
             }
 
             methodBuilder.addCode(codeBlock.build());

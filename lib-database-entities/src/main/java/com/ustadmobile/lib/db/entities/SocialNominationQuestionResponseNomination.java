@@ -23,14 +23,22 @@ public class SocialNominationQuestionResponseNomination {
     //Added 31012019 sel TODO add to Migrations
     private boolean nominationActive;
 
-    @UmSyncLastChangedBy
-    private int scheduleNominationQuestionResponseNominationLastChangedBy;
+    //Removed : TODO: add to Migrations
+//    @UmSyncLastChangedBy
+//    private int scheduleNominationQuestionResponseNominationLastChangedBy;
 
+    //Renamed: TODO: add to Migrations
     @UmSyncMasterChangeSeqNum
-    private long scheduleNominationQuestionResponseNominationMasterChangeSeqNum;
+    private long socialNominationQuestionResponseNominationMasterChangeSeqNum;
+    //private long scheduleNominationQuestionResponseNominationMasterChangeSeqNum;
 
+    //Renamed: TODO: add to Migrations
     @UmSyncLocalChangeSeqNum
-    private long scheduleNominationQuestionResponseNominationLocalChangeSeqNum;
+    private long socialNominationQuestionResponseNominationLocalChangeSeqNum;
+    //private long scheduleNominationQuestionResponseNominationLocalChangeSeqNum;
+
+    @UmSyncLastChangedBy
+    private int socialNominationQuestionResponseNominationLastChangedBy;
 
     public int getSocialNominationQuestionResponseNominationLastChangedBy() {
         return socialNominationQuestionResponseNominationLastChangedBy;
@@ -39,9 +47,6 @@ public class SocialNominationQuestionResponseNomination {
     public void setSocialNominationQuestionResponseNominationLastChangedBy(int socialNominationQuestionResponseNominationLastChangedBy) {
         this.socialNominationQuestionResponseNominationLastChangedBy = socialNominationQuestionResponseNominationLastChangedBy;
     }
-
-    @UmSyncLastChangedBy
-    private int socialNominationQuestionResponseNominationLastChangedBy;
 
     public long getSocialNominationQuestionResponseNominationUid() {
         return socialNominationQuestionResponseNominationUid;
@@ -67,29 +72,6 @@ public class SocialNominationQuestionResponseNomination {
         this.socialNominationQuestionResponseNominationSocialNominationQuestionResponseUId = socialNominationQuestionResponseNominationSocialNominationQuestionResponseUId;
     }
 
-    public long getScheduleNominationQuestionResponseNominationMasterChangeSeqNum() {
-        return scheduleNominationQuestionResponseNominationMasterChangeSeqNum;
-    }
-
-    public void setScheduleNominationQuestionResponseNominationMasterChangeSeqNum(long scheduleNominationQuestionResponseNominationMasterChangeSeqNum) {
-        this.scheduleNominationQuestionResponseNominationMasterChangeSeqNum = scheduleNominationQuestionResponseNominationMasterChangeSeqNum;
-    }
-
-    public long getScheduleNominationQuestionResponseNominationLocalChangeSeqNum() {
-        return scheduleNominationQuestionResponseNominationLocalChangeSeqNum;
-    }
-
-    public void setScheduleNominationQuestionResponseNominationLocalChangeSeqNum(long scheduleNominationQuestionResponseNominationLocalChangeSeqNum) {
-        this.scheduleNominationQuestionResponseNominationLocalChangeSeqNum = scheduleNominationQuestionResponseNominationLocalChangeSeqNum;
-    }
-
-    public int getScheduleNominationQuestionResponseNominationLastChangedBy() {
-        return scheduleNominationQuestionResponseNominationLastChangedBy;
-    }
-
-    public void setScheduleNominationQuestionResponseNominationLastChangedBy(int scheduleNominationQuestionResponseNominationLastChangedBy) {
-        this.scheduleNominationQuestionResponseNominationLastChangedBy = scheduleNominationQuestionResponseNominationLastChangedBy;
-    }
 
     public boolean isNominationActive() {
         return nominationActive;
@@ -97,5 +79,21 @@ public class SocialNominationQuestionResponseNomination {
 
     public void setNominationActive(boolean nominationActive) {
         this.nominationActive = nominationActive;
+    }
+
+    public long getSocialNominationQuestionResponseNominationLocalChangeSeqNum() {
+        return socialNominationQuestionResponseNominationLocalChangeSeqNum;
+    }
+
+    public void setSocialNominationQuestionResponseNominationLocalChangeSeqNum(long socialNominationQuestionResponseNominationLocalChangeSeqNum) {
+        this.socialNominationQuestionResponseNominationLocalChangeSeqNum = socialNominationQuestionResponseNominationLocalChangeSeqNum;
+    }
+
+    public long getSocialNominationQuestionResponseNominationMasterChangeSeqNum() {
+        return socialNominationQuestionResponseNominationMasterChangeSeqNum;
+    }
+
+    public void setSocialNominationQuestionResponseNominationMasterChangeSeqNum(long socialNominationQuestionResponseNominationMasterChangeSeqNum) {
+        this.socialNominationQuestionResponseNominationMasterChangeSeqNum = socialNominationQuestionResponseNominationMasterChangeSeqNum;
     }
 }

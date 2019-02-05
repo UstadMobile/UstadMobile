@@ -80,16 +80,6 @@ public class SELAnswerListPresenter extends
 
 
     /**
-     * UstadBaseController's setUiString().
-     *
-     * Right not it doesn't do anything.
-     */
-    @Override
-    public void setUIStrings() {
-
-    }
-
-    /**
      * Handles what happens when the primary button of every item on the SEL Answer list recycler
      * adapter is clicked - It should go to the SEL Answers. TODOne: Finish this.
      *

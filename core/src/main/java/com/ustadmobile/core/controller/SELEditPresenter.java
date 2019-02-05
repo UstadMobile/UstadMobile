@@ -353,11 +353,5 @@ public class SELEditPresenter
         //No secondary option here.
     }
 
-    /**
-     * Overridden. Doesn't do anything.
-     */
-    @Override
-    public void setUIStrings() {
 
-    }
 }

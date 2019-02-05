@@ -121,11 +121,6 @@ public class ReceiveCoursePresenter extends UstadBaseController implements WifiP
 
 
     @Override
-    public void setUIStrings() {
-
-    }
-
-    @Override
     public void peersChanged(List<NetworkNode> peers) {
 
     }

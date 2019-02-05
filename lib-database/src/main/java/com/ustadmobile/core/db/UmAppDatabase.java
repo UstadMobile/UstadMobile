@@ -9,11 +9,11 @@ import com.ustadmobile.core.db.dao.ClazzLogDao;
 import com.ustadmobile.core.db.dao.ClazzMemberDao;
 import com.ustadmobile.core.db.dao.ContainerFileDao;
 import com.ustadmobile.core.db.dao.ContainerFileEntryDao;
+import com.ustadmobile.core.db.dao.ContentEntryDao;
 import com.ustadmobile.core.db.dao.ContentCategoryDao;
 import com.ustadmobile.core.db.dao.ContentCategorySchemaDao;
 import com.ustadmobile.core.db.dao.ContentEntryContentCategoryJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryContentEntryFileJoinDao;
-import com.ustadmobile.core.db.dao.ContentEntryDao;
 import com.ustadmobile.core.db.dao.ContentEntryFileDao;
 import com.ustadmobile.core.db.dao.ContentEntryFileStatusDao;
 import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
@@ -133,6 +133,7 @@ import com.ustadmobile.lib.db.sync.dao.SyncablePrimaryKeyDao;
 import com.ustadmobile.lib.db.sync.entities.SyncDeviceBits;
 import com.ustadmobile.lib.db.sync.entities.SyncStatus;
 import com.ustadmobile.lib.db.sync.entities.SyncablePrimaryKey;
+import com.ustadmobile.lib.database.UmDbBuilder;
 
 import java.util.Hashtable;
 
@@ -199,7 +200,7 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
 
     public static synchronized UmAppDatabase getInstance(Object context) {
         if(instance == null){
-            instance = UmDbBuilder.makeDatabase(UmAppDatabase.class, context);
+            instance = UmDbBuilder.builder(UmAppDatabase.class, context).build();
         }
 
         return instance;
@@ -208,12 +209,14 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
     public static synchronized UmAppDatabase getInstance(Object context, String dbName) {
         UmAppDatabase db = namedInstances.get(dbName);
         if(db == null){
-            db = UmDbBuilder.makeDatabase(UmAppDatabase.class, context, dbName);
+            db = UmDbBuilder.builder(UmAppDatabase.class, context, dbName).build();
             namedInstances.put(dbName, db);
         }
 
         return db;
     }
+
+
 
     public abstract OpdsEntryDao getOpdsEntryDao();
 
@@ -263,6 +266,8 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
 
     public abstract FeedEntryDao getFeedEntryDao();
 
+    public abstract ContentEntryDao getContentEntryDao();
+
     public abstract PersonCustomFieldDao getPersonCustomFieldDao();
 
     public abstract PersonCustomFieldValueDao getPersonCustomFieldValueDao();
@@ -288,8 +293,6 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
     public abstract ClazzActivityDao getClazzActivityDao();
 
     public abstract ClazzActivityChangeDao getClazzActivityChangeDao();
-
-    public abstract ContentEntryDao getContentEntryDao();
 
     public abstract ContentEntryContentCategoryJoinDao getContentEntryContentCategoryJoinDao();
 

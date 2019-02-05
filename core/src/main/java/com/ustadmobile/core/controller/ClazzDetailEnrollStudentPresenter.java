@@ -256,9 +256,4 @@ public class ClazzDetailEnrollStudentPresenter extends
         view.finish();
     }
 
-    @Override
-    public void setUIStrings() {
-
-    }
-
 }

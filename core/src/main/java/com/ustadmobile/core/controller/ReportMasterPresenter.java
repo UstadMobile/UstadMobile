@@ -94,16 +94,5 @@ public class ReportMasterPresenter extends UstadBaseController<ReportMasterView>
 
 
     }
-        public boolean isGenderDisaggregated() {
-        return genderDisaggregated;
-    }
 
-    public void setGenderDisaggregated(boolean genderDisaggregated) {
-        this.genderDisaggregated = genderDisaggregated;
-    }
-
-    @Override
-    public void setUIStrings() {
-
-    }
 }

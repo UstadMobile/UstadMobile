@@ -259,9 +259,5 @@ public class ReportAttendanceGroupedByThresholdsPresenter
 
     }
 
-    @Override
-    public void setUIStrings() {
-
-    }
 
 }

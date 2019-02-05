@@ -64,6 +64,25 @@ public class ZipUtil {
 
     }
 
+    public boolean zipThisFoldersContents(String sourcePath, String toLocation){
+        File folder = new File(sourcePath);
+        try {
+            BufferedInputStream origin = null;
+            FileOutputStream dest = new FileOutputStream(toLocation);
+            ZipOutputStream out = new ZipOutputStream(new BufferedOutputStream(
+                    dest));
+
+            zipSubFolder(out, folder, sourcePath.length());
+
+            out.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+
+    }
+
     /**
      * Zips soure path folder to location
      * @param sourcePath    Source of folder to zip
@@ -74,7 +93,7 @@ public class ZipUtil {
 
         File sourceFile = new File(sourcePath);
         try {
-            BufferedInputStream origin = null;
+            BufferedInputStream origin;
             FileOutputStream dest = new FileOutputStream(toLocation);
             ZipOutputStream out = new ZipOutputStream(new BufferedOutputStream(
                     dest));
@@ -108,23 +127,23 @@ public class ZipUtil {
      * @param basePathLength    The basePath length
      * @throws IOException      exception
      */
-    private void zipSubFolder(ZipOutputStream out, File folder,
+    public void zipSubFolder(ZipOutputStream out, File folder,
                               int basePathLength) throws IOException {
 
         File[] fileList = folder.listFiles();
-        BufferedInputStream origin = null;
-        for (File file : fileList) {
-            if (file.isDirectory()) {
-                zipSubFolder(out, file, basePathLength);
+        BufferedInputStream origin;
+        for (File currentFile : fileList) {
+            if (currentFile.isDirectory()) {
+                zipSubFolder(out, currentFile, basePathLength);
             } else {
                 byte data[] = new byte[BUFFER];
-                String unmodifiedFilePath = file.getPath();
-                String relativePath = unmodifiedFilePath
+                String currentFilePath = currentFile.getPath();
+                String relativePath = currentFilePath
                         .substring(basePathLength);
-                FileInputStream fi = new FileInputStream(unmodifiedFilePath);
+                FileInputStream fi = new FileInputStream(currentFilePath);
                 origin = new BufferedInputStream(fi, BUFFER);
                 ZipEntry entry = new ZipEntry(relativePath);
-                entry.setTime(file.lastModified()); // to keep modification time after unzipping
+                entry.setTime(currentFile.lastModified()); // to keep modification time after unzipping
                 out.putNextEntry(entry);
                 int count;
                 while ((count = origin.read(data, 0, BUFFER)) != -1) {

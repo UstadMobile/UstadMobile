@@ -18,11 +18,6 @@ public class SettingsPresenter extends UstadBaseController<SettingsView> {
         super.onCreate(savedState);
     }
 
-    @Override
-    public void setUIStrings() {
-
-    }
-
     public void goToSELQuestionSets(){
         Hashtable args = new Hashtable();
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();

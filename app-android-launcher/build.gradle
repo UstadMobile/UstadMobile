@@ -63,16 +63,6 @@ android {
 
     productFlavors {
         /*
-         * The localconfig flavor is created based on the buildconfig.local.properties settings
-         */
-        localconfig {
-            dimension "config"
-            applicationId project.ext.buildConfigProperties['android.applicationId']
-            testApplicationId = project.ext.buildConfigProperties['android.applicationId'] + ".test"
-            versionCode rootProject.ext.ustadVersionCode + Integer.parseInt(rootProject.ext.buildConfigProperties['localVersionCode'])
-        }
-
-        /*
          * The vanilla config flavor is here for convenience : it's the same as having no
          * buildconfig.local.properties and relying on what's in buildconfig.default.properties
          *
@@ -155,6 +145,7 @@ dependencies {
     api fileTree(dir: 'libs', include: ['*.jar'])
     androidTestImplementation "com.android.support.test.espresso:espresso-core:$version_android_espresso"
     androidTestImplementation "com.android.support.test.espresso:espresso-contrib:$version_android_espresso"
+    androidTestImplementation "org.mockito:mockito-android:$version_android_mockito"
 
     testImplementation "junit:junit:$version_junit"
 }

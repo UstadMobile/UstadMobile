@@ -25,9 +25,4 @@ public class SelectTwoDatesDialogPresenter
        view.finish();
     }
 
-    @Override
-    public void setUIStrings() {
-
-    }
-
 }

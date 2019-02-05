@@ -123,9 +123,4 @@ public class CallPersonRelatedDialogPresenter extends UstadBaseController<CallPe
         });
 
     }
-
-    @Override
-    public void setUIStrings() {
-
-    }
 }

@@ -20,7 +20,7 @@ public class NetworkNode {
 
     private String deviceWifiDirectName;
 
-    private long wifiDirectLastUpdated;
+    private long lastUpdateTimeStamp;
 
     private long networkServiceLastUpdated;
 
@@ -162,8 +162,15 @@ public class NetworkNode {
      * Method which used to get last node update time by Wi-Fi Direct service.
      * @return long: Time in milliseconds
      */
-    public long getWifiDirectLastUpdated() {
-        return wifiDirectLastUpdated;
+    public long getLastUpdateTimeStamp() {
+        return lastUpdateTimeStamp;
+    }
+
+    /**
+     * Method which used to set last node update time by Wi-Fi Direct service.
+     */
+    public void setLastUpdateTimeStamp(long lastUpdateTimeStamp) {
+        this.lastUpdateTimeStamp = lastUpdateTimeStamp;
     }
 
     /**
@@ -171,17 +178,16 @@ public class NetworkNode {
      * @return
      */
     public long getTimeSinceWifiDirectLastUpdated() {
-        return System.currentTimeMillis() - wifiDirectLastUpdated;
+        return System.currentTimeMillis() - lastUpdateTimeStamp;
     }
 
 
     /**
      * Method which is responsible to set time when this node was last updated
-     * by Wi-Fi Direct service
-     * @param wifiDirectLastUpdated
+     * @param lastUpdateTimeStamp Update timestamp
      */
-    public void setWifiDirectLastUpdated(long wifiDirectLastUpdated) {
-        this.wifiDirectLastUpdated = wifiDirectLastUpdated;
+    public void setNetworkNodeLastUpdated(long lastUpdateTimeStamp) {
+        this.lastUpdateTimeStamp = lastUpdateTimeStamp;
     }
 
     /**

@@ -104,14 +104,6 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
         }));
     }
 
-    /**
-     * UstadBaseController\s setUiString()
-     * Doesn't do anything here.
-     */
-    @Override
-    public void setUIStrings() {
-
-    }
 
     /**
      * The Presenter's onCreate. This populated the provider and sets it to the View.

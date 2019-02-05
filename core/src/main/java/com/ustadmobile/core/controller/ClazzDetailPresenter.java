@@ -144,9 +144,4 @@ public class ClazzDetailPresenter
         impl.go(ClazzEditView.VIEW_NAME, args, view.getContext());
     }
 
-    @Override
-    public void setUIStrings() {
-
-    }
-
 }

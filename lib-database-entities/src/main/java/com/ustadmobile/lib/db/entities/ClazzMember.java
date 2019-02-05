@@ -18,6 +18,7 @@ public class ClazzMember {
 
     public static final int ROLE_TEACHER = 2;
 
+
     @UmPrimaryKey(autoGenerateSyncable = true)
     private long clazzMemberUid;
 

@@ -94,11 +94,6 @@ public class SelectClazzesDialogPresenter
 
     }
 
-    @Override
-    public void setUIStrings() {
-
-    }
-
     public void handleCommonPressed(Object arg) {
         // The finish() should call the onResult method in parent activity, etc.
         // Make sure you send the list

@@ -319,9 +319,4 @@ public class ClazzActivityListPresenter
                 });
     }
 
-    @Override
-    public void setUIStrings() {
-
-    }
-
 }

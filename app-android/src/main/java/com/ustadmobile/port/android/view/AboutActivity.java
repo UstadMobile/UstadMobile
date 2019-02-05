@@ -9,11 +9,8 @@ import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.AboutController;
-import com.ustadmobile.core.controller.UstadController;
 import com.ustadmobile.core.view.AboutView;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
-
-import java.util.Hashtable;
 
 public class AboutActivity extends UstadBaseActivity implements AboutView {
 
@@ -25,27 +22,21 @@ public class AboutActivity extends UstadBaseActivity implements AboutView {
         setContentView(R.layout.activity_about);
         setUMToolbar(R.id.um_toolbar);
         setTitle(R.string.about);
-        mAboutController = new AboutController(this, this);
-        mAboutController.onCreate(UMAndroidUtil.bundleToHashtable(getIntent().getExtras()), null);
+        mAboutController = new AboutController(this,
+                UMAndroidUtil.bundleToHashtable(getIntent().getExtras()),
+                this);
+        mAboutController.onCreate(null);
     }
 
     @Override
     public void setVersionInfo(final String versionInfo) {
-        runOnUiThread(new Runnable(){
-            public void run(){
-                ((TextView)findViewById(R.id.about_version_text)).setText(versionInfo);
-            }
-        });
+        runOnUiThread(() -> ((TextView)findViewById(R.id.about_version_text)).setText(versionInfo));
     }
 
     @Override
     public void setAboutHTML(final String aboutHTML) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                ((WebView)findViewById(R.id.about_html)).loadData(aboutHTML, "text/html", "UTF-8");
-            }
-        });
+        runOnUiThread(() -> ((WebView)findViewById(R.id.about_html))
+                .loadData(aboutHTML, "text/html", "UTF-8"));
     }
 
     public boolean onCreateOptionsMenu(Menu menu) {

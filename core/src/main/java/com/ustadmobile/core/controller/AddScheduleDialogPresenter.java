@@ -131,11 +131,4 @@ public class AddScheduleDialogPresenter  extends UstadBaseController<AddSchedule
         currentSchedule.setScheduleDay(position + 1);
     }
 
-    /**
-     * Overridden method. Does nothing.
-     */
-    @Override
-    public void setUIStrings() {
-
-    }
 }

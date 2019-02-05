@@ -50,10 +50,4 @@ public class ReportSelectionPresenter
         impl.go(ReportEditView.VIEW_NAME, args, context);
     }
 
-
-    @Override
-    public void setUIStrings() {
-
-    }
-
 }

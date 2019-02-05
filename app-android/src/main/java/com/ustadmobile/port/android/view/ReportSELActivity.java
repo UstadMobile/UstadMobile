@@ -20,26 +20,15 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
-import com.incesoft.tools.excel.xlsx.Fill;
-import com.incesoft.tools.excel.xlsx.Font;
-import com.incesoft.tools.excel.xlsx.Sheet;
-import com.incesoft.tools.excel.xlsx.SimpleXLSXWorkbook;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.ReportSELPresenter;
 import com.ustadmobile.core.view.ReportSELView;
-import com.ustadmobile.core.xlsx.ZipUtil;
 import com.ustadmobile.lib.db.entities.ClazzMemberWithPerson;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
-import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileDescriptor;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.FileSystem;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -47,13 +36,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
-import java.util.zip.ZipOutputStream;
 
 import ru.dimorinny.floatingtextbutton.FloatingTextButton;
 
-import static com.ustadmobile.core.xlsx.ZipUtil.createZip;
 import static com.ustadmobile.port.android.view.ReportAttendanceGroupedByThresholdsActivity.dpToPx;
 
 public class ReportSELActivity extends UstadBaseActivity implements
@@ -181,64 +166,64 @@ public class ReportSELActivity extends UstadBaseActivity implements
     /**
      * Starts the xlsx report process. Here it creates the xlsx file.
      */
-    private void startXLSXReportGeneration_FAILED() throws Exception {
-
-        String xlsxReportPath;
-        //Create the file.
-
-        File dir = getFilesDir();
-        File output = new File(dir, "report_sel_" +
-                System.currentTimeMillis() + ".xlsx");
-
-        xlsxReportPath = output.getAbsolutePath();
-
-        output.createNewFile();
-
-        createZip(xlsxReportPath);
-
-        output = new File(xlsxReportPath);
-
-        SimpleXLSXWorkbook workbook = new SimpleXLSXWorkbook(output);
-
-        Font font2 = workbook.createFont();
-        font2.setColor("FFFF0000");
-        Fill fill = workbook.createFill();
-        fill.setFgColor("FF00FF00");
-        workbook.createStyle(font2, fill);
-
-        Sheet sheet = workbook.createSheet();
-        sheet.modify(0,0, "The");
-        sheet.modify(0,1, "Quick");
-        sheet.modify(0,2, "Brown");
-        sheet.modify(0,3, "Fox");
-        sheet.modify(1,0, "Jumped");
-        sheet.modify(1,1, "Over");
-        sheet.modify(1,2, "The");
-        sheet.modify(1,3, "Lazy");
-        sheet.modify(2,0, "Dog");
-        sheet.modify(2,1, "And");
-        sheet.modify(2,2, "Then");
-        sheet.modify(2,3, "Sleeps");
-
-        BufferedOutputStream outputStream = new BufferedOutputStream(new FileOutputStream(output));
-
-        workbook.commit(outputStream);
-        outputStream.close();
-
-        String applicationId = getPackageName();
-        Uri sharedUri = FileProvider.getUriForFile(this,
-                applicationId+".fileprovider",
-                new File(xlsxReportPath));
-        Intent shareIntent = new Intent(Intent.ACTION_SEND);
-        shareIntent.setType("*/*");
-        shareIntent.putExtra(Intent.EXTRA_STREAM, sharedUri);
-        shareIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-
-        if(shareIntent.resolveActivity(getPackageManager()) != null) {
-            startActivity(shareIntent);
-        }
-
-    }
+//    private void startXLSXReportGeneration_FAILED() throws Exception {
+//
+//        String xlsxReportPath;
+//        //Create the file.
+//
+//        File dir = getFilesDir();
+//        File output = new File(dir, "report_sel_" +
+//                System.currentTimeMillis() + ".xlsx");
+//
+//        xlsxReportPath = output.getAbsolutePath();
+//
+//        output.createNewFile();
+//
+//        createZip(xlsxReportPath);
+//
+//        output = new File(xlsxReportPath);
+//
+//        SimpleXLSXWorkbook workbook = new SimpleXLSXWorkbook(output);
+//
+//        Font font2 = workbook.createFont();
+//        font2.setColor("FFFF0000");
+//        Fill fill = workbook.createFill();
+//        fill.setFgColor("FF00FF00");
+//        workbook.createStyle(font2, fill);
+//
+//        Sheet sheet = workbook.createSheet();
+//        sheet.modify(0,0, "The");
+//        sheet.modify(0,1, "Quick");
+//        sheet.modify(0,2, "Brown");
+//        sheet.modify(0,3, "Fox");
+//        sheet.modify(1,0, "Jumped");
+//        sheet.modify(1,1, "Over");
+//        sheet.modify(1,2, "The");
+//        sheet.modify(1,3, "Lazy");
+//        sheet.modify(2,0, "Dog");
+//        sheet.modify(2,1, "And");
+//        sheet.modify(2,2, "Then");
+//        sheet.modify(2,3, "Sleeps");
+//
+//        BufferedOutputStream outputStream = new BufferedOutputStream(new FileOutputStream(output));
+//
+//        workbook.commit(outputStream);
+//        outputStream.close();
+//
+//        String applicationId = getPackageName();
+//        Uri sharedUri = FileProvider.getUriForFile(this,
+//                applicationId+".fileprovider",
+//                new File(xlsxReportPath));
+//        Intent shareIntent = new Intent(Intent.ACTION_SEND);
+//        shareIntent.setType("*/*");
+//        shareIntent.putExtra(Intent.EXTRA_STREAM, sharedUri);
+//        shareIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//
+//        if(shareIntent.resolveActivity(getPackageManager()) != null) {
+//            startActivity(shareIntent);
+//        }
+//
+//    }
 
     @Override
     public void generateCSVReport() {

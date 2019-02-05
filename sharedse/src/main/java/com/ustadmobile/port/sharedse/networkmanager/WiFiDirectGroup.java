@@ -5,11 +5,10 @@ import com.ustadmobile.lib.db.entities.NetworkNode;
 import java.util.List;
 
 /**
- * <h1>WiFiDirectGroup</h1>
- *
  * This is a class which define Wi-Fi Direct group in a cross platform way.
  *
  * @author mike
+ * @author kileha3
  */
 
 public class WiFiDirectGroup {
@@ -50,30 +49,37 @@ public class WiFiDirectGroup {
         return passphrase;
     }
 
+    @Deprecated
     public boolean isOwner() {
         return owner;
     }
 
+    @Deprecated
     public void setOwner(boolean owner) {
         this.owner = owner;
     }
 
+    @Deprecated
     public List<NetworkNode> getGroupClients() {
         return groupClients;
     }
 
+    @Deprecated
     protected void setGroupClients(List<NetworkNode> groupClients) {
         this.groupClients = groupClients;
     }
 
+    @Deprecated
     public NetworkNode getGroupOwner() {
         return groupOwner;
     }
 
+    @Deprecated
     protected void setGroupOwner(NetworkNode groupOwner) {
         this.groupOwner = groupOwner;
     }
 
+    @Deprecated
     public boolean groupIncludes(String deviceMacAddr){
         NetworkNode owner = getGroupOwner();
         if(owner != null && owner.getWifiDirectMacAddress() != null

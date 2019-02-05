@@ -98,7 +98,4 @@ public class SELQuestionSetDetailPresenter extends
         view.setListProvider(questionUmProvider);
         view.updateToolbarTitle(questionSetName);
     }
-
-    @Override
-    public void setUIStrings() {}
 }

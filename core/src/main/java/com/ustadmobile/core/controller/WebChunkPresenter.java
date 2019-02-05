@@ -29,8 +29,4 @@ public class WebChunkPresenter extends UstadBaseController<WebChunkView> {
         });
     }
 
-    @Override
-    public void setUIStrings() {
-
-    }
 }

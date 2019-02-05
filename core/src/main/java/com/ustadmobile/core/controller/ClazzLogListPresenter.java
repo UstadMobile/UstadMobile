@@ -292,13 +292,5 @@ public class ClazzLogListPresenter extends UstadBaseController<ClassLogListView>
         view.updateAttendanceBarChart(barData);
     }
 
-    /**
-     * Presenter's setUiStrings method that doesn't do anything here.
-     */
-    @Override
-    public void setUIStrings() {
-
-    }
-
 
 }

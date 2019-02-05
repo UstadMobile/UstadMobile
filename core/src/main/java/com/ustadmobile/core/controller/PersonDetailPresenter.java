@@ -561,10 +561,4 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
         view.handleClickText(number);
     }
 
-    /**
-     * Overriding. Doesn't do anything.
-     */
-    @Override
-    public void setUIStrings() {
-    }
 }

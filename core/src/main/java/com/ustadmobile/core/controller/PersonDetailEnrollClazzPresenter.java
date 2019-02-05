@@ -68,11 +68,5 @@ public class PersonDetailEnrollClazzPresenter extends UstadBaseController<Person
         //does nothing
     }
 
-    /**
-     * Overriding. Does nothing
-     */
-    @Override
-    public void setUIStrings() {
 
-    }
 }

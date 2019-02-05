@@ -197,11 +197,5 @@ public class PeopleListPresenter
         //No secondary action for every item here.
     }
 
-    /**
-     * Just overriding. Does nothing.
-     */
-    @Override
-    public void setUIStrings() {
 
-    }
 }

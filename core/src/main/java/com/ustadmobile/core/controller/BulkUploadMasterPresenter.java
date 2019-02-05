@@ -700,11 +700,6 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
         });
     }
 
-    @Override
-    public void setUIStrings() {
-
-    }
-
 
     public class BulkUploadLine{
 

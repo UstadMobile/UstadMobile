@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 
     <style name="Theme.UstadTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
 
@@ -28,7 +28,16 @@
 
         <!-- This is important! Don't forget to set window background -->
         <item name="android:windowBackground">@color/background_light</item>
+    </style>
 
+    <style name="ThemeOnboarding" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="colorPrimary">@color/icons</item>
+        <item name="colorPrimaryDark">@color/divider</item>
+        <item name="colorAccent">@color/icons</item>
+        <item name="android:statusBarColor" tools:targetApi="lollipop">@color/divider</item>
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="android:windowBackground">@color/icons</item>
     </style>
 
 </resources>

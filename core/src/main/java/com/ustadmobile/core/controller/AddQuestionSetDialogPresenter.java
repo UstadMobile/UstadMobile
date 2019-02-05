@@ -51,8 +51,4 @@ public class AddQuestionSetDialogPresenter extends UstadBaseController<AddQuesti
         questionSet = null;
     }
 
-    @Override
-    public void setUIStrings() {
-
-    }
 }

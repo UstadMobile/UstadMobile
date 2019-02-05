@@ -49,8 +49,4 @@ public class PersonPictureDialogPresenter extends UstadBaseController<PersonPict
                 ));
     }
 
-    @Override
-    public void setUIStrings() {
-
-    }
 }

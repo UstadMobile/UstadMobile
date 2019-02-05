@@ -3,10 +3,11 @@ package com.ustadmobile.core.db.dao;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.lib.database.annotation.UmDao;
+import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.database.annotation.UmQueryFindByPrimaryKey;
-import com.ustadmobile.lib.database.annotation.UmUpdate;
 import com.ustadmobile.lib.database.annotation.UmRepository;
+import com.ustadmobile.lib.database.annotation.UmUpdate;
 import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 
@@ -15,6 +16,15 @@ import java.util.List;
 @UmDao(selectPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
 @UmRepository
 public abstract class ContentEntryDao implements SyncableDao<ContentEntry, ContentEntryDao> {
+
+    @UmInsert
+    public abstract Long[] insert(List<ContentEntry> contentEntries);
+
+    @UmQuery("SELECT * FROM ContentEntry WHERE contentEntryUid=:entryUuid")
+    public abstract ContentEntry findByEntryId(long entryUuid);
+
+    @UmQuery("SELECT * FROM ContentEntry")
+    public abstract List<ContentEntry> getAllEntries();
 
     @UmQuery("SELECT * FROM ContentEntry WHERE sourceUrl = :sourceUrl")
     public abstract ContentEntry findBySourceUrl(String sourceUrl);

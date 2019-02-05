@@ -31,7 +31,7 @@
 package com.ustadmobile.core.view;
 
 import com.ustadmobile.core.controller.ContainerController;
-import com.ustadmobile.core.epubnav.EPUBNavItem;
+import com.ustadmobile.core.contentformats.epub.nav.EpubNavItem;
 
 /**
  *
@@ -49,7 +49,7 @@ public interface ContainerView extends UstadView {
 
     void setPageTitle(String pageTitle);
 
-    void setTableOfContents(EPUBNavItem tocNavItem);
+    void setTableOfContents(EpubNavItem tocNavItem);
 
     void setCoverImage(String imageUrl);
 

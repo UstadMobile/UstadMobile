@@ -526,8 +526,11 @@ This is the one you should be editing. The one in /core/locale/main/values/strin
     <string name="recognition_not_selected">Recognition confirmation not given. Please check. </string>
     <string name="sel_question_set_to_use">SEL question set to use</string>
     <string name="nominating">Nominating</string>
-    
 
-
+    <string name="onboarding_get_started_label">Get Started</string>
+    <string name="onboarding_no_internet_headline">No Internet? No problem.</string>
+    <string name="onboarding_no_internet_subheadline">Download educational videos, articles and interactive exercises for later use. </string>
+    <string name="onboarding_offline_sharing">Share offline</string>
+    <string name="onboarding_offline_sharing_subheading">Share content at high speed with any other user nearby.</string>
 
 </resources>

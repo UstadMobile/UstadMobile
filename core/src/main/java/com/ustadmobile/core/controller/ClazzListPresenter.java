@@ -271,8 +271,4 @@ public class ClazzListPresenter extends UstadBaseController<ClazzListView> {
         }
     }
 
-    @Override
-    public void setUIStrings() {
-
-    }
 }

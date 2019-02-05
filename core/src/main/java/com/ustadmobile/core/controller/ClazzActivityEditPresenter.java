@@ -507,9 +507,6 @@ public class ClazzActivityEditPresenter
         this.activityEditable = activityEditable;
     }
 
-    @Override
-    public void setUIStrings() {
 
-    }
 
 }

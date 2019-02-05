@@ -72,17 +72,5 @@ public class SELQuestionDetailPresenter
         view.finish();
     }
 
-//    public void handleClickSortOrder(int sortOrder){
-//        //TODO: Sort order
-//
-//    }
-
-    /**
-     * Overridden. Does nothing here.
-     */
-    @Override
-    public void setUIStrings() {
-
-    }
 
 }

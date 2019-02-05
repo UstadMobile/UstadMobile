@@ -15,29 +15,21 @@ import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.Menu;
 import android.view.MenuItem;
 
-import com.ustadmobile.core.buildconfig.CoreBuildConfig;
 import com.ustadmobile.core.controller.UstadBaseController;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.impl.AppConfig;
 import com.ustadmobile.core.impl.UMLog;
-import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.lib.util.UMUtil;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
-import com.ustadmobile.port.android.netwokmanager.NetworkServiceAndroid;
 import com.ustadmobile.port.android.netwokmanager.UmAppDatabaseSyncService;
-import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-
-import androidx.work.WorkManager;
 
 /**
  * Base activity to handle interacting with UstadMobileSystemImpl
@@ -46,19 +38,9 @@ import androidx.work.WorkManager;
  */
 public abstract class UstadBaseActivity extends AppCompatActivity implements ServiceConnection {
 
-    private int mUIDirection = UstadMobileConstants.DIR_LTR;
-
     private UstadBaseController baseController;
 
-    private boolean handleUIStringsOnResume = true;
-
     protected Toolbar umToolbar;
-
-    private int[] appMenuCommands;
-
-    private String[] appMenuLabels;
-
-    private String displayName;
 
     private List<WeakReference<Fragment>> fragmentList;
 
@@ -154,66 +136,10 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
 
     }
 
-
-
-
-
-    public int getDirection() {
-        return mUIDirection;
-    }
-
-    protected void setDirectionFromSystem() {
-        setDirection(UstadMobileSystemImpl.getInstance().getDirection());
-    }
-
-    public void setUIStrings() {
-
-    }
-
-    public void setDirection(int dir) {
-        if(dir != mUIDirection) {
-            UMAndroidUtil.setDirectionIfSupported(findViewById(android.R.id.content),
-                    UstadMobileSystemImpl.getInstance().getDirection());
-            mUIDirection = dir;
-        }
-    }
-
-    public void setHandleUIStringsOnResume(boolean handleUIStringsOnResume) {
-        this.handleUIStringsOnResume = handleUIStringsOnResume;
-    }
-
-    public boolean isHandleUIStringsOnResume() {
-        return this.handleUIStringsOnResume;
-    }
-
     protected void setUMToolbar(int toolbarID) {
         umToolbar = (Toolbar)findViewById(toolbarID);
         setSupportActionBar(umToolbar);
         getSupportActionBar().setHomeButtonEnabled(true);
-    }
-
-
-    public void setAppMenuCommands(String[] labels, int[] ids) {
-        this.appMenuLabels = labels;
-        this.appMenuCommands = ids;
-        supportInvalidateOptionsMenu();
-    }
-
-    //TODO: Fully disable this properly
-    public boolean onCreateOptionsMenu(Menu menu) {
-//        if(appMenuCommands != null && appMenuLabels != null) {
-//            for(int i = 0; i < appMenuLabels.length; i++) {
-//                menu.add(Menu.NONE, appMenuCommands[i], i + 10, appMenuLabels[i]);
-//            }
-//            return true;
-//        }else {
-//            return super.onCreateOptionsMenu(menu);
-//        }
-        return super.onCreateOptionsMenu(menu);
-    }
-
-    public boolean handleClickAppMenuItem(MenuItem item, UstadBaseController controller) {
-        return UstadBaseController.handleClickAppMenuItem(item.getItemId(), getContext());
     }
 
     /**
@@ -234,7 +160,6 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        UstadMobileSystemImpl.getInstance().handleSave();
     }
 
     @Override
@@ -247,7 +172,6 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
     public void onStop() {
         isStarted = false;
         super.onStop();
-        UstadMobileSystemImpl.getInstance().handleSave();
         UstadMobileSystemImplAndroid.getInstanceAndroid().handleActivityStop(this);
     }
 
@@ -285,16 +209,7 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
 
         }
 
-        if(handleClickAppMenuItem(item, baseController)) {
-            return true;
-        }
-
         return super.onOptionsItemSelected(item);
-    }
-
-    public void setDisplayName(String displayName) {
-        this.displayName = displayName;
-        supportInvalidateOptionsMenu();
     }
 
     @Override

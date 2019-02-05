@@ -269,8 +269,4 @@ public class SELQuestionDetail2Presenter extends
         });
     }
 
-    @Override
-    public void setUIStrings() {
-
-    }
 }

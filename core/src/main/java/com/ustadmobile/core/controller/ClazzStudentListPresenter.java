@@ -306,13 +306,4 @@ public class ClazzStudentListPresenter extends
         }
     }
 
-    /**
-     * UstadBaseController's setUiString().
-     *
-     * Right not it doesn't do anything.
-     */
-    @Override
-    public void setUIStrings() {
-
-    }
 }

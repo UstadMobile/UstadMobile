@@ -115,9 +115,5 @@ public class ReportNumberOfDaysClassesOpenPresenter
         //TODO
     }
 
-    @Override
-    public void setUIStrings() {
-
-    }
 
 }

@@ -140,12 +140,5 @@ public class SELQuestionPresenter
 
     }
 
-    /**
-     * Overridden. Does nothing.
-     */
-    @Override
-    public void setUIStrings() {
-
-    }
 
 }

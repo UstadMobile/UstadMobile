@@ -209,6 +209,15 @@ public class ReportSELPresenter extends UstadBaseController<ReportSELView> {
 
             umXLSX.addSheet(newSheet);
 
+            UmSheet newSheet2 = new UmSheet("Another Test sheet");
+            newSheet2.addValueToSheet(0,0, "The");
+            newSheet2.addValueToSheet(0,1, "Quick");
+            newSheet2.addValueToSheet(0,2, "Brown");
+            newSheet2.addValueToSheet(0,3, "Fox");
+            newSheet2.addValueToSheet(1,0, "Jumped");
+
+            umXLSX.addSheet(newSheet2);
+
             umXLSX.createXLSX();
 
             view.generateXLSReport(xlsxReportPath);
@@ -216,10 +225,5 @@ public class ReportSELPresenter extends UstadBaseController<ReportSELView> {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    @Override
-    public void setUIStrings() {
-
     }
 }

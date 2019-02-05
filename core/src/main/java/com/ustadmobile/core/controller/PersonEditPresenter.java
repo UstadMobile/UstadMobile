@@ -608,12 +608,5 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
 
     }
 
-    /**
-     * Overridden. Does'nt do anything.
-     */
-    @Override
-    public void setUIStrings() {
-
-    }
 
 }

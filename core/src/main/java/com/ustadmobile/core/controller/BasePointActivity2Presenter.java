@@ -104,8 +104,4 @@ public class BasePointActivity2Presenter extends UstadBaseController<BasePointVi
         });
     }
 
-    @Override
-    public void setUIStrings() {
-
-    }
 }

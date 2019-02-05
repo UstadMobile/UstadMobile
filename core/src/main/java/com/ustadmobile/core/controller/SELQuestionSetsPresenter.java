@@ -53,8 +53,4 @@ public class SELQuestionSetsPresenter extends UstadBaseController<SELQuestionSet
 
     }
 
-    @Override
-    public void setUIStrings() {
-
-    }
 }

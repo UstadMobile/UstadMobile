@@ -27,12 +27,8 @@ public class SelectAttendanceThresholdsDialogPresenter
     }
 
     public void handleClickPrimaryActionButton(long selectedObjectUid) {
-
+        //TODO: Check if we still ned this
     }
 
-    @Override
-    public void setUIStrings() {
-
-    }
 
 }

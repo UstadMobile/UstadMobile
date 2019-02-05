@@ -277,6 +277,9 @@ public abstract class PersonDao implements SyncableDao<Person, PersonDao> {
         });
     }
 
+    @UmInsert
+    public abstract List<Long> insertListAndGetIds(List<Person> personList);
+
 
     protected long getAndIncrementPrimaryKey() {
         if(getDeviceBits() == 0)
@@ -352,6 +355,7 @@ public abstract class PersonDao implements SyncableDao<Person, PersonDao> {
             ENTITY_LEVEL_PERMISSION_CONDITION1 + " :permission " + ENTITY_LEVEL_PERMISSION_CONDITION2 + ") ")
     public abstract void personHasPermission(long accountPersonUid, long personUid, long permission,
                                     UmCallback<Boolean> callback);
+
 
     @UmInsert
     public abstract void insertPersonGroup(PersonGroup personGroup, UmCallback<Long> callback);
@@ -491,6 +495,9 @@ public abstract class PersonDao implements SyncableDao<Person, PersonDao> {
             }
         });
     }
+
+    @UmQuery("SELECT Count(*) FROM Person")
+    public abstract long countAll();
 
 }
 

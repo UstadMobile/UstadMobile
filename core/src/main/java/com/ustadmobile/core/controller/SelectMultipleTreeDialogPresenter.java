@@ -82,10 +82,6 @@ public class SelectMultipleTreeDialogPresenter
         view.finish();
     }
 
-    @Override
-    public void setUIStrings() {
-
-    }
 
     public List<Long> getSelectedLocationsList() {
         if(selectedLocationsList == null){

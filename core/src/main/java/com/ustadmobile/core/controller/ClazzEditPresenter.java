@@ -214,10 +214,6 @@ public class ClazzEditPresenter
         });
     }
 
-    @Override
-    public void setUIStrings() {
-
-    }
 
     /**
      * Handles the primary button pressed on the recycler adapter on the Class Edit page. This is

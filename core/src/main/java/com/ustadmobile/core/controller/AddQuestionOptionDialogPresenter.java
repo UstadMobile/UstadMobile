@@ -111,9 +111,4 @@ public class AddQuestionOptionDialogPresenter extends UstadBaseController<AddQue
             }
         });
     }
-
-    @Override
-    public void setUIStrings() {
-        
-    }
 }

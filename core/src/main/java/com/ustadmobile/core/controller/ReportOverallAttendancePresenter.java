@@ -231,9 +231,5 @@ public class ReportOverallAttendancePresenter
         getAttendanceDataAndUpdateCharts();
     }
 
-    @Override
-    public void setUIStrings() {
-
-    }
 
 }

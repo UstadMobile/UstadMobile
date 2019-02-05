@@ -237,12 +237,5 @@ public class SELSelectConsentPresenter
         });
     }
 
-    /**
-     * Overridden. Does nothing.
-     */
-    @Override
-    public void setUIStrings() {
-
-    }
 
 }

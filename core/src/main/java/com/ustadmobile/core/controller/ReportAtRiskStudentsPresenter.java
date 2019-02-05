@@ -83,11 +83,6 @@ public class ReportAtRiskStudentsPresenter extends CommonHandlerPresenter<Report
         view.generateCSVReport();
     }
 
-    @Override
-    public void setUIStrings() {
-
-    }
-
     /**
      * Queries database, gets raw report data, updates view. The Guts of the logic
      */

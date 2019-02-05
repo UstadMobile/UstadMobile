@@ -102,10 +102,4 @@ public class AddActivityChangeDialogPresenter
     public void handleTitleChanged(String title){
         currentChange.setClazzActivityChangeTitle(title);
     }
-
-    @Override
-    public void setUIStrings() {
-
-    }
-
 }

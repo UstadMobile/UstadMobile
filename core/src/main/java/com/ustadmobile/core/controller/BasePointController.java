@@ -129,10 +129,6 @@ public class BasePointController extends UstadBaseController {
             throw new IllegalArgumentException("Must be basepointview");
         }
     }
-    
-    public void setUIStrings() {
-        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
 
 
     /**

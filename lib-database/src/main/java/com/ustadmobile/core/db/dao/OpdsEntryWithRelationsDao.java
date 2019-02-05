@@ -12,6 +12,7 @@ import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelationsAndContainerMimeType;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithStatusCache;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -212,8 +213,10 @@ public abstract class OpdsEntryWithRelationsDao {
             ")\n" +
             "\n" +
             "SELECT entryId FROM OpdsEntry_recursive";
-    @UmQuery(GET_CHILD_ENTRIES_RECURSIVE_SQL)
-    public abstract List<String> findAllChildEntryIdsRecursive(String entryId);
+    //@UmQuery(GET_CHILD_ENTRIES_RECURSIVE_SQL)
+    public  List<String> findAllChildEntryIdsRecursive(String entryId){
+        return new ArrayList<>();
+    }
 
     public List<OpdsEntryRelative> getAncestors(List<String> entryIds) {
         return getAncestors_RecursiveQuery(entryIds);
@@ -233,8 +236,10 @@ public abstract class OpdsEntryWithRelationsDao {
             ")" +
             "SELECT * FROM OpdsEntry_recursive ";
 
-    @UmQuery(GET_ANCESTOR_ENTRIES_RECURSIVE_SQL)
-    public abstract List<OpdsEntryRelative> getAncestors_RecursiveQuery(List<String> entryIds);
+    //@UmQuery(GET_ANCESTOR_ENTRIES_RECURSIVE_SQL)
+    public  List<OpdsEntryRelative> getAncestors_RecursiveQuery(List<String> entryIds){
+        return new ArrayList<>();
+    }
 
     protected static final String GET_DESCENDANT_ENTRIES_RECURSIVE_SQL =
             "WITH RECURSIVE OpdsEntry_recursive(entryId, relativeEntryId, distance) AS ( " +
@@ -254,8 +259,10 @@ public abstract class OpdsEntryWithRelationsDao {
             ") " +
             "SELECT * FROM OpdsEntry_recursive WHERE distance > 0";
 
-    @UmQuery(GET_DESCENDANT_ENTRIES_RECURSIVE_SQL)
-    public abstract List<OpdsEntryRelative> getDescendant_RecursiveQuery(List<String> entryIds);
+    //@UmQuery(GET_DESCENDANT_ENTRIES_RECURSIVE_SQL)
+    public  List<OpdsEntryRelative> getDescendant_RecursiveQuery(List<String> entryIds){
+        return new ArrayList<>();
+    }
 
     protected static final String GET_ENTRIES_WITH_DOWNLOADSET_SQL =
             "SELECT OpdsEntry.*, OpdsEntryStatusCache.* FROM OpdsEntry " +

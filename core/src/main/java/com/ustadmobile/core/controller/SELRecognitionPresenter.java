@@ -366,13 +366,7 @@ public class SELRecognitionPresenter
 
     }
 
-    /**
-     * Overridden. Does nothing.
-     */
-    @Override
-    public void setUIStrings() {
 
-    }
 
     /**
      * Handler for toggling student name. Does nothing on the presenter side.

@@ -15,6 +15,7 @@
 .idea/markdown-navigator.xml
 .idea/caches/build_file_checksums.ser
 .idea/modules.xml
+.idea/caches/
 
 
 # Java class files
@@ -58,54 +59,6 @@ lib-content-scrapers/src/main/java/com/ustadmobile/lib/contentscrapers/buildconf
 
 #Android Studio files
 ports/android/.idea
-
-#J2ME properties and build dist folders
-app-j2me/build/
-app-j2me/dist/
-app-j2me/lib/
-app-j2me/*-ANTENNA/
-app-j2me/*~
-
-#Preprocessed unit test files
-preproctmp
-ports/android/src/androidTest/java/com/ustadmobile/test/core/*
-!ports/android/src/androidTest/java/com/ustadmobile/test/core/UMContextGetter.java
-
-#Files preproc'd into j2me version
-app-j2me/src/com/ustadmobile/core/*
-!app-j2me/src/com/ustadmobile/core/view
-!app-j2me/src/com/ustadmobile/core/impl
-!app-j2me/src/com/ustadmobile/core/networkmanager
-
-app-j2me/src/com/ustadmobile/core/view/*
-!app-j2me/src/com/ustadmobile/core/view/ViewFactory.java
-
-app-j2me/src/com/ustadmobile/core/impl/*
-!app-j2me/src/com/ustadmobile/core/impl/UstadMobileSystemImplFactory.java
-
-
-#QRCode that gets checked out into the source directory
-app-j2me/src/jp
-
-#localization files copied into the j2me directory
-app-j2me/src/res
-
-#Testing node server files
-testres/node-qunit-server/node_modules
-
-#Test HTTP server: checked out from git itself
-testres/DodgyHTTPD
-
-#Project properties
-ustadmobilemicro-build.properties
-
-#Ignore Core Tests copied to port
-app-j2me/src/com/ustadmobile/test/core/*.java
-!app-j2me/src/com/ustadmobile/test/core/UMContextGetter.java
-
-#Ignore mock unit test results sent by testing the test method
-testres/unittest-testresults.txt
-testres/unittest-result
 
 *.bak
 *~
@@ -217,9 +170,7 @@ keystore.properties
 
 # Generated build configuration
 buildconfig/*.java
-app-j2me/src/com/ustadmobile/test/core/buildconfig/TestConstants.java
 core-tests/src/main/java/com/ustadmobile/test/core/buildconfig/TestConstants.java
-core/src/main/java/com/ustadmobile/core/buildconfig/CoreBuildConfig.java
 core/src/main/java/com/ustadmobile/core/generated/*
 app-android/src/main/java/com/ustadmobile/port/android/generated/*
 app-android/src/vanilla/java/com/ustadmobile/port/android/generated/*
