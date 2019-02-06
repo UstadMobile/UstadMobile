@@ -180,6 +180,8 @@ public class ContentEntryDetailActivity extends UstadBaseActivity implements Con
                     downloadProgressView.setStatusText("Downloading");
                 }
             } else {
+                button.setVisibility(View.VISIBLE);
+                downloadProgressView.setVisibility(View.GONE);
                 button.setText(R.string.download);
             }
 
