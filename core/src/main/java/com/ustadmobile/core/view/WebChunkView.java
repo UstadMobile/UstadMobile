@@ -5,6 +5,7 @@ import com.ustadmobile.core.impl.UmCallback;
 public interface WebChunkView extends UstadView {
 
     String ARG_CHUNK_PATH = "chunkpath";
+    String VIEW_NAME = "webChunk";
 
     void mountChunk(String webChunkPath, UmCallback<String> callback);
 

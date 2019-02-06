@@ -21,6 +21,8 @@ import static com.ustadmobile.core.controller.ContentEntryListPresenter.ARG_CONT
 public class DummyActivity extends UstadBaseActivity implements DummyView {
 
 
+    public static final long MASTER_SERVER_ROOT_ENTRY_UID = -4103245208651563007L;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -58,9 +60,10 @@ public class DummyActivity extends UstadBaseActivity implements DummyView {
         @Override
         public Fragment getItem(int position) {
             Bundle bundle = new Bundle();
-            bundle.putString(ARG_CONTENT_ENTRY_UID, String.valueOf(-4103245208651563007L));
+
             switch (position) {
                 case 0: // Fragment # 0 - This will show FirstFragment
+                    bundle.putString(ARG_CONTENT_ENTRY_UID, String.valueOf(MASTER_SERVER_ROOT_ENTRY_UID));
                     return ContentEntryListFragment.newInstance(bundle);
                 case 1: // Fragment # 0 - This will show FirstFragment different title
                     return ContentEntryListFragment.newInstance(bundle);

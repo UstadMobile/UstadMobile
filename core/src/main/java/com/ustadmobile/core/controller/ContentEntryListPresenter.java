@@ -21,6 +21,9 @@ import java.util.Map;
 public class ContentEntryListPresenter extends UstadBaseController<ContentEntryListView> {
 
     public static final String ARG_CONTENT_ENTRY_UID = "entryid";
+
+    public static final String ARG_DOWNLOADED_CONTENT = "downloaded";
+
     public static final String ARG_NAVIGATION = "navigation";
     private final ContentEntryListView viewContract;
     private ContentEntryDao contentEntryDao;
@@ -39,6 +42,15 @@ public class ContentEntryListPresenter extends UstadBaseController<ContentEntryL
     public void onCreate(Hashtable hashtable) {
         UmAppDatabase appDatabase = UmAccountManager.getRepositoryForActiveAccount(getContext());
         contentEntryDao = appDatabase.getContentEntryDao();
+
+        if(getArguments().containsKey(ARG_CONTENT_ENTRY_UID)) {
+            showContentByParent();
+        }else if(getArguments().containsKey(ARG_DOWNLOADED_CONTENT)) {
+            showDownloadedContent();
+        }
+    }
+
+    private void showContentByParent() {
         parentUid = Long.valueOf((String) getArguments().get(ARG_CONTENT_ENTRY_UID));
         viewContract.setContentEntryProvider(contentEntryDao.getChildrenByParentUidWithCategoryFilter(parentUid, 0, 0));
         contentEntryDao.getContentByUuid(parentUid, new UmCallback<ContentEntry>() {
@@ -56,6 +68,7 @@ public class ContentEntryListPresenter extends UstadBaseController<ContentEntryL
                 viewContract.runOnUiThread(viewContract::showError);
             }
         });
+
         contentEntryDao.findUniqueLanguagesInList(parentUid, new UmCallback<List<Language>>() {
             @Override
             public void onSuccess(List<Language> result) {
@@ -117,7 +130,10 @@ public class ContentEntryListPresenter extends UstadBaseController<ContentEntryL
 
             }
         });
+    }
 
+    private void showDownloadedContent() {
+        viewContract.setContentEntryProvider(contentEntryDao.getDownloadedRootItems());
     }
 
 

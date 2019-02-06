@@ -82,6 +82,8 @@ import com.ustadmobile.core.view.OnBoardingView;
 import com.ustadmobile.core.view.Login2View;
 import com.ustadmobile.core.view.Register2View;
 import com.ustadmobile.core.view.ScormPackageView;
+import com.ustadmobile.core.view.VideoPlayerView;
+import com.ustadmobile.core.view.WebChunkView;
 import com.ustadmobile.core.view.XapiPackageView;
 import com.ustadmobile.port.android.generated.MessageIDMap;
 import com.ustadmobile.port.android.impl.http.UmHttpCachePicassoRequestHandler;
@@ -154,6 +156,8 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         viewNameToAndroidImplMap.put(DummyView.VIEW_NAME, DummyActivity.class);
         viewNameToAndroidImplMap.put(OnBoardingView.VIEW_NAME, OnBoardingActivity.class);
         viewNameToAndroidImplMap.put(Register2View.VIEW_NAME, Register2Activity.class);
+        viewNameToAndroidImplMap.put(WebChunkView.VIEW_NAME, WebChunkActivity.class);
+        viewNameToAndroidImplMap.put(VideoPlayerView.VIEW_NAME, VideoPlayerActivity.class);
     }
 
     /**

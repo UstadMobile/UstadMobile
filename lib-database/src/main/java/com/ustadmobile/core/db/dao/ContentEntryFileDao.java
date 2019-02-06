@@ -50,4 +50,15 @@ public abstract class ContentEntryFileDao implements SyncableDao<ContentEntryFil
 
     @UmQuery("UPDATE ContentEntryFile SET mimeType = :mimeType  WHERE contentEntryFileUid = :cefsUid")
     public abstract void updateMimeType(String mimeType, long cefsUid);
+
+    @UmQuery("SELECT ContentEntryFile.*, ContentEntryFileStatus.* " +
+            "FROM ContentEntryFile " +
+            "LEFT JOIN ContentEntryContentEntryFileJoin ON ContentEntryFile.contentEntryFileUid = ContentEntryContentEntryFileJoin.cecefjContentEntryFileUid " +
+            "LEFT JOIN ContentEntryFileStatus ON ContentEntryFile.contentEntryFileUid = ContentEntryFileStatus.cefsContentEntryFileUid " +
+            "WHERE ContentEntryContentEntryFileJoin.cecefjContentEntryUid = :contentEntryUid " +
+            "AND ContentEntryFileStatus.filePath IS NOT NULL " +
+            "ORDER BY lastModified DESC LIMIT 1")
+    public abstract void findLatestCompletedFileForEntry(long contentEntryUid,
+                                                         UmCallback<ContentEntryFileWithStatus> callback);
+
 }
