@@ -39,6 +39,10 @@ public class ReportSELPresenter extends UstadBaseController<ReportSELView> {
     HashMap<Long, Integer> nominatorToIdMap;
     HashMap<Long, Integer> nomineeToIdMap;
 
+    public static final String TICK_UNICODE = "\u2713";
+    public static final String CROSS_UNICODE = "\u2718";
+
+
 
     public ReportSELPresenter(Object context, Hashtable arguments, ReportSELView view) {
         super(context, arguments, view);
@@ -202,6 +206,9 @@ public class ReportSELPresenter extends UstadBaseController<ReportSELView> {
 
             int r = 0;
             int c = 1;
+            int t = students.size();
+
+            //Top Nominee Row ( 0th Row) and every X
             for (ClazzMemberWithPerson everyStudent : students) {
 
                 String studentName = everyStudent.getPerson().getFirstNames() + " " +
@@ -211,15 +218,31 @@ public class ReportSELPresenter extends UstadBaseController<ReportSELView> {
                 nomineeToIdMap.put(everyStudent.getClazzMemberUid(), c);
 
                 c++;
+
             }
 
+            //Every Nominator names
             r = 1;
             for (ClazzMemberWithPerson es : students) {
                 nominatorToIdMap.put(es.getClazzMemberUid(), r);
                 String nominatorName = es.getPerson().getFirstNames() + " " +
                         es.getPerson().getLastName();
+
                 clazzSheet.addValueToSheet(r, 0, nominatorName);
                 r++;
+
+            }
+
+            //Every x cross
+            for(int j=1;j<=t;j++){
+                for(int k = 1; k<=t;k++){
+                    clazzSheet.addValueToSheet(j, k, CROSS_UNICODE);
+                }
+            }
+
+            //Every -
+            for(int j=1;j<=t;j++){
+                clazzSheet.addValueToSheet(j,j, "-");
             }
 
             clazzSheetTemplate.put(clazzName, clazzSheet);
@@ -264,9 +287,26 @@ public class ReportSELPresenter extends UstadBaseController<ReportSELView> {
                     }
                     String sheetTitleShort = sheetTitle.replace('?',' ');
 
-                    UmSheet clazzQuestionSheet = new UmSheet(sheetTitleShort, clazzSheet.getSheetValues());
-                    umXLSX.addSheet(clazzQuestionSheet);
+                    UmSheet clazzQuestionSheet = new UmSheet(sheetTitleShort,
+                            clazzSheet.getSheetValues(), clazzSheet.getSheetMap());
 
+                    //TODO: Put in values to the sheet : Check
+                    Iterator<Long> questionDataIterator = questionData.keySet().iterator();
+                    while(questionDataIterator.hasNext()){
+                        Long nominatorUid = questionDataIterator.next();
+                        int r = nominatorToIdMap.get(nominatorUid);
+
+                        List<Long> nomineeList = questionData.get(nominatorUid);
+                        for(Long nominee:nomineeList){
+                            int c = nomineeToIdMap.get(nominee);
+
+                            //Put value
+                            clazzQuestionSheet.addValueToSheet(r,c, TICK_UNICODE);
+                        }
+                    }
+
+
+                    umXLSX.addSheet(clazzQuestionSheet);
                 }
             }
 

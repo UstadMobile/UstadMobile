@@ -265,13 +265,11 @@ public class UmXLSX {
         ZipUtil zipUtil = new ZipUtil();
         zipUtil.zipThisFoldersContents(workingPath +'/', filePath);
 
-        System.out.println("is it done?");
-
         //5. Remove working dir
         workingDirFile.delete();
 
         //6. Call view's export/share
-
+        //View is already calling it.
     }
 
     public List<Element> createContentTypeSheetEntry(Document doc){
@@ -298,18 +296,10 @@ public class UmXLSX {
 
     public List<Element> createAppSheetEntry(Document doc){
         List<Element> appSheetEntry = new ArrayList<>();
-        int index = SHEET_COUNT_START;
         for(UmSheet everySheet:sheets){
             Element el = doc.createElement("vt:lpstr");
             el.setTextContent(everySheet.title);
             appSheetEntry.add(el);
-//            if(index<SHEET_COUNT_START + 1){
-//                index++;
-//            }else{
-//                Element el = doc.createElement("vt:lpstr");
-//                el.setTextContent(everySheet.title);
-//                appSheetEntry.add(el);
-//            }
         }
         return appSheetEntry;
     }
@@ -329,18 +319,6 @@ public class UmXLSX {
             sheetEntries.add(el);
             index++;
 
-
-//            if(index < SHEET_COUNT_START + 1){
-//                index++;
-//            }else{
-//                relId++;
-//                Element el = doc.createElement("Relationship");
-//                el.setAttribute("Id", "rId"+relId );
-//                el.setAttribute("Type",
-//                        "http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet");
-//                el.setAttribute("Target","worksheets/sheet"+index+".xml");
-//                sheetEntries.add(el);
-//            }
         }
 
         Element ss = doc.createElement("Relationship");
@@ -386,18 +364,7 @@ public class UmXLSX {
             sheetEntries.add(el);
 
             index++;
-//            if(index < SHEET_COUNT_START + 1){
-//                index++;
-//            }else{
-//                relId++;
-//                Element el = doc.createElement("sheet");
-//                el.setAttribute("name", everySheet.title);
-//                el.setAttribute("sheetId", String.valueOf(index));
-//                el.setAttribute("r:id", "rId"+relId);
-//
-//                sheetEntries.add(el);
-//
-//            }
+
         }
         return sheetEntries;
     }
@@ -555,7 +522,6 @@ public class UmXLSX {
 
             Iterator<String> valueIterator = sharedStringMap.keySet().iterator();
 
-            List<Element> addThese = new ArrayList<>();
             while(valueIterator.hasNext()){
                 String value = valueIterator.next();
                 Integer valueId = sharedStringMap.get(value);
@@ -565,7 +531,6 @@ public class UmXLSX {
                 Element newStringElementValue = doc.createElement("t");
                 newStringElementValue.setTextContent(value);
                 newStringElement.appendChild(newStringElementValue);
-                addThese.add(newStringElement);
                 siNodeList.item(siNodeList.getLength() -1).appendChild(newStringElement);
             }
 
@@ -610,11 +575,14 @@ public class UmXLSX {
                 LinkedHashMap<Integer, Element> rowMap = new LinkedHashMap<>();
                 LinkedHashMap<Integer, List<Element>> rowColElements = new LinkedHashMap<>();
                 //1. Add Values to sheet
-                for(UmSheet.TableValue everyValuePair:everySheet.sheetValues){
+                //for(UmSheet.TableValue everyValuePair:everySheet.sheetValues){
+                for(UmSheet.TableValue everyValuePair:everySheet.getTableValueList()){
 
                     int r = everyValuePair.rowIndex;
                     int c = everyValuePair.colIndex;
                     String v = everyValuePair.value;
+
+
                     //TODO: Check
                     int valueId = addValueToSharedString(v);
 
@@ -644,8 +612,6 @@ public class UmXLSX {
                     }
                     colEntries.add(newColElement);
                     rowColElements.put(r, colEntries);
-
-
                 }
 
                 //Update row's col count in "spans"
@@ -698,15 +664,6 @@ public class UmXLSX {
             e.printStackTrace();
         }
         return null;
-    }
-
-
-    public void initiateXmlObjects(){
-
-    }
-
-    private void createContentTypeFile(){
-
     }
 
 }

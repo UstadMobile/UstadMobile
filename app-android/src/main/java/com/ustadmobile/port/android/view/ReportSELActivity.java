@@ -52,6 +52,7 @@ public class ReportSELActivity extends UstadBaseActivity implements
     public static final int TAG_NOMINEE_CLAZZMEMBER_UID = R.string.nomination;
     public static final int TAG_NOMINATOR_CLAZZMEMBER_UID = R.string.nominating;
     public static final int TAG_NOMINATOR_NAME = R.string.name;
+    public static final int SEL_REPORT_QUESTION_BUTTON_RADIUS = 50;
 
     //For export line by line data.
     List<String[]> tableTextData;
@@ -306,7 +307,7 @@ public class ReportSELActivity extends UstadBaseActivity implements
                 questionButton.setLayoutParams(buttonParams);
                 questionButton.setTextSize(12);
                 GradientDrawable shape = new GradientDrawable();
-                shape.setCornerRadius(40);
+                shape.setCornerRadius(SEL_REPORT_QUESTION_BUTTON_RADIUS);
 
                 if(firstQuestionTitle.equals(everyQuestion)){
                     shape.setColorFilter(getResources().getColor(R.color.primary),
@@ -330,12 +331,12 @@ public class ReportSELActivity extends UstadBaseActivity implements
                     //Gray out other buttons.
                     for(Button everyButton:allButtons){
                         GradientDrawable shapeb = new GradientDrawable();
-                        shapeb.setCornerRadius(40);
+                        shapeb.setCornerRadius(SEL_REPORT_QUESTION_BUTTON_RADIUS);
                         shapeb.setColorFilter(Color.GRAY, PorterDuff.Mode.ADD);
                         everyButton.setBackground(shapeb);
                     }
                     GradientDrawable shapea = new GradientDrawable();
-                    shapea.setCornerRadius(40);
+                    shapea.setCornerRadius(SEL_REPORT_QUESTION_BUTTON_RADIUS);
                     shapea.setColorFilter(getResources().getColor(R.color.primary),
                             PorterDuff.Mode.ADD);
                     v.setBackground(shapea);
