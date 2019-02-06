@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.v7.widget.RecyclerView;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -40,6 +41,27 @@ public class ContentEntryDetailActivity extends UstadBaseActivity implements Con
         entryDetailPresenter = new ContentEntryDetailPresenter(getContext(),
                 UMAndroidUtil.bundleToHashtable(getIntent().getExtras()), this);
         entryDetailPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            // Respond to the action bar's Up/Home button
+            case android.R.id.home:
+                clickUpNavigation();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void clickUpNavigation() {
+        runOnUiThread(() -> {
+            if(entryDetailPresenter != null){
+                entryDetailPresenter.handleUpNavigation();
+            }
+        });
+
+
     }
 
     @Override
@@ -89,7 +111,7 @@ public class ContentEntryDetailActivity extends UstadBaseActivity implements Con
 
 
                 TextView downloadSize = findViewById(R.id.entry_detail_content_size);
-                downloadSize.setText(UMFileUtil.formatFileSize(contentEntryFile.getFileSize()));
+                downloadSize.setText(UMFileUtil.formatFileSize(contentEntryFile.getFileSize()) + contentEntryFile.getMimeType());
 
             } else {
 
@@ -109,6 +131,7 @@ public class ContentEntryDetailActivity extends UstadBaseActivity implements Con
 
         runOnUiThread(() -> {
             RecyclerView flexBox = findViewById(R.id.entry_detail_flex);
+            flexBox.setNestedScrollingEnabled(false);
 
             if (result.size() == 0) {
                 flexBox.setVisibility(View.GONE);

@@ -5,6 +5,7 @@ import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.Toolbar;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -39,6 +40,26 @@ public class ContentEntryListActivity extends UstadBaseActivity implements Conte
         }
 
     }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            // Respond to the action bar's Up/Home button
+            case android.R.id.home:
+                clickUpNavigation();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void clickUpNavigation() {
+        runOnUiThread(() ->{
+            ContentEntryListFragment fragment = (ContentEntryListFragment) getSupportFragmentManager().findFragmentById(R.id.entry_content);
+            fragment.clickUpNavigation();
+        });
+
+    }
+
 
     @Override
     public void setTitle(String title) {

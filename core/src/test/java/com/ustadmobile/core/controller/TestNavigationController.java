@@ -1,0 +1,87 @@
+package com.ustadmobile.core.controller;
+
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.view.ContentEntryDetailView;
+import com.ustadmobile.core.view.ContentEntryListView;
+import com.ustadmobile.core.view.DummyView;
+import com.ustadmobile.test.core.impl.PlatformTestUtil;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mockito;
+
+import java.util.Hashtable;
+
+import static com.ustadmobile.core.controller.ContentEntryListPresenter.ARG_CONTENT_ENTRY_UID;
+import static com.ustadmobile.core.impl.UstadMobileSystemImpl.ARG_REFERRER;
+import static com.ustadmobile.core.impl.UstadMobileSystemImpl.GO_FLAG_CLEAR_TOP;
+import static com.ustadmobile.core.impl.UstadMobileSystemImpl.GO_FLAG_SINGLE_TOP;
+import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.verify;
+
+public class TestNavigationController {
+
+    UstadMobileSystemImpl mainImpl;
+    UstadMobileSystemImpl systemImplSpy;
+
+    private static final String REFERRER_FULL_PATH = "/DummyView?/ContentEntry?entryid=41/ContentEntry?entryid=42/ContentEntryDetail?entryid=43";
+    private static final String REFERRER_NO_PATH = "";
+    private ContentEntryDetailView mockView;
+    private static final int flags = GO_FLAG_CLEAR_TOP | GO_FLAG_SINGLE_TOP;
+
+    @Before
+    public void setUp() {
+        mainImpl = UstadMobileSystemImpl.getInstance();
+        systemImplSpy = Mockito.spy(mainImpl);
+        UstadMobileSystemImpl.setMainInstance(systemImplSpy);
+
+        mockView = Mockito.mock(ContentEntryDetailView.class);
+    }
+
+    @After
+    public void tearDown() {
+        UstadMobileSystemImpl.setMainInstance(mainImpl);
+        systemImplSpy = null;
+    }
+
+
+    @Test
+    public void givenUserIsInDetailViewFromListView_WhenUpNavigationCalled_thenShouldReturnToListView() {
+
+        Hashtable args = new Hashtable();
+        args.put(ARG_CONTENT_ENTRY_UID, String.valueOf(43L));
+        args.put(ARG_REFERRER, REFERRER_FULL_PATH);
+
+        ContentEntryDetailPresenter presenter = new ContentEntryDetailPresenter(PlatformTestUtil.getTargetContext(),
+                args, mockView);
+        presenter.onCreate(args);
+
+        args.remove(ARG_REFERRER);
+
+        presenter.handleUpNavigation();
+        verify(systemImplSpy, timeout(5000)).go(ContentEntryListView.VIEW_NAME, args,
+                mockView.getContext(), flags);
+
+    }
+
+    @Test
+    public void givenUserIsInDetailViewFromNavigation_WhenUpNavigationCalled_thenShouldReturnToDummyView() {
+
+        Hashtable args = new Hashtable();
+        args.put(ARG_CONTENT_ENTRY_UID, String.valueOf(42L));
+        args.put(ARG_REFERRER, REFERRER_NO_PATH);
+
+        ContentEntryDetailPresenter presenter = new ContentEntryDetailPresenter(PlatformTestUtil.getTargetContext(),
+                args, mockView);
+        presenter.onCreate(args);
+
+        args.remove(ARG_REFERRER);
+
+        presenter.handleUpNavigation();
+        verify(systemImplSpy, timeout(5000)).go(DummyView.VIEW_NAME, null,
+                mockView.getContext(), GO_FLAG_CLEAR_TOP | GO_FLAG_SINGLE_TOP);
+
+    }
+
+}

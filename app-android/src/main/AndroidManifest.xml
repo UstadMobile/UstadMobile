@@ -31,7 +31,8 @@
     <application android:supportsRtl="true">
         <activity
             android:theme="@style/ThemeOnboarding"
-            android:name="com.ustadmobile.port.android.view.OnBoardingActivity"/>
+            android:name="com.ustadmobile.port.android.view.OnBoardingActivity"
+            android:noHistory="true"/>
 
         <provider
             android:name="android.support.v4.content.FileProvider"

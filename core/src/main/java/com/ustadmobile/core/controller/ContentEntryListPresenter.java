@@ -6,7 +6,8 @@ import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.ContentEntryDetailView;
-import com.ustadmobile.core.view.ContentEntryView;
+import com.ustadmobile.core.view.ContentEntryListView;
+import com.ustadmobile.core.view.DummyView;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.DistinctCategorySchema;
 import com.ustadmobile.lib.db.entities.Language;
@@ -17,17 +18,19 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
-public class ContentEntryListPresenter extends UstadBaseController<ContentEntryView> {
+public class ContentEntryListPresenter extends UstadBaseController<ContentEntryListView> {
 
     public static final String ARG_CONTENT_ENTRY_UID = "entryid";
-    private final ContentEntryView viewContract;
+    public static final String ARG_NAVIGATION = "navigation";
+    private final ContentEntryListView viewContract;
     private ContentEntryDao contentEntryDao;
 
     private long filterByLang = 0;
 
     private long filterByCategory = 0;
+    private Long parentUid;
 
-    public ContentEntryListPresenter(Object context, Hashtable arguments, ContentEntryView viewContract) {
+    public ContentEntryListPresenter(Object context, Hashtable arguments, ContentEntryListView viewContract) {
         super(context, arguments, viewContract);
         this.viewContract = viewContract;
 
@@ -36,7 +39,7 @@ public class ContentEntryListPresenter extends UstadBaseController<ContentEntryV
     public void onCreate(Hashtable hashtable) {
         UmAppDatabase appDatabase = UmAccountManager.getRepositoryForActiveAccount(getContext());
         contentEntryDao = appDatabase.getContentEntryDao();
-        Long parentUid = (Long) getArguments().get(ARG_CONTENT_ENTRY_UID);
+        parentUid = Long.valueOf((String) getArguments().get(ARG_CONTENT_ENTRY_UID));
         viewContract.setContentEntryProvider(contentEntryDao.getChildrenByParentUid(parentUid));
         contentEntryDao.getContentByUuid(parentUid, new UmCallback<ContentEntry>() {
             @Override
@@ -132,11 +135,11 @@ public class ContentEntryListPresenter extends UstadBaseController<ContentEntryV
                 }
 
                 if (result.isLeaf()) {
-                    args.put(ARG_CONTENT_ENTRY_UID, entryUid);
+                    args.put(ARG_CONTENT_ENTRY_UID, String.valueOf(entryUid));
                     impl.go(ContentEntryDetailView.VIEW_NAME, args, view.getContext());
                 } else {
-                    args.put(ARG_CONTENT_ENTRY_UID, entryUid);
-                    impl.go(ContentEntryView.VIEW_NAME, args, view.getContext());
+                    args.put(ARG_CONTENT_ENTRY_UID, String.valueOf(entryUid));
+                    impl.go(ContentEntryListView.VIEW_NAME, args, view.getContext());
                 }
             }
 
@@ -149,15 +152,20 @@ public class ContentEntryListPresenter extends UstadBaseController<ContentEntryV
 
     public void handleClickFilterByLanguage(long langUid) {
         this.filterByLang = langUid;
-        Long parentUid = (Long) getArguments().get(ARG_CONTENT_ENTRY_UID);
         viewContract.setContentEntryProvider(contentEntryDao.getChildrenByParentUidWithCategoryFilter
                 (parentUid, filterByLang, filterByCategory));
     }
 
     public void handleClickFilterByCategory(long contentCategoryUid) {
         this.filterByCategory = contentCategoryUid;
-        Long parentUid = (Long) getArguments().get(ARG_CONTENT_ENTRY_UID);
         viewContract.setContentEntryProvider(contentEntryDao.getChildrenByParentUidWithCategoryFilter
                 (parentUid, filterByLang, filterByCategory));
+    }
+
+    public void handleUpNavigation() {
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        impl.go(DummyView.VIEW_NAME, null, view.getContext(),
+                UstadMobileSystemImpl.GO_FLAG_CLEAR_TOP | UstadMobileSystemImpl.GO_FLAG_SINGLE_TOP);
+
     }
 }

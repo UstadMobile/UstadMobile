@@ -113,7 +113,7 @@ public class IndexDdlContent {
         parentDdl = ContentScraperUtil.createOrUpdateContentEntry("https://www.ddl.af/", "Darakht-e Danesh",
                 "https://www.ddl.af/", DDL, LICENSE_TYPE_CC_BY, englishLang.getLangUid(), null,
                 "Free and open educational resources for Afghanistan", false, EMPTY_STRING,
-                "https://www.ddl.af/storage/files/logo-dd.png", EMPTY_STRING, EMPTY_STRING, contentEntryDao);
+                "https://ddl.af/storage/files/logo-dd.png", EMPTY_STRING, EMPTY_STRING, contentEntryDao);
 
 
         ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, masterRootParent, parentDdl, 5);

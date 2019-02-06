@@ -121,6 +121,18 @@ public abstract class UstadMobileSystemImpl {
 
     public static final int STATUS_ACQUISITION_IN_PROGRESS = 1;
 
+    public static final String ARG_REFERRER = "ref";
+
+    /**
+     * As per Android Intent.FLAG_ACTIVITY_SINGLE_TOP
+     */
+    public static final int GO_FLAG_SINGLE_TOP = 536870912;
+
+    /**
+     * As per Android Intent.FLAG_CLEAR_TOP
+     */
+    public static final int GO_FLAG_CLEAR_TOP = 67108864;
+
 
     static {
         MIME_TYPES.put("image/jpg", "jpg");
@@ -213,15 +225,6 @@ public abstract class UstadMobileSystemImpl {
         }
     }
 
-    /**
-     * The main method used to go to a new view. This is implemented at the platform level. On
-     * Android this involves starting a new activity with the arguments being turned into an
-     * Android bundle.
-     *
-     * @param viewName The name of the view to go to: This should match the view's interface .VIEW_NAME constant
-     * @param args (Optional) Hahstable of arguments for the new view (e.g. catalog/container url etc)
-     * @param context System context object
-     */
     public void go(String viewName, Hashtable args, Object context) {
         go(viewName, args, context, 0);
     }
@@ -229,12 +232,12 @@ public abstract class UstadMobileSystemImpl {
     /**
      * The main method used to go to a new view. This is implemented at the platform level. On
      * Android this involves starting a new activity with the arguments being turned into an
-     * Android bundle.
+     * Android bundle. On J2ME it creates a new Form and shows it, on iOS it looks up the related
+     * UIViewController.
      *
      * @param viewName The name of the view to go to: This should match the view's interface .VIEW_NAME constant
      * @param args (Optional) Hahstable of arguments for the new view (e.g. catalog/container url etc)
      * @param context System context object
-     * @param flags system flags for going to the next destination
      */
     public abstract void go(String viewName, Hashtable args, Object context, int flags);
 
@@ -448,6 +451,7 @@ public abstract class UstadMobileSystemImpl {
         xpp.setInput(in, encoding);
         return xpp;
     }
+
 
 
 

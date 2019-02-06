@@ -58,7 +58,7 @@ public class DummyActivity extends UstadBaseActivity implements DummyView {
         @Override
         public Fragment getItem(int position) {
             Bundle bundle = new Bundle();
-            bundle.putLong(ARG_CONTENT_ENTRY_UID, -4103245208651563007L);
+            bundle.putString(ARG_CONTENT_ENTRY_UID, String.valueOf(-4103245208651563007L));
             switch (position) {
                 case 0: // Fragment # 0 - This will show FirstFragment
                     return ContentEntryListFragment.newInstance(bundle);

@@ -8,9 +8,9 @@ import com.ustadmobile.lib.db.entities.Language;
 import java.util.List;
 import java.util.Map;
 
-public interface ContentEntryView extends UstadView {
+public interface ContentEntryListView extends UstadView {
 
-    public static final String VIEW_NAME = "ContentEntry";
+    String VIEW_NAME = "ContentEntryList";
 
     void setContentEntryProvider(UmProvider<ContentEntry> entryProvider);
 

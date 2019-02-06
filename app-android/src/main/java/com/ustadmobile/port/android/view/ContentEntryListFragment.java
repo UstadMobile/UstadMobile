@@ -17,7 +17,7 @@ import android.widget.Toast;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.ContentEntryListPresenter;
 import com.ustadmobile.core.db.UmProvider;
-import com.ustadmobile.core.view.ContentEntryView;
+import com.ustadmobile.core.view.ContentEntryListView;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.DistinctCategorySchema;
 import com.ustadmobile.lib.db.entities.Language;
@@ -32,7 +32,7 @@ import java.util.Map;
  * Activities containing this fragment MUST implement the {@link}
  * interface.
  */
-public class ContentEntryListFragment extends UstadBaseFragment implements ContentEntryView, ContentEntryRecyclerViewAdapter.AdapterViewListener {
+public class ContentEntryListFragment extends UstadBaseFragment implements ContentEntryListView, ContentEntryRecyclerViewAdapter.AdapterViewListener {
 
 
     private ContentEntryListPresenter entryListPresenter;
@@ -52,6 +52,10 @@ public class ContentEntryListFragment extends UstadBaseFragment implements Conte
 
     public void filterBySchemaCategory(long contentCategoryUid, long contentCategorySchemaUid) {
         entryListPresenter.handleClickFilterByCategory(contentCategoryUid);
+    }
+
+    public void clickUpNavigation() {
+       entryListPresenter.handleUpNavigation();
     }
 
     public interface ContentEntryListener {
@@ -158,7 +162,11 @@ public class ContentEntryListFragment extends UstadBaseFragment implements Conte
 
     @Override
     public void contentEntryClicked(ContentEntry entry) {
-        entryListPresenter.handleContentEntryClicked(entry);
+        runOnUiThread(() -> {
+            if(entryListPresenter != null){
+                entryListPresenter.handleContentEntryClicked(entry);
+            }
+        });
     }
 
 }

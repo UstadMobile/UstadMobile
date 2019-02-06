@@ -1,12 +1,10 @@
 package com.ustadmobile.test.port.android.view;
 
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.espresso.contrib.RecyclerViewActions;
 import android.support.test.espresso.intent.rule.IntentsTestRule;
-import android.support.test.espresso.matcher.ViewMatchers;
 import android.support.test.runner.AndroidJUnit4;
 
 import com.toughra.ustadmobile.R;
@@ -21,7 +19,6 @@ import com.ustadmobile.core.db.dao.ContentEntryFileDao;
 import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryRelatedEntryJoinDao;
 import com.ustadmobile.core.db.dao.LanguageDao;
-import com.ustadmobile.core.view.ContentEntryView;
 import com.ustadmobile.lib.db.entities.ContentCategory;
 import com.ustadmobile.lib.db.entities.ContentCategorySchema;
 import com.ustadmobile.lib.db.entities.ContentEntry;
@@ -33,17 +30,12 @@ import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoin;
 import com.ustadmobile.lib.db.entities.Language;
 import com.ustadmobile.port.android.view.ContentEntryDetailActivity;
 import com.ustadmobile.port.android.view.ContentEntryListActivity;
-import com.ustadmobile.port.android.view.DummyActivity;
 
 import org.hamcrest.Matchers;
-import org.hamcrest.core.AllOf;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import java.util.EnumSet;
-import java.util.concurrent.TimeUnit;
 
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.action.ViewActions.click;
@@ -52,10 +44,7 @@ import static android.support.test.espresso.intent.Intents.intended;
 import static android.support.test.espresso.intent.matcher.IntentMatchers.hasComponent;
 import static android.support.test.espresso.intent.matcher.IntentMatchers.hasExtra;
 import static android.support.test.espresso.matcher.ViewMatchers.hasDescendant;
-import static android.support.test.espresso.matcher.ViewMatchers.hasSibling;
-import static android.support.test.espresso.matcher.ViewMatchers.isDescendantOfA;
 import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
-import static android.support.test.espresso.matcher.ViewMatchers.withChild;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
 import static com.ustadmobile.core.controller.ContentEntryListPresenter.ARG_CONTENT_ENTRY_UID;
