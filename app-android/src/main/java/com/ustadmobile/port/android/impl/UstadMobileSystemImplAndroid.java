@@ -86,7 +86,6 @@ import com.ustadmobile.core.view.XapiPackageView;
 import com.ustadmobile.port.android.generated.MessageIDMap;
 import com.ustadmobile.port.android.impl.http.UmHttpCachePicassoRequestHandler;
 import com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroid;
-import com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroidBle;
 import com.ustadmobile.port.android.netwokmanager.NetworkServiceAndroid;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 import com.ustadmobile.port.android.view.*;
@@ -331,7 +330,6 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
     protected HashMap<Context, ServiceConnection> networkServiceConnections = new HashMap<>();
 
     protected NetworkManagerAndroid networkManagerAndroid;
-    protected NetworkManagerAndroidBle managerAndroidBle;
 
     /**
      */
@@ -340,8 +338,6 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         appViews = new WeakHashMap<>();
         networkManagerAndroid = new NetworkManagerAndroid();
         networkManagerAndroid.setServiceConnectionMap(networkServiceConnections);
-        managerAndroidBle = new NetworkManagerAndroidBle();
-        managerAndroidBle.setServiceConnectionMap(networkServiceConnections);
     }
 
     /**
@@ -710,7 +706,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
 
     @Override
     public NetworkManagerBle getNetworkManagerBle() {
-        return managerAndroidBle;
+        return null;
     }
 
     @Override

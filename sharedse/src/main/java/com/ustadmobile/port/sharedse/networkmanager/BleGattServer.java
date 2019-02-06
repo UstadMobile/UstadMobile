@@ -1,8 +1,12 @@
 package com.ustadmobile.port.sharedse.networkmanager;
 
+import com.google.gson.Gson;
+import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.ContentEntryDao;
+import com.ustadmobile.core.db.dao.ContentEntryFileDao;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.lib.db.entities.ContentEntry;
+import com.ustadmobile.lib.db.entities.ContentEntryFile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +18,6 @@ import static com.ustadmobile.port.sharedse.networkmanager.BleMessageUtil.bleMes
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.ENTRY_STATUS_REQUEST;
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.ENTRY_STATUS_RESPONSE;
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.WIFI_GROUP_CREATION_RESPONSE;
-import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.WIFI_GROUP_INFO_SEPARATOR;
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.WIFI_GROUP_REQUEST;
 
 /**
@@ -71,13 +74,12 @@ public abstract class BleGattServer implements WiFiDirectGroupListenerBle{
         byte requestType = requestReceived.getRequestType();
         switch (requestType){
             case ENTRY_STATUS_REQUEST:
-                ContentEntryDao contentEntryDao =
-                        UmAccountManager.getRepositoryForActiveAccount(context).getContentEntryDao();
+                ContentEntryFileDao contentEntryDao =
+                        UmAppDatabase.getInstance(context).getContentEntryFileDao();
                 List<Long> entryStatusResponse = new ArrayList<>();
-                for(long entryUuid: bleMessageBytesToLong(requestReceived.getPayload())){
-                    ContentEntry contentEntry = contentEntryDao.findByEntryId(entryUuid);
-                    entryStatusResponse.add(contentEntry == null ?
-                            0L: contentEntry.getLastUpdateTime());
+                for(long entryFileUid: bleMessageBytesToLong(requestReceived.getPayload())){
+                    ContentEntryFile contentEntryFile = contentEntryDao.findByUid(entryFileUid);
+                    entryStatusResponse.add(contentEntryFile == null ? 0L: 1L);
                 }
                 return new BleMessage(ENTRY_STATUS_RESPONSE,
                         bleMessageLongToBytes(entryStatusResponse));
@@ -98,7 +100,8 @@ public abstract class BleGattServer implements WiFiDirectGroupListenerBle{
 
     @Override
     public void groupCreated(WiFiDirectGroupBle group, Exception err) {
-        this.message = group.getSsid() + WIFI_GROUP_INFO_SEPARATOR + group.getPassphrase();
+        group.setPort(networkManager.getHttpd().getListeningPort());
+        this.message = new Gson().toJson(group);
         mLatch.countDown();
     }
 

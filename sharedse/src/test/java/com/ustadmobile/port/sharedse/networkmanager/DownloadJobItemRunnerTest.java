@@ -1,5 +1,6 @@
 package com.ustadmobile.port.sharedse.networkmanager;
 
+import com.google.gson.Gson;
 import com.ustadmobile.core.db.JobStatus;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmLiveData;
@@ -12,9 +13,12 @@ import com.ustadmobile.lib.db.entities.ContentEntryFile;
 import com.ustadmobile.lib.db.entities.ContentEntryFileStatus;
 import com.ustadmobile.lib.db.entities.DownloadJob;
 import com.ustadmobile.lib.db.entities.DownloadJobItem;
+import com.ustadmobile.lib.db.entities.DownloadJobItemHistory;
 import com.ustadmobile.lib.db.entities.DownloadJobItemWithDownloadSetItem;
 import com.ustadmobile.lib.db.entities.DownloadSet;
 import com.ustadmobile.lib.db.entities.DownloadSetItem;
+import com.ustadmobile.lib.db.entities.EntryStatusResponse;
+import com.ustadmobile.lib.db.entities.NetworkNode;
 import com.ustadmobile.test.core.impl.PlatformTestUtil;
 
 import org.junit.After;
@@ -26,11 +30,10 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 
 import okhttp3.mockwebserver.Dispatcher;
 import okhttp3.mockwebserver.MockResponse;
@@ -40,11 +43,18 @@ import okio.Buffer;
 import okio.BufferedSource;
 import okio.Okio;
 
+import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.WIFI_GROUP_CREATION_RESPONSE;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * Test class which tests {@link DownloadJobItemRunner} behaves as expected when downloading
@@ -54,16 +64,19 @@ import static org.mockito.Mockito.spy;
  */
 public class DownloadJobItemRunnerTest {
 
-    private MockWebServer mockWebServer;
+    private MockWebServer mockCloudWebServer;
+
+    private MockWebServer mockPeerWebServer;
 
     private NetworkManagerBle mockedNetworkManager;
 
     private UmAppDatabase umAppDatabase;
 
-    private String endPoint;
+    private String cloudEndPoint, localEndPoint;
 
+    private ContentEntryFileDispatcher cloudServerDispatcher = null;
 
-    private ContentEntryFileDispatcher dispatcher = null;
+    private ContentEntryFileDispatcher mockPeerServerDispatcher = null;
 
     private static File webServerTmpDir;
 
@@ -76,9 +89,21 @@ public class DownloadJobItemRunnerTest {
     private static final String TEST_FILE_RESOURCE_PATH =
             "/com/ustadmobile/port/sharedse/networkmanager/thelittlechicks.epub";
 
-    private DownloadJob downloadJob;
-
     private  Object context;
+
+
+    private EntryStatusResponse entryStatusResponse;
+
+    private DownloadJobItemHistory history;
+
+    private BleEntryStatusTask mockedEntryStatusTask;
+
+    private NetworkNode networkNode;
+
+    private BleMessage wifiDirectGroupInfoMessage;
+
+    private WiFiDirectGroupBle groupBle;
+
 
     //Uid of the
     private long testDownloadJobItemUid;
@@ -174,6 +199,12 @@ public class DownloadJobItemRunnerTest {
         context = PlatformTestUtil.getTargetContext();
         mockedNetworkManager = spy(NetworkManagerBle.class);
 
+        mockedEntryStatusTask = mock(BleEntryStatusTask.class);
+        mockedNetworkManager.setContext(context);
+
+        groupBle =  new WiFiDirectGroupBle("networkSSID","networkPass123");
+
+
         File downloadTmpDir = File.createTempFile("DownloadJobItemRunnerTest", "dldir");
         if(!(downloadTmpDir.delete() && downloadTmpDir.mkdirs())) {
             throw new IOException("Failed to create tmp directory" + downloadTmpDir);
@@ -181,6 +212,10 @@ public class DownloadJobItemRunnerTest {
 
         UmAppDatabase.getInstance(context).clearAllTables();
         umAppDatabase = UmAppDatabase.getInstance(context);
+        networkNode = new NetworkNode();
+        networkNode.setBluetoothMacAddress("00:3F:2F:64:C6:4F");
+        networkNode.setLastUpdateTimeStamp(System.currentTimeMillis());
+        networkNode.setNodeId(umAppDatabase.getNetworkNodeDao().insert(networkNode));
 
         ContentEntry contentEntry = new ContentEntry();
         contentEntry.setTitle("Test entry");
@@ -203,7 +238,7 @@ public class DownloadJobItemRunnerTest {
         DownloadSetItem downloadSetItem = new DownloadSetItem(downloadSet, contentEntry);
         downloadSetItem.setDsiUid((int)umAppDatabase.getDownloadSetItemDao().insert(downloadSetItem));
 
-        downloadJob = new DownloadJob(downloadSet);
+        DownloadJob downloadJob = new DownloadJob(downloadSet);
         downloadJob.setTimeCreated(System.currentTimeMillis());
         downloadJob.setTimeRequested(System.currentTimeMillis());
         downloadJob.setDjStatus(JobStatus.QUEUED);
@@ -224,16 +259,73 @@ public class DownloadJobItemRunnerTest {
         connectivityStatus.setConnectivityState(ConnectivityStatus.STATE_UNMETERED);
         umAppDatabase.getConnectivityStatusDao().insert(connectivityStatus);
 
-        dispatcher =  new ContentEntryFileDispatcher();
-        mockWebServer = new MockWebServer();
-        mockWebServer.setDispatcher(dispatcher);
-        mockWebServer.start();
-        endPoint = mockWebServer.url("/").toString();
+        entryStatusResponse = new EntryStatusResponse();
+        entryStatusResponse.setErContentEntryFileUid(downloadJobItem.getDjiContentEntryFileUid());
+        entryStatusResponse.setErNodeId(networkNode.getNodeId());
+        entryStatusResponse.setAvailable(true);
+        entryStatusResponse.setResponseTime(System.currentTimeMillis());
+
+
+        history = new DownloadJobItemHistory();
+        history.setNetworkNode(networkNode.getNodeId());
+        history.setStartTime(System.currentTimeMillis());
+        history.setSuccessful(true);
+        umAppDatabase.getDownloadJobItemHistoryDao().insert(history);
+
+        cloudServerDispatcher =  new ContentEntryFileDispatcher();
+        mockCloudWebServer = new MockWebServer();
+        mockCloudWebServer.setDispatcher(cloudServerDispatcher);
+        mockCloudWebServer.start();
+        cloudEndPoint = mockCloudWebServer.url("/").toString();
+
+
+        when(mockedNetworkManager.makeEntryStatusTask(any(Object.class),
+                any(),any(NetworkNode.class))).thenReturn(mockedEntryStatusTask);
+
+
+        doAnswer(invocation -> {
+            BleMessageResponseListener bleResponseListener = invocation.getArgument(3);
+            startPeerWebServer();
+            Thread.sleep(1);
+            int mockPort = mockPeerWebServer.getPort();
+            groupBle.setPort(mockPort);
+            groupBle.setEndpoint(localEndPoint);
+            wifiDirectGroupInfoMessage = new BleMessage(WIFI_GROUP_CREATION_RESPONSE,
+                    new Gson().toJson(groupBle).getBytes());
+
+            bleResponseListener.onResponseReceived(networkNode.getBluetoothMacAddress(), wifiDirectGroupInfoMessage);
+
+            return null;
+        }).when(mockedNetworkManager).sendMessage(any(Object.class), any(BleMessage.class),
+                any(NetworkNode.class), any(BleMessageResponseListener.class));
+
+        doAnswer((invocation -> {
+            umAppDatabase.getConnectivityStatusDao().update(ConnectivityStatus.STATE_CONNECTING_LOCAL);
+            Thread.sleep(TimeUnit.SECONDS.toMillis(1));
+            umAppDatabase.getConnectivityStatusDao().update(ConnectivityStatus.STATE_CONNECTED_LOCAL, groupBle.getSsid());
+            return null;
+        })).when(mockedNetworkManager).connectToWiFi(eq(groupBle.getSsid()), eq(groupBle.getPassphrase()));
+
     }
 
     @After
     public void tearDown() throws IOException{
-        mockWebServer.shutdown();
+        if(mockCloudWebServer != null){
+            mockCloudWebServer.shutdown();
+        }
+        if(mockPeerWebServer != null){
+            mockPeerWebServer.shutdown();
+        }
+    }
+
+    private void startPeerWebServer() throws IOException {
+        if(mockPeerWebServer == null){
+            mockPeerServerDispatcher = new ContentEntryFileDispatcher();
+            mockPeerWebServer = new MockWebServer();
+            mockPeerWebServer.setDispatcher(mockPeerServerDispatcher);
+            mockPeerWebServer.start();
+            localEndPoint = mockPeerWebServer.url("/").toString();
+        }
     }
 
 
@@ -244,7 +336,7 @@ public class DownloadJobItemRunnerTest {
                 umAppDatabase.getDownloadJobItemDao().findWithDownloadSetItemByUid(
                         (int)testDownloadJobItemUid);
         DownloadJobItemRunner jobItemRunner =
-                new DownloadJobItemRunner(context,item, mockedNetworkManager, umAppDatabase, endPoint);
+                new DownloadJobItemRunner(context,item, mockedNetworkManager, umAppDatabase, cloudEndPoint);
 
         jobItemRunner.run();
 
@@ -269,13 +361,13 @@ public class DownloadJobItemRunnerTest {
     @Test
     public void givenDownloadStarted_whenFailsOnce_shouldRetryAndComplete() {
 
-        dispatcher.setNumTimesToFail(1);
+        cloudServerDispatcher.setNumTimesToFail(1);
 
         DownloadJobItemWithDownloadSetItem item =
                 umAppDatabase.getDownloadJobItemDao().findWithDownloadSetItemByUid(
                         (int)testDownloadJobItemUid);
         DownloadJobItemRunner jobItemRunner =
-                new DownloadJobItemRunner(context,item, mockedNetworkManager, umAppDatabase, endPoint);
+                new DownloadJobItemRunner(context,item, mockedNetworkManager, umAppDatabase, cloudEndPoint);
 
         jobItemRunner.run();
 
@@ -290,19 +382,20 @@ public class DownloadJobItemRunnerTest {
 
         assertEquals("Number of attempts = 2", 2, item.getNumAttempts());
         assertEquals("Number of file get requests = 2", 2,
-                dispatcher.getNumFileGetRequests());
+                cloudServerDispatcher.getNumFileGetRequests());
 
     }
 
     @Test
     public void givenDownloadStarted_whenFailsExceedMaxAttempts_shouldStopAndSetStatusToFailed() {
-        dispatcher.setNumTimesToFail(4);
+
+        cloudServerDispatcher.setNumTimesToFail(4);
 
         DownloadJobItemWithDownloadSetItem item =
                 umAppDatabase.getDownloadJobItemDao().findWithDownloadSetItemByUid(
                         (int)testDownloadJobItemUid);
         DownloadJobItemRunner jobItemRunner =
-                new DownloadJobItemRunner(context,item, mockedNetworkManager, umAppDatabase, endPoint);
+                new DownloadJobItemRunner(context,item, mockedNetworkManager, umAppDatabase, cloudEndPoint);
 
         jobItemRunner.run();
 
@@ -314,15 +407,16 @@ public class DownloadJobItemRunnerTest {
     }
 
     @Test
-    public void givenDownloadUnmeteredConnectivityOnly_whenConnectivitySwitchesToMetered_shouldStopAndSetStatusToWaiting() throws InterruptedException {
+    public void givenDownloadUnmeteredConnectivityOnly_whenConnectivitySwitchesToMetered_shouldStopAndSetStatusToWaiting()
+            throws InterruptedException {
 
-        dispatcher.setThrottle(512, 1,TimeUnit.SECONDS);
+        cloudServerDispatcher.setThrottle(512, 1,TimeUnit.SECONDS);
 
         DownloadJobItemWithDownloadSetItem item =
                 umAppDatabase.getDownloadJobItemDao().findWithDownloadSetItemByUid(
                         (int)testDownloadJobItemUid);
         DownloadJobItemRunner jobItemRunner =
-                new DownloadJobItemRunner(context,item, mockedNetworkManager, umAppDatabase, endPoint);
+                new DownloadJobItemRunner(context,item, mockedNetworkManager, umAppDatabase, cloudEndPoint);
 
         new Thread(jobItemRunner).start();
 
@@ -354,14 +448,16 @@ public class DownloadJobItemRunnerTest {
     }
 
     @Test
-    public void givenDownloadStarted_whenJobIsStopped_shouldStopAndSetStatus() throws InterruptedException {
-        dispatcher.setThrottle(512, 1,TimeUnit.SECONDS);
+    public void givenDownloadStarted_whenJobIsStopped_shouldStopAndSetStatus()
+            throws InterruptedException {
+
+        cloudServerDispatcher.setThrottle(512, 1,TimeUnit.SECONDS);
 
         DownloadJobItemWithDownloadSetItem item =
                 umAppDatabase.getDownloadJobItemDao().findWithDownloadSetItemByUid(
                         (int)testDownloadJobItemUid);
         DownloadJobItemRunner jobItemRunner =
-                new DownloadJobItemRunner(context,item, mockedNetworkManager, umAppDatabase, endPoint);
+                new DownloadJobItemRunner(context,item, mockedNetworkManager, umAppDatabase, cloudEndPoint);
 
         new Thread(jobItemRunner).start();
 
@@ -391,14 +487,16 @@ public class DownloadJobItemRunnerTest {
     }
 
     @Test
-    public void givenDownloadStartsOnMeteredConnection_whenJobSetChangedToDisableMeteredConnection_shouldStopAndSetStatus() throws InterruptedException {
-        dispatcher.setThrottle(512, 1,TimeUnit.SECONDS);
+    public void givenDownloadStartsOnMeteredConnection_whenJobSetChangedToDisableMeteredConnection_shouldStopAndSetStatus()
+            throws InterruptedException {
+
+        cloudServerDispatcher.setThrottle(512, 1,TimeUnit.SECONDS);
 
         DownloadJobItemWithDownloadSetItem item =
                 umAppDatabase.getDownloadJobItemDao().findWithDownloadSetItemByUid(
                         (int)testDownloadJobItemUid);
         DownloadJobItemRunner jobItemRunner =
-                new DownloadJobItemRunner(context,item, mockedNetworkManager, umAppDatabase, endPoint);
+                new DownloadJobItemRunner(context,item, mockedNetworkManager, umAppDatabase, cloudEndPoint);
 
         umAppDatabase.getConnectivityStatusDao().update(ConnectivityStatus.STATE_METERED);
         umAppDatabase.getDownloadSetDao().setMeteredConnectionBySetUid(
@@ -438,14 +536,16 @@ public class DownloadJobItemRunnerTest {
     }
 
     @Test
-    public void givenDownloadStarted_whenConnectionGoesOff_shouldStopAndSetStatusToWaiting() throws InterruptedException {
-        dispatcher.setThrottle(512, 1,TimeUnit.SECONDS);
+    public void givenDownloadStarted_whenConnectionGoesOff_shouldStopAndSetStatusToWaiting()
+            throws InterruptedException {
+
+        cloudServerDispatcher.setThrottle(512, 1,TimeUnit.SECONDS);
 
         DownloadJobItemWithDownloadSetItem item =
                 umAppDatabase.getDownloadJobItemDao().findWithDownloadSetItemByUid(
                         (int)testDownloadJobItemUid);
         DownloadJobItemRunner jobItemRunner =
-                new DownloadJobItemRunner(context,item, mockedNetworkManager, umAppDatabase, endPoint);
+                new DownloadJobItemRunner(context,item, mockedNetworkManager, umAppDatabase, cloudEndPoint);
 
         new Thread(jobItemRunner).start();
 
@@ -474,5 +574,251 @@ public class DownloadJobItemRunnerTest {
                 item.getDjiStatus(), JobStatus.WAITING_FOR_CONNECTION);
     }
 
+
+    @Test
+    public void givenDownloadLocallyAvailable_whenDownloadStarted_shouldDownloadFromLocalNode()
+            throws InterruptedException {
+
+        entryStatusResponse.setAvailable(true);
+        umAppDatabase.getEntryStatusResponseDao().insert(entryStatusResponse);
+
+        DownloadJobItemWithDownloadSetItem item =
+                umAppDatabase.getDownloadJobItemDao().findWithDownloadSetItemByUid(
+                        (int)testDownloadJobItemUid);
+        DownloadJobItemRunner jobItemRunner =
+                new DownloadJobItemRunner(context,item, mockedNetworkManager, umAppDatabase, cloudEndPoint);
+
+        new Thread(jobItemRunner).start();
+
+
+        CountDownLatch latch = new CountDownLatch(1);
+        UmObserver<Integer> itemStatusObserver = (newStatus) -> {
+            if(newStatus == JobStatus.COMPLETE)
+                latch.countDown();
+        };
+
+        UmLiveData<Integer> statusLiveData = umAppDatabase.getDownloadJobItemDao().getLiveStatus(
+                item.getDjiUid());
+        statusLiveData.observeForever(itemStatusObserver);
+
+        latch.await(6, TimeUnit.SECONDS);
+
+        assertTrue("File downloaded from peer web server",
+                mockPeerWebServer.getRequestCount() >=1);
+        assertEquals("Cloud mock server received no requests", 0 ,
+                mockCloudWebServer.getRequestCount());
+
+        item = umAppDatabase.getDownloadJobItemDao().findWithDownloadSetItemByUid(
+                        (int)testDownloadJobItemUid);
+        assertEquals("File downloaded successfully",item.getDjiStatus(),
+                JobStatus.COMPLETE);
+
+
+    }
+
+    @Test
+    public void givenDownloadStartedWithoutFileAvailable_whenDownloadBecomesLocallyAvailable_shouldSwitchToDownloadLocally()
+            throws InterruptedException {
+
+        cloudServerDispatcher.setThrottle(512, 1,TimeUnit.SECONDS);
+
+        entryStatusResponse.setAvailable(false);
+        entryStatusResponse.setErId((int)
+                umAppDatabase.getEntryStatusResponseDao().insert(entryStatusResponse));
+
+        DownloadJobItemWithDownloadSetItem item =
+                umAppDatabase.getDownloadJobItemDao().findWithDownloadSetItemByUid(
+                        (int)testDownloadJobItemUid);
+        DownloadJobItemRunner jobItemRunner =
+                new DownloadJobItemRunner(context,item, mockedNetworkManager, umAppDatabase, cloudEndPoint);
+
+        new Thread(jobItemRunner).start();
+
+        CountDownLatch latch = new CountDownLatch(1);
+        UmObserver<Integer> statusObserver = (status) -> {
+            if(status == JobStatus.COMPLETE)
+                latch.countDown();
+        };
+        UmLiveData<Integer> statusLiveData = umAppDatabase.getDownloadJobItemDao().getLiveStatus(
+                item.getDjiUid());
+        statusLiveData.observeForever(statusObserver);
+
+        Thread.sleep(TimeUnit.SECONDS.toMillis(3));
+
+        entryStatusResponse.setAvailable(true);
+        umAppDatabase.getEntryStatusResponseDao().insert(entryStatusResponse);
+
+        latch.await(100, TimeUnit.SECONDS);
+
+        assertTrue("File downloaded from peer web server",
+                mockPeerWebServer.getRequestCount() >= 1
+                        && mockCloudWebServer.getRequestCount() >= 1);
+
+
+        item = umAppDatabase.getDownloadJobItemDao().findWithDownloadSetItemByUid(
+                (int)testDownloadJobItemUid);
+        assertEquals("File downloaded successfully",item.getDjiStatus(),
+                JobStatus.COMPLETE);
+
+        List<DownloadJobItemHistory> histories = umAppDatabase.getDownloadJobItemHistoryDao().
+                findHistoryItemsByDownloadJobItem(item.getDjiUid());
+
+        assertTrue("First download request was sent to the cloud web server and " +
+                        "last one was to peer web server",
+                histories.get(0).getMode() == DownloadJobItemHistory.MODE_CLOUD
+                        && histories.get(1).getMode() == DownloadJobItemHistory.MODE_LOCAL);
+
+
+    }
+
+    @Test
+    public void givenDownloadLocallyAvailableFromBadNode_whenDownloadStarted_shouldDownloadFromCloud()
+            throws InterruptedException {
+
+        when(mockedNetworkManager.makeEntryStatusTask(any(Object.class),
+                any(BleMessage.class),any(NetworkNode.class),
+                any(BleMessageResponseListener.class))).thenReturn(mockedEntryStatusTask);
+
+        entryStatusResponse.setAvailable(true);
+        umAppDatabase.getEntryStatusResponseDao().insert(entryStatusResponse);
+
+        //add failure history (bad not)
+        for(int i = 0; i < 4; i++){
+            history.setSuccessful(false);
+            umAppDatabase.getDownloadJobItemHistoryDao().insert(history);
+        }
+
+
+        DownloadJobItemWithDownloadSetItem item =
+                umAppDatabase.getDownloadJobItemDao().findWithDownloadSetItemByUid(
+                        (int)testDownloadJobItemUid);
+        DownloadJobItemRunner jobItemRunner =
+                new DownloadJobItemRunner(context,item, mockedNetworkManager, umAppDatabase, cloudEndPoint);
+
+        new Thread(jobItemRunner).start();
+
+
+        CountDownLatch latch = new CountDownLatch(1);
+        UmObserver<Integer> statusObserver = (status) -> {
+            if(status == JobStatus.COMPLETE)
+                latch.countDown();
+        };
+        UmLiveData<Integer> statusLiveData = umAppDatabase.getDownloadJobItemDao().getLiveStatus(
+                item.getDjiUid());
+        statusLiveData.observeForever(statusObserver);
+
+        latch.await(10, TimeUnit.SECONDS);
+
+        assertTrue("File downloaded from cloud web server",
+                mockCloudWebServer.getRequestCount() >=1 && mockPeerWebServer == null);
+
+        item = umAppDatabase.getDownloadJobItemDao().findWithDownloadSetItemByUid(
+                (int)testDownloadJobItemUid);
+        assertEquals("File downloaded successfully from cloud",item.getDjiStatus(),
+                JobStatus.COMPLETE);
+    }
+
+
+    @Test
+    public void givenDownloadLocallyAvailableWhenConnected_whenPeerFailsRepeatedly_shouldDownloadFromCloud()
+            throws Exception {
+
+        startPeerWebServer();
+
+        mockPeerServerDispatcher.setNumTimesToFail(4);
+
+        entryStatusResponse.setAvailable(true);
+        umAppDatabase.getEntryStatusResponseDao().insert(entryStatusResponse);
+
+        DownloadJobItemWithDownloadSetItem item =
+                umAppDatabase.getDownloadJobItemDao().findWithDownloadSetItemByUid(
+                        (int)testDownloadJobItemUid);
+
+        DownloadJobItemRunner jobItemRunner =
+                new DownloadJobItemRunner(context,item, mockedNetworkManager, umAppDatabase, cloudEndPoint);
+
+
+        new Thread(jobItemRunner).start();
+
+        CountDownLatch latch = new CountDownLatch(1);
+
+        UmObserver<Integer> statusObserver = (status) -> {
+            if(status == JobStatus.COMPLETE)
+                latch.countDown();
+        };
+
+        UmLiveData<Integer> statusLiveData = umAppDatabase.getDownloadJobItemDao().getLiveStatus(
+                item.getDjiUid());
+        statusLiveData.observeForever(statusObserver);
+
+        Thread.sleep(TimeUnit.SECONDS.toMillis(1));
+
+        entryStatusResponse.setAvailable(true);
+        umAppDatabase.getEntryStatusResponseDao().insert(entryStatusResponse);
+
+        latch.await(10, TimeUnit.SECONDS);
+
+
+        assertTrue("File downloaded from cloud web server after failure when try " +
+                        "to download from peer",
+                mockPeerWebServer.getRequestCount() >=1 && mockPeerWebServer.getRequestCount()>=1);
+
+        item = umAppDatabase.getDownloadJobItemDao().findWithDownloadSetItemByUid(
+                (int)testDownloadJobItemUid);
+
+        assertEquals("File downloaded successfully from cloud",
+                item.getDjiStatus(), JobStatus.COMPLETE);
+
+    }
+
+    @Test
+    public void givenDownloadLocallyAvailableWhenDisconnected_whenPeerFailsRepeatedly_shouldStopAndSetStatus() throws InterruptedException {
+
+        entryStatusResponse.setAvailable(true);
+        umAppDatabase.getEntryStatusResponseDao().insert(entryStatusResponse);
+
+        DownloadJobItemWithDownloadSetItem item =
+                umAppDatabase.getDownloadJobItemDao().findWithDownloadSetItemByUid(
+                        (int)testDownloadJobItemUid);
+        DownloadJobItemRunner jobItemRunner =
+                new DownloadJobItemRunner(context,item, mockedNetworkManager, umAppDatabase, cloudEndPoint);
+
+        doAnswer((invocation -> {
+            umAppDatabase.getConnectivityStatusDao().update(ConnectivityStatus.STATE_CONNECTING_LOCAL);
+            return null;
+        })).when(mockedNetworkManager).connectToWiFi(eq(groupBle.getSsid()), eq(groupBle.getPassphrase()));
+
+
+
+        new Thread(jobItemRunner).start();
+
+        CountDownLatch latch = new CountDownLatch(1);
+
+        UmObserver<Integer> statusObserver = (status) -> {
+            if(status == JobStatus.WAITING_FOR_CONNECTION)
+                latch.countDown();
+        };
+        UmLiveData<Integer> statusLiveData = umAppDatabase.getDownloadJobItemDao().getLiveStatus(
+                item.getDjiUid());
+        statusLiveData.observeForever(statusObserver);
+
+        Thread.sleep(TimeUnit.SECONDS.toMillis(1));
+
+        entryStatusResponse.setAvailable(true);
+        umAppDatabase.getEntryStatusResponseDao().insert(entryStatusResponse);
+
+        latch.await(15, TimeUnit.SECONDS);
+
+
+        //Verify that connection failed at least once when trying to connect to a peer
+        verify(mockedNetworkManager, atLeast(1))
+                .connectToWiFi(eq(groupBle.getSsid()),eq(groupBle.getPassphrase()));
+
+        item = umAppDatabase.getDownloadJobItemDao().findWithDownloadSetItemByUid(
+                (int)testDownloadJobItemUid);
+
+        assertEquals("File failed to be downloaded from peer and status was updated",
+                item.getDjiStatus(), JobStatus.WAITING_FOR_CONNECTION);
+    }
 
 }

@@ -15,6 +15,9 @@ public abstract class ConnectivityStatusDao{
     @UmQuery("UPDATE ConnectivityStatus SET connectivityState = :connectivityState")
     public abstract int update(int connectivityState);
 
+    @UmQuery("UPDATE ConnectivityStatus SET connectivityState = :connectivityState , wifiSsid = :wifiSsid")
+    public abstract int update(int connectivityState, String wifiSsid);
+
     @UmQuery("SELECT ConnectivityStatus.* FROM ConnectivityStatus LIMIT 1")
     public abstract UmLiveData<ConnectivityStatus> getStatusLive();
 

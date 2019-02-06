@@ -1,23 +1,30 @@
 package com.ustadmobile.port.sharedse.networkmanager;
 
+import com.google.gson.Gson;
 import com.ustadmobile.core.db.JobStatus;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.UmObserver;
 import com.ustadmobile.lib.db.entities.ConnectivityStatus;
 import com.ustadmobile.lib.db.entities.ContentEntryFileStatus;
+import com.ustadmobile.lib.db.entities.DownloadJobItemHistory;
 import com.ustadmobile.lib.db.entities.DownloadJobItemWithDownloadSetItem;
+import com.ustadmobile.lib.db.entities.EntryStatusResponse;
 import com.ustadmobile.lib.db.entities.NetworkNode;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static com.ustadmobile.lib.db.entities.ConnectivityStatus.STATE_CONNECTED_LOCAL;
+import static com.ustadmobile.lib.db.entities.ConnectivityStatus.STATE_CONNECTING_LOCAL;
+import static com.ustadmobile.lib.db.entities.DownloadJobItemHistory.MODE_CLOUD;
+import static com.ustadmobile.lib.db.entities.DownloadJobItemHistory.MODE_LOCAL;
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.WIFI_GROUP_CREATION_RESPONSE;
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.WIFI_GROUP_REQUEST;
 
@@ -45,6 +52,10 @@ public class DownloadJobItemRunner implements Runnable, BleMessageResponseListen
 
     private UmObserver<ConnectivityStatus> statusObserver;
 
+    private UmObserver<EntryStatusResponse> entryStatusObserver;
+
+    private UmLiveData<EntryStatusResponse> entryStatusLiveData;
+
     private UmObserver<Integer> downloadJobItemObserver;
 
     private UmLiveData<Integer> downloadJobItemLiveData;
@@ -53,7 +64,7 @@ public class DownloadJobItemRunner implements Runnable, BleMessageResponseListen
 
     private UmObserver<Boolean> downloadSetConnectivityObserver;
 
-    private CountDownLatch localConnectLatch;
+    private CountDownLatch localConnectLatch = new CountDownLatch(1);
 
     private volatile ResumableHttpDownload httpDownload;
 
@@ -67,9 +78,17 @@ public class DownloadJobItemRunner implements Runnable, BleMessageResponseListen
 
     private AtomicInteger meteredConnectionAllowed = new AtomicInteger(-1);
 
-    @SuppressWarnings("unused") //will be needed for p2p
+    private AtomicInteger availableLocally = new AtomicInteger(-1);
+
     private Object context;
 
+    private WiFiDirectGroupBle wiFiDirectGroupBle;
+
+    private NetworkNode currentNetworkNode;
+
+    private EntryStatusResponse currentContentEntryFileStatus;
+
+    private static final int BAD_PEER_FAILURE_THRESHOLD = 3;
 
     /**
      * Timer task to keep track of the download status
@@ -103,7 +122,6 @@ public class DownloadJobItemRunner implements Runnable, BleMessageResponseListen
         this.downloadItem = downloadItem;
         this.appDb = appDb;
         this.endpointUrl = endpointUrl;
-        this.localConnectLatch = new CountDownLatch(1);
         this.context = context;
         this.httpDownloadRef = new AtomicReference<>();
     }
@@ -120,15 +138,15 @@ public class DownloadJobItemRunner implements Runnable, BleMessageResponseListen
                     if(meteredConnectionAllowed.get() == 0) {
                         stopAsync(JobStatus.WAITING_FOR_CONNECTION);
                     }
-
                     break;
 
                 case ConnectivityStatus.STATE_DISCONNECTED:
                     stopAsync(JobStatus.WAITING_FOR_CONNECTION);
                     break;
 
-                case ConnectivityStatus.STATE_CONNECTED_LOCAL:
+                case STATE_CONNECTED_LOCAL:
                     localConnectLatch.countDown();
+                    startDownload(false);
                     break;
 
             }
@@ -160,6 +178,24 @@ public class DownloadJobItemRunner implements Runnable, BleMessageResponseListen
         }
     }
 
+    /**
+     * Handle changes triggered when file which wasn't available locally changes
+     * @param entryStatusResponse new file entry status
+     */
+    private void handleContentEntryFileStatus(EntryStatusResponse entryStatusResponse){
+        availableLocally.set(entryStatusResponse.isAvailable() ? 1:0);
+        if(availableLocally.get() == 1 && !currentContentEntryFileStatus.isAvailable()){
+            this.currentNetworkNode =
+                    appDb.getNetworkNodeDao().findNodeById(entryStatusResponse.getErNodeId());
+            startLocalConnectionHandShake();
+        }
+    }
+
+
+    /**
+     * Stop download task Async
+     * @param newStatus net status
+     */
     private void stopAsync(int newStatus){
         runnerStatus.set(JobStatus.STOPPING);
         new Thread(() -> stop(newStatus)).start();
@@ -182,6 +218,7 @@ public class DownloadJobItemRunner implements Runnable, BleMessageResponseListen
             statusLiveData.removeObserver(statusObserver);
             downloadJobItemLiveData.removeObserver(downloadJobItemObserver);
             downloadSetConnectivityData.removeObserver(downloadSetConnectivityObserver);
+            entryStatusLiveData.removeObserver(entryStatusObserver);
 
             statusCheckTimer.cancel();
 
@@ -194,6 +231,8 @@ public class DownloadJobItemRunner implements Runnable, BleMessageResponseListen
     public void run() {
         runnerStatus.set(JobStatus.RUNNING);
         updateItemStatus(JobStatus.RUNNING);
+        networkManager.startMonitoringAvailability(this,
+                Arrays.asList(downloadItem.getDjiContentEntryFileUid()));
 
         statusLiveData = appDb.getConnectivityStatusDao().getStatusLive();
         downloadJobItemLiveData = appDb.getDownloadJobItemDao().getLiveStatus(downloadItem.getDjiUid());
@@ -203,52 +242,64 @@ public class DownloadJobItemRunner implements Runnable, BleMessageResponseListen
                 appDb.getDownloadSetDao().getLiveMeteredNetworkAllowed(downloadItem
                         .getDownloadSetItem().getDsiDsUid());
 
+        entryStatusLiveData = appDb.getEntryStatusResponseDao()
+                .getLiveEntryStatus(downloadItem.getDjiContentEntryFileUid());
+
         downloadSetConnectivityObserver = this::handleDownloadSetMeteredConnectionAllowedChanged;
         statusObserver = this::handleConnectivityStatusChanged;
         downloadJobItemObserver = this::handleDownloadJobItemStatusChanged;
+        entryStatusObserver = this::handleContentEntryFileStatus;
         statusLiveData.observeForever(statusObserver);
         downloadJobItemLiveData.observeForever(downloadJobItemObserver);
         downloadSetConnectivityData.observeForever(downloadSetConnectivityObserver);
+        entryStatusLiveData.observeForever(entryStatusObserver);
 
+        currentContentEntryFileStatus = appDb.getEntryStatusResponseDao()
+                .findByContentEntryFileUid(downloadItem.getDjiContentEntryFileUid());
 
-        startDownload();
-/*
-        ContentEntryFileStatus entryFileStatus = appDb.getContentEntryFileStatusDao().
-                findByContentEntryFileUid(downloadItem.getDjiContentEntryFileUid());
-        if(entryFileStatus == null){
-            startDownload();
+        checkWhereToDownloadFrom();
+    }
+
+    private void checkWhereToDownloadFrom(){
+        long currentTimeStamp = System.currentTimeMillis();
+        long minLastSeen = currentTimeStamp - TimeUnit.MINUTES.toMillis(1);
+        long maxFailureFromTimeStamp = currentTimeStamp - TimeUnit.MINUTES.toMillis(5);
+
+        currentNetworkNode = appDb.getNetworkNodeDao()
+                .findNodeWithContentFileEntry(downloadItem.getDjiContentEntryFileUid(),
+                        minLastSeen,BAD_PEER_FAILURE_THRESHOLD,maxFailureFromTimeStamp);
+
+        if(currentContentEntryFileStatus == null || currentNetworkNode == null){
+            startDownload(true);
         }else{
-            //request connection info from the peer node
-            */
-/*List<EntryStatusResponseWithNode> statusResponseWithNodes =
-                    appDb.getEntryStatusResponseDao().findByEntryIdAndAvailability(entryFileStatus.)*//*
-
-
-            try {
-                NetworkNode networkNode = new NetworkNode();
-                BleMessage requestGroupCreation = new BleMessage(WIFI_GROUP_REQUEST,new byte[]{});
-                networkManager.sendMessage(context,requestGroupCreation,
-                        networkNode,this);
-
-                localConnectLatch.wait(TimeUnit.SECONDS.toMillis(10));
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            //start download only if WiFiP2P is connected successfully
-            if(connectivityStatus.getConnectivityState()
-                    == ConnectivityStatus.STATE_CONNECTED_LOCAL){
-                startDownload();
-            }
+            startLocalConnectionHandShake();
         }
-*/
+    }
+
+
+    /**
+     * Start local peers connection handshake
+     */
+    private void startLocalConnectionHandShake(){
+        BleMessage requestGroupCreation = new BleMessage(WIFI_GROUP_REQUEST,new byte[0]);
+        networkManager.sendMessage(context,requestGroupCreation,
+                currentNetworkNode,this);
+        try {
+            localConnectLatch.await(10,TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        if(connectivityStatus != null &&
+                connectivityStatus.getConnectivityState() == STATE_CONNECTING_LOCAL){
+            stopAsync(JobStatus.WAITING_FOR_CONNECTION);
+        }
     }
 
     /**
      * Start downloading a file
      */
-    private void startDownload(){
-        String fileHref = endpointUrl + "ContentEntryFileServer/" + downloadItem
-                .getDjiContentEntryFileUid();
+    private void startDownload(boolean fromCloud){
 
         int attemptsRemaining = 3;
 
@@ -256,16 +307,28 @@ public class DownloadJobItemRunner implements Runnable, BleMessageResponseListen
         StatusCheckTask statusCheckTask = new StatusCheckTask();
         statusCheckTimer.scheduleAtFixedRate(statusCheckTask,
                 0, TimeUnit.SECONDS.toMillis(1));
+        DownloadJobItemHistory history = new DownloadJobItemHistory();
+        history.setMode(fromCloud ? MODE_CLOUD : MODE_LOCAL);
+        history.setDownloadJobItemId(downloadItem.getDjiUid());
+        history.setNetworkNode(fromCloud ? 0L: currentNetworkNode.getNodeId());
+        history.setUrl(getFileUrl(fromCloud));
+        history.setId((int) appDb.getDownloadJobItemHistoryDao().insert(history));
         do {
             try {
                 appDb.getDownloadJobItemDao().incrementNumAttempts(downloadItem.getDjiUid());
-                httpDownload = new ResumableHttpDownload(fileHref, downloadItem.getDestinationFile());
+                httpDownload = new ResumableHttpDownload(getFileUrl(fromCloud),
+                        downloadItem.getDestinationFile());
                 httpDownloadRef.set(httpDownload);
+                history.setStartTime(System.currentTimeMillis());
                 downloaded = httpDownload.download();
             }catch(IOException e) {
                 e.printStackTrace();
                 statusCheckTask.cancel();
             }
+
+            history.setEndTime(System.currentTimeMillis());
+            history.setSuccessful(downloaded);
+            appDb.getDownloadJobItemHistoryDao().update(history);
 
             attemptsRemaining--;
         }while(runnerStatus.get() == JobStatus.RUNNING && !downloaded && attemptsRemaining > 0);
@@ -279,7 +342,22 @@ public class DownloadJobItemRunner implements Runnable, BleMessageResponseListen
             appDb.getContentEntryFileStatusDao().insert(fileStatus);
         }
 
-        stop(downloaded ? JobStatus.COMPLETE : JobStatus.FAILED);
+        if(wiFiDirectGroupBle != null && !downloaded){
+            checkWhereToDownloadFrom();
+        }else{
+            stop(downloaded ? JobStatus.COMPLETE : JobStatus.FAILED);
+        }
+    }
+
+
+    private String getFileUrl(boolean isFromCloud){
+        if(isFromCloud){
+            return endpointUrl + "ContentEntryFileServer/" + downloadItem
+                    .getDjiContentEntryFileUid();
+        }else{
+            return wiFiDirectGroupBle.getEndpoint() + "ContentEntryFileServer/" + downloadItem
+                    .getDjiContentEntryFileUid();
+        }
     }
 
     /**
@@ -295,7 +373,10 @@ public class DownloadJobItemRunner implements Runnable, BleMessageResponseListen
     @Override
     public void onResponseReceived(String sourceDeviceAddress, BleMessage response) {
         if(response.getRequestType() == WIFI_GROUP_CREATION_RESPONSE){
-            appDb.getConnectivityStatusDao().update(ConnectivityStatus.STATE_CONNECTING_LOCAL);
+            this.wiFiDirectGroupBle = new Gson().fromJson(new String(response.getPayload()),
+                            WiFiDirectGroupBle.class);
+            networkManager.connectToWiFi(wiFiDirectGroupBle.getSsid(),
+                    wiFiDirectGroupBle.getPassphrase());
         }
     }
 }

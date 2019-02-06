@@ -1,11 +1,7 @@
 package com.ustadmobile.port.sharedse.networkmanager;
 
 import com.ustadmobile.core.db.UmAppDatabase;
-import com.ustadmobile.core.db.dao.CrawlJobDao;
-import com.ustadmobile.core.db.dao.DownloadJobDao;
-import com.ustadmobile.core.db.dao.DownloadSetDao;
 import com.ustadmobile.core.db.dao.NetworkNodeDao;
-import com.ustadmobile.core.fs.db.ContainerFileHelper;
 import com.ustadmobile.core.impl.AppConfig;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UmCallback;
@@ -23,12 +19,7 @@ import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.lib.db.entities.ContainerFileEntry;
 import com.ustadmobile.lib.db.entities.CrawlJob;
-import com.ustadmobile.lib.db.entities.CrawlJobItem;
-import com.ustadmobile.lib.db.entities.DownloadJob;
-import com.ustadmobile.lib.db.entities.DownloadJobItemWithDownloadSetItem;
-import com.ustadmobile.lib.db.entities.DownloadJobWithDownloadSet;
 import com.ustadmobile.lib.db.entities.DownloadSet;
-import com.ustadmobile.lib.db.entities.DownloadSetItem;
 import com.ustadmobile.lib.db.entities.EntryStatusResponse;
 import com.ustadmobile.lib.db.entities.NetworkNode;
 import com.ustadmobile.lib.db.entities.OpdsEntry;
@@ -48,7 +39,6 @@ import net.lingala.zip4j.core.ZipFile;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -572,7 +562,7 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
 //        for(OpdsEntryWithRelations entry : rootEntries) {
 //            jobItems.add(new DownloadSetItem(entry, job));
 //        }
-//        UmAppDatabase.getInstance(getContext()).getDownloadSetItemDao().insertList(jobItems);
+//        UmAppDatabase.getInstance(getContext()).getDownloadSetItemDao().insert(jobItems);
 //
 //        return job;
         return null;

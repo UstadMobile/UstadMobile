@@ -1,5 +1,6 @@
 package com.ustadmobile.core.db.dao;
 
+import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmOnConflictStrategy;
@@ -18,34 +19,41 @@ public abstract class EntryStatusResponseDao {
     @UmInsert(onConflict = UmOnConflictStrategy.REPLACE)
     public abstract Long[] insert(List<EntryStatusResponse> responses);
 
+    @UmInsert(onConflict = UmOnConflictStrategy.REPLACE)
+    public abstract long insert(EntryStatusResponse response);
 
-    @UmQuery("SELECT (COUNT(*) > 0) FROM EntryStatusResponse WHERE entryId = :entryId and available = 1 ")
-    public abstract boolean isEntryAvailableLocally(String entryId);
 
 
     @UmQuery("SELECT * FROM EntryStatusResponse " +
-            " LEFT JOIN NetworkNode ON EntryStatusResponse.responderNodeId = NetworkNode.nodeId " +
-            "WHERE entryId = :entryId AND available = :available ")
-    public abstract List<EntryStatusResponseWithNode> findByEntryIdAndAvailability(long entryId, boolean available);
+            " LEFT JOIN NetworkNode ON EntryStatusResponse.erNodeId = NetworkNode.nodeId " +
+            "WHERE erContentEntryFileUid = :erContentEntryFileUid AND EntryStatusResponse.available = :available ")
+    public abstract List<EntryStatusResponseWithNode> findByEntryIdAndAvailability(long erContentEntryFileUid, boolean available);
 
-    @UmQuery("SELECT * FROM EntryStatusResponse WHERE entryid=:entryId AND responderNodeId=:nodeId")
-    public abstract EntryStatusResponse findByEntryIdAndNetworkNode(long entryId, int nodeId);
+    @UmQuery("SELECT * FROM EntryStatusResponse WHERE erContentEntryFileUid =:erContentEntryFileUid AND erNodeId=:erNodeId")
+    public abstract EntryStatusResponse findByEntryIdAndNetworkNode(long erContentEntryFileUid, long erNodeId);
+
+    @UmQuery("SELECT * FROM EntryStatusResponse WHERE erContentEntryFileUid =:erContentEntryFileUid")
+    public abstract EntryStatusResponse findByContentEntryFileUid(long erContentEntryFileUid);
+
+    @UmQuery("SELECT * FROM EntryStatusResponse WHERE erContentEntryFileUid = :erContentEntryFileUid")
+    public abstract UmLiveData<EntryStatusResponse> getLiveEntryStatus(long erContentEntryFileUid);
+
 
     public static class EntryWithoutRecentResponse {
-        private long contentEntryUid;
+        private long contentEntryFileUid;
 
         private int nodeId;
 
-        public long getContentEntryUid() {
-            return contentEntryUid;
-        }
-
-        public void setContentEntryUid(long contentEntryUid) {
-            this.contentEntryUid = contentEntryUid;
-        }
-
         public int getNodeId() {
             return nodeId;
+        }
+
+        public long getContentEntryFileUid() {
+            return contentEntryFileUid;
+        }
+
+        public void setContentEntryFileUid(long contentEntryFileUid) {
+            this.contentEntryFileUid = contentEntryFileUid;
         }
 
         public void setNodeId(int nodeId) {
@@ -53,10 +61,10 @@ public abstract class EntryStatusResponseDao {
         }
     }
 
-    @UmQuery("SELECT ContentEntry.contentEntryUid, NetworkNode.nodeId FROM ContentEntry, NetworkNode " +
-            " WHERE ContentEntry.contentEntryUid IN (:contentUids) " +
+    @UmQuery("SELECT ContentEntryFile.contentEntryFileUid, NetworkNode.nodeId FROM ContentEntryFile, NetworkNode " +
+            " WHERE ContentEntryFile.contentEntryFileUid IN (:contentUids) " +
             " AND NetworkNode.nodeId IN (:nodeIds)  " +
-            " AND NOT EXISTS(Select id FROM EntryStatusResponse WHERE entryId = ContentEntry.contentEntryUid" +
-            " AND responderNodeId = NetworkNode.nodeId) ORDER BY NetworkNode.nodeId")
-    public abstract List<EntryWithoutRecentResponse> findEntriesWithoutRecentResponse(List<Long> contentUids, List<Integer> nodeIds);
+            " AND NOT EXISTS(Select erId FROM EntryStatusResponse WHERE erContentEntryFileUid = ContentEntryFile.contentEntryFileUid" +
+            " AND erNodeId = NetworkNode.nodeId) ORDER BY NetworkNode.nodeId")
+    public abstract List<EntryWithoutRecentResponse> findEntriesWithoutRecentResponse(List<Long> contentUids, List<Long> nodeIds);
 }
