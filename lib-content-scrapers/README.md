@@ -141,3 +141,22 @@ Download all ddl content for all 3 languages
 
 >$ gradlew scrapeContent -PfindDdlUrl="https://www.ddl.af/en/resources" -PfindDdlDir="C:\ddl\"
 
+#### Find all Khan Academy Content
+
+Download all content from Khan Academy 
+
+>$ gradlew scrapeContent -PfindKhanUrl="https://www.khanacademy.org/" -PfindKhanDir="C:\khan\"
+
+
+#### Find All VOA Content
+
+>$ gradlew scrapeContent -PfindVoaUrl="https://learningenglish.voanews.com/" -PfindVoaDir="C:\voa\"
+
+#### Find All Etekkato Content
+
+>$ gradlew scrapeContent -PfindEtekUrl="http://www.etekkatho.org/subjects/" -PfindEtekDir="C:\etek\"
+
+
+### Find All Epub in Folder 
+
+>$ gradlew scrapeContent -PfindFolderName="Asafeer" -PfindFolderDir="C:\asafeer\"

@@ -32,6 +32,11 @@
         android:required="false" />
 
     <application android:supportsRtl="true">
+        <activity
+            android:theme="@style/ThemeOnboarding"
+            android:name="com.ustadmobile.port.android.view.OnBoardingActivity"
+            android:noHistory="true"/>
+
         <provider
             android:name="android.support.v4.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"
@@ -72,6 +77,11 @@
         <activity
             android:name="com.ustadmobile.port.android.view.WebChunkActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
+            android:label=""
+            android:theme="@style/Theme.UstadTheme" />
+        <activity
+            android:name="com.ustadmobile.port.android.view.VideoPlayerActivity"
+            android:configChanges="keyboardHidden|keyboard|screenSize"
             android:label=""
             android:theme="@style/Theme.UstadTheme" />
         <activity

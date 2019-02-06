@@ -33,46 +33,60 @@
             android:layout_margin="8dp"
             android:textColor="@android:color/black"
             android:textSize="20sp"
-            tools:text="Content Title"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/entry_detail_thumbnail"
-            app:layout_constraintTop_toBottomOf="@id/entry_detail_toolbar" />
+            app:layout_constraintTop_toBottomOf="@id/entry_detail_toolbar"
+            tools:text="Content Title" />
 
         <TextView
             android:id="@+id/entry_detail_author"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
-            android:textSize="16sp"
-            tools:text="Author"
             android:textColor="@android:color/black"
+            android:textSize="16sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/entry_detail_thumbnail"
-            app:layout_constraintTop_toBottomOf="@id/entry_detail_title" />
+            app:layout_constraintTop_toBottomOf="@id/entry_detail_title"
+            tools:text="Author" />
 
         <TextView
             android:id="@+id/entry_detail_license"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
-            android:textSize="14sp"
-            tools:text="BY_SA"
             android:textColor="@android:color/black"
+            android:textSize="14sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/entry_detail_thumbnail"
-            app:layout_constraintTop_toBottomOf="@id/entry_detail_author" />
+            app:layout_constraintTop_toBottomOf="@id/entry_detail_author"
+            tools:text="BY_SA" />
 
-        <Button
-            android:id="@+id/entry_detail_button"
+        <LinearLayout
+            android:id="@+id/entry_detail_anchor_download"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
-            android:background="@color/primary"
-            android:text="Download"
-            android:textColor="@android:color/white"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/entry_detail_thumbnail" />
+            app:layout_constraintTop_toBottomOf="@id/entry_detail_thumbnail"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/entry_detail_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/primary"
+                android:textColor="@android:color/white" />
+
+            <com.ustadmobile.port.android.view.DownloadProgressView
+                android:id="@+id/entry_detail_progress"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone" />
+
+        </LinearLayout>
+
 
         <View
             android:id="@+id/library_size_divider"
@@ -82,7 +96,7 @@
             android:background="@color/secondary_text"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/entry_detail_button" />
+            app:layout_constraintTop_toBottomOf="@id/entry_detail_anchor_download" />
 
 
         <ImageView
@@ -90,10 +104,10 @@
             android:layout_width="@dimen/dimen_16dp"
             android:layout_height="@dimen/dimen_16dp"
             android:layout_marginTop="@dimen/dimen_8dp"
-            android:src="@drawable/download_archive_tray"
             app:layout_constraintEnd_toEndOf="@id/entry_detail_content_size"
             app:layout_constraintStart_toStartOf="@id/entry_detail_content_size"
-            app:layout_constraintTop_toBottomOf="@id/library_size_divider" />
+            app:layout_constraintTop_toBottomOf="@id/library_size_divider"
+            app:srcCompat="@drawable/download_archive_tray" />
 
 
         <TextView
@@ -157,9 +171,9 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
-            android:textSize="16sp"
-            android:textColor="@android:color/black"
             android:text="Also Available in:"
+            android:textColor="@android:color/black"
+            android:textSize="16sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/language_divider" />
@@ -169,6 +183,7 @@
             android:id="@+id/entry_detail_flex"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:nestedScrollingEnabled="false"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/entry_detail_available_label" />
@@ -179,8 +194,8 @@
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
             android:text="SEE ALSO"
-            android:textSize="16sp"
             android:textColor="@android:color/black"
+            android:textSize="16sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/entry_detail_flex" />

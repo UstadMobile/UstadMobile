@@ -128,12 +128,8 @@ public class TestPrathamContentScraper {
         DdlContentScraper scraper = new DdlContentScraper(
                 mockWebServer.url("json/com/ustadmobile/lib/contentscrapers/ddl/ddlcontent.txt").toString(),
                 tmpDir);
-        try {
-            scraper.scrapeContent();
-            scraper.getParentSubjectAreas();
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
+        scraper.scrapeContent();
+        scraper.getParentSubjectAreas();
 
         File contentFolder = new File(tmpDir, "ddlcontent");
         Assert.assertEquals(true, contentFolder.isDirectory());

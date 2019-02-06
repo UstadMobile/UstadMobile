@@ -68,111 +68,6 @@
 
 
 
-    <!-- CDN invalidation script -->
-    <script async="" src="//www.googletagmanager.com/gtm.js?id=GTM-NFJ3V2"></script><script src="/media/buildnumber.js"> </script>
-    <!-- End CDN invalidation script -->
-<script type="text/javascript" charset="utf-8" async="" data-requirecontext="_" data-requiremodule="main" src="//st3.ck12.org/media/build-20181015164501/main.js"></script><script type="text/javascript" charset="utf-8" async="" data-requirecontext="_" data-requiremodule="flxweb.settings" src="//st3.ck12.org/media/build-20181015164501/js/flxweb.settings.js"></script><script id="googleClassroomScript" type="text/javascript" src="https://apis.google.com/js/platform.js" gapi_processed="true"></script><script type="text/javascript" charset="utf-8" async="" data-requirecontext="_" data-requiremodule="elementarymath/controllers/elementarymath" src="//st3.ck12.org/media/build-20181015164501/elementarymath/js/controllers/elementarymath.js"></script><script type="text/javascript" charset="utf-8" async="" data-requirecontext="_" data-requiremodule="elementarymath/views/elementarymath.view" src="//st3.ck12.org/media/build-20181015164501/elementarymath/js/views/elementarymath.view.js"></script><script type="text/javascript" charset="utf-8" async="" data-requirecontext="_" data-requiremodule="elementarymath/models/browse.models" src="//st3.ck12.org/media/build-20181015164501/elementarymath/js/models/browse.models.js"></script><script type="text/javascript" charset="utf-8" async="" data-requirecontext="_" data-requiremodule="elementarymath/templates/elementarymath.templates" src="//st3.ck12.org/media/build-20181015164501/elementarymath/js/templates/elementarymath.templates.js"></script><script type="text/javascript" charset="utf-8" async="" data-requirecontext="_" data-requiremodule="common/views/modal.view" src="//st3.ck12.org/media/build-20181015164501/common/js/views/modal.view.js"></script><script type="text/javascript" charset="utf-8" async="" data-requirecontext="_" data-requiremodule="hammer" src="//st3.ck12.org/media/build-20181015164501/common/vendor/jquery-plugins/hammer/jquery.hammer.min.js"></script><script type="text/javascript" charset="utf-8" async="" data-requirecontext="_" data-requiremodule="elementarymath/templates/browse.main.html" src="//st3.ck12.org/media/build-20181015164501/elementarymath/js/templates/browse.main.html.js"></script><script type="text/javascript" charset="utf-8" async="" data-requirecontext="_" data-requiremodule="elementarymath/templates/browse.topicList.html" src="//st3.ck12.org/media/build-20181015164501/elementarymath/js/templates/browse.topicList.html.js"></script><script type="text/javascript" charset="utf-8" async="" data-requirecontext="_" data-requiremodule="elementarymath/templates/browse.conceptTrack.html" src="//st3.ck12.org/media/build-20181015164501/elementarymath/js/templates/browse.conceptTrack.html.js"></script><script type="text/javascript" charset="utf-8" async="" data-requirecontext="_" data-requiremodule="elementarymath/templates/browse.conceptTrackSmall.html" src="//st3.ck12.org/media/build-20181015164501/elementarymath/js/templates/browse.conceptTrackSmall.html.js"></script><script type="text/javascript" charset="utf-8" async="" data-requirecontext="_" data-requiremodule="elementarymath/templates/browse.conceptTrackList.html" src="//st3.ck12.org/media/build-20181015164501/elementarymath/js/templates/browse.conceptTrackList.html.js"></script><script type="text/javascript" charset="utf-8" async="" data-requirecontext="_" data-requiremodule="elementarymath/templates/browse.conceptTrackListSmall.html" src="//st3.ck12.org/media/build-20181015164501/elementarymath/js/templates/browse.conceptTrackListSmall.html.js"></script><script type="text/javascript" charset="utf-8" async="" data-requirecontext="_" data-requiremodule="common/templates/uikitModal.html" src="//st3.ck12.org/media/build-20181015164501/common/js/templates/uikitModal.html.js"></script><link rel="stylesheet" type="text/css" href="/media/common/css/shareplane.css"><script type="text/javascript" charset="UTF-8" src="https://maps.googleapis.com/maps-api-v3/api/js/34/14/intl/en_au/common.js"></script><script type="text/javascript" charset="UTF-8" src="https://maps.googleapis.com/maps-api-v3/api/js/34/14/intl/en_au/util.js"></script><script type="text/javascript" charset="UTF-8" src="https://maps.googleapis.com/maps-api-v3/api/js/34/14/intl/en_au/stats.js"></script></head>
-<body class="" style="height: auto;">
-
-    <script type="text/javascript">
-/* Check for app-context:
- * -- set the <html> data-app-context = {app-context}
- */
-var _context = sessionStorage.getItem('app-context');
-if (_context && _context === 'lti-app' && window.name !=="lms-context-override"){
-    try {
-	// Set data-app-context for css
-        document.getElementsByTagName('html')[0].setAttribute('data-app-context','lti_app');
-	// Set window lmsContext for js
-	window.lmsContext='lti-app';
-    } catch(e){
-        console.log("Error setting lms app context:"+ String(e));
-    }
-}
-
-function closeLTIHelpBanner(){
-    try {
-        document.getElementById('lti_help_banner').remove();
-    } catch(e){
-	console.log("Could not close banner:"+ String(e));
-    }
-}
-
-/*
- *  Need to show a loading icon on some pages.
- *  - browse, library
- */
-function loadingCheck(){
-try {
-    var pathname = window.location.pathname;
-    if (/library|browse/.test(pathname)){
-	// Create loading icon and append to body
-	var loading_div = document.createElement("div");
-	loading_div.setAttribute('id','lti-loading-icon');
-	loading_div.setAttribute('class','loading-icon js-loading-icon');
-	var img_el = document.createElement("img");
-	img_el.setAttribute('alt','loading');
-	img_el.setAttribute('src','/media/common/images/icon_loading.gif');
-
-	loading_div.appendChild(img_el);
-	document.body.appendChild(loading_div);
-
-	if (document.readyState === 'complete'){
-	    removeLoadingIcon();
-	}
-
-	document.addEventListener('readystatechange', function(evnt){
-	    if (evnt.target.readyState ==='complete'){
-		removeLoadingIcon();
-	    }
-	}, false);
-    }
-
-} catch(e){
-    console.log("Error in loadingCheck: "+ String(e));
-}
-}
-
-// Remove the loading icon after 2 seconds
-function removeLoadingIcon(){
-try {
-    window.setTimeout(function(){
-        $('#lti-loading-icon').remove();
-	console.log("removed loading icon");
-    }, 1500);
-} catch(e){
-    console.log("Error in removeLoadingIcon: "+ String(e));
-}
-}
-</script>
-
-
-    	<script type="text/javascript">
-// GA global object
-var _gaq = _gaq || [];
-// GTM dataLayer for global data push
-dataLayer = [];
-
-
-var pageType = pageType || "";
-var pageSubType = pageSubType || "";
-var gtm_pageType = pageType;
-var gtm_pageSubType = pageSubType;
-</script>
-
-<!-- Google Tag Manager -->
-
-<noscript><iframe src="//www.googletagmanager.com/ns.html?id=GTM-NFJ3V2"
-height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-'//www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-})(window,document,'script','dataLayer','GTM-NFJ3V2');</script>
-<!-- End Google Tag Manager -->
-
-
-
 
 
 <header class="ff4-compt original-nav ">
@@ -347,7 +242,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 						<li class="user-image-small">
 							<a id="side_nav_username" class="cursor-default">
 
-									<span class="menu-item-img"><img src="https://lh6.googleusercontent.com/-PStava_PLBA/AAAAAAAAAAI/AAAAAAAAAAA/AAnnY7q4riUFo2XRUClnjGVIz3497xNz9g/mo/photo.jpg" width="28" height="28"></span>
 
 								<span class="relative menu-item-title">Samih </span>
 							</a>
@@ -376,7 +270,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 					<div id="nav_search" class="right search-field-container-large">
 						<input type="text" value="" placeholder="What do you want to learn today?" class="search-large header-search search-input js-search-large ui-autocomplete-input" data-autocompleteclass="search" autocomplete="off"><span role="status" aria-live="polite" class="ui-helper-hidden-accessible"></span>
 						<span id="loading-search" class="custom-loading-search right hide js-loading-icon">
-							<img alt="loading" src="//img3.ck12.org/media/build-20181015164501/common/images/loading.gif">
+
 						</span>
 						<div class="left pointer search-button-large js-search-content">
 							<i class="icon-search"></i>
@@ -393,7 +287,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 			    	<div id="nav_search_medium" class="left search-field-container">
 			        	<input type="text" class="search-field search-input js-search-large ui-autocomplete-input" value="" placeholder="What do you want to learn today?" data-autocompleteclass="search" autocomplete="off"><span role="status" aria-live="polite" class="ui-helper-hidden-accessible"></span>
 						<span id="loading-search-medium" class="custom-loading-search-medium right hide js-loading-icon">
-							<img alt="loading" src="//img3.ck12.org/media/build-20181015164501/common/images/loading.gif">
+
 						</span>
 			        	<div class="left pointer search-button js-search-content">
 			          		<i class="icon-search"></i>
@@ -432,7 +326,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
 	<div id="page-disable" class="page-disable js-page-disable hide"></div>
  	<div id="loading-icon" class="loading-icon js-loading-icon hide">
-        <img alt="loading" src="//img2.ck12.org/media/build-20181015164501/common/images/icon_loading.gif">
+
 	</div>
 	<div id="elementarymath_contentwrap" class="row collapse"><div class="row collapse elementary-header hide-for-small">
 	<h1>
@@ -593,7 +487,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 		<ul>
 
 
-				<li><a href="/json/com/ustadmobile/lib/contentscrapers/ck12/index/plix-list.txt">Add to 10 with Images</a></li>
+
 
 
 		</ul>
@@ -685,11 +579,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 					</div>
 					<div class="app-store-icons">
 						<a id="apple-store-link" target="_blank" rel="noopener" href="https://itunes.apple.com/us/app/ck-12/id909343639?ls=1&amp;mt=8">
-							<img class="apple-store-image" alt="Download on the app store" src="//img2.ck12.org/media/build-20181015164501/common/images/apple-app-store.svg">
-						</a>
+								</a>
 						<a id="google-store-link" target="_blank" rel="noopener" href="https://play.google.com/store/apps/details?id=org.ck12.app.practice">
-							<img class="google-store-image" alt="Get it on Google Play" src="//img1.ck12.org/media/build-20181015164501/common/images/google-play-badge.png">
-						</a>
+									</a>
 					</div>
 				</div>
 			</div>
@@ -709,7 +601,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 	 		<span class="footer-separator">|</span>
 	 		<span><a id="footer_guidelines" href="https://www.ck12info.org/about//attribution-guidelines/" title="CK-12 Attribution Requirements">Attribution Guide</a></span>
 	 		<span class="footer-separator">|</span>
-	 		<span><a id="footer_license" href="http://creativecommons.org/licenses/by-nc/3.0/" title="CK-12 Foundation is licensed under Creative Commons Attribution-NonCommercial 3.0 Unported (CC BY-NC 3.0)." target="new"><img class="footer_image" src="//img1.ck12.org/media/build-20181015164501/images/icon_licence.png" alt="Attribution-NonCommercial 3.0 Unported"></a></span>
+	 		<span><a id="footer_license" href="http://creativecommons.org/licenses/by-nc/3.0/" title="CK-12 Foundation is licensed under Creative Commons Attribution-NonCommercial 3.0 Unported (CC BY-NC 3.0)." target="new"><img class="footer_image" alt="Attribution-NonCommercial 3.0 Unported"></a></span>
 	 	</div>
 	 	<div class="large-5 small-12 columns footer-version-info-small show-for-small">
 	 		<span>v2.8.2.20181011163612</span>
@@ -734,7 +626,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
 	<!-- All the divs inside this div will be hidden and are used for showing dialogs and messages -->
 	<div id="loading_div">
-		Please wait... <img src="//img1.ck12.org/media/build-20181015164501/images/icon_loading.gif" width="43" height="11">
+		Please wait...
 	</div>
 
 
@@ -745,7 +637,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 	<div id="js_dialog_basic">
 	<!-- used for simple OK/Cancel or Alert type dialogs. -->
 	<div class="dialog_msg"></div>
-	<div class="dialog_loading hide">Please wait...<img src="//img1.ck12.org/media/build-20181015164501/images/icon_loading.gif" width="43" height="11"></div>
+	<div class="dialog_loading hide">Please wait...img width="43" height="11"></div>
 	</div>
 
 </div>
@@ -753,17 +645,17 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
 
 
-<script type="text/javascript" src="//maps.googleapis.com/maps/api/js?libraries=places&amp;key=AIzaSyDVTA7d25Puy-_W52IfMDdflx93pWYDJB8"></script>
-<script src="//st2.ck12.org/media/build-20181015164501/dexterjs/dexterjs.min.js"></script>
+<script type="text/javascript" ></script>
+<script ></script>
 
-<script src="//st1.ck12.org/media/build-20181015164501/common/js/utils/globals.js"></script>
-
-
+<script ></script>
 
 
 
 
-<script data-main="//st3.ck12.org/media/build-20181015164501/main" src="//st3.ck12.org/media/build-20181015164501/common/vendor/requirejs/require.js"></script>
+
+
+<script data-main="//st3.ck12.org/media/build-20181015164501/main" ></script>
 
 
 <script language="javascript" type="text/javascript">
@@ -818,7 +710,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 	    }
             dexterjs.set('config', {mixins:mixins});
        } catch(e) {
-            console.error("Error adding ADS mixins for lti: "+ String(e));
+            console.error("Error adding ADS mixins for lti: "+ plix-listString(e));
        }
     }
     _ck12 = dexterjs;

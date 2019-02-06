@@ -6,6 +6,8 @@ import com.ustadmobile.lib.db.entities.ContentEntryFileStatus;
 import com.ustadmobile.lib.db.entities.ContentEntryFileWithStatus;
 import com.ustadmobile.lib.db.sync.dao.BaseDao;
 
+import java.util.List;
+
 @UmDao
 public abstract class ContentEntryFileStatusDao implements BaseDao<ContentEntryFileStatus> {
 

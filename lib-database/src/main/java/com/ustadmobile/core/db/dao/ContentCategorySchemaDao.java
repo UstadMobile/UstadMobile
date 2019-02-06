@@ -7,6 +7,8 @@ import com.ustadmobile.lib.database.annotation.UmUpdate;
 import com.ustadmobile.lib.db.entities.ContentCategorySchema;
 import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
+import java.util.List;
+
 @UmDao(selectPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
 @UmRepository
 public abstract class ContentCategorySchemaDao implements SyncableDao<ContentCategorySchema, ContentCategorySchemaDao> {
@@ -16,5 +18,8 @@ public abstract class ContentCategorySchemaDao implements SyncableDao<ContentCat
 
     @UmUpdate
     public abstract void update(ContentCategorySchema entity);
+
+    @UmQuery("SELECT ContentCategorySchema.* FROM ContentCategorySchema")
+    public abstract List<ContentCategorySchema> getPublicContentCategorySchemas();
 
 }

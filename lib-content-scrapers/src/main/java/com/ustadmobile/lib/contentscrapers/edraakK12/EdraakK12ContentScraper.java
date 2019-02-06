@@ -5,12 +5,15 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.ScraperConstants;
+import com.ustadmobile.lib.contentscrapers.UMLogUtil;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.exception.ExceptionUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -39,22 +42,23 @@ public class EdraakK12ContentScraper {
     private final String url;
     private final File destinationDirectory;
     boolean contentUpdated = false;
+    private URL scrapUrl;
+    private File courseDirectory;
 
     public static void main(String[] args) {
-        if (args.length != 2) {
-            System.err.println("Usage: <edraak k12 json url> <file destination>");
+        if (args.length < 2) {
+            System.err.println("Usage: <edraak k12 json url> <file destination><optional log{trace, debug, info, warn, error, fatal}>");
             System.exit(1);
         }
-
-        System.out.println(args[0]);
-        System.out.println(args[1]);
+        UMLogUtil.setLevel(args.length == 3 ? args[2] : "");
+        UMLogUtil.logInfo("main url for edraak = " + args[0]);
+        UMLogUtil.logInfo("main file destination = " + args[1]);
         try {
             new EdraakK12ContentScraper(args[0], new File(args[1])).scrapeContent();
         } catch (IOException e) {
-            System.err.println("Exception running scrapeContent");
-            e.printStackTrace();
+            UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
+            UMLogUtil.logError("Exception running scrapeContent");
         }
-
     }
 
     public EdraakK12ContentScraper(String url, File destinationDir) {
@@ -63,8 +67,6 @@ public class EdraakK12ContentScraper {
     }
 
     public static String generateUrl(String baseUrl, String contentId, int programId) {
-        System.out.println("scrapeContent url = " + baseUrl + "component/" + contentId + "/?states_program_id=" + programId);
-
         return baseUrl + "component/" + contentId + "/?states_program_id=" + programId;
     }
 
@@ -75,74 +77,61 @@ public class EdraakK12ContentScraper {
      */
     public void scrapeContent() throws IOException {
 
-        URL scrapUrl;
         try {
             scrapUrl = new URL(url);
         } catch (MalformedURLException e) {
-            System.out.println("Scrap Malformed url" + url);
+            UMLogUtil.logError("Scrap Malformed url" + url);
             throw new IllegalArgumentException("Malformed url" + url, e);
         }
 
         destinationDirectory.mkdirs();
 
         ContentResponse response;
+        HttpURLConnection urlConnection = null;
         try {
-
-            URLConnection urlConnection = scrapUrl.openConnection();
+            urlConnection = (HttpURLConnection) scrapUrl.openConnection();
             urlConnection.setRequestProperty("Accept", "application/json, text/javascript, */*; q=0.01");
             response = new GsonBuilder().create().fromJson(IOUtils.toString(urlConnection.getInputStream(), UTF_ENCODING), ContentResponse.class);
         } catch (IOException | JsonSyntaxException e) {
-            throw new IllegalArgumentException("JSON INVALID", e.getCause());
+            throw new IllegalArgumentException("JSON INVALID for url " + scrapUrl.toString(), e.getCause());
+        }finally {
+            if (urlConnection != null) {
+                urlConnection.disconnect();
+            }
         }
 
-        File courseDirectory = new File(destinationDirectory, response.id);
+        courseDirectory = new File(destinationDirectory, response.id);
         courseDirectory.mkdirs();
 
         if (!ContentScraperUtil.isImportedComponent(response.component_type))
-            throw new IllegalArgumentException("Not an imported content type!");
+            throw new IllegalArgumentException("Not an imported content type! for id" + response.id);
 
         if (response.target_component == null || response.target_component.children == null)
-            throw new IllegalArgumentException("Null target component, or target component children are null");
+            throw new IllegalArgumentException("Null target component, or target component children are null for id " + response.id);
 
-        boolean anyContentUpdated;
+        boolean anyContentUpdated = false;
 
         List<ContentResponse> questionsList = getQuestionSet(response);
-        if(questionsList == null){
-            System.err.println("the question set was not found in its known position for course id " + response.id);
-            throw new IllegalArgumentException("the question set was not found course id" + response.id);
+        try {
+            anyContentUpdated = downloadQuestions(questionsList, courseDirectory, scrapUrl);
+        } catch (IllegalArgumentException e) {
+            UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
+            UMLogUtil.logError("The question set was not available for response id " + response.id);
         }
-
-        anyContentUpdated = downloadQuestions(questionsList, courseDirectory, scrapUrl);
 
         if (ComponentType.ONLINE.getType().equalsIgnoreCase(response.target_component.component_type)) {
 
-            // Contains children which have video and question set list
+            // Contains children which have video
             for (ContentResponse children : response.target_component.children) {
 
                 if (ScraperConstants.ComponentType.VIDEO.getType().equalsIgnoreCase(children.component_type)) {
 
-                    if (children.video_info == null || children.video_info.encoded_videos == null || children.video_info.encoded_videos.isEmpty())
-                        throw new IllegalArgumentException("Component Type was Video but no video found");
-
-                    ContentResponse.Encoded_videos videoHref = selectVideo(children.video_info.encoded_videos);
-                    URL videoUrl;
                     try {
-                        videoUrl = new URL(scrapUrl, videoHref.url);
-                    } catch (MalformedURLException e) {
-                        throw new IllegalArgumentException("video Malformed url", e);
+                        anyContentUpdated = downloadVideo(children);
+                    } catch (IllegalArgumentException e) {
+                        UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
+                        UMLogUtil.logError("Video was unable to download or had no video for response id" + response.id);
                     }
-
-
-                    File videoFile = new File(courseDirectory, VIDEO_MP4);
-                    if (ContentScraperUtil.isContentUpdated(ContentScraperUtil.parseServerDate(videoHref.modified), videoFile)) {
-                        try {
-                            FileUtils.copyURLToFile(videoUrl, videoFile);
-                            anyContentUpdated = true;
-                        } catch (IOException e) {
-                            throw new IllegalArgumentException("Download Video Malformed url", e);
-                        }
-                    }
-
                 }
 
             }
@@ -165,32 +154,67 @@ public class EdraakK12ContentScraper {
                         url.substring(0, url.indexOf("component/")) + response.id,
                         "", "en");
             } catch (ParserConfigurationException | TransformerException e) {
-                e.printStackTrace();
+                UMLogUtil.logError("Failed to created tin can file for response" + response.id);
             }
             anyContentUpdated = true;
         }
 
+        try {
+            checkBeforeCopyToFile(ScraperConstants.EDRAAK_INDEX_HTML_TAG, new File(courseDirectory, INDEX_HTML));
+            checkBeforeCopyToFile(ScraperConstants.JS_TAG, new File(courseDirectory, JQUERY_JS));
+            checkBeforeCopyToFile(ScraperConstants.MATERIAL_CSS_LINK, new File(courseDirectory, MATERIAL_CSS));
+            checkBeforeCopyToFile(ScraperConstants.MATERIAL_JS_LINK, new File(courseDirectory, MATERIAL_JS));
+            checkBeforeCopyToFile(ScraperConstants.REGULAR_ARABIC_FONT_LINK, new File(courseDirectory, ARABIC_FONT_REGULAR));
+            checkBeforeCopyToFile(ScraperConstants.BOLD_ARABIC_FONT_LINK, new File(courseDirectory, ARABIC_FONT_BOLD));
+        } catch (IOException ie) {
+            UMLogUtil.logError("Failed to download the necessary files for response id " + response.id);
+        }
         // nothing changed, keep same files
         if (anyContentUpdated) {
             // add these files into the directory
-            FileUtils.copyToFile(getClass().getResourceAsStream(ScraperConstants.EDRAAK_INDEX_HTML_TAG), new File(courseDirectory, INDEX_HTML));
-            FileUtils.copyToFile(getClass().getResourceAsStream(ScraperConstants.JS_TAG), new File(courseDirectory, JQUERY_JS));
-            FileUtils.copyToFile(getClass().getResourceAsStream(ScraperConstants.MATERIAL_CSS_LINK), new File(courseDirectory, MATERIAL_CSS));
-            FileUtils.copyToFile(getClass().getResourceAsStream(ScraperConstants.MATERIAL_JS_LINK), new File(courseDirectory, ScraperConstants.MATERIAL_JS));
-            FileUtils.copyToFile(getClass().getResourceAsStream(ScraperConstants.REGULAR_ARABIC_FONT_LINK), new File(courseDirectory, ScraperConstants.ARABIC_FONT_REGULAR));
-            FileUtils.copyToFile(getClass().getResourceAsStream(ScraperConstants.BOLD_ARABIC_FONT_LINK), new File(courseDirectory, ScraperConstants.ARABIC_FONT_BOLD));
-
             ContentScraperUtil.zipDirectory(courseDirectory, response.id, destinationDirectory);
         }
         contentUpdated = anyContentUpdated;
     }
 
+    private boolean downloadVideo(ContentResponse children) {
+        if (children.video_info == null || children.video_info.encoded_videos == null || children.video_info.encoded_videos.isEmpty())
+            throw new IllegalArgumentException("Component Type was Video but no video found for response id");
+
+        ContentResponse.Encoded_videos videoHref = selectVideo(children.video_info.encoded_videos);
+        URL videoUrl;
+        try {
+            videoUrl = new URL(scrapUrl, videoHref.url);
+        } catch (MalformedURLException e) {
+            throw new IllegalArgumentException("video Malformed url for response");
+        }
+
+
+        File videoFile = new File(courseDirectory, VIDEO_MP4);
+        if (ContentScraperUtil.isContentUpdated(ContentScraperUtil.parseServerDate(videoHref.modified), videoFile)) {
+            try {
+                FileUtils.copyURLToFile(videoUrl, videoFile);
+                return true;
+            } catch (IOException e) {
+                throw new IllegalArgumentException("Download Video Malformed url for response");
+            }
+        }
+        return false;
+    }
+
     /**
      * Check if any new content has been updated after scraping
+     *
      * @return Return true if content has been updated
      */
-    public boolean hasContentUpdated(){
+    public boolean hasContentUpdated() {
         return contentUpdated;
+    }
+
+    private void checkBeforeCopyToFile(String fileToDownload, File locationToSave) throws IOException {
+        if (!ContentScraperUtil.fileHasContent(locationToSave)) {
+            FileUtils.copyToFile(getClass().getResourceAsStream(fileToDownload), locationToSave);
+        }
     }
 
     /**
@@ -199,7 +223,7 @@ public class EdraakK12ContentScraper {
      * @param response depending on type of course (lesson or test), the question set is in different locations
      * @return the question set if found
      */
-    public List<ContentResponse> getQuestionSet(ContentResponse response) {
+    List<ContentResponse> getQuestionSet(ContentResponse response) {
 
         if (ComponentType.ONLINE.getType().equalsIgnoreCase(response.target_component.component_type)) {
 
