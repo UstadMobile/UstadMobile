@@ -6,6 +6,7 @@ import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.database.annotation.UmRepository;
 import com.ustadmobile.lib.db.entities.ContentEntryFile;
+import com.ustadmobile.lib.db.entities.ContentEntryFileWithStatus;
 import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
 import java.util.List;
@@ -26,5 +27,10 @@ public abstract class ContentEntryFileDao implements SyncableDao<ContentEntryFil
             "ON ContentEntryFile.contentEntryFileUid = ContentEntryContentEntryFileJoin.cecefjContentEntryFileUid " +
             "WHERE ContentEntryContentEntryFileJoin.cecefjContentEntryUid = :contentEntryUid")
     public abstract List<ContentEntryFile> findFilesByContentEntryUid(long contentEntryUid);
+
+    @UmQuery("SELECT ContentEntryFile.*, ContentEntryFileStatus.* FROM ContentEntryFile " +
+            "LEFT JOIN ContentEntryFileStatus ON ContentEntryFile.contentEntryFileUid = ContentEntryFileStatus.cefsContentEntryFileUid " +
+            "WHERE ContentEntryFile.contentEntryFileUid = :contentEntryFileUid")
+    public abstract ContentEntryFileWithStatus findByUidWithStatus(long contentEntryFileUid);
 
 }
