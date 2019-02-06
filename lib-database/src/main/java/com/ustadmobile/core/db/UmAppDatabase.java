@@ -192,7 +192,7 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
             public void onCreate(DoorDbAdapter dbHelper) {
                 if(dbHelper.getDbType() == UmDbType.TYPE_SQLITE) {
                     dbHelper.execSql("CREATE TRIGGER upd_ce_status AFTER UPDATE ON ContentEntry " +
-                            "WHEN EXISTS(SELECT cesUid FROM ContentEntryStatus WHERE cesContentEntryUid = NEW.contentEntryUid) " +
+                            "WHEN EXISTS(SELECT cesUid FROM ContentEntryStatus WHERE cesUid = NEW.contentEntryUid) " +
                             "BEGIN " +
                             "UPDATE ContentEntryStatus SET invalidated = 1 WHERE cesUid = NEW.contentEntryUid; " +
                             "END");
