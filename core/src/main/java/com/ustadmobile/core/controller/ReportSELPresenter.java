@@ -194,36 +194,34 @@ public class ReportSELPresenter extends UstadBaseController<ReportSELView> {
             List<ClazzMemberWithPerson> students = clazzToStudents.get(clazzName);
 
             UmSheet clazzSheet = new UmSheet(clazzName);
-            int r = 0;
-            int c = 0;
             String nominating = "Nominating";
             //1st corner is "Nominating"
-            clazzSheet.addValueToSheet(r, c, nominating);
+            clazzSheet.addValueToSheet(0, 0, nominating);
 
+
+
+            int r = 0;
+            int c = 1;
             for (ClazzMemberWithPerson everyStudent : students) {
 
                 String studentName = everyStudent.getPerson().getFirstNames() + " " +
                         everyStudent.getPerson().getLastName();
 
-                //Add Nominees
-                if(c > 0) {
-                    clazzSheet.addValueToSheet(0, c, studentName);
-                    nomineeToIdMap.put(everyStudent.getClazzMemberUid(), c);
-                }
+                clazzSheet.addValueToSheet(0, c, studentName);
+                nomineeToIdMap.put(everyStudent.getClazzMemberUid(), c);
 
-                //Add Nominators
-                if (c == 0) {
-                    r = 1;
-                    for (ClazzMemberWithPerson es : students) {
-                        nominatorToIdMap.put(es.getClazzMemberUid(), r);
-                        String nominatorName = es.getPerson().getFirstNames() + " " +
-                                es.getPerson().getLastName();
-                        clazzSheet.addValueToSheet(r, c, nominatorName);
-                        r++;
-                    }
-                }
                 c++;
             }
+
+            r = 1;
+            for (ClazzMemberWithPerson es : students) {
+                nominatorToIdMap.put(es.getClazzMemberUid(), r);
+                String nominatorName = es.getPerson().getFirstNames() + " " +
+                        es.getPerson().getLastName();
+                clazzSheet.addValueToSheet(r, 0, nominatorName);
+                r++;
+            }
+
             clazzSheetTemplate.put(clazzName, clazzSheet);
         }
     }
