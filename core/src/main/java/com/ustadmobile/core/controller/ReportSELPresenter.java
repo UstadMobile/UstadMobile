@@ -294,7 +294,6 @@ public class ReportSELPresenter extends UstadBaseController<ReportSELView> {
                     UmSheet clazzQuestionSheet = new UmSheet(sheetTitleShort,
                             newValues, newMap);
 
-                    //TODO: Put in values to the sheet : Check
                     Iterator<Long> questionDataIterator = questionData.keySet().iterator();
                     while(questionDataIterator.hasNext()){
                         Long nominatorUid = questionDataIterator.next();
