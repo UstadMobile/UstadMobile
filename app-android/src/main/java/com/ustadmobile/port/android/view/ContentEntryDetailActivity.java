@@ -170,19 +170,21 @@ public class ContentEntryDetailActivity extends UstadBaseActivity implements Con
                     button.setOnClickListener(view ->
                             entryDetailPresenter.handleDownloadButtonClick(isDownloadComplete));
 
-            } else {
-                button.setVisibility(View.GONE);
-                downloadProgressView.setVisibility(View.VISIBLE);
-                if (status.getTotalSize() > 0) {
-                    downloadProgressView.setProgress((float) status.getBytesDownloadSoFar() /
-                            (float) status.getTotalSize());
+                } else {
+                    button.setVisibility(View.GONE);
+                    downloadProgressView.setVisibility(View.VISIBLE);
+                    if (status.getTotalSize() > 0) {
+                        downloadProgressView.setProgress((float) status.getBytesDownloadSoFar() /
+                                (float) status.getTotalSize());
+                    }
+                    downloadProgressView.setStatusText("Downloading");
                 }
-                downloadProgressView.setStatusText("Downloading");
+            } else {
+                button.setText(R.string.download);
             }
-        }
 
-    });
-}
+        });
+    }
 
     @Override
     public void handleFileOpenError() {
