@@ -20,4 +20,8 @@ public interface DownloadDialogView extends UstadView {
 
     void setStackOptionsVisible(boolean visible);
 
+    int [] getOptionIds();
+
+    void cancelDialog();
+
 }

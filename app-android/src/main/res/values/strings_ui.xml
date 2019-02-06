@@ -259,4 +259,12 @@
     <string name="onboarding_offline_sharing">Share offline</string>
     <string name="onboarding_offline_sharing_subheading">Share content at high speed with any other user nearby.</string>
 
+    <string name="download_pause_stacked_label">Pause download</string>
+    <string name="download_delete_btn_label">Delete</string>
+    <string name="download_cancel_stacked_label">Cancel download</string>
+    <string name="download_cancel_label">Cancel</string>
+    <string name="download_continue_stacked_label">Continue download</string>
+    <string name="download_continue_btn_label">Continue</string>
+    <string name="download_wifi_only">WiFi only</string>
+
 </resources>

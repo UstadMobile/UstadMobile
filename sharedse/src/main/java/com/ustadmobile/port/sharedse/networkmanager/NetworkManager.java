@@ -614,7 +614,7 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
 //        UstadMobileSystemImpl.l(UMLog.DEBUG, 0, "Setting status to paused on " +
 //                pausedItems.size() + " items");
 //        for(DownloadJobItemWithDownloadSetItem pausedItem : pausedItems) {
-//            dbManager.getDownloadJobItemDao().updateStatus(pausedItem.getDownloadJobItemId(),
+//            dbManager.getDownloadJobItemDao().update(pausedItem.getDownloadJobItemId(),
 //                    NetworkTask.STATUS_PAUSED);
 //            dbManager.getOpdsEntryStatusCacheDao().handleContainerDownloadPaused(
 //                    pausedItem.getDownloadSetItem().getEntryId());

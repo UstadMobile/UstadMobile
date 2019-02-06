@@ -79,7 +79,7 @@ public class ContentEntry {
     }
 
     public ContentEntry(String title, String description, boolean leaf, boolean publik) {
-        this.title = title;;
+        this.title = title;
         this.description = description;
         this.leaf = leaf;
         this.publik = publik;

@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    android:background="@android:color/white"
+    android:padding="@dimen/dimen_16dp"
+    android:orientation="vertical"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/download_option_status_text"
+        android:textSize="@dimen/text_title_medium"
+        android:layout_width="match_parent"
+        android:text="Sample text "
+        android:textColor="@color/text_primary"
+        android:lineSpacingExtra="@dimen/dimen_4dp"
+        android:layout_height="wrap_content" />
+
+    <RelativeLayout
+        android:background="@android:color/white"
+        android:focusable="true"
+        android:clickable="true"
+        android:foreground="?android:attr/selectableItemBackground"
+        android:id="@+id/wifi_only_option_holder"
+        android:layout_marginTop="@dimen/dimen_16dp"
+        android:paddingTop="@dimen/dimen_10dp"
+        android:paddingBottom="@dimen/dimen_10dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <CheckBox
+            android:id="@+id/wifi_only_option"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:layout_centerVertical="true"
+            android:layout_marginStart="@dimen/dimen_16dp"
+            android:layout_toEndOf="@+id/wifi_only_option"
+            android:textSize="@dimen/text_body"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_marginTop="@dimen/dimen_16dp"
+        android:id="@+id/stacked_option_holder"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <Button
+            android:id="@+id/action_btn_pause_download"
+            style="@style/Widget.AppCompat.Button.Borderless.Colored"
+            android:text="Pause Download"
+            android:textSize="@dimen/text_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@null"
+            android:clickable="true"
+            android:focusable="true"
+            android:layout_alignParentEnd="true"
+            android:paddingRight="8dp"
+            android:paddingLeft="8dp"
+            />
+
+        <Button
+            android:layout_marginTop="@dimen/dimen_10dp"
+            android:layout_below="@+id/action_btn_pause_download"
+            android:id="@+id/action_btn_cancel_download"
+            style="@style/Widget.AppCompat.Button.Borderless.Colored"
+            android:text="canvel download"
+            android:textSize="@dimen/text_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@null"
+            android:clickable="true"
+            android:focusable="true"
+            android:layout_alignParentEnd="true"
+            android:paddingRight="8dp"
+            android:paddingLeft="8dp"
+            />
+
+        <Button
+            android:layout_marginTop="@dimen/dimen_10dp"
+            android:layout_below="@+id/action_btn_cancel_download"
+            android:id="@+id/action_btn_continue_download"
+            style="@style/Widget.AppCompat.Button.Borderless.Colored"
+            android:text="continue download"
+            android:textSize="@dimen/text_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@null"
+            android:clickable="false"
+            android:focusable="false"
+            android:layout_alignParentEnd="true"
+            android:paddingRight="8dp"
+            android:paddingLeft="8dp"
+            />
+
+    </RelativeLayout>
+
+</LinearLayout>

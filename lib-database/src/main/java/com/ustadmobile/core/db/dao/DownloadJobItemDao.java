@@ -15,13 +15,46 @@ import java.util.List;
 @UmDao
 public abstract class DownloadJobItemDao {
 
+    public static class DownloadJobItemToBeCreated {
+
+        long downloadSetItemUid;
+
+        long contentEntryFileUid;
+
+        long fileSize;
+
+        public long getFileSize() {
+            return fileSize;
+        }
+
+        public void setFileSize(long fileSize) {
+            this.fileSize = fileSize;
+        }
+
+        public long getDownloadSetItemUid() {
+            return downloadSetItemUid;
+        }
+
+        public void setDownloadSetItemUid(long downloadSetItemUid) {
+            this.downloadSetItemUid = downloadSetItemUid;
+        }
+
+        public long getContentEntryFileUid() {
+            return contentEntryFileUid;
+        }
+
+        public void setContentEntryFileUid(long contentEntryFileUid) {
+            this.contentEntryFileUid = contentEntryFileUid;
+        }
+    }
+
     /**
      * Insert a list of DownloadJobItems
      *
      * @param jobRunItems List of DownloadJobItem to insert
      */
     @UmInsert
-    public abstract void insertList(List<DownloadJobItem> jobRunItems);
+    public abstract void insert(List<DownloadJobItem> jobRunItems);
 
     /**
      * Insert a single DownloadJobItem
@@ -44,12 +77,12 @@ public abstract class DownloadJobItemDao {
             "djiStatus = :djiStatus, downloadedSoFar = :downloadedSoFar, " +
             "downloadLength = :downloadLength, currentSpeed = :currentSpeed " +
             " WHERE djiUid = :djiUid")
-    public abstract void updateDownloadJobItemStatus(int djiUid, int djiStatus,
+    public abstract void updateDownloadJobItemStatus(long djiUid, int djiStatus,
                                                      long downloadedSoFar, long downloadLength,
                                                      long currentSpeed);
 
     @UmQuery("UPDATE DownloadJobItem SET djiStatus = :status WHERE djiUid = :djiUid")
-    public abstract void updateStatus(int djiUid, int status);
+    public abstract void updateStatus(long djiUid, long status);
 
     @UmQuery("UPDATE DownloadJobItem SET djiStatus = :djiStatus WHERE djiDjUid = :djiDjUid")
     public abstract void updateStatusByJobId(long djiDjUid, int djiStatus);
@@ -61,9 +94,30 @@ public abstract class DownloadJobItemDao {
             "DownloadJobItem " +
             "LEFT JOIN DownloadSetItem ON DownloadJobItem.djiDsiUid = DownloadSetItem.dsiUid " +
             "WHERE DownloadJobItem.djiUid = :djiUid")
-    public abstract DownloadJobItemWithDownloadSetItem findWithDownloadSetItemByUid(int djiUid);
+    public abstract DownloadJobItemWithDownloadSetItem findWithDownloadSetItemByUid(long djiUid);
 
     @UmQuery("SELECT djiStatus FROM DownloadJobItem WHERE djiUid = :djiUid")
-    public abstract UmLiveData<Integer> getLiveStatus(int djiUid);
+    public abstract UmLiveData<Integer> getLiveStatus(long djiUid);
+
+    @UmQuery("SELECT * FROM DownloadJobItem")
+    public abstract UmLiveData<List<DownloadJobItem>> findAllLive();
+
+    @UmQuery("SELECT * FROM DownloadJobItem")
+    public abstract List<DownloadJobItem> findAll();
+
+    @UmQuery("SELECT DownloadSetItem.dsiUid,\n" +
+            "ContentEntryFile.contentEntryFileUid,\n" +
+            "ContentEntryFile.fileSize\n" +
+            "FROM DownloadSetItem\n" +
+            "LEFT JOIN ContentEntryContentEntryFileJoin ON DownloadSetItem.dsiContentEntryUid = ContentEntryContentEntryFileJoin.cecefjContentEntryUid\n" +
+            "LEFT JOIN ContentEntryFile ON ContentEntryFile.lastModified = \n" +
+            "\t(SELECT MAX(lastModified) FROM ContentEntryContentEntryFileJoin AS InnerCEFJ\n" +
+            "\t\tLEFT JOIN ContentEntryFile ON InnerCEFJ.cecefjContentEntryUid = ContentEntryFile.contentEntryFileUid\n" +
+            "\t    WHERE InnerCEFJ.cecefjContentEntryUid = DownloadSetItem.dsiContentEntryUid)\n" +
+            "WHERE DownloadSetItem.dsiDsUid = :downloadSetUid")
+    public abstract List<DownloadJobItemToBeCreated> findJobItemsToBeCreatedForDownloadSet(long downloadSetUid);
+
+    @UmQuery("SELECT * FROM DownloadJobItem WHERE djiDjUid = :djiDjUid")
+    public abstract List<DownloadJobItem> findByJobUid(long djiDjUid);
 
 }

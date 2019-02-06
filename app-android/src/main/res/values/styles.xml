@@ -16,4 +16,9 @@
         <item name="android:windowBackground">@color/icons</item>
     </style>
 
+    <style name="AppTheme.Button.Stacked" parent="Widget.AppCompat.Button.Colored">
+        <item name="colorButtonNormal">@color/icons</item>
+        <item name="android:textColor">@color/text_primary</item>
+    </style>
+
 </resources>

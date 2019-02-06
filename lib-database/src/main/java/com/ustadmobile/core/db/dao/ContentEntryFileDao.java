@@ -33,4 +33,7 @@ public abstract class ContentEntryFileDao implements SyncableDao<ContentEntryFil
             "WHERE ContentEntryFile.contentEntryFileUid = :contentEntryFileUid")
     public abstract ContentEntryFileWithStatus findByUidWithStatus(long contentEntryFileUid);
 
+    @UmQuery("SELECT * FROM ContentEntryFile")
+    public abstract List<ContentEntryFile> findAll();
+
 }

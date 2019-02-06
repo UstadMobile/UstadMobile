@@ -26,6 +26,12 @@ public abstract class ContentEntryParentChildJoinDao
             "cepcjParentContentEntryUid = :parentUid AND cepcjChildContentEntryUid = :childUid")
     public abstract ContentEntryParentChildJoin findJoinByParentChildUuids(long parentUid, long childUid);
 
+
+    @UmQuery("SELECT cepcjChildContentEntryUid FROM ContentEntryParentChildJoin " +
+            "WHERE cepcjParentContentEntryUid IN (:parentUids)")
+    public abstract List<Long> findChildEntriesByParents(List<Long> parentUids);
+
+
     @UmUpdate
     public abstract void update(ContentEntryParentChildJoin entity);
 

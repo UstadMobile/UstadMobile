@@ -39,4 +39,9 @@ public abstract class DownloadSetDao {
     @UmQuery("UPDATE DownloadSet SET meteredNetworkAllowed = :meteredNetworkAllowed WHERE dsUid = :dsUid")
     public abstract void setMeteredConnectionBySetUid(long dsUid, boolean meteredNetworkAllowed);
 
+    @UmQuery("SELECT dsUid FROM DownloadSet WHERE dsRootContentEntryUid = :contentEntryUid")
+    public abstract long findDownloadSetUidByRootContentEntryUid(long contentEntryUid);
+
+
+
 }

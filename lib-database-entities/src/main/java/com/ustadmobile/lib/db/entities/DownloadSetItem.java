@@ -11,13 +11,13 @@ import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 public class DownloadSetItem {
 
     @UmPrimaryKey(autoIncrement = true)
-    private int dsiUid;
+    private long dsiUid;
 
     /**
      * Foreign key for DownloadSet.dsUid (many to one relationship)
      */
     @UmIndexField
-    private int dsiDsUid;
+    private long dsiDsUid;
 
     @UmIndexField
     private long dsiContentEntryUid;
@@ -31,19 +31,24 @@ public class DownloadSetItem {
         this.dsiContentEntryUid = contentEntry.getContentEntryUid();
     }
 
-    public int getDsiUid() {
+    public DownloadSetItem(long downloadSetUid, long contentEntryUid){
+        this.dsiDsUid = downloadSetUid;
+        this.dsiContentEntryUid = contentEntryUid;
+    }
+
+    public long getDsiUid() {
         return dsiUid;
     }
 
-    public void setDsiUid(int dsiUid) {
+    public void setDsiUid(long dsiUid) {
         this.dsiUid = dsiUid;
     }
 
-    public int getDsiDsUid() {
+    public long getDsiDsUid() {
         return dsiDsUid;
     }
 
-    public void setDsiDsUid(int dsiDsUid) {
+    public void setDsiDsUid(long dsiDsUid) {
         this.dsiDsUid = dsiDsUid;
     }
 
