@@ -36,6 +36,8 @@ public class ReportSELPresenter extends UstadBaseController<ReportSELView> {
     LinkedHashMap<String, LinkedHashMap<String, Map<Long, List<Long>>>> clazzMap;
     HashMap<String, List<ClazzMemberWithPerson>> clazzToStudents;
     HashMap<String, UmSheet> clazzSheetTemplate;
+    HashMap<Long, Integer> nominatorToIdMap;
+    HashMap<Long, Integer> nomineeToIdMap;
 
 
     public ReportSELPresenter(Object context, Hashtable arguments, ReportSELView view) {
@@ -186,6 +188,8 @@ public class ReportSELPresenter extends UstadBaseController<ReportSELView> {
 
     private void createClassSheetTemplates(){
         clazzSheetTemplate = new HashMap<>();
+        nominatorToIdMap = new HashMap<>();
+        nomineeToIdMap = new HashMap<>();
         for (String clazzName : clazzToStudents.keySet()) {
             List<ClazzMemberWithPerson> students = clazzToStudents.get(clazzName);
 
@@ -193,19 +197,25 @@ public class ReportSELPresenter extends UstadBaseController<ReportSELView> {
             int r = 0;
             int c = 0;
             String nominating = "Nominating";
-            clazzSheet.addValueToSheet(0, 0, nominating);
+            //1st corner is "Nominating"
+            clazzSheet.addValueToSheet(r, c, nominating);
+
             for (ClazzMemberWithPerson everyStudent : students) {
 
                 String studentName = everyStudent.getPerson().getFirstNames() + " " +
                         everyStudent.getPerson().getLastName();
 
+                //Add Nominees
                 if(c > 0) {
                     clazzSheet.addValueToSheet(0, c, studentName);
+                    nomineeToIdMap.put(everyStudent.getClazzMemberUid(), c);
                 }
 
+                //Add Nominators
                 if (c == 0) {
                     r = 1;
                     for (ClazzMemberWithPerson es : students) {
+                        nominatorToIdMap.put(es.getClazzMemberUid(), r);
                         clazzSheet.addValueToSheet(r, c, studentName);
                         r++;
                     }
@@ -216,7 +226,6 @@ public class ReportSELPresenter extends UstadBaseController<ReportSELView> {
         }
     }
 
-
     /**
      * Generates the excel file with th ecurrently set data.
      * @param title             The title of the excel file
@@ -226,13 +235,18 @@ public class ReportSELPresenter extends UstadBaseController<ReportSELView> {
     public void dataToXLSX(String title, String xlsxReportPath, String theWorkingPath){
 
         try {
-            File xlsxFile = ZipUtil.createEmptyZipFile(xlsxReportPath);
+            ZipUtil.createEmptyZipFile(xlsxReportPath);
 
             UmXLSX umXLSX = new UmXLSX(title, xlsxReportPath, theWorkingPath);
 
+            /*
+                Sheet order
+                Class A - Question 1 ]- Uses Class A template
+                Class A - Question 2 ]
+                Class B - Question 1 ]- Uses Class B template
+                Class B - Question 2 ]
 
-
-            //TODO: Generate sheets from the SEL Report data
+             */
             Iterator<String> clazzIterator = clazzMap.keySet().iterator();
             while(clazzIterator.hasNext()){
 
@@ -243,38 +257,18 @@ public class ReportSELPresenter extends UstadBaseController<ReportSELView> {
                     String question = questionIterator.next();
                     Map<Long, List<Long>> questionData = clazzData.get(question);
 
+                    UmSheet clazzSheet = clazzSheetTemplate.get(clazzName);
+                    String sheetTitle = clazzName + " " + question;
+                    if(sheetTitle.length() > 30){
+                        sheetTitle = sheetTitle.substring(0,29);
+                    }
+                    String sheetTitleShort = sheetTitle.replace('?',' ');
+
+                    UmSheet clazzQuestionSheet = new UmSheet(sheetTitleShort, clazzSheet.getSheetValues());
+                    umXLSX.addSheet(clazzQuestionSheet);
+
                 }
             }
-
-
-
-            //Testing XLSX:
-
-            UmSheet newSheet = new UmSheet("Test sheet");
-            newSheet.addValueToSheet(0,0, "The");
-            newSheet.addValueToSheet(0,1, "Quick");
-            newSheet.addValueToSheet(0,2, "Brown");
-            newSheet.addValueToSheet(0,3, "Fox");
-            newSheet.addValueToSheet(1,0, "Jumped");
-            newSheet.addValueToSheet(1,1, "Over");
-            newSheet.addValueToSheet(1,2, "The");
-            newSheet.addValueToSheet(1,3, "Lazy");
-            newSheet.addValueToSheet(2,0, "Dog");
-            newSheet.addValueToSheet(2,1, "And");
-            newSheet.addValueToSheet(2,2, "Then");
-            newSheet.addValueToSheet(2,3, "Sleeps");
-
-            umXLSX.addSheet(newSheet);
-
-            UmSheet newSheet2 = new UmSheet("Another Test sheet");
-            newSheet2.addValueToSheet(0,0, "The");
-            newSheet2.addValueToSheet(0,1, "Quick");
-            newSheet2.addValueToSheet(0,2, "Brown");
-            newSheet2.addValueToSheet(0,3, "Fox");
-            newSheet2.addValueToSheet(1,0, "Jumped");
-
-            umXLSX.addSheet(newSheet2);
-
 
             //Generate the xlsx report from the xlsx object.
             umXLSX.createXLSX();

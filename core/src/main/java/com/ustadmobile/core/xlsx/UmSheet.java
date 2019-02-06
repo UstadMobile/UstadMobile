@@ -39,4 +39,19 @@ public class UmSheet{
         sheetValues.add(newTableValue);
     }
 
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public List<TableValue> getSheetValues() {
+        return sheetValues;
+    }
+
+    public void setSheetValues(List<TableValue> sheetValues) {
+        this.sheetValues = sheetValues;
+    }
 }
