@@ -40,7 +40,7 @@ public class ContentEntryListPresenter extends UstadBaseController<ContentEntryL
         UmAppDatabase appDatabase = UmAccountManager.getRepositoryForActiveAccount(getContext());
         contentEntryDao = appDatabase.getContentEntryDao();
         parentUid = Long.valueOf((String) getArguments().get(ARG_CONTENT_ENTRY_UID));
-        viewContract.setContentEntryProvider(contentEntryDao.getChildrenByParentUid(parentUid));
+        viewContract.setContentEntryProvider(contentEntryDao.getChildrenByParentUidWithCategoryFilter(parentUid, 0, 0));
         contentEntryDao.getContentByUuid(parentUid, new UmCallback<ContentEntry>() {
             @Override
             public void onSuccess(ContentEntry result) {
@@ -167,5 +167,12 @@ public class ContentEntryListPresenter extends UstadBaseController<ContentEntryL
         impl.go(DummyView.VIEW_NAME, null, view.getContext(),
                 UstadMobileSystemImpl.GO_FLAG_CLEAR_TOP | UstadMobileSystemImpl.GO_FLAG_SINGLE_TOP);
 
+    }
+
+    public void handleDownloadStatusButtonClicked(ContentEntry entry) {
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        Hashtable args = new Hashtable();
+        args.put("contentEntryUid", entry.getContentEntryUid());
+        impl.go("DownloadDialog", args, getContext());
     }
 }

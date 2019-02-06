@@ -491,7 +491,7 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
                     case UmDbType.TYPE_POSTGRES:
                         //Must use new device bits, otherwise
                         //BEGIN Create ContentEntryStatus (PostgreSQL)
-                        db.execSql("CREATE TABLE IF NOT EXISTS  ContentEntryStatus  ( cesUid  BIGINT PRIMARY KEY  NOT NULL ,  totalSize  BIGINT,  bytesDownloadSoFar  BIGINT,  downloadStatus  INTEGER,  invalidated  BOOL,  leaf  BOOL)");
+                        db.execSql("CREATE TABLE IF NOT EXISTS  ContentEntryStatus  ( cesUid  BIGINT PRIMARY KEY  NOT NULL ,  totalSize  BIGINT,  bytesDownloadSoFar  BIGINT,  downloadStatus  INTEGER,  invalidated  BOOL,  cesLeaf  BOOL)");
                         //END Create ContentEntryStatus (PostgreSQL)
 
                         //BEGIN Create ConnectivityStatus (PostgreSQL)

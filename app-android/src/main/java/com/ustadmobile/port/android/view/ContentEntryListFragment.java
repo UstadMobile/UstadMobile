@@ -19,6 +19,7 @@ import com.ustadmobile.core.controller.ContentEntryListPresenter;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.view.ContentEntryListView;
 import com.ustadmobile.lib.db.entities.ContentEntry;
+import com.ustadmobile.lib.db.entities.ContentEntryWithContentEntryStatus;
 import com.ustadmobile.lib.db.entities.DistinctCategorySchema;
 import com.ustadmobile.lib.db.entities.Language;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
@@ -32,7 +33,7 @@ import java.util.Map;
  * Activities containing this fragment MUST implement the {@link}
  * interface.
  */
-public class ContentEntryListFragment extends UstadBaseFragment implements ContentEntryListView, ContentEntryRecyclerViewAdapter.AdapterViewListener {
+public class ContentEntryListFragment extends UstadBaseFragment implements ContentEntryListView, ContentEntryListRecyclerViewAdapter.AdapterViewListener {
 
 
     private ContentEntryListPresenter entryListPresenter;
@@ -117,11 +118,11 @@ public class ContentEntryListFragment extends UstadBaseFragment implements Conte
     }
 
     @Override
-    public void setContentEntryProvider(UmProvider<ContentEntry> entryProvider) {
-        ContentEntryRecyclerViewAdapter recyclerAdapter = new ContentEntryRecyclerViewAdapter(this);
-        DataSource.Factory<Integer, ContentEntry> factory =
-                (DataSource.Factory<Integer, ContentEntry>) entryProvider.getProvider();
-        LiveData<PagedList<ContentEntry>> data =
+    public void setContentEntryProvider(UmProvider<ContentEntryWithContentEntryStatus> entryProvider) {
+        ContentEntryListRecyclerViewAdapter recyclerAdapter = new ContentEntryListRecyclerViewAdapter(this);
+        DataSource.Factory<Integer, ContentEntryWithContentEntryStatus> factory =
+                (DataSource.Factory<Integer, ContentEntryWithContentEntryStatus>) entryProvider.getProvider();
+        LiveData<PagedList<ContentEntryWithContentEntryStatus>> data =
                 new LivePagedListBuilder<>(factory, 20).build();
         data.observe(this, recyclerAdapter::submitList);
 
@@ -165,6 +166,15 @@ public class ContentEntryListFragment extends UstadBaseFragment implements Conte
         runOnUiThread(() -> {
             if(entryListPresenter != null){
                 entryListPresenter.handleContentEntryClicked(entry);
+            }
+        });
+    }
+
+    @Override
+    public void downloadStatusClicked(ContentEntry entry) {
+        runOnUiThread(() -> {
+            if(entryListPresenter != null){
+                entryListPresenter.handleDownloadStatusButtonClicked(entry);
             }
         });
     }

@@ -7,6 +7,7 @@ import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.database.annotation.UmQueryFindByPrimaryKey;
 import com.ustadmobile.lib.database.annotation.UmRepository;
+import com.ustadmobile.lib.db.entities.ContentEntryWithContentEntryStatus;
 import com.ustadmobile.lib.db.entities.DistinctCategorySchema;
 import com.ustadmobile.lib.db.entities.Language;
 import com.ustadmobile.lib.database.annotation.UmUpdate;
@@ -78,15 +79,16 @@ public abstract class ContentEntryDao implements SyncableDao<ContentEntry, Conte
     @UmQuery("SELECT * FROM ContentEntry WHERE publik")
     public abstract List<ContentEntry> getPublicContentEntries();
 
-    @UmQuery("SELECT ContentEntry.* FROM ContentEntry " +
+    @UmQuery("SELECT ContentEntry.*,ContentEntryStatus.* FROM ContentEntry " +
             "LEFT JOIN ContentEntryParentChildJoin ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid " +
+            "LEFT JOIN ContentEntryStatus ON ContentEntryStatus.cesUid = ContentEntry.contentEntryUid " +
             "WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = :parentUid " +
             "AND " +
             "(:langParam = 0 OR ContentEntry.primaryLanguageUid = :langParam) " +
             "AND " +
             "(:categoryParam0 = 0 OR :categoryParam0 IN (SELECT ceccjContentCategoryUid FROM ContentEntryContentCategoryJoin " +
             "WHERE ceccjContentEntryUid = ContentEntry.contentEntryUid))")
-    public abstract UmProvider<ContentEntry> getChildrenByParentUidWithCategoryFilter(long parentUid, long langParam, long categoryParam0);
+    public abstract UmProvider<ContentEntryWithContentEntryStatus> getChildrenByParentUidWithCategoryFilter(long parentUid, long langParam, long categoryParam0);
 
 
 }

@@ -2,6 +2,7 @@ package com.ustadmobile.core.view;
 
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.lib.db.entities.ContentEntry;
+import com.ustadmobile.lib.db.entities.ContentEntryWithContentEntryStatus;
 import com.ustadmobile.lib.db.entities.DistinctCategorySchema;
 import com.ustadmobile.lib.db.entities.Language;
 
@@ -12,7 +13,7 @@ public interface ContentEntryListView extends UstadView {
 
     String VIEW_NAME = "ContentEntryList";
 
-    void setContentEntryProvider(UmProvider<ContentEntry> entryProvider);
+    void setContentEntryProvider(UmProvider<ContentEntryWithContentEntryStatus> entryProvider);
 
     void setToolbarTitle(String title);
 

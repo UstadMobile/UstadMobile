@@ -57,10 +57,11 @@ public class TestNavigationController {
                 args, mockView);
         presenter.onCreate(args);
 
-        args.remove(ARG_REFERRER);
+        Hashtable argsresult = new Hashtable();
+        args.put(ARG_CONTENT_ENTRY_UID, String.valueOf(42L));
 
         presenter.handleUpNavigation();
-        verify(systemImplSpy, timeout(5000)).go(ContentEntryListView.VIEW_NAME, args,
+        verify(systemImplSpy, timeout(5000)).go(ContentEntryListView.VIEW_NAME, argsresult,
                 mockView.getContext(), flags);
 
     }
