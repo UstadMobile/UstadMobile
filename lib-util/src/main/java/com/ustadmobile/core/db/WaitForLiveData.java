@@ -5,7 +5,7 @@ import java.util.concurrent.TimeUnit;
 
 public class WaitForLiveData {
 
-    interface WaitForChecker<T> {
+    public interface WaitForChecker<T> {
         boolean done(T value);
     }
 
