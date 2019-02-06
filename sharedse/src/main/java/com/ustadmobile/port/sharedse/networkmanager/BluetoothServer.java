@@ -24,7 +24,7 @@ import java.util.UUID;
  *
  * @author kileha3
  */
-
+@Deprecated
 public abstract class BluetoothServer implements WiFiDirectGroupListener{
 
     /**

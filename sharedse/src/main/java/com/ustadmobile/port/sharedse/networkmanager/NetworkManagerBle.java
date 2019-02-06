@@ -8,6 +8,7 @@ import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.lib.db.entities.NetworkNode;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -20,6 +21,9 @@ import java.util.UUID;
 import java.util.Vector;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
+import fi.iki.elonen.router.RouterNanoHTTPD;
 
 /**
  * This is an abstract class which is used to implement platform specific NetworkManager
@@ -65,10 +69,6 @@ public abstract class NetworkManagerBle {
      */
     public static final byte WIFI_GROUP_CREATION_RESPONSE = (byte) 114;
 
-    /**
-     * Separator between Wifi direct network SSID and Passphrase
-     */
-    public static final String WIFI_GROUP_INFO_SEPARATOR = ",";
 
     /**
      * Commonly used MTU for android devices
@@ -101,6 +101,8 @@ public abstract class NetworkManagerBle {
 
     private Map<Object, List<Long>> availabilityMonitoringRequests = new HashMap<>();
 
+    private static RouterNanoHTTPD httpd = null;
+
     /**
      * Holds all created entry status tasks
      */
@@ -111,15 +113,55 @@ public abstract class NetworkManagerBle {
      */
     private Vector<WiFiDirectGroupListenerBle> wiFiDirectGroupListeners = new Vector<>();
 
+
+
     /**
-     * Do the main initialization of the NetworkManagerBle
-     * @param context The mContext to use for the network manager
+     * Constructor to be used when creating new instance
+     * @param context Platform specific application context
      */
-    public synchronized void init(Object context){
-        if(this.mContext == null){
-            this.mContext = context;
-        }
+    public NetworkManagerBle(Object context) {
+        this.mContext = context;
     }
+
+    /**
+     * Constructor to be used for testing purpose (mocks)
+     */
+    public NetworkManagerBle(){ }
+
+    /**
+     * Set context
+     * @param context Platform's context to be set
+     */
+    public void setContext(Object context){
+        this.mContext = context;
+    }
+
+    /**
+     * Start web server, advertising and discovery
+     */
+    public void onCreate() {
+
+        startAdvertising();
+
+        //Starting scanning too soon after advertising will cause issues on Droid
+        new Thread(() -> {
+            try{
+                Thread.sleep(TimeUnit.SECONDS.toMillis(3));
+                startScanning();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }).start();
+
+        httpd = new RouterNanoHTTPD(0);
+        try{
+            httpd.start();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
 
     /**
      * Check if WiFi is enabled / disabled on the device
@@ -177,6 +219,7 @@ public abstract class NetworkManagerBle {
 
         synchronized (knownNodesLock){
             long updateTime = Calendar.getInstance().getTimeInMillis();
+
             NetworkNodeDao networkNodeDao = UmAppDatabase.getInstance(mContext).getNetworkNodeDao();
             networkNodeDao.updateLastSeen(node.getBluetoothMacAddress(),updateTime,
                     new UmCallback<Integer>() {
@@ -197,6 +240,7 @@ public abstract class NetworkManagerBle {
                                     UstadMobileSystemImpl.l(UMLog.DEBUG,694,
                                             "Node added to the db and task created",
                                             null);
+
                                 }else{
                                     UstadMobileSystemImpl.l(UMLog.DEBUG,694,
                                             "Task couldn't be created, monitoring stopped",
@@ -314,7 +358,7 @@ public abstract class NetworkManagerBle {
                 UmAppDatabase.getInstance(mContext).getEntryStatusResponseDao();
 
         List<Long> uniqueEntryUidsToMonitor = new ArrayList<>(getAllUidsToBeMonitored());
-        List<Integer> knownNetworkNodes =
+        List<Long> knownNetworkNodes =
                 getAllKnownNetworkNodeIds(networkNodeDao.findAllActiveNodes());
 
         List<EntryStatusResponseDao.EntryWithoutRecentResponse> entryWithoutRecentResponses =
@@ -327,7 +371,7 @@ public abstract class NetworkManagerBle {
             if(!nodeToCheckEntryList.containsKey(nodeIdToCheckFrom))
                 nodeToCheckEntryList.put(nodeIdToCheckFrom, new ArrayList<>());
 
-            nodeToCheckEntryList.get(nodeIdToCheckFrom).add(entryResponse.getContentEntryUid());
+            nodeToCheckEntryList.get(nodeIdToCheckFrom).add(entryResponse.getContentEntryFileUid());
         }
 
         //Make entryStatusTask as per node list and entryUuids found
@@ -366,8 +410,8 @@ public abstract class NetworkManagerBle {
      * @param networkNodes Known NetworkNode
      * @return List of all known nodes
      */
-    private List<Integer> getAllKnownNetworkNodeIds(List<NetworkNode> networkNodes){
-        List<Integer> nodeIdList = new ArrayList<>();
+    private List<Long> getAllKnownNetworkNodeIds(List<NetworkNode> networkNodes){
+        List<Long> nodeIdList = new ArrayList<>();
         for(NetworkNode networkNode: networkNodes){
             nodeIdList.add(networkNode.getNodeId());
         }
@@ -420,14 +464,21 @@ public abstract class NetworkManagerBle {
         BleEntryStatusTask task = makeEntryStatusTask(context,message,peerToSendMessageTo, responseListener);
         task.run();
     }
+
+    /**
+     * @return Active RouterNanoHTTPD
+     */
+    public RouterNanoHTTPD getHttpd(){
+        return httpd;
+    }
+
+
     /**
      * Clean up the network manager for shutdown
      */
     public void onDestroy(){
         wiFiDirectGroupListeners.clear();
         entryStatusTaskExecutorService.shutdown();
-        if(entryStatusTaskExecutorService.isShutdown()){
-            mContext = null;
-        }
+        httpd.stop();
     }
 }

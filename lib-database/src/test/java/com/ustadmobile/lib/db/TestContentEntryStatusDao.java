@@ -7,10 +7,14 @@ import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.ContentEntryContentEntryFileJoin;
 import com.ustadmobile.lib.db.entities.ContentEntryFile;
 import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin;
+import com.ustadmobile.lib.db.entities.ContentEntryStatus;
 
+import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.List;
 
 public class TestContentEntryStatusDao {
 
@@ -19,7 +23,7 @@ public class TestContentEntryStatusDao {
     private UmAppDatabase appRepo;
 
     @Before
-    protected void before() {
+    public void before() {
         appDb = UmAppDatabase.getInstance(null, "db1");
         appRepo = appDb.getRepository("http://localhost/dummy/", "");
 
@@ -69,12 +73,13 @@ public class TestContentEntryStatusDao {
                 subcat2LeafJoin));
     }
 
+    @Test
     public void givenBlankDatabase_whenContentEntriesInserted_thenInvalidatedContentEntryStatusEntitiesShouldBeCreated() {
         insertContentEntities();
 
-
-
-
+        List<ContentEntryStatus> rootEntryStatus = appDb.getContentEntryStatusDao().findAllInvalidated();
+        Assert.assertFalse("content entry status items generated for newly inserted entities not empty",
+                rootEntryStatus.isEmpty());
     }
 
     public void givenContentEntitiesWithParents_whenRefreshCalled_thenEntryStatusDaoShouldUpdate() {

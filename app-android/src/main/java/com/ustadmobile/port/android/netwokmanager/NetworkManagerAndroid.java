@@ -555,7 +555,8 @@ public class NetworkManagerAndroid extends NetworkManager implements EmbeddedHTT
      * @exception IOException
      */
     @Override
-    public void connectBluetooth(final String deviceAddress, final BluetoothConnectionHandler handler) {
+    public void connectBluetooth(final String deviceAddress,
+                                 final BluetoothConnectionHandler handler) {
         new Thread(new Runnable() {
             @Override
             public void run() {

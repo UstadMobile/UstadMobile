@@ -22,6 +22,7 @@ import com.ustadmobile.core.impl.AppConfig;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
+import com.ustadmobile.port.android.netwokmanager.BleNetworkService;
 import com.ustadmobile.port.android.netwokmanager.UmAppDatabaseSyncService;
 
 import java.lang.ref.WeakReference;
@@ -48,6 +49,9 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
 
     private boolean isStarted = false;
 
+    /**
+     * Ble service connection
+     */
     private ServiceConnection mSyncServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
@@ -60,7 +64,21 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
         }
     };
 
+    private ServiceConnection bleServiceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            bleServiceBound = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            bleServiceBound = false;
+        }
+    };
+
     private boolean mSyncServiceBound = false;
+
+    private boolean bleServiceBound = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,10 +93,13 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
         localeOnCreate = UstadMobileSystemImpl.getInstance().getDisplayedLocale(this);
 
 
-
-
         Intent syncServiceIntent = new Intent(this, UmAppDatabaseSyncService.class);
         bindService(syncServiceIntent, mSyncServiceConnection,
+                Context.BIND_AUTO_CREATE|Context.BIND_ADJUST_WITH_ACTIVITY);
+
+        //bind ble service
+        Intent bleServiceIntent = new Intent(this, BleNetworkService.class);
+        bindService(bleServiceIntent,bleServiceConnection,
                 Context.BIND_AUTO_CREATE|Context.BIND_ADJUST_WITH_ACTIVITY);
     }
 
@@ -166,6 +187,7 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
         isStarted = false;
         super.onStop();
         UstadMobileSystemImplAndroid.getInstanceAndroid().handleActivityStop(this);
+
     }
 
     /**
@@ -184,6 +206,10 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
 
         if(mSyncServiceBound) {
             unbindService(mSyncServiceConnection);
+        }
+
+        if(bleServiceBound){
+            unbindService(bleServiceConnection);
         }
     }
 

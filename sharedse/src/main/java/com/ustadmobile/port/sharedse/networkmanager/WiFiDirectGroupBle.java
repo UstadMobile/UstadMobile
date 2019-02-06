@@ -12,6 +12,10 @@ public class WiFiDirectGroupBle{
 
     private String passphrase;
 
+    private int port;
+
+    private String endpoint;
+
     /**
      * Create Wi-Fi Direct group
      * @param ssid Group SSID
@@ -36,5 +40,25 @@ public class WiFiDirectGroupBle{
      */
     public String getPassphrase() {
         return passphrase;
+    }
+
+    /**
+     * Get currently active port
+     * @return active port number
+     */
+    public int getPort() {
+        return port;
+    }
+
+    public void setPort(int port) {
+        this.port = port;
+    }
+
+    public String getEndpoint() {
+        return endpoint;
+    }
+
+    public void setEndpoint(String endpoint) {
+        this.endpoint = endpoint;
     }
 }

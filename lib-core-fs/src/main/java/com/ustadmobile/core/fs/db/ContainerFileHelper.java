@@ -30,21 +30,22 @@ public class ContainerFileHelper {
     }
 
     public int deleteAllContainerFilesByEntryId(Object context, String entryId){
-        List<ContainerFileEntryWithContainerFile> containerFileEntries = UmAppDatabase.getInstance(context)
-                .getContainerFileEntryDao().findContainerFileEntriesWithContainerFileByEntryId(entryId);
-
-        int deleteCount = 0;
-        for(ContainerFileEntryWithContainerFile containerFileEntry : containerFileEntries) {
-            if(deleteContainerFile(context, containerFileEntry.getContainerFile())) {
-                deleteCount++;
-            }
-        }
-
-        if(deleteCount > 0 && deleteCount == containerFileEntries.size()){//All entries have been deleted
-            UmAppDatabase.getInstance(context).getOpdsEntryStatusCacheDao().handleContainerDeleted(entryId);
-        }
-
-        return deleteCount;
+//        List<ContainerFileEntryWithContainerFile> containerFileEntries = UmAppDatabase.getInstance(context)
+//                .getContainerFileEntryDao().findContainerFileEntriesWithContainerFileByEntryId(entryId);
+//
+//        int deleteCount = 0;
+//        for(ContainerFileEntryWithContainerFile containerFileEntry : containerFileEntries) {
+//            if(deleteContainerFile(context, containerFileEntry.getContainerFile())) {
+//                deleteCount++;
+//            }
+//        }
+//
+//        if(deleteCount > 0 && deleteCount == containerFileEntries.size()){//All entries have been deleted
+//            UmAppDatabase.getInstance(context).getOpdsEntryStatusCacheDao().handleContainerDeleted(entryId);
+//        }
+//
+//        return deleteCount;
+        return 0;
     }
 
 }

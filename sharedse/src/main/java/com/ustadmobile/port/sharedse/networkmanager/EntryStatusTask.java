@@ -41,7 +41,7 @@ import static com.ustadmobile.port.sharedse.networkmanager.BluetoothServer.CMD_S
  *
  * @author kileha3
  */
-
+@Deprecated
 public class EntryStatusTask extends NetworkTask implements BluetoothConnectionHandler{
 
     private List<String> entryIdList;

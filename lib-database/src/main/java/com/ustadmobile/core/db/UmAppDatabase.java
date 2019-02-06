@@ -3,17 +3,19 @@ package com.ustadmobile.core.db;
 import com.ustadmobile.core.db.dao.AccessTokenDao;
 import com.ustadmobile.core.db.dao.ClazzDao;
 import com.ustadmobile.core.db.dao.ClazzMemberDao;
+import com.ustadmobile.core.db.dao.ConnectivityStatusDao;
 import com.ustadmobile.core.db.dao.ContainerFileDao;
 import com.ustadmobile.core.db.dao.ContainerFileEntryDao;
-import com.ustadmobile.core.db.dao.ContentEntryDao;
 import com.ustadmobile.core.db.dao.ContentCategoryDao;
 import com.ustadmobile.core.db.dao.ContentCategorySchemaDao;
 import com.ustadmobile.core.db.dao.ContentEntryContentCategoryJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryContentEntryFileJoinDao;
+import com.ustadmobile.core.db.dao.ContentEntryDao;
 import com.ustadmobile.core.db.dao.ContentEntryFileDao;
 import com.ustadmobile.core.db.dao.ContentEntryFileStatusDao;
 import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryRelatedEntryJoinDao;
+import com.ustadmobile.core.db.dao.ContentEntryStatusDao;
 import com.ustadmobile.core.db.dao.CrawJoblItemDao;
 import com.ustadmobile.core.db.dao.CrawlJobDao;
 import com.ustadmobile.core.db.dao.DownloadJobDao;
@@ -54,6 +56,7 @@ import com.ustadmobile.lib.database.annotation.UmRepository;
 import com.ustadmobile.lib.database.annotation.UmSyncCountLocalPendingChanges;
 import com.ustadmobile.lib.database.annotation.UmSyncOutgoing;
 import com.ustadmobile.lib.db.AbstractDoorwayDbBuilder;
+import com.ustadmobile.lib.db.DbCallback;
 import com.ustadmobile.lib.db.DoorDbAdapter;
 import com.ustadmobile.lib.db.DoorUtils;
 import com.ustadmobile.lib.db.UmDbMigration;
@@ -63,6 +66,7 @@ import com.ustadmobile.lib.db.UmDbWithAuthenticator;
 import com.ustadmobile.lib.db.entities.AccessToken;
 import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.ClazzMember;
+import com.ustadmobile.lib.db.entities.ConnectivityStatus;
 import com.ustadmobile.lib.db.entities.ContainerFile;
 import com.ustadmobile.lib.db.entities.ContainerFileEntry;
 import com.ustadmobile.lib.db.entities.ContentCategory;
@@ -74,6 +78,7 @@ import com.ustadmobile.lib.db.entities.ContentEntryFile;
 import com.ustadmobile.lib.db.entities.ContentEntryFileStatus;
 import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin;
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoin;
+import com.ustadmobile.lib.db.entities.ContentEntryStatus;
 import com.ustadmobile.lib.db.entities.CrawlJob;
 import com.ustadmobile.lib.db.entities.CrawlJobItem;
 import com.ustadmobile.lib.db.entities.DownloadJob;
@@ -111,12 +116,12 @@ import com.ustadmobile.lib.db.sync.dao.SyncablePrimaryKeyDao;
 import com.ustadmobile.lib.db.sync.entities.SyncDeviceBits;
 import com.ustadmobile.lib.db.sync.entities.SyncStatus;
 import com.ustadmobile.lib.db.sync.entities.SyncablePrimaryKey;
-import com.ustadmobile.lib.database.UmDbBuilder;
 
 import java.util.Hashtable;
 import java.util.Random;
 
-@UmDatabase(version = 4, entities = {
+
+@UmDatabase(version = 6, entities = {
         OpdsEntry.class, OpdsLink.class, OpdsEntryParentToChildJoin.class,
         ContainerFile.class, ContainerFileEntry.class, DownloadSet.class,
         DownloadSetItem.class, NetworkNode.class, EntryStatusResponse.class,
@@ -133,7 +138,8 @@ import java.util.Random;
         SyncStatus.class, SyncablePrimaryKey.class, SyncDeviceBits.class,
         AccessToken.class, PersonAuth.class, Role.class, EntityRole.class,
         PersonGroup.class, PersonGroupMember.class, Location.class, LocationAncestorJoin.class,
-        PersonLocationJoin.class, PersonPicture.class, ScrapeQueueItem.class, ScrapeRun.class
+        PersonLocationJoin.class, PersonPicture.class, ScrapeQueueItem.class, ScrapeRun.class,
+        ContentEntryStatus.class, ConnectivityStatus.class
 })
 public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthenticator,
         UmDbWithAttachmentsDir {
@@ -173,7 +179,8 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
         if (instance == null) {
             AbstractDoorwayDbBuilder<UmAppDatabase> builder = UmDbBuilder
                     .builder(UmAppDatabase.class, context);
-            instance = addMigrations(builder).build();
+            builder = addMigrations(builder);
+            instance = addCallbacks(builder).build();
         }
 
         return instance;
@@ -181,14 +188,16 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
 
     public static synchronized UmAppDatabase getInstance(Object context, String dbName) {
         UmAppDatabase db = namedInstances.get(dbName);
+
         if (db == null) {
             AbstractDoorwayDbBuilder<UmAppDatabase> builder = UmDbBuilder.builder(
                     UmAppDatabase.class, context, dbName);
-            db = addMigrations(builder).build();
-            namedInstances.put(dbName, db);
+            builder = addMigrations(builder);
+            db = addCallbacks(builder).build();
         }
         return db;
     }
+
 
     private static AbstractDoorwayDbBuilder<UmAppDatabase> addMigrations(
             AbstractDoorwayDbBuilder<UmAppDatabase> builder) {
@@ -467,7 +476,90 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
                                 "ADD COLUMN timeFinished BIGINT DEFAULT 0, " +
                                 "DROP COLUMN time "
                         );
+                }
+            }
+        });
 
+        builder.addMigration(new UmDbMigration(4, 6) {
+            @Override
+            public void migrate(DoorDbAdapter db) {
+                switch (db.getDbType()) {
+                    case UmDbType.TYPE_SQLITE:
+                        throw new RuntimeException("Not supported on SQLite");
+
+                    case UmDbType.TYPE_POSTGRES:
+                        //Must use new device bits, otherwise
+                        //BEGIN Create ContentEntryStatus (PostgreSQL)
+                        db.execSql("CREATE TABLE IF NOT EXISTS  ContentEntryStatus  ( cesUid  BIGINT PRIMARY KEY  NOT NULL ,  totalSize  BIGINT,  bytesDownloadSoFar  BIGINT,  downloadStatus  INTEGER,  invalidated  BOOL,  leaf  BOOL)");
+                        //END Create ContentEntryStatus (PostgreSQL)
+
+                        //BEGIN Create ConnectivityStatus (PostgreSQL)
+                        db.execSql("CREATE TABLE IF NOT EXISTS  ConnectivityStatus  ( csUid  INTEGER PRIMARY KEY  NOT NULL ,  connectivityState  INTEGER,  wifiSsid  TEXT,  connectedOrConnecting  BOOL)");
+                        //END Create ConnectivityStatus (PostgreSQL)
+
+                        db.execSql("DROP TABLE DownloadJob");
+                        //BEGIN Create DownloadJob (PostgreSQL)
+                        db.execSql("CREATE TABLE IF NOT EXISTS  DownloadJob  ( djUid  SERIAL PRIMARY KEY  NOT NULL ,  djDsUid  INTEGER,  timeCreated  BIGINT,  timeRequested  BIGINT,  timeCompleted  BIGINT,  djStatus  INTEGER)");
+                        //END Create DownloadJob (PostgreSQL)
+
+                        db.execSql("DROP TABLE DownloadJobItem");
+                        //BEGIN Create DownloadJobItem (PostgreSQL)
+                        db.execSql("CREATE TABLE IF NOT EXISTS  DownloadJobItem  ( djiUid  SERIAL PRIMARY KEY  NOT NULL ,  djiDsiUid  INTEGER,  djiDjUid  INTEGER,  djiContentEntryFileUid  BIGINT,  downloadedSoFar  BIGINT,  downloadLength  BIGINT,  currentSpeed  BIGINT,  timeStarted  BIGINT,  timeFinished  BIGINT,  djiStatus  INTEGER,  destinationFile  TEXT,  numAttempts  INTEGER)");
+                        db.execSql("CREATE INDEX  index_DownloadJobItem_djiStatus  ON  DownloadJobItem  ( djiStatus  )");
+                        //END Create DownloadJobItem (PostgreSQL)
+
+                        db.execSql("DROP TABLE DownloadJobItemHistory");
+                        //BEGIN Create DownloadJobItemHistory (SQLite)
+                        db.execSql("CREATE TABLE IF NOT EXISTS  DownloadJobItemHistory  ( id  INTEGER PRIMARY KEY  AUTOINCREMENT  NOT NULL ,  url  TEXT,  networkNode  BIGINT,  downloadJobItemId  INTEGER,  mode  INTEGER,  numBytes  BIGINT,  successful  BOOL,  startTime  BIGINT,  endTime  BIGINT)");
+                        //END Create DownloadJobItemHistory (SQLite)
+
+                        db.execSql("DROP TABLE DownloadSet");
+                        //BEGIN Create DownloadSet (PostgreSQL)
+                        db.execSql("CREATE TABLE IF NOT EXISTS  DownloadSet  ( dsUid  SERIAL PRIMARY KEY  NOT NULL ,  destinationDir  TEXT,  meteredNetworkAllowed  BOOL,  dsRootContentEntryUid  BIGINT)");
+                        //END Create DownloadSet (PostgreSQL)
+
+                        db.execSql("DROP TABLE DownloadSetItem");
+                        //BEGIN Create DownloadSetItem (PostgreSQL)
+                        db.execSql("CREATE TABLE IF NOT EXISTS  DownloadSetItem  ( dsiUid  SERIAL PRIMARY KEY  NOT NULL ,  dsiDsUid  INTEGER,  dsiContentEntryUid  BIGINT)");
+                        db.execSql("CREATE INDEX  index_DownloadSetItem_dsiContentEntryUid  ON  DownloadSetItem  ( dsiContentEntryUid  )");
+                        db.execSql("CREATE INDEX  index_DownloadSetItem_dsiDsUid  ON  DownloadSetItem  ( dsiDsUid  )");
+                        //END Create DownloadSetItem (PostgreSQL)
+
+
+                }
+            }
+        });
+
+        return builder;
+    }
+
+    private static synchronized AbstractDoorwayDbBuilder<UmAppDatabase> addCallbacks(
+            AbstractDoorwayDbBuilder<UmAppDatabase> builder) {
+        builder.addCallback(new DbCallback() {
+            @Override
+            public void onCreate(DoorDbAdapter dbHelper) {
+                if (dbHelper.getDbType() == UmDbType.TYPE_SQLITE) {
+                    dbHelper.execSql("CREATE TRIGGER upd_ce_status AFTER UPDATE ON ContentEntry " +
+                            "WHEN EXISTS(SELECT cesUid FROM ContentEntryStatus WHERE cesUid = NEW.contentEntryUid) " +
+                            "BEGIN " +
+                            "UPDATE ContentEntryStatus SET invalidated = 1 WHERE cesUid = NEW.contentEntryUid; " +
+                            "END");
+                    String insertNewTriggerBody = "WHEN NOT EXISTS(SELECT cesUid FROM ContentEntryStatus WHERE cesUid = NEW.contentEntryUid) " +
+                            "BEGIN " +
+                            "INSERT INTO ContentEntryStatus (cesUid, invalidated, leaf) VALUES (NEW.contentEntryUid, 1, NEW.leaf);" +
+                            "END";
+                    dbHelper.execSql("CREATE TRIGGER upd_ce_ins_ces AFTER UPDATE ON ContentEntry " +
+                            insertNewTriggerBody);
+                    dbHelper.execSql("CREATE TRIGGER ins_ce_ins_ces AFTER INSERT ON ContentEntry " +
+                            insertNewTriggerBody);
+
+                }
+            }
+
+            @Override
+            public void onOpen(DoorDbAdapter dbHelper) {
+                if (dbHelper.getDbType() == UmDbType.TYPE_SQLITE) {
+                    dbHelper.execSql("PRAGMA recursive_triggers = ON");
                 }
             }
         });
@@ -570,6 +662,10 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
     public abstract PersonPictureDao getPersonPictureDao();
 
     public abstract ScrapeRunDao getScrapeRunDao();
+
+    public abstract ContentEntryStatusDao getContentEntryStatusDao();
+
+    public abstract ConnectivityStatusDao getConnectivityStatusDao();
 
     @UmDbContext
     public abstract Object getContext();

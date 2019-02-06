@@ -10,10 +10,7 @@ import java.util.List;
 @UmDao
 public abstract class ContentEntryFileStatusDao implements BaseDao<ContentEntryFileStatus> {
 
-    @UmQuery("SELECT * FROM ContentEntryFileStatus WHERE " +
-            "filePath LIKE '%/khan/en/%'")
-    public abstract List<ContentEntryFileStatus> findKhan();
+    @UmQuery("SELECT * FROM ContentEntryFileStatus WHERE cefsContentEntryFileUid = :cefsContentEntryFileUid")
+    public abstract ContentEntryFileStatus findByContentEntryFileUid(long cefsContentEntryFileUid);
 
-    @UmQuery("UPDATE ContentEntryFileStatus SET filePath = :path WHERE cefsUid = :cefsUid")
-    public abstract void updateKhanFilePath(int cefsUid, String path);
 }

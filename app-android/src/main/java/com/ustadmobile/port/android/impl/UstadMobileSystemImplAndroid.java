@@ -86,7 +86,6 @@ import com.ustadmobile.core.view.XapiPackageView;
 import com.ustadmobile.port.android.generated.MessageIDMap;
 import com.ustadmobile.port.android.impl.http.UmHttpCachePicassoRequestHandler;
 import com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroid;
-import com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroidBle;
 import com.ustadmobile.port.android.netwokmanager.NetworkServiceAndroid;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 import com.ustadmobile.port.android.view.*;
@@ -146,7 +145,6 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         viewNameToAndroidImplMap.put(BasePointView.VIEW_NAME, BasePointActivity.class);
         viewNameToAndroidImplMap.put(AboutView.VIEW_NAME, AboutActivity.class);
         viewNameToAndroidImplMap.put(SendCourseView.VIEW_NAME, SendCourseDialogFragment.class);
-        viewNameToAndroidImplMap.put(ReceiveCourseView.VIEW_NAME, ReceiveCourseDialogFragment.class);
         viewNameToAndroidImplMap.put(XapiPackageView.VIEW_NAME, XapiPackageActivity.class);
         viewNameToAndroidImplMap.put(ScormPackageView.VIEW_NAME, ScormPackageActivity.class);
         viewNameToAndroidImplMap.put(H5PContentView.VIEW_NAME, H5PContentActivity.class);
@@ -330,7 +328,6 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
     protected HashMap<Context, ServiceConnection> networkServiceConnections = new HashMap<>();
 
     protected NetworkManagerAndroid networkManagerAndroid;
-    protected NetworkManagerAndroidBle managerAndroidBle;
 
     /**
      */
@@ -339,8 +336,6 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         appViews = new WeakHashMap<>();
         networkManagerAndroid = new NetworkManagerAndroid();
         networkManagerAndroid.setServiceConnectionMap(networkServiceConnections);
-        managerAndroidBle = new NetworkManagerAndroidBle();
-        managerAndroidBle.setServiceConnectionMap(networkServiceConnections);
     }
 
     /**
@@ -720,7 +715,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
 
     @Override
     public NetworkManagerBle getNetworkManagerBle() {
-        return managerAndroidBle;
+        return null;
     }
 
     @Override
@@ -776,21 +771,21 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
 
     @Override
     public void deleteEntries(Object context, List<String> entryIds, boolean recursive) {
-        OpdsEntryStatusCacheDao entryStatusCacheDao = UmAppDatabase.getInstance(context).getOpdsEntryStatusCacheDao();
-        List<String> entryIdsToDelete = entryIds;
-        if (recursive) {
-            entryIdsToDelete = new ArrayList<>();
-            for (String entryId : entryIds) {
-                entryIdsToDelete.add(entryId);
-                entryIdsToDelete.addAll(entryStatusCacheDao.findAllKnownDescendantEntryIds(entryId));
-            }
-        }
-
-        for (String descendantEntryId : entryIdsToDelete) {
-            ContainerFileHelper.getInstance().deleteAllContainerFilesByEntryId(context, descendantEntryId);
-        }
-
-
+//        OpdsEntryStatusCacheDao entryStatusCacheDao = UmAppDatabase.getInstance(context).getOpdsEntryStatusCacheDao();
+//        List<String> entryIdsToDelete = entryIds;
+//        if(recursive) {
+//            entryIdsToDelete = new ArrayList<>();
+//            for(String entryId : entryIds) {
+//                entryIdsToDelete.add(entryId);
+//                entryIdsToDelete.addAll(entryStatusCacheDao.findAllKnownDescendantEntryIds(entryId));
+//            }
+//        }
+//
+//        for(String descendantEntryId: entryIdsToDelete) {
+//            ContainerFileHelper.getInstance().deleteAllContainerFilesByEntryId(context, descendantEntryId);
+//        }
+//
+//
     }
 
     @Override

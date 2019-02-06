@@ -1,7 +1,5 @@
 package com.ustadmobile.core.db.dao;
 
-import com.ustadmobile.core.db.UmAppDatabase;
-import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmDelete;
 import com.ustadmobile.lib.database.annotation.UmInsert;
@@ -26,12 +24,6 @@ public abstract class ContainerFileDao {
     @UmQuery("UPDATE ContainerFile SET lastUpdated = :lastUpdated WHERE id = :id")
     public abstract void updateLastUpdatedById(int id, long lastUpdated);
 
-    @UmQuery("SELECT * From ContainerFile WHERE id = :containerFileId")
-    public abstract void getContainerFileByIdAsync(int containerFileId, UmCallback<ContainerFile> callback);
-
-    @UmQuery("SELECT * FROM ContainerFile WHERE id = :id")
-    public abstract ContainerFileWithRelations getContainerFileById(int id);
-
     /**
      * Deletes a container file, and all entries associated with it (including ContainerFileEntry,
      * OpdsEntry, OpdsLink). This does *NOT* delete the file itself
@@ -40,15 +32,15 @@ public abstract class ContainerFileDao {
      * @param containerFile
      */
     public void deleteContainerFileAndRelations(Object context, ContainerFile containerFile) {
-        List<String> opdsEntryUuids = UmAppDatabase.getInstance(context).getContainerFileEntryDao()
-                .findOpdsEntryUuidsByContainerFileId(containerFile.getId());
-        List<String> opdsEntryIds = UmAppDatabase.getInstance(context).getContainerFileEntryDao()
-                .findEntryIdsByContainerFile(containerFile.getId());
-        UmAppDatabase.getInstance(context).getOpdsEntryWithRelationsDao().deleteEntriesWithRelationsByUuids(
-                opdsEntryUuids);
-        UmAppDatabase.getInstance(context).getContainerFileEntryDao().deleteByContainerFileId(containerFile.getId());
-        UmAppDatabase.getInstance(context).getOpdsEntryStatusCacheDao().handleContainerDeleted(opdsEntryIds);
-        delete(containerFile);
+//        List<String> opdsEntryUuids = UmAppDatabase.getInstance(context).getContainerFileEntryDao()
+//                .findOpdsEntryUuidsByContainerFileId(containerFile.getId());
+//        List<String> opdsEntryIds = UmAppDatabase.getInstance(context).getContainerFileEntryDao()
+//                .findEntryIdsByContainerFile(containerFile.getId());
+//        UmAppDatabase.getInstance(context).getOpdsEntryWithRelationsDao().deleteEntriesWithRelationsByUuids(
+//                opdsEntryUuids);
+//        UmAppDatabase.getInstance(context).getContainerFileEntryDao().deleteByContainerFileId(containerFile.getId());
+//        UmAppDatabase.getInstance(context).getOpdsEntryStatusCacheDao().handleContainerDeleted(opdsEntryIds);
+//        delete(containerFile);
     }
 
     public void delete(ContainerFile containerFile) {
@@ -62,9 +54,6 @@ public abstract class ContainerFileDao {
 
     @UmQuery("SELECT * From ContainerFile WHERE dirPath = :dirPath")
     public abstract List<ContainerFile> findFilesByDirectory(String dirPath);
-
-    @UmQuery("SELECT fileSize FROM ContainerFile WHERE id = :containerFileId")
-    public abstract void findContainerFileLengthAsync(int containerFileId, UmCallback<Long> callback);
 
     @UmQuery("Select * FROM ContainerFile")
     public abstract List<ContainerFile> findAll();

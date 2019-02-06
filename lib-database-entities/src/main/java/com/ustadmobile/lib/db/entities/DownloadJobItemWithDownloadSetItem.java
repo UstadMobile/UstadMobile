@@ -7,10 +7,6 @@ import com.ustadmobile.lib.database.annotation.UmEmbedded;
  */
 public class DownloadJobItemWithDownloadSetItem extends DownloadJobItem {
 
-    public DownloadJobItemWithDownloadSetItem(int downloadSetItemId, int downloadJobId) {
-        super(downloadSetItemId, downloadJobId);
-    }
-
     public DownloadJobItemWithDownloadSetItem() {
 
     }
