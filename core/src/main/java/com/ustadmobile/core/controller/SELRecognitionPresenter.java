@@ -166,7 +166,8 @@ public class SELRecognitionPresenter
                                                     new SocialNominationQuestionResponse();
                                             questionResponse
                                                     .setSocialNominationQuestionResponseSocialNominationQuestionSetResponseUid(
-                                                            newResponse.getSocialNominationQuestionSetResposeUid());
+                                                            questionSetResponseUid);
+                                                            //newResponse.getSocialNominationQuestionSetResposeUid());
                                             questionResponse
                                                     .setSocialNominationQuestionResponseSocialNominationQuestionUid(
                                                             nextQuestion.getSocialNominationQuestionUid());

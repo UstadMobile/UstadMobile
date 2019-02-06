@@ -176,7 +176,8 @@ public class ClazzListFragment extends UstadBaseFragment implements ClazzListVie
 
     @Override
     public void forceCheckPermissions() {
-        mPresenter.checkPermissions();
+        if(mPresenter != null)
+            mPresenter.checkPermissions();
     }
 
     public void showSettings(){

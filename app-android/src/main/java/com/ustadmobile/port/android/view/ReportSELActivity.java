@@ -2,6 +2,7 @@ package com.ustadmobile.port.android.view;
 
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
@@ -12,6 +13,7 @@ import android.view.Gravity;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
@@ -120,10 +122,7 @@ public class ReportSELActivity extends UstadBaseActivity implements
         if (i == R.id.menu_export_csv) {
             generateCSVReport();
             return true;
-        }
-
-        //TODO: Sprint 5
-        else if (i == R.id.menu_export_xls) {
+        } else if (i == R.id.menu_export_xls) {
             try {
                 startXLSXReportGeneration();
             } catch (Exception e) {
@@ -140,8 +139,6 @@ public class ReportSELActivity extends UstadBaseActivity implements
             return false;
         }
     }
-
-
 
     /**
      * Starts the xlsx report process. Here it crates hte xlsx file.
@@ -289,28 +286,61 @@ public class ReportSELActivity extends UstadBaseActivity implements
             reportLinearLayout.addView(horizontalScrollView);
 
             LinearLayout hLL = new LinearLayout(this);
+            LinearLayout.LayoutParams hllP =
+                    new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
+                            ViewGroup.LayoutParams.WRAP_CONTENT);
+            hLL.setLayoutParams(hllP);
             hLL.setOrientation(LinearLayout.HORIZONTAL);
 
             Set<String> questions = clazzNominationData.keySet();
+            List<Button> allButtons = new ArrayList<>();
+
+            LinearLayout.LayoutParams buttonParams =
+                    new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
+                            LinearLayout.LayoutParams.WRAP_CONTENT);
+            buttonParams.weight = 1;
+
             for (String everyQuestion : questions) {
 
                 Button questionButton = new Button(this);
-
+                questionButton.setLayoutParams(buttonParams);
+                questionButton.setTextSize(12);
                 GradientDrawable shape = new GradientDrawable();
-
-                shape.setStroke(3, Color.YELLOW);
-                shape.setCornerRadius(8);
-
+                shape.setCornerRadius(40);
 
                 if(firstQuestionTitle.equals(everyQuestion)){
-                    //TODO: highlight this one. Check this
-                    questionButton.setBackgroundColor(getResources().getColor(R.color.accent));
+                    shape.setColorFilter(getResources().getColor(R.color.primary),
+                            PorterDuff.Mode.ADD);
+                }else{
+                    shape.setColorFilter(Color.GRAY, PorterDuff.Mode.ADD);
                 }
                 questionButton.setBackground(shape);
                 questionButton.setText(everyQuestion);
+                questionButton.setPadding(12,20,12,8);
+                //questionButton.setLines(3);
+                questionButton.setGravity(1);
+
+                allButtons.add(questionButton);
                 questionButton.setOnClickListener(v ->
-                        updateTableBasedOnQuestionSelected(currentClazzName, everyQuestion,
-                                tableLayout));
+                {
+                    updateTableBasedOnQuestionSelected(currentClazzName, everyQuestion,
+                            tableLayout);
+
+
+                    //Gray out other buttons.
+                    for(Button everyButton:allButtons){
+                        GradientDrawable shapeb = new GradientDrawable();
+                        shapeb.setCornerRadius(40);
+                        shapeb.setColorFilter(Color.GRAY, PorterDuff.Mode.ADD);
+                        everyButton.setBackground(shapeb);
+                    }
+                    GradientDrawable shapea = new GradientDrawable();
+                    shapea.setCornerRadius(40);
+                    shapea.setColorFilter(getResources().getColor(R.color.primary),
+                            PorterDuff.Mode.ADD);
+                    v.setBackground(shapea);
+
+                });
 
                 hLL.addView(questionButton);
             }
@@ -552,7 +582,7 @@ public class ReportSELActivity extends UstadBaseActivity implements
     public View getHorizontalLine(){
         //Horizontal line
         TableRow.LayoutParams hlineParams = new TableRow.LayoutParams(
-                TableRow.LayoutParams.WRAP_CONTENT, 1);
+                TableRow.LayoutParams.MATCH_PARENT, 1);
         View hl = new View(this);
         hl.setBackgroundColor(Color.GRAY);
         hl.setLayoutParams(hlineParams);

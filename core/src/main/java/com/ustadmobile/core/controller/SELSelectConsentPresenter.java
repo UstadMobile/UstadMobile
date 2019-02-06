@@ -107,6 +107,7 @@ public class SELSelectConsentPresenter
                         goToNextQuestion();
 
                     }else{
+                        //TODO remove another newResponse creation? : Check
                         //Go re-do/do the recognition activity.
                         SocialNominationQuestionSetResponse newResponse =
                                 new SocialNominationQuestionSetResponse();
@@ -120,6 +121,8 @@ public class SELSelectConsentPresenter
                         args.put(ARG_CLAZZ_UID, currentClazzUid);
                         args.put(ARG_PERSON_UID, currentPersonUid);
                         args.put(ARG_CLAZZMEMBER_UID, currentClazzMemberUid);
+                        //Added:
+                        //args.put(ARG_QUESTION_SET_RESPONSE_UID, newResponse.getSocialNominationQuestionSetResposeUid());
                         args.put(ARG_SELECTED_QUESTION_SET_UID, currentQuestionSetUid);
                         doneClazzMemberUids += "," + String.valueOf(currentClazzMemberUid);
                         args.put(ARG_DONE_CLAZZMEMBER_UIDS, doneClazzMemberUids);

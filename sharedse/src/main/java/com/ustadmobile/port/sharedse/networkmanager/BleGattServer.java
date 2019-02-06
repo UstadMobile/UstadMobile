@@ -77,7 +77,7 @@ public abstract class BleGattServer implements WiFiDirectGroupListenerBle{
                 for(long entryUuid: bleMessageBytesToLong(requestReceived.getPayload())){
                     ContentEntry contentEntry = contentEntryDao.findByEntryId(entryUuid);
                     entryStatusResponse.add(contentEntry == null ?
-                            0L: contentEntry.getLastUpdateTime());
+                            0L: contentEntry.getLastModified());
                 }
                 return new BleMessage(ENTRY_STATUS_RESPONSE,
                         bleMessageLongToBytes(entryStatusResponse));
