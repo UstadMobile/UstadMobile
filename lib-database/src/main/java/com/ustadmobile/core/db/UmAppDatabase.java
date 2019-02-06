@@ -194,6 +194,7 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
                     UmAppDatabase.class, context, dbName);
             builder = addMigrations(builder);
             db = addCallbacks(builder).build();
+            namedInstances.put(dbName, db);
         }
         return db;
     }
