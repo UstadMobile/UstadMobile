@@ -575,8 +575,9 @@ public class UmXLSX {
                 LinkedHashMap<Integer, Element> rowMap = new LinkedHashMap<>();
                 LinkedHashMap<Integer, List<Element>> rowColElements = new LinkedHashMap<>();
                 //1. Add Values to sheet
-                //for(UmSheet.TableValue everyValuePair:everySheet.sheetValues){
-                for(UmSheet.TableValue everyValuePair:everySheet.getTableValueList()){
+                //List<UmSheet.TableValue> values = everySheet.getTableValueList();
+                //for(UmSheet.TableValue everyValuePair:values){
+                for(UmSheet.TableValue everyValuePair:everySheet.sheetValues){
 
                     int r = everyValuePair.rowIndex;
                     int c = everyValuePair.colIndex;

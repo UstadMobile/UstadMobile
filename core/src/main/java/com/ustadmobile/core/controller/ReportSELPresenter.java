@@ -287,8 +287,12 @@ public class ReportSELPresenter extends UstadBaseController<ReportSELView> {
                     }
                     String sheetTitleShort = sheetTitle.replace('?',' ');
 
+                    LinkedHashMap<Integer, LinkedHashMap<Integer, String>> newMap =
+                            new LinkedHashMap<>(clazzSheet.getSheetMap());
+                    List<UmSheet.TableValue> newValues = new ArrayList<>(clazzSheet.getSheetValues());
+
                     UmSheet clazzQuestionSheet = new UmSheet(sheetTitleShort,
-                            clazzSheet.getSheetValues(), clazzSheet.getSheetMap());
+                            newValues, newMap);
 
                     //TODO: Put in values to the sheet : Check
                     Iterator<Long> questionDataIterator = questionData.keySet().iterator();
@@ -304,7 +308,6 @@ public class ReportSELPresenter extends UstadBaseController<ReportSELView> {
                             clazzQuestionSheet.addValueToSheet(r,c, TICK_UNICODE);
                         }
                     }
-
 
                     umXLSX.addSheet(clazzQuestionSheet);
                 }

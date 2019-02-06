@@ -59,21 +59,42 @@ public class UmSheet{
 
     public void addValueToSheet(int r, int c, String value){
         TableValue newTableValue = new TableValue(r,c,value);
-        LinkedHashMap<Integer, String> insideMap = new LinkedHashMap<>();
+
         //replace
         if(sheetMap.containsKey(r)){
+            LinkedHashMap<Integer, String> insideMap;
             insideMap = sheetMap.get(r);
             if(insideMap.containsKey(c)){
                 insideMap.put(c, value);
             }else{
                 insideMap.put(c, value);
             }
+            sheetMap.put(r, insideMap);
         }else{
+            LinkedHashMap<Integer, String> insideMap = new LinkedHashMap<>();
             insideMap.put(c, value);
+            sheetMap.put(r, insideMap);
         }
 
-        sheetMap.put(r, insideMap);
-        sheetValues.add(newTableValue);
+        boolean added = false;
+        int index=-1;
+
+        for(TableValue everyValue: sheetValues){
+            if(everyValue.colIndex == c && everyValue.rowIndex == r){
+                index = sheetValues.indexOf(everyValue);
+                added = true;
+                break;
+            }
+        }
+
+        if(index > -1){
+            sheetValues.set(index, newTableValue);
+        }
+
+        if(!added){
+            sheetValues.add(newTableValue);
+        }
+
     }
 
     public String getTitle() {
