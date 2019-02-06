@@ -6,6 +6,11 @@ import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 @UmEntity
 public class ContentEntryStatus {
 
+
+    public static final int LOCAL_STATUS_UNAVAILABLE = 0;
+
+    public static final int LOCAL_STATUS_AVAILABLE = 1;
+
     //Always equals contentEntryUid
     @UmPrimaryKey
     private long cesUid;
@@ -16,9 +21,13 @@ public class ContentEntryStatus {
 
     private int downloadStatus;
 
+    private int localAvailability;
+
+    private int downloadSpeed;
+
     private boolean invalidated = false;
 
-    private boolean leaf;
+    private boolean cesLeaf;
 
     public long getCesUid() {
         return cesUid;
@@ -36,12 +45,12 @@ public class ContentEntryStatus {
         this.invalidated = invalidated;
     }
 
-    public boolean isLeaf() {
-        return leaf;
+    public boolean isCesLeaf() {
+        return cesLeaf;
     }
 
-    public void setLeaf(boolean leaf) {
-        this.leaf = leaf;
+    public void setCesLeaf(boolean cesLeaf) {
+        this.cesLeaf = cesLeaf;
     }
 
     public long getTotalSize() {
@@ -68,6 +77,22 @@ public class ContentEntryStatus {
         this.downloadStatus = downloadStatus;
     }
 
+    public int getLocalAvailability() {
+        return localAvailability;
+    }
+
+    public void setLocalAvailability(int localAvailability) {
+        this.localAvailability = localAvailability;
+    }
+
+    public int getDownloadSpeed() {
+        return downloadSpeed;
+    }
+
+    public void setDownloadSpeed(int downloadSpeed) {
+        this.downloadSpeed = downloadSpeed;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -80,7 +105,7 @@ public class ContentEntryStatus {
         if (bytesDownloadSoFar != that.bytesDownloadSoFar) return false;
         if (downloadStatus != that.downloadStatus) return false;
         if (invalidated != that.invalidated) return false;
-        return leaf == that.leaf;
+        return cesLeaf == that.cesLeaf;
     }
 
     @Override
@@ -90,7 +115,7 @@ public class ContentEntryStatus {
         result = 31 * result + (int) (bytesDownloadSoFar ^ (bytesDownloadSoFar >>> 32));
         result = 31 * result + downloadStatus;
         result = 31 * result + (invalidated ? 1 : 0);
-        result = 31 * result + (leaf ? 1 : 0);
+        result = 31 * result + (cesLeaf ? 1 : 0);
         return result;
     }
 }
