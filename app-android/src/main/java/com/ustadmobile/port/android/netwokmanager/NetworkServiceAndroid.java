@@ -48,7 +48,7 @@ public class NetworkServiceAndroid extends Service {
     @Override
     public void onDestroy() {
         networkManagerAndroid.onDestroy();
-        managerAndroidBle.onDestroy();
+//        managerAndroidBle.onDestroy();
         super.onDestroy();
     }
 

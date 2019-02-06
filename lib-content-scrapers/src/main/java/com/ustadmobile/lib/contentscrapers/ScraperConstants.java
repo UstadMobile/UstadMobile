@@ -28,6 +28,40 @@ public class ScraperConstants {
     public static final String TROPHY_NAME = "trophy.svg";
     public static final String CHECK_PATH = "/com/ustadmobile/lib/contentscrapers/ck12/check.svg";
     public static final String CHECK_NAME = "check.svg";
+    public static final String XML_NAMESPACE = "http://purl.org/dc/elements/1.1/";
+
+    public static final String KHAN_USERNAME = "samih@ustadmobile.com";
+    public static final String KHAN_PASS = "ustadscraper";
+    public static final String KHAN_LOGIN_LINK = "https://www.khanacademy.org/login";
+    public static final String ANDROID_USER_AGENT = "user-agent=Mozilla/5.0 (Linux; Android 4.4; Nexus 5 Build/_BuildID_) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/30.0.0.0 Mobile Safari/537.36";
+
+    public static final String GRAPHIE = "+graphie";
+    public static final String KHAN_GRAPHIE_PREFIX = "https://cdn.kastatic.org/ka-perseus-graphie/";
+
+
+    public static final String CORRECT_KHAN_LINK = "/com/ustadmobile/lib/contentscrapers/khan/exercise-correct.svg";
+    public static final String CORRECT_FILE = "exercise-correct.svg";
+
+    public static final String ATTEMPT_KHAN_LINK = "/com/ustadmobile/lib/contentscrapers/khan/star-attempt.svg";
+    public static final String ATTEMPT_FILE = "star-attempt.svg";
+
+    public static final String COMPLETE_KHAN_LINK = "/com/ustadmobile/lib/contentscrapers/khan/star-complete.svg";
+    public static final String COMPLETE_FILE = "star-complete.svg";
+
+    public static final String KHAN_CSS_LINK = "/com/ustadmobile/lib/contentscrapers/khan/khanscraper.css";
+    public static final String KHAN_CSS_FILE = "khanscraper.css";
+
+    public static final String TRY_AGAIN_KHAN_LINK = "/com/ustadmobile/lib/contentscrapers/khan/exercise-try-again.svg";
+    public static final String TRY_AGAIN_FILE = "exercise-try-again.svg";
+
+    public static final String QUIZ_HTML_LINK = "/com/ustadmobile/lib/contentscrapers/voa/quiz.html";
+    public static final String QUIZ_HTML_FILE = "quiz.html";
+
+    public static final String IFRAME_RESIZE_LINK = "/com/ustadmobile/lib/contentscrapers/voa/iframeResizer.min.js";
+    public static final String IFRAME_RESIZE_FILE = "iframeResizer.min.js";
+
+    public static final String IFRAME_RESIZE_WINDOW_LINK = "/com/ustadmobile/lib/contentscrapers/voa/iframeResizer.contentWindow.min.js";
+    public static final String IFRAME_RESIZE_WINDOW_FILE = "iframeResizer.contentWindow.min.js";
 
     // math jax links
     public static final String MATH_JAX_LINK = "/com/ustadmobile/lib/contentscrapers/ck12/mathjax/MathJax.js";
@@ -81,6 +115,14 @@ public class ScraperConstants {
     public static final String CONFIG_OUTPUT_LINK = "/com/ustadmobile/lib/contentscrapers/ck12/mathjax/output/config.js";
     public static final String CONFIG_OUTPUT_FILE = "/jax/output/HTML-CSS/config.js";
 
+    public static final String HINT_JSON_LINK = "/com/ustadmobile/lib/contentscrapers/khan/hint.json";
+    public static final String HINT_JSON_FILE = "/hint.json";
+
+    public static final String ATTEMPT_JSON_LINK = "/com/ustadmobile/lib/contentscrapers/khan/attempt.json";
+    public static final String ATTEMPT_JSON_FILE = "/attempt.json";
+
+    public static final String INTERNAL_JSON_LINK = "/com/ustadmobile/lib/contentscrapers/khan/internal-practice.json";
+    public static final String INTERNAL_FILE = "internal-practice.json";
 
     public static final String MATERIAL_JS = "materialize.min.js";
     public static final String MATERIAL_CSS = "materialize.min.css";
@@ -93,6 +135,8 @@ public class ScraperConstants {
     public static final String VIDEO_TIN_CAN_FILE = "http://activitystrea.ms/schema/1.0/video";
     public static final String ARTICLE_TIN_CAN_FILE = "http://activitystrea.ms/schema/1.0/ARTICLE_TIN_CAN_FILE";
     public static final String ASSESMENT_TIN_CAN_FILE = "http://adlnet.gov/expapi/activities/assessment";
+
+    public static final String REQUEST_HEAD = "HEAD";
 
     public static final List<String> QUESTION_SET_HOLDER_TYPES = Arrays.asList(
            ComponentType.EXCERCISE.getType(), ComponentType.ONLINE.getType(),
@@ -107,15 +151,30 @@ public class ScraperConstants {
 
     public static final String MIMETYPE_ZIP = "application/zip";
     public static final String MIMETYPE_EPUB = "application/epub+zip";
+    public static final String MIMETYPE_JSON = "application/json";
+    public static final String MIMETYPE_SVG = "image/svg+xml";
+    public static final String MIMETYPE_JPG = "image/jpg";
+    public static final String MIMETYPE_CSS = "text/css";
+    public static final String MIMETYPE_MP4 = "video/mp4";
+    public static final String MIMETYPE_WEB_CHUNK = "application/webchunk+zip";
+    public static final String MIMETYPE_TINCAN = "application/tincan+zip";
 
     public static final String ZIP_EXT = ".zip";
     public static final String PNG_EXT = ".png";
+    public static final String EPUB_EXT = ".epub";
+    public static final String SVG_EXT = ".svg";
+    public static final String JSON_EXT = ".json";
 
     public static final String ARABIC_LANG_CODE = "ar";
     public static final String ENGLISH_LANG_CODE = "en";
     public static final String USTAD_MOBILE = "Ustad Mobile";
     public static final String ROOT = "root";
     public static final String EMPTY_STRING = "";
+    public static final String EMPTY_SPACE = " ";
+    public static final String FORWARD_SLASH = "/";
+    public static final String KHAN = "Khan Academy";
+
+    public static final int TIME_OUT_SELENIUM = 500;
 
 
     public enum QUESTION_TYPE{
@@ -179,5 +238,39 @@ public class ScraperConstants {
         }
 
     }
+
+    public enum KhanContentType{
+        TOPICS("Topics"),
+        SUBJECT("Subjects"),
+        VIDEO("Video"),
+        EXERCISE("Exercise"),
+        ARTICLE("Article");
+
+        private String type;
+
+        KhanContentType(String compType) {
+            this.type = compType;
+        }
+
+        public String getType() {
+            return type;
+        }
+    }
+
+    public enum CK12ContentType{
+        SUBJECTS("Subjects");
+
+
+        private String type;
+
+        CK12ContentType(String compType) {
+            this.type = compType;
+        }
+
+        public String getType() {
+            return type;
+        }
+    }
+
 
 }

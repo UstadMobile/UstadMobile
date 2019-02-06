@@ -17,6 +17,7 @@ import com.ustadmobile.core.db.dao.LanguageVariantDao;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.LanguageList;
 import com.ustadmobile.lib.contentscrapers.ScraperConstants;
+import com.ustadmobile.lib.contentscrapers.UMLogUtil;
 import com.ustadmobile.lib.db.entities.ContentCategory;
 import com.ustadmobile.lib.db.entities.ContentCategorySchema;
 import com.ustadmobile.lib.db.entities.ContentEntry;
@@ -25,6 +26,7 @@ import com.ustadmobile.lib.db.entities.Language;
 import com.ustadmobile.lib.db.entities.LanguageVariant;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
@@ -55,6 +57,8 @@ import java.util.List;
 import java.util.Map;
 
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.EMPTY_STRING;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.TIME_OUT_SELENIUM;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING;
 
 
 /**
@@ -84,21 +88,22 @@ import static com.ustadmobile.lib.contentscrapers.ScraperConstants.EMPTY_STRING;
  */
 public class AsbScraper {
 
-    public static final String AFRICAN_STORY_BOOKS = "African Story Books";
+    private static final String AFRICAN_STORY_BOOKS = "African Story Books";
     private final String COVER_URL = "https://www.africanstorybook.org/illustrations/covers/";
 
     public static void main(String[] args) {
-        if (args.length != 1) {
-            System.err.println("Usage: <file destination>");
+        if (args.length < 1) {
+            System.err.println("Usage: <file destination><optional log{trace, debug, info, warn, error, fatal}>");
             System.exit(1);
         }
+        UMLogUtil.setLevel(args.length == 2 ? args[1] : "");
 
-        System.out.println(args[0]);
+        UMLogUtil.logInfo(args[0]);
         try {
             new AsbScraper().findContent(new File(args[0]));
         } catch (IOException e) {
-            System.err.println("Exception running findContent");
-            e.printStackTrace();
+            UMLogUtil.logFatal(ExceptionUtils.getStackTrace(e));
+            UMLogUtil.logFatal("Exception running findContent AsbScraper");
         }
     }
 
@@ -108,13 +113,12 @@ public class AsbScraper {
         URL africanBooksUrl = generateURL();
 
         UmAppDatabase db = UmAppDatabase.getInstance(null);
-        db.setMaster(true);
         UmAppDatabase repository = db.getRepository("https://localhost", EMPTY_STRING);
         ContentEntryDao contentEntryDao = repository.getContentEntryDao();
         ContentEntryParentChildJoinDao contentParentChildJoinDao = repository.getContentEntryParentChildJoinDao();
         ContentEntryFileDao contentEntryFileDao = repository.getContentEntryFileDao();
         ContentEntryContentEntryFileJoinDao contentEntryFileJoinDao = repository.getContentEntryContentEntryFileJoinDao();
-        ContentEntryFileStatusDao contentFileStatusDao = repository.getContentEntryFileStatusDao();
+        ContentEntryFileStatusDao contentFileStatusDao = db.getContentEntryFileStatusDao();
         ContentCategorySchemaDao categorySchemeDao = repository.getContentCategorySchemaDao();
         ContentCategoryDao categoryDao = repository.getContentCategoryDao();
         ContentEntryContentCategoryJoinDao contentCategoryJoinDao = repository.getContentEntryContentCategoryJoinDao();
@@ -152,7 +156,7 @@ public class AsbScraper {
                             langValue = value.substring(0, value.indexOf("(")).trim();
                         }
                         langMap.put(id, langValue);
-                        Language langEntity = ContentScraperUtil.insertOrUpdateLanguage(languageDao, langValue);
+                        Language langEntity = ContentScraperUtil.insertOrUpdateLanguageByName(languageDao, langValue);
 
                         if (!variant.isEmpty()) {
                             ContentScraperUtil.insertOrUpdateLanguageVariant(variantDao, variant, langEntity);
@@ -172,8 +176,7 @@ public class AsbScraper {
 
         ContentEntry asbParentEntry = ContentScraperUtil.createOrUpdateContentEntry("https://www.africanstorybook.org/", AFRICAN_STORY_BOOKS,
                 "https://www.africanstorybook.org/", AFRICAN_STORY_BOOKS, ContentEntry.LICENSE_TYPE_CC_BY,
-                englishLang.getLangUid(), null, "Open access to picture storybooks in the languages of Africa. \n " +
-                        "For children’s literacy, enjoyment and imagination.", false, EMPTY_STRING,
+                englishLang.getLangUid(), null, new String("Open access to picture storybooks in the languages of Africa. \n For children's literacy, enjoyment and imagination.".getBytes(), UTF_ENCODING), false, EMPTY_STRING,
                 "https://www.africanstorybook.org/img/asb120.png", EMPTY_STRING, EMPTY_STRING, contentEntryDao);
 
 
@@ -185,7 +188,7 @@ public class AsbScraper {
         AfricanBooksResponse bookObj;
         ContentScraperUtil.setChromeDriverLocation();
         ChromeDriver driver = ContentScraperUtil.setupChrome(true);
-        WebDriverWait waitDriver = new WebDriverWait(driver, 10000);
+        WebDriverWait waitDriver = new WebDriverWait(driver, TIME_OUT_SELENIUM);
         int retry = 0;
 
         for (int i = 0; i < africanBooksList.size(); i++) {
@@ -222,12 +225,12 @@ public class AsbScraper {
 
                 LanguageVariant languageVariant = null;
                 if (!variant.isEmpty()) {
-                    languageVariant = ContentScraperUtil.insertOrUpdateLanguageVariant(variantDao, variant, language);
+                    languageVariant = ContentScraperUtil. insertOrUpdateLanguageVariant(variantDao, variant, language);
                 }
-                String sourceUrl = epubUrl.getPath() + "?" + epubUrl.getQuery();
+                String sourceUrl = epubUrl.getPath() + ((epubUrl.getQuery() != null && !epubUrl.getQuery().isEmpty()) ? "?" + epubUrl.getQuery() : EMPTY_STRING);
 
                 ContentEntry childEntry = ContentScraperUtil.createOrUpdateContentEntry(sourceUrl, bookObj.title, sourceUrl, AFRICAN_STORY_BOOKS, ContentEntry.LICENSE_TYPE_CC_BY,
-                        language.getLangUid(), languageVariant  == null ? null : languageVariant.getLangVariantUid(), bookObj.summary, true, bookObj.author, getCoverUrl(bookId),
+                        language != null ? language.getLangUid() : 0L, languageVariant  == null ? null : languageVariant.getLangVariantUid(), bookObj.summary, true, bookObj.author, getCoverUrl(bookId),
                         EMPTY_STRING, EMPTY_STRING, contentEntryDao);
 
                 Document readerDoc = Jsoup.connect(generateReaderUrl(africanBooksUrl, bookId)).get();
@@ -260,7 +263,7 @@ public class AsbScraper {
 
                         Language relatedLanguage = languageDao.findByName(relatedLangValue);
                         if (relatedLanguage == null) {
-                            relatedLanguage = ContentScraperUtil.insertOrUpdateLanguage(languageDao, lang);
+                            relatedLanguage = ContentScraperUtil.insertOrUpdateLanguageByName(languageDao, lang);
                         }
                         LanguageVariant relatedLanguageVariant = null;
                         if (!variant.isEmpty()) {
@@ -268,7 +271,7 @@ public class AsbScraper {
                         }
 
                         URL content = generateEPubUrl(africanBooksUrl, id);
-                        String relatedSourceUrl = content.getPath() + "?" + content.getQuery();
+                        String relatedSourceUrl = content.getPath() + ((content.getQuery() != null && !content.getQuery().isEmpty()) ? "?" + content.getQuery() : EMPTY_STRING);
                         ContentEntry contentEntry = contentEntryDao.findBySourceUrl(relatedSourceUrl);
                         if (contentEntry == null) {
                             contentEntry = new ContentEntry();
@@ -286,7 +289,7 @@ public class AsbScraper {
                             originalEntry = contentEntry;
                         }
                     } catch (NullPointerException e) {
-                        System.err.println("A translated book could not be parsed " + lang + "for book " + bookObj.title);
+                        UMLogUtil.logError("A translated book could not be parsed " + lang + "for book " + bookObj.title);
                     }
 
                 }
@@ -322,7 +325,7 @@ public class AsbScraper {
                     retry++;
                     if (retry == 3) {
                         retry = 0;
-                        System.out.println(ePubFile.getName() + " size 0 bytes: failed! for title " + bookObj.title);
+                        UMLogUtil.logError(ePubFile.getName() + " size 0 bytes after 3rd try: failed! for title " + bookObj.title);
                         continue;
                     }
                     i--;
@@ -343,15 +346,14 @@ public class AsbScraper {
                 retry++;
                 if (retry == 3) {
                     retry = 0;
-                    System.err.println("Exception downloading/checking : " + ePubFile.getName() + " with title " + bookObj.title);
-                    System.out.println(ePubFile.getName() + " size 0 bytes: failed! for title " + bookObj.title);
+                    UMLogUtil.logError("Exception downloading/checking after 3rd try : " + ePubFile.getName() + " with title " + bookObj.title);
                     continue;
                 }
                 i--;
                 driver.manage().deleteAllCookies();
-                e.printStackTrace();
             }
         }
+        driver.close();
         driver.quit();
     }
 
@@ -417,14 +419,14 @@ public class AsbScraper {
                     retVal.add(currentObj);
                     parsedCounter++;
                 } catch (Exception e) {
-                    System.out.println("Failed to parse: " + line);
-                    e.printStackTrace();
+                    UMLogUtil.logError("Failed to parse: " + line);
+                    UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
                     failCounter++;
                 }
             }
         }
 
-        System.out.println("Parsed " + parsedCounter + " / failed " + failCounter + " items from booklist.php");
+        UMLogUtil.logInfo("Parsed " + parsedCounter + " / failed " + failCounter + " items from booklist.php");
 
         reader.close();
         booklistIn.close();
@@ -484,13 +486,13 @@ public class AsbScraper {
             Files.copy(epubCssResPath, zipFs.getPath("epub.css"), StandardCopyOption.REPLACE_EXISTING);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
         } finally {
             if (opfReader != null) {
                 try {
                     opfReader.close();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
                 }
             }
 
@@ -498,7 +500,7 @@ public class AsbScraper {
                 try {
                     zipFs.close();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
                 }
             }
         }

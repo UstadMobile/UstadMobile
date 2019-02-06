@@ -1,6 +1,8 @@
 package com.ustadmobile.lib.db.entities;
 
 import com.ustadmobile.lib.database.annotation.UmEntity;
+import com.ustadmobile.lib.database.annotation.UmIndex;
+import com.ustadmobile.lib.database.annotation.UmIndexField;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 import com.ustadmobile.lib.database.annotation.UmSyncLastChangedBy;
 import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
@@ -13,7 +15,10 @@ import static com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin.TABLE_
  * ContentEntry child - parent join entity
  */
 //short code = cepcj
-@UmEntity(tableId = TABLE_ID)
+@UmEntity(tableId = TABLE_ID, indices =
+        {@UmIndex(name="parent_child", value =
+                {"cepcjChildContentEntryUid",
+                "cepcjParentContentEntryUid"})})
 public class ContentEntryParentChildJoin {
 
     public static final int TABLE_ID = 7;
@@ -21,7 +26,9 @@ public class ContentEntryParentChildJoin {
     @UmPrimaryKey(autoGenerateSyncable = true)
     private long cepcjUid;
 
+
     private long cepcjChildContentEntryUid;
+
 
     private long cepcjParentContentEntryUid;
 

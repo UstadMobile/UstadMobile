@@ -12,21 +12,20 @@ import com.ustadmobile.core.db.dao.LanguageDao;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.LanguageList;
 import com.ustadmobile.lib.contentscrapers.ScraperConstants;
+import com.ustadmobile.lib.contentscrapers.UMLogUtil;
 import com.ustadmobile.lib.db.entities.ContentEntry;
-import com.ustadmobile.lib.db.entities.ContentEntryContentEntryFileJoin;
-import com.ustadmobile.lib.db.entities.ContentEntryFile;
-import com.ustadmobile.lib.db.entities.ContentEntryFileStatus;
 import com.ustadmobile.lib.db.entities.Language;
 
-import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.exception.ExceptionUtils;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
 
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.EMPTY_STRING;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.ROOT;
@@ -71,14 +70,20 @@ public class IndexEdraakK12Content {
 
 
     public static void main(String[] args) throws IOException {
-        if (args.length != 2) {
-            System.err.println("Usage: <edraak k12 json url> <file destination>");
+        if (args.length < 2) {
+            System.err.println("Usage: <edraak k12 json url> <file destination><optional log{trace, debug, info, warn, error, fatal}>");
             System.exit(1);
         }
+        UMLogUtil.setLevel(args.length == 3 ? args[2] : "");
+        UMLogUtil.logInfo("main args url = " + args[0]);
+        UMLogUtil.logInfo("main args destination = " + args[1]);
+        try{
+            new IndexEdraakK12Content().findContent(args[0], new File(args[1]));
+        }catch (Exception e){
+            UMLogUtil.logFatal(ExceptionUtils.getStackTrace(e));
+            UMLogUtil.logFatal("Exception running findContent Edraak");
+        }
 
-        System.out.println(args[0]);
-        System.out.println(args[1]);
-        new IndexEdraakK12Content().findContent(args[0], new File(args[1]));
     }
 
 
@@ -93,7 +98,7 @@ public class IndexEdraakK12Content {
         try {
             url = new URL(urlString);
         } catch (MalformedURLException e) {
-            System.out.println("Index Malformed url" + urlString);
+            UMLogUtil.logError("url from main is Malformed = " + urlString);
             throw new IllegalArgumentException("Malformed url" + urlString, e);
         }
 
@@ -101,25 +106,28 @@ public class IndexEdraakK12Content {
         destinationDirectory = destinationDir;
 
         UmAppDatabase db = UmAppDatabase.getInstance(null);
-        db.setMaster(true);
         UmAppDatabase repository = db.getRepository("https://localhost", "");
         contentEntryDao = repository.getContentEntryDao();
         contentParentChildJoinDao = repository.getContentEntryParentChildJoinDao();
         contentEntryFileDao = repository.getContentEntryFileDao();
         contentEntryFileJoin = repository.getContentEntryContentEntryFileJoinDao();
-        contentFileStatusDao = repository.getContentEntryFileStatusDao();
+        contentFileStatusDao = db.getContentEntryFileStatusDao();
         languageDao = repository.getLanguageDao();
 
         new LanguageList().addAllLanguages();
 
-        arabicLang = ContentScraperUtil.insertOrUpdateLanguage(languageDao, "Arabic");
-
+        arabicLang = ContentScraperUtil.insertOrUpdateLanguageByName(languageDao, "Arabic");
+        HttpURLConnection connection = null;
         try {
-            URLConnection connection = url.openConnection();
+            connection = (HttpURLConnection) url.openConnection();
             connection.setRequestProperty("Accept", "application/json, text/javascript, */*; q=0.01");
             response = new GsonBuilder().disableHtmlEscaping().create().fromJson(IOUtils.toString(connection.getInputStream(), UTF_ENCODING), ContentResponse.class);
         } catch (IOException | JsonSyntaxException e) {
             throw new IllegalArgumentException("JSON INVALID", e.getCause());
+        }finally {
+            if (connection != null) {
+                connection.disconnect();
+            }
         }
 
 
@@ -128,13 +136,16 @@ public class IndexEdraakK12Content {
                 EMPTY_STRING, false, EMPTY_STRING, EMPTY_STRING,
                 EMPTY_STRING, EMPTY_STRING, contentEntryDao);
 
+        String description = "تعليم مجانيّ\n" +
+                "إلكترونيّ باللغة العربيّة!" +
+                "\n Free Online \n" +
+                "Education, In Arabic!";
+
+        description = new String(description.getBytes(), UTF_ENCODING);
 
         ContentEntry edraakParentEntry = ContentScraperUtil.createOrUpdateContentEntry("https://www.edraak.org/k12/", "Edraak K12",
                 "https://www.edraak.org/k12/", EDRAAK, ALL_RIGHTS_RESERVED, arabicLang.getLangUid(), null,
-                "تعليم مجانيّ\n" +
-                        "إلكترونيّ باللغة العربيّة!" +
-                        "\n Free Online \n" +
-                        "Education, In Arabic!", false, EMPTY_STRING, "https://www.edraak.org/static/images/logo-dark-ar.fa1399e8d134.png",
+                description, false, EMPTY_STRING, "https://www.edraak.org/static/images/logo-dark-ar.fa1399e8d134.png",
                 EMPTY_STRING, EMPTY_STRING, contentEntryDao);
 
 
@@ -170,8 +181,7 @@ public class IndexEdraakK12Content {
 
 
             } catch (Exception e) {
-                System.err.println(e.getCause());
-                return;
+                UMLogUtil.logError("Unable to scrape content" + parentContent.id);
             }
 
         } else {
@@ -179,7 +189,7 @@ public class IndexEdraakK12Content {
             for (ContentResponse children : parentContent.children) {
 
                 String sourceUrl = children.id;
-                boolean isLeaf = ContentScraperUtil.isImportedComponent(parentContent.component_type);
+                boolean isLeaf = ContentScraperUtil.isImportedComponent(children.component_type);
 
                 ContentEntry childEntry = ContentScraperUtil.createOrUpdateContentEntry(children.id, children.title,
                         sourceUrl, EDRAAK, getLicenseType(children.license), arabicLang.getLangUid(), null,
@@ -202,7 +212,7 @@ public class IndexEdraakK12Content {
         } else if (license.toLowerCase().contains("all_rights_reserved")) {
             return ALL_RIGHTS_RESERVED;
         } else {
-            System.err.println("License type not matched for license: " + license);
+            UMLogUtil.logError("License type not matched for license: " + license);
             return ALL_RIGHTS_RESERVED;
         }
     }

@@ -5,13 +5,15 @@ import com.ustadmobile.core.db.dao.ContentEntryContentCategoryJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryDao;
 import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
 import com.ustadmobile.core.db.dao.LanguageDao;
+import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.LanguageList;
-import com.ustadmobile.lib.contentscrapers.ScraperConstants;
+import com.ustadmobile.lib.contentscrapers.UMLogUtil;
 import com.ustadmobile.lib.db.entities.ContentCategory;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.Language;
 
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -28,7 +30,6 @@ import static com.ustadmobile.lib.contentscrapers.ScraperConstants.EMPTY_STRING;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.ROOT;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.USTAD_MOBILE;
 import static com.ustadmobile.lib.db.entities.ContentEntry.LICENSE_TYPE_CC_BY;
-import static com.ustadmobile.lib.db.entities.ContentEntry.LICENSE_TYPE_CC_BY_NC;
 
 
 /**
@@ -43,8 +44,7 @@ import static com.ustadmobile.lib.db.entities.ContentEntry.LICENSE_TYPE_CC_BY_NC
 public class IndexDdlContent {
 
 
-    public static final String DDL = "DDL";
-    private URL url;
+    static final String DDL = "DDL";
     private File destinationDirectory;
 
     private int maxNumber;
@@ -58,14 +58,22 @@ public class IndexDdlContent {
 
 
     public static void main(String[] args) throws IOException {
-        if (args.length != 2) {
-            System.err.println("Usage: <ddl website url> <file destination>");
+
+        if (args.length < 2) {
+            System.err.println("Usage: <ddl website url> <file destination><optional log{trace, debug, info, warn, error, fatal}>");
             System.exit(1);
         }
 
-        System.out.println(args[0]);
-        System.out.println(args[1]);
-        new IndexDdlContent().findContent(args[0], new File(args[1]));
+        UMLogUtil.setLevel(args.length == 3 ? args[2] : "");
+
+        UMLogUtil.logError(args[0]);
+        UMLogUtil.logError(args[1]);
+        try {
+            new IndexDdlContent().findContent(args[0], new File(args[1]));
+        }catch (Exception e){
+            UMLogUtil.logFatal(ExceptionUtils.getStackTrace(e));
+            UMLogUtil.logFatal("Exception running findContent DDL Scraper");
+        }
     }
 
 
@@ -73,9 +81,9 @@ public class IndexDdlContent {
     public void findContent(String urlString, File destinationDir) throws IOException {
 
         try {
-            url = new URL(urlString);
+            URL url = new URL(urlString);
         } catch (MalformedURLException e) {
-            System.out.println("Index Malformed url" + urlString);
+            UMLogUtil.logError("Index Malformed url" + urlString);
             throw new IllegalArgumentException("Malformed url" + urlString, e);
         }
 
@@ -83,7 +91,6 @@ public class IndexDdlContent {
         destinationDirectory = destinationDir;
 
         UmAppDatabase db = UmAppDatabase.getInstance(null);
-        db.setMaster(true);
         UmAppDatabase repository = db.getRepository("https://localhost", "");
         contentEntryDao = repository.getContentEntryDao();
         contentParentChildJoinDao = repository.getContentEntryParentChildJoinDao();
@@ -92,9 +99,9 @@ public class IndexDdlContent {
 
         new LanguageList().addAllLanguages();
 
-        Language englishLang = ContentScraperUtil.insertOrUpdateLanguage(languageDao, "English");
-        Language farsiLang = ContentScraperUtil.insertOrUpdateLanguage(languageDao, "Persian");
-        Language pashtoLang = ContentScraperUtil.insertOrUpdateLanguage(languageDao, "Pashto");
+        Language englishLang = ContentScraperUtil.insertOrUpdateLanguageByName(languageDao, "English");
+        Language farsiLang = ContentScraperUtil.insertOrUpdateLanguageByName(languageDao, "Persian");
+        Language pashtoLang = ContentScraperUtil.insertOrUpdateLanguageByName(languageDao, "Pashto");
 
 
         ContentEntry masterRootParent = ContentScraperUtil.createOrUpdateContentEntry(ROOT, USTAD_MOBILE,
@@ -106,7 +113,7 @@ public class IndexDdlContent {
         parentDdl = ContentScraperUtil.createOrUpdateContentEntry("https://www.ddl.af/", "Darakht-e Danesh",
                 "https://www.ddl.af/", DDL, LICENSE_TYPE_CC_BY, englishLang.getLangUid(), null,
                 "Free and open educational resources for Afghanistan", false, EMPTY_STRING,
-                "https://www.ddl.af/storage/files/logo-dd.png", EMPTY_STRING, EMPTY_STRING, contentEntryDao);
+                "https://ddl.af/storage/files/logo-dd.png", EMPTY_STRING, EMPTY_STRING, contentEntryDao);
 
 
         ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, masterRootParent, parentDdl, 5);
@@ -125,7 +132,7 @@ public class IndexDdlContent {
         Elements pageList = document.select("a.page-link");
 
         langEntry = ContentScraperUtil.createOrUpdateContentEntry(lang + "/resources/list", lang,
-                lang + "/resources/list", DDL, LICENSE_TYPE_CC_BY, langEntity.getLangUid(), null,
+                "https://www.ddl.af/" + lang + "/resources/list", DDL, LICENSE_TYPE_CC_BY, langEntity.getLangUid(), null,
                 EMPTY_STRING, false, EMPTY_STRING, EMPTY_STRING,
                 EMPTY_STRING, EMPTY_STRING, contentEntryDao);
 
@@ -140,7 +147,7 @@ public class IndexDdlContent {
                 if (number > maxNumber) {
                     maxNumber = number;
                 }
-            } catch (NumberFormatException e) {
+            } catch (NumberFormatException ignored) {
             }
         }
 
@@ -192,9 +199,9 @@ public class IndexDdlContent {
                         }
                     }
 
-                } catch (IOException | URISyntaxException e) {
-                    System.out.println("Error downloading resource at " + url);
-                    e.printStackTrace();
+                } catch (IOException e) {
+                    UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
+                    UMLogUtil.logError("Error downloading resource at " + url);
                 }
 
             }

@@ -46,6 +46,10 @@ import android.view.MenuItem;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.port.android.impl.DbInitialEntriesInserter;
+
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.WorkManager;
 
 
 public class SplashScreenActivity extends AppCompatActivity implements DialogInterface.OnClickListener, ActivityCompat.OnRequestPermissionsResultCallback{
@@ -64,6 +68,12 @@ public class SplashScreenActivity extends AppCompatActivity implements DialogInt
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash_screen);
+        OneTimeWorkRequest dbWork =
+                new OneTimeWorkRequest.Builder(
+                        DbInitialEntriesInserter.DbInitialEntriesInserterWorker.class)
+                        .build();
+        WorkManager.getInstance().enqueue(dbWork);
+
     }
 
     public void checkPermissions() {

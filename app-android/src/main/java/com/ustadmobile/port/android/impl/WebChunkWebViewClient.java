@@ -7,18 +7,16 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import com.ustadmobile.core.util.UMIOUtils;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Array;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -26,65 +24,120 @@ import java.util.zip.ZipFile;
 public class WebChunkWebViewClient extends WebViewClient {
 
 
-    private List<IndexLog> listIndex;
-    private Map<String, IndexLog> indexMap = new HashMap<>();
+    private Map<String, IndexLog.IndexEntry> indexMap = new HashMap<>();
+    private Map<Pattern, String> linkPatterns = new HashMap<>();
     private ZipFile zipFile;
     private String url;
+
+
 
     public WebChunkWebViewClient(String pathToZip) {
         try {
             zipFile = new ZipFile(pathToZip);
             ZipEntry index = zipFile.getEntry("index.json");
             InputStream inputIndex = zipFile.getInputStream(index);
-            Type indexListType = new TypeToken<ArrayList<IndexLog>>() {
-            }.getType();
 
-            listIndex = new Gson().fromJson(UMIOUtils.readStreamToString(inputIndex), indexListType);
-            IndexLog firstUrlToOpen = listIndex.get(0);
+            IndexLog indexLog = new Gson().fromJson(UMIOUtils.readStreamToString(inputIndex), IndexLog.class);
+            List<IndexLog.IndexEntry> indexList = indexLog.entries;
+            IndexLog.IndexEntry firstUrlToOpen = indexList.get(0);
             setUrl(firstUrlToOpen.url);
-            for (IndexLog log : listIndex) {
+            for (IndexLog.IndexEntry log : indexList) {
                 indexMap.put(log.url, log);
             }
-
+            Map<String, String> linksMap = indexLog.links;
+            if(linksMap != null && !linksMap.isEmpty()){
+                for(String link: linksMap.keySet()) {
+                    linkPatterns.put(Pattern.compile(link), linksMap.get(link));
+                }
+            }
         } catch (IOException e) {
             System.err.println("Error opening Zip File from path " + pathToZip);
         }
     }
 
+    @Override
+    public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+        checkWithPattern(request.getUrl().toString());
+        return super.shouldOverrideUrlLoading(view, request);
+    }
+
     @Nullable
     @Override
     public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
-        String requestUrl = request.getUrl().toString();
-        System.out.println("request url = " + requestUrl);
-        IndexLog log = indexMap.get(requestUrl);
-        if (log == null) {
-            for (Map.Entry<String, IndexLog> e : indexMap.entrySet()) {
+        StringBuilder requestUrl = new StringBuilder(request.getUrl().toString());
+        checkWithPattern(requestUrl.toString());
+        if (requestUrl.toString().contains("/Take-a-hint")) {
+            return new WebResourceResponse("text/plain", "utf-8", new ByteArrayInputStream("true".getBytes(StandardCharsets.UTF_8)));
+        }
 
-                if (e.getKey().contains("plixbrowse") && requestUrl.contains("plixbrowse")) {
+        IndexLog.IndexEntry log = indexMap.get(requestUrl.toString());
+        if (log == null) {
+            for (Map.Entry<String, IndexLog.IndexEntry> e : indexMap.entrySet()) {
+
+                if (e.getKey().contains("plixbrowse") && requestUrl.toString().contains("plixbrowse")) {
                     log = indexMap.get(e.getKey());
                     break;
                 }
                 if (e.getKey().contains("https://www.ck12.org/assessment/api/render/questionInstance?qID") &&
-                        requestUrl.contains("https://www.ck12.org/assessment/api/render/questionInstance?qID")) {
+                        requestUrl.toString().contains("https://www.ck12.org/assessment/api/render/questionInstance?qID")) {
                     log = indexMap.get(e.getKey());
                     break;
                 }
                 if (e.getKey().contains("https://www.ck12.org/assessment/api/get/info/test/plix%20practice/plixID/") &&
-                        requestUrl.contains("https://www.ck12.org/assessment/api/get/info/test/plix%20practice/plixID/")) {
+                        requestUrl.toString().contains("https://www.ck12.org/assessment/api/get/info/test/plix%20practice/plixID/")) {
                     log = indexMap.get(e.getKey());
                     break;
                 }
-                if(e.getKey().contains("https://www.ck12.org/assessment/api/start/tests/") &&
-                        requestUrl.contains("https://www.ck12.org/assessment/api/start/tests/")){
+                if (e.getKey().contains("https://www.ck12.org/assessment/api/start/tests/") &&
+                        requestUrl.toString().contains("https://www.ck12.org/assessment/api/start/tests/")) {
                     log = indexMap.get(e.getKey());
                     break;
+                }
+                if (e.getKey().contains("hint") && requestUrl.toString().contains("hint")) {
+                    log = indexMap.get(e.getKey());
+                    break;
+                }
+                if (e.getKey().contains("attempt") && requestUrl.toString().contains("attempt")) {
+                    log = indexMap.get(e.getKey());
+                    break;
+                }
+                if (e.getKey().contains("/api/internal/user/task/practice/") &&
+                        requestUrl.toString().contains("/api/internal/user/task/practice/")) {
+                    view.post(() ->
+                            view.loadUrl(getUrl()));
+                    return super.shouldInterceptRequest(view, request);
+                }
+                if (e.getKey().contains("/assessment_item") && requestUrl.toString().contains("/assessment_item")) {
+                    int langIndex = requestUrl.indexOf("?lang");
+
+                    String newRequestUrl = requestUrl.substring(0, langIndex);
+                    log = indexMap.get(newRequestUrl);
+                    if (log != null) {
+                        break;
+                    }
+                }
+                if (e.getKey().contains("/Quiz/Answer") && requestUrl.toString().contains("/Quiz/Answer")) {
+
+                    Map<String, String> headers = request.getRequestHeaders();
+                    String pageIndex = headers.get("PageIndex");
+                    String answerId = headers.get("AnswerId");
+
+                    requestUrl.append("?page=").append(pageIndex);
+                    if (answerId != null && answerId.isEmpty()) {
+                        requestUrl.append("&answer=").append(answerId);
+                    }
+
+                    log = indexMap.get(requestUrl.toString());
+                    break;
+
                 }
             }
         }
 
+
         if (log == null) {
             System.err.println("did not find match for url in indexMap " + request.getUrl().toString());
-            return super.shouldInterceptRequest(view, request);
+            return new WebResourceResponse("", "utf-8", 200, "OK", null, null);
         }
         try {
             ZipEntry entry = zipFile.getEntry(log.path);
@@ -98,6 +151,13 @@ public class WebChunkWebViewClient extends WebViewClient {
         return super.shouldInterceptRequest(view, request);
     }
 
+    private void checkWithPattern(String requestUrl) {
+        for(Pattern linkPattern : linkPatterns.keySet()) {
+            if(linkPattern.matcher(requestUrl).lookingAt()){
+                System.out.println("Found match" + requestUrl);
+            }
+        }
+    }
 
 
     public void setUrl(String url) {
@@ -114,13 +174,25 @@ public class WebChunkWebViewClient extends WebViewClient {
 
     public class IndexLog {
 
-        public String url;
+        public String title;
 
-        public String mimeType;
+        public List<IndexEntry> entries;
 
-        public String path;
+        public class IndexEntry {
 
-        public Map<String, String> headers;
+            public String url;
+
+            public String mimeType;
+
+            public String path;
+
+            public Map<String, String> headers;
+
+            public Map<String, String> requestHeaders;
+
+        }
+
+        public Map<String, String> links;
 
     }
 

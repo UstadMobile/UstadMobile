@@ -1,6 +1,7 @@
 package com.ustadmobile.lib.db.entities;
 
 import com.ustadmobile.lib.database.annotation.UmEntity;
+import com.ustadmobile.lib.database.annotation.UmIndexField;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 import com.ustadmobile.lib.database.annotation.UmSyncLastChangedBy;
 import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
@@ -32,6 +33,8 @@ public class ContentEntry {
 
     public static final int LICESNE_TYPE_CC_BY_NC_SA = 6;
 
+    public static final int PUBLIC_DOMAIN = 7;
+
     @UmPrimaryKey(autoGenerateSyncable = true)
     private long contentEntryUid;
 
@@ -57,6 +60,8 @@ public class ContentEntry {
 
     private long lastModified;
 
+    //TODO: Migration : add to migration
+    @UmIndexField
     private long primaryLanguageUid;
 
     private long languageVariantUid;

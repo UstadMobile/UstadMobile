@@ -1,5 +1,6 @@
 package com.ustadmobile.core.db.dao;
 
+import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.db.entities.ContentEntryStatus;
@@ -16,5 +17,8 @@ public abstract class ContentEntryStatusDao implements BaseDao<ContentEntryStatu
 
     @UmQuery("SELECT * FROM ContentEntryStatus WHERE invalidated")
     public abstract List<ContentEntryStatus> findAllInvalidated();
+
+    @UmQuery("Select * FROM ContentEntryStatus where cesUid = :parentUid")
+    public abstract UmLiveData<ContentEntryStatus> findContentEntryStatusByUid(long parentUid);
 
 }
