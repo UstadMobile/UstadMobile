@@ -1841,10 +1841,11 @@ public abstract class AbstractDbProcessor {
                     "VALUES ($tableId:L, 1)\");\n", triggerSqlArgs);
             codeBlock.addNamed("$execSqlMethod:L(\"CREATE TRIGGER upd_$tableId:L " +
                     "AFTER update ON $tableName:L FOR EACH ROW WHEN " +
+                        "(SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN " +
+                        "(NEW.$masterCsnFieldName:L = 0 " +
+                        "OR OLD.$masterCsnFieldName:L = NEW.$masterCsnFieldName:L) ELSE " +
                         "(NEW.$localCsnFieldName:L = 0 " +
-                        "OR OLD.$localCsnFieldName:L = NEW.$localCsnFieldName:L " +
-                        "OR OLD.$masterCsnFieldName:L = 0 " +
-                        "OR OLD.$masterCsnFieldName:L = NEW.$masterCsnFieldName:L) " +
+                        "OR OLD.$localCsnFieldName:L = NEW.$localCsnFieldName:L) END) " +
                     "BEGIN " +
                     "UPDATE $tableName:L SET $localCsnFieldName:L = " +
                         "(SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.$localCsnFieldName:L " +
