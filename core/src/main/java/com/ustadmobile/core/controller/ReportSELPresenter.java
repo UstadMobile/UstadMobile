@@ -216,7 +216,9 @@ public class ReportSELPresenter extends UstadBaseController<ReportSELView> {
                     r = 1;
                     for (ClazzMemberWithPerson es : students) {
                         nominatorToIdMap.put(es.getClazzMemberUid(), r);
-                        clazzSheet.addValueToSheet(r, c, studentName);
+                        String nominatorName = es.getPerson().getFirstNames() + " " +
+                                es.getPerson().getLastName();
+                        clazzSheet.addValueToSheet(r, c, nominatorName);
                         r++;
                     }
                 }
