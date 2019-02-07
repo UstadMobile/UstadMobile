@@ -391,9 +391,7 @@ public class PersonWithEnrollmentRecyclerAdapter
 
         //IF IN STUDENTS LIST IN CLASS DETAIL:
         if(!showEnrollment){
-            System.out.println("WHAT");
             if(showAttendance){
-                System.out.println("WHY");
             }
         }
 

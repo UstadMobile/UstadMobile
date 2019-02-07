@@ -2,7 +2,7 @@ package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.ClazzMemberDao;
-import com.ustadmobile.core.db.dao.SocialNominationQuestionResponseNominationDao;
+import com.ustadmobile.core.db.dao.SelQuestionResponseNominationDao;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.view.ReportSELView;
@@ -13,7 +13,6 @@ import com.ustadmobile.lib.db.entities.ClazzMember;
 import com.ustadmobile.lib.db.entities.ClazzMemberWithPerson;
 import com.ustadmobile.lib.db.entities.SELNominationItem;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -93,7 +92,7 @@ public class ReportSELPresenter extends UstadBaseController<ReportSELView> {
         clazzToStudents = new HashMap<>();
         clazzMap = new LinkedHashMap<>();
 
-        SocialNominationQuestionResponseNominationDao nominationDao =
+        SelQuestionResponseNominationDao nominationDao =
                 repository.getSocialNominationQuestionResponseNominationDao();
 
         //Get all nominations

@@ -15,7 +15,6 @@ import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.SELQuestionSetsPresenter;
 import com.ustadmobile.core.tincan.Activity;
 import com.ustadmobile.lib.db.entities.SELQuestionSetWithNumQuestions;
-import com.ustadmobile.lib.db.entities.SocialNominationQuestionSet;
 
 public class SELQuestionSetListRecyclerAdapter extends
         PagedListAdapter<SELQuestionSetWithNumQuestions,
@@ -47,7 +46,7 @@ public class SELQuestionSetListRecyclerAdapter extends
         questionTitle.setText(theQuestionSet.getTitle());
         ConstraintLayout cl = holder.itemView.findViewById(R.id.item_sel_question_set_question_cl);
         cl.setOnClickListener(view ->
-                mPresenter.handleGoToQuestionSet(theQuestionSet.getSocialNominationQuestionSetUid(),
+                mPresenter.handleGoToQuestionSet(theQuestionSet.getSelQuestionSetUid(),
                         theQuestionSet.getTitle()));
 
 

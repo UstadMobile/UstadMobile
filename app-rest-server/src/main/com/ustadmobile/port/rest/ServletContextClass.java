@@ -8,8 +8,8 @@ import com.ustadmobile.core.db.dao.PersonDao;
 import com.ustadmobile.core.db.dao.PersonDetailPresenterFieldDao;
 import com.ustadmobile.core.db.dao.PersonGroupMemberDao;
 import com.ustadmobile.core.db.dao.RoleDao;
-import com.ustadmobile.core.db.dao.SocialNominationQuestionDao;
-import com.ustadmobile.core.db.dao.SocialNominationQuestionSetDao;
+import com.ustadmobile.core.db.dao.SelQuestionDao;
+import com.ustadmobile.core.db.dao.SelQuestionSetDao;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.lib.db.entities.Clazz;
@@ -20,8 +20,8 @@ import com.ustadmobile.lib.db.entities.PersonDetailPresenterField;
 import com.ustadmobile.lib.db.entities.PersonField;
 import com.ustadmobile.lib.db.entities.PersonGroupMember;
 import com.ustadmobile.lib.db.entities.Role;
-import com.ustadmobile.lib.db.entities.SocialNominationQuestion;
-import com.ustadmobile.lib.db.entities.SocialNominationQuestionSet;
+import com.ustadmobile.lib.db.entities.SelQuestion;
+import com.ustadmobile.lib.db.entities.SelQuestionSet;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -461,12 +461,12 @@ public class ServletContextClass implements ServletContextListener
                                     newRole.setRoleName(ROLE_NAME_SEL);
                                     long selPermissions =
                                             Role.PERMISSION_CLAZZ_SELECT |
-                                                    Role.PERMISSION_PERSON_SELECT |
-                                                    Role.PERMISSION_PERSON_PICTURE_SELECT |
-                                                    Role.PERMISSION_SEL_QUESTION_SELECT |
-                                                    Role.PERMISSION_SEL_QUESTION_RESPONSE_SELECT |
-                                                    Role.PERMISSION_SEL_QUESTION_RESPONSE_INSERT |
-                                                    Role.PERMISSION_SEL_QUESTION_RESPONSE_UPDATE
+                                            Role.PERMISSION_PERSON_SELECT |
+                                            Role.PERMISSION_PERSON_PICTURE_SELECT |
+                                            Role.PERMISSION_SEL_QUESTION_SELECT |
+                                            Role.PERMISSION_SEL_QUESTION_RESPONSE_SELECT |
+                                            Role.PERMISSION_SEL_QUESTION_RESPONSE_INSERT |
+                                            Role.PERMISSION_SEL_QUESTION_RESPONSE_UPDATE
                                             ;
                                     newRole.setRolePermissions(selPermissions);
                                     roleDao.insert(newRole);
@@ -563,60 +563,6 @@ public class ServletContextClass implements ServletContextListener
             }
         });
 
-
-    }
-
-    private void addSELQuestions(){
-
-        System.out.println("ServletContextClass: Adding SEL Questions: TODOne: REMOVE ME");
-
-        String question1Text = "Who sits next to you?";
-        String question2Text = "Who participates a lot in class?";
-        String question3Text = "Who is disruptive during class?";
-        String question4Text = "Who are your friends in class?";
-        String question5Text = "Who are the kids you spend time with outside of class?";
-
-        String[] selQuestions = new String[]{question1Text, question2Text, question3Text,
-                question3Text,question4Text, question5Text};
-
-        SocialNominationQuestionSetDao questionSetDao =
-                appDb.getRepository(dummyBaseUrl, dummyAuth).getSocialNominationQuestionSetDao();
-
-        //Create SEL Question Set
-        SocialNominationQuestionSet questionSet = new SocialNominationQuestionSet();
-        questionSet.setTitle("Default set");
-        Long questionSetUid = questionSetDao.insert(questionSet);
-        questionSet.setSocialNominationQuestionSetUid(questionSetUid);
-        System.out.println("Default Question set uid: " + questionSetUid);
-
-        SocialNominationQuestionDao questionDao = appDb.getRepository(dummyBaseUrl, dummyAuth)
-                .getSocialNominationQuestionDao();
-
-        //Create SEL Questions
-        for(int i=0; i < selQuestions.length; i++){
-            SocialNominationQuestion question = new SocialNominationQuestion();
-            question.setSocialNominationQuestionSocialNominationQuestionSetUid(
-                    questionSetUid);
-            question.setQuestionIndex(i+1);
-            question.setQuestionText(selQuestions[i]);
-            question.setMultiNominations(true);
-            question.setAssignToAllClasses(true);
-            questionDao.findByQuestionStringAsync(selQuestions[i],
-                    new UmCallback<List<SocialNominationQuestion>>() {
-                        @Override
-                        public void onSuccess(List<SocialNominationQuestion> questionList) {
-                            if(questionList.isEmpty()){
-                                System.out.println("Peristing i: ");
-                                questionDao.insert(question);
-                            }
-                        }
-
-                        @Override
-                        public void onFailure(Throwable exception) {
-                            //exception.printStackTrace();
-                        }
-                    });
-        }
 
     }
 

@@ -3,10 +3,11 @@ package com.ustadmobile.core.controller;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.db.dao.ClazzMemberDao;
-import com.ustadmobile.core.db.dao.SocialNominationQuestionDao;
-import com.ustadmobile.core.db.dao.SocialNominationQuestionResponseDao;
-import com.ustadmobile.core.db.dao.SocialNominationQuestionResponseNominationDao;
-import com.ustadmobile.core.db.dao.SocialNominationQuestionSetResponseDao;
+import com.ustadmobile.core.db.dao.SelQuestionDao;
+import com.ustadmobile.core.db.dao.SelQuestionResponseDao;
+import com.ustadmobile.core.db.dao.SelQuestionResponseNominationDao;
+import com.ustadmobile.core.db.dao.SelQuestionSetResponseDao;
+import com.ustadmobile.core.db.dao.SelQuestionSetResponseDao;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
@@ -15,10 +16,10 @@ import com.ustadmobile.core.view.SELQuestionView;
 import com.ustadmobile.core.view.SELSelectStudentView;
 import com.ustadmobile.lib.db.entities.ClazzMember;
 import com.ustadmobile.lib.db.entities.PersonWithPersonPicture;
-import com.ustadmobile.lib.db.entities.SocialNominationQuestion;
-import com.ustadmobile.lib.db.entities.SocialNominationQuestionResponse;
-import com.ustadmobile.lib.db.entities.SocialNominationQuestionResponseNomination;
-import com.ustadmobile.lib.db.entities.SocialNominationQuestionSetResponse;
+import com.ustadmobile.lib.db.entities.SelQuestion;
+import com.ustadmobile.lib.db.entities.SelQuestionResponse;
+import com.ustadmobile.lib.db.entities.SelQuestionResponseNomination;
+import com.ustadmobile.lib.db.entities.SelQuestionSetResponse;
 
 import java.util.Hashtable;
 import java.util.List;
@@ -154,20 +155,20 @@ public class SELEditPresenter
      */
     public void handleClickPrimaryActionButton() {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        SocialNominationQuestionDao  questionDao =
+        SelQuestionDao questionDao =
                 repository.getSocialNominationQuestionDao();
-        SocialNominationQuestionSetResponseDao questionSetResponseDao =
+        SelQuestionSetResponseDao questionSetResponseDao =
                 repository.getSocialNominationQuestionSetResponseDao();
-        SocialNominationQuestionResponseDao questionResponseDao =
+        SelQuestionResponseDao questionResponseDao =
                 repository.getSocialNominationQuestionResponseDao();
 
 
         //Before we go to the next one. We need to end the current one.
         questionSetResponseDao.findByUidAsync(currentQuestionSetResponseUid,
-                new UmCallback<SocialNominationQuestionSetResponse>() {
+                new UmCallback<SelQuestionSetResponse>() {
             @Override
-            public void onSuccess(SocialNominationQuestionSetResponse currentQuestionSetResponse) {
-                currentQuestionSetResponse.setSocialNominationQuestionSetResponseFinishTime(
+            public void onSuccess(SelQuestionSetResponse currentQuestionSetResponse) {
+                currentQuestionSetResponse.setSelQuestionSetResponseFinishTime(
                         System.currentTimeMillis());
 
                 questionSetResponseDao.updateAsync(currentQuestionSetResponse, new UmCallback<Integer>() {
@@ -177,21 +178,21 @@ public class SELEditPresenter
                         //Find total number of questions as well.
                         int totalSELQuestions =
                                 questionDao.findTotalNumberOfActiveQuestionsInAQuestionSet(
-                                        currentQuestionSetResponse.getSocialNominationQuestionSetResponseSocialNominationQuestionSetUid()
+                                        currentQuestionSetResponse.getSelQuestionSetResponseSelQuestionSetUid()
                                 );
 
 
                         questionDao.findNextQuestionByQuestionSetUidAsync(currentQuestionSetUid,
-                            currentQuestionIndexId, new UmCallback<SocialNominationQuestion>() {
+                            currentQuestionIndexId, new UmCallback<SelQuestion>() {
                                 @Override
-                                public void onSuccess(SocialNominationQuestion nextQuestion) {
+                                public void onSuccess(SelQuestion nextQuestion) {
 
                                     if(nextQuestion != null) {
 
-                                        SocialNominationQuestionSetResponse newResponse = new SocialNominationQuestionSetResponse();
-                                        newResponse.setSocialNominationQuestionSetResponseStartTime(System.currentTimeMillis());
-                                        newResponse.setSocialNominationQuestionSetResponseSocialNominationQuestionSetUid(currentQuestionSetUid);
-                                        newResponse.setSocialNominationQuestionSetResponseClazzMemberUid(currentClazzMemberUid);
+                                        SelQuestionSetResponse newResponse = new SelQuestionSetResponse();
+                                        newResponse.setSelQuestionSetResponseStartTime(System.currentTimeMillis());
+                                        newResponse.setSelQuestionSetResponseSelQuestionSetUid(currentQuestionSetUid);
+                                        newResponse.setSelQuestionSetResponseClazzMemberUid(currentClazzMemberUid);
 
                                         questionSetResponseDao.insertAsync(newResponse, new UmCallback<Long>() {
                                             @Override
@@ -201,16 +202,16 @@ public class SELEditPresenter
 
                                                 //Make a question response for the next Question for
                                                 // this Response-Set instance.
-                                                SocialNominationQuestionResponse questionResponse =
-                                                        new SocialNominationQuestionResponse();
+                                                SelQuestionResponse questionResponse =
+                                                        new SelQuestionResponse();
                                                 questionResponse
-                                                        .setSocialNominationQuestionResponseSocialNominationQuestionSetResponseUid(
+                                                        .setSelQuestionResponseSelQuestionSetResponseUid(
                                                                 currentQuestionSetResponseUid);
                                                 questionResponse
-                                                        .setSocialNominationQuestionResponseSocialNominationQuestionUid(
-                                                                nextQuestion.getSocialNominationQuestionUid());
+                                                        .setSelQuestionResponseSelQuestionUid(
+                                                                nextQuestion.getSelQuestionUid());
                                                 questionResponse
-                                                        .setSocialNominationQuestionResponseUid(
+                                                        .setSelQuestionResponseUid(
                                                                 questionResponseDao.insert(questionResponse));
 
                                                 //Create arguments
@@ -219,14 +220,14 @@ public class SELEditPresenter
                                                 args.put(ARG_PERSON_UID, currentPersonUid);
                                                 args.put(ARG_QUESTION_SET_UID, currentQuestionSetUid);
                                                 args.put(ARG_CLAZZMEMBER_UID, currentClazzMemberUid);
-                                                args.put(ARG_QUESTION_UID, nextQuestion.getSocialNominationQuestionUid());
+                                                args.put(ARG_QUESTION_UID, nextQuestion.getSelQuestionUid());
                                                 args.put(ARG_QUESTION_SET_RESPONSE_UID, currentQuestionSetResponseUid);
                                                 args.put(ARG_QUESTION_INDEX_ID, nextQuestion.getQuestionIndex());
                                                 args.put(ARG_QUESTION_TEXT, nextQuestion.getQuestionText());
                                                 args.put(ARG_QUESTION_INDEX, nextQuestion.getQuestionIndex());
                                                 args.put(ARG_QUESTION_TOTAL, totalSELQuestions);
                                                 args.put(ARG_QUESTION_RESPONSE_UID,
-                                                        questionResponse.getSocialNominationQuestionResponseUid());
+                                                        questionResponse.getSelQuestionResponseUid());
                                                 args.put(ARG_DONE_CLAZZMEMBER_UIDS, doneClazzMemberUids);
 
                                                 impl.go(SELQuestionView.VIEW_NAME, args, view.getContext());
@@ -289,7 +290,7 @@ public class SELEditPresenter
     public void handleCommonPressed(Object arg) {
         //Record nomination and highlight selected.
         ClazzMemberDao clazzMemberDao = repository.getClazzMemberDao();
-        SocialNominationQuestionResponseNominationDao questionResponseNominationDao =
+        SelQuestionResponseNominationDao questionResponseNominationDao =
                 repository.getSocialNominationQuestionResponseNominationDao();
 
         clazzMemberDao.findByPersonUidAndClazzUidAsync((Long) arg, currentClazzUid,
@@ -298,12 +299,12 @@ public class SELEditPresenter
             public void onSuccess(ClazzMember result) {
 
                 questionResponseNominationDao.findExistingNomination(result.getClazzMemberUid(),
-                    currentQuestionResponseUid, new UmCallback<List<SocialNominationQuestionResponseNomination>>() {
+                    currentQuestionResponseUid, new UmCallback<List<SelQuestionResponseNomination>>() {
                         @Override
-                        public void onSuccess(List<SocialNominationQuestionResponseNomination> existingNominations) {
+                        public void onSuccess(List<SelQuestionResponseNomination> existingNominations) {
                             if(existingNominations != null && !existingNominations.isEmpty()){
                                 if(existingNominations.size() == 1){
-                                    SocialNominationQuestionResponseNomination
+                                    SelQuestionResponseNomination
                                             thisNomination = existingNominations.get(0);
 
                                     thisNomination.setNominationActive(!thisNomination.isNominationActive());
@@ -311,13 +312,13 @@ public class SELEditPresenter
                                 }
                             }else{
                                 //Create a new one.
-                                SocialNominationQuestionResponseNomination responseNomination =
-                                        new SocialNominationQuestionResponseNomination();
+                                SelQuestionResponseNomination responseNomination =
+                                        new SelQuestionResponseNomination();
                                 responseNomination
-                                        .setSocialNominationQuestionResponseNominationSocialNominationQuestionResponseUId(
+                                        .setSelQuestionResponseNominationSelQuestionResponseUId(
                                                 currentQuestionResponseUid);
                                 responseNomination
-                                        .setSocialNominationQuestionResponseNominationClazzMemberUid(
+                                        .setSelQuestionResponseNominationClazzMemberUid(
                                                 result.getClazzMemberUid());
                                 responseNomination.setNominationActive(true);
 

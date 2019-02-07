@@ -1,8 +1,8 @@
 package com.ustadmobile.test.port.android.testutil;
 
 import com.ustadmobile.core.db.dao.ClazzActivityChangeDao;
-import com.ustadmobile.core.db.dao.SocialNominationQuestionDao;
-import com.ustadmobile.core.db.dao.SocialNominationQuestionSetDao;
+import com.ustadmobile.core.db.dao.SelQuestionDao;
+import com.ustadmobile.core.db.dao.SelQuestionSetDao;
 import com.ustadmobile.core.view.ClazzListView;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.ClazzDao;
@@ -26,8 +26,8 @@ import com.ustadmobile.lib.db.entities.Person;
 import com.ustadmobile.lib.db.entities.PersonField;
 import com.ustadmobile.lib.db.entities.PersonCustomFieldValue;
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField;
-import com.ustadmobile.lib.db.entities.SocialNominationQuestion;
-import com.ustadmobile.lib.db.entities.SocialNominationQuestionSet;
+import com.ustadmobile.lib.db.entities.SelQuestion;
+import com.ustadmobile.lib.db.entities.SelQuestionSet;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -569,24 +569,24 @@ public class UmDbTestUtil {
     }
 
     public static void createDefaultQuestionSet(Object context){
-        SocialNominationQuestionSetDao socialNominationQuestionSetDao =
+        SelQuestionSetDao selQuestionSetDao =
                 UmAppDatabase.getInstance(context).getSocialNominationQuestionSetDao();
-        SocialNominationQuestionSet socialNominationQuestionSet = new SocialNominationQuestionSet();
-        socialNominationQuestionSet.setTitle("Default set");
-        socialNominationQuestionSetDao.insert(socialNominationQuestionSet);
+        SelQuestionSet selQuestionSet = new SelQuestionSet();
+        selQuestionSet.setTitle("Default set");
+        selQuestionSetDao.insert(selQuestionSet);
         
     }
     
     public static void createDefaultQuestionSetAndSomeQuestions(Object context){
-        SocialNominationQuestionSetDao questionSetDao =
+        SelQuestionSetDao questionSetDao =
                 UmAppDatabase.getInstance(context).getSocialNominationQuestionSetDao();
-        SocialNominationQuestionSet questionSet = new SocialNominationQuestionSet();
+        SelQuestionSet questionSet = new SelQuestionSet();
         questionSet.setTitle("Default set");
         questionSet.setSocialNominationQuestionSetUid(questionSetDao.insert(questionSet));
 
-        SocialNominationQuestionDao questionDao = 
+        SelQuestionDao questionDao =
                 UmAppDatabase.getInstance(context).getSocialNominationQuestionDao();
-        SocialNominationQuestion question1 = new SocialNominationQuestion();
+        SelQuestion question1 = new SelQuestion();
         question1.setSocialNominationQuestionSocialNominationQuestionSetUid(
                 questionSet.getSocialNominationQuestionSetUid());
         question1.setQuestionIndex(1);
@@ -595,7 +595,7 @@ public class UmDbTestUtil {
         question1.setAssignToAllClasses(true);
         questionDao.insert(question1);
 
-        SocialNominationQuestion question2 = new SocialNominationQuestion();
+        SelQuestion question2 = new SelQuestion();
         question2.setSocialNominationQuestionSocialNominationQuestionSetUid(
                 questionSet.getSocialNominationQuestionSetUid());
         question2.setQuestionIndex(2);
@@ -604,7 +604,7 @@ public class UmDbTestUtil {
         question2.setAssignToAllClasses(true);
         questionDao.insert(question2);
 
-        SocialNominationQuestion question3 = new SocialNominationQuestion();
+        SelQuestion question3 = new SelQuestion();
         question3.setSocialNominationQuestionSocialNominationQuestionSetUid(
                 questionSet.getSocialNominationQuestionSetUid());
         question3.setQuestionIndex(3);

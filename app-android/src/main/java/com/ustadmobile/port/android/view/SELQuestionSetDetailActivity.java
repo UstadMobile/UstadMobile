@@ -15,7 +15,7 @@ import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.SELQuestionSetDetailPresenter;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.view.SELQuestionSetDetailView;
-import com.ustadmobile.lib.db.entities.SocialNominationQuestion;
+import com.ustadmobile.lib.db.entities.SelQuestion;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.util.Objects;
@@ -81,23 +81,23 @@ public class SELQuestionSetDetailActivity extends
     /**
      * The DIFF CALLBACK
      */
-    public static final DiffUtil.ItemCallback<SocialNominationQuestion> DIFF_CALLBACK =
-        new DiffUtil.ItemCallback<SocialNominationQuestion>() {
+    public static final DiffUtil.ItemCallback<SelQuestion> DIFF_CALLBACK =
+        new DiffUtil.ItemCallback<SelQuestion>() {
             @Override
-            public boolean areItemsTheSame(SocialNominationQuestion oldItem,
-                                           SocialNominationQuestion newItem) {
+            public boolean areItemsTheSame(SelQuestion oldItem,
+                                           SelQuestion newItem) {
                 return oldItem == newItem;
             }
 
             @Override
-            public boolean areContentsTheSame(SocialNominationQuestion oldItem,
-                                              SocialNominationQuestion newItem) {
+            public boolean areContentsTheSame(SelQuestion oldItem,
+                                              SelQuestion newItem) {
                 return oldItem.equals(newItem);
             }
         };
 
     @Override
-    public void setListProvider(UmProvider<SocialNominationQuestion> listProvider) {
+    public void setListProvider(UmProvider<SelQuestion> listProvider) {
 
         SELQuestionRecyclerAdapter recyclerAdapter =
                 new SELQuestionRecyclerAdapter(DIFF_CALLBACK, getApplicationContext(),
@@ -105,10 +105,10 @@ public class SELQuestionSetDetailActivity extends
 
         // get the provider, set , observe, etc.
         // A warning is expected
-        DataSource.Factory<Integer, SocialNominationQuestion> factory =
-                (DataSource.Factory<Integer, SocialNominationQuestion>)
+        DataSource.Factory<Integer, SelQuestion> factory =
+                (DataSource.Factory<Integer, SelQuestion>)
                         listProvider.getProvider();
-        LiveData<PagedList<SocialNominationQuestion>> data =
+        LiveData<PagedList<SelQuestion>> data =
                 new LivePagedListBuilder<>(factory, 20).build();
         //Observe the data:
         data.observe(this, recyclerAdapter::submitList);

@@ -1,11 +1,11 @@
 package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.db.UmAppDatabase;
-import com.ustadmobile.core.db.dao.SocialNominationQuestionDao;
+import com.ustadmobile.core.db.dao.SelQuestionDao;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.view.SELQuestionEditView;
-import com.ustadmobile.lib.db.entities.SocialNominationQuestion;
+import com.ustadmobile.lib.db.entities.SelQuestion;
 
 import java.util.Hashtable;
 
@@ -20,14 +20,14 @@ public class SELQuestionEditPresenter
 
     private long DEFAULT_QUESTION_SET_UID = 1;
 
-    private SocialNominationQuestionDao socialNominationQuestionDao;
+    private SelQuestionDao selQuestionDao;
 
 
     public SELQuestionEditPresenter(Object context, Hashtable arguments, SELQuestionEditView view) {
         super(context, arguments, view);
 
         UmAppDatabase repository = UmAccountManager.getRepositoryForActiveAccount(context);
-        socialNominationQuestionDao =
+        selQuestionDao =
                 repository.getSocialNominationQuestionDao();
 
     }
@@ -48,18 +48,18 @@ public class SELQuestionEditPresenter
      */
     public void handleClickDone(String newQuestion, boolean allClasses, boolean multiNominations){
 
-        socialNominationQuestionDao.getMaxIndexAsync(new UmCallback<Integer>() {
+        selQuestionDao.getMaxIndexAsync(new UmCallback<Integer>() {
             @Override
             public void onSuccess(Integer result) {
-                SocialNominationQuestion socialNominationQuestion = new SocialNominationQuestion();
+                SelQuestion socialNominationQuestion = new SelQuestion();
                 socialNominationQuestion.setQuestionText(newQuestion);
                 socialNominationQuestion.setQuestionIndex(result);
                 socialNominationQuestion.setAssignToAllClasses(allClasses);
                 socialNominationQuestion.setMultiNominations(multiNominations);
-                socialNominationQuestion.setSocialNominationQuestionSocialNominationQuestionSetUid(
+                socialNominationQuestion.setSelQuestionSelQuestionSetUid(
                         DEFAULT_QUESTION_SET_UID);
 
-                socialNominationQuestionDao.insertAsync(socialNominationQuestion,
+                selQuestionDao.insertAsync(socialNominationQuestion,
                         new UmCallback<Long>() {
                     @Override
                     public void onSuccess(Long result) {

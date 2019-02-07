@@ -14,12 +14,12 @@ import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.SELQuestionDetail2Presenter;
-import com.ustadmobile.lib.db.entities.SocialNominationQuestionOption;
+import com.ustadmobile.lib.db.entities.SelQuestionOption;
 
 import io.reactivex.annotations.NonNull;
 
 public class SELQuestionOptionRecyclerAdapter extends
-        PagedListAdapter<SocialNominationQuestionOption,
+        PagedListAdapter<SelQuestionOption,
                 SELQuestionOptionRecyclerAdapter.SELQuestionOptionViewHolder> {
     Context theContext;
     Activity theActivity;
@@ -27,7 +27,7 @@ public class SELQuestionOptionRecyclerAdapter extends
     //The presenter mPresenter
 
     protected SELQuestionOptionRecyclerAdapter(
-            @android.support.annotation.NonNull DiffUtil.ItemCallback<SocialNominationQuestionOption> diffCallback,
+            @android.support.annotation.NonNull DiffUtil.ItemCallback<SelQuestionOption> diffCallback,
             Context context, Activity mActivity, SELQuestionDetail2Presenter thePresenter
             ) {
         super(diffCallback);
@@ -48,7 +48,7 @@ public class SELQuestionOptionRecyclerAdapter extends
     @Override
     public void onBindViewHolder(
             @android.support.annotation.NonNull SELQuestionOptionViewHolder holder, int position) {
-        SocialNominationQuestionOption questionOption = getItem(position);
+        SelQuestionOption questionOption = getItem(position);
         TextView questionOptionTitle =
                 holder.itemView.findViewById(R.id.item_sel_question_option_text);
         questionOptionTitle.setText(questionOption.getOptionText());
@@ -63,11 +63,11 @@ public class SELQuestionOptionRecyclerAdapter extends
                 int i = item.getItemId();
                 if (i == R.id.edit) {
                     mPresenter.handleQuestionOptionEdit(
-                            questionOption.getSocialNominationQuestionOptionUid());
+                            questionOption.getSelQuestionOptionUid());
                     return true;
                 } else if (i == R.id.delete) {
                     mPresenter.handleQuestionOptionDelete(
-                            questionOption.getSocialNominationQuestionOptionUid());
+                            questionOption.getSelQuestionOptionUid());
                     return true;
                 } else {
                     return false;

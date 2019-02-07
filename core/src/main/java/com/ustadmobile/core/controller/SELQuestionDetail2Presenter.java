@@ -2,8 +2,8 @@ package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmProvider;
-import com.ustadmobile.core.db.dao.SocialNominationQuestionDao;
-import com.ustadmobile.core.db.dao.SocialNominationQuestionOptionDao;
+import com.ustadmobile.core.db.dao.SelQuestionDao;
+import com.ustadmobile.core.db.dao.SelQuestionOptionDao;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.db.UmLiveData;
@@ -11,8 +11,8 @@ import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.AddQuestionOptionDialogView;
 import com.ustadmobile.core.view.SELQuestionDetail2View;
-import com.ustadmobile.lib.db.entities.SocialNominationQuestion;
-import com.ustadmobile.lib.db.entities.SocialNominationQuestionOption;
+import com.ustadmobile.lib.db.entities.SelQuestion;
+import com.ustadmobile.lib.db.entities.SelQuestionOption;
 
 import java.util.Hashtable;
 
@@ -25,16 +25,16 @@ public class SELQuestionDetail2Presenter extends
 
 
     //Provider
-    private UmProvider<SocialNominationQuestionOption> providerList;
+    private UmProvider<SelQuestionOption> providerList;
     UmAppDatabase repository;
     private long currentQuestionUid;
     private long currentQuestionSetUid;
-    UmLiveData<SocialNominationQuestion> questionUmLiveData;
+    UmLiveData<SelQuestion> questionUmLiveData;
 
-    private SocialNominationQuestion mOriginalQuestion;
-    private SocialNominationQuestion mUpdatedQuestion;
-    SocialNominationQuestionDao questionDao;
-    SocialNominationQuestionOptionDao questionOptionDao;
+    private SelQuestion mOriginalQuestion;
+    private SelQuestion mUpdatedQuestion;
+    SelQuestionDao questionDao;
+    SelQuestionOptionDao questionOptionDao;
 
     private String[] questionTypePresets;
 
@@ -83,25 +83,25 @@ public class SELQuestionDetail2Presenter extends
         questionUmLiveData.observe(SELQuestionDetail2Presenter.this,
                 SELQuestionDetail2Presenter.this::handleSELQuestionValueChanged);
 
-        SocialNominationQuestionDao socialNominationQuestionDao =
+        SelQuestionDao selQuestionDao =
                 repository.getSocialNominationQuestionDao();
-        socialNominationQuestionDao.findByUidAsync(currentQuestionUid,
-                new UmCallback<SocialNominationQuestion>() {
+        selQuestionDao.findByUidAsync(currentQuestionUid,
+                new UmCallback<SelQuestion>() {
             @Override
-            public void onSuccess(SocialNominationQuestion selQuestion) {
+            public void onSuccess(SelQuestion selQuestion) {
                 if(selQuestion != null){
                     mUpdatedQuestion = selQuestion;
                     view.setQuestionOnView(mUpdatedQuestion);
                 }else{
 
                     //Set index
-                    socialNominationQuestionDao.getMaxIndexByQuestionSetAsync(currentQuestionSetUid,
+                    selQuestionDao.getMaxIndexByQuestionSetAsync(currentQuestionSetUid,
                         new UmCallback<Integer>() {
                             @Override
                             public void onSuccess(Integer result) {
                                 //Create a new one
-                                SocialNominationQuestion newSELQuestion = new SocialNominationQuestion();
-                                newSELQuestion.setSocialNominationQuestionSocialNominationQuestionSetUid(
+                                SelQuestion newSELQuestion = new SelQuestion();
+                                newSELQuestion.setSelQuestionSelQuestionSetUid(
                                         currentQuestionSetUid);
                                 newSELQuestion.setQuestionIndex(result+1);
                                 mUpdatedQuestion = newSELQuestion;
@@ -135,13 +135,13 @@ public class SELQuestionDetail2Presenter extends
     public void handleQuestionTypeChange(int type){
 
         switch (type){
-            case SocialNominationQuestionDao.SEL_QUESTION_TYPE_NOMINATION:
+            case SelQuestionDao.SEL_QUESTION_TYPE_NOMINATION:
                 view.showQuestionOptions(false);
                 break;
-            case SocialNominationQuestionDao.SEL_QUESTION_TYPE_MULTI_CHOICE:
+            case SelQuestionDao.SEL_QUESTION_TYPE_MULTI_CHOICE:
                 view.showQuestionOptions(true);
                 break;
-            case SocialNominationQuestionDao.SEL_QUESTION_TYPE_FREE_TEXT:
+            case SelQuestionDao.SEL_QUESTION_TYPE_FREE_TEXT:
                 view.showQuestionOptions(false);
                 break;
             default:
@@ -155,7 +155,7 @@ public class SELQuestionDetail2Presenter extends
         mUpdatedQuestion.setQuestionText(title);
     }
 
-    public void handleSELQuestionValueChanged(SocialNominationQuestion question){
+    public void handleSELQuestionValueChanged(SelQuestion question){
         //set the og person value
         if(mOriginalQuestion == null)
             mOriginalQuestion = question;
@@ -182,10 +182,10 @@ public class SELQuestionDetail2Presenter extends
     public void handleClickDone(){
 
         mUpdatedQuestion.setQuestionActive(true);
-        mUpdatedQuestion.setSocialNominationQuestionSocialNominationQuestionSetUid(currentQuestionSetUid);
-        questionDao.findByUidAsync(mUpdatedQuestion.getSocialNominationQuestionUid(), new UmCallback<SocialNominationQuestion>() {
+        mUpdatedQuestion.setSelQuestionSelQuestionSetUid(currentQuestionSetUid);
+        questionDao.findByUidAsync(mUpdatedQuestion.getSelQuestionUid(), new UmCallback<SelQuestion>() {
             @Override
-            public void onSuccess(SocialNominationQuestion questionInDB) {
+            public void onSuccess(SelQuestion questionInDB) {
                 if(questionInDB != null){
                     questionDao.updateAsync(mUpdatedQuestion, new UmCallback<Integer>() {
                         @Override
@@ -222,14 +222,14 @@ public class SELQuestionDetail2Presenter extends
     }
 
     public void handleQuestionOptionEdit(long questionOptionUid){
-        questionOptionDao.findByUidAsync(questionOptionUid, new UmCallback<SocialNominationQuestionOption>() {
+        questionOptionDao.findByUidAsync(questionOptionUid, new UmCallback<SelQuestionOption>() {
             @Override
-            public void onSuccess(SocialNominationQuestionOption result) {
+            public void onSuccess(SelQuestionOption result) {
                 if(result != null){
                     UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
                     Hashtable args = new Hashtable();
                     args.put(ARG_QUESTION_UID_QUESTION_DETAIL, result.getSelQuestionOptionQuestionUid());
-                    args.put(ARG_QUESTION_OPTION_UID, result.getSocialNominationQuestionOptionUid());
+                    args.put(ARG_QUESTION_OPTION_UID, result.getSelQuestionOptionUid());
                     impl.go(AddQuestionOptionDialogView.VIEW_NAME, args, getContext());
 
                 }
@@ -243,9 +243,9 @@ public class SELQuestionDetail2Presenter extends
     }
 
     public void handleQuestionOptionDelete(long questionOptionUid){
-        questionOptionDao.findByUidAsync(questionOptionUid, new UmCallback<SocialNominationQuestionOption>() {
+        questionOptionDao.findByUidAsync(questionOptionUid, new UmCallback<SelQuestionOption>() {
             @Override
-            public void onSuccess(SocialNominationQuestionOption result) {
+            public void onSuccess(SelQuestionOption result) {
                 if(result != null){
                     result.setOptionActive(false);
                     questionOptionDao.updateAsync(result, new UmCallback<Integer>() {

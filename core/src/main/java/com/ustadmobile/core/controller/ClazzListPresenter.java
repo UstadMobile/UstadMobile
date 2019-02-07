@@ -89,7 +89,7 @@ public class ClazzListPresenter extends UstadBaseController<ClazzListView> {
 
         if(loggedInPersonUid != null){
 
-            clazzListProvider = clazzDao.findAllClazzesByPersonUid(loggedInPersonUid);
+            clazzListProvider = clazzDao.findAllClazzesByPermission(loggedInPersonUid);
             updateProviderToView();
 
             idToOrderInteger = new Hashtable<>();

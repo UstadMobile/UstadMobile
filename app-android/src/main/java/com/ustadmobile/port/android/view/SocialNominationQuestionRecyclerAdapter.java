@@ -12,10 +12,10 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
-import com.ustadmobile.lib.db.entities.SocialNominationQuestion;
+import com.ustadmobile.lib.db.entities.SelQuestion;
 
 public class SocialNominationQuestionRecyclerAdapter extends
-        PagedListAdapter<SocialNominationQuestion,
+        PagedListAdapter<SelQuestion,
                 SocialNominationQuestionRecyclerAdapter.SELQuestionViewHolder> {
 
 
@@ -30,7 +30,7 @@ public class SocialNominationQuestionRecyclerAdapter extends
     }
 
     protected SocialNominationQuestionRecyclerAdapter(
-            @NonNull DiffUtil.ItemCallback<SocialNominationQuestion> diffCallback,
+            @NonNull DiffUtil.ItemCallback<SelQuestion> diffCallback,
             Context context, Activity activity) {
 
         super(diffCallback);
@@ -39,7 +39,7 @@ public class SocialNominationQuestionRecyclerAdapter extends
     }
 
     protected SocialNominationQuestionRecyclerAdapter(
-            @NonNull DiffUtil.ItemCallback<SocialNominationQuestion> diffCallback,
+            @NonNull DiffUtil.ItemCallback<SelQuestion> diffCallback,
                                               Context context) {
         super(diffCallback);
         theContext = context;
@@ -74,7 +74,7 @@ public class SocialNominationQuestionRecyclerAdapter extends
             int position) {
 
 
-        SocialNominationQuestion thisQuestion = getItem(position);
+        SelQuestion thisQuestion = getItem(position);
         String questionString;
         if(thisQuestion == null){
             questionString = "Student";

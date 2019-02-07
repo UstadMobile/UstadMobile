@@ -12,15 +12,15 @@ import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
  *
  */
 @UmEntity(tableId = 22)
-public class SocialNominationQuestion {
+public class SelQuestion {
 
     @UmPrimaryKey(autoGenerateSyncable = true)
-    private long socialNominationQuestionUid;
+    private long selQuestionUid;
 
     private String questionText;
 
-    // -> SocialNominationQuestionSet - what set is this question a part of
-    private long socialNominationQuestionSocialNominationQuestionSetUid;
+    // -> SelQuestionSet - what set is this question a part of
+    private long selQuestionSelQuestionSetUid;
 
     //The order.
     private int questionIndex;
@@ -52,13 +52,13 @@ public class SocialNominationQuestion {
     }
 
     @UmSyncMasterChangeSeqNum
-    private long scheduleNominationQuestionMasterChangeSeqNum;
+    private long selQuestionMasterChangeSeqNum;
 
     @UmSyncLocalChangeSeqNum
-    private long scheduleNominationQuestionLocalChangeSeqNum;
+    private long selQuestionLocalChangeSeqNum;
 
     @UmSyncLastChangedBy
-    private int scheduleNominationQuestionLastChangedBy;
+    private int selQuestionLastChangedBy;
 
 
     public boolean isAssignToAllClasses() {
@@ -77,14 +77,6 @@ public class SocialNominationQuestion {
         this.multiNominations = multiNominations;
     }
 
-    public long getSocialNominationQuestionUid() {
-        return socialNominationQuestionUid;
-    }
-
-    public void setSocialNominationQuestionUid(long socialNominationQuestionUid) {
-        this.socialNominationQuestionUid = socialNominationQuestionUid;
-    }
-
     public String getQuestionText() {
         return questionText;
     }
@@ -93,13 +85,6 @@ public class SocialNominationQuestion {
         this.questionText = questionText;
     }
 
-    public long getSocialNominationQuestionSocialNominationQuestionSetUid() {
-        return socialNominationQuestionSocialNominationQuestionSetUid;
-    }
-
-    public void setSocialNominationQuestionSocialNominationQuestionSetUid(long socialNominationQuestionSocialNominationQuestionSetUid) {
-        this.socialNominationQuestionSocialNominationQuestionSetUid = socialNominationQuestionSocialNominationQuestionSetUid;
-    }
 
     public int getQuestionIndex() {
         return questionIndex;
@@ -109,27 +94,44 @@ public class SocialNominationQuestion {
         this.questionIndex = questionIndex;
     }
 
-    public long getScheduleNominationQuestionMasterChangeSeqNum() {
-        return scheduleNominationQuestionMasterChangeSeqNum;
+
+    public int getSelQuestionLastChangedBy() {
+        return selQuestionLastChangedBy;
     }
 
-    public void setScheduleNominationQuestionMasterChangeSeqNum(long scheduleNominationQuestionMasterChangeSeqNum) {
-        this.scheduleNominationQuestionMasterChangeSeqNum = scheduleNominationQuestionMasterChangeSeqNum;
+    public void setSelQuestionLastChangedBy(int selQuestionLastChangedBy) {
+        this.selQuestionLastChangedBy = selQuestionLastChangedBy;
     }
 
-    public long getScheduleNominationQuestionLocalChangeSeqNum() {
-        return scheduleNominationQuestionLocalChangeSeqNum;
+    public long getSelQuestionLocalChangeSeqNum() {
+        return selQuestionLocalChangeSeqNum;
     }
 
-    public void setScheduleNominationQuestionLocalChangeSeqNum(long scheduleNominationQuestionLocalChangeSeqNum) {
-        this.scheduleNominationQuestionLocalChangeSeqNum = scheduleNominationQuestionLocalChangeSeqNum;
+    public void setSelQuestionLocalChangeSeqNum(long selQuestionLocalChangeSeqNum) {
+        this.selQuestionLocalChangeSeqNum = selQuestionLocalChangeSeqNum;
     }
 
-    public int getScheduleNominationQuestionLastChangedBy() {
-        return scheduleNominationQuestionLastChangedBy;
+    public long getSelQuestionMasterChangeSeqNum() {
+        return selQuestionMasterChangeSeqNum;
     }
 
-    public void setScheduleNominationQuestionLastChangedBy(int scheduleNominationQuestionLastChangedBy) {
-        this.scheduleNominationQuestionLastChangedBy = scheduleNominationQuestionLastChangedBy;
+    public void setSelQuestionMasterChangeSeqNum(long selQuestionMasterChangeSeqNum) {
+        this.selQuestionMasterChangeSeqNum = selQuestionMasterChangeSeqNum;
+    }
+
+    public long getSelQuestionSelQuestionSetUid() {
+        return selQuestionSelQuestionSetUid;
+    }
+
+    public void setSelQuestionSelQuestionSetUid(long selQuestionSelQuestionSetUid) {
+        this.selQuestionSelQuestionSetUid = selQuestionSelQuestionSetUid;
+    }
+
+    public long getSelQuestionUid() {
+        return selQuestionUid;
+    }
+
+    public void setSelQuestionUid(long selQuestionUid) {
+        this.selQuestionUid = selQuestionUid;
     }
 }

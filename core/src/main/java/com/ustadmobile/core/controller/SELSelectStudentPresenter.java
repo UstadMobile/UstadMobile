@@ -11,15 +11,12 @@ import com.ustadmobile.core.view.SELSelectConsentView;
 import com.ustadmobile.core.view.SELSelectStudentView;
 import com.ustadmobile.lib.db.entities.ClazzMember;
 import com.ustadmobile.lib.db.entities.Person;
-import com.ustadmobile.lib.db.entities.SocialNominationQuestionSet;
+import com.ustadmobile.lib.db.entities.SelQuestionSet;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static com.ustadmobile.core.view.ClazzListView.ARG_CLAZZ_UID;
 import static com.ustadmobile.core.view.PersonDetailView.ARG_PERSON_UID;
@@ -44,7 +41,7 @@ public class SELSelectStudentPresenter extends CommonHandlerPresenter<SELSelectS
 
     UmAppDatabase repository = UmAccountManager.getRepositoryForActiveAccount(context);
 
-    private UmLiveData<List<SocialNominationQuestionSet>> questionSetUmProvider;
+    private UmLiveData<List<SelQuestionSet>> questionSetUmProvider;
 
     private HashMap<Long, Long> idToQuestionSetMap;
     private HashMap<Long, Long> questionSetToIdMap;
@@ -98,15 +95,15 @@ public class SELSelectStudentPresenter extends CommonHandlerPresenter<SELSelectS
                 SELSelectStudentPresenter.this::updateSELQuestionSetOnView);
     }
 
-    private void updateSELQuestionSetOnView(List<SocialNominationQuestionSet> questionSets){
+    private void updateSELQuestionSetOnView(List<SelQuestionSet> questionSets){
         idToQuestionSetMap = new HashMap<>();
         questionSetToIdMap = new HashMap<>();
         ArrayList<String> questions = new ArrayList<>();
         long i=0;
-        for(SocialNominationQuestionSet questionSet : questionSets){
+        for(SelQuestionSet questionSet : questionSets){
             questions.add(questionSet.getTitle());
-            idToQuestionSetMap.put(i, questionSet.getSocialNominationQuestionSetUid());
-            questionSetToIdMap.put(questionSet.getSocialNominationQuestionSetUid(), i);
+            idToQuestionSetMap.put(i, questionSet.getSelQuestionSetUid());
+            questionSetToIdMap.put(questionSet.getSelQuestionSetUid(), i);
             i++;
         }
 

@@ -1,17 +1,12 @@
 package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.db.UmAppDatabase;
-import com.ustadmobile.core.db.dao.SocialNominationQuestionOptionDao;
-import com.ustadmobile.core.generated.locale.MessageID;
+import com.ustadmobile.core.db.dao.SelQuestionOptionDao;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
-import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.AddQuestionOptionDialogView;
-import com.ustadmobile.lib.db.entities.SocialNominationQuestionOption;
-import com.ustadmobile.lib.db.entities.UmAccount;
+import com.ustadmobile.lib.db.entities.SelQuestionOption;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Hashtable;
 
 import static com.ustadmobile.core.view.SELQuestionDetail2View.ARG_QUESTION_OPTION_UID;
@@ -19,11 +14,11 @@ import static com.ustadmobile.core.view.SELQuestionDetail2View.ARG_QUESTION_UID_
 
 public class AddQuestionOptionDialogPresenter extends UstadBaseController<AddQuestionOptionDialogView> {
 
-    SocialNominationQuestionOption currentOption;
+    SelQuestionOption currentOption;
     UmAppDatabase repository;
     private long currentQuestionUid;
     private long currnetQuestonOptionUid;
-    SocialNominationQuestionOptionDao questionOptionDao;
+    SelQuestionOptionDao questionOptionDao;
 
     public AddQuestionOptionDialogPresenter(Object context, Hashtable arguments, AddQuestionOptionDialogView view) {
         super(context, arguments, view);
@@ -43,11 +38,11 @@ public class AddQuestionOptionDialogPresenter extends UstadBaseController<AddQue
 
         questionOptionDao = repository.getSELQuestionOptionDao();
         questionOptionDao.findByUidAsync(currnetQuestonOptionUid, 
-                new UmCallback<SocialNominationQuestionOption>() {
+                new UmCallback<SelQuestionOption>() {
             @Override
-            public void onSuccess(SocialNominationQuestionOption result) {
+            public void onSuccess(SelQuestionOption result) {
                 if(result == null){
-                    currentOption = new SocialNominationQuestionOption();
+                    currentOption = new SelQuestionOption();
                     currentOption.setSelQuestionOptionQuestionUid(currentQuestionUid);
                     currentOption.setOptionText("");
                 }else{
@@ -72,10 +67,10 @@ public class AddQuestionOptionDialogPresenter extends UstadBaseController<AddQue
     public void handleAddQuestionOption(String newTitle){
         currentOption.setOptionText(newTitle);
         currentOption.setOptionActive(true);
-        questionOptionDao.findByUidAsync(currentOption.getSocialNominationQuestionOptionUid(),
-                new UmCallback<SocialNominationQuestionOption>() {
+        questionOptionDao.findByUidAsync(currentOption.getSelQuestionOptionUid(),
+                new UmCallback<SelQuestionOption>() {
             @Override
-            public void onSuccess(SocialNominationQuestionOption result) {
+            public void onSuccess(SelQuestionOption result) {
                 if(result != null){
                     //exists. update
                     questionOptionDao.updateAsync(currentOption, new UmCallback<Integer>() {

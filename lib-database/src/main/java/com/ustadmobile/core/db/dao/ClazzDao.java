@@ -83,6 +83,30 @@ public abstract class ClazzDao implements SyncableDao<Clazz, ClazzDao> {
             " AND ClazzMember.clazzMemberActive = 1) " +
             " ) AS teacherNames " ;
 
+    private static final String SELECT_CLAZZ_WHERE_PERMISSION =
+            " SELECT " +
+            "   Clazz.*, " +
+            "   (SELECT COUNT(*) " +
+            "       FROM ClazzMember WHERE " +
+            "       ClazzMember.clazzMemberClazzUid = Clazz.clazzUid " +
+            "       AND ClazzMember.role = " + ClazzMember.ROLE_STUDENT +
+            "       AND ClazzMember.clazzMemberActive = 1" +
+        "       ) AS numStudents, " +
+            "   (SELECT COUNT(*) FROM ClazzMember " +
+            "       WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid " +
+            "       AND ClazzMember.role = " + ClazzMember.ROLE_TEACHER +
+            "       AND ClazzMember.clazzMemberActive = 1 " +
+            "   ) AS numTeachers, " +
+            "   (SELECT GROUP_CONCAT" +
+            "       (Person.firstNames || ' ' ||  Person.lastName ) as teacherName " +
+            "       FROM Person where Person.personUid in " +
+            "       (SELECT ClazzMember.clazzMemberPersonUid " +
+            "           FROM ClazzMember WHERE ClazzMember.role = " + ClazzMember.ROLE_TEACHER  +
+            "           AND ClazzMember.clazzMemberClazzUid = Clazz.clazzUid" +
+            "           AND ClazzMember.clazzMemberActive = 1" +
+            "       ) " +
+            "   ) AS teacherNames " ;
+
 
     @Override
     @UmInsert
@@ -109,6 +133,12 @@ public abstract class ClazzDao implements SyncableDao<Clazz, ClazzDao> {
             " (SELECT ClazzMember.clazzMemberPersonUid FROM ClazzMember " +
                 "  WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid)")
     public abstract UmProvider<ClazzWithNumStudents> findAllClazzesByPersonUid(long personUid);
+
+    @UmQuery(CLAZZ_WHERE +
+            " FROM Clazz " +
+            " WHERE " + ENTITY_LEVEL_PERMISSION_CONDITION1 + Role.PERMISSION_CLAZZ_SELECT +
+            ENTITY_LEVEL_PERMISSION_CONDITION2)
+    public abstract UmProvider<ClazzWithNumStudents> findAllClazzesByPermission(long accountPersonUid);
 
     @UmQuery(CLAZZ_WHERE +
             " FROM Clazz ")

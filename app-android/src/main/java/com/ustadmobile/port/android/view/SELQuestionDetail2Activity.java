@@ -24,10 +24,10 @@ import android.widget.Spinner;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.SELQuestionDetail2Presenter;
 import com.ustadmobile.core.db.UmProvider;
-import com.ustadmobile.core.db.dao.SocialNominationQuestionDao;
+import com.ustadmobile.core.db.dao.SelQuestionDao;
 import com.ustadmobile.core.view.SELQuestionDetail2View;
-import com.ustadmobile.lib.db.entities.SocialNominationQuestion;
-import com.ustadmobile.lib.db.entities.SocialNominationQuestionOption;
+import com.ustadmobile.lib.db.entities.SelQuestion;
+import com.ustadmobile.lib.db.entities.SelQuestionOption;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.util.Objects;
@@ -43,18 +43,18 @@ public class SELQuestionDetail2Activity extends UstadBaseActivity implements SEL
     ConstraintLayout addOptionCL;
     ConstraintLayout optionsCL;
 
-    public static final DiffUtil.ItemCallback<SocialNominationQuestionOption> DIFF_CALLBACK =
-        new DiffUtil.ItemCallback<SocialNominationQuestionOption>(){
+    public static final DiffUtil.ItemCallback<SelQuestionOption> DIFF_CALLBACK =
+        new DiffUtil.ItemCallback<SelQuestionOption>(){
 
             @Override
-            public boolean areItemsTheSame(SocialNominationQuestionOption oldItem,
-                                           SocialNominationQuestionOption newItem) {
+            public boolean areItemsTheSame(SelQuestionOption oldItem,
+                                           SelQuestionOption newItem) {
                 return oldItem == newItem;
             }
 
             @Override
-            public boolean areContentsTheSame(SocialNominationQuestionOption oldItem,
-                                              SocialNominationQuestionOption newItem) {
+            public boolean areContentsTheSame(SelQuestionOption oldItem,
+                                              SelQuestionOption newItem) {
                 return oldItem.equals(newItem);
             }
         };
@@ -170,7 +170,7 @@ public class SELQuestionDetail2Activity extends UstadBaseActivity implements SEL
     }
 
     @Override
-    public void setQuestionOptionsProvider(UmProvider<SocialNominationQuestionOption> listProvider) {
+    public void setQuestionOptionsProvider(UmProvider<SelQuestionOption> listProvider) {
         SELQuestionOptionRecyclerAdapter recyclerAdapter =
                 new SELQuestionOptionRecyclerAdapter(
                         DIFF_CALLBACK,
@@ -180,10 +180,10 @@ public class SELQuestionDetail2Activity extends UstadBaseActivity implements SEL
 
         // get the provider, set , observe, etc.
         // A warning is expected
-        DataSource.Factory<Integer, SocialNominationQuestionOption> factory =
-                (DataSource.Factory<Integer, SocialNominationQuestionOption>)
+        DataSource.Factory<Integer, SelQuestionOption> factory =
+                (DataSource.Factory<Integer, SelQuestionOption>)
                         listProvider.getProvider();
-        LiveData<PagedList<SocialNominationQuestionOption>> data =
+        LiveData<PagedList<SelQuestionOption>> data =
                 new LivePagedListBuilder<>(factory, 20).build();
         //Observe the data:
         data.observe(this, recyclerAdapter::submitList);
@@ -201,16 +201,16 @@ public class SELQuestionDetail2Activity extends UstadBaseActivity implements SEL
     @Override
     public void setQuestionType(int type) {
         switch(type){
-            case SocialNominationQuestionDao
+            case SelQuestionDao
                     .SEL_QUESTION_TYPE_NOMINATION:
                 showQuestionOptions(false);
                 questionType.setSelection(type);
                 break;
-            case SocialNominationQuestionDao.SEL_QUESTION_TYPE_MULTI_CHOICE:
+            case SelQuestionDao.SEL_QUESTION_TYPE_MULTI_CHOICE:
                 showQuestionOptions(true);
                 questionType.setSelection(type);
                 break;
-            case SocialNominationQuestionDao.SEL_QUESTION_TYPE_FREE_TEXT:
+            case SelQuestionDao.SEL_QUESTION_TYPE_FREE_TEXT:
                 showQuestionOptions(false);
                 questionType.setSelection(type);
                 break;
@@ -264,7 +264,7 @@ public class SELQuestionDetail2Activity extends UstadBaseActivity implements SEL
     }
 
     @Override
-    public void setQuestionOnView(SocialNominationQuestion selQuestion) {
+    public void setQuestionOnView(SelQuestion selQuestion) {
         if(selQuestion.getQuestionText() != null)
             setQuestionText(selQuestion.getQuestionText());
         if(selQuestion.getQuestionType() > 0)

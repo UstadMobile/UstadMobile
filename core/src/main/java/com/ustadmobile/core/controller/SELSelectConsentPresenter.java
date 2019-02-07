@@ -3,9 +3,9 @@ package com.ustadmobile.core.controller;
 import java.util.Hashtable;
 import java.util.List;
 
-import com.ustadmobile.core.db.dao.SocialNominationQuestionDao;
-import com.ustadmobile.core.db.dao.SocialNominationQuestionSetDao;
-import com.ustadmobile.core.db.dao.SocialNominationQuestionSetResponseDao;
+import com.ustadmobile.core.db.dao.SelQuestionDao;
+import com.ustadmobile.core.db.dao.SelQuestionSetDao;
+import com.ustadmobile.core.db.dao.SelQuestionSetResponseDao;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
@@ -15,9 +15,9 @@ import com.ustadmobile.core.view.SELSelectConsentView;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 
 import com.ustadmobile.core.db.UmAppDatabase;
-import com.ustadmobile.lib.db.entities.SocialNominationQuestion;
-import com.ustadmobile.lib.db.entities.SocialNominationQuestionSet;
-import com.ustadmobile.lib.db.entities.SocialNominationQuestionSetResponse;
+import com.ustadmobile.lib.db.entities.SelQuestion;
+import com.ustadmobile.lib.db.entities.SelQuestionSet;
+import com.ustadmobile.lib.db.entities.SelQuestionSetResponse;
 
 import static com.ustadmobile.core.view.ClazzListView.ARG_CLAZZ_UID;
 import static com.ustadmobile.core.view.PersonDetailView.ARG_PERSON_UID;
@@ -89,18 +89,18 @@ public class SELSelectConsentPresenter
      * @param consentGiven true if consent given. False if not.
      */
     public void handleClickPrimaryActionButton(boolean consentGiven) {
-        SocialNominationQuestionSetResponseDao socialNominationQuestionSetResponseDao =
+        SelQuestionSetResponseDao selQuestionSetResponseDao =
                 repository.getSocialNominationQuestionSetResponseDao();
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
 
         //Check selectedObject for consent given.
         if(consentGiven){
 
-            socialNominationQuestionSetResponseDao.findAllPassedRecognitionByPersonUid(
+            selQuestionSetResponseDao.findAllPassedRecognitionByPersonUid(
                     currentClazzMemberUid,
-                    new UmCallback<List<SocialNominationQuestionSetResponse>>() {
+                    new UmCallback<List<SelQuestionSetResponse>>() {
                 @Override
-                public void onSuccess(List<SocialNominationQuestionSetResponse> listPassed) {
+                public void onSuccess(List<SelQuestionSetResponse> listPassed) {
 
                     if(listPassed.size() > MIN_RECOGNITION_SUCCESSES){
                         //Go straight to the Questions
@@ -109,20 +109,18 @@ public class SELSelectConsentPresenter
                     }else{
                         //TODO remove another newResponse creation? : Check
                         //Go re-do/do the recognition activity.
-                        SocialNominationQuestionSetResponse newResponse =
-                                new SocialNominationQuestionSetResponse();
-                        newResponse.setSocialNominationQuestionSetResponseStartTime(System.currentTimeMillis());
-                        newResponse.setSocialNominationQuestionSetResponseClazzMemberUid(currentClazzMemberUid);
-                        newResponse.setSocialNominationQuestionSetResposeUid(
-                                socialNominationQuestionSetResponseDao.insert(newResponse));
+                        SelQuestionSetResponse newResponse =
+                                new SelQuestionSetResponse();
+                        newResponse.setSelQuestionSetResponseStartTime(System.currentTimeMillis());
+                        newResponse.setSelQuestionSetResponseClazzMemberUid(currentClazzMemberUid);
+                        newResponse.setSelQuestionSetResposeUid(
+                                selQuestionSetResponseDao.insert(newResponse));
 
                         Hashtable<String, Object> args = new Hashtable<>();
-                        args.put(ARG_RECOGNITION_UID, newResponse.getSocialNominationQuestionSetResposeUid());
+                        args.put(ARG_RECOGNITION_UID, newResponse.getSelQuestionSetResposeUid());
                         args.put(ARG_CLAZZ_UID, currentClazzUid);
                         args.put(ARG_PERSON_UID, currentPersonUid);
                         args.put(ARG_CLAZZMEMBER_UID, currentClazzMemberUid);
-                        //Added:
-                        //args.put(ARG_QUESTION_SET_RESPONSE_UID, newResponse.getSocialNominationQuestionSetResposeUid());
                         args.put(ARG_SELECTED_QUESTION_SET_UID, currentQuestionSetUid);
                         doneClazzMemberUids += "," + String.valueOf(currentClazzMemberUid);
                         args.put(ARG_DONE_CLAZZMEMBER_UIDS, doneClazzMemberUids);
@@ -153,43 +151,43 @@ public class SELSelectConsentPresenter
     private void goToNextQuestion(){
 
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        SocialNominationQuestionSetResponseDao socialNominationQuestionSetResponseDao =
+        SelQuestionSetResponseDao selQuestionSetResponseDao =
                 repository.getSocialNominationQuestionSetResponseDao();
-        SocialNominationQuestionSetDao questionSetDao = repository
+        SelQuestionSetDao questionSetDao = repository
                 .getSocialNominationQuestionSetDao();
-        SocialNominationQuestionDao questionDao = repository
+        SelQuestionDao questionDao = repository
                 .getSocialNominationQuestionDao();
 
         //Loop through questions.
-        questionSetDao.findAllQuestionsAsync(new UmCallback<List<SocialNominationQuestionSet>>() {
+        questionSetDao.findAllQuestionsAsync(new UmCallback<List<SelQuestionSet>>() {
             @Override
-            public void onSuccess(List<SocialNominationQuestionSet> questionSets) {
+            public void onSuccess(List<SelQuestionSet> questionSets) {
 
                 //Update: Sprint 5: Question Set will be selectable at the
                 // SELSelectStudentView screen.
                 //TODOne: Change this when we add more Question Sets to
                 // findNextQuestionSet like we did for findNextQuestion
-                for(SocialNominationQuestionSet questionSet : questionSets){
+                for(SelQuestionSet questionSet : questionSets){
 
                     //Find total number of questions as well.
                     int totalSELQuestions =
                         questionDao.findTotalNumberOfActiveQuestionsInAQuestionSet(
-                                questionSet.getSocialNominationQuestionSetUid()
+                                questionSet.getSelQuestionSetUid()
                         );
 
-                    questionDao.findNextQuestionByQuestionSetUidAsync(questionSet.getSocialNominationQuestionSetUid(),
-                            BASE_INDEX_SEL_QUESTION, new UmCallback<SocialNominationQuestion>() {
+                    questionDao.findNextQuestionByQuestionSetUidAsync(questionSet.getSelQuestionSetUid(),
+                            BASE_INDEX_SEL_QUESTION, new UmCallback<SelQuestion>() {
                         @Override
-                        public void onSuccess(SocialNominationQuestion nextQuestion) {
+                        public void onSuccess(SelQuestion nextQuestion) {
                             if(nextQuestion != null) {
 
-                                SocialNominationQuestionSetResponse newResponse = new SocialNominationQuestionSetResponse();
-                                newResponse.setSocialNominationQuestionSetResponseStartTime(System.currentTimeMillis());
-                                newResponse.setSocialNominationQuestionSetResponseSocialNominationQuestionSetUid(
-                                        questionSet.getSocialNominationQuestionSetUid());
-                                newResponse.setSocialNominationQuestionSetResponseClazzMemberUid(currentClazzMemberUid);
+                                SelQuestionSetResponse newResponse = new SelQuestionSetResponse();
+                                newResponse.setSelQuestionSetResponseStartTime(System.currentTimeMillis());
+                                newResponse.setSelQuestionSetResponseSelQuestionSetUid(
+                                        questionSet.getSelQuestionSetUid());
+                                newResponse.setSelQuestionSetResponseClazzMemberUid(currentClazzMemberUid);
 
-                                socialNominationQuestionSetResponseDao.insertAsync(newResponse, new UmCallback<Long>() {
+                                selQuestionSetResponseDao.insertAsync(newResponse, new UmCallback<Long>() {
                                     @Override
                                     public void onSuccess(Long questionSetResponseUid) {
 
@@ -199,9 +197,9 @@ public class SELSelectConsentPresenter
                                         Hashtable<String, Object> args = new Hashtable<>();
                                         args.put(ARG_CLAZZ_UID, currentClazzUid);
                                         args.put(ARG_PERSON_UID, currentPersonUid);
-                                        args.put(ARG_QUESTION_SET_UID, questionSet.getSocialNominationQuestionSetUid());
+                                        args.put(ARG_QUESTION_SET_UID, questionSet.getSelQuestionSetUid());
                                         args.put(ARG_CLAZZMEMBER_UID, currentClazzMemberUid);
-                                        args.put(ARG_QUESTION_UID, nextQuestion.getSocialNominationQuestionUid());
+                                        args.put(ARG_QUESTION_UID, nextQuestion.getSelQuestionUid());
                                         args.put(ARG_QUESTION_INDEX_ID, nextQuestion.getQuestionIndex());
                                         args.put(ARG_QUESTION_SET_RESPONSE_UID, questionSetResponseUid);
                                         args.put(ARG_QUESTION_TEXT, nextQuestion.getQuestionText());

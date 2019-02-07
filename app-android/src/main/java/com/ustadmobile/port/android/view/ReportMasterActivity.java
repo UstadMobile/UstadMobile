@@ -160,6 +160,20 @@ public class ReportMasterActivity extends UstadBaseActivity implements
         return (int) (dp * Resources.getSystem().getDisplayMetrics().density);
     }
 
+    /**
+     * Creates a new Horizontal line for a table's row.
+     * @return  The horizontal line view.
+     */
+    public View getHorizontalLine(){
+        //Horizontal line
+        TableRow.LayoutParams hlineParams = new TableRow.LayoutParams(
+                TableRow.LayoutParams.MATCH_PARENT, 1);
+        View hl = new View(this);
+        hl.setBackgroundColor(Color.GRAY);
+        hl.setLayoutParams(hlineParams);
+        return hl;
+    }
+
     @Override
     public void updateTables(List<ReportMasterItem> items) {
         System.out.println("Updating tables with : " + items.size() + " items.");
@@ -270,6 +284,7 @@ public class ReportMasterActivity extends UstadBaseActivity implements
 
 
         tableLayout.addView(headingRow);
+        tableLayout.addView(getHorizontalLine());
 
         //MAKE TABLE TEXT DATA:
         String[] headingItems = new String[headingRow.getChildCount()];
@@ -388,6 +403,7 @@ public class ReportMasterActivity extends UstadBaseActivity implements
                 tableTextData.add(rowItems);
 
                 tableLayout.addView(iRow);
+                tableLayout.addView(getHorizontalLine());
 
             }
 

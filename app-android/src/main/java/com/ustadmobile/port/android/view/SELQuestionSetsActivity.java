@@ -12,12 +12,10 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
 import com.toughra.ustadmobile.R;
-import com.ustadmobile.core.controller.SELQuestionPresenter;
 import com.ustadmobile.core.controller.SELQuestionSetsPresenter;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.view.SELQuestionSetsView;
 import com.ustadmobile.lib.db.entities.SELQuestionSetWithNumQuestions;
-import com.ustadmobile.lib.db.entities.SocialNominationQuestionSet;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.util.Objects;

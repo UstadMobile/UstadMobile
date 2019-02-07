@@ -52,12 +52,12 @@ import com.ustadmobile.core.db.dao.PersonLocationJoinDao;
 import com.ustadmobile.core.db.dao.PersonPictureDao;
 import com.ustadmobile.core.db.dao.RoleDao;
 import com.ustadmobile.core.db.dao.ScheduleDao;
-import com.ustadmobile.core.db.dao.SocialNominationQuestionDao;
-import com.ustadmobile.core.db.dao.SocialNominationQuestionOptionDao;
-import com.ustadmobile.core.db.dao.SocialNominationQuestionResponseDao;
-import com.ustadmobile.core.db.dao.SocialNominationQuestionResponseNominationDao;
-import com.ustadmobile.core.db.dao.SocialNominationQuestionSetDao;
-import com.ustadmobile.core.db.dao.SocialNominationQuestionSetResponseDao;
+import com.ustadmobile.core.db.dao.SelQuestionDao;
+import com.ustadmobile.core.db.dao.SelQuestionOptionDao;
+import com.ustadmobile.core.db.dao.SelQuestionResponseDao;
+import com.ustadmobile.core.db.dao.SelQuestionResponseNominationDao;
+import com.ustadmobile.core.db.dao.SelQuestionSetDao;
+import com.ustadmobile.core.db.dao.SelQuestionSetResponseDao;
 import com.ustadmobile.core.db.dao.UMCalendarDao;
 import com.ustadmobile.lib.database.UmDbBuilder;
 import com.ustadmobile.lib.database.annotation.UmClearAll;
@@ -119,13 +119,13 @@ import com.ustadmobile.lib.db.entities.PersonLocationJoin;
 import com.ustadmobile.lib.db.entities.PersonPicture;
 import com.ustadmobile.lib.db.entities.Role;
 import com.ustadmobile.lib.db.entities.Schedule;
-import com.ustadmobile.lib.db.entities.SocialNominationQuestion;
-import com.ustadmobile.lib.db.entities.SocialNominationQuestionOption;
-import com.ustadmobile.lib.db.entities.SocialNominationQuestionResponse;
-import com.ustadmobile.lib.db.entities.SocialNominationQuestionResponseNomination;
-import com.ustadmobile.lib.db.entities.SocialNominationQuestionSet;
-import com.ustadmobile.lib.db.entities.SocialNominationQuestionSetRecognition;
-import com.ustadmobile.lib.db.entities.SocialNominationQuestionSetResponse;
+import com.ustadmobile.lib.db.entities.SelQuestion;
+import com.ustadmobile.lib.db.entities.SelQuestionResponse;
+import com.ustadmobile.lib.db.entities.SelQuestionOption;
+import com.ustadmobile.lib.db.entities.SelQuestionResponseNomination;
+import com.ustadmobile.lib.db.entities.SelQuestionSet;
+import com.ustadmobile.lib.db.entities.SelQuestionSetRecognition;
+import com.ustadmobile.lib.db.entities.SelQuestionSetResponse;
 import com.ustadmobile.lib.db.entities.UMCalendar;
 import com.ustadmobile.lib.db.sync.UmSyncableDatabase;
 import com.ustadmobile.lib.db.sync.dao.SyncStatusDao;
@@ -147,9 +147,9 @@ import java.util.Hashtable;
         ClazzLogAttendanceRecord.class, FeedEntry.class,
         PersonField.class, PersonCustomFieldValue.class,
         PersonDetailPresenterField.class,
-        SocialNominationQuestion.class, SocialNominationQuestionResponse.class,
-        SocialNominationQuestionResponseNomination.class, SocialNominationQuestionSet.class,
-        SocialNominationQuestionSetRecognition.class, SocialNominationQuestionSetResponse.class,
+        SelQuestion.class, SelQuestionResponse.class,
+        SelQuestionResponseNomination.class, SelQuestionSet.class,
+        SelQuestionSetRecognition.class, SelQuestionSetResponse.class,
         Schedule.class, Holiday.class, UMCalendar.class,
         ClazzActivity.class, ClazzActivityChange.class,
         ContentEntry.class, ContentEntryContentCategoryJoin.class,
@@ -161,7 +161,7 @@ import java.util.Hashtable;
         AccessToken.class, PersonAuth.class, Role.class, EntityRole.class,
         PersonGroup.class, PersonGroupMember.class, LocationAncestorJoin.class,
         PersonLocationJoin.class, PersonPicture.class,
-        SocialNominationQuestionOption.class
+        SelQuestionOption.class
 })
 public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthenticator,
         UmDbWithAttachmentsDir {
@@ -271,15 +271,15 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
 
     public abstract PersonDetailPresenterFieldDao getPersonDetailPresenterFieldDao();
 
-    public abstract SocialNominationQuestionDao getSocialNominationQuestionDao();
+    public abstract SelQuestionDao getSocialNominationQuestionDao();
 
-    public abstract SocialNominationQuestionSetResponseDao getSocialNominationQuestionSetResponseDao();
+    public abstract SelQuestionSetResponseDao getSocialNominationQuestionSetResponseDao();
 
-    public abstract SocialNominationQuestionSetDao getSocialNominationQuestionSetDao();
+    public abstract SelQuestionSetDao getSocialNominationQuestionSetDao();
 
-    public abstract SocialNominationQuestionResponseNominationDao getSocialNominationQuestionResponseNominationDao();
+    public abstract SelQuestionResponseNominationDao getSocialNominationQuestionResponseNominationDao();
 
-    public abstract SocialNominationQuestionResponseDao getSocialNominationQuestionResponseDao();
+    public abstract SelQuestionResponseDao getSocialNominationQuestionResponseDao();
 
     public abstract ScheduleDao getScheduleDao();
 
@@ -333,7 +333,7 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
 
     public abstract PersonPictureDao getPersonPictureDao();
 
-    public abstract SocialNominationQuestionOptionDao getSELQuestionOptionDao();
+    public abstract SelQuestionOptionDao getSELQuestionOptionDao();
 
     @UmDbContext
     public abstract Object getContext();

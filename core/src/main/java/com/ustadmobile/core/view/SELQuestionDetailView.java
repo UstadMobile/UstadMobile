@@ -1,6 +1,6 @@
 package com.ustadmobile.core.view;
 
-import com.ustadmobile.lib.db.entities.SocialNominationQuestion;
+import com.ustadmobile.lib.db.entities.SelQuestion;
 import com.ustadmobile.core.db.UmProvider;
 
 /**
@@ -19,7 +19,7 @@ public interface SELQuestionDetailView extends UstadView {
      *
      * @param listProvider The provider data
      */
-    void setListProvider(UmProvider<SocialNominationQuestion> listProvider);
+    void setListProvider(UmProvider<SelQuestion> listProvider);
 
     /**
      * Closes the view.

@@ -9,7 +9,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.view.SELQuestionDetailView;
 import com.ustadmobile.core.view.SELQuestionEditView;
-import com.ustadmobile.lib.db.entities.SocialNominationQuestion;
+import com.ustadmobile.lib.db.entities.SelQuestion;
 
 
 /**
@@ -21,7 +21,7 @@ public class SELQuestionDetailPresenter
         extends UstadBaseController<SELQuestionDetailView> {
 
     //Provider 
-    private UmProvider<SocialNominationQuestion> providerList;
+    private UmProvider<SelQuestion> providerList;
 
     public SELQuestionDetailPresenter(Object context, Hashtable arguments, SELQuestionDetailView view) {
         super(context, arguments, view);
@@ -29,7 +29,7 @@ public class SELQuestionDetailPresenter
 
     /**
      * In Order:
- *          1. Gets all Social Nomination Questions and sets the SocialNominationQuestion Provider
+ *          1. Gets all Social Nomination Questions and sets the SelQuestion Provider
      *          to the view.
      * @param savedState    The saved state
      */
@@ -47,7 +47,7 @@ public class SELQuestionDetailPresenter
     }
 
     /**
-     * Sets already set SocialNominationQuestion UmProvider to the View.
+     * Sets already set SelQuestion UmProvider to the View.
      */
     private void setQuestionListProviderToView(){
         //set Provider.

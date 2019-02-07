@@ -2,15 +2,14 @@ package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmProvider;
-import com.ustadmobile.core.db.dao.SocialNominationQuestionDao;
-import com.ustadmobile.core.db.dao.SocialNominationQuestionSetDao;
+import com.ustadmobile.core.db.dao.SelQuestionDao;
+import com.ustadmobile.core.db.dao.SelQuestionSetDao;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.SELQuestionDetail2View;
 import com.ustadmobile.core.view.SELQuestionSetDetailView;
-import com.ustadmobile.lib.db.entities.SocialNominationQuestion;
-import com.ustadmobile.lib.db.entities.SocialNominationQuestionOption;
+import com.ustadmobile.lib.db.entities.SelQuestion;
 
 import java.util.Hashtable;
 
@@ -20,10 +19,10 @@ import static com.ustadmobile.core.view.SELQuestionSetDetailView.ARG_SEL_QUESTIO
 public class SELQuestionSetDetailPresenter extends
         UstadBaseController<SELQuestionSetDetailView> {
 
-    private UmProvider<SocialNominationQuestion> questionUmProvider;
+    private UmProvider<SelQuestion> questionUmProvider;
     UmAppDatabase repository;
-    private SocialNominationQuestionDao selQuestionDao;
-    private SocialNominationQuestionSetDao selQuestionSetDao;
+    private SelQuestionDao selQuestionDao;
+    private SelQuestionSetDao selQuestionSetDao;
     private long questionSetUid = 0L;
     private String questionSetName = "";
 
@@ -42,15 +41,15 @@ public class SELQuestionSetDetailPresenter extends
         }
     }
 
-    public void handleQuestionEdit(SocialNominationQuestion question){
+    public void handleQuestionEdit(SelQuestion question){
 
         goToQuestionDetail(question);
     }
 
     public void handleQuestionDelete(long selQuestionUid){
-        selQuestionDao.findByUidAsync(selQuestionUid, new UmCallback<SocialNominationQuestion>() {
+        selQuestionDao.findByUidAsync(selQuestionUid, new UmCallback<SelQuestion>() {
             @Override
-            public void onSuccess(SocialNominationQuestion selQuestionObj) {
+            public void onSuccess(SelQuestion selQuestionObj) {
                 if(selQuestionObj != null){
                     selQuestionObj.setQuestionActive(false);
                     selQuestionDao.updateAsync(selQuestionObj, new UmCallback<Integer>() {
@@ -74,12 +73,12 @@ public class SELQuestionSetDetailPresenter extends
         });
     }
 
-    public void goToQuestionDetail(SocialNominationQuestion question){
-        long questionUid = question.getSocialNominationQuestionUid();
+    public void goToQuestionDetail(SelQuestion question){
+        long questionUid = question.getSelQuestionUid();
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         Hashtable args = new Hashtable();
         args.put(SELQuestionDetail2View.ARG_QUESTION_UID_QUESTION_DETAIL, questionUid);
-        args.put(ARG_SEL_QUESTION_SET_UID, question.getSocialNominationQuestionSocialNominationQuestionSetUid());
+        args.put(ARG_SEL_QUESTION_SET_UID, question.getSelQuestionSelQuestionSetUid());
         impl.go(SELQuestionDetail2View.VIEW_NAME, args, context);
     }
 

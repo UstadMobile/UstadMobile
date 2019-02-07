@@ -1,24 +1,24 @@
 package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.db.UmAppDatabase;
-import com.ustadmobile.core.db.dao.SocialNominationQuestionSetDao;
+import com.ustadmobile.core.db.dao.SelQuestionSetDao;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.view.AddQuestionSetDialogView;
-import com.ustadmobile.lib.db.entities.SocialNominationQuestionSet;
+import com.ustadmobile.lib.db.entities.SelQuestionSet;
 
 import java.util.Hashtable;
 
 public class AddQuestionSetDialogPresenter extends UstadBaseController<AddQuestionSetDialogView> {
 
-    SocialNominationQuestionSet questionSet;
-    SocialNominationQuestionSetDao socialNominationQuestionSetDao;
+    SelQuestionSet questionSet;
+    SelQuestionSetDao selQuestionSetDao;
 
     public AddQuestionSetDialogPresenter(Object context, Hashtable arguments, AddQuestionSetDialogView view) {
         super(context, arguments, view);
 
         UmAppDatabase repository = UmAccountManager.getRepositoryForActiveAccount(context);
-        socialNominationQuestionSetDao = repository.getSocialNominationQuestionSetDao();
+        selQuestionSetDao = repository.getSocialNominationQuestionSetDao();
 
 
     }
@@ -31,9 +31,9 @@ public class AddQuestionSetDialogPresenter extends UstadBaseController<AddQuesti
 
 
     public void handleAddQuestionSet(String title){
-        questionSet = new SocialNominationQuestionSet();
+        questionSet = new SelQuestionSet();
         questionSet.setTitle(title);
-        socialNominationQuestionSetDao.insertAsync(questionSet, new UmCallback<Long>() {
+        selQuestionSetDao.insertAsync(questionSet, new UmCallback<Long>() {
             @Override
             public void onSuccess(Long result) {
                 //sup

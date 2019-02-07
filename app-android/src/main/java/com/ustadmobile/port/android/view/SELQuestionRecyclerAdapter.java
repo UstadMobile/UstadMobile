@@ -15,12 +15,11 @@ import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
-import com.ustadmobile.core.controller.CommonHandlerPresenter;
 import com.ustadmobile.core.controller.SELQuestionSetDetailPresenter;
-import com.ustadmobile.core.db.dao.SocialNominationQuestionDao;
-import com.ustadmobile.lib.db.entities.SocialNominationQuestion;
+import com.ustadmobile.core.db.dao.SelQuestionDao;
+import com.ustadmobile.lib.db.entities.SelQuestion;
 
-public class SELQuestionRecyclerAdapter  extends PagedListAdapter<SocialNominationQuestion,
+public class SELQuestionRecyclerAdapter  extends PagedListAdapter<SelQuestion,
         SELQuestionRecyclerAdapter.SELQuestionViewHolder> {
 
     Context theContext;
@@ -40,7 +39,7 @@ public class SELQuestionRecyclerAdapter  extends PagedListAdapter<SocialNominati
     @Override
     public void onBindViewHolder(@NonNull SELQuestionViewHolder holder, int position) {
 
-        SocialNominationQuestion theQuestion = getItem(position);
+        SelQuestion theQuestion = getItem(position);
         TextView questionTitle =
                 holder.itemView.findViewById(R.id.item_sel_question_title);
         TextView questionType =
@@ -49,14 +48,14 @@ public class SELQuestionRecyclerAdapter  extends PagedListAdapter<SocialNominati
         questionTitle.setText(theQuestion.getQuestionText());
 
         switch(theQuestion.getQuestionType()){
-            case SocialNominationQuestionDao
+            case SelQuestionDao
                     .SEL_QUESTION_TYPE_NOMINATION:
                 questionType.setText(theActivity.getText(R.string.sel_question_type_nomination));
                 break;
-            case SocialNominationQuestionDao.SEL_QUESTION_TYPE_MULTI_CHOICE:
+            case SelQuestionDao.SEL_QUESTION_TYPE_MULTI_CHOICE:
                 questionType.setText(theActivity.getText(R.string.sel_question_type_multiple_choise));
                 break;
-            case SocialNominationQuestionDao.SEL_QUESTION_TYPE_FREE_TEXT:
+            case SelQuestionDao.SEL_QUESTION_TYPE_FREE_TEXT:
                 questionType.setText(theActivity.getText(R.string.sel_question_type_free_text));
                 break;
             default:
@@ -83,7 +82,7 @@ public class SELQuestionRecyclerAdapter  extends PagedListAdapter<SocialNominati
                     mPresenter.handleQuestionEdit(theQuestion);
                     return true;
                 } else if (i == R.id.delete) {
-                    mPresenter.handleQuestionDelete(theQuestion.getSocialNominationQuestionUid());
+                    mPresenter.handleQuestionDelete(theQuestion.getSelQuestionUid());
                     return true;
                 } else {
                     return false;
@@ -103,7 +102,7 @@ public class SELQuestionRecyclerAdapter  extends PagedListAdapter<SocialNominati
     }
 
     protected SELQuestionRecyclerAdapter(
-            @NonNull DiffUtil.ItemCallback<SocialNominationQuestion> diffCallback,
+            @NonNull DiffUtil.ItemCallback<SelQuestion> diffCallback,
             Context context, Activity activity, SELQuestionSetDetailPresenter presenter) {
         super(diffCallback);
         theContext = context;

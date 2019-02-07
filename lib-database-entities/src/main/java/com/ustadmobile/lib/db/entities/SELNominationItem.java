@@ -9,7 +9,7 @@ public class SELNominationItem {
     private long nomineeUid;
     private long nominatorUid;
     private long clazzUid;
-    private long socialNominationQuestionUid;
+    private long selQuestionUid;
 
 
     public String getClazzName() {
@@ -76,11 +76,11 @@ public class SELNominationItem {
         this.clazzUid = clazzUid;
     }
 
-    public long getSocialNominationQuestionUid() {
-        return socialNominationQuestionUid;
+    public long getSelQuestionUid() {
+        return selQuestionUid;
     }
 
-    public void setSocialNominationQuestionUid(long socialNominationQuestionUid) {
-        this.socialNominationQuestionUid = socialNominationQuestionUid;
+    public void setSelQuestionUid(long selQuestionUid) {
+        this.selQuestionUid = selQuestionUid;
     }
 }
