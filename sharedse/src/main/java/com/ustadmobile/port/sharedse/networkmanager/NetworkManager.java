@@ -636,7 +636,7 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
 //        UstadMobileSystemImpl.l(UMLog.INFO, 0, "cancelDownloadJob #" + downloadJobId +
 //            " task running: " + (downloadTask != null));
 //
-//        //go through all downloads that have been completed, and delete them
+//        //go through all downloads that have been completed, and deleteByDownloadSetUid them
 //        List<DownloadJobItemWithDownloadSetItem> downloadedItems =  dbManager
 //                .getDownloadJobItemDao().findAllWithDownloadSet(downloadJobId);
 //
@@ -652,11 +652,11 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
 //                if(item.getDestinationFile() != null) {
 //                    File file = new File(item.getDestinationFile());
 //                    if(file.exists())
-//                        file.delete();
+//                        file.deleteByDownloadSetUid();
 //
 //                    file = new File(item.getDestinationFile() + ResumableHttpDownload.DLPART_EXTENSION);
 //                    if(file.exists())
-//                        file.delete();
+//                        file.deleteByDownloadSetUid();
 //                }
 //            }else {
 //                UstadMobileSystemImpl.l(UMLog.INFO, 0, "cancelDownloadJob #"
@@ -1925,7 +1925,7 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
     public void setSharedFeed(String[] uuids, String title) {
         //TODO: replace this hardcoded value with something generic that gets replaced by client
 
-        //TODO: if there is already a shared feed, delete the old one from the database
+        //TODO: if there is already a shared feed, deleteByDownloadSetUid the old one from the database
         String feedSrcHref = "p2p://groupowner:" + getHttpListeningPort() + "/";
 
         OpdsEntryWithRelations sharedFeed = new OpdsEntryWithRelations();

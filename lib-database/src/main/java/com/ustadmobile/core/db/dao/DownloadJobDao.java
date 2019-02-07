@@ -69,13 +69,14 @@ public abstract class DownloadJobDao {
     @UmQuery("SELECT * FROM DownloadJob WHERE djUid = :djUid")
     public abstract UmLiveData<DownloadJob>  getJobLive(long djUid);
 
-    @UmQuery("SELECT * FROM DownloadJob WHERE djDsUid = :djDsUid")
-    public abstract UmLiveData<DownloadJob> getLiveJobBySetUid(long djDsUid);
+    @UmQuery("SELECT djUid FROM DownloadJob WHERE djDsUid = :djDsUid LIMIT 1")
+    public abstract long getLatestDownloadJobUidForDownloadSet(long djDsUid);
+
 
     @UmQuery("UPDATE DownloadJob SET djStatus =:djStatus WHERE djDsUid = :djDsUid")
     public abstract void update(long djDsUid, int djStatus);
 
     @UmQuery("DELETE FROM DownloadJob WHERE djDsUid = :djDsUid")
-    public abstract void delete(long djDsUid, UmCallback<Integer> callback);
+    public abstract int deleteByDownloadSetUid(long djDsUid);
 
 }

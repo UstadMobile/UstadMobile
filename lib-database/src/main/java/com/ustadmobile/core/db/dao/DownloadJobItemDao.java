@@ -48,6 +48,29 @@ public abstract class DownloadJobItemDao {
         }
     }
 
+    public static class DownloadJobInfo{
+
+        private int totalDownloadItems;
+
+        private long totalSize;
+
+        public int getTotalDownloadItems() {
+            return totalDownloadItems;
+        }
+
+        public void setTotalDownloadItems(int totalDownloadItems) {
+            this.totalDownloadItems = totalDownloadItems;
+        }
+
+        public long getTotalSize() {
+            return totalSize;
+        }
+
+        public void setTotalSize(long totalSize) {
+            this.totalSize = totalSize;
+        }
+    }
+
     /**
      * Insert a list of DownloadJobItems
      *
@@ -105,7 +128,10 @@ public abstract class DownloadJobItemDao {
     @UmQuery("SELECT * FROM DownloadJobItem")
     public abstract List<DownloadJobItem> findAll();
 
-    @UmQuery("SELECT DownloadSetItem.dsiUid,\n" +
+    @UmQuery("SELECT COUNT(*) as totalDownloadItems, SUM(downloadLength) as totalSize FROM DownloadJobItem WHERE djiDjUid =:djiDjUid")
+    public abstract DownloadJobInfo getDownloadJobInfoByJobUid(long djiDjUid);
+
+    @UmQuery("SELECT DownloadSetItem.dsiUid as downloadSetItemUid,\n" +
             "ContentEntryFile.contentEntryFileUid,\n" +
             "ContentEntryFile.fileSize\n" +
             "FROM DownloadSetItem\n" +
@@ -119,5 +145,8 @@ public abstract class DownloadJobItemDao {
 
     @UmQuery("SELECT * FROM DownloadJobItem WHERE djiDjUid = :djiDjUid")
     public abstract List<DownloadJobItem> findByJobUid(long djiDjUid);
+
+    @UmQuery("DELETE FROM DownloadJobItem WHERE djiDjUid = :djiDjUid")
+    public abstract int deleteByDownloadSetUid(long djiDjUid);
 
 }

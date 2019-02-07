@@ -26,7 +26,7 @@ public abstract class ContainerFileDao {
 
     /**
      * Deletes a container file, and all entries associated with it (including ContainerFileEntry,
-     * OpdsEntry, OpdsLink). This does *NOT* delete the file itself
+     * OpdsEntry, OpdsLink). This does *NOT* deleteByDownloadSetUid the file itself
      *
      * @param context
      * @param containerFile
@@ -40,11 +40,11 @@ public abstract class ContainerFileDao {
 //                opdsEntryUuids);
 //        UmAppDatabase.getInstance(context).getContainerFileEntryDao().deleteByContainerFileId(containerFile.getId());
 //        UmAppDatabase.getInstance(context).getOpdsEntryStatusCacheDao().handleContainerDeleted(opdsEntryIds);
-//        delete(containerFile);
+//        deleteByDownloadSetUid(containerFile);
     }
 
     public void delete(ContainerFile containerFile) {
-        System.out.println("ContainerFileDao.delete: " + containerFile.getId());
+        System.out.println("ContainerFileDao.deleteByDownloadSetUid: " + containerFile.getId());
         Thread.dumpStack();
         deleteQuery(containerFile);
     }

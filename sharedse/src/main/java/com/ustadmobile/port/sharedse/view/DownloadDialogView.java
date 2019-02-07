@@ -14,7 +14,7 @@ public interface DownloadDialogView extends UstadView {
 
     void setDownloadOverWifiOnly(boolean wifiOnly);
 
-    void setStatusText(String statusText);
+    void setStatusText(String statusText, int totalItems, String sizeInfo);
 
     void setStackedOptions(int[] optionIds, String[] optionTexts);
 
@@ -23,5 +23,7 @@ public interface DownloadDialogView extends UstadView {
     int [] getOptionIds();
 
     void cancelDialog();
+
+    void setCalculatingViewVisible(boolean visible);
 
 }

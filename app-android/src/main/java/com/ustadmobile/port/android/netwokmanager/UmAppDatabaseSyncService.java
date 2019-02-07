@@ -46,7 +46,8 @@ public class UmAppDatabaseSyncService extends Service implements LifecycleObserv
         super.onCreate();
         inForeground = true;
         WorkManager.getInstance().cancelAllWorkByTag(UmAppDatabaseSyncWorker.TAG);
-        UmAppDatabaseSyncWorker.queueSyncWorker(100, TimeUnit.MILLISECONDS);
+        //dont pollute my logs
+        //UmAppDatabaseSyncWorker.queueSyncWorker(100, TimeUnit.MILLISECONDS);
         ProcessLifecycleOwner.get().getLifecycle().addObserver(this);
     }
 

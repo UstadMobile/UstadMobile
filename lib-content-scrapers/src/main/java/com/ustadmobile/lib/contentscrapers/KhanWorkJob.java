@@ -133,7 +133,7 @@ public class KhanWorkJob {
                     for (File file : list) {
                         String ext = FilenameUtils.getExtension(file.getPath());
                         if (ext.endsWith("mp4")) {
-                            boolean deleted = zipFile.delete();
+                            boolean deleted = zipFile.deleteByDownloadSetUid();
                             if (deleted) {
                                 countmp4++;
                             }

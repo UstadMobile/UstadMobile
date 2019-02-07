@@ -37,6 +37,8 @@ public abstract class DownloadSetItemDao {
     @UmQuery("SELECT dsiDsUid FROM DownloadSetItem WHERE dsiContentEntryUid = :contentEntryUid")
     public abstract long findDownloadSetUidByContentEntryUid(long contentEntryUid);
 
+    @UmQuery("DELETE FROM DownloadSetItem WHERE dsiDsUid = :dsiDsUid")
+    public abstract int deleteByDownloadSetUid(long dsiDsUid);
 
 
 

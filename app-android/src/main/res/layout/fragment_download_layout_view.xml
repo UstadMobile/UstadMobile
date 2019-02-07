@@ -8,6 +8,8 @@
     android:layout_height="match_parent">
 
     <TextView
+        android:visibility="gone"
+        android:layout_marginTop="@dimen/dimen_16dp"
         android:id="@+id/download_option_status_text"
         android:textSize="@dimen/text_title_medium"
         android:layout_width="match_parent"
@@ -33,6 +35,7 @@
             android:layout_height="wrap_content" />
 
         <TextView
+            android:id="@+id/wifi_only_option_label"
             android:layout_centerVertical="true"
             android:layout_marginStart="@dimen/dimen_16dp"
             android:layout_toEndOf="@+id/wifi_only_option"
@@ -42,6 +45,30 @@
     </RelativeLayout>
 
     <RelativeLayout
+        android:id="@+id/download_calculate_holder"
+        android:layout_width="match_parent"
+        android:paddingTop="@dimen/dimen_16dp"
+        android:paddingBottom="@dimen/dimen_16dp"
+        android:layout_height="wrap_content">
+        <FrameLayout
+            android:layout_centerVertical="true"
+            android:background="@color/primary_light"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"/>
+        <TextView
+            android:paddingStart="@dimen/dimen_8dp"
+            android:paddingEnd="@dimen/dimen_8dp"
+            android:background="@color/icons"
+            android:text="Calculating"
+            android:textColor="@color/primary_dark"
+            android:textSize="@dimen/text_body_small"
+            android:id="@+id/download_dialog_calculating"
+            android:layout_centerInParent="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </RelativeLayout>
+    <RelativeLayout
+        android:visibility="gone"
         android:layout_marginTop="@dimen/dimen_16dp"
         android:id="@+id/stacked_option_holder"
         android:layout_width="match_parent"
@@ -49,51 +76,19 @@
 
         <Button
             android:id="@+id/action_btn_pause_download"
-            style="@style/Widget.AppCompat.Button.Borderless.Colored"
-            android:text="Pause Download"
-            android:textSize="@dimen/text_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@null"
-            android:clickable="true"
-            android:focusable="true"
-            android:layout_alignParentEnd="true"
-            android:paddingRight="8dp"
-            android:paddingLeft="8dp"
+            style="@style/UmTheme.Button.Stacked"
             />
 
         <Button
-            android:layout_marginTop="@dimen/dimen_10dp"
             android:layout_below="@+id/action_btn_pause_download"
             android:id="@+id/action_btn_cancel_download"
-            style="@style/Widget.AppCompat.Button.Borderless.Colored"
-            android:text="canvel download"
-            android:textSize="@dimen/text_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@null"
-            android:clickable="true"
-            android:focusable="true"
-            android:layout_alignParentEnd="true"
-            android:paddingRight="8dp"
-            android:paddingLeft="8dp"
+            style="@style/UmTheme.Button.Stacked"
             />
 
         <Button
-            android:layout_marginTop="@dimen/dimen_10dp"
             android:layout_below="@+id/action_btn_cancel_download"
             android:id="@+id/action_btn_continue_download"
-            style="@style/Widget.AppCompat.Button.Borderless.Colored"
-            android:text="continue download"
-            android:textSize="@dimen/text_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@null"
-            android:clickable="false"
-            android:focusable="false"
-            android:layout_alignParentEnd="true"
-            android:paddingRight="8dp"
-            android:paddingLeft="8dp"
+            style="@style/UmTheme.Button.Stacked"
             />
 
     </RelativeLayout>

@@ -127,7 +127,7 @@ public class OpdsDirScanner implements Runnable{
                 containerFile.setId((int)containerFileId);
             }
 
-            //delete old entry info on this file
+            //deleteByDownloadSetUid old entry info on this file
             dbManager.getContainerFileEntryDao()
                     .deleteOpdsAndContainerFileEntriesByContainerFile(containerFile.getId());
 

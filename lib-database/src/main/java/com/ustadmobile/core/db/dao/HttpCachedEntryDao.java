@@ -47,7 +47,7 @@ public abstract class HttpCachedEntryDao {
     public abstract void insert(HttpCachedEntry entry);
 
     /**
-     * Get a list of the file uris for a given list of urls. Useful when it's time to delete the entries from the disk.
+     * Get a list of the file uris for a given list of urls. Useful when it's time to deleteByDownloadSetUid the entries from the disk.
      *
      * @param urls URLs to find entries for
      *
