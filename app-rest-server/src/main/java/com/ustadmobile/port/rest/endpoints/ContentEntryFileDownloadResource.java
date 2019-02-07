@@ -4,6 +4,7 @@ import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.lib.db.entities.ContentEntryFileWithStatus;
 
 import java.io.File;
+import java.util.List;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -29,7 +30,8 @@ public class ContentEntryFileDownloadResource {
             return Response.status(Response.Status.NOT_FOUND).build();
 
         Response.ResponseBuilder responseBuilder;
-        if(!headers.getRequestHeader("range").isEmpty()) {
+        List<String> rangeRequestHeaders = headers.getRequestHeader("range");
+        if(rangeRequestHeaders != null && !rangeRequestHeaders.isEmpty()) {
             //TODO: change this to actually handle the range request
             responseBuilder = Response.ok();
         }else {
