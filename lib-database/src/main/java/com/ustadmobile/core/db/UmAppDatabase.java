@@ -498,28 +498,28 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
                         db.execSql("CREATE TABLE IF NOT EXISTS  ConnectivityStatus  ( csUid  INTEGER PRIMARY KEY  NOT NULL ,  connectivityState  INTEGER,  wifiSsid  TEXT,  connectedOrConnecting  BOOL)");
                         //END Create ConnectivityStatus (PostgreSQL)
 
-                        db.execSql("DROP TABLE DownloadJob");
+                        db.execSql("DROP TABLE  IF EXISTS DownloadJob");
                         //BEGIN Create DownloadJob (PostgreSQL)
                         db.execSql("CREATE TABLE IF NOT EXISTS  DownloadJob  ( djUid  SERIAL PRIMARY KEY  NOT NULL ,  djDsUid  INTEGER,  timeCreated  BIGINT,  timeRequested  BIGINT,  timeCompleted  BIGINT,  djStatus  INTEGER)");
                         //END Create DownloadJob (PostgreSQL)
 
-                        db.execSql("DROP TABLE DownloadJobItem");
+                        db.execSql("DROP TABLE  IF EXISTS DownloadJobItem");
                         //BEGIN Create DownloadJobItem (PostgreSQL)
                         db.execSql("CREATE TABLE IF NOT EXISTS  DownloadJobItem  ( djiUid  SERIAL PRIMARY KEY  NOT NULL ,  djiDsiUid  INTEGER,  djiDjUid  INTEGER,  djiContentEntryFileUid  BIGINT,  downloadedSoFar  BIGINT,  downloadLength  BIGINT,  currentSpeed  BIGINT,  timeStarted  BIGINT,  timeFinished  BIGINT,  djiStatus  INTEGER,  destinationFile  TEXT,  numAttempts  INTEGER)");
                         db.execSql("CREATE INDEX  index_DownloadJobItem_djiStatus  ON  DownloadJobItem  ( djiStatus  )");
                         //END Create DownloadJobItem (PostgreSQL)
 
-                        db.execSql("DROP TABLE DownloadJobItemHistory");
-                        //BEGIN Create DownloadJobItemHistory (SQLite)
-                        db.execSql("CREATE TABLE IF NOT EXISTS  DownloadJobItemHistory  ( id  INTEGER PRIMARY KEY  AUTOINCREMENT  NOT NULL ,  url  TEXT,  networkNode  BIGINT,  downloadJobItemId  INTEGER,  mode  INTEGER,  numBytes  BIGINT,  successful  BOOL,  startTime  BIGINT,  endTime  BIGINT)");
-                        //END Create DownloadJobItemHistory (SQLite)
+                        db.execSql("DROP TABLE  IF EXISTS DownloadJobItemHistory");
+                        //BEGIN Create DownloadJobItemHistory (PostgreSQL)
+                        db.execSql("CREATE TABLE IF NOT EXISTS  DownloadJobItemHistory  ( id  SERIAL PRIMARY KEY  NOT NULL ,  url  TEXT,  networkNode  BIGINT,  downloadJobItemId  INTEGER,  mode  INTEGER,  numBytes  BIGINT,  successful  BOOL,  startTime  BIGINT,  endTime  BIGINT)");
+                        //END Create DownloadJobItemHistory (PostgreSQL)
 
-                        db.execSql("DROP TABLE DownloadSet");
+                        db.execSql("DROP TABLE  IF EXISTS DownloadSet");
                         //BEGIN Create DownloadSet (PostgreSQL)
                         db.execSql("CREATE TABLE IF NOT EXISTS  DownloadSet  ( dsUid  SERIAL PRIMARY KEY  NOT NULL ,  destinationDir  TEXT,  meteredNetworkAllowed  BOOL,  dsRootContentEntryUid  BIGINT)");
                         //END Create DownloadSet (PostgreSQL)
 
-                        db.execSql("DROP TABLE DownloadSetItem");
+                        db.execSql("DROP TABLE  IF EXISTS DownloadSetItem");
                         //BEGIN Create DownloadSetItem (PostgreSQL)
                         db.execSql("CREATE TABLE IF NOT EXISTS  DownloadSetItem  ( dsiUid  SERIAL PRIMARY KEY  NOT NULL ,  dsiDsUid  INTEGER,  dsiContentEntryUid  BIGINT)");
                         db.execSql("CREATE INDEX  index_DownloadSetItem_dsiContentEntryUid  ON  DownloadSetItem  ( dsiContentEntryUid  )");
