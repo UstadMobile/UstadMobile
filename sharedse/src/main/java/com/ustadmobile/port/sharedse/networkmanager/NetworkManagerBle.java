@@ -6,7 +6,10 @@ import com.ustadmobile.core.db.dao.NetworkNodeDao;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.lib.db.entities.DownloadJobItem;
+import com.ustadmobile.lib.db.entities.DownloadJobItemWithDownloadSetItem;
 import com.ustadmobile.lib.db.entities.NetworkNode;
+import com.ustadmobile.port.sharedse.util.LiveDataWorkQueue;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -114,6 +117,7 @@ public abstract class NetworkManagerBle {
     private Vector<WiFiDirectGroupListenerBle> wiFiDirectGroupListeners = new Vector<>();
 
 
+    private LiveDataWorkQueue<DownloadJobItemWithDownloadSetItem> downloadJobItemWorkQueue;
 
     /**
      * Constructor to be used when creating new instance
@@ -122,6 +126,8 @@ public abstract class NetworkManagerBle {
     public NetworkManagerBle(Object context) {
         this.mContext = context;
     }
+
+    private UmAppDatabase umAppDatabase;
 
     /**
      * Constructor to be used for testing purpose (mocks)
@@ -136,11 +142,32 @@ public abstract class NetworkManagerBle {
         this.mContext = context;
     }
 
+    private class DownloadJobItemHolder implements
+            LiveDataWorkQueue.WorkQueueItemHolder<DownloadJobItemWithDownloadSetItem> {
+
+        private DownloadJobItemWithDownloadSetItem jobItem;
+
+        private DownloadJobItemHolder(DownloadJobItemWithDownloadSetItem jobItem) {
+            this.jobItem = jobItem;
+        }
+
+        @Override
+        public long getUid() {
+            return jobItem.getDjiUid();
+        }
+
+        @Override
+        public Runnable makeRunnable() {
+            return new DownloadJobItemRunner(mContext, jobItem, NetworkManagerBle.this,
+                    umAppDatabase, "");
+        }
+    }
+
     /**
      * Start web server, advertising and discovery
      */
     public void onCreate() {
-
+        umAppDatabase = UmAppDatabase.getInstance(mContext);
         startAdvertising();
 
         //Starting scanning too soon after advertising will cause issues on Droid
@@ -160,6 +187,10 @@ public abstract class NetworkManagerBle {
             e.printStackTrace();
         }
 
+
+//        downloadJobItemWorkQueue = new LiveDataWorkQueue<>(1);
+//        downloadJobItemWorkQueue.setAdapter(jobItem -> new DownloadJobItemHolder(jobItem));
+//        downloadJobItemWorkQueue.start(umAppDatabase.getDownloadJobItemDao().findNextDownloadJobItem());
     }
 
 
@@ -477,6 +508,7 @@ public abstract class NetworkManagerBle {
      * Clean up the network manager for shutdown
      */
     public void onDestroy(){
+        //downloadJobItemWorkQueue.shutdown();
         wiFiDirectGroupListeners.clear();
         entryStatusTaskExecutorService.shutdown();
         httpd.stop();

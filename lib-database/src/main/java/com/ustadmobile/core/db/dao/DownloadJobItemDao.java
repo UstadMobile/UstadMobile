@@ -66,4 +66,10 @@ public abstract class DownloadJobItemDao {
     @UmQuery("SELECT djiStatus FROM DownloadJobItem WHERE djiUid = :djiUid")
     public abstract UmLiveData<Integer> getLiveStatus(int djiUid);
 
+    @UmQuery("SELECT * FROM DownloadJobItem " +
+            "LEFT JOIN DownloadSetItem ON DownloadJobItem.djiDsiUid = DownloadSetItem.dsiUid " +
+            "LIMIT 1")
+    public abstract UmLiveData<List<DownloadJobItemWithDownloadSetItem>> findNextDownloadJobItem();
+
+
 }

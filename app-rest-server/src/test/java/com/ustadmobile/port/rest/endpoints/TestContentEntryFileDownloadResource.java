@@ -80,7 +80,7 @@ public class TestContentEntryFileDownloadResource {
 
 
     @Test
-    public void givneFileExists_whenDownloaded_thenShouldDownloadAndBeTheSameFile()
+    public void givenFileExists_whenDownloaded_thenShouldDownloadAndBeTheSameFile()
             throws IOException{
         File downloadTmp = File.createTempFile("TestContentEntryFileDownloadResource",
                 "dltmp");
