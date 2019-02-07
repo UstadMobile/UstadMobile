@@ -88,6 +88,7 @@ public class UmDbBuilder {
                 return dbResult;
             }catch(Exception e) {
                 System.err.print("Exception creating database: " + e);
+                e.printStackTrace();
                 throw new RuntimeException(e);
             }finally {
                 JdbcDatabaseUtils.closeQuietly(dbAdapter);

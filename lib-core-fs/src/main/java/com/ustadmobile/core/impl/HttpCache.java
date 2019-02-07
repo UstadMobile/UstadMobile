@@ -256,7 +256,7 @@ public class HttpCache implements HttpCacheResponse.ResponseCompleteListener{
                 if(!entryFile.exists() || (entryFile.exists() && entryFile.delete())){
                     deletedFileUris.add(fileUri);
                 }else {
-                    UstadMobileSystemImpl.l(UMLog.ERROR, 0, "Failed to delete cache file: " +
+                    UstadMobileSystemImpl.l(UMLog.ERROR, 0, "Failed to deleteByDownloadSetUid cache file: " +
                             fileUri);
                 }
             }

@@ -16,14 +16,14 @@ public class DownloadJobItemHistory {
     public static final int MODE_LOCAL = 2;
 
     @UmPrimaryKey(autoIncrement = true)
-    private int id;
+    private long id;
 
     private String url;
 
     //Foreign key for the networknode this is connected to
     private long networkNode;
 
-    private int downloadJobItemId;
+    private long downloadJobItemId;
 
     private int mode;
 
@@ -59,11 +59,11 @@ public class DownloadJobItemHistory {
     }
 
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
 
@@ -123,11 +123,11 @@ public class DownloadJobItemHistory {
         this.endTime = endTime;
     }
 
-    public int getDownloadJobItemId() {
+    public long getDownloadJobItemId() {
         return downloadJobItemId;
     }
 
-    public void setDownloadJobItemId(int downloadJobItemId) {
+    public void setDownloadJobItemId(long downloadJobItemId) {
         this.downloadJobItemId = downloadJobItemId;
     }
 }

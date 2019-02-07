@@ -22,7 +22,7 @@ public abstract class DownloadSetItemDao {
      * @param jobItems List of DownloadSetItem entities to insert
      */
     @UmInsert
-    public abstract void insertList(List<DownloadSetItem> jobItems);
+    public abstract void insert(List<DownloadSetItem> jobItems);
 
     /**
      * Insert a single DownloadSetItem
@@ -33,4 +33,13 @@ public abstract class DownloadSetItemDao {
      */
     @UmInsert
     public abstract long insert(DownloadSetItem item);
+
+    @UmQuery("SELECT dsiDsUid FROM DownloadSetItem WHERE dsiContentEntryUid = :contentEntryUid")
+    public abstract long findDownloadSetUidByContentEntryUid(long contentEntryUid);
+
+    @UmQuery("DELETE FROM DownloadSetItem WHERE dsiDsUid = :dsiDsUid")
+    public abstract int deleteByDownloadSetUid(long dsiDsUid);
+
+
+
 }

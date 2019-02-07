@@ -127,7 +127,7 @@ public interface AppView {
      *
      * @param title Title of the dialog window
      * @param text Text for the dialog window
-     * @param positiveButtonText Text for the positive / confirmation button e.g. delete, add etc.
+     * @param positiveButtonText Text for the positive / confirmation button e.g. deleteByDownloadSetUid, add etc.
      * @param negativeButtonText Text for the negative button e.g. cancel
      * @param cmdId Command ID that will be passed to the listener
      * @param listener Listener to receive event when the user makes a choice
@@ -142,7 +142,7 @@ public interface AppView {
      *
      * @param title Title of the dialog window
      * @param text Text for the dialog window
-     * @param positiveButtonText Text for the positive / confirmation button e.g. delete, add etc.
+     * @param positiveButtonText Text for the positive / confirmation button e.g. deleteByDownloadSetUid, add etc.
      * @param negativeButtonText Text for the negative button e.g. cancel
      * @param cmdId Command ID that will be passed to the listener
      * @param listener Listener to receive event when the user makes a choice
