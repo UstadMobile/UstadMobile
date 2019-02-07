@@ -49,9 +49,6 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
 
     private boolean isStarted = false;
 
-    /**
-     * Ble service connection
-     */
     private ServiceConnection mSyncServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
@@ -64,6 +61,9 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
         }
     };
 
+    /**
+     * Ble service connection
+     */
     private ServiceConnection bleServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
@@ -78,7 +78,7 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
 
     private boolean mSyncServiceBound = false;
 
-    private boolean bleServiceBound = false;
+    private volatile boolean bleServiceBound = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -199,18 +199,19 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
         return isStarted;
     }
 
+    @Override
     public void onDestroy() {
-        super.onDestroy();
+        if(bleServiceBound){
+            unbindService(bleServiceConnection);
+        }
+
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mLocaleChangeBroadcastReceiver);
         UstadMobileSystemImplAndroid.getInstanceAndroid().handleActivityDestroy(this);
-
         if(mSyncServiceBound) {
             unbindService(mSyncServiceConnection);
         }
 
-        if(bleServiceBound){
-            unbindService(bleServiceConnection);
-        }
+        super.onDestroy();
     }
 
     public Object getContext() {

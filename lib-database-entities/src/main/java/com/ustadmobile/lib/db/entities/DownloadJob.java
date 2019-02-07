@@ -13,9 +13,9 @@ import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 public class DownloadJob {
 
     @UmPrimaryKey(autoIncrement = true)
-    private int djUid;
+    private long djUid;
 
-    private int djDsUid;
+    private long djDsUid;
 
     private long timeCreated;
 
@@ -40,19 +40,19 @@ public class DownloadJob {
         this.djDsUid = downloadSet.getDsUid();
     }
 
-    public int getDjUid() {
+    public long getDjUid() {
         return djUid;
     }
 
-    public void setDjUid(int djUid) {
+    public void setDjUid(long djUid) {
         this.djUid = djUid;
     }
 
-    public int getDjDsUid() {
+    public long getDjDsUid() {
         return djDsUid;
     }
 
-    public void setDjDsUid(int djDsUid) {
+    public void setDjDsUid(long djDsUid) {
         this.djDsUid = djDsUid;
     }
 

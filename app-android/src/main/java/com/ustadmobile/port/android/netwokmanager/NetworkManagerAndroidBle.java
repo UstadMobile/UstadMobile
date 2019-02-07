@@ -13,7 +13,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
+import android.net.NetworkRequest;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.net.wifi.p2p.WifiP2pManager;
@@ -135,6 +139,26 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
     };
 
     /**
+     * Callback for the network connectivity changes
+     */
+    private class UmNetworkCallback extends ConnectivityManager.NetworkCallback {
+        @Override
+        public void onAvailable(Network network) {
+            super.onAvailable(network);
+        }
+
+        @Override
+        public void onLost(Network network) {
+            super.onLost(network);
+        }
+
+        @Override
+        public void onUnavailable(){
+            super.onUnavailable();
+        }
+    }
+
+    /**
      * Constructor to be used when creating new instance
      *
      * @param context Platform specific application context
@@ -142,6 +166,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
     public NetworkManagerAndroidBle(Object context) {
         super(context);
         mContext = ((Context) context);
+        startMonitoringNetworkChanges();
     }
 
 
@@ -463,6 +488,18 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
     }
 
 
+    /**
+     * Start monitoring network changes
+     */
+    public void startMonitoringNetworkChanges() {
+        NetworkRequest networkRequest  = new NetworkRequest.Builder()
+                .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
+                .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
+                .build();
+        ConnectivityManager connectivityManager = (ConnectivityManager)mContext
+                .getSystemService(Context.CONNECTIVITY_SERVICE);
+        connectivityManager.requestNetwork(networkRequest,new UmNetworkCallback());
+    }
 
     /**
      * Check if the device needs runtime-permission

@@ -1,6 +1,7 @@
 package com.ustadmobile.core.db.dao;
 
 import com.ustadmobile.core.db.UmLiveData;
+import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
@@ -54,7 +55,7 @@ public abstract class DownloadJobDao {
      * @return The DownloadJob with the given id, or null if no such DownloadJob exists
      */
     @UmQuery("SELECT * From DownloadJob WHERE djUid = :djUid")
-    public abstract DownloadJob findById(int djUid);
+    public abstract DownloadJob findById(long djUid);
 
 
     /**
@@ -67,5 +68,15 @@ public abstract class DownloadJobDao {
 
     @UmQuery("SELECT * FROM DownloadJob WHERE djUid = :djUid")
     public abstract UmLiveData<DownloadJob>  getJobLive(long djUid);
+
+    @UmQuery("SELECT djUid FROM DownloadJob WHERE djDsUid = :djDsUid LIMIT 1")
+    public abstract long getLatestDownloadJobUidForDownloadSet(long djDsUid);
+
+
+    @UmQuery("UPDATE DownloadJob SET djStatus =:djStatus WHERE djDsUid = :djDsUid")
+    public abstract void update(long djDsUid, int djStatus);
+
+    @UmQuery("DELETE FROM DownloadJob WHERE djDsUid = :djDsUid")
+    public abstract int deleteByDownloadSetUid(long djDsUid);
 
 }

@@ -16,7 +16,7 @@ import java.util.List;
 public abstract class DownloadJobItemHistoryDao {
 
     @UmQuery("SELECT * FROM DownloadJobItemHistory WHERE networkNode = :nodeId AND startTime >= :since")
-    public abstract List<DownloadJobItemHistory> findHistoryItemsByNetworkNodeSince(int nodeId, long since);
+    public abstract List<DownloadJobItemHistory> findHistoryItemsByNetworkNodeSince(long nodeId, long since);
 
     @UmInsert
     public abstract long insert(DownloadJobItemHistory downloadJobItemHistory);
@@ -25,10 +25,6 @@ public abstract class DownloadJobItemHistoryDao {
     public abstract void update(DownloadJobItemHistory downloadJobItemHistory);
 
 
-
-    @UmQuery("SELECT * FROM DownloadJobItemHistory")
-    public abstract List<DownloadJobItemHistory> getAll();
-
     @UmQuery("SELECT * From DownloadJobItemHistory WHERE downloadJobItemId = :downloadJobItemId")
-    public abstract List<DownloadJobItemHistory> findHistoryItemsByDownloadJobItem(int downloadJobItemId);
+    public abstract List<DownloadJobItemHistory> findHistoryItemsByDownloadJobItem(long downloadJobItemId);
 }

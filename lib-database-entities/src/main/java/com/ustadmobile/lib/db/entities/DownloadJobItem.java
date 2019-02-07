@@ -14,11 +14,11 @@ import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 public class DownloadJobItem {
 
     @UmPrimaryKey(autoIncrement = true)
-    private int djiUid;
+    private long djiUid;
 
-    private int djiDsiUid;
+    private long djiDsiUid;
 
-    private int djiDjUid;
+    private long djiDjUid;
 
     private long djiContentEntryFileUid;
 
@@ -51,27 +51,28 @@ public class DownloadJobItem {
         this.djiContentEntryFileUid = contentEntryFile.getContentEntryFileUid();
     }
 
-    public int getDjiUid() {
+
+    public long getDjiUid() {
         return djiUid;
     }
 
-    public void setDjiUid(int djiUid) {
+    public void setDjiUid(long djiUid) {
         this.djiUid = djiUid;
     }
 
-    public int getDjiDsiUid() {
+    public long getDjiDsiUid() {
         return djiDsiUid;
     }
 
-    public void setDjiDsiUid(int djiDsiUid) {
+    public void setDjiDsiUid(long djiDsiUid) {
         this.djiDsiUid = djiDsiUid;
     }
 
-    public int getDjiDjUid() {
+    public long getDjiDjUid() {
         return djiDjUid;
     }
 
-    public void setDjiDjUid(int djiDjUid) {
+    public void setDjiDjUid(long djiDjUid) {
         this.djiDjUid = djiDjUid;
     }
 
