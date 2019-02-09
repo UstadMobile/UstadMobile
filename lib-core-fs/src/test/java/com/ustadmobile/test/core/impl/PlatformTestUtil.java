@@ -9,14 +9,7 @@ import com.ustadmobile.port.javase.impl.UmContextSe;
 
 public class PlatformTestUtil {
 
-//    static TestContext testContext = new TestContext("maindevice");
-
     static UmContextSe testContext = new UmContextSe();
-
-    static {
-        testContext.setCacheDbJdbcUrl(TestConstantsCoreFs.TEST_JDBC_URL);
-    }
-
 
     public static Object getTargetContext() {
         return testContext;

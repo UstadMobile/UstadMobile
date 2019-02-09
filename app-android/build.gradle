@@ -293,8 +293,6 @@ dependencies {
 
 
     androidTestImplementation project(":core-tests")
-    androidTestImplementation project(":sharedse-tests")
-    androidTestImplementation project(":lib-core-fs-tests")
 
 
     /*
