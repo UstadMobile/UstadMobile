@@ -5,25 +5,24 @@ import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMFileUtil;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.StringTokenizer;
 import java.util.Vector;
-import java.util.WeakHashMap;
+import java.util.regex.Pattern;
+
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
 
 import fi.iki.elonen.NanoHTTPD;
 import fi.iki.elonen.router.RouterNanoHTTPD;
-
-import static com.ustadmobile.port.sharedse.networkmanager.NetworkManager.CATALOG_HTTP_ENDPOINT_PREFIX;
 
 /**
  * Embedded HTTP Server which runs to serve files directly out of a zipped container on the fly
@@ -109,9 +108,6 @@ public class EmbeddedHTTPD extends RouterNanoHTTPD implements ResponseMonitoredI
         //mountedEPUBs = new HashMap<>();
         id = idCounter;
         idCounter++;
-
-        addRoute(CATALOG_HTTP_ENDPOINT_PREFIX + "(.)+", CatalogUriResponder.class, context,
-                new WeakHashMap(), this);
         //TODO: Setup 404 handling
     }
 
@@ -264,5 +260,48 @@ public class EmbeddedHTTPD extends RouterNanoHTTPD implements ResponseMonitoredI
     @Override
     public void onStreamClosed(NanoHTTPD.Response response) {
         fireResponseFinished(response);
+    }
+
+    /**
+     * Get the local HTTP server url with the URL as it is to be used for access over the loopback
+     * interface
+     *
+     * @return Local http server url e.g. http://127.0.0.1:PORT/
+     */
+    public String getLocalHttpUrl() {
+        return "http://127.0.0.1:" + getListeningPort() + "/";
+    }
+
+    /**
+     * Mount a Zip File to the http server.  Optionally specify a preferred mount point (useful if
+     * the activity is being created from a saved state)
+     *
+     * ***PORTED FROM NetworkManager***. TODO: refactor / clean this up somewhat.
+     *
+     * @param zipPath Path to the zip that should be mounted (mandatory)
+     * @param mountName Directory name that this should be mounted as e.g. something.epub-timestamp. Can be null
+     *
+     * @return The mountname that was used - the content will then be accessible on getZipMountURL()/return value
+     */
+    public String mountZipOnHttp(String zipPath, String mountName, boolean epubFilterEnabled,
+                                 String epubScriptToAdd) {
+        UstadMobileSystemImpl.l(UMLog.INFO, 371, "Mount zip " + zipPath + " on service "
+                + this + "httpd server = " + this + " listening port = " + getListeningPort());
+
+        String extension = UMFileUtil.getExtension(zipPath);
+        HashMap<String, List<MountedZipHandler.MountedZipFilter>> filterMap = null;
+
+        if(extension != null && extension.endsWith("epub")) {
+            filterMap = new HashMap<>();
+            List<MountedZipHandler.MountedZipFilter> xhtmlFilterList = new ArrayList<>();
+            MountedZipHandler.MountedZipFilter autoplayFilter = new MountedZipHandler.MountedZipFilter(
+                    Pattern.compile("autoplay(\\s?)=(\\s?)([\"'])autoplay", Pattern.CASE_INSENSITIVE),
+                    "data-autoplay$1=$2$3autoplay");
+            xhtmlFilterList.add(autoplayFilter);
+            filterMap.put("xhtml", xhtmlFilterList);
+        }
+
+        mountName = mountZip(zipPath, mountName, epubFilterEnabled, epubScriptToAdd);
+        return mountName;
     }
 }

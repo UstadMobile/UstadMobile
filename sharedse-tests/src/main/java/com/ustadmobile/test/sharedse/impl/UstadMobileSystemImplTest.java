@@ -7,7 +7,6 @@ import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
-import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle;
 import com.ustadmobile.test.core.impl.TestContext;
 
@@ -68,11 +67,6 @@ public class UstadMobileSystemImplTest extends UstadMobileSystemImplSE {
     @Override
     public void go(String viewName, Hashtable args, Object context, int flags) {
 
-    }
-
-    @Override
-    public NetworkManager getNetworkManager() {
-        return null;
     }
 
     @Override

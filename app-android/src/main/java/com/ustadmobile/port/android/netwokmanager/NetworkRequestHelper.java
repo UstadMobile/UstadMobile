@@ -8,7 +8,7 @@ import android.net.NetworkInfo;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 
-import static com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroid.normalizeAndroidWifiSsid;
+import static com.ustadmobile.port.android.util.UMAndroidUtil.normalizeAndroidWifiSsid;
 
 /**
  * On Android SDK 21+ when a wifi connection is established no traffic will be routed through it
@@ -22,14 +22,13 @@ public class NetworkRequestHelper extends ConnectivityManager.NetworkCallback {
 
     private ConnectivityManager connectivityManager;
 
-    private NetworkManagerAndroid manager;
+    //private NetworkManagerAndroid manager;
 
     private String targetSsid;
 
-    public NetworkRequestHelper(NetworkManagerAndroid manager, ConnectivityManager connectivityManager,
+    public NetworkRequestHelper(ConnectivityManager connectivityManager,
                                 String targetSsid) {
         this.connectivityManager = connectivityManager;
-        this.manager = manager;
         this.targetSsid = targetSsid;
     }
 
@@ -40,10 +39,10 @@ public class NetworkRequestHelper extends ConnectivityManager.NetworkCallback {
         String ssid = normalizeAndroidWifiSsid(networkInfo.getExtraInfo());
         if(ssid != null && targetSsid.equals(ssid)) {
             UstadMobileSystemImpl.l(UMLog.INFO, 0, "NetworkRequestHelper: onAvailable" + network);
-            manager.setWifiSocketFactory(network.getSocketFactory());
+//            manager.setWifiSocketFactory(network.getSocketFactory());
 
             //TODO: this could be replaced with a method reference
-            manager.setWifiUrlConnectionOpener(new AndroidNetworkURLConnectionOpener(network));
+//            manager.setWifiUrlConnectionOpener(new AndroidNetworkURLConnectionOpener(network));
             connectivityManager.unregisterNetworkCallback(this);
         }
     }

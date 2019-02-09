@@ -25,7 +25,6 @@ import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.port.sharedse.impl.http.UmHttpCallSe;
 import com.ustadmobile.port.sharedse.impl.http.UmHttpResponseSe;
-import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -184,15 +183,6 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
 
         return serializer;
     }
-
-    /**
-     * Return the network manager for this platform
-     *
-     * @return
-     */
-
-    @Deprecated
-    public abstract NetworkManager getNetworkManager();
 
     /**
      * Get NetworkManagerBle instance

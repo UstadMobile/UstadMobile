@@ -2,10 +2,7 @@ package com.ustadmobile.port.sharedse.networkmanager;
 
 import com.google.gson.Gson;
 import com.ustadmobile.core.db.UmAppDatabase;
-import com.ustadmobile.core.db.dao.ContentEntryDao;
 import com.ustadmobile.core.db.dao.ContentEntryFileDao;
-import com.ustadmobile.core.impl.UmAccountManager;
-import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.ContentEntryFile;
 
 import java.util.ArrayList;
@@ -94,7 +91,7 @@ public abstract class BleGattServer implements WiFiDirectGroupListenerBle{
                     e.printStackTrace();
                 }
                 return new BleMessage(WIFI_GROUP_CREATION_RESPONSE,message.getBytes());
-                default: return null;
+            default: return null;
         }
     }
 

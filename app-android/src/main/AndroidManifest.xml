@@ -47,8 +47,6 @@
                 android:resource="@xml/file_provider_path" />
         </provider>
 
-        <service android:name="com.ustadmobile.port.android.netwokmanager.NetworkServiceAndroid" />
-
         <activity
             android:name="com.ustadmobile.port.android.view.ContainerActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
