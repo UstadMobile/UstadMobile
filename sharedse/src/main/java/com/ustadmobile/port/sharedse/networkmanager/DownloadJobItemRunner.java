@@ -159,7 +159,6 @@ public class DownloadJobItemRunner implements Runnable, BleMessageResponseListen
      */
     private void handleDownloadSetMeteredConnectionAllowedChanged(boolean meteredConnection){
         meteredConnectionAllowed.set(meteredConnection ? 1 : 0);
-
         if(meteredConnectionAllowed.get() == 0 && connectivityStatus != null
             && connectivityStatus.getConnectivityState() == ConnectivityStatus.STATE_METERED) {
             stopAsync(JobStatus.WAITING_FOR_CONNECTION);
@@ -260,6 +259,9 @@ public class DownloadJobItemRunner implements Runnable, BleMessageResponseListen
         checkWhereToDownloadFrom();
     }
 
+    /**
+     * Decide where to get the file, on cloud or from peer devices.
+     */
     private void checkWhereToDownloadFrom(){
         long currentTimeStamp = System.currentTimeMillis();
         long minLastSeen = currentTimeStamp - TimeUnit.MINUTES.toMillis(1);
@@ -350,6 +352,12 @@ public class DownloadJobItemRunner implements Runnable, BleMessageResponseListen
     }
 
 
+    /**
+     * Create URL where the runner will get the file from
+     * @param isFromCloud True if the download will be coming from the cloud otherwise
+     *                    it will be a peer download.
+     * @return constructed file URL
+     */
     private String getFileUrl(boolean isFromCloud){
         if(isFromCloud){
             return endpointUrl + "ContentEntryFileServer/" + downloadItem
