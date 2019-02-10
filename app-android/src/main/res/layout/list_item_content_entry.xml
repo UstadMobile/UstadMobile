@@ -35,6 +35,7 @@
         android:layout_margin="@dimen/dimen_4dp"
         android:textSize="12sp"
         app:layout_constraintStart_toEndOf="@id/content_entry_item_thumbnail"
+        app:layout_constraintEnd_toStartOf="@id/content_entry_item_download"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/content_entry_item_title"
         tools:text="Content Description" />
@@ -65,12 +66,13 @@
 
     <com.ustadmobile.port.android.view.DownloadStatusButton
         android:id="@+id/content_entry_item_download"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
+        android:layout_width="42dp"
+        android:layout_height="42dp"
         android:layout_margin="@dimen/dimen_8dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         android:tint="@color/text_secondary"
+        android:padding="8dp"
         android:contentDescription="@string/download"
         app:srcCompat="@drawable/ic_file_download_black_24dp"/>
 
