@@ -73,7 +73,7 @@ public class TestOpfDocument {
             Assert.assertEquals("Item id # " + item.getId() + " same href",
                     item.getHref(), loadedItem.getHref());
             Assert.assertEquals("Item id #" + item.getId() + " same mime type",
-                    item.getMimeType(), loadedItem.getMimeType());
+                    item.getMediaType(), loadedItem.getMediaType());
         }
 
         Assert.assertEquals("Original and reserialized TOC has same navitem",
