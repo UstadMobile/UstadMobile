@@ -496,7 +496,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
     /**
      * Start monitoring network changes
      */
-    public void startMonitoringNetworkChanges() {
+    private void startMonitoringNetworkChanges() {
         NetworkRequest networkRequest  = new NetworkRequest.Builder()
                 .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
                 .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)

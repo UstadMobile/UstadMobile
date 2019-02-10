@@ -288,7 +288,6 @@ public class DownloadJobItemRunnerTest {
             startPeerWebServer();
             Thread.sleep(1);
             int mockPort = mockPeerWebServer.getPort();
-            groupBle.setPort(mockPort);
             groupBle.setEndpoint(localEndPoint);
             wifiDirectGroupInfoMessage = new BleMessage(WIFI_GROUP_CREATION_RESPONSE,
                     new Gson().toJson(groupBle).getBytes());
