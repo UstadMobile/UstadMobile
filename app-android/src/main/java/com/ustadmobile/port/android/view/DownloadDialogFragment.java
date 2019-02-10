@@ -41,8 +41,6 @@ public class DownloadDialogFragment extends UstadDialogFragment implements Downl
 
     private CheckBox wifiOnlyView;
 
-    private TextView calculateTextView;
-
     private RelativeLayout calculateHolder;
 
 
@@ -57,7 +55,7 @@ public class DownloadDialogFragment extends UstadDialogFragment implements Downl
         statusTextView = rootView.findViewById(R.id.download_option_status_text);
         wifiOnlyView = rootView.findViewById(R.id.wifi_only_option);
         calculateHolder = rootView.findViewById(R.id.download_calculate_holder);
-        calculateTextView = rootView.findViewById(R.id.download_dialog_calculating);
+        TextView calculateTextView = rootView.findViewById(R.id.download_dialog_calculating);
         RelativeLayout wifiOnlyHolder = rootView.findViewById(R.id.wifi_only_option_holder);
 
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
