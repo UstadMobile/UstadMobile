@@ -183,6 +183,8 @@ public class ContentEntryDetailActivity extends UstadBaseActivity implements Con
                 button.setVisibility(View.VISIBLE);
                 downloadProgressView.setVisibility(View.GONE);
                 button.setText(R.string.download);
+                button.setOnClickListener(view ->
+                        entryDetailPresenter.handleDownloadButtonClick(false));
             }
 
         });
