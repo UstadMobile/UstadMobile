@@ -31,9 +31,9 @@ public abstract class HttpCachedEntryDao {
     public abstract HttpCachedEntry findByUrlAndMethod(String url, int method);
 
     /**
-     * Update method - update the given entry. Has no effect if it has not already been inserted
+     * Update method - updateState the given entry. Has no effect if it has not already been inserted
      *
-     * @param entry Entry to update
+     * @param entry Entry to updateState
      */
     @UmUpdate
     public abstract void update(HttpCachedEntry entry);

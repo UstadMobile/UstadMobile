@@ -465,7 +465,7 @@ public class ContentScraperUtil {
     /**
      * Insert or Update the database for those parentChild Joins where the child have 1 parent
      *
-     * @param dao         dao to insert/update
+     * @param dao         dao to insert/updateState
      * @param parentEntry
      * @param childEntry
      * @param index
@@ -553,9 +553,9 @@ public class ContentScraperUtil {
     }
 
     /**
-     * Insert or update the database with a new/updated Schema
+     * Insert or updateState the database with a new/updated Schema
      *
-     * @param categorySchemeDao dao to insert/update
+     * @param categorySchemeDao dao to insert/updateState
      * @param schemaName        schema Name
      * @param schemaUrl         schema Url
      * @return the entry that was created/updated
@@ -581,9 +581,9 @@ public class ContentScraperUtil {
     }
 
     /**
-     * Insert or update the category that belongs in a schema
+     * Insert or updateState the category that belongs in a schema
      *
-     * @param categoryDao  dao to insert/update
+     * @param categoryDao  dao to insert/updateState
      * @param schema       schema the category belongs in
      * @param categoryName name of category
      * @return the new/updated category entry
@@ -609,9 +609,9 @@ public class ContentScraperUtil {
     }
 
     /**
-     * Insert or update the relation between 2 content entry
+     * Insert or updateState the relation between 2 content entry
      *
-     * @param contentEntryRelatedJoinDao dao to insert/update
+     * @param contentEntryRelatedJoinDao dao to insert/updateState
      * @param relatedEntry               related entry of parent contententry
      * @param parentEntry                parent content entry
      * @param relatedType                type of relation (Translation, related content)
@@ -865,9 +865,9 @@ public class ContentScraperUtil {
     }
 
     /**
-     * Insert or update language variant
+     * Insert or updateState language variant
      *
-     * @param variantDao variant dao to insert/update
+     * @param variantDao variant dao to insert/updateState
      * @param variant    variant of the language
      * @param language   the language the variant belongs to
      * @return the language variant entry that was created/updated
@@ -970,7 +970,7 @@ public class ContentScraperUtil {
      * @param thumbnailUrl    thumbnail Url of entry if exists
      * @param licenseName     license name of entry
      * @param licenseUrl      license Url of entry
-     * @param contentEntryDao dao to insert or update
+     * @param contentEntryDao dao to insert or updateState
      * @return the updated content entry
      */
     public static ContentEntry createOrUpdateContentEntry(String id, String title, String sourceUrl, String publisher, int licenseType,

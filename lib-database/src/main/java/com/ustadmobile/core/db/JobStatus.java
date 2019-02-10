@@ -60,6 +60,8 @@ public class JobStatus {
 
     public static final int COMPLETE_MAX = 30;
 
+    public static final int PAUSING = 23;
+
     public static final int COMPLETE = 24;
 
     public static final int FAILED = 25;

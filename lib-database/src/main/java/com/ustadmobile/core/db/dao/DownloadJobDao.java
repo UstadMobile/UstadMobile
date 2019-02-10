@@ -1,10 +1,13 @@
 package com.ustadmobile.core.db.dao;
 
+import com.ustadmobile.core.db.JobStatus;
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.impl.UmCallback;
+import com.ustadmobile.core.impl.UmCallbackUtil;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
+import com.ustadmobile.lib.database.annotation.UmTransaction;
 import com.ustadmobile.lib.database.annotation.UmUpdate;
 import com.ustadmobile.lib.db.entities.DownloadJob;
 
@@ -41,7 +44,7 @@ public abstract class DownloadJobDao {
     /**
      * Update all fields on the given DownloadJob
      *
-     * @param job The DownloadJob to update
+     * @param job The DownloadJob to updateState
      */
     @UmUpdate
     public abstract void update(DownloadJob job);
@@ -73,10 +76,25 @@ public abstract class DownloadJobDao {
     public abstract long getLatestDownloadJobUidForDownloadSet(long djDsUid);
 
 
-    @UmQuery("UPDATE DownloadJob SET djStatus =:djStatus WHERE djDsUid = :djDsUid")
-    public abstract void update(long djDsUid, int djStatus);
+    @UmQuery("UPDATE DownloadJob SET djStatus =:djStatus WHERE djUid = :djUid")
+    public abstract void update(long djUid, int djStatus);
+
+    @UmQuery("UPDATE DownloadJobItem SET djiStatus = :djiStatus WHERE djiDjUid = :djUid " +
+            "AND djiStatus BETWEEN :jobStatusFrom AND :jobStatusTo")
+    public abstract void updateJobItems(long djUid, int djiStatus, int jobStatusFrom,
+                                        int jobStatusTo);
 
     @UmQuery("DELETE FROM DownloadJob WHERE djDsUid = :djDsUid")
     public abstract int deleteByDownloadSetUid(long djDsUid);
+
+    @UmTransaction
+    public void updateJobAndItems(long djiUid, int djStatus, int activeJobItemsStatus) {
+        update(djiUid, djStatus);
+        updateJobItems(djiUid, djStatus, 0, JobStatus.WAITING_MAX);
+
+        if(activeJobItemsStatus != -1)
+            updateJobItems(djiUid, activeJobItemsStatus, JobStatus.RUNNING_MIN, JobStatus.RUNNING_MAX);
+    }
+
 
 }

@@ -45,6 +45,8 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
 
     private String statusMessage = null;
 
+    private String destinationDir = null;
+
     public DownloadDialogPresenter(Object context, Hashtable arguments, DownloadDialogView view) {
         super(context, arguments, view);
 
@@ -154,7 +156,8 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
         DownloadSet downloadSet = new DownloadSet();
         UMStorageDir[] storageDir = UstadMobileSystemImpl.getInstance()
                 .getStorageDirs(UstadMobileSystemImpl.SHARED_RESOURCE, getContext());
-        downloadSet.setDestinationDir(storageDir[0].getDirURI());
+        destinationDir = storageDir[0].getDirURI();
+        downloadSet.setDestinationDir(destinationDir);
         downloadSet.setDsRootContentEntryUid(contentEntryUid);
 
         downloadSetUid = umAppDatabase.getDownloadSetDao().insert(downloadSet);
@@ -208,6 +211,8 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
             jobItem.setDjiDjUid(downloadJobId);
             jobItem.setDownloadLength(item.getFileSize());
             jobItem.setDjiDsiUid(item.getDownloadSetItemUid());
+            jobItem.setDestinationFile(UMFileUtil.joinPaths(destinationDir,
+                    String.valueOf(item.getContentEntryFileUid())));
             jobItems.add(jobItem);
         }
 
@@ -221,8 +226,8 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
     }
 
     public void handleContinueDownloading(){
-        new Thread(() -> umAppDatabase.getDownloadJobDao()
-                .update(downloadSetUid,JobStatus.QUEUED)).start();
+        new Thread(() -> umAppDatabase.getDownloadJobDao().updateJobAndItems(downloadJobUid,
+                JobStatus.QUEUED, -1)).start();
     }
 
     public void handleCancelDownload(){
@@ -231,8 +236,8 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
     }
 
     public void handlePauseDownload(){
-        new Thread(() -> umAppDatabase.getDownloadJobDao()
-                .update(downloadSetUid,JobStatus.PAUSED)).start();
+        new Thread(() -> umAppDatabase.getDownloadJobDao().updateJobAndItems(downloadJobUid,
+                JobStatus.PAUSED, JobStatus.PAUSING)).start();
     }
 
     public void handleDeleteDownloadFile(){

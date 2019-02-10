@@ -73,4 +73,14 @@ public class UmAccountManager {
                 activeAccount.getAuth());
     }
 
+    public static String getActiveEndpoint(Object context) {
+        UmAccount activeAccount = getActiveAccount(context);
+        if(activeAccount != null) {
+            return activeAccount.getEndpointUrl();
+        }else {
+            return UstadMobileSystemImpl.getInstance().getAppConfigString("apiUrl",
+                    "http://localhost", context);
+        }
+    }
+
 }

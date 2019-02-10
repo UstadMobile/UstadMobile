@@ -82,7 +82,7 @@ import static com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING;
  * Epubs can fail but a retry policy of 2 is enough to get the file.
  * <p>
  * 3. Once downloaded, some epubs have some missing information
- * Open the epub, find description and image property and update them
+ * Open the epub, find description and image property and updateState them
  * We also need to increase the font for the epub and this is done by modifying the css and replacing the existing
  * Move on to next epub until list is complete
  */

@@ -257,7 +257,7 @@ public class DownloadJobItemRunnerTest {
         ConnectivityStatus connectivityStatus = new ConnectivityStatus();
         connectivityStatus.setConnectedOrConnecting(true);
         connectivityStatus.setConnectivityState(ConnectivityStatus.STATE_UNMETERED);
-        umAppDatabase.getConnectivityStatusDao().insert(connectivityStatus);
+        umAppDatabase.getConnectivityStatusDao().insert(connectivityStatus,null);
 
         entryStatusResponse = new EntryStatusResponse();
         entryStatusResponse.setErContentEntryFileUid(downloadJobItem.getDjiContentEntryFileUid());
@@ -292,16 +292,19 @@ public class DownloadJobItemRunnerTest {
             wifiDirectGroupInfoMessage = new BleMessage(WIFI_GROUP_CREATION_RESPONSE,
                     new Gson().toJson(groupBle).getBytes());
 
-            bleResponseListener.onResponseReceived(networkNode.getBluetoothMacAddress(), wifiDirectGroupInfoMessage);
+            bleResponseListener.onResponseReceived(networkNode.getBluetoothMacAddress(),
+                    wifiDirectGroupInfoMessage);
 
             return null;
         }).when(mockedNetworkManager).sendMessage(any(Object.class), any(BleMessage.class),
                 any(NetworkNode.class), any(BleMessageResponseListener.class));
 
         doAnswer((invocation -> {
-            umAppDatabase.getConnectivityStatusDao().update(ConnectivityStatus.STATE_CONNECTING_LOCAL);
+            umAppDatabase.getConnectivityStatusDao()
+                    .updateState(ConnectivityStatus.STATE_CONNECTING_LOCAL, null);
             Thread.sleep(TimeUnit.SECONDS.toMillis(1));
-            umAppDatabase.getConnectivityStatusDao().update(ConnectivityStatus.STATE_CONNECTED_LOCAL, groupBle.getSsid());
+            umAppDatabase.getConnectivityStatusDao().updateState(ConnectivityStatus.STATE_CONNECTED_LOCAL,
+                    groupBle.getSsid() , null);
             return null;
         })).when(mockedNetworkManager).connectToWiFi(eq(groupBle.getSsid()), eq(groupBle.getPassphrase()));
 
@@ -421,7 +424,7 @@ public class DownloadJobItemRunnerTest {
 
         Thread.sleep(TimeUnit.SECONDS.toMillis(1));
 
-        umAppDatabase.getConnectivityStatusDao().update(ConnectivityStatus.STATE_METERED);
+        umAppDatabase.getConnectivityStatusDao().updateState(ConnectivityStatus.STATE_METERED, null);
 
         CountDownLatch latch = new CountDownLatch(1);
         UmObserver<Integer> itemStatusObserver = (newStatus) -> {
@@ -497,7 +500,7 @@ public class DownloadJobItemRunnerTest {
         DownloadJobItemRunner jobItemRunner =
                 new DownloadJobItemRunner(context,item, mockedNetworkManager, umAppDatabase, cloudEndPoint);
 
-        umAppDatabase.getConnectivityStatusDao().update(ConnectivityStatus.STATE_METERED);
+        umAppDatabase.getConnectivityStatusDao().updateState(ConnectivityStatus.STATE_METERED, null);
         umAppDatabase.getDownloadSetDao().setMeteredConnectionBySetUid(
                 item.getDownloadSetItem().getDsiDsUid(),true);
 
@@ -550,7 +553,7 @@ public class DownloadJobItemRunnerTest {
 
         Thread.sleep(TimeUnit.SECONDS.toMillis(1));
 
-        umAppDatabase.getConnectivityStatusDao().update(ConnectivityStatus.STATE_DISCONNECTED);
+        umAppDatabase.getConnectivityStatusDao().updateState(ConnectivityStatus.STATE_DISCONNECTED, null);
 
         CountDownLatch latch = new CountDownLatch(1);
         UmObserver<Integer> itemStatusObserver = (newStatus) -> {
@@ -783,7 +786,7 @@ public class DownloadJobItemRunnerTest {
                 new DownloadJobItemRunner(context,item, mockedNetworkManager, umAppDatabase, cloudEndPoint);
 
         doAnswer((invocation -> {
-            umAppDatabase.getConnectivityStatusDao().update(ConnectivityStatus.STATE_CONNECTING_LOCAL);
+            umAppDatabase.getConnectivityStatusDao().updateState(ConnectivityStatus.STATE_CONNECTING_LOCAL,null);
             return null;
         })).when(mockedNetworkManager).connectToWiFi(eq(groupBle.getSsid()), eq(groupBle.getPassphrase()));
 

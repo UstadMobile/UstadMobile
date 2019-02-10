@@ -4,6 +4,7 @@ import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.EntryStatusResponseDao;
 import com.ustadmobile.core.db.dao.NetworkNodeDao;
 import com.ustadmobile.core.impl.UMLog;
+import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.lib.db.entities.DownloadJobItem;
@@ -133,7 +134,7 @@ public abstract class NetworkManagerBle {
     public NetworkManagerBle(){ }
 
     /**
-     * Set context
+     * Set platform specific context
      * @param context Platform's context to be set
      */
     public void setContext(Object context){
@@ -145,7 +146,7 @@ public abstract class NetworkManagerBle {
         @Override
         public Runnable makeRunnable(DownloadJobItemWithDownloadSetItem item) {
             return new DownloadJobItemRunner(mContext, item, NetworkManagerBle.this,
-                    umAppDatabase, "");
+                    umAppDatabase, UmAccountManager.getActiveEndpoint(mContext));
         }
 
         @Override
@@ -172,9 +173,9 @@ public abstract class NetworkManagerBle {
         }).start();
 
 
-//        downloadJobItemWorkQueue = new LiveDataWorkQueue<>(1);
-//        downloadJobItemWorkQueue.setAdapter(mJobItemAdapter);
-//        downloadJobItemWorkQueue.start(umAppDatabase.getDownloadJobItemDao().findNextDownloadJobItem());
+        downloadJobItemWorkQueue = new LiveDataWorkQueue<>(1);
+        downloadJobItemWorkQueue.setAdapter(mJobItemAdapter);
+        downloadJobItemWorkQueue.start(umAppDatabase.getDownloadJobItemDao().findNextDownloadJobItems());
     }
 
 
@@ -231,7 +232,6 @@ public abstract class NetworkManagerBle {
      * @param node The nearby device discovered
      */
     protected void handleNodeDiscovered(NetworkNode node) {
-
         synchronized (knownNodesLock){
             long updateTime = Calendar.getInstance().getTimeInMillis();
 

@@ -24,9 +24,12 @@ import android.net.wifi.p2p.WifiP2pManager;
 import android.os.Build;
 import android.os.ParcelUuid;
 import android.support.annotation.RequiresApi;
+import android.support.v4.net.ConnectivityManagerCompat;
 
+import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.lib.db.entities.ConnectivityStatus;
 import com.ustadmobile.lib.db.entities.NetworkNode;
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD;
 import com.ustadmobile.port.sharedse.networkmanager.BleEntryStatusTask;
@@ -95,6 +98,10 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
 
     private EmbeddedHTTPD httpd;
 
+    private UmAppDatabase umAppDatabase;
+
+    private ConnectivityManager connectivityManager;
+
     /**
      * Listeners for the WiFi-Direct group connections / states,
      * invoked when WiFi Direct state/connection has changed
@@ -149,16 +156,33 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
         @Override
         public void onAvailable(Network network) {
             super.onAvailable(network);
+            String WiFiSSID = null;
+            boolean isMeteredConnection =
+                    ConnectivityManagerCompat.isActiveNetworkMetered(connectivityManager);
+            //get network SSID
+            if(!isMeteredConnection){
+                WifiManager wifiManager = (WifiManager) mContext.getApplicationContext()
+                        .getSystemService (Context.WIFI_SERVICE);
+                WiFiSSID = wifiManager.getConnectionInfo().getSSID();
+            }
+            int state = isMeteredConnection ?
+                    ConnectivityStatus.STATE_METERED : ConnectivityStatus.STATE_UNMETERED;
+            umAppDatabase.getConnectivityStatusDao()
+                    .update( state, WiFiSSID,true,null);
         }
 
         @Override
         public void onLost(Network network) {
             super.onLost(network);
+            umAppDatabase.getConnectivityStatusDao()
+                    .updateState(ConnectivityStatus.STATE_DISCONNECTED, null);
         }
 
         @Override
         public void onUnavailable(){
             super.onUnavailable();
+            umAppDatabase.getConnectivityStatusDao()
+                    .updateState(ConnectivityStatus.STATE_DISCONNECTED, null);
         }
     }
 
@@ -170,8 +194,9 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
     public NetworkManagerAndroidBle(Object context, EmbeddedHTTPD httpd) {
         super(context);
         mContext = ((Context) context);
-        startMonitoringNetworkChanges();
         this.httpd = httpd;
+        this.umAppDatabase = UmAppDatabase.getInstance(context);
+        startMonitoringNetworkChanges();
     }
 
 
@@ -501,7 +526,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
                 .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
                 .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
                 .build();
-        ConnectivityManager connectivityManager = (ConnectivityManager)mContext
+        connectivityManager = (ConnectivityManager)mContext
                 .getSystemService(Context.CONNECTIVITY_SERVICE);
         connectivityManager.requestNetwork(networkRequest,new UmNetworkCallback());
     }

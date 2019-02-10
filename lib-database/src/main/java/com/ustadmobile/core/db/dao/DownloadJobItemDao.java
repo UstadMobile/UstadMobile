@@ -1,9 +1,11 @@
 package com.ustadmobile.core.db.dao;
 
+import com.ustadmobile.core.db.JobStatus;
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
+import com.ustadmobile.lib.db.entities.ConnectivityStatus;
 import com.ustadmobile.lib.db.entities.DownloadJobItem;
 import com.ustadmobile.lib.db.entities.DownloadJobItemWithDownloadSetItem;
 
@@ -90,7 +92,7 @@ public abstract class DownloadJobItemDao {
     /**
      * Update the main status fields for the given DownloadJobitem
      *
-     * @param djiUid DownloadJobItemId to update (primary key)
+     * @param djiUid DownloadJobItemId to updateState (primary key)
      * @param djiStatus status property to set
      * @param downloadedSoFar downloadedSoFar property to set
      * @param downloadLength downloadLength property to set
@@ -149,10 +151,18 @@ public abstract class DownloadJobItemDao {
     @UmQuery("DELETE FROM DownloadJobItem WHERE djiDjUid = :djiDjUid")
     public abstract int deleteByDownloadSetUid(long djiDjUid);
 
-    @UmQuery("SELECT * FROM DownloadJobItem " +
+    @UmQuery("SELECT DownloadJobItem.*, DownloadSetItem.* FROM DownloadJobItem " +
             "LEFT JOIN DownloadSetItem ON DownloadJobItem.djiDsiUid = DownloadSetItem.dsiUid " +
+            "LEFT JOIN DownloadSet on DownloadSetItem.dsiDsUid = DownloadSet.dsUid " +
+            "WHERE DownloadJobItem.djiStatus >= " + JobStatus.WAITING_MIN +
+            " AND DownloadJobItem.djiStatus < " + JobStatus.RUNNING_MIN +
+            " AND (((SELECT connectivityState FROM ConnectivityStatus) =  " + ConnectivityStatus.STATE_UNMETERED + ") " +
+                " OR ((SELECT connectivityState FROM ConnectivityStatus) = " + ConnectivityStatus.STATE_METERED + ") " +
+                " AND DownloadSet.meteredNetworkAllowed) " +
             "LIMIT 1")
-    public abstract UmLiveData<List<DownloadJobItemWithDownloadSetItem>> findNextDownloadJobItem();
+    public abstract UmLiveData<List<DownloadJobItemWithDownloadSetItem>> findNextDownloadJobItems();
+
+
 
 
 }

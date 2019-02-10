@@ -182,11 +182,13 @@ public class DownloadJobItemRunner implements Runnable, BleMessageResponseListen
      * @param entryStatusResponse new file entry status
      */
     private void handleContentEntryFileStatus(EntryStatusResponse entryStatusResponse){
-        availableLocally.set(entryStatusResponse.isAvailable() ? 1:0);
-        if(availableLocally.get() == 1 && !currentContentEntryFileStatus.isAvailable()){
-            this.currentNetworkNode =
-                    appDb.getNetworkNodeDao().findNodeById(entryStatusResponse.getErNodeId());
-            startLocalConnectionHandShake();
+        if(entryStatusResponse != null){
+            availableLocally.set(entryStatusResponse.isAvailable() ? 1:0);
+            if(availableLocally.get() == 1 && !currentContentEntryFileStatus.isAvailable()){
+                this.currentNetworkNode =
+                        appDb.getNetworkNodeDao().findNodeById(entryStatusResponse.getErNodeId());
+                startLocalConnectionHandShake();
+            }
         }
     }
 
@@ -359,13 +361,8 @@ public class DownloadJobItemRunner implements Runnable, BleMessageResponseListen
      * @return constructed file URL
      */
     private String getFileUrl(boolean isFromCloud){
-        if(isFromCloud){
-            return endpointUrl + "ContentEntryFileServer/" + downloadItem
-                    .getDjiContentEntryFileUid();
-        }else{
-            return wiFiDirectGroupBle.getEndpoint() + "ContentEntryFileServer/" + downloadItem
-                    .getDjiContentEntryFileUid();
-        }
+        return (isFromCloud ? this.endpointUrl :  wiFiDirectGroupBle.getEndpoint())
+                + "ContentEntryFile/" + downloadItem.getDjiContentEntryFileUid();
     }
 
     /**
