@@ -83,7 +83,7 @@ public class EpubTypePluginFs extends EPUBTypePlugin implements ContentTypePlugi
                     String coverImgHref = UMFileUtil.PROTOCOL_FILE + file.getAbsolutePath() + "!" +
                             UMFileUtil.resolveLink(root.getFullPath(), coverImageItem.href);
                     OpdsLink coverImgLink = new OpdsLink(entry.getUuid(),
-                            coverImageItem.mimeType, coverImgHref, OpdsEntry.LINK_REL_THUMBNAIL);
+                            coverImageItem.mediaType, coverImgHref, OpdsEntry.LINK_REL_THUMBNAIL);
                     if(entry.getLinks() == null)
                         entry.setLinks(new ArrayList<>());
 
