@@ -104,8 +104,6 @@ public abstract class NetworkManagerBle {
 
     private Map<Object, List<Long>> availabilityMonitoringRequests = new HashMap<>();
 
-    private static RouterNanoHTTPD httpd = null;
-
     /**
      * Holds all created entry status tasks
      */
@@ -179,13 +177,6 @@ public abstract class NetworkManagerBle {
                 e.printStackTrace();
             }
         }).start();
-
-        httpd = new RouterNanoHTTPD(0);
-        try{
-            httpd.start();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
 
 
 //        downloadJobItemWorkQueue = new LiveDataWorkQueue<>(1);
@@ -499,9 +490,7 @@ public abstract class NetworkManagerBle {
     /**
      * @return Active RouterNanoHTTPD
      */
-    public RouterNanoHTTPD getHttpd(){
-        return httpd;
-    }
+    public abstract RouterNanoHTTPD getHttpd();
 
 
     /**
@@ -511,6 +500,5 @@ public abstract class NetworkManagerBle {
         //downloadJobItemWorkQueue.shutdown();
         wiFiDirectGroupListeners.clear();
         entryStatusTaskExecutorService.shutdown();
-        httpd.stop();
     }
 }

@@ -1,8 +1,7 @@
-package com.ustadmobile.test.sharedse;
+package com.ustadmobile.port.sharedse.impl.http;
 
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
-import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD;
 import com.ustadmobile.test.core.impl.PlatformTestUtil;
 
 import org.junit.AfterClass;

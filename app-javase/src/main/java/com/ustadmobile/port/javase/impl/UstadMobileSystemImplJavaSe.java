@@ -9,7 +9,6 @@ import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
-import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle;
 
 import java.io.File;
@@ -60,11 +59,6 @@ public class UstadMobileSystemImplJavaSe extends UstadMobileSystemImplSE {
     @Override
     public String getString(int messageCode, Object context) {
         return ""+messageCode;
-    }
-
-    @Override
-    public NetworkManager getNetworkManager() {
-        return null;
     }
 
     @Override

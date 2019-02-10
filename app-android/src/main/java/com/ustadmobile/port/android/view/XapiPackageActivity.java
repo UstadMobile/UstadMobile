@@ -1,9 +1,7 @@
 package com.ustadmobile.port.android.view;
 
-import android.content.ComponentName;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.view.MenuItem;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
@@ -14,11 +12,11 @@ import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.XapiPackagePresenter;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UmCallback;
+import com.ustadmobile.core.impl.UmCallbackUtil;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.XapiPackageView;
-import com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroid;
-import com.ustadmobile.port.android.netwokmanager.NetworkServiceAndroid;
-import com.ustadmobile.port.android.util.UMAndroidUtil;
+
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Created by mike on 9/14/17.
@@ -28,9 +26,7 @@ public class XapiPackageActivity extends ZippedContentActivity implements XapiPa
 
     private XapiPackagePresenter mPresenter;
 
-    private NetworkManagerAndroid networkManagerAndroid;
-
-    private String mMountedPath;
+    private AtomicReference<String> mMountedPath;
 
     private WebView mWebView;
 
@@ -52,17 +48,9 @@ public class XapiPackageActivity extends ZippedContentActivity implements XapiPa
         setUMToolbar(R.id.um_toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        mPresenter = new XapiPackagePresenter(this,this);
-    }
+        mMountedPath = new AtomicReference<>();
 
-    @Override
-    public void onServiceConnected(ComponentName name, IBinder iBinder) {
-        super.onServiceConnected(name, iBinder);
-        if (name.getClassName().equals(NetworkServiceAndroid.class.getName())) {
-            networkManagerAndroid = ((NetworkServiceAndroid.LocalServiceBinder)iBinder).getService()
-                    .getNetworkManager();
-            mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(getIntent().getExtras()));
-        }
+        mPresenter = new XapiPackagePresenter(this,this);
     }
 
     @Override
@@ -88,8 +76,19 @@ public class XapiPackageActivity extends ZippedContentActivity implements XapiPa
     }
 
     @Override
-    public void mountZip(String zipUri, UmCallback callback) {
-        new MountZipAsyncTask(networkManagerAndroid, callback).execute(zipUri);
+    public void mountZip(String zipUri, UmCallback<String> callback) {
+        super.mountZip(zipUri, new UmCallback<String>() {
+            @Override
+            public void onSuccess(String result) {
+                mMountedPath.set(result);
+                UmCallbackUtil.onSuccessIfNotNull(callback, result);
+            }
+
+            @Override
+            public void onFailure(Throwable exception) {
+                UmCallbackUtil.onFailIfNotNull(callback, exception);
+            }
+        });
     }
 
     @Override
@@ -100,7 +99,7 @@ public class XapiPackageActivity extends ZippedContentActivity implements XapiPa
     @Override
     public void onDestroy() {
         if(mMountedPath != null)
-            networkManagerAndroid.unmountZipFromHttp(mMountedPath);
+            super.unmountZipFromHttp(mMountedPath.get());
 
         super.onDestroy();
     }

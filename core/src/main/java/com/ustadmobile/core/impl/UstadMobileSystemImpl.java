@@ -37,7 +37,6 @@ import com.ustadmobile.core.impl.http.UmHttpCall;
 import com.ustadmobile.core.impl.http.UmHttpRequest;
 import com.ustadmobile.core.impl.http.UmHttpResponse;
 import com.ustadmobile.core.impl.http.UmHttpResponseCallback;
-import com.ustadmobile.core.networkmanager.NetworkManagerCore;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.view.Login2View;
 import com.ustadmobile.lib.db.entities.UmAccount;
@@ -534,11 +533,6 @@ public abstract class UstadMobileSystemImpl {
         return false;
     }
 
-
-    public NetworkManagerCore getNetworkManager() {
-
-        return null;
-    }
 
     /**
      * Returns whether or not the init method has already been run

@@ -6,8 +6,6 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     compile project(":core")
     testCompile project(":sharedse")
-    testCompile project(':lib-core-fs-tests')
-    testCompile project(":sharedse-tests")
     testCompile project(":app-javase")
     implementation project(':lib-database')
     implementation project(":lib-database-runtime")

@@ -31,10 +31,10 @@ public class ScormPackagePresenter extends UstadBaseController {
 
     private String mountedPath;
 
-    private UmCallback zipMountedCallback = new UmCallback() {
+    private UmCallback<String> zipMountedCallback = new UmCallback<String>() {
         @Override
-        public void onSuccess(Object result) {
-            mountedPath = (String)result;
+        public void onSuccess(String result) {
+            mountedPath = result;
             UstadMobileSystemImpl.getInstance().makeRequestAsync(new UmHttpRequest(
                             getContext(),
                             UMFileUtil.joinPaths(new String[]{mountedPath, "imsmanifest.xml"})),

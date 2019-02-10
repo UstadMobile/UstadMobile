@@ -20,10 +20,8 @@ Code is contained (mostly) in the following modules:
   app-android-launcher but can also be used as a library in other apps.
 * [app-android-launcher/](app-android-launcher/): Standalone app launcher that uses app-android.
 * [app-android-testserver](app-android-testserver/): Provides a test server for p2p functionality integration testing.
-* [app-gwt](app-gwt/): implementtion of the core app using GWT (work in progress).
 * [lib-core-fs](lib-core-fs/): Contains code used on platforms that have a file system. To be
 merged into sharedse.
-* [lib-core-fs-tests](lib-core-fs-tests/): Contains unit tests for implementations that have a file system.
 * [lib-database](lib-database/): core Database and Data Access Object (DAO) classes. See this
 module's README for further details on the relationship between different database modules.
 * [lib-database-android](lib-database-android/) Android database

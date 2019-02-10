@@ -50,7 +50,6 @@ dependencies {
 
     testImplementation "junit:junit:$version_junit"
     testImplementation "org.mockito:mockito-core:$version_android_mockito"
-    testImplementation project(":sharedse-tests")
     testImplementation project(":core-tests")
     testImplementation project (':lib-database-entities')
 

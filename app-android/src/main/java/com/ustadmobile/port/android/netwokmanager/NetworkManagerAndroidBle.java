@@ -28,15 +28,17 @@ import android.support.annotation.RequiresApi;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.lib.db.entities.NetworkNode;
+import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD;
 import com.ustadmobile.port.sharedse.networkmanager.BleEntryStatusTask;
 import com.ustadmobile.port.sharedse.networkmanager.BleMessage;
 import com.ustadmobile.port.sharedse.networkmanager.BleMessageResponseListener;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle;
-import com.ustadmobile.port.sharedse.networkmanager.WiFiDirectConnectionListener;
 import com.ustadmobile.port.sharedse.networkmanager.WiFiDirectGroupBle;
 
 import java.util.List;
 import java.util.UUID;
+
+import fi.iki.elonen.router.RouterNanoHTTPD;
 
 import static android.os.Looper.getMainLooper;
 
@@ -90,6 +92,8 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
     private WifiP2pManager wifiP2pManager;
 
     private WiFiDirectGroupBle wiFiDirectGroupBle;
+
+    private EmbeddedHTTPD httpd;
 
     /**
      * Listeners for the WiFi-Direct group connections / states,
@@ -163,7 +167,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
      *
      * @param context Platform specific application context
      */
-    public NetworkManagerAndroidBle(Object context) {
+    public NetworkManagerAndroidBle(Object context, EmbeddedHTTPD httpd) {
         super(context);
         mContext = ((Context) context);
         startMonitoringNetworkChanges();
@@ -533,6 +537,11 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
         }
 
         return maxPriority;
+    }
+
+    @Override
+    public RouterNanoHTTPD getHttpd() {
+        return httpd;
     }
 
     /**

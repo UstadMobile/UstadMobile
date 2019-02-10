@@ -56,13 +56,10 @@ import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 import com.ustadmobile.core.catalog.contenttype.*;
-import com.ustadmobile.core.db.UmAppDatabase;
-import com.ustadmobile.core.db.dao.OpdsEntryStatusCacheDao;
 import com.ustadmobile.core.fs.contenttype.EpubTypePluginFs;
 import com.ustadmobile.core.fs.contenttype.H5PContentTypeFs;
 import com.ustadmobile.core.fs.contenttype.ScormTypePluginFs;
 import com.ustadmobile.core.fs.contenttype.XapiPackageTypePluginFs;
-import com.ustadmobile.core.fs.db.ContainerFileHelper;
 import com.ustadmobile.core.impl.AppConfig;
 import com.ustadmobile.core.impl.ContainerMountRequest;
 import com.ustadmobile.core.impl.UMLog;
@@ -87,14 +84,11 @@ import com.ustadmobile.core.view.WebChunkView;
 import com.ustadmobile.core.view.XapiPackageView;
 import com.ustadmobile.port.android.generated.MessageIDMap;
 import com.ustadmobile.port.android.impl.http.UmHttpCachePicassoRequestHandler;
-import com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroid;
-import com.ustadmobile.port.android.netwokmanager.NetworkServiceAndroid;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 import com.ustadmobile.port.android.view.*;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle;
 import com.ustadmobile.port.sharedse.view.*;
 import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
-import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
 
 import org.xmlpull.v1.XmlSerializer;
 
@@ -105,7 +99,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
@@ -146,7 +139,6 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         viewNameToAndroidImplMap.put(ContainerView.VIEW_NAME, ContainerActivity.class);
         viewNameToAndroidImplMap.put(BasePointView.VIEW_NAME, BasePointActivity.class);
         viewNameToAndroidImplMap.put(AboutView.VIEW_NAME, AboutActivity.class);
-        viewNameToAndroidImplMap.put(SendCourseView.VIEW_NAME, SendCourseDialogFragment.class);
         viewNameToAndroidImplMap.put(XapiPackageView.VIEW_NAME, XapiPackageActivity.class);
         viewNameToAndroidImplMap.put(ScormPackageView.VIEW_NAME, ScormPackageActivity.class);
         viewNameToAndroidImplMap.put(H5PContentView.VIEW_NAME, H5PContentActivity.class);
@@ -205,22 +197,6 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         @Override
         public void onServiceConnected(ComponentName name, IBinder iBinder) {
             this.iBinder = iBinder;
-
-            /*
-             * NetworkServiceAndroid will register itself using the Application to receive lifecycle
-             * callbacks. That however happens when the service is created, by which point an activity
-             * might have already started. This check happens when the NetworkService is bound to
-             * each activity.
-             */
-            if (context instanceof UstadBaseActivity
-                    && name.getClassName().equals(NetworkServiceAndroid.class.getName())) {
-                UstadBaseActivity activity = (UstadBaseActivity) context;
-                if (activity.isStarted()) {
-                    NetworkServiceAndroid networkService = ((NetworkServiceAndroid.LocalServiceBinder) iBinder)
-                            .getService();
-                    networkService.getNetworkManager().onActivityStarted(activity);
-                }
-            }
 
             if (context instanceof ServiceConnection) {
                 ((ServiceConnection) context).onServiceConnected(name, iBinder);
@@ -331,15 +307,12 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
 
     protected HashMap<Context, ServiceConnection> networkServiceConnections = new HashMap<>();
 
-    protected NetworkManagerAndroid networkManagerAndroid;
 
     /**
      */
     public UstadMobileSystemImplAndroid() {
         logger = new UMLogAndroid();
         appViews = new WeakHashMap<>();
-        networkManagerAndroid = new NetworkManagerAndroid();
-        networkManagerAndroid.setServiceConnectionMap(networkServiceConnections);
     }
 
     /**
@@ -426,9 +399,6 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
      */
     public void handleActivityCreate(Activity mContext, Bundle savedInstanceState) {
         init(mContext);
-        Intent networkIntent = new Intent(mContext, NetworkServiceAndroid.class);
-        BaseServiceConnection connection = new BaseServiceConnection(mContext, networkServiceConnections);
-        mContext.bindService(networkIntent, connection, Context.BIND_AUTO_CREATE | Context.BIND_ADJUST_WITH_ACTIVITY);
     }
 
     /**
@@ -444,8 +414,6 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
     }
 
     public void handleActivityDestroy(Activity mContext) {
-        mContext.unbindService(networkServiceConnections.get(mContext));
-        networkServiceConnections.remove(mContext);
         if (appViews.containsKey(mContext)) {
             appViews.remove(mContext);
         }
@@ -713,11 +681,6 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
     }
 
     @Override
-    public NetworkManager getNetworkManager() {
-        return networkManagerAndroid;
-    }
-
-    @Override
     public NetworkManagerBle getNetworkManagerBle() {
         return null;
     }
@@ -755,22 +718,23 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
     public void mountContainer(final ContainerMountRequest request, final int id,
                                final UmCallback callback) {
 
-        final String scriptPath = UMFileUtil.joinPaths(new String[]{
-                networkManagerAndroid.getHttpAndroidAssetsUrl(), "epub-paginate.js"});
-        new AsyncTask<Void, Void, String>() {
-            @Override
-            protected String doInBackground(Void... voids) {
-                String mountedPath = networkManagerAndroid.mountZipOnHttp(request.getContainerUri(),
-                        null, request.isEpubMode(), scriptPath);
-                return UMFileUtil.joinPaths(new String[]{networkManagerAndroid.getLocalHttpUrl(),
-                        mountedPath});
-            }
-
-            @Override
-            protected void onPostExecute(String mountedPath) {
-                callback.onSuccess(mountedPath);
-            }
-        }.execute();
+//        TODO: this must be handled using zippcontentactivity
+//        final String scriptPath = UMFileUtil.joinPaths(new String[]{
+//                networkManagerAndroid.getHttpAndroidAssetsUrl(), "epub-paginate.js"});
+//        new AsyncTask<Void, Void, String>() {
+//            @Override
+//            protected String doInBackground(Void... voids) {
+//                String mountedPath = networkManagerAndroid.mountZipOnHttp(request.getContainerUri(),
+//                        null, request.isEpubMode(), scriptPath);
+//                return UMFileUtil.joinPaths(new String[]{networkManagerAndroid.getLocalHttpUrl(),
+//                        mountedPath});
+//            }
+//
+//            @Override
+//            protected void onPostExecute(String mountedPath) {
+//                callback.onSuccess(mountedPath);
+//            }
+//        }.execute();
     }
 
     @Override
