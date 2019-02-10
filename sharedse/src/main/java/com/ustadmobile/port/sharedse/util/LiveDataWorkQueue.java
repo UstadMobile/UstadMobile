@@ -39,41 +39,28 @@ public class LiveDataWorkQueue<T> {
      */
     public interface WorkQueueItemAdapter<T> {
 
-        WorkQueueItemHolder<T> getItem(T item);
+        Runnable makeRunnable(T item);
 
-    }
-
-    /**
-     * The work queue item holder provides a unique id for each item to be run, and, when required,
-     * must provide a runnable for the given item
-     *
-     * @param <T> The type of item being run from the queue
-     */
-    public interface WorkQueueItemHolder<T> {
-
-        long getUid();
-
-        Runnable makeRunnable();
+        long getUid(T item);
 
     }
 
 
+    private class RunWrapper<T> implements Runnable{
 
-    private static class RunWrapper<T> implements Runnable{
+        private T item;
 
-        private LiveDataWorkQueue<T> workQueue;
+        WorkQueueItemAdapter<T> adapter;
 
-        private WorkQueueItemHolder<T> item;
-
-        private RunWrapper(WorkQueueItemHolder<T> item, LiveDataWorkQueue<T> workQueue) {
+        private RunWrapper(T item, WorkQueueItemAdapter<T> adapter) {
             this.item = item;
-            this.workQueue  = workQueue;
+            this.adapter = adapter;
         }
 
         @Override
         public void run() {
-            item.makeRunnable().run();
-            workQueue.removeItemFromActiveItems(item.getUid());
+            adapter.makeRunnable(item).run();
+            LiveDataWorkQueue.this.removeItemFromActiveItems(adapter.getUid(item));
         }
     }
 
@@ -120,10 +107,10 @@ public class LiveDataWorkQueue<T> {
             lock.lock();
 
             for(T sourceItem : sourceData) {
-                WorkQueueItemHolder<T> itemHolder = adapter.getItem(sourceItem);
-                if(activeItems.size() < maxThreads && !activeItems.containsKey(itemHolder.getUid())) {
-                    RunWrapper<T> wrapper = new RunWrapper<>(itemHolder, this);
-                    activeItems.put(itemHolder.getUid(), wrapper);
+                long uid = adapter.getUid(sourceItem);
+                if(activeItems.size() < maxThreads && !activeItems.containsKey(uid)) {
+                    RunWrapper<T> wrapper = new RunWrapper<>(sourceItem, adapter);
+                    activeItems.put(uid, wrapper);
                     executor.submit(wrapper);
                 }
             }

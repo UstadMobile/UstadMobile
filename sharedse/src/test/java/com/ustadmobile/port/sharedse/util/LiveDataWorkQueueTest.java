@@ -37,30 +37,18 @@ public class LiveDataWorkQueueTest {
         }
     }
 
-    private class TestWorkItemHolder implements LiveDataWorkQueue.WorkQueueItemHolder<TestWorkItem>{
+    private class TestWorkItemAdapter implements LiveDataWorkQueue.WorkQueueItemAdapter<TestWorkItem>{
 
-        private TestWorkItem item;
-
-        private Runnable runnable;
-
-        private TestWorkItemHolder(TestWorkItem item) {
-            this.item = item;
+        @Override
+        public Runnable makeRunnable(TestWorkItem item) {
+            return item.getMockRunnable();
         }
 
         @Override
-        public long getUid() {
+        public long getUid(TestWorkItem item) {
             return item.getUid();
         }
 
-        @Override
-        public Runnable makeRunnable() {
-            if(this.runnable == null) {
-                runnable = item.getMockRunnable();
-                return runnable;
-            }
-
-            throw new IllegalStateException("makeRunnable should be called only once");
-        }
     }
 
 
@@ -98,7 +86,7 @@ public class LiveDataWorkQueueTest {
             mockRunnables.add(mockRunnable);
         }
 
-        liveDataWorkQueue.setAdapter((item -> new TestWorkItemHolder(item)));
+        liveDataWorkQueue.setAdapter(new TestWorkItemAdapter());
         liveDataWorkQueue.start(dataSource);
 
         for(int i = 0; i < mockRunnables.size(); i++) {

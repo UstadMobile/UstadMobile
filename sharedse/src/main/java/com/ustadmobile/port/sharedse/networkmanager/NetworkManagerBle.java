@@ -140,26 +140,19 @@ public abstract class NetworkManagerBle {
         this.mContext = context;
     }
 
-    private class DownloadJobItemHolder implements
-            LiveDataWorkQueue.WorkQueueItemHolder<DownloadJobItemWithDownloadSetItem> {
-
-        private DownloadJobItemWithDownloadSetItem jobItem;
-
-        private DownloadJobItemHolder(DownloadJobItemWithDownloadSetItem jobItem) {
-            this.jobItem = jobItem;
-        }
-
+    private LiveDataWorkQueue.WorkQueueItemAdapter<DownloadJobItemWithDownloadSetItem>
+        mJobItemAdapter = new LiveDataWorkQueue.WorkQueueItemAdapter<DownloadJobItemWithDownloadSetItem>() {
         @Override
-        public long getUid() {
-            return jobItem.getDjiUid();
-        }
-
-        @Override
-        public Runnable makeRunnable() {
-            return new DownloadJobItemRunner(mContext, jobItem, NetworkManagerBle.this,
+        public Runnable makeRunnable(DownloadJobItemWithDownloadSetItem item) {
+            return new DownloadJobItemRunner(mContext, item, NetworkManagerBle.this,
                     umAppDatabase, "");
         }
-    }
+
+        @Override
+        public long getUid(DownloadJobItemWithDownloadSetItem item) {
+            return item.getDjiUid();
+        }
+    };
 
     /**
      * Start web server, advertising and discovery
@@ -180,7 +173,7 @@ public abstract class NetworkManagerBle {
 
 
 //        downloadJobItemWorkQueue = new LiveDataWorkQueue<>(1);
-//        downloadJobItemWorkQueue.setAdapter(jobItem -> new DownloadJobItemHolder(jobItem));
+//        downloadJobItemWorkQueue.setAdapter(mJobItemAdapter);
 //        downloadJobItemWorkQueue.start(umAppDatabase.getDownloadJobItemDao().findNextDownloadJobItem());
     }
 
