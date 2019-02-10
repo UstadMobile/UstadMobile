@@ -171,6 +171,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
         super(context);
         mContext = ((Context) context);
         startMonitoringNetworkChanges();
+        this.httpd = httpd;
     }
 
 

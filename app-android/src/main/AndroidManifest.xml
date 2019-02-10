@@ -4,28 +4,33 @@
     package="com.toughra.ustadmobile">
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <!-- Required for BLE peer-to-peer GATT server -->
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+
+    <!-- Required for saving files to external SD -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- Used for content editing when a user wants to add pictures/video from camera -->
     <uses-permission android:name="android.permission.CAMERA" />
-    <uses-permission android:name="android.permission.VIBRATE" />
+
+    <!-- Required for peer-to-peer connecting using WiFi direct -->
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
+
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+
+    <!-- Required to use BLE scanning for peer devices -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
+    <!-- Required for Android WorkManager to run jobs -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
-    <!-- To obtain wifi lock -->
+    <!-- To obtain wifi lock to avoid wifi powering down during download-->
     <uses-permission android:name="android.permission.WAKE_LOCK" />
-
-    <!--
-    Multicast lock required for use of JmDns to subsitute for 'normal' service discovery on
-    older devices where built-in service discovery is buggy.
-    -->
-    <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE" />
 
     <uses-feature
         android:name="android.hardware.camera"
@@ -109,9 +114,18 @@
             android:theme="@style/Theme.UstadTheme"
             />
 
-
         <service
             android:name="com.ustadmobile.port.android.netwokmanager.UmAppDatabaseSyncService"
+            android:enabled="true"
+            android:exported="true"/>
+
+        <service
+            android:name="com.ustadmobile.port.android.netwokmanager.NetworkManagerBleAndroidService"
+            android:enabled="true"
+            android:exported="true"/>
+
+        <service
+            android:name="com.ustadmobile.port.android.netwokmanager.EmbeddedHttpdService"
             android:enabled="true"
             android:exported="true"/>
 
