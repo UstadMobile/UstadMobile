@@ -122,7 +122,7 @@ public class DownloadDialogFragment extends UstadDialogFragment implements Downl
 
     @Override
     public void setStackOptionsVisible(boolean visible) {
-        stackedOptionHolderView.setVisibility(visible ? View.VISIBLE:View.GONE);
+        stackedOptionHolderView.setVisibility(visible ? View.VISIBLE : View.GONE);
     }
 
     @Override
@@ -135,46 +135,34 @@ public class DownloadDialogFragment extends UstadDialogFragment implements Downl
     }
 
     @Override
-    public void cancelDialog() {
+    public void dismissDialog() {
         mDialog.dismiss();
     }
 
     @Override
     public void setCalculatingViewVisible(boolean visible) {
-        calculateHolder.setVisibility(visible ? View.VISIBLE:View.GONE);
+        calculateHolder.setVisibility(visible ? View.VISIBLE : View.GONE);
     }
 
     @Override
     public void onClick(DialogInterface dialog, int which) {
         switch(which){
             case DialogInterface.BUTTON_POSITIVE:
-                if(mPresenter.isDeleteFileOptions()){
-                    mPresenter.handleDeleteDownloadFile();
-                }else{
-                    mPresenter.handleContinueDownloading();
-                }
-                mPresenter.handleDismissDialog();
+                mPresenter.handleClickPositive();
                 break;
 
             case DialogInterface.BUTTON_NEGATIVE:
-                mPresenter.handleDismissDialog();
+                mPresenter.handleClickNegative();
                 break;
         }
     }
 
     @Override
     public void onClick(View stackedButton) {
-        int mId = stackedButton.getId();
-        if (mId == R.id.action_btn_pause_download) {
-            mPresenter.handlePauseDownload();
-            mPresenter.handleDismissDialog();
-        }else if(mId == R.id.action_btn_cancel_download){
-            mPresenter.handleCancelDownload();
-            mPresenter.handleDismissDialog();
-        }else if(mId == R.id.action_btn_continue_download){
-            mPresenter.handleContinueDownloading();
-            mPresenter.handleDismissDialog();
-        }else if(mId == R.id.wifi_only_option_holder){
+        int viewId = stackedButton.getId();
+        if(viewId != R.id.wifi_only_option_holder){
+            mPresenter.handleClickStackedButton(viewId);
+        }else{
             mPresenter.handleWiFiOnlyOption(!wifiOnlyView.isChecked());
         }
     }
