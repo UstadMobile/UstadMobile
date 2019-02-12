@@ -8,6 +8,7 @@ import android.arch.paging.LivePagedListBuilder;
 import android.arch.paging.PagedList;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.net.Uri;
@@ -55,6 +56,7 @@ import com.ustadmobile.port.android.util.UMAndroidUtil;
 import java.io.File;
 import java.io.IOException;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
@@ -471,7 +473,28 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
         Uri cameraImage = FileProvider.getUriForFile(this,
                 getPackageName() + ".fileprovider", output);
         cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT,cameraImage);
+
+
+        List<ResolveInfo> resInfoList =
+                getPackageManager().queryIntentActivities(cameraIntent,
+                        PackageManager.MATCH_DEFAULT_ONLY);
+        for (ResolveInfo resolveInfo : resInfoList) {
+            String packageName = resolveInfo.activityInfo.packageName;
+            grantUriPermission(packageName, cameraImage,
+                    Intent.FLAG_GRANT_WRITE_URI_PERMISSION |
+                            Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        }
+
+
+        //cameraIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION |Intent.FLAG_GRANT_READ_URI_PERMISSION|Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivityForResult(cameraIntent, CAMERA_IMAGE_CAPTURE_REQUEST);
+
+
+
+
+
+
+
     }
 
     //this is how you check permission grant task result.
@@ -548,9 +571,10 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
         if (ContextCompat.checkSelfPermission(getApplicationContext(),
                 Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(PersonEditActivity.this,
-                    new String[]{Manifest.permission.CAMERA,
-                            Manifest.permission.READ_EXTERNAL_STORAGE,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE}, CAMERA_PERMISSION_REQUEST);
+                new String[]{Manifest.permission.CAMERA,
+                        Manifest.permission.READ_EXTERNAL_STORAGE,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE
+                    }, CAMERA_PERMISSION_REQUEST);
             return;
         }
         startCameraIntent();

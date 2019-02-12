@@ -7,6 +7,7 @@ import android.arch.paging.LivePagedListBuilder;
 import android.arch.paging.PagedList;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.net.Uri;
@@ -41,6 +42,7 @@ import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.Objects;
 
 import id.zelory.compressor.Compressor;
@@ -205,6 +207,16 @@ public class PersonDetailActivity extends UstadBaseActivity implements PersonDet
         Uri cameraImage = FileProvider.getUriForFile(this,
                 getPackageName() + ".fileprovider", output);
         cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT,cameraImage);
+
+        List<ResolveInfo> resInfoList =
+                getPackageManager().queryIntentActivities(cameraIntent,
+                        PackageManager.MATCH_DEFAULT_ONLY);
+        for (ResolveInfo resolveInfo : resInfoList) {
+            String packageName = resolveInfo.activityInfo.packageName;
+            grantUriPermission(packageName, cameraImage,
+                    Intent.FLAG_GRANT_WRITE_URI_PERMISSION |
+                            Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        }
         startActivityForResult(cameraIntent, CAMERA_IMAGE_CAPTURE_REQUEST);
     }
 
