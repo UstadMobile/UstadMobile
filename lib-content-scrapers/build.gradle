@@ -105,7 +105,7 @@ task generateScraperBuildConfig(type: de.fuerstenau.gradle.buildconfig.GenerateB
     version = rootProject.version
 
     buildConfigField "String", "CHROME_DRIVER_PATH", rootProject.ext.localProperties["scraper.chrome_driver_path"]
-    buildConfigField "String", "WEBP_PATH", rootProject.ext.localProperties["shrinker.webp"]
+    buildConfigField "String", "WEBP_PATH", rootProject.ext.buildConfigProperties["shrinker.webp"]
 
 }
 compileJava.dependsOn(generateScraperBuildConfig)
@@ -116,9 +116,10 @@ if (!ext.localProperties.containsKey("scraper.chrome_driver_path")) {
             "Please open the README file in lib-content-scrapers for further instructions")
 }
 
-if (!rootProject.ext.buildConfigProperties.containsKey("shrinker.webp")) {
+if (!rootProject.file(rootProject.ext.buildConfigProperties["shrinker.webp"]).exists()) {
     throw new GradleException("Shrinker Util requires webp to turn images to lossy format which needs to run on the command line" +
-            " You must define a path to cwebp.exe in local.properties. " +
+            " You must define a path to the cwebp executable in buildconfig.local.properties.  " +
+            " On Ubuntu you can install this using apt-get install webp. " +
             "Please open the README file in lib-content-scrapers for further instructions")
 }
 
