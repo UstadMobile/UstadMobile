@@ -383,10 +383,6 @@ dependencies {
     //Range seekbar by Crystal
     implementation "com.crystal:crystalrangeseekbar:$version_crystalrangeseekbar"
 
-    //XML Stream
-    //implementation group: 'javax.xml.stream', name: 'stax-api', version: '1.0-2'
-    //implementation group: 'com.fasterxml', name: 'aalto-xml', version: '1.1.1'
-
     testImplementation "com.squareup.okhttp3:okhttp:$version_okhttp"
 
 }
