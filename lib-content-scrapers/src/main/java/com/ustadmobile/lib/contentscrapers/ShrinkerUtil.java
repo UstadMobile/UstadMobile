@@ -38,7 +38,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import static com.ustadmobile.lib.contentscrapers.ScraperConstants.EPUB_EXT;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_CSS;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_JPG;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING;
@@ -59,7 +58,7 @@ public class ShrinkerUtil {
         for (ContentEntryFileWithFilePath entryfile : epubFileList) {
             try {
                 File epubFile = new File(entryfile.getFilePath());
-                new ShrinkerUtil(epubFile);
+                ShrinkerUtil.shrinkEpub(epubFile);
                 contentEntryFileDao.updateEpubFiles(epubFile.length(), ContentScraperUtil.getMd5(epubFile), entryfile.getContentEntryFileUid());
 
             } catch (Exception e) {
@@ -68,38 +67,13 @@ public class ShrinkerUtil {
         }
     }
 
-    public static void searchFolders(File[] folderList) {
-
-        if (folderList == null || folderList.length == 0) {
-            return;
-        }
-
-        for (File epubFile : folderList) {
-
-            if (epubFile.isFile() && epubFile.getName().contains(EPUB_EXT)) {
-
-                try {
-                    new ShrinkerUtil(epubFile);
-                } catch (Exception e) {
-                    UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
-                    UMLogUtil.logError("Exception for epubfile " + epubFile.getPath());
-                }
-
-            } else if (epubFile.isDirectory()) {
-                searchFolders(epubFile.listFiles());
-            }
-
-        }
-    }
-
-
-    public ShrinkerUtil(File epub) throws IOException {
+    public static void shrinkEpub(File epub) throws IOException {
 
         File parentFolder = epub.getParentFile();
         File tmpFolder = new File(parentFolder, UMFileUtil.stripExtensionIfPresent(epub.getName()));
         tmpFolder.mkdirs();
         UmZipUtils.unzip(epub, tmpFolder);
-        shrinkEpub(tmpFolder);
+        shrinkEpubFiles(tmpFolder);
         ContentScraperUtil.zipDirectory(tmpFolder, epub.getName(), epub.getParentFile());
         FileUtils.deleteDirectory(tmpFolder);
 
@@ -116,7 +90,7 @@ public class ShrinkerUtil {
     }
 
 
-    public static boolean shrinkEpub(File directory) {
+    private static boolean shrinkEpubFiles(File directory) {
         FileInputStream opfFileInputStream = null;
         FileInputStream ocfFileInputStream = null;
         FileOutputStream opfFileOutputStream = null;
