@@ -93,27 +93,29 @@ task scrapeContent(type: JavaExec) {
     outputs.upToDateWhen { false }
 }
 
-ext.buildConfigProperties = new Properties()
-ext.buildConfigProperties.load(new FileInputStream(rootProject.file("buildconfig.default.properties")))
-ext.localProperties = new Properties()
-ext.localProperties.load(new FileInputStream(rootProject.file("local.properties")))
-
 task generateScraperBuildConfig(type: de.fuerstenau.gradle.buildconfig.GenerateBuildConfigTask) {
     inputs.files(rootProject.file("local.properties"))
     outputDir = new File("${projectDir}/src/main/java")
     packageName = "com.ustadmobile.lib.contentscrapers.buildconfig"
-    appName = project.ext.buildConfigProperties['appName']
+    appName = rootProject.ext.buildConfigProperties['appName']
     clsName = "ScraperBuildConfig"
     version = rootProject.version
 
     buildConfigField "String", "CHROME_DRIVER_PATH", rootProject.ext.localProperties["scraper.chrome_driver_path"]
+    buildConfigField "String", "WEBP_PATH", rootProject.ext.localProperties["shrinker.webp"]
 
 }
 compileJava.dependsOn(generateScraperBuildConfig)
 
-if (!ext.localProperties.containsKey("scraper.chrome_driver_path")) {
+if (!rootProject.ext.buildConfigProperties.containsKey("scraper.chrome_driver_path")) {
     throw new GradleException("Content Scraping requires Selenium which needs a chrome driver to run." +
             " You must define a path to the chrome driver in local.properties. " +
+            "Please open the README file in lib-content-scrapers for further instructions")
+}
+
+if (!rootProject.ext.buildConfigProperties.containsKey("shrinker.webp")) {
+    throw new GradleException("Shrinker Util requires webp to turn images to lossy format which needs to run on the command line" +
+            " You must define a path to cwebp.exe in local.properties. " +
             "Please open the README file in lib-content-scrapers for further instructions")
 }
 
@@ -126,6 +128,7 @@ dependencies {
     implementation "com.google.code.gson:gson:$version_gson"
     implementation project(":core")
     implementation project(":lib-database-entities")
+    testImplementation project(":app-javase")
     implementation "commons-io:commons-io:$version_commons_io"
     implementation "org.apache.commons:commons-lang3:$version_apache_commons_lang"
     implementation "org.seleniumhq.selenium:selenium-java:$version_selenium"

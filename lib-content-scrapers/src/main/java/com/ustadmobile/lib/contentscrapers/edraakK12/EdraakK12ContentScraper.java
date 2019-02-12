@@ -172,7 +172,7 @@ public class EdraakK12ContentScraper {
         // nothing changed, keep same files
         if (anyContentUpdated) {
             // add these files into the directory
-            ContentScraperUtil.zipDirectory(courseDirectory, response.id, destinationDirectory);
+            ContentScraperUtil.zipDirectory(courseDirectory, response.id + ZIP_EXT, destinationDirectory);
         }
         contentUpdated = anyContentUpdated;
     }

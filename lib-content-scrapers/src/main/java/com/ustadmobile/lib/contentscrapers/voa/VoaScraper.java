@@ -282,7 +282,7 @@ public class VoaScraper {
             UMLogUtil.logError("VOA failed to create tin can file for url " + scrapUrl.toString());
         }
 
-        ContentScraperUtil.zipDirectory(voaDirectory, FilenameUtils.getBaseName(scrapUrl.getPath()), destinationDir);
+        ContentScraperUtil.zipDirectory(voaDirectory, FilenameUtils.getBaseName(scrapUrl.getPath()) + ZIP_EXT, destinationDir);
     }
 
     private Map<String, String> createParams(String quizId, int count, String selectedAnswer, String voted) {

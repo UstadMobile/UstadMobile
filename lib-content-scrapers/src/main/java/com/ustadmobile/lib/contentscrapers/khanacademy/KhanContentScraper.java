@@ -62,6 +62,7 @@ import static com.ustadmobile.lib.contentscrapers.ScraperConstants.TIME_OUT_SELE
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.TRY_AGAIN_FILE;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.TRY_AGAIN_KHAN_LINK;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.ZIP_EXT;
 import static com.ustadmobile.lib.contentscrapers.ck12.CK12ContentScraper.RESPONSE_RECEIVED;
 
 
@@ -515,7 +516,7 @@ public class KhanContentScraper implements Runnable {
         index.links = linksMap;
 
         FileUtils.writeStringToFile(indexJsonFile, gson.toJson(index), UTF_ENCODING);
-        ContentScraperUtil.zipDirectory(khanDirectory, khanDirectory.getName(), destinationDirectory);
+        ContentScraperUtil.zipDirectory(khanDirectory, khanDirectory.getName() + ZIP_EXT, destinationDirectory);
 
     }
 
@@ -670,7 +671,7 @@ public class KhanContentScraper implements Runnable {
 
 
         FileUtils.writeStringToFile(indexJsonFile, gson.toJson(logIndex), UTF_ENCODING);
-        ContentScraperUtil.zipDirectory(khanDirectory, khanDirectory.getName(), destinationDirectory);
+        ContentScraperUtil.zipDirectory(khanDirectory, khanDirectory.getName() + ZIP_EXT, destinationDirectory);
 
     }
 
