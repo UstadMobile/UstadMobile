@@ -5,6 +5,8 @@ import com.ustadmobile.core.db.JobStatus;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.UmObserver;
+import com.ustadmobile.core.impl.UMLog;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.lib.db.entities.ConnectivityStatus;
 import com.ustadmobile.lib.db.entities.ContentEntryFileStatus;
 import com.ustadmobile.lib.db.entities.DownloadJobItemHistory;
@@ -23,7 +25,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static com.ustadmobile.lib.db.entities.ConnectivityStatus.STATE_CONNECTED_LOCAL;
 import static com.ustadmobile.lib.db.entities.ConnectivityStatus.STATE_CONNECTING_LOCAL;
-import static com.ustadmobile.lib.db.entities.ConnectivityStatus.STATE_UNMETERED;
 import static com.ustadmobile.lib.db.entities.DownloadJobItemHistory.MODE_CLOUD;
 import static com.ustadmobile.lib.db.entities.DownloadJobItemHistory.MODE_LOCAL;
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.WIFI_GROUP_CREATION_RESPONSE;
@@ -148,8 +149,9 @@ public class DownloadJobItemRunner implements Runnable, BleMessageResponseListen
                     break;
 
                 case STATE_CONNECTED_LOCAL:
-                    //TODO: check this is the local connection we wanted - e.g. the SSID
-                    localConnectLatch.countDown();
+                    if(newStatus.getWifiSsid().equals(wiFiDirectGroupBle.getSsid())){
+                        localConnectLatch.countDown();
+                    }
                     break;
 
             }
@@ -333,7 +335,8 @@ public class DownloadJobItemRunner implements Runnable, BleMessageResponseListen
                 history.setStartTime(System.currentTimeMillis());
                 downloaded = httpDownload.download();
             }catch(IOException e) {
-                e.printStackTrace();
+                UstadMobileSystemImpl.l(UMLog.ERROR,699,
+                        "Failed to download a file from "+getFileUrl(fromCloud),e);
             }
 
             if(!downloaded) {
