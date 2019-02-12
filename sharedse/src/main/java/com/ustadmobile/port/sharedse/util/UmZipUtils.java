@@ -16,20 +16,26 @@ public class UmZipUtils {
 
                 String fileName = zipEntry.getName();
                 File fileToCreate = new File(destDir, fileName);
+                System.out.println("Inflating " + zipEntry.getName() + " to "
+                        + fileToCreate.getAbsolutePath());
 
-                if (!fileToCreate.getParentFile().isDirectory()) {
-                    if (!fileToCreate.getParentFile().mkdirs()) {
+                File dirToCreate = zipEntry.isDirectory() ? fileToCreate : fileToCreate.getParentFile();
+                if (!dirToCreate.isDirectory()) {
+                    if (!dirToCreate.mkdirs()) {
                         throw new RuntimeException("Could not create directory to extract to: " +
                                 fileToCreate.getParentFile());
+                    } else {
+                        System.out.println("Created directory " + fileToCreate.getParentFile().getName());
                     }
                 }
                 if (!zipEntry.isDirectory()) {
                     entryOut = new FileOutputStream(fileToCreate);
                     UMIOUtils.readFully(zipIn, entryOut);
                     entryOut.close();
+                    System.out.println("Unzipped" + fileToCreate);
                 }
             }
-        }finally {
+        } finally {
             UMIOUtils.closeQuietly(entryOut);
         }
 

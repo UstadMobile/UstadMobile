@@ -49,22 +49,36 @@ public class ShrinkerUtil {
     public static final List<String> IMAGE_MIME_TYPES = Arrays.asList(MIMETYPE_JPG, "image/png", "image/jpeg");
 
     public static void main(String[] args) {
+        if (args.length < 2) {
+            System.err.println("Usage: <file or db><if file file location><optional log{trace, debug, info, warn, error, fatal}>");
+            System.exit(1);
+        }
+        UMLogUtil.setLevel(args.length == 3 ? args[2] : "");
 
-        UMLogUtil.setLevel(args.length == 1 ? args[0] : "");
+        if ("db".equals(args[0])) {
+            UmAppDatabase db = UmAppDatabase.getInstance(null);
+            UmAppDatabase repository = db.getRepository("https://localhost", "");
+            ContentEntryFileDao contentEntryFileDao = repository.getContentEntryFileDao();
+            List<ContentEntryFileWithFilePath> epubFileList = contentEntryFileDao.findEpubsFiles();
+            for (ContentEntryFileWithFilePath entryfile : epubFileList) {
+                try {
+                    File epubFile = new File(entryfile.getFilePath());
+                    ShrinkerUtil.shrinkEpub(epubFile);
+                    contentEntryFileDao.updateEpubFiles(epubFile.length(), ContentScraperUtil.getMd5(epubFile), entryfile.getContentEntryFileUid());
 
-        UmAppDatabase db = UmAppDatabase.getInstance(null);
-        UmAppDatabase repository = db.getRepository("https://localhost", "");
-        ContentEntryFileDao contentEntryFileDao = repository.getContentEntryFileDao();
-        List<ContentEntryFileWithFilePath> epubFileList = contentEntryFileDao.findEpubsFiles();
-        for (ContentEntryFileWithFilePath entryfile : epubFileList) {
+                } catch (Exception e) {
+                    UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
+                    UMLogUtil.logError("Failed to shrink epub " + entryfile.getFilePath());
+                }
+            }
+        } else {
             try {
-                File epubFile = new File(entryfile.getFilePath());
+                File epubFile = new File(args[1]);
                 ShrinkerUtil.shrinkEpub(epubFile);
-                contentEntryFileDao.updateEpubFiles(epubFile.length(), ContentScraperUtil.getMd5(epubFile), entryfile.getContentEntryFileUid());
 
             } catch (Exception e) {
                 UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
-                UMLogUtil.logError("Failed to shrink epub " + entryfile.getFilePath());
+                UMLogUtil.logError("Failed to shrink epub " + args[1]);
             }
         }
     }
@@ -73,7 +87,8 @@ public class ShrinkerUtil {
 
         File parentFolder = epub.getParentFile();
         File tmpFolder = new File(parentFolder, UMFileUtil.stripExtensionIfPresent(epub.getName()));
-        tmpFolder.mkdirs();
+        boolean isCreated = tmpFolder.mkdirs();
+        UMLogUtil.logTrace("Tmp folder for epub unzip is created " + isCreated);
         UmZipUtils.unzip(epub, tmpFolder);
         try {
             shrinkEpubFiles(tmpFolder);
