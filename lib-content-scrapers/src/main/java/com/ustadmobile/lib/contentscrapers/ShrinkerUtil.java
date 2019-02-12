@@ -49,7 +49,7 @@ public class ShrinkerUtil {
     public static final List<String> IMAGE_MIME_TYPES = Arrays.asList(MIMETYPE_JPG, "image/png", "image/jpeg");
 
     public static void main(String[] args) {
-        if (args.length < 2) {
+        if (args.length < 1) {
             System.err.println("Usage: <file or db><if file file location><optional log{trace, debug, info, warn, error, fatal}>");
             System.exit(1);
         }
