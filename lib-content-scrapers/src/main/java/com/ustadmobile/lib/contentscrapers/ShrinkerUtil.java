@@ -75,7 +75,12 @@ public class ShrinkerUtil {
         File tmpFolder = new File(parentFolder, UMFileUtil.stripExtensionIfPresent(epub.getName()));
         tmpFolder.mkdirs();
         UmZipUtils.unzip(epub, tmpFolder);
-        shrinkEpubFiles(tmpFolder);
+        try {
+            shrinkEpubFiles(tmpFolder);
+        } catch (Exception e) {
+            FileUtils.deleteDirectory(tmpFolder);
+            return;
+        }
         ContentScraperUtil.zipDirectory(tmpFolder, epub.getName(), epub.getParentFile());
         FileUtils.deleteDirectory(tmpFolder);
 
@@ -92,7 +97,7 @@ public class ShrinkerUtil {
     }
 
 
-    private static boolean shrinkEpubFiles(File directory)  {
+    private static boolean shrinkEpubFiles(File directory) {
         FileInputStream opfFileInputStream = null;
         FileInputStream ocfFileInputStream = null;
         FileOutputStream opfFileOutputStream = null;
@@ -266,7 +271,7 @@ public class ShrinkerUtil {
      * @param dest webp file path
      */
     public static void convertImageToWebp(File src, File dest) throws IOException {
-        if(!src.exists()) {
+        if (!src.exists()) {
             throw new FileNotFoundException("convertImageToWebp: Source file: " + src.getAbsolutePath() + " does not exist");
         }
 
@@ -281,7 +286,7 @@ public class ShrinkerUtil {
             e.printStackTrace();
         }
 
-        if(!dest.exists()) {
+        if (!dest.exists()) {
             throw new IOException("convertImaegToWebP: source existed, but output does not " +
                     dest.getPath());
         }
