@@ -23,6 +23,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static com.ustadmobile.lib.db.entities.ConnectivityStatus.STATE_CONNECTED_LOCAL;
 import static com.ustadmobile.lib.db.entities.ConnectivityStatus.STATE_CONNECTING_LOCAL;
+import static com.ustadmobile.lib.db.entities.ConnectivityStatus.STATE_UNMETERED;
 import static com.ustadmobile.lib.db.entities.DownloadJobItemHistory.MODE_CLOUD;
 import static com.ustadmobile.lib.db.entities.DownloadJobItemHistory.MODE_LOCAL;
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.WIFI_GROUP_CREATION_RESPONSE;
@@ -103,6 +104,8 @@ public class DownloadJobItemRunner implements Runnable, BleMessageResponseListen
                 appDb.getDownloadJobItemDao().updateDownloadJobItemStatus(downloadItem.getDjiUid(),
                         JobStatus.RUNNING,httpDownload.getDownloadedSoFar(),
                         httpDownload.getTotalSize(),httpDownload.getCurrentDownloadSpeed());
+                appDb.getDownloadJobDao().updateBytesDownloadedSoFar(downloadItem.getDjiDjUid(),
+                        null);
             }
         }
     }
@@ -145,8 +148,8 @@ public class DownloadJobItemRunner implements Runnable, BleMessageResponseListen
                     break;
 
                 case STATE_CONNECTED_LOCAL:
+                    //TODO: check this is the local connection we wanted - e.g. the SSID
                     localConnectLatch.countDown();
-                    startDownload(false);
                     break;
 
             }
@@ -232,6 +235,10 @@ public class DownloadJobItemRunner implements Runnable, BleMessageResponseListen
     public void run() {
         runnerStatus.set(JobStatus.RUNNING);
         updateItemStatus(JobStatus.RUNNING);
+        long downloadJobId = appDb.getDownloadJobDao().getLatestDownloadJobUidForDownloadSet(
+                downloadItem.getDownloadSetItem().getDsiDsUid());
+        appDb.getDownloadJobDao().update(downloadJobId, JobStatus.RUNNING);
+
         networkManager.startMonitoringAvailability(this,
                 Arrays.asList(downloadItem.getDjiContentEntryFileUid()));
 
@@ -258,13 +265,13 @@ public class DownloadJobItemRunner implements Runnable, BleMessageResponseListen
         currentContentEntryFileStatus = appDb.getEntryStatusResponseDao()
                 .findByContentEntryFileUid(downloadItem.getDjiContentEntryFileUid());
 
-        checkWhereToDownloadFrom();
+        checkWhereToDownloadAFileFrom();
     }
 
     /**
      * Decide where to get the file, on cloud or from peer devices.
      */
-    private void checkWhereToDownloadFrom(){
+    private void checkWhereToDownloadAFileFrom(){
         long currentTimeStamp = System.currentTimeMillis();
         long minLastSeen = currentTimeStamp - TimeUnit.MINUTES.toMillis(1);
         long maxFailureFromTimeStamp = currentTimeStamp - TimeUnit.MINUTES.toMillis(5);
@@ -327,7 +334,12 @@ public class DownloadJobItemRunner implements Runnable, BleMessageResponseListen
                 downloaded = httpDownload.download();
             }catch(IOException e) {
                 e.printStackTrace();
-                statusCheckTask.cancel();
+            }
+
+            if(!downloaded) {
+                //wait before retry
+                try { Thread.sleep(3000); }
+                catch(InterruptedException e) {}
             }
 
             history.setEndTime(System.currentTimeMillis());
@@ -344,10 +356,12 @@ public class DownloadJobItemRunner implements Runnable, BleMessageResponseListen
             fileStatus.setFilePath(downloadItem.getDestinationFile());
             fileStatus.setCefsContentEntryFileUid(downloadItem.getDjiContentEntryFileUid());
             appDb.getContentEntryFileStatusDao().insert(fileStatus);
+            appDb.getDownloadJobDao().updateBytesDownloadedSoFar(downloadItem.getDjiDjUid(),
+                    null);
         }
 
         if(wiFiDirectGroupBle != null && !downloaded){
-            checkWhereToDownloadFrom();
+            checkWhereToDownloadAFileFrom();
         }else{
             stop(downloaded ? JobStatus.COMPLETE : JobStatus.FAILED);
         }
