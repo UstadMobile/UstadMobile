@@ -225,6 +225,11 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
             mPresenter.handleClickSettingsIcon();
             return super.onOptionsItemSelected(item);
         }
+        else if( i == R.id.menu_basepoint_search){
+            //TODO: send which fragment called it.
+            mPresenter.handleClickSearchIcon();
+            return super.onOptionsItemSelected(item);
+        }
         else {
             return super.onOptionsItemSelected(item);
         }

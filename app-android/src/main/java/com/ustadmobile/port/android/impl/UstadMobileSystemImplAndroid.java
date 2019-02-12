@@ -95,6 +95,7 @@ import com.ustadmobile.core.view.Login2View;
 import com.ustadmobile.core.view.PersonDetailEnrollClazzView;
 import com.ustadmobile.core.view.PersonDetailView;
 import com.ustadmobile.core.view.PersonEditView;
+import com.ustadmobile.core.view.PersonListSearchView;
 import com.ustadmobile.core.view.PersonPictureDialogView;
 import com.ustadmobile.core.view.Register2View;
 import com.ustadmobile.core.view.ReportAtRiskStudentsView;
@@ -291,6 +292,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         viewNameToAndroidImplMap.put(CallPersonRelatedDialogView.VIEW_NAME, CallPersonRelatedDialogFragment.class);
         viewNameToAndroidImplMap.put(ReportMasterView.VIEW_NAME, ReportMasterActivity.class);
         viewNameToAndroidImplMap.put(ReportSELView.VIEW_NAME, ReportSELActivity.class);
+        viewNameToAndroidImplMap.put(PersonListSearchView.VIEW_NAME, PersonListSearchActivity.class);
     }
 
     /**

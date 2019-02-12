@@ -29,12 +29,12 @@ task clean(type: Delete) {
 }
 
 //Major.minor.database version
-version = "0.3.19.0"
+version = "0.4.19.0"
 group = "com.ustadmobile.app"
 
 ext {
     ustadVersion = project.version
-    ustadVersionCode = 169
+    ustadVersionCode = 170
 
 
     version_junit = "4.12"
@@ -101,6 +101,7 @@ ext {
     version_work_manager = "1.0.0-alpha02"
 
     version_picasso = "2.71828"
+    version_crystalrangeseekbar = "1.1.3"
 }
 
 ext.buildConfigProperties = new Properties()

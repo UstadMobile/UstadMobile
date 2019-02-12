@@ -8,6 +8,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.BasePointView2;
 import com.ustadmobile.core.view.BulkUploadMasterView;
 import com.ustadmobile.core.view.Login2View;
+import com.ustadmobile.core.view.PersonListSearchView;
 import com.ustadmobile.core.view.SettingsView;
 import com.ustadmobile.lib.db.entities.Person;
 
@@ -15,17 +16,11 @@ import java.util.Hashtable;
 
 public class BasePointActivity2Presenter extends UstadBaseController<BasePointView2> {
 
-
+    //Database repository
     UmAppDatabase repository;
 
     public BasePointActivity2Presenter(Object context, Hashtable arguments, BasePointView2 view) {
         super(context, arguments, view);
-    }
-
-    @Override
-    public void onCreate(Hashtable savedState) {
-        super.onCreate(savedState);
-
     }
 
     /**
@@ -44,7 +39,7 @@ public class BasePointActivity2Presenter extends UstadBaseController<BasePointVi
      *
      * @param loggedInPerson    The person changed.
      */
-    public void handlePersonValueChanged(Person loggedInPerson){
+    private void handlePersonValueChanged(Person loggedInPerson){
         if(loggedInPerson != null) {
             view.updatePermissionCheck();
             if (loggedInPerson.isAdmin()) {
@@ -58,16 +53,25 @@ public class BasePointActivity2Presenter extends UstadBaseController<BasePointVi
         }
     }
 
+    /**
+     * Shows the share app dialog screen
+     */
     public void handleClickShareIcon(){
         view.showShareAppDialog();
     }
 
+    /**
+     * Goes to bulk upload screen
+     */
     public void handleClickBulkUpload(){
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         Hashtable args = new Hashtable();
         impl.go(BulkUploadMasterView.VIEW_NAME, args, context);
     }
 
+    /**
+     * Logs out
+     */
     public void handleLogOut(){
         UmAccountManager.setActiveAccount(null, context);
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
@@ -75,15 +79,29 @@ public class BasePointActivity2Presenter extends UstadBaseController<BasePointVi
         impl.go(Login2View.VIEW_NAME, args, context);
     }
 
+    /**
+     * Goes to settings screen.
+     */
     public void handleClickSettingsIcon(){
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         Hashtable args = new Hashtable();
-
         impl.go(SettingsView.VIEW_NAME, args, context);
-
     }
 
+    /**
+     * Goes to Search activity.
+     * TODO: Account for which fragment called it (which search to show)
+     */
+    public void handleClickSearchIcon(){
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        Hashtable args = new Hashtable();
+        impl.go(PersonListSearchView.VIEW_NAME, args, context);
+    }
 
+    /**
+     * Confirm that user wants to share the app which will get the app set up file and share it
+     * upon getting it from System Impl.
+     */
     public void handleConfirmShareApp(){
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
 
@@ -92,14 +110,13 @@ public class BasePointActivity2Presenter extends UstadBaseController<BasePointVi
 
             @Override
             public void onSuccess(Object result) {
-
+                //Share it on the view
                 view.shareAppSetupFile(result.toString());
-
             }
 
             @Override
             public void onFailure(Throwable exception) {
-
+                exception.printStackTrace();
             }
         });
     }

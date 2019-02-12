@@ -378,7 +378,8 @@ dependencies {
     implementation "android.arch.work:work-runtime:$version_work_manager"
     testImplementation "junit:junit:$version_junit"
 
-    //implementation files('lib/sjxlsx-1.0.0.jar')
+    //Range seekbar by Crystal
+    implementation "com.crystal:crystalrangeseekbar:$version_crystalrangeseekbar"
 
     //XML Stream
     //implementation group: 'javax.xml.stream', name: 'stax-api', version: '1.0-2'
