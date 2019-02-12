@@ -290,6 +290,11 @@ public class ShrinkerUtil {
             throw new FileNotFoundException("convertImageToWebp: Source file: " + src.getAbsolutePath() + " does not exist");
         }
 
+        File webpExecutableFile = new File(ScraperBuildConfig.WEBP_PATH);
+        if(!webpExecutableFile.exists()) {
+            throw new IOException("Webp executable does not exist: " + ScraperBuildConfig.WEBP_PATH);
+        }
+
         Runtime runTime = Runtime.getRuntime();
         try {
             Process process = runTime.exec(ScraperBuildConfig.WEBP_PATH + " " + src.getPath() + " -o  " + dest.getPath());
@@ -297,6 +302,7 @@ public class ShrinkerUtil {
             process.destroy();
         } catch (IOException e) {
             e.printStackTrace();
+            throw e;
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
