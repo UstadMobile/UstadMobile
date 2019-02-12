@@ -9,22 +9,23 @@
 
     <android.support.design.widget.AppBarLayout
         android:id="@+id/activity_class_log_detail_appbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:elevation="4dp"
         android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:elevation="4dp">
-
-    <android.support.v7.widget.Toolbar
-        android:id="@+id/class_log_detail_toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/primary"
-        android:theme="@style/Theme.AppCompat"
-        android:titleTextColor="#fff"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_scrollFlags="scroll|enterAlways"
-        tools:layout_editor_absoluteY="0dp"
-        />
+        app:layout_constraintTop_toTopOf="parent">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/class_log_detail_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/primary"
+            android:theme="@style/Theme.AppCompat"
+            android:titleTextColor="#fff"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_scrollFlags="scroll|enterAlways"
+            tools:layout_editor_absoluteY="0dp" />
     </android.support.design.widget.AppBarLayout>
 
     <TextView
@@ -47,13 +48,16 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
-        android:drawableLeft="@drawable/ic_checkbox_multiple_blank"
+        android:drawableLeft="@drawable/ic_checkbox_blank"
         android:drawablePadding="16dp"
         android:paddingStart="0dp"
         android:text="@string/mark_all_absent"
         android:textAlignment="textStart"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/activity_class_log_detail_mark_all_present_text" />
+        app:layout_constraintTop_toBottomOf="@+id/activity_class_log_detail_mark_all_present_text"
+        android:layout_marginLeft="16dp"
+        android:paddingLeft="0dp"
+        android:gravity="start" />
 
 
     <Button
@@ -63,13 +67,16 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
-        android:drawableLeft="@drawable/ic_checkbox_multiple_marked"
+        android:drawableLeft="@drawable/ic_checkbox_marked"
         android:drawablePadding="16dp"
         android:paddingStart="0dp"
         android:text="@string/mark_all_present"
         android:textAlignment="textStart"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/activity_class_log_detail_date_heading" />
+        app:layout_constraintTop_toBottomOf="@+id/activity_class_log_detail_date_heading"
+        android:layout_marginLeft="16dp"
+        android:paddingLeft="0dp"
+        android:gravity="start" />
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/class_log_detail_container_recyclerview"
@@ -84,7 +91,8 @@
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
         app:layout_constraintBottom_toTopOf="@+id/class_log_detail__done_fab"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/activity_class_log_detail_mark_all_absent_text" />
+        app:layout_constraintTop_toBottomOf="@+id/activity_class_log_detail_mark_all_absent_text"
+        android:layout_marginLeft="8dp" />
 
 
     <ru.dimorinny.floatingtextbutton.FloatingTextButton
@@ -96,14 +104,14 @@
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
         app:floating_background_color="@color/accent"
-        app:floating_left_icon="@drawable/ic_check_white_24dp"
+        app:floating_left_icon="@drawable/ic_done_white_24dp"
         app:floating_title="@string/done"
         app:floating_title_color="@android:color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
-    <ImageButton
+    <android.support.v7.widget.AppCompatImageButton
         android:id="@+id/activity_class_log_detail_date_go_back"
         style="?android:attr/borderlessButtonStyle"
         android:layout_width="45dp"
@@ -113,7 +121,7 @@
         app:layout_constraintTop_toBottomOf="@+id/activity_class_log_detail_appbar"
         app:srcCompat="@drawable/ic_chevron_left_black_24dp" />
 
-    <ImageButton
+    <android.support.v7.widget.AppCompatImageButton
         android:id="@+id/activity_class_log_detail_date_go_forward"
         style="?android:attr/borderlessButtonStyle"
         android:layout_width="45dp"

@@ -30,7 +30,8 @@
         app:layout_constraintBottom_toTopOf="@id/activity_report_overall_attendance_fab"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/activity_report_overall_attendance_appbar">
+        app:layout_constraintTop_toBottomOf="@+id/activity_report_overall_attendance_appbar"
+        android:layout_marginRight="4dp">
 
         <LinearLayout
             android:id="@+id/activity_report_overall_attendance_report_cl"
@@ -46,12 +47,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_marginStart="8dp"
-                android:layout_marginTop="8dp" />
+                android:layout_marginTop="8dp"
+                android:layout_marginLeft="8dp" />
 
-
-            <!--<ScrollView-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="match_parent">-->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -82,7 +80,7 @@
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="8dp"
         app:floating_background_color="@color/accent"
-        app:floating_left_icon="@drawable/ic_dropout_white_24dp"
+        app:floating_left_icon="@drawable/ic_export"
         app:floating_title="@string/export"
         app:floating_title_color="@android:color/white"
         app:layout_constraintBottom_toBottomOf="parent"

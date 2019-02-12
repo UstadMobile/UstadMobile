@@ -11,7 +11,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:elevation="4dp"
-        android:theme="@style/ThemeOverlay.AppCompat.ActionBar">
+        android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
         <android.support.v7.widget.Toolbar
             android:id="@+id/activity_sel_question_detail2_toolbar"
@@ -45,7 +47,8 @@
         android:layout_marginTop="8dp"
         android:text="@string/question_type"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/activity_sel_question_detail2_question_name" />
+        app:layout_constraintTop_toBottomOf="@+id/activity_sel_question_detail2_question_name"
+        android:layout_marginLeft="12dp" />
 
     <Spinner
         android:id="@+id/activity_sel_question_detail2_question_type_spinner"
@@ -56,7 +59,9 @@
         android:layout_marginEnd="8dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/activity_sel_question_detail2_question_type_heading" />
+        app:layout_constraintTop_toBottomOf="@+id/activity_sel_question_detail2_question_type_heading"
+        android:layout_marginLeft="4dp"
+        android:layout_marginRight="8dp" />
 
     <android.support.constraint.ConstraintLayout
         android:id="@+id/activity_sel_question_detail2_options_cl"
@@ -87,7 +92,8 @@
                 android:layout_marginTop="8dp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/ic_add_circle_outline_black_24dp" />
+                app:srcCompat="@drawable/ic_add_circle_outline_black_24dp"
+                android:layout_marginLeft="16dp" />
 
             <TextView
                 android:id="@+id/activity_sel_question_detail2_add_question_cl_add_text"
@@ -98,7 +104,8 @@
                 android:text="@string/add_option"
                 android:textColor="@color/text_primary"
                 app:layout_constraintStart_toEndOf="@+id/activity_sel_question_detail2_add_question_cl_add_image"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent"
+                android:layout_marginLeft="8dp" />
 
         </android.support.constraint.ConstraintLayout>
 
@@ -115,7 +122,9 @@
             app:layout_behavior="@string/appbar_scrolling_view_behavior"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/activity_sel_question_detail2_add_question_cl" />
+            app:layout_constraintTop_toBottomOf="@+id/activity_sel_question_detail2_add_question_cl"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="8dp" />
     </android.support.constraint.ConstraintLayout>
 
 

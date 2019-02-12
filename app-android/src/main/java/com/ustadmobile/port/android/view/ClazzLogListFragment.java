@@ -4,11 +4,15 @@ import android.arch.lifecycle.LiveData;
 import android.arch.paging.DataSource;
 import android.arch.paging.LivePagedListBuilder;
 import android.arch.paging.PagedList;
+import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.graphics.drawable.DrawableCompat;
+import android.support.v7.content.res.AppCompatResources;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -292,23 +296,33 @@ public class ClazzLogListFragment extends UstadBaseFragment implements ClassLogL
         lastWeekButton.setOnClickListener(
                 v -> {
                     mPresenter.getAttendanceDataAndUpdateCharts(CHART_DURATION_LAST_WEEK);
-                    lastWeekButton.getBackground().setTint(getResources().getColor(R.color.primary));
+                    getTintedDrawable(lastWeekButton.getBackground(), R.color.primary);
+                    //lastWeekButton.getBackground().setTint(getResources().getColor(R.color.primary));
                 });
         lastMonthButton.setOnClickListener(
                 v -> {
                     mPresenter.getAttendanceDataAndUpdateCharts(CHART_DURATION_LAST_MONTH);
-                    lastMonthButton.getBackground().setTint(getResources().getColor(R.color.primary));
+                    getTintedDrawable(lastMonthButton.getBackground(), R.color.primary);
+                    //lastMonthButton.getBackground().setTint(getResources().getColor(R.color.primary));
                 });
         lastYearButton.setOnClickListener(
                 v ->{
                     mPresenter.getAttendanceDataAndUpdateCharts(CHART_DURATION_LAST_YEAR);
-                    lastYearButton.getBackground().setTint(getResources().getColor(R.color.primary));
+                    getTintedDrawable(lastYearButton.getBackground(), R.color.primary);
+                    //lastYearButton.getBackground().setTint(getResources().getColor(R.color.primary));
                 });
 
         //Default start to Last Week's data:
         lastWeekButton.callOnClick();
 
         return rootContainer;
+    }
+
+    public Drawable getTintedDrawable(Drawable drawable, int color) {
+        drawable = DrawableCompat.wrap(drawable);
+        int tintColor = ContextCompat.getColor(getContext(), color);
+        DrawableCompat.setTint(drawable, tintColor);
+        return drawable;
     }
 
     /**
@@ -318,9 +332,18 @@ public class ClazzLogListFragment extends UstadBaseFragment implements ClassLogL
     public void resetReportButtons() {
         runOnUiThread(() -> {
 
-            lastWeekButton.getBackground().setTint(getResources().getColor(R.color.color_gray));
-            lastMonthButton.getBackground().setTint(getResources().getColor(R.color.color_gray));
-            lastYearButton.getBackground().setTint(getResources().getColor(R.color.color_gray));
+            lastWeekButton.setBackground(getTintedDrawable(lastWeekButton.getBackground(), R.color.color_gray));
+            lastMonthButton.setBackground(getTintedDrawable(lastMonthButton.getBackground(), R.color.color_gray));
+            lastYearButton.setBackground(getTintedDrawable(lastYearButton.getBackground(), R.color.color_gray));
+
+            getTintedDrawable(lastWeekButton.getBackground(), R.color.color_gray);
+            getTintedDrawable(lastMonthButton.getBackground(), R.color.color_gray);
+            getTintedDrawable(lastYearButton.getBackground(), R.color.color_gray);
+
+
+//            lastWeekButton.getBackground().setTint(getResources().getColor(R.color.color_gray));
+//            lastMonthButton.getBackground().setTint(getResources().getColor(R.color.color_gray));
+//            lastYearButton.getBackground().setTint(getResources().getColor(R.color.color_gray));
         });
 
     }

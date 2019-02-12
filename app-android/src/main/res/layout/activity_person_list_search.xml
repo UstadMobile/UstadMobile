@@ -50,7 +50,8 @@
         android:layout_alignParentTop="true"
         android:scrollbars="vertical"
         app:layout_constraintTop_toBottomOf="@+id/rangeSeekbar2"
-        tools:layout_editor_absoluteX="0dp" />
+        tools:layout_editor_absoluteX="0dp"
+        android:layout_alignParentLeft="true" />
 
     <TextView
         android:id="@+id/textView14"
@@ -60,7 +61,8 @@
         android:layout_marginTop="8dp"
         android:text="@string/filter"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/activity_person_list_search_appbar" />
+        app:layout_constraintTop_toBottomOf="@+id/activity_person_list_search_appbar"
+        android:layout_marginLeft="8dp" />
 
     <TextView
         android:id="@+id/textView15"
@@ -70,7 +72,8 @@
         android:layout_marginTop="8dp"
         android:text="@string/attendance_percentage"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView14" />
+        app:layout_constraintTop_toBottomOf="@+id/textView14"
+        android:layout_marginLeft="8dp" />
 
     <TextView
         android:id="@+id/textView16"
@@ -80,7 +83,8 @@
         android:layout_marginTop="8dp"
         android:text="TextView"
         app:layout_constraintStart_toEndOf="@+id/textView15"
-        app:layout_constraintTop_toBottomOf="@+id/textView14" />
+        app:layout_constraintTop_toBottomOf="@+id/textView14"
+        android:layout_marginLeft="8dp" />
 
     <TextView
         android:id="@+id/textView17"
@@ -90,7 +94,8 @@
         android:layout_marginTop="8dp"
         android:text="@string/number_of_absent_days"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/rangeSeekbar1" />
+        app:layout_constraintTop_toBottomOf="@+id/rangeSeekbar1"
+        android:layout_marginLeft="8dp" />
 
     <TextView
         android:id="@+id/textView18"
@@ -100,7 +105,8 @@
         android:layout_marginTop="8dp"
         android:text="TextView"
         app:layout_constraintStart_toEndOf="@+id/textView17"
-        app:layout_constraintTop_toBottomOf="@+id/rangeSeekbar1" />
+        app:layout_constraintTop_toBottomOf="@+id/rangeSeekbar1"
+        android:layout_marginLeft="12dp" />
 
     <com.crystal.crystalrangeseekbar.widgets.CrystalSeekbar
         android:id="@+id/rangeSeekbar2"
@@ -113,6 +119,7 @@
         app:bar_color="@color/color_gray"
         app:bar_highlight_color="@color/accent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView17" />
+        app:layout_constraintTop_toBottomOf="@+id/textView17"
+        android:layout_marginLeft="8dp" />
 
 </android.support.constraint.ConstraintLayout>

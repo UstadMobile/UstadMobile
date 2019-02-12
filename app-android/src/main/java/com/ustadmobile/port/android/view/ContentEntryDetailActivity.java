@@ -53,7 +53,6 @@ public class ContentEntryDetailActivity extends UstadBaseActivity implements Con
 
         new Handler(Looper.getMainLooper()).post(() -> {
 
-            //Picasso.with(ContentEntryDetailActivity.this)
             Picasso.get()
                     .load(contentEntry.getThumbnailUrl())
                     .into((ImageView) findViewById(R.id.entry_detail_thumbnail));

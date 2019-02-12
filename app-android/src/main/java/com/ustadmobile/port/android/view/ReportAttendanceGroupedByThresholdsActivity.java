@@ -130,11 +130,10 @@ public class ReportAttendanceGroupedByThresholdsActivity extends UstadBaseActivi
         //Build a string array of the data
         tableTextData = new ArrayList<>();
 
-        Iterator<String> iterator = dataMaps.keySet().iterator();
-        while(iterator.hasNext()){
-            String locationName = iterator.next();
+        for (String locationName : dataMaps.keySet()) {
             List<AttendanceResultGroupedByAgeAndThreshold> dataMapList = dataMaps.get(locationName);
-            if(!dataMapList.isEmpty()){
+            assert dataMapList != null;
+            if (!dataMapList.isEmpty()) {
 
                 //Add title to tableTextData
                 String[] titleItems = new String[]{locationName};
@@ -142,7 +141,6 @@ public class ReportAttendanceGroupedByThresholdsActivity extends UstadBaseActivi
 
                 List<View> addThese = generateAllViewRowsForTable(dataMapList);
 
-                ScrollView scrollView = new ScrollView(getApplicationContext());
                 //heading
                 TextView heading = new TextView(getApplicationContext());
                 heading.setTextColor(Color.BLACK);
@@ -284,9 +282,17 @@ public class ReportAttendanceGroupedByThresholdsActivity extends UstadBaseActivi
         addThese.add(superHeadingRow);
 
         //Super heading row to tableTextData
-        String[] superHeadingItems = new String[superHeadingRow.getChildCount()];
+        String[] superHeadingItems = new String[superHeadingRow.getChildCount() + 3];
+        int j = 0;
         for(int i = 0; i < superHeadingRow.getChildCount(); i++){
-            superHeadingItems[i] = ((TextView) superHeadingRow.getChildAt(i)).getText().toString();
+            String addThis = ((TextView) superHeadingRow.getChildAt(i)).getText().toString();
+            superHeadingItems[j] = addThis;
+
+            if(addThis.startsWith(getText(R.string.attendance).toString())){
+                j++;
+                superHeadingItems[j] = "";
+            }
+            j++;
         }
         tableTextData.add(superHeadingItems);
 

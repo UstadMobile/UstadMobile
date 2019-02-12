@@ -6,7 +6,10 @@ import android.content.DialogInterface;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.content.res.AppCompatResources;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -155,8 +158,12 @@ public class SelectMultipleTreeDialogFragment extends UstadDialogFragment implem
         toolbar = rootView.findViewById(R.id.fragment_select_multiple_tree_dialog_toolbar);
         toolbar.setTitle(R.string.select_locations);
 
-        Drawable upIcon = getResources().getDrawable(R.drawable.ic_arrow_back_white_24dp);
-        upIcon.setTint(getResources().getColor(R.color.icons));
+
+
+        Drawable upIcon = AppCompatResources.getDrawable(getContext(),
+                R.drawable.ic_arrow_back_white_24dp);
+        upIcon = getTintedDrawable(upIcon, R.color.icons);
+
         toolbar.setNavigationIcon(upIcon);
         toolbar.setNavigationOnClickListener(v -> dialog.dismiss());
 
@@ -186,6 +193,12 @@ public class SelectMultipleTreeDialogFragment extends UstadDialogFragment implem
 
     }
 
+    public Drawable getTintedDrawable(Drawable drawable, int color) {
+        drawable = DrawableCompat.wrap(drawable);
+        int tintColor = ContextCompat.getColor(getContext(), color);
+        DrawableCompat.setTint(drawable, tintColor);
+        return drawable;
+    }
 
     /**
      * Custom TreeView Adapter written so that we can work with onBindView and manipulate the

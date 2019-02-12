@@ -8,6 +8,7 @@ import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.content.FileProvider;
+import android.support.v7.widget.AppCompatImageView;
 import android.support.v7.widget.Toolbar;
 import android.view.Gravity;
 import android.view.MenuInflater;
@@ -16,7 +17,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.HorizontalScrollView;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.TableLayout;
@@ -318,7 +318,6 @@ public class ReportSELActivity extends UstadBaseActivity implements
                 questionButton.setBackground(shape);
                 questionButton.setText(everyQuestion);
                 questionButton.setPadding(12,20,12,8);
-                //questionButton.setLines(3);
                 questionButton.setGravity(1);
 
                 allButtons.add(questionButton);
@@ -404,16 +403,16 @@ public class ReportSELActivity extends UstadBaseActivity implements
             //Find all views within that nominator Row that have an id in the NomineeList
             for(int j=0;j<nominatorRow.getChildCount();j++){
                 View rowChild = nominatorRow.getChildAt(j);
-                if(rowChild instanceof ImageView){
+                if(rowChild instanceof AppCompatImageView){
                     Long rowChildNomineeUid = (Long) rowChild.getTag(TAG_NOMINEE_CLAZZMEMBER_UID);
                     if(rowChildNomineeUid != null){
                         if(nomineeList.contains(rowChildNomineeUid)){
                             //If this cell is in the nominee list , change the view to be a tick!
-                            ImageView nomineeImageView = (ImageView) rowChild;
+                            AppCompatImageView nomineeImageView = (AppCompatImageView) rowChild;
                             nomineeImageView.setImageResource(R.drawable.ic_check_black_24dp);
                         }else{
                             //if not, its a cross
-                            ImageView nomineImageView = (ImageView) rowChild;
+                            AppCompatImageView nomineImageView = (AppCompatImageView) rowChild;
                             nomineImageView.setImageResource(R.drawable.ic_clear_black_24dp);
                         }
                     }
@@ -595,7 +594,7 @@ public class ReportSELActivity extends UstadBaseActivity implements
      * @return  The imageview view
      */
     public View getTick(){
-        ImageView tickIV = new ImageView(this);
+        AppCompatImageView tickIV = new AppCompatImageView(this);
         tickIV.setImageResource(R.drawable.ic_check_black_24dp);
         tickIV.setColorFilter(Color.GRAY);
         //tickIV.setLayoutParams(imageLP);
@@ -608,7 +607,7 @@ public class ReportSELActivity extends UstadBaseActivity implements
      */
     public View getCross(){
         imageLP.setMargins(dpToPx(8), dpToPx(8), dpToPx(8), dpToPx(8));
-        ImageView crossIV = new ImageView(this);
+        AppCompatImageView crossIV = new AppCompatImageView(this);
         //crossIV.setLayoutParams(imageLP);
         crossIV.setImageResource(R.drawable.ic_clear_black_24dp);
         crossIV.setColorFilter(Color.GRAY);
@@ -620,7 +619,7 @@ public class ReportSELActivity extends UstadBaseActivity implements
      * @return  The imageview view
      */
     public View getNA(){
-        ImageView naIV = new ImageView(this);
+        AppCompatImageView naIV = new AppCompatImageView(this);
         naIV.setImageResource(R.drawable.ic_remove_black_24dp);
         naIV.setColorFilter(Color.GRAY);
         //naIV.setLayoutParams(imageLP);

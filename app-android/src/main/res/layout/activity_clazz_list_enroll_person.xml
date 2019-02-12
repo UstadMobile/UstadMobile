@@ -7,10 +7,12 @@
 
     <android.support.design.widget.AppBarLayout
         android:id="@+id/activity_clazz_list_enroll_person_appbar"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:elevation="4dp">
+        android:elevation="4dp"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
         <android.support.v7.widget.Toolbar
             android:id="@+id/activity_clazz_list_enroll_person_toolbar"
@@ -21,8 +23,7 @@
             android:titleTextColor="#fff"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_scrollFlags="scroll|enterAlways"
-            tools:layout_editor_absoluteY="0dp"
-            />
+            tools:layout_editor_absoluteY="0dp" />
     </android.support.design.widget.AppBarLayout>
 
     <android.support.v7.widget.RecyclerView
@@ -36,7 +37,8 @@
         android:scrollbars="vertical"
         android:visibility="visible"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/activity_clazz_list_enroll_person_appbar" />
+        app:layout_constraintTop_toBottomOf="@id/activity_clazz_list_enroll_person_appbar"
+        android:layout_marginLeft="8dp" />
 
     <ru.dimorinny.floatingtextbutton.FloatingTextButton
         android:id="@+id/activity_clazz_list_enroll_person_fab"

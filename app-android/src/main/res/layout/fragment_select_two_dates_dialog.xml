@@ -15,7 +15,8 @@
         android:layout_marginTop="8dp"
         android:text="@string/fromC"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginLeft="8dp" />
 
     <EditText
         android:id="@+id/fragment_select_two_dates_dialog_from_date_edittext"
@@ -23,7 +24,8 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/fragment_select_two_dates_dialog_from_date_heading" />
+        app:layout_constraintTop_toBottomOf="@+id/fragment_select_two_dates_dialog_from_date_heading"
+        android:layout_marginLeft="8dp" />
 
     <TextView
         android:id="@+id/fragment_select_two_dates_dialog_to_date_heading"
@@ -33,7 +35,8 @@
         android:layout_marginTop="8dp"
         android:text="@string/toC"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/fragment_select_two_dates_dialog_from_date_edittext" />
+        app:layout_constraintTop_toBottomOf="@+id/fragment_select_two_dates_dialog_from_date_edittext"
+        android:layout_marginLeft="8dp" />
 
     <EditText
         android:id="@+id/fragment_select_two_dates_dialog_to_date_edittext"
@@ -41,15 +44,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/fragment_select_two_dates_dialog_to_date_heading" />
-
-
-
-    <!--<com.appeaser.sublimepickerlibrary.datepicker.SublimeDatePicker-->
-        <!--android:id="@+id/fragment_select_two_dates_dialog_datepicker"-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content">-->
-
-    <!--</com.appeaser.sublimepickerlibrary.datepicker.SublimeDatePicker>-->
+        app:layout_constraintTop_toBottomOf="@+id/fragment_select_two_dates_dialog_to_date_heading"
+        android:layout_marginLeft="8dp" />
 
 </android.support.constraint.ConstraintLayout>

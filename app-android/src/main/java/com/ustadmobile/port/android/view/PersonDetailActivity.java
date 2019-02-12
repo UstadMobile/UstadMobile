@@ -17,6 +17,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v7.util.DiffUtil;
+import android.support.v7.widget.AppCompatImageView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -350,7 +351,7 @@ public class PersonDetailActivity extends UstadBaseActivity implements PersonDet
                 }
 
                 int iconResId = getResourceId(iconName, "drawable", getPackageName());
-                ImageView icon = new ImageView(this);
+                AppCompatImageView icon = new AppCompatImageView(this);
                 icon.setImageResource(iconResId);
                 if(iconName.equals(ADD_PERSON_ICON)) icon.setAlpha(0);
                 icon.setPadding(16,0,4,0);
@@ -381,13 +382,13 @@ public class PersonDetailActivity extends UstadBaseActivity implements PersonDet
 
                 //Add call and text buttons to father and mother detail
                 if(field.getActionParam() != null && field.getActionParam().length() > 0){
-                    ImageView textIcon = new ImageView(this);
+                    AppCompatImageView textIcon = new AppCompatImageView(this);
                     textIcon.setImageResource(getResourceId(TEXT_ICON_NAME,
                             "drawable", getPackageName()));
                     textIcon.setPadding(8,16, 32,16);
                     textIcon.setOnClickListener(v -> mPresenter.handleClickText(field.getActionParam()));
 
-                    ImageView callIcon = new ImageView(this);
+                    AppCompatImageView callIcon = new AppCompatImageView(this);
                     callIcon.setImageResource(getResourceId(CALL_ICON_NAME,
                             "drawable", getPackageName()));
                     callIcon.setPadding(8,16, 32,16);

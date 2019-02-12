@@ -18,7 +18,7 @@
         app:layout_constraintStart_toEndOf="@+id/activity_class_activity_date_go_back3"
         app:layout_constraintTop_toBottomOf="@+id/activity_clazz_activity_edit_appbar" />
 
-    <ImageButton
+    <android.support.v7.widget.AppCompatImageButton
         android:id="@+id/activity_class_activity_date_go_back3"
         style="?android:attr/borderlessButtonStyle"
         android:layout_width="wrap_content"
@@ -28,7 +28,7 @@
         app:layout_constraintTop_toBottomOf="@+id/activity_clazz_activity_edit_appbar"
         app:srcCompat="@drawable/ic_chevron_left_black_24dp" />
 
-    <ImageButton
+    <android.support.v7.widget.AppCompatImageButton
         android:id="@+id/activity_class_activity_date_go_forward3"
         style="?android:attr/borderlessButtonStyle"
         android:layout_width="wrap_content"
@@ -43,7 +43,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:elevation="4dp"
-        android:theme="@style/ThemeOverlay.AppCompat.ActionBar">
+        android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
         <android.support.v7.widget.Toolbar
             android:id="@+id/activity_clazz_activity_edit_toolbar"
@@ -63,7 +65,8 @@
         android:text="@string/activity_change"
         android:textColor="@color/text_primary"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/activity_class_activity_date_go_back3" />
+        app:layout_constraintTop_toBottomOf="@+id/activity_class_activity_date_go_back3"
+        android:layout_marginLeft="8dp" />
 
     <android.support.v7.widget.AppCompatSpinner
         android:id="@+id/activity_clazz_activity_edit_change_spinner"
@@ -73,7 +76,8 @@
         android:layout_marginTop="8dp"
         android:paddingTop="20dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView3">
+        app:layout_constraintTop_toBottomOf="@+id/textView3"
+        android:layout_marginLeft="8dp">
 
     </android.support.v7.widget.AppCompatSpinner>
 
@@ -90,7 +94,9 @@
         android:spinnerMode="dialog"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/textView3"
-        app:layout_constraintTop_toBottomOf="@+id/activity_clazz_activity_edit_change_uom_title">
+        app:layout_constraintTop_toBottomOf="@+id/activity_clazz_activity_edit_change_uom_title"
+        android:layout_marginLeft="44dp"
+        android:layout_marginRight="8dp">
 
     </EditText>
 
@@ -103,7 +109,8 @@
         android:text="@string/change_implemented_if_any"
         android:textSize="12sp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/activity_clazz_activity_edit_heading" />
+        app:layout_constraintTop_toBottomOf="@+id/activity_clazz_activity_edit_heading"
+        android:layout_marginLeft="8dp" />
 
     <TextView
         android:id="@+id/activity_clazz_activity_edit_change_uom_title"
@@ -114,7 +121,8 @@
         android:text="@string/duration"
         android:textSize="12sp"
         app:layout_constraintStart_toStartOf="@+id/activity_clazz_activity_edit_change_spinner2"
-        app:layout_constraintTop_toBottomOf="@+id/activity_clazz_activity_edit_heading" />
+        app:layout_constraintTop_toBottomOf="@+id/activity_clazz_activity_edit_heading"
+        android:layout_marginLeft="8dp" />
 
     <TextView
         android:id="@+id/textView5"
@@ -125,7 +133,8 @@
         android:text="@string/how_did_it_go"
         android:textSize="12sp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/activity_clazz_activity_edit_change_spinner" />
+        app:layout_constraintTop_toBottomOf="@+id/activity_clazz_activity_edit_change_spinner"
+        android:layout_marginLeft="8dp" />
 
     <ImageView
         android:id="@+id/activity_clazz_activity_edit_went_good"
@@ -137,7 +146,8 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView5"
         app:srcCompat="@drawable/ic_thumb_up_black_24dp"
-        android:contentDescription="@string/activity_went_good" />
+        android:contentDescription="@string/activity_went_good"
+        android:layout_marginRight="130dp" />
 
     <ImageView
         android:id="@+id/activity_clazz_activity_edit_went_bad"
@@ -148,7 +158,8 @@
         app:layout_constraintStart_toEndOf="@+id/activity_clazz_activity_edit_went_good"
         app:layout_constraintTop_toBottomOf="@+id/textView5"
         app:srcCompat="@drawable/ic_thumb_down_black_24dp"
-        android:contentDescription="@string/activity_went_bad" />
+        android:contentDescription="@string/activity_went_bad"
+        android:layout_marginLeft="64dp" />
 
     <TextView
         android:id="@+id/textView6"
@@ -159,7 +170,8 @@
         android:text="@string/notes"
         android:textSize="12sp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/activity_clazz_activity_edit_went_bad" />
+        app:layout_constraintTop_toBottomOf="@+id/activity_clazz_activity_edit_went_bad"
+        android:layout_marginLeft="8dp" />
 
     <EditText
         android:id="@+id/activity_clazz_activity_edit_notes"
@@ -201,6 +213,8 @@
         android:visibility="invisible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/textView3"
-        app:layout_constraintTop_toBottomOf="@+id/activity_clazz_activity_edit_change_uom_title" />
+        app:layout_constraintTop_toBottomOf="@+id/activity_clazz_activity_edit_change_uom_title"
+        android:layout_marginLeft="44dp"
+        android:layout_marginRight="8dp" />
 
 </android.support.constraint.ConstraintLayout>

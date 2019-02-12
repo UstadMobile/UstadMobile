@@ -94,30 +94,6 @@
     </android.support.constraint.ConstraintLayout>
 
 
-    <!--<android.support.design.widget.AppBarLayout-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--&gt;-->
-        <!--<android.support.design.widget.CollapsingToolbarLayout-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="match_parent"-->
-            <!--app:layout_scrollFlags="scroll|exitUntilCollapsed"-->
-            <!--&gt;-->
-
-            <!--<LinearLayout-->
-                <!--android:layout_width="match_parent"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--app:layout_collapseMode="parallax"-->
-                <!--&gt;-->
-                <!--<Button-->
-                    <!--android:layout_width="match_parent"-->
-                    <!--android:layout_height="wrap_content"-->
-                    <!--/>-->
-            <!--</LinearLayout>-->
-        <!--</android.support.design.widget.CollapsingToolbarLayout>-->
-
-    <!--</android.support.design.widget.AppBarLayout>-->
-
     <android.support.v7.widget.RecyclerView
         android:id="@+id/fragment_clazz_activity_list_recyclerview"
         android:layout_width="match_parent"
@@ -139,7 +115,7 @@
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="8dp"
         app:floating_background_color="@color/accent"
-        app:floating_left_icon="@drawable/ic_record_voice_over_white_24dp"
+        app:floating_left_icon="@drawable/ic_clazz_activity"
         app:floating_title="@string/record_activity"
         app:floating_title_color="@android:color/white"
         app:layout_constraintBottom_toBottomOf="parent"

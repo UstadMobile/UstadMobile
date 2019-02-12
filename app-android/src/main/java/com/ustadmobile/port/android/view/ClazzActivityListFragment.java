@@ -6,8 +6,11 @@ import android.arch.paging.LivePagedListBuilder;
 import android.arch.paging.PagedList;
 import android.content.res.Resources;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.graphics.drawable.DrawableCompat;
+import android.support.v7.content.res.AppCompatResources;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -120,9 +123,11 @@ public class ClazzActivityListFragment extends UstadBaseFragment implements Claz
 
             BarEntry anEntry  = new BarEntry(thisBarKey, thisBarValue);
             if(thisBarValue < 0){
-                anEntry.setIcon(getResources().getDrawable(R.drawable.ic_thumb_down_black_12dp));
+                anEntry.setIcon(AppCompatResources.getDrawable(getContext(),
+                        R.drawable.ic_thumb_down_black_12dp));
             }else {
-                anEntry.setIcon(getResources().getDrawable(R.drawable.ic_thumb_up_black_12dp));
+                anEntry.setIcon(AppCompatResources.getDrawable(getContext(),
+                        R.drawable.ic_thumb_up_black_12dp));
             }
             if(thisBarValue <0){
                 thisBarValue = (-1)*thisBarValue;
@@ -223,17 +228,20 @@ public class ClazzActivityListFragment extends UstadBaseFragment implements Claz
         lastWeekButton.setOnClickListener(
                 v -> {
                     mPresenter.getActivityDataAndUpdateCharts(CHART_DURATION_LAST_WEEK);
-                    lastWeekButton.getBackground().setTint(getResources().getColor(R.color.primary));
+                    getTintedDrawable(lastWeekButton.getBackground(), R.color.primary);
+                    //lastWeekButton.getBackground().setTint(getResources().getColor(R.color.primary));
                 });
         lastMonthButton.setOnClickListener(
                 v -> {
                     mPresenter.getActivityDataAndUpdateCharts(CHART_DURATION_LAST_MONTH);
-                    lastMonthButton.getBackground().setTint(getResources().getColor(R.color.primary));
+                    getTintedDrawable(lastMonthButton.getBackground(), R.color.primary);
+                    //lastMonthButton.getBackground().setTint(getResources().getColor(R.color.primary));
                 });
         lastYearButton.setOnClickListener(
                 v -> {
                     mPresenter.getActivityDataAndUpdateCharts(CHART_DURATION_LAST_YEAR);
-                    lastYearButton.getBackground().setTint(getResources().getColor(R.color.primary));
+                    getTintedDrawable(lastYearButton.getBackground(), R.color.primary);
+                    //lastYearButton.getBackground().setTint(getResources().getColor(R.color.primary));
                 });
 
         activityChangesSpinner =
@@ -251,7 +259,7 @@ public class ClazzActivityListFragment extends UstadBaseFragment implements Claz
                     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                         mPresenter.setClazzActivityChangeUid(id);
                         //Default start to Last Week's data:
-                        lastMonthButton.callOnClick();
+                        lastWeekButton.callOnClick();
                     }
 
                     @Override
@@ -261,8 +269,17 @@ public class ClazzActivityListFragment extends UstadBaseFragment implements Claz
                 }
         );
 
+        lastWeekButton.callOnClick();
+
         //return container
         return rootContainer;
+    }
+
+    public Drawable getTintedDrawable(Drawable drawable, int color) {
+        drawable = DrawableCompat.wrap(drawable);
+        int tintColor = ContextCompat.getColor(getContext(), color);
+        DrawableCompat.setTint(drawable, tintColor);
+        return drawable;
     }
 
     /**
@@ -271,9 +288,13 @@ public class ClazzActivityListFragment extends UstadBaseFragment implements Claz
     @Override
     public void resetReportButtons() {
         runOnUiThread(() -> {
-            lastWeekButton.getBackground().setTint(getResources().getColor(R.color.color_gray));
-            lastMonthButton.getBackground().setTint(getResources().getColor(R.color.color_gray));
-            lastYearButton.getBackground().setTint(getResources().getColor(R.color.color_gray));
+
+            getTintedDrawable(lastWeekButton.getBackground(), R.color.color_gray);
+            getTintedDrawable(lastMonthButton.getBackground(), R.color.color_gray);
+            getTintedDrawable(lastYearButton.getBackground(), R.color.color_gray);
+//            lastWeekButton.getBackground().setTint(getResources().getColor(R.color.color_gray));
+//            lastMonthButton.getBackground().setTint(getResources().getColor(R.color.color_gray));
+//            lastYearButton.getBackground().setTint(getResources().getColor(R.color.color_gray));
         });
     }
 

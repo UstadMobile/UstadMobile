@@ -107,6 +107,8 @@ android {
         manifestPlaceholders = [applicationClass: "android.app.Application"]
 
         testInstrumentationRunnerArgument "notAnnotation", "com.ustadmobile.test.core.annotation.PeerServerRequiredTest,com.ustadmobile.test.core.annotation.ImplementationRequiredTest"
+
+        //vectorDrawables.useSupportLibrary = true
     }
 
     flavorDimensions "config"

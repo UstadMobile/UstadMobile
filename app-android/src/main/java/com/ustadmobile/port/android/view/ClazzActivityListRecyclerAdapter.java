@@ -6,7 +6,10 @@ import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
 import android.support.constraint.ConstraintSet;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.content.res.AppCompatResources;
 import android.support.v7.util.DiffUtil;
+import android.support.v7.widget.AppCompatImageView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -101,15 +104,18 @@ public class ClazzActivityListRecyclerAdapter extends
         TextView statusTextView = holder.itemView
                 .findViewById(R.id.item_clazzlog_log_status_text);
 
-        ImageView secondaryTextImageView =
+        AppCompatImageView secondaryTextImageView =
                 holder.itemView.findViewById(R.id.item_clazzlog_log_status_text_imageview);
 
         String verb = "Increased group work by ";
 
         if(!wasItGood){
-            secondaryTextImageView.setBackgroundResource(R.drawable.ic_thumb_down_black_24dp);
+            secondaryTextImageView.setBackground(
+                    AppCompatResources.getDrawable(theContext,R.drawable.ic_thumb_down_black_24dp));
         }else{
-            secondaryTextImageView.setBackgroundResource(R.drawable.ic_thumb_up_black_24dp);
+            secondaryTextImageView.setBackground(
+                    AppCompatResources.getDrawable(theContext,R.drawable.ic_thumb_up_black_24dp));
+            //secondaryTextImageView.setBackgroundResource(R.drawable.ic_thumb_up_black_24dp);
         }
 
         String desc = verb + clazzActivity.getClazzActivityQuantity()

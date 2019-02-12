@@ -8,13 +8,19 @@
 
     <android.support.design.widget.AppBarLayout
         android:id="@+id/activity_selselect_consent_appbar"
-        android:layout_width="match_parent" android:layout_height="wrap_content"
-        android:elevation="4dp" android:theme="@style/ThemeOverlay.AppCompat.ActionBar">
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:elevation="4dp"
+        android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
         <android.support.v7.widget.Toolbar
             android:id="@+id/activity_selselect_consent_toolbar"
-            android:layout_width="match_parent" android:layout_height="?android:attr/actionBarSize"
-            android:background="@color/primary" app:layout_scrollFlags="scroll|enterAlways" />
+            android:layout_width="match_parent"
+            android:layout_height="?android:attr/actionBarSize"
+            android:background="@color/primary"
+            app:layout_scrollFlags="scroll|enterAlways" />
 
     </android.support.design.widget.AppBarLayout>
 
@@ -26,7 +32,8 @@
         android:layout_marginTop="8dp"
         android:scrollbars="vertical"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/activity_selselect_consent_checkbox" />
+        app:layout_constraintTop_toBottomOf="@+id/activity_selselect_consent_checkbox"
+        android:layout_marginLeft="8dp" />
 
     <TextView
         android:id="@+id/activity_selselect_consent_title"
@@ -36,7 +43,8 @@
         android:layout_marginTop="8dp"
         android:text="@string/explain_sn"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/activity_selselect_consent_appbar" />
+        app:layout_constraintTop_toBottomOf="@+id/activity_selselect_consent_appbar"
+        android:layout_marginLeft="16dp" />
 
     <CheckBox
         android:id="@+id/activity_selselect_consent_checkbox"
@@ -46,7 +54,8 @@
         android:layout_marginTop="8dp"
         android:text="@string/child_given_consent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/activity_selselect_consent_title" />
+        app:layout_constraintTop_toBottomOf="@+id/activity_selselect_consent_title"
+        android:layout_marginLeft="16dp" />
 
 
     <ru.dimorinny.floatingtextbutton.FloatingTextButton
@@ -58,14 +67,11 @@
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
         app:floating_background_color="@color/accent"
-        app:floating_left_icon="@drawable/ic_check_white_24dp"
+        app:floating_left_icon="@drawable/ic_done_white_24dp"
         app:floating_title="@string/start_selection"
         app:floating_title_color="@android:color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
-
-
-
 
 </android.support.constraint.ConstraintLayout>

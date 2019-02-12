@@ -15,7 +15,8 @@
         android:textColor="@android:color/black"
         android:textSize="14sp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginLeft="8dp" />
 
     <ImageView
         android:id="@+id/item_schedule_secondary_menu_imageview"
@@ -26,8 +27,8 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/ic_more_vert_black_24dp"
-        android:src="@drawable/ic_more_vert_black_24dp"
-        android:contentDescription="@string/edit" />
+        android:contentDescription="@string/edit"
+        android:layout_marginRight="8dp" />
 
 
 </android.support.constraint.ConstraintLayout>

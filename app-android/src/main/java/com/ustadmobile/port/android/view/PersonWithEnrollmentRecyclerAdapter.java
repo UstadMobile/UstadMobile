@@ -13,6 +13,7 @@ import android.support.constraint.ConstraintSet;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.util.DiffUtil;
+import android.support.v7.widget.AppCompatImageView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -258,10 +259,13 @@ public class PersonWithEnrollmentRecyclerAdapter
         //NAME:
         String firstName = "";
         String lastName = "";
-        if(personWithEnrollment.getFirstNames() != null){
+        if(personWithEnrollment == null){
+            return;
+        }
+        if(personWithEnrollment != null && personWithEnrollment.getFirstNames() != null){
             firstName = personWithEnrollment.getFirstNames();
         }
-        if(personWithEnrollment.getLastName() != null){
+        if(personWithEnrollment != null && personWithEnrollment.getLastName() != null){
             lastName = personWithEnrollment.getLastName();
         }
 
@@ -470,10 +474,6 @@ public class PersonWithEnrollmentRecyclerAdapter
 
     }
 
-    private void addClassHeading(ConstraintLayout cl, long uid){
-
-    }
-
     private void setPictureOnView(String imagePath, ImageView theImage) {
 
         Uri imageUri = Uri.fromFile(new File(imagePath));
@@ -620,7 +620,7 @@ public class PersonWithEnrollmentRecyclerAdapter
         clazzMemberRoleHeadingTextView.setLeft(8);
 
         int addIconResId = getAddPersonIconRes();
-        ImageView addPersonImageView = new ImageView(theContext);
+        AppCompatImageView addPersonImageView = new AppCompatImageView(theContext);
         addPersonImageView.setImageResource(addIconResId);
 
         TextView addClazzMemberTextView = new TextView(theContext);

@@ -17,7 +17,7 @@
         android:spinnerMode="dialog"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/fragment_add_schedule_dialog_day_heading"></Spinner>
+        app:layout_constraintTop_toBottomOf="@+id/fragment_add_schedule_dialog_day_heading" />
 
     <TextView
         android:id="@+id/fragment_add_schedule_dialog_schedule_heading"
@@ -40,7 +40,7 @@
         android:spinnerMode="dialog"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/fragment_add_schedule_dialog_schedule_heading"></Spinner>
+        app:layout_constraintTop_toBottomOf="@+id/fragment_add_schedule_dialog_schedule_heading" />
 
     <TextView
         android:id="@+id/fragment_add_schedule_dialog_day_heading"
@@ -50,7 +50,8 @@
         android:layout_marginTop="16dp"
         android:text="@string/day"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/fragment_add_schedule_dialog_schedule_spinner" />
+        app:layout_constraintTop_toBottomOf="@+id/fragment_add_schedule_dialog_schedule_spinner"
+        android:layout_marginLeft="16dp" />
 
     <TextView
         android:id="@+id/fragment_add_schedule_dialog_from_heading"
@@ -60,7 +61,8 @@
         android:layout_marginTop="16dp"
         android:text="@string/fromC"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/fragment_add_schedule_dialog_day_spinner" />
+        app:layout_constraintTop_toBottomOf="@+id/fragment_add_schedule_dialog_day_spinner"
+        android:layout_marginLeft="16dp" />
 
     <TextView
         android:id="@+id/fragment_add_schedule_dialog_to_heading"
@@ -70,7 +72,8 @@
         android:layout_marginTop="16dp"
         android:text="@string/toC"
         app:layout_constraintStart_toEndOf="@+id/fragment_add_schedule_dialog_from_heading"
-        app:layout_constraintTop_toBottomOf="@+id/fragment_add_schedule_dialog_day_spinner" />
+        app:layout_constraintTop_toBottomOf="@+id/fragment_add_schedule_dialog_day_spinner"
+        android:layout_marginLeft="124dp" />
 
 
     <EditText
@@ -80,7 +83,8 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/fragment_add_schedule_dialog_from_heading" />
+        app:layout_constraintTop_toBottomOf="@+id/fragment_add_schedule_dialog_from_heading"
+        android:layout_marginLeft="16dp" />
 
     <EditText
         android:id="@+id/fragment_add_schedule_dialog_to_time"

@@ -6,13 +6,21 @@
     tools:context="com.ustadmobile.port.android.view.SELQuestionEditActivity">
 
 
-    <android.support.design.widget.AppBarLayout android:id="@+id/activity_sel_question_edit_appbar"
-        android:layout_width="match_parent" android:layout_height="wrap_content"
-        android:elevation="4dp" android:theme="@style/ThemeOverlay.AppCompat.ActionBar">
+    <android.support.design.widget.AppBarLayout
+        android:id="@+id/activity_sel_question_edit_appbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:elevation="4dp"
+        android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
-        <android.support.v7.widget.Toolbar android:id="@+id/activity_sel_question_edit_toolbar"
-            android:layout_width="match_parent" android:layout_height="?android:attr/actionBarSize"
-            android:background="@color/primary" app:layout_scrollFlags="scroll|enterAlways" />
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/activity_sel_question_edit_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?android:attr/actionBarSize"
+            android:background="@color/primary"
+            app:layout_scrollFlags="scroll|enterAlways" />
 
     </android.support.design.widget.AppBarLayout>
 
@@ -54,7 +62,8 @@
         android:layout_marginTop="8dp"
         android:text="@string/sel_question_description"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/activity_sel_question_edit_question" />
+        app:layout_constraintTop_toBottomOf="@+id/activity_sel_question_edit_question"
+        android:layout_marginLeft="16dp" />
 
     <CheckBox
         android:id="@+id/activity_sel_question_edit_assign_to_all_classes"
@@ -65,7 +74,8 @@
         android:checked="true"
         android:text="@string/assign_to_all_classes"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/activity_sel_question_edit_question_description" />
+        app:layout_constraintTop_toBottomOf="@+id/activity_sel_question_edit_question_description"
+        android:layout_marginLeft="16dp" />
 
     <CheckBox
         android:id="@+id/activity_sel_question_edit_allow_multiple_nominations"
@@ -76,7 +86,8 @@
         android:layout_marginTop="16dp"
         android:text="@string/allow_multiple_nominations"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/activity_sel_question_edit_assign_to_all_classes" />
+        app:layout_constraintTop_toBottomOf="@+id/activity_sel_question_edit_assign_to_all_classes"
+        android:layout_marginLeft="16dp" />
 
 
 

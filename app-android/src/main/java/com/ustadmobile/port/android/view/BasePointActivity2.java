@@ -12,6 +12,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.content.res.AppCompatResources;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -251,10 +252,14 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
         MenuItem settingsMenuItem = menu.findItem(R.id.menu_settings_gear);
         MenuItem logoutMenuItem = menu.findItem(R.id.menu_basepoint_logout);
 
-        Drawable shareMenuIcon = getResources().getDrawable(R.drawable.ic_share_white_24dp);
-        Drawable bulkUploadMenuIcon = getResources().getDrawable(R.drawable.ic_file_upload_white_24dp);
-        Drawable settingsMenuIcon = getResources().getDrawable(R.drawable.ic_settings_white_24dp);
-        Drawable logoutMenuIcon = getResources().getDrawable(R.drawable.ic_dropout_bcd4_24dp);
+        Drawable shareMenuIcon = AppCompatResources.getDrawable(getApplicationContext(),
+                R.drawable.ic_share_white_24dp);
+        Drawable bulkUploadMenuIcon =
+                AppCompatResources.getDrawable(getApplicationContext(),R.drawable.ic_file_upload_white_24dp);
+        Drawable settingsMenuIcon =
+                AppCompatResources.getDrawable(getApplicationContext(),R.drawable.ic_settings_white_24dp);
+        Drawable logoutMenuIcon =
+                AppCompatResources.getDrawable(getApplicationContext(),R.drawable.ic_dropout_bcd4_24dp);
 
         shareMenuIcon.setColorFilter(getResources().getColor(R.color.icons), PorterDuff.Mode.SRC_IN);
         bulkUploadMenuIcon.setColorFilter(getResources().getColor(R.color.icons), PorterDuff.Mode.SRC_IN);

@@ -504,6 +504,7 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
     }
 
     public void checkPerson(Clazz thisClazz, BulkUploadLine bulkLine, int role){
+        String personUid = bulkLine.person_id;
         String teacherUsername = bulkLine.teacher_username;
         String teacherFirstName = bulkLine.teacher_first_name;
         String teacherLastName = bulkLine.teacher_last_name;
@@ -531,7 +532,9 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
         if(role == ClazzMember.ROLE_TEACHER){
             username = teacherUsername;
         }else{
-            username = studentUsername;
+            //username = studentUsername;
+            //FIX: Considering Person id is unique in the sheet.
+            username = personUid;
         }
 
         repository.getPersonDao().findByUsernameAsync(username, new UmCallback<Person>() {
@@ -546,9 +549,6 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
                     createEntityRoleForTeacherAndClazz(role,thisClazz, thePerson.getPersonUid(),
                             bulkLine);
 
-
-
-
                 }else{
                     //Create new person
                     Person person = new Person();
@@ -557,13 +557,13 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
                         person.setFirstNames(teacherFirstName);
                         person.setLastName(teacherLastName);
                         person.setPhoneNum(teacherPhoneNo);
-                        person.setUsername(teacherUsername);
+                        person.setUsername(username);
 
                         //TODO: Set teacher id
                         //TODO: Set teacher authentication:
                         PersonAuth personAuth = new PersonAuth();
                     }else{
-                        person.setUsername(studentUsername);
+                        person.setUsername(username);
                         person.setFirstNames(stuentFirstName);
                         person.setLastName(studentLastName);
                         person.setMotherName(studentMotherName);

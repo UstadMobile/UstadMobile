@@ -19,7 +19,8 @@
             android:textColor="@color/text_primary"
             android:textSize="16sp"
             app:layout_constraintStart_toEndOf="@+id/imageView4"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginLeft="48dp" />
 
         <ImageView
             android:id="@+id/item_clazzstudentlist_attendance_trafficlight"
@@ -29,7 +30,8 @@
             android:layout_marginTop="12dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/item_clazzstudentlist_student_title"
-            android:src="@drawable/ic_lens_black_24dp" />
+            app:srcCompat="@drawable/ic_lens_black_24dp"
+            android:layout_marginLeft="58dp" />
 
         <TextView
             android:id="@+id/item_clazzstudentlist_student_attendance_percentage"
@@ -42,7 +44,8 @@
             android:textSize="12sp"
             app:layout_constraintBottom_toTopOf="@+id/item_clazzstudentlist_horizontal_divider"
             app:layout_constraintStart_toEndOf="@+id/item_clazzstudentlist_attendance_trafficlight"
-            app:layout_constraintTop_toBottomOf="@+id/item_clazzstudentlist_student_title" />
+            app:layout_constraintTop_toBottomOf="@+id/item_clazzstudentlist_student_title"
+            android:layout_marginLeft="74dp" />
 
         <View
             android:id="@+id/item_clazzstudentlist_horizontal_divider"
@@ -62,6 +65,7 @@
             android:layout_marginTop="16dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            android:src="@drawable/ic_person_black_new_24dp" />
+            app:srcCompat="@drawable/ic_person_black_new_24dp"
+            android:layout_marginLeft="16dp" />
 
 </android.support.constraint.ConstraintLayout>

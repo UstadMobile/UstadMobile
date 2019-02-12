@@ -19,6 +19,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v7.util.DiffUtil;
+import android.support.v7.widget.AppCompatImageView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -238,7 +239,10 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
                     //Add the icon
                     int addIconResId = getResourceId(ADD_PERSON_ICON,
                             "drawable", getPackageName());
-                    ImageView addIcon = new ImageView(this);
+                    //ImageView addIcon = new ImageView(this);
+                    AppCompatImageView addIcon = new AppCompatImageView(this);
+
+
                     addIcon.setImageResource(addIconResId);
                     addIcon.setPadding(DEFAULT_PADDING,0,DEFAULT_TEXT_PADDING_RIGHT,0);
                     addPersonToClazzHL.addView(addIcon);
@@ -278,7 +282,8 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
 
                 //Add the icon
                 int iconResId = getResourceId(iconName, "drawable", getPackageName());
-                ImageView icon = new ImageView(this);
+                //ImageView icon = new ImageView(this);
+                AppCompatImageView icon = new AppCompatImageView(this);
                 if(iconName.equals(ADD_PERSON_ICON)){
                     icon.setImageAlpha(0);
                 }
@@ -513,7 +518,6 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
         runOnUiThread(() -> {
             Uri profileImage = Uri.fromFile(new File(imagePath));
 
-            //Picasso.with(getApplicationContext()).load(profileImage).into(personEditImage);
             Picasso.get().load(profileImage).into(personEditImage);
         });
 

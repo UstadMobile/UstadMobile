@@ -110,7 +110,6 @@ public class PeopleBlobListRecyclerAdapter extends
     private void updateImageOnView(String imagePath, ImageView personImageView){
 
         File profilePic = new File(imagePath);
-        //Picasso.with(theContext)
         Picasso.get()
                 .load(profilePic)
                 .transform(new CropSquareTransformation())

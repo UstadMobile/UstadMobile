@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -11,7 +10,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:elevation="4dp"
-        android:theme="@style/ThemeOverlay.AppCompat.ActionBar">
+        android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
         <android.support.v7.widget.Toolbar
             android:id="@+id/activity_clazz_detail_enroll_student_toolbar"
@@ -30,13 +31,14 @@
         android:layout_marginBottom="16dp"
         android:layout_marginTop="16dp"
         android:backgroundTint="@android:color/transparent"
-        android:drawableLeft="@drawable/ic_group_add_black_24dp"
+        android:drawableLeft="@drawable/ic_group_add"
         android:drawablePadding="@dimen/dimen_16dp"
         android:text="@string/enroll_new_student"
         android:textAlignment="textStart"
         app:layout_constraintBottom_toTopOf="@+id/activity_clazz_detail_enroll_student_recycler_view"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/activity_clazz_detail_enroll_student_appbar" />
+        app:layout_constraintTop_toBottomOf="@+id/activity_clazz_detail_enroll_student_appbar"
+        android:gravity="start" />
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/activity_clazz_detail_enroll_student_recycler_view"
@@ -56,7 +58,7 @@
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
         app:floating_background_color="@color/accent"
-        app:floating_left_icon="@drawable/ic_check_white_24dp"
+        app:floating_left_icon="@drawable/ic_done_white_24dp"
         app:floating_title="@string/done"
         app:floating_title_color="@android:color/white"
         app:layout_constraintBottom_toBottomOf="parent"

@@ -31,7 +31,8 @@
             android:scrollbars="vertical"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/fragment_sel_answer_list_title" />
+            app:layout_constraintTop_toBottomOf="@+id/fragment_sel_answer_list_title"
+            android:layout_marginRight="8dp" />
 
 
     </android.support.constraint.ConstraintLayout>

@@ -5,6 +5,8 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.text.TextUtilsCompat;
 import android.support.v4.view.ViewCompat;
+import android.support.v7.content.res.AppCompatResources;
+import android.support.v7.widget.AppCompatImageButton;
 import android.support.v7.widget.AppCompatSpinner;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
@@ -70,7 +72,7 @@ public class ClazzActivityEditActivity extends UstadBaseActivity implements Claz
     TextView dateHeading;
 
     //Back and Forward date
-    ImageView backDate, forwardDate;
+    AppCompatImageButton backDate, forwardDate;
 
     //FAB
     FloatingTextButton fab;
@@ -125,8 +127,6 @@ public class ClazzActivityEditActivity extends UstadBaseActivity implements Claz
         dateHeading = findViewById(R.id.activity_class_activity_date_heading3);
         backDate = findViewById(R.id.activity_class_activity_date_go_back3);
         forwardDate = findViewById(R.id.activity_class_activity_date_go_forward3);
-        backDate = findViewById(R.id.activity_class_activity_date_go_back3);
-        forwardDate = findViewById(R.id.activity_class_activity_date_go_forward3);
         fab = findViewById(R.id.activity_clazz_activity_edit_fab);
         trueFalseSpinner = findViewById(R.id.activity_clazz_activity_edit_change_measurement_spinner);
         activityChangeSpinner = findViewById(R.id.activity_clazz_activity_edit_change_spinner);
@@ -140,8 +140,10 @@ public class ClazzActivityEditActivity extends UstadBaseActivity implements Claz
         int isLeftToRight = TextUtilsCompat.getLayoutDirectionFromLocale(Locale.getDefault());
         switch (isLeftToRight){
             case ViewCompat.LAYOUT_DIRECTION_RTL:
-                backDate.setImageDrawable(getDrawable(R.drawable.ic_chevron_right_black_24dp));
-                forwardDate.setImageDrawable(getDrawable(R.drawable.ic_chevron_left_black_24dp));
+                backDate.setImageDrawable(AppCompatResources.getDrawable(
+                        getApplicationContext(), R.drawable.ic_chevron_right_black_24dp));
+                forwardDate.setImageDrawable(AppCompatResources.getDrawable(
+                        getApplicationContext(), R.drawable.ic_chevron_left_black_24dp));
         }
 
         //FAB and its listener

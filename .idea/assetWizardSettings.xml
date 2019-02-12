@@ -56,9 +56,11 @@
                                   </option>
                                   <option name="values">
                                     <map>
-                                      <entry key="outputName" value="accent_dot" />
+                                      <entry key="assetType" value="IMAGE" />
+                                      <entry key="imageAsset" value="C:\Users\lenovo\UstadMobile\UstadMobile\app-android\src\main\res\drawable\ic_file_upload_black_24dp.xml" />
+                                      <entry key="outputName" value="ic_upload" />
                                       <entry key="theme" value="CUSTOM" />
-                                      <entry key="themeColor" value="fdc82f" />
+                                      <entry key="themeColor" value="000000" />
                                     </map>
                                   </option>
                                 </PersistentState>

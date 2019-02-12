@@ -7,7 +7,10 @@ import android.arch.paging.PagedList;
 import android.os.Bundle;
 import android.support.v4.text.TextUtilsCompat;
 import android.support.v4.view.ViewCompat;
+import android.support.v7.content.res.AppCompatResources;
 import android.support.v7.util.DiffUtil;
+import android.support.v7.widget.AppCompatImageButton;
+import android.support.v7.widget.AppCompatImageView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -53,7 +56,7 @@ public class ClazzLogDetailActivity extends UstadBaseActivity
     public long clazzUid;
     public long logDate;
     private TextView dateHeading;
-    private ImageView backDate, forwardDate;
+    private AppCompatImageButton backDate, forwardDate;
     private Button markAllPresent, markAllAbsent;
 
     @Override
@@ -130,8 +133,10 @@ public class ClazzLogDetailActivity extends UstadBaseActivity
         int isLeftToRight = TextUtilsCompat.getLayoutDirectionFromLocale(Locale.getDefault());
         switch (isLeftToRight){
             case ViewCompat.LAYOUT_DIRECTION_RTL:
-                backDate.setImageDrawable(getDrawable(R.drawable.ic_chevron_right_black_24dp));
-                forwardDate.setImageDrawable(getDrawable(R.drawable.ic_chevron_left_black_24dp));
+                backDate.setImageDrawable(AppCompatResources.getDrawable(
+                        getApplicationContext(), R.drawable.ic_chevron_right_black_24dp));
+                forwardDate.setImageDrawable(AppCompatResources.getDrawable(getApplication(),
+                        R.drawable.ic_chevron_left_black_24dp));
         }
 
         //FAB

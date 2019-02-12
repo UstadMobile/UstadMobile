@@ -24,20 +24,22 @@
         android:maxLines="2"
         app:layout_constraintEnd_toStartOf="@+id/item_studentlist_student_simple_student_checkbox"
         app:layout_constraintStart_toEndOf="@+id/item_studentlist_student_simple_student_image"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginLeft="16dp" />
 
-    <ImageView
+    <android.support.v7.widget.AppCompatImageView
         android:id="@+id/item_studentlist_student_simple_attendance_trafficlight"
         android:layout_width="12dp"
         android:layout_height="12dp"
         android:layout_marginStart="58dp"
         android:layout_marginTop="12dp"
         android:layout_marginBottom="8dp"
-        android:src="@drawable/ic_lens_black_24dp"
+        app:srcCompat="@drawable/ic_lens_black_24dp"
         android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="@+id/item_studentlist_student_simple_attendance_percentage"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/item_studentlist_student_simple_student_title" />
+        app:layout_constraintTop_toBottomOf="@+id/item_studentlist_student_simple_student_title"
+        android:layout_marginLeft="58dp" />
 
     <TextView
         android:id="@+id/item_studentlist_student_simple_attendance_percentage"
@@ -50,20 +52,22 @@
         android:textSize="12sp"
         android:visibility="invisible"
         app:layout_constraintStart_toEndOf="@+id/item_studentlist_student_simple_attendance_trafficlight"
-        app:layout_constraintTop_toBottomOf="@+id/item_studentlist_student_simple_student_title" />
+        app:layout_constraintTop_toBottomOf="@+id/item_studentlist_student_simple_student_title"
+        android:layout_marginLeft="4dp" />
 
-    <ImageView
+    <android.support.v7.widget.AppCompatImageView
         android:id="@+id/item_studentlist_student_simple_student_image"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
-        android:src="@drawable/ic_person_black_new_24dp"
+        app:srcCompat="@drawable/ic_person_black_new_24dp"
         app:layout_constraintBottom_toBottomOf="@+id/item_studentlist_student_simple_student_title"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginLeft="16dp" />
 
-    <CheckBox
+    <android.support.v7.widget.AppCompatCheckBox
         android:id="@+id/item_studentlist_student_simple_student_checkbox"
         android:visibility="invisible"
         android:layout_width="wrap_content"
@@ -76,7 +80,8 @@
         android:text="@string/enroll_in_class"
         app:layout_constraintBottom_toBottomOf="@+id/item_studentlist_student_simple_horizontal_divider"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginRight="8dp" />
 
     <!--Horizontal Line -->
     <View
@@ -88,19 +93,21 @@
         android:background="?android:attr/listDivider"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/item_studentlist_student_simple_attendance_percentage" />
+        app:layout_constraintTop_toBottomOf="@+id/item_studentlist_student_simple_attendance_percentage"
+        android:layout_marginRight="8dp" />
 
-    <ImageView
+    <android.support.v7.widget.AppCompatImageView
         android:id="@+id/item_studentlist_student_simple_call_iv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="24dp"
         android:layout_marginBottom="8dp"
-        android:src="@drawable/ic_phone_forwarded_bcd4_24dp"
+        app:srcCompat="@drawable/ic_phone_forwarded_bcd4_24dp"
         android:tint="@color/primary_dark"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginRight="24dp" />
 
 </android.support.constraint.ConstraintLayout>

@@ -58,7 +58,8 @@
                 android:background="@android:color/transparent"
                 android:text="@string/update_picture"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent"
+                android:layout_marginRight="8dp" />
 
             <LinearLayout
                 android:id="@+id/activity_person_edit_fields_linear_layout"

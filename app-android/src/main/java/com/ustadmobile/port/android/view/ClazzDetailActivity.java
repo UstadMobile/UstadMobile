@@ -8,6 +8,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v7.content.res.AppCompatResources;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -128,7 +129,8 @@ public class ClazzDetailActivity extends UstadBaseActivity implements
         inflater.inflate(R.menu.menu_clazzdetail, menu);
 
         MenuItem settingsGearMenuItem = menu.findItem(R.id.menu_clazzdetail_gear);
-        Drawable gearIcon = getResources().getDrawable(R.drawable.ic_settings_white_24dp);
+        Drawable gearIcon =
+                AppCompatResources.getDrawable(getApplicationContext(), R.drawable.ic_settings_white_24dp);
         gearIcon.setColorFilter(getResources().getColor(R.color.icons), PorterDuff.Mode.SRC_IN);
         settingsGearMenuItem.setIcon(gearIcon);
 

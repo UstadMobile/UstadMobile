@@ -16,7 +16,8 @@
         android:scrollbars="vertical"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_alignParentLeft="true" />
 
     <ru.dimorinny.floatingtextbutton.FloatingTextButton
         android:id="@+id/fragment_people_list_fab"
@@ -30,12 +31,15 @@
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="8dp"
         app:floating_background_color="@color/accent"
-        app:floating_left_icon="@drawable/ic_add_white_trans_24dp"
         app:floating_title="@string/add_person"
+        app:floating_left_icon="@drawable/fab_add"
         app:floating_title_color="@android:color/white"
         app:layout_constraintBottom_toBottomOf="@+id/fragment_people_list_recyclerview"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.502"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_alignParentLeft="true" />
+
+    <!--app:floating_left_icon="@drawable/ic_add_white_trans_24dp"-->
 
 </android.support.constraint.ConstraintLayout>

@@ -31,18 +31,22 @@
                     android:layout_marginStart="8dp"
                     android:layout_marginTop="8dp"
                     android:layout_marginBottom="8dp"
-                    android:src="@drawable/ic_assignment_turned_in_grey_24dp"
+                    app:srcCompat="@drawable/ic_assignment_turned_in_grey_24dp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
-                    android:contentDescription="@string/attendance_report" />
+                    android:contentDescription="@string/attendance_report"
+                    android:layout_marginLeft="8dp" />
 
                 <com.github.mikephil.charting.charts.HorizontalBarChart
                     android:id="@+id/fragment_clazz_log_list_bar_chart"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="32dp"
-                    app:layout_constraintStart_toEndOf="@+id/fragment_clazz_log_list_bar_attendance_image" />
+                    android:layout_marginLeft="32dp"
+                    android:layout_marginTop="8dp"
+                    app:layout_constraintStart_toEndOf="@+id/fragment_clazz_log_list_bar_attendance_image"
+                    app:layout_constraintTop_toTopOf="parent" />
 
             </android.support.constraint.ConstraintLayout>
 
@@ -81,7 +85,8 @@
                     android:textSize="8sp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/fragment_clazz_log_list_bar_explaination_text_1" />
+                    app:layout_constraintTop_toBottomOf="@+id/fragment_clazz_log_list_bar_explaination_text_1"
+                    android:layout_marginRight="8dp" />
 
                 <TextView
                     android:id="@+id/fragment_clazz_log_list_bar_explaination_text_3"
@@ -95,7 +100,8 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="0.0"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/fragment_clazz_log_list_bar_explaination_text_2" />
+                    app:layout_constraintTop_toBottomOf="@+id/fragment_clazz_log_list_bar_explaination_text_2"
+                    android:layout_marginRight="8dp" />
 
             </android.support.constraint.ConstraintLayout>
         </LinearLayout>
@@ -109,7 +115,8 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/fragment_clazz_log_list_bar_ll" />
+        app:layout_constraintTop_toBottomOf="@+id/fragment_clazz_log_list_bar_ll"
+        android:layout_marginLeft="8dp" />
 
     <LinearLayout
         android:id="@+id/fragment_clazz_log_list_line_chart_selector_ll"

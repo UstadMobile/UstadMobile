@@ -9,7 +9,12 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.annotation.ColorRes;
+import android.support.annotation.DrawableRes;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.content.res.AppCompatResources;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -75,6 +80,13 @@ public class SelectClazzesDialogFragment extends UstadDialogFragment implements
     }
 
 
+    public Drawable getTintedDrawable(Drawable drawable, int color) {
+        drawable = DrawableCompat.wrap(drawable);
+        int tintColor = ContextCompat.getColor(getContext(), color);
+        DrawableCompat.setTint(drawable, tintColor);
+        return drawable;
+    }
+
     @android.support.annotation.NonNull
     @NonNull
     @Override
@@ -94,10 +106,10 @@ public class SelectClazzesDialogFragment extends UstadDialogFragment implements
         toolbar = rootView.findViewById(R.id.fragment_select_clazzes_dialog_toolbar);
         toolbar.setTitle(R.string.select_classes);
 
-        //toolbar.setNavigationIcon(R.drawable.ic_arrow_back_white_24dp);
+        Drawable upIcon = AppCompatResources.getDrawable(getContext(),
+                R.drawable.ic_arrow_back_white_24dp);
 
-        Drawable upIcon = getResources().getDrawable(R.drawable.ic_arrow_back_white_24dp);
-        upIcon.setTint(getResources().getColor(R.color.icons));
+        upIcon = getTintedDrawable(upIcon, R.color.icons);
 
         toolbar.setNavigationIcon(upIcon);
         toolbar.setNavigationOnClickListener(v -> dialog.dismiss());
@@ -126,6 +138,15 @@ public class SelectClazzesDialogFragment extends UstadDialogFragment implements
                 .create();
         return dialog;
 
+    }
+
+
+    public static Drawable getTintedDrawable(@NonNull final Context context,
+                                             @DrawableRes int drawableRes, @ColorRes int colorRes) {
+        Drawable d = ContextCompat.getDrawable(context, drawableRes);
+        d = DrawableCompat.wrap(d);
+        DrawableCompat.setTint(d.mutate(), ContextCompat.getColor(context, colorRes));
+        return d;
     }
 
     private void initView(){

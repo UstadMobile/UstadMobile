@@ -70,7 +70,8 @@ public class SELAnswerListFragment extends UstadBaseFragment implements SELAnswe
 
     @Override
     public void setSELAnswerListProvider(UmProvider<Person> selAnswersProvider) {
-        // Specify the mAdapter
+        //TODO: Consider using PeopleWithEnrollmentAdapter instead and remove this adapter class
+        // Specify the mAdapte
         SimplePeopleListRecyclerAdapter recyclerAdapter = new SimplePeopleListRecyclerAdapter(
                 DIFF_CALLBACK, getContext(),this, mPresenter);
 
