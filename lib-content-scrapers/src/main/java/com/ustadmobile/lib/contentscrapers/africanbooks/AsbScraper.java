@@ -17,6 +17,7 @@ import com.ustadmobile.core.db.dao.LanguageVariantDao;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.LanguageList;
 import com.ustadmobile.lib.contentscrapers.ScraperConstants;
+import com.ustadmobile.lib.contentscrapers.ShrinkerUtil;
 import com.ustadmobile.lib.contentscrapers.UMLogUtil;
 import com.ustadmobile.lib.db.entities.ContentCategory;
 import com.ustadmobile.lib.db.entities.ContentCategorySchema;
@@ -208,7 +209,7 @@ public class AsbScraper {
                 driver.get(makeUrl.toString());
                 ContentScraperUtil.waitForJSandJQueryToLoad(waitDriver);
 
-                if(bookObj.lang.contains(",")){
+                if (bookObj.lang.contains(",")) {
                     bookObj.lang = bookObj.lang.split(",")[0];
                 }
 
@@ -225,12 +226,12 @@ public class AsbScraper {
 
                 LanguageVariant languageVariant = null;
                 if (!variant.isEmpty()) {
-                    languageVariant = ContentScraperUtil. insertOrUpdateLanguageVariant(variantDao, variant, language);
+                    languageVariant = ContentScraperUtil.insertOrUpdateLanguageVariant(variantDao, variant, language);
                 }
                 String sourceUrl = epubUrl.getPath() + ((epubUrl.getQuery() != null && !epubUrl.getQuery().isEmpty()) ? "?" + epubUrl.getQuery() : EMPTY_STRING);
 
                 ContentEntry childEntry = ContentScraperUtil.createOrUpdateContentEntry(sourceUrl, bookObj.title, sourceUrl, AFRICAN_STORY_BOOKS, ContentEntry.LICENSE_TYPE_CC_BY,
-                        language != null ? language.getLangUid() : 0L, languageVariant  == null ? null : languageVariant.getLangVariantUid(), bookObj.summary, true, bookObj.author, getCoverUrl(bookId),
+                        language != null ? language.getLangUid() : 0L, languageVariant == null ? null : languageVariant.getLangVariantUid(), bookObj.summary, true, bookObj.author, getCoverUrl(bookId),
                         EMPTY_STRING, EMPTY_STRING, contentEntryDao);
 
                 Document readerDoc = Jsoup.connect(generateReaderUrl(africanBooksUrl, bookId)).get();
@@ -440,15 +441,15 @@ public class AsbScraper {
      * is not specified on the EPUB provided by African Story Book so we need to add that.
      *
      * @param booklistEntry
-     * @param path
+     * @param epubFile
      */
-    public void updateAsbEpub(AfricanBooksResponse booklistEntry, File path) {
+    public void updateAsbEpub(AfricanBooksResponse booklistEntry, File epubFile) {
         FileSystem zipFs = null;
 
         BufferedReader opfReader = null;
         try {
 
-            zipFs = FileSystems.newFileSystem(path.toPath(), ClassLoader.getSystemClassLoader());
+            zipFs = FileSystems.newFileSystem(epubFile.toPath(), ClassLoader.getSystemClassLoader());
             opfReader = new BufferedReader(
                     new InputStreamReader(Files.newInputStream(zipFs.getPath("content.opf")), "UTF-8"));
             StringBuffer opfModBuffer = new StringBuffer();
@@ -484,6 +485,8 @@ public class AsbScraper {
             //replace the epub.css to increase font size
             Path epubCssResPath = Paths.get(getClass().getResource("/com/ustadmobile/lib/contentscrapers/epub.css").toURI());
             Files.copy(epubCssResPath, zipFs.getPath("epub.css"), StandardCopyOption.REPLACE_EXISTING);
+
+            ShrinkerUtil.shrinkEpub(epubFile);
 
         } catch (Exception e) {
             UMLogUtil.logError(ExceptionUtils.getStackTrace(e));

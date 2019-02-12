@@ -154,6 +154,7 @@ public class ScraperConstants {
     public static final String MIMETYPE_JSON = "application/json";
     public static final String MIMETYPE_SVG = "image/svg+xml";
     public static final String MIMETYPE_JPG = "image/jpg";
+    public static final String MIMETYPE_WEBP = "image/webp";
     public static final String MIMETYPE_CSS = "text/css";
     public static final String MIMETYPE_MP4 = "video/mp4";
     public static final String MIMETYPE_WEB_CHUNK = "application/webchunk+zip";
@@ -164,6 +165,7 @@ public class ScraperConstants {
     public static final String EPUB_EXT = ".epub";
     public static final String SVG_EXT = ".svg";
     public static final String JSON_EXT = ".json";
+    public static final String WEBP_EXT = ".webp";
 
     public static final String ARABIC_LANG_CODE = "ar";
     public static final String ENGLISH_LANG_CODE = "en";

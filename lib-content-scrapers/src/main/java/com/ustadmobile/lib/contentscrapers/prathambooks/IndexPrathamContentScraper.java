@@ -12,6 +12,7 @@ import com.ustadmobile.core.db.dao.LanguageDao;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.LanguageList;
 import com.ustadmobile.lib.contentscrapers.ScraperConstants;
+import com.ustadmobile.lib.contentscrapers.ShrinkerUtil;
 import com.ustadmobile.lib.contentscrapers.UMLogUtil;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.Language;
@@ -171,6 +172,7 @@ public class IndexPrathamContentScraper {
                 }
                 try {
                     FileUtils.copyInputStreamToFile(connection.getInputStream(), content);
+                    ShrinkerUtil.shrinkEpub(content);
                 } catch (IOException io) {
                     cookie = loginPratham();
                     retry++;

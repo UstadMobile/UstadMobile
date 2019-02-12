@@ -286,12 +286,13 @@ public class ContentScraperUtil {
      */
     public static void zipDirectory(File directoryToZip, String filename, File locationToSave) throws IOException {
 
-        File zippedFile = new File(locationToSave, filename + ZIP_EXT);
+        File zippedFile = new File(locationToSave, filename);
         try (ZipOutputStream out = new ZipOutputStream(Files.newOutputStream(zippedFile.toPath()), StandardCharsets.UTF_8)) {
             Path sourceDirPath = Paths.get(directoryToZip.toURI());
             Files.walk(sourceDirPath).filter(path -> !Files.isDirectory(path))
                     .forEach(path -> {
-                        ZipEntry zipEntry = new ZipEntry(sourceDirPath.relativize(path).toString().replaceAll(Pattern.quote("\\"), "/"));
+                        ZipEntry zipEntry = new ZipEntry(sourceDirPath.relativize(path).toString()
+                                .replaceAll(Pattern.quote("\\"), "/"));
                         try {
                             out.putNextEntry(zipEntry);
                             out.write(Files.readAllBytes(path));
