@@ -14,6 +14,9 @@ apply plugin: 'java-library'
 apply plugin: 'com.github.johnrengelman.shadow'
 apply plugin: "jacoco"
 
+ext.localProperties = new Properties()
+ext.localProperties.load(new FileInputStream(rootProject.file("local.properties")))
+
 task scrapeContent(type: JavaExec) {
     classpath sourceSets.main.runtimeClasspath
     if (project.hasProperty("edraakUrl") && project.hasProperty("edraakDir")) {
@@ -107,7 +110,7 @@ task generateScraperBuildConfig(type: de.fuerstenau.gradle.buildconfig.GenerateB
 }
 compileJava.dependsOn(generateScraperBuildConfig)
 
-if (!rootProject.ext.buildConfigProperties.containsKey("scraper.chrome_driver_path")) {
+if (!ext.localProperties.containsKey("scraper.chrome_driver_path")) {
     throw new GradleException("Content Scraping requires Selenium which needs a chrome driver to run." +
             " You must define a path to the chrome driver in local.properties. " +
             "Please open the README file in lib-content-scrapers for further instructions")
