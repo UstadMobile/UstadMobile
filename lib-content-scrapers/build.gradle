@@ -131,7 +131,7 @@ dependencies {
     implementation "com.google.code.gson:gson:$version_gson"
     implementation project(":core")
     implementation project(":lib-database-entities")
-    testImplementation project(":app-javase")
+    implementation project(":app-javase")
     implementation "commons-io:commons-io:$version_commons_io"
     implementation "org.apache.commons:commons-lang3:$version_apache_commons_lang"
     implementation "org.seleniumhq.selenium:selenium-java:$version_selenium"

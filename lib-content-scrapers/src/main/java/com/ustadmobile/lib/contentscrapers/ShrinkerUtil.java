@@ -63,6 +63,7 @@ public class ShrinkerUtil {
 
             } catch (Exception e) {
                 UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
+                UMLogUtil.logError("Failed to shrink epub " + entryfile.getFilePath());
             }
         }
     }
