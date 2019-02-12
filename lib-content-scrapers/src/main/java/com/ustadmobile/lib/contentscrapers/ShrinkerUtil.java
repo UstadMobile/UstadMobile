@@ -27,6 +27,7 @@ import org.xmlpull.v1.XmlSerializer;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -91,7 +92,7 @@ public class ShrinkerUtil {
     }
 
 
-    private static boolean shrinkEpubFiles(File directory) {
+    private static boolean shrinkEpubFiles(File directory)  {
         FileInputStream opfFileInputStream = null;
         FileInputStream ocfFileInputStream = null;
         FileOutputStream opfFileOutputStream = null;
@@ -128,6 +129,7 @@ public class ShrinkerUtil {
                     File inputFile = new File(opfDir, oldHrefValue);
                     File outputFile = new File(opfDir, newHref);
                     replacedFiles.put(inputFile, outputFile);
+
 
                     convertImageToWebp(inputFile, outputFile);
 
@@ -238,7 +240,7 @@ public class ShrinkerUtil {
 
             for (File replacedFile : replacedFiles.keySet()) {
                 if (!replacedFile.delete()) {
-                    System.err.println("Could not delete: " + replacedFile);
+                    throw new IllegalStateException("Could not delete: " + replacedFile);
                 }
             }
             return true;
@@ -263,7 +265,10 @@ public class ShrinkerUtil {
      * @param src  file image path
      * @param dest webp file path
      */
-    public static void convertImageToWebp(File src, File dest) {
+    public static void convertImageToWebp(File src, File dest) throws IOException {
+        if(!src.exists()) {
+            throw new FileNotFoundException("convertImageToWebp: Source file: " + src.getAbsolutePath() + " does not exist");
+        }
 
         Runtime runTime = Runtime.getRuntime();
         try {
@@ -275,6 +280,12 @@ public class ShrinkerUtil {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+
+        if(!dest.exists()) {
+            throw new IOException("convertImaegToWebP: source existed, but output does not " +
+                    dest.getPath());
+        }
+
     }
 
 
