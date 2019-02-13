@@ -417,6 +417,6 @@ public class DownloadJobItemRunner implements Runnable, BleMessageResponseListen
     }
 
     private String mkLogPrefix() {
-        return "DownloadJob #" + downloadItem.getDjiUid() + ":";
+        return "DownloadJobItem #" + downloadItem.getDjiUid() + ":";
     }
 }

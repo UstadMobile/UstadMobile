@@ -110,7 +110,7 @@ public abstract class DownloadJobDao {
 
 
     @UmQuery("SELECT * From DownloadJob WHERE djStatus BETWEEN " + (JobStatus.PAUSED + 1) + " AND " +
-            JobStatus.RUNNING_MAX + " OR djStatus = " + JobStatus.COMPLETE + " ORDER BY timeCreated")
+            JobStatus.RUNNING_MAX + " ORDER BY timeCreated")
     public abstract UmLiveData<List<DownloadJob>> getActiveDownloadJobs();
 
     @UmQuery("SELECT count(*) > 0 From DownloadJob WHERE djStatus BETWEEN " + (JobStatus.PAUSED + 1) + " AND " +

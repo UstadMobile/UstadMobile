@@ -27,6 +27,7 @@ import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.lib.db.entities.DownloadJob;
+import com.ustadmobile.lib.db.entities.DownloadJobItem;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -245,10 +246,11 @@ public class DownloadNotificationService extends Service {
      * @param activeJobs list of all jobs being monitored
      */
     private void handleJobListChanged(List<DownloadJob> activeJobs){
-        if(activeJobs.isEmpty()){
-            stopForegroundService();
-            return;
-        }
+        new Thread(() -> {
+            //breakpoint to allow for checking status;
+            List<DownloadJobItem> allDownloadJobItems = umAppDatabase.getDownloadJobItemDao().findAll();
+            System.out.print(allDownloadJobItems.size());
+        }).start();
 
         List<Long> inactiveDownloadJobs = new ArrayList<>();
         for(Long knownDownloadId : knownNotifications.keySet()) {
@@ -266,7 +268,10 @@ public class DownloadNotificationService extends Service {
         }
 
         for(Long inactiveDownloadUid : inactiveDownloadJobs) {
-            cancelNotification(knownNotifications.get(inactiveDownloadUid).notificationId);
+            if(mNotificationManager != null){
+                mNotificationManager.cancel(knownNotifications.get(inactiveDownloadUid).notificationId);
+            }
+
             knownNotifications.remove(inactiveDownloadUid);
         }
 
@@ -325,6 +330,9 @@ public class DownloadNotificationService extends Service {
             }
         }
 
+        if(activeJobs.isEmpty()){
+            stopForegroundService();
+        }
     }
 
     /**
@@ -459,9 +467,7 @@ public class DownloadNotificationService extends Service {
      * @param notificationId notification id to be canceled.
      */
     private void cancelNotification(int notificationId){
-        if(mNotificationManager != null){
-            mNotificationManager.cancel(notificationId);
-        }
+
     }
 
 
