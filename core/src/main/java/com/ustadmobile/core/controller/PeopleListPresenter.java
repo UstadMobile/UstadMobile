@@ -71,6 +71,13 @@ public class PeopleListPresenter
         checkPermissions();
     }
 
+    public void updateProviderWithSearch(String searchValue){
+        String queryParam = "%" + searchValue + "%";
+        personWithEnrollmentUmProvider = repository.getPersonDao()
+                .findAllPeopleWithEnrollmentBySearch(queryParam);
+        setPeopleProviderToView();
+    }
+
     /**
      * Gets logged in person and observes it.
      */

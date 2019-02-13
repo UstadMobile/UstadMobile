@@ -85,9 +85,21 @@ public abstract class PersonDao implements SyncableDao<Person, PersonDao> {
             " (SELECT PersonPicture.personPictureUid FROM PersonPicture WHERE " +
             " PersonPicture.personPicturePersonUid = Person.personUid ORDER BY picTimestamp " +
             " DESC LIMIT 1) AS personPictureUid, " +
-            //" (0) AS personPictureUid, " +
             " (0) AS enrolled FROM Person WHERE Person.active = 1 ")
     public abstract UmProvider<PersonWithEnrollment> findAllPeopleWithEnrollment();
+
+
+    @UmQuery("SELECT Person.* , (0) AS clazzUid, " +
+            " (0) AS attendancePercentage, " +
+            " (0) AS clazzMemberRole, " +
+            " (SELECT PersonPicture.personPictureUid FROM PersonPicture WHERE " +
+            " PersonPicture.personPicturePersonUid = Person.personUid ORDER BY picTimestamp " +
+            " DESC LIMIT 1) AS personPictureUid, " +
+            " (0) AS enrolled FROM Person WHERE Person.active = 1 " +
+            " AND Person.firstNames like :searchQuery OR Person.lastName like :searchQuery")
+    public abstract UmProvider<PersonWithEnrollment> findAllPeopleWithEnrollmentBySearch(String searchQuery);
+
+
 
     protected static final String ENTITY_LEVEL_PERMISSION_CONDITION1 = " Person.personUid = :accountPersonUid OR" +
 

@@ -1,5 +1,7 @@
 package com.ustadmobile.port.android.view;
 
+import android.app.SearchManager;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
@@ -13,6 +15,7 @@ import android.support.v4.content.FileProvider;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.content.res.AppCompatResources;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -51,6 +54,13 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
     private Menu mOptionsMenu;
 
     private ClazzListFragment classesFragment;
+    private PeopleListFragment peopleListFragment;
+    private FeedListFragment newFrag;
+
+    public static final int VIEW_POSITION_POSITION_FEED = 0;
+    public static final int VIEW_POSITION_POSITION_CLASSES = 1;
+    public static final int VIEW_POSITION_POSITION_PEOPLE = 2;
+    public static final int VIEW_POSITION_POSITION_REPORTS = 3;
 
     /**
      * ViewPager set up in its own method for clarity.
@@ -151,7 +161,6 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
     }
 
 
-
     @Override
     public void shareAppSetupFile(String filePath) {
         String applicationId = getPackageName();
@@ -227,8 +236,8 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
             return super.onOptionsItemSelected(item);
         }
         else if( i == R.id.menu_basepoint_search){
-            //TODO: send which fragment called it.
             mPresenter.handleClickSearchIcon();
+
             return super.onOptionsItemSelected(item);
         }
         else {
@@ -261,9 +270,13 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
         Drawable logoutMenuIcon =
                 AppCompatResources.getDrawable(getApplicationContext(),R.drawable.ic_dropout_bcd4_24dp);
 
+        assert shareMenuIcon != null;
         shareMenuIcon.setColorFilter(getResources().getColor(R.color.icons), PorterDuff.Mode.SRC_IN);
+        assert bulkUploadMenuIcon != null;
         bulkUploadMenuIcon.setColorFilter(getResources().getColor(R.color.icons), PorterDuff.Mode.SRC_IN);
+        assert settingsMenuIcon != null;
         settingsMenuIcon.setColorFilter(getResources().getColor(R.color.icons), PorterDuff.Mode.SRC_IN);
+        assert logoutMenuIcon != null;
         logoutMenuIcon.setColorFilter(getResources().getColor(R.color.icons), PorterDuff.Mode.SRC_IN);
 
         shareMenuItem.setIcon(shareMenuIcon);
@@ -273,6 +286,67 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
 
         mOptionsMenu = menu;
         mPresenter.getLoggedInPerson();
+
+        //Search stuff
+        // Associate searchable configuration with the SearchView
+        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        SearchView searchView = (SearchView) menu.findItem(R.id.menu_basepoint_search)
+                .getActionView();
+        searchView.setSearchableInfo(searchManager
+                .getSearchableInfo(getComponentName()));
+
+        searchView.setMaxWidth(Integer.MAX_VALUE);
+
+        // listening to search query text change
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                // filter recycler view when query submitted
+                switch (mPager.getCurrentItem()){
+                    case VIEW_POSITION_POSITION_FEED:
+                        break;
+                    case VIEW_POSITION_POSITION_CLASSES:
+                        classesFragment.searchClasses(query);
+                        break;
+                    case VIEW_POSITION_POSITION_PEOPLE:
+                        peopleListFragment.searchPeople(query);
+                        break;
+                    case VIEW_POSITION_POSITION_REPORTS:
+                        break;
+                    default:
+                        break;
+                }
+
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String query) {
+                // filter recycler view when text is changed
+                return false;
+            }
+        });
+
+
+        searchView.setOnCloseListener(() -> {
+
+            // filter recycler view when query submitted
+            switch (mPager.getCurrentItem()){
+                case VIEW_POSITION_POSITION_FEED:
+                    break;
+                case VIEW_POSITION_POSITION_CLASSES:
+                    classesFragment.searchClasses("");
+                    break;
+                case VIEW_POSITION_POSITION_PEOPLE:
+                    peopleListFragment.searchPeople("");
+                    break;
+                case VIEW_POSITION_POSITION_REPORTS:
+                    break;
+                default:
+                    break;
+            }
+            return false;
+        });
         return true;
     }
 
@@ -333,7 +407,7 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
             }else{
                 switch(position){
                     case 0:
-                        UstadBaseFragment newFrag =
+                        newFrag =
                                 FeedListFragment.newInstance();
                         this.positionMap.put(position, newFrag);
                         return newFrag;
@@ -344,7 +418,7 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
                         return classesFragment;
 
                     case 2:
-                        UstadBaseFragment peopleListFragment =
+                        peopleListFragment =
                                 PeopleListFragment.newInstance();
                         this.positionMap.put(position, peopleListFragment);
                         return peopleListFragment;
@@ -371,5 +445,6 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
     public int fetchColor(int color){
         return ContextCompat.getColor(this, color);
     }
+
 
 }

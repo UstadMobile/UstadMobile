@@ -73,8 +73,6 @@ public class ReportMasterPresenter extends UstadBaseController<ReportMasterView>
 
         long currentTime = System.currentTimeMillis();
 
-        //TODO: This
-
         ClazzLogAttendanceRecordDao attendanceRecordDao =
                 repository.getClazzLogAttendanceRecordDao();
 

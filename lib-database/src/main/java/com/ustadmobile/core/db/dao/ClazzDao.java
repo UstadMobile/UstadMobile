@@ -140,6 +140,9 @@ public abstract class ClazzDao implements SyncableDao<Clazz, ClazzDao> {
             ENTITY_LEVEL_PERMISSION_CONDITION2)
     public abstract UmProvider<ClazzWithNumStudents> findAllClazzesByPermission(long accountPersonUid);
 
+
+
+
     @UmQuery(CLAZZ_WHERE +
             " FROM Clazz ")
     public abstract UmProvider<ClazzWithNumStudents> findAllClazzes();
@@ -197,26 +200,42 @@ public abstract class ClazzDao implements SyncableDao<Clazz, ClazzDao> {
 
     @UmQuery(CLAZZ_WHERE +
             " FROM Clazz WHERE Clazz.clazzActive = 1 " +
+            " AND Clazz.clazzName like :searchQuery" +
             " ORDER BY Clazz.clazzName ASC")
-    public abstract UmProvider<ClazzWithNumStudents> findAllActiveClazzesSortByNameAsc();
+    public abstract UmProvider<ClazzWithNumStudents> findAllActiveClazzesSortByNameAsc(
+            String searchQuery);
 
     @UmQuery(CLAZZ_WHERE +
             " FROM Clazz WHERE Clazz.clazzActive = 1 " +
+            " AND Clazz.clazzName like :searchQuery" +
             " ORDER BY Clazz.clazzName DESC")
-    public abstract UmProvider<ClazzWithNumStudents> findAllActiveClazzesSortByNameDesc();
-    @UmQuery(CLAZZ_WHERE +
-            " FROM Clazz WHERE Clazz.clazzActive = 1 " +
-            " ORDER BY Clazz.attendanceAverage ASC ")
-    public abstract UmProvider<ClazzWithNumStudents> findAllActiveClazzesSortByAttendanceAsc();
-    @UmQuery(CLAZZ_WHERE +
-            " FROM Clazz WHERE Clazz.clazzActive = 1 " +
-            " ORDER BY Clazz.attendanceAverage DESC ")
-    public abstract UmProvider<ClazzWithNumStudents> findAllActiveClazzesSortByAttendanceDesc();
+    public abstract UmProvider<ClazzWithNumStudents> findAllActiveClazzesSortByNameDesc(
+            String searchQuery
+    );
 
     @UmQuery(CLAZZ_WHERE +
             " FROM Clazz WHERE Clazz.clazzActive = 1 " +
+            " AND Clazz.clazzName like :searchQuery" +
+            " ORDER BY Clazz.attendanceAverage ASC ")
+    public abstract UmProvider<ClazzWithNumStudents> findAllActiveClazzesSortByAttendanceAsc(
+            String searchQuery
+    );
+
+    @UmQuery(CLAZZ_WHERE +
+            " FROM Clazz WHERE Clazz.clazzActive = 1 " +
+            " AND Clazz.clazzName like :searchQuery" +
+            " ORDER BY Clazz.attendanceAverage DESC ")
+    public abstract UmProvider<ClazzWithNumStudents> findAllActiveClazzesSortByAttendanceDesc(
+            String searchQuery
+    );
+
+    @UmQuery(CLAZZ_WHERE +
+            " FROM Clazz WHERE Clazz.clazzActive = 1 " +
+            " AND Clazz.clazzName like :searchQuery" +
             " ORDER BY teacherNames ASC ")
-    public abstract UmProvider<ClazzWithNumStudents> findAllActiveClazzesSortByTeacherAsc();
+    public abstract UmProvider<ClazzWithNumStudents> findAllActiveClazzesSortByTeacherAsc(
+            String searchQuery
+    );
 
     @UmQuery("SELECT * FROM Clazz WHERE clazzName = :name")
     public abstract void findByClazzNameAsync(String name, UmCallback<List<Clazz>> resultList);

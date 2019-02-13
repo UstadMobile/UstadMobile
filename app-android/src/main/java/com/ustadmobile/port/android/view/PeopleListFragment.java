@@ -82,6 +82,10 @@ public class PeopleListFragment extends UstadBaseFragment implements PeopleListV
         return rootContainer;
     }
 
+    public void searchPeople(String searchValue){
+        mPresenter.updateProviderWithSearch(searchValue);
+    }
+
     /**
      * The DIFF CALLBACK
      */

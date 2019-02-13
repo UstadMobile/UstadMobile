@@ -32,8 +32,9 @@
     <item android:id="@+id/menu_basepoint_search"
         android:icon="@drawable/ic_search_black_24dp"
         android:title="@string/search"
-        android:visible="false"
+        android:visible="true"
         android:iconTint="@color/icons"
-        app:showAsAction="always"/>
+        app:showAsAction="always"
+        app:actionViewClass="android.support.v7.widget.SearchView"/>
 
 </menu>

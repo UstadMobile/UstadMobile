@@ -48,6 +48,8 @@ public class ClazzListPresenter extends UstadBaseController<ClazzListView> {
 
     Long loggedInPersonUid = 0L;
 
+    String searchQuery = "%";
+
     private Boolean recordAttendanceVisibility = false;
 
     public Boolean getRecordAttendanceVisibility() {
@@ -99,6 +101,11 @@ public class ClazzListPresenter extends UstadBaseController<ClazzListView> {
             //Check permissions
             checkPermissions();
         }
+    }
+
+    public void updateProviderWithSearch(String searchValue){
+        searchQuery = "%" + searchValue + "%";
+        getAndSetProvider(0);
     }
 
     public void checkPermissions() {
@@ -173,24 +180,24 @@ public class ClazzListPresenter extends UstadBaseController<ClazzListView> {
 
             case SORT_ORDER_NAME_DESC:
                 clazzListProvider = repository.getClazzDao()
-                        .findAllActiveClazzesSortByNameDesc();
+                        .findAllActiveClazzesSortByNameDesc(searchQuery);
                 break;
             case SORT_ORDER_ATTENDANCE_ASC:
                 clazzListProvider = repository.getClazzDao()
-                        .findAllActiveClazzesSortByAttendanceAsc();
+                        .findAllActiveClazzesSortByAttendanceAsc(searchQuery);
                 break;
             case SORT_ORDER_ATTENDANCE_DESC:
                 clazzListProvider = repository.getClazzDao()
-                        .findAllActiveClazzesSortByAttendanceDesc();
+                        .findAllActiveClazzesSortByAttendanceDesc(searchQuery);
                 break;
             case SORT_ORDER_TEACHER_ASC:
                 clazzListProvider = repository.getClazzDao()
-                        .findAllActiveClazzesSortByTeacherAsc();
+                        .findAllActiveClazzesSortByTeacherAsc(searchQuery);
                 break;
             default:
                 //SORT_ORDER_NAME_ASC
                 clazzListProvider = repository.getClazzDao()
-                        .findAllActiveClazzesSortByNameAsc();
+                        .findAllActiveClazzesSortByNameAsc(searchQuery);
                 break;
         }
 

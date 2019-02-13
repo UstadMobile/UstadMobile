@@ -93,9 +93,12 @@ public class BasePointActivity2Presenter extends UstadBaseController<BasePointVi
      * TODO: Account for which fragment called it (which search to show)
      */
     public void handleClickSearchIcon(){
+
+
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         Hashtable args = new Hashtable();
-        impl.go(PersonListSearchView.VIEW_NAME, args, context);
+        //Disabling going anywhere but just text search in BasePoint
+        //impl.go(PersonListSearchView.VIEW_NAME, args, context);
     }
 
     /**

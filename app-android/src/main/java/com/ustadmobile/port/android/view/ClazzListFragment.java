@@ -59,6 +59,9 @@ public class ClazzListFragment extends UstadBaseFragment implements ClazzListVie
         return fragment;
     }
 
+    public void searchClasses(String searchValue){
+        mPresenter.updateProviderWithSearch(searchValue);
+    }
     /**
      * On Create of the fragment.
      *
