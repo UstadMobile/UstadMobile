@@ -196,7 +196,8 @@ public abstract class ClazzMemberDao implements SyncableDao<ClazzMember, ClazzMe
             "   AND clazzMemberPersonUid = Person.personUid) as clazzMemberRole " +
             " FROM Person " +
             " WHERE " +
-            " Person.firstNames like :searchQuery OR Person.lastName like :searchQuery " +
+            " attendancePercentage > :apl AND attendancePercentage < :aph " +
+            " AND Person.firstNames like :searchQuery OR Person.lastName like :searchQuery " +
             " AND personUid IN ( " +
             "   SELECT Person.personUid FROM ClazzMember " +
             "   LEFT  JOIN Person On ClazzMember.clazzMemberPersonUid = Person.personUid " +
@@ -204,7 +205,6 @@ public abstract class ClazzMemberDao implements SyncableDao<ClazzMember, ClazzMe
             "   AND ClazzMember.clazzMemberActive = 1 " +
             " ) " +
             " AND Person.active = 1 " +
-            " AND attendancePercentage >= :apl AND attendancePercentage <= :aph " +
             "ORDER BY clazzMemberRole ASC")
     public abstract UmProvider<PersonWithEnrollment>
             findAllPersonWithEnrollmentInClazzByClazzUidWithSearchFilter(long clazzUid,
