@@ -16,6 +16,7 @@ import org.jsoup.select.Elements;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runners.Parameterized;
 
 import java.io.File;
 import java.io.IOException;
@@ -97,19 +98,12 @@ public class TestShrinkerUtils {
     }
 
     @Test
-    public void givenEpub_whenEpubShrinked_checkIfTempFoldersCreatedGotDeleted() {
+    public void givenValidEpub_whenShrunk_shouldConvertAllImagesToWebPAndOutsourceStylesheets() throws IOException {
 
-        ShrinkerUtil.main(new String[]{});
+        ShrinkerUtil.main(new String[]{"db"});
 
         Assert.assertEquals("Failed to delete the tmp Folder for epub test after shrinking", false, new File(tmpDir, "test").exists());
         Assert.assertEquals("Failed to delete the tmp Folder for epub 13232 after shrinking", false, new File(tmpFolder, "13232").exists());
-
-    }
-
-    @Test
-    public void givenEpub_whenEpubShrinked_checkIfAllPngDeleted() throws IOException {
-
-        ShrinkerUtil.main(new String[]{});
 
         ZipFile zipFile = new ZipFile(firstepub);
         ZipEntry entry = zipFile.getEntry("META-INF/container.xml");
@@ -122,38 +116,49 @@ public class TestShrinkerUtils {
         Document opfdoc = Jsoup.parse(UMIOUtils.readStreamToString(opfis), "", Parser.xmlParser());
         Elements manifestitems = opfdoc.select("manifest item");
 
+        int countWebp = 0;
+        int countCss = 0;
         for (Element manifest : manifestitems) {
 
             String href = manifest.attr("href");
             Assert.assertEquals("png file still exists in manifest", false, href.contains(".png"));
 
+            if (href.contains(".webp")) {
+                countWebp++;
+            }
+
+            if (href.contains(".css")) {
+                countCss++;
+            }
+
         }
 
+        Assert.assertEquals("16 webp converted in manifest", 16, countWebp);
+        Assert.assertEquals("16 css converted in manifest", 4, countCss);
+
+        countWebp = 0;
+        countCss = 0;
         Enumeration<? extends ZipEntry> entryList = zipFile.entries();
         while (entryList.hasMoreElements()) {
 
             ZipEntry entryElement = entryList.nextElement();
-            Assert.assertEquals("png file still exists in epub", false, entryElement.getName().contains(".png"));
+            String href = entryElement.getName();
+            Assert.assertEquals("png file still exists in epub", false, href.contains(".png"));
+
+            if (href.contains(".webp")) {
+                countWebp++;
+            }
+
+            if (href.contains(".css")) {
+                countCss++;
+            }
 
         }
 
-    }
+        Assert.assertEquals("16 webp available in epub", 16, countWebp);
+        Assert.assertEquals("4 css available in epub", 4, countCss);
 
-    @Test
-    public void givenEpub_whenShrinkerChecksAgain_noChangesShouldBeMade() {
-
-
-        ShrinkerUtil.main(new String[]{});
-
-        long sizeOfFirst = firstepub.length();
-
-        ShrinkerUtil.main(new String[]{});
-
-        long secondSize = firstepub.length();
-
-        Assert.assertEquals("Size did not match after shrinker run twice on same epub", sizeOfFirst, secondSize);
 
     }
-
 
 }
