@@ -92,12 +92,13 @@ public class ShrinkerUtil {
         UmZipUtils.unzip(epub, tmpFolder);
         try {
             shrinkEpubFiles(tmpFolder);
-        } catch (Exception e) {
+            ContentScraperUtil.zipDirectory(tmpFolder, epub.getName(), epub.getParentFile());
+        } catch (IOException e) {
+            UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
+            throw e;
+        } finally {
             FileUtils.deleteDirectory(tmpFolder);
-            return;
         }
-        ContentScraperUtil.zipDirectory(tmpFolder, epub.getName(), epub.getParentFile());
-        FileUtils.deleteDirectory(tmpFolder);
 
     }
 
@@ -238,7 +239,7 @@ public class ShrinkerUtil {
 
                         }
                         styleList.remove();
-                        FileUtils.writeStringToFile(htmlFile, doc.html(), UTF_ENCODING);
+                        FileUtils.writeStringToFile(htmlFile, doc.toString(), UTF_ENCODING);
                     }
 
                 }
@@ -291,7 +292,7 @@ public class ShrinkerUtil {
         }
 
         File webpExecutableFile = new File(ScraperBuildConfig.WEBP_PATH);
-        if(!webpExecutableFile.exists()) {
+        if (!webpExecutableFile.exists()) {
             throw new IOException("Webp executable does not exist: " + ScraperBuildConfig.WEBP_PATH);
         }
 
