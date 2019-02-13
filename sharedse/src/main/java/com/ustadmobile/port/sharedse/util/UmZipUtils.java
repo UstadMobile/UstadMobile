@@ -17,8 +17,9 @@ public class UmZipUtils {
                 String fileName = zipEntry.getName();
                 File fileToCreate = new File(destDir, fileName);
 
-                if (!fileToCreate.getParentFile().isDirectory()) {
-                    if (!fileToCreate.getParentFile().mkdirs()) {
+                File dirToCreate = zipEntry.isDirectory() ? fileToCreate : fileToCreate.getParentFile();
+                if (!dirToCreate.isDirectory()) {
+                    if (!dirToCreate.mkdirs()) {
                         throw new RuntimeException("Could not create directory to extract to: " +
                                 fileToCreate.getParentFile());
                     }
@@ -29,7 +30,7 @@ public class UmZipUtils {
                     entryOut.close();
                 }
             }
-        }finally {
+        } finally {
             UMIOUtils.closeQuietly(entryOut);
         }
 
