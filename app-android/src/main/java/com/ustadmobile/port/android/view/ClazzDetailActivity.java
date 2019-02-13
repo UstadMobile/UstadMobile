@@ -42,6 +42,8 @@ public class ClazzDetailActivity extends UstadBaseActivity implements
     private boolean attendanceVisibility, activityVisibility, selVisibility, settingsVisibility;
     Menu menu;
 
+    private ClazzStudentListFragment clazzStudentListFragment;
+
     private Map<Integer, Class> fragPosMap = new HashMap<>();
 
     /**
@@ -142,6 +144,7 @@ public class ClazzDetailActivity extends UstadBaseActivity implements
         return true;
     }
 
+
     /**
      * Handles Action Bar menu button click.
      * @param item  The MenuItem clicked.
@@ -154,6 +157,10 @@ public class ClazzDetailActivity extends UstadBaseActivity implements
         //If this activity started from other activity
         if (i == R.id.menu_clazzdetail_gear) {
             mPresenter.handleClickClazzEdit();
+            return super.onOptionsItemSelected(item);
+        }
+        else if(i == R.id.menu_clazzdetail_search){
+            mPresenter.handleClickSearch();
             return super.onOptionsItemSelected(item);
         }
         else if(i == android.R.id.home) {
@@ -244,7 +251,8 @@ public class ClazzDetailActivity extends UstadBaseActivity implements
             } else {
                 Class fragClass = fragPosMap.get(position);
                 if(fragClass.equals(ClazzStudentListFragment.class)) {
-                    return ClazzStudentListFragment.newInstance(currentClazzUid);
+                    clazzStudentListFragment = ClazzStudentListFragment.newInstance(currentClazzUid);
+                    return clazzStudentListFragment;
                 }else if(fragClass.equals(ClazzLogListFragment.class)) {
                     return ClazzLogListFragment.newInstance(currentClazzUid);
                 }else if(fragClass.equals(ClazzActivityListFragment.class)) {

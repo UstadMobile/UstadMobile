@@ -65,6 +65,8 @@ public class PersonWithEnrollmentRecyclerAdapter
 
     private boolean groupByClass = false;
 
+    private boolean hideHeading = false;
+
     private int headingCLId;
 
     private boolean classChange = true;
@@ -132,6 +134,21 @@ public class PersonWithEnrollmentRecyclerAdapter
         showEnrollment = enrollment;
         reportMode = rmode;
         groupByClass = classGrouped;
+    }
+
+    PersonWithEnrollmentRecyclerAdapter(
+            @NonNull DiffUtil.ItemCallback<PersonWithEnrollment> diffCallback, Context context,
+            Activity activity, CommonHandlerPresenter presenter, boolean attendance,
+            boolean enrollment, boolean rmode, boolean classGrouped, boolean hideHeading){
+        super(diffCallback);
+        theContext = context;
+        theActivity = activity;
+        mPresenter = presenter;
+        showAttendance = attendance;
+        showEnrollment = enrollment;
+        reportMode = rmode;
+        groupByClass = classGrouped;
+        this.hideHeading = hideHeading;
     }
 
 
@@ -404,12 +421,12 @@ public class PersonWithEnrollmentRecyclerAdapter
 
             //if(showAddStudent && showAddTeacher) {
                 if (position == 0) {//First Entry. Add Teacher and Add Teacher item
-                    if(!reportMode)
+                    if(!reportMode && !hideHeading)
                     addHeadingAndNew(cl, ClazzMember.ROLE_TEACHER, showAddTeacher);
 
                     if (personWithEnrollment.getClazzMemberRole() == ClazzMember.ROLE_STUDENT) {
 
-                        if(!reportMode)
+                        if(!reportMode && !hideHeading)
                         addHeadingAndNew(cl, ClazzMember.ROLE_STUDENT, showAddStudent);
                     }
 
@@ -426,7 +443,7 @@ public class PersonWithEnrollmentRecyclerAdapter
                             personWithEnrollment.getClazzMemberRole() == ClazzMember.ROLE_STUDENT) {
 
                         //Add student
-                        if(!reportMode)
+                        if(!reportMode && !hideHeading)
                         addHeadingAndNew(cl, ClazzMember.ROLE_STUDENT, showAddStudent);
                     }
 

@@ -530,6 +530,9 @@ This is the one you should be editing. The one in /core/locale/main/values/strin
     <string name="attendance_percentage">Attendance percentage:</string>
     <string name="filter">Filter</string>
     <string name="number_of_absent_days">Number of absent days in a row: </string>
+    <string name="over">over</string>
+
+
 
     <string name="onboarding_get_started_label">Get Started</string>
     <string name="onboarding_no_internet_headline">No Internet? No problem.</string>

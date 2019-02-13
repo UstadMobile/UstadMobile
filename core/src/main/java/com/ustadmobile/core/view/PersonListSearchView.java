@@ -6,6 +6,8 @@ import com.ustadmobile.lib.db.entities.PersonWithEnrollment;
 public interface PersonListSearchView extends UstadView {
 
     String VIEW_NAME = "PersonListSearch";
+
+    String ARGUMENT_CURRNET_CLAZZ_UID = "PersonListSearchCurrentclazzUid";
     /**
      * Set people list provider to the view.
      *

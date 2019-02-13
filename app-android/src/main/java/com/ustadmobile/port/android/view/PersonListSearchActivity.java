@@ -14,7 +14,13 @@ import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
 
+import com.crystal.crystalrangeseekbar.interfaces.OnRangeSeekbarChangeListener;
+import com.crystal.crystalrangeseekbar.interfaces.OnRangeSeekbarFinalValueListener;
+import com.crystal.crystalrangeseekbar.interfaces.OnSeekbarChangeListener;
+import com.crystal.crystalrangeseekbar.widgets.CrystalRangeSeekbar;
+import com.crystal.crystalrangeseekbar.widgets.CrystalSeekbar;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.PersonListSearchPresenter;
 import com.ustadmobile.core.db.UmProvider;
@@ -31,6 +37,15 @@ public class PersonListSearchActivity extends UstadBaseActivity implements Perso
     private PersonListSearchPresenter mPresenter;
     private SearchView searchView;
 
+    private float apl = 0.0f;
+    private float aph = 1.0f;
+    private int days =0;
+    private String currentValue = "";
+
+    private CrystalRangeSeekbar attendanceRangeSeekbar;
+    private CrystalSeekbar daysAbsentSeekbar;
+    private TextView rangeTextView;
+    private TextView daysAbsentTextView;
 
     @Override
     public void onCreate(Bundle savedInstanceState){
@@ -41,7 +56,7 @@ public class PersonListSearchActivity extends UstadBaseActivity implements Perso
 
         //Toolbar
         Toolbar toolbar = findViewById(R.id.activity_person_list_search_toolbar);
-        toolbar.setTitle(R.string.people);
+        toolbar.setTitle(R.string.students_literal);
         setSupportActionBar(toolbar);
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
@@ -51,13 +66,60 @@ public class PersonListSearchActivity extends UstadBaseActivity implements Perso
                 new LinearLayoutManager(getApplicationContext());
         mRecyclerView.setLayoutManager(mRecyclerLayoutManager);
 
+        attendanceRangeSeekbar =
+             findViewById(R.id.activity_person_list_search_attendance_range_seekbar);
+        daysAbsentSeekbar =
+             findViewById(R.id.activity_person_list_search_days_absent_seekbar);
+        rangeTextView = findViewById(R.id.activity_person_list_search_range_textview);
+        daysAbsentTextView = findViewById(R.id.activity_person_list_search_days_absent_textview);
+
+
         //Presenter
         mPresenter = new PersonListSearchPresenter(this,
                 UMAndroidUtil.bundleToHashtable(getIntent().getExtras()), this);
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
 
+
+        daysAbsentSeekbar.setOnSeekbarChangeListener(value -> {
+            updateDaysAbsentText(value.intValue());
+            days = value.intValue();
+
+        });
+
+        attendanceRangeSeekbar.setOnRangeSeekbarChangeListener((minValue, maxValue) -> {
+            updateAttendanceRangeText(minValue.intValue(), maxValue.intValue());
+            if(minValue.floatValue() > 0)
+                apl = (minValue.intValue()/100f);
+            if(maxValue.floatValue() > 0)
+                aph = (maxValue.intValue()/100f);
+
+        });
+
+        attendanceRangeSeekbar.setOnRangeSeekbarFinalValueListener(new OnRangeSeekbarFinalValueListener() {
+            @Override
+            public void finalValue(Number minValue, Number maxValue) {
+                if(minValue.floatValue() > 0)
+                    apl = (minValue.intValue()/100f);
+                if(maxValue.floatValue() > 0)
+                    aph = (maxValue.intValue()/100f);
+                mPresenter.updateFilter(apl, aph, currentValue);
+            }
+        });
+
+        updateDaysAbsentText(0);
+        updateAttendanceRangeText(0,100);
     }
 
+    public void updateDaysAbsentText(int days){
+        String daysAbsentText = getText(R.string.over).toString() + " " + days + " " +
+                getText(R.string.days).toString().toLowerCase();
+        daysAbsentTextView.setText(daysAbsentText);
+    }
+
+    public void updateAttendanceRangeText(int from, int to){
+        String rangeText = from + "% " + getText(R.string.to).toString() + " " + to + "%";
+        rangeTextView.setText(rangeText);
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -76,7 +138,9 @@ public class PersonListSearchActivity extends UstadBaseActivity implements Perso
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
+                currentValue = query;
                 // filter recycler view when query submitted
+                mPresenter.updateFilter(apl, aph, currentValue);
                 return false;
             }
 
@@ -86,6 +150,14 @@ public class PersonListSearchActivity extends UstadBaseActivity implements Perso
                 return false;
             }
         });
+
+        searchView.setOnCloseListener(() -> {
+            currentValue = "";
+            mPresenter.updateFilter(apl, aph, currentValue);
+            return false;
+        });
+
+
         return true;
     }
 
@@ -119,7 +191,8 @@ public class PersonListSearchActivity extends UstadBaseActivity implements Perso
 
         PersonWithEnrollmentRecyclerAdapter recyclerAdapter =
                 new PersonWithEnrollmentRecyclerAdapter(DIFF_CALLBACK2, getApplicationContext(),
-                        this, mPresenter, false, false);
+                        this, mPresenter, true, false,
+                        false, false, true);
         //A warning is expected
         DataSource.Factory<Integer, PersonWithEnrollment> factory =
                 (DataSource.Factory<Integer, PersonWithEnrollment>)listProvider.getProvider();
@@ -147,4 +220,21 @@ public class PersonListSearchActivity extends UstadBaseActivity implements Perso
                 return oldItem.equals(newItem);
             }
         };
+
+//    public float getAttendancePercentageLow() {
+//        return apl;
+//    }
+//
+//    public void setAttendancePercentageLow(float apl) {
+//        this.apl = apl;
+//    }
+//
+//    public float getAttendancePercentageHigh() {
+//        return aph;
+//    }
+//
+//    public void setAttendancePercentageHigh(float aph) {
+//        this.aph = aph;
+//    }
+
 }

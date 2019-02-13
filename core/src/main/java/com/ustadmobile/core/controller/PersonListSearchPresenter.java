@@ -8,6 +8,8 @@ import com.ustadmobile.lib.db.entities.PersonWithEnrollment;
 
 import java.util.Hashtable;
 
+import static com.ustadmobile.core.view.PersonListSearchView.ARGUMENT_CURRNET_CLAZZ_UID;
+
 public class PersonListSearchPresenter extends CommonHandlerPresenter<PersonListSearchView> {
 
     //Provider
@@ -15,9 +17,17 @@ public class PersonListSearchPresenter extends CommonHandlerPresenter<PersonList
 
     UmAppDatabase repository = UmAccountManager.getRepositoryForActiveAccount(context);
 
+    private long currentClazzUid = 0;
+    private long loggedInPerson = 0L;
+
     public PersonListSearchPresenter(Object context, Hashtable arguments, PersonListSearchView view) {
         super(context, arguments, view);
 
+        if(arguments.containsKey(ARGUMENT_CURRNET_CLAZZ_UID)){
+            currentClazzUid = (long) arguments.get(ARGUMENT_CURRNET_CLAZZ_UID);
+        }
+
+        loggedInPerson = UmAccountManager.getActiveAccount(context).getPersonUid();
     }
 
     /**
@@ -30,12 +40,20 @@ public class PersonListSearchPresenter extends CommonHandlerPresenter<PersonList
     public void onCreate(Hashtable savedState) {
         super.onCreate(savedState);
 
-        personWithEnrollmentUmProvider = repository.getPersonDao()
-                .findAllPeopleWithEnrollment();
+        personWithEnrollmentUmProvider = repository.getClazzMemberDao()
+                .findAllPersonWithEnrollmentInClazzByClazzUidWithSearchFilter(currentClazzUid,
+                        0,1, "%");
         setPeopleProviderToView();
 
     }
 
+    public void updateFilter(float apl, float aph, String value){
+        String stringQuery = "%" + value + "%";
+        personWithEnrollmentUmProvider = repository.getClazzMemberDao()
+                .findAllPersonWithEnrollmentInClazzByClazzUidWithSearchFilter(currentClazzUid,
+                        apl,aph, stringQuery);
+        setPeopleProviderToView();
+    }
 
     /**
      * Sets the people list provider set in the Presenter to the View.

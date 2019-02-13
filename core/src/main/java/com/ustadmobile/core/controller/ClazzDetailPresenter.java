@@ -8,12 +8,14 @@ import com.ustadmobile.core.impl.UmCallbackWithDefaultValue;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.ClassDetailView;
 import com.ustadmobile.core.view.ClazzEditView;
+import com.ustadmobile.core.view.PersonListSearchView;
 import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.Role;
 
 import java.util.Hashtable;
 
 import static com.ustadmobile.core.view.ClazzListView.ARG_CLAZZ_UID;
+import static com.ustadmobile.core.view.PersonListSearchView.ARGUMENT_CURRNET_CLAZZ_UID;
 
 
 /**
@@ -142,6 +144,13 @@ public class ClazzDetailPresenter
         Hashtable<String, Object> args = new Hashtable<>();
         args.put(ARG_CLAZZ_UID, currentClazzUid);
         impl.go(ClazzEditView.VIEW_NAME, args, view.getContext());
+    }
+
+    public void handleClickSearch(){
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        Hashtable args = new Hashtable();
+        args.put(ARGUMENT_CURRNET_CLAZZ_UID, currentClazzUid);
+        impl.go(PersonListSearchView.VIEW_NAME, args, context);
     }
 
 }
