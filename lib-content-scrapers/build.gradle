@@ -97,6 +97,21 @@ task scrapeContent(type: JavaExec) {
 }
 
 task generateScraperBuildConfig(type: de.fuerstenau.gradle.buildconfig.GenerateBuildConfigTask) {
+    doFirst {
+        if (!rootProject.file(rootProject.ext.buildConfigProperties["shrinker.webp"]).exists()) {
+            throw new GradleException("Shrinker Util requires webp to turn images to lossy format which needs to run on the command line" +
+                    " You must define a path to the cwebp executable in buildconfig.local.properties.  " +
+                    " On Ubuntu you can install this using apt-get install webp. " +
+                    "Please open the README file in lib-content-scrapers for further instructions")
+        }
+
+        if (!ext.localProperties.containsKey("scraper.chrome_driver_path")) {
+            throw new GradleException("Content Scraping requires Selenium which needs a chrome driver to run." +
+                    " You must define a path to the chrome driver in local.properties. " +
+                    "Please open the README file in lib-content-scrapers for further instructions")
+        }
+    }
+
     inputs.files(rootProject.file("local.properties"))
     outputDir = new File("${projectDir}/src/main/java")
     packageName = "com.ustadmobile.lib.contentscrapers.buildconfig"
@@ -110,18 +125,6 @@ task generateScraperBuildConfig(type: de.fuerstenau.gradle.buildconfig.GenerateB
 }
 compileJava.dependsOn(generateScraperBuildConfig)
 
-if (!ext.localProperties.containsKey("scraper.chrome_driver_path")) {
-    throw new GradleException("Content Scraping requires Selenium which needs a chrome driver to run." +
-            " You must define a path to the chrome driver in local.properties. " +
-            "Please open the README file in lib-content-scrapers for further instructions")
-}
-
-if (!rootProject.file(rootProject.ext.buildConfigProperties["shrinker.webp"]).exists()) {
-    throw new GradleException("Shrinker Util requires webp to turn images to lossy format which needs to run on the command line" +
-            " You must define a path to the cwebp executable in buildconfig.local.properties.  " +
-            " On Ubuntu you can install this using apt-get install webp. " +
-            "Please open the README file in lib-content-scrapers for further instructions")
-}
 
 
 dependencies {
