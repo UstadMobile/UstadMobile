@@ -32,6 +32,9 @@
     <!-- To obtain wifi lock to avoid wifi powering down during download-->
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
+    <!--To show download progress indicator-->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+
     <uses-feature
         android:name="android.hardware.camera"
         android:required="false" />
@@ -113,6 +116,10 @@
             android:label="@string/register"
             android:theme="@style/Theme.UstadTheme"
             />
+
+        <service android:name="com.ustadmobile.port.android.netwokmanager.DownloadNotificationService"
+            android:enabled="true"
+            android:exported="true"/>
 
         <service
             android:name="com.ustadmobile.port.android.netwokmanager.UmAppDatabaseSyncService"

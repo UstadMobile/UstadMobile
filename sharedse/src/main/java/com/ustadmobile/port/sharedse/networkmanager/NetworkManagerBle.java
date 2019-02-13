@@ -105,6 +105,8 @@ public abstract class NetworkManagerBle {
 
     private Map<Object, List<Long>> availabilityMonitoringRequests = new HashMap<>();
 
+    private static final int MAX_THREAD_COUNT = 10;
+
     /**
      * Holds all created entry status tasks
      */
@@ -173,7 +175,7 @@ public abstract class NetworkManagerBle {
         }).start();
 
 
-        downloadJobItemWorkQueue = new LiveDataWorkQueue<>(1);
+        downloadJobItemWorkQueue = new LiveDataWorkQueue<>(MAX_THREAD_COUNT);
         downloadJobItemWorkQueue.setAdapter(mJobItemAdapter);
         downloadJobItemWorkQueue.start(umAppDatabase.getDownloadJobItemDao().findNextDownloadJobItems());
     }

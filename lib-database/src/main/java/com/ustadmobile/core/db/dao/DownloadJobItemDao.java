@@ -4,6 +4,7 @@ import com.ustadmobile.core.db.JobStatus;
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmInsert;
+import com.ustadmobile.lib.database.annotation.UmOnConflictStrategy;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.db.entities.ConnectivityStatus;
 import com.ustadmobile.lib.db.entities.DownloadJobItem;
@@ -106,6 +107,13 @@ public abstract class DownloadJobItemDao {
                                                      long downloadedSoFar, long downloadLength,
                                                      long currentSpeed);
 
+    @UmQuery("UPDATE DownloadJobItem SET downloadedSoFar = :downloadedSoFar, " +
+            "currentSpeed = :currentSpeed " +
+            "WHERE djiUid = :djiUid")
+    public abstract void updateDownloadJobItemProgress(long djiUid, long downloadedSoFar,
+                                                       long currentSpeed);
+
+
     @UmQuery("UPDATE DownloadJobItem SET djiStatus = :status WHERE djiUid = :djiUid")
     public abstract void updateStatus(long djiUid, long status);
 
@@ -148,13 +156,21 @@ public abstract class DownloadJobItemDao {
     @UmQuery("SELECT * FROM DownloadJobItem WHERE djiDjUid = :djiDjUid")
     public abstract List<DownloadJobItem> findByJobUid(long djiDjUid);
 
-    @UmQuery("DELETE FROM DownloadJobItem WHERE djiDjUid = :djiDjUid")
-    public abstract int deleteByDownloadSetUid(long djiDjUid);
+    @UmQuery("DELETE FROM DownloadJobItem WHERE djiDsiUid = :djiDsiUid")
+    public abstract int deleteByDownloadSetUid(long djiDsiUid);
+
+
+    @UmQuery("SELECT count(*) FROM DownloadJobItem " +
+            "WHERE djiDjUid = :djiDjUid " +
+            "AND djiStatus BETWEEN " + (JobStatus.PAUSED + 1) + " AND " + JobStatus.RUNNING_MAX)
+    public abstract int getCurrentlyRunningTasksByJobId(long djiDjUid);
 
     @UmQuery("SELECT DownloadJobItem.*, DownloadSetItem.* FROM DownloadJobItem " +
             "LEFT JOIN DownloadSetItem ON DownloadJobItem.djiDsiUid = DownloadSetItem.dsiUid " +
             "LEFT JOIN DownloadSet on DownloadSetItem.dsiDsUid = DownloadSet.dsUid " +
-            "WHERE DownloadJobItem.djiStatus >= " + JobStatus.WAITING_MIN +
+            "WHERE " +
+            " DownloadJobItem.djiContentEntryFileUid != 0 " +
+            " AND DownloadJobItem.djiStatus >= " + JobStatus.WAITING_MIN +
             " AND DownloadJobItem.djiStatus < " + JobStatus.RUNNING_MIN +
             " AND (((SELECT connectivityState FROM ConnectivityStatus) =  " + ConnectivityStatus.STATE_UNMETERED + ") " +
                 " OR ((SELECT connectivityState FROM ConnectivityStatus) = " + ConnectivityStatus.STATE_METERED + ") " +

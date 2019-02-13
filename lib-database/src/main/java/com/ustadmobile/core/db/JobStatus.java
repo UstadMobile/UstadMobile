@@ -56,7 +56,7 @@ public class JobStatus {
 
     //Complete statuses where the job is not part of the queue - 21-30
 
-    public static final int COMPLETE_MIN = 20;
+    public static final int COMPLETE_MIN = 21;
 
     public static final int COMPLETE_MAX = 30;
 
@@ -71,5 +71,7 @@ public class JobStatus {
     public static final int STOPPED = 27;
 
     public static final int CANCELED = 28;
+
+    public static final int CANCELLING = 29;
     
 }

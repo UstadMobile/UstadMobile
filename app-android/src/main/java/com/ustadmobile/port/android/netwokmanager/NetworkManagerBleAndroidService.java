@@ -6,13 +6,22 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Binder;
+import android.os.Build;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 
+import com.google.gson.Gson;
+import com.ustadmobile.core.db.UmAppDatabase;
+import com.ustadmobile.core.db.UmLiveData;
+import com.ustadmobile.core.db.UmObserver;
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+
+import static com.ustadmobile.port.android.netwokmanager.DownloadNotificationService.ACTION_START_FOREGROUND_SERVICE;
+import static com.ustadmobile.port.android.netwokmanager.DownloadNotificationService.GROUP_SUMMARY_ID;
+import static com.ustadmobile.port.android.netwokmanager.DownloadNotificationService.JOB_ID_TAG;
 
 /**
  * Wrapper class for NetworkManagerBle. A service is required as this encapsulates
@@ -31,6 +40,12 @@ public class NetworkManagerBleAndroidService extends Service {
 
     private AtomicReference<EmbeddedHTTPD> httpdRef = new AtomicReference<>();
 
+    private AtomicBoolean mHttpDownloadServiceActive = new AtomicBoolean(false);
+
+    private UmLiveData<Boolean> activeDownloadJobData = null;
+
+    private UmObserver<Boolean> activeDownloadJobObserver;
+
     private ServiceConnection mHttpdServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
@@ -45,6 +60,7 @@ public class NetworkManagerBleAndroidService extends Service {
         }
     };
 
+
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         return START_STICKY;
@@ -55,6 +71,11 @@ public class NetworkManagerBleAndroidService extends Service {
         super.onCreate();
         Intent serviceIntent = new Intent(getApplicationContext(), EmbeddedHttpdService.class);
         bindService(serviceIntent, mHttpdServiceConnection, Context.BIND_AUTO_CREATE);
+
+        activeDownloadJobData = UmAppDatabase.getInstance(this)
+                .getDownloadJobDao().getAnyActiveDownloadJob();
+        activeDownloadJobObserver = this::handleActiveJob;
+        activeDownloadJobData.observeForever(activeDownloadJobObserver);
     }
 
     private void handleHttpdServiceBound() {
@@ -63,6 +84,22 @@ public class NetworkManagerBleAndroidService extends Service {
         managerAndroidBleRef.set(managerAndroidBle);
         managerAndroidBle.onCreate();
     }
+
+    private void handleActiveJob(boolean anyActivityJob){
+        if(!mHttpDownloadServiceActive.get() && anyActivityJob){
+            Intent serviceIntent = new Intent(getApplicationContext(), DownloadNotificationService.class);
+            serviceIntent.setAction(ACTION_START_FOREGROUND_SERVICE);
+            serviceIntent.putExtra(JOB_ID_TAG,GROUP_SUMMARY_ID);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                startForegroundService(serviceIntent);
+            } else {
+                startService(serviceIntent);
+            }
+        }
+
+        mHttpDownloadServiceActive.set(anyActivityJob);
+    }
+
 
     @Nullable
     @Override
@@ -75,6 +112,9 @@ public class NetworkManagerBleAndroidService extends Service {
         super.onDestroy();
         if(mHttpServiceBound.get())
             unbindService(mHttpdServiceConnection);
+
+        if(mHttpDownloadServiceActive.get())
+            activeDownloadJobData.removeObserver(activeDownloadJobObserver);
 
         NetworkManagerAndroidBle managerAndroidBle = managerAndroidBleRef.get();
         if(managerAndroidBle != null)

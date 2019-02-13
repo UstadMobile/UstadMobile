@@ -23,6 +23,10 @@ public class DownloadJob {
 
     private long timeCompleted;
 
+    private long totalBytesToDownload;
+
+    private long bytesDownloadedSoFar;
+
     /**
      * Status as per flags on NetworkTask
      */
@@ -86,5 +90,21 @@ public class DownloadJob {
 
     public void setDjStatus(int djStatus) {
         this.djStatus = djStatus;
+    }
+
+    public long getTotalBytesToDownload() {
+        return totalBytesToDownload;
+    }
+
+    public void setTotalBytesToDownload(long totalBytesToDownload) {
+        this.totalBytesToDownload = totalBytesToDownload;
+    }
+
+    public long getBytesDownloadedSoFar() {
+        return bytesDownloadedSoFar;
+    }
+
+    public void setBytesDownloadedSoFar(long bytesDownloadedSoFar) {
+        this.bytesDownloadedSoFar = bytesDownloadedSoFar;
     }
 }
