@@ -17,6 +17,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.DummyView;
 
 import static com.ustadmobile.core.controller.ContentEntryListPresenter.ARG_CONTENT_ENTRY_UID;
+import static com.ustadmobile.core.controller.ContentEntryListPresenter.ARG_DOWNLOADED_CONTENT;
 
 public class DummyActivity extends UstadBaseActivity implements DummyView {
 
@@ -66,6 +67,7 @@ public class DummyActivity extends UstadBaseActivity implements DummyView {
                     bundle.putString(ARG_CONTENT_ENTRY_UID, String.valueOf(MASTER_SERVER_ROOT_ENTRY_UID));
                     return ContentEntryListFragment.newInstance(bundle);
                 case 1: // Fragment # 0 - This will show FirstFragment different title
+                    bundle.putString(ARG_DOWNLOADED_CONTENT, String.valueOf(""));
                     return ContentEntryListFragment.newInstance(bundle);
                 default:
                     return null;

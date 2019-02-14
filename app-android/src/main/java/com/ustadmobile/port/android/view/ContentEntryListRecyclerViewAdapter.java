@@ -69,7 +69,7 @@ public class ContentEntryListRecyclerViewAdapter extends PagedListAdapter<Conten
                 int dlStatus = status.getDownloadStatus();
 
                 if (dlStatus > 0 && dlStatus <= JobStatus.RUNNING_MAX && status.getTotalSize() > 0) {
-                    holder.getDownloadView().setProgress((int) (status.getBytesDownloadSoFar() / status.getTotalSize()));
+                    holder.getDownloadView().setProgress((int) ((status.getBytesDownloadSoFar() * 100) / status.getTotalSize()));
                 } else {
                     holder.getDownloadView().setProgress(0);
                 }
