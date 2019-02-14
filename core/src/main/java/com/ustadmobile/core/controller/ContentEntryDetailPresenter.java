@@ -28,6 +28,7 @@ import java.util.List;
 
 import static com.ustadmobile.core.controller.ContainerController.ARG_CONTAINERURI;
 import static com.ustadmobile.core.impl.UstadMobileSystemImpl.ARG_REFERRER;
+import static com.ustadmobile.core.view.VideoPlayerView.ARG_VIDEO_PATH;
 
 public class ContentEntryDetailPresenter extends UstadBaseController<ContentEntryDetailView> {
 
@@ -146,17 +147,15 @@ public class ContentEntryDetailPresenter extends UstadBaseController<ContentEntr
                             args.put(ARG_CONTAINERURI, path);
                             impl.go(XapiPackageView.VIEW_NAME, args, getContext());
                         } else if (result.getMimeType().equals("video/mp4")) {
-
+                            args.put(VideoPlayerView.ARG_VIDEO_PATH, path);
                             args.put(VideoPlayerView.ARG_CONTENT_ENTRY_ID, String.valueOf(entryUuid));
                             impl.go(VideoPlayerView.VIEW_NAME, args, getContext());
                         } else if(result.getMimeType().equals("application/webchunk+zip")){
-
                             args.put(WebChunkView.ARG_CHUNK_PATH, path);
                             impl.go(WebChunkView.VIEW_NAME, args, getContext());
-                        } else if(result.getMimeType().equals("application/epub+zip/")){
-
+                        } else if(result.getMimeType().equals("application/epub+zip")){
                             args.put(ARG_CONTAINERURI, path);
-                            impl.go(ContainerView.VIEW_NAME, getContext());
+                            impl.go(ContainerView.VIEW_NAME, args, getContext());
                         }
 
                     }
