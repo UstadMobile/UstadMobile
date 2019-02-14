@@ -25,6 +25,8 @@ public abstract class DownloadJobItemDao {
 
         long fileSize;
 
+        long contentEntryUid;
+
         public long getFileSize() {
             return fileSize;
         }
@@ -47,6 +49,14 @@ public abstract class DownloadJobItemDao {
 
         public void setContentEntryFileUid(long contentEntryFileUid) {
             this.contentEntryFileUid = contentEntryFileUid;
+        }
+
+        public long getContentEntryUid() {
+            return contentEntryUid;
+        }
+
+        public void setContentEntryUid(long contentEntryUid) {
+            this.contentEntryUid = contentEntryUid;
         }
     }
 
@@ -153,12 +163,14 @@ public abstract class DownloadJobItemDao {
 
     @UmQuery("SELECT DownloadSetItem.dsiUid as downloadSetItemUid,\n" +
             "ContentEntryFile.contentEntryFileUid,\n" +
-            "ContentEntryFile.fileSize\n" +
+            "ContentEntryFile.fileSize, \n" +
+            "DownloadSetItem.dsiContentEntryUid AS contentEntryUid \n" +
             "FROM DownloadSetItem\n" +
             "LEFT JOIN ContentEntryContentEntryFileJoin ON DownloadSetItem.dsiContentEntryUid = ContentEntryContentEntryFileJoin.cecefjContentEntryUid\n" +
-            "LEFT JOIN ContentEntryFile ON ContentEntryFile.lastModified = \n" +
+            "LEFT JOIN ContentEntryFile ON ContentEntryFile.contentEntryFileUid = ContentEntryContentEntryFileJoin.cecefjContentEntryFileUid " +
+            "AND ContentEntryFile.lastModified = \n" +
             "\t(SELECT MAX(lastModified) FROM ContentEntryContentEntryFileJoin AS InnerCEFJ\n" +
-            "\t\tLEFT JOIN ContentEntryFile ON InnerCEFJ.cecefjContentEntryUid = ContentEntryFile.contentEntryFileUid\n" +
+            "\t\tLEFT JOIN ContentEntryFile ON InnerCEFJ.cecefjContentEntryFileUid = ContentEntryFile.contentEntryFileUid\n" +
             "\t    WHERE InnerCEFJ.cecefjContentEntryUid = DownloadSetItem.dsiContentEntryUid)\n" +
             "WHERE DownloadSetItem.dsiDsUid = :downloadSetUid")
     public abstract List<DownloadJobItemToBeCreated> findJobItemsToBeCreatedForDownloadSet(long downloadSetUid);

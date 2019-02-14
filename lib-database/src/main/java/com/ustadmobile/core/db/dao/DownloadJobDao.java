@@ -94,12 +94,12 @@ public abstract class DownloadJobDao {
     public abstract int deleteByDownloadSetUid(long djDsUid);
 
     @UmTransaction
-    public void updateJobAndItems(long djiUid, int djStatus, int activeJobItemsStatus) {
-        update(djiUid, djStatus);
-        updateJobItems(djiUid, djStatus, 0, JobStatus.WAITING_MAX);
+    public void updateJobAndItems(long djUid, int djStatus, int activeJobItemsStatus) {
+        update(djUid, djStatus);
+        updateJobItems(djUid, djStatus, 0, JobStatus.WAITING_MAX);
 
         if(activeJobItemsStatus != -1)
-            updateJobItems(djiUid, activeJobItemsStatus, JobStatus.RUNNING_MIN, JobStatus.RUNNING_MAX);
+            updateJobItems(djUid, activeJobItemsStatus, JobStatus.RUNNING_MIN, JobStatus.RUNNING_MAX);
     }
 
     @UmTransaction
@@ -128,9 +128,10 @@ public abstract class DownloadJobDao {
     public abstract void updateBytesDownloadedSoFar(long downloadJobId, UmCallback<Integer> callback);
 
 
-    @UmQuery("SELECT title FROM ContentEntry WHERE ContentEntry.contentEntryUid = \n" +
-            "(SELECT DownloadSet.dsRootContentEntryUid FROM DownloadSet " +
-            "LEFT JOIN DownloadJob ON DownloadJob.djDsUid = DownloadSet.dsUid AND DownloadJob.djUid = :downloadJobId)")
+    @UmQuery("SELECT ContentEntry.title FROM DownloadJob " +
+            "LEFT JOIN DownloadSet ON DownloadJob.djDsUid = DownloadSet.dsUid " +
+            "LEFT JOIN ContentEntry ON DownloadSet.dsRootContentEntryUid = ContentEntry.contentEntryUid " +
+            "WHERE DownloadJob.djUid = :downloadJobId")
     public abstract void getEntryTitleByJobUid(long downloadJobId, UmCallback<String> callback);
 
     @UmQuery("UPDATE DownloadJob " +
