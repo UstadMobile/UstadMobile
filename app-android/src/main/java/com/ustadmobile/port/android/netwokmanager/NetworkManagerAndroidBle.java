@@ -204,25 +204,27 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
     public void onCreate() {
         wifiManager = (WifiManager) mContext.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         wifiP2pManager = (WifiP2pManager) mContext.getSystemService(Context.WIFI_P2P_SERVICE);
-        wifiP2pChannel = wifiP2pManager.initialize(mContext, getMainLooper(), null);
+        if(wifiP2pManager != null){
+            wifiP2pChannel = wifiP2pManager.initialize(mContext, getMainLooper(), null);
 
-        //setting up WiFi Direct & bluetooth connection listener
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
-        intentFilter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
-        mContext.registerReceiver(mReceiver, intentFilter);
+            //setting up WiFi Direct & bluetooth connection listener
+            IntentFilter intentFilter = new IntentFilter();
+            intentFilter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
+            intentFilter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
+            mContext.registerReceiver(mReceiver, intentFilter);
 
-        if(isBleCapable()){
-            bluetoothManager =  mContext.getSystemService(Context.BLUETOOTH_SERVICE);
-            bluetoothAdapter = ((BluetoothManager)bluetoothManager).getAdapter();
-            if(isBluetoothEnabled()){
-                gattServerAndroid = new BleGattServerAndroid(mContext,this);
-                super.onCreate();
-            }else{
-                openBluetoothSettings();
+            if(isBleCapable()){
+                bluetoothManager =  mContext.getSystemService(Context.BLUETOOTH_SERVICE);
+                bluetoothAdapter = ((BluetoothManager)bluetoothManager).getAdapter();
+                if(isBluetoothEnabled()){
+                    gattServerAndroid = new BleGattServerAndroid(mContext,this);
+                    super.onCreate();
+                }else{
+                    openBluetoothSettings();
+                }
             }
-        }
 
+        }
 
     }
 
