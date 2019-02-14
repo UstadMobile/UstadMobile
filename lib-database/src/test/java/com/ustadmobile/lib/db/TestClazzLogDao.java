@@ -2,14 +2,20 @@ package com.ustadmobile.lib.db;
 
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.ClazzDao;
+import com.ustadmobile.core.db.dao.ClazzLogDao;
+import com.ustadmobile.core.db.dao.ScheduleDao;
+import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.ClazzLog;
 import com.ustadmobile.lib.db.entities.EntityRole;
 import com.ustadmobile.lib.db.entities.Role;
+import com.ustadmobile.lib.db.entities.Schedule;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.List;
 
 public class TestClazzLogDao extends AbstractDaoTest{
 
@@ -20,6 +26,21 @@ public class TestClazzLogDao extends AbstractDaoTest{
 
     protected void addScheduleToMyClazz() {
         //add scheduled occurences to myclazz
+        myClazz.getClazzUid();
+
+        Schedule schedule1 = new Schedule();
+        schedule1.setSceduleStartTime(468 * 100000);    //13 hours - 1 pm ?
+        schedule1.setScheduleDay(Schedule.DAY_FRIDAY);
+        schedule1.setScheduleActive(true);
+        schedule1.setScheduleClazzUid(myClazz.getClazzUid());
+        schedule1.setScheduleEndTime(3600000);          //1 hour
+
+        UmAppDatabase serverDummyRepo = serverDb.getRepository("http://localhost/dummy/", "");
+
+        ScheduleDao scheduleDao = serverDummyRepo.getScheduleDao();
+        scheduleDao.insert(schedule1);
+
+
 
     }
 
@@ -65,7 +86,21 @@ public class TestClazzLogDao extends AbstractDaoTest{
         Assert.assertNotNull(serverDb.getClazzLogDao().findByUid(clazzLog.getClazzLogUid()));
     }
 
+    @Test
     public void givenScheduledClazzLogNotExisting_whenCreateClazzLogsCalled_thenClazzLogShouldExist() {
+
+        addScheduleToMyClazz();
+
+        UmAppDatabase serverDummyRepo = serverDb.getRepository("http://localhost/dummy/", "");
+        ScheduleDao scheduleDao = serverDummyRepo.getScheduleDao();
+
+        scheduleDao.createClazzLogs(UMCalendarUtil.getDateInMilliPlusDays(0),
+                UMCalendarUtil.getDateInMilliPlusDays(1),accountPerson.getPersonUid(),
+                serverDummyRepo);
+
+        ClazzLogDao clazzLogDao = serverDummyRepo.getClazzLogDao();
+        List<ClazzLog> allClazzLogs = clazzLogDao.findAll();
+        Assert.assertTrue(allClazzLogs.size() > 0);
 
     }
 
